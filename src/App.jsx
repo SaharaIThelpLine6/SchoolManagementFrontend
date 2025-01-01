@@ -3,9 +3,9 @@
 // import viteLogo from '/vite.svg'
 import { useEffect, useState } from 'react';
 import './App.css'
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
-import Loader from './components/Loader';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import DefaultLayout from './layout/DefaultLayout';
+import Home from './pages/Home';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<DefaultLayout />}>
-          <Route index element={<p>Home</p>} />
+          <Route index element={<Home/>} />
         </Route>
         {/* <Route path="/" element={<h1>Home Page</h1>} /> */}
         {/* <Route path="dashboard" element={<Dashboard />}>
