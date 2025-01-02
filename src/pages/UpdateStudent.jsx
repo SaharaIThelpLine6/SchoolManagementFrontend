@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
-const Home = ({pageTitle}) =>{
+const UpdateStudent = ({pageTitle}) =>{
     const dispatch = useDispatch();
 
   useEffect(() => {
@@ -11,4 +11,4 @@ const Home = ({pageTitle}) =>{
         <>{pageTitle}</>
     )
 }
-export default Home
+export default UpdateStudent

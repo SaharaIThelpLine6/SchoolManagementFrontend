@@ -1,14 +1,17 @@
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
+import SelectGroupOne from "../components/Forms/SelectGroup/SelectGroupOne";
 
-const Home = ({pageTitle}) =>{
+const Student = ({pageTitle}) =>{
     const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch({ type: "SET_PAGE_TITLE", payload: pageTitle });
   }, [pageTitle, dispatch]);
     return(
-        <>{pageTitle}</>
+      <div>
+        {pageTitle}
+      </div>
     )
 }
-export default Home
+export default Student

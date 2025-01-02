@@ -5,7 +5,14 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'lato': '"Lato", serif',
+      },
+      boxShadow: {
+        'sub_menu': '0 0 9px -4px rgba(0,0,0,0.6)',
+      }
+    },
   },
   plugins: [],
 }
