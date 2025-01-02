@@ -1,6 +1,10 @@
+import TableOne from "../components/Tables/TableOne"
+
 const Home = () =>{
     return(
-        <>Home comming</>
+        <div>
+            <TableOne />
+        </div>
     )
 }
 export default Home

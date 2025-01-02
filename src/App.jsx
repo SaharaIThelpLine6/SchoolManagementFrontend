@@ -25,7 +25,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<DefaultLayout />}>
-          <Route index element={<Home/>} />
+          <Route index element={<Home />} />
         </Route>
         {/* <Route path="/" element={<h1>Home Page</h1>} /> */}
         {/* <Route path="dashboard" element={<Dashboard />}>
