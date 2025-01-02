@@ -1,51 +1,28 @@
 import { useState } from 'react';
-import BrandOne from '../../images/brand/brand-01.svg';
-import BrandTwo from '../../images/brand/brand-02.svg';
-import BrandThree from '../../images/brand/brand-03.svg';
-import BrandFour from '../../images/brand/brand-04.svg';
-import BrandFive from '../../images/brand/brand-05.svg';
+import Fourdots from '../../images/brand/four-dots-square.svg';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 
 const initialBrandData = [
   {
-    logo: BrandOne,
-    name: 'Google',
-    visitors: 3.5,
-    revenues: '5,768',
-    sales: 590,
-    conversion: 4.8,
+    id: 1001,
+    name: 'khan',
+    fName: 'khanSenior',
+    phone: '01742095986',
+    category: 'Software_User',
   },
   {
-    logo: BrandTwo,
-    name: 'Twitter',
-    visitors: 2.2,
-    revenues: '4,635',
-    sales: 467,
-    conversion: 4.3,
+    id: 1002,
+    name: 'khan2',
+    fName: 'khanSenior2',
+    phone: '01742095986',
+    category: 'Software_User2',
   },
   {
-    logo: BrandThree,
-    name: 'Github',
-    visitors: 2.1,
-    revenues: '4,290',
-    sales: 420,
-    conversion: 3.7,
-  },
-  {
-    logo: BrandFour,
-    name: 'Vimeo',
-    visitors: 1.5,
-    revenues: '3,580',
-    sales: 389,
-    conversion: 2.5,
-  },
-  {
-    logo: BrandFive,
-    name: 'Facebook',
-    visitors: 3.5,
-    revenues: '6,768',
-    sales: 390,
-    conversion: 4.2,
+    id: 1003,
+    name: 'khan3',
+    fName: 'khanSenior3',
+    phone: '017420959863',
+    category: 'Software_User3',
   },
 ];
 
@@ -61,70 +38,41 @@ const TableOne = () => {
   };
 
   return (
-    <div className="rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+    <div className="rounded-sm bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
-        <table className="w-full table-auto">
-          <thead>
-            <tr className="bg-gray-2 text-left dark:bg-meta-4">
-              <th className="min-w-[220px] py-4 px-4 font-medium text-black dark:text-white xl:pl-11">
-                Source
-              </th>
-              <th className="min-w-[150px] py-4 px-4 font-medium text-black dark:text-white">
-                Visitors
-              </th>
-              <th className="min-w-[120px] py-4 px-4 font-medium text-black dark:text-white">
-                Revenues
-              </th>
-              <th className="py-4 px-4 font-medium text-black dark:text-white">
-                Sales
-              </th>
-              <th className="py-4 px-4 font-medium text-black dark:text-white">
-                Conversion
-              </th>
-              <th className="py-4 px-4 font-medium text-black dark:text-white">
-                Action
-              </th>
+        <table className="w-full table-auto border-collapse">
+          <thead className='bg-[#3F4885] text-white h-fit'>
+            <tr className="text-center">
+              {[<img key="icon1" src={Fourdots} alt="Fourdots" className="w-4 h-4" />, <img key="icon2" src={Fourdots} alt="Fourdots" className="w-4 h-4" />, 'দাখেলা', 'ইউজার নাম', 'পিতার নাম', 'মোবাইল নাম্বার', 'ইউজার ধরন'].map((header, index) => (
+                <th key={index} className="px-4 py-1 font-medium border border-white">
+                  {typeof header === 'string' ? header : <div className="flex justify-center">{header}</div>}
+                </th>
+              ))}
             </tr>
           </thead>
+
           <tbody>
             {brandData.map((brand, key) => (
-              <tr key={key}>
-                <td className="border-b border-[#eee] py-5 px-4 pl-9 dark:border-strokedark xl:pl-11">
-                  <div className="flex items-center gap-2">
-                    <img src={brand.logo} alt={brand.name} className="w-6 h-6" />
-                    <p className="text-sm font-medium text-black dark:text-white">
-                      {brand.name}
-                    </p>
-                  </div>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {brand.visitors}K
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    ${brand.revenues}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {brand.sales}
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">
-                  <p className="text-black dark:text-white">
-                    {brand.conversion}%
-                  </p>
-                </td>
-                <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark flex gap-2">
-                  <button className="text-blue-500 hover:text-blue-700">
-                    <FaEdit />
-                  </button>
-                  <button className="text-red-500 hover:text-red-700" onClick={() => handleDelete(key)}>
-                    <FaTrash />
-                  </button>
-                </td>
+              <tr key={key} className={`${key % 2 !== 0 ? 'bg-[#f5f3f3]' : ''} border border-white`}>
+                {[
+                  <FaEdit key={`edit-${key}`} />, 
+                  <FaTrash key={`trash-${key}`} onClick={() => handleDelete(key)} />,
+                  brand.id, 
+                  brand.name, 
+                  brand.fName, 
+                  brand.phone, 
+                  brand.category
+                ].map((data, index) => (
+                  <td key={index} className="py-1 px-4 border border-white dark:border-strokedark">
+                    {typeof data === 'string' ? (
+                      <p className="text-black dark:text-white">{data}</p>
+                    ) : (
+                      <button className={index === 0 ? 'text-blue-500 hover:text-blue-700' : 'text-red-500 hover:text-red-700'}>
+                        {data}
+                      </button>
+                    )}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
