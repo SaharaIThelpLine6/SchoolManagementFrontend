@@ -75,9 +75,8 @@ const DefaultLayout = () => {
         {/* <!-- ===== Content Area Start ===== --> */}
         <div className="relative flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
           {/* <!-- ===== Header Start ===== --> */}
-          <header className="sticky top-0 z-999 flex w-full bg-white drop-shadow-1">
-            header
-          </header>
+          <Header />
+          <Filter />
           {/* <!-- ===== Header End ===== --> */}
 
           {/* <!-- ===== Main Content Start ===== --> */}
