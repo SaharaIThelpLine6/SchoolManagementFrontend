@@ -10,6 +10,7 @@ import Student from './pages/Student';
 import AddStudent from './pages/AddStudent';
 import UpdateStudent from './pages/UpdateStudent';
 import { useForm, FormProvider } from "react-hook-form"
+import Login from './pages/Login';
 function App() {
   const [loading, setLoading] = useState(true);
   const methods = useForm()
@@ -36,7 +37,9 @@ function App() {
               <Route path="add_students" element={<AddStudent pageTitle={"Add Student"} />} />
               <Route path="update_student" element={<UpdateStudent pageTitle={"Update Student"} />} />
             </Route>
+           
           </Route>
+          <Route path="/login" element={<Login />} />
         </Routes>
       </BrowserRouter>
     </FormProvider>
