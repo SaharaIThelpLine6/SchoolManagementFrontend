@@ -15,7 +15,7 @@ const DefaultInput = ({ label, type, placeholder, registerKey, require }) => {
                 name={registerKey}
                 type={type}
                 placeholder={placeholder}
-                className="w-full rounded border-[1.5px] border-stroke bg-transparent py-1 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter"
+                className="w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] py-1 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter"
                 {...register(registerKey, {required: require ? require : false})}
 
             />

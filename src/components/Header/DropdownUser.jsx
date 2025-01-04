@@ -28,10 +28,10 @@ const DropdownUser = () => {
           className={`absolute right-0 mt-2 flex w-72 flex-col rounded-lg border border-stroke bg-white shadow-[0_0_10px_rgba(0,0,0,0.1)] shadow-gray-300`}
         >
           {/*box*/}
-          <div className='absolute bg-white w-3 h-3 right-[14px] -translate-y-1/2 rotate-[45deg] shadow-[0_0_10px_rgba(0,0,0,0.1)]'></div>
+          <div className='absolute bg-white w-3 h-3 right-[14px] -translate-y-1/2 rotate-[45deg] shadow-[4px_-4px_10px_rgba(0,0,0,0.1)]'></div>
 
           {/* First Part: Profile Info */}
-          <div className="flex items-center gap-4 p-4 border-b border-gray-200">
+          <div className="flex items-center gap-4 p-4 border-b bg-white border-gray-200">
             <span className="h-12 w-12 rounded-md overflow-hidden border border-gray-300">
               <img src={UserOne} alt="User" className="h-full w-full object-cover" />
             </span>
@@ -47,7 +47,7 @@ const DropdownUser = () => {
           </div>
 
           {/* Second Part: Options */}
-          <ul className="flex flex-col gap-4 p-4 border-b border-gray-200">
+          <ul className="flex flex-col gap-4 p-4 border-b bg-white border-gray-200">
             <li>
               <Link
                 to="#"

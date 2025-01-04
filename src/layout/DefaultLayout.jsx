@@ -83,7 +83,7 @@ const DefaultLayout = () => {
 
           {/* <!-- ===== Main Content Start ===== --> */}
           {/* mx-auto max-w-screen-2xl px-4 md:px-6 2xl:px-10 */}
-          <main className='pl-[24px] pt-[24px] border-t border-[#eee]'>
+          <main className='pt-[24px] border-t border-[#eee]'>
             <div >
               <Outlet />
             </div>

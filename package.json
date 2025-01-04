@@ -12,6 +12,7 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.5.0",
     "@tabler/icons-react": "^3.26.0",
+    "cors": "^2.8.5",
     "html-react-parser": "^5.2.2",
     "prop-types": "^15.8.1",
     "react": "^18.3.1",
