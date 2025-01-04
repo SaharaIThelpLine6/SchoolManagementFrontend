@@ -2,11 +2,13 @@
 // import Header from '../components/Header/index';
 // import Sidebar from '../components/Sidebar/index';
 
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import Header from "../components/Header";
 import Filter from "../components/Filter";
+import { useEffect } from 'react';
+import { logout } from '../features/auth/authSlice';
 
 const menuData = [
   {
@@ -59,8 +61,22 @@ const menuData = [
   }
 ]
 const DefaultLayout = () => {
-  // const [sidebarOpen, setSidebarOpen] = useState(false);
-  const pageTitle = useSelector((state) => state.pageTitle);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    console.log('Authentication state:', isAuthenticated);
+    
+    if (!isAuthenticated) {
+      // dispatch(logout());
+      navigate('/login');
+
+      console.log('Token not found');
+    }
+  }, [isAuthenticated, dispatch, navigate]);
+
+  // isAuthenticated ? (
   return (
     <div className="dark:bg-boxdark-2 dark:text-bodydark">
       {/* <!-- ===== Page Wrapper Start ===== --> */}
@@ -71,7 +87,7 @@ const DefaultLayout = () => {
           aside
         </aside> */}
         {/* <Sidebar/> */}
-        <Sidebar menuList={menuData} title={pageTitle} />
+        <Sidebar menuList={menuData} title={"pageTitle"} />
         {/* <!-- ===== Sidebar End ===== --> */}
 
         {/* <!-- ===== Content Area Start ===== --> */}
@@ -95,6 +111,7 @@ const DefaultLayout = () => {
       {/* <!-- ===== Page Wrapper End ===== --> */}
     </div>
   );
+  // ) : (<p>Token not found</p>);
 };
 
 export default DefaultLayout;

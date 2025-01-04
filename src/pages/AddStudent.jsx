@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import { useFormContext } from "react-hook-form";
 import DefaultInput from "../components/Forms/DefaultInput";
 import DefaultSelect from "../components/Forms/DefaultSelect";
@@ -7,7 +6,6 @@ import DefaultSelect from "../components/Forms/DefaultSelect";
 import "flatpickr/dist/flatpickr.css";
 import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
 const AddStudent = ({ pageTitle }) => {
-  const dispatch = useDispatch();
 
   const {
     register,
@@ -15,9 +13,6 @@ const AddStudent = ({ pageTitle }) => {
     formState: { errors },
   } = useFormContext();
 
-  useEffect(() => {
-    dispatch({ type: "SET_PAGE_TITLE", payload: pageTitle });
-  }, [pageTitle, dispatch]);
   const onSubmit = (data) => console.log(data)
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="font-lato">

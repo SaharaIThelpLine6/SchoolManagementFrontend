@@ -1,16 +1,18 @@
+import PropTypes from 'prop-types';
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
 
-const Student = ({pageTitle}) =>{
-    const dispatch = useDispatch();
+const Student = ({ pageTitle }) => {
 
-  useEffect(() => {
-    dispatch({ type: "SET_PAGE_TITLE", payload: pageTitle });
-  }, [pageTitle, dispatch]);
-    return(
-      <div>
-        {pageTitle}
-      </div>
-    )
-}
-export default Student
+
+  return (
+    <div>
+      <h1>{pageTitle}</h1>
+    </div>
+  );
+};
+
+Student.propTypes = {
+  pageTitle: PropTypes.string.isRequired,
+};
+
+export default Student;
