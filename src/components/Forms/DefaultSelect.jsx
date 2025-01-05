@@ -1,22 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 const DefaultSelect = ({ label, options, registerKey, require }) => {
-  // const [selectedOption, setSelectedOption] = useState('');
-  // const [isOptionSelected, setIsOptionSelected] = useState(false);
-
-  // const changeTextColor = () => {
-  //   setIsOptionSelected(true);
-  // };
   const {
     register,
     formState: { errors },
   } = useFormContext();
 
-  useEffect(()=>{
+  useEffect(() => {
     console.log(options);
-    
-  }, [options])
+  }, [options]);
 
   return (
     <div className="w-full">
@@ -28,11 +21,15 @@ const DefaultSelect = ({ label, options, registerKey, require }) => {
         <select
           name={registerKey}
           {...register(registerKey, { required: require ? require : false })}
-          className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-1 px-4 outline-none transition focus:border-primary active:border-primary`}
+          className={`relative z-20 w-full appearance-none rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition focus:border-primary active:border-primary`}
         >
-
           {
-           options && options.map(option => <option value={option.value} className="text-body">{option.value}</option>)
+            options && options.map((option, index) => (
+              // Add a unique 'key' prop
+              <option key={option.value || index} value={option.value} className="text-body">
+                {option.value}
+              </option>
+            ))
           }
         </select>
 
