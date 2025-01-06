@@ -60,7 +60,7 @@ const TableOne = () => {
                   brand.UserName, 
                   brand.FatherName, 
                   brand.Mobile1, 
-                  brand.UserTypeID
+                  brand.UserType.TypeName
                 ].map((data, index) => (
                   <td key={index} className="py-1 px-4 border border-white dark:border-strokedark">
                     {typeof data === 'string' ? (

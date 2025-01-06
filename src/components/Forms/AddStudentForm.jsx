@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useFormContext } from "react-hook-form";
@@ -6,7 +7,24 @@ import "flatpickr/dist/flatpickr.css";
 import DefaultInput from "./DefaultInput";
 import DefaultSelect from "./DefaultSelect";
 import DatePickerOne from "./DatePicker/DatePickerOne";
+
+
+
 const AddStudentForm = ({ pageTitle }) => {
+
+  const [selectedImage, setSelectedImage] = useState(null);
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+
   const dispatch = useDispatch();
 
   const {
@@ -23,134 +41,123 @@ const AddStudentForm = ({ pageTitle }) => {
     <form onSubmit={handleSubmit(onSubmit)} className="font-lato">
 
       <div className="px-[24px] text-[14px]">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 w-full flex-wrap lg:flex-nowrap">
+          {/*Form Start*/}
+          <div className="mb-2">
+            <DefaultSelect
+              label={
+                <span className="text-red-500">
+                  ব্যবহারকারীর ধরণ * :
+                </span>
+              }
+              options={[
+                { id: '1', value: "শিক্ষার্থী" },
+                { id: '2', value: "শিক্ষক/স্টাফ" },
+                { id: '3', value: "অভিভাবক" },
+                { id: '4', value: "দাতা সদস্য" },
+                { id: '5', value: "লাইব্রেরী সদস্য" },
+                { id: '6', value: "কফিল" }
+              ]}
+              registerKey={"user_type"}
+            />
+          </div>
 
-        
+          <div className="mb-2">
+            <DefaultInput
+              label={
+                <div className="flex justify-between">
+                  <span className="text-red-500">দাখেলা</span>
+                  <p className="text-blue-700 underline">
+                    <a href="http://">Code Setting</a>
+                  </p>
+                </div>
+              }
+              type={'email'}
+              placeholder={"100149"}
+              registerKey={"student_email"}
+            />
+          </div>
 
-        <div className="md:flex  gap-5">
-          {/*Column 1 Start*/}
-          <div className="w-full flex-wrap lg:flex-nowrap">
-            <div className="mb-2">
-              <DefaultSelect
-                label={
-                  <span className="text-red-500">
-                    ব্যবহারকারীর ধরণ * :
-                  </span>
-                }
-                options={[
-                  { id: '1', value: "শিক্ষার্থী" },
-                  { id: '2', value: "শিক্ষক/স্টাফ" },
-                  { id: '3', value: "অভিভাবক" },
-                  { id: '4', value: "দাতা সদস্য" },
-                  { id: '5', value: "লাইব্রেরী সদস্য" },
-                  { id: '6', value: "কফিল" }
-                ]}
-                registerKey={"user_type"}
-              />
+          <div className="mb-2">
+            <DefaultSelect
+              label={
+                <span className="text-red-500">
+                  লিঙ্গ * :
+                </span>
+              }
+              options={[
+                { id: '1', value: "পুরুষ" },
+                { id: '2', value: "মহিলা" },
+              ]}
+              registerKey={"user_type"}
+            />
+          </div>
+
+          <div className="mb-2">
+            <DefaultInput
+              label={
+                <span className="text-red-500">
+                  নাম * :
+                </span>
+              }
+              type={'email'}
+              placeholder={""}
+              registerKey={"student_email"}
+            />
+          </div>
+
+          <div className="mb-2">
+            <DefaultInput label={"পিতার নাম :"} type={'email'} placeholder={""} registerKey={"student_email"} />
+          </div>
+
+          <div className="mb-2">
+            <DefaultInput label={"মাতার নাম :"} type={'email'} placeholder={""} registerKey={"student_email"} />
+          </div>
+
+          <div className="flex gap-3">
+            <div className="mb-2 w-full">
+              <DatePickerOne />
             </div>
-
-
-            <div className="mb-2">
+            <div className="mb-2 w-16">
+              <DefaultInput label={"বয়স :"} type={'email'} placeholder={"৭০"} registerKey={"student_email"} />
+            </div>
+          </div>
+          <div className="mb-2">
+            <DefaultInput label={"NID/জন্ম নিবন্ধন নং :"} type={'email'} placeholder={""} registerKey={"student_email"} />
+          </div>
+          <div className="flex gap-3">
+            <div className="mb-2 w-full">
+              <label className="text-red-500">মোবাইল ১* (SMS যাবে)</label>
               <DefaultInput
-                label={
-                  <div className="flex justify-between">
-                    <span className="text-red-500">দাখেলা</span>
-                    <p className="text-blue-700 underline">
-                      <a href="http://">Code Setting</a>
-                    </p>
-                  </div>
-                }
-                type={'email'}
-                placeholder={"100149"}
-                registerKey={"student_email"}
-              />
-            </div>
-
-            <div className="mb-2">
-              <DefaultSelect
-                label={
-                  <span className="text-red-500">
-                    লিঙ্গ * :
-                  </span>
-                }
-                options={[
-                  { id: '1', value: "পুরুষ" },
-                  { id: '2', value: "মহিলা" },
-                ]}
-                registerKey={"user_type"}
-              />
-            </div>
-
-            <div className="mb-2">
-              <DefaultInput
-                label={
-                  <span className="text-red-500">
-                    নাম * :
-                  </span>
-                }
                 type={'email'}
                 placeholder={""}
                 registerKey={"student_email"}
               />
             </div>
 
-            <div className="mb-2">
-              <DefaultInput label={"পিতার নাম :"} type={'email'} placeholder={""} registerKey={"student_email"} />
-            </div>
-
-            <div className="mb-2">
-              <DefaultInput label={"মাতার নাম :"} type={'email'} placeholder={""} registerKey={"student_email"} />
+            <div className="mb-2 w-36">
+              <DefaultSelect label={"সম্পর্ক:"} options={[{ id: '1', value: "Father" }, { id: '2', value: "Mother" }]} registerKey={"user_type"} />
             </div>
           </div>
-          {/*Column 1 End*/}
-
-          {/*Column 2 Start*/}
-          <div className="w-full flex-wrap lg:flex-nowrap">
-
-            <div className="flex gap-5">
-              <div className="mb-2 w-full">
-                <DatePickerOne />
-              </div>
-              <div className="mb-2">
-                <DefaultInput label={"বয়স :"} type={'email'} placeholder={"৭০"} registerKey={"student_email"} />
-              </div>
+          <div className="flex gap-3">
+            <div className="mb-2 w-full">
+              <DefaultInput label={"মোবাইল ২"} type={'email'} placeholder={""} registerKey={"student_email"} />
             </div>
-            <div className="mb-2">
-              <DefaultInput label={"NID/জন্ম নিবন্ধন নং :"} type={'email'} placeholder={""} registerKey={"student_email"} />
-            </div>
-            <div className="flex gap-4">
-              <div className="mb-2 w-full">
-                <label className="text-red-500">মোবাইল ১* (SMS যাবে)</label>
-                <DefaultInput
-                  type={'email'}
-                  placeholder={""}
-                  registerKey={"student_email"}
-                />
-              </div>
-
-              <div className="mb-2 w-44">
-                <DefaultSelect label={"সম্পর্ক:"} options={[{ id: '1', value: "Father" }, { id: '2', value: "Mother" }]} registerKey={"user_type"} />
-              </div>
-            </div>
-            <div className="flex gap-5">
-              <div className="mb-2 w-full">
-                <DefaultInput label={"মোবাইল ২"} type={'email'} placeholder={""} registerKey={"student_email"} />
-              </div>
-              <div className="mb-2 w-44">
-                <DefaultSelect label={"সম্পর্ক:"} options={[{ id: '1', value: "Father" }, { id: '2', value: "Mother" }]} registerKey={"user_type"} />
-              </div>
-            </div>
-            <div className="mb-2">
-              <DefaultInput label={"ই-মেইল"} type={'email'} placeholder={""} registerKey={"student_email"} />
-            </div>
-            <div className="mb-2">
-              <DefaultSelect label={"রক্তের গ্রুপ :"} options={[{ id: '1', value: "A+" }, { id: '2', value: "A-" }, { id: '2', value: "B+" }, { id: '2', value: "B-" }, { id: '2', value: "AB+" }, { id: '2', value: "AB-" }, { id: '2', value: "O+" }, { id: '2', value: "O-" }, { id: '2', value: "Empty" }]} registerKey={"user_type"} />
+            <div className="mb-2 w-36">
+              <DefaultSelect label={"সম্পর্ক:"} options={[{ id: '1', value: "Father" }, { id: '2', value: "Mother" }]} registerKey={"user_type"} />
             </div>
           </div>
-          {/*Column 2 End*/}
+          <div className="mb-2">
+            <DefaultInput label={"ই-মেইল"} type={'email'} placeholder={""} registerKey={"student_email"} />
+          </div>
+          <div className="mb-2">
+            <DefaultSelect label={"রক্তের গ্রুপ :"} options={[{ id: '1', value: "A+" }, { id: '2', value: "A-" }, { id: '2', value: "B+" }, { id: '2', value: "B-" }, { id: '2', value: "AB+" }, { id: '2', value: "AB-" }, { id: '2', value: "O+" }, { id: '2', value: "O-" }, { id: '2', value: "Empty" }]} registerKey={"user_type"} />
+          </div>
+
         </div>
 
 
-        {/*Permanent address column Start*/}
+        {/* Permanent address column Start*/}
         <div className="my-5">
           <div className="mb-3">
             <p>স্থায়ী ঠিকানা</p>
@@ -193,7 +200,7 @@ const AddStudentForm = ({ pageTitle }) => {
 
 
 
-        {/*Temporary address column Start*/}
+        {/* Temporary address column Start*/}
         <div className="my-5">
           <div className="mb-3">
             <p>অস্থায়ী ঠিকানা</p>
@@ -219,6 +226,18 @@ const AddStudentForm = ({ pageTitle }) => {
           {/*Temporary address column End*/}
 
         </div>
+
+        {/*Image add start*/}
+        <div className="flex gap-2 my-5">
+          <p>ছবি সংযুক্ত করুন</p>
+          <input
+            type="file"
+            className="file-input"
+            onChange={handleImageChange}
+          />
+          {selectedImage && <img src={selectedImage} alt="uploaded" className="uploaded-image h-20 w-20 border-4 border-slate-300" />}
+        </div>
+        {/*Image add end*/}
 
         {/*Save Button & Filter start*/}
         <div className="flex gap-3">
@@ -254,7 +273,7 @@ const AddStudentForm = ({ pageTitle }) => {
 
 
 
-              
+
           {/* <div className="flex flex-col p-4 pl-10">
 
             <div className="flex gap-4 items-center text-[14px] text-[rgb(51,51,51)]">
