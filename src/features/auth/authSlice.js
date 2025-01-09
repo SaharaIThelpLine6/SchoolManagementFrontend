@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { verifyToken } from '../../utils/read/api';
 
 // Read the token from localStorage (or sessionStorage)
 const token = localStorage.getItem('token');
@@ -8,16 +9,21 @@ const initialState = {
   isAuthenticated: !!token,
   token: token || null,
   user: null,
+  status: 'idle',
+  error: null,
 };
 
-export const verifyToken = createAsyncThunk('auth/verifyToken', async (token, { rejectWithValue }) => {
-  try {
-    const response = await axios.post('http://10.11.13.183:3000/api/users/authenticate', { token }); 
-    return response.data;
-  } catch (error) {
-    return rejectWithValue(error.response?.data || 'Token verification failed');
+export const verifyUser = createAsyncThunk(
+  'auth/verifyUser',
+  async (token, { rejectWithValue }) => {
+    try {
+      const user = await verifyToken(token);
+      return user;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || error.message);
+    }
   }
-});
+);
 
 const authSlice = createSlice({
   name: 'auth',
@@ -28,7 +34,6 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
       state.token = token;
       state.user = user;
-
       localStorage.setItem('token', token);
     },
     logout: (state) => {
@@ -40,11 +45,18 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(verifyToken.fulfilled, (state, action) => {
-        state.isAuthenticated = true;
-        state.user = action.payload.user;
+      .addCase(verifyUser.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
       })
-      .addCase(verifyToken.rejected, (state) => {
+      .addCase(verifyUser.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.user = action.payload;
+        state.isAuthenticated = true;
+      })
+      .addCase(verifyUser.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.payload;
         state.isAuthenticated = false;
         state.token = null;
         state.user = null;
@@ -52,8 +64,6 @@ const authSlice = createSlice({
       });
   },
 });
-
-
 
 export const { login, logout } = authSlice.actions;
 export default authSlice.reducer;

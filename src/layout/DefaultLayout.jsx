@@ -8,7 +8,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Header from "../components/Header";
 import Filter from "../components/Filter";
 import { useEffect } from 'react';
-import { logout } from '../features/auth/authSlice';
+import { logout, verifyUser } from '../features/auth/authSlice';
 
 const menuData = [
   {
@@ -124,20 +124,39 @@ const menuData = [
   },
 ]
 const DefaultLayout = () => {
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  /*useEffect(() => {
+    console.log('Authentication state:', isAuthenticated);
+    function fetchData() {
+      if (isAuthenticated) {
+        dispatch(verifyuser());
+        // console.log('Token not found');
+        // console.log(isAuthenticated);
+        
+        
+      }
+      else {
+        navigate("/login")
+      }
+    }
+
+    fetchData()
+  }, [isAuthenticated, dispatch, navigate, []]);*/
+
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const token = useSelector((state) => state.auth.token);
 
   useEffect(() => {
     console.log('Authentication state:', isAuthenticated);
 
-    if (!isAuthenticated) {
-      // dispatch(logout());
-      navigate('/login');
-
-      console.log('Token not found');
+    if (isAuthenticated) {
+      dispatch(verifyUser(token)); // Dispatch the thunk
+    } else {
+      navigate('/login'); // Redirect if not authenticated
     }
-  }, [isAuthenticated, dispatch, navigate]);
+  }, [isAuthenticated, dispatch, navigate, token]);
 
   // isAuthenticated ? (
   return (

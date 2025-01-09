@@ -1,14 +1,15 @@
-import { useState } from 'react'
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { useFormContext } from "react-hook-form";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useFormContext, useForm } from "react-hook-form";
 
 import "flatpickr/dist/flatpickr.css";
 import DefaultInput from "./DefaultInput";
 import DefaultSelect from "./DefaultSelect";
 import DatePickerOne from "./DatePicker/DatePickerOne";
-
-
+import { getUserType } from "../../utils/read/api";
+import { fetchSettingsData, fetchDidata, fetchThanadata } from "../../features/settings/settingsSlice";
+import { insertUserInfo } from "../../utils/create/api";
+import { useNavigate } from "react-router-dom";
 
 const AddStudentForm = ({ pageTitle }) => {
 
@@ -26,17 +27,130 @@ const AddStudentForm = ({ pageTitle }) => {
 
 
   const dispatch = useDispatch();
-
+  const { gender, divition, district, thana, studentRelation, status, error } = useSelector((state) => state.settings);
+  const { token } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
+    resetField,
     formState: { errors },
   } = useFormContext();
 
+  const [userType, setUserType] = useState([]);
+
+  const [DivisionID, DistrictID, DivisionID2, DistrictID2, TransientPoliceStationID, sameAddress, TransientPost, TransientVill] = watch(["DivisionID", "DistrictID", "DivisionID2", "DistrictID2", "TransientPoliceStationID", "sameAddress", "TransientPost", "TransientVill"])
+
+  const isSameAddressRef = useRef(false);
+
+  useEffect(() => {
+    setValue("DistrictID", "");
+    setValue("TransientPoliceStationID", "");
+    if (DivisionID) {
+      dispatch(fetchDidata(DivisionID));
+    }
+  }, [DivisionID, setValue]);
+
+  useEffect(() => {
+    setValue("TransientPoliceStationID", "");
+    if (DistrictID) {
+      dispatch(fetchThanadata(DistrictID))
+    }
+  }, [DistrictID, setValue]);
+
+  useEffect(() => {
+    if (!isSameAddressRef.current) {
+      setValue("DistrictID2", "");
+      setValue("permanentPoliceStationID", "");
+      if (DivisionID2) {
+        dispatch(fetchDidata(DivisionID2));
+      }
+    }
+    else {
+      setValue("DistrictID2", DistrictID);
+    }
+
+
+  }, [DivisionID2, setValue]);
+
+  useEffect(() => {
+    if (!isSameAddressRef.current) {
+      setValue("permanentPoliceStationID", "");
+      if (DistrictID2) {
+        dispatch(fetchThanadata(DistrictID2))
+      }
+    }
+    else {
+      setValue("permanentPoliceStationID", TransientPoliceStationID);
+    }
+
+  }, [DistrictID2, setValue]);
+
+  useEffect(() => {
+
+    isSameAddressRef.current = sameAddress;
+
+    if (isSameAddressRef.current) {
+      setValue("DivisionID2", DivisionID);
+      setValue("DistrictID2", DistrictID);
+      setValue("permanentPoliceStationID", TransientPoliceStationID);
+
+      setValue("permanentPost", TransientPost)
+      setValue("permanentVill", TransientVill)
+    }
+
+  }, [sameAddress, setValue, DivisionID, DistrictID, TransientPoliceStationID, TransientVill])
+
   useEffect(() => {
     dispatch({ type: "SET_PAGE_TITLE", payload: pageTitle });
+    dispatch(fetchSettingsData());
   }, [pageTitle, dispatch]);
-  const onSubmit = (data) => console.log(data)
+
+
+  useEffect(() => {
+    const dataFeatch = async () => {
+      try {
+        const data = await getUserType();
+        const transformedData = data.map(item => ({
+          id: String(item.ID),
+          value: item.TypeName
+        }));
+        setUserType(transformedData)
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    }
+
+    dataFeatch();
+  }, [])
+
+  if (status === 'failed') {
+    console.log(error);
+
+  }
+  if (status === 'succeeded') {
+    console.log(district);
+    console.log(DistrictID);
+    console.log(thana);
+    console.log(studentRelation);
+
+  }
+  const onSubmit = async (data) => {
+    try {
+      console.log(token);
+
+      const submitRes = await insertUserInfo(token, data)
+      console.log(submitRes);
+      navigate(0);
+    } catch (err) {
+      console.error(err.message)
+      // alert(err.message)
+    }
+
+
+  }
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="font-lato">
 
@@ -45,24 +159,20 @@ const AddStudentForm = ({ pageTitle }) => {
           {/*Form Start*/}
           <div className="">
             <DefaultSelect
+              type="number"
               label={
                 <span className="text-red-500">
                   ব্যবহারকারীর ধরণ * :
                 </span>
               }
-              options={[
-                { id: '1', value: "শিক্ষার্থী" },
-                { id: '2', value: "শিক্ষক/স্টাফ" },
-                { id: '3', value: "অভিভাবক" },
-                { id: '4', value: "দাতা সদস্য" },
-                { id: '5', value: "লাইব্রেরী সদস্য" },
-                { id: '6', value: "কফিল" }
-              ]}
-              registerKey={"user_type"}
+              options={userType}
+              registerKey={"UserTypeID"}
+              valueField={"id"}
+              nameField={"value"}
             />
           </div>
 
-          <div className="">
+          <div className="mb-2">
             <DefaultInput
               label={
                 <div className="flex justify-between">
@@ -72,9 +182,9 @@ const AddStudentForm = ({ pageTitle }) => {
                   </p>
                 </div>
               }
-              type={'email'}
+              type={'number'}
               placeholder={"100149"}
-              registerKey={"student_email"}
+              registerKey={"UserCode"}
             />
           </div>
 
@@ -85,11 +195,11 @@ const AddStudentForm = ({ pageTitle }) => {
                   লিঙ্গ * :
                 </span>
               }
-              options={[
-                { id: '1', value: "পুরুষ" },
-                { id: '2', value: "মহিলা" },
-              ]}
-              registerKey={"user_type"}
+              options={gender}
+              registerKey={"GenderID"}
+              require={"Gender Field is require"}
+              nameField={"GenderName"}
+              valueField={"ID"}
             />
           </div>
 
@@ -100,18 +210,18 @@ const AddStudentForm = ({ pageTitle }) => {
                   নাম * :
                 </span>
               }
-              type={'email'}
+              type={'text'}
               placeholder={""}
-              registerKey={"student_email"}
+              registerKey={"UserName"}
             />
           </div>
 
           <div className="">
-            <DefaultInput label={"পিতার নাম :"} type={'email'} placeholder={""} registerKey={"student_email"} />
+            <DefaultInput label={"পিতার নাম :"} type={'text'} placeholder={""} registerKey={"FatherName"} />
           </div>
 
           <div className="">
-            <DefaultInput label={"মাতার নাম :"} type={'email'} placeholder={""} registerKey={"student_email"} />
+            <DefaultInput label={"মাতার নাম :"} type={'text'} placeholder={""} registerKey={"MotherName"} />
           </div>
 
           <div className="flex gap-3">
@@ -119,43 +229,44 @@ const AddStudentForm = ({ pageTitle }) => {
               <DatePickerOne />
             </div>
             <div className=" w-16">
-              <DefaultInput label={"বয়স :"} type={'email'} placeholder={"৭০"} registerKey={"student_email"} />
+              <DefaultInput label={"বয়স :"} type={'text'} placeholder={"৭০"} registerKey={"age"} />
             </div>
           </div>
           <div className="">
-            <DefaultInput label={"NID/জন্ম নিবন্ধন নং :"} type={'email'} placeholder={""} registerKey={"student_email"} />
+            <DefaultInput label={"NID/জন্ম নিবন্ধন নং :"} type={'text'} placeholder={""} registerKey={"NIDNO"} />
           </div>
           <div className="flex gap-3">
             <div className="mb-2 w-full">
               <label className="text-red-500">মোবাইল ১* (SMS যাবে)</label>
               <DefaultInput
-                type={'email'}
+                type={'text'}
                 placeholder={""}
-                registerKey={"student_email"}
+                registerKey={"Mobile1"}
               />
             </div>
 
             <div className=" w-36">
-              <DefaultSelect label={"সম্পর্ক:"} options={[{ id: '1', value: "Father" }, { id: '2', value: "Mother" }]} registerKey={"user_type"} />
+              <DefaultSelect label={"সম্পর্ক:"} type="number" options={studentRelation} valueField={"RelationID"} nameField={"RelationName"} registerKey={"Relationship1"} />
             </div>
           </div>
           <div className="flex gap-3">
             <div className=" w-full">
-              <DefaultInput label={"মোবাইল ২"} type={'email'} placeholder={""} registerKey={"student_email"} />
+              <DefaultInput label={"মোবাইল ২"} type={'text'} placeholder={""} registerKey={"Mobile2"} />
             </div>
             <div className=" w-36">
-              <DefaultSelect label={"সম্পর্ক:"} options={[{ id: '1', value: "Father" }, { id: '2', value: "Mother" }]} registerKey={"user_type"} />
+              <DefaultSelect label={"সম্পর্ক:"} type="number" options={studentRelation} valueField={"RelationID"} nameField={"RelationName"} registerKey={"Relationship2"} />
             </div>
           </div>
           <div className="">
-            <DefaultInput label={"ই-মেইল"} type={'email'} placeholder={""} registerKey={"student_email"} />
+            <DefaultInput label={"ই-মেইল"} type={'email'} placeholder={""} registerKey={"Email"} />
           </div>
           <div className="">
-            <DefaultSelect label={"রক্তের গ্রুপ :"} options={[{ id: '1', value: "A+" }, { id: '2', value: "A-" }, { id: '2', value: "B+" }, { id: '2', value: "B-" }, { id: '2', value: "AB+" }, { id: '2', value: "AB-" }, { id: '2', value: "O+" }, { id: '2', value: "O-" }, { id: '2', value: "Empty" }]} registerKey={"user_type"} />
+            <DefaultSelect label={"রক্তের গ্রুপ :"} type="string" options={[{ value: "A+" }, { value: "A-" }, { value: "B+" }, { value: "B-" }, { value: "AB+" }, { value: "AB-" }, { value: "O+" }, { value: "O-" }]} registerKey={"BloodGroup"} nameField={"value"}
+              valueField={"value"}
+
+            />
           </div>
-
         </div>
-
 
         {/* Permanent address column Start*/}
         <div className="">
@@ -165,19 +276,19 @@ const AddStudentForm = ({ pageTitle }) => {
 
           <div className="md:grid md:grid-cols-5 gap-3">
             <div className="">
-              <DefaultSelect label={"বিভাগ"} options={[{ id: '1', value: "Dhaka" }, { id: '2', value: "Chittagong" }]} registerKey={"user_type"} />
+              <DefaultSelect label={"বিভাগ"} type="number" options={divition} registerKey={"DivisionID"} valueField={"DivisionID"} nameField={"DivisionName"} />
             </div>
             <div className="">
-              <DefaultSelect label={"জেলা"} options={[{ id: '1', value: "Manikganj" }, { id: '2', value: "Narayanganj" }]} registerKey={"user_type"} />
+              <DefaultSelect label={"জেলা"} type="number" options={district[DivisionID]} registerKey={"DistrictID"} valueField={"DistrictID"} nameField={"DistrictName"} />
             </div>
             <div className="">
-              <DefaultSelect label={"থানা"} options={[{ id: '1', value: "Daulatpur" }, { id: '2', value: "Ghior" }]} registerKey={"user_type"} />
+              <DefaultSelect label={"থানা"} type="number" options={thana[DistrictID]} registerKey={"TransientPoliceStationID"} valueField={"PoliceStationID"} nameField={"PoliceStationName"} />
             </div>
             <div className="">
-              <DefaultInput label={"ডাক"} type={'email'} placeholder={""} registerKey={"student_email"} />
+              <DefaultInput label={"ডাক"} type={'text'} placeholder={""} registerKey={"TransientPost"} />
             </div>
             <div className="">
-              <DefaultInput label={"গ্রাম"} type={'email'} placeholder={""} registerKey={"student_email"} />
+              <DefaultInput label={"গ্রাম"} type={'text'} placeholder={""} registerKey={"TransientVill"} />
             </div>
           </div>
         </div>
@@ -185,44 +296,39 @@ const AddStudentForm = ({ pageTitle }) => {
 
         <div className="flex mb-[14px] mt-[18px] pl-[4px] font-bold relative">
 
-          <div className="flex gap-[5px] items-start">
-            <div className="flex items-center">
-              <label className="inline-flex items-center">
-                <input
-                  type="checkbox"
-                  name=""
-                  value="male"
-                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500"
-                />
-              </label>
-            </div>
-            <label className="items-center text-[16px] font-bold font-noto left-[50%] top-[50%]"> ঠিকানা একই হলে এখানে ক্লিক করুন </label>
+          <div className="flex items-center">
+            <label className="inline-flex items-center">
+              <input
+                id="sameAddress"
+                type="checkbox"
+                name="sameAddress"
+                className="h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+                {...register("sameAddress")}
+              />
+            </label>
           </div>
-
-          <div className="mx-auto font-bold font-noto mb-[-10px] text-[16px] absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-35%]">
-            <p>অস্থায়ী ঠিকানা</p>
-          </div>
+          <label htmlFor="sameAddress" className="block text-sm font-medium">একই </label>
         </div>
 
 
 
-        {/* Temporary address column Start*/}
+        {/*Temporary address column Start*/}
           <div className="md:grid md:grid-cols-5 gap-3">
 
             <div className="">
               <DefaultSelect label={"বিভাগ"} options={[{ id: '1', value: "Dhaka" }, { id: '2', value: "Chittagong" }]} registerKey={"user_type"} />
             </div>
             <div className="">
-              <DefaultSelect label={"জেলা"} options={[{ id: '1', value: "Manikganj" }, { id: '2', value: "Narayanganj" }]} registerKey={"user_type"} />
+              <DefaultSelect label={"জেলা"} type="number" options={district[DivisionID2]} registerKey={"DistrictID2"} valueField={"DistrictID"} nameField={"DistrictName"} />
             </div>
             <div className="">
-              <DefaultSelect label={"থানা"} options={[{ id: '1', value: "Daulatpur" }, { id: '2', value: "Ghior" }]} registerKey={"user_type"} />
+              <DefaultSelect label={"থানা"} type="number" options={thana[DistrictID2]} registerKey={"permanentPoliceStationID"} valueField={"PoliceStationID"} nameField={"PoliceStationName"} />
             </div>
             <div className="">
-              <DefaultInput label={"ডাক"} type={'email'} placeholder={""} registerKey={"student_email"} />
+              <DefaultInput label={"ডাক"} type={'text'} placeholder={""} registerKey={"permanentPost"} />
             </div>
             <div className="">
-              <DefaultInput label={"গ্রাম"} type={'email'} placeholder={""} registerKey={"student_email"} />
+              <DefaultInput label={"গ্রাম"} type={'text'} placeholder={""} registerKey={"permanentVill"} />
             </div>
           </div>
           {/*Temporary address column End*/}
@@ -273,8 +379,9 @@ const AddStudentForm = ({ pageTitle }) => {
             New
           </button>
 
+          {/*Save Button & Filter end*/}
+
         </div>
-        {/*Save Button & Filter end*/}
 
       </div>
     </form >

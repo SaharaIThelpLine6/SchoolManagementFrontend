@@ -1,15 +1,11 @@
 import { useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 
-const DefaultSelect = ({ label, options, registerKey, require }) => {
+const DefaultSelect = ({ label, type, options, registerKey, require, valueField, nameField }) => {
   const {
     register,
     formState: { errors },
   } = useFormContext();
-
-  useEffect(() => {
-    console.log(options);
-  }, [options]);
 
   return (
     <div className="w-full">
@@ -18,20 +14,49 @@ const DefaultSelect = ({ label, options, registerKey, require }) => {
       </label>
 
       <div className="relative z-20 bg-transparent">
-        <select
+        {
+          type === 'number' ? <select
+            name={registerKey}
+            {...register(registerKey, { required: require ? require : false, valueAsNumber: true })}
+            className={`relative z-20 w-full appearance-none rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition focus:border-primary active:border-primary`}
+          >
+            <option value="" className="text-body">Select</option>
+            {
+              options && options.map((option, index) => (
+                <option key={option.value} value={option[valueField]} className="text-body">
+                  {option[nameField]}
+                </option>
+              ))
+            }
+          </select> : <select
+            name={registerKey}
+            {...register(registerKey, { required: require ? require : false })}
+            className={`relative z-20 w-full appearance-none rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition focus:border-primary active:border-primary`}
+          >
+            <option value="" className="text-body">Select</option>
+            {
+              options && options.map((option, index) => (
+                <option key={option.value} value={option[valueField]} className="text-body">
+                  {option[nameField]}
+                </option>
+              ))
+            }
+          </select>
+        }
+        {/* <select
           name={registerKey}
           {...register(registerKey, { required: require ? require : false })}
           className={`relative z-20 w-full appearance-none rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition focus:border-primary active:border-primary`}
         >
+          <option  value="" className="text-body">Select</option>
           {
             options && options.map((option, index) => (
-              // Add a unique 'key' prop
-              <option key={option.value || index} value={option.value} className="text-body">
-                {option.value}
+              <option key={option.value} value={option[valueField]} className="text-body">
+                {option[nameField]}
               </option>
             ))
           }
-        </select>
+        </select> */}
 
         <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
           <svg

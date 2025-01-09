@@ -1,0 +1,121 @@
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { getSettingsData } from '../../utils/read/api';
+
+export const fetchSettingsData = createAsyncThunk('settings/fetchSettingsData', async (_, { getState }) => {
+    const token = localStorage.getItem('token');
+    const state = getState();
+    if (!token) throw new Error('Token is missing');
+    const [genderResponse, divisionResponse, codeSettingResponse, residentialResponse,permissionTypeResponse, studentRelationResponse] = await Promise.all([
+        getSettingsData(token, '/api/settings/gender'),
+        getSettingsData(token, '/api/settings/division'),
+        // getSettingsData(token, '/api/settings/thana'),
+        getSettingsData(token, '/api/settings/code_setting'),
+        getSettingsData(token, '/api/settings/residential'),
+        getSettingsData(token, '/api/settings/permission_type'),
+        getSettingsData(token, '/api/settings/student_relation'),
+    ]);
+
+    // console.log(state.settings.status);
+
+    // const currentDivitionId = getState().settings.currentDivitionId;
+    // if(currentDivitionId){
+    //     console.log(currentDivitionId);
+    // }
+    return {
+        gender: genderResponse,
+        divition: divisionResponse,
+        codeSetting: codeSettingResponse,
+        residential: residentialResponse,
+        permissionType: permissionTypeResponse,
+        studentRelation: studentRelationResponse
+    };
+});
+
+export const fetchDidata = createAsyncThunk("settings/fetchDidata", async (id) => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token is missing');
+
+    const response = await getSettingsData(token, `/api/settings/district?divition_id=${id}`);
+    return { id, data: response };
+})
+
+export const fetchThanadata = createAsyncThunk("settings/fetchThanadata", async (id) => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token is missing');
+    const response = await getSettingsData(token, `/api/settings/thana?district_id=${id}`);
+    return { id, data: response };
+})
+const initialState = {
+    gender: [],
+    divition: [],
+    district: {},
+    thana: {},
+    codeSetting: [],
+    residential: [],
+    permissionType: [],
+    studentRelation: [],
+    currentDivitionId: null,
+    currentDistrictId: null,
+    status: 'idle',
+    error: null,
+};
+
+const settingsSlice = createSlice({
+    name: 'settings',
+    initialState,
+    reducers: {
+        setDivisionID: (state, action) => {
+            state.currentDivitionId = action.payload;
+        }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchSettingsData.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(fetchSettingsData.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.gender = action.payload.gender;
+                state.divition = action.payload.divition;
+                state.codeSetting = action.payload.codeSetting;
+                state.residential = action.payload.residential;
+                state.permissionType = action.payload.permissionType;
+                state.studentRelation = action.payload.studentRelation;
+            })
+            .addCase(fetchSettingsData.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            .addCase(fetchDidata.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchDidata.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                const { id, data } = action.payload || {};
+                if (id && data) {
+                    state.district[id] = data;
+                }
+            })
+            .addCase(fetchDidata.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            .addCase(fetchThanadata.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchThanadata.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                const { id, data } = action.payload || {};
+                if (id && data) {
+                    state.thana[id] = data;
+                }
+            })
+            .addCase(fetchThanadata.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+    },
+});
+export const { setDivisionID } = settingsSlice.actions;
+export default settingsSlice.reducer;
