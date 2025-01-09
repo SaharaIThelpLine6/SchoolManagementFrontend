@@ -1,31 +1,51 @@
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import Fourdots from '../images/brand/four-dots-square.svg';
+import { useFormContext } from 'react-hook-form';
+import { useState } from 'react';
+import DefaultInput from '../components/Forms/DefaultInput';
+
+import DefaultGray from '../components/Button/DefaultGray';
 
 
 const BookList = () => {
+    const [submitData, setSubmitData] = useState([]);
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useFormContext();
+
+    const onSubmit = (data) => {
+        setSubmitData([...submitData, data]);
+        console.log(data);
+    }
+
+    const saveButton = "Save";
     return (
-        <div className="grid grid-cols-3 px-5 py-2 gap-2">
-            {/*First Column Start*/}
-            <div className="col-span-1 border-b border-slate-200 p-2">
-                <h1 className="font-semibold text-lg text-slate-500">Book List</h1>
-                <div className="mb-2">
-                    <label>
-                        <p className="text-slate-500 pb-1">
-                            ID {" "}
-                            <span className="text-red-700">*</span>
-                        </p>
-                        <input
+        <div className="grid grid-cols-2 px-5 py-0 gap-5">
+            {/*Form Column Start*/}
+            <form action='' onSubmit={handleSubmit(onSubmit)} className="">
+                <h1 className="font-semibold text-lg text-slate-800">Book List</h1>
+                <div className="mb-2 text-[14px] text-slate-600">
+                    <div className="">
+                        <DefaultInput
+                            label={
+                                <p className="text-slate-700">
+                                    ID {" "}
+                                    <span className="text-red-700">*</span>
+                                </p>
+                            }
                             type={'text'}
                             placeholder={""}
-                            className="border border-slate-300 w-full"
+                            registerKey={"id"}
                         />
-                    </label>
+                    </div>
 
                     <div className="">
                         <DefaultSelect
                             label={
-                                <p className="text-slate-500">
+                                <p className="text-slate-700">
                                     Class {" "}
                                     <span className="text-red-700">*</span>
                                 </p>
@@ -35,138 +55,74 @@ const BookList = () => {
                                 { id: '2', value: "Nursary" },
                                 { id: '3', value: "First Class" },
                             ]}
-                            registerKey={"user_type"}
+                            registerKey={"class"}
                         />
                     </div>
 
-                    <label>
-                        <p className="text-slate-500 pb-1">
-                            Book Name {" "}
-                            <span className="text-red-700">*</span>
-                        </p>
-                        <input
+
+                    <div className="">
+                        <DefaultInput
+                            label={
+                                <p className="text-slate-700">
+                                    Book Name {" "}
+                                    <span className="text-red-700">*</span>
+                                </p>
+                            }
                             type={'text'}
                             placeholder={""}
-                            className="border border-slate-300 w-full"
+                            registerKey={"bookName"}
                         />
-                    </label>
-                    <label>
-                        <p className="text-slate-500 pb-1">
-                            Book name arabic
-                        </p>
-                        <input
+                    </div>
+                    <div className="">
+                        <DefaultInput
+                            label={
+                                <p className="text-slate-700">
+                                    Book Name Arabic
+                                </p>
+                            }
                             type={'text'}
                             placeholder={""}
-                            className="border border-slate-300 w-full"
+                            registerKey={"bookArabic"}
                         />
-                    </label>
+                    </div>
                 </div>
 
                 {/*Button start*/}
                 <div className="flex gap-3">
-                    <button
-                        className="
-                            mega-button positive
-                            text-white 
-                            bg-gradient-to-r
-                            from-green-400
-                                via-green-500
-                                to-green-600
-                                hover:bg-gradient-to-br
-                                    focus:ring-4
-                                    focus:outline-none
-                                    focus:ring-green-300
-                                    font-medium
-                                        rounded-lg
-                                        text-sm
-                                        px-0 py-0
-                                        text-center
-                                            me-2 mb-2 mt-4
-                                            w-24
-                                            h-8
-                                "
-                        type="submit">
-                        Save
-                    </button>
-
-                    <button
-                        className="
-                                mega-button positive
-                                text-white 
-                                bg-gradient-to-r
-                                from-green-400
-                                    via-green-500
-                                    to-green-600
-                                    hover:bg-gradient-to-br
-                                        focus:ring-4
-                                        focus:outline-none
-                                        focus:ring-green-300
-                                        font-medium
-                                            rounded-lg
-                                            text-sm
-                                            px-0 py-0
-                                            text-center
-                                                me-2 mb-2 mt-4
-                                                w-24
-                                                h-8
-                                    "
-                        type="submit">
-                        New
-                    </button>
-                    <button
-                        className="
-                                    mega-button positive
-                                    text-white 
-                                    bg-gradient-to-r
-                                    from-green-400
-                                        via-green-500
-                                        to-green-600
-                                        hover:bg-gradient-to-br
-                                            focus:ring-4
-                                            focus:outline-none
-                                            focus:ring-green-300
-                                            font-medium
-                                                rounded-lg
-                                                text-sm
-                                                px-0 py-0
-                                                text-center
-                                                    me-2 mb-2 mt-4
-                                                    w-24
-                                                    h-8
-                                        "
-                        type="submit">
-                        Close
-                    </button>
+                    <DefaultGray submitButton={saveButton} />  
+  
                 </div>
                 {/*Button end*/}
-            </div>
-            {/*First Column End*/}
+            </form>
+            {/*Form Column End*/}
 
-            {/*Second Column Start*/}
-            <div className="col-span-2 border-b border-slate-200 p-2">
+            {/*Table Column Start*/}
+            <div className="">
 
-                <table className='w-full mt-5'>
-                    <thead className="text-left">
-                        <tr className="font-normal text-sm text-slate-500 bg-slate-200">
+                <table className='w-full'>
+                    <thead className="text-left h-8">
+                        <tr className=" text-[14px] text-slate-600 bg-[#EDEDED]">
                             <th className='w-[5%]'><img key="icon1" src={Fourdots} alt="Fourdots" className="w-4 h-4" /></th>
                             <th className='w-[5%]'><img key="icon2" src={Fourdots} alt="Fourdots" className="w-4 h-4" /></th>
-                            <th className='w-[20%]'>Marhala/Class</th>
-                            <th>ID</th>
-                            <th>Bangla</th>
-                            <th>Arabic</th>
+                            <th className='w-[20%] font-semibold'>Marhala/Class</th>
+                            <th className='font-semibold'>ID</th>
+                            <th className='font-semibold'>Bangla</th>
+                            <th className='font-semibold'>Arabic</th>
                         </tr>
                     </thead>
                     <tbody className='text-left'>
-                        <tr className="font-normal text-sm text-slate-500">
-                            <td><FaEdit /></td>
-                            <td><FaTrash /></td>
-                            <td>Class 1</td>
-                            <td>101</td>
-                            <td>Ibrahim</td>
-                            <td> إبراهيم</td>
+                        {submitData.map((item, index) => (
+                            <tr key={index} className="font-normal text-sm text-slate-500">
+                                <td><FaEdit /></td>
+                                <td><FaTrash /></td>
+                                <td>{item.class}</td>
+                                <td>{item.id}</td>
+                                <td>{item.bookName}</td>
+                                <td> {item.bookArabic}</td>
 
-                        </tr>
-                        <tr className="font-normal text-sm text-slate-500 ">
+                            </tr>
+                        ))}
+                        <tr className="font-normal text-sm text-slate-600 ">
                             <td><FaEdit /></td>
                             <td><FaTrash /></td>
                             <td>Class 2</td>
@@ -175,23 +131,43 @@ const BookList = () => {
                             <td> إبراهيم</td>
 
                         </tr>
-                        <tr className="font-normal text-sm text-slate-500 ">
-                            <td><FaEdit /></td>
-                            <td><FaTrash /></td>
-                            <td>Class 3</td>
-                            <td>103</td>
-                            <td>Ibrahim</td>
-                            <td> إبراهيم</td>
 
-                        </tr>
 
                     </tbody>
                 </table>
 
             </div>
-            {/*Second Column End*/}
+            {/*Table Column End*/}
+
+
+            {/*Error message*/}
+            <div className='my-5'>
+
+
+                <div className='
+                    flex
+                    text-[14px] 
+                    font-SolaimanLipi
+                    bg-[#323232] 
+                    text-[rgba(255,255,255,.7)]                 
+                    justify-between                 
+                    items-center
+                    py-2
+                    px-2
+                    rounded-[4px]
+                    font-normal
+                    '
+                    style={{ boxShadow: '0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)' }}>
+                    দুঃখিত, কোন তথ্য পাওয়া যায়নি!
+                    <button className='bg-transparent text-[#ff4dcb] -translate-x-3'>Close</button>
+                </div>
+
+
+            </div>
+
+
         </div>
-    )
-}
+    );
+};
 
 export default BookList;

@@ -8,6 +8,8 @@ export default {
     extend: {
       fontFamily: {
         'lato': '"Lato", serif',
+        'SolaimanLipi':'SolaimanLipi, serif',
+        'noto':'"Noto Serif Bengali", serif'
       },
       boxShadow: {
         'sub_menu': '0 0 9px -4px rgba(0,0,0,0.6)',

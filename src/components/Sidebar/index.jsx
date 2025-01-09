@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import parse from 'html-react-parser';
-import Logo from '/vite.svg';
+import Logo from '/saharaIt.svg';
 
 const Sidebar = ({ menuList, title }) => {
   const location = useLocation();
@@ -144,7 +144,7 @@ const Sidebar = ({ menuList, title }) => {
         <div className="main_menu_area w-[64px] bg-[#333] h-full">
           <div className="flex items-center justify-between gap-2">
             <NavLink to="/" className="w-full flex justify-center py-5">
-            <img src={Logo} alt="Logo" className='w-8' />
+            <img src={Logo} alt="Logo" className='w-8 h-8 rounded-sm'/>
             </NavLink>
           </div>
 

@@ -3,7 +3,7 @@
 // import viteLogo from '/vite.svg'
 import { useEffect, useState } from 'react';
 import './App.css'
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Form, Route, Routes } from 'react-router-dom';
 import DefaultLayout from './layout/DefaultLayout';
 import Home from './pages/Home';
 import Student from './pages/Student';
@@ -13,8 +13,15 @@ import { useForm, FormProvider } from "react-hook-form"
 import Login from './pages/Login';
 import Users from './pages/Users';
 import Class from './pages/Class';
+import FormP from './pages/FormP';
 import BookList from './pages/BookList';
 import GroupDistribution from './pages/GroupDistribution';
+import Section from './pages/Section';
+import Student_Section from './pages/Section';
+import TeacherInfo from './pages/TeacherInfo';
+import PayRole from './pages/PayRole';
+import PayRoleName from './pages/PayRoleName';
+import Report from './pages/Report';
 function App() {
   const [loading, setLoading] = useState(true);
   const methods = useForm()
@@ -40,11 +47,19 @@ function App() {
               <Route index element={<Student pageTitle={"Student"} />} />
               <Route path="add_students" element={<AddStudent pageTitle={"Add Student"} />} />
               <Route path="update_student" element={<UpdateStudent pageTitle={"Update Student"} />} />
-              <Route path="booklist" element={<BookList pageTitle={"Book List"}/>} />
-              <Route path="groupdistribution" element={<GroupDistribution pageTitle={"Students Group"}/>}/>
+              <Route path="booklist" element={<BookList pageTitle={"Book List"} />} />
+              <Route path="groupdistribution" element={<GroupDistribution pageTitle={"Students Group"} />} />
+              <Route path="class" element={<Class />} pageTitle={"Class"} />
+              <Route path="section" element={<Section />} pageTitle={"Section"} />
             </Route>
-           <Route path="/users" element={<Users />} />
-           <Route path="/class" element={<Class />} />
+            <Route path="users">
+              <Route index element={<Users pageTitle={"Staff"} />} />
+              <Route path="teacherInfo" element={<TeacherInfo pageTitle={"Teacher Info"} />} />
+              <Route path="payRole" element={<PayRole pageTitle={"Pay Role"} />} />
+              <Route path="pRName" element={<PayRoleName pageTitle={"Pay Role Name"} />} />
+              <Route path="report" element={<Report pageTitle={"Reports"} />} />
+            </Route>
+            <Route path="/formp" element={<FormP />} />
           </Route>
           <Route path="/login" element={<Login />} />
         </Routes>

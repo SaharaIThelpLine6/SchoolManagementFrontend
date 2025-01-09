@@ -8,7 +8,7 @@ const DefaultInput = ({ label, type, placeholder, registerKey, require }) => {
     } = useFormContext();
     return (
         <div className="w-full">
-            <label htmlFor={registerKey} className="mb-2.5 block text-black">
+            <label htmlFor={registerKey} className="mb-1 block text-black">
                 {label}
             </label>
             <input
