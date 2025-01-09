@@ -1,7 +1,5 @@
 /* eslint-disable no-unused-vars */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-/* eslint-disable no-unused-vars */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import parse from 'html-react-parser';
 import Logo from '/vite.svg';
@@ -10,7 +8,6 @@ const Sidebar = ({ menuList, title }) => {
   const location = useLocation();
   const { pathname } = location;
   // const [hasChild, setHasChild] = useState(true)
-  const [activeMenu, setActiveMenu] = useState(null);
 
   const sidebarRef = useRef(null);
   const [isResizing, setIsResizing] = useState(false); // Resizing state
@@ -96,9 +93,38 @@ const Sidebar = ({ menuList, title }) => {
   }, [isResizing]);
 
   return (
+    <div className="flex">
+      {/* Toggle Button */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 bg-transparent text-[#EDEDED] p-2 rounded-md"
+        onClick={toggleSidebar}
+      >
+        {isOpen ? '✖' : '☰'}
+      </button>
+
+      {/* Close Button */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={toggleSidebar}
+        ></div>
+      )}
+      {isOpen && (
+        <button
+          className="fixed top-4 right-4 z-50 bg-slate-300 text-white p-2 rounded-md"
+          onClick={toggleSidebar}
+        >
+          ✖
+        </button>
+      )}
+
+      {/* Sidebar */}
       <aside
         ref={sidebarRef}
-    style={{ width: `${activeMenu?.subMenu ? sidebarWidth : 64}px`, 
+        className={`fixed md:relative h-full transition-all duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          } md:translate-x-0`}
+        style={{
+          width: `${activeMenu?.subMenu ? sidebarWidth : 64}px`,
           flexGrow: 0,
           flexShrink: 0,
           maxWidth: '800px',
@@ -108,7 +134,7 @@ const Sidebar = ({ menuList, title }) => {
           background: '#ffffff',
           boxShadow: '-8px 2px 22px -7px rgba(0, 0, 0, 0.25)',
           borderRadius: '10px 0px 0px 10px',
-      zIndex: 2,
+          zIndex: 99,
         }}
     onMouseDown={(e) => e.preventDefault()
 
@@ -125,8 +151,6 @@ const Sidebar = ({ menuList, title }) => {
 
           <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
             <nav>
-            <div>
-
               <ul className="mb-6 flex flex-col gap-1.5">
                 {menuList.map((menu) => (
                   <li key={menu.id}>
@@ -143,24 +167,25 @@ const Sidebar = ({ menuList, title }) => {
                       onClick={() => handleMenuClick(menu)}
                     >
                       {parse(menu.icon)}
-                      <span className={`${pathname.includes(menu.route) &&
-                        'text-white'
-                        }`}>{menu.name}</span>
+                      <span
+                        className={pathname.includes(menu.route) ? 'text-white' : ''}
+                      >
+                        {menu.name}
+                      </span>
                     </NavLink>
                   </li>
                 ))}
 
 
               </ul>
-            </div>
-
             </nav>
           </div>
         </div>
-      {activeMenu && activeMenu.subMenu ? (
-        <div className='sub_menu_area bg-[#ededed] h-full pt-[20px] ps-[10px] pe-[20px] min-w-[150px]'>
-          <h1 className='text-[#333] text-[20px] font-lato font-normal'>{title}</h1>
 
+        {/* Submenu Area */}
+        {activeMenu?.subMenu && (
+          <div className="sub_menu_area bg-[#ededed] h-full pt-[20px] ps-[10px] pe-[20px] min-w-[150px]">
+            <h1 className="text-[#333] text-[20px] font-lato font-normal">{title}</h1>
             <ul className="flex flex-col mt-[30px]">
               {activeMenu.subMenu.map((subItem) => (
               <li key={subItem.id} className={`pl-5 ${pathname.includes(subItem.route)
@@ -185,6 +210,7 @@ const Sidebar = ({ menuList, title }) => {
       ): null}
        
       </aside>
+    </div>
   );
 };
 
