@@ -10,13 +10,13 @@ const TableOne = () => {
   const [brandData, setBrandData] = useState([]);
   const itemPerPage = useSelector((state) => state.pagination.itemsPerPage);
   const dispatch = useDispatch();
-  const tokenDux = useSelector((state)=>state.auth.token)
+  const tokenDux = useSelector((state) => state.auth.token)
 
   // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getUserInfo(itemPerPage,tokenDux);
+        const data = await getUserInfo(itemPerPage, tokenDux);
         setBrandData(data);
         console.log(data);
 
@@ -64,25 +64,32 @@ const TableOne = () => {
           <tbody>
             {brandData.length && brandData.map((brand, key) => (
               <tr key={key} className={`${key % 2 !== 0 ? 'bg-[#f5f3f3]' : ''} border border-white`}>
-                {[
-                  <FaEdit key={`edit-${key}`} />,
-                  <FaTrash key={`trash-${key}`} onClick={() => handleDelete(key)} />,
-                  brand.UserCode, 
-                  brand.UserName, 
-                  brand.FatherName, 
-                  brand.Mobile1, 
-                  brand.UserType.TypeName
-                ].map((data, index) => (
-                  <td key={index} className="py-1 px-4 border border-white dark:border-strokedark">
-                    {typeof data === 'string' ? (
-                      <p className="text-black dark:text-white">{data}</p>
-                    ) : (
-                      <button className={index === 0 ? 'text-blue-500 hover:text-blue-700' : 'text-red-500 hover:text-red-700'}>
-                        {data}
-                      </button>
-                    )}
-                  </td>
-                ))}
+                <td className="py-1 px-4 border border-white">
+                  <button className='text-blue-500 hover:text-blue-700'>
+                    <FaEdit />
+                  </button>
+                </td>
+                <td className="py-1 px-4 border border-white ">
+                  <button className='text-red-500 hover:text-red-700'>
+                    <FaTrash />
+                  </button>
+                </td>
+                <td className="py-1 px-4 border border-white">
+                  <p className="text-black dark:text-white">{brand.UserCode}</p>
+                </td>
+
+                <td className="py-1 px-4 border border-white ">
+                  <p className="text-black dark:text-white">{brand.UserName}</p>
+                </td>
+                <td className="py-1 px-4 border border-white">
+                  <p className="text-black dark:text-white">{brand.FatherName}</p>
+                </td>
+                <td className="py-1 px-4 border border-white">
+                  <p className="text-black dark:text-white">{brand.Mobile1}</p>
+                </td>
+                <td className="py-1 px-4 border border-white">
+                  <p className="text-black dark:text-white">{brand.UserType.TypeName}</p>
+                </td>
               </tr>
             ))}
           </tbody>
