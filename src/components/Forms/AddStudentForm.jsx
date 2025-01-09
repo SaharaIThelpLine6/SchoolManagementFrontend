@@ -89,7 +89,7 @@ const AddStudentForm = ({ pageTitle }) => {
   }, [DistrictID2, setValue]);
 
   useEffect(() => {
-    
+
     isSameAddressRef.current = sameAddress;
 
     if (isSameAddressRef.current) {
@@ -140,102 +140,98 @@ const AddStudentForm = ({ pageTitle }) => {
   const onSubmit = async (data) => {
     try {
       console.log(token);
-      
+
       const submitRes = await insertUserInfo(token, data)
       console.log(submitRes);
       navigate(0);
-    } catch(err){
+    } catch (err) {
       console.error(err.message)
       // alert(err.message)
     }
-    
-    
+
+
   }
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="font-lato">
 
       <div className="px-[24px] text-[14px]">
-
-        <div className="md:flex  gap-5">
-          {/*Column 1 Start*/}
-          <div className="w-full flex-wrap lg:flex-nowrap">
-            <div className="mb-2">
-              <DefaultSelect
+        {/*Column 1 Start*/}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3 w-full flex-wrap lg:flex-nowrap">
+          <div className="mb-2">
+            <DefaultSelect
               type="number"
-                label={
-                  <span className="text-red-500">
-                    ব্যবহারকারীর ধরণ * :
-                  </span>
-                }
-                options={userType}
-                registerKey={"UserTypeID"}
-                valueField={"id"}
-                nameField={"value"}
-              />
-            </div>
-
-
-            <div className="mb-2">
-              <DefaultInput
-                label={
-                  <div className="flex justify-between">
-                    <span className="text-red-500">দাখেলা</span>
-                    <p className="text-blue-700 underline">
-                      <a href="http://">Code Setting</a>
-                    </p>
-                  </div>
-                }
-                type={'number'}
-                placeholder={"100149"}
-                registerKey={"UserCode"}
-              />
-            </div>
-
-            <div className="mb-2">
-              <DefaultSelect
-                label={
-                  <span className="text-red-500">
-                    লিঙ্গ * :
-                  </span>
-                }
-                options={gender}
-                registerKey={"GenderID"}
-                require={"Gender Field is require"}
-                nameField={"GenderName"}
-                valueField={"ID"}
-              />
-            </div>
-
-            <div className="mb-2">
-              <DefaultInput
-                label={
-                  <span className="text-red-500">
-                    নাম * :
-                  </span>
-                }
-                type={'text'}
-                placeholder={""}
-                registerKey={"UserName"}
-              />
-            </div>
-
-            <div className="mb-2">
-              <DefaultInput label={"পিতার নাম :"} type={'text'} placeholder={""} registerKey={"FatherName"} />
-            </div>
-
-            <div className="mb-2">
-              <DefaultInput label={"মাতার নাম :"} type={'text'} placeholder={""} registerKey={"MotherName"} />
-            </div>
+              label={
+                <span className="text-red-500">
+                  ব্যবহারকারীর ধরণ * :
+                </span>
+              }
+              options={userType}
+              registerKey={"UserTypeID"}
+              valueField={"id"}
+              nameField={"value"}
+            />
           </div>
-          {/*Column 1 End*/}
+
+
+          <div className="mb-2">
+            <DefaultInput
+              label={
+                <div className="flex justify-between">
+                  <span className="text-red-500">দাখেলা</span>
+                  <p className="text-blue-700 underline">
+                    <a href="http://">Code Setting</a>
+                  </p>
+                </div>
+              }
+              type={'number'}
+              placeholder={"100149"}
+              registerKey={"UserCode"}
+            />
+          </div>
+
+          <div className="mb-2">
+            <DefaultSelect
+              label={
+                <span className="text-red-500">
+                  লিঙ্গ * :
+                </span>
+              }
+              options={gender}
+              registerKey={"GenderID"}
+              require={"Gender Field is require"}
+              nameField={"GenderName"}
+              valueField={"ID"}
+            />
+          </div>
+
+          <div className="mb-2">
+            <DefaultInput
+              label={
+                <span className="text-red-500">
+                  নাম * :
+                </span>
+              }
+              type={'text'}
+              placeholder={""}
+              registerKey={"UserName"}
+            />
+          </div>
+
+          <div className="mb-2">
+            <DefaultInput label={"পিতার নাম :"} type={'text'} placeholder={""} registerKey={"FatherName"} />
+          </div>
+
+          <div className="mb-2">
+            <DefaultInput label={"মাতার নাম :"} type={'text'} placeholder={""} registerKey={"MotherName"} />
+          </div>
 
           <div className="flex gap-3">
-            {/* <div className="mb-2 w-full">
+            <div className="mb-2 w-full">
               <DatePickerOne />
-            </div> */}
-            {/* <div className="mb-2 w-16">
+            </div>
+            <div className="mb-2 w-16">
               <DefaultInput label={"বয়স :"} type={'text'} placeholder={"৭০"} registerKey={"age"} />
-            </div> */}
+            </div>
           </div>
           <div className="mb-2">
             <DefaultInput label={"NID/জন্ম নিবন্ধন নং :"} type={'text'} placeholder={""} registerKey={"NIDNO"} />
@@ -266,14 +262,12 @@ const AddStudentForm = ({ pageTitle }) => {
             <DefaultInput label={"ই-মেইল"} type={'email'} placeholder={""} registerKey={"Email"} />
           </div>
           <div className="mb-2">
-            <DefaultSelect label={"রক্তের গ্রুপ :"} type="string" options={[{ value: "A+" }, { value: "A-" }, { value: "B+" }, {value: "B-" }, {value: "AB+" }, { value: "AB-" }, {value: "O+" }, { value: "O-" }]} registerKey={"BloodGroup"} nameField={"value"} 
+            <DefaultSelect label={"রক্তের গ্রুপ :"} type="string" options={[{ value: "A+" }, { value: "A-" }, { value: "B+" }, { value: "B-" }, { value: "AB+" }, { value: "AB-" }, { value: "O+" }, { value: "O-" }]} registerKey={"BloodGroup"} nameField={"value"}
               valueField={"value"}
-              
-              />
+
+            />
           </div>
-
         </div>
-
 
         {/* Permanent address column Start*/}
         <div className="my-5">
@@ -389,8 +383,10 @@ const AddStudentForm = ({ pageTitle }) => {
           <button className="mega-button positive text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-0 py-0 text-center me-2 mb-2 mt-4 w-24 h-8" type="submit">
             New
           </button>
+
+          {/*Save Button & Filter end*/}
+
         </div>
-        {/*Save Button & Filter end*/}
 
       </div>
     </form >
