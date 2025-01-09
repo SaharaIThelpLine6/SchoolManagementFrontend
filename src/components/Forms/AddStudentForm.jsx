@@ -301,14 +301,16 @@ const AddStudentForm = ({ pageTitle }) => {
             <div className="flex items-center">
               <label className="inline-flex items-center">
                 <input
+                  id="sameAddress"
                   type="checkbox"
-                  name=""
                   value="male"
+                  name="sameAddress"
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500"
+                  {...register("sameAddress")}
                 />
               </label>
             </div>
-            <label className="items-center text-[16px] font-bold font-noto left-[50%] top-[50%]"> ঠিকানা একই হলে এখানে ক্লিক করুন </label>
+            <label htmlFor="sameAddress" className="items-center text-[16px] font-bold font-noto left-[50%] top-[50%]"> ঠিকানা একই হলে এখানে ক্লিক করুন </label>
           </div>
 
           <div className="mx-auto font-bold font-noto mb-[-10px] text-[16px] absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-35%]">
@@ -322,7 +324,7 @@ const AddStudentForm = ({ pageTitle }) => {
         <div className="md:grid md:grid-cols-5 gap-3">
 
           <div className="">
-            <DefaultSelect label={"বিভাগ"} options={[{ id: '1', value: "Dhaka" }, { id: '2', value: "Chittagong" }]} registerKey={"user_type"} />
+            <DefaultSelect label={"বিভাগ"} type="number" options={divition} registerKey={"DivisionID2"} valueField={"DivisionID"} nameField={"DivisionName"} />
           </div>
           <div className="">
             <DefaultSelect label={"জেলা"} type="number" options={district[DivisionID2]} registerKey={"DistrictID2"} valueField={"DistrictID"} nameField={"DistrictName"} />
