@@ -27,9 +27,9 @@ const AddStudent = ({ pageTitle }) => {
         <div className="mb-4.5">
           <DefaultInput label={"Email"} type={'email'} placeholder={"Enter Student Email"} registerKey={"student_email"} />
         </div>
-        <div className="mb-4.5">
+        {/* <div className="mb-4.5">
           <DefaultSelect label={"User Type"} options={[{ id: '1', value: "Admin" }, { id: '2', value: "Teacher" }]} registerKey={"user_type"} />
-        </div>
+        </div> */}
         <div className="mb-4.5">
           <DatePickerOne />
         </div>
