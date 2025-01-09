@@ -47,7 +47,6 @@ function App() {
            <Route path="/class" element={<Class />} />
           </Route>
           <Route path="/login" element={<Login />} />
-          <Route path="/testpage" element={<TestPage />} />
         </Routes>
       </BrowserRouter>
     </FormProvider>
