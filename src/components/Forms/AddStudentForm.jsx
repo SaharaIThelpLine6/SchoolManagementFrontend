@@ -172,7 +172,7 @@ const AddStudentForm = ({ pageTitle }) => {
             />
           </div>
 
-          <div className="mb-2">
+          <div className="">
             <DefaultInput
               label={
                 <div className="flex justify-between">
