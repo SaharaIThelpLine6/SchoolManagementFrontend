@@ -67,11 +67,11 @@ const TableOne = () => {
                 {[
                   <FaEdit key={`edit-${key}`} />,
                   <FaTrash key={`trash-${key}`} onClick={() => handleDelete(key)} />,
-                  brand.UserCode,
-                  brand.UserName,
-                  brand.FatherName,
-                  brand.Mobile1,
-                  brand.UserTypeID
+                  brand.UserCode, 
+                  brand.UserName, 
+                  brand.FatherName, 
+                  brand.Mobile1, 
+                  brand.UserType.TypeName
                 ].map((data, index) => (
                   <td key={index} className="py-1 px-4 border border-white dark:border-strokedark">
                     {typeof data === 'string' ? (

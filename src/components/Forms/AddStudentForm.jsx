@@ -12,6 +12,20 @@ import { insertUserInfo } from "../../utils/create/api";
 import { useNavigate } from "react-router-dom";
 
 const AddStudentForm = ({ pageTitle }) => {
+
+  const [selectedImage, setSelectedImage] = useState(null);
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+
   const dispatch = useDispatch();
   const { gender, divition, district, thana, studentRelation, status, error } = useSelector((state) => state.settings);
   const { token } = useSelector((state) => state.auth);
@@ -215,57 +229,53 @@ const AddStudentForm = ({ pageTitle }) => {
           </div>
           {/*Column 1 End*/}
 
-          {/*Column 2 Start*/}
-          <div className="w-full flex-wrap lg:flex-nowrap">
+          <div className="flex gap-3">
+            {/* <div className="mb-2 w-full">
+              <DatePickerOne />
+            </div> */}
+            {/* <div className="mb-2 w-16">
+              <DefaultInput label={"বয়স :"} type={'text'} placeholder={"৭০"} registerKey={"age"} />
+            </div> */}
+          </div>
+          <div className="mb-2">
+            <DefaultInput label={"NID/জন্ম নিবন্ধন নং :"} type={'text'} placeholder={""} registerKey={"NIDNO"} />
+          </div>
+          <div className="flex gap-3">
+            <div className="mb-2 w-full">
+              <label className="text-red-500">মোবাইল ১* (SMS যাবে)</label>
+              <DefaultInput
+                type={'text'}
+                placeholder={""}
+                registerKey={"Mobile1"}
+              />
+            </div>
 
-            <div className="flex gap-5">
-              {/* <div className="mb-2 w-full">
-                <DatePickerOne />
-              </div> */}
-              {/* <div className="mb-2">
-                <DefaultInput label={"বয়স :"} type={'text'} placeholder={"৭০"} registerKey={"age"} />
-              </div> */}
+            <div className="mb-2 w-36">
+              <DefaultSelect label={"সম্পর্ক:"} type="number" options={studentRelation} valueField={"RelationID"} nameField={"RelationName"} registerKey={"Relationship1"} />
             </div>
-            <div className="mb-2">
-              <DefaultInput label={"NID/জন্ম নিবন্ধন নং :"} type={'text'} placeholder={""} registerKey={"NIDNO"} />
+          </div>
+          <div className="flex gap-3">
+            <div className="mb-2 w-full">
+              <DefaultInput label={"মোবাইল ২"} type={'text'} placeholder={""} registerKey={"Mobile2"} />
             </div>
-            <div className="flex gap-4">
-              <div className="mb-2 w-full">
-                <label className="text-red-500">মোবাইল ১* (SMS যাবে)</label>
-                <DefaultInput
-                  type={'text'}
-                  placeholder={""}
-                  registerKey={"Mobile1"}
-                />
-              </div>
-
-              <div className="mb-2 w-44">
-                <DefaultSelect label={"সম্পর্ক:"} type="number" options={studentRelation} valueField={"RelationID"} nameField={"RelationName"} registerKey={"Relationship1"} />
-              </div>
+            <div className="mb-2 w-36">
+              <DefaultSelect label={"সম্পর্ক:"} type="number" options={studentRelation} valueField={"RelationID"} nameField={"RelationName"} registerKey={"Relationship2"} />
             </div>
-            <div className="flex gap-5">
-              <div className="mb-2 w-full">
-                <DefaultInput label={"মোবাইল ২"} type={'text'} placeholder={""} registerKey={"Mobile2"} />
-              </div>
-              <div className="mb-2 w-44">
-                <DefaultSelect label={"সম্পর্ক:"} type="number" options={studentRelation} valueField={"RelationID"} nameField={"RelationName"} registerKey={"Relationship2"} />
-              </div>
-            </div>
-            <div className="mb-2">
-              <DefaultInput label={"ই-মেইল"} type={'email'} placeholder={""} registerKey={"Email"} />
-            </div>
-            <div className="mb-2">
-              <DefaultSelect label={"রক্তের গ্রুপ :"} type="string" options={[{ value: "A+" }, { value: "A-" }, { value: "B+" }, {value: "B-" }, {value: "AB+" }, { value: "AB-" }, {value: "O+" }, { value: "O-" }]} registerKey={"BloodGroup"} nameField={"value"} 
+          </div>
+          <div className="mb-2">
+            <DefaultInput label={"ই-মেইল"} type={'email'} placeholder={""} registerKey={"Email"} />
+          </div>
+          <div className="mb-2">
+            <DefaultSelect label={"রক্তের গ্রুপ :"} type="string" options={[{ value: "A+" }, { value: "A-" }, { value: "B+" }, {value: "B-" }, {value: "AB+" }, { value: "AB-" }, {value: "O+" }, { value: "O-" }]} registerKey={"BloodGroup"} nameField={"value"} 
               valueField={"value"}
               
               />
-            </div>
           </div>
-          {/*Column 2 End*/}
+
         </div>
 
 
-        {/*Permanent address column Start*/}
+        {/* Permanent address column Start*/}
         <div className="my-5">
           <div className="mb-3">
             <p>স্থায়ী ঠিকানা</p>
@@ -308,6 +318,7 @@ const AddStudentForm = ({ pageTitle }) => {
         </div>
 
 
+
         {/*Temporary address column Start*/}
         <div className="my-5">
           <div className="mb-3">
@@ -334,6 +345,18 @@ const AddStudentForm = ({ pageTitle }) => {
           {/*Temporary address column End*/}
 
         </div>
+
+        {/*Image add start*/}
+        <div className="flex gap-2 my-5">
+          <p>ছবি সংযুক্ত করুন</p>
+          <input
+            type="file"
+            className="file-input"
+            onChange={handleImageChange}
+          />
+          {selectedImage && <img src={selectedImage} alt="uploaded" className="uploaded-image h-20 w-20 border-4 border-slate-300" />}
+        </div>
+        {/*Image add end*/}
 
         {/*Save Button & Filter start*/}
         <div className="flex gap-3">

@@ -1,5 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+/* eslint-disable no-unused-vars */
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import parse from 'html-react-parser';
 import Logo from '/vite.svg';
@@ -11,16 +13,29 @@ const Sidebar = ({ menuList, title }) => {
   const [activeMenu, setActiveMenu] = useState(null);
 
   const sidebarRef = useRef(null);
-  const [isResizing, setIsResizing] = useState(false);
-  const [sidebarWidth, setSidebarWidth] = useState(360);
-
+  const [isResizing, setIsResizing] = useState(false); // Resizing state
+  const [sidebarWidth, setSidebarWidth] = useState(360); // Sidebar width
+  const [activeMenu, setActiveMenu] = useState(null); // Active menu
+  
+  const [isOpen, setIsOpen] = useState(false); // Sidebar toggle for small screens
+  
   const startResizing = useCallback((mouseDownEvent) => {
     setIsResizing(true);
   }, []);
 
-  const stopResizing = useCallback(() => {
+    const stopResizing = useCallback(() => {
     setIsResizing(false);
   }, []);
+
+
+  // Handle resizing logic
+ 
+  const handleMouseMove = (e) => {
+    if (!isResizing) return;
+    const newWidth = e.clientX - sidebarRef.current.getBoundingClientRect().left;
+    setSidebarWidth(Math.max(64, newWidth)); // Minimum width 64px
+  };
+ 
 
   const resize = useCallback(
     (mouseMoveEvent) => {
@@ -56,6 +71,30 @@ const Sidebar = ({ menuList, title }) => {
     setActiveMenu(activeItem);
   }, [pathname, menuList]);
 
+  // Toggle sidebar open/close for small screens
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
+
+  // Handle submenu toggle (optional manual click behavior)
+  const handleMenuClick = (menu) => {
+    setActiveMenu(activeMenu?.id === menu.id ? null : menu); // Toggle submenu
+  };
+
+  
+
+  // Attach mousemove and mouseup events during resizing
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', stopResizing);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [isResizing]);
+
   return (
       <aside
         ref={sidebarRef}
@@ -79,11 +118,11 @@ const Sidebar = ({ menuList, title }) => {
         <div className="main_menu_area w-[64px] bg-[#333] h-full">
           <div className="flex items-center justify-between gap-2">
             <NavLink to="/" className="w-full flex justify-center py-5">
-            <img src={Logo} alt="Logo" className='w-10' />
+            <img src={Logo} alt="Logo" className='w-8' />
             </NavLink>
           </div>
 
-          {/* Menu List */}
+
           <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
             <nav>
             <div>
@@ -93,7 +132,7 @@ const Sidebar = ({ menuList, title }) => {
                   <li key={menu.id}>
                     <NavLink
                       to={menu.route}
-                      className={`group relative flex items-center gap-2.5 rounded-sm py-5 text-[12px] font-bold flex flex-col items-center justify-center duration-300 ease-in-out ${pathname === '/' || menu.route === '/'
+                      className={`group relative flex items-center gap-1 rounded-sm py-2 text-[12px] font-semibold flex-col justify-center duration-300 ease-in-out ${pathname === '/' || menu.route === '/'
                         ? pathname === menu.route
                           ? "bg-black text-[#0ea5e9]"
                           : "text-[#f6f6f6]"
@@ -101,7 +140,7 @@ const Sidebar = ({ menuList, title }) => {
                           ? "bg-black text-[#0ea5e9]"
                           : "text-[#e6e6e6]"
                         }`}
-
+                      onClick={() => handleMenuClick(menu)}
                     >
                       {parse(menu.icon)}
                       <span className={`${pathname.includes(menu.route) &&
@@ -140,7 +179,7 @@ const Sidebar = ({ menuList, title }) => {
             </ul>
 
           </div>
-      ) : null}
+      )}
       {activeMenu && activeMenu.subMenu ? (
         <div className="app-sidebar-resizer h-full w-[10px] after:content[''] after:relative after:w-[5px] after:h-[16px] after:top-1/2 after:-translate-y-1/2 after:border-x after:border-x-[#cccccc] bg-[#ededed] after:block" onMouseDown={startResizing} style={{flexGrow: 0, flexShrink: 0, flexBasis: '6px', justifySelf: 'flex-end', cursor: "ew-resize", resize: "horizontal"}} />
       ): null}
