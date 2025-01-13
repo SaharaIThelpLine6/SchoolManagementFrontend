@@ -20,7 +20,7 @@ const Login = () => {
                 data,
                 {
                     headers: {
-                        'Content-Type': 'application/json', // Set content type to JSON
+                        'Content-Type': 'application/json',
                     },
                 }
             );
@@ -56,9 +56,6 @@ const Login = () => {
                             <div className="mt-5">
                                 <button type="submit" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300  shadow-lg shadow-green-500/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-2 block w-full ">Login</button>
                             </div>
-                            {/* <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-                                Don’t have an account yet? <a href="#" className="font-medium text-primary-600 hover:underline dark:text-primary-500">Sign up</a>
-                            </p> */}
                         </form>
                     </div>
                 </div>

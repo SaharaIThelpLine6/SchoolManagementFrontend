@@ -1,12 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '../features/auth/authSlice';
 import paginationReducer from '../features/pagination/paginationSlice';
-import settings from '../features/settings/settingsSlice';
+import settingsReducer from '../features/settings/settingsSlice';
+import userInfoReducer from '../features/userInfo/userInfoSlice';
 const store = configureStore({
   reducer: {
     auth: authReducer,
     pagination: paginationReducer,
-    settings: settings
+    settings: settingsReducer,
+    userInfo: userInfoReducer
   },
 });
 

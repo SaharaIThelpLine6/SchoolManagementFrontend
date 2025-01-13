@@ -5,6 +5,7 @@ import { getUserInfo } from '../../utils/read/api';
 import { useDispatch, useSelector } from 'react-redux';
 import { setItemsPerPage } from '../../features/pagination/paginationSlice';
 import { logout } from '../../features/auth/authSlice';
+import { fetchSingleUser, setEditMode } from '../../features/userInfo/userInfoSlice';
 
 const TableOne = () => {
   const [brandData, setBrandData] = useState([]);
@@ -65,7 +66,10 @@ const TableOne = () => {
             {brandData.length && brandData.map((brand, key) => (
               <tr key={key} className={`${key % 2 !== 0 ? 'bg-[#f5f3f3]' : ''} border border-white`}>
                 <td className="py-1 px-4 border border-white">
-                  <button className='text-blue-500 hover:text-blue-700'>
+                  <button type='button' className='text-blue-500 hover:text-blue-700' onClick={() => {
+                    dispatch(setEditMode(1))
+                    dispatch(fetchSingleUser(brand.UserID))
+                  }}>
                     <FaEdit />
                   </button>
                 </td>

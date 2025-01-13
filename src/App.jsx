@@ -22,6 +22,8 @@ import TeacherInfo from './pages/TeacherInfo';
 import PayRole from './pages/PayRole';
 import PayRoleName from './pages/PayRoleName';
 import Report from './pages/Report';
+import Query from './pages/Query';
+import { ToastContainer } from 'react-toastify';
 function App() {
   const [loading, setLoading] = useState(true);
   const methods = useForm()
@@ -60,10 +62,12 @@ function App() {
               <Route path="report" element={<Report pageTitle={"Reports"} />} />
             </Route>
             <Route path="/formp" element={<FormP />} />
+            <Route path='/query' element={<Query />} />
           </Route>
           <Route path="/login" element={<Login />} />
         </Routes>
       </BrowserRouter>
+      <ToastContainer autoClose={8000} />
     </FormProvider>
   );
 }
