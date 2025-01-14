@@ -29,6 +29,8 @@ import Library from './pages/Library';
 import Setting from './pages/Setting';
 import Help from './pages/Help';
 
+import Query from './pages/Query';
+import { ToastContainer } from 'react-toastify';
 function App() {
   const [loading, setLoading] = useState(true);
   const methods = useForm()
@@ -77,6 +79,7 @@ function App() {
           <Route path="/login" element={<Login />} />
         </Routes>
       </BrowserRouter>
+      <ToastContainer autoClose={8000} />
     </FormProvider>
   );
 }

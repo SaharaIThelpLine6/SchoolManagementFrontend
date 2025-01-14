@@ -33,20 +33,18 @@ const Keyword = ({ title, field_prefix }) => {
   };
 
   return (
-    <div className="mb-4 flex items-start flex-col md:flex-row">
-      {title && (
-        <h1 className="text-xs font-semibold mb-2 w-full md:w-1/5">{title}</h1>
-      )}
-      <div className="w-full md:w-4/5 flex items-center flex-wrap border p-2 gap-2 bg-white rounded">
+    <div className="">
+      <div className="w-full md:w-4/5">
         <Controller
           name={`${field_prefix}_tags`}
           control={control}
           render={({ field }) => (
-            <>
+            <div className="flex">
+              <div className="flex flex-wrap">
               {tags.map((tag, index) => (
                 <div
                   key={index}
-                  className="flex items-center text-gray-700 border rounded-full px-3 py-1"
+                  className="flex items-center text-gray-700 border px-3 py-1"
                 >
                   <span>{tag}</span>
                   <button
@@ -57,13 +55,14 @@ const Keyword = ({ title, field_prefix }) => {
                   </button>
                 </div>
               ))}
+              </div>
               <input
                 type="text"
-                placeholder="Add a keyword"
-                className="flex-grow border py-1 px-2 rounded-full outline-none"
+                placeholder="Add a column name"
+                className="flex-grow border px-2 outline-none"
                 onKeyDown={(e) => handleKeyDown(e, field.onChange)}
               />
-            </>
+            </div>
           )}
         />
       </div>

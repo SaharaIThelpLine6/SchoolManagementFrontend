@@ -10,12 +10,16 @@ import { getUserType } from "../../utils/read/api";
 import { fetchSettingsData, fetchDidata, fetchThanadata } from "../../features/settings/settingsSlice";
 import { insertUserInfo } from "../../utils/create/api";
 import { useNavigate } from "react-router-dom";
+import { setEditMode } from "../../features/userInfo/userInfoSlice";
+import { updateUserInfo } from "../../utils/update/api";
 import DefaultGreen from "../Button/DefaultGreen";
 import { setItemsPerPage } from "../../features/pagination/paginationSlice";
 
 const AddStudentForm = ({ pageTitle }) => {
 
   const [selectedImage, setSelectedImage] = useState(null);
+  const defaultData = useSelector((state) => state.userInfo.defaultFormValue);
+  const editMode = useSelector((state) => state.userInfo.editMode);
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -26,8 +30,6 @@ const AddStudentForm = ({ pageTitle }) => {
       reader.readAsDataURL(file);
     }
   };
-
-
   const dispatch = useDispatch();
   const { gender, divition, district, thana, studentRelation, status, error } = useSelector((state) => state.settings);
   const { token } = useSelector((state) => state.auth);
@@ -37,73 +39,155 @@ const AddStudentForm = ({ pageTitle }) => {
     handleSubmit,
     watch,
     setValue,
-    resetField,
+    reset,
     formState: { errors },
   } = useFormContext();
 
   const [userType, setUserType] = useState([]);
-
-  const [DivisionID, DistrictID, DivisionID2, DistrictID2, TransientPoliceStationID, sameAddress, TransientPost, TransientVill] = watch(["DivisionID", "DistrictID", "DivisionID2", "DistrictID2", "TransientPoliceStationID", "sameAddress", "TransientPost", "TransientVill"])
-
+  const [userMainDetails, setUserMainDetails] = useState([]);
+  const [DivisionID, DistrictID, DivisionID2, DistrictID2, permanentPoliceStationID, sameAddress, TransientPost, TransientVill] = watch(["DivisionID", "DistrictID", "DivisionID2", "DistrictID2", "permanentPoliceStationID", "sameAddress", "TransientPost", "TransientVill"])
   const isSameAddressRef = useRef(false);
 
   useEffect(() => {
-    setValue("DistrictID", "");
-    setValue("TransientPoliceStationID", "");
-    if (DivisionID) {
-      dispatch(fetchDidata(DivisionID));
-    }
-  }, [DivisionID, setValue]);
-
-  useEffect(() => {
-    setValue("TransientPoliceStationID", "");
-    if (DistrictID) {
-      dispatch(fetchThanadata(DistrictID))
-    }
-  }, [DistrictID, setValue]);
-
-  useEffect(() => {
-    if (!isSameAddressRef.current) {
-      setValue("DistrictID2", "");
+    if (editMode === 0) {
+      setValue("DistrictID", "");
       setValue("permanentPoliceStationID", "");
-      if (DivisionID2) {
-        dispatch(fetchDidata(DivisionID2));
+      if (DivisionID) {
+        dispatch(fetchDidata(DivisionID));
       }
     }
-    else {
-      setValue("DistrictID2", DistrictID);
-    }
-
-
-  }, [DivisionID2, setValue]);
-
-  useEffect(() => {
-    if (!isSameAddressRef.current) {
-      setValue("permanentPoliceStationID", "");
-      if (DistrictID2) {
-        dispatch(fetchThanadata(DistrictID2))
+    else if (editMode === 2) {
+      const numberStrP = defaultData.permanentPoliceStationID.toString();
+      if (DivisionID === Number(numberStrP.slice(0, 1))) {
+        console.log("Both Are Same");
+      }
+      else {
+        console.log("Both Are Not Same");
+        setValue("DistrictID", "");
+        setValue("permanentPoliceStationID", "");
+        if (DivisionID) {
+          dispatch(fetchDidata(DivisionID));
+        }
       }
     }
-    else {
-      setValue("permanentPoliceStationID", TransientPoliceStationID);
-    }
 
-  }, [DistrictID2, setValue]);
+  }, [DivisionID, setValue, editMode]);
 
   useEffect(() => {
+    if (editMode === 0) {
+      setValue("permanentPoliceStationID", "");
+      if (DistrictID) {
+        dispatch(fetchThanadata(DistrictID))
+      }
+    }
+    else if (editMode === 2) {
+      const numberStrP = defaultData.permanentPoliceStationID.toString();
+      if (DistrictID === Number(numberStrP.slice(0, 3))) {
+        console.log("Both Are Same");
+      }
+      else {
+        setValue("permanentPoliceStationID", "");
+        if (DistrictID) {
+          dispatch(fetchThanadata(DistrictID))
+        }
+      }
+    }
 
+  }, [DistrictID, setValue, editMode]);
+
+  // permanent address End
+
+  //tempo adress start
+  useEffect(() => {
+    if (editMode === 0) {
+      if (!isSameAddressRef.current) {
+        setValue("DistrictID2", "");
+        setValue("TransientPoliceStationID", "");
+        if (DivisionID2) {
+          dispatch(fetchDidata(DivisionID2));
+        }
+      }
+      else {
+        setValue("DistrictID2", DistrictID);
+      }
+    }
+    else if (editMode === 2) {
+      const numberStrT = defaultData.TransientPoliceStationID.toString();
+      if (DivisionID2 === Number(numberStrT.slice(0, 1))) {
+        console.log("Both Are Same");
+      }
+      else {
+        if (!isSameAddressRef.current) {
+          setValue("DistrictID2", "");
+          setValue("TransientPoliceStationID", "");
+          if (DivisionID2) {
+            dispatch(fetchDidata(DivisionID2));
+          }
+        }
+        else {
+          setValue("DistrictID2", DistrictID);
+        }
+      }
+    }
+
+
+
+  }, [DivisionID2, setValue, editMode]);
+
+  useEffect(() => {
+    if (editMode === 0) {
+      console.log("Emon hasan");
+
+      if (!isSameAddressRef.current) {
+        setValue("TransientPoliceStationID", "");
+        if (DistrictID2) {
+          dispatch(fetchThanadata(DistrictID2))
+        }
+      }
+      else {
+        setValue("TransientPoliceStationID", permanentPoliceStationID);
+      }
+    }
+    else if (editMode === 2) {
+      console.log("data getter");
+
+      const numberStrT = defaultData.TransientPoliceStationID.toString();
+      if (DistrictID2 === Number(numberStrT.slice(0, 3))) {
+        console.log("Both Are Same");
+      }
+      else {
+        console.log("Both Are Not Same");
+        console.log(DistrictID2);
+
+
+        if (!isSameAddressRef.current) {
+          setValue("TransientPoliceStationID", "");
+          if (DistrictID2) {
+            dispatch(fetchThanadata(DistrictID2));
+          }
+        }
+        else {
+          setValue("DistrictID2", DistrictID);
+        }
+      }
+    }
+
+
+  }, [DistrictID2, setValue, editMode]);
+  //tempo adress End
+  useEffect(() => {
     isSameAddressRef.current = sameAddress;
-
+    // if (editMode === 0) {
     if (isSameAddressRef.current) {
       setValue("DivisionID2", DivisionID);
       setValue("DistrictID2", DistrictID);
-      setValue("permanentPoliceStationID", TransientPoliceStationID);
+      setValue("TransientPoliceStationID", permanentPoliceStationID);
 
       setValue("permanentPost", TransientPost)
       setValue("permanentVill", TransientVill)
     }
-
-  }, [sameAddress, setValue, DivisionID, DistrictID, TransientPoliceStationID, TransientVill])
+    // }
+  }, [sameAddress, setValue, DivisionID, DistrictID, permanentPoliceStationID, TransientVill, editMode])
 
   useEffect(() => {
     dispatch({ type: "SET_PAGE_TITLE", payload: pageTitle });
@@ -128,30 +212,72 @@ const AddStudentForm = ({ pageTitle }) => {
     dataFeatch();
   }, [])
 
+  useEffect(() => {
+    if (defaultData && editMode === 1) {
+      reset(defaultData)
+      const numberStrP = defaultData.permanentPoliceStationID.toString();
+      const numberStrT = defaultData.TransientPoliceStationID.toString();
+
+      const defaultFormData = {
+        ...defaultData,
+        DivisionID: Number(numberStrP.slice(0, 1)),
+        DistrictID: Number(numberStrP.slice(0, 3)),
+        DivisionID2: Number(numberStrT.slice(0, 1)),
+        DistrictID2: Number(numberStrT.slice(0, 3)),
+        sameAddress: numberStrP == numberStrT ? true : false
+      };
+
+      const promises = [
+        dispatch(fetchDidata(defaultFormData.DivisionID)),
+        dispatch(fetchDidata(defaultFormData.DivisionID2)),
+        dispatch(fetchThanadata(defaultFormData.DistrictID)),
+        dispatch(fetchThanadata(defaultFormData.DistrictID2)),
+      ];
+
+      Promise.all(promises)
+        .then(() => {
+          console.log(defaultFormData);
+          reset(defaultFormData);
+          dispatch(setEditMode(2));
+        })
+        .catch((err) => {
+          console.error('Error in dispatching actions:', err);
+        });
+
+    }
+  }, [defaultData, reset]);
+
   if (status === 'failed') {
     console.log(error);
 
   }
   if (status === 'succeeded') {
-    console.log(district);
-    console.log(DistrictID);
-    console.log(thana);
-    console.log(studentRelation);
+    // console.log(district);
+    // console.log(DistrictID);
+    // console.log(thana);
+    // console.log(studentRelation);
 
   }
   const onSubmit = async (data) => {
-    try {
-      console.log(token);
+    console.log(data);
 
-      const submitRes = await insertUserInfo(token, data)
-      console.log(submitRes);
-      navigate(0);
+    try {
+      console.log(editMode);
+      if (editMode === 0) {
+        const submitRes = await insertUserInfo(token, data)
+        console.log(submitRes);
+
+        navigate(0);
+      }
+      else if (editMode === 2) {
+        const submitRes = await updateUserInfo(defaultData.UserID, data)
+        console.log(submitRes);
+        navigate(0);
+      }
+
     } catch (err) {
       console.error(err.message)
-      // alert(err.message)
     }
-
-
   }
   const saveButton = "Save";
   const newButton = "New";
@@ -286,13 +412,13 @@ const AddStudentForm = ({ pageTitle }) => {
               <DefaultSelect label={"জেলা"} type="number" options={district[DivisionID]} registerKey={"DistrictID"} valueField={"DistrictID"} nameField={"DistrictName"} />
             </div>
             <div className="">
-              <DefaultSelect label={"থানা"} type="number" options={thana[DistrictID]} registerKey={"TransientPoliceStationID"} valueField={"PoliceStationID"} nameField={"PoliceStationName"} />
+              <DefaultSelect label={"থানা"} type="number" options={thana[DistrictID]} registerKey={"permanentPoliceStationID"} valueField={"PoliceStationID"} nameField={"PoliceStationName"} />
             </div>
             <div className="">
-              <DefaultInput label={"ডাক"} type={'text'} placeholder={""} registerKey={"TransientPost"} />
+              <DefaultInput label={"ডাক"} type={'text'} placeholder={""} registerKey={"permanentPost"} />
             </div>
             <div className="">
-              <DefaultInput label={"গ্রাম"} type={'text'} placeholder={""} registerKey={"TransientVill"} />
+              <DefaultInput label={"গ্রাম"} type={'text'} placeholder={""} registerKey={"permanentVill"} />
             </div>
           </div>
         </div>
@@ -332,13 +458,13 @@ const AddStudentForm = ({ pageTitle }) => {
             <DefaultSelect label={"জেলা"} type="number" options={district[DivisionID2]} registerKey={"DistrictID2"} valueField={"DistrictID"} nameField={"DistrictName"} />
           </div>
           <div className="">
-            <DefaultSelect label={"থানা"} type="number" options={thana[DistrictID2]} registerKey={"permanentPoliceStationID"} valueField={"PoliceStationID"} nameField={"PoliceStationName"} />
+            <DefaultSelect label={"থানা"} type="number" options={thana[DistrictID2]} registerKey={"TransientPoliceStationID"} valueField={"PoliceStationID"} nameField={"PoliceStationName"} />
           </div>
           <div className="">
-            <DefaultInput label={"ডাক"} type={'text'} placeholder={""} registerKey={"permanentPost"} />
+            <DefaultInput label={"ডাক"} type={'text'} placeholder={""} registerKey={"TransientPost"} />
           </div>
           <div className="">
-            <DefaultInput label={"গ্রাম"} type={'text'} placeholder={""} registerKey={"permanentVill"} />
+            <DefaultInput label={"গ্রাম"} type={'text'} placeholder={""} registerKey={"TransientVill"} />
           </div>
         </div>
         {/*Temporary address column End*/}
@@ -346,7 +472,7 @@ const AddStudentForm = ({ pageTitle }) => {
 
 
         {/*Image add start*/}
-        <div className="flex gap-2 mt-1">
+        {/* <div className="flex gap-2 mt-1">
           <p>ছবি সংযুক্ত করুন</p>
           <input
             type="file"
@@ -354,7 +480,7 @@ const AddStudentForm = ({ pageTitle }) => {
             onChange={handleImageChange}
           />
           {selectedImage && <img src={selectedImage} alt="uploaded" className="uploaded-image h-20 w-20 border-4 border-slate-300" />}
-        </div>
+        </div> */}
         {/*Image add end*/}
 
         {/*Save Button & Filter start*/}

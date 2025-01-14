@@ -8,19 +8,11 @@ export const fetchSettingsData = createAsyncThunk('settings/fetchSettingsData', 
     const [genderResponse, divisionResponse, codeSettingResponse, residentialResponse,permissionTypeResponse, studentRelationResponse] = await Promise.all([
         getSettingsData(token, '/api/settings/gender'),
         getSettingsData(token, '/api/settings/division'),
-        // getSettingsData(token, '/api/settings/thana'),
         getSettingsData(token, '/api/settings/code_setting'),
         getSettingsData(token, '/api/settings/residential'),
         getSettingsData(token, '/api/settings/permission_type'),
         getSettingsData(token, '/api/settings/student_relation'),
     ]);
-
-    // console.log(state.settings.status);
-
-    // const currentDivitionId = getState().settings.currentDivitionId;
-    // if(currentDivitionId){
-    //     console.log(currentDivitionId);
-    // }
     return {
         gender: genderResponse,
         divition: divisionResponse,
@@ -31,20 +23,28 @@ export const fetchSettingsData = createAsyncThunk('settings/fetchSettingsData', 
     };
 });
 
-export const fetchDidata = createAsyncThunk("settings/fetchDidata", async (id) => {
+export const fetchDidata = createAsyncThunk("settings/fetchDidata", async (id, { getState }) => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Token is missing');
-
+    const state = getState();
+    if (state.settings.district[id]) {
+        return { id, data: state.settings.district[id] }; 
+    }
     const response = await getSettingsData(token, `/api/settings/district?divition_id=${id}`);
     return { id, data: response };
-})
+});
 
-export const fetchThanadata = createAsyncThunk("settings/fetchThanadata", async (id) => {
+export const fetchThanadata = createAsyncThunk("settings/fetchThanadata", async (id, { getState }) => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Token is missing');
+    const state = getState();
+    if (state.settings.thana[id]) {
+        return { id, data: state.settings.thana[id] };
+    }
     const response = await getSettingsData(token, `/api/settings/thana?district_id=${id}`);
     return { id, data: response };
-})
+});
+
 const initialState = {
     gender: [],
     divition: [],
