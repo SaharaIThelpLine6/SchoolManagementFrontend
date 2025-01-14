@@ -12,7 +12,7 @@ export default {
         'noto':'"Noto Serif Bengali", serif'
       },
       boxShadow: {
-        'sub_menu': '0 0 9px -4px rgba(0,0,0,0.6)',
+        'sub_menu': '0 0 15px -5px rgba(0, 0, 0, 0.2)',
       }
     },
   },

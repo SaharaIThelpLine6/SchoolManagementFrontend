@@ -17,14 +17,12 @@ const DefaultGreen = (props) => {
                                     rounded-lg
                                     text-sm
                                     px-0 py-0
-                                    text-center
-                                    me-2 mb-2 mt-4
+                                    text-center                                    
                                     w-24
                                     h-8
                                 "
                         type="submit">
-                            Save
-                        {/* {props.submitButtonGreen} */}
+                        {props.submitButtonGreen}
                     </button>
         </div>
     )

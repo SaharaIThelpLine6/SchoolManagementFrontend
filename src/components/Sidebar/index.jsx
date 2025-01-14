@@ -158,10 +158,10 @@ const Sidebar = ({ menuList, title }) => {
                       to={menu.route}
                       className={`group relative flex items-center gap-1 rounded-sm py-2 text-[12px] font-semibold flex-col justify-center duration-300 ease-in-out ${pathname === '/' || menu.route === '/'
                         ? pathname === menu.route
-                          ? "bg-black text-[#0ea5e9]"
+                          ? "bg-black text-[#6ad965]"
                           : "text-[#f6f6f6]"
                         : pathname.includes(menu.route)
-                          ? "bg-black text-[#0ea5e9]"
+                          ? "bg-black text-[#6ad965]"
                           : "text-[#e6e6e6]"
                         }`}
                       onClick={() => handleMenuClick(menu)}
@@ -189,14 +189,14 @@ const Sidebar = ({ menuList, title }) => {
             <ul className="flex flex-col mt-[30px]">
               {activeMenu.subMenu.map((subItem) => (
               <li key={subItem.id} className={`pl-5 ${pathname.includes(subItem.route)
-                ? "shadow-sub_menu bg-white rounded-[4px]"
+                ? "shadow-sub_menu bg-[#f9f9f9] rounded-[4px]"
                 : ""
                 }`}>
                   <NavLink
                     to={`${activeMenu.route}${subItem.route}`}
                   className={`flex items-center gap-2 p-2 rounded-md text-[14px] `}
                     >
-                  <span className={`${pathname.includes(subItem.route) ? 'text-[#0ea5e9]' : ""}`}>{subItem.icon ? parse(subItem.icon) : null}</span>
+                  <span className={`${pathname.includes(subItem.route) ? 'text-[#6ad965]' : ""}`}>{subItem.icon ? parse(subItem.icon) : null}</span>
                     <span>{subItem.name}</span>
                   </NavLink>
                 </li>

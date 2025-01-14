@@ -1,8 +1,12 @@
+import DefaultGray from "../components/Button/DefaultGray";
+import DefaultInput from "../components/Forms/DefaultInput";
+import DefaultSelect from "../components/Forms/DefaultSelect";
 
 
 const GroupDistribution = () => {
+    const saveButton = "Save";
     return (
-        <div className="px-5 py-0 space-y-1 text-slate-500 text-[14px]">
+        <div className="px-5 py-0 space-y-1 text-slate-600 text-[14px]">
             <nav className="bg-[#F0F0F0]">
                 <ul className="flex gap-2 p-2">
                     <li><a href="">গ্রুপ বন্টন</a></li>
@@ -11,69 +15,96 @@ const GroupDistribution = () => {
             </nav>
 
             {/*Form*/}
-            <div className="bg-[#f8fbfd] py-1 px-1 grid grid-cols-2 gap-5">
-                {/*First Column Start*/}
-                <div className="space-y-2 w-full">
-                    <div className=" flex w-full gap-2 justify-between">
-                        <label>শিক্ষাবর্ষ :</label>
+            <form className="bg-[#f8fbfd]">
+                <div className="w-full gap-5 grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+                    <div className="">
+                        <DefaultSelect
+                            label={
+                                <p className="text-slate-800">
+                                    শিক্ষাবর্ষ :
 
-                        <select className="bg-slate-200 py-0 px-2 w-[80%]">
-                            <option value="">2025</option>
-                            <option value="">2025-2026</option>
-                            <option value="">2026</option>
-                            <option value="" selected>2026-2027</option>
-                        </select>
+                                </p>
+                            }
+                            options={[
+                                { id: '1', value: "2025", },
+                                { id: '2', value: "2025-2026" },
+                                { id: '3', value: "2026" },
+                            ]}
+                            valueField={"id"}
+                            nameField={"value"}
+                            registerKey={"class"}
+                        />
                     </div>
 
-                    <div className=" flex gap-2 justify-between">
-                        <label>মারহালা/ক্লাশ:</label>
+                    <div className="">
+                        <DefaultSelect
+                            label={
+                                <p className="text-slate-800">
+                                    মারহালা/ক্লাশ:
 
-                        <select className="bg-slate-200 py-0 px-2 w-[80%]">
-                            <option value="">Play</option>
-                            <option value="">Nursery</option>
-                            <option value="">Nurani</option>
-                            <option value="" selected>Kitab</option>
-                        </select>
+                                </p>
+                            }
+                            options={[
+                                { id: '1', value: "Play", },
+                                { id: '2', value: "Nursery" },
+                                { id: '3', value: "Nurani" },
+                            ]}
+                            valueField={"id"}
+                            nameField={"value"}
+                            registerKey={"class"}
+                        />
                     </div>
-                    <div className=" flex gap-2 justify-between">
-                        <label>লিঙ্গ:</label>
 
-                        <select className="bg-slate-200 py-0 px-2 w-[80%]">
-                            <option value="">Male</option>
-                            <option value="">Female</option>
-                            <option value="">Common</option>
-                        </select>
+                    <div className="">
+                        <DefaultSelect
+                            label={
+                                <p className="text-slate-800">
+                                    লিঙ্গ:
+
+                                </p>
+                            }
+                            options={[
+                                { id: '1', value: "Male", },
+                                { id: '2', value: "Female" },
+                                { id: '3', value: "Common" },
+                            ]}
+                            valueField={"id"}
+                            nameField={"value"}
+                            registerKey={"class"}
+                        />
+                    </div>
+
+                    <div className="">
+                        <DefaultInput label={"ই-মেইল :"} type={'email'} placeholder={""} registerKey={"email"} />
+                    </div>
+
+                    <div className="">
+                        <DefaultSelect
+                            label={
+                                <p className="text-slate-800">
+                                    Class :
+
+                                </p>
+                            }
+                            options={[
+                                { id: '1', value: "A", },
+                                { id: '2', value: "B" },
+                                { id: '3', value: "C" },
+                                { id: '3', value: "D" },
+                            ]}
+                            valueField={"id"}
+                            nameField={"value"}
+                            registerKey={"class"}
+                        />
                     </div>
                 </div>
-                {/*First Column End*/}
-
-                {/*Second Column Start*/}
-                <div className="space-y-2">
-
-                    <div className="flex gap-2 justify-between ">
-                        <label> ই-মেইল :</label>
-                        <div className="w-[80%]">
-                            <input type="text" className="w-full border border-slate-200 rounded-sm"/>
-                        </div>
-                    </div>
-
-                    <div className=" flex gap-2 justify-between">
-                        <label>Class :</label>
-
-                        <select className="bg-slate-200 py-0 px-2 w-[80%]">
-                            <option value="volvo">A</option>
-                            <option value="saab">B</option>
-                            <option value="vw">C</option>
-                            <option value="audi" selected>D</option>
-                        </select>
-                    </div>
-
-                    <div className="bg-[#3A5ECA] float-end  text-center mt-2 w-[80%] cursor-pointer text-white">
-                        <button type="button">Save</button>
-                    </div>
+                {/*Button start*/}
+                <div className="flex">
+                    <DefaultGray submitButton={saveButton} />
                 </div>
-                {/*Second Column End*/}
-            </div>
+                {/*Button end*/}
+
+            </form>
         </div>
     )
 }
