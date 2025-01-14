@@ -5,19 +5,24 @@ import { getUserInfo } from '../../utils/read/api';
 import { useDispatch, useSelector } from 'react-redux';
 import { setItemsPerPage } from '../../features/pagination/paginationSlice';
 import { logout } from '../../features/auth/authSlice';
+import Pagination from '../Pagination/Pagination';
 
 const TableOne = () => {
   const [brandData, setBrandData] = useState([]);
   const itemPerPage = useSelector((state) => state.pagination.itemsPerPage);
+  const currentPage = useSelector((state) => state.pagination.currentPage);
   const dispatch = useDispatch();
   const tokenDux = useSelector((state) => state.auth.token)
+
+  const [totalPage, setTotalPage] = useState();
 
   // Fetch data from API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getUserInfo(itemPerPage, tokenDux);
-        setBrandData(data);
+        const data = await getUserInfo(itemPerPage, tokenDux, currentPage);
+        setBrandData(data.users);
+        setTotalPage(data.totalPages);
         console.log(data);
 
       } catch (error) {
@@ -27,7 +32,7 @@ const TableOne = () => {
     };
 
     fetchData();
-  }, [itemPerPage, tokenDux]);
+  }, [itemPerPage,currentPage, tokenDux]);
 
   const handleDelete = (index) => {
     const confirmDelete = window.confirm('Are you sure delete this?');
@@ -38,7 +43,7 @@ const TableOne = () => {
   };
 
   return (
-    <div className="rounded-sm bg-white pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+    <div className="rounded-sm bg-white pt-2 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
         <select className="bg-transparent pl-2" onChange={(e) => dispatch(setItemsPerPage(e.target.value))}>
           <option value="2">2</option>
@@ -71,7 +76,7 @@ const TableOne = () => {
                 </td>
                 <td className="py-1 px-4 border border-white ">
                   <button className='text-red-500 hover:text-red-700'>
-                    <FaTrash />
+                    <FaTrash /> 
                   </button>
                 </td>
                 <td className="py-1 px-4 border border-white">
@@ -95,6 +100,31 @@ const TableOne = () => {
           </tbody>
         </table>
       </div>
+
+      {/*Pagination Start*/}   
+      <div className='flex items-center my-2'>
+        <div className='pl-2'>
+          <span className="text-md text-gray-800">
+            Showing {" "}
+            <span className="font-semibold text-black">
+              {currentPage} {" "}
+            </span>
+            - {" "}
+            <span className="font-semibold text-black">
+              {itemPerPage} {" "}
+            </span>
+            of {" "}
+            <span className="font-semibold text-black">
+              {totalPage} {" "}
+            </span>
+            Pages
+          </span>
+        </div>
+        <div className='ml-auto'>
+          <Pagination totalpages={totalPage}/>
+        </div>
+      </div>
+      {/*Pagination End*/}
     </div>
   );
 };
