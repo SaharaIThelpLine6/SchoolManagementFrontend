@@ -17,7 +17,6 @@ import FormP from './pages/FormP';
 import BookList from './pages/BookList';
 import GroupDistribution from './pages/GroupDistribution';
 import Section from './pages/Section';
-import Student_Section from './pages/Section';
 import TeacherInfo from './pages/TeacherInfo';
 import PayRole from './pages/PayRole';
 import PayRoleName from './pages/PayRoleName';
@@ -29,7 +28,6 @@ import Library from './pages/Library';
 import Setting from './pages/Setting';
 import Help from './pages/Help';
 
-import Query from './pages/Query';
 import { ToastContainer } from 'react-toastify';
 function App() {
   const [loading, setLoading] = useState(true);
