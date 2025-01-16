@@ -268,11 +268,11 @@ const DefaultLayout = () => {
   useEffect(() => {
     console.log('Authentication state:', isAuthenticated);
 
-    // if (isAuthenticated) {
-    //   dispatch(verifyUser(token)); // Dispatch the thunk
-    // } else {
-    //   navigate('/login'); // Redirect if not authenticated
-    // }
+    if (isAuthenticated) {
+      dispatch(verifyUser(token)); // Dispatch the thunk
+    } else {
+      navigate('/login'); // Redirect if not authenticated
+    }
   }, [isAuthenticated, dispatch, navigate, token]);
 
   // isAuthenticated ? (
