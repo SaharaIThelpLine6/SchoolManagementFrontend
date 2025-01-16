@@ -29,6 +29,9 @@ import Setting from './pages/Setting';
 import Help from './pages/Help';
 
 import { ToastContainer } from 'react-toastify';
+import Notepad from './pages/Notepad';
+import Others from './pages/Others';
+import Calculator from './pages/Calculator';
 function App() {
   const [loading, setLoading] = useState(true);
   const methods = useForm()
@@ -51,9 +54,7 @@ function App() {
           <Route path="/" element={<DefaultLayout />}>
             <Route index element={<Home pageTitle={"Home"} />} />
             <Route path="student">
-              <Route index element={<Student pageTitle={"Student"} />} />
-              <Route path="add_students" element={<AddStudent pageTitle={"Add Student"} />} />
-              <Route path="update_student" element={<UpdateStudent pageTitle={"Update Student"} />} />
+              <Route index element={<AddStudent pageTitle={"Add Student"} />} />
               <Route path="booklist" element={<BookList pageTitle={"Book List"} />} />
               <Route path="groupdistribution" element={<GroupDistribution pageTitle={"Students Group Set"} />} />
               <Route path="class" element={<Class />} pageTitle={"Class"} />
@@ -71,10 +72,15 @@ function App() {
             <Route path="/exam" element={<Exam pageTitle={"Exam"} />} />
             <Route path="/result" element={<Result pageTitle={"Result"} />} />
             <Route path="/library" element={<Library pageTitle={"Library"} />} />
-            <Route path="/setting" element={<Setting pageTitle={"Setting"} />} />
-            <Route path="/help" element={<Help pageTitle={"Help"} />} />
-          </Route>
-          <Route path="/login" element={<Login />} />
+            <Route path="others">
+              <Route index element={<Others pageTitle={"Others"} />} />
+              <Route path="notepad" element={<Notepad pageTitle={"Notepad"} />} />
+              <Route path="calculator" element={<Calculator pageTitle={"Calculator"} />}/>
+            </Route>
+              <Route path="/setting" element={<Setting pageTitle={"Setting"} />} />
+              <Route path="/help" element={<Help pageTitle={"Help"} />} />
+            </Route>
+            <Route path="/login" element={<Login />} />
         </Routes>
       </BrowserRouter>
       <ToastContainer autoClose={8000} />

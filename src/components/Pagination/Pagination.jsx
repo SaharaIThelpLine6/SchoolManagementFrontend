@@ -63,7 +63,7 @@ const Pagination = (props) => {
                             </li>
                         ))}
 
-                        {/* Next Button */}
+                        {/* Next Button Start*/}
                         <li>
                             <a
                                 href="#"

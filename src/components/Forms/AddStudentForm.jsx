@@ -356,7 +356,7 @@ const AddStudentForm = ({ pageTitle }) => {
 
           <div className="flex gap-3">
             <div className=" w-full">
-              <DatePickerOne />
+              <DatePickerOne dateCalender={"জন্ম তারিখ :"}/>
             </div>
             <div className=" w-16">
               <DefaultInput label={"বয়স :"} type={'text'} placeholder={"৭০"} registerKey={"age"} />

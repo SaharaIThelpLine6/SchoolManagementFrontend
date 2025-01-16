@@ -4,6 +4,7 @@ import DefaultSelect from "../components/Forms/DefaultSelect";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Fourdots from '../images/brand/four-dots-square.svg';
 import "../App.css"
+import DefaultGreen from "../components/Button/DefaultGreen";
 
 
 const Users = () => {
@@ -20,7 +21,7 @@ const Users = () => {
         <div>
             {/*Form Start*/}
             <form action="">
-                <div className="flex gap-1 px-5">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2 px-5 items-center">
 
                     <div className="">
                         <DefaultInput
@@ -31,25 +32,22 @@ const Users = () => {
                         />
                     </div>
 
-                    <div>
-
-                        <div className="">
-                            <DefaultSelect
-                                label={
-                                    <span className="">
-                                        User Power
-                                    </span>
-                                }
-                                options={[
-                                    { id: '1', value: "Reseller" },
-                                    { id: '2', value: "Users Admin" },
-                                    { id: '2', value: "Users" },
-                                ]}
-                                registerKey={"user_type"}
-                            />
-                        </div>
-
+                    <div className="">
+                        <DefaultSelect
+                            label={
+                                <span className="">
+                                    User Type
+                                </span>
+                            }
+                            options={[
+                                { id: '1', value: "Reseller" },
+                                { id: '2', value: "Users Admin" },
+                                { id: '2', value: "Users" },
+                            ]}
+                            registerKey={"user_type"}
+                        />
                     </div>
+
 
                     <div className="">
                         <DefaultInput label={"Login Name"} type={'text'} placeholder={""} registerKey={"student_email"} />
@@ -76,36 +74,14 @@ const Users = () => {
 
                     <button
                         type="button"
-                        className="items-center pl-2 pt-8"
+                        className="items-center pl-2 pt-6"
                         onClick={handleToggle}
                     >
                         {icon ? <FaEye /> : <FaEyeSlash />}
                     </button>
-
-                    <button
-                        className="
-          mega-button positive
-           text-white 
-           bg-gradient-to-r
-          from-green-400
-             via-green-500
-              to-green-600
-               hover:bg-gradient-to-br
-                focus:ring-4
-                 focus:outline-none
-                  focus:ring-green-300
-                   font-medium
-                    rounded-lg
-                     text-sm
-                      px-0 py-0
-                       text-center
-                         mb-2 mt-8 ml-2
-                        w-16
-                        h-8
-              "
-                        type="submit">
-                        Save
-                    </button>
+                    <div className="items-center lg:pt-6">
+                        <DefaultGreen submitButtonGreen={"Save"} />
+                    </div>
                 </div>
             </form>
             {/*Form End*/}
