@@ -24,3 +24,23 @@ export const updateUserInfo = async (id, data) => {
     let response = await axios.request(reqOptions);
     console.log(response.data);
 };
+
+export const updateInData = async (id, data, path) => {
+    let headersList = {
+        "Accept": "*/*",
+        "Content-Type": "application/json",
+        "Authorization": AuthStr
+    }
+
+    let bodyContent = JSON.stringify({id: id, data: data});
+
+    let reqOptions = {
+        url: `${API_URL}${path}`,
+        method: "PUT",
+        headers: headersList,
+        data: bodyContent,
+    }
+
+    let response = await axios.request(reqOptions);
+    console.log(response.data);
+};

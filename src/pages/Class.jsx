@@ -1,17 +1,43 @@
-import InputTable from "../components/InputTable/InputTable";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchClassData } from "../features/class/classSlice";
+import { useEffect, useState } from "react";
+import InputTable2 from "../components/InputTable/InputTable2";
 
 const Class = () => {
     const title = "Add Class"
     const field = "Class"
-    const tableTitleHeaders = ["Class", "Sections", "Bangla","Arabic", "Action"]
-    const tableRow = ["Class","A", "Ibrahim", "إبراهيم"]
-    return(
+    const tableTitleHeaders = ["Serial", "Class", "Sections", "Bangla", "Arabic"];
+    const [filteredClassList, setFilteredClassList] = useState([]);
+    const { classList, status, error } = useSelector((state) => state.class);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (status === 'idle') {
+            dispatch(fetchClassData());
+        }
+
+        if (status === 'succeeded') {
+
+            const transformedData = classList.map((item) => ({
+                id: item.ClassID.toString(),
+                Serial: item.Serial,
+                Class: item.EnglishClass,
+                Sections: item.ClassGroup.map(group => group.SubClass).join(", "),
+                Bangla: item.ClassName, 
+                Arabic: item.ArabicClass,
+            }));
+            setFilteredClassList(transformedData);
+            
+        }
+    }, [status, dispatch]);
+
+    return (
         <div>
-            <InputTable 
-            tableTitle={title}
-            field={field}
-            tableHeaders={tableTitleHeaders}
-            tableRows={tableRow}
+            <InputTable2
+                tableTitle={title}
+                field={field}
+                tableRows={filteredClassList}
+                tableHeader={tableTitleHeaders}
             />
         </div>
     )
