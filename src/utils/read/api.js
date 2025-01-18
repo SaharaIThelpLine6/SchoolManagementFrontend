@@ -5,9 +5,9 @@ const token = localStorage.getItem('token');
 
 const AuthStr = `Bearer ${token}`;
 
-export const getUserInfo = async (limit, tokenDux) => {
+export const getUserInfo = async (limit, tokenDux, page) => {
   try {
-    const res = await axios.get(`${API_URL}/api/users?limit=${limit}`, { headers: { Authorization: `Bearer ${tokenDux}` } })
+    const res = await axios.get(`${API_URL}/api/users?limit=${limit}&page=${page}`, { headers: { Authorization: `Bearer ${tokenDux}` } })
     return res.data;
   } catch (error) {
     console.error('Error fetching data:', error);

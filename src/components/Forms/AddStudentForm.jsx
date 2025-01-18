@@ -12,6 +12,8 @@ import { insertUserInfo } from "../../utils/create/api";
 import { useNavigate } from "react-router-dom";
 import { setEditMode } from "../../features/userInfo/userInfoSlice";
 import { updateUserInfo } from "../../utils/update/api";
+import DefaultGreen from "../Button/DefaultGreen";
+import { setItemsPerPage } from "../../features/pagination/paginationSlice";
 
 const AddStudentForm = ({ pageTitle }) => {
 
@@ -277,6 +279,8 @@ const AddStudentForm = ({ pageTitle }) => {
       console.error(err.message)
     }
   }
+  const saveButton = "Save";
+  const newButton = "New";
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="font-lato">
 
@@ -352,7 +356,7 @@ const AddStudentForm = ({ pageTitle }) => {
 
           <div className="flex gap-3">
             <div className=" w-full">
-              <DatePickerOne />
+              <DatePickerOne dateCalender={"জন্ম তারিখ :"}/>
             </div>
             <div className=" w-16">
               <DefaultInput label={"বয়স :"} type={'text'} placeholder={"৭০"} registerKey={"age"} />
@@ -421,8 +425,6 @@ const AddStudentForm = ({ pageTitle }) => {
         {/*Permanent address column End*/}
 
         <div className="flex mb-[14px] mt-[18px] pl-[4px] font-bold relative">
-
-
           <div className="flex gap-[5px] items-start">
             <div className="flex items-center">
               <label className="inline-flex items-center">
@@ -482,40 +484,21 @@ const AddStudentForm = ({ pageTitle }) => {
         {/*Image add end*/}
 
         {/*Save Button & Filter start*/}
-        <div className="flex gap-3">
-          <button
-            className="
-          mega-button positive
-           text-white 
-           bg-gradient-to-r
-          from-green-400
-             via-green-500
-              to-green-600
-               hover:bg-gradient-to-br
-                focus:ring-4
-                 focus:outline-none
-                  focus:ring-green-300
-                   font-medium
-                    rounded-lg
-                     text-sm
-                      px-0 py-0
-                       text-center
-                        me-2 mb-2 mt-2
-                        w-24
-                        h-8
-              "
-            type="submit">
-            Save
-          </button>
-
-
-          <button className="mega-button positive text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-0 py-0 text-center me-2 mb-2 mt-2 w-24 h-8" type="submit">
-            New
-          </button>
-
-          {/*Save Button & Filter end*/}
-
+        <div className="flex mt-[10px] pl-[4px] font-bold relative">
+          <div className="flex gap-3">
+            <DefaultGreen submitButtonGreen={saveButton} />
+            <DefaultGreen submitButtonGreen={newButton} />
+          </div>
+          <div className="font-bold text-slate-800  font-noto text-[16px] absolute left-[90%]">
+            <select className="border-2 border-slate-300 rounded-lg py-0.5 px-4 bg-transparent" onChange={(e) => dispatch(setItemsPerPage(e.target.value))}>
+              <option value="2">2</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+              <option value="50" selected>50</option>
+            </select>
+          </div>
         </div>
+        {/*Save Button & Filter end*/}
 
       </div>
     </form >

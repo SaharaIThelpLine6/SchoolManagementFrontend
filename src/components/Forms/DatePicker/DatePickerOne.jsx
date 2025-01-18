@@ -1,7 +1,7 @@
 import Flatpickr from "react-flatpickr";
 import { Controller, useFormContext } from 'react-hook-form';
 
-const DatePickerOne = () => {
+const DatePickerOne = (props) => {
   const {
     control,
     formState: { errors },
@@ -9,7 +9,7 @@ const DatePickerOne = () => {
   return (
     <div>
       <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-        জন্ম তারিখ :
+        {props.dateCalender}
       </label>
 
       <Controller

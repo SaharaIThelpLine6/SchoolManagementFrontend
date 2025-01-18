@@ -17,13 +17,21 @@ import FormP from './pages/FormP';
 import BookList from './pages/BookList';
 import GroupDistribution from './pages/GroupDistribution';
 import Section from './pages/Section';
-import Student_Section from './pages/Section';
 import TeacherInfo from './pages/TeacherInfo';
 import PayRole from './pages/PayRole';
 import PayRoleName from './pages/PayRoleName';
 import Report from './pages/Report';
+import Exam from './pages/Exam';
+import Result from './pages/Result';
 import Query from './pages/Query';
+import Library from './pages/Library';
+import Setting from './pages/Setting';
+import Help from './pages/Help';
+
 import { ToastContainer } from 'react-toastify';
+import Notepad from './pages/Notepad';
+import Others from './pages/Others';
+import Calculator from './pages/Calculator';
 function App() {
   const [loading, setLoading] = useState(true);
   const methods = useForm()
@@ -46,11 +54,9 @@ function App() {
           <Route path="/" element={<DefaultLayout />}>
             <Route index element={<Home pageTitle={"Home"} />} />
             <Route path="student">
-              <Route index element={<Student pageTitle={"Student"} />} />
-              <Route path="add_students" element={<AddStudent pageTitle={"Add Student"} />} />
-              <Route path="update_student" element={<UpdateStudent pageTitle={"Update Student"} />} />
+              <Route index element={<AddStudent pageTitle={"Add Student"} />} />
               <Route path="booklist" element={<BookList pageTitle={"Book List"} />} />
-              <Route path="groupdistribution" element={<GroupDistribution pageTitle={"Students Group"} />} />
+              <Route path="groupdistribution" element={<GroupDistribution pageTitle={"Students Group Set"} />} />
               <Route path="class" element={<Class />} pageTitle={"Class"} />
               <Route path="section" element={<Section />} pageTitle={"Section"} />
             </Route>
@@ -61,11 +67,20 @@ function App() {
               <Route path="pRName" element={<PayRoleName pageTitle={"Pay Role Name"} />} />
               <Route path="report" element={<Report pageTitle={"Reports"} />} />
             </Route>
-            <Route path="/formp" element={<FormP />} />
-            <Route path='/query' element={<Query />} />
-          </Route>
-          <Route path=":pid" element={<p>Home</p>} />
-          <Route path="/login" element={<Login />} />
+            <Route path="/formp" element={<FormP />} />  {/*Form form just practice. Not displaying*/}
+            <Route path="/query" element={<Query />} />
+            <Route path="/exam" element={<Exam pageTitle={"Exam"} />} />
+            <Route path="/result" element={<Result pageTitle={"Result"} />} />
+            <Route path="/library" element={<Library pageTitle={"Library"} />} />
+            <Route path="others">
+              <Route index element={<Others pageTitle={"Others"} />} />
+              <Route path="notepad" element={<Notepad pageTitle={"Notepad"} />} />
+              <Route path="calculator" element={<Calculator pageTitle={"Calculator"} />}/>
+            </Route>
+              <Route path="/setting" element={<Setting pageTitle={"Setting"} />} />
+              <Route path="/help" element={<Help pageTitle={"Help"} />} />
+            </Route>
+            <Route path="/login" element={<Login />} />
         </Routes>
       </BrowserRouter>
       {/* <ToastContainer autoClose={8000} /> */}

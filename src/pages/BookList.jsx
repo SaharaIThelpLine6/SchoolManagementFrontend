@@ -51,10 +51,12 @@ const BookList = () => {
                                 </p>
                             }
                             options={[
-                                { id: '1', value: "Play" },
+                                { id: '1', value: "Play", },
                                 { id: '2', value: "Nursary" },
                                 { id: '3', value: "First Class" },
                             ]}
+                            valueField={"id"}
+                            nameField={"value"}
                             registerKey={"class"}
                         />
                     </div>
@@ -73,6 +75,9 @@ const BookList = () => {
                             registerKey={"bookName"}
                         />
                     </div>
+                    {/* <div className="">
+                        <DefaultInput label={"Book Name "} type={'text'} placeholder={""} registerKey={"email"} />
+                    </div> */}
                     <div className="">
                         <DefaultInput
                             label={
@@ -86,11 +91,9 @@ const BookList = () => {
                         />
                     </div>
                 </div>
-
                 {/*Button start*/}
                 <div className="flex gap-3">
-                    <DefaultGray submitButton={saveButton} />  
-  
+                    <DefaultGray submitButton={saveButton} />
                 </div>
                 {/*Button end*/}
             </form>
@@ -98,7 +101,6 @@ const BookList = () => {
 
             {/*Table Column Start*/}
             <div className="">
-
                 <table className='w-full'>
                     <thead className="text-left h-8">
                         <tr className=" text-[14px] text-slate-600 bg-[#EDEDED]">
@@ -129,21 +131,15 @@ const BookList = () => {
                             <td>102</td>
                             <td>Ibrahim</td>
                             <td> إبراهيم</td>
-
                         </tr>
-
-
                     </tbody>
                 </table>
-
             </div>
             {/*Table Column End*/}
 
 
             {/*Error message*/}
             <div className='my-5'>
-
-
                 <div className='
                     flex
                     text-[14px] 
@@ -161,8 +157,6 @@ const BookList = () => {
                     দুঃখিত, কোন তথ্য পাওয়া যায়নি!
                     <button className='bg-transparent text-[#ff4dcb] -translate-x-3'>Close</button>
                 </div>
-
-
             </div>
 
 
