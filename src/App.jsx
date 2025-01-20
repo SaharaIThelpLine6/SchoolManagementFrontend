@@ -32,6 +32,11 @@ import { ToastContainer } from 'react-toastify';
 import Notepad from './pages/Notepad';
 import Others from './pages/Others';
 import Calculator from './pages/Calculator';
+import PublicLayout from './layout/PublicLayout';
+import ClassResult from './pages/ClassResult';
+import AdmissionRegistration from './pages/AdmissionRegistration';
+
+
 function App() {
   const [loading, setLoading] = useState(true);
   const methods = useForm()
@@ -69,18 +74,25 @@ function App() {
             </Route>
             <Route path="/formp" element={<FormP />} />  {/*Form form just practice. Not displaying*/}
             <Route path="/query" element={<Query />} />
-            <Route path="/exam" element={<Exam pageTitle={"Exam"} />} />
-            <Route path="/result" element={<Result pageTitle={"Result"} />} />
+            <Route path="exam">
+              <Route index element={<Exam pageTitle={"Exam"} />} />
+              <Route path="result" element={<Result pageTitle={"Result"} />} />
+            </Route>
             <Route path="/library" element={<Library pageTitle={"Library"} />} />
             <Route path="others">
               <Route index element={<Others pageTitle={"Others"} />} />
               <Route path="notepad" element={<Notepad pageTitle={"Notepad"} />} />
-              <Route path="calculator" element={<Calculator pageTitle={"Calculator"} />}/>
+              <Route path="calculator" element={<Calculator pageTitle={"Calculator"} />} />
             </Route>
-              <Route path="/setting" element={<Setting pageTitle={"Setting"} />} />
-              <Route path="/help" element={<Help pageTitle={"Help"} />} />
-            </Route>
-            <Route path="/login" element={<Login />} />
+            <Route path="/setting" element={<Setting pageTitle={"Setting"} />} />
+            <Route path="/help" element={<Help pageTitle={"Help"} />} />
+          </Route>
+          <Route path="/login" element={<Login />} />
+          <Route path="1234" element={<PublicLayout />}>
+            <Route index element={<Result pageTitle={"Result Page"} />} />
+            <Route path="ClassResult" element={<ClassResult />} />
+            <Route path="AdmissionRegistration" element={<AdmissionRegistration />} />
+          </Route>
         </Routes>
       </BrowserRouter>
       <ToastContainer autoClose={8000} />

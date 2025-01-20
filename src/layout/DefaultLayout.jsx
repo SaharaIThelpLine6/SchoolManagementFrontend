@@ -7,8 +7,9 @@ import Sidebar from '../components/Sidebar';
 import { useDispatch, useSelector } from 'react-redux';
 import Header from "../components/Header";
 import Filter from "../components/Filter";
-import { useEffect } from 'react';
+import { useEffect, useTransition } from 'react';
 import { logout, verifyUser } from '../features/auth/authSlice';
+
 
 
 const menuData = [
@@ -106,14 +107,14 @@ const menuData = [
       },
       {
         id: "2",
-        name: "Pay role Heading",
+        name: "Pay-role Heading",
         route: "/payRole",
         icon: `<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-map-dollar"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M13 19l-4 -2l-6 3v-13l6 -3l6 3l6 -3v6.5" /><path d="M9 4v13" /><path d="M15 7v5" /><path d="M21 15h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5" /><path d="M19 21v1m0 -8v1" /></svg>`,
         subMenu: false
       },
       {
         id: "3",
-        name: "Pay role Name",
+        name: "Pay-role Name",
         route: "/pRName",
         icon: `<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-file-dollar"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 3v4a1 1 0 0 0 1 1h4" /><path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2z" /><path d="M14 11h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5" /><path d="M12 17v1m0 -8v1" /></svg>`,
         subMenu: false
@@ -166,7 +167,7 @@ const menuData = [
       {
         id: "5",
         name: "Result",
-        route: "/",
+        route: "/result",
         subMenu: false,
         icon: `<img src='sidebar/exam-result.svg' alt="Result" class="w-6 h-6" />`,
       },
@@ -286,7 +287,7 @@ const DefaultLayout = () => {
           aside
         </aside> */}
         {/* <Sidebar/> */}
-        <Sidebar menuList={menuData} title={"pageTitle"} />
+        <Sidebar  menuList={menuData} title={"pageTitle"} />
         {/* <!-- ===== Sidebar End ===== --> */}
 
         {/* <!-- ===== Content Area Start ===== --> */}
