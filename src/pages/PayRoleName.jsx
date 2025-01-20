@@ -1,79 +1,75 @@
 import { FaEdit, FaTrash } from "react-icons/fa";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import DefaultInput from "../components/Forms/DefaultInput";
-import DefaultGray from "../components/Button/DefaultGray";
+import DefaultGreen from "../components/Button/DefaultGreen";
 
 const PayRoleName = () => {
     return (
-        <div className="flex w-full px-5 py-2 gap-5">
+        <div className="md:flex w-full px-3 gap-3 font-lato">
             {/*Input form Start*/}
-            <div className="w-[25%]">
-                <div className="text-[12px] space-y-2 text-slate-800 font-semibold">
+            <div className="md:w-[50%]">
+                <div className="text-sm font-medium text-black items-center gap-2 grid grid-cols-1 lg:grid-cols-2">
 
                     <div className="">
                         <DefaultSelect
-                            type=""
+                            type="number"
                             label={
-                                <span>ফান্ড :</span>
+                                <span>
+                                    ফান্ড :
+                                </span>
                             }
-                            registerKey={"fund"}
-                            valueField={"value"}
-                            nameField={"name"}
+                            registerKey={"UserTypeID"}
+                            valueField={"id"}
+                            nameField={"value"}
                         />
                     </div>
                     <div className="">
                         <DefaultSelect
-                            type=""
+                            type="number"
                             label={
-                                <span>জে-লেজার :</span>
+                                <span>
+                                    জে-লেজার :
+                                </span>
                             }
-                            registerKey={"jledger"}
-                            valueField={"jledger"}
-                            nameField={"name"}
+                            registerKey={"UserTypeID"}
+                            valueField={"id"}
+                            nameField={"value"}
                         />
                     </div>
                     <div className="">
                         <DefaultSelect
-                            type={""}
+                            type="number"
                             label={
-                                <span>সাব-লেজার :</span>
+                                <span>
+                                    সাব-লেজার :
+                                </span>
                             }
-                            registerKey={"sub-Ledger"}
-                            valueField={"sub-Ledger"}
-                            nameField={"name"}
+                            registerKey={"UserTypeID"}
+                            valueField={"id"}
+                            nameField={"value"}
                         />
                     </div>
                     <div className="">
-                        <DefaultInput
-                        type={"text"}
-                        label={"পে-খাতের নাম"}
-                        registerKey={"PayName"}
-                        />
+                        <DefaultInput label={"পে-খাতের নাম :"} type={'text'} placeholder={""} registerKey={"FatherName"} />
                     </div>
-                    
-                    
                     <div className="">
-                        <DefaultInput
-                        type={"text"}
-                        label={"সিরিয়াল"}
-                        registerKey={"Serial"}
-                        />
+                        <DefaultInput label={"সিরিয়াল :"} type={'text'} placeholder={""} registerKey={"FatherName"} />
                     </div>
+
                 </div>
-
-                <div className='text-center flex gap-10'>
-                    <DefaultGray submitButton = {"Save"} />
-                    <DefaultGray submitButton={"New"} />
+                <div className='text-center flex py-3 gap-3'>
+                    <DefaultGreen submitButtonGreen={"Save"} />
+                    <DefaultGreen submitButtonGreen={"New"} />
                 </div>
             </div>
             {/*Input form End*/}
 
             {/*Table start*/}
-            <div className="w-[75%]">
-                <table className='w-full mt-5'>
-                    <thead className="text-left">
-                        <tr className="font-normal text-sm text-slate-800 ">
-                            <th className=''>সিরিয়াল</th>
+            <div className="md:w-[50%] font-lato">
+                <table className='w-full'>
+                    <thead className="text-left bg-slate-700 ">
+                        <tr className="font-normal text-sm text-white">
+                            <th className='px-2 py-1'>সিরিয়াল</th>
                             <th>পে-রোলের নাম</th>
                             <th className='w-[10%]'>Action</th>
                         </tr>
