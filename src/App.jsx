@@ -95,7 +95,19 @@ function App() {
           </Route>
         </Routes>
       </BrowserRouter>
-      <ToastContainer autoClose={8000} />
+      {/* <ToastContainer autoClose={8000} /> */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        // className="flex text-[14px] font-SolaimanLipi bg-[#323232] text-[rgba(255,255,255,.7)] justify-between items-center py-2 px-2 rounded-[4px] font-normal"
+      />
     </FormProvider>
   );
 }

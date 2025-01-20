@@ -13,6 +13,9 @@ export default {
       },
       boxShadow: {
         'sub_menu': '0 0 15px -5px rgba(0, 0, 0, 0.2)',
+      },
+      colors: {
+        'theme-offwhite': '#ededed',
       }
     },
   },

@@ -3,6 +3,7 @@ import authReducer from '../features/auth/authSlice';
 import paginationReducer from '../features/pagination/paginationSlice';
 import settingsReducer from '../features/settings/settingsSlice';
 import userInfoReducer from '../features/userInfo/userInfoSlice';
+import classReducer from '../features/class/classSlice';
 import languageReducer from '../features/language/languageSlice';
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     pagination: paginationReducer,
     settings: settingsReducer,
     userInfo: userInfoReducer,
+    class: classReducer,
     language: languageReducer,
   },
 });
