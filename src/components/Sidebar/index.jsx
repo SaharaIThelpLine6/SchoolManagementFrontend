@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import parse from 'html-react-parser';
 import Logo from '/saharaIt.svg';
+import Translate from '../../utils/Translate';
 
 const Sidebar = ({ menuList, title }) => {
   const location = useLocation();
@@ -170,7 +171,7 @@ const Sidebar = ({ menuList, title }) => {
                       <span
                         className={pathname.includes(menu.route) ? 'text-white' : ''}
                       >
-                        {menu.name}
+                        {Translate(menu.name)}
                       </span>
                     </NavLink>
                   </li>

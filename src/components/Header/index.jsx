@@ -3,12 +3,13 @@ import { FaSearch } from "react-icons/fa"; // Import Search Icon
 import DropdownNotification from './DropdownNotification';
 import DropdownUser from './DropdownUser';
 import ThreeDotDropdown from './Threedots';
+import TranslateButton from './TranslateButton';
 
 const Header = () => {
   return (
     <header className="top-0 w-full bg-white">
       <div className="flex w-full gap-2  md:gap-20 items-center px-2 py-4 md:px-6 2xl:px-11">
-       
+
 
         {/* Center Section: Search Bar */}
         <div className="flex-grow pl-11 w-full md:px-0">
@@ -26,6 +27,7 @@ const Header = () => {
 
         {/* Right Section: Notifications and User Dropdown */}
         <div className="flex items-center gap-3 md:gap-7">
+          <TranslateButton />
           <ul className="">
             <DropdownNotification />
           </ul>

@@ -1,3 +1,5 @@
+import Translate from "../../utils/Translate";
+
 const Filter = () => {
     return (
         <div className="flex flex-col px-5 py-2 ">
@@ -9,18 +11,18 @@ const Filter = () => {
                 {/*Filter by Last Modified */}
                 <div className="relative outline-none">
                     <select className="rounded-full outline-none py-0.5 px-2 bg-[#EDEDED]">
-                        <option value="">Last Modified</option>
-                        <option value="">Today</option>
-                        <option value="">Last Week</option>
-                        <option value="">Last Month</option>
+                        <option value="">{Translate("Last Modified")}</option>
+                        <option value="">{Translate("Today")}</option>
+                        <option value="">{Translate("Last Week")}</option>
+                        <option value="">{Translate("Last Month")}</option>
                     </select>
                 </div>
                 {/* Filter by Date Added*/}
                 <div className="relative outline-none">
                     <select className="rounded-full outline-none px-2 py-0.5 bg-[#EDEDED]">
-                        <option value="">Date Added</option>
-                        <option value="">Newest First</option>
-                        <option value="">Oldest First</option>
+                        <option value="">{Translate("Date Added")}</option>
+                        <option value="">{Translate("Newest First")}</option>
+                        <option value="">{Translate("Oldest First")}</option>
                     </select>
                 </div>
             </div>
