@@ -22,7 +22,7 @@ const AddStudent = () => {
   return (
     <div className="-translate-y-4 font-lato">
 
-      <h1 className="mt-[-7px] py-[12px] px-[12px] text-black bg-green-600 text-center mx-auto text-xl w-full font-normal font-lato block border-0">শিক্ষার্থী ভর্তি ফর্ম</h1>
+      <h1 className="mt-[-7px] pb-[6px] pt-[10px] 2xl:py-[12px] px-[12px] text-white bg-green-600 text-center mx-auto text-[18px] 2xl:text-xl w-full font-normal font-lato block border-0">শিক্ষার্থী ভর্তি ফর্ম</h1>
       <form action="" className="px-[12px] pt-2 text-[14px]">
 
         <div className="pb-4 grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3 flex-wrap lg:flex-nowrap">

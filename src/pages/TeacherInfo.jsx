@@ -5,6 +5,8 @@ import DefaultSelect from "../components/Forms/DefaultSelect";
 import { useState } from 'react';
 import Fourdots from '../images/brand/four-dots-square.svg';
 import { FaEdit, FaTrash } from 'react-icons/fa';
+import DefaultGreen from "../components/Button/DefaultGreen";
+import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
 
 const initialBrandData = [
     {
@@ -60,111 +62,83 @@ const TeacherInfo = () => {
 
     return (
         <div>
+            <h1 className="mt-[-23px] pb-[6px] pt-[10px] 2xl:py-[12px] px-[12px] text-white bg-green-600 text-center mx-auto text-[18px] 2xl:text-xl w-full font-normal font-lato block border-0">শিক্ষকদের তথ্য</h1>
+
+
             {/*Form Start*/}
-            <form action="" className="grid px-3 text-[14px] md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 font-lato">
-                <div className="flex gap-3">
-                    <div className=" w-14">
-                        <DefaultInput label={"সিরিয়াল"} type={'text'} placeholder={"1"} registerKey={"student_email"} />
-                    </div>
-                    <div className="w-full">
-                        <DefaultSelect
-                            label={
-                                <span className="">
-                                    পদবী :
-                                </span>
-                            }
-                            options={[
-                                { id: '1', value: "প্রিন্সিপাল / মুহতামিম" },
-                                { id: '2', value: "প্রধান শিক্ষক" },
-                                { id: '3', value: "সহকারী শিক্ষক " },
-                            ]}
-                            registerKey={"user_type"}
-                        />
-                    </div>
-                </div>
-                <div>
-                    <label className="mb-1 block text-sm font-medium text-black dark:text-white">
-                        যোগদানের তারিখ :
-                    </label>
-                    <div className="relative">
-                        <Flatpickr options={{ minDate: "2017-01-01" }} className="w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] py-1 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter" />
+            <form action="" className="text-[14px] px-2 font-lato">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3 w-full flex-wrap lg:flex-nowrap">
+                    <div className="pt-2 flex flex-nowrap relative items-center">
+                        <div className="">
+
+                            <input
+                                className="block outline-none p-1.5 w-16 text-sm text-gray-900 border border-green-400 rounded-s-md "
+                                placeholder="Serial"
+                                required
+                            />
+                        </div>
+                        <button
+                            className="w-full items-center py-1.5 px-2 text-sm border border-green-400 border-l-0 font-medium text-center text-black rounded-e-md"
+                            type="button">
+                            <select
+                                className="outline-none text-sm text-gray-900 bg-transparent  "
+                                required
+                            >
+                                <option value="option1" selected disabled>পদবী</option>
+                                <option value="option2">General Teacher</option>
+                                <option value="option2">Senior Teacher</option>
+                            </select>
+                        </button>
                     </div>
                 </div>
-                <div className="">
-                    <DefaultInput label={"পাশের বিভাগ :"} type={'text'} placeholder={""} registerKey={"student_email"} />
+
+                <div className="pt-2 grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3 w-full flex-wrap lg:flex-nowrap">
+
+                    <div>
+                        <label className="mb-1 block text-sm font-medium text-black dark:text-white">
+                            যোগদানের তারিখ :
+                        </label>
+                        <div className="relative">
+                            <Flatpickr options={{ minDate: "2017-01-01" }} className="w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] py-1 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter" />
+                        </div>
+                    </div>
+                    <div className="">
+                        <DefaultInput label={"পাশের বিভাগ :"} type={'text'} placeholder={""} registerKey={"student_email"} />
+                    </div>
+                    <div className="">
+                        <DefaultInput label={"নাম :"} type={'text'} placeholder={""} registerKey={"student_email"} />
+                    </div>
+                    <div className="">
+                        <DefaultInput label={"পাসের সন ও তারিখ :"} type={'text'} placeholder={""} registerKey={"student_email"} />
+                    </div>
+                    <div className="">
+                        <DefaultInput label={"যোগ্যতা :"} type={'text'} placeholder={""} registerKey={"student_email"} />
+                    </div>
+                    <div className="">
+                        <DefaultInput label={"পিতা :"} type={'text'} placeholder={""} registerKey={"student_email"} />
+                    </div>
+                    <div className="">
+                        <DefaultInput label={"সমাপনী বোর্ড/মাদরাসা :"} type={'text'} placeholder={""} registerKey={"student_email"} />
+                    </div>
+                    <div className="">
+                        <DefaultInput label={"অভিজ্ঞতা :"} type={'text'} placeholder={""} registerKey={"student_email"} />
+                    </div>
                 </div>
-                <div className="">
-                    <DefaultInput label={"নাম :"} type={'text'} placeholder={""} registerKey={"student_email"} />
+
+
+                {/*Save Button start*/}
+                <div className="flex gap-5 py-3">
+                    <DefaultGreen submitButtonGreen={"Save"} />
+                    <DefaultGreen submitButtonGreen={"New"} />
                 </div>
-                <div className="">
-                    <DefaultInput label={"পাসের সন ও তারিখ :"} type={'text'} placeholder={""} registerKey={"student_email"} />
-                </div>
-                <div className="">
-                    <DefaultInput label={"যোগ্যতা :"} type={'text'} placeholder={""} registerKey={"student_email"} />
-                </div>
-                <div className="">
-                    <DefaultInput label={"পিতা :"} type={'text'} placeholder={""} registerKey={"student_email"} />
-                </div>
-                <div className="">
-                    <DefaultInput label={"সমাপনী বোর্ড/মাদরাসা :"} type={'text'} placeholder={""} registerKey={"student_email"} />
-                </div>
-                <div className="">
-                    <DefaultInput label={"অভিজ্ঞতা :"} type={'text'} placeholder={""} registerKey={"student_email"} />
-                </div>
+                {/*Save Button end*/}
             </form>
             {/*Form End*/}
 
-            {/*Image add start*/}
-            <div className="flex gap-2 mt-1 font-lato text-[12px] px-2">
-                <p>ছবি সংযুক্ত করুন</p>
-                <input
-                    type="file"
-                    className="file-input"
-                    onChange={handleImageChange}
-                />
-                {selectedImage && <img src={selectedImage} alt="uploaded" className="uploaded-image h-20 w-20 border-4 border-slate-300" />}
-            </div>
-            {/*Image add end*/}
 
-            {/*SSave, New, Close Button start*/}
-            <div className="flex gap-3 px-2">
-                <button
-                    className="
-          mega-button positive
-           text-white 
-           bg-gradient-to-r
-          from-green-400
-             via-green-500
-              to-green-600
-               hover:bg-gradient-to-br
-                focus:ring-4
-                 focus:outline-none
-                  focus:ring-green-300
-                   font-medium
-                    rounded-lg
-                     text-sm
-                      px-0 py-0
-                       text-center
-                        me-2 mb-2 mt-2
-                        w-24
-                        h-8
-              "
-                    type="submit">
-                    Save
-                </button>
-
-                <button className="mega-button positive text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-0 py-0 text-center me-2 mb-2 mt-2 w-24 h-8" type="submit">
-                    New
-                </button>
-                <button className="mega-button positive text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-0 py-0 text-center me-2 mb-2 mt-2 w-24 h-8" type="submit">
-                    Close
-                </button>
-
-            </div>
-            {/*Save, New, Close Button end*/}
 
             {/*Database Table start*/}
-            <div className="rounded-sm bg-white pt-1 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+            <div className="rounded-sm bg-white pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
                 <div className="max-w-full overflow-x-auto">
                     <table className="w-full table-auto border-collapse">
                         <thead className='bg-slate-500 text-white h-fit'>

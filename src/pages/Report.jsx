@@ -1,13 +1,13 @@
-import DefaultGray from "../components/Button/DefaultGray"
+import DefaultGreen from "../components/Button/DefaultGreen"
 import DefaultSelect from "../components/Forms/DefaultSelect"
 
 const Report = () => {
     return (
-        <div>
+        <div className="font-lato">
             {/*Find form Start*/}
             <div className="px-5">
 
-                <div className="text-[12px] gap-5 w-full grid grid-cols-3 text-slate-800 font-semibold">
+                <div className="text-sm gap-5 w-full grid grid-cols-3 text-black font-normal">
                     <div className="">
                         <DefaultSelect
                             type={""}
@@ -33,8 +33,8 @@ const Report = () => {
                    
                 </div>
 
-                <div className='text-center flex gap-10'>
-                    <DefaultGray submitButton={"Preview"}/>
+                <div className='py-3'>
+                    <DefaultGreen submitButtonGreen={"Preview"}/>
                 </div>
 
             </div>
