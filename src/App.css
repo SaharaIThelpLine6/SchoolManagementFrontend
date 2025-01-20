@@ -1,3 +1,13 @@
+
+@font-face {
+  font-family: "SolaimanLipiNormal";
+  src: local('SolaimanLipiNormal'), local('solaimanlipi'), url('./assets/fonts/solaimanlipi.woff') format('woff');
+  /* font-display: swap;
+  unicode-range: U+0980-09FF; */
+  /* local('SolaimanLipiNormal'), url('solaimanlipi.woff') format('woff') */
+}
+
+
 .sub_menu_area {
   width: calc(100% - 64px);
 }

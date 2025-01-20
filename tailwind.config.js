@@ -8,7 +8,7 @@ export default {
     extend: {
       fontFamily: {
         'lato': '"Lato", serif',
-        'SolaimanLipi':'SolaimanLipi, serif',
+        'SolaimanLipi':'SolaimanLipiNormal, serif',
         'noto':'"Noto Serif Bengali", serif'
       },
       boxShadow: {
