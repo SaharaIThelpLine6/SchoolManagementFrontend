@@ -2,7 +2,7 @@ const Result = () => {
     return (
         <div className=" pt-20 lg:pt-10 px-8 lg:px-0 mx-auto w-full lg:w-[60%] text-center place-items-center font-SolaimanLipi">
 
-            <form className="w-full lg:w-[60%] shadow-[rgba(0,0,0,0.5)_0px_1px_0px_0px] rounded-md">
+            <form className="w-full  shadow-[rgba(0,0,0,0.5)_0px_1px_0px_0px] rounded-md">
                 <div className="bg-[#307847] font-semibold rounded-t-md">
                     <h1 className="text-white text-2xl py-4 ">ব্যক্তিগত ফলাফল</h1>
                 </div>
