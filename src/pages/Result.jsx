@@ -11,7 +11,6 @@ const Result = () => {
 
                     <div className="w-full">
                         <div className="relative z-20 bg-transparent">
-                            {
                                 <select
                                     className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4 outline-none transition focus:border-primary active:border-primary`}
                                 >
@@ -24,7 +23,6 @@ const Result = () => {
                                         lmn
                                     </option>
                                 </select>
-                            }
                             <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
                                 <svg
                                     className="fill-current"
@@ -49,7 +47,6 @@ const Result = () => {
 
                     <div className="w-full">
                         <div className="relative z-20 bg-transparent">
-                            {
                                 <select
                                     className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-3 px-4 outline-none transition focus:border-primary active:border-primary`}
                                 >
@@ -62,7 +59,6 @@ const Result = () => {
                                         lmn
                                     </option>
                                 </select>
-                            }
                             <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
                                 <svg
                                     className="fill-current"
@@ -87,7 +83,6 @@ const Result = () => {
 
                     <div className="w-full">
                         <div className="relative z-20 bg-transparent">
-                            {
                                 <select
                                     className={`relative z-20 w-full appearance-none rounded border border-stroke bg-transparent py-4 px-4 outline-none transition focus:border-primary active:border-primary`}
                                 >
@@ -100,7 +95,6 @@ const Result = () => {
                                         lmn
                                     </option>
                                 </select>
-                            }
                             <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
                                 <svg
                                     className="fill-current"
@@ -124,14 +118,12 @@ const Result = () => {
                     </div>
 
                     <div className="w-full">
-                        {
                             <input
                                 name="ID"
                                 value="ID"
                                 type="number"
                                 placeholder="আইডি"
                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-4 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter" />
-                        }
                     </div>
 
                     <div className="">
