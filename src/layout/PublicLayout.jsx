@@ -10,7 +10,7 @@ const PublicLayout = () => {
     }
 
     return (
-        <div className='bg-[#fafafa] lg:flex min-h-screen font-SolaimanLipi'>
+        <div className=' lg:flex min-h-screen font-SolaimanLipi'>
 
             {/*  Menu bar start */}
             <button
