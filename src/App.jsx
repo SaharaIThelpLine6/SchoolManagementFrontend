@@ -22,7 +22,6 @@ import PayRole from './pages/PayRole';
 import PayRoleName from './pages/PayRoleName';
 import Report from './pages/Report';
 import Exam from './pages/Exam';
-import Result from './pages/Result';
 import Query from './pages/Query';
 import Library from './pages/Library';
 import Setting from './pages/Setting';
@@ -35,7 +34,9 @@ import Calculator from './pages/Calculator';
 import PublicLayout from './layout/PublicLayout';
 import ClassResult from './pages/ClassResult';
 import AdmissionRegistration from './pages/AdmissionRegistration';
-
+import ResultRequest from './pages/public/ResultRequest';
+import Result from './pages/public/Result';
+import NotFound from './pages/NotFound';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -76,7 +77,7 @@ function App() {
             <Route path="/query" element={<Query />} />
             <Route path="exam">
               <Route index element={<Exam pageTitle={"Exam"} />} />
-              <Route path="result" element={<Result pageTitle={"Result"} />} />
+              {/* <Route path="result" element={<Result pageTitle={"Result"} />} /> */}
             </Route>
             <Route path="/library" element={<Library pageTitle={"Library"} />} />
             <Route path="others">
@@ -88,14 +89,15 @@ function App() {
             <Route path="/help" element={<Help pageTitle={"Help"} />} />
           </Route>
           <Route path="/login" element={<Login />} />
-          <Route path="1234" element={<PublicLayout />}>
-            <Route index element={<Result pageTitle={"Result Page"} />} />
+          <Route path=":schoolid" element={<PublicLayout />}>
+            <Route index element={<ResultRequest pageTitle={"Result Page"} />} />
             <Route path="ClassResult" element={<ClassResult />} />
             <Route path="AdmissionRegistration" element={<AdmissionRegistration />} />
+            <Route path="students/:seassonid/:examid/:classid/:userid" element={<Result/>} />
           </Route>
+          <Route path="*" element={<NotFound />} /> {/* Add this line for 404 page */}
         </Routes>
       </BrowserRouter>
-      {/* <ToastContainer autoClose={8000} /> */}
       <ToastContainer
         position="top-right"
         autoClose={5000}

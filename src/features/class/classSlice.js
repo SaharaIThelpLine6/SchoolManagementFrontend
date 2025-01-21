@@ -5,20 +5,14 @@ import { updateInData } from "../../utils/update/api";
 export const fetchClassData = createAsyncThunk("class/fetchClassData", async () => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Token is missing');
-    // console.log("fetch data =============");
-
-
     const [classListResponse, subClassListResponse] = await Promise.all([
         getUserData(token, `/api/academic/view_class`),
         getUserData(token, '/api/academic/view_subclass'),
     ]);
-
-
-    // await 
     return {
         classList: classListResponse,
         subClassList: subClassListResponse
-    }; // Assuming response contains the class data
+    };
 });
 
 export const updateClassSerial = createAsyncThunk("class/updateClassSerial",

@@ -66,3 +66,14 @@ export const getUserData = async (token, path) => {
   }
 
 };
+
+export const getPublicData = async (path) => {
+  try {
+    const res = await axios.get(`${API_URL}${path}`)
+    return res.data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw new Error("Data fetching failed");
+  }
+
+};
