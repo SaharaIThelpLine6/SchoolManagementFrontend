@@ -120,14 +120,14 @@ const Result = () => {
                     <div className="w-full">
                             <input
                                 name="ID"
-                                value="ID"
+                                value=""
                                 type="number"
                                 placeholder="আইডি"
                                 className="w-full rounded border-[1.5px] border-stroke bg-transparent py-4 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter" />
                     </div>
 
                     <div className="">
-                        <button type="button" className="bg-[#E0E0E0] text-slate-400 py-[10px] px-16 rounded-md">দাখিল করুন</button>
+                        <button type="submit" className="bg-[#E0E0E0] text-slate-400 py-[10px] px-16 rounded-md">দাখিল করুন</button>
                     </div>
 
                 </div>
