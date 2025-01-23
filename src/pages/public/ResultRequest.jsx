@@ -12,35 +12,16 @@ const ResultRequest = () => {
     const {
         register,
         handleSubmit,
-        watch,
-        setValue,
-        reset,
         formState: { errors },
     } = useFormContext();
     const navigate = useNavigate();
     const dispatch = useDispatch()
-    useEffect(() => {
-        console.log("Dispatch");
-
-        dispatch(fetchResultFieldData(schoolid))
-    }, [dispatch])
-
-    const convertToBengali = (input) => {
-        if (!input) return '';
-        const strValue = input.toString();
-        return strValue.split('').map((char) => {
-            const ascii = char.charCodeAt(0);
-            if (ascii >= 48 && ascii <= 57) {
-                return String.fromCharCode(ascii + 2486); 
-            }
-            return char;
-        }).join('');
-    };
+    // useEffect(() => {
+    //     dispatch(fetchResultFieldData(schoolid))
+    // }, [dispatch])
 
     const onSubmit = (data) => {
-        console.log(data);
         navigate(`/${schoolid}/students/${data.SessionID}/${data.ExamID}/${data.SubClassID}/${data.userid}`)
-
     }
 
     return (

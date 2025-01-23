@@ -1,6 +1,8 @@
 
-import { useState } from 'react';
-import { Outlet, Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { Outlet, Link, useParams } from 'react-router-dom';
+import { fetchResultFieldData } from '../features/studentResultPublicView/studentResultPublicViewSlice';
 
 const PublicLayout = () => {
 
@@ -8,29 +10,36 @@ const PublicLayout = () => {
     const toggleSidebar = () => {
         setIsOpen(!isOpen);
     }
+    const { schoolid } = useParams();
+    const dispatch = useDispatch()
+    useEffect(() => {
+        console.log(schoolid);
+        dispatch(fetchResultFieldData(schoolid))
+            
+    }, [dispatch])
 
     return (
         <div className=' lg:flex min-h-screen font-SolaimanLipi'>
 
             {/*  Menu bar start */}
             <button
-                className="lg:hidden fixed pt-5 left-4 z-50 bg-transparent text-white p-2 rounded-md"
+                className="lg:hidden fixed pt-5 left-4 z-50 bg-transparent text-white p-2 rounded-md hidden_in_print"
                 onClick={toggleSidebar}
             >
                 {isOpen ? '✖' : '☰'}
-                
+
             </button>
 
             {/* Close Button */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                    className="fixed inset-0 bg-black bg-opacity-50 z-40 hidden_in_print"
                     onClick={toggleSidebar}
                 ></div>
             )}
             {isOpen && (
                 <button
-                    className="fixed top-3 right-4 z-9999 bg-slate-500 text-white p-1 rounded-sm"
+                    className="fixed top-3 right-4 z-9999 bg-slate-500 text-white p-1 rounded-sm hidden_in_print"
                     onClick={toggleSidebar}
                 >
                     ✖
@@ -48,7 +57,7 @@ const PublicLayout = () => {
             </div>
             {/*For mobile display end*/}
 
-            <header className={`lg:flex w-[410px] max-w-[85%] font-SolaimanLipi ${isOpen ? "flex absolute z-50" : "hidden"}`}>
+            <header className={`lg:flex w-[410px] max-w-[85%] font-SolaimanLipi hidden_in_print ${isOpen ? "flex absolute z-50" : "hidden"}`}>
                 <nav>
                     <div className='relative shadow-[0_2px_10px_rgba(0,0,0,.3)] text-center pt-[38px] pb-[32px] px-16 bg-[#307847]'>
                         <div className='place-items-center'>
