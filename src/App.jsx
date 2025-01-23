@@ -32,7 +32,7 @@ import Notepad from './pages/Notepad';
 import Others from './pages/Others';
 import Calculator from './pages/Calculator';
 import PublicLayout from './layout/PublicLayout';
-import ClassResult from './pages/ClassResult';
+// import ClassResult from './pages/ClassResult';
 import AdmissionRegistration from './pages/AdmissionRegistration';
 import ResultRequest from './pages/public/ResultRequest';
 import Result from './pages/public/Result';
@@ -91,7 +91,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path=":schoolid" element={<PublicLayout />}>
             <Route index element={<ResultRequest pageTitle={"Result Page"} />} />
-            <Route path="ClassResult" element={<ClassResult />} />
+            {/* <Route path="ClassResult" element={<ClassResult />} /> */}
             <Route path="AdmissionRegistration" element={<AdmissionRegistration />} />
             <Route path="students/:seassonid/:examid/:classid/:userid" element={<Result/>} />
           </Route>

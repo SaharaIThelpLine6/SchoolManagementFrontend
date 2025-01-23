@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchResult } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
 import ResultTable from '../../components/ResultTable';
+import Marksheet from '../Marksheet';
 
 const Result = () => {
     const { schoolid, seassonid, examid, classid, userid } = useParams();
@@ -26,29 +27,10 @@ const Result = () => {
 
     return (
         <div>
-           {/* <h5>
-           {JSON.stringify(studentResult)}
-           </h5> */}
            <ResultTable />
-            {/* <h1>Student Results</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Grade</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {results.map(result => (
-                        <tr key={result.id}>
-                            <td>{result.id}</td>
-                            <td>{result.name}</td>
-                            <td>{result.grade}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table> */}
+           <div className='print_canvas'>
+            <Marksheet />
+           </div>
         </div>
     );
 };

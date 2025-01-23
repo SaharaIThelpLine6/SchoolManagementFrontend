@@ -6,11 +6,10 @@ import bnBijoy2Unicode from "../utils/conveter";
 const ResultTable = () => {
     const { resultStatus, resultError, studentResult } = useSelector((state) => state.studentResultPublicView)
     const [logo, setLogo] = useState(null)
+    const [principal, setPrincipal] = useState(null)
 
     useEffect(() => {
         if (studentResult?.Logo?.data) {
-            console.log("Buffer data");
-
             const buffer = Buffer.from(studentResult.Logo.data);
             const base64String = buffer.toString('base64');
             const imageSrc = `data:image/png;base64,${base64String}`;
@@ -21,7 +20,7 @@ const ResultTable = () => {
     }, [studentResult])
 
     return (
-        <div className="pt-[80px]">
+        <div className="pt-[80px] hidden_in_print">
             <table width={750} border={0} align="center" cellPadding={0} cellSpacing={0}>
                 <tbody>
                     <tr>

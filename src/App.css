@@ -13,12 +13,21 @@
 }
 
 tr:nth-child(even) {background-color: #F0F0F0;}
+.print_canvas{
+  display: none;
+}
 
 @media print {
   @page {
-    margin-top: 0;
+    margin-top: 10px;
     margin-bottom: 0;
     background-color: white;
+  }
+  .print_canvas{
+    display: block;
+  }
+  .hidden_in_print{
+    display: none;
   }
   body  {
     background-color: white;

@@ -41,7 +41,7 @@ const PublicLayout = () => {
 
 
             {/*For mobile display start*/}
-            <div className='fixed lg:hidden pr-4 w-full h-14 text-left py-[6px] bg-[#307847]'>
+            <div className='fixed lg:hidden pr-4 w-full h-14 text-left py-[6px] bg-[#307847] hidden_in_print'>
                 <div className='float-end'>
                     <img src="/logo.jpeg" alt="জামিয়া ইসলামিয়া ওবাইদিয়া" className="w-[66px] h-[45px]" />
                 </div>
