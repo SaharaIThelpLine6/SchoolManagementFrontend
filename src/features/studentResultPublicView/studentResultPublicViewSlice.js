@@ -2,12 +2,14 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getPublicData } from "../../utils/read/api";
 
 export const fetchResultFieldData = createAsyncThunk("studentResultPublicView/fetchResultFieldData", async (madrasaId) => {
-    const [academicSessionResponse, examsResponse, classListResponse] = await Promise.all([
+    const [schoolDataResponse, academicSessionResponse, examsResponse, classListResponse] = await Promise.all([
+        getPublicData(`/api/public/result/${madrasaId}`),
         getPublicData(`/api/public/result/${madrasaId}/academic_session`),
         getPublicData(`/api/public/result/${madrasaId}/exam_name`),
         getPublicData(`/api/public/result/${madrasaId}/sub_class`),
     ]);
     return {
+        schoolData: schoolDataResponse,
         academicSession: academicSessionResponse,
         exam: examsResponse,
         classList: classListResponse,
@@ -28,6 +30,7 @@ const initialState = {
     exam: [],
     classList: [],
     studentResult:[],
+    schoolData:[],
     resultStatus: 'idle',
     resultError: null,
     status: 'idle',
@@ -37,7 +40,11 @@ const initialState = {
 const studentResultPublicViewSlice = createSlice({
     name: "studentResultPublicView",
     initialState,
-    reducers: {},
+    reducers: {
+        setResultError: (state, action)=>{
+            state.resultError = action.payload
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchResultFieldData.pending, (state) => {
@@ -46,6 +53,7 @@ const studentResultPublicViewSlice = createSlice({
             })
             .addCase(fetchResultFieldData.fulfilled, (state, action) => {
                 state.status = 'succeeded';
+                state.schoolData = action.payload.schoolData
                 state.academicSession = action.payload.academicSession;
                 state.exam = action.payload.exam;
                 state.classList = action.payload.classList;
@@ -69,5 +77,5 @@ const studentResultPublicViewSlice = createSlice({
             });
     },
 });
-// export const { setEditMode } = classSlice.actions;
+export const { setResultError } = studentResultPublicViewSlice.actions;
 export default studentResultPublicViewSlice.reducer;

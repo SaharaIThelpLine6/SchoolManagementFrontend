@@ -21,8 +21,7 @@ const Result = () => {
         dispatch(fetchResult(`/${schoolid}/students/${seassonid}/${examid}/${classid}/${userid}`))
     }, [dispatch])
     if (resultStatus === 'failed') {
-        console.log(resultError);
-        // navigate(`/${schoolid}/page_not_found`);
+        navigate(`/${schoolid}`);
     }
 
     return (

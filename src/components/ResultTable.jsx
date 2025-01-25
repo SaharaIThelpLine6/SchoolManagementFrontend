@@ -26,9 +26,11 @@ const ResultTable = () => {
                     <tr>
                         <td>
                             <table cellSpacing={0} cellPadding={0} width={"100%"} border={0}>
-                                <tr>
-                                    <td bgcolor="#ffffff" height={10}></td>
-                                </tr>
+                                <tbody>
+                                    <tr>
+                                        <td bgcolor="#ffffff" height={10}></td>
+                                    </tr>
+                                </tbody>
                             </table>
                         </td>
                     </tr>
@@ -310,12 +312,12 @@ const ResultTable = () => {
                                                                 className="border-collapse border border-black">
                                                                 <thead>
                                                                     <tr>
-                                                                        <th className="text-semibold text-[16px] border border-black h- "  bgcolor="#ffffff">ক্রমিক নং</th>
-                                                                        <th className="text-semibold text-[16px] border border-black h-12 "  bgcolor="#ffffff">বিষয়</th>
-                                                                        <th className="text-semibold text-[16px] border border-black h-12 "  bgcolor="#ffffff">পূর্ণমান</th>
-                                                                        <th className="text-semibold text-[16px] border border-black h-12 "  bgcolor="#ffffff">পাশ নম্বর</th>
-                                                                        <th className="text-semibold text-[16px] border border-black h-12 "  bgcolor="#ffffff">সর্বোচ্চ প্রাপ্ত নম্বর</th>
-                                                                        <th className="text-semibold text-[16px] border border-black h-12 "  bgcolor="#ffffff">প্রাপ্ত নম্বর</th>
+                                                                        <th className="text-semibold text-[16px] border border-black h- " bgcolor="#ffffff">ক্রমিক নং</th>
+                                                                        <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">বিষয়</th>
+                                                                        <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">পূর্ণমান</th>
+                                                                        <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">পাশ নম্বর</th>
+                                                                        <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">সর্বোচ্চ প্রাপ্ত নম্বর</th>
+                                                                        <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">প্রাপ্ত নম্বর</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>

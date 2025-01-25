@@ -93,7 +93,7 @@ function App() {
             <Route index element={<ResultRequest pageTitle={"Result Page"} />} />
             {/* <Route path="ClassResult" element={<ClassResult />} /> */}
             <Route path="AdmissionRegistration" element={<AdmissionRegistration />} />
-            <Route path="students/:seassonid/:examid/:classid/:userid" element={<Result/>} />
+            <Route path="students/:seassonid/:examid/:classid/:userid" element={<Result />} />
           </Route>
           <Route path="*" element={<NotFound />} /> {/* Add this line for 404 page */}
         </Routes>
@@ -108,7 +108,7 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        // className="flex text-[14px] font-SolaimanLipi bg-[#323232] text-[rgba(255,255,255,.7)] justify-between items-center py-2 px-2 rounded-[4px] font-normal"
+      // className="flex text-[14px] font-SolaimanLipi bg-[#323232] text-[rgba(255,255,255,.7)] justify-between items-center py-2 px-2 rounded-[4px] font-normal"
       />
     </FormProvider>
   );

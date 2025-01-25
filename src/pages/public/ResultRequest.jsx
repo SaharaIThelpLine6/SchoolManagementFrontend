@@ -1,12 +1,19 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchResultFieldData } from "../../features/studentResultPublicView/studentResultPublicViewSlice";
+import { fetchResultFieldData, setResultError } from "../../features/studentResultPublicView/studentResultPublicViewSlice";
 import { useFormContext } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import bnBijoy2Unicode from "../../utils/conveter";
+import 'animate.css/animate.min.css';
+import { toast, cssTransition } from "react-toastify";
+const bounce = cssTransition({
+    enter: 'animate__animated animate__bounceIn',
+    exit: 'animate__animated animate__bounceOut',
+});
 
 const ResultRequest = () => {
-    const { academicSession, exam, classList, status, error } = useSelector((state) => state.studentResultPublicView);
+    const [notification, setNotification] = useState(true)
+    const { academicSession, exam, classList, status, error, resultStatus, resultError } = useSelector((state) => state.studentResultPublicView);
     const { schoolid } = useParams();
 
     const {
@@ -24,6 +31,49 @@ const ResultRequest = () => {
         navigate(`/${schoolid}/students/${data.SessionID}/${data.ExamID}/${data.SubClassID}/${data.userid}`)
     }
 
+    /*if (resultStatus === 'failed') {
+        console.log("==============");
+        // console.log(resultError);
+        setResultError(null)
+        toast.dark("দুঃখিত, কোন তথ্য পাওয়া যায়নি!", {
+            className: "toast-error-container toast-error-container-after min-h-[50px] max-h-[50px] overflow-hidden text-[14px] font-SolaimanLipi bg-[#323232] text-[#ffffff] py-2 px-2 rounded-[4px] font-normal",
+            style: {
+                boxShadow: '0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)',
+            },
+            autoClose: false,
+            transition: bounce,
+            position: "bottom-center",
+            type: "error",
+            enter: 'zoomIn',
+            exit: 'zoomOut',
+            appendPosition: false,
+            collapse: true,
+            collapseDuration: 300,
+            closeButton: false
+        })
+        // navigate(`/${schoolid}/page_not_found`);
+    }*/
+    const toastShown = useRef(false); // Use a ref to track if the toast has been shown
+
+    useEffect(() => {
+        if (resultStatus === 'failed' && !toastShown.current) {
+            console.log("==============");
+            setResultError(null);
+            toastShown.current = true; // Set the flag to true
+
+            toast.dark("দুঃখিত, কোন তথ্য পাওয়া যায়নি!", {
+                className: "toast-error-container toast-error-container-after min-h-[50px] max-h-[50px] overflow-hidden text-[14px] font-SolaimanLipi bg-[#323232] text-[#ffffff] py-2 px-2 rounded-[4px] font-normal",
+                style: {
+                    boxShadow: '0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)',
+                },
+                // autoClose: false,
+                transition: bounce,
+                position: "bottom-center",
+                type: "error",
+                closeButton: false,
+            });
+        }
+    }, [resultStatus, setResultError]);
     return (
         <div className=" pt-20 lg:pt-10 px-8 lg:px-0 mx-auto w-full lg:w-[60%] text-center place-items-center font-SolaimanLipi">
 

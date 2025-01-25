@@ -7,6 +7,7 @@ const Marksheet = () => {
     const { resultStatus, resultError, studentResult } = useSelector((state) => state.studentResultPublicView)
     const [logo, setLogo] = useState(null)
     const [principal, setPrincipal] = useState(null)
+    const [najem, setNajem] = useState(null)
 
     useEffect(() => {
         if (studentResult?.Logo?.data) {
@@ -19,6 +20,11 @@ const Marksheet = () => {
             const base64StringPrincipalBuffer = signaturePrincipalBuffer.toString('base64');
             const PrincipalimageSrc = `data:image/png;base64,${base64StringPrincipalBuffer}`;
             setPrincipal(PrincipalimageSrc)
+
+            const signatureNajemBuffer = Buffer.from(studentResult.SignatureNajem.data);
+            const base64StringNajemBuffer = signatureNajemBuffer.toString('base64');
+            const NajemimageSrc = `data:image/png;base64,${base64StringNajemBuffer}`;
+            setNajem(NajemimageSrc)
         }
     }, [studentResult])
     return (
@@ -153,6 +159,7 @@ const Marksheet = () => {
                             <p>তারিখ : </p>
                         </div>
                         <div className="text-center">
+                            <img src={najem} alt="" className="absolute top-[0px] right-0 w-[60px] -translate-x-1/2" />
                             <p>.....................................</p>
                             <p>নাযেম</p>
                             <p>তারিখ : </p>
