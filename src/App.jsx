@@ -37,6 +37,10 @@ import AdmissionRegistration from './pages/AdmissionRegistration';
 import ResultRequest from './pages/public/ResultRequest';
 import Result from './pages/public/Result';
 import NotFound from './pages/NotFound';
+import Marksheet from './pages/Marksheet';
+import MarksheetClassWise from './pages/MarksheetClassWise';
+import ClassResultForm from './pages/public/ClassResultForm';
+import ClassResult from './pages/public/ClassResult';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -92,9 +96,12 @@ function App() {
           <Route path=":schoolid" element={<PublicLayout />}>
             <Route index element={<ResultRequest pageTitle={"Result Page"} />} />
             {/* <Route path="ClassResult" element={<ClassResult />} /> */}
+            <Route path="classes" element={<ClassResultForm />} />
             <Route path="AdmissionRegistration" element={<AdmissionRegistration />} />
-            <Route path="students/:seassonid/:examid/:classid/:userid" element={<Result />} />
+            <Route path="students/:seassonid/:examid/:classid/:userid" element={<Result/>} />
+            <Route path="classes/:seassonid/:examid/:classid" element={<ClassResult/>} />
           </Route>
+          <Route path='/MarksheetClassWise' element={<MarksheetClassWise pageTitle={"MarksheetClassWise"} />} />
           <Route path="*" element={<NotFound />} /> {/* Add this line for 404 page */}
         </Routes>
       </BrowserRouter>
@@ -108,7 +115,7 @@ function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-      // className="flex text-[14px] font-SolaimanLipi bg-[#323232] text-[rgba(255,255,255,.7)] justify-between items-center py-2 px-2 rounded-[4px] font-normal"
+        // className="flex text-[14px] font-SolaimanLipi bg-[#323232] text-[rgba(255,255,255,.7)] justify-between items-center py-2 px-2 rounded-[4px] font-normal"
       />
     </FormProvider>
   );

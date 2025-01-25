@@ -1,7 +1,28 @@
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useFormContext } from "react-hook-form";
+import { useNavigate, useParams } from "react-router-dom";
+import bnBijoy2Unicode from "../../utils/conveter";
+
 const ClassResultForm = () => {
+    const { academicSession, exam, classList, status, error } = useSelector((state) => state.studentResultPublicView);
+    const { schoolid } = useParams();
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useFormContext();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const onSubmit = (data) => {
+        navigate(`/${schoolid}/classes/${data.SessionID}/${data.ExamID}/${data.SubClassID}`)
+    }
+
     return (
         <div className=" lg:pt-10 text-center place-items-center font-SolaimanLipi">
-            <form className="w-[60%] bg-white shadow-[rgba(0,0,0,0.5)_0px_1px_0px_0px] rounded-md">
+            <form className="w-[60%] bg-white shadow-[rgba(0,0,0,0.5)_0px_1px_0px_0px] rounded-md" onSubmit={handleSubmit(onSubmit)}>
                 <div className="bg-[#307847] font-semibold rounded-t-md">
                     <h1 className="text-white text-2xl py-4 ">ক্লাশ/মারহালা ভিত্তিক ফলাফল</h1>
                 </div>
@@ -51,15 +72,17 @@ const ClassResultForm = () => {
 
                     <div className="w-full relative group border border-stroke rounded-[5px] hover:border-[#2a394f] hover:outline hover:outline-[1px] hover:rounded-[5px]">
                         <select type="" id="username" required
-                            className="appearance-none w-full h-12 block relative cursor-pointer px-4 text-sm peer bg-transparent outline-none"
+                            className={`relative z-20 w-full appearance-none rounded border-2 bg-transparent py-3 px-4 outline-none transition ease-linear duration-300	 
+                                ${errors.SessionID ? 'border-red-500 focus:border-[#f44336]' : 'border-stroke focus:border-primary'}`}
+
+                            {...register("SessionID", { required: true })}
                         >
-                            <option value="" className=" text-body disabled"></option>
-                            <option className="text-body bg-slate-300 hover:bg-slate-200">
-                                abc
-                            </option>
-                            <option className="text-body">
-                                lmn
-                            </option>
+                            <option value="" className="text-body disabled:"></option>
+                            {academicSession.map((session) => (
+                                <option key={session.SessionID} value={session.SessionID} className="text-body">
+                                    {bnBijoy2Unicode(session.SessionName)}
+                                </option>
+                            ))}
                         </select>
                         <label
                             className=" transform transition-all absolute top-0 left-0 h-full flex items-center pl-3 text-sm text-[rgb(0,0,0,0.50)] group-focus-within:text-xs peer-valid:text-xs group-focus-within:h-1/2 peer-valid:h-1/2 group-focus-within:-translate-y-full peer-valid:-translate-y-full group-focus-within:pl-0 peer-valid:pl-0"
@@ -85,16 +108,18 @@ const ClassResultForm = () => {
 
                     <div className="w-full relative group border border-stroke rounded-[5px] hover:border-[#2a394f] hover:outline hover:outline-[1px] hover:rounded-[5px]">
                         <select type="" id="username" required
-                            className="appearance-none w-full h-12 px-4 text-sm peer bg-transparent outline-none"
+                            className={`relative z-20 w-full appearance-none rounded border-2 border-stroke bg-transparent py-3 px-4 outline-none transition focus:border-primary active:border-primary  ${errors.ExamID ? 'border-red-500 focus:border-[#f44336]' : 'border-stroke focus:border-primary'}`}
+
+                            {...register("ExamID", { required: true })}
                         >
 
-                            <option value="" className="text-body disabled"></option>
-                            <option className="text-body">
-                                abc
-                            </option>
-                            <option className="text-body">
-                                lmn
-                            </option>
+                            <option value="" className="text-body disabled:"></option>
+
+                            {exam.map((session) => (
+                                <option key={session.ExamID} value={session.ExamID} className="text-body">
+                                    {bnBijoy2Unicode(session.ExamName)}
+                                </option>
+                            ))}
                         </select>
                         <label
                             className=" transform transition-all absolute top-0 left-0 h-full flex items-center pl-2 text-sm text-[rgb(0,0,0,0.50)] group-focus-within:text-xs peer-valid:text-xs group-focus-within:h-1/2 peer-valid:h-1/2 group-focus-within:-translate-y-full peer-valid:-translate-y-full group-focus-within:pl-0 peer-valid:pl-0"
@@ -122,15 +147,16 @@ const ClassResultForm = () => {
 
                     <div className="w-full relative group border border-stroke rounded-[5px] hover:border-[#2a394f] hover:outline hover:outline-[1px] hover:rounded-[5px]">
                         <select type="" id="username" required
-                            className="appearance-none w-full h-12 px-4 text-sm peer bg-transparent outline-none"
+                            className={`relative z-20 w-full appearance-none rounded border-2 border-stroke bg-transparent py-4 px-4 outline-none transition focus:border-primary active:border-primary ${errors.SubClassID ? 'border-red-500 focus:border-[#f44336]' : 'border-stroke focus:border-primary'}`}
+                            {...register("SubClassID", { required: true })}
                         >
-                            <option value="" className="text-body disabled"></option>
-                            <option className="text-body">
-                                abc
-                            </option>
-                            <option className="text-body">
-                                lmn
-                            </option>
+                            <option value="" className="text-body disabled:"></option>
+
+                            {classList.map((session) => (
+                                <option key={session.SubClassID} value={session.SubClassID} className="text-body">
+                                    {bnBijoy2Unicode(session.SubClass)}
+                                </option>
+                            ))}
                         </select>
                         <label
                             className=" transform transition-all absolute top-0 left-0 h-full flex items-center pl-2 text-sm text-[rgb(0,0,0,0.50)] group-focus-within:text-xs peer-valid:text-xs group-focus-within:h-1/2 peer-valid:h-1/2 group-focus-within:-translate-y-full peer-valid:-translate-y-full group-focus-within:pl-0 peer-valid:pl-0"

@@ -84,7 +84,7 @@ const Marksheet = () => {
                             <table className="w-[295px]">
                                 <tbody className="border border-black w-full">
                                     {Array.from({ length: studentResult.SubSonkha }).map((_, index) => (
-                                        <tr>
+                                        <tr key={index}>
                                             <td className="text-start pl-2">{bnBijoy2Unicode(studentResult[`Division${index+1}`])}</td>
                                             <td className="w-12 text-end">:</td>
                                             <td className="pl-3">{bnBijoy2Unicode(String(studentResult[`DivisionNumber${index+1}`]))} X</td>
@@ -113,7 +113,7 @@ const Marksheet = () => {
                             </thead>
                             <tbody className="text-center">
                                 {Array.from({ length: studentResult.SubSonkha }).map((_, index) => (
-                                    <tr className="border border-black">
+                                    <tr key={studentResult[`Subject${index + 1}`]} className="border border-black">
                                         <td className="border border-black">{bnBijoy2Unicode(String(index + 1))}</td>
                                         <td className="border border-black text-left">{bnBijoy2Unicode(studentResult[`Subject${index + 1}`])}</td>
                                         <td className="border border-black">{bnBijoy2Unicode(String(studentResult?.DivisionTopNumber))}</td>
