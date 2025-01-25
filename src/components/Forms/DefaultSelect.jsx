@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
 
 const DefaultSelect = ({ label, type, options, registerKey, require, valueField, nameField }) => {
@@ -7,18 +7,41 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
     formState: { errors },
   } = useFormContext();
 
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleDropdown = () => {
+    setIsOpen(!isOpen);
+  }
+
+  // Close dropdown when clicking outside start
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const dropdown = document.getElementById(`${registerKey}-dropdown`)
+      if (dropdown && !dropdown.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [registerKey]);
+  // Close dropdown when clicking outside end
   return (
     <div className="w-full">
       <label htmlFor={registerKey} className="mb-1 block text-black ">
         {label}
       </label>
 
-      <div className="relative z-20 bg-transparent">
+      <div
+        id={`${registerKey}-dropdown`}
+        className="relative z-20 bg-transparent">
         {
           type === 'number' ? <select
             name={registerKey}
             {...register(registerKey, { required: require ? require : false, valueAsNumber: true })}
-            className={`relative z-20 w-full appearance-none rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition focus:border-primary active:border-primary`}
+            onClick={toggleDropdown}
+            className={`relative z-20  w-full appearance-none rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition focus:border-primary active:border-primary`}
           >
             <option value="" className="text-body">Select</option>
             {
@@ -31,6 +54,7 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
           </select> : <select
             name={registerKey}
             {...register(registerKey, { required: require ? require : false })}
+            onClick={toggleDropdown}
             className={`relative z-20 w-full appearance-none rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition focus:border-primary active:border-primary`}
           >
             <option value="" className="text-body">Select</option>
@@ -58,11 +82,12 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
           }
         </select> */}
 
-        <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
+        <span className={`absolute pointer-events-none transform transition-transform duration-300 top-1/2 right-4 z-30 -translate-y-1/2 
+        ${isOpen ? "rotate-180" : "rotate-0"}`}>
           <svg
             className="fill-current"
-            width="24"
-            height="24"
+            width="20"
+            height="20"
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
