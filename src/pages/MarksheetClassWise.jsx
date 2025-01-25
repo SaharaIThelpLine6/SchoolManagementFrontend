@@ -1,7 +1,7 @@
 const MarksheetClassWise = () => {
     return (
-        <div>
-            <div className="w-[750px] h-[1076px] relative bg-white ">
+        <div >
+            <div className="w-[1076px] h-[750px] mx-auto relative bg-white font-SolaimanLipi">
                 <div className="pt-0 pb-1 px-2 bg-white">
                     {/*Heading part start*/}
                     <div className="flex justify-around">
@@ -122,6 +122,15 @@ const MarksheetClassWise = () => {
                                     <td className="border border-black [writing-mode:vertical-rl]">হাদীস</td>
                                     <td className="border border-black [writing-mode:vertical-rl]">আরবী লিখা</td>
                                     <td className="border border-black [writing-mode:vertical-rl]">আদব আখলাক</td>
+                                    <td className="border border-black [writing-mode:vertical-rl]">কালিমা</td>
+                                    <td className="border border-black [writing-mode:vertical-rl]">ইংরেজী</td>
+                                    <td className="border border-black [writing-mode:vertical-rl]">বাংলা</td>
+                                    <td className="border border-black [writing-mode:vertical-rl]">গণিত </td>
+                                    <td className="border border-black py-1 [writing-mode:vertical-rl]">মাসআলা ও দোয়া</td>
+                                    <td className="border border-black [writing-mode:vertical-rl]">হাদীস</td>
+                                    <td className="border border-black [writing-mode:vertical-rl]">আরবী লিখা</td>
+                                    <td className="border border-black [writing-mode:vertical-rl]">আদব আখলাক</td>
+                                    <td className="border border-black [writing-mode:vertical-rl]">আদব আখলাক</td>
                                     <td className="border border-black">মোট</td>
                                     <td className="border border-black">গড়</td>
                                     <td className="border border-black">বিভাগ</td>
@@ -141,6 +150,15 @@ const MarksheetClassWise = () => {
                                     <td className="border border-black">১০০</td>
                                     <td className="border border-black">৯৩</td>
                                     <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
                                     <td className="border border-black">৭৬৭</td>
                                     <td className="border border-black">৯৫.৮৮</td>
                                     <td className="border border-black">মুমতায</td>
@@ -158,28 +176,761 @@ const MarksheetClassWise = () => {
                                     <td className="border border-black">১০০</td>
                                     <td className="border border-black">৯৩</td>
                                     <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
                                     <td className="border border-black">৭৬৭</td>
                                     <td className="border border-black">৯৫.৮৮</td>
                                     <td className="border border-black">মুমতায</td>
                                     <td className="border border-black">১৯</td>
-                                </tr>                            
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">১</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১</td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black">২</td>
+                                    <td className="border border-black">৪১৭১৩</td>
+                                    <td className="border border-black text-left pl-1">খাজিদা আক্তার সাজিয়া</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৮</td>
+                                    <td className="border border-black">৯৭</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">৯২</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">১০০</td>
+                                    <td className="border border-black">৯৩</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৯৫</td>
+                                    <td className="border border-black">৭৬৭</td>
+                                    <td className="border border-black">৯৫.৮৮</td>
+                                    <td className="border border-black">মুমতায</td>
+                                    <td className="border border-black">১৯</td>
+                                </tr>
+
                             </tbody>
+
+                            <tfoot>
+                                <tr>
+                                    <td className="text-start" colSpan={11} height={150}>
+                                        {/* <div className="text-center">
+                                            <p>.....................................</p>
+                                            <p>মুহতামিম</p>
+                                            <p>তারিখ : </p>
+                                        </div> */}
+                                        <div className="relative h-full">
+                                            <div className="absolute text-center w-auto left-0 top-0 pt-5">
+                                                <img src="https://images.pexels.com/photos/29204314/pexels-photo-29204314/free-photo-of-modern-city-architecture-against-blue-sky.jpeg?auto=compress&cs=tinysrgb&w=60&h=50&dpr=1" alt="" />
+                                                <p>.....................................</p>
+                                                <p>নাযেম</p>
+                                                <p>তারিখ : </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    {/* <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td> */}
+                                    <td className="" height={150} colSpan={11}>
+                                        <div className="relative h-full">
+                                            <div className="absolute text-center w-auto right-0 top-0 pt-5">
+                                                <img src="https://images.pexels.com/photos/29204314/pexels-photo-29204314/free-photo-of-modern-city-architecture-against-blue-sky.jpeg?auto=compress&cs=tinysrgb&w=60&h=50&dpr=1" alt="" />
+                                                <p>.....................................</p>
+                                                <p>নাযেম</p>
+                                                <p>তারিখ : </p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tfoot>
                         </table>
+                        {/* <table className="w-full">
+                            
+                        </table> */}
                     </div>
                     {/*Marksheet Body End*/}
                     {/*Signature part start*/}
-                    <div className="flex absolute bottom-0 w-full  justify-around text-[14px] pt-[60px]">
-                        <div className="text-center">
-                            <p>.....................................</p>
-                            <p>মুহতামিম</p>
-                            <p>তারিখ : </p>
-                        </div>
-                        <div className="text-center">
-                            <p>.....................................</p>
-                            <p>নাযেম</p>
-                            <p>তারিখ : </p>
-                        </div>
-                    </div>
+                    {/* <div className="flex absolute bottom-0 w-full  justify-around text-[14px] pt-[60px]">
+
+
+                    </div> */}
                     {/*Signature part end*/}
                 </div>
             </div>
