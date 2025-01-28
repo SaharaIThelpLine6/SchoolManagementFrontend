@@ -25,11 +25,11 @@ export const fetchResult = createAsyncThunk("studentResultPublicView/fetchResult
 
 })
 
-export const fetchClassResult = createAsyncThunk("studentResultPublicView/fetchClassResult", async (resultUrl) => {
-    const [classResultResponse] = await Promise.all([getPublicData(`/api/public/result/${resultUrl}`)])
+export const fetchClassResult = createAsyncThunk("studentResultPublicView/fetchClassResult", async ({schoolId,resultUrl}) => {
+    const [classResultResponse] = await Promise.all([getPublicData(`/api/public/result/${schoolId}/marhala/${resultUrl}`)])
 
     return {
-        classResult: classResultResponse
+        classResult: classResultResponse,
     }
 
 })
@@ -39,6 +39,7 @@ const initialState = {
     exam: [],
     classList: [],
     classResult:[],
+    resultStatistics: null,
     studentResult:[],
     schoolData:[],
     resultStatus: 'idle',
@@ -92,6 +93,7 @@ const studentResultPublicViewSlice = createSlice({
             .addCase(fetchClassResult.fulfilled, (state, action) => {
                 state.resultStatus = 'succeeded'
                 state.classResult = action.payload.classResult;
+                state.resultStatistics = action.payload.classResult[0];
             })
             .addCase(fetchClassResult.rejected, (state, action) => {
                 state.resultStatus = 'failed';

@@ -36,6 +36,7 @@ tr:nth-child(even) {background-color: #F0F0F0;}
   main{
     width: 100%;
     background-color: white !important; 
+    overflow: visible !important;
   }
   table tr, td{
     background-color: white;

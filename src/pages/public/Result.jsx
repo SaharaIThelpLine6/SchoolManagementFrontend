@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchResult } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
 import ResultTable from '../../components/ResultTable';
-import Marksheet from '../Marksheet';
+import Marksheet from '../../components/Document/Marksheet';
 
 const Result = () => {
     const { schoolid, seassonid, examid, classid, userid } = useParams();
