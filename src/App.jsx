@@ -41,6 +41,14 @@ import Marksheet from './components/Document/Marksheet';
 import MarksheetClassWise from './components/Document/MarksheetClassWise';
 import ClassResultForm from './pages/public/ClassResultForm';
 import ClassResult from './pages/public/ClassResult';
+import StudentsResult from './pages/StudentsResult';
+import AverageResult from './pages/AverageResult';
+import PassMarksSubject from './pages/SubjectPassNumber';
+import SubjectPassNumber from './pages/SubjectPassNumber';
+import ResultConditions from './pages/ResultConditions';
+import Loading from './pages/Loading';
+import BoardExam from './pages/BoardExam';
+import MadrasahBoardInfo from './pages/MadrasahBoardInfo';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -81,7 +89,16 @@ function App() {
             <Route path="/query" element={<Query />} />
             <Route path="exam">
               <Route index element={<Exam pageTitle={"Exam"} />} />
-              {/* <Route path="result" element={<Result pageTitle={"Result"} />} /> */}
+            </Route>
+            <Route path="board_exam">
+              <Route index element={<BoardExam pageTitle={"Board Exam"} />} />
+              <Route path="madrasahboardinfo" element={<MadrasahBoardInfo pageTitle={"Madrasah Board Information"} />} />
+            </Route>
+            <Route path='result'>
+              <Route index element={<StudentsResult pageTitle={"Result"} />} />
+              <Route path="averageresult" element={<AverageResult pageTitle={"Average Result Entry"} />} />
+              <Route path="passmarkssubject" element={<SubjectPassNumber />} />
+              <Route path="resultconditions" element={<ResultConditions />} />
             </Route>
             <Route path="/library" element={<Library pageTitle={"Library"} />} />
             <Route path="others">

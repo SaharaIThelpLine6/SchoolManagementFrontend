@@ -137,13 +137,6 @@ const menuData = [
     icon: `<svg  xmlns="http://www.w3.org/2000/svg"  width="32"  height="32"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-notes"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 3m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z" /><path d="M9 7l6 0" /><path d="M9 11l6 0" /><path d="M9 15l4 0" /></svg>`,
     subMenu: [
       {
-        id: "1",
-        name: "Board Exam",
-        route: "/",
-        icon: `<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-building"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0" /><path d="M9 8l1 0" /><path d="M9 12l1 0" /><path d="M9 16l1 0" /><path d="M14 8l1 0" /><path d="M14 12l1 0" /><path d="M14 16l1 0" /><path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16" /></svg>`,
-        subMenu: false
-      },
-      {
         id: "2",
         name: "Exam name & Fee",
         route: "/",
@@ -164,19 +157,46 @@ const menuData = [
         icon: `<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-id-badge-2"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M7 12h3v4h-3z" /><path d="M10 6h-6a1 1 0 0 0 -1 1v12a1 1 0 0 0 1 1h16a1 1 0 0 0 1 -1v-12a1 1 0 0 0 -1 -1h-6" /><path d="M10 3m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v3a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /><path d="M14 16h2" /><path d="M14 12h4" /></svg>`,
         subMenu: false
       },
-      {
-        id: "5",
-        name: "Result",
-        route: "/result",
-        subMenu: false,
-        icon: `<img src='sidebar/exam-result.svg' alt="Result" class="w-6 h-6" />`,
-      },
     ]
   },
   // Exam menu end
+  // Board Exam menu start
+  {
+    id: "40",
+    name: "Board",
+    route: "/board_exam",
+    icon: `<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-building"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0" /><path d="M9 8l1 0" /><path d="M9 12l1 0" /><path d="M9 16l1 0" /><path d="M14 8l1 0" /><path d="M14 12l1 0" /><path d="M14 16l1 0" /><path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16" /></svg>`,
+    subMenu: [
+      {
+        id: "2",
+        name: "Madrasah Board Information",
+        route: "/madrasahboardinfo",
+        icon: `<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-building"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0" /><path d="M9 8l1 0" /><path d="M9 12l1 0" /><path d="M9 16l1 0" /><path d="M14 8l1 0" /><path d="M14 12l1 0" /><path d="M14 16l1 0" /><path d="M5 21v-16a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v16" /></svg>`,
+        subMenu: false
+      },
+    ]
+  },
+  // Board Exam menu end
+  // Result menu start
+  {
+    id: "20",
+    name: "Result",
+    route: "/result",
+    icon: `<img src='sidebar/exam-result.svg' alt="Result" class="w-6 h-6" />`,
+    subMenu: [
+      {
+        id: "1",
+        name: "Average Result Entry",
+        route: "/averageresult",
+        icon: `<img src='/exam-result-average.svg' alt="Result" class="w-6 h-6" />`,
+        subMenu: false
+      },
+    ]
+  },
+  // Result menu end
   // Library menu start
   {
-    id: "5",
+    id: "6",
     name: "Libery",
     route: "/library",
     subMenu: false,
@@ -185,7 +205,7 @@ const menuData = [
   // Library menu end
   // Other menu start
   {
-    id: "6",
+    id: "7",
     name: "Others",
     route: "/others",
     icon: `<svg  xmlns="http://www.w3.org/2000/svg"  width="32"  height="32"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-dots-circle-horizontal"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M8 12l0 .01" /><path d="M12 12l0 .01" /><path d="M16 12l0 .01" /></svg>`,
@@ -209,11 +229,11 @@ const menuData = [
   // Other menu bar end
   // Settings Menu start
   {
-    id: "7",
+    id: "8",
     name: "Setting",
     route: "/setting",
     icon: `<svg  xmlns="http://www.w3.org/2000/svg"  width="32"  height="32"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-settings"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>`,
-    subMenu : [
+    subMenu: [
       {
         id: "1",
         name: "Setting",
@@ -233,7 +253,7 @@ const menuData = [
   // Settings Menu end
   // Help menu start
   {
-    id: "8",
+    id: "9",
     name: "Help",
     route: "/help",
     subMenu: false,
@@ -269,11 +289,11 @@ const DefaultLayout = () => {
   useEffect(() => {
     console.log('Authentication state:', isAuthenticated);
 
-    if (isAuthenticated) {
-      dispatch(verifyUser(token)); // Dispatch the thunk
-    } else {
-      navigate('/login'); // Redirect if not authenticated
-    }
+    // if (isAuthenticated) {
+    //   dispatch(verifyUser(token)); // Dispatch the thunk
+    // } else {
+    //   navigate('/login'); // Redirect if not authenticated
+    // }
   }, [isAuthenticated, dispatch, navigate, token]);
 
   // isAuthenticated ? (
@@ -287,7 +307,7 @@ const DefaultLayout = () => {
           aside
         </aside> */}
         {/* <Sidebar/> */}
-        <Sidebar  menuList={menuData} title={"pageTitle"} />
+        <Sidebar menuList={menuData} title={"pageTitle"} />
         {/* <!-- ===== Sidebar End ===== --> */}
 
         {/* <!-- ===== Content Area Start ===== --> */}

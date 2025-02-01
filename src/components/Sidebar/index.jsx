@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import parse from 'html-react-parser';
-import Logo from '/saharaIt.svg';
+import Logo from '/saharaItlogo.png';
 import Translate from '../../utils/Translate';
 
 const Sidebar = ({ menuList, title }) => {
@@ -142,15 +142,15 @@ const Sidebar = ({ menuList, title }) => {
     }>
 
         {/* Main Menu Area */}
-        <div className="main_menu_area w-[64px] bg-[#333] h-full">
-          <div className="flex items-center justify-between gap-2">
-            <NavLink to="/" className="w-full flex justify-center py-5">
-            <img src={Logo} alt="Logo" className='w-8 h-8 rounded-sm'/>
+        <div className="main_menu_area w-[64px] bg-[#333] h-full flex flex-col">
+          <div className="flex items-center justify-center py-5 bg-[#333] z-10">
+            <NavLink to="/" className="w-full flex justify-center">
+            <img src={Logo} alt="Logo" className='w-12 h-[60px] rounded-sm'/>
             </NavLink>
           </div>
 
 
-          <div className="no-scrollbar flex flex-col overflow-y-auto duration-300 ease-linear">
+          <div className=" flex flex-col overflow-y-auto duration-300 ease-linear flex-1">
             <nav>
               <ul className="mb-6 flex flex-col gap-1.5">
                 {menuList.map((menu) => (
