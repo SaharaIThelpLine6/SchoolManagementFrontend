@@ -20,8 +20,8 @@ const ResultTable = () => {
     }, [studentResult])
 
     return (
-        <div className="pt-[80px] hidden_in_print">
-            <table width={750} border={0} align="center" cellPadding={0} cellSpacing={0}>
+        <div className="pt-[80px] hidden_in_print w-full min-h-screen bg-[#f9f9f9] overflow-auto">
+            <table className="mx-auto" width={750} border={0} align="center" cellPadding={0} cellSpacing={0}>
                 <tbody>
                     <tr>
                         <td>
@@ -67,7 +67,7 @@ const ResultTable = () => {
 
                                                         </td>
 
-                                                        <td valign="top" bgcolor="#007814">
+                                                        <td valign="top" className="bg-theme-color">
                                                             <table
                                                                 width="100%"
                                                                 border={0}
@@ -97,7 +97,7 @@ const ResultTable = () => {
                                                                         </td>
                                                                     </tr>
                                                                     <tr>
-                                                                        <td align="center" height={40} bgcolor="#479e55">
+                                                                        <td align="center" height={40} className="bg-theme-color">
                                                                             <p className="text-white">{bnBijoy2Unicode(studentResult?.Address)}</p>
                                                                         </td>
                                                                     </tr>

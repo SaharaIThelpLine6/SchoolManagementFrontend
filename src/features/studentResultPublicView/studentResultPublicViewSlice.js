@@ -1,20 +1,27 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getPublicData } from "../../utils/read/api";
-
-export const fetchResultFieldData = createAsyncThunk("studentResultPublicView/fetchResultFieldData", async (madrasaId) => {
-    const [schoolDataResponse, academicSessionResponse, examsResponse, classListResponse] = await Promise.all([
-        getPublicData(`/api/public/result/${madrasaId}`),
-        getPublicData(`/api/public/result/${madrasaId}/academic_session`),
-        getPublicData(`/api/public/result/${madrasaId}/exam_name`),
-        getPublicData(`/api/public/result/${madrasaId}/sub_class`),
-    ]);
-    return {
-        schoolData: schoolDataResponse,
-        academicSession: academicSessionResponse,
-        exam: examsResponse,
-        classList: classListResponse,
-    };
-});
+export const fetchResultFieldData = createAsyncThunk(
+    "studentResultPublicView/fetchResultFieldData",
+    async (madrasaId) => {
+      try {
+        const [schoolDataResponse, academicSessionResponse, examsResponse, classListResponse] = await Promise.all([
+          getPublicData(`/api/public/result/${madrasaId}`),
+          getPublicData(`/api/public/result/${madrasaId}/academic_session`),
+          getPublicData(`/api/public/result/${madrasaId}/exam_name`),
+          getPublicData(`/api/public/result/${madrasaId}/sub_class`),
+        ]);
+        return {
+          schoolData: schoolDataResponse,
+          academicSession: academicSessionResponse,
+          exam: examsResponse,
+          classList: classListResponse,
+        };
+      } catch (error) {
+        console.error("Error fetching result field data:", error);
+        throw error;
+      }
+    }
+  );
 
 export const fetchResult = createAsyncThunk("studentResultPublicView/fetchResult", async (resultUrl) => {
     const [studentResultResponse] = await Promise.all([getPublicData(`/api/public/result/${resultUrl}`)])

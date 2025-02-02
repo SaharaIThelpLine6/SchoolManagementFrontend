@@ -33,7 +33,7 @@ const TableOne = () => {
     };
 
     fetchData();
-  }, [itemPerPage,currentPage, tokenDux]);
+  }, [itemPerPage, currentPage, tokenDux]);
 
   const handleDelete = (index) => {
     const confirmDelete = window.confirm('Are you sure delete this?');
@@ -46,12 +46,12 @@ const TableOne = () => {
   return (
     <div className="rounded-sm bg-white pt-2 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
-        <select className="bg-transparent pl-2" onChange={(e) => dispatch(setItemsPerPage(e.target.value))}>
+        {/* <select className="bg-transparent pl-2" onChange={(e) => dispatch(setItemsPerPage(e.target.value))}>
           <option value="2">2</option>
           <option value="10">10</option>
           <option value="20">20</option>
           <option value="50">50</option>
-        </select>
+        </select> */}
         <table className="w-full table-auto border-collapse">
           <thead className='bg-[#3F4885] text-white h-fit'>
             <tr className="text-center">
@@ -68,44 +68,50 @@ const TableOne = () => {
           </thead>
 
           <tbody>
-            {brandData.length && brandData.map((brand, key) => (
-              <tr key={key} className={`${key % 2 !== 0 ? 'bg-[#f5f3f3]' : ''} border border-white`}>
-                <td className="py-1 px-4 border border-white">
-                  <button type='button' className='text-blue-500 hover:text-blue-700' onClick={() => {
-                    dispatch(setEditMode(1))
-                    dispatch(fetchSingleUser(brand.UserID))
-                  }}>
-                    <FaEdit />
-                  </button>
-                </td>
-                <td className="py-1 px-4 border border-white ">
-                  <button className='text-red-500 hover:text-red-700'>
-                    <FaTrash /> 
-                  </button>
-                </td>
-                <td className="py-1 px-4 border border-white">
-                  <p className="text-black dark:text-white">{brand.UserCode}</p>
-                </td>
-
-                <td className="py-1 px-4 border border-white ">
-                  <p className="text-black dark:text-white">{brand.UserName}</p>
-                </td>
-                <td className="py-1 px-4 border border-white">
-                  <p className="text-black dark:text-white">{brand.FatherName}</p>
-                </td>
-                <td className="py-1 px-4 border border-white">
-                  <p className="text-black dark:text-white">{brand.Mobile1}</p>
-                </td>
-                <td className="py-1 px-4 border border-white">
-                  <p className="text-black dark:text-white">{brand.UserType.TypeName}</p>
-                </td>
+            {brandData.length > 0 ? (
+              brandData.map((brand, key) => (
+                <tr key={key} className={`${key % 2 !== 0 ? 'bg-[#f5f3f3]' : ''} border border-white`}>
+                  <td className="py-1 px-4 border border-white">
+                    <button type='button' className='text-blue-500 hover:text-blue-700' onClick={() => {
+                      dispatch(setEditMode(1));
+                      dispatch(fetchSingleUser(brand.UserID));
+                    }}>
+                      <FaEdit />
+                    </button>
+                  </td>
+                  <td className="py-1 px-4 border border-white ">
+                    <button className='text-red-500 hover:text-red-700'>
+                      <FaTrash />
+                    </button>
+                  </td>
+                  <td className="py-1 px-4 border border-white">
+                    <p className="text-black dark:text-white">{brand.UserCode}</p>
+                  </td>
+                  <td className="py-1 px-4 border border-white ">
+                    <p className="text-black dark:text-white">{brand.UserName}</p>
+                  </td>
+                  <td className="py-1 px-4 border border-white">
+                    <p className="text-black dark:text-white">{brand.FatherName}</p>
+                  </td>
+                  <td className="py-1 px-4 border border-white">
+                    <p className="text-black dark:text-white">{brand.Mobile1}</p>
+                  </td>
+                  <td className="py-1 px-4 border border-white">
+                    <p className="text-black dark:text-white">{brand.UserType.TypeName}</p>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="7" className="text-center py-2 text-gray-500">No data available</td>
               </tr>
-            ))}
+            )}
           </tbody>
+
         </table>
       </div>
 
-      {/*Pagination Start*/}   
+      {/*Pagination Start*/}
       <div className='flex items-center my-2'>
         <div className='pl-2'>
           <span className="text-md text-gray-800">
@@ -125,7 +131,7 @@ const TableOne = () => {
           </span>
         </div>
         <div className='ml-auto'>
-          <Pagination totalpages={totalPage}/>
+          <Pagination totalpages={totalPage} />
         </div>
       </div>
       {/*Pagination End*/}

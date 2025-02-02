@@ -12,7 +12,7 @@ export const fetchSingleUser = createAsyncThunk("userInfo/fetchSingleUser", asyn
 
 const initialState = {
     defaultFormValue: null,
-    editMode: 5,
+    editMode: 0,
     singleUserstatus: 'idle',
     singleUsererror: null,
 };

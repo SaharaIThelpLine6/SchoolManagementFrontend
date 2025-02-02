@@ -26,16 +26,21 @@ import { updateInData, updateUserInfo } from "../../utils/update/api";
 import { insertData } from "../../utils/create/api";
 import { useFormContext } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-// import { updateClassSerial } from "../../features/class/classSlice";
+import { cssTransition, toast } from "react-toastify";
+import Translate from "../../utils/Translate";
+import { setReqLoading } from "../../features/requestHandeler/requestHandelerSlice";
 
+const bounce = cssTransition({
+    enter: 'animate__animated animate__bounceIn',
+    exit: 'animate__animated animate__bounceOut',
+});
 
 const RowDragHandleCell = ({ rowId }) => {
     const { attributes, listeners } = useSortable({
         id: rowId,
     })
     return (
-        <button {...attributes} {...listeners} className="w-full flex items-center justify-center text-slate-700">
+        <button {...attributes} {...listeners} className="w-full flex items-center justify-center text-theme-dark">
             <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-grip-vertical"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M9 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M9 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M15 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M15 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M15 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>
         </button>
     )
@@ -43,8 +48,6 @@ const RowDragHandleCell = ({ rowId }) => {
 
 const DraggableRow = ({ row, headers, statename }) => {
     const dispatch = useDispatch();
-    // console.log(row);
-    
 
     const { transform, transition, setNodeRef, isDragging } = useSortable({
         id: row.Serial,
@@ -70,13 +73,13 @@ const DraggableRow = ({ row, headers, statename }) => {
                     {row[header]}
                 </td>
             ))}
-            <td className="pt-3 flex gap-2">
+            <td className="pt-3 text-center">
                 <button type="button" onClick={() => {
                     dispatch(setEditMode(row.id))
                 }}>
                     <FaEdit className="text-blue-500 cursor-pointer hover:text-blue-700" />
                 </button>
-                <FaTrash className="text-red-500 cursor-pointer hover:text-red-700" />
+                {/* <FaTrash className="text-red-500 cursor-pointer hover:text-red-700" /> */}
             </td>
         </tr>
     );
@@ -85,6 +88,7 @@ const DraggableRow = ({ row, headers, statename }) => {
 const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
     const [rows, setRows] = useState(tableRows);
     const { classList } = useSelector((state) => state.class);
+    const { reqLoading } = useSelector((state) => state.requestHandeler);
 
     const [dataUpdate, setDataUpdate] = useState(false);
     const editMode = useSelector((state) => state.class.editMode);
@@ -94,7 +98,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
         reset,
         formState: { errors },
     } = useFormContext()
-    // const headers = Object.keys(tableRows.length ? tableRows[0] : {});
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -107,66 +111,6 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
         useSensor(TouchSensor, {}),
         useSensor(KeyboardSensor, {})
     );
-
-    /* const handleDragEnd = (event) => {
-         const { active, over } = event;
- 
-         if (active && over && active.id !== over.id) {
-             setRows((currentRows) => {
-                 if (!Array.isArray(currentRows)) return currentRows;
-                 const oldIndex = currentRows.findIndex((row) => row.id === active.id);
-                 const newIndex = currentRows.findIndex((row) => row.id === over.id);
-                 const updatedRows = arrayMove(currentRows, oldIndex, newIndex);
-                 const updatedRowsWithSerial = updatedRows.map((row, index) => ({ ...row, Serial: index + 1 }));
-                 try {
-                    async function updateSerial() {
-                        await dispatch(updateClassSerial({ id: "2", data: updatedRowsWithSerial }));
-                     }
-                     updateSerial()
-                     return updatedRowsWithSerial
-                 } catch (error) {
-                     console.log(error);
-                 }
-                 
-             });
-         }
-     };*/
-
-    /*const handleDragEnd = (event) => {
-        const { active, over } = event;
-
-        if (active && over && active.id !== over.id) {
-            setRows((currentRows) => {
-                if (!Array.isArray(currentRows)) return currentRows;
-
-                const oldIndex = currentRows.findIndex((row) => row.id === active.id);
-                const newIndex = currentRows.findIndex((row) => row.id === over.id);
-
-                const updatedRows = arrayMove(currentRows, oldIndex, newIndex);
-                const updatedRowsWithSerial = updatedRows.map((row, index) => ({ ...row, Serial: index + 1 }));
-                const updatedState = updatedRowsWithSerial;
-
-                setDataUpdate(true);
-                return updatedState;
-            });
-        }
-    };
-
-
-    useEffect(() => {
-        if (update) {
-            setDataUpdate(false);
-            async function updateSerial() {
-                try {
-                    await dispatch(updateClassSerial({ id: "2", data: rows }));
-                } catch (error) {
-                    console.log(error);
-                }
-            }
-            updateSerial();
-        }
-    }, [update, dispatch, rows]);*/
-
     const handleDragEnd = (event) => {
         const { active, over } = event;
 
@@ -210,46 +154,61 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
 
         if (editMode !== 0) {
             const selectedClass = classList.find((item) => item.ClassID == editMode);
-            console.log(selectedClass);
-            
             reset(selectedClass);
         }
     }, [editMode]);
 
-    // const refreshSection = async () => {
-    //     try {
-    //         // setRows(classList);
-    //         console.log(classList);
-            
-    //     } catch (error) {
-    //         console.log("Error refreshing section:", error);
-    //     }
-    // };
-
     const onSubmit = async (data) => {
-        console.log(data);
-
+        if(reqLoading){
+            console.log("Request already in progress. Please wait...");
+            return false;
+        }
+        dispatch(setReqLoading(true))
+        const id = toast.dark("তথ্য যুক্ত করা হচ্ছে...", {
+            className: " min-h-[50px] max-h-[50px] overflow-hidden text-[14px] font-SolaimanLipi bg-[#323232] text-[#ffffff] py-2 px-2 rounded-[4px] font-normal",
+            style: {
+                boxShadow: '0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)',
+            },
+            transition: bounce,
+            position: "bottom-center",
+            type: "success",
+            closeButton: false,
+            isLoading: true
+        });
 
         try {
             if (editMode === 0) {
                 const submitedData = { ...data, Serial: rows.length + 1 }
                 const submitRes = await insertData(submitedData, "/api/academic/insert_class")
-                navigate(0);
+                // console.log(submitRes);
+                if (submitRes.success) {
+                    reset({ ClassName: "", EnglishClass: "", ArabicClass: "" });
+                    toast.update(id, { render: "তথ্য যুক্ত করা হয়েছে।", type: "success", isLoading: false, autoClose: true });
+                    dispatch(fetchClassData());
+                    dispatch(setReqLoading(false))
+                }
+                else {
+                    toast.update(id, { render: String(submitRes.error), type: "error", isLoading: false, autoClose: true });
+                    dispatch(setReqLoading(false))
+                    console.error("Failed to insert data:", submitRes.error);
+                }
+                
             }
             else {
-                console.log("Emon Hasan");
-                console.log(editMode, data);
-                const id = toast.loading("Please wait...")
-                
                 const submitRes = await updateInData(editMode, data, "/api/academic/update_class")
                 dispatch(setEditMode(0));
-                reset({ClassName: "", EnglishClass: "", ArabicClass: ""});
-                toast.update(id, { render: "Unicode Converted Successfully", type: "success", isLoading: false });
-                dispatch(fetchClassData()); 
+                reset({ ClassName: "", EnglishClass: "", ArabicClass: "" });
+                toast.update(id, { render: "তথ্য যুক্ত করা হয়েছে।", type: "success", isLoading: false, autoClose: true });
+                dispatch(fetchClassData());
+                dispatch(setReqLoading(false))
+
                 // navigate(0);
             }
 
         } catch (err) {
+            reset({ ClassName: "", EnglishClass: "", ArabicClass: "" });
+            toast.update(id, { render: String(err.message), type: "error", isLoading: false, autoClose: true });
+            dispatch(setReqLoading(false))
             console.error(err.message)
         }
     }
@@ -258,47 +217,30 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
     return (
         <div className="p-4">
             <div className="flex gap-3 flex-wrap lg:flex-nowrap">
-                <div className="w-full lg:w-[40%] border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
-                    <h1 className="font-semibold text-lg text-slate-700 mb-4">{tableTitle}</h1>
-                    <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="w-full lg:w-[40%] lg:h-fit lg:sticky lg:top-0  border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
+                    <h1 className="font-semibold text-lg text-theme-dark font-SolaimanLipi mb-4">{Translate(tableTitle)}</h1>
+                    <form onSubmit={handleSubmit(onSubmit)} className="font-SolaimanLipi">
                         <div className="mb-3">
                             <ThemeInputBox1 label={field} registerKey={"ClassName"} require={"Class Name is require"} type={"text"} />
                         </div>
                         <div className="mb-3">
-                            <ThemeInputBox1 label={"English"} registerKey={"EnglishClass"} require={"Class Name in English is require"} type={"text"} />
+                            <ThemeInputBox1 label={"English"} registerKey={"EnglishClass"} type={"text"} />
                         </div>
                         <div className="mb-3">
-                            <ThemeInputBox1 label={"عربي"} registerKey={"ArabicClass"} require={"Class Name in Arabic is require"} type={"text"} />
+                            <ThemeInputBox1 label={"عربي"} registerKey={"ArabicClass"} type={"text"} />
                         </div>
-                        {/* <div className="mb-4">
-                            <p className="text-slate-500 pb-2">
-                                Sections <span className="text-red-700">*</span>
-                            </p>
-                            <div className="flex gap-5 flex-wrap">
-                                {
-                                    subClassList.map((subClass) => {
-                                        return (
-                                            <div key={subClass.SubClassID} className="flex items-center">
-                                                <input
-                                                    type="checkbox"
-                                                    id={`section-${subClass.SubClassID}`}
-                                                    value={subClass.SubClassID}
-                                                    className="h-4 w-4 text-slate-600 border-gray-300 rounded"
-                                                />
-                                                <label
-                                                    htmlFor={`section-${subClass.SubClassID}`}
-                                                    className="ml-2 text-slate-600 text-sm"
-                                                >
-                                                    {subClass.SubClass}
-                                                </label>
-                                            </div>
-                                        )
-                                    })
-                                }
-                            </div>
-                        </div> */}
-                        <button type="submit" className="bg-slate-700 px-4 py-2 text-white rounded-md mt-4 w-full hover:bg-slate-700">
-                            Save
+                        <button type="submit" className="bg-theme-color transation ease-linear font-bold font-SolaimanLipi duration-500 inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-[#121212]">
+                            {Translate("Save")}
+                        </button>
+                        <button type="button" onClick={() => {
+                            setEditMode(0);
+                            reset({
+                                ClassName: "",
+                                EnglishClass: "",
+                                ArabicClass: "",
+                            })
+                        }} className="bg-[#121212] transation ease-linear duration-500 font-bold font-SolaimanLipi inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-slate-700 ms-[20px]">
+                            {Translate("Add New")}
                         </button>
                     </form>
                 </div>
@@ -312,11 +254,11 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
                         <div className="relative overflow-x-auto">
                             <table className="w-full h-fit border-collapse">
                                 <thead>
-                                    <tr className="bg-slate-100 text-left text-sm text-slate-600">
+                                    <tr className="bg-theme-dark text-left text-sm text-white font-SolaimanLipi">
                                         <th></th>
                                         {tableHeader.map((title) => (
                                             <th key={title} className="py-2 px-3">
-                                                {title}
+                                                {Translate(title)}
                                             </th>
                                         ))}
                                         <th>Actions</th>
@@ -326,7 +268,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
                                     items={rows.map((row) => row.Serial)}
                                     strategy={verticalListSortingStrategy}
                                 >
-                                    <tbody>
+                                    <tbody className="font-SolaimanLipi text-semibold">
                                         {rows.map((row) => (
                                             <DraggableRow key={row.id} row={row} headers={tableHeader} />
                                         ))}

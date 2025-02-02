@@ -30,17 +30,22 @@ export const insertData = async (data, path) => {
         "Accept": "*/*",
         "Content-Type": "application/json",
         "Authorization": AuthStr
-    }
+    };
 
-    let bodyContent = JSON.stringify({data: data});
+    let bodyContent = JSON.stringify({ data: data });
 
     let reqOptions = {
         url: `${API_URL}${path}`,
         method: "POST",
         headers: headersList,
         data: bodyContent,
-    }
+    };
 
-    let response = await axios.request(reqOptions);
-    console.log(response.data);
+    try {
+        let response = await axios.request(reqOptions);
+        return { success: true, data: response.data };
+    } catch (error) {
+        console.error("Error inserting data:", error);
+        return { success: false, error: error.message };
+    }
 };

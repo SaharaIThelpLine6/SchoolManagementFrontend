@@ -1,10 +1,7 @@
 import React, { useEffect } from 'react';
-import { getPublicData } from '../../utils/read/api';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchClassResult, fetchResult } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
-import ResultTable from '../../components/ResultTable';
-import Marksheet from '../../components/Document/Marksheet';
+import { fetchClassResult, fetchResult, setResultError } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
 import bnBijoy2Unicode from '../../utils/conveter';
 import { Buffer } from 'buffer';
 import MarksheetClassWise from '../../components/Document/MarksheetClassWise';
@@ -19,13 +16,10 @@ const ClassResult = () => {
     const navigate = useNavigate();
     useEffect(() => {
         dispatch(fetchClassResult({schoolId: schoolid, resultUrl: `${seassonid}/${examid}/${classid}`}))
-        // dispatch(fetchClassResult(`/${schoolid}/result_statistics/${seassonid}/${examid}/${classid}`))
     }, [dispatch])
     if (resultStatus === 'failed') {
-        console.log(resultError);
-        // navigate(`/${schoolid}/page_not_found`);
+        navigate(`/${schoolid}/classes`);
     }
-
     const bufferConveter = (bufferData) => {
         const buffer = Buffer.from(bufferData);
         const base64String = buffer.toString('base64');
@@ -38,16 +32,16 @@ const ClassResult = () => {
             {classResult?.length > 0 ? (
                 <div>
                     <div className="hidden_in_print">
-                        <div className="mx-auto relative bg-white font-SolaimanLipi">
+                        <div className="mx-auto relative bg-white font-SolaimanLipi pt-[80px] lg:pt-0">
                             <div className=" pt-0 pb-1 px-2 bg-white">
-                                <div className="bg-[#307847]">
+                                <div className="bg-theme-color">
                                     {/*Logo*/}
-                                    <div className="absolute pt-5 pl-5">
+                                    <div className="absolute pt-5 pl-5 opacity-0 lg:opacity-100">
                                         <img src={bufferConveter(schoolData?.Logo?.data)} alt="logo" width={100} height={100} className="" />
                                     </div>
 
                                     {/*Heading Title Start*/}
-                                    <div className="mx-auto text-center py-3 text-white">
+                                    <div className="mx-auto text-center py-3 text-white relative z-10">
                                         <h2 className="text-[22px] font-medium">{bnBijoy2Unicode(schoolData?.InstitutionName)}</h2>
                                         <h3 className="">{bnBijoy2Unicode(schoolData?.Address)}</h3>
                                         <h3 className="">{bnBijoy2Unicode(classResult[0]?.ExamName)} - {bnBijoy2Unicode(classResult[0]?.SessionName)}</h3>
@@ -83,7 +77,7 @@ const ClassResult = () => {
                                                             <td className="border border-black px-1 min-w-[20px]">{bnBijoy2Unicode(String(studentResult.UserCode))}</td>
                                                             <td className="border border-black px-1 min-w-[20px]">{bnBijoy2Unicode(studentResult.UserName)}</td>
                                                             {
-                                                                Array.from({ length: studentResult.SubSonkha }).map((_, index) => (<td className="border border-black min-w-[100px]">{bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}</td>))
+                                                                Array.from({ length: studentResult.SubSonkha }).map((_, index) => (<td key={`subind_${index}`} className="border border-black min-w-[100px]">{bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}</td>))
 
                                                             }
                                                             <td className="border border-black px-1 min-w-[20px]">{bnBijoy2Unicode(String(studentResult?.Total))}</td>
@@ -120,7 +114,7 @@ const ClassResult = () => {
                         <MarksheetClassWise classResult={classResult} schoolData={schoolData} resultStatices={resultStatistics} />
                     </div>
                 </div>
-            ) : null}
+            ) : <>Loading...</>}
         </div>
     );
 };

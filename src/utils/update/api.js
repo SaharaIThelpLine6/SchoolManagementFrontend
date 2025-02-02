@@ -30,17 +30,23 @@ export const updateInData = async (id, data, path) => {
         "Accept": "*/*",
         "Content-Type": "application/json",
         "Authorization": AuthStr
-    }
+    };
 
-    let bodyContent = JSON.stringify({id: id, data: data});
+    let bodyContent = JSON.stringify({ id: id, data: data });
 
     let reqOptions = {
         url: `${API_URL}${path}`,
         method: "PUT",
         headers: headersList,
         data: bodyContent,
-    }
+    };
 
-    let response = await axios.request(reqOptions);
-    console.log(response.data);
+    try {
+        let response = await axios.request(reqOptions);
+        console.log(response.data);
+        return { success: true, data: response.data };
+    } catch (error) {
+        console.error("Error updating data:", error);
+        return { success: false, error: error.message };
+    }
 };

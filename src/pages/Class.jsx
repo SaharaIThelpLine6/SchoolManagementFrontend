@@ -2,8 +2,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchClassData } from "../features/class/classSlice";
 import { useEffect, useState } from "react";
 import InputTable2 from "../components/InputTable/InputTable2";
+import { setPageName } from "../features/auth/authSlice";
 
-const Class = () => {
+const Class = ({pageTitle}) => {
+    
     const title = "Add Class"
     const field = "Class"
     const tableTitleHeaders = ["Serial", "Class", "Sections", "Bangla", "Arabic"];
@@ -12,12 +14,12 @@ const Class = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
+        dispatch(setPageName(pageTitle))
         if (status === 'idle') {
             dispatch(fetchClassData());
         }
 
         if (status === 'succeeded') {
-
             const transformedData = classList.map((item) => ({
                 id: item.ClassID.toString(),
                 Serial: item.Serial,

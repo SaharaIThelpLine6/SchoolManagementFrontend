@@ -7,6 +7,7 @@ const token = localStorage.getItem('token');
 
 const initialState = {
   isAuthenticated: !!token,
+  pageName: "Home",
   token: token || null,
   user: null,
   status: 'idle',
@@ -42,6 +43,9 @@ const authSlice = createSlice({
       state.user = null;
       localStorage.removeItem('token');
     },
+    setPageName: (state, action)=>{
+      state.pageName = action.payload
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -65,5 +69,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { login, logout } = authSlice.actions;
+export const { login, logout, setPageName } = authSlice.actions;
 export default authSlice.reducer;

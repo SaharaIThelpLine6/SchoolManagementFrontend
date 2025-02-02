@@ -27,7 +27,7 @@ import Library from './pages/Library';
 import Setting from './pages/Setting';
 import Help from './pages/Help';
 
-import { ToastContainer } from 'react-toastify';
+import { cssTransition, ToastContainer } from 'react-toastify';
 import Notepad from './pages/Notepad';
 import Others from './pages/Others';
 import Calculator from './pages/Calculator';
@@ -41,9 +41,19 @@ import Marksheet from './components/Document/Marksheet';
 import MarksheetClassWise from './components/Document/MarksheetClassWise';
 import ClassResultForm from './pages/public/ClassResultForm';
 import ClassResult from './pages/public/ClassResult';
+import Loading from './components/Loading/Loading';
+import 'animate.css/animate.min.css';
+import { useSelector } from 'react-redux';
+
+const bounce = cssTransition({
+  enter: 'animate__animated animate__bounceIn',
+  exit: 'animate__animated animate__bounceOut',
+});
 
 function App() {
   const [loading, setLoading] = useState(true);
+  // const { isLoading } = useSelector((state) => state.loading)
+
   const methods = useForm()
   // const { pathname } = useLocation();
 
@@ -52,11 +62,11 @@ function App() {
   // }, [pathname]);
 
   useEffect(() => {
-    setTimeout(() => setLoading(false), 1000);
+    setTimeout(() => setLoading(false), 1500);
   }, []);
-
+ 
   return loading ? (
-    <p>Loading...</p>
+    <Loading />
   ) : (
     <FormProvider {...methods}>
       <BrowserRouter>
@@ -67,8 +77,8 @@ function App() {
               <Route index element={<AddStudent pageTitle={"Add Student"} />} />
               <Route path="booklist" element={<BookList pageTitle={"Book List"} />} />
               <Route path="groupdistribution" element={<GroupDistribution pageTitle={"Students Group Set"} />} />
-              <Route path="class" element={<Class />} pageTitle={"Class"} />
-              <Route path="section" element={<Section />} pageTitle={"Section"} />
+              <Route path="class" element={<Class pageTitle={"Class"} />} />
+              <Route path="section" element={<Section pageTitle={"Section"} />} />
             </Route>
             <Route path="users">
               <Route index element={<Users pageTitle={"Staff"} />} />
@@ -77,11 +87,10 @@ function App() {
               <Route path="pRName" element={<PayRoleName pageTitle={"Pay Role Name"} />} />
               <Route path="report" element={<Report pageTitle={"Reports"} />} />
             </Route>
-            <Route path="/formp" element={<FormP />} />  {/*Form form just practice. Not displaying*/}
+            <Route path="/formp" element={<FormP />} />
             <Route path="/query" element={<Query />} />
             <Route path="exam">
               <Route index element={<Exam pageTitle={"Exam"} />} />
-              {/* <Route path="result" element={<Result pageTitle={"Result"} />} /> */}
             </Route>
             <Route path="/library" element={<Library pageTitle={"Library"} />} />
             <Route path="others">
@@ -97,24 +106,31 @@ function App() {
             <Route index element={<ResultRequest pageTitle={"Result Page"} />} />
             <Route path="classes" element={<ClassResultForm />} />
             <Route path="AdmissionRegistration" element={<AdmissionRegistration />} />
-            <Route path="students/:seassonid/:examid/:classid/:userid" element={<Result/>} />
-            <Route path="classes/:seassonid/:examid/:classid" element={<ClassResult/>} />
+            <Route path="students/:seassonid/:examid/:classid/:userid" element={<Result />} />
+            <Route path="classes/:seassonid/:examid/:classid" element={<ClassResult />} />
           </Route>
           
           <Route path="*" element={<NotFound />} /> 
         </Routes>
       </BrowserRouter>
+      {/* bg-[#323232] */}
       <ToastContainer
-        position="top-right"
+        position="bottom-center"
         autoClose={5000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
-        rtl={false}
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        // className="flex text-[14px] font-SolaimanLipi bg-[#323232] text-[rgba(255,255,255,.7)] justify-between items-center py-2 px-2 rounded-[4px] font-normal"
+        transition={ bounce }
+        closeButton={false}
+        className=" min-h-[50px] max-h-fit overflow-hidden text-[14px] font-SolaimanLipi  text-[#ffffff]  rounded-[4px] font-normal"
+        // style={{
+        //   boxShadow: '0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)',
+        // }
+
+        // }
       />
     </FormProvider>
   );

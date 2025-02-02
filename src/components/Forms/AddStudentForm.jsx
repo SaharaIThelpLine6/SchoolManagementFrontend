@@ -136,8 +136,6 @@ const AddStudentForm = ({ pageTitle }) => {
 
   useEffect(() => {
     if (editMode === 0) {
-      console.log("Emon hasan");
-
       if (!isSameAddressRef.current) {
         setValue("TransientPoliceStationID", "");
         if (DistrictID2) {
@@ -149,8 +147,6 @@ const AddStudentForm = ({ pageTitle }) => {
       }
     }
     else if (editMode === 2) {
-      console.log("data getter");
-
       const numberStrT = defaultData.TransientPoliceStationID.toString();
       if (DistrictID2 === Number(numberStrT.slice(0, 3))) {
         console.log("Both Are Same");

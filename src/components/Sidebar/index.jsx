@@ -57,14 +57,13 @@ const Sidebar = ({ menuList, title }) => {
   }, [resize, stopResizing]);
 
   useEffect(() => {
-    console.log(menuList);
+    // console.log(menuList);
 
     const activeItem = menuList.find(
       (menu) => pathname.startsWith(menu.route) && menu.subMenu
     );
-    console.log(pathname);
-
-    console.log(activeItem);
+    // console.log(pathname);
+    // console.log(activeItem);
 
     setActiveMenu(activeItem);
   }, [pathname, menuList]);
@@ -186,10 +185,10 @@ const Sidebar = ({ menuList, title }) => {
         {/* Submenu Area */}
         {activeMenu?.subMenu && (
           <div className="sub_menu_area bg-[#ededed] h-full pt-[20px] ps-[10px] pe-[20px] min-w-[150px]">
-            <h1 className="text-[#333] text-[20px] font-lato font-normal">{title}</h1>
-            <ul className="flex flex-col mt-[30px]">
+            <h1 className="text-theme-dark text-[20px] font-lato font-bold pl-3">{title}</h1>
+            <ul className="flex flex-col mt-[20px]">
               {activeMenu.subMenu.map((subItem) => (
-              <li key={subItem.id} className={`pl-5 ${pathname.includes(subItem.route)
+              <li key={subItem.id} className={`pl-1 ${pathname.includes(subItem.route)
                 ? "shadow-sub_menu bg-[#f9f9f9] rounded-[4px]"
                 : ""
                 }`}>
@@ -197,7 +196,7 @@ const Sidebar = ({ menuList, title }) => {
                     to={`${activeMenu.route}${subItem.route}`}
                   className={`flex items-center gap-2 p-2 rounded-md text-[14px] `}
                     >
-                  <span className={`${pathname.includes(subItem.route) ? 'text-[#6ad965]' : ""}`}>{subItem.icon ? parse(subItem.icon) : null}</span>
+                  <span className={`${pathname.includes(subItem.route) ? 'text-[#6ad965]' : "text-theme-dark"}`}>{subItem.icon ? parse(subItem.icon) : null}</span>
                     <span>{subItem.name}</span>
                   </NavLink>
                 </li>

@@ -46,7 +46,7 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
             <option value="" className="text-body">Select</option>
             {
               options && options.map((option, index) => (
-                <option key={option.value} value={option[valueField]} className="text-body">
+                <option key={option[valueField]} value={option[valueField]} className="text-body">
                   {option[nameField]}
                 </option>
               ))
@@ -60,7 +60,7 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
             <option value="" className="text-body">Select</option>
             {
               options && options.map((option, index) => (
-                <option key={option.value} value={option[valueField]} className="text-body">
+                <option key={option[valueField]} value={option[valueField]} className="text-body">
                   {option[nameField]}
                 </option>
               ))

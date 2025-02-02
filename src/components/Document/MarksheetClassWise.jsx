@@ -11,18 +11,12 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
         return imageSrc
     }
 
-    console.log(resultStatices);
-
-    const divisionKeys = Object.keys(resultStatices).filter(key => key.startsWith("DC"));
-    // const dcKeys = Object.keys(resultStatices).filter(key => key.startsWith("DC"));
-    // console.log(divisionKeys, dcKeys);
-
-
+    const divisionKeys = Object.keys(resultStatices).filter(key => key.startsWith("DC")); 
     return (
         <div >
             {classResult?.length > 0 ? (
                 <div className="w-[1076px] h-[750px] mx-auto relative bg-white font-SolaimanLipi">
-                    <div className="pt-0 pb-1 px-2 bg-white">
+                    <div className="pb-1 px-2 bg-white">
                         {/*Heading part start*/}
                         <div className="flex justify-around">
                             {/*Total Student Table start*/}

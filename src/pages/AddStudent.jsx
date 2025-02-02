@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DefaultGreen from "../components/Button/DefaultGreen";
 import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
 import DefaultInput from "../components/Forms/DefaultInput";
 import DefaultSelect from "../components/Forms/DefaultSelect";
+import { useDispatch } from "react-redux";
+import { setPageName } from "../features/auth/authSlice";
 
 
 
 
-const AddStudent = () => {
+const AddStudent = ({pageTitle}) => {
   const [selectedImage, setSelectedImage] = useState(null);
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -19,6 +21,10 @@ const AddStudent = () => {
       reader.readAsDataURL(file);
     }
   };
+  const dispatch = useDispatch()
+  useEffect(()=>{
+    dispatch(setPageName(pageTitle))
+  }, [dispatch])
   return (
     <div className="-translate-y-4 font-lato">
 

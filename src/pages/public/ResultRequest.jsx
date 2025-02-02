@@ -13,23 +13,34 @@ const bounce = cssTransition({
 
 const ResultRequest = () => {
     const [notification, setNotification] = useState(true)
+    const [buttonDisable, setButtonDisable] = useState(true)
     const { academicSession, exam, classList, status, error, resultStatus, resultError } = useSelector((state) => state.studentResultPublicView);
     const { schoolid } = useParams();
-
     const {
         register,
         handleSubmit,
+        watch,
         formState: { errors },
     } = useFormContext();
+    const [SessionID, ExamID, SubClassID, userid] = watch(["SessionID", "ExamID", "SubClassID", "userid"])
     const navigate = useNavigate();
     const dispatch = useDispatch()
-    // useEffect(() => {
-    //     dispatch(fetchResultFieldData(schoolid))
-    // }, [dispatch])
+    useEffect(() => {
+        console.log(SessionID, ExamID, SubClassID, userid);
+      
+        if (SessionID && ExamID && SubClassID && userid) {
+          setButtonDisable(false);
+        }
+        else {
+          setButtonDisable(true);
+
+        }
+      }, [SessionID, ExamID, SubClassID, userid]);
 
     const onSubmit = (data) => {
         navigate(`/${schoolid}/students/${data.SessionID}/${data.ExamID}/${data.SubClassID}/${data.userid}`)
     }
+   
 
     /*if (resultStatus === 'failed') {
         console.log("==============");
@@ -57,8 +68,7 @@ const ResultRequest = () => {
 
     useEffect(() => {
         if (resultStatus === 'failed' && !toastShown.current) {
-            console.log("==============");
-            setResultError(null);
+            dispatch(setResultError(null));
             toastShown.current = true; // Set the flag to true
 
             toast.dark("দুঃখিত, কোন তথ্য পাওয়া যায়নি!", {
@@ -78,7 +88,7 @@ const ResultRequest = () => {
         <div className=" pt-20 lg:pt-10 px-8 lg:px-0 mx-auto w-full lg:w-[60%] text-center place-items-center font-SolaimanLipi">
 
             <form className="w-full  shadow-[rgba(0,0,0,0.5)_0px_1px_0px_0px] rounded-md" onSubmit={handleSubmit(onSubmit)}>
-                <div className="bg-[#307847] font-semibold rounded-t-md">
+                <div className="bg-theme-color font-semibold rounded-t-md">
                     <h1 className="text-white text-2xl py-4 "> ব্যক্তিগত ফলাফল</h1>
                 </div>
 
@@ -206,7 +216,7 @@ const ResultRequest = () => {
                     </div>
 
                     <div className="">
-                        <button type="submit" className="bg-[#E0E0E0] text-slate-400 py-[10px] px-16 rounded-md">দাখিল করুন</button>
+                        <button type="submit" disabled={buttonDisable} className={`${buttonDisable? "bg-[#E0E0E0]" : "bg-theme-color text-white"} transition ease-in-out delay-300 text-slate-400 py-[10px] px-16 rounded-md`}>দাখিল করুন</button>
                     </div>
 
                 </div>
