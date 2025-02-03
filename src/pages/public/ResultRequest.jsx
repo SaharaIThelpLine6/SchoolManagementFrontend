@@ -96,6 +96,7 @@ const ResultRequest = () => {
 
                     <div className="w-full">
                         <div className="relative z-20 bg-transparent">
+                            
                             <select
                                 className={`relative z-20 w-full appearance-none rounded border-2 bg-transparent py-3 px-4 outline-none transition transition ease-linear duration-300	 
                                         ${errors.SessionID ? 'border-red-500 focus:border-[#f44336]' : 'border-stroke focus:border-primary'}`}
@@ -110,7 +111,7 @@ const ResultRequest = () => {
                                 ))}
                             </select>
 
-                            <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2">
+                            <span className="absolute top-1/2 right-4 z-30 -translate-y-1/2 pointer-event-none">
                                 <svg
                                     className="fill-current"
                                     width="24"
