@@ -54,7 +54,6 @@ import AverageResult from './pages/AverageResult';
 import PassMarksSubject from './pages/SubjectPassNumber';
 import SubjectPassNumber from './pages/SubjectPassNumber';
 import ResultConditions from './pages/ResultConditions';
-import Loading from './pages/Loading';
 import BoardExam from './pages/BoardExam';
 import MadrasahBoardInfo from './pages/MadrasahBoardInfo';
 
