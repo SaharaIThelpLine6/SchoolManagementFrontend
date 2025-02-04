@@ -1,18 +1,13 @@
-import { ApexOptions } from 'apexcharts';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactApexChart from 'react-apexcharts';
 
-interface ChartThreeState {
-  series: number[];
-}
-
-const options: ApexOptions = {
+const options = {
   chart: {
     fontFamily: 'Satoshi, sans-serif',
     type: 'donut',
   },
   colors: ['#3C50E0', '#6577F3', '#8FD0EF', '#0FADCF'],
-  labels: ['Desktop', 'Tablet', 'Mobile', 'Unknown'],
+  labels: ['Male', 'Female'],  // Update as per your data categories
   legend: {
     show: false,
     position: 'bottom',
@@ -49,21 +44,37 @@ const options: ApexOptions = {
   ],
 };
 
-const ChartThree: React.FC = () => {
-  const [state, setState] = useState<ChartThreeState>({
-    series: [65, 34, 12, 56],
+const ChartThree = ({ data }) => {
+  const [state, setState] = useState({
+    series: [],
+    labels: [],
   });
 
-  const handleReset = () => {
-    setState((prevState) => ({
-      ...prevState,
-      series: [65, 34, 12, 56],
-    }));
-  };
-  handleReset;
+  useEffect(() => {
+    // Dynamically calculate the values based on data
+    const genderCount = {
+      male: 0,
+      female: 0,
+    };
+
+    data.forEach(user => {
+      if (user.GenderID === 1) genderCount.male += 1;  // Male
+      else if (user.GenderID === 2) genderCount.female += 1;  // Female
+      else genderCount.unknown += 1;  // Unknown
+    });
+
+    const totalUsers = data.length;
+    const malePercentage = (genderCount.male / totalUsers) * 100;
+    const femalePercentage = (genderCount.female / totalUsers) * 100;
+
+    setState({
+      series: [malePercentage, femalePercentage],
+      labels: ['Male', 'Female'],
+    });
+  }, [data]);
 
   return (
-    <div className="sm:px-7.5 col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-5">
+    <div className="sm:px-7.5 col-span-12 rounded-[10px] border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default xl:col-span-6 w-full">
       <div className="mb-3 justify-between gap-4 sm:flex">
         <div>
           <h5 className="text-xl font-semibold text-black dark:text-white">
@@ -71,7 +82,7 @@ const ChartThree: React.FC = () => {
           </h5>
         </div>
         <div>
-          <div className="relative z-20 inline-block">
+          {/* <div className="relative z-20 inline-block">
             <select
               name=""
               id=""
@@ -104,7 +115,7 @@ const ChartThree: React.FC = () => {
                 />
               </svg>
             </span>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -119,42 +130,17 @@ const ChartThree: React.FC = () => {
       </div>
 
       <div className="-mx-8 flex flex-wrap items-center justify-center gap-y-3">
-        <div className="sm:w-1/2 w-full px-8">
-          <div className="flex w-full items-center">
-            <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-primary"></span>
-            <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-              <span> Desktop </span>
-              <span> 65% </span>
-            </p>
+        {state.labels.map((label, index) => (
+          <div className="sm:w-1/2 w-full px-8" key={index}>
+            <div className="flex w-full items-center">
+              <span className={`mr-2 block h-3 w-full max-w-3 rounded-full bg-${options.colors[index]}`}></span>
+              <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
+                <span>{label}</span>
+                <span>{state.series[index].toFixed(2)}%</span>
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="sm:w-1/2 w-full px-8">
-          <div className="flex w-full items-center">
-            <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#6577F3]"></span>
-            <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-              <span> Tablet </span>
-              <span> 34% </span>
-            </p>
-          </div>
-        </div>
-        <div className="sm:w-1/2 w-full px-8">
-          <div className="flex w-full items-center">
-            <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#8FD0EF]"></span>
-            <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-              <span> Mobile </span>
-              <span> 45% </span>
-            </p>
-          </div>
-        </div>
-        <div className="sm:w-1/2 w-full px-8">
-          <div className="flex w-full items-center">
-            <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#0FADCF]"></span>
-            <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-              <span> Unknown </span>
-              <span> 12% </span>
-            </p>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ import classReducer from '../features/class/classSlice';
 import languageReducer from '../features/language/languageSlice';
 import studentResultPublicViewReducer from '../features/studentResultPublicView/studentResultPublicViewSlice';
 import requestHandelerReducer from '../features/requestHandeler/requestHandelerSlice';
-import loadingReducer from '../features/loading/loadingSlice';
+import studentReducer from '../features/student/studentSlice';
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -18,7 +18,7 @@ const store = configureStore({
     language: languageReducer,
     studentResultPublicView: studentResultPublicViewReducer,
     requestHandeler: requestHandelerReducer,
-    loading: loadingReducer,
+    student: studentReducer,
   },
 });
 

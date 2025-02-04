@@ -20,8 +20,139 @@ const ResultTable = () => {
     }, [studentResult])
 
     return (
-        <div className="pt-[80px] hidden_in_print w-full min-h-screen bg-[#f9f9f9] overflow-auto">
-            <table className="mx-auto" width={750} border={0} align="center" cellPadding={0} cellSpacing={0}>
+        <div className="pt-[80px] pb-[80px] hidden_in_print w-full min-h-screen bg-[#f9f9f9]">
+            {/* flex justify-center */}
+            <div className=" bg-white font-SolaimanLipi w-[750px] max-w-full mx-auto pr-[0px]">
+                <div className="w-full block bg-white">
+
+                    <div className="flex-1">
+                        <div className="flex items-center flex-col bg-theme-color md:bg-white md:flex-row">
+                            <div className="w-[80px] h-[80px] md:w-[140px] md:h-[140px] mt-6 md:mt-0  flex items-center justify-center bg-white rounded-full overflow-hidden">
+                                {logo ? <img src={logo} alt="Logo" className="max-w-full max-h-full" /> : null}
+                            </div>
+
+                            <div className="flex-1 bg-theme-color w-full">
+                                <div className="flex justify-end">
+                                    <div className="w-full text-center">
+                                        <h1 className="text-white text-[32px] pb-4">
+                                            {bnBijoy2Unicode(studentResult?.InstitutionName)}
+                                        </h1>
+                                    </div>
+                                </div>
+                                <div className="bg-theme-color text-center">
+                                    <p className="text-white">{bnBijoy2Unicode(studentResult?.Address)}</p>
+                                </div>
+
+                                <div className="text-center py-3">
+                                    <p className="text-white mb-0">{bnBijoy2Unicode(studentResult?.ExamName)}</p>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div className="bg-white px-[5px]">
+                    <div className="flex flex-col items-center">
+                        <div className="w-full flex justify-between my-5 px-2">
+
+                            <div className="space-y-4">
+                                <div className="flex items-center space-x-2">
+                                    <p className="font-semibold text-[16px]">
+                                        {bnBijoy2Unicode(studentResult?.StudentIDLabel)}:
+                                    </p>
+                                    <p>{studentResult?.UserCode}</p>
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <p className="font-semibold text-[16px]">
+                                        {bnBijoy2Unicode(studentResult?.ClassNameLabel)}:
+                                    </p>
+                                    <p className="text-[16px]">{bnBijoy2Unicode(studentResult?.SubClass)}</p>
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <p className="font-semibold text-[16px]">প্রাপ্তি বিভাগ:</p>
+                                    <p className="text-[16px]">{bnBijoy2Unicode(studentResult?.Division)}</p>
+                                </div>
+
+
+                            </div>
+
+                            <div className="space-y-4">
+                                <div className="flex items-center space-x-2">
+                                    <p className="font-semibold text-[16px]">নাম:</p>
+                                    <p className="text-[16px]">{bnBijoy2Unicode(studentResult?.UserName)}</p>
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <p className="font-semibold text-[16px]">পিতার নাম:</p>
+                                    <p className="text-[16px]">{bnBijoy2Unicode(studentResult?.FatherName)}</p>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <p className="font-semibold text-[16px]">জম্ন তারিখ:</p>
+                                    <p className="text-[16px]">{bnBijoy2Unicode(studentResult?.DateOfBirth)}</p>
+                                </div>
+                            </div>
+
+                            
+                        </div>
+                    </div>
+                    <table
+                        width="100%"
+                        border={0}
+                        cellSpacing={0}
+                        cellPadding={0}
+                        className="border-collapse border border-black">
+                        <thead>
+                            <tr>
+                                <th className="text-semibold text-[16px] border border-black h- " bgcolor="#ffffff">ক্রমিক নং</th>
+                                <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">বিষয়</th>
+                                <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">পূর্ণমান</th>
+                                <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">পাশ নম্বর</th>
+                                <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">সর্বোচ্চ প্রাপ্ত নম্বর</th>
+                                <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">প্রাপ্ত নম্বর</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {Array.from({ length: studentResult.SubSonkha }).map((_, index) => (
+                                <tr>
+                                    <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(String(index + 1))}</td>
+                                    <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(studentResult[`Subject${index + 1}`])}</td>
+                                    <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(String(studentResult?.DivisionTopNumber))}</td>
+                                    <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(String(studentResult[`PassNumber${index + 1}`]))}</td>
+                                    <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(String(studentResult[`TN${index + 1}`]))}</td>
+                                    <td className="text-[16px] border border-black h-[36px] pl-4 " bgcolor="#ffffff">{bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}</td>
+                                </tr>
+                            ))}
+
+                        </tbody>
+                    </table>
+
+                    <div className="flex justify-center mt-[25px]">
+                        <div className="w-full">
+                            <div className="flex justify-between items-center border border-black p-4 font-bold">
+                                <div className="flex items-center space-x-2 ">
+                                    <p className="text-[16px]">মেধা স্থান:</p>
+                                    <p>{bnBijoy2Unicode(String(studentResult?.Positions))}</p>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <p className="text-[16px]">গড়:</p>
+                                    <p>{bnBijoy2Unicode(String(studentResult?.Average))}</p>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <p className="text-[16px]">মোট নম্বর:</p>
+                                    <p>{bnBijoy2Unicode(String(studentResult?.Total))}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            {/* <table className="mx-auto" width={750} border={0} align="center" cellPadding={0} cellSpacing={0}>
                 <tbody>
                     <tr>
                         <td>
@@ -350,9 +481,7 @@ const ResultTable = () => {
                                         </td>
                                     </tr>
                                     <tr>
-                                        {/* <td align="left" valign="top" bgcolor="#ffffff" height={40}>
-                                            &nbsp;
-                                        </td> */}
+
                                         <td>
                                             <table width="100%"
                                                 border={0}
@@ -388,16 +517,10 @@ const ResultTable = () => {
                                                         </table>
                                                     </td>
                                                 </tr>
-                                                {/* <tr>
-                                                    <td className="pl-6">মেধা স্থান:</td>
-                                                    <td>গড়:</td>
-                                                    <td>মোট নম্বর:</td>
-                                                </tr> */}
+
                                             </table>
                                         </td>
-                                        {/* <td align="left" valign="top" bgcolor="#ffffff" height={40}>
-                                            &nbsp;
-                                        </td> */}
+
                                     </tr>
                                     <tr>
                                         <td align="left" valign="top" bgcolor="#ffffff" width={20}>
@@ -412,7 +535,7 @@ const ResultTable = () => {
 
 
                 </tbody>
-            </table>
+            </table> */}
         </div>
     );
 };

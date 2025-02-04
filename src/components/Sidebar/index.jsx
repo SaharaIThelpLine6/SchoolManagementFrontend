@@ -96,7 +96,7 @@ const Sidebar = ({ menuList, title }) => {
     <div className="flex">
       {/* Toggle Button */}
       <button
-        className="md:hidden fixed top-4 left-4 z-50 bg-transparent text-[#EDEDED] p-2 rounded-md"
+        className="md:hidden fixed top-4 left-4 z-50 bg-transparent text-[#000000] p-2 rounded-md"
         onClick={toggleSidebar}
       >
         {isOpen ? '✖' : '☰'}
@@ -149,7 +149,7 @@ const Sidebar = ({ menuList, title }) => {
           </div>
 
 
-          <div className=" flex flex-col overflow-y-auto duration-300 ease-linear flex-1">
+          <div className=" flex flex-col duration-300 ease-linear flex-1">
             <nav>
               <ul className="mb-6 flex flex-col gap-1.5">
                 {menuList.map((menu) => (

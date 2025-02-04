@@ -29,7 +29,7 @@ const Marksheet = () => {
     }, [studentResult])
     return (
         <div className="">
-            <div className=" w-[750px] h-[1076px] relative bg-white ">
+            <div className=" w-[750px] h-[1000px] relative bg-white ">
                 <div className="pt-4 pb-1 px-8 bg-white">
                     {/*Logo and Heading start*/}
                     <div className="flex">
@@ -85,14 +85,14 @@ const Marksheet = () => {
                                 <tbody className="border border-black w-full">
                                     {Array.from({ length: studentResult.SubSonkha }).map((_, index) => (
                                         <tr key={index}>
-                                            <td className="text-start pl-2">{bnBijoy2Unicode(studentResult[`Division${index+1}`])}</td>
+                                            <td className="text-start pl-2">{bnBijoy2Unicode(studentResult[`Division${index + 1}`])}</td>
                                             <td className="w-12 text-end">:</td>
-                                            <td className="pl-3">{bnBijoy2Unicode(String(studentResult[`DivisionNumber${index+1}`]))} X</td>
-                                            <td className="pr-2">{bnBijoy2Unicode(String(studentResult?.SubSonkha))} = {bnBijoy2Unicode(String(studentResult?.SubSonkha * studentResult[`DivisionNumber${index+1}`]))}</td>
+                                            <td className="pl-3">{bnBijoy2Unicode(String(studentResult[`DivisionNumber${index + 1}`]))} X</td>
+                                            <td className="pr-2">{bnBijoy2Unicode(String(studentResult?.SubSonkha))} = {bnBijoy2Unicode(String(studentResult?.SubSonkha * studentResult[`DivisionNumber${index + 1}`]))}</td>
                                         </tr>
 
                                     ))}
-                                   
+
                                 </tbody>
                             </table>
                         </div>
@@ -114,12 +114,12 @@ const Marksheet = () => {
                             <tbody className="text-center">
                                 {Array.from({ length: studentResult.SubSonkha }).map((_, index) => (
                                     <tr key={studentResult[`Subject${index + 1}`]} className="border border-black">
-                                        <td className="border border-black">{bnBijoy2Unicode(String(index + 1))}</td>
-                                        <td className="border border-black text-left">{bnBijoy2Unicode(studentResult[`Subject${index + 1}`])}</td>
-                                        <td className="border border-black">{bnBijoy2Unicode(String(studentResult?.DivisionTopNumber))}</td>
-                                        <td className="border border-black">{bnBijoy2Unicode(String(studentResult[`PassNumber${index + 1}`]))}</td>
-                                        <td className="border border-black">{bnBijoy2Unicode(String(studentResult[`TN${index + 1}`]))}</td>
-                                        <td className="border border-black">{bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}</td>
+                                        <td className="border border-black pl-2">{bnBijoy2Unicode(String(index + 1))}</td>
+                                        <td className="border border-black text-left pl-2">{bnBijoy2Unicode(studentResult[`Subject${index + 1}`])}</td>
+                                        <td className="border border-black pl-2">{bnBijoy2Unicode(String(studentResult?.DivisionTopNumber))}</td>
+                                        <td className="border border-black pl-2">{bnBijoy2Unicode(String(studentResult[`PassNumber${index + 1}`]))}</td>
+                                        <td className="border border-black pl-2">{bnBijoy2Unicode(String(studentResult[`TN${index + 1}`]))}</td>
+                                        <td className="border border-black pl-2">{bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}</td>
                                     </tr>
 
                                 ))}

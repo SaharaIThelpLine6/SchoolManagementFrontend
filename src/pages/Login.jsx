@@ -1,22 +1,34 @@
 import { useFormContext } from "react-hook-form";
 import DefaultInput from "../components/Forms/DefaultInput";
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { login } from "../features/auth/authSlice";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+const API_URL = import.meta.env.VITE_SERVER_URL;
+
 const Login = () => {
     const {
         handleSubmit
     } = useFormContext();
     const dispatch = useDispatch()
     const navigate = useNavigate();
+
+    const auth = useSelector((state) => state.auth); // Get auth state from Redux
+
+    useEffect(() => {
+        if (auth.token) {
+            navigate("/"); // Redirect to home if already logged in
+        }
+    }, [auth.token, navigate]);
+
     const onSubmit = async (data) => {
         console.log(data);
 
         try {
             // Make the POST request to the API
             const response = await axios.post(
-                'http://10.11.13.183:3000/api/users/login',
+                `${API_URL}/api/users/login`,
                 data,
                 {
                     headers: {

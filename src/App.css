@@ -10,6 +10,21 @@
     background-color: #d1d5db; /* Darker gray */
   }
 }
+.animation_label + label{
+  height: 100%;
+  z-index: 22;
+  pointer-events: none;
+}
+
+.animation_label:focus + label, .animation_label + label.active{
+  transform: translateY(-80%) !important;
+}
+
+  /* .table-container {
+    width: 100%;
+    overflow-x: auto;   
+  } */
+
 /* 
 :root {
   --loading-grey: #ededed;

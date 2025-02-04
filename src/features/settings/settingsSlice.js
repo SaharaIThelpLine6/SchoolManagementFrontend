@@ -1,11 +1,11 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { getSettingsData } from '../../utils/read/api';
+import { getSettingsData, getUserData } from '../../utils/read/api';
 
 export const fetchSettingsData = createAsyncThunk('settings/fetchSettingsData', async (_, { getState }) => {
     const token = localStorage.getItem('token');
     const state = getState();
     if (!token) throw new Error('Token is missing');
-    const [genderResponse, divisionResponse, codeSettingResponse, residentialResponse,permissionTypeResponse, studentRelationResponse, academicSessionResponse] = await Promise.all([
+    const [genderResponse, divisionResponse, codeSettingResponse, residentialResponse,permissionTypeResponse, studentRelationResponse, academicSessionResponse, userTypeResponse] = await Promise.all([
         getSettingsData(token, '/api/settings/gender'),
         getSettingsData(token, '/api/settings/division'),
         getSettingsData(token, '/api/settings/code_setting'),
@@ -13,6 +13,7 @@ export const fetchSettingsData = createAsyncThunk('settings/fetchSettingsData', 
         getSettingsData(token, '/api/settings/permission_type'),
         getSettingsData(token, '/api/settings/student_relation'),
         getSettingsData(token, '/api/settings/academic_session'),
+        getUserData(token, '/api/users/user_type'),
     ]);
     return {
         gender: genderResponse,
@@ -22,6 +23,7 @@ export const fetchSettingsData = createAsyncThunk('settings/fetchSettingsData', 
         permissionType: permissionTypeResponse,
         studentRelation: studentRelationResponse,
         academicSession: academicSessionResponse,
+        userType: userTypeResponse
     };
 });
 
@@ -52,6 +54,7 @@ export const fetchThanadata = createAsyncThunk("settings/fetchThanadata", async 
 const initialState = {
     gender: [],
     divition: [],
+    userType: [],
     district: {},
     thana: {},
     codeSetting: [],
@@ -87,7 +90,8 @@ const settingsSlice = createSlice({
                 state.residential = action.payload.residential;
                 state.permissionType = action.payload.permissionType;
                 state.studentRelation = action.payload.studentRelation;
-                state.academicSession = action.payload.academicSession
+                state.academicSession = action.payload.academicSession;
+                state.userType = action.payload.userType
             })
             .addCase(fetchSettingsData.rejected, (state, action) => {
                 state.status = 'failed';

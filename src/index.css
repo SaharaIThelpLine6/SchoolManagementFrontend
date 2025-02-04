@@ -4,40 +4,6 @@
 
 @layer utilities {
 
-    /* Chrome, Safari and Opera */
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-
-    .no-scrollbar {
-        -ms-overflow-style: none;
-        /* IE and Edge */
-        scrollbar-width: none;
-        /* Firefox */
-    }
-
-    /*width*/
-    ::-webkit-scrollbar {
-        width: 12px;
-    }
-
-    /*Track*/
-    ::-webkit-scrollbar-track {
-        border-radius: 20px;
-        background: #e2f8e7;
-    }
-
-    /*handle*/
-    ::-webkit-scrollbar-thumb {
-        border-radius: 20px;
-        background-color: #4b5563;
-    }
-
-    /*Handle on hover*/
-    ::-webkit-scrollbar-thumb:hover {
-        background-color: #7beca5;
-    }
-
     .chat-height {
         @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
     }

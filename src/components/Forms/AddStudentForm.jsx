@@ -31,7 +31,7 @@ const AddStudentForm = ({ pageTitle }) => {
     }
   };
   const dispatch = useDispatch();
-  const { gender, divition, district, thana, studentRelation, status, error } = useSelector((state) => state.settings);
+  const { gender, divition, district, thana, studentRelation,userType, status, error } = useSelector((state) => state.settings);
   const { token } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const {
@@ -43,7 +43,7 @@ const AddStudentForm = ({ pageTitle }) => {
     formState: { errors },
   } = useFormContext();
 
-  const [userType, setUserType] = useState([]);
+  // const [userType, setUserType] = useState([]);
   const [userMainDetails, setUserMainDetails] = useState([]);
   const [DivisionID, DistrictID, DivisionID2, DistrictID2, permanentPoliceStationID, sameAddress, TransientPost, TransientVill] = watch(["DivisionID", "DistrictID", "DivisionID2", "DistrictID2", "permanentPoliceStationID", "sameAddress", "TransientPost", "TransientVill"])
   const isSameAddressRef = useRef(false);
@@ -179,8 +179,10 @@ const AddStudentForm = ({ pageTitle }) => {
       setValue("DistrictID2", DistrictID);
       setValue("TransientPoliceStationID", permanentPoliceStationID);
 
-      setValue("permanentPost", TransientPost)
-      setValue("permanentVill", TransientVill)
+      // setValue("permanentPost", TransientPost)
+      // setValue("permanentVill", TransientVill)
+      setValue("TransientPost", watch("permanentPost"));
+      setValue("TransientVill", watch("permanentVill"));
     }
     // }
   }, [sameAddress, setValue, DivisionID, DistrictID, permanentPoliceStationID, TransientVill, editMode])
@@ -188,25 +190,26 @@ const AddStudentForm = ({ pageTitle }) => {
   useEffect(() => {
     dispatch({ type: "SET_PAGE_TITLE", payload: pageTitle });
     dispatch(fetchSettingsData());
+    
   }, [pageTitle, dispatch]);
 
 
-  useEffect(() => {
-    const dataFeatch = async () => {
-      try {
-        const data = await getUserType();
-        const transformedData = data.map(item => ({
-          id: String(item.ID),
-          value: item.TypeName
-        }));
-        setUserType(transformedData)
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    }
+  // useEffect(() => {
+  //   const dataFeatch = async () => {
+  //     try {
+  //       const data = await getUserType();
+  //       const transformedData = data.map(item => ({
+  //         id: String(item.ID),
+  //         value: item.TypeName
+  //       }));
+  //       setUserType(transformedData)
+  //     } catch (error) {
+  //       console.error('Error fetching data:', error);
+  //     }
+  //   }
 
-    dataFeatch();
-  }, [])
+  //   dataFeatch();
+  // }, [])
 
   useEffect(() => {
     if (defaultData && editMode === 1) {
@@ -232,7 +235,7 @@ const AddStudentForm = ({ pageTitle }) => {
 
       Promise.all(promises)
         .then(() => {
-          console.log(defaultFormData);
+          // console.log(defaultFormData);
           reset(defaultFormData);
           dispatch(setEditMode(2));
         })
@@ -251,7 +254,7 @@ const AddStudentForm = ({ pageTitle }) => {
     // console.log(district);
     // console.log(DistrictID);
     // console.log(thana);
-    // console.log(studentRelation);
+    // console.log(userType);
 
   }
   const onSubmit = async (data) => {
@@ -293,8 +296,8 @@ const AddStudentForm = ({ pageTitle }) => {
               }
               options={userType}
               registerKey={"UserTypeID"}
-              valueField={"id"}
-              nameField={"value"}
+              valueField={"ID"}
+              nameField={"TypeName"}
             />
           </div>
 
@@ -486,11 +489,11 @@ const AddStudentForm = ({ pageTitle }) => {
             <DefaultGreen submitButtonGreen={newButton} />
           </div>
           <div className="font-bold text-slate-800  font-noto text-[16px] absolute left-[90%]">
-            <select className="border-2 border-slate-300 rounded-lg py-0.5 px-4 bg-transparent" onChange={(e) => dispatch(setItemsPerPage(e.target.value))}>
+            <select className="border-2 border-slate-300 rounded-lg py-0.5 px-4 bg-transparent" onChange={(e) => dispatch(setItemsPerPage(e.target.value))} defaultValue={"2"}>
               <option value="2">2</option>
               <option value="10">10</option>
               <option value="20">20</option>
-              <option value="50" selected>50</option>
+              <option value="50">50</option>
             </select>
           </div>
         </div>

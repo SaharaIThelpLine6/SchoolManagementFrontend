@@ -39,7 +39,8 @@ const Translate = (key) => {
         'Serial': "সিরিয়াল",
         'Sections': 'সাব ক্লাস',
         'Bangla': 'বাংলা',
-        'Arabic': "আরবি"
+        'Arabic': "আরবি",
+        'User': 'ইউজার',
     };
     return currectLanguage === 'bn' ? englishToBangla[key] || key : key;
 };

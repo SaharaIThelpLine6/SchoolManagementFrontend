@@ -44,7 +44,7 @@ const PublicLayout = () => {
             )}
             {isOpen && (
                 <button
-                    className="fixed top-3 right-4 z-9999 bg-slate-500 text-white p-1 rounded-sm hidden_in_print"
+                    className="fixed top-3 right-4 z-9999 text-white p-1 rounded-sm hidden_in_print"
                     onClick={toggleSidebar}
                 >
                     ✖
@@ -55,16 +55,16 @@ const PublicLayout = () => {
 
 
             {/*For mobile display start*/}
-            <div className='fixed flex items-center justify-between z-10 lg:hidden px-4 w-full h-14 text-left py-[6px] bg-theme-color hidden_in_print'>
+            <div className='fixed flex items-center justify-between z-10 lg:hidden px-4 w-full h-[70px] text-left py-[6px] bg-theme-color hidden_in_print'>
                 <button
-                    className="lg:hidden pt-5 left-4 z-50 bg-transparent text-white p-2 rounded-md hidden_in_print"
+                    className="lg:hidden left-4 z-50 bg-transparent text-white p-2 rounded-md hidden_in_print"
                     onClick={toggleSidebar}
                 >
                     {isOpen ? '✖' : '☰'}
 
                 </button>
                 <div className=''>
-                    <img src={bufferConveter(schoolData?.Logo?.data)} alt={schoolData?.InstitutionName} className="w-[66px] h-[45px]" />
+                    <img src={bufferConveter(schoolData?.Logo?.data)} alt={schoolData?.InstitutionName} className="w-[60px] h-[60px] object-cover" />
                 </div>
             </div>
             {/*For mobile display end*/}
