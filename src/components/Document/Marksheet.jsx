@@ -28,7 +28,7 @@ const Marksheet = () => {
         }
     }, [studentResult])
     return (
-        <div className="">
+        <div className="portrait-page">
             <div className=" w-[750px] h-[1000px] relative bg-white ">
                 <div className="pt-4 pb-1 px-8 bg-white">
                     {/*Logo and Heading start*/}

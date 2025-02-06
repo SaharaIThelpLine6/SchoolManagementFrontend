@@ -15,7 +15,7 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
     return (
         <div >
             {classResult?.length > 0 ? (
-                <div className="w-[1076px] h-[750px] mx-auto relative bg-white font-SolaimanLipi">
+                <div className="w-[1076px] h-[750px] mx-auto relative bg-white font-SolaimanLipi landscape-page">
                     <div className="pb-1 px-2 bg-white">
                         {/*Heading part start*/}
                         <div className="flex justify-around">

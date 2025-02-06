@@ -70,12 +70,38 @@
   border-radius: 4px;
   animation-delay: .06s;
 } */
+
 @font-face {
   font-family: "SolaimanLipiNormal";
   src: local('SolaimanLipiNormal'), local('solaimanlipi'), url('./assets/fonts/solaimanlipi.woff') format('woff');
   /* font-display: swap;
   unicode-range: U+0980-09FF; */
   /* local('SolaimanLipiNormal'), url('solaimanlipi.woff') format('woff') */
+}
+
+/* @font-face {
+  font-family: 'Kalpurush';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url('./assets/fonts/kalpurush/kalpurush-v0.256.eot');
+  src: url('./assets/fonts/kalpurush/kalpurush-v0.256.woff') format('woff'),
+    url('./assets/fonts/kalpurush/kalpurush-v0.256.ttf') format('truetype'),
+    url('./assets/fonts/kalpurush/kalpurush-v0.256.svg#AdorshoLipi') format('svg'),
+    url('./assets/fonts/kalpurush/kalpurush-v0.256.eot?#iefix') format('embedded-opentype');
+  unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
+} */
+@font-face {
+  font-family: 'Kalpurush';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url('/assets/fonts/kalpurush-v0.256.woff') format('woff'),
+       url('/assets/fonts/kalpurush-v0.256.ttf') format('truetype'),
+       url('/assets/fonts/kalpurush-v0.256.svg#AdorshoLipi') format('svg'),
+       url('/assets/fonts/kalpurush-v0.256.eot?#iefix') format('embedded-opentype');
 }
 
 
@@ -101,6 +127,16 @@ tr:nth-child(even) {background-color: #F0F0F0;}
     margin-top: 10px;
     margin-bottom: 0;
     background-color: white;
+  }
+  @page portrait-page {
+    size: portrait;
+  }
+  @page landscape-page {
+    size: landscape;
+  }
+  body {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
   .print_canvas{
     display: block;
