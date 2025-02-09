@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useFormContext } from 'react-hook-form';
+import useTranslate from '../../utils/Translate';
 
 const DefaultSelect = ({ label, type, options, registerKey, require, valueField, nameField }) => {
   const {
     register,
     formState: { errors },
   } = useFormContext();
+
+  const translate = useTranslate()
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -41,9 +44,10 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
             name={registerKey}
             {...register(registerKey, { required: require ? require : false, valueAsNumber: true })}
             onClick={toggleDropdown}
+            defaultValue={""}
             className={`relative z-20  w-full appearance-none rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition focus:border-primary active:border-primary`}
           >
-            <option value="" className="text-body">Select</option>
+            <option value="" className="text-body">{translate("Select")}</option>
             {
               options && options.map((option, index) => (
                 <option key={option[valueField]} value={option[valueField]} className="text-body">
@@ -56,8 +60,9 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
             {...register(registerKey, { required: require ? require : false })}
             onClick={toggleDropdown}
             className={`relative z-20 w-full appearance-none rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition focus:border-primary active:border-primary`}
+            defaultValue={""}
           >
-            <option value="" className="text-body">Select</option>
+            <option value="" className="text-body">{translate("Select")}</option>
             {
               options && options.map((option, index) => (
                 <option key={option[valueField]} value={option[valueField]} className="text-body">
@@ -103,6 +108,7 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
           </svg>
         </span>
       </div>
+      {errors[registerKey] && errors[registerKey].message}
     </div>
   );
 };

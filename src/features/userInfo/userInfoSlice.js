@@ -105,7 +105,11 @@ const userInfoSlice = createSlice({
     reducers: {
         setEditMode: (state, action) => {
             state.editMode = action.payload;
+        },
+        setDefaultValue: (state, action) => {
+            state.defaultFormValue = action.payload
         }
+
     },
     extraReducers: (builder) => {
         builder
@@ -186,5 +190,5 @@ const userInfoSlice = createSlice({
     }
 });
 
-export const { setEditMode } = userInfoSlice.actions;
+export const { setEditMode, setDefaultValue } = userInfoSlice.actions;
 export default userInfoSlice.reducer;

@@ -14,7 +14,8 @@ export default {
       fontFamily: {
         'lato': '"Lato", serif',
         'SolaimanLipi': 'SolaimanLipiNormal, serif',
-        'noto': '"Noto Serif Bengali", serif'
+        'noto': '"Noto Serif Bengali", serif',
+        'kalpurush': "'Kalpurush', sans-serif"
       },
       boxShadow: {
         'sub_menu': '0 0 15px -5px rgba(0, 0, 0, 0.2)',
@@ -41,12 +42,12 @@ export default {
           ...colors.red,
           DEFAULT: '#FB5454',
         },
-        body: '#64748B',
-        bodydark: '#AEB7C0',
-        bodydark1: '#DEE4EE',
-        bodydark2: '#8A99AF',
-        primary: '#3C50E0',
-        secondary: '#80CAEE',
+        // body: '#64748B',
+        // bodydark: '#AEB7C0',
+        // bodydark1: '#DEE4EE',
+        // bodydark2: '#8A99AF',
+        // primary: '#3C50E0',
+        // secondary: '#80CAEE',
         stroke: '#E2E8F0',
         gray: {
           ...colors.gray,

@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getUserData } from "../../utils/read/api";
-import { updateInData } from "../../utils/update/api";
 
 export const fetchStudentData = createAsyncThunk("student/fetchStudentData", async () => {
     const token = localStorage.getItem('token');
@@ -8,33 +7,25 @@ export const fetchStudentData = createAsyncThunk("student/fetchStudentData", asy
     const [studentListResponse] = await Promise.all([
         getUserData(token, `/api/students/view_students`),
     ]);
-    console.log(studentListResponse);
-    
     return {
         studentList: studentListResponse,
     };
 });
 
-// export const updateClassSerial = createAsyncThunk("class/updateClassSerial",
-//     async ({ id, data }, { rejectWithValue }) => {
-//         try {
-//             const token = localStorage.getItem("token");
-//             if (!token) throw new Error("Token is missing");
-
-//             console.log("Token verified");
-//             console.log("Data to update:", data);
-//             const response = await updateInData(1, data, `/api/academic/update_serial`);
-//             return { id, data: response };
-//         } catch (error) {
-//             console.error("Error updating class serial:", error);
-//             return rejectWithValue(error.message);
-//         }
-//     }
-// );
-
+export const fetchUserOnlyStudentData = createAsyncThunk("student/fetchUserOnlyStudentData", async () => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token is missing');
+    const [studentListResponse] = await Promise.all([
+        getUserData(token, `/api/students/view_useronly_students`),
+    ]);
+    return {
+        userOnlyStudents: studentListResponse,
+    };
+});
 
 const initialState = {
     studentList: [],
+    userOnlyStudents:[],
     editMode: 0,
     status: 'idle',
     error: null,
@@ -59,6 +50,18 @@ const classSlice = createSlice({
                 state.studentList = action.payload.studentList;
             })
             .addCase(fetchStudentData.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            .addCase(fetchUserOnlyStudentData.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(fetchUserOnlyStudentData.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.userOnlyStudents = action.payload.userOnlyStudents;
+            })
+            .addCase(fetchUserOnlyStudentData.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })

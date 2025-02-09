@@ -8,6 +8,7 @@ import languageReducer from '../features/language/languageSlice';
 import studentResultPublicViewReducer from '../features/studentResultPublicView/studentResultPublicViewSlice';
 import requestHandelerReducer from '../features/requestHandeler/requestHandelerSlice';
 import studentReducer from '../features/student/studentSlice';
+import modalReducer from '../features/modal/modalSlice';
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -19,6 +20,8 @@ const store = configureStore({
     studentResultPublicView: studentResultPublicViewReducer,
     requestHandeler: requestHandelerReducer,
     student: studentReducer,
+    modal: modalReducer,
+
   },
 });
 

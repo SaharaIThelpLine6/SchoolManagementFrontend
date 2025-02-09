@@ -3,9 +3,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import parse from 'html-react-parser';
 import Logo from '/saharaItlogo.png';
-import Translate from '../../utils/Translate';
+import useTranslate from '../../utils/Translate';
 
 const Sidebar = ({ menuList, title }) => {
+  const translate = useTranslate()
   const location = useLocation();
   const { pathname } = location;
   // const [hasChild, setHasChild] = useState(true)
@@ -14,33 +15,33 @@ const Sidebar = ({ menuList, title }) => {
   const [isResizing, setIsResizing] = useState(false); // Resizing state
   const [sidebarWidth, setSidebarWidth] = useState(360); // Sidebar width
   const [activeMenu, setActiveMenu] = useState(null); // Active menu
-  
+
   const [isOpen, setIsOpen] = useState(false); // Sidebar toggle for small screens
-  
+
   const startResizing = useCallback((mouseDownEvent) => {
     setIsResizing(true);
   }, []);
 
-    const stopResizing = useCallback(() => {
+  const stopResizing = useCallback(() => {
     setIsResizing(false);
   }, []);
 
 
   // Handle resizing logic
- 
+
   const handleMouseMove = (e) => {
     if (!isResizing) return;
     const newWidth = e.clientX - sidebarRef.current.getBoundingClientRect().left;
     setSidebarWidth(Math.max(64, newWidth)); // Minimum width 64px
   };
- 
+
 
   const resize = useCallback(
     (mouseMoveEvent) => {
       if (isResizing) {
         setSidebarWidth(
           mouseMoveEvent.clientX -
-            sidebarRef.current.getBoundingClientRect().left
+          sidebarRef.current.getBoundingClientRect().left
         );
       }
     },
@@ -78,7 +79,7 @@ const Sidebar = ({ menuList, title }) => {
     setActiveMenu(activeMenu?.id === menu.id ? null : menu); // Toggle submenu
   };
 
-  
+
 
   // Attach mousemove and mouseup events during resizing
   useEffect(() => {
@@ -118,10 +119,10 @@ const Sidebar = ({ menuList, title }) => {
         </button>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar fixed md:relative */}
       <aside
         ref={sidebarRef}
-        className={`fixed md:relative h-full transition-all duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`h-full transition-all duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
           } md:translate-x-0`}
         style={{
           width: `${activeMenu?.subMenu ? sidebarWidth : 64}px`,
@@ -134,17 +135,17 @@ const Sidebar = ({ menuList, title }) => {
           background: '#ffffff',
           boxShadow: '-8px 2px 22px -7px rgba(0, 0, 0, 0.25)',
           borderRadius: '10px 0px 0px 10px',
-          zIndex: 99,
+          zIndex: 9,
         }}
-    onMouseDown={(e) => e.preventDefault()
+        onMouseDown={(e) => e.preventDefault()
 
-    }>
+        }>
 
         {/* Main Menu Area */}
         <div className="main_menu_area w-[64px] bg-[#333] h-full flex flex-col">
           <div className="flex items-center justify-center py-5 bg-[#333] z-10">
             <NavLink to="/" className="w-full flex justify-center">
-            <img src={Logo} alt="Logo" className='w-12 h-[60px] rounded-sm'/>
+              <img src={Logo} alt="Logo" className='w-12 h-[60px] rounded-sm' />
             </NavLink>
           </div>
 
@@ -156,7 +157,7 @@ const Sidebar = ({ menuList, title }) => {
                   <li key={menu.id}>
                     <NavLink
                       to={menu.route}
-                      className={`group relative flex items-center gap-1 rounded-sm py-2 text-[12px] font-semibold flex-col justify-center duration-300 ease-in-out ${pathname === '/' || menu.route === '/'
+                      className={`group relative flex items-center gap-1 rounded-sm py-2 text-[16px] font-normal font-SolaimanLipi flex-col justify-center duration-300 ease-in-out ${pathname === '/' || menu.route === '/'
                         ? pathname === menu.route
                           ? "bg-black text-[#6ad965]"
                           : "text-[#f6f6f6]"
@@ -170,7 +171,7 @@ const Sidebar = ({ menuList, title }) => {
                       <span
                         className={pathname.includes(menu.route) ? 'text-white' : ''}
                       >
-                        {Translate(menu.name)}
+                        {translate(menu.name)}
                       </span>
                     </NavLink>
                   </li>
@@ -188,15 +189,15 @@ const Sidebar = ({ menuList, title }) => {
             <h1 className="text-theme-dark text-[20px] font-lato font-bold pl-3">{title}</h1>
             <ul className="flex flex-col mt-[20px]">
               {activeMenu.subMenu.map((subItem) => (
-              <li key={subItem.id} className={`pl-1 ${pathname.includes(subItem.route)
-                ? "shadow-sub_menu bg-[#f9f9f9] rounded-[4px]"
-                : ""
-                }`}>
+                <li key={subItem.id} className={`pl-1 ${pathname.includes(subItem.route)
+                  ? "shadow-sub_menu bg-[#f9f9f9] rounded-[4px]"
+                  : ""
+                  }`}>
                   <NavLink
                     to={`${activeMenu.route}${subItem.route}`}
-                  className={`flex items-center gap-2 p-2 rounded-md text-[14px] `}
-                    >
-                  <span className={`${pathname.includes(subItem.route) ? 'text-[#6ad965]' : "text-theme-dark"}`}>{subItem.icon ? parse(subItem.icon) : null}</span>
+                    className={`flex items-center gap-2 p-2 rounded-md text-[14px] `}
+                  >
+                    <span className={`${pathname.includes(subItem.route) ? 'text-[#6ad965]' : "text-theme-dark"}`}>{subItem.icon ? parse(subItem.icon) : null}</span>
                     <span>{subItem.name}</span>
                   </NavLink>
                 </li>
@@ -204,11 +205,11 @@ const Sidebar = ({ menuList, title }) => {
             </ul>
 
           </div>
-      )}
-      {activeMenu && activeMenu.subMenu ? (
-        <div className="app-sidebar-resizer h-full w-[10px] after:content[''] after:relative after:w-[5px] after:h-[16px] after:top-1/2 after:-translate-y-1/2 after:border-x after:border-x-[#cccccc] bg-[#ededed] after:block" onMouseDown={startResizing} style={{flexGrow: 0, flexShrink: 0, flexBasis: '6px', justifySelf: 'flex-end', cursor: "ew-resize", resize: "horizontal"}} />
-      ): null}
-       
+        )}
+        {activeMenu && activeMenu.subMenu ? (
+          <div className="app-sidebar-resizer h-full w-[10px] after:content[''] after:relative after:w-[5px] after:h-[16px] after:top-1/2 after:-translate-y-1/2 after:border-x after:border-x-[#cccccc] bg-[#ededed] after:block" onMouseDown={startResizing} style={{ flexGrow: 0, flexShrink: 0, flexBasis: '6px', justifySelf: 'flex-end', cursor: "ew-resize", resize: "horizontal" }} />
+        ) : null}
+
       </aside>
     </div>
   );

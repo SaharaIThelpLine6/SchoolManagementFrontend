@@ -27,8 +27,8 @@ import { insertData } from "../../utils/create/api";
 import { useFormContext } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { cssTransition, toast } from "react-toastify";
-import Translate from "../../utils/Translate";
 import { setReqLoading } from "../../features/requestHandeler/requestHandelerSlice";
+import useTranslate from "../../utils/Translate";
 
 const bounce = cssTransition({
     enter: 'animate__animated animate__bounceIn',
@@ -89,6 +89,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
     const [rows, setRows] = useState(tableRows);
     const { classList } = useSelector((state) => state.class);
     const { reqLoading } = useSelector((state) => state.requestHandeler);
+    const translate = useTranslate()
 
     const [dataUpdate, setDataUpdate] = useState(false);
     const editMode = useSelector((state) => state.class.editMode);
@@ -218,7 +219,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
         <div className="p-4">
             <div className="flex gap-3 flex-wrap lg:flex-nowrap">
                 <div className="w-full lg:w-[40%] lg:h-fit lg:sticky lg:top-0  border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
-                    <h1 className="font-semibold text-lg text-theme-dark font-SolaimanLipi mb-4">{Translate(tableTitle)}</h1>
+                    <h1 className="font-semibold text-lg text-theme-dark font-SolaimanLipi mb-4">{translate(tableTitle)}</h1>
                     <form onSubmit={handleSubmit(onSubmit)} className="font-SolaimanLipi">
                         <div className="mb-3">
                             <ThemeInputBox1 label={field} registerKey={"ClassName"} require={"Class Name is require"} type={"text"} />
@@ -230,7 +231,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
                             <ThemeInputBox1 label={"عربي"} registerKey={"ArabicClass"} type={"text"} />
                         </div>
                         <button type="submit" className="bg-theme-color transation ease-linear font-bold font-SolaimanLipi duration-500 inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-[#121212]">
-                            {Translate("Save")}
+                            {translate("Save")}
                         </button>
                         <button type="button" onClick={() => {
                             setEditMode(0);
@@ -240,7 +241,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
                                 ArabicClass: "",
                             })
                         }} className="bg-[#121212] transation ease-linear duration-500 font-bold font-SolaimanLipi inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-slate-700 ms-[20px]">
-                            {Translate("Add New")}
+                            {translate("Add New")}
                         </button>
                     </form>
                 </div>
@@ -258,7 +259,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
                                         <th></th>
                                         {tableHeader.map((title) => (
                                             <th key={title} className="py-2 px-3">
-                                                {Translate(title)}
+                                                {translate(title)}
                                             </th>
                                         ))}
                                         <th>Actions</th>

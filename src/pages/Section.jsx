@@ -25,11 +25,11 @@ import { updateInData } from "../utils/update/api";
 import { insertData } from "../utils/create/api";
 import { useFormContext } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import Translate from "../utils/Translate";
 import ThemeInputBox1 from "../components/Forms/ThemeInputBox1";
 import { setPageName } from "../features/auth/authSlice";
 import SelectBox1 from "../components/Forms/SelectBox1";
 import { fetchSettingsData } from "../features/settings/settingsSlice";
+import useTranslate from "../utils/Translate";
 
 
 const RowDragHandleCell = ({ rowId }) => {
@@ -83,6 +83,7 @@ const DraggableRow = ({ row, headers, statename }) => {
 };
 
 const Section = ({ pageTitle }) => {
+    const translate = useTranslate()
     const [rows, setRows] = useState([]);
     const tableHeader = ["Class Serial", "Class", "Section Serial", "Section", "English", "Arabic"];
     const { classList, subClassList, editMode, status, error } = useSelector((state) => state.class);
@@ -230,7 +231,7 @@ const Section = ({ pageTitle }) => {
             {/* <SortableCompo /> */}
             <div className="flex gap-3 flex-wrap lg:flex-nowrap">
                 <div className="w-full lg:w-[40%] lg:h-fit lg:sticky lg:top-0  border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
-                    <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">{Translate("Add Section")}</h1>
+                    <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">{translate("Add Section")}</h1>
 
                     <form onSubmit={handleSubmit(onSubmit)}>
                         {/* <div className="mb-4">
@@ -265,7 +266,7 @@ const Section = ({ pageTitle }) => {
                         </div>
 
                         <button type="submit" className="bg-theme-color transation ease-linear font-bold duration-500 inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-[#121212] font-SolaimanLipi">
-                            {Translate("Save")}
+                            {translate("Save")}
                         </button>
                         <button type="button" onClick={() => {
                             setEditMode(0);
@@ -276,7 +277,7 @@ const Section = ({ pageTitle }) => {
                                 ClassID: ""
                             })
                         }} className="bg-[#121212] transation ease-linear duration-500 font-bold inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-slate-700 ms-[20px] font-SolaimanLipi">
-                            {Translate("Add New")}
+                            {translate("Add New")}
                         </button>
                     </form>
                 </div>

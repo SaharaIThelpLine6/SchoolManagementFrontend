@@ -26,8 +26,6 @@ export const getUserType = async () => {
 
 };
 export const verifyToken = async (token) => {
-  console.log(token);
-
   const configuration = {
     method: "POST",
     url: `${API_URL}/api/users/authenticate`,
@@ -41,7 +39,7 @@ export const verifyToken = async (token) => {
     return res.data;
   } catch (error) {
     console.error("Error in token verification:", error);
-    throw new Error("Token verification failed");  // Throws an error if the request fails
+    throw new Error("Token verification failed"); 
   }
 };
 

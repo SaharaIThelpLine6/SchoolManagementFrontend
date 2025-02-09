@@ -10,7 +10,7 @@ import { getUserType } from "../../utils/read/api";
 import { fetchSettingsData, fetchDidata, fetchThanadata } from "../../features/settings/settingsSlice";
 import { insertUserInfo } from "../../utils/create/api";
 import { useNavigate } from "react-router-dom";
-import { setEditMode } from "../../features/userInfo/userInfoSlice";
+import { fetchSingleUser, setEditMode } from "../../features/userInfo/userInfoSlice";
 import { updateUserInfo } from "../../utils/update/api";
 import DefaultGreen from "../Button/DefaultGreen";
 import { setItemsPerPage } from "../../features/pagination/paginationSlice";
@@ -39,6 +39,7 @@ const AddStudentForm = ({ pageTitle }) => {
     handleSubmit,
     watch,
     setValue,
+    getValues,
     reset,
     formState: { errors },
   } = useFormContext();
@@ -188,10 +189,56 @@ const AddStudentForm = ({ pageTitle }) => {
   }, [sameAddress, setValue, DivisionID, DistrictID, permanentPoliceStationID, TransientVill, editMode])
 
   useEffect(() => {
-    dispatch({ type: "SET_PAGE_TITLE", payload: pageTitle });
-    dispatch(fetchSettingsData());
+    // dispatch({ type: "SET_PAGE_TITLE", payload: pageTitle });
+    // console.log(editMode);
     
-  }, [pageTitle, dispatch]);
+    if(editMode === 2){
+      const formUserid = getValues("UserID")
+      const actualUserId = defaultData.UserID
+      if(formUserid != actualUserId){
+        dispatch(setEditMode(1))
+        dispatch(fetchSingleUser(formUserid))
+      }
+    }
+    // else if(editMode === 0) {
+      // reset()
+    // }
+  }, []);
+
+  useEffect(() => {
+    dispatch(fetchSettingsData());
+    console.log(editMode);
+    
+    if(editMode === 0){
+      reset({
+        UserName: "",
+        UserTypeID: "",
+        UserCode: "",
+        GenderID: "",
+        FatherName: "",
+        MotherName: "",
+        DateOfBirth: "",
+        age: "",
+        NIDNO: "",
+        Mobile1: "",
+        Mobile2: "",
+        Relationship2: "",
+        Email: "",
+        BloodGroup: "",
+        DivisionID: "",
+        DistrictID: "",
+        permanentPoliceStationID: "",
+        permanentPost: "",
+        permanentVill: "",
+        sameAddress: false,
+        DivisionID2: "",
+        DistrictID2: "",
+        TransientPoliceStationID: "",
+        TransientPost: "",
+        TransientVill: "",
+      })
+    }
+  }, [dispatch]);
 
 
   // useEffect(() => {
@@ -355,7 +402,7 @@ const AddStudentForm = ({ pageTitle }) => {
 
           <div className="flex gap-3">
             <div className=" w-full">
-              <DatePickerOne dateCalender={"জন্ম তারিখ :"}/>
+              <DatePickerOne dateCalender={"জন্ম তারিখ :"} placeholder={""} registerKey={"DateOfBirth"} require={"Date Of Birth Require"}/>
             </div>
             <div className=" w-16">
               <DefaultInput label={"বয়স :"} type={'text'} placeholder={"৭০"} registerKey={"age"} />
