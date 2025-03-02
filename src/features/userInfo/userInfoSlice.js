@@ -11,9 +11,7 @@ export const fetchSingleUser = createAsyncThunk("userInfo/fetchSingleUser", asyn
 
 export const fetchUserList = createAsyncThunk(
     "userInfo/fetchUserList",
-    async ({ itemPerPage, currentPage }, { rejectWithValue }) => {
-        console.log("home");
-        
+    async ({ itemPerPage, currentPage }, { rejectWithValue }) => {        
         const token = localStorage.getItem('token');
         if (!token) throw new Error('Token is missing');
         try {

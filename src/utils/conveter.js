@@ -258,19 +258,13 @@ function isAlreadyUnicode(string) {
 }
 
 function bnBijoy2Unicode(string) {
-    // if (isAlreadyUnicode(string)) {
-    //     return string;  // Return the string as it is if it's already Unicode
-    // }
-    if(string){
-        var convText = string.replace(PRE_CONVERSION_PATTERN, function (m) { return PRE_CONVERSION_MAP[m] || string; });
-        convText = convText.replace(MAIN_CONVERSION_PATTERN, mainConverter);
-        convText = convText.replace(POST_CONVERSION_PATTERN, function (m) { return POST_CONVERSION_MAP[m] || convText; });
-        return convText;
+    if (string == null) {
+        return null;
     }
+    var convText = string.replace(PRE_CONVERSION_PATTERN, function (m) { return PRE_CONVERSION_MAP[m] || string; });
+    convText = convText.replace(MAIN_CONVERSION_PATTERN, mainConverter);
+    convText = convText.replace(POST_CONVERSION_PATTERN, function (m) { return POST_CONVERSION_MAP[m] || convText; });
 
-    else {
-        return string
-    }
-   
+    return convText;
 }
 export default  bnBijoy2Unicode;

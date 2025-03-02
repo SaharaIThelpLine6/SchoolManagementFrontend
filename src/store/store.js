@@ -9,6 +9,9 @@ import studentResultPublicViewReducer from '../features/studentResultPublicView/
 import requestHandelerReducer from '../features/requestHandeler/requestHandelerSlice';
 import studentReducer from '../features/student/studentSlice';
 import modalReducer from '../features/modal/modalSlice';
+import sidebarReducer from '../features/sidebar/sideBarSlice';
+import { feeCollectionSlice } from '../features/feeCollection/feeCollectionSlice';
+import { onlineAdmissionSlice } from '../features/onlineAdmission/onlineAdmissionSlice';
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -21,8 +24,15 @@ const store = configureStore({
     requestHandeler: requestHandelerReducer,
     student: studentReducer,
     modal: modalReducer,
+    sideBar: sidebarReducer,
+    [feeCollectionSlice.reducerPath]: feeCollectionSlice.reducer,
+    [onlineAdmissionSlice.reducerPath]: onlineAdmissionSlice.reducer,
 
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware()
+      .concat(feeCollectionSlice.middleware)
+      .concat(onlineAdmissionSlice.middleware),
 });
 
 export default store;

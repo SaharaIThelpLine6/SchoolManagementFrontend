@@ -3,6 +3,8 @@ import ClickOutside from "./ClickOutside";
 import { motion } from "framer-motion";
 import { closeModal } from "../features/modal/modalSlice";
 import AdmissionForm from "./Forms/AdmissionForm";
+import FeeCollectionForm from "./Forms/FeeCollectionForm";
+import PaymentModal from "./Forms/PaymentModal";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -28,9 +30,14 @@ const DefaultModal = () => {
               </button>
             </div>
 
-            {
-                modalType && <div className="body p-3">{modalType === 'ADD_STUDENT' && <AdmissionForm userId={id}/>}</div>
-            }
+            {modalType && (
+              <div className="body p-3">
+                {modalType === 'ADD_STUDENT' && <AdmissionForm userId={id} />}
+                {modalType === 'FEE_COLLECTION' && <FeeCollectionForm  userId={id} />}
+                {modalType === 'PAYMENT' && <PaymentModal  />}
+              </div>
+            )}
+
           </div>
         </motion.div>
       </ClickOutside>

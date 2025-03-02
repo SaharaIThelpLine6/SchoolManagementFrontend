@@ -21,8 +21,6 @@ export const Table = ({ rows, deleteRow, editRow }) => {
         </thead>
         <tbody>
           {rows.map((row:any, idx:number) => {
-           
-
             return (
               <tr key={idx} className="content-center">
                 <td className="border-b border-[#eee] py-5 px-4 dark:border-strokedark">{row.id}</td>

@@ -11,20 +11,28 @@ const Marksheet = () => {
 
     useEffect(() => {
         if (studentResult?.Logo?.data) {
-            const buffer = Buffer.from(studentResult.Logo.data);
-            const base64String = buffer.toString('base64');
-            const imageSrc = `data:image/png;base64,${base64String}`;
-            setLogo(imageSrc)
+            if(studentResult?.Logo?.data){
+                const buffer = Buffer.from(studentResult.Logo.data);
+                const base64String = buffer.toString('base64');
+                const imageSrc = `data:image/png;base64,${base64String}`;
+                setLogo(imageSrc)
+            }
+            
+            if (studentResult?.SignaturePrincipal?.data) {
+                const signaturePrincipalBuffer = Buffer.from(studentResult.SignaturePrincipal.data);
+                const base64StringPrincipalBuffer = signaturePrincipalBuffer.toString('base64');
+                const PrincipalimageSrc = `data:image/png;base64,${base64StringPrincipalBuffer}`;
+                setPrincipal(PrincipalimageSrc)
+            }
 
-            const signaturePrincipalBuffer = Buffer.from(studentResult.SignaturePrincipal.data);
-            const base64StringPrincipalBuffer = signaturePrincipalBuffer.toString('base64');
-            const PrincipalimageSrc = `data:image/png;base64,${base64StringPrincipalBuffer}`;
-            setPrincipal(PrincipalimageSrc)
 
-            const signatureNajemBuffer = Buffer.from(studentResult.SignatureNajem.data);
-            const base64StringNajemBuffer = signatureNajemBuffer.toString('base64');
-            const NajemimageSrc = `data:image/png;base64,${base64StringNajemBuffer}`;
-            setNajem(NajemimageSrc)
+            if (studentResult?.SignatureNajem?.data) {
+                const signatureNajemBuffer = Buffer.from(studentResult.SignatureNajem.data);
+                const base64StringNajemBuffer = signatureNajemBuffer.toString('base64');
+                const NajemimageSrc = `data:image/png;base64,${base64StringNajemBuffer}`;
+                setNajem(NajemimageSrc)
+            }
+
         }
     }, [studentResult])
     return (

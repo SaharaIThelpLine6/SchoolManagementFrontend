@@ -22,7 +22,7 @@ import { hideModal } from "../../utils/ModalControlar";
 import { fetchUserOnlyStudentData } from "../../features/student/studentSlice";
 
 const AdmissionForm = ({ userId }) => {
-    const { academicSession, status, error } = useSelector((state) => state.settings);
+    const { academicSession, residential, studentFinancialStatus, status, error } = useSelector((state) => state.settings);
     const { classList, subClassList } = useSelector((state) => state.class);
     const { defaultFormValue, singleUserstatus } = useSelector((state) => state.userInfo);
     const { reqLoading } = useSelector((state) => state.requestHandeler);
@@ -107,38 +107,6 @@ const AdmissionForm = ({ userId }) => {
         }
     }, [singleUserstatus, defaultFormValue, userId, reset]);
 
-    const FinancialCondition = [
-        {
-            id: 1,
-            name: "Poor"
-        },
-        {
-            id: 2,
-            name: "Orphan"
-        },
-        {
-            id: 3,
-            name: "Rich"
-        },
-        {
-            id: 4,
-            name: "Helpless"
-        },
-    ]
-    const Housing = [
-        {
-            id: 1,
-            name: "In campus"
-        },
-        {
-            id: 2,
-            name: "No Campus"
-        },
-        {
-            id: 3,
-            name: "Day-care"
-        },
-    ]
     const AdmissionType = [
         {
             id: 1,
@@ -207,14 +175,14 @@ const AdmissionForm = ({ userId }) => {
                         }
                     />
 
-                    <DefaultInput registerKey={"AdmissionSerial"} placeholder={"Admission Serial/ Roll"} type={"number"} label={<span className="text-red-500">
+                    <DefaultInput registerKey={"AdmissionSerial"} placeholder={"Admission Serial/ Roll"} type={"number"} require={"Admission Serial is require"} label={<span className="text-red-500">
                         {translate("Admission Serial")} *
                     </span>} />
 
-                    <DefaultSelect options={FinancialCondition} require={"Sub Class is require"} nameField={"name"} valueField={"id"} registerKey={"SFTID"} type={"number"} label={<span className="text-red-500">
+                    <DefaultSelect options={studentFinancialStatus} require={"Sub Class is require"} nameField={"FinancialName"} valueField={"SFTID"} registerKey={"SFTID"} type={"number"} label={<span className="text-red-500">
                         {translate("Financial Condition")} *
                     </span>} />
-                    <DefaultSelect options={Housing} require={"Sub Class is require"} nameField={"name"} valueField={"id"} registerKey={"ResidentialStatusId"} type={"number"} label={<span className="text-red-500">
+                    <DefaultSelect options={residential} require={"Sub Class is require"} nameField={"ResidentialName"} valueField={"RDID"} registerKey={"ResidentialStatusId"} type={"number"} label={<span className="text-red-500">
                         {translate("Living Condition")} *
                     </span>} />
                     <DefaultSelect options={AdmissionType} require={"AdmissionType is require"} nameField={"name"} valueField={"id"} registerKey={"NewOldId"} type={"number"} label={<span className="text-red-500">

@@ -15,7 +15,8 @@ export default {
         'lato': '"Lato", serif',
         'SolaimanLipi': 'SolaimanLipiNormal, serif',
         'noto': '"Noto Serif Bengali", serif',
-        'kalpurush': "'Kalpurush', sans-serif"
+        'kalpurush': "'Kalpurush', sans-serif",
+        'SutonnyMJ': 'SutonnyMJ'
       },
       boxShadow: {
         'sub_menu': '0 0 15px -5px rgba(0, 0, 0, 0.2)',

@@ -22,10 +22,21 @@ export const fetchUserOnlyStudentData = createAsyncThunk("student/fetchUserOnlyS
         userOnlyStudents: studentListResponse,
     };
 });
+export const fetchSingleStudentData = createAsyncThunk("student/fetchSingleStudentData", async (id) => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token is missing');
+    const [studentResponse] = await Promise.all([
+        getUserData(token, `/api/students/view_single_student?id=${id}`),
+    ]);
+    return {
+        singleStudent: studentResponse,
+    };
+});
 
 const initialState = {
     studentList: [],
-    userOnlyStudents:[],
+    userOnlyStudents: [],
+    singleStudent: null, // Added initial state for single student
     editMode: 0,
     status: 'idle',
     error: null,
@@ -65,7 +76,18 @@ const classSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.error.message;
             })
-            
+            .addCase(fetchSingleStudentData.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(fetchSingleStudentData.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.singleStudent = action.payload.singleStudent;
+            })
+            .addCase(fetchSingleStudentData.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            });
     },
 });
 export const { setEditMode } = classSlice.actions;

@@ -62,6 +62,9 @@ const useTranslate = () => {
     'Admission Details': 'ভর্তির ফরম',
     'Request already in progress. Please wait...': 'অনুরোধ ইতিমধ্যে প্রক্রিয়াধীন। অনুগ্রহ করে অপেক্ষা করুন...',
     'Information Added Successfully': 'তথ্য যুক্ত করা হয়েছে।',
+    'Employee': 'কর্মচারী',
+    'Admitted Teacher List': 'যোগদেয়া কর্মীদের তালিকা',
+    'Not Admitted Teacher List': 'যোগ না দেয়া কর্মীদের তালিকা',
     
   };
 

@@ -1,27 +1,62 @@
 .animate-pulse-custom {
   animation: pulse-custom 1.5s cubic-bezier(0.8, 0, 0.8, 1) infinite;
 }
+
 @keyframes pulse-custom {
+
   0%,
   100% {
-    background-color: #e5e7eb; /* Light gray */
+    background-color: #e5e7eb;
+    /* Light gray */
   }
+
   50% {
-    background-color: #d1d5db; /* Darker gray */
+    background-color: #d1d5db;
+    /* Darker gray */
   }
 }
-.animation_label + label{
+
+.animation_label+label {
   height: 100%;
   z-index: 22;
   pointer-events: none;
 }
 
-.animation_label:focus + label, .animation_label + label.active{
+.animation_label:focus+label,
+.animation_label+label.active {
   transform: translateY(-80%) !important;
 }
-
-  /* .table-container {
+.input-table > div{
+  box-shadow: none;
+}
+.input-table input{
+  width: 100px;
+  background: transparent;
+  height: 100%;
+}
+.input-table td{
+  padding-top: 0;
+  padding-bottom: 4px;
+} 
+::-webkit-scrollbar {
+  height: 5px;
+  width: 5px;
+  border-radius: 50px !important;
+}
+::-webkit-scrollbar-thumb, ::-webkit-scrollbar-thumb:hover {
+  background: rgb(205, 208, 215);
+}
+::-webkit-scrollbar-track {
+  background: rgb(244, 246, 250);
+}
+::selection {
+  color: rgb(255, 255, 255);
+  text-shadow: none;
+  background: rgb(61, 94, 225);
+}
+/* .table-container {
     width: 100%;
+
     overflow-x: auto;   
   } */
 
@@ -78,6 +113,11 @@
   unicode-range: U+0980-09FF; */
   /* local('SolaimanLipiNormal'), url('solaimanlipi.woff') format('woff') */
 }
+@font-face {
+  font-display: swap;
+  font-family: SutonnyMJ;
+  src: url("./assets/fonts/SutonnyMJ.ttf") format("truetype")
+}
 
 /* @font-face {
   font-family: 'Kalpurush';
@@ -99,9 +139,9 @@
   font-stretch: 100%;
   font-display: swap;
   src: url('/assets/fonts/kalpurush-v0.256.woff') format('woff'),
-       url('/assets/fonts/kalpurush-v0.256.ttf') format('truetype'),
-       url('/assets/fonts/kalpurush-v0.256.svg#AdorshoLipi') format('svg'),
-       url('/assets/fonts/kalpurush-v0.256.eot?#iefix') format('embedded-opentype');
+    url('/assets/fonts/kalpurush-v0.256.ttf') format('truetype'),
+    url('/assets/fonts/kalpurush-v0.256.svg#AdorshoLipi') format('svg'),
+    url('/assets/fonts/kalpurush-v0.256.eot?#iefix') format('embedded-opentype');
 }
 
 
@@ -109,10 +149,14 @@
   width: calc(100% - 64px);
 }
 
-tr:nth-child(even) {background-color: #F0F0F0;}
-.print_canvas{
+tr:nth-child(even) {
+  background-color: #F0F0F0;
+}
+
+.print_canvas {
   display: none;
 }
+
 /* .Toastify__toast{
   padding-top: 0;
   padding-bottom: 0;
@@ -128,32 +172,41 @@ tr:nth-child(even) {background-color: #F0F0F0;}
     margin-bottom: 0;
     background-color: white;
   }
+
   @page portrait-page {
     size: portrait;
   }
+
   @page landscape-page {
     size: landscape;
   }
+
   body {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .print_canvas{
+
+  .print_canvas {
     display: block;
   }
-  .hidden_in_print{
+
+  .hidden_in_print {
     display: none;
   }
-  body  {
+
+  body {
     background-color: white;
     width: 100%;
   }
-  main{
+
+  main {
     width: 100%;
-    background-color: white !important; 
+    background-color: white !important;
     overflow: visible !important;
   }
-  table tr, td{
+
+  table tr,
+  td {
     background-color: white;
   }
 }

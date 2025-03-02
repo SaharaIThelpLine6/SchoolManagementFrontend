@@ -56,6 +56,13 @@ import SubjectPassNumber from './pages/SubjectPassNumber';
 import ResultConditions from './pages/ResultConditions';
 import BoardExam from './pages/BoardExam';
 import MadrasahBoardInfo from './pages/MadrasahBoardInfo';
+import User from './pages/User';
+import Quota from './pages/Quota';
+import AddTeacher from './pages/AddTeacher';
+import Session from './pages/Session';
+import FormBuilder from './pages/FormBuilder';
+import OnlineAdmission from './pages/public/OnlineAdmission';
+import StudentAdmissionForm from './pages/public/studentAddmitionForm';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -86,10 +93,16 @@ function App() {
               <Route path="groupdistribution" element={<GroupDistribution pageTitle={"Students Group Set"} />} />
               <Route path="class" element={<Class pageTitle={"Class"} />} />
               <Route path="section" element={<Section pageTitle={"Section"} />} />
+              <Route path="sessions" element={<Session pageTitle={"Session"} />} />
             </Route>
-            <Route path="users">
-              <Route index element={<Users pageTitle={"Staff"} />} />
-              <Route path="teacherInfo" element={<TeacherInfo pageTitle={"Teacher Info"} />} />
+            <Route path="usersinfo" element={<User />}/>
+            <Route path="online_applications" element={<User />}/>
+            <Route path='renew' element={<Quota type="renew"/>}/>
+            <Route path='quota' element={<Quota type="quota"/>}/>
+            <Route path='formbuilder' element={<FormBuilder/>}/>
+            <Route path="teacherinfo">
+              <Route index element={<AddTeacher pageTitle={"Employee"} />} />
+              <Route path="teacherinfo" element={<TeacherInfo pageTitle={"Teacher Info"} />} />
               <Route path="payRole" element={<PayRole pageTitle={"Pay Role"} />} />
               <Route path="pRName" element={<PayRoleName pageTitle={"Pay Role Name"} />} />
               <Route path="report" element={<Report pageTitle={"Reports"} />} />
@@ -118,6 +131,9 @@ function App() {
             <Route path="/setting" element={<Setting pageTitle={"Setting"} />} />
             <Route path="/help" element={<Help pageTitle={"Help"} />} />
           </Route>
+          {/* <Route path='/quota/:payfor' element={<Quota/>}>
+          
+          </Route> */}
           <Route path="/login" element={<Login />} />
           <Route path=":schoolid" element={<PublicLayout />}>
             <Route index element={<ResultRequest pageTitle={"Result Page"} />} />
@@ -125,6 +141,10 @@ function App() {
             <Route path="AdmissionRegistration" element={<AdmissionRegistration />} />
             <Route path="students/:seassonid/:examid/:classid/:userid" element={<Result />} />
             <Route path="classes/:seassonid/:examid/:classid" element={<ClassResult />} />
+            <Route path="online_admission" element={<OnlineAdmission />} />
+            <Route path="online_admission/:usercode" element={<StudentAdmissionForm />} />
+            {/* <Route path="online_admission_download" element={<StudentAdmissionForm />} /> */}
+            {/* <Route path='renew' element={<Quota type="renew"/>}/>  */}
           </Route>
           
           <Route path="*" element={<NotFound />} /> 

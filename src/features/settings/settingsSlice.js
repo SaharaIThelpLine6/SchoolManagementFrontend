@@ -5,7 +5,7 @@ export const fetchSettingsData = createAsyncThunk('settings/fetchSettingsData', 
     const token = localStorage.getItem('token');
     const state = getState();
     if (!token) throw new Error('Token is missing');
-    const [genderResponse, divisionResponse, codeSettingResponse, residentialResponse,permissionTypeResponse, studentRelationResponse, academicSessionResponse, userTypeResponse] = await Promise.all([
+    const [genderResponse, divisionResponse, codeSettingResponse, residentialResponse,permissionTypeResponse, studentRelationResponse, academicSessionResponse, userTypeResponse, studentFinancialStatusResponse] = await Promise.all([
         getSettingsData(token, '/api/settings/gender'),
         getSettingsData(token, '/api/settings/division'),
         getSettingsData(token, '/api/settings/code_setting'),
@@ -14,6 +14,7 @@ export const fetchSettingsData = createAsyncThunk('settings/fetchSettingsData', 
         getSettingsData(token, '/api/settings/student_relation'),
         getSettingsData(token, '/api/settings/academic_session'),
         getUserData(token, '/api/users/user_type'),
+        getUserData(token, '/api/settings/financial_status'),
     ]);
     return {
         gender: genderResponse,
@@ -23,7 +24,8 @@ export const fetchSettingsData = createAsyncThunk('settings/fetchSettingsData', 
         permissionType: permissionTypeResponse,
         studentRelation: studentRelationResponse,
         academicSession: academicSessionResponse,
-        userType: userTypeResponse
+        userType: userTypeResponse,
+        studentFinancialStatus: studentFinancialStatusResponse
     };
 });
 
@@ -62,6 +64,7 @@ const initialState = {
     permissionType: [],
     studentRelation: [],
     academicSession:[],
+    studentFinancialStatus: [],
     currentDivitionId: null,
     currentDistrictId: null,
     status: 'idle',
@@ -91,7 +94,8 @@ const settingsSlice = createSlice({
                 state.permissionType = action.payload.permissionType;
                 state.studentRelation = action.payload.studentRelation;
                 state.academicSession = action.payload.academicSession;
-                state.userType = action.payload.userType
+                state.userType = action.payload.userType;
+                state.studentFinancialStatus = action.payload.studentFinancialStatus;
             })
             .addCase(fetchSettingsData.rejected, (state, action) => {
                 state.status = 'failed';

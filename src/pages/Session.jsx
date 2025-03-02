@@ -31,6 +31,7 @@ import SelectBox1 from "../components/Forms/SelectBox1";
 import { fetchSettingsData } from "../features/settings/settingsSlice";
 import useTranslate from "../utils/Translate";
 import { toast } from "react-toastify";
+import { setReqLoading } from "../features/requestHandeler/requestHandelerSlice";
 
 
 const RowDragHandleCell = ({ rowId }) => {
@@ -83,12 +84,13 @@ const DraggableRow = ({ row, headers, statename }) => {
     );
 };
 
-const Section = ({ pageTitle }) => {
+const Session = ({ pageTitle }) => {
     const translate = useTranslate()
     const [rows, setRows] = useState([]);
-    const tableHeader = ["Class Serial", "Class", "Section Serial", "Section", "English", "Arabic"];
-    const { classList, subClassList, editMode, status, error } = useSelector((state) => state.class);
-    const { academicSession } = useSelector((state) => state.settings);
+    const tableHeader = ["Session Serial", "Session", "English", "Arabic"];
+    const { editMode } = useSelector((state) => state.class);
+    const { academicSession, status } = useSelector((state) => state.settings);
+    const { reqLoading } = useSelector((state) => state.requestHandeler);
 
     const [dataUpdate, setDataUpdate] = useState(false);
     const {
@@ -98,26 +100,20 @@ const Section = ({ pageTitle }) => {
     } = useFormContext()
     // const headers = Object.keys(tableRows.length ? tableRows[0] : {});
     const dispatch = useDispatch();
-    const navigate = useNavigate();
 
     useEffect(() => {
-        console.log(pageTitle);
-        
         dispatch(setPageName(pageTitle))
+        dispatch(setEditMode(0));
         if (status === 'idle') {
-            dispatch(fetchClassData());
             dispatch(fetchSettingsData());
         }
-
         if (status === 'succeeded') {
-            const transformedData = subClassList.map((item) => ({
-                id: item.SubClassID.toString(),
-                "Class Serial": item.Serial,
-                Class: item.Class?.ClassName,
-                "Section Serial": item.CGSL,
-                Section: item.SubClass,
-                English: item.SubClassEng,
-                Arabic: item.SubClassAra
+            const transformedData = academicSession.map((item) => ({
+                id: item.SessionID.toString(),
+                "Session Serial": item.Serial,
+                Session: item.SessionName,
+                English: item.SessionEngName,
+                Arabic: item.SessionAraName
             }));
             setRows(transformedData);
 
@@ -132,17 +128,17 @@ const Section = ({ pageTitle }) => {
 
     const handleDragEnd = (event) => {
         const { active, over } = event;
-    
+
         if (active && over && active.id !== over.id) {
             setRows((currentRows) => {
                 if (!Array.isArray(currentRows)) return currentRows;
-    
+
                 const oldIndex = currentRows.findIndex((row) => row.CGSL === active.id);
                 const newIndex = currentRows.findIndex((row) => row.CGSL === over.id);
-    
+
                 const updatedRows = arrayMove(currentRows, oldIndex, newIndex);
                 const updatedRowsWithSerial = updatedRows.map((row, index) => ({ ...row, Serial: index + 1 }));
-    
+
                 setDataUpdate(true);
                 return updatedRowsWithSerial;
             });
@@ -152,7 +148,7 @@ const Section = ({ pageTitle }) => {
     useEffect(() => {
         if (dataUpdate) {
             setDataUpdate(false);
-    
+
             async function updateSerial() {
                 try {
                     const response = await updateInData(1, rows, '/api/academic/update_subclass_serial');
@@ -161,109 +157,144 @@ const Section = ({ pageTitle }) => {
                     console.error('Failed to update serial:', error);
                 }
             }
-    
+
             updateSerial();
         }
     }, [dataUpdate, rows]);
 
     useEffect(() => {
-
         if (editMode !== 0) {
-            const selectedClass = subClassList.find((item) => item.SubClassID == editMode);
-            // console.log(selectedClass);
-
+            const selectedClass = academicSession.find((item) => item.SessionID == editMode);
             reset(selectedClass);
         }
+
     }, [editMode]);
 
 
     const onSubmit = async (data) => {
+        if (reqLoading) {
+            console.log("Request already in progress. Please wait...");
+            return false;
+        }
+        dispatch(setReqLoading(true))
         const id = toast.dark("তথ্য যুক্ত করা হচ্ছে...", {
-            type: "success",
-            isLoading: true,
             className: " min-h-[50px] max-h-[50px] overflow-hidden text-[14px] font-SolaimanLipi bg-[#323232] text-[#ffffff] py-2 px-2 rounded-[4px] font-normal",
             style: {
                 boxShadow: '0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)',
             },
+            // transition: bounce,
+            position: "bottom-center",
+            type: "success",
+            closeButton: false,
+            isLoading: true
         });
-        function getSerialBySubClassId(subclassId) {
-            const item = subClassList.find(item => item.SubClassID === subclassId);
 
-            return item ? item.Serial : null; // Return the Serial if found, otherwise return null
-        }
         try {
             if (editMode === 0) {
-                const submitedData = { ...data, Serial: getSerialBySubClassId(data.ClassID), CGSL: rows.length + 1 }
-                const submitRes = await insertData(submitedData, "/api/academic/insert_sub_class")
-                if(submitRes.success){
-                    dispatch(fetchClassData());
-                    toast.update(id, { render: submitRes.data.message, type: "success", isLoading: false, autoClose: true });
+                const submitedData = { ...data, Serial: rows.length + 1 }
+                const submitRes = await insertData(submitedData, "/api/academic/insert_session")
+                // console.log(submitRes);
+                if (submitRes.success) {
+                    reset({ SessionName: "", SessionEngName: "", SessionAraName: "" });
+                    toast.update(id, { render: "তথ্য যুক্ত করা হয়েছে।", type: "success", isLoading: false, autoClose: true });
+                    dispatch(fetchSettingsData());
+                    dispatch(setReqLoading(false))
                 }
                 else {
-                    dispatch(fetchClassData());
-                    toast.update(id, { render: submitRes.error, type: "error", isLoading: false, autoClose: true });
+                    toast.update(id, { render: String(submitRes.error), type: "error", isLoading: false, autoClose: true });
+                    dispatch(setReqLoading(false))
+                    console.error("Failed to insert data:", submitRes.error);
                 }
-                
+
             }
             else {
-                console.log(data);
-                
-                const submitRes = await updateInData(editMode, data, "/api/academic/update_sub_class")
+                const submitRes = await updateInData(editMode, data, "/api/academic/update_session")
                 dispatch(setEditMode(0));
-                if(submitRes.success){
-                    reset({ SubClass: "", ClassID: "", SubClassEng: "", SubClassAra: "" });
-                    dispatch(fetchClassData());
-                    toast.update(id, { render: submitRes.data.message, type: "success", isLoading: false, autoClose: true });
+                reset({ SessionName: "", SessionEngName: "", SessionAraName: "" });
+
+                if (submitRes.success) {
+                    reset({ SessionName: "", SessionEngName: "", SessionAraName: "" });
+                    toast.update(id, { render: "তথ্য যুক্ত করা হয়েছে।", type: "success", isLoading: false, autoClose: true });
+                    dispatch(fetchSettingsData());
+                    dispatch(setReqLoading(false))
                 }
                 else {
-                    toast.update(id, { render: submitRes.error, type: "error", isLoading: false, autoClose: true });
+                    toast.update(id, { render: String(submitRes.error), type: "error", isLoading: false, autoClose: true });
+                    dispatch(setReqLoading(false))
+                    console.error("Failed to insert data:", submitRes.error);
                 }
             }
 
         } catch (err) {
-            toast.update(id, { render: submitRes.error, type: "error", isLoading: false, autoClose: true });
+            reset({ SessionName: "", SessionEngName: "", SessionAraName: "" });
+            toast.update(id, { render: String(err.message), type: "error", isLoading: false, autoClose: true });
+            dispatch(setReqLoading(false))
             console.error(err.message)
         }
     }
 
+    const FieldValue = [
+        {
+            "serial": 1,
+            "type": "input",
+            "title": "User Name",
+            "key": "username",
+            "options": [],
+            "required": "true"
+        },
+        {
+            "serial": 2,
+            "type": "select",
+            "title": "user req",
+            "key": "user req",
+            "options": [
+                {
+                    "title": "book name",
+                    "value": "book_name"
+                },
+                {
+                    "title": "class id",
+                    "value": "class_id"
+                }
+            ],
+            "required": "true"
+        },
+        {
+            "type": "list",
+            "serial": 3,
+            "title": "user req",
+            "key": "user req",
+            "options": [
+                {
+                    "title": "book name",
+                    "value": "book_name"
+                },
+                {
+                    "title": "class id",
+                    "value": "class_id"
+                }
+            ],
+            "required": "true"
+        }
+    ]
 
     return (
         <div className="p-4">
             {/* <SortableCompo /> */}
             <div className="flex gap-3 flex-wrap lg:flex-nowrap">
                 <div className="w-full lg:w-[40%] lg:h-fit lg:sticky lg:top-0  border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
-                    <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">{translate("Add Section")}</h1>
+                    <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">{translate("Add Session")}</h1>
 
                     <form onSubmit={handleSubmit(onSubmit)}>
-                        {/* <div className="mb-4">
-                            <SelectBox1
-                                label={"শিক্ষাবর্ষ:"}
-                                options={academicSession}
-                                valueField={"SessionID"}
-                                nameField={"SessionName"}
-                                registerKey={"class"}
-                                require={"Session is require"}
-                            />
-                        </div> */}
-                        <div className="mb-4">
-                            <SelectBox1
-                                label={"মারহালা/ক্লাশ:"}
-                                options={classList}
-                                valueField={"ClassID"}
-                                nameField={"ClassName"}
-                                registerKey={"ClassID"}
-                                require={"Class is require"}
-                                type={"number"}
-                            />
+
+                        <div className="mb-3">
+                            <ThemeInputBox1 label={"Session"} registerKey={"SessionName"} require={"Session Name Name is require"} type={"text"} />
                         </div>
                         <div className="mb-3">
-                            <ThemeInputBox1 label={"Section"} registerKey={"SubClass"} require={"Sub Class Name is require"} type={"text"} />
+                            <ThemeInputBox1 label={"English"} registerKey={"SessionEngName"} type={"text"} />
                         </div>
                         <div className="mb-3">
-                            <ThemeInputBox1 label={"English"} registerKey={"SubClassEng"} type={"text"} />
-                        </div>
-                        <div className="mb-3">
-                            <ThemeInputBox1 label={"عربي"} registerKey={"SubClassAra"} type={"text"} />
+                            <ThemeInputBox1 label={"عربي"} registerKey={"SessionAraName"} type={"text"} />
                         </div>
 
                         <button type="submit" className="bg-theme-color transation ease-linear font-bold duration-500 inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-[#121212] font-SolaimanLipi">
@@ -272,10 +303,10 @@ const Section = ({ pageTitle }) => {
                         <button type="button" onClick={() => {
                             setEditMode(0);
                             reset({
-                                SubClass: "",
-                                SubClassEng: "",
-                                SubClassAra: "",
-                                ClassID: ""
+                                SessionName: "",
+                                SessionEngName: "",
+                                SessionAraName: "",
+                                SessionID: ""
                             })
                         }} className="bg-[#121212] transation ease-linear duration-500 font-bold inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-slate-700 ms-[20px] font-SolaimanLipi">
                             {translate("Add New")}
@@ -324,10 +355,13 @@ const Section = ({ pageTitle }) => {
                 </DndContext>
 
 
+
+
+
             </div>
 
         </div>
     );
 };
 
-export default Section;
+export default Session;

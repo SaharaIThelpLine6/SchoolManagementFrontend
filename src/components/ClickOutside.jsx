@@ -1,32 +1,78 @@
+// import React, { useRef, useEffect } from 'react';
+// const ClickOutside = ({
+//   children,
+//   exceptionRef,
+//   onClick,
+//   className,
+// }) => {
+//   const wrapperRef = useRef(null);
+
+//   useEffect(() => {
+//     const handleClickListener = (event) => {
+//       let clickedInside= false;
+//       if (exceptionRef) {
+//         clickedInside =
+//           (wrapperRef.current &&
+//             wrapperRef.current.contains(event.target)) ||
+//           (exceptionRef.current && exceptionRef.current === event.target) ||
+//           (exceptionRef.current &&
+//             exceptionRef.current.contains(event.target));
+//       } else {
+//         clickedInside =
+//           wrapperRef.current &&
+//           wrapperRef.current.contains(event.target);
+//       }
+
+//       if (!clickedInside) onClick();
+//     };
+
+//     document.addEventListener('mousedown', handleClickListener);
+
+//     return () => {
+//       document.removeEventListener('mousedown', handleClickListener);
+//     };
+//   }, [exceptionRef, onClick]);
+
+//   return (
+//     <div ref={wrapperRef} className={`${className || ''}`}>
+//       {children}
+//     </div>
+//   );
+// };
+
+// export default ClickOutside;
+
+
 import React, { useRef, useEffect } from 'react';
-
-
 
 const ClickOutside = ({
   children,
-  exceptionRef,
   onClick,
   className,
 }) => {
   const wrapperRef = useRef(null);
-
+const excludeClasses = [
+  "flatpickr-calendar",
+  "Toastify"
+]
   useEffect(() => {
     const handleClickListener = (event) => {
-      let clickedInside= false;
-      if (exceptionRef) {
-        clickedInside =
-          (wrapperRef.current &&
-            wrapperRef.current.contains(event.target)) ||
-          (exceptionRef.current && exceptionRef.current === event.target) ||
-          (exceptionRef.current &&
-            exceptionRef.current.contains(event.target));
+      let clickedInside = false;
+
+      // Check if the click is inside the wrapper
+      if (wrapperRef.current && wrapperRef.current.contains(event.target)) {
+        clickedInside = true;
       } else {
-        clickedInside =
-          wrapperRef.current &&
-          wrapperRef.current.contains(event.target);
+        // Check if the click is inside any element with the excluded classes
+        clickedInside = excludeClasses.some((className) => {
+          return event.target.closest(`.${className}`) !== null;
+        });
       }
 
-      if (!clickedInside) onClick();
+      // If the click is outside, trigger the onClick handler
+      if (!clickedInside) {
+        onClick();
+      }
     };
 
     document.addEventListener('mousedown', handleClickListener);
@@ -34,7 +80,7 @@ const ClickOutside = ({
     return () => {
       document.removeEventListener('mousedown', handleClickListener);
     };
-  }, [exceptionRef, onClick]);
+  }, [excludeClasses, onClick]);
 
   return (
     <div ref={wrapperRef} className={`${className || ''}`}>

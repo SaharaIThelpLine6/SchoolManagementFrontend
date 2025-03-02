@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useTranslate from '../../../utils/Translate';
 
-const FilterSelectGroup = ({defaultSelect}) => {
+const FilterSelectGroup = ({defaultSelect, options, valueField, nameField}) => {
     const [selectedOption, setSelectedOption] = useState(defaultSelect);
     const [isOptionSelected, setIsOptionSelected] = useState(false);
     const translate = useTranslate();
@@ -32,20 +32,31 @@ const FilterSelectGroup = ({defaultSelect}) => {
                 </span>
 
                 <select
-                    value={selectedOption}
+                    value={selectedOption ? selectedOption : ''}
                     onChange={(e) => {
                         handleFilterChange(e)
                     }}
                     className={`relative z-20 w-full appearance-none rounded-[8px] border border-stroke bg-transparent pointer py-2 pt-[10px] pl-8 pr-6 text-start text-[14px] font-kalpurush   outline-none transition  ${isOptionSelected ? 'text-black dark:text-white' : ''
                         }`}
                 >
-                    <option value="" className="">{translate("Filter")}</option>
-                    <option value="0" className="">
+                    {/* {
+                        defaultSelect ? null : <option value="" className="">{translate("Filter")}</option>
+                    } */}
+                    {
+                        options &&
+                        options.map((option) => (
+                            <option key={option[valueField]} value={option[valueField]}>
+                                {option[nameField]}
+                            </option>
+                        ))
+                    }
+                    
+                    {/* <option value="0" className="">
                         {translate("Admitted students")}
                     </option>
                     <option value="2" className="">
                         {translate("Not Admitted students")}
-                    </option>
+                    </option> */}
                 </select>
 
                 <span className="absolute top-1/2 right-2 z-10 -translate-y-1/2 pointer-event-none">

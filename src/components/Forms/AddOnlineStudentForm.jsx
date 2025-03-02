@@ -6,32 +6,21 @@ import "flatpickr/dist/flatpickr.css";
 import DefaultInput from "./DefaultInput";
 import DefaultSelect from "./DefaultSelect";
 import DatePickerOne from "./DatePicker/DatePickerOne";
-import { getUserType } from "../../utils/read/api";
-import { fetchSettingsData, fetchDidata, fetchThanadata } from "../../features/settings/settingsSlice";
-import { insertUserInfo } from "../../utils/create/api";
 import { useNavigate } from "react-router-dom";
-import { fetchSingleUser, setEditMode } from "../../features/userInfo/userInfoSlice";
-import { updateUserInfo } from "../../utils/update/api";
-import DefaultGreen from "../Button/DefaultGreen";
-import { setItemsPerPage } from "../../features/pagination/paginationSlice";
+import { useAddStudentMutation, useGetClassQuery, useGetResidentialQuery } from "../../features/onlineAdmission/onlineAdmissionSlice";
+import { fetchDidata, fetchSettingsFieldData, fetchThanadata, setEditMode } from "../../features/studentResultPublicView/studentResultPublicViewSlice";
+import convertBijoyToBengali from "../../utils/uniconveter";
 
-const AddStudentForm = ({ pageTitle }) => {
-
-  const [selectedImage, setSelectedImage] = useState(null);
-  const defaultData = useSelector((state) => state.userInfo.defaultFormValue);
-  const editMode = useSelector((state) => state.userInfo.editMode);
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+const AddOnlineStudentForm = ({ schoolid }) => {
+  const defaultData = useSelector((state) => state.studentResultPublicView.defaultFormValue);
+  const editMode = useSelector((state) => state.studentResultPublicView.editMode);
+  const [buttonDisable, setButtonDisable] = useState(false)
+  const { data: classData, error: classError } = useGetClassQuery({ id: schoolid });
+  const { data: residentialData, error: residentialError } = useGetResidentialQuery({ id: schoolid });
   const dispatch = useDispatch();
-  const { gender, divition, district, thana, studentRelation,userType, status, error } = useSelector((state) => state.settings);
+  const { gender, divition, district, thana, studentRelation, status, error } = useSelector((state) => state.studentResultPublicView);
+
+
   const { token } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const {
@@ -47,14 +36,14 @@ const AddStudentForm = ({ pageTitle }) => {
   // const [userType, setUserType] = useState([]);
   const [userMainDetails, setUserMainDetails] = useState([]);
   const [DivisionID, DistrictID, DivisionID2, DistrictID2, permanentPoliceStationID, sameAddress, TransientPost, TransientVill] = watch(["DivisionID", "DistrictID", "DivisionID2", "DistrictID2", "permanentPoliceStationID", "sameAddress", "TransientPost", "TransientVill"])
+  const [addStudent, { isLoading, isError, isSuccess, data: newApplicationResponse }] = useAddStudentMutation();
   const isSameAddressRef = useRef(false);
-
   useEffect(() => {
     if (editMode === 0) {
       setValue("DistrictID", "");
       setValue("permanentPoliceStationID", "");
       if (DivisionID) {
-        dispatch(fetchDidata(DivisionID));
+        dispatch(fetchDidata({ madrasaId: schoolid, id: DivisionID }));
       }
     }
     else if (editMode === 2) {
@@ -67,7 +56,7 @@ const AddStudentForm = ({ pageTitle }) => {
         setValue("DistrictID", "");
         setValue("permanentPoliceStationID", "");
         if (DivisionID) {
-          dispatch(fetchDidata(DivisionID));
+          dispatch(fetchDidata({ madrasaId: schoolid, id: DivisionID }));
         }
       }
     }
@@ -78,7 +67,7 @@ const AddStudentForm = ({ pageTitle }) => {
     if (editMode === 0) {
       setValue("permanentPoliceStationID", "");
       if (DistrictID) {
-        dispatch(fetchThanadata(DistrictID))
+        dispatch(fetchThanadata({ madrasaId: schoolid, id: DistrictID }))
       }
     }
     else if (editMode === 2) {
@@ -89,7 +78,7 @@ const AddStudentForm = ({ pageTitle }) => {
       else {
         setValue("permanentPoliceStationID", "");
         if (DistrictID) {
-          dispatch(fetchThanadata(DistrictID))
+          dispatch(fetchThanadata({ madrasaId: schoolid, id: DistrictID }))
         }
       }
     }
@@ -105,7 +94,7 @@ const AddStudentForm = ({ pageTitle }) => {
         setValue("DistrictID2", "");
         setValue("TransientPoliceStationID", "");
         if (DivisionID2) {
-          dispatch(fetchDidata(DivisionID2));
+          dispatch(fetchDidata({ madrasaId: schoolid, id: DivisionID2 }));
         }
       }
       else {
@@ -122,7 +111,7 @@ const AddStudentForm = ({ pageTitle }) => {
           setValue("DistrictID2", "");
           setValue("TransientPoliceStationID", "");
           if (DivisionID2) {
-            dispatch(fetchDidata(DivisionID2));
+            dispatch(fetchDidata({ madrasaId: schoolid, id: DivisionID2 }));
           }
         }
         else {
@@ -140,7 +129,7 @@ const AddStudentForm = ({ pageTitle }) => {
       if (!isSameAddressRef.current) {
         setValue("TransientPoliceStationID", "");
         if (DistrictID2) {
-          dispatch(fetchThanadata(DistrictID2))
+          dispatch(fetchThanadata({ madrasaId: schoolid, id: DistrictID2 }))
         }
       }
       else {
@@ -160,7 +149,7 @@ const AddStudentForm = ({ pageTitle }) => {
         if (!isSameAddressRef.current) {
           setValue("TransientPoliceStationID", "");
           if (DistrictID2) {
-            dispatch(fetchThanadata(DistrictID2));
+            dispatch(fetchThanadata({ madrasaId: schoolid, id: DistrictID2 }));
           }
         }
         else {
@@ -188,39 +177,34 @@ const AddStudentForm = ({ pageTitle }) => {
     // }
   }, [sameAddress, setValue, DivisionID, DistrictID, permanentPoliceStationID, TransientVill, editMode])
 
-  useEffect(() => {
-    // dispatch({ type: "SET_PAGE_TITLE", payload: pageTitle });
-    // console.log(editMode);
-    
-    if(editMode === 2){
-      const formUserid = getValues("UserID")
-      const actualUserId = defaultData.UserID
-      if(formUserid != actualUserId){
-        dispatch(setEditMode(1))
-        dispatch(fetchSingleUser(formUserid))
-      }
-    }
-    // else if(editMode === 0) {
-      // reset()
-    // }
-  }, []);
+  // useEffect(() => {
+  //   // dispatch({ type: "SET_PAGE_TITLE", payload: pageTitle });
+  //   // console.log(editMode);
+
+  //   if (editMode === 2) {
+  //     const formUserid = getValues("UserID")
+  //     const actualUserId = defaultData.UserID
+  //     if (formUserid != actualUserId) {
+  //       dispatch(setEditMode(1))
+  //       dispatch(fetchSingleUser(formUserid))
+  //     }
+  //   }
+  // }, []);
 
   useEffect(() => {
-    dispatch(fetchSettingsData());
-    console.log(editMode);
-    
-    if(editMode === 0){
+    dispatch(fetchSettingsFieldData(schoolid));
+    // console.log(editMode);
+
+    if (editMode === 0) {
       reset({
         UserName: "",
-        UserTypeID: "",
-        UserCode: "",
         GenderID: "",
         FatherName: "",
         MotherName: "",
         DateOfBirth: "",
-        age: "",
         NIDNO: "",
         Mobile1: "",
+        Relationship1: "",
         Mobile2: "",
         Relationship2: "",
         Email: "",
@@ -236,27 +220,13 @@ const AddStudentForm = ({ pageTitle }) => {
         TransientPoliceStationID: "",
         TransientPost: "",
         TransientVill: "",
+        ClassID: "",
+        ResidentialStatusId: ""
       })
     }
   }, [dispatch]);
 
 
-  // useEffect(() => {
-  //   const dataFeatch = async () => {
-  //     try {
-  //       const data = await getUserType();
-  //       const transformedData = data.map(item => ({
-  //         id: String(item.ID),
-  //         value: item.TypeName
-  //       }));
-  //       setUserType(transformedData)
-  //     } catch (error) {
-  //       console.error('Error fetching data:', error);
-  //     }
-  //   }
-
-  //   dataFeatch();
-  // }, [])
 
   useEffect(() => {
     if (defaultData && editMode === 1) {
@@ -274,10 +244,10 @@ const AddStudentForm = ({ pageTitle }) => {
       };
 
       const promises = [
-        dispatch(fetchDidata(defaultFormData.DivisionID)),
-        dispatch(fetchDidata(defaultFormData.DivisionID2)),
-        dispatch(fetchThanadata(defaultFormData.DistrictID)),
-        dispatch(fetchThanadata(defaultFormData.DistrictID2)),
+        dispatch(fetchDidata({ madrasaId: schoolid, id: defaultFormData.DivisionID })),
+        dispatch(fetchDidata({ madrasaId: schoolid, id: defaultFormData.DivisionID2 })),
+        dispatch(fetchThanadata({ madrasaId: schoolid, id: defaultFormData.DistrictID })),
+        dispatch(fetchThanadata({ madrasaId: schoolid, id: defaultFormData.DistrictID2 })),
       ];
 
       Promise.all(promises)
@@ -295,90 +265,56 @@ const AddStudentForm = ({ pageTitle }) => {
 
   if (status === 'failed') {
     console.log(error);
-
   }
-  if (status === 'succeeded') {
-    // console.log(district);
-    // console.log(DistrictID);
-    // console.log(thana);
-    // console.log(userType);
+  // if (status === 'succeeded') {
+  //   // console.log(district);
+  //   // console.log(DistrictID);
+  //   // console.log(thana);
+  //   // console.log(userType);
 
-  }
+  // }
   const onSubmit = async (data) => {
-    console.log(data);
-
     try {
-      console.log(editMode);
-      if (editMode === 0) {
-        const submitRes = await insertUserInfo(token, data)
-        console.log(submitRes);
+      // Convert all text fields to Bijoy encoding
+      const convertedData = Object.fromEntries(
+        Object.entries(data).map(([key, value]) =>
+          typeof value === "string" ? [key, convertBijoyToBengali(value)] : [key, value]
+        )
+      );
 
-        navigate(0);
-      }
-      else if (editMode === 2) {
-        const submitRes = await updateUserInfo(defaultData.UserID, data)
-        console.log(submitRes);
-        navigate(0);
-      }
+      console.log('Converted Data:', convertedData);
 
+      await addStudent({ dataBody: convertedData, id: schoolid }).unwrap();
     } catch (err) {
-      console.error(err.message)
+      console.error('Error submitting data:', err);
     }
-  }
-  const saveButton = "Save";
-  const newButton = "New";
+  };
+
+
+  useEffect(() => {
+    if (isSuccess) {
+      console.log(newApplicationResponse);
+      console.log(newApplicationResponse?.data);
+      console.log(newApplicationResponse?.data?.student.UserCode);
+
+      navigate(`/${schoolid}/online_admission/${newApplicationResponse?.data?.student.UserCode}`);  // Trigger navigation when the API call is successful
+      // console.log(isSuccess);
+
+    }
+
+    if (isError) {
+      console.error('API call failed:', error);
+      // Show an error message to the user here
+    }
+  }, [isSuccess, isError]);
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="font-lato">
+    <form onSubmit={handleSubmit(onSubmit)} className="font-lato pt-[100px] lg:pt-0 lg:mt-5 lg:ml-5">
 
       <div className="px-[24px] text-[14px]">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3 w-full flex-wrap lg:flex-nowrap">
           {/*Form Start*/}
-          <div className="">
-            <DefaultSelect
-              type="number"
-              label={
-                <span className="text-red-500">
-                  ব্যবহারকারীর ধরণ * :
-                </span>
-              }
-              options={userType}
-              registerKey={"UserTypeID"}
-              valueField={"ID"}
-              nameField={"TypeName"}
-            />
-          </div>
 
-          <div className="">
-            <DefaultInput
-              label={
-                <div className="flex justify-between">
-                  <span className="text-red-500">দাখেলা</span>
-                  <p className="text-blue-700 underline">
-                    <a href="http://">Code Setting</a>
-                  </p>
-                </div>
-              }
-              type={'number'}
-              placeholder={"100149"}
-              registerKey={"UserCode"}
-              require={"Dakhela is require"}
-            />
-          </div>
 
-          <div className="">
-            <DefaultSelect
-              label={
-                <span className="text-red-500">
-                  লিঙ্গ * :
-                </span>
-              }
-              options={gender}
-              registerKey={"GenderID"}
-              require={"Gender Field is require"}
-              nameField={"GenderName"}
-              valueField={"ID"}
-            />
-          </div>
 
           <div className="">
             <DefaultInput
@@ -401,22 +337,35 @@ const AddStudentForm = ({ pageTitle }) => {
             <DefaultInput label={"মাতার নাম :"} type={'text'} placeholder={""} registerKey={"MotherName"} />
           </div>
 
+          <div className="">
+            <DefaultSelect
+              label={
+                <span className="text-red-500">
+                  লিঙ্গ * :
+                </span>
+              }
+              options={gender}
+              registerKey={"GenderID"}
+              require={"Gender Field is require"}
+              nameField={"GenderName"}
+              valueField={"ID"}
+            />
+          </div>
+
           <div className="flex gap-3">
             <div className=" w-full">
-              <DatePickerOne dateCalender={"জন্ম তারিখ :"} placeholder={""} registerKey={"DateOfBirth"} require={"Date Of Birth Require"}/>
+              <DatePickerOne dateCalender={"জন্ম তারিখ :"} placeholder={""} registerKey={"DateOfBirth"} require={"Date Of Birth Require"} />
             </div>
-            <div className=" w-16">
-              <DefaultInput label={"বয়স :"} type={'text'} placeholder={"৭০"} registerKey={"age"} />
-            </div>
+
           </div>
           <div className="">
             <DefaultInput label={"NID/জন্ম নিবন্ধন নং :"} type={'text'} placeholder={""} registerKey={"NIDNO"} />
           </div>
           <div className="flex gap-3">
             <div className="mb-2 w-full">
-              <label className="text-red-500">মোবাইল ১* (SMS যাবে)</label>
+              <label className="text-red-500 font-SolaimanLipi">মোবাইল ১* (SMS যাবে)</label>
               <DefaultInput
-                type={'text'}
+                type={'phone'}
                 placeholder={""}
                 registerKey={"Mobile1"}
               />
@@ -442,6 +391,12 @@ const AddStudentForm = ({ pageTitle }) => {
               valueField={"value"}
 
             />
+          </div>
+          <div className="">
+            {classData ? <DefaultSelect label={"শ্রেণী"} type={"number"} options={classData} nameField={"ClassName"} valueField={"ClassID"} registerKey={"ClassID"} require={"This Field is require"} unicode={true} /> : "no data"}
+          </div>
+          <div className="">
+            {classData ? <DefaultSelect label={"আবাসন"} type={"number"} options={residentialData} nameField={"ResidentialName"} valueField={"RDID"} registerKey={"ResidentialStatusId"} require={"This Field is require"} /> : "no data"}
           </div>
         </div>
 
@@ -471,7 +426,7 @@ const AddStudentForm = ({ pageTitle }) => {
         </div>
         {/*Permanent address column End*/}
 
-        <div className="flex mb-[14px] mt-[18px] pl-[4px] font-bold relative">
+        <div className="lg:flex mb-[14px] mt-[18px] pl-[4px] font-bold relative">
           <div className="flex gap-[5px] items-start">
             <div className="flex items-center">
               <label className="inline-flex items-center">
@@ -488,7 +443,7 @@ const AddStudentForm = ({ pageTitle }) => {
             <label htmlFor="sameAddress" className="items-center text-[16px] font-bold font-noto left-[50%] top-[50%]"> ঠিকানা একই হলে এখানে ক্লিক করুন </label>
           </div>
 
-          <div className="mx-auto font-bold font-noto mb-[-10px] text-[16px] absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-35%]">
+          <div className="mx-auto font-bold font-noto mt-[20px] lg:mt-0 lg:mb-[-10px] text-[16px] lg:absolute lg:left-[50%] lg:top-[50%] lg:translate-x-[-50%] lg:translate-y-[-35%]">
             <p>অস্থায়ী ঠিকানা</p>
           </div>
         </div>
@@ -515,40 +470,11 @@ const AddStudentForm = ({ pageTitle }) => {
           </div>
         </div>
         {/*Temporary address column End*/}
-
-
-
-        {/*Image add start*/}
-        {/* <div className="flex gap-2 mt-1">
-          <p>ছবি সংযুক্ত করুন</p>
-          <input
-            type="file"
-            className="file-input"
-            onChange={handleImageChange}
-          />
-          {selectedImage && <img src={selectedImage} alt="uploaded" className="uploaded-image h-20 w-20 border-4 border-slate-300" />}
-        </div> */}
-        {/*Image add end*/}
-
-        {/*Save Button & Filter start*/}
-        <div className="flex mt-[10px] pl-[4px] font-bold relative">
-          <div className="flex gap-3">
-            <DefaultGreen submitButtonGreen={saveButton} />
-            <DefaultGreen submitButtonGreen={newButton} />
-          </div>
-          <div className="font-bold text-slate-800  font-noto text-[16px] absolute left-[90%]">
-            <select className="border-2 border-slate-300 rounded-lg py-0.5 px-4 bg-transparent" onChange={(e) => dispatch(setItemsPerPage(e.target.value))} defaultValue={"2"}>
-              <option value="2">2</option>
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-          </div>
+        <div className="mt-[40px]">
+          <button type="submit" disabled={buttonDisable} className={`${buttonDisable ? "bg-[#E0E0E0]" : "bg-theme-color text-white"} transition ease-in-out delay-300 text-slate-400 py-[10px] px-16 rounded-md`}>দাখিল করুন</button>
         </div>
-        {/*Save Button & Filter end*/}
-
       </div>
     </form >
   )
 }
-export default AddStudentForm
+export default AddOnlineStudentForm;

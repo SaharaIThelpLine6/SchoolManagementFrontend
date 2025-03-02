@@ -155,7 +155,10 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                              </div> */}
                                             <div className="relative h-full">
                                                 <div className="absolute text-center w-auto left-0 top-0 pt-5">
-                                                    <img className="w-[60px]" src={bufferConveter(schoolData.SignaturePrincipal.data)} alt="principal Image" />
+                                                    {
+                                                        schoolData?.SignaturePrincipal?.data ? <img className="w-[60px]" src={bufferConveter(schoolData.SignaturePrincipal.data)} alt="principal Image" /> : null
+                                                    }
+                                                    
                                                     <p>.....................................</p>
                                                     <p>মুহতামিম</p>
                                                     <p>তারিখ : </p>
@@ -165,7 +168,10 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                         <td className="" height={150} colSpan={11}>
                                             <div className="relative h-full">
                                                 <div className="absolute text-center w-auto right-0 top-0 pt-5">
-                                                    <img className="w-[60px]" src={bufferConveter(schoolData.SignatureNajem.data)} alt="" />
+                                                    {
+                                                      schoolData?.SignatureNajem?.data  ? <img className="w-[60px]" src={bufferConveter(schoolData.SignatureNajem.data)} alt="" /> : null
+                                                    }
+                                                    
                                                     <p>.....................................</p>
                                                     <p>নাযেম</p>
                                                     <p>তারিখ : </p>
