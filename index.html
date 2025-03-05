@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png+xml" href="/QMMSoftIcon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Noto+Serif+Bengali:wght@100..900&display=swap"
+        rel="stylesheet">
+    <title>Qmmsoft- কওমী মাদরাসা ম্যানেজমেন্ট </title>
+</head>
+
+<body>
+    <div id="root"></div>
+    <div class="loading-container hidden_in_print" style="display: flex; align-items: center; justify-content: center; flex-direction: column; height: 100%; width: 100%; position: fixed;">
+       
+        <div class="logo-container">
+            <div class="logo-border hidden_in_print">
+                <img src="/QMMSoft-Logo.png" alt="Logo" width="200">
+            </div>
+        </div>
+        <div class="loading-effect hidden_in_print">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="50" height="50">
+                <circle fill="#0B7ED3" stroke="#0B7ED3" stroke-width="7" r="7" cx="20" cy="50">
+                    <animate attributeName="opacity" calcMode="spline" dur="2" values="1;0;1;"
+                        keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.4"></animate>
+                </circle>
+                <circle fill="#0B7ED3" stroke="#0B7ED3" stroke-width="7" r="7" cx="50" cy="50">
+                    <animate attributeName="opacity" calcMode="spline" dur="2" values="1;0;1;"
+                        keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="-.2"></animate>
+                </circle>
+                <circle fill="#0B7ED3" stroke="#0B7ED3" stroke-width="7" r="7" cx="80" cy="50">
+                    <animate attributeName="opacity" calcMode="spline" dur="2" values="1;0;1;"
+                        keySplines=".5 0 .5 1;.5 0 .5 1" repeatCount="indefinite" begin="0"></animate>
+                </circle>
+            </svg>
+        </div>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>

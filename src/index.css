@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+
+    .chat-height {
+        @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
+    }
+
+    .inbox-height {
+        @apply h-[calc(100vh_-_8.125rem)] lg:h-[calc(100vh_-_5.625rem)];
+    }
+}
+
+@layer base {
+    @font-face {
+        font-family: SolaimanLipi;
+        src: url(/SolaimanLipi.ttf) format('truetype');
+        font-display: swap;
+        unicode-range: U+0980-09FF;
+        /* src: url(/SolaimanLipi.ttf) format('ttf'); */
+    }
+}
