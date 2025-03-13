@@ -4,15 +4,6 @@ import "flatpickr/dist/themes/light.css";
 
 const SortableTable = ({ columns, data, isFilterColumn = true }) => {
   const [filters, setFilters] = useState({});
-
-  // Handle filter input changes
-  // const handleFilterChange = (field, value) => {
-  //   setFilters((prevFilters) => ({
-  //     ...prevFilters,
-  //     [field]: value,
-  //   }));
-  // };
-
   const handleFilterChange = (field, value) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
@@ -32,10 +23,6 @@ const SortableTable = ({ columns, data, isFilterColumn = true }) => {
           .toLowerCase()
           .includes(filters[column.field].toLowerCase());
       }
-
-      // if (column.type === "select") {
-      //   return row[column.field] === filters[column.field];
-      // }
       if (column.type === "select") {
         return row[column.field] === Number(filters[column.field]); // Compare as number
       }
@@ -87,18 +74,6 @@ const SortableTable = ({ columns, data, isFilterColumn = true }) => {
                       )}
 
                       {column.type === "select" && (
-                        // <select
-                        //   className="w-full px-2 py-1 border rounded-md text-xs"
-                        //   value={filters[column.field] || "All"}
-                        //   onChange={(e) => handleFilterChange(column.field, e.target.value)}
-                        // >
-                        //   <option value="All">All</option>
-                        //   {column.options.map((option, i) => (
-                        //     <option key={i} value={option}>
-                        //       {option}
-                        //     </option>
-                        //   ))}
-                        // </select>
                         <select
                           className="w-full h-[80%] px-2 py-1 outline-1 border border-gray-300 outline-theme-color rounded-[5px] text-xs font-normal"
                           value={filters[column.field] ?? "All"}

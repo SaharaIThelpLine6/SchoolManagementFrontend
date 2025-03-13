@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPageName } from "../features/auth/authSlice";
-import { fetchStudentData, fetchUserOnlyStudentData } from "../features/student/studentSlice";
+import { fetchAdmissionStudentData, fetchUserOnlyStudentData } from "../features/student/studentSlice";
 import SortableTable from "../components/Tables/SortableTable";
 import { read, utils, writeFile } from 'xlsx';
 import FilterDropdown from "../components/Dropdowns/FilterDropdown";
@@ -15,17 +15,19 @@ import useTranslate from "../utils/Translate";
 import { showModal } from "../utils/ModalControlar";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/light.css";
+import { useGetStudentQuery } from "../features/student/studentQuerySlice";
+import LoadingComponent from "../components/LoadingComponent";
 
 const AddStudent = ({ pageTitle }) => {
   const translate = useTranslate();
   const [selectedImage, setSelectedImage] = useState(null);
-  const { studentList, userOnlyStudents, status, error } = useSelector((state) => state.student);
+  const { userOnlyStudents, status, error } = useSelector((state) => state.student);
   const location = useLocation();
   const dispatch = useDispatch()
   const searchParams = new URLSearchParams(location.search);
   const filter = searchParams.get('filter');
   const [selectedDateRange, setSelectedDateRange] = useState([]);
-
+  const { data: studentList, error: studentListError } = useGetStudentQuery();
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -47,9 +49,6 @@ const AddStudent = ({ pageTitle }) => {
     if (filter == 2) {
       dispatch(fetchUserOnlyStudentData())
 
-    }
-    else {
-      dispatch(fetchStudentData())
     }
     dispatch(setPageName(pageTitle))
   }, [dispatch, location])
@@ -139,7 +138,7 @@ const AddStudent = ({ pageTitle }) => {
       }
     },
     {
-      title: "Payment status", field: "AdmissionStatus", hozAlign: "center", type: "select", filterable: true, options: [
+      title: "Admission Payment status", field: "AdmissionStatus", hozAlign: "center", type: "select", filterable: true, options: [
         { label: "Pending", value: 0 },
         { label: "Paid", value: 1 },
         { label: "Free", value: 2 },
@@ -149,7 +148,7 @@ const AddStudent = ({ pageTitle }) => {
           case 0:
             return <button type="button" onClick={() => { handleFeeCollectionModal(row.UserID) }}><p className="inline-flex rounded-lg bg-warning bg-opacity-10 px-3 py-1 text-sm font-medium text-warning">Pending</p></button>;
           case 1:
-            return <button type="button" onClick={() => { handleFeeCollectionModal(row.UserID) }}><p className="inline-flex rounded-lg bg-success bg-opacity-10 px-3 py-1 text-sm font-medium text-success">Paid</p></button>;
+            return <p className="inline-flex rounded-lg bg-success bg-opacity-10 px-3 py-1 text-sm font-medium text-success">Paid</p>;
           case 2:
             return <p className="inline-flex rounded-lg bg-info bg-opacity-10 px-3 py-1 text-sm font-medium text-info">Free</p>;
           case 3:
@@ -218,6 +217,7 @@ const AddStudent = ({ pageTitle }) => {
       )
     }
   ];
+// console.log(studentList);
 
   return (
     <div className="-translate-y-4 font-lato">
@@ -243,10 +243,13 @@ const AddStudent = ({ pageTitle }) => {
 
           </div>
         </div>
-        <SortableTable
+        {
+         studentList && studentList.length > 0 ? <SortableTable
           columns={filter == 2 ? columnsNotAdmitedStudent : columnsAdmitedStudent}
           data={filter == 2 ? userOnlyStudents : studentList}
-        />
+        /> : <LoadingComponent/>
+        }
+        
       </div>
     </div>
 

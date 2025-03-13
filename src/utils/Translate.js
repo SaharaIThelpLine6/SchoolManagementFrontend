@@ -65,6 +65,7 @@ const useTranslate = () => {
     'Employee': 'কর্মচারী',
     'Admitted Teacher List': 'যোগদেয়া কর্মীদের তালিকা',
     'Not Admitted Teacher List': 'যোগ না দেয়া কর্মীদের তালিকা',
+    'Account': 'একাউটিং',
     
   };
 

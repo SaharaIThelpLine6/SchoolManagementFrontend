@@ -20,9 +20,9 @@ const DefaultInput = ({ label, type, placeholder, registerKey, require = false, 
             </label>
 
             <input
-                type={type === 'number' || type === 'phone' ? 'number' : 'text'}
+                type={type === 'number' || type === 'phone' ? 'number' : type}
                 placeholder={translate(placeholder)}
-                className={`w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] px-1 text-black outline-none text-[20px] transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-slate-200 ${errors[registerKey] && 'placeholder:text-red-400 border-red-400'}`}
+                className={`w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] px-2 h-[30px] text-black outline-none text-[14px] transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-slate-200 ${errors[registerKey] ? 'placeholder:text-red-400 border-red-400': ''}`}
                 {...register(registerKey, {
                     required: require ? require : false,
                     ...(type === 'number' && { validate: validateNumber }),

@@ -13,6 +13,7 @@ import { fetchSingleStudentData } from '../../features/student/studentSlice';
 import LoadingComponent from '../LoadingComponent';
 import { fetchSettingsData } from '../../features/settings/settingsSlice';
 import { useAddFeeMutation, useGetDueFeeQuery, useGetFeeQuery, useGetFeesQuery, useGetPaymentTypeQuery, useGetSubLedgerQuery } from '../../features/feeCollection/feeCollectionSlice';
+import toBengaliWords from '../../utils/numberToBanglaWords';
 const FeeCollectionForm = ({ userId }) => {
     const dispatch = useDispatch()
     const translate = useTranslate()
@@ -30,9 +31,6 @@ const FeeCollectionForm = ({ userId }) => {
         control,
         formState: { errors },
     } = useFormContext();
-    //     useEffect(()=>{
-    // reset({"SFGNID": 1})
-    //     }, [])
 
     useEffect(() => {
         if (!studentFinancialStatus.length || !academicSession.length) {
@@ -41,12 +39,6 @@ const FeeCollectionForm = ({ userId }) => {
         if (singleStudent?.UserID != userId) {
             dispatch(fetchSingleStudentData(userId))
         }
-        // if (!academicSession.length) {
-        //     dispatch(fetchSettingsData())
-        // }
-        // if (!classList.length) {
-        //     dispatch(fetchClassData())
-        // }
     }, [dispatch])
 
     useEffect(() => {
@@ -55,7 +47,7 @@ const FeeCollectionForm = ({ userId }) => {
         }
     }, [fees, reset]);
 
-    const { GLID, SFGNID, SessionID, CreateAt, invoiceId } = watch();
+    const [ GLID, SFGNID, SessionID, CreateAt, invoiceId ] = watch(["GLID", "SFGNID", "SessionID", "CreateAt", "invoiceId"]);
 
     const { data: subLedger, error: subLedgerError } = useGetSubLedgerQuery(GLID, {
         skip: !GLID,
@@ -66,6 +58,7 @@ const FeeCollectionForm = ({ userId }) => {
             skip: !SessionID || !singleStudent?.ClassID || !SFGNID || singleStudent?.UserID !== userId
         }
     );
+
     const [subladger, setSubLadger] = useState([]);
 
     useEffect(() => {
@@ -75,7 +68,7 @@ const FeeCollectionForm = ({ userId }) => {
         }
     }, [feeData]);
 
-    
+
     const { data: feeDueData, error: feedueError } = useGetDueFeeQuery(
         { sessionID: SessionID, classID: singleStudent?.ClassID, SFGNID, AdmissionID: singleStudent?.AdmissionID },
         {
@@ -95,7 +88,29 @@ const FeeCollectionForm = ({ userId }) => {
     //     console.log(feeError);
     //     alert(feeError.data?.error)
     // }
+    // useEffect(() => {
+    //     console.log("Watched Entries:", watchedEntries);
+    // }, [watchedEntries]);
 
+    if (feeData && feeData.length) {
+        const entryKeys = feeData.map((row) => `entry_${row.SLID}`);
+        const watchedEntries = watch(entryKeys);
+        const subtotal = watchedEntries.reduce((acc, curr) => acc + (+curr || 0), 0);
+        if(subtotal){
+            // console.log(subtotal);
+            // console.log(toBengaliWords(subtotal));
+            const takaBangla = `${toBengaliWords(subtotal)} টাকা। `
+            setValue("AmountInWord", takaBangla)
+        }
+        
+        
+
+
+    }
+// if(feeData){
+//     console.log("============================ Fee data ================");
+    
+// }
     const feeType = [
         {
             SFGNID: 1,
@@ -140,8 +155,11 @@ const FeeCollectionForm = ({ userId }) => {
 
             }
         },
-        { title: "Subtract", field: "UserID", render: (row) => {
-            return <DefaultInput registerKey={`InvoiceDiscount_${row.SLID}`} type={"number"} /> } },
+        {
+            title: "Subtract", field: "UserID", render: (row) => {
+                return <DefaultInput registerKey={`InvoiceDiscount_${row.SLID}`} type={"number"} />
+            }
+        },
         {
             title: "Past Entry",
             render: (row) => {
@@ -155,15 +173,6 @@ const FeeCollectionForm = ({ userId }) => {
             }
         },
         { title: "Main Entry", field: "UserID", render: (row) => { return <DefaultInput registerKey={`entry_${row.SLID}`} type={"number"} /> } },
-        // {
-        //     title: "Receivable", render: (row) => {
-        //         if(!feeDueData){
-        //             return <p>0</p>
-        //         }
-        //         const dueEntry = feeDueData.find((due) => due?.SLID === row?.SLID);
-        //         return <p>{dueEntry ? dueEntry.Fee - dueEntry.PreviousDeposite : JSON.stringify(row[`${genderMap[singleStudent?.GenderID]}${ResidentialStatusMap[singleStudent?.ResidentialStatusId]}${AdmissionType[singleStudent?.NewOldId]}`])}</p>;
-        //     }
-        // },
         {
             title: "Receivable",
             render: (row) => {
@@ -183,8 +192,6 @@ const FeeCollectionForm = ({ userId }) => {
                 return <p>{receivableValue}</p>;
             }
         }
-
-
     ]
 
     // const columnData = ]
@@ -198,7 +205,11 @@ const FeeCollectionForm = ({ userId }) => {
     ]
     const onSubmit = async (data) => {
         const isConfirmed = window.confirm("Are you sure you want to submit the form?");
+
         const submitableData = { ...data, SLID: subladger, UserID: singleStudent.UserID }
+        if(submitableData.SFGNID == 1){
+            submitableData.MonthID = 0
+        }
         if (isConfirmed) {
             await addFee(submitableData).unwrap()
             // User clicked "Yes" or "OK"
@@ -315,7 +326,7 @@ const FeeCollectionForm = ({ userId }) => {
                     {/* <DefaultInput registerKey={"SFGNID"} require={"Payment Type is require"} type={"text"} label={"Payment Type No:"} disable={true} /> */}
 
 
-                    <DefaultSelect label={"Fee Type"} nameField={"SFGName"} registerKey={"SFGNID"} valueField={"SFGNID"} options={feeType} type={"number"} require={"This Field is require"} disabled={false} />
+                    <DefaultSelect label={"Fee Type"} nameField={"SFGName"} registerKey={"SFGNID"} valueField={"SFGNID"} options={feeType} type={"number"} require={"This Field is require"} disabled={true} />
 
 
 
@@ -338,13 +349,15 @@ const FeeCollectionForm = ({ userId }) => {
                             <div className='block mt-4 input-table'>
                                 <SortableTable columns={columnForFee} data={feeData} isFilterColumn={false} />
                             </div>
-                            <div className="flex justify-between">
-                                <div className='text-[14px] mt-2'>
+                            <div className="flex justify-between gap-4 py-3">
+                                {/* <div className='text-[14px] mt-2'>
                                     <p className=''>Print Invoice</p>
                                     <div className='mt-1'>
                                         <SwitcherThree />
                                     </div>
-                                </div>
+                                </div> */}
+                                <DefaultInput registerKey={"AmountInWord"} type={"text"} placeholder={"In Words"} />
+                                <DefaultInput registerKey={"Remark"} type={"text"} placeholder={"Remark"} />
                                 {/* <table className='w-full max-w-[200px] font-SolaimanLipi text-[14px]  mt-4'>
                                     <tbody>
                                         <tr>
@@ -372,7 +385,7 @@ const FeeCollectionForm = ({ userId }) => {
 
                             </div>
                             <div className="text-center">
-                                <button type="submit" disabled={isLoading} className="bg-blue-500 text-white p-2 rounded w-full">
+                                <button type="submit" disabled={isLoading} className="bg-blue-500 inline-block text-white p-2 rounded">
                                     {isLoading ? "Submitting..." : translate("Save")}
                                 </button>
                                 {isSuccess && <p className="text-green-500">Fee added successfully!</p>}

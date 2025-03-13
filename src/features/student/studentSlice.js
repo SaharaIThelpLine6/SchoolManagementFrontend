@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getUserData } from "../../utils/read/api";
 
-export const fetchStudentData = createAsyncThunk("student/fetchStudentData", async () => {
+export const fetchAdmissionStudentData = createAsyncThunk("student/fetchAdmissionStudentData", async () => {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Token is missing');
     const [studentListResponse] = await Promise.all([
@@ -52,15 +52,15 @@ const classSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(fetchStudentData.pending, (state) => {
+            .addCase(fetchAdmissionStudentData.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
             })
-            .addCase(fetchStudentData.fulfilled, (state, action) => {
+            .addCase(fetchAdmissionStudentData.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.studentList = action.payload.studentList;
             })
-            .addCase(fetchStudentData.rejected, (state, action) => {
+            .addCase(fetchAdmissionStudentData.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             })

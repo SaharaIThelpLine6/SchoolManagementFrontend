@@ -12,6 +12,9 @@ import modalReducer from '../features/modal/modalSlice';
 import sidebarReducer from '../features/sidebar/sideBarSlice';
 import { feeCollectionSlice } from '../features/feeCollection/feeCollectionSlice';
 import { onlineAdmissionSlice } from '../features/onlineAdmission/onlineAdmissionSlice';
+import { teachersSlice } from '../features/teachers/teachersSlice';
+import { paymentSlice } from '../features/payment/paymentSlice';
+import { userStudentSlice } from '../features/student/studentQuerySlice';
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -27,12 +30,18 @@ const store = configureStore({
     sideBar: sidebarReducer,
     [feeCollectionSlice.reducerPath]: feeCollectionSlice.reducer,
     [onlineAdmissionSlice.reducerPath]: onlineAdmissionSlice.reducer,
+    [teachersSlice.reducerPath]: teachersSlice.reducer,
+    [paymentSlice.reducerPath]: paymentSlice.reducer,
+    [userStudentSlice.reducerPath]: userStudentSlice.reducer
 
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(feeCollectionSlice.middleware)
-      .concat(onlineAdmissionSlice.middleware),
+      .concat(userStudentSlice.middleware)
+      .concat(onlineAdmissionSlice.middleware)
+      .concat(teachersSlice.middleware)
+      .concat(paymentSlice.middleware),
 });
 
 export default store;

@@ -11,13 +11,13 @@ const Marksheet = () => {
 
     useEffect(() => {
         if (studentResult?.Logo?.data) {
-            if(studentResult?.Logo?.data){
+            if (studentResult?.Logo?.data) {
                 const buffer = Buffer.from(studentResult.Logo.data);
                 const base64String = buffer.toString('base64');
                 const imageSrc = `data:image/png;base64,${base64String}`;
                 setLogo(imageSrc)
             }
-            
+
             if (studentResult?.SignaturePrincipal?.data) {
                 const signaturePrincipalBuffer = Buffer.from(studentResult.SignaturePrincipal.data);
                 const base64StringPrincipalBuffer = signaturePrincipalBuffer.toString('base64');
@@ -91,18 +91,30 @@ const Marksheet = () => {
                             <h1 className="bg-[#a8a6a6] text-white text-center text-[16px]">মোট বিষয় {bnBijoy2Unicode(String(studentResult?.SubSonkha))} টি - পূর্ণমান {bnBijoy2Unicode(String(studentResult?.DivisionTopNumber))}* = {bnBijoy2Unicode(String(studentResult?.DivisionTopNumber * studentResult?.SubSonkha))}</h1>
                             <table className="w-[295px]">
                                 <tbody className="border border-black w-full">
-                                    {Array.from({ length: studentResult.SubSonkha }).map((_, index) => (
-                                        <tr key={index}>
-                                            <td className="text-start pl-2">{bnBijoy2Unicode(studentResult[`Division${index + 1}`])}</td>
-                                            <td className="w-12 text-end">:</td>
-                                            <td className="pl-3">{bnBijoy2Unicode(String(studentResult[`DivisionNumber${index + 1}`]))} X</td>
-                                            <td className="pr-2">{bnBijoy2Unicode(String(studentResult?.SubSonkha))} = {bnBijoy2Unicode(String(studentResult?.SubSonkha * studentResult[`DivisionNumber${index + 1}`]))}</td>
-                                        </tr>
+                                    {Array.from({ length: studentResult?.SubSonkha || 0 }).map((_, index) => {
+                                        const division = studentResult[`Division${index + 1}`];
+                                        const divisionNumber = studentResult[`DivisionNumber${index + 1}`];
+                                        const subSonkha = studentResult?.SubSonkha;
 
-                                    ))}
+                                        // Skip rendering if any of the three values are undefined
+                                        if (division == undefined || divisionNumber == undefined || subSonkha == undefined || division == '') {
+                                            return null;
+                                        }
 
+                                        return (
+                                            <tr key={index}>
+                                                <td className="text-start pl-2">{bnBijoy2Unicode(division)}</td>
+                                                <td className="w-12 text-end">:</td>
+                                                <td className="pl-3">{bnBijoy2Unicode(String(divisionNumber))} X</td>
+                                                <td className="pr-2">
+                                                    {bnBijoy2Unicode(String(subSonkha))} = {bnBijoy2Unicode(String(subSonkha * divisionNumber))}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
+
                         </div>
                     </div>
                     {/*Students details and grade point end*/}

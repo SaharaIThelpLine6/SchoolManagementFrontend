@@ -63,6 +63,7 @@ import Session from './pages/Session';
 import FormBuilder from './pages/FormBuilder';
 import OnlineAdmission from './pages/public/OnlineAdmission';
 import StudentAdmissionForm from './pages/public/studentAddmitionForm';
+import PaymentConfirm from './pages/PaymentConfirm';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -87,7 +88,7 @@ function App() {
         <Routes>
           <Route path="/" element={<DefaultLayout />}>
             <Route index element={<Home pageTitle={"Home"} />} />
-            <Route path="student">
+           <Route path="student">
               <Route index element={<AddStudent pageTitle={"Add Student"} />} />
               <Route path="booklist" element={<BookList pageTitle={"Book List"} />} />
               <Route path="groupdistribution" element={<GroupDistribution pageTitle={"Students Group Set"} />} />
@@ -95,11 +96,14 @@ function App() {
               <Route path="section" element={<Section pageTitle={"Section"} />} />
               <Route path="sessions" element={<Session pageTitle={"Session"} />} />
             </Route>
+
             <Route path="usersinfo" element={<User />}/>
-            <Route path="online_applications" element={<User />}/>
+            <Route path="payment_confirm/:schoolid/:service/:size" element={<PaymentConfirm />}/>
             <Route path='renew' element={<Quota type="renew"/>}/>
+            <Route path='accounts' element={<Quota type="renew"/>}/>
             <Route path='quota' element={<Quota type="quota"/>}/>
             <Route path='formbuilder' element={<FormBuilder/>}/>
+
             <Route path="teacherinfo">
               <Route index element={<AddTeacher pageTitle={"Employee"} />} />
               <Route path="teacherinfo" element={<TeacherInfo pageTitle={"Teacher Info"} />} />

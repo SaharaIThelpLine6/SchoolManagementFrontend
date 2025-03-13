@@ -4,7 +4,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPageName } from "../features/auth/authSlice";
-import { fetchStudentData, fetchUserOnlyStudentData } from "../features/student/studentSlice";
+import { fetchAdmissionStudentData, fetchUserOnlyStudentData } from "../features/student/studentSlice";
 import SortableTable from "../components/Tables/SortableTable";
 import FilterSelectGroup from "../components/Forms/SelectGroup/FilterSelectGroup";
 import { useLocation } from "react-router-dom";
@@ -41,7 +41,7 @@ const AddTeacher = ({ pageTitle }) => {
   
       }
       else {
-        dispatch(fetchStudentData())
+        dispatch(fetchAdmissionStudentData())
       }
       dispatch(setPageName(pageTitle))
     }, [dispatch, location])

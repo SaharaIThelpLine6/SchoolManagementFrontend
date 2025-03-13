@@ -263,10 +263,10 @@ const Sidebar = ({ menuList, title }) => {
   return (
     <aside
       ref={sidebarRef}
-      className={`h-full transition-all duration-300 ease-in-out min-h-screen flex z-30 absolute left-0 top-0 lg:relative ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}
+      className={`h-full transition-all duration-300 ease-in-out min-h-screen flex z-30 absolute left-0 top-0 lg:relative ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 hidden_in_print`}
     >
       <div className='flex relative z-30'>
-        <div className="main_menu_area w-[64px] bg-[#333] h-full flex flex-col">
+        <div className="main_menu_area w-[80px] bg-[#333] h-full flex flex-col">
           <div className="flex items-center justify-center py-5 bg-[#333] z-10">
             <NavLink to="/" className="w-full flex justify-center">
               <img src={Logo} alt="Logo" className='w-12 h-[60px] rounded-sm' />

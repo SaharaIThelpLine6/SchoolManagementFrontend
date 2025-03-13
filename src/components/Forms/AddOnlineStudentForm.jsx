@@ -309,6 +309,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
   }, [isSuccess, isError]);
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="font-lato pt-[100px] lg:pt-0 lg:mt-5 lg:ml-5">
+      <h5 className="text-[30px] text-center font-bold mb-5 mt-2 font-SolaimanLipi">শুধুমাত্র নতুন শিক্ষার্থীদের জন্য আবেদন ফরম</h5>
 
       <div className="px-[24px] text-[14px]">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3 w-full flex-wrap lg:flex-nowrap">

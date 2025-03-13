@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { closeModal } from "../features/modal/modalSlice";
 import AdmissionForm from "./Forms/AdmissionForm";
 import FeeCollectionForm from "./Forms/FeeCollectionForm";
-import PaymentModal from "./Forms/PaymentModal";
+import PaymentModal from "./Modals/PaymentModal";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);

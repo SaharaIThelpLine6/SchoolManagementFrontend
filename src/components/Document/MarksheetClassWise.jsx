@@ -11,7 +11,7 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
         return imageSrc
     }
 
-    const divisionKeys = Object.keys(resultStatices).filter(key => key.startsWith("DC")); 
+    const divisionKeys = Object.keys(resultStatices).filter(key => key.startsWith("DC"));
     return (
         <div >
             {classResult?.length > 0 ? (
@@ -22,49 +22,22 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                             {/*Total Student Table start*/}
                             <div className="text-[14px] pt-1">
                                 <h1 className="bg-[#a8a6a6] text-white text-center text-[14px]">মোট পরীক্ষার্থী = {bnBijoy2Unicode(String(classResult.length))}</h1>
-                                <table className="w-[140px]">
+                                <table className="w-[180px]">
                                     <tbody className=" border border-black w-full">
-
                                         {
-                                            divisionKeys.map((division, index) => (
-                                                <tr key={`division_${division}`}>
-                                                    <td className="text-start pl-2">{bnBijoy2Unicode(String(resultStatices[`Division${index+1}`]))}</td>
-                                                    <td className="w-12 text-end">=</td>
-                                                    <td className="px-3">{bnBijoy2Unicode(String(resultStatices[`DC${index+1}`]))}</td>
-                                                </tr>
-                                            ))
+                                            divisionKeys.map((division, index) => {
+                                                const divisionValue = resultStatices[`Division${index + 1}`];
+                                                const dcValue = resultStatices[`DC${index + 1}`];
+                                                if (divisionValue == undefined || dcValue == undefined || divisionValue == '') return null;
+                                                return (
+                                                    <tr key={`division_${division}`}>
+                                                        <td className="text-start pl-2">{bnBijoy2Unicode(String(divisionValue))}</td>
+                                                        <td className="w-12 text-end">=</td>
+                                                        <td className="px-3">{bnBijoy2Unicode(String(dcValue))}</td>
+                                                    </tr>
+                                                );
+                                            })
                                         }
-
-                                        {/* <tr>
-                                            <td className="text-start pl-2">মুমতায</td>
-                                            <td className="w-12 text-end">=</td>
-                                            <td className="px-3">১১</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="text-start pl-2">জা.জি.মুরতাযে</td>
-                                            <td className="w-12 text-end ">=</td>
-                                            <td className="pl-3 ">১২</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="text-start pl-2">জা.জিদ্দান</td>
-                                            <td className="w-12 text-end ">=</td>
-                                            <td className="pl-3">০</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="text-start pl-2">জায়্যেদ</td>
-                                            <td className="w-12 text-end ">=</td>
-                                            <td className="pl-3">০</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="text-start pl-2">মাকবুল</td>
-                                            <td className="w-12 text-end ">=</td>
-                                            <td className="pl-3">২</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="text-start pl-2">রাসেব</td>
-                                            <td className="w-12 text-end ">=</td>
-                                            <td className="pl-3">১</td>
-                                        </tr> */}
                                     </tbody>
                                 </table>
                             </div>
@@ -83,18 +56,28 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                 <p className="bg-[#a8a6a6] text-white text-center text-[14px]">মোট বিষয় {bnBijoy2Unicode(String(classResult[0]?.SubSonkha))} টি - পূর্ণমান {bnBijoy2Unicode(String(classResult[0]?.DivisionTopNumber))}* = {bnBijoy2Unicode(String(classResult[0]?.DivisionTopNumber * classResult[0]?.SubSonkha))}</p>
                                 <table className="w-[220px]">
                                     <tbody className="border border-black w-full">
+                                        {Array.from({ length: classResult[0].SubSonkha }).map((_, index) => {
+                                            const division = classResult[0][`Division${index + 1}`];
+                                            const divisionNumber = classResult[0][`DivisionNumber${index + 1}`];
+                                            const subSonkha = classResult[0]?.SubSonkha;
 
-                                        {Array.from({ length: classResult[0].SubSonkha }).map((_, index) => (
-                                            <tr key={index}>
-                                                <td className="text-start pl-2">{bnBijoy2Unicode(classResult[0][`Division${index + 1}`])}</td>
-                                                <td className="">:</td>
-                                                <td className="pl-3">{bnBijoy2Unicode(String(classResult[0][`DivisionNumber${index + 1}`]))} X</td>
-                                                <td className="pr-1">{bnBijoy2Unicode(String(classResult[0]?.SubSonkha))} = {bnBijoy2Unicode(String(classResult[0]?.SubSonkha * classResult[0][`DivisionNumber${index + 1}`]))}</td>
-                                            </tr>
+                                            if (division == undefined || divisionNumber == undefined || subSonkha == undefined || division == '') {
+                                                return null;
+                                            }
 
-                                        ))}
-
+                                            return (
+                                                <tr key={index}>
+                                                    <td className="text-start pl-2">{bnBijoy2Unicode(division)}</td>
+                                                    <td className="">:</td>
+                                                    <td className="pl-3">{bnBijoy2Unicode(String(divisionNumber))} X</td>
+                                                    <td className="pr-1">
+                                                        {bnBijoy2Unicode(String(subSonkha))} = {bnBijoy2Unicode(String(subSonkha * divisionNumber))}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
                                     </tbody>
+
                                 </table>
                             </div>
                             {/*Grade Determination End*/}
@@ -158,7 +141,7 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                                     {
                                                         schoolData?.SignaturePrincipal?.data ? <img className="w-[60px]" src={bufferConveter(schoolData.SignaturePrincipal.data)} alt="principal Image" /> : null
                                                     }
-                                                    
+
                                                     <p>.....................................</p>
                                                     <p>মুহতামিম</p>
                                                     <p>তারিখ : </p>
@@ -169,9 +152,9 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                             <div className="relative h-full">
                                                 <div className="absolute text-center w-auto right-0 top-0 pt-5">
                                                     {
-                                                      schoolData?.SignatureNajem?.data  ? <img className="w-[60px]" src={bufferConveter(schoolData.SignatureNajem.data)} alt="" /> : null
+                                                        schoolData?.SignatureNajem?.data ? <img className="w-[60px]" src={bufferConveter(schoolData.SignatureNajem.data)} alt="" /> : null
                                                     }
-                                                    
+
                                                     <p>.....................................</p>
                                                     <p>নাযেম</p>
                                                     <p>তারিখ : </p>

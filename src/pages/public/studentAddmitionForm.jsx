@@ -244,8 +244,8 @@ const StudentAdmissionForm = () => {
                                 </div>
                                 <div className="body_text mt-1 flex justify-between">
                                     <div className='w-1/2'>
-                                        <p className='text-[14px]'>গ্রাম/মহল্লা: {applicationData.permanentVill}</p>
-                                        <p className='text-[14px]'>ডাক: {applicationData.permanentPost}</p>
+                                        <p className='text-[14px]'>গ্রাম/মহল্লা: {bnBijoy2Unicode(applicationData.permanentVill)}</p>
+                                        <p className='text-[14px]'>ডাক: {bnBijoy2Unicode(applicationData.permanentPost)}</p>
                                     </div>
                                     <div className='w-1/2'>
                                         <p className='text-[14px]'>থানা: {thanaP}</p>
@@ -257,8 +257,8 @@ const StudentAdmissionForm = () => {
                                 </div>
                                 <div className="body_text mt-1 flex justify-between">
                                     <div className='w-1/2'>
-                                        <p className='text-[14px]'>গ্রাম/মহল্লা: {applicationData.TransientVill}</p>
-                                        <p className='text-[14px]'>ডাক: {applicationData.TransientPost}</p>
+                                        <p className='text-[14px]'>গ্রাম/মহল্লা: {bnBijoy2Unicode(applicationData.TransientVill)}</p>
+                                        <p className='text-[14px]'>ডাক: {bnBijoy2Unicode(applicationData.TransientPost)}</p>
                                     </div>
                                     <div className='w-1/2'>
                                         <p className='text-[14px]'>থানা: {thanaT}</p>
