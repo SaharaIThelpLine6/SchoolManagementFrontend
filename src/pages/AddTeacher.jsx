@@ -151,7 +151,7 @@ const AddTeacher = ({ pageTitle }) => {
         )
       }
     ];
-  
+    console.log(userOnlyStudents);
     return (
       <div className="-translate-y-4 font-lato">
         <div className="block w-full overflow-x-auto">

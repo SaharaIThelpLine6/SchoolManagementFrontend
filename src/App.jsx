@@ -64,6 +64,7 @@ import FormBuilder from './pages/FormBuilder';
 import OnlineAdmission from './pages/public/OnlineAdmission';
 import StudentAdmissionForm from './pages/public/studentAddmitionForm';
 import PaymentConfirm from './pages/PaymentConfirm';
+import StudentFeeSetup from './pages/StudentFeeSetup';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -100,7 +101,7 @@ function App() {
             <Route path="usersinfo" element={<User />}/>
             <Route path="payment_confirm/:schoolid/:service/:size" element={<PaymentConfirm />}/>
             <Route path='renew' element={<Quota type="renew"/>}/>
-            <Route path='accounts' element={<Quota type="renew"/>}/>
+            <Route path='accounts' element={<StudentFeeSetup type="renew"/>}/>
             <Route path='quota' element={<Quota type="quota"/>}/>
             <Route path='formbuilder' element={<FormBuilder/>}/>
 

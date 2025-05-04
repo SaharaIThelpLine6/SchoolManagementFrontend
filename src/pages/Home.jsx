@@ -57,14 +57,14 @@ const Home = ({ pageTitle }) => {
                     <img src={staffSvg} alt="student icon" />
                 </CardDataStats> */}
             </div>
-            <div className="flex gap-4 mt-4">
+            <div className="flex gap-4 mt-4 pb-4 flex-col md:flex-row">
                 <ChartThree data={students} />
                 {/* <ChartThree data={students} /> */}
                 {/* <ChartThree /> */}
                 <div className="w-full">
                     <div className="inline-block min-w-full align-middle">
                         <div className="overflow-hidden ">
-                            <table className="min-w-full divide-y divide-gray-200 table-fixed">
+                            <table className="min-w-full divide-y divide-gray-200 table-fixed border border-gray-200">
                                 <thead className="bg-gray-100">
                                     <tr>
 
@@ -85,7 +85,7 @@ const Home = ({ pageTitle }) => {
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {Object.entries(countBySession).map(([sessionId, count]) => (
                                         <tr key={sessionId} className="hover:bg-gray-100 dark:hover:bg-gray-700">
-                                            <td className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap">
+                                            <td className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap border border-gray-200">
                                                 {sessionId}
                                             </td>
                                             <td className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap">

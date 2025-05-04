@@ -15,6 +15,7 @@ import { onlineAdmissionSlice } from '../features/onlineAdmission/onlineAdmissio
 import { teachersSlice } from '../features/teachers/teachersSlice';
 import { paymentSlice } from '../features/payment/paymentSlice';
 import { userStudentSlice } from '../features/student/studentQuerySlice';
+import { monthSlice } from '../features/month/monthSlice';
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -32,7 +33,8 @@ const store = configureStore({
     [onlineAdmissionSlice.reducerPath]: onlineAdmissionSlice.reducer,
     [teachersSlice.reducerPath]: teachersSlice.reducer,
     [paymentSlice.reducerPath]: paymentSlice.reducer,
-    [userStudentSlice.reducerPath]: userStudentSlice.reducer
+    [userStudentSlice.reducerPath]: userStudentSlice.reducer,
+    [monthSlice.reducerPath]: monthSlice.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -41,7 +43,8 @@ const store = configureStore({
       .concat(userStudentSlice.middleware)
       .concat(onlineAdmissionSlice.middleware)
       .concat(teachersSlice.middleware)
-      .concat(paymentSlice.middleware),
+      .concat(paymentSlice.middleware)
+      .concat(monthSlice.middleware),
 });
 
 export default store;

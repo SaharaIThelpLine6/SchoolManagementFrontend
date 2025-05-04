@@ -7,6 +7,7 @@ import { setItemsPerPage } from '../../features/pagination/paginationSlice';
 import { logout } from '../../features/auth/authSlice';
 import { fetchSingleUser, setEditMode } from '../../features/userInfo/userInfoSlice';
 import Pagination from '../Pagination/Pagination';
+import bijoyToUnicode from '@codesigntheory/bnbijoy2unicode';
 
 const TableOne = () => {
   const [brandData, setBrandData] = useState([]);
@@ -88,10 +89,10 @@ const TableOne = () => {
                     <p className="text-black dark:text-white">{brand.UserCode}</p>
                   </td>
                   <td className="py-1 px-4 border border-white ">
-                    <p className="text-black dark:text-white">{brand.UserName}</p>
+                    <p className="text-black dark:text-white">{brand.UserName ? bijoyToUnicode(String(brand.UserName)) : ''}</p>
                   </td>
                   <td className="py-1 px-4 border border-white">
-                    <p className="text-black dark:text-white">{brand.FatherName}</p>
+                    <p className="text-black dark:text-white">{brand.FatherName ? bijoyToUnicode(String(brand?.FatherName)) : ''}</p>
                   </td>
                   <td className="py-1 px-4 border border-white">
                     <p className="text-black dark:text-white">{brand.Mobile1}</p>
