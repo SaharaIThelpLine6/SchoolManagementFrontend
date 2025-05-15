@@ -14,6 +14,7 @@ import LoadingComponent from '../LoadingComponent';
 import { fetchSettingsData } from '../../features/settings/settingsSlice';
 import { useAddFeeMutation, useGetDueFeeQuery, useGetFeeQuery, useGetFeesQuery, useGetPaymentTypeQuery, useGetSubLedgerQuery } from '../../features/feeCollection/feeCollectionSlice';
 import toBengaliWords from '../../utils/numberToBanglaWords';
+import { useNavigate } from 'react-router-dom';
 const FeeCollectionForm = ({ userId }) => {
     const dispatch = useDispatch()
     const translate = useTranslate()
@@ -22,6 +23,7 @@ const FeeCollectionForm = ({ userId }) => {
     const { data: fees, error: feesError, isLoading: feesLoading } = useGetFeesQuery();
     const { data: paymentType, error: paymentError, isLoading: paymentLoading } = useGetPaymentTypeQuery();
     const [addFee, { isLoading, isError, isSuccess }] = useAddFeeMutation();
+    const navigate = useNavigate()
     const {
         register,
         handleSubmit,
@@ -31,6 +33,7 @@ const FeeCollectionForm = ({ userId }) => {
         control,
         formState: { errors },
     } = useFormContext();
+    // console.log(singleStudent);
 
     useEffect(() => {
         if (!studentFinancialStatus.length || !academicSession.length) {
@@ -80,8 +83,19 @@ const FeeCollectionForm = ({ userId }) => {
 
     useEffect(() => {
         if (feeError && !errorShown) {
-            alert(feeError.data?.error || "An error occurred");
+            console.log(feeError.status);
+            if(feeError?.status !== 404){
+                alert(feeError.data?.error || "An error occurred");
+            }
+            else {
+                if(SFGNID == 1){
+                    // navigate("/setup_asmissionfee")
+                }
+            }
             setErrorShown(true);
+            
+            
+            
         }
     }, [feeError, errorShown]);
     // if(feeError){
@@ -326,7 +340,7 @@ const FeeCollectionForm = ({ userId }) => {
                     {/* <DefaultInput registerKey={"SFGNID"} require={"Payment Type is require"} type={"text"} label={"Payment Type No:"} disable={true} /> */}
 
 
-                    <DefaultSelect label={"Fee Type"} nameField={"SFGName"} registerKey={"SFGNID"} valueField={"SFGNID"} options={feeType} type={"number"} require={"This Field is require"} disabled={true} />
+                    <DefaultSelect label={"Fee Type"} nameField={"SFGName"} registerKey={"SFGNID"} valueField={"SFGNID"} options={feeType} type={"number"} require={"This Field is require"} />
 
 
 
@@ -344,7 +358,7 @@ const FeeCollectionForm = ({ userId }) => {
                     {/* <DefaultInput registerKey={"recept"} require={"Recept Number is require"} type={"text"} label={"Account"} disable={true} /> */}
                 </div>
                 {
-                    !feeError && feeData && feeData.length > 0 && (
+                    !feeError && feeData && feeData.length > 0 ? (
                         <div>
                             <div className='block mt-4 input-table'>
                                 <SortableTable columns={columnForFee} data={feeData} isFilterColumn={false} />
@@ -394,7 +408,7 @@ const FeeCollectionForm = ({ userId }) => {
                             </div>
 
                         </div>
-                    )
+                    ) : <p>Data Not found</p>
                 }
 
                 {/* <DefaultInput registerKey={"FatherName"} require={"Father Name is require"} type={"text"} label={"Father Name"} disable={true} />

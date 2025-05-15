@@ -151,7 +151,7 @@ const AddTeacher = ({ pageTitle }) => {
         )
       }
     ];
-  
+    console.log(userOnlyStudents);
     return (
       <div className="-translate-y-4 font-lato">
         <div className="block w-full overflow-x-auto">
@@ -165,10 +165,10 @@ const AddTeacher = ({ pageTitle }) => {
               
             </div>
           </div>
-          <SortableTable
+          {/* <SortableTable
             columns={filter == 2 ? columnsNotAdmitedStudent : columnsAdmitedStudent}
             data={filter == 2 ? userOnlyStudents : studentList}
-          />
+          /> */}
         </div>
       </div>
   

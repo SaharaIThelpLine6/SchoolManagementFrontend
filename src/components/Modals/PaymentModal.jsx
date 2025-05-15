@@ -84,7 +84,12 @@ const PaymentModal = () => {
         // console.log(paymentRequest);
         if(req){
             setReq(false)
-            await createPaymentRequest(paymentRequest).unwrap()
+            await createPaymentRequest(paymentRequest).unwrap().then((payload) => {
+                sessionStorage.clear();
+                setReq(true)
+                window.location.href = payload.bkashURL;
+
+            }).catch((error) => { setPaymentStatus(error.data?.error ? error.data.error : "Failed"); setReq(true) });
         }
 
        
@@ -148,11 +153,15 @@ const PaymentModal = () => {
             name: "1000"
         },
     ]
-    if (isSuccess) {
-        window.location.href = paymentMethodData.bkashURL;
-        // console.log(paymentMethodData);
+    // if (isSuccess) {
+    //     sessionStorage.clear();
+    //     console.log("session clear");
+    //     setTimeout(() => {
+    //         window.location.href = paymentMethodData.bkashURL;
+    //     }, 100);
         
-    }
+    //     // window.location.href = paymentMethodData.bkashURL;
+    // }
     if(isLoading){
         return <p>Loading...</p>
     }

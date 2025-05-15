@@ -64,6 +64,7 @@ import FormBuilder from './pages/FormBuilder';
 import OnlineAdmission from './pages/public/OnlineAdmission';
 import StudentAdmissionForm from './pages/public/studentAddmitionForm';
 import PaymentConfirm from './pages/PaymentConfirm';
+import StudentFeeSetup from './pages/StudentFeeSetup';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -100,13 +101,13 @@ function App() {
             <Route path="usersinfo" element={<User />}/>
             <Route path="payment_confirm/:schoolid/:service/:size" element={<PaymentConfirm />}/>
             <Route path='renew' element={<Quota type="renew"/>}/>
-            <Route path='accounts' element={<Quota type="renew"/>}/>
+            <Route path='accounts' element={<StudentFeeSetup type="renew"/>}/>
             <Route path='quota' element={<Quota type="quota"/>}/>
             <Route path='formbuilder' element={<FormBuilder/>}/>
 
             <Route path="teacherinfo">
               <Route index element={<AddTeacher pageTitle={"Employee"} />} />
-              <Route path="teacherinfo" element={<TeacherInfo pageTitle={"Teacher Info"} />} />
+              {/* <Route path="teacherinfo" element={<TeacherInfo pageTitle={"Teacher Info"} />} /> */}
               <Route path="payRole" element={<PayRole pageTitle={"Pay Role"} />} />
               <Route path="pRName" element={<PayRoleName pageTitle={"Pay Role Name"} />} />
               <Route path="report" element={<Report pageTitle={"Reports"} />} />

@@ -8,7 +8,7 @@ export const fetchAdmissionStudentData = createAsyncThunk("student/fetchAdmissio
         getUserData(token, `/api/students/view_students`),
     ]);
     return {
-        studentList: studentListResponse,
+        studentList: studentListResponse.data,
     };
 });
 
@@ -32,14 +32,25 @@ export const fetchSingleStudentData = createAsyncThunk("student/fetchSingleStude
         singleStudent: studentResponse,
     };
 });
+export const fetchSingleStudentDataByStudentCode = createAsyncThunk("student/fetchSingleStudentDataByStudentCode", async (id) => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token is missing');
+    const [studentResponse] = await Promise.all([
+        getUserData(token, `/api/students/view_single_student_withcode?id=${id}`),
+    ]);
+    return {
+        academicStudent: studentResponse,
+    };
+});
 
 const initialState = {
     studentList: [],
     userOnlyStudents: [],
-    singleStudent: null, // Added initial state for single student
+    singleStudent: null, 
     editMode: 0,
     status: 'idle',
     error: null,
+    admittedStudent:{}
 };
 
 const classSlice = createSlice({
@@ -85,6 +96,18 @@ const classSlice = createSlice({
                 state.singleStudent = action.payload.singleStudent;
             })
             .addCase(fetchSingleStudentData.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            .addCase(fetchSingleStudentDataByStudentCode.pending, (state) => {
+                state.status = 'loading';
+                state.error = null;
+            })
+            .addCase(fetchSingleStudentDataByStudentCode.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.admittedStudent = action.payload.academicStudent; 
+            })
+            .addCase(fetchSingleStudentDataByStudentCode.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             });

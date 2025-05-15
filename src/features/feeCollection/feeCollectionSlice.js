@@ -28,8 +28,11 @@ export const feeCollectionSlice = createApi({
             query: ({ sessionID, classID, SFGNID }) => `view_student_fee/${sessionID}/${classID}/${SFGNID}`,
         }), 
         getDueFee: builder.query({
-            query: ({ sessionID, classID, SFGNID, AdmissionID }) => `view_student_due_fee/${sessionID}/${classID}/${SFGNID}/${AdmissionID}`,
-        }),        
+            query: ({ sessionID, classID, SFGNID, AdmissionID, monthID }) => `view_student_due_fee/${sessionID}/${classID}/${SFGNID}/${AdmissionID}/${monthID ? monthID : 0}`,
+        }),    
+        getFeeById: builder.query({
+            query: ({ studentCode, sessionID, SFGNID, monthID }) => `view_student_fee_by_code/${studentCode}/${sessionID}/${SFGNID}/${monthID}`,
+        }),    
         addFee: builder.mutation({
             query: (newFee) => ({
                 url: 'fee_insert',
@@ -59,6 +62,7 @@ export const {
     useGetSubLedgerQuery,
     useGetFeeQuery,
     useGetDueFeeQuery,
+    useGetFeeByIdQuery,
     useAddFeeMutation,
     useUpdateFeeMutation,
     useDeleteFeeMutation,

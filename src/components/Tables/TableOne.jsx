@@ -97,7 +97,7 @@ const TableOne = () => {
                     <p className="text-black dark:text-white">{brand.Mobile1}</p>
                   </td>
                   <td className="py-1 px-4 border border-white">
-                    <p className="text-black dark:text-white">{brand.UserType.TypeName}</p>
+                    <p className="text-black dark:text-white">{brand?.UserType?.TypeName}</p>
                   </td>
                 </tr>
               ))
