@@ -26,19 +26,10 @@ const Home = ({ pageTitle }) => {
         dispatch(fetchAdmissionStudentData())
 
     }, [dispatch])
-    // if(status === 'succeeded'){
-    //     const countBySession = studentList.reduce((acc, student) => {
-    //         acc[student.SessionName] = (acc[student.SessionID] || 0) + 1;
-    //         return acc;
-    //     }, {});
-    //     // console.log(studentList);
-    //     // console.log(countBySession);
-    // }
-
-    // const countBySession = studentList.reduce((acc, student) => {
-    //     acc[student.SessionName] = (acc[student.SessionName] || 0) + 1;
-    //     return acc;
-    // }, {});
+    const countBySession = studentList ? studentList.reduce((acc, student) => {
+        acc[student.SessionName] = (acc[student.SessionName] || 0) + 1;
+        return acc;
+    }, {}) : [];
     
     return (
         <div className="px-[24px]">
@@ -83,7 +74,7 @@ const Home = ({ pageTitle }) => {
                                     </tr>
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
-                                    {/* {Object.entries(countBySession).map(([sessionId, count]) => (
+                                    {Object.entries(countBySession).map(([sessionId, count]) => (
                                         <tr key={sessionId} className="hover:bg-gray-100 dark:hover:bg-gray-700">
                                             <td className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap border border-gray-200">
                                                 {sessionId}
@@ -92,7 +83,7 @@ const Home = ({ pageTitle }) => {
                                                 {count}
                                             </td>
                                         </tr>
-                                    ))} */}
+                                    ))}
                                 </tbody>
                             </table>
                         </div>
