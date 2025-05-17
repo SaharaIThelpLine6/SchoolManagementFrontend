@@ -220,3 +220,54 @@ tr:nth-child(even) {
     background-color: white;
   }
 }
+
+/* .swal2-icon.swal2-error.swal2-icon-show{
+  width: 30px;
+  height: 20px;
+} */
+
+div:where(.swal2-icon) {
+  
+  width: 60px !important;
+  height: 60px !important;
+  
+}
+div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line][class$=left] {
+  left: 10px !important; 
+ 
+}
+div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
+
+top: 28px !important;
+  width: 37px !important;
+  height: 4px !important;
+
+}
+div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line][class$=right] {
+  right: 13px !important;
+ 
+}
+div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
+
+  top: 28px !important;
+  width: 37px !important;
+  height: 4px !important;
+ 
+}
+
+.swal2-title{
+  font-size: 20px  !important;
+  
+}
+
+.swal2-loader{
+
+
+    width: 10px !important;
+    height: 10px !important;
+    margin: 10px !important;
+    
+}
+
+
+
