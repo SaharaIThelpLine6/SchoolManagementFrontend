@@ -75,7 +75,7 @@ const Home = ({ pageTitle }) => {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {Object.entries(countBySession).map(([sessionId, count]) => (
-                                        <tr key={sessionId} className="hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <tr key={sessionId} className="hover:bg-gray-100">
                                             <td className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap border border-gray-200">
                                                 {sessionId}
                                             </td>

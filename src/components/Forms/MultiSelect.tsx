@@ -95,7 +95,7 @@ const MultiSelect: React.FC<DropdownProps> = ({ id }) => {
 
   return (
     <div className="relative z-50">
-      <label className="mb-3 block text-sm font-medium text-black dark:text-white">
+      <label className="mb-3 block text-sm font-medium text-black ">
         Multiselect Dropdown
       </label>
       <div>
@@ -111,12 +111,12 @@ const MultiSelect: React.FC<DropdownProps> = ({ id }) => {
           <div className="relative z-20 inline-block w-full">
             <div className="relative flex flex-col items-center">
               <div ref={trigger} onClick={open} className="w-full">
-                <div className="mb-2 flex rounded border border-stroke py-2 pl-3 pr-3 outline-none transition focus:border-primary active:border-primary dark:border-form-strokedark dark:bg-form-input">
+                <div className="mb-2 flex rounded border border-stroke py-2 pl-3 pr-3 outline-none transition focus:border-primary active:border-primary">
                   <div className="flex flex-auto flex-wrap gap-3">
                     {selected.map((index) => (
                       <div
                         key={index}
-                        className="my-1.5 flex items-center justify-center rounded border-[.5px] border-stroke bg-gray px-2.5 py-1.5 text-sm font-medium dark:border-strokedark dark:bg-white/30"
+                        className="my-1.5 flex items-center justify-center rounded border-[.5px] border-stroke bg-gray px-2.5 py-1.5 text-sm font-medium"
                       >
                         <div className="max-w-full flex-initial">
                           {options[index].text}
@@ -184,7 +184,7 @@ const MultiSelect: React.FC<DropdownProps> = ({ id }) => {
               </div>
               <div className="w-full px-4">
                 <div
-                  className={`max-h-select absolute top-full left-0 z-40 w-full overflow-y-auto rounded bg-white shadow dark:bg-form-input ${
+                  className={`max-h-select absolute top-full left-0 z-40 w-full overflow-y-auto rounded bg-white shadow ${
                     isOpen() ? '' : 'hidden'
                   }`}
                   ref={dropdownRef}
@@ -195,7 +195,7 @@ const MultiSelect: React.FC<DropdownProps> = ({ id }) => {
                     {options.map((option, index) => (
                       <div key={index}>
                         <div
-                          className="w-full cursor-pointer rounded-t border-b border-stroke hover:bg-primary/5 dark:border-form-strokedark"
+                          className="w-full cursor-pointer rounded-t border-b border-stroke hover:bg-primary/5"
                           onClick={(event) => select(index, event)}
                         >
                           <div

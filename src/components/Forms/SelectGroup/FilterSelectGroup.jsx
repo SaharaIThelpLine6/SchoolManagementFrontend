@@ -36,7 +36,7 @@ const FilterSelectGroup = ({defaultSelect, options, valueField, nameField}) => {
                     onChange={(e) => {
                         handleFilterChange(e)
                     }}
-                    className={`relative z-20 w-full appearance-none rounded-[8px] border border-stroke bg-transparent pointer py-2 pt-[10px] pl-8 pr-6 text-start text-[14px] font-kalpurush   outline-none transition  ${isOptionSelected ? 'text-black dark:text-white' : ''
+                    className={`relative z-20 w-full appearance-none rounded-[8px] border border-stroke bg-transparent pointer py-2 pt-[10px] pl-8 pr-6 text-start text-[14px] font-kalpurush   outline-none transition  ${isOptionSelected ? 'text-black' : ''
                         }`}
                 >
                     {/* {
