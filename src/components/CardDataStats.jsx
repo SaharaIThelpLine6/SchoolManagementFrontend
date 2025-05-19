@@ -17,7 +17,7 @@ const CardDataStats = ({
 
       <div className=" flex items-end justify-between font-lato">
         <div>
-          <h4 className="text-title-md font-bold text-black dark:text-white">
+          <h4 className="text-title-md font-bold text-black">
             {total}
           </h4>
           <span className="text-sm font-medium">{title}</span>

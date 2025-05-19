@@ -18,10 +18,32 @@ export const userStudentSlice = createApi({
     endpoints: (builder) => ({
         getStudent: builder.query({
             query: () => 'view_students',
+        }),
+        getStudentReportCets: builder.query({
+            query: () => `get_studentreport_cet`,
+
+        }),
+        getStudentReportType: builder.query({
+            query: () => `get_studentreport_type`,
+        }),
+        getStudentReports: builder.mutation({
+           query: (data) => (`get_studentreports?StudentCode=${data}`),
+        }),
+        postStudentCharacterReport: builder.mutation({
+            query: (data) => ({
+                url: `student_character_report`,
+                method: 'POST',
+                body: data,
+            }),
         })
     }),
 });
 
 export const {
-    useGetStudentQuery
+    useGetStudentQuery,
+    useGetStudentReportCetsQuery,
+    useGetStudentReportTypeQuery,
+    useGetStudentReportsMutation,
+    usePostStudentCharacterReportMutation
 } = userStudentSlice;
+

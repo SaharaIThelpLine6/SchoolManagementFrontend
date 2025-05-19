@@ -321,13 +321,32 @@ const Sidebar = ({ menuList, title }) => {
                     <span className={`${pathname.includes(subItem.route) ? 'text-[#6ad965]' : "text-theme-dark"}`}>{subItem.icon ? parse(subItem.icon) : null}</span>
                     <span>{subItem.name}</span>
                   </NavLink>
+
+                  {subItem.subMenu && Array.isArray(subItem.subMenu) && (
+                    <ul className={`ml-5 mt-1 border-l border-gray-300 pl-3 ${pathname.includes(subItem.route) ? '' : 'hidden'}`}>
+                      {subItem.subMenu.map((nestedItem) => (
+                        <li key={nestedItem.id} className="mb-1">
+                          <NavLink
+                            to={`${activeMenu.route}${subItem.route}${nestedItem.route}`}
+                            className={`flex items-center gap-2 p-1 rounded-md text-[13px] ${pathname.includes(nestedItem.route)
+                              ? "text-[#6ad965] font-semibold"
+                              : "text-theme-dark"
+                              }`}
+                          >
+                            {nestedItem.icon ? parse(nestedItem.icon) : null}
+                            <span>{nestedItem.name}</span>
+                          </NavLink>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </li>
               ))}
             </ul>
           </div>
         )}
         {activeMenu && activeMenu.subMenu ? (
-          <div className="app-sidebar-resizer h-full w-[10px] after:content[''] after:relative after:w-[5px] after:h-[16px] after:top-1/2 after:-translate-y-1/2 after:border-x after:border-x-[#cccccc] bg-[#ededed] after:block" style={{ flexGrow: 0, flexShrink: 0, flexBasis: '6px', justifySelf: 'flex-end', cursor: "ew-resize", resize: "horizontal" }} />
+          <div className="app-sidebar-resizer h-full w-[10px] after:content[''] after:relative after:w-[5px] after:h-[16px] after:top-1/2 after:-translate-y-1/2 after:border-x after:border-x-[#cccccc] bg-[#ededed] after:block" style={{ flexGrow: 0, flexShrink: 0, flexBasis: '6px', justifySelf: 'flex-end', cursor: "ew-resize", resize: "horizontal" }}></div>
         ) : null}
       </div>
       <div className={`fixed bg-black bg-opacity-80 z-10 w-screen h-screen ${isOpen ? 'block' : 'hidden'} lg:hidden`} onClick={() => { dispatch(closeSidebar()) }}>

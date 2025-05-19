@@ -10,7 +10,7 @@ const DatePickerOne = ({ dateCalender, placeholder, registerKey, require, disabl
   const translate = useTranslate()
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-black dark:text-white">
+      <label className="mb-1 block text-sm font-medium text-black ">
         {translate(dateCalender)}
       </label>
 

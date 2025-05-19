@@ -65,6 +65,8 @@ import OnlineAdmission from './pages/public/OnlineAdmission';
 import StudentAdmissionForm from './pages/public/studentAddmitionForm';
 import PaymentConfirm from './pages/PaymentConfirm';
 import StudentFeeSetup from './pages/StudentFeeSetup';
+import StudentReport from './pages/StudentReport';
+import StudentReportList from './pages/StudentReportList';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -96,6 +98,11 @@ function App() {
               <Route path="class" element={<Class pageTitle={"Class"} />} />
               <Route path="section" element={<Section pageTitle={"Section"} />} />
               <Route path="sessions" element={<Session pageTitle={"Session"} />} />
+
+              <Route path="students-report" element={<StudentReport pageTitle={"Student Report"} />}/>
+              <Route path="students-report/list" element={<StudentReportList pageTitle={"Student Reports"} />} />
+              
+              
             </Route>
 
             <Route path="usersinfo" element={<User />}/>

@@ -40,16 +40,16 @@ const Login = () => {
                 }
             );
             if (response.status === 200) {
-                Swal.fire({
-                    icon: 'success',
-                    width: '300px',
-                    title: 'Login Successful!',
-                    text: 'You have been logged in successfully',
-                    showConfirmButton: false,
-                    timer: 2000
-                  });
+                // Swal.fire({
+                //     icon: 'success',
+                //     width: '300px',
+                //     title: 'Login Successful!',
+                //     text: 'You have been logged in successfully',
+                //     showConfirmButton: false,
+                //     timer: 20000000
+                //   });
                   
-                console.log(response.data.token);
+                // console.log(response.data.token);
                 
 
                 dispatch(login({ token: response.data.token, user: response.data.user }));
@@ -81,8 +81,8 @@ const Login = () => {
             <div className="w-full bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 max-w-md hover:shadow-2xl transition-shadow duration-300">
                 <div className="p-8 space-y-6">
                     <div className="text-center">
-                        <h1 className="text-3xl font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-sky-700 bg-clip-text text-transparent">
-                            Welcome Back
+                        <h1 className="text-[28px] leading-[42px] font-bold text-gray-800 bg-gradient-to-r from-blue-600 to-sky-700 bg-clip-text text-transparent font-SolaimanLipi">
+                            QMMSOFT কওমী মাদরাসা ম্যানেজমেন্ট
                         </h1>
                         <p className="mt-2 text-gray-500">Sign in to continue to your account</p>
                     </div>
@@ -94,14 +94,12 @@ const Login = () => {
                                 type={'number'} 
                                 placeholder={"Enter School ID"} 
                                 registerKey={"school_id"}
-                                className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500 border-gray-200"
                             />
                             <DefaultInput 
                                 label={"Username"} 
                                 type={'text'} 
                                 placeholder={"Username"} 
                                 registerKey={"username"}
-                                className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500 border-gray-200"
                             />
                             
                             {/* Password Input with Toggle */}
@@ -111,7 +109,6 @@ const Login = () => {
                                     type={showPassword ? 'text' : 'password'} 
                                     placeholder={"••••••••"} 
                                     registerKey={"password"}
-                                    className="focus:ring-2 focus:ring-blue-500 focus:border-blue-500 border-gray-200 pr-10 mb-10"
                                 />
                                 <button
                                     type="button"

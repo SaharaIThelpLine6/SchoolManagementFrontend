@@ -244,9 +244,9 @@ const AddStudent = ({ pageTitle }) => {
           </div>
         </div>
         {
-         studentList && studentList.length > 0 ? <SortableTable
+         studentList && studentList.data.length > 0 ? <SortableTable
           columns={filter == 2 ? columnsNotAdmitedStudent : columnsAdmitedStudent}
-          data={filter == 2 ? userOnlyStudents : studentList}
+          data={filter == 2 ? userOnlyStudents : studentList.data}
         /> : <LoadingComponent/>
         }
         

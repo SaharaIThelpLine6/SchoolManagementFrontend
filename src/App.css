@@ -112,7 +112,7 @@
 
 @font-face {
   font-family: "SolaimanLipiNormal";
-  src: local('SolaimanLipiNormal'), local('solaimanlipi'), url('./assets/fonts/solaimanlipi.woff') format('woff');
+  src: local('SolaimanLipiNormal'), local('solaimanlipi'), url('./assets/font/solaimanlipi.woff') format('woff');
   /* font-display: swap;
   unicode-range: U+0980-09FF; */
   /* local('SolaimanLipiNormal'), url('solaimanlipi.woff') format('woff') */
@@ -120,7 +120,7 @@
 @font-face {
   font-display: swap;
   font-family: SutonnyMJ;
-  src: url("./assets/fonts/SutonnyMJ.ttf") format("truetype")
+  src: url("./assets/font/SutonnyMJ.ttf") format("truetype")
 }
 
 /* @font-face {
@@ -136,17 +136,17 @@
     url('./assets/fonts/kalpurush/kalpurush-v0.256.eot?#iefix') format('embedded-opentype');
   unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
 } */
-@font-face {
+/* @font-face {
   font-family: 'Kalpurush';
   font-style: normal;
   font-weight: 100 900;
   font-stretch: 100%;
   font-display: swap;
-  src: url('/assets/fonts/kalpurush-v0.256.woff') format('woff'),
-    url('/assets/fonts/kalpurush-v0.256.ttf') format('truetype'),
-    url('/assets/fonts/kalpurush-v0.256.svg#AdorshoLipi') format('svg'),
-    url('/assets/fonts/kalpurush-v0.256.eot?#iefix') format('embedded-opentype');
-}
+  src: url('/assets/font/kalpurush-v0.256.woff') format('woff'),
+    url('/assets/font/kalpurush-v0.256.ttf') format('truetype'),
+    url('/assets/font/kalpurush-v0.256.svg#AdorshoLipi') format('svg'),
+    url('/assets/font/kalpurush-v0.256.eot?#iefix') format('embedded-opentype');
+} */
 
 
 .sub_menu_area {
