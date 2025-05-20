@@ -67,6 +67,7 @@ import PaymentConfirm from './pages/PaymentConfirm';
 import StudentFeeSetup from './pages/StudentFeeSetup';
 import StudentReport from './pages/StudentReport';
 import StudentReportList from './pages/StudentReportList';
+import StudentReportsPdf from './pages/Reports/StudentReportsPdf';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -101,7 +102,7 @@ function App() {
 
               <Route path="students-report" element={<StudentReport pageTitle={"Student Report"} />}/>
               <Route path="students-report/list" element={<StudentReportList pageTitle={"Student Reports"} />} />
-              
+              <Route path="students-report/list/print" element={<StudentReportsPdf pageTitle={"Student Reports Print"} />} />
               
             </Route>
 
