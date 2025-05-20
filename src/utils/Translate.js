@@ -66,6 +66,12 @@ const useTranslate = () => {
     'Admitted Teacher List': 'যোগদেয়া কর্মীদের তালিকা',
     'Not Admitted Teacher List': 'যোগ না দেয়া কর্মীদের তালিকা',
     'Account': 'একাউটিং',
+    "User Code": "ইউজার কোড",
+    "Varient": "প্রকার",
+    "Type": "ধরন",
+    "Remark": "মন্তব্য",
+    "Character Report": "চারিত্রিক রিপোর্ট",
+    "No.": "ক্র: নং",
     
   };
 

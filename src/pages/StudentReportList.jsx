@@ -9,6 +9,9 @@ import { useGetStudentReportCetsQuery, useGetStudentReportsMutation, useGetStude
 import { fetchSingleStudentDataByStudentCode } from '../features/student/studentSlice';
 import { toast } from 'react-toastify';
 import SortableTable from '../components/Tables/SortableTable';
+import convertBijoyToBengali from '../utils/uniconveter';
+import bnBijoy2Unicode from '../utils/conveter';
+import useTranslate from '../utils/Translate';
 
 const StudentReportList = ({ pageTitle }) => {
     const dispatch = useDispatch();
@@ -17,6 +20,7 @@ const StudentReportList = ({ pageTitle }) => {
     const { data: studentReportCet, error: studentReportCetError } = useGetStudentReportCetsQuery();
     const { data: studentReportType, error: studentReportTypeError } = useGetStudentReportTypeQuery();
     const [studentReports, { isLoading, isError, isSuccess, data: reportsResponse }] = useGetStudentReportsMutation();
+    const translate = useTranslate();
     useEffect(() => {
         if (!academicSession.length) {
             dispatch(fetchSettingsData())
@@ -32,7 +36,6 @@ const StudentReportList = ({ pageTitle }) => {
             try {
 
                 const response = await studentReports(studentCode).unwrap();
-                console.log(response);
 
                 toast.update(toastId, {
                     render: 'Submitted successfully!',
@@ -68,36 +71,36 @@ const StudentReportList = ({ pageTitle }) => {
                 <FormProvider {...methods}>
                     <form onSubmit={methods.handleSubmit(onSubmit)} className="mx-auto">
                         <div className='relative max-w-[400px]'>
-                            <DefaultInput registerKey={"filterStudentCode"} require={"Student code is require"} type={"text"} label={"User Code:"} disable={false} />
+                            <DefaultInput registerKey={"filterStudentCode"} require={""} type={"text"} label={<span className="text-red-500">{translate("User Code")}*: </span>} disable={false} />
                             <button type='submit' className='absolute bottom-[8px] right-[4px] text-[#999]'><svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-logout"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /><path d="M9 12h12l-3 -3" /><path d="M18 15l3 -3" /></svg></button>
                         </div>
                     </form>
                 </FormProvider>
             </div>
-            <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                <table className="w-full text-sm text-left text-gray-500">
+            <div className="relative overflow-x-auto px-6">
+                <table className="w-full text-sm text-left text-gray-500 shadow-md sm:rounded-lg">
                     <thead className="text-xs text-theme-dark font-SolaimanLipi uppercase bg-gray-50">
                         <tr>
-                            <th className={`px-3 py-3 text-nowrap`}>
-                                No.
+                            <th className={`px-3 py-3 text-nowrap  text-[16px]`}>
+                                {translate("No.")}
                             </th>
-                            <th className={`px-3 py-3 text-nowrap`}>
-                                Code
+                            <th className={`px-3 py-3 text-nowrap  text-[16px]`}>
+                                {translate("User Code")}
                             </th>
-                            <th className={`px-3 py-3 text-nowrap`}>
-                                Student Name
+                            <th className={`px-3 py-3 text-nowrap  text-[16px]`}>
+                                {translate("Student Name")}
                             </th>
-                            <th className={`px-3 py-3 text-nowrap`}>
-                                Category
+                            <th className={`px-3 py-3 text-nowrap  text-[16px]`}>
+                                {translate("Varient")}
                             </th>
-                            <th className={`px-3 py-3 text-nowrap`}>
-                                Type
+                            <th className={`px-3 py-3 text-nowrap text-[16px] `}>
+                                {translate("Type")}
                             </th>
-                            <th className={`px-3 py-3 text-nowrap`}>
-                                Date
+                            <th className={`px-3 py-3 text-nowrap text-[16px]`}>
+                                {translate("Date")}
                             </th>
-                            <th className={`px-3 py-3 text-nowrap`}>
-                                Remark
+                            <th className={`px-3 py-3 text-nowrap  text-[16px]  w-[300px]`}>
+                                {translate("Remark")}
                             </th>
                             
 
@@ -107,16 +110,15 @@ const StudentReportList = ({ pageTitle }) => {
 
                     </thead>
                     <tbody>
-
                         {reportsResponse && reportsResponse.map((item, index) => (
-                            <tr key={index} className="bg-white border-b hover:bg-gray-50">
+                            <tr key={index} className="bg-white border-b hover:bg-gray-50 text-black">
                                 <td className="px-3 py-4 text-nowrap">{index + 1}</td>
                                 <td className="px-3 py-4 text-nowrap">{item.StudentCode}</td>
-                                <td className="px-3 py-4 text-nowrap">{item.StudentName}</td>
-                                <td className="px-3 py-4 text-nowrap">{item.ReportCet}</td>
-                                <td className="px-3 py-4 text-nowrap">{item.ReportType}</td>
-                                <td className="px-3 py-4 text-nowrap">{item.dataValues.CreateDate}</td>
-                                <td className="px-3 py-4 text-nowrap w-[200px] whitespace-pre-wrap">{item.dataValues.Remark}</td>
+                                <td className="px-3 py-4 text-nowrap">{bnBijoy2Unicode(item.StudentName)}</td>
+                                <td className="px-3 py-4 text-nowrap">{bnBijoy2Unicode(item.ReportCet)}</td>
+                                <td className="px-3 py-4 text-nowrap">{bnBijoy2Unicode(item.ReportType)}</td>
+                                <td className="px-3 py-4 text-nowrap">{item.CreateDate}</td>
+                                <td className="px-3 py-4 text-nowrap w-[300px]" style={{whiteSpace: "normal"}}>{bnBijoy2Unicode(item.Remark)}</td>
 
                             </tr>
                         ))}
