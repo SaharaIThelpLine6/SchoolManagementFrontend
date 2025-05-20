@@ -139,7 +139,7 @@ const AddTeacherForm = ({ userId }) => {
             </div>
             <DatePickerOne
               registerKey={"JoiningDate"}
-              placeholder={"Joning Date"}
+              placeholder={translate("Inter your date of join") + " ..."}
               dateCalender={translate("Date of join") + " :"}
               require={"Entry Date is require"}
               // disable={true}
@@ -148,7 +148,7 @@ const AddTeacherForm = ({ userId }) => {
               registerKey={"ResultDevision"}
               require={"Result devision is require"}
               type={"text"}
-              placeholder={"Result devision ..."}
+              placeholder={translate("Inter your result devision") + " ..."}
               label={translate("Result Devision") + " :"}
               // disable={true}
             />
@@ -163,7 +163,7 @@ const AddTeacherForm = ({ userId }) => {
             />
             <DefaultInput
               registerKey={"PasstedDate"}
-              placeholder={"Passing year and date"}
+              placeholder={translate("Inter your passted date") + " ..."}
               require={"Passing year and date is require"}
               type={"text"}
               label={translate("Passted Date") + " :"}
@@ -172,7 +172,7 @@ const AddTeacherForm = ({ userId }) => {
 
             <DefaultInput
               registerKey={"Qualification"}
-              placeholder={"Qualification"}
+              placeholder={translate("Inter your qualification") + " :"}
               require={"Qualification is require"}
               type={"text"}
               label={translate("Qualification") + " :"}
@@ -189,18 +189,18 @@ const AddTeacherForm = ({ userId }) => {
             />
             <DefaultInput
               registerKey={"ExamBoardName"}
-              placeholder={"Exam board name"}
               require={"Exam Board Name is require"}
               type={"text"}
               label={translate("Exam Board Name") + " :"}
+              placeholder={translate("Inter your Exam Board Name") + " ..."}
               // disable={true}
             />
             <DefaultInput
               registerKey={"Experience"}
-              placeholder={"Experience"}
               require={"Experience is require"}
               type={"text"}
               label={translate("Experience") + " :"}
+              placeholder={translate("Inter your experience") + " ..."}
               // disable={true}
             />
           </div>
