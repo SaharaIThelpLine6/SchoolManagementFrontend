@@ -83,6 +83,12 @@ const useTranslate = () => {
     "Result Devision": "ফলাফল বিভাগ",
     "Passted Date": "পাসের তারিখ",
     "Exam Board Name": "পররীক্ষার বোর্ডের নাম",
+    "Teacher Info Update": "শিক্ষক তথ্য আপডেট",
+    "Designation List": "পদবী তালিকা",
+    "Create Designation": "পদবী তৈরি করুন",
+    "Update Designation": "পদবী আপডেট করুন",
+    "Enter new designation": "নতুন পদবি লিখুন",
+    "Teacher Register": "শিক্ষক নিবন্ধন",
     Account: "একাউটিং",
     Mobile1: "মোবাইল ১",
     Name: "নাম",
@@ -91,6 +97,7 @@ const useTranslate = () => {
     Register: "রেজিস্টার সম্পুর্ণ করুন",
     Experience: "অভিজ্ঞতা",
     Qualification: "যোগ্যতা",
+    Designation: "পদবী",
   };
 
   return (key) =>

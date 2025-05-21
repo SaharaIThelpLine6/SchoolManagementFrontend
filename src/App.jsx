@@ -67,10 +67,13 @@ import PaymentConfirm from "./pages/PaymentConfirm";
 import StudentFeeSetup from "./pages/StudentFeeSetup";
 import StudentReport from "./pages/StudentReport";
 import StudentReportList from "./pages/StudentReportList";
+import AddDesignation from "./pages/AddDesignation";
+import useTranslate from "./utils/Translate";
 
 function App() {
   const [loading, setLoading] = useState(true);
   // const { isLoading } = useSelector((state) => state.loading)
+  const translate = useTranslate();
 
   const methods = useForm();
   // const { pathname } = useLocation();
@@ -143,6 +146,12 @@ function App() {
                 element={<PayRoleName pageTitle={"Pay Role Name"} />}
               />
               <Route path="report" element={<Report pageTitle={"Reports"} />} />
+              <Route
+                path="designation"
+                element={
+                  <AddDesignation pageTitle={translate("Designation List")} />
+                }
+              />
             </Route>
             <Route path="/formp" element={<FormP />} />
             <Route path="/query" element={<Query />} />

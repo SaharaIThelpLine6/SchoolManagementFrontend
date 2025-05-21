@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormContext, useForm } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
-
+import Swal from "sweetalert2";
 import "flatpickr/dist/flatpickr.css";
 import DefaultInput from "./DefaultInput";
 import DefaultSelect from "./DefaultSelect";
@@ -28,39 +28,24 @@ const AddTeacherForm = ({ userId }) => {
     isLoading: teacherDesignationfoLoading,
     isError: teacherDesignationError,
   } = useGetDesignationQuery();
-  console.log(teacherDesignation);
 
   const {
     data: teacherInfoNR,
     isLoading: teacherInfoNRLoading,
     isError: teacherInfoNRError,
   } = useGetTeacherInfoNotRegisteredQuery();
-  console.log(teacherInfoNR);
 
   const {
     data: teacherList,
     isLoading: teacherInfoLoading,
     isError: teacherInfoError,
   } = useGetTeacherInfoQuery();
-  console.log(teacherList);
 
   const teacher = teacherInfoNR?.find((t) => t.UserID === userId);
-  console.log(teacher);
 
   const [postTeacherInfoRegistered, { data, isLoading, isError }] =
     usePostTeacherInfoRegisteredMutation();
 
-  const dispatch = useDispatch();
-  const {
-    gender,
-    divition,
-    district,
-    thana,
-    studentRelation,
-    userType,
-    status,
-    error,
-  } = useSelector((state) => state.settings);
   const {
     register,
     handleSubmit,
@@ -88,8 +73,18 @@ const AddTeacherForm = ({ userId }) => {
       reset();
       // navigate("/teachers");
       hideModal();
+      Swal.fire({
+        title: "Teacher register successfull!",
+        icon: "success",
+        draggable: true,
+      });
     } catch (error) {
       console.log(error);
+      Swal.fire({
+        icon: "error",
+        title: "Teacher register failed",
+        confirmButtonColor: "#3B82F6",
+      });
     }
   };
   const saveButton = "Save";
@@ -101,21 +96,23 @@ const AddTeacherForm = ({ userId }) => {
           {/*Form Start*/}
         </div>
 
-        <div className="flex justify-between items-start w-full gap-5">
-          <div className="w-[150px] text-center flex flex-col items-center gap-3">
-            <h2 className="text-base font-semibold mb-2">
-              {translate("Enter image")}
-            </h2>
-            <div className="w-[150px] h-[150px] overflow-hidden rounded-lg shadow-lg">
-              <img
-                src="https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2264922221.jpg"
-                alt="Cultural diversity in education"
-                className="w-full h-full object-cover"
-              />
+        <div className="flex justify-between flex-col sm:flex-row  items-start w-full gap-5">
+          <div className="w-full sm:w-auto flex justify-center flex-col items-center gap-3">
+            <div className="w-[150px] text-center">
+              <h2 className="text-base font-semibold mb-2">
+                {translate("Enter image")}
+              </h2>
+              <div className="w-[150px] h-[150px] overflow-hidden rounded-lg shadow-lg">
+                <img
+                  src="https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2264922221.jpg"
+                  alt="Cultural diversity in education"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <h2 className="">
+                {translate("User ID")} : {teacher?.UserID}
+              </h2>
             </div>
-            <h2 className="">
-              {translate("User ID")} : {teacher?.UserID}
-            </h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5 w-full">
             <div className="">
@@ -132,9 +129,9 @@ const AddTeacherForm = ({ userId }) => {
                   type={"number"}
                 />
 
-                <div className="w-14 h-6 border border-gray-300 text-center">
+                {/* <div className="w-14 h-6 border border-gray-300 text-center">
                   +
-                </div>
+                </div> */}
               </div>
             </div>
             <DatePickerOne

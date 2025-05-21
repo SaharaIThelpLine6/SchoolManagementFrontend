@@ -18,6 +18,7 @@ export const teachersSlice = createApi({
   endpoints: (builder) => ({
     getDesignation: builder.query({
       query: () => "designation",
+      providesTags: ["Designation"], // cache tagging
     }),
     getTeacherInfo: builder.query({
       query: () => "teacher_info",
@@ -33,7 +34,38 @@ export const teachersSlice = createApi({
         method: "POST",
         body: body,
       }),
-      invalidatesTags: ["Teacher"], // invalidate cache
+      invalidatesTags: ["Teacher"],
+    }),
+    createDesignation: builder.mutation({
+      query: (body) => ({
+        url: "designation",
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["Designation"],
+    }),
+    updateDesignation: builder.mutation({
+      query: (data) => ({
+        url: `/designation/${data.DNID}`,
+        method: "PUT",
+        body: { Designation: data.Designation },
+      }),
+      invalidatesTags: ["Designation"],
+    }),
+    deleteDesignation: builder.mutation({
+      query: (DNID) => ({
+        url: `/designation/${DNID}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Designation"],
+    }),
+    updateTeacherInfo: builder.mutation({
+      query: (body) => ({
+        url: "update_teacher",
+        method: "PUT",
+        body: body,
+      }),
+      invalidatesTags: ["Teacher"],
     }),
   }),
 });
@@ -43,4 +75,8 @@ export const {
   useGetTeacherInfoQuery,
   useGetTeacherInfoNotRegisteredQuery,
   usePostTeacherInfoRegisteredMutation,
+  useUpdateTeacherInfoMutation,
+  useCreateDesignationMutation,
+  useUpdateDesignationMutation,
+  useDeleteDesignationMutation,
 } = teachersSlice;

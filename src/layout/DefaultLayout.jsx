@@ -13,7 +13,7 @@ import { setCurrentLanguage } from "../features/language/languageSlice";
 import DefaultModal from "../components/DefaultModal";
 import ClickOutside from "../components/ClickOutside";
 import { useGetUserInfoQuery } from "../features/payment/paymentSlice";
-
+import { MdWork } from "react-icons/md";
 const menuData = [
   // Home Menu bar Start
   {
@@ -146,6 +146,26 @@ const menuData = [
         name: "Reports",
         route: "/report",
         icon: `<svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-report"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h5.697" /><path d="M18 14v4h4" /><path d="M18 11v-4a2 2 0 0 0 -2 -2h-2" /><path d="M8 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" /><path d="M18 18m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M8 11h4" /><path d="M8 15h3" /></svg>`,
+        subMenu: false,
+      },
+      {
+        id: "5",
+        name: "Designation",
+        route: "/designation",
+        icon: `<svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"  height="24"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m2 0a2 2 0 002-2V7a2 2 0 00-2-2h-3V4a1 1 0 00-1-1H9a1 1 0 00-1 1v1H5a2 2 0 00-2 2v3a2 2 0 002 2m14 0v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5"
+            />
+          </svg>`,
         subMenu: false,
       },
     ],

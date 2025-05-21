@@ -6,6 +6,10 @@ import AdmissionForm from "./Forms/AdmissionForm";
 import FeeCollectionForm from "./Forms/FeeCollectionForm";
 import PaymentModal from "./Modals/PaymentModal";
 import AddTeacherForm from "./Forms/AddTeacherForm";
+import EditTeacherForm from "./Forms/EditTeacherForm";
+import AddDesignation from "../pages/AddDesignation";
+import EditDesignationForm from "./Forms/EditDesignationForm";
+import CreateDesignationForm from "./Forms/CreateDesignationForm";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -59,6 +63,13 @@ const DefaultModal = () => {
                 )}
                 {modalType === "PAYMENT" && <PaymentModal />}
                 {modalType === "ADD_TEACHER" && <AddTeacherForm userId={id} />}
+                {modalType === "EDIT_TEACHER" && (
+                  <EditTeacherForm userId={id} />
+                )}
+                {modalType === "ADD_DESIGNATION" && <CreateDesignationForm />}
+                {modalType === "EDIT_DESIGNATION" && (
+                  <EditDesignationForm userId={id} />
+                )}
               </div>
             )}
           </div>
