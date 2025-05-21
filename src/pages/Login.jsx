@@ -54,7 +54,7 @@ const Login = () => {
 
   return (
     <section className="min-h-screen flex sm:items-center items-start justify-center bg-gradient-to-b from-white to-blue-100">
-      <div className="w-full md:max-w-md bg-[#ddeffe] flex flex-col overflow-hidden max-h-[900px]">
+      <div className="w-full md:max-w-md shadow-md pb-5 rounded-b-xl rounded-md bg-[#ddeffe] flex flex-col overflow-hidden border-b-[#ffa500] border-b-8">
         {/* Banner */}
         <div className="bg-[#007af7] p-6 text-center rounded-b-3xl relative">
           <img
@@ -116,7 +116,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full flex justify-center items-center bg-[#007af7] hover:bg-blue-600 text-white py-2 rounded-lg text-lg font-medium"
+            className="w-full flex justify-center items-center bg-[#007af7] hover:bg-blue-600 text-white py-2 rounded-full text-lg font-medium"
           >
             <FiArrowRight className="mr-2" />
             লগিন অথবা সাইন আপ

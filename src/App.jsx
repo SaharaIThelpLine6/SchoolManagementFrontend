@@ -69,6 +69,7 @@ import StudentReport from "./pages/StudentReport";
 import StudentReportList from "./pages/StudentReportList";
 import AddDesignation from "./pages/AddDesignation";
 import useTranslate from "./utils/Translate";
+import NewSideBar from "./components/Sidebar/NewSideBar";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -201,6 +202,7 @@ function App() {
           
           </Route> */}
           <Route path="/login" element={<Login />} />
+          <Route path="/new" element={<NewSideBar />} />
           <Route path=":schoolid" element={<PublicLayout />}>
             <Route
               index
