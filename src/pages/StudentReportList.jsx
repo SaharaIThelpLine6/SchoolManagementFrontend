@@ -32,6 +32,8 @@ const StudentReportList = ({ pageTitle }) => {
     studentReports,
     { isLoading, isError, isSuccess, data: reportsResponse },
   ] = useGetStudentReportsMutation();
+
+  // translate function
   const translate = useTranslate();
   useEffect(() => {
     if (!academicSession.length) {
