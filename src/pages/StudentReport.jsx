@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { setPageName } from '../features/auth/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -24,6 +24,9 @@ const StudentReport = ({ pageTitle }) => {
     const { data: studentReportType, error: studentReportTypeError } = useGetStudentReportTypeQuery();
     const [addCharacterStudent, { isLoading, isError, isSuccess, data: newReportResponse }] = usePostStudentCharacterReportMutation();
     const translate = useTranslate();
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [userTyping, setUserTyping] = useState(true);
+
     useEffect(() => {
         if (!academicSession.length) {
             dispatch(fetchSettingsData())
@@ -73,7 +76,7 @@ const StudentReport = ({ pageTitle }) => {
             });
         } catch (err) {
             console.log(err);
-            
+
             toast.update(toastId, {
                 render: err?.data?.error || 'Submission failed!',
                 type: 'error',
@@ -86,9 +89,20 @@ const StudentReport = ({ pageTitle }) => {
     };
 
     const studentCodeOrName = methods.watch("StudentCode");
-    const { data, error, isLoading: studentInfoLoading } = useGetStudentBySearchQuery(studentCodeOrName, {
-        skip: !studentCodeOrName,
+    const { data: searchStudentInfo, error: searchStudentError, isLoading: studentInfoLoading } = useGetStudentBySearchQuery(studentCodeOrName, {
+        skip: !studentCodeOrName || !userTyping,
+        refetchOnFocus: false,
+        
     });
+
+    useEffect(() => {
+        if (studentCodeOrName && searchStudentInfo?.length > 0 && !searchStudentError) {
+            setShowSuggestions(true);
+        } 
+        else {
+            setShowSuggestions(false);
+        }
+    }, [searchStudentInfo, searchStudentError]);
 
     const handleUserCode = () => {
         const studentCode = methods.getValues("StudentCode");
@@ -96,17 +110,34 @@ const StudentReport = ({ pageTitle }) => {
             dispatch(fetchSingleStudentDataByStudentCode(studentCode));
         }
     };
-    if (status === 'succeeded') {
-        if (academicSession.length > 0) {
+    useEffect(() => {
+        if (status === 'succeeded' && academicSession.length > 0) {
             const today = new Date();
             methods.setValue("SessionID", academicSession[0].SessionID);
             methods.setValue("Date", today);
         }
-    }
+    }, [status, academicSession]);
+
+    // useEffect(() => {
+    //     if (studentCodeOrName) {
+    //         setUserTyping(true);
+    //     }
+    // }, [studentCodeOrName]);
+
     if (status === 'loading') {
         return <LoadingComponent />;
     }
+    const handleSuggestionClick = (item) => {
+         setUserTyping(false);
+        methods.setValue("StudentCode", item.StudentCode);
+        methods.setValue("StudentName", item.StudentName);
+        methods.setValue("FatherName", item.FatherName);
+        methods.setValue("Mobile1", item.Mobile1);
+        methods.setValue("ClassName", item.ClassName);
+        methods.setValue("SubClassID", item.SubClassID);
 
+        setShowSuggestions(false);
+    };
 
 
     return (
@@ -115,18 +146,34 @@ const StudentReport = ({ pageTitle }) => {
                 <FormProvider {...methods}>
                     <form onSubmit={methods.handleSubmit(onSubmit)} className=" mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg ">
                         <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8 text-blue-600 uppercase font-SolaimanLipi">{translate("Character Report")}</h1>
-
-                        {/* Institution Name */}
-
-                        {/* Address Section */}
                         <div className="grid xl:grid-cols-4 gap-4 md:gap-6 mb-6">
                             <input {...methods.register("SubClassID", { required: "Short address is required" })} className='hidden' />
+                            
                             <div className='relative'>
-                                <DefaultInput registerKey={"StudentCode"} require={" "} type={"text"} placeholder={"EX: 1001"} label={<span className="text-red-500">
-                                    {translate("User Code")} * :
-                                </span>} disable={false} />
+                                <div className="w-full">
+                                    <label htmlFor={"StudentCode"} className="mb-1 block text-black font-SolaimanLipi">
+                                        <span className="text-red-500">
+                                            {translate("User Code")} * :
+                                        </span>
+                                    </label>
+                                    <input type="text" {...methods.register("StudentCode", { required: " " })} className='w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-slate-200' onInput={() => setUserTyping(true)} autoComplete='false'/>
+                                </div>
 
                                 <button type='button' onClick={handleUserCode} className='absolute bottom-[8px] right-[4px] text-[#999]'><svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-logout"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /><path d="M9 12h12l-3 -3" /><path d="M18 15l3 -3" /></svg></button>
+
+                                {showSuggestions && (
+                                    <div className='search_suggetion h-[200px] overflow-y-auto absolute bottom-[0px] translate-y-full left-0 w-full bg-white shadow-lg z-30'>
+                                        {searchStudentInfo.map((item, index) => (
+                                            <div
+                                                key={index}
+                                                className='p-2 hover:bg-blue-100 cursor-pointer'
+                                                onClick={() => handleSuggestionClick(item)}
+                                            >
+                                                {item.StudentCode} - {bnBijoy2Unicode(item.StudentName)} - {bnBijoy2Unicode(item.SubClass)}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
 
                             </div>
                             <DefaultSelect label={<span className="text-red-500">

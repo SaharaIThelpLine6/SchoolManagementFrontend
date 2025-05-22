@@ -10,7 +10,7 @@ const DatePickerOne = ({ dateCalender, placeholder, registerKey, require, disabl
   const translate = useTranslate()
   return (
     <div>
-      <label className="mb-1 block text-sm font-medium text-black ">
+      <label className="mb-1 block text-black font-SolaimanLipi" htmlFor={registerKey}>
         {translate(dateCalender)}
       </label>
 
@@ -29,7 +29,7 @@ const DatePickerOne = ({ dateCalender, placeholder, registerKey, require, disabl
             options={{
               dateFormat: "Y-m-d",
             }}
-            className="w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] py-1 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-slate-200"
+            className="w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] py-1 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-slate-200 h-[38px]"
             {...field}
           />
         )}
