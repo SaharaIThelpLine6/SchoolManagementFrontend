@@ -1,181 +1,254 @@
-
-
-
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import { setPageName } from "../features/auth/authSlice";
-import { fetchAdmissionStudentData, fetchUserOnlyStudentData } from "../features/student/studentSlice";
 import SortableTable from "../components/Tables/SortableTable";
 import FilterSelectGroup from "../components/Forms/SelectGroup/FilterSelectGroup";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useTranslate from "../utils/Translate";
 import { showModal } from "../utils/ModalControlar";
+import Swal from "sweetalert2";
+import {
+  useGetTeacherInfoNotRegisteredQuery,
+  useGetTeacherInfoQuery,
+} from "../features/teachers/teachersSlice";
+import Loading from "../components/Loading/Loading";
+import { FiEdit } from "react-icons/fi";
+import {
+  MdDelete,
+  MdKeyboardArrowLeft,
+  MdKeyboardArrowRight,
+} from "react-icons/md";
+import Pagination from "../components/Pagination/Pagination";
+
+const PAGE_SIZE = 10;
+
 const AddTeacher = ({ pageTitle }) => {
-    const translate = useTranslate();
-    const [selectedImage, setSelectedImage] = useState(null);
-    const { studentList, userOnlyStudents, status, error } = useSelector((state) => state.student);
-    const location = useLocation();
-    const dispatch = useDispatch()
-    const searchParams = new URLSearchParams(location.search);
-    const filter = searchParams.get('filter');
-    const handleImageChange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setSelectedImage(reader.result);
-        };
-        reader.readAsDataURL(file);
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const translate = useTranslate();
+
+  const searchParams = new URLSearchParams(location.search);
+  const filter = parseInt(searchParams.get("filter") || "0");
+
+  useEffect(() => {
+    if (pageTitle) dispatch(setPageName(pageTitle));
+  }, [dispatch, pageTitle]);
+
+  const {
+    data: teacherList = [],
+    isLoading: teacherInfoLoading,
+    isError: teacherInfoError,
+  } = useGetTeacherInfoQuery();
+
+  const {
+    data: teacherInfoNR = [],
+    isLoading: teacherInfoNRLoading,
+    isError: teacherInfoNRError,
+  } = useGetTeacherInfoNotRegisteredQuery();
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const isLoading = filter === 2 ? teacherInfoNRLoading : teacherInfoLoading;
+  const isError = filter === 2 ? teacherInfoNRError : teacherInfoError;
+  const allData = filter === 2 ? teacherInfoNR : teacherList;
+  const totalPages = Math.ceil(allData.length / PAGE_SIZE);
+
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return allData.slice(start, start + PAGE_SIZE);
+  }, [allData, currentPage]);
+
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+  };
+
+  const handlePrev = () => {
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+  };
+
+  const handleOpenModal = useCallback((id) => {
+    showModal(translate("Teacher Register"), "ADD_TEACHER", id);
+  }, []);
+
+  const handleEditOpenModal = useCallback(
+    (id) => {
+      showModal(translate("Teacher Info Update"), "EDIT_TEACHER", id);
+    },
+    [translate]
+  );
+
+  const handleDelete = useCallback((id) => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action will permanently delete the teacher info.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        Swal.fire("Deleted!", "The teacher info has been removed.", "success");
       }
-    };
-    const handleOpenModal = useCallback((id) => {
-      showModal("Admission Details", "ADD_STUDENT", id);
-    }, []);
-    const handleFeeCollectionModal = useCallback((id) => {
-      showModal("Fee Collection", "FEE_COLLECTION", id);
-    }, []);
-  
-    useEffect(() => {
-      if (filter == 2) {
-        dispatch(fetchUserOnlyStudentData())
-  
-      }
-      else {
-        dispatch(fetchAdmissionStudentData())
-      }
-      dispatch(setPageName(pageTitle))
-    }, [dispatch, location])
-  
-    const columnsAdmitedStudent = [
-      { title: "User Id", field: "UserID", hozAlign: 'center' },
-      { title: "Admission No / Roll No", field: "AdmissionID", hozAlign: 'center' },
-      { title: "Student Id", field: "StudentCode", hozAlign: 'center',type: 'text', filterable: true },
-      { title: "Name", field: "StudentName", render: (row) =>{
-        return <input type="text" placeholder={row.StudentName} />
-      }},
-      { title: "Class", field: "ClassName", hozAlign: 'center' },
-      { title: "Section", field: "SubClass", hozAlign: "center" },
-      {
-        title: "Gender", field: "GenderID", hozAlign: "center",
-        render: (row) => {
-          const genderMap = {
-            1: "Male",
-            2: "Female",
-            3: "Other"
-          };
-          return genderMap[row.GenderID] || "N/A";
-        }
-      },
-      {
-        title: "Date of join", field: "CreateAt", hozAlign: "center",type: "range", filterable: true,
-        render: (row) => {
-          return new Date(row.CreateAt).toLocaleDateString('en-GB')
-        }
-      },
-      {
-        title: "Payment status", field: "AdmissionStatus", hozAlign: "center",type: "select", filterable: true, options: [
-          { label: "Pending", value: 0 },
-          { label: "Paid", value: 1 },
-          { label: "Free", value: 2 },
-          { label: "Unpaid", value: 3 },
-        ], render: (row) => {
-          switch (row.AdmissionStatus) {
-            case 0:
-              return <button type="button" onClick={()=>{handleFeeCollectionModal(row.UserID)}}><p className="inline-flex rounded-lg bg-warning bg-opacity-10 px-3 py-1 text-sm font-medium text-warning">Pending</p></button>;
-            case 1:
-              return <p className="inline-flex rounded-lg bg-success bg-opacity-10 px-3 py-1 text-sm font-medium text-success">Paid</p>;
-            case 2:
-              return <p className="inline-flex rounded-lg bg-info bg-opacity-10 px-3 py-1 text-sm font-medium text-info">Free</p>;
-            case 3:
-              return <p className="inline-flex rounded-lg bg-danger bg-opacity-10 px-3 py-1 text-sm font-medium text-danger">Unpaid</p>;
-            default:
-              return row.AdmissionStatus
-          }
-        }
-      },
-      {
-        title: "Status", field: "SessionAction", hozAlign: "center", render: (row) => {
-          switch (row.SessionAction) {
-            case 0:
-              return <p className="inline-flex rounded-lg bg-warning bg-opacity-10 px-3 py-1 text-sm font-medium text-warning">Pending</p>;
-            case 1:
-              return <p className="inline-flex rounded-lg bg-success bg-opacity-10 px-3 py-1 text-sm font-medium text-success">Active</p>;
-            default:
-              return row.AdmissionStatus
-          }
-        }
-      },
-      // {
-      //   title: "Action", field: "SessionSerial", hozAlign: "center",
-      //   render: (row) => (
-      //     <button
-      //       onClick={() => handleActionClick(row)}
-      //       className="px-4 py-2 bg-blue-500 text-white rounded"
-      //     >
-      //       Edit
-      //     </button>
-      //   )
-      // }
-    ];
-    const columnsNotAdmitedStudent = [
-      { title: "User Id", field: "UserID", hozAlign: 'center' },
-      { title: "Student Id", field: "UserCode", hozAlign: 'center' },
-      { title: "Name", field: "UserName" },
-      { title: "Class", field: "ClassName", hozAlign: 'center' },
-      { title: "Section", field: "SubClass", hozAlign: "center" },
-      { title: "Gender", field: "GenderID", hozAlign: "center",
-        render: (row) => {
-          const genderMap = {
-            1: "Male",
-            2: "Female",
-            3: "Other"
-          };
-          return genderMap[row.GenderID] || "N/A";
-        }
-      },
-      {
-        title: "Date of join", field: "CreateAt", hozAlign: "center",
-        render: (row) => {
-          return new Date(row.CreateAt).toLocaleDateString('en-GB')
-        }
-      },
-      {
-        title: "Action", field: "SessionSerial", hozAlign: "center",
-        render: (row) => (
+    });
+  }, []);
+
+  if (isLoading) return <Loading />;
+  if (isError)
+    return <p className="text-red-500">Failed to load teacher data</p>;
+
+  const columnsAdmitedStudent = [
+    { title: translate("User ID"), field: "UserID", hozAlign: "center" },
+    {
+      title: translate("Teacher Code"),
+      field: "TeacherCode",
+      hozAlign: "center",
+      render: (row) => <p>{row.User?.UserCode}</p>,
+    },
+    { title: translate("Serial"), field: "Serial", hozAlign: "center" },
+    {
+      title: translate("Name"),
+      field: "UserName",
+      hozAlign: "center",
+      render: (row) => <p>{row.User?.UserName}</p>,
+    },
+    {
+      title: translate("Father Name"),
+      field: "FatherName",
+      hozAlign: "center",
+      render: (row) => <p>{row.User?.FatherName}</p>,
+    },
+    {
+      title: translate("Mobile1"),
+      field: "Mobile1",
+      hozAlign: "center",
+      render: (row) => <p>{row.User?.Mobile1}</p>,
+    },
+    {
+      title: translate("Date of join"),
+      field: "CreateAt",
+      hozAlign: "center",
+      render: (row) => new Date(row.JoiningDate).toLocaleDateString("en-GB"),
+    },
+    {
+      title: translate("Action"),
+      field: "SessionSerial",
+      hozAlign: "center",
+      render: (row) => (
+        <div className="flex justify-center items-center gap-2">
           <button
-            onClick={()=>{handleOpenModal(row.UserID)}}
-            className="px-4 py-2 bg-rose-500 text-white rounded"
+            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
+            title="Edit"
+            onClick={() => handleEditOpenModal(row.UserID)}
           >
-            {translate("Complete Admission")}
+            <FiEdit className="w-5 h-5" />
           </button>
-        )
-      }
-    ];
-    console.log(userOnlyStudents);
-    return (
-      <div className="-translate-y-4 font-lato">
-        <div className="block w-full overflow-x-auto">
-          <div className="filter_header border-b  border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
-            <h3 className="font-SolaimanLipi text-[20px] font-bold ">{filter == 2 ? translate("Admitted Teacher List") : translate("Not Admitted Teacher List")}</h3>
-            <div className="flex items-center space-x-5">
-              <div className="filter relative">
-                {/* <SelectGroupTwo /> */}
-                <FilterSelectGroup defaultSelect={filter} options={[{id: 0, value: translate("Admitted Teacher List")}, {id: 2, value: translate("Not Admitted Teacher List")}]} nameField={"value"} valueField={"id"} />
-              </div>
-              
+          <button
+            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
+            title="Delete"
+            onClick={() => handleDelete(row.UserID)}
+          >
+            <MdDelete className="w-5 h-5" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  const columnsNotAdmitedStudent = [
+    { title: translate("User ID"), field: "UserID", hozAlign: "center" },
+    { title: translate("Teacher Code"), field: "UserCode", hozAlign: "center" },
+    { title: translate("Name"), field: "UserName" },
+    {
+      title: translate("Gender"),
+      field: "GenderID",
+      hozAlign: "center",
+      render: (row) => {
+        const genderMap = { 1: "Male", 2: "Female", 3: "Other" };
+        return genderMap[row.GenderID] || "N/A";
+      },
+    },
+    {
+      title: translate("Date of join"),
+      field: "CreateAt",
+      hozAlign: "center",
+      render: (row) => new Date(row.CreateAt).toLocaleDateString("en-GB"),
+    },
+    {
+      title: translate("Action"),
+      field: "SessionSerial",
+      hozAlign: "center",
+      render: (row) => (
+        <button
+          onClick={() => handleOpenModal(row.UserID)}
+          className="px-4 py-2 bg-rose-500 text-white rounded"
+        >
+          {translate("Register")}
+        </button>
+      ),
+    },
+  ];
+
+  return (
+    <div className="-translate-y-4 font-lato">
+      <div className="block w-full overflow-x-auto">
+        <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
+          <h3 className="font-SolaimanLipi text-[20px] font-bold">
+            {filter === 2
+              ? translate("Not Admitted Teacher List")
+              : translate("Admitted Teacher List")}
+          </h3>
+          <div className="flex items-center space-x-5">
+            <div className="filter relative">
+              <FilterSelectGroup
+                defaultSelect={filter}
+                options={[
+                  { id: 0, value: translate("Admitted Teacher List") },
+                  { id: 2, value: translate("Not Admitted Teacher List") },
+                ]}
+                nameField="value"
+                valueField="id"
+              />
             </div>
           </div>
-          {/* <SortableTable
-            columns={filter == 2 ? columnsNotAdmitedStudent : columnsAdmitedStudent}
-            data={filter == 2 ? userOnlyStudents : studentList}
-          /> */}
+        </div>
+
+        <SortableTable
+          columns={
+            filter === 2 ? columnsNotAdmitedStudent : columnsAdmitedStudent
+          }
+          data={paginatedData}
+        />
+
+        {/* Pagination Controls */}
+        <div className="flex justify-center items-center gap-4 mt-4">
+          <button
+            onClick={handlePrev}
+            disabled={currentPage === 1}
+            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
+          >
+            <MdKeyboardArrowLeft className="text-lg" />
+            Prev
+          </button>
+
+          <span className="text-sm font-medium text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <button
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
+          >
+            Next
+            <MdKeyboardArrowRight className="text-lg" />
+          </button>
         </div>
       </div>
-  
-  
-  
-  
-    )
+    </div>
+  );
 };
 
 export default AddTeacher;
