@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 package-lock.json
 .env
-*.development
+.env.development
