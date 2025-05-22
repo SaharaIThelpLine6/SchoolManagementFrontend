@@ -151,7 +151,7 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
 
   return (
     <div className="w-full">
-      <label htmlFor={registerKey} className="mb-1 block text-black">
+      <label htmlFor={registerKey} className="mb-1 block text-black font-SolaimanLipi">
         {label}
       </label>
 
@@ -161,7 +161,7 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
           {...register(registerKey, { required: require, valueAsNumber: type === 'number' })}
           onClick={toggleDropdown}
           defaultValue=""
-          className={`relative z-20 w-full appearance-none rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition focus:border-primary active:border-primary ${disabled ? 'cursor-not-allowed disabled:bg-slate-200' : ''
+          className={`relative h-[38px] z-20 w-full appearance-none font-SolaimanLipi rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition focus:border-primary active:border-primary ${disabled ? 'cursor-not-allowed disabled:bg-slate-200' : ''
             }`}
           disabled={disabled}
         >
@@ -196,7 +196,7 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
           </svg>
         </span>
       </div>
-      {errors[registerKey] && errors[registerKey].message}
+      {errors[registerKey] && <p className="text-red-500 text-sm mt-1">{errors[registerKey].message}</p>}
     </div>
   );
 };

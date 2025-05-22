@@ -77,7 +77,7 @@ const ChartThree = ({ data }) => {
     <div className="sm:px-7.5 col-span-12 rounded-[10px] border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default xl:col-span-6 w-full">
       <div className="mb-3 justify-between gap-4 sm:flex">
         <div>
-          <h5 className="text-xl font-semibold text-black dark:text-white">
+          <h5 className="text-xl font-semibold text-black">
             Visitors Analytics
           </h5>
         </div>
@@ -134,7 +134,7 @@ const ChartThree = ({ data }) => {
           <div className="sm:w-1/2 w-full px-8" key={index}>
             <div className="flex w-full items-center">
               <span className={`mr-2 block h-3 w-full max-w-3 rounded-full bg-${options.colors[index]}`}></span>
-              <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
+              <p className="flex w-full justify-between text-sm font-medium text-black">
                 <span>{label}</span>
                 <span>{state.series[index].toFixed(2)}%</span>
               </p>

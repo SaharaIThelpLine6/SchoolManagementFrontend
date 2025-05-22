@@ -20,14 +20,14 @@ const PaymentConfirm = () => {
     const { refetch } = useGetUserInfoQuery();
 
     useEffect(() => {
-        if (status === 'success' && !requestSent.current) {
-            requestSent.current = true;
+        // if (status === 'success' && !requestSent.current) {
+        //     requestSent.current = true;
             executePaymentRequest({ schoolid, service, size, paymentID, signature, apiVersion }).unwrap().then((payload) => {
                 console.log(payload);
                 refetch();
 
             }).catch((error) => { setPaymentStatus(error.data?.error ? error.data.error : "Failed") });
-        }
+        // }
     }, [status, schoolid, service, size, paymentID, signature, apiVersion, executePaymentRequest]);
 
     const handleCopy = () => {

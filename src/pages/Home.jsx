@@ -26,11 +26,14 @@ const Home = ({ pageTitle }) => {
         dispatch(fetchAdmissionStudentData())
 
     }, [dispatch])
-    const countBySession = studentList ? studentList.reduce((acc, student) => {
-        acc[student.SessionName] = (acc[student.SessionName] || 0) + 1;
-        return acc;
-    }, {}) : [];
-    
+    const countBySession = Array.isArray(studentList) && studentList.length > 0
+        ? studentList.reduce((acc, student) => {
+            acc[student.SessionName] = (acc[student.SessionName] || 0) + 1;
+            return acc;
+        }, {})
+        : {};
+
+
     return (
         <div className="px-[24px]">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-3 2xl:gap-7.5">
@@ -75,7 +78,7 @@ const Home = ({ pageTitle }) => {
                                 </thead>
                                 <tbody className="bg-white divide-y divide-gray-200">
                                     {Object.entries(countBySession).map(([sessionId, count]) => (
-                                        <tr key={sessionId} className="hover:bg-gray-100 dark:hover:bg-gray-700">
+                                        <tr key={sessionId} className="hover:bg-gray-100">
                                             <td className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap border border-gray-200">
                                                 {sessionId}
                                             </td>

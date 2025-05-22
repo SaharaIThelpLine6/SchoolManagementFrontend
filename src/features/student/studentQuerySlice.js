@@ -16,6 +16,9 @@ export const userStudentSlice = createApi({
         },
     }),
     endpoints: (builder) => ({
+         getStudentBySearch: builder.query({
+           query: (data) => (`search_student?search=${data}`),
+        }),
         getStudent: builder.query({
             query: () => 'view_students',
         }),
@@ -40,6 +43,7 @@ export const userStudentSlice = createApi({
 });
 
 export const {
+    useGetStudentBySearchQuery,
     useGetStudentQuery,
     useGetStudentReportCetsQuery,
     useGetStudentReportTypeQuery,

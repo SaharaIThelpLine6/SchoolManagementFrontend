@@ -49,10 +49,8 @@ const AddOnlineStudentForm = ({ schoolid }) => {
     else if (editMode === 2) {
       const numberStrP = defaultData.permanentPoliceStationID.toString();
       if (DivisionID === Number(numberStrP.slice(0, 1))) {
-        console.log("Both Are Same");
       }
       else {
-        console.log("Both Are Not Same");
         setValue("DistrictID", "");
         setValue("permanentPoliceStationID", "");
         if (DivisionID) {
@@ -73,7 +71,6 @@ const AddOnlineStudentForm = ({ schoolid }) => {
     else if (editMode === 2) {
       const numberStrP = defaultData.permanentPoliceStationID.toString();
       if (DistrictID === Number(numberStrP.slice(0, 3))) {
-        console.log("Both Are Same");
       }
       else {
         setValue("permanentPoliceStationID", "");
@@ -104,7 +101,6 @@ const AddOnlineStudentForm = ({ schoolid }) => {
     else if (editMode === 2) {
       const numberStrT = defaultData.TransientPoliceStationID.toString();
       if (DivisionID2 === Number(numberStrT.slice(0, 1))) {
-        console.log("Both Are Same");
       }
       else {
         if (!isSameAddressRef.current) {
@@ -139,13 +135,8 @@ const AddOnlineStudentForm = ({ schoolid }) => {
     else if (editMode === 2) {
       const numberStrT = defaultData.TransientPoliceStationID.toString();
       if (DistrictID2 === Number(numberStrT.slice(0, 3))) {
-        console.log("Both Are Same");
       }
       else {
-        console.log("Both Are Not Same");
-        console.log(DistrictID2);
-
-
         if (!isSameAddressRef.current) {
           setValue("TransientPoliceStationID", "");
           if (DistrictID2) {
@@ -177,23 +168,9 @@ const AddOnlineStudentForm = ({ schoolid }) => {
     // }
   }, [sameAddress, setValue, DivisionID, DistrictID, permanentPoliceStationID, TransientVill, editMode])
 
-  // useEffect(() => {
-  //   // dispatch({ type: "SET_PAGE_TITLE", payload: pageTitle });
-  //   // console.log(editMode);
-
-  //   if (editMode === 2) {
-  //     const formUserid = getValues("UserID")
-  //     const actualUserId = defaultData.UserID
-  //     if (formUserid != actualUserId) {
-  //       dispatch(setEditMode(1))
-  //       dispatch(fetchSingleUser(formUserid))
-  //     }
-  //   }
-  // }, []);
 
   useEffect(() => {
     dispatch(fetchSettingsFieldData(schoolid));
-    // console.log(editMode);
 
     if (editMode === 0) {
       reset({
@@ -252,7 +229,6 @@ const AddOnlineStudentForm = ({ schoolid }) => {
 
       Promise.all(promises)
         .then(() => {
-          // console.log(defaultFormData);
           reset(defaultFormData);
           dispatch(setEditMode(2));
         })
@@ -266,14 +242,9 @@ const AddOnlineStudentForm = ({ schoolid }) => {
   if (status === 'failed') {
     console.log(error);
   }
-  // if (status === 'succeeded') {
-  //   // console.log(district);
-  //   // console.log(DistrictID);
-  //   // console.log(thana);
-  //   // console.log(userType);
 
-  // }
   const onSubmit = async (data) => {
+    setButtonDisable(true);
     try {
       // Convert all text fields to Bijoy encoding
       const convertedData = Object.fromEntries(
@@ -282,10 +253,9 @@ const AddOnlineStudentForm = ({ schoolid }) => {
         )
       );
 
-      console.log('Converted Data:', convertedData);
-
       await addStudent({ dataBody: convertedData, id: schoolid }).unwrap();
     } catch (err) {
+      setButtonDisable(false);
       console.error('Error submitting data:', err);
     }
   };
@@ -293,18 +263,13 @@ const AddOnlineStudentForm = ({ schoolid }) => {
 
   useEffect(() => {
     if (isSuccess) {
-      console.log(newApplicationResponse);
-      console.log(newApplicationResponse?.data);
-      console.log(newApplicationResponse?.data?.student.UserCode);
-
-      navigate(`/${schoolid}/online_admission/${newApplicationResponse?.data?.student.UserCode}`);  // Trigger navigation when the API call is successful
-      // console.log(isSuccess);
-
+      setButtonDisable(false);
+      navigate(`/${schoolid}/online_admission/${newApplicationResponse?.data?.student.UserCode}`);
     }
 
     if (isError) {
+      setButtonDisable(false);
       console.error('API call failed:', error);
-      // Show an error message to the user here
     }
   }, [isSuccess, isError]);
   return (
@@ -324,6 +289,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
                   নাম * :
                 </span>
               }
+              require={"শিক্ষার্থীর নাম অবশ্যই লিখতে হবে"}
               type={'text'}
               placeholder={""}
               registerKey={"UserName"}
@@ -347,7 +313,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
               }
               options={gender}
               registerKey={"GenderID"}
-              require={"Gender Field is require"}
+              require={"শিক্ষার্থীর লিঙ্গ নির্বাচন করতে হবে"}
               nameField={"GenderName"}
               valueField={"ID"}
             />
@@ -355,7 +321,9 @@ const AddOnlineStudentForm = ({ schoolid }) => {
 
           <div className="flex gap-3">
             <div className=" w-full">
-              <DatePickerOne dateCalender={"জন্ম তারিখ :"} placeholder={""} registerKey={"DateOfBirth"} require={"Date Of Birth Require"} />
+              <DatePickerOne dateCalender={<span className="text-red-500">
+                  জন্ম তারিখ * :
+                </span>} placeholder={""} registerKey={"DateOfBirth"} require={"শিক্ষার্থীর জন্ম তারিখ নির্বাচন করতে হবে"} />
             </div>
 
           </div>
@@ -369,11 +337,14 @@ const AddOnlineStudentForm = ({ schoolid }) => {
                 type={'phone'}
                 placeholder={""}
                 registerKey={"Mobile1"}
+                require={"অভিভাবক মোবাইল নাম্বার লিখতে হবে"}
               />
             </div>
 
             <div className=" w-36">
-              <DefaultSelect label={"সম্পর্ক:"} type="number" options={studentRelation} valueField={"RelationID"} nameField={"RelationName"} registerKey={"Relationship1"} />
+              <DefaultSelect label={<span className="text-red-500">
+                  সম্পর্ক * :
+                </span>} type="number" options={studentRelation} valueField={"RelationID"} nameField={"RelationName"} registerKey={"Relationship1"} require={"শিক্ষার্থীর অভিভাবক সম্পর্ক নির্বাচন করতে হবে"} />
             </div>
           </div>
           <div className="flex gap-3">
@@ -394,34 +365,40 @@ const AddOnlineStudentForm = ({ schoolid }) => {
             />
           </div>
           <div className="">
-            {classData ? <DefaultSelect label={"শ্রেণী"} type={"number"} options={classData} nameField={"ClassName"} valueField={"ClassID"} registerKey={"ClassID"} require={"This Field is require"} unicode={true} /> : "no data"}
+            {classData ? <DefaultSelect label={<span className="text-red-500">
+                  শ্রেণী * :
+                </span>} type={"number"} options={classData} nameField={"ClassName"} valueField={"ClassID"} registerKey={"ClassID"} require={"শিক্ষার্থীর শ্রেণী নির্বাচন করতে হবে"} unicode={true} /> : "no data"}
           </div>
           <div className="">
-            {classData ? <DefaultSelect label={"আবাসন"} type={"number"} options={residentialData} nameField={"ResidentialName"} valueField={"RDID"} registerKey={"ResidentialStatusId"} require={"This Field is require"} /> : "no data"}
+            {classData ? <DefaultSelect label={<span className="text-red-500">
+                  আবাসন * :
+                </span>} type={"number"} options={residentialData} nameField={"ResidentialName"} valueField={"RDID"} registerKey={"ResidentialStatusId"} require={"শিক্ষার্থীর আবাসন নির্বাচন করতে হবে"} /> : "no data"}
           </div>
         </div>
 
         {/* Permanent address column Start*/}
         <div className="">
           <div className="text-center font-bold mt-3 font-noto mb-[-10px] text-[16px]">
-            <p>স্থায়ী ঠিকানা</p>
+            <p><span className="text-red-500">
+                  স্থায়ী ঠিকানা * :
+                </span></p>
           </div>
 
           <div className="md:grid md:grid-cols-5 gap-3">
             <div className="">
-              <DefaultSelect label={"বিভাগ"} type="number" options={divition} registerKey={"DivisionID"} valueField={"DivisionID"} nameField={"DivisionName"} />
+              <DefaultSelect label={"বিভাগ"} type="number" options={divition} registerKey={"DivisionID"} valueField={"DivisionID"} nameField={"DivisionName"} require={"বিভাগ নির্বাচন করতে হবে"} />
             </div>
             <div className="">
-              <DefaultSelect label={"জেলা"} type="number" options={district[DivisionID]} registerKey={"DistrictID"} valueField={"DistrictID"} nameField={"DistrictName"} />
+              <DefaultSelect label={"জেলা"} type="number" options={district[DivisionID]} registerKey={"DistrictID"} valueField={"DistrictID"} nameField={"DistrictName"} require={"জেলা নির্বাচন করতে হবে"} />
             </div>
             <div className="">
-              <DefaultSelect label={"থানা"} type="number" options={thana[DistrictID]} registerKey={"permanentPoliceStationID"} valueField={"PoliceStationID"} nameField={"PoliceStationName"} />
+              <DefaultSelect label={"থানা"} type="number" options={thana[DistrictID]} registerKey={"permanentPoliceStationID"} valueField={"PoliceStationID"} nameField={"PoliceStationName"} require={"থানা নির্বাচন করতে হবে"} />
             </div>
             <div className="">
-              <DefaultInput label={"ডাক"} type={'text'} placeholder={""} registerKey={"permanentPost"} />
+              <DefaultInput label={"ডাক"} type={'text'} placeholder={""} registerKey={"permanentPost"} require={"ডাক নির্বাচন করতে হবে"} />
             </div>
             <div className="">
-              <DefaultInput label={"গ্রাম"} type={'text'} placeholder={""} registerKey={"permanentVill"} />
+              <DefaultInput label={"গ্রাম"} type={'text'} placeholder={""} registerKey={"permanentVill"} require={"গ্রাম নির্বাচন করতে হবে"} />
             </div>
           </div>
         </div>
@@ -445,7 +422,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
           </div>
 
           <div className="mx-auto font-bold font-noto mt-[20px] lg:mt-0 lg:mb-[-10px] text-[16px] lg:absolute lg:left-[50%] lg:top-[50%] lg:translate-x-[-50%] lg:translate-y-[-35%]">
-            <p>অস্থায়ী ঠিকানা</p>
+            <p> <span className="text-red-500"> অস্থায়ী ঠিকানা *</span></p>
           </div>
         </div>
 
@@ -455,19 +432,19 @@ const AddOnlineStudentForm = ({ schoolid }) => {
         <div className="md:grid md:grid-cols-5 gap-3">
 
           <div className="">
-            <DefaultSelect label={"বিভাগ"} type="number" options={divition} registerKey={"DivisionID2"} valueField={"DivisionID"} nameField={"DivisionName"} />
+            <DefaultSelect label={"বিভাগ"} type="number" options={divition} registerKey={"DivisionID2"} valueField={"DivisionID"} nameField={"DivisionName"} require={"বিভাগ নির্বাচন করতে হবে"} />
           </div>
           <div className="">
-            <DefaultSelect label={"জেলা"} type="number" options={district[DivisionID2]} registerKey={"DistrictID2"} valueField={"DistrictID"} nameField={"DistrictName"} />
+            <DefaultSelect label={"জেলা"} type="number" options={district[DivisionID2]} registerKey={"DistrictID2"} valueField={"DistrictID"} nameField={"DistrictName"} require={"জেলা নির্বাচন করতে হবে"} />
           </div>
           <div className="">
-            <DefaultSelect label={"থানা"} type="number" options={thana[DistrictID2]} registerKey={"TransientPoliceStationID"} valueField={"PoliceStationID"} nameField={"PoliceStationName"} />
+            <DefaultSelect label={"থানা"} type="number" options={thana[DistrictID2]} registerKey={"TransientPoliceStationID"} valueField={"PoliceStationID"} nameField={"PoliceStationName"} require={"থানা নির্বাচন করতে হবে"} />
           </div>
           <div className="">
-            <DefaultInput label={"ডাক"} type={'text'} placeholder={""} registerKey={"TransientPost"} />
+            <DefaultInput label={"ডাক"} type={'text'} placeholder={""} registerKey={"TransientPost"} require={"ডাক নির্বাচন করতে হবে"} />
           </div>
           <div className="">
-            <DefaultInput label={"গ্রাম"} type={'text'} placeholder={""} registerKey={"TransientVill"} />
+            <DefaultInput label={"গ্রাম"} type={'text'} placeholder={""} registerKey={"TransientVill"} require={"গ্রাম নির্বাচন করতে হবে"} />
           </div>
         </div>
         {/*Temporary address column End*/}

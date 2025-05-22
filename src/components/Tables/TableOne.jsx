@@ -44,7 +44,7 @@ const TableOne = () => {
   };
 
   return (
-    <div className="rounded-sm bg-white pt-2 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1">
+    <div className="rounded-sm bg-white pt-2 pb-2.5 shadow-default sm:px-7.5 xl:pb-1">
       <div className="max-w-full overflow-x-auto">
         {/* <select className="bg-transparent pl-2" onChange={(e) => dispatch(setItemsPerPage(e.target.value))}>
           <option value="2">2</option>
@@ -85,19 +85,19 @@ const TableOne = () => {
                     </button>
                   </td>
                   <td className="py-1 px-4 border border-white">
-                    <p className="text-black dark:text-white">{brand.UserCode}</p>
+                    <p className="text-black">{brand.UserCode}</p>
                   </td>
                   <td className="py-1 px-4 border border-white ">
-                    <p className="text-black dark:text-white">{brand.UserName}</p>
+                    <p className="text-black">{brand.UserName}</p>
                   </td>
                   <td className="py-1 px-4 border border-white">
-                    <p className="text-black dark:text-white">{brand.FatherName}</p>
+                    <p className="text-black">{brand.FatherName}</p>
                   </td>
                   <td className="py-1 px-4 border border-white">
-                    <p className="text-black dark:text-white">{brand.Mobile1}</p>
+                    <p className="text-black">{brand.Mobile1}</p>
                   </td>
                   <td className="py-1 px-4 border border-white">
-                    <p className="text-black dark:text-white">{brand?.UserType?.TypeName}</p>
+                    <p className="text-black">{brand?.UserType?.TypeName}</p>
                   </td>
                 </tr>
               ))
