@@ -53,72 +53,74 @@ const Login = () => {
   };
 
   return (
-    <section className="min-h-screen flex sm:items-center items-start justify-center bg-gradient-to-b from-white to-blue-100">
-      <div className="w-full md:max-w-md shadow-md pb-5 rounded-b-xl rounded-md bg-[#ddeffe] flex flex-col overflow-hidden border-b-[#ffa500] border-b-8">
+    <section className="h-screen w-full flex items-center justify-center bg-gradient-to-b from-white to-blue-100 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <div className="w-full max-w-[360px] sm:max-w-md bg-[#ddeffe] rounded-lg shadow-lg border-b-8 border-[#ffa500] flex flex-col">
         {/* Banner */}
-        <div className="bg-[#007af7] p-6 text-center rounded-b-3xl relative">
+        <div className="bg-[#007af7] p-4 sm:p-6 text-center rounded-t-xl relative">
           <img
             src="/saharaITnewlogo.svg"
             alt="Logo"
-            width={200}
-            className="mx-auto filter brightness-0 invert"
+            className="mx-auto w-36 sm:w-48 filter brightness-0 invert"
           />
-          <p className="text-white text-sm mt-4">
+          <p className="text-white text-xs sm:text-sm mt-2 sm:mt-3 font-lato">
             কওমি মাদরাসার জন্য একটি পূর্ণ সমাধান
           </p>
           <img
             src="/QMMSoftIcon.svg"
             alt="Icon"
-            width={100}
-            className="absolute top-4 right-4 opacity-10 filter brightness-0 invert"
+            className="absolute top-2 right-2 w-12 sm:w-24 opacity-10 filter brightness-0 invert"
           />
         </div>
 
         {/* Form */}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="p-6 space-y-4 font-lato"
+          className="p-4 sm:p-6 space-y-3 sm:space-y-4 font-lato flex-1 flex flex-col justify-between"
         >
           <div className="flex justify-center">
-            <img src="/lock.png" alt="Lock" width={80} className="mb-4" />
+            <img
+              src="/lock.png"
+              alt="Lock"
+              className="w-12 sm:w-16 mb-3 sm:mb-4"
+            />
           </div>
 
-          <DefaultInput
-            label="School ID"
-            type="number"
-            placeholder="Enter School ID"
-            registerKey="school_id"
-          />
-
-          <DefaultInput
-            label="Username"
-            type="text"
-            placeholder="Enter Username"
-            registerKey="username"
-          />
-
-          {/* Password with toggle */}
-          <div className="relative">
+          <div className="space-y-3 sm:space-y-4">
             <DefaultInput
-              label="Password"
-              type={showPassword ? "text" : "password"}
-              placeholder="Enter Password"
-              registerKey="password"
+              label="School ID"
+              type="number"
+              placeholder="Enter School ID"
+              registerKey="school_id"
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-600"
-            >
-              {showPassword ? "🙈" : "👁️"}
-            </button>
+
+            <DefaultInput
+              label="Username"
+              type="text"
+              placeholder="Enter Username"
+              registerKey="username"
+            />
+
+            {/* Password with toggle */}
+            <div className="relative">
+              <DefaultInput
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter Password"
+                registerKey="password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-2 top-[32px] sm:top-[36px] text-gray-400 hover:text-gray-600 text-base sm:text-lg"
+              />
+            </div>
           </div>
 
           <button
             type="submit"
-            className="w-full flex justify-center items-center bg-[#007af7] hover:bg-blue-600 text-white py-2 rounded-full text-lg font-medium"
+            className="w-full flex justify-center items-center bg-[#007af7] hover:bg-blue-600 text-white py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-colors duration-200 mt-auto"
           >
-            <FiArrowRight className="mr-2" />
+            <FiArrowRight className="mr-1.5 text-base sm:text-lg" />
             লগিন অথবা সাইন আপ
           </button>
         </form>
