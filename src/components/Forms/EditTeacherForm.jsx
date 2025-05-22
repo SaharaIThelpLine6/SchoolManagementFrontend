@@ -6,7 +6,7 @@ import "flatpickr/dist/flatpickr.css";
 import DefaultInput from "./DefaultInput";
 import DefaultSelect from "./DefaultSelect";
 import DatePickerOne from "./DatePicker/DatePickerOne";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import DefaultGreen from "../Button/DefaultGreen";
 import {
   useGetDesignationQuery,
@@ -14,6 +14,7 @@ import {
   useUpdateTeacherInfoMutation,
 } from "../../features/teachers/teachersSlice";
 import { hideModal } from "../../utils/ModalControlar";
+import getYearOnly from "../../helper/getYearOnly";
 
 const EditTeacherForm = ({ userId }) => {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -27,16 +28,15 @@ const EditTeacherForm = ({ userId }) => {
     isError: teacherInfoError,
   } = useGetTeacherInfoQuery();
   const teacher = teacherList?.find((t) => t.UserID === userId);
+  console.log(teacher);
 
   const methods = useForm({
     defaultValues: {
       DNID: teacher?.DNID || "",
-      JoiningDate: teacher?.JoiningDate || "",
+      JoiningDate: getYearOnly(teacher?.JoiningDate),
+      PasstedDate: getYearOnly(teacher?.PasstedDate),
       ResultDevision: teacher?.ResultDevision || "",
-      // Name: teacher?.User?.UserName || "",
-      PasstedDate: teacher?.PasstedDate || "",
       Qualification: teacher?.Qualification || "",
-      // FatherName: teacher?.User?.FatherName || "",
       ExamBoardName: teacher?.ExamBoardName || "",
       Experience: teacher?.Experience || "",
     },
@@ -47,6 +47,13 @@ const EditTeacherForm = ({ userId }) => {
     isLoading: teacherDesignationfoLoading,
     isError: teacherDesignationError,
   } = useGetDesignationQuery();
+  // DNID দিয়ে Designation বের করা
+  const matchedDesignation = teacherDesignation?.find(
+    (d) => d.DNID === teacher?.DNID
+  );
+
+  const designation = matchedDesignation?.Designation;
+  const serial = matchedDesignation?.SL;
 
   const [updateTeacherInfo, { isLoading, error, data }] =
     useUpdateTeacherInfoMutation();
@@ -126,7 +133,7 @@ const EditTeacherForm = ({ userId }) => {
                 <h2>{translate("Serial Title")} :</h2>
                 <div className="flex gap-5 justify-center items-center">
                   <p className="w-14 h-6 border border-gray-300 text-center">
-                    4
+                    {serial}
                   </p>
 
                   <DefaultSelect
@@ -138,9 +145,13 @@ const EditTeacherForm = ({ userId }) => {
                     type={"number"}
                   />
 
-                  <div className="w-14 h-6 border border-gray-300 text-center">
+                  <NavLink
+                    to="/teacherinfo/designation"
+                    onClick={() => setTimeout(() => hideModal(), 100)}
+                    className="w-14 h-6 border border-gray-300 text-center flex items-center justify-center text-xs rounded"
+                  >
                     +
-                  </div>
+                  </NavLink>
                 </div>
               </div>
               <DatePickerOne
@@ -172,7 +183,7 @@ const EditTeacherForm = ({ userId }) => {
                 placeholder={translate("Inter your passted date") + " ..."}
                 require={"Passing year and date is require"}
                 type={"text"}
-                label={translate("Passted Date") + " :"}
+                label={translate("Year") + " :"}
                 // disable={true}
               />
 

@@ -7,7 +7,7 @@ import "flatpickr/dist/flatpickr.css";
 import DefaultInput from "./DefaultInput";
 import DefaultSelect from "./DefaultSelect";
 import DatePickerOne from "./DatePicker/DatePickerOne";
-import { useNavigate } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import DefaultGreen from "../Button/DefaultGreen";
 import {
   useGetDesignationQuery,
@@ -118,8 +118,6 @@ const AddTeacherForm = ({ userId }) => {
             <div className="">
               <h2>{translate("Serial Title")} :</h2>
               <div className="flex gap-5 justify-center items-center">
-                <p className="w-14 h-6 border border-gray-300 text-center">4</p>
-
                 <DefaultSelect
                   options={teacherDesignation}
                   require={"Designation is required"}
@@ -128,10 +126,13 @@ const AddTeacherForm = ({ userId }) => {
                   registerKey={"DNID"} // Key used for react-hook-form registration
                   type={"number"}
                 />
-
-                {/* <div className="w-14 h-6 border border-gray-300 text-center">
+                <NavLink
+                  to="/teacherinfo/designation"
+                  onClick={() => setTimeout(() => hideModal(), 100)}
+                  className="w-14 h-6 border border-gray-300 text-center flex items-center justify-center text-xs rounded"
+                >
                   +
-                </div> */}
+                </NavLink>
               </div>
             </div>
             <DatePickerOne
@@ -160,10 +161,10 @@ const AddTeacherForm = ({ userId }) => {
             />
             <DefaultInput
               registerKey={"PasstedDate"}
-              placeholder={translate("Inter your passted date") + " ..."}
+              placeholder={translate("Inter your passted year") + " ..."}
               require={"Passing year and date is require"}
               type={"text"}
-              label={translate("Passted Date") + " :"}
+              label={translate("Year") + " :"}
               // disable={true}
             />
 
