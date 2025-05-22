@@ -28,7 +28,6 @@ const EditTeacherForm = ({ userId }) => {
     isError: teacherInfoError,
   } = useGetTeacherInfoQuery();
   const teacher = teacherList?.find((t) => t.UserID === userId);
-  console.log(teacher);
 
   const methods = useForm({
     defaultValues: {
@@ -47,12 +46,12 @@ const EditTeacherForm = ({ userId }) => {
     isLoading: teacherDesignationfoLoading,
     isError: teacherDesignationError,
   } = useGetDesignationQuery();
+
   // DNID দিয়ে Designation বের করা
   const matchedDesignation = teacherDesignation?.find(
     (d) => d.DNID === teacher?.DNID
   );
 
-  const designation = matchedDesignation?.Designation;
   const serial = matchedDesignation?.SL;
 
   const [updateTeacherInfo, { isLoading, error, data }] =
@@ -82,9 +81,7 @@ const EditTeacherForm = ({ userId }) => {
         UserID: userId,
         Serial: maxSerial + 1,
       };
-      console.log(finalData);
       const result = await updateTeacherInfo(finalData).unwrap();
-      console.log(result);
       reset();
       hideModal();
       Swal.fire({
@@ -139,9 +136,9 @@ const EditTeacherForm = ({ userId }) => {
                   <DefaultSelect
                     options={teacherDesignation}
                     require={"Designation is required"}
-                    nameField={"Designation"} // Display text field
-                    valueField={"DNID"} // Value field for the select
-                    registerKey={"DNID"} // Key used for react-hook-form registration
+                    nameField={"Designation"}
+                    valueField={"DNID"}
+                    registerKey={"DNID"}
                     type={"number"}
                   />
 

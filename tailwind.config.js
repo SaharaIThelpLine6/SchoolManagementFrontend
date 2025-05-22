@@ -27,7 +27,7 @@ export default {
         danger: "#d34053",
         success: "#219653",
         info: "#6577f3",
-
+        "custom-focus": "#007af7",
         current: "currentColor",
         transparent: "transparent",
         white: "#FFFFFF",
