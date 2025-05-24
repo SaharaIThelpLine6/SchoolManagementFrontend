@@ -42,6 +42,16 @@ export const fetchSingleStudentDataByStudentCode = createAsyncThunk("student/fet
         academicStudent: studentResponse,
     };
 });
+export const fetchSingleStudentDataByStudentCodeAndSession = createAsyncThunk("student/fetchSingleStudentDataByStudentCodeAndSession", async ({id, sessionId}) => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token is missing');
+    const [studentResponse] = await Promise.all([
+        getUserData(token, `/api/students/view_single_student_withcode_and_session?id=${id}&sessionId=${sessionId}`),
+    ]);
+    return {
+        academicClassStudent: studentResponse,
+    };
+});
 
 const initialState = {
     studentList: [],
@@ -50,7 +60,9 @@ const initialState = {
     editMode: 0,
     status: 'idle',
     error: null,
-    admittedStudent:{}
+    admittedStudent:{},
+    academicClassStudent:{},
+    academicClassStudentError: null,
 };
 
 const classSlice = createSlice({
@@ -110,6 +122,18 @@ const classSlice = createSlice({
             .addCase(fetchSingleStudentDataByStudentCode.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
+            })
+            .addCase(fetchSingleStudentDataByStudentCodeAndSession.pending, (state) => {
+                state.status = 'loading';
+                state.academicClassStudentError = null;
+            })
+            .addCase(fetchSingleStudentDataByStudentCodeAndSession.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.admittedStudent = action.payload.academicClassStudent; 
+            })
+            .addCase(fetchSingleStudentDataByStudentCodeAndSession.rejected, (state, action) => {
+                state.status = 'failed';
+                state.academicClassStudentError = action.error.message;
             });
     },
 });
