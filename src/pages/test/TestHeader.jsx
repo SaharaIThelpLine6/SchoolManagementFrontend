@@ -12,11 +12,24 @@ import TranslateButton from "../../components/Header/TranslateButton";
 import { useGetUserInfoQuery } from "../../features/payment/paymentSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import Logo from "/Screenshot_13.png";
-
+import { useGetInstitutionInfoQuery } from "../../features/settings/settingsQuerySlice";
+import bnBijoy2Unicode from "../../utils/conveter";
+import { Buffer } from 'buffer';
 const TestHeader = () => {
   const dispatch = useDispatch();
   const { data: userPayInfo, refetch } = useGetUserInfoQuery();
+  const { data: institutionInfo, error: institutionInfoError, isLoading: institutionInfoLoading } = useGetInstitutionInfoQuery();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const [logo, setLogo] = useState(null)
+  useEffect(() => {
+    if (institutionInfo?.Logo?.data) {
+      const buffer = Buffer.from(institutionInfo.Logo.data);
+      const base64String = buffer.toString('base64');
+      const imageSrc = `data:image/png;base64,${base64String}`;
+      setLogo(imageSrc)
+    }
+  }, [institutionInfo])
   const handleOpenModal = useCallback(() => {
     showModal("Payment", "PAYMENT");
   }, []);
@@ -51,7 +64,7 @@ const TestHeader = () => {
         </button>
 
         <img
-          src={Logo}
+          src={logo}
           alt="Logo"
           className="w-20 h-20 object-cover rounded-full"
         />
@@ -80,7 +93,7 @@ const TestHeader = () => {
             variants={mobileMenuVariants}
           >
             <h2 className="text-center text-base font-semibold text-gray-800">
-              উম্মাহাতুল মুমিনিন মহিলা মাদ্রাসা
+              {bnBijoy2Unicode(institutionInfo?.InstitutionName) || ""}
             </h2>
             <form className="w-full relative">
               <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
@@ -94,26 +107,24 @@ const TestHeader = () => {
             <div className="flex flex-wrap items-center gap-2 justify-center">
               {userPayInfo && (
                 <p
-                  className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${
-                    userPayInfo.RenewDays > 60
+                  className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${userPayInfo.RenewDays > 60
                       ? "bg-green-500"
                       : userPayInfo.RenewDays > 30
-                      ? "bg-yellow-500"
-                      : "bg-rose-500"
-                  }`}
+                        ? "bg-yellow-500"
+                        : "bg-rose-500"
+                    }`}
                 >
                   Days: {userPayInfo.RenewDays}
                 </p>
               )}
               {userPayInfo && (
                 <p
-                  className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${
-                    userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
+                  className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
                       ? "bg-green-500"
                       : userPayInfo.BalanceDr - userPayInfo.BalanceCr > 10
-                      ? "bg-yellow-500"
-                      : "bg-rose-500"
-                  }`}
+                        ? "bg-yellow-500"
+                        : "bg-rose-500"
+                    }`}
                 >
                   Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
                 </p>
@@ -157,7 +168,7 @@ const TestHeader = () => {
               </svg>
             </button>
             <img
-              src={Logo}
+              src={logo}
               alt="Logo"
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
             />
@@ -166,7 +177,7 @@ const TestHeader = () => {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 flex-1 min-w-0">
           <h2 className="text-sm sm:text-base md:text-3xl font-semibold text-gray-800 text-center sm:text-left truncate">
-            উম্মাহাতুল মুমিনিন মহিলা মাদ্রাসা
+            {bnBijoy2Unicode(institutionInfo?.InstitutionName) || ""}
           </h2>
 
           <form className="w-full max-w-[180px] sm:max-w-[220px] md:max-w-[250px] relative">
@@ -182,26 +193,24 @@ const TestHeader = () => {
         <div className="flex items-center gap-3 flex-shrink-0">
           {userPayInfo && (
             <p
-              className={`text-white py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-nowrap text-[14px] font-semibold  ${
-                userPayInfo.RenewDays > 60
+              className={`text-white py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-nowrap text-[14px] font-semibold  ${userPayInfo.RenewDays > 60
                   ? "bg-green-500"
                   : userPayInfo.RenewDays > 30
-                  ? "bg-yellow-500"
-                  : "bg-rose-500"
-              }`}
+                    ? "bg-yellow-500"
+                    : "bg-rose-500"
+                }`}
             >
               Days: {userPayInfo.RenewDays}
             </p>
           )}
           {userPayInfo && (
             <p
-              className={`text-white py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-nowrap text-[14px] font-semibold  ${
-                userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
+              className={`text-white py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-nowrap text-[14px] font-semibold  ${userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
                   ? "bg-green-500"
                   : userPayInfo.BalanceDr - userPayInfo.BalanceCr > 10
-                  ? "bg-yellow-500"
-                  : "bg-rose-500"
-              }`}
+                    ? "bg-yellow-500"
+                    : "bg-rose-500"
+                }`}
             >
               Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
             </p>
