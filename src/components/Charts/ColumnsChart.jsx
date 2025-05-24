@@ -1,7 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
+import { useGetStudentBySessionQuery } from "../../features/dashboard/dashboardQuerySlice";
+import bnBijoy2Unicode from "../../utils/conveter";
+import BarChartSkeleton from "../Skeleton/BarChartSkeleton";
 
 const ColumnsChart = () => {
+  const {
+    data: studentCount,
+    isLoading,
+    isError,
+  } = useGetStudentBySessionQuery();
+
   const colors = [
     "#3C50E0",
     "#6577F3",
@@ -13,11 +22,11 @@ const ColumnsChart = () => {
     "#FF6B6B",
   ];
 
-  const [state, setState] = useState({
+  const [chartData, setChartData] = useState({
     series: [
       {
-        name: "ভর্তি সংখ্যা", // Admission Count
-        data: [120, 135, 150, 145, 160, 175, 190, 205],
+        name: "ভর্তি সংখ্যা",
+        data: [],
       },
     ],
     options: {
@@ -28,7 +37,7 @@ const ColumnsChart = () => {
         },
       },
       title: {
-        text: "বিগত ৮ বছরের শিক্ষার্থী ভর্তি চাট",
+        text: "বিগত শিক্ষাবর্ষ অনুযায়ী শিক্ষার্থী সংখ্যা",
         align: "center",
         style: {
           fontSize: "18px",
@@ -39,11 +48,12 @@ const ColumnsChart = () => {
       colors: colors,
       plotOptions: {
         bar: {
-          columnWidth: "50%",
+          columnWidth: "30px", // বা percentage: "50%" ইত্যাদি
           distributed: true,
           borderRadius: 6,
         },
       },
+
       dataLabels: {
         enabled: false,
       },
@@ -51,16 +61,7 @@ const ColumnsChart = () => {
         show: false,
       },
       xaxis: {
-        categories: [
-          "২০১৭",
-          "২০১৮",
-          "২০১৯",
-          "২০২০",
-          "২০২১",
-          "২০২২",
-          "২০২৩",
-          "২০২৪",
-        ],
+        categories: [],
         labels: {
           style: {
             colors: colors,
@@ -115,11 +116,36 @@ const ColumnsChart = () => {
     },
   });
 
+  // Update chart when data is loaded
+  useEffect(() => {
+    if (studentCount && Array.isArray(studentCount)) {
+      const categories = studentCount.map((item) =>
+        bnBijoy2Unicode(item.sessionName)
+      );
+      const values = studentCount.map((item) => item.student_count);
+
+      setChartData((prev) => ({
+        ...prev,
+        series: [{ name: "ভর্তি সংখ্যা", data: values }],
+        options: {
+          ...prev.options,
+          xaxis: {
+            ...prev.options.xaxis,
+            categories,
+          },
+        },
+      }));
+    }
+  }, [studentCount]);
+
+  if (isLoading) return <BarChartSkeleton />;
+  if (isError) return <p>ডেটা আনতে সমস্যা হয়েছে।</p>;
+
   return (
     <div className="w-full max-w-7xl mx-auto mt-6 bg-white p-4 md:p-6 rounded-md shadow">
       <ReactApexChart
-        options={state.options}
-        series={state.series}
+        options={chartData.options}
+        series={chartData.series}
         type="bar"
         height={350}
       />

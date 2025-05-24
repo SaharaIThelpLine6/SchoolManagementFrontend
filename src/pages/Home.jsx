@@ -20,18 +20,20 @@ import CalendarOne from "../components/Calendar/CalendarOne";
 import ColumnsChart from "../components/Charts/ColumnsChart";
 import AttendanceChart from "../components/Charts/AttendanceChart";
 import ClassRoutine from "../components/Tables/ClassRoutine";
-
+import {
+  useGetStudentBySessionQuery,
+  useGetTotalDueQuery,
+  useGetTotalTeacherQuery,
+  useGetTotalDonerQuery,
+} from "../features/dashboard/dashboardQuerySlice";
 const Home = ({ pageTitle }) => {
   const dispatch = useDispatch();
-  const {
-    totalPages,
-    students,
-    studentsStatus,
-    totalStudents,
-    totalTeachers,
-    totalGuardian,
-  } = useSelector((state) => state.userInfo);
+
   const { studentList, status } = useSelector((state) => state.student);
+  const { data: studentCount } = useGetStudentBySessionQuery();
+  const { data: teacherCount } = useGetTotalTeacherQuery();
+  const { data: donerCount } = useGetTotalDonerQuery();
+  const { data: totalDueCount } = useGetTotalDueQuery();
 
   useEffect(() => {
     dispatch(fetchUserList({ itemPerPage: 1, currentPage: 1 }));
@@ -54,39 +56,43 @@ const Home = ({ pageTitle }) => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <CardDataStats
           title="মোট শিক্ষার্থী" // Total Student
-          total={totalStudents}
+          total={studentCount ? studentCount.length : 0}
           bgColor="#ECF7FB" // Light pink
           iconColor="text-[#06AEEF]"
           titleColor="text-[#06AEEF]"
+          isLoading={!studentCount}
         >
           <FaGraduationCap className="w-8 h-8" />
         </CardDataStats>
 
         <CardDataStats
           title="মোট শিক্ষক" // Total Teacher
-          total={totalTeachers}
+          total={teacherCount?.totalUsers ?? 0}
           bgColor="#F9CEE1" // Light green
           titleColor="text-[#EB058C]"
           iconColor="text-[#EB058C]" // Pass the color value without "text-" prefix
+          isLoading={!teacherCount}
         >
           <FaChalkboardTeacher className="w-8 h-8" />
         </CardDataStats>
 
         <CardDataStats
           title="মোট দাতা সদস্য" // Total Guardian
-          total={totalGuardian}
+          total={donerCount?.totalUsers ?? 0}
           bgColor="#C3DCC2" // Light green
           titleColor="text-[#0C9444]"
           iconColor="text-[#0C9444]" // Pass the color value without "text-" prefix
+          isLoading={!donerCount}
         >
           <FaSackDollar className="w-8 h-8" />
         </CardDataStats>
         <CardDataStats
           title="মোট পাওনা" // Total User
-          total={totalPages}
+          total={totalDueCount?.totalDue ?? 0}
           bgColor="#FFE4C6" // Light orange
           titleColor="text-[#F7951E]"
           iconColor="text-[#F7951E]"
+          isLoading={!totalDueCount}
         >
           <HiDocumentCurrencyDollar className="w-8 h-8" />
         </CardDataStats>
