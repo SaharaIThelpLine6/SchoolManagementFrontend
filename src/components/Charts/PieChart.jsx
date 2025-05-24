@@ -2,6 +2,7 @@ import React from "react";
 import ReactApexChart from "react-apexcharts";
 import { useGetStudentNumberByClassQuery } from "../../features/dashboard/dashboardQuerySlice";
 import PieChartSkeleton from "../Skeleton/PieChartSkeleton";
+import bnBijoy2Unicode from "../../utils/conveter";
 import useTranslate from "../../utils/Translate";
 
 const PieChart = () => {
@@ -17,7 +18,8 @@ const PieChart = () => {
   if (isError) return <p>ডেটা আনতে সমস্যা হয়েছে!</p>;
 
   // labels and series তৈরি করা
-  const labels = student_count?.map((item) => item.className) || [];
+  const labels =
+    student_count?.map((item) => bnBijoy2Unicode(item.className)) || [];
   const series = student_count?.map((item) => item.student) || [];
 
   const options = {
