@@ -3,12 +3,10 @@ import { useEffect } from "react";
 import TableOne from "../components/Tables/TableOne";
 import AddStudentForm from "../components/Forms/AddStudentForm";
 import CardDataStats from "../components/CardDataStats";
-import { FaGraduationCap } from "react-icons/fa";
-import { FaChalkboardTeacher } from "react-icons/fa";
-import { FaUserShield } from "react-icons/fa";
+import { FaChalkboardTeacher, FaGraduationCap } from "react-icons/fa";
+import { FaSackDollar } from "react-icons/fa6";
+import { HiDocumentCurrencyDollar } from "react-icons/hi2";
 
-import teacherSvg from "../assets/teacher.svg";
-import staffSvg from "../assets/staff.svg";
 import ChartThree from "../components/Charts/ChartThree";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -51,35 +49,42 @@ const Home = ({ pageTitle }) => {
     <div className="px-[24px]">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <CardDataStats
-          title="মোট ব্যবহারকারী" // Total User
-          total={totalPages}
-          bgColor="#E3F2FD" // Light blue
+          title="মোট শিক্ষার্থী" // Total Student
+          total={totalStudents}
+          bgColor="#ECF7FB" // Light pink
+          iconColor="text-[#06AEEF]"
+          titleColor="text-[#06AEEF]"
         >
           <FaGraduationCap className="w-8 h-8" />
         </CardDataStats>
 
         <CardDataStats
-          title="মোট শিক্ষার্থী" // Total Student
-          total={totalStudents}
-          bgColor="#FCE4EC" // Light pink
-        >
-          <FaChalkboardTeacher className="w-8 h-8" />
-        </CardDataStats>
-
-        <CardDataStats
           title="মোট শিক্ষক" // Total Teacher
           total={totalTeachers}
-          bgColor="#E8F5E9" // Light green
+          bgColor="#F9CEE1" // Light green
+          titleColor="text-[#EB058C]"
+          iconColor="text-[#EB058C]" // Pass the color value without "text-" prefix
         >
           <FaChalkboardTeacher className="w-8 h-8" />
         </CardDataStats>
 
         <CardDataStats
-          title="মোট অভিভাবক" // Total Guardian
+          title="মোট দাতা সদস্য" // Total Guardian
           total={totalGuardian}
-          bgColor="#FFF3E0" // Light orange
+          bgColor="#C3DCC2" // Light green
+          titleColor="text-[#0C9444]"
+          iconColor="text-[#0C9444]" // Pass the color value without "text-" prefix
         >
-          <FaUserShield className="w-8 h-8" />
+          <FaSackDollar className="w-8 h-8" />
+        </CardDataStats>
+        <CardDataStats
+          title="মোট পাওনা" // Total User
+          total={totalPages}
+          bgColor="#FFE4C6" // Light orange
+          titleColor="text-[#F7951E]"
+          iconColor="text-[#F7951E]"
+        >
+          <HiDocumentCurrencyDollar className="w-8 h-8" />
         </CardDataStats>
       </div>
       <div className="flex gap-4 mt-4 pb-4 flex-col md:flex-row">
