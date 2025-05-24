@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import { FiArrowRight } from "react-icons/fi";
+import LoginInput from "../components/Forms/LoginInput";
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -75,7 +76,7 @@ const Login = () => {
         {/* Form */}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="p-4 px-8 sm:p-6 space-y-3 sm:space-y-4 font-lato flex-1 flex flex-col justify-between"
+          className="p-4 sm:p-6 px-12 sm:px-12 space-y-3 sm:space-y-4 font-lato flex-1 flex flex-col justify-between"
         >
           <div className="flex justify-center">
             <img
@@ -86,14 +87,14 @@ const Login = () => {
           </div>
 
           <div className="space-y-3 sm:space-y-4">
-            <DefaultInput
+            <LoginInput
               label="School ID"
               type="number"
               placeholder="Enter School ID"
               registerKey="school_id"
             />
 
-            <DefaultInput
+            <LoginInput
               label="Username"
               type="text"
               placeholder="Enter Username"
@@ -102,7 +103,7 @@ const Login = () => {
 
             {/* Password with toggle */}
             <div className="relative">
-              <DefaultInput
+              <LoginInput
                 label="Password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter Password"
@@ -118,7 +119,7 @@ const Login = () => {
 
           <button
             type="submit"
-            className="w-full flex justify-center items-center bg-[#007af7] hover:bg-blue-600 text-white py-2 sm:py-2.5 rounded-full text-sm sm:text-base font-medium transition-colors duration-200 mt-auto"
+            className="w-full flex justify-center items-center bg-[#007af7] hover:bg-blue-600 text-white py-2 sm:py-2.5 rounded-md text-sm sm:text-base font-medium transition-colors duration-200 mt-auto"
           >
             <FiArrowRight className="mr-1.5 text-base sm:text-lg" />
             লগিন অথবা সাইন আপ
