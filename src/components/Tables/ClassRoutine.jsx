@@ -2,6 +2,7 @@ import React from "react";
 
 import { useGetStudentNumberByClassQuery } from "../../features/dashboard/dashboardQuerySlice";
 import StudentClassListSkeleton from "../Skeleton/StudentClassListSkeleton";
+import bnBijoy2Unicode from "../../utils/conveter";
 
 const ClassRoutine = () => {
   const {
@@ -23,7 +24,7 @@ const ClassRoutine = () => {
             key={index}
             className="flex justify-between items-center py-2 border-b border-gray-200"
           >
-            <span className="text-gray-700 text-base">{item.className}</span>
+            <span className="text-gray-700 text-base">{bnBijoy2Unicode(item.className)}</span>
             <span className="flex items-center justify-center w-8 h-8   font-semibold rounded-full text-sm">
               {item.student}
             </span>
