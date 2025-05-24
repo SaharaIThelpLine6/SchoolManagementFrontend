@@ -17,6 +17,7 @@ import { paymentSlice } from '../features/payment/paymentSlice';
 import { userStudentSlice } from '../features/student/studentQuerySlice';
 import { monthSlice } from '../features/month/monthSlice';
 import { settingsSlice } from '../features/settings/settingsQuerySlice';
+import { dashboardSlice } from '../features/dashboard/dashboardQuerySlice';
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -37,6 +38,7 @@ const store = configureStore({
     [userStudentSlice.reducerPath]: userStudentSlice.reducer,
     [monthSlice.reducerPath]: monthSlice.reducer,
     [settingsSlice.reducerPath]: settingsSlice.reducer,
+    [dashboardSlice.reducerPath]: dashboardSlice.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -47,7 +49,8 @@ const store = configureStore({
       .concat(teachersSlice.middleware)
       .concat(paymentSlice.middleware)
       .concat(monthSlice.middleware)
-      .concat(settingsSlice.middleware),
+      .concat(settingsSlice.middleware)
+      .concat(dashboardSlice.middleware),
 });
 
 export default store;
