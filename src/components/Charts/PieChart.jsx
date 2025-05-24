@@ -60,7 +60,7 @@ const PieChart = () => {
   };
 
   return (
-    <div className="w-full h-[400px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col">
+    <div className="w-full h-[450px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col">
       <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
         {translate("Class-based student distribution")}
       </h2>
