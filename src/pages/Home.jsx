@@ -7,7 +7,6 @@ import { FaChalkboardTeacher, FaGraduationCap } from "react-icons/fa";
 import { FaSackDollar } from "react-icons/fa6";
 import { HiDocumentCurrencyDollar } from "react-icons/hi2";
 
-import ChartThree from "../components/Charts/ChartThree";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchGuardianData,
@@ -16,6 +15,11 @@ import {
   fetchUserList,
 } from "../features/userInfo/userInfoSlice";
 import { fetchAdmissionStudentData } from "../features/student/studentSlice";
+import PieChart from "../components/Charts/PieChart";
+import CalendarOne from "../components/Calendar/CalendarOne";
+import ColumnsChart from "../components/Charts/ColumnsChart";
+import AttendanceChart from "../components/Charts/AttendanceChart";
+import ClassRoutine from "../components/Tables/ClassRoutine";
 
 const Home = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -87,50 +91,31 @@ const Home = ({ pageTitle }) => {
           <HiDocumentCurrencyDollar className="w-8 h-8" />
         </CardDataStats>
       </div>
-      <div className="flex gap-4 mt-4 pb-4 flex-col md:flex-row">
-        <ChartThree data={students} />
-        {/* <ChartThree data={students} /> */}
-        {/* <ChartThree /> */}
-        <div className="w-full">
-          <div className="inline-block min-w-full align-middle">
-            <div className="overflow-hidden ">
-              <table className="min-w-full divide-y divide-gray-200 table-fixed border border-gray-200">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase "
-                    >
-                      Session
-                    </th>
-                    <th
-                      scope="col"
-                      className="py-3 px-6 text-xs font-medium tracking-wider text-left text-gray-700 uppercase"
-                    >
-                      Student
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {Object.entries(countBySession).map(([sessionId, count]) => (
-                    <tr key={sessionId} className="hover:bg-gray-100">
-                      <td className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap border border-gray-200">
-                        {sessionId}
-                      </td>
-                      <td className="py-4 px-6 text-sm font-medium text-gray-900 whitespace-nowrap">
-                        {count}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-1 col-span-1">
+          <PieChart />
+        </div>
+        <div className="md:col-span-1 col-span-1">
+          <CalendarOne />
+        </div>
+        <div className="md:col-span-1 col-span-1">
+          <ClassRoutine />
         </div>
       </div>
 
       {/* <AddStudentForm />
             <TableOne /> */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* ColumnsChart spans 2/3 on medium+ screens, full width on small screens */}
+        <div className="md:col-span-2 col-span-1">
+          <ColumnsChart />
+        </div>
+
+        {/* AttendanceChart takes 1/3 on medium+ screens, full width on small screens */}
+        <div className="md:col-span-1 col-span-1">
+          <AttendanceChart />
+        </div>
+      </div>
     </div>
   );
 };
