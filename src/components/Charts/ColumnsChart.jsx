@@ -95,7 +95,7 @@ const ColumnsChart = () => {
             },
             plotOptions: {
               bar: {
-                columnWidth: "60%",
+                columnWidth: "30px",
               },
             },
           },

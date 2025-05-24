@@ -53,9 +53,7 @@ const PieChart = () => {
           chart: {
             width: 300,
           },
-          legend: {
-            position: "bottom",
-          },
+          legend: false,
         },
       },
     ],
