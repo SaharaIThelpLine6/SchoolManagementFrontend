@@ -1,0 +1,37 @@
+import React from "react";
+
+import { useGetStudentNumberByClassQuery } from "../../features/dashboard/dashboardQuerySlice";
+import StudentClassListSkeleton from "../Skeleton/StudentClassListSkeleton";
+
+const ClassRoutine = () => {
+  const {
+    data: studentclass,
+    isLoading,
+    isError,
+  } = useGetStudentNumberByClassQuery();
+  // যদি লোডিং হয়
+  if (isLoading) return <StudentClassListSkeleton />;
+  if (isError) return <p>ডেটা আনতে সমস্যা হয়েছে!</p>;
+  return (
+    <div className="w-full h-[400px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col font-sans">
+      <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
+        ক্লাস ভিত্তিক শিক্ষার্থীর সংখ্যা
+      </h2>
+      <ul className="space-y-3 flex-1 overflow-y-auto">
+        {studentclass?.map((item, index) => (
+          <li
+            key={index}
+            className="flex justify-between items-center py-2 border-b border-gray-200"
+          >
+            <span className="text-gray-700 text-base">{item.className}</span>
+            <span className="flex items-center justify-center w-8 h-8   font-semibold rounded-full text-sm">
+              {item.student}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+export default ClassRoutine;

@@ -60,7 +60,7 @@ const TestLayout = () => {
 
         {/* Main Content */}
         <main className="flex-1 ml-0 h-full overflow-y-auto">
-          <div className="p-4 sm:p-6 lg:p-8 bg-white min-h-full">
+          <div className="p-4 bg-[#F2F3F3] min-h-full">
             <div>
               <Outlet />
             </div>
