@@ -104,6 +104,16 @@ const useTranslate = () => {
     Remark: "মন্তব্য",
     "Character Report": "চারিত্রিক রিপোর্ট",
     "No.": "ক্র: নং",
+    "Total students": "মোট শিক্ষার্থী",
+    "Total teachers": "মোট শিক্ষক",
+    "Total donor member": "মোট দাতা সদস্য",
+    "Total owed": "মোট পাওনা",
+    "Class-based student distribution": "শ্রেণি ভিত্তিক শিক্ষার্থী বন্টন",
+    Calendar: "ক্যালেন্ডার",
+    "Number of students by class": "ক্লাস ভিত্তিক শিক্ষার্থীর সংখ্যা",
+    "Presence and absence": "উপস্থিতি ও অনুপস্থিতি",
+    "Number of students according to the previous academic year":
+      "বিগত শিক্ষাবর্ষ অনুযায়ী শিক্ষার্থী সংখ্যা",
   };
 
   return (key) =>

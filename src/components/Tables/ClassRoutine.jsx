@@ -2,8 +2,11 @@ import React from "react";
 
 import { useGetStudentNumberByClassQuery } from "../../features/dashboard/dashboardQuerySlice";
 import StudentClassListSkeleton from "../Skeleton/StudentClassListSkeleton";
+import useTranslate from "../../utils/Translate";
 
 const ClassRoutine = () => {
+  const translate = useTranslate();
+
   const {
     data: studentclass,
     isLoading,
@@ -15,7 +18,7 @@ const ClassRoutine = () => {
   return (
     <div className="w-full h-[400px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col font-sans">
       <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
-        ক্লাস ভিত্তিক শিক্ষার্থীর সংখ্যা
+        {translate("Number of students by class")}
       </h2>
       <ul className="space-y-3 flex-1 overflow-y-auto">
         {studentclass?.map((item, index) => (

@@ -26,8 +26,10 @@ import {
   useGetTotalTeacherQuery,
   useGetTotalDonerQuery,
 } from "../features/dashboard/dashboardQuerySlice";
+import useTranslate from "../utils/Translate";
 const Home = ({ pageTitle }) => {
   const dispatch = useDispatch();
+  const translate = useTranslate();
 
   const { studentList, status } = useSelector((state) => state.student);
   const { data: studentCount } = useGetStudentBySessionQuery();
@@ -55,7 +57,7 @@ const Home = ({ pageTitle }) => {
     <div className="px-[24px]">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <CardDataStats
-          title="মোট শিক্ষার্থী" // Total Student
+          title={translate("Total students")} // Total Student
           total={studentCount ? studentCount.length : 0}
           bgColor="#ECF7FB" // Light pink
           iconColor="text-[#06AEEF]"
@@ -66,7 +68,7 @@ const Home = ({ pageTitle }) => {
         </CardDataStats>
 
         <CardDataStats
-          title="মোট শিক্ষক" // Total Teacher
+          title={translate("Total teachers")} // Total Teacher
           total={teacherCount?.totalUsers ?? 0}
           bgColor="#F9CEE1" // Light green
           titleColor="text-[#EB058C]"
@@ -77,7 +79,7 @@ const Home = ({ pageTitle }) => {
         </CardDataStats>
 
         <CardDataStats
-          title="মোট দাতা সদস্য" // Total Guardian
+          title={translate("Total donor member")} // Total Guardian
           total={donerCount?.totalUsers ?? 0}
           bgColor="#C3DCC2" // Light green
           titleColor="text-[#0C9444]"
@@ -87,7 +89,7 @@ const Home = ({ pageTitle }) => {
           <FaSackDollar className="w-8 h-8" />
         </CardDataStats>
         <CardDataStats
-          title="মোট পাওনা" // Total User
+          title={translate("Total owed")} // Total User
           total={totalDueCount?.totalDue ?? 0}
           bgColor="#FFE4C6" // Light orange
           titleColor="text-[#F7951E]"

@@ -1,7 +1,10 @@
 import React, { useState } from "react";
 import ReactApexChart from "react-apexcharts";
+import useTranslate from "../../utils/Translate";
 
 const AttendanceChart = () => {
+  const translate = useTranslate();
+
   const [state] = useState({
     series: [70, 30], // Present vs Absent
     options: {
@@ -55,9 +58,9 @@ const AttendanceChart = () => {
   });
 
   return (
-    <div className="w-full h-[400px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col">
+    <div className="w-full h-[450px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col">
       <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
-        উপস্থিতি ও অনুপস্থিতি
+        {translate("Presence and absence")}
       </h2>
       <div className="flex-1 flex items-center justify-center">
         <ReactApexChart
