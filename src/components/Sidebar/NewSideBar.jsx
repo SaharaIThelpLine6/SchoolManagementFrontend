@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import * as Icons from "react-icons/fa";
+
 import { menuData } from "./data";
 import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { renderIcons } from "../../helper/renderIcons";
 
 const NewSideBar = () => {
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -13,16 +14,9 @@ const NewSideBar = () => {
     setOpenMenuId((prev) => (prev === id ? null : id));
   };
 
-  const renderIcon = (icon) => {
-    if (icon.startsWith("Fa") && Icons[icon]) {
-      return React.createElement(Icons[icon], { className: "text-2xl" });
-    }
-    return <span className="text-2xl">{icon}</span>;
-  };
-
   useEffect(() => {
     menuData.forEach((menu) => {
-      if (menu.subMenu) {
+      if (Array.isArray(menu.subMenu)) {
         const activeSubMenu = menu.subMenu.find((item) =>
           location.pathname.startsWith(item.route)
         );
@@ -64,7 +58,7 @@ const NewSideBar = () => {
                     }`}
                   >
                     <span className="flex items-center gap-2">
-                      {renderIcon(menu.icon)}
+                      {renderIcons(menu.icon)}
                       {menu.name}
                     </span>
                     <span>
@@ -120,7 +114,7 @@ const NewSideBar = () => {
                     }`
                   }
                 >
-                  {renderIcon(menu.icon)} {menu.name}
+                  {renderIcons(menu.icon)} {menu.name}
                 </NavLink>
               )}
             </li>

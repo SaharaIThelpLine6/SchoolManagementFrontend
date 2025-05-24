@@ -7,62 +7,62 @@ export const menuData = [
     icon: "FaHome",
   },
   {
-    id: "10",
+    id: "2",
     name: "User",
     route: "/usersinfo",
     subMenu: false,
     icon: "FaUsers",
   },
   {
-    id: "2",
+    id: "3",
     name: "Student",
     route: "/students",
     icon: "FaUsers",
     subMenu: [
       {
-        id: "3",
+        id: "1",
         name: "All Students",
         route: "/students",
       },
       {
-        id: "4",
+        id: "2",
         name: "Book List",
         route: "/students/booklist",
       },
       {
-        id: "5",
+        id: "3",
         name: "Group Distribution",
         route: "/students/groupdistribution",
       },
       {
-        id: "6",
+        id: "4",
         name: "Class",
         route: "/students/class",
       },
       {
-        id: "7",
+        id: "5",
         name: "Section",
         route: "/students/section",
       },
       {
-        id: "8",
+        id: "6",
         name: "Session",
         route: "/students/sessions",
       },
       {
-        id: "9",
+        id: "7",
         name: "Students Report",
         route: "/students/students-report",
       },
       {
-        id: "10",
+        id: "8",
         name: "Report List",
         route: "/students/students-report/list",
       },
     ],
   },
   {
-    id: "3",
+    id: "4",
     name: "Employee",
     route: "/teacherinfo",
     icon: "FaUsers",
@@ -99,67 +99,71 @@ export const menuData = [
       },
     ],
   },
+
   {
-    label: "Staff",
+    id: "5",
+    name: "Settings",
+    route: "/settings",
+    subMenu: false,
     icon: "TbIdBadge2",
-    path: "/staff",
-    subMenu: [
-      { label: "Teacher Info", path: "/staff/teacherinfo" },
-      { label: "Non Teaching Staff", path: "/staff/nonteaching" },
-      { label: "Staff Attendance", path: "/staff/attendance" },
-      { label: "Leave Request", path: "/staff/leave" },
-      { label: "Assign Role", path: "/staff/assign-role" },
-    ],
-  },
-  {
-    label: "Exam",
-    icon: "TbNotes",
-    path: "/exam",
-    subMenu: [
-      { label: "Exam List", path: "/exam/list" },
-      { label: "Admit Card", path: "/exam/list" },
-    ],
-  },
-  {
-    label: "Board",
-    icon: "TbBuilding",
-    path: "/board",
-    subMenu: [
-      { label: "Add Board", path: "/board/add" },
-      { label: "Board List", path: "/board/list" },
-    ],
-  },
-  {
-    label: "Result",
-    icon: "TbFileAnalytics",
-    path: "/result",
-    subMenu: [
-      { label: "Add Result", path: "/result/add" },
-      { label: "Result List", path: "/result/list" },
-    ],
-  },
-  {
-    label: "Library",
-    icon: "TbBooks",
-    path: "/library",
-    subMenu: [
-      { label: "Add Book", path: "/library/add" },
-      { label: "Book List", path: "/library/list" },
-    ],
-  },
-  {
-    label: "Others",
-    icon: "TbDotsCircleHorizontal",
-    path: "/others",
-    subMenu: [
-      { label: "Add Class", path: "/others/add-class" },
-      { label: "Add Section", path: "/others/add-section" },
-      { label: "Subject", path: "/others/subject" },
-    ],
-  },
-  {
-    label: "Settings",
-    icon: "TbSettings",
-    path: "/settings",
   },
 ];
+
+// {
+//   label: "Staff",
+//   icon: "TbIdBadge2",
+//   path: "/staff",
+//   subMenu: [
+//     { label: "Teacher Info", path: "/staff/teacherinfo" },
+//     { label: "Non Teaching Staff", path: "/staff/nonteaching" },
+//     { label: "Staff Attendance", path: "/staff/attendance" },
+//     { label: "Leave Request", path: "/staff/leave" },
+//     { label: "Assign Role", path: "/staff/assign-role" },
+//   ],
+// },
+// {
+//   label: "Exam",
+//   icon: "TbNotes",
+//   path: "/exam",
+//   subMenu: [
+//     { label: "Exam List", path: "/exam/list" },
+//     { label: "Admit Card", path: "/exam/list" },
+//   ],
+// },
+// {
+//   label: "Board",
+//   icon: "TbBuilding",
+//   path: "/board",
+//   subMenu: [
+//     { label: "Add Board", path: "/board/add" },
+//     { label: "Board List", path: "/board/list" },
+//   ],
+// },
+// {
+//   label: "Result",
+//   icon: "TbFileAnalytics",
+//   path: "/result",
+//   subMenu: [
+//     { label: "Add Result", path: "/result/add" },
+//     { label: "Result List", path: "/result/list" },
+//   ],
+// },
+// {
+//   label: "Library",
+//   icon: "TbBooks",
+//   path: "/library",
+//   subMenu: [
+//     { label: "Add Book", path: "/library/add" },
+//     { label: "Book List", path: "/library/list" },
+//   ],
+// },
+// {
+//   label: "Others",
+//   icon: "TbDotsCircleHorizontal",
+//   path: "/others",
+//   subMenu: [
+//     { label: "Add Class", path: "/others/add-class" },
+//     { label: "Add Section", path: "/others/add-section" },
+//     { label: "Subject", path: "/others/subject" },
+//   ],
+// },

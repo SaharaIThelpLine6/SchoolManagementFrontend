@@ -195,7 +195,7 @@ function App() {
               />
             </Route>
             <Route
-              path="/setting"
+              path="settings"
               element={<Setting pageTitle={"Setting"} />}
             />
             <Route path="/help" element={<Help pageTitle={"Help"} />} />
