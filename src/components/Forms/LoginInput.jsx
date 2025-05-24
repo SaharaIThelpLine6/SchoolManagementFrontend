@@ -1,7 +1,8 @@
 import React from "react";
 import { useFormContext } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
-import { FaUser, FaLock, FaRegUser } from "react-icons/fa"; // Example icons
+import * as FaIcons from "react-icons/fa"; // Import all Fa icons
+
 const LoginInput = ({
   label,
   type,
@@ -9,7 +10,7 @@ const LoginInput = ({
   registerKey,
   require = false,
   disable = false,
-  icon, // New prop to specify the icon
+  icon, // Icon name as a string (e.g., "FaUser")
 }) => {
   const {
     register,
@@ -23,20 +24,11 @@ const LoginInput = ({
       : true;
   };
 
-  // Map icon based on type or custom icon prop
-  const getIcon = () => {
-    switch (icon || type) {
-      case "text":
-      case "email":
-        return <FaUser className="text-gray-500" />;
-      case "number":
-        return <FaRegUser className="text-gray-500" />;
-      case "password":
-        return <FaLock className="text-gray-500" />;
-      default:
-        return null;
-    }
-  };
+  // Dynamically get the icon component based on the icon name
+  const IconComponent = icon && FaIcons[icon] ? FaIcons[icon] : null;
+
+  // Debug: Log the icon name and whether the component is found
+  console.log(`Icon for ${registerKey}:`, icon, "Component:", IconComponent);
 
   return (
     <div className="w-full">
@@ -64,16 +56,18 @@ const LoginInput = ({
             ...(type === "number" && { validate: validateNumber }),
             ...(type === "phone" && {
               pattern: {
-                value: /^\d{11}$/, // Ensures exactly 11 digits
+                value: /^\d{11}$/,
                 message: "Phone number must be exactly 11 digits",
               },
             }),
           })}
           disabled={disable}
         />
-        <div className="absolute inset-y-0 left-0 flex items-center pl-3">
-          {getIcon()}
-        </div>
+        {IconComponent && (
+          <div className="absolute inset-y-0 left-0 flex items-center pl-3">
+            <IconComponent className="text-gray-500 w-5 h-5" />
+          </div>
+        )}
       </div>
 
       {errors[registerKey] && (

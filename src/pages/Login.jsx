@@ -1,12 +1,12 @@
 import { useFormContext } from "react-hook-form";
-import DefaultInput from "../components/Forms/DefaultInput";
+import DefaultInput from "../components/Forms/DefaultInput"; // Updated to use DefaultInput
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../features/auth/authSlice";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { FiArrowRight } from "react-icons/fi";
+import { FiArrowRight, FiEye, FiEyeOff } from "react-icons/fi";
 import LoginInput from "../components/Forms/LoginInput";
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
@@ -92,6 +92,7 @@ const Login = () => {
               type="number"
               placeholder="Enter School ID"
               registerKey="school_id"
+              icon="FaPhone" // Pass icon name as a string
             />
 
             <LoginInput
@@ -99,6 +100,7 @@ const Login = () => {
               type="text"
               placeholder="Enter Username"
               registerKey="username"
+              icon="FaUser" // Pass icon name as a string
             />
 
             {/* Password with toggle */}
@@ -108,12 +110,16 @@ const Login = () => {
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter Password"
                 registerKey="password"
+                icon="FaLock" // Pass icon name as a string
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-[32px] sm:top-[36px] text-gray-400 hover:text-gray-600 text-base sm:text-lg"
-              />
+                className="absolute right-2 top-[40px] sm:top-[36px] text-gray-400 hover:text-gray-600 text-base sm:text-lg focus:outline-none"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
             </div>
           </div>
 
