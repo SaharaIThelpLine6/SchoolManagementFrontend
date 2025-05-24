@@ -75,7 +75,7 @@ const Login = () => {
         {/* Form */}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="p-4 sm:p-6 space-y-3 sm:space-y-4 font-lato flex-1 flex flex-col justify-between"
+          className="p-4 px-8 sm:p-6 space-y-3 sm:space-y-4 font-lato flex-1 flex flex-col justify-between"
         >
           <div className="flex justify-center">
             <img

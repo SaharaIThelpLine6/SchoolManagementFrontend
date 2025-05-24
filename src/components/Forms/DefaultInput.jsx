@@ -34,7 +34,7 @@ const DefaultInput = ({
       <input
         type={type === "number" || type === "phone" ? "number" : type}
         placeholder={translate(placeholder)}
-        className={`w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] px-2 h-[38px] text-black outline-none text-[14px] transition
+        className={`w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition
                     focus:border-custom-focus active:border-custom-focus
                     disabled:cursor-not-allowed disabled:bg-slate-200
                     ${

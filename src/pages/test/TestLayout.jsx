@@ -1,13 +1,38 @@
-import { Outlet } from "react-router-dom";
 import NewSideBar from "../../components/Sidebar/NewSideBar";
 import TestHeader from "./TestHeader";
-import { useSelector, useDispatch } from "react-redux";
 import { closeSidebar } from "../../features/sidebar/sideBarSlice";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setCurrentLanguage } from "../../features/language/languageSlice";
+import { verifyUser } from "../../features/auth/authSlice";
+import { useEffect } from "react";
+import DefaultModal from "../../components/DefaultModal";
 
 const TestLayout = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const sidebarOpen = useSelector((state) => state.sideBar?.isOpen ?? false);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const token = useSelector((state) => state.auth.token);
+  const pageName = useSelector((state) => state.auth.pageName);
+  const { currectLanguage } = useSelector((state) => state.language);
+  const { isOpen } = useSelector((state) => state.modal);
 
+  useEffect(() => {
+    // console.log('Authentication state:', isAuthenticated);
+
+    if (isAuthenticated) {
+      dispatch(verifyUser(token)); // Dispatch the thunk
+    } else {
+      navigate("/login"); // Redirect if not authenticated
+    }
+    const lang = localStorage.getItem("lang");
+    // console.log(lang);
+
+    if (lang !== currectLanguage && lang) {
+      dispatch(setCurrentLanguage(lang));
+    }
+  }, [isAuthenticated, dispatch, navigate, token]);
   return (
     <div className="h-screen flex flex-col bg-gray-100 font-SolaimanLipi overflow-hidden">
       {/* Header */}
@@ -36,7 +61,10 @@ const TestLayout = () => {
         {/* Main Content */}
         <main className="flex-1 ml-0 h-full overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 bg-white min-h-full">
-            <Outlet />
+            <div>
+              <Outlet />
+            </div>
+            <DefaultModal></DefaultModal>
           </div>
         </main>
       </div>

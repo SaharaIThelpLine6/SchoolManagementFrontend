@@ -133,7 +133,7 @@ const TestHeader = () => {
 
       {/* Desktop Header */}
       <div className="hidden sm:flex items-center justify-between px-6 py-3 gap-3 2xl:px-11">
-        <div className="flex justify-center items-center w-full max-w-[200px] sm:max-w-[220px] md:max-w-[250px] flex-shrink-0">
+        <div className="flex justify-center items-center w-full max-w-[200px] sm:max-w-[220px] md:max-w-[200px] flex-shrink-0">
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               onClick={() => dispatch(toggleSidebar())}
@@ -164,7 +164,7 @@ const TestHeader = () => {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-end gap-2 sm:gap-4 flex-1 min-w-0">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 flex-1 min-w-0">
           <h2 className="text-sm sm:text-base md:text-3xl font-semibold text-gray-800 text-center sm:text-left truncate">
             উম্মাহাতুল মুমিনিন মহিলা মাদ্রাসা
           </h2>
@@ -174,7 +174,7 @@ const TestHeader = () => {
             <input
               type="text"
               placeholder="Search"
-              className="w-full rounded-full bg-[#EDEDED] h-8 sm:h-9 pl-10 pr-4 py-2 text-sm sm:text-base placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#0c80d5] transition-colors"
+              className="w-full rounded-full bg-[#EDEDED] h-8 sm:h-9 pl-10 pr-4 py-2 text-sm sm:text-base placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-custom-focus transition-colors"
             />
           </form>
         </div>

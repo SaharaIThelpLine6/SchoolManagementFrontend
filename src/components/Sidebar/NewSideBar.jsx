@@ -20,13 +20,11 @@ const NewSideBar = () => {
     return <span className="text-2xl">{icon}</span>;
   };
 
-  const isActiveRoute = (route) => location.pathname === route;
-
   useEffect(() => {
     menuData.forEach((menu) => {
       if (menu.subMenu) {
         const activeSubMenu = menu.subMenu.find((item) =>
-          isActiveRoute(item.route)
+          location.pathname.startsWith(item.route)
         );
         if (activeSubMenu) {
           setOpenMenuId(menu.id);
@@ -59,11 +57,10 @@ const NewSideBar = () => {
                 <>
                   <button
                     onClick={() => handleToggle(menu.id)}
-                    className={`w-full flex px-4 font-SolaimanLipi items-center justify-between border-l-6 gap-2 py-2 font-semibold ${
-                      menu.subMenu.some((item) => isActiveRoute(item.route)) ||
-                      isActiveRoute(menu.route)
-                        ? "bg-[#deeff9] text-[#00aeef] border-[#00aeef]"
-                        : "hover:text-[#00aeef] hover:bg-gray-50"
+                    className={`w-full flex px-4 font-SolaimanLipi items-center justify-between border-l-6 border-solid gap-2 py-2 font-semibold ${
+                      location.pathname.startsWith(menu.route)
+                        ? "bg-[#deeff9] text-[#00aeef] border-l-[#00aeef]"
+                        : "hover:text-[#00aeef] hover:bg-gray-50 border-l-transparent"
                     }`}
                   >
                     <span className="flex items-center gap-2">
@@ -94,6 +91,7 @@ const NewSideBar = () => {
                           >
                             <NavLink
                               to={item.route}
+                              end
                               className={({ isActive }) =>
                                 `block py-2 pl-6 font-SolaimanLipi ${
                                   isActive
@@ -113,11 +111,12 @@ const NewSideBar = () => {
               ) : (
                 <NavLink
                   to={menu.route}
+                  onClick={() => setOpenMenuId(null)}
                   className={({ isActive }) =>
-                    `flex items-center font-SolaimanLipi gap-2 py-2 px-4 ${
+                    `flex items-center font-SolaimanLipi gap-2 py-2 px-4 border-l-6 border-solid ${
                       isActive
-                        ? "bg-[#deeff9] text-[#00aeef] border-l-6 border-[#00aeef]"
-                        : "hover:text-[#00aeef] hover:bg-gray-50"
+                        ? "bg-[#deeff9] text-[#00aeef] border-l-[#00aeef]"
+                        : "hover:text-[#00aeef] hover:bg-gray-50 border-l-transparent"
                     }`
                   }
                 >
