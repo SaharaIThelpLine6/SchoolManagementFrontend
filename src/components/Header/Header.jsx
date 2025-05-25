@@ -6,30 +6,35 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaSearch } from "react-icons/fa";
 import { toggleSidebar } from "../../features/sidebar/sideBarSlice";
 import { showModal } from "../../utils/ModalControlar";
-import DropdownNotification from "../../components/Header/DropdownNotification";
-import DropdownUser from "../../components/Header/DropdownUser";
 import TranslateButton from "../../components/Header/TranslateButton";
 import { useGetUserInfoQuery } from "../../features/payment/paymentSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import Logo from "/Screenshot_13.png";
 import { useGetInstitutionInfoQuery } from "../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../utils/conveter";
-import { Buffer } from 'buffer';
-const TestHeader = () => {
+import { Buffer } from "buffer";
+import DropdownNotification from "./DropdownNotification";
+import DropdownUser from "./DropdownUser";
+
+const Header = () => {
   const dispatch = useDispatch();
   const { data: userPayInfo, refetch } = useGetUserInfoQuery();
-  const { data: institutionInfo, error: institutionInfoError, isLoading: institutionInfoLoading } = useGetInstitutionInfoQuery();
+  const {
+    data: institutionInfo,
+    error: institutionInfoError,
+    isLoading: institutionInfoLoading,
+  } = useGetInstitutionInfoQuery();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const [logo, setLogo] = useState(null)
+  const [logo, setLogo] = useState(null);
   useEffect(() => {
     if (institutionInfo?.Logo?.data) {
       const buffer = Buffer.from(institutionInfo.Logo.data);
-      const base64String = buffer.toString('base64');
+      const base64String = buffer.toString("base64");
       const imageSrc = `data:image/png;base64,${base64String}`;
-      setLogo(imageSrc)
+      setLogo(imageSrc);
     }
-  }, [institutionInfo])
+  }, [institutionInfo]);
   const handleOpenModal = useCallback(() => {
     showModal("Payment", "PAYMENT");
   }, []);
@@ -107,24 +112,26 @@ const TestHeader = () => {
             <div className="flex flex-wrap items-center gap-2 justify-center">
               {userPayInfo && (
                 <p
-                  className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${userPayInfo.RenewDays > 60
+                  className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${
+                    userPayInfo.RenewDays > 60
                       ? "bg-green-500"
                       : userPayInfo.RenewDays > 30
-                        ? "bg-yellow-500"
-                        : "bg-rose-500"
-                    }`}
+                      ? "bg-yellow-500"
+                      : "bg-rose-500"
+                  }`}
                 >
                   Days: {userPayInfo.RenewDays}
                 </p>
               )}
               {userPayInfo && (
                 <p
-                  className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
+                  className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${
+                    userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
                       ? "bg-green-500"
                       : userPayInfo.BalanceDr - userPayInfo.BalanceCr > 10
-                        ? "bg-yellow-500"
-                        : "bg-rose-500"
-                    }`}
+                      ? "bg-yellow-500"
+                      : "bg-rose-500"
+                  }`}
                 >
                   Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
                 </p>
@@ -193,24 +200,26 @@ const TestHeader = () => {
         <div className="flex items-center gap-3 flex-shrink-0">
           {userPayInfo && (
             <p
-              className={`text-white py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-nowrap text-[14px] font-semibold  ${userPayInfo.RenewDays > 60
+              className={`text-white py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-nowrap text-[14px] font-semibold  ${
+                userPayInfo.RenewDays > 60
                   ? "bg-green-500"
                   : userPayInfo.RenewDays > 30
-                    ? "bg-yellow-500"
-                    : "bg-rose-500"
-                }`}
+                  ? "bg-yellow-500"
+                  : "bg-rose-500"
+              }`}
             >
               Days: {userPayInfo.RenewDays}
             </p>
           )}
           {userPayInfo && (
             <p
-              className={`text-white py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-nowrap text-[14px] font-semibold  ${userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
+              className={`text-white py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-nowrap text-[14px] font-semibold  ${
+                userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
                   ? "bg-green-500"
                   : userPayInfo.BalanceDr - userPayInfo.BalanceCr > 10
-                    ? "bg-yellow-500"
-                    : "bg-rose-500"
-                }`}
+                  ? "bg-yellow-500"
+                  : "bg-rose-500"
+              }`}
             >
               Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
             </p>
@@ -230,9 +239,9 @@ const TestHeader = () => {
   );
 };
 
-TestHeader.propTypes = {
+Header.propTypes = {
   sidebarOpen: PropTypes.bool,
   setSidebarOpen: PropTypes.func,
 };
 
-export default TestHeader;
+export default Header;

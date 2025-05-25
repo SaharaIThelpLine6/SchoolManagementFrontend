@@ -6,7 +6,7 @@ import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { renderIcons } from "../../helper/renderIcons";
 
-const NewSideBar = () => {
+const SideBar = () => {
   const [openMenuId, setOpenMenuId] = useState(null);
   const location = useLocation();
 
@@ -51,7 +51,7 @@ const NewSideBar = () => {
                 <>
                   <button
                     onClick={() => handleToggle(menu.id)}
-                    className={`w-full flex px-4 font-SolaimanLipi items-center justify-between border-l-6 border-solid gap-2 py-2 font-semibold ${
+                    className={`w-full flex px-4 font-SolaimanLipi items-center justify-between border-l-6 border-solid gap-2 py-2 ${
                       location.pathname.startsWith(menu.route)
                         ? "bg-[#deeff9] text-[#00aeef] border-l-[#00aeef]"
                         : "hover:text-[#00aeef] hover:bg-gray-50 border-l-transparent"
@@ -125,4 +125,4 @@ const NewSideBar = () => {
   );
 };
 
-export default NewSideBar;
+export default SideBar;

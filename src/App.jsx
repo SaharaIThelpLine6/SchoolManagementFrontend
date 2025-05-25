@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { BrowserRouter, Form, Route, Routes } from "react-router-dom";
-import DefaultLayout from "./layout/DefaultLayout";
+// import DefaultLayout from "./layout/OldDefaultLayout";
 import Home from "./pages/Home";
 import Student from "./pages/Student";
 import AddStudent from "./pages/AddStudent";
@@ -69,10 +69,7 @@ import StudentReport from "./pages/StudentReport";
 import StudentReportList from "./pages/StudentReportList";
 import AddDesignation from "./pages/AddDesignation";
 import useTranslate from "./utils/Translate";
-import NewSideBar from "./components/Sidebar/NewSideBar";
-import Teachers from "./pages/test/Teachers";
-import Students from "./pages/test/Students";
-import TestLayout from "./pages/test/TestLayout";
+import DefaultLayout from "./layout/DefaultLayout";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -97,7 +94,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* <Route path="/" element={<DefaultLayout />}> */}
-          <Route path="/" element={<TestLayout />}>
+          <Route path="/" element={<DefaultLayout />}>
             <Route index element={<Home pageTitle={"Home"} />} />
 
             <Route path="students">
@@ -204,10 +201,6 @@ function App() {
           
           </Route> */}
           <Route path="/login" element={<Login />} />
-          <Route path="/new" element={<TestLayout />}>
-            <Route path="teachers" element={<Teachers />} />
-            <Route path="students" element={<Students />} />
-          </Route>
           <Route path=":schoolid" element={<PublicLayout />}>
             <Route
               index
