@@ -87,7 +87,7 @@
 //           }
 //         </select> */}
 
-//         <span className={`absolute pointer-events-none transform transition-transform duration-300 top-1/2 right-4 z-30 -translate-y-1/2 
+//         <span className={`absolute pointer-events-none transform transition-transform duration-300 top-1/2 right-4 z-30 -translate-y-1/2
 //         ${isOpen ? "rotate-180" : "rotate-0"}`}>
 //           <svg
 //             className="fill-current"
@@ -115,13 +115,22 @@
 
 // export default DefaultSelect;
 
+import React, { useState, useEffect } from "react";
+import { useFormContext } from "react-hook-form";
+import useTranslate from "../../utils/Translate";
+import bnBijoy2Unicode from "../../utils/conveter";
 
-import React, { useState, useEffect } from 'react';
-import { useFormContext } from 'react-hook-form';
-import useTranslate from '../../utils/Translate';
-import bnBijoy2Unicode from '../../utils/conveter';
-
-const DefaultSelect = ({ label, type, options, registerKey, require, valueField, nameField, disabled, unicode = false }) => {
+const DefaultSelect = ({
+  label,
+  type,
+  options,
+  registerKey,
+  require,
+  valueField,
+  nameField,
+  disabled,
+  unicode = false,
+}) => {
   const {
     register,
     formState: { errors },
@@ -143,40 +152,60 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [registerKey]);
 
   return (
     <div className="w-full">
-      <label htmlFor={registerKey} className="mb-1 block text-black font-SolaimanLipi">
+      <label
+        htmlFor={registerKey}
+        className="mb-1 block text-black font-SolaimanLipi"
+      >
         {label}
       </label>
 
-      <div id={`${registerKey}-dropdown`} className="relative z-20 bg-transparent">
+      <div
+        id={`${registerKey}-dropdown`}
+        className="relative z-20 bg-transparent"
+      >
         <select
           name={registerKey}
-          {...register(registerKey, { required: require, valueAsNumber: type === 'number' })}
+          {...register(registerKey, {
+            required: require,
+            valueAsNumber: type === "number",
+          })}
           onClick={toggleDropdown}
           defaultValue=""
-          className={`relative h-[38px] z-20 w-full appearance-none font-SolaimanLipi rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition focus:border-primary active:border-primary ${disabled ? 'cursor-not-allowed disabled:bg-slate-200' : ''
-            }`}
+          className={`relative h-[38px] z-20 w-full appearance-none font-SolaimanLipi rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition 
+            focus:border-custom-focus active:border-custom-focus
+            ${disabled ? "cursor-not-allowed disabled:bg-slate-200" : ""}`}
           disabled={disabled}
         >
           <option value="" className="text-body">
-            {translate('Select')}
+            {translate("Select")}
           </option>
           {options &&
             options.map((option) => (
-              <option key={option[valueField]} value={option[valueField]} className="text-body">
-                {unicode ? bnBijoy2Unicode(option[nameField]) : option[nameField]}
+              <option
+                key={option[valueField]}
+                value={option[valueField]}
+                className="text-body"
+              >
+                {unicode
+                  ? bnBijoy2Unicode(option[nameField])
+                  : option[nameField]}
               </option>
             ))}
         </select>
 
-        <span className={`absolute pointer-events-none transform transition-transform duration-300 top-1/2 right-4 z-30 -translate-y-1/2 ${isOpen ? 'rotate-180' : 'rotate-0'}`}>
+        <span
+          className={`absolute pointer-events-none transform transition-transform duration-300 top-1/2 right-4 z-30 -translate-y-1/2 ${
+            isOpen ? "rotate-180" : "rotate-0"
+          }`}
+        >
           <svg
             className="fill-current"
             width="20"
@@ -196,7 +225,12 @@ const DefaultSelect = ({ label, type, options, registerKey, require, valueField,
           </svg>
         </span>
       </div>
-      {errors[registerKey] && <p className="text-red-500 text-sm mt-1">{errors[registerKey].message}</p>}
+
+      {errors[registerKey] && (
+        <p className="text-red-500 text-sm mt-1">
+          {errors[registerKey].message}
+        </p>
+      )}
     </div>
   );
 };

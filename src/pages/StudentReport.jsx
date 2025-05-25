@@ -7,7 +7,7 @@ import { fetchSettingsData } from '../features/settings/settingsSlice';
 import DefaultInput from '../components/Forms/DefaultInput';
 import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
 import { useGetStudentBySearchQuery, useGetStudentReportCetsQuery, useGetStudentReportTypeQuery, usePostStudentCharacterReportMutation } from '../features/student/studentQuerySlice';
-import { fetchSingleStudentDataByStudentCode } from '../features/student/studentSlice';
+import { fetchSingleStudentDataByStudentCode, fetchSingleStudentDataByStudentCodeAndSession } from '../features/student/studentSlice';
 import { toast } from 'react-toastify';
 import LoadingComponent from '../components/LoadingComponent';
 import convertBijoyToBengali from '../utils/uniconveter';
@@ -18,7 +18,7 @@ const StudentReport = ({ pageTitle }) => {
     const dispatch = useDispatch();
     const { register, handleSubmit, formState: { errors } } = useForm();
     const { academicSession, status } = useSelector((state) => state.settings);
-    const { admittedStudent } = useSelector((state) => state.student);
+    const { admittedStudent, academicClassStudentError, academicClassStudent } = useSelector((state) => state.student);
     const methods = useForm()
     const { data: studentReportCet, error: studentReportCetError } = useGetStudentReportCetsQuery();
     const { data: studentReportType, error: studentReportTypeError } = useGetStudentReportTypeQuery();
@@ -36,13 +36,14 @@ const StudentReport = ({ pageTitle }) => {
 
     useEffect(() => {
         if (admittedStudent) {
-
             methods.reset({
                 StudentName: bnBijoy2Unicode(admittedStudent.StudentName),
                 FatherName: bnBijoy2Unicode(admittedStudent.FatherName),
                 Mobile1: admittedStudent.Mobile1,
                 ClassName: bnBijoy2Unicode(admittedStudent.ClassName),
                 SubClassID: admittedStudent.SubClassID,
+                SessionID: admittedStudent.SessionID,
+                Date: new Date(),
             });
         }
     }, [admittedStudent])
@@ -75,8 +76,6 @@ const StudentReport = ({ pageTitle }) => {
                 SubClassID: ''
             });
         } catch (err) {
-            console.log(err);
-
             toast.update(toastId, {
                 render: err?.data?.error || 'Submission failed!',
                 type: 'error',
@@ -92,13 +91,13 @@ const StudentReport = ({ pageTitle }) => {
     const { data: searchStudentInfo, error: searchStudentError, isLoading: studentInfoLoading } = useGetStudentBySearchQuery(studentCodeOrName, {
         skip: !studentCodeOrName || !userTyping,
         refetchOnFocus: false,
-        
+
     });
 
     useEffect(() => {
         if (studentCodeOrName && searchStudentInfo?.length > 0 && !searchStudentError) {
             setShowSuggestions(true);
-        } 
+        }
         else {
             setShowSuggestions(false);
         }
@@ -106,7 +105,11 @@ const StudentReport = ({ pageTitle }) => {
 
     const handleUserCode = () => {
         const studentCode = methods.getValues("StudentCode");
-        if (studentCode) {
+        const studentSession = methods.getValues("SessionID");
+        if (studentCode && studentSession) {
+            dispatch(fetchSingleStudentDataByStudentCodeAndSession({ id: studentCode, sessionId: studentSession }));
+        }
+        else {
             dispatch(fetchSingleStudentDataByStudentCode(studentCode));
         }
     };
@@ -118,23 +121,29 @@ const StudentReport = ({ pageTitle }) => {
         }
     }, [status, academicSession]);
 
-    // useEffect(() => {
-    //     if (studentCodeOrName) {
-    //         setUserTyping(true);
-    //     }
-    // }, [studentCodeOrName]);
+    useEffect(() => {
+        if (academicClassStudentError) {
+            methods.setValue("StudentName", "");
+            methods.setValue("FatherName", "");
+            methods.setValue("Mobile1", "");
+            methods.setValue("ClassName", "");
+            methods.setValue("SubClassID", "");
+            toast.error(academicClassStudentError || "Something went wrong");
+        }
+    }, [academicClassStudentError]);
 
     if (status === 'loading') {
         return <LoadingComponent />;
     }
     const handleSuggestionClick = (item) => {
-         setUserTyping(false);
+        setUserTyping(false);
         methods.setValue("StudentCode", item.StudentCode);
         methods.setValue("StudentName", item.StudentName);
         methods.setValue("FatherName", item.FatherName);
         methods.setValue("Mobile1", item.Mobile1);
         methods.setValue("ClassName", item.ClassName);
         methods.setValue("SubClassID", item.SubClassID);
+        methods.setValue("SessionID", item.SessionID);
 
         setShowSuggestions(false);
     };
@@ -148,7 +157,7 @@ const StudentReport = ({ pageTitle }) => {
                         <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8 text-blue-600 uppercase font-SolaimanLipi">{translate("Character Report")}</h1>
                         <div className="grid xl:grid-cols-4 gap-4 md:gap-6 mb-6">
                             <input {...methods.register("SubClassID", { required: "Short address is required" })} className='hidden' />
-                            
+
                             <div className='relative'>
                                 <div className="w-full">
                                     <label htmlFor={"StudentCode"} className="mb-1 block text-black font-SolaimanLipi">
@@ -156,7 +165,7 @@ const StudentReport = ({ pageTitle }) => {
                                             {translate("User Code")} * :
                                         </span>
                                     </label>
-                                    <input type="text" {...methods.register("StudentCode", { required: " " })} className='w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-slate-200' onInput={() => setUserTyping(true)} autoComplete='false'/>
+                                    <input type="text" {...methods.register("StudentCode", { required: " " })} className='w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-slate-200' onInput={() => setUserTyping(true)} autoComplete='false' />
                                 </div>
 
                                 <button type='button' onClick={handleUserCode} className='absolute bottom-[8px] right-[4px] text-[#999]'><svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-logout"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" /><path d="M9 12h12l-3 -3" /><path d="M18 15l3 -3" /></svg></button>

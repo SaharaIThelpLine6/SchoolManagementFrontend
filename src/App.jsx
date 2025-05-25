@@ -97,9 +97,11 @@ function App() {
     <FormProvider {...methods}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<DefaultLayout />}>
+          {/* <Route path="/" element={<DefaultLayout />}> */}
+          <Route path="/" element={<TestLayout />}>
             <Route index element={<Home pageTitle={"Home"} />} />
-            <Route path="student">
+
+            <Route path="students">
               <Route index element={<AddStudent pageTitle={"Add Student"} />} />
               <Route
                 path="booklist"
@@ -118,7 +120,6 @@ function App() {
                 path="sessions"
                 element={<Session pageTitle={"Session"} />}
               />
-
               <Route
                 path="students-report"
                 element={<StudentReport pageTitle={"Student Report"} />}
@@ -150,7 +151,6 @@ function App() {
 
             <Route path="teacherinfo">
               <Route index element={<AddTeacher pageTitle={"Employee"} />} />
-              {/* <Route path="teacherinfo" element={<TeacherInfo pageTitle={"Teacher Info"} />} /> */}
               <Route
                 path="payRole"
                 element={<PayRole pageTitle={"Pay Role"} />}
@@ -162,11 +162,10 @@ function App() {
               <Route path="report" element={<Report pageTitle={"Reports"} />} />
               <Route
                 path="designation"
-                element={
-                  <AddDesignation pageTitle={translate("Designation List")} />
-                }
+                element={<AddDesignation pageTitle={"Designation List"} />}
               />
             </Route>
+
             <Route path="/formp" element={<FormP />} />
             <Route path="/query" element={<Query />} />
             <Route path="exam">
@@ -206,7 +205,7 @@ function App() {
               />
             </Route>
             <Route
-              path="/setting"
+              path="settings"
               element={<Setting pageTitle={"Setting"} />}
             />
             <Route path="/help" element={<Help pageTitle={"Help"} />} />
