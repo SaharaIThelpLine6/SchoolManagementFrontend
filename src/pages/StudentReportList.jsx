@@ -5,13 +5,9 @@ import { FormProvider, useForm } from "react-hook-form";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import { fetchSettingsData } from "../features/settings/settingsSlice";
 import DefaultInput from "../components/Forms/DefaultInput";
-import {
-  useGetStudentBySearchQuery,
-  useGetStudentReportCetsQuery,
-  useGetStudentReportsMutation,
-  useGetStudentReportTypeQuery,
-  usePostStudentCharacterReportMutation,
-} from "../features/student/studentQuerySlice";
+// acterReportMutation,
+//   useDeleteStudentReportMutation, // Add this if you have delete functionality
+// } from "../features/student/studentQuerySlice";
 import { fetchSingleStudentDataByStudentCode } from "../features/student/studentSlice";
 import { toast } from "react-toastify";
 import SortableTable from "../components/Tables/SortableTable";
@@ -20,6 +16,11 @@ import bnBijoy2Unicode from "../utils/conveter";
 import useTranslate from "../utils/Translate";
 import { Link, useNavigate } from "react-router-dom";
 import CharacterReport from "../components/Document/characterReport";
+import { FiEdit } from "react-icons/fi";
+import { MdDelete } from "react-icons/md";
+// import { showModal } from "../controllers/ModalController"; // Import the modal controller
+import { useDeleteStudentReportMutation, useGetStudentBySearchQuery, useGetStudentReportCetsQuery,  useGetStudentReportsMutation, useGetStudentReportTypeQuery } from "../features/student/studentQuerySlice";
+import { showModal } from "../utils/ModalControlar";
 
 const StudentReportList = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -34,12 +35,17 @@ const StudentReportList = ({ pageTitle }) => {
     studentReports,
     { isLoading, isError, isSuccess, data: reportsResponse },
   ] = useGetStudentReportsMutation();
+  
+  // Add delete mutation if you have it
+  const [deleteStudentReport] = useDeleteStudentReportMutation();
+  
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [userTyping, setUserTyping] = useState(true);
 
   // translate function
   const translate = useTranslate();
   const printRef = useRef();
+  
   useEffect(() => {
     if (!academicSession.length) {
       dispatch(fetchSettingsData());
@@ -100,16 +106,63 @@ const StudentReportList = ({ pageTitle }) => {
 
   if (reportsResponse && reportsResponse.length > 0) {
   }
+  
   const handleSuggestionClick = (item) => {
     setUserTyping(false);
     methods.setValue("filterStudentCode", item.StudentCode);
     setShowSuggestions(false);
   };
+  
   const handlePrint = () => {
     // window.print();
     navigate("/student/students-report/list/print", {
       state: { reportData: reportsResponse },
     });
+  };
+
+  // Handle Edit functionality
+  const handleEdit = (reportItem) => {
+    console.log('Edit Report Item:', reportItem); // Debug log
+    
+    showModal(
+      translate("Edit Student Report"), // Modal title
+      "EDIT_STUDENT_REPORT", // Modal type
+      reportItem.SRID, // Use SRID as the primary key
+      reportItem // Pass the entire report data
+    );
+  };
+
+  // Handle Delete functionality
+  const handleDelete = async (reportItem) => {
+    if (window.confirm(translate("Are you sure you want to delete this report?"))) {
+      const toastId = toast.loading("Deleting report...");
+      try {
+        await deleteStudentReport(reportItem.SRID).unwrap(); // Use SRID
+        
+        toast.update(toastId, {
+          render: "Report deleted successfully!",
+          type: "success",
+          isLoading: false,
+          autoClose: 3000,
+          closeOnClick: true,
+        });
+
+        // Refresh the data
+        const studentCode = methods.getValues("filterStudentCode");
+        if (studentCode) {
+          studentReports(studentCode);
+        }
+      } catch (err) {
+        toast.update(toastId, {
+          render: err?.data?.message || "Delete failed!",
+          type: "error",
+          isLoading: false,
+          autoClose: 3000,
+          closeOnClick: true,
+        });
+        console.error("Error deleting report:", err);
+      }
+    }
   };
 
   return (
@@ -206,7 +259,7 @@ const StudentReportList = ({ pageTitle }) => {
       <div className="relative overflow-x-auto px-6 hidden_in_print">
         <table className="w-full text-sm text-left text-gray-500 shadow-md sm:rounded-lg hidden_in_print">
           <thead className="text-xs text-theme-dark font-SolaimanLipi uppercase bg-gray-50">
-            <tr>
+            <tr className="text-center">
               <th className={`px-3 py-3 text-nowrap  text-[16px]`}>
                 {translate("No.")}
               </th>
@@ -228,6 +281,9 @@ const StudentReportList = ({ pageTitle }) => {
               <th className={`px-3 py-3 text-nowrap  text-[16px]  w-[300px]`}>
                 {translate("Remark")}
               </th>
+              <th className={`px-3 py-3 text-nowrap  text-[16px]  w-[300px]`}>
+                {translate("Action")}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -235,7 +291,7 @@ const StudentReportList = ({ pageTitle }) => {
               reportsResponse.map((item, index) => (
                 <tr
                   key={index}
-                  className="bg-white border-b hover:bg-gray-50 text-black"
+                  className="bg-white border-b hover:bg-gray-50 text-center text-black"
                 >
                   <td className="px-3 py-4 text-nowrap">{index + 1}</td>
                   <td className="px-3 py-4 text-nowrap">{item.StudentCode}</td>
@@ -254,6 +310,24 @@ const StudentReportList = ({ pageTitle }) => {
                     style={{ whiteSpace: "normal" }}
                   >
                     {bnBijoy2Unicode(item.Remark)}
+                  </td>
+                  <td className="px-3 py-4 text-nowrap">
+                    <div className="flex justify-center items-center gap-2">
+                      <button
+                        className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
+                        title="Edit"
+                        onClick={() => handleEdit(item)}
+                      >
+                        <FiEdit className="w-5 h-5" />
+                      </button>
+                      <button
+                        className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
+                        title="Delete"
+                        onClick={() => handleDelete(item)}
+                      >
+                        <MdDelete className="w-5 h-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -10,9 +10,10 @@ import EditTeacherForm from "./Forms/EditTeacherForm";
 import AddDesignation from "../pages/AddDesignation";
 import EditDesignationForm from "./Forms/EditDesignationForm";
 import CreateDesignationForm from "./Forms/CreateDesignationForm";
+import EditStudentReportForm from "./Forms/EditStudentReportForm";
 
 const DefaultModal = () => {
-  const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
+  const { isOpen, title, modalType, id, data } = useSelector((state) => state.modal);
   const dispatch = useDispatch();
 
   if (!isOpen) return null;
@@ -69,6 +70,16 @@ const DefaultModal = () => {
                 {modalType === "ADD_DESIGNATION" && <CreateDesignationForm />}
                 {modalType === "EDIT_DESIGNATION" && (
                   <EditDesignationForm userId={id} />
+                )}
+                 {/* Add the new EDIT_STUDENT_REPORT modal type */}
+                {modalType === "EDIT_STUDENT_REPORT" && (
+                  <EditStudentReportForm
+                    reportData={data} 
+                    onSuccess={() => {
+                      // You can add any refresh logic here
+                      window.location.reload(); // Simple refresh, or implement better state management
+                    }}
+                  />
                 )}
               </div>
             )}
