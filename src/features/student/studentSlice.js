@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getUserData } from "../../utils/read/api";
+import { set } from "react-hook-form";
 
 export const fetchAdmissionStudentData = createAsyncThunk("student/fetchAdmissionStudentData", async () => {
     const token = localStorage.getItem('token');
@@ -63,6 +64,8 @@ const initialState = {
     admittedStudent:{},
     academicClassStudent:{},
     academicClassStudentError: null,
+    filteredStudent: null,
+    characterReportEditMode: null,
 };
 
 const classSlice = createSlice({
@@ -72,6 +75,12 @@ const classSlice = createSlice({
         setEditMode: (state, action) => {
             state.editMode = action.payload;
         },
+        setFilteredStudent: (state, action) => {
+            state.filteredStudent = action.payload;
+        },
+        setCharacterReportEditMode: (state, action) => {
+            state.characterReportEditMode = action.payload;
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -137,5 +146,5 @@ const classSlice = createSlice({
             });
     },
 });
-export const { setEditMode } = classSlice.actions;
+export const { setEditMode, setFilteredStudent, setCharacterReportEditMode } = classSlice.actions;
 export default classSlice.reducer;

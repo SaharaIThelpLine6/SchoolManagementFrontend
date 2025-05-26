@@ -16,9 +16,17 @@ export const userStudentSlice = createApi({
         },
     }),
     endpoints: (builder) => ({
-         getStudentBySearch: builder.query({
-           query: (data) => (`search_student?search=${data}`),
+        getStudentBySearch: builder.query({
+            query: ({ search, ClassID, SessionID }) => {
+                const params = new URLSearchParams();
+                params.append("search", search);
+                if (ClassID) params.append("ClassID", ClassID);
+                if (SessionID) params.append("SessionID", SessionID);
+
+                return `search_student?${params.toString()}`;
+            },
         }),
+
         getStudent: builder.query({
             query: () => 'view_students',
         }),
@@ -29,8 +37,16 @@ export const userStudentSlice = createApi({
         getStudentReportType: builder.query({
             query: () => `get_studentreport_type`,
         }),
-        getStudentReports: builder.mutation({
-           query: (data) => (`get_studentreports?StudentCode=${data}`),
+        getStudentReports: builder.query({
+            query: ({ userCode, classID, SessionID }) => {
+                const params = new URLSearchParams();
+
+                if (userCode) params.append('StudentCode', userCode);
+                if (classID) params.append('SubClassID', classID);
+                if (SessionID) params.append('SessionID', SessionID);
+
+                return `get_studentreports?${params.toString()}`;
+            },
         }),
         postStudentCharacterReport: builder.mutation({
             query: (data) => ({
@@ -47,7 +63,7 @@ export const {
     useGetStudentQuery,
     useGetStudentReportCetsQuery,
     useGetStudentReportTypeQuery,
-    useGetStudentReportsMutation,
+    useGetStudentReportsQuery,
     usePostStudentCharacterReportMutation
 } = userStudentSlice;
 

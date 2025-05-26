@@ -16,7 +16,7 @@ function CharacterReport({report}) {
         }
     }, [institutionInfo])
     return (
-        <div className=' w-[750px] bg-white mx-auto pl-[10px] pr-[10px] font-SolaimanLipi print_canvas'>
+        <div className='w-full bg-white mx-auto font-SolaimanLipi print_canvas'>
             <div className="header relative text-center border-b-2 border-black pb-4 mb-6">
                 <h2 className='text-[28px] text-black font-bold'>{bnBijoy2Unicode(institutionInfo?.InstitutionName)}</h2>
                 <p className='text-[18px] font-semibold'>{bnBijoy2Unicode(institutionInfo?.Address)}</p>
@@ -39,6 +39,7 @@ function CharacterReport({report}) {
                     <tr className="bg-gray-100">
                         <th className="border border-gray-300 px-2 py-2">ক্র: নং</th>
                         <th className="border border-gray-300 px-2 py-2">রিপোর্ট ধরন</th>
+                        <th className="border border-gray-300 px-2 py-2">রিপোর্ট প্রকার</th>
                         <th className="border border-gray-300 px-2 py-2">তারিখ</th>
                         <th className="border border-gray-300 px-2 py-2">মন্তব্য</th>
                     </tr>
@@ -49,8 +50,9 @@ function CharacterReport({report}) {
                             <tr key={index} className="bg-white border-b hover:bg-gray-50 text-black">
                                 <td className="border border-gray-300 px-2 py-2">{index + 1}</td>
                                 <td className="border border-gray-300 px-2 py-2">{bnBijoy2Unicode(item.ReportType)}</td>
+                                <td className="border border-gray-300 px-2 py-2">{bnBijoy2Unicode(item.ReportCet)}</td>
                                 <td className="border border-gray-300 px-2 py-2">{item.CreateDate}</td>
-                                <td className="border border-gray-300 px-2 py-2 w-[380px]">{bnBijoy2Unicode(item.Remark)}</td>
+                                <td className="border border-gray-300 px-2 py-2 w-[350px]">{bnBijoy2Unicode(item.Remark)}</td>
                             </tr>
                         ))
                     }
