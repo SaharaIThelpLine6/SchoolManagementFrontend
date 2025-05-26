@@ -133,19 +133,19 @@ const StudentVacationListTable = ({ pageTitle }) => {
       ),
     },
     {
-      title: translate("ইউজার কোড"), // User Code in Bengali
+      title: translate("User Code"), // User Code in Bengali
       field: "UserCode",
       hozAlign: "center",
       render: (row) => <p>{row.User?.UserCode}</p>,
     },
     {
-      title: translate("User Name"),
+      title: translate("Student Name"),
       field: "UserName",
       hozAlign: "center",
       render: (row) => <p>{row.User?.UserName}</p>,
     },
     {
-      title: translate("Class Name"),
+      title: translate("Class/Jamaat"),
       field: "ClassName",
       hozAlign: "center",
       render: (row) => <p>{row.AcademicClass?.ClassName}</p>,
@@ -164,7 +164,7 @@ const StudentVacationListTable = ({ pageTitle }) => {
         new Date(cell.getValue()).toLocaleDateString("bn-BD"),
     },
     {
-      title: translate("To Date"),
+      title: translate("Up to date"),
       field: "VacationDateTo",
       hozAlign: "center",
       formatter: (cell) =>
