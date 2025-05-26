@@ -3,8 +3,9 @@ import ReactApexChart from "react-apexcharts";
 import { useGetStudentBySessionQuery } from "../../features/dashboard/dashboardQuerySlice";
 import bnBijoy2Unicode from "../../utils/conveter";
 import BarChartSkeleton from "../Skeleton/BarChartSkeleton";
-
+import useTranslate from "../../utils/Translate";
 const ColumnsChart = () => {
+  const translate = useTranslate();
   const {
     data: studentCount,
     isLoading,
@@ -36,15 +37,17 @@ const ColumnsChart = () => {
           show: false,
         },
       },
-      title: {
-        text: "বিগত শিক্ষাবর্ষ অনুযায়ী শিক্ষার্থী সংখ্যা",
-        align: "center",
-        style: {
-          fontSize: "18px",
-          fontWeight: "bold",
-          fontFamily: "inherit",
-        },
-      },
+      // title: {
+      //   text: translate(
+      //     "Number of students according to the previous academic year"
+      //   ),
+      //   align: "center",
+      //   style: {
+      //     fontSize: "18px",
+      //     fontWeight: "bold",
+      //     fontFamily: "inherit",
+      //   },
+      // },
       colors: colors,
       plotOptions: {
         bar: {
@@ -92,7 +95,7 @@ const ColumnsChart = () => {
             },
             plotOptions: {
               bar: {
-                columnWidth: "60%",
+                columnWidth: "30px",
               },
             },
           },
@@ -142,7 +145,12 @@ const ColumnsChart = () => {
   if (isError) return <p>ডেটা আনতে সমস্যা হয়েছে।</p>;
 
   return (
-    <div className="w-full max-w-7xl mx-auto mt-6 bg-white p-4 md:p-6 rounded-md shadow">
+    <div className="w-full h-[450px]  mx-auto mt-6 bg-white p-4 md:p-6 rounded-md shadow">
+      <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
+        {translate(
+          "Number of students according to the previous academic year"
+        )}
+      </h2>
       <ReactApexChart
         options={chartData.options}
         series={chartData.series}

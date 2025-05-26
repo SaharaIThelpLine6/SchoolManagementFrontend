@@ -4,20 +4,15 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import { BrowserRouter, Form, Route, Routes } from "react-router-dom";
-import DefaultLayout from "./layout/DefaultLayout";
 import Home from "./pages/Home";
-import Student from "./pages/Student";
 import AddStudent from "./pages/AddStudent";
-import UpdateStudent from "./pages/UpdateStudent";
 import { useForm, FormProvider } from "react-hook-form";
 import Login from "./pages/Login";
-import Users from "./pages/Users";
 import Class from "./pages/Class";
 import FormP from "./pages/FormP";
 import BookList from "./pages/BookList";
 import GroupDistribution from "./pages/GroupDistribution";
 import Section from "./pages/Section";
-import TeacherInfo from "./pages/TeacherInfo";
 import PayRole from "./pages/PayRole";
 import PayRoleName from "./pages/PayRoleName";
 import Report from "./pages/Report";
@@ -26,24 +21,19 @@ import Query from "./pages/Query";
 import Library from "./pages/Library";
 import Setting from "./pages/Setting";
 import Help from "./pages/Help";
-
 import { cssTransition, ToastContainer } from "react-toastify";
 import Notepad from "./pages/Notepad";
 import Others from "./pages/Others";
 import Calculator from "./pages/Calculator";
 import PublicLayout from "./layout/PublicLayout";
-// import ClassResult from './pages/ClassResult';
 import AdmissionRegistration from "./pages/AdmissionRegistration";
 import ResultRequest from "./pages/public/ResultRequest";
 import Result from "./pages/public/Result";
 import NotFound from "./pages/NotFound";
-import Marksheet from "./components/Document/Marksheet";
-import MarksheetClassWise from "./components/Document/MarksheetClassWise";
 import ClassResultForm from "./pages/public/ClassResultForm";
 import ClassResult from "./pages/public/ClassResult";
 import Loading from "./components/Loading/Loading";
 import "animate.css/animate.min.css";
-import { useSelector } from "react-redux";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -51,7 +41,6 @@ const bounce = cssTransition({
 });
 import StudentsResult from "./pages/StudentsResult";
 import AverageResult from "./pages/AverageResult";
-import PassMarksSubject from "./pages/SubjectPassNumber";
 import SubjectPassNumber from "./pages/SubjectPassNumber";
 import ResultConditions from "./pages/ResultConditions";
 import BoardExam from "./pages/BoardExam";
@@ -68,10 +57,9 @@ import StudentFeeSetup from "./pages/StudentFeeSetup";
 import StudentReport from "./pages/StudentReport";
 import AddDesignation from "./pages/AddDesignation";
 import useTranslate from "./utils/Translate";
-import NewSideBar from "./components/Sidebar/NewSideBar";
-import Teachers from "./pages/test/Teachers";
-import Students from "./pages/test/Students";
-import TestLayout from "./pages/test/TestLayout";
+import DefaultLayout from "./layout/DefaultLayout";
+import TypeOfVacation from "./pages/TypeOfVacation";
+import StudentVacationListTable from "./components/Tables/StudentVacationListTable";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -95,8 +83,7 @@ function App() {
     <FormProvider {...methods}>
       <BrowserRouter>
         <Routes>
-          {/* <Route path="/" element={<DefaultLayout />}> */}
-          <Route path="/" element={<TestLayout />}>
+          <Route path="/" element={<DefaultLayout />}>
             <Route index element={<Home pageTitle={"Home"} />} />
 
             <Route path="students">
@@ -119,8 +106,24 @@ function App() {
                 element={<Session pageTitle={"Session"} />}
               />
               <Route
-                path="students-report"
+                path="report"
                 element={<StudentReport pageTitle={"Student Report"} />}
+              />
+              <Route
+                path="report/list"
+                element={
+                  <StudentReportList pageTitle={"Student Reports List"} />
+                }
+              />
+              <Route
+                path="vacation"
+                element={
+                  <StudentVacationListTable pageTitle={"Students Vacation"} />
+                }
+              />
+              <Route
+                path="vacation/type-of-vacation"
+                element={<TypeOfVacation pageTitle={"Type of Vacation"} />}
               />
             </Route>
 
@@ -199,10 +202,6 @@ function App() {
           
           </Route> */}
           <Route path="/login" element={<Login />} />
-          <Route path="/new" element={<TestLayout />}>
-            <Route path="teachers" element={<Teachers />} />
-            <Route path="students" element={<Students />} />
-          </Route>
           <Route path=":schoolid" element={<PublicLayout />}>
             <Route
               index

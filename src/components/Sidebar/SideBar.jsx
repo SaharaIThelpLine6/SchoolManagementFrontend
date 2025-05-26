@@ -6,7 +6,7 @@ import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { renderIcons } from "../../helper/renderIcons";
 
-const NewSideBar = () => {
+const SideBar = () => {
   const [openMenuId, setOpenMenuId] = useState(null);
   const location = useLocation();
 
@@ -51,7 +51,7 @@ const NewSideBar = () => {
                 <>
                   <button
                     onClick={() => handleToggle(menu.id)}
-                    className={`w-full flex px-4 font-SolaimanLipi items-center justify-between border-l-6 border-solid gap-2 py-2 font-semibold ${
+                    className={`w-full flex px-4 font-SolaimanLipi items-center justify-between border-l-6 border-solid gap-2 py-2 ${
                       location.pathname.startsWith(menu.route)
                         ? "bg-[#deeff9] text-[#00aeef] border-l-[#00aeef]"
                         : "hover:text-[#00aeef] hover:bg-gray-50 border-l-transparent"
@@ -69,7 +69,7 @@ const NewSideBar = () => {
                       )}
                     </span>
                   </button>
-                  <AnimatePresence>
+                  {/* <AnimatePresence>
                     {openMenuId === menu.id && (
                       <motion.ul
                         className="text-gray-600"
@@ -88,6 +88,38 @@ const NewSideBar = () => {
                               end
                               className={({ isActive }) =>
                                 `block py-2 pl-6 font-SolaimanLipi ${
+                                  isActive
+                                    ? "bg-[#deeff9] text-[#00aeef]"
+                                    : "hover:text-[#00aeef] hover:bg-gray-50"
+                                }`
+                              }
+                            >
+                              {item.name}
+                            </NavLink>
+                          </li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence> */}
+                  <AnimatePresence>
+                    {openMenuId === menu.id && (
+                      <motion.ul
+                        className="relative text-gray-600"
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        variants={submenuVariants}
+                      >
+                        {/* Vertical Dashed Line */}
+                        <div className="absolute top-0 bottom-0 left-6 w-px border-l-2 border-dashed border-[#00aeef] z-0" />
+
+                        {menu.subMenu.map((item) => (
+                          <li key={item.id} className="relative z-10 pl-[26px]">
+                            <NavLink
+                              to={item.route}
+                              end
+                              className={({ isActive }) =>
+                                `block py-2 font-SolaimanLipi pl-4  ${
                                   isActive
                                     ? "bg-[#deeff9] text-[#00aeef]"
                                     : "hover:text-[#00aeef] hover:bg-gray-50"
@@ -125,4 +157,4 @@ const NewSideBar = () => {
   );
 };
 
-export default NewSideBar;
+export default SideBar;

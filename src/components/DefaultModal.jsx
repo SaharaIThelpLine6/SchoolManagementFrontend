@@ -10,6 +10,9 @@ import EditTeacherForm from "./Forms/EditTeacherForm";
 import AddDesignation from "../pages/AddDesignation";
 import EditDesignationForm from "./Forms/EditDesignationForm";
 import CreateDesignationForm from "./Forms/CreateDesignationForm";
+import TypeOfVacationForm from "./Forms/TypeOfVacationForm";
+import EditStudentVacationForm from "./Forms/EditStudentVacationForm";
+import AddStudentVacationForm from "./Forms/AddStudentVacationForm";
 import StudentFilterModal from "./Modals/StudentFilterModal";
 
 const DefaultModal = () => {
@@ -70,6 +73,16 @@ const DefaultModal = () => {
                 {modalType === "ADD_DESIGNATION" && <CreateDesignationForm />}
                 {modalType === "EDIT_DESIGNATION" && (
                   <EditDesignationForm userId={id} />
+                )}
+                {modalType === "ADD_TYPEOFVACATION" && <TypeOfVacationForm />}
+                {modalType === "EDIT_TYPEOFVACATION" && (
+                  <TypeOfVacationForm userId={id} />
+                )}
+                {modalType === "ADD_STUDENTVACATION" && (
+                  <AddStudentVacationForm />
+                )}
+                {modalType === "EDIT_STUDENTVACATION" && (
+                  <EditStudentVacationForm userId={id} />
                 )}
                 {modalType === "STUDENT_FILTER" && (
                   <StudentFilterModal  />
