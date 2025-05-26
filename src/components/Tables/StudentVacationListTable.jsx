@@ -15,6 +15,7 @@ import { showModal } from "../../utils/ModalControlar";
 import LoadingComponent from "../../components/Loading/Loading";
 import { useGetStudentsVacationListQuery } from "../../features/student/studentQuerySlice";
 import Button from "../Button/Button";
+import Print from "./Print";
 
 const StudentVacationListTable = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -188,7 +189,8 @@ const StudentVacationListTable = ({ pageTitle }) => {
   ];
 
   return (
-    // <div className="-translate-y-4 font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+    <div className="">
+
     <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="block w-full overflow-x-auto">
         <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
@@ -246,6 +248,9 @@ const StudentVacationListTable = ({ pageTitle }) => {
         </div>
       </div>
     </div>
+  <Print/>
+    </div>
+   
   );
 };
 
