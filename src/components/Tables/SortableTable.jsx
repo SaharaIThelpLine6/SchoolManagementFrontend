@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/light.css";
+import bnBijoy2Unicode from "../../utils/conveter";
 
 const SortableTable = ({ columns, data, isFilterColumn = true }) => {
   const [filters, setFilters] = useState({});
@@ -127,7 +128,7 @@ const SortableTable = ({ columns, data, isFilterColumn = true }) => {
                   key={cellIndex}
                   className={`px-3 py-4 font-medium text-theme-dark whitespace-nowrap font-SolaimanLipi text-${column.hozAlign || "start"}`}
                 >
-                  {column.render ? column.render(row) : row[column.field] || "N/A"}
+                  {column.render ? column.render(row) : column?.unicode ? bnBijoy2Unicode(row[column.field]) : row[column.field] || "N/A"}
                 </td>
               ))}
             </tr>

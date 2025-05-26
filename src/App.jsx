@@ -55,7 +55,6 @@ import StudentAdmissionForm from "./pages/public/studentAddmitionForm";
 import PaymentConfirm from "./pages/PaymentConfirm";
 import StudentFeeSetup from "./pages/StudentFeeSetup";
 import StudentReport from "./pages/StudentReport";
-import StudentReportList from "./pages/StudentReportList";
 import AddDesignation from "./pages/AddDesignation";
 import useTranslate from "./utils/Translate";
 import DefaultLayout from "./layout/DefaultLayout";

@@ -5,10 +5,8 @@ import { useFormContext } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import UserOne from '../../images/user/checking.jpeg'
 import DefaultSelect from './DefaultSelect';
-import SwitcherThree from '../Switchers/SwitcherThree';
 import useTranslate from '../../utils/Translate';
 import SortableTable from '../Tables/SortableTable';
-import { fetchSingleUser } from '../../features/userInfo/userInfoSlice';
 import { fetchSingleStudentData } from '../../features/student/studentSlice';
 import LoadingComponent from '../LoadingComponent';
 import { fetchSettingsData } from '../../features/settings/settingsSlice';
@@ -23,9 +21,8 @@ const FeeCollectionForm = ({ userId }) => {
     const { data: fees, error: feesError, isLoading: feesLoading } = useGetFeesQuery();
     const { data: paymentType, error: paymentError, isLoading: paymentLoading } = useGetPaymentTypeQuery();
     const [addFee, { isLoading, isError, isSuccess }] = useAddFeeMutation();
-    const navigate = useNavigate()
     const {
-        register,
+
         handleSubmit,
         watch,
         setValue,
@@ -150,12 +147,6 @@ const FeeCollectionForm = ({ userId }) => {
         3: "Day",
     }
     const AdmissionType = { 1: "New", 2: "Old" }
-    const [feeDueState, setFeeDueState] = useState(0);
-    // useEffect(() => {
-    //     if (feeDueData) {
-    //         setFeeDueState(feeDueData);
-    //     }
-    // }, [feeDueData]);
     const columnForFee = [
         { title: "Fee Name", field: "SlName" },
         { title: "Fee Amount", field: `${genderMap[singleStudent?.GenderID]}${ResidentialStatusMap[singleStudent?.ResidentialStatusId]}${AdmissionType[singleStudent?.NewOldId]}` },
@@ -234,18 +225,6 @@ const FeeCollectionForm = ({ userId }) => {
             console.log("Form submission canceled.");
         }
     };
-    // if (singleStudent?.UserID !== userId || isLoading || error) {
-    //     return <LoadingComponent />
-    // }
-
-    // if (isLoading){
-    //     console.log("Loading...");
-    // };
-
-    // if (error){
-    //     console.log("Error...");
-
-    // };
 
 
     if (feesLoading || paymentLoading) return <LoadingComponent />;
@@ -323,29 +302,11 @@ const FeeCollectionForm = ({ userId }) => {
 
                 </div>
             </div>
-            {/* <div className="flex items-center justify-center gap-4 p-3 rounded-[5px] ">
-                <button
-                    type="button"
-                    class="text-white bg-gradient-to-r from-blue-500 to-gray-700 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-lime-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 transition-all duration-300 ease-linear"
-                >
-                    Free Admission
-                </button>
 
-                <button type="button" className="text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Take Payment</button>
-
-            </div> */}
             <form onSubmit={handleSubmit(onSubmit)} className="font-SolaimanLipi pt-4">
                 <div className='grid grid-cols-1 lg:grid-cols-4 gap-4 text-[13px] font-SolaimanLipi'>
                     <DefaultInput registerKey={"invoiceId"} require={"Student Name is require"} type={"text"} label={"Payment Reference No:"} disable={true} />
-                    {/* <DefaultInput registerKey={"SFGNID"} require={"Payment Type is require"} type={"text"} label={"Payment Type No:"} disable={true} /> */}
-
-
                     <DefaultSelect label={"Fee Type"} nameField={"SFGName"} registerKey={"SFGNID"} valueField={"SFGNID"} options={feeType} type={"number"} require={"This Field is require"} />
-
-
-
-                    {/* <DefaultInput registerKey={"recept"} require={"Recept Number is require"} type={"text"} label={"Recept No:"} disable={true} /> */}
-
                     <DefaultSelect label={"Session"} nameField={"SessionName"} registerKey={"SessionID"} valueField={"SessionID"} options={academicSession} type={"number"} require={"This Field is require"} disabled={false} />
 
                     {/* <DefaultSelect label={"Month"} nameField={"SFGName"} registerKey={"SFGNID"} valueField={"SFGNID"} options={feeType} type={"number"} require={"This Field is require"} /> */}

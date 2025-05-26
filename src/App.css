@@ -177,50 +177,67 @@ tr:nth-child(even) {
   @page {
     margin-top: 10px;
     margin-bottom: 0;
-    background-color: white;
-  }
-
-  @page portrait-page {
-    size: portrait;
-  }
-
-  @page landscape-page {
-    size: landscape;
   }
 
   body {
+    margin: 0;
+    background-color: white !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
-  }
-
-  .print_canvas {
-    display: block;
-  }
-
-  .hidden_in_print {
-    display: none;
-    
-  }
-  .show_in_print{
-    overflow: hidden;
-  }
-  body {
-    background-color: white;
     width: 100%;
   }
 
   main {
     width: 100%;
-    border: 0px;
     background-color: white !important;
+    border: none;
     overflow: visible !important;
   }
 
-  table tr,
-  td {
+  .print_canvas {
+    display: block;
+    page-break-inside: avoid;
+    break-inside: avoid;
     background-color: white;
   }
+
+  .hidden_in_print {
+    display: none !important;
+  }
+
+  .show_in_print {
+    overflow: hidden !important;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white !important;
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  tr:last-child td {
+    border-bottom: 1px solid #000 !important;
+  }
+
+  td, th {
+    background-color: white !important;
+  }
 }
+
 
 /* .swal2-icon.swal2-error.swal2-icon-show{
   width: 30px;

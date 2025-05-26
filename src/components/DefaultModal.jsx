@@ -13,6 +13,7 @@ import CreateDesignationForm from "./Forms/CreateDesignationForm";
 import TypeOfVacationForm from "./Forms/TypeOfVacationForm";
 import EditStudentVacationForm from "./Forms/EditStudentVacationForm";
 import AddStudentVacationForm from "./Forms/AddStudentVacationForm";
+import StudentFilterModal from "./Modals/StudentFilterModal";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -82,6 +83,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === "EDIT_STUDENTVACATION" && (
                   <EditStudentVacationForm userId={id} />
+                )}
+                {modalType === "STUDENT_FILTER" && (
+                  <StudentFilterModal  />
                 )}
               </div>
             )}

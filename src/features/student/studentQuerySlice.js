@@ -108,7 +108,7 @@ export const {
   useGetStudentQuery,
   useGetStudentReportCetsQuery,
   useGetStudentReportTypeQuery,
-  useGetStudentReportsMutation,
+  useGetStudentReportsQuery,
   usePostStudentCharacterReportMutation,
   useGetStudentsVacationListQuery,
   usePostStudentsVacationMutation,
