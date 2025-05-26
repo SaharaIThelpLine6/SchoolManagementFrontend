@@ -69,7 +69,7 @@ const SideBar = () => {
                       )}
                     </span>
                   </button>
-                  <AnimatePresence>
+                  {/* <AnimatePresence>
                     {openMenuId === menu.id && (
                       <motion.ul
                         className="text-gray-600"
@@ -88,6 +88,38 @@ const SideBar = () => {
                               end
                               className={({ isActive }) =>
                                 `block py-2 pl-6 font-SolaimanLipi ${
+                                  isActive
+                                    ? "bg-[#deeff9] text-[#00aeef]"
+                                    : "hover:text-[#00aeef] hover:bg-gray-50"
+                                }`
+                              }
+                            >
+                              {item.name}
+                            </NavLink>
+                          </li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence> */}
+                  <AnimatePresence>
+                    {openMenuId === menu.id && (
+                      <motion.ul
+                        className="relative text-gray-600"
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        variants={submenuVariants}
+                      >
+                        {/* Vertical Dashed Line */}
+                        <div className="absolute top-0 bottom-0 left-6 w-px border-l-2 border-dashed border-[#00aeef] z-0" />
+
+                        {menu.subMenu.map((item) => (
+                          <li key={item.id} className="relative z-10 pl-[26px]">
+                            <NavLink
+                              to={item.route}
+                              end
+                              className={({ isActive }) =>
+                                `block py-2 font-SolaimanLipi pl-4  ${
                                   isActive
                                     ? "bg-[#deeff9] text-[#00aeef]"
                                     : "hover:text-[#00aeef] hover:bg-gray-50"

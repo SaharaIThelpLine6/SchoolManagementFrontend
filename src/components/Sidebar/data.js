@@ -52,12 +52,22 @@ export const menuData = [
       {
         id: "7",
         name: "Students Report",
-        route: "/students/students-report",
+        route: "/students/report",
       },
       {
         id: "8",
         name: "Report List",
-        route: "/students/students-report/list",
+        route: "/students/report/list",
+      },
+      {
+        id: "9",
+        name: "Student Vacation",
+        route: "/students/vacation",
+      },
+      {
+        id: "10",
+        name: "Type of vacation",
+        route: "/students/vacation/type-of-vacation",
       },
     ],
   },
