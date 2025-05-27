@@ -113,7 +113,7 @@ const DesktopView = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-[36px] text-gray-400 hover:text-gray-600 text-lg focus:outline-none"
+                  className="absolute right-2 top-[40px] text-gray-400 hover:text-gray-600 text-lg focus:outline-none"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <FiEyeOff /> : <FiEye />}
