@@ -23,6 +23,8 @@ const StudentVacationListTable = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const [currentPage, setCurrentPage] = useState(1);
+  const [printID, setPrintID] = useState(null);
+
 
   const {
     data: getStudentsVacationList,
@@ -30,9 +32,7 @@ const StudentVacationListTable = ({ pageTitle }) => {
     isLoading: isStudentsVacationListLoading,
   } = useGetStudentsVacationListQuery({ page: currentPage, limit: 10 });
 
-  const { academicSession } = useSelector(
-    (state) => state.settings
-  );
+  const { academicSession } = useSelector((state) => state.settings);
   // Process data with session names and maintain pagination info
   const {
     processedData,
@@ -67,8 +67,6 @@ const StudentVacationListTable = ({ pageTitle }) => {
       currentPage: apiData.currentPage || 1,
     };
   }, [getStudentsVacationList, academicSession]);
-  console.log(processedData);
-  console.log(academicSession);
 
   // Pagination handlers
   const handleNext = () => {
@@ -78,7 +76,10 @@ const StudentVacationListTable = ({ pageTitle }) => {
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
-
+ // Function to handle print button click
+  const handlePrint = useCallback((id) => {
+    setPrintID(printID === id ? null : id);
+  });
   // Set page title and fetch settings
   useEffect(() => {
     dispatch(setPageName(pageTitle));
@@ -147,6 +148,9 @@ const StudentVacationListTable = ({ pageTitle }) => {
     return null;
   }
 
+
+ 
+
   const columns = [
     {
       title: translate("Action"),
@@ -171,6 +175,7 @@ const StudentVacationListTable = ({ pageTitle }) => {
           <button
             className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md"
             title={translate("Print")}
+            onClick={() => handlePrint(row.ID)}
           >
             <PiPrinterFill className="w-5 h-5" />
           </button>
@@ -244,7 +249,6 @@ const StudentVacationListTable = ({ pageTitle }) => {
       //   value: session.SessionID,
       //   label: session.SessionName,
       // })),
- 
     },
     {
       title: translate("Comment"),
@@ -322,7 +326,7 @@ const StudentVacationListTable = ({ pageTitle }) => {
           </div>
         </div>
       </div>
-      <Print />
+      <Print id={printID}/>
     </div>
   );
 };

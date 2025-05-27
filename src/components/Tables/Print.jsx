@@ -1,16 +1,35 @@
 import React from "react";
 import { FaScissors } from "react-icons/fa6";
+import { useGetStudentsVacationListQuery } from "../../features/student/studentQuerySlice";
 
-const Print = () => {
+const Print = ({ id }) => {
+  const currentPage = 1;
+
+  const {
+    data: getStudentsVacationList,
+    error: studentsVacationListError,
+    isLoading: isStudentsVacationListLoading,
+  } = useGetStudentsVacationListQuery({ page: currentPage, limit: 10 });
+
+  if (isStudentsVacationListLoading) return <p>Loading...</p>;
+  if (studentsVacationListError) return <p>Error loading data</p>;
+
+  // Optional chaining to avoid errors if data is undefined
+  const matchedData = getStudentsVacationList?.data?.find(
+    (item) => item.ID === id
+  );
+
+console.log(matchedData);
+
   const studentInfo = [
-    { label: "শিক্ষার্থীর নাম", value: "গডফ্র" },
+    { label: "শিক্ষার্থীর নাম", value: matchedData?.User.UserName || " " },
     { label: "গেইট পাস নং", value: "১" },
     { label: "পিতার নাম", value: "মোঃ গাজ্জা সালা উদ্দিন", bold: true },
     { label: "রোল", value: "১০০৪" },
   ];
 
   const studentDataInfo = [
-    { label: "শিক্ষার্থীর নাম", value: "গডফ্র" },
+    { label: "শিক্ষার্থীর নাম", value: matchedData?.User.UserName || " " },
     { label: "গেইট পাস নং", value: "১" },
     { label: "পিতার নাম", value: "মোঃ গাজ্জা সালা উদ্দিন", bold: true },
     { label: "তারিখ", value: "২৫/০৫/২০২৫" },
