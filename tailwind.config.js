@@ -21,6 +21,9 @@ export default {
       boxShadow: {
         sub_menu: "0 0 15px -5px rgba(0, 0, 0, 0.2)",
       },
+       height: {
+        svh: '100svh', 
+      },
       colors: {
         "theme-offwhite": "#ededed",
         "theme-dark": "#121212",

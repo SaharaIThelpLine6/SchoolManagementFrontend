@@ -56,7 +56,7 @@ const MobileView = () => {
   return (
     <div className="">
       {/* Mobile version (up to md breakpoint) */}
-      <section className="md:hidden h-screen w-full flex items-center justify-center from-white to-blue-100 overflow-hidden">
+      <section className="md:hidden h-svh w-full flex items-center justify-center from-white to-blue-100 overflow-hidden">
         <div className="w-full h-full bg-[#ddeffe] rounded-lg shadow-lg  border-b-8 border-[#ffa500] flex flex-col">
           {/* Banner */}
           <div className="bg-[#007af7] text-center rounded-t-xl rounded-b-[40px] relative h-[250px] flex flex-col items-center justify-center">
