@@ -244,7 +244,7 @@ tr:nth-child(even) {
   height: 20px;
 } */
 
-div:where(.swal2-icon) {
+/* div:where(.swal2-icon) {
   
   width: 60px !important;
   height: 60px !important;
@@ -285,7 +285,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     height: 10px !important;
     margin: 10px !important;
     
-}
+} */
 
 
 
