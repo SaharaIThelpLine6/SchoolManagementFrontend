@@ -30,7 +30,9 @@ const StudentVacationListTable = ({ pageTitle }) => {
     isLoading: isStudentsVacationListLoading,
   } = useGetStudentsVacationListQuery({ page: currentPage, limit: 10 });
 
-  const { academicSession } = useSelector((state) => state.settings);
+  const { academicSession } = useSelector(
+    (state) => state.settings
+  );
   // Process data with session names and maintain pagination info
   const {
     processedData,
@@ -65,8 +67,8 @@ const StudentVacationListTable = ({ pageTitle }) => {
       currentPage: apiData.currentPage || 1,
     };
   }, [getStudentsVacationList, academicSession]);
-console.log(processedData);
-console.log(academicSession);
+  console.log(processedData);
+  console.log(academicSession);
 
   // Pagination handlers
   const handleNext = () => {
@@ -240,7 +242,7 @@ console.log(academicSession);
       type: "text",
       // options: academicSession.map((session) => ({
       //   value: session.SessionID,
-      //   label: session.sessionName,
+      //   label: session.SessionName,
       // })),
  
     },
