@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../features/auth/authSlice";
 import axios from "axios";
@@ -12,7 +12,8 @@ const API_URL = import.meta.env.VITE_SERVER_URL;
 
 const DesktopView = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const { handleSubmit } = useFormContext();
+  const methods = useForm();
+  const { handleSubmit } = methods; // Destructure handleSubmit from methods
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
@@ -54,81 +55,83 @@ const DesktopView = () => {
   };
 
   return (
-    <section className="hidden md:flex h-screen w-full items-center justify-center bg-gradient-to-b from-white to-blue-100 px-6 lg:px-8 overflow-hidden">
-      <div className="w-full max-w-md bg-[#ddeffe] rounded-lg shadow-lg border-b-8 border-[#ffa500] flex flex-col">
-        {/* Banner */}
-        <div className="bg-[#007af7] p-6 text-center rounded-t-xl relative">
-          <img
-            src="/saharaITnewlogo.svg"
-            alt="Logo"
-            className="mx-auto w-48 filter brightness-0 invert"
-          />
-          <p className="text-white text-sm mt-3 font-lato">
-            কওমি মাদরাসার জন্য একটি পূর্ণ সমাধান
-          </p>
-          <img
-            src="/QMMSoftIcon.svg"
-            alt="Icon"
-            className="absolute top-2 right-2 w-24 opacity-10 filter brightness-0 invert"
-          />
-        </div>
-
-        {/* Form */}
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="p-6 px-12 space-y-4 font-lato flex-1 flex flex-col justify-between"
-        >
-          <div className="flex justify-center">
-            <img src="/lock.png" alt="Lock" className="w-16 mb-4" />
+    <FormProvider {...methods}>
+      <section className="hidden md:flex h-screen w-full items-center justify-center bg-gradient-to-b from-white to-blue-100 px-6 lg:px-8 overflow-hidden">
+        <div className="w-full max-w-md bg-[#ddeffe] rounded-lg shadow-lg border-b-8 border-[#ffa500] flex flex-col">
+          {/* Banner */}
+          <div className="bg-[#007af7] p-6 text-center rounded-t-xl relative">
+            <img
+              src="/saharaITnewlogo.svg"
+              alt="Logo"
+              className="mx-auto w-48 filter brightness-0 invert"
+            />
+            <p className="text-white text-sm mt-3 font-lato">
+              কওমি মাদরাসার জন্য একটি পূর্ণ সমাধান
+            </p>
+            <img
+              src="/QMMSoftIcon.svg"
+              alt="Icon"
+              className="absolute top-2 right-2 w-24 opacity-10 filter brightness-0 invert"
+            />
           </div>
 
-          <div className="space-y-4">
-            <LoginInput
-              label="School ID"
-              type="number"
-              placeholder="Enter School ID"
-              registerKey="school_id"
-              icon="FaPhone"
-            />
-
-            <LoginInput
-              label="Username"
-              type="text"
-              placeholder="Enter Username"
-              registerKey="username"
-              icon="FaUser"
-            />
-
-            {/* Password with toggle */}
-            <div className="relative">
-              <LoginInput
-                label="Password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter Password"
-                registerKey="password"
-                icon="FaLock"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-[36px] text-gray-400 hover:text-gray-600 text-lg focus:outline-none"
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? <FiEyeOff /> : <FiEye />}
-              </button>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full flex justify-center items-center bg-[#007af7] hover:bg-blue-600 text-white py-2.5 rounded-md text-base font-medium transition-colors duration-200 mt-auto"
+          {/* Form */}
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="p-6 px-12 space-y-4 font-lato flex-1 flex flex-col justify-between"
           >
-            <FiArrowRight className="mr-1.5 text-lg" />
-            লগিন অথবা সাইন আপ
-          </button>
-        </form>
-      </div>
-    </section>
+            <div className="flex justify-center">
+              <img src="/lock.png" alt="Lock" className="w-16 mb-4" />
+            </div>
+
+            <div className="space-y-4">
+              <LoginInput
+                label="School ID"
+                type="number"
+                placeholder="Enter School ID"
+                registerKey="school_id"
+                icon="FaPhone"
+              />
+
+              <LoginInput
+                label="Username"
+                type="text"
+                placeholder="Enter Username"
+                registerKey="username"
+                icon="FaUser"
+              />
+
+              {/* Password with toggle */}
+              <div className="relative">
+                <LoginInput
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter Password"
+                  registerKey="password"
+                  icon="FaLock"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-[36px] text-gray-400 hover:text-gray-600 text-lg focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full flex justify-center items-center bg-[#007af7] hover:bg-blue-600 text-white py-2.5 rounded-md text-base font-medium transition-colors duration-200 mt-auto"
+            >
+              <FiArrowRight className="mr-1.5 text-lg" />
+              লগিন অথবা সাইন আপ
+            </button>
+          </form>
+        </div>
+      </section>
+    </FormProvider>
   );
 };
 
