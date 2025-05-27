@@ -24,7 +24,7 @@ const StudentVacationListTable = ({ pageTitle }) => {
   const translate = useTranslate();
   const [currentPage, setCurrentPage] = useState(1);
   const [printID, setPrintID] = useState(null);
-
+  const [shouldPrint, setShouldPrint] = useState(false);
 
   const {
     data: getStudentsVacationList,
@@ -76,10 +76,26 @@ const StudentVacationListTable = ({ pageTitle }) => {
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
- // Function to handle print button click
+  
+  // Function to handle print button click
   const handlePrint = useCallback((id) => {
-    setPrintID(printID === id ? null : id);
-  });
+    setPrintID(id);
+    setShouldPrint(true);
+  }, []);
+
+  
+  useEffect(() => {
+    if (shouldPrint && printID !== null) {
+    
+      const timer = setTimeout(() => {
+        window.print();
+        setShouldPrint(false); 
+      }, 300); 
+
+      return () => clearTimeout(timer);
+    }
+  }, [shouldPrint, printID]);
+
   // Set page title and fetch settings
   useEffect(() => {
     dispatch(setPageName(pageTitle));
@@ -147,9 +163,6 @@ const StudentVacationListTable = ({ pageTitle }) => {
     });
     return null;
   }
-
-
- 
 
   const columns = [
     {
@@ -269,7 +282,7 @@ const StudentVacationListTable = ({ pageTitle }) => {
 
   return (
     <div className="">
-      <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+      <div className="print:hidden font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
         <div className="block w-full overflow-x-auto">
           <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
             <div className="w-full flex flex-col gap-5 mb-3">
@@ -326,7 +339,11 @@ const StudentVacationListTable = ({ pageTitle }) => {
           </div>
         </div>
       </div>
-      <Print id={printID}/>
+      {printID && (
+        <div className="print-canvus hidden print:block">
+          <Print id={printID} />
+        </div>
+      )}
     </div>
   );
 };
