@@ -14,10 +14,17 @@ export const userStudentSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Student", "StudentVacation", "StudentVacationType"],
+  tagTypes: ["Student", "StudentVacation", "StudentVacationType", "StudentReports"],
   endpoints: (builder) => ({
     getStudentBySearch: builder.query({
-      query: (data) => `search_student?search=${data}`,
+      query: ({ search, ClassID, SessionID }) => {
+                const params = new URLSearchParams();
+                params.append("search", search);
+                if (ClassID) params.append("ClassID", ClassID);
+                if (SessionID) params.append("SessionID", SessionID);
+
+                return `search_student?${params.toString()}`;
+            },
     }),
 
     getStudent: builder.query({
@@ -33,8 +40,16 @@ export const userStudentSlice = createApi({
       query: () => `get_studentreport_type`,
     }),
 
-    getStudentReports: builder.mutation({
-      query: (data) => `get_studentreports?StudentCode=${data}`,
+    getStudentReports: builder.query({
+      query: ({ userCode, classID, SessionID }) => {
+                const params = new URLSearchParams();
+                if (userCode) params.append('StudentCode', userCode);
+                if (classID) params.append('SubClassID', classID);
+                if (SessionID) params.append('SessionID', SessionID);
+                return `get_studentreports?${params.toString()}`;
+            },
+
+      providesTags: ["StudentReports"],
     }),
 
     postStudentCharacterReport: builder.mutation({
@@ -43,6 +58,7 @@ export const userStudentSlice = createApi({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["StudentReports"],
     }),
 
     // Vacation List

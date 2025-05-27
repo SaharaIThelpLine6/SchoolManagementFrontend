@@ -60,7 +60,6 @@ import useTranslate from "./utils/Translate";
 import DefaultLayout from "./layout/DefaultLayout";
 import TypeOfVacation from "./pages/TypeOfVacation";
 import StudentVacationListTable from "./components/Tables/StudentVacationListTable";
-import StudentReportList from "./components/StudentReportList";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -109,12 +108,6 @@ function App() {
               <Route
                 path="report"
                 element={<StudentReport pageTitle={"Student Report"} />}
-              />
-              <Route
-                path="report/list"
-                element={
-                  <StudentReportList pageTitle={"Student Reports List"} />
-                }
               />
               <Route
                 path="vacation"

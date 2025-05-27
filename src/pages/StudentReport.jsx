@@ -120,15 +120,10 @@ const StudentReport = ({ pageTitle }) => {
                 autoClose: 3000,
                 closeOnClick: true
             });
-
-            methods.reset();
-            methods.reset({
-                StudentCode: '',
-                StudentName: '',
-                FatherName: '',
-                ClassName: '',
-                SubClassID: ''
-            });
+            // methods.reset({
+            //     Remark: '',
+            // });
+            setShowReport({ userCode: methods.getValues("StudentCode"), classID: methods.getValues("SubClassID"), SessionID: methods.getValues("SessionID") })
         } catch (err) {
             toast.update(toastId, {
                 render: err?.data?.error || 'Submission failed!',
@@ -254,9 +249,9 @@ const StudentReport = ({ pageTitle }) => {
                             </div>
                         </form>
                     </FormProvider>
-                    {
-                        showReport && <StudentReportList reportParams={showReport} />
-                    }
+
+                    <StudentReportList reportParams={showReport} />
+                    
 
                 </div>
             </div>

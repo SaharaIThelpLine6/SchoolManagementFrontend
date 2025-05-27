@@ -150,7 +150,7 @@ const Header = () => {
       </AnimatePresence>
 
       {/* Desktop Header */}
-      <div className="hidden sm:flex items-center justify-between px-6 py-3 gap-3 2xl:px-11">
+      <div className="hidden sm:flex items-center justify-between px-6 py-3 gap-3 2xl:px-11 print:hidden">
         <div className="flex justify-center items-center w-full max-w-[200px] sm:max-w-[220px] md:max-w-[200px] flex-shrink-0">
           <div className="flex items-center gap-2 sm:gap-3">
             <button

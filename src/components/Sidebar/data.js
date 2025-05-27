@@ -55,11 +55,6 @@ export const menuData = [
         route: "/students/report",
       },
       {
-        id: "8",
-        name: "Report List",
-        route: "/students/report/list",
-      },
-      {
         id: "9",
         name: "Student Vacation",
         route: "/students/vacation",
