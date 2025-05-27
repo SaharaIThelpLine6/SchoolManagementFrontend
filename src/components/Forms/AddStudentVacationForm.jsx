@@ -71,7 +71,7 @@ const AddStudentVacationForm = ({ pageTitle }) => {
     data: searchStudentInfo,
     error: searchStudentError,
     isLoading: studentInfoLoading,
-  } = useGetStudentBySearchQuery(studentCodeOrName, {
+  } = useGetStudentBySearchQuery({ search: studentCodeOrName, ClassID: null, SessionID: null }, {
     skip: !userTyping,
     refetchOnFocus: false,
   });
