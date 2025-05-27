@@ -8,7 +8,8 @@ const DropdownNotification = () => {
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
-      <li>
+      <ul className="list-none m-0 p-0">
+    <li className="list-none">
         <Link
           onClick={() => {
             setNotifying(false);
@@ -46,7 +47,7 @@ const DropdownNotification = () => {
 
         {dropdownOpen && (
           <div
-            className={` absolute -right-27 z-30 p-5 mt-2.5 flex h-90  w-75  flex-col  rounded-[10px]  border  bg-slate-50 border-stroke  sm:right-0  sm:w-80`}
+            className={` absolute -right-[2.75rem] sm:-right-27 z-30 p-5 mt-2.5 flex h-90  w-75  flex-col  rounded-[10px]  border  bg-slate-50 border-stroke  sm:right-0  sm:w-80`}
           >
             <div className="px-4.5 py-3">
               <h5 className="text-sm font-medium text-bodydark2">
@@ -122,6 +123,7 @@ const DropdownNotification = () => {
           </div>
         )}
       </li>
+      </ul>
     </ClickOutside>
   );
 };

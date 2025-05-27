@@ -25,6 +25,7 @@ import {
   useGetTotalDueQuery,
   useGetTotalTeacherQuery,
   useGetTotalDonerQuery,
+  useGetTotalStudentQuery,
 } from "../features/dashboard/dashboardQuerySlice";
 import useTranslate from "../utils/Translate";
 const Home = ({ pageTitle }) => {
@@ -32,10 +33,12 @@ const Home = ({ pageTitle }) => {
   const translate = useTranslate();
 
   const { studentList, status } = useSelector((state) => state.student);
-  const { data: studentCount } = useGetStudentBySessionQuery();
+  const { data: studentCount } = useGetTotalStudentQuery();
   const { data: teacherCount } = useGetTotalTeacherQuery();
   const { data: donerCount } = useGetTotalDonerQuery();
   const { data: totalDueCount } = useGetTotalDueQuery();
+console.log(donerCount);
+  
 
   useEffect(() => {
     dispatch(fetchUserList({ itemPerPage: 1, currentPage: 1 }));
@@ -58,7 +61,7 @@ const Home = ({ pageTitle }) => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <CardDataStats
           title={translate("Total students")} // Total Student
-          total={studentCount ? studentCount.length : 0}
+          total={studentCount ? studentCount?.totalUsers : 0}
           bgColor="#ECF7FB" // Light pink
           iconColor="text-[#06AEEF]"
           titleColor="text-[#06AEEF]"
@@ -113,16 +116,16 @@ const Home = ({ pageTitle }) => {
 
       {/* <AddStudentForm />
             <TableOne /> */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* ColumnsChart spans 2/3 on medium+ screens, full width on small screens */}
-        <div className="md:col-span-2 col-span-1">
+        <div className="">
           <ColumnsChart />
         </div>
 
         {/* AttendanceChart takes 1/3 on medium+ screens, full width on small screens */}
-        <div className="md:col-span-1 col-span-1">
+        {/* <div className="md:col-span-1 col-span-1">
           <AttendanceChart />
-        </div>
+        </div> */}
       </div>
     </div>
   );
