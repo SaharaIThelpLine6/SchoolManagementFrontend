@@ -26,6 +26,8 @@ const useTranslate = () => {
     Added: "যোগ করা হয়েছে",
     "Newest First": "নতুন থেকে শুরু",
     "Oldest First": "পুরাতন থেকে শুরু",
+    "From Time": "সময় থেকে",
+    "Be Time": "সময় হতে",
     Search: "অনুসন্ধান",
     Notification: "বিজ্ঞপ্তি",
     Online: "অনলাইন",

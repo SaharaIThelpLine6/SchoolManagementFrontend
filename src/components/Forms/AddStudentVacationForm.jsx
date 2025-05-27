@@ -30,9 +30,11 @@ const AddStudentVacationForm = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const { admittedStudent, academicClassStudentError, academicClassStudent } =
     useSelector((state) => state.student);
+
   const { academicSession, studentRelation, status } = useSelector(
     (state) => state.settings
   );
+
 
   const translate = useTranslate();
   const [showSuggestions, setShowSuggestions] = useState(false);

@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { useDispatch } from "react-redux";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { setPageName } from "../../features/auth/authSlice";
 import SortableTable from "../../components/Tables/SortableTable";
 import Swal from "sweetalert2";
@@ -16,6 +16,8 @@ import LoadingComponent from "../../components/Loading/Loading";
 import { useGetStudentsVacationListQuery } from "../../features/student/studentQuerySlice";
 import Button from "../Button/Button";
 import Print from "./Print";
+import { formatTime } from "../../helper/formatTime";
+import { fetchSettingsData } from "../../features/settings/settingsSlice";
 
 const StudentVacationListTable = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -28,6 +30,60 @@ const StudentVacationListTable = ({ pageTitle }) => {
     isLoading: isStudentsVacationListLoading,
   } = useGetStudentsVacationListQuery({ page: currentPage, limit: 10 });
 
+  const { academicSession } = useSelector((state) => state.settings);
+  // Process data with session names and maintain pagination info
+  const {
+    processedData,
+    totalPages,
+    currentPage: serverPage,
+  } = useMemo(() => {
+    const apiData = getStudentsVacationList || {};
+
+    // Process vacation data with flattened structure
+    const processed =
+      apiData.data?.map((vacation) => {
+        // Find matching academic session
+        const session = academicSession?.find(
+          (s) => s.SessionID === vacation.SessionID
+        );
+
+        return {
+          ...vacation,
+          // Flatten user properties
+          UserCode: vacation.User?.UserCode || "N/A",
+          UserName: vacation.User?.UserName || "N/A",
+          // Add session name
+          sessionName: session?.SessionName || "N/A",
+          // Remove the nested User object if you want
+          ...(vacation.User && { User: undefined }), // Optional: remove nested object
+        };
+      }) || [];
+
+    return {
+      processedData: processed,
+      totalPages: apiData.totalPages || 1,
+      currentPage: apiData.currentPage || 1,
+    };
+  }, [getStudentsVacationList, academicSession]);
+console.log(processedData);
+console.log(academicSession);
+
+  // Pagination handlers
+  const handleNext = () => {
+    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
+  };
+
+  const handlePrev = () => {
+    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
+  };
+
+  // Set page title and fetch settings
+  useEffect(() => {
+    dispatch(setPageName(pageTitle));
+    if (!academicSession.length) {
+      dispatch(fetchSettingsData());
+    }
+  }, [dispatch, pageTitle, academicSession.length]);
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
@@ -89,20 +145,6 @@ const StudentVacationListTable = ({ pageTitle }) => {
     return null;
   }
 
-  const {
-    data = [],
-    totalPages = 1,
-    currentPage: serverPage = 1,
-  } = getStudentsVacationList || {};
-
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
-
   const columns = [
     {
       title: translate("Action"),
@@ -137,13 +179,15 @@ const StudentVacationListTable = ({ pageTitle }) => {
       title: translate("User Code"), // User Code in Bengali
       field: "UserCode",
       hozAlign: "center",
-      render: (row) => <p>{row.User?.UserCode}</p>,
+      filterable: true,
+      type: "text",
     },
     {
       title: translate("Student Name"),
       field: "UserName",
       hozAlign: "center",
-      render: (row) => <p>{row.User?.UserName}</p>,
+      filterable: true,
+      type: "text",
     },
     {
       title: translate("Class/Jamaat"),
@@ -172,6 +216,35 @@ const StudentVacationListTable = ({ pageTitle }) => {
         new Date(cell.getValue()).toLocaleDateString("bn-BD"),
     },
     {
+      title: translate("From Time"),
+      field: "VacationTimeFrom",
+      hozAlign: "center",
+      render: (row) => {
+        return formatTime(row.VacationTimeFrom);
+      },
+    },
+    {
+      title: translate("Be Time"),
+      field: "VacationTimeTo",
+      hozAlign: "center",
+      render: (row) => {
+        return formatTime(row.VacationTimeTo);
+      },
+    },
+    {
+      title: translate("Session"),
+      field: "sessionName",
+      hozAlign: "center",
+      formatter: (cell) => cell.getValue() || "-",
+      filterable: true,
+      type: "text",
+      // options: academicSession.map((session) => ({
+      //   value: session.SessionID,
+      //   label: session.sessionName,
+      // })),
+ 
+    },
+    {
       title: translate("Comment"),
       field: "Comment",
       hozAlign: "center",
@@ -190,67 +263,65 @@ const StudentVacationListTable = ({ pageTitle }) => {
 
   return (
     <div className="">
-
-    <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
-      <div className="block w-full overflow-x-auto">
-        <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
-          <div className="w-full flex flex-col gap-5 mb-3">
-            <div className="flex justify-start gap-5 sm:gap-0 items-center">
-              {/* Left Buttons */}
-              <div className="flex flex-wrap justify-start gap-3 order-2 md:order-1">
-                <Button className="bg-[#007af7] text-white hover:bg-blue-600">
-                  {translate("Single")}
-                </Button>
-                <Button className="bg-[#007af7] text-white hover:bg-blue-600">
-                  {translate("Class Based")}
+      <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+        <div className="block w-full overflow-x-auto">
+          <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
+            <div className="w-full flex flex-col gap-5 mb-3">
+              <div className="flex justify-start gap-5 sm:gap-0 items-center">
+                {/* Left Buttons */}
+                <div className="flex flex-wrap justify-start gap-3 order-2 md:order-1">
+                  <Button className="bg-[#007af7] text-white hover:bg-blue-600">
+                    {translate("Single")}
+                  </Button>
+                  <Button className="bg-[#007af7] text-white hover:bg-blue-600">
+                    {translate("Class Based")}
+                  </Button>
+                </div>
+              </div>
+              <div className="flex justify-between w-full gap-5 sm:gap-0 items-center">
+                {/* Left Buttons */}
+                <h3 className="font-SolaimanLipi text-[20px] font-bold">
+                  {translate("List of holidays")}
+                </h3>
+                <Button
+                  onClick={handleOpenModal}
+                  className="bg-[#007af7] text-white hover:bg-blue-600"
+                >
+                  {translate("Create Vacation")}
                 </Button>
               </div>
             </div>
-            <div className="flex justify-between w-full gap-5 sm:gap-0 items-center">
-              {/* Left Buttons */}
-              <h3 className="font-SolaimanLipi text-[20px] font-bold">
-                {translate("List of holidays")}
-              </h3>
-              <Button
-                onClick={handleOpenModal}
-                className="bg-[#007af7] text-white hover:bg-blue-600"
-              >
-                {translate("Create Vacation")}
-              </Button>
-            </div>
+          </div>
+
+          <SortableTable columns={columns} data={processedData} />
+
+          <div className="flex justify-center items-center gap-4 mt-4">
+            <button
+              onClick={handlePrev}
+              disabled={currentPage === 1}
+              className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
+            >
+              <MdKeyboardArrowLeft className="text-lg" />
+              {translate("Prev")}
+            </button>
+
+            <span className="text-sm font-medium text-gray-700">
+              {translate("Page")} {currentPage} {translate("of")} {totalPages}
+            </span>
+
+            <button
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+              className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
+            >
+              {translate("Next")}
+              <MdKeyboardArrowRight className="text-lg" />
+            </button>
           </div>
         </div>
-
-        <SortableTable columns={columns} data={data} />
-
-        <div className="flex justify-center items-center gap-4 mt-4">
-          <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-          >
-            <MdKeyboardArrowLeft className="text-lg" />
-            {translate("Prev")}
-          </button>
-
-          <span className="text-sm font-medium text-gray-700">
-            {translate("Page")} {currentPage} {translate("of")} {totalPages}
-          </span>
-
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-          >
-            {translate("Next")}
-            <MdKeyboardArrowRight className="text-lg" />
-          </button>
-        </div>
       </div>
+      <Print />
     </div>
-  <Print/>
-    </div>
-   
   );
 };
 
