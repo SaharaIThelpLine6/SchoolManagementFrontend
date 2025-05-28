@@ -15,36 +15,47 @@ import {
 import useTranslate from "../utils/Translate";
 import { FiEdit } from "react-icons/fi";
 import Swal from "sweetalert2";
-import { showModal } from "../utils/ModalControlar"; // Make sure this path is correct
+import { showModal } from "../utils/ModalControlar";
 import Button from "../components/Button/Button";
 
 const PAGE_SIZE = 10;
+
 const AddDesignation = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
-
-  useEffect(() => {
-    if (pageTitle) dispatch(setPageName(pageTitle));
-  }, [dispatch, pageTitle]);
 
   const {
     data: designation = [],
     isLoading,
     isError,
   } = useGetDesignationQuery();
+
   const [deleteDesignation] = useDeleteDesignationMutation();
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(designation.length / PAGE_SIZE);
+
+  useEffect(() => {
+    if (pageTitle) dispatch(setPageName(pageTitle));
+  }, [dispatch, pageTitle]);
+
+  useEffect(() => {
+    if (isError) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Failed to load designation data",
+      });
+    }
+  }, [isError]);
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return designation.slice(start, start + PAGE_SIZE);
   }, [designation, currentPage]);
 
-  // Define all callbacks here, unconditionally
   const handleOpenModal = useCallback(() => {
     showModal(translate("Create Designation"), "ADD_DESIGNATION");
-  }, []);
+  }, [translate]);
 
   const handleEditOpenModal = useCallback(
     (id) => {
@@ -68,12 +79,7 @@ const AddDesignation = ({ pageTitle }) => {
         if (result.isConfirmed) {
           try {
             await deleteDesignation(id).unwrap();
-
-            Swal.fire(
-              "Deleted!",
-              "The designation has been removed.",
-              "success"
-            );
+            Swal.fire("Deleted!", "The designation has been removed.", "success");
           } catch (error) {
             Swal.fire("Error!", "Failed to delete designation.", "error");
           }
@@ -84,8 +90,6 @@ const AddDesignation = ({ pageTitle }) => {
   );
 
   if (isLoading) return <Loading />;
-  if (isError)
-    return <p className="text-red-500">Failed to load designation data</p>;
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -96,12 +100,7 @@ const AddDesignation = ({ pageTitle }) => {
   };
 
   const columns = [
-    { title: "SL", field: "SL", hozAlign: "center" },
-    {
-      title: translate("Designation"),
-      field: "Designation",
-      hozAlign: "center",
-    },
+    
     {
       title: translate("Action"),
       hozAlign: "center",
@@ -114,25 +113,30 @@ const AddDesignation = ({ pageTitle }) => {
           >
             <FiEdit className="w-5 h-5" />
           </button>
-          <button
+          {/* <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
             title="Delete"
             onClick={() => handleDelete(row.DNID)}
           >
             <MdDelete className="w-5 h-5" />
-          </button>
+          </button> */}
         </div>
       ),
+    },{ title: "SL", field: "SL", hozAlign: "center" },
+    {
+      title: translate("Designation"),
+      field: "Designation",
+      hozAlign: "center",
     },
   ];
 
   return (
     <div className="p-4 font-lato bg-white md:p-4 rounded-xl shadow-lg">
       <div className="flex justify-between items-center mb-4 border-b border-[#e9edf4] py-5 pt-0">
-        <h3 className="text-xl font-bold">{pageTitle || "Designation List"}</h3>
-        <Button
-          onClick={() => handleOpenModal()}
-        >
+        <h3 className="text-xl font-bold">
+          {pageTitle || "Designation List"}
+        </h3>
+        <Button onClick={handleOpenModal}>
           {translate("Create Designation")}
         </Button>
       </div>

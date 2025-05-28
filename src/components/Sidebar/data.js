@@ -104,9 +104,15 @@ export const menuData = [
       },
     ],
   },
-
   {
     id: "5",
+    name: "Month name",
+    route: "/month-name-list",
+    subMenu: false,
+    icon: "MdCalendarMonth",
+  },
+  {
+    id: "6",
     name: "Settings",
     route: "/settings",
     subMenu: false,

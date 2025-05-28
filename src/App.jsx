@@ -55,11 +55,12 @@ import StudentAdmissionForm from "./pages/public/studentAddmitionForm";
 import PaymentConfirm from "./pages/PaymentConfirm";
 import StudentFeeSetup from "./pages/StudentFeeSetup";
 import StudentReport from "./pages/StudentReport";
-import AddDesignation from "./pages/AddDesignation";
+import Designations from "./pages/Designations";
 import useTranslate from "./utils/Translate";
 import DefaultLayout from "./layout/DefaultLayout";
 import TypeOfVacation from "./pages/TypeOfVacation";
 import StudentVacationListTable from "./components/Tables/StudentVacationListTable";
+import MonthListTable from "./pages/MonthListTable";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -144,10 +145,18 @@ function App() {
               <Route path="report" element={<Report pageTitle={"Reports"} />} />
               <Route
                 path="designation"
-                element={<AddDesignation pageTitle={"Designation List"} />}
+                element={<Designations pageTitle={"Designation List"} />}
               />
             </Route>
 
+            <Route
+              path="/month-name-list"
+              element={
+                <MonthListTable
+                  pageTitle={translate("Months list table")}
+                />
+              }
+            />
             <Route path="/formp" element={<FormP />} />
             <Route path="/query" element={<Query />} />
             <Route path="exam">
