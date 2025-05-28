@@ -112,14 +112,14 @@ const TypeOfVacation = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
+          {/* <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
             title="Delete"
             onClick={() => handleDelete(row.ID)}
             disabled={isDeleteLoading}
           >
             <MdDelete className="w-5 h-5" />
-          </button>
+          </button> */}
           <button
             className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
             title="Edit"

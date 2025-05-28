@@ -26,6 +26,7 @@ const useTranslate = () => {
     Added: "যোগ করা হয়েছে",
     "Newest First": "নতুন থেকে শুরু",
     "Oldest First": "পুরাতন থেকে শুরু",
+    "Create Vacation Type": "ছুটির ধরন তৈরি করুন",
     "From Time": "সময় থেকে",
     "Be Time": "সময় হতে",
     Search: "অনুসন্ধান",
