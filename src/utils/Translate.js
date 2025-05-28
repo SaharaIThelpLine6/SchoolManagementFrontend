@@ -147,6 +147,7 @@ const useTranslate = () => {
     "Total owed": "মোট পাওনা",
     "Class-based student distribution": "শ্রেণি ভিত্তিক শিক্ষার্থী বন্টন",
     Calendar: "ক্যালেন্ডার",
+    "Pay Now": "এখনই পেমেন্ট করুন",
     "Number of students by class": "ক্লাস ভিত্তিক শিক্ষার্থীর সংখ্যা",
     "Presence and absence": "উপস্থিতি ও অনুপস্থিতি",
     "Number of students according to the previous academic year":

@@ -15,9 +15,12 @@ import bnBijoy2Unicode from "../../utils/conveter";
 import { Buffer } from "buffer";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
+import Button from "../Button/Button";
+import useTranslate from "../../utils/Translate";
 
 const Header = () => {
   const dispatch = useDispatch();
+    const translate = useTranslate();
   const { data: userPayInfo, refetch } = useGetUserInfoQuery();
   const {
     data: institutionInfo,
@@ -224,12 +227,8 @@ const Header = () => {
               Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
             </p>
           )}
-          <button
-            onClick={handleOpenModal}
-            className="text-white bg-cyan-500 hover:bg-cyan-600 font-medium rounded-full text-sm px-4 py-2"
-          >
-            Pay now
-          </button>
+        
+          <Button onClick={handleOpenModal} className="!rounded-full">{translate("Pay Now")}</Button>
           <TranslateButton />
           <DropdownNotification />
           <DropdownUser />
