@@ -53,8 +53,8 @@ const SideBar = () => {
                     onClick={() => handleToggle(menu.id)}
                     className={`w-full flex px-4 font-SolaimanLipi items-center justify-between border-l-6 border-solid gap-2 py-2 ${
                       location.pathname.startsWith(menu.route)
-                        ? "bg-[#deeff9] text-[#00aeef] border-l-[#00aeef]"
-                        : "hover:text-[#00aeef] hover:bg-gray-50 border-l-transparent"
+                        ? "bg-[#deeff9] text-[#007af7] border-l-[#007af7]"
+                        : "hover:text-[#007af7] hover:bg-[#ddeffe] border-l-transparent"
                     }`}
                   >
                     <span className="flex items-center gap-2">
@@ -69,38 +69,7 @@ const SideBar = () => {
                       )}
                     </span>
                   </button>
-                  {/* <AnimatePresence>
-                    {openMenuId === menu.id && (
-                      <motion.ul
-                        className="text-gray-600"
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        variants={submenuVariants}
-                      >
-                        {menu.subMenu.map((item) => (
-                          <li
-                            key={item.id}
-                            className="text-sm border-l-2 border-dashed border-[#00aeef] ml-5"
-                          >
-                            <NavLink
-                              to={item.route}
-                              end
-                              className={({ isActive }) =>
-                                `block py-2 pl-6 font-SolaimanLipi ${
-                                  isActive
-                                    ? "bg-[#deeff9] text-[#00aeef]"
-                                    : "hover:text-[#00aeef] hover:bg-gray-50"
-                                }`
-                              }
-                            >
-                              {item.name}
-                            </NavLink>
-                          </li>
-                        ))}
-                      </motion.ul>
-                    )}
-                  </AnimatePresence> */}
+
                   <AnimatePresence>
                     {openMenuId === menu.id && (
                       <motion.ul
@@ -111,7 +80,7 @@ const SideBar = () => {
                         variants={submenuVariants}
                       >
                         {/* Vertical Dashed Line */}
-                        <div className="absolute top-0 bottom-0 left-6 w-px border-l-2 border-dashed border-[#00aeef] z-0" />
+                        <div className="absolute top-0 bottom-0 left-6 w-px border-l-2 border-dashed border-[#007af7] z-0" />
 
                         {menu.subMenu.map((item) => (
                           <li key={item.id} className="relative z-10 pl-[26px]">
@@ -121,8 +90,8 @@ const SideBar = () => {
                               className={({ isActive }) =>
                                 `block py-2 font-SolaimanLipi pl-4  ${
                                   isActive
-                                    ? "bg-[#deeff9] text-[#00aeef]"
-                                    : "hover:text-[#00aeef] hover:bg-gray-50"
+                                    ? "bg-[#ddeffe] text-[#007af7]"
+                                    : "hover:text-[#007af7] hover:bg-[#ddeffe]"
                                 }`
                               }
                             >
@@ -141,8 +110,8 @@ const SideBar = () => {
                   className={({ isActive }) =>
                     `flex items-center font-SolaimanLipi gap-2 py-2 px-4 border-l-6 border-solid ${
                       isActive
-                        ? "bg-[#deeff9] text-[#00aeef] border-l-[#00aeef]"
-                        : "hover:text-[#00aeef] hover:bg-gray-50 border-l-transparent"
+                        ? "bg-[#ddeffe] text-[#007af7] border-l-[#007af7]"
+                        : "hover:text-[#007af7] hover:bg-[#ddeffe] border-l-transparent"
                     }`
                   }
                 >
