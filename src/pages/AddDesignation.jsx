@@ -16,6 +16,7 @@ import useTranslate from "../utils/Translate";
 import { FiEdit } from "react-icons/fi";
 import Swal from "sweetalert2";
 import { showModal } from "../utils/ModalControlar"; // Make sure this path is correct
+import Button from "../components/Button/Button";
 
 const PAGE_SIZE = 10;
 const AddDesignation = ({ pageTitle }) => {
@@ -126,15 +127,14 @@ const AddDesignation = ({ pageTitle }) => {
   ];
 
   return (
-    <div className="p-4 font-lato">
-      <div className="flex justify-between items-center mb-4">
+    <div className="p-4 font-lato bg-white md:p-4 rounded-xl shadow-lg">
+      <div className="flex justify-between items-center mb-4 border-b border-[#e9edf4] py-5 pt-0">
         <h3 className="text-xl font-bold">{pageTitle || "Designation List"}</h3>
-        <button
-          className="text-white py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-nowrap text-[14px] font-semibold bg-green-500 hover:bg-green-600 transition"
+        <Button
           onClick={() => handleOpenModal()}
         >
           {translate("Create Designation")}
-        </button>
+        </Button>
       </div>
 
       <SortableTable columns={columns} data={paginatedData} />

@@ -23,11 +23,14 @@ const Button = ({
     focus:outline-none
     focus:ring-4
     focus:ring-green-300
+    bg-blue-500
+    hover:bg-blue-600
+    text-white
   `;
 
   // Combine base classes with custom className, ensuring custom styles take precedence
   const combinedClasses = clsx(baseClasses, className, {
-    "bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br":
+    "from-green-400 via-green-500 to-green-600":
       !className.includes("bg-"),
   });
 
