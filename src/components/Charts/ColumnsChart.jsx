@@ -49,16 +49,28 @@ const ColumnsChart = () => {
       //   },
       // },
       colors: colors,
+
       plotOptions: {
         bar: {
+          borderRadius: 10,
           columnWidth: "30px", // বা percentage: "50%" ইত্যাদি
+
           distributed: true,
-          borderRadius: 6,
+          dataLabels: {
+            position: "top", // show label above the bar
+          },
         },
       },
-
       dataLabels: {
-        enabled: false,
+        enabled: true,
+        formatter: function (val) {
+          return `${val} জন`;
+        },
+        offsetY: -20,
+        style: {
+          fontSize: "12px",
+          colors: ["#304758"],
+        },
       },
       legend: {
         show: false,

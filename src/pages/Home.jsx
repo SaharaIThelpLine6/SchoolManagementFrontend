@@ -37,7 +37,6 @@ const Home = ({ pageTitle }) => {
   const { data: teacherCount } = useGetTotalTeacherQuery();
   const { data: donerCount } = useGetTotalDonerQuery();
   const { data: totalDueCount } = useGetTotalDueQuery();
-console.log(donerCount);
   
 
   useEffect(() => {
