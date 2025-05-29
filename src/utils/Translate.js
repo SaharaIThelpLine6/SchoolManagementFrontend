@@ -58,6 +58,7 @@ const useTranslate = () => {
     "Last Modified": "সর্বশেষ পরিবর্তিত",
     Last: "সর্বশেষ",
     Modified: "পরিবর্তিত",
+    "Update Student Report": "ছাত্র রিপোর্ট আপডেট",
     Today: "আজ",
     "Last Week": "শেষ সপ্তাহ",
     "Last Month": "শেষ মাস",
