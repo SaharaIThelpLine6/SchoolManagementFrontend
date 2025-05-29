@@ -195,10 +195,18 @@ function App() {
                 element={<Calculator pageTitle={"Calculator"} />}
               />
             </Route>
-            <Route
-              path="settings"
-              element={<Setting pageTitle={"Setting"} />}
-            />
+            <Route path="settings">
+              <Route index element={<Setting pageTitle={"Setting"} />} />
+              <Route
+                path="month-name-list"
+                element={<MonthListTable pageTitle={"Month Name List"} />}
+              />
+              <Route
+                path="calculator"
+                element={<Calculator pageTitle={"Calculator"} />}
+              />
+            </Route>
+           
             <Route path="/help" element={<Help pageTitle={"Help"} />} />
           </Route>
           {/* <Route path='/quota/:payfor' element={<Quota/>}>

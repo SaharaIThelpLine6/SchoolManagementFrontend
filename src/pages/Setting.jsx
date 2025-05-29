@@ -209,7 +209,7 @@ const Setting = () => {
 
           {/* Save Button */}
           <div className="flex pl-[4px] font-bold">
-            <Button>{translate("Save")}</Button>
+            <Button type="submit">{translate("Save")}</Button>
           </div>
         </div>
       </div>

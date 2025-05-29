@@ -5,10 +5,12 @@ import { menuData } from "./data";
 import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { renderIcons } from "../../helper/renderIcons";
+import useTranslate from "../../utils/Translate";
 
 const SideBar = () => {
   const [openMenuId, setOpenMenuId] = useState(null);
   const location = useLocation();
+  const translate = useTranslate();
 
   const handleToggle = (id) => {
     setOpenMenuId((prev) => (prev === id ? null : id));
@@ -59,7 +61,7 @@ const SideBar = () => {
                   >
                     <span className="flex items-center gap-2">
                       {renderIcons(menu.icon)}
-                      {menu.name}
+                      {translate(menu.name)}
                     </span>
                     <span>
                       {openMenuId === menu.id ? (
@@ -95,7 +97,7 @@ const SideBar = () => {
                                 }`
                               }
                             >
-                              {item.name}
+                              {translate(item.name)}
                             </NavLink>
                           </li>
                         ))}
@@ -115,7 +117,7 @@ const SideBar = () => {
                     }`
                   }
                 >
-                  {renderIcons(menu.icon)} {menu.name}
+                  {renderIcons(menu.icon)} {translate(menu.name)}
                 </NavLink>
               )}
             </li>

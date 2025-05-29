@@ -5,7 +5,7 @@ const useTranslate = () => {
 
   const englishToBangla = {
     Home: "হোম",
-    Student: "ছাত্র-ছাত্রী",
+    Student: "শিক্ষার্থী",
     "Book List": "বুক লিস্ট",
     Staff: "স্টাফ",
     Exam: "পরীক্ষা",
@@ -251,6 +251,19 @@ const useTranslate = () => {
     "Presence and absence": "উপস্থিতি ও অনুপস্থিতি",
     "Number of students according to the previous academic year":
       "বিগত শিক্ষাবর্ষ অনুযায়ী শিক্ষার্থী সংখ্যা",
+    Dashboard: "ড্যাশবোর্ড",
+    "Teacher Staff": "শিক্ষক কর্মচারী",
+    "Result": "ফলাফল",
+    "Board Exam": "বোর্ড পরীক্ষা",
+    "Darul Ikama": "দারুল ইকামা",
+    "Accounting": "অ্যাকাউন্টিং",
+    "Donation": "দান অনুদান",
+    "Library": "পাঠাগার",
+    "Others": "অন্যান্য",
+    "Help": "সাহায্য",
+    "Month Name": "মাসের নাম",
+    "Institution Information": "প্রতিষ্ঠানের তথ্য",
+
   };
 
   return (key) =>

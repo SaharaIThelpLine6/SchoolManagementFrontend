@@ -1,7 +1,7 @@
 export const menuData = [
   {
     id: "1",
-    name: "Home",
+    name: "Dashboard",
     route: "/",
     subMenu: false,
     icon: "FaHome",
@@ -17,50 +17,86 @@ export const menuData = [
     id: "3",
     name: "Student",
     route: "/students",
-    icon: "FaUsers",
+    icon: "PiStudentBold",
     subMenu: [
       {
         id: "1",
-        name: "All Students",
-        route: "/students",
-      },
-      {
-        id: "2",
-        name: "Book List",
-        route: "/students/booklist",
-      },
-      {
-        id: "3",
-        name: "Group Distribution",
-        route: "/students/groupdistribution",
-      },
-      {
-        id: "4",
-        name: "Class",
-        route: "/students/class",
-      },
-      {
-        id: "5",
-        name: "Section",
-        route: "/students/section",
-      },
-      {
-        id: "6",
         name: "Session",
         route: "/students/sessions",
       },
       {
+        id: "2",
+        name: "Class",
+        route: "/students/class",
+      },
+      {
+        id: "3",
+        name: "Class Group",
+        route: "/students/class-group",
+      },
+      {
+        id: "4",
+        name: "Student Admission",
+        route: "/students/admission",
+      },
+      {
+        id: "5",
+        name: "English Name",
+        route: "/students/english-name",
+      },
+      {
+        id: "6",
+        name: "Arobi Name",
+        route: "/students/arobi-name",
+      },
+      {
         id: "7",
+        name: "Book List",
+        route: "/students/booklist",
+      },
+      {
+        id: "8",
+        name: "Student Group Setting",
+        route: "/students/group-setting",
+      },
+      {
+        id: "9",
+        name: "Student ID card",
+        route: "/students/id-card",
+      },
+      {
+        id: "10",
+        name: "ID Card Print",
+        route: "/students/id-print",
+      },
+      {
+        id: "11",
+        name: "All Students",
+        route: "/students",
+      },
+      {
+        id: "13",
+        name: "Group Distribution",
+        route: "/students/groupdistribution",
+      },
+
+      {
+        id: "14",
+        name: "Section",
+        route: "/students/section",
+      },
+      {
+        id: "16",
         name: "Students Report",
         route: "/students/report",
       },
       {
-        id: "9",
+        id: "17",
         name: "Student Vacation",
         route: "/students/vacation",
       },
       {
-        id: "10",
+        id: "18",
         name: "Type of vacation",
         route: "/students/vacation/type-of-vacation",
       },
@@ -68,9 +104,9 @@ export const menuData = [
   },
   {
     id: "4",
-    name: "Employee",
+    name: "Teacher Staff",
     route: "/teacherinfo",
-    icon: "FaUsers",
+    icon: "IoIosPeople",
     subMenu: [
       {
         id: "1",
@@ -106,17 +142,154 @@ export const menuData = [
   },
   {
     id: "5",
-    name: "Month Name",
-    route: "/month-name-list",
-    subMenu: false,
-    icon: "MdCalendarMonth",
+    name: "Exam",
+    route: "/exam",
+    icon: "PiExam",
+    subMenu: [
+      {
+        id: "1",
+        name: "Result 1",
+        route: "/result-1",
+        subMenu: false,
+      },
+    
+    ],
   },
   {
     id: "6",
+    name: "Result",
+    route: "/result",
+    icon: "GiGraduateCap",
+    subMenu: [
+      {
+        id: "1",
+        name: "Result 1",
+        route: "/result-1",
+        subMenu: false,
+      },
+     
+    ],
+  },
+  {
+    id: "7",
+    name: "Board Exam",
+    route: "/board-exam",
+    icon: "LiaSchoolSolid",
+    subMenu: [
+      {
+        id: "1",
+        name: "Board Exam 1",
+        route: "/board-exam-1",
+        subMenu: false,
+      },
+      
+    ],
+  },
+  {
+    id: "8",
+    name: "Darul Ikama",
+    route: "/darul-ikama",
+    icon: "RiSchoolFill",
+    subMenu: [
+      {
+        id: "1",
+        name: "Darul Ikama 1",
+        route: "/darul-ikama",
+        subMenu: false,
+      },
+     
+    ],
+  },
+  {
+    id: "9",
+    name: "Accounting",
+    route: "/accounting",
+    icon: "FaCalculator",
+    subMenu: [
+      {
+        id: "1",
+        name: "Acccounting 1",
+        route: "/accounting",
+        subMenu: false,
+      },
+    ],
+  },
+  {
+    id: "10",
+    name: "Donation",
+    route: "/donation",
+    icon: "FaDonate",
+    subMenu: [
+      {
+        id: "1",
+        name: "Donation 1",
+        route: "/donation",
+        subMenu: false,
+      },
+    ],
+  },
+  {
+    id: "11",
+    name: "Library",
+    route: "/library",
+    icon: "ImLibrary",
+    subMenu: [
+      {
+        id: "1",
+        name: "Library 1",
+        route: "/library",
+        subMenu: false,
+      },
+     
+    ],
+  },
+  {
+    id: "12",
+    name: "Others",
+    route: "/others",
+    icon: "HiDotsCircleHorizontal",
+    subMenu: [
+      {
+        id: "1",
+        name: "Others 1",
+        route: "/others",
+        subMenu: false,
+      },
+    ],
+  },
+  {
+    id: "13",
     name: "Settings",
     route: "/settings",
-    subMenu: false,
-    icon: "TbIdBadge2",
+    icon: "IoMdSettings",
+    subMenu: [
+      {
+        id: "1",
+        name: "Institution Information",
+        route: "/settings",
+        subMenu: false,
+      },
+      {
+        id: "2",
+        name: "Month Name",
+        route: "/settings/month-name-list",
+        subMenu: false,
+      },
+    ],
+  },
+  {
+    id: "14",
+    name: "Help",
+    route: "/help",
+    icon: "IoMdHelp",
+    subMenu: [
+      {
+        id: "1",
+        name: "Help 1",
+        route: "/help-1",
+        subMenu: false,
+      },
+    ],
   },
 ];
 
