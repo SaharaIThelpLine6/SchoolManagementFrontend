@@ -106,7 +106,7 @@ export const menuData = [
   },
   {
     id: "5",
-    name: "Month name",
+    name: "Month Name",
     route: "/month-name-list",
     subMenu: false,
     icon: "MdCalendarMonth",

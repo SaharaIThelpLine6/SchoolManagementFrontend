@@ -4,18 +4,34 @@ import Swal from "sweetalert2";
 import "flatpickr/dist/flatpickr.css";
 import React, { useState, useRef, useEffect } from "react";
 import DefaultInput from "../components/Forms/DefaultInput";
-import DefaultGreen from "../components/Button/DefaultGreen";
 import { formFieldsSettings } from "../components/Forms/FormData/SettingFormData";
 import {
   useGetInstitutionInfoQuery,
   useUpdateInstitutionInfoMutation,
 } from "../features/settings/settingsQuerySlice";
+import Button from "../components/Button/Button";
+import Loading from "../components/Loading/Loading";
 
 const Setting = () => {
   const translate = useTranslate();
 
-  const { data: institutionInfo } = useGetInstitutionInfoQuery();
+  const {
+    data: institutionInfo,
+    isLoading,
+    isError,
+  } = useGetInstitutionInfoQuery();
   const [updateInstitutionInfo] = useUpdateInstitutionInfoMutation();
+
+  if (isLoading) <Loading />;
+  {
+    isError && (
+      <div className="flex items-center justify-center h-full">
+        <div className="bg-red-100 text-red-700 px-6 py-4 rounded-lg shadow-md">
+          <p className="text-lg font-semibold">Page Data Not Found</p>
+        </div>
+      </div>
+    );
+  }
 
   const {
     register,
@@ -193,7 +209,7 @@ const Setting = () => {
 
           {/* Save Button */}
           <div className="flex pl-[4px] font-bold">
-            <DefaultGreen submitButtonGreen="Save" />
+            <Button>{translate("Save")}</Button>
           </div>
         </div>
       </div>
