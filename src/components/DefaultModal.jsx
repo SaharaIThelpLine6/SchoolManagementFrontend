@@ -7,13 +7,12 @@ import FeeCollectionForm from "./Forms/FeeCollectionForm";
 import PaymentModal from "./Modals/PaymentModal";
 import AddTeacherForm from "./Forms/AddTeacherForm";
 import EditTeacherForm from "./Forms/EditTeacherForm";
-import EditDesignationForm from "./Forms/EditDesignationForm";
-import CreateDesignationForm from "./Forms/CreateDesignationForm";
 import TypeOfVacationForm from "./Forms/TypeOfVacationForm";
 import EditStudentVacationForm from "./Forms/EditStudentVacationForm";
 import AddStudentVacationForm from "./Forms/AddStudentVacationForm";
 import StudentFilterModal from "./Modals/StudentFilterModal";
 import MonthNamesForm from "./Forms/MonthNamesForm";
+import DesignationForm from "./Forms/DesignationForm";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -70,9 +69,9 @@ const DefaultModal = () => {
                 {modalType === "EDIT_TEACHER" && (
                   <EditTeacherForm userId={id} />
                 )}
-                {modalType === "ADD_DESIGNATION" && <CreateDesignationForm />}
+                {modalType === "ADD_DESIGNATION" && <DesignationForm />}
                 {modalType === "EDIT_DESIGNATION" && (
-                  <EditDesignationForm userId={id} />
+                  <DesignationForm userId={id} />
                 )}
                 {modalType === "ADD_TYPEOFVACATION" && <TypeOfVacationForm />}
                 {modalType === "EDIT_TYPEOFVACATION" && (
