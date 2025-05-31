@@ -15,6 +15,19 @@ export const menuData = [
   },
   {
     id: "3",
+    name: "General Information",
+    route: "/general-info",
+    icon: "LuWarehouse",
+    subMenu: [
+      {
+        id: "1",
+        name: "User Reports",
+        route: "/general-info/user-reports",
+      },
+    ],
+  },
+  {
+    id: "4",
     name: "Student",
     route: "/students",
     icon: "PiStudentBold",
@@ -103,7 +116,7 @@ export const menuData = [
     ],
   },
   {
-    id: "4",
+    id: "5",
     name: "Teacher Staff",
     route: "/teacherinfo",
     icon: "IoIosPeople",
@@ -141,7 +154,7 @@ export const menuData = [
     ],
   },
   {
-    id: "5",
+    id: "6",
     name: "Exam",
     route: "/exam",
     icon: "PiExam",
@@ -152,11 +165,10 @@ export const menuData = [
         route: "/result-1",
         subMenu: false,
       },
-    
     ],
   },
   {
-    id: "6",
+    id: "7",
     name: "Result",
     route: "/result",
     icon: "GiGraduateCap",
@@ -167,11 +179,10 @@ export const menuData = [
         route: "/result-1",
         subMenu: false,
       },
-     
     ],
   },
   {
-    id: "7",
+    id: "8",
     name: "Board Exam",
     route: "/board-exam",
     icon: "LiaSchoolSolid",
@@ -182,11 +193,10 @@ export const menuData = [
         route: "/board-exam-1",
         subMenu: false,
       },
-      
     ],
   },
   {
-    id: "8",
+    id: "9",
     name: "Darul Ikama",
     route: "/darul-ikama",
     icon: "RiSchoolFill",
@@ -197,11 +207,10 @@ export const menuData = [
         route: "/darul-ikama",
         subMenu: false,
       },
-     
     ],
   },
   {
-    id: "9",
+    id: "10",
     name: "Accounting",
     route: "/accounting",
     icon: "FaCalculator",
@@ -215,7 +224,7 @@ export const menuData = [
     ],
   },
   {
-    id: "10",
+    id: "11",
     name: "Donation",
     route: "/donation",
     icon: "FaDonate",
@@ -229,7 +238,7 @@ export const menuData = [
     ],
   },
   {
-    id: "11",
+    id: "12",
     name: "Library",
     route: "/library",
     icon: "ImLibrary",
@@ -240,11 +249,10 @@ export const menuData = [
         route: "/library",
         subMenu: false,
       },
-     
     ],
   },
   {
-    id: "12",
+    id: "13",
     name: "Others",
     route: "/others",
     icon: "HiDotsCircleHorizontal",
@@ -258,7 +266,7 @@ export const menuData = [
     ],
   },
   {
-    id: "13",
+    id: "14",
     name: "Settings",
     route: "/settings",
     icon: "IoMdSettings",
@@ -278,7 +286,7 @@ export const menuData = [
     ],
   },
   {
-    id: "14",
+    id: "15",
     name: "Help",
     route: "/help",
     icon: "IoMdHelp",

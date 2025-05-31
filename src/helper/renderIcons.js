@@ -10,6 +10,7 @@ import * as RiIcons from "react-icons/ri";
 import * as LiaIcons from "react-icons/lia";
 import * as ImIcons from "react-icons/im";
 import * as HiIcons from "react-icons/hi";
+import * as LuIcons from "react-icons/lu";
 
 export const renderIcons = (iconData, sizeClass = "text-2xl") => {
   const getIconComponent = (iconName) => {
@@ -37,6 +38,8 @@ export const renderIcons = (iconData, sizeClass = "text-2xl") => {
         return ImIcons[iconName];
       case "Hi":
         return HiIcons[iconName];
+      case "Lu":
+        return LuIcons[iconName];
       default:
         return null;
     }
