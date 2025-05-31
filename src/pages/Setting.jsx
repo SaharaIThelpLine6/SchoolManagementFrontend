@@ -1,8 +1,9 @@
+import React, { useState, useRef, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
-import useTranslate from "../utils/Translate";
 import Swal from "sweetalert2";
 import "flatpickr/dist/flatpickr.css";
-import React, { useState, useRef, useEffect } from "react";
+import { Buffer } from "buffer";
+import useTranslate from "../utils/Translate";
 import DefaultInput from "../components/Forms/DefaultInput";
 import { formFieldsSettings } from "../components/Forms/FormData/SettingFormData";
 import {
@@ -22,16 +23,26 @@ const Setting = () => {
   } = useGetInstitutionInfoQuery();
   const [updateInstitutionInfo] = useUpdateInstitutionInfoMutation();
 
-  if (isLoading) <Loading />;
-  {
-    isError && (
-      <div className="flex items-center justify-center h-full">
-        <div className="bg-red-100 text-red-700 px-6 py-4 rounded-lg shadow-md">
-          <p className="text-lg font-semibold">Page Data Not Found</p>
-        </div>
-      </div>
-    );
-  }
+  const [images, setImages] = useState({
+    Logo: null,
+    SignaturePrincipal: null,
+    SignatureNajem: null,
+    SignatureAccountant: null,
+  });
+
+  useEffect(() => {
+    if (institutionInfo) {
+      const loadedImages = {};
+      ["Logo", "SignaturePrincipal", "SignatureNajem", "SignatureAccountant"].forEach((key) => {
+        const bufferData = institutionInfo[key]?.data;
+        if (bufferData) {
+          const base64 = Buffer.from(bufferData).toString("base64");
+          loadedImages[key] = `data:image/png;base64,${base64}`;
+        }
+      });
+      setImages(loadedImages);
+    }
+  }, [institutionInfo]);
 
   const {
     register,
@@ -67,7 +78,6 @@ const Setting = () => {
         PrincipalName: institutionInfo.PrincipalName || "",
         SMSMobile: institutionInfo.SMSMobile || "",
         Village: institutionInfo.Village || "",
-        // Add other fields as needed
       });
     }
   }, [institutionInfo, reset]);
@@ -97,11 +107,10 @@ const Setting = () => {
     try {
       const updatedData = {
         ...data,
-        // UserID: userId,
-        // Logo: imagePreviews[0], // base64 or dataURL
-        // SignaturePrincipal: imagePreviews[1],
-        // SignatureNajem: imagePreviews[2],
-        // SignatureAccountant: imagePreviews[3],
+        // Logo: imagePreviews[0] || images.Logo,
+        // SignaturePrincipal: imagePreviews[1] || images.SignaturePrincipal,
+        // SignatureNajem: imagePreviews[2] || images.SignatureNajem,
+        // SignatureAccountant: imagePreviews[3] || images.SignatureAccountant,
       };
 
       await updateInstitutionInfo(updatedData).unwrap();
@@ -119,6 +128,16 @@ const Setting = () => {
     }
   };
 
+  if (isLoading) return <Loading />;
+  if (isError)
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="bg-red-100 text-red-700 px-6 py-4 rounded-lg shadow-md">
+          <p className="text-lg font-semibold">Page Data Not Found</p>
+        </div>
+      </div>
+    );
+
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
@@ -134,8 +153,7 @@ const Setting = () => {
                     {translate(section.title)}
                   </h2>
                 </div>
-
-                {section.fields.map((field, index) => (
+                {section.fields.map((field) => (
                   <DefaultInput
                     key={field.key}
                     registerKey={field.key}
@@ -161,7 +179,6 @@ const Setting = () => {
                 key={index}
                 className="flex flex-col items-center bg-white p-4 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300"
               >
-                {/* Show label for Logo, input for others */}
                 {role === "Logo" ? (
                   <p className="mb-5 text-sm font-semibold text-gray-700 mt-9">
                     {translate("Institution Logo Upload")}
@@ -177,7 +194,7 @@ const Setting = () => {
                   </div>
                 )}
 
-                {/* Image Upload Section */}
+                {/* Image Preview/Upload */}
                 <div
                   className="w-[150px] h-[150px] overflow-hidden rounded-lg shadow-inner mb-3 cursor-pointer"
                   onClick={() => handleImageClick(index)}
@@ -185,6 +202,11 @@ const Setting = () => {
                   <img
                     src={
                       imagePreviews[index] ||
+                      images[
+                        role === "Logo"
+                          ? "Logo"
+                          : `Signature${role}`
+                      ] ||
                       "https://live.staticflickr.com/7262/26793943536_523d3176a2_z.jpg"
                     }
                     alt={`${role} image`}
@@ -198,6 +220,7 @@ const Setting = () => {
                   ref={(el) => (fileInputs.current[index] = el)}
                   onChange={(e) => handleImageChange(e, index)}
                   className="hidden"
+                  disabled
                 />
 
                 <p className="text-sm font-medium text-gray-700">
@@ -207,7 +230,7 @@ const Setting = () => {
             ))}
           </div>
 
-          {/* Save Button */}
+          {/* Submit Button */}
           <div className="flex pl-[4px] font-bold">
             <Button type="submit">{translate("Save")}</Button>
           </div>
