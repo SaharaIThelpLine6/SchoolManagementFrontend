@@ -19,6 +19,7 @@ import { monthSlice } from '../features/month/monthSlice';
 import { settingsSlice } from '../features/settings/settingsQuerySlice';
 import { dashboardSlice } from '../features/dashboard/dashboardQuerySlice';
 import { monthListSlice } from '../features/months/montListSlice';
+import { userReportsSlice } from '../features/userReports/userReportsSlice';
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -41,6 +42,7 @@ const store = configureStore({
     [monthListSlice.reducerPath]: monthListSlice.reducer,
     [settingsSlice.reducerPath]: settingsSlice.reducer,
     [dashboardSlice.reducerPath]: dashboardSlice.reducer,
+    [userReportsSlice.reducerPath]: userReportsSlice.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -53,7 +55,8 @@ const store = configureStore({
       .concat(monthSlice.middleware)
       .concat(monthListSlice.middleware)
       .concat(settingsSlice.middleware)
-      .concat(dashboardSlice.middleware),
+      .concat(dashboardSlice.middleware)
+      .concat(userReportsSlice.middleware),
 });
 
 export default store;
