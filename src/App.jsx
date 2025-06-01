@@ -61,6 +61,7 @@ import DefaultLayout from "./layout/DefaultLayout";
 import TypeOfVacation from "./pages/TypeOfVacation";
 import StudentVacationListTable from "./components/Tables/StudentVacationListTable";
 import MonthListTable from "./pages/MonthListTable";
+import UserReports from "./pages/UserReports";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -123,6 +124,13 @@ function App() {
             </Route>
 
             <Route path="usersinfo" element={<User />} />
+            <Route path="general-info">
+              <Route
+                index
+                path="user-reports"
+                element={<UserReports pageTitle={"User Reports"} />}
+              />
+            </Route>
             <Route
               path="payment_confirm/:schoolid/:service/:size"
               element={<PaymentConfirm />}
@@ -152,9 +160,7 @@ function App() {
             <Route
               path="/month-name-list"
               element={
-                <MonthListTable
-                  pageTitle={translate("Months list table")}
-                />
+                <MonthListTable pageTitle={translate("Months list table")} />
               }
             />
             <Route path="/formp" element={<FormP />} />
@@ -206,7 +212,7 @@ function App() {
                 element={<Calculator pageTitle={"Calculator"} />}
               />
             </Route>
-           
+
             <Route path="/help" element={<Help pageTitle={"Help"} />} />
           </Route>
           {/* <Route path='/quota/:payfor' element={<Quota/>}>

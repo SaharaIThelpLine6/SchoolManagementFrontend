@@ -23,18 +23,19 @@ import Button from "../../components/Button/Button";
 import TimePicker from "../../components/Forms/DatePicker/TimePicker";
 import StudentVacationListTable from "../../components/Tables/StudentVacationListTable";
 import { FaPlus } from "react-icons/fa";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-
+import { hideModal } from "../../utils/ModalControlar";
 const AddStudentVacationForm = ({ pageTitle }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const { admittedStudent, academicClassStudentError, academicClassStudent } =
     useSelector((state) => state.student);
 
   const { academicSession, studentRelation, status } = useSelector(
     (state) => state.settings
   );
-
 
   const translate = useTranslate();
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -71,10 +72,13 @@ const AddStudentVacationForm = ({ pageTitle }) => {
     data: searchStudentInfo,
     error: searchStudentError,
     isLoading: studentInfoLoading,
-  } = useGetStudentBySearchQuery({ search: studentCodeOrName, ClassID: null, SessionID: null }, {
-    skip: !userTyping,
-    refetchOnFocus: false,
-  });
+  } = useGetStudentBySearchQuery(
+    { search: studentCodeOrName, ClassID: null, SessionID: null },
+    {
+      skip: !userTyping,
+      refetchOnFocus: false,
+    }
+  );
 
   // Set page title and fetch settings
   useEffect(() => {
@@ -221,9 +225,11 @@ const AddStudentVacationForm = ({ pageTitle }) => {
     });
     return null; // Prevent rendering the form if vacation types fail to load
   }
-
-  console.log(showSuggestions);
-
+  // Handle navigation to vacation type page
+  const handleNavigate = () => {
+    hideModal();
+    navigate("/students/vacation/type-of-vacation");
+  };
   return (
     <div>
       <div className="mx-auto">
@@ -332,11 +338,12 @@ const AddStudentVacationForm = ({ pageTitle }) => {
                   defaultSelect={false}
                   unicode={true}
                 />
-                <NavLink to="/students/vacation/type-of-vacation">
-                  <Button className="bg-[#EDEDED] mt-7 rounded-md py-3">
-                    <FaPlus />
-                  </Button>
-                </NavLink>
+                <Button
+                  onClick={handleNavigate}
+                  className="bg-[#EDEDED] mt-7 rounded-md py-3"
+                >
+                  <FaPlus />
+                </Button>
               </div>
               <DefaultSelect
                 label={`${translate("Relationship")}:`}
