@@ -183,48 +183,96 @@ const UserReports = ({ pageTitle }) => {
           </form>
         </div>
 
-        {/* Report Render */}
         <div className="w-full text-sm text-black bg-white p-2">
           {isFetching && <div>{translate("Loading report...")}</div>}
 
+          {/* Students List Report */}
           {reportData && selectedReportID === 1 && (
-            <div className="">
-              <StudentsListPdf
-                data={reportData}
-                title={"শিক্ষার্থীদের তালিকা"}
-              />
+            <div className="print-container">
+              <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                <div className="min-w-[800px]">
+                  <StudentsListPdf
+                    data={reportData}
+                    title={"শিক্ষার্থীদের তালিকা"}
+                  />
+                </div>
+              </div>
               <div className="flex justify-end mt-2 print:hidden">
-                <Button onClick={() => window.print()}>{translate("Print")}</Button>
+                <Button onClick={() => window.print()}>
+                  {translate("Print")}
+                </Button>
+              </div>
+              <div className="hidden print:block">
+                <StudentsListPdf
+                  data={reportData}
+                  title={"শিক্ষার্থীদের তালিকা"}
+                />
               </div>
             </div>
           )}
 
+          {/* Non-Admitted Students List */}
           {reportData && selectedReportID === 4 && (
-            <div className="">
-              <StudentsListPdf
-                data={reportData}
-                title={"ভর্তি বিহীন শিক্ষার্থীদের তালিকা"}
-              />
+            <div className="print-container">
+              <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                <div className="min-w-[800px]">
+                  <StudentsListPdf
+                    data={reportData}
+                    title={"ভর্তি বিহীন শিক্ষার্থীদের তালিকা"}
+                  />
+                </div>
+              </div>
               <div className="flex justify-end mt-2 print:hidden">
-                <Button onClick={() => window.print()}>{translate("Print")}</Button>
+                <Button onClick={() => window.print()}>
+                  {translate("Print")}
+                </Button>
+              </div>
+              <div className="hidden print:block">
+                <StudentsListPdf
+                  data={reportData}
+                  title={"ভর্তি বিহীন শিক্ষার্থীদের তালিকা"}
+                />
               </div>
             </div>
           )}
 
+          {/* User Summary Report */}
           {reportData && selectedReportID === 2 && (
-            <div className="">
-              <UserSummaryReportsPdf data={reportData} />
+            <div className="print-container">
+              <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                <div className="min-w-[800px]">
+                  <UserSummaryReportsPdf data={reportData} />
+                </div>
+              </div>
               <div className="flex justify-end mt-2 print:hidden">
-                <Button onClick={() => window.print()}>{translate("Print")}</Button>
+                <Button onClick={() => window.print()}>
+                  {translate("Print")}
+                </Button>
+              </div>
+              <div className="hidden print:block">
+                <UserSummaryReportsPdf data={reportData} />
               </div>
             </div>
           )}
 
+          {/* Admission Form Report */}
           {selectedReportID === 3 && admission === 10 && (
-            <div className="">
-              <AdmissionFormPdf />
-              <div className="flex justify-end mt-2 print:hidden">
-                <Button onClick={() => window.print()}>{translate("Print")}</Button>
+            <div className="print-container">
+              <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                <div className="min-w-[800px]">
+                  <AdmissionFormPdf />
+                </div>
+              </div>
+              <div className="flex justify-end mt-4 print:hidden">
+                <Button
+                  onClick={() => window.print()}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  {translate("Print")}
+                </Button>
+              </div>
+              <div className="hidden print:block">
+                <AdmissionFormPdf />
               </div>
             </div>
           )}

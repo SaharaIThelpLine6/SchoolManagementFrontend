@@ -2,13 +2,12 @@ import React from "react";
 import PdfHeader from "./PdfHeader";
 
 const AdmissionFormPdf = () => {
-
   return (
     <div
       className="w-full"
       style={{
         width: "210mm",
-        height: "250mm", // Fixed height for one page
+        height: "270mm", // Fixed height for one page
         margin: "0 auto",
         fontFamily: "'SolaimanLipi', 'Bangla', sans-serif",
         fontSize: "12px", // Reduced font size
@@ -48,9 +47,7 @@ const AdmissionFormPdf = () => {
             </div>
             <div className="flex-grow">
               <p className="text-2xs mb-0">জামায়াত : </p>
-              <p className="text-2xs mb-0">
-                শিক্ষাবর্ষ : 
-              </p>
+              <p className="text-2xs mb-0">শিক্ষাবর্ষ :</p>
               <p className="text-2xs">আইডি :</p>
               <div className="flex flex-row gap-1 mt-1 text-2xs">
                 <div className="flex gap-1 items-center">
@@ -154,12 +151,10 @@ const AdmissionFormPdf = () => {
         </div>
 
         {/* Office Section */}
-        <div className="flex justify-between items-start mb-2">
-          <div className="w-1/2">
-            <div className="text-center border border-black p-1 text-xs">
-              <h2 className="font-bold">অফিসের অংশ</h2>
-            </div>
-          </div>
+        <div className="text-center border border-black p-0.5 text-xs mb-1">
+          <h2 className="font-bold">অফিসের অংশ</h2>
+        </div>
+        <div className="flex justify-end items-center mb-2">
           <div className="w-1/2 text-right">
             <p className="text-2xs">__________________________</p>
             <p className="text-2xs text-center">আবেদনকারীর স্বাক্ষর</p>
