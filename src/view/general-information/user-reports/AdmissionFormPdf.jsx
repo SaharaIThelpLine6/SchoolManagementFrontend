@@ -1,5 +1,5 @@
-
 import React from "react";
+import PdfHeader from "./PdfHeader";
 const AdmissionFormPdf = () => {
   // Sample past data
   const pastData = {
@@ -56,23 +56,7 @@ const AdmissionFormPdf = () => {
     <div className="w-full">
       <div className="p-6 bg-white text-black print:text-sm print:p-0 font-sans">
         {/* Header */}
-        <div className="flex items-center justify-between pb-2">
-          <div className="w-16 h-16">
-            <img
-              src="https://thumbs.dreamstime.com/b/education-badge-logo-design-university-high-school-emblem-education-badge-logo-design-university-high-school-emblem-151924849.jpg"
-              alt="Logo"
-              className="w-full h-full object-contain"
-            />
-          </div>
-          <div className="flex-1 text-center">
-            <h1 className="text-xl font-bold">জামেয়া রশীদিয়া ফেনী (তেমো)</h1>
-            <p className="text-xs">
-              হাউজ-১/৭, রোড-১, ব্লক- জে, বাড্ডারআ জা/৭, ঢাকা
-            </p>
-            <p className="text-xs">০১৮৮৫৫৯৫৫৫২</p>
-          </div>
-          <div className="w-16 h-16" />
-        </div>
+        <PdfHeader />
 
         {/* Top Info */}
         <div className="flex justify-between items-center mb-4">
@@ -81,10 +65,8 @@ const AdmissionFormPdf = () => {
               <h2 className="border border-black p-1">বিগত তথ্য</h2>
             </div>
             <p className="text-xs mb-1">জামায়াত : {pastData.date}</p>
-            <p className="text-xs mb-1">শিক্ষাবর্ষ  : {pastData.student}</p>
-            <p className="text-xs">
-             আইডি : {pastData.signature}
-            </p>
+            <p className="text-xs mb-1">শিক্ষাবর্ষ : {pastData.student}</p>
+            <p className="text-xs">আইডি : {pastData.signature}</p>
           </div>
           <div className="text-center flex-1 flex justify-center items-center">
             <h2 className="text-lg font-semibold mb-2 border-b-2 border-black text-center">
@@ -95,23 +77,19 @@ const AdmissionFormPdf = () => {
             <div className="w-full flex justify-center mb-2 items-center">
               <h2 className="border border-black p-1">বর্তমান তথ্য</h2>
             </div>
-           <p className="text-xs mb-1">জামায়াত : {pastData.date}</p>
-            <p className="text-xs mb-1">শিক্ষাবর্ষ  : {pastData.student}</p>
-            <p className="text-xs">
-             আইডি : {pastData.signature}
-            </p>
+            <p className="text-xs mb-1">জামায়াত : {pastData.date}</p>
+            <p className="text-xs mb-1">শিক্ষাবর্ষ : {pastData.student}</p>
+            <p className="text-xs">আইডি : {pastData.signature}</p>
             <div className="flex flex-row gap-2">
-                <div className="flex gap-2">
-                    <p>আবাসিক:</p> <input type="checkbox" name="" id="" />
-                </div>
-                <div className="flex gap-2">
-                    <p>অনাবাসিক</p> <input type="checkbox" name="" id="" />
-                </div>
-                <div className="flex gap-2">
-                    <p>ডে কেয়ার</p> <input type="checkbox" name="" id="" />
-                </div>
-             
-             
+              <div className="flex gap-2">
+                <p>আবাসিক:</p> <input type="checkbox" name="" id="" />
+              </div>
+              <div className="flex gap-2">
+                <p>অনাবাসিক</p> <input type="checkbox" name="" id="" />
+              </div>
+              <div className="flex gap-2">
+                <p>ডে কেয়ার</p> <input type="checkbox" name="" id="" />
+              </div>
             </div>
           </div>
         </div>
@@ -235,18 +213,20 @@ const AdmissionFormPdf = () => {
               </p>
             </div>
             <div className="w-1/3 text-center">
-              <p className="text-xs mb-1">সম্পর্ক : __________________________________</p>
+              <p className="text-xs mb-1">
+                সম্পর্ক : __________________________________
+              </p>
             </div>
             <div className="w-1/3 text-right">
-              <p className="text-xs mb-1">স্বাক্ষর : __________________________________</p>
+              <p className="text-xs mb-1">
+                স্বাক্ষর : __________________________________
+              </p>
             </div>
           </div>
         </div>
         <div className="flex justify-start items-start mb-4">
           <div className="w-1/3 text-left">
-            <p className="text-xs mb-1">
-              দারুল ইকামা শ্রেণী শিক্ষকের মতামত :
-            </p>
+            <p className="text-xs mb-1">দারুল ইকামা শ্রেণী শিক্ষকের মতামত :</p>
           </div>
         </div>
         <div className="bg-white text-black print:text-sm print:p-0 font-sans">
@@ -348,17 +328,17 @@ const AdmissionFormPdf = () => {
             ভর্তির আবেদন মঞ্জুরি করা হলো
           </p>
         </div>
-           {/* তারিখ ও স্বাক্ষর */}
-          <div className="flex justify-end items-end flex-col text-sm">
-            <div>
-              <h2 className="font-semibold">মুহতামীমির জামিয়ার স্বাক্ষর/সীল</h2>
-              <p>_______________________________________</p>
-            </div>
-            <div className="flex flex-row py-3">
-              <h2 className="font-semibold">তারিখ</h2>
-              <p>__________________________________</p>
-            </div>
+        {/* তারিখ ও স্বাক্ষর */}
+        <div className="flex justify-end items-end flex-col text-sm">
+          <div>
+            <h2 className="font-semibold">মুহতামীমির জামিয়ার স্বাক্ষর/সীল</h2>
+            <p>_______________________________________</p>
           </div>
+          <div className="flex flex-row py-3">
+            <h2 className="font-semibold">তারিখ</h2>
+            <p>__________________________________</p>
+          </div>
+        </div>
       </div>
     </div>
   );
