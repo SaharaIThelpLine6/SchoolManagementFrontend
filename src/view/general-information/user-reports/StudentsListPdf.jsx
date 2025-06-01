@@ -4,7 +4,7 @@ import PdfHeader from "./PdfHeader";
 
 const StudentsListPdf = ({ data, title }) => {
   return (
-    <div className="p-6 bg-white text-black print:text-sm print:p-0 print:bg-white">
+    <div className="p-6 text-black">
       {/* Header */}
       <PdfHeader />
 

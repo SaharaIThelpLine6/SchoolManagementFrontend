@@ -184,46 +184,46 @@ const UserReports = ({ pageTitle }) => {
         </div>
 
         {/* Report Render */}
-        <div className="w-full text-sm text-black overflow-x-auto border rounded-md p-2">
+        <div className="w-full text-sm text-black bg-white p-2">
           {isFetching && <div>{translate("Loading report...")}</div>}
 
           {reportData && selectedReportID === 1 && (
-            <div className="min-w-[1000px]">
+            <div className="">
               <StudentsListPdf
                 data={reportData}
                 title={"শিক্ষার্থীদের তালিকা"}
               />
-              <div className="flex justify-end mt-2">
+              <div className="flex justify-end mt-2 print:hidden">
                 <Button onClick={() => window.print()}>{translate("Print")}</Button>
               </div>
             </div>
           )}
 
           {reportData && selectedReportID === 4 && (
-            <div className="min-w-[1000px]">
+            <div className="">
               <StudentsListPdf
                 data={reportData}
                 title={"ভর্তি বিহীন শিক্ষার্থীদের তালিকা"}
               />
-              <div className="flex justify-end mt-2">
+              <div className="flex justify-end mt-2 print:hidden">
                 <Button onClick={() => window.print()}>{translate("Print")}</Button>
               </div>
             </div>
           )}
 
           {reportData && selectedReportID === 2 && (
-            <div className="min-w-[1000px]">
+            <div className="">
               <UserSummaryReportsPdf data={reportData} />
-              <div className="flex justify-end mt-2">
+              <div className="flex justify-end mt-2 print:hidden">
                 <Button onClick={() => window.print()}>{translate("Print")}</Button>
               </div>
             </div>
           )}
 
           {selectedReportID === 3 && admission === 10 && (
-            <div className="min-w-[1000px]">
+            <div className="">
               <AdmissionFormPdf />
-              <div className="flex justify-end mt-2">
+              <div className="flex justify-end mt-2 print:hidden">
                 <Button onClick={() => window.print()}>{translate("Print")}</Button>
               </div>
             </div>
