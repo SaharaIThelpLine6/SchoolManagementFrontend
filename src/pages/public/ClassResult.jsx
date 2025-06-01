@@ -10,7 +10,7 @@ import MarksheetClassWise from '../../components/Document/MarksheetClassWise';
 
 const ClassResult = () => {
     const { schoolid, seassonid, examid, classid, userid } = useParams();
-    const { resultStatus, resultError, classResult, schoolData, resultStatistics } = useSelector((state) => state.studentResultPublicView)
+    const { resultStatus, resultError, classResult, schoolData, resultStatistics, resultSubGroupInfo } = useSelector((state) => state.studentResultPublicView)
 
     const dispatch = useDispatch()
     const navigate = useNavigate();
@@ -20,6 +20,8 @@ const ClassResult = () => {
     if (resultStatus === 'failed') {
         navigate(`/${schoolid}/classes`);
     }
+
+    
     const bufferConveter = (bufferData) => {
         const buffer = Buffer.from(bufferData);
         const base64String = buffer.toString('base64');
@@ -36,7 +38,10 @@ const ClassResult = () => {
             document.title = originalTitle;
         }, 1000);
     };
+
+        console.log('schoolData', schoolData);
     if(resultStatus === 'succeeded'){
+        
         document.title = `${bnBijoy2Unicode(classResult[0]?.ExamName)} - ${bnBijoy2Unicode(classResult[0]?.SessionName)}`;
     }
 
@@ -113,15 +118,6 @@ const ClassResult = () => {
                                                     )
                                                 })
                                             }
-                                            {/* <tr>
-                                        <td className="border border-black">১</td>
-                                        <td className="border border-black">৪১৭১৩</td>
-                                        <td className="border border-black pl-1 text-left">খাজিদা আক্তার সাজিয়া</td>
-
-                                        <td className="border border-black">৯৫.৮৮</td>
-                                        <td className="border border-black">মুমতায</td>
-                                        <td className="border border-black">১</td>
-                                    </tr> */}
 
                                         </tbody>
                                     </table>

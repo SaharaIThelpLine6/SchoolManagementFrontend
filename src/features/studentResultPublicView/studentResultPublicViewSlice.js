@@ -93,6 +93,7 @@ const initialState = {
     classResult: [],
     resultStatistics: null,
     studentResult: [],
+    resultSubGroupInfo: {},
     schoolData: [],
     studentRelation: [],
     gender:[],
@@ -141,7 +142,8 @@ const studentResultPublicViewSlice = createSlice({
             })
             .addCase(fetchResult.fulfilled, (state, action) => {
                 state.resultStatus = 'succeeded'
-                state.studentResult = action.payload.studentResult;
+                state.studentResult = action.payload.studentResult.results[0];
+                state.resultSubGroupInfo = action.payload.studentResult.schoolGroup;
             })
             .addCase(fetchResult.rejected, (state, action) => {
                 state.resultStatus = 'failed';

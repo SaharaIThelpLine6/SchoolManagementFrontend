@@ -85,24 +85,24 @@ const PublicLayout = () => {
                                 ব্যক্তিগত ফলাফল
                             </a>
                         </li>
-                        <li>
+                        {/* <li>
                             <a href={`/${schoolid}/classes`} className='py-3 pl-6 cursor-pointer hover:bg-theme-secondary border border-slate-200 border-y-0 border-r-0 flex items-center gap-[4px]'>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
                                 ক্লাশ/মারহালা ভিত্তিক ফলাফল
                             </a>
-                        </li>
+                        </li> */}
                         <li>
                             <a href={`/${schoolid}/online_admission`} className='py-3 pl-6 cursor-pointer hover:bg-theme-secondary border border-slate-200  border-r-0 flex items-center gap-[4px]'>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
                                 অনলাইনে ভর্তি
                             </a>
                         </li>
-                        {/* <li>
-                            <a href={`/${schoolid}/online_admission_download`} className='py-3 pl-6 cursor-pointer hover:bg-theme-secondary border border-slate-200 border-y-0 border-r-0 flex items-center gap-[4px]'>
+                        <li>
+                            <a href={`https://wifaqresult.com`} target='_blank' className='py-3 pl-6 cursor-pointer hover:bg-theme-secondary border border-slate-200 border-y-0 border-r-0 flex items-center gap-[4px]'>
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
-                                আবেদনপত্রের কপি ডাউনলোড
+                                বেফাক মাদারাসা ফলাফল
                             </a>
-                        </li> */}
+                        </li>
                         {/* <li className='py-3 pl-6 cursor-pointer hover:bg-[#D6E4DA] border border-slate-200 border-r-0 flex items-center gap-[4px]'>
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
                             <Link to="/1234/AdmissionRegistration">ভর্তি রেজিস্ট্রেশন</Link>
