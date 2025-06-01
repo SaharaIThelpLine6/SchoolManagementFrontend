@@ -14,9 +14,11 @@ export const settingsSlice = createApi({
       return headers;
     },
   }),
+  tagTypes: ['InstitutionInfo'], // Define your tag type
   endpoints: (builder) => ({
     getInstitutionInfo: builder.query({
       query: () => "institution_info",
+      providesTags: ['InstitutionInfo'], // This query provides this tag
     }),
     updateInstitutionInfo: builder.mutation({
       query: (body) => ({
@@ -24,7 +26,7 @@ export const settingsSlice = createApi({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["siteSettings"],
+      invalidatesTags: ['InstitutionInfo'], // This mutation invalidates this tag
     }),
   }),
 });

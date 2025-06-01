@@ -89,7 +89,7 @@ const UserReports = ({ pageTitle }) => {
   };
 
   return (
-    <div className="p-4 pt-0 font-SolaimanLipi">
+    <div className="font-SolaimanLipi">
       <div className="flex flex-col gap-3">
         {/* Form */}
         <div className="print:hidden w-full border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
@@ -183,8 +183,8 @@ const UserReports = ({ pageTitle }) => {
           </form>
         </div>
 
-        <div className="w-full text-sm text-black bg-white p-2">
-          {isFetching && <div>{translate("Loading report...")}</div>}
+        <div className="w-full text-sm text-black bg-white ">
+          {isFetching && <div className="p-2">{translate("Loading report...")}</div>}
 
           {/* Students List Report */}
           {reportData && selectedReportID === 1 && (
