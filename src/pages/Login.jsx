@@ -93,7 +93,7 @@ const Login = () => {
               <LoginInput
                 label="মাদ্রাসার কোড :"
                 type="number"
-                placeholder="Madrasa Code ..."
+                placeholder="Madrasa Code"
                 registerKey="school_id"
                 icon="FaPhone"
               />
@@ -101,7 +101,7 @@ const Login = () => {
               <LoginInput
                 label="ইউজার নাম :"
                 type="text"
-                placeholder="Username ..."
+                placeholder="Username"
                 registerKey="username"
                 icon="FaUser"
               />
@@ -110,7 +110,7 @@ const Login = () => {
                 <LoginInput
                   label="পাসওয়ার্ড :"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Password ..."
+                  placeholder="Password"
                   registerKey="password"
                   icon="FaLock"
                 />
