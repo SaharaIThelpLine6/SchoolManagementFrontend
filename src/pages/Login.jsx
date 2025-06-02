@@ -91,26 +91,26 @@ const Login = () => {
 
             <div className="flex flex-col gap-4 md:gap-4">
               <LoginInput
-                label="School ID"
+                label="মাদ্রাসার কোড :"
                 type="number"
-                placeholder="Enter School ID"
+                placeholder="Madrasa Code ..."
                 registerKey="school_id"
                 icon="FaPhone"
               />
 
               <LoginInput
-                label="Username"
+                label="ইউজার নাম :"
                 type="text"
-                placeholder="Enter Username"
+                placeholder="Username ..."
                 registerKey="username"
                 icon="FaUser"
               />
 
               <div className="relative">
                 <LoginInput
-                  label="Password"
+                  label="পাসওয়ার্ড :"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter Password"
+                  placeholder="Password ..."
                   registerKey="password"
                   icon="FaLock"
                 />
