@@ -1,60 +1,90 @@
+/* Calendar container */
 .react-calendar {
   width: 100% !important;
+  max-width: 100% !important;
   height: 100% !important;
   border: none !important;
-  font-family: "Satoshi, sans-serif";
-  /* flex: 0 0 100px; */
+  font-family: inherit !important;
 }
 
-.react-calendar__month-view__days {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+/* Navigation buttons */
+.react-calendar__navigation button {
+  min-width: 44px !important;
+  background: none !important;
+  font-size: 1.1rem !important;
 }
 
-.custom-tile {
-  flex: 0 0 40px !important;
-  width: 40px !important;
-  height: 40px !important;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 2px;
-  box-sizing: border-box;
-  font-size: 0.8rem;
-  /* background-color: #f0f0f0; */
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.custom-tile:hover {
-  background-color: #e0e0e0;
-}
-
-.custom-tile--active {
-  background-color: #007bff;
-  color: white;
-  font-weight: bold;
-}
-
-.custom-tile--now {
-  background-color: #ffeb3b;
-  color: black;
-}
-
+/* Weekday labels */
 .react-calendar__month-view__weekdays {
-  font-size: 0.7rem;
-  text-align: center;
-  color: #666;
+  text-align: center !important;
+  text-transform: uppercase !important;
+  font-weight: bold !important;
+  font-size: 0.75rem !important;
 }
 
-.react-calendar__navigation {
-  margin-bottom: 8px;
+.react-calendar__month-view__weekdays__weekday {
+  padding: 0.5em !important;
 }
 
-.react-calendar__navigation__label,
-.react-calendar__navigation__arrow {
-  font-size: 0.9rem;
-  color: #333;
+/* Day tiles - Only these selectors get circular style */
+.react-calendar__tile,
+.react-calendar__month-view__days__day,
+.react-calendar__month-view__days__day--weekend,
+.react-calendar__month-view__days__day--neighboringMonth,
+.custom-tile {
+  max-width: 100% !important;
+  padding: 0.75em 0.5em !important;
+  background: none !important;
+  text-align: center !important;
+  line-height: 1 !important;
+  border-radius: 50% !important;
+  transition: background-color 0.2s ease !important;
+}
+
+/* Hover effects only for specified tiles */
+.react-calendar__tile:hover,
+.react-calendar__month-view__days__day:hover,
+.react-calendar__month-view__days__day--weekend:hover,
+.react-calendar__month-view__days__day--neighboringMonth:hover,
+.custom-tile:hover {
+  background-color: #f0f0f0 !important;
+}
+
+/* Active day styles */
+.react-calendar__tile--active {
+  background: #006edc !important;
+  color: white !important;
+}
+
+.react-calendar__tile--active:hover {
+  background: #005bb7 !important;
+}
+
+/* Current day styles */
+.react-calendar__tile--now {
+  background: #ffff76 !important;
+}
+
+.react-calendar__tile--now:hover {
+  background: #ffffa0 !important;
+}
+
+/* Day alignment */
+.react-calendar__month-view__days__day {
+  flex: 0 0 calc(100% / 7) !important;
+  aspect-ratio: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* For larger screens */
+@media (min-width: 768px) {
+  .react-calendar__month-view__weekdays__weekday {
+    font-size: 0.85rem !important;
+  }
+  
+  .react-calendar__tile {
+    font-size: 1rem !important;
+  }
 }
