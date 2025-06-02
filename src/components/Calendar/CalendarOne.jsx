@@ -9,7 +9,7 @@ const CalendarComponent = () => {
   const [value, setValue] = useState(new Date("2025-06-01"));
 
   return (
-    <div className="w-full max-w-[600px] h-[470px] 2xl:h-[550px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col">
+    <div className="w-full max-w-[600px] h-[450px] 2xl:h-[550px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col">
       <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
         {translate("Calendar")}
       </h2>

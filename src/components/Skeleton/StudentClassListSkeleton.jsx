@@ -2,7 +2,7 @@ import React from "react";
 
 const StudentClassListSkeleton = () => {
   return (
-    <div className="w-full  h-[470px] 2xl:h-[550px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col animate-pulse font-sans">
+    <div className="w-full  h-[450px] 2xl:h-[550px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col animate-pulse font-sans">
       <div className="h-6 bg-gray-300 rounded w-2/3 mx-auto mb-4"></div>
 
       <ul className="space-y-3 flex-1 ">
