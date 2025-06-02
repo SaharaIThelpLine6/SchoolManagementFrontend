@@ -17,7 +17,7 @@ const ClassRoutine = () => {
   if (isLoading) return <StudentClassListSkeleton />;
   if (isError) return <p>ডেটা আনতে সমস্যা হয়েছে!</p>;
   return (
-    <div className="w-full h-[450px] 2xl:h-[550px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col font-sans">
+    <div className="w-full h-[470px] 2xl:h-[550px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col font-sans">
       <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
         {translate("Number of students by class")}
       </h2>

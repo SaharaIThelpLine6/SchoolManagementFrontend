@@ -60,11 +60,11 @@ const PieChart = () => {
   };
 
   return (
-    <div className="w-full h-[450px] 2xl:h-[550px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col">
+    <div className="w-full h-[470px] 2xl:h-[550px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col">
       <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
         {translate("Class-based student distribution")}
       </h2>
-      <div className="flex-1 flex items-center justify-center 2xl:mt-14">
+      <div className="flex-1 flex items-center justify-center mt-5 2xl:mt-14">
         <ReactApexChart
           options={options}
           series={series}
