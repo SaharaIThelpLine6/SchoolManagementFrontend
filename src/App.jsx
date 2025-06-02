@@ -230,7 +230,7 @@ function App() {
               index
               element={<ResultRequest pageTitle={"Result Page"} />}
             />
-            <Route path="classes" element={<ClassResultForm />} />
+            {/* <Route path="classes" element={<ClassResultForm />} /> */}
             <Route
               path="AdmissionRegistration"
               element={<AdmissionRegistration />}
@@ -239,17 +239,15 @@ function App() {
               path="students/:seassonid/:examid/:classid/:userid"
               element={<Result />}
             />
-            <Route
+            {/* <Route
               path="classes/:seassonid/:examid/:classid"
               element={<ClassResult />}
-            />
+            /> */}
             <Route path="online_admission" element={<OnlineAdmission />} />
             <Route
               path="online_admission/:usercode"
               element={<StudentAdmissionForm />}
             />
-            {/* <Route path="online_admission_download" element={<StudentAdmissionForm />} /> */}
-            {/* <Route path='renew' element={<Quota type="renew"/>}/>  */}
           </Route>
 
           <Route path="*" element={<NotFound />} />
