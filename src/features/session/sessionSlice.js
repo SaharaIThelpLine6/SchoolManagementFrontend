@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_SERVER_URL;
 export const sessionSlice = createApi({
     reducerPath: 'session',
     baseQuery: fetchBaseQuery({
-        baseUrl: `${API_URL}/api/academic`,
+        baseUrl: `${API_URL}/api/settings`,
         prepareHeaders: (headers) => {
             const token = localStorage.getItem('token');
             if (token) {
@@ -16,7 +16,7 @@ export const sessionSlice = createApi({
     }),
     endpoints: (builder) => ({
         getSessions: builder.query({
-            query: () => 'view_sessions',
+            query: () => 'academic_session',
         }),
         getSession: builder.query({
             query: (id) => `view_session/${id}`,

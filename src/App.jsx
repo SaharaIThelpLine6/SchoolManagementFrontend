@@ -62,6 +62,7 @@ import TypeOfVacation from "./pages/TypeOfVacation";
 import StudentVacationListTable from "./components/Tables/StudentVacationListTable";
 import MonthListTable from "./pages/MonthListTable";
 import UserReports from "./pages/UserReports";
+import SMS from "./pages/SMS";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -129,6 +130,11 @@ function App() {
                 index
                 path="user-reports"
                 element={<UserReports pageTitle={"User Reports"} />}
+              />
+              <Route
+                index
+                path="sms"
+                element={<SMS pageTitle={"SMS List"} />}
               />
             </Route>
             <Route

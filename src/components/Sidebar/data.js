@@ -24,6 +24,11 @@ export const menuData = [
         name: "User Reports",
         route: "/general-info/user-reports",
       },
+      {
+        id: "2",
+        name: "SMS",
+        route: "/general-info/sms",
+      },
     ],
   },
   {
