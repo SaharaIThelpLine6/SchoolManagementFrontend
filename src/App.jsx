@@ -84,7 +84,7 @@ function App() {
   return loading ? (
     <Loading />
   ) : (
-    <FormProvider {...methods}>
+    <>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<DefaultLayout />}>
@@ -274,7 +274,7 @@ function App() {
 
         // }
       />
-    </FormProvider>
+    </>
   );
 }
 

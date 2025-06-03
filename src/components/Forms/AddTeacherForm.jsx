@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useFormContext, useForm } from "react-hook-form";
+import { useFormContext, useForm, FormProvider } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 import Swal from "sweetalert2";
 import "flatpickr/dist/flatpickr.css";
@@ -45,6 +45,7 @@ const AddTeacherForm = ({ userId }) => {
 
   const [postTeacherInfoRegistered, { data, isLoading, isError }] =
     usePostTeacherInfoRegisteredMutation();
+  const methods = useForm();
 
   const {
     register,
@@ -54,7 +55,7 @@ const AddTeacherForm = ({ userId }) => {
     getValues,
     reset,
     formState: { errors },
-  } = useFormContext();
+  } = methods;
 
   const onSubmit = async (data) => {
     try {
@@ -90,6 +91,8 @@ const AddTeacherForm = ({ userId }) => {
   const saveButton = "Save";
   const newButton = "New";
   return (
+          <FormProvider {...methods}>
+
     <form onSubmit={handleSubmit(onSubmit)} className="font-lato">
       <div className="px-[24px] text-[14px]">
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3 w-full flex-wrap lg:flex-nowrap">
@@ -213,6 +216,8 @@ const AddTeacherForm = ({ userId }) => {
         {/*Save Button & Filter end*/}
       </div>
     </form>
+          </FormProvider>
+
   );
 };
 export default AddTeacherForm;

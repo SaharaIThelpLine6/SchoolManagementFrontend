@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useFormContext, useWatch } from "react-hook-form";
+import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
 import { setPageName } from "../features/auth/authSlice";
 import useTranslate from "../utils/Translate";
 import DefaultSelect from "../components/Forms/DefaultSelect";
@@ -17,13 +17,14 @@ import UserSummaryReportsPdf from "../view/general-information/user-reports/User
 const UserReports = ({ pageTitle }) => {
   const translate = useTranslate();
   const dispatch = useDispatch();
+  const methods = useForm();
   const { userType, status } = useSelector((state) => state.settings);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-  } = useFormContext();
+  } = methods;
 
   const selectedReportID = useWatch({ control, name: "ReportID" });
 
@@ -100,6 +101,7 @@ const UserReports = ({ pageTitle }) => {
           {errorMessage && (
             <div className="text-red-500 mb-4">{errorMessage}</div>
           )}
+<FormProvider {...methods}>
 
           <form
             onSubmit={handleSubmit(onSubmit)}
@@ -181,6 +183,7 @@ const UserReports = ({ pageTitle }) => {
               </Button>
             </div>
           </form>
+</FormProvider>
         </div>
 
         <div className="w-full text-sm text-black bg-white ">

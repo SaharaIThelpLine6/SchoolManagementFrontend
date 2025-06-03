@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useFormContext } from "react-hook-form";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 import Swal from "sweetalert2";
 import DefaultSelect from "./DefaultSelect";
@@ -32,14 +32,14 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
   // 👇 Hooks MUST go before early return
   const [insertMonth] = useInsertMonthMutation();
   const [editMonth] = useEditMonthMutation();
-
+  const methods = useForm();
   const {
     register,
     handleSubmit,
     reset,
     setValue,
     formState: { errors },
-  } = useFormContext();
+  } = methods;
 
   const defaultValues = useMemo(() => {
     const item = monthsList.find((item) => item.ID === id);
@@ -162,6 +162,9 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
   };
 
   return (
+
+    <FormProvider {...methods}>
+
     <form onSubmit={handleSubmit(onSubmit)} className="font-lato">
       <div className="px-6 text-sm">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -230,6 +233,8 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
         </div>
       </div>
     </form>
+    </FormProvider>
+
   );
 };
 
