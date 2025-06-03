@@ -19,12 +19,14 @@ import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetClassListQuery } from "../../../features/class/classQuerySlice";
 import { useGetUserTypesQuery } from "../../../features/userType/userTypeSlice";
+import { FormProvider, useForm } from "react-hook-form";
 
 const PAGE_SIZE = 10;
 
 const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
+  const methods = useForm();
 
   const {
     data: designation = [],
@@ -72,9 +74,6 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return designation.slice(start, start + PAGE_SIZE);
   }, [designation, currentPage]);
-
-
-
 
   const handleDelete = useCallback(
     (id) => {
@@ -144,42 +143,44 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
     },
   ];
   return (
+      <FormProvider {...methods}>
     <div>
-      {checkedValue === "guardian" && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-          <DefaultSelect
-            options={sessionData ? sessionData : null}
-            require={"Session is required"}
-            nameField={"SessionName"}
-            valueField={"SessionID"}
-            registerKey={"SessionID"}
-            type={"number"}
-            label={translate("Session")}
-          />
-          <DefaultSelect
-            options={classData ? classData : null}
-            require={"Designation is required"}
-            nameField={"ClassName"}
-            valueField={"Serial"}
-            registerKey={"Serial"}
-            type={"number"}
-            label={translate("Class")}
-          />
-        </div>
-      )}
-      {checkedValue === "all_users" && (
-        <div className="grid gap-3 mb-3">
-          <DefaultSelect
-            options={userTypeData ? userTypeData : null}
-            require={"User Type is required"}
-            nameField={"TypeName"} // Display text field
-            valueField={"ID"} // Value field for the select
-            registerKey={"ID"} // Key used for react-hook-form registration
-            type={"number"}
-            label={translate("User Types")}
-          />
-        </div>
-      )}
+        {checkedValue === "guardian" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+            <DefaultSelect
+              options={sessionData ? sessionData : null}
+              require={"Session is required"}
+              nameField={"SessionName"}
+              valueField={"SessionID"}
+              registerKey={"SessionID"}
+              type={"number"}
+              label={translate("Session")}
+            />
+            <DefaultSelect
+              options={classData ? classData : null}
+              require={"Designation is required"}
+              nameField={"ClassName"}
+              valueField={"Serial"}
+              registerKey={"Serial"}
+              type={"number"}
+              label={translate("Class")}
+            />
+          </div>
+        )}
+        {checkedValue === "all_users" && (
+          <div className="grid gap-3 mb-3">
+            <DefaultSelect
+              options={userTypeData ? userTypeData : null}
+              require={"User Type is required"}
+              nameField={"TypeName"} // Display text field
+              valueField={"ID"} // Value field for the select
+              registerKey={"ID"} // Key used for react-hook-form registration
+              type={"number"}
+              label={translate("User Types")}
+            />
+          </div>
+        )}
+
       <SortableTable
         columns={columns}
         data={paginatedData}
@@ -210,6 +211,8 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
         </button>
       </div>
     </div>
+      </FormProvider>
+
   );
 };
 

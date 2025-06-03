@@ -32,7 +32,7 @@
     },
   ];
   export const userStatus = [
-    { id: 0, name: "Active" },
-    { id: 1, name: "InActive" },
+    { id: 1, name: "Active" },
+    { id: 0, name: "InActive" },
     { id: 2, name: "Both" },
   ];

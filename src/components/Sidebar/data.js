@@ -54,62 +54,57 @@ export const menuData = [
       },
       {
         id: "4",
-        name: "Student Admission",
-        route: "/students/admission",
-      },
-      {
-        id: "5",
         name: "English & Arobi Name",
         route: "/students/english-arobi-name",
       },
       {
-        id: "7",
+        id: "5",
         name: "Book List",
         route: "/students/booklist",
       },
       {
-        id: "8",
+        id: "6",
         name: "Student Group Setting",
         route: "/students/group-setting",
       },
       {
-        id: "9",
+        id: "7",
         name: "Student ID card",
         route: "/students/id-card",
       },
       {
-        id: "10",
+        id: "8",
         name: "ID Card Print",
         route: "/students/id-print",
       },
       {
-        id: "11",
+        id: "9",
         name: "All Students",
         route: "/students",
       },
       {
-        id: "13",
+        id: "10",
         name: "Group Distribution",
         route: "/students/groupdistribution",
       },
 
       {
-        id: "14",
+        id: "11",
         name: "Section",
         route: "/students/section",
       },
       {
-        id: "16",
+        id: "12",
         name: "Students Report",
         route: "/students/report",
       },
       {
-        id: "17",
+        id: "13",
         name: "Student Vacation",
         route: "/students/vacation",
       },
       {
-        id: "18",
+        id: "14",
         name: "Type of vacation",
         route: "/students/vacation/type-of-vacation",
       },

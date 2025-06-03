@@ -13,6 +13,7 @@ const useTranslate = () => {
     Others: "অন্যান্য",
     SMS: "এসএমএস",
     "SMS Sending Form": "মেসেজ প্রেরণ ফর্ম",
+    "Missing or invalid data provided": "অনুপস্থিত বা অবৈধ তথ্য সরবরাহ করা হয়েছে",
     "Buy SMS": "মেসেজ কিনতে",
     "Buy SMS": "মেসেজ কিনতে",
     "1st Month": "১ম মাস",

@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { FormProvider, useForm, useFormContext, useWatch } from "react-hook-form";
+import {
+  FormProvider,
+  useForm,
+  useFormContext,
+  useWatch,
+} from "react-hook-form";
 import { setPageName } from "../features/auth/authSlice";
 import useTranslate from "../utils/Translate";
 import DefaultSelect from "../components/Forms/DefaultSelect";
@@ -13,6 +18,7 @@ import { fetchSettingsData } from "../features/settings/settingsSlice";
 import { useGetUserReportQuery } from "../features/userReports/userReportsSlice";
 import StudentsListPdf from "../view/general-information/user-reports/StudentsListPdf";
 import UserSummaryReportsPdf from "../view/general-information/user-reports/UserSummaryReportsPdf";
+import Swal from "sweetalert2";
 
 const UserReports = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -65,6 +71,16 @@ const UserReports = ({ pageTitle }) => {
     }
   }, [isError, error, translate]);
 
+  useEffect(() => {
+    if (errorMessage) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: errorMessage,
+      });
+    }
+  }, [errorMessage]);
+
   const onSubmit = (formData) => {
     const params = {
       report_id: formData.ReportID,
@@ -98,96 +114,96 @@ const UserReports = ({ pageTitle }) => {
             {translate("User Based Report")}
           </h1>
 
-          {errorMessage && (
-            <div className="text-red-500 mb-4">{errorMessage}</div>
-          )}
-<FormProvider {...methods}>
-
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            <DefaultSelect
-              label={translate("Report") + ":"}
-              nameField="ReportName"
-              registerKey="ReportID"
-              valueField="ReportID"
-              options={reports.filter((r) => [1, 2, 3, 4].includes(r.ReportID))}
-              type="number"
-              require="This Field is required"
-              defaultSelect={false}
-              unicode={true}
-            />
-
-            {showUserType && (
+          <FormProvider {...methods}>
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
               <DefaultSelect
-                label={translate("User Types") + ":"}
-                nameField="TypeName"
-                registerKey="UserTypeID"
-                valueField="ID"
-                options={userType}
+                label={translate("Report") + ":"}
+                nameField="ReportName"
+                registerKey="ReportID"
+                valueField="ReportID"
+                options={reports.filter((r) =>
+                  [1, 2, 3, 4].includes(r.ReportID)
+                )}
                 type="number"
                 require="This Field is required"
                 defaultSelect={false}
                 unicode={true}
               />
-            )}
 
-            <DefaultSelect
-              label={translate("Gender") + ":"}
-              nameField="ReportName"
-              registerKey="GenderID"
-              valueField="GenderID"
-              options={genders}
-              type="number"
-              require={
-                selectedReportID === 1 || selectedReportID === 2
-                  ? "This Field is required"
-                  : false
-              }
-              defaultSelect={false}
-              unicode={true}
-            />
-
-            <Checkbox
-              label={translate("User Status") + ":"}
-              options={userStatus}
-              registerKey="IsActive"
-              require={
-                selectedReportID === 1 || selectedReportID === 2
-                  ? "This Field is required"
-                  : false
-              }
-            />
-
-            {showVacationInputs && (
-              <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <DefaultInput
-                  registerKey="StartID"
-                  type="text"
-                  placeholder={translate("Enter start user id") + " ..."}
-                  label={translate("Start User ID") + ":"}
+              {showUserType && (
+                <DefaultSelect
+                  label={translate("User Types") + ":"}
+                  nameField="TypeName"
+                  registerKey="UserTypeID"
+                  valueField="ID"
+                  options={userType}
+                  type="number"
+                  require="This Field is required"
+                  defaultSelect={false}
+                  unicode={true}
                 />
-                <DefaultInput
-                  registerKey="EndID"
-                  type="text"
-                  placeholder={translate("Enter end user id") + " ..."}
-                  label={translate("End User ID") + ":"}
-                />
+              )}
+
+              <DefaultSelect
+                label={translate("Gender") + ":"}
+                nameField="ReportName"
+                registerKey="GenderID"
+                valueField="GenderID"
+                options={genders}
+                type="number"
+                require={
+                  selectedReportID === 1 || selectedReportID === 2
+                    ? "This Field is required"
+                    : false
+                }
+                defaultSelect={false}
+                unicode={true}
+              />
+
+              <Checkbox
+                label={translate("User Status") + ":"}
+                options={userStatus}
+                registerKey="IsActive"
+                require={
+                  selectedReportID === 1 || selectedReportID === 2
+                    ? "This Field is required"
+                    : false
+                }
+              />
+
+              {showVacationInputs && (
+                <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <DefaultInput
+                    registerKey="StartID"
+                    type="text"
+                    placeholder={translate("Enter start user id") + " ..."}
+                    label={translate("Start User ID") + ":"}
+                  />
+                  <DefaultInput
+                    registerKey="EndID"
+                    type="text"
+                    placeholder={translate("Enter end user id") + " ..."}
+                    label={translate("End User ID") + ":"}
+                  />
+                </div>
+              )}
+
+              <div className="md:col-span-2 flex justify-end">
+                <Button type="submit" loading={isFetching}>
+                  {translate("Preview")}
+                </Button>
               </div>
-            )}
-
-            <div className="md:col-span-2 flex justify-end">
-              <Button type="submit" loading={isFetching}>
-                {translate("Preview")}
-              </Button>
-            </div>
-          </form>
-</FormProvider>
+            </form>
+          </FormProvider>
         </div>
 
         <div className="w-full text-sm text-black bg-white ">
-          {isFetching && <div className="p-2">{translate("Loading report...")}</div>}
+          {isFetching && (
+            <div className="p-2">{translate("Loading report...")}</div>
+          )}
 
           {/* Students List Report */}
           {reportData && selectedReportID === 1 && (
