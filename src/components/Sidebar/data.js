@@ -59,8 +59,8 @@ export const menuData = [
       },
       {
         id: "5",
-        name: "English Name",
-        route: "/students/english-name",
+        name: "English & Arobi Name",
+        route: "/students/english-arobi-name",
       },
       {
         id: "6",

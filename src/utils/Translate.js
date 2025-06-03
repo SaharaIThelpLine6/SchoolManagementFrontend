@@ -81,6 +81,7 @@ const useTranslate = () => {
     "From Time": "সময় থেকে",
     "Be Time": "সময় হতে",
     Search: "অনুসন্ধান",
+    "Mother Name": "মাতার নাম",
     Years: "সাল",
     "User Status": "ব্যবহারকারীর অবস্থা",
     Active: "অ্যাক্টিভ",
@@ -136,6 +137,7 @@ const useTranslate = () => {
     "Not Admitted Teacher List": "যোগ না দেয়া কর্মীদের তালিকা",
     Account: "একাউটিং",
     "User ID": "ইউজার আইডি",
+    "Student's English Name": "শিক্ষার্থীর ইংরেজি নাম",
     "Start User ID": "ইউজার আইডি হতে",
     "End User ID": "ইউজার আইডি পর্যন্ত",
     "Enter start user id": "ব্যবহারকারী আইডি হতে লিখুন",
@@ -187,6 +189,8 @@ const useTranslate = () => {
     "End Time of leave": "ছুটির সময় পর্যন্ত",
     "Select Time": "সময় নির্বাচন করুন",
     "Student ID": "শিক্ষার্থীর আইডি",
+    "Marhala/Class": "মারহালা/ক্লাস",
+    "English & Arobi Name": "ইংরেজি এবং আরবি নাম",
     "List of holidays": "ছুটির তালিকা",
     "Vacation type list": "ছুটির তালিকার ধরণ",
     "Type of holiday create": "তৈরি ছুটির ধরণ",
@@ -312,6 +316,7 @@ const useTranslate = () => {
     "Mobile number must be 11 digits": "মোবাইল নম্বর অবশ্যই ১১ সংখ্যার হতে হবে",
     "SMS Templates": "মেসেজ টেমপ্লেট",
     "SMS Buy": "মেসেজ কিনুন",
+    "This number already exists": "এই নম্বরটি ইতিমধ্যেই বিদ্যমান।",
 
   };
 

@@ -63,6 +63,7 @@ import StudentVacationListTable from "./components/Tables/StudentVacationListTab
 import MonthListTable from "./pages/MonthListTable";
 import UserReports from "./pages/UserReports";
 import SMS from "./pages/SMS";
+import EnglisArobihName from "./pages/EnglisArobihName";
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -100,6 +101,7 @@ function App() {
                 element={<GroupDistribution pageTitle={"Students Group Set"} />}
               />
               <Route path="class" element={<Class pageTitle={"Class"} />} />
+              <Route path="english-arobi-name" element={<EnglisArobihName pageTitle={"English Arobi Name"} />} />
               <Route
                 path="section"
                 element={<Section pageTitle={"Section"} />}
