@@ -63,11 +63,6 @@ export const menuData = [
         route: "/students/english-arobi-name",
       },
       {
-        id: "6",
-        name: "Arobi Name",
-        route: "/students/arobi-name",
-      },
-      {
         id: "7",
         name: "Book List",
         route: "/students/booklist",
