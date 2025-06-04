@@ -1,5 +1,4 @@
-import React from "react";
-import { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { setPageName } from "../../../features/auth/authSlice";
 import {
@@ -20,6 +19,7 @@ import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetClassListQuery } from "../../../features/class/classQuerySlice";
 import { useGetUserTypesQuery } from "../../../features/userType/userTypeSlice";
 import { FormProvider, useForm } from "react-hook-form";
+import { useGetStudentBySearchQuery } from "../../../features/student/studentQuerySlice";
 
 const PAGE_SIZE = 10;
 
@@ -27,6 +27,10 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const methods = useForm();
+  const { watch } = methods;
+
+  const selectedSessionID = watch("SessionID");
+  const selectedClassID = watch("Serial");
 
   const {
     data: designation = [],
@@ -35,26 +39,30 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
   } = useGetDesignationQuery();
 
   const [deleteDesignation] = useDeleteDesignationMutation();
-  const {
-    data: sessionData,
-    isSessionLoading,
-    isSessionError,
-  } = useGetSessionsQuery();
 
-  const {
-    data: classData,
-    isClassLoading,
-    isClassError,
-  } = useGetClassListQuery();
-
+  const { data: sessionData } = useGetSessionsQuery();
+  const { data: classData } = useGetClassListQuery();
   const {
     data: userTypeData,
     isuserTypeLoading,
     isuserTypeError,
   } = useGetUserTypesQuery();
 
+  const {
+    data: studentData = [],
+    isFetching: isStudentFetching,
+  } = useGetStudentBySearchQuery(
+    {
+      // search: "",
+      ClassID: selectedClassID || null,
+      SessionID: selectedSessionID || null,
+    },
+    {
+      skip: !selectedClassID || !selectedSessionID,
+    }
+  );
+
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(designation.length / PAGE_SIZE);
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
@@ -70,10 +78,20 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
     }
   }, [isError]);
 
-  const paginatedData = useMemo(() => {
+  const paginatedDesignation = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return designation.slice(start, start + PAGE_SIZE);
   }, [designation, currentPage]);
+
+  const paginatedStudentData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return studentData.slice(start, start + PAGE_SIZE);
+  }, [studentData, currentPage]);
+
+  const totalPages =
+    checkedValue === "guardian"
+      ? Math.ceil(studentData.length / PAGE_SIZE)
+      : Math.ceil(designation.length / PAGE_SIZE);
 
   const handleDelete = useCallback(
     (id) => {
@@ -90,11 +108,7 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
         if (result.isConfirmed) {
           try {
             await deleteDesignation(id).unwrap();
-            Swal.fire(
-              "Deleted!",
-              "The designation has been removed.",
-              "success"
-            );
+            Swal.fire("Deleted!", "The designation has been removed.", "success");
           } catch (error) {
             Swal.fire("Error!", "Failed to delete designation.", "error");
           }
@@ -142,13 +156,14 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
       hozAlign: "center",
     },
   ];
+
   return (
-      <FormProvider {...methods}>
-    <div>
+    <FormProvider {...methods}>
+      <div>
         {checkedValue === "guardian" && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
             <DefaultSelect
-              options={sessionData ? sessionData : null}
+              options={sessionData || []}
               require={"Session is required"}
               nameField={"SessionName"}
               valueField={"SessionID"}
@@ -157,8 +172,8 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
               label={translate("Session")}
             />
             <DefaultSelect
-              options={classData ? classData : null}
-              require={"Designation is required"}
+              options={classData || []}
+              require={"Class is required"}
               nameField={"ClassName"}
               valueField={"Serial"}
               registerKey={"Serial"}
@@ -167,52 +182,70 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
             />
           </div>
         )}
+
         {checkedValue === "all_users" && (
           <div className="grid gap-3 mb-3">
             <DefaultSelect
-              options={userTypeData ? userTypeData : null}
+              options={userTypeData || []}
               require={"User Type is required"}
-              nameField={"TypeName"} // Display text field
-              valueField={"ID"} // Value field for the select
-              registerKey={"ID"} // Key used for react-hook-form registration
+              nameField={"TypeName"}
+              valueField={"ID"}
+              registerKey={"ID"}
               type={"number"}
               label={translate("User Types")}
             />
           </div>
         )}
 
-      <SortableTable
-        columns={columns}
-        data={paginatedData}
-        isFilterColumn={false}
-      />
-      {/* Pagination Controls */}
-      <div className="flex justify-center items-center gap-4 mt-4">
-        <button
-          onClick={handlePrev}
-          disabled={currentPage === 1}
-          className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-        >
-          <MdKeyboardArrowLeft className="text-lg" />
-          Prev
-        </button>
+        {checkedValue === "guardian" ? (
+          <>
+            {isStudentFetching ? (
+              <p className="text-center text-blue-500">Loading student data...</p>
+            ) : selectedSessionID && selectedClassID ? (
+              <SortableTable
+                columns={columns}
+                data={paginatedStudentData}
+                isFilterColumn={false}
+              />
+            ) : (
+              <p className="text-center text-gray-500 my-4">
+                Please select both Session and Class to view student data.
+              </p>
+            )}
+          </>
+        ) : (
+          <SortableTable
+            columns={columns}
+            data={paginatedDesignation}
+            isFilterColumn={false}
+          />
+        )}
 
-        <span className="text-sm font-medium text-gray-700">
-          Page {currentPage} of {totalPages}
-        </span>
+        <div className="flex justify-center items-center gap-4 mt-4">
+          <button
+            onClick={handlePrev}
+            disabled={currentPage === 1}
+            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
+          >
+            <MdKeyboardArrowLeft className="text-lg" />
+            Prev
+          </button>
 
-        <button
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-          className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-        >
-          Next
-          <MdKeyboardArrowRight className="text-lg" />
-        </button>
+          <span className="text-sm font-medium text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <button
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
+          >
+            Next
+            <MdKeyboardArrowRight className="text-lg" />
+          </button>
+        </div>
       </div>
-    </div>
-      </FormProvider>
-
+    </FormProvider>
   );
 };
 

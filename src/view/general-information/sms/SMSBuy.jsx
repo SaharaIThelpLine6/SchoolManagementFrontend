@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-import { hideModal } from "../../../utils/ModalControlar";
+import { hideModal, showModal } from "../../../utils/ModalControlar";
 import useTranslate from "../../../utils/Translate";
 import DefaultInput from "../../../components/Forms/DefaultInput";
 import Button from "../../../components/Button/Button";
@@ -11,7 +11,13 @@ const SMSBuy = () => {
   const methods = useForm();
   const { reset } = methods;
 
+    const handlePaymentGetwayOpenModal = useCallback(() => {
+    showModal(translate("Payment Getway"), "PAYMENT_GETWAY");
+  }, []);
+
   const onSubmit = async (data) => {
+
+    handlePaymentGetwayOpenModal()
     // try {
     //   if (userId)
     //     Swal.fire({

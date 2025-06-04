@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 
 const Input = forwardRef(
-  ({ label, placeholder, type, error, helperText, ...rest }, ref) => {
+  ({ label,disabled = false, placeholder, type, error, helperText, ...rest }, ref) => {
     return (
       <div className="flex flex-col gap-1">
         <label className="text-sm font-medium">{label}</label>
@@ -13,6 +13,7 @@ const Input = forwardRef(
             ${error ? "border-red-500 focus:border-red-500" : "border-stroke focus:border-custom-focus"}
             disabled:cursor-not-allowed disabled:bg-slate-200`}
           {...rest}
+          disabled={disabled}
         />
         {error && (
           <span className="text-red-500 text-xs font-medium">{helperText}</span>

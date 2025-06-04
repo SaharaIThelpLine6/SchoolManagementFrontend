@@ -292,13 +292,14 @@ const useTranslate = () => {
     "Parents": "অভিভাবক",
     "All Users": "সকল ইউজার",
     "Mobile Number": "মোবাইল নম্বর",
-    "Message Type": "বার্তার ধরন",
+    "Message Type": "মেসেজের ধরন",
     "Enter mobile number": "মোবাইল নম্বর লিখুন",
-    "Message Template": "বার্তা টেমপ্লেট",
-    "Message": "বার্তা",
-    "Enter your message": "আপনার বার্তা লিখুন",
+    "Message Template": "মেসেজ টেমপ্লেট",
+    "Message": "মেসেজ",
+    "Enter your message": "আপনার মেসেজ লিখুন",
     "765": "৭৬৫",
-    "Characters left": "অক্ষর বাকি",
+    "Characters typed": "অক্ষর টাইপ করা হয়েছে",
+    "next SMS from 67 chars": "৬৭টি অক্ষর থেকে পরবর্তী এসএমএস",
     "1 SMS": "১ মেসেজ",
     "70 Char/SMS": "৭০ অক্ষর/মেসেজ",
     "Send SMS": "মেসেজ পাঠান",
@@ -318,6 +319,8 @@ const useTranslate = () => {
     "SMS Templates": "মেসেজ টেমপ্লেট",
     "SMS Buy": "মেসেজ কিনুন",
     "This number already exists": "এই নম্বরটি ইতিমধ্যেই বিদ্যমান।",
+    "Write only in Bengali.": "শুধুমাত্র বাংলা ভাষায় লিখুন।",
+    "Write only in English.": "শুধুমাত্র ইংরেজি ভাষায় লিখুন।",
 
   };
 

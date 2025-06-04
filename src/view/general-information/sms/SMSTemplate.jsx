@@ -125,7 +125,7 @@ const SMSTemplate = ({ pageTitle, checkedValue }) => {
           </div>
           <div className="mb-4">
             {/* Textarea Field */}
-            <label className="text-sm font-medium text-gray-700">{translate("Message")}</label>
+            <label className="text-sm font-medium text-gray-700">{translate("Message") + " :"}</label>
             <textarea
               name="message"
               placeholder={translate("Enter your message")}

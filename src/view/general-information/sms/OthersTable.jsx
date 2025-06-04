@@ -13,12 +13,11 @@ import Input from "../../../components/Input/Input";
 
 const PAGE_SIZE = 5; // Reduced page size for better demonstration
 
-const OthersTable = ({ pageTitle, checkedValue }) => {
+const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers  }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
 
   // State for mobile numbers
-  const [mobileNumbers, setMobileNumbers] = useState([""]);
   const [errors, setErrors] = useState({});
 
   // Check if a number is a valid Bangladeshi mobile prefix

@@ -23,6 +23,7 @@ import { userReportsSlice } from '../features/userReports/userReportsSlice';
 import { sessionSlice } from '../features/session/sessionSlice';
 import { classSlice } from '../features/class/classQuerySlice';
 import { userTypeSlice } from '../features/userType/userTypeSlice';
+import { smsSlice } from '../features/sms/smsSlice';
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -48,6 +49,7 @@ const store = configureStore({
     [userReportsSlice.reducerPath]: userReportsSlice.reducer,
     [sessionSlice.reducerPath]: sessionSlice.reducer,
     [classSlice.reducerPath]: classSlice.reducer,
+    [smsSlice.reducerPath]: smsSlice.reducer,
     [userTypeSlice.reducerPath]: userTypeSlice.reducer,
 
   },
@@ -65,6 +67,7 @@ const store = configureStore({
       .concat(userReportsSlice.middleware)
       .concat(classSlice.middleware)
       .concat(userTypeSlice.middleware)
+      .concat(smsSlice.middleware)
       .concat(sessionSlice.middleware),
 });
 
