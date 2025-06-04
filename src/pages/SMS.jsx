@@ -1,32 +1,42 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useState, useCallback, useMemo } from "react";
+import { useDispatch } from "react-redux";
+import { FormProvider, useForm } from "react-hook-form";
 import useTranslate from "../utils/Translate";
 import Button from "../components/Button/Button";
 import Input from "../components/Input/Input";
 import ParentsAndAllUserTable from "../view/general-information/sms/ParentsAndAllUserTable";
 import OthersTable from "../view/general-information/sms/OthersTable";
 import { showModal } from "../utils/ModalControlar";
-import { useCallback, useState } from "react";
 import { usePostSMSSendMutation } from "../features/sms/smsSlice";
-import { FormProvider, useForm } from "react-hook-form";
 
 const SMS = ({ pageTitle }) => {
-  const dispatch = useDispatch();
   const translate = useTranslate();
   const methods = useForm();
-
   const { handleSubmit } = methods;
+  const dispatch = useDispatch();
 
+  // State management
   const [selectedRecipient, setSelectedRecipient] = useState("single");
-  const [mobileNumber, setMobileNumber] = useState("");
-  const [mobileError, setMobileError] = useState("");
+  const [mobileNumbers, setMobileNumbers] = useState([""]);
+  const [othersMobileNumbers, setOthersMobileNumbers] = useState([""]);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("bangla");
+  const [mobileError, setMobileError] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [mobileNumbers, setMobileNumbers] = useState([""]);
-const filteredNumbers = mobileNumbers.filter(num => num.trim() !== "");
-  console.log(filteredNumbers);
+  // Calculate parents mobile numbers based on selected recipient
+  const parentsMobileNumbers = useMemo(() => {
+    return selectedRecipient === "guardian" ? [] : [];
+  }, [selectedRecipient]);
 
+  // Filter empty numbers
+  const filteredOthersNumbers = othersMobileNumbers.filter(num => num.trim() !== "");
+
+  // API mutation
+  const [sendSMS] = usePostSMSSendMutation();
+
+  // Constants
   const options = [
     { label: "Single", value: "single" },
     { label: "Parents", value: "guardian" },
@@ -34,48 +44,35 @@ const filteredNumbers = mobileNumbers.filter(num => num.trim() !== "");
     { label: "Others", value: "others" },
   ];
 
-  const [sendSMS, { isLoading, isError }] = usePostSMSSendMutation();
-
+  // Handlers
   const handleOpenModal = useCallback(() => {
     showModal(translate("SMS Templates"), "SMS_TEMPLATES");
-  }, []);
+  }, [translate]);
 
   const handleSMSBuyOpenModal = useCallback(() => {
     showModal(translate("SMS Buy"), "SMS_BUY");
-  }, []);
-
+  }, [translate]);
 
   const validateMobileNumber = (number) => {
     if (!number) return "";
-
-    // Check if it's exactly 11 digits
-    if (number.length !== 11) {
-      return translate("Mobile number must be 11 digits");
-    }
-
-    // Check valid Bangladeshi prefixes
+    if (number.length !== 11) return translate("Mobile number must be 11 digits");
+    
     const validPrefixes = ["013", "014", "015", "016", "017", "018", "019"];
-    const prefix = number.substring(0, 3);
-
-    if (!validPrefixes.includes(prefix)) {
-      return translate(
-        "Invalid mobile number. Must start with 013, 014, 015, 016, 017, 018, or 019"
-      );
+    if (!validPrefixes.includes(number.substring(0, 3))) {
+      return translate("Invalid mobile number. Must start with 013, 014, 015, 016, 017, 018, or 019");
     }
-
     return "";
   };
 
   const handleMobileChange = (e) => {
     const value = e.target.value.replace(/\D/g, "").substring(0, 11);
-    setMobileNumber(value);
+    setMobileNumbers([value]);
     setMobileError(validateMobileNumber(value));
   };
 
   const handleMessageChange = (e) => {
     const val = e.target.value;
-
-    if (val.length > 765) return; // Enforce max character limit
+    if (val.length > 765) return;
 
     const isBangla = /^[\u0980-\u09FF\s.,!?()'"“”‘’\-০-৯\n\r\t]*$/;
     const isEnglish = /^[A-Za-z0-9\s.,!?()'"“”‘’\-`\n\r\t]*$/;
@@ -83,19 +80,24 @@ const filteredNumbers = mobileNumbers.filter(num => num.trim() !== "");
     if (val === "") {
       setMessage(val);
       setErrorMessage("");
-    } else if (messageType === "bangla" && isBangla.test(val)) {
-      setMessage(val);
-      setErrorMessage("");
-    } else if (messageType === "english" && isEnglish.test(val)) {
+    } else if (
+      (messageType === "bangla" && isBangla.test(val)) ||
+      (messageType === "english" && isEnglish.test(val))
+    ) {
       setMessage(val);
       setErrorMessage("");
     } else {
       setErrorMessage(
-        messageType === "bangla"
-          ? translate("Write only in Bengali.")
+        messageType === "bangla" 
+          ? translate("Write only in Bengali.") 
           : translate("Write only in English.")
       );
     }
+  };
+
+  const handleChangeMessageReci = (value) => {
+    setSelectedRecipient(value);
+    setMobileNumbers([""]);
   };
 
   const getSMSInfo = (text) => {
@@ -107,37 +109,43 @@ const filteredNumbers = mobileNumbers.filter(num => num.trim() !== "");
 
     if (len <= firstSMS) return { charCount: len, smsCount: 1 };
 
-    const remaining = len - firstSMS;
-    const extraSMS = Math.ceil(remaining / nextSMS);
-
-    return { charCount: len, smsCount: 1 + extraSMS };
+    return { 
+      charCount: len, 
+      smsCount: 1 + Math.ceil((len - firstSMS) / nextSMS) 
+    };
   };
 
   const { charCount, smsCount } = getSMSInfo(message);
 
-  const onSubmit = () => {
-    // Prepare the payload with only mobile number and message
-    const payload = {
-      mobile: mobileNumber,
-      message: message,
-      messageType: messageType,
-    };
+  const onSubmit = async () => {
+    const receivers = selectedRecipient === "others" 
+      ? filteredOthersNumbers 
+      : mobileNumbers;
 
-    console.log(payload);
+    if (!receivers.length || !message) {
+      setErrorMessage(translate("Please provide all required information"));
+      return;
+    }
 
-    // Call the mutation with the payload
-    // sendSMS(payload)
-    //   .unwrap()
-    //   .then((response) => {
-    //     // Handle successful submission
-    //     console.log("SMS sent successfully:", response);
-    //     // You might want to show a success message to the user
-    //   })
-    //   .catch((error) => {
-    //     // Handle error
-    //     console.error("Failed to send SMS:", error);
-    //     // You might want to show an error message to the user
-    //   });
+    setIsLoading(true);
+    
+    try {
+      const response = await sendSMS({
+        receiver: receivers,
+        message: message,
+      }).unwrap();
+      
+      console.log("SMS sent successfully:", response);
+      // Reset form on success
+      setMessage("");
+      setMobileNumbers([""]);
+      setOthersMobileNumbers([""]);
+    } catch (error) {
+      console.error("Failed to send SMS:", error);
+      setErrorMessage(translate("Failed to send SMS. Please try again."));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -154,6 +162,7 @@ const filteredNumbers = mobileNumbers.filter(num => num.trim() !== "");
           </div>
         </div>
 
+        {/* Recipient Selection */}
         <div className="grid grid-cols-2 gap-2 md:gap-3">
           {options.map((option) => (
             <label
@@ -165,7 +174,7 @@ const filteredNumbers = mobileNumbers.filter(num => num.trim() !== "");
                 name="messageRecipient"
                 value={option.value}
                 checked={selectedRecipient === option.value}
-                onChange={() => setSelectedRecipient(option.value)}
+                onChange={() => handleChangeMessageReci(option.value)}
                 className="text-indigo-600 focus:ring-indigo-500"
               />
               <span className="text-sm 2xl:text-base font-semibold 2xl:font-bold text-gray-700">
@@ -174,16 +183,18 @@ const filteredNumbers = mobileNumbers.filter(num => num.trim() !== "");
             </label>
           ))}
         </div>
+
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+              {/* Mobile Input */}
               <div className="flex flex-col gap-1">
                 <Input
-                  label={translate("Mobile Number") + " :"}
+                  label={`${translate("Mobile Number")} :`}
                   placeholder={translate("Enter mobile number")}
                   type="tel"
                   name="mobile"
-                  value={mobileNumber}
+                  value={mobileNumbers[0] || ""}
                   onChange={handleMobileChange}
                   disabled={selectedRecipient !== "single"}
                   error={mobileError}
@@ -193,45 +204,32 @@ const filteredNumbers = mobileNumbers.filter(num => num.trim() !== "");
               {/* Message Type */}
               <div className="flex flex-col gap-2">
                 <span className="text-sm font-medium text-gray-700">
-                  {translate("Message Type") + " :"}
+                  {`${translate("Message Type")} :`}
                 </span>
                 <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="radio"
-                      name="messageType"
-                      value="bangla"
-                      checked={messageType === "bangla"}
-                      onChange={() => {
-                        setMessageType("bangla");
-                        setMessage("");
-                        setErrorMessage("");
-                      }}
-                      className="accent-custom-focus text-gray-700"
-                    />
-                    {translate("Bangla")}
-                  </label>
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="radio"
-                      name="messageType"
-                      value="english"
-                      checked={messageType === "english"}
-                      onChange={() => {
-                        setMessageType("english");
-                        setMessage("");
-                        setErrorMessage("");
-                      }}
-                      className="accent-custom-focus text-gray-700"
-                    />
-                    {translate("English")}
-                  </label>
+                  {["bangla", "english"].map((type) => (
+                    <label key={type} className="flex items-center gap-2 text-sm">
+                      <input
+                        type="radio"
+                        name="messageType"
+                        value={type}
+                        checked={messageType === type}
+                        onChange={() => {
+                          setMessageType(type);
+                          setMessage("");
+                          setErrorMessage("");
+                        }}
+                        className="accent-custom-focus text-gray-700"
+                      />
+                      {translate(type.charAt(0).toUpperCase() + type.slice(1))}
+                    </label>
+                  ))}
                 </div>
               </div>
 
-              {/* Message Template */}
+              {/* Message Template Button */}
               <div className="col-span-2">
-                <Button className="w-full" onClick={handleOpenModal}>
+                <Button className="w-full" onClick={handleOpenModal} type="button">
                   {translate("Message Template")}
                 </Button>
               </div>
@@ -239,7 +237,7 @@ const filteredNumbers = mobileNumbers.filter(num => num.trim() !== "");
               {/* Message Textarea */}
               <div className="flex flex-col gap-1 col-span-2">
                 <label className="text-sm font-medium text-gray-700">
-                  {translate("Message") + " :"}
+                  {`${translate("Message")} :`}
                 </label>
                 <textarea
                   name="message"
@@ -257,26 +255,24 @@ const filteredNumbers = mobileNumbers.filter(num => num.trim() !== "");
               {/* Character/SMS Counter */}
               <div className="space-y-3 col-span-2 text-center">
                 <div className="text-gray-700 text-sm 2xl:text-base font-normal">
-                  <p
-                    className={charCount >= 765 ? "text-red-600 font-bold" : ""}
-                  >
+                  <p className={charCount >= 765 ? "text-red-600 font-bold" : ""}>
                     {charCount}/765 {translate("Characters typed")}
                   </p>
-
                   <p>
                     {smsCount} {translate("SMS")} ({translate("70 Char/SMS")},{" "}
                     {translate("next SMS from 67 chars")})
                   </p>
                 </div>
 
-                {/* Buttons */}
+                {/* Action Buttons */}
                 <div className="flex gap-2">
                   <Button
                     className="bg-green-500 hover:bg-green-600 transition-colors"
                     disabled={
                       !!mobileError ||
-                      (selectedRecipient === "single" && !mobileNumber) ||
-                      !message
+                      (selectedRecipient === "single" && !mobileNumbers[0]) ||
+                      !message ||
+                      isLoading
                     }
                     type="submit"
                     loading={isLoading}
@@ -288,9 +284,11 @@ const filteredNumbers = mobileNumbers.filter(num => num.trim() !== "");
                     onClick={() => {
                       setMessage("");
                       setErrorMessage("");
-                      setMobileNumber("");
+                      setMobileNumbers([""]);
+                      setOthersMobileNumbers([""]);
                       setMobileError("");
                     }}
+                    type="button"
                   >
                     {translate("Reset SMS")}
                   </Button>
@@ -301,17 +299,18 @@ const filteredNumbers = mobileNumbers.filter(num => num.trim() !== "");
         </FormProvider>
       </div>
 
+      {/* Tables for different recipient types */}
       {["guardian", "all_users"].includes(selectedRecipient) && (
         <ParentsAndAllUserTable
           pageTitle={pageTitle}
           checkedValue={selectedRecipient}
         />
       )}
-      {["others"].includes(selectedRecipient) && (
+      {selectedRecipient === "others" && (
         <OthersTable
           pageTitle={pageTitle}
-          setMobileNumbers={setMobileNumbers}
-          mobileNumbers={mobileNumbers}
+          setMobileNumbers={setOthersMobileNumbers}
+          mobileNumbers={othersMobileNumbers}
         />
       )}
     </div>

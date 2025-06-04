@@ -14,17 +14,24 @@ export const userStudentSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Student", "StudentVacation", "StudentVacationType", "StudentReports"],
+  tagTypes: [
+    "Student",
+    "StudentVacation",
+    "StudentVacationType",
+    "StudentReports",
+  ],
   endpoints: (builder) => ({
     getStudentBySearch: builder.query({
       query: ({ search, ClassID, SessionID }) => {
-                const params = new URLSearchParams();
-                params.append("search", search);
-                if (ClassID) params.append("ClassID", ClassID);
-                if (SessionID) params.append("SessionID", SessionID);
+        const params = new URLSearchParams();
+        if (search) {
+          params.append("search", search);
+        }
+        if (ClassID) params.append("ClassID", ClassID);
+        if (SessionID) params.append("SessionID", SessionID);
 
-                return `search_student?${params.toString()}`;
-            },
+        return `search_student?${params.toString()}`;
+      },
     }),
 
     getStudent: builder.query({
@@ -42,12 +49,12 @@ export const userStudentSlice = createApi({
 
     getStudentReports: builder.query({
       query: ({ userCode, classID, SessionID }) => {
-                const params = new URLSearchParams();
-                if (userCode) params.append('StudentCode', userCode);
-                if (classID) params.append('SubClassID', classID);
-                if (SessionID) params.append('SessionID', SessionID);
-                return `get_studentreports?${params.toString()}`;
-            },
+        const params = new URLSearchParams();
+        if (userCode) params.append("StudentCode", userCode);
+        if (classID) params.append("SubClassID", classID);
+        if (SessionID) params.append("SessionID", SessionID);
+        return `get_studentreports?${params.toString()}`;
+      },
 
       providesTags: ["StudentReports"],
     }),
@@ -132,5 +139,5 @@ export const {
   useGetStudentsVacationTypeListQuery,
   usePostStudentsVacationTypeMutation,
   useUpdateStudentsVacationTypeMutation,
-  useDeleteStudentsVacationTypeMutation
+  useDeleteStudentsVacationTypeMutation,
 } = userStudentSlice;

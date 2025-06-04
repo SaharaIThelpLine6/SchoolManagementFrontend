@@ -5,17 +5,22 @@ import useTranslate from "../../../utils/Translate";
 import DefaultInput from "../../../components/Forms/DefaultInput";
 import Button from "../../../components/Button/Button";
 
-// Import all logos
-import nagadLogo from "/public/banking/Nagad.png";
-import rocketLogo from "/public/banking/Rocket.jpg";
-import bkashLogo from "/public/banking/BKash.png";
-import alArafaIslamicLogo from "/public/banking/al_islami_bank.jpg";
-import dutchBanglaLogo from "/public/banking/Dutch-bangla-bank.png";
-import asiaBankLogo from "/public/banking/asia-bank.jpg";
-import janataBankLogo from "/public/banking/janata-bank.jpg";
-import visaLogo from "/public/banking/visa card.webp";
-import masterLogo from "/public/banking/master-card.png";
-import dbblLogo from "/public/banking/dBBL-card.jpeg";
+// Mobile Banking Logos
+const nagadLogo = "/banking/Nagad.png";
+const rocketLogo = "/banking/Rocket.jpg";
+const bkashLogo = "/banking/BKash.png";
+
+// Net Banking Logos
+const alArafaIslamicLogo = "/banking/al_islami_bank.jpg";
+const dutchBanglaLogo = "/banking/Dutch-bangla-bank.png";
+const asiaBankLogo = "/banking/asia-bank.jpg";
+const janataBankLogo = "/banking/janata-bank.jpg";
+
+// Card Logos
+const visaLogo = "/banking/visa card.webp";
+const masterLogo = "/banking/master-card.png";
+const dbblLogo = "/banking/dBBL-card.jpeg";
+
 
 const PaymentGetway = () => {
   const translate = useTranslate();

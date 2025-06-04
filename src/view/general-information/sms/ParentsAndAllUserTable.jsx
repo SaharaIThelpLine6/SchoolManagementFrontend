@@ -1,17 +1,9 @@
-import React, { useEffect, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { setPageName } from "../../../features/auth/authSlice";
-import {
-  useDeleteDesignationMutation,
-  useGetDesignationQuery,
-} from "../../../features/teachers/teachersSlice";
 import Loading from "../../../components/Loading/Loading";
 import SortableTable from "../../../components/Tables/SortableTable";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
+import { MdDelete, MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import useTranslate from "../../../utils/Translate";
 import Swal from "sweetalert2";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
@@ -23,37 +15,29 @@ import { useGetStudentBySearchQuery } from "../../../features/student/studentQue
 
 const PAGE_SIZE = 10;
 
-const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
+const ParentsAndAllUserTable = ({
+  pageTitle,
+  checkedValue,
+}) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const methods = useForm();
-  const { watch } = methods;
+const { watch } = methods;
 
   const selectedSessionID = watch("SessionID");
-  const selectedClassID = watch("Serial");
-
-  const {
-    data: designation = [],
-    isLoading,
-    isError,
-  } = useGetDesignationQuery();
-
-  const [deleteDesignation] = useDeleteDesignationMutation();
+  const selectedClassID = watch("ClassID");
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: classData } = useGetClassListQuery();
-  const {
-    data: userTypeData,
-    isuserTypeLoading,
-    isuserTypeError,
-  } = useGetUserTypesQuery();
+  const { data: userTypeData } = useGetUserTypesQuery();
 
   const {
-    data: studentData = [],
+    data: studentSMSData = [],
     isFetching: isStudentFetching,
+    isError,
+    refetch: refetchStudents,
   } = useGetStudentBySearchQuery(
     {
-      // search: "",
       ClassID: selectedClassID || null,
       SessionID: selectedSessionID || null,
     },
@@ -62,6 +46,7 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
     }
   );
 
+  const [studentData, setStudentData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
@@ -70,55 +55,54 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
 
   useEffect(() => {
     if (isError) {
-      Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Failed to load designation data",
-      });
+      setStudentData([]);
+    } 
+     if (studentSMSData) {
+      setStudentData(studentSMSData);
     }
-  }, [isError]);
+  }, [studentSMSData]);
 
-  const paginatedDesignation = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return designation.slice(start, start + PAGE_SIZE);
-  }, [designation, currentPage]);
+  const handleDelete = async (StudentCode) => {
+    Swal.fire({
+      title: translate("Are you sure?"),
+      text: translate("This will permanently delete the student record"),
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: translate("Yes, delete it!"),
+      cancelButtonText: translate("Cancel"),
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          setStudentData((prev) =>
+            prev.filter((student) => student.StudentCode !== StudentCode)
+          );
+
+          Swal.fire(
+            translate("Deleted!"),
+            translate("Student record has been deleted."),
+            "success"
+          );
+        } catch (error) {
+          Swal.fire(
+            translate("Error!"),
+            translate("Failed to delete student record"),
+            "error"
+          );
+        }
+      }
+    });
+  };
 
   const paginatedStudentData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return studentData.slice(start, start + PAGE_SIZE);
   }, [studentData, currentPage]);
 
-  const totalPages =
-    checkedValue === "guardian"
-      ? Math.ceil(studentData.length / PAGE_SIZE)
-      : Math.ceil(designation.length / PAGE_SIZE);
-
-  const handleDelete = useCallback(
-    (id) => {
-      Swal.fire({
-        title: "Are you sure?",
-        text: "This action will permanently delete the designation.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, delete it!",
-        cancelButtonText: "Cancel",
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          try {
-            await deleteDesignation(id).unwrap();
-            Swal.fire("Deleted!", "The designation has been removed.", "success");
-          } catch (error) {
-            Swal.fire("Error!", "Failed to delete designation.", "error");
-          }
-        }
-      });
-    },
-    [deleteDesignation]
-  );
-
-  if (isLoading) return <Loading />;
+  const totalPages = useMemo(() => {
+    return Math.ceil(studentData.length / PAGE_SIZE);
+  }, [studentData]);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -136,8 +120,8 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
         <div className="flex justify-center items-center gap-2">
           <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
-            title="Delete"
-            onClick={() => handleDelete(row.DNID)}
+            title={translate("Delete")}
+            onClick={() => handleDelete(row.StudentCode)}
           >
             <MdDelete className="w-5 h-5" />
           </button>
@@ -146,16 +130,18 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
     },
     {
       title: translate("Student ID"),
-      field: "শিক্ষার্থীর আইডি",
+      field: "StudentCode",
       hozAlign: "center",
     },
-    { title: translate("Name"), field: "নাম", hozAlign: "center" },
+    { title: translate("Name"), field: "StudentName", hozAlign: "center" },
     {
       title: translate("Mobile Number"),
-      field: "মোবাইল নং",
+      field: "Mobile1",
       hozAlign: "center",
     },
   ];
+
+  if (isStudentFetching) return <Loading />;
 
   return (
     <FormProvider {...methods}>
@@ -175,8 +161,8 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
               options={classData || []}
               require={"Class is required"}
               nameField={"ClassName"}
-              valueField={"Serial"}
-              registerKey={"Serial"}
+              valueField={"ClassID"}
+              registerKey={"ClassID"}
               type={"number"}
               label={translate("Class")}
             />
@@ -199,9 +185,7 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
 
         {checkedValue === "guardian" ? (
           <>
-            {isStudentFetching ? (
-              <p className="text-center text-blue-500">Loading student data...</p>
-            ) : selectedSessionID && selectedClassID ? (
+            {selectedSessionID && selectedClassID ? (
               <SortableTable
                 columns={columns}
                 data={paginatedStudentData}
@@ -209,16 +193,20 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
               />
             ) : (
               <p className="text-center text-gray-500 my-4">
-                Please select both Session and Class to view student data.
+                {translate(
+                  "Please select both Session and Class to view student data."
+                )}
               </p>
             )}
           </>
         ) : (
-          <SortableTable
-            columns={columns}
-            data={paginatedDesignation}
-            isFilterColumn={false}
-          />
+          <div className="text-center py-4">
+            <p>
+              {translate(
+                "User management functionality will be implemented here"
+              )}
+            </p>
+          </div>
         )}
 
         <div className="flex justify-center items-center gap-4 mt-4">
@@ -228,11 +216,11 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
             className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
           >
             <MdKeyboardArrowLeft className="text-lg" />
-            Prev
+            {translate("Prev")}
           </button>
 
           <span className="text-sm font-medium text-gray-700">
-            Page {currentPage} of {totalPages}
+            {translate("Page")} {currentPage} {translate("of")} {totalPages}
           </span>
 
           <button
@@ -240,7 +228,7 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
             disabled={currentPage === totalPages}
             className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
           >
-            Next
+            {translate("Next")}
             <MdKeyboardArrowRight className="text-lg" />
           </button>
         </div>
