@@ -6,7 +6,7 @@ const ComingSoon = () => {
       <div className="bg-white shadow-xl rounded-2xl p-10 max-w-md text-center animate-fadeIn">
         <h1 className="text-4xl font-bold text-indigo-600 mb-4">Coming Soon</h1>
         <p className="text-gray-600 text-lg mb-6">
-          We’re working hard to bring you something amazing. Stay tuned!
+          We’re working hard to bring you something amazing. Stay tuned...
         </p>
         <div className="flex justify-center">
           <svg
