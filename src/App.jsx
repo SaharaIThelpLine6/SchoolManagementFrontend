@@ -1,81 +1,75 @@
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
 import { useEffect, useState } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { cssTransition, ToastContainer } from "react-toastify";
+
 import "./App.css";
-import { BrowserRouter, Form, Route, Routes } from "react-router-dom";
+import "animate.css/animate.min.css";
+
+// Layouts
+import DefaultLayout from "./layout/DefaultLayout";
+import PublicLayout from "./layout/PublicLayout";
+
+// Pages
 import Home from "./pages/Home";
 import AddStudent from "./pages/AddStudent";
-import { useForm, FormProvider } from "react-hook-form";
-import Login from "./pages/Login";
-import Class from "./pages/Class";
-import FormP from "./pages/FormP";
 import BookList from "./pages/BookList";
 import GroupDistribution from "./pages/GroupDistribution";
+import Class from "./pages/Class";
 import Section from "./pages/Section";
+import Session from "./pages/Session";
+import StudentReport from "./pages/StudentReport";
+import TypeOfVacation from "./pages/TypeOfVacation";
+import StudentVacationListTable from "./components/Tables/StudentVacationListTable";
+import EnglisArobihName from "./pages/EnglisArobihName";
+import UserReports from "./pages/UserReports";
+import SMS from "./pages/SMS";
+import Setting from "./pages/Setting";
+import MonthListTable from "./pages/MonthListTable";
+import Quota from "./pages/Quota";
+import StudentFeeSetup from "./pages/StudentFeeSetup";
+import FormBuilder from "./pages/FormBuilder";
+import AddTeacher from "./pages/AddTeacher";
 import PayRole from "./pages/PayRole";
 import PayRoleName from "./pages/PayRoleName";
 import Report from "./pages/Report";
+import Designations from "./pages/Designations";
 import Exam from "./pages/Exam";
-import Query from "./pages/Query";
+import BoardExam from "./pages/BoardExam";
+import MadrasahBoardInfo from "./pages/MadrasahBoardInfo";
+import StudentsResult from "./pages/StudentsResult";
+import AverageResult from "./pages/AverageResult";
+import SubjectPassNumber from "./pages/SubjectPassNumber";
+import ResultConditions from "./pages/ResultConditions";
 import Library from "./pages/Library";
-import Setting from "./pages/Setting";
-import Help from "./pages/Help";
-import { cssTransition, ToastContainer } from "react-toastify";
-import Notepad from "./pages/Notepad";
 import Others from "./pages/Others";
+import Notepad from "./pages/Notepad";
 import Calculator from "./pages/Calculator";
-import PublicLayout from "./layout/PublicLayout";
+import Help from "./pages/Help";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
+import PaymentConfirm from "./pages/PaymentConfirm";
+import FormP from "./pages/FormP";
+import Query from "./pages/Query";
+import User from "./pages/User";
 import AdmissionRegistration from "./pages/AdmissionRegistration";
 import ResultRequest from "./pages/public/ResultRequest";
 import Result from "./pages/public/Result";
-import NotFound from "./pages/NotFound";
-import ClassResultForm from "./pages/public/ClassResultForm";
-import ClassResult from "./pages/public/ClassResult";
+import OnlineAdmission from "./pages/public/OnlineAdmission";
+import StudentAdmissionForm from "./pages/public/studentAddmitionForm";
 import Loading from "./components/Loading/Loading";
-import "animate.css/animate.min.css";
+import useTranslate from "./utils/Translate";
+import ComingSoon from "./components/ComingSoon";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
   exit: "animate__animated animate__bounceOut",
 });
-import StudentsResult from "./pages/StudentsResult";
-import AverageResult from "./pages/AverageResult";
-import SubjectPassNumber from "./pages/SubjectPassNumber";
-import ResultConditions from "./pages/ResultConditions";
-import BoardExam from "./pages/BoardExam";
-import MadrasahBoardInfo from "./pages/MadrasahBoardInfo";
-import User from "./pages/User";
-import Quota from "./pages/Quota";
-import AddTeacher from "./pages/AddTeacher";
-import Session from "./pages/Session";
-import FormBuilder from "./pages/FormBuilder";
-import OnlineAdmission from "./pages/public/OnlineAdmission";
-import StudentAdmissionForm from "./pages/public/studentAddmitionForm";
-import PaymentConfirm from "./pages/PaymentConfirm";
-import StudentFeeSetup from "./pages/StudentFeeSetup";
-import StudentReport from "./pages/StudentReport";
-import Designations from "./pages/Designations";
-import useTranslate from "./utils/Translate";
-import DefaultLayout from "./layout/DefaultLayout";
-import TypeOfVacation from "./pages/TypeOfVacation";
-import StudentVacationListTable from "./components/Tables/StudentVacationListTable";
-import MonthListTable from "./pages/MonthListTable";
-import UserReports from "./pages/UserReports";
-import SMS from "./pages/SMS";
-import EnglisArobihName from "./pages/EnglisArobihName";
 
 function App() {
   const [loading, setLoading] = useState(true);
-  // const { isLoading } = useSelector((state) => state.loading)
   const translate = useTranslate();
-
   const methods = useForm();
-  // const { pathname } = useLocation();
-
-  // useEffect(() => {
-  //   window.scrollTo(0, 0);
-  // }, [pathname]);
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 1500);
@@ -88,57 +82,85 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<DefaultLayout />}>
-            <Route index element={<Home pageTitle={"Home"} />} />
+            <Route path="/" element={<Home pageTitle="Home" />} />
 
             <Route path="students">
-              <Route index element={<AddStudent pageTitle={"Add Student"} />} />
+              <Route index element={<AddStudent pageTitle="Add Student" />} />
               <Route
                 path="booklist"
-                element={<BookList pageTitle={"Book List"} />}
+                element={<BookList pageTitle="Book List" />}
               />
               <Route
                 path="groupdistribution"
-                element={<GroupDistribution pageTitle={"Students Group Set"} />}
+                element={<GroupDistribution pageTitle="Students Group Set" />}
               />
-              <Route path="class" element={<Class pageTitle={"Class"} />} />
-              <Route path="english-arobi-name" element={<EnglisArobihName pageTitle={"English Arobi Name"} />} />
+              <Route path="class" element={<Class pageTitle="Class" />} />
               <Route
-                path="section"
-                element={<Section pageTitle={"Section"} />}
+                path="class-group"
+                element={<ComingSoon pageTitle="Class Group" />}
               />
+              <Route
+                path="book-list"
+                element={<ComingSoon pageTitle="Book List" />}
+              />
+              <Route
+                path="group-setting"
+                element={<ComingSoon pageTitle="Book List" />}
+              />
+              <Route
+                path="id-card"
+                element={<ComingSoon pageTitle="Book List" />}
+              />
+              <Route
+                path="id-print"
+                element={<ComingSoon pageTitle="Book List" />}
+              />
+              <Route
+                path="group-distribution"
+                element={<ComingSoon pageTitle="Book List" />}
+              />
+              <Route
+                path="english-arobi-name"
+                element={<EnglisArobihName pageTitle="English Arobi Name" />}
+              />
+              <Route path="section" element={<Section pageTitle="Section" />} />
               <Route
                 path="sessions"
-                element={<Session pageTitle={"Session"} />}
+                element={<Session pageTitle="Session" />}
               />
               <Route
                 path="report"
-                element={<StudentReport pageTitle={"Student Report"} />}
+                element={<StudentReport pageTitle="Student Report" />}
               />
               <Route
                 path="vacation"
                 element={
-                  <StudentVacationListTable pageTitle={"Students Vacation"} />
+                  <StudentVacationListTable pageTitle="Students Vacation" />
                 }
               />
               <Route
                 path="vacation/type-of-vacation"
-                element={<TypeOfVacation pageTitle={"Type of Vacation"} />}
+                element={<TypeOfVacation pageTitle="Type of Vacation" />}
               />
             </Route>
 
-            <Route path="usersinfo" element={<User />} />
             <Route path="general-info">
+              <Route path="users-info" element={<User /> } pageTitle="User Information"/>
               <Route
-                index
                 path="user-reports"
-                element={<UserReports pageTitle={"User Reports"} />}
+                element={<UserReports pageTitle="User Reports" />}
+              />
+              <Route path="sms" element={<SMS pageTitle="SMS List" />} />
+              <Route
+                path="institution-info"
+                element={<Setting pageTitle="Setting" />}
               />
               <Route
-                index
-                path="sms"
-                element={<SMS pageTitle={"SMS List"} />}
+                path="month-name-list"
+                element={<MonthListTable pageTitle="Month Name List" />}
               />
             </Route>
+
             <Route
               path="payment_confirm/:schoolid/:service/:size"
               element={<PaymentConfirm />}
@@ -149,90 +171,66 @@ function App() {
             <Route path="formbuilder" element={<FormBuilder />} />
 
             <Route path="teacherinfo">
-              <Route index element={<AddTeacher pageTitle={"Employee"} />} />
+              <Route index element={<AddTeacher pageTitle="Employee" />} />
               <Route
                 path="payRole"
-                element={<PayRole pageTitle={"Pay Role"} />}
+                element={<PayRole pageTitle="Pay Role" />}
               />
               <Route
                 path="pRName"
-                element={<PayRoleName pageTitle={"Pay Role Name"} />}
+                element={<PayRoleName pageTitle="Pay Role Name" />}
               />
-              <Route path="report" element={<Report pageTitle={"Reports"} />} />
+              <Route path="report" element={<Report pageTitle="Reports" />} />
               <Route
                 path="designation"
-                element={<Designations pageTitle={"Designation List"} />}
+                element={<Designations pageTitle="Designation List" />}
               />
             </Route>
 
-            <Route
-              path="/month-name-list"
-              element={
-                <MonthListTable pageTitle={translate("Months list table")} />
-              }
-            />
-            <Route path="/formp" element={<FormP />} />
-            <Route path="/query" element={<Query />} />
-            <Route path="exam">
-              <Route index element={<Exam pageTitle={"Exam"} />} />
-            </Route>
+            <Route path="exam" element={<Exam pageTitle="Exam" />} />
+
             <Route path="board_exam">
-              <Route index element={<BoardExam pageTitle={"Board Exam"} />} />
+              <Route index element={<BoardExam pageTitle="Board Exam" />} />
               <Route
                 path="madrasahboardinfo"
                 element={
-                  <MadrasahBoardInfo pageTitle={"Madrasah Board Information"} />
+                  <MadrasahBoardInfo pageTitle="Madrasah Board Information" />
                 }
               />
             </Route>
+
             <Route path="result">
-              <Route index element={<StudentsResult pageTitle={"Result"} />} />
+              <Route index element={<StudentsResult pageTitle="Result" />} />
               <Route
                 path="averageresult"
-                element={<AverageResult pageTitle={"Average Result Entry"} />}
+                element={<AverageResult pageTitle="Average Result Entry" />}
               />
               <Route path="passmarkssubject" element={<SubjectPassNumber />} />
               <Route path="resultconditions" element={<ResultConditions />} />
             </Route>
-            <Route
-              path="/library"
-              element={<Library pageTitle={"Library"} />}
-            />
+
+            <Route path="library" element={<Library pageTitle="Library" />} />
+
             <Route path="others">
-              <Route index element={<Others pageTitle={"Others"} />} />
-              <Route
-                path="notepad"
-                element={<Notepad pageTitle={"Notepad"} />}
-              />
+              <Route index element={<Others pageTitle="Others" />} />
+              <Route path="notepad" element={<Notepad pageTitle="Notepad" />} />
               <Route
                 path="calculator"
-                element={<Calculator pageTitle={"Calculator"} />}
-              />
-            </Route>
-            <Route path="settings">
-              <Route index element={<Setting pageTitle={"Setting"} />} />
-              <Route
-                path="month-name-list"
-                element={<MonthListTable pageTitle={"Month Name List"} />}
-              />
-              <Route
-                path="calculator"
-                element={<Calculator pageTitle={"Calculator"} />}
+                element={<Calculator pageTitle="Calculator" />}
               />
             </Route>
 
-            <Route path="/help" element={<Help pageTitle={"Help"} />} />
-          </Route>
-          {/* <Route path='/quota/:payfor' element={<Quota/>}>
-          
-          </Route> */}
-          <Route path="/login" element={<Login />} />
-          <Route path=":schoolid" element={<PublicLayout />}>
             <Route
-              index
-              element={<ResultRequest pageTitle={"Result Page"} />}
+              path="settings/calculator"
+              element={<Calculator pageTitle="Calculator" />}
             />
-            {/* <Route path="classes" element={<ClassResultForm />} /> */}
+            <Route path="help" element={<Help pageTitle="Help" />} />
+          </Route>
+
+          <Route path="/login" element={<Login />} />
+
+          <Route path=":schoolid" element={<PublicLayout />}>
+            <Route index element={<ResultRequest pageTitle="Result Page" />} />
             <Route
               path="AdmissionRegistration"
               element={<AdmissionRegistration />}
@@ -241,10 +239,6 @@ function App() {
               path="students/:seassonid/:examid/:classid/:userid"
               element={<Result />}
             />
-            {/* <Route
-              path="classes/:seassonid/:examid/:classid"
-              element={<ClassResult />}
-            /> */}
             <Route path="online_admission" element={<OnlineAdmission />} />
             <Route
               path="online_admission/:usercode"
@@ -252,10 +246,13 @@ function App() {
             />
           </Route>
 
+          <Route path="/formp" element={<FormP />} />
+          <Route path="/query" element={<Query />} />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-      {/* bg-[#323232] */}
+
       <ToastContainer
         position="bottom-center"
         autoClose={5000}
@@ -267,12 +264,7 @@ function App() {
         pauseOnHover
         transition={bounce}
         closeButton={false}
-        className=" min-h-[50px] max-h-fit overflow-hidden text-[14px] font-SolaimanLipi  text-[#ffffff]  rounded-[4px] font-normal hidden_in_print"
-        // style={{
-        //   boxShadow: '0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)',
-        // }
-
-        // }
+        className="min-h-[50px] text-[14px] font-SolaimanLipi text-white rounded-[4px] hidden_in_print"
       />
     </>
   );

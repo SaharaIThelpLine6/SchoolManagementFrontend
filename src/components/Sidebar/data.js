@@ -1,38 +1,46 @@
 export const menuData = [
   {
     id: "1",
-    name: "Dashboard",
-    route: "/",
-    subMenu: false,
-    icon: "FaHome",
-  },
-  {
-    id: "2",
-    name: "User",
-    route: "/usersinfo",
-    subMenu: false,
-    icon: "FaUsers",
-  },
-  {
-    id: "3",
     name: "General Information",
     route: "/general-info",
     icon: "LuWarehouse",
     subMenu: [
       {
         id: "1",
+        name: "Dashboard",
+        route: "/",
+      },
+      {
+        id: "2",
+        name: "User",
+        route: "/general-info/users-info",
+      },
+      {
+        id: "3",
         name: "User Reports",
         route: "/general-info/user-reports",
       },
       {
-        id: "2",
+        id: "4",
         name: "SMS",
         route: "/general-info/sms",
+      },
+      {
+        id: "5",
+        name: "Institution Information",
+        route: "/general-info/institution-info",
+        subMenu: false,
+      },
+      {
+        id: "6",
+        name: "Month Name",
+        route: "/general-info/month-name-list",
+        subMenu: false,
       },
     ],
   },
   {
-    id: "4",
+    id: "2",
     name: "Student",
     route: "/students",
     icon: "PiStudentBold",
@@ -60,7 +68,7 @@ export const menuData = [
       {
         id: "5",
         name: "Book List",
-        route: "/students/booklist",
+        route: "/students/book-list",
       },
       {
         id: "6",
@@ -85,7 +93,7 @@ export const menuData = [
       {
         id: "10",
         name: "Group Distribution",
-        route: "/students/groupdistribution",
+        route: "/students/group-distribution",
       },
 
       {
@@ -111,7 +119,7 @@ export const menuData = [
     ],
   },
   {
-    id: "5",
+    id: "3",
     name: "Teacher Staff",
     route: "/teacherinfo",
     icon: "IoIosPeople",
@@ -149,208 +157,91 @@ export const menuData = [
     ],
   },
   {
-    id: "6",
+    id: "4",
     name: "Exam",
     route: "/exam",
     icon: "PiExam",
     subMenu: [
-      {
-        id: "1",
-        name: "Result 1",
-        route: "/result-1",
-        subMenu: false,
-      },
+
     ],
   },
   {
-    id: "7",
+    id: "5",
     name: "Result",
     route: "/result",
     icon: "GiGraduateCap",
     subMenu: [
-      {
-        id: "1",
-        name: "Result 1",
-        route: "/result-1",
-        subMenu: false,
-      },
+      
     ],
   },
   {
-    id: "8",
+    id: "6",
     name: "Board Exam",
     route: "/board-exam",
     icon: "LiaSchoolSolid",
     subMenu: [
-      {
-        id: "1",
-        name: "Board Exam 1",
-        route: "/board-exam-1",
-        subMenu: false,
-      },
+     
     ],
   },
   {
-    id: "9",
+    id: "7",
     name: "Darul Ikama",
     route: "/darul-ikama",
     icon: "RiSchoolFill",
     subMenu: [
-      {
-        id: "1",
-        name: "Darul Ikama 1",
-        route: "/darul-ikama",
-        subMenu: false,
-      },
+    
     ],
   },
   {
-    id: "10",
+    id: "8",
     name: "Accounting",
     route: "/accounting",
     icon: "FaCalculator",
     subMenu: [
-      {
-        id: "1",
-        name: "Acccounting 1",
-        route: "/accounting",
-        subMenu: false,
-      },
+      
     ],
   },
   {
-    id: "11",
+    id: "9",
     name: "Donation",
     route: "/donation",
     icon: "FaDonate",
     subMenu: [
-      {
-        id: "1",
-        name: "Donation 1",
-        route: "/donation",
-        subMenu: false,
-      },
+     
     ],
   },
   {
-    id: "12",
+    id: "10",
     name: "Library",
     route: "/library",
     icon: "ImLibrary",
     subMenu: [
-      {
-        id: "1",
-        name: "Library 1",
-        route: "/library",
-        subMenu: false,
-      },
+     
     ],
   },
   {
-    id: "13",
+    id: "11",
     name: "Others",
     route: "/others",
     icon: "HiDotsCircleHorizontal",
     subMenu: [
-      {
-        id: "1",
-        name: "Others 1",
-        route: "/others",
-        subMenu: false,
-      },
+    
     ],
   },
   {
-    id: "14",
+    id: "12",
     name: "Settings",
     route: "/settings",
     icon: "IoMdSettings",
-    subMenu: [
-      {
-        id: "1",
-        name: "Institution Information",
-        route: "/settings",
-        subMenu: false,
-      },
-      {
-        id: "2",
-        name: "Month Name",
-        route: "/settings/month-name-list",
-        subMenu: false,
-      },
-    ],
+    subMenu: [],
   },
   {
-    id: "15",
+    id: "13",
     name: "Help",
     route: "/help",
     icon: "IoMdHelp",
     subMenu: [
-      {
-        id: "1",
-        name: "Help 1",
-        route: "/help-1",
-        subMenu: false,
-      },
+     
     ],
   },
 ];
-
-// {
-//   label: "Staff",
-//   icon: "TbIdBadge2",
-//   path: "/staff",
-//   subMenu: [
-//     { label: "Teacher Info", path: "/staff/teacherinfo" },
-//     { label: "Non Teaching Staff", path: "/staff/nonteaching" },
-//     { label: "Staff Attendance", path: "/staff/attendance" },
-//     { label: "Leave Request", path: "/staff/leave" },
-//     { label: "Assign Role", path: "/staff/assign-role" },
-//   ],
-// },
-// {
-//   label: "Exam",
-//   icon: "TbNotes",
-//   path: "/exam",
-//   subMenu: [
-//     { label: "Exam List", path: "/exam/list" },
-//     { label: "Admit Card", path: "/exam/list" },
-//   ],
-// },
-// {
-//   label: "Board",
-//   icon: "TbBuilding",
-//   path: "/board",
-//   subMenu: [
-//     { label: "Add Board", path: "/board/add" },
-//     { label: "Board List", path: "/board/list" },
-//   ],
-// },
-// {
-//   label: "Result",
-//   icon: "TbFileAnalytics",
-//   path: "/result",
-//   subMenu: [
-//     { label: "Add Result", path: "/result/add" },
-//     { label: "Result List", path: "/result/list" },
-//   ],
-// },
-// {
-//   label: "Library",
-//   icon: "TbBooks",
-//   path: "/library",
-//   subMenu: [
-//     { label: "Add Book", path: "/library/add" },
-//     { label: "Book List", path: "/library/list" },
-//   ],
-// },
-// {
-//   label: "Others",
-//   icon: "TbDotsCircleHorizontal",
-//   path: "/others",
-//   subMenu: [
-//     { label: "Add Class", path: "/others/add-class" },
-//     { label: "Add Section", path: "/others/add-section" },
-//     { label: "Subject", path: "/others/subject" },
-//   ],
-// },

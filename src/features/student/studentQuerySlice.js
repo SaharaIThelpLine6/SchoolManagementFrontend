@@ -32,6 +32,7 @@ export const userStudentSlice = createApi({
 
         return `search_student?${params.toString()}`;
       },
+      providesTags: ["Student"],
     }),
 
     getStudent: builder.query({
@@ -66,6 +67,14 @@ export const userStudentSlice = createApi({
         body: data,
       }),
       invalidatesTags: ["StudentReports"],
+    }),
+    postEnglishAndArobicName: builder.mutation({
+      query: (data) => ({
+        url: `student_translate`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Student"],
     }),
 
     // Vacation List
@@ -140,4 +149,5 @@ export const {
   usePostStudentsVacationTypeMutation,
   useUpdateStudentsVacationTypeMutation,
   useDeleteStudentsVacationTypeMutation,
+  usePostEnglishAndArobicNameMutation
 } = userStudentSlice;
