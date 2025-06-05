@@ -11,28 +11,25 @@ import {
 import useTranslate from "../../../utils/Translate";
 import Swal from "sweetalert2";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
-import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
-import { useGetClassListQuery } from "../../../features/class/classQuerySlice";
+import { useGetUserTypesQuery } from "../../../features/userType/userTypeSlice";
 import { FormProvider, useForm } from "react-hook-form";
-import { useGetStudentBySearchQuery } from "../../../features/student/studentQuerySlice";
 import {
-  clearParentsData,
-  deleteParentData,
-  setParentsData,
+  clearAllUsersData,
+  deleteAllUsersData,
+  setAllUsersData,
 } from "../../../features/student/studentSlice";
 import { isEqual } from "lodash";
+import { useGetUserReportQuery } from "../../../features/userReports/userReportsSlice";
 
 const PAGE_SIZE = 5;
 
-const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
+const AllUsersData = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const methods = useForm();
   const { watch } = methods;
-  const prevStudentDataRef = useRef([]);
+  const prevUserDataRef = useRef([]);
 
-  const selectedSessionID = watch("SessionID");
-  const selectedClassID = watch("ClassID");
   const selectedType = watch("ID");
 
   const params = {
@@ -42,25 +39,18 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
     is_active: 1,
   };
 
-  const { data: sessionData } = useGetSessionsQuery();
-  const { data: classData } = useGetClassListQuery();
-
-  const studentData = useSelector((state) => state.student.parentsData); // ✅ Access correct slice
-
   const {
-    data: studentDatas = [],
-    isFetching: isStudentFetching,
-    isError,
-    refetch: refetchStudents,
-  } = useGetStudentBySearchQuery(
-    {
-      ClassID: selectedClassID || null,
-      SessionID: selectedSessionID || null,
-    },
-    {
-      skip: !selectedClassID || !selectedSessionID,
-    }
-  );
+    data: allUsersData,
+    isFetching,
+    isError: isAllUsersDataError,
+    error,
+  } = useGetUserReportQuery(params, {
+    skip: !params,
+  });
+
+  const { data: userTypeData } = useGetUserTypesQuery();
+
+  const userData = useSelector((state) => state.student.allUsers);
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -69,23 +59,23 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
   }, [dispatch, pageTitle]);
 
   useEffect(() => {
-    const hasValidData = Array.isArray(studentDatas) && studentDatas.length > 0;
+    const hasValidData = Array.isArray(allUsersData) && allUsersData.length > 0;
 
-    if (!isError && hasValidData) {
-      if (!isEqual(studentDatas, prevStudentDataRef.current)) {
-        prevStudentDataRef.current = studentDatas;
-        dispatch(setParentsData(studentDatas));
+    if (!isAllUsersDataError && hasValidData) {
+      if (!isEqual(allUsersData, prevUserDataRef.current)) {
+        prevUserDataRef.current = allUsersData;
+        dispatch(setAllUsersData(allUsersData));
       }
-    } else if (isError && prevStudentDataRef.current.length > 0) {
-      prevStudentDataRef.current = [];
-      dispatch(clearParentsData());
+    } else if (isAllUsersDataError && prevUserDataRef.current.length > 0) {
+      prevUserDataRef.current = [];
+      dispatch(clearAllUsersData());
     }
-  }, [studentDatas, isError, dispatch]);
+  }, [allUsersData, isAllUsersDataError, dispatch]);
 
-  const handleDelete = async (StudentCode) => {
+  const handleDelete = async (userCode) => {
     Swal.fire({
       title: translate("Are you sure?"),
-      text: translate("This will permanently delete the student record"),
+      text: translate("This will permanently delete the user record"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -95,16 +85,16 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
     }).then((result) => {
       if (result.isConfirmed) {
         try {
-          dispatch(deleteParentData(StudentCode));
+          dispatch(deleteAllUsersData(userCode));
           Swal.fire(
             translate("Deleted!"),
-            translate("Student record has been deleted."),
+            translate("User record has been deleted."),
             "success"
           );
         } catch (error) {
           Swal.fire(
             translate("Error!"),
-            translate("Failed to delete student record"),
+            translate("Failed to delete user record"),
             "error"
           );
         }
@@ -112,14 +102,14 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
     });
   };
 
-  const paginatedStudentData = useMemo(() => {
+  const paginatedUserData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return studentData.slice(start, start + PAGE_SIZE);
-  }, [studentData, currentPage]);
+    return userData.slice(start, start + PAGE_SIZE);
+  }, [userData, currentPage]);
 
   const totalPages = useMemo(() => {
-    return Math.ceil(studentData.length / PAGE_SIZE);
-  }, [studentData]);
+    return Math.ceil(userData.length / PAGE_SIZE);
+  }, [userData]);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -138,7 +128,7 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
           <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
             title={translate("Delete")}
-            onClick={() => handleDelete(row.StudentCode)}
+            onClick={() => handleDelete(row.UserCode)}
           >
             <MdDelete className="w-5 h-5" />
           </button>
@@ -146,11 +136,11 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
       ),
     },
     {
-      title: translate("Student ID"),
-      field: "StudentCode",
+      title: translate("User ID"),
+      field: "UserCode",
       hozAlign: "center",
     },
-    { title: translate("Name"), field: "StudentName", hozAlign: "center" },
+    { title: translate("Name"), field: "UserName", hozAlign: "center" },
     {
       title: translate("Mobile Number"),
       field: "Mobile1",
@@ -158,47 +148,28 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
     },
   ];
 
-  if (isStudentFetching) return <Loading />;
+  if (isFetching) return <Loading />;
 
   return (
     <FormProvider {...methods}>
       <div>
-        {checkedValue === "guardian" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-            <DefaultSelect
-              options={sessionData || []}
-              require={"Session is required"}
-              nameField={"SessionName"}
-              valueField={"SessionID"}
-              registerKey={"SessionID"}
-              type={"number"}
-              label={translate("Session")}
-            />
-            <DefaultSelect
-              options={classData || []}
-              require={"Class is required"}
-              nameField={"ClassName"}
-              valueField={"ClassID"}
-              registerKey={"ClassID"}
-              type={"number"}
-              label={translate("Class")}
-            />
-          </div>
-        )}
-
-        {selectedSessionID && selectedClassID ? (
-          <SortableTable
-            columns={columns}
-            data={paginatedStudentData}
-            isFilterColumn={false}
+        <div className="grid gap-3 mb-3">
+          <DefaultSelect
+            options={userTypeData || []}
+            require={"User Type is required"}
+            nameField={"TypeName"}
+            valueField={"ID"}
+            registerKey={"ID"}
+            type={"number"}
+            label={translate("User Types")}
           />
-        ) : (
-          <p className="text-center text-gray-500 my-4">
-            {translate(
-              "Please select both Session and Class to view student data."
-            )}
-          </p>
-        )}
+        </div>
+
+        <SortableTable
+          columns={columns}
+          data={paginatedUserData}
+          isFilterColumn={false}
+        />
 
         <div className="flex justify-center items-center gap-4 mt-4">
           <button
@@ -228,4 +199,4 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
   );
 };
 
-export default ParentsAndAllUserTable;
+export default AllUsersData;

@@ -2,149 +2,216 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getUserData } from "../../utils/read/api";
 import { set } from "react-hook-form";
 
-export const fetchAdmissionStudentData = createAsyncThunk("student/fetchAdmissionStudentData", async () => {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token is missing');
+export const fetchAdmissionStudentData = createAsyncThunk(
+  "student/fetchAdmissionStudentData",
+  async () => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Token is missing");
     const [studentListResponse] = await Promise.all([
-        getUserData(token, `/api/students/view_students`),
+      getUserData(token, `/api/students/view_students`),
     ]);
     return {
-        studentList: studentListResponse.data,
+      studentList: studentListResponse.data,
     };
-});
+  }
+);
 
-export const fetchUserOnlyStudentData = createAsyncThunk("student/fetchUserOnlyStudentData", async () => {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token is missing');
+export const fetchUserOnlyStudentData = createAsyncThunk(
+  "student/fetchUserOnlyStudentData",
+  async () => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Token is missing");
     const [studentListResponse] = await Promise.all([
-        getUserData(token, `/api/students/view_useronly_students`),
+      getUserData(token, `/api/students/view_useronly_students`),
     ]);
     return {
-        userOnlyStudents: studentListResponse,
+      userOnlyStudents: studentListResponse,
     };
-});
-export const fetchSingleStudentData = createAsyncThunk("student/fetchSingleStudentData", async (id) => {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token is missing');
+  }
+);
+export const fetchSingleStudentData = createAsyncThunk(
+  "student/fetchSingleStudentData",
+  async (id) => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Token is missing");
     const [studentResponse] = await Promise.all([
-        getUserData(token, `/api/students/view_single_student?id=${id}`),
+      getUserData(token, `/api/students/view_single_student?id=${id}`),
     ]);
     return {
-        singleStudent: studentResponse,
+      singleStudent: studentResponse,
     };
-});
-export const fetchSingleStudentDataByStudentCode = createAsyncThunk("student/fetchSingleStudentDataByStudentCode", async (id) => {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token is missing');
+  }
+);
+export const fetchSingleStudentDataByStudentCode = createAsyncThunk(
+  "student/fetchSingleStudentDataByStudentCode",
+  async (id) => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Token is missing");
     const [studentResponse] = await Promise.all([
-        getUserData(token, `/api/students/view_single_student_withcode?id=${id}`),
+      getUserData(token, `/api/students/view_single_student_withcode?id=${id}`),
     ]);
     return {
-        academicStudent: studentResponse,
+      academicStudent: studentResponse,
     };
-});
-export const fetchSingleStudentDataByStudentCodeAndSession = createAsyncThunk("student/fetchSingleStudentDataByStudentCodeAndSession", async ({id, sessionId}) => {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('Token is missing');
+  }
+);
+export const fetchSingleStudentDataByStudentCodeAndSession = createAsyncThunk(
+  "student/fetchSingleStudentDataByStudentCodeAndSession",
+  async ({ id, sessionId }) => {
+    const token = localStorage.getItem("token");
+    if (!token) throw new Error("Token is missing");
     const [studentResponse] = await Promise.all([
-        getUserData(token, `/api/students/view_single_student_withcode_and_session?id=${id}&sessionId=${sessionId}`),
+      getUserData(
+        token,
+        `/api/students/view_single_student_withcode_and_session?id=${id}&sessionId=${sessionId}`
+      ),
     ]);
     return {
-        academicClassStudent: studentResponse,
+      academicClassStudent: studentResponse,
     };
-});
+  }
+);
 
 const initialState = {
-    studentList: [],
-    userOnlyStudents: [],
-    singleStudent: null, 
-    editMode: 0,
-    status: 'idle',
-    error: null,
-    admittedStudent:{},
-    academicClassStudent:{},
-    academicClassStudentError: null,
-    filteredStudent: null,
-    characterReportEditMode: null,
+  studentList: [],
+  userOnlyStudents: [],
+  singleStudent: null,
+  editMode: 0,
+  status: "idle",
+  error: null,
+  admittedStudent: {},
+  academicClassStudent: {},
+  academicClassStudentError: null,
+  filteredStudent: null,
+  characterReportEditMode: null,
+  parentsData: [],
+  allUsers: [],
 };
 
 const classSlice = createSlice({
-    name: "student",
-    initialState,
-    reducers: {
-        setEditMode: (state, action) => {
-            state.editMode = action.payload;
-        },
-        setFilteredStudent: (state, action) => {
-            state.filteredStudent = action.payload;
-        },
-        setCharacterReportEditMode: (state, action) => {
-            state.characterReportEditMode = action.payload;
+  name: "student",
+  initialState,
+  reducers: {
+    setEditMode: (state, action) => {
+      state.editMode = action.payload;
+    },
+    setFilteredStudent: (state, action) => {
+      state.filteredStudent = action.payload;
+    },
+    setCharacterReportEditMode: (state, action) => {
+      state.characterReportEditMode = action.payload;
+    },
+    setParentsData: (state, action) => {
+      state.parentsData = action.payload;
+    },
+    deleteParentData: (state, action) => {
+      state.parentsData = state.parentsData.filter(
+        (student) => student.StudentCode !== action.payload
+      );
+    },
+    clearParentsData: (state) => {
+      state.parentsData = [];
+    },
+    setAllUsersData: (state, action) => {
+      state.allUsers = action.payload;
+    },
+    deleteAllUsersData: (state, action) => {
+      state.allUsers = state.allUsers.filter(
+        (user) => user.UserCode !== action.payload
+      );
+    },
+    clearAllUsersData: (state) => {
+      state.allUsers = [];
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchAdmissionStudentData.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(fetchAdmissionStudentData.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.studentList = action.payload.studentList;
+      })
+      .addCase(fetchAdmissionStudentData.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(fetchUserOnlyStudentData.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(fetchUserOnlyStudentData.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.userOnlyStudents = action.payload.userOnlyStudents;
+      })
+      .addCase(fetchUserOnlyStudentData.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(fetchSingleStudentData.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(fetchSingleStudentData.fulfilled, (state, action) => {
+        state.status = "succeeded";
+        state.singleStudent = action.payload.singleStudent;
+      })
+      .addCase(fetchSingleStudentData.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.error.message;
+      })
+      .addCase(fetchSingleStudentDataByStudentCode.pending, (state) => {
+        state.status = "loading";
+        state.error = null;
+      })
+      .addCase(
+        fetchSingleStudentDataByStudentCode.fulfilled,
+        (state, action) => {
+          state.status = "succeeded";
+          state.admittedStudent = action.payload.academicStudent;
         }
-    },
-    extraReducers: (builder) => {
-        builder
-            .addCase(fetchAdmissionStudentData.pending, (state) => {
-                state.status = 'loading';
-                state.error = null;
-            })
-            .addCase(fetchAdmissionStudentData.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.studentList = action.payload.studentList;
-            })
-            .addCase(fetchAdmissionStudentData.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.error.message;
-            })
-            .addCase(fetchUserOnlyStudentData.pending, (state) => {
-                state.status = 'loading';
-                state.error = null;
-            })
-            .addCase(fetchUserOnlyStudentData.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.userOnlyStudents = action.payload.userOnlyStudents;
-            })
-            .addCase(fetchUserOnlyStudentData.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.error.message;
-            })
-            .addCase(fetchSingleStudentData.pending, (state) => {
-                state.status = 'loading';
-                state.error = null;
-            })
-            .addCase(fetchSingleStudentData.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.singleStudent = action.payload.singleStudent;
-            })
-            .addCase(fetchSingleStudentData.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.error.message;
-            })
-            .addCase(fetchSingleStudentDataByStudentCode.pending, (state) => {
-                state.status = 'loading';
-                state.error = null;
-            })
-            .addCase(fetchSingleStudentDataByStudentCode.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.admittedStudent = action.payload.academicStudent; 
-            })
-            .addCase(fetchSingleStudentDataByStudentCode.rejected, (state, action) => {
-                state.status = 'failed';
-                state.error = action.error.message;
-            })
-            .addCase(fetchSingleStudentDataByStudentCodeAndSession.pending, (state) => {
-                state.status = 'loading';
-                state.academicClassStudentError = null;
-            })
-            .addCase(fetchSingleStudentDataByStudentCodeAndSession.fulfilled, (state, action) => {
-                state.status = 'succeeded';
-                state.admittedStudent = action.payload.academicClassStudent; 
-            })
-            .addCase(fetchSingleStudentDataByStudentCodeAndSession.rejected, (state, action) => {
-                state.status = 'failed';
-                state.academicClassStudentError = action.error.message;
-            });
-    },
+      )
+      .addCase(
+        fetchSingleStudentDataByStudentCode.rejected,
+        (state, action) => {
+          state.status = "failed";
+          state.error = action.error.message;
+        }
+      )
+      .addCase(
+        fetchSingleStudentDataByStudentCodeAndSession.pending,
+        (state) => {
+          state.status = "loading";
+          state.academicClassStudentError = null;
+        }
+      )
+      .addCase(
+        fetchSingleStudentDataByStudentCodeAndSession.fulfilled,
+        (state, action) => {
+          state.status = "succeeded";
+          state.admittedStudent = action.payload.academicClassStudent;
+        }
+      )
+      .addCase(
+        fetchSingleStudentDataByStudentCodeAndSession.rejected,
+        (state, action) => {
+          state.status = "failed";
+          state.academicClassStudentError = action.error.message;
+        }
+      );
+  },
 });
-export const { setEditMode, setFilteredStudent, setCharacterReportEditMode } = classSlice.actions;
+export const {
+  setEditMode,
+  setFilteredStudent,
+  setCharacterReportEditMode,
+  setParentsData,
+  deleteParentData,
+  clearParentsData,
+  setAllUsersData,
+  deleteAllUsersData,
+  clearAllUsersData
+} = classSlice.actions;
 export default classSlice.reducer;

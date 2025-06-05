@@ -14,6 +14,7 @@ export const smsSlice = createApi({
       return headers;
     },
   }),
+  tagTypes: ["Template"],
   endpoints: (builder) => ({
     postSMSSend: builder.mutation({
       query: (data) => ({
@@ -21,9 +22,12 @@ export const smsSlice = createApi({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["StudentReports"],
+    }),
+    getSMSTemplates: builder.query({
+      query: () => "templates",
+      providesTags: ["Template"],
     }),
   }),
 });
 
-export const { usePostSMSSendMutation } = smsSlice;
+export const { usePostSMSSendMutation, useGetSMSTemplatesQuery } = smsSlice;

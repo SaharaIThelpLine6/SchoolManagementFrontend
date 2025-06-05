@@ -17,6 +17,7 @@ import EditStudentReport from "./Forms/EditStudentReport";
 import SMSTemplate from "../view/general-information/sms/SMSTemplate";
 import SMSBuy from "../view/general-information/sms/SMSBuy";
 import PaymentGetway from "../view/general-information/sms/PaymentGetway";
+import SuccessAndError from "../view/general-information/sms/SuccessAndError";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -98,6 +99,7 @@ const DefaultModal = () => {
                 {modalType === "SMS_TEMPLATES" && <SMSTemplate />}
                 {modalType === "SMS_BUY" && <SMSBuy />}
                 {modalType === "PAYMENT_GETWAY" && <PaymentGetway />}
+                {modalType === "SUCCESSANDERROR" && <SuccessAndError />}
               </div>
             )}
           </div>

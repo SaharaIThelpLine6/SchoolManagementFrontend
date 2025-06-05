@@ -1,5 +1,5 @@
-import { useState, useCallback, useMemo } from "react";
-import { useDispatch } from "react-redux";
+import { useState, useCallback, useMemo, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { FormProvider, useForm } from "react-hook-form";
 import useTranslate from "../utils/Translate";
 import Button from "../components/Button/Button";
@@ -8,6 +8,13 @@ import ParentsAndAllUserTable from "../view/general-information/sms/ParentsAndAl
 import OthersTable from "../view/general-information/sms/OthersTable";
 import { showModal } from "../utils/ModalControlar";
 import { usePostSMSSendMutation } from "../features/sms/smsSlice";
+import {
+  clearAllUsersData,
+  clearParentsData,
+} from "../features/student/studentSlice";
+import AllUsersData from "../view/general-information/sms/AllUsersData";
+import Swal from "sweetalert2";
+import { setSuccessAndErrorMessage } from "../features/sms/smsReducersSlice";
 
 const SMS = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -15,6 +22,15 @@ const SMS = ({ pageTitle }) => {
   const { handleSubmit } = methods;
   const dispatch = useDispatch();
 
+  const { allUsers, parentsData } = useSelector((state) => state.student); // ✅ Access correct slice
+  const smsTemplateData = useSelector(
+    (state) => state.smsSuccessError.smsTemplate
+  );
+
+
+
+  const parentsNumbers = parentsData.map((student) => student.Mobile1);
+  const allUserNumbers = allUsers.map((student) => student.Mobile1);
   // State management
   const [selectedRecipient, setSelectedRecipient] = useState("single");
   const [mobileNumbers, setMobileNumbers] = useState([""]);
@@ -25,14 +41,16 @@ const SMS = ({ pageTitle }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Calculate parents mobile numbers based on selected recipient
-  const parentsMobileNumbers = useMemo(() => {
-    return selectedRecipient === "guardian" ? [] : [];
-  }, [selectedRecipient]);
-
   // Filter empty numbers
-  const filteredOthersNumbers = othersMobileNumbers.filter(num => num.trim() !== "");
-
+  const filteredOthersNumbers = othersMobileNumbers.filter(
+    (num) => num.trim() !== ""
+  );
+  // Add useEffect to handle template selection
+  useEffect(() => {
+    if (smsTemplateData) {
+      setMessage(smsTemplateData);
+    }
+  }, [smsTemplateData]);
   // API mutation
   const [sendSMS] = usePostSMSSendMutation();
 
@@ -53,13 +71,21 @@ const SMS = ({ pageTitle }) => {
     showModal(translate("SMS Buy"), "SMS_BUY");
   }, [translate]);
 
+  // Success and error message
+  const handleSuccessAndErrorOpenModal = useCallback(() => {
+    showModal(translate("Success and Error"), "SUCCESSANDERROR");
+  }, [translate]);
+
   const validateMobileNumber = (number) => {
     if (!number) return "";
-    if (number.length !== 11) return translate("Mobile number must be 11 digits");
-    
+    if (number.length !== 11)
+      return translate("Mobile number must be 11 digits");
+
     const validPrefixes = ["013", "014", "015", "016", "017", "018", "019"];
     if (!validPrefixes.includes(number.substring(0, 3))) {
-      return translate("Invalid mobile number. Must start with 013, 014, 015, 016, 017, 018, or 019");
+      return translate(
+        "Invalid mobile number. Must start with 013, 014, 015, 016, 017, 018, or 019"
+      );
     }
     return "";
   };
@@ -72,32 +98,46 @@ const SMS = ({ pageTitle }) => {
 
   const handleMessageChange = (e) => {
     const val = e.target.value;
+
+    // Limit max characters
     if (val.length > 765) return;
 
-    const isBangla = /^[\u0980-\u09FF\s.,!?()'"“”‘’\-০-৯\n\r\t]*$/;
-    const isEnglish = /^[A-Za-z0-9\s.,!?()'"“”‘’\-`\n\r\t]*$/;
-
+    // Empty message handling
     if (val === "") {
       setMessage(val);
       setErrorMessage("");
-    } else if (
-      (messageType === "bangla" && isBangla.test(val)) ||
-      (messageType === "english" && isEnglish.test(val))
-    ) {
-      setMessage(val);
-      setErrorMessage("");
-    } else {
-      setErrorMessage(
-        messageType === "bangla" 
-          ? translate("Write only in Bengali.") 
-          : translate("Write only in English.")
-      );
+      return;
     }
+
+    // Bangla and English regex (currently not enforced)
+    // const isBangla = /^[\u0980-\u09FF\s.,!?()'"“”‘’\-০-৯\n\r\t]*$/;
+    // const isEnglish = /^[A-Za-z0-9\s.,!?()'"“”‘’\-`\n\r\t]*$/;
+
+    // if (
+    //   (messageType === "bangla" && isBangla.test(val)) ||
+    //   (messageType === "english" && isEnglish.test(val))
+    // ) {
+    //   setMessage(val);
+    //   setErrorMessage("");
+    // } else {
+    //   setErrorMessage(
+    //     messageType === "bangla"
+    //       ? translate("Write only in Bengali.")
+    //       : translate("Write only in English.")
+    //   );
+    //   return;
+    // }
+
+    // Default behavior (no language validation)
+    setMessage(val);
+    setErrorMessage("");
   };
 
   const handleChangeMessageReci = (value) => {
     setSelectedRecipient(value);
     setMobileNumbers([""]);
+    dispatch(clearParentsData());
+    dispatch(clearAllUsersData());
   };
 
   const getSMSInfo = (text) => {
@@ -109,33 +149,56 @@ const SMS = ({ pageTitle }) => {
 
     if (len <= firstSMS) return { charCount: len, smsCount: 1 };
 
-    return { 
-      charCount: len, 
-      smsCount: 1 + Math.ceil((len - firstSMS) / nextSMS) 
+    return {
+      charCount: len,
+      smsCount: 1 + Math.ceil((len - firstSMS) / nextSMS),
     };
   };
 
   const { charCount, smsCount } = getSMSInfo(message);
 
   const onSubmit = async () => {
-    const receivers = selectedRecipient === "others" 
-      ? filteredOthersNumbers 
-      : mobileNumbers;
+    let receivers = [];
 
-    if (!receivers.length || !message) {
+    if (selectedRecipient === "others") {
+      receivers = filteredOthersNumbers;
+    } else if (selectedRecipient === "single") {
+      receivers = mobileNumbers;
+    } else if (selectedRecipient === "guardian") {
+      receivers = parentsNumbers;
+    } else if (selectedRecipient === "all_users") {
+      receivers = allUserNumbers;
+    }
+
+    // Basic validation
+    if (!receivers.length || !message?.trim()) {
       setErrorMessage(translate("Please provide all required information"));
       return;
     }
 
     setIsLoading(true);
-    
+    setErrorMessage(""); // Clear previous error
+
     try {
       const response = await sendSMS({
         receiver: receivers,
-        message: message,
+        message: message.trim(),
       }).unwrap();
-      
-      console.log("SMS sent successfully:", response);
+
+      dispatch(clearParentsData());
+      dispatch(clearAllUsersData());
+      dispatch(setSuccessAndErrorMessage(response.results));
+
+      handleSuccessAndErrorOpenModal();
+
+      // Show success alert
+      // Swal.fire({
+      //   icon: "success",
+      //   title: translate("Success"),
+      //   text: translate("SMS sent successfully!"),
+      //   confirmButtonColor: "#3085d6",
+      // });
+
       // Reset form on success
       setMessage("");
       setMobileNumbers([""]);
@@ -149,171 +212,198 @@ const SMS = ({ pageTitle }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-2 p-4 gap-10 sm:gap-3 font-SolaimanLipi bg-white md:p-4 rounded-xl shadow-lg">
-      <div className="rounded-lg bg-white shadow-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-2 pb-3">
-          <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4">
-            {translate("SMS Sending Form")}
-          </h2>
-          <div className="flex justify-end items-center">
-            <Button onClick={handleSMSBuyOpenModal}>
-              {translate("Buy SMS")}
-            </Button>
-          </div>
-        </div>
-
-        {/* Recipient Selection */}
-        <div className="grid grid-cols-2 gap-2 md:gap-3">
-          {options.map((option) => (
-            <label
-              key={option.value}
-              className="flex items-center p-2 space-x-2 border border-gray-200 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer has-[:checked]:bg-indigo-100 has-[:checked]:border-indigo-300"
-            >
-              <input
-                type="radio"
-                name="messageRecipient"
-                value={option.value}
-                checked={selectedRecipient === option.value}
-                onChange={() => handleChangeMessageReci(option.value)}
-                className="text-indigo-600 focus:ring-indigo-500"
-              />
-              <span className="text-sm 2xl:text-base font-semibold 2xl:font-bold text-gray-700">
-                {translate(option.label)}
-              </span>
-            </label>
-          ))}
-        </div>
-
-        <FormProvider {...methods}>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
-              {/* Mobile Input */}
-              <div className="flex flex-col gap-1">
-                <Input
-                  label={`${translate("Mobile Number")} :`}
-                  placeholder={translate("Enter mobile number")}
-                  type="tel"
-                  name="mobile"
-                  value={mobileNumbers[0] || ""}
-                  onChange={handleMobileChange}
-                  disabled={selectedRecipient !== "single"}
-                  error={mobileError}
-                />
-              </div>
-
-              {/* Message Type */}
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-medium text-gray-700">
-                  {`${translate("Message Type")} :`}
-                </span>
-                <div className="flex items-center gap-4">
-                  {["bangla", "english"].map((type) => (
-                    <label key={type} className="flex items-center gap-2 text-sm">
-                      <input
-                        type="radio"
-                        name="messageType"
-                        value={type}
-                        checked={messageType === type}
-                        onChange={() => {
-                          setMessageType(type);
-                          setMessage("");
-                          setErrorMessage("");
-                        }}
-                        className="accent-custom-focus text-gray-700"
-                      />
-                      {translate(type.charAt(0).toUpperCase() + type.slice(1))}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Message Template Button */}
-              <div className="col-span-2">
-                <Button className="w-full" onClick={handleOpenModal} type="button">
-                  {translate("Message Template")}
+    <>
+      <div className="sm:gap-3 font-SolaimanLipi bg-white md:p-4 rounded-xl shadow-lg">
+      
+        <div className="grid grid-cols-1 xl:grid-cols-2 p-4 gap-10">
+          <div className="rounded-lg bg-white shadow-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 pb-3">
+              <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4">
+                {translate("SMS Sending Form")}
+              </h2>
+              <div className="flex justify-end items-center">
+                <Button onClick={handleSMSBuyOpenModal}>
+                  {translate("Buy SMS")}
                 </Button>
               </div>
-
-              {/* Message Textarea */}
-              <div className="flex flex-col gap-1 col-span-2">
-                <label className="text-sm font-medium text-gray-700">
-                  {`${translate("Message")} :`}
-                </label>
-                <textarea
-                  name="message"
-                  placeholder={translate("Enter your message")}
-                  rows={4}
-                  value={message}
-                  onChange={handleMessageChange}
-                  className="p-2 w-full rounded border-[1.5px] h-[100px] text-black outline-none text-[14px] transition border-stroke focus:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200"
-                />
-                {errorMessage && (
-                  <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
-                )}
-              </div>
-
-              {/* Character/SMS Counter */}
-              <div className="space-y-3 col-span-2 text-center">
-                <div className="text-gray-700 text-sm 2xl:text-base font-normal">
-                  <p className={charCount >= 765 ? "text-red-600 font-bold" : ""}>
-                    {charCount}/765 {translate("Characters typed")}
-                  </p>
-                  <p>
-                    {smsCount} {translate("SMS")} ({translate("70 Char/SMS")},{" "}
-                    {translate("next SMS from 67 chars")})
-                  </p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-2">
-                  <Button
-                    className="bg-green-500 hover:bg-green-600 transition-colors"
-                    disabled={
-                      !!mobileError ||
-                      (selectedRecipient === "single" && !mobileNumbers[0]) ||
-                      !message ||
-                      isLoading
-                    }
-                    type="submit"
-                    loading={isLoading}
-                  >
-                    {translate("Send SMS")}
-                  </Button>
-                  <Button
-                    className="bg-red-500 hover:bg-red-600 transition-colors"
-                    onClick={() => {
-                      setMessage("");
-                      setErrorMessage("");
-                      setMobileNumbers([""]);
-                      setOthersMobileNumbers([""]);
-                      setMobileError("");
-                    }}
-                    type="button"
-                  >
-                    {translate("Reset SMS")}
-                  </Button>
-                </div>
-              </div>
             </div>
-          </form>
-        </FormProvider>
-      </div>
 
-      {/* Tables for different recipient types */}
-      {["guardian", "all_users"].includes(selectedRecipient) && (
-        <ParentsAndAllUserTable
-          pageTitle={pageTitle}
-          checkedValue={selectedRecipient}
-        />
-      )}
-      {selectedRecipient === "others" && (
-        <OthersTable
-          pageTitle={pageTitle}
-          setMobileNumbers={setOthersMobileNumbers}
-          mobileNumbers={othersMobileNumbers}
-        />
-      )}
-    </div>
+            {/* Recipient Selection */}
+            <div className="grid grid-cols-2 gap-2 md:gap-3">
+              {options.map((option) => (
+                <label
+                  key={option.value}
+                  className="flex items-center p-2 space-x-2 border border-gray-200 rounded-lg hover:bg-indigo-50 transition-colors cursor-pointer has-[:checked]:bg-indigo-100 has-[:checked]:border-indigo-300"
+                >
+                  <input
+                    type="radio"
+                    name="messageRecipient"
+                    value={option.value}
+                    checked={selectedRecipient === option.value}
+                    onChange={() => handleChangeMessageReci(option.value)}
+                    className="text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span className="text-sm 2xl:text-base font-semibold 2xl:font-bold text-gray-700">
+                    {translate(option.label)}
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            <FormProvider {...methods}>
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
+                  {/* Mobile Input */}
+                  <div className="flex flex-col gap-1">
+                    <Input
+                      label={`${translate("Mobile Number")} :`}
+                      placeholder={translate("Enter mobile number")}
+                      type="tel"
+                      name="mobile"
+                      value={mobileNumbers[0] || ""}
+                      onChange={handleMobileChange}
+                      disabled={selectedRecipient !== "single"}
+                      error={mobileError}
+                    />
+                  </div>
+
+                  {/* Message Type */}
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-medium text-gray-700">
+                      {`${translate("Message Type")} :`}
+                    </span>
+                    <div className="flex items-center gap-4">
+                      {["bangla", "english"].map((type) => (
+                        <label
+                          key={type}
+                          className="flex items-center gap-2 text-sm"
+                        >
+                          <input
+                            type="radio"
+                            name="messageType"
+                            value={type}
+                            checked={messageType === type}
+                            onChange={() => {
+                              setMessageType(type);
+                              setMessage("");
+                              setErrorMessage("");
+                            }}
+                            className="accent-custom-focus text-gray-700"
+                          />
+                          {translate(
+                            type.charAt(0).toUpperCase() + type.slice(1)
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Message Template Button */}
+                  <div className="col-span-2">
+                    <Button
+                      className="w-full"
+                      onClick={handleOpenModal}
+                      type="button"
+                    >
+                      {translate("Message Template")}
+                    </Button>
+                  </div>
+
+                  {/* Message Textarea */}
+                  <div className="flex flex-col gap-1 col-span-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      {`${translate("Message")} :`}
+                    </label>
+                    <textarea
+                      name="message"
+                      placeholder={translate("Enter your message")}
+                      rows={4}
+                      value={message}
+                      onChange={handleMessageChange}
+                      className="p-2 w-full rounded border-[1.5px] h-[100px] text-black outline-none text-[14px] transition border-stroke focus:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200"
+                    />
+
+                    {/* Uncomment below to show error message */}
+                    {/* {errorMessage && (
+    <p className="text-red-500 text-sm mt-1">
+      {errorMessage}
+    </p>
+  )} */}
+                  </div>
+
+                  {/* Character/SMS Counter */}
+                  <div className="space-y-3 col-span-2 text-center">
+                    <div className="text-gray-700 text-sm 2xl:text-base font-normal">
+                      <p
+                        className={
+                          charCount >= 765 ? "text-red-600 font-bold" : ""
+                        }
+                      >
+                        {charCount}/765 {translate("Characters typed")}
+                      </p>
+                      <p>
+                        {smsCount} {translate("SMS")} (
+                        {translate("70 Char/SMS")},{" "}
+                        {translate("next SMS from 67 chars")})
+                      </p>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-2">
+                      <Button
+                        className="bg-green-500 hover:bg-green-600 transition-colors"
+                        disabled={
+                          !!mobileError ||
+                          (selectedRecipient === "single" &&
+                            !mobileNumbers[0]) ||
+                          !message ||
+                          isLoading
+                        }
+                        type="submit"
+                        loading={isLoading}
+                      >
+                        {translate("Send SMS")}
+                      </Button>
+                      <Button
+                        className="bg-red-500 hover:bg-red-600 transition-colors"
+                        onClick={() => {
+                          setMessage("");
+                          setErrorMessage("");
+                          setMobileNumbers([""]);
+                          setOthersMobileNumbers([""]);
+                          setMobileError("");
+                        }}
+                        type="button"
+                      >
+                        {translate("Reset SMS")}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </FormProvider>
+          </div>
+
+          {/* Tables for different recipient types */}
+          {["guardian"].includes(selectedRecipient) && (
+            <ParentsAndAllUserTable
+              pageTitle={pageTitle}
+              checkedValue={selectedRecipient}
+            />
+          )}
+          {["all_users"].includes(selectedRecipient) && (
+            <AllUsersData pageTitle={pageTitle} />
+          )}
+          {selectedRecipient === "others" && (
+            <OthersTable
+              pageTitle={pageTitle}
+              setMobileNumbers={setOthersMobileNumbers}
+              mobileNumbers={othersMobileNumbers}
+            />
+          )}
+        </div>
+      </div>
+    </>
   );
 };
 
