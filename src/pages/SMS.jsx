@@ -14,7 +14,11 @@ import {
 } from "../features/student/studentSlice";
 import AllUsersData from "../view/general-information/sms/AllUsersData";
 import Swal from "sweetalert2";
-import { setSuccessAndErrorMessage } from "../features/sms/smsReducersSlice";
+import {
+  clearSmsTemplate,
+  clearSuccessAndErrorMessage,
+  setSuccessAndErrorMessage,
+} from "../features/sms/smsReducersSlice";
 
 const SMS = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -26,8 +30,7 @@ const SMS = ({ pageTitle }) => {
   const smsTemplateData = useSelector(
     (state) => state.smsSuccessError.smsTemplate
   );
-
-
+  const { isOpen, id } = useSelector((state) => state.modal);
 
   const parentsNumbers = parentsData.map((student) => student.Mobile1);
   const allUserNumbers = allUsers.map((student) => student.Mobile1);
@@ -51,6 +54,13 @@ const SMS = ({ pageTitle }) => {
       setMessage(smsTemplateData);
     }
   }, [smsTemplateData]);
+
+  useEffect(() => {
+    if (!isOpen) {
+      dispatch(clearSuccessAndErrorMessage());
+    }
+  }, [isOpen]);
+  
   // API mutation
   const [sendSMS] = usePostSMSSendMutation();
 
@@ -138,6 +148,7 @@ const SMS = ({ pageTitle }) => {
     setMobileNumbers([""]);
     dispatch(clearParentsData());
     dispatch(clearAllUsersData());
+    dispatch(clearSmsTemplate());
   };
 
   const getSMSInfo = (text) => {
@@ -187,6 +198,7 @@ const SMS = ({ pageTitle }) => {
 
       dispatch(clearParentsData());
       dispatch(clearAllUsersData());
+      dispatch(clearSmsTemplate());
       dispatch(setSuccessAndErrorMessage(response.results));
 
       handleSuccessAndErrorOpenModal();
@@ -214,7 +226,6 @@ const SMS = ({ pageTitle }) => {
   return (
     <>
       <div className="sm:gap-3 font-SolaimanLipi bg-white md:p-4 rounded-xl shadow-lg">
-      
         <div className="grid grid-cols-1 xl:grid-cols-2 p-4 gap-10">
           <div className="rounded-lg bg-white shadow-sm">
             <div className="grid grid-cols-1 sm:grid-cols-2 pb-3">
