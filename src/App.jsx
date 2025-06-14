@@ -83,7 +83,26 @@ function App() {
         <Routes>
           <Route path="/" element={<DefaultLayout />}>
             <Route path="/" element={<Home pageTitle="Home" />} />
-
+            <Route path="general-info">
+              <Route
+                path="users-info"
+                element={<User />}
+                pageTitle="User Information"
+              />
+              <Route
+                path="user-reports"
+                element={<UserReports pageTitle="User Reports" />}
+              />
+              <Route path="sms" element={<SMS pageTitle="SMS List" />} />
+              <Route
+                path="institution-info"
+                element={<Setting pageTitle="Setting" />}
+              />
+              <Route
+                path="month-name-list"
+                element={<MonthListTable pageTitle="Month Name List" />}
+              />
+            </Route>
             <Route path="students">
               <Route index element={<AddStudent pageTitle="Add Student" />} />
               <Route
@@ -141,23 +160,6 @@ function App() {
               <Route
                 path="vacation/type-of-vacation"
                 element={<TypeOfVacation pageTitle="Type of Vacation" />}
-              />
-            </Route>
-
-            <Route path="general-info">
-              <Route path="users-info" element={<User /> } pageTitle="User Information"/>
-              <Route
-                path="user-reports"
-                element={<UserReports pageTitle="User Reports" />}
-              />
-              <Route path="sms" element={<SMS pageTitle="SMS List" />} />
-              <Route
-                path="institution-info"
-                element={<Setting pageTitle="Setting" />}
-              />
-              <Route
-                path="month-name-list"
-                element={<MonthListTable pageTitle="Month Name List" />}
               />
             </Route>
 

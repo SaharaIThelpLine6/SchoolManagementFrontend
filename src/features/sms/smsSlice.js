@@ -27,7 +27,11 @@ export const smsSlice = createApi({
       query: () => "templates",
       providesTags: ["Template"],
     }),
+    getCheckBalance: builder.query({
+      query: () => "check_balance",
+      providesTags: ["Template"],
+    }),
   }),
 });
 
-export const { usePostSMSSendMutation, useGetSMSTemplatesQuery } = smsSlice;
+export const { usePostSMSSendMutation, useGetSMSTemplatesQuery, useGetCheckBalanceQuery } = smsSlice;

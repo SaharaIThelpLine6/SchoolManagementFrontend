@@ -7,7 +7,7 @@ import Input from "../components/Input/Input";
 import ParentsAndAllUserTable from "../view/general-information/sms/ParentsAndAllUserTable";
 import OthersTable from "../view/general-information/sms/OthersTable";
 import { showModal } from "../utils/ModalControlar";
-import { usePostSMSSendMutation } from "../features/sms/smsSlice";
+import { useGetCheckBalanceQuery, usePostSMSSendMutation } from "../features/sms/smsSlice";
 import {
   clearAllUsersData,
   clearParentsData,
@@ -31,6 +31,11 @@ const SMS = ({ pageTitle }) => {
     (state) => state.smsSuccessError.smsTemplate
   );
   const { isOpen, id } = useSelector((state) => state.modal);
+
+  // 
+  const {data: checkBalanceData, isError, isSuccess} = useGetCheckBalanceQuery()
+
+
 
   const parentsNumbers = parentsData.map((student) => student.Mobile1);
   const allUserNumbers = allUsers.map((student) => student.Mobile1);
@@ -60,7 +65,7 @@ const SMS = ({ pageTitle }) => {
       dispatch(clearSuccessAndErrorMessage());
     }
   }, [isOpen]);
-  
+
   // API mutation
   const [sendSMS] = usePostSMSSendMutation();
 
@@ -226,9 +231,24 @@ const SMS = ({ pageTitle }) => {
   return (
     <>
       <div className="sm:gap-3 font-SolaimanLipi bg-white md:p-4 rounded-xl shadow-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-2">
+          <h2 className="text-lg md:text-xl font-bold text-gray-800">
+            {translate("Send single and multiple SMS")}
+          </h2>
+          <div className="flex flex-row justify-center sm:justify-end items-end md:items-center gap-2 md:gap-4">
+            <h2 className="text-lg md:text-xl font-bold text-gray-800">
+              {translate("Balance") + " :"}
+            </h2>
+            <div className="flex gap-3 text-sm md:text-base text-gray-700 font-medium">
+              <h3>mask: {checkBalanceData?.mask}</h3>
+              <h3>nonmask:{checkBalanceData?.nonmask}</h3>
+              <h3>voice: {checkBalanceData?.voice}</h3>
+            </div>
+          </div>
+        </div>
         <div className="grid grid-cols-1 xl:grid-cols-2 p-4 gap-10">
           <div className="rounded-lg bg-white shadow-sm">
-            <div className="grid grid-cols-1 sm:grid-cols-2 pb-3">
+            <div className="grid grid-cols-2 pb-3">
               <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4">
                 {translate("SMS Sending Form")}
               </h2>

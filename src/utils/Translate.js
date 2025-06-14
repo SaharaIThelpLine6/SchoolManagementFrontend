@@ -16,6 +16,8 @@ const useTranslate = () => {
     Libery: "লাইব্রেরি",
     Others: "অন্যান্য",
     SMS: "এসএমএস",
+    Balance: "ব্যালেন্স",
+    "Send single and multiple SMS": "একক এবং একাধিক এসএমএস পাঠান",
     "SMS Sending Form": "মেসেজ প্রেরণ ফর্ম",
     "Missing or invalid data provided": "অনুপস্থিত বা অবৈধ তথ্য সরবরাহ করা হয়েছে",
     "Buy SMS": "মেসেজ কিনতে",

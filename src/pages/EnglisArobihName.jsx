@@ -20,6 +20,7 @@ import bnBijoy2Unicode from "../utils/conveter";
 import useTranslate from "../utils/Translate";
 import { toast } from "react-toastify";
 import { showModal } from "../utils/ModalControlar";
+import { TbFilterPlus } from "react-icons/tb";
 
 const EnglisArobihName = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -65,7 +66,7 @@ const EnglisArobihName = ({ pageTitle }) => {
       dispatch(setCharacterReportEditMode(null));
 
       methods.reset({
-        UserID: filteredStudent.UserID, // UserID 
+        UserID: filteredStudent.UserID, // UserID
         StudentCode: filteredStudent.StudentCode,
         StudentName: bnBijoy2Unicode(filteredStudent.StudentName),
         FatherName: bnBijoy2Unicode(filteredStudent.FatherName),
@@ -115,14 +116,30 @@ const EnglisArobihName = ({ pageTitle }) => {
     try {
       const convertedData = {
         UserID: data.UserID, // Make sure UserID
-        EnglishName: data.EnglishName ? convertBijoyToBengali(data.EnglishName) : null,
-        EnglishFather: data.EnglishFather ? convertBijoyToBengali(data.EnglishFather) : null,
-        EnglishMother: data.EnglishMother ? convertBijoyToBengali(data.EnglishMother) : null,
-        EnglishShortAdd: data.EnglishShortAdd ? convertBijoyToBengali(data.EnglishShortAdd) : null,
-        ArabicName: data.ArabicName ? convertBijoyToBengali(data.ArabicName) : null,
-        ArabicFather: data.ArabicFather ? convertBijoyToBengali(data.ArabicFather) : null,
-        ArabicMother: data.ArabicMother ? convertBijoyToBengali(data.ArabicMother) : null,
-        ArabicShortAdd: data.ArabicShortAdd ? convertBijoyToBengali(data.ArabicShortAdd) : null
+        EnglishName: data.EnglishName
+          ? convertBijoyToBengali(data.EnglishName)
+          : null,
+        EnglishFather: data.EnglishFather
+          ? convertBijoyToBengali(data.EnglishFather)
+          : null,
+        EnglishMother: data.EnglishMother
+          ? convertBijoyToBengali(data.EnglishMother)
+          : null,
+        EnglishShortAdd: data.EnglishShortAdd
+          ? convertBijoyToBengali(data.EnglishShortAdd)
+          : null,
+        ArabicName: data.ArabicName
+          ? convertBijoyToBengali(data.ArabicName)
+          : null,
+        ArabicFather: data.ArabicFather
+          ? convertBijoyToBengali(data.ArabicFather)
+          : null,
+        ArabicMother: data.ArabicMother
+          ? convertBijoyToBengali(data.ArabicMother)
+          : null,
+        ArabicShortAdd: data.ArabicShortAdd
+          ? convertBijoyToBengali(data.ArabicShortAdd)
+          : null,
       };
 
       await addEnglishArobicNameStudent(convertedData).unwrap();
@@ -169,8 +186,8 @@ const EnglisArobihName = ({ pageTitle }) => {
                     dispatch(setCharacterReportEditMode(null));
                   }}
                 />
-                <button type="button" onClick={handleOpenModal}>
-                  🔍
+                <button type="button" onClick={handleOpenModal} className="pr-2">
+                  <TbFilterPlus size={30}/>
                 </button>
               </div>
               {showSuggestions && (
@@ -250,18 +267,9 @@ const EnglisArobihName = ({ pageTitle }) => {
 
             {/* Arabic Column */}
             <div className="space-y-4">
-              <DefaultInput
-                registerKey={"ArabicName"}
-                label="اسم الطالب :"
-              />
-              <DefaultInput
-                registerKey={"ArabicFather"}
-                label="اسم الأب :"
-              />
-              <DefaultInput
-                registerKey={"ArabicMother"}
-                label="اسم الأم :"
-              />
+              <DefaultInput registerKey={"ArabicName"} label="اسم الطالب :" />
+              <DefaultInput registerKey={"ArabicFather"} label="اسم الأب :" />
+              <DefaultInput registerKey={"ArabicMother"} label="اسم الأم :" />
               <DefaultInput
                 registerKey={"ArabicShortAdd"}
                 label="عنوان قصير باللغة العربية :"
