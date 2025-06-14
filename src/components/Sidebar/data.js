@@ -87,32 +87,37 @@ export const menuData = [
       },
       {
         id: "9",
+        name: "Data Export",
+        route: "/students/data-export",
+      },
+      {
+        id: "10",
         name: "All Students",
         route: "/students",
       },
       {
-        id: "10",
+        id: "11",
         name: "Group Distribution",
         route: "/students/group-distribution",
       },
 
       {
-        id: "11",
+        id: "12",
         name: "Section",
         route: "/students/section",
       },
       {
-        id: "12",
+        id: "13",
         name: "Students Report",
         route: "/students/report",
       },
       {
-        id: "13",
+        id: "14",
         name: "Student Vacation",
         route: "/students/vacation",
       },
       {
-        id: "14",
+        id: "15",
         name: "Type of vacation",
         route: "/students/vacation/type-of-vacation",
       },

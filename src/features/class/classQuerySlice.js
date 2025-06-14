@@ -14,13 +14,17 @@ export const classSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['ClassList'], // Define your tag type
+  tagTypes: ["ClassList", "SubClassList"], // Define your tag type
   endpoints: (builder) => ({
     getClassList: builder.query({
       query: () => "view_class",
-      providesTags: ['ClassList'], // This query provides this tag
+      providesTags: ["ClassList"], // This query provides this tag
+    }),
+    getSubClassList: builder.query({
+      query: () => "view_subclass",
+      providesTags: ["SubClassList"], // This query provides this tag
     }),
   }),
 });
 
-export const { useGetClassListQuery } = classSlice;
+export const { useGetClassListQuery, useGetSubClassListQuery } = classSlice;

@@ -183,7 +183,7 @@ const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers  }) => {
   return (
     <div>
       <div className="flex justify-center items-center mb-4 border-b border-[#e9edf4] py-5 pt-0">
-        <h3 className="text-xl font-bold">
+        <h3 className="text-base md:text-lg font-bold">
          {translate("To create a list of mobile numbers by typing")}
         </h3>
       </div>

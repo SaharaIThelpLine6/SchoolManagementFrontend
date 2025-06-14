@@ -60,6 +60,7 @@ import StudentAdmissionForm from "./pages/public/studentAddmitionForm";
 import Loading from "./components/Loading/Loading";
 import useTranslate from "./utils/Translate";
 import ComingSoon from "./components/ComingSoon";
+import DataExport from "./pages/DataExport";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -133,6 +134,10 @@ function App() {
               <Route
                 path="id-print"
                 element={<ComingSoon pageTitle="Book List" />}
+              />
+              <Route
+                path="data-export"
+                element={<DataExport pageTitle="Data Export" />}
               />
               <Route
                 path="group-distribution"

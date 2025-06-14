@@ -249,7 +249,7 @@ const SMS = ({ pageTitle }) => {
         <div className="grid grid-cols-1 xl:grid-cols-2 p-4 gap-10">
           <div className="rounded-lg bg-white shadow-sm">
             <div className="grid grid-cols-2 pb-3">
-              <h2 className="text-lg md:text-xl font-bold text-gray-800 mb-3 md:mb-4">
+              <h2 className="text-base md:text-lg font-bold text-gray-800 mb-3 md:mb-4">
                 {translate("SMS Sending Form")}
               </h2>
               <div className="flex justify-end items-center">
