@@ -1,5 +1,11 @@
+import { useForm } from "react-hook-form";
+
 const AdmissionRegistration = () => {
+      const methods = useForm();
+    
     return (
+            <FormProvider {...{ methods }}>
+                
         <div className="pt-10 text-center place-items-center font-SolaimanLipi">
 
             <form className="w-[60%] shadow-[rgba(0,0,0,0.5)_0px_1px_0px_0px] rounded-md">
@@ -52,6 +58,7 @@ const AdmissionRegistration = () => {
 
             </form>
         </div>
+            </FormProvider>
     )
 }
 
