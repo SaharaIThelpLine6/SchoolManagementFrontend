@@ -18,6 +18,8 @@ import SMSTemplate from "../view/general-information/sms/SMSTemplate";
 import SMSBuy from "../view/general-information/sms/SMSBuy";
 import PaymentGetway from "../view/general-information/sms/PaymentGetway";
 import SuccessAndError from "../view/general-information/sms/SuccessAndError";
+import CreateDistribution from "../view/students/group-distribution/CreateDistribution";
+import Recordchange from "../view/students/group-distribution/Recordchange";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -100,6 +102,8 @@ const DefaultModal = () => {
                 {modalType === "SMS_BUY" && <SMSBuy />}
                 {modalType === "PAYMENT_GETWAY" && <PaymentGetway />}
                 {modalType === "SUCCESSANDERROR" && <SuccessAndError />}
+                {modalType === "ADD_GROUP_DISTRIBUTION" && <CreateDistribution />}
+                {modalType === "ADD_GROUP_CHANGE" && <Recordchange />}
               </div>
             )}
           </div>

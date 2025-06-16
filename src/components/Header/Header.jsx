@@ -20,7 +20,7 @@ import useTranslate from "../../utils/Translate";
 
 const Header = () => {
   const dispatch = useDispatch();
-    const translate = useTranslate();
+  const translate = useTranslate();
   const { data: userPayInfo, refetch } = useGetUserInfoQuery();
   const {
     data: institutionInfo,
@@ -71,11 +71,13 @@ const Header = () => {
           <IoReorderThreeOutline />
         </button>
 
-        <img
-          src={logo}
-          alt="Logo"
-          className="w-20 h-20 object-cover rounded-full"
-        />
+        <div className="ml-16 sm:ml-0">
+          <img
+            src={logo}
+            alt="Logo"
+            className="w-20 h-20 object-cover rounded-full"
+          />
+        </div>
 
         <div className="flex flex-row gap-2">
           <div className="block sm:hidden">
@@ -227,8 +229,10 @@ const Header = () => {
               Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
             </p>
           )}
-        
-          <Button onClick={handleOpenModal} className="!rounded-full">{translate("Pay Now")}</Button>
+
+          <Button onClick={handleOpenModal} className="!rounded-full">
+            {translate("Pay Now")}
+          </Button>
           <TranslateButton />
           <DropdownNotification />
           <DropdownUser />

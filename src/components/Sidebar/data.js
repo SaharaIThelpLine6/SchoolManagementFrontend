@@ -57,69 +57,64 @@ export const menuData = [
       },
       {
         id: "3",
-        name: "Class Group",
-        route: "/students/class-group",
-      },
-      {
-        id: "4",
         name: "English & Arobi Name",
         route: "/students/english-arobi-name",
       },
       {
-        id: "5",
-        name: "Book List",
+        id: "4",
+        name: "Book",
         route: "/students/book-list",
       },
+      // {
+      //   id: "8",
+      //   name: "ID Card Print",
+      //   route: "/students/id-print",
+      // },
       {
         id: "6",
-        name: "Student Group Setting",
-        route: "/students/group-setting",
-      },
-      {
-        id: "7",
-        name: "Student ID card",
-        route: "/students/id-card",
-      },
-      {
-        id: "8",
-        name: "ID Card Print",
-        route: "/students/id-print",
-      },
-      {
-        id: "9",
         name: "Data Export",
         route: "/students/data-export",
       },
       {
-        id: "10",
+        id: "7",
         name: "All Students",
         route: "/students",
       },
       {
-        id: "11",
+        id: "8",
         name: "Group Distribution",
         route: "/students/group-distribution",
       },
 
       {
-        id: "12",
+        id: "9",
         name: "Section",
         route: "/students/section",
       },
       {
-        id: "13",
+        id: "10",
         name: "Students Report",
         route: "/students/report",
       },
       {
-        id: "14",
+        id: "11",
         name: "Student Vacation",
         route: "/students/vacation",
       },
       {
-        id: "15",
+        id: "12",
         name: "Type of vacation",
         route: "/students/vacation/type-of-vacation",
+      },
+      {
+        id: "13",
+        name: "Certificate of Attestation",
+        route: "/students/certificate-of-attestation",
+      },
+      {
+        id: "14",
+        name: "Online Admission",
+        route: "/students/online-admission",
       },
     ],
   },

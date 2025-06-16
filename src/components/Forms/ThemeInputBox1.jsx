@@ -10,7 +10,7 @@ const ThemeInputBox1 = ({ label, type, placeholder, registerKey, require }) => {
     return (
         <div className='w-full'>
             <label className="block">
-                <span className="text-theme-dark pb-1 block font-noto text-[14px] font-bold">
+                <span className="text-theme-dark pb-1 block font-SolaimanLipi text-[14px] font-bold">
                     {translate(label)} {require ? <span className="text-rose-500 text-[18px]">*</span> : null}
                 </span>
                 <input

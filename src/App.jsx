@@ -61,6 +61,7 @@ import Loading from "./components/Loading/Loading";
 import useTranslate from "./utils/Translate";
 import ComingSoon from "./components/ComingSoon";
 import DataExport from "./pages/DataExport";
+import Book from "./pages/Book";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -107,10 +108,6 @@ function App() {
             <Route path="students">
               <Route index element={<AddStudent pageTitle="Add Student" />} />
               <Route
-                path="booklist"
-                element={<BookList pageTitle="Book List" />}
-              />
-              <Route
                 path="groupdistribution"
                 element={<GroupDistribution pageTitle="Students Group Set" />}
               />
@@ -121,7 +118,7 @@ function App() {
               />
               <Route
                 path="book-list"
-                element={<ComingSoon pageTitle="Book List" />}
+                element={<Book pageTitle="Book" />}
               />
               <Route
                 path="group-setting"
@@ -141,7 +138,7 @@ function App() {
               />
               <Route
                 path="group-distribution"
-                element={<ComingSoon pageTitle="Book List" />}
+                element={<GroupDistribution pageTitle="Book List" />}
               />
               <Route
                 path="english-arobi-name"
@@ -165,6 +162,14 @@ function App() {
               <Route
                 path="vacation/type-of-vacation"
                 element={<TypeOfVacation pageTitle="Type of Vacation" />}
+              />
+              <Route
+                path="certificate-of-attestation"
+                element={<ComingSoon pageTitle="Certificate of Attestation" />}
+              />
+              <Route
+                path="online-admission"
+                element={<ComingSoon pageTitle="Online Admission" />}
               />
             </Route>
 
