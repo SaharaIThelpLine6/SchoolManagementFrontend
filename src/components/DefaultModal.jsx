@@ -20,10 +20,14 @@ import PaymentGetway from "../view/general-information/sms/PaymentGetway";
 import SuccessAndError from "../view/general-information/sms/SuccessAndError";
 import CreateDistribution from "../view/students/group-distribution/CreateDistribution";
 import Recordchange from "../view/students/group-distribution/Recordchange";
+import AddEditBook from "../view/students/book/AddEditBook";
+import CreateCertificateAttestation from "../view/students/certificate-attestation/CreateCertificateAttestation";
+import useTranslate from "../utils/Translate";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
   const dispatch = useDispatch();
+  const translate = useTranslate();
 
   if (!isOpen) return null;
 
@@ -41,7 +45,7 @@ const DefaultModal = () => {
         >
           <div className="bg-white rounded-lg shadow-lg relative w-full max-h-[90vh] overflow-y-auto">
             <div className="header pl-3 pr-2 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
-              {title && <h2 className="text-[18px] font-bold">{title}</h2>}
+              {title && <h2 className="text-[18px] font-bold">{translate(title)}</h2>}
 
               <button
                 onClick={() => dispatch(closeModal())}
@@ -104,6 +108,10 @@ const DefaultModal = () => {
                 {modalType === "SUCCESSANDERROR" && <SuccessAndError />}
                 {modalType === "ADD_GROUP_DISTRIBUTION" && <CreateDistribution />}
                 {modalType === "ADD_GROUP_CHANGE" && <Recordchange />}
+                {modalType === "ADD_BOOK" && <AddEditBook />}
+                {modalType === "UPDATE_BOOK" && <AddEditBook />}
+                {modalType === "ADD_CERTIFICATE_ATTESTATION" && <CreateCertificateAttestation />}
+                {modalType === "UPDATE_CERTIFICATE_ATTESTATION" && <CreateCertificateAttestation />}
               </div>
             )}
           </div>

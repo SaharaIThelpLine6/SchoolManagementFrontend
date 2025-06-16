@@ -158,7 +158,7 @@ const GroupDistribution = ({ pageTitle }) => {
   return (
     <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
       {/* Tab Navigation */}
-      <nav className="bg-gray-50 border-b border-gray-200 mb-6">
+      <nav className="bg-gray-50 border-b border-gray-200">
         <ul className="flex">
           {tabs.map((tab) => (
             <li key={tab.id} className="flex-1">
@@ -184,8 +184,8 @@ const GroupDistribution = ({ pageTitle }) => {
       </nav>
 
       <div className="block w-full overflow-x-auto">
-        <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
-          <h3 className="font-SolaimanLipi text-[20px] font-bold">
+        <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5  ">
+          <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
             {translate(activeTab === "distribution" ? "Group Distribution List" : "Group Change History")}
           </h3>
           <Button onClick={() => handleOpenModal()}>
@@ -196,6 +196,7 @@ const GroupDistribution = ({ pageTitle }) => {
         <SortableTable 
           columns={activeTab === "distribution" ? columnsDistribution : columnsChange} 
           data={paginatedData} 
+          isFilterColumn={false}
         />
 
         {/* Pagination Controls */}
@@ -228,184 +229,3 @@ const GroupDistribution = ({ pageTitle }) => {
 };
 
 export default GroupDistribution;
-
-// import { FormProvider, useForm } from "react-hook-form";
-// import { useState } from "react";
-// import DefaultGray from "../components/Button/DefaultGray";
-// import DefaultInput from "../components/Forms/DefaultInput";
-// import DefaultSelect from "../components/Forms/DefaultSelect";
-
-// const GroupDistribution = () => {
-//   const methods = useForm();
-//   const [activeTab, setActiveTab] = useState("distribution");
-  
-//   const tabs = [
-//     { id: "distribution", label: "গ্রুপ বন্টন" },
-//     { id: "change", label: "গ্রুপ পরিবর্তন" },
-//   ];
-
-//   // Common select options
-//   const academicYearOptions = [
-//     { id: "1", value: "2025" },
-//     { id: "2", value: "2025-2026" },
-//     { id: "3", value: "2026" },
-//   ];
-
-//   const classOptions = [
-//     { id: "1", value: "Play" },
-//     { id: "2", value: "Nursery" },
-//     { id: "3", value: "Nurani" },
-//   ];
-
-//   const genderOptions = [
-//     { id: "1", value: "Male" },
-//     { id: "2", value: "Female" },
-//     { id: "3", value: "Common" },
-//   ];
-
-//   const subClassOptions = [
-//     { id: "1", value: "A" },
-//     { id: "2", value: "B" },
-//     { id: "3", value: "C" },
-//     { id: "4", value: "D" },
-//   ];
-
-//   return (
-//     <FormProvider {...methods}>
-//       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-//         {/* Tab Navigation */}
-//         <nav className="bg-gray-50 border-b border-gray-200">
-//           <ul className="flex">
-//             {tabs.map((tab) => (
-//               <li key={tab.id} className="flex-1">
-//                 <button
-//                   onClick={() => setActiveTab(tab.id)}
-//                   className={`w-full py-3 px-4 text-center font-medium transition-all duration-200 relative ${
-//                     activeTab === tab.id
-//                       ? "text-blue-600 bg-white"
-//                       : "text-gray-600 hover:bg-gray-100"
-//                   }`}
-//                 >
-//                   {tab.label}
-//                   {activeTab === tab.id && (
-//                     <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></span>
-//                   )}
-//                 </button>
-//               </li>
-//             ))}
-//           </ul>
-//         </nav>
-
-//         {/* Tab Content */}
-//         <div className="p-5">
-//           {activeTab === "distribution" && (
-            // <form>
-            //   <div className="w-full gap-4 grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            //     {/* Academic Year */}
-            //     <div className="space-y-1">
-            //       <DefaultSelect
-            //         label={<p className="text-gray-700 font-medium">শিক্ষাবর্ষ :</p>}
-            //         options={academicYearOptions}
-            //         valueField="id"
-            //         nameField="value"
-            //         registerKey="academicYear"
-            //       />
-            //     </div>
-
-            //     {/* Class/Marhala */}
-            //     <div className="space-y-1">
-            //       <DefaultSelect
-            //         label={<p className="text-gray-700 font-medium">মারহালা/ক্লাশ:</p>}
-            //         options={classOptions}
-            //         valueField="id"
-            //         nameField="value"
-            //         registerKey="class"
-            //       />
-            //     </div>
-
-            //     {/* Gender */}
-            //     <div className="space-y-1">
-            //       <DefaultSelect
-            //         label={<p className="text-gray-700 font-medium">লিঙ্গ:</p>}
-            //         options={genderOptions}
-            //         valueField="id"
-            //         nameField="value"
-            //         registerKey="gender"
-            //       />
-            //     </div>
-
-            //     {/* Sub Class ID */}
-            //     <div className="space-y-1">
-            //       <DefaultInput
-            //         label={<p className="text-gray-700 font-medium">সাব ক্লাস আইডি :</p>}
-            //         type="number"
-            //         placeholder="সাব ক্লাস আইডি লিখুন"
-            //         registerKey="subClassId"
-            //       />
-            //     </div>
-
-            //     {/* Sub Class */}
-            //     <div className="space-y-1">
-            //       <DefaultSelect
-            //         label={<p className="text-gray-700 font-medium">সাব ক্লাস :</p>}
-            //         options={subClassOptions}
-            //         valueField="id"
-            //         nameField="value"
-            //         registerKey="subClass"
-            //       />
-            //     </div>
-            //   </div>
-              
-            //   <div className="flex mt-6 border-t pt-5">
-            //     <DefaultGray submitButton="সংরক্ষণ করুন" />
-            //   </div>
-            // </form>
-//           )}
-
-//           {activeTab === "change" && (
-            // <form>
-            //   <div className="w-full gap-4 grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            //     {/* Student ID */}
-            //     <div className="space-y-1">
-            //       <DefaultInput
-            //         label={<p className="text-gray-700 font-medium">শিক্ষার্থী আইডি :</p>}
-            //         type="number"
-            //         placeholder="শিক্ষার্থী আইডি লিখুন"
-            //         registerKey="studentId"
-            //       />
-            //     </div>
-
-            //     {/* Student Name */}
-            //     <div className="space-y-1">
-            //       <DefaultInput
-            //         label={<p className="text-gray-700 font-medium">শিক্ষার্থী নাম :</p>}
-            //         type="text"
-            //         placeholder="শিক্ষার্থীর নাম লিখুন"
-            //         registerKey="studentName"
-            //       />
-            //     </div>
-
-            //     {/* Current Sub Class */}
-            //     <div className="space-y-1">
-            //       <DefaultSelect
-            //         label={<p className="text-gray-700 font-medium">সাব মারহালা :</p>}
-            //         options={subClassOptions}
-            //         valueField="id"
-            //         nameField="value"
-            //         registerKey="currentSubClass"
-            //       />
-            //     </div>
-            //   </div>
-              
-            //   <div className="flex mt-6 border-t pt-5">
-            //     <DefaultGray submitButton="গ্রুপ পরিবর্তন" />
-            //   </div>
-            // </form>
-    //       )}
-    //     </div>
-    //   </div>
-    // </FormProvider>
-//   );
-// };
-
-// export default GroupDistribution;

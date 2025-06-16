@@ -13,7 +13,7 @@ import Button from "../components/Button/Button";
 
 const PAGE_SIZE = 10;
 
-const Book = ({ pageTitle }) => {
+const CertificateAttesation = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
@@ -61,12 +61,12 @@ const Book = ({ pageTitle }) => {
 
 
   const handleOpenModal = useCallback(() => {
-    showModal(translate("Add Book"), "ADD_BOOK",);
+    showModal(translate("Create Certificate of Attestation"), "ADD_CERTIFICATE_ATTESTATION",);
   }, []);
 
  const handleEditOpenModal = useCallback(
     (id) => {
-      showModal(translate("Update Book"), "UPDATE_BOOK", id);
+      showModal(translate("Update Certificate of Attestation"), "UPDATE_CERTIFICATE_ATTESTATION", id);
     },
     [translate]
   );
@@ -115,10 +115,10 @@ const Book = ({ pageTitle }) => {
       <div className="block w-full overflow-x-auto">
         <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
           <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
-            {translate("Book List")}
+            {translate("Certificate of Attestation List")}
           </h3>
           <Button onClick={() => handleOpenModal()}>
-            {translate("Add Book")}
+            {translate("Create Certificate")}
           </Button>
         </div>
 
@@ -157,4 +157,6 @@ const Book = ({ pageTitle }) => {
   );
 };
 
-export default Book;
+
+
+export default CertificateAttesation

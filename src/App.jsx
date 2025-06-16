@@ -62,6 +62,7 @@ import useTranslate from "./utils/Translate";
 import ComingSoon from "./components/ComingSoon";
 import DataExport from "./pages/DataExport";
 import Book from "./pages/Book";
+import CertificateAttesation from "./pages/CertificateAttesation";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -121,18 +122,6 @@ function App() {
                 element={<Book pageTitle="Book" />}
               />
               <Route
-                path="group-setting"
-                element={<ComingSoon pageTitle="Book List" />}
-              />
-              <Route
-                path="id-card"
-                element={<ComingSoon pageTitle="Book List" />}
-              />
-              <Route
-                path="id-print"
-                element={<ComingSoon pageTitle="Book List" />}
-              />
-              <Route
                 path="data-export"
                 element={<DataExport pageTitle="Data Export" />}
               />
@@ -165,7 +154,7 @@ function App() {
               />
               <Route
                 path="certificate-of-attestation"
-                element={<ComingSoon pageTitle="Certificate of Attestation" />}
+                element={<CertificateAttesation pageTitle="Certificate of Attestation" />}
               />
               <Route
                 path="online-admission"
