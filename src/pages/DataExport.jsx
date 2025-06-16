@@ -12,12 +12,12 @@ import {
 } from "../features/student/studentQuerySlice";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import { FormProvider, useForm } from "react-hook-form";
-import DefaultInput from "../components/Forms/DefaultInput";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
 import { fetchSettingsData } from "../features/settings/settingsSlice";
-import { toast } from "react-toastify";
 import Button from "../components/Button/Button";
+import { toast } from "react-toastify";
+import * as XLSX from "xlsx";
 
 const PAGE_SIZE = 10;
 
@@ -27,38 +27,41 @@ const DataExport = ({ pageTitle }) => {
   const translate = useTranslate();
   const methods = useForm();
   const { watch } = methods;
-  const [SessionID, NewOldId, SubClassID, ResidentialStatusId] = watch([
+  const [SessionID, SubClassID, NewOldId, ResidentialStatusId] = watch([
     "SessionID",
-    "NewOldId",
     "SubClassID",
+    "NewOldId",
     "ResidentialStatusId",
   ]);
-  const { residential, status, error } = useSelector((state) => state.settings);
+  const { residential, error: settingsError } = useSelector(
+    (state) => state.settings
+  );
 
   const {
     data: studentVacationTypeData = [],
-    isSVTError,
-    isSVTLoading,
+    isError: isSVTError,
+    isLoading: isSVTLoading,
   } = useGetStudentsVacationTypeListQuery();
 
-  const { data: searchStudentInfo, error: searchStudentError } =
-    useGetStudentBySearchQuery(
-      {
-        ClassID: SubClassID ? SubClassID : null,
-        SessionID: SessionID ? SessionID : null,
-        NewOldId: NewOldId ? NewOldId : null,
-        ResidentialStatusId: ResidentialStatusId ? ResidentialStatusId : null,
-      },
-      { skip: false, refetchOnFocus: false }
-    );
-  console.log(SessionID, SubClassID, NewOldId, ResidentialStatusId);
-  console.log(searchStudentInfo);
+  const {
+    data: searchStudentInfo,
+    error: searchStudentError,
+    isLoading: isSearchLoading,
+  } = useGetStudentBySearchQuery(
+    {
+      ClassID: SubClassID ? SubClassID : null,
+      SessionID: SessionID ? SessionID : null,
+      NewOldId: NewOldId ? NewOldId : null,
+      ResidentialStatusId: ResidentialStatusId ? ResidentialStatusId : null,
+    },
+    {
+      skip: !SessionID || !SubClassID || !ResidentialStatusId,
+      refetchOnFocus: false,
+    }
+  );
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassData } = useGetSubClassListQuery();
-
-  const searchParams = new URLSearchParams(location.search);
-  const filter = parseInt(searchParams.get("filter") || "0");
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
@@ -67,11 +70,9 @@ const DataExport = ({ pageTitle }) => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedColumns, setSelectedColumns] = useState([]);
-  const [errors, setErrors] = useState({
-    filters: false,
-  });
+  const [errors, setErrors] = useState({ filters: false });
 
-  // Define all possible columns with their mapping to student data
+  // Define all columns
   const allColumns = [
     { id: "ID", label: "ID", field: "StudentCode" },
     { id: "Name", label: "Name", field: "StudentName" },
@@ -82,62 +83,61 @@ const DataExport = ({ pageTitle }) => {
     { id: "E-mail", label: "E-mail", field: "Email" },
     { id: "Session", label: "Session", field: "SessionName" },
     { id: "Class", label: "Class", field: "ClassName" },
-    { id: "Sub Class", label: "Sub Class", field: "SubClass" }, // updated
+    { id: "Sub Class", label: "Sub Class", field: "SubClass" },
     {
       id: "Admission Serial",
       label: "Admission Serial",
       field: "AdmissionSerial",
     },
-    { id: "Gender", label: "Gender", field: "GenderID" }, // or map to text if needed
-    { id: "Residence", label: "Residence", field: "ResidentialName" }, // updated
-    { id: "New/Old", label: "New/Old", field: "NewOldId" }, // or map to নতুন/পুরাতন/উভয়
+    { id: "Gender", label: "Gender", field: "GenderID" },
+    { id: "Residence", label: "Residence", field: "ResidentialName" },
+    { id: "New/Old", label: "New/Old", field: "NewOldId" },
     { id: "Date Of Birth", label: "Date Of Birth", field: "DateOfBirth" },
     {
       id: "NID/Birth Registration",
       label: "NID/Birth Registration",
       field: "NIDNO",
-    }, // updated
+    },
     { id: "Blood Group", label: "Blood Group", field: "BloodGroup" },
-    { id: "Village", label: "Village", field: "permanentVill" }, // updated
-    { id: "Post Office", label: "Post Office", field: "permanentPost" }, // updated
+    { id: "Village", label: "Village", field: "permanentVill" },
+    { id: "Post Office", label: "Post Office", field: "permanentPost" },
     {
       id: "Police Station",
       label: "Police Station",
       field: "PoliceStationName",
-    }, // updated
-    { id: "District", label: "District", field: "PermanentDistrictName" }, // updated
+    },
+    { id: "District", label: "District", field: "PermanentDistrictName" },
     {
       id: "Financial Status",
       label: "Financial Status",
       field: "FinancialStatus",
-    }, // not present in data
+    },
   ];
 
-  const handleColumnToggle = (columnId) => {
+  const handleColumnToggle = useCallback((columnId) => {
     setSelectedColumns((prev) =>
       prev.includes(columnId)
         ? prev.filter((id) => id !== columnId)
         : [...prev, columnId]
     );
-  };
+  }, []);
 
-  const validateFilters = () => {
-    const { SessionID, SubClassID, ClassID, ResidentialStatusId } =
-      methods.getValues();
-    const isValid = SessionID && SubClassID && ClassID && ResidentialStatusId;
+  const validateFilters = useCallback(() => {
+    const { SessionID, SubClassID, ResidentialStatusId } = methods.getValues();
+    const isValid = SessionID && SubClassID && ResidentialStatusId;
     setErrors((prev) => ({ ...prev, filters: !isValid }));
     return isValid;
-  };
+  }, [methods]);
 
   // Filter student data based on selected columns
   const filteredStudentData = useMemo(() => {
-    if (!searchStudentInfo) return [];
+    if (!searchStudentInfo || !searchStudentInfo.length) return [];
 
     return searchStudentInfo.map((student) => {
       const filteredStudent = {};
       allColumns.forEach((col) => {
         if (selectedColumns.includes(col.id)) {
-          filteredStudent[col.id] = student[col.field] || "";
+          filteredStudent[col.id] = student[col.field] || "-";
         }
       });
       return filteredStudent;
@@ -156,6 +156,90 @@ const DataExport = ({ pageTitle }) => {
       }));
   }, [selectedColumns, translate]);
 
+  // Export to Excel with file picker
+  const exportToExcel = useCallback(async () => {
+    if (!validateFilters()) {
+      toast.error(translate("Please select all required filters"));
+      return;
+    }
+
+    if (!filteredStudentData.length) {
+      toast.error(translate("No data available to export"));
+      return;
+    }
+
+    if (!selectedColumns.length) {
+      toast.error(translate("Please select at least one column to export"));
+      return;
+    }
+
+    try {
+      // Prepare data for Excel
+      const exportData = filteredStudentData.map((row) => {
+        const rowData = {};
+        selectedColumns.forEach((colId) => {
+          const column = allColumns.find((c) => c.id === colId);
+          rowData[column.label] = row[colId];
+        });
+        return rowData;
+      });
+
+      // Log data for debugging
+      console.log("Export Data:", exportData);
+
+      // Rest of the export logic...
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
+
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+      const blob = new Blob([excelBuffer], {
+        type: "application/octet-stream",
+      });
+
+      if ("showSaveFilePicker" in window) {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: "Student_Data.xlsx",
+          types: [
+            {
+              description: "Excel Files",
+              accept: {
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+                  [".xlsx"],
+              },
+            },
+          ],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "Student_Data.xlsx";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      toast.success(translate("Data exported successfully"));
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+      toast.error(translate("Failed to export data. Please try again."));
+    }
+  }, [
+    filteredStudentData,
+    selectedColumns,
+    allColumns,
+    validateFilters,
+    translate,
+  ]);
+
   const totalPages = Math.ceil(filteredStudentData.length / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
@@ -171,16 +255,15 @@ const DataExport = ({ pageTitle }) => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
-  if (isSVTLoading) return <Loading />;
-  if (isSVTError)
-    return <p className="text-red-500">Failed to load vacation type data</p>;
+  if (isSVTLoading || isSearchLoading) return <Loading />;
+  if (isSVTError || settingsError)
+    return <p className="text-red-500">Failed to load required data</p>;
 
   return (
     <FormProvider {...methods}>
       <div className="bg-white shadow-lg rounded-xl p-6 font-lato flex flex-col gap-6">
         {/* Top Section - Title and Filters */}
         <div className="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-4">
-          {/* Title - Left Aligned */}
           <h2 className="text-xl font-bold text-black shrink-0 2xl:mr-6">
             {translate("Export students data")}
           </h2>
@@ -196,7 +279,6 @@ const DataExport = ({ pageTitle }) => {
               label={translate("Session")}
               error={errors.filters}
             />
-
             <DefaultSelect
               options={subClassData || []}
               require={"Sub Class is required"}
@@ -233,7 +315,9 @@ const DataExport = ({ pageTitle }) => {
               error={errors.filters}
             />
             <div className="flex justify-center items-center">
-              <Button className="sm:mt-6 w-full">Export</Button>
+              <Button className="sm:mt-6 w-full" onClick={exportToExcel}>
+                Export
+              </Button>
             </div>
           </div>
         </div>
@@ -267,48 +351,60 @@ const DataExport = ({ pageTitle }) => {
           </div>
 
           {/* Right Panel - Table */}
-          <div className="w-full lg:w-3/4">
-            {selectedColumns.length > 0 ? (
-              <div className="space-y-4">
-                <div className="overflow-x-auto border border-gray-200 rounded-lg">
-                  <SortableTable
-                    columns={dynamicColumns}
-                    data={paginatedData}
-                    isFilterColumn={false}
-                  />
+          {searchStudentError ? (
+            <div className="w-full lg:w-3/4">
+              <p className="text-red-500 text-center">
+                {translate(
+                  "Failed to load student data. Please check your filters or try again later."
+                )}
+              </p>
+            </div>
+          ) : (
+            <div className="w-full lg:w-3/4">
+              {selectedColumns.length > 0 && filteredStudentData.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                    <SortableTable
+                      columns={dynamicColumns}
+                      data={paginatedData}
+                      isFilterColumn={false}
+                    />
+                  </div>
+
+                  {/* Pagination */}
+                  <div className="flex justify-between items-center">
+                    <button
+                      onClick={handlePrev}
+                      disabled={currentPage === 1}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <MdKeyboardArrowLeft className="text-xl" />
+                      Previous
+                    </button>
+                    <span className="text-sm font-medium text-gray-700">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                      onClick={handleNext}
+                      disabled={currentPage === totalPages}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Next
+                      <MdKeyboardArrowRight className="text-xl" />
+                    </button>
+                  </div>
                 </div>
-
-                {/* Pagination */}
-                <div className="flex justify-between items-center">
-                  <button
-                    onClick={handlePrev}
-                    disabled={currentPage === 1}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <MdKeyboardArrowLeft className="text-xl" />
-                    Previous
-                  </button>
-
-                  <span className="text-sm font-medium text-gray-700">
-                    Page {currentPage} of {totalPages}
-                  </span>
-
-                  <button
-                    onClick={handleNext}
-                    disabled={currentPage === totalPages}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Next
-                    <MdKeyboardArrowRight className="text-xl" />
-                  </button>
+              ) : (
+                <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500">
+                    {selectedColumns.length === 0
+                      ? "Select columns to display data"
+                      : "No data available for the selected filters"}
+                  </p>
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">Select columns to display data</p>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </FormProvider>
