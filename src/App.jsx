@@ -117,10 +117,7 @@ function App() {
                 path="class-group"
                 element={<ComingSoon pageTitle="Class Group" />}
               />
-              <Route
-                path="book-list"
-                element={<Book pageTitle="Book" />}
-              />
+              <Route path="book-list" element={<Book pageTitle="Book" />} />
               <Route
                 path="data-export"
                 element={<DataExport pageTitle="Data Export" />}
@@ -154,7 +151,9 @@ function App() {
               />
               <Route
                 path="certificate-of-attestation"
-                element={<CertificateAttesation pageTitle="Certificate of Attestation" />}
+                element={
+                  <CertificateAttesation pageTitle="Certificate of Attestation" />
+                }
               />
               <Route
                 path="online-admission"
@@ -246,7 +245,7 @@ function App() {
               element={<StudentAdmissionForm />}
             />
           </Route>
-
+        
           <Route path="/formp" element={<FormP />} />
           <Route path="/query" element={<Query />} />
 

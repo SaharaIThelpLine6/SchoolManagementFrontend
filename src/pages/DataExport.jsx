@@ -26,6 +26,13 @@ const DataExport = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const methods = useForm();
+  const { watch } = methods;
+  const [SessionID, NewOldId, SubClassID, ResidentialStatusId] = watch([
+    "SessionID",
+    "NewOldId",
+    "SubClassID",
+    "ResidentialStatusId",
+  ]);
   const { residential, status, error } = useSelector((state) => state.settings);
 
   const {
@@ -36,9 +43,16 @@ const DataExport = ({ pageTitle }) => {
 
   const { data: searchStudentInfo, error: searchStudentError } =
     useGetStudentBySearchQuery(
-      { search: "100001", ClassID: null, SessionID: null },
+      {
+        ClassID: SubClassID ? SubClassID : null,
+        SessionID: SessionID ? SessionID : null,
+        NewOldId: NewOldId ? NewOldId : null,
+        ResidentialStatusId: ResidentialStatusId ? ResidentialStatusId : null,
+      },
       { skip: false, refetchOnFocus: false }
     );
+  console.log(SessionID, SubClassID, NewOldId, ResidentialStatusId);
+  console.log(searchStudentInfo);
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassData } = useGetSubClassListQuery();
@@ -59,7 +73,7 @@ const DataExport = ({ pageTitle }) => {
 
   // Define all possible columns with their mapping to student data
   const allColumns = [
-    { id: "ID", label: "ID", field: "StudentID" },
+    { id: "ID", label: "ID", field: "StudentCode" },
     { id: "Name", label: "Name", field: "StudentName" },
     { id: "Fathar", label: "Father", field: "FatherName" },
     { id: "Mother", label: "Mother", field: "MotherName" },
@@ -68,31 +82,35 @@ const DataExport = ({ pageTitle }) => {
     { id: "E-mail", label: "E-mail", field: "Email" },
     { id: "Session", label: "Session", field: "SessionName" },
     { id: "Class", label: "Class", field: "ClassName" },
-    { id: "Sub Class", label: "Sub Class", field: "SubClassName" },
+    { id: "Sub Class", label: "Sub Class", field: "SubClass" }, // updated
     {
       id: "Admission Serial",
       label: "Admission Serial",
       field: "AdmissionSerial",
     },
-    { id: "Gender", label: "Gender", field: "Gender" },
-    { id: "Residence", label: "Residence", field: "ResidentialStatus" },
-    { id: "New/Old", label: "New/Old", field: "StudentType" },
+    { id: "Gender", label: "Gender", field: "GenderID" }, // or map to text if needed
+    { id: "Residence", label: "Residence", field: "ResidentialName" }, // updated
+    { id: "New/Old", label: "New/Old", field: "NewOldId" }, // or map to নতুন/পুরাতন/উভয়
     { id: "Date Of Birth", label: "Date Of Birth", field: "DateOfBirth" },
     {
       id: "NID/Birth Registration",
       label: "NID/Birth Registration",
-      field: "NID",
-    },
+      field: "NIDNO",
+    }, // updated
     { id: "Blood Group", label: "Blood Group", field: "BloodGroup" },
-    { id: "Village", label: "Village", field: "Village" },
-    { id: "Post Office", label: "Post Office", field: "PostOffice" },
-    { id: "Police Station", label: "Police Station", field: "PoliceStation" },
-    { id: "District", label: "District", field: "District" },
+    { id: "Village", label: "Village", field: "permanentVill" }, // updated
+    { id: "Post Office", label: "Post Office", field: "permanentPost" }, // updated
+    {
+      id: "Police Station",
+      label: "Police Station",
+      field: "PoliceStationName",
+    }, // updated
+    { id: "District", label: "District", field: "PermanentDistrictName" }, // updated
     {
       id: "Financial Status",
       label: "Financial Status",
       field: "FinancialStatus",
-    },
+    }, // not present in data
   ];
 
   const handleColumnToggle = (columnId) => {
@@ -178,7 +196,7 @@ const DataExport = ({ pageTitle }) => {
               label={translate("Session")}
               error={errors.filters}
             />
-            
+
             <DefaultSelect
               options={subClassData || []}
               require={"Sub Class is required"}
@@ -192,14 +210,14 @@ const DataExport = ({ pageTitle }) => {
             />
             <DefaultSelect
               options={[
-                { ClassID: 1, ClassName: "নতুন" },
-                { ClassID: 2, ClassName: "পুরাতন" },
-                { ClassID: 3, ClassName: "উভয়" },
+                { NewOldId: 1, ClassName: "নতুন" },
+                { NewOldId: 2, ClassName: "পুরাতন" },
+                { NewOldId: 3, ClassName: "উভয়" },
               ]}
               require={"New/Old is required"}
               nameField={"ClassName"}
-              valueField={"ClassID"}
-              registerKey={"ClassID"}
+              valueField={"NewOldId"}
+              registerKey={"NewOldId"}
               type={"number"}
               label={translate("New/Old")}
               error={errors.filters}

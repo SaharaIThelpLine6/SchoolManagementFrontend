@@ -22,13 +22,22 @@ export const userStudentSlice = createApi({
   ],
   endpoints: (builder) => ({
     getStudentBySearch: builder.query({
-      query: ({ search, ClassID, SessionID }) => {
+      query: ({
+        search,
+        ClassID,
+        SessionID,
+        NewOldId,
+        ResidentialStatusId,
+      }) => {
         const params = new URLSearchParams();
         if (search) {
           params.append("search", search);
         }
         if (ClassID) params.append("ClassID", ClassID);
         if (SessionID) params.append("SessionID", SessionID);
+        if (NewOldId) params.append("NewOldId", NewOldId);
+        if (ResidentialStatusId)
+          params.append("ResidentialStatusId", ResidentialStatusId);
 
         return `search_student?${params.toString()}`;
       },
@@ -149,5 +158,5 @@ export const {
   usePostStudentsVacationTypeMutation,
   useUpdateStudentsVacationTypeMutation,
   useDeleteStudentsVacationTypeMutation,
-  usePostEnglishAndArobicNameMutation
+  usePostEnglishAndArobicNameMutation,
 } = userStudentSlice;
