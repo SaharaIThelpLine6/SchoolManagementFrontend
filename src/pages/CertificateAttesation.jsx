@@ -10,6 +10,10 @@ import Loading from "../components/Loading/Loading";
 import { FiEdit } from "react-icons/fi";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import Button from "../components/Button/Button";
+import { MdOutlineDeleteOutline } from "react-icons/md";
+import { MdLocalPrintshop } from "react-icons/md";
+
+
 
 const PAGE_SIZE = 10;
 
@@ -85,26 +89,40 @@ const CertificateAttesation = ({ pageTitle }) => {
           >
             <FiEdit className="w-5 h-5" />
           </button>
+          <button
+            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
+            title="Edit"
+            onClick={() => handleEditOpenModal(row.ID)}
+          >
+            <MdOutlineDeleteOutline className="w-5 h-5" />
+          </button>
+          <button
+            className="p-2 text-white bg-cyan-500 hover:bg-cyan-600 rounded-md"
+            title="Edit"
+            onClick={() => handleEditOpenModal(row.ID)}
+          >
+            <MdLocalPrintshop   className="w-5 h-5" />
+          </button>
         </div>
       ),
     },
     {
-      title: translate("Student ID"),
+      title: translate("ID"),
       field: "StudentID",
       hozAlign: "center",
     },
     {
-      title: translate("Student Name"),
-      field: "StudentName",
+      title: translate("Code"),
+      field: "StudentID",
       hozAlign: "center",
     },
     {
-      title: translate("Current Group"),
+      title: translate("Name"),
       field: "CurrentGroup",
       hozAlign: "center",
     },
     {
-      title: translate("New Group"),
+      title: translate("Father Name"),
       field: "NewGroup",
       hozAlign: "center",
     },
@@ -117,7 +135,7 @@ const CertificateAttesation = ({ pageTitle }) => {
           <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
             {translate("Certificate of Attestation List")}
           </h3>
-          <Button onClick={() => handleOpenModal()}>
+          <Button onClick={() => handleOpenModal()} className="font-SolaimanLipi">
             {translate("Create Certificate")}
           </Button>
         </div>

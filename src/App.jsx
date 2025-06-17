@@ -63,6 +63,7 @@ import ComingSoon from "./components/ComingSoon";
 import DataExport from "./pages/DataExport";
 import Book from "./pages/Book";
 import CertificateAttesation from "./pages/CertificateAttesation";
+import OnlineAdmissionTable from "./pages/OnlineAdmissionTable";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -157,7 +158,7 @@ function App() {
               />
               <Route
                 path="online-admission"
-                element={<ComingSoon pageTitle="Online Admission" />}
+                element={<OnlineAdmissionTable pageTitle="Online Admission List" />}
               />
             </Route>
 

@@ -76,8 +76,8 @@ const DataExport = ({ pageTitle }) => {
   const allColumns = [
     { id: "ID", label: "ID", field: "StudentCode" },
     { id: "Name", label: "Name", field: "StudentName" },
-    { id: "Fathar", label: "Father", field: "FatherName" },
-    { id: "Mother", label: "Mother", field: "MotherName" },
+    { id: "Fathar Name", label: "Father Name", field: "FatherName" },
+    { id: "Mother Name", label: "Mother Name", field: "MotherName" },
     { id: "Mobile 1", label: "Mobile 1", field: "Mobile1" },
     { id: "Mobile 2", label: "Mobile 2", field: "Mobile2" },
     { id: "E-mail", label: "E-mail", field: "Email" },
@@ -92,7 +92,7 @@ const DataExport = ({ pageTitle }) => {
     { id: "Gender", label: "Gender", field: "GenderID" },
     { id: "Residence", label: "Residence", field: "ResidentialName" },
     { id: "New/Old", label: "New/Old", field: "NewOldId" },
-    { id: "Date Of Birth", label: "Date Of Birth", field: "DateOfBirth" },
+    { id: "Date Of Birth", label: "Date of Birth", field: "DateOfBirth" },
     {
       id: "NID/Birth Registration",
       label: "NID/Birth Registration",
@@ -316,7 +316,7 @@ const DataExport = ({ pageTitle }) => {
             />
             <div className="flex justify-center items-center">
               <Button className="sm:mt-6 w-full" onClick={exportToExcel}>
-                Export
+                {translate("Data Export")}
               </Button>
             </div>
           </div>
@@ -342,7 +342,7 @@ const DataExport = ({ pageTitle }) => {
                       className="form-checkbox h-4 w-4 text-blue-600 rounded cursor-pointer"
                     />
                     <span className="text-sm text-gray-700">
-                      {column.label}
+                      {translate(column.label)}
                     </span>
                   </label>
                 ))}
@@ -398,8 +398,8 @@ const DataExport = ({ pageTitle }) => {
                 <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">
                   <p className="text-gray-500">
                     {selectedColumns.length === 0
-                      ? "Select columns to display data"
-                      : "No data available for the selected filters"}
+                      ? translate("Select columns to display data")
+                      : translate("No data available for the selected filters")}
                   </p>
                 </div>
               )}
