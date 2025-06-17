@@ -35,8 +35,8 @@ const GroupDistribution = ({ pageTitle }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const tabs = [
-    { id: "distribution", label: "গ্রুপ বন্টন" },
-    { id: "change", label: "গ্রুপ পরিবর্তন" },
+    { id: "distribution", label: "Group distribution" },
+    { id: "change", label: "Change group" },
   ];
 
   useEffect(() => {
@@ -173,7 +173,7 @@ const GroupDistribution = ({ pageTitle }) => {
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
-                {tab.label}
+                {translate(tab.label)}
                 {activeTab === tab.id && (
                   <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></span>
                 )}

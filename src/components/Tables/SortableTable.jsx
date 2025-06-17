@@ -50,7 +50,7 @@ const SortableTable = ({ columns, data, isFilterColumn = true }) => {
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
-        <thead className="text-xs text-theme-dark font-SolaimanLipi uppercase bg-gray-50">
+        <thead className="text-xs sm:text-sm text-theme-dark font-SolaimanLipi uppercase bg-gray-50">
           <tr>
             {columns.map((column, index) => (
               <th key={index} className={`px-3 py-3 text-nowrap text-${column.hozAlign || "start"}`}>

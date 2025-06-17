@@ -45,7 +45,9 @@ const DefaultModal = () => {
         >
           <div className="bg-white rounded-lg shadow-lg relative w-full max-h-[90vh] overflow-y-auto">
             <div className="header pl-3 pr-2 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
-              {title && <h2 className="text-[18px] font-bold">{translate(title)}</h2>}
+              {title && (
+                <h2 className="text-[18px] font-bold">{translate(title)}</h2>
+              )}
 
               <button
                 onClick={() => dispatch(closeModal())}
@@ -96,7 +98,7 @@ const DefaultModal = () => {
                 )}
                 {modalType === "ADD_MONTHNAMES" && <MonthNamesForm />}
                 {modalType === "EDIT_MONTHNAMES" && (
-                  <MonthNamesForm id={id} isEdit={true}/>
+                  <MonthNamesForm id={id} isEdit={true} />
                 )}
                 {modalType === "EDIT_STUDENTVACATION" && (
                   <EditStudentVacationForm userId={id} />
@@ -106,12 +108,18 @@ const DefaultModal = () => {
                 {modalType === "SMS_BUY" && <SMSBuy />}
                 {modalType === "PAYMENT_GETWAY" && <PaymentGetway />}
                 {modalType === "SUCCESSANDERROR" && <SuccessAndError />}
-                {modalType === "ADD_GROUP_DISTRIBUTION" && <CreateDistribution />}
+                {modalType === "ADD_GROUP_DISTRIBUTION" && (
+                  <CreateDistribution />
+                )}
                 {modalType === "ADD_GROUP_CHANGE" && <Recordchange />}
                 {modalType === "ADD_BOOK" && <AddEditBook />}
-                {modalType === "UPDATE_BOOK" && <AddEditBook />}
-                {modalType === "ADD_CERTIFICATE_ATTESTATION" && <CreateCertificateAttestation />}
-                {modalType === "UPDATE_CERTIFICATE_ATTESTATION" && <CreateCertificateAttestation />}
+                {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
+                {modalType === "ADD_CERTIFICATE_ATTESTATION" && (
+                  <CreateCertificateAttestation />
+                )}
+                {modalType === "UPDATE_CERTIFICATE_ATTESTATION" && (
+                  <CreateCertificateAttestation />
+                )}
               </div>
             )}
           </div>

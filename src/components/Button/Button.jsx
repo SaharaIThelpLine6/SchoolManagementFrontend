@@ -30,7 +30,7 @@ const Button = ({
   `;
 
   const combinedClasses = clsx(baseClasses, className, {
-    "from-green-400 via-green-500 to-green-600": !className.includes("bg-"),
+    "from-green-400 via-green-500 to-green-600 font-SolaimanLipi": !className.includes("bg-"),
   });
 
   return (

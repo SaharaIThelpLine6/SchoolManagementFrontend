@@ -14,17 +14,64 @@ export const classSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["ClassList", "SubClassList"], // Define your tag type
+  tagTypes: ["ClassList", "SubClassList", "Academic_Subjects", "SubClasss"],
   endpoints: (builder) => ({
+    // GET endpoints
     getClassList: builder.query({
       query: () => "view_class",
-      providesTags: ["ClassList"], // This query provides this tag
+      providesTags: ["ClassList"],
     }),
     getSubClassList: builder.query({
       query: () => "view_subclass",
-      providesTags: ["SubClassList"], // This query provides this tag
+      providesTags: ["SubClassList"],
+    }),
+    getAcademicSubjects: builder.query({
+      query: () => "academic_subjects",
+      providesTags: ["Academic_Subjects"],
+    }),
+    getSubClasss: builder.query({
+      query: () => "view_subclass",
+      providesTags: ["SubClasss"],
+    }),
+
+    // POST endpoint - Create new academic subject
+    createAcademicSubject: builder.mutation({
+      query: (subjectData) => ({
+        url: "academic_subjects",
+        method: "POST",
+        body: subjectData,
+      }),
+      invalidatesTags: ["Academic_Subjects"], 
+    }),
+
+    // PUT endpoint - Update academic subject
+    updateAcademicSubject: builder.mutation({
+      query: ({ id, ...subjectData }) => ({
+        url: `academic_subjects/${id}`,
+        method: "PUT",
+        body: subjectData,
+      }),
+      invalidatesTags: ["Academic_Subjects"], 
+    }),
+
+    // DELETE endpoint - Remove academic subject
+    deleteAcademicSubject: builder.mutation({
+      query: (id) => ({
+        url: `academic_subjects/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Academic_Subjects"],
     }),
   }),
 });
 
-export const { useGetClassListQuery, useGetSubClassListQuery } = classSlice;
+// Export all hooks
+export const {
+  useGetClassListQuery,
+  useGetSubClassListQuery,
+  useGetAcademicSubjectsQuery,
+  useGetSubClasssQuery,
+  useCreateAcademicSubjectMutation,
+  useUpdateAcademicSubjectMutation,
+  useDeleteAcademicSubjectMutation,
+} = classSlice;
