@@ -27,7 +27,6 @@ import SMS from "./pages/SMS";
 import Setting from "./pages/Setting";
 import MonthListTable from "./pages/MonthListTable";
 import Quota from "./pages/Quota";
-import StudentFeeSetup from "./pages/StudentFeeSetup";
 import FormBuilder from "./pages/FormBuilder";
 import AddTeacher from "./pages/AddTeacher";
 import PayRole from "./pages/PayRole";
@@ -64,6 +63,7 @@ import DataExport from "./pages/DataExport";
 import Book from "./pages/Book";
 import CertificateAttesation from "./pages/CertificateAttesation";
 import OnlineAdmissionTable from "./pages/OnlineAdmissionTable";
+import { useGetAllUserPermissionsQuery } from "./features/permission/permissionSlice";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -74,6 +74,28 @@ function App() {
   const [loading, setLoading] = useState(true);
   const translate = useTranslate();
   const methods = useForm();
+
+  const {
+    data: permissions,
+    isLoading,
+    isError,
+  } = useGetAllUserPermissionsQuery();
+  // Optional helper to confirm all is loaded and valid
+  const isPermissionsReady =
+    !isLoading && !isError && Array.isArray(permissions);
+
+  const hasPermission = (id) => {
+    if (!isPermissionsReady) return false;
+
+    return permissions.some(
+      (p) =>
+        p.PermissionListID === id &&
+        (p.PermissionView ||
+          p.PermissionInsert ||
+          p.PermissionEdit ||
+          p.PermissionDelete)
+    );
+  };
 
   useEffect(() => {
     setTimeout(() => setLoading(false), 1500);
@@ -88,104 +110,144 @@ function App() {
           <Route path="/" element={<DefaultLayout />}>
             <Route path="/" element={<Home pageTitle="Home" />} />
             <Route path="general-info">
-              <Route
-                path="users-info"
-                element={<User />}
-                pageTitle="User Information"
-              />
-              <Route
-                path="user-reports"
-                element={<UserReports pageTitle="User Reports" />}
-              />
-              <Route path="sms" element={<SMS pageTitle="SMS List" />} />
-              <Route
-                path="institution-info"
-                element={<Setting pageTitle="Setting" />}
-              />
-              <Route
-                path="month-name-list"
-                element={<MonthListTable pageTitle="Month Name List" />}
-              />
+              {isPermissionsReady && hasPermission(2) && (
+                <Route
+                  path="users-info"
+                  element={<User pageTitle="User Information" />}
+                />
+              )}
+              {isPermissionsReady && hasPermission(4) && (
+                <Route
+                  path="user-reports"
+                  element={<UserReports pageTitle="User Reports" />}
+                />
+              )}
+              {hasPermission(86) && (
+                <Route path="sms" element={<SMS pageTitle="SMS List" />} />
+              )}
+              {isPermissionsReady && hasPermission(1) && (
+                <Route
+                  path="institution-info"
+                  element={<Setting pageTitle="Setting" />}
+                />
+              )}
+              {isPermissionsReady && hasPermission(30) && (
+                <Route
+                  path="month-name-list"
+                  element={<MonthListTable pageTitle="Month Name List" />}
+                />
+              )}
             </Route>
+
             <Route path="students">
               <Route index element={<AddStudent pageTitle="Add Student" />} />
-              <Route
-                path="groupdistribution"
-                element={<GroupDistribution pageTitle="Students Group Set" />}
-              />
-              <Route path="class" element={<Class pageTitle="Class" />} />
-              <Route
-                path="class-group"
-                element={<ComingSoon pageTitle="Class Group" />}
-              />
-              <Route path="book-list" element={<Book pageTitle="Book" />} />
-              <Route
-                path="data-export"
-                element={<DataExport pageTitle="Data Export" />}
-              />
-              <Route
-                path="group-distribution"
-                element={<GroupDistribution pageTitle="Book List" />}
-              />
-              <Route
-                path="english-arobi-name"
-                element={<EnglisArobihName pageTitle="English Arobi Name" />}
-              />
-              <Route path="section" element={<Section pageTitle="Section" />} />
-              <Route
-                path="sessions"
-                element={<Session pageTitle="Session" />}
-              />
-              <Route
-                path="report"
-                element={<StudentReport pageTitle="Student Report" />}
-              />
-              <Route
-                path="vacation"
-                element={
-                  <StudentVacationListTable pageTitle="Students Vacation" />
-                }
-              />
-              <Route
-                path="vacation/type-of-vacation"
-                element={<TypeOfVacation pageTitle="Type of Vacation" />}
-              />
-              <Route
-                path="certificate-of-attestation"
-                element={
-                  <CertificateAttesation pageTitle="Certificate of Attestation" />
-                }
-              />
-              <Route
-                path="online-admission"
-                element={<OnlineAdmissionTable pageTitle="Online Admission List" />}
-              />
+              {isPermissionsReady && hasPermission(17) && (
+                <Route
+                  path="group-distribution"
+                  element={<GroupDistribution pageTitle="Students Group Set" />}
+                />
+              )}
+              {isPermissionsReady && hasPermission(15) && (
+                <Route path="class" element={<Class pageTitle="Class" />} />
+              )}
+              {isPermissionsReady && hasPermission(29) && (
+                <Route path="book-list" element={<Book pageTitle="Book" />} />
+              )}
+              {isPermissionsReady && hasPermission(13) && (
+                <Route
+                  path="data-export"
+                  element={<DataExport pageTitle="Data Export" />}
+                />
+              )}
+
+              {isPermissionsReady && hasPermission(20) && (
+                <Route
+                  path="english-arobi-name"
+                  element={<EnglisArobihName pageTitle="English Arobi Name" />}
+                />
+              )}
+              {isPermissionsReady && hasPermission(16) && (
+                <Route
+                  path="section"
+                  element={<Section pageTitle="Section" />}
+                />
+              )}
+
+              {isPermissionsReady && hasPermission(14) && (
+                <Route
+                  path="sessions"
+                  element={<Session pageTitle="Session" />}
+                />
+              )}
+              {isPermissionsReady && hasPermission(13) && (
+                <Route
+                  path="report"
+                  element={<StudentReport pageTitle="Student Report" />}
+                />
+              )}
+              {isPermissionsReady && hasPermission(25) && (
+                <Route
+                  path="vacation"
+                  element={
+                    <StudentVacationListTable pageTitle="Students Vacation" />
+                  }
+                />
+              )}
+              {isPermissionsReady && hasPermission(25) && (
+                <Route
+                  path="vacation/type-of-vacation"
+                  element={<TypeOfVacation pageTitle="Type of Vacation" />}
+                />
+              )}
+              {isPermissionsReady && hasPermission(23) && (
+                <Route
+                  path="certificate-of-attestation"
+                  element={
+                    <CertificateAttesation pageTitle="Certificate of Attestation" />
+                  }
+                />
+              )}
+              {isPermissionsReady && hasPermission(2) && (
+                <Route
+                  path="online-admission"
+                  element={
+                    <OnlineAdmissionTable pageTitle="Online Admission List" />
+                  }
+                />
+              )}
             </Route>
 
             <Route
               path="payment_confirm/:schoolid/:service/:size"
               element={<PaymentConfirm />}
             />
-            <Route path="renew" element={<Quota type="renew" />} />
-            <Route path="accounts" element={<StudentFeeSetup type="renew" />} />
+            {/* <Route path="renew" element={<Quota type="renew" />} />
             <Route path="quota" element={<Quota type="quota" />} />
-            <Route path="formbuilder" element={<FormBuilder />} />
+            <Route path="formbuilder" element={<FormBuilder />} /> */}
 
             <Route path="teacherinfo">
-              <Route index element={<AddTeacher pageTitle="Employee" />} />
-              <Route
-                path="payRole"
-                element={<PayRole pageTitle="Pay Role" />}
-              />
-              <Route
-                path="pRName"
-                element={<PayRoleName pageTitle="Pay Role Name" />}
-              />
+              {isPermissionsReady && hasPermission(90) && (
+                <Route index element={<AddTeacher pageTitle="Employee" />} />
+              )}
+              {isPermissionsReady && hasPermission(92) && (
+                <Route
+                  path="payRole"
+                  element={<PayRole pageTitle="Pay Role" />}
+                />
+              )}
+              {isPermissionsReady && hasPermission(94) && (
+                <Route
+                  path="pRName"
+                  element={<PayRoleName pageTitle="Pay Role Name" />}
+                />
+              )}
               <Route path="report" element={<Report pageTitle="Reports" />} />
-              <Route
-                path="designation"
-                element={<Designations pageTitle="Designation List" />}
-              />
+              {isPermissionsReady && hasPermission(91) && (
+                <Route
+                  path="designation"
+                  element={<Designations pageTitle="Designation List" />}
+                />
+              )}
             </Route>
 
             <Route path="exam" element={<Exam pageTitle="Exam" />} />
@@ -246,7 +308,7 @@ function App() {
               element={<StudentAdmissionForm />}
             />
           </Route>
-        
+
           <Route path="/formp" element={<FormP />} />
           <Route path="/query" element={<Query />} />
 

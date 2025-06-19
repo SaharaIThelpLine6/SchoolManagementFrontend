@@ -25,6 +25,7 @@ import { classSlice } from "../features/class/classQuerySlice";
 import { userTypeSlice } from "../features/userType/userTypeSlice";
 import { smsSlice } from "../features/sms/smsSlice";
 import smsReducersSlice from "../features/sms/smsReducersSlice";
+import { permissionSlice } from "../features/permission/permissionSlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -52,6 +53,7 @@ const store = configureStore({
     [sessionSlice.reducerPath]: sessionSlice.reducer,
     [classSlice.reducerPath]: classSlice.reducer,
     [smsSlice.reducerPath]: smsSlice.reducer,
+    [permissionSlice.reducerPath]: permissionSlice.reducer,
     [userTypeSlice.reducerPath]: userTypeSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -69,6 +71,7 @@ const store = configureStore({
       .concat(classSlice.middleware)
       .concat(userTypeSlice.middleware)
       .concat(smsSlice.middleware)
+      .concat(permissionSlice.middleware)
       .concat(sessionSlice.middleware),
 });
 

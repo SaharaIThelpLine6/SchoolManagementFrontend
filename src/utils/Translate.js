@@ -42,7 +42,7 @@ const useTranslate = () => {
     Balance: "ব্যালেন্স",
     Book: "কিতাব",
     "Create Certificate of Attestation": "প্রত্যয়ন পত্র তৈরি করুন",
-    Section: "ক্লাস গ্রুপ",
+    Section: "সাব ক্লাস",
     "Certificate of Attestation List": "প্রত্যয়ন পত্রর তালিকা",
     "Create Certificate": "পত্র তৈরি করুন",
     "Update Certificate of Attestation": "প্রত্যয়ন পত্র আপডেট করুন",

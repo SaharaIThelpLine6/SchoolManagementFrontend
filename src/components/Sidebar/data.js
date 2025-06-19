@@ -65,11 +65,6 @@ export const menuData = [
         name: "Book",
         route: "/students/book-list",
       },
-      // {
-      //   id: "8",
-      //   name: "ID Card Print",
-      //   route: "/students/id-print",
-      // },
       {
         id: "6",
         name: "Data Export",

@@ -6,7 +6,7 @@ import { fetchResultFieldData } from '../features/studentResultPublicView/studen
 import bnBijoy2Unicode from '../utils/conveter';
 
 const Quota = ({ type }) => {
-    const { register, handleSubmit } = useFormContext();
+    // const { register, handleSubmit } = useFormContext();
     // const { payfor } = useParams();
     const { schoolData } = useSelector((state) => state.studentResultPublicView)
     const { user } = useSelector((state) => state.auth)
