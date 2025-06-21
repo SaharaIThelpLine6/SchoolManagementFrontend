@@ -135,7 +135,7 @@ const EditCertificateAttestation = ({
     <FormProvider {...methods}>
       <form
         onSubmit={methods.handleSubmit(onSubmit)}
-        className="mx-auto bg-white p-4 2xl:p-6 text-gray-800 space-y-6"
+        className="mx-auto bg-white p-4 2xl:p-6 text-gray-800 space-y-6 font-SolaimanLipi"
       >
         {/* Header */}
         <div className="flex justify-between sm:flex-row flex-col items-center">

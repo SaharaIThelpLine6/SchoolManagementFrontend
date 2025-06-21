@@ -323,6 +323,7 @@ const useTranslate = () => {
     "Exam Board Name is require": "পরীক্ষা বোর্ডের নাম আবশ্যক",
     "Result devision is require": "ফলাফল বিভাগ আবশ্যক",
     "Character Report": "চারিত্রিক রিপোর্ট",
+    "Gate pass and leave": "গেইট পাশ ও ছুটি",
     "No.": "ক্র: নং",
     "Total students": "মোট শিক্ষার্থী",
     "Total teachers": "মোট শিক্ষক",

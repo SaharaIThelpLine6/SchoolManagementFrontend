@@ -113,7 +113,6 @@ const DefaultModal = () => {
                 {modalType === "ADD_GROUP_CHANGE" && <Recordchange />}
                 {modalType === "ADD_BOOK" && <AddEditBook />}
                 {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
-            
               </div>
             )}
           </div>

@@ -88,26 +88,16 @@ export const menuData = [
       },
       {
         id: "10",
-        name: "Students Report",
-        route: "/students/report",
-      },
-      {
-        id: "11",
-        name: "Student Vacation",
-        route: "/students/vacation",
-      },
-      {
-        id: "12",
         name: "Type of vacation",
         route: "/students/vacation/type-of-vacation",
       },
       {
-        id: "13",
+        id: "11",
         name: "Certificate of Attestation",
         route: "/students/certificate-of-attestation",
       },
       {
-        id: "14",
+        id: "12",
         name: "Online Admission",
         route: "/students/online-admission",
       },
@@ -184,7 +174,16 @@ export const menuData = [
     route: "/darul-ikama",
     icon: "RiSchoolFill",
     subMenu: [
-    
+         {
+        id: "1",
+        name: "Character Report",
+        route: "/students/report",
+      },
+      {
+        id: "2",
+        name: "Gate pass and leave",
+        route: "/students/vacation",
+      }
     ],
   },
   {

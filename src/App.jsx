@@ -65,6 +65,7 @@ import CertificateAttesation from "./pages/CertificateAttesation";
 import OnlineAdmissionTable from "./pages/OnlineAdmissionTable";
 import { useGetAllUserPermissionsQuery } from "./features/permission/permissionSlice";
 import CreateCertificateAttestation from "./view/students/certificate-attestation/CreateCertificateAttestation";
+import PrintTwo from "./view/students/certificate-attestation/print/PrintTwo";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -208,6 +209,12 @@ function App() {
                   }
                 />
               )}
+               <Route
+                  path="print-check"
+                  element={
+                    <PrintTwo pageTitle="Print design check" />
+                  }
+                />
               {isPermissionsReady && hasPermission(2) && (
                 <Route
                   path="online-admission"

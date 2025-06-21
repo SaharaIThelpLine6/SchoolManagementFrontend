@@ -16,6 +16,8 @@ import {
 } from "../features/student/studentQuerySlice";
 import Swal from "sweetalert2";
 import bnBijoy2Unicode from "../utils/conveter";
+import { showModal } from "../utils/ModalControlar";
+import PrintOptions from "../view/students/certificate-attestation/PrintOptions";
 
 const PAGE_SIZE = 10;
 
@@ -27,7 +29,11 @@ const CertificateAttestation = ({ pageTitle }) => {
   const [activeView, setActiveView] = useState("table"); // 'table', 'create', or 'edit'
   const [selectedId, setSelectedId] = useState(null);
 
-  const { data: certificateData = [], isLoading, refetch } = useGetStudentsTransferCertificateQuery();
+  const {
+    data: certificateData = [],
+    isLoading,
+    refetch,
+  } = useGetStudentsTransferCertificateQuery();
   const [deleteCertificate] = useDeleteStudentsTransferCertificateMutation();
 
   useEffect(() => {
@@ -46,7 +52,7 @@ const CertificateAttestation = ({ pageTitle }) => {
     setActiveView("create");
   }, []);
 
-  const handleOpenEditModal = useCallback((id) => {
+  const handleOpenEdit = useCallback((id) => {
     setSelectedId(id);
     setActiveView("edit");
   }, []);
@@ -87,9 +93,12 @@ const CertificateAttestation = ({ pageTitle }) => {
     [deleteCertificate, refetch]
   );
 
-  const handlePrint = useCallback((id) => {
-    console.log("Print", id); // Implement your print logic here
-  }, []);
+  const handlePrint = useCallback(
+    (id) => {
+    setActiveView("print");
+    },
+    [translate]
+  );
 
   const handleBackToList = useCallback(() => {
     setActiveView("table");
@@ -107,7 +116,7 @@ const CertificateAttestation = ({ pageTitle }) => {
           <button
             className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
             title="Edit"
-            onClick={() => handleOpenEditModal(row.CFID)}
+            onClick={() => handleOpenEdit(row.CFID)}
           >
             <FiEdit className="w-5 h-5" />
           </button>
@@ -159,7 +168,7 @@ const CertificateAttestation = ({ pageTitle }) => {
   ];
 
   return (
-    <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+    <div className="bg-white p-6 md:p-4 rounded-xl shadow-lg font-SolaimanLipi">
       {activeView === "table" && (
         <>
           <div className="block w-full overflow-x-auto">
@@ -167,7 +176,10 @@ const CertificateAttestation = ({ pageTitle }) => {
               <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
                 {translate("Certificate of Attestation List")}
               </h3>
-              <Button onClick={handleOpenCreateModal} className="font-SolaimanLipi">
+              <Button
+                onClick={handleOpenCreateModal}
+                className="font-SolaimanLipi"
+              >
                 {translate("Create Certificate")}
               </Button>
             </div>
@@ -194,7 +206,9 @@ const CertificateAttestation = ({ pageTitle }) => {
               </span>
 
               <button
-                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
               >
@@ -209,9 +223,17 @@ const CertificateAttestation = ({ pageTitle }) => {
       {activeView === "create" && (
         <CreateCertificateAttestation onBack={handleBackToList} />
       )}
+      {activeView === "print" && (
+        <PrintOptions/>
+      )}
 
       {activeView === "edit" && selectedId && (
-        <EditCertificateAttestation id={selectedId} onBack={handleBackToList} setActiveView={setActiveView} activeView={activeView}/>
+        <EditCertificateAttestation
+          id={selectedId}
+          onBack={handleBackToList}
+          setActiveView={setActiveView}
+          activeView={activeView}
+        />
       )}
     </div>
   );
