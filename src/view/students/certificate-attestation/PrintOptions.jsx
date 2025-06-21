@@ -6,9 +6,9 @@ import Print3 from "/printview/print3.png";
 import Print4 from "/printview/print4.png";
 
 import PrintTwo from "./print/PrintTwo";
-import { hideModal } from "../../../utils/ModalControlar";
+import Button from "../../../components/Button/Button";
 
-const PrintOptions = () => {
+const PrintOptions = ({ onBack, id }) => {
   const [selectedOption, setSelectedOption] = useState(1);
   const [previewImage, setPreviewImage] = useState(Print1);
   const [printComponent, setPrintComponent] = useState(null);
@@ -38,10 +38,10 @@ const PrintOptions = () => {
     // Select component based on option
     switch (selectedOption) {
       case 2:
-        setPrintComponent(<PrintTwo />);
+        setPrintComponent(<PrintTwo id={id}/>);
         break;
       default:
-        setPrintComponent(<PrintTwo />);
+        setPrintComponent(<PrintTwo id={id}/>);
     }
 
     setShouldPrint(true); // trigger effect
@@ -51,7 +51,6 @@ const PrintOptions = () => {
   useEffect(() => {
     if (shouldPrint && printComponent) {
       const timeout = setTimeout(() => {
-        hideModal(); // ✅ hide modal before print
         window.print();
         setShouldPrint(false);
       }, 200); // Allow time for printComponent to render
@@ -63,6 +62,22 @@ const PrintOptions = () => {
   return (
     <>
       {/* Normal UI */}
+      <div className="flex justify-between items-center mb-5 print:hidden">
+        <h2 className="text-lg md:text-xl font-semibold font-SolaimanLipi">
+          ছাড়পত্র তৈরি
+        </h2>
+        {onBack && (
+          <Button
+            className="bg-gray-500 text-white px-4 py-2"
+            onClick={() => {
+              if (onBack) onBack(); // Go back
+            }}
+            type="button"
+          >
+            ← পিছনে যান
+          </Button>
+        )}
+      </div>
       <div className="max-w-3xl mx-auto font-SolaimanLipi print:hidden">
         <div className="flex items-center flex-col sm:flex-row gap-5 sm:gap-0 justify-between space-x-4">
           {/* Left - Radio Buttons */}
@@ -83,7 +98,7 @@ const PrintOptions = () => {
                   {num === 1 && "A4 বাংলা রঙিন Landscape"}
                   {num === 2 && "A4 বাংলা প্রেসে ছাপানো কাগজে portrait"}
                   {num === 3 && "A4 বাংলা প্রেসে ছাপানো Landscape"}
-                  {num === 4 && "ছাউড়ত্র"}
+                  {num === 4 && "ছাড়পত্র"}
                 </span>
               </label>
             ))}

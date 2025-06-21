@@ -28,6 +28,7 @@ const CertificateAttestation = ({ pageTitle }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [activeView, setActiveView] = useState("table"); // 'table', 'create', or 'edit'
   const [selectedId, setSelectedId] = useState(null);
+  const [printId, setPrintId] = useState(null);
 
   const {
     data: certificateData = [],
@@ -96,6 +97,7 @@ const CertificateAttestation = ({ pageTitle }) => {
   const handlePrint = useCallback(
     (id) => {
     setActiveView("print");
+    setPrintId(id)
     },
     [translate]
   );
@@ -168,7 +170,7 @@ const CertificateAttestation = ({ pageTitle }) => {
   ];
 
   return (
-    <div className="bg-white p-6 md:p-4 rounded-xl shadow-lg font-SolaimanLipi">
+    <div className="bg-white p-6 md:p-4 rounded-xl  font-SolaimanLipi">
       {activeView === "table" && (
         <>
           <div className="block w-full overflow-x-auto">
@@ -224,7 +226,7 @@ const CertificateAttestation = ({ pageTitle }) => {
         <CreateCertificateAttestation onBack={handleBackToList} />
       )}
       {activeView === "print" && (
-        <PrintOptions/>
+        <PrintOptions onBack={handleBackToList} id={printId}/>
       )}
 
       {activeView === "edit" && selectedId && (
