@@ -1,102 +1,104 @@
-import React, { useEffect, useState, useCallback } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { FormProvider, useForm } from "react-hook-form";
-import { TbFilterPlus } from "react-icons/tb";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
+import { useDispatch } from "react-redux";
 
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import DefaultInput from "../../../components/Forms/DefaultInput";
 import Textarea from "../../../components/Forms/Textarea";
 import Button from "../../../components/Button/Button";
 import LoadingComponent from "../../../components/LoadingComponent";
+import { FormProvider } from "react-hook-form";
 
 import {
-  usePostStudentsTransferCertificateMutation,
-  useGetStudentBySearchQuery,
+  useGetStudentsTransferCertificateQuery,
+  useUpdateStudentsTransferCertificateMutation,
   useGetExamNamesQuery,
+  useGetStudentBySearchQuery,
 } from "../../../features/student/studentQuerySlice";
-import { setFilteredStudent } from "../../../features/student/studentSlice";
 import bnBijoy2Unicode from "../../../utils/conveter";
-import { showModal } from "../../../utils/ModalControlar";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetClassListQuery } from "../../../features/class/classQuerySlice";
 
-const CreateCertificateAttestation = ({ onBack }) => {
-  const dispatch = useDispatch();
+const EditCertificateAttestation = ({
+  id,
+  onBack,
+  activeView,
+  setActiveView,
+}) => {
   const methods = useForm();
   const { reset, watch } = methods;
-  const { filteredStudent } = useSelector((state) => state.student);
-
-  // State for student search
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [userTyping, setUserTyping] = useState(false);
-  const studentCodeOrName = watch("StudentCode");
 
   // API Hooks
-  const [postCertificate, { isLoading: isPosting }] =
-    usePostStudentsTransferCertificateMutation();
+  const [updateCertificate, { isLoading: isUpdating }] =
+    useUpdateStudentsTransferCertificateMutation();
+  const { data: existingData } = useGetStudentsTransferCertificateQuery();
   const { data: sessionData } = useGetSessionsQuery();
   const { data: classListData } = useGetClassListQuery();
   const { data: examNamesData } = useGetExamNamesQuery();
+  const [studentCode, setStudentcode] = useState("");
+  const [debouncedStudentCode, setDebouncedStudentCode] = useState("");
+
+  // Debounce effect to prevent too many API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedStudentCode(studentCode);
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [studentCode]);
+
+  // Search student query with debounced value
   const { data: searchStudentInfo, error: searchStudentError } =
     useGetStudentBySearchQuery(
-      { search: studentCodeOrName, ClassID: null, SessionID: null },
-      { skip: !userTyping, refetchOnFocus: false }
+      { search: debouncedStudentCode, ClassID: null, SessionID: null },
+      { skip: debouncedStudentCode.length === 0, refetchOnFocus: false }
     );
 
-  // Handle student search suggestions
+  // Set initial student code when component mounts or id changes
   useEffect(() => {
-    if (
-      studentCodeOrName &&
-      searchStudentInfo?.length > 0 &&
-      !searchStudentError
-    ) {
-      setShowSuggestions(true);
-    } else {
-      setShowSuggestions(false);
+    if (id && Array.isArray(existingData)) {
+      const found = existingData.find((item) => item.CFID === id);
+      if (found) {
+        setStudentcode(found.User?.UserCode || "");
+      }
     }
-  }, [searchStudentInfo, searchStudentError]);
+  }, [id, existingData]);
 
-  // Handle when student is selected from search
+  // Prefill data for editing when searchStudentInfo is available
   useEffect(() => {
-    if (filteredStudent) {
-      setUserTyping(false);
+    if (id && Array.isArray(existingData) && searchStudentInfo?.[0]) {
+      const found = existingData.find((item) => item.CFID === id);
+      if (found) {
+        const fullAddress = `গ্রাম: ${bnBijoy2Unicode(
+          searchStudentInfo[0].permanentVill || ""
+        )}, ডাক: ${bnBijoy2Unicode(
+          searchStudentInfo[0].permanentPost || ""
+        )}, থানা: ${bnBijoy2Unicode(
+          searchStudentInfo[0].PoliceStationName || ""
+        )}, জেলা: ${bnBijoy2Unicode(
+          searchStudentInfo[0].PermanentDistrictName || ""
+        )}`;
 
-      const fullAddress = `গ্রাম: ${bnBijoy2Unicode(
-        filteredStudent.permanentVill || ""
-      )}, ডাক: ${bnBijoy2Unicode(
-        filteredStudent.permanentPost || ""
-      )}, থানা: ${bnBijoy2Unicode(
-        filteredStudent.PoliceStationName || ""
-      )}, জেলা: ${bnBijoy2Unicode(
-        filteredStudent.PermanentDistrictName || ""
-      )}`;
-
-      reset({
-        UserID: filteredStudent.UserID,
-        CreateAt: filteredStudent.CreateAt?.split("T")[0] || "",
-        StudentCode: filteredStudent.StudentCode,
-        name: bnBijoy2Unicode(filteredStudent.StudentName),
-        fatherName: bnBijoy2Unicode(filteredStudent.FatherName),
-        motherName: bnBijoy2Unicode(filteredStudent.MotherName),
-        admissionNumber: filteredStudent.StudentCode,
-        birthDate: filteredStudent.DateOfBirth?.split("T")[0] || "",
-        description: fullAddress,
-      });
+        reset({
+          CreateAt: found.CreateAt || "",
+          name: bnBijoy2Unicode(found.User?.UserName) || "",
+          fatherName: bnBijoy2Unicode(found.User?.FatherName) || "",
+          motherName: bnBijoy2Unicode(found.User?.MotherName) || "",
+          description: fullAddress,
+          admissionNumber: found.User?.UserCode || "",
+          birthDate: searchStudentInfo[0].DateOfBirth,
+          SessionID: found.SessionID || "",
+          ClassID: found.ClassIDTo || "",
+          ExamID: found.ExamID || "",
+          totalMarks: found.TotalMark || "",
+          division: found.DivisionName || "",
+          StudentCode: found.User?.UserCode || "",
+          UserID: found.UserID || "",
+        });
+      }
     }
-  }, [filteredStudent, reset]);
-
-  const handleSuggestionClick = (item) => {
-    setUserTyping(false);
-    dispatch(setFilteredStudent(item));
-    setShowSuggestions(false);
-  };
-
-  const handleOpenModal = useCallback(() => {
-    dispatch(setFilteredStudent(null));
-    setShowSuggestions(false);
-    showModal("Filter Student", "STUDENT_FILTER");
-  }, [dispatch]);
+  }, [id, existingData, reset, searchStudentInfo]);
 
   // Submit handler
   const onSubmit = async (data) => {
@@ -110,17 +112,24 @@ const CreateCertificateAttestation = ({ onBack }) => {
         DivisionName: data.division,
       };
 
-      await postCertificate(certificateData).unwrap();
-      Swal.fire("সফল", "সার্টিফিকেট সফলভাবে তৈরি হয়েছে", "success");
+      await updateCertificate({ id, body: certificateData }).unwrap();
+      Swal.fire({
+        title: "সফল",
+        text: "সার্টিফিকেট সফলভাবে আপডেট হয়েছে",
+        icon: "success",
+      });
       if (onBack) onBack();
-     dispatch(setFilteredStudent(null));
-      reset();
     } catch (error) {
-      Swal.fire("ত্রুটি", "কোনো একটি সমস্যা হয়েছে", "error");
+      console.error("Update error:", error);
+      Swal.fire({
+        title: "ত্রুটি",
+        text: error.data?.error || "কোনো একটি সমস্যা হয়েছে",
+        icon: "error",
+      });
     }
   };
 
-  if (isPosting) return <LoadingComponent />;
+  if (isUpdating) return <LoadingComponent />;
 
   return (
     <FormProvider {...methods}>
@@ -129,23 +138,30 @@ const CreateCertificateAttestation = ({ onBack }) => {
         className="mx-auto bg-white p-4 2xl:p-6 text-gray-800 space-y-6"
       >
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between sm:flex-row flex-col items-center">
           <h2 className="text-lg md:text-xl font-semibold font-SolaimanLipi">
-            নতুন প্রত্যায়ন তৈরি
+            প্রত্যায়ন আপডেট
           </h2>
-          {onBack && (
-            <Button
-              className="bg-gray-500 text-white px-4 py-2"
-              onClick={() => {
-                reset(); // Reset the form
-                dispatch(setFilteredStudent(null)); // Optional: clear selected student
-                if (onBack) onBack(); // Go back
-              }}
-              type="button"
-            >
-              ← পিছনে যান
-            </Button>
-          )}
+          <div className="flex gap-2">
+            {onBack && (
+              <Button
+                className="bg-gray-500 text-white px-4 py-2"
+                onClick={onBack}
+                type="button"
+              >
+                ← পিছনে যান
+              </Button>
+            )}
+            {activeView === "edit" && (
+              <Button
+                className="bg-gray-500 text-white px-4 py-2"
+                onClick={() => setActiveView("create")}
+                type="button"
+              >
+                Create Certificate
+              </Button>
+            )}
+          </div>
         </div>
 
         {/* Photo & Info */}
@@ -155,40 +171,15 @@ const CreateCertificateAttestation = ({ onBack }) => {
               Photo
             </div>
             <div className="w-full">
-              <div className="mb-6 relative">
+              <div className="mb-6">
                 <label className="font-SolaimanLipi block mb-1">
                   শিক্ষার্থীর কোড:
                 </label>
-                <div className="flex gap-2">
-                  <input
-                    {...methods.register("StudentCode", { required: true })}
-                    className="w-full rounded border border-gray-300 px-2 h-[38px] bg-[#EDEDED]"
-                    onInput={() => {
-                      setUserTyping(true);
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleOpenModal}
-                    className="pr-2"
-                  >
-                    <TbFilterPlus size={30} />
-                  </button>
-                </div>
-                {showSuggestions && (
-                  <div className="absolute z-30 bg-white shadow border w-full max-h-[200px] overflow-y-auto mt-1">
-                    {searchStudentInfo.map((item, index) => (
-                      <div
-                        key={index}
-                        className="p-2 hover:bg-blue-100 cursor-pointer"
-                        onClick={() => handleSuggestionClick(item)}
-                      >
-                        {item.StudentCode} - {bnBijoy2Unicode(item.StudentName)}{" "}
-                        - {bnBijoy2Unicode(item.ClassName)}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <input
+                  {...methods.register("StudentCode", { required: true })}
+                  className="w-full rounded border border-gray-300 px-2 h-[38px] bg-[#EDEDED]"
+                  disabled
+                />
               </div>
             </div>
           </div>
@@ -318,9 +309,9 @@ const CreateCertificateAttestation = ({ onBack }) => {
           <Button
             type="submit"
             className="font-SolaimanLipi"
-            disabled={isPosting}
+            disabled={isUpdating}
           >
-            {isPosting ? "লোড হচ্ছে..." : "সংরক্ষণ করুন"}
+            {isUpdating ? "লোড হচ্ছে..." : "আপডেট করুন"}
           </Button>
         </div>
       </form>
@@ -328,4 +319,4 @@ const CreateCertificateAttestation = ({ onBack }) => {
   );
 };
 
-export default CreateCertificateAttestation;
+export default EditCertificateAttestation;

@@ -64,6 +64,7 @@ import Book from "./pages/Book";
 import CertificateAttesation from "./pages/CertificateAttesation";
 import OnlineAdmissionTable from "./pages/OnlineAdmissionTable";
 import { useGetAllUserPermissionsQuery } from "./features/permission/permissionSlice";
+import CreateCertificateAttestation from "./view/students/certificate-attestation/CreateCertificateAttestation";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",

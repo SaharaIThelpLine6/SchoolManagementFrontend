@@ -19,6 +19,7 @@ export const userStudentSlice = createApi({
     "StudentVacation",
     "StudentVacationType",
     "StudentReports",
+    "ExamNames",
   ],
   endpoints: (builder) => ({
     getStudentBySearch: builder.query({
@@ -116,7 +117,6 @@ export const userStudentSlice = createApi({
       query: () => `get_studentvacation_type_list`,
       providesTags: ["StudentVacationType"],
     }),
-
     postStudentsVacationType: builder.mutation({
       query: (body) => ({
         url: `studentvacation_type`,
@@ -125,7 +125,6 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ["StudentVacationType"],
     }),
-
     updateStudentsVacationType: builder.mutation({
       query: ({ id, ...body }) => ({
         url: `studentvacation_type/${id}`,
@@ -140,6 +139,41 @@ export const userStudentSlice = createApi({
         method: "DELETE",
       }),
       invalidatesTags: ["StudentVacationType"], // Ensures the list is refreshed
+    }),
+    // Transfer Certificate
+    getStudentsTransferCertificate: builder.query({
+      query: () => `get_student_transfer_certificate`,
+      providesTags: ["StudentTransferCertificate"],
+    }),
+    getExamNames: builder.query({
+      query: () => `get_exam_names`,
+      providesTags: ["ExamNames"],
+    }),
+    postStudentsTransferCertificate: builder.mutation({
+      query: (body) => ({
+        url: `student_transfer_certificate`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["StudentTransferCertificate"],
+    }),
+    updateStudentsTransferCertificate: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `student_transfer_certificate/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: "StudentTransferCertificate", id },
+        "StudentTransferCertificate", // Invalidate both specific and all queries
+      ],
+    }),
+    deleteStudentsTransferCertificate: builder.mutation({
+      query: (id) => ({
+        url: `student_transfer_certificate/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["StudentTransferCertificate"], // Ensures the list is refreshed
     }),
   }),
 });
@@ -159,4 +193,9 @@ export const {
   useUpdateStudentsVacationTypeMutation,
   useDeleteStudentsVacationTypeMutation,
   usePostEnglishAndArobicNameMutation,
+  useGetStudentsTransferCertificateQuery,
+  usePostStudentsTransferCertificateMutation,
+  useUpdateStudentsTransferCertificateMutation,
+  useDeleteStudentsTransferCertificateMutation,
+  useGetExamNamesQuery,
 } = userStudentSlice;

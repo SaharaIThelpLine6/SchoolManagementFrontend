@@ -21,7 +21,6 @@ import SuccessAndError from "../view/general-information/sms/SuccessAndError";
 import CreateDistribution from "../view/students/group-distribution/CreateDistribution";
 import Recordchange from "../view/students/group-distribution/Recordchange";
 import AddEditBook from "../view/students/book/AddEditBook";
-import CreateCertificateAttestation from "../view/students/certificate-attestation/CreateCertificateAttestation";
 import useTranslate from "../utils/Translate";
 
 const DefaultModal = () => {
@@ -114,12 +113,7 @@ const DefaultModal = () => {
                 {modalType === "ADD_GROUP_CHANGE" && <Recordchange />}
                 {modalType === "ADD_BOOK" && <AddEditBook />}
                 {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
-                {modalType === "ADD_CERTIFICATE_ATTESTATION" && (
-                  <CreateCertificateAttestation />
-                )}
-                {modalType === "UPDATE_CERTIFICATE_ATTESTATION" && (
-                  <CreateCertificateAttestation />
-                )}
+            
               </div>
             )}
           </div>
