@@ -88,21 +88,16 @@ export const menuData = [
       },
       {
         id: "10",
-        name: "Type of vacation",
-        route: "/students/vacation/type-of-vacation",
-      },
-      {
-        id: "11",
         name: "Certificate of Attestation",
         route: "/students/certificate-of-attestation",
       },
       {
-        id: "12",
+        id: "11",
         name: "Students Report",
         route: "/students/report",
       },
       {
-        id: "13",
+        id: "12",
         name: "Online Admission",
         route: "/students/online-admission",
       },

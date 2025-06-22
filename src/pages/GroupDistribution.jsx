@@ -127,7 +127,7 @@ const GroupDistribution = ({ pageTitle }) => {
   };
 
   return (
-    <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+    <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
         <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
           {translate("Group Distribution List")}
