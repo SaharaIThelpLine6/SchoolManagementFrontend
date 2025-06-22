@@ -107,7 +107,7 @@ const PrintTwo = ({ id }) => {
           </p>
         </div>
 
-        <p>
+        
           ভর্তির রেজিস্ট্রি অনুযায়ী তাহার :
           <span className="inline-block border-b border-black w-28 mx-2 text-center">
             {cfidCode || "------"}
@@ -116,8 +116,8 @@ const PrintTwo = ({ id }) => {
           <span className="inline-block border-b border-black w-40 ml-2 text-center">
             {student?.DateOfBirth || "------"}
           </span>
-        </p>
-        <p>
+        
+        
           সে অত্র বিদ্যালয়ে
           <span className="inline-block border-b border-black w-28 mx-2 text-center">
             {student?.SessionName || "------"}
@@ -127,9 +127,9 @@ const PrintTwo = ({ id }) => {
             {student?.ClassName || "------"}
           </span>
          জামাতে অধ্যায়ন করেছে।
-        </p>
+        
 
-        <p>
+        
           <span className=" border-b border-black w-20 mx-2 text-center">
             {examData?.ExamName ? bnBijoy2Unicode(examData.ExamName) : "------"}
           </span>
@@ -142,7 +142,7 @@ const PrintTwo = ({ id }) => {
             {cfidData?.DivisionName || "------"}
           </span>
           বিভাগ পেয়ে উত্তীর্ণ হইয়াছে।
-        </p>
+        
 
 
         <p className="mt-4 text-justify">

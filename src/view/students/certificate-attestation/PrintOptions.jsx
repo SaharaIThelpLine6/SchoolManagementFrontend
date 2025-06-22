@@ -7,6 +7,7 @@ import Print4 from "/printview/print4.png";
 
 import PrintTwo from "./print/PrintTwo";
 import Button from "../../../components/Button/Button";
+import PrintOne from "./print/PrintOne";
 
 const PrintOptions = ({ onBack, id }) => {
   const [selectedOption, setSelectedOption] = useState(1);
@@ -37,8 +38,17 @@ const PrintOptions = ({ onBack, id }) => {
   const handlePrint = () => {
     // Select component based on option
     switch (selectedOption) {
+      case 1:
+        setPrintComponent(<PrintOne id={id} title={"প্রত্যয়নপত্র"}/>);
+        break;
       case 2:
         setPrintComponent(<PrintTwo id={id}/>);
+        break;
+      case 3:
+        setPrintComponent(<PrintTwo id={id}/>);
+        break;
+      case 4:
+        setPrintComponent(<PrintOne id={id} title={"ছাড়পত্র"}/>);
         break;
       default:
         setPrintComponent(<PrintTwo id={id}/>);
@@ -64,7 +74,7 @@ const PrintOptions = ({ onBack, id }) => {
       {/* Normal UI */}
       <div className="flex justify-between items-center mb-5 print:hidden">
         <h2 className="text-lg md:text-xl font-semibold font-SolaimanLipi">
-          ছাড়পত্র তৈরি
+          ছাড়পত্র প্রিন্ট করুন
         </h2>
         {onBack && (
           <Button
@@ -95,9 +105,9 @@ const PrintOptions = ({ onBack, id }) => {
                   onChange={() => handleOptionChange(num)}
                 />
                 <span className="text-gray-800 font-medium">
-                  {num === 1 && "A4 বাংলা রঙিন Landscape"}
-                  {num === 2 && "A4 বাংলা প্রেসে ছাপানো কাগজে portrait"}
-                  {num === 3 && "A4 বাংলা প্রেসে ছাপানো Landscape"}
+                  {num === 1 && "বাংলা রঙিন"}
+                  {num === 2 && "বাংলা প্রেসে ছাপানো কাগজে"}
+                  {num === 3 && "বাংলা প্রেসে ছাপানো"}
                   {num === 4 && "ছাড়পত্র"}
                 </span>
               </label>
