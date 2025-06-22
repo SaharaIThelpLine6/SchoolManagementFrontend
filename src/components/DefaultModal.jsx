@@ -18,8 +18,6 @@ import SMSTemplate from "../view/general-information/sms/SMSTemplate";
 import SMSBuy from "../view/general-information/sms/SMSBuy";
 import PaymentGetway from "../view/general-information/sms/PaymentGetway";
 import SuccessAndError from "../view/general-information/sms/SuccessAndError";
-import CreateDistribution from "../view/students/group-distribution/CreateDistribution";
-import Recordchange from "../view/students/group-distribution/Recordchange";
 import AddEditBook from "../view/students/book/AddEditBook";
 import useTranslate from "../utils/Translate";
 
@@ -107,10 +105,6 @@ const DefaultModal = () => {
                 {modalType === "SMS_BUY" && <SMSBuy />}
                 {modalType === "PAYMENT_GETWAY" && <PaymentGetway />}
                 {modalType === "SUCCESSANDERROR" && <SuccessAndError />}
-                {modalType === "ADD_GROUP_DISTRIBUTION" && (
-                  <CreateDistribution />
-                )}
-                {modalType === "ADD_GROUP_CHANGE" && <Recordchange />}
                 {modalType === "ADD_BOOK" && <AddEditBook />}
                 {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
               </div>
