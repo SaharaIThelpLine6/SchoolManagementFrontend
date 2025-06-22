@@ -20,10 +20,12 @@ import bnBijoy2Unicode from "../../../utils/conveter";
 import { showModal } from "../../../utils/ModalControlar";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetClassListQuery } from "../../../features/class/classQuerySlice";
+import useTranslate from "../../../utils/Translate";
 
 const CreateCertificateAttestation = ({ onBack }) => {
   const dispatch = useDispatch();
   const methods = useForm();
+  const translate = useTranslate();
   const { reset, watch } = methods;
   const { filteredStudent } = useSelector((state) => state.student);
 
@@ -131,7 +133,7 @@ const CreateCertificateAttestation = ({ onBack }) => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <h2 className="text-lg md:text-xl font-semibold font-SolaimanLipi">
-            নতুন প্রত্যায়ন তৈরি
+           {translate("Create new certificate")}
           </h2>
           {onBack && (
             <Button
@@ -143,7 +145,7 @@ const CreateCertificateAttestation = ({ onBack }) => {
               }}
               type="button"
             >
-              ← পিছনে যান
+              ← {translate("Back")}
             </Button>
           )}
         </div>
@@ -157,7 +159,7 @@ const CreateCertificateAttestation = ({ onBack }) => {
             <div className="w-full">
               <div className="mb-6 relative">
                 <label className="font-SolaimanLipi block mb-1">
-                  শিক্ষার্থীর কোড:
+                  {translate("Student Code")}:
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -195,32 +197,32 @@ const CreateCertificateAttestation = ({ onBack }) => {
 
           <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <DefaultInput
-              label="এন্ট্রি তারিখ :"
+              label={translate("Date of entry") + " :"}
               type="date"
               registerKey="CreateAt"
               disable={true}
             />
             <DefaultInput
-              label="নাম :"
+              label={translate("Name")+ " :"}
               type="text"
               registerKey="name"
               disable={true}
             />
             <DefaultInput
-              label="পিতা :"
+              label={translate("Father Name")+ " :"}
               type="text"
               registerKey="fatherName"
               disable={true}
             />
             <DefaultInput
-              label="মাতা :"
+              label={translate("Mother Name")+ " :"}
               type="text"
               registerKey="motherName"
               disable={true}
             />
             <div className="md:col-span-2">
               <Textarea
-                label="ঠিকানা :"
+                label={translate("Address")+ " :"}
                 placeholder="ঠিকানা লিখুন"
                 registerKey="description"
                 require={true}
@@ -320,7 +322,7 @@ const CreateCertificateAttestation = ({ onBack }) => {
             className="font-SolaimanLipi"
             disabled={isPosting}
           >
-            {isPosting ? "লোড হচ্ছে..." : "সংরক্ষণ করুন"}
+            {isPosting ? "লোড হচ্ছে..." : translate("Save")}
           </Button>
         </div>
       </form>

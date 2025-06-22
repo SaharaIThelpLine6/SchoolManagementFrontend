@@ -19,6 +19,7 @@ import {
 import bnBijoy2Unicode from "../../../utils/conveter";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetClassListQuery } from "../../../features/class/classQuerySlice";
+import useTranslate from "../../../utils/Translate";
 
 const EditCertificateAttestation = ({
   id,
@@ -28,6 +29,8 @@ const EditCertificateAttestation = ({
 }) => {
   const methods = useForm();
   const { reset, watch } = methods;
+
+  const translate = useTranslate();
 
   // API Hooks
   const [updateCertificate, { isLoading: isUpdating }] =
@@ -140,7 +143,7 @@ const EditCertificateAttestation = ({
         {/* Header */}
         <div className="flex justify-between sm:flex-row flex-col items-center">
           <h2 className="text-lg md:text-xl font-semibold font-SolaimanLipi">
-            প্রত্যায়ন আপডেট
+            {translate("Certification update")}
           </h2>
           <div className="flex gap-2">
             {onBack && (
@@ -149,7 +152,7 @@ const EditCertificateAttestation = ({
                 onClick={onBack}
                 type="button"
               >
-                ← পিছনে যান
+                ← {translate("Back")}
               </Button>
             )}
             {activeView === "edit" && (
@@ -158,7 +161,7 @@ const EditCertificateAttestation = ({
                 onClick={() => setActiveView("create")}
                 type="button"
               >
-                Create Certificate
+                {translate("Create Certificate")}
               </Button>
             )}
           </div>
@@ -173,7 +176,7 @@ const EditCertificateAttestation = ({
             <div className="w-full">
               <div className="mb-6">
                 <label className="font-SolaimanLipi block mb-1">
-                  শিক্ষার্থীর কোড:
+                  {translate("Student Code")}:
                 </label>
                 <input
                   {...methods.register("StudentCode", { required: true })}
@@ -186,32 +189,32 @@ const EditCertificateAttestation = ({
 
           <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <DefaultInput
-              label="এন্ট্রি তারিখ :"
+              label={translate("Date of entry") + " :"}
               type="date"
               registerKey="CreateAt"
               disable={true}
             />
             <DefaultInput
-              label="নাম :"
+              label={translate("Name") + " :"}
               type="text"
               registerKey="name"
               disable={true}
             />
             <DefaultInput
-              label="পিতা :"
+              label={translate("Father Name") + " :"}
               type="text"
               registerKey="fatherName"
               disable={true}
             />
             <DefaultInput
-              label="মাতা :"
+              label={translate("Mother Name") + " :"}
               type="text"
               registerKey="motherName"
               disable={true}
             />
             <div className="md:col-span-2">
               <Textarea
-                label="ঠিকানা :"
+                label={translate("Address") + " :"}
                 placeholder="ঠিকানা লিখুন"
                 registerKey="description"
                 require={true}
@@ -311,7 +314,7 @@ const EditCertificateAttestation = ({
             className="font-SolaimanLipi"
             disabled={isUpdating}
           >
-            {isUpdating ? "লোড হচ্ছে..." : "আপডেট করুন"}
+            {isUpdating ? "লোড হচ্ছে..." : translate("Update")}
           </Button>
         </div>
       </form>

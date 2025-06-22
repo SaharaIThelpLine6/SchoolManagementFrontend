@@ -5,6 +5,7 @@ import {
   useGetStudentsTransferCertificateQuery,
 } from "../../../../features/student/studentQuerySlice";
 import bnBijoy2Unicode from "../../../../utils/conveter";
+import { formatDate } from "../../../../helper/formatTime";
 
 const PrintTwo = ({ id }) => {
   const [cfidCode, setCfidCode] = useState("");
@@ -49,7 +50,7 @@ const PrintTwo = ({ id }) => {
           <span>ক্রমিক:</span>
           <div className="border border-black w-12 text-center">১</div>
         </div>
-        <div>তারিখ: ০৩/০৩/২০২৫</div>
+        <div>{formatDate(new Date())}</div>
       </div>
 
       {/* Title */}

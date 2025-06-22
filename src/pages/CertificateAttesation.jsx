@@ -37,6 +37,9 @@ const CertificateAttestation = ({ pageTitle }) => {
   } = useGetStudentsTransferCertificateQuery();
   const [deleteCertificate] = useDeleteStudentsTransferCertificateMutation();
 
+  console.log(certificateData);
+
+
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
@@ -158,14 +161,16 @@ const CertificateAttestation = ({ pageTitle }) => {
       render: (row) => <span>{bnBijoy2Unicode(row.User?.FatherName)}</span>,
     },
     {
-      title: translate("To Class"),
-      field: "ClassIDTo",
+      title: translate("Total Mark"),
+      field: "TotalMark",
       hozAlign: "center",
+      render: (row) => <span>{row.TotalMark}</span>,
     },
     {
       title: translate("Division"),
       field: "DivisionName",
       hozAlign: "center",
+      render: (row) => <span>{row.DivisionName}</span>,
     },
   ];
 
