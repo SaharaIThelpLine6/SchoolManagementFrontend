@@ -28,6 +28,7 @@ export const userStudentSlice = createApi({
         ClassID,
         SessionID,
         NewOldId,
+        GenderID,
         ResidentialStatusId,
       }) => {
         const params = new URLSearchParams();
@@ -35,6 +36,7 @@ export const userStudentSlice = createApi({
           params.append("search", search);
         }
         if (ClassID) params.append("ClassID", ClassID);
+        if (GenderID) params.append("GenderID", GenderID);
         if (SessionID) params.append("SessionID", SessionID);
         if (NewOldId) params.append("NewOldId", NewOldId);
         if (ResidentialStatusId)
@@ -168,6 +170,14 @@ export const userStudentSlice = createApi({
         "StudentTransferCertificate", // Invalidate both specific and all queries
       ],
     }),
+    postChnageStudentGroup: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `change_studentgroup/${id}`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Student"], // Ensures the list is refreshed
+    }),
     deleteStudentsTransferCertificate: builder.mutation({
       query: (id) => ({
         url: `student_transfer_certificate/${id}`,
@@ -198,4 +208,5 @@ export const {
   useUpdateStudentsTransferCertificateMutation,
   useDeleteStudentsTransferCertificateMutation,
   useGetExamNamesQuery,
+  usePostChnageStudentGroupMutation
 } = userStudentSlice;

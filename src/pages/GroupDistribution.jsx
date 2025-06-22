@@ -9,6 +9,14 @@ import Button from "../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import DefaultInput from "../components/Forms/DefaultInput";
+import {
+  useGetStudentBySearchQuery,
+  usePostChnageStudentGroupMutation,
+} from "../features/student/studentQuerySlice";
+import { useGetSessionsQuery } from "../features/session/sessionSlice";
+import { useGetClassListQuery } from "../features/class/classQuerySlice";
+import bnBijoy2Unicode from "../utils/conveter";
+import Swal from "sweetalert2";
 
 const PAGE_SIZE = 10;
 
@@ -17,66 +25,48 @@ const GroupDistribution = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const methods = useForm();
-
-  const academicYearOptions = [];
-  const classOptions = [];
-  const genderOptions = [];
-  const subClassOptions = [];
-  // Sample data
-  const groupDistributionData = [
-    {
-      ID: "S001",
-      StudentName: "আহমেদ রহমান",
-      CurrentGroup: "A",
-      NewGroup: "B",
-    },
-    {
-      ID: "S002",
-      StudentName: "ফাতেমা আক্তার",
-      CurrentGroup: "B",
-      NewGroup: "A",
-    },
-    {
-      ID: "S003",
-      StudentName: "করিম উদ্দিন",
-      CurrentGroup: "C",
-      NewGroup: "D",
-    },
-    {
-      ID: "S004",
-      StudentName: "সুমাইয়া ইসলাম",
-      CurrentGroup: "D",
-      NewGroup: "C",
-    },
-    { ID: "S005", StudentName: "আজিজুল হক", CurrentGroup: "E", NewGroup: "F" },
-    {
-      ID: "S006",
-      StudentName: "হাসান মাহমুদ",
-      CurrentGroup: "F",
-      NewGroup: "E",
-    },
-    {
-      ID: "S007",
-      StudentName: "ফারজানা খাতুন",
-      CurrentGroup: "G",
-      NewGroup: "H",
-    },
-    { ID: "S008", StudentName: "ইমরান", CurrentName: "H", NewGroup: "G" },
-  ];
-
+  const { watch, handleSubmit } = methods;
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState([]);
+  const genderOptions = [
+    { id: "1", value: "পুরুষ" },
+    { id: "2", value: "মহিলা" },
+    { id: "3", value: "উভয়" },
+  ];
+
+  const SessionID = watch("SessionID");
+  const ClassID = watch("ClassID");
+  const genderId = watch("gender");
+
+  const { data: sessionData } = useGetSessionsQuery();
+  const { data: classListData } = useGetClassListQuery();
+  const [postChnageStudentGroup, { isLoading, isSuccess, isError }] =
+    usePostChnageStudentGroupMutation();
+
+  const selectedClass = classListData?.find((item) => item.ClassID == ClassID); // Use == to avoid type mismatch
+
+  console.log("Selected class:", selectedClass);
+
+  const { data: searchStudentInfo = [], refetch } = useGetStudentBySearchQuery(
+    { search: null, ClassID, SessionID, GenderID: genderId },
+    {
+      skip: !ClassID || !SessionID || !genderId,
+      refetchOnFocus: false,
+    }
+  );
+
+  console.log(selectedRows);
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  const totalPages = Math.ceil(groupDistributionData.length / PAGE_SIZE);
+  const totalPages = Math.ceil(searchStudentInfo.length / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return groupDistributionData.slice(start, start + PAGE_SIZE);
-  }, [groupDistributionData, currentPage]);
+    return searchStudentInfo.slice(start, start + PAGE_SIZE);
+  }, [searchStudentInfo, currentPage]);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -86,24 +76,9 @@ const GroupDistribution = ({ pageTitle }) => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
-  const handleOpenModal = useCallback(() => {
-    showModal(translate("Group Distribution Create"), "ADD_GROUP_DISTRIBUTION");
-  }, [translate]);
-
-  const handleEditOpenModal = useCallback(
-    (id) => {
-      showModal(
-        translate("Group Distribution Update"),
-        "EDIT_GROUP_DISTRIBUTION",
-        id
-      );
-    },
-    [translate]
-  );
-
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      setSelectedRows(paginatedData.map((row) => row.ID));
+      setSelectedRows(paginatedData.map((row) => row.AdmissionID));
     } else {
       setSelectedRows([]);
     }
@@ -116,10 +91,39 @@ const GroupDistribution = ({ pageTitle }) => {
       setSelectedRows((prev) => prev.filter((rowId) => rowId !== id));
     }
   };
+  const onSubmit = async (data) => {
+    try {
+      if (!data.SubClassID || selectedRows.length === 0) {
+        Swal.fire({
+          icon: "warning",
+          title: "ফর্ম অসম্পূর্ণ",
+          text: "অনুগ্রহ করে সাব ক্লাস নির্বাচন করুন এবং অন্তত একজন শিক্ষার্থী সিলেক্ট করুন।",
+        });
+        return;
+      }
 
-  const handleSave = () => {
-    // Logic to save selected rows
-    console.log("Saving selected rows:", selectedRows);
+      const response = await postChnageStudentGroup({
+        id: data.SubClassID,
+        body: { admissionIds: selectedRows },
+      }).unwrap();
+
+      Swal.fire({
+        icon: "success",
+        title: "সফলভাবে সংরক্ষণ হয়েছে",
+        text: response?.message || "গ্রুপ পরিবর্তন সফল হয়েছে।",
+      }).then(() => {
+        refetch();
+        setSelectedRows([]);
+        // methods.reset();
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "ত্রুটি ঘটেছে!",
+        text: error?.data?.error || "ডেটা সংরক্ষণ করতে ব্যর্থ হয়েছে।",
+      });
+      console.error("Error updating student group:", error);
+    }
   };
 
   return (
@@ -128,36 +132,26 @@ const GroupDistribution = ({ pageTitle }) => {
         <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
           {translate("Group Distribution List")}
         </h3>
-        {/* <button
-          onClick={handleSave}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          SAVE
-        </button> */}
       </div>
+
       <FormProvider {...methods}>
-        <form className="w-full space-y-4">
+        <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-3">
             {/* Left Column */}
             <div className="flex flex-col space-y-4">
               <DefaultSelect
-                label={
-                  <p className="text-gray-700 font-medium">শিক্ষাবর্ষ :</p>
-                }
-                options={academicYearOptions}
-                valueField="id"
-                nameField="value"
-                registerKey="academicYear"
+                label="শিক্ষাবর্ষ"
+                options={sessionData ?? []}
+                valueField="SessionID"
+                nameField="SessionName"
+                registerKey="SessionID"
               />
-
               <DefaultSelect
-                label={
-                  <p className="text-gray-700 font-medium">মারহালা/ক্লাশ:</p>
-                }
-                options={classOptions}
-                valueField="id"
-                nameField="value"
-                registerKey="class"
+                label="শ্রেণি"
+                options={classListData ?? []}
+                valueField="ClassID"
+                nameField="ClassName"
+                registerKey="ClassID"
               />
 
               <DefaultSelect
@@ -171,21 +165,22 @@ const GroupDistribution = ({ pageTitle }) => {
 
             {/* Right Column */}
             <div className="flex flex-col space-y-4">
-              <DefaultInput
+              {/* <DefaultInput
                 label={
                   <p className="text-gray-700 font-medium">সাব ক্লাস আইডি :</p>
                 }
                 type="number"
                 placeholder="সাব ক্লাস আইডি লিখুন"
                 registerKey="subClassId"
-              />
+              /> */}
 
               <DefaultSelect
                 label={<p className="text-gray-700 font-medium">সাব ক্লাস :</p>}
-                options={subClassOptions}
-                valueField="id"
-                nameField="value"
-                registerKey="subClass"
+                options={selectedClass?.ClassGroup}
+                valueField="SubClassID"
+                nameField="SubClass"
+                registerKey="SubClassID"
+                unicode={true}
               />
 
               {/* Button */}
@@ -199,74 +194,78 @@ const GroupDistribution = ({ pageTitle }) => {
         </form>
       </FormProvider>
 
-      <div className="w-full overflow-x-auto mt-4">
-        <table className="w-full border-collapse min-w-[800px]">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="p-2 text-center border">
+      <div className="overflow-x-auto mt-5">
+        <table className="w-full border border-gray-300">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="p-2 text-left">
                 <input
                   type="checkbox"
                   onChange={handleSelectAll}
-                  checked={selectedRows.length === paginatedData.length}
+                  checked={
+                    selectedRows.length === paginatedData.length &&
+                    paginatedData.length > 0
+                  }
                 />
               </th>
-              <th className="p-2 text-center border">আইডি</th>
-              <th className="p-2 text-center border">শিক্ষার্থীর নাম</th>
-              <th className="p-2 text-center border">সাব ক্লাস</th>
-              <th className="p-2 text-center border">অবস্থান</th>
+              <th className="p-2 text-left">আইডি</th>
+              <th className="p-2 text-left">শিক্ষার্থীর নাম</th>
+              <th className="p-2 text-left">ক্লাস</th>
+              <th className="p-2 text-left">সাব ক্লাস</th>
+              <th className="p-2 text-left">অবস্থান</th>
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((row, index) => (
-              <tr
-                key={row.ID}
-                className={`${
-                  selectedRows.includes(row.ID)
-                    ? "bg-purple-200"
-                    : index % 2 === 0
-                    ? "bg-gray-50"
-                    : ""
-                }`}
-              >
-                <td className="p-2 text-center border">
+            {paginatedData.map((student) => (
+              <tr key={student.AdmissionID} className="border-t">
+                <td className="p-2">
                   <input
                     type="checkbox"
-                    checked={selectedRows.includes(row.ID)}
-                    onChange={(e) => handleRowSelect(e, row.ID)}
+                    onChange={(e) => handleRowSelect(e, student.AdmissionID)}
+                    checked={selectedRows.includes(student.AdmissionID)}
                   />
                 </td>
-                <td className="p-2 text-center border">{row.ID}</td>
-                <td className="p-2 text-center border">{row.StudentName}</td>
-                <td className="p-2 text-center border">{row.CurrentGroup}</td>
-                <td className="p-2 text-center border">{row.NewGroup}</td>
+                <td className="p-2">{student.StudentCode}</td>
+                <td className="p-2">{bnBijoy2Unicode(student.StudentName)}</td>
+                <td className="p-2">{bnBijoy2Unicode(student.ClassName)}</td>
+                <td className="p-2">{bnBijoy2Unicode(student.SubClass)}</td>
+                <td className="p-2">{student.ResidentialName}</td>
               </tr>
             ))}
+            {paginatedData.length === 0 && (
+              <tr>
+                <td colSpan="7" className="text-center p-4">
+                  {translate("No data found")}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      <div className="flex justify-center items-center gap-4 mt-4">
-        <button
-          onClick={handlePrev}
-          disabled={currentPage === 1}
-          className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-        >
-          <MdKeyboardArrowLeft className="text-lg" />
-          {translate("Prev")}
-        </button>
-
-        <span className="text-sm font-medium text-gray-700">
-          {translate("Page")} {currentPage} {translate("of")} {totalPages}
-        </span>
-
-        <button
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-          className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-        >
-          {translate("Next")}
-          <MdKeyboardArrowRight className="text-lg" />
-        </button>
+      <div className="flex justify-center items-center mt-4">
+        {/* <div>
+          <Button onClick={handleSave}>সংরক্ষণ করুন</Button>
+        </div> */}
+        <div className="flex items-center space-x-2">
+          <button
+            className="p-1 border rounded disabled:opacity-50"
+            onClick={handlePrev}
+            disabled={currentPage === 1}
+          >
+            <MdKeyboardArrowLeft size={24} />
+          </button>
+          <span>
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="p-1 border rounded disabled:opacity-50"
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+          >
+            <MdKeyboardArrowRight size={24} />
+          </button>
+        </div>
       </div>
     </div>
   );
