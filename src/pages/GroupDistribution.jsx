@@ -114,7 +114,7 @@ const GroupDistribution = ({ pageTitle }) => {
       }).then(() => {
         refetch();
         setSelectedRows([]);
-        // methods.reset();
+        methods.reset();
       });
     } catch (error) {
       Swal.fire({
@@ -140,14 +140,14 @@ const GroupDistribution = ({ pageTitle }) => {
             {/* Left Column */}
             <div className="flex flex-col space-y-4">
               <DefaultSelect
-                label="শিক্ষাবর্ষ"
+                label={translate("Session")}
                 options={sessionData ?? []}
                 valueField="SessionID"
                 nameField="SessionName"
                 registerKey="SessionID"
               />
               <DefaultSelect
-                label="শ্রেণি"
+                label={translate("Class")}
                 options={classListData ?? []}
                 valueField="ClassID"
                 nameField="ClassName"
@@ -155,7 +155,7 @@ const GroupDistribution = ({ pageTitle }) => {
               />
 
               <DefaultSelect
-                label={<p className="text-gray-700 font-medium">লিঙ্গ:</p>}
+                label={<p className="text-gray-700 font-medium">{translate("Gender")}:</p>}
                 options={genderOptions}
                 valueField="id"
                 nameField="value"
@@ -175,7 +175,7 @@ const GroupDistribution = ({ pageTitle }) => {
               /> */}
 
               <DefaultSelect
-                label={<p className="text-gray-700 font-medium">সাব ক্লাস :</p>}
+                label={<p className="text-gray-700 font-medium">{translate("Sub Class")} :</p>}
                 options={selectedClass?.ClassGroup}
                 valueField="SubClassID"
                 nameField="SubClass"
@@ -186,7 +186,7 @@ const GroupDistribution = ({ pageTitle }) => {
               {/* Button */}
               <div className="pt-7 w-full">
                 <Button type="submit" className="w-full md:w-auto">
-                  সংরক্ষণ করুন
+                  {translate("Save")}
                 </Button>
               </div>
             </div>
@@ -208,11 +208,11 @@ const GroupDistribution = ({ pageTitle }) => {
                   }
                 />
               </th>
-              <th className="p-2 text-left">আইডি</th>
-              <th className="p-2 text-left">শিক্ষার্থীর নাম</th>
-              <th className="p-2 text-left">ক্লাস</th>
-              <th className="p-2 text-left">সাব ক্লাস</th>
-              <th className="p-2 text-left">অবস্থান</th>
+              <th className="p-2 text-left">{translate("User ID")}</th>
+              <th className="p-2 text-left">{translate("Student Name")}</th>
+              <th className="p-2 text-left">{translate("Class")}</th>
+              <th className="p-2 text-left">{translate("Sub Class")}</th>
+              <th className="p-2 text-left">{translate("Residential")}</th>
             </tr>
           </thead>
           <tbody>

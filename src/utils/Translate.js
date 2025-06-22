@@ -320,6 +320,7 @@ const useTranslate = () => {
     "Institution Names": "প্রতিষ্ঠানের নামসমূহ",
     Addresses: "ঠিকানাসমূহ",
     Address: "ঠিকানা",
+    Residential: "অবস্থান",
     "Location Information": "অবস্থান সম্পর্কিত তথ্য",
     "Contact Information": "যোগাযোগের তথ্য",
     "Institution Details": "প্রতিষ্ঠানের বিস্তারিত",
