@@ -16,7 +16,7 @@ import useTranslate from '../utils/Translate';
 import { showModal } from '../utils/ModalControlar';
 import StudentReportList from '../components/StudentReportList';
 
-const StudentReport = ({ pageTitle }) => {
+const CharacterReport = ({ pageTitle }) => {
     const dispatch = useDispatch();
     const { register, handleSubmit, formState: { errors } } = useForm();
     const { academicSession, status } = useSelector((state) => state.settings);
@@ -260,4 +260,4 @@ const StudentReport = ({ pageTitle }) => {
     );
 };
 
-export default StudentReport;
+export default CharacterReport;

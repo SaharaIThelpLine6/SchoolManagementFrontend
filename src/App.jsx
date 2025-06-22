@@ -18,7 +18,7 @@ import GroupDistribution from "./pages/GroupDistribution";
 import Class from "./pages/Class";
 import Section from "./pages/Section";
 import Session from "./pages/Session";
-import StudentReport from "./pages/StudentReport";
+import CharacterReport from "./pages/CharacterReport";
 import TypeOfVacation from "./pages/TypeOfVacation";
 import StudentVacationListTable from "./components/Tables/StudentVacationListTable";
 import EnglisArobihName from "./pages/EnglisArobihName";
@@ -66,6 +66,7 @@ import OnlineAdmissionTable from "./pages/OnlineAdmissionTable";
 import { useGetAllUserPermissionsQuery } from "./features/permission/permissionSlice";
 import CreateCertificateAttestation from "./view/students/certificate-attestation/CreateCertificateAttestation";
 import PrintTwo from "./view/students/certificate-attestation/print/PrintTwo";
+import StudentsReport from "./pages/StudentsReport";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -183,8 +184,14 @@ function App() {
               )}
               {isPermissionsReady && hasPermission(13) && (
                 <Route
+                  path="character-report"
+                  element={<CharacterReport pageTitle="Character Report" />}
+                />
+              )}
+              {isPermissionsReady && hasPermission(98) && (
+                <Route
                   path="report"
-                  element={<StudentReport pageTitle="Student Report" />}
+                  element={<StudentsReport pageTitle="Students Report" />}
                 />
               )}
               {isPermissionsReady && hasPermission(25) && (

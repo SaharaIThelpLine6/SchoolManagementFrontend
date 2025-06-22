@@ -98,6 +98,11 @@ export const menuData = [
       },
       {
         id: "12",
+        name: "Students Report",
+        route: "/students/report",
+      },
+      {
+        id: "13",
         name: "Online Admission",
         route: "/students/online-admission",
       },
@@ -177,7 +182,7 @@ export const menuData = [
          {
         id: "1",
         name: "Character Report",
-        route: "/students/report",
+        route: "/students/character-report",
       },
       {
         id: "2",

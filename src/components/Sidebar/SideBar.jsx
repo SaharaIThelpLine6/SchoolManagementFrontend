@@ -96,8 +96,11 @@ const SideBar = () => {
             if (subItem.name === "Group Distribution") {
               return hasPermission(17); // Example
             }
-            if (subItem.name === "Students Report") {
+            if (subItem.name === "Character Report") {
               return hasPermission(13); // Example
+            }
+            if (subItem.name === "Students Report") {
+              return hasPermission(98); // Example
             }
             if (subItem.name === "Certificate of Attestation") {
               return hasPermission(23); // Example

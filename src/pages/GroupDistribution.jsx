@@ -140,14 +140,14 @@ const GroupDistribution = ({ pageTitle }) => {
             {/* Left Column */}
             <div className="flex flex-col space-y-4">
               <DefaultSelect
-                label={translate("Session")}
+                label={translate("Session") + " :"}
                 options={sessionData ?? []}
                 valueField="SessionID"
                 nameField="SessionName"
                 registerKey="SessionID"
               />
               <DefaultSelect
-                label={translate("Class")}
+                label={translate("Class") + " :"}
                 options={classListData ?? []}
                 valueField="ClassID"
                 nameField="ClassName"
