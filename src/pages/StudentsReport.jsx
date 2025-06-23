@@ -24,8 +24,36 @@ const StudentsReport = () => {
     { id: "3", value: "উভয়" },
   ];
 
-  const studentReportData = []
-  const residentialData = []
+  const studentReportData = [
+    { id: "1", value: "ভর্তি রেজিস্টার" },
+    { id: "2", value: "নতুন পুরাতন শিক্ষার্থীর তালিকা" },
+    { id: "3", value: "জামাত ভিত্তিক নতুন পুরাতন মোট শিক্ষার্থী" },
+    { id: "4", value: "শিক্ষার্থীর সংক্ষিপ্ত তালিকা দুই কলমে" },
+    { id: "5", value: "অভিভাবকের মোবাইল নাম্বারের তালিকা" },
+    { id: "6", value: "জামাত ওয়ারী কিতাব/বিষয়ের তালিকা" },
+    { id: "7", value: "শিক্ষার্থীদের পরিচয় পত্র (আইডি কার্ড)" },
+    { id: "8", value: "বাংলা হাজিরা খাতা 30 দিনের" },
+    { id: "9", value: "বাংলা হাজিরা খাতা বিষয়ওয়ারী" },
+    { id: "10", value: "আরবী হাজিরা খাতা 30 দিনের সর্ট অ্যাড্রেস" },
+    { id: "11", value: "আরবী হাজিরা খাতা বিষয়ওয়ারী" },
+    { id: "12", value: "ভর্তি রেজি: সকল শিক্ষার্থীর জামাত সিরিয়াল" },
+    { id: "13", value: "সকল শিক্ষার্থীর পরিসংখ্যান" },
+    { id: "14", value: "ভর্তি ফর্ম" },
+    { id: "15", value: "নতুন ভর্তির ফর্ম" },
+    { id: "16", value: "আইডি দিয়ে ভর্তি রেজিস্টার" },
+    { id: "17", value: "ভর্তি রেজি: সকল শিক্ষার্থীর আইডি সিরিয়াল" },
+    { id: "18", value: "ছবি সহ ভর্তি রেজিস্টার নতুন-পুরাতন" },
+    { id: "19", value: "অভিভাবকের মোবাইল নাম্বার দুই কলমে" },
+    { id: "20", value: "আর্থিক অবস্থা ভিত্তিক পরিসংখ্যান" },
+    { id: "21", value: "আর্থিক অবস্থা ভিত্তিক ভর্তি রেজিস্টার" },
+    { id: "22", value: "জন্ম নিবন্ধন ভিত্তিক তালিকা" },
+    { id: "23", value: "অভিভাবকের তথ্য" },
+    { id: "24", value: "আইডি দিয়ে ভর্তি ফর্ম" },
+    { id: "25", value: "ঠিকানা ভিত্তিক ভর্তি রেজিস্টার" },
+    { id: "26", value: "ছবিসহ হাজিরা খাতা" },
+  ];
+
+  const residentialData = [];
 
   const onSubmit = (data) => {
     console.log(data);
@@ -45,9 +73,9 @@ const StudentsReport = () => {
             <DefaultSelect
               label={translate("Students Report") + " :"}
               options={studentReportData ?? []}
-              valueField="SessionID"
-              nameField="SessionName"
-              registerKey="SessionID"
+              valueField="id"
+              nameField="value"
+              registerKey="id"
             />
             <DefaultSelect
               label={translate("Session") + " :"}

@@ -57,7 +57,7 @@ const PrintOne = ({ id, title }) => {
 
 
   return (
-    <div className="w-[842px] h-auto mx-auto relative bg-white text-black font-sanskrit overflow-hidden shadow-md print:border-none">
+    <div className="h-auto mx-auto relative bg-white text-black font-sanskrit overflow-hidden shadow-md print:border-none">
       {/* Top Border */}
       <img
         src={TopBottom}
@@ -95,9 +95,9 @@ const PrintOne = ({ id, title }) => {
           {/* Title Section */}
           <div className="text-center flex-1">
             <h1 className="text-2xl font-extrabold">
-              {instutionInfo?.InstitutionName}
+              {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
             </h1>
-            <p className="text-sm">{instutionInfo?.Address}</p>
+            <p className="text-sm">{bnBijoy2Unicode(instutionInfo?.Address)}</p>
             <p className="text-sm mb-2">{instutionInfo?.ContactNumber}</p>
             <div className="text-white bg-black px-6 py-1 inline-block text-lg rounded font-bold tracking-widest">
               {title}
@@ -173,8 +173,6 @@ const PrintOne = ({ id, title }) => {
             <span className="inline-block border-b border-black w-40 ml-2 text-center">
               {student?.DateOfBirth || "------"}
             </span>
-          </p>
-          <p>
             সে অত্র বিদ্যালয়ে
             <span className="inline-block border-b border-black w-28 mx-2 text-center">
               {student?.SessionName || "------"}
@@ -184,9 +182,6 @@ const PrintOne = ({ id, title }) => {
               {student?.ClassName || "------"}
             </span>
             জামাতে অধ্যায়ন করেছে।
-          </p>
-
-          <p>
             <span className=" border-b border-black w-20 mx-2 text-center">
               {examData?.ExamName
                 ? bnBijoy2Unicode(examData.ExamName)
