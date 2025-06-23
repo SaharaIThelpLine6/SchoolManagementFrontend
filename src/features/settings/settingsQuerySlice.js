@@ -14,11 +14,15 @@ export const settingsSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['InstitutionInfo'], // Define your tag type
+  tagTypes: ['InstitutionInfo', "Residential"], // Define your tag type
   endpoints: (builder) => ({
     getInstitutionInfo: builder.query({
       query: () => "institution_info",
       providesTags: ['InstitutionInfo'], // This query provides this tag
+    }),
+    getResidential: builder.query({
+      query: () => "residential",
+      providesTags: ['Residential'], // This query provides this tag
     }),
     updateInstitutionInfo: builder.mutation({
       query: (body) => ({
@@ -31,4 +35,4 @@ export const settingsSlice = createApi({
   }),
 });
 
-export const { useGetInstitutionInfoQuery, useUpdateInstitutionInfoMutation } = settingsSlice;
+export const { useGetInstitutionInfoQuery, useUpdateInstitutionInfoMutation,useGetResidentialQuery } = settingsSlice;

@@ -11,6 +11,7 @@ const useTranslate = () => {
     "SMS ID": "এসএমএস আইডি",
     "Phone Number": "ফোন নম্বর",
     "Success and Error": "সাকসেস এবং এরোর",
+    "Book of Subjects": "বিষয়ের খাতা",
     Staff: "স্টাফ",
     "Select columns to display data":
       "ডেটা প্রদর্শনের জন্য কলাম নির্বাচন করুন।",

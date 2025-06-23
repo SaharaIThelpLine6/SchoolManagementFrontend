@@ -182,26 +182,14 @@ function App() {
                   element={<Session pageTitle="Session" />}
                 />
               )}
-              {isPermissionsReady && hasPermission(13) && (
-                <Route
-                  path="character-report"
-                  element={<CharacterReport pageTitle="Character Report" />}
-                />
-              )}
+
               {isPermissionsReady && hasPermission(98) && (
                 <Route
                   path="report"
                   element={<StudentsReport pageTitle="Students Report" />}
                 />
               )}
-              {isPermissionsReady && hasPermission(25) && (
-                <Route
-                  path="vacation"
-                  element={
-                    <StudentVacationListTable pageTitle="Students Vacation" />
-                  }
-                />
-              )}
+
               {isPermissionsReady && hasPermission(25) && (
                 <Route
                   path="vacation/type-of-vacation"
@@ -216,12 +204,10 @@ function App() {
                   }
                 />
               )}
-               <Route
-                  path="print-check"
-                  element={
-                    <PrintTwo pageTitle="Print design check" />
-                  }
-                />
+              <Route
+                path="print-check"
+                element={<PrintTwo pageTitle="Print design check" />}
+              />
               {isPermissionsReady && hasPermission(2) && (
                 <Route
                   path="online-admission"
@@ -231,7 +217,23 @@ function App() {
                 />
               )}
             </Route>
-
+            
+            <Route path="darul-ikama">
+              {isPermissionsReady && hasPermission(13) && (
+                <Route
+                  index
+                  element={<CharacterReport pageTitle="Character Report" />}
+                />
+              )}
+              {isPermissionsReady && hasPermission(25) && (
+                <Route
+                  path="vacation"
+                  element={
+                    <StudentVacationListTable pageTitle="Students Vacation" />
+                  }
+                />
+              )}
+            </Route>
             <Route
               path="payment_confirm/:schoolid/:service/:size"
               element={<PaymentConfirm />}

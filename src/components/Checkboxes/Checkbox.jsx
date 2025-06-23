@@ -18,7 +18,7 @@ const Checkbox = ({ label, options, registerKey }) => {
 
   return (
     <div className="mb-4">
-      <label className="block mb-2 font-medium text-gray-700 font-SolaimanLipi">
+      <label className="block mb-2 font-medium text-black font-SolaimanLipi">
         {label}
       </label>
       <div className="grid grid-cols-3 gap-3">

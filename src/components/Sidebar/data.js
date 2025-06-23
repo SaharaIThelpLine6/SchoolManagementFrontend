@@ -174,15 +174,15 @@ export const menuData = [
     route: "/darul-ikama",
     icon: "RiSchoolFill",
     subMenu: [
-         {
+           {
         id: "1",
         name: "Character Report",
-        route: "/students/character-report",
+        route: "/darul-ikama",
       },
       {
         id: "2",
         name: "Gate pass and leave",
-        route: "/students/vacation",
+        route: "/darul-ikama/vacation",
       }
     ],
   },
