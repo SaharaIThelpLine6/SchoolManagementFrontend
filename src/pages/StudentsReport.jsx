@@ -21,6 +21,8 @@ import {
   fetchDidata,
   fetchThanadata,
 } from "../features/settings/settingsSlice";
+import AdmissionRegisterPrint from "../view/students/reports/AdmissionRegisterPrint";
+import OldNewRegisterList from "../view/students/reports/OldNewRegisterList";
 
 const StudentsReport = () => {
   const methods = useForm();
@@ -279,172 +281,181 @@ const StudentsReport = () => {
   };
 
   return (
-    <div className="bg-white p-6 md:p-4 rounded-xl shadow-lg font-SolaimanLipi">
-      <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
-        <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
-          {translate("Students Report")}
-        </h3>
-      </div>
-      <FormProvider {...methods}>
-        <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-3">
-            {/* Always visible report selector */}
-            <SearchSelect
-              label={translate("Students Report") + " :"}
-              registerKey="district"
-              options={studentReportData ?? []}
-              valueField="id"
-              nameField="value"
-              require="Students Report is required"
-            />
-
-            {/* Conditionally visible filters */}
-            {reportFieldMap.SessionID.includes(selectedReportID) && (
-              <DefaultSelect
-                label={translate("Session") + " :"}
-                options={sessionData ?? []}
-                valueField="SessionID"
-                nameField="SessionName"
-                registerKey="SessionID"
-              />
-            )}
-            {reportFieldMap.classAndSubClassData.includes(selectedReportID) && (
-              <DefaultSelect
-                label={translate("Class And Subclass") + " :"}
-                options={classAndSubClassData ?? []}
-                valueField="id"
-                nameField="name"
-                registerKey="id"
-              />
-            )}
-            {reportFieldMap.bookOfSubject.includes(selectedReportID) && (
-              <DefaultSelect
-                label={translate("Book of subjects") + " :"}
-                options={bookOfSubjectData ?? []}
-                valueField="id"
-                nameField="name"
-                registerKey="id"
-              />
-            )}
-            {reportFieldMap.ClassID.includes(selectedReportID) && (
-              <DefaultSelect
-                label={translate("Class") + " :"}
-                options={classListData ?? []}
-                valueField="ClassID"
-                nameField="ClassName"
-                registerKey="ClassID"
-              />
-            )}
-            {reportFieldMap.gender.includes(selectedReportID) && (
-              <DefaultSelect
-                label={
-                  <p className="text-gray-700 font-medium">
-                    {translate("Gender")}:
-                  </p>
-                }
-                options={genderOptions}
+    <>
+      <div className="bg-white p-6 md:p-4 rounded-xl shadow-lg font-SolaimanLipi">
+        <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
+          <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
+            {translate("Students Report")}
+          </h3>
+        </div>
+        <FormProvider {...methods}>
+          <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-3">
+              {/* Always visible report selector */}
+              <SearchSelect
+                label={translate("Students Report") + " :"}
+                registerKey="district"
+                options={studentReportData ?? []}
                 valueField="id"
                 nameField="value"
-                registerKey="gender"
+                require="Students Report is required"
               />
-            )}
-            {reportFieldMap.id.includes(selectedReportID) && (
-              <DefaultSelect
-                label={translate("New/Old") + " :"}
-                options={newAndOldData ?? []}
-                valueField="id"
-                nameField="value"
-                registerKey="id"
-              />
-            )}
-            {reportFieldMap.RDID.includes(selectedReportID) && (
-              <DefaultSelect
-                label={translate("Residential") + " :"}
-                options={residentialData ?? []}
-                valueField="RDID"
-                nameField="ResidentialName"
-                registerKey="RDID"
-              />
-            )}
-            {reportFieldMap.addresss.includes(selectedReportID) && (
-              <>
-                <DefaultSelect
-                  label={translate("Division") + " :"}
-                  type="number"
-                  options={Array.isArray(divition) ? divition : []}
-                  registerKey="DivisionID"
-                  valueField="DivisionID"
-                  nameField="DivisionName"
-                />
-                <DefaultSelect
-                  label={translate("District") + " :"}
-                  type="number"
-                  options={
-                    Array.isArray(district[DivisionID])
-                      ? district[DivisionID]
-                      : []
-                  }
-                  registerKey="DistrictID"
-                  valueField="DistrictID"
-                  nameField="DistrictName"
-                />
-                <DefaultSelect
-                  label={translate("Thana") + " :"}
-                  type="number"
-                  options={
-                    Array.isArray(thana[DistrictID]) ? thana[DistrictID] : []
-                  }
-                  registerKey="permanentPoliceStationID"
-                  valueField="PoliceStationID"
-                  nameField="PoliceStationName"
-                />
-              </>
-            )}
-            {reportFieldMap.IdAdmissionRegister.includes(selectedReportID) && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <DefaultInput
-                  label={translate("Id one") + " :"}
-                  registerKey="IdOne"
-                />
-                <DefaultInput
-                  label={translate("Id two") + " :"}
-                  registerKey="IdTwo"
-                />
-              </div>
-            )}
-            {reportFieldMap.IdAdmissionForm.includes(selectedReportID) && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <DefaultInput
-                  label={translate("Id one") + " :"}
-                  registerKey="IdOne"
-                />
-              </div>
-            )}
-            {reportFieldMap.IsActive.includes(selectedReportID) && (
-              <Checkbox
-                label={translate("User Status") + ":"}
-                options={userStatus}
-                registerKey="IsActive"
-              />
-            )}
-            {reportFieldMap.IsActiveAdmissionForm.includes(selectedReportID) && (
-              <Checkbox
-                label={translate("Admission Status") + ":"}
-                options={admissionData}
-                registerKey="IsActive"
-              />
-            )}
 
-            {/* Submit Button */}
-            <div className="pt-7 w-full">
-              <Button type="submit" className="w-full md:w-auto">
-                {translate("Preview")}
-              </Button>
+              {/* Conditionally visible filters */}
+              {reportFieldMap.SessionID.includes(selectedReportID) && (
+                <DefaultSelect
+                  label={translate("Session") + " :"}
+                  options={sessionData ?? []}
+                  valueField="SessionID"
+                  nameField="SessionName"
+                  registerKey="SessionID"
+                />
+              )}
+              {reportFieldMap.classAndSubClassData.includes(
+                selectedReportID
+              ) && (
+                <DefaultSelect
+                  label={translate("Class And Subclass") + " :"}
+                  options={classAndSubClassData ?? []}
+                  valueField="id"
+                  nameField="name"
+                  registerKey="id"
+                />
+              )}
+              {reportFieldMap.bookOfSubject.includes(selectedReportID) && (
+                <DefaultSelect
+                  label={translate("Book of subjects") + " :"}
+                  options={bookOfSubjectData ?? []}
+                  valueField="id"
+                  nameField="name"
+                  registerKey="id"
+                />
+              )}
+              {reportFieldMap.ClassID.includes(selectedReportID) && (
+                <DefaultSelect
+                  label={translate("Class") + " :"}
+                  options={classListData ?? []}
+                  valueField="ClassID"
+                  nameField="ClassName"
+                  registerKey="ClassID"
+                />
+              )}
+              {reportFieldMap.gender.includes(selectedReportID) && (
+                <DefaultSelect
+                  label={
+                    <p className="text-gray-700 font-medium">
+                      {translate("Gender")}:
+                    </p>
+                  }
+                  options={genderOptions}
+                  valueField="id"
+                  nameField="value"
+                  registerKey="gender"
+                />
+              )}
+              {reportFieldMap.id.includes(selectedReportID) && (
+                <DefaultSelect
+                  label={translate("New/Old") + " :"}
+                  options={newAndOldData ?? []}
+                  valueField="id"
+                  nameField="value"
+                  registerKey="id"
+                />
+              )}
+              {reportFieldMap.RDID.includes(selectedReportID) && (
+                <DefaultSelect
+                  label={translate("Residential") + " :"}
+                  options={residentialData ?? []}
+                  valueField="RDID"
+                  nameField="ResidentialName"
+                  registerKey="RDID"
+                />
+              )}
+              {reportFieldMap.addresss.includes(selectedReportID) && (
+                <>
+                  <DefaultSelect
+                    label={translate("Division") + " :"}
+                    type="number"
+                    options={Array.isArray(divition) ? divition : []}
+                    registerKey="DivisionID"
+                    valueField="DivisionID"
+                    nameField="DivisionName"
+                  />
+                  <DefaultSelect
+                    label={translate("District") + " :"}
+                    type="number"
+                    options={
+                      Array.isArray(district[DivisionID])
+                        ? district[DivisionID]
+                        : []
+                    }
+                    registerKey="DistrictID"
+                    valueField="DistrictID"
+                    nameField="DistrictName"
+                  />
+                  <DefaultSelect
+                    label={translate("Thana") + " :"}
+                    type="number"
+                    options={
+                      Array.isArray(thana[DistrictID]) ? thana[DistrictID] : []
+                    }
+                    registerKey="permanentPoliceStationID"
+                    valueField="PoliceStationID"
+                    nameField="PoliceStationName"
+                  />
+                </>
+              )}
+              {reportFieldMap.IdAdmissionRegister.includes(
+                selectedReportID
+              ) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <DefaultInput
+                    label={translate("Id one") + " :"}
+                    registerKey="IdOne"
+                  />
+                  <DefaultInput
+                    label={translate("Id two") + " :"}
+                    registerKey="IdTwo"
+                  />
+                </div>
+              )}
+              {reportFieldMap.IdAdmissionForm.includes(selectedReportID) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <DefaultInput
+                    label={translate("Id one") + " :"}
+                    registerKey="IdOne"
+                  />
+                </div>
+              )}
+              {reportFieldMap.IsActive.includes(selectedReportID) && (
+                <Checkbox
+                  label={translate("User Status") + ":"}
+                  options={userStatus}
+                  registerKey="IsActive"
+                />
+              )}
+              {reportFieldMap.IsActiveAdmissionForm.includes(
+                selectedReportID
+              ) && (
+                <Checkbox
+                  label={translate("Admission Status") + ":"}
+                  options={admissionData}
+                  registerKey="IsActive"
+                />
+              )}
+
+              {/* Submit Button */}
+              <div className="pt-7 w-full">
+                <Button type="submit" className="w-full md:w-auto">
+                  {translate("Preview")}
+                </Button>
+              </div>
             </div>
-          </div>
-        </form>
-      </FormProvider>
-    </div>
+          </form>
+        </FormProvider>
+      </div>
+      <><OldNewRegisterList/></>
+    </>
   );
 };
 

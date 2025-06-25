@@ -67,6 +67,7 @@ import { useGetAllUserPermissionsQuery } from "./features/permission/permissionS
 import CreateCertificateAttestation from "./view/students/certificate-attestation/CreateCertificateAttestation";
 import PrintTwo from "./view/students/certificate-attestation/print/PrintTwo";
 import StudentsReport from "./pages/StudentsReport";
+import {permissionsDataList} from "./Data/permissions"
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -86,6 +87,7 @@ function App() {
   // Optional helper to confirm all is loaded and valid
   const isPermissionsReady =
     !isLoading && !isError && Array.isArray(permissions);
+
 
   const hasPermission = (id) => {
     if (!isPermissionsReady) return false;
@@ -113,28 +115,28 @@ function App() {
           <Route path="/" element={<DefaultLayout />}>
             <Route path="/" element={<Home pageTitle="Home" />} />
             <Route path="general-info">
-              {isPermissionsReady && hasPermission(2) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.user_code_setting) && (
                 <Route
                   path="users-info"
                   element={<User pageTitle="User Information" />}
                 />
               )}
-              {isPermissionsReady && hasPermission(4) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.user_report) && (
                 <Route
                   path="user-reports"
                   element={<UserReports pageTitle="User Reports" />}
                 />
               )}
-              {hasPermission(86) && (
+              {hasPermission(permissionsDataList.sms) && (
                 <Route path="sms" element={<SMS pageTitle="SMS List" />} />
               )}
-              {isPermissionsReady && hasPermission(1) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.institute_info) && (
                 <Route
                   path="institution-info"
                   element={<Setting pageTitle="Setting" />}
                 />
               )}
-              {isPermissionsReady && hasPermission(30) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.month_name) && (
                 <Route
                   path="month-name-list"
                   element={<MonthListTable pageTitle="Month Name List" />}
@@ -144,59 +146,59 @@ function App() {
 
             <Route path="students">
               <Route index element={<AddStudent pageTitle="Add Student" />} />
-              {isPermissionsReady && hasPermission(17) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.student_group_setting) && (
                 <Route
                   path="group-distribution"
                   element={<GroupDistribution pageTitle="Students Group Set" />}
                 />
               )}
-              {isPermissionsReady && hasPermission(15) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.class) && (
                 <Route path="class" element={<Class pageTitle="Class" />} />
               )}
-              {isPermissionsReady && hasPermission(29) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.kitab_entry) && (
                 <Route path="book-list" element={<Book pageTitle="Book" />} />
               )}
-              {isPermissionsReady && hasPermission(13) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.student_report) && (
                 <Route
                   path="data-export"
                   element={<DataExport pageTitle="Data Export" />}
                 />
               )}
 
-              {isPermissionsReady && hasPermission(20) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.english_name_entry || permissionsDataList.arabic_name_entry) && (
                 <Route
                   path="english-arobi-name"
                   element={<EnglisArobihName pageTitle="English Arobi Name" />}
                 />
               )}
-              {isPermissionsReady && hasPermission(16) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.sub_class) && (
                 <Route
                   path="section"
                   element={<Section pageTitle="Section" />}
                 />
               )}
 
-              {isPermissionsReady && hasPermission(14) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.academic_year) && (
                 <Route
                   path="sessions"
                   element={<Session pageTitle="Session" />}
                 />
               )}
 
-              {isPermissionsReady && hasPermission(98) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.student_report) && (
                 <Route
                   path="report"
                   element={<StudentsReport pageTitle="Students Report" />}
                 />
               )}
 
-              {isPermissionsReady && hasPermission(25) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.gate_pass_leave) && (
                 <Route
                   path="vacation/type-of-vacation"
                   element={<TypeOfVacation pageTitle="Type of Vacation" />}
                 />
               )}
-              {isPermissionsReady && hasPermission(23) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.certificate) && (
                 <Route
                   path="certificate-of-attestation"
                   element={
@@ -204,11 +206,7 @@ function App() {
                   }
                 />
               )}
-              <Route
-                path="print-check"
-                element={<PrintTwo pageTitle="Print design check" />}
-              />
-              {isPermissionsReady && hasPermission(2) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.user_entry) && (
                 <Route
                   path="online-admission"
                   element={
@@ -219,13 +217,13 @@ function App() {
             </Route>
             
             <Route path="darul-ikama">
-              {isPermissionsReady && hasPermission(13) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.student_report) && (
                 <Route
                   index
                   element={<CharacterReport pageTitle="Character Report" />}
                 />
               )}
-              {isPermissionsReady && hasPermission(25) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.gate_pass_leave) && (
                 <Route
                   path="vacation"
                   element={
@@ -243,23 +241,26 @@ function App() {
             <Route path="formbuilder" element={<FormBuilder />} /> */}
 
             <Route path="teacherinfo">
-              {isPermissionsReady && hasPermission(90) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.teacher_info) && (
                 <Route index element={<AddTeacher pageTitle="Employee" />} />
               )}
-              {isPermissionsReady && hasPermission(92) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.teacher_payroll) && (
                 <Route
                   path="payRole"
                   element={<PayRole pageTitle="Pay Role" />}
                 />
               )}
-              {isPermissionsReady && hasPermission(94) && (
+              {isPermissionsReady && hasPermission(permissionsDataList.teacher_payroll_name) && (
                 <Route
                   path="pRName"
                   element={<PayRoleName pageTitle="Pay Role Name" />}
                 />
               )}
+              {isPermissionsReady && hasPermission(permissionsDataList.teacher_report) && (
               <Route path="report" element={<Report pageTitle="Reports" />} />
-              {isPermissionsReady && hasPermission(91) && (
+              )}
+
+              {isPermissionsReady && hasPermission(permissionsDataList.teacher_designation) && (
                 <Route
                   path="designation"
                   element={<Designations pageTitle="Designation List" />}

@@ -7,6 +7,7 @@ import { menuData } from "./data";
 import { renderIcons } from "../../helper/renderIcons";
 import useTranslate from "../../utils/Translate";
 import { useGetAllUserPermissionsQuery } from "../../features/permission/permissionSlice";
+import { permissionsDataList } from "../../Data/permissions";
 
 const submenuVariants = {
   hidden: { opacity: 0, height: 0 },
@@ -63,70 +64,71 @@ const SideBar = () => {
           const filteredSubMenu = menu.subMenu.filter((subItem) => {
             // General Information
             if (subItem.name === "User") {
-              return hasPermission(2);
+              return hasPermission(permissionsDataList.user_code_setting);
             }
             if (subItem.name === "User Reports") {
-              return hasPermission(4);
+              return hasPermission(permissionsDataList.user_report);
             }
             if (subItem.name === "SMS") {
-              return hasPermission(86);
+              return hasPermission(permissionsDataList.sms);
             }
             if (subItem.name === "Institution Information") {
-              return hasPermission(1);
+              return hasPermission(permissionsDataList.institute_info);
             }
             if (subItem.name === "Month Name") {
-              return hasPermission(30);
+              return hasPermission(permissionsDataList.month_name);
             }
             // Students
             if (subItem.name === "Session") {
-              return hasPermission(14); // Example
+              return hasPermission(permissionsDataList.academic_year); // Example
             }
             if (subItem.name === "Section") {
-              return hasPermission(16); // Example
+              return hasPermission(permissionsDataList.sub_class); // Example
             }
             if (subItem.name === "Class") {
-              return hasPermission(15); // Example
+              return hasPermission(permissionsDataList.class); // Example
             }
             if (subItem.name === "English & Arobi Name") {
-              return hasPermission(20); // Example
+              return hasPermission(permissionsDataList.english_name_entry || permissionsDataList.arabic_name_entry); // Example
             }
             if (subItem.name === "Book") {
-              return hasPermission(29); // Example
+              return hasPermission(permissionsDataList.kitab_entry); // Example
             }
             if (subItem.name === "Group Distribution") {
-              return hasPermission(17); // Example
+              return hasPermission(permissionsDataList.student_group_setting); // Example
             }
             if (subItem.name === "Character Report") {
-              return hasPermission(13); // Example
+              return hasPermission(permissionsDataList.student_report); // Example
             }
             if (subItem.name === "Students Report") {
-              return hasPermission(98); // Example
+              return hasPermission(permissionsDataList.student_report); // Example
             }
             if (subItem.name === "Certificate of Attestation") {
-              return hasPermission(23); // Example
+              return hasPermission(permissionsDataList.certificate); // Example
             }
             if (subItem.name === "Students Vacation") {
-              return hasPermission(25); // Example
+              return hasPermission(permissionsDataList.gate_pass_leave); // Example
             }
             if (subItem.name === "Type of Vacation") {
-              return hasPermission(25); // Example
+              return hasPermission(permissionsDataList.gate_pass_leave); // Example
             }
             // Teachers
             if (subItem.name === "Teacher Info") {
-              return hasPermission(90); // Example
+              return hasPermission(permissionsDataList.teacher_info); // Example
             }
             if (subItem.name === "Pay-role Heading") {
-              return hasPermission(92); // Example
+              return hasPermission(permissionsDataList.teacher_payroll); // Example
             }
             if (subItem.name === "Pay-role Name") {
-              return hasPermission(94); // Example
+              return hasPermission(permissionsDataList.teacher_payroll_name); // Example
+            }
+            if (subItem.name === "Students Report") {
+              return hasPermission(permissionsDataList.teacher_report); // Example
             }
             if (subItem.name === "Designation") {
-              return hasPermission(91); // Example
+              return hasPermission(permissionsDataList.teacher_designation); // Example
             }
-            // if (subItem.name === "Type of vacation") {
-            //   return hasPermission(12);
-            // }
+ 
             // Add other submenu permission mappings here
             return true; // Default allow
           });
