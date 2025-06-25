@@ -4,7 +4,7 @@ import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 
-const AdmissionRegisterPrint = () => {
+const JamaatBasedNewOldTotalStudent = () => {
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
@@ -48,6 +48,10 @@ const AdmissionRegisterPrint = () => {
     },
   ];
 
+  const totalNew = tableData.reduce((sum, item) => sum + item.new, 0);
+  const totalOld = tableData.reduce((sum, item) => sum + item.old, 0);
+  const total = totalNew + totalOld;
+
   return (
     <div className="relative z-10 sm:px-20 sm:py-16 px-8 py-5  bg-white">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
@@ -64,8 +68,14 @@ const AdmissionRegisterPrint = () => {
           <p className="text-base font-semibold bg-white">
             {bnBijoy2Unicode(instutionInfo?.Address)}
           </p>
-          <div className="text-black border border-black px-4 py-1 inline-block mt-2 sm:mt-3 rounded tracking-widest bg-white text-base font-bold sm:text-lg">
-            ভর্তি রেজিস্টার : 2025-26 Bs
+          <p className="text-base font-semibold bg-white">
+            {instutionInfo?.ContactNumber}
+          </p>
+          <div
+            className="text-black border-b-[3px] border-black px-4 py-1 inline-block sm:mt-3 rounded tracking-widest bg-white text-base font-bold sm:text-lg"
+            style={{ borderBottomStyle: "double" }}
+          >
+            শিক্ষাবর্ষ : 2025-26 Bs
           </div>
         </div>
 
@@ -73,10 +83,7 @@ const AdmissionRegisterPrint = () => {
         <div className="hidden sm:block w-20 h-20 bg-white" />
       </div>
 
-      <div className="flex justify-between items-center mb-4 bg-white">
-        <div className="flex gap-2 font-semibold text-base items-center bg-white">
-          শ্রেণী/জামাত : কিতাব খানা
-        </div>
+      <div className="flex justify-end items-center mb-4 bg-white">
         <div className="bg-white">প্রিন্ট {formatDate(new Date())}</div>
       </div>
 
@@ -84,22 +91,19 @@ const AdmissionRegisterPrint = () => {
         <table className="w-full border-collapse border border-black bg-white">
           <thead>
             <tr className="bg-white text-sm text-black">
-              <th className="border border-black p-2 bg-white">ক্র:</th>
-              <th className="border border-black p-2 bg-white">দাখেলা</th>
+              <th className="border border-black p-2 bg-white">ক্রমিক নং</th>
               <th className="border border-black p-2 bg-white">
-                শিক্ষার্থীর নাম
+                শ্রেণীর/জামাত
               </th>
-              <th className="border border-black p-2 bg-white">পিতার নাম</th>
-              <th className="border border-black p-2 bg-white">মাতার নাম</th>
-              <th className="border border-black p-2 bg-white">জন্ম তারিখ</th>
-              <th className="border border-black p-2 bg-white">রক্তের গ্রুপ</th>
               <th className="border border-black p-2 bg-white">
-                মোবাইল
+                নতুন শিক্ষার্থী
               </th>
-              <th className="border border-black p-2 bg-white">গ্রাম</th>
-              <th className="border border-black p-2 bg-white">ডাক </th>
-              <th className="border border-black p-2 bg-white">থানা</th>
-              <th className="border border-black p-2 bg-white">জেলা</th>
+              <th className="border border-black p-2 bg-white">
+                পুরাতন শিক্ষার্থী
+              </th>
+              <th className="border border-black p-2 bg-white">
+                মোট শিক্ষার্থী
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -120,29 +124,21 @@ const AdmissionRegisterPrint = () => {
                 <td className="border border-black p-2 text-center bg-white">
                   {row.motherName}
                 </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.dob}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.bloodGroup}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.mobile}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.village}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.postOffice}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.thana}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.district}
-                </td>
               </tr>
             ))}
+            {/* Total Row */}
+            <tr className="bg-white font-bold">
+              <td className="border border-black p-2 text-center" colSpan={2}>
+                মোট শিক্ষার্থী
+              </td>
+              <td className="border border-black p-2 text-center">
+                10
+              </td>
+              <td className="border border-black p-2 text-center">
+            5
+              </td>
+              <td className="border border-black p-2 text-center">15</td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -150,4 +146,4 @@ const AdmissionRegisterPrint = () => {
   );
 };
 
-export default AdmissionRegisterPrint;
+export default JamaatBasedNewOldTotalStudent;

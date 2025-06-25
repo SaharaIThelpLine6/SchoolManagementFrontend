@@ -4,18 +4,10 @@ import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 
-const AdmissionRegisterPrint = () => {
-  const [logo, setLogo] = useState(null);
+const ImageWithAdmissionRegisterNewOld = () => {
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
-  useEffect(() => {
-    if (instutionInfo?.Logo?.data) {
-      const buffer = Buffer.from(instutionInfo.Logo.data);
-      const base64String = buffer.toString("base64");
-      const imageSrc = `data:image/png;base64,${base64String}`;
-      setLogo(imageSrc);
-    }
-  }, [instutionInfo]);
+
 
   const tableData = [
     {
@@ -52,9 +44,7 @@ const AdmissionRegisterPrint = () => {
     <div className="relative z-10 sm:px-20 sm:py-16 px-8 py-5  bg-white">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
         {/* Logo */}
-        <div className="flex justify-center sm:justify-start w-full sm:w-auto">
-          <img src={logo} alt="Logo" className="w-20 h-20 bg-white" />
-        </div>
+     
 
         {/* Title Section */}
         <div className="text-center flex-1 bg-white">
@@ -87,19 +77,13 @@ const AdmissionRegisterPrint = () => {
               <th className="border border-black p-2 bg-white">ক্র:</th>
               <th className="border border-black p-2 bg-white">দাখেলা</th>
               <th className="border border-black p-2 bg-white">
-                শিক্ষার্থীর নাম
+                 নাম/পিতার নাম
               </th>
-              <th className="border border-black p-2 bg-white">পিতার নাম</th>
-              <th className="border border-black p-2 bg-white">মাতার নাম</th>
-              <th className="border border-black p-2 bg-white">জন্ম তারিখ</th>
-              <th className="border border-black p-2 bg-white">রক্তের গ্রুপ</th>
-              <th className="border border-black p-2 bg-white">
-                মোবাইল
-              </th>
-              <th className="border border-black p-2 bg-white">গ্রাম</th>
-              <th className="border border-black p-2 bg-white">ডাক </th>
-              <th className="border border-black p-2 bg-white">থানা</th>
-              <th className="border border-black p-2 bg-white">জেলা</th>
+              <th className="border border-black p-2 bg-white">জন্ম তারিখ/মোবাইল</th>
+              <th className="border border-black p-2 bg-white">এনআইডি/জন্ম নিবন্ধন</th>
+             
+              <th className="border border-black p-2 bg-white">ঠিকানা</th>
+              <th className="border border-black p-2 bg-white">ছবি</th>
             </tr>
           </thead>
           <tbody>
@@ -126,21 +110,7 @@ const AdmissionRegisterPrint = () => {
                 <td className="border border-black p-2 text-center bg-white">
                   {row.bloodGroup}
                 </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.mobile}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.village}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.postOffice}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.thana}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.district}
-                </td>
+                
               </tr>
             ))}
           </tbody>
@@ -150,4 +120,6 @@ const AdmissionRegisterPrint = () => {
   );
 };
 
-export default AdmissionRegisterPrint;
+
+
+export default ImageWithAdmissionRegisterNewOld

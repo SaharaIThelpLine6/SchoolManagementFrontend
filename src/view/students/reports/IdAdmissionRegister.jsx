@@ -4,7 +4,7 @@ import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 
-const AdmissionRegisterPrint = () => {
+const IdAdmissionRegister = () => {
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
@@ -73,10 +73,8 @@ const AdmissionRegisterPrint = () => {
         <div className="hidden sm:block w-20 h-20 bg-white" />
       </div>
 
-      <div className="flex justify-between items-center mb-4 bg-white">
-        <div className="flex gap-2 font-semibold text-base items-center bg-white">
-          শ্রেণী/জামাত : কিতাব খানা
-        </div>
+      <div className="flex justify-end items-center mb-4 bg-white">
+        
         <div className="bg-white">প্রিন্ট {formatDate(new Date())}</div>
       </div>
 
@@ -150,4 +148,6 @@ const AdmissionRegisterPrint = () => {
   );
 };
 
-export default AdmissionRegisterPrint;
+
+
+export default IdAdmissionRegister

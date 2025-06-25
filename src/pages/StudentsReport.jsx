@@ -23,6 +23,17 @@ import {
 } from "../features/settings/settingsSlice";
 import AdmissionRegisterPrint from "../view/students/reports/AdmissionRegisterPrint";
 import OldNewRegisterList from "../view/students/reports/OldNewRegisterList";
+import JamaatBasedNewOldTotalStudent from "../view/students/reports/JamaatBasedNewOldTotalStudent";
+import StudentsListTwoColumns from "../view/students/reports/StudentsListTwoColumns";
+import ParentsMobileNumberList from "../view/students/reports/ParentsMobileNumberList";
+import JamaatWariBookList from "../view/students/reports/JamaatWariBookList";
+import BanglaAttendence from "../view/students/reports/BanglaAttendence";
+import BanglaAttendenceSubjectWari from "../view/students/reports/BanglaAttendenceSubjectWari";
+import AdmissionRegisterSerial from "../view/students/reports/AdmissionRegisterSerial";
+import AllStudentsStatistics from "../view/students/reports/AllStudentsStatistics";
+import IdAdmissionRegister from "../view/students/reports/IdAdmissionRegister";
+import AdmissionResigterAllStudentsSerial from "../view/students/reports/AdmissionResigterAllStudentsSerial";
+import ImageWithAdmissionRegisterNewOld from "../view/students/reports/ImageWithAdmissionRegisterNewOld";
 
 const StudentsReport = () => {
   const methods = useForm();
@@ -291,7 +302,6 @@ const StudentsReport = () => {
         <FormProvider {...methods}>
           <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-3">
-              {/* Always visible report selector */}
               <SearchSelect
                 label={translate("Students Report") + " :"}
                 registerKey="district"
@@ -444,7 +454,6 @@ const StudentsReport = () => {
                 />
               )}
 
-              {/* Submit Button */}
               <div className="pt-7 w-full">
                 <Button type="submit" className="w-full md:w-auto">
                   {translate("Preview")}
@@ -454,8 +463,23 @@ const StudentsReport = () => {
           </form>
         </FormProvider>
       </div>
-      <><OldNewRegisterList/></>
+
     </>
+    // <>
+    //   <AdmissionRegisterPrint />
+    //   <OldNewRegisterList />
+    //   <JamaatBasedNewOldTotalStudent />
+    //   <StudentsListTwoColumns />
+    //   <ParentsMobileNumberList />
+    //   <JamaatWariBookList />
+    //   <BanglaAttendence />
+    //   <BanglaAttendenceSubjectWari />
+    //   <AdmissionRegisterSerial />
+    //   <AllStudentsStatistics />
+    //   <IdAdmissionRegister />
+    //   <AdmissionResigterAllStudentsSerial />
+    //   <ImageWithAdmissionRegisterNewOld />
+    // </>
   );
 };
 
