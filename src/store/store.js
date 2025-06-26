@@ -54,6 +54,7 @@ const store = configureStore({
     [classSlice.reducerPath]: classSlice.reducer,
     [smsSlice.reducerPath]: smsSlice.reducer,
     [permissionSlice.reducerPath]: permissionSlice.reducer,
+    [permissionSlice.reducerPath]: permissionSlice.reducer,
     [userTypeSlice.reducerPath]: userTypeSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>

@@ -4,7 +4,7 @@ import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 
-const AdmissionRegisterSerial = () => {
+const FinancialStatusBasedAdmissionRegister = () => {
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
@@ -49,7 +49,7 @@ const AdmissionRegisterSerial = () => {
   ];
 
   return (
-    <div className="relative z-10 sm:py-16  py-5  bg-white">
+    <div className="relative z-10 sm:px-20 sm:py-16 px-8 py-5  bg-white">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
         {/* Logo */}
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
@@ -73,13 +73,15 @@ const AdmissionRegisterSerial = () => {
         <div className="hidden sm:block w-20 h-20 bg-white" />
       </div>
 
-      <div className="flex justify-end items-center mb-4 bg-white">
-    
+      <div className="flex justify-between items-center mb-4 bg-white">
+        <div className="flex gap-2 font-semibold text-base items-center bg-white">
+          শ্রেণী/জামাত : কিতাব খানা
+        </div>
         <div className="bg-white">প্রিন্ট {formatDate(new Date())}</div>
       </div>
 
-      <div className="bg-white px-4">
-        <table className="w-full border-collapse border text-xs border-black bg-white">
+      <div className="overflow-x-auto bg-white">
+        <table className="w-full border-collapse border border-black bg-white">
           <thead>
             <tr className="bg-white text-sm text-black">
               <th className="border border-black p-2 bg-white">ক্র:</th>
@@ -90,13 +92,11 @@ const AdmissionRegisterSerial = () => {
               <th className="border border-black p-2 bg-white">পিতার নাম</th>
               <th className="border border-black p-2 bg-white">মাতার নাম</th>
               <th className="border border-black p-2 bg-white">জন্ম তারিখ</th>
-              <th className="border border-black p-2 bg-white">শ্রেণী/জামাত</th>
+              <th className="border border-black p-2 bg-white">রক্তের গ্রুপ</th>
+              <th className="border border-black p-2 bg-white">আর্থিক অবস্থা</th>
               <th className="border border-black p-2 bg-white">
                 মোবাইল
               </th>
-              <th className="border border-black p-2 bg-white">গ্রাম</th>
-              <th className="border border-black p-2 bg-white">ডাক </th>
-              <th className="border border-black p-2 bg-white">থানা</th>
               <th className="border border-black p-2 bg-white">জেলা</th>
             </tr>
           </thead>
@@ -128,14 +128,9 @@ const AdmissionRegisterSerial = () => {
                   {row.mobile}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.village}
+                  {row.mobile}
                 </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.postOffice}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.thana}
-                </td>
+              
                 <td className="border border-black p-2 text-center bg-white">
                   {row.district}
                 </td>
@@ -150,4 +145,4 @@ const AdmissionRegisterSerial = () => {
 
 
 
-export default AdmissionRegisterSerial
+export default FinancialStatusBasedAdmissionRegister

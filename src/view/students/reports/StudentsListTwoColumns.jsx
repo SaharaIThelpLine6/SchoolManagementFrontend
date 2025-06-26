@@ -75,21 +75,33 @@ const StudentsListTwoColumns = () => {
   return (
     <>
       <div className="bg-white p-8 text-black text-sm">
-        <div className="text-center flex-1 bg-white">
-          <h1 className="text-xl sm:text-2xl font-extrabold bg-white">
+        <div className="text-center space-y-2">
+          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">
             {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
           </h1>
-          <p className="text-base font-semibold bg-white">
+          <p className="text-base font-semibold text-gray-700">
             {bnBijoy2Unicode(instutionInfo?.Address)}
           </p>
-          <div className="text-black px-4 py-1 inline-block rounded tracking-widest bg-white text-base font-bold sm:text-lg border-b-[3px] border-black border-double">
-            শিক্ষার্থীদের সংক্ষিপ্ত তালিকা, শিক্ষাবর্ষ-(2025-26 Bs),
-            শ্রেণী/জামাত-(হিফজ(ক))
-          </div>
         </div>
+
         {/* Header Section */}
-        <div className="flex justify-end items-center pt-3 sm:pt-0 mb-4 bg-white">
-          <div className="bg-white">প্রিন্ট {formatDate(new Date())}</div>
+        <div className="grid grid-cols-7 items-center mb-6 px-4 py-3 gap-4">
+          <div className="col-span-1"></div>
+
+          <div className="col-span-5 text-center">
+            <div className="inline-block border-b-4 border-black px-6 py-2">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold tracking-wider">
+                শিক্ষার্থীদের সংক্ষিপ্ত তালিকা, শিক্ষাবর্ষ-২০২৫-২৬,
+                শ্রেণী/জামাত-হিফজ(ক)
+              </h2>
+            </div>
+          </div>
+
+          <div className="col-span-1 flex justify-end">
+            <p className="text-sm sm:text-base font-medium text-gray-600">
+              প্রিন্ট তারিখ: {new Date().toLocaleDateString("bn-BD")}
+            </p>
+          </div>
         </div>
 
         {/* Table Section */}

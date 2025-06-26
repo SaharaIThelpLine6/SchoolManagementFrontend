@@ -97,7 +97,7 @@ const JamaatWariBookList = () => {
             {bnBijoy2Unicode(instutionInfo?.Address)}
           </p>
           <div className="text-black border-b-4 border-r-4 border-black border-solid px-4 py-1 inline-block mt-2 sm:mt-3 tracking-widest bg-white text-base font-bold sm:text-lg">
-            মারহালা / ক্লাস ওয়ারী কিতাবের নাম
+            মারহালা/ক্লাসওয়ারী কিতাবের নাম
           </div>
         </div>
 
@@ -105,14 +105,14 @@ const JamaatWariBookList = () => {
         <div className="hidden sm:block w-20 h-20 bg-white" />
       </div>
 
-      <div className="flex justify-between items-center mb-4 bg-white">
+      <div className="flex justify-between items-center mb-4 bg-white my-3">
         <div className="flex gap-2 font-semibold text-base items-center bg-white">
-          শিক্ষাবর্ষ : 2025-26 Bs
+         শ্রেণি/জামাত : কিতাব খানা
         </div>
         <div className="bg-white">প্রিন্ট {formatDate(new Date())}</div>
       </div>
 
-      <div className="overflow-x-auto bg-white">
+      <div className="bg-white">
         <table className="w-full border-collapse border border-black bg-white">
           <thead>
             <tr className="bg-white text-sm text-black">

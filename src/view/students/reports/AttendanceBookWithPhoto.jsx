@@ -3,7 +3,7 @@ import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQ
 import bnBijoy2Unicode from "../../../utils/conveter";
 import { Buffer } from "buffer";
 
-const BanglaAttendenceSubjectWari = () => {
+const AttendanceBookWithPhoto = () => {
   const [logo, setLogo] = useState(null);
 
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
@@ -15,7 +15,6 @@ const BanglaAttendenceSubjectWari = () => {
       setLogo(imageSrc);
     }
   }, [instutionInfo]);
-
   const students = [
     { id: "30001", name: "সাফিক আলী" },
     { id: "30002", name: "রহিম হোসেন" },
@@ -38,12 +37,14 @@ const BanglaAttendenceSubjectWari = () => {
   };
 
   return (
-    <div className="font-bangla max-w-5xl mx-auto p-4 bg-white">
+    <div className="font-SolaimanLipi mx-auto p-4  bg-white">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
+        {/* Logo */}
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
           <img src={logo} alt="Logo" className="w-20 h-20 bg-white" />
         </div>
 
+        {/* Title Section */}
         <div className="text-center flex-1 bg-white">
           <h1 className="text-xl sm:text-2xl font-extrabold bg-white">
             {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
@@ -56,53 +57,78 @@ const BanglaAttendenceSubjectWari = () => {
           </div>
         </div>
 
+        {/* Optional right-aligned blank space */}
         <div className="hidden sm:block w-20 h-20 bg-white" />
       </div>
-
-      <div className="grid grid-cols-2 my-3">
-        <div className="font-normal text-base py-1 px-2 text-start">
+      <div className="flex justify-between my-3 bg-gray-50">
+        <div className="flex-1 basis-0 min-w-0 font-bold text-sm border border-black py-1 px-2 text-center">
           শ্রেণী/জামাত: কিতাব খানা
         </div>
-        <div className="grid grid-cols-2 px-2">
-          <div className="font-normal text-base py-1 text-start">মাস: </div>
-          <div className="font-normal text-base py-1 text-start">বছর: </div>
+        <div className="flex-1 basis-0 min-w-0 font-bold text-sm border border-black py-1 px-2 text-center">
+          শিক্ষাবর্ষ: 2025-26 Bs
+        </div>
+        <div className="flex-1 basis-0 min-w-0 font-bold text-sm border border-black py-1 px-2 text-center">
+          সন: ১৪৪৫
+        </div>
+        <div className="flex-1 basis-0 min-w-0 font-bold text-sm border border-black py-1 px-2 text-center">
+          হিজরী: ১৪৪৬
+        </div>
+        <div className="flex-1 basis-0 min-w-0 font-bold text-sm border border-black py-1 px-2 text-center">
+          মাস:জানুয়ারী
         </div>
       </div>
 
-      <div>
-        <table className="w-full border-collapse table-fixed text-sm">
+      <div className=" text-xs">
+        <table className="w-full border-collapse">
           <thead>
-            <tr>
-              <th className="border border-black bg-white text-center text-sm w-10 h-6">ক্র.নং</th>
-              <th className="border border-black bg-white text-center text-sm w-14 h-6">দাখেলা</th>
-              <th className="border border-black bg-white text-sm min-w-[150px] h-6" colSpan={2}>ছাত্র/ছাত্রীর নাম</th>
+            <tr className="h-6">
+              {/* Serial Number */}
+              <th className="border border-black bg-white text-center w-8 min-w-[32px]">
+                ক্র.নং
+              </th>
+
+              {/* Student ID */}
+              <th className="border border-black bg-white text-center w-12 min-w-[48px]">
+                দাখেলা
+              </th>
+
+              {/* Student Name */}
+              <th className="border border-black bg-white text-left px-1 min-w-[150px] truncate">
+                ছাত্র/ছাত্রীর নাম
+              </th>
+
+              {/* Days */}
               {days.map((day) => (
                 <th
                   key={day}
-                  className="border border-black text-center bg-white text-sm w-6 h-6"
+                  className="border border-black bg-white text-center w-6 min-w-[24px]"
                 >
                   {day}
                 </th>
               ))}
             </tr>
           </thead>
+
           <tbody>
             {students.map((student, index) => (
-              <tr key={student.id}>
-                <td className="border border-black text-center bg-white text-sm w-10 h-6 p-0 align-middle">
+              <tr key={student.id} className="h-6">
+                {/* Serial Number */}
+                <td className="border border-black bg-white text-center align-middle">
                   {index + 1}
                 </td>
-                <td className="border border-black text-center bg-white text-sm w-10 h-6 p-0 align-middle">
+
+                {/* Student ID */}
+                <td className="border border-black bg-white text-center align-middle truncate">
                   {student.id}
                 </td>
-                <td className="border border-black bg-white text-sm min-w-[150px] h-6 px-1 py-0.5">
+
+                {/* Student Name */}
+                <td className="border border-black bg-white text-left px-1 align-middle truncate">
                   {student.name}
                 </td>
-                <td className="border border-black bg-white w-6 h-6 text-center text-xs p-0">
-                  {Array.from({ length: 7 }).map((_, i) => (
-                    <div key={i} className="border-b border-black h-3">{i + 1}</div>
-                  ))}
-                </td>
+
+                {/* Attendance Cells */}
+            
                 {days.map((day) => (
                   <td
                     key={day}
@@ -111,7 +137,7 @@ const BanglaAttendenceSubjectWari = () => {
                     }`}
                     onClick={() => toggleAttendance(student.id, day)}
                   >
-                    {Array.from({ length: 7 }).map((_, i) => (
+                    {Array.from({ length: 3 }).map((_, i) => (
                       <div key={i} className="border-b border-black h-3 w-6">
                         {attendance[`${student.id}-${day}`] === i + 1 ? "✓" : ""}
                       </div>
@@ -123,8 +149,16 @@ const BanglaAttendenceSubjectWari = () => {
           </tbody>
         </table>
       </div>
+      <div className="flex flex-wrap justify-between mt-6 p-3 ">
+        <div className="border-t border-black w-50 text-center">
+          <span className="font-normal">মোট কার্য দিবস: </span>
+        </div>
+        <div className="border-t border-black w-50 text-center">
+          <span className="font-normal">শিক্ষক/শিক্ষিকার স্বাক্ষর: </span>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default BanglaAttendenceSubjectWari;
+export default AttendanceBookWithPhoto;

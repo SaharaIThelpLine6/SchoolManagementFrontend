@@ -4,7 +4,7 @@ import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 
-const ParentsMobileNumberList = () => {
+const BirthRegistrationBasedList = () => {
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
@@ -132,51 +132,41 @@ const ParentsMobileNumberList = () => {
 
   return (
     <div className="relative z-10 sm:px-20 sm:py-16 px-8 py-5  bg-white">
-      <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4 sm:gap-8 bg-white">
-        {/* Logo - Centered on mobile, left-aligned on desktop */}
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
+        {/* Logo */}
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
-          <img
-            src={logo}
-            alt="Institution Logo"
-            className="w-20 h-20 sm:w-24 sm:h-24 object-contain"
-          />
+          <img src={logo} alt="Logo" className="w-20 h-20 bg-white" />
         </div>
 
-        {/* Institution Info - Centered */}
-        <div className="text-center flex-1 space-y-2">
-          <h1 className="text-xl sm:text-2xl font-extrabold text-gray-900">
-            {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
-          </h1>
-          <p className="text-base sm:text-lg font-semibold text-gray-700">
-            {bnBijoy2Unicode(instutionInfo?.Address)}
-          </p>
+        {/* Title Section */}
+        <div className="text-center flex-1 bg-white">
+          <div className="text-center flex-1 bg-white">
+            <h1 className="text-xl sm:text-2xl font-extrabold bg-white">
+              {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
+            </h1>
+            <p className="text-base font-semibold bg-white">
+              {bnBijoy2Unicode(instutionInfo?.Address)}
+            </p>
 
-          {/* Parent Mobile Header */}
-          <div className="inline-block border-b-2 border-black px-4 py-1">
-            <span className="text-base sm:text-lg font-bold tracking-wider">
-              অভিভাবকের মোবাইল
-            </span>
+            {/* এখানে flex-col wrapper */}
+            <div className="flex flex-col items-center gap-2 ">
+          
+              <div className="text-black px-4 py-1 rounded tracking-widest bg-white text-base font-bold sm:text-lg">
+                শিক্ষাবর্ষ : 2025-26 Bs
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Spacer - Maintains balance on desktop */}
-        <div className="hidden sm:block w-20 h-20" />
+        {/* Optional right-aligned blank space */}
+        <div className="hidden sm:block w-20 h-20 bg-white" />
       </div>
 
-      {/* Secondary Header - Class and Academic Year */}
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 sm:gap-8 bg-white">
-        <div className="text-base sm:text-lg font-semibold text-gray-900">
+      <div className="flex justify-between items-center mb-4 bg-white">
+        <div className="flex gap-2 font-semibold text-base items-center bg-white">
           শ্রেণী/জামাত : কিতাব খানা
         </div>
-
-        <div className="flex items-center gap-4">
-          <div className="text-base sm:text-lg font-bold text-gray-900">
-            শিক্ষাবর্ষ : ২০২৫-২৬ ইং
-          </div>
-          <div className="text-sm sm:text-base font-medium text-black">
-           প্রিন্ট তারিখ: <span className="text-gray-600">{new Date().toLocaleDateString("bn-BD")}</span>
-          </div>
-        </div>
+        <div className="bg-white">2025-26 Bs</div>
       </div>
 
       <div className="overflow-x-auto bg-white">
@@ -189,10 +179,9 @@ const ParentsMobileNumberList = () => {
                 শিক্ষার্থীর নাম
               </th>
               <th className="border border-black p-2 bg-white">পিতার নাম</th>
-              <th className="border border-black p-2 bg-white">মোবাইল ১</th>
-              <th className="border border-black p-2 bg-white">সম্পর্ক</th>
-              <th className="border border-black p-2 bg-white">মোবাইল ২</th>
-              <th className="border border-black p-2 bg-white">সম্পর্ক</th>
+              <th className="border border-black p-2 bg-white">জন্ম তারিখ</th>
+              <th className="border border-black p-2 bg-white">জন্ম নিবন্ধন/NID</th>
+            
             </tr>
           </thead>
           <tbody>
@@ -210,19 +199,14 @@ const ParentsMobileNumberList = () => {
                 <td className="border border-black p-2 text-center bg-white">
                   {row.fatherName}
                 </td>
-                <td
-                  className="border border-black p-2 text-center bg-white"
-                  colSpan={2}
-                >
-                  {row.mobile1} {"--->"} {row.mobile1Relation}
+                <td className="border border-black p-2 text-center bg-white">
+                  {row.fatherName}
                 </td>
-
-                <td
-                  className="border border-black p-2 text-center bg-white"
-                  colSpan={2}
-                >
-                  {row.mobile2} {"--->"} {row.mobile2Relation}
+                <td className="border border-black p-2 text-center bg-white">
+                  {row.fatherName}
                 </td>
+               
+              
               </tr>
             ))}
           </tbody>
@@ -232,4 +216,6 @@ const ParentsMobileNumberList = () => {
   );
 };
 
-export default ParentsMobileNumberList;
+
+
+export default BirthRegistrationBasedList

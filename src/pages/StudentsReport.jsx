@@ -1,12 +1,14 @@
 import { FormProvider, useForm } from "react-hook-form";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import Button from "../components/Button/Button";
 import useTranslate from "../utils/Translate";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
-import { useGetClassListQuery } from "../features/class/classQuerySlice";
+import {
+  useGetClassListQuery,
+  useGetSubClassListQuery,
+} from "../features/class/classQuerySlice";
 import SearchSelect from "../components/Forms/SearchSelect";
 import { useGetResidentialQuery } from "../features/settings/settingsQuerySlice";
 import Checkbox from "../components/Checkboxes/Checkbox";
@@ -34,16 +36,29 @@ import AllStudentsStatistics from "../view/students/reports/AllStudentsStatistic
 import IdAdmissionRegister from "../view/students/reports/IdAdmissionRegister";
 import AdmissionResigterAllStudentsSerial from "../view/students/reports/AdmissionResigterAllStudentsSerial";
 import ImageWithAdmissionRegisterNewOld from "../view/students/reports/ImageWithAdmissionRegisterNewOld";
+import ParentsMobileNumberTwoColumn from "../view/students/reports/ParentsMobileNumberTwoColumn";
+import FinancialStatusBasedStatistics from "../view/students/reports/FinancialStatusBasedStatistics";
+import FinancialStatusBasedAdmissionRegister from "../view/students/reports/FinancialStatusBasedAdmissionRegister";
+import BirthRegistrationBasedList from "../view/students/reports/BirthRegistrationBasedList";
+import ParentsInfo from "../view/students/reports/ParentsInfo";
+import AdmissionFormWithID from "../view/students/reports/AdmissionFormWithID";
+import AddressBasedAdmissionRegister from "../view/students/reports/AddressBasedAdmissionRegister";
+import AttendanceBookWithPhoto from "../view/students/reports/AttendanceBookWithPhoto";
+import { useGetStudentReportQuery } from "../features/userReports/userReportsSlice";
 
 const StudentsReport = () => {
   const methods = useForm();
   const translate = useTranslate();
   const { register, handleSubmit, watch, setValue, getValues, reset } = methods;
 
-  const selectedReportID = watch("district");
+  const [selectedReportComponent, setSelectedReportComponent] = useState(null);
+  const reportRef = useRef(null);
+  const selectedReportID = watch("studentReport");
+  const [queryParams, setQueryParams] = useState(null);
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: classListData } = useGetClassListQuery();
+  const { data: subClassListData } = useGetSubClassListQuery();
   const { data: residentialData } = useGetResidentialQuery();
 
   const defaultData = useSelector((state) => state.userInfo.defaultFormValue);
@@ -52,8 +67,18 @@ const StudentsReport = () => {
   const { divition, district, thana, status, error } = useSelector(
     (state) => state.settings
   );
-  const { token } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
+
+  const {
+    data: reportData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetStudentReportQuery(queryParams, {
+    skip: !queryParams,
+    refetchOnMountOrArgChange: true,
+  });
+
+  console.log(reportData);
 
   const [DivisionID, DistrictID, permanentPoliceStationID] = watch([
     "DivisionID",
@@ -71,9 +96,9 @@ const StudentsReport = () => {
     } else if (editMode === 2) {
       const numberStrP = defaultData.permanentPoliceStationID?.toString();
       if (DivisionID === Number(numberStrP?.slice(0, 1))) {
-        console.log("Both Are Same");
+        console.log("Division: Both Are Same");
       } else {
-        console.log("Both Are Not Same");
+        console.log("Division: Both Are Not Same");
         setValue("DistrictID", "");
         setValue("permanentPoliceStationID", "");
         if (DivisionID) {
@@ -92,7 +117,7 @@ const StudentsReport = () => {
     } else if (editMode === 2) {
       const numberStrP = defaultData.permanentPoliceStationID?.toString();
       if (DistrictID === Number(numberStrP?.slice(0, 3))) {
-        console.log("Both Are Same");
+        console.log("District: Both Are Same");
       } else {
         setValue("permanentPoliceStationID", "");
         if (DistrictID) {
@@ -153,6 +178,20 @@ const StudentsReport = () => {
 
   if (status === "failed") {
     console.error("Settings status failed:", error);
+    return <div>{translate("Failed to load settings data")}</div>;
+  }
+
+  if (isLoading) {
+    return <div>{translate("Loading...")}</div>;
+  }
+
+  if (isError) {
+    return (
+      <div>
+        {translate("Error fetching report data")}
+        <Button onClick={refetch}>{translate("Retry")}</Button>
+      </div>
+    );
   }
 
   const genderOptions = [
@@ -258,7 +297,7 @@ const StudentsReport = () => {
       "24",
       "26",
     ],
-    gender: ["1", "5", "4", "8", "12", "23", "26", "16"],
+    gender: ["1", "4", "8", "12", "23", "26", "16"],
     id: ["1", "2", "4", "12", "17", "16", "18", "21"], // New/Old
     RDID: ["1", "5", "8", "9", "12", "23", "26"],
     IsActive: [
@@ -288,12 +327,63 @@ const StudentsReport = () => {
   };
 
   const onSubmit = (data) => {
-    console.log("Form submitted with data:", data);
+    const params = {
+      report_id: data.studentReport,
+      SessionID: data.SessionID,
+      SubClassID: data.SubClassID,
+      gender: data.gender,
+      NewOldId: data.NewOldId,
+      ResidentialStatusId: data.ResidentialStatusId,
+    };
+
+    // Clean up empty params
+    Object.keys(params).forEach(
+      (key) =>
+        (params[key] === undefined || params[key] === "") && delete params[key]
+    );
+
+    setQueryParams(params);
   };
+  // Map report ID to component and pass reportData as a prop
+  // const reportComponents = {
+  //   1: <AdmissionRegisterPrint reportData={reportData} />,
+  //   2: <OldNewRegisterList reportData={reportData} />,
+  //   3: <JamaatBasedNewOldTotalStudent reportData={reportData} />,
+  //   4: <StudentsListTwoColumns reportData={reportData} />,
+  //   5: <ParentsMobileNumberList reportData={reportData} />,
+  //   6: <JamaatWariBookList reportData={reportData} />,
+  //   8: <BanglaAttendence reportData={reportData} />,
+  //   9: <BanglaAttendenceSubjectWari reportData={reportData} />,
+  //   12: <AdmissionRegisterSerial reportData={reportData} />,
+  //   13: <AllStudentsStatistics reportData={reportData} />,
+  //   16: <IdAdmissionRegister reportData={reportData} />,
+  //   17: <AdmissionResigterAllStudentsSerial reportData={reportData} />,
+  //   18: <ImageWithAdmissionRegisterNewOld reportData={reportData} />,
+  //   19: <ParentsMobileNumberTwoColumn reportData={reportData} />,
+  //   20: <FinancialStatusBasedStatistics reportData={reportData} />,
+  //   21: <FinancialStatusBasedAdmissionRegister reportData={reportData} />,
+  //   22: <BirthRegistrationBasedList reportData={reportData} />,
+  //   23: <ParentsInfo reportData={reportData} />,
+  //   24: <AdmissionFormWithID reportData={reportData} />,
+  //   25: <AddressBasedAdmissionRegister reportData={reportData} />,
+  //   26: <AttendanceBookWithPhoto reportData={reportData} />,
+  // };
+
+  // const component = reportComponents[data.studentReport] || null;
+  // setSelectedReportComponent(component);
+
+  // Trigger print only if data is available and component is set
+  // if (component && reportData && !isLoading) {
+  //   setTimeout(() => {
+  //     window.print();
+  //   }, 500); // Increased delay to ensure rendering
+  // } else {
+  //   console.warn("Cannot print: Data not ready or component not set.");
+  // }
 
   return (
     <>
-      <div className="bg-white p-6 md:p-4 rounded-xl shadow-lg font-SolaimanLipi">
+      <div className="bg-white p-6 md:p-4 rounded-xl shadow-lg font-SolaimanLipi hidden_in_print">
         <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
           <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
             {translate("Students Report")}
@@ -304,14 +394,13 @@ const StudentsReport = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-3">
               <SearchSelect
                 label={translate("Students Report") + " :"}
-                registerKey="district"
+                registerKey="studentReport"
                 options={studentReportData ?? []}
                 valueField="id"
                 nameField="value"
                 require="Students Report is required"
               />
 
-              {/* Conditionally visible filters */}
               {reportFieldMap.SessionID.includes(selectedReportID) && (
                 <DefaultSelect
                   label={translate("Session") + " :"}
@@ -343,11 +432,12 @@ const StudentsReport = () => {
               )}
               {reportFieldMap.ClassID.includes(selectedReportID) && (
                 <DefaultSelect
-                  label={translate("Class") + " :"}
-                  options={classListData ?? []}
-                  valueField="ClassID"
-                  nameField="ClassName"
-                  registerKey="ClassID"
+                  label={translate("SubClass") + " :"}
+                  options={subClassListData ?? []}
+                  valueField="SubClassID"
+                  nameField="SubClass"
+                  registerKey="SubClassID"
+                  unicode={true}
                 />
               )}
               {reportFieldMap.gender.includes(selectedReportID) && (
@@ -369,7 +459,7 @@ const StudentsReport = () => {
                   options={newAndOldData ?? []}
                   valueField="id"
                   nameField="value"
-                  registerKey="id"
+                  registerKey="NewOldId"
                 />
               )}
               {reportFieldMap.RDID.includes(selectedReportID) && (
@@ -378,7 +468,7 @@ const StudentsReport = () => {
                   options={residentialData ?? []}
                   valueField="RDID"
                   nameField="ResidentialName"
-                  registerKey="RDID"
+                  registerKey="ResidentialStatusId"
                 />
               )}
               {reportFieldMap.addresss.includes(selectedReportID) && (
@@ -441,7 +531,7 @@ const StudentsReport = () => {
                 <Checkbox
                   label={translate("User Status") + ":"}
                   options={userStatus}
-                  registerKey="IsActive"
+                  registerKey="is_active"
                 />
               )}
               {reportFieldMap.IsActiveAdmissionForm.includes(
@@ -464,23 +554,63 @@ const StudentsReport = () => {
         </FormProvider>
       </div>
 
+      {selectedReportComponent && (
+        <div ref={reportRef} className="print_canvas mt-4">
+          {selectedReportComponent}
+        </div>
+      )}
     </>
-    // <>
-    //   <AdmissionRegisterPrint />
-    //   <OldNewRegisterList />
-    //   <JamaatBasedNewOldTotalStudent />
-    //   <StudentsListTwoColumns />
-    //   <ParentsMobileNumberList />
-    //   <JamaatWariBookList />
-    //   <BanglaAttendence />
-    //   <BanglaAttendenceSubjectWari />
-    //   <AdmissionRegisterSerial />
-    //   <AllStudentsStatistics />
-    //   <IdAdmissionRegister />
-    //   <AdmissionResigterAllStudentsSerial />
-    //   <ImageWithAdmissionRegisterNewOld />
-    // </>
   );
 };
 
 export default StudentsReport;
+//     <>
+//       {/* reports 1 */}
+//       <AdmissionRegisterPrint />
+//       {/* reports 2 */}
+//       <OldNewRegisterList />
+//       {/* reports 3 */}
+//       <JamaatBasedNewOldTotalStudent />
+//       {/* reports 4 */}
+//       <StudentsListTwoColumns />
+//       {/* reports 5 */}
+//       <ParentsMobileNumberList />
+//       {/* reports 6 */}
+//       <JamaatWariBookList />
+//       {/* শিক্ষার্থীদের পরিচয় পত্র আইডি কার্ড 7 */}
+//       {/* reports 8 */}
+//       <BanglaAttendence />
+//       {/* reports 9 */}
+//       <BanglaAttendenceSubjectWari />
+//       {/* আরবি হাজিরা খাতা 30 দিনের 10 */}
+//       {/* আরবি হাজিরা খাতা 30 দিনের শর্ট অ্যাড্রেস 10.2 */}
+//       {/* আরবি হাজিরা খাতা বিষয় ওয়ারী 11 */}
+//       {/* reports 12 */}
+//       <AdmissionRegisterSerial />
+//       {/* reports 13 */}
+//       <AllStudentsStatistics />
+//       {/* ভর্তি ফর্ম *  14 /}
+//       {/* নতুন ভর্তি ফর্ম 15 */}
+//       {/* reports 16 */}
+//       <IdAdmissionRegister />
+//       {/* reports 17 */}
+//       <AdmissionResigterAllStudentsSerial />
+//       {/* reports 18 */}
+//       <ImageWithAdmissionRegisterNewOld />
+//       {/* reports 19 */}
+//       <ParentsMobileNumberTwoColumn />
+//       {/* reports 20 */}
+//       <FinancialStatusBasedStatistics />
+//       {/* reports 21 */}
+//       <FinancialStatusBasedAdmissionRegister />
+//       {/* reports 22 */}
+//       <BirthRegistrationBasedList />
+//       {/* reports 23 */}
+//       <ParentsInfo />
+//       {/* reports 24 */}
+//       <AdmissionFormWithID />
+//       {/* reports 25 */}
+//       <AddressBasedAdmissionRegister />
+//       {/* reports 26 */}
+//       <AttendanceBookWithPhoto />
+//     </>

@@ -80,7 +80,7 @@ const AdmissionRegisterPrint = () => {
         <div className="bg-white">প্রিন্ট {formatDate(new Date())}</div>
       </div>
 
-      <div className="overflow-x-auto bg-white">
+      <div className="bg-white">
         <table className="w-full border-collapse border border-black bg-white">
           <thead>
             <tr className="bg-white text-sm text-black">
