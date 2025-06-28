@@ -4,9 +4,12 @@ import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 
-const FinancialStatusBasedStatistics = () => {
+const FinancialStatusBasedStatistics = ({reportData}) => {
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
+
+  console.log(reportData);
+
 
   useEffect(() => {
     if (instutionInfo?.Logo?.data) {

@@ -3,7 +3,7 @@ import bnBijoy2Unicode from "../../../utils/conveter";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 
-const ParentsMobileNumberTwoColumn = () => {
+const ParentsMobileNumberTwoColumn = ({ reportData }) => {
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
@@ -16,83 +16,17 @@ const ParentsMobileNumberTwoColumn = () => {
     }
   }, [instutionInfo]);
 
-  const students = [
-    {
-      sl: "১",
-      roll: "১০০০১",
-      name: "সাকিব আল হাসান",
-      father: "হাসান",
-      mobile: "017xxxxxxxx",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "২",
-      roll: "১০০০২",
-      name: "শেখ হাসিনা",
-      father: "হাসান",
-      mobile: "018xxxxxxxx",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "৩",
-      roll: "১০০০৩",
-      name: "শেখ কামাল",
-      father: "হাসান",
-      mobile: "019xxxxxxxx",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "৪",
-      roll: "১০০০৫",
-      name: "নাসির ভাই",
-      father: "হাসান",
-      mobile: "017xxxxxxxx",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "৫",
-      roll: "১০০০৬",
-      name: "তানভীর",
-      father: "হাসান",
-      mobile: "013xxxxxxxx",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "৬",
-      roll: "১০০০৮",
-      name: "খালেদুল্লাহ লব্ধরক্ষ",
-      father: "হাসান",
-      mobile: "017xxxxxxxx",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "৭",
-      roll: "১০১০১",
-      name: "ইমন",
-      father: "হাসান",
-      mobile: "017xxxxxxxx",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "৮",
-      roll: "১০১০২",
-      name: "গিয়াস",
-      father: "মোঃ গাজী সালা উদ্দিন",
-      mobile: "017xxxxxxxx",
-      dob: "১১/০১/২০০৪",
-    },
-    {
-      sl: "৯",
-      roll: "১০১০৩",
-      name: "ইমন",
-      father: "মোঃ গাজী সালা উদ্দিন",
-      mobile: "017xxxxxxxx",
-      dob: "১২/০১/২০০৪",
-    },
-  ];
+  // Transform reportData into the required format
+  const students = reportData?.map((student, index) => ({
+    sl: index + 1,
+    roll: student.StudentCode,
+    name: bnBijoy2Unicode(student.StudentName),
+    mobile: `${bnBijoy2Unicode(student.FatherName || '')} - ${student.Mobile1 || ''}`
+  })) || [];
 
   return (
-    <div className="relative z-10 sm:px-20 sm:py-16 px-8 py-5  bg-white">
+    <div className="font-bangla max-w-5xl mx-auto p-4 bg-white text-xs">
+
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
         {/* Logo */}
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
@@ -114,7 +48,7 @@ const ParentsMobileNumberTwoColumn = () => {
       </div>
 
       {/* Section Title */}
-      <div className="w-full border-b-4 border-black  border-double text-center mt-2 sm:mb-3 pb-2 mx-5">
+      <div className="w-full border-b-4 border-black border-double text-center mt-2 sm:mb-3 pb-2 mx-5">
         <span className="text-black tracking-widest border-b border-black text-base font-bold sm:text-lg">
           অভিভাবকের মোবাইল
         </span>
@@ -122,7 +56,7 @@ const ParentsMobileNumberTwoColumn = () => {
 
       <div className="flex justify-start items-center mb-4 bg-white">
         <div className="flex gap-2 font-semibold text-base items-center bg-white">
-          শ্রেণী/জামাত : কিতাব খানা
+          শ্রেণী/জামাত: {reportData?.[0]?.ClassName ? bnBijoy2Unicode(reportData[0].ClassName) : ''}
         </div>
       </div>
 
@@ -149,19 +83,19 @@ const ParentsMobileNumberTwoColumn = () => {
               <tbody>
                 {students
                   .filter((_, i) => i % 2 === colIndex)
-                  .map((s, idx) => (
+                  .map((student, idx) => (
                     <tr key={idx} className="text-center bg-white">
                       <td className="border border-black px-2 py-1 bg-white">
-                        {s.sl}
+                        {student.sl}
                       </td>
                       <td className="border border-black px-2 py-1 bg-white">
-                        {s.roll}
+                        {student.roll}
                       </td>
                       <td className="border border-black px-2 py-1 bg-white">
-                        {s.name}
+                        {student.name}
                       </td>
                       <td className="border border-black px-2 py-1 bg-white">
-                        {s.mobile}
+                        {student.mobile}
                       </td>
                     </tr>
                   ))}

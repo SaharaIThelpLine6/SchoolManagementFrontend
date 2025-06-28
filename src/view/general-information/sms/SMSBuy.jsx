@@ -55,13 +55,13 @@ const SMSBuy = () => {
             registerKey="amount"
             require={translate("The amount of money must be paid.")}
             type="number"
-            placeholder={translate("Enter the amount of money (eg: 100).")}
+            placeholder={translate("Enter the amount of money (eg: 500).")}
             label={translate("Amount of Taka")}
             inputMode="numeric"
             className="text-right" // For right-aligned numbers
           />
           <p className="text-xs text-gray-500 mt-1">
-            {translate("SMS can be purchased from a minimum of 100 Taka.")}
+            {translate("SMS can be purchased from a minimum of 500 Taka.")}
           </p>
         </div>
 
@@ -77,8 +77,8 @@ const SMSBuy = () => {
 
         {/* Additional Information */}
         <div className="mt-6 text-center text-sm text-gray-500 border-t pt-4">
-          <p>{translate("SMS can be purchased from a minimum of 100 Taka.")}</p>
-          <p className="mt-1">{translate("SMS Rate: 0.30 Taka per SMS Approximately 333 SMS can be sent for 100 Taka")}</p>
+          <p>{translate("SMS can be purchased from a minimum of 500 Taka.")}</p>
+          <p className="mt-1">{translate("SMS Rate: 0.38 Taka per SMS Approximately 1316 SMS can be sent for 500 Taka")}</p>
         </div>
       </form>
     </FormProvider>

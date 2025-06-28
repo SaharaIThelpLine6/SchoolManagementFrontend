@@ -45,6 +45,7 @@ import AdmissionFormWithID from "../view/students/reports/AdmissionFormWithID";
 import AddressBasedAdmissionRegister from "../view/students/reports/AddressBasedAdmissionRegister";
 import AttendanceBookWithPhoto from "../view/students/reports/AttendanceBookWithPhoto";
 import { useGetStudentReportQuery } from "../features/userReports/userReportsSlice";
+import AdmissionFormPdf from "../view/general-information/user-reports/AdmissionFormPdf";
 
 const StudentsReport = () => {
   const methods = useForm();
@@ -54,6 +55,13 @@ const StudentsReport = () => {
   const [selectedReportComponent, setSelectedReportComponent] = useState(null);
   const reportRef = useRef(null);
   const selectedReportID = watch("studentReport");
+  const SessionID = watch("SessionID");
+  const SubClassID = watch("SubClassID");
+  const gender = watch("gender");
+  const NewOldId = watch("NewOldId");
+  const ResidentialStatusId = watch("ResidentialStatusId");
+  const BookLine = watch("BookLine");
+
   const [queryParams, setQueryParams] = useState(null);
 
   const { data: sessionData } = useGetSessionsQuery();
@@ -68,17 +76,65 @@ const StudentsReport = () => {
     (state) => state.settings
   );
 
+  useEffect(() => {
+    const numericSelectedID = Number(selectedReportID);
+
+    const reportId = [
+      2, 4, 5, 8, 9, 12, 14, 15, 16, 17, 18, 19, 21, 22, 24, 25, 26,
+
+      // coming soon
+      7, 10, 11, 20, 23,
+    ];
+
+    const params = {
+      report_id: reportId.includes(numericSelectedID) ? 1 : numericSelectedID,
+      SessionID,
+      SubClassID,
+      gender,
+      NewOldId,
+      ResidentialStatusId,
+    };
+
+    // Clean up undefined or empty values
+    const cleanedParams = Object.fromEntries(
+      Object.entries(params).filter(
+        ([, value]) => value !== undefined && value !== ""
+      )
+    );
+
+    // Only set params if report_id is present (or your key condition)
+    if (cleanedParams.report_id) {
+      setQueryParams(cleanedParams);
+    }
+  }, [
+    selectedReportID,
+    SessionID,
+    SubClassID,
+    gender,
+    NewOldId,
+    ResidentialStatusId,
+  ]);
+
+  // Query only if queryParams are ready and valid
   const {
     data: reportData,
     isLoading,
     isError,
     refetch,
   } = useGetStudentReportQuery(queryParams, {
-    skip: !queryParams,
+    skip: !queryParams || Object.keys(queryParams).length === 0,
     refetchOnMountOrArgChange: true,
   });
 
-  console.log(reportData);
+  // Debug log
+  useEffect(() => {
+    if (isError) {
+      console.error("Error fetching report data");
+    }
+    if (reportData) {
+      console.log("Report data:", reportData);
+    }
+  }, [reportData, isError]);
 
   const [DivisionID, DistrictID, permanentPoliceStationID] = watch([
     "DivisionID",
@@ -181,9 +237,9 @@ const StudentsReport = () => {
     return <div>{translate("Failed to load settings data")}</div>;
   }
 
-  if (isLoading) {
-    return <div>{translate("Loading...")}</div>;
-  }
+  // if (isLoading) {
+  //   return <div>{translate("Loading...")}</div>;
+  // }
 
   if (isError) {
     return (
@@ -213,14 +269,14 @@ const StudentsReport = () => {
     { id: "2", name: "ভর্তির পরে" },
   ];
   const bookOfSubjectData = [
-    { id: "1", name: "3 বিষয়ের খাতা" },
-    { id: "2", name: "4 বিষয়ের খাতা" },
-    { id: "3", name: "5 বিষয়ের খাতা" },
-    { id: "4", name: "6 বিষয়ের খাতা" },
-    { id: "5", name: "7 বিষয়ের খাতা" },
-    { id: "6", name: "8 বিষয়ের খাতা" },
-    { id: "7", name: "9 বিষয়ের খাতা" },
-    { id: "8", name: "10 বিষয়ের খাতা" },
+    { id: "3", name: "3 বিষয়ের খাতা" },
+    { id: "4", name: "4 বিষয়ের খাতা" },
+    { id: "5", name: "5 বিষয়ের খাতা" },
+    { id: "6", name: "6 বিষয়ের খাতা" },
+    { id: "7", name: "7 বিষয়ের খাতা" },
+    { id: "8", name: "8 বিষয়ের খাতা" },
+    { id: "9", name: "9 বিষয়ের খাতা" },
+    { id: "10", name: "10 বিষয়ের খাতা" },
   ];
 
   const studentReportData = [
@@ -325,61 +381,104 @@ const StudentsReport = () => {
     IdAdmissionForm: ["24"],
     addresss: ["25"],
   };
+  const ComingSoon = () => {
+    return (
+      <div className="flex items-center justify-center bg-gradient-to-br from-indigo-100 to-purple-200 py-16 px-4">
+        <div className="bg-white shadow-xl rounded-2xl p-10 max-w-md w-full text-center">
+          <h1 className="text-4xl font-bold text-indigo-600 mb-4">
+            Coming Soon
+          </h1>
+          <p className="text-gray-600 text-lg mb-6">
+            We're working hard to bring you something amazing. Stay tuned...
+          </p>
+          {/* Loader removed per your request */}
+        </div>
+      </div>
+    );
+  };
+  const onSubmit = () => {
+    // Map report ID to component and pass reportData as a prop
 
-  const onSubmit = (data) => {
-    const params = {
-      report_id: data.studentReport,
-      SessionID: data.SessionID,
-      SubClassID: data.SubClassID,
-      gender: data.gender,
-      NewOldId: data.NewOldId,
-      ResidentialStatusId: data.ResidentialStatusId,
+    const reportComponents = {
+      1: <AdmissionRegisterPrint reportData={reportData} />,
+      2: (
+        <OldNewRegisterList
+          reportData={reportData}
+          NewOldId={NewOldId}
+          SubClassID={SubClassID}
+        />
+      ),
+      3: <JamaatBasedNewOldTotalStudent reportData={reportData} />,
+      4: <StudentsListTwoColumns reportData={reportData} />,
+      5: (
+        <ParentsMobileNumberList
+          reportData={reportData}
+          SubClassID={SubClassID}
+          SessionID={SessionID}
+        />
+      ),
+      6: <JamaatWariBookList reportData={reportData} SubClassID={SubClassID} />,
+      7: <ComingSoon />,
+ 
+      8: (
+        <BanglaAttendence
+          reportData={reportData}
+          SubClassID={SubClassID}
+          SessionID={SessionID}
+        />
+      ),
+      9: (
+        <BanglaAttendenceSubjectWari
+          reportData={reportData}
+          SubClassID={SubClassID}
+          BookLine={BookLine}
+        />
+      ),
+           10: <ComingSoon />,
+      11: <ComingSoon />,
+      12: (
+        <AdmissionRegisterSerial
+          reportData={reportData}
+          SessionID={SessionID}
+        />
+      ),
+      // 13: <AllStudentsStatistics reportData={reportData} />,
+      13: <ComingSoon />,
+      14: <AdmissionFormPdf SubClassID={SubClassID} SessionID={SessionID} />,
+      15: <AdmissionFormPdf />,
+      16: <IdAdmissionRegister reportData={reportData} />,
+      17: (
+        <AdmissionResigterAllStudentsSerial
+          reportData={reportData}
+          SessionID={SessionID}
+        />
+      ),
+      18: <ImageWithAdmissionRegisterNewOld reportData={reportData} />,
+      19: <ParentsMobileNumberTwoColumn reportData={reportData} />,
+      // 20: <FinancialStatusBasedStatistics reportData={reportData} />,
+      20: <ComingSoon />,
+      21: <FinancialStatusBasedAdmissionRegister reportData={reportData} />,
+      22: <BirthRegistrationBasedList reportData={reportData} />,
+      // 23: <ParentsInfo reportData={reportData} />,
+      23: <ComingSoon />,
+      24: <AdmissionFormPdf SubClassID={SubClassID} SessionID={SessionID} />,
+      25: <AddressBasedAdmissionRegister reportData={reportData} />,
+      26: <AttendanceBookWithPhoto reportData={reportData} />,
     };
 
-    // Clean up empty params
-    Object.keys(params).forEach(
-      (key) =>
-        (params[key] === undefined || params[key] === "") && delete params[key]
-    );
+    const component = reportComponents[selectedReportID] || null;
+    setSelectedReportComponent(component);
 
-    setQueryParams(params);
+    // Trigger print only if data is available and component is set
+    if (component && reportData && !isLoading) {
+      setTimeout(() => {
+        window.print();
+      }, 500); // Increased delay to ensure rendering
+    } else {
+      console.warn("Cannot print: Data not ready or component not set.");
+    }
+    reset()
   };
-  // Map report ID to component and pass reportData as a prop
-  // const reportComponents = {
-  //   1: <AdmissionRegisterPrint reportData={reportData} />,
-  //   2: <OldNewRegisterList reportData={reportData} />,
-  //   3: <JamaatBasedNewOldTotalStudent reportData={reportData} />,
-  //   4: <StudentsListTwoColumns reportData={reportData} />,
-  //   5: <ParentsMobileNumberList reportData={reportData} />,
-  //   6: <JamaatWariBookList reportData={reportData} />,
-  //   8: <BanglaAttendence reportData={reportData} />,
-  //   9: <BanglaAttendenceSubjectWari reportData={reportData} />,
-  //   12: <AdmissionRegisterSerial reportData={reportData} />,
-  //   13: <AllStudentsStatistics reportData={reportData} />,
-  //   16: <IdAdmissionRegister reportData={reportData} />,
-  //   17: <AdmissionResigterAllStudentsSerial reportData={reportData} />,
-  //   18: <ImageWithAdmissionRegisterNewOld reportData={reportData} />,
-  //   19: <ParentsMobileNumberTwoColumn reportData={reportData} />,
-  //   20: <FinancialStatusBasedStatistics reportData={reportData} />,
-  //   21: <FinancialStatusBasedAdmissionRegister reportData={reportData} />,
-  //   22: <BirthRegistrationBasedList reportData={reportData} />,
-  //   23: <ParentsInfo reportData={reportData} />,
-  //   24: <AdmissionFormWithID reportData={reportData} />,
-  //   25: <AddressBasedAdmissionRegister reportData={reportData} />,
-  //   26: <AttendanceBookWithPhoto reportData={reportData} />,
-  // };
-
-  // const component = reportComponents[data.studentReport] || null;
-  // setSelectedReportComponent(component);
-
-  // Trigger print only if data is available and component is set
-  // if (component && reportData && !isLoading) {
-  //   setTimeout(() => {
-  //     window.print();
-  //   }, 500); // Increased delay to ensure rendering
-  // } else {
-  //   console.warn("Cannot print: Data not ready or component not set.");
-  // }
 
   return (
     <>
@@ -427,7 +526,7 @@ const StudentsReport = () => {
                   options={bookOfSubjectData ?? []}
                   valueField="id"
                   nameField="name"
-                  registerKey="id"
+                  registerKey="BookLine"
                 />
               )}
               {reportFieldMap.ClassID.includes(selectedReportID) && (
@@ -564,6 +663,7 @@ const StudentsReport = () => {
 };
 
 export default StudentsReport;
+
 //     <>
 //       {/* reports 1 */}
 //       <AdmissionRegisterPrint />
@@ -582,15 +682,15 @@ export default StudentsReport;
 //       <BanglaAttendence />
 //       {/* reports 9 */}
 //       <BanglaAttendenceSubjectWari />
-//       {/* আরবি হাজিরা খাতা 30 দিনের 10 */}
-//       {/* আরবি হাজিরা খাতা 30 দিনের শর্ট অ্যাড্রেস 10.2 */}
-//       {/* আরবি হাজিরা খাতা বিষয় ওয়ারী 11 */}
+// {/* আরবি হাজিরা খাতা 30 দিনের 10 */}
+// {/* আরবি হাজিরা খাতা 30 দিনের শর্ট অ্যাড্রেস 10.2 */}
+// {/* আরবি হাজিরা খাতা বিষয় ওয়ারী 11 */}
 //       {/* reports 12 */}
 //       <AdmissionRegisterSerial />
 //       {/* reports 13 */}
 //       <AllStudentsStatistics />
-//       {/* ভর্তি ফর্ম *  14 /}
-//       {/* নতুন ভর্তি ফর্ম 15 */}
+// {/* ভর্তি ফর্ম *  14 /}
+// {/* নতুন ভর্তি ফর্ম 15 */}
 //       {/* reports 16 */}
 //       <IdAdmissionRegister />
 //       {/* reports 17 */}

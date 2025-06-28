@@ -3,10 +3,17 @@ import bnBijoy2Unicode from "../../../utils/conveter";
 import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
+import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 
-const IdAdmissionRegister = () => {
+const IdAdmissionRegister = ({ reportData, SessionID }) => {
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
+
+  const { data: sessionSData } = useGetSessionsQuery();
+
+  const sessionData = sessionSData?.find(
+    (i) => i.SessionID === Number(SessionID)
+  );
 
   useEffect(() => {
     if (instutionInfo?.Logo?.data) {
@@ -17,39 +24,9 @@ const IdAdmissionRegister = () => {
     }
   }, [instutionInfo]);
 
-  const tableData = [
-    {
-      sl: "০১",
-      roll: "১০০০১",
-      studentName: "রহিম উদ্দিন",
-      fatherName: "মোঃ আবুল কালাম",
-      motherName: "রোকেয়া বেগম",
-      dob: "০১/০১/২০১০",
-      bloodGroup: "বি+",
-      mobile: "০১৭১২৩৪৫৬৭৮",
-      village: "বড়ইতলী",
-      postOffice: "রাঙ্গাবালী",
-      thana: "গলাচিপা",
-      district: "পটুয়াখালী",
-    },
-    {
-      sl: "০২",
-      roll: "১০০০২",
-      studentName: "সাব্বির হোসেন",
-      fatherName: "জাকির হোসেন",
-      motherName: "নাসরিন আক্তার",
-      dob: "১৫/০৩/২০১১",
-      bloodGroup: "এ+",
-      mobile: "০১৯১২৩৪৫৬৭৮",
-      village: "পূর্ব টাকেশ্বর",
-      postOffice: "কালিগঞ্জ",
-      thana: "সাতক্ষীরা সদর",
-      district: "সাতক্ষীরা",
-    },
-  ];
-
   return (
-    <div className="relative z-10 sm:px-20 sm:py-16 px-8 py-5  bg-white">
+        <div className="font-bangla  p-4 bg-white text-xs">
+
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
         {/* Logo */}
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
@@ -65,7 +42,7 @@ const IdAdmissionRegister = () => {
             {bnBijoy2Unicode(instutionInfo?.Address)}
           </p>
           <div className="text-black border border-black px-4 py-1 inline-block mt-2 sm:mt-3 rounded tracking-widest bg-white text-base font-bold sm:text-lg">
-            ভর্তি রেজিস্টার : 2025-26 Bs
+            ভর্তি রেজিস্টার : {bnBijoy2Unicode(sessionData?.SessionName)}
           </div>
         </div>
 
@@ -74,7 +51,6 @@ const IdAdmissionRegister = () => {
       </div>
 
       <div className="flex justify-end items-center mb-4 bg-white">
-        
         <div className="bg-white">প্রিন্ট {formatDate(new Date())}</div>
       </div>
 
@@ -91,9 +67,7 @@ const IdAdmissionRegister = () => {
               <th className="border border-black p-2 bg-white">মাতার নাম</th>
               <th className="border border-black p-2 bg-white">জন্ম তারিখ</th>
               <th className="border border-black p-2 bg-white">রক্তের গ্রুপ</th>
-              <th className="border border-black p-2 bg-white">
-                মোবাইল
-              </th>
+              <th className="border border-black p-2 bg-white">মোবাইল</th>
               <th className="border border-black p-2 bg-white">গ্রাম</th>
               <th className="border border-black p-2 bg-white">ডাক </th>
               <th className="border border-black p-2 bg-white">থানা</th>
@@ -101,43 +75,43 @@ const IdAdmissionRegister = () => {
             </tr>
           </thead>
           <tbody>
-            {tableData.map((row, index) => (
+            {reportData?.map((row, index) => (
               <tr key={index} className="bg-white">
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.sl}
+                  {index + 1}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.roll}
+                  {row.StudentCode}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.studentName}
+                  {bnBijoy2Unicode(row.StudentName)}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.fatherName}
+                  {bnBijoy2Unicode(row.FatherName)}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.motherName}
+                  {bnBijoy2Unicode(row.MotherName)}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.dob}
+                  {row.DateOfBirth}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.bloodGroup}
+                  {row.BloodGroup}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.mobile}
+                  {row.Mobile1}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.village}
+                  {row.permanentVill}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.postOffice}
+                  {row.permanentPost}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.thana}
+                  {row.PoliceStationName}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.district}
+                  {row.PermanentDistrictName}
                 </td>
               </tr>
             ))}
@@ -148,6 +122,4 @@ const IdAdmissionRegister = () => {
   );
 };
 
-
-
-export default IdAdmissionRegister
+export default IdAdmissionRegister;

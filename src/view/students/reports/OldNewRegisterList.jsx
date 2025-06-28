@@ -1,75 +1,17 @@
 import React from "react";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../../utils/conveter";
+import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 
-const OldNewRegisterList = () => {
-    const { data: instutionInfo } = useGetInstitutionInfoQuery();
-  
-  const students = [
-    {
-      sl: "১",
-      roll: "১০০০১",
-      name: "সাকিব আল হাসান",
-      father: "হাসান",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "২",
-      roll: "১০০০২",
-      name: "শেখ হাসিনা",
-      father: "হাসান",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "৩",
-      roll: "১০০০৩",
-      name: "শেখ কামাল",
-      father: "হাসান",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "৪",
-      roll: "১০০০৫",
-      name: "নাসির ভাই",
-      father: "হাসান",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "৫",
-      roll: "১০০০৬",
-      name: "তানভীর",
-      father: "হাসান",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "৬",
-      roll: "১০০০৮",
-      name: "খালেদুল্লাহ লব্ধরক্ষ",
-      father: "হাসান",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "৭",
-      roll: "১০১০১",
-      name: "ইমন",
-      father: "হাসান",
-      dob: "০১/০১/২০০৫",
-    },
-    {
-      sl: "৮",
-      roll: "১০১০২",
-      name: "গিয়াস",
-      father: "মোঃ গাজী সালা উদ্দিন",
-      dob: "১১/০১/২০০৪",
-    },
-    {
-      sl: "৯",
-      roll: "১০১০৩",
-      name: "ইমন",
-      father: "মোঃ গাজী সালা উদ্দিন",
-      dob: "১২/০১/২০০৪",
-    },
-  ];
+const OldNewRegisterList = ({ reportData, NewOldId, SubClassID }) => {
+  const { data: instutionInfo } = useGetInstitutionInfoQuery();
+
+  const { data: subClassListData } = useGetSubClassListQuery();
+ const subClasData = subClassListData?.find(
+  (i) => i.SubClassID === Number(SubClassID)
+);
+
+
 
   return (
     <div className="bg-white p-8 text-black text-sm">
@@ -88,15 +30,21 @@ const OldNewRegisterList = () => {
       <div className="grid grid-cols-3 gap-4 mb-4 sm:mb-0 p-4 bg-white">
         <div className="flex gap-2 bg-white">
           <span>শ্রেণী/জামাত:</span>
-          <span className="font-bold underline">হিফজ</span>
+          <span className="font-bold underline">{bnBijoy2Unicode(subClasData?.SubClass)}</span>
         </div>
         <div className="flex gap-2 justify-center bg-white">
           <span>সর্বমোট শিক্ষার্থী:</span>
-          <span className="font-bold underline">{students.length}</span>
+          <span className="font-bold underline">{reportData?.length}</span>
         </div>
         <div className="flex gap-2 justify-end bg-white">
           <span>শিক্ষার্থীর ধরন:</span>
-          <span className="font-bold underline">নতুন</span>
+          <span className="font-bold underline">
+            {{
+              1: "নতুন",
+              2: "পুরাতন",
+              3: "উভয়",
+            }[Number(NewOldId)] || ""}
+          </span>
         </div>
       </div>
 
@@ -113,22 +61,22 @@ const OldNewRegisterList = () => {
             </tr>
           </thead>
           <tbody>
-            {students.map((s, idx) => (
+            {reportData?.map((s, idx) => (
               <tr key={idx} className="text-center bg-white">
                 <td className="border border-black px-2 py-1 bg-white">
-                  {s.sl}
+                  {idx + 1}
                 </td>
                 <td className="border border-black px-2 py-1 bg-white">
-                  {s.roll}
+                  {s.StudentCode}
                 </td>
                 <td className="border border-black px-2 py-1 bg-white">
-                  {s.name}
+                  {bnBijoy2Unicode(s.StudentName)}
                 </td>
                 <td className="border border-black px-2 py-1 bg-white">
-                  {s.father}
+                  {bnBijoy2Unicode(s.FatherName)}
                 </td>
                 <td className="border border-black px-2 py-1 bg-white">
-                  {s.dob}
+                  {bnBijoy2Unicode(s.DateOfBirth)}
                 </td>
               </tr>
             ))}

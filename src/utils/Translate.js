@@ -378,11 +378,11 @@ const useTranslate = () => {
       "যত টাকার এসএমএস নিতে চান, তত টাকা নিচে উল্লেখ করুন",
     "Amount of Taka": "টাকার পরিমাণ",
     "The amount of money must be paid.": "টাকার পরিমাণ অবশ্যই দিতে হবে",
-    "Enter the amount of money (eg: 100).": "টাকার পরিমাণ লিখুন (যেমন: ১০০)",
-    "SMS can be purchased from a minimum of 100 Taka.":
-      "সর্বনিম্ন ১০০ টাকা থেকে এসএমএস ক্রয় করা যাবে",
-    "SMS Rate: 0.30 Taka per SMS Approximately 333 SMS can be sent for 100 Taka":
-      "এসএমএস এর দর: প্রতি এসএমএস ০.৩০ টাকা ১০০ টাকায় প্রায় ৩৩৩ টি এসএমএস পাঠানো যাবে",
+    "Enter the amount of money (eg: 500).": "টাকার পরিমাণ লিখুন (যেমন: ৫০০)",
+    "SMS can be purchased from a minimum of 500 Taka.":
+      "সর্বনিম্ন ৫০০ টাকা থেকে এসএমএস ক্রয় করা যাবে",
+    "SMS Rate: 0.38 Taka per SMS Approximately 1316 SMS can be sent for 500 Taka":
+      "এসএমএস এর দর: প্রতি এসএমএস ০.৩৮ টাকা ৫০০ টাকায় প্রায় ১৩১৬ টি এসএমএস পাঠানো যাবে",
     "Message Name": "মেসেজ নাম",
     "Enter new message name": "নতুন মেসেজ নাম লিখুন",
     "Invalid Bangladeshi mobile prefix": "অবৈধ বাংলাদেশী মোবাইল প্রিফিক্স",

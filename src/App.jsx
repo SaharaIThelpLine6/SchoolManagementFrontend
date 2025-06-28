@@ -64,8 +64,6 @@ import Book from "./pages/Book";
 import CertificateAttesation from "./pages/CertificateAttesation";
 import OnlineAdmissionTable from "./pages/OnlineAdmissionTable";
 import { useGetAllUserPermissionsQuery } from "./features/permission/permissionSlice";
-import CreateCertificateAttestation from "./view/students/certificate-attestation/CreateCertificateAttestation";
-import PrintTwo from "./view/students/certificate-attestation/print/PrintTwo";
 import StudentsReport from "./pages/StudentsReport";
 import {permissionsDataList} from "./Data/permissions"
 

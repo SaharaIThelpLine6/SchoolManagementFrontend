@@ -3,31 +3,21 @@ import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQ
 import bnBijoy2Unicode from "../../../utils/conveter";
 import { Buffer } from "buffer";
 
-const AttendanceBookWithPhoto = () => {
+const AttendanceBookWithPhoto = ({ reportData }) => {
   const [logo, setLogo] = useState(null);
-
+  const [attendance, setAttendance] = useState({});
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
+
+  // Generate days of the month
+  const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
   useEffect(() => {
     if (instutionInfo?.Logo?.data) {
       const buffer = Buffer.from(instutionInfo.Logo.data);
       const base64String = buffer.toString("base64");
-      const imageSrc = `data:image/png;base64,${base64String}`;
-      setLogo(imageSrc);
+      setLogo(`data:image/png;base64,${base64String}`);
     }
   }, [instutionInfo]);
-  const students = [
-    { id: "30001", name: "সাফিক আলী" },
-    { id: "30002", name: "রহিম হোসেন" },
-    { id: "30003", name: "করিম হোসেন" },
-    { id: "30004", name: "নজিফুল ইসলাম" },
-    { id: "30005", name: "জাহিদুল" },
-    { id: "30006", name: "শফিকুল" },
-    { id: "30007", name: "ইমরান" },
-  ];
-
-  const days = Array.from({ length: 31 }, (_, i) => i + 1);
-
-  const [attendance, setAttendance] = useState({});
 
   const toggleAttendance = (studentId, day) => {
     setAttendance((prev) => ({
@@ -36,68 +26,72 @@ const AttendanceBookWithPhoto = () => {
     }));
   };
 
+  // Transform reportData to match the expected structure
+  const students =
+    reportData?.map((student) => ({
+      id: student.StudentCode,
+      name: bnBijoy2Unicode(student.StudentName),
+    })) || [];
+
   return (
-    <div className="font-SolaimanLipi mx-auto p-4  bg-white">
-      <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
-        {/* Logo */}
+    <div className="font-bangla  p-4 bg-white text-xs">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0">
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
-          <img src={logo} alt="Logo" className="w-20 h-20 bg-white" />
+          {logo && <img src={logo} alt="Logo" className="w-20 h-20" />}
         </div>
 
-        {/* Title Section */}
-        <div className="text-center flex-1 bg-white">
-          <h1 className="text-xl sm:text-2xl font-extrabold bg-white">
+        <div className="text-center flex-1">
+          <h1 className="text-xl sm:text-2xl font-extrabold">
             {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
           </h1>
-          <p className="text-base font-semibold bg-white">
+          <p className="text-base font-semibold">
             {bnBijoy2Unicode(instutionInfo?.Address)}
           </p>
-          <div className="text-black border-2 border-black px-4 py-1 inline-block mt-2 sm:mt-3 rounded-xl tracking-widest bg-white text-lg font-medium sm:text-lg">
+          <div className="text-black border-2 border-black px-4 py-1 inline-block mt-2 sm:mt-3 rounded-xl tracking-widest text-lg font-medium sm:text-lg">
             দৈনিক শিক্ষার্থীর হাজিরা খাতা
           </div>
         </div>
 
-        {/* Optional right-aligned blank space */}
-        <div className="hidden sm:block w-20 h-20 bg-white" />
+        <div className="hidden sm:block w-20 h-20" />
       </div>
+
+      {/* Info Bar */}
       <div className="flex justify-between my-3 bg-gray-50">
         <div className="flex-1 basis-0 min-w-0 font-bold text-sm border border-black py-1 px-2 text-center">
-          শ্রেণী/জামাত: কিতাব খানা
+          শ্রেণী/জামাত:{" "}
+          {reportData?.[0]?.ClassName
+            ? bnBijoy2Unicode(reportData[0].ClassName)
+            : "কিতাব খানা"}
         </div>
         <div className="flex-1 basis-0 min-w-0 font-bold text-sm border border-black py-1 px-2 text-center">
-          শিক্ষাবর্ষ: 2025-26 Bs
+          শিক্ষাবর্ষ: {reportData?.[0]?.SessionName || "2025-26 Bs"}
         </div>
         <div className="flex-1 basis-0 min-w-0 font-bold text-sm border border-black py-1 px-2 text-center">
-          সন: ১৪৪৫
+          সন: 
         </div>
         <div className="flex-1 basis-0 min-w-0 font-bold text-sm border border-black py-1 px-2 text-center">
-          হিজরী: ১৪৪৬
+          হিজরী: 
         </div>
         <div className="flex-1 basis-0 min-w-0 font-bold text-sm border border-black py-1 px-2 text-center">
-          মাস:জানুয়ারী
+          মাস: 
         </div>
       </div>
 
-      <div className=" text-xs">
+      {/* Attendance Table */}
+      <div className="text-xs">
         <table className="w-full border-collapse">
           <thead>
             <tr className="h-6">
-              {/* Serial Number */}
               <th className="border border-black bg-white text-center w-8 min-w-[32px]">
                 ক্র.নং
               </th>
-
-              {/* Student ID */}
               <th className="border border-black bg-white text-center w-12 min-w-[48px]">
                 দাখেলা
               </th>
-
-              {/* Student Name */}
               <th className="border border-black bg-white text-left px-1 min-w-[150px] truncate">
                 ছাত্র/ছাত্রীর নাম
               </th>
-
-              {/* Days */}
               {days.map((day) => (
                 <th
                   key={day}
@@ -112,34 +106,30 @@ const AttendanceBookWithPhoto = () => {
           <tbody>
             {students.map((student, index) => (
               <tr key={student.id} className="h-6">
-                {/* Serial Number */}
                 <td className="border border-black bg-white text-center align-middle">
                   {index + 1}
                 </td>
-
-                {/* Student ID */}
                 <td className="border border-black bg-white text-center align-middle truncate">
                   {student.id}
                 </td>
-
-                {/* Student Name */}
                 <td className="border border-black bg-white text-left px-1 align-middle truncate">
                   {student.name}
                 </td>
-
-                {/* Attendance Cells */}
-            
                 {days.map((day) => (
                   <td
                     key={day}
-                    className={`border border-black text-center cursor-pointer text-sm w-6 h-6 p-0 align-middle ${
-                      attendance[`${student.id}-${day}`] ? "bg-green-200" : "bg-white"
+                    className={`border border-black text-center cursor-pointer w-6 h-6 p-0 align-middle ${
+                      attendance[`${student.id}-${day}`]
+                        ? "bg-green-200"
+                        : "bg-white"
                     }`}
                     onClick={() => toggleAttendance(student.id, day)}
                   >
                     {Array.from({ length: 3 }).map((_, i) => (
                       <div key={i} className="border-b border-black h-3 w-6">
-                        {attendance[`${student.id}-${day}`] === i + 1 ? "✓" : ""}
+                        {attendance[`${student.id}-${day}`] === i + 1
+                          ? "✓"
+                          : ""}
                       </div>
                     ))}
                   </td>
@@ -149,7 +139,9 @@ const AttendanceBookWithPhoto = () => {
           </tbody>
         </table>
       </div>
-      <div className="flex flex-wrap justify-between mt-6 p-3 ">
+
+      {/* Footer */}
+      <div className="flex justify-between mt-6 p-3">
         <div className="border-t border-black w-50 text-center">
           <span className="font-normal">মোট কার্য দিবস: </span>
         </div>

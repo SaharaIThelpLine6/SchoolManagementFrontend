@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import bnBijoy2Unicode from "../../../utils/conveter";
-import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 
-const JamaatBasedNewOldTotalStudent = () => {
+const JamaatBasedNewOldTotalStudent = ({ reportData }) => {
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
@@ -17,43 +16,15 @@ const JamaatBasedNewOldTotalStudent = () => {
     }
   }, [instutionInfo]);
 
-  const tableData = [
-    {
-      sl: "০১",
-      roll: "১০০০১",
-      studentName: "রহিম উদ্দিন",
-      fatherName: "মোঃ আবুল কালাম",
-      motherName: "রোকেয়া বেগম",
-      dob: "০১/০১/২০১০",
-      bloodGroup: "বি+",
-      mobile: "০১৭১২৩৪৫৬৭৮",
-      village: "বড়ইতলী",
-      postOffice: "রাঙ্গাবালী",
-      thana: "গলাচিপা",
-      district: "পটুয়াখালী",
-    },
-    {
-      sl: "০২",
-      roll: "১০০০২",
-      studentName: "সাব্বির হোসেন",
-      fatherName: "জাকির হোসেন",
-      motherName: "নাসরিন আক্তার",
-      dob: "১৫/০৩/২০১১",
-      bloodGroup: "এ+",
-      mobile: "০১৯১২৩৪৫৬৭৮",
-      village: "পূর্ব টাকেশ্বর",
-      postOffice: "কালিগঞ্জ",
-      thana: "সাতক্ষীরা সদর",
-      district: "সাতক্ষীরা",
-    },
-  ];
 
-  const totalNew = tableData.reduce((sum, item) => sum + item.new, 0);
-  const totalOld = tableData.reduce((sum, item) => sum + item.old, 0);
+  // উপরের দিকে যুক্ত করুন
+  const totalNew = reportData?.reduce((sum, item) => sum + item.new, 0) || 0;
+  const totalOld = reportData?.reduce((sum, item) => sum + item.old, 0) || 0;
   const total = totalNew + totalOld;
 
   return (
-    <div className="relative z-10 sm:px-20 sm:py-16 px-8 py-5  bg-white w-full">
+          <div className="font-bangla  p-4 bg-white text-xs">
+
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
         {/* Logo */}
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
@@ -120,22 +91,22 @@ const JamaatBasedNewOldTotalStudent = () => {
             </tr>
           </thead>
           <tbody>
-            {tableData.map((row, index) => (
+            {reportData?.map((row, index) => (
               <tr key={index} className="bg-white">
                 <td className="border border-black p-2 text-center w-[100px] bg-white">
-                  {row.sl}
+                  {index + 1}
                 </td>
                 <td className="border border-black p-2 text-center w-[250px] bg-white">
-                  {row.roll}
+                  {row.ClassName}
                 </td>
                 <td className="border border-black p-2 text-center w-[200px] bg-white">
-                  {row.studentName}
+                  {row.new}
                 </td>
                 <td className="border border-black p-2 text-center w-[200px] bg-white">
-                  {row.fatherName}
+                  {row.old}
                 </td>
                 <td className="border border-black p-2 text-center w-[200px] bg-white">
-                  {row.motherName}
+                  {row.Total}
                 </td>
               </tr>
             ))}
@@ -144,9 +115,13 @@ const JamaatBasedNewOldTotalStudent = () => {
               <td className="border border-black p-2 text-center" colSpan={2}>
                 মোট শিক্ষার্থী
               </td>
-              <td className="border border-black p-2 text-center">10</td>
-              <td className="border border-black p-2 text-center">5</td>
-              <td className="border border-black p-2 text-center">15</td>
+              <td className="border border-black p-2 text-center">
+                {totalNew}
+              </td>
+              <td className="border border-black p-2 text-center">
+                {totalOld}
+              </td>
+              <td className="border border-black p-2 text-center">{total}</td>
             </tr>
           </tbody>
         </table>

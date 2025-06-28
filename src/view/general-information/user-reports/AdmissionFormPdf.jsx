@@ -1,7 +1,25 @@
 import React from "react";
 import PdfHeader from "./PdfHeader";
+import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
+import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
+import bnBijoy2Unicode from "../../../utils/conveter";
 
-const AdmissionFormPdf = () => {
+const AdmissionFormPdf = ({SubClassID, SessionID}) => {
+
+   const { data: subClassListData } = useGetSubClassListQuery();
+    const subClasData = subClassListData?.find(
+      (i) => i.SubClassID === Number(SubClassID)
+    );
+    const { data: sessionSData } = useGetSessionsQuery();
+  
+    const sessionData = sessionSData?.find(
+      (i) => i.SessionID === Number(SessionID)
+    );
+
+    console.log(subClasData);
+
+    const SubClassName = bnBijoy2Unicode(subClasData?.SubClass)
+    const SessionName = bnBijoy2Unicode(sessionData?.SessionName)
   return (
     <div
       className="w-full"
@@ -27,8 +45,8 @@ const AdmissionFormPdf = () => {
               <h2 className="border border-black px-1 text-xs">বিগত তথ্য</h2>
             </div>
             <div className="flex-grow">
-              <p className="text-2xs mb-0">জামায়াত : </p>
-              <p className="text-2xs mb-0">শিক্ষাবর্ষ : </p>
+              <p className="text-2xs mb-0">জামায়াত :{SubClassName ? SubClassName : ""} </p>
+              <p className="text-2xs mb-0">শিক্ষাবর্ষ : {SessionName ? SessionName : ""}</p>
               <p className="text-2xs">আইডি : </p>
             </div>
           </div>
