@@ -20,6 +20,7 @@ import PaymentGetway from "../view/general-information/sms/PaymentGetway";
 import SuccessAndError from "../view/general-information/sms/SuccessAndError";
 import AddEditBook from "../view/students/book/AddEditBook";
 import useTranslate from "../utils/Translate";
+import Subsidiary from "../view/exam/Subsidiary";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -107,6 +108,7 @@ const DefaultModal = () => {
                 {modalType === "SUCCESSANDERROR" && <SuccessAndError />}
                 {modalType === "ADD_BOOK" && <AddEditBook />}
                 {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
+                {modalType === "SUB_SIDIARY" && <Subsidiary />}
               </div>
             )}
           </div>
