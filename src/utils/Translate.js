@@ -13,6 +13,9 @@ const useTranslate = () => {
     "Success and Error": "সাকসেস এবং এরোর",
     "Book of Subjects": "বিষয়ের খাতা",
     Staff: "স্টাফ",
+    SubClass: "সাব ক্লাস",
+    "Book of subjects": "বিষয়ের খাতা",
+    "Class And Subclass": "ক্লাস এবং সাব ক্লাস",
     "Select columns to display data":
       "ডেটা প্রদর্শনের জন্য কলাম নির্বাচন করুন।",
     "No data available for the selected filters":
