@@ -171,7 +171,7 @@ const StudentFeeGroup = ({ pageTitle, onBack }) => {
         <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
           {translate("Student Fee Group")}
         </h3>
-        <Button onClick={() => onBack(false)}>Back</Button>
+        <Button onClick={() => onBack(false)}>{translate("Back")}</Button>
       </div>
 
       <FormProvider {...methods}>

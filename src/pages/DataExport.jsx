@@ -329,23 +329,56 @@ const DataExport = ({ pageTitle }) => {
               <h3 className="font-medium text-gray-700 mb-3">
                 {translate("Select Columns")}
               </h3>
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-                {allColumns.map((column) => (
-                  <label
-                    key={column.id}
-                    className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded cursor-pointer"
-                  >
+              <div className="p-2">
+                {/* "All Select" checkbox */}
+                <div className="mb-2">
+                  <label className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={selectedColumns.includes(column.id)}
-                      onChange={() => handleColumnToggle(column.id)}
+                      checked={selectedColumns.length === allColumns.length}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          // Select all columns
+                          setSelectedColumns(allColumns.map((col) => col.id));
+                        } else {
+                          // Deselect all columns
+                          setSelectedColumns([]);
+                        }
+                      }}
                       className="form-checkbox h-4 w-4 text-blue-600 rounded cursor-pointer"
                     />
                     <span className="text-sm text-gray-700">
-                      {translate(column.label)}
+                      {translate("All Select")}
                     </span>
                   </label>
-                ))}
+                </div>
+
+                {/* Individual column checkboxes */}
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
+                  {allColumns.map((column) => (
+                    <label
+                      key={column.id}
+                      className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedColumns.includes(column.id)}
+                        onChange={() => {
+                          setSelectedColumns(
+                            (prev) =>
+                              prev.includes(column.id)
+                                ? prev.filter((id) => id !== column.id) // Remove if already selected
+                                : [...prev, column.id] // Add if not selected
+                          );
+                        }}
+                        className="form-checkbox h-4 w-4 text-blue-600 rounded cursor-pointer"
+                      />
+                      <span className="text-sm text-gray-700">
+                        {translate(column.label)}
+                      </span>
+                    </label>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
