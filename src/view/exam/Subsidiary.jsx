@@ -184,7 +184,7 @@ const Subsidiary = ({ pageTitle }) => {
               registerKey="SessionID"
             />
             <DefaultSelect
-              label={translate("General Ledger") + " :"}
+              label={translate("Chart account") + " :"}
               options={classListData ?? []}
               valueField="ClassID"
               nameField="ClassName"
