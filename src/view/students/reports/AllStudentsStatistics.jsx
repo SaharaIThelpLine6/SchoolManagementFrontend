@@ -3,7 +3,7 @@ import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQ
 import { Buffer } from "buffer";
 import bnBijoy2Unicode from "../../../utils/conveter";
 
-const AllStudentsStatistics = () => {
+const AllStudentsStatistics = ({reportData}) => {
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 

@@ -3,11 +3,18 @@ import bnBijoy2Unicode from "../../../utils/conveter";
 import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
+import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 
-const JamaatWariBookList = () => {
+const JamaatWariBookList = ({reportData, SubClassID}) => {
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
+  console.log(reportData);
+
+ const { data: subClassListData } = useGetSubClassListQuery();
+  const subClasData = subClassListData?.find(
+    (i) => i.SubClassID === Number(SubClassID)
+  );
   useEffect(() => {
     if (instutionInfo?.Logo?.data) {
       const buffer = Buffer.from(instutionInfo.Logo.data);
@@ -17,71 +24,11 @@ const JamaatWariBookList = () => {
     }
   }, [instutionInfo]);
 
-  const bookData = [
-    {
-      sl: "০১",
-      banglaName: "আরবি ভাষার প্রথম পাঠ",
-      arabicName: "الكتاب الأول في اللغة العربية",
-      id: "3001",
-    },
-    {
-      sl: "০২",
-      banglaName: "কুরআন শিক্ষা",
-      arabicName: "تعليم القرآن",
-      id: "3002",
-    },
-    {
-      sl: "০৩",
-      banglaName: "হাদিস শিক্ষা",
-      arabicName: "تعليم الحديث",
-      id: "3003",
-    },
-    {
-      sl: "০৪",
-      banglaName: "ফিকহ শিক্ষা",
-      arabicName: "تعليم الفقه",
-      id: "3004",
-    },
-    {
-      sl: "০৫",
-      banglaName: "তাজবিদ শিক্ষা",
-      arabicName: "تعليم التجويد",
-      id: "3005",
-    },
-    {
-      sl: "০৬",
-      banglaName: "ইসলামিক ইতিহাস",
-      arabicName: "التاريخ الإسلامي",
-      id: "3006",
-    },
-    {
-      sl: "০৭",
-      banglaName: "আকাইদ শিক্ষা",
-      arabicName: "تعليم العقائد",
-      id: "3007",
-    },
-    {
-      sl: "০৮",
-      banglaName: "নাহু সরফ",
-      arabicName: "النحو والصرف",
-      id: "3008",
-    },
-    {
-      sl: "০৯",
-      banglaName: "তাফসীর শিক্ষা",
-      arabicName: "تعليم التفسير",
-      id: "3009",
-    },
-    {
-      sl: "১০",
-      banglaName: "ইসলামী আদব-কায়দা",
-      arabicName: "الآداب الإسلامية",
-      id: "3163",
-    },
-  ];
+
 
   return (
-    <div className="relative z-10 sm:px-20 sm:py-16 px-8 py-5 bg-white">
+           <div className="font-bangla  p-4 bg-white text-xs">
+
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
         {/* Logo */}
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
@@ -107,7 +54,7 @@ const JamaatWariBookList = () => {
 
       <div className="flex justify-between items-center mb-4 bg-white my-3">
         <div className="flex gap-2 font-semibold text-base items-center bg-white">
-         শ্রেণি/জামাত : কিতাব খানা
+         শ্রেণি/জামাত : {bnBijoy2Unicode(subClasData?.SubClass)}
         </div>
         <div className="bg-white">প্রিন্ট {formatDate(new Date())}</div>
       </div>
@@ -127,25 +74,25 @@ const JamaatWariBookList = () => {
             </tr>
           </thead>
           <tbody>
-            {bookData.map((row, index) => (
+            {reportData?.map((row, index) => (
               <tr key={index} className="bg-white">
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.sl}
+                  {index + 1}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.banglaName}
+                  {bnBijoy2Unicode(row.SubjectName)}
                 </td>
                 <td
                   className="border border-black p-2 text-center bg-white"
                   dir="rtl"
                 >
-                  {row.arabicName}
+                  {bnBijoy2Unicode(row.ArabicSubject)}
                 </td>
                 <td
                   className="border border-black p-2 text-center bg-white"
                   dir="rtl"
                 >
-                  {row.id}
+                  {row.SubSerial}
                 </td>
               </tr>
             ))}

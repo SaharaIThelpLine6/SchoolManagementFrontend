@@ -13,6 +13,25 @@ const useTranslate = () => {
     "Success and Error": "সাকসেস এবং এরোর",
     "Book of Subjects": "বিষয়ের খাতা",
     Staff: "স্টাফ",
+    SubClass: "সাব ক্লাস",
+    "Exam Name": "পরীক্ষার নাম",
+    "Fee Name": "ফি এর নাম",
+    Fee: "ফি",
+    Fund: "ফান্ড",
+    "Average based Condition": "গড় ভিত্তিক অবস্থা",
+    "Highest recitation score": "তেলাওয়াতের সর্বোচ্চ নম্বর",
+    "Average Condition": "গড় নম্বর",
+    "Fee Type": "ফি ধরণ",
+    "Average V: Condition": "গড় ভি: কন্ডিশন",
+    "General Ledger": "জেনারেল লেজার",
+    "Sub Ledger (Fee Name)": "সাব লেজার (ফি এর নাম)",
+    "Sub Ledger": "সাব লেজার",
+    "G Ledger": "জি: লেজার",
+    "Student Fee Group": "ছাত্র ফি গ্রুপ",
+    "Chart account": "চার্ট একাউন্ট",
+    "Exam Fee Determine": "পরীক্ষার ফি নির্ধারণ ",
+    "Book of subjects": "বিষয়ের খাতা",
+    "Class And Subclass": "ক্লাস এবং সাব ক্লাস",
     "Select columns to display data":
       "ডেটা প্রদর্শনের জন্য কলাম নির্বাচন করুন।",
     "No data available for the selected filters":
@@ -378,11 +397,11 @@ const useTranslate = () => {
       "যত টাকার এসএমএস নিতে চান, তত টাকা নিচে উল্লেখ করুন",
     "Amount of Taka": "টাকার পরিমাণ",
     "The amount of money must be paid.": "টাকার পরিমাণ অবশ্যই দিতে হবে",
-    "Enter the amount of money (eg: 100).": "টাকার পরিমাণ লিখুন (যেমন: ১০০)",
-    "SMS can be purchased from a minimum of 100 Taka.":
-      "সর্বনিম্ন ১০০ টাকা থেকে এসএমএস ক্রয় করা যাবে",
-    "SMS Rate: 0.30 Taka per SMS Approximately 333 SMS can be sent for 100 Taka":
-      "এসএমএস এর দর: প্রতি এসএমএস ০.৩০ টাকা ১০০ টাকায় প্রায় ৩৩৩ টি এসএমএস পাঠানো যাবে",
+    "Enter the amount of money (eg: 500).": "টাকার পরিমাণ লিখুন (যেমন: ৫০০)",
+    "SMS can be purchased from a minimum of 500 Taka.":
+      "সর্বনিম্ন ৫০০ টাকা থেকে এসএমএস ক্রয় করা যাবে",
+    "SMS Rate: 0.38 Taka per SMS Approximately 1316 SMS can be sent for 500 Taka":
+      "এসএমএস এর দর: প্রতি এসএমএস ০.৩৮ টাকা ৫০০ টাকায় প্রায় ১৩১৬ টি এসএমএস পাঠানো যাবে",
     "Message Name": "মেসেজ নাম",
     "Enter new message name": "নতুন মেসেজ নাম লিখুন",
     "Invalid Bangladeshi mobile prefix": "অবৈধ বাংলাদেশী মোবাইল প্রিফিক্স",
