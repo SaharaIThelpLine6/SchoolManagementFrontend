@@ -159,8 +159,8 @@ const Exam = ({ pageTitle }) => {
     },];
 
     return (
-        <div className="w-full flex justify-space-between items-start mb-4 gap-6 pt-4">
-            <div className="w-2/5">
+        <div className="w-full flex flex-col lg:flex-row justify-space-between items-start mb-4 gap-6 pt-4">
+            <div className="w-full lg:w-2/5">
                 <FormProvider {...methods}>
                     <form
                         onSubmit={methods.handleSubmit(onSubmit)}
@@ -211,7 +211,7 @@ const Exam = ({ pageTitle }) => {
                     </form>
                 </FormProvider>
             </div>
-            <div className="w-3/5">
+            <div className="w-full lg:w-3/5">
                 {
                     isLoading ? (
                         <div>Loading...</div>
