@@ -37,9 +37,7 @@ import Exam from "./pages/Exam";
 import BoardExam from "./pages/BoardExam";
 import MadrasahBoardInfo from "./pages/MadrasahBoardInfo";
 import StudentsResult from "./pages/StudentsResult";
-import AverageResult from "./pages/AverageResult";
-import SubjectPassNumber from "./pages/SubjectPassNumber";
-import ResultConditions from "./pages/ResultConditions";
+
 import Library from "./pages/Library";
 import Others from "./pages/Others";
 import Notepad from "./pages/Notepad";
@@ -67,8 +65,8 @@ import { useGetAllUserPermissionsQuery } from "./features/permission/permissionS
 import StudentsReport from "./pages/StudentsReport";
 import { permissionsDataList } from "./Data/permissions";
 import ExamFeeDetermine from "./pages/ExamFeeDetermine";
-import AverageVCondition from "./pages/AverageVCondition";
 import QueryManage from "./pages/QueryManage";
+import AverageVCondition from "./pages/AverageVCondition";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -333,12 +331,7 @@ function App() {
 
             <Route path="result">
               <Route index element={<StudentsResult pageTitle="Result" />} />
-              <Route
-                path="averageresult"
-                element={<AverageResult pageTitle="Average Result Entry" />}
-              />
-              <Route path="passmarkssubject" element={<SubjectPassNumber />} />
-              <Route path="resultconditions" element={<ResultConditions />} />
+  
             </Route>
 
             <Route path="library" element={<Library pageTitle="Library" />} />
