@@ -147,15 +147,25 @@ export const menuData = [
     route: "/exam",
     icon: "PiExam",
     subMenu: [
- {
+      {
         id: "1",
         name: "Exam",
         route: "/exam",
       },
- {
+      {
         id: "2",
         name: "Exam Fee Determine",
         route: "/exam/fee-determine",
+      },
+      {
+        id: "3",
+        name: "Average V: Condition",
+        route: "/exam/average-v-condition",
+      },
+      {
+        id: "4",
+        name: "Query Manage",
+        route: "/exam/query-manage",
       },
     ],
   },
@@ -164,18 +174,14 @@ export const menuData = [
     name: "Result",
     route: "/result",
     icon: "GiGraduateCap",
-    subMenu: [
-      
-    ],
+    subMenu: [],
   },
   {
     id: "6",
     name: "Board Exam",
     route: "/board-exam",
     icon: "LiaSchoolSolid",
-    subMenu: [
-     
-    ],
+    subMenu: [],
   },
   {
     id: "7",
@@ -183,7 +189,7 @@ export const menuData = [
     route: "/darul-ikama",
     icon: "RiSchoolFill",
     subMenu: [
-           {
+      {
         id: "1",
         name: "Character Report",
         route: "/darul-ikama",
@@ -192,7 +198,7 @@ export const menuData = [
         id: "2",
         name: "Gate pass and leave",
         route: "/darul-ikama/vacation",
-      }
+      },
     ],
   },
   {
@@ -200,36 +206,28 @@ export const menuData = [
     name: "Accounting",
     route: "/accounting",
     icon: "FaCalculator",
-    subMenu: [
-      
-    ],
+    subMenu: [],
   },
   {
     id: "9",
     name: "Donation",
     route: "/donation",
     icon: "FaDonate",
-    subMenu: [
-     
-    ],
+    subMenu: [],
   },
   {
     id: "10",
     name: "Library",
     route: "/library",
     icon: "ImLibrary",
-    subMenu: [
-     
-    ],
+    subMenu: [],
   },
   {
     id: "11",
     name: "Others",
     route: "/others",
     icon: "HiDotsCircleHorizontal",
-    subMenu: [
-    
-    ],
+    subMenu: [],
   },
   {
     id: "12",
@@ -243,8 +241,6 @@ export const menuData = [
     name: "Help",
     route: "/help",
     icon: "IoMdHelp",
-    subMenu: [
-     
-    ],
+    subMenu: [],
   },
 ];
