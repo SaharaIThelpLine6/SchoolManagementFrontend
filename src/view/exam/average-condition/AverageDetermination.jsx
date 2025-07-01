@@ -169,7 +169,7 @@ const AverageDetermination = ({ pageTitle, title }) => {
         <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col sm:flex-row my-5 gap-5">
             <DefaultSelect
-              label={translate("Exam Name") + " :"}
+              label={translate("Session") + " :"}
               options={classListData ?? []}
               valueField="ClassID"
               nameField="ClassName"

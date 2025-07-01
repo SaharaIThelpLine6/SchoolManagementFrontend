@@ -21,6 +21,7 @@ import SuccessAndError from "../view/general-information/sms/SuccessAndError";
 import AddEditBook from "../view/students/book/AddEditBook";
 import useTranslate from "../utils/Translate";
 import Subsidiary from "../view/exam/Subsidiary";
+import TalentCondition from "../view/exam/TalentCondition";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -109,6 +110,7 @@ const DefaultModal = () => {
                 {modalType === "ADD_BOOK" && <AddEditBook />}
                 {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
                 {modalType === "SUB_SIDIARY" && <Subsidiary />}
+                {modalType === "TALENT_CONDITION" && <TalentCondition />}
               </div>
             )}
           </div>

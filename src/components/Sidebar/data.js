@@ -164,6 +164,16 @@ export const menuData = [
       },
       {
         id: "4",
+        name: "Students List",
+        route: "/exam/students-list",
+      },
+      {
+        id: "5",
+        name: "Exam Admit Card",
+        route: "/exam/admit-card",
+      },
+      {
+        id: "6",
         name: "Query Manage",
         route: "/exam/query-manage",
       },

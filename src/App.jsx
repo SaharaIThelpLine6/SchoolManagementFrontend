@@ -67,6 +67,8 @@ import { permissionsDataList } from "./Data/permissions";
 import ExamFeeDetermine from "./pages/ExamFeeDetermine";
 import QueryManage from "./pages/QueryManage";
 import AverageVCondition from "./pages/AverageVCondition";
+import StudentsList from "./pages/StudentsList";
+import ExamAdmitCard from "./pages/ExamAdmitCard";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -310,6 +312,18 @@ function App() {
                 path="average-v-condition"
                 element={
                   <AverageVCondition pageTitle="Exam Fee Determine" />
+                }
+              />
+              <Route
+                path="students-list"
+                element={
+                  <StudentsList pageTitle="Students List" />
+                }
+              />
+              <Route
+                path="admit-card"
+                element={
+                  <ExamAdmitCard pageTitle="Students List" />
                 }
               />
               <Route
