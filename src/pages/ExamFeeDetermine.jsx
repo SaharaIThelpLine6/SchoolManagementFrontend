@@ -1,27 +1,35 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { setPageName } from "../features/auth/authSlice";
 import { useLocation } from "react-router-dom";
-import useTranslate from "../utils/Translate";
-import { showModal } from "../utils/ModalControlar";
-import { MdDelete, MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
-import Button from "../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
-import DefaultSelect from "../components/Forms/DefaultSelect";
-import DefaultInput from "../components/Forms/DefaultInput";
-import {
-  useGetStudentBySearchQuery,
-  usePostChnageStudentGroupMutation,
-} from "../features/student/studentQuerySlice";
-import { useGetSessionsQuery } from "../features/session/sessionSlice";
-import { useGetClassListQuery } from "../features/class/classQuerySlice";
-import bnBijoy2Unicode from "../utils/conveter";
 import Swal from "sweetalert2";
-import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
-import { FaPlus } from "react-icons/fa";
-import SortableTable from "../components/Tables/SortableTable";
-import { useGetDesignationQuery } from "../features/teachers/teachersSlice";
+import {
+  MdDelete,
+  MdKeyboardArrowLeft,
+  MdKeyboardArrowRight,
+} from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
+import { FaPlus } from "react-icons/fa";
+
+import { setPageName } from "../features/auth/authSlice";
+import { useGetSessionsQuery } from "../features/session/sessionSlice";
+import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
+import {
+  useDeleteExamFeeSettingMutation,
+  useGetExamFeeSettingQuery,
+  useGetExamNamesQuery,
+  usePostExamFeeSettingMutation,
+  useUpdateExamFeeSettingMutation,
+} from "../features/exam/examQuerySlice";
+
+import useTranslate from "../utils/Translate";
+import bnBijoy2Unicode from "../utils/conveter";
+
+import SortableTable from "../components/Tables/SortableTable";
+import Loading from "../components/Loading/Loading";
+import DefaultInput from "../components/Forms/DefaultInput";
+import DefaultSelect from "../components/Forms/DefaultSelect";
+import Button from "../components/Button/Button";
 import StudentFeeGroup from "../view/exam/StudentFeeGroup";
 
 const PAGE_SIZE = 10;
@@ -32,49 +40,31 @@ const ExamFeeDetermine = ({ pageTitle }) => {
   const translate = useTranslate();
   const methods = useForm();
   const { watch, handleSubmit } = methods;
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false); // State to toggle components
+  const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false);
 
-  const genderOptions = [
-    { id: "1", value: "পুরুষ" },
-    { id: "2", value: "মহিলা" },
-    { id: "3", value: "উভয়" },
-  ];
+  const [postExamFeeSetting] = usePostExamFeeSettingMutation();
+  const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
+  const [deleteExamFeeSetting] = useDeleteExamFeeSettingMutation();
 
-  const SessionID = watch("SessionID");
-  const ClassID = watch("ClassID");
-  const genderId = watch("gender");
-  const {
-    data: designation = [],
-    isLoading: isdLoading,
-    isError: isdError,
-  } = useGetDesignationQuery();
   const { data: sessionData } = useGetSessionsQuery();
-  const { data: classListData } = useGetClassListQuery();
-  const [postChnageStudentGroup, { isLoading, isSuccess, isError }] =
-    usePostChnageStudentGroupMutation();
+  const { data: subClassListData } = useGetSubClassListQuery();
+  const { data: examNameData } = useGetExamNamesQuery();
 
-  const selectedClass = classListData?.find((item) => item.ClassID == ClassID);
+  const {
+    data: examFeeSettingData,
+    isLoading: isExamFeeSettingLoading,
+    isError: isExamFeeSettingError,
+    refetch,
+  } = useGetExamFeeSettingQuery();
 
-  const { data: searchStudentInfo = [], refetch } = useGetStudentBySearchQuery(
-    { search: null, ClassID, SessionID, GenderID: genderId },
-    {
-      skip: !ClassID || !SessionID || !genderId,
-      refetchOnFocus: false,
-    }
-  );
-
-  useEffect(() => {
-    if (pageTitle) dispatch(setPageName(pageTitle));
-  }, [dispatch, pageTitle]);
-
-  const totalPages = Math.ceil(designation.length / PAGE_SIZE);
+  const totalPages = Math.ceil((examFeeSettingData?.length || 0) / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return designation.slice(start, start + PAGE_SIZE);
-  }, [designation, currentPage]);
+    return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
+  }, [examFeeSettingData, currentPage]);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -84,50 +74,114 @@ const ExamFeeDetermine = ({ pageTitle }) => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
-  const onSubmit = async (data) => {
-    try {
-      if (!data.SubClassID || selectedRows.length === 0) {
-        Swal.fire({
-          icon: "warning",
-          title: "ফর্ম অসম্পূর্ণ",
-          text: "অনুগ্রহ করে সাব ক্লাস নির্বাচন করুন এবং অন্তত একজন শিক্ষার্থী সিলেক্ট করুন।",
-        });
-        return;
-      }
-
-      const response = await postChnageStudentGroup({
-        id: data.SubClassID,
-        body: { admissionIds: selectedRows },
-      }).unwrap();
-
-      Swal.fire({
-        icon: "success",
-        title: "সফলভাবে সংরক্ষণ হয়েছে",
-        text: response?.message || "গ্রুপ পরিবর্তন সফল হয়েছে।",
-      }).then(() => {
-        refetch();
-        setSelectedRows([]);
-        methods.reset();
-      });
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "ত্রুটি ঘটেছে!",
-        text: error?.data?.error || "ডেটা সংরক্ষণ করতে ব্যর্থ হয়েছে।",
-      });
-      console.error("Error updating student group:", error);
-    }
-  };
+  useEffect(() => {
+    if (pageTitle) dispatch(setPageName(pageTitle));
+  }, [dispatch, pageTitle]);
 
   const handleShowStudentFeeGroup = () => {
     setShowStudentFeeGroup(true);
   };
 
-  console.log(showStudentFeeGroup);
+  // Update Handle
+  const handleEdit = (row) => {
+    methods.reset({
+      ID: row.ID,
+      SessionID: row.SessionID,
+      ExamID: row.ExamID,
+      SubClassID: row.SubClassID,
+      Fee: row.Fee,
+    });
+  };
 
+  // Delete Exam Feee Setting data
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "আপনি কি নিশ্চিত?",
+      text: "একবার মুছে ফেলা হলে পুনরুদ্ধার করা যাবে না!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "হ্যাঁ, মুছে ফেলুন!",
+      cancelButtonText: "বাতিল",
+    });
 
+    if (result.isConfirmed) {
+      try {
+        const response = await deleteExamFeeSetting(id).unwrap();
 
+        Swal.fire({
+          icon: "success",
+          title: "সফলভাবে মুছে ফেলা হয়েছে",
+          text: response?.message || "ডেটা সফলভাবে মুছে ফেলা হয়েছে।",
+        });
 
+        refetch(); // Reload table
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "ত্রুটি ঘটেছে!",
+          text:
+            error?.data?.message ||
+            error?.data?.error ||
+            "ডেটা মুছে ফেলতে ব্যর্থ হয়েছে।",
+        });
+        console.error("Delete error:", error);
+      }
+    }
+  };
+
+  // Data Create Exam Fee Setting
+  const onSubmit = async (data) => {
+    if (!data.SessionID || !data.SubClassID || !data.ExamID) {
+      Swal.fire({
+        icon: "warning",
+        title: "ফর্ম অসম্পূর্ণ",
+        text: "Session, SubClass এবং Exam নির্বাচন করুন।",
+      });
+      return;
+    }
+
+    const payload = {
+      SessionID: Number(data.SessionID),
+      ExamID: Number(data.ExamID),
+      SubClassID: Number(data.SubClassID),
+      Fee: Number(data.Fee),
+      SLID: 1001,
+    };
+
+    try {
+      let response;
+      if (data.ID) {
+        response = await updateExamFeeSetting({
+          id: data.ID,
+          body: payload,
+        }).unwrap();
+      } else {
+        response = await postExamFeeSetting(payload).unwrap();
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "সফলভাবে সংরক্ষণ হয়েছে",
+        text: response?.message || "Exam Fee Setting সফলভাবে সংরক্ষিত হয়েছে।",
+      }).then(() => {
+        refetch();
+        methods.reset();
+      });
+    } catch (error) {
+      const errMsg =
+        error?.data?.message ||
+        error?.data?.error ||
+        "অজানা একটি ত্রুটি ঘটেছে।";
+      Swal.fire({
+        icon: "error",
+        title: "ত্রুটি ঘটেছে!",
+        text: errMsg,
+      });
+      console.error("Exam Fee Setting Error:", error);
+    }
+  };
+
+  // Table Data Columns
   const columns = [
     {
       title: translate("Action"),
@@ -137,43 +191,47 @@ const ExamFeeDetermine = ({ pageTitle }) => {
           <button
             className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
             title="Edit"
+            onClick={() => handleEdit(row)}
           >
             <FiEdit className="w-5 h-5" />
           </button>
           <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
-            title="Delete"
-            onClick={() => handleDelete(row.DNID)}
+            onClick={() => handleDelete(row.ID)}
           >
             <MdDelete className="w-5 h-5" />
           </button>
         </div>
       ),
     },
-    { title: "SL", field: "SL", hozAlign: "center" },
+    {
+      title: translate("ID"),
+      hozAlign: "center",
+      render: (row) => <>{row?.ID}</>,
+    },
     {
       title: translate("Session"),
-      field: "Designation",
       hozAlign: "center",
+      render: (row) => <>{row?.AcademicSession?.SessionName}</>,
     },
     {
       title: translate("Exam Name"),
-      field: "Designation",
       hozAlign: "center",
+      render: (row) => <>{bnBijoy2Unicode(row?.Exam_Name?.ExamName)}</>,
     },
     {
       title: translate("Class/Jamaat"),
-      field: "Designation",
       hozAlign: "center",
+      render: (row) => <>{bnBijoy2Unicode(row?.Class?.SubClass)}</>,
     },
     {
       title: translate("Fee Name"),
-      field: "Designation",
+      field: "SLID",
       hozAlign: "center",
     },
     {
       title: translate("Fee"),
-      field: "Designation",
+      field: "Fee",
       hozAlign: "center",
     },
   ];
@@ -185,15 +243,15 @@ const ExamFeeDetermine = ({ pageTitle }) => {
   return (
     <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
-        <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
+        <h3 className="text-base sm:text-[20px] font-bold">
           {translate("Exam Fee Determine")}
         </h3>
       </div>
 
       <FormProvider {...methods}>
         <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
+          <input type="hidden" {...methods.register("ID")} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-3">
-            {/* Left Column */}
             <div className="flex flex-col space-y-4">
               <DefaultSelect
                 label={translate("Session") + " :"}
@@ -201,46 +259,39 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                 valueField="SessionID"
                 nameField="SessionName"
                 registerKey="SessionID"
+                unicode={true}
               />
               <DefaultSelect
                 label={translate("Exam Name") + " :"}
-                options={classListData ?? []}
-                valueField="ClassID"
-                nameField="ClassName"
-                registerKey="ClassID"
+                options={examNameData ?? []}
+                valueField="ExamID"
+                nameField="ExamName"
+                registerKey="ExamID"
+                unicode={true}
               />
-
               <DefaultSelect
                 label={
                   <p className="text-gray-700 font-medium">
                     {translate("Class/Jamaat")}:
                   </p>
                 }
-                options={genderOptions}
-                valueField="id"
-                nameField="value"
-                registerKey="gender"
+                options={subClassListData}
+                valueField="SubClassID"
+                nameField="SubClass"
+                registerKey="SubClassID"
+                unicode={true}
               />
             </div>
 
-            {/* Right Column */}
             <div className="flex flex-col space-y-4">
-              <DatePickerOne
-                dateCalender={`${translate("Date")}: `}
-                placeholder={""}
-                registerKey={"Date"}
-                require={"Date Require"}
-              />
-
-              <div className="flex flex-row items-center justify-center gap-2">
+              <div className="flex items-center gap-2">
                 <DefaultSelect
                   label={`${translate("Fee Name")}:`}
-                  nameField="VacationList"
-                  registerKey="ID"
-                  valueField="ID"
-                  options={null}
+                  nameField="SLID"
+                  registerKey="SLID"
+                  valueField="SLID"
+                  options={[]}
                   type="number"
-                  require="This Field is required"
                   disabled={false}
                   defaultSelect={false}
                   unicode={true}
@@ -252,24 +303,46 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                   <FaPlus />
                 </Button>
               </div>
-
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("Fee")}: `}
-              />
+              <DefaultInput registerKey="Fee" label={`${translate("Fee")}: `} />
             </div>
           </div>
-          {/* Button */}
-          <div className="w-full">
+          <div className="w-full flex flex-wrap gap-2">
             <Button type="submit" className="w-full md:w-auto">
               {translate("Save")}
+            </Button>
+            <Button
+              type="button"
+              onClick={() =>
+                methods.reset({
+                  SLID: "",
+                  SessionID: "",
+                  ExamID: "",
+                  SubClassID: "",
+                  Fee: "",
+                })
+              }
+              className="w-full md:w-auto bg-red-500 hover:bg-red-600 text-white"
+            >
+              {translate("Reset")}
             </Button>
           </div>
         </form>
       </FormProvider>
 
       <div className="mt-5">
-        <SortableTable columns={columns} data={paginatedData} />
+        {isExamFeeSettingLoading ? (
+          <Loading />
+        ) : isExamFeeSettingError ? (
+          <div className="text-red-500 text-center py-4">
+            {translate("Failed to load exam fee settings. Please try again.")}
+          </div>
+        ) : (
+          <SortableTable
+            columns={columns}
+            data={paginatedData}
+            isFilterColumn={false}
+          />
+        )}
       </div>
 
       <div className="flex justify-center items-center mt-4">

@@ -14,9 +14,7 @@ export const examSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: [
-    "ExamNames",
-  ],
+  tagTypes: ["ExamNames", "ExamFeeSettings"],
   endpoints: (builder) => ({
     postNewExam: builder.mutation({
       query: (body) => ({
@@ -44,7 +42,34 @@ export const examSlice = createApi({
     getExamNames: builder.query({
       query: () => `get_exam_names`,
       providesTags: ["ExamNames"],
-    })
+    }),
+    getExamFeeSetting: builder.query({
+      query: () => `get_exam_fee_setting`,
+      providesTags: ["ExamFeeSettings"],
+    }),
+    postExamFeeSetting: builder.mutation({
+      query: (body) => ({
+        url: `insert_exam_fee_setting`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["ExamFeeSettings"],
+    }),
+    updateExamFeeSetting: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `update_exam_fee_setting/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["ExamFeeSettings"],
+    }),
+    deleteExamFeeSetting: builder.mutation({
+      query: (id) => ({
+        url: `delete_exam_fee_setting/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ExamFeeSettings"],
+    }),
   }),
 });
 
@@ -52,5 +77,9 @@ export const {
   usePostNewExamMutation,
   useUpdateExamnameMutation,
   useDeleteExamNameMutation,
-  useGetExamNamesQuery
+  useGetExamNamesQuery,
+  useGetExamFeeSettingQuery,
+  usePostExamFeeSettingMutation,
+  useUpdateExamFeeSettingMutation,
+  useDeleteExamFeeSettingMutation
 } = examSlice;
