@@ -172,11 +172,6 @@ export const menuData = [
         name: "Exam Admit Card",
         route: "/exam/admit-card",
       },
-      {
-        id: "6",
-        name: "Query Manage",
-        route: "/exam/query-manage",
-      },
     ],
   },
   {

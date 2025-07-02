@@ -202,6 +202,8 @@ const useTranslate = () => {
     "Father Name": "পিতার নাম",
     Mobile: "মোবাইল",
     "Entry Date": "এন্টি তারিখ",
+    "Students List": "শিক্ষার্থীর তালিকা",
+    "Exam Admit Card": "পরীক্ষার প্রবেশপত্র",
     Session: "শিক্ষাবর্ষ",
     Vacation: "ছুটি",
     Single: "একক",
