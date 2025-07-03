@@ -31,6 +31,7 @@ import DefaultInput from "../components/Forms/DefaultInput";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import Button from "../components/Button/Button";
 import StudentFeeGroup from "../view/exam/StudentFeeGroup";
+import { useGetNameOFExamFeeQuery } from "../features/feeCollection/feeCollectionSlice";
 
 const PAGE_SIZE = 10;
 
@@ -51,6 +52,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
+  const { data: nameOfExamFeeData } = useGetNameOFExamFeeQuery();
 
   const {
     data: examFeeSettingData,
@@ -90,6 +92,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
       ExamID: row.ExamID,
       SubClassID: row.SubClassID,
       Fee: row.Fee,
+      SLID: row.SLID,
     });
   };
 
@@ -145,7 +148,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
       ExamID: Number(data.ExamID),
       SubClassID: Number(data.SubClassID),
       Fee: Number(data.Fee),
-      SLID: 1001,
+      SLID: data.SLID,
     };
 
     try {
@@ -275,7 +278,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                     {translate("Class/Jamaat")}:
                   </p>
                 }
-                options={subClassListData}
+                options={subClassListData ?? []}
                 valueField="SubClassID"
                 nameField="SubClass"
                 registerKey="SubClassID"
@@ -287,13 +290,10 @@ const ExamFeeDetermine = ({ pageTitle }) => {
               <div className="flex items-center gap-2">
                 <DefaultSelect
                   label={`${translate("Fee Name")}:`}
-                  nameField="SLID"
+                  nameField="SlName"
                   registerKey="SLID"
                   valueField="SLID"
-                  options={[]}
-                  type="number"
-                  disabled={false}
-                  defaultSelect={false}
+                  options={nameOfExamFeeData ?? []}
                   unicode={true}
                 />
                 <Button
