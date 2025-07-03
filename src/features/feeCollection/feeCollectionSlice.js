@@ -14,7 +14,7 @@ export const feeCollectionSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["ExamNames"],
+  tagTypes: ["ExamNames", "FundNames", "GeneralLedgers", "StudentFeeGroups"],
   endpoints: (builder) => ({
     getFees: builder.query({
       query: () => "view_userfee",
@@ -63,6 +63,45 @@ export const feeCollectionSlice = createApi({
       query: () => `name_of_exam_fee`,
       providesTags: ["NameOfExamFee"],
     }),
+    getFundNames: builder.query({
+      query: () => `fund_names`,
+      providesTags: ["FundNames"],
+    }),
+    getGeneralLedgers: builder.query({
+      query: (id) => `general_ledger/${id}`,
+      providesTags: ["GeneralLedgers"],
+    }),
+    getFeeGroupNames: builder.query({
+      query: () => `fee_group_name`,
+      providesTags: ["FeeGroupNames"],
+    }),
+    getStudentFeeGroups: builder.query({
+      query: () => `student_fee_groups`,
+      providesTags: ["StudentFeeGroups"],
+    }),
+    postStudentFeeGroup: builder.mutation({
+      query: (data) => ({
+        url: "create_student_fee_group",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["StudentFeeGroups"],
+    }),
+    updateStudentFeeGroup: builder.mutation({
+      query: (data) => ({
+        url: `update_student_fee_group/${data.ID}`, 
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["StudentFeeGroups"],
+    }),
+    deleteStudentFeeGroup: builder.mutation({
+      query: (id) => ({
+        url: `delete_student_fee_group/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["StudentFeeGroups"],
+    }),
   }),
 });
 
@@ -76,5 +115,12 @@ export const {
   useAddFeeMutation,
   useUpdateFeeMutation,
   useDeleteFeeMutation,
-  useGetNameOFExamFeeQuery
+  useGetNameOFExamFeeQuery,
+  useGetFundNamesQuery,
+  useGetGeneralLedgersQuery,
+  useGetFeeGroupNamesQuery,
+  usePostStudentFeeGroupMutation,
+  useGetStudentFeeGroupsQuery,
+  useUpdateStudentFeeGroupMutation,
+  useDeleteStudentFeeGroupMutation,
 } = feeCollectionSlice;
