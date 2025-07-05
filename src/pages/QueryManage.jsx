@@ -54,37 +54,38 @@ const mockPaginatedData = [
     ResidentialName: "Residential",
   },
 ];
-
+const API_URL = import.meta.env.VITE_SERVER_URL;
 const QueryManage = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
+  const [query, setQuery] = useState("");
+  const [disableButton, setDisableButton] = useState(false);
   const methods = useForm();
   const { watch, handleSubmit, reset } = methods;
-
-  const [currentPage, setCurrentPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState([]);
+  const [queryResult, setQueryResult] = useState([]);
   const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false);
+  const [dataList, setDataList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   console.log(selectedRows);
-
-  const totalPages = Math.ceil(mockPaginatedData.length / PAGE_SIZE);
-
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return mockPaginatedData.slice(start, start + PAGE_SIZE);
-  }, [currentPage]);
-
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
+  useEffect(() => {
+    // Fetch data when component mounts
+    fetch(`${API_URL}/api/querymanage/database_list`)
+      .then((res) => res.json())
+      .then((data) => {
+        setDataList(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error('Error fetching users:', err);
+        setLoading(false);
+      });
+  }, []);
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
-      const allIds = mockPaginatedData.map((s) => s.AdmissionID);
+      const allIds = dataList.map((s) => s.ID);
       setSelectedRows(allIds);
     } else {
       setSelectedRows([]);
@@ -100,8 +101,8 @@ const QueryManage = ({ pageTitle }) => {
   };
 
   const isAllSelected =
-    selectedRows.length === mockPaginatedData.length &&
-    mockPaginatedData.length > 0;
+    selectedRows.length === dataList.length &&
+    dataList.length > 0;
 
   useEffect(() => {
     if (pageTitle) {
@@ -113,28 +114,144 @@ const QueryManage = ({ pageTitle }) => {
     return <StudentFeeGroup onBack={() => setShowStudentFeeGroup(false)} />;
   }
 
+  const handleQueryRun = async () => {
+
+    if (query.trim() === "" && selectedRows.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: translate("Please enter a query"),
+        confirmButtonText: translate("OK"),
+      });
+      return;
+    }
+    setDisableButton(true)
+    const confirmed = window.confirm("Are you sure you want to Run this Query?");
+    if (confirmed) {
+      console.log("Running query:", query);
+      console.log("Selected rows:", selectedRows);
+
+      try {
+        const response = await fetch(`${API_URL}/api/querymanage/rundb_query`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: query,
+            databaseids: selectedRows,
+          }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          setDisableButton(false)
+          console.log("Query Result:", result);
+          setQueryResult(result.results || []);
+        } else {
+          setDisableButton(false)
+          console.error("Server Error:", result);
+          alert("Query failed: " + result.message);
+
+        }
+      } catch (error) {
+        setDisableButton(false)
+        console.error("Fetch Error:", error);
+        alert("Network or server error occurred.");
+      }
+
+    } else {
+      setDisableButton(false)
+      console.log("Delete cancelled");
+    }
+
+
+    // Simulate running the query
+    // Swal.fire({
+    //   icon: "success",
+    //   title: translate("Query executed successfully"),
+    //   confirmButtonText: translate("OK"),
+    // });
+
+    // // Reset selected rows after running the query
+    // setSelectedRows([]);
+  }
+
   return (
     <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
       {/* Header */}
-      <div className="border-b border-[#e9edf4] flex flex-col md:flex-row items-start md:items-center justify-between py-5 gap-4">
-        <h3 className="text-base sm:text-[20px] font-bold">
+      <div className="border-b border-[#e9edf4] py-5 gap-4">
+        <h3 className="text-base sm:text-[20px] font-bold mb-4">
           {translate("Average based Condition")}
         </h3>
 
-        <div className="w-full md:w-1/2">
-          <label
-            htmlFor="conditionNotes"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            {translate("Notes")}
-          </label>
-          <textarea
-            id="conditionNotes"
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            rows="2"
-            placeholder={translate("Enter your notes here...")}
-          />
+        <div className="flex justify-between w-full items-end gap-4">
+          <div className="w-1/2">
+            <label
+              htmlFor="conditionNotes"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              {translate("Notes")}
+            </label>
+            <textarea
+              id="conditionNotes"
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows="5"
+              placeholder={translate("Enter your notes here...")}
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+              }}
+            />
+          </div>
+          {/* `
+          SELECT ClassID
+      ,Serial
+      ,ClassName
+      ,ArabicClass
+      ,EnglishClass
+      ,CreateAt
+      ,UpdateAt
+      ,CreateUserID
+      ,UpdateUserID
+  FROM Academic_Class
+  ভার্সন নং ১০, রায়পুরা, নরসিংদী
+          ` */}
+          <div className="flex w-1/2 items-end gap-4">
+            <div className="table-responsive h-[200px] overflow-y-auto w-full">
+              {
+                queryResult.length > 0 ? (
+                  <table className="table table-striped table-bordered w-full">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>Database</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {queryResult.map((item, index) => {
+                        return (
+                          <tr key={index}>
+                            <td>{item.id}</td>
+                            <td>{item.db}</td>
+                            <td>{item.status}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+
+                ) : null
+              }
+
+            </div>
+
+            <button type="button" className="text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 w-[150px] max-h-[40px]" onClick={handleQueryRun} disabled={disableButton}>Run</button>
+          </div>
+
         </div>
+
       </div>
 
       {/* Table */}
@@ -150,30 +267,34 @@ const QueryManage = ({ pageTitle }) => {
                 />
               </th>
               <th className="p-2 text-left">{translate("User ID")}</th>
-              <th className="p-2 text-left">{translate("Student Name")}</th>
-              <th className="p-2 text-left">{translate("Class")}</th>
-              <th className="p-2 text-left">{translate("Sub Class")}</th>
-              <th className="p-2 text-left">{translate("Residential")}</th>
+              <th className="p-2 text-left">{translate("Name")}</th>
+              <th className="p-2 text-left">{translate("Name")}</th>
+              <th className="p-2 text-left">{translate("Entry Date")}</th>
+              <th className="p-2 text-left">{translate("Expry Date")}</th>
+              <th className="p-2 text-left">{translate("Remaining days")}</th>
+              <th className="p-2 text-left">{translate("Status")}</th>
             </tr>
           </thead>
           <tbody>
-            {paginatedData.map((student) => (
-              <tr key={student.AdmissionID} className="border-t">
+            {dataList.map((student) => (
+              <tr key={student.ID} className="border-t">
                 <td className="p-2">
                   <input
                     type="checkbox"
-                    onChange={(e) => handleRowSelect(e, student.AdmissionID)}
-                    checked={selectedRows.includes(student.AdmissionID)}
+                    onChange={(e) => handleRowSelect(e, student.ID)}
+                    checked={selectedRows.includes(student.ID)}
                   />
                 </td>
-                <td className="p-2">{student.StudentCode}</td>
-                <td className="p-2">{bnBijoy2Unicode(student.StudentName)}</td>
-                <td className="p-2">{bnBijoy2Unicode(student.ClassName)}</td>
-                <td className="p-2">{bnBijoy2Unicode(student.SubClass)}</td>
-                <td className="p-2">{student.ResidentialName}</td>
+                <td className="p-2">{student.UserCode}</td>
+                <td className="p-2">{bnBijoy2Unicode(student.InstituteName)}</td>
+                <td className="p-2">{student.DatabaseName}</td>
+                <td className="p-2">{student.EntryDate}</td>
+                <td className="p-2">{student.ExpryDate}</td>
+                <td className="p-2">{student.RenewDays}</td>
+                <td className="p-2">{student.Action}</td>
               </tr>
             ))}
-            {mockPaginatedData.length === 0 && (
+            {dataList.length === 0 && (
               <tr>
                 <td colSpan="6" className="text-center p-4">
                   {translate("No data found")}
@@ -184,30 +305,6 @@ const QueryManage = ({ pageTitle }) => {
         </table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex justify-center items-center mt-4">
-        <div className="flex items-center space-x-2">
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            aria-label="Previous page"
-          >
-            <MdKeyboardArrowLeft size={24} />
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            aria-label="Next page"
-          >
-            <MdKeyboardArrowRight size={24} />
-          </button>
-        </div>
-      </div>
     </div>
   );
 };
