@@ -2,7 +2,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import DefaultModal from "../components/DefaultModal";
-import { verifyUser } from "../features/auth/authSlice";
+import { verifyUser, logout } from "../features/auth/authSlice";
 import { setCurrentLanguage } from "../features/language/languageSlice";
 import { closeSidebar } from "../features/sidebar/sideBarSlice";
 import SideBar from "../components/Sidebar/SideBar";
@@ -11,6 +11,8 @@ import Header from "../components/Header/Header";
 const DefaultLayout = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const location = useLocation();
+
   const sidebarOpen = useSelector((state) => state.sideBar?.isOpen ?? false);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const token = useSelector((state) => state.auth.token);
@@ -18,21 +20,41 @@ const DefaultLayout = () => {
   const { currectLanguage } = useSelector((state) => state.language);
   const { isOpen } = useSelector((state) => state.modal);
 
+  // ✅ রাউট পরিবর্তনের সময় token verify
   useEffect(() => {
-    // console.log('Authentication state:', isAuthenticated);
-
-    if (isAuthenticated) {
-      dispatch(verifyUser(token)); // Dispatch the thunk
-    } else {
-      navigate("/login"); // Redirect if not authenticated
-    }
     const lang = localStorage.getItem("lang");
-    // console.log(lang);
-
-    if (lang !== currectLanguage && lang) {
+    if (lang && lang !== currectLanguage) {
       dispatch(setCurrentLanguage(lang));
     }
-  }, [isAuthenticated, dispatch, navigate, token]);
+
+    if (token) {
+      dispatch(verifyUser(token))
+        .unwrap()
+        .catch(() => {
+          dispatch(logout());
+          navigate("/login");
+        });
+    } else {
+      navigate("/login");
+    }
+  }, [dispatch, navigate, token, location.pathname]);
+
+
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === "token") {
+        const localToken = e.newValue;
+        if (localToken !== token) {
+          dispatch(logout());
+          navigate("/login");
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [dispatch, navigate, token]);
+
   return (
     <div className="h-screen flex flex-col bg-gray-100 font-SolaimanLipi overflow-hidden print:h-auto print:bg-white print:overflow-visible">
       {/* Header */}
