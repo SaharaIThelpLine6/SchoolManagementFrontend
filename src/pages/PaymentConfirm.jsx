@@ -68,6 +68,10 @@ const PaymentConfirm = () => {
                                 </div>
                                 <div className="flex flex-col gap-3 border-b pt-6 pb-2 text-xs">
                                     <p className="flex justify-between text-[14px]">
+                                        <span className="text-gray-900 text-[14px]">Date:</span>
+                                        <span>{data?.CreateAt ? new Date(data.CreateAt).toLocaleDateString() : 'N/A'}</span>
+                                    </p>
+                                    <p className="flex justify-between text-[14px]">
                                         <span className="text-gray-900 text-[14px]">Invoice No:</span>
                                         <span>{data?.InvoiceNumber}</span>
                                     </p>

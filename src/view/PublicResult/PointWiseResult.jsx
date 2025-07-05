@@ -61,7 +61,6 @@ const PointWiseResult = ({ studentResult }) => {
                         <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">বিষয়</th>
                         <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">পূর্ণমান</th>
                         <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">পাশ নম্বর</th>
-                        <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">সর্বোচ্চ প্রাপ্ত নম্বর</th>
                         <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">প্রাপ্ত নম্বর</th>
                         <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">গ্রেড</th>
                         <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">জিপিএ</th>
@@ -74,7 +73,6 @@ const PointWiseResult = ({ studentResult }) => {
                             <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(studentResult[`Subject${index + 1}`])}</td>
                             <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(String(studentResult[`DVTop${index + 1}`]))}</td>
                             <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(String(studentResult[`PassNumber${index + 1}`]))}</td>
-                            <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(String(studentResult[`TN${index + 1}`]))}</td>
                             <td className="text-[16px] border border-black h-[36px] pl-4 " bgcolor="#ffffff">{bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}</td>
                             <td className="text-[16px] border border-black h-[36px] pl-4 font-bold" bgcolor="#ffffff">{studentResult[`GPA${index + 1}`] == 5 ? "A+" : studentResult[`GPA${index + 1}`] == 4 ? "A": studentResult[`GPA${index + 1}`] == 3.5 ? "A-": studentResult[`GPA${index + 1}`] == 3 ? "B": studentResult[`GPA${index + 1}`] == 2 ? "C": studentResult[`GPA${index + 1}`] == 1 ? "D" : "F"}</td>
                             {/* <td className="text-[16px] border border-black h-[36px] pl-4 " bgcolor="#ffffff">{String(studentResult[`Division`])}</td> */}
@@ -84,7 +82,7 @@ const PointWiseResult = ({ studentResult }) => {
                                 bgcolor="#ffffff"
                                 rowSpan={studentResult.SubSonkha}
                                 >
-                                {String(studentResult.Division)}
+                                {studentResult.GPA.toFixed(2)}
                                 </td>
                             )}
                         </tr>

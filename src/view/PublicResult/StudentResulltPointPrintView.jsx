@@ -28,6 +28,9 @@ const StudentResultPointPrintView = ({ studentResult }) => {
             }
         }
     }, [studentResult]);
+    const greadPoints = [
+        "5", "4", "3.5", "3", "2", "1", "0"
+    ]
 
     return (
         <div>
@@ -76,7 +79,7 @@ const StudentResultPointPrintView = ({ studentResult }) => {
                 </div>
 
                 <div className="pt-5">
-                    <h1 className="bg-[#a8a6a6] text-white text-center text-[16px]">মোট বিষয় {bnBijoy2Unicode(String(studentResult?.SubSonkha))} টি - পূর্ণমান {bnBijoy2Unicode(String(studentResult?.DVTop1))}* = {bnBijoy2Unicode(String(studentResult?.DVTop1 * studentResult?.SubSonkha))}</h1>
+                    <h1 className="bg-[#a8a6a6] text-white text-center text-[16px]">গ্রেডিং পদ্ধতি</h1>
                     <table className="w-[295px]">
                         <tbody className="border border-black w-full">
                             {Array.from({ length: studentResult?.SubSonkha || 0 }).map((_, index) => {
@@ -89,11 +92,10 @@ const StudentResultPointPrintView = ({ studentResult }) => {
 
                                 return (
                                     <tr key={index}>
-                                        <td className="text-start pl-2">{division}</td>
-                                        <td className="w-12 text-end">:</td>
-                                        <td className="pl-3">{bnBijoy2Unicode(String(divisionNumber))} X</td>
+                                        <td className="text-start pl-2">{divisionNumber}</td>
+                                        <td className="pl-3">{division}</td>
                                         <td className="pr-2">
-                                            {bnBijoy2Unicode(String(subSonkha))} = {bnBijoy2Unicode(String(subSonkha * divisionNumber))}
+                                            {greadPoints[index]}
                                         </td>
                                     </tr>
                                 );
@@ -108,10 +110,9 @@ const StudentResultPointPrintView = ({ studentResult }) => {
                     <thead className="border border-black">
                         <tr className="border border-b-[2px] border-t-[2px] border-black">
                             <th className="border border-black">ক্রমিক নং</th>
-                            <th className="border border-black w-40">বিষয়</th>
+                            <th className="border border-black w-60">বিষয়</th>
                             <th className="border border-black">পূর্ণমান</th>
                             <th className="border border-black">পাশ নম্বর</th>
-                            <th className="border border-black">সর্বোচ্চ প্রাপ্ত নম্বর</th>
                             <th className="border border-black">প্রাপ্ত নম্বর</th>
                             <th className="border border-black" bgcolor="#ffffff">গ্রেড</th>
                             <th className="border border-black" bgcolor="#ffffff">জিপিএ</th>
@@ -124,7 +125,6 @@ const StudentResultPointPrintView = ({ studentResult }) => {
                                 <td className="border border-black text-left pl-2">{bnBijoy2Unicode(studentResult[`Subject${index + 1}`])}</td>
                                 <td className="border border-black pl-2">{bnBijoy2Unicode(String(studentResult[`DVTop${index + 1}`]))}</td>
                                 <td className="border border-black pl-2">{bnBijoy2Unicode(String(studentResult[`PassNumber${index + 1}`]))}</td>
-                                <td className="border border-black pl-2">{bnBijoy2Unicode(String(studentResult[`TN${index + 1}`]))}</td>
                                 <td className="border border-black pl-2">{bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}</td>
                                 <td className="text-[16px] border border-black h-[36px] pl-4 font-bold" bgcolor="#ffffff">{studentResult[`GPA${index + 1}`] == 5 ? "A+" : studentResult[`GPA${index + 1}`] == 4 ? "A": studentResult[`GPA${index + 1}`] == 3.5 ? "A-": studentResult[`GPA${index + 1}`] == 3 ? "B": studentResult[`GPA${index + 1}`] == 2 ? "C": studentResult[`GPA${index + 1}`] == 1 ? "D" : "F"}</td>
                                 {index === 0 && (
@@ -133,7 +133,7 @@ const StudentResultPointPrintView = ({ studentResult }) => {
                                         bgcolor="#ffffff"
                                         rowSpan={studentResult.SubSonkha}
                                     >
-                                        {String(studentResult.Division)}
+                                        {studentResult.GPA.toFixed(2)}
                                     </td>
                                 )}
                             </tr>
@@ -169,18 +169,20 @@ const StudentResultPointPrintView = ({ studentResult }) => {
             </div>
             {/*Comment Part End*/}
             {/*Signature part start*/}
-            <div className="flex absolute bottom-0 w-full left-0 justify-between text-[14px] pt-[60px]">
-                <div className="text-center relative">
-                    <img src={principal ? principal : ''} alt="" className="absolute -top-[40px] left-1/2 w-[60px] -translate-x-1/2" />
-                    <p>.....................................</p>
-                    <p>মুহতামিম</p>
-                    <p>তারিখ : </p>
-                </div>
-                <div className="text-center">
-                    <img src={najem} alt="" className="absolute top-[0px] right-0 w-[60px] -translate-x-1/2" />
-                    <p>.....................................</p>
-                    <p>নাযেম</p>
-                    <p>তারিখ : </p>
+            <div className="absolute bottom-0 left-0 w-full  text-[14px]">
+                <div className="relative h-[100px] flex justify-between">
+                    <div className="text-center relative mt-4">
+                        <img src={principal ? principal : ''} alt="" className="w-[60px]" />
+                        <p>.....................................</p>
+                        <p>মুহতামিম</p>
+                        <p>তারিখ : </p>
+                    </div>
+                    <div className="text-center relative mt-4">
+                        <img src={najem} alt="" className="w-[60px]" />
+                        <p>.....................................</p>
+                        <p>নাযেম</p>
+                        <p>তারিখ : </p>
+                    </div>
                 </div>
             </div>
             {/*Signature part end*/}
