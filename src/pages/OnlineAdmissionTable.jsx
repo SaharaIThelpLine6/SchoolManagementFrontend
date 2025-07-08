@@ -1,61 +1,90 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setPageName } from "../features/auth/authSlice";
 import SortableTable from "../components/Tables/SortableTable";
 import { useLocation } from "react-router-dom";
 import useTranslate from "../utils/Translate";
-import { showModal } from "../utils/ModalControlar";
-import Swal from "sweetalert2";
 import Loading from "../components/Loading/Loading";
-import { FiEdit } from "react-icons/fi";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
-import Button from "../components/Button/Button";
-import {
-  useGetStudentsVacationTypeListQuery,
-  useDeleteStudentsVacationTypeMutation,
-} from "../features/student/studentQuerySlice";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import { useGetUsersOnlineRegInfoQuery } from "../features/student/studentQuerySlice";
 import DefaultSelect from "../components/Forms/DefaultSelect";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
+import Button from "../components/Button/Button";
 import DefaultInput from "../components/Forms/DefaultInput";
+import { useMemo } from "react";
+import bnBijoy2Unicode from "../utils/conveter";
+import OnlineAdmissionForm from "../view/students/admission/OnlineAdmissionForm";
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 const OnlineAdmissionTable = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
-  const methods = useForm();
+  const methods = useForm({
+    defaultValues: {
+      pageSize: 10,
+      applicationNo: "",
+    },
+  });
+
+  const { watch } = methods;
+  const applicationNo = watch("applicationNo");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [showForm, setShowForm] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   const {
-    data: studentVacationTypeData = [],
-    isSVTError,
-    isSVTLoading,
-  } = useGetStudentsVacationTypeListQuery();
+    data: apiData,
+    isLoading,
+    isError,
+  } = useGetUsersOnlineRegInfoQuery({
+    page: currentPage,
+    limit: pageSize,
+  });
 
-  const [
-    deleteVacationType,
-    { isLoading: isDeleteLoading, isError: isDeleteError },
-  ] = useDeleteStudentsVacationTypeMutation();
+  // State for selected filter
+  const [selectedStatus, setSelectedStatus] = useState(null);
 
-  const searchParams = new URLSearchParams(location.search);
-  const filter = parseInt(searchParams.get("filter") || "0");
+  const studentData = apiData?.data || [];
+  const totalRecords = apiData?.total || 0;
+  const totalPages = Math.ceil(totalRecords / pageSize);
+
+  // Filter data based on selected status and application number
+  const filteredData = useMemo(() => {
+    let result = studentData;
+
+    // Filter by status if selected
+    if (selectedStatus !== null) {
+      result = result.filter((student) => student.Status === selectedStatus);
+    }
+
+    // Filter by application number if entered
+    if (applicationNo) {
+      const searchTerm = applicationNo.toString().trim().toLowerCase();
+      result = result.filter((student) =>
+        student.UserCode.toString().toLowerCase().includes(searchTerm)
+      );
+    }
+
+    return result;
+  }, [studentData, selectedStatus, applicationNo]);
+
+  const SUB_CLASS_OPTIONS = [
+    { value: 0, label: "ভর্তি অসম্পূর্ণ" },
+    { value: 2, label: "ভর্তি সম্পূর্ণ" },
+    { value: 1, label: "ইনঅ্যাক্টিভ" },
+    { value: 3, label: "সকল" },
+  ];
+
+  const handleStatusChange = (selectedOption) => {
+    setSelectedStatus(selectedOption.value === 3 ? null : selectedOption.value);
+  };
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
-
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const totalPages = Math.ceil(studentVacationTypeData.length / PAGE_SIZE);
-
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return studentVacationTypeData.slice(start, start + PAGE_SIZE);
-  }, [studentVacationTypeData, currentPage]);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -65,191 +94,250 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
-  const handleOpenModal = useCallback(() => {
-    showModal(translate("Type of holiday create"), "ADD_TYPEOFVACATION");
-  }, [translate]);
+  const handlePageSizeChange = (e) => {
+    const newSize = Number(e.target.value);
+    setPageSize(newSize);
+    setCurrentPage(1);
+  };
 
-  const handleEditOpenModal = useCallback(
-    (id) => {
-      showModal(translate("Type of holiday update"), "EDIT_TYPEOFVACATION", id);
-    },
-    [translate]
-  );
+  const getGenderText = (genderId) => {
+    return genderId === 1 ? "Male" : "Female";
+  };
 
-  const handleDelete = useCallback(
-    async (id) => {
-      Swal.fire({
-        title: "Are you sure?",
-        text: "This action will permanently delete the vacation type.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, delete it!",
-        cancelButtonText: "Cancel",
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          try {
-            await deleteVacationType(id).unwrap();
-            Swal.fire(
-              "Deleted!",
-              "The vacation type has been removed.",
-              "success"
-            );
-          } catch (error) {
-            Swal.fire("Error!", "Failed to delete the vacation type.", "error");
-          }
+  const handleEditStudent = (student) => {
+    setSelectedStudent(student);
+    setShowForm(true);
+  };
+
+  const handleBackToList = () => {
+    setShowForm(false);
+    setSelectedStudent(null);
+  };
+
+  const handleNewAdmission = () => {
+    setSelectedStudent(null);
+    setShowForm(true);
+  };
+
+  if (isLoading) return <Loading />;
+  if (isError) return <div className="text-red-500">Error loading data</div>;
+
+  const columns = [
+    {
+      title: translate("Action"),
+      hozAlign: "center",
+      render: (row) => {
+        const statusOption = SUB_CLASS_OPTIONS.find(
+          (opt) => opt.value === row.Status
+        );
+        const statusText = statusOption?.label || "অজানা";
+
+        let textColor = "text-gray-800";
+        let bgColor = "bg-gray-100";
+        let buttonClass = "";
+
+        switch (row.Status) {
+          case 0:
+            textColor = "text-yellow-800";
+            bgColor = "bg-yellow-100";
+            buttonClass = "bg-yellow-500 hover:bg-yellow-600 text-white";
+            break;
+          case 1:
+            textColor = "text-red-800";
+            bgColor = "bg-red-100";
+            break;
+          case 2:
+            textColor = "text-green-800";
+            bgColor = "bg-green-100";
+            break;
+          case 3:
+            textColor = "text-blue-800";
+            bgColor = "bg-blue-100";
+            break;
+          default:
+            textColor = "text-gray-800";
+            bgColor = "bg-gray-100";
         }
-      });
+
+        return (
+          <div className="flex justify-center items-center gap-2">
+            {row.Status === 0 ? (
+              <Button
+                onClick={() => handleEditStudent(row)}
+                className={buttonClass}
+              >
+                {statusText}
+              </Button>
+            ) : (
+              <span
+                className={`px-3 py-1 rounded-full text-sm ${textColor} ${bgColor}`}
+              >
+                {statusText}
+              </span>
+            )}
+          </div>
+        );
+      },
     },
-    [deleteVacationType]
-  );
-
-  if (isSVTLoading) return <Loading />;
-  if (isSVTError)
-    return <p className="text-red-500">Failed to load vacation type data</p>;
-
-  const columnsVacationType = [
     {
       title: translate("Sequential"),
-      field: "ID",
+      field: "UserID",
       hozAlign: "center",
-      render: (row) => <p>{row.ID}</p>,
+      width: 80,
+      render: (row) => <p>{row.UserID}</p>,
     },
     {
       title: translate("Application No"),
-      field: "Name",
+      field: "UserCode",
       hozAlign: "center",
-      render: (row) => <p>{row.Name}</p>,
+      width: 120,
+      render: (row) => <p>{row.UserCode}</p>,
     },
-
+    {
+      title: translate("User Name"),
+      field: "UserName",
+      hozAlign: "center",
+      width: 150,
+      render: (row) => <p>{bnBijoy2Unicode(row.UserName)}</p>,
+    },
     {
       title: translate("Father Name"),
       field: "FatherName",
       hozAlign: "center",
-      render: (row) => <p>{row.FatherName}</p>,
+      width: 150,
+      render: (row) => <p>{bnBijoy2Unicode(row.FatherName)}</p>,
     },
     {
       title: translate("Gender"),
-      field: "MotherName",
+      field: "GenderID",
       hozAlign: "center",
-      render: (row) => <p>{row.MotherName}</p>,
-    },
-
-    {
-      title: translate("Living Condition"),
-      field: "Address",
-      hozAlign: "center",
-      render: (row) => <p>{row.Address}</p>,
-    },
-
-    {
-      title: translate("Class"),
-      field: "Class",
-      hozAlign: "center",
-      render: (row) => <p>{row.Class}</p>,
+      width: 100,
+      render: (row) => <p>{getGenderText(row.GenderID)}</p>,
     },
     {
-      title: translate("Mobile Number"),
-      field: "MobileNumber",
+      title: translate("Mobile"),
+      field: "Mobile1",
       hozAlign: "center",
-      render: (row) => <p>{row.MobileNumber}</p>,
+      width: 120,
+      render: (row) => <p>{row.Mobile1}</p>,
     },
     {
       title: translate("Village"),
-      field: "MobileNumber",
+      field: "permanentVill",
       hozAlign: "center",
-      render: (row) => <p>{row.MobileNumber}</p>,
+      width: 120,
+      render: (row) => <p>{bnBijoy2Unicode(row.permanentVill)}</p>,
     },
     {
       title: translate("Post Office"),
-      field: "MobileNumber",
+      field: "permanentPost",
       hozAlign: "center",
-      render: (row) => <p>{row.MobileNumber}</p>,
+      width: 120,
+      render: (row) => <p>{bnBijoy2Unicode(row.permanentPost)}</p>,
     },
     {
-      title: translate("Police Station"),
-      field: "MobileNumber",
+      title: translate("Date of Birth"),
+      field: "DateOfBirth",
       hozAlign: "center",
-      render: (row) => <p>{row.MobileNumber}</p>,
-    },
-    {
-      title: translate("District"),
-      field: "MobileNumber",
-      hozAlign: "center",
-      render: (row) => <p>{row.MobileNumber}</p>,
-    },
-    {
-      title: translate("ভর্তির ধরণ"),
-      field: "AdmissionType",
-      hozAlign: "center",
-      render: (row) => <p>{row.AdmissionType}</p>,
+      width: 120,
+      render: (row) => <p>{row.DateOfBirth}</p>,
     },
   ];
 
-  const subClassData = [];
   return (
-    <FormProvider {...methods}>
-      <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
-        <div className="block w-full overflow-x-auto">
-          <div className="filter_header border-b border-[#e9edf4] flex flex-col sm:flex-row items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
-            <h3 className="font-SolaimanLipi text-[20px] font-bold">
-              {translate("Online Admission List")}
-            </h3>
-            <div className="flex gap-3 flex-col sm:flex-row w-full sm:w-auto py-3">
-              {" "}
-              <DefaultSelect
-                options={subClassData || []}
-                require={"Sub Class is required"}
-                nameField={"SubClass"}
-                valueField={"SubClassID"}
-                registerKey={"SubClassID"}
-                type={"number"}
-                label={translate("")}
-                unicode={true}
+    <>
+      {!showForm ? (
+        <FormProvider {...methods}>
+          <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+            <div className="block w-full overflow-x-auto">
+              <div className="flex flex-row justify-between items-center mb-4">
+                <h3 className="font-SolaimanLipi text-[20px] font-bold">
+                  {translate("Online Admission List")}
+                </h3>
+                <Button onClick={handleNewAdmission}>New Admission</Button>
+              </div>
+
+              <div className="filter_header border-b border-[#e9edf4] flex flex-col sm:flex-row items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
+                <div className="flex gap-3 flex-col sm:flex-row w-full sm:w-auto py-3">
+                  <DefaultSelect
+                    options={SUB_CLASS_OPTIONS}
+                    nameField={"label"}
+                    valueField={"value"}
+                    registerKey={"statusFilter"}
+                    label={translate("")}
+                    onChange={handleStatusChange}
+                  />
+                  <DefaultInput
+                    type="text"
+                    registerKey="applicationNo"
+                    placeholder="সার্চ করুন..."
+                  />
+                </div>
+                <div className="flex gap-3 items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">Show:</span>
+                    <select
+                      value={pageSize}
+                      onChange={handlePageSizeChange}
+                      className="border rounded px-2 py-1 text-sm"
+                    >
+                      {PAGE_SIZE_OPTIONS.map((size) => (
+                        <option key={size} value={size}>
+                          {size}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="text-sm">entries</span>
+                  </div>
+                </div>
+              </div>
+
+              <SortableTable
+                columns={columns}
+                data={filteredData}
+                isFilterColumn={false}
               />
-              <DefaultInput
-                label=""
-                type="text"
-                registerKey="motherName"
-                defaultValue="জবিনা"
-              />
+
+              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
+                <div className="text-sm text-gray-600">
+                  Showing {(currentPage - 1) * pageSize + 1} to{" "}
+                  {Math.min(currentPage * pageSize, totalRecords)} of{" "}
+                  {totalRecords} entries
+                </div>
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={handlePrev}
+                    disabled={currentPage === 1}
+                    className="flex items-center gap-1 px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <MdKeyboardArrowLeft className="text-lg" />
+                    Previous
+                  </button>
+
+                  <span className="text-sm font-medium text-gray-700">
+                    Page {currentPage} of {totalPages}
+                  </span>
+
+                  <button
+                    onClick={handleNext}
+                    disabled={currentPage === totalPages}
+                    className="flex items-center gap-1 px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                    <MdKeyboardArrowRight className="text-lg" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
-
-          <SortableTable
-            columns={columnsVacationType}
-            data={paginatedData}
-            isFilterColumn={false}
-          />
-
-          {/* Pagination Controls */}
-          <div className="flex justify-center items-center gap-4 mt-4">
-            <button
-              onClick={handlePrev}
-              disabled={currentPage === 1}
-              className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-            >
-              <MdKeyboardArrowLeft className="text-lg" />
-              Prev
-            </button>
-
-            <span className="text-sm font-medium text-gray-700">
-              Page {currentPage} of {totalPages}
-            </span>
-
-            <button
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-              className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-            >
-              Next
-              <MdKeyboardArrowRight className="text-lg" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </FormProvider>
+        </FormProvider>
+      ) : (
+        <OnlineAdmissionForm 
+          studentData={selectedStudent} 
+          onBack={handleBackToList} 
+        />
+      )}
+    </>
   );
 };
 

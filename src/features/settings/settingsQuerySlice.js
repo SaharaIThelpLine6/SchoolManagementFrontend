@@ -14,15 +14,21 @@ export const settingsSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['InstitutionInfo', "Residential"], // Define your tag type
+  tagTypes: ["InstitutionInfo", "Residential"], // Define your tag type
   endpoints: (builder) => ({
     getInstitutionInfo: builder.query({
       query: () => "institution_info",
-      providesTags: ['InstitutionInfo'], // This query provides this tag
+      providesTags: ["InstitutionInfo"], // This query provides this tag
     }),
     getResidential: builder.query({
       query: () => "residential",
-      providesTags: ['Residential'], // This query provides this tag
+      providesTags: ["Residential"], // This query provides this tag
+    }),
+    getStudentRelations: builder.query({
+      query: () => "student_relation",
+    }),
+    getFinancialStatus: builder.query({
+      query: () => "financial_status",
     }),
     updateInstitutionInfo: builder.mutation({
       query: (body) => ({
@@ -30,9 +36,28 @@ export const settingsSlice = createApi({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ['InstitutionInfo'], // This mutation invalidates this tag
+      invalidatesTags: ["InstitutionInfo"], // This mutation invalidates this tag
+    }),
+    // Division, District, Thana Get
+    getDivisions: builder.query({
+      query: () => "division",
+    }),
+    getDistricts: builder.query({
+      query: (id) => `district?divition_id=${id}`,
+    }),
+    getPoliceStations: builder.query({
+      query: (id) => `thana?district_id=${id}`,
     }),
   }),
 });
 
-export const { useGetInstitutionInfoQuery, useUpdateInstitutionInfoMutation,useGetResidentialQuery } = settingsSlice;
+export const {
+  useGetInstitutionInfoQuery,
+  useUpdateInstitutionInfoMutation,
+  useGetResidentialQuery,
+  useGetStudentRelationsQuery,
+  useGetFinancialStatusQuery,
+  useGetDivisionsQuery,
+  useGetDistrictsQuery,
+  useGetPoliceStationsQuery
+} = settingsSlice;

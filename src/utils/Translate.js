@@ -12,6 +12,8 @@ const useTranslate = () => {
     "Phone Number": "ফোন নম্বর",
     "Success and Error": "সাকসেস এবং এরোর",
     "Book of Subjects": "বিষয়ের খাতা",
+    "Application No": "আবেদন নাম্বার",
+    "User Name": "ইউজার নাম",
     Staff: "স্টাফ",
     SubClass: "সাব ক্লাস",
     "Exam Name": "পরীক্ষার নাম",

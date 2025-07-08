@@ -20,6 +20,7 @@ export const userStudentSlice = createApi({
     "StudentVacationType",
     "StudentReports",
     "ExamNames",
+    "UsersOnlineRegInfo",
   ],
   endpoints: (builder) => ({
     getStudentBySearch: builder.query({
@@ -178,12 +179,26 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ["Student"], // Ensures the list is refreshed
     }),
+
     deleteStudentsTransferCertificate: builder.mutation({
       query: (id) => ({
         url: `student_transfer_certificate/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["StudentTransferCertificate"], // Ensures the list is refreshed
+    }),
+    getUsersOnlineRegInfo: builder.query({
+      query: ({ page = 1, limit = 20 }) =>
+        `get_User_Onlice_RegInfo?page=${page}&limit=${limit}`,
+      providesTags: ["UsersOnlineRegInfo"],
+    }),
+    postStudentAdmission: builder.mutation({
+      query: (body) => ({
+        url: `student_admission`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["UsersOnlineRegInfo"], // Ensures the list is refreshed
     }),
   }),
 });
@@ -208,5 +223,7 @@ export const {
   useUpdateStudentsTransferCertificateMutation,
   useDeleteStudentsTransferCertificateMutation,
   useGetExamNamesQuery,
-  usePostChnageStudentGroupMutation
+  usePostChnageStudentGroupMutation,
+  useGetUsersOnlineRegInfoQuery,
+  usePostStudentAdmissionMutation,
 } = userStudentSlice;

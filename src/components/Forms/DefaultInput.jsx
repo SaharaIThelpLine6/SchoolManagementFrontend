@@ -1,27 +1,39 @@
-import React from "react";
-import { useFormContext } from "react-hook-form";
+import React, { useEffect } from "react";
+import { useFormContext, useWatch } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
+import bnBijoy2Unicode from "../../utils/conveter";
 
 const DefaultInput = ({
   label,
-  type,
+  type = "text",
   placeholder,
   registerKey,
   require = false,
   disable = false,
+  unicode = false,
   labelPosition = "top", // 'top' or 'left'
 }) => {
   const {
     register,
+    setValue,
+    getValues,
+    control,
     formState: { errors },
   } = useFormContext();
   const translate = useTranslate();
 
-  const validateNumber = (value) => {
-    return type === "number" && isNaN(Number(value))
-      ? "Please enter a valid number"
-      : true;
-  };
+  // ✅ Watch current value of the field
+  const currentValue = useWatch({ name: registerKey, control });
+
+  // ✅ Convert existing value to Unicode on mount if needed
+  useEffect(() => {
+    if (unicode && currentValue && typeof currentValue === "string") {
+      const converted = bnBijoy2Unicode(currentValue);
+      if (converted !== currentValue) {
+        setValue(registerKey, converted);
+      }
+    }
+  }, []); // Run only on mount
 
   return (
     <div className={`w-full ${labelPosition === 'left' ? 'flex items-center gap-4' : ''}`}>
@@ -51,8 +63,11 @@ const DefaultInput = ({
                           : ""
                       }`}
           {...register(registerKey, {
-            required: require ? require : false,
-            ...(type === "number" && { validate: validateNumber }),
+            required: require,
+            ...(type === "number" && {
+              validate: (value) =>
+                isNaN(Number(value)) ? "Please enter a valid number" : true,
+            }),
             ...(type === "phone" && {
               pattern: {
                 value: /^\d{11}$/,
