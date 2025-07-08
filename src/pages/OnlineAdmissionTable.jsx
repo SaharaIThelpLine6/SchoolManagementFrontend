@@ -31,7 +31,7 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
   const { watch } = methods;
   const applicationNo = watch("applicationNo");
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(100);
   const [showForm, setShowForm] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
 
@@ -114,10 +114,7 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
     setSelectedStudent(null);
   };
 
-  const handleNewAdmission = () => {
-    setSelectedStudent(null);
-    setShowForm(true);
-  };
+
 
   if (isLoading) return <Loading />;
   if (isError) return <div className="text-red-500">Error loading data</div>;
@@ -250,11 +247,11 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
         <FormProvider {...methods}>
           <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
             <div className="block w-full overflow-x-auto">
-              <div className="flex flex-row justify-between items-center mb-4">
+              <div className="flex flex-row justify-start items-center mb-4">
                 <h3 className="font-SolaimanLipi text-[20px] font-bold">
                   {translate("Online Admission List")}
                 </h3>
-                <Button onClick={handleNewAdmission}>New Admission</Button>
+                {/* <Button onClick={handleNewAdmission}>New Admission</Button> */}
               </div>
 
               <div className="filter_header border-b border-[#e9edf4] flex flex-col sm:flex-row items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">

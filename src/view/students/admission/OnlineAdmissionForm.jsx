@@ -285,15 +285,13 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
   ];
 
   return (
-    <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+    <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="block w-full overflow-x-auto">
         <div className="flex flex-row justify-between items-center mb-4">
-          <h3 className="font-SolaimanLipi text-[20px] font-bold">
-            {translate(
-              studentData ? "Edit Student Admission" : "New Student Admission"
-            )}
+          <h3 className="font-SolaimanLipi text-2xl font-bold">
+            {translate("Student Admission")}
           </h3>
-          <Button onClick={handleBackClick}>Back</Button>
+          <Button onClick={handleBackClick}>{translate("Back")}</Button>
         </div>
 
         <FormProvider {...methods}>
@@ -304,15 +302,15 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
               {/* Personal Information Section */}
               <div className="space-y-4 col-span-1 md:col-span-2 lg:col-span-5">
-                <h2 className="text-xl font-bold text-gray-800 border-b pb-2">
-                  ব্যক্তিগত তথ্য
+                <h2 className="text-base font-bold text-gray-800 border-b pb-2">
+                  {translate("Personal Information")}
                 </h2>
               </div>
 
               <DefaultInput
                 type="text"
                 registerKey="UserCode"
-                label="শিক্ষার্থীর নাম্বার"
+                label={translate("Student Code") + " :"}
                 placeholder="পূর্ণ নাম লিখুন"
                 require="This field is required!"
               />
@@ -320,7 +318,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultInput
                 type="text"
                 registerKey="UserName"
-                label="শিক্ষার্থীর নাম"
+                label={translate("User Name") + " :"}
                 placeholder="পূর্ণ নাম লিখুন"
                 require="This field is required!"
                 unicode={true}
@@ -329,7 +327,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultInput
                 type="text"
                 registerKey="FatherName"
-                label="পিতার নাম"
+                label={translate("Father Name") + " :"}
                 placeholder="পিতার নাম লিখুন"
                 require="This field is required!"
                 unicode={true}
@@ -338,14 +336,14 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultInput
                 type="text"
                 registerKey="MotherName"
-                label="মাতার নাম"
+                label={translate("Mother Name") + " :"}
                 placeholder="মাতার নাম লিখুন"
                 require="This field is required!"
                 unicode={true}
               />
 
               <DefaultSelect
-                label="লিঙ্গ"
+                label={translate("Gender") + " :"}
                 options={GENDER_OPTIONS}
                 valueField="GenderID"
                 nameField="label"
@@ -356,20 +354,20 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultInput
                 type="text"
                 registerKey="NIDNO"
-                label="জাতীয় পরিচয়পত্র নম্বর"
+                label={translate("NID Number") + " :"}
                 placeholder="NID নম্বর লিখুন"
               />
 
               <DefaultInput
                 type="tel"
                 registerKey="Mobile1"
-                label="মোবাইল নম্বর ১"
+                label={translate("Mobile No 1") + " :"}
                 placeholder="01XXXXXXXXX"
                 require="This field is required!"
               />
 
               <DefaultSelect
-                label="সম্পর্ক ১"
+                label={translate("Relationship 1") + " :"}
                 options={mobileRelationshipData ?? []}
                 valueField="RelationID"
                 nameField="RelationName"
@@ -380,37 +378,40 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultInput
                 type="tel"
                 registerKey="Mobile2"
-                label="মোবাইল নম্বর ২"
+                label={translate("Mobile No 2") + " :"}
                 placeholder="01XXXXXXXXX"
               />
 
               <DefaultSelect
-                label="সম্পর্ক ২"
+                label={translate("Relationship 2") + " :"}
                 options={mobileRelationshipData ?? []}
                 valueField="RelationID"
                 nameField="RelationName"
                 registerKey="Relationship2"
               />
 
-              <DefaultInput registerKey="BloodGroup" label="রক্তের গ্রুপ" />
+              <DefaultInput
+                registerKey="BloodGroup"
+                label={translate("Blood Group") + " :"}
+              />
 
               <DefaultInput
                 type="email"
                 registerKey="Email"
-                label="ইমেইল"
+                label={translate("Email Address") + " :"}
                 placeholder="example@domain.com"
               />
 
               <DatePickerOne
                 registerKey="DateOfBirth"
-                dateCalender="জন্ম তারিখ"
+                dateCalender={translate("Date of Birth") + " :"}
                 require="This field is required!"
               />
 
               {/* Address Information Section */}
               <div className="space-y-4 col-span-1 md:col-span-2 lg:col-span-5 mt-6">
-                <h2 className="text-xl font-bold text-gray-800 border-b pb-2">
-                  ঠিকানা তথ্য
+                <h2 className="text-base font-bold text-gray-800 border-b pb-2">
+                  {translate("Permanent Address Information") + " :"}
                 </h2>
               </div>
 
@@ -418,7 +419,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultInput
                 type="text"
                 registerKey="permanentVill"
-                label="স্থায়ী গ্রাম"
+                label={translate("Village") + " :"}
                 placeholder="গ্রামের নাম লিখুন"
                 require="This field is required!"
                 unicode={true}
@@ -427,7 +428,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultInput
                 type="text"
                 registerKey="permanentPost"
-                label="স্থায়ী ডাকঘর"
+                label={translate("Post Office") + " :"}
                 placeholder="ডাকঘরের নাম লিখুন"
                 require="This field is required!"
                 unicode={true}
@@ -436,7 +437,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultSelect
                 options={divisionsData ?? []}
                 registerKey="permanentDivisionId"
-                label="স্থায়ী বিভাগ"
+                label={translate("Division") + " :"}
                 valueField="DivisionID"
                 nameField="DivisionName"
                 require="This field is required!"
@@ -445,7 +446,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultSelect
                 options={permDistrictsData ?? []}
                 registerKey="permanentDistrictId"
-                label="স্থায়ী জেলা"
+                label={translate("District") + " :"}
                 valueField="DistrictID"
                 nameField="DistrictName"
                 disabled={!selectedPermDivision}
@@ -455,18 +456,22 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultSelect
                 options={permThanaData ?? []}
                 registerKey="permanentThanaId"
-                label="স্থায়ী থানা"
+                label={translate("Police Station") + " :"}
                 valueField="PoliceStationID"
                 nameField="PoliceStationName"
                 disabled={!selectedPermDistrict}
                 require="This field is required!"
               />
-
+              <div className="space-y-4 col-span-1 md:col-span-2 lg:col-span-5 mt-6">
+                <h2 className="text-base font-bold text-gray-800 border-b pb-2">
+                  {translate("Present Address Information") + " :"}
+                </h2>
+              </div>
               {/* Current Address */}
               <DefaultInput
                 type="text"
                 registerKey="TransientVill"
-                label="বর্তমান গ্রাম"
+                label={translate("Village") + " :"}
                 placeholder="গ্রামের নাম লিখুন"
                 unicode={true}
                 require="This field is required!"
@@ -475,7 +480,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultInput
                 type="text"
                 registerKey="TransientPost"
-                label="বর্তমান ডাকঘর"
+                label={translate("Post Office") + " :"}
                 placeholder="ডাকঘরের নাম লিখুন"
                 unicode={true}
                 require="This field is required!"
@@ -484,7 +489,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultSelect
                 options={divisionsData ?? []}
                 registerKey="divisionId"
-                label="বর্তমান বিভাগ"
+                label={translate("Division") + " :"}
                 valueField="DivisionID"
                 nameField="DivisionName"
                 require="This field is required!"
@@ -493,7 +498,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultSelect
                 options={districtsData ?? []}
                 registerKey="districtId"
-                label="বর্তমান জেলা"
+                label={translate("District") + " :"}
                 valueField="DistrictID"
                 nameField="DistrictName"
                 disabled={!selectedDivision}
@@ -503,7 +508,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultSelect
                 options={thanaData ?? []}
                 registerKey="thanaId"
-                label="বর্তমান থানা"
+                label={translate("Police Station") + ":"}
                 valueField="PoliceStationID"
                 nameField="PoliceStationName"
                 disabled={!selectedDistrict}
@@ -512,13 +517,13 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
 
               {/* Academic Information Section */}
               <div className="space-y-4 col-span-1 md:col-span-2 lg:col-span-5 mt-6">
-                <h2 className="text-xl font-bold text-gray-800 border-b pb-2">
-                  শিক্ষাগত তথ্য
+                <h2 className="text-base font-bold text-gray-800 border-b pb-2">
+                  {translate("Educational Information")}
                 </h2>
               </div>
 
               <DefaultSelect
-                label="সেশন"
+                label={translate("Session") + " :"}
                 options={sessionData ?? []}
                 valueField="SessionID"
                 nameField="SessionName"
@@ -527,7 +532,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               />
 
               <DefaultSelect
-                label="শ্রেণী"
+                label={translate("Class") + " :"}
                 options={classData ?? []}
                 valueField="ClassID"
                 nameField="ClassName"
@@ -537,7 +542,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               />
 
               <DefaultSelect
-                label="সাব-ক্লাস"
+                label={translate("SubClass") + " :"}
                 options={subClassData ?? []}
                 valueField="SubClassID"
                 nameField="SubClass"
@@ -549,13 +554,13 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               <DefaultInput
                 type="text"
                 registerKey="AdmissionSerial"
-                label="ভর্তি সিরিয়াল"
+                label={translate("Admission Serial") + " :"}
                 placeholder="ভর্তি সিরিয়াল নম্বর"
                 require="This field is required!"
               />
 
               <DefaultSelect
-                label="আর্থিক অবস্থা"
+                label={translate("Financial Status") + " :"}
                 options={financialStatusData ?? []}
                 valueField="SFTID"
                 nameField="FinancialName"
@@ -564,7 +569,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               />
 
               <DefaultSelect
-                label="আবাসিক অবস্থা"
+                label={translate("Residential") + " :"}
                 options={residentialData ?? []}
                 valueField="RDID"
                 nameField="ResidentialName"
@@ -573,7 +578,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               />
 
               <DefaultSelect
-                label="নতুন/পুরাতন"
+                label={translate("New/Old") + " :"}
                 options={NEW_OLD_OPTIONS}
                 valueField="NewOldId"
                 nameField="NewOldName"
@@ -582,7 +587,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               />
 
               <DefaultSelect
-                label="ভর্তি অবস্থা"
+                label={translate("Admission Status") + " :"}
                 options={ADMISSION_STATUS_OPTIONS}
                 valueField="value"
                 nameField="label"
@@ -596,13 +601,13 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 type="button"
                 className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50"
               >
-                বাতিল করুন
+                {translate("Cancel")}
               </button>
               <button
                 type="submit"
                 className="px-6 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
               >
-                জমা দিন
+                {translate("Save")}
               </button>
             </div>
           </form>

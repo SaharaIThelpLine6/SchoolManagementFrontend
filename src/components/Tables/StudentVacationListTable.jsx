@@ -18,6 +18,7 @@ import Button from "../Button/Button";
 import Print from "./Print";
 import { formatTime } from "../../helper/formatTime";
 import { fetchSettingsData } from "../../features/settings/settingsSlice";
+import bnBijoy2Unicode from "../../utils/conveter";
 
 const StudentVacationListTable = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -208,6 +209,8 @@ const StudentVacationListTable = ({ pageTitle }) => {
       hozAlign: "center",
       filterable: true,
       type: "text",
+      render: (row) => <p>{bnBijoy2Unicode(row.UserName)}</p>,
+
     },
     {
       title: translate("Class/Jamaat"),
