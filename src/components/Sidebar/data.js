@@ -172,6 +172,16 @@ export const menuData = [
         name: "Exam Admit Card",
         route: "/exam/admit-card",
       },
+      {
+        id: "6",
+        name: "Exam Routing",
+        route: "/exam/routing",
+      },
+      {
+        id: "7",
+        name: "Exam Report",
+        route: "/exam/report",
+      },
     ],
   },
   {
@@ -179,7 +189,13 @@ export const menuData = [
     name: "Result",
     route: "/result",
     icon: "GiGraduateCap",
-    subMenu: [],
+    subMenu: [
+      {
+        id: "1",
+        name: "Point Result Entry",
+        route: "/result",
+      },
+    ],
   },
   {
     id: "6",

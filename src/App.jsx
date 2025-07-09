@@ -36,7 +36,6 @@ import Designations from "./pages/Designations";
 import Exam from "./pages/Exam";
 import BoardExam from "./pages/BoardExam";
 import MadrasahBoardInfo from "./pages/MadrasahBoardInfo";
-import StudentsResult from "./pages/StudentsResult";
 
 import Library from "./pages/Library";
 import Others from "./pages/Others";
@@ -69,6 +68,9 @@ import QueryManage from "./pages/QueryManage";
 import AverageVCondition from "./pages/AverageVCondition";
 import StudentsList from "./pages/StudentsList";
 import ExamAdmitCard from "./pages/ExamAdmitCard";
+import ExamRouting from "./pages/ExamRouting";
+import ExamReport from "./pages/ExamReport";
+import PointBasedResultEntry from "./pages/PointBasedResultEntry";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -327,6 +329,18 @@ function App() {
                 }
               />
               <Route
+                path="routing"
+                element={
+                  <ExamRouting pageTitle="Exam Routing" />
+                }
+              />
+              <Route
+                path="report"
+                element={
+                  <ExamReport pageTitle="Exam Report"/>
+                }
+              />
+              <Route
                 path="query-manage"
                 element={
                   <QueryManage pageTitle="Query Manage" />
@@ -344,7 +358,7 @@ function App() {
             </Route>
 
             <Route path="result">
-              <Route index element={<StudentsResult pageTitle="Result" />} />
+              <Route index element={<PointBasedResultEntry pageTitle="Result" />} />
   
             </Route>
 
