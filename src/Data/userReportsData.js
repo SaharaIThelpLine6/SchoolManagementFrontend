@@ -54,6 +54,36 @@
       ReportName: "9. নম্বরপত্র প্যাকেট",
     },
   ];
+  export const resultReports = [
+    {
+      ReportID: 1,
+      ReportName: "1. আইডি সিরিয়ালে ফলাফল",
+    },
+    {
+      ReportID: 2,
+      ReportName: "2. আইডি সিরিয়ালে ফলাফল লিগেল",
+    },
+    {
+      ReportID: 3,
+      ReportName: "3. বিভাগ অনুসারে ফলাফল",
+    },
+    {
+      ReportID: 4,
+      ReportName: "4. নাম্বার অনুসারে ফলাফল",
+    },
+    {
+      ReportID: 5,
+      ReportName: "5. ভর্তি ফরম A4",
+    },
+    {
+      ReportID: 6,
+      ReportName: "6. ভর্তি ফরম লিগেল",
+    },
+    {
+      ReportID: 7,
+      ReportName: "7. মেধা অনুসারে হাজিরা খাতা",
+    }
+  ];
 
    export const genders = [
     {
@@ -83,6 +113,14 @@
     { id: 2, name: "পরীক্ষার রুটিন বিহীন" },
   ];
   export const colorStatus = [
-    { id: 1, name: "সাদা-কালার " },
+    { id: 1, name: "সাদা-কালার" },
     { id: 2, name: "রঙিন" },
+  ];
+  export const resultReportSizeStatus = [
+    { id: 1, name: "অটো সাইজ" },
+    { id: 2, name: "হরিজন্টাল" },
+  ];
+  export const resultReportOptional = [
+    { id: 1, name: "With Optional" },
+    { id: 2, name: "Without Optional" },
   ];

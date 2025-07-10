@@ -195,6 +195,11 @@ export const menuData = [
         name: "Point Result Entry",
         route: "/result",
       },
+      {
+        id: "1",
+        name: "Point V: Result Report",
+        route: "/result/report",
+      },
     ],
   },
   {

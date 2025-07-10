@@ -71,6 +71,7 @@ import ExamAdmitCard from "./pages/ExamAdmitCard";
 import ExamRouting from "./pages/ExamRouting";
 import ExamReport from "./pages/ExamReport";
 import PointBasedResultEntry from "./pages/PointBasedResultEntry";
+import PointVReport from "./pages/PointVReport";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -306,45 +307,31 @@ function App() {
               <Route index element={<Exam pageTitle="Exam" />} />
               <Route
                 path="fee-determine"
-                element={
-                  <ExamFeeDetermine pageTitle="Exam Fee Determine" />
-                }
+                element={<ExamFeeDetermine pageTitle="Exam Fee Determine" />}
               />
               <Route
                 path="average-v-condition"
-                element={
-                  <AverageVCondition pageTitle="Exam Fee Determine" />
-                }
+                element={<AverageVCondition pageTitle="Exam Fee Determine" />}
               />
               <Route
                 path="students-list"
-                element={
-                  <StudentsList pageTitle="Students List" />
-                }
+                element={<StudentsList pageTitle="Students List" />}
               />
               <Route
                 path="admit-card"
-                element={
-                  <ExamAdmitCard pageTitle="Students List" />
-                }
+                element={<ExamAdmitCard pageTitle="Students List" />}
               />
               <Route
                 path="routing"
-                element={
-                  <ExamRouting pageTitle="Exam Routing" />
-                }
+                element={<ExamRouting pageTitle="Exam Routing" />}
               />
               <Route
                 path="report"
-                element={
-                  <ExamReport pageTitle="Exam Report"/>
-                }
+                element={<ExamReport pageTitle="Exam Report" />}
               />
               <Route
                 path="query-manage"
-                element={
-                  <QueryManage pageTitle="Query Manage" />
-                }
+                element={<QueryManage pageTitle="Query Manage" />}
               />
             </Route>
             <Route path="board_exam">
@@ -358,8 +345,16 @@ function App() {
             </Route>
 
             <Route path="result">
-              <Route index element={<PointBasedResultEntry pageTitle="Result" />} />
-  
+              <Route
+                index
+                element={<PointBasedResultEntry pageTitle="Result" />}
+              />
+              <Route
+                path="report"
+                element={
+                  <PointVReport pageTitle="Madrasah Board Information" />
+                }
+              />
             </Route>
 
             <Route path="library" element={<Library pageTitle="Library" />} />
