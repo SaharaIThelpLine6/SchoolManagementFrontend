@@ -6,6 +6,14 @@ import { permissionsDataList } from "../Data/permissions";
 // Public Pages
 import Login from "../pages/Login";
 import NotFound from "../pages/NotFound";
+import PublicLayout from "../layout/PublicLayout";
+import ResultRequest from "../pages/public/ResultRequest";
+import AdmissionRegistration from "../pages/AdmissionRegistration";
+import Result from "../pages/public/Result";
+import OnlineAdmission from "../pages/public/OnlineAdmission";
+import StudentAdmissionForm from "../pages/public/studentAddmitionForm";
+import FromP from "../pages/FormP";
+import Query from "../pages/Query";
 
 // Layout
 import DefaultLayout from "../layout/DefaultLayout";
@@ -45,14 +53,6 @@ import ExamRouting from "../pages/ExamRouting";
 import ExamReport from "../pages/ExamReport";
 import PointBasedResultEntry from "../pages/PointBasedResultEntry";
 import PointVReport from "../pages/PointVReport";
-import PublicLayout from "../layout/PublicLayout";
-import ResultRequest from "../pages/public/ResultRequest";
-import AdmissionRegistration from "../pages/AdmissionRegistration";
-import Result from "../pages/public/Result";
-import OnlineAdmission from "../pages/public/OnlineAdmission";
-import StudentAdmissionForm from "../pages/public/studentAddmitionForm";
-import FromP from "../pages/FormP";
-import Query from "../pages/Query";
 import CharacterReport from "../pages/CharacterReport";
 import StudentVacationListTable from "../components/Tables/StudentVacationListTable";
 
