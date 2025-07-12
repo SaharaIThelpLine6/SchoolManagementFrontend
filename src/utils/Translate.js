@@ -7,6 +7,7 @@ const useTranslate = () => {
     Home: "হোম",
     Student: "শিক্ষার্থী",
     "Book List": "বুক লিস্ট",
+    "List of Candidates": "পরীক্ষার্থীর তালিকা",
     Status: "স্ট্যাটাস",
     "SMS ID": "এসএমএস আইডি",
     "Phone Number": "ফোন নম্বর",

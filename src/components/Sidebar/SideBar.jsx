@@ -64,7 +64,7 @@ const SideBar = () => {
           const filteredSubMenu = menu.subMenu.filter((subItem) => {
             // General Information
             if (subItem.name === "User") {
-              return hasPermission(permissionsDataList.user_code_setting);
+              return hasPermission(permissionsDataList.user_entry);
             }
             if (subItem.name === "User Reports") {
               return hasPermission(permissionsDataList.user_report);
@@ -78,7 +78,10 @@ const SideBar = () => {
             if (subItem.name === "Month Name") {
               return hasPermission(permissionsDataList.month_name);
             }
-            // Students
+            // StudsubItements
+            if (subItem.name === "All Students") {
+              return hasPermission(permissionsDataList.student_admission); // Example
+            }
             if (subItem.name === "Session") {
               return hasPermission(permissionsDataList.academic_year); // Example
             }
@@ -89,7 +92,10 @@ const SideBar = () => {
               return hasPermission(permissionsDataList.class); // Example
             }
             if (subItem.name === "English & Arobi Name") {
-              return hasPermission(permissionsDataList.english_name_entry || permissionsDataList.arabic_name_entry); // Example
+              return hasPermission(
+                permissionsDataList.english_name_entry ||
+                  permissionsDataList.arabic_name_entry
+              ); // Example
             }
             if (subItem.name === "Book") {
               return hasPermission(permissionsDataList.kitab_entry); // Example
@@ -106,12 +112,15 @@ const SideBar = () => {
             if (subItem.name === "Certificate of Attestation") {
               return hasPermission(permissionsDataList.certificate); // Example
             }
-            if (subItem.name === "Students Vacation") {
-              return hasPermission(permissionsDataList.gate_pass_leave); // Example
+            if (subItem.name === "Online Admission") {
+              return hasPermission(permissionsDataList.student_admission); // Example
             }
-            if (subItem.name === "Type of Vacation") {
-              return hasPermission(permissionsDataList.gate_pass_leave); // Example
-            }
+            // if (subItem.name === "Students Vacation") {
+            //   return hasPermission(permissionsDataList.gate_pass_leave); // Example
+            // }
+            // if (subItem.name === "Type of Vacation") {
+            //   return hasPermission(permissionsDataList.gate_pass_leave); // Example
+            // }
             // Teachers
             if (subItem.name === "Teacher Info") {
               return hasPermission(permissionsDataList.teacher_info); // Example
@@ -128,7 +137,46 @@ const SideBar = () => {
             if (subItem.name === "Designation") {
               return hasPermission(permissionsDataList.teacher_designation); // Example
             }
- 
+            // Exam
+            if (subItem.name === "Exam") {
+              return hasPermission(permissionsDataList.exam_name); // Example
+            }
+            if (subItem.name === "Exam Fee Determine") {
+              return hasPermission(permissionsDataList.exam_fee_setting); // Example
+            }
+            if (subItem.name === "Point V: Condition") {
+              return hasPermission(permissionsDataList.exam_condition); // Example
+            }
+            if (subItem.name === "Average V: Condition") {
+              return hasPermission(permissionsDataList.exam_condition); // Example
+            }
+            if (subItem.name === "List of Candidates") {
+              return hasPermission(permissionsDataList.exam_list_generation); // Example
+            }
+            if (subItem.name === "Exam Admit Card") {
+              return hasPermission(permissionsDataList.admit_card); // Example
+            }
+            if (subItem.name === "Exam Routing") {
+              return hasPermission(permissionsDataList.routine_with_signature); // Example
+            }
+            if (subItem.name === "Exam Report") {
+              return hasPermission(permissionsDataList.exam_report); // Example
+            }
+           // Darul-ikama
+            if (subItem.name === "Character Report") {
+              return hasPermission(permissionsDataList.certificate); // Example
+            }
+            if (subItem.name === "Gate pass and leave") {
+              return hasPermission(permissionsDataList.gate_pass_leave); // Example
+            }
+
+            // Result
+            if (subItem.name === "Point Result Entry") {
+              return hasPermission(permissionsDataList.result_entry); // Example
+            }
+            if (subItem.name === "Point V: Result Report") {
+              return hasPermission(permissionsDataList.result_report); // Example
+            }
             // Add other submenu permission mappings here
             return true; // Default allow
           });

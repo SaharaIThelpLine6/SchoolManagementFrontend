@@ -21,7 +21,7 @@ import PrintOptions from "../view/students/certificate-attestation/PrintOptions"
 
 const PAGE_SIZE = 10;
 
-const CertificateAttestation = ({ pageTitle }) => {
+const CertificateAttesation = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
 
@@ -246,4 +246,4 @@ const CertificateAttestation = ({ pageTitle }) => {
   );
 };
 
-export default CertificateAttestation;
+export default CertificateAttesation;

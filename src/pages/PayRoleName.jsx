@@ -9,7 +9,9 @@ const PayRoleName = () => {
 
   return (
     <FormProvider {...methods}>
-      <div className="md:flex w-full px-3 gap-3 font-lato">
+      <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-SolaimanLipi">
+
+      <div className="md:flex w-full px-3 gap-3 ">
         {/*Input form Start*/}
         <div className="md:w-[50%]">
           <div className="text-sm font-medium text-black items-center gap-2 grid grid-cols-1 lg:grid-cols-2">
@@ -95,6 +97,7 @@ const PayRoleName = () => {
           </table>
         </div>
         {/*Table End*/}
+      </div>
       </div>
     </FormProvider>
   );

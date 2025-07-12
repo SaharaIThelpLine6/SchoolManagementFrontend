@@ -7,7 +7,8 @@ const Report = () => {
     return (
         <FormProvider {...methods}>
 
-        <div className="font-lato">
+      <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-SolaimanLipi">
+
             {/*Find form Start*/}
             <div className="px-5">
 

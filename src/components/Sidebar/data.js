@@ -169,8 +169,8 @@ export const menuData = [
       },
       {
         id: "5",
-        name: "Students List",
-        route: "/exam/students-list",
+        name: "List of Candidates",
+        route: "/exam/list-of-candidates",
       },
       {
         id: "6",
