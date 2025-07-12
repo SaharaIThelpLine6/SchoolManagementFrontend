@@ -70,6 +70,14 @@ export const examSlice = createApi({
       }),
       invalidatesTags: ["ExamFeeSettings"],
     }),
+    postExamPointCondition: builder.mutation({
+      query: (body) => ({
+        url: `pointwise_exam_condition_setting`,
+        method: "POST",
+        body,
+      }),
+      // invalidatesTags: ["ExamFeeSettings"],
+    }),
   }),
 });
 
@@ -81,5 +89,6 @@ export const {
   useGetExamFeeSettingQuery,
   usePostExamFeeSettingMutation,
   useUpdateExamFeeSettingMutation,
-  useDeleteExamFeeSettingMutation
+  useDeleteExamFeeSettingMutation,
+  usePostExamPointConditionMutation
 } = examSlice;

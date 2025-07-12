@@ -72,6 +72,7 @@ import ExamRouting from "./pages/ExamRouting";
 import ExamReport from "./pages/ExamReport";
 import PointBasedResultEntry from "./pages/PointBasedResultEntry";
 import PointVReport from "./pages/PointVReport";
+import PointVCondition from "./pages/PointVCondition";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -308,6 +309,10 @@ function App() {
               <Route
                 path="fee-determine"
                 element={<ExamFeeDetermine pageTitle="Exam Fee Determine" />}
+              />
+              <Route
+                path="point-v-condition"
+                element={<PointVCondition pageTitle="Exam Fee Determine" />}
               />
               <Route
                 path="average-v-condition"

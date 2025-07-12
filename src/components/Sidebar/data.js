@@ -159,26 +159,31 @@ export const menuData = [
       },
       {
         id: "3",
+        name: "Point V: Condition",
+        route: "/exam/point-v-condition",
+      },
+      {
+        id: "4",
         name: "Average V: Condition",
         route: "/exam/average-v-condition",
       },
       {
-        id: "4",
+        id: "5",
         name: "Students List",
         route: "/exam/students-list",
       },
       {
-        id: "5",
+        id: "6",
         name: "Exam Admit Card",
         route: "/exam/admit-card",
       },
       {
-        id: "6",
+        id: "7",
         name: "Exam Routing",
         route: "/exam/routing",
       },
       {
-        id: "7",
+        id: "8",
         name: "Exam Report",
         route: "/exam/report",
       },

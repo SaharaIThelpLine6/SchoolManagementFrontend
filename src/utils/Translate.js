@@ -17,6 +17,7 @@ const useTranslate = () => {
     "Result Report": "ফলাফল রিপোর্ট",
     "Size Status": "সাইজ স্ট্যাটাস",
     "Optional": "অপশনাল",
+    "Point V: Condition": "পয়েন্ট ভি: কন্ডিশন",
     Staff: "স্টাফ",
     SubClass: "সাব ক্লাস",
     "Exam Name": "পরীক্ষার নাম",

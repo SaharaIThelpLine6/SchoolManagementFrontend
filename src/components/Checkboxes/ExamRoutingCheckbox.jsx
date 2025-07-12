@@ -2,59 +2,68 @@ import React from "react";
 import { useFormContext } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 
-const ExamRoutingCheckbox = ({ label, options, registerKey, labelPosition = "top" }) => {
+const ExamRoutingCheckbox = ({
+  label,
+  options,
+  registerKey,
+  labelPosition = "top",
+  className = "",
+  checkboxClassName = "",
+  labelClassName = "",
+  optionLabelClassName = "",
+}) => {
   const { setValue, watch, register } = useFormContext();
   const translate = useTranslate();
-
   const selectedValue = watch(registerKey);
 
   const handleChange = (optionId) => {
-    if (selectedValue === optionId) {
-      setValue(registerKey, null);
-    } else {
-      setValue(registerKey, optionId);
-    }
+    setValue(registerKey, selectedValue === optionId ? null : optionId);
   };
 
   return (
     <div
-      className={` ${
-        labelPosition === "left" ? "flex items-center gap-4" : "mb-4"
-      }`}
+      className={`${
+        labelPosition === "left" ? "flex items-start gap-4" : "space-y-2"
+      } ${className}`}
     >
       {label && (
         <label
           className={`font-medium text-black font-SolaimanLipi ${
             labelPosition === "left"
               ? "w-1/4 min-w-[100px] text-end pt-2"
-              : "block mb-2"
-          }`}
+              : "block"
+          } ${labelClassName}`}
         >
           {translate(label)}
         </label>
       )}
 
-      <div className={labelPosition === "left" ? "flex-1 w-full" : "w-full"}>
-        <div className="flex flex-row gap-3 w-full">
+      <div className={labelPosition === "left" ? "flex-1" : "w-full"}>
+        <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
           {options.map((option) => (
-            <label
+            <div
               key={option.id}
-              className="flex items-center justify-center gap-3 text-gray-800 cursor-pointer w-full"
+              className="flex items-center group cursor-pointer"
+              onClick={() => handleChange(option.id)}
             >
               <input
                 type="checkbox"
                 checked={selectedValue === option.id}
-                onChange={() => handleChange(option.id)}
-                className="h-4 w-4 text-blue-600 border-gray-300 rounded mt-1 flex-shrink-0"
+                onChange={() => {}}
+                className={`h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 flex-shrink-0 ${
+                  selectedValue === option.id ? "opacity-100" : "opacity-80 group-hover:opacity-100"
+                } ${checkboxClassName}`}
               />
-              <span className="text-sm font-SolaimanLipi flex-1 min-w-0 break-words">
+              <span
+                className={`ml-2 text-sm font-SolaimanLipi ${
+                  selectedValue === option.id ? "text-black" : "text-gray-700"
+                } ${optionLabelClassName}`}
+              >
                 {translate(option.name)}
               </span>
-            </label>
+            </div>
           ))}
         </div>
-
-        {/* Hidden input to register the single value */}
         <input type="hidden" {...register(registerKey)} />
       </div>
     </div>

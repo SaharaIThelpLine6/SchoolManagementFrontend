@@ -43,9 +43,6 @@ const AverageDetermination = ({ pageTitle, title }) => {
   } = useGetDesignationQuery();
   const { data: classListData } = useGetClassListQuery();
 
-
-
-
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
@@ -99,9 +96,6 @@ const AverageDetermination = ({ pageTitle, title }) => {
       console.error("Error updating student group:", error);
     }
   };
-
-
-
 
   const columns = [
     {
@@ -194,6 +188,7 @@ const AverageDetermination = ({ pageTitle, title }) => {
               nameField="value"
               registerKey="gender"
             />
+         
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-3">
             <div className="flex flex-col space-y-2">
@@ -493,5 +488,4 @@ const AverageDetermination = ({ pageTitle, title }) => {
   );
 };
 
-
-export default AverageDetermination
+export default AverageDetermination;
