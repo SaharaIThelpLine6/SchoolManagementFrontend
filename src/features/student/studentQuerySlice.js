@@ -81,6 +81,21 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ["StudentReports"],
     }),
+    updateStudentCharacterReport: builder.mutation({
+      query: (data) => ({
+        url: `student_character_report`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["StudentReports"],
+    }),
+     deleteStudentCharacterReport: builder.mutation({
+      query: (id) => ({
+        url: `student_character_report/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["StudentReports"], 
+    }),
     postEnglishAndArobicName: builder.mutation({
       query: (data) => ({
         url: `student_translate`,
@@ -226,4 +241,6 @@ export const {
   usePostChnageStudentGroupMutation,
   useGetUsersOnlineRegInfoQuery,
   usePostStudentAdmissionMutation,
+  useUpdateStudentCharacterReportMutation,
+  useDeleteStudentCharacterReportMutation
 } = userStudentSlice;
