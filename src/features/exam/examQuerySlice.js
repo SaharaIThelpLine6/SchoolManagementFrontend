@@ -14,7 +14,7 @@ export const examSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["ExamNames", "ExamFeeSettings"],
+  tagTypes: ["ExamNames", "ExamFeeSettings", "ExamCondition"],
   endpoints: (builder) => ({
     postNewExam: builder.mutation({
       query: (body) => ({
@@ -47,6 +47,7 @@ export const examSlice = createApi({
       query: () => `get_exam_fee_setting`,
       providesTags: ["ExamFeeSettings"],
     }),
+
     postExamFeeSetting: builder.mutation({
       query: (body) => ({
         url: `insert_exam_fee_setting`,
@@ -78,6 +79,26 @@ export const examSlice = createApi({
       }),
       // invalidatesTags: ["ExamFeeSettings"],
     }),
+    getExamCondition: builder.query({
+      query: ({ SessionID, ExamID, SubClassID }) => ({
+        url: `exam_condition/${SessionID}/${ExamID}/${SubClassID}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
+        { type: "ExamCondition", id: `${SessionID}-${ExamID}-${SubClassID}` },
+      ],
+      
+    }),
+    postExamCondition: builder.mutation({
+      query: (body) => ({
+        url: "new_exam_condition",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
+        { type: "ExamCondition", id: `${SessionID}-${ExamID}-${SubClassID}` },
+      ],
+    }),
   }),
 });
 
@@ -90,5 +111,7 @@ export const {
   usePostExamFeeSettingMutation,
   useUpdateExamFeeSettingMutation,
   useDeleteExamFeeSettingMutation,
-  usePostExamPointConditionMutation
+  usePostExamPointConditionMutation,
+  useGetExamConditionQuery,
+  usePostExamConditionMutation
 } = examSlice;
