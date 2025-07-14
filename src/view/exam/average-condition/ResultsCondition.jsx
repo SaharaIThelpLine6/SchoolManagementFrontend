@@ -309,9 +309,9 @@ const ResultsCondition = () => {
 
   const onSubmit = async (data) => {
     const payload = {
-      SessionID: filter.SessionID,
-      ExamID: filter.ExamID,
-      SubClassID: filter.SubClassID,
+      SessionID: filter.SessionId,
+      ExamID: filter.ExamId,
+      SubClassID: filter.SubClassId,
       MeariUnMeari: data.MeariUnMeari,
       MeariDivision: data.MeariDivision,
       MeariAraDivision: data.MeariAraDivision,
