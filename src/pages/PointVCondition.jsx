@@ -37,8 +37,8 @@ const PointVCondition = ({ pageTitle }) => {
             onClick={() => setActiveTab(tab.id)}
             className={`px-4 py-2 rounded-md ${
               activeTab === tab.id
-                ? "bg-blue-600 text-white"
-                : "bg-gray-100 !text-black "
+                ? "text-white bg-blue-500" // active style (you can adjust)
+                : "bg-gray-400 text-black hover:text-white hover:bg-gray-500"
             }`}
           >
             {tab.label}

@@ -222,7 +222,7 @@ const PointCondition = ({ pageTitle, title }) => {
   }
 
   return (
-    <div>
+    <div className="bg-white">
       {/* <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
         <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
           {translate(title)}

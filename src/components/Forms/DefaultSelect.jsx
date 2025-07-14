@@ -89,7 +89,7 @@ const DefaultSelect = ({
             onClick={toggleDropdown}
             onChange={handleChange} // Add onChange handler
             defaultValue=""
-            className={`relative h-[38px] z-20 w-full appearance-none font-SolaimanLipi rounded border border-stroke bg-[#EDEDED] py-1 px-4 outline-none transition 
+            className={`relative h-[38px] z-20 w-full appearance-none font-SolaimanLipi rounded border border-stroke bg-white py-1 px-4 outline-none transition 
               focus:border-custom-focus active:border-custom-focus
               ${disabled ? "cursor-not-allowed disabled:bg-slate-200" : ""}`}
             disabled={disabled}

@@ -87,7 +87,7 @@ const DatePickerOne = ({
             options={{
               dateFormat: "Y-m-d",
             }}
-            className={`w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] py-1 px-4 text-black outline-none transition
+            className={`w-full rounded border-[1.5px] border-stroke bg-white py-1 px-4 text-black outline-none transition
               focus:border-custom-focus active:border-custom-focus
               disabled:cursor-not-allowed disabled:bg-slate-200 h-[38px]`}
             {...field}

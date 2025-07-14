@@ -1,5 +1,4 @@
-
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import DefaultInput from "../../../components/Forms/DefaultInput";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
@@ -13,6 +12,7 @@ import {
 } from "../../../features/exam/examQuerySlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import Swal from "sweetalert2";
+import FilteringForm from "./FilteringForm";
 
 const CheckboxOption = ({ label, registerKey }) => {
   const { register } = useFormContext();
@@ -31,15 +31,7 @@ const CheckboxOption = ({ label, registerKey }) => {
 const ResultsCondition = () => {
   const methods = useForm();
   const { handleSubmit, watch } = methods;
-
-  // Inside your component
-  const { data: sessionData } = useGetSessionsQuery();
-  const { data: subClassListData } = useGetSubClassListQuery();
-  const { data: examNameData } = useGetExamNamesQuery();
-
-  const SessionId = watch("SessionID");
-  const ExamId = watch("ExamID");
-  const SubClassId = watch("SubClassID");
+  const [filter, setFilter] = useState(null);
 
   // Conditional fetching - only fetch when all required IDs are available
   const {
@@ -48,8 +40,12 @@ const ResultsCondition = () => {
     error: examConditionError,
     isFetching: isExamConditionFetching,
   } = useGetExamConditionQuery(
-    SessionId && ExamId && SubClassId
-      ? { SessionID: SessionId, ExamID: ExamId, SubClassID: SubClassId }
+    filter?.SessionId && filter?.ExamId && filter?.SubClassId
+      ? {
+          SessionID: filter?.SessionId,
+          ExamID: filter?.ExamId,
+          SubClassID: filter?.SubClassId,
+        }
       : skipToken
   );
 
@@ -73,10 +69,6 @@ const ResultsCondition = () => {
     // When filter values change but no data is available (either loading or no data)
     if (examConditionData === null) {
       methods.reset({
-        SessionID: SessionId || null,
-        ExamID: ExamId || null,
-        SubClassID: SubClassId || null,
-        // Reset all other fields to their default values
         MeariUnMeari: null,
         MeariDivision: "",
         MeariAraDivision: "",
@@ -109,9 +101,6 @@ const ResultsCondition = () => {
     } else if (examConditionData) {
       // When data is available, populate the form
       methods.reset({
-        SessionID: examConditionData.SessionID,
-        ExamID: examConditionData.ExamID,
-        SubClassID: examConditionData.SubClassID,
         MeariDivision: examConditionData.MeariDivision,
         MeariAraDivision: examConditionData.MeariAraDivision,
         Color7: examConditionData.Color7,
@@ -142,7 +131,7 @@ const ResultsCondition = () => {
         Published: examConditionData.Published !== undefined ? 1 : 0,
       });
     }
-  }, [examConditionData, SessionId, ExamId, SubClassId, methods.reset]);
+  }, [examConditionData, methods.reset]);
 
   useEffect(() => {
     if (isExamConditionFetching || isExamConditionLoading) {
@@ -320,9 +309,9 @@ const ResultsCondition = () => {
 
   const onSubmit = async (data) => {
     const payload = {
-      SessionID: data.SessionID,
-      ExamID: data.ExamID,
-      SubClassID: data.SubClassID,
+      SessionID: filter.SessionID,
+      ExamID: filter.ExamID,
+      SubClassID: filter.SubClassID,
       MeariUnMeari: data.MeariUnMeari,
       MeariDivision: data.MeariDivision,
       MeariAraDivision: data.MeariAraDivision,
@@ -374,54 +363,12 @@ const ResultsCondition = () => {
       });
     }
   };
-
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="p-6  text-sm text-gray-800 rounded-lg shadow-md border space-y-6">
+        <div className="text-sm text-gray-800 bg-white space-y-6">
           {/* Header Filters */}
-
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div>
-              <label className="block mb-1 font-medium text-gray-700">
-                শিক্ষাবর্ষ :
-              </label>
-              <DefaultSelect
-                options={sessionData ?? []}
-                registerKey="SessionID"
-                placeholder="বছর নির্বাচন করুন"
-                nameField="SessionName"
-                valueField={"SessionID"}
-                unicode={true}
-              />
-            </div>
-            <div>
-              <label className="block mb-1 font-medium text-gray-700">
-                পরীক্ষা :
-              </label>
-              <DefaultSelect
-                options={examNameData ?? []}
-                registerKey="ExamID"
-                placeholder="পরীক্ষা নির্বাচন করুন"
-                nameField="ExamName"
-                valueField={"ExamID"}
-                unicode={true}
-              />
-            </div>
-            <div>
-              <label className="block mb-1 font-medium text-gray-700">
-                শ্রেণি :
-              </label>
-              <DefaultSelect
-                options={subClassListData ?? []}
-                registerKey="SubClassID"
-                placeholder="শ্রেণি নির্বাচন করুন"
-                nameField="SubClass"
-                valueField={"SubClassID"}
-                unicode={true}
-              />
-            </div>
-          </div>
+          <FilteringForm onFilter={setFilter} />
 
           {/* Condition Sections */}
           {[1, 2, 3, 4, 5].map((condition) => (

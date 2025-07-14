@@ -39,7 +39,6 @@ const DefaultLayout = () => {
     }
   }, [dispatch, navigate, token, location.pathname]);
 
-
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === "token") {
@@ -82,11 +81,13 @@ const DefaultLayout = () => {
 
         {/* Main Content */}
         <main className="flex-1 ml-0 h-full overflow-y-auto print:ml-0 print:h-auto print:overflow-y-visible">
-          <div className="p-4 bg-[#F2F3F3] min-h-full print:p-0 print:h-auto print:bg-white print:min-h-auto">
-            <div>
+          <div className="relative p-4 min-h-full print:p-0 print:h-auto print:bg-white print:min-h-auto">
+            {/* Main Content */}
+            <div className="relative">
               <Outlet />
             </div>
-            <DefaultModal></DefaultModal>
+
+            <DefaultModal />
           </div>
         </main>
       </div>
