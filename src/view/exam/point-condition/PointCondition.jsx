@@ -51,10 +51,7 @@ const PointCondition = ({ pageTitle, title }) => {
   const { data: subjectsListData } = useGetAcademicSubjectsQuery();
   const [postExamPointCondition] = usePostExamPointConditionMutation();
 
-  // console.log(sessionData, "sessionData");
-  // console.log(subClassListData, "subClassListData");
-  // console.log(examNameData, "examNameData");
-  // console.log(subjectsListData, "subjectsListData");
+
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
@@ -130,42 +127,6 @@ const PointCondition = ({ pageTitle, title }) => {
     }
   };
 
-  // const onSubmit = async (data) => {
-  //   console.log(data);
-  //   // await postExamPointCondition(data).unwrap();
-  //   // try {
-  //   //   if (!data.SubClassID || selectedRows.length === 0) {
-  //   //     Swal.fire({
-  //   //       icon: "warning",
-  //   //       title: "ফর্ম অসম্পূর্ণ",
-  //   //       text: "অনুগ্রহ করে সাব ক্লাস নির্বাচন করুন এবং অন্তত একজন শিক্ষার্থী সিলেক্ট করুন।",
-  //   //     });
-  //   //     return;
-  //   //   }
-
-  //   //   // const response = await postChnageStudentGroup({
-  //   //   //   id: data.SubClassID,
-  //   //   //   body: { admissionIds: selectedRows },
-  //   //   // }).unwrap();
-
-  //   //   Swal.fire({
-  //   //     icon: "success",
-  //   //     title: "সফলভাবে সংরক্ষণ হয়েছে",
-  //   //     text: response?.message || "গ্রুপ পরিবর্তন সফল হয়েছে।",
-  //   //   }).then(() => {
-  //   //     refetch();
-  //   //     setSelectedRows([]);
-  //   //     methods.reset();
-  //   //   });
-  //   // } catch (error) {
-  //   //   Swal.fire({
-  //   //     icon: "error",
-  //   //     title: "ত্রুটি ঘটেছে!",
-  //   //     text: error?.data?.error || "ডেটা সংরক্ষণ করতে ব্যর্থ হয়েছে।",
-  //   //   });
-  //   //   console.error("Error updating student group:", error);
-  //   // }
-  // };
 
   const columns = [
     {

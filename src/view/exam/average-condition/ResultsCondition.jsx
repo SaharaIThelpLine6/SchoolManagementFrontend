@@ -1,11 +1,7 @@
 import React, { useEffect, useState } from "react";
-import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import DefaultInput from "../../../components/Forms/DefaultInput";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import Button from "../../../components/Button/Button";
-import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
-import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
-import { useGetExamNamesQuery } from "../../../features/student/studentQuerySlice";
 import {
   useGetExamConditionQuery,
   usePostExamConditionMutation,
