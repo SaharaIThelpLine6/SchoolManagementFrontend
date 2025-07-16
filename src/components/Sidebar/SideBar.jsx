@@ -177,6 +177,9 @@ const SideBar = () => {
             if (subItem.name === "Point V: Result Report") {
               return hasPermission(permissionsDataList.result_report); // Example
             }
+            if (subItem.name === "Point Based Mark Sheet") {
+              return hasPermission(permissionsDataList.marksheet); // Example
+            }
             // Add other submenu permission mappings here
             return true; // Default allow
           });

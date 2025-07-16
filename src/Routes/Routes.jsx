@@ -55,6 +55,7 @@ import PointBasedResultEntry from "../pages/PointBasedResultEntry";
 import PointVReport from "../pages/PointVReport";
 import CharacterReport from "../pages/CharacterReport";
 import StudentVacationListTable from "../components/Tables/StudentVacationListTable";
+import PointBasedMarkSheet from "../pages/PointBasedMarkSheet";
 
 const router = createBrowserRouter([
   {
@@ -430,6 +431,16 @@ const router = createBrowserRouter([
                     permissionId={permissionsDataList.result_report}
                   >
                     <PointVReport pageTitle="Madrasah Board Information" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: "mark-sheet",
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.marksheet}
+                  >
+                    <PointBasedMarkSheet pageTitle="Point Based Mark Sheet" />
                   </RequirePermission>
                 ),
               },

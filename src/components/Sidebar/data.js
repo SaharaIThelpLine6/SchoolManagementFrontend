@@ -201,9 +201,14 @@ export const menuData = [
         route: "/result",
       },
       {
-        id: "1",
+        id: "2",
         name: "Point V: Result Report",
         route: "/result/report",
+      },
+      {
+        id: "3",
+        name: "Point Based Mark Sheet",
+        route: "/result/mark-sheet",
       },
     ],
   },
