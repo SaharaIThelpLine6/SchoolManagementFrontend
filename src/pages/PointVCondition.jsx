@@ -4,9 +4,11 @@ import { setPageName } from "../features/auth/authSlice";
 import ResultsCondition from "../view/exam/average-condition/ResultsCondition";
 import Button from "../components/Button/Button";
 import PointCondition from "../view/exam/point-condition/PointCondition";
+import useTranslate from "../utils/Translate";
 
 const PointVCondition = ({ pageTitle }) => {
   const dispatch = useDispatch();
+  const translate = useTranslate();
   const [activeTab, setActiveTab] = useState("subject");
 
   useEffect(() => {
@@ -41,7 +43,7 @@ const PointVCondition = ({ pageTitle }) => {
                 : "bg-gray-400 text-black hover:text-white hover:bg-gray-500"
             }`}
           >
-            {tab.label}
+            {translate(tab.label)}
           </Button>
         ))}
       </div>

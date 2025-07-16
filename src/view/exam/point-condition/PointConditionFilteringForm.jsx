@@ -6,7 +6,7 @@ import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice
 import { useGetExamNamesQuery } from "../../../features/student/studentQuerySlice";
 import useTranslate from "../../../utils/Translate";
 
-const FilteringForm = ({ onFilter }) => {
+const PointConditionFilteringForm = ({ onFilter }) => {
   const methods = useForm();
   const translate = useTranslate();
   const { watch } = methods;
@@ -18,46 +18,43 @@ const FilteringForm = ({ onFilter }) => {
   const SessionId = watch("SessionID");
   const ExamId = watch("ExamID");
   const SubClassId = watch("SubClassID");
+  const SubjectId = watch("SubjectID");
 
   useEffect(() => {
     onFilter({
-      SessionId,
-      ExamId,
-      SubClassId,
+      SessionID: SessionId,
+      ExamID: ExamId,
+      SubClassID: SubClassId,
+      BookID: SubjectId,
     });
-  }, [SessionId, ExamId, SubClassId, onFilter]);
+  }, [SessionId, ExamId, SubClassId, SubjectId, onFilter]);
 
   return (
     <FormProvider {...methods}>
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-       
           <DefaultSelect
             options={sessionData ?? []}
             registerKey="SessionID"
             placeholder="বছর নির্বাচন করুন"
             nameField="SessionName"
             valueField={"SessionID"}
-            label={translate("Session") + " :"}
-
             unicode={true}
+            label={translate("Session") + " :"}
           />
         </div>
         <div>
-   
           <DefaultSelect
             options={examNameData ?? []}
             registerKey="ExamID"
             placeholder="পরীক্ষা নির্বাচন করুন"
             nameField="ExamName"
             valueField={"ExamID"}
-            unicode={true}
             label={translate("Exam") + " :"}
-
+            unicode={true}
           />
         </div>
         <div>
-   
           <DefaultSelect
             options={subClassListData ?? []}
             registerKey="SubClassID"
@@ -73,4 +70,4 @@ const FilteringForm = ({ onFilter }) => {
   );
 };
 
-export default FilteringForm;
+export default PointConditionFilteringForm;

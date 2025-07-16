@@ -9,6 +9,7 @@ import {
 import { skipToken } from "@reduxjs/toolkit/query";
 import Swal from "sweetalert2";
 import FilteringForm from "./FilteringForm";
+import useTranslate from "../../../utils/Translate";
 
 const CheckboxOption = ({ label, registerKey }) => {
   const { register } = useFormContext();
@@ -26,6 +27,7 @@ const CheckboxOption = ({ label, registerKey }) => {
 
 const ResultsCondition = () => {
   const methods = useForm();
+  const translate = useTranslate();
   const { handleSubmit, watch } = methods;
   const [filter, setFilter] = useState(null);
 
@@ -177,11 +179,11 @@ const ResultsCondition = () => {
 
   const getConditionTitle = (condition) => {
     const titles = {
-      1: "গড় মি”ইয়ারী কিতাবের ফেল সংক্রান্ত",
-      2: "মি”ইয়ারী কিতাবের ফেল সংক্রান্ত",
-      3: "অধিকতর মি”ইয়ারী কিতাবের ফেল সংক্রান্ত",
-      4: "অপশনাল বিষয়",
-      5: "(যদি কোন এক বিষয়ে নাম্বার এন্ট্রি না হয়)",
+      1: "Regarding the failure of the average math book",
+      2: "Regarding the failure of the Mi'Yari book",
+      3: "More about the failure of the Mi'yari book",
+      4: "Optional Subject",
+      5: "(If a number is not entered for a subject)",
     };
     return titles[condition] || "";
   };
@@ -194,24 +196,36 @@ const ResultsCondition = () => {
             <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
               <DefaultInput
                 registerKey="GorMeariSCount"
-                placeholder="গড় মিয়ানের যে কোন"
+                placeholder={translate("Average Mi'iary any")}
               />
               <p className="col-span-full md:col-span-2 text-gray-600 self-center">
-                কিভাবে অথবা এর চেয়ে কম ফেল করে তাহল
+                {translate("If someone fails in this way or less, then")}
               </p>
-              <DefaultInput registerKey="GorDivision" placeholder="ইংরেজি" />
-              <DefaultInput registerKey="GorAraDivision" placeholder="বাংলা" />
-              <p className=" text-gray-600 self-center">হবে ।</p>
-              <CheckboxOption label="Silver Color" registerKey="Color8" />
+              <DefaultInput
+                registerKey="GorDivision"
+                placeholder={translate("English")}
+              />
+              <DefaultInput
+                registerKey="GorAraDivision"
+                placeholder={translate("Bangla")}
+              />
+              <p className=" text-gray-600 self-center">{translate("Will.")}</p>
+              <CheckboxOption label={translate("Silver Color")} registerKey="Color8" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-7 gap-3 mt-3">
               <p className="col-span-full md:col-span-3 text-gray-600 self-center">
-                এর চেয়ে বেশি ফেল করলে
+                {translate("Fails in the subject, then")}
               </p>
-              <DefaultInput registerKey="IfNotEqul" placeholder="ইংরেজি" />
-              <DefaultInput registerKey="IfNotEqulAra" placeholder="বাংলা" />
-              <p className=" text-gray-600 self-center">হবে ।</p>
-              <CheckboxOption label="Silver Color" registerKey="Color9" />
+              <DefaultInput
+                registerKey="IfNotEqul"
+                placeholder={translate("English")}
+              />
+              <DefaultInput
+                registerKey="IfNotEqulAra"
+                placeholder={translate("Bangla")}
+              />
+              <p className=" text-gray-600 self-center">{translate("Will.")}</p>
+              <CheckboxOption label={translate("Silver Color")} registerKey="Color9" />
             </div>
           </>
         );
@@ -221,53 +235,61 @@ const ResultsCondition = () => {
             <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
               <DefaultInput
                 registerKey="MeariSCount"
-                placeholder="মি”ইয়ারী যে কোন"
+                placeholder={translate("Mi'iary any")}
               />
               <p className="col-span-full md:col-span-2 text-gray-600 self-center">
-                কিভাবে অথবা এর চেয়ে কম ফেল করে তাহল
+                {translate("If someone fails more than that")}
               </p>
-              <DefaultInput registerKey="MeariDivision" placeholder="ইংরেজি" />
+              <DefaultInput
+                registerKey="MeariDivision"
+                placeholder={translate("English")}
+              />
               <DefaultInput
                 registerKey="MeariAraDivision"
-                placeholder="বাংলা"
+                placeholder={translate("Bangla")}
               />
-              <p className=" text-gray-600 self-center">হবে ।</p>
+              <p className=" text-gray-600 self-center">{translate("Will.")}</p>
               <p></p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-7 gap-3 mt-3">
               <p className="col-span-full md:col-span-3 text-gray-600 self-center">
-                এর চেয়ে বেশি ফেল করলে
+                {translate("Fails in the subject, then")}
               </p>
               <DefaultInput
                 registerKey="MeariRasibDivision"
-                placeholder="ইংরেজি"
+                placeholder={translate("English")}
               />
               <DefaultInput
                 registerKey="MeariRasibDivisionAra"
-                placeholder="বাংলা"
+                placeholder={translate("Bangla")}
               />
-              <p className=" text-gray-600 self-center">হবে ।</p>
-              <CheckboxOption label="Silver Color" registerKey="Color7" />
+              <p className=" text-gray-600 self-center">{translate("Will.")}</p>
+              <CheckboxOption label={translate("Silver Color")} registerKey="Color7" />
             </div>
           </>
         );
       case 3:
         return (
           <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
-            <p className="text-gray-600 self-center">যে কোন</p>
-            <DefaultInput registerKey="MostMeariScount" placeholder="নাম্বার" />
-            <p className="text-gray-600 self-center">টি কিভাবে ফেল করলে</p>
+            <p className="text-gray-600 self-center">
+              {translate("If someone fails in")}
+            </p>
+            <DefaultInput
+              registerKey="MostMeariScount"
+              placeholder={translate("Number")}
+            />
+            <p className="text-gray-600 self-center">{translate("subjects")}</p>
             <DefaultInput
               registerKey="MostMeariBanDivision"
-              placeholder="ইংরেজি"
+              placeholder={translate("English")}
             />
             <DefaultInput
               registerKey="MostMeariAraDivision"
-              placeholder="বাংলা"
+              placeholder={translate("Bangla")}
             />
-            <p className=" text-gray-600 self-center">হবে ।</p>
+            <p className=" text-gray-600 self-center">{translate("Will.")}</p>
 
-            <CheckboxOption label="Silver Color" registerKey="Color11" />
+            <CheckboxOption label={translate("Silver Color")} registerKey="Color11" />
           </div>
         );
       case 4:
@@ -275,7 +297,9 @@ const ResultsCondition = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
               <p className="col-span-full md:col-span-3 text-gray-600 self-center">
-                অপশনাল বিষয়ের গ্রেড কত এর বেশি হলে মূল গ্রেডের সাথে যোগ হবে
+                {translate(
+                  "If the grade in the optional subject is above how much, will it be added to the main grade"
+                )}
               </p>
 
               <DefaultInput registerKey="AboveGPA" />
@@ -287,14 +311,16 @@ const ResultsCondition = () => {
           <>
             <div className="grid grid-cols-1 md:grid-cols-7 gap-3">
               <p className="col-span-full md:col-span-3 text-gray-600 self-center">
-                যদি কোন এক বিষয়ে এন্ট্রি বা নাম্বার বাকি থাকে তাহলে ডিভিশন হবে
+                {translate(
+                  "If there are entries or numbers left in any subject, then division will be done."
+                )}
               </p>
 
               <DefaultInput registerKey="AbsenceName" />
               <DefaultInput registerKey="AbsenceAraName" />
-              <p className=" text-gray-600 self-center">হবে ।</p>
+              <p className=" text-gray-600 self-center">{translate("Will.")}</p>
 
-              <CheckboxOption label="Silver Color" registerKey="Color10" />
+              <CheckboxOption label={translate("Silver Color")} registerKey="Color10" />
             </div>
           </>
         );
@@ -378,7 +404,9 @@ const ResultsCondition = () => {
                   className="h-4 w-4 text-amber-600 rounded border-gray-300 focus:ring-amber-500"
                   {...methods.register(`condition${condition}_active`)}
                 />
-                {`কন্ডিশন-${condition} : ${getConditionTitle(condition)}`}
+                {`${translate(
+                  `Condition-${condition} : ${getConditionTitle(condition)}`
+                )}`}
               </label>
               {renderConditionFields(condition)}
             </div>
@@ -386,7 +414,7 @@ const ResultsCondition = () => {
 
           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex flex-col md:flex-row justify-center items-center gap-3">
             <p className="text-gray-600 text-center md:text-left whitespace-nowrap">
-              মেধার সংখ্যা কত ভাগে তা উল্লেখ করুন
+              {translate("Please specify the number of merit points.")}
             </p>
             <div className="w-full md:w-auto">
               <DefaultInput registerKey="TotalMadha" className="w-full" />

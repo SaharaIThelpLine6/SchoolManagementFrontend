@@ -87,7 +87,6 @@ export const examSlice = createApi({
       providesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
         { type: "ExamCondition", id: `${SessionID}-${ExamID}-${SubClassID}` },
       ],
-      
     }),
     postExamCondition: builder.mutation({
       query: (body) => ({
@@ -96,6 +95,23 @@ export const examSlice = createApi({
         body,
       }),
       invalidatesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
+        { type: "ExamCondition", id: `${SessionID}-${ExamID}-${SubClassID}` },
+      ],
+    }),
+    updatePointWiseExamCondition: builder.mutation({
+      query: (body) => ({
+        url: `pointwise_exam_condition_setting`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["ExamCondition"],
+    }),
+    getPointWiseExamCondition: builder.query({
+      query: ({ SessionID, ExamID, SubClassID }) => ({
+        url: `pointwise_exam_condition/${SessionID}/${ExamID}/${SubClassID}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
         { type: "ExamCondition", id: `${SessionID}-${ExamID}-${SubClassID}` },
       ],
     }),
@@ -113,5 +129,7 @@ export const {
   useDeleteExamFeeSettingMutation,
   usePostExamPointConditionMutation,
   useGetExamConditionQuery,
-  usePostExamConditionMutation
+  usePostExamConditionMutation,
+  useGetPointWiseExamConditionQuery,
+  useUpdatePointWiseExamConditionMutation,
 } = examSlice;

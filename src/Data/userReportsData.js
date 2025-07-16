@@ -126,8 +126,8 @@
   ];
 
   export const examPointConditionStatus = [
-    { id: 1, name: "গড় মি‘ইয়ারি" },
-    { id: 2, name: "মি‘ইয়ারি" },
-    { id: 3, name: "অধিকতর মি‘ইয়ারি" },
-    { id: 4, name: "অপশনাল" },
+    { id: 1, name: "Average Mi'iary" },
+    { id: 2, name: "Mi'iary" },
+    { id: 3, name: "Higher Mi'iary" },
+    { id: 4, name: "Optional" },
   ];

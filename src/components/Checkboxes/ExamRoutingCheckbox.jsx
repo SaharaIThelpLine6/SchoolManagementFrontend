@@ -16,8 +16,12 @@ const ExamRoutingCheckbox = ({
   const translate = useTranslate();
   const selectedValue = watch(registerKey);
 
+  const isChecked = (optionId) => {
+    return selectedValue != null && Number(selectedValue) === Number(optionId);
+  };
+
   const handleChange = (optionId) => {
-    setValue(registerKey, selectedValue === optionId ? null : optionId);
+    setValue(registerKey, isChecked(optionId) ? null : optionId);
   };
 
   return (
@@ -48,15 +52,15 @@ const ExamRoutingCheckbox = ({
             >
               <input
                 type="checkbox"
-                checked={selectedValue === option.id}
-                onChange={() => {}}
+                checked={isChecked(option.id)}
+                onChange={() => {}} // রিয়্যাক্ট হ্যান্ডলার ওয়ার্নিং এড়াতে
                 className={`h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 flex-shrink-0 ${
-                  selectedValue === option.id ? "opacity-100" : "opacity-80 group-hover:opacity-100"
+                  isChecked(option.id) ? "opacity-100" : "opacity-80 group-hover:opacity-100"
                 } ${checkboxClassName}`}
               />
               <span
                 className={`ml-2 text-sm font-SolaimanLipi ${
-                  selectedValue === option.id ? "text-black" : "text-gray-700"
+                  isChecked(option.id) ? "text-black" : "text-gray-700"
                 } ${optionLabelClassName}`}
               >
                 {translate(option.name)}

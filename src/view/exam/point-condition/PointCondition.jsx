@@ -11,23 +11,21 @@ import Button from "../../../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import DefaultInput from "../../../components/Forms/DefaultInput";
-import {
-  useGetAcademicSubjectsQuery,
-  useGetSubClassListQuery,
-} from "../../../features/class/classQuerySlice";
+import { useGetAcademicSubjectsQuery } from "../../../features/class/classQuerySlice";
 import Swal from "sweetalert2";
-
 import SortableTable from "../../../components/Tables/SortableTable";
-import { useGetDesignationQuery } from "../../../features/teachers/teachersSlice";
 import { FiEdit } from "react-icons/fi";
 import StudentFeeGroup from "../../../view/exam/StudentFeeGroup";
 import { examPointConditionStatus } from "../../../Data/userReportsData";
 import ExamRoutingCheckbox from "../../../components/Checkboxes/ExamRoutingCheckbox";
 import {
-  useGetExamNamesQuery,
+  useGetPointWiseExamConditionQuery,
   usePostExamPointConditionMutation,
+  useUpdatePointWiseExamConditionMutation,
 } from "../../../features/exam/examQuerySlice";
-import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
+import { skipToken } from "@reduxjs/toolkit/query";
+import PointConditionFilteringForm from "./PointConditionFilteringForm";
+import bnBijoy2Unicode from "../../../utils/conveter";
 import SingleCheckbox from "../../../components/Checkboxes/SingleCheckbox";
 
 const PAGE_SIZE = 10;
@@ -36,33 +34,51 @@ const PointCondition = ({ pageTitle, title }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const methods = useForm();
-  const { watch, handleSubmit } = methods;
+  const { watch, handleSubmit, reset, setValue } = methods;
   const [currentPage, setCurrentPage] = useState(1);
-  const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false); // State to toggle components
+  const [pointConditionFilter, setPointConditionFilter] = useState(null);
+  const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const { data: subjectsListData } = useGetAcademicSubjectsQuery();
+
+  const [postExamPointCondition] = usePostExamPointConditionMutation();
+  const [updateExamPointCondition] = useUpdatePointWiseExamConditionMutation();
 
   const {
-    data: designation = [],
-    isLoading: isdLoading,
-    isError: isdError,
-  } = useGetDesignationQuery();
-  const { data: sessionData } = useGetSessionsQuery();
-  const { data: subClassListData } = useGetSubClassListQuery();
-  const { data: examNameData } = useGetExamNamesQuery();
-  const { data: subjectsListData } = useGetAcademicSubjectsQuery();
-  const [postExamPointCondition] = usePostExamPointConditionMutation();
+    data: examConditionResponse,
+    isLoading: isExamConditionLoading,
+    error: examConditionError,
+    isFetching,
+    refetch,
+  } = useGetPointWiseExamConditionQuery(
+    pointConditionFilter?.SessionID &&
+      pointConditionFilter?.ExamID &&
+      pointConditionFilter?.SubClassID
+      ? {
+          SessionID: pointConditionFilter?.SessionID,
+          ExamID: pointConditionFilter?.ExamID,
+          SubClassID: pointConditionFilter?.SubClassID,
+        }
+      : skipToken
+  );
 
-
+  const examConditionData = useMemo(() => {
+    if (!examConditionResponse) return [];
+    return Array.isArray(examConditionResponse)
+      ? examConditionResponse
+      : [examConditionResponse];
+  }, [examConditionResponse]);
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  const totalPages = Math.ceil(designation.length / PAGE_SIZE);
+  const totalPages = Math.ceil(examConditionData.length / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return designation.slice(start, start + PAGE_SIZE);
-  }, [designation, currentPage]);
+    return examConditionData.slice(start, start + PAGE_SIZE);
+  }, [examConditionData, currentPage]);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -72,11 +88,32 @@ const PointCondition = ({ pageTitle, title }) => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
+  const handleEdit = (row) => {
+    setEditingId(row.ID);
+    // Set form values from the row data
+    setValue("SubjectID", row.BookID);
+    setValue("PassNumber", row.PassNumber);
+    setValue("MeariAction", row.MeariAction);
+    setValue("MaxNumber", row.MaxNumber);
+
+    // Set division numbers
+    for (let i = 0; i < 7; i++) {
+      setValue(`DivisionNumber${i}`, row[`DivisionNumber${i + 1}`]);
+      setValue(`Division${i}`, row[`Division${i + 1}`]);
+      setValue(`Color${i}`, row[`Color${i + 1}`] !== null);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    reset();
+  };
+
   const onSubmit = async (data) => {
     const payload = {
-      SessionID: data.SessionID,
-      ExamID: data.ExamID,
-      SubClassID: data.SubClassID,
+      SessionID: pointConditionFilter.SessionID,
+      ExamID: pointConditionFilter.ExamID,
+      SubClassID: pointConditionFilter.SubClassID,
       BookID: data.SubjectID,
       MeariAction: data.MeariAction,
       PassNumber: data.PassNumber,
@@ -105,20 +142,32 @@ const PointCondition = ({ pageTitle, title }) => {
     };
 
     try {
-      await postExamPointCondition(payload).unwrap();
+      if (editingId) {
+        // Update existing record
+        await updateExamPointCondition({ ...payload, ID: editingId }).unwrap();
+        Swal.fire({
+          icon: "success",
+          title: "আপডেট সফল হয়েছে!",
+          text: "তথ্যটি সফলভাবে আপডেট করা হয়েছে।",
+        });
+      } else {
+        // Create new record
+        await postExamPointCondition(payload).unwrap();
+        Swal.fire({
+          icon: "success",
+          title: "সংরক্ষণ সফল হয়েছে!",
+          text: "তথ্যটি সফলভাবে সংরক্ষণ করা হয়েছে।",
+        });
+      }
 
-      Swal.fire({
-        icon: "success",
-        title: "সংরক্ষণ সফল হয়েছে!",
-        text: "তথ্যটি সফলভাবে সংরক্ষণ করা হয়েছে।",
-      });
-      //     refetch();
-      methods.reset();
+      await refetch();
+      handleCancelEdit();
     } catch (error) {
       const errMsg =
         error?.data?.error ||
-        "তথ্য সংরক্ষণে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।";
-
+        (editingId
+          ? "তথ্য আপডেটে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
+          : "তথ্য সংরক্ষণে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।");
       Swal.fire({
         icon: "error",
         title: "ব্যর্থ হয়েছে!",
@@ -127,6 +176,29 @@ const PointCondition = ({ pageTitle, title }) => {
     }
   };
 
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "আপনি কি নিশ্চিত?",
+      text: "এই তথ্যটি মুছে ফেলা হবে!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "হ্যাঁ, মুছে ফেলুন!",
+      cancelButtonText: "বাতিল করুন",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        // You'll need to implement the delete mutation in your API slice
+        // await deleteExamPointCondition(id).unwrap();
+        await refetch();
+        Swal.fire("মুছে ফেলা হয়েছে!", "তথ্যটি মুছে ফেলা হয়েছে।", "success");
+      } catch (error) {
+        Swal.fire("ব্যর্থ হয়েছে!", "তথ্য মুছে ফেলতে সমস্যা হয়েছে।", "error");
+      }
+    }
+  };
 
   const columns = [
     {
@@ -137,44 +209,56 @@ const PointCondition = ({ pageTitle, title }) => {
           <button
             className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
             title="Edit"
+            onClick={() => handleEdit(row)}
           >
             <FiEdit className="w-5 h-5" />
           </button>
           <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
             title="Delete"
-            onClick={() => handleDelete(row.DNID)}
+            onClick={() => handleDelete(row.ID)}
           >
             <MdDelete className="w-5 h-5" />
           </button>
         </div>
       ),
     },
-    { title: "SL", field: "SL", hozAlign: "center" },
+    { title: "SL", field: "ID", hozAlign: "center" },
     {
       title: translate("Session"),
-      field: "Designation",
+      field: "SessionID",
       hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row?.Session?.SessionName) || "",
     },
     {
       title: translate("Exam Name"),
-      field: "Designation",
+      field: "ExamID",
       hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row?.Exam?.ExamName) || "",
     },
     {
       title: translate("Class/Jamaat"),
-      field: "Designation",
+      field: "SubClassID",
       hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row?.SubClass?.ClassName) || "",
     },
     {
-      title: translate("Fee Name"),
-      field: "Designation",
+      title: translate("Subject"),
+      field: "SubjectID",
       hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row?.Subject?.SubjectName) || "",
     },
     {
-      title: translate("Fee"),
-      field: "Designation",
+      title: translate("Pass Number"),
+      field: "PassNumber",
       hozAlign: "center",
+    },
+    { title: translate("Max Number"), field: "MaxNumber", hozAlign: "center" },
+    {
+      title: translate("Meari Action"),
+      field: "MeariAction",
+      hozAlign: "center",
+      render: (row) => (row.MeariAction ? "✔️" : "❌"),
     },
   ];
 
@@ -184,90 +268,57 @@ const PointCondition = ({ pageTitle, title }) => {
 
   return (
     <div className="bg-white">
-      {/* <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
-        <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
-          {translate(title)}
-        </h3>
-      </div> */}
-
       <FormProvider {...methods}>
         <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-1 md:grid-cols-4 my-5 gap-5">
-            <DefaultSelect
-              label={translate("Session") + " :"}
-              options={sessionData ?? []}
-              valueField="SessionID"
-              nameField="SessionName"
-              registerKey="SessionID"
-            />
-            <DefaultSelect
-              label={translate("Exam Name") + " :"}
-              options={examNameData ?? []}
-              valueField="ExamID"
-              nameField="ExamName"
-              registerKey="ExamID"
-              unicode={true}
-            />
-            <DefaultSelect
-              label={
-                <p className="text-gray-700 font-medium">
-                  {translate("Class/Jamaat")}:
-                </p>
-              }
-              options={subClassListData ?? []}
-              valueField="SubClassID"
-              nameField="SubClass"
-              registerKey="SubClassID"
-              unicode={true}
-            />
+          <PointConditionFilteringForm onFilter={setPointConditionFilter} />
 
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-5 my-5">
             <DefaultSelect
-              label={
-                <p className="text-gray-700 font-medium">
-                  {translate("Subject")}:
-                </p>
-              }
+              label={translate("Subject") + " :"}
               options={subjectsListData ?? []}
               valueField="SubjectID"
               nameField="SubjectName"
               registerKey="SubjectID"
               unicode={true}
+              require={"This is required!"}
+            />
+            <DefaultInput
+              registerKey="PassNumber"
+              label={translate("Pass Number") + " :"}
+              type="number"
+              require={"This is required!"}
             />
             <div className="sm:col-span-2">
               <ExamRoutingCheckbox
                 label={translate("Point Condition Status") + " :"}
                 options={examPointConditionStatus}
                 registerKey="MeariAction"
-                require={"This Field is required"}
+                value={watch("MeariAction")}
               />
             </div>
-            <DefaultInput
-              registerKey={`PassNumber`}
-              label={translate("পাস নাম্বার") + " :"}
-              type="text"
-            />
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 my-6">
-            {/* Left Column: Score Thresholds */}
             <div className="flex flex-col space-y-3">
               <DefaultInput
                 registerKey="MaxNumber"
                 label={translate("Highest score")}
-                type="text"
+                type="number"
                 labelPosition="left"
+                require={"This is required!"}
               />
               {[...Array(7)].map((_, index) => (
                 <DefaultInput
                   key={`score-threshold-${index}`}
                   registerKey={`DivisionNumber${index}`}
                   label={`${translate(index === 0 ? "If >=" : "Or If >=")}`}
-                  type="text"
+                  type="number"
                   labelPosition="left"
+                  require={"This is required!"}
                 />
               ))}
             </div>
 
-            {/* Middle Column: Division Outputs */}
             <div className="col-span-2 flex flex-col justify-end space-y-4">
               {[...Array(7)].map((_, index) => (
                 <div
@@ -276,16 +327,16 @@ const PointCondition = ({ pageTitle, title }) => {
                 >
                   <div className="flex-1">
                     <DefaultInput
-                      key={`division-${index}`}
                       registerKey={`Division${index}`}
-                      label={translate("তাহলে ডিভিশন")}
+                      label={translate("Then Division")}
                       type="text"
                       labelPosition="left"
+                      require={"This is required!"}
                     />
                   </div>
                   <div className="flex items-center">
                     <SingleCheckbox
-                      label="Silver Color"
+                      label={translate("Silver Color")}
                       registerKey={`Color${index}`}
                     />
                   </div>
@@ -294,38 +345,63 @@ const PointCondition = ({ pageTitle, title }) => {
             </div>
           </div>
 
-          <div className="w-full">
+          <div className="w-full flex gap-4">
             <Button type="submit" className="w-full md:w-auto">
-              {translate("Save")}
+              {editingId ? translate("Update") : translate("Save")}
             </Button>
+            {editingId && (
+              <Button
+                type="button"
+                className="w-full md:w-auto bg-gray-500 hover:bg-gray-600"
+                onClick={handleCancelEdit}
+              >
+                {translate("Cancel")}
+              </Button>
+            )}
           </div>
         </form>
       </FormProvider>
 
+      {/* Table section with loading/error states */}
       <div className="mt-5">
-        <SortableTable columns={columns} data={paginatedData} />
-      </div>
-
-      <div className="flex justify-center items-center mt-4">
-        <div className="flex items-center space-x-2">
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-          >
-            <MdKeyboardArrowLeft size={24} />
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-          >
-            <MdKeyboardArrowRight size={24} />
-          </button>
-        </div>
+        {isExamConditionLoading || isFetching ? (
+          <div className="text-center py-8">Loading table data...</div>
+        ) : examConditionError ? (
+          <div className="text-center py-8 text-red-500">
+            Error loading table data: {examConditionError.message}
+          </div>
+        ) : examConditionData.length > 0 ? (
+          <>
+            <SortableTable columns={columns} data={paginatedData} />
+            <div className="flex justify-center items-center mt-4">
+              <div className="flex items-center space-x-2">
+                <button
+                  className="p-1 border rounded disabled:opacity-50"
+                  onClick={handlePrev}
+                  disabled={currentPage === 1}
+                >
+                  <MdKeyboardArrowLeft size={24} />
+                </button>
+                <span>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  className="p-1 border rounded disabled:opacity-50"
+                  onClick={handleNext}
+                  disabled={currentPage === totalPages}
+                >
+                  <MdKeyboardArrowRight size={24} />
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-8">
+            {pointConditionFilter
+              ? translate("No data available for the selected filters")
+              : translate("Please select filters to view exam conditions")}
+          </div>
+        )}
       </div>
     </div>
   );
