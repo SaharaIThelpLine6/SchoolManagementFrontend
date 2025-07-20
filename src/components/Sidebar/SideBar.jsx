@@ -162,7 +162,7 @@ const SideBar = () => {
             if (subItem.name === "Exam Report") {
               return hasPermission(permissionsDataList.exam_report); // Example
             }
-           // Darul-ikama
+            // Darul-ikama
             if (subItem.name === "Character Report") {
               return hasPermission(permissionsDataList.certificate); // Example
             }
@@ -179,6 +179,9 @@ const SideBar = () => {
             }
             if (subItem.name === "Point Based Mark Sheet") {
               return hasPermission(permissionsDataList.marksheet); // Example
+            }
+            if (subItem.name === "Online Result Public") {
+              return hasPermission(permissionsDataList.result_entry); // Example
             }
             // Add other submenu permission mappings here
             return true; // Default allow

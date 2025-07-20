@@ -202,7 +202,7 @@ export const menuData = [
       },
       {
         id: "2",
-        name: "Point V: Result Report",
+        name: "Point V: Report",
         route: "/result/report",
       },
       {
@@ -214,6 +214,11 @@ export const menuData = [
         id: "4",
         name: "Double Student D:",
         route: "/result/double-student-delete",
+      },
+      {
+        id: "5",
+        name: "Online Result Public",
+        route: "/result/online-result-public",
       },
     ],
   },

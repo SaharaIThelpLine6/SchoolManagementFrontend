@@ -164,7 +164,7 @@ const PointVReport = ({ pageTitle }) => {
       <div className="flex flex-col gap-3">
         <div className="print:hidden w-full border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
           <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">
-            {translate("Result Report")}
+            {translate(pageTitle)}
           </h1>
 
           <FormProvider {...methods}>
