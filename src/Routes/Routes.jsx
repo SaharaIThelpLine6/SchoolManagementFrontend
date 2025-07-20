@@ -56,6 +56,7 @@ import PointVReport from "../pages/PointVReport";
 import CharacterReport from "../pages/CharacterReport";
 import StudentVacationListTable from "../components/Tables/StudentVacationListTable";
 import PointBasedMarkSheet from "../pages/PointBasedMarkSheet";
+import DoubleStudentD from "../pages/DoubleStudentD";
 
 const router = createBrowserRouter([
   {
@@ -441,6 +442,16 @@ const router = createBrowserRouter([
                     permissionId={permissionsDataList.marksheet}
                   >
                     <PointBasedMarkSheet pageTitle="Point Based Mark Sheet" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: "double-student-delete",
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.marksheet}
+                  >
+                    <DoubleStudentD pageTitle="Double Student D:" />
                   </RequirePermission>
                 ),
               },

@@ -23,6 +23,7 @@ const useTranslate = () => {
     "User Name": "ইউজার নাম",
     "Result Report": "ফলাফল রিপোর্ট",
     "Size Status": "সাইজ স্ট্যাটাস",
+    "Double Student D:": "ডাবল শিক্ষার্থী ডি:",
     Optional: "অপশনাল",
     "Point V: Condition": "পয়েন্ট ভি: কন্ডিশন",
     Staff: "স্টাফ",

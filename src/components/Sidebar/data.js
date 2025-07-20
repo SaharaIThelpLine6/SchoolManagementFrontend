@@ -210,6 +210,11 @@ export const menuData = [
         name: "Point Based Mark Sheet",
         route: "/result/mark-sheet",
       },
+      {
+        id: "4",
+        name: "Double Student D:",
+        route: "/result/double-student-delete",
+      },
     ],
   },
   {
