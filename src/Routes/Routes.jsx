@@ -58,6 +58,7 @@ import StudentVacationListTable from "../components/Tables/StudentVacationListTa
 import PointBasedMarkSheet from "../pages/PointBasedMarkSheet";
 import DoubleStudentD from "../pages/DoubleStudentD";
 import OnlineResultPublic from "../pages/OnlineResultPublic";
+import MadrasahBoardInfo from "../pages/MadrasahBoardInfo";
 
 const router = createBrowserRouter([
   {
@@ -394,11 +395,11 @@ const router = createBrowserRouter([
               {
                 index: true,
                 element: (
-                    <RequirePermission
-                      permissionId={permissionsDataList.certificate}
-                    >
-                  <CharacterReport pageTitle="Character Report" />
-                    </RequirePermission>
+                  <RequirePermission
+                    permissionId={permissionsDataList.certificate}
+                  >
+                    <CharacterReport pageTitle="Character Report" />
+                  </RequirePermission>
                 ),
               },
               {
@@ -455,7 +456,8 @@ const router = createBrowserRouter([
                     <DoubleStudentD pageTitle="Double Student D:" />
                   </RequirePermission>
                 ),
-              },  {
+              },
+              {
                 path: "online-result-public",
                 element: (
                   <RequirePermission
@@ -467,6 +469,7 @@ const router = createBrowserRouter([
               },
             ],
           },
+
         ],
       },
     ],

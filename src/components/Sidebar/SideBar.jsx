@@ -183,6 +183,7 @@ const SideBar = () => {
             if (subItem.name === "Online Result Public") {
               return hasPermission(permissionsDataList.result_entry); // Example
             }
+
             // Add other submenu permission mappings here
             return true; // Default allow
           });

@@ -197,6 +197,7 @@ const ResultsCondition = () => {
               <DefaultInput
                 registerKey="GorMeariSCount"
                 placeholder={translate("Average Mi'iary any")}
+                type="number"
               />
               <p className="col-span-full md:col-span-2 text-gray-600 self-center">
                 {translate("If someone fails in this way or less, then")}
@@ -210,7 +211,10 @@ const ResultsCondition = () => {
                 placeholder={translate("Bangla")}
               />
               <p className=" text-gray-600 self-center">{translate("Will.")}</p>
-              <CheckboxOption label={translate("Silver Color")} registerKey="Color8" />
+              <CheckboxOption
+                label={translate("Silver Color")}
+                registerKey="Color8"
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-7 gap-3 mt-3">
               <p className="col-span-full md:col-span-3 text-gray-600 self-center">
@@ -225,7 +229,10 @@ const ResultsCondition = () => {
                 placeholder={translate("Bangla")}
               />
               <p className=" text-gray-600 self-center">{translate("Will.")}</p>
-              <CheckboxOption label={translate("Silver Color")} registerKey="Color9" />
+              <CheckboxOption
+                label={translate("Silver Color")}
+                registerKey="Color9"
+              />
             </div>
           </>
         );
@@ -236,6 +243,7 @@ const ResultsCondition = () => {
               <DefaultInput
                 registerKey="MeariSCount"
                 placeholder={translate("Mi'iary any")}
+                type="number"
               />
               <p className="col-span-full md:col-span-2 text-gray-600 self-center">
                 {translate("If someone fails more than that")}
@@ -264,7 +272,10 @@ const ResultsCondition = () => {
                 placeholder={translate("Bangla")}
               />
               <p className=" text-gray-600 self-center">{translate("Will.")}</p>
-              <CheckboxOption label={translate("Silver Color")} registerKey="Color7" />
+              <CheckboxOption
+                label={translate("Silver Color")}
+                registerKey="Color7"
+              />
             </div>
           </>
         );
@@ -277,6 +288,7 @@ const ResultsCondition = () => {
             <DefaultInput
               registerKey="MostMeariScount"
               placeholder={translate("Number")}
+              type="number"
             />
             <p className="text-gray-600 self-center">{translate("subjects")}</p>
             <DefaultInput
@@ -289,7 +301,10 @@ const ResultsCondition = () => {
             />
             <p className=" text-gray-600 self-center">{translate("Will.")}</p>
 
-            <CheckboxOption label={translate("Silver Color")} registerKey="Color11" />
+            <CheckboxOption
+              label={translate("Silver Color")}
+              registerKey="Color11"
+            />
           </div>
         );
       case 4:
@@ -302,7 +317,7 @@ const ResultsCondition = () => {
                 )}
               </p>
 
-              <DefaultInput registerKey="AboveGPA" />
+              <DefaultInput registerKey="AboveGPA" type="number" />
             </div>
           </>
         );
@@ -320,7 +335,10 @@ const ResultsCondition = () => {
               <DefaultInput registerKey="AbsenceAraName" />
               <p className=" text-gray-600 self-center">{translate("Will.")}</p>
 
-              <CheckboxOption label={translate("Silver Color")} registerKey="Color10" />
+              <CheckboxOption
+                label={translate("Silver Color")}
+                registerKey="Color10"
+              />
             </div>
           </>
         );
@@ -365,8 +383,8 @@ const ResultsCondition = () => {
       GorMeariAction: data.condition1_active ? 1 : 0,
       MeariUnMeari: data.condition2_active ? 1 : 0,
       MostMeariAction: data.condition3_active ? 1 : 0,
-      condition4_active: data.condition4_active,
-      condition5_active: data.condition5_active,
+      // condition4_active: data.condition4_active,
+      // condition5_active: data.condition5_active,
     };
 
     try {
@@ -417,7 +435,7 @@ const ResultsCondition = () => {
               {translate("Please specify the number of merit points.")}
             </p>
             <div className="w-full md:w-auto">
-              <DefaultInput registerKey="TotalMadha" className="w-full" />
+              <DefaultInput registerKey="TotalMadha" className="w-full" type="number" />
             </div>
           </div>
 
