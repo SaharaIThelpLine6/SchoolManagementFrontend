@@ -59,6 +59,7 @@ import PointBasedMarkSheet from "../pages/PointBasedMarkSheet";
 import DoubleStudentD from "../pages/DoubleStudentD";
 import OnlineResultPublic from "../pages/OnlineResultPublic";
 import MadrasahBoardInfo from "../pages/MadrasahBoardInfo";
+import FeeSetting from "../pages/FeeSetting";
 
 const router = createBrowserRouter([
   {
@@ -469,7 +470,31 @@ const router = createBrowserRouter([
               },
             ],
           },
-
+          {
+            path: "accounting",
+            children: [
+              {
+                index: true,
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.certificate}
+                  >
+                    <FeeSetting pageTitle="Fee Setting" />
+                  </RequirePermission>
+                ),
+              },
+              // {
+              //   path: "vacation",
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.gate_pass_leave}
+              //     >
+              //       <StudentVacationListTable pageTitle="Type of Vacation" />
+              //     </RequirePermission>
+              //   ),
+              // },
+            ],
+          },
         ],
       },
     ],

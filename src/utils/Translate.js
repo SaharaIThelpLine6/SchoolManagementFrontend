@@ -38,6 +38,7 @@ const useTranslate = () => {
     "Exam Report": "পরীক্ষার রিপোর্ট",
     "Result Type": "ফলাফলের ধরণ",
     "Point V: Report": "পয়েন্ট ভি: রিপোর্ট",
+    "Fee Setting": "ফি সেটিংস",
     Fee: "ফি",
     Fund: "ফান্ড",
     Langauge: "ভাষা",

@@ -252,7 +252,13 @@ export const menuData = [
     name: "Accounting",
     route: "/accounting",
     icon: "FaCalculator",
-    subMenu: [],
+    subMenu: [
+      {
+        id: "1",
+        name: "Fee Setting",
+        route: "/accounting",
+      },
+    ],
   },
   {
     id: "9",

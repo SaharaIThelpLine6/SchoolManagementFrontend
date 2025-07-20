@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import bnBijoy2Unicode from '../../utils/conveter';
 import { Buffer } from 'buffer';
+import convertBijoyToBengali from '../../utils/uniconveter';
 const StudentResultAvgPrintView = ({ studentResult }) => {
     const [logo, setLogo] = useState(null)
     const [principal, setPrincipal] = useState(null)
@@ -65,7 +66,7 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
                             <tr>
                                 <td className="text-end">পিতার নাম</td>
                                 <td className="w-10 text-center"> : </td>
-                                <td> {bnBijoy2Unicode(studentResult?.FatherName)} </td>
+                                <td> {bnBijoy2Unicode(String(studentResult?.FatherName))} </td>
                             </tr>
                             <tr>
                                 <td className="text-end">জন্ম তারিখ</td>
@@ -77,7 +78,7 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
                 </div>
 
                 <div className="pt-5">
-                    <h1 className="bg-[#a8a6a6] text-white text-center text-[16px]">মোট বিষয় {bnBijoy2Unicode(String(studentResult?.SubSonkha))} টি - পূর্ণমান {bnBijoy2Unicode(String(studentResult?.DVTop1))}* = {bnBijoy2Unicode(String(studentResult?.DVTop1 * studentResult?.SubSonkha))}</h1>
+                    <h1 className="bg-[#a8a6a6] text-white text-center text-[16px]">মোট বিষয় {bnBijoy2Unicode(String(studentResult?.SubSonkha))} টি</h1>
                     <table className="w-[295px]">
                         <tbody className="border border-black w-full">
                             {Array.from({ length: studentResult?.SubSonkha || 0 }).map((_, index) => {
@@ -90,7 +91,7 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
 
                                 return (
                                     <tr key={index}>
-                                        <td className="text-start pl-2">{division}</td>
+                                        <td className="text-start pl-2">{bnBijoy2Unicode(division)}</td>
                                         <td className="w-12 text-end">:</td>
                                         <td className="pl-3">{bnBijoy2Unicode(String(divisionNumber))} X</td>
                                         <td className="pr-2">
