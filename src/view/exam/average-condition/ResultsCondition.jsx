@@ -10,20 +10,8 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import Swal from "sweetalert2";
 import FilteringForm from "./FilteringForm";
 import useTranslate from "../../../utils/Translate";
+import CheckboxOption from "./CheckboxOption";
 
-const CheckboxOption = ({ label, registerKey }) => {
-  const { register } = useFormContext();
-  return (
-    <label className="flex items-center gap-2 cursor-pointer">
-      <input
-        type="checkbox"
-        {...register(registerKey)}
-        className="h-4 w-4 text-amber-600 rounded border-gray-300 focus:ring-amber-500"
-      />
-      <span className="text-gray-700">{label}</span>
-    </label>
-  );
-};
 
 const ResultsCondition = () => {
   const methods = useForm();
@@ -352,7 +340,6 @@ const ResultsCondition = () => {
       SessionID: filter.SessionId,
       ExamID: filter.ExamId,
       SubClassID: filter.SubClassId,
-      MeariUnMeari: data.MeariUnMeari,
       MeariDivision: data.MeariDivision,
       MeariAraDivision: data.MeariAraDivision,
       Color7: data.Color7,
