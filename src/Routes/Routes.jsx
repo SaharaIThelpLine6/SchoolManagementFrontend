@@ -477,7 +477,7 @@ const router = createBrowserRouter([
                 index: true,
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.certificate}
+                    permissionId={permissionsDataList.fee_setting}
                   >
                     <FeeSetting pageTitle="Fee Setting" />
                   </RequirePermission>

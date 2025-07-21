@@ -32,7 +32,7 @@ const FeeSetting = ({ pageTitle }) => {
     <>
       <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-SolaimanLipi">
         {/* Top Section - Title and Filters */}
-        <div className="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-4">
+        <div className="flex gap-5 flex-col">
           <h2 className="text-xl font-bold text-black shrink-0 2xl:mr-6">
             {translate(pageTitle)}
           </h2>

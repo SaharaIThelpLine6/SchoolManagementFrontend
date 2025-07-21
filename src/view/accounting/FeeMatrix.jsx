@@ -1,65 +1,108 @@
 import React, { useState } from "react";
 
 const FeeMatrix = () => {
-  const [studentData, setStudentData] = useState({
+  // State initialization
+  const initialStudentState = {
     residential: { new: false, old: false },
     nonResidential: { new: false, old: false },
     dayCare: { new: false, old: false },
-  });
-
-  const [studentFemaleData, setStudentFemaleData] = useState({
-    residential: { new: false, old: false },
-    nonResidential: { new: false, old: false },
-    dayCare: { new: false, old: false },
-  });
-
-  const [amounts, setAmounts] = useState({
-    male: "",
-    female: "",
-  });
-
-  const handleCheckboxChange = (gender, category, type) => {
-    if (gender === "male") {
-      setStudentData((prev) => ({
-        ...prev,
-        [category]: {
-          ...prev[category],
-          [type]: !prev[category][type],
-        },
-      }));
-    } else {
-      setStudentFemaleData((prev) => ({
-        ...prev,
-        [category]: {
-          ...prev[category],
-          [type]: !prev[category][type],
-        },
-      }));
-    }
   };
 
-  const handleAmountChange = (gender, value) => {
-    setAmounts((prev) => ({
+  const [studentData, setStudentData] = useState(initialStudentState);
+  const [studentFemaleData, setStudentFemaleData] = useState(initialStudentState);
+  const [amounts, setAmounts] = useState({ male: "", female: "" });
+
+  // Category translations
+  const categoryTranslations = {
+    residential: "আবাসিক",
+    nonResidential: "অনাবাসিক",
+    dayCare: "ডে-কেয়ার",
+  };
+
+  // Handler functions
+  const handleCheckboxChange = (gender, category, type) => {
+    const setter = gender === "male" ? setStudentData : setStudentFemaleData;
+    setter((prev) => ({
       ...prev,
-      [gender]: value,
+      [category]: {
+        ...prev[category],
+        [type]: !prev[category][type],
+      },
     }));
   };
 
+  const handleAmountChange = (gender, value) => {
+    setAmounts((prev) => ({ ...prev, [gender]: value }));
+  };
+
+  // Reusable components
+  const CategoryHeader = ({ category }) => (
+    <td
+      colSpan={2}
+      className="p-2 border border-gray-200 text-center font-medium text-gray-600 text-sm"
+    >
+      {categoryTranslations[category]}
+    </td>
+  );
+
+  const NewOldLabel = ({ index }) => (
+    <td className="p-1 border border-gray-200 text-center text-xs text-gray-500">
+      {index % 2 === 0 ? "নতুন" : "পুরাতন"}
+    </td>
+  );
+
+  const CheckboxCell = ({ gender, category, type, checked }) => (
+    <td className="p-1 border border-gray-200 text-center">
+      <div className="flex flex-col gap-1 justify-center items-center">
+        <input
+          type="text"
+          className="w-16 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-center text-xs"
+        />
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={() => handleCheckboxChange(gender, category, type)}
+          className="h-3 w-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+        />
+      </div>
+    </td>
+  );
+
+  const AmountInput = ({ gender }) => (
+    <td colSpan={6} className="p-2 border border-gray-200">
+      <div className="flex flex-col items-center gap-1">
+        <input
+          type="text"
+          value={amounts[gender]}
+          onChange={(e) => handleAmountChange(gender, e.target.value)}
+          placeholder="টাকা লিখুন"
+          className="w-24 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-center text-sm"
+        />
+        <div className="flex items-center gap-1">
+          <input
+            type="checkbox"
+            className="h-3 w-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+          />
+        </div>
+      </div>
+    </td>
+  );
+
   return (
-    <div className="flex justify-center p-6">
-      <div className="w-full max-w-6xl overflow-x-auto">
-        <table className="w-full border-collapse shadow-lg bg-white rounded-lg overflow-hidden">
+    <div className="flex justify-center py-2">
+      <div className="w-full overflow-x-auto">
+        <table className="w-full border-collapse bg-white rounded-lg overflow-hidden">
           <thead>
             <tr className="bg-gray-50">
               <th
                 colSpan={6}
-                className="p-4 border border-gray-200 text-center font-semibold text-gray-700"
+                className="p-2 border border-gray-200 text-center font-semibold text-gray-700 text-sm"
               >
                 ছাত্র (Male Students)
               </th>
               <th
                 colSpan={6}
-                className="p-4 border border-gray-200 text-center font-semibold text-gray-700"
+                className="p-2 border border-gray-200 text-center font-semibold text-gray-700 text-sm"
               >
                 ছাত্রী (Female Students)
               </th>
@@ -68,53 +111,21 @@ const FeeMatrix = () => {
           <tbody>
             {/* Category Row */}
             <tr>
-              {["residential", "nonResidential", "dayCare"].map((category) => (
-                <React.Fragment key={`male-${category}`}>
-                  <td
-                    colSpan={2}
-                    className="p-3 border border-gray-200 text-center font-medium text-gray-600"
-                  >
-                    {category === "residential"
-                      ? "আবাসিক"
-                      : category === "nonResidential"
-                      ? "অনাবাসিক"
-                      : "ডে-কেয়ার"}
-                  </td>
-                </React.Fragment>
+              {Object.keys(initialStudentState).map((category) => (
+                <CategoryHeader key={`male-${category}`} category={category} />
               ))}
-              {["residential", "nonResidential", "dayCare"].map((category) => (
-                <React.Fragment key={`female-${category}`}>
-                  <td
-                    colSpan={2}
-                    className="p-3 border border-gray-200 text-center font-medium text-gray-600"
-                  >
-                    {category === "residential"
-                      ? "আবাসিক"
-                      : category === "nonResidential"
-                      ? "অনাবাসিক"
-                      : "ডে-কেয়ার"}
-                  </td>
-                </React.Fragment>
+              {Object.keys(initialStudentState).map((category) => (
+                <CategoryHeader key={`female-${category}`} category={category} />
               ))}
             </tr>
 
             {/* New/Old Labels Row */}
             <tr>
               {[...Array(6)].map((_, i) => (
-                <td
-                  key={`male-label-${i}`}
-                  className="p-3 border border-gray-200 text-center text-sm text-gray-500"
-                >
-                  {i % 2 === 0 ? "নতুন" : "পুরাতন"}
-                </td>
+                <NewOldLabel key={`male-label-${i}`} index={i} />
               ))}
               {[...Array(6)].map((_, i) => (
-                <td
-                  key={`female-label-${i}`}
-                  className="p-3 border border-gray-200 text-center text-sm text-gray-500"
-                >
-                  {i % 2 === 0 ? "নতুন" : "পুরাতন"}
-                </td>
+                <NewOldLabel key={`female-label-${i}`} index={i} />
               ))}
             </tr>
 
@@ -122,96 +133,45 @@ const FeeMatrix = () => {
             <tr>
               {/* Male Checkboxes */}
               {Object.entries(studentData).map(([category, types]) => (
-                <React.Fragment key={`male-check-${category}`}>
-                  <td className="p-3 border border-gray-200 text-center">
-                    <input
-                      type="checkbox"
-                      checked={types.new}
-                      onChange={() =>
-                        handleCheckboxChange("male", category, "new")
-                      }
-                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                    />
-                  </td>
-                  <td className="p-3 border border-gray-200 text-center">
-                    <input
-                      type="checkbox"
-                      checked={types.old}
-                      onChange={() =>
-                        handleCheckboxChange("male", category, "old")
-                      }
-                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                    />
-                  </td>
+                <React.Fragment key={`male-${category}`}>
+                  <CheckboxCell
+                    gender="male"
+                    category={category}
+                    type="new"
+                    checked={types.new}
+                  />
+                  <CheckboxCell
+                    gender="male"
+                    category={category}
+                    type="old"
+                    checked={types.old}
+                  />
                 </React.Fragment>
               ))}
 
               {/* Female Checkboxes */}
               {Object.entries(studentFemaleData).map(([category, types]) => (
-                <React.Fragment key={`female-check-${category}`}>
-                  <td className="p-3 border border-gray-200 text-center">
-                    <input
-                      type="checkbox"
-                      checked={types.new}
-                      onChange={() =>
-                        handleCheckboxChange("female", category, "new")
-                      }
-                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                    />
-                  </td>
-                  <td className="p-3 border border-gray-200 text-center">
-                    <input
-                      type="checkbox"
-                      checked={types.old}
-                      onChange={() =>
-                        handleCheckboxChange("female", category, "old")
-                      }
-                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                    />
-                  </td>
+                <React.Fragment key={`female-${category}`}>
+                  <CheckboxCell
+                    gender="female"
+                    category={category}
+                    type="new"
+                    checked={types.new}
+                  />
+                  <CheckboxCell
+                    gender="female"
+                    category={category}
+                    type="old"
+                    checked={types.old}
+                  />
                 </React.Fragment>
               ))}
             </tr>
 
             {/* Amount Input Row */}
             <tr>
-              <td colSpan={6} className="p-4 border border-gray-200">
-                <div className="flex flex-col items-center gap-3">
-                  <input
-                    type="text"
-                    value={amounts.male}
-                    onChange={(e) => handleAmountChange("male", e.target.value)}
-                    placeholder="টাকা লিখুন"
-                    className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-center"
-                  />
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-600">সক্রিয় করুন</span>
-                  </div>
-                </div>
-              </td>
-              <td colSpan={6} className="p-4 border border-gray-200">
-                <div className="flex flex-col items-center gap-3">
-                  <input
-                    type="text"
-                    value={amounts.female}
-                    onChange={(e) =>
-                      handleAmountChange("female", e.target.value)
-                    }
-                    placeholder="টাকা লিখুন"
-                    className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-center"
-                  />
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-              </td>
+              <AmountInput gender="male" />
+              <AmountInput gender="female" />
             </tr>
           </tbody>
         </table>

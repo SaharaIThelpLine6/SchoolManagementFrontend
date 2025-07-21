@@ -184,6 +184,11 @@ const SideBar = () => {
               return hasPermission(permissionsDataList.result_entry); // Example
             }
 
+            // Accounting
+            if (subItem.name === "Fee Setting") {
+              return hasPermission(permissionsDataList.fee_setting); // Example
+            }
+
             // Add other submenu permission mappings here
             return true; // Default allow
           });
