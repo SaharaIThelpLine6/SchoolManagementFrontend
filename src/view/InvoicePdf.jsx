@@ -3,14 +3,14 @@ import React from "react";
 const InvoicePdf = () => {
   return (
     <div
-      className="p-6 font-sans bg-white text-xs text-black relative max-w-3xl mx-auto border"
+      className="p-6 pb-3 font-SolaimanLipi bg-white text-xs text-black relative max-w-3xl mx-auto"
       style={{ fontSize: "0.75rem" }}
     >
-      {/* PAID Ribbon */}
-      <div className="absolute right-0 top-0">
+      {/* PAID Ribbon - Improved styling */}
+      <div className="absolute right-0 top-0 overflow-hidden w-32 h-32">
         <div
-          className="rotate-45 transform bg-green-500 text-white font-bold text-xxs px-16 py-0.5 -mr-8 mt-8 shadow-lg"
-          style={{ fontSize: "0.65rem" }}
+          className="absolute bg-[#22c55e] text-white font-bold text-center shadow-md w-48 py-2 -right-10 top-6 rotate-45 border-2 border-green-600"
+          style={{ fontSize: "24px" }}
         >
           PAID
         </div>
@@ -19,14 +19,11 @@ const InvoicePdf = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <img src="/logo.png" alt="Alpha Net Logo" className="h-8 mb-1" />
-          <p className="text-xxs text-gray-600">
-            ENTERPRISE IT SOLUTIONS PROVIDER
-          </p>
+          <img src="/saharait.png" alt="Alpha Net Logo" className="h-24 mb-1" />
         </div>
       </div>
-      <div className="text-right text-xxs text-gray-700 leading-4">
-        <p className="font-bold">Alpha Net</p>
+      <div className="text-right text-xxs text-gray-700 leading-4 mt-4">
+        <p className="font-bold text-xl">Alpha Net</p>
         <p>RDR Tower, House #01, Road #01</p>
         <p>Airport Road, Nikunja 2</p>
         <p>Dhaka-1229, Bangladesh</p>
@@ -34,10 +31,14 @@ const InvoicePdf = () => {
       </div>
 
       {/* Invoice Info */}
-      <div className="mt-4 mb-1 bg-gray-100">
-        <h2 className="text-sm font-bold">Invoice #211387</h2>
-        <p>Invoice Date: Saturday, July 19th, 2025</p>
-        <p>Due Date: Saturday, July 19th, 2025</p>
+      <div className="mt-8 py-1 mb-1 bg-gray-100 flex flex-col gap-2">
+        <h2 className="text-xl font-bold">Invoice #211387</h2>
+        <p className="text-sm font-medium">
+          Invoice Date: Saturday, July 19th, 2025
+        </p>
+        <p className="text-sm font-medium">
+          Due Date: Saturday, July 19th, 2025
+        </p>
       </div>
 
       {/* Invoiced To */}
@@ -61,7 +62,7 @@ const InvoicePdf = () => {
         </div>
 
         {/* Table Row */}
-        <div className="grid grid-cols-4 border-b border-gray-300">
+        <div className="grid grid-cols-4 border-b border-gray-300 h-10">
           <div className="col-span-3 p-1 border-r border-gray-300">
             Addon (VPS 500104 - Sahara IT) - 50GB for 13 Days bill:- (07/19/2025
             - 08/01/2025)
@@ -70,7 +71,7 @@ const InvoicePdf = () => {
         </div>
 
         {/* Subtotal */}
-        <div className="grid grid-cols-4 border-b border-gray-300 font-bold">
+        <div className="grid grid-cols-4 border-b border-gray-300 font-bold bg-gray-100">
           <div className="col-span-3 p-1 border-r border-gray-300 text-right">
             Sub Total
           </div>
@@ -78,7 +79,7 @@ const InvoicePdf = () => {
         </div>
 
         {/* VAT */}
-        <div className="grid grid-cols-4 border-b border-gray-300 font-bold">
+        <div className="grid grid-cols-4 border-t border-gray-300 font-bold bg-gray-100">
           <div className="col-span-3 p-1 border-r border-gray-300 text-right">
             5.00% VAT
           </div>
@@ -86,7 +87,7 @@ const InvoicePdf = () => {
         </div>
 
         {/* Credit */}
-        <div className="grid grid-cols-4 border-b border-gray-300 font-bold">
+        <div className="grid grid-cols-4 border-t border-gray-300 font-bold bg-gray-100">
           <div className="col-span-3 p-1 border-r border-gray-300 text-right">
             Credit
           </div>
@@ -94,7 +95,7 @@ const InvoicePdf = () => {
         </div>
 
         {/* Total */}
-        <div className="grid grid-cols-4 font-bold bg-gray-100">
+        <div className="grid grid-cols-4 font-bold border-t border-gray-300 bg-gray-100">
           <div className="col-span-3 p-1 border-r border-gray-300 text-right">
             Total
           </div>
@@ -103,10 +104,10 @@ const InvoicePdf = () => {
       </div>
 
       {/* Transactions */}
-      <div className="mt-4">
-        <h3 className="font-bold text-sm mb-1">Transactions</h3>
+      <div className="mt-10">
+        <h3 className="font-bold text-sm mb-5">Transactions</h3>
         <div className="border border-gray-300">
-          <div className="grid grid-cols-4 bg-gray-100 font-semibold border-b border-gray-300 text-center">
+          <div className="grid grid-cols-4 bg-gray-100 font-bold border-b border-gray-300 text-center">
             <div className="p-1 border-r border-gray-300">Transaction Date</div>
             <div className="p-1 border-r border-gray-300">Gateway</div>
             <div className="p-1 border-r border-gray-300">Transaction ID</div>
@@ -124,7 +125,7 @@ const InvoicePdf = () => {
             </div>
             <div className="p-1">BDT 441TK</div>
           </div>
-          <div className="grid grid-cols-4 font-bold">
+          <div className="grid grid-cols-4 font-bold bg-gray-100">
             <div className="col-span-3 p-1 text-right border-r border-gray-300">
               Balance
             </div>
@@ -134,7 +135,7 @@ const InvoicePdf = () => {
       </div>
 
       {/* Footer */}
-      <div className="mt-8 text-xs text-black flex justify-between">
+      <div className="mt-10 text-xs text-black flex justify-between">
         <p>Manual signature is not required for system generated invoice.</p>
         <p>PDF Generated on Saturday, July 19th, 2025</p>
       </div>
