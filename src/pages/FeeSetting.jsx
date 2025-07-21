@@ -9,6 +9,7 @@ import { useGetExamNamesQuery } from "../features/exam/examQuerySlice";
 
 import FeeMatrix from "../view/accounting/FeeMatrix";
 import FeeSettingTable from "../view/accounting/FeeSettingTable";
+import InvoicePdf from "../view/InvoicePdf";
 
 const PAGE_SIZE = 10;
 
@@ -25,14 +26,12 @@ const FeeSetting = ({ pageTitle }) => {
   const { data: subClassData } = useGetSubClassListQuery();
   const { data: examData } = useGetExamNamesQuery();
 
-
-
-
   return (
     <>
       <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-SolaimanLipi">
         {/* Top Section - Title and Filters */}
-        <div className="flex gap-5 flex-col">
+        <InvoicePdf />
+        {/* <div className="flex gap-5 flex-col">
           <h2 className="text-xl font-bold text-black shrink-0 2xl:mr-6">
             {translate(pageTitle)}
           </h2>
@@ -70,13 +69,10 @@ const FeeSetting = ({ pageTitle }) => {
           </FormProvider>
         </div>
           <FeeMatrix />
-          <FeeSettingTable />
-      
+          <FeeSettingTable /> */}
       </div>
     </>
   );
 };
 
-
-
-export default FeeSetting
+export default FeeSetting;

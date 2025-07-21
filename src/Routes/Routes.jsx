@@ -60,6 +60,7 @@ import DoubleStudentD from "../pages/DoubleStudentD";
 import OnlineResultPublic from "../pages/OnlineResultPublic";
 import MadrasahBoardInfo from "../pages/MadrasahBoardInfo";
 import FeeSetting from "../pages/FeeSetting";
+import PaymentConfirm from "../pages/PaymentConfirm";
 
 const router = createBrowserRouter([
   {
@@ -416,6 +417,10 @@ const router = createBrowserRouter([
             ],
           },
           {
+            path: "/payment_confirm/:schoolid/:service/:size",
+            element: <PaymentConfirm />,
+          },
+          {
             path: "result",
             children: [
               {
@@ -483,16 +488,16 @@ const router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-              // {
-              //   path: "vacation",
-              //   element: (
-              //     <RequirePermission
-              //       permissionId={permissionsDataList.gate_pass_leave}
-              //     >
-              //       <StudentVacationListTable pageTitle="Type of Vacation" />
-              //     </RequirePermission>
-              //   ),
-              // },
+              {
+                path: "student-fee-collection",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.st}
+                  // >
+                  <StudentVacationListTable pageTitle="Student Fee Collection" />
+                  // </RequirePermission>
+                ),
+              },
             ],
           },
         ],
