@@ -33,8 +33,26 @@ const PAGE_SIZE = 10;
 const PointCondition = ({ pageTitle, title }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
-  const methods = useForm();
-  const { watch, handleSubmit, reset, setValue } = methods;
+
+  const methods = useForm({
+    defaultValues: {
+      SessionID: null,
+      ExamID: null,
+      SubClassID: null,
+      SubjectID: "",
+      PassNumber: "",
+      MeariAction: false,
+      MaxNumber: "",
+      ...Array.from({ length: 7 }).reduce((acc, _, index) => ({
+        ...acc,
+        [`DivisionNumber${index}`]: "",
+        [`Division${index}`]: "",
+        [`Color${index}`]: false,
+      }), {})
+    },
+  });
+
+  const { watch, handleSubmit, reset, setValue, getValues } = methods;
   const [currentPage, setCurrentPage] = useState(1);
   const [pointConditionFilter, setPointConditionFilter] = useState(null);
   const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false);
@@ -73,6 +91,32 @@ const PointCondition = ({ pageTitle, title }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
+  // Reset form when filters change
+  useEffect(() => {
+    if (
+      pointConditionFilter?.SessionID &&
+      pointConditionFilter?.ExamID &&
+      pointConditionFilter?.SubClassID
+    ) {
+      reset({
+        SessionID: pointConditionFilter.SessionID,
+        ExamID: pointConditionFilter.ExamID,
+        SubClassID: pointConditionFilter.SubClassID,
+        SubjectID: "",
+        PassNumber: "",
+        MeariAction: false,
+        MaxNumber: "",
+        ...Array.from({ length: 7 }).reduce((acc, _, index) => ({
+          ...acc,
+          [`DivisionNumber${index}`]: "",
+          [`Division${index}`]: "",
+          [`Color${index}`]: false,
+        }), {})
+      });
+      setEditingId(null);
+    }
+  }, [pointConditionFilter, reset]);
+
   const totalPages = Math.ceil(examConditionData.length / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
@@ -90,13 +134,11 @@ const PointCondition = ({ pageTitle, title }) => {
 
   const handleEdit = (row) => {
     setEditingId(row.ID);
-    // Set form values from the row data
     setValue("SubjectID", row.BookID);
     setValue("PassNumber", row.PassNumber);
     setValue("MeariAction", row.MeariAction);
     setValue("MaxNumber", row.MaxNumber);
 
-    // Set division numbers
     for (let i = 0; i < 7; i++) {
       setValue(`DivisionNumber${i}`, row[`DivisionNumber${i + 1}`]);
       setValue(`Division${i}`, row[`Division${i + 1}`]);
@@ -105,8 +147,23 @@ const PointCondition = ({ pageTitle, title }) => {
   };
 
   const handleCancelEdit = () => {
+    const { SessionID, ExamID, SubClassID } = getValues();
+    reset({
+      SessionID,
+      ExamID,
+      SubClassID,
+      SubjectID: "",
+      PassNumber: "",
+      MeariAction: false,
+      MaxNumber: "",
+      ...Array.from({ length: 7 }).reduce((acc, _, index) => ({
+        ...acc,
+        [`DivisionNumber${index}`]: "",
+        [`Division${index}`]: "",
+        [`Color${index}`]: false,
+      }), {})
+    });
     setEditingId(null);
-    reset();
   };
 
   const onSubmit = async (data) => {
@@ -143,7 +200,6 @@ const PointCondition = ({ pageTitle, title }) => {
 
     try {
       if (editingId) {
-        // Update existing record
         await updateExamPointCondition({ ...payload, ID: editingId }).unwrap();
         Swal.fire({
           icon: "success",
@@ -151,7 +207,6 @@ const PointCondition = ({ pageTitle, title }) => {
           text: "তথ্যটি সফলভাবে আপডেট করা হয়েছে।",
         });
       } else {
-        // Create new record
         await postExamPointCondition(payload).unwrap();
         Swal.fire({
           icon: "success",
@@ -177,27 +232,27 @@ const PointCondition = ({ pageTitle, title }) => {
   };
 
   const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      title: "আপনি কি নিশ্চিত?",
-      text: "এই তথ্যটি মুছে ফেলা হবে!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "হ্যাঁ, মুছে ফেলুন!",
-      cancelButtonText: "বাতিল করুন",
-    });
+    // const result = await Swal.fire({
+    //   title: "আপনি কি নিশ্চিত?",
+    //   text: "এই তথ্যটি মুছে ফেলা হবে!",
+    //   icon: "warning",
+    //   showCancelButton: true,
+    //   confirmButtonColor: "#3085d6",
+    //   cancelButtonColor: "#d33",
+    //   confirmButtonText: "হ্যাঁ, মুছে ফেলুন!",
+    //   cancelButtonText: "বাতিল করুন",
+    // });
 
-    if (result.isConfirmed) {
-      try {
-        // You'll need to implement the delete mutation in your API slice
-        // await deleteExamPointCondition(id).unwrap();
-        await refetch();
-        Swal.fire("মুছে ফেলা হয়েছে!", "তথ্যটি মুছে ফেলা হয়েছে।", "success");
-      } catch (error) {
-        Swal.fire("ব্যর্থ হয়েছে!", "তথ্য মুছে ফেলতে সমস্যা হয়েছে।", "error");
-      }
-    }
+    // if (result.isConfirmed) {
+    //   try {
+    //     // You'll need to implement the delete mutation in your API slice
+    //     // await deleteExamPointCondition(id).unwrap();
+    //     await refetch();
+    //     Swal.fire("মুছে ফেলা হয়েছে!", "তথ্যটি মুছে ফেলা হয়েছে।", "success");
+    //   } catch (error) {
+    //     Swal.fire("ব্যর্থ হয়েছে!", "তথ্য মুছে ফেলতে সমস্যা হয়েছে।", "error");
+    //   }
+    // }
   };
 
   const columns = [
@@ -349,15 +404,13 @@ const PointCondition = ({ pageTitle, title }) => {
             <Button type="submit" className="w-full md:w-auto">
               {editingId ? translate("Update") : translate("Save")}
             </Button>
-            {editingId && (
-              <Button
-                type="button"
-                className="w-full md:w-auto bg-gray-500 hover:bg-gray-600"
-                onClick={handleCancelEdit}
-              >
-                {translate("Cancel")}
-              </Button>
-            )}
+            <Button
+              type="button"
+              className="w-full md:w-auto !bg-[#22c55e] text-white"
+              onClick={handleCancelEdit}
+            >
+              {translate("Reset")}
+            </Button>
           </div>
         </form>
       </FormProvider>

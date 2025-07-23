@@ -9,50 +9,107 @@ import {
 } from "react-icons/md";
 import Button from "../../../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
-import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import DefaultInput from "../../../components/Forms/DefaultInput";
-import { useGetClassListQuery } from "../../../features/class/classQuerySlice";
 import Swal from "sweetalert2";
-
 import SortableTable from "../../../components/Tables/SortableTable";
-import { useGetDesignationQuery } from "../../../features/teachers/teachersSlice";
 import { FiEdit } from "react-icons/fi";
-import StudentFeeGroup from "../../../view/exam/StudentFeeGroup";
+import FormColumn from "./FormColumn";
+import SingleCheckbox from "../../../components/Checkboxes/SingleCheckbox";
+import {
+  useGetAverageExamConditionAllQuery,
+  usePostAverageExamConditionSettingMutation,
+  useUpdateAverageExamConditionSettingMutation,
+} from "../../../features/exam/examQuerySlice";
+import bnBijoy2Unicode from "../../../utils/conveter";
+import PointConditionFilteringForm from "../point-condition/PointConditionFilteringForm";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 const PAGE_SIZE = 10;
 
-const AverageDetermination = ({ pageTitle, title }) => {
+const AverageDetermination = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
-  const methods = useForm();
-  const { watch, handleSubmit } = methods;
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false); // State to toggle components
 
-  const genderOptions = [
-    { id: "1", value: "পুরুষ" },
-    { id: "2", value: "মহিলা" },
-    { id: "3", value: "উভয়" },
-  ];
+  const methods = useForm({
+    defaultValues: {
+      SessionID: null,
+      ExamID: null,
+      SubClassID: null,
+      DivisionTopNumber: "",
+      ...Object.fromEntries(
+        Array.from({ length: 6 }).flatMap((_, i) => {
+          const index = i + 1;
+          return [
+            [`DivisionNumber${index}`, ""],
+            [`Division${index}`, ""],
+            [`DivisionAra${index}`, ""],
+            [`Color${index}`, false],
+            [`TopNum${index}`, ""],
+          ];
+        })
+      ),
+    },
+  });
+
+  const { watch, handleSubmit, setValue, reset, getValues } = methods;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [averageDetermineFilter, setAverageDetermineFilter] = useState(null);
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+
+  const [postAverageExamConditionSetting] = usePostAverageExamConditionSettingMutation();
+  const [updateAverageExamConditionSetting] = useUpdateAverageExamConditionSettingMutation();
 
   const {
-    data: designation = [],
-    isLoading: isdLoading,
-    isError: isdError,
-  } = useGetDesignationQuery();
-  const { data: classListData } = useGetClassListQuery();
+    data: averageExamConditionAllData = [],
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useGetAverageExamConditionAllQuery(
+    averageDetermineFilter?.SessionID &&
+      averageDetermineFilter?.ExamID &&
+      averageDetermineFilter?.SubClassID
+      ? {
+          SessionID: averageDetermineFilter?.SessionID,
+          ExamID: averageDetermineFilter?.ExamID,
+          SubClassID: averageDetermineFilter?.SubClassID,
+        }
+      : skipToken
+  );
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  const totalPages = Math.ceil(designation.length / PAGE_SIZE);
+  useEffect(() => {
+    if (
+      averageDetermineFilter?.SessionID &&
+      averageDetermineFilter?.ExamID &&
+      averageDetermineFilter?.SubClassID
+    ) {
+      reset({
+        SessionID: averageDetermineFilter.SessionID,
+        ExamID: averageDetermineFilter.ExamID,
+        SubClassID: averageDetermineFilter.SubClassID,
+      });
+      setEditingId(null);
+    }
+  }, [averageDetermineFilter, reset]);
+
+  const examConditionData = useMemo(() => {
+    if (!averageExamConditionAllData) return [];
+    return Array.isArray(averageExamConditionAllData)
+      ? averageExamConditionAllData
+      : [averageExamConditionAllData];
+  }, [averageExamConditionAllData]);
+
+  const totalPages = Math.ceil(examConditionData.length / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return designation.slice(start, start + PAGE_SIZE);
-  }, [designation, currentPage]);
+    return examConditionData.slice(start, start + PAGE_SIZE);
+  }, [examConditionData, currentPage]);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -62,38 +119,57 @@ const AverageDetermination = ({ pageTitle, title }) => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
+  const handleEdit = (row) => {
+    setEditingId(row.ID);
+    setValue("DivisionTopNumber", row.DivisionTopNumber);
+
+    Array.from({ length: 6 }).forEach((_, i) => {
+      const index = i + 1;
+      setValue(`DivisionNumber${index}`, row[`DivisionNumber${index}`]);
+      setValue(`Division${index}`, row[`Division${index}`]);
+      setValue(`DivisionAra${index}`, row[`DivisionAra${index}`]);
+      setValue(`Color${index}`, row[`Color${index}`] || false);
+      setValue(`TopNum${index}`, row.HifzCondition[`TopNum${index}`]);
+    });
+  };
+
   const onSubmit = async (data) => {
     try {
-      if (!data.SubClassID || selectedRows.length === 0) {
-        Swal.fire({
-          icon: "warning",
-          title: "ফর্ম অসম্পূর্ণ",
-          text: "অনুগ্রহ করে সাব ক্লাস নির্বাচন করুন এবং অন্তত একজন শিক্ষার্থী সিলেক্ট করুন।",
-        });
-        return;
-      }
+      const payload = {
+        ...data,
+        SessionID: averageDetermineFilter.SessionID,
+        ExamID: averageDetermineFilter.ExamID,
+        SubClassID: averageDetermineFilter.SubClassID,
+      };
 
-      // const response = await postChnageStudentGroup({
-      //   id: data.SubClassID,
-      //   body: { admissionIds: selectedRows },
-      // }).unwrap();
+      let response;
+
+      if (!editingId) {
+        response = await postAverageExamConditionSetting(payload).unwrap();
+      } else {
+        response = await updateAverageExamConditionSetting(payload).unwrap();
+      }
 
       Swal.fire({
         icon: "success",
-        title: "সফলভাবে সংরক্ষণ হয়েছে",
-        text: response?.message || "গ্রুপ পরিবর্তন সফল হয়েছে।",
+        title: "সফলভাবে সংরক্ষণ হয়েছে",
+        text: response?.message || "গ্রুপ পরিবর্তন সফল হয়েছে।",
       }).then(() => {
         refetch();
         setSelectedRows([]);
-        methods.reset();
+        reset({
+          SessionID: averageDetermineFilter.SessionID,
+          ExamID: averageDetermineFilter.ExamID,
+          SubClassID: averageDetermineFilter.SubClassID,
+        });
+        setEditingId(null);
       });
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "ত্রুটি ঘটেছে!",
-        text: error?.data?.error || "ডেটা সংরক্ষণ করতে ব্যর্থ হয়েছে।",
+        title: "ত্রুটি সৃজিত!",
+        text: error?.data?.error || "ডেটা সংরক্ষণ করতে ব্যর্থ হয়েছে।",
       });
-      console.error("Error updating student group:", error);
     }
   };
 
@@ -106,191 +182,88 @@ const AverageDetermination = ({ pageTitle, title }) => {
           <button
             className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
             title="Edit"
+            onClick={() => handleEdit(row)}
           >
             <FiEdit className="w-5 h-5" />
           </button>
           <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
             title="Delete"
-            onClick={() => handleDelete(row.DNID)}
+            onClick={() => handleDelete(row.ID)}
           >
             <MdDelete className="w-5 h-5" />
           </button>
         </div>
       ),
     },
-    { title: "SL", field: "SL", hozAlign: "center" },
+    { title: "SL", field: "ID", hozAlign: "center" },
     {
       title: translate("Session"),
-      field: "Designation",
+      field: "SessionName",
       hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row.Session.SessionName),
     },
     {
-      title: translate("Exam Name"),
-      field: "Designation",
+      title: translate("Exam"),
+      field: "ExamID",
       hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row.Exam.ExamName),
     },
     {
       title: translate("Class/Jamaat"),
-      field: "Designation",
+      field: "SubClass",
       hozAlign: "center",
-    },
-    {
-      title: translate("Fee Name"),
-      field: "Designation",
-      hozAlign: "center",
-    },
-    {
-      title: translate("Fee"),
-      field: "Designation",
-      hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row.SubClass.SubClass),
     },
   ];
 
-  if (showStudentFeeGroup) {
-    return <StudentFeeGroup onBack={setShowStudentFeeGroup} />;
-  }
-
   return (
     <div>
-      {/* <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
-        <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
-          {translate(title)}
-        </h3>
-      </div> */}
-
       <FormProvider {...methods}>
         <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-col sm:flex-row my-5 gap-5">
-            <DefaultSelect
-              label={translate("Session") + " :"}
-              options={classListData ?? []}
-              valueField="ClassID"
-              nameField="ClassName"
-              registerKey="ClassID"
-            />
-            <DefaultSelect
-              label={translate("Exam Name") + " :"}
-              options={classListData ?? []}
-              valueField="ClassID"
-              nameField="ClassName"
-              registerKey="ClassID"
-            />
+          <PointConditionFilteringForm onFilter={setAverageDetermineFilter} />
 
-            <DefaultSelect
-              label={
-                <p className="text-gray-700 font-medium">
-                  {translate("Class/Jamaat")}:
-                </p>
-              }
-              options={genderOptions}
-              valueField="id"
-              nameField="value"
-              registerKey="gender"
-            />
-         
-          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-3">
-            <div className="flex flex-col space-y-2">
-              <div className="flex justify-center items-center my-4">
-                <h2 className="text-base font-semibold text-gray-800">
-                  {translate("Average Condition")}
-                </h2>
-              </div>
+            <div className="flex flex-col space-y-3">
+              <DefaultInput
+                registerKey="DivisionTopNumber"
+                label={translate("Highest score")}
+                type="number"
+                labelPosition="left"
+                require={"This is required!"}
+              />
+              {[...Array(6)].map((_, i) => (
+                <DefaultInput
+                  key={`score-threshold-${i + 1}`}
+                  registerKey={`DivisionNumber${i + 1}`}
+                  label={`${translate(i + 1 === 1 ? "If >=" : "Or If >=")}`}
+                  type="number"
+                  labelPosition="left"
+                  require={"This is required!"}
+                />
+              ))}
+            </div>
 
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("Highest score")}`}
-                type={"text"}
-                labelPosition="left"
-              />
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("If >=")} `}
-                labelPosition="left"
-                type={"text"}
-              />
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("Or If >=")} `}
-                labelPosition="left"
-                type={"text"}
-              />
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("Or If >=")}`}
-                labelPosition="left"
-                type={"text"}
-              />
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("Or If >=")} `}
-                labelPosition="left"
-                type={"text"}
-              />
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("Or If >=")}`}
-                labelPosition="left"
-                type={"text"}
-              />
-            </div>
-            <div className="flex flex-col space-y-2">
-              <div className="flex justify-center items-center my-4">
-                <h2 className="text-base font-semibold text-gray-800">
-                  {translate("Bangla")}
-                </h2>
-              </div>
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("তাহলে ডিভিশন")} `}
-                type={"text"}
-                labelPosition="left"
-              />
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("তাহলে ডিভিশন")} `}
-                labelPosition="left"
-                type={"text"}
-              />
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("তাহলে ডিভিশন")} `}
-                labelPosition="left"
-                type={"text"}
-              />
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("তাহলে ডিভিশন")} `}
-                labelPosition="left"
-                type={"text"}
-              />
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("তাহলে ডিভিশন")} `}
-                labelPosition="left"
-                type={"text"}
-              />
-              <DefaultInput
-                registerKey={"StudentName"}
-                label={`${translate("তাহলে ডিভিশন")}`}
-                labelPosition="left"
-                type={"text"}
-              />
-            </div>
-            <div className="flex flex-col space-y-2">
-              <div className="flex justify-center items-center my-4">
-                <h2 className="text-base font-semibold text-gray-800">
-                  {translate("Arabic")}
-                </h2>
-              </div>
-              <DefaultInput registerKey={"StudentName"} type={"text"} />
-              <DefaultInput registerKey={"StudentName"} type={"text"} />
-              <DefaultInput registerKey={"StudentName"} type={"text"} />
-              <DefaultInput registerKey={"StudentName"} type={"text"} />
-              <DefaultInput registerKey={"StudentName"} type={"text"} />
-              <DefaultInput registerKey={"StudentName"} type={"text"} />
-            </div>
+            <FormColumn
+              title="Bangla"
+              inputs={Array(6)
+                .fill()
+                .map((_, i) => ({
+                  registerKey: `Division${i + 1}`,
+                  label: "তাহলে ডিভিশন",
+                  type: "text",
+                }))}
+            />
+
+            <FormColumn
+              title="Arabic"
+              inputs={Array(6)
+                .fill()
+                .map((_, i) => ({
+                  registerKey: `DivisionAra${i + 1}`,
+                  type: "text",
+                }))}
+            />
 
             <div className="flex flex-col space-y-2">
               <div className="flex justify-center items-center my-4">
@@ -300,189 +273,109 @@ const AverageDetermination = ({ pageTitle, title }) => {
               </div>
 
               <div className="grid grid-cols-1 gap-2">
-                {/* Checkbox-Input Pair 1 */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center w-1/4 min-w-[110px]">
-                    <input
-                      type="checkbox"
-                      id="silverColor"
-                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label
-                      htmlFor="silverColor"
-                      className="ml-2 block text-base text-gray-700"
-                    >
-                      {translate("Silver color")}
-                    </label>
-                  </div>
-                  <div className="flex-1">
-                    <DefaultInput
-                      registerKey={"StudentName"}
-                      type={"text"}
-                      label=""
-                      placeholder="Student name"
-                    />
-                  </div>
-                </div>
-
-                {/* Checkbox-Input Pair 2 */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center w-1/4 min-w-[110px]">
-                    <input
-                      type="checkbox"
-                      id="goldColor"
-                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label
-                      htmlFor="goldColor"
-                      className="ml-2 block text-base text-gray-700"
-                    >
-                      {translate("Silver color")}
-                    </label>
-                  </div>
-                  <div className="flex-1">
-                    <DefaultInput
-                      registerKey={"Score1"}
-                      type={"number"}
-                      label=""
-                      placeholder="Score value"
-                    />
-                  </div>
-                </div>
-
-                {/* Checkbox-Input Pair 3 */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center w-1/4 min-w-[110px]">
-                    <input
-                      type="checkbox"
-                      id="bronzeColor"
-                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label
-                      htmlFor="bronzeColor"
-                      className="ml-2 block text-base text-gray-700"
-                    >
-                      {translate("Silver color")}
-                    </label>
-                  </div>
-                  <div className="flex-1">
-                    <DefaultInput
-                      registerKey={"Score2"}
-                      type={"number"}
-                      label=""
-                      placeholder="Score value"
-                    />
-                  </div>
-                </div>
-
-                {/* Checkbox-Input Pair 4 */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center w-1/4 min-w-[110px]">
-                    <input
-                      type="checkbox"
-                      id="platinumColor"
-                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label
-                      htmlFor="platinumColor"
-                      className="ml-2 block text-base text-gray-700"
-                    >
-                      {translate("Silver color")}
-                    </label>
-                  </div>
-                  <div className="flex-1">
-                    <DefaultInput
-                      registerKey={"Score3"}
-                      type={"number"}
-                      label=""
-                      placeholder="Score value"
-                    />
-                  </div>
-                </div>
-
-                {/* Checkbox-Input Pair 5 */}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center w-1/4 min-w-[110px]">
-                    <input
-                      type="checkbox"
-                      id="diamondColor"
-                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label
-                      htmlFor="diamondColor"
-                      className="ml-2 block text-base text-gray-700"
-                    >
-                      {translate("Silver color")}
-                    </label>
-                  </div>
-                  <div className="flex-1">
-                    <DefaultInput
-                      registerKey={"Score4"}
-                      type={"number"}
-                      label=""
-                      placeholder="Score value"
-                    />
-                  </div>
-                </div>
-                {/* Checkbox-Input Pair 6*/}
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center w-1/4 min-w-[110px]">
-                    <input
-                      type="checkbox"
-                      id="diamondColor"
-                      className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label
-                      htmlFor="diamondColor"
-                      className="ml-2 block text-base text-gray-700"
-                    >
-                      {translate("Silver color")}
-                    </label>
-                  </div>
-                  <div className="flex-1">
-                    <DefaultInput
-                      registerKey={"Score4"}
-                      type={"number"}
-                      label=""
-                      placeholder="Score value"
-                    />
-                  </div>
-                </div>
+                {Array(6)
+                  .fill()
+                  .map((_, i) => (
+                    <div key={i + 1} className="flex items-center gap-2">
+                      <SingleCheckbox
+                        label={translate("Silver Color")}
+                        registerKey={`Color${i + 1}`}
+                      />
+                      <div className="flex-1">
+                        <DefaultInput
+                          registerKey={`TopNum${i + 1}`}
+                          type="number"
+                          placeholder={"Score value"}
+                          require={true}
+                        />
+                      </div>
+                    </div>
+                  ))}
               </div>
             </div>
           </div>
-          <div className="w-full">
+
+          <div className="w-full flex gap-2 flex-wrap">
             <Button type="submit" className="w-full md:w-auto">
               {translate("Save")}
+            </Button>
+            <Button
+              type="button"
+              className="w-full md:w-auto !bg-[#22c55e] text-white"
+              onClick={() => {
+                const { SessionID, ExamID, SubClassID } = getValues();
+                reset({ SessionID, ExamID, SubClassID });
+                setEditingId(null);
+              }}
+            >
+              {translate("Reset")}
             </Button>
           </div>
         </form>
       </FormProvider>
 
+      {/* Table */}
       <div className="mt-5">
-        <SortableTable columns={columns} data={paginatedData} />
-      </div>
+        {isLoading || isFetching ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h--12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <span className="ml-3 text-gray-700">Loading data...</span>
+          </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center h-64 rounded-lg">
+            <div className="text-red-500 text-xl mb-2">Data Not Found</div>
+            <button
+              onClick={refetch}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Retry
+            </button>
+          </div>
+        ) : paginatedData.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg">
+            <div className="text-gray-500 text-xl">
+              {averageDetermineFilter?.SessionID &&
+              averageDetermineFilter?.ExamID &&
+              averageDetermineFilter?.SubClassID
+                ? "No data available for the selected filters"
+                : "Please select all filters to view data"}
+            </div>
+          </div>
+        ) : (
+          <>
+            <SortableTable
+              columns={columns}
+              data={paginatedData}
+              isLoading={isLoading || isFetching}
+            />
 
-      <div className="flex justify-center items-center mt-4">
-        <div className="flex items-center space-x-2">
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-          >
-            <MdKeyboardArrowLeft size={24} />
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-          >
-            <MdKeyboardArrowRight size={24} />
-          </button>
-        </div>
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center mt-4">
+                <div className="flex items-center space-x-2">
+                  <button
+                    className="p-1 border rounded disabled:opacity-50"
+                    onClick={handlePrev}
+                    disabled={currentPage === 1 || isLoading || isFetching}
+                  >
+                    <MdKeyboardArrowLeft size={24} />
+                  </button>
+                  <span>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    className="p-1 border rounded disabled:opacity-50"
+                    onClick={handleNext}
+                    disabled={
+                      currentPage === totalPages || isLoading || isFetching
+                    }
+                  >
+                    <MdKeyboardArrowRight size={24} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

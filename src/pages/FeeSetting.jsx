@@ -40,7 +40,7 @@ const FeeSetting = ({ pageTitle }) => {
 
         <button onClick={handlePrint}>Print</button>
 
-        {/* <div className="flex gap-5 flex-col">
+       <div className="flex gap-5 flex-col">
           <h2 className="text-xl font-bold text-black shrink-0 2xl:mr-6">
             {translate(pageTitle)}
           </h2>
@@ -78,11 +78,11 @@ const FeeSetting = ({ pageTitle }) => {
           </FormProvider>
         </div>
           <FeeMatrix />
-          <FeeSettingTable /> */}
+          <FeeSettingTable />
       </div>
-      <div className="print_canvas">
+      {/* <div className="print_canvas">
         <InvoicePdf />
-      </div>
+      </div> */}
     </>
   );
 };
