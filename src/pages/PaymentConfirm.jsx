@@ -110,7 +110,7 @@ const PaymentConfirm = () => {
                   />
                 </div>
               </div>
-              <div className="text-right text-xxs text-gray-700 leading-4 mt-4">
+              <div className="text-center text-xxs text-gray-700 leading-4">
                 <p className="font-bold text-xl">SAHARA IT</p>
                 <p>ATTN: Farhad Hasan</p>
                 <p>Masud building, Lift-2, Vangapress, Jatrabari</p>

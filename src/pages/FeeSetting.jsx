@@ -38,7 +38,7 @@ const FeeSetting = ({ pageTitle }) => {
       <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-SolaimanLipi hidden_in_print">
         {/* Top Section - Title and Filters */}
 
-        <button onClick={handlePrint}>Print</button>
+        {/* <button onClick={handlePrint}>Print</button> */}
 
        <div className="flex gap-5 flex-col">
           <h2 className="text-xl font-bold text-black shrink-0 2xl:mr-6">
@@ -80,9 +80,9 @@ const FeeSetting = ({ pageTitle }) => {
           <FeeMatrix />
           <FeeSettingTable />
       </div>
-      {/* <div className="print_canvas">
+      <div className="print_canvas">
         <InvoicePdf />
-      </div> */}
+      </div>
     </>
   );
 };
