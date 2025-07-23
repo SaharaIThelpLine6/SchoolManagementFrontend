@@ -11,9 +11,7 @@ import Button from "../../../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import DefaultInput from "../../../components/Forms/DefaultInput";
-import {
-  useGetAcademicSubjectsQuery,
-} from "../../../features/class/classQuerySlice";
+import { useGetAcademicSubjectsQuery } from "../../../features/class/classQuerySlice";
 import Swal from "sweetalert2";
 import SortableTable from "../../../components/Tables/SortableTable";
 import { FiEdit } from "react-icons/fi";
@@ -57,7 +55,7 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
   const {
     data: averageSubjectPassNumberData = [],
     isLoading,
-    error,
+    isError,
     isFetching,
     refetch,
   } = useGetAverageSubjectPassNumberQuery(
@@ -432,43 +430,64 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
       </div>
 
       {/* Table section */}
+    {/* Table Section */}
       <div className="mt-5">
         {isLoading || isFetching ? (
-          <div className="text-center py-8">Loading table data...</div>
-        ) : error ? (
-          <div className="text-center py-8 text-red-500">
-            Error loading table data: {error.message}
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <span className="ml-3 text-gray-700">Loading data...</span>
           </div>
-        ) : averageSubjectPassNumberData.length > 0 ? (
-          <>
-            <SortableTable columns={columns} data={paginatedData} />
-            <div className="flex justify-center items-center mt-4">
-              <div className="flex items-center space-x-2">
-                <button
-                  className="p-1 border rounded disabled:opacity-50"
-                  onClick={handlePrev}
-                  disabled={currentPage === 1}
-                >
-                  <MdKeyboardArrowLeft size={24} />
-                </button>
-                <span>
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button
-                  className="p-1 border rounded disabled:opacity-50"
-                  onClick={handleNext}
-                  disabled={currentPage === totalPages}
-                >
-                  <MdKeyboardArrowRight size={24} />
-                </button>
-              </div>
+        ) : isError ? (
+          <div className="flex flex-col items-center justify-center h-64 rounded-lg">
+            <div className="text-center py-8 text-red-500">
+              Error loading table data: {( isError).message}
             </div>
+          </div>
+        ) : averageSubjectPassNumberData?.length > 0 ||
+          paginatedData?.length > 0 ? (
+          <>
+            <SortableTable
+              columns={columns}
+              data={paginatedData || averageSubjectPassNumberData}
+              isLoading={isLoading || isFetching}
+            />
+
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center mt-4">
+                <div className="flex items-center space-x-2">
+                  <button
+                    className="p-1 border rounded disabled:opacity-50"
+                    onClick={handlePrev}
+                    disabled={currentPage === 1 || isLoading || isFetching}
+                  >
+                    <MdKeyboardArrowLeft size={24} />
+                  </button>
+                  <span>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    className="p-1 border rounded disabled:opacity-50"
+                    onClick={handleNext}
+                    disabled={
+                      currentPage === totalPages || isLoading || isFetching
+                    }
+                  >
+                    <MdKeyboardArrowRight size={24} />
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         ) : (
-          <div className="text-center py-8">
-            {subjectAndPassNumberFilter
-              ? "No data available for the selected filters"
-              : "Please select filters to view data"}
+          <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg">
+            <div className="text-gray-500 text-xl">
+              {subjectAndPassNumberFilter ||
+              (subjectAndPassNumberFilter?.SessionID &&
+                subjectAndPassNumberFilter?.ExamID &&
+                subjectAndPassNumberFilter?.SubClassID)
+                ? "No data available for the selected filters"
+                : "Please select all filters to view data"}
+            </div>
           </div>
         )}
       </div>

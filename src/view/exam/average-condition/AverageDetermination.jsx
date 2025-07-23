@@ -57,8 +57,10 @@ const AverageDetermination = ({ pageTitle }) => {
   const [selectedRows, setSelectedRows] = useState([]);
   const [editingId, setEditingId] = useState(null);
 
-  const [postAverageExamConditionSetting] = usePostAverageExamConditionSettingMutation();
-  const [updateAverageExamConditionSetting] = useUpdateAverageExamConditionSettingMutation();
+  const [postAverageExamConditionSetting] =
+    usePostAverageExamConditionSettingMutation();
+  const [updateAverageExamConditionSetting] =
+    useUpdateAverageExamConditionSettingMutation();
 
   const {
     data: averageExamConditionAllData = [],
@@ -78,6 +80,7 @@ const AverageDetermination = ({ pageTitle }) => {
       : skipToken
   );
 
+  console.log(averageExamConditionAllData, "averageExamConditionAllData");
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
@@ -215,6 +218,96 @@ const AverageDetermination = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => bnBijoy2Unicode(row.SubClass.SubClass),
     },
+    {
+      title: translate(">=1"),
+      field: "DivisionNumber1",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Division-1"),
+      field: "Division1",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Division Arabic-1"),
+      field: "DivisionAra1",
+      hozAlign: "center",
+    },
+    {
+      title: translate(">=2"),
+      field: "DivisionNumber2",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Division-2"),
+      field: "Division2",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Division Arabic-2"),
+      field: "DivisionAra2",
+      hozAlign: "center",
+    },
+    {
+      title: translate(">=3"),
+      field: "DivisionNumber3",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Division-3"),
+      field: "Division3",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Division Arabic-3"),
+      field: "DivisionAra3",
+      hozAlign: "center",
+    },
+    {
+      title: translate(">=4"),
+      field: "DivisionNumber4",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Division-4"),
+      field: "Division4",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Division Arabic-4"),
+      field: "DivisionAra4",
+      hozAlign: "center",
+    },
+    {
+      title: translate(">=5"),
+      field: "DivisionNumber5",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Division-5"),
+      field: "Division5",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Division Arabic-5"),
+      field: "DivisionAra5",
+      hozAlign: "center",
+    },
+    {
+      title: translate(">=6"),
+      field: "DivisionNumber6",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Division-6"),
+      field: "Division6",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Division Arabic-6"),
+      field: "DivisionAra6",
+      hozAlign: "center",
+    },
   ];
 
   return (
@@ -314,38 +407,25 @@ const AverageDetermination = ({ pageTitle }) => {
         </form>
       </FormProvider>
 
-      {/* Table */}
+      {/* Table Section */}
       <div className="mt-5">
         {isLoading || isFetching ? (
           <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h--12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
             <span className="ml-3 text-gray-700">Loading data...</span>
           </div>
         ) : isError ? (
           <div className="flex flex-col items-center justify-center h-64 rounded-lg">
-            <div className="text-red-500 text-xl mb-2">Data Not Found</div>
-            <button
-              onClick={refetch}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Retry
-            </button>
-          </div>
-        ) : paginatedData.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg">
-            <div className="text-gray-500 text-xl">
-              {averageDetermineFilter?.SessionID &&
-              averageDetermineFilter?.ExamID &&
-              averageDetermineFilter?.SubClassID
-                ? "No data available for the selected filters"
-                : "Please select all filters to view data"}
+            <div className="text-center py-8 text-red-500">
+              Error loading table data: {isError.message}
             </div>
           </div>
-        ) : (
+        ) : averageExamConditionAllData?.length > 0 ||
+          paginatedData?.length > 0 ? (
           <>
             <SortableTable
               columns={columns}
-              data={paginatedData}
+              data={paginatedData || averageExamConditionAllData}
               isLoading={isLoading || isFetching}
             />
 
@@ -375,6 +455,17 @@ const AverageDetermination = ({ pageTitle }) => {
               </div>
             )}
           </>
+        ) : (
+          <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg">
+            <div className="text-gray-500 text-xl">
+              {averageDetermineFilter ||
+              (averageDetermineFilter?.SessionID &&
+                averageDetermineFilter?.ExamID &&
+                averageDetermineFilter?.SubClassID)
+                ? "No data available for the selected filters"
+                : "Please select all filters to view data"}
+            </div>
+          </div>
         )}
       </div>
     </div>
