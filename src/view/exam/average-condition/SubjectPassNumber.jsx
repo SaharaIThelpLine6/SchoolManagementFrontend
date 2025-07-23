@@ -11,48 +11,105 @@ import Button from "../../../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import DefaultInput from "../../../components/Forms/DefaultInput";
-import { useGetClassListQuery } from "../../../features/class/classQuerySlice";
+import {
+  useGetAcademicSubjectsQuery,
+} from "../../../features/class/classQuerySlice";
 import Swal from "sweetalert2";
-
 import SortableTable from "../../../components/Tables/SortableTable";
-import { useGetDesignationQuery } from "../../../features/teachers/teachersSlice";
 import { FiEdit } from "react-icons/fi";
-import StudentFeeGroup from "../../../view/exam/StudentFeeGroup";
+import FilteringForm from "./FilteringForm";
+import {
+  useGetAverageSubjectPassNumberQuery,
+  usePostAverageSubjectPassNumberMutation,
+  useUpdateAverageSubjectPassNumberMutation,
+} from "../../../features/exam/examQuerySlice";
+import { examAveragePasNumberStatus } from "../../../Data/userReportsData";
+import ExamRoutingCheckbox from "../../../components/Checkboxes/ExamRoutingCheckbox";
+import { skipToken } from "@reduxjs/toolkit/query";
+import bnBijoy2Unicode from "../../../utils/conveter";
 
 const PAGE_SIZE = 10;
 
 const SubjectPassNumber = ({ pageTitle, title }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
-  const methods = useForm();
-  const { watch, handleSubmit } = methods;
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRows, setSelectedRows] = useState([]);
-  const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false); // State to toggle components
 
-  const genderOptions = [
-    { id: "1", value: "পুরুষ" },
-    { id: "2", value: "মহিলা" },
-    { id: "3", value: "উভয়" },
-  ];
+  const methods = useForm({
+    defaultValues: {
+      SessionID: null,
+      ExamID: null,
+      SubClassID: null,
+      SubjectID: "",
+      PassNumber: "",
+      MeariAction: false,
+      MaxNumber: "",
+      KeratAction: false,
+    },
+  });
+
+  const { watch, handleSubmit, reset, setValue } = methods;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [editingId, setEditingId] = useState(null);
+
+  const [subjectAndPassNumberFilter, setSubjectAndPassNumberFilter] =
+    useState(null);
 
   const {
-    data: designation = [],
-    isLoading: isdLoading,
-    isError: isdError,
-  } = useGetDesignationQuery();
-  const { data: classListData } = useGetClassListQuery();
+    data: averageSubjectPassNumberData = [],
+    isLoading,
+    error,
+    isFetching,
+    refetch,
+  } = useGetAverageSubjectPassNumberQuery(
+    subjectAndPassNumberFilter?.SessionId &&
+      subjectAndPassNumberFilter?.ExamId &&
+      subjectAndPassNumberFilter?.SubClassId
+      ? {
+          SessionID: subjectAndPassNumberFilter?.SessionId,
+          ExamID: subjectAndPassNumberFilter?.ExamId,
+          SubClassID: subjectAndPassNumberFilter?.SubClassId,
+        }
+      : skipToken
+  );
+
+  const { data: subjectsData } = useGetAcademicSubjectsQuery();
+  const [postAverageSubjectPassNumber] =
+    usePostAverageSubjectPassNumberMutation();
+  const [updateAverageSubjectPassNumber] =
+    useUpdateAverageSubjectPassNumberMutation();
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  const totalPages = Math.ceil(designation.length / PAGE_SIZE);
+  // Reset form when filters change
+  useEffect(() => {
+    if (
+      subjectAndPassNumberFilter?.SessionId &&
+      subjectAndPassNumberFilter?.ExamId &&
+      subjectAndPassNumberFilter?.SubClassId
+    ) {
+      reset({
+        SessionID: subjectAndPassNumberFilter.SessionId,
+        ExamID: subjectAndPassNumberFilter.ExamId,
+        SubClassID: subjectAndPassNumberFilter.SubClassId,
+        SubjectID: "",
+        PassNumber: "",
+        MeariAction: false,
+        MaxNumber: "",
+        KeratAction: false,
+        SubjectArabic: "",
+      });
+      setEditingId(null);
+    }
+  }, [subjectAndPassNumberFilter, reset]);
+
+  const totalPages = Math.ceil(averageSubjectPassNumberData.length / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return designation.slice(start, start + PAGE_SIZE);
-  }, [designation, currentPage]);
+    return averageSubjectPassNumberData.slice(start, start + PAGE_SIZE);
+  }, [averageSubjectPassNumberData, currentPage]);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -62,39 +119,134 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
+  const handleEdit = (row) => {
+    setEditingId(row.ID);
+    setValue("SubjectID", row.BookID);
+    setValue("PassNumber", row.PassNumber);
+    setValue("MeariAction", row.MeariAction);
+    setValue("MaxNumber", row.MaxNumber);
+    setValue("KeratAction", row.KeratAction);
+    setValue("SubjectArabic", row.SubjectArabic);
+  };
+
+  const handleCancelEdit = () => {
+    reset({
+      SessionID: subjectAndPassNumberFilter?.SessionId,
+      ExamID: subjectAndPassNumberFilter?.ExamId,
+      SubClassID: subjectAndPassNumberFilter?.SubClassId,
+      SubjectID: "",
+      PassNumber: "",
+      MeariAction: false,
+      MaxNumber: "",
+      KeratAction: false,
+      SubjectArabic: "",
+    });
+    setEditingId(null);
+  };
+
   const onSubmit = async (data) => {
     try {
-      if (!data.SubClassID || selectedRows.length === 0) {
+      // Validate required fields
+      if (
+        !subjectAndPassNumberFilter?.SessionId ||
+        !subjectAndPassNumberFilter?.ExamId ||
+        !subjectAndPassNumberFilter?.SubClassId
+      ) {
         Swal.fire({
           icon: "warning",
-          title: "ফর্ম অসম্পূর্ণ",
-          text: "অনুগ্রহ করে সাব ক্লাস নির্বাচন করুন এবং অন্তত একজন শিক্ষার্থী সিলেক্ট করুন।",
+          title: "Incomplete Form",
+          text: "Please select Session, Exam, and Class/Jamaat first",
         });
         return;
       }
 
-      // const response = await postChnageStudentGroup({
-      //   id: data.SubClassID,
-      //   body: { admissionIds: selectedRows },
-      // }).unwrap();
+      if (!data.SubjectID) {
+        Swal.fire({
+          icon: "warning",
+          title: "Subject Required",
+          text: "Please select a subject",
+        });
+        return;
+      }
+
+      if (!data.PassNumber) {
+        Swal.fire({
+          icon: "warning",
+          title: "Pass Number Required",
+          text: "Please enter pass number",
+        });
+        return;
+      }
+
+      const payload = {
+        SessionID: subjectAndPassNumberFilter.SessionId,
+        ExamID: subjectAndPassNumberFilter.ExamId,
+        SubClassID: subjectAndPassNumberFilter.SubClassId,
+        BookID: data.SubjectID,
+        PassNumber: data.PassNumber,
+        MeariAction: data.MeariAction || false,
+        MaxNumber: data.MaxNumber || 0,
+        KeratAction: data.KeratAction || false,
+        SubjectArabic: data.SubjectArabic,
+      };
+
+      let response;
+      if (editingId) {
+        // Update existing record
+        response = await updateAverageSubjectPassNumber(payload).unwrap();
+      } else {
+        // Create new record
+        response = await postAverageSubjectPassNumber(payload).unwrap();
+      }
 
       Swal.fire({
         icon: "success",
-        title: "সফলভাবে সংরক্ষণ হয়েছে",
-        text: response?.message || "গ্রুপ পরিবর্তন সফল হয়েছে।",
-      }).then(() => {
-        refetch();
-        setSelectedRows([]);
-        methods.reset();
+        title: editingId ? "Updated Successfully" : "Successfully Saved",
+        text: response?.message || "Data saved successfully",
       });
+
+      // Refresh data and reset form
+      await refetch();
+      handleCancelEdit();
     } catch (error) {
+      console.error("Submission error:", error);
+
+      let errorMessage = "Failed to save data";
+      if (error.status === 409) {
+        errorMessage = "This record already exists for the selected criteria";
+      } else if (error?.data?.error) {
+        errorMessage = error.data.error;
+      }
+
       Swal.fire({
         icon: "error",
-        title: "ত্রুটি ঘটেছে!",
-        text: error?.data?.error || "ডেটা সংরক্ষণ করতে ব্যর্থ হয়েছে।",
+        title: "Error",
+        text: errorMessage,
       });
-      console.error("Error updating student group:", error);
     }
+  };
+
+  const handleDelete = async (id) => {
+    // const result = await Swal.fire({
+    //   title: "Are you sure?",
+    //   text: "This record will be deleted!",
+    //   icon: "warning",
+    //   showCancelButton: true,
+    //   confirmButtonColor: "#3085d6",
+    //   cancelButtonColor: "#d33",
+    //   confirmButtonText: "Yes, delete it!",
+    //   cancelButtonText: "Cancel",
+    // });
+    // if (result.isConfirmed) {
+    //   try {
+    //     // You'll need to implement the delete mutation in your API slice
+    //     // await deleteAverageSubjectPassNumber(id).unwrap();
+    //     await refetch();
+    //     Swal.fire("Deleted!", "The record has been deleted.", "success");
+    //   } catch (error) {
+    //     Swal.fire("Error!", "Failed to delete the record.", "error");
+    //   }
+    // }
   };
 
   const columns = [
@@ -106,194 +258,159 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
           <button
             className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
             title="Edit"
+            onClick={() => handleEdit(row)}
           >
             <FiEdit className="w-5 h-5" />
           </button>
           <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
             title="Delete"
-            onClick={() => handleDelete(row.DNID)}
+            onClick={() => handleDelete(row.ID)}
           >
             <MdDelete className="w-5 h-5" />
           </button>
         </div>
       ),
     },
-    { title: "SL", field: "SL", hozAlign: "center" },
+    { title: "SL", field: "ID", hozAlign: "center" },
     {
       title: translate("Session"),
-      field: "Designation",
+      field: "SessionName",
       hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row.Session?.SessionName || ""),
     },
     {
       title: translate("Exam Name"),
-      field: "Designation",
+      field: "ExamName",
       hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row.Exam?.ExamName || ""),
     },
     {
       title: translate("Class/Jamaat"),
-      field: "Designation",
+      field: "ClassName",
+      hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row.SubClass?.ClassName || ""),
+    },
+    {
+      title: translate("Book"),
+      field: "SubjectName",
+      hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row.Subject?.SubjectName || ""),
+    },
+    {
+      title: translate("Arobi Book"),
+      field: "SubjectArabic",
+      hozAlign: "center",
+      render: (row) => row.ArabicSubject || "",
+    },
+    {
+      title: translate("Full-Size"),
+      field: "MaxNumber",
       hozAlign: "center",
     },
     {
-      title: translate("Fee Name"),
-      field: "Designation",
+      title: translate("Pass Number"),
+      field: "PassNumber",
       hozAlign: "center",
     },
     {
-      title: translate("Fee"),
-      field: "Designation",
+      title: translate("Meari Action"),
+      field: "MeariAction",
       hozAlign: "center",
+      render: (row) => (row.MeariAction ? "✔️" : "❌"),
+    },
+    {
+      title: translate("Kerat Action"),
+      field: "KeratAction",
+      hozAlign: "center",
+      render: (row) => (row.KeratAction ? "✔️" : "❌"),
     },
   ];
 
-  if (showStudentFeeGroup) {
-    return <StudentFeeGroup onBack={setShowStudentFeeGroup} />;
-  }
-
   return (
     <div>
-      {/* <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
-        <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
-          {translate(title)}
-        </h3>
-      </div> */}
-
       <FormProvider {...methods}>
         <form
           className="w-full space-y-10 bg-white p-6 rounded-xl shadow-md"
           onSubmit={handleSubmit(onSubmit)}
         >
+          <FilteringForm onFilter={setSubjectAndPassNumberFilter} />
+
           {/* Two-column layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Left Column - Exam & Class Selects */}
-            <div className="space-y-2">
-              <DefaultSelect
-                label={`${translate("Exam Name")}:`}
-                options={classListData ?? []}
-                valueField="ClassID"
-                nameField="ClassName"
-                registerKey="examName"
-              />
-
-              <DefaultSelect
-                label={`${translate("Exam Type")}:`}
-                options={classListData ?? []}
-                valueField="ClassID"
-                nameField="ClassName"
-                registerKey="examType"
-              />
-
-              <DefaultSelect
-                label={`${translate("Exam Term")}:`}
-                options={classListData ?? []}
-                valueField="ClassID"
-                nameField="ClassName"
-                registerKey="examTerm"
-              />
-
-              <DefaultSelect
-                label={`${translate("Class/Jamaat")}:`}
-                options={genderOptions}
-                valueField="id"
-                nameField="value"
-                registerKey="classGroup"
+            <DefaultSelect
+              options={subjectsData ?? []}
+              registerKey="SubjectID"
+              placeholder="বছর নির্বাচন করুন"
+              nameField="SubjectName"
+              valueField={"SubjectID"}
+              label={translate("Subject") + " :"}
+              unicode={true}
+            />
+            <DefaultInput
+              registerKey="SubjectArabic"
+              label={translate("Subject Arabic")}
+              disable
+            />
+            <DefaultInput
+              registerKey="PassNumber"
+              label={translate("Pass Number")}
+              type="number"
+            />
+            <div className="flex flex-col py-1 gap-4">
+              <ExamRoutingCheckbox
+                label={translate("Point Condition Status") + " :"}
+                options={examAveragePasNumberStatus}
+                registerKey="MeariAction"
+                value={watch("MeariAction")}
               />
             </div>
-
-            {/* Right Column - Score Settings */}
-            <div className="space-y-2">
-              <DefaultInput
-                registerKey="arabicScore"
-                label={translate("Subject Arabic")}
-                type="number"
-              />
-
-              {/* Score Type Radio Group */}
-              <div className="flex flex-col py-1 gap-4">
-                <label className="text-sm font-semibold text-start text-gray-700 w-32 shrink-0 pt-1.5">
-                  {translate("Score Type")}
-                </label>
-                <fieldset className="flex-1">
-                  <div className="flex flex-wrap gap-4">
-                    {[
-                      {
-                        id: "averageScore",
-                        value: "average",
-                        label: "গড় মার্ক",
-                      },
-                      {
-                        id: "minimumScore",
-                        value: "minimum",
-                        label: "সর্বনিম্ন মার্ক",
-                      },
-                      {
-                        id: "higherScore",
-                        value: "higher",
-                        label: "সর্বোচ্চ মার্ক",
-                      },
-                    ].map((option) => (
-                      <label
-                        key={option.id}
-                        htmlFor={option.id}
-                        className="flex items-center gap-2 text-sm text-gray-700"
-                      >
-                        <input
-                          type="radio"
-                          id={option.id}
-                          value={option.value}
-                          {...methods.register("scoreType")}
-                          className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                        />
-                        {translate(option.label)}
-                      </label>
-                    ))}
-                  </div>
-                </fieldset>
-              </div>
-
-              {/* Checkbox Group - কেরাত কন্ডিশন */}
-              <div className="flex flex-col py-1 gap-4">
-                <label className="text-sm font-semibold text-start text-gray-700 w-32 shrink-0">
-                  {translate("কেরাত কন্ডিশন টাইপ")}
-                </label>
-                <fieldset className="flex-1">
-                  <div className="flex items-center gap-2 text-sm text-gray-700">
-                    <input
-                      id="keratCondition"
-                      type="checkbox"
-                      value="kerat"
-                      {...methods.register("keratCondition")}
-                      className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 rounded"
-                    />
-                    <label htmlFor="keratCondition">
-                      {translate("কেরাত কন্ডিশন")}
-                    </label>
-                  </div>
-                </fieldset>
-              </div>
-              <DefaultInput
-                registerKey="highestScore"
-                label={translate("Highest Score")}
-                type="number"
-              />
+            {/* Checkbox Group - কেরাত কন্ডিশন */}
+            <div className="flex flex-col py-1 gap-4">
+              <label className="text-sm font-semibold text-start text-gray-700 w-32 shrink-0">
+                {translate("কেরাত কন্ডিশন টাইপ")}
+              </label>
+              <fieldset className="flex-1">
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    id="KeratAction"
+                    type="checkbox"
+                    {...methods.register("KeratAction")}
+                    className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 rounded"
+                  />
+                  <label htmlFor="KeratAction">
+                    {translate("কেরাত কন্ডিশন")}
+                  </label>
+                </div>
+              </fieldset>
             </div>
           </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-start">
+          {/* Submit and Reset Buttons */}
+          <div className="flex justify-start gap-4">
             <Button
               type="submit"
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium shadow transition"
             >
-              {translate("Save")}
+              {editingId ? translate("Update") : translate("Save")}
             </Button>
+            {editingId && (
+              <Button
+                type="button"
+                className="w-full md:w-auto !bg-[#22c55e] text-white"
+                onClick={handleCancelEdit}
+              >
+                {translate("Reset")}
+              </Button>
+            )}
           </div>
         </form>
       </FormProvider>
+
       <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mt-3">
         <h2 className="text-xl font-semibold text-green-500 mb-3 font-SolaimanLipi">
-          মোট বিষয় ৫ টি
+          মোট বিষয় {averageSubjectPassNumberData.length} টি
         </h2>
 
         <p className="text-gray-600 mb-4 font-SolaimanLipi">
@@ -313,30 +430,47 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
           </button>
         </div>
       </div>
-      <div className="mt-5">
-        <SortableTable columns={columns} data={paginatedData} />
-      </div>
 
-      <div className="flex justify-center items-center mt-4">
-        <div className="flex items-center space-x-2">
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-          >
-            <MdKeyboardArrowLeft size={24} />
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-          >
-            <MdKeyboardArrowRight size={24} />
-          </button>
-        </div>
+      {/* Table section */}
+      <div className="mt-5">
+        {isLoading || isFetching ? (
+          <div className="text-center py-8">Loading table data...</div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-500">
+            Error loading table data: {error.message}
+          </div>
+        ) : averageSubjectPassNumberData.length > 0 ? (
+          <>
+            <SortableTable columns={columns} data={paginatedData} />
+            <div className="flex justify-center items-center mt-4">
+              <div className="flex items-center space-x-2">
+                <button
+                  className="p-1 border rounded disabled:opacity-50"
+                  onClick={handlePrev}
+                  disabled={currentPage === 1}
+                >
+                  <MdKeyboardArrowLeft size={24} />
+                </button>
+                <span>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  className="p-1 border rounded disabled:opacity-50"
+                  onClick={handleNext}
+                  disabled={currentPage === totalPages}
+                >
+                  <MdKeyboardArrowRight size={24} />
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-8">
+            {subjectAndPassNumberFilter
+              ? "No data available for the selected filters"
+              : "Please select filters to view data"}
+          </div>
+        )}
       </div>
     </div>
   );

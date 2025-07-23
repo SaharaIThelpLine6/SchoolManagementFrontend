@@ -3,8 +3,8 @@ import { useDispatch } from "react-redux";
 import { setPageName } from "../features/auth/authSlice";
 import AverageDetermination from "../view/exam/average-condition/AverageDetermination";
 import SubjectPassNumber from "../view/exam/average-condition/SubjectPassNumber";
-import ResultsCondition from "../view/exam/average-condition/ResultsCondition";
 import Button from "../components/Button/Button";
+import ResultsCondition from "../view/exam/average-condition/ResultsCondition";
 
 const AverageVCondition = ({ pageTitle }) => {
   const dispatch = useDispatch();

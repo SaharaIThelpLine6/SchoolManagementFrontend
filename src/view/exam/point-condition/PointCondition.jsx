@@ -43,12 +43,15 @@ const PointCondition = ({ pageTitle, title }) => {
       PassNumber: "",
       MeariAction: false,
       MaxNumber: "",
-      ...Array.from({ length: 7 }).reduce((acc, _, index) => ({
-        ...acc,
-        [`DivisionNumber${index}`]: "",
-        [`Division${index}`]: "",
-        [`Color${index}`]: false,
-      }), {})
+      ...Array.from({ length: 7 }).reduce(
+        (acc, _, index) => ({
+          ...acc,
+          [`DivisionNumber${index}`]: "",
+          [`Division${index}`]: "",
+          [`Color${index}`]: false,
+        }),
+        {}
+      ),
     },
   });
 
@@ -106,12 +109,15 @@ const PointCondition = ({ pageTitle, title }) => {
         PassNumber: "",
         MeariAction: false,
         MaxNumber: "",
-        ...Array.from({ length: 7 }).reduce((acc, _, index) => ({
-          ...acc,
-          [`DivisionNumber${index}`]: "",
-          [`Division${index}`]: "",
-          [`Color${index}`]: false,
-        }), {})
+        ...Array.from({ length: 7 }).reduce(
+          (acc, _, index) => ({
+            ...acc,
+            [`DivisionNumber${index}`]: "",
+            [`Division${index}`]: "",
+            [`Color${index}`]: false,
+          }),
+          {}
+        ),
       });
       setEditingId(null);
     }
@@ -156,12 +162,15 @@ const PointCondition = ({ pageTitle, title }) => {
       PassNumber: "",
       MeariAction: false,
       MaxNumber: "",
-      ...Array.from({ length: 7 }).reduce((acc, _, index) => ({
-        ...acc,
-        [`DivisionNumber${index}`]: "",
-        [`Division${index}`]: "",
-        [`Color${index}`]: false,
-      }), {})
+      ...Array.from({ length: 7 }).reduce(
+        (acc, _, index) => ({
+          ...acc,
+          [`DivisionNumber${index}`]: "",
+          [`Division${index}`]: "",
+          [`Color${index}`]: false,
+        }),
+        {}
+      ),
     });
     setEditingId(null);
   };
@@ -185,17 +194,17 @@ const PointCondition = ({ pageTitle, title }) => {
       Division1: data.Division0,
       Color1: data.Color0 ? 1 : null,
       Division2: data.Division1,
-      Color2: data.Color1 ? 2 : null,
+      Color2: data.Color1 ? 1 : null,
       Division3: data.Division2,
-      Color3: data.Color2 ? 3 : null,
+      Color3: data.Color2 ? 1 : null,
       Division4: data.Division3,
-      Color4: data.Color3 ? 4 : null,
+      Color4: data.Color3 ? 1 : null,
       Division5: data.Division4,
-      Color5: data.Color4 ? 5 : null,
+      Color5: data.Color4 ? 1 : null,
       Division6: data.Division5,
-      Color6: data.Color5 ? 6 : null,
+      Color6: data.Color5 ? 1 : null,
       Division7: data.Division6,
-      Color7: data.Color6 ? 7 : null,
+      Color7: data.Color6 ? 1 : null,
     };
 
     try {
@@ -242,7 +251,6 @@ const PointCondition = ({ pageTitle, title }) => {
     //   confirmButtonText: "হ্যাঁ, মুছে ফেলুন!",
     //   cancelButtonText: "বাতিল করুন",
     // });
-
     // if (result.isConfirmed) {
     //   try {
     //     // You'll need to implement the delete mutation in your API slice

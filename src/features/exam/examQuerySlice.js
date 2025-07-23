@@ -104,7 +104,8 @@ export const examSlice = createApi({
       }),
       invalidatesTags: ["AverageExamConditionAll"],
     }),
-   updateAverageExamConditionSetting: builder.mutation({
+
+    updateAverageExamConditionSetting: builder.mutation({
       query: (body) => ({
         url: `average_exam_condition_setting`,
         method: "PUT",
@@ -148,6 +149,34 @@ export const examSlice = createApi({
         { type: "ExamCondition", id: `${SessionID}-${ExamID}-${SubClassID}` },
       ],
     }),
+    postAverageSubjectPassNumber: builder.mutation({
+      query: (body) => ({
+        url: `average_subject_and_passnumber`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["AverageSubjectPassNumberAll"],
+    }),
+    updateAverageSubjectPassNumber: builder.mutation({
+      query: (body) => ({
+        url: `average_subject_and_passnumber`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["AverageSubjectPassNumberAll"],
+    }),
+    getAverageSubjectPassNumber: builder.query({
+      query: ({ SessionID, ExamID, SubClassID }) => ({
+        url: `average_subject_and_passnumber/${SessionID}/${ExamID}/${SubClassID}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
+        {
+          type: "AverageSubjectPassNumberAll",
+          id: `${SessionID}-${ExamID}-${SubClassID}`,
+        },
+      ],
+    }),
   }),
 });
 
@@ -167,5 +196,8 @@ export const {
   useUpdatePointWiseExamConditionMutation,
   useGetAverageExamConditionAllQuery,
   usePostAverageExamConditionSettingMutation,
-  useUpdateAverageExamConditionSettingMutation
+  useUpdateAverageExamConditionSettingMutation,
+  usePostAverageSubjectPassNumberMutation,
+  useUpdateAverageSubjectPassNumberMutation,
+  useGetAverageSubjectPassNumberQuery,
 } = examSlice;
