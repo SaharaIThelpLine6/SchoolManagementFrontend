@@ -5,9 +5,11 @@ import AverageDetermination from "../view/exam/average-condition/AverageDetermin
 import SubjectPassNumber from "../view/exam/average-condition/SubjectPassNumber";
 import Button from "../components/Button/Button";
 import ResultsCondition from "../view/exam/average-condition/ResultsCondition";
+import useTranslate from "../utils/Translate";
 
 const AverageVCondition = ({ pageTitle }) => {
   const dispatch = useDispatch();
+  const translate = useTranslate();
   const [activeTab, setActiveTab] = useState("average");
 
   useEffect(() => {
@@ -22,8 +24,8 @@ const AverageVCondition = ({ pageTitle }) => {
     },
     {
       id: "subject",
-      label: "Subject Pass number",
-      component: <SubjectPassNumber title="Subject Pass number"/>
+      label: "Subject Pass Number",
+      component: <SubjectPassNumber title="Subject Pass Number"/>
     },
     {
       id: "results",
@@ -46,7 +48,7 @@ const AverageVCondition = ({ pageTitle }) => {
                 : "bg-gray-100 !text-black "
             }`}
           >
-            {tab.label}
+            {translate(tab.label)}
           </Button>
         ))}
       </div>

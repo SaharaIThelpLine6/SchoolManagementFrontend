@@ -199,7 +199,7 @@ const AverageDetermination = ({ pageTitle }) => {
         </div>
       ),
     },
-    { title: "SL", field: "ID", hozAlign: "center" },
+    { title: translate("SL"), field: "ID", hozAlign: "center" },
     {
       title: translate("Session"),
       field: "SessionName",
@@ -378,7 +378,7 @@ const AverageDetermination = ({ pageTitle }) => {
                         <DefaultInput
                           registerKey={`TopNum${i + 1}`}
                           type="number"
-                          placeholder={"Score value"}
+                          placeholder={translate("Score value")}
                           require={true}
                         />
                       </div>
@@ -392,17 +392,19 @@ const AverageDetermination = ({ pageTitle }) => {
             <Button type="submit" className="w-full md:w-auto">
               {translate("Save")}
             </Button>
-            <Button
-              type="button"
-              className="w-full md:w-auto !bg-[#22c55e] text-white"
-              onClick={() => {
-                const { SessionID, ExamID, SubClassID } = getValues();
-                reset({ SessionID, ExamID, SubClassID });
-                setEditingId(null);
-              }}
-            >
-              {translate("Reset")}
-            </Button>
+            {editingId && (
+              <Button
+                type="button"
+                className="w-full md:w-auto !bg-[#ddd] !text-black"
+                onClick={() => {
+                  const { SessionID, ExamID, SubClassID } = getValues();
+                  reset({ SessionID, ExamID, SubClassID });
+                  setEditingId(null);
+                }}
+              >
+                {translate("Reset")}
+              </Button>
+            )}
           </div>
         </form>
       </FormProvider>
@@ -417,7 +419,7 @@ const AverageDetermination = ({ pageTitle }) => {
         ) : isError ? (
           <div className="flex flex-col items-center justify-center h-64 rounded-lg">
             <div className="text-center py-8 text-red-500">
-              Error loading table data: {isError.message}
+              {translate("Data Not Found")} {isError.message}
             </div>
           </div>
         ) : averageExamConditionAllData?.length > 0 ||
@@ -427,6 +429,7 @@ const AverageDetermination = ({ pageTitle }) => {
               columns={columns}
               data={paginatedData || averageExamConditionAllData}
               isLoading={isLoading || isFetching}
+              isFilterColumn={false}
             />
 
             {totalPages > 1 && (
@@ -462,8 +465,8 @@ const AverageDetermination = ({ pageTitle }) => {
               (averageDetermineFilter?.SessionID &&
                 averageDetermineFilter?.ExamID &&
                 averageDetermineFilter?.SubClassID)
-                ? "No data available for the selected filters"
-                : "Please select all filters to view data"}
+                ? translate("No data available for the selected filters")
+                : translate("Please select all filters to view data")}
             </div>
           </div>
         )}
