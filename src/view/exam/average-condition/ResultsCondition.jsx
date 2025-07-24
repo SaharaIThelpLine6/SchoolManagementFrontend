@@ -112,7 +112,6 @@ const ResultsCondition = ({ colorOption }) => {
         MeariSCount: examConditionData.MeariSCount,
         MeariRasibDivision: examConditionData.MeariRasibDivision,
         MeariRasibDivisionAra: examConditionData.MeariRasibDivisionAra,
-        ClassType: examConditionData.ClassType,
         MostMeariScount: examConditionData.MostMeariScount,
         MostMeariBanDivision: examConditionData.MostMeariBanDivision,
         MostMeariAraDivision: examConditionData.MostMeariAraDivision,
@@ -373,9 +372,7 @@ const ResultsCondition = ({ colorOption }) => {
       AboveGPA: data.AboveGPA,
       Published: data.Published,
       ClassType: data.ClassType,
-      GorMeariAction: data.condition1_active ? 1 : 0,
       MeariUnMeari: data.condition2_active ? 1 : 0,
-      MostMeariAction: data.condition3_active ? 1 : 0,
       // condition4_active: data.condition4_active,
       // condition5_active: data.condition5_active,
     };
