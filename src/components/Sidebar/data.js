@@ -269,7 +269,7 @@ export const menuData = [
     id: "9",
     name: "Payment",
     route: "/payment",
-    icon: "FaCalculator",
+    icon: "MdOutlinePayment",
     subMenu: [
       {
         id: "1",
