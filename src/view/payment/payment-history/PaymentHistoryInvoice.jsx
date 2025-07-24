@@ -7,7 +7,7 @@ const PaymentHistoryInvoice = ({ data }) => {
       {/* PAID Ribbon */}
       <div className="absolute right-0 top-0 overflow-hidden w-32 h-32">
         <div
-          className="absolute bg-[#22c55e] text-white font-bold text-center shadow-md w-48 py-2 -right-10 top-6 rotate-45 border-2 border-green-600"
+          className="absolute bg-[#22c55e] text-white font-bold text-center shadow-md w-48 py-2 -right-12 top-6 rotate-45 border-2 border-green-600"
           style={{ fontSize: "24px" }}
         >
           PAID
