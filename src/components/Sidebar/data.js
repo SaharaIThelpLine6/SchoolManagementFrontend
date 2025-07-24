@@ -258,10 +258,28 @@ export const menuData = [
         name: "Fee Setting",
         route: "/accounting",
       },
+      {
+        id: "2",
+        name: "Student Fee Collection",
+        route: "/accounting/student-fee-collection",
+      },
     ],
   },
   {
     id: "9",
+    name: "Payment",
+    route: "/payment",
+    icon: "FaCalculator",
+    subMenu: [
+      {
+        id: "1",
+        name: "Payment History",
+        route: "/payment-history",
+      },
+    ],
+  },
+  {
+    id: "10",
     name: "Donation",
     route: "/donation",
     icon: "FaDonate",

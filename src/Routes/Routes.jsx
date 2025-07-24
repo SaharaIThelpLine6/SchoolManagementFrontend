@@ -61,6 +61,8 @@ import OnlineResultPublic from "../pages/OnlineResultPublic";
 import MadrasahBoardInfo from "../pages/MadrasahBoardInfo";
 import FeeSetting from "../pages/FeeSetting";
 import PaymentConfirm from "../pages/PaymentConfirm";
+import StudentFeeCollection from "../pages/StudentFeeCollection";
+import PaymentHistory from "../pages/PaymentHistory";
 
 const router = createBrowserRouter([
   {
@@ -494,9 +496,18 @@ const router = createBrowserRouter([
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
                   // >
-                  <StudentVacationListTable pageTitle="Student Fee Collection" />
+                  <StudentFeeCollection pageTitle="Student Fee Collection" />
                   // </RequirePermission>
                 ),
+              },
+            ],
+          },
+          {
+            path: "payment-history",
+            children: [
+              {
+                index: true,
+                element: <PaymentHistory pageTitle="Payment History" />,
               },
             ],
           },

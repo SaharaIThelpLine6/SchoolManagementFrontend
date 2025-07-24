@@ -204,7 +204,7 @@ const PaymentConfirm = () => {
                         ? new Date(data.CreateAt).toLocaleDateString()
                         : "N/A"}
                     </div>
-                    <div className="p-1 border-r border-gray-300">bKash</div>
+                    <div className="p-1 border-r border-gray-300">BKash</div>
                     <div className="p-1 border-r border-gray-300">
                       {data?.TransactionID}
                     </div>

@@ -11,9 +11,9 @@ import Swal from "sweetalert2";
 import FilteringForm from "./FilteringForm";
 import useTranslate from "../../../utils/Translate";
 import CheckboxOption from "./CheckboxOption";
+import RadioOption from "../../../components/Radio/RadioOption";
 
-
-const ResultsCondition = () => {
+const ResultsCondition = ({ colorOption }) => {
   const methods = useForm();
   const translate = useTranslate();
   const { handleSubmit, watch } = methods;
@@ -35,6 +35,11 @@ const ResultsCondition = () => {
       : skipToken
   );
 
+  console.log(examConditionData, "examConditionData")
+  const colorOptions = [
+    { id: "1", label: "দরসিয়াত" },
+    { id: "2", label: "হিফয" },
+  ];
   const [
     postExamCondition,
     {
@@ -114,6 +119,7 @@ const ResultsCondition = () => {
         Color11: examConditionData.Color11,
         OptionalAbove: examConditionData.OptionalAbove,
         AboveGPA: examConditionData.AboveGPA,
+       ClassType: String(examConditionData.ClassType), 
         Published: examConditionData.Published !== undefined ? 1 : 0,
       });
     }
@@ -358,7 +364,6 @@ const ResultsCondition = () => {
       MeariSCount: data.MeariSCount,
       MeariRasibDivision: data.MeariRasibDivision,
       MeariRasibDivisionAra: data.MeariRasibDivisionAra,
-      ClassType: data.ClassType,
       MostMeariAction: data.MostMeariAction,
       MostMeariScount: data.MostMeariScount,
       MostMeariBanDivision: data.MostMeariBanDivision,
@@ -367,6 +372,7 @@ const ResultsCondition = () => {
       OptionalAbove: data.OptionalAbove,
       AboveGPA: data.AboveGPA,
       Published: data.Published,
+      ClassType: data.ClassType,
       GorMeariAction: data.condition1_active ? 1 : 0,
       MeariUnMeari: data.condition2_active ? 1 : 0,
       MostMeariAction: data.condition3_active ? 1 : 0,
@@ -395,7 +401,29 @@ const ResultsCondition = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="text-sm text-gray-800 bg-white space-y-6">
           {/* Header Filters */}
-          <FilteringForm onFilter={setFilter} />
+          <div className="grid grid-cols-1  sm:grid-cols-4 gap-3">
+            <div className="col-span-3">
+              <FilteringForm onFilter={setFilter} />
+            </div>
+            {/* Color Selection Fieldset */}
+            {colorOption && (
+              <fieldset className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm w-full sm:max-w-[400px]">
+                <legend className="text-gray-700 font-medium px-2 text-sm sm:text-base">
+                  ক্লাসের ধরণ
+                </legend>
+                <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mt-2">
+                  {colorOptions.map((option) => (
+                    <RadioOption
+                      key={option.id}
+                      option={option}
+                      register={methods.register}
+                      name="ClassType"
+                    />
+                  ))}
+                </div>
+              </fieldset>
+            )}
+          </div>
 
           {/* Condition Sections */}
           {[1, 2, 3, 4, 5].map((condition) => (
@@ -422,7 +450,11 @@ const ResultsCondition = () => {
               {translate("Please specify the number of merit points.")}
             </p>
             <div className="w-full md:w-auto">
-              <DefaultInput registerKey="TotalMadha" className="w-full" type="number" />
+              <DefaultInput
+                registerKey="TotalMadha"
+                className="w-full"
+                type="number"
+              />
             </div>
           </div>
 

@@ -10,6 +10,7 @@ const useTranslate = () => {
     "List of Candidates": "পরীক্ষার্থীর তালিকা",
     Status: "স্ট্যাটাস",
     "Reset": "রিসেট",
+    "Description": "ডেসক্রিপশন",
     "Subject Pass Number": "বিষয় পাস নম্বর",
     "Average Determination": "গড় নির্ণয়",
     "SMS ID": "এসএমএস আইডি",
@@ -489,6 +490,7 @@ const useTranslate = () => {
     "Please enter the amount of SMS you would like to receive below.":
       "যত টাকার এসএমএস নিতে চান, তত টাকা নিচে উল্লেখ করুন",
     "Amount of Taka": "টাকার পরিমাণ",
+    "Amount": "টাকার পরিমাণ",
     "The amount of money must be paid.": "টাকার পরিমাণ অবশ্যই দিতে হবে",
     "Enter the amount of money (eg: 500).": "টাকার পরিমাণ লিখুন (যেমন: ৫০০)",
     "SMS can be purchased from a minimum of 500 Taka.":

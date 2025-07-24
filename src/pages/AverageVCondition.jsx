@@ -30,7 +30,7 @@ const AverageVCondition = ({ pageTitle }) => {
     {
       id: "results",
       label: "Results Condition",
-      component: <ResultsCondition title="Results Condition"/>
+      component: <ResultsCondition title="Results Condition" colorOption={true}/>
     }
   ];
 

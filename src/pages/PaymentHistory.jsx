@@ -1,0 +1,159 @@
+import { FaBoxOpen, FaCreditCard, FaGlobe, FaTicketAlt } from "react-icons/fa";
+import React, { useState } from "react";
+import { useGetPaymentHistoryQuery } from "../features/payment/paymentSlice";
+import PaymentHistoryInvoiceTable from "../view/payment/payment-history/PaymentHistoryInvoiceTable";
+import Loader from "../components/Loader";
+import PaymentHistoryInvoice from "../view/payment/payment-history/PaymentHistoryInvoice";
+import Button from "../components/Button/Button";
+import useTranslate from "../utils/Translate";
+
+const PaymentHistory = () => {
+  const translate = useTranslate();
+  const [activeTab, setActiveTab] = useState("invoices");
+  const [invoice, setInvoice] = useState(false);
+  const [invoiceData, setInvoiceData] = useState(null);
+
+  // Fetch data from API
+  const { data: paymentData, isError, isLoading } = useGetPaymentHistoryQuery();
+
+  const summaryItems = [
+    {
+      label: "INVOICES",
+      count: paymentData?.length || 0,
+      color: "border-blue-400",
+      icon: <FaCreditCard size={30} className="text-gray-400" />,
+      tab: "invoices",
+    },
+    {
+      label: "SERVICES",
+      count: 0,
+      color: "border-green-400",
+      icon: <FaBoxOpen size={30} className="text-gray-400" />,
+      tab: "services",
+    },
+    {
+      label: "DOMAINS",
+      count: 0,
+      color: "border-purple-400",
+      icon: <FaGlobe size={30} className="text-gray-400" />,
+      tab: "domains",
+    },
+    {
+      label: "TICKETS",
+      count: 0,
+      color: "border-yellow-400",
+      icon: <FaTicketAlt size={30} className="text-gray-400" />,
+      tab: "tickets",
+    },
+  ];
+  const handlePrint = () => {
+    window.print();
+  };
+  if (isLoading) {
+    return (
+      <div className="w-full bg-white p-4 rounded-lg min-h-[300px] flex items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="w-full bg-white p-4 rounded-lg text-red-500 text-center py-8">
+        Error loading payment history. Please try again later.
+      </div>
+    );
+  }
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "services":
+        return (
+          <>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Services
+            </h3>
+          </>
+        );
+      case "domains":
+        return (
+          <>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Domains
+            </h3>
+          </>
+        );
+      case "tickets":
+        return (
+          <>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Tickets
+            </h3>
+          </>
+        );
+      default: // invoices
+        return (
+          <>
+            <div className="flex justify-between items-center print:hidden">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Invoices
+              </h3>
+              {invoice && (
+                <div className="flex justify-end items-center gap-3">
+                  <Button onClick={() => setInvoice(false)}>
+                    {translate("Back")}
+                  </Button>
+                  <Button onClick={handlePrint}>{translate("Print")}</Button>
+                </div>
+              )}
+            </div>
+            {invoice ? (
+              <PaymentHistoryInvoice data={invoiceData} />
+            ) : (
+              <PaymentHistoryInvoiceTable
+                data={paymentData}
+                setInvoice={setInvoice}
+                setInvoiceData={setInvoiceData}
+              />
+            )}
+          </>
+        );
+    }
+  };
+
+  return (
+    <div className="w-full bg-white p-4 rounded-lg">
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6 print:hidden">
+        {summaryItems.map((item, idx) => (
+          <div
+            key={idx}
+            onClick={() => setActiveTab(item.tab)}
+            className={`bg-white rounded-md shadow-sm border-t-4 ${
+              item.color
+            } p-4 flex flex-row justify-between items-center cursor-pointer transition-all hover:shadow-md ${
+              activeTab === item.tab ? "ring-2 ring-blue-300" : ""
+            }`}
+          >
+            <div>
+              <div className="text-2xl text-gray-800 font-bold">
+                {item.count}
+              </div>
+              <div className="text-xs text-gray-600 mt-1 tracking-wide">
+                {item.label}
+              </div>
+            </div>
+            <div>{item.icon}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tab Content */}
+      <div className="bg-white rounded-lg shadow-sm">
+        {renderTabContent()}
+      </div>
+    </div>
+  );
+};
+
+export default PaymentHistory;
