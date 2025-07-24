@@ -1,13 +1,10 @@
-
-
 const PaymentHistoryInvoice = ({ data }) => {
-
   return (
     <div
-      className="p-6 mt-5 pb-3 font-SolaimanLipi bg-white text-xs text-black relative max-w-3xl mx-auto"
-      style={{ fontSize: "0.75rem" }}
+      className="p-6 mt-5 pb-3 font-SolaimanLipi bg-white text-sm text-black relative max-w-3xl mx-auto"
+      style={{ fontSize: "0.875rem" }} // 14px
     >
-      {/* PAID Ribbon - Improved styling */}
+      {/* PAID Ribbon */}
       <div className="absolute right-0 top-0 overflow-hidden w-32 h-32">
         <div
           className="absolute bg-[#22c55e] text-white font-bold text-center shadow-md w-48 py-2 -right-10 top-6 rotate-45 border-2 border-green-600"
@@ -23,7 +20,7 @@ const PaymentHistoryInvoice = ({ data }) => {
           <img src="/saharait.png" alt="Alpha Net Logo" className="h-24 mb-1" />
         </div>
       </div>
-      <div className="text-center text-xxs text-gray-700 leading-4">
+      <div className="text-center text-gray-700 leading-5">
         <p className="font-bold text-xl">SAHARA IT</p>
         <p>Masud building, Lift-2, Vangapress, Jatrabari</p>
         <p>Dhaka, Dhaka, 1236</p>
@@ -33,7 +30,7 @@ const PaymentHistoryInvoice = ({ data }) => {
       {/* Invoice Info */}
       <div className="mt-8 py-1 mb-1 bg-gray-100 flex flex-col gap-2">
         <h2 className="text-xl font-bold">Invoice #{data?.InvoiceNumber}</h2>
-        <p className="text-sm font-medium">
+        <p className="text-base font-medium">
           Invoice Date :{" "}
           {data?.CreateAt
             ? new Date(data.CreateAt).toLocaleDateString()
@@ -51,7 +48,6 @@ const PaymentHistoryInvoice = ({ data }) => {
 
       {/* Description Table */}
       <div className="mt-8 border border-gray-300">
-        {/* Table Header */}
         <div className="grid grid-cols-4 bg-gray-100 border-b border-gray-300 font-bold">
           <div className="col-span-3 p-1 border-r border-gray-300 text-center">
             Description
@@ -59,7 +55,6 @@ const PaymentHistoryInvoice = ({ data }) => {
           <div className="p-1 text-center">Total</div>
         </div>
 
-        {/* Table Row */}
         <div className="grid grid-cols-4 border-b border-gray-300 h-10">
           <div className="col-span-3 p-1 border-r border-gray-300">
             {data?.Intent === "quota"
@@ -69,7 +64,6 @@ const PaymentHistoryInvoice = ({ data }) => {
           <div className="p-1 text-center">BDT {data?.PayAmount}TK</div>
         </div>
 
-        {/* Subtotal */}
         <div className="grid grid-cols-4 border-b border-gray-300 font-bold bg-gray-100">
           <div className="col-span-3 p-1 border-r border-gray-300 text-right">
             Sub Total
@@ -77,7 +71,6 @@ const PaymentHistoryInvoice = ({ data }) => {
           <div className="p-1 text-center">BDT {data?.PayAmount}TK</div>
         </div>
 
-        {/* Credit */}
         <div className="grid grid-cols-4 border-t border-gray-300 font-bold bg-gray-100">
           <div className="col-span-3 p-1 border-r border-gray-300 text-right">
             Credit
@@ -85,7 +78,6 @@ const PaymentHistoryInvoice = ({ data }) => {
           <div className="p-1 text-center">BDT 0TK</div>
         </div>
 
-        {/* Total */}
         <div className="grid grid-cols-4 font-bold border-t border-gray-300 bg-gray-100">
           <div className="col-span-3 p-1 border-r border-gray-300 text-right">
             Total
@@ -96,7 +88,7 @@ const PaymentHistoryInvoice = ({ data }) => {
 
       {/* Transactions */}
       <div className="mt-10">
-        <h3 className="font-bold text-sm mb-5">Transactions</h3>
+        <h3 className="font-bold text-base mb-5">Transactions</h3>
         <div className="border border-gray-300">
           <div className="grid grid-cols-4 bg-gray-100 font-bold border-b border-gray-300 text-center">
             <div className="p-1 border-r border-gray-300">Transaction Date</div>
@@ -126,10 +118,10 @@ const PaymentHistoryInvoice = ({ data }) => {
       </div>
 
       {/* Footer */}
-      <div className="mt-10 text-xs text-black flex justify-between">
+      <div className="mt-10 text-sm text-black flex justify-between">
         <p>Manual signature is not required for system generated invoice.</p>
         <p>
-          PDF Generated
+          PDF Generated{" "}
           {data?.CreateAt
             ? new Date(data.CreateAt).toLocaleDateString()
             : "N/A"}
