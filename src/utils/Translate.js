@@ -9,8 +9,8 @@ const useTranslate = () => {
     "Book List": "বুক লিস্ট",
     "List of Candidates": "পরীক্ষার্থীর তালিকা",
     Status: "স্ট্যাটাস",
-    "Reset": "রিসেট",
-    "Description": "ডেসক্রিপশন",
+    Reset: "রিসেট",
+    Description: "ডেসক্রিপশন",
     "Subject Pass Number": "বিষয় পাস নম্বর",
     "Average Determination": "গড় নির্ণয়",
     "SMS ID": "এসএমএস আইডি",
@@ -108,18 +108,23 @@ const useTranslate = () => {
     "Condition-3 : More about the failure of the Mi'yari book":
       "কন্ডিশন-3 : অধিকতর মি”ইয়ারী কিতাবের ফেল সংক্রান্ত",
     "Condition-4 : Optional Subject": "কন্ডিশন-4 : অপশনাল বিষয়",
-    "Condition-5 : (If a number is not entered for a subject)": "কন্ডিশন-5 : (যদি কোন এক বিষয়ে নাম্বার এন্ট্রি না হয়)",
+    "Condition-5 : (If a number is not entered for a subject)":
+      "কন্ডিশন-5 : (যদি কোন এক বিষয়ে নাম্বার এন্ট্রি না হয়)",
     Optional: "অপশনাল",
     "Subject ID": "সাবজেক্ট আইডি",
-    "If someone fails in this way or less, then": "কিভাবে অথবা এর চেয়ে কম ফেল করে তাহল",
+    "If someone fails in this way or less, then":
+      "কিভাবে অথবা এর চেয়ে কম ফেল করে তাহল",
     "Fails in the subject, then": "বিষয়ে ফেল করে তাহল",
     "If someone fails more than that": "এর চেয়ে বেশি ফেল করলে",
     "If someone fails in": "যে কোন",
-    "subjects": "টি বিষয়ে ফেল করলে",
-    "If the grade in the optional subject is above how much, will it be added to the main grade": "অপশনাল বিষয়ের গ্রেড কত এর বেশি হলে মূল গ্রেডের সাথে যোগ হবে",
-    "If there are entries or numbers left in any subject, then division will be done.": "যদি কোন এক বিষয়ে এন্ট্রি বা নাম্বার বাকি থাকে তাহলে ডিভিশন হবে",
+    subjects: "টি বিষয়ে ফেল করলে",
+    "If the grade in the optional subject is above how much, will it be added to the main grade":
+      "অপশনাল বিষয়ের গ্রেড কত এর বেশি হলে মূল গ্রেডের সাথে যোগ হবে",
+    "If there are entries or numbers left in any subject, then division will be done.":
+      "যদি কোন এক বিষয়ে এন্ট্রি বা নাম্বার বাকি থাকে তাহলে ডিভিশন হবে",
     "Subject Name": "সাবজেক্ট নাম",
-    "Please specify the number of merit points.": "মেধার সংখ্যা কত ভাগে তা উল্লেখ করুন",
+    "Please specify the number of merit points.":
+      "মেধার সংখ্যা কত ভাগে তা উল্লেখ করুন",
     "English Name": "ইংরেজী নাম",
     "Arabic Name": "আরবী নাম",
     "Class Group": "ক্লাস নাম",
@@ -135,7 +140,7 @@ const useTranslate = () => {
     Exam: "পরীক্ষা",
     Libery: "লাইব্রেরি",
     Residence: "বাসস্থান",
-    "Payment History": "পেমেন্ট ইতিহাস",
+    "Payment History": "পেমেন্টের তালিকা",
     "Group distribution": "গ্রুপ বন্টন",
     "Change group": "গ্রুপ পরিবর্তন",
     "Group Distribution List": "গ্রুপ বিতরণ তালিকা",
@@ -492,7 +497,7 @@ const useTranslate = () => {
     "Please enter the amount of SMS you would like to receive below.":
       "যত টাকার এসএমএস নিতে চান, তত টাকা নিচে উল্লেখ করুন",
     "Amount of Taka": "টাকার পরিমাণ",
-    "Amount": "টাকার পরিমাণ",
+    Amount: "টাকার পরিমাণ",
     "The amount of money must be paid.": "টাকার পরিমাণ অবশ্যই দিতে হবে",
     "Enter the amount of money (eg: 500).": "টাকার পরিমাণ লিখুন (যেমন: ৫০০)",
     "SMS can be purchased from a minimum of 500 Taka.":
@@ -511,8 +516,9 @@ const useTranslate = () => {
     "Kerat Condition Type": "কেরাত কন্ডিশন টাইপ",
     "Kerat Condition": "কেরাত কন্ডিশন",
     "Total Subject": "মোট বিষয়",
-    "If you need to divide the total number by a number other than the specified number, enter it in the box below and click the Save button.": "উল্লেখিত সংখ্যা ব্যতীত অন্য কোনো সংখ্যা দ্বারা যদি মোট নাম্বার ভাগ দেওয়ার প্রয়োজন হয়, তাহলে নিচের বক্সে তা লিখে সেইভ বাটনে ক্লিক করুন।",
-    "SL": "নম্বর",
+    "If you need to divide the total number by a number other than the specified number, enter it in the box below and click the Save button.":
+      "উল্লেখিত সংখ্যা ব্যতীত অন্য কোনো সংখ্যা দ্বারা যদি মোট নাম্বার ভাগ দেওয়ার প্রয়োজন হয়, তাহলে নিচের বক্সে তা লিখে সেইভ বাটনে ক্লিক করুন।",
+    SL: "নম্বর",
     ">=1": ">=১",
     ">=2": ">=২",
     ">=3": ">=৩",
