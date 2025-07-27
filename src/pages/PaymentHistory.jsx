@@ -1,4 +1,10 @@
-import { FaBoxOpen, FaCreditCard, FaGlobe, FaTicketAlt } from "react-icons/fa";
+import {
+  FaBars,
+  FaBoxOpen,
+  FaCreditCard,
+  FaGlobe,
+  FaTicketAlt,
+} from "react-icons/fa";
 import React, { useState } from "react";
 import { useGetPaymentHistoryQuery } from "../features/payment/paymentSlice";
 import PaymentHistoryInvoiceTable from "../view/payment/payment-history/PaymentHistoryInvoiceTable";
@@ -95,18 +101,35 @@ const PaymentHistory = () => {
         return (
           <>
             <div className="flex justify-between items-center print:hidden">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                Invoices
-              </h3>
-              {invoice && (
-                <div className="flex justify-end items-center gap-3">
-                  <Button onClick={() => setInvoice(false)}>
+              {/* Title Section */}
+              <div className="flex-1 bg-[#3598db] rounded-t-md">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2 px-4 py-2">
+                  <FaBars size={20} /> {translate("List of Applicants")}
+                </h3>
+              </div>
+
+              {/* Button Section (Only visible if invoice is true) */}
+            </div>
+            {invoice && (
+              <div className="flex justify-end items-center mt-5 print:hidden">
+                <div className="flex items-center gap-3 px-4">
+                  <Button
+                    onClick={() => setInvoice(false)}
+                    className="bg-[#3598db] hover:bg-[#2b7dba] text-white"
+                  >
                     {translate("Back")}
                   </Button>
-                  <Button onClick={handlePrint}>{translate("Print")}</Button>
+
+                  <Button
+                    onClick={handlePrint}
+                    className="bg-[#3598db] hover:bg-[#2b7dba] text-white"
+                  >
+                    {translate("Print")}
+                  </Button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
             {invoice ? (
               <PaymentHistoryInvoice data={invoiceData} />
             ) : (
@@ -149,9 +172,7 @@ const PaymentHistory = () => {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-white rounded-lg shadow-sm">
-        {renderTabContent()}
-      </div>
+      <div className="bg-white rounded-lg shadow-sm">{renderTabContent()}</div>
     </div>
   );
 };

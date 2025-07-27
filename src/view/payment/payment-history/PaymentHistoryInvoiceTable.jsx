@@ -1,70 +1,18 @@
 import React, { useMemo, useState } from "react";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import { FaEye } from "react-icons/fa";
 import useTranslate from "../../../utils/Translate";
-import SortableTable from "../../../components/Tables/SortableTable";
+
 const PAGE_SIZE = 10;
 
 const PaymentHistoryInvoiceTable = ({ data, setInvoice, setInvoiceData }) => {
   const translate = useTranslate();
   const [currentPage, setCurrentPage] = useState(1);
 
-  const invoiceHandle = (data) => {
+  const invoiceHandle = (row) => {
     setInvoice(true);
-    setInvoiceData(data);
+    setInvoiceData(row);
   };
-  const columns = [
-    {
-      title: translate("Status"),
-      field: "TransactionStatus",
-      hozAlign: "center",
-    },
-    {
-      title: translate("Amount"),
-      field: "PayAmount",
-      hozAlign: "center",
-    },
-    {
-      title: translate("Date"),
-      field: "CreateAt",
-      hozAlign: "center",
-      render: (row) => {
-        const date = new Date(row.CreateAt);
-        return date.toLocaleDateString("en-CA");
-      },
-    },
-    {
-      title: translate("Description"),
-      field: "Intent",
-      hozAlign: "left",
-      render: (row) => {
-        if (row.Intent === "quota") {
-          return `Addon ${row.size ?? 0} Quota`;
-        } else {
-          return `Renew For ${row.size ?? 0} years`;
-        }
-      },
-    },
-
-    {
-      title: translate("Action"),
-      field: "ID",
-      hozAlign: "center",
-      render: (row) => (
-        <div className="flex justify-center items-center gap-2">
-          <button
-            onClick={() => invoiceHandle(row)}
-            className="p-2 text-white bg-[#22c55e] rounded-md"
-          >
-            Details
-          </button>
-        </div>
-      ),
-    },
-  ];
 
   const totalPages = Math.ceil(data?.length / PAGE_SIZE);
 
@@ -83,11 +31,60 @@ const PaymentHistoryInvoiceTable = ({ data, setInvoice, setInvoiceData }) => {
 
   return (
     <div className="my-5">
-      <SortableTable
-        columns={columns}
-        data={paginatedData}
-        isFilterColumn={false}
-      />
+      <div className="overflow-x-auto rounded-md border w-full max-w-6xl mx-auto">
+        <table className="min-w-full table-auto text-sm md:text-base">
+          <thead className="bg-[#cfe2ff] text-black">
+            <tr>
+              <th className="px-4 py-3 text-center">{translate("Status")}</th>
+              <th className="px-4 py-3 text-center">{translate("Amount")}</th>
+              <th className="px-4 py-3 text-center">{translate("Date")}</th>
+              <th className="px-4 py-3 text-center">
+                {translate("Description")}
+              </th>
+              <th className="px-4 py-3 text-center">{translate("Action")}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedData.map((row, index) => (
+              <tr
+                key={index}
+                className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
+              >
+                <td className="px-4 py-2 text-center">
+                  {row.TransactionStatus}
+                </td>
+                <td className="px-4 py-2 text-center">{row.PayAmount}</td>
+                <td className="px-4 py-2 text-center">
+                  {new Date(row.CreateAt).toLocaleDateString("en-CA")}
+                </td>
+                <td className="px-4 py-2 text-center">
+                  {row.Intent === "quota"
+                    ? `Addon ${row.size ?? 0} Quota`
+                    : `Renew For ${row.size ?? 0} years`}
+                </td>
+                <td className="px-4 py-2">
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => invoiceHandle(row)}
+                      className="p-2 text-white bg-[#1aa5b8] hover:bg-[#17899a] rounded-md flex justify-center items-center gap-2"
+                    >
+                      <FaEye size={18} /> <span>{translate("Preview")}</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {paginatedData.length === 0 && (
+              <tr>
+                <td colSpan="5" className="text-center py-6 text-gray-500">
+                  {translate("No data available")}
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
       <div className="flex justify-center items-center mt-4">
         <div className="flex items-center space-x-2">
           <button
