@@ -17,7 +17,7 @@ import useTranslate from "../utils/Translate";
 import { useGetGetStudentListQuery } from "../features/exam/examQuerySlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import bnBijoy2Unicode from "../utils/conveter";
-
+import { GrDrag } from "react-icons/gr";
 // Droppable wrapper for tables
 function DroppableTable({ id, children }) {
   const { setNodeRef, isOver } = useDroppable({ id });
@@ -57,6 +57,9 @@ function DraggableRow({ row, isSelected, onSelect }) {
         }
       }}
     >
+      <th className="px-4 py-3 text-left">
+        <GrDrag size={20} />
+      </th>{" "}
       <td className="border px-4 py-2">
         <input
           type="checkbox"
@@ -68,11 +71,11 @@ function DraggableRow({ row, isSelected, onSelect }) {
           className="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
         />
       </td>
-      <td className="border px-4 py-2">{row.UserCode}</td>
-      <td className="border px-4 py-2">{bnBijoy2Unicode(row.UserName)}</td>
-      <td className="border px-4 py-2">{row.FatherName || "-"}</td>
-      <td className="border px-4 py-2">{row.ClassName}</td>
-      <td className="border px-4 py-2">{row.Fee}</td>
+      <td className="border px-4 py-2 whitespace-nowrap">{row.UserCode}</td>
+      <td className="border px-4 py-2 whitespace-nowrap">{bnBijoy2Unicode(row.UserName)}</td>
+      <td className="border px-4 py-2 whitespace-nowrap">{row.FatherName || "-"}</td>
+      <td className="border px-4 py-2 whitespace-nowrap">{row.ClassName}</td>
+      <td className="border px-4 py-2 whitespace-nowrap">{row.Fee}</td>
     </tr>
   );
 }
@@ -108,8 +111,6 @@ export default function DragAndDropTables({
       : skipToken
   );
 
-
-
   useEffect(() => {
     if (!studentData) return;
 
@@ -131,7 +132,6 @@ export default function DragAndDropTables({
       },
     })
   );
-
 
   const LEFT_CONTAINER = "left";
   const RIGHT_CONTAINER = "right";
@@ -210,13 +210,18 @@ export default function DragAndDropTables({
           <DroppableTable id={LEFT_CONTAINER}>
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <h2 className="text-lg font-semibold p-4 border-b border-gray-200">
-                {translate("যে সকর শিক্ষার্থী পরীক্ষায় অংশ গ্রহন করছে না তাদের তালিকা।")}
+                {translate(
+                  "যে সকর শিক্ষার্থী পরীক্ষায় অংশ গ্রহন করছে না তাদের তালিকা।"
+                )}
               </h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-3 text-left">
+                      <th className="px-4 py-3 text-left whitespace-nowrap">
+                        <GrDrag size={20} />
+                      </th>{" "}
+                      <th className="px-4 py-3 text-left whitespace-nowrap">
                         <input
                           type="checkbox"
                           checked={
@@ -229,17 +234,17 @@ export default function DragAndDropTables({
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
                       </th>
-                      <th className="px-4 py-3 text-left">{translate("ID")}</th>
+                      <th className="px-4 py-3 text-left whitespace-nowrap">{translate("ID")}</th>
                       <th className="px-4 py-3 text-left">
                         {translate("Name")}
                       </th>
-                      <th className="px-4 py-3 text-left">
+                      <th className="px-4 py-3 whitespace-nowrap text-left">
                         {translate("Father Name")}
                       </th>
-                      <th className="px-4 py-3 text-left">
+                      <th className="px-4 py-3 text-left whitespace-nowrap">
                         {translate("Class")}
                       </th>
-                      <th className="px-4 py-3 text-left">
+                      <th className="px-4 py-3 text-left whitespace-nowrap">
                         {translate("Fee")}
                       </th>
                     </tr>
