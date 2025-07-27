@@ -22,9 +22,7 @@ const StudentsList = ({ pageTitle }) => {
   // Initialize table data
   const [leftRows, setLeftRows] = useState([]);
   const [rightRows, setRightRows] = useState([]);
-  console.log(filter, "filter");
-  console.log(leftRows, "leftRows");
-  console.log(rightRows, "rightRows");
+
 
   const [postGetStudentList] = usePostGetStudentListMutation();
 
@@ -63,7 +61,7 @@ const StudentsList = ({ pageTitle }) => {
         // Optional: Reset form state if needed
         if (methods) methods.reset();
         // Clear selection
-        setSelectedRows({ left: [], right: [] });
+        // setSelectedRows({ left: [], right: [] });
         // Reset tables to initial state if needed
         setLeftRows(studentData?.Exam_StudentLoadView || []);
         setRightRows([]);
