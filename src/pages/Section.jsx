@@ -93,7 +93,10 @@ const DraggableRow = ({ row, headers, statename }) => {
         </div>
       </td>
       {headers.map((header) => (
-        <td key={header} className="py-2 px-4 border border-slate-100">
+        <td
+          key={header}
+          className="py-2 px-4 border border-slate-100 whitespace-nowrap"
+        >
           {row[header]}
         </td>
       ))}
@@ -313,8 +316,8 @@ const Section = ({ pageTitle }) => {
   return (
     <div className="p-4">
       {/* <SortableCompo /> */}
-      <div className="flex gap-3 flex-wrap lg:flex-nowrap">
-        <div className="w-full lg:w-[40%] lg:h-fit lg:sticky lg:top-0  border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="w-full lg:h-fit lg:sticky lg:top-0  border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
           <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">
             {translate("Add Section")}
           </h1>
@@ -364,27 +367,29 @@ const Section = ({ pageTitle }) => {
                 />
               </div>
 
-              <button
-                type="submit"
-                className="bg-theme-color transation ease-linear font-bold duration-500 inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-[#121212] font-SolaimanLipi"
-              >
-                {translate("Save")}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditMode(0);
-                  reset({
-                    SubClass: "",
-                    SubClassEng: "",
-                    SubClassAra: "",
-                    ClassID: "",
-                  });
-                }}
-                className="bg-[#121212] transation ease-linear duration-500 font-bold inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-slate-700 ms-[20px] font-SolaimanLipi"
-              >
-                {translate("Add New")}
-              </button>
+              <div className="flex flex-col sm:flex-row justify-center sm:justify-start items-center gap-3 mt-4">
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto bg-theme-color transition ease-linear font-bold duration-300 px-4 py-2 text-white rounded-md hover:bg-[#121212] font-SolaimanLipi text-sm sm:text-base"
+                >
+                  {translate("Save")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditMode(0);
+                    reset({
+                      SubClass: "",
+                      SubClassEng: "",
+                      SubClassAra: "",
+                      ClassID: "",
+                    });
+                  }}
+                  className="w-full sm:w-auto bg-[#121212] transition ease-linear duration-300 font-bold px-4 py-2 text-white rounded-md hover:bg-slate-700 font-SolaimanLipi text-sm sm:text-base"
+                >
+                  {translate(editMode === 0 ? "Clear Form" : "Add New")}
+                </button>
+              </div>
             </form>
           </FormProvider>
         </div>
@@ -394,14 +399,14 @@ const Section = ({ pageTitle }) => {
           onDragEnd={handleDragEnd}
           sensors={sensors}
         >
-          <div className="w-full flex-1 border rounded-lg bg-white shadow-sm">
+          <div className="w-full flex-1 border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
             <div className="relative overflow-x-auto">
-              <table className="w-full h-fit border-collapse">
+              <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-theme-dark text-left text-sm text-white font-SolaimanLipi">
                     <th></th>
                     {tableHeader.map((title) => (
-                      <th key={title} className="py-2 px-3">
+                      <th key={title} className="py-2 px-3 whitespace-nowrap">
                         {title}
                       </th>
                     ))}
