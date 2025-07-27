@@ -12,6 +12,8 @@ import { showModal } from "../utils/ModalControlar";
 import LoadingComponent from "../components/LoadingComponent";
 import EmptyState from "../components/EmptyState";
 import Swal from "sweetalert2";
+import Flatpickr from "react-flatpickr";
+import "flatpickr/dist/themes/material_green.css";
 
 const StudentReportList = ({
   reportParams,
@@ -21,12 +23,40 @@ const StudentReportList = ({
 }) => {
   const translate = useTranslate();
   const printRef = useRef();
+  const [filterDate, setFilterDate] = useState(null);
+  const [filteredReports, setFilteredReports] = useState([]);
+
   const { data: reportsResponse } = useGetStudentReportsQuery({
     userCode: reportParams.userCode,
     classID: reportParams.classID || undefined,
     SessionID: reportParams.SessionID || undefined,
   });
 
+  // Reset filter when reportParams change
+  useEffect(() => {
+    setFilterDate(null);
+  }, [reportParams]);
+
+  // Apply filtering when reportsResponse or filterDate changes
+  useEffect(() => {
+    if (reportsResponse) {
+      if (filterDate) {
+        const filtered = reportsResponse.filter((report) => {
+          const reportDate = new Date(report.CreateDate);
+          return (
+            reportDate.getFullYear() === filterDate.getFullYear() &&
+            reportDate.getMonth() === filterDate.getMonth() &&
+            reportDate.getDate() === filterDate.getDate()
+          );
+        });
+        setFilteredReports(filtered);
+      } else {
+        setFilteredReports(reportsResponse);
+      }
+    }
+  }, [reportsResponse, filterDate]);
+
+  // Rest of your component remains the same...
   const handleEditOpenModal = useCallback(
     (id) => {
       setReportUpdateId(id);
@@ -74,6 +104,14 @@ const StudentReportList = ({
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDateFilterChange = (dates) => {
+    setFilterDate(dates[0] || null);
+  };
+
+  const clearDateFilter = () => {
+    setFilterDate(null);
   };
 
   if (isLoading) {
@@ -130,7 +168,7 @@ const StudentReportList = ({
       </div>
 
       <div className="relative overflow-x-auto hidden_in_print">
-        <table className="w-full text-sm text-left text-gray-500 shadow-md sm:rounded-lg">
+        <table className="w-full text-sm text-center text-gray-500 shadow-md sm:rounded-lg">
           <thead className="text-xs text-theme-dark font-SolaimanLipi uppercase bg-gray-50">
             <tr>
               <th className="px-3 py-3 text-nowrap text-[16px]">
@@ -158,9 +196,43 @@ const StudentReportList = ({
                 {translate("Remark")}
               </th>
             </tr>
+            <tr>
+              <th className="px-3 py-3 text-nowrap text-[16px]"></th>
+              <th className="px-3 py-3 text-nowrap text-[16px]"></th>
+              <th className="px-3 py-3 text-nowrap text-[16px]"></th>
+              <th className="px-3 py-3 text-nowrap text-[16px]"></th>
+              <th className="px-3 py-3 text-nowrap text-[16px]"></th>
+              <th className="px-3 py-3 text-nowrap text-[16px]"></th>
+              <th className="px-3 py-3 text-nowrap text-[16px]">
+                <div className="mt-1 flex justify-center">
+                  <div className="w-full max-w-[200px]">
+                    <Flatpickr
+                      value={filterDate}
+                      onChange={handleDateFilterChange}
+                      options={{
+                        dateFormat: "d-m-Y",
+                        maxDate: "today",
+                        allowInput: true,
+                        placeholder: "Filter by date",
+                      }}
+                      className="w-full p-1 border rounded text-sm"
+                    />
+                    {/* {filterDate && (
+                      <button
+                        onClick={clearDateFilter}
+                        className="text-xs text-blue-500 hover:text-blue-700 mt-1"
+                      >
+                        Clear filter
+                      </button>
+                    )} */}
+                  </div>
+                </div>
+              </th>
+              <th className="px-3 py-3 text-nowrap text-[16px] w-[300px]"></th>
+            </tr>
           </thead>
           <tbody>
-            {reportsResponse.map((item, index) => (
+            {filteredReports.map((item, index) => (
               <tr
                 key={item.SRID}
                 className="bg-white border-b hover:bg-gray-50 text-black"

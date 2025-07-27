@@ -550,6 +550,8 @@ const CharacterReport = ({ pageTitle }) => {
             reportsResponse={reportsResponse}
             isLoading={reportsLoading}
             error={reportsError}
+            studentReportCet={studentReportCet}
+            studentReportType={studentReportType}
           />
         </div>
       </div>
