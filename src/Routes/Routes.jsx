@@ -63,6 +63,7 @@ import FeeSetting from "../pages/FeeSetting";
 import PaymentConfirm from "../pages/PaymentConfirm";
 import StudentFeeCollection from "../pages/StudentFeeCollection";
 import PaymentHistory from "../pages/PaymentHistory";
+import MonthlyDues from "../pages/MonthlyDues";
 
 const router = createBrowserRouter([
   {
@@ -497,6 +498,16 @@ const router = createBrowserRouter([
                   //   permissionId={permissionsDataList.st}
                   // >
                   <StudentFeeCollection pageTitle="Student Fee Collection" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: "monthly-dues",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.st}
+                  // >
+                  <MonthlyDues pageTitle="Student Fee Collection" />
                   // </RequirePermission>
                 ),
               },

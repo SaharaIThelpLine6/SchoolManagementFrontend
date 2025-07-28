@@ -30,6 +30,7 @@ const useTranslate = () => {
     "Double Student D:": "ডাবল শিক্ষার্থী ডি:",
     "Online Result Public": "অনলাইন ফলাফল প্রকাশ",
     Optional: "অপশনাল",
+    "Monthly Dues": "মাসিক বকেয়া",
     "Point V: Condition": "পয়েন্ট ভি: কন্ডিশন",
     Staff: "স্টাফ",
     SubClass: "সাব ক্লাস",
