@@ -267,6 +267,10 @@ export const menuData = [
         id: "3",
         name: "Monthly Dues",
         route: "/accounting/monthly-dues",
+      },  {
+        id: "4",
+        name: "Fee Collection Report",
+        route: "/accounting/fee-collection-report",
       },
     ],
   },

@@ -136,3 +136,102 @@ export const examAveragePasNumberStatus = [
   { id: 2, name: "Mi'iary" },
   { id: 3, name: "Higher Mi'iary" },
 ];
+
+export const feeCollectionReport = [
+  {
+    ReportID: 1,
+    ReportName: "1. দৈনিক ফি গ্রহণ তালিকা",
+  },
+  {
+    ReportID: 2,
+    ReportName: "2. দৈনিক ফি গ্রহণ সকল সেশন একত্রে",
+  },
+  {
+    ReportID: 3,
+    ReportName: "3. রসিদ হতে রসিদ ফি গ্রহণ তালিকা",
+  },
+  {
+    ReportID: 4,
+    ReportName: "4. ক্লাস ভিক্তিক ফি গ্রহণ তালিকা",
+  },
+  {
+    ReportID: 5,
+    ReportName: "5. ফি গ্রহণ ইউজার ভিক্তিক একত্রে",
+  },
+  {
+    ReportID: 6,
+    ReportName: "6. ফি গ্রহণ উইজার ভিক্তিক আলাদা",
+  },
+  {
+    ReportID: 7,
+    ReportName: "7. রসিদ ভিক্তিক ফি গ্রহণ তালিকা",
+  },
+  {
+    ReportID: 8,
+    ReportName: "8. খাত ভিক্তিক সংক্ষিপ্ত একত্রে",
+  },
+  {
+    ReportID: 9,
+    ReportName: "9. শেসন ভিক্তিক নির্ধারিত ফি তালিকা",
+  },
+  {
+    ReportID: 10,
+    ReportName: "10. ইউজার ভিক্তিক পেমেন্ট তালিকা",
+  },
+  {
+    ReportID: 11,
+    ReportName: "11. বারো মাসের তালিকা মূল ক্লাস আলাদা",
+  },
+  {
+    ReportID: 12,
+    ReportName: "12. বারো মাসের তালিকা মূল ক্লাস একত্রে",
+  },
+  {
+    ReportID: 13,
+    ReportName: "13. বারো মাসের তালিকা মূল সাব ক্লাস আলাদা",
+  },
+  {
+    ReportID: 14,
+    ReportName: "14. বারো মাসের তালিকা মূল সাব ক্লাস একত্রে",
+  },
+  {
+    ReportID: 15,
+    ReportName: "15. মাস ভিক্তিক মূল তালিকা আলাদা",
+  },
+  {
+    ReportID: 16,
+    ReportName: "16. মাস ভিক্তিক মূল তালিকা একত্রে",
+  },
+  {
+    ReportID: 17,
+    ReportName: "17. মাস ভিক্তিক সাব জামাত আলাদা",
+  },
+  {
+    ReportID: 18,
+    ReportName: "18. মাস ভিক্তিক সাব জামাত একত্রে",
+  },
+  {
+    ReportID: 19,
+    ReportName: "19. মাসিক ফি ফ্রি তালিকা",
+  },
+  {
+    ReportID: 20,
+    ReportName: "20. খাত ভিক্তিক সংক্ষিপ্ত তালিকা",
+  },
+  {
+    ReportID: 21,
+    ReportName: "21. খাত ভিক্তিক আলাদা ফির তালিকা",
+  },
+  {
+    ReportID: 22,
+    ReportName: "22. খাতের ধরণ ভিক্তিক একত্রে তালিকা",
+  },
+  {
+    ReportID: 23,
+    ReportName: "23. খাতের ধরণ ভিক্তিক আলাদা তালিকা",
+  },
+  {
+    ReportID: 24,
+    ReportName: "24. সাব জামাত ভিক্তিক মাসিক বেতন শীট",
+  },
+];

@@ -31,6 +31,7 @@ const useTranslate = () => {
     "Online Result Public": "অনলাইন ফলাফল প্রকাশ",
     Optional: "অপশনাল",
     "Monthly Dues": "মাসিক বকেয়া",
+    "Fee Collection Report": "ফি গ্রহনের রিপোর্ট",
     "Point V: Condition": "পয়েন্ট ভি: কন্ডিশন",
     Staff: "স্টাফ",
     SubClass: "সাব ক্লাস",
