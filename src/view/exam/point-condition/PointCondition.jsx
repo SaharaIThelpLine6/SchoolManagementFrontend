@@ -82,6 +82,13 @@ const PointCondition = ({ pageTitle, title }) => {
         }
       : skipToken
   );
+  const filteredSubjects =
+    pointConditionFilter && pointConditionFilter.SubClassID
+      ? (subjectsListData || []).filter(
+          (subject) =>
+            subject.SubClassID === Number(pointConditionFilter.SubClassID)
+        )
+      : subjectsListData || [];
 
   const examConditionData = useMemo(() => {
     if (!examConditionResponse) return [];
@@ -338,13 +345,14 @@ const PointCondition = ({ pageTitle, title }) => {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5 my-5">
             <DefaultSelect
               label={translate("Subject") + " :"}
-              options={subjectsListData ?? []}
+              options={filteredSubjects ?? []}
               valueField="SubjectID"
               nameField="SubjectName"
               registerKey="SubjectID"
               unicode={true}
               require={"This is required!"}
-            />
+              disabled={editingId ? true : false}
+            />{" "}
             <DefaultInput
               registerKey="PassNumber"
               label={translate("Pass Number") + " :"}

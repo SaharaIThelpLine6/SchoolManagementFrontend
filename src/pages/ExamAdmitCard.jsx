@@ -11,13 +11,20 @@ import SortableTable from "../components/Tables/SortableTable";
 import { FiEdit } from "react-icons/fi";
 import { MdDelete } from "react-icons/md";
 import RadioOption from "../components/Radio/RadioOption";
-
-
+import SingleAdmitCardPdf from "../view/exam/AdmitCardPdf/SingleAdmitCardPdf";
+import ColoredSingleAdmitCardPdf from "../view/exam/AdmitCardPdf/ColoredSingleAdmitCardPdf";
+import { useGetResidentialQuery } from "../features/settings/settingsQuerySlice";
+import { useGetExamNamesQuery } from "../features/student/studentQuerySlice";
+import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
 
 const ExamAdmitCard = () => {
   const translate = useTranslate();
   const methods = useForm();
+  const { watch } = methods;
   const { data: sessionData } = useGetSessionsQuery();
+  const { data: residentialData } = useGetResidentialQuery();
+  const { data: examNameData } = useGetExamNamesQuery();
+  const { data: subClassData } = useGetSubClassListQuery();
 
   const { handleSubmit } = methods;
   const classListData = null;
@@ -35,6 +42,23 @@ const ExamAdmitCard = () => {
     { id: "hifz", label: "রঙিন" },
     { id: "printed", label: "প্রেসে ছাপানো কাগজে" },
   ];
+  const selectOptions = [
+    { id: "allStudents", label: "সকল শিক্ষার্থী" },
+    { id: "aladaEntry", label: "আলাদা এন্ট্রি" },
+  ];
+  const reportOptions = [
+    { id: "1", label: "1. A5 কাগজের ১টি বাংলা" },
+    { id: "2", label: "2. A4 কাগজের ২টি বাংলা" },
+    { id: "3", label: "3. A4 কাগজের ৪টি বাংলা" },
+    { id: "4", label: "4. A4 কাগজের ৬টি বাংলা" },
+    { id: "5", label: "5. A4 কাগজের ২টি বাংলা" },
+    { id: "6", label: "6. A4 কাগজের ৪টি বাংলা" },
+    { id: "7", label: "7. A4 কাগজের ৬টি বাংলা" },
+    { id: "8", label: "8. A4 কাগজের ৪টি বাংলা" },
+  ];
+
+  const selectedClassID = watch("classType");
+
   const tableData = [
     {
       ExamID: 1,
@@ -122,7 +146,7 @@ const ExamAdmitCard = () => {
       </div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 my-5">
         <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
-          {colorOptions.map((option) => (
+          {selectOptions.map((option) => (
             <RadioOption
               key={option.id}
               option={option}
@@ -153,34 +177,41 @@ const ExamAdmitCard = () => {
               valueField="SessionID"
               nameField="SessionName"
               registerKey="SessionID"
+              unicode
             />
             <DefaultSelect
               label={translate("Exam Name") + " :"}
-              options={classListData ?? []}
-              valueField="ClassID"
-              nameField="ClassName"
+              options={examNameData ?? []}
+              valueField="ExamID"
+              nameField="ExamName"
               registerKey="ExamID"
+              unicode
+            />
+            {selectedClassID !== "aladaEntry" && (
+              <DefaultSelect
+                label={translate("Class/Jamaat") + ":"}
+                options={subClassData ?? []}
+                valueField="SubClass"
+                nameField="SubClass"
+                registerKey="SubClassID"
+                unicode
+              />
+            )}
+            <DefaultSelect
+              label={translate("Residential") + " :"}
+              nameField="ResidentialName"
+              registerKey="RDID"
+              valueField="RDID"
+              options={residentialData ?? []}
+              require={"This Field is required"}
+              unicode={true}
             />
             <DefaultSelect
-              label={translate("Class/Jamaat") + ":"}
-              options={genderOptions}
+              label={translate("Report Type") + ":"}
+              options={reportOptions}
               valueField="id"
-              nameField="value"
-              registerKey="gender"
-            />
-            <DefaultSelect
-              label={translate("Class/Jamaat") + ":"}
-              options={genderOptions}
-              valueField="id"
-              nameField="value"
-              registerKey="gender"
-            />
-            <DefaultSelect
-              label={translate("Class/Jamaat") + ":"}
-              options={genderOptions}
-              valueField="id"
-              nameField="value"
-              registerKey="gender"
+              nameField="label"
+              registerKey="ReportID"
             />
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
@@ -212,9 +243,10 @@ const ExamAdmitCard = () => {
                 />
               </div>
             </div>
-
-            {/* Right Section: Student ID Input */}
-            <div className="w-full sm:w-auto">
+          </div>
+          <div className="flex justify-start items-start gap-4">
+            {/* Student ID Input */}
+            <div className="w-48">
               <DefaultInput
                 valueField="id"
                 nameField="value"
@@ -222,9 +254,11 @@ const ExamAdmitCard = () => {
                 label={translate("Student ID")}
               />
             </div>
-          </div>
-          <div className="flex justify-end gap-4 pt-4">
-            <Button type="submit">{translate("Save")}</Button>
+
+            {/* Save Button */}
+            <div className="pt-6">
+              <Button type="submit">{translate("Save")}</Button>
+            </div>
           </div>
         </form>
       </FormProvider>
@@ -237,6 +271,8 @@ const ExamAdmitCard = () => {
         />
       </div>
     </div>
+    // <ColoredSingleAdmitCardPdf />
+    // <SingleAdmitCardPdf />
   );
 };
 

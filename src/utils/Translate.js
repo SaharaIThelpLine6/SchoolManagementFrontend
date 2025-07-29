@@ -14,6 +14,7 @@ const useTranslate = () => {
     "Subject Pass Number": "বিষয় পাস নম্বর",
     "Average Determination": "গড় নির্ণয়",
     "SMS ID": "এসএমএস আইডি",
+    "Report Type": "রিপোর্টের ধরণ",
     "Phone Number": "ফোন নম্বর",
     "Success and Error": "সাকসেস এবং এরোর",
     "Book of Subjects": "বিষয়ের খাতা",
