@@ -1,13 +1,28 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import UserOne from '../../images/user/user-01.png';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import UserOne from "../../images/user/user-01.png";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../features/auth/authSlice";
-import ClickOutside from '../ClickOutside';
+import ClickOutside from "../ClickOutside";
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+
+  const handleLogout = (dispatch) => {
+    // 1. Redux logout
+    dispatch({ type: "auth/logout" });
+
+    // 2. Remove Tawk.to storage keys
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("twk_")) {
+        localStorage.removeItem(key);
+      }
+    });
+
+    // 3. Force reload
+    window.location.reload();
+  };
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -20,7 +35,11 @@ const DropdownUser = () => {
           {/* Online Green Dot */}
           <span className="absolute top-0 right-0 h-2 w-2 border border-white rounded-full bg-green-500"></span>
           {/* Profile Picture */}
-          <img src={UserOne} alt="User" className="h-8 w-8 object-cover rounded-full" />
+          <img
+            src={UserOne}
+            alt="User"
+            className="h-8 w-8 object-cover rounded-full"
+          />
         </div>
       </Link>
 
@@ -30,23 +49,30 @@ const DropdownUser = () => {
           className={`absolute right-0 mt-2 flex w-72 flex-col rounded-lg border border-stroke bg-white shadow-[0_0_10px_rgba(0,0,0,0.1)] shadow-gray-300 z-30`}
         >
           {/*box*/}
-          <div className='absolute bg-white w-3 h-3 right-[14px] -translate-y-1/2 rotate-[45deg] shadow-[4px_-4px_10px_rgba(0,0,0,0.1)]'></div>
+          <div className="absolute bg-white w-3 h-3 right-[14px] -translate-y-1/2 rotate-[45deg] shadow-[4px_-4px_10px_rgba(0,0,0,0.1)]"></div>
 
           {/* First Part: Profile Info */}
           <div className="flex items-center gap-4 p-4 border-b bg-white border-gray-200">
             <span className="h-12 w-12 rounded-md overflow-hidden border border-gray-300">
-              <img src={UserOne} alt="User" className="h-full w-full object-cover" />
+              <img
+                src={UserOne}
+                alt="User"
+                className="h-full w-full object-cover"
+              />
             </span>
             <div>
-              {user?.username ?  <p className="text-sm font-medium text-gray-800">{user.username}</p> : null}
-             
+              {user?.username ? (
+                <p className="text-sm font-medium text-gray-800">
+                  {user.username}
+                </p>
+              ) : null}
+
               {/* <p className="text-xs text-gray-500">johndoe@example.com</p> */}
               <div className="flex items-center gap-1 mt-1">
                 <span className="inline-block h-2 w-2 rounded-full bg-green-500"></span>
                 <span className="text-xs text-gray-500">Online</span>
               </div>
             </div>
-
           </div>
 
           {/* Second Part: Options */}
@@ -82,7 +108,10 @@ const DropdownUser = () => {
             {/* <button className="text-sm font-medium text-gray-500 hover:text-primary text-left">
               Share Your Opinion
             </button> */}
-            <button className="text-sm font-medium text-gray-500 hover:text-primary mt-3 text-left" onClick={()=>{dispatch(logout())}}>
+            <button
+              className="text-sm font-medium text-gray-500 hover:text-primary mt-3 text-left"
+              onClick={() => handleLogout(dispatch)}
+            >
               Log Out
             </button>
           </div>

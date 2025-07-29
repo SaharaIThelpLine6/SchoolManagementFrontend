@@ -191,7 +191,7 @@ const ExamAdmitCard = () => {
               <DefaultSelect
                 label={translate("Class/Jamaat") + ":"}
                 options={subClassData ?? []}
-                valueField="SubClass"
+                valueField="SubClassID"
                 nameField="SubClass"
                 registerKey="SubClassID"
                 unicode

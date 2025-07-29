@@ -7,6 +7,8 @@ import { setCurrentLanguage } from "../features/language/languageSlice";
 import { closeSidebar } from "../features/sidebar/sideBarSlice";
 import SideBar from "../components/Sidebar/SideBar";
 import Header from "../components/Header/Header";
+import { useGetInstitutionInfoQuery } from "../features/settings/settingsQuerySlice";
+import  TawkMessenger  from '@tawk.to/tawk-messenger-react';
 
 const DefaultLayout = () => {
   const navigate = useNavigate();
@@ -20,7 +22,21 @@ const DefaultLayout = () => {
   const { currectLanguage } = useSelector((state) => state.language);
   const { isOpen } = useSelector((state) => state.modal);
 
-  // ✅ রাউট পরিবর্তনের সময় token verify
+  const { data: institutionInfo, isSuccess } = useGetInstitutionInfoQuery();
+
+  // ✅ Set default title
+  useEffect(() => {
+    document.title = "Qmmsoft - কওমী মাদরাসা ম্যানেজমেন্ট";
+  }, []);
+
+  // ✅ Update title when institution info loads
+  useEffect(() => {
+    if (isSuccess && institutionInfo?.InstitutionCode) {
+      document.title = `Qmmsoft - কওমী মাদরাসা ম্যানেজমেন্ট : ${institutionInfo.InstitutionCode}`;
+    }
+  }, [isSuccess, institutionInfo?.InstitutionCode]);
+
+  // ✅ Token verification on route change
   useEffect(() => {
     const lang = localStorage.getItem("lang");
     if (lang && lang !== currectLanguage) {
@@ -39,6 +55,7 @@ const DefaultLayout = () => {
     }
   }, [dispatch, navigate, token, location.pathname]);
 
+  // ✅ Handle multi-tab logout
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === "token") {
@@ -82,7 +99,6 @@ const DefaultLayout = () => {
         {/* Main Content */}
         <main className="flex-1 ml-0 h-full overflow-y-auto print:ml-0 print:h-auto print:overflow-y-visible">
           <div className="relative p-4 min-h-full print:p-0 print:h-auto print:bg-white print:min-h-auto">
-            {/* Main Content */}
             <div className="relative">
               <Outlet />
             </div>
@@ -91,6 +107,14 @@ const DefaultLayout = () => {
           </div>
         </main>
       </div>
+
+      {/* ✅ Show Tawk chat only when logged in */}
+      {isAuthenticated && (
+        <TawkMessenger
+          propertyId="6888afe97058a0192737a5b5"
+          widgetId="1j1auuap3"
+        />
+      )}
     </div>
   );
 };
