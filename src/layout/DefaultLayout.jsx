@@ -8,7 +8,10 @@ import { closeSidebar } from "../features/sidebar/sideBarSlice";
 import SideBar from "../components/Sidebar/SideBar";
 import Header from "../components/Header/Header";
 import { useGetInstitutionInfoQuery } from "../features/settings/settingsQuerySlice";
-import  TawkMessenger  from '@tawk.to/tawk-messenger-react';
+import TawkMessenger from "@tawk.to/tawk-messenger-react";
+
+const tawkPropertyId = import.meta.env.VITE_TAWK_PROPERTY_ID;
+const tawkWidgetId = import.meta.env.VITE_TAWK_WIDGET_ID;
 
 const DefaultLayout = () => {
   const navigate = useNavigate();
@@ -110,10 +113,7 @@ const DefaultLayout = () => {
 
       {/* ✅ Show Tawk chat only when logged in */}
       {isAuthenticated && (
-        <TawkMessenger
-          propertyId="6888afe97058a0192737a5b5"
-          widgetId="1j1auuap3"
-        />
+        <TawkMessenger propertyId={tawkPropertyId} widgetId={tawkWidgetId} />
       )}
     </div>
   );
