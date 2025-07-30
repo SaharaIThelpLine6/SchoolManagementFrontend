@@ -20,6 +20,7 @@ export const examSlice = createApi({
     "ExamCondition",
     "AverageExamConditionAll",
     "GetStudentList",
+    "StudentAdmitCard",
   ],
   endpoints: (builder) => ({
     postNewExam: builder.mutation({
@@ -191,6 +192,29 @@ export const examSlice = createApi({
         },
       ],
     }),
+    getStudentAdmitCards: builder.query({
+      query: ({ SessionID, ExamID, SubClassID, RDID, UserCode }) => {
+        const url = UserCode?.trim()
+          ? `student_admit_card/${SessionID}/${ExamID}/${SubClassID}/${RDID}/${UserCode}`
+          : `student_admit_card/${SessionID}/${ExamID}/${SubClassID}/${RDID}`;
+        return {
+          url,
+          method: "GET",
+        };
+      },
+      providesTags: (
+        result,
+        error,
+        { SessionID, ExamID, SubClassID, RDID, UserCode }
+      ) => [
+        {
+          type: "StudentAdmitCard",
+          id: `${SessionID}-${ExamID}-${SubClassID}-${RDID}-${
+            UserCode || "all"
+          }`,
+        },
+      ],
+    }),
     postGetStudentList: builder.mutation({
       query: (body) => ({
         url: `addto_student_list`,
@@ -223,5 +247,6 @@ export const {
   useUpdateAverageSubjectPassNumberMutation,
   useGetAverageSubjectPassNumberQuery,
   useGetGetStudentListQuery,
-  usePostGetStudentListMutation
+  usePostGetStudentListMutation,
+  useGetStudentAdmitCardsQuery,
 } = examSlice;

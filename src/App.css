@@ -288,5 +288,10 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     
 } */
 
+@media print {
+  .break-after-page {
+    page-break-after: always;
+  }
+}
 
 
