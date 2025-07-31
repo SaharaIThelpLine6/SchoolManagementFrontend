@@ -3,11 +3,14 @@ import AdmitCardArabicA4FourAlt from "../view/exam/AdmitCardPdf/Arabi/AdmitCardA
 import AdmitCardArabicA4Six from "../view/exam/AdmitCardPdf/Arabi/AdmitCardArabicA4Six";
 import AdmitCardArabicA4Two from "../view/exam/AdmitCardPdf/Arabi/AdmitCardArabicA4Two";
 import AdmitCardBanglaA4Four from "../view/exam/AdmitCardPdf/Bangla/AdmitCardBanglaA4Four";
+import AdmitCardBanglaA4FourColor from "../view/exam/AdmitCardPdf/Bangla/AdmitCardBanglaA4FourColor";
 import AdmitCardBanglaA4Six from "../view/exam/AdmitCardPdf/Bangla/AdmitCardBanglaA4Six";
+import AdmitCardBanglaA4SixColor from "../view/exam/AdmitCardPdf/Bangla/AdmitCardBanglaA4SixColor";
 import AdmitCardBanglaA4Two from "../view/exam/AdmitCardPdf/Bangla/AdmitCardBanglaA4Two";
-import AdmitCardBanglaA5 from "../view/exam/AdmitCardPdf/Bangla/AdmitCardBanglaA5";
+import AdmitCardBanglaA4TwoColor from "../view/exam/AdmitCardPdf/Bangla/AdmitCardBanglaA4TwoColor";
+import AdmitCardBanglaA5Color from "../view/exam/AdmitCardPdf/Bangla/AdmitCardBanglaA5Color";
 
-const AdmitCardRenderer = ({ type, data }) => {
+const AdmitCardRendererColor = ({ type, data }) => {
   if (!data || (Array.isArray(data) && data.length === 0)) {
     return <p>ডাটা পাওয়া যায়নি।</p>;
   }
@@ -24,7 +27,7 @@ const AdmitCardRenderer = ({ type, data }) => {
       case "1":
         return (
           <div key={index} style={pageStyle}>
-            <AdmitCardBanglaA5 {...props} />
+            <AdmitCardBanglaA5Color {...props} />
           </div>
         );
       case "5":
@@ -78,7 +81,7 @@ const AdmitCardRenderer = ({ type, data }) => {
                 index === studentPairs.length - 1 ? "auto" : "always",
             }}
           >
-            <AdmitCardBanglaA4Two data={pair} />
+            <AdmitCardBanglaA4TwoColor data={pair} />
           </div>
         ))}
       </>
@@ -102,7 +105,7 @@ const AdmitCardRenderer = ({ type, data }) => {
                 index === studentPairs.length - 1 ? "auto" : "always",
             }}
           >
-            <AdmitCardBanglaA4Four data={pair} />
+            <AdmitCardBanglaA4FourColor data={pair} />
           </div>
         ))}
       </>
@@ -125,7 +128,7 @@ const AdmitCardRenderer = ({ type, data }) => {
                 index === studentPairs.length - 1 ? "auto" : "always",
             }}
           >
-            <AdmitCardBanglaA4Six data={pair} />
+            <AdmitCardBanglaA4SixColor data={pair} />
           </div>
         ))}
       </>
@@ -147,4 +150,4 @@ const AdmitCardRenderer = ({ type, data }) => {
   return renderComponent(data, 0, true);
 };
 
-export default AdmitCardRenderer;
+export default AdmitCardRendererColor;
