@@ -73,10 +73,10 @@ const AdmitCardBanglaA4Four = ({ data }) => {
           {/* Center Title */}
           <div className="text-center flex-1">
             <h2 className="text-lg font-bold mb-1">
-              {institutionInfo?.InstitutionName || "টেস্ট মাদরাসা"}
+              {bnBijoy2Unicode(institutionInfo?.InstitutionName) || "টেস্ট মাদরাসা"}
             </h2>
             <p className="text-xs">
-              {institutionInfo?.Address ||
+              {bnBijoy2Unicode(institutionInfo?.Address) ||
                 "সরকারি মুজিব কলেজ রোড, সখিপুর, টাংগাইল"}
             </p>
             <p className="text-xs mb-1">{bnBijoy2Unicode(student?.ExamName)}</p>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Buffer } from "buffer";
 import bnBijoy2Unicode from "../../../../utils/conveter";
 import { useGetInstitutionInfoQuery } from "../../../../features/settings/settingsQuerySlice";
+import { bindActionCreators } from "@reduxjs/toolkit";
 
 const AdmitCardBanglaA5 = ({ data }) => {
   const {
@@ -70,11 +71,11 @@ const AdmitCardBanglaA5 = ({ data }) => {
 
             {/* Center Title */}
             <div className="text-center flex-1">
-              <h2 className="text-3xl font-bold mb-2">
-                {institutionInfo?.InstitutionName || "টেস্ট মাদরাসা ১১১"}
+              <h2 className="text-2xl font-bold mb-2">
+                {bnBijoy2Unicode(institutionInfo?.InstitutionName) || "টেস্ট মাদরাসা ১১১"}
               </h2>
               <p className="text-xl">
-                {institutionInfo?.Address ||
+                {bnBijoy2Unicode(institutionInfo?.Address) ||
                   "সরকারি মুজিব কলেজ রোড, সখিপুর, টাংগাইল"}
               </p>
               <p className="text-xl mb-4">{bnBijoy2Unicode(data?.ExamName)}</p>
@@ -88,7 +89,7 @@ const AdmitCardBanglaA5 = ({ data }) => {
           </div>
 
           {/* Info Grid */}
-          <div className="flex justify-around mt-8 text-xl leading-9">
+          <div className="flex justify-around mt-8 text-lg leading-9">
             {/* Left Column */}
             <div>
               <div className="flex gap-3">
@@ -151,8 +152,8 @@ const AdmitCardBanglaA5 = ({ data }) => {
               className="w-32 h-16 object-contain mx-auto"
             />
             <div className="border-t-2 border-black w-48 mx-auto mt-3" />
-            <p className="mt-2 text-xl">নায়েম</p>
-            <p className="text-xl mt-2">
+            <p className="mt-2 text-lg">নায়েম</p>
+            <p className="text-lg mt-2">
               তারিখ : {new Date().toLocaleDateString("bn-BD")} ইং.
             </p>
           </div>
@@ -165,8 +166,8 @@ const AdmitCardBanglaA5 = ({ data }) => {
               className="w-32 h-16 object-contain mx-auto"
             />
             <div className="border-t-2 border-black w-48 mx-auto mt-3" />
-            <p className="mt-2 text-xl">মুহতামিম</p>
-            <p className="text-xl mt-2">
+            <p className="mt-2 text-lg">মুহতামিম</p>
+            <p className="text-lg mt-2">
               তারিখ : {new Date().toLocaleDateString("bn-BD")} ইং.
             </p>
           </div>

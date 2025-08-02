@@ -78,10 +78,10 @@ const AdmitCardBanglaA5Color = ({ data }) => {
             {/* Center Title */}
             <div className="flex-1 text-white mt-5 text-center ml-30">
               <h2 className="text-xl font-bold mb-2 text-[#c0c000]">
-                {institutionInfo?.InstitutionName || "টেস্ট মাদরাসা ১১১"}
+                {bnBijoy2Unicode(institutionInfo?.InstitutionName)|| "টেস্ট মাদরাসা ১১১"}
               </h2>
               <p className="text-base">
-                {institutionInfo?.Address ||
+                {bnBijoy2Unicode(institutionInfo?.Address) ||
                   "সরকারি মুজিব কলেজ রোড, সখিপুর, টাংগাইল"}
               </p>
               <p className="text-base mb-4">{bnBijoy2Unicode(data?.ExamName)}</p>

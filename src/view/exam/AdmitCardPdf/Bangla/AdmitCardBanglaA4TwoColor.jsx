@@ -85,10 +85,10 @@ const AdmitCardBanglaA4TwoColor = ({ data }) => {
             {/* Center Title */}
             <div className="text-center flex-1 mt-8">
               <h2 className="text-xl font-bold text-[#c0c000]"> {/* Increased from text-lg */}
-                {institutionInfo?.InstitutionName || "টেস্ট মাদরাসা"}
+                {bnBijoy2Unicode(institutionInfo?.InstitutionName) || "টেস্ট মাদরাসা"}
               </h2>
               <p className="text-sm text-white"> {/* Increased from text-xs */}
-                {institutionInfo?.Address ||
+                {bnBijoy2Unicode(institutionInfo?.Address) ||
                   "সরকারি মুজিব কলেজ রোড, সখিপুর, টাংগাইল"}
               </p>
               <p className="text-sm mb-2 text-white"> {/* Increased from text-xs */}
