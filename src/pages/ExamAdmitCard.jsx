@@ -63,7 +63,7 @@ const ExamAdmitCard = () => {
   const colorOptions = [
     { id: "poriyat", label: "সাদা-কালা" },
     { id: "hifz", label: "রঙিন" },
-    { id: "printed", label: "প্রেসে ছাপানো কাগজে" },
+    // { id: "printed", label: "প্রেসে ছাপানো কাগজে" },
   ];
 
   const reportOptions = [
