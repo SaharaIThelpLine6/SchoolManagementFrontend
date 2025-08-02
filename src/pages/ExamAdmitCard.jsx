@@ -17,6 +17,7 @@ import { useGetStudentAdmitCardsQuery } from "../features/exam/examQuerySlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import AdmitCardRenderer from "../components/AdmitCardRenderer";
 import AdmitCardRendererColor from "../components/AdmitCardRendererColor";
+import Swal from "sweetalert2";
 
 const ExamAdmitCard = () => {
   const translate = useTranslate();
@@ -79,10 +80,15 @@ const ExamAdmitCard = () => {
   const reportType = watch("ReportID");
 
   const handlePrint = () => {
-    if (studentAdmitCards?.data && color && reportType ) {
+    if (studentAdmitCards?.data && color && reportType) {
       window.print();
     } else {
-      alert("প্রিন্ট করার মতো কোনো তথ্য পাওয়া যায়নি।");
+      Swal.fire({
+        icon: "warning",
+        title: "প্রিন্ট সম্ভব নয়",
+        text: "প্রিন্ট করার মতো কোনো তথ্য পাওয়া যায়নি।",
+        confirmButtonText: "ঠিক আছে",
+      });
     }
   };
   return (
@@ -199,12 +205,14 @@ const ExamAdmitCard = () => {
           <AdmitCardRenderer type={reportType} data={studentAdmitCards.data} />
         )}
         {color === "hifz" && (
-          <AdmitCardRendererColor type={reportType} data={studentAdmitCards.data} />
+          <AdmitCardRendererColor
+            type={reportType}
+            data={studentAdmitCards.data}
+          />
         )}
         {/* {color === "printed" && (
           <PrePrintedAdmitCardPdf data={studentAdmitCardData} />
         )}  */}
-        
       </div>
     </>
   );
