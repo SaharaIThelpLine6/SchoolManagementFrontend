@@ -78,7 +78,7 @@ const useTranslate = () => {
       "নিম্নোক্ত শিক্ষার্থীদের ফ্রী গ্রহণ করুন।",
     "Talent Condition": "মেধা কন্ডিশন",
     "All the divisions whose merit will be mentioned":
-      "যে সকল বিভাগের যোগ্যতা উল্লেখ করা হবে।",
+      "যে সকল ডিভিশনের মেধা উল্লেখ করা হবে।",
     "Select it with a check mark.": "তা টিক চিহ্ন দিয়ে নির্বাচন করুন।",
     "Select all inputs": "সকল ইনপুট নির্বাচন করুন।",
     "Exam List Made": "পরীক্ষার তালিকা তৈরি",
