@@ -8,8 +8,6 @@ import { IoMdSettings } from "react-icons/io";
 import { useCallback } from "react";
 import { showModal } from "../utils/ModalControlar";
 import RadioOption from "../components/Radio/RadioOption";
-import SingleAdmitCardPdf from "../view/exam/AdmitCardPdf/SingleAdmitCardPdf";
-import ColoredSingleAdmitCardPdf from "../view/exam/AdmitCardPdf/ColoredSingleAdmitCardPdf";
 import { useGetResidentialQuery } from "../features/settings/settingsQuerySlice";
 import { useGetExamNamesQuery } from "../features/student/studentQuerySlice";
 import { useGetSubClassListQuery } from "../features/class/classQuerySlice";

@@ -289,17 +289,6 @@ const StudentVacationListTable = ({ pageTitle }) => {
         <div className="block w-full overflow-x-auto">
           <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
             <div className="w-full flex flex-col gap-5 mb-3">
-              <div className="flex justify-start gap-5 sm:gap-0 items-center">
-                {/* Left Buttons */}
-                <div className="flex flex-wrap justify-start gap-3 order-2 md:order-1">
-                  <Button className="bg-[#007af7] text-white hover:bg-blue-600">
-                    {translate("Single")}
-                  </Button>
-                  <Button className="bg-[#007af7] text-white hover:bg-blue-600">
-                    {translate("Class Based")}
-                  </Button>
-                </div>
-              </div>
               <div className="flex justify-between w-full gap-5 sm:gap-0 items-center">
                 {/* Left Buttons */}
                 <h3 className="font-SolaimanLipi text-[20px] font-bold">
