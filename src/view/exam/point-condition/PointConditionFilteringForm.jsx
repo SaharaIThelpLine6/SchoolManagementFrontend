@@ -15,7 +15,6 @@ const PointConditionFilteringForm = ({ onFilter }) => {
   const { data: subClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
 
-  console.log(subClassListData, "subClassListData")
 
 
   const SessionId = watch("SessionID");

@@ -81,7 +81,7 @@ const AdmitCardBanglaA4FourColor = ({ data }) => {
             </div>
 
             {/* Center Title */}
-            <div className="text-center flex-1">
+            <div className="text-center flex-1 mt-3">
               <h2 className="text-lg font-bold text-[#c0c000]">
                 {institutionInfo?.InstitutionName || "টেস্ট মাদরাসা"}
               </h2>

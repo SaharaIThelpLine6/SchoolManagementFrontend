@@ -65,6 +65,7 @@ import StudentFeeCollection from "../pages/StudentFeeCollection";
 import PaymentHistory from "../pages/PaymentHistory";
 import MonthlyDues from "../pages/MonthlyDues";
 import FeeCollectionReport from "../pages/FeeCollectionReport";
+import TalentCondition from "../pages/TalentCondition";
 
 const router = createBrowserRouter([
   {
@@ -359,7 +360,17 @@ const router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
+              
               {
+                path: "talent-condition",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.admit_card}
+                  // >
+                    <TalentCondition pageTitle="Talent Condition" />
+                  // {/* </RequirePermission> */}
+                ),
+              },  {
                 path: "admit-card",
                 element: (
                   <RequirePermission

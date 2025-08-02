@@ -46,7 +46,7 @@ const AdmitCardBanglaA5 = ({ data }) => {
     <div
       className="bg-white text-black mx-auto"
       style={{
-        // width: "210mm",
+        width: "210mm",
         padding: "4mm",
         fontFamily: "'SolaimanLipi', 'Bangla', sans-serif",
       }}
@@ -78,7 +78,7 @@ const AdmitCardBanglaA5 = ({ data }) => {
                   "সরকারি মুজিব কলেজ রোড, সখিপুর, টাংগাইল"}
               </p>
               <p className="text-xl mb-4">{bnBijoy2Unicode(data?.ExamName)}</p>
-              <div className="border-2 border-black px-6 py-2 inline-block rounded">
+              <div className="border border-black px-4 py-2 inline-block rounded-3xl">
                 <h3 className="text-2xl font-bold">প্রবেশপত্র</h3>
               </div>
             </div>
@@ -92,25 +92,25 @@ const AdmitCardBanglaA5 = ({ data }) => {
             {/* Left Column */}
             <div>
               <div className="flex gap-3">
-                <div className="min-w-[160px] font-normal text-end">
+                <div className="min-w-[110px] font-normal text-start">
                   শ্রেণি / জামাত{" "}
                 </div>
                 :<div>{bnBijoy2Unicode(data?.SubClass)}</div>
               </div>
               <div className="flex gap-3">
-                <div className="min-w-[160px] font-normal text-end">
+                <div className="min-w-[110px] font-normal text-strat">
                   পরীক্ষার্থীর নাম{" "}
                 </div>
                 :<div>{bnBijoy2Unicode(data?.UserName)}</div>
               </div>
               <div className="flex gap-3">
-                <div className="min-w-[160px] font-normal text-end">
+                <div className="min-w-[110px] font-normal text-start">
                   পিতার নাম{" "}
                 </div>
                 :<div>{bnBijoy2Unicode(data?.FatherName)}</div>
               </div>
               <div className="flex gap-3">
-                <div className="min-w-[160px] font-normal text-end">
+                <div className="min-w-[110px] font-normal text-start">
                   মাতার নাম{" "}
                 </div>
                 :<div>{bnBijoy2Unicode(data?.MotherName)}</div>
@@ -133,7 +133,7 @@ const AdmitCardBanglaA5 = ({ data }) => {
               </div>
               <div className="flex gap-3">
                 <div className="min-w-[160px] font-normal text-end">
-                  ভর্তি নাম্বার / সিরিয়াল{" "}
+                  ভর্তি নং
                 </div>
                 :<div>{data?.AdmissionSerial}</div>
               </div>

@@ -3,7 +3,6 @@ import AdmitCardArabicA4FourAlt from "../view/exam/AdmitCardPdf/Arabi/AdmitCardA
 import AdmitCardArabicA4Six from "../view/exam/AdmitCardPdf/Arabi/AdmitCardArabicA4Six";
 import AdmitCardArabicA4Two from "../view/exam/AdmitCardPdf/Arabi/AdmitCardArabicA4Two";
 import AdmitCardBanglaA4Four from "../view/exam/AdmitCardPdf/Bangla/AdmitCardBanglaA4Four";
-import AdmitCardBanglaA4Six from "../view/exam/AdmitCardPdf/Bangla/AdmitCardBanglaA4Six";
 import AdmitCardBanglaA4Two from "../view/exam/AdmitCardPdf/Bangla/AdmitCardBanglaA4Two";
 import AdmitCardBanglaA5 from "../view/exam/AdmitCardPdf/Bangla/AdmitCardBanglaA5";
 
@@ -108,29 +107,7 @@ const AdmitCardRenderer = ({ type, data }) => {
       </>
     );
   }
-  if (type === "4") {
-    // Group students into pairs (6 per page)
-    const studentPairs = [];
-    for (let i = 0; i < data.length; i += 6) {
-      studentPairs.push(data.slice(i, i + 6));
-    }
 
-    return (
-      <>
-        {studentPairs.map((pair, index) => (
-          <div
-            key={index}
-            style={{
-              pageBreakAfter:
-                index === studentPairs.length - 1 ? "auto" : "always",
-            }}
-          >
-            <AdmitCardBanglaA4Six data={pair} />
-          </div>
-        ))}
-      </>
-    );
-  }
 
   // For other types, handle normally
   if (Array.isArray(data)) {

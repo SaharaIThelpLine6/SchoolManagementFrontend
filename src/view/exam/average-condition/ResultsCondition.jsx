@@ -348,7 +348,6 @@ const ResultsCondition = ({ colorOption }) => {
       MeariDivision: data.MeariDivision,
       MeariAraDivision: data.MeariAraDivision,
       Color7: data.Color7,
-      GorMeariAction: data.GorMeariAction,
       GorMeariSCount: data.GorMeariSCount,
       GorDivision: data.GorDivision,
       GorAraDivision: data.GorAraDivision,
@@ -363,22 +362,24 @@ const ResultsCondition = ({ colorOption }) => {
       MeariSCount: data.MeariSCount,
       MeariRasibDivision: data.MeariRasibDivision,
       MeariRasibDivisionAra: data.MeariRasibDivisionAra,
-      MostMeariAction: data.MostMeariAction,
       MostMeariScount: data.MostMeariScount,
       MostMeariBanDivision: data.MostMeariBanDivision,
       MostMeariAraDivision: data.MostMeariAraDivision,
       Color11: data.Color11,
-      OptionalAbove: data.OptionalAbove,
+      // OptionalAbove: data.OptionalAbove,
       AboveGPA: data.AboveGPA,
-      Published: data.Published,
-      ClassType: data.ClassType,
+      // Published: data.Published,
+      // ClassType: data.ClassType === 'null' ? null : data.ClassType,
+      GorMeariAction: data.condition1_active ? 1 : 0,
       MeariUnMeari: data.condition2_active ? 1 : 0,
-      // condition4_active: data.condition4_active,
+      MostMeariAction: data.condition3_active ? 1 : 0,
       // condition5_active: data.condition5_active,
     };
 
     try {
+      console.log(payload, "payload")
       await postExamCondition(payload).unwrap();
+    console.log(data, "data")
       Swal.fire({
         icon: "success",
         title: "সফলভাবে সংরক্ষণ করা হয়েছে",

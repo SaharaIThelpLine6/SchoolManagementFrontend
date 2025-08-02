@@ -174,16 +174,21 @@ export const menuData = [
       },
       {
         id: "6",
+        name: "Talent Condition",
+        route: "/exam/talent-condition",
+      },
+      {
+        id: "7",
         name: "Exam Admit Card",
         route: "/exam/admit-card",
       },
       {
-        id: "7",
+        id: "8",
         name: "Exam Routing",
         route: "/exam/routing",
       },
       {
-        id: "8",
+        id: "9",
         name: "Exam Report",
         route: "/exam/report",
       },
@@ -267,7 +272,8 @@ export const menuData = [
         id: "3",
         name: "Monthly Dues",
         route: "/accounting/monthly-dues",
-      },  {
+      },
+      {
         id: "4",
         name: "Fee Collection Report",
         route: "/accounting/fee-collection-report",
@@ -287,6 +293,7 @@ export const menuData = [
       },
     ],
   },
+
   {
     id: "10",
     name: "Donation",
@@ -322,4 +329,5 @@ export const menuData = [
     icon: "IoMdHelp",
     subMenu: [],
   },
+
 ];

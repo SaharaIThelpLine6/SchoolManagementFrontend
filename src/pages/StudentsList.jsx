@@ -1,13 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { setPageName } from "../features/auth/authSlice";
 import useTranslate from "../utils/Translate";
 import Button from "../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-import DefaultInput from "../components/Forms/DefaultInput";
-import { showModal } from "../utils/ModalControlar";
-import { enToBnNumber } from "../helper/languageFormat";
 
 import DragAndDropTables from "../components/DragAndDropTables";
 import FilteringForm from "../view/exam/average-condition/FilteringForm";
@@ -31,9 +28,6 @@ const StudentsList = ({ pageTitle }) => {
     // Initialize table data
   }, [dispatch, pageTitle]);
 
-  const handleOpenModal = useCallback(() => {
-    showModal("Talent Condition", "TALENT_CONDITION");
-  }, []);
 
   const onSubmit = async () => {
     try {
@@ -85,9 +79,7 @@ const StudentsList = ({ pageTitle }) => {
           <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
             {translate("Exam List Made")}
           </h3>
-          {/* <Button onClick={handleOpenModal}>
-            {translate("Talent Condition")}
-          </Button> */}
+       
         </div>
         <FormProvider {...methods}>
           <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>

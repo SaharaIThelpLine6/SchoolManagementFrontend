@@ -21,6 +21,7 @@ export const examSlice = createApi({
     "AverageExamConditionAll",
     "GetStudentList",
     "StudentAdmitCard",
+    "ExamTalentCondition",
   ],
   endpoints: (builder) => ({
     postNewExam: builder.mutation({
@@ -62,6 +63,14 @@ export const examSlice = createApi({
         body,
       }),
       invalidatesTags: ["ExamFeeSettings"],
+    }),
+    postNewExamCondition: builder.mutation({
+      query: (body) => ({
+        url: `new_exam_condition`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["NewExamCondition"],
     }),
     updateExamFeeSetting: builder.mutation({
       query: ({ id, body }) => ({
@@ -223,6 +232,26 @@ export const examSlice = createApi({
       }),
       invalidatesTags: ["GetStudentList"],
     }),
+    postExamTalentCondition: builder.mutation({
+      query: (body) => ({
+        url: `exam_talent_condition`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["ExamTalentCondition"],
+    }),
+    getExamTalentCondition: builder.query({
+      query: ({ SessionID, ExamID, SubClassID }) => ({
+        url: `exam_talent_condition/${SessionID}/${ExamID}/${SubClassID}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
+        {
+          type: "ExamTalentCondition",
+          id: `${SessionID}-${ExamID}-${SubClassID}`,
+        },
+      ],
+    }),
   }),
 });
 
@@ -249,4 +278,7 @@ export const {
   useGetGetStudentListQuery,
   usePostGetStudentListMutation,
   useGetStudentAdmitCardsQuery,
+  usePostNewExamConditionMutation,
+  useGetExamTalentConditionQuery,
+  usePostExamTalentConditionMutation
 } = examSlice;

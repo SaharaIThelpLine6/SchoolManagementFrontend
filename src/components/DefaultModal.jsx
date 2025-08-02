@@ -21,7 +21,6 @@ import SuccessAndError from "../view/general-information/sms/SuccessAndError";
 import AddEditBook from "../view/students/book/AddEditBook";
 import useTranslate from "../utils/Translate";
 import Subsidiary from "../view/exam/Subsidiary";
-import TalentCondition from "../view/exam/TalentCondition";
 import ExamReportSetting from "../view/exam/ExamReportSetting";
 
 const DefaultModal = () => {
@@ -111,7 +110,6 @@ const DefaultModal = () => {
                 {modalType === "ADD_BOOK" && <AddEditBook />}
                 {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
                 {modalType === "SUB_SIDIARY" && <Subsidiary />}
-                {modalType === "TALENT_CONDITION" && <TalentCondition />}
                 {modalType === "EXAM_REPORT_SETTING" && <ExamReportSetting />}
               </div>
             )}
