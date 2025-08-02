@@ -14,7 +14,9 @@ import Swal from "sweetalert2";
 
 // ✅ Input with Label + Checkbox
 const InputWithCheckbox = ({ registerKey, checked, onCheckChange }) => (
-  <div className="flex flex-col items-start gap-1">
+  <div className="flex flex-row items-start gap-1">
+    <DefaultInput registerKey={registerKey} />
+
     <label className="flex items-center gap-2">
       <input
         type="checkbox"
@@ -22,9 +24,7 @@ const InputWithCheckbox = ({ registerKey, checked, onCheckChange }) => (
         onChange={onCheckChange}
         className="cursor-pointer"
       />
-      <span className="text-sm font-medium">Talent</span>
     </label>
-    <DefaultInput registerKey={registerKey} />
   </div>
 );
 
@@ -61,7 +61,6 @@ const TalentCondition = () => {
         }
       : skipToken
   );
-
 
   useEffect(() => {
     if (isLoading || error) {
@@ -165,35 +164,41 @@ const TalentCondition = () => {
       </div>
 
       <FormProvider {...methods}>
-        <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <PointConditionFilteringForm onFilter={setFilter} />
-
-          {/* ✅ Select All */}
-          <div className="flex items-center mb-2">
-            <input
-              type="checkbox"
-              checked={checkedInputs.every(Boolean)}
-              onChange={handleSelectAll}
-              className="mr-2 cursor-pointer"
+        <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
+          <div className="flex flex-col
+           justify-center items-center gap-5">
+            <PointConditionFilteringForm
+              onFilter={setFilter}
             />
-            <label className="font-bold">
-              {translate("Select all inputs")}
-            </label>
-          </div>
 
-          {/* ✅ Inputs Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6">
-            {inputs.map((input, index) => (
-              <InputWithCheckbox
-                key={index}
-                {...input}
-                checked={checkedInputs[index]}
-                onCheckChange={() => handleCheckChange(index)}
-              />
-            ))}
-          </div>
+            <div className="">
+              {/* ✅ Select All */}
+              <div className="flex items-center mb-2">
+                <input
+                  type="checkbox"
+                  checked={checkedInputs.every(Boolean)}
+                  onChange={handleSelectAll}
+                  className="mr-2 cursor-pointer"
+                />
+                <label className="font-semibold">
+                  {translate("Select all inputs")}
+                </label>
+              </div>
 
-          <div className="flex justify-end gap-4 pt-4">
+              {/* ✅ Inputs Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6">
+                {inputs.map((input, index) => (
+                  <InputWithCheckbox
+                    key={index}
+                    {...input}
+                    checked={checkedInputs[index]}
+                    onCheckChange={() => handleCheckChange(index)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex justify-center gap-4 mr-10">
             <Button type="submit">{translate("Save")}</Button>
           </div>
         </form>
