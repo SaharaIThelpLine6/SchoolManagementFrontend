@@ -78,7 +78,11 @@ const ExamAdmitCard = () => {
   const reportType = watch("ReportID");
 
   const handlePrint = () => {
-    if (studentAdmitCards?.data && color && reportType) {
+    const hasData = studentAdmitCards?.data?.length > 0;
+    const hasColor = Boolean(color);
+    const hasReportType = Boolean(reportType);
+
+    if (hasData && hasColor && hasReportType) {
       window.print();
     } else {
       Swal.fire({
