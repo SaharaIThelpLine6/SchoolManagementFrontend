@@ -270,11 +270,16 @@ export const menuData = [
       },
       {
         id: "3",
+        name: "Dues List",
+        route: "/accounting/dues-list",
+      },
+      {
+        id: "4",
         name: "Monthly Dues",
         route: "/accounting/monthly-dues",
       },
       {
-        id: "4",
+        id: "5",
         name: "Fee Collection Report",
         route: "/accounting/fee-collection-report",
       },
@@ -329,5 +334,4 @@ export const menuData = [
     icon: "IoMdHelp",
     subMenu: [],
   },
-
 ];

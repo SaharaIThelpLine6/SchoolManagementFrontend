@@ -66,6 +66,7 @@ import PaymentHistory from "../pages/PaymentHistory";
 import MonthlyDues from "../pages/MonthlyDues";
 import FeeCollectionReport from "../pages/FeeCollectionReport";
 import TalentCondition from "../pages/TalentCondition";
+import DoesList from "../pages/DoesList";
 
 const router = createBrowserRouter([
   {
@@ -360,17 +361,18 @@ const router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-              
+
               {
                 path: "talent-condition",
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.admit_card}
                   // >
-                    <TalentCondition pageTitle="Talent Condition" />
+                  <TalentCondition pageTitle="Talent Condition" />
                   // {/* </RequirePermission> */}
                 ),
-              },  {
+              },
+              {
                 path: "admit-card",
                 element: (
                   <RequirePermission
@@ -510,6 +512,16 @@ const router = createBrowserRouter([
                   //   permissionId={permissionsDataList.st}
                   // >
                   <StudentFeeCollection pageTitle="Student Fee Collection" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: "dues-list",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.st}
+                  // >
+                  <DoesList pageTitle="Dues List" />
                   // </RequirePermission>
                 ),
               },

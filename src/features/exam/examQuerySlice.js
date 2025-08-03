@@ -22,6 +22,7 @@ export const examSlice = createApi({
     "GetStudentList",
     "StudentAdmitCard",
     "ExamTalentCondition",
+    "ReportSettings",
   ],
   endpoints: (builder) => ({
     postNewExam: builder.mutation({
@@ -252,6 +253,18 @@ export const examSlice = createApi({
         },
       ],
     }),
+    getReportSetting: builder.query({
+      query: () => `report_settings`,
+      providesTags: ["ReportSettings"],
+    }),
+    postReportSetting: builder.mutation({
+      query: (body) => ({
+        url: `report_settings`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["ReportSettings"],
+    }),
   }),
 });
 
@@ -280,5 +293,7 @@ export const {
   useGetStudentAdmitCardsQuery,
   usePostNewExamConditionMutation,
   useGetExamTalentConditionQuery,
-  usePostExamTalentConditionMutation
+  usePostExamTalentConditionMutation,
+  useGetReportSettingQuery,
+  usePostReportSettingMutation
 } = examSlice;

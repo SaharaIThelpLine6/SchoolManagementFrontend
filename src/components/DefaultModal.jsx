@@ -22,6 +22,7 @@ import AddEditBook from "../view/students/book/AddEditBook";
 import useTranslate from "../utils/Translate";
 import Subsidiary from "../view/exam/Subsidiary";
 import ExamReportSetting from "../view/exam/ExamReportSetting";
+import Statement from "../view/accounting/dues-list/Statement";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -111,6 +112,7 @@ const DefaultModal = () => {
                 {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
                 {modalType === "SUB_SIDIARY" && <Subsidiary />}
                 {modalType === "EXAM_REPORT_SETTING" && <ExamReportSetting />}
+                {modalType === "ACCOUNTING_DUES_LIST_STATEMENT" && <Statement />}
               </div>
             )}
           </div>
