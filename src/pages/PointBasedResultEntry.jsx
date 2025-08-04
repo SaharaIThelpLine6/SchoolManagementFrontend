@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import {
@@ -40,6 +40,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
+  const navigate = useNavigate();
   const methods = useForm();
   const { watch, handleSubmit } = methods;
 
@@ -196,16 +197,16 @@ const PointBasedResultEntry = ({ pageTitle }) => {
           <button
             className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
             title="Edit"
-            onClick={() => handleEdit(row)}
+            onClick={() => navigate(`/result/${row?.ID}`)}
           >
             <FiEdit className="w-5 h-5" />
           </button>
-          <button
+          {/* <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
             onClick={() => handleDelete(row.ID)}
           >
             <MdDelete className="w-5 h-5" />
-          </button>
+          </button> */}
         </div>
       ),
     },
@@ -239,6 +240,27 @@ const PointBasedResultEntry = ({ pageTitle }) => {
       field: "Fee",
       hozAlign: "center",
     },
+    {
+      title: translate("Status"),
+      field: "status",
+      hozAlign: "center",
+      headerHozAlign: "center",
+      width: 150,
+      render: (row) => {
+        const status = 1;
+        const isPublished = status === 1;
+
+        return (
+          <button
+            className={`px-3 py-1 rounded text-sm font-medium ${
+              isPublished ? "bg-green-500 text-white" : "bg-red-500 text-white"
+            }`}
+          >
+            {isPublished ? "প্রকাশিত" : "প্রকাশিত হয়নি"}
+          </button>
+        );
+      },
+    },
   ];
 
   if (showStudentFeeGroup) {
@@ -247,154 +269,17 @@ const PointBasedResultEntry = ({ pageTitle }) => {
 
   return (
     <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
-      <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
+      <div className="filter_header flex items-center justify-between pt-5">
         <h3 className="text-base sm:text-[20px] font-bold">
           {translate("Point Result Entry")}
-        </h3>
+        </h3>{" "}
+        <Button onClick={() => navigate("/result/create")}>
+          {translate("New Result Create")}
+        </Button>
       </div>
-
       <FormProvider {...methods}>
         <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <input type="hidden" {...methods.register("ID")} />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Column */}
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <DefaultSelect
-                  label={translate("Session") + ":"}
-                  options={sessionData ?? []}
-                  valueField="SessionID"
-                  nameField="SessionName"
-                  registerKey="SessionID"
-                  unicode={true}
-                />
-
-                <DefaultSelect
-                  label={translate("Exam Name") + ":"}
-                  options={examNameData ?? []}
-                  valueField="ExamID"
-                  nameField="ExamName"
-                  registerKey="ExamID"
-                  unicode={true}
-                />
-
-                <DefaultSelect
-                  label={translate("Class/Jamaat") + ":"}
-                  options={subClassListData ?? []}
-                  valueField="SubClassID"
-                  nameField="SubClass"
-                  registerKey="SubClassID"
-                  unicode={true}
-                />
-                <DefaultSelect
-                  label={translate("Residential") + " :"}
-                  nameField="ResidentialName"
-                  registerKey="RDID"
-                  valueField="RDID"
-                  options={residentialData ?? []}
-                  require={"This Field is required"}
-                  defaultSelect={false}
-                  unicode={true}
-                />
-                <div className="col-span-2">
-                  <DefaultSelect
-                    label={translate("Subject") + ":"}
-                    options={examNameData ?? []}
-                    valueField="ExamID"
-                    nameField="ExamName"
-                    registerKey="ExamID"
-                    unicode={true}
-                  />
-                </div>
-                <DefaultInput
-                  registerKey="Fee"
-                  className="w-full"
-                  placeholder={"1"}
-                />
-                <DefaultInput
-                  registerKey="Fee"
-                  className="w-full"
-                  placeholder={"1"}
-                />
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                <Button
-                  type="submit"
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
-                >
-                  {translate("Save")}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() =>
-                    methods.reset({
-                      SLID: "",
-                      SessionID: "",
-                      ExamID: "",
-                      SubClassID: "",
-                      Fee: "",
-                    })
-                  }
-                  className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800"
-                >
-                  {translate("Reset")}
-                </Button>
-              </div>
-            </div>
-
-            {/* Right Column */}
-            <div className="space-y-4 md:border-l md:border-gray-200 md:pl-6">
-              <div className="grid grid-cols-2 gap-4">
-                <DefaultInput
-                  registerKey="Fee"
-                  label={translate("আইডি") + ":"}
-                  type="number"
-                />
-                <DefaultInput
-                  registerKey="Fee"
-                  label={translate("দাখেলা") + ":"}
-                  type="number"
-                />
-                <DefaultInput
-                  registerKey="Fee"
-                  label={translate("শিক্ষার্থীর নাম") + ":"}
-                  type="number"
-                />
-                <DefaultInput
-                  registerKey="Fee"
-                  label={translate("প্রাপ্ত নাম্বার") + ":"}
-                  type="number"
-                />
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                <Button
-                  type="submit"
-                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700"
-                >
-                  {translate("Save")}
-                </Button>
-                <Button
-                  type="button"
-                  onClick={() =>
-                    methods.reset({
-                      SLID: "",
-                      SessionID: "",
-                      ExamID: "",
-                      SubClassID: "",
-                      Fee: "",
-                    })
-                  }
-                  className="w-full sm:w-auto bg-gray-200 hover:bg-gray-300 text-gray-800"
-                >
-                  {translate("Reset")}
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <DefaultSelect
               label={translate("Session") + ":"}
@@ -404,7 +289,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               registerKey="SessionID"
               unicode={true}
             />
-
             <DefaultSelect
               label={translate("Exam Name") + ":"}
               options={examNameData ?? []}
@@ -413,7 +297,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               registerKey="ExamID"
               unicode={true}
             />
-
             <DefaultSelect
               label={translate("Class/Jamaat") + ":"}
               options={subClassListData ?? []}
@@ -422,11 +305,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               registerKey="SubClassID"
               unicode={true}
             />
-
-            <div className="flex flex-row gap-4 justify-start items-center">
-              <h3 className="text-base font-semibold">মোট বিষয়: ১৬,৪৮৪</h3>
-              <h3 className="text-base font-semibold">গড় হবে: ৫৬৯</h3>
-            </div>
           </div>
         </form>
       </FormProvider>

@@ -67,6 +67,7 @@ import MonthlyDues from "../pages/MonthlyDues";
 import FeeCollectionReport from "../pages/FeeCollectionReport";
 import TalentCondition from "../pages/TalentCondition";
 import DoesList from "../pages/DoesList";
+import PointBasedResultCreateUpdate from "../pages/PointBasedResultCreateUpdate";
 
 const router = createBrowserRouter([
   {
@@ -450,6 +451,27 @@ const router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
+              {
+                path: "create",
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.result_report}
+                  >
+                    <PointBasedResultCreateUpdate pageTitle="Result" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: ":id",
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.result_report}
+                  >
+                    <PointBasedResultCreateUpdate pageTitle="Result" />
+                  </RequirePermission>
+                ),
+              },
+
               {
                 path: "report",
                 element: (
