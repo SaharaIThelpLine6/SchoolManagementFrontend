@@ -10,6 +10,7 @@ const useTranslate = () => {
     "List of Candidates": "পরীক্ষার্থীর তালিকা",
     Status: "স্ট্যাটাস",
     Reset: "রিসেট",
+    "Balance Transfer": "ব্যালেন্স ট্রান্সফার",
     Description: "ডেসক্রিপশন",
     "Subject Pass Number": "বিষয় পাস নম্বর",
     "Average Determination": "গড় নির্ণয়",

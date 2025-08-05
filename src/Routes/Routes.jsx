@@ -68,6 +68,7 @@ import FeeCollectionReport from "../pages/FeeCollectionReport";
 import TalentCondition from "../pages/TalentCondition";
 import DoesList from "../pages/DoesList";
 import PointBasedResultCreateUpdate from "../pages/PointBasedResultCreateUpdate";
+import BalanceTransfer from "../pages/BalanceTransfer";
 
 const router = createBrowserRouter([
   {
@@ -564,6 +565,16 @@ const router = createBrowserRouter([
                   //   permissionId={permissionsDataList.st}
                   // >
                   <FeeCollectionReport pageTitle="Fee Collection Report" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: "balance-transfer",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.st}
+                  // >
+                  <BalanceTransfer pageTitle="Fee Collection Report" />
                   // </RequirePermission>
                 ),
               },

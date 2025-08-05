@@ -56,7 +56,7 @@ const FeeMatrix = () => {
       <div className="flex flex-col gap-1 justify-center items-center">
         <input
           type="text"
-          className="w-16 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-center text-xs"
+          className="w-16 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-center text-xs"
         />
         <input
           type="checkbox"
@@ -76,7 +76,7 @@ const FeeMatrix = () => {
           value={amounts[gender]}
           onChange={(e) => handleAmountChange(gender, e.target.value)}
           placeholder="টাকা লিখুন"
-          className="w-24 px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-center text-sm"
+          className="w-24 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-center text-sm"
         />
         <div className="flex items-center gap-1">
           <input

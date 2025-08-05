@@ -23,6 +23,7 @@ import useTranslate from "../utils/Translate";
 import Subsidiary from "../view/exam/Subsidiary";
 import ExamReportSetting from "../view/exam/ExamReportSetting";
 import Statement from "../view/accounting/dues-list/Statement";
+import BalanceTransferModal from "../view/accounting/BalanceTransferModal";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -113,6 +114,8 @@ const DefaultModal = () => {
                 {modalType === "SUB_SIDIARY" && <Subsidiary />}
                 {modalType === "EXAM_REPORT_SETTING" && <ExamReportSetting />}
                 {modalType === "ACCOUNTING_DUES_LIST_STATEMENT" && <Statement />}
+                {modalType === "BALANCE_TRANSFER" && <BalanceTransferModal />}
+                {modalType === "BALANCE_TRANSFER_UPDATE" && <BalanceTransferModal />}
               </div>
             )}
           </div>

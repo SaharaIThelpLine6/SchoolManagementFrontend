@@ -283,6 +283,11 @@ export const menuData = [
         name: "Fee Collection Report",
         route: "/accounting/fee-collection-report",
       },
+      {
+        id: "6",
+        name: "Balance Transfer",
+        route: "/accounting/balance-transfer",
+      },
     ],
   },
   {

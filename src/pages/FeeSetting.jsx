@@ -21,9 +21,7 @@ const FeeSetting = ({ pageTitle }) => {
 
   const methods = useForm();
   const { watch } = methods;
-  const { residential, error: settingsError } = useSelector(
-    (state) => state.settings
-  );
+
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassData } = useGetSubClassListQuery();
   const { data: examData } = useGetExamNamesQuery();
