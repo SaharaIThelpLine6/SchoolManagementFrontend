@@ -20,6 +20,8 @@ import { useGetSessionsQuery } from "../../features/session/sessionSlice";
 import { useGetClassListQuery } from "../../features/class/classQuerySlice";
 import useTranslate from "../../utils/Translate";
 import DatePickerOne from "../../components/Forms/DatePicker/DatePickerOne";
+import UserSearch from "../../components/UserSearch";
+import { GrDrag } from "react-icons/gr";
 
 const AddNewDonation = ({ onBack }) => {
   const dispatch = useDispatch();
@@ -121,13 +123,17 @@ const AddNewDonation = ({ onBack }) => {
     }
   };
 
+  const handleUserSearchOpenModal = useCallback(() => {
+    showModal("User Search", "USER_SEARCH");
+  }, []);
+
   if (isPosting) return <LoadingComponent />;
 
   return (
     <FormProvider {...methods}>
       <form
         onSubmit={methods.handleSubmit(onSubmit)}
-        className="mx-auto max-w-screen-xl bg-white p-4 sm:p-6 md:p-8 text-gray-800 space-y-6 font-SolaimanLipi"
+        className="mx-auto max-w-screen-xl bg-white pt-5 text-gray-800 space-y-6 font-SolaimanLipi"
       >
         {/* Photo & Student Info */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -179,31 +185,31 @@ const AddNewDonation = ({ onBack }) => {
               registerKey={`admissionNumber`}
               labelPosition="left"
               label={translate("Donor") + " :"}
-            />{" "}
+            />
             <DefaultInput
               type="text"
               registerKey={`admissionNumbe`}
               labelPosition="left"
               label={translate("Sub Ledger") + " :"}
-            />{" "}
+            />
             <DefaultInput
               type="text"
               registerKey={`admissionNumber`}
               labelPosition="left"
               label={translate("Father") + " :"}
-            />{" "}
+            />
             <DefaultInput
               type="text"
               registerKey={`admissionNumbe`}
               labelPosition="left"
               label={translate("Type") + " :"}
-            />{" "}
+            />
             <DefaultInput
               type="text"
               registerKey={`admissionNumber`}
               labelPosition="left"
               label={translate("Mobile") + " :"}
-            />{" "}
+            />
             <DatePickerOne
               dateCalender={translate("Next Date") + " :"}
               placeholder="YYYY-MM-DD"
@@ -223,7 +229,7 @@ const AddNewDonation = ({ onBack }) => {
               registerKey={`admissionNumbe`}
               labelPosition="left"
               label={translate("Amount") + " :"}
-            />{" "}
+            />
             <DatePickerOne
               dateCalender={translate("Date") + " :"}
               placeholder="YYYY-MM-DD"
@@ -231,30 +237,48 @@ const AddNewDonation = ({ onBack }) => {
               require="তারিখ দিন"
               labelPosition="left"
             />
-            <DefaultInput
-              type="text"
-              registerKey={`admissionNumbe`}
-              labelPosition="left"
-              label={translate("Cofil 1") + " :"}
-            />{" "}
+            <div className="flex justify-center items-center gap-2">
+              <DefaultInput
+                type="text"
+                registerKey={`admissionNumbe`}
+                labelPosition="left"
+                label={translate("Cofil 1") + " :"}
+              />
+              <Button onClick={handleUserSearchOpenModal}>
+                {" "}
+                <GrDrag className="w-5 h-5" />
+              </Button>
+            </div>
             <DefaultInput
               type="text"
               registerKey={`admissionNumbe`}
               labelPosition="left"
               label={translate("Sectors") + " :"}
-            />{" "}
-            <DefaultInput
-              type="text"
-              registerKey={`admissionNumbe`}
-              labelPosition="left"
-              label={translate("Cofil 2") + " :"}
-            />{" "}
-            <DefaultInput
-              type="text"
-              registerKey={`admissionNumbe`}
-              labelPosition="left"
-              label={translate("Cofil 3") + " :"}
             />
+            <div className="flex justify-center items-center gap-2">
+              <DefaultInput
+                type="text"
+                registerKey={`admissionNumbe`}
+                labelPosition="left"
+                label={translate("Cofil 1") + " :"}
+              />
+              <Button onClick={handleUserSearchOpenModal}>
+                {" "}
+                <GrDrag className="w-5 h-5" />
+              </Button>
+            </div>
+            <div className="flex justify-center items-center gap-2">
+              <DefaultInput
+                type="text"
+                registerKey={`admissionNumbe`}
+                labelPosition="left"
+                label={translate("Cofil 1") + " :"}
+              />
+              <Button onClick={handleUserSearchOpenModal}>
+                {" "}
+                <GrDrag className="w-5 h-5" />
+              </Button>
+            </div>
           </div>
         </div>
 

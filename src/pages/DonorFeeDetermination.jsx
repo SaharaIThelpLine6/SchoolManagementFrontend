@@ -19,6 +19,7 @@ import Loading from "../components/Loading/Loading";
 import Button from "../components/Button/Button";
 import { GrDrag } from "react-icons/gr";
 import { showModal } from "../utils/ModalControlar";
+import AddNewDonation from "../view/donation/AddNewDonation";
 
 const PAGE_SIZE = 10;
 
@@ -57,9 +58,9 @@ const DonorFeeDetermination = ({ pageTitle }) => {
   }, [dispatch, pageTitle]);
 
   // Update Handle
-  const handleOpenModal = (row) => {
-    showModal("Add New Donation", "ADD_NEW_DONATION");
-  };
+  // const handleOpenModal = (row) => {
+  //   showModal("Add New Donation", "ADD_NEW_DONATION");
+  // };
   //   const handleEdit = (row) => {
   //     showModal(
   //       "Accounting dues list Statement",
@@ -139,8 +140,9 @@ const DonorFeeDetermination = ({ pageTitle }) => {
         <h3 className="text-lg md:text-xl font-bold">
           {translate("Donation")}
         </h3>
-        <Button onClick={handleOpenModal}>{translate("Add New Donation")}</Button>
+        {/* <Button onClick={handleOpenModal}>{translate("Add New Donation")}</Button> */}
       </div>
+      <AddNewDonation />
 
       {/* Table Section */}
       <div className="mt-5 overflow-x-auto">

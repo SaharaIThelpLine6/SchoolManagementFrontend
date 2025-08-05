@@ -272,6 +272,8 @@ const useTranslate = () => {
     "Mother Name": "মাতার নাম",
     Years: "সাল",
     "User Status": "ব্যবহারকারীর অবস্থা",
+    "User Search": "ইউজার সার্চ",
+    "User Type": "ইউজার সার্চ",
     Active: "অ্যাক্টিভ",
     InActive: "ইনঅ্যাক্টিভ",
     Both: "উভয়",

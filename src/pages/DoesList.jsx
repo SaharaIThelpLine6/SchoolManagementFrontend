@@ -216,9 +216,7 @@ const DoesList = ({ pageTitle }) => {
     },
   ];
 
-  if (showStudentFeeGroup) {
-    return <StudentFeeGroup onBack={setShowStudentFeeGroup} />;
-  }
+
   const duesTypeOptions = [
     { id: "1", label: translate("Creditor") },
     { id: "2", label: translate("Debtor") },
