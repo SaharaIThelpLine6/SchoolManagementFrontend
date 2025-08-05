@@ -69,6 +69,7 @@ import TalentCondition from "../pages/TalentCondition";
 import DoesList from "../pages/DoesList";
 import PointBasedResultCreateUpdate from "../pages/PointBasedResultCreateUpdate";
 import BalanceTransfer from "../pages/BalanceTransfer";
+import DonorFeeDetermination from "../pages/DonorFeeDetermination";
 
 const router = createBrowserRouter([
   {
@@ -586,6 +587,15 @@ const router = createBrowserRouter([
               {
                 index: true,
                 element: <PaymentHistory pageTitle="Payment History" />,
+              },
+            ],
+          },
+          {
+            path: "donation",
+            children: [
+              {
+                index: true,
+                element: <DonorFeeDetermination pageTitle="Donor Fee Determination" />,
               },
             ],
           },

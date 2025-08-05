@@ -24,6 +24,7 @@ import Subsidiary from "../view/exam/Subsidiary";
 import ExamReportSetting from "../view/exam/ExamReportSetting";
 import Statement from "../view/accounting/dues-list/Statement";
 import BalanceTransferModal from "../view/accounting/BalanceTransferModal";
+import AddNewDonation from "../view/donation/AddNewDonation";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -116,6 +117,7 @@ const DefaultModal = () => {
                 {modalType === "ACCOUNTING_DUES_LIST_STATEMENT" && <Statement />}
                 {modalType === "BALANCE_TRANSFER" && <BalanceTransferModal />}
                 {modalType === "BALANCE_TRANSFER_UPDATE" && <BalanceTransferModal />}
+                {modalType === "ADD_NEW_DONATION" && <AddNewDonation />}
               </div>
             )}
           </div>

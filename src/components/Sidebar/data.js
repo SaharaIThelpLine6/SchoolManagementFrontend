@@ -309,7 +309,13 @@ export const menuData = [
     name: "Donation",
     route: "/donation",
     icon: "FaDonate",
-    subMenu: [],
+    subMenu: [
+      {
+        id: "1",
+        name: "Donor Fee Determination",
+        route: "/donation",
+      },
+    ],
   },
   {
     id: "10",
