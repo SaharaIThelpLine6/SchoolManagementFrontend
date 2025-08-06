@@ -33,6 +33,10 @@ import Button from "../components/Button/Button";
 import StudentFeeGroup from "../view/exam/StudentFeeGroup";
 import { useGetNameOFExamFeeQuery } from "../features/feeCollection/feeCollectionSlice";
 import { useGetResidentialQuery } from "../features/settings/settingsQuerySlice";
+import {
+  useGetExamListQuery,
+  useUpdateExamListStatusUpdateMutation,
+} from "../features/result/resultSilce";
 
 const PAGE_SIZE = 10;
 
@@ -50,26 +54,36 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   const [postExamFeeSetting] = usePostExamFeeSettingMutation();
   const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
   const [deleteExamFeeSetting] = useDeleteExamFeeSettingMutation();
+  const [updateStatus] = useUpdateExamListStatusUpdateMutation();
+  const [showError, setShowError] = useState(false);
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
-  const { data: nameOfExamFeeData } = useGetNameOFExamFeeQuery();
-  const { data: residentialData } = useGetResidentialQuery();
+  const session_id = watch("SessionID");
+  const exam_id = watch("ExamID");
+  const subclass_id = watch("SubClassID");
 
   const {
-    data: examFeeSettingData,
-    isLoading: isExamFeeSettingLoading,
-    isError: isExamFeeSettingError,
-    refetch,
-  } = useGetExamFeeSettingQuery();
+    data: examListData,
+    isLoading,
+    error,
+  } = useGetExamListQuery(
+    { session_id, exam_id, subclass_id },
+    {
+      skip: !session_id && !exam_id && !subclass_id,
+    }
+  );
 
-  const totalPages = Math.ceil((examFeeSettingData?.length || 0) / PAGE_SIZE);
+  console.log(session_id, exam_id, subclass_id, "Ids");
+  console.log(examListData, "examListData");
+
+  const totalPages = Math.ceil((examListData?.length || 0) / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
-  }, [examFeeSettingData, currentPage]);
+    return examListData?.slice(start, start + PAGE_SIZE) || [];
+  }, [examListData, currentPage]);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -187,6 +201,37 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     }
   };
 
+const handleStatusUpdate = async (id, currentPublished) => {
+  const newPublished = !currentPublished;
+  const confirmResult = await Swal.fire({
+    title: `Are you sure you want to mark as ${newPublished ? "Published" : "Unpublished"}?`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Yes",
+    cancelButtonText: "Cancel",
+  });
+
+  if (!confirmResult.isConfirmed) return;
+
+  try {
+    await updateStatus({ id, published: newPublished }).unwrap();
+    Swal.fire({
+      icon: "success",
+      title: "Updated!",
+      text: `Status has been ${newPublished ? "published" : "unpublished"}.`,
+      timer: 1500,
+      showConfirmButton: false,
+    });
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Oops...",
+      text: "Update failed. Please try again.",
+    });
+  }
+};
+
+
   // Table Data Columns
   const columns = [
     {
@@ -201,71 +246,70 @@ const PointBasedResultEntry = ({ pageTitle }) => {
           >
             <FiEdit className="w-5 h-5" />
           </button>
-          {/* <button
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
-            onClick={() => handleDelete(row.ID)}
-          >
-            <MdDelete className="w-5 h-5" />
-          </button> */}
         </div>
       ),
     },
     {
       title: translate("ID"),
+      field: "ID",
       hozAlign: "center",
-      render: (row) => <>{row?.ID}</>,
     },
     {
       title: translate("Session"),
+      field: "SessionID",
       hozAlign: "center",
-      render: (row) => <>{row?.AcademicSession?.SessionName}</>,
+      render: (row) => bnBijoy2Unicode(row.Session?.SessionName),
     },
     {
-      title: translate("Exam Name"),
+      title: translate("Exam"),
+      field: "ExamID",
       hozAlign: "center",
-      render: (row) => <>{bnBijoy2Unicode(row?.Exam_Name?.ExamName)}</>,
+      render: (row) => bnBijoy2Unicode(row.Exam?.ExamName),
     },
     {
-      title: translate("Class/Jamaat"),
+      title: translate("SubClass"),
+      field: "SubClassID",
       hozAlign: "center",
-      render: (row) => <>{bnBijoy2Unicode(row?.Class?.SubClass)}</>,
+      render: (row) => bnBijoy2Unicode(row.Class?.SubClass),
     },
     {
-      title: translate("Fee Name"),
-      field: "SLID",
+      title: translate("মেয়ারী বিভাজন"),
+      field: "MeariDivision",
       hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row.MeariDivision),
     },
     {
-      title: translate("Fee"),
-      field: "Fee",
+      title: translate("গোর বিভাজন"),
+      field: "GorDivision",
       hozAlign: "center",
+      render: (row) => bnBijoy2Unicode(row.GorDivision),
     },
     {
-      title: translate("Status"),
-      field: "status",
+      title: translate("If Not Equal"),
+      field: "IfNotEqulAra",
       hozAlign: "center",
-      headerHozAlign: "center",
-      width: 150,
+      render: (row) => bnBijoy2Unicode(row.IfNotEqulAra),
+    },
+    {
+      title: translate("Published Status"),
+      field: "Published",
+      hozAlign: "center",
       render: (row) => {
-        const status = 1;
-        const isPublished = status === 1;
-
+        const isPublished = row?.Published;
         return (
           <button
             className={`px-3 py-1 rounded text-sm font-medium ${
               isPublished ? "bg-green-500 text-white" : "bg-red-500 text-white"
             }`}
+            onClick={() => handleStatusUpdate(row.ID, isPublished)}
+            disabled={isLoading}
           >
-            {isPublished ? "প্রকাশিত" : "প্রকাশিত হয়নি"}
+            {isLoading ? "Updating..." : isPublished ? "প্রকাশিত" : "অপ্রকাশিত"}
           </button>
         );
       },
     },
   ];
-
-  if (showStudentFeeGroup) {
-    return <StudentFeeGroup onBack={setShowStudentFeeGroup} />;
-  }
 
   return (
     <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
@@ -310,9 +354,9 @@ const PointBasedResultEntry = ({ pageTitle }) => {
       </FormProvider>
 
       <div className="mt-5">
-        {isExamFeeSettingLoading ? (
+        {isLoading ? (
           <Loading />
-        ) : isExamFeeSettingError ? (
+        ) : error ? (
           <div className="text-red-500 text-center py-4">
             {translate("Failed to load exam fee settings. Please try again.")}
           </div>

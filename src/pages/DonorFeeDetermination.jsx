@@ -20,6 +20,7 @@ import Button from "../components/Button/Button";
 import { GrDrag } from "react-icons/gr";
 import { showModal } from "../utils/ModalControlar";
 import AddNewDonation from "../view/donation/AddNewDonation";
+import DefaultSelect from "../components/Forms/DefaultSelect";
 
 const PAGE_SIZE = 10;
 
@@ -133,6 +134,11 @@ const DonorFeeDetermination = ({ pageTitle }) => {
     },
   ];
 
+  const SearchTypes = [
+    { ID: "1", Name: translate("User Code") },
+    { ID: "2", Name: translate("User Name") },
+    { ID: "3", Name: translate("Mobile 1") },
+  ];
   return (
     <div className="font-SolaimanLipi bg-white p-4 md:p-6 rounded-xl shadow-lg">
       {/* Header */}
@@ -143,6 +149,29 @@ const DonorFeeDetermination = ({ pageTitle }) => {
         {/* <Button onClick={handleOpenModal}>{translate("Add New Donation")}</Button> */}
       </div>
       <AddNewDonation />
+      <FormProvider {...methods}>
+        <div className="flex justify-center gap-3 items-center h-full">
+          <h2 className="text-lg font-semibold text-gray-700">
+            {translate("Filter")}
+          </h2>
+
+          <DefaultSelect
+            label={translate("Search Type") + " :"}
+            options={SearchTypes ?? []}
+            valueField="ID"
+            nameField="Name"
+            registerKey="searchType1"
+          />
+
+          <DefaultSelect
+            label={translate("Search Type") + " :"}
+            options={SearchTypes ?? []}
+            valueField="ID"
+            nameField="Name"
+            registerKey="searchType2"
+          />
+        </div>
+      </FormProvider>
 
       {/* Table Section */}
       <div className="mt-5 overflow-x-auto">

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
@@ -19,6 +19,8 @@ import DefaultSelect from "../components/Forms/DefaultSelect";
 import Button from "../components/Button/Button";
 import { useGetExamNamesQuery } from "../features/student/studentQuerySlice";
 import TableInput from "../components/Input/TableInput";
+import { useGetUserResultQuery } from "../features/result/resultSilce";
+import bnBijoy2Unicode from "../utils/conveter";
 
 const PAGE_SIZE = 10;
 
@@ -29,31 +31,8 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
   const { handleSubmit, setValue, watch } = methods;
   const { id } = useParams();
 
-
   const [currentPage, setCurrentPage] = useState(1);
-  const [students, setStudents] = useState(
-    Array.from({ length: 20 }, (_, i) => ({
-      ID: i + 1,
-      StudentName: `Student ${i + 1}`,
-      Bangla: Math.floor(Math.random() * 100),
-      English: Math.floor(Math.random() * 100),
-      Math: Math.floor(Math.random() * 100),
-      Science: Math.floor(Math.random() * 100),
-      Arabic: Math.floor(Math.random() * 100),
-      Hadith: Math.floor(Math.random() * 100),
-      Tafsir: Math.floor(Math.random() * 100),
-      Aqaid: Math.floor(Math.random() * 100),
-      Fiqh: Math.floor(Math.random() * 100),
-      Tajweed: Math.floor(Math.random() * 100),
-      IslamicStudies: Math.floor(Math.random() * 100),
-      Total: 0,
-      GPA: 0,
-      MeritPosition: 0,
-      MeritGroup: "",
-      AdmissionNumber: `ADM${1000 + i}`,
-      StudentID: `STU${2000 + i}`,
-    }))
-  );
+  const [students, setStudents] = useState([]);
 
   const [postExamFeeSetting] = usePostExamFeeSettingMutation();
   const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
@@ -62,75 +41,76 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
   const { data: subClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
 
-  const totalPages = Math.ceil(students.length / PAGE_SIZE);
+  const session_id = watch("SessionID");
+  const exam_id = watch("ExamID");
+  const subclass_id = watch("SubClassID");
 
-  const paginatedData = students.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
+  const {
+    data: userResultData,
+    isLoading,
+    error,
+  } = useGetUserResultQuery(
+    { session_id, exam_id, subclass_id },
+    {
+      skip: !session_id || !exam_id || !subclass_id,
+    }
   );
 
-  // Calculate totals and GPA whenever marks change
+  console.log(session_id, exam_id, subclass_id, "Ids");
+  console.log(userResultData, "userResultData");
+  // console.log(
+  //   userResultData?.examList?.map((student) => student.Subjects),
+  //   "All Subjects"
+  // );
+
   useEffect(() => {
-    const subscription = watch((value) => {
-      const updatedStudents = students.map((student) => {
-        const bangla = Number(value.students?.[student.ID]?.Bangla) || 0;
-        const english = Number(value.students?.[student.ID]?.English) || 0;
-        const math = Number(value.students?.[student.ID]?.Math) || 0;
-        const science = Number(value.students?.[student.ID]?.Science) || 0;
-        const arabic = Number(value.students?.[student.ID]?.Arabic) || 0;
-        const hadith = Number(value.students?.[student.ID]?.Hadith) || 0;
-        const tafsir = Number(value.students?.[student.ID]?.Tafsir) || 0;
-        const aqaid = Number(value.students?.[student.ID]?.Aqaid) || 0;
-        const fiqh = Number(value.students?.[student.ID]?.Fiqh) || 0;
-        const tajweed = Number(value.students?.[student.ID]?.Tajweed) || 0;
-        const islamicStudies =
-          Number(value.students?.[student.ID]?.IslamicStudies) || 0;
-
-        const total =
-          bangla +
-          english +
-          math +
-          science +
-          arabic +
-          hadith +
-          tafsir +
-          aqaid +
-          fiqh +
-          tajweed +
-          islamicStudies;
-        const gpa = (total / 11).toFixed(2);
-
-        return {
-          ...student,
-          Total: total,
-          GPA: gpa,
-        };
-      });
-
-      // Calculate merit positions
-      const rankedStudents = [...updatedStudents].sort(
-        (a, b) => b.Total - a.Total
-      );
-      const withMerit = rankedStudents.map((student, index) => ({
-        ...student,
-        MeritPosition: index + 1,
-        MeritGroup: getMeritGroup(index + 1, rankedStudents.length),
+    if (userResultData?.examList) {
+      const formattedStudents = userResultData.examList.map((student) => ({
+        ID: student.ID,
+        UserID: student.UserID,
+        UserName: student.User?.UserName,
+        Subjects: student.Subjects.map((sub) => sub.SubjectName),
+        SubVal1: student.SubVal1,
+        SubVal2: student.SubVal2,
+        SubVal3: student.SubVal3,
+        SubVal4: student.SubVal4,
+        SubVal5: student.SubVal5,
+        SubVal6: student.SubVal6,
+        SubVal7: student.SubVal7,
+        SubVal8: student.SubVal8,
+        SubVal9: student.SubVal9,
+        SubVal10: student.SubVal10,
+        SubVal11: student.SubVal11,
+        SubVal12: student.SubVal12,
+        SubVal13: student.SubVal13,
+        SubVal14: student.SubVal14,
+        Total: calculateTotal(student),
+        GPA: calculateGPA(student),
       }));
 
-      setStudents(withMerit);
-    });
+      setStudents(formattedStudents);
+    }
+  }, [userResultData]);
 
-    return () => subscription.unsubscribe();
-  }, [watch, students]);
-
-  const getMeritGroup = (position, totalStudents) => {
-    const top10Percent = Math.ceil(totalStudents * 0.1);
-    const top30Percent = Math.ceil(totalStudents * 0.3);
-
-    if (position <= top10Percent) return "A+";
-    if (position <= top30Percent) return "A";
-    return "B";
+  const calculateTotal = (student) => {
+    let total = 0;
+    for (let i = 1; i <= 14; i++) {
+      total += student[`SubVal${i}`] || 0;
+    }
+    return total;
   };
+
+  const calculateGPA = (student) => {
+    const subjectCount = student.Subjects?.length || 1;
+    const total = calculateTotal(student);
+    return ((total / (subjectCount * 100)) * 4).toFixed(2); // Assuming max score is 100
+  };
+
+  const totalPages = Math.ceil(students?.length / PAGE_SIZE) || 1;
+
+  const paginatedData =
+    students?.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE) ||
+    [];
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -144,25 +124,6 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  useEffect(() => {
-    students.forEach((student) => {
-      setValue(`students[${student.ID}].Bangla`, student.Bangla);
-      setValue(`students[${student.ID}].English`, student.English);
-      setValue(`students[${student.ID}].Math`, student.Math);
-      setValue(`students[${student.ID}].Science`, student.Science);
-      setValue(`students[${student.ID}].Arabic`, student.Arabic);
-      setValue(`students[${student.ID}].Hadith`, student.Hadith);
-      setValue(`students[${student.ID}].Tafsir`, student.Tafsir);
-      setValue(`students[${student.ID}].Aqaid`, student.Aqaid);
-      setValue(`students[${student.ID}].Fiqh`, student.Fiqh);
-      setValue(`students[${student.ID}].Tajweed`, student.Tajweed);
-      setValue(
-        `students[${student.ID}].IslamicStudies`,
-        student.IslamicStudies
-      );
-    });
-  }, []);
-
   const onSubmit = async (data) => {
     if (!data.SessionID || !data.SubClassID || !data.ExamID) {
       Swal.fire({
@@ -173,26 +134,29 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
       return;
     }
 
-    const studentResults = students.map((student) => ({
-      StudentID: student.ID,
-      Bangla: data.students?.[student.ID]?.Bangla || 0,
-      English: data.students?.[student.ID]?.English || 0,
-      Math: data.students?.[student.ID]?.Math || 0,
-      Science: data.students?.[student.ID]?.Science || 0,
-      Arabic: data.students?.[student.ID]?.Arabic || 0,
-      Hadith: data.students?.[student.ID]?.Hadith || 0,
-      Tafsir: data.students?.[student.ID]?.Tafsir || 0,
-      Aqaid: data.students?.[student.ID]?.Aqaid || 0,
-      Fiqh: data.students?.[student.ID]?.Fiqh || 0,
-      Tajweed: data.students?.[student.ID]?.Tajweed || 0,
-      IslamicStudies: data.students?.[student.ID]?.IslamicStudies || 0,
-      Total: student.Total,
-      GPA: student.GPA,
-      MeritPosition: student.MeritPosition,
-      MeritGroup: student.MeritGroup,
-      AdmissionNumber: student.AdmissionNumber,
-      StudentID: student.StudentID,
-    }));
+    const studentResults = students.map((student) => {
+      const originalStudentData = userResultData?.examList?.find(
+        (s) => s.ID === student.ID
+      );
+
+      const subjectsWithValues = student.Subjects.map((subjectName, index) => {
+        const originalSubject = originalStudentData?.Subjects?.[index];
+
+        return {
+          SubjectID: originalSubject?.SubjectID || 0, 
+          // SubjectName: subjectName,
+          [`SubVal${index + 1}`]:
+            data.students?.[student.ID]?.[`SubVal${index + 1}`] ||
+            student[`SubVal${index + 1}`] ||
+            0,
+        };
+      });
+
+      return {
+        UserID: student.UserID,
+        Subjects: subjectsWithValues,
+      };
+    });
 
     const payload = {
       SessionID: Number(data.SessionID),
@@ -201,24 +165,30 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
       StudentResults: studentResults,
     };
 
-    try {
-      const response = data.ID
-        ? await updateExamFeeSetting({ id: data.ID, body: payload }).unwrap()
-        : await postExamFeeSetting(payload).unwrap();
+    console.log(payload);
 
-      Swal.fire({
-        icon: "success",
-        title: "সফলভাবে সংরক্ষণ হয়েছে",
-        text: response?.message || "Exam Results সফলভাবে সংরক্ষিত হয়েছে।",
-      });
-    } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "ত্রুটি ঘটেছে!",
-        text: error?.data?.message || "অজানা একটি ত্রুটি ঘটেছে।",
-      });
-    }
+    // try {
+    //   // const response = data.ID
+    //   //   ? await updateExamFeeSetting({ id: data.ID, body: payload }).unwrap()
+    //   //   : await postExamFeeSetting(payload).unwrap();
+    //   console.log({ id: data.ID, body: payload });
+
+    //   Swal.fire({
+    //     icon: "success",
+    //     title: "সফলভাবে সংরক্ষণ হয়েছে",
+    //     text: response?.message || "Exam Results সফলভাবে সংরক্ষিত হয়েছে।",
+    //   });
+    // } catch (error) {
+    //   Swal.fire({
+    //     icon: "error",
+    //     title: "ত্রুটি ঘটেছে!",
+    //     text: error?.data?.message || "অজানা একটি ত্রুটি ঘটেছে।",
+    //   });
+    // }
   };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <FormProvider {...methods}>
@@ -264,178 +234,92 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
             />
           </div>
 
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="p-2 border whitespace-nowrap w-16">রোল</th>
-                  <th className="p-2 border whitespace-nowrap w-40">
-                    শিক্ষার্থীর নাম
-                  </th>
-                  <th className="p-2 border whitespace-nowrap w-20">বাংলা</th>
-                  <th className="p-2 border whitespace-nowrap w-20">ইংরেজি</th>
-                  <th className="p-2 border whitespace-nowrap w-20">গণিত</th>
-                  <th className="p-2 border whitespace-nowrap w-20">বিজ্ঞান</th>
-                  <th className="p-2 border whitespace-nowrap w-20">আরবি</th>
-                  <th className="p-2 border whitespace-nowrap w-20">হাদীস</th>
-                  <th className="p-2 border whitespace-nowrap w-20">তাফসীর</th>
-                  <th className="p-2 border whitespace-nowrap w-20">আকাইদ</th>
-                  <th className="p-2 border whitespace-nowrap w-20">ফিকহ</th>
-                  <th className="p-2 border whitespace-nowrap w-20">তাজবিদ</th>
-                  <th className="p-2 border whitespace-nowrap w-20">
-                    ইসলাম শিক্ষা
-                  </th>
-                  <th className="p-2 border whitespace-nowrap w-20">মোট</th>
-                  <th className="p-2 border whitespace-nowrap w-20">জিপিএ</th>
-                  <th className="p-2 border whitespace-nowrap w-20">
-                    মেধা সংখ্যা
-                  </th>
-                  <th className="p-2 border whitespace-nowrap w-24">
-                    মেধাবী গ্রুপ
-                  </th>
-                  <th className="p-2 border whitespace-nowrap w-24">
-                    ভর্তি নম্বর
-                  </th>
-                  <th className="p-2 border whitespace-nowrap w-24">আইডি</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedData.map((student) => (
-                  <tr key={student.ID} className="bg-transparent"> 
-                    <td className="p-2 border text-center whitespace-nowrap bg-white">
-                      {student.ID}
-                    </td>
-                    <td className="p-2 border text-center whitespace-nowrap bg-white">
-                      {student.StudentName}
-                    </td>
-
-                    <td className="border whitespace-nowrap bg-white">
-                      <div className="w-16 mx-auto">
-                        <TableInput
-                          type="number"
-                          registerKey={`students[${student.ID}].Bangla`}                       
-                        />
-                      </div>
-                    </td>
-
-                    <td className="p-2 border whitespace-nowrap bg-white">
-                      <div className="w-16 mx-auto">
-                        <TableInput
-                          type="number"
-                          registerKey={`students[${student.ID}].English`}
-                        />
-                      </div>
-                    </td>
-
-                    <td className="p-2 border whitespace-nowrap bg-white">
-                      <div className="w-16 mx-auto">
-                        <TableInput
-                          type="number"
-                          registerKey={`students[${student.ID}].Math`}
-                        />
-                      </div>
-                    </td>
-
-                    <td className="p-2 border whitespace-nowrap bg-white">
-                      <div className="w-16 mx-auto">
-                        <TableInput
-                          type="number"
-                          registerKey={`students[${student.ID}].Science`}
-                        />
-                      </div>
-                    </td>
-
-                    <td className="p-2 border whitespace-nowrap bg-white">
-                      <div className="w-16 mx-auto">
-                        <TableInput
-                          type="number"
-                          registerKey={`students[${student.ID}].Arabic`}
-                        />
-                      </div>
-                    </td>
-
-                    <td className="p-2 border whitespace-nowrap bg-white">
-                      <div className="w-16 mx-auto">
-                        <TableInput
-                          type="number"
-                          registerKey={`students[${student.ID}].Hadith`}
-                        />
-                      </div>
-                    </td>
-
-                    <td className="p-2 border whitespace-nowrap bg-white">
-                      <div className="w-16 mx-auto">
-                        <TableInput
-                          type="number"
-                          registerKey={`students[${student.ID}].Tafsir`}
-                        />
-                      </div>
-                    </td>
-
-                    <td className="p-2 border whitespace-nowrap bg-white">
-                      <div className="w-16 mx-auto">
-                        <TableInput
-                          type="number"
-                          registerKey={`students[${student.ID}].Aqaid`}
-                        />
-                      </div>
-                    </td>
-
-                    <td className="p-2 border whitespace-nowrap bg-white">
-                      <div className="w-16 mx-auto">
-                        <TableInput
-                          type="number"
-                          registerKey={`students[${student.ID}].Fiqh`}
-                        />
-                      </div>
-                    </td>
-
-                    <td className="p-2 border whitespace-nowrap bg-white">
-                      <div className="w-16 mx-auto">
-                        <TableInput
-                          type="number"
-                          registerKey={`students[${student.ID}].Tajweed`}
-                        />
-                      </div>
-                    </td>
-
-                    <td className="p-2 border whitespace-nowrap bg-white">
-                      <div className="w-16 mx-auto">
-                        <TableInput
-                          type="number"
-                          registerKey={`students[${student.ID}].IslamicStudies`}
-                        />
-                      </div>
-                    </td>
-
-                    <td className="p-2 border text-center whitespace-nowrap bg-white">
-                      {student.Total}
-                    </td>
-
-                    <td className="p-2 border text-center whitespace-nowrap bg-white">
-                      {student.GPA}
-                    </td>
-
-                    <td className="p-2 border text-center whitespace-nowrap bg-white">
-                      {student.MeritPosition}
-                    </td>
-
-                    <td className="p-2 border text-center whitespace-nowrap bg-white">
-                      {student.MeritGroup}
-                    </td>
-
-                    <td className="p-2 border text-center whitespace-nowrap bg-white">
-                      {student.AdmissionNumber}
-                    </td>
-
-                    <td className="p-2 border text-center whitespace-nowrap bg-white">
-                      {student.StudentID}
-                    </td>
+          {paginatedData.length > 0 && (
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="p-2 border whitespace-nowrap w-16">ID</th>
+                    <th className="p-2 border whitespace-nowrap w-40">
+                      শিক্ষার্থীর নাম
+                    </th>
+                    {/* Dynamically render subject headers */}
+                    {paginatedData[0]?.Subjects?.map((subject, index) => (
+                      <th
+                        key={`header-${index}`}
+                        className="p-2 border whitespace-nowrap w-20"
+                      >
+                        {subject}
+                      </th>
+                    ))}
+                    <th className="p-2 border whitespace-nowrap w-20">মোট</th>
+                    <th className="p-2 border whitespace-nowrap w-20">জিপিএ</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {paginatedData.map((student) => {
+                    // Calculate total marks for this student
+                    const totalMarks = Array.from({
+                      length: student.Subjects?.length || 0,
+                    }).reduce(
+                      (sum, _, i) => sum + (student[`SubVal${i + 1}`] || 0),
+                      0
+                    );
+
+                    // Calculate GPA (assuming 100 is max per subject)
+                    const gpa = (
+                      (totalMarks / (student.Subjects?.length * 100)) *
+                      4
+                    ).toFixed(2);
+
+                    return (
+                      <tr
+                        key={`student-${student.ID}`}
+                        className="bg-transparent"
+                      >
+                        <td className="p-2 border text-center whitespace-nowrap bg-white">
+                          {student.ID}
+                        </td>
+                        <td className="p-2 border text-center whitespace-nowrap bg-white">
+                          {bnBijoy2Unicode(student.UserName)}
+                        </td>
+
+                        {/* Dynamically render subject inputs */}
+                        {student.Subjects?.map((subject, index) => (
+                          <td
+                            key={`subject-${student.ID}-${index}`}
+                            className="border whitespace-nowrap bg-white"
+                          >
+                            <div className="w-16 mx-auto">
+                              <TableInput
+                                type="number"
+                                min="0"
+                                max="100"
+                                defaultValue={
+                                  student[`SubVal${index + 1}`] || 0
+                                }
+                                registerKey={`students[${student.ID}].SubVal${
+                                  index + 1
+                                }`}
+                              />
+                            </div>
+                          </td>
+                        ))}
+
+                        <td className="p-2 border text-center whitespace-nowrap bg-white">
+                          {totalMarks}
+                        </td>
+
+                        <td className="p-2 border text-center whitespace-nowrap bg-white">
+                          {gpa}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
 
           <div className="flex justify-between items-center mt-4">
             <Button
@@ -464,7 +348,6 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
                 <MdKeyboardArrowRight size={24} />
               </button>
             </div>
-            <div className=""></div>
           </div>
         </form>
       </div>

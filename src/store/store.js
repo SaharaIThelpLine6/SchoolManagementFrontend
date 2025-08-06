@@ -27,6 +27,7 @@ import { smsSlice } from "../features/sms/smsSlice";
 import smsReducersSlice from "../features/sms/smsReducersSlice";
 import { permissionSlice } from "../features/permission/permissionSlice";
 import { examSlice } from "../features/exam/examQuerySlice";
+import { resultSilce } from "../features/result/resultSilce";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -57,6 +58,7 @@ const store = configureStore({
     [permissionSlice.reducerPath]: permissionSlice.reducer,
     [permissionSlice.reducerPath]: permissionSlice.reducer,
     [userTypeSlice.reducerPath]: userTypeSlice.reducer,
+    [resultSilce.reducerPath]: resultSilce.reducer,
     [examSlice.reducerPath]: examSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -76,6 +78,7 @@ const store = configureStore({
       .concat(smsSlice.middleware)
       .concat(permissionSlice.middleware)
       .concat(sessionSlice.middleware)
+      .concat(resultSilce.middleware)
       .concat(examSlice.middleware),
 });
 
