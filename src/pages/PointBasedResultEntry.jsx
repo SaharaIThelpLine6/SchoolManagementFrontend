@@ -33,7 +33,6 @@ import {
 const PAGE_SIZE = 10;
 
 const PointBasedResultEntry = ({ pageTitle }) => {
-  const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
   const navigate = useNavigate();
@@ -44,9 +43,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
 
   const [postExamFeeSetting] = usePostExamFeeSettingMutation();
   const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
-  const [deleteExamFeeSetting] = useDeleteExamFeeSettingMutation();
   const [updateStatus] = useUpdateExamListStatusUpdateMutation();
-  const [showError, setShowError] = useState(false);
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
@@ -66,8 +63,8 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     }
   );
 
-  console.log(session_id, exam_id, subclass_id, "Ids");
-  console.log(examListData, "examListData");
+  // console.log(session_id, exam_id, subclass_id, "Ids");
+  // console.log(examListData, "examListData");
 
   const totalPages = Math.ceil((examListData?.length || 0) / PAGE_SIZE);
 
@@ -87,21 +84,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
-
-
-  // Update Handle
-  const handleEdit = (row) => {
-    methods.reset({
-      ID: row.ID,
-      SessionID: row.SessionID,
-      ExamID: row.ExamID,
-      SubClassID: row.SubClassID,
-      Fee: row.Fee,
-      SLID: row.SLID,
-    });
-  };
-
-
 
   // Data Create Exam Fee Setting
   const onSubmit = async (data) => {
@@ -230,24 +212,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
       field: "SubClassID",
       hozAlign: "center",
       render: (row) => bnBijoy2Unicode(row.Class?.SubClass),
-    },
-    {
-      title: translate("মেয়ারী বিভাজন"),
-      field: "MeariDivision",
-      hozAlign: "center",
-      render: (row) => bnBijoy2Unicode(row.MeariDivision),
-    },
-    {
-      title: translate("গোর বিভাজন"),
-      field: "GorDivision",
-      hozAlign: "center",
-      render: (row) => bnBijoy2Unicode(row.GorDivision),
-    },
-    {
-      title: translate("If Not Equal"),
-      field: "IfNotEqulAra",
-      hozAlign: "center",
-      render: (row) => bnBijoy2Unicode(row.IfNotEqulAra),
     },
     {
       title: translate("Published Status"),

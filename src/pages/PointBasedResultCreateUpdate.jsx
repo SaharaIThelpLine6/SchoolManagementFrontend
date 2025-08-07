@@ -17,6 +17,7 @@ import {
   useUpdateAndPostResultMutation,
 } from "../features/result/resultSilce";
 import bnBijoy2Unicode from "../utils/conveter";
+import Loading from "../components/Loading/Loading";
 
 const PAGE_SIZE = 10;
 
@@ -174,7 +175,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
     }
   };
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <div><Loading/></div>;
   if (error) return <div>Error: {error.message}</div>;
 
   // filter subject funstion
@@ -241,9 +242,9 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="p-2 border whitespace-nowrap w-16">ID</th>
+                    <th className="p-2 border whitespace-nowrap w-16">{translate("ID")}</th>
                     <th className="p-2 border whitespace-nowrap w-40">
-                      শিক্ষার্থীর নাম
+                      {translate("Student Name")}
                     </th>
                     {/* Dynamically render subject headers */}
                     {filteredSubjects?.map((subject, index) => {
@@ -256,8 +257,8 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
                         </th>
                       );
                     })}
-                    <th className="p-2 border whitespace-nowrap w-20">মোট</th>
-                    <th className="p-2 border whitespace-nowrap w-20">জিপিএ</th>
+                    <th className="p-2 border whitespace-nowrap w-20">{translate("Total")}</th>
+                    <th className="p-2 border whitespace-nowrap w-20">{translate("GPA")}</th>
                   </tr>
                 </thead>
                 <tbody>

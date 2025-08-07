@@ -342,6 +342,8 @@ const useTranslate = () => {
     "Enter end user id": "ব্যবহারকারী আইডি পর্যন্ত লিখুন",
     "Teacher Code": "শিক্ষক কোড",
     "Father Name": "বাবার নাম",
+    "GPA": "জিপিএ",
+    "Published Status": "প্রকাশিত স্ট্যাটাস",
     "Date of join": "যোগদানের তারিখ",
     "Inter your date of join": "যোগদানের তারিখ যোগ করুন",
     "Inter your result devision": "ফলাফল বিভাগ যোগ করুন",
