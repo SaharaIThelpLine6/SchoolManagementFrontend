@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 import bnBijoy2Unicode from "../../utils/conveter";
@@ -11,21 +11,22 @@ const TableInput = ({
   require = false,
   disable = false,
   unicode = false,
-  labelPosition = "top", // 'top' or 'left'
+  labelPosition = "top",
+  defaultValue,
+  min,
+  max,
 }) => {
   const {
     register,
     setValue,
-    getValues,
     control,
     formState: { errors },
   } = useFormContext();
   const translate = useTranslate();
-
-  // ✅ Watch current value of the field
+  const [hasChanged, setHasChanged] = useState(false);
   const currentValue = useWatch({ name: registerKey, control });
 
-  // ✅ Convert existing value to Unicode on mount if needed
+  // Handle Unicode conversion and change detection
   useEffect(() => {
     if (unicode && currentValue && typeof currentValue === "string") {
       const converted = bnBijoy2Unicode(currentValue);
@@ -33,38 +34,71 @@ const TableInput = ({
         setValue(registerKey, converted);
       }
     }
-  }, []); // Run only on mount
+
+    // Detect if value has changed from default
+    if (currentValue !== undefined) {
+      const isChanged = type === "number"
+        ? Number(currentValue) !== Number(defaultValue)
+        : currentValue !== defaultValue;
+      setHasChanged(isChanged);
+    }
+  }, [currentValue, defaultValue, registerKey, setValue, type, unicode]);
+
+  const handleChange = (e) => {
+    const value = e.target.value;
+    const isChanged = type === "number"
+      ? Number(value) !== Number(defaultValue)
+      : value !== defaultValue;
+    setHasChanged(isChanged);
+  };
 
   return (
-    <div className={`w-full bg-transparent ${labelPosition === 'left' ? 'flex items-center gap-4' : ''}`}>
+    <div
+      className={`w-full bg-transparent ${
+        labelPosition === "left" ? "flex items-center gap-4" : ""
+      }`}
+    >
       {label && (
         <label
           htmlFor={registerKey}
           className={`text-black font-SolaimanLipi ${
-            labelPosition === 'left' 
-              ? 'w-1/4 min-w-[100px] mb-0 text-end' 
-              : 'mb-1 block'
+            labelPosition === "left"
+              ? "w-1/4 min-w-[100px] mb-0 text-end"
+              : "mb-1 block"
           }`}
         >
           {translate(label)}
         </label>
       )}
 
-      <div className={labelPosition === 'left' ? 'flex-1' : 'w-full'}>
+      <div className={labelPosition === "left" ? "flex-1" : "w-full"}>
         <input
           type={type === "number" || type === "phone" ? "number" : type}
           placeholder={translate(placeholder)}
-          className={`w-full rounded bg-white px-2 h-[38px] text-black outline-none text-[14px] transition
-                      focus:border-custom-focus active:border-custom-focus
-                      disabled:cursor-not-allowed disabled:bg-slate-200
-                      ${
-                        errors[registerKey]
-                          ? "placeholder:text-red-400 border-red-400"
-                          : ""
-                      }`}
+          className={`w-full rounded px-2 h-[38px] outline-none text-[14px] transition
+                    ${
+                      hasChanged
+                        ? "bg-green-100 border-green-300"
+                        : "bg-white border-gray-300"
+                    }
+                    ${
+                      errors[registerKey]
+                        ? "border-red-400 placeholder:text-red-400"
+                        : "border"
+                    }
+                    focus:ring-2 focus:ring-green-200 focus:border-green-500
+                    disabled:cursor-not-allowed disabled:bg-slate-200`}
           {...register(registerKey, {
-            required: require,
+            required: require && "This field is required",
             ...(type === "number" && {
+              min: {
+                value: min,
+                message: `Minimum value is ${min}`,
+              },
+              max: {
+                value: max,
+                message: `Maximum value is ${max}`,
+              },
               validate: (value) =>
                 isNaN(Number(value)) ? "Please enter a valid number" : true,
             }),
@@ -75,7 +109,11 @@ const TableInput = ({
               },
             }),
           })}
+          defaultValue={defaultValue}
           disabled={disable}
+          min={min}
+          max={max}
+          onChange={handleChange}
         />
 
         {errors[registerKey] && (
@@ -88,5 +126,4 @@ const TableInput = ({
   );
 };
 
-
-export default TableInput
+export default TableInput;

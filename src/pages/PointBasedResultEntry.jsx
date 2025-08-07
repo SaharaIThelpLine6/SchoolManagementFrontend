@@ -4,19 +4,16 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import {
-  MdDelete,
   MdKeyboardArrowLeft,
   MdKeyboardArrowRight,
 } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
-import { FaPlus } from "react-icons/fa";
 
 import { setPageName } from "../features/auth/authSlice";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
 import {
   useDeleteExamFeeSettingMutation,
-  useGetExamFeeSettingQuery,
   useGetExamNamesQuery,
   usePostExamFeeSettingMutation,
   useUpdateExamFeeSettingMutation,
@@ -27,12 +24,7 @@ import bnBijoy2Unicode from "../utils/conveter";
 
 import SortableTable from "../components/Tables/SortableTable";
 import Loading from "../components/Loading/Loading";
-import DefaultInput from "../components/Forms/DefaultInput";
 import DefaultSelect from "../components/Forms/DefaultSelect";
-import Button from "../components/Button/Button";
-import StudentFeeGroup from "../view/exam/StudentFeeGroup";
-import { useGetNameOFExamFeeQuery } from "../features/feeCollection/feeCollectionSlice";
-import { useGetResidentialQuery } from "../features/settings/settingsQuerySlice";
 import {
   useGetExamListQuery,
   useUpdateExamListStatusUpdateMutation,
@@ -49,7 +41,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   const { watch, handleSubmit } = methods;
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false);
 
   const [postExamFeeSetting] = usePostExamFeeSettingMutation();
   const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
@@ -71,7 +62,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   } = useGetExamListQuery(
     { session_id, exam_id, subclass_id },
     {
-      skip: !session_id && !exam_id && !subclass_id,
+      skip: session_id === null && exam_id === null && subclass_id === null,
     }
   );
 
@@ -97,9 +88,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  const handleShowStudentFeeGroup = () => {
-    setShowStudentFeeGroup(true);
-  };
 
   // Update Handle
   const handleEdit = (row) => {
@@ -113,41 +101,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     });
   };
 
-  // Delete Exam Feee Setting data
-  const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      title: "আপনি কি নিশ্চিত?",
-      text: "একবার মুছে ফেলা হলে পুনরুদ্ধার করা যাবে না!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonText: "হ্যাঁ, মুছে ফেলুন!",
-      cancelButtonText: "বাতিল",
-    });
 
-    if (result.isConfirmed) {
-      try {
-        const response = await deleteExamFeeSetting(id).unwrap();
-
-        Swal.fire({
-          icon: "success",
-          title: "সফলভাবে মুছে ফেলা হয়েছে",
-          text: response?.message || "ডেটা সফলভাবে মুছে ফেলা হয়েছে।",
-        });
-
-        refetch(); // Reload table
-      } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "ত্রুটি ঘটেছে!",
-          text:
-            error?.data?.message ||
-            error?.data?.error ||
-            "ডেটা মুছে ফেলতে ব্যর্থ হয়েছে।",
-        });
-        console.error("Delete error:", error);
-      }
-    }
-  };
 
   // Data Create Exam Fee Setting
   const onSubmit = async (data) => {
@@ -201,36 +155,37 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     }
   };
 
-const handleStatusUpdate = async (id, currentPublished) => {
-  const newPublished = !currentPublished;
-  const confirmResult = await Swal.fire({
-    title: `Are you sure you want to mark as ${newPublished ? "Published" : "Unpublished"}?`,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "Yes",
-    cancelButtonText: "Cancel",
-  });
-
-  if (!confirmResult.isConfirmed) return;
-
-  try {
-    await updateStatus({ id, published: newPublished }).unwrap();
-    Swal.fire({
-      icon: "success",
-      title: "Updated!",
-      text: `Status has been ${newPublished ? "published" : "unpublished"}.`,
-      timer: 1500,
-      showConfirmButton: false,
+  const handleStatusUpdate = async (id, currentPublished) => {
+    const newPublished = !currentPublished;
+    const confirmResult = await Swal.fire({
+      title: `Are you sure you want to mark as ${
+        newPublished ? "Published" : "Unpublished"
+      }?`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: "Yes",
+      cancelButtonText: "Cancel",
     });
-  } catch (error) {
-    Swal.fire({
-      icon: "error",
-      title: "Oops...",
-      text: "Update failed. Please try again.",
-    });
-  }
-};
 
+    if (!confirmResult.isConfirmed) return;
+
+    try {
+      await updateStatus({ id, published: newPublished }).unwrap();
+      Swal.fire({
+        icon: "success",
+        title: "Updated!",
+        text: `Status has been ${newPublished ? "published" : "unpublished"}.`,
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Update failed. Please try again.",
+      });
+    }
+  };
 
   // Table Data Columns
   const columns = [
@@ -242,7 +197,11 @@ const handleStatusUpdate = async (id, currentPublished) => {
           <button
             className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
             title="Edit"
-            onClick={() => navigate(`/result/${row?.ID}`)}
+            onClick={() =>
+              navigate(
+                `/result/${row?.ID}?session_id=${row?.SessionID}&exam_id=${row?.ExamID}&subclass_id=${row?.SubClassID}`
+              )
+            }
           >
             <FiEdit className="w-5 h-5" />
           </button>
@@ -317,9 +276,6 @@ const handleStatusUpdate = async (id, currentPublished) => {
         <h3 className="text-base sm:text-[20px] font-bold">
           {translate("Point Result Entry")}
         </h3>{" "}
-        <Button onClick={() => navigate("/result/create")}>
-          {translate("New Result Create")}
-        </Button>
       </div>
       <FormProvider {...methods}>
         <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>

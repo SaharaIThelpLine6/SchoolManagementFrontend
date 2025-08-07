@@ -14,29 +14,37 @@ export const resultSilce = createApi({
       return headers;
     },
   }),
-  tagTypes: ["ExamList"],
+  tagTypes: ["ExamList", "Result"],
   endpoints: (builder) => ({
     getExamList: builder.query({
-      query: ({ session_id, exam_id, subclass_id }) => {
+      query: ({ session_id, exam_id, subclass_id } = {}) => {
         const params = new URLSearchParams();
+
         if (session_id) params.append("session_id", session_id);
         if (exam_id) params.append("exam_id", exam_id);
         if (subclass_id) params.append("subclass_id", subclass_id);
 
-        return `exam_list?${params.toString()}`;
+        const queryString = params.toString();
+        return queryString ? `exam_list?${queryString}` : "exam_list";
       },
       providesTags: ["ExamList"],
     }),
     getUserResult: builder.query({
-      query: ({ session_id, exam_id, subclass_id }) => {
+      query: ({ session_id, exam_id, subclass_id } = {}) => {
         const params = new URLSearchParams();
+
         if (session_id) params.append("session_id", session_id);
         if (exam_id) params.append("exam_id", exam_id);
         if (subclass_id) params.append("subclass_id", subclass_id);
 
-        return `get_user_result?${params.toString()}`;
+        const queryString = params.toString();
+        return queryString
+          ? `get_user_result?${queryString}`
+          : "get_user_result";
       },
+      providesTags: ["Result"]
     }),
+
     updateExamListStatusUpdate: builder.mutation({
       query: ({ id, ...updatedData }) => ({
         url: `exam_list_status_update/${id}`,
@@ -45,6 +53,14 @@ export const resultSilce = createApi({
       }),
       invalidatesTags: ["ExamList"],
     }),
+    updateAndPostResult: builder.mutation({
+      query: (body) => ({
+        url: `update_result`,
+        method: "POST",
+        body: body,
+      }),
+      invalidatesTags: ["Result"],
+    }),
   }),
 });
 
@@ -52,4 +68,5 @@ export const {
   useGetExamListQuery,
   useGetUserResultQuery,
   useUpdateExamListStatusUpdateMutation,
+  useUpdateAndPostResultMutation,
 } = resultSilce;

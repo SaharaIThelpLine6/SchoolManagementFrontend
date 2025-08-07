@@ -1,41 +1,43 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
-
 import { setPageName } from "../features/auth/authSlice";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
-import {
-  usePostExamFeeSettingMutation,
-  useUpdateExamFeeSettingMutation,
-} from "../features/exam/examQuerySlice";
-
 import useTranslate from "../utils/Translate";
-import DefaultInput from "../components/Forms/DefaultInput";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import Button from "../components/Button/Button";
 import { useGetExamNamesQuery } from "../features/student/studentQuerySlice";
 import TableInput from "../components/Input/TableInput";
-import { useGetUserResultQuery } from "../features/result/resultSilce";
+import {
+  useGetUserResultQuery,
+  useUpdateAndPostResultMutation,
+} from "../features/result/resultSilce";
 import bnBijoy2Unicode from "../utils/conveter";
 
 const PAGE_SIZE = 10;
 
 const PointBasedResultCreateUpdate = ({ pageTitle }) => {
+  const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
   const translate = useTranslate();
-  const methods = useForm();
+  const methods = useForm({
+    defaultValues: {
+      SessionID: searchParams.get("session_id") || "",
+      ExamID: searchParams.get("exam_id") || "",
+      SubClassID: searchParams.get("subclass_id") || "",
+    },
+  });
   const { handleSubmit, setValue, watch } = methods;
   const { id } = useParams();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [students, setStudents] = useState([]);
 
-  const [postExamFeeSetting] = usePostExamFeeSettingMutation();
-  const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
+  const [updateAndPostResult] = useUpdateAndPostResultMutation();
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
@@ -44,6 +46,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
   const session_id = watch("SessionID");
   const exam_id = watch("ExamID");
   const subclass_id = watch("SubClassID");
+  const selectedSubject = watch("subjectSelect");
 
   const {
     data: userResultData,
@@ -56,55 +59,44 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
     }
   );
 
-  console.log(session_id, exam_id, subclass_id, "Ids");
-  console.log(userResultData, "userResultData");
+  // console.log(session_id, exam_id, subclass_id, "Ids");
+  // console.log(userResultData, "userResultData");
   // console.log(
   //   userResultData?.examList?.map((student) => student.Subjects),
   //   "All Subjects"
   // );
-
   useEffect(() => {
     if (userResultData?.examList) {
-      const formattedStudents = userResultData.examList.map((student) => ({
-        ID: student.ID,
-        UserID: student.UserID,
-        UserName: student.User?.UserName,
-        Subjects: student.Subjects.map((sub) => sub.SubjectName),
-        SubVal1: student.SubVal1,
-        SubVal2: student.SubVal2,
-        SubVal3: student.SubVal3,
-        SubVal4: student.SubVal4,
-        SubVal5: student.SubVal5,
-        SubVal6: student.SubVal6,
-        SubVal7: student.SubVal7,
-        SubVal8: student.SubVal8,
-        SubVal9: student.SubVal9,
-        SubVal10: student.SubVal10,
-        SubVal11: student.SubVal11,
-        SubVal12: student.SubVal12,
-        SubVal13: student.SubVal13,
-        SubVal14: student.SubVal14,
-        Total: calculateTotal(student),
-        GPA: calculateGPA(student),
-      }));
+      const formattedStudents = userResultData.examList.map((student) => {
+        const allSubjects = [];
+
+        student.Subjects?.forEach((subject, index) => {
+          const subValKey = `SubVal${index + 1}`;
+          const subVal = student[subValKey];
+
+          if (subVal !== null && subVal !== undefined) {
+            allSubjects.push({
+              SubjectName: subject.SubjectName,
+              SubValKey: subValKey,
+              Value: subVal,
+            });
+          }
+        });
+
+        return {
+          ID: student.ID,
+          UserID: student.UserID,
+          UserName: student.User?.UserName,
+          Subjects: allSubjects.map((s) => s.SubjectName),
+          allSubjects,
+          Total: student.Total,
+          Division: student.Division,
+        };
+      });
 
       setStudents(formattedStudents);
     }
   }, [userResultData]);
-
-  const calculateTotal = (student) => {
-    let total = 0;
-    for (let i = 1; i <= 14; i++) {
-      total += student[`SubVal${i}`] || 0;
-    }
-    return total;
-  };
-
-  const calculateGPA = (student) => {
-    const subjectCount = student.Subjects?.length || 1;
-    const total = calculateTotal(student);
-    return ((total / (subjectCount * 100)) * 4).toFixed(2); // Assuming max score is 100
-  };
 
   const totalPages = Math.ceil(students?.length / PAGE_SIZE) || 1;
 
@@ -143,7 +135,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
         const originalSubject = originalStudentData?.Subjects?.[index];
 
         return {
-          SubjectID: originalSubject?.SubjectID || 0, 
+          SubjectID: originalSubject?.SubjectID || 0,
           // SubjectName: subjectName,
           [`SubVal${index + 1}`]:
             data.students?.[student.ID]?.[`SubVal${index + 1}`] ||
@@ -165,30 +157,33 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
       StudentResults: studentResults,
     };
 
-    console.log(payload);
+    try {
+      const response = await updateAndPostResult(payload).unwrap();
 
-    // try {
-    //   // const response = data.ID
-    //   //   ? await updateExamFeeSetting({ id: data.ID, body: payload }).unwrap()
-    //   //   : await postExamFeeSetting(payload).unwrap();
-    //   console.log({ id: data.ID, body: payload });
-
-    //   Swal.fire({
-    //     icon: "success",
-    //     title: "সফলভাবে সংরক্ষণ হয়েছে",
-    //     text: response?.message || "Exam Results সফলভাবে সংরক্ষিত হয়েছে।",
-    //   });
-    // } catch (error) {
-    //   Swal.fire({
-    //     icon: "error",
-    //     title: "ত্রুটি ঘটেছে!",
-    //     text: error?.data?.message || "অজানা একটি ত্রুটি ঘটেছে।",
-    //   });
-    // }
+      Swal.fire({
+        icon: "success",
+        title: "সফলভাবে সংরক্ষণ হয়েছে",
+        text: response?.message || "Exam Results সফলভাবে সংরক্ষিত হয়েছে।",
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "ত্রুটি ঘটেছে!",
+        text: error?.data?.message || "অজানা একটি ত্রুটি ঘটেছে।",
+      });
+    }
   };
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
+
+  // filter subject funstion
+  const filteredSubjects = selectedSubject
+    ? paginatedData[0]?.Subjects?.filter(
+        (subject) => subject === selectedSubject
+      )
+    : paginatedData[0]?.Subjects;
+
 
   return (
     <FormProvider {...methods}>
@@ -202,7 +197,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <input type="hidden" {...methods.register("ID")} />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <DefaultSelect
               label={translate("Session")}
               options={sessionData ?? []}
@@ -212,7 +207,6 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
               unicode={true}
               require={true}
             />
-
             <DefaultSelect
               label={translate("Exam Name")}
               options={examNameData ?? []}
@@ -222,7 +216,6 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
               unicode={true}
               require={true}
             />
-
             <DefaultSelect
               label={translate("Class/Jamaat")}
               options={subClassListData ?? []}
@@ -232,6 +225,15 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
               unicode={true}
               require={true}
             />
+            {students.length > 0 && students[0].allSubjects && (
+              <DefaultSelect
+                label={translate("Subjects")}
+                options={students[0].allSubjects ?? []}
+                valueField="SubjectName"
+                nameField="SubjectName"
+                registerKey="subjectSelect"
+              />
+            )}
           </div>
 
           {paginatedData.length > 0 && (
@@ -244,34 +246,23 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
                       শিক্ষার্থীর নাম
                     </th>
                     {/* Dynamically render subject headers */}
-                    {paginatedData[0]?.Subjects?.map((subject, index) => (
-                      <th
-                        key={`header-${index}`}
-                        className="p-2 border whitespace-nowrap w-20"
-                      >
-                        {subject}
-                      </th>
-                    ))}
+                    {filteredSubjects?.map((subject, index) => {
+                      return (
+                        <th
+                          key={`header-${index}`}
+                          className="p-2 border whitespace-nowrap w-20"
+                        >
+                          {subject}
+                        </th>
+                      );
+                    })}
                     <th className="p-2 border whitespace-nowrap w-20">মোট</th>
                     <th className="p-2 border whitespace-nowrap w-20">জিপিএ</th>
                   </tr>
                 </thead>
                 <tbody>
                   {paginatedData.map((student) => {
-                    // Calculate total marks for this student
-                    const totalMarks = Array.from({
-                      length: student.Subjects?.length || 0,
-                    }).reduce(
-                      (sum, _, i) => sum + (student[`SubVal${i + 1}`] || 0),
-                      0
-                    );
-
-                    // Calculate GPA (assuming 100 is max per subject)
-                    const gpa = (
-                      (totalMarks / (student.Subjects?.length * 100)) *
-                      4
-                    ).toFixed(2);
-
+                    console.log(student, "student");
                     return (
                       <tr
                         key={`student-${student.ID}`}
@@ -285,33 +276,33 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
                         </td>
 
                         {/* Dynamically render subject inputs */}
-                        {student.Subjects?.map((subject, index) => (
-                          <td
-                            key={`subject-${student.ID}-${index}`}
-                            className="border whitespace-nowrap bg-white"
-                          >
-                            <div className="w-16 mx-auto">
+                        {student.allSubjects
+                          .filter((subject) =>
+                            selectedSubject
+                              ? subject.SubjectName === selectedSubject
+                              : true
+                          )
+                          .map((subject) => (
+                            <td
+                              key={`${student.ID}-subject-${subject.SubValKey}`}
+                              className={`border`}
+                            >
                               <TableInput
                                 type="number"
                                 min="0"
                                 max="100"
-                                defaultValue={
-                                  student[`SubVal${index + 1}`] || 0
-                                }
-                                registerKey={`students[${student.ID}].SubVal${
-                                  index + 1
-                                }`}
+                                defaultValue={subject.Value}
+                                registerKey={`students.${student.ID}.${subject.SubValKey}`}
                               />
-                            </div>
-                          </td>
-                        ))}
+                            </td>
+                          ))}
 
                         <td className="p-2 border text-center whitespace-nowrap bg-white">
-                          {totalMarks}
+                          {student.Total}
                         </td>
 
                         <td className="p-2 border text-center whitespace-nowrap bg-white">
-                          {gpa}
+                          {student.Division}
                         </td>
                       </tr>
                     );

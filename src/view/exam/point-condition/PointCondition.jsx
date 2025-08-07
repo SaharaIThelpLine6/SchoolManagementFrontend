@@ -349,7 +349,6 @@ const PointCondition = ({ pageTitle, title }) => {
               valueField="SubjectID"
               nameField="SubjectName"
               registerKey="SubjectID"
-              unicode={true}
               require={"This is required!"}
               disabled={editingId ? true : false}
             />{" "}

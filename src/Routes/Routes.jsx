@@ -454,16 +454,6 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "create",
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.result_report}
-                  >
-                    <PointBasedResultCreateUpdate pageTitle="Result" />
-                  </RequirePermission>
-                ),
-              },
-              {
                 path: ":id",
                 element: (
                   <RequirePermission
