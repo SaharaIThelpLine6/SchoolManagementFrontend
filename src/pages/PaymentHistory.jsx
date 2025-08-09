@@ -104,7 +104,7 @@ const PaymentHistory = () => {
               {/* Title Section */}
               <div className="flex-1 bg-[#3598db] rounded-t-md">
                 <h3 className="text-lg font-semibold text-white flex items-center gap-2 px-4 py-2">
-                  <FaBars size={20} /> {translate("List of Applicants")}
+                  {translate("List of Applicants")}
                 </h3>
               </div>
 
@@ -172,7 +172,7 @@ const PaymentHistory = () => {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-white rounded-lg shadow-sm">{renderTabContent()}</div>
+      <div className="bg-white">{renderTabContent()}</div>
     </div>
   );
 };
