@@ -10,6 +10,7 @@ import TranslateButton from "../../components/Header/TranslateButton";
 import { useGetUserInfoQuery } from "../../features/payment/paymentSlice";
 import { motion, AnimatePresence } from "framer-motion";
 import Logo from "/Screenshot_13.png";
+import LogoAvater from "/saharait-preview.png";
 import { useGetInstitutionInfoQuery } from "../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../utils/conveter";
 import { Buffer } from "buffer";
@@ -73,7 +74,7 @@ const Header = () => {
 
         <div className="ml-16 sm:ml-0">
           <img
-            src={logo}
+            src={logo ? logo : LogoAvater}
             alt="Logo"
             className="w-20 h-20 object-cover rounded-full"
           />
@@ -180,7 +181,7 @@ const Header = () => {
               </svg>
             </button>
             <img
-              src={logo}
+              src={logo ? logo : LogoAvater}
               alt="Logo"
               className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
             />

@@ -45,7 +45,6 @@ const GroupDistribution = ({ pageTitle }) => {
 
   const selectedClass = classListData?.find((item) => item.ClassID == ClassID); // Use == to avoid type mismatch
 
-  console.log("Selected class:", selectedClass);
 
   const { data: searchStudentInfo = [], refetch } = useGetStudentBySearchQuery(
     { search: null, ClassID, SessionID, GenderID: genderId },
@@ -55,7 +54,6 @@ const GroupDistribution = ({ pageTitle }) => {
     }
   );
 
-  console.log(selectedRows);
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));

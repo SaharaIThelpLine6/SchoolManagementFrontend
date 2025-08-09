@@ -8,6 +8,7 @@ import { renderIcons } from "../../helper/renderIcons";
 import useTranslate from "../../utils/Translate";
 import { useGetAllUserPermissionsQuery } from "../../features/permission/permissionSlice";
 import { permissionsDataList } from "../../Data/permissions";
+import Loading from "../Loading/Loading";
 
 const submenuVariants = {
   hidden: { opacity: 0, height: 0 },
@@ -224,7 +225,8 @@ const SideBar = () => {
     setOpenMenuId((prev) => (prev === id ? null : id));
   };
 
-  if (isLoading) return <div className="p-4">Loading sidebar...</div>;
+  if (isLoading) return <Loading />;
+
   if (isError)
     return <div className="p-4 text-red-500">Failed to load menu.</div>;
 

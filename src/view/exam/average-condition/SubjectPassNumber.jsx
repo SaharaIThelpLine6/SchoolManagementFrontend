@@ -25,6 +25,7 @@ import { examAveragePasNumberStatus } from "../../../Data/userReportsData";
 import ExamRoutingCheckbox from "../../../components/Checkboxes/ExamRoutingCheckbox";
 import { skipToken } from "@reduxjs/toolkit/query";
 import bnBijoy2Unicode from "../../../utils/conveter";
+import Loading from "../../../components/Loading/Loading";
 
 const PAGE_SIZE = 10;
 
@@ -433,10 +434,8 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
       {/* Table Section */}
       <div className="mt-5">
         {isLoading || isFetching ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            <span className="ml-3 text-gray-700">Loading data...</span>
-          </div>
+              <Loading/>
+         
         ) : isError ? (
           <div className="flex flex-col items-center justify-center h-64 rounded-lg">
             <div className="text-center py-8 text-red-500">

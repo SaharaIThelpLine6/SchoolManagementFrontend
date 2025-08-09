@@ -277,6 +277,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
     }
   };
 
+
   return (
     <div className="p-4">
       <div className="flex gap-3 flex-wrap lg:flex-nowrap">

@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { useGetAllUserPermissionsQuery } from "../features/permission/permissionSlice";
+import Loading from "../components/Loading/Loading";
 
 export const RequirePermission = ({ permissionId, children }) => {
   const {
@@ -10,9 +11,7 @@ export const RequirePermission = ({ permissionId, children }) => {
 
   if (isLoading)
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
-      </div>
+     <Loading/>
     );
     
   if (isError || !permissions) return <Navigate to="/" />;

@@ -8,10 +8,10 @@ import {
 import React, { useState } from "react";
 import { useGetPaymentHistoryQuery } from "../features/payment/paymentSlice";
 import PaymentHistoryInvoiceTable from "../view/payment/payment-history/PaymentHistoryInvoiceTable";
-import Loader from "../components/Loader";
 import PaymentHistoryInvoice from "../view/payment/payment-history/PaymentHistoryInvoice";
 import Button from "../components/Button/Button";
 import useTranslate from "../utils/Translate";
+import Loading from "../components/Loading/Loading";
 
 const PaymentHistory = () => {
   const translate = useTranslate();
@@ -58,7 +58,7 @@ const PaymentHistory = () => {
   if (isLoading) {
     return (
       <div className="w-full bg-white p-4 rounded-lg min-h-[300px] flex items-center justify-center">
-        <Loader />
+        <Loading />
       </div>
     );
   }

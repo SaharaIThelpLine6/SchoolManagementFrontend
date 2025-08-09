@@ -11,16 +11,15 @@ import {
   setCharacterReportEditMode,
   setFilteredStudent,
 } from "../features/student/studentSlice";
-
 import DefaultInput from "../components/Forms/DefaultInput";
 import DefaultSelect from "../components/Forms/DefaultSelect";
-import LoadingComponent from "../components/LoadingComponent";
 import convertBijoyToBengali from "../utils/uniconveter";
 import bnBijoy2Unicode from "../utils/conveter";
 import useTranslate from "../utils/Translate";
 import { toast } from "react-toastify";
 import { showModal } from "../utils/ModalControlar";
 import { TbFilterPlus } from "react-icons/tb";
+import Loading from "../components/Loading/Loading";
 
 const EnglisArobihName = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -159,7 +158,7 @@ const EnglisArobihName = ({ pageTitle }) => {
     }
   };
 
-  if (status === "loading") return <LoadingComponent />;
+  if (status === "loading") return <Loading />;
 
   return (
     <div className="bg-white p-4 md:p-8 rounded-xl shadow-lg">

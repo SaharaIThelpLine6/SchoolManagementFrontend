@@ -16,7 +16,7 @@ import { showModal } from "../utils/ModalControlar";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/light.css";
 import { useGetStudentQuery } from "../features/student/studentQuerySlice";
-import LoadingComponent from "../components/LoadingComponent";
+import Loading from "../components/Loading/Loading";
 
 const AddStudent = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -247,7 +247,7 @@ const AddStudent = ({ pageTitle }) => {
          studentList && studentList.data.length > 0 ? <SortableTable
           columns={filter == 2 ? columnsNotAdmitedStudent : columnsAdmitedStudent}
           data={filter == 2 ? userOnlyStudents : studentList.data}
-        /> : <LoadingComponent/>
+        /> : <Loading/>
         }
         
       </div>

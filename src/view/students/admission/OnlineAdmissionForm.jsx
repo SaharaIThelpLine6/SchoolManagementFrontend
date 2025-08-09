@@ -22,9 +22,9 @@ import {
   useGetClassListQuery,
   useGetSubClassListQuery,
 } from "../../../features/class/classQuerySlice";
-import Loader from "../../../components/Loader";
 import { usePostStudentAdmissionMutation } from "../../../features/student/studentQuerySlice";
 import Swal from "sweetalert2";
+import Loading from "../../../components/Loading/Loading";
 
 const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
   const dispatch = useDispatch();
@@ -201,7 +201,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
     isLoadingPermDistricts ||
     isLoadingPermThanas
   ) {
-    return <Loader />;
+    return <Loading />;
   }
 
   const onSubmit = async (data) => {

@@ -18,6 +18,7 @@ import Swal from "sweetalert2";
 import bnBijoy2Unicode from "../utils/conveter";
 import { showModal } from "../utils/ModalControlar";
 import PrintOptions from "../view/students/certificate-attestation/PrintOptions";
+import Loading from "../components/Loading/Loading";
 
 const PAGE_SIZE = 10;
 
@@ -36,9 +37,6 @@ const CertificateAttesation = ({ pageTitle }) => {
     refetch,
   } = useGetStudentsTransferCertificateQuery();
   const [deleteCertificate] = useDeleteStudentsTransferCertificateMutation();
-
-  console.log(certificateData);
-
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
@@ -99,8 +97,8 @@ const CertificateAttesation = ({ pageTitle }) => {
 
   const handlePrint = useCallback(
     (id) => {
-    setActiveView("print");
-    setPrintId(id)
+      setActiveView("print");
+      setPrintId(id);
     },
     [translate]
   );
@@ -191,38 +189,44 @@ const CertificateAttesation = ({ pageTitle }) => {
               </Button>
             </div>
 
-            <SortableTable
-              columns={columns}
-              data={paginatedData}
-              isFilterColumn={false}
-              loading={isLoading}
-            />
+            {isLoading ? (
+              <Loading />
+            ) : (
+              <>
+                <SortableTable
+                  columns={columns}
+                  data={paginatedData}
+                  isFilterColumn={false}
+                />
 
-            <div className="flex justify-center items-center gap-4 mt-4">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                disabled={currentPage === 1}
-                className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-              >
-                <MdKeyboardArrowLeft className="text-lg" />
-                {translate("Prev")}
-              </button>
+                <div className="flex justify-center items-center gap-4 mt-4">
+                  <button
+                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                    disabled={currentPage === 1}
+                    className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
+                  >
+                    <MdKeyboardArrowLeft className="text-lg" />
+                    {translate("Prev")}
+                  </button>
 
-              <span className="text-sm font-medium text-gray-700">
-                {translate("Page")} {currentPage} {translate("of")} {totalPages}
-              </span>
+                  <span className="text-sm font-medium text-gray-700">
+                    {translate("Page")} {currentPage} {translate("of")}{" "}
+                    {totalPages}
+                  </span>
 
-              <button
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(p + 1, totalPages))
-                }
-                disabled={currentPage === totalPages}
-                className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-              >
-                {translate("Next")}
-                <MdKeyboardArrowRight className="text-lg" />
-              </button>
-            </div>
+                  <button
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(p + 1, totalPages))
+                    }
+                    disabled={currentPage === totalPages}
+                    className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
+                  >
+                    {translate("Next")}
+                    <MdKeyboardArrowRight className="text-lg" />
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </>
       )}
@@ -231,7 +235,7 @@ const CertificateAttesation = ({ pageTitle }) => {
         <CreateCertificateAttestation onBack={handleBackToList} />
       )}
       {activeView === "print" && (
-        <PrintOptions onBack={handleBackToList} id={printId}/>
+        <PrintOptions onBack={handleBackToList} id={printId} />
       )}
 
       {activeView === "edit" && selectedId && (
