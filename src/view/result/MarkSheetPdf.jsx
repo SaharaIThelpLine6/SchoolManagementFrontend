@@ -143,7 +143,6 @@ const MarkSheetPdf = ({ studentResult }) => {
               <th className="border border-black w-72">বিষয়</th>
               <th className="border border-black">পূর্ণমান</th>
               <th className="border border-black">পাশ নম্বর</th>
-              <th className="border border-black">সর্বোচ্চ প্রাপ্ত নম্বর</th>
               <th className="border border-black">প্রাপ্ত নম্বর</th>
             </tr>
           </thead>
@@ -166,9 +165,6 @@ const MarkSheetPdf = ({ studentResult }) => {
                   {bnBijoy2Unicode(
                     String(studentResult[`PassNumber${index + 1}`])
                   )}
-                </td>
-                <td className="border border-black pl-2">
-                  {bnBijoy2Unicode(String(studentResult[`TN${index + 1}`]))}
                 </td>
                 <td className="border border-black pl-2">
                   {bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}
