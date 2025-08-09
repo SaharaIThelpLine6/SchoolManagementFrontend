@@ -39,7 +39,7 @@ const PaymentHistoryInvoiceTable = ({ data, setInvoice, setInvoiceData }) => {
 
   return (
     <div className="my-5">
-      <div className="flex justify-start items-center mb-4">     
+      <div className="flex justify-start items-center mb-4">
         {/* Pagination Size Selector */}
         <div className="flex items-center space-x-2">
           <label className="text-sm font-medium">{translate("Show")}:</label>
@@ -65,13 +65,21 @@ const PaymentHistoryInvoiceTable = ({ data, setInvoice, setInvoiceData }) => {
         <table className="min-w-full table-auto text-sm md:text-base">
           <thead className="bg-[#cfe2ff] text-black">
             <tr>
-              <th className="px-4 py-3 text-center whitespace-nowrap">{translate("Status")}</th>
-              <th className="px-4 py-3 text-center whitespace-nowrap">{translate("Amount")}</th>
-              <th className="px-4 py-3 text-center whitespace-nowrap">{translate("Date")}</th>
+              <th className="px-4 py-3 text-center whitespace-nowrap">
+                {translate("Status")}
+              </th>
+              <th className="px-4 py-3 text-center whitespace-nowrap">
+                {translate("Amount")}
+              </th>
+              <th className="px-4 py-3 text-center whitespace-nowrap">
+                {translate("Date")}
+              </th>
               <th className="px-4 py-3 text-center whitespace-nowrap">
                 {translate("Description")}
               </th>
-              <th className="px-4 py-3 text-center whitespace-nowrap">{translate("Action")}</th>
+              <th className="px-4 py-3 text-center whitespace-nowrap">
+                {translate("Action")}
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -83,7 +91,9 @@ const PaymentHistoryInvoiceTable = ({ data, setInvoice, setInvoiceData }) => {
                 <td className="px-4 py-2 text-center whitespace-nowrap">
                   {row.TransactionStatus}
                 </td>
-                <td className="px-4 py-2 text-center whitespace-nowrap">{row.PayAmount}</td>
+                <td className="px-4 py-2 text-center whitespace-nowrap">
+                  {row.PayAmount}
+                </td>
                 <td className="px-4 py-2 text-center whitespace-nowrap">
                   {new Date(row.CreateAt).toLocaleDateString("en-CA")}
                 </td>
@@ -115,14 +125,18 @@ const PaymentHistoryInvoiceTable = ({ data, setInvoice, setInvoiceData }) => {
         </table>
       </div>
 
-      <div className="flex justify-between items-center mt-4">
-        <div className="text-sm text-gray-600">
-          {translate("Showing")} {(currentPage - 1) * pageSize + 1} -{" "}
-          {Math.min(currentPage * pageSize, filteredData.length)}{" "}
-          {translate("of")} {filteredData.length} {translate("entries")}
+      <div className="grid grid-cols-3 items-center mt-4">
+        {/* Left - entries info */}
+        <div className="flex justify-start">
+          <div className="text-sm text-gray-600">
+            {translate("Showing")} {(currentPage - 1) * pageSize + 1} -{" "}
+            {Math.min(currentPage * pageSize, filteredData.length)}{" "}
+            {translate("of")} {filteredData.length} {translate("entries")}
+          </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        {/* Center - pagination */}
+        <div className="flex justify-center items-center space-x-2">
           <button
             className="p-1 border rounded disabled:opacity-50"
             onClick={handlePrev}
@@ -141,7 +155,9 @@ const PaymentHistoryInvoiceTable = ({ data, setInvoice, setInvoiceData }) => {
             <MdKeyboardArrowRight size={24} />
           </button>
         </div>
-        <div className=""></div>
+
+        {/* Right - empty */}
+        <div></div>
       </div>
     </div>
   );
