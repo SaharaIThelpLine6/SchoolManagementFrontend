@@ -60,12 +60,6 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
     }
   );
 
-  // console.log(session_id, exam_id, subclass_id, "Ids");
-  // console.log(userResultData, "userResultData");
-  // console.log(
-  //   userResultData?.examList?.map((student) => student.Subjects),
-  //   "All Subjects"
-  // );
   useEffect(() => {
     if (userResultData?.examList) {
       const formattedStudents = userResultData.examList.map((student) => {
@@ -253,7 +247,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
                           key={`header-${index}`}
                           className="p-2 border whitespace-nowrap w-20"
                         >
-                          {subject}
+                          {bnBijoy2Unicode(subject)}
                         </th>
                       );
                     })}

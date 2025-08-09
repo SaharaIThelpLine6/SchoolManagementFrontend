@@ -209,22 +209,7 @@ export const menuData = [
         id: "2",
         name: "Point V: Report",
         route: "/result/report",
-      },
-      {
-        id: "3",
-        name: "Point Based Mark Sheet",
-        route: "/result/mark-sheet",
-      },
-      {
-        id: "4",
-        name: "Double Student D:",
-        route: "/result/double-student-delete",
-      },
-      {
-        id: "5",
-        name: "Online Result Public",
-        route: "/result/online-result-public",
-      },
+      }
     ],
   },
   {

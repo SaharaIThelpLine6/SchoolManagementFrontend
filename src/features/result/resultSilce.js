@@ -42,7 +42,7 @@ export const resultSilce = createApi({
           ? `get_user_result?${queryString}`
           : "get_user_result";
       },
-      providesTags: ["Result"]
+      providesTags: ["Result"],
     }),
 
     updateExamListStatusUpdate: builder.mutation({
@@ -61,6 +61,16 @@ export const resultSilce = createApi({
       }),
       invalidatesTags: ["Result"],
     }),
+    getUserSingleResult: builder.query({
+      query: ({ session_id, exam_id, class_id, user_id }) => {
+        let url = `students/${session_id}/${exam_id}/${class_id}`;
+        if (user_id) {
+          url += `?user_id=${user_id}`;
+        }
+        return url;
+      },
+      providesTags: ["Result"],
+    }),
   }),
 });
 
@@ -69,4 +79,5 @@ export const {
   useGetUserResultQuery,
   useUpdateExamListStatusUpdateMutation,
   useUpdateAndPostResultMutation,
+  useGetUserSingleResultQuery,
 } = resultSilce;

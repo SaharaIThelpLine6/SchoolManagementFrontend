@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import {
   MdKeyboardArrowLeft,
   MdKeyboardArrowRight,
+  MdPrint,
 } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 
@@ -13,7 +14,6 @@ import { setPageName } from "../features/auth/authSlice";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
 import {
-  useDeleteExamFeeSettingMutation,
   useGetExamNamesQuery,
   usePostExamFeeSettingMutation,
   useUpdateExamFeeSettingMutation,
@@ -172,25 +172,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   // Table Data Columns
   const columns = [
     {
-      title: translate("Action"),
-      hozAlign: "center",
-      render: (row) => (
-        <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title="Edit"
-            onClick={() =>
-              navigate(
-                `/result/${row?.ID}?session_id=${row?.SessionID}&exam_id=${row?.ExamID}&subclass_id=${row?.SubClassID}`
-              )
-            }
-          >
-            <FiEdit className="w-5 h-5" />
-          </button>
-        </div>
-      ),
-    },
-    {
       title: translate("ID"),
       field: "ID",
       hozAlign: "center",
@@ -214,7 +195,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
       render: (row) => bnBijoy2Unicode(row.Class?.SubClass),
     },
     {
-      title: translate("Published Status"),
+      title: translate("Status"),
       field: "Published",
       hozAlign: "center",
       render: (row) => {
@@ -231,6 +212,36 @@ const PointBasedResultEntry = ({ pageTitle }) => {
           </button>
         );
       },
+    },
+    {
+      title: translate("Action"),
+      hozAlign: "center",
+      render: (row) => (
+        <div className="flex justify-center items-center gap-2">
+          <button
+            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
+            title="Edit"
+            onClick={() =>
+              navigate(
+                `/result/${row?.ID}?session_id=${row?.SessionID}&exam_id=${row?.ExamID}&subclass_id=${row?.SubClassID}`
+              )
+            }
+          >
+            <FiEdit className="w-5 h-5" />
+          </button>
+          <button
+            className="p-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md flex items-center gap-1"
+            title="Print"
+            onClick={() =>
+              navigate(
+                `/result/mark-sheet/${row?.ID}?session_id=${row?.SessionID}&exam_id=${row?.ExamID}&subclass_id=${row?.SubClassID}`
+              )
+            }
+          >
+            <MdPrint className="w-5 h-5 text-white" />
+          </button>
+        </div>
+      ),
     },
   ];
 

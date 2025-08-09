@@ -1,282 +1,242 @@
 import React, { useEffect, useState } from "react";
-import { useGetSubClassListQuery } from "../../features/class/classQuerySlice";
-import { useGetSessionsQuery } from "../../features/session/sessionSlice";
-import { useGetInstitutionInfoQuery } from "../../features/settings/settingsQuerySlice";
 import { Buffer } from "buffer";
-import Swal from "sweetalert2";
-import { enToBnNumber } from "../../helper/languageFormat";
-
-const MarkSheetPdf = ({ SubClassID, SessionID }) => {
-  const { data: subClassListData } = useGetSubClassListQuery();
-  const subClasData = subClassListData?.find(
-    (i) => i.SubClassID === Number(SubClassID)
-  );
-  const { data: sessionSData } = useGetSessionsQuery();
-
-  const sessionData = sessionSData?.find(
-    (i) => i.SessionID === Number(SessionID)
-  );
-
-  const {
-    data: institutionInfo,
-    error: institutionInfoError,
-    isLoading: institutionInfoLoading,
-  } = useGetInstitutionInfoQuery();
+import bnBijoy2Unicode from "../../utils/conveter";
+const MarkSheetPdf = ({ studentResult }) => {
   const [logo, setLogo] = useState(null);
+  const [principal, setPrincipal] = useState(null);
+  const [najem, setNajem] = useState(null);
 
   useEffect(() => {
-    if (institutionInfo?.Logo?.data) {
-      const buffer = Buffer.from(institutionInfo.Logo.data);
-      const base64String = buffer.toString("base64");
-      const imageSrc = `data:image/png;base64,${base64String}`;
-      setLogo(imageSrc);
-    }
-  }, [institutionInfo]);
+    if (studentResult?.Logo?.data) {
+      if (studentResult?.Logo?.data) {
+        const buffer = Buffer.from(studentResult.Logo.data);
+        const base64String = buffer.toString("base64");
+        const imageSrc = `data:image/png;base64,${base64String}`;
+        setLogo(imageSrc);
+      }
+      if (studentResult?.SignaturePrincipal?.data) {
+        const signaturePrincipalBuffer = Buffer.from(
+          studentResult.SignaturePrincipal.data
+        );
+        const base64StringPrincipalBuffer =
+          signaturePrincipalBuffer.toString("base64");
+        const PrincipalimageSrc = `data:image/png;base64,${base64StringPrincipalBuffer}`;
+        setPrincipal(PrincipalimageSrc);
+      }
 
-  useEffect(() => {
-    if (institutionInfoLoading) {
-      Swal.fire({
-        title: "লোড হচ্ছে...",
-        text: "তথ্য আনয়ন করা হচ্ছে। দয়া করে অপেক্ষা করুন।",
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        didOpen: () => {
-          Swal.showLoading();
-        },
-      });
-    } else {
-      Swal.close(); // Close the loading alert once loading finishes
+      if (studentResult?.SignatureNajem?.data) {
+        const signatureNajemBuffer = Buffer.from(
+          studentResult.SignatureNajem.data
+        );
+        const base64StringNajemBuffer = signatureNajemBuffer.toString("base64");
+        const NajemimageSrc = `data:image/png;base64,${base64StringNajemBuffer}`;
+        setNajem(NajemimageSrc);
+      }
     }
-
-    if (institutionInfoError) {
-      Swal.fire({
-        icon: "error",
-        title: "ভুল হয়েছে!",
-        text: "প্রতিষ্ঠানের তথ্য লোড করতে ব্যর্থ হয়েছে।",
-      });
-    }
-  }, [institutionInfoLoading, institutionInfoError]);
+  }, [studentResult]);
   return (
-    <div
-      className="w-full"
-      style={{
-        width: "210mm",
-        height: "270mm", // Fixed height for one page
-        margin: "0 auto",
-        fontFamily: "'SolaimanLipi', 'Bangla', sans-serif",
-        fontSize: "12px", // Reduced font size
-        lineHeight: "1.4", // Tighter line height
-        padding: "5mm", // Reduced padding
-      }}
-    >
-      <div className="bg-white text-black p-5">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3 print:flex-row print:items-start">
-          {/* Logo on the left */}
-          <div className="w-20 h-20">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-full h-full object-contain"
-            />
-          </div>
-
-          {/* Text in the center */}
-          <div className="flex-1 text-center">
-            <h1 className="text-xl font-bold">
-              {institutionInfo?.InstitutionName}
-            </h1>
-            <p className="text-sm">সরকারি মুজিব কলেজ রোড, সখিপুর, টাঙ্গাইল</p>
-            <p className="text-sm">শিক্ষাবর্ষ : ২০২৫-২৬ ইং</p>
-            <p className="text-sm">পরীক্ষা : ১ম সাময়িক পরিক্ষা</p>
-          </div>
-
-          {/* Empty placeholder for symmetry */}
-          <div className="w-20 h-20"></div>
+    <div>
+      <div className="flex">
+        <div className="pt-6">
+          <img src={logo} alt="Logo" className=" w-[80px] h-[80px]" />
         </div>
-        <div className="flex justify-between items-center">
-          <div className="">
-            <div className="flex items-center gap-4">
-              <h3 className="w-20">পরীক্ষার্থীর নাম</h3>:<b>সাকিব আল হাসান</b>
-            </div>
-            <div className="flex items-center gap-4">
-              <h3 className="w-20">শ্রেণী/জামাত</h3>:<p>হিফজ (ক)</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <h3 className="w-20">দাখেলা</h3>:<p>১০০০০১</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <h3 className="w-20">পিতার নাম</h3>:<p></p>
-            </div>
-            <div className="flex items-center gap-4">
-              <h3 className="w-20">জন্ম তারিখ</h3>:<p>০১/০১/১৯৫৫</p>
-            </div>
-          </div>
-
-          <div className="flex justify-center p-4">
-            <table className="min-w-[300px] border-collapse shadow-md bg-white">
-              <thead>
-                <tr className="!bg-white">
-                  <th className="p-2 text-left border border-black"></th>
-                  <th className="p-2 text-left border border-black"></th>
-                  <th className="p-2 text-left border border-black"></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="!bg-white">
-                  <td className="p-2 border border-black"></td>
-                  <td className="p-2 border border-black"></td>
-                  <td className="p-2 border border-black"></td>
-                </tr>
-                <tr className="!bg-white">
-                  <td className="p-2 border border-black"></td>
-                  <td className="p-2 border border-black"></td>
-                  <td className="p-2 border border-black"></td>
-                </tr>
-                <tr className="!bg-white">
-                  <td className="p-2 border border-black"></td>
-                  <td className="p-2 border border-black"></td>
-                  <td className="p-2 border border-black"></td>
-                </tr>
-                <tr className="!bg-white">
-                  <td className="p-2 border border-black"></td>
-                  <td className="p-2 border border-black"></td>
-                  <td className="p-2 border border-black"></td>
-                </tr>
-                <tr className="!bg-white">
-                  <td className="p-2 border border-black"></td>
-                  <td className="p-2 border border-black"></td>
-                  <td className="p-2 border border-black"></td>
-                </tr>
-                <tr className="!bg-white">
-                  <td className="p-2 border border-black"></td>
-                  <td className="p-2 border border-black"></td>
-                  <td className="p-2 border border-black"></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div className="overflow-auto">
-          <div className="flex justify-center">
-            <table className="w-full border-collapse shadow-md bg-white">
-              <thead>
-                <tr className="!bg-white">
-                  <th className="p-2 text-left border border-black">ক্র:</th>
-                  <th className="p-2 text-left border border-black">বিষয়</th>
-                  <th className="p-2 text-left border border-black">
-                    পূর্ণমান
-                  </th>
-                  <th className="p-2 text-left border border-black">
-                    পাশ নম্বর
-                  </th>
-                  <th className="p-2 text-left border border-black">
-                    সর্বোচ্চ প্রাপ্ত নম্বর
-                  </th>
-                  <th className="p-2 text-left border border-black">
-                    প্রাপ্ত নম্বর
-                  </th>
-                  <th className="p-2 text-left border border-black">গ্রেড</th>
-                  <th className="p-2 text-left border border-black">জিপিএ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Array.from({ length: 6 }).map((_, rowIndex) => (
-                  <tr key={rowIndex} className="!bg-white">
-                    {Array.from({ length: 8 }).map((_, colIndex) => (
-                      <td key={colIndex} className="p-2 border border-black">
-                        {/* Example content */}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div className="flex justify-around items-center border border-black p-4 my-5">
-          <div className="flex items-center gap-2">
-            <h3>
-              <b>প্রাপ্ত নম্বর</b>
-            </h3>
-            :<p></p>
-          </div>
-          <div className="flex items-center gap-2">
-            <h3>
-              <b>মেধাস্থান</b>
-            </h3>
-            :<p></p>
-          </div>
-          <div className="flex items-center gap-2">
-            <h3>
-              <b>মোট নম্বর</b>
-            </h3>
-            :<p></p>
-          </div>
-        </div>
-        <div className="flex justify-around items-center border border-black p-4 my-5">
-          <div className="flex items-center gap-2">
-            <h3>
-              <b>কার্য দিবস</b>
-            </h3>
-            :<p></p>
-          </div>
-          <div className="flex items-center gap-2">
-            <h3>
-              <b>উপস্থিতি</b>
-            </h3>
-            :<p></p>
-          </div>
-          <div className="flex items-center gap-2">
-            <h3>
-              <b>অনুপস্থিতি</b>
-            </h3>
-            :<p></p>
-          </div>
-        </div>
-        <div className="flex justify-between items-start gap-4 my-6">
-          {/* শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য */}
-          <div className="w-1/2 border border-black p-4 rounded-md min-h-[120px]">
-            <h3 className="font-semibold mb-2">
-              শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর:
-            </h3>
-            <div className="h-20 border-t border-dashed border-gray-400 mt-4"></div>
-          </div>
-
-          {/* অভিভাবকের মন্তব্য */}
-          <div className="w-1/2 border border-black p-4 rounded-md min-h-[120px]">
-            <h3 className="font-semibold mb-2">
-              অভিভাবকের মন্তব্য ও স্বাক্ষর:
-            </h3>
-            <div className="h-20 border-t border-dashed border-gray-400 mt-4"></div>
-          </div>
-        </div>
-        <div className="flex justify-between mt-20 px-5">
-          {/* Signature 1 - Left */}
-          <div className="flex flex-col items-center w-1/2">
-            <img
-              src="/singnature.png"
-              alt="Signature 1"
-              className="h-16 object-contain mb-2"
-            />
-            <div className="border-t border-dotted border-black w-32 my-1"></div>
-            <p className="font-semibold text-sm">মুহতামিম</p>
-            <p className="text-xs">তারিখ: ০৭/১৬/২০২৫</p>
-          </div>
-
-          {/* Signature 2 - Right */}
-          <div className="flex flex-col items-center w-1/2">
-              <img
-                src="/singnature.png"
-                alt="Signature 2"
-                className="h-16 object-contain"
-              />
-            <div className="border-t border-dotted border-black w-32 my-1"></div>
-            <p className="font-semibold text-sm">নاظেম</p>
-            <p className="text-xs">তারিখ: ০৭/১৬/২০২৫</p>
-          </div>
+        <div className="mx-auto text-center">
+          <h2 className="text-[24px] font-medium">
+            {bnBijoy2Unicode(studentResult?.InstitutionName)}
+          </h2>
+          <h3 className="text-md">{bnBijoy2Unicode(studentResult?.Address)}</h3>
+          <h3 className="text-md">
+            শিক্ষাবর্ষঃ {bnBijoy2Unicode(studentResult?.SessionName)}
+          </h3>
+          <h3 className="text-md">
+            পরীক্ষাঃ {bnBijoy2Unicode(studentResult?.ExamName)}
+          </h3>
         </div>
       </div>
+      <div className="flex items-center justify-between">
+        <div className="pt-3">
+          <table>
+            <tbody className="">
+              <tr>
+                <td className="text-end font-semibold">পরীক্ষার্থীর নাম</td>
+                <td className="w-10 text-center"> : </td>
+                <td className="text-start">
+                  {" "}
+                  {bnBijoy2Unicode(studentResult?.UserName)}{" "}
+                </td>
+              </tr>
+              <tr>
+                <td className="text-end">
+                  {bnBijoy2Unicode(studentResult?.ClassNameLabel)}:
+                </td>
+                <td className="w-10 text-center"> : </td>
+                <td> {bnBijoy2Unicode(studentResult?.SubClass)} </td>
+              </tr>
+              <tr>
+                <td className="text-end">
+                  {bnBijoy2Unicode(studentResult?.StudentIDLabel)}:
+                </td>
+                <td className="w-10 text-center"> : </td>
+                <td> {bnBijoy2Unicode(String(studentResult?.UserCode))} </td>
+              </tr>
+              <tr>
+                <td className="text-end">পিতার নাম</td>
+                <td className="w-10 text-center"> : </td>
+                <td> {bnBijoy2Unicode(String(studentResult?.FatherName))} </td>
+              </tr>
+              <tr>
+                <td className="text-end">জন্ম তারিখ</td>
+                <td className="w-10 text-center"> : </td>
+                <td> {bnBijoy2Unicode(studentResult?.DateOfBirth)} ইং </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="pt-5">
+          <h1 className="bg-[#a8a6a6] text-white text-center text-[16px]">
+            মোট বিষয় {bnBijoy2Unicode(String(studentResult?.SubSonkha))} টি
+          </h1>
+          <table className="w-[295px]">
+            <tbody className="border border-black w-full">
+              {Array.from({ length: studentResult?.SubSonkha || 0 }).map(
+                (_, index) => {
+                  const division = studentResult[`Division${index + 1}`];
+                  const divisionNumber =
+                    studentResult[`DivisionNumber${index + 1}`];
+                  const subSonkha = studentResult?.SubSonkha;
+                  if (
+                    division == undefined ||
+                    divisionNumber == undefined ||
+                    subSonkha == undefined ||
+                    division == ""
+                  ) {
+                    return null;
+                  }
+
+                  return (
+                    <tr key={index}>
+                      <td className="text-start pl-2">
+                        {bnBijoy2Unicode(division)}
+                      </td>
+                      <td className="w-12 text-end">:</td>
+                      <td className="pl-3">
+                        {bnBijoy2Unicode(String(divisionNumber))} X
+                      </td>
+                      <td className="pr-2">
+                        {bnBijoy2Unicode(String(subSonkha))} ={" "}
+                        {bnBijoy2Unicode(String(subSonkha * divisionNumber))}
+                      </td>
+                    </tr>
+                  );
+                }
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className="pt-2 w-full">
+        <table className="w-full border border-collapse">
+          <thead className="border border-black">
+            <tr className="border border-b-[2px] border-t-[2px] border-black">
+              <th className="border border-black">ক্রমিক নং</th>
+              <th className="border border-black w-72">বিষয়</th>
+              <th className="border border-black">পূর্ণমান</th>
+              <th className="border border-black">পাশ নম্বর</th>
+              <th className="border border-black">সর্বোচ্চ প্রাপ্ত নম্বর</th>
+              <th className="border border-black">প্রাপ্ত নম্বর</th>
+            </tr>
+          </thead>
+          <tbody className="text-center">
+            {Array.from({ length: studentResult.SubSonkha }).map((_, index) => (
+              <tr
+                key={studentResult[`Subject${index + 1}`]}
+                className="border border-black"
+              >
+                <td className="border border-black pl-2">
+                  {bnBijoy2Unicode(String(index + 1))}
+                </td>
+                <td className="border border-black text-left pl-2">
+                  {bnBijoy2Unicode(studentResult[`Subject${index + 1}`])}
+                </td>
+                <td className="border border-black pl-2">
+                  {bnBijoy2Unicode(String(studentResult?.DivisionTopNumber))}
+                </td>
+                <td className="border border-black pl-2">
+                  {bnBijoy2Unicode(
+                    String(studentResult[`PassNumber${index + 1}`])
+                  )}
+                </td>
+                <td className="border border-black pl-2">
+                  {bnBijoy2Unicode(String(studentResult[`TN${index + 1}`]))}
+                </td>
+                <td className="border border-black pl-2">
+                  {bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/*Subject wise number and table end*/}
+      {/*Total Mark Start*/}
+      <div className="w-full pt-8">
+        <table className="border w-full border-black">
+          <tbody>
+            <tr>
+              <td className="pl-2">
+                প্রাপ্তি বিভাগ : {bnBijoy2Unicode(studentResult?.Division)}
+              </td>
+              <td>
+                মেধা স্থান : {bnBijoy2Unicode(String(studentResult?.Positions))}
+              </td>
+              <td>গড় : {bnBijoy2Unicode(String(studentResult?.Average))}</td>
+              <td>
+                মোট নম্বর : {bnBijoy2Unicode(String(studentResult?.Total))}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {/*Total Mark End*/}
+      {/*Comment Part Start*/}
+      <div className=" pt-5 flex gap-2">
+        <div className="w-full h-[100px] border border-black">
+          <p className="text-[12px] pl-2 pt-1">
+            শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :
+          </p>
+        </div>
+        <div className="w-full h-[100px] border border-black">
+          <p className="text-[12px] pl-2 pt-1">
+            অভিভাবকের মন্তব্য ও স্বাক্ষর :
+          </p>
+        </div>
+      </div>
+      {/*Comment Part End*/}
+      {/* Signature part start */}
+      <div className="flex justify-between text-[14px] mt-8">
+        <div className="text-center">
+          <img
+            src={principal}
+            alt="Principal Signature"
+            className="mx-auto w-[60px] mb-2"
+          />
+          <p>.....................................</p>
+          <p>মুহতামিম</p>
+          <p>তারিখ : </p>
+        </div>
+        <div className="text-center">
+          <img
+            src={najem}
+            alt="Najem Signature"
+            className="mx-auto w-[60px] mb-2"
+          />
+          <p>.....................................</p>
+          <p>নাযেম</p>
+          <p>তারিখ : </p>
+        </div>
+      </div>
+      {/* Signature part end */}
     </div>
   );
 };

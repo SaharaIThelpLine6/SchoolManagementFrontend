@@ -475,32 +475,12 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "mark-sheet",
+                path: "mark-sheet/:id",
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.marksheet}
                   >
                     <PointBasedMarkSheet pageTitle="Point Based Mark Sheet" />
-                  </RequirePermission>
-                ),
-              },
-              {
-                path: "double-student-delete",
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.marksheet}
-                  >
-                    <DoubleStudentD pageTitle="Double Student D:" />
-                  </RequirePermission>
-                ),
-              },
-              {
-                path: "online-result-public",
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.result_entry}
-                  >
-                    <OnlineResultPublic pageTitle="Online Result Public" />
                   </RequirePermission>
                 ),
               },
