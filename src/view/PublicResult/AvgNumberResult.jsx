@@ -63,7 +63,6 @@ const AvgNumberResult = ({ studentResult }) => {
                         <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">বিষয়</th>
                         <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">পূর্ণমান</th>
                         <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">পাশ নম্বর</th>
-                        <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">সর্বোচ্চ প্রাপ্ত নম্বর</th>
                         <th className="text-semibold text-[16px] border border-black h-12 " bgcolor="#ffffff">প্রাপ্ত নম্বর</th>
                     </tr>
                 </thead>
@@ -74,7 +73,6 @@ const AvgNumberResult = ({ studentResult }) => {
                             <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(studentResult[`Subject${index + 1}`])}</td>
                             <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(String(studentResult?.DivisionTopNumber))}</td>
                             <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(String(studentResult[`PassNumber${index + 1}`]))}</td>
-                            <td className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">{bnBijoy2Unicode(String(studentResult[`TN${index + 1}`]))}</td>
                             <td className="text-[16px] border border-black h-[36px] pl-4 " bgcolor="#ffffff">{bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}</td>
                         </tr>
                     ))}
