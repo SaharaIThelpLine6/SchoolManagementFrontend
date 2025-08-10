@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import useTranslate from "../utils/Translate";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import { FormProvider, useForm } from "react-hook-form";
@@ -27,6 +27,7 @@ const PAGE_SIZE = 10;
 const PointBasedMarkSheet = ({ pageTitle }) => {
   const [searchParams] = useSearchParams();
   const translate = useTranslate();
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [printID, setPrintID] = useState(null);
   const [printAll, setPrintAll] = useState(false);
@@ -88,6 +89,23 @@ const PointBasedMarkSheet = ({ pageTitle }) => {
     },
     { skip: !printAll }
   );
+
+  console.log(userResultData, "userResultData")
+
+useEffect(() => {
+  if (isLoading) return;
+
+  if (error || !userResultData || userResultData.examList?.length === 0) {
+    Swal.fire({  
+      title: 'Data Not Found',
+      text: 'The requested result data could not be found.',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    }).then(() => {
+      navigate("/result");
+    });
+  }
+}, [userResultData, isLoading, error, navigate]);
 
   // Reset current page when filters or examList changes
   useEffect(() => {

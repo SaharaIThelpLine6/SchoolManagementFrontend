@@ -14,15 +14,15 @@ import Swal from "sweetalert2";
 
 // ✅ Input with Label + Checkbox
 const InputWithCheckbox = ({ registerKey, checked, onCheckChange }) => (
-  <div className="flex flex-row items-start gap-1">
+  <div className="flex flex-row items-center justify-center gap-3">
     <DefaultInput registerKey={registerKey} />
 
-    <label className="flex items-center gap-2">
+    <label className="flex items-center justify-center gap-2">
       <input
         type="checkbox"
         checked={checked}
         onChange={onCheckChange}
-        className="cursor-pointer"
+        className="cursor-pointer w-5 h-5"
       />
     </label>
   </div>
@@ -147,9 +147,17 @@ const TalentCondition = () => {
     }
   };
 
+  if (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error?.data?.message || "Something went wrong. Please try again.",
+    });
+  }
+
   return (
     <div className="font-SolaimanLipi bg-white p-5">
-      <div className="text-center mb-8">
+      <div className="text-center mb-4">
         <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
           <span className="text-blue-600">•</span>{" "}
           {translate("All the divisions whose merit will be mentioned")}
@@ -165,13 +173,14 @@ const TalentCondition = () => {
 
       <FormProvider {...methods}>
         <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
-          <div className="flex flex-col
-           justify-center items-center gap-5">
-            <PointConditionFilteringForm
-              onFilter={setFilter}
-            />
-
-            <div className="">
+          <div
+            className="flex flex-col
+           justify-center items-center gap-5"
+          >
+            <div className="w-full">
+              <PointConditionFilteringForm onFilter={setFilter} />
+            </div>
+            <div className="w-full">
               {/* ✅ Select All */}
               <div className="flex items-center mb-2">
                 <input
@@ -186,7 +195,7 @@ const TalentCondition = () => {
               </div>
 
               {/* ✅ Inputs Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-4 mb-6 w-full">
                 {inputs.map((input, index) => (
                   <InputWithCheckbox
                     key={index}
@@ -198,7 +207,7 @@ const TalentCondition = () => {
               </div>
             </div>
           </div>
-          <div className="flex justify-center gap-4 mr-10">
+          <div className="flex justify-end gap-4">
             <Button type="submit">{translate("Save")}</Button>
           </div>
         </form>

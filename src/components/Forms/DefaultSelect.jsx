@@ -15,6 +15,7 @@ const DefaultSelect = ({
   unicode = false,
   labelPosition = "top",
   onChange,
+  defaultValue = "Select"
 }) => {
   const {
     register,
@@ -95,7 +96,7 @@ const DefaultSelect = ({
             disabled={disabled}
           >
             <option value="" className="text-body">
-              {translate("Select")}
+              {translate(defaultValue)}
             </option>
             {options &&
               options.map((option) => (

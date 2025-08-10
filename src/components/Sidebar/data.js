@@ -209,7 +209,7 @@ export const menuData = [
         id: "2",
         name: "Point V: Report",
         route: "/result/report",
-      }
+      },
     ],
   },
   {
@@ -243,33 +243,38 @@ export const menuData = [
     route: "/accounting",
     icon: "FaCalculator",
     subMenu: [
-      {
+       {
         id: "1",
-        name: "Fee Setting",
+        name: "Deposit Costs",
         route: "/accounting",
       },
       {
         id: "2",
+        name: "Fee Setting",
+        route: "/accounting/fee-setting",
+      },
+      {
+        id: "3",
         name: "Student Fee Collection",
         route: "/accounting/student-fee-collection",
       },
       {
-        id: "3",
+        id: "4",
         name: "Dues List",
         route: "/accounting/dues-list",
       },
       {
-        id: "4",
+        id: "5",
         name: "Monthly Dues",
         route: "/accounting/monthly-dues",
       },
       {
-        id: "5",
+        id: "6",
         name: "Fee Collection Report",
         route: "/accounting/fee-collection-report",
       },
       {
-        id: "6",
+        id: "7",
         name: "Balance Transfer",
         route: "/accounting/balance-transfer",
       },

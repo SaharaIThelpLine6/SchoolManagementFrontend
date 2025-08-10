@@ -28,6 +28,7 @@ import useTranslate from "../utils/Translate";
 import { showModal } from "../utils/ModalControlar";
 import StudentReportList from "../components/StudentReportList";
 import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
+import Loading from "../components/Loading/Loading";
 
 const CharacterReport = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -337,7 +338,7 @@ const CharacterReport = ({ pageTitle }) => {
   };
 
   if (status === "loading" || isCreating || isUpdating) {
-    return <LoadingComponent />;
+    return <Loading />;
   }
 
   return (

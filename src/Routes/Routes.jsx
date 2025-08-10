@@ -70,6 +70,7 @@ import DoesList from "../pages/DoesList";
 import PointBasedResultCreateUpdate from "../pages/PointBasedResultCreateUpdate";
 import BalanceTransfer from "../pages/BalanceTransfer";
 import DonorFeeDetermination from "../pages/DonorFeeDetermination";
+import DepositCosts from "../pages/DepositCosts";
 
 const router = createBrowserRouter([
   {
@@ -492,10 +493,20 @@ const router = createBrowserRouter([
               {
                 index: true,
                 element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.fee_setting}
+                  // >
+                    <DepositCosts pageTitle="Deposit Costs" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: "fee-setting",
+                element: (
                   <RequirePermission
                     permissionId={permissionsDataList.fee_setting}
                   >
-                    <FeeSetting pageTitle="Fee Setting" />
+                  <FeeSetting pageTitle="Fee Setting" />
                   </RequirePermission>
                 ),
               },
@@ -565,7 +576,9 @@ const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: <DonorFeeDetermination pageTitle="Donor Fee Determination" />,
+                element: (
+                  <DonorFeeDetermination pageTitle="Donor Fee Determination" />
+                ),
               },
             ],
           },

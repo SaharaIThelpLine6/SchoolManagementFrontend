@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
@@ -34,6 +34,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
   });
   const { handleSubmit, setValue, watch } = methods;
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [students, setStudents] = useState([]);
@@ -59,6 +60,21 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
       skip: !session_id || !exam_id || !subclass_id,
     }
   );
+
+  useEffect(() => {
+    if (isLoading) return;
+  
+    if (error || !userResultData || userResultData.examList?.length === 0) {
+      Swal.fire({  
+        title: 'Data Not Found',
+        text: 'The requested result data could not be found.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      }).then(() => {
+        navigate("/result");
+      });
+    }
+  }, [userResultData, isLoading, error, navigate]);
 
   useEffect(() => {
     if (userResultData?.examList) {
