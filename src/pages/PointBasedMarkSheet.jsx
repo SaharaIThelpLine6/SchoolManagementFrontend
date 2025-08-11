@@ -226,12 +226,12 @@ useEffect(() => {
       <div className="bg-white shadow-lg rounded-xl p-6 font-SolaimanLipi print:hidden">
         <FormProvider {...methods}>
           <div className="flex flex-col gap-6">
-            <div className="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-4">
+            <div className="flex flex-col items-start justify-center gap-4">
               <h2 className="text-xl font-bold text-black shrink-0 2xl:mr-6">
                 {translate(pageTitle)}
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 w-full gap-4">
                 <DefaultSelect
                   options={sessionData || []}
                   require={"Session is required"}

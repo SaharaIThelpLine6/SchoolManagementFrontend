@@ -211,9 +211,6 @@ const DepositCosts = ({ pageTitle }) => {
     },
   ];
 
-  const handleOpenFundModal = () => {};
-  const handleOpenDepositModal = () => {};
-  const handleOpenPaymentModal = () => {};
 
   return (
     <div className="font-SolaimanLipi bg-white p-4 md:p-6 rounded-xl shadow-lg">
@@ -248,12 +245,11 @@ const DepositCosts = ({ pageTitle }) => {
                   unicode={true}
                 />
               </div>
-              <FilterButton onClick={handleOpenFundModal} />
             </div>
             <div className="flex items-end gap-2">
               <div className="flex-1">
                 <DefaultSelect
-                  label={translate("Deposit") + " :"}
+                  label={translate("Deposit/Cost") + " :"}
                   options={fundNamesData ?? []}
                   valueField="FundID"
                   nameField="FundName"
@@ -261,7 +257,6 @@ const DepositCosts = ({ pageTitle }) => {
                   unicode={true}
                 />
               </div>
-              <FilterButton onClick={handleOpenDepositModal} />
             </div>
             <DefaultSelect
               label={translate("General Ledger") + " :"}
@@ -322,7 +317,6 @@ const DepositCosts = ({ pageTitle }) => {
                   className="col-span-1"
                 />
               </div>
-              <FilterButton onClick={handleOpenPaymentModal} />
             </div>
             <DefaultSelect
               label={translate("Name") + " :"}
