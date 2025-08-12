@@ -73,13 +73,26 @@ const DepositCosts = ({ pageTitle }) => {
   ]);
 
   const { data: fundNamesData } = useGetFundNamesQuery();
-  const { data: generalLedgersData } = useGetGeneralLedgersQuery(caID);
+  const { data: generalLedgersData } = useGetGeneralLedgersQuery(caID, {
+    skip: !caID,
+  });
+
   const { data: gSLData } = useGetSubLedgerQuery(ledgerGLID, {
-    skip: !ledgerGLID,
+    skip: !ledgerGLID, // 
   });
+
   const { data: pgSLData } = useGetSubLedgerQuery(paymentGLID, {
-    skip: !paymentGLID,
+    skip: !paymentGLID, // 
   });
+  const { data: receiptNumber, isSuccess } = useGetReceiptNumberQuery(
+    {
+      fundid: FundID,
+      caid: caID,
+    },
+    {
+      skip: !FundID || !caID,
+    }
+  );
   const { data: paymentTypesData } = useGetPaymentTypeQuery();
   const { data: chartOfAccountData } = useGetChartOFAccountQuery();
   const {
@@ -89,10 +102,6 @@ const DepositCosts = ({ pageTitle }) => {
     refetch,
   } = useGetTransactionOrdersQuery();
   // Example call
-  const { data: receiptNumber, isSuccess } = useGetReceiptNumberQuery({
-    fundid: Number(FundID),
-    caid: Number(caID),
-  });
 
   const [postInComeExpense] = usePostInComeExpenseMutation();
 
@@ -148,7 +157,7 @@ const DepositCosts = ({ pageTitle }) => {
       const payload = {
         SLID: data.SLID,
         Particulars: data.Description,
-        CAID: data.CAID,
+        CAID: Number(data.CAID),
         Amount: data.Quantity,
         ID: editIdDefaultData
           ? editIdDefaultData // keep old ID if editing
@@ -222,7 +231,7 @@ const DepositCosts = ({ pageTitle }) => {
         ...methods.getValues(),
         SLID: existing.SLID,
         Description: existing.Particulars,
-        CAID: existing.CAID,
+        CAID: Number(existing.CAID),
         Quantity: existing.Amount,
       });
     }
@@ -352,7 +361,7 @@ const DepositCosts = ({ pageTitle }) => {
         gledger: defaultData,
       };
 
-      const response = await postInComeExpense(payload).unwrap();
+      // const response = await postInComeExpense(payload).unwrap();
 
       // Show success alert
       Swal.fire({
