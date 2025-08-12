@@ -398,13 +398,13 @@ const DepositCosts = ({ pageTitle }) => {
         <h3 className="text-lg md:text-xl font-bold">
           {translate("Accounting")}
         </h3>
-        <button
+        {/* <button
           className="rounded-full p-2 bg-gray-200 hover:bg-gray-300 transition"
           aria-label="Settings"
           //   onClick={handleOpenModal}
         >
           <IoMdSettings className="text-2xl text-gray-700" />
-        </button>
+        </button> */}
       </div>
 
       <FormProvider {...methods}>
