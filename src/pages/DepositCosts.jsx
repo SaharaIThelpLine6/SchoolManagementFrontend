@@ -24,18 +24,20 @@ import DefaultInput from "../components/Forms/DefaultInput";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import Button from "../components/Button/Button";
 import {
+  useGetChartOFAccountQuery,
   useGetFundNamesQuery,
   useGetGeneralLedgersQuery,
   useGetPaymentTypeQuery,
   useGetSubLedgerQuery,
+  useGetTransactionOrdersQuery,
+  usePostInComeExpenseMutation,
 } from "../features/feeCollection/feeCollectionSlice";
 import { IoMdSettings } from "react-icons/io";
 import { GrDrag } from "react-icons/gr";
 import { showModal } from "../utils/ModalControlar";
 import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
-import Textarea from "../components/Forms/Textarea";
-import FilterButton from "../components/Filter/FilterButton";
-import HijriDateFormatter from "../components/Calendar/HijriDateFormatter";
+import { numberToBanglaWords } from "../helper/numberToBanglaWords";
+import BanglaDatePicker from "../components/Forms/DatePicker/BanglaDatePicker";
 
 const PAGE_SIZE = 10;
 
@@ -43,33 +45,53 @@ const DepositCosts = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const methods = useForm();
-  const { watch, handleSubmit } = methods;
+  const { watch, handleSubmit, setValue } = methods;
   const [currentPage, setCurrentPage] = useState(1);
-  const [postExamFeeSetting] = usePostExamFeeSettingMutation();
-  const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
+  const [defaultData, setDefaultData] = useState([]);
+  const [editIdDefaultData, setEditIdDefaultData] = useState(null);
+  const [
+    caID,
+    ledgerGLID,
+    paymentGLID,
+    Quantity,
+    FundID,
+    VoucherNo,
+    BookNo,
+    TransactionDateEng,
+    TransactionBanglaDate,
+  ] = watch([
+    "CAID",
+    "ledgerGLID",
+    "paymentGLID",
+    "Quantity",
+    "FundID",
+    "VoucherNo",
+    "BookNo",
+    "TransactionDateEng",
+    "TransactionBanglaDate",
+  ]);
 
-  const fundID = watch("FundID");
-  const gLID = watch("GLID");
-
-  const { data: subClassListData } = useGetSubClassListQuery();
   const { data: fundNamesData } = useGetFundNamesQuery();
-  const { data: generalLedgersData } = useGetGeneralLedgersQuery(fundID);
-  const { data: gSLData } = useGetSubLedgerQuery(gLID);
+  const { data: generalLedgersData } = useGetGeneralLedgersQuery(caID);
+  const { data: gSLData } = useGetSubLedgerQuery(ledgerGLID, {
+    skip: !ledgerGLID,
+  });
+  const { data: pgSLData } = useGetSubLedgerQuery(paymentGLID, {
+    skip: !paymentGLID,
+  });
   const { data: paymentTypesData } = useGetPaymentTypeQuery();
+  const { data: chartOfAccountData } = useGetChartOFAccountQuery();
+  const { data: transactionOrdersData, isLoading, isError, refetch } = useGetTransactionOrdersQuery();
+  const [postInComeExpense] = usePostInComeExpenseMutation();
 
-  const {
-    data: examFeeSettingData,
-    isLoading: isExamFeeSettingLoading,
-    isError: isExamFeeSettingError,
-    refetch,
-  } = useGetExamFeeSettingQuery();
 
-  const totalPages = Math.ceil((examFeeSettingData?.length || 0) / PAGE_SIZE);
+
+  const totalPages = Math.ceil((transactionOrdersData?.length || 0) / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
-  }, [examFeeSettingData, currentPage]);
+    return transactionOrdersData?.slice(start, start + PAGE_SIZE) || [];
+  }, [transactionOrdersData, currentPage]);
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -102,32 +124,27 @@ const DepositCosts = ({ pageTitle }) => {
 
   // Data Create Exam Fee Setting
   const onSubmit = async (data) => {
-    if (!data.SessionID || !data.SubClassID || !data.ExamID) {
-      Swal.fire({
-        icon: "warning",
-        title: "ফর্ম অসম্পূর্ণ",
-        text: "Session, SubClass এবং Exam নির্বাচন করুন।",
-      });
-      return;
-    }
-
-    const payload = {
-      SessionID: Number(data.SessionID),
-      ExamID: Number(data.ExamID),
-      SubClassID: Number(data.SubClassID),
-      Fee: Number(data.Fee),
-      SLID: data.SLID,
-    };
-
     try {
       let response;
-      if (data.ID) {
-        response = await updateExamFeeSetting({
-          id: data.ID,
-          body: payload,
-        }).unwrap();
+      const payload = {
+        SLID: data.SLID,
+        Particulars: data.Description,
+        CAID: data.CAID,
+        Amount: data.Quantity,
+        ID: editIdDefaultData
+          ? editIdDefaultData // keep old ID if editing
+          : 1 + defaultData.length, // new row ID
+      };
+
+      if (editIdDefaultData) {
+        // Update existing record
+        setDefaultData((prev) =>
+          prev.map((item) => (item.ID === editIdDefaultData ? payload : item))
+        );
+        setEditIdDefaultData(null);
       } else {
-        response = await postExamFeeSetting(payload).unwrap();
+        // Add new record
+        setDefaultData((prev) => [...prev, payload]);
       }
 
       Swal.fire({
@@ -135,8 +152,12 @@ const DepositCosts = ({ pageTitle }) => {
         title: "সফলভাবে সংরক্ষণ হয়েছে",
         text: response?.message || "Exam Fee Setting সফলভাবে সংরক্ষিত হয়েছে।",
       }).then(() => {
-        refetch();
-        methods.reset();
+        // refetch();
+        methods.reset({
+          ...methods.getValues(),
+          Description: "",
+          Quantity: "",
+        });
       });
     } catch (error) {
       const errMsg =
@@ -152,22 +173,147 @@ const DepositCosts = ({ pageTitle }) => {
     }
   };
 
+  // Delete function
+  const handleDeleteDefaultData = (id) => {
+    Swal.fire({
+      title: "আপনি কি নিশ্চিত?",
+      text: "এই ডেটা মুছে ফেলা হবে!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "হ্যাঁ, মুছে ফেলুন",
+      cancelButtonText: "না, বাতিল করুন",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setDefaultData((prev) => prev.filter((item) => item.ID !== id));
+        Swal.fire(
+          "মুছে ফেলা হয়েছে!",
+          "ডেটা সফলভাবে মুছে ফেলা হয়েছে।",
+          "success"
+        );
+      }
+    });
+  };
+
+  // Edit function
+  const handleEditOpenModalDefaultData = (id) => {
+    const existing = defaultData.find((item) => item.ID === id);
+    if (existing) {
+      setEditIdDefaultData(id);
+      methods.reset({
+        ...methods.getValues(),
+        SLID: existing.SLID,
+        Description: existing.Particulars,
+        CAID: existing.CAID,
+        Quantity: existing.Amount,
+      });
+    }
+  };
+
   // Table Data Columns
   const columns = [
+    // {
+    //   title: translate("Action"),
+    //   hozAlign: "center",
+    //   render: (row) => (
+    //     <div className="flex justify-center items-center gap-2">
+    //       <button
+    //         // onClick={() => handleDelete(row.SL)}
+    //         className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors duration-200 flex items-center justify-center"
+    //         title={translate("Delete")}
+    //       >
+    //         <MdDelete className="w-4 h-4" />
+    //       </button>
+    //       <button
+    //         // onClick={() => handleEditOpenModal(row.SL)}
+    //         className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors duration-200 flex items-center justify-center"
+    //         title={translate("Edit")}
+    //       >
+    //         <FaRegEdit className="w-4 h-4" />
+    //       </button>
+    //     </div>
+    //   ),
+    // },
+    {
+      title: (
+        <div className="flex items-center justify-center gap-1">
+          <GrDrag />
+        </div>
+      ),
+      hozAlign: "center",
+      render: (row) => <>{row.SL}</>,
+    },
+    {
+      title: translate("Order ID"),
+      hozAlign: "center",
+      render: (row) => <>{row.OrderID}</>,
+    },
+    {
+      title: translate("Fund ID"),
+      hozAlign: "center",
+      render: (row) => <>{row.FundID}</>,
+    },
+    {
+      title: translate("Voucher No"),
+      hozAlign: "center",
+      render: (row) => <>{row.VoucherNo}</>,
+    },
+    {
+      title: translate("Book No"),
+      hozAlign: "center",
+      render: (row) => <>{row.BookNo}</>,
+    },
+    {
+      title: translate("Transaction Date (Eng)"),
+      hozAlign: "center",
+      render: (row) => <>{row.TransactionDateEng}</>,
+    },
+    {
+      title: translate("Transaction Date (Bangla)"),
+      hozAlign: "center",
+      render: (row) => <>{row.TransactionBanglaDate || "-"}</>,
+    },
+    {
+      title: translate("User ID"),
+      hozAlign: "center",
+      render: (row) => <>{row.UserID}</>,
+    },
+    {
+      title: translate("Entry Year"),
+      hozAlign: "center",
+      render: (row) => <>{row.EntryYear || "-"}</>,
+    },
+    {
+      title: translate("Transfer Type"),
+      hozAlign: "center",
+      render: (row) => <>{row.TransferType}</>,
+    },
+    {
+      title: translate("In Word"),
+      hozAlign: "center",
+      render: (row) => <>{row.InWord || "-"}</>,
+    },
+    {
+      title: translate("Transaction ID"),
+      hozAlign: "center",
+      render: (row) => <>{row.TransactionID || "-"}</>,
+    },
+  ];
+
+  const defaultColumns = [
     {
       title: translate("Action"),
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
           <button
-            onClick={() => handleDelete(row.id)}
+            onClick={() => handleDeleteDefaultData(row.ID)}
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors duration-200 flex items-center justify-center"
             title="Delete"
           >
             <MdDelete className="w-4 h-4" />
           </button>
           <button
-            onClick={() => handleEditOpenModal(row.id)}
+            onClick={() => handleEditOpenModalDefaultData(row.ID)}
             className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors duration-200 flex items-center justify-center"
           >
             <FaRegEdit className="w-4 h-4" />
@@ -185,32 +331,63 @@ const DepositCosts = ({ pageTitle }) => {
       render: (row) => <>{row?.ID}</>,
     },
     {
-      title: translate("General Ledger"),
+      title: translate("SLID"),
       hozAlign: "center",
-      render: (row) => <>{row?.ID}</>,
-    },
-    {
-      title: translate("ID"),
-      hozAlign: "center",
-      render: (row) => <>{row?.AcademicSession?.SessionName}</>,
-    },
-    {
-      title: translate("Sub Ledger"),
-      hozAlign: "center",
-      render: (row) => <>{bnBijoy2Unicode(row?.Exam_Name?.ExamName)}</>,
+      render: (row) => <>{row?.SLID}</>,
     },
     {
       title: translate("Particulars"),
       hozAlign: "center",
-      render: (row) => <>{bnBijoy2Unicode(row?.Class?.SubClass)}</>,
+      render: (row) => <>{row?.Particulars}</>,
     },
     {
-      title: translate("Quantity"),
-      field: "SLID",
+      title: translate("CAID"),
       hozAlign: "center",
+      render: (row) => <>{row?.CAID}</>,
+    },
+    {
+      title: translate("Amount"),
+      hozAlign: "center",
+      render: (row) => <>{bnBijoy2Unicode(row?.Amount)}</>,
     },
   ];
 
+  const handleSubmitButton = async () => {
+    try {
+      const payload = {
+        FundID: Number(FundID),
+        VoucherNo,
+        BookNo,
+        TransactionDateEng: Array.isArray(TransactionDateEng)
+          ? TransactionDateEng[0]
+          : TransactionDateEng,
+        TransactionBanglaDate: Array.isArray(TransactionBanglaDate)
+          ? TransactionBanglaDate[0]
+          : TransactionBanglaDate,
+        gledger: defaultData,
+      };
+
+      const response = await postInComeExpense(payload).unwrap();
+
+      // Show success alert
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Data submitted successfully!",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+      refetch();
+      methods.reset();
+    } catch (error) {
+      console.error("Submission Error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to submit data. Please try again.",
+      });
+    }
+  };
 
   return (
     <div className="font-SolaimanLipi bg-white p-4 md:p-6 rounded-xl shadow-lg">
@@ -243,6 +420,7 @@ const DepositCosts = ({ pageTitle }) => {
                   nameField="FundName"
                   registerKey="FundID"
                   unicode={true}
+                  require={"Fund is required!"}
                 />
               </div>
             </div>
@@ -250,11 +428,12 @@ const DepositCosts = ({ pageTitle }) => {
               <div className="flex-1">
                 <DefaultSelect
                   label={translate("Deposit/Cost") + " :"}
-                  options={fundNamesData ?? []}
-                  valueField="FundID"
-                  nameField="FundName"
-                  registerKey="FundID"
+                  options={chartOfAccountData ?? []}
+                  valueField="CAID"
+                  nameField="ChartOfAcName"
+                  registerKey="CAID"
                   unicode={true}
+                  require={"Deposit/Cost is required!"}
                 />
               </div>
             </div>
@@ -263,8 +442,9 @@ const DepositCosts = ({ pageTitle }) => {
               options={generalLedgersData ?? []}
               valueField="GLID"
               nameField="GlName"
-              registerKey="GLID"
+              registerKey="ledgerGLID"
               unicode={true}
+              require={"General Ledger is required!"}
             />
             <DefaultSelect
               label={translate("Sectors") + " :"}
@@ -273,14 +453,7 @@ const DepositCosts = ({ pageTitle }) => {
               nameField="SlName"
               registerKey="SLID"
               unicode={true}
-            />
-            <DefaultSelect
-              label={translate("Sectors 2") + " :"}
-              options={subClassListData ?? []}
-              valueField="SubClassID"
-              nameField="SubClass"
-              registerKey="SubClassID"
-              unicode={true}
+              require={"Sectors is required!"}
             />
             <DefaultInput
               label={translate("Voucher/Bill") + " :"}
@@ -290,90 +463,113 @@ const DepositCosts = ({ pageTitle }) => {
               className="col-span-1"
             />
             <DefaultInput
-              label={translate("Book") + " :"}
-              type="text"
-              registerKey={"Book"}
-              placeholder={translate("Enter Book Name ...")}
-              require={"Book is required!"}
+              label={translate("Ledger No") + " :"}
+              type="number"
+              registerKey={"BookNo"}
+              placeholder={translate("Enter Book Id ...")}
+              require={"BookNo is required!"}
               className="col-span-1"
             />
             <DatePickerOne
-              dateCalender={`${translate("Christian Date")}: `}
+              dateCalender={`${translate("English Date")}: `}
               placeholder="Enter date"
-              registerKey="VacationDateFrom"
-              require="Date Required"
+              registerKey="TransactionDateEng"
+              require="English date is required!"
               className="col-span-1"
             />
-            <HijriDateFormatter />
-            <div className="flex items-end gap-2">
-              <div className="flex-1">
-                <DefaultSelect
-                  label={translate("Payment System") + " :"}
-                  options={paymentTypesData ?? []}
-                  valueField="SL"
-                  nameField="GlName"
-                  registerKey="SL"
-                  unicode={true}
-                  className="col-span-1"
-                />
-              </div>
-            </div>
+            <BanglaDatePicker
+              dateCalender={`${translate("Bangla Date")}: `}
+              placeholder="Enter date"
+              registerKey="TransactionBanglaDate"
+              require="Bangla date is required!"
+              className="col-span-1"
+            />
             <DefaultSelect
-              label={translate("Name") + " :"}
-              options={subClassListData ?? []}
-              valueField="SubClassID"
-              nameField="SubClass"
-              registerKey="SubClassID"
+              label={translate("Payment System") + " :"}
+              nameField={"GlName"}
+              registerKey="paymentGLID"
+              valueField={"GLID"}
+              options={paymentTypesData ?? []}
+              type={"number"}
+              require={"Payment System is required!"}
               unicode={true}
-              className="col-span-1"
             />
-            <DefaultInput
-              label={translate("Quantity") + " :"}
-              type="text"
-              registerKey={"Book"}
-              placeholder={translate("Enter Book Name ...")}
-              require={"Book is required!"}
-              className="col-span-1"
+            <DefaultSelect
+              label={"Account"}
+              nameField={"SlName"}
+              registerKey={"cashier"}
+              valueField={"SLID"}
+              options={pgSLData ?? []}
+              type={"number"}
+              require={"Account is required!"}
+              unicode={true}
             />
             <div className="col-span-2">
-              <Textarea
+              <DefaultInput
                 label={translate("Payment Comments") + " :"}
                 placeholder={translate("Enter comments")}
                 registerKey="Comments"
-                require={false}
+                require={"Payment comments is required!"}
                 unicode={true}
                 className="sm:col-span-2 lg:col-span-3"
               />
             </div>
             <div className="col-span-2">
-              <Textarea
+              <DefaultInput
                 label={translate("Description") + " :"}
                 placeholder={translate("Enter description")}
                 registerKey="Description"
-                require={false}
+                require={"Description is required!"}
                 unicode={true}
                 className="sm:col-span-2 lg:col-span-3"
               />
             </div>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex justify-end gap-4 px-4 bg-white">
-            <Button
-              type="submit"
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-            >
-              {translate("Submit")}
-            </Button>
+            <DefaultInput
+              label={translate("Quantity") + " :"}
+              type="text"
+              registerKey={"Quantity"}
+              placeholder={translate("Enter quantity number ...")}
+              require={"Book is required!"}
+              className="col-span-1"
+            />
+            <div className="flex items-center justify-start w-full pt-6">
+              <Button
+                type="submit"
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+              >
+                {translate("Add")}
+              </Button>
+            </div>
           </div>
         </form>
       </FormProvider>
 
+      <div className="my-5">
+        {defaultData && defaultData.length > 0 && (
+          <SortableTable
+            columns={defaultColumns}
+            data={defaultData}
+            isFilterColumn={false}
+          />
+        )}
+      </div>
+
+      {/* Buttons */}
+      <div className="flex justify-end gap-4 px-4 bg-white">
+        <Button
+          type="button"
+          onClick={handleSubmitButton}
+          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+        >
+          {translate("Submit")}
+        </Button>
+      </div>
+
       {/* Table Section */}
       <div className="mt-5 overflow-x-auto">
-        {isExamFeeSettingLoading ? (
+        {isLoading ? (
           <Loading />
-        ) : isExamFeeSettingError ? (
+        ) : isError ? (
           <div className="text-red-500 text-center py-4">
             {translate("Failed to load exam fee settings. Please try again.")}
           </div>

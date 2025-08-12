@@ -481,6 +481,7 @@ const FeeCollectionForm = ({ userId }) => {
               options={paymentType}
               type={"number"}
               require={"This Field is require"}
+              unicode={true}
             />
 
             <DefaultSelect
@@ -491,6 +492,7 @@ const FeeCollectionForm = ({ userId }) => {
               options={subLedger}
               type={"number"}
               require={"This Field is require"}
+              unicode={true}
             />
 
             <DatePickerOne

@@ -79,6 +79,18 @@ export const feeCollectionSlice = createApi({
       query: () => `student_fee_groups`,
       providesTags: ["StudentFeeGroups"],
     }),
+    getChartOFAccount: builder.query({
+      query: () => `chart_of_account`,
+      providesTags: ["ChartOFAccount"],
+    }),
+    getTransactionDetails: builder.query({
+      query: () => `transaction_details`,
+      providesTags: ["TransactionDetails"],
+    }),
+    getTransactionOrders: builder.query({
+      query: () => `transaction_orders`,
+      providesTags: ["TransactionOrders"],
+    }),
     postStudentFeeGroup: builder.mutation({
       query: (data) => ({
         url: "create_student_fee_group",
@@ -87,9 +99,17 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["StudentFeeGroups"],
     }),
+    postInComeExpense: builder.mutation({
+      query: (data) => ({
+        url: "income_expense",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["TransactionOrders"],
+    }),
     updateStudentFeeGroup: builder.mutation({
       query: (data) => ({
-        url: `update_student_fee_group/${data.ID}`, 
+        url: `update_student_fee_group/${data.ID}`,
         method: "PUT",
         body: data,
       }),
@@ -123,4 +143,8 @@ export const {
   useGetStudentFeeGroupsQuery,
   useUpdateStudentFeeGroupMutation,
   useDeleteStudentFeeGroupMutation,
+  useGetChartOFAccountQuery,
+  useGetTransactionDetailsQuery,
+  useGetTransactionOrdersQuery,
+  usePostInComeExpenseMutation
 } = feeCollectionSlice;
