@@ -60,6 +60,8 @@ const DepositCosts = ({ pageTitle }) => {
     BookNo,
     TransactionDateEng,
     TransactionBanglaDate,
+    LParticulars,
+    LSLID,
   ] = watch([
     "CAID",
     "ledgerGLID",
@@ -70,6 +72,8 @@ const DepositCosts = ({ pageTitle }) => {
     "BookNo",
     "TransactionDateEng",
     "TransactionBanglaDate",
+    "LParticulars",
+    "LSLID",
   ]);
 
   const { data: fundNamesData } = useGetFundNamesQuery();
@@ -157,7 +161,6 @@ const DepositCosts = ({ pageTitle }) => {
       const payload = {
         SLID: data.SLID,
         Particulars: data.Description,
-        CAID: Number(data.CAID),
         Amount: data.Quantity,
         ID: editIdDefaultData
           ? editIdDefaultData // keep old ID if editing
@@ -231,7 +234,6 @@ const DepositCosts = ({ pageTitle }) => {
         ...methods.getValues(),
         SLID: existing.SLID,
         Description: existing.Particulars,
-        CAID: Number(existing.CAID),
         Quantity: existing.Amount,
       });
     }
@@ -349,9 +351,12 @@ const DepositCosts = ({ pageTitle }) => {
   const handleSubmitButton = async () => {
     try {
       const payload = {
-        FundID: Number(FundID),
+        FundID,
+        CAID: caID,
         VoucherNo,
         BookNo,
+        LParticulars,
+        LSLID,
         TransactionDateEng: Array.isArray(TransactionDateEng)
           ? TransactionDateEng[0]
           : TransactionDateEng,
@@ -361,7 +366,7 @@ const DepositCosts = ({ pageTitle }) => {
         gledger: defaultData,
       };
 
-      // const response = await postInComeExpense(payload).unwrap();
+      const response = await postInComeExpense(payload).unwrap();
 
       // Show success alert
       Swal.fire({
@@ -496,7 +501,7 @@ const DepositCosts = ({ pageTitle }) => {
             <DefaultSelect
               label={"Account"}
               nameField={"SlName"}
-              registerKey={"cashier"}
+              registerKey={"LSLID"}
               valueField={"SLID"}
               options={pgSLData ?? []}
               type={"number"}
@@ -507,7 +512,7 @@ const DepositCosts = ({ pageTitle }) => {
               <DefaultInput
                 label={translate("Payment Comments") + " :"}
                 placeholder={translate("Enter comments")}
-                registerKey="Comments"
+                registerKey="LParticulars"
                 require={"Payment comments is required!"}
                 unicode={true}
                 className="sm:col-span-2 lg:col-span-3"
