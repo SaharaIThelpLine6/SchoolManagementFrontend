@@ -28,6 +28,7 @@ import {
   useGetFundNamesQuery,
   useGetGeneralLedgersQuery,
   useGetPaymentTypeQuery,
+  useGetReceiptNumberQuery,
   useGetSubLedgerQuery,
   useGetTransactionOrdersQuery,
   usePostInComeExpenseMutation,
@@ -81,12 +82,23 @@ const DepositCosts = ({ pageTitle }) => {
   });
   const { data: paymentTypesData } = useGetPaymentTypeQuery();
   const { data: chartOfAccountData } = useGetChartOFAccountQuery();
-  const { data: transactionOrdersData, isLoading, isError, refetch } = useGetTransactionOrdersQuery();
+  const {
+    data: transactionOrdersData,
+    isLoading,
+    isError,
+    refetch,
+  } = useGetTransactionOrdersQuery();
+  // Example call
+  const { data: receiptNumber, isSuccess } = useGetReceiptNumberQuery({
+    fundid: Number(FundID),
+    caid: Number(caID),
+  });
+
   const [postInComeExpense] = usePostInComeExpenseMutation();
 
-
-
-  const totalPages = Math.ceil((transactionOrdersData?.length || 0) / PAGE_SIZE);
+  const totalPages = Math.ceil(
+    (transactionOrdersData?.length || 0) / PAGE_SIZE
+  );
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
@@ -100,6 +112,13 @@ const DepositCosts = ({ pageTitle }) => {
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
+
+  // Set default value when receiptNumber changes
+  useEffect(() => {
+    if (isSuccess && receiptNumber) {
+      setValue("VoucherNo", receiptNumber);
+    }
+  }, [isSuccess, receiptNumber, setValue]);
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
@@ -243,17 +262,13 @@ const DepositCosts = ({ pageTitle }) => {
       render: (row) => <>{row.SL}</>,
     },
     {
-      title: translate("Order ID"),
+      title: translate("Order"),
       hozAlign: "center",
       render: (row) => <>{row.OrderID}</>,
     },
+
     {
-      title: translate("Fund ID"),
-      hozAlign: "center",
-      render: (row) => <>{row.FundID}</>,
-    },
-    {
-      title: translate("Voucher No"),
+      title: translate("Voucher/Bill"),
       hozAlign: "center",
       render: (row) => <>{row.VoucherNo}</>,
     },
@@ -263,39 +278,9 @@ const DepositCosts = ({ pageTitle }) => {
       render: (row) => <>{row.BookNo}</>,
     },
     {
-      title: translate("Transaction Date (Eng)"),
+      title: translate("Date"),
       hozAlign: "center",
       render: (row) => <>{row.TransactionDateEng}</>,
-    },
-    {
-      title: translate("Transaction Date (Bangla)"),
-      hozAlign: "center",
-      render: (row) => <>{row.TransactionBanglaDate || "-"}</>,
-    },
-    {
-      title: translate("User ID"),
-      hozAlign: "center",
-      render: (row) => <>{row.UserID}</>,
-    },
-    {
-      title: translate("Entry Year"),
-      hozAlign: "center",
-      render: (row) => <>{row.EntryYear || "-"}</>,
-    },
-    {
-      title: translate("Transfer Type"),
-      hozAlign: "center",
-      render: (row) => <>{row.TransferType}</>,
-    },
-    {
-      title: translate("In Word"),
-      hozAlign: "center",
-      render: (row) => <>{row.InWord || "-"}</>,
-    },
-    {
-      title: translate("Transaction ID"),
-      hozAlign: "center",
-      render: (row) => <>{row.TransactionID || "-"}</>,
     },
   ];
 
@@ -378,7 +363,15 @@ const DepositCosts = ({ pageTitle }) => {
         showConfirmButton: false,
       });
       refetch();
-      methods.reset();
+      methods.reset({
+        FundID: "",
+        VoucherNo: "",
+        BookNo: "",
+        TransactionDateEng: "",
+        TransactionBanglaDate: "",
+        gledger: [],
+      });
+      setDefaultData([]);
     } catch (error) {
       console.error("Submission Error:", error);
       Swal.fire({
@@ -460,7 +453,7 @@ const DepositCosts = ({ pageTitle }) => {
               type="text"
               registerKey={"VoucherNo"}
               require={"Voucher/Bill is required!"}
-              className="col-span-1"
+              disable
             />
             <DefaultInput
               label={translate("Ledger No") + " :"}
@@ -468,21 +461,18 @@ const DepositCosts = ({ pageTitle }) => {
               registerKey={"BookNo"}
               placeholder={translate("Enter Book Id ...")}
               require={"BookNo is required!"}
-              className="col-span-1"
             />
             <DatePickerOne
               dateCalender={`${translate("English Date")}: `}
               placeholder="Enter date"
               registerKey="TransactionDateEng"
               require="English date is required!"
-              className="col-span-1"
             />
             <BanglaDatePicker
               dateCalender={`${translate("Bangla Date")}: `}
               placeholder="Enter date"
               registerKey="TransactionBanglaDate"
               require="Bangla date is required!"
-              className="col-span-1"
             />
             <DefaultSelect
               label={translate("Payment System") + " :"}

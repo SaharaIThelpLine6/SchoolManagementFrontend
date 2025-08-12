@@ -14,7 +14,13 @@ export const feeCollectionSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["ExamNames", "FundNames", "GeneralLedgers", "StudentFeeGroups"],
+  tagTypes: [
+    "ExamNames",
+    "FundNames",
+    "GeneralLedgers",
+    "StudentFeeGroups",
+    "ResceiptNumber",
+  ],
   endpoints: (builder) => ({
     getFees: builder.query({
       query: () => "view_userfee",
@@ -91,6 +97,11 @@ export const feeCollectionSlice = createApi({
       query: () => `transaction_orders`,
       providesTags: ["TransactionOrders"],
     }),
+    getReceiptNumber: builder.query({
+      query: ({ fundid, caid }) => `receipt_number/${fundid}/${caid}`,
+      providesTags: ["ReceiptNumber"],
+    }),
+
     postStudentFeeGroup: builder.mutation({
       query: (data) => ({
         url: "create_student_fee_group",
@@ -146,5 +157,6 @@ export const {
   useGetChartOFAccountQuery,
   useGetTransactionDetailsQuery,
   useGetTransactionOrdersQuery,
-  usePostInComeExpenseMutation
+  usePostInComeExpenseMutation,
+  useGetReceiptNumberQuery
 } = feeCollectionSlice;
