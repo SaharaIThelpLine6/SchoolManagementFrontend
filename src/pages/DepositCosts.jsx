@@ -9,13 +9,6 @@ import {
 } from "react-icons/md";
 import { FaRegEdit } from "react-icons/fa";
 import { setPageName } from "../features/auth/authSlice";
-import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
-import {
-  useGetExamFeeSettingQuery,
-  usePostExamFeeSettingMutation,
-  useUpdateExamFeeSettingMutation,
-} from "../features/exam/examQuerySlice";
-import { CiFilter } from "react-icons/ci";
 import useTranslate from "../utils/Translate";
 import bnBijoy2Unicode from "../utils/conveter";
 import SortableTable from "../components/Tables/SortableTable";
@@ -24,20 +17,20 @@ import DefaultInput from "../components/Forms/DefaultInput";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import Button from "../components/Button/Button";
 import {
+  useDeleteInComeExpenseMutation,
   useGetChartOFAccountQuery,
   useGetFundNamesQuery,
   useGetGeneralLedgersQuery,
+  useGetGLedgersQuery,
   useGetPaymentTypeQuery,
   useGetReceiptNumberQuery,
   useGetSubLedgerQuery,
   useGetTransactionOrdersQuery,
   usePostInComeExpenseMutation,
 } from "../features/feeCollection/feeCollectionSlice";
-import { IoMdSettings } from "react-icons/io";
 import { GrDrag } from "react-icons/gr";
 import { showModal } from "../utils/ModalControlar";
 import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
-import { numberToBanglaWords } from "../helper/numberToBanglaWords";
 import BanglaDatePicker from "../components/Forms/DatePicker/BanglaDatePicker";
 
 const PAGE_SIZE = 10;
@@ -50,11 +43,12 @@ const DepositCosts = ({ pageTitle }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [defaultData, setDefaultData] = useState([]);
   const [editIdDefaultData, setEditIdDefaultData] = useState(null);
+  const [editId, setEditId] = useState(null);
   const [
     caID,
     ledgerGLID,
     paymentGLID,
-    Quantity,
+    Amount,
     FundID,
     VoucherNo,
     BookNo,
@@ -66,7 +60,7 @@ const DepositCosts = ({ pageTitle }) => {
     "CAID",
     "ledgerGLID",
     "paymentGLID",
-    "Quantity",
+    "Amount",
     "FundID",
     "VoucherNo",
     "BookNo",
@@ -77,16 +71,17 @@ const DepositCosts = ({ pageTitle }) => {
   ]);
 
   const { data: fundNamesData } = useGetFundNamesQuery();
+  const { data: gldgersData } = useGetGLedgersQuery();
   const { data: generalLedgersData } = useGetGeneralLedgersQuery(caID, {
     skip: !caID,
   });
 
   const { data: gSLData } = useGetSubLedgerQuery(ledgerGLID, {
-    skip: !ledgerGLID, // 
+    skip: !ledgerGLID, //
   });
 
   const { data: pgSLData } = useGetSubLedgerQuery(paymentGLID, {
-    skip: !paymentGLID, // 
+    skip: !paymentGLID, //
   });
   const { data: receiptNumber, isSuccess } = useGetReceiptNumberQuery(
     {
@@ -97,6 +92,7 @@ const DepositCosts = ({ pageTitle }) => {
       skip: !FundID || !caID,
     }
   );
+
   const { data: paymentTypesData } = useGetPaymentTypeQuery();
   const { data: chartOfAccountData } = useGetChartOFAccountQuery();
   const {
@@ -107,7 +103,10 @@ const DepositCosts = ({ pageTitle }) => {
   } = useGetTransactionOrdersQuery();
   // Example call
 
+  console.log(transactionOrdersData, "transactionOrdersData");
+
   const [postInComeExpense] = usePostInComeExpenseMutation();
+  const [deleteInComeExpense] = useDeleteInComeExpenseMutation();
 
   const totalPages = Math.ceil(
     (transactionOrdersData?.length || 0) / PAGE_SIZE
@@ -129,7 +128,7 @@ const DepositCosts = ({ pageTitle }) => {
   // Set default value when receiptNumber changes
   useEffect(() => {
     if (isSuccess && receiptNumber) {
-      setValue("VoucherNo", receiptNumber);
+      setValue("VoucherNo", receiptNumber.receipt_num);
     }
   }, [isSuccess, receiptNumber, setValue]);
 
@@ -138,20 +137,54 @@ const DepositCosts = ({ pageTitle }) => {
   }, [dispatch, pageTitle]);
 
   // Update Handle
-  const handleEdit = (row) => {
-    showModal(
-      "Accounting dues list Statement",
-      "ACCOUNTING_DUES_LIST_STATEMENT"
+  const handleEdit = (orderId) => {
+    setEditId(orderId);
+
+    // transactionOrdersData থেকে মিলে যাওয়া ডাটা বের করা
+    const selectedOrder = transactionOrdersData?.find(
+      (item) => item.OrderID === orderId
     );
 
-    // methods.reset({
-    //   ID: row.ID,
-    //   SessionID: row.SessionID,
-    //   ExamID: row.ExamID,
-    //   SubClassID: row.SubClassID,
-    //   Fee: row.Fee,
-    //   SLID: row.SLID,
-    // });
+    const data = [10, 20, 546, 75, 102];
+
+    console.log(selectedOrder, "selectedOrder");
+
+    if (selectedOrder) {
+      // মেইন ট্রান্সাকশন ডাটা সেট করা
+      setValue("FundID", selectedOrder.FundID);
+      setValue("VoucherNo", selectedOrder.VoucherNo);
+      setValue("BookNo", selectedOrder.BookNo);
+      setValue("TransactionDateEng", selectedOrder.TransactionDateEng);
+      setValue("TransactionBanglaDate", selectedOrder.TransactionBanglaDate);
+      setValue("LParticulars", selectedOrder.AccBankTransaction.Particulars);
+      const targetStr = selectedOrder.AccBankTransaction.SLID.toString();
+
+      const match = gldgersData.find((i) =>
+        targetStr.startsWith(i.GLID.toString())
+      );
+      console.log(match.GLID, "LSLID");
+      setValue("paymentGLID", match.GLID);
+      setValue("LSLID", selectedOrder.AccBankTransaction.LSLID);
+      setDefaultData(selectedOrder.AccTransactionDetails || []);
+
+      // সাব-ডিটেইলস থাকলে সেট করা
+      // if (selectedOrder.AccTransactionDetails?.length > 0) {
+      //   const detail = selectedOrder.AccTransactionDetails[0]; // প্রথম ডিটেইল নিচ্ছি, লুপও করতে পারেন
+      //   setValue("SLID", detail.SLID);
+      //   setValue("Description", detail.Particulars);
+      //   setValue("Amount", detail.Amount);
+      // }
+
+      // // ব্যাংক ট্রান্সাকশন থাকলে সেট করা
+      // if (selectedOrder.AccBankTransaction) {
+      //   setValue("PaymentSLID", selectedOrder.AccBankTransaction.SLID);
+      //   setValue(
+      //     "PaymentDescription",
+      //     selectedOrder.AccBankTransaction.Particulars
+      //   );
+      //   setValue("PaymentAmount", selectedOrder.AccBankTransaction.Amount);
+      // }
+    }
   };
 
   // Data Create Exam Fee Setting
@@ -160,9 +193,9 @@ const DepositCosts = ({ pageTitle }) => {
       let response;
       const payload = {
         SLID: data.SLID,
-        Particulars: data.Description,
-        Amount: data.Quantity,
-        ID: editIdDefaultData
+        Particulars: data.Particulars,
+        Amount: data.Amount,
+        SL: editIdDefaultData
           ? editIdDefaultData // keep old ID if editing
           : 1 + defaultData.length, // new row ID
       };
@@ -170,7 +203,7 @@ const DepositCosts = ({ pageTitle }) => {
       if (editIdDefaultData) {
         // Update existing record
         setDefaultData((prev) =>
-          prev.map((item) => (item.ID === editIdDefaultData ? payload : item))
+          prev.map((item) => (item.SL === editIdDefaultData ? payload : item))
         );
         setEditIdDefaultData(null);
       } else {
@@ -186,8 +219,8 @@ const DepositCosts = ({ pageTitle }) => {
         // refetch();
         methods.reset({
           ...methods.getValues(),
-          Description: "",
-          Quantity: "",
+          Particulars: "",
+          Amount: "",
         });
       });
     } catch (error) {
@@ -223,46 +256,76 @@ const DepositCosts = ({ pageTitle }) => {
         );
       }
     });
+  }; // Delete function
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "আপনি কি নিশ্চিত?",
+      text: "এই ডেটা মুছে ফেলা হবে!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "হ্যাঁ, মুছে ফেলুন",
+      cancelButtonText: "না, বাতিল করুন",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteInComeExpense(id).unwrap();
+
+        Swal.fire(
+          "মুছে ফেলা হয়েছে!",
+          "ডেটা সফলভাবে মুছে ফেলা হয়েছে।",
+          "success"
+        );
+        refetch();
+      } catch (error) {
+        Swal.fire(
+          "ত্রুটি!",
+          "ডেটা মুছে ফেলা যায়নি। আবার চেষ্টা করুন।",
+          "error"
+        );
+        console.error("Delete Error:", error);
+      }
+    }
   };
 
   // Edit function
   const handleEditOpenModalDefaultData = (id) => {
-    const existing = defaultData.find((item) => item.ID === id);
+    const existing = defaultData.find((item) => item.SL === id);
     if (existing) {
       setEditIdDefaultData(id);
       methods.reset({
         ...methods.getValues(),
-        SLID: existing.SLID,
-        Description: existing.Particulars,
-        Quantity: existing.Amount,
+        // SLID: existing.SLID,
+        Particulars: existing.Particulars,
+        Amount: existing.Amount,
       });
     }
   };
 
   // Table Data Columns
   const columns = [
-    // {
-    //   title: translate("Action"),
-    //   hozAlign: "center",
-    //   render: (row) => (
-    //     <div className="flex justify-center items-center gap-2">
-    //       <button
-    //         // onClick={() => handleDelete(row.SL)}
-    //         className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors duration-200 flex items-center justify-center"
-    //         title={translate("Delete")}
-    //       >
-    //         <MdDelete className="w-4 h-4" />
-    //       </button>
-    //       <button
-    //         // onClick={() => handleEditOpenModal(row.SL)}
-    //         className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors duration-200 flex items-center justify-center"
-    //         title={translate("Edit")}
-    //       >
-    //         <FaRegEdit className="w-4 h-4" />
-    //       </button>
-    //     </div>
-    //   ),
-    // },
+    {
+      title: translate("Action"),
+      hozAlign: "center",
+      render: (row) => (
+        <div className="flex justify-center items-center gap-2">
+          <button
+            onClick={() => handleDelete(row.OrderID)}
+            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors duration-200 flex items-center justify-center"
+            title={translate("Delete")}
+          >
+            <MdDelete className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => handleEdit(row.OrderID)}
+            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors duration-200 flex items-center justify-center"
+            title={translate("Edit")}
+          >
+            <FaRegEdit className="w-4 h-4" />
+          </button>
+        </div>
+      ),
+    },
     {
       title: (
         <div className="flex items-center justify-center gap-1">
@@ -302,14 +365,14 @@ const DepositCosts = ({ pageTitle }) => {
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
           <button
-            onClick={() => handleDeleteDefaultData(row.ID)}
+            onClick={() => handleDeleteDefaultData(row.SL)}
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors duration-200 flex items-center justify-center"
             title="Delete"
           >
             <MdDelete className="w-4 h-4" />
           </button>
           <button
-            onClick={() => handleEditOpenModalDefaultData(row.ID)}
+            onClick={() => handleEditOpenModalDefaultData(row.SL)}
             className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors duration-200 flex items-center justify-center"
           >
             <FaRegEdit className="w-4 h-4" />
@@ -324,7 +387,7 @@ const DepositCosts = ({ pageTitle }) => {
         </div>
       ),
       hozAlign: "center",
-      render: (row) => <>{row?.ID}</>,
+      render: (row) => <>{row?.SL}</>,
     },
     {
       title: translate("SLID"),
@@ -337,14 +400,9 @@ const DepositCosts = ({ pageTitle }) => {
       render: (row) => <>{row?.Particulars}</>,
     },
     {
-      title: translate("CAID"),
-      hozAlign: "center",
-      render: (row) => <>{row?.CAID}</>,
-    },
-    {
       title: translate("Amount"),
       hozAlign: "center",
-      render: (row) => <>{bnBijoy2Unicode(row?.Amount)}</>,
+      render: (row) => <>{row?.Amount}</>,
     },
   ];
 
@@ -353,7 +411,7 @@ const DepositCosts = ({ pageTitle }) => {
       const payload = {
         FundID,
         CAID: caID,
-        VoucherNo,
+        VoucherNo: VoucherNo ? VoucherNo : 1,
         BookNo,
         LParticulars,
         LSLID,
@@ -366,7 +424,8 @@ const DepositCosts = ({ pageTitle }) => {
         gledger: defaultData,
       };
 
-      const response = await postInComeExpense(payload).unwrap();
+      console.log(payload, "payload");
+      // const response = await postInComeExpense(payload).unwrap();
 
       // Show success alert
       Swal.fire({
@@ -466,7 +525,7 @@ const DepositCosts = ({ pageTitle }) => {
               label={translate("Voucher/Bill") + " :"}
               type="text"
               registerKey={"VoucherNo"}
-              require={"Voucher/Bill is required!"}
+              // require={"Voucher/Bill is required!"}
               disable
             />
             <DefaultInput
@@ -522,17 +581,17 @@ const DepositCosts = ({ pageTitle }) => {
               <DefaultInput
                 label={translate("Description") + " :"}
                 placeholder={translate("Enter description")}
-                registerKey="Description"
+                registerKey="Particulars"
                 require={"Description is required!"}
                 unicode={true}
                 className="sm:col-span-2 lg:col-span-3"
               />
             </div>
             <DefaultInput
-              label={translate("Quantity") + " :"}
+              label={translate("Amount") + " :"}
               type="text"
-              registerKey={"Quantity"}
-              placeholder={translate("Enter quantity number ...")}
+              registerKey={"Amount"}
+              placeholder={translate("Enter Amount number ...")}
               require={"Book is required!"}
               className="col-span-1"
             />

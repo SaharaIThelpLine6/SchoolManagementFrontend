@@ -76,6 +76,10 @@ export const feeCollectionSlice = createApi({
     getGeneralLedgers: builder.query({
       query: (id) => `general_ledger/${id}`,
       providesTags: ["GeneralLedgers"],
+    }), 
+    getGLedgers: builder.query({
+      query: () => `general_ledger/`,
+      providesTags: ["GeneralLedgers"],
     }),
     getFeeGroupNames: builder.query({
       query: () => `fee_group_name`,
@@ -118,6 +122,14 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["TransactionOrders"],
     }),
+    updateInComeExpense: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `income_expense/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["TransactionOrders"],
+    }),
     updateStudentFeeGroup: builder.mutation({
       query: (data) => ({
         url: `update_student_fee_group/${data.ID}`,
@@ -132,6 +144,13 @@ export const feeCollectionSlice = createApi({
         method: "DELETE",
       }),
       invalidatesTags: ["StudentFeeGroups"],
+    }),
+    deleteInComeExpense: builder.mutation({
+      query: (id) => ({
+        url: `income_expense/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["TransactionOrders"],
     }),
   }),
 });
@@ -149,6 +168,7 @@ export const {
   useGetNameOFExamFeeQuery,
   useGetFundNamesQuery,
   useGetGeneralLedgersQuery,
+  useGetGLedgersQuery,
   useGetFeeGroupNamesQuery,
   usePostStudentFeeGroupMutation,
   useGetStudentFeeGroupsQuery,
@@ -158,5 +178,7 @@ export const {
   useGetTransactionDetailsQuery,
   useGetTransactionOrdersQuery,
   usePostInComeExpenseMutation,
-  useGetReceiptNumberQuery
+  useGetReceiptNumberQuery,
+  useUpdateInComeExpenseMutation,
+  useDeleteInComeExpenseMutation
 } = feeCollectionSlice;
