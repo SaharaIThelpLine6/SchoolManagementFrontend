@@ -28,6 +28,7 @@ import {
   useGetTotalStudentQuery,
 } from "../features/dashboard/dashboardQuerySlice";
 import useTranslate from "../utils/Translate";
+import DeveloperCredit from "../components/DeveloperCredit";
 const Home = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();

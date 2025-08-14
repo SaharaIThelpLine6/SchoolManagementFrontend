@@ -3,6 +3,8 @@ import router from "./Routes/Routes";
 import { cssTransition, ToastContainer } from "react-toastify";
 import "./App.css";
 import "animate.css/animate.min.css";
+import { Suspense } from "react";
+import Loading from "./components/Loading/Loading";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -12,7 +14,9 @@ const bounce = cssTransition({
 export default function App() {
   return (
     <>
-      <RouterProvider router={router} />
+      <Suspense fallback={<Loading/>}>
+        <RouterProvider router={router} />
+      </Suspense>
       <ToastContainer
         position="bottom-center"
         autoClose={5000}

@@ -2,9 +2,10 @@
 import { createBrowserRouter } from "react-router-dom";
 import PrivateRoute from "./PrivateRoute";
 import { permissionsDataList } from "../Data/permissions";
+import { lazy } from "react";
 
 // Public Pages
-import Login from "../pages/Login";
+const Login = lazy(() => import("../pages/Login"));
 import NotFound from "../pages/NotFound";
 import PublicLayout from "../layout/PublicLayout";
 import ResultRequest from "../pages/public/ResultRequest";

@@ -9,6 +9,7 @@ import SideBar from "../components/Sidebar/SideBar";
 import Header from "../components/Header/Header";
 import { useGetInstitutionInfoQuery } from "../features/settings/settingsQuerySlice";
 import TawkMessenger from "@tawk.to/tawk-messenger-react";
+import DeveloperCredit from "../components/DeveloperCredit";
 
 const tawkPropertyId = import.meta.env.VITE_TAWK_PROPERTY_ID;
 const tawkWidgetId = import.meta.env.VITE_TAWK_WIDGET_ID;
@@ -108,6 +109,7 @@ const DefaultLayout = () => {
 
             <DefaultModal />
           </div>
+          <DeveloperCredit />
         </main>
       </div>
 
