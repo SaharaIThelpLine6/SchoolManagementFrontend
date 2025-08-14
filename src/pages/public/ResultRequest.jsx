@@ -5,7 +5,7 @@ import {
   setResultError,
 } from "../../features/studentResultPublicView/studentResultPublicViewSlice";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import bnBijoy2Unicode from "../../utils/conveter";
 import "animate.css/animate.min.css";
 import { toast, cssTransition } from "react-toastify";
@@ -28,10 +28,13 @@ const ResultRequest = () => {
     resultError,
   } = useSelector((state) => state.studentResultPublicView);
   const { schoolid } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams()
+  
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = methods;
   const [SessionID, ExamID, SubClassID, userid] = watch([
@@ -51,6 +54,25 @@ const ResultRequest = () => {
       setButtonDisable(true);
     }
   }, [SessionID, ExamID, SubClassID, userid]);
+
+  useEffect(()=>{
+    const classid = searchParams.get("classid")
+    const sessionid = searchParams.get("sessionid")
+    const examid = searchParams.get("examid")
+    const usercode = searchParams.get("usercode")
+    if(classid){
+      setValue("SubClassID", classid)
+    }
+    if(sessionid){
+      setValue("SessionID", sessionid)
+    }
+    if(examid){
+      setValue("ExamID", examid)
+    }
+    if(usercode){
+      setValue("userid", usercode)
+    }
+  }, [classList])
 
   const onSubmit = (data) => {
     navigate(
