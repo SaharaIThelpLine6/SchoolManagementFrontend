@@ -4,11 +4,11 @@ import { AnimatePresence, motion } from "framer-motion";
 import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 
 import { menuData } from "./data";
-import { renderIcons } from "../../helper/renderIcons";
 import useTranslate from "../../utils/Translate";
 import { useGetAllUserPermissionsQuery } from "../../features/permission/permissionSlice";
 import { permissionsDataList } from "../../Data/permissions";
 import Loading from "../Loading/Loading";
+import SvgIcon from "../icons/SvgIcon";
 
 const submenuVariants = {
   hidden: { opacity: 0, height: 0 },
@@ -240,16 +240,20 @@ const SideBar = () => {
                 <>
                   <button
                     onClick={() => handleToggle(menu.id)}
-                    className={`w-full flex px-4 font-SolaimanLipi items-center justify-between border-l-6 border-solid gap-2 py-2 ${
+                    className={`w-full flex px-4 font-SolaimanLipi items-center justify-between border-l-6 border-solid gap-2 py-2.5 ${
                       location.pathname.startsWith(menu.route)
                         ? "bg-[#deeff9] text-[#007af7] border-l-[#007af7]"
                         : "hover:text-[#007af7] hover:bg-[#ddeffe] border-l-transparent"
                     }`}
                   >
-                    <span className="flex items-center gap-2">
-                      {renderIcons(menu.icon)}
+                    <div className="flex items-center justify-center gap-3">
+                      <SvgIcon
+                        name={menu.icon}
+                        size={20}
+                        className="mb-0.5"
+                      />
                       {translate(menu.name)}
-                    </span>
+                    </div>
                     <span>
                       {openMenuId === menu.id ? (
                         <FaChevronUp />
@@ -303,7 +307,12 @@ const SideBar = () => {
                     }`
                   }
                 >
-                  {renderIcons(menu.icon)} {translate(menu.name)}
+                  <SvgIcon
+                    name={menu.icon}
+                    size={20}
+                    className="text-current"
+                  />
+                  {translate(menu.name)}
                 </NavLink>
               )}
             </li>

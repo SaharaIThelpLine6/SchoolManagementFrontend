@@ -16,7 +16,6 @@ export default function App() {
     <>
       <Suspense fallback={<Loading/>}>
         <RouterProvider router={router} />
-      </Suspense>
       <ToastContainer
         position="bottom-center"
         autoClose={5000}
@@ -30,6 +29,8 @@ export default function App() {
         closeButton={false}
         className="min-h-[50px] text-[14px] font-SolaimanLipi text-white rounded-[4px] hidden_in_print"
       />
+      </Suspense>
+
     </>
   );
 }
