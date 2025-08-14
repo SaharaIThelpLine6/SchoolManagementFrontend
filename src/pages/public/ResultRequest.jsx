@@ -52,42 +52,42 @@ const ResultRequest = () => {
     }
   }, [SessionID, ExamID, SubClassID, userid]);
 
-  // const onSubmit = (data) => {
-  //   navigate(
-  //     `/${schoolid}/students/${data.SessionID}/${data.ExamID}/${data.SubClassID}/${data.userid}`
-  //   );
+  const onSubmit = (data) => {
+    navigate(
+      `/${schoolid}/students/${data.SessionID}/${data.ExamID}/${data.SubClassID}/${data.userid}`
+    );
 
-  //   console.log(data, "data")
-  // };
-
-    const onSubmit = async (data) => {
-    try {
-      const result = await dispatch(
-        fetchResultFieldData({
-          schoolid,
-          SessionID: data.SessionID,
-          ExamID: data.ExamID,
-          SubClassID: data.SubClassID,
-          userid: data.userid,
-        })
-      ).unwrap();
-
-      if (result) {
-        navigate(
-          `/${schoolid}/students/${data.SessionID}/${data.ExamID}/${data.SubClassID}/${data.userid}`
-        );
-      }
-    } catch (error) {
-      toast.error("দুঃখিত, আপনার রেজাল্ট পাওয়া যায়নি!", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    }
+    console.log(data, "data")
   };
+
+  //   const onSubmit = async (data) => {
+  //   try {
+  //     const result = await dispatch(
+  //       fetchResultFieldData({
+  //         schoolid,
+  //         SessionID: data.SessionID,
+  //         ExamID: data.ExamID,
+  //         SubClassID: data.SubClassID,
+  //         userid: data.userid,
+  //       })
+  //     ).unwrap();
+
+  //     if (result) {
+  //       navigate(
+  //         `/${schoolid}/students/${data.SessionID}/${data.ExamID}/${data.SubClassID}/${data.userid}`
+  //       );
+  //     }
+  //   } catch (error) {
+  //     toast.error("দুঃখিত, আপনার রেজাল্ট পাওয়া যায়নি!", {
+  //       position: "top-center",
+  //       autoClose: 5000,
+  //       hideProgressBar: false,
+  //       closeOnClick: true,
+  //       pauseOnHover: true,
+  //       draggable: true,
+  //     });
+  //   }
+  // };
 
   /*if (resultStatus === 'failed') {
         console.log("==============");
