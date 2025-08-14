@@ -14,7 +14,6 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@reduxjs/toolkit": "^2.5.0",
-    "@tabler/icons-react": "^3.26.0",
     "@tawk.to/tawk-messenger-react": "^2.0.2",
     "animate.css": "^4.1.1",
     "apexcharts": "^4.4.0",
