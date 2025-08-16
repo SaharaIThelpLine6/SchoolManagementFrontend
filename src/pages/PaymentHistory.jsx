@@ -1,17 +1,11 @@
-import {
-  FaBars,
-  FaBoxOpen,
-  FaCreditCard,
-  FaGlobe,
-  FaTicketAlt,
-} from "react-icons/fa";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useGetPaymentHistoryQuery } from "../features/payment/paymentSlice";
 import PaymentHistoryInvoiceTable from "../view/payment/payment-history/PaymentHistoryInvoiceTable";
 import PaymentHistoryInvoice from "../view/payment/payment-history/PaymentHistoryInvoice";
 import Button from "../components/Button/Button";
 import useTranslate from "../utils/Translate";
 import Loading from "../components/Loading/Loading";
+import SvgIcon from "../components/icons/SvgIcon";
 
 const PaymentHistory = () => {
   const translate = useTranslate();
@@ -27,28 +21,28 @@ const PaymentHistory = () => {
       label: "INVOICES",
       count: paymentData?.length || 0,
       color: "border-blue-400",
-      icon: <FaCreditCard size={30} className="text-gray-400" />,
+      icon: <SvgIcon name={"FaCreditCard"} size={30} />,
       tab: "invoices",
     },
     {
       label: "SERVICES",
       count: 0,
       color: "border-green-400",
-      icon: <FaBoxOpen size={30} className="text-gray-400" />,
+      icon: <SvgIcon name={"FaBoxOpen"} size={30} />,
       tab: "services",
     },
     {
       label: "DOMAINS",
       count: 0,
       color: "border-purple-400",
-      icon: <FaGlobe size={30} className="text-gray-400" />,
+      icon: <SvgIcon name={"FaGlobe"} size={30} />,
       tab: "domains",
     },
     {
       label: "TICKETS",
       count: 0,
       color: "border-yellow-400",
-      icon: <FaTicketAlt size={30} className="text-gray-400" />,
+      icon: <SvgIcon name={"FaTicketAlt"} size={30} />,
       tab: "tickets",
     },
   ];

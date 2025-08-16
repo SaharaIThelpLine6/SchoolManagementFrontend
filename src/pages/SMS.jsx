@@ -124,25 +124,6 @@ const SMS = ({ pageTitle }) => {
       return;
     }
 
-    // Bangla and English regex (currently not enforced)
-    // const isBangla = /^[\u0980-\u09FF\s.,!?()'"“”‘’\-০-৯\n\r\t]*$/;
-    // const isEnglish = /^[A-Za-z0-9\s.,!?()'"“”‘’\-`\n\r\t]*$/;
-
-    // if (
-    //   (messageType === "bangla" && isBangla.test(val)) ||
-    //   (messageType === "english" && isEnglish.test(val))
-    // ) {
-    //   setMessage(val);
-    //   setErrorMessage("");
-    // } else {
-    //   setErrorMessage(
-    //     messageType === "bangla"
-    //       ? translate("Write only in Bengali.")
-    //       : translate("Write only in English.")
-    //   );
-    //   return;
-    // }
-
     // Default behavior (no language validation)
     setMessage(val);
     setErrorMessage("");
@@ -207,14 +188,6 @@ const SMS = ({ pageTitle }) => {
       dispatch(setSuccessAndErrorMessage(response.results));
 
       handleSuccessAndErrorOpenModal();
-
-      // Show success alert
-      // Swal.fire({
-      //   icon: "success",
-      //   title: translate("Success"),
-      //   text: translate("SMS sent successfully!"),
-      //   confirmButtonColor: "#3085d6",
-      // });
 
       // Reset form on success
       setMessage("");
@@ -353,13 +326,6 @@ const SMS = ({ pageTitle }) => {
                       onChange={handleMessageChange}
                       className="p-2 w-full rounded border-[1.5px] h-[100px] text-black outline-none text-[14px] transition border-stroke focus:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200"
                     />
-
-                    {/* Uncomment below to show error message */}
-                    {/* {errorMessage && (
-    <p className="text-red-500 text-sm mt-1">
-      {errorMessage}
-    </p>
-  )} */}
                   </div>
 
                   {/* Character/SMS Counter */}

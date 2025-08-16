@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import { FaScissors } from "react-icons/fa6";
+import { useEffect, useState } from "react";
 import { useGetStudentsVacationListQuery } from "../../features/student/studentQuerySlice";
 import {
   enToBnNumber,
@@ -12,6 +11,7 @@ import { useGetInstitutionInfoQuery } from "../../features/settings/settingsQuer
 import { Buffer } from "buffer";
 import Swal from "sweetalert2";
 import { useSelector } from "react-redux";
+import SvgIcon from "../icons/SvgIcon";
 
 const Print = ({ id }) => {
   const currentPage = 1;
@@ -86,7 +86,10 @@ const Print = ({ id }) => {
   const banglaVacationDays = enToBnNumber(vacationDays);
 
   const studentInfo = [
-    { label: "শিক্ষার্থীর নাম", value: bnBijoy2Unicode(matchedData?.User.UserName) || " " },
+    {
+      label: "শিক্ষার্থীর নাম",
+      value: bnBijoy2Unicode(matchedData?.User.UserName) || " ",
+    },
     { label: "গেইট পাস নং", value: enToBnNumber(matchedData?.ID || "") },
     {
       label: "পিতার নাম",
@@ -206,7 +209,8 @@ const Print = ({ id }) => {
 
       {/* Cut Line & Office Copy */}
       <div className="flex items-center my-4">
-        <FaScissors className="mr-2" />
+        <SvgIcon name="FaScissors" size={16} className="mr-2" />
+
         <div className="flex-grow border-t border-dashed border-black"></div>
       </div>
 

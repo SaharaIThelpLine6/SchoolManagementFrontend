@@ -1,9 +1,6 @@
 import PropTypes from "prop-types";
 import { useState, useCallback, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { IoReorderThreeOutline } from "react-icons/io5";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import { FaSearch } from "react-icons/fa";
 import { toggleSidebar } from "../../features/sidebar/sideBarSlice";
 import { showModal } from "../../utils/ModalControlar";
 import TranslateButton from "../../components/Header/TranslateButton";
@@ -18,6 +15,7 @@ import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
 import Button from "../Button/Button";
 import useTranslate from "../../utils/Translate";
+import SvgIcon from "../icons/SvgIcon";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -69,7 +67,10 @@ const Header = () => {
           onClick={() => dispatch(toggleSidebar())}
           className="text-2xl text-gray-700"
         >
-          <IoReorderThreeOutline />
+          <SvgIcon
+            name={"IoReorderThreeOutline"}
+            size={20}
+          />
         </button>
 
         <div className="ml-16 sm:ml-0">
@@ -88,7 +89,10 @@ const Header = () => {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="text-xl text-gray-700"
           >
-            <BsThreeDotsVertical />
+            <SvgIcon
+              name={"BsThreeDotsVertical"}
+              size={20}
+            />
           </button>
         </div>
       </div>
@@ -106,12 +110,24 @@ const Header = () => {
             <h2 className="text-center text-base font-semibold text-gray-800">
               {bnBijoy2Unicode(institutionInfo?.InstitutionName) || ""}
             </h2>
-            <form className="w-full relative">
-              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+            <form className="w-full relative max-w-[250px]">
+              <svg
+                stroke="currentColor"
+                fill="currentColor"
+                strokeWidth="0"
+                viewBox="0 0 512 512"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
+                height="20"
+                width="20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z" />
+              </svg>
+
               <input
                 type="text"
                 placeholder="Search"
-                className="w-full rounded-full bg-[#EDEDED] h-9 pl-10 pr-4 text-sm placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00aeef]"
+                className="w-full rounded-full bg-[#EDEDED] h-9 pl-10 pr-4 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00aeef]"
               />
             </form>
 
@@ -194,11 +210,23 @@ const Header = () => {
           </h2>
 
           <form className="w-full max-w-[180px] sm:max-w-[220px] md:max-w-[250px] relative">
-            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm sm:text-base" />
+            <svg
+              stroke="currentColor"
+              fill="currentColor"
+              strokeWidth="0"
+              viewBox="0 0 512 512"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm sm:text-base"
+              height="18"
+              width="18"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z" />
+            </svg>
+
             <input
               type="text"
               placeholder="Search"
-              className="w-full rounded-full bg-[#EDEDED] h-8 sm:h-9 pl-10 pr-4 py-2 text-sm sm:text-base placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-custom-focus transition-colors"
+              className="w-full rounded-full bg-[#EDEDED] h-8 sm:h-9 pl-10 pr-4 py-2 text-sm sm:text-base placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-custom-focus transition-colors"
             />
           </form>
         </div>

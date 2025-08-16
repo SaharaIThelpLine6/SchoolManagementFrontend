@@ -1,29 +1,26 @@
-import React from 'react';
-import useTranslate from '../utils/Translate';
-import { FiFileText } from 'react-icons/fi';
+import useTranslate from "../utils/Translate";
+import SvgIcon from "./icons/SvgIcon";
 
-const EmptyState = ({ 
-  message, 
-  className = '', 
+const EmptyState = ({
+  message,
+  className = "",
   iconSize = 48,
-  iconColor = 'text-gray-400',
+  iconColor = "text-gray-400",
   buttonText,
-  onButtonClick 
+  onButtonClick,
 }) => {
   const translate = useTranslate();
 
   return (
-    <div className={`flex flex-col items-center justify-center py-12 px-4 text-center ${className}`}>
-      <FiFileText 
-        className={`w-12 h-12 ${iconColor} mb-4`} 
-        size={iconSize}
-        aria-hidden="true"
-      />
+    <div
+      className={`flex flex-col items-center justify-center py-12 px-4 text-center ${className}`}
+    >
+      <SvgIcon name={"FiFileText"} size={iconSize} className={iconColor} />
       <h3 className="text-lg font-medium text-gray-700 mb-2 font-SolaimanLipi">
-        {message || translate('No data available')}
+        {message || translate("No data available")}
       </h3>
       <p className="text-gray-500 mb-6 max-w-md font-SolaimanLipi">
-        {translate('There are currently no items to display.')}
+        {translate("There are currently no items to display.")}
       </p>
       {buttonText && (
         <button

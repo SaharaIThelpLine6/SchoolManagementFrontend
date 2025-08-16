@@ -4,11 +4,7 @@ import { setPageName } from "../../../features/auth/authSlice";
 import { useLocation } from "react-router-dom";
 import useTranslate from "../../../utils/Translate";
 import { showModal } from "../../../utils/ModalControlar";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
+
 import Button from "../../../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
@@ -21,8 +17,8 @@ import { useGetClassListQuery } from "../../../features/class/classQuerySlice";
 import Swal from "sweetalert2";
 import SortableTable from "../../../components/Tables/SortableTable";
 import { useGetDesignationQuery } from "../../../features/teachers/teachersSlice";
-import { FiEdit } from "react-icons/fi";
 import DatePickerOne from "../../../components/Forms/DatePicker/DatePickerOne";
+import DefaultPagination from "../../../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 10;
 
@@ -149,7 +145,8 @@ const Statement = ({ pageTitle }) => {
       title: translate("ক্রেডিট"),
       field: "Designation",
       hozAlign: "center",
-    },{
+    },
+    {
       title: translate("UFODID"),
       field: "Designation",
       hozAlign: "center",
@@ -281,25 +278,11 @@ const Statement = ({ pageTitle }) => {
           <div className="text-gray-600">
             মোট রেকর্ড: <span className="font-bold">125</span>
           </div>
-          <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">
-            <button
-              className="p-1 border rounded-full disabled:opacity-50 hover:bg-gray-100 transition-colors"
-              onClick={handlePrev}
-              disabled={currentPage === 1}
-            >
-              <MdKeyboardArrowLeft size={24} className="text-blue-600" />
-            </button>
-            <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full font-medium">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              className="p-1 border rounded-full disabled:opacity-50 hover:bg-gray-100 transition-colors"
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-            >
-              <MdKeyboardArrowRight size={24} className="text-blue-600" />
-            </button>
-          </div>
+          <DefaultPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
       </FormProvider>
     </div>

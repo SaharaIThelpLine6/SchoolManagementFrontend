@@ -1,7 +1,6 @@
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FormProvider, useForm } from "react-hook-form";
-import { TbFilterPlus } from "react-icons/tb";
 import Swal from "sweetalert2";
 
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
@@ -21,6 +20,7 @@ import { showModal } from "../../../utils/ModalControlar";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetClassListQuery } from "../../../features/class/classQuerySlice";
 import useTranslate from "../../../utils/Translate";
+import SvgIcon from "../../../components/icons/SvgIcon";
 
 const CreateCertificateAttestation = ({ onBack }) => {
   const dispatch = useDispatch();
@@ -115,7 +115,7 @@ const CreateCertificateAttestation = ({ onBack }) => {
       await postCertificate(certificateData).unwrap();
       Swal.fire("সফল", "সার্টিফিকেট সফলভাবে তৈরি হয়েছে", "success");
       if (onBack) onBack();
-     dispatch(setFilteredStudent(null));
+      dispatch(setFilteredStudent(null));
       reset();
     } catch (error) {
       Swal.fire("ত্রুটি", "কোনো একটি সমস্যা হয়েছে", "error");
@@ -133,7 +133,7 @@ const CreateCertificateAttestation = ({ onBack }) => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <h2 className="text-lg md:text-xl font-semibold font-SolaimanLipi">
-           {translate("Create new certificate")}
+            {translate("Create new certificate")}
           </h2>
           {onBack && (
             <Button
@@ -174,7 +174,7 @@ const CreateCertificateAttestation = ({ onBack }) => {
                     onClick={handleOpenModal}
                     className="pr-2"
                   >
-                    <TbFilterPlus size={30} />
+                    <SvgIcon name={"TbFilterPlus"} size={30} />
                   </button>
                 </div>
                 {showSuggestions && (
@@ -203,26 +203,26 @@ const CreateCertificateAttestation = ({ onBack }) => {
               disable={true}
             />
             <DefaultInput
-              label={translate("Name")+ " :"}
+              label={translate("Name") + " :"}
               type="text"
               registerKey="name"
               disable={true}
             />
             <DefaultInput
-              label={translate("Father Name")+ " :"}
+              label={translate("Father Name") + " :"}
               type="text"
               registerKey="fatherName"
               disable={true}
             />
             <DefaultInput
-              label={translate("Mother Name")+ " :"}
+              label={translate("Mother Name") + " :"}
               type="text"
               registerKey="motherName"
               disable={true}
             />
             <div className="md:col-span-2">
               <Textarea
-                label={translate("Address")+ " :"}
+                label={translate("Address") + " :"}
                 placeholder="ঠিকানা লিখুন"
                 registerKey="description"
                 require={true}

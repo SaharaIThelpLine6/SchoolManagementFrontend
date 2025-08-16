@@ -3,12 +3,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-import { FiDelete, FiEdit } from "react-icons/fi";
-import { MdDelete, MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 import useTranslate from "../utils/Translate";
 import DefaultSelect from "../components/Forms/DefaultSelect";
-import Button from "../components/Button/Button";
 import Loading from "../components/Loading/Loading";
 import SortableTable from "../components/Tables/SortableTable";
 import { showModal } from "../utils/ModalControlar";
@@ -20,6 +17,8 @@ import {
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
 import { useGetExamNamesQuery } from "../features/exam/examQuerySlice";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
+import DeleteButton from "../components/Button/DeleteButton";
 
 const PAGE_SIZE = 10;
 
@@ -120,13 +119,6 @@ const DoubleStudentD = ({ pageTitle }) => {
     [deleteDesignation]
   );
 
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   // Table columns
   const columns = [
@@ -135,13 +127,7 @@ const DoubleStudentD = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
-            title="delete"
-            onClick={() => handleEditOpenModal(row.DNID)}
-          >
-            <MdDelete className="w-5 h-5" />
-          </button>
+          <DeleteButton onClick={() => handleEditOpenModal(row.DNID)} />
         </div>
       ),
     },
@@ -207,29 +193,11 @@ const DoubleStudentD = ({ pageTitle }) => {
 
         <SortableTable columns={columns} data={paginatedData} />
 
-        <div className="flex justify-center items-center gap-4 mt-4">
-          <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50 hover:bg-gray-400 transition-colors"
-          >
-            <MdKeyboardArrowLeft className="text-lg" />
-            Prev
-          </button>
-
-          <span className="text-sm font-medium text-gray-700">
-            Page {currentPage} of {totalPages}
-          </span>
-
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50 hover:bg-gray-400 transition-colors"
-          >
-            Next
-            <MdKeyboardArrowRight className="text-lg" />
-          </button>
-        </div>
+        <DefaultPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

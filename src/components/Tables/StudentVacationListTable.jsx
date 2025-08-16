@@ -3,22 +3,20 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPageName } from "../../features/auth/authSlice";
 import SortableTable from "../../components/Tables/SortableTable";
 import Swal from "sweetalert2";
-import { FiEdit } from "react-icons/fi";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
-import { PiPrinterFill } from "react-icons/pi";
+
 import useTranslate from "../../utils/Translate";
 import { showModal } from "../../utils/ModalControlar";
-import LoadingComponent from "../../components/Loading/Loading";
 import { useGetStudentsVacationListQuery } from "../../features/student/studentQuerySlice";
 import Button from "../Button/Button";
 import Print from "./Print";
 import { formatTime } from "../../helper/formatTime";
 import { fetchSettingsData } from "../../features/settings/settingsSlice";
 import bnBijoy2Unicode from "../../utils/conveter";
+import EditButton from "../Button/EditButton";
+import DeleteButton from "../Button/DeleteButton";
+import Loading from "../../components/Loading/Loading";
+import SvgIcon from "../icons/SvgIcon";
+import DefaultPagination from "../Pagination/DefaultPagination";
 
 const StudentVacationListTable = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -69,29 +67,18 @@ const StudentVacationListTable = ({ pageTitle }) => {
     };
   }, [getStudentsVacationList, academicSession]);
 
-  // Pagination handlers
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
-  
   // Function to handle print button click
   const handlePrint = useCallback((id) => {
     setPrintID(id);
     setShouldPrint(true);
   }, []);
 
-  
   useEffect(() => {
     if (shouldPrint && printID !== null) {
-    
       const timer = setTimeout(() => {
         window.print();
-        setShouldPrint(false); 
-      }, 300); 
+        setShouldPrint(false);
+      }, 300);
 
       return () => clearTimeout(timer);
     }
@@ -152,7 +139,7 @@ const StudentVacationListTable = ({ pageTitle }) => {
     [translate]
   );
 
-  if (isStudentsVacationListLoading) return <LoadingComponent />;
+  if (isStudentsVacationListLoading) return <Loading />;
 
   if (studentsVacationListError) {
     Swal.fire({
@@ -172,26 +159,15 @@ const StudentVacationListTable = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
-            title={translate("Delete")}
-            onClick={() => handleDelete(row.ID)}
-          >
-            <MdDelete className="w-5 h-5" />
-          </button>
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title={translate("Edit")}
-            onClick={() => handleEditOpenModal(row.ID)}
-          >
-            <FiEdit className="w-5 h-5" />
-          </button>
+          <EditButton onClick={() => handleEditOpenModal(row.ID)} />
+          <DeleteButton onClick={() => handleDelete(row.ID)} />
+
           <button
             className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md"
             title={translate("Print")}
             onClick={() => handlePrint(row.ID)}
           >
-            <PiPrinterFill className="w-5 h-5" />
+            <SvgIcon name={"MdLocalPrintshop"} size={20} />
           </button>
         </div>
       ),
@@ -210,7 +186,6 @@ const StudentVacationListTable = ({ pageTitle }) => {
       filterable: true,
       type: "text",
       render: (row) => <p>{bnBijoy2Unicode(row.UserName)}</p>,
-
     },
     {
       title: translate("Class/Jamaat"),
@@ -306,29 +281,11 @@ const StudentVacationListTable = ({ pageTitle }) => {
 
           <SortableTable columns={columns} data={processedData} />
 
-          <div className="flex justify-center items-center gap-4 mt-4">
-            <button
-              onClick={handlePrev}
-              disabled={currentPage === 1}
-              className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-            >
-              <MdKeyboardArrowLeft className="text-lg" />
-              {translate("Prev")}
-            </button>
-
-            <span className="text-sm font-medium text-gray-700">
-              {translate("Page")} {currentPage} {translate("of")} {totalPages}
-            </span>
-
-            <button
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-              className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-            >
-              {translate("Next")}
-              <MdKeyboardArrowRight className="text-lg" />
-            </button>
-          </div>
+          <DefaultPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </div>
       </div>
       {printID && (

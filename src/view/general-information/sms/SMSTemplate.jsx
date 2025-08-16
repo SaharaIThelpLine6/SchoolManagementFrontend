@@ -1,23 +1,15 @@
-import React from "react";
 import { useState, useMemo, useCallback } from "react";
 import { useDispatch } from "react-redux";
-import { useGetDesignationQuery } from "../../../features/teachers/teachersSlice";
 import SortableTable from "../../../components/Tables/SortableTable";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
 import useTranslate from "../../../utils/Translate";
-import { FiEdit } from "react-icons/fi";
 import Swal from "sweetalert2";
 import Button from "../../../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import DefaultInput from "../../../components/Forms/DefaultInput";
 import { useGetSMSTemplatesQuery } from "../../../features/sms/smsSlice";
-import { IoIosAddCircle } from "react-icons/io";
 import { setAddSMSTemplate } from "../../../features/sms/smsReducersSlice";
 import { hideModal } from "../../../utils/ModalControlar";
+import SvgIcon from "../../../components/icons/SvgIcon";
 
 const PAGE_SIZE = 10;
 
@@ -73,10 +65,10 @@ const SMSTemplate = ({ pageTitle, checkedValue }) => {
   };
 
   const handleAddSMSTemplate = (data) => {
-    dispatch(setAddSMSTemplate(data))
+    dispatch(setAddSMSTemplate(data));
 
-    hideModal()
-  }
+    hideModal();
+  };
 
   const columns = [
     {
@@ -103,18 +95,20 @@ const SMSTemplate = ({ pageTitle, checkedValue }) => {
             title="Delete"
             onClick={() => handleAddSMSTemplate(row.Message)}
           >
-            <IoIosAddCircle className="w-5 h-5" />
+            <SvgIcon name={"IoIosAddCircle"} size={20} />
           </button>
         </div>
       ),
     },
     { title: translate("Name"), field: "Name", hozAlign: "center" },
-{
-  title: translate("Message"),
-  field: "Message",
-  hozAlign: "center",
-  render: (row) => <div class="h-[50px] w-[200px] overflow-auto">${row.Message}</div>,
-},
+    {
+      title: translate("Message"),
+      field: "Message",
+      hozAlign: "center",
+      render: (row) => (
+        <div class="h-[50px] w-[200px] overflow-auto">${row.Message}</div>
+      ),
+    },
   ];
 
   const onSubmit = async (data) => {};
@@ -161,7 +155,7 @@ const SMSTemplate = ({ pageTitle, checkedValue }) => {
             disabled={currentPage === 1}
             className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
           >
-            <MdKeyboardArrowLeft className="text-lg" />
+            <SvgIcon name={"MdKeyboardArrowLeft"} size={18} />
             Prev
           </button>
 
@@ -175,7 +169,7 @@ const SMSTemplate = ({ pageTitle, checkedValue }) => {
             className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
           >
             Next
-            <MdKeyboardArrowRight className="text-lg" />
+            <SvgIcon name={"MdKeyboardArrowRight"} size={18} />
           </button>
         </div>
       </div>

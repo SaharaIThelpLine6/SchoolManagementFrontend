@@ -413,35 +413,7 @@ const router = createBrowserRouter([
               },
             ],
           },
-          {
-            path: "darul-ikama",
-            children: [
-              {
-                index: true,
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.certificate}
-                  >
-                    <CharacterReport pageTitle="Character Report" />
-                  </RequirePermission>
-                ),
-              },
-              {
-                path: "vacation",
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.gate_pass_leave}
-                  >
-                    <StudentVacationListTable pageTitle="Type of Vacation" />
-                  </RequirePermission>
-                ),
-              },
-            ],
-          },
-          {
-            path: "/payment_confirm/:schoolid/:service/:size",
-            element: <PaymentConfirm />,
-          },
+       
           {
             path: "result",
             children: [
@@ -483,6 +455,31 @@ const router = createBrowserRouter([
                     permissionId={permissionsDataList.marksheet}
                   >
                     <PointBasedMarkSheet pageTitle="Point Based Mark Sheet" />
+                  </RequirePermission>
+                ),
+              },
+            ],
+          },
+           {
+            path: "darul-ikama",
+            children: [
+              {
+                index: true,
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.certificate}
+                  >
+                    <CharacterReport pageTitle="Character Report" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: "vacation",
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.gate_pass_leave}
+                  >
+                    <StudentVacationListTable pageTitle="Type of Vacation" />
                   </RequirePermission>
                 ),
               },
@@ -562,6 +559,10 @@ const router = createBrowserRouter([
                 ),
               },
             ],
+          },
+             {
+            path: "/payment_confirm/:schoolid/:service/:size",
+            element: <PaymentConfirm />,
           },
           {
             path: "payment-history",

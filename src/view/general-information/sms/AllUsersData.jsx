@@ -3,11 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPageName } from "../../../features/auth/authSlice";
 import Loading from "../../../components/Loading/Loading";
 import SortableTable from "../../../components/Tables/SortableTable";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
 import useTranslate from "../../../utils/Translate";
 import Swal from "sweetalert2";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
@@ -20,6 +15,7 @@ import {
 } from "../../../features/student/studentSlice";
 import { isEqual } from "lodash";
 import { useGetUserReportQuery } from "../../../features/userReports/userReportsSlice";
+import SvgIcon from "../../../components/icons/SvgIcon";
 
 const PAGE_SIZE = 5;
 
@@ -130,7 +126,7 @@ const AllUsersData = ({ pageTitle }) => {
             title={translate("Delete")}
             onClick={() => handleDelete(row.UserCode)}
           >
-            <MdDelete className="w-5 h-5" />
+            <SvgIcon name={"FaTrash"} size={20} />
           </button>
         </div>
       ),
@@ -177,7 +173,8 @@ const AllUsersData = ({ pageTitle }) => {
             disabled={currentPage === 1}
             className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
           >
-            <MdKeyboardArrowLeft className="text-lg" />
+            <SvgIcon name={"MdKeyboardArrowLeft"} size={18} />
+
             {translate("Prev")}
           </button>
 
@@ -191,7 +188,7 @@ const AllUsersData = ({ pageTitle }) => {
             className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
           >
             {translate("Next")}
-            <MdKeyboardArrowRight className="text-lg" />
+            <SvgIcon name={"MdKeyboardArrowRight"} size={18} />
           </button>
         </div>
       </div>

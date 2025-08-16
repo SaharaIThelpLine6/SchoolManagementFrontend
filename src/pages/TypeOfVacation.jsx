@@ -7,17 +7,14 @@ import useTranslate from "../utils/Translate";
 import { showModal } from "../utils/ModalControlar";
 import Swal from "sweetalert2";
 import Loading from "../components/Loading/Loading";
-import { FiEdit } from "react-icons/fi";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
+
 import Button from "../components/Button/Button";
 import {
   useGetStudentsVacationTypeListQuery,
   useDeleteStudentsVacationTypeMutation,
 } from "../features/student/studentQuerySlice";
+import EditButton from "../components/Button/EditButton";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 10;
 
@@ -120,14 +117,8 @@ const TypeOfVacation = ({ pageTitle }) => {
           >
             <MdDelete className="w-5 h-5" />
           </button> */}
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title="Edit"
-            onClick={() => handleEditOpenModal(row.ID)}
-            disabled={isDeleteLoading}
-          >
-            <FiEdit className="w-5 h-5" />
-          </button>
+
+          <EditButton onClick={() => handleEditOpenModal(row.ID)} />
         </div>
       ),
     },
@@ -152,9 +143,7 @@ const TypeOfVacation = ({ pageTitle }) => {
           <h3 className="font-SolaimanLipi text-[20px] font-bold">
             {translate("Vacation type list")}
           </h3>
-          <Button
-            onClick={() => handleOpenModal()}
-          >
+          <Button onClick={() => handleOpenModal()}>
             {translate("Create type")}
           </Button>
         </div>
@@ -162,29 +151,12 @@ const TypeOfVacation = ({ pageTitle }) => {
         <SortableTable columns={columnsVacationType} data={paginatedData} />
 
         {/* Pagination Controls */}
-        <div className="flex justify-center items-center gap-4 mt-4">
-          <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-          >
-            <MdKeyboardArrowLeft className="text-lg" />
-            Prev
-          </button>
 
-          <span className="text-sm font-medium text-gray-700">
-            Page {currentPage} of {totalPages}
-          </span>
-
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-          >
-            Next
-            <MdKeyboardArrowRight className="text-lg" />
-          </button>
-        </div>
+        <DefaultPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

@@ -2,12 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
-import { FaRegEdit } from "react-icons/fa";
+
 import { setPageName } from "../features/auth/authSlice";
 import useTranslate from "../utils/Translate";
 import bnBijoy2Unicode from "../utils/conveter";
@@ -28,10 +23,12 @@ import {
   useGetTransactionOrdersQuery,
   usePostInComeExpenseMutation,
 } from "../features/feeCollection/feeCollectionSlice";
-import { GrDrag } from "react-icons/gr";
-import { showModal } from "../utils/ModalControlar";
 import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
 import BanglaDatePicker from "../components/Forms/DatePicker/BanglaDatePicker";
+import EditButton from "../components/Button/EditButton";
+import DeleteButton from "../components/Button/DeleteButton";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
+import SvgIcon from "../components/icons/SvgIcon";
 
 const PAGE_SIZE = 10;
 
@@ -309,27 +306,18 @@ const DepositCosts = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            onClick={() => handleDelete(row.OrderID)}
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors duration-200 flex items-center justify-center"
-            title={translate("Delete")}
-          >
-            <MdDelete className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => handleEdit(row.OrderID)}
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors duration-200 flex items-center justify-center"
-            title={translate("Edit")}
-          >
-            <FaRegEdit className="w-4 h-4" />
-          </button>
+          <EditButton onClick={() => handleEdit(row.OrderID)} />
+          <DeleteButton onClick={() => handleDelete(row.OrderID)} />
         </div>
       ),
     },
     {
       title: (
         <div className="flex items-center justify-center gap-1">
-          <GrDrag />
+            <SvgIcon
+              name={"GrDrag"}
+              size={16}
+            />
         </div>
       ),
       hozAlign: "center",
@@ -364,26 +352,19 @@ const DepositCosts = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            onClick={() => handleDeleteDefaultData(row.SL)}
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors duration-200 flex items-center justify-center"
-            title="Delete"
-          >
-            <MdDelete className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => handleEditOpenModalDefaultData(row.SL)}
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors duration-200 flex items-center justify-center"
-          >
-            <FaRegEdit className="w-4 h-4" />
-          </button>
+          
+          <EditButton onClick={() => handleEditOpenModalDefaultData(row.SL)}/>
+          <DeleteButton   onClick={() => handleDeleteDefaultData(row.SL)}/>
         </div>
       ),
     },
     {
       title: (
         <div className="flex items-center justify-center gap-1">
-          <GrDrag />
+        <SvgIcon
+              name={"GrDrag"}
+              size={16}
+            />
         </div>
       ),
       hozAlign: "center",
@@ -646,27 +627,11 @@ const DepositCosts = ({ pageTitle }) => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4">
-        <div className="flex items-center space-x-2">
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-          >
-            <MdKeyboardArrowLeft size={24} />
-          </button>
-          <span className="text-sm md:text-base">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-          >
-            <MdKeyboardArrowRight size={24} />
-          </button>
-        </div>
-      </div>
+      <DefaultPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

@@ -3,13 +3,6 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-import {
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-  MdPrint,
-} from "react-icons/md";
-import { FiEdit } from "react-icons/fi";
-
 import { setPageName } from "../features/auth/authSlice";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
@@ -29,6 +22,9 @@ import {
   useGetExamListQuery,
   useUpdateExamListStatusUpdateMutation,
 } from "../features/result/resultSilce";
+import EditButton from "../components/Button/EditButton";
+import SvgIcon from "../components/icons/SvgIcon";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 10;
 
@@ -72,14 +68,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return examListData?.slice(start, start + PAGE_SIZE) || [];
   }, [examListData, currentPage]);
-
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
@@ -218,17 +206,13 @@ const PointBasedResultEntry = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title="Edit"
+          <EditButton
             onClick={() =>
               navigate(
                 `/result/${row?.ID}?session_id=${row?.SessionID}&exam_id=${row?.ExamID}&subclass_id=${row?.SubClassID}`
               )
             }
-          >
-            <FiEdit className="w-5 h-5" />
-          </button>
+          />
           <button
             className="p-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md flex items-center gap-1"
             title="Print"
@@ -238,7 +222,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               )
             }
           >
-            <MdPrint className="w-5 h-5 text-white" />
+            <SvgIcon name={"MdLocalPrintshop"} size={20} />
           </button>
         </div>
       ),
@@ -300,27 +284,11 @@ const PointBasedResultEntry = ({ pageTitle }) => {
         )}
       </div>
 
-      <div className="flex justify-center items-center mt-4">
-        <div className="flex items-center space-x-2">
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-          >
-            <MdKeyboardArrowLeft size={24} />
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-          >
-            <MdKeyboardArrowRight size={24} />
-          </button>
-        </div>
-      </div>
+      <DefaultPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

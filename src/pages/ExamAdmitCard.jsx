@@ -4,7 +4,6 @@ import { FormProvider, useForm } from "react-hook-form";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import DefaultInput from "../components/Forms/DefaultInput";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
-import { IoMdSettings } from "react-icons/io";
 import { useCallback } from "react";
 import { showModal } from "../utils/ModalControlar";
 import RadioOption from "../components/Radio/RadioOption";
@@ -16,6 +15,7 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import AdmitCardRenderer from "../components/AdmitCardRenderer";
 import AdmitCardRendererColor from "../components/AdmitCardRendererColor";
 import Swal from "sweetalert2";
+import SvgIcon from "../components/icons/SvgIcon";
 
 const ExamAdmitCard = () => {
   const translate = useTranslate();
@@ -105,7 +105,12 @@ const ExamAdmitCard = () => {
             aria-label="Settings"
             onClick={handleOpenModal}
           >
-            <IoMdSettings className="text-2xl text-gray-700" />
+              <SvgIcon
+              name={"IoMdSettings"}
+              size={20}
+              className="text-2xl text-gray-700"
+            />
+
           </button>
         </div>
 

@@ -5,7 +5,6 @@ import SortableTable from "../components/Tables/SortableTable";
 import { useLocation } from "react-router-dom";
 import useTranslate from "../utils/Translate";
 import Loading from "../components/Loading/Loading";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import {
   useGetStudentBySearchQuery,
   useGetStudentsVacationTypeListQuery,
@@ -18,6 +17,7 @@ import { fetchSettingsData } from "../features/settings/settingsSlice";
 import Button from "../components/Button/Button";
 import { toast } from "react-toastify";
 import * as XLSX from "xlsx";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 10;
 
@@ -247,13 +247,7 @@ const DataExport = ({ pageTitle }) => {
     return filteredStudentData.slice(start, start + PAGE_SIZE);
   }, [filteredStudentData, currentPage]);
 
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
 
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   if (isSVTLoading || isSearchLoading) return <Loading />;
   if (isSVTError || settingsError)
@@ -405,27 +399,11 @@ const DataExport = ({ pageTitle }) => {
                   </div>
 
                   {/* Pagination */}
-                  <div className="flex justify-between items-center">
-                    <button
-                      onClick={handlePrev}
-                      disabled={currentPage === 1}
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <MdKeyboardArrowLeft className="text-xl" />
-                      Previous
-                    </button>
-                    <span className="text-sm font-medium text-gray-700">
-                      Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                      onClick={handleNext}
-                      disabled={currentPage === totalPages}
-                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Next
-                      <MdKeyboardArrowRight className="text-xl" />
-                    </button>
-                  </div>
+                  <DefaultPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg">

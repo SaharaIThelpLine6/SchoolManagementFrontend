@@ -14,13 +14,10 @@ import {
 } from "../features/result/resultSilce";
 import Loading from "../components/Loading/Loading";
 import SortableTable from "../components/Tables/SortableTable";
-import {
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-  MdPrint,
-} from "react-icons/md";
 import bnBijoy2Unicode from "../utils/conveter";
 import Swal from "sweetalert2";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
+import SvgIcon from "../components/icons/SvgIcon";
 
 const PAGE_SIZE = 10;
 
@@ -90,22 +87,22 @@ const PointBasedMarkSheet = ({ pageTitle }) => {
     { skip: !printAll }
   );
 
-  console.log(userResultData, "userResultData")
+  console.log(userResultData, "userResultData");
 
-useEffect(() => {
-  if (isLoading) return;
+  useEffect(() => {
+    if (isLoading) return;
 
-  if (error || !userResultData || userResultData.examList?.length === 0) {
-    Swal.fire({  
-      title: 'Data Not Found',
-      text: 'The requested result data could not be found.',
-      icon: 'error',
-      confirmButtonText: 'OK'
-    }).then(() => {
-      navigate("/result");
-    });
-  }
-}, [userResultData, isLoading, error, navigate]);
+    if (error || !userResultData || userResultData.examList?.length === 0) {
+      Swal.fire({
+        title: "Data Not Found",
+        text: "The requested result data could not be found.",
+        icon: "error",
+        confirmButtonText: "OK",
+      }).then(() => {
+        navigate("/result");
+      });
+    }
+  }, [userResultData, isLoading, error, navigate]);
 
   // Reset current page when filters or examList changes
   useEffect(() => {
@@ -214,7 +211,7 @@ useEffect(() => {
             title="Print"
             onClick={handlePrint(row)}
           >
-            <MdPrint className="w-5 h-5 text-white" />
+            <SvgIcon name={"MdLocalPrintshop"} size={20} />
           </button>
         </div>
       ),
@@ -286,27 +283,11 @@ useEffect(() => {
           )}
         </div>
 
-        <div className="flex justify-center items-center mt-4">
-          <div className="flex items-center space-x-2">
-            <button
-              className="p-1 border rounded disabled:opacity-50"
-              onClick={handlePrev}
-              disabled={currentPage === 1}
-            >
-              <MdKeyboardArrowLeft size={24} />
-            </button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              className="p-1 border rounded disabled:opacity-50"
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-            >
-              <MdKeyboardArrowRight size={24} />
-            </button>
-          </div>
-        </div>
+        <DefaultPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
 
       {/* Print Preview Section */}

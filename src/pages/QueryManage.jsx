@@ -5,7 +5,6 @@ import { useLocation } from "react-router-dom";
 import useTranslate from "../utils/Translate";
 import { useForm, FormProvider } from "react-hook-form";
 import Swal from "sweetalert2";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 import StudentFeeGroup from "../view/exam/StudentFeeGroup";
 import bnBijoy2Unicode from "../utils/conveter";

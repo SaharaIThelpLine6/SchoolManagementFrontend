@@ -2,11 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setPageName } from "../../../features/auth/authSlice";
 import useTranslate from "../../../utils/Translate";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
 import Button from "../../../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
@@ -14,7 +9,6 @@ import DefaultInput from "../../../components/Forms/DefaultInput";
 import { useGetAcademicSubjectsQuery } from "../../../features/class/classQuerySlice";
 import Swal from "sweetalert2";
 import SortableTable from "../../../components/Tables/SortableTable";
-import { FiEdit } from "react-icons/fi";
 import FilteringForm from "./FilteringForm";
 import {
   useGetAverageSubjectPassNumberQuery,
@@ -26,6 +20,9 @@ import ExamRoutingCheckbox from "../../../components/Checkboxes/ExamRoutingCheck
 import { skipToken } from "@reduxjs/toolkit/query";
 import bnBijoy2Unicode from "../../../utils/conveter";
 import Loading from "../../../components/Loading/Loading";
+import DefaultPagination from "../../../components/Pagination/DefaultPagination";
+import EditButton from "../../../components/Button/EditButton";
+import DeleteButton from "../../../components/Button/DeleteButton";
 
 const PAGE_SIZE = 10;
 
@@ -109,14 +106,6 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return averageSubjectPassNumberData.slice(start, start + PAGE_SIZE);
   }, [averageSubjectPassNumberData, currentPage]);
-
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   const handleEdit = (row) => {
     setEditingId(row.ID);
@@ -254,20 +243,8 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title="Edit"
-            onClick={() => handleEdit(row)}
-          >
-            <FiEdit className="w-5 h-5" />
-          </button>
-          <button
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
-            title="Delete"
-            onClick={() => handleDelete(row.ID)}
-          >
-            <MdDelete className="w-5 h-5" />
-          </button>
+          <EditButton onClick={() => handleEdit(row)} />
+          <DeleteButton onClick={() => handleDelete(row.ID)} />
         </div>
       ),
     },
@@ -425,7 +402,7 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
           />
 
           <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md shadow-sm transition-colors whitespace-nowrap">
-           {translate("Save")}
+            {translate("Save")}
           </button>
         </div>
       </div>
@@ -434,8 +411,7 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
       {/* Table Section */}
       <div className="mt-5">
         {isLoading || isFetching ? (
-              <Loading/>
-         
+          <Loading />
         ) : isError ? (
           <div className="flex flex-col items-center justify-center h-64 rounded-lg">
             <div className="text-center py-8 text-red-500">
@@ -452,29 +428,11 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
             />
 
             {totalPages > 1 && (
-              <div className="flex justify-center items-center mt-4">
-                <div className="flex items-center space-x-2">
-                  <button
-                    className="p-1 border rounded disabled:opacity-50"
-                    onClick={handlePrev}
-                    disabled={currentPage === 1 || isLoading || isFetching}
-                  >
-                    <MdKeyboardArrowLeft size={24} />
-                  </button>
-                  <span>
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <button
-                    className="p-1 border rounded disabled:opacity-50"
-                    onClick={handleNext}
-                    disabled={
-                      currentPage === totalPages || isLoading || isFetching
-                    }
-                  >
-                    <MdKeyboardArrowRight size={24} />
-                  </button>
-                </div>
-              </div>
+              <DefaultPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             )}
           </>
         ) : (

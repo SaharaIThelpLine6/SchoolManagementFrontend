@@ -3,13 +3,6 @@ import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
-import { FiEdit } from "react-icons/fi";
-import { FaPlus } from "react-icons/fa";
 
 import { setPageName } from "../features/auth/authSlice";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
@@ -32,6 +25,10 @@ import DefaultSelect from "../components/Forms/DefaultSelect";
 import Button from "../components/Button/Button";
 import StudentFeeGroup from "../view/exam/StudentFeeGroup";
 import { useGetNameOFExamFeeQuery } from "../features/feeCollection/feeCollectionSlice";
+import DeleteButton from "../components/Button/DeleteButton";
+import EditButton from "../components/Button/EditButton";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
+import SvgIcon from "../components/icons/SvgIcon";
 
 const PAGE_SIZE = 10;
 
@@ -67,14 +64,6 @@ const ExamFeeDetermine = ({ pageTitle }) => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
   }, [examFeeSettingData, currentPage]);
-
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
@@ -191,19 +180,8 @@ const ExamFeeDetermine = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title="Edit"
-            onClick={() => handleEdit(row)}
-          >
-            <FiEdit className="w-5 h-5" />
-          </button>
-          <button
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
-            onClick={() => handleDelete(row.ID)}
-          >
-            <MdDelete className="w-5 h-5" />
-          </button>
+          <EditButton onClick={() => handleEdit(row)} />
+          <DeleteButton onClick={() => handleDelete(row.ID)} />
         </div>
       ),
     },
@@ -300,7 +278,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                   onClick={handleShowStudentFeeGroup}
                   className="bg-[#EDEDED] mt-7 rounded-md py-3"
                 >
-                  <FaPlus />
+                  <SvgIcon name={"FaPlus"} size={14} />
                 </Button>
               </div>
               <DefaultInput registerKey="Fee" label={`${translate("Fee")}: `} />
@@ -345,27 +323,11 @@ const ExamFeeDetermine = ({ pageTitle }) => {
         )}
       </div>
 
-      <div className="flex justify-center items-center mt-4">
-        <div className="flex items-center space-x-2">
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-          >
-            <MdKeyboardArrowLeft size={24} />
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-          >
-            <MdKeyboardArrowRight size={24} />
-          </button>
-        </div>
-      </div>
+      <DefaultPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

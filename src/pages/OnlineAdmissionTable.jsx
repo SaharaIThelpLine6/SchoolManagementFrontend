@@ -5,15 +5,15 @@ import SortableTable from "../components/Tables/SortableTable";
 import { useLocation } from "react-router-dom";
 import useTranslate from "../utils/Translate";
 import Loading from "../components/Loading/Loading";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { useGetUsersOnlineRegInfoQuery } from "../features/student/studentQuerySlice";
 import DefaultSelect from "../components/Forms/DefaultSelect";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import Button from "../components/Button/Button";
 import DefaultInput from "../components/Forms/DefaultInput";
 import { useMemo } from "react";
 import bnBijoy2Unicode from "../utils/conveter";
 import OnlineAdmissionForm from "../view/students/admission/OnlineAdmissionForm";
+import SvgIcon from "../components/icons/SvgIcon";
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
@@ -113,8 +113,6 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
     setShowForm(false);
     setSelectedStudent(null);
   };
-
-
 
   if (isLoading) return <Loading />;
   if (isError) return <div className="text-red-500">Error loading data</div>;
@@ -307,7 +305,7 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
                     disabled={currentPage === 1}
                     className="flex items-center gap-1 px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <MdKeyboardArrowLeft className="text-lg" />
+                    <SvgIcon name={"MdKeyboardArrowLeft"} size={18} />
                     Previous
                   </button>
 
@@ -321,7 +319,7 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
                     className="flex items-center gap-1 px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Next
-                    <MdKeyboardArrowRight className="text-lg" />
+                    <SvgIcon name={"MdKeyboardArrowRight"} size={18} />
                   </button>
                 </div>
               </div>
@@ -329,9 +327,9 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
           </div>
         </FormProvider>
       ) : (
-        <OnlineAdmissionForm 
-          studentData={selectedStudent} 
-          onBack={handleBackToList} 
+        <OnlineAdmissionForm
+          studentData={selectedStudent}
+          onBack={handleBackToList}
         />
       )}
     </>

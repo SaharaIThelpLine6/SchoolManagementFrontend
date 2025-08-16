@@ -21,11 +21,10 @@ import bnBijoy2Unicode from "../../utils/conveter";
 import useTranslate from "../../utils/Translate";
 import Button from "../../components/Button/Button";
 import TimePicker from "../../components/Forms/DatePicker/TimePicker";
-import StudentVacationListTable from "../../components/Tables/StudentVacationListTable";
-import { FaPlus } from "react-icons/fa";
-import { NavLink, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { hideModal } from "../../utils/ModalControlar";
+import SvgIcon from "../icons/SvgIcon";
 const AddStudentVacationForm = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -342,7 +341,7 @@ const AddStudentVacationForm = ({ pageTitle }) => {
                   onClick={handleNavigate}
                   className="bg-[#EDEDED] mt-7 rounded-md py-3"
                 >
-                  <FaPlus />
+                  <SvgIcon name={"FaPlus"} size={14} />
                 </Button>
               </div>
               <DefaultSelect

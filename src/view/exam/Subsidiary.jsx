@@ -4,11 +4,7 @@ import { setPageName } from "../../features/auth/authSlice";
 import { useLocation } from "react-router-dom";
 import useTranslate from "../../utils/Translate";
 import { showModal } from "../../utils/ModalControlar";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
+
 import Button from "../../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import DefaultSelect from "../../components/Forms/DefaultSelect";
@@ -22,10 +18,11 @@ import { useGetClassListQuery } from "../../features/class/classQuerySlice";
 import bnBijoy2Unicode from "../../utils/conveter";
 import Swal from "sweetalert2";
 import DatePickerOne from "../../components/Forms/DatePicker/DatePickerOne";
-import { FaPlus } from "react-icons/fa";
 import SortableTable from "../../components/Tables/SortableTable";
 import { useGetDesignationQuery } from "../../features/teachers/teachersSlice";
-import { FiEdit } from "react-icons/fi";
+import DefaultPagination from "../../components/Pagination/DefaultPagination";
+import EditButton from "../../components/Button/EditButton";
+import DeleteButton from "../../components/Button/DeleteButton";
 
 const PAGE_SIZE = 10;
 
@@ -128,20 +125,11 @@ const Subsidiary = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title="Edit"
-            // onClick={() => handleEditOpenModal(row.DNID)}
-          >
-            <FiEdit className="w-5 h-5" />
-          </button>
-          <button
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
-            title="Delete"
-            onClick={() => handleDelete(row.DNID)}
-          >
-            <MdDelete className="w-5 h-5" />
-          </button>
+        
+          <EditButton
+           // onClick={() => handleEditOpenModal(row.DNID)}
+           />
+          <DeleteButton onClick={() => handleDelete(row.DNID)}/>
         </div>
       ),
     },
@@ -215,27 +203,11 @@ const Subsidiary = ({ pageTitle }) => {
         />
       </div>
 
-      <div className="flex justify-center items-center mt-4">
-        <div className="flex items-center space-x-2">
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-          >
-            <MdKeyboardArrowLeft size={24} />
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-          >
-            <MdKeyboardArrowRight size={24} />
-          </button>
-        </div>
-      </div>
+      <DefaultPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

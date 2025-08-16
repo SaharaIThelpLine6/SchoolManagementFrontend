@@ -1,11 +1,11 @@
-import { FaEdit, FaTrash } from "react-icons/fa";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import Fourdots from "../images/brand/four-dots-square.svg";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { useState } from "react";
 import DefaultInput from "../components/Forms/DefaultInput";
 
 import DefaultGray from "../components/Button/DefaultGray";
+import SvgIcon from "../components/icons/SvgIcon";
 
 const BookList = () => {
   const [submitData, setSubmitData] = useState([]);
@@ -123,10 +123,10 @@ const BookList = () => {
               {submitData.map((item, index) => (
                 <tr key={index} className="font-normal text-sm text-slate-500">
                   <td>
-                    <FaEdit />
+                    <SvgIcon name={"FaTrash"} size={16} />
                   </td>
                   <td>
-                    <FaTrash />
+                    <SvgIcon name={"FaTrash"} size={16} />
                   </td>
                   <td>{item.class}</td>
                   <td>{item.id}</td>
@@ -136,10 +136,10 @@ const BookList = () => {
               ))}
               <tr className="font-normal text-sm text-slate-600 ">
                 <td>
-                  <FaEdit />
+                  <SvgIcon name={"FaTrash"} size={16} />
                 </td>
                 <td>
-                  <FaTrash />
+                  <SvgIcon name={"FaTrash"} size={16} />
                 </td>
                 <td>Class 2</td>
                 <td>102</td>

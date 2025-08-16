@@ -1,8 +1,9 @@
-import { FaEdit, FaTrash } from "react-icons/fa";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import DefaultInput from "../components/Forms/DefaultInput";
 import DefaultGreen from "../components/Button/DefaultGreen";
 import { FormProvider, useForm } from "react-hook-form";
+import EditButton from "../components/Button/EditButton";
+import DeleteButton from "../components/Button/DeleteButton";
 
 const PayRole = () => {
   const methods = useForm();
@@ -78,17 +79,25 @@ const PayRole = () => {
                 <tr className="font-normal text-sm text-slate-800">
                   <td>১</td>
                   <td>মূল বেতন</td>
-                  <td className="flex gap-2 w-8 h-8">
-                    <FaEdit />
-                    <FaTrash />
+                  <td className="flex gap-2  py-2 px-2">
+                    <EditButton
+                    // onClick={() => ()}
+                    />{" "}
+                    <DeleteButton
+                    // onClick={() => ()}
+                    />
                   </td>
                 </tr>
                 <tr className="font-normal text-sm text-slate-800 ">
                   <td>২</td>
                   <td>চিকিৎসা ভাতা</td>
-                  <td className="flex gap-2 w-8 h-8">
-                    <FaEdit />
-                    <FaTrash />
+                  <td className="flex gap-2 py-2 px-2">
+                    <EditButton
+                    // onClick={() => ()}
+                    />{" "}
+                    <DeleteButton
+                    // onClick={() => ()}
+                    />
                   </td>
                 </tr>
               </tbody>

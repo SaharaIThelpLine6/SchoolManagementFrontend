@@ -1,13 +1,10 @@
-import React, { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FormProvider, useForm } from "react-hook-form";
-import { TbFilterPlus } from "react-icons/tb";
 import Swal from "sweetalert2";
-
 import DefaultInput from "../../components/Forms/DefaultInput";
 import Button from "../../components/Button/Button";
 import LoadingComponent from "../../components/LoadingComponent";
-
 import {
   usePostStudentsTransferCertificateMutation,
   useGetStudentBySearchQuery,
@@ -20,8 +17,7 @@ import { useGetSessionsQuery } from "../../features/session/sessionSlice";
 import { useGetClassListQuery } from "../../features/class/classQuerySlice";
 import useTranslate from "../../utils/Translate";
 import DatePickerOne from "../../components/Forms/DatePicker/DatePickerOne";
-import UserSearch from "../../components/UserSearch";
-import { GrDrag } from "react-icons/gr";
+import SvgIcon from "../../components/icons/SvgIcon";
 
 const AddNewDonation = ({ onBack }) => {
   const dispatch = useDispatch();
@@ -158,7 +154,7 @@ const AddNewDonation = ({ onBack }) => {
                   className="text-gray-700 hover:text-blue-600"
                   title="Filter"
                 >
-                  <TbFilterPlus size={30} />
+                  <SvgIcon name={"TbFilterPlus"} size={30} />
                 </button>
               </div>
               {showSuggestions && (
@@ -246,7 +242,10 @@ const AddNewDonation = ({ onBack }) => {
               />
               <Button onClick={handleUserSearchOpenModal}>
                 {" "}
-                <GrDrag className="w-5 h-5" />
+                  <SvgIcon
+              name={"GrDrag"}
+              size={16}
+            />
               </Button>
             </div>
             <DefaultInput
@@ -264,7 +263,10 @@ const AddNewDonation = ({ onBack }) => {
               />
               <Button onClick={handleUserSearchOpenModal}>
                 {" "}
-                <GrDrag className="w-5 h-5" />
+             <SvgIcon
+              name={"GrDrag"}
+              size={16}
+            />
               </Button>
             </div>
             <div className="flex justify-center items-center gap-2">
@@ -276,7 +278,10 @@ const AddNewDonation = ({ onBack }) => {
               />
               <Button onClick={handleUserSearchOpenModal}>
                 {" "}
-                <GrDrag className="w-5 h-5" />
+               <SvgIcon
+              name={"GrDrag"}
+              size={16}
+            />
               </Button>
             </div>
           </div>

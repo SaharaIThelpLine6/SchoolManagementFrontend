@@ -1,29 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
-import { FormProvider, useForm } from "react-hook-form";
-import Swal from "sweetalert2";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
-import { FiEdit } from "react-icons/fi";
-import { FaEye, FaPlus } from "react-icons/fa";
-
+import { useForm } from "react-hook-form";
 import { setPageName } from "../features/auth/authSlice";
-
 import { useGetExamFeeSettingQuery } from "../features/exam/examQuerySlice";
-
 import useTranslate from "../utils/Translate";
 import bnBijoy2Unicode from "../utils/conveter";
-
 import SortableTable from "../components/Tables/SortableTable";
 import Loading from "../components/Loading/Loading";
-
-import { GrDrag } from "react-icons/gr";
 import { showModal } from "../utils/ModalControlar";
 import Button from "../components/Button/Button";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
+import DeleteButton from "../components/Button/DeleteButton";
+import EditButton from "../components/Button/EditButton";
+import SvgIcon from "../components/icons/SvgIcon";
 
 const PAGE_SIZE = 10;
 
@@ -49,14 +39,6 @@ const BalanceTransfer = ({ pageTitle }) => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
   }, [examFeeSettingData, currentPage]);
-
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
@@ -86,27 +68,15 @@ const BalanceTransfer = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md transition duration-200"
-            title="Edit"
-            onClick={() => handleEdit(row)}
-          >
-            <FiEdit className="w-5 h-5" />
-          </button>
-          <button
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md transition duration-200"
-            title="Delete"
-            onClick={() => handleDelete(row)}
-          >
-            <MdDelete className="w-5 h-5" />
-          </button>
+          <EditButton onClick={() => handleEdit(row)} />
+          <DeleteButton onClick={() => handleDelete(row)} />
         </div>
       ),
     },
     {
       title: (
         <div className="flex items-center justify-center gap-1">
-          <GrDrag />
+          <SvgIcon name={"GrDrag"} size={16} />
         </div>
       ),
       hozAlign: "center",
@@ -136,7 +106,8 @@ const BalanceTransfer = ({ pageTitle }) => {
       title: translate("Deposit"),
       field: "SLID",
       hozAlign: "center",
-    },   {
+    },
+    {
       title: translate("Withdraw"),
       field: "SLID",
       hozAlign: "center",
@@ -172,27 +143,11 @@ const BalanceTransfer = ({ pageTitle }) => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-center items-center mt-4">
-        <div className="flex items-center space-x-2">
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-          >
-            <MdKeyboardArrowLeft size={24} />
-          </button>
-          <span className="text-sm md:text-base">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-          >
-            <MdKeyboardArrowRight size={24} />
-          </button>
-        </div>
-      </div>
+      <DefaultPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

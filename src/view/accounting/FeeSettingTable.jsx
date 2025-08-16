@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { FaRegEdit } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
+import EditButton from "../../components/Button/EditButton";
+import DeleteButton from "../../components/Button/DeleteButton";
 
 const initialData = [
   {
@@ -165,19 +165,8 @@ const FeeSettingTable = () => {
                 </td>
                 <td className="p-3 text-center">
                   <div className="flex justify-center space-x-2">
-                    <button
-                      onClick={() => handleDelete(row.id)}
-                      className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors duration-200 flex items-center justify-center"
-                      title="Delete"
-                    >
-                      <MdDelete className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => handleEditOpenModal(row.id)}
-                      className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors duration-200 flex items-center justify-center"
-                    >
-                      <FaRegEdit className="w-4 h-4" />
-                    </button>
+                    <EditButton onClick={() => handleEditOpenModal(row.id)} />
+                    <DeleteButton onClick={() => handleDelete(row.id)} />
                   </div>
                 </td>
                 <td className="p-3 text-gray-800 font-medium">{row.class}</td>

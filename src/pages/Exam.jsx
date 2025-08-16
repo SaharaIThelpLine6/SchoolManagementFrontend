@@ -1,22 +1,20 @@
-import { useDispatch, useSelector } from "react-redux";
-import { fetchClassData } from "../features/class/classSlice";
+import { useDispatch } from "react-redux";
 import { useGetExamNamesQuery } from "/src/features/exam/examQuerySlice";
 import { useEffect, useState } from "react";
-import InputTable2 from "../components/InputTable/InputTable2";
 import { setPageName } from "../features/auth/authSlice";
 import SortableTable from "../components/Tables/SortableTable";
 import { FormProvider, useForm } from "react-hook-form";
 import ThemeInputBox1 from "../components/Forms/ThemeInputBox1";
 import useTranslate from "../utils/Translate";
-import { MdDelete } from "react-icons/md";
-import { FiEdit } from "react-icons/fi";
-import { PiPrinterFill } from "react-icons/pi";
 import {
   useDeleteExamNameMutation,
   usePostNewExamMutation,
   useUpdateExamnameMutation,
 } from "../features/exam/examQuerySlice";
 import { toast } from "react-toastify";
+import DeleteButton from "../components/Button/DeleteButton";
+import EditButton from "../components/Button/EditButton";
+import Swal from "sweetalert2";
 
 const Exam = ({ pageTitle }) => {
   const title = "Add Exam";
@@ -116,17 +114,31 @@ const Exam = ({ pageTitle }) => {
   };
 
   const handleExamNameDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this exam?")) {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
       try {
         const response = await deleteExam({ ID: id }).unwrap();
         console.log("Response:", response);
+
         if (response) {
-          // Optionally, you can reset the form or update the state after deletion
+          // Optionally reset the form or update state
           methods.reset({
             ExamName: "",
             ExamEngName: "",
             ExamAraName: "",
           });
+
+          Swal.fire("Deleted!", "Exam has been deleted.", "success");
         }
       } catch (error) {
         toast.error(error?.data?.error || "Failed to delete exam name");
@@ -160,20 +172,8 @@ const Exam = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title={translate("Edit")}
-            onClick={() => handleExamNameEdit(row.ExamID)}
-          >
-            <FiEdit className="w-5 h-5" />
-          </button>
-          <button
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
-            title={translate("Delete")}
-            onClick={() => handleExamNameDelete(row.ExamID)}
-          >
-            <MdDelete className="w-5 h-5" />
-          </button>
+          <EditButton onClick={() => handleExamNameEdit(row.ExamID)} />
+          <DeleteButton onClick={() => handleExamNameDelete(row.ExamID)} />
         </div>
       ),
     },

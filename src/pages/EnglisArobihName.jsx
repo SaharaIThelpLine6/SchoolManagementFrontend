@@ -18,8 +18,8 @@ import bnBijoy2Unicode from "../utils/conveter";
 import useTranslate from "../utils/Translate";
 import { toast } from "react-toastify";
 import { showModal } from "../utils/ModalControlar";
-import { TbFilterPlus } from "react-icons/tb";
 import Loading from "../components/Loading/Loading";
+import SvgIcon from "../components/icons/SvgIcon";
 
 const EnglisArobihName = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -185,8 +185,12 @@ const EnglisArobihName = ({ pageTitle }) => {
                     dispatch(setCharacterReportEditMode(null));
                   }}
                 />
-                <button type="button" onClick={handleOpenModal} className="pr-2">
-                  <TbFilterPlus size={30}/>
+                <button
+                  type="button"
+                  onClick={handleOpenModal}
+                  className="pr-2"
+                >
+                  <SvgIcon name={"TbFilterPlus"} size={30} />
                 </button>
               </div>
               {showSuggestions && (

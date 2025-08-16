@@ -9,8 +9,7 @@ import { usePostGetStudentListMutation } from "../features/exam/examQuerySlice";
 import MonthlyDuesFilter from "../view/accounting/MonthlyDuesFilter";
 import MonthTable from "../view/accounting/MonthTable";
 import SortableTable from "../components/Tables/SortableTable";
-import { FiEdit } from "react-icons/fi";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 10;
 
@@ -139,13 +138,6 @@ const MonthlyDues = ({ pageTitle }) => {
     },
   ];
 
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   return (
     <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
@@ -182,29 +174,11 @@ const MonthlyDues = ({ pageTitle }) => {
         />
 
         {/* Pagination Controls */}
-        <div className="flex justify-center items-center gap-4 mt-4">
-          <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50 hover:bg-gray-400 transition-colors"
-          >
-            <MdKeyboardArrowLeft className="text-lg" />
-            {translate("Prev")}
-          </button>
-
-          <span className="text-sm font-medium text-gray-700">
-            {translate("Page")} {currentPage} {translate("of")} {totalPages}
-          </span>
-
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50 hover:bg-gray-400 transition-colors"
-          >
-            {translate("Next")}
-            <MdKeyboardArrowRight className="text-lg" />
-          </button>
-        </div>
+        <DefaultPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

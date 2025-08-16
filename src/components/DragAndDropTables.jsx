@@ -17,7 +17,7 @@ import useTranslate from "../utils/Translate";
 import { useGetGetStudentListQuery } from "../features/exam/examQuerySlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import bnBijoy2Unicode from "../utils/conveter";
-import { GrDrag } from "react-icons/gr";
+import SvgIcon from "./icons/SvgIcon";
 // Droppable wrapper for tables
 function DroppableTable({ id, children }) {
   const { setNodeRef, isOver } = useDroppable({ id });
@@ -58,7 +58,10 @@ function DraggableRow({ row, isSelected, onSelect }) {
       }}
     >
       <th className="px-4 py-3 text-left">
-        <GrDrag size={20} />
+         <SvgIcon
+              name={"GrDrag"}
+              size={16}
+            />
       </th>{" "}
       <td className="border px-4 py-2">
         <input
@@ -223,7 +226,10 @@ export default function DragAndDropTables({
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-3 text-left whitespace-nowrap">
-                        <GrDrag size={20} />
+                         <SvgIcon
+              name={"GrDrag"}
+              size={16}
+            />
                       </th>{" "}
                       <th className="px-4 py-3 text-left whitespace-nowrap">
                         <input
@@ -299,7 +305,10 @@ export default function DragAndDropTables({
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-4 py-3 text-left">
-                        <GrDrag size={20} />
+                       <SvgIcon
+              name={"GrDrag"}
+              size={16}
+            />
                       </th>{" "}
                       <th className="px-4 py-3 text-left">
                         <input

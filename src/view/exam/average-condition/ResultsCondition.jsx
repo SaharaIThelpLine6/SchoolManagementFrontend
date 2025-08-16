@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import DefaultInput from "../../../components/Forms/DefaultInput";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import Button from "../../../components/Button/Button";
 import {
   useGetExamConditionQuery,

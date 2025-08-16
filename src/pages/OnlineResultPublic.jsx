@@ -5,16 +5,11 @@ import DefaultSelect from "../components/Forms/DefaultSelect";
 import { FormProvider, useForm } from "react-hook-form";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
-import Button from "../components/Button/Button";
 import { useGetExamNamesQuery } from "../features/exam/examQuerySlice";
 import { useGetDesignationQuery } from "../features/teachers/teachersSlice";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
 import SortableTable from "../components/Tables/SortableTable";
 import { useMemo, useState } from "react";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 10;
 
@@ -122,29 +117,11 @@ const OnlineResultPublic = ({ pageTitle }) => {
         </div>
         <SortableTable columns={columns} data={paginatedData} />
 
-        <div className="flex justify-center items-center gap-4 mt-4">
-          <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50 hover:bg-gray-400 transition-colors"
-          >
-            <MdKeyboardArrowLeft className="text-lg" />
-            Prev
-          </button>
-
-          <span className="text-sm font-medium text-gray-700">
-            Page {currentPage} of {totalPages}
-          </span>
-
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50 hover:bg-gray-400 transition-colors"
-          >
-            Next
-            <MdKeyboardArrowRight className="text-lg" />
-          </button>
-        </div>
+        <DefaultPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </>
   );

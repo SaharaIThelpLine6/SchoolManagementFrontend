@@ -4,12 +4,12 @@ import { setPageName } from "../features/auth/authSlice";
 import { useGetMonthListQuery } from "../features/months/montListSlice";
 import Loading from "../components/Loading/Loading";
 import SortableTable from "../components/Tables/SortableTable";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import useTranslate from "../utils/Translate";
-import { FiEdit } from "react-icons/fi";
 import { showModal } from "../utils/ModalControlar";
 import Button from "../components/Button/Button";
 import { months } from "../Data/monthsData";
+import SvgIcon from "../components/icons/SvgIcon";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 10;
 
@@ -23,8 +23,6 @@ const MonthListTable = ({ pageTitle }) => {
 
   const { data: monthsList = [], isLoading, isError } = useGetMonthListQuery();
 
-
-
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(monthsList.length / PAGE_SIZE);
 
@@ -32,9 +30,6 @@ const MonthListTable = ({ pageTitle }) => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return monthsList.slice(start, start + PAGE_SIZE);
   }, [monthsList, currentPage]);
-
-
-
 
   const handleOpenModal = useCallback(() => {
     showModal(translate("Create month names"), "ADD_MONTHNAMES");
@@ -59,7 +54,6 @@ const MonthListTable = ({ pageTitle }) => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
 
-
   const monthColumns = months.map((month, index) => ({
     title: translate(month),
     field: `Month${index + 1}`,
@@ -76,7 +70,7 @@ const MonthListTable = ({ pageTitle }) => {
             title="Edit"
             onClick={() => handleEditOpenModal(row.ID)}
           >
-            <FiEdit className="w-5 h-5" />
+            <SvgIcon name={"FiEdit"} size={20} />
           </button>
         </div>
       ),
@@ -98,29 +92,11 @@ const MonthListTable = ({ pageTitle }) => {
       <SortableTable columns={columns} data={paginatedData} />
 
       {/* Pagination Controls */}
-      <div className="flex justify-center items-center gap-4 mt-4">
-        <button
-          onClick={handlePrev}
-          disabled={currentPage === 1}
-          className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-        >
-          <MdKeyboardArrowLeft className="text-lg" />
-          Prev
-        </button>
-
-        <span className="text-sm font-medium text-gray-700">
-          Page {currentPage} of {totalPages}
-        </span>
-
-        <button
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-          className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-        >
-          Next
-          <MdKeyboardArrowRight className="text-lg" />
-        </button>
-      </div>
+      <DefaultPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
     </div>
   );
 };

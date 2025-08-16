@@ -12,13 +12,9 @@ import {
   useGetTeacherInfoQuery,
 } from "../features/teachers/teachersSlice";
 import Loading from "../components/Loading/Loading";
-import { FiEdit } from "react-icons/fi";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
-import Pagination from "../components/Pagination/Pagination";
+import SvgIcon from "../components/icons/SvgIcon";
+import EditButton from "../components/Button/EditButton";
+import DeleteButton from "../components/Button/DeleteButton";
 
 const PAGE_SIZE = 10;
 
@@ -138,20 +134,8 @@ const AddTeacher = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title="Edit"
-            onClick={() => handleEditOpenModal(row.UserID)}
-          >
-            <FiEdit className="w-5 h-5" />
-          </button>
-          <button
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
-            title="Delete"
-            onClick={() => handleDelete(row.UserID)}
-          >
-            <MdDelete className="w-5 h-5" />
-          </button>
+          <EditButton onClick={() => handleEditOpenModal(row.UserID)} />
+          <DeleteButton onClick={() => handleDelete(row.UserID)} />
         </div>
       ),
     },
@@ -229,7 +213,7 @@ const AddTeacher = ({ pageTitle }) => {
             disabled={currentPage === 1}
             className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
           >
-            <MdKeyboardArrowLeft className="text-lg" />
+            <SvgIcon name={"MdKeyboardArrowLeft"} size={18} />
             Prev
           </button>
 
@@ -243,7 +227,7 @@ const AddTeacher = ({ pageTitle }) => {
             className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
           >
             Next
-            <MdKeyboardArrowRight className="text-lg" />
+            <SvgIcon name={"MdKeyboardArrowRight"} size={18} />
           </button>
         </div>
       </div>

@@ -7,14 +7,13 @@ import useTranslate from "../utils/Translate";
 import { showModal } from "../utils/ModalControlar";
 import Swal from "sweetalert2";
 import Loading from "../components/Loading/Loading";
-import { FiEdit } from "react-icons/fi";
-import { FiTrash2 } from "react-icons/fi";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import Button from "../components/Button/Button";
 import {
   useDeleteAcademicSubjectMutation,
   useGetAcademicSubjectsQuery,
 } from "../features/class/classQuerySlice";
+import SvgIcon from "../components/icons/SvgIcon";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 10;
 
@@ -115,14 +114,14 @@ const Book = ({ pageTitle }) => {
             title="Edit"
             onClick={() => handleEditSubject(data.SubjectID)}
           >
-            <FiEdit className="w-5 h-5" />
+            <SvgIcon name={"FiEdit"} size={20} />
           </button>
           <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
             title="Delete"
             onClick={() => handleDeleteSubject(data.SubjectID)}
           >
-            <FiTrash2 className="w-5 h-5" />
+            <SvgIcon name={"FaTrash"} size={20} />
           </button>
         </div>
       ),
@@ -219,29 +218,12 @@ const Book = ({ pageTitle }) => {
             />
 
             {/* Pagination Controls */}
-            <div className="flex justify-center items-center gap-4 mt-4">
-              <button
-                onClick={handlePrev}
-                disabled={currentPage === 1}
-                className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-              >
-                <MdKeyboardArrowLeft className="text-lg" />
-                {translate("Prev")}
-              </button>
-
-              <span className="text-sm font-medium text-gray-700">
-                {translate("Page")} {currentPage} {translate("of")} {totalPages}
-              </span>
-
-              <button
-                onClick={handleNext}
-                disabled={currentPage === totalPages}
-                className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-              >
-                {translate("Next")}
-                <MdKeyboardArrowRight className="text-lg" />
-              </button>
-            </div>
+          
+              <DefaultPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
           </>
         ) : (
           <div className="text-center py-8">

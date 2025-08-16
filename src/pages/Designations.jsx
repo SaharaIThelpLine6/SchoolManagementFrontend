@@ -7,16 +7,12 @@ import {
 } from "../features/teachers/teachersSlice";
 import Loading from "../components/Loading/Loading";
 import SortableTable from "../components/Tables/SortableTable";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
 import useTranslate from "../utils/Translate";
-import { FiEdit } from "react-icons/fi";
 import Swal from "sweetalert2";
 import { showModal } from "../utils/ModalControlar";
 import Button from "../components/Button/Button";
+import EditButton from "../components/Button/EditButton";
+import SvgIcon from "../components/icons/SvgIcon";
 
 const PAGE_SIZE = 10;
 
@@ -79,7 +75,11 @@ const AddDesignation = ({ pageTitle }) => {
         if (result.isConfirmed) {
           try {
             await deleteDesignation(id).unwrap();
-            Swal.fire("Deleted!", "The designation has been removed.", "success");
+            Swal.fire(
+              "Deleted!",
+              "The designation has been removed.",
+              "success"
+            );
           } catch (error) {
             Swal.fire("Error!", "Failed to delete designation.", "error");
           }
@@ -100,19 +100,12 @@ const AddDesignation = ({ pageTitle }) => {
   };
 
   const columns = [
-    
     {
       title: translate("Action"),
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title="Edit"
-            onClick={() => handleEditOpenModal(row.DNID)}
-          >
-            <FiEdit className="w-5 h-5" />
-          </button>
+          <EditButton onClick={() => handleEditOpenModal(row.DNID)} />
           {/* <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
             title="Delete"
@@ -122,7 +115,8 @@ const AddDesignation = ({ pageTitle }) => {
           </button> */}
         </div>
       ),
-    },{ title: "SL", field: "SL", hozAlign: "center" },
+    },
+    { title: "SL", field: "SL", hozAlign: "center" },
     {
       title: translate("Designation"),
       field: "Designation",
@@ -133,9 +127,7 @@ const AddDesignation = ({ pageTitle }) => {
   return (
     <div className="p-4 font-lato bg-white md:p-4 rounded-xl shadow-lg">
       <div className="flex justify-between items-center mb-4 border-b border-[#e9edf4] py-5 pt-0">
-        <h3 className="text-xl font-bold">
-          {pageTitle || "Designation List"}
-        </h3>
+        <h3 className="text-xl font-bold">{pageTitle || "Designation List"}</h3>
         <Button onClick={handleOpenModal}>
           {translate("Create Designation")}
         </Button>
@@ -150,7 +142,7 @@ const AddDesignation = ({ pageTitle }) => {
           disabled={currentPage === 1}
           className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
         >
-          <MdKeyboardArrowLeft className="text-lg" />
+          <SvgIcon name={"MdKeyboardArrowLeft"} size={18} />
           Prev
         </button>
 
@@ -164,7 +156,7 @@ const AddDesignation = ({ pageTitle }) => {
           className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
         >
           Next
-          <MdKeyboardArrowRight className="text-lg" />
+          <SvgIcon name={"MdKeyboardArrowRight"} size={18} />
         </button>
       </div>
     </div>

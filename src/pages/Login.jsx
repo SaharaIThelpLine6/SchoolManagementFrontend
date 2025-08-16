@@ -1,4 +1,3 @@
-
 import { useForm, FormProvider } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../features/auth/authSlice";
@@ -6,8 +5,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import { FiArrowRight, FiEye, FiEyeOff } from "react-icons/fi";
 import LoginInput from "../components/Forms/LoginInput";
+import SvgIcon from "../components/icons/SvgIcon";
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -120,7 +119,11 @@ const Login = () => {
                   className="absolute right-2.5 top-[2.5rem] text-gray-400 hover:text-gray-600 text-lg focus:outline-none"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? <FiEyeOff /> : <FiEye />}
+                  {showPassword ? (
+                    <SvgIcon name="FiEyeOff" size={18} />
+                  ) : (
+                    <SvgIcon name="FaEye" size={18} />
+                  )}
                 </button>
               </div>
             </div>
@@ -129,7 +132,7 @@ const Login = () => {
               type="submit"
               className="w-full flex justify-center items-center gap-2 md:gap-1 bg-[#007af7] hover:bg-blue-600 text-white py-2.5 rounded-full md:rounded-md text-base font-semibold md:font-medium transition-all duration-200 md:mt-auto"
             >
-              <FiArrowRight className="text-lg" />
+              <SvgIcon name="FiArrowRight" size={18} />
               লগিন অথবা সাইন আপ
             </button>
           </form>

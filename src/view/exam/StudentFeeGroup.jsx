@@ -4,18 +4,12 @@ import { setPageName } from "../../features/auth/authSlice";
 import { useLocation } from "react-router-dom";
 import useTranslate from "../../utils/Translate";
 import { showModal } from "../../utils/ModalControlar";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
+
 import Button from "../../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import DefaultSelect from "../../components/Forms/DefaultSelect";
 import Swal from "sweetalert2";
-import { FaPlus } from "react-icons/fa";
 import SortableTable from "../../components/Tables/SortableTable";
-import { FiEdit } from "react-icons/fi";
 import {
   useDeleteStudentFeeGroupMutation,
   useGetFeeGroupNamesQuery,
@@ -28,6 +22,10 @@ import {
 } from "../../features/feeCollection/feeCollectionSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import bnBijoy2Unicode from "../../utils/conveter";
+import DefaultPagination from "../../components/Pagination/DefaultPagination";
+import DeleteButton from "../../components/Button/DeleteButton";
+import EditButton from "../../components/Button/EditButton";
+import SvgIcon from "../../components/icons/SvgIcon";
 
 const PAGE_SIZE = 10;
 
@@ -195,20 +193,8 @@ const StudentFeeGroup = ({ pageTitle, onBack }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title="Edit"
-            onClick={() => handleEditStudentGroup(row.SFGID)}
-          >
-            <FiEdit className="w-5 h-5" />
-          </button>
-          <button
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
-            title="Delete"
-            onClick={() => handleDelete(row.SFGID)}
-          >
-            <MdDelete className="w-5 h-5" />
-          </button>
+          <DeleteButton onClick={() => handleDelete(row.SFGID)} />
+          <EditButton onClick={() => handleEditStudentGroup(row.SFGID)} />
         </div>
       ),
     },
@@ -279,7 +265,7 @@ const StudentFeeGroup = ({ pageTitle, onBack }) => {
                   onClick={handleSubsidiary}
                   className="bg-[#EDEDED] mt-7 rounded-md py-3"
                 >
-                  <FaPlus />
+                  <SvgIcon name={"FaPlus"} size={14} />
                 </Button>
               </div>
             </div>
@@ -326,27 +312,11 @@ const StudentFeeGroup = ({ pageTitle, onBack }) => {
             />
           </div>
 
-          <div className="flex justify-center items-center mt-4">
-            <div className="flex items-center space-x-2">
-              <button
-                className="p-1 border rounded disabled:opacity-50"
-                onClick={handlePrev}
-                disabled={currentPage === 1}
-              >
-                <MdKeyboardArrowLeft size={24} />
-              </button>
-              <span>
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                className="p-1 border rounded disabled:opacity-50"
-                onClick={handleNext}
-                disabled={currentPage === totalPages}
-              >
-                <MdKeyboardArrowRight size={24} />
-              </button>
-            </div>
-          </div>
+          <DefaultPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         </>
       ) : (
         <div className="mt-5 text-center text-gray-500">

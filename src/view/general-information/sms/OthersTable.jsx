@@ -3,17 +3,13 @@ import { useEffect, useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { setPageName } from "../../../features/auth/authSlice";
 import SortableTable from "../../../components/Tables/SortableTable";
-import {
-  MdDelete,
-  MdKeyboardArrowLeft,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
 import useTranslate from "../../../utils/Translate";
 import Input from "../../../components/Input/Input";
+import SvgIcon from "../../../components/icons/SvgIcon";
 
 const PAGE_SIZE = 5; // Reduced page size for better demonstration
 
-const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers  }) => {
+const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
 
@@ -36,9 +32,9 @@ const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers  }) => {
   const hasDuplicates = (numbers, currentIndex) => {
     const currentNumber = numbers[currentIndex];
     if (!currentNumber) return false;
-    
-    return numbers.some((num, index) => 
-      index !== currentIndex && num === currentNumber
+
+    return numbers.some(
+      (num, index) => index !== currentIndex && num === currentNumber
     );
   };
 
@@ -52,8 +48,8 @@ const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers  }) => {
     setMobileNumbers(newNumbers);
 
     // Validate the input
-    const newErrors = {...errors};
-    
+    const newErrors = { ...errors };
+
     if (cleanedValue && !isValidPrefix(cleanedValue)) {
       newErrors[index] = translate("Invalid Bangladeshi mobile prefix");
     } else if (cleanedValue && !isCompleteNumber(cleanedValue)) {
@@ -82,15 +78,15 @@ const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers  }) => {
     if (mobileNumbers.length === 1 && mobileNumbers[0] === "") {
       return;
     }
-    
+
     const newNumbers = [...mobileNumbers];
     newNumbers.splice(index, 1);
     setMobileNumbers(newNumbers);
 
     // Remove corresponding error if exists
-    const newErrors = {...errors};
+    const newErrors = { ...errors };
     delete newErrors[index];
-    
+
     // Revalidate remaining numbers for duplicates
     newNumbers.forEach((num, i) => {
       if (num && hasDuplicates(newNumbers, i)) {
@@ -99,7 +95,7 @@ const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers  }) => {
         delete newErrors[i];
       }
     });
-    
+
     setErrors(newErrors);
   };
 
@@ -107,14 +103,16 @@ const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers  }) => {
   const isDeleteDisabled = (index) => {
     // Disable if it's the only field
     if (mobileNumbers.length === 1) return true;
-    
+
     // Disable if it's the last field and empty, and there are other non-empty fields
-    if (index === mobileNumbers.length - 1 && 
-        mobileNumbers[index] === "" && 
-        mobileNumbers.some((num, i) => i !== index && num !== "")) {
+    if (
+      index === mobileNumbers.length - 1 &&
+      mobileNumbers[index] === "" &&
+      mobileNumbers.some((num, i) => i !== index && num !== "")
+    ) {
       return true;
     }
-    
+
     return false;
   };
 
@@ -149,15 +147,17 @@ const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers  }) => {
         <div className="flex justify-center items-center gap-2">
           <button
             className={`p-2 text-white rounded-md ${
-              isDeleteDisabled(row.id) 
-                ? "bg-gray-400 cursor-not-allowed" 
+              isDeleteDisabled(row.id)
+                ? "bg-gray-400 cursor-not-allowed"
                 : "bg-red-500 hover:bg-red-600"
             }`}
             title="Delete"
-            onClick={() => !isDeleteDisabled(row.id) && handleDeleteMobile(row.id)}
+            onClick={() =>
+              !isDeleteDisabled(row.id) && handleDeleteMobile(row.id)
+            }
             disabled={isDeleteDisabled(row.id)}
           >
-            <MdDelete className="w-5 h-5" />
+            <SvgIcon name={"FaTrash"} size={20} />
           </button>
         </div>
       ),
@@ -184,7 +184,7 @@ const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers  }) => {
     <div>
       <div className="flex justify-center items-center mb-4 border-b border-[#e9edf4] py-5 pt-0">
         <h3 className="text-base md:text-lg font-bold">
-         {translate("To create a list of mobile numbers by typing")}
+          {translate("To create a list of mobile numbers by typing")}
         </h3>
       </div>
       <SortableTable
@@ -199,7 +199,7 @@ const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers  }) => {
           disabled={currentPage === 1}
           className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
         >
-          <MdKeyboardArrowLeft className="text-lg" />
+          <SvgIcon name={"MdKeyboardArrowLeft"} size={18} />
           Prev
         </button>
 
@@ -213,7 +213,7 @@ const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers  }) => {
           className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
         >
           Next
-          <MdKeyboardArrowRight className="text-lg" />
+          <SvgIcon name={"MdKeyboardArrowRight"} size={18} />
         </button>
       </div>
     </div>

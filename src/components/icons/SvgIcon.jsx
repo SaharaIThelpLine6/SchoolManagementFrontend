@@ -8,14 +8,16 @@ const SvgIcon = ({ name, size = 20, className = '' }) => {
     return null;
   }
 
+  // Create a sanitized SVG string
+  const svg = iconSvg
+    .replace(/width="[^"]*"/, `width="${size}"`)
+    .replace(/height="[^"]*"/, `height="${size}"`)
+    .replace(/<svg/, `<svg width="${size}" height="${size}"`);
+
   return (
     <span 
-      className={`inline-block ${className}`}
-      style={{
-        width: `${size}px`,
-        height: `${size}px`,
-      }}
-      dangerouslySetInnerHTML={{ __html: iconSvg }}
+      className={`flex justify-center items-center ${className}`}
+      dangerouslySetInnerHTML={{ __html: svg }}
     />
   );
 };

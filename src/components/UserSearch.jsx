@@ -1,16 +1,15 @@
-import React, { useMemo, useState } from "react";
-import { GrDrag } from "react-icons/gr";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import { useMemo, useState } from "react";
 import { useGetUserTypesQuery } from "../features/userType/userTypeSlice";
 import { useGetExamFeeSettingQuery } from "../features/exam/examQuerySlice";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import SortableTable from "../components/Tables/SortableTable";
 import useTranslate from "../utils/Translate";
 import bnBijoy2Unicode from "../utils/conveter";
-import { FaEye } from "react-icons/fa";
 import Loading from "./Loading/Loading";
 import { FormProvider, useForm } from "react-hook-form";
 import DefaultInput from "./Forms/DefaultInput";
+import DefaultPagination from "./Pagination/DefaultPagination";
+import SvgIcon from "./icons/SvgIcon";
 
 const PAGE_SIZE = 10;
 
@@ -34,13 +33,7 @@ const UserSearch = () => {
     return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
   }, [examFeeSettingData, currentPage]);
 
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
 
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   const handleEdit = (row) => {
     console.log("Edit clicked for row:", row);
@@ -57,7 +50,10 @@ const UserSearch = () => {
             title="View"
             onClick={() => handleEdit(row)}
           >
-            <FaEye className="w-5 h-5" />
+             <SvgIcon
+              name={"FaEye"}
+              size={14}
+            />
           </button>
         </div>
       ),
@@ -65,7 +61,10 @@ const UserSearch = () => {
     {
       title: (
         <div className="flex items-center justify-center gap-1">
-          <GrDrag />
+            <SvgIcon
+              name={"GrDrag"}
+              size={14}
+            />
         </div>
       ),
       hozAlign: "center",
@@ -152,27 +151,11 @@ const UserSearch = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center mt-4">
-          <div className="flex items-center space-x-2">
-            <button
-              className="p-1 border rounded disabled:opacity-50"
-              onClick={handlePrev}
-              disabled={currentPage === 1}
-            >
-              <MdKeyboardArrowLeft size={24} />
-            </button>
-            <span className="text-sm md:text-base">
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              className="p-1 border rounded disabled:opacity-50"
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-            >
-              <MdKeyboardArrowRight size={24} />
-            </button>
-          </div>
-        </div>
+       <DefaultPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
       )}
     </div>
   );

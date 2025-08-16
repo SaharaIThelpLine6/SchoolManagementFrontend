@@ -1,5 +1,4 @@
-import React, { CSSProperties, useEffect, useMemo, useState } from "react";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { useEffect, useState } from "react";
 import {
   DndContext,
   KeyboardSensor,
@@ -9,7 +8,6 @@ import {
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
   arrayMove,
   SortableContext,
@@ -21,18 +19,15 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import ThemeInputBox1 from "../Forms/ThemeInputBox1";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchClassData,
-  setEditMode,
-  updateClassSerial,
-} from "../../features/class/classSlice";
-import { updateInData, updateUserInfo } from "../../utils/update/api";
+import { fetchClassData, setEditMode } from "../../features/class/classSlice";
+import { updateInData } from "../../utils/update/api";
 import { insertData } from "../../utils/create/api";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { cssTransition, toast } from "react-toastify";
 import { setReqLoading } from "../../features/requestHandeler/requestHandelerSlice";
 import useTranslate from "../../utils/Translate";
+import SvgIcon from "../icons/SvgIcon";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -100,14 +95,15 @@ const DraggableRow = ({ row, headers, statename }) => {
           {row[header]}
         </td>
       ))}
-      <td className="pt-3 text-center">
+      <td className="py-2 text-center">
         <button
           type="button"
+          className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
           onClick={() => {
             dispatch(setEditMode(row.id));
           }}
         >
-          <FaEdit className="text-blue-500 cursor-pointer hover:text-blue-700" />
+          <SvgIcon name={"FiEdit"} size={20} />
         </button>
         {/* <FaTrash className="text-red-500 cursor-pointer hover:text-red-700" /> */}
       </td>
@@ -276,7 +272,6 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
       console.error(err.message);
     }
   };
-
 
   return (
     <div className="p-4">

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   useDeleteStudentCharacterReportMutation,
   useGetStudentReportsQuery,
@@ -6,14 +6,14 @@ import {
 import bnBijoy2Unicode from "../utils/conveter";
 import useTranslate from "../utils/Translate";
 import CharacterReport from "./Document/characterReport";
-import { FiEdit } from "react-icons/fi";
-import { MdDelete } from "react-icons/md";
-import { showModal } from "../utils/ModalControlar";
 import LoadingComponent from "../components/LoadingComponent";
 import EmptyState from "../components/EmptyState";
 import Swal from "sweetalert2";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/material_green.css";
+import DeleteButton from "./Button/DeleteButton";
+import EditButton from "./Button/EditButton";
+import SvgIcon from "./icons/SvgIcon";
 
 const StudentReportList = ({
   reportParams,
@@ -146,23 +146,11 @@ const StudentReportList = ({
           className="inline-flex items-center px-4 py-2 gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium rounded-md font-SolaimanLipi"
           onClick={handlePrint}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={16}
-            height={16}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="icon icon-tabler icons-tabler-outline icon-tabler-printer"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" />
-            <path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" />
-            <path d="M7 13m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z" />
-          </svg>
+         <SvgIcon
+              name={"MdLocalPrintshop"}
+              size={20}
+            />
+        
           <span>{translate("Print")}</span>
         </button>
       </div>
@@ -239,20 +227,9 @@ const StudentReportList = ({
               >
                 <td className="px-3 py-4 text-nowrap">
                   <div className="flex justify-center items-center gap-2">
-                    <button
-                      className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors"
-                      title={translate("Delete")}
-                      onClick={() => handleDelete(item.SRID)}
-                    >
-                      <MdDelete className="w-5 h-5" />
-                    </button>
-                    <button
-                      className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md transition-colors"
-                      title={translate("Edit")}
-                      onClick={() => handleEditOpenModal(item.SRID)}
-                    >
-                      <FiEdit className="w-5 h-5" />
-                    </button>
+                 
+                    <EditButton onClick={() => handleEditOpenModal(item.SRID)}/>
+                    <DeleteButton onClick={() => handleDelete(item.SRID)}/>
                   </div>
                 </td>
                 <td className="px-3 py-4 text-nowrap">{index + 1}</td>

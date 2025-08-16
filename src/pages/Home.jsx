@@ -1,13 +1,5 @@
 import { useEffect } from "react";
-
-import TableOne from "../components/Tables/TableOne";
-import AddStudentForm from "../components/Forms/AddStudentForm";
 import CardDataStats from "../components/CardDataStats";
-import { FaChalkboardTeacher, FaGraduationCap } from "react-icons/fa";
-import { FaSackDollar } from "react-icons/fa6";
-import { HiDocumentCurrencyDollar } from "react-icons/hi2";
-
-import { useDispatch, useSelector } from "react-redux";
 import {
   fetchGuardianData,
   fetchStudentData,
@@ -29,6 +21,8 @@ import {
 } from "../features/dashboard/dashboardQuerySlice";
 import useTranslate from "../utils/Translate";
 import DeveloperCredit from "../components/DeveloperCredit";
+import SvgIcon from "../components/icons/SvgIcon";
+import { useDispatch, useSelector } from "react-redux";
 const Home = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
@@ -38,7 +32,6 @@ const Home = ({ pageTitle }) => {
   const { data: teacherCount } = useGetTotalTeacherQuery();
   const { data: donerCount } = useGetTotalDonerQuery();
   const { data: totalDueCount } = useGetTotalDueQuery();
-  
 
   useEffect(() => {
     dispatch(fetchUserList({ itemPerPage: 1, currentPage: 1 }));
@@ -67,7 +60,7 @@ const Home = ({ pageTitle }) => {
           titleColor="text-[#06AEEF]"
           isLoading={!studentCount}
         >
-          <FaGraduationCap className="w-8 h-8" />
+          <SvgIcon name={"FaGraduationCap"} size={20}  />
         </CardDataStats>
 
         <CardDataStats
@@ -78,7 +71,7 @@ const Home = ({ pageTitle }) => {
           iconColor="text-[#EB058C]" // Pass the color value without "text-" prefix
           isLoading={!teacherCount}
         >
-          <FaChalkboardTeacher className="w-8 h-8" />
+          <SvgIcon name={"FaChalkboardTeacher"} size={20} />
         </CardDataStats>
 
         <CardDataStats
@@ -89,7 +82,7 @@ const Home = ({ pageTitle }) => {
           iconColor="text-[#0C9444]" // Pass the color value without "text-" prefix
           isLoading={!donerCount}
         >
-          <FaSackDollar className="w-8 h-8" />
+          <SvgIcon name={"FaSackDollar"} size={20} />
         </CardDataStats>
         <CardDataStats
           title={translate("Total owed")} // Total User
@@ -99,7 +92,10 @@ const Home = ({ pageTitle }) => {
           iconColor="text-[#F7951E]"
           isLoading={!totalDueCount}
         >
-          <HiDocumentCurrencyDollar className="w-8 h-8" />
+          <SvgIcon
+            name={"HiDocumentCurrencyDollar"}
+            size={32}
+          />
         </CardDataStats>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

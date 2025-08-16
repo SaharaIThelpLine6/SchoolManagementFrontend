@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from "react";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
-import { FaEye } from "react-icons/fa";
+import { useMemo, useState } from "react";
 import useTranslate from "../../../utils/Translate";
+import SvgIcon from "../../../components/icons/SvgIcon";
+import DefaultPagination from "../../../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
@@ -108,7 +108,7 @@ const PaymentHistoryInvoiceTable = ({ data, setInvoice, setInvoiceData }) => {
                       onClick={() => invoiceHandle(row)}
                       className="p-2 text-white bg-[#1aa5b8] hover:bg-[#17899a] rounded-md flex justify-center items-center gap-2"
                     >
-                      <FaEye size={18} /> <span>{translate("Preview")}</span>
+                      <SvgIcon name={"FaEye"} size={20} />
                     </button>
                   </div>
                 </td>
@@ -136,25 +136,11 @@ const PaymentHistoryInvoiceTable = ({ data, setInvoice, setInvoiceData }) => {
         </div>
 
         {/* Center - pagination */}
-        <div className="flex justify-center items-center space-x-2">
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-          >
-            <MdKeyboardArrowLeft size={24} />
-          </button>
-          <span>
-            {translate("Page")} {currentPage} {translate("of")} {totalPages}
-          </span>
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-          >
-            <MdKeyboardArrowRight size={24} />
-          </button>
-        </div>
+        <DefaultPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
 
         {/* Right - empty */}
         <div></div>

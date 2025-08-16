@@ -3,7 +3,6 @@ import { useDispatch } from "react-redux";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { setPageName } from "../features/auth/authSlice";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
@@ -18,6 +17,7 @@ import {
 } from "../features/result/resultSilce";
 import bnBijoy2Unicode from "../utils/conveter";
 import Loading from "../components/Loading/Loading";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 10;
 
@@ -331,25 +331,12 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
               {translate("Save Results")}
             </Button>
 
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={handlePrev}
-                disabled={currentPage === 1}
-                className="p-1 border rounded disabled:opacity-50"
-              >
-                <MdKeyboardArrowLeft size={24} />
-              </button>
-              <span>
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={handleNext}
-                disabled={currentPage === totalPages}
-                className="p-1 border rounded disabled:opacity-50"
-              >
-                <MdKeyboardArrowRight size={24} />
-              </button>
-            </div>
+          
+            <DefaultPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
           </div>
         </form>
       </div>

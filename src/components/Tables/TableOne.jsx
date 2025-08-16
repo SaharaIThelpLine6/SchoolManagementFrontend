@@ -1,19 +1,22 @@
-import { useState, useEffect } from 'react';
-import Fourdots from '../../images/brand/four-dots-square.svg';
-import { FaEdit, FaTrash } from 'react-icons/fa';
-import { getUserInfo } from '../../utils/read/api';
-import { useDispatch, useSelector } from 'react-redux';
-import { setItemsPerPage } from '../../features/pagination/paginationSlice';
-import { logout } from '../../features/auth/authSlice';
-import { fetchSingleUser, setEditMode } from '../../features/userInfo/userInfoSlice';
-import Pagination from '../Pagination/Pagination';
+import { useState, useEffect } from "react";
+import Fourdots from "../../images/brand/four-dots-square.svg";
+import { getUserInfo } from "../../utils/read/api";
+import { useDispatch, useSelector } from "react-redux";
+import { setItemsPerPage } from "../../features/pagination/paginationSlice";
+import { logout } from "../../features/auth/authSlice";
+import {
+  fetchSingleUser,
+  setEditMode,
+} from "../../features/userInfo/userInfoSlice";
+import Pagination from "../Pagination/Pagination";
+import SvgIcon from "../icons/SvgIcon";
 
 const TableOne = () => {
   const [brandData, setBrandData] = useState([]);
   const itemPerPage = useSelector((state) => state.pagination.itemsPerPage);
   const currentPage = useSelector((state) => state.pagination.currentPage);
   const dispatch = useDispatch();
-  const tokenDux = useSelector((state) => state.auth.token)
+  const tokenDux = useSelector((state) => state.auth.token);
 
   const [totalPage, setTotalPage] = useState();
 
@@ -25,10 +28,9 @@ const TableOne = () => {
         setBrandData(data.users);
         setTotalPage(data.totalPages);
         console.log(data);
-
       } catch (error) {
         // dispatch(logout());
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       }
     };
 
@@ -36,7 +38,7 @@ const TableOne = () => {
   }, [itemPerPage, currentPage, tokenDux]);
 
   const handleDelete = (index) => {
-    const confirmDelete = window.confirm('Are you sure delete this?');
+    const confirmDelete = window.confirm("Are you sure delete this?");
     if (confirmDelete) {
       const updatedData = brandData.filter((_, i) => i !== index);
       setBrandData(updatedData);
@@ -53,15 +55,36 @@ const TableOne = () => {
           <option value="50">50</option>
         </select> */}
         <table className="w-full table-auto border-collapse">
-          <thead className='bg-[#3F4885] text-white h-fit'>
+          <thead className="bg-[#3F4885] text-white h-fit">
             <tr className="text-center">
               {[
-                <img key="icon1" src={Fourdots} alt="Fourdots" className="w-4 h-4" />,
-                <img key="icon2" src={Fourdots} alt="Fourdots" className="w-4 h-4" />,
-                'দাখেলা', 'ইউজার নাম', 'পিতার নাম', 'মোবাইল নাম্বার', 'ইউজার ধরন'
+                <img
+                  key="icon1"
+                  src={Fourdots}
+                  alt="Fourdots"
+                  className="w-4 h-4"
+                />,
+                <img
+                  key="icon2"
+                  src={Fourdots}
+                  alt="Fourdots"
+                  className="w-4 h-4"
+                />,
+                "দাখেলা",
+                "ইউজার নাম",
+                "পিতার নাম",
+                "মোবাইল নাম্বার",
+                "ইউজার ধরন",
               ].map((header, index) => (
-                <th key={index} className="px-4 py-1 font-medium border border-white">
-                  {typeof header === 'string' ? header : <div className="flex justify-center">{header}</div>}
+                <th
+                  key={index}
+                  className="px-4 py-1 font-medium border border-white"
+                >
+                  {typeof header === "string" ? (
+                    header
+                  ) : (
+                    <div className="flex justify-center">{header}</div>
+                  )}
                 </th>
               ))}
             </tr>
@@ -70,18 +93,27 @@ const TableOne = () => {
           <tbody>
             {brandData.length > 0 ? (
               brandData.map((brand, key) => (
-                <tr key={key} className={`${key % 2 !== 0 ? 'bg-[#f5f3f3]' : ''} border border-white`}>
+                <tr
+                  key={key}
+                  className={`${
+                    key % 2 !== 0 ? "bg-[#f5f3f3]" : ""
+                  } border border-white`}
+                >
                   <td className="py-1 px-4 border border-white">
-                    <button type='button' className='text-blue-500 hover:text-blue-700' onClick={() => {
-                      dispatch(setEditMode(1));
-                      dispatch(fetchSingleUser(brand.UserID));
-                    }}>
-                      <FaEdit />
+                    <button
+                      type="button"
+                      className="text-blue-500 hover:text-blue-700"
+                      onClick={() => {
+                        dispatch(setEditMode(1));
+                        dispatch(fetchSingleUser(brand.UserID));
+                      }}
+                    >
+                      <SvgIcon name={"FiEdit"} size={20} />
                     </button>
                   </td>
                   <td className="py-1 px-4 border border-white ">
-                    <button className='text-red-500 hover:text-red-700'>
-                      <FaTrash />
+                    <button className="text-red-500 hover:text-red-700">
+                      <SvgIcon name={"FaTrash"} size={20} />
                     </button>
                   </td>
                   <td className="py-1 px-4 border border-white">
@@ -103,34 +135,27 @@ const TableOne = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center py-2 text-gray-500">No data available</td>
+                <td colSpan="7" className="text-center py-2 text-gray-500">
+                  No data available
+                </td>
               </tr>
             )}
           </tbody>
-
         </table>
       </div>
 
       {/*Pagination Start*/}
-      <div className='flex items-center my-2'>
-        <div className='pl-2'>
+      <div className="flex items-center my-2">
+        <div className="pl-2">
           <span className="text-md text-gray-800">
-            Showing {" "}
-            <span className="font-semibold text-black">
-              {currentPage} {" "}
-            </span>
-            - {" "}
-            <span className="font-semibold text-black">
-              {itemPerPage} {" "}
-            </span>
-            of {" "}
-            <span className="font-semibold text-black">
-              {totalPage} {" "}
-            </span>
+            Showing{" "}
+            <span className="font-semibold text-black">{currentPage} </span>-{" "}
+            <span className="font-semibold text-black">{itemPerPage} </span>
+            of <span className="font-semibold text-black">{totalPage} </span>
             Pages
           </span>
         </div>
-        <div className='ml-auto'>
+        <div className="ml-auto">
           <Pagination totalpages={totalPage} />
         </div>
       </div>

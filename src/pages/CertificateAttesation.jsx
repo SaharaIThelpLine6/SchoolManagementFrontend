@@ -2,12 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setPageName } from "../features/auth/authSlice";
 import SortableTable from "../components/Tables/SortableTable";
-import { useLocation } from "react-router-dom";
 import useTranslate from "../utils/Translate";
 import Button from "../components/Button/Button";
-import { FiEdit } from "react-icons/fi";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
-import { MdOutlineDeleteOutline, MdLocalPrintshop } from "react-icons/md";
 import CreateCertificateAttestation from "../view/students/certificate-attestation/CreateCertificateAttestation";
 import EditCertificateAttestation from "../view/students/certificate-attestation/EditCertificateAttestation";
 import {
@@ -16,9 +12,9 @@ import {
 } from "../features/student/studentQuerySlice";
 import Swal from "sweetalert2";
 import bnBijoy2Unicode from "../utils/conveter";
-import { showModal } from "../utils/ModalControlar";
 import PrintOptions from "../view/students/certificate-attestation/PrintOptions";
 import Loading from "../components/Loading/Loading";
+import SvgIcon from "../components/icons/SvgIcon";
 
 const PAGE_SIZE = 10;
 
@@ -121,21 +117,21 @@ const CertificateAttesation = ({ pageTitle }) => {
             title="Edit"
             onClick={() => handleOpenEdit(row.CFID)}
           >
-            <FiEdit className="w-5 h-5" />
+            <SvgIcon name={"FiEdit"} size={20} />
           </button>
           <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
             title="Delete"
             onClick={() => handleDelete(row.CFID)}
           >
-            <MdOutlineDeleteOutline className="w-5 h-5" />
+            <SvgIcon name={"FaTrash"} size={20} />
           </button>
           <button
             className="p-2 text-white bg-cyan-500 hover:bg-cyan-600 rounded-md"
             title="Print"
             onClick={() => handlePrint(row.CFID)}
           >
-            <MdLocalPrintshop className="w-5 h-5" />
+            <SvgIcon name={"MdLocalPrintshop"} size={20} />
           </button>
         </div>
       ),
@@ -205,7 +201,8 @@ const CertificateAttesation = ({ pageTitle }) => {
                     disabled={currentPage === 1}
                     className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
                   >
-                    <MdKeyboardArrowLeft className="text-lg" />
+                    <SvgIcon name={"MdKeyboardArrowLeft"} size={18} />
+
                     {translate("Prev")}
                   </button>
 
@@ -222,7 +219,7 @@ const CertificateAttesation = ({ pageTitle }) => {
                     className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
                   >
                     {translate("Next")}
-                    <MdKeyboardArrowRight className="text-lg" />
+                    <SvgIcon name={"MdKeyboardArrowRight"} size={18} />
                   </button>
                 </div>
               </>

@@ -1,14 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {  useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setPageName } from "../features/auth/authSlice";
 import { useLocation } from "react-router-dom";
 import useTranslate from "../utils/Translate";
-import { showModal } from "../utils/ModalControlar";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import Button from "../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
 import DefaultSelect from "../components/Forms/DefaultSelect";
-import DefaultInput from "../components/Forms/DefaultInput";
 import {
   useGetStudentBySearchQuery,
   usePostChnageStudentGroupMutation,
@@ -17,6 +14,7 @@ import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetClassListQuery } from "../features/class/classQuerySlice";
 import bnBijoy2Unicode from "../utils/conveter";
 import Swal from "sweetalert2";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 10;
 
@@ -45,7 +43,6 @@ const GroupDistribution = ({ pageTitle }) => {
 
   const selectedClass = classListData?.find((item) => item.ClassID == ClassID); // Use == to avoid type mismatch
 
-
   const { data: searchStudentInfo = [], refetch } = useGetStudentBySearchQuery(
     { search: null, ClassID, SessionID, GenderID: genderId },
     {
@@ -53,7 +50,6 @@ const GroupDistribution = ({ pageTitle }) => {
       refetchOnFocus: false,
     }
   );
-
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
@@ -66,13 +62,6 @@ const GroupDistribution = ({ pageTitle }) => {
     return searchStudentInfo.slice(start, start + PAGE_SIZE);
   }, [searchStudentInfo, currentPage]);
 
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -153,7 +142,11 @@ const GroupDistribution = ({ pageTitle }) => {
               />
 
               <DefaultSelect
-                label={<p className="text-gray-700 font-medium">{translate("Gender")}:</p>}
+                label={
+                  <p className="text-gray-700 font-medium">
+                    {translate("Gender")}:
+                  </p>
+                }
                 options={genderOptions}
                 valueField="id"
                 nameField="value"
@@ -173,7 +166,11 @@ const GroupDistribution = ({ pageTitle }) => {
               /> */}
 
               <DefaultSelect
-                label={<p className="text-gray-700 font-medium">{translate("Sub Class")} :</p>}
+                label={
+                  <p className="text-gray-700 font-medium">
+                    {translate("Sub Class")} :
+                  </p>
+                }
                 options={selectedClass?.ClassGroup}
                 valueField="SubClassID"
                 nameField="SubClass"
@@ -241,30 +238,11 @@ const GroupDistribution = ({ pageTitle }) => {
         </table>
       </div>
 
-      <div className="flex justify-center items-center mt-4">
-        {/* <div>
-          <Button onClick={handleSave}>সংরক্ষণ করুন</Button>
-        </div> */}
-        <div className="flex items-center space-x-2">
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-          >
-            <MdKeyboardArrowLeft size={24} />
-          </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            className="p-1 border rounded disabled:opacity-50"
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-          >
-            <MdKeyboardArrowRight size={24} />
-          </button>
-        </div>
-      </div>
+        <DefaultPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
     </div>
   );
 };

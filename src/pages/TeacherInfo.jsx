@@ -3,10 +3,7 @@ import DefaultInput from "../components/Forms/DefaultInput";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 
 import { useEffect, useState } from "react";
-import Fourdots from "../images/brand/four-dots-square.svg";
-import { FaEdit, FaTrash } from "react-icons/fa";
 import DefaultGreen from "../components/Button/DefaultGreen";
-import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
 import {
   useGetDesignationQuery,
   useGetTeacherInfoQuery,

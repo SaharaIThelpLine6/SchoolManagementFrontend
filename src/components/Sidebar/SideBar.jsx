@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
-import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 
 import { menuData } from "./data";
 import useTranslate from "../../utils/Translate";
@@ -246,19 +245,21 @@ const SideBar = () => {
                         : "hover:text-[#007af7] hover:bg-[#ddeffe] border-l-transparent"
                     }`}
                   >
-                    <div className="flex items-center justify-center gap-3">
-                      <SvgIcon
-                        name={menu.icon}
-                        size={20}
-                        className="mb-0.5"
-                      />
+                    <div className="flex items-center justify-center gap-2">
+                      <SvgIcon name={menu.icon} size={24}/>
                       {translate(menu.name)}
                     </div>
                     <span>
                       {openMenuId === menu.id ? (
-                        <FaChevronUp />
+                        <SvgIcon
+                          name={"FaChevronUp"}
+                          size={14}
+                        />
                       ) : (
-                        <FaChevronDown />
+                        <SvgIcon
+                          name={"FaChevronDown"}
+                          size={14}
+                        />
                       )}
                     </span>
                   </button>
@@ -309,7 +310,7 @@ const SideBar = () => {
                 >
                   <SvgIcon
                     name={menu.icon}
-                    size={20}
+                    size={14}
                     className="text-current"
                   />
                   {translate(menu.name)}
