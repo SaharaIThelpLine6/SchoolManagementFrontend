@@ -1,9 +1,8 @@
-
 const DeveloperCredit = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="text-center py-3 bg-gray-50 text-gray-500 text-sm border-t border-gray-200">
+    <footer className="fixed bottom-0 left-0 right-0 py-3 bg-gray-50 text-gray-500 text-sm border-t border-gray-200 text-center print:hidden">
       &copy; {year} Developed by{" "}
       <a
         href="https://saharait.com/"

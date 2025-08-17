@@ -101,7 +101,7 @@ const DefaultLayout = () => {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 ml-0 h-full overflow-y-auto print:ml-0 print:h-auto print:overflow-y-visible">
+        <main className="flex-1 ml-0 h-full overflow-y-auto print:ml-0 print:h-auto print:overflow-y-visible pb-16">
           <div className="relative p-4 min-h-full print:p-0 print:h-auto print:bg-white print:min-h-auto">
             <div className="relative">
               <Outlet />
