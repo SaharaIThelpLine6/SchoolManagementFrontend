@@ -174,6 +174,14 @@ const router = createBrowserRouter([
                 ),
               },
               {
+                path: "vacation/type-of-vacation",
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                    <TypeOfVacation pageTitle="Class" />
+                  // </RequirePermission>
+                ),
+              },
+              {
                 path: "book-list",
                 element: (
                   <RequirePermission
@@ -413,7 +421,7 @@ const router = createBrowserRouter([
               },
             ],
           },
-       
+
           {
             path: "result",
             children: [
@@ -460,7 +468,7 @@ const router = createBrowserRouter([
               },
             ],
           },
-           {
+          {
             path: "darul-ikama",
             children: [
               {
@@ -494,7 +502,7 @@ const router = createBrowserRouter([
                   // <RequirePermission
                   //   permissionId={permissionsDataList.fee_setting}
                   // >
-                    <DepositCosts pageTitle="Deposit Costs" />
+                  <DepositCosts pageTitle="Deposit Costs" />
                   // </RequirePermission>
                 ),
               },
@@ -504,7 +512,7 @@ const router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.fee_setting}
                   >
-                  <FeeSetting pageTitle="Fee Setting" />
+                    <FeeSetting pageTitle="Fee Setting" />
                   </RequirePermission>
                 ),
               },
@@ -560,7 +568,7 @@ const router = createBrowserRouter([
               },
             ],
           },
-             {
+          {
             path: "/payment_confirm/:schoolid/:service/:size",
             element: <PaymentConfirm />,
           },
