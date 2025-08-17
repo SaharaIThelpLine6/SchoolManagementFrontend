@@ -15,6 +15,7 @@ import bnBijoy2Unicode from "../utils/conveter";
 import PrintOptions from "../view/students/certificate-attestation/PrintOptions";
 import Loading from "../components/Loading/Loading";
 import SvgIcon from "../components/icons/SvgIcon";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 10;
 
@@ -195,33 +196,11 @@ const CertificateAttesation = ({ pageTitle }) => {
                   isFilterColumn={false}
                 />
 
-                <div className="flex justify-center items-center gap-4 mt-4">
-                  <button
-                    onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                    disabled={currentPage === 1}
-                    className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-                  >
-                    <SvgIcon name={"MdKeyboardArrowLeft"} size={18} />
-
-                    {translate("Prev")}
-                  </button>
-
-                  <span className="text-sm font-medium text-gray-700">
-                    {translate("Page")} {currentPage} {translate("of")}{" "}
-                    {totalPages}
-                  </span>
-
-                  <button
-                    onClick={() =>
-                      setCurrentPage((p) => Math.min(p + 1, totalPages))
-                    }
-                    disabled={currentPage === totalPages}
-                    className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-                  >
-                    {translate("Next")}
-                    <SvgIcon name={"MdKeyboardArrowRight"} size={18} />
-                  </button>
-                </div>
+                <DefaultPagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
               </>
             )}
           </div>

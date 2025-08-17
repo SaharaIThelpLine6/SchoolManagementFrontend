@@ -16,6 +16,7 @@ import {
 import { isEqual } from "lodash";
 import { useGetUserReportQuery } from "../../../features/userReports/userReportsSlice";
 import SvgIcon from "../../../components/icons/SvgIcon";
+import DefaultPagination from "../../../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 5;
 
@@ -107,13 +108,7 @@ const AllUsersData = ({ pageTitle }) => {
     return Math.ceil(userData.length / PAGE_SIZE);
   }, [userData]);
 
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
 
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   const columns = [
     {
@@ -167,30 +162,11 @@ const AllUsersData = ({ pageTitle }) => {
           isFilterColumn={false}
         />
 
-        <div className="flex justify-center items-center gap-4 mt-4">
-          <button
-            onClick={handlePrev}
-            disabled={currentPage === 1}
-            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-          >
-            <SvgIcon name={"MdKeyboardArrowLeft"} size={18} />
-
-            {translate("Prev")}
-          </button>
-
-          <span className="text-sm font-medium text-gray-700">
-            {translate("Page")} {currentPage} {translate("of")} {totalPages}
-          </span>
-
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-          >
-            {translate("Next")}
-            <SvgIcon name={"MdKeyboardArrowRight"} size={18} />
-          </button>
-        </div>
+         <DefaultPagination
+                 currentPage={currentPage}
+                 totalPages={totalPages}
+                 onPageChange={setCurrentPage}
+               />
       </div>
     </FormProvider>
   );

@@ -6,6 +6,7 @@ import SortableTable from "../../../components/Tables/SortableTable";
 import useTranslate from "../../../utils/Translate";
 import Input from "../../../components/Input/Input";
 import SvgIcon from "../../../components/icons/SvgIcon";
+import DefaultPagination from "../../../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 5; // Reduced page size for better demonstration
 
@@ -193,29 +194,11 @@ const OthersTable = ({ pageTitle, setMobileNumbers, mobileNumbers }) => {
         isFilterColumn={false}
       />
       {/* Pagination Controls */}
-      <div className="flex justify-center items-center gap-4 mt-4">
-        <button
-          onClick={handlePrev}
-          disabled={currentPage === 1}
-          className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-        >
-          <SvgIcon name={"MdKeyboardArrowLeft"} size={18} />
-          Prev
-        </button>
-
-        <span className="text-sm font-medium text-gray-700">
-          Page {currentPage} of {totalPages}
-        </span>
-
-        <button
-          onClick={handleNext}
-          disabled={currentPage === totalPages}
-          className="flex items-center gap-1 px-3 py-1 rounded bg-gray-300 disabled:opacity-50"
-        >
-          Next
-          <SvgIcon name={"MdKeyboardArrowRight"} size={18} />
-        </button>
-      </div>
+      <DefaultPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };
