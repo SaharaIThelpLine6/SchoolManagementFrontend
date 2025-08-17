@@ -22,6 +22,7 @@ import {
   useGetSubLedgerQuery,
   useGetTransactionOrdersQuery,
   usePostInComeExpenseMutation,
+  useUpdateInComeExpenseMutation,
 } from "../features/feeCollection/feeCollectionSlice";
 import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
 import BanglaDatePicker from "../components/Forms/DatePicker/BanglaDatePicker";
@@ -41,6 +42,9 @@ const DepositCosts = ({ pageTitle }) => {
   const [defaultData, setDefaultData] = useState([]);
   const [editIdDefaultData, setEditIdDefaultData] = useState(null);
   const [editId, setEditId] = useState(null);
+
+  console.log(defaultData, "defaultData");
+
   const [
     caID,
     ledgerGLID,
@@ -68,18 +72,19 @@ const DepositCosts = ({ pageTitle }) => {
   ]);
 
   const { data: fundNamesData } = useGetFundNamesQuery();
-  const { data: gldgersData } = useGetGLedgersQuery();
+  const { data: gldgersData = [] } = useGetGLedgersQuery(); // Provide default empty array
   const { data: generalLedgersData } = useGetGeneralLedgersQuery(caID, {
     skip: !caID,
   });
 
   const { data: gSLData } = useGetSubLedgerQuery(ledgerGLID, {
-    skip: !ledgerGLID, //
+    skip: !ledgerGLID,
   });
 
   const { data: pgSLData } = useGetSubLedgerQuery(paymentGLID, {
-    skip: !paymentGLID, //
+    skip: !paymentGLID,
   });
+
   const { data: receiptNumber, isSuccess } = useGetReceiptNumberQuery(
     {
       fundid: FundID,
@@ -98,11 +103,11 @@ const DepositCosts = ({ pageTitle }) => {
     isError,
     refetch,
   } = useGetTransactionOrdersQuery();
-  // Example call
 
   console.log(transactionOrdersData, "transactionOrdersData");
 
   const [postInComeExpense] = usePostInComeExpenseMutation();
+  const [updateInComeExpense] = useUpdateInComeExpenseMutation();
   const [deleteInComeExpense] = useDeleteInComeExpenseMutation();
 
   const totalPages = Math.ceil(
@@ -113,14 +118,6 @@ const DepositCosts = ({ pageTitle }) => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return transactionOrdersData?.slice(start, start + PAGE_SIZE) || [];
   }, [transactionOrdersData, currentPage]);
-
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   // Set default value when receiptNumber changes
   useEffect(() => {
@@ -137,83 +134,64 @@ const DepositCosts = ({ pageTitle }) => {
   const handleEdit = (orderId) => {
     setEditId(orderId);
 
-    // transactionOrdersData থেকে মিলে যাওয়া ডাটা বের করা
+    // Find the selected order
     const selectedOrder = transactionOrdersData?.find(
       (item) => item.OrderID === orderId
     );
 
-    const data = [10, 20, 546, 75, 102];
+    if (!selectedOrder) return;
 
-    console.log(selectedOrder, "selectedOrder");
+    // Set main transaction data
+    setValue("FundID", selectedOrder.FundID);
+    setValue("VoucherNo", selectedOrder.VoucherNo);
+    setValue("BookNo", selectedOrder.BookNo);
+    setValue("TransactionDateEng", selectedOrder.TransactionDateEng);
+    setValue("TransactionBanglaDate", selectedOrder.TransactionBanglaDate);
+    setValue(
+      "LParticulars",
+      selectedOrder.AccBankTransaction?.Particulars || ""
+    );
 
-    if (selectedOrder) {
-      // মেইন ট্রান্সাকশন ডাটা সেট করা
-      setValue("FundID", selectedOrder.FundID);
-      setValue("VoucherNo", selectedOrder.VoucherNo);
-      setValue("BookNo", selectedOrder.BookNo);
-      setValue("TransactionDateEng", selectedOrder.TransactionDateEng);
-      setValue("TransactionBanglaDate", selectedOrder.TransactionBanglaDate);
-      setValue("LParticulars", selectedOrder.AccBankTransaction.Particulars);
-      const targetStr = selectedOrder.AccBankTransaction.SLID.toString();
+    // Safely handle GL data
+    const targetStr = selectedOrder.AccBankTransaction?.SLID?.toString() || "";
+    const match = gldgersData?.find((i) =>
+      targetStr.startsWith(i?.GLID?.toString() || "")
+    );
 
-      const match = gldgersData.find((i) =>
-        targetStr.startsWith(i.GLID.toString())
-      );
-      console.log(match.GLID, "LSLID");
+    if (match) {
       setValue("paymentGLID", match.GLID);
-      setValue("LSLID", selectedOrder.AccBankTransaction.LSLID);
-      setDefaultData(selectedOrder.AccTransactionDetails || []);
-
-      // সাব-ডিটেইলস থাকলে সেট করা
-      // if (selectedOrder.AccTransactionDetails?.length > 0) {
-      //   const detail = selectedOrder.AccTransactionDetails[0]; // প্রথম ডিটেইল নিচ্ছি, লুপও করতে পারেন
-      //   setValue("SLID", detail.SLID);
-      //   setValue("Description", detail.Particulars);
-      //   setValue("Amount", detail.Amount);
-      // }
-
-      // // ব্যাংক ট্রান্সাকশন থাকলে সেট করা
-      // if (selectedOrder.AccBankTransaction) {
-      //   setValue("PaymentSLID", selectedOrder.AccBankTransaction.SLID);
-      //   setValue(
-      //     "PaymentDescription",
-      //     selectedOrder.AccBankTransaction.Particulars
-      //   );
-      //   setValue("PaymentAmount", selectedOrder.AccBankTransaction.Amount);
-      // }
     }
+    setTimeout(() => {
+      setValue("LSLID", selectedOrder.AccBankTransaction?.SLID || "");
+    }, 500);
+
+    setDefaultData(selectedOrder.AccTransactionDetails || []);
   };
 
   // Data Create Exam Fee Setting
   const onSubmit = async (data) => {
     try {
-      let response;
       const payload = {
         SLID: data.SLID,
         Particulars: data.Particulars,
         Amount: data.Amount,
-        SL: editIdDefaultData
-          ? editIdDefaultData // keep old ID if editing
-          : 1 + defaultData.length, // new row ID
+        SL: editIdDefaultData ? editIdDefaultData : 1 + defaultData.length,
       };
 
       if (editIdDefaultData) {
-        // Update existing record
         setDefaultData((prev) =>
           prev.map((item) => (item.SL === editIdDefaultData ? payload : item))
         );
         setEditIdDefaultData(null);
       } else {
-        // Add new record
         setDefaultData((prev) => [...prev, payload]);
       }
 
       Swal.fire({
         icon: "success",
         title: "সফলভাবে সংরক্ষণ হয়েছে",
-        text: response?.message || "Exam Fee Setting সফলভাবে সংরক্ষিত হয়েছে।",
+        text: "Exam Fee Setting সফলভাবে সংরক্ষিত হয়েছে।",
       }).then(() => {
-        // refetch();
         methods.reset({
           ...methods.getValues(),
           Particulars: "",
@@ -221,10 +199,7 @@ const DepositCosts = ({ pageTitle }) => {
         });
       });
     } catch (error) {
-      const errMsg =
-        error?.data?.message ||
-        error?.data?.error ||
-        "অজানা একটি ত্রুটি ঘটেছে।";
+      const errMsg = error?.data?.message || "অজানা একটি ত্রুটি ঘটেছে।";
       Swal.fire({
         icon: "error",
         title: "ত্রুটি ঘটেছে!",
@@ -245,7 +220,7 @@ const DepositCosts = ({ pageTitle }) => {
       cancelButtonText: "না, বাতিল করুন",
     }).then((result) => {
       if (result.isConfirmed) {
-        setDefaultData((prev) => prev.filter((item) => item.ID !== id));
+        setDefaultData((prev) => prev.filter((item) => item.SL !== id));
         Swal.fire(
           "মুছে ফেলা হয়েছে!",
           "ডেটা সফলভাবে মুছে ফেলা হয়েছে।",
@@ -253,7 +228,8 @@ const DepositCosts = ({ pageTitle }) => {
         );
       }
     });
-  }; // Delete function
+  };
+
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: "আপনি কি নিশ্চিত?",
@@ -267,7 +243,6 @@ const DepositCosts = ({ pageTitle }) => {
     if (result.isConfirmed) {
       try {
         await deleteInComeExpense(id).unwrap();
-
         Swal.fire(
           "মুছে ফেলা হয়েছে!",
           "ডেটা সফলভাবে মুছে ফেলা হয়েছে।",
@@ -292,7 +267,6 @@ const DepositCosts = ({ pageTitle }) => {
       setEditIdDefaultData(id);
       methods.reset({
         ...methods.getValues(),
-        // SLID: existing.SLID,
         Particulars: existing.Particulars,
         Amount: existing.Amount,
       });
@@ -314,10 +288,7 @@ const DepositCosts = ({ pageTitle }) => {
     {
       title: (
         <div className="flex items-center justify-center gap-1">
-            <SvgIcon
-              name={"GrDrag"}
-              size={16}
-            />
+          <SvgIcon name={"GrDrag"} size={16} />
         </div>
       ),
       hozAlign: "center",
@@ -328,7 +299,6 @@ const DepositCosts = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => <>{row.OrderID}</>,
     },
-
     {
       title: translate("Voucher/Bill"),
       hozAlign: "center",
@@ -352,19 +322,15 @@ const DepositCosts = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          
-          <EditButton onClick={() => handleEditOpenModalDefaultData(row.SL)}/>
-          <DeleteButton   onClick={() => handleDeleteDefaultData(row.SL)}/>
+          <EditButton onClick={() => handleEditOpenModalDefaultData(row.SL)} />
+          <DeleteButton onClick={() => handleDeleteDefaultData(row.SL)} />
         </div>
       ),
     },
     {
       title: (
         <div className="flex items-center justify-center gap-1">
-        <SvgIcon
-              name={"GrDrag"}
-              size={16}
-            />
+          <SvgIcon name={"GrDrag"} size={16} />
         </div>
       ),
       hozAlign: "center",
@@ -392,7 +358,7 @@ const DepositCosts = ({ pageTitle }) => {
       const payload = {
         FundID,
         CAID: caID,
-        VoucherNo: VoucherNo ? VoucherNo : 1,
+        VoucherNo: VoucherNo || 1,
         BookNo,
         LParticulars,
         LSLID,
@@ -405,10 +371,14 @@ const DepositCosts = ({ pageTitle }) => {
         gledger: defaultData,
       };
 
-      console.log(payload, "payload");
-      // const response = await postInComeExpense(payload).unwrap();
+      if (editId) {
+        console.log(payload, "payload edit data")
+        await updateInComeExpense({ id: editId, data: payload }).unwrap();
 
-      // Show success alert
+      } else {
+        await postInComeExpense(payload).unwrap();
+      }
+
       Swal.fire({
         icon: "success",
         title: "Success",
@@ -416,6 +386,7 @@ const DepositCosts = ({ pageTitle }) => {
         timer: 2000,
         showConfirmButton: false,
       });
+
       refetch();
       methods.reset({
         FundID: "",
@@ -443,13 +414,6 @@ const DepositCosts = ({ pageTitle }) => {
         <h3 className="text-lg md:text-xl font-bold">
           {translate("Accounting")}
         </h3>
-        {/* <button
-          className="rounded-full p-2 bg-gray-200 hover:bg-gray-300 transition"
-          aria-label="Settings"
-          //   onClick={handleOpenModal}
-        >
-          <IoMdSettings className="text-2xl text-gray-700" />
-        </button> */}
       </div>
 
       <FormProvider {...methods}>
@@ -506,7 +470,6 @@ const DepositCosts = ({ pageTitle }) => {
               label={translate("Voucher/Bill") + " :"}
               type="text"
               registerKey={"VoucherNo"}
-              // require={"Voucher/Bill is required!"}
               disable
             />
             <DefaultInput
@@ -526,7 +489,6 @@ const DepositCosts = ({ pageTitle }) => {
               dateCalender={`${translate("Bangla Date")}: `}
               placeholder="Enter date"
               registerKey="TransactionBanglaDate"
-              require="Bangla date is required!"
             />
             <DefaultSelect
               label={translate("Payment System") + " :"}
