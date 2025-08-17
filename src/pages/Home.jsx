@@ -55,7 +55,7 @@ const Home = ({ pageTitle }) => {
         <CardDataStats
           title={translate("Total students")} // Total Student
           total={studentCount ? studentCount?.totalUsers : 0}
-          bgColor="#ECF7FB" // Light pink
+          bgColor="bg-[#ECF7FB]" // Light pink
           iconColor="text-[#06AEEF]"
           titleColor="text-[#06AEEF]"
           isLoading={!studentCount}
@@ -66,7 +66,7 @@ const Home = ({ pageTitle }) => {
         <CardDataStats
           title={translate("Total teachers")} // Total Teacher
           total={teacherCount?.totalUsers ?? 0}
-          bgColor="#F9CEE1" // Light green
+          bgColor="bg-[#F9CEE1]" // Light green
           titleColor="text-[#EB058C]"
           iconColor="text-[#EB058C]" // Pass the color value without "text-" prefix
           isLoading={!teacherCount}
@@ -77,7 +77,7 @@ const Home = ({ pageTitle }) => {
         <CardDataStats
           title={translate("Total donor member")} // Total Guardian
           total={donerCount?.totalUsers ?? 0}
-          bgColor="#C3DCC2" // Light green
+          bgColor="bg-[#C3DCC2]" // Light green
           titleColor="text-[#0C9444]"
           iconColor="text-[#0C9444]" // Pass the color value without "text-" prefix
           isLoading={!donerCount}
@@ -87,7 +87,7 @@ const Home = ({ pageTitle }) => {
         <CardDataStats
           title={translate("Total owed")} // Total User
           total={totalDueCount?.totalDue ?? 0}
-          bgColor="#FFE4C6" // Light orange
+          bgColor="bg-[#FFE4C6]" // Light orange
           titleColor="text-[#F7951E]"
           iconColor="text-[#F7951E]"
           isLoading={!totalDueCount}

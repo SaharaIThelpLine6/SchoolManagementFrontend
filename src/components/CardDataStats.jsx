@@ -35,8 +35,7 @@ const CardDataStats = ({
   return (
     <div className="flex items-center gap-4 rounded-md bg-white p-4 shadow-sm transition hover:shadow-md">
       <div
-        className="flex h-14 md:h-16 w-14 md:w-16 items-center justify-center rounded-full"
-        style={{ backgroundColor: bgColor }}
+        className={`flex h-14 md:h-16 w-14 md:w-16 items-center justify-center rounded-full ${bgColor}`}
       >
         {styledIcon}
       </div>
