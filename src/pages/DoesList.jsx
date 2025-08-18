@@ -8,9 +8,7 @@ import { setPageName } from "../features/auth/authSlice";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
 import {
-  useDeleteExamFeeSettingMutation,
   useGetExamFeeSettingQuery,
-  useGetExamNamesQuery,
   usePostExamFeeSettingMutation,
   useUpdateExamFeeSettingMutation,
 } from "../features/exam/examQuerySlice";
@@ -41,21 +39,14 @@ const DoesList = ({ pageTitle }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false);
   // Create an array to track visibility for each select (12 columns)
-  const [visibility, setVisibility] = useState(Array(12).fill(true));
 
-  const toggleVisibility = (index) => {
-    const newVisibility = [...visibility];
-    newVisibility[index] = !newVisibility[index];
-    setVisibility(newVisibility);
-  };
+
 
   const [postExamFeeSetting] = usePostExamFeeSettingMutation();
   const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
-  const [deleteExamFeeSetting] = useDeleteExamFeeSettingMutation();
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
-  const { data: examNameData } = useGetExamNamesQuery();
 
   const {
     data: examFeeSettingData,
@@ -71,13 +62,7 @@ const DoesList = ({ pageTitle }) => {
     return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
   }, [examFeeSettingData, currentPage]);
 
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
 
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
