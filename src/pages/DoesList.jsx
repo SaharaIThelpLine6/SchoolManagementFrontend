@@ -37,7 +37,6 @@ const DoesList = ({ pageTitle }) => {
   const { watch, handleSubmit } = methods;
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false);
   // Create an array to track visibility for each select (12 columns)
 
 

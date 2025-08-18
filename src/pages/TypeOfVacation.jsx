@@ -50,13 +50,6 @@ const TypeOfVacation = ({ pageTitle }) => {
     return studentVacationTypeData.slice(start, start + PAGE_SIZE);
   }, [studentVacationTypeData, currentPage]);
 
-  const handleNext = () => {
-    if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
-  };
-
-  const handlePrev = () => {
-    if (currentPage > 1) setCurrentPage((prev) => prev - 1);
-  };
 
   const handleOpenModal = useCallback(() => {
     showModal(translate("Type of holiday create"), "ADD_TYPEOFVACATION");

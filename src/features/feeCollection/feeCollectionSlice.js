@@ -31,6 +31,9 @@ export const feeCollectionSlice = createApi({
     getSubLedger: builder.query({
       query: (id) => `view_subledger/${id}`,
     }),
+    getAllSubLedger: builder.query({
+      query: () => `view_subledger`,
+    }),
     getFee: builder.query({
       query: ({ sessionID, classID, SFGNID }) =>
         `view_student_fee/${sessionID}/${classID}/${SFGNID}`,
@@ -76,7 +79,7 @@ export const feeCollectionSlice = createApi({
     getGeneralLedgers: builder.query({
       query: (id) => `general_ledger/${id}`,
       providesTags: ["GeneralLedgers"],
-    }), 
+    }),
     getGLedgers: builder.query({
       query: () => `general_ledger/`,
       providesTags: ["GeneralLedgers"],
@@ -98,7 +101,7 @@ export const feeCollectionSlice = createApi({
       providesTags: ["TransactionDetails"],
     }),
     getTransactionOrders: builder.query({
-      query: () => `transaction_orders`,
+      query: ({ id }) => `transaction_orders/${id}`,
       providesTags: ["TransactionOrders"],
     }),
     getReceiptNumber: builder.query({
@@ -159,6 +162,7 @@ export const {
   useGetFeesQuery,
   useGetPaymentTypeQuery,
   useGetSubLedgerQuery,
+  useGetAllSubLedgerQuery,
   useGetFeeQuery,
   useGetDueFeeQuery,
   useGetFeeByIdQuery,
@@ -180,5 +184,5 @@ export const {
   usePostInComeExpenseMutation,
   useGetReceiptNumberQuery,
   useUpdateInComeExpenseMutation,
-  useDeleteInComeExpenseMutation
+  useDeleteInComeExpenseMutation,
 } = feeCollectionSlice;

@@ -13,6 +13,7 @@ import DefaultSelect from "../components/Forms/DefaultSelect";
 import Button from "../components/Button/Button";
 import {
   useDeleteInComeExpenseMutation,
+  useGetAllSubLedgerQuery,
   useGetChartOFAccountQuery,
   useGetFundNamesQuery,
   useGetGeneralLedgersQuery,
@@ -73,6 +74,8 @@ const DepositCosts = ({ pageTitle }) => {
 
   const { data: fundNamesData } = useGetFundNamesQuery();
   const { data: gldgersData = [] } = useGetGLedgersQuery(); // Provide default empty array
+  const { data: allLedgersData = [] } = useGetAllSubLedgerQuery(); // Provide default empty array
+  console.log(gldgersData, "gldgersData");
   const { data: generalLedgersData } = useGetGeneralLedgersQuery(caID, {
     skip: !caID,
   });
@@ -102,7 +105,7 @@ const DepositCosts = ({ pageTitle }) => {
     isLoading,
     isError,
     refetch,
-  } = useGetTransactionOrdersQuery();
+  } = useGetTransactionOrdersQuery({ id: caID }, { skip: !caID });
 
   console.log(transactionOrdersData, "transactionOrdersData");
 
@@ -179,6 +182,7 @@ const DepositCosts = ({ pageTitle }) => {
       };
 
       if (editIdDefaultData) {
+        console.log(payload, "payload edit data eeeeeeeeeeeeeeeeeeeee");
         setDefaultData((prev) =>
           prev.map((item) => (item.SL === editIdDefaultData ? payload : item))
         );
@@ -263,13 +267,30 @@ const DepositCosts = ({ pageTitle }) => {
   // Edit function
   const handleEditOpenModalDefaultData = (id) => {
     const existing = defaultData.find((item) => item.SL === id);
+
+    console.log(existing, "existing edit default data");
+    console.log(allLedgersData, "allLedgersData");
+
+    // existing null/undefined না হলে compare করা যাবে
+    const match = allLedgersData?.find((i) =>
+      existing?.SLID?.toString().startsWith(i?.GLID?.toString() || "")
+    );
+
+    console.log(match, "match");
+
     if (existing) {
       setEditIdDefaultData(id);
+
       methods.reset({
         ...methods.getValues(),
         Particulars: existing.Particulars,
         Amount: existing.Amount,
       });
+
+      setValue("ledgerGLID", match.GLID);
+      setTimeout(() => {
+        setValue("SLID", existing.SLID);
+      }, 500);
     }
   };
 
@@ -323,7 +344,9 @@ const DepositCosts = ({ pageTitle }) => {
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
           <EditButton onClick={() => handleEditOpenModalDefaultData(row.SL)} />
-          <DeleteButton onClick={() => handleDeleteDefaultData(row.SL)} />
+          {!editId && (
+            <DeleteButton onClick={() => handleDeleteDefaultData(row.SL)} />
+          )}
         </div>
       ),
     },
@@ -372,9 +395,8 @@ const DepositCosts = ({ pageTitle }) => {
       };
 
       if (editId) {
-        console.log(payload, "payload edit data")
+        console.log(payload, "payload edit data");
         await updateInComeExpense({ id: editId, data: payload }).unwrap();
-
       } else {
         await postInComeExpense(payload).unwrap();
       }
@@ -390,10 +412,11 @@ const DepositCosts = ({ pageTitle }) => {
       refetch();
       methods.reset({
         FundID: "",
-        VoucherNo: "",
+        VoucherNo: methods.getValues("VoucherNo"),
         BookNo: "",
         TransactionDateEng: "",
         TransactionBanglaDate: "",
+        CAID: methods.getValues("CAID"),
         gledger: [],
       });
       setDefaultData([]);
@@ -572,28 +595,46 @@ const DepositCosts = ({ pageTitle }) => {
       </div>
 
       {/* Table Section */}
-      <div className="mt-5 overflow-x-auto">
-        {isLoading ? (
-          <Loading />
-        ) : isError ? (
+      <div className="mt-5">
+        {/* Loading State */}
+        {isLoading && <Loading />}
+
+        {/* Error State */}
+        {isError && (
           <div className="text-red-500 text-center py-4">
             {translate("Failed to load exam fee settings. Please try again.")}
           </div>
-        ) : (
-          <SortableTable
-            columns={columns}
-            data={paginatedData}
-            isFilterColumn={false}
-          />
         )}
-      </div>
 
-      {/* Pagination */}
-      <DefaultPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
+        {/* Success State - Only shows when data exists */}
+        {!isLoading && !isError && paginatedData?.length > 0 && (
+          <>
+            <div className="overflow-x-auto">
+              <SortableTable
+                columns={columns}
+                data={paginatedData}
+                isFilterColumn={false}
+              />
+            </div>
+
+            {/* Pagination - Only shows when data exists */}
+            <DefaultPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        )}
+
+        {/* Empty State - When no data exists */}
+        {!isLoading &&
+          !isError &&
+          (!paginatedData || paginatedData.length === 0) && (
+            <div className="text-center py-8 text-gray-500">
+              {translate("No data found.")}
+            </div>
+          )}
+      </div>
     </div>
   );
 };
