@@ -35,6 +35,7 @@ const AddStudentVacationForm = ({ pageTitle }) => {
   const { academicSession, studentRelation, status } = useSelector(
     (state) => state.settings
   );
+  
 
   const translate = useTranslate();
   const [showSuggestions, setShowSuggestions] = useState(false);

@@ -6,7 +6,10 @@ import Swal from "sweetalert2";
 
 import useTranslate from "../../utils/Translate";
 import { showModal } from "../../utils/ModalControlar";
-import { useGetStudentsVacationListQuery } from "../../features/student/studentQuerySlice";
+import {
+  useDeleteStudentsVacationMutation,
+  useGetStudentsVacationListQuery,
+} from "../../features/student/studentQuerySlice";
 import Button from "../Button/Button";
 import Print from "./Print";
 import { formatTime } from "../../helper/formatTime";
@@ -32,6 +35,10 @@ const StudentVacationListTable = ({ pageTitle }) => {
   } = useGetStudentsVacationListQuery({ page: currentPage, limit: 10 });
 
   const { academicSession } = useSelector((state) => state.settings);
+
+  const [deleteStudentsVacation, { isLoading, isSuccess, isError, error }] =
+    useDeleteStudentsVacationMutation();
+
   // Process data with session names and maintain pagination info
   const {
     processedData,
@@ -95,8 +102,11 @@ const StudentVacationListTable = ({ pageTitle }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
+
+
   const handleDelete = useCallback(
     (id) => {
+      console.log(id, "id")
       Swal.fire({
         title: translate("Are you sure?"),
         text: translate(
@@ -108,20 +118,33 @@ const StudentVacationListTable = ({ pageTitle }) => {
         cancelButtonColor: "#3085d6",
         confirmButtonText: translate("Yes, delete it!"),
         cancelButtonText: translate("Cancel"),
-      }).then((result) => {
+      }).then(async (result) => {
         if (result.isConfirmed) {
-          Swal.fire({
-            icon: "success",
-            title: translate("Deleted!"),
-            text: translate("The record has been removed."),
-            confirmButtonColor: "#3085d6",
-            confirmButtonText: translate("OK"),
-          });
-          // TODO: Implement actual delete API call here
+          try {
+            await deleteStudentsVacation(id).unwrap();
+
+            Swal.fire({
+              icon: "success",
+              title: translate("Deleted!"),
+              text: translate("The record has been removed."),
+              confirmButtonColor: "#3085d6",
+              confirmButtonText: translate("OK"),
+            });
+
+            // ✅ এখানে চাইলে refetch বা state update করতে পারো
+          } catch (err) {
+            Swal.fire({
+              icon: "error",
+              title: translate("Error!"),
+              text: translate("Failed to delete the record."),
+              confirmButtonColor: "#3085d6",
+            });
+            console.error(err);
+          }
         }
       });
     },
-    [translate]
+    [translate, deleteStudentsVacation]
   );
 
   const handleOpenModal = useCallback(() => {
