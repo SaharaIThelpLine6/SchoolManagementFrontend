@@ -14,10 +14,11 @@ import EditButton from "../components/Button/EditButton";
 import DeleteButton from "../components/Button/DeleteButton";
 import SvgIcon from "../components/icons/SvgIcon";
 import DefaultPagination from "../components/Pagination/DefaultPagination";
+import AcceptFeeForm from "../view/donation/AcceptFeeForm";
 
 const PAGE_SIZE = 10;
 
-const DonorFeeDetermination = ({ pageTitle }) => {
+const FeeCollection = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
@@ -39,71 +40,58 @@ const DonorFeeDetermination = ({ pageTitle }) => {
     return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
   }, [examFeeSettingData, currentPage]);
 
-
-
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  // Update Handle
-  // const handleOpenModal = (row) => {
-  //   showModal("Add New Donation", "ADD_NEW_DONATION");
-  // };
-  //   const handleEdit = (row) => {
-  //     showModal(
-  //       "Accounting dues list Statement",
-  //       "ACCOUNTING_DUES_LIST_STATEMENT"
-  //     );
-  //   };
-
-  // Table Data Columns
   const columns = [
     {
-      title: translate("Action"),
-      hozAlign: "center",
-      render: (row) => (
-        <div className="flex justify-center items-center gap-2">
-          <EditButton onClick={() => handleEdit(row)} />
-          <DeleteButton onClick={() => handleDelete(row)} />
-        </div>
-      ),
-    },
-    {
-      title: (
-        <div className="flex items-center justify-center gap-1">
-          <SvgIcon name={"GrDrag"} size={16} />
-        </div>
-      ),
+      title: translate("Renewal"),
       hozAlign: "center",
       render: (row) => <>{row?.ID}</>,
     },
     {
-      title: translate("Code"),
-      hozAlign: "center",
-      render: (row) => <>{row?.ID}</>,
-    },
-    {
-      title: translate("Donor Name"),
+      title: translate("Print View"),
       hozAlign: "center",
       render: (row) => <>{row?.AcademicSession?.SessionName}</>,
     },
     {
-      title: translate("Sectors"),
+      title: translate("Code"),
       hozAlign: "center",
       render: (row) => <>{bnBijoy2Unicode(row?.Exam_Name?.ExamName)}</>,
     },
     {
-      title: translate("Start"),
+      title: translate("Donor Name"),
       hozAlign: "center",
       render: (row) => <>{bnBijoy2Unicode(row?.Class?.SubClass)}</>,
     },
     {
-      title: translate("End"),
+      title: translate("Sectors"),
       field: "SLID",
       hozAlign: "center",
     },
     {
-      title: translate("Total"),
+      title: translate("Renewal"),
+      field: "SLID",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Renewal end"),
+      field: "SLID",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Collection"),
+      field: "SLID",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Entry Date"),
+      field: "SLID",
+      hozAlign: "center",
+    },
+    {
+      title: translate("Status"),
       field: "SLID",
       hozAlign: "center",
     },
@@ -123,7 +111,7 @@ const DonorFeeDetermination = ({ pageTitle }) => {
         </h3>
         {/* <Button onClick={handleOpenModal}>{translate("Add New Donation")}</Button> */}
       </div>
-      <AddNewDonation />
+      <AcceptFeeForm />
       <FormProvider {...methods}>
         <div className="flex justify-center gap-3 items-center h-full">
           <h2 className="text-lg font-semibold text-gray-700">
@@ -166,13 +154,13 @@ const DonorFeeDetermination = ({ pageTitle }) => {
       </div>
 
       {/* Pagination */}
-         <DefaultPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+      <DefaultPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };
 
-export default DonorFeeDetermination;
+export default FeeCollection;

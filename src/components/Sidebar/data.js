@@ -305,6 +305,10 @@ export const menuData = [
         id: "1",
         name: "Donor Fee Determination",
         route: "/donation",
+      }, {
+        id: "2",
+        name: "Fee Collection",
+        route: "/donation/fee-collection",
       },
     ],
   },

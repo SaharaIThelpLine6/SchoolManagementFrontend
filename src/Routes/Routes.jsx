@@ -72,6 +72,7 @@ import PointBasedResultCreateUpdate from "../pages/PointBasedResultCreateUpdate"
 import BalanceTransfer from "../pages/BalanceTransfer";
 import DonorFeeDetermination from "../pages/DonorFeeDetermination";
 import DepositCosts from "../pages/DepositCosts";
+import FeeCollection from "../pages/FeeCollection";
 
 const router = createBrowserRouter([
   {
@@ -177,7 +178,7 @@ const router = createBrowserRouter([
                 path: "vacation/type-of-vacation",
                 element: (
                   // <RequirePermission permissionId={permissionsDataList.class}>
-                    <TypeOfVacation pageTitle="Class" />
+                  <TypeOfVacation pageTitle="Class" />
                   // </RequirePermission>
                 ),
               },
@@ -588,6 +589,16 @@ const router = createBrowserRouter([
                 index: true,
                 element: (
                   <DonorFeeDetermination pageTitle="Donor Fee Determination" />
+                ),
+              },
+              {
+                path: "fee-collection",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.st}
+                  // >
+                  <FeeCollection pageTitle="Fee Collection Report" />
+                  // </RequirePermission>
                 ),
               },
             ],
