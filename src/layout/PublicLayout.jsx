@@ -4,7 +4,6 @@ import { Outlet, Link, useParams, useNavigate } from "react-router-dom";
 import { fetchResultFieldData } from "../features/studentResultPublicView/studentResultPublicViewSlice";
 import bnBijoy2Unicode from "../utils/conveter";
 
-
 import { Buffer } from "buffer";
 import DeveloperCredit from "../components/DeveloperCredit";
 const PublicLayout = () => {
@@ -169,6 +168,29 @@ const PublicLayout = () => {
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
                             <Link to="/1234/AdmissionRegistration">ভর্তি রেজিস্ট্রেশন</Link>
                         </li> */}
+              <li>
+                <a
+                  href="https://hems.alhaiatululya.org/exam-result"
+                  className="py-3 pl-6 cursor-pointer hover:bg-theme-secondary border border-slate-200 border-r-0 flex items-center gap-[4px]"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 28 28"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M9 6l6 6l-6 6" />
+                  </svg>
+                  আল-হাইআ ফলাফল
+                </a>
+              </li>
             </ul>
           </nav>
         </header>
