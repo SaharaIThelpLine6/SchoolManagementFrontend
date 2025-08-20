@@ -1,6 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
 import ClickOutside from "./ClickOutside";
-import { motion } from "framer-motion";
 import { closeModal } from "../features/modal/modalSlice";
 import AdmissionForm from "./Forms/AdmissionForm";
 import FeeCollectionForm from "./Forms/FeeCollectionForm";
@@ -36,21 +35,19 @@ const DefaultModal = () => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
       <ClickOutside
-        className="max-w-screen-lg w-full overflow-hidden "
+        className="max-w-screen-lg w-full overflow-hidden"
         onClick={() => dispatch(closeModal())}
       >
-        <motion.div
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, scale: { type: "spring", bounce: 0.2 } }}
-          className="w-full"
+        {/* Tailwind animation */}
+        <div
+          className={`w-full transform transition-all duration-300 ease-out 
+            ${isOpen ? "opacity-100 scale-100" : "opacity-0 scale-0"}`}
         >
           <div className="bg-white rounded-lg shadow-lg relative w-full max-h-[90vh] overflow-y-auto">
             <div className="header pl-3 pr-2 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
               {title && (
                 <h2 className="text-[18px] font-bold">{translate(title)}</h2>
               )}
-
               <button
                 onClick={() => dispatch(closeModal())}
                 className="text-xl"
@@ -76,35 +73,19 @@ const DefaultModal = () => {
             {modalType && (
               <div className="body p-3">
                 {modalType === "ADD_STUDENT" && <AdmissionForm userId={id} />}
-                {modalType === "FEE_COLLECTION" && (
-                  <FeeCollectionForm userId={id} />
-                )}
+                {modalType === "FEE_COLLECTION" && <FeeCollectionForm userId={id} />}
                 {modalType === "PAYMENT" && <PaymentModal />}
                 {modalType === "ADD_TEACHER" && <AddTeacherForm userId={id} />}
-                {modalType === "EDIT_TEACHER" && (
-                  <EditTeacherForm userId={id} />
-                )}
+                {modalType === "EDIT_TEACHER" && <EditTeacherForm userId={id} />}
                 {modalType === "ADD_DESIGNATION" && <DesignationForm />}
-                {modalType === "EDIT_DESIGNATION" && (
-                  <DesignationForm userId={id} />
-                )}
+                {modalType === "EDIT_DESIGNATION" && <DesignationForm userId={id} />}
                 {modalType === "ADD_TYPEOFVACATION" && <TypeOfVacationForm />}
-                {modalType === "EDIT_TYPEOFVACATION" && (
-                  <TypeOfVacationForm userId={id} />
-                )}
-                {modalType === "EDIT_STUDENTREPORT" && (
-                  <EditStudentReport id={id} />
-                )}
-                {modalType === "ADD_STUDENTVACATION" && (
-                  <AddStudentVacationForm />
-                )}
+                {modalType === "EDIT_TYPEOFVACATION" && <TypeOfVacationForm userId={id} />}
+                {modalType === "EDIT_STUDENTREPORT" && <EditStudentReport id={id} />}
+                {modalType === "ADD_STUDENTVACATION" && <AddStudentVacationForm />}
                 {modalType === "ADD_MONTHNAMES" && <MonthNamesForm />}
-                {modalType === "EDIT_MONTHNAMES" && (
-                  <MonthNamesForm id={id} isEdit={true} />
-                )}
-                {modalType === "EDIT_STUDENTVACATION" && (
-                  <EditStudentVacationForm userId={id} />
-                )}
+                {modalType === "EDIT_MONTHNAMES" && <MonthNamesForm id={id} isEdit={true} />}
+                {modalType === "EDIT_STUDENTVACATION" && <EditStudentVacationForm userId={id} />}
                 {modalType === "STUDENT_FILTER" && <StudentFilterModal />}
                 {modalType === "SMS_TEMPLATES" && <SMSTemplate />}
                 {modalType === "SMS_BUY" && <SMSBuy />}
@@ -121,7 +102,7 @@ const DefaultModal = () => {
               </div>
             )}
           </div>
-        </motion.div>
+        </div>
       </ClickOutside>
     </div>
   );

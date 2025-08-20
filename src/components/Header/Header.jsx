@@ -5,8 +5,6 @@ import { toggleSidebar } from "../../features/sidebar/sideBarSlice";
 import { showModal } from "../../utils/ModalControlar";
 import TranslateButton from "../../components/Header/TranslateButton";
 import { useGetUserInfoQuery } from "../../features/payment/paymentSlice";
-import { motion, AnimatePresence } from "framer-motion";
-import Logo from "/Screenshot_13.png";
 import LogoAvater from "/saharait-preview.png";
 import { useGetInstitutionInfoQuery } from "../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../utils/conveter";
@@ -21,14 +19,11 @@ const Header = () => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const { data: userPayInfo, refetch } = useGetUserInfoQuery();
-  const {
-    data: institutionInfo,
-    error: institutionInfoError,
-    isLoading: institutionInfoLoading,
-  } = useGetInstitutionInfoQuery();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: institutionInfo } = useGetInstitutionInfoQuery();
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logo, setLogo] = useState(null);
+
   useEffect(() => {
     if (institutionInfo?.Logo?.data) {
       const buffer = Buffer.from(institutionInfo.Logo.data);
@@ -37,6 +32,7 @@ const Header = () => {
       setLogo(imageSrc);
     }
   }, [institutionInfo]);
+
   const handleOpenModal = useCallback(() => {
     showModal("Payment", "PAYMENT");
   }, []);
@@ -44,20 +40,6 @@ const Header = () => {
   useEffect(() => {
     refetch();
   }, [refetch]);
-
-  const mobileMenuVariants = {
-    hidden: { opacity: 0, height: 0 },
-    visible: {
-      opacity: 1,
-      height: "auto",
-      transition: { duration: 0.3, ease: "easeInOut" },
-    },
-    exit: {
-      opacity: 0,
-      height: 0,
-      transition: { duration: 0.3, ease: "easeInOut" },
-    },
-  };
 
   return (
     <header className="w-full bg-white shadow-sm sticky top-0 z-30 font-SolaimanLipi">
@@ -67,10 +49,7 @@ const Header = () => {
           onClick={() => dispatch(toggleSidebar())}
           className="text-2xl text-gray-700"
         >
-          <SvgIcon
-            name={"IoReorderThreeOutline"}
-            size={20}
-          />
+          <SvgIcon name={"IoReorderThreeOutline"} size={20} />
         </button>
 
         <div className="ml-16 sm:ml-0">
@@ -89,87 +68,76 @@ const Header = () => {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="text-xl text-gray-700"
           >
-            <SvgIcon
-              name={"BsThreeDotsVertical"}
-              size={20}
-            />
+            <SvgIcon name={"BsThreeDotsVertical"} size={20} />
           </button>
         </div>
       </div>
 
       {/* Expanded Mobile Menu */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <motion.div
-            className="px-4 pb-4 flex flex-col gap-3 sm:hidden"
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={mobileMenuVariants}
-          >
-            <h2 className="text-center text-base font-semibold text-gray-800">
-              {bnBijoy2Unicode(institutionInfo?.InstitutionName) || ""}
-            </h2>
-            <form className="w-full relative max-w-[250px]">
-              <svg
-                stroke="currentColor"
-                fill="currentColor"
-                strokeWidth="0"
-                viewBox="0 0 512 512"
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
-                height="20"
-                width="20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z" />
-              </svg>
+      {mobileMenuOpen && (
+        <div className="px-4 pb-4 flex flex-col gap-3 sm:hidden origin-top animate-scaleFadeIn">
+          <h2 className="text-center text-base font-semibold text-gray-800">
+            {bnBijoy2Unicode(institutionInfo?.InstitutionName) || ""}
+          </h2>
+          <form className="w-full relative max-w-[250px]">
+            <svg
+              stroke="currentColor"
+              fill="currentColor"
+              strokeWidth="0"
+              viewBox="0 0 512 512"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
+              height="20"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z" />
+            </svg>
 
-              <input
-                type="text"
-                placeholder="Search"
-                className="w-full rounded-full bg-[#EDEDED] h-9 pl-10 pr-4 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00aeef]"
-              />
-            </form>
+            <input
+              type="text"
+              placeholder="Search"
+              className="w-full rounded-full bg-[#EDEDED] h-9 pl-10 pr-4 text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00aeef]"
+            />
+          </form>
 
-            <div className="flex flex-wrap items-center gap-2 justify-center">
-              {userPayInfo && (
-                <p
-                  className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${
-                    userPayInfo.RenewDays > 60
-                      ? "bg-green-500"
-                      : userPayInfo.RenewDays > 30
-                      ? "bg-yellow-500"
-                      : "bg-rose-500"
-                  }`}
-                >
-                  Days: {userPayInfo.RenewDays}
-                </p>
-              )}
-              {userPayInfo && (
-                <p
-                  className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${
-                    userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
-                      ? "bg-green-500"
-                      : userPayInfo.BalanceDr - userPayInfo.BalanceCr > 10
-                      ? "bg-yellow-500"
-                      : "bg-rose-500"
-                  }`}
-                >
-                  Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
-                </p>
-              )}
-              <button
-                onClick={handleOpenModal}
-                className="text-white bg-cyan-500 hover:bg-cyan-600 font-medium rounded-full text-xs px-4 py-1.5"
+          <div className="flex flex-wrap items-center gap-2 justify-center">
+            {userPayInfo && (
+              <p
+                className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${
+                  userPayInfo.RenewDays > 60
+                    ? "bg-green-500"
+                    : userPayInfo.RenewDays > 30
+                    ? "bg-yellow-500"
+                    : "bg-rose-500"
+                }`}
               >
-                Pay now
-              </button>
-              <DropdownNotification />
-              <DropdownUser />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                Days: {userPayInfo.RenewDays}
+              </p>
+            )}
+            {userPayInfo && (
+              <p
+                className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${
+                  userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
+                    ? "bg-green-500"
+                    : userPayInfo.BalanceDr - userPayInfo.BalanceCr > 10
+                    ? "bg-yellow-500"
+                    : "bg-rose-500"
+                }`}
+              >
+                Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
+              </p>
+            )}
+            <button
+              onClick={handleOpenModal}
+              className="text-white bg-cyan-500 hover:bg-cyan-600 font-medium rounded-full text-xs px-4 py-1.5"
+            >
+              Pay now
+            </button>
+            <DropdownNotification />
+            <DropdownUser />
+          </div>
+        </div>
+      )}
 
       {/* Desktop Header */}
       <div className="hidden sm:flex items-center justify-between px-6 py-3 gap-3 2xl:px-11 print:hidden">

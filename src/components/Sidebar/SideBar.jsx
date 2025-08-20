@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 
 import { menuData } from "./data";
 import useTranslate from "../../utils/Translate";
@@ -246,55 +245,43 @@ const SideBar = () => {
                     }`}
                   >
                     <div className="flex items-center justify-center gap-2">
-                      <SvgIcon name={menu.icon} size={24}/>
+                      <SvgIcon name={menu.icon} size={24} />
                       {translate(menu.name)}
                     </div>
                     <span>
                       {openMenuId === menu.id ? (
-                        <SvgIcon
-                          name={"FaChevronUp"}
-                          size={14}
-                        />
+                        <SvgIcon name={"FaChevronUp"} size={14} />
                       ) : (
-                        <SvgIcon
-                          name={"FaChevronDown"}
-                          size={14}
-                        />
+                        <SvgIcon name={"FaChevronDown"} size={14} />
                       )}
                     </span>
                   </button>
 
-                  <AnimatePresence>
-                    {openMenuId === menu.id && (
-                      <motion.ul
-                        className="relative text-gray-600"
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        variants={submenuVariants}
-                      >
-                        <div className="absolute top-0 bottom-0 left-6 w-px border-l-2 border-dashed border-[#007af7] z-0" />
+                  <ul
+                    className={`relative text-gray-600 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out
+    ${openMenuId === menu.id ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}
+  `}
+                  >
+                    <div className="absolute top-0 bottom-0 left-6 w-px border-l-2 border-dashed border-[#007af7] z-0" />
 
-                        {menu.subMenu.map((item) => (
-                          <li key={item.id} className="relative z-10 pl-[26px]">
-                            <NavLink
-                              to={item.route}
-                              end
-                              className={({ isActive }) =>
-                                `block py-2 font-SolaimanLipi pl-4 ${
-                                  isActive
-                                    ? "bg-[#ddeffe] text-[#007af7]"
-                                    : "hover:text-[#007af7] hover:bg-[#ddeffe]"
-                                }`
-                              }
-                            >
-                              {translate(item.name)}
-                            </NavLink>
-                          </li>
-                        ))}
-                      </motion.ul>
-                    )}
-                  </AnimatePresence>
+                    {menu.subMenu.map((item) => (
+                      <li key={item.id} className="relative z-10 pl-[26px]">
+                        <NavLink
+                          to={item.route}
+                          end
+                          className={({ isActive }) =>
+                            `block py-2 font-SolaimanLipi pl-4 ${
+                              isActive
+                                ? "bg-[#ddeffe] text-[#007af7]"
+                                : "hover:text-[#007af7] hover:bg-[#ddeffe]"
+                            }`
+                          }
+                        >
+                          {translate(item.name)}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </ul>
                 </>
               ) : (
                 <NavLink

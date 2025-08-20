@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { Outlet, Link, useParams, useNavigate } from "react-router-dom";
 import { fetchResultFieldData } from "../features/studentResultPublicView/studentResultPublicViewSlice";
 import bnBijoy2Unicode from "../utils/conveter";
-import { motion } from "motion/react";
+
+
 import { Buffer } from "buffer";
 import DeveloperCredit from "../components/DeveloperCredit";
 const PublicLayout = () => {
@@ -172,17 +173,9 @@ const PublicLayout = () => {
           </nav>
         </header>
         <main className=" mx-auto w-full overflow-hidden h-full">
-          <motion.div
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-              duration: 0.4,
-              scale: { type: "spring", visualDuration: 0.4, bounce: 0.2 },
-            }}
-            className="w-full"
-          >
+          <div className="w-full animate-scaleIn">
             <Outlet />
-          </motion.div>
+          </div>
         </main>
       </div>
       <DeveloperCredit />

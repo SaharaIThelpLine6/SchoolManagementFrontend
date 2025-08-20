@@ -9,7 +9,7 @@ export default {
   theme: {
     extend: {
       screens: {
-        'print': { 'raw': 'print' },
+        print: { raw: "print" },
       },
       fontFamily: {
         lato: '"Lato", serif',
@@ -21,8 +21,8 @@ export default {
       boxShadow: {
         sub_menu: "0 0 15px -5px rgba(0, 0, 0, 0.2)",
       },
-       height: {
-        svh: '100svh', 
+      height: {
+        svh: "100svh",
       },
       colors: {
         "theme-offwhite": "#ededed",
@@ -215,6 +215,7 @@ export default {
         35: "8.75rem",
         70: "17.5rem",
         90: "22.5rem",
+         96: "24rem",
         550: "34.375rem",
         300: "18.75rem",
       },
@@ -242,7 +243,7 @@ export default {
       content: {
         "icon-copy": 'url("../images/icon/icon-copy-alt.svg")',
       },
-      transitionProperty: { width: "width", stroke: "stroke" },
+      transitionProperty: { width: "width", stroke: "stroke",  height: "max-height" },
       borderWidth: {
         6: "6px",
       },
@@ -271,11 +272,16 @@ export default {
           "0%": { backgroundPositionX: "180%" },
           "100%": { backgroundPositionX: "-20%" },
         },
+        scaleIn: {
+          "0%": { opacity: "0", transform: "scale(0)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
       },
       animation: {
         shimmer: "shimmer 1s ease-in-out infinite",
         "pulse-custom":
           "pulse-custom 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        scaleIn: "scaleIn 0.4s ease-out",
       },
     },
   },
