@@ -15,9 +15,10 @@ import {
   deleteParentData,
   setParentsData,
 } from "../../../features/student/studentSlice";
-import { isEqual } from "lodash";
+// import { isEqual } from "lodash";
 import SvgIcon from "../../../components/icons/SvgIcon";
 import DefaultPagination from "../../../components/Pagination/DefaultPagination";
+import { isEqual } from "../../../utils/isEqual";
 
 const PAGE_SIZE = 5;
 

@@ -1,73 +1,45 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import EditButton from "../../components/Button/EditButton";
 import DeleteButton from "../../components/Button/DeleteButton";
+import {
+  useDeleteStudentFeeSettingsMutation,
+  useGetStudentFeeSettingsQuery,
+} from "../../features/feeCollection/feeCollectionSlice";
+import bnBijoy2Unicode from "../../utils/conveter";
+import Swal from "sweetalert2";
+import useTranslate from "../../utils/Translate";
+import Loading from "../../components/Loading/Loading";
 
-const initialData = [
-  {
-    id: 1,
-    name: "Hasan",
-    class: "5",
-    SIName: "ABC",
-    MAN: 100,
-    MON: 110,
-    MOO: 120,
-    MDN: 130,
-    MDO: 140,
-    FAN: 150,
-    FAO: 160,
-    FON: 170,
-    FOO: 180,
-    FDN: 190,
-    FDO: 200,
-    SFSID: 210,
-  },
-  {
-    id: 2,
-    name: "Rahim",
-    class: "4",
-    SIName: "XYZ",
-    MAN: 90,
-    MON: 100,
-    MOO: 110,
-    MDN: 120,
-    MDO: 130,
-    FAN: 140,
-    FAO: 150,
-    FON: 160,
-    FOO: 170,
-    FDN: 180,
-    FDO: 190,
-    SFSID: 200,
-  },
-  {
-    id: 3,
-    name: "Karima",
-    class: "3",
-    SIName: "LMN",
-    MAN: 80,
-    MON: 90,
-    MOO: 100,
-    MDN: 110,
-    MDO: 120,
-    FAN: 130,
-    FAO: 140,
-    FON: 150,
-    FOO: 160,
-    FDN: 170,
-    FDO: 180,
-    SFSID: 190,
-  },
-];
-
-const FeeSettingTable = () => {
+const FeeSettingTable = ({ setEditData, editId, filter }) => {
+  console.log(filter, "filter");
+  const translate = useTranslate();
   const [selectedRows, setSelectedRows] = useState([]);
   const [allSelected, setAllSelected] = useState(false);
+
+  const {
+    data: studentFeeSettingData,
+    error,
+    isFetching,
+  } = useGetStudentFeeSettingsQuery({
+    sessionId: filter.sessionId,
+    classId: filter.classId,
+    sfgnid: filter.SLID,
+  });
+
+  const [deleteStudentSettings] = useDeleteStudentFeeSettingsMutation();
+
+  useEffect(() => {
+    if (!studentFeeSettingData || !editId) return;
+
+    const data = studentFeeSettingData.find((i) => i.SFSID === editId);
+    setEditData(data);
+  }, [studentFeeSettingData, editId, setEditData]);
 
   const handleSelectAll = () => {
     if (allSelected) {
       setSelectedRows([]);
     } else {
-      setSelectedRows(initialData.map((row) => row.id));
+      setSelectedRows(studentFeeSettingData.map((row) => row.SFSID));
     }
     setAllSelected(!allSelected);
   };
@@ -81,11 +53,97 @@ const FeeSettingTable = () => {
   };
 
   const handleEditOpenModal = (id) => {
-    alert("Edit for ID: " + id);
+    setEditData(studentFeeSettingData.find((i) => i.SFSID === id));
   };
 
+  // Single delete with SweetAlert
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "আপনি কি এই ফি সেটিং মুছে ফেলতে চান?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "হ্যাঁ, মুছে ফেলুন",
+      cancelButtonText: "বাতিল করুন",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteStudentSettings(id).unwrap();
+        setSelectedRows((prev) => prev.filter((rowId) => rowId !== id));
+
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: "ডাটা সফলভাবে মুছে ফেলা হয়েছে।",
+          confirmButtonText: "ঠিক আছে",
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "ডাটা মুছে ফেলা যায়নি। আবার চেষ্টা করুন।",
+          confirmButtonText: "ঠিক আছে",
+        });
+      }
+    }
+  };
+
+  // Multiple delete with SweetAlert
+  const handleDeleteSelected = async () => {
+    if (selectedRows.length === 0) return;
+
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: `আপনি কি ${selectedRows.length}টি ফি সেটিং মুছে ফেলতে চান?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "হ্যাঁ, মুছে ফেলুন",
+      cancelButtonText: "বাতিল করুন",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteStudentSettings(selectedRows).unwrap(); // multiple delete
+        setSelectedRows([]);
+        setAllSelected(false);
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: "ডাটা সফলভাবে মুছে ফেলা হয়েছে।",
+          confirmButtonText: "ঠিক আছে",
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error!",
+          text: "ডাটা মুছে ফেলা যায়নি। আবার চেষ্টা করুন।",
+          confirmButtonText: "ঠিক আছে",
+        });
+      }
+    }
+  };
+  if (isFetching) {
+    return <Loading/>;
+  }
+
+  if (error) {
+    return <div className="flex justify-center items-center">
+      <p>No data found!</p>
+    </div>;
+  }
   return (
     <div className="bg-white py-4 rounded-lg shadow-sm">
+      <div className="flex justify-end mb-2">
+        {selectedRows.length > 0 && (
+          <button
+            onClick={handleDeleteSelected}
+            className="bg-red-500 text-white px-4 py-1 rounded"
+          >
+            Delete Selected
+          </button>
+        )}
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead className="bg-gray-50">
@@ -98,59 +156,62 @@ const FeeSettingTable = () => {
                   className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                 />
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
-                Action
+              <th className="p-3 border-b border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider w-32">
+                {translate("Action")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">
-                Class Name
+              <th className="p-3 border-b whitespace-nowrap border-gray-200 text-left text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">
+                {translate("Class Name")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
-                SIName
+              <th className="p-3 border-b whitespace-nowrap border-gray-200 text-left text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
+                {translate("Fee Name")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                MAN
+              <th className="p-3 whitespace-nowrap border-b border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+                {translate("Male Residence")} <br /> {translate("New")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                MON
+              <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+                {translate("Male Residence")} <br /> {translate("Old")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                MOO
+              <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+                {translate("Male Non-resident")} <br /> {translate("New")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                MDN
+              <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+                {translate("Male Non-resident")} <br /> {translate("Old")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                MDO
+              <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+                {translate("Male Daycare")} <br /> {translate("New")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                FAN
+              <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+                {translate("Male Daycare")} <br /> {translate("Old")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                FAO
+              <th className="p-3 whitespace-nowrap border-b border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+                {translate("Female Residence")} <br /> {translate("New")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                FON
+              <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+                {translate("Female Residence")} <br /> {translate("Old")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                FOO
+              <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+                {translate("Female Non-resident")} <br /> {translate("New")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                FDN
+              <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+                {translate("Female Non-resident")} <br /> {translate("Old")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                FDO
+              <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+                {translate("Female Daycare")} <br /> {translate("New")}
               </th>
-              <th className="p-3 border-b border-gray-200 text-center text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
+              <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+                {translate("Female Daycare")} <br /> {translate("Old")}
+              </th>
+              <th className="p-3 border-b border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
                 SFSID
               </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {initialData.map((row) => (
+            {studentFeeSettingData?.map((row) => (
               <tr
-                key={row.id}
+                key={row.SFSID}
                 className={`${
-                  selectedRows.includes(row.id)
+                  selectedRows.includes(row.SFSID)
                     ? "bg-orange-50 hover:bg-orange-100"
                     : "hover:bg-gray-50"
                 } transition-colors duration-150`}
@@ -158,30 +219,65 @@ const FeeSettingTable = () => {
                 <td className="p-3 text-center">
                   <input
                     type="checkbox"
-                    checked={selectedRows.includes(row.id)}
-                    onChange={() => handleRowToggle(row.id)}
+                    checked={selectedRows.includes(row.SFSID)}
+                    onChange={() => handleRowToggle(row.SFSID)}
                     className="h-4 w-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                   />
                 </td>
                 <td className="p-3 text-center">
                   <div className="flex justify-center space-x-2">
-                    <EditButton onClick={() => handleEditOpenModal(row.id)} />
-                    <DeleteButton onClick={() => handleDelete(row.id)} />
+                    <EditButton
+                      onClick={() => handleEditOpenModal(row.SFSID)}
+                    />
+                    <DeleteButton onClick={() => handleDelete(row.SFSID)} />
                   </div>
                 </td>
-                <td className="p-3 text-gray-800 font-medium">{row.class}</td>
-                <td className="p-3 text-gray-600">{row.SIName}</td>
-                <td className="p-3 text-center text-gray-600">{row.MAN}</td>
-                <td className="p-3 text-center text-gray-600">{row.MON}</td>
-                <td className="p-3 text-center text-gray-600">{row.MOO}</td>
-                <td className="p-3 text-center text-gray-600">{row.MDN}</td>
-                <td className="p-3 text-center text-gray-600">{row.MDO}</td>
-                <td className="p-3 text-center text-gray-600">{row.FAN}</td>
-                <td className="p-3 text-center text-gray-600">{row.FAO}</td>
-                <td className="p-3 text-center text-gray-600">{row.FON}</td>
-                <td className="p-3 text-center text-gray-600">{row.FOO}</td>
-                <td className="p-3 text-center text-gray-600">{row.FDN}</td>
-                <td className="p-3 text-center text-gray-600">{row.FDO}</td>
+                <td className="p-3 text-gray-800 font-medium">
+                  {bnBijoy2Unicode(
+                    row.ClassName ? row.ClassName : row.Class?.ClassName
+                  )}
+                </td>
+                <td className="p-3 text-gray-600">
+                  {bnBijoy2Unicode(
+                    row.SlName ? row.SlName : row.SubLedger?.SlName
+                  )}
+                </td>
+                <td className="p-3 text-center text-gray-600">
+                  {row.MaleAbaNew}
+                </td>
+                <td className="p-3 text-center text-gray-600">
+                  {row.MaleAbaOld}
+                </td>
+                <td className="p-3 text-center text-gray-600">
+                  {row.MaleOnaNew}
+                </td>
+                <td className="p-3 text-center text-gray-600">
+                  {row.MaleOnaOld}
+                </td>
+                <td className="p-3 text-center text-gray-600">
+                  {row.MaleDayNew}
+                </td>
+                <td className="p-3 text-center text-gray-600">
+                  {row.MaleDayOld}
+                </td>
+                <td className="p-3 text-center text-gray-600">
+                  {row.FemaleAbaNew}
+                </td>
+                <td className="p-3 text-center text-gray-600">
+                  {row.FemaleAbaOld}
+                </td>
+                <td className="p-3 text-center text-gray-600">
+                  {row.FemaleOnaNew}
+                </td>
+                <td className="p-3 text-center text-gray-600">
+                  {row.FemaleOnaOld}
+                </td>
+                <td className="p-3 text-center text-gray-600">
+                  {row.FemaleDayNew}
+                </td>
+                <td className="p-3 text-center text-gray-600">
+                  {row.FemaleDayOld}
+                </td>
                 <td className="p-3 text-center text-gray-600 font-mono">
                   {row.SFSID}
                 </td>

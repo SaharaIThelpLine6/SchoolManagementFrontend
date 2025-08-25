@@ -1,0 +1,105 @@
+import { useState, useRef, useEffect } from "react";
+import ToggleBox from "../../components/ToggleBox/ToggleBox";
+import { showModal } from "../../utils/ModalControlar";
+
+const CustomTable = ({ columns, data }) => {
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [toggleStyle, setToggleStyle] = useState({});
+  const containerRef = useRef(null);
+
+  const handleSelect = (item) => {
+    console.log(item, "item");
+
+    if (item === "Power Distribution") {
+      showModal("Power Distribution", "POWER_DISTRIBUTION");
+    } else if (item === "Change User Name") {
+      showModal("Change User Name", "USER_NAME_CHANGE");
+    } else if (item === "Change Password") {
+      showModal("Change Password", "PASSWORD_CHANGE");
+    }
+  };
+
+  const handleRowClick = (row, e) => {
+    e.stopPropagation(); // row click এ parent close হবে না
+
+    const containerRect = containerRef.current.getBoundingClientRect();
+
+    setToggleStyle({
+      top: e.clientY - containerRect.top + 5, // 5px gap
+      left: e.clientX - containerRect.left,
+    });
+
+    setSelectedRow(selectedRow?.ID === row.ID ? null : row);
+  };
+
+  // Click outside handler
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setSelectedRow(null); // Close toggle
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  return (
+    <div className="relative w-full" ref={containerRef}>
+      {/* Scrollable wrapper */}
+      <div className="overflow-x-auto w-full rounded-lg shadow-md bg-white">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-100">
+            <tr className="whitespace-nowrap">
+              {columns.map((col, idx) => (
+                <th
+                  key={idx}
+                  className="px-4 py-2 text-left text-sm font-medium text-gray-700"
+                >
+                  {col.title}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {data.map((row, idx) => (
+              <tr
+                key={idx}
+                className="cursor-pointer hover:bg-gray-50 relative"
+                onClick={(e) => handleRowClick(row, e)}
+              >
+                {columns.map((col, cidx) => (
+                  <td
+                    key={cidx}
+                    className="px-4 py-2 text-sm text-gray-700 whitespace-nowrap"
+                  >
+                    {row[col.field]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {selectedRow && (
+        <div
+          className="absolute  z-50"
+          style={{
+            top: toggleStyle.top,
+            left: toggleStyle.left,
+          }}
+        >
+          <ToggleBox handleSelect={handleSelect} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CustomTable;

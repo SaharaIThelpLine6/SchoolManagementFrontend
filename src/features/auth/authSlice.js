@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import axios from 'axios';
 import { verifyToken } from '../../utils/read/api';
 
 // Read the token from localStorage (or sessionStorage)

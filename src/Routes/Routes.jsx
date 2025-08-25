@@ -73,6 +73,8 @@ import BalanceTransfer from "../pages/BalanceTransfer";
 import DonorFeeDetermination from "../pages/DonorFeeDetermination";
 import DepositCosts from "../pages/DepositCosts";
 import FeeCollection from "../pages/FeeCollection";
+import DonationReport from "../pages/DonationReport";
+import AddLoginUsers from "../pages/AddLoginUsers";
 
 const router = createBrowserRouter([
   {
@@ -601,6 +603,27 @@ const router = createBrowserRouter([
                   // </RequirePermission>
                 ),
               },
+              {
+                path: "report",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.st}
+                  // >
+                  <DonationReport pageTitle="Donation Report" />
+                  // </RequirePermission>
+                ),
+              },
+            ],
+          },
+          {
+            path: "settings",
+            children: [
+              {
+                index: true,
+                element: (
+                  <AddLoginUsers pageTitle="Add Login Users" />
+                ),
+              }
             ],
           },
         ],

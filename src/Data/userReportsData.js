@@ -235,3 +235,48 @@ export const feeCollectionReport = [
     ReportName: "24. সাব জামাত ভিক্তিক মাসিক বেতন শীট",
   },
 ];
+
+
+export const donationReports = [
+  {
+    ReportID: 1,
+    ReportName: "1. দৈনিক ফি গ্রহণ তালিকা",
+  },
+  {
+    ReportID: 2,
+    ReportName: "2. সদস্যের ধরন ভিক্তিক ফি গ্রহণ তালিকা",
+  },
+  {
+    ReportID: 3,
+    ReportName: "3. সদস্য ভিক্তিক ফি গ্রহণ তালিকা",
+  },
+  {
+    ReportID: 4,
+    ReportName: "4. সদস্য ভিক্তিক নিধ্যারিত ফির তালিকা",
+  },
+  {
+    ReportID: 5,
+    ReportName: "5. সদস্যদের রেজিস্টার",
+  },
+  {
+    ReportID: 6,
+    ReportName: "6. সদস্যদের কফিল ভিক্তিক তালিকা",
+  },
+  {
+    ReportID: 7,
+    ReportName: "7. সদস্যদের বকেয়া তালিকা আইডি",
+  },
+  {
+    ReportID: 8,
+    ReportName: "8. সদস্যদের বকেয়া তালিকা দিন সি:",
+  },
+  {
+    ReportID: 9,
+    ReportName: "9. ঠিকানা ভিক্তিক সদস্যদের রেজিস্টার",
+  },
+];
+
+export const feeStatus = [
+  { id: 1, name: "বকেয়া" },
+  { id: 2, name: "উভয়" },
+];

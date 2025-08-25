@@ -24,6 +24,8 @@ import ExamReportSetting from "../view/exam/ExamReportSetting";
 import Statement from "../view/accounting/dues-list/Statement";
 import BalanceTransferModal from "../view/accounting/BalanceTransferModal";
 import UserSearch from "./UserSearch";
+import AddLoginUsersModal from "../view/settings/AddLoginUsersModal";
+import UserNamePasswordChangeModal from "../view/settings/UserNamePasswordChangeModal";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -73,19 +75,35 @@ const DefaultModal = () => {
             {modalType && (
               <div className="body p-3">
                 {modalType === "ADD_STUDENT" && <AdmissionForm userId={id} />}
-                {modalType === "FEE_COLLECTION" && <FeeCollectionForm userId={id} />}
+                {modalType === "FEE_COLLECTION" && (
+                  <FeeCollectionForm userId={id} />
+                )}
                 {modalType === "PAYMENT" && <PaymentModal />}
                 {modalType === "ADD_TEACHER" && <AddTeacherForm userId={id} />}
-                {modalType === "EDIT_TEACHER" && <EditTeacherForm userId={id} />}
+                {modalType === "EDIT_TEACHER" && (
+                  <EditTeacherForm userId={id} />
+                )}
                 {modalType === "ADD_DESIGNATION" && <DesignationForm />}
-                {modalType === "EDIT_DESIGNATION" && <DesignationForm userId={id} />}
+                {modalType === "EDIT_DESIGNATION" && (
+                  <DesignationForm userId={id} />
+                )}
                 {modalType === "ADD_TYPEOFVACATION" && <TypeOfVacationForm />}
-                {modalType === "EDIT_TYPEOFVACATION" && <TypeOfVacationForm userId={id} />}
-                {modalType === "EDIT_STUDENTREPORT" && <EditStudentReport id={id} />}
-                {modalType === "ADD_STUDENTVACATION" && <AddStudentVacationForm />}
+                {modalType === "EDIT_TYPEOFVACATION" && (
+                  <TypeOfVacationForm userId={id} />
+                )}
+                {modalType === "EDIT_STUDENTREPORT" && (
+                  <EditStudentReport id={id} />
+                )}
+                {modalType === "ADD_STUDENTVACATION" && (
+                  <AddStudentVacationForm />
+                )}
                 {modalType === "ADD_MONTHNAMES" && <MonthNamesForm />}
-                {modalType === "EDIT_MONTHNAMES" && <MonthNamesForm id={id} isEdit={true} />}
-                {modalType === "EDIT_STUDENTVACATION" && <EditStudentVacationForm userId={id} />}
+                {modalType === "EDIT_MONTHNAMES" && (
+                  <MonthNamesForm id={id} isEdit={true} />
+                )}
+                {modalType === "EDIT_STUDENTVACATION" && (
+                  <EditStudentVacationForm userId={id} />
+                )}
                 {modalType === "STUDENT_FILTER" && <StudentFilterModal />}
                 {modalType === "SMS_TEMPLATES" && <SMSTemplate />}
                 {modalType === "SMS_BUY" && <SMSBuy />}
@@ -95,10 +113,21 @@ const DefaultModal = () => {
                 {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
                 {modalType === "SUB_SIDIARY" && <Subsidiary />}
                 {modalType === "EXAM_REPORT_SETTING" && <ExamReportSetting />}
-                {modalType === "ACCOUNTING_DUES_LIST_STATEMENT" && <Statement />}
+                {modalType === "ACCOUNTING_DUES_LIST_STATEMENT" && (
+                  <Statement />
+                )}
                 {modalType === "BALANCE_TRANSFER" && <BalanceTransferModal />}
-                {modalType === "BALANCE_TRANSFER_UPDATE" && <BalanceTransferModal />}
+                {modalType === "BALANCE_TRANSFER_UPDATE" && (
+                  <BalanceTransferModal />
+                )}
                 {modalType === "USER_SEARCH" && <UserSearch />}
+                {modalType === "POWER_DISTRIBUTION" && <AddLoginUsersModal />}
+                {modalType === "USER_NAME_CHANGE" && (
+                  <UserNamePasswordChangeModal id={id} changeType="username"/>
+                )}
+                {modalType === "PASSWORD_CHANGE" && (
+                  <UserNamePasswordChangeModal id={id} changeType="password"/>
+                )}
               </div>
             )}
           </div>

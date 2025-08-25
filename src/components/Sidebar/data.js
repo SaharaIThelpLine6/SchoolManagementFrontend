@@ -1,4 +1,3 @@
-
 export const menuData = [
   {
     id: "1",
@@ -244,7 +243,7 @@ export const menuData = [
     route: "/accounting",
     icon: "FaCalculator",
     subMenu: [
-       {
+      {
         id: "1",
         name: "Deposit Costs",
         route: "/accounting",
@@ -305,10 +304,16 @@ export const menuData = [
         id: "1",
         name: "Donor Fee Determination",
         route: "/donation",
-      }, {
+      },
+      {
         id: "2",
         name: "Fee Collection",
         route: "/donation/fee-collection",
+      },
+      {
+        id: "3",
+        name: "Donation Report",
+        route: "/donation/report",
       },
     ],
   },
@@ -331,7 +336,13 @@ export const menuData = [
     name: "Settings",
     route: "/settings",
     icon: "IoMdSettings",
-    subMenu: [],
+    subMenu: [
+        {
+        id: "1",
+        name: "Add Login Users",
+        route: "/settings",
+      },
+    ],
   },
   {
     id: "13",

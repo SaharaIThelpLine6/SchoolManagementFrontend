@@ -20,6 +20,7 @@ export const feeCollectionSlice = createApi({
     "GeneralLedgers",
     "StudentFeeGroups",
     "ResceiptNumber",
+    "StudentFeeSettings",
   ],
   endpoints: (builder) => ({
     getFees: builder.query({
@@ -88,6 +89,26 @@ export const feeCollectionSlice = createApi({
       query: () => `fee_group_name`,
       providesTags: ["FeeGroupNames"],
     }),
+    getStudentFeeSettings: builder.query({
+      query: ({ sessionId, classId, sfgnid } = {}) => {
+        if (sessionId && classId && sfgnid) {
+          return `view_student_fee/${sessionId}/${classId}/${sfgnid}`;
+        } else if (!sessionId && !classId && !sfgnid) {
+          return `view_student_fee_settings`;
+        }
+        return { url: "", skip: true };
+      },
+      providesTags: ["StudentFeeSettings"],
+    }),
+
+    postStudentFeeSettings: builder.mutation({
+      query: (data) => ({
+        url: "insert_student_fee_settings",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["StudentFeeSettings"],
+    }),
     getStudentFeeGroups: builder.query({
       query: () => `student_fee_groups`,
       providesTags: ["StudentFeeGroups"],
@@ -108,7 +129,6 @@ export const feeCollectionSlice = createApi({
       query: ({ fundid, caid }) => `receipt_number/${fundid}/${caid}`,
       providesTags: ["ReceiptNumber"],
     }),
-
     postStudentFeeGroup: builder.mutation({
       query: (data) => ({
         url: "create_student_fee_group",
@@ -155,6 +175,14 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["TransactionOrders"],
     }),
+    deleteStudentFeeSettings: builder.mutation({
+      query: (SFSID) => ({
+        url: `delete_student_fee_settings`,
+        method: "DELETE",
+        body: { SFSID },
+      }),
+      invalidatesTags: ["StudentFeeSettings"],
+    }),
   }),
 });
 
@@ -185,4 +213,7 @@ export const {
   useGetReceiptNumberQuery,
   useUpdateInComeExpenseMutation,
   useDeleteInComeExpenseMutation,
+  useGetStudentFeeSettingsQuery,
+  usePostStudentFeeSettingsMutation,
+  useDeleteStudentFeeSettingsMutation,
 } = feeCollectionSlice;

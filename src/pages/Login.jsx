@@ -1,14 +1,14 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../features/auth/authSlice";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import LoginInput from "../components/Forms/LoginInput";
 import SvgIcon from "../components/icons/SvgIcon";
+import { usePostLoginMutation } from "../features/dashboard/dashboardQuerySlice";
 
-const API_URL = import.meta.env.VITE_SERVER_URL;
+// const API_URL = import.meta.env.VITE_SERVER_URL;
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +17,7 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
+  const [ postLogin ] = usePostLoginMutation()
 
   useEffect(() => {
     if (auth.token) {
@@ -26,13 +27,10 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axios.post(`${API_URL}/api/users/login`, data, {
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (response.status === 200) {
+      const response = await postLogin(data).unwrap();
+      if (response.token) {
         dispatch(
-          login({ token: response.data.token, user: response.data.user })
+          login({ token: response.token, user: response.user })
         );
         navigate("/");
         window.location.reload();

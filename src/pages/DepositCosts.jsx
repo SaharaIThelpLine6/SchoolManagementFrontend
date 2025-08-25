@@ -44,7 +44,6 @@ const DepositCosts = ({ pageTitle }) => {
   const [editIdDefaultData, setEditIdDefaultData] = useState(null);
   const [editId, setEditId] = useState(null);
 
-  console.log(defaultData, "defaultData");
 
   const [
     caID,
@@ -75,7 +74,6 @@ const DepositCosts = ({ pageTitle }) => {
   const { data: fundNamesData } = useGetFundNamesQuery();
   const { data: gldgersData = [] } = useGetGLedgersQuery(); // Provide default empty array
   const { data: allLedgersData = [] } = useGetAllSubLedgerQuery(); // Provide default empty array
-  console.log(gldgersData, "gldgersData");
   const { data: generalLedgersData } = useGetGeneralLedgersQuery(caID, {
     skip: !caID,
   });
@@ -268,15 +266,10 @@ const DepositCosts = ({ pageTitle }) => {
   const handleEditOpenModalDefaultData = (id) => {
     const existing = defaultData.find((item) => item.SL === id);
 
-    console.log(existing, "existing edit default data");
-    console.log(allLedgersData, "allLedgersData");
-
     // existing null/undefined না হলে compare করা যাবে
     const match = allLedgersData?.find((i) =>
       existing?.SLID?.toString().startsWith(i?.GLID?.toString() || "")
     );
-
-    console.log(match, "match");
 
     if (existing) {
       setEditIdDefaultData(id);

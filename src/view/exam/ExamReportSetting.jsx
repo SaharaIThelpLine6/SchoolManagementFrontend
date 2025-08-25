@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   useGetReportSettingQuery,
   usePostReportSettingMutation,
 } from "../../features/exam/examQuerySlice";
-import debounce from "lodash.debounce";
+import Swal from "sweetalert2";
+import { debounce } from "../../utils/debounce";
 
 const settingConfig = [
   {
@@ -46,7 +47,6 @@ const ExamReportSetting = () => {
 
   const [formData, setFormData] = useState({});
 
-
   useEffect(() => {
     if (setting) {
       setFormData({
@@ -60,13 +60,23 @@ const ExamReportSetting = () => {
     }
   }, [setting]);
 
+
   const debouncedSave = debounce(async (updatedData) => {
     if (!updatedData.ID) return;
     try {
       await postReportSetting({ settings: [updatedData] }).unwrap();
-      console.log("Auto-saved successfully");
+      Swal.fire({
+        icon: "success",
+        title: "Auto-saved successfully",
+        showConfirmButton: false,
+        timer: 1500,
+      });
     } catch (err) {
-      console.error("Auto-save failed", err);
+      Swal.fire({
+        icon: "error",
+        title: "Auto-save failed",
+        text: err?.message || "Something went wrong!",
+      });
     }
   }, 500); // 500ms debounce
 
@@ -93,7 +103,10 @@ const ExamReportSetting = () => {
             </label>
             <div className="flex gap-4 bg-white p-3 flex-wrap justify-start rounded-md shadow-sm w-2/3">
               {row.options.map((option, i) => (
-                <label key={i} className="flex items-center gap-2 text-gray-800">
+                <label
+                  key={i}
+                  className="flex items-center gap-2 text-gray-800"
+                >
                   <input
                     type="radio"
                     name={row.name}

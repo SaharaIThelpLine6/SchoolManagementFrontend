@@ -171,6 +171,7 @@ const PublicLayout = () => {
               <li>
                 <a
                   href="https://hems.alhaiatululya.org/exam-result"
+                  target="_blank"
                   className="py-3 pl-6 cursor-pointer hover:bg-theme-secondary border border-slate-200 border-r-0 flex items-center gap-[4px]"
                 >
                   <svg
