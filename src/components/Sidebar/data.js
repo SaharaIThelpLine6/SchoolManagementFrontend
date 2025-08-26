@@ -278,6 +278,11 @@ export const menuData = [
         name: "Balance Transfer",
         route: "/accounting/balance-transfer",
       },
+      {
+        id: "8",
+        name: "Delete Edit Record",
+        route: "/accounting/delete-edit-record",
+      },
     ],
   },
   {
@@ -337,7 +342,7 @@ export const menuData = [
     route: "/settings",
     icon: "IoMdSettings",
     subMenu: [
-        {
+      {
         id: "1",
         name: "Add Login Users",
         route: "/settings",

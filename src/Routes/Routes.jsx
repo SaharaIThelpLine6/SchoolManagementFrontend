@@ -75,6 +75,7 @@ import DepositCosts from "../pages/DepositCosts";
 import FeeCollection from "../pages/FeeCollection";
 import DonationReport from "../pages/DonationReport";
 import AddLoginUsers from "../pages/AddLoginUsers";
+import DeleteEditRecord from "../pages/DeleteEditRecord";
 
 const router = createBrowserRouter([
   {
@@ -565,7 +566,17 @@ const router = createBrowserRouter([
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
                   // >
-                  <BalanceTransfer pageTitle="Fee Collection Report" />
+                  <BalanceTransfer pageTitle="Balance Transfer" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: "delete-edit-record",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.st}
+                  // >
+                  <DeleteEditRecord pageTitle="Delete Edit Record" />
                   // </RequirePermission>
                 ),
               },
@@ -620,10 +631,8 @@ const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: (
-                  <AddLoginUsers pageTitle="Add Login Users" />
-                ),
-              }
+                element: <AddLoginUsers pageTitle="Add Login Users" />,
+              },
             ],
           },
         ],

@@ -87,7 +87,6 @@ const PointBasedMarkSheet = ({ pageTitle }) => {
     { skip: !printAll }
   );
 
-  console.log(userResultData, "userResultData");
 
   useEffect(() => {
     if (isLoading) return;
