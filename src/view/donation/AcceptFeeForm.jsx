@@ -136,7 +136,7 @@ const AcceptFeeForm = ({ onBack }) => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Photo and Student Code */}
           <div className="flex flex-col items-center gap-4">
-            <div className="w-28 h-36 md:w-44 md:h-56 border-2 border-dashed border-gray-400 flex items-center justify-center text-sm text-gray-500 rounded-lg">
+            <div className="w-28 h-36 md:w-48 md:h-56 border-2 border-dashed border-gray-400 flex items-center justify-center text-sm text-gray-500 rounded-lg">
               Photo
             </div>
             <div className="w-full relative">
