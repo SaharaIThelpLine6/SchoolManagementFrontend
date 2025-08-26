@@ -345,6 +345,11 @@ export const menuData = [
       {
         id: "1",
         name: "Add Login Users",
+        route: "/settings/add-login-users",
+      },
+      {
+        id: "2",
+        name: "Settings",
         route: "/settings",
       },
     ],

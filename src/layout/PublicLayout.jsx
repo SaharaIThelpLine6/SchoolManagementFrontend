@@ -6,6 +6,7 @@ import bnBijoy2Unicode from "../utils/conveter";
 
 import { Buffer } from "buffer";
 import DeveloperCredit from "../components/DeveloperCredit";
+
 const PublicLayout = () => {
   const { schoolData } = useSelector((state) => state.studentResultPublicView);
 
@@ -16,6 +17,7 @@ const PublicLayout = () => {
   const { schoolid } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const bufferConveter = (bufferData) => {
     if (!bufferData) {
       return "/logo.png";
@@ -25,13 +27,28 @@ const PublicLayout = () => {
     const imageSrc = `data:image/png;base64,${base64String}`;
     return imageSrc;
   };
+
   useEffect(() => {
     dispatch(fetchResultFieldData(schoolid));
   }, [dispatch, navigate]);
 
+  // Prevent body scrolling when sidebar is open on mobile
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    // Cleanup function to reset overflow when component unmounts
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
   return (
     <>
-      <div className=" lg:flex min-h-screen font-SolaimanLipi">
+      <div className="lg:flex min-h-screen font-SolaimanLipi">
         {isOpen && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-40 hidden_in_print"
@@ -47,9 +64,7 @@ const PublicLayout = () => {
           </button>
         )}
 
-        {/*  Menu bar end */}
-
-        {/*For mobile display start*/}
+        {/* For mobile display start */}
         <div className="fixed flex items-center justify-between z-30 lg:hidden px-4 w-full h-[70px] text-left py-[6px] bg-theme-color hidden_in_print">
           <button
             className="lg:hidden left-4 z-50 bg-transparent text-white p-2 rounded-md hidden_in_print"
@@ -65,11 +80,11 @@ const PublicLayout = () => {
             />
           </div>
         </div>
-        {/*For mobile display end*/}
+        {/* For mobile display end */}
 
         <header
           className={`lg:flex h-screen overflow-hidden lg:min-w-[410px] w-[410px] max-w-[85%] font-SolaimanLipi hidden_in_print ${
-            isOpen ? "flex absolute z-50" : "hidden"
+            isOpen ? "flex fixed z-50" : "hidden"
           }`}
         >
           <nav className="w-full">
@@ -87,7 +102,7 @@ const PublicLayout = () => {
                 </h1>
               </div>
             </div>
-            <ul className="pt-[10px] bg-white h-screen text-[16px] font-[400] border border-slate-200 text-theme-color items-center">
+            <ul className="pt-[10px] bg-white h-screen text-[16px] font-[400] border border-slate-200 text-theme-color items-center overflow-y-auto">
               <li>
                 <a
                   href={`/${schoolid}`}
@@ -112,11 +127,11 @@ const PublicLayout = () => {
                 </a>
               </li>
               {/* <li>
-                            <a href={`/${schoolid}/classes`} className='py-3 pl-6 cursor-pointer hover:bg-theme-secondary border border-slate-200 border-y-0 border-r-0 flex items-center gap-[4px]'>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
-                                ক্লাশ/মারহালা ভিত্তিক ফলাফল
-                            </a>
-                        </li> */}
+                <a href={`/${schoolid}/classes`} className='py-3 pl-6 cursor-pointer hover:bg-theme-secondary border border-slate-200 border-y-0 border-r-0 flex items-center gap-[4px]'>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
+                  ক্লাশ/মারহালা ভিত্তিক ফলাফল
+                </a>
+              </li> */}
               <li>
                 <a
                   href={`/${schoolid}/online_admission`}
@@ -165,9 +180,9 @@ const PublicLayout = () => {
                 </a>
               </li>
               {/* <li className='py-3 pl-6 cursor-pointer hover:bg-[#D6E4DA] border border-slate-200 border-r-0 flex items-center gap-[4px]'>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
-                            <Link to="/1234/AdmissionRegistration">ভর্তি রেজিস্ট্রেশন</Link>
-                        </li> */}
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
+                <Link to="/1234/AdmissionRegistration">ভর্তি রেজিস্ট্রেশন</Link>
+              </li> */}
               <li>
                 <a
                   href="https://hems.alhaiatululya.org/exam-result"
@@ -195,7 +210,8 @@ const PublicLayout = () => {
             </ul>
           </nav>
         </header>
-        <main className=" mx-auto w-full overflow-hidden h-full">
+
+        <main className="mx-auto w-full overflow-hidden h-full">
           <div className="w-full animate-scaleIn">
             <Outlet />
           </div>

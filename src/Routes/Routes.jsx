@@ -76,6 +76,7 @@ import FeeCollection from "../pages/FeeCollection";
 import DonationReport from "../pages/DonationReport";
 import AddLoginUsers from "../pages/AddLoginUsers";
 import DeleteEditRecord from "../pages/DeleteEditRecord";
+import Settings from "../pages/Settings";
 
 const router = createBrowserRouter([
   {
@@ -631,7 +632,19 @@ const router = createBrowserRouter([
             children: [
               {
                 index: true,
-                element: <AddLoginUsers pageTitle="Add Login Users" />,
+                element: <Settings pageTitle="Settings" />,
+              },
+
+               {
+                path: "add-login-users",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.st}
+                  // >
+                  <AddLoginUsers pageTitle="Add Login Users" />
+                  
+                  // </RequirePermission>
+                ),
               },
             ],
           },

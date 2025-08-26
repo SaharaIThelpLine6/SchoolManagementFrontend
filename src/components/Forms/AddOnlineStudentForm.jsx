@@ -547,7 +547,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
         </div>
 
         {/* Submit */}
-        <div className="flex justify-end my-10">
+        <div className="flex justify-end mb-10 mt-5">
           <Button
             className="w-full sm:w-auto"
             type="submit"
