@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import { useState, useCallback, useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toggleSidebar } from "../../features/sidebar/sideBarSlice";
 import { showModal } from "../../utils/ModalControlar";
 import TranslateButton from "../../components/Header/TranslateButton";
@@ -18,6 +18,7 @@ import SvgIcon from "../icons/SvgIcon";
 const Header = () => {
   const dispatch = useDispatch();
   const translate = useTranslate();
+  const isOpen = useSelector((state) => state.sideBar.isOpen);
   const { data: userPayInfo, refetch } = useGetUserInfoQuery();
   const { data: institutionInfo } = useGetInstitutionInfoQuery();
 
@@ -49,7 +50,11 @@ const Header = () => {
           onClick={() => dispatch(toggleSidebar())}
           className="text-2xl text-gray-700"
         >
-          <SvgIcon name={"IoReorderThreeOutline"} size={20} />
+          {isOpen ? (
+            <SvgIcon name={"Close"} size={20} />
+          ) : (
+            <SvgIcon name={"IoReorderThreeOutline"} size={20} />
+          )}
         </button>
 
         <div className="ml-16 sm:ml-0">
@@ -68,7 +73,11 @@ const Header = () => {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="text-xl text-gray-700"
           >
-            <SvgIcon name={"BsThreeDotsVertical"} size={20} />
+            {mobileMenuOpen ? (
+              <SvgIcon name={"Close"} size={20} />
+            ) : (
+              <SvgIcon name={"BsThreeDotsVertical"} size={20} />
+            )}
           </button>
         </div>
       </div>
