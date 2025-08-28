@@ -114,9 +114,9 @@ const DefaultLayout = () => {
       </div>
 
       {/* ✅ Show Tawk chat only when logged in */}
-      {isAuthenticated && (
+      {/* {isAuthenticated && (
         <TawkMessenger propertyId={tawkPropertyId} widgetId={tawkWidgetId} />
-      )}
+      )} */}
     </div>
   );
 };
