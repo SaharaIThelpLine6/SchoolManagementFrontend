@@ -4,8 +4,10 @@ import Button from "../components/Button/Button";
 import { usePostUserMultipleImagesUploadMutation } from "../features/dashboard/dashboardQuerySlice";
 import Swal from "sweetalert2";
 import { useState } from "react";
+import useTranslate from "../utils/Translate";
 
 const BulkImage = () => {
+  const translate = useTranslate();
   const methods = useForm({
     defaultValues: {
       multiImages: [],
@@ -85,11 +87,12 @@ const BulkImage = () => {
         <FormProvider {...methods}>
           <div className="mb-6">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              Bulk Image Upload
+              {translate("Bulk Image")}
             </h2>
             <p className="text-gray-600 mb-4">
-              Upload multiple user profile images at once. File names must match
-              UserCode (numeric only).
+              {translate(
+                `Upload multiple user profile images at once. File names must match UserCode (numeric only).`
+              )}
             </p>
 
             {selectedFiles?.length > 0 && (

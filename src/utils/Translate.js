@@ -419,6 +419,8 @@ const useTranslate = () => {
     "Enter image": "ছবি প্রবেশ করান",
     "User Image": "ব্যবহারকারী ছবি",
     "Bulk Image": "বাল্ক ছবি",
+    "Upload Profile Images": "প্রোফাইল ছবি আপলোড",
+    "Upload multiple user profile images at once. File names must match UserCode (numeric only).": "একসাথে একাধিক ব্যবহারকারীর প্রোফাইল ছবি আপলোড করুন। ফাইলের নাম অবশ্যই UserCode এর সাথে মিলতে হবে (শুধুমাত্র সংখ্যাসূচক)।",
     "Image": "ছবি",
     "Upload Profile Image": "প্রোফাইল ছবি আপলোড",
     "Serial Title": "শিরোনাম সিরিয়াল",
