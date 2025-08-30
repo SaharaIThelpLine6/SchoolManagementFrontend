@@ -15,9 +15,32 @@ export const dashboardSlice = createApi({
       return headers;
     },
   }),
+  tagTypes: ["UserWithImages"],
   endpoints: (builder) => ({
     getTotalStudent: builder.query({
       query: () => "total_user?usertype=1",
+    }),
+    getAllUserWithImage: builder.query({
+      query: ({ page = 1, limit = 10 } = {}) =>
+        `user_info_image?page=${page}&limit=${limit}`,
+      providesTags: ["UserWithImages"],
+    }),
+
+    postUserSingleImageUpload: builder.mutation({
+      query: (data) => ({
+        url: `upload_single`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["UserWithImages"],
+    }),
+    postUserMultipleImagesUpload: builder.mutation({
+      query: (data) => ({
+        url: `upload_multiple`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["UserWithImages"],
     }),
     getTotalTeacher: builder.query({
       query: () => "total_user?usertype=2",
@@ -46,10 +69,13 @@ export const dashboardSlice = createApi({
 
 export const {
   useGetTotalStudentQuery,
+  useGetAllUserWithImageQuery,
   useGetTotalTeacherQuery,
   useGetTotalDonerQuery,
   useGetTotalDueQuery,
   useGetStudentNumberByClassQuery,
   useGetStudentBySessionQuery,
-  usePostLoginMutation
+  usePostLoginMutation,
+  usePostUserSingleImageUploadMutation,
+  usePostUserMultipleImagesUploadMutation,
 } = dashboardSlice;

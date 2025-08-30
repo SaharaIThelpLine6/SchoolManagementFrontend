@@ -37,6 +37,18 @@ export const menuData = [
         route: "/general-info/month-name-list",
         subMenu: false,
       },
+      {
+        id: "7",
+        name: "User Image",
+        route: "/general-info/user-image",
+        subMenu: false,
+      },
+      {
+        id: "8",
+        name: "Bulk Image",
+        route: "/general-info/bulk-image",
+        subMenu: false,
+      },
     ],
   },
   {

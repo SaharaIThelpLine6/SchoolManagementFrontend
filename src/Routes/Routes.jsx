@@ -77,6 +77,8 @@ import DonationReport from "../pages/DonationReport";
 import AddLoginUsers from "../pages/AddLoginUsers";
 import DeleteEditRecord from "../pages/DeleteEditRecord";
 import Settings from "../pages/Settings";
+import UserImage from "../pages/UserImage";
+import BulkImage from "../pages/BulkImage";
 
 const router = createBrowserRouter([
   {
@@ -143,6 +145,26 @@ const router = createBrowserRouter([
                   >
                     <MonthListTable />
                   </RequirePermission>
+                ),
+              }, 
+              {
+                path: "user-image",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.month_name}
+                  // >
+                    <UserImage />
+                  // </RequirePermission>
+                ),
+              }, 
+                 {
+                path: "bulk-image",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.month_name}
+                  // >
+                    <BulkImage />
+                  // </RequirePermission>
                 ),
               },
             ],
