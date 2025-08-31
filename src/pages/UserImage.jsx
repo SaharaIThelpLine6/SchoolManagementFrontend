@@ -30,6 +30,7 @@ const UserImage = ({ pageTitle }) => {
 
   const [previewImg, setPreviewImg] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [userFilterData, setUserFilterData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
   const methods = useForm();
@@ -41,13 +42,11 @@ const UserImage = ({ pageTitle }) => {
     isError,
     isLoading,
   } = useGetAllUserWithImageQuery({ page: currentPage, limit: PAGE_SIZE });
-  console.log(userResponse, "userResponse")
+  console.log(userResponse, "userResponse");
 
   const users = userResponse?.data ?? [];
 
-  const filterData = users.find(
-    (i) => i.UserID === filteredStudent?.UserID
-  );
+  const filterData = users.find((i) => i.UserID === filteredStudent?.UserID);
 
   const [
     postUserInage,
@@ -61,8 +60,12 @@ const UserImage = ({ pageTitle }) => {
   const totalPages = userResponse?.totalPages ?? 0;
 
   useEffect(() => {
-    if (filterData) {
-      const imageBuffer = filterData?.UserImage?.[0]?.Image;
+    setUserFilterData(filterData);
+  }, [filterData]);
+
+  useEffect(() => {
+    if (userFilterData) {
+      const imageBuffer = userFilterData?.UserImage?.[0]?.Image;
       if (imageBuffer) {
         const base64String = Buffer.from(imageBuffer).toString("base64");
         const src = `data:image/png;base64,${base64String}`;
@@ -75,11 +78,11 @@ const UserImage = ({ pageTitle }) => {
     }
 
     reset({
-      ID: filterData?.UserID || "",
-      UserCode: filterData?.UserCode || "",
-      UserName: filterData?.UserName || "",
+      ID: userFilterData?.UserID || "",
+      UserCode: userFilterData?.UserCode || "",
+      UserName: userFilterData?.UserName || "",
     });
-  }, [filterData, reset]);
+  }, [userFilterData, reset]);
 
   const handleEditOpenModal = (row) => {
     setPreviewUrl(null);
@@ -138,24 +141,26 @@ const UserImage = ({ pageTitle }) => {
 
         return (
           <div className="flex justify-center items-center">
-            <img
-              src={src}
-              alt="User"
-              className="w-16 h-16 object-cover rounded-md"
-            />
+            <div className="w-16 h-16 sm:w-20 sm:h-20  rounded-lg overflow-hidden shadow-md border border-gray-200">
+              <img
+                src={src}
+                alt="User"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         );
       },
     },
   ];
 
-  const handleOpenModal = useCallback((id) => {
+  const handleOpenModal = useCallback(() => {
     showModal("Filter Student", "STUDENT_FILTER");
   }, []);
 
   const onSubmit = async (data) => {
     // single image field থেকে file
-    const file = data.singleImage?.[0];
+    const file = data.singleImage;
     if (!file) {
       Swal.fire({
         icon: "warning",
@@ -180,6 +185,7 @@ const UserImage = ({ pageTitle }) => {
       reset({ ID: "", UserCode: "", UserName: "", singleImage: null });
       setPreviewImg(null);
       setPreviewUrl(null);
+      setUserFilterData(null);
     } catch (err) {
       Swal.fire({
         icon: "error",
@@ -195,6 +201,9 @@ const UserImage = ({ pageTitle }) => {
     setPreviewUrl(null);
   };
 
+  if (uploadLoading) {
+    <Loading />;
+  }
   return (
     <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="block w-full overflow-x-auto">
@@ -207,83 +216,156 @@ const UserImage = ({ pageTitle }) => {
           <div className="mb-5">
             <form
               onSubmit={methods.handleSubmit(onSubmit)}
-              className="font-lato space-y-6 p-4 sm:p-6 border rounded-lg"
+              className="font-lato space-y-6 p-0 sm:p-6 bg-white rounded-xl shadow-md border border-gray-100"
             >
               {/* Grid layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Single Image Upload + Filter */}
-                <div className="flex flex-col sm:flex-row sm:items-end gap-3 w-full">
-                  {/* Image Upload */}
-                  <DefaultImageUpload
-                    label="Upload Profile Image"
-                    registerKey="singleImage"
-                    require={true}
-                    multiple={true}
-                    image={previewImg}
-                    setPreviewUrl={setPreviewUrl}
-                    previewUrl={previewUrl}
-                  />
-
-                  {/* Filter Button + optional mobile label */}
-                  <div className="flex flex-col sm:flex-row sm:items-end gap-2 w-full sm:w-auto sm:mb-4">
-                    {/* Mobile only label */}
-                    <label className="sm:hidden text-gray-700 font-medium mb-1">
-                      Filter User :
-                    </label>
-
-                    {/* Button */}
-                    <FilterButton
-                      onClick={handleOpenModal}
-                      className="w-full sm:w-auto"
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Image Upload Section */}
+                <div className="bg-blue-50 p-5 rounded-lg border border-blue-100">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg
+                      className="w-5 h-5 mr-2 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    {translate("Profile Image")}
+                  </h3>
+                  <div className="flex justify-center items-center">
+                    <DefaultImageUpload
+                      // label="Upload Profile Image"
+                      registerKey="singleImage"
+                      require={"This is required"}
+                      image={previewImg}
+                      setPreviewUrl={setPreviewUrl}
+                      previewUrl={previewUrl}
                     />
                   </div>
                 </div>
 
-                {/* Input fields */}
-                <div className="space-y-4">
-                  <DefaultInput
-                    registerKey="ID"
-                    require={translate("ID is required")}
-                    type="text"
-                    placeholder={translate("Enter type of id") + " ..."}
-                    label={translate("ID") + " :"}
-                    disable
-                  />
-                  <DefaultInput
-                    registerKey="UserCode"
-                    require={translate("UserCode is required")}
-                    type="text"
-                    placeholder={translate("Enter type of userCode") + " ..."}
-                    label={translate("Code") + " :"}
-                    disable
-                  />
-                  <DefaultInput
-                    registerKey="UserName"
-                    require={translate("UserName is required")}
-                    type="text"
-                    placeholder={translate("Enter type of userName") + " ..."}
-                    label={translate("Name") + " :"}
-                    disable
-                    unicode={true}
-                  />
+                {/* Input fields Section */}
+                <div className="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg
+                      className="w-5 h-5 mr-2 text-gray-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                      />
+                    </svg>
+                    {translate("User Information")}
+                  </h3>
+                  <div className="space-y-4">
+                    <DefaultInput
+                      registerKey="ID"
+                      require={translate("ID is required")}
+                      type="text"
+                      placeholder={translate("Enter type of id") + " ..."}
+                      label={translate("ID") + " :"}
+                      disable
+                    />
+                    <DefaultInput
+                      registerKey="UserCode"
+                      require={translate("UserCode is required")}
+                      type="text"
+                      placeholder={translate("Enter type of userCode") + " ..."}
+                      label={translate("Code") + " :"}
+                      disable
+                    />
+                    <DefaultInput
+                      registerKey="UserName"
+                      require={translate("UserName is required")}
+                      type="text"
+                      placeholder={translate("Enter type of userName") + " ..."}
+                      label={translate("Name") + " :"}
+                      disable
+                      unicode={true}
+                    />
+                  </div>
                 </div>
               </div>
 
               {/* Action buttons */}
-              <div className="pt-2 flex flex-col sm:flex-row gap-3">
-                <Button
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-md w-full sm:w-auto"
-                  type="submit"
-                >
-                  Upload
-                </Button>
+              <div className="flex p-4 flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                  <Button
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg w-full sm:w-auto flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg"
+                    type="submit"
+                  >
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                    {translate("Upload")}
+                  </Button>
 
-                <Button
-                  className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-md w-full sm:w-auto"
-                  onClick={handleReset}
-                >
-                  Reset
-                </Button>
+                  <Button
+                    className="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2.5 rounded-lg w-full sm:w-auto flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg"
+                    onClick={handleReset}
+                  >
+                    <svg
+                      className="w-5 h-5 mr-2"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                    {translate("Reset")}
+                  </Button>
+                  {/* Filter Button */}
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <label className="text-gray-700 font-medium sm:hidden">
+                      {translate("Filter User")} :
+                    </label>
+                    <FilterButton
+                      onClick={handleOpenModal}
+                      className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 border-0 text-white px-5 py-2.5 rounded-lg flex items-center justify-center transition-all duration-200 shadow-md hover:shadow-lg"
+                    >
+                      <svg
+                        className="w-5 h-5 mr-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                        />
+                      </svg>
+                      {translate("Filter")}
+                    </FilterButton>
+                  </div>
+                </div>
               </div>
             </form>
           </div>
