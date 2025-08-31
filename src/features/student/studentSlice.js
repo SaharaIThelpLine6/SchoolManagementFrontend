@@ -83,6 +83,7 @@ const initialState = {
   academicClassStudent: {},
   academicClassStudentError: null,
   filteredStudent: null,
+  filteredUser: null,
   characterReportEditMode: null,
   parentsData: [],
   allUsers: [],
@@ -97,6 +98,9 @@ const classSlice = createSlice({
     },
     setFilteredStudent: (state, action) => {
       state.filteredStudent = action.payload;
+    },
+    setFilteredUser: (state, action) => {
+      state.filteredUser = action.payload;
     },
     setCharacterReportEditMode: (state, action) => {
       state.characterReportEditMode = action.payload;
@@ -206,12 +210,13 @@ const classSlice = createSlice({
 export const {
   setEditMode,
   setFilteredStudent,
+  setFilteredUser,
   setCharacterReportEditMode,
   setParentsData,
   deleteParentData,
   clearParentsData,
   setAllUsersData,
   deleteAllUsersData,
-  clearAllUsersData
+  clearAllUsersData,
 } = classSlice.actions;
 export default classSlice.reducer;

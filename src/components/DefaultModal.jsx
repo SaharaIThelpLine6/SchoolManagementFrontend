@@ -26,6 +26,7 @@ import BalanceTransferModal from "../view/accounting/BalanceTransferModal";
 import UserSearch from "./UserSearch";
 import AddLoginUsersModal from "../view/settings/AddLoginUsersModal";
 import UserNamePasswordChangeModal from "../view/settings/UserNamePasswordChangeModal";
+import UserFilterModal from "./Modals/UserFilterModal";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -105,6 +106,7 @@ const DefaultModal = () => {
                   <EditStudentVacationForm userId={id} />
                 )}
                 {modalType === "STUDENT_FILTER" && <StudentFilterModal />}
+                {modalType === "USER_FILTER" && <UserFilterModal />}
                 {modalType === "SMS_TEMPLATES" && <SMSTemplate />}
                 {modalType === "SMS_BUY" && <SMSBuy />}
                 {modalType === "PAYMENT_GETWAY" && <PaymentGetway />}

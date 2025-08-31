@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 
@@ -11,8 +11,20 @@ const DefaultImageUpload = ({
   previewUrl,
   setPreviewUrl,
 }) => {
-  const { register, formState: { errors }, setValue } = useFormContext();
+  const {
+    register,
+    formState: { errors },
+    setValue,
+  } = useFormContext();
   const translate = useTranslate();
+
+  // পূর্বে থাকা image থাকলে form value এ সেট করো
+  useEffect(() => {
+    if (image) {
+      setPreviewUrl(image);
+      setValue(registerKey, image, { shouldValidate: true });
+    }
+  }, [image, registerKey, setValue, setPreviewUrl]);
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -54,7 +66,11 @@ const DefaultImageUpload = ({
   };
 
   return (
-    <div className={`mb-4 ${labelPosition === "left" ? "md:flex md:items-start md:gap-4" : ""}`}>
+    <div
+      className={`mb-4 ${
+        labelPosition === "left" ? "md:flex md:items-start md:gap-4" : ""
+      }`}
+    >
       {label && (
         <label
           htmlFor={registerKey}
@@ -75,7 +91,10 @@ const DefaultImageUpload = ({
           type="file"
           accept="image/*"
           {...register(registerKey, {
-            required: require && !image ? "This field is required" : false,
+            required:
+              require && !previewUrl && !image
+                ? require || "This field is required"
+                : false,
           })}
           onChange={handleFileChange}
           className="hidden"
@@ -124,8 +143,12 @@ const DefaultImageUpload = ({
                   />
                 </svg>
               </div>
-              <p className="text-gray-700 text-xs font-medium">{translate("Upload image")}</p>
-              <p className="text-gray-500 text-xs mt-1">{translate("Click or drag here")}</p>
+              <p className="text-gray-700 text-xs font-medium">
+                {translate("Upload image")}
+              </p>
+              <p className="text-gray-500 text-xs mt-1">
+                {translate("Click or drag here")}
+              </p>
             </div>
           )}
         </div>

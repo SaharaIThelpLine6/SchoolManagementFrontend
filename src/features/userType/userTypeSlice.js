@@ -14,13 +14,31 @@ export const userTypeSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['UserType'], // Define your tag type
+  tagTypes: ["UserType", "User"], // Define your tag type
   endpoints: (builder) => ({
     getUserTypes: builder.query({
       query: () => "user_type",
-      providesTags: ['UserType'], // This query provides this tag
+      providesTags: ["UserType"], // This query provides this tag
+    }),
+    getUserBySearch: builder.query({
+      query: ({
+        search,
+        ClassID,
+        SessionID,
+        UserTypeID,
+      }) => {
+        const params = new URLSearchParams();
+        if (search) {
+          params.append("search", search);
+        }
+        if (ClassID) params.append("ClassID", ClassID);
+        if (UserTypeID) params.append("UserTypeID", UserTypeID);
+        if (SessionID) params.append("SessionID", SessionID);
+        return `search_user?${params.toString()}`;
+      },
+      providesTags: ["User"],
     }),
   }),
 });
 
-export const {  useGetUserTypesQuery} = userTypeSlice;
+export const { useGetUserTypesQuery, useGetUserBySearchQuery } = userTypeSlice;

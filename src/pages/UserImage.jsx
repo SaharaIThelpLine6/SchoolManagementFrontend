@@ -35,18 +35,17 @@ const UserImage = ({ pageTitle }) => {
 
   const methods = useForm();
   const { reset } = methods;
-  const { filteredStudent } = useSelector((state) => state.student);
+  const { filteredUser } = useSelector((state) => state.student);
 
   const {
     data: userResponse = { data: [], totalUsers: 0, totalPages: 0 },
     isError,
     isLoading,
   } = useGetAllUserWithImageQuery({ page: currentPage, limit: PAGE_SIZE });
-  console.log(userResponse, "userResponse");
 
   const users = userResponse?.data ?? [];
 
-  const filterData = users.find((i) => i.UserID === filteredStudent?.UserID);
+  const filterData = users.find((i) => i.UserID === filteredUser?.UserID);
 
   const [
     postUserInage,
@@ -114,7 +113,7 @@ const UserImage = ({ pageTitle }) => {
     },
     {
       title: translate("User Code"),
-      field: "ID",
+      field: "UserCode",
       hozAlign: "center",
       render: (row) => <p>{row.UserCode}</p>,
     },
@@ -155,7 +154,7 @@ const UserImage = ({ pageTitle }) => {
   ];
 
   const handleOpenModal = useCallback(() => {
-    showModal("Filter Student", "STUDENT_FILTER");
+    showModal("Filter User", "USER_FILTER");
   }, []);
 
   const onSubmit = async (data) => {
@@ -240,12 +239,11 @@ const UserImage = ({ pageTitle }) => {
                   </h3>
                   <div className="flex justify-center items-center">
                     <DefaultImageUpload
-                      // label="Upload Profile Image"
                       registerKey="singleImage"
-                      require={"This is required"}
-                      image={previewImg}
+                      require="This is required"
+                      image={previewImg} 
                       setPreviewUrl={setPreviewUrl}
-                      previewUrl={previewUrl}
+                      previewUrl={previewUrl} 
                     />
                   </div>
                 </div>
