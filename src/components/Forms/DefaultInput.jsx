@@ -16,41 +16,44 @@ const DefaultInput = ({
   const {
     register,
     setValue,
-    getValues,
     control,
     formState: { errors },
   } = useFormContext();
   const translate = useTranslate();
 
-  // ✅ Watch current value of the field
+  // ✅ Watch field value
   const currentValue = useWatch({ name: registerKey, control });
 
-  // ✅ Convert existing value to Unicode on mount if needed
+  // ✅ Convert whenever value changes (not only on mount)
   useEffect(() => {
-    if (unicode && currentValue && typeof currentValue === "string") {
+    if (unicode && currentValue) {
       const converted = bnBijoy2Unicode(currentValue);
-      if (converted !== currentValue) {
-        setValue(registerKey, converted);
+      if (converted && converted !== currentValue) {
+        setValue(registerKey, converted, { shouldValidate: true });
       }
     }
-  }, []); // Run only on mount
+  }, [currentValue, unicode, registerKey, setValue]);
 
   return (
-    <div className={`w-full ${labelPosition === 'left' ? 'flex items-center gap-4' : ''}`}>
+    <div
+      className={`w-full ${
+        labelPosition === "left" ? "flex items-center gap-4" : ""
+      }`}
+    >
       {label && (
         <label
           htmlFor={registerKey}
           className={`text-black font-SolaimanLipi ${
-            labelPosition === 'left' 
-              ? 'w-1/4 min-w-[100px] mb-0 text-end' 
-              : 'mb-1 block'
+            labelPosition === "left"
+              ? "w-1/4 min-w-[100px] mb-0 text-end"
+              : "mb-1 block"
           }`}
         >
           {translate(label)}
         </label>
       )}
 
-      <div className={labelPosition === 'left' ? 'flex-1' : 'w-full'}>
+      <div className={labelPosition === "left" ? "flex-1" : "w-full"}>
         <input
           type={type === "number" || type === "phone" ? "number" : type}
           placeholder={translate(placeholder)}

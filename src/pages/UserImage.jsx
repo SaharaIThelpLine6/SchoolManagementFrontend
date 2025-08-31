@@ -21,6 +21,7 @@ import {
 } from "../features/dashboard/dashboardQuerySlice";
 import bnBijoy2Unicode from "../utils/conveter";
 import Swal from "sweetalert2";
+import { setFilteredUser } from "../features/student/studentSlice";
 const PAGE_SIZE = 10;
 
 const UserImage = ({ pageTitle }) => {
@@ -30,9 +31,7 @@ const UserImage = ({ pageTitle }) => {
 
   const [previewImg, setPreviewImg] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
-  const [userFilterData, setUserFilterData] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-
   const methods = useForm();
   const { reset } = methods;
   const { filteredUser } = useSelector((state) => state.student);
@@ -58,13 +57,11 @@ const UserImage = ({ pageTitle }) => {
 
   const totalPages = userResponse?.totalPages ?? 0;
 
-  useEffect(() => {
-    setUserFilterData(filterData);
-  }, [filterData]);
+  useEffect(() => {}, [filterData]);
 
   useEffect(() => {
-    if (userFilterData) {
-      const imageBuffer = userFilterData?.UserImage?.[0]?.Image;
+    if (filterData) {
+      const imageBuffer = filterData?.UserImage?.[0]?.Image;
       if (imageBuffer) {
         const base64String = Buffer.from(imageBuffer).toString("base64");
         const src = `data:image/png;base64,${base64String}`;
@@ -77,11 +74,11 @@ const UserImage = ({ pageTitle }) => {
     }
 
     reset({
-      ID: userFilterData?.UserID || "",
-      UserCode: userFilterData?.UserCode || "",
-      UserName: userFilterData?.UserName || "",
+      ID: filterData?.UserID || "",
+      UserCode: filterData?.UserCode || "",
+      UserName: filterData?.UserName || "",
     });
-  }, [userFilterData, reset]);
+  }, [filterData, reset]);
 
   const handleEditOpenModal = (row) => {
     setPreviewUrl(null);
@@ -158,6 +155,8 @@ const UserImage = ({ pageTitle }) => {
   }, []);
 
   const onSubmit = async (data) => {
+    console.log(data, "data");
+
     // single image field থেকে file
     const file = data.singleImage;
     if (!file) {
@@ -169,6 +168,21 @@ const UserImage = ({ pageTitle }) => {
       return;
     }
 
+    const fileName = file.name || "";
+    const match = fileName.match(/^\d+/);
+    const prefixNumber = match ? parseInt(match[0], 10) : null;
+
+    // ✅ UserCode এর সাথে মিলানো
+    if (!prefixNumber || prefixNumber !== Number(data.UserCode)) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid File",
+        text: `File name must start with UserCode: ${data.UserCode}`,
+      });
+      return;
+    }
+
+    // ✅ সব ঠিক থাকলে submit
     const formData = new FormData();
     formData.append("image", file);
 
@@ -184,7 +198,7 @@ const UserImage = ({ pageTitle }) => {
       reset({ ID: "", UserCode: "", UserName: "", singleImage: null });
       setPreviewImg(null);
       setPreviewUrl(null);
-      setUserFilterData(null);
+      dispatch(setFilteredUser(null));
     } catch (err) {
       Swal.fire({
         icon: "error",
@@ -198,7 +212,13 @@ const UserImage = ({ pageTitle }) => {
     reset({ ID: "", UserCode: "", UserName: "", singleImage: null });
     setPreviewImg(null);
     setPreviewUrl(null);
+    dispatch(setFilteredUser(null));
   };
+  // page change বা component remount হলে form reset করা
+  useEffect(() => {
+    // page change হলে filterData reset করা
+    handleReset();
+  }, [location.pathname]);
 
   if (uploadLoading) {
     <Loading />;
@@ -235,15 +255,15 @@ const UserImage = ({ pageTitle }) => {
                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
                     </svg>
-                    {translate("Profile Image")}
+                    {translate("Upload Profile Image")}
                   </h3>
                   <div className="flex justify-center items-center">
                     <DefaultImageUpload
                       registerKey="singleImage"
                       require="This is required"
-                      image={previewImg} 
+                      image={previewImg}
                       setPreviewUrl={setPreviewUrl}
-                      previewUrl={previewUrl} 
+                      previewUrl={previewUrl}
                     />
                   </div>
                 </div>
@@ -289,7 +309,7 @@ const UserImage = ({ pageTitle }) => {
                       type="text"
                       placeholder={translate("Enter type of userName") + " ..."}
                       label={translate("Name") + " :"}
-                      disable
+                      disable={true}
                       unicode={true}
                     />
                   </div>

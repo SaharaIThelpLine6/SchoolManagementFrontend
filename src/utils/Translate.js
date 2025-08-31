@@ -18,6 +18,7 @@ const useTranslate = () => {
     "Deposit/Cost": "জমা/খরচ",
     "Fee Collection": "ফি গ্রহণ করা",
     "Collection": "আদায়",
+    "User Information": "ব্যবহারকারীর তথ্য",
     Description: "ডেসক্রিপশন",
     Renewal: "নবায়ন",
     "Class Name": "ক্লাস নাম",
