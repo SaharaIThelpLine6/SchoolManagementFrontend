@@ -14,6 +14,7 @@ const Settings = () => {
   const [updateSetting] = useUpdateSettingsMutation();
 
   const allSettingInfo = response?.data || [];
+  console.log(allSettingInfo, "allSettingInfo");
 
   const [formData, setFormData] = useState({});
 
@@ -64,7 +65,7 @@ const Settings = () => {
               {translate(row.Description)} :
             </label>
             <div className="flex flex-wrap gap-3 bg-white p-3 rounded-md shadow-sm w-full md:w-2/3">
-              {["Active", "Inactive"].map((status, i) => (
+              {["Active", "InActive"].map((status, i) => (
                 <label
                   key={i}
                   className="flex items-center gap-2 text-gray-800 px-2 py-1"
@@ -74,7 +75,7 @@ const Settings = () => {
                     name={`status-${row.ID}`}
                     checked={
                       (row.ActiveInAcive === 1 && status === "Active") ||
-                      (row.ActiveInAcive === 0 && status === "Inactive")
+                      (row.ActiveInAcive === 0 && status === "InActive")
                     }
                     onChange={() =>
                       handleChange(row.ID, status === "Active" ? 1 : 0)
@@ -82,7 +83,7 @@ const Settings = () => {
                     disabled={isLoading}
                     className="w-4 h-4"
                   />
-                  <span className="text-sm md:text-base">{status}</span>
+                  <span className="text-sm md:text-base">{translate(status)}</span>
                 </label>
               ))}
             </div>
