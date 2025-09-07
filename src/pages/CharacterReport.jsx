@@ -452,7 +452,7 @@ const CharacterReport = ({ pageTitle }) => {
 
                 <DefaultInput
                   registerKey={"FatherName"}
-                  label={`${translate("Father Name")}:`}
+                  label={`${translate("Father Name")}: `}
                   disable={true}
                 />
 
@@ -470,7 +470,7 @@ const CharacterReport = ({ pageTitle }) => {
                 />
 
                 <DefaultSelect
-                  label={`${translate("Varient")}:`}
+                  label={`${translate("Varient")}: `}
                   nameField={"ReportCetName"}
                   registerKey={"ReportCetID"}
                   valueField={"ReportCetID"}
@@ -483,7 +483,7 @@ const CharacterReport = ({ pageTitle }) => {
                 />
 
                 <DefaultSelect
-                  label={`${translate("Type")}:`}
+                  label={`${translate("Type")}: `}
                   nameField={"ReportTypeName"}
                   registerKey={"ReportTypID"}
                   valueField={"ReportTypID"}

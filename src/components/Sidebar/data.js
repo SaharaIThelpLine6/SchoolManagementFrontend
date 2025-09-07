@@ -12,43 +12,66 @@ export const menuData = [
       },
       {
         id: "2",
-        name: "User",
+        name: "New User",
         route: "/general-info/users-info",
       },
       {
         id: "3",
-        name: "User Reports",
-        route: "/general-info/user-reports",
-      },
-      {
-        id: "4",
-        name: "SMS",
-        route: "/general-info/sms",
-      },
-      {
-        id: "5",
-        name: "Institution Information",
-        route: "/general-info/institution-info",
-        subMenu: false,
-      },
-      {
-        id: "6",
         name: "Month Name",
         route: "/general-info/month-name-list",
         subMenu: false,
       },
+      // {
+      //   id: "3",
+      //   name: "All Madrasah",
+      //   route: "/general-info/month-name-list",
+      //   subMenu: false,
+      // },
       {
-        id: "7",
+        id: "4",
+        name: "Institution Information",
+        route: "/general-info/institution-info",
+        subMenu: false,
+      },
+      // {
+      //   id: "5",
+      //   name: "RFID ",
+      //   route: "/general-info/sms",
+      // },
+      {
+        id: "5",
         name: "User Image",
         route: "/general-info/user-image",
         subMenu: false,
       },
       {
-        id: "8",
+        id: "6",
+
         name: "Bulk Image",
         route: "/general-info/bulk-image",
         subMenu: false,
       },
+      //   {
+      //   id: "5",
+      //   name: "Address Entry",
+      //   route: "/general-info/sms",
+      // },
+
+      {
+        id: "7",
+        name: "SMS",
+        route: "/general-info/sms",
+      },
+      {
+        id: "8",
+        name: "User Reports",
+        route: "/general-info/user-reports",
+      },
+      // {
+      //   id: "9",
+      //   name: "User Transaction",
+      //   route: "/general-info/user-reports",
+      // },
     ],
   },
   {
@@ -69,47 +92,48 @@ export const menuData = [
       },
       {
         id: "3",
-        name: "English & Arobi Name",
-        route: "/students/english-arobi-name",
+        name: "Class Group",
+        route: "/students/section",
       },
       {
         id: "4",
-        name: "Book",
-        route: "/students/book-list",
-      },
-      {
-        id: "6",
-        name: "Data Export",
-        route: "/students/data-export",
-      },
-      {
-        id: "7",
         name: "All Students",
         route: "/students",
       },
       {
-        id: "8",
+        id: "5",
+        name: "English & Arobi Name",
+        route: "/students/english-arobi-name",
+      },
+      {
+        id: "6",
+        name: "Book",
+        route: "/students/book-list",
+      },
+
+      {
+        id: "7",
         name: "Group Distribution",
         route: "/students/group-distribution",
+      },
+      {
+        id: "8",
+        name: "Data Export",
+        route: "/students/data-export",
       },
 
       {
         id: "9",
-        name: "Section",
-        route: "/students/section",
-      },
-      {
-        id: "10",
         name: "Certificate of Attestation",
         route: "/students/certificate-of-attestation",
       },
       {
-        id: "11",
+        id: "10",
         name: "Students Report",
         route: "/students/report",
       },
       {
-        id: "12",
+        id: "11",
         name: "Online Admission",
         route: "/students/online-admission",
       },
@@ -161,7 +185,7 @@ export const menuData = [
     subMenu: [
       {
         id: "1",
-        name: "Exam",
+        name: "Exam Name",
         route: "/exam",
       },
       {
@@ -191,12 +215,12 @@ export const menuData = [
       },
       {
         id: "7",
-        name: "Exam Admit Card",
+        name: "Admit Card",
         route: "/exam/admit-card",
       },
       {
         id: "8",
-        name: "Exam Routing",
+        name: "Exam Routing Create",
         route: "/exam/routing",
       },
       {
@@ -267,31 +291,36 @@ export const menuData = [
       },
       {
         id: "3",
+        name: "Selected Per Student Fee",
+        route: "/accounting/selected-per-student-fee",
+      },
+      {
+        id: "4",
         name: "Student Fee Collection",
         route: "/accounting/student-fee-collection",
       },
       {
-        id: "4",
+        id: "5",
         name: "Dues List",
         route: "/accounting/dues-list",
       },
       {
-        id: "5",
+        id: "6",
         name: "Monthly Dues",
         route: "/accounting/monthly-dues",
       },
       {
-        id: "6",
+        id: "7",
         name: "Fee Collection Report",
         route: "/accounting/fee-collection-report",
       },
       {
-        id: "7",
+        id: "8",
         name: "Balance Transfer",
         route: "/accounting/balance-transfer",
       },
       {
-        id: "8",
+        id: "9",
         name: "Delete Edit Record",
         route: "/accounting/delete-edit-record",
       },
@@ -329,7 +358,7 @@ export const menuData = [
       },
       {
         id: "3",
-        name: "Donation Report",
+        name: "Donor Report",
         route: "/donation/report",
       },
     ],

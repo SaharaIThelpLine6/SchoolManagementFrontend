@@ -3,7 +3,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import ThemeInputBox1 from "../../../components/Forms/ThemeInputBox1";
 import SelectBox1 from "../../../components/Forms/SelectBox1";
 import useTranslate from "../../../utils/Translate";
-import { 
+import {
   useGetSubClasssQuery,
   useCreateAcademicSubjectMutation,
   useUpdateAcademicSubjectMutation,
@@ -55,7 +55,7 @@ const AddEditBook = ({ id }) => {
           id: editData.SubjectID,
           ...data
         }).unwrap();
-        
+
         Swal.fire({
           title: translate("Success"),
           text: translate("Subject updated successfully"),
@@ -64,14 +64,14 @@ const AddEditBook = ({ id }) => {
       } else {
         // Handle create
         await createSubject(data).unwrap();
-        
+
         Swal.fire({
           title: translate("Success"),
           text: translate("Subject created successfully"),
           icon: "success"
         });
       }
-      
+
       resetForm();
       // if (refetchSubjects) refetchSubjects();
     } catch (error) {
@@ -85,14 +85,13 @@ const AddEditBook = ({ id }) => {
   };
 
   // if (isSubClassLoading) return <Loading />;
-
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* First Column */}
           <div className="space-y-4">
-          
+
 
             <div >
               <ThemeInputBox1
@@ -126,7 +125,7 @@ const AddEditBook = ({ id }) => {
               />
             </div>
 
-       
+
 
             <div >
               <ThemeInputBox1

@@ -200,9 +200,9 @@ const ExamAdmitCard = () => {
             </div>
             <div className="flex justify-start items-start gap-4">
               {/* Save Button */}
-              <div className="pt-6">
+              {/* <div className="pt-6">
                 <Button type="submit">{translate("Save")}</Button>
-              </div>
+              </div> */}
             </div>
           </form>
         </FormProvider>

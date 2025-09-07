@@ -21,6 +21,7 @@ export const feeCollectionSlice = createApi({
     "StudentFeeGroups",
     "ResceiptNumber",
     "StudentFeeSettings",
+    "SelectedStudentPerFee",
   ],
   endpoints: (builder) => ({
     getFees: builder.query({
@@ -183,6 +184,34 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["StudentFeeSettings"],
     }),
+    getSelectedPerStudentFeeBySearch: builder.query({
+      query: ({ search, ClassID, SessionID }) => {
+        const params = new URLSearchParams();
+        if (search) {
+          params.append("search", search);
+        }
+        if (ClassID) params.append("ClassID", ClassID);
+        if (SessionID) params.append("SessionID", SessionID);
+        return `/search__selected_per_student_fee?${params.toString()}`;
+      },
+      providesTags: ["SelectedStudentPerFee"],
+    }),
+    postSelectedPerStudentFee: builder.mutation({
+      query: (data) => ({
+        url: "selected_per_student_fee",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["SelectedStudentPerFee"],
+    }),
+    deleteSelectedPerStudentFee: builder.mutation({
+      query: (body) => ({
+        url: "/selected_per_student_fee",
+        method: "DELETE",
+        body, // backend expects JSON body
+      }),
+      invalidatesTags: ["SelectedStudentPerFee"],
+    }),
   }),
 });
 
@@ -216,4 +245,7 @@ export const {
   useGetStudentFeeSettingsQuery,
   usePostStudentFeeSettingsMutation,
   useDeleteStudentFeeSettingsMutation,
+  useGetSelectedPerStudentFeeBySearchQuery,
+  usePostSelectedPerStudentFeeMutation,
+  useDeleteSelectedPerStudentFeeMutation,
 } = feeCollectionSlice;

@@ -79,6 +79,7 @@ import DeleteEditRecord from "../pages/DeleteEditRecord";
 import Settings from "../pages/Settings";
 import UserImage from "../pages/UserImage";
 import BulkImage from "../pages/BulkImage";
+import SelectedPerStudentFee from "../pages/SelectedPerStudentFee";
 
 const router = createBrowserRouter([
   {
@@ -544,6 +545,15 @@ const router = createBrowserRouter([
                 ),
               },
               {
+                path: "selected-per-student-fee",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.st}
+                  // >
+                  <SelectedPerStudentFee pageTitle="Selected Per Student Fee" />
+                  // </RequirePermission>
+                ),
+              }, {
                 path: "student-fee-collection",
                 element: (
                   // <RequirePermission

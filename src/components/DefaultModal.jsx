@@ -27,6 +27,7 @@ import UserSearch from "./UserSearch";
 import AddLoginUsersModal from "../view/settings/AddLoginUsersModal";
 import UserNamePasswordChangeModal from "../view/settings/UserNamePasswordChangeModal";
 import UserFilterModal from "./Modals/UserFilterModal";
+import SelectedPerStudentFeeModal from "./Modals/SelectedPerStudentFeeModal";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -107,6 +108,7 @@ const DefaultModal = () => {
                 )}
                 {modalType === "STUDENT_FILTER" && <StudentFilterModal />}
                 {modalType === "USER_FILTER" && <UserFilterModal />}
+                {modalType === "SELECTED_PERSTUDENT_FEE_FILTER" && <SelectedPerStudentFeeModal />}
                 {modalType === "SMS_TEMPLATES" && <SMSTemplate />}
                 {modalType === "SMS_BUY" && <SMSBuy />}
                 {modalType === "PAYMENT_GETWAY" && <PaymentGetway />}

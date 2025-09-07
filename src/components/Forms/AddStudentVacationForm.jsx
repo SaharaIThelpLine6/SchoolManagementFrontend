@@ -305,12 +305,12 @@ const AddStudentVacationForm = ({ pageTitle }) => {
               />
               <DefaultInput
                 registerKey="FatherName"
-                label={`${translate("Father Name")}:`}
+                label={`${translate("Father Name")}: `}
                 disable={true}
               />
               <DefaultInput
                 registerKey="ClassName"
-                label={`${translate("ClassName")}:`}
+                label={`${translate("ClassName")}: `}
                 disable={true}
               />
               <DefaultSelect
@@ -327,7 +327,7 @@ const AddStudentVacationForm = ({ pageTitle }) => {
               />
               <div className="flex flex-row items-center justify-center gap-2">
                 <DefaultSelect
-                  label={`${translate("Type of vacation")}:`}
+                  label={`${translate("Type of vacation")}: `}
                   nameField="VacationList"
                   registerKey="ID"
                   valueField="ID"

@@ -84,6 +84,7 @@ const initialState = {
   academicClassStudentError: null,
   filteredStudent: null,
   filteredUser: null,
+  filteredSelectedPerStudentFee: null,
   characterReportEditMode: null,
   parentsData: [],
   allUsers: [],
@@ -101,6 +102,9 @@ const classSlice = createSlice({
     },
     setFilteredUser: (state, action) => {
       state.filteredUser = action.payload;
+    },
+    setFilteredSelectedPerStudentFee: (state, action) => {
+      state.filteredSelectedPerStudentFee = action.payload;
     },
     setCharacterReportEditMode: (state, action) => {
       state.characterReportEditMode = action.payload;
@@ -211,6 +215,7 @@ export const {
   setEditMode,
   setFilteredStudent,
   setFilteredUser,
+  setFilteredSelectedPerStudentFee,
   setCharacterReportEditMode,
   setParentsData,
   deleteParentData,
