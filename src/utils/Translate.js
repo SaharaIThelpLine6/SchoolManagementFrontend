@@ -26,6 +26,8 @@ const useTranslate = () => {
     "Student Financial Status": "শিক্ষার্থীর আর্থিক অবস্থা",
     "Student Residential Status": "শিক্ষার্থীর আবাসিক অবস্থা",
     "New and Old": "নতুন ও পুরাতন",
+    "Search Id": "আইডি দিয়ে সার্চ করুন",
+    "Card Name": "কার্ড নাম",
     "Acc Rosid Satting": "হিসাব রসিদ সেটিং",
     "Message Admission": "ভর্তি মেসেজ",
     "Donor SMS": "দানকারী এসএমএস",

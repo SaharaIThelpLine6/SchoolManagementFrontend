@@ -81,6 +81,7 @@ import UserImage from "../pages/UserImage";
 import BulkImage from "../pages/BulkImage";
 import SelectedPerStudentFee from "../pages/SelectedPerStudentFee";
 import AllMadrasah from "../pages/AllMadrasah";
+import RFIDCard from "../pages/RFIDCard";
 
 const router = createBrowserRouter([
   {
@@ -121,13 +122,23 @@ const router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-               {
+              {
                 path: "all-madrasah",
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.user_report}
                   // >
-                    <AllMadrasah pageTitle="All Madrasah" />
+                  <AllMadrasah pageTitle="All Madrasah" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: "rfid-card",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.user_report}
+                  // >
+                  <RFIDCard pageTitle="All Madrasah" />
                   // </RequirePermission>
                 ),
               },
@@ -165,17 +176,17 @@ const router = createBrowserRouter([
                   // <RequirePermission
                   //   permissionId={permissionsDataList.month_name}
                   // >
-                    <UserImage />
+                  <UserImage />
                   // </RequirePermission>
                 ),
               },
-                 {
+              {
                 path: "bulk-image",
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.month_name}
                   // >
-                    <BulkImage />
+                  <BulkImage />
                   // </RequirePermission>
                 ),
               },
@@ -564,7 +575,8 @@ const router = createBrowserRouter([
                   <SelectedPerStudentFee pageTitle="Selected Per Student Fee" />
                   // </RequirePermission>
                 ),
-              }, {
+              },
+              {
                 path: "student-fee-collection",
                 element: (
                   // <RequirePermission
@@ -678,7 +690,7 @@ const router = createBrowserRouter([
                 element: <Settings pageTitle="Settings" />,
               },
 
-               {
+              {
                 path: "add-login-users",
                 element: (
                   // <RequirePermission

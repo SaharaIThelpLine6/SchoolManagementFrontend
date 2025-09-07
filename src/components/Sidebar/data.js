@@ -33,19 +33,25 @@ export const menuData = [
         route: "/general-info/institution-info",
         subMenu: false,
       },
+      {
+        id: "6",
+        name: "RFID Card",
+        route: "/general-info/rfid-card",
+        subMenu: false,
+      },
       // {
       //   id: "5",
       //   name: "RFID ",
       //   route: "/general-info/sms",
       // },
       {
-        id: "6",
+        id: "7",
         name: "User Image",
         route: "/general-info/user-image",
         subMenu: false,
       },
       {
-        id: "7",
+        id: "8",
         name: "Bulk Image",
         route: "/general-info/bulk-image",
         subMenu: false,
@@ -57,12 +63,12 @@ export const menuData = [
       // },
 
       {
-        id: "8 ",
+        id: "9",
         name: "SMS",
         route: "/general-info/sms",
       },
       {
-        id: "8",
+        id: "10",
         name: "User Reports",
         route: "/general-info/user-reports",
       },
