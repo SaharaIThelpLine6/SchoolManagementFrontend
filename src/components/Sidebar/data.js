@@ -21,14 +21,14 @@ export const menuData = [
         route: "/general-info/month-name-list",
         subMenu: false,
       },
-      // {
-      //   id: "3",
-      //   name: "All Madrasah",
-      //   route: "/general-info/month-name-list",
-      //   subMenu: false,
-      // },
       {
         id: "4",
+        name: "All Madrasah",
+        route: "/general-info/all-madrasah",
+        subMenu: false,
+      },
+      {
+        id: "5",
         name: "Institution Information",
         route: "/general-info/institution-info",
         subMenu: false,
@@ -39,14 +39,13 @@ export const menuData = [
       //   route: "/general-info/sms",
       // },
       {
-        id: "5",
+        id: "6",
         name: "User Image",
         route: "/general-info/user-image",
         subMenu: false,
       },
       {
-        id: "6",
-
+        id: "7",
         name: "Bulk Image",
         route: "/general-info/bulk-image",
         subMenu: false,
@@ -58,7 +57,7 @@ export const menuData = [
       // },
 
       {
-        id: "7",
+        id: "8 ",
         name: "SMS",
         route: "/general-info/sms",
       },

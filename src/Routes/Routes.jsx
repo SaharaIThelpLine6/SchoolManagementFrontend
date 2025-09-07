@@ -80,6 +80,7 @@ import Settings from "../pages/Settings";
 import UserImage from "../pages/UserImage";
 import BulkImage from "../pages/BulkImage";
 import SelectedPerStudentFee from "../pages/SelectedPerStudentFee";
+import AllMadrasah from "../pages/AllMadrasah";
 
 const router = createBrowserRouter([
   {
@@ -120,6 +121,16 @@ const router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
+               {
+                path: "all-madrasah",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.user_report}
+                  // >
+                    <AllMadrasah pageTitle="All Madrasah" />
+                  // </RequirePermission>
+                ),
+              },
               {
                 path: "sms",
                 element: (
@@ -147,7 +158,7 @@ const router = createBrowserRouter([
                     <MonthListTable />
                   </RequirePermission>
                 ),
-              }, 
+              },
               {
                 path: "user-image",
                 element: (
@@ -157,7 +168,7 @@ const router = createBrowserRouter([
                     <UserImage />
                   // </RequirePermission>
                 ),
-              }, 
+              },
                  {
                 path: "bulk-image",
                 element: (
@@ -674,7 +685,7 @@ const router = createBrowserRouter([
                   //   permissionId={permissionsDataList.st}
                   // >
                   <AddLoginUsers pageTitle="Add Login Users" />
-                  
+
                   // </RequirePermission>
                 ),
               },
