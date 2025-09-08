@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setPageName } from "../features/auth/authSlice";
 import SortableTable from "../components/Tables/SortableTable";
@@ -10,215 +10,73 @@ import Loading from "../components/Loading/Loading";
 import Button from "../components/Button/Button";
 import EditButton from "../components/Button/EditButton";
 import DefaultPagination from "../components/Pagination/DefaultPagination";
-
-const PAGE_SIZE = 10;
+import {
+  useGetAllMadrasahQuery,
+  useGetMadrasahStatsQuery,
+  useToggleMadrasahActionMutation,
+} from "../features/userType/userTypeSlice";
 
 const AllMadrasah = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
 
-  // Sample data based on the provided image
-  const madrasahData = [
-    {
-      ID: 1140,
-      Code: 1271,
-      DatabaseName: "1271_TajkiatulUm...",
-      InstitutionName: "vnr@singer...",
-      CreateAt: "12/24/2022",
-      LastLogin: "9/6/2025 8:04 PM",
-      Balance: 174,
-      Status: "Active",
-      Online: "Offline",
-      Online2: 0,
-    },
-    {
-      ID: 1150,
-      Code: 1269,
-      DatabaseName: "1269_AshrafunNi...",
-      InstitutionName: "vnr@singer.fa...",
-      CreateAt: "12/30/2022",
-      LastLogin: "9/7/2025 8:32 AM",
-      Balance: 138,
-      Status: "Active",
-      Online: "Online",
-      Online2: 1,
-    },
-    {
-      ID: 1151,
-      Code: 1276,
-      DatabaseName: "1276_12AwilaRon...",
-      InstitutionName: "vnr-vnr@singer...",
-      CreateAt: "12/30/2022",
-      LastLogin: "6/29/2025 6:51 PM",
-      Balance: 172,
-      Status: "Active",
-      Online: "Offline",
-      Online2: 0,
-    },
-    {
-      ID: 1152,
-      Code: 1278,
-      DatabaseName: "1278_AlHeraMadrasah",
-      InstitutionName: "alhera@edu.org",
-      CreateAt: "1/15/2023",
-      LastLogin: "9/7/2025 9:15 AM",
-      Balance: 210,
-      Status: "Active",
-      Online: "Online",
-      Online2: 1,
-    },
-    {
-      ID: 1153,
-      Code: 1280,
-      DatabaseName: "1280_NoorulIslam",
-      InstitutionName: "noorul@islam.edu",
-      CreateAt: "2/3/2023",
-      LastLogin: "9/6/2025 3:45 PM",
-      Balance: 95,
-      Status: "Inactive",
-      Online: "Offline",
-      Online2: 0,
-    },
-    {
-      ID: 1154,
-      Code: 1282,
-      DatabaseName: "1282_DarulUloom",
-      InstitutionName: "darul@ulum.edu",
-      CreateAt: "2/18/2023",
-      LastLogin: "9/5/2025 11:20 AM",
-      Balance: 156,
-      Status: "Active",
-      Online: "Offline",
-      Online2: 0,
-    },
-    {
-      ID: 1155,
-      Code: 1284,
-      DatabaseName: "1284_MadrasatulBanat",
-      InstitutionName: "banat@edu.org",
-      CreateAt: "3/5/2023",
-      LastLogin: "9/7/2025 10:05 AM",
-      Balance: 187,
-      Status: "Active",
-      Online: "Online",
-      Online2: 1,
-    },
-    {
-      ID: 1156,
-      Code: 1286,
-      DatabaseName: "1286_JamiaRahmania",
-      InstitutionName: "jamia@rahmania.edu",
-      CreateAt: "3/22/2023",
-      LastLogin: "9/4/2025 4:30 PM",
-      Balance: 122,
-      Status: "Pending",
-      Online: "Offline",
-      Online2: 0,
-    },
-    {
-      ID: 1157,
-      Code: 1288,
-      DatabaseName: "1288_MiftahulUloom",
-      InstitutionName: "miftahul@uloom.edu",
-      CreateAt: "4/10/2023",
-      LastLogin: "9/7/2025 8:50 AM",
-      Balance: 203,
-      Status: "Active",
-      Online: "Online",
-      Online2: 1,
-    },
-    {
-      ID: 1158,
-      Code: 1290,
-      DatabaseName: "1290_AlMadinatulIlm",
-      InstitutionName: "almadinatul@ilm.edu",
-      CreateAt: "4/28/2023",
-      LastLogin: "9/3/2025 2:15 PM",
-      Balance: 178,
-      Status: "Active",
-      Online: "Offline",
-      Online2: 0,
-    },
-  ];
-
+  // Get query parameters from URL
   const searchParams = new URLSearchParams(location.search);
-  const filter = parseInt(searchParams.get("filter") || "0");
+  const initialFilter = searchParams.get("filter") || "all";
 
+  // State for pagination, search, and filters
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilter, setActiveFilter] = useState(initialFilter);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch data with query parameters
+  const {
+    data: allMadrasah,
+    isLoading: isFetchingMadrasah,
+    isError: isErrorMadrasah,
+  } = useGetAllMadrasahQuery({
+    page: currentPage,
+    limit: 10,
+    search: searchTerm || undefined,
+    filter: activeFilter !== "all" ? activeFilter : undefined,
+  });
+
+  // Fetch stats
+  const {
+    data: statsData,
+    isLoading: isFetchingStats,
+    isError: isErrorStats,
+  } = useGetMadrasahStatsQuery();
+
+  // Toggle action mutation
+  const [toggleMadrasahAction, { isLoading: isToggling }] =
+    useToggleMadrasahActionMutation();
+
+  // Set page title
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilter, setActiveFilter] = useState("all"); // Track active filter
+  // Handle loading state from API
+  useEffect(() => {
+    setIsLoading(isFetchingMadrasah || isFetchingStats || isToggling);
+  }, [isFetchingMadrasah, isFetchingStats, isToggling]);
 
-  // Filter data based on search term and active filter
-  const filteredData = useMemo(() => {
-    let result = madrasahData;
+  // Use stats from API
+  const stats = statsData || {
+    totalUsers: 0,
+    active: 0,
+    inactive: 0,
+    online: 0,
+    offline: 0,
+  };
 
-    // Apply search filter
-    if (searchTerm) {
-      result = result.filter(
-        (item) =>
-          item.DatabaseName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.InstitutionName.toLowerCase().includes(
-            searchTerm.toLowerCase()
-          ) ||
-          item.Code.toString().includes(searchTerm) ||
-          item.ID.toString().includes(searchTerm)
-      );
-    }
-
-    // Apply active filter
-    if (activeFilter !== "all") {
-      switch (activeFilter) {
-        case "active":
-          result = result.filter((item) => item.Status === "Active");
-          break;
-        case "inactive":
-          result = result.filter((item) => item.Status === "Inactive");
-          break;
-        case "online":
-          result = result.filter((item) => item.Online === "Online");
-          break;
-        case "offline":
-          result = result.filter((item) => item.Online === "Offline");
-          break;
-        default:
-          break;
-      }
-    }
-
-    return result;
-  }, [madrasahData, searchTerm, activeFilter]);
-
-  // Calculate statistics
-  const stats = useMemo(() => {
-    const totalUsers = madrasahData.length;
-    const active = madrasahData.filter(
-      (item) => item.Status === "Active"
-    ).length;
-    const inactive = madrasahData.filter(
-      (item) => item.Status === "Inactive"
-    ).length;
-    const online = madrasahData.filter(
-      (item) => item.Online === "Online"
-    ).length;
-    const offline = madrasahData.filter(
-      (item) => item.Online === "Offline"
-    ).length;
-
-    return { totalUsers, active, inactive, online, offline };
-  }, [madrasahData]);
-
-  const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
-
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return filteredData.slice(start, start + PAGE_SIZE);
-  }, [filteredData, currentPage]);
+  // Extract paginated data and metadata
+  const paginatedData = allMadrasah?.data || [];
+  const totalPages = allMadrasah?.pagination?.totalPages || 1;
+  const totalRecords = allMadrasah?.pagination?.totalRecords || 0;
 
   const handleOpenModal = useCallback(() => {
     showModal(translate("Add new madrasah"), "ADD_MADRASAH");
@@ -244,8 +102,8 @@ const AllMadrasah = ({ pageTitle }) => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          // Simulate API call
           setIsLoading(true);
+          // TODO: Replace with actual delete API call
           await new Promise((resolve) => setTimeout(resolve, 1000));
           Swal.fire("Deleted!", "The madrasah has been removed.", "success");
         } catch (error) {
@@ -262,13 +120,47 @@ const AllMadrasah = ({ pageTitle }) => {
     setCurrentPage(1); // Reset to first page when searching
   }, []);
 
-  // Handle filter button clicks
   const handleFilterClick = useCallback(
     (filterType) => {
       setActiveFilter(activeFilter === filterType ? "all" : filterType);
       setCurrentPage(1); // Reset to first page when filtering
     },
     [activeFilter]
+  );
+
+  const handleClearFilter = () => {
+    setActiveFilter("all"), setSearchTerm("");
+  };
+
+  const handleToggleAction = useCallback(
+    async (id) => {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to change this Madrasah status?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, change it!",
+        cancelButtonText: "Cancel",
+      });
+
+      if (result.isConfirmed) {
+        try {
+          await toggleMadrasahAction(id).unwrap();
+          Swal.fire({
+            title: "Success!",
+            text: "Madrasah status updated.",
+            icon: "success",
+            timer: 1500,
+            showConfirmButton: false,
+          });
+        } catch (error) {
+          Swal.fire("Error!", "Failed to toggle status.", "error");
+        }
+      }
+    },
+    [toggleMadrasahAction]
   );
 
   const columnsMadrasah = [
@@ -281,10 +173,10 @@ const AllMadrasah = ({ pageTitle }) => {
     },
     {
       title: translate("Code"),
-      field: "Code",
+      field: "UserCode",
       hozAlign: "center",
       width: 90,
-      render: (row) => <p className="text-sm">{row.Code}</p>,
+      render: (row) => <p className="text-sm">{row.UserCode}</p>,
     },
     {
       title: translate("Database Name"),
@@ -296,76 +188,93 @@ const AllMadrasah = ({ pageTitle }) => {
     },
     {
       title: translate("Institution Name"),
-      field: "InstitutionName",
+      field: "InstituteName",
       hozAlign: "left",
       render: (row) => (
-        <p className="text-sm truncate max-w-xs">{row.InstitutionName}</p>
+        <p className="text-sm truncate max-w-xs">{row.InstituteName}</p>
       ),
     },
     {
       title: translate("Created At"),
-      field: "CreateAt",
+      field: "EntryDate",
       hozAlign: "center",
       width: 120,
-      render: (row) => <p className="text-sm">{row.CreateAt}</p>,
+      render: (row) => (
+        <p className="text-sm">
+          {new Date(row.EntryDate).toLocaleDateString()}
+        </p>
+      ),
     },
     {
       title: translate("Last Login"),
       field: "LastLogin",
       hozAlign: "center",
       width: 150,
-      render: (row) => <p className="text-sm">{row.LastLogin}</p>,
+      render: (row) => (
+        <p className="text-sm">
+          {row.LastLogin ? new Date(row.LastLogin).toLocaleString() : "N/A"}
+        </p>
+      ),
     },
     {
       title: translate("Balance"),
       field: "Balance",
       hozAlign: "center",
       width: 100,
-      render: (row) => <p className="text-sm font-medium">${row.Balance}</p>,
+      render: (row) => <p className="text-sm font-medium">৳{row.Balance}</p>,
     },
     {
       title: translate("Status"),
-      field: "Status",
+      field: "Action",
       hozAlign: "center",
       width: 110,
       render: (row) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            row.Status === "Active"
+            row.Action === "Active"
               ? "bg-green-100 text-green-800"
-              : row.Status === "Inactive"
-              ? "bg-red-100 text-red-800"
-              : "bg-yellow-100 text-yellow-800"
+              : "bg-red-100 text-red-800"
           }`}
         >
-          {row.Status}
+          {row.Action}
         </span>
       ),
     },
     {
       title: translate("Online"),
-      field: "Online",
+      field: "LoginStatus",
       hozAlign: "center",
       width: 100,
       render: (row) => (
         <div className="flex items-center justify-center">
           <span
             className={`inline-block w-3 h-3 rounded-full mr-2 ${
-              row.Online === "Online" ? "bg-green-500" : "bg-gray-400"
+              row.LoginStatus === 1 ? "bg-green-500" : "bg-gray-400"
             }`}
           ></span>
-          <span className="text-sm">{row.Online}</span>
+          <span className="text-sm">
+            {row.LoginStatus === 1 ? "Online" : "Offline"}
+          </span>
         </div>
       ),
     },
     {
-      title: translate("Actions"),
+      title: translate("Action"),
       field: "actions",
       hozAlign: "center",
-      width: 120,
+      width: 150,
       headerSort: false,
       render: (row) => (
         <div className="flex justify-center space-x-2">
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={row.Action === "Active"}
+              onChange={() => handleToggleAction(row.UserCode)}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-gray-200 rounded-full peer-checked:bg-green-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-1.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+          </label>
           <EditButton
             onClick={() => handleEditOpenModal(row.ID)}
             className="w-8 h-8 flex items-center justify-center"
@@ -396,6 +305,9 @@ const AllMadrasah = ({ pageTitle }) => {
   ];
 
   if (isLoading) return <Loading />;
+  if (isErrorMadrasah || isErrorStats) {
+    return <div className="text-red-600 text-center">Error fetching data</div>;
+  }
 
   return (
     <div className="font-lato bg-white p-6 rounded-xl shadow-lg">
@@ -404,10 +316,9 @@ const AllMadrasah = ({ pageTitle }) => {
           <h3 className="font-SolaimanLipi text-2xl font-bold text-gray-800">
             {translate("All Madrasah List")}
           </h3>
-
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <Button
-              onClick={() => handleOpenModal()}
+              onClick={handleOpenModal}
               className="flex justify-center items-center"
             >
               <svg
@@ -524,7 +435,7 @@ const AllMadrasah = ({ pageTitle }) => {
             className={`p-3 rounded-lg text-center border cursor-pointer transition-colors ${
               activeFilter === "offline"
                 ? "bg-gray-100 border-gray-300"
-                : "bg-gray-50 border-gray-100 hover:bg-gray-100"
+                : "bg-gray-50 border-gray-200 hover:bg-gray-100"
             }`}
             onClick={() => handleFilterClick("offline")}
           >
@@ -545,7 +456,7 @@ const AllMadrasah = ({ pageTitle }) => {
               {activeFilter}
             </span>
             <button
-              onClick={() => setActiveFilter("all")}
+              onClick={handleClearFilter}
               className="ml-2 text-blue-600 text-sm hover:underline"
             >
               Clear filter
@@ -565,10 +476,9 @@ const AllMadrasah = ({ pageTitle }) => {
         {/* Pagination Controls */}
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-600">
-            Showing {paginatedData.length} of {filteredData.length} madrasahs
+            Showing {paginatedData.length} of {totalRecords} madrasahs
             {activeFilter !== "all" && ` (filtered by ${activeFilter})`}
           </p>
-
           <DefaultPagination
             currentPage={currentPage}
             totalPages={totalPages}

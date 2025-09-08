@@ -14,19 +14,14 @@ export const userTypeSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["UserType", "User"], // Define your tag type
+  tagTypes: ["UserType", "User", "Madrasah"], // Define your tag type
   endpoints: (builder) => ({
     getUserTypes: builder.query({
       query: () => "user_type",
       providesTags: ["UserType"], // This query provides this tag
     }),
     getUserBySearch: builder.query({
-      query: ({
-        search,
-        ClassID,
-        SessionID,
-        UserTypeID,
-      }) => {
+      query: ({ search, ClassID, SessionID, UserTypeID }) => {
         const params = new URLSearchParams();
         if (search) {
           params.append("search", search);
@@ -38,7 +33,31 @@ export const userTypeSlice = createApi({
       },
       providesTags: ["User"],
     }),
+    getAllMadrasah: builder.query({
+      query: ({ page, limit, search, filter }) => ({
+        url: "all_madrasah",
+        params: { page, limit, search, filter },
+      }),
+      providesTags: ["Madrasah"],
+    }),
+    getMadrasahStats: builder.query({
+      query: () => "all_madrasah_stats",
+      providesTags: ["Madrasah"],
+    }),
+    toggleMadrasahAction: builder.mutation({
+      query: (id) => ({
+        url: `madrasah/${id}/toggle-action`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Madrasah"],
+    }),
   }),
 });
 
-export const { useGetUserTypesQuery, useGetUserBySearchQuery } = userTypeSlice;
+export const {
+  useGetUserTypesQuery,
+  useGetUserBySearchQuery,
+  useGetAllMadrasahQuery,
+  useGetMadrasahStatsQuery,
+  useToggleMadrasahActionMutation,
+} = userTypeSlice;

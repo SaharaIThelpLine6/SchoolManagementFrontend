@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { setPageName } from "../features/auth/authSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { FormProvider, useForm } from "react-hook-form";
@@ -15,13 +15,10 @@ import {
   useUpdateStudentCharacterReportMutation,
 } from "../features/student/studentQuerySlice";
 import {
-  fetchSingleStudentDataByStudentCode,
-  fetchSingleStudentDataByStudentCodeAndSession,
   setCharacterReportEditMode,
   setFilteredStudent,
 } from "../features/student/studentSlice";
 import { toast } from "react-toastify";
-import LoadingComponent from "../components/LoadingComponent";
 import convertBijoyToBengali from "../utils/uniconveter";
 import bnBijoy2Unicode from "../utils/conveter";
 import useTranslate from "../utils/Translate";
