@@ -4,25 +4,33 @@ import UserOne from "../../images/user/user-01.png";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../features/auth/authSlice";
 import ClickOutside from "../ClickOutside";
+import { disconnectSocket } from "../../helper/socket";
 const DropdownUser = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
-  const handleLogout = (dispatch) => {
-    // 1. Redux logout
-    dispatch({ type: "auth/logout" });
+const handleLogout = (dispatch) => {
+  console.log("🚀 Logging out...");
 
-    // 2. Remove Tawk.to storage keys
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith("twk_")) {
-        localStorage.removeItem(key);
-      }
-    });
+  // 1. Redux logout
+  dispatch({ type: "auth/logout" });
 
-    // 3. Force reload
-    window.location.reload();
-  };
+  // 2. Disconnect socket
+  disconnectSocket();
+
+  // 3. Remove Tawk.to storage keys
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith("twk_")) {
+      localStorage.removeItem(key);
+    }
+  });
+
+  // 4. Delay reload (so logs are visible)
+  // setTimeout(() => {
+  //   window.location.reload();
+  // }, 500);
+};
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">

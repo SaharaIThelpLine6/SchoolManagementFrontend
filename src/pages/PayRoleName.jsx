@@ -43,13 +43,7 @@ const PayRoleName = () => {
         </div>
       ),
     },
-
     {
-      title: translate("Serial"),
-      field: "VacationList",
-      hozAlign: "center",
-      render: (row) => <p>{row.VacationList}</p>,
-    },{
       title: translate("পে-রোলের নাম"),
       field: "VacationList",
       hozAlign: "center",

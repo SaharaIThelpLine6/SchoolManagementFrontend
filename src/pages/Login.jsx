@@ -7,6 +7,7 @@ import Swal from "sweetalert2";
 import LoginInput from "../components/Forms/LoginInput";
 import SvgIcon from "../components/icons/SvgIcon";
 import { usePostLoginMutation } from "../features/dashboard/dashboardQuerySlice";
+import { initSocket } from "../helper/socket";
 
 // const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -32,8 +33,9 @@ const Login = () => {
         dispatch(
           login({ token: response.token, user: response.user })
         );
+        initSocket(response.token);
         navigate("/");
-        window.location.reload();
+        // window.location.reload();
       } else {
         Swal.fire({
           icon: "error",

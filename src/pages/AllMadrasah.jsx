@@ -6,6 +6,7 @@ import { useLocation } from "react-router-dom";
 import useTranslate from "../utils/Translate";
 import { showModal } from "../utils/ModalControlar";
 import Swal from "sweetalert2";
+import { io } from "socket.io-client";
 import Loading from "../components/Loading/Loading";
 import Button from "../components/Button/Button";
 import EditButton from "../components/Button/EditButton";
@@ -30,6 +31,7 @@ const AllMadrasah = ({ pageTitle }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [isLoading, setIsLoading] = useState(false);
+  const [users, setUsers] = useState([]);
 
   // Fetch data with query parameters
   const {
@@ -72,11 +74,17 @@ const AllMadrasah = ({ pageTitle }) => {
     online: 0,
     offline: 0,
   };
+  useEffect(() => {
+    if (allMadrasah) {
+      setUsers(allMadrasah);
+    }
+  }, [allMadrasah]);
+
 
   // Extract paginated data and metadata
-  const paginatedData = allMadrasah?.data || [];
-  const totalPages = allMadrasah?.pagination?.totalPages || 1;
-  const totalRecords = allMadrasah?.pagination?.totalRecords || 0;
+  const paginatedData = users?.data || [];
+  const totalPages = users?.pagination?.totalPages || 1;
+  const totalRecords = users?.pagination?.totalRecords || 0;
 
   const handleOpenModal = useCallback(() => {
     showModal(translate("Add new madrasah"), "ADD_MADRASAH");
@@ -252,9 +260,7 @@ const AllMadrasah = ({ pageTitle }) => {
               row.LoginStatus === 1 ? "bg-green-500" : "bg-gray-400"
             }`}
           ></span>
-          <span className="text-sm">
-            {row.LoginStatus === 1 ? "Online" : "Offline"}
-          </span>
+          <span>{row.LoginStatus === 1 ? "Online" : "Offline"}</span>
         </div>
       ),
     },

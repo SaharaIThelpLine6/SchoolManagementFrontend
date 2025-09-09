@@ -5,6 +5,7 @@ import "./App.css";
 import "animate.css/animate.min.css";
 import { Suspense } from "react";
 import Loading from "./components/Loading/Loading";
+import SocketManager from "./components/socket/SocketManager";
 
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
@@ -14,23 +15,23 @@ const bounce = cssTransition({
 export default function App() {
   return (
     <>
-      <Suspense fallback={<Loading/>}>
+      <SocketManager />
+      <Suspense fallback={<Loading />}>
         <RouterProvider router={router} />
-      <ToastContainer
-        position="bottom-center"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        transition={bounce}
-        closeButton={false}
-        className="min-h-[50px] text-[14px] font-SolaimanLipi text-white rounded-[4px] hidden_in_print"
-      />
+        <ToastContainer
+          position="bottom-center"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          transition={bounce}
+          closeButton={false}
+          className="min-h-[50px] text-[14px] font-SolaimanLipi text-white rounded-[4px] hidden_in_print"
+        />
       </Suspense>
-
     </>
   );
 }
