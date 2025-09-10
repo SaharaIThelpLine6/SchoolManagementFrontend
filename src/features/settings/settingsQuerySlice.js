@@ -24,6 +24,10 @@ export const settingsSlice = createApi({
       query: () => "residential",
       providesTags: ["Residential"],
     }),
+    getPermissionTypes: builder.query({
+      query: () => "permission_type",
+      providesTags: ["PermissionType"],
+    }),
     getSettings: builder.query({
       query: () => "settings_info",
       providesTags: ["Settings"],
@@ -40,7 +44,7 @@ export const settingsSlice = createApi({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["InstitutionInfo"], 
+      invalidatesTags: ["InstitutionInfo"],
     }),
     updateSettings: builder.mutation({
       query: (body) => ({
@@ -48,7 +52,7 @@ export const settingsSlice = createApi({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["Settings"], 
+      invalidatesTags: ["Settings"],
     }),
     // Division, District, Thana Get
     getDivisions: builder.query({
@@ -73,5 +77,6 @@ export const {
   useGetDistrictsQuery,
   useGetPoliceStationsQuery,
   useGetSettingsQuery,
-  useUpdateSettingsMutation
+  useUpdateSettingsMutation,
+  useGetPermissionTypesQuery
 } = settingsSlice;

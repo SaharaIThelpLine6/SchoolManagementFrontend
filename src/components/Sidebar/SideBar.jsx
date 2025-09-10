@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
 import { menuData } from "./data";
@@ -7,25 +7,14 @@ import { useGetAllUserPermissionsQuery } from "../../features/permission/permiss
 import { permissionsDataList } from "../../Data/permissions";
 import Loading from "../Loading/Loading";
 import SvgIcon from "../icons/SvgIcon";
-
-const submenuVariants = {
-  hidden: { opacity: 0, height: 0 },
-  visible: {
-    opacity: 1,
-    height: "auto",
-    transition: { duration: 0.3, ease: "easeInOut" },
-  },
-  exit: {
-    opacity: 0,
-    height: 0,
-    transition: { duration: 0.3, ease: "easeInOut" },
-  },
-};
+import { useSelector } from "react-redux";
 
 const SideBar = () => {
   const [openMenuId, setOpenMenuId] = useState(null);
   const location = useLocation();
   const translate = useTranslate();
+  const { user } = useSelector((state) => state.auth);
+  const permissionType = user?.permissionType;
 
   const {
     data: permissions,
@@ -71,6 +60,11 @@ const SideBar = () => {
             if (subItem.name === "SMS") {
               return hasPermission(permissionsDataList.sms);
             }
+            if (subItem.name === "All Madrasah") {
+              // 1,2,3,4 allowed, 5,6 not allowed
+              return typeof permissionType === "number" && permissionType <= 4;
+            }
+
             if (subItem.name === "Institution Information") {
               return hasPermission(permissionsDataList.institute_info);
             }

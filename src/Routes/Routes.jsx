@@ -82,6 +82,7 @@ import BulkImage from "../pages/BulkImage";
 import SelectedPerStudentFee from "../pages/SelectedPerStudentFee";
 import AllMadrasah from "../pages/AllMadrasah";
 import RFIDCard from "../pages/RFIDCard";
+import OwenGuide from "./OwenGuide";
 
 const router = createBrowserRouter([
   {
@@ -125,11 +126,9 @@ const router = createBrowserRouter([
               {
                 path: "all-madrasah",
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.user_report}
-                  // >
-                  <AllMadrasah pageTitle="All Madrasah" />
-                  // </RequirePermission>
+                  <OwenGuide>
+                    <AllMadrasah pageTitle="All Madrasah" />
+                  </OwenGuide>
                 ),
               },
               {

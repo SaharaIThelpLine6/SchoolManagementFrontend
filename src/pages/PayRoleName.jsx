@@ -9,6 +9,7 @@ import useTranslate from "../utils/Translate";
 import { useMemo, useState } from "react";
 import { useGetStudentsVacationTypeListQuery } from "../features/student/studentQuerySlice";
 import DeleteButton from "../components/Button/DeleteButton";
+import OwenGuide from "../Routes/OwenGuide";
 
 const PAGE_SIZE = 5;
 
@@ -54,6 +55,7 @@ const PayRoleName = () => {
   return (
     <FormProvider {...methods}>
       <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-SolaimanLipi">
+        <OwenGuide/>
         <div className="md:flex w-full px-3 gap-3">
           {/*Input form Start*/}
           <div className="md:w-[50%]">
