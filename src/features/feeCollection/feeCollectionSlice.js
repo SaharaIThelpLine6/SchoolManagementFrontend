@@ -22,6 +22,7 @@ export const feeCollectionSlice = createApi({
     "ResceiptNumber",
     "StudentFeeSettings",
     "SelectedStudentPerFee",
+    "GeneralLedgersByFundAndCaids",
   ],
   endpoints: (builder) => ({
     getFees: builder.query({
@@ -78,10 +79,46 @@ export const feeCollectionSlice = createApi({
       query: () => `fund_names`,
       providesTags: ["FundNames"],
     }),
+    postFund: builder.mutation({
+      query: (data) => ({
+        url: "insert_fund",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["FundNames"],
+    }),
+    deleteFund: builder.mutation({
+      query: (id) => ({
+        url: `delete_fund/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["FundNames"],
+    }),
+    updateFund: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `insert_fund/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["FundNames"],
+    }),
+    updateFundStatus: builder.mutation({
+      query: ({ id, Action }) => ({
+        url: `/update_fund_status/${id}`,
+        method: "PATCH",
+        body: { Action },
+      }),
+      invalidatesTags: ["FundNames"],
+    }),
     getGeneralLedgers: builder.query({
       query: (id) => `general_ledger/${id}`,
       providesTags: ["GeneralLedgers"],
     }),
+    getGeneralLedgersByFundAndCaids: builder.query({
+      query: ({ fundId, caId }) => `general_ledger_by_caid/${fundId}/${caId}`,
+      providesTags: ["GeneralLedgersByFundAndCaids"],
+    }),
+
     getGLedgers: builder.query({
       query: () => `general_ledger/`,
       providesTags: ["GeneralLedgers"],
@@ -110,6 +147,31 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["StudentFeeSettings"],
     }),
+    postGeneralLedgersByFundAndCaids: builder.mutation({
+      query: (data) => ({
+        url: "insert_general_ledger",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["GeneralLedgersByFundAndCaids"],
+    }),
+    updateGeneralLedgersByFundAndCaids: builder.mutation({
+      query: ({ FundID, CAID, GLID, data }) => ({
+        url: `/update_general_ledger/${FundID}/${CAID}/${GLID}`,
+        method: "PUT",
+        body: data, // body সরাসরি পাঠানো, { data } না
+      }),
+      invalidatesTags: ["GeneralLedgersByFundAndCaids"],
+    }),
+
+    deleteGeneralLedgersByFundAndCaids: builder.mutation({
+      query: ({ FundID, CAID, GLID }) => ({
+        url: `/delete_general_ledger/${FundID}/${CAID}/${GLID}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["GeneralLedgersByFundAndCaids"],
+    }),
+
     getStudentFeeGroups: builder.query({
       query: () => `student_fee_groups`,
       providesTags: ["StudentFeeGroups"],
@@ -248,4 +310,12 @@ export const {
   useGetSelectedPerStudentFeeBySearchQuery,
   usePostSelectedPerStudentFeeMutation,
   useDeleteSelectedPerStudentFeeMutation,
+  usePostFundMutation,
+  useUpdateFundMutation,
+  useDeleteFundMutation,
+  useUpdateFundStatusMutation,
+  useGetGeneralLedgersByFundAndCaidsQuery,
+  usePostGeneralLedgersByFundAndCaidsMutation,
+  useUpdateGeneralLedgersByFundAndCaidsMutation,
+  useDeleteGeneralLedgersByFundAndCaidsMutation
 } = feeCollectionSlice;

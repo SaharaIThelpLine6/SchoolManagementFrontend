@@ -31,6 +31,8 @@ import EditButton from "../components/Button/EditButton";
 import DeleteButton from "../components/Button/DeleteButton";
 import DefaultPagination from "../components/Pagination/DefaultPagination";
 import SvgIcon from "../components/icons/SvgIcon";
+import { useCallback } from "react";
+import { showModal } from "../utils/ModalControlar";
 
 const PAGE_SIZE = 10;
 
@@ -43,7 +45,6 @@ const DepositCosts = ({ pageTitle }) => {
   const [defaultData, setDefaultData] = useState([]);
   const [editIdDefaultData, setEditIdDefaultData] = useState(null);
   const [editId, setEditId] = useState(null);
-
 
   const [
     caID,
@@ -168,6 +169,14 @@ const DepositCosts = ({ pageTitle }) => {
 
     setDefaultData(selectedOrder.AccTransactionDetails || []);
   };
+
+  const handleOpenModal = useCallback(() => {
+    showModal(translate("Funds"), "OPEN_FUND");
+  }, [translate]);
+
+  const handleGeneralOpenModal = useCallback(() => {
+    showModal(translate("Generals"), "OPEN_GENERAL");
+  }, [translate]);
 
   // Data Create Exam Fee Setting
   const onSubmit = async (data) => {
@@ -438,7 +447,7 @@ const DepositCosts = ({ pageTitle }) => {
 
           {/* Top Section - 4 responsive columns */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 p-4 bg-white rounded-lg shadow-sm">
-            <div className="flex items-end gap-2">
+            <div className="flex items-end gap-3">
               <div className="flex-1">
                 <DefaultSelect
                   label={translate("Fund") + " :"}
@@ -450,29 +459,49 @@ const DepositCosts = ({ pageTitle }) => {
                   require={"Fund is required!"}
                 />
               </div>
+              <Button
+                type="button"
+                className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#007af7] text-white
+               hover:bg-[#0066cc] transition-colors duration-150"
+                onClick={handleOpenModal}
+              >
+                <SvgIcon name="FaPlus" size={16} />
+              </Button>{" "}
             </div>
-            <div className="flex items-end gap-2">
+
+            <DefaultSelect
+              label={translate("Deposit/Cost") + " :"}
+              options={chartOfAccountData ?? []}
+              valueField="CAID"
+              nameField="ChartOfAcName"
+              registerKey="CAID"
+              unicode={true}
+              require={"Deposit/Cost is required!"}
+            />
+
+            <div className="flex items-end gap-3">
               <div className="flex-1">
                 <DefaultSelect
-                  label={translate("Deposit/Cost") + " :"}
-                  options={chartOfAccountData ?? []}
-                  valueField="CAID"
-                  nameField="ChartOfAcName"
-                  registerKey="CAID"
+                  label={translate("General Ledger") + " :"}
+                  options={generalLedgersData ?? []}
+                  valueField="GLID"
+                  nameField="GlName"
+                  registerKey="ledgerGLID"
                   unicode={true}
-                  require={"Deposit/Cost is required!"}
+                  require={"General Ledger is required!"}
                 />
               </div>
+
+              <Button
+                type="button"
+                className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#007af7] text-white
+               hover:bg-[#0066cc] transition-colors duration-150"
+                onClick={handleGeneralOpenModal}
+              >
+                <SvgIcon name="FaPlus" size={16} />
+              </Button>
             </div>
-            <DefaultSelect
-              label={translate("General Ledger") + " :"}
-              options={generalLedgersData ?? []}
-              valueField="GLID"
-              nameField="GlName"
-              registerKey="ledgerGLID"
-              unicode={true}
-              require={"General Ledger is required!"}
-            />
+
             <DefaultSelect
               label={translate("Sectors") + " :"}
               options={gSLData ?? []}

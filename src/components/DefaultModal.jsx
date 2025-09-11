@@ -28,6 +28,8 @@ import AddLoginUsersModal from "../view/settings/AddLoginUsersModal";
 import UserNamePasswordChangeModal from "../view/settings/UserNamePasswordChangeModal";
 import UserFilterModal from "./Modals/UserFilterModal";
 import SelectedPerStudentFeeModal from "./Modals/SelectedPerStudentFeeModal";
+import FundForm from "../view/accounting/FundForm";
+import GeneralForm from "../view/accounting/GeneralForm";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -44,7 +46,7 @@ const DefaultModal = () => {
       >
         {/* Tailwind animation */}
         <div
-          className={`w-full transform transition-all duration-300 ease-out 
+          className={`w-full transform transition-all duration-300 ease-out
             ${isOpen ? "opacity-100 scale-100" : "opacity-0 scale-0"}`}
         >
           <div className="bg-white rounded-lg shadow-lg relative w-full max-h-[90vh] overflow-y-auto">
@@ -90,6 +92,9 @@ const DefaultModal = () => {
                   <DesignationForm userId={id} />
                 )}
                 {modalType === "ADD_TYPEOFVACATION" && <TypeOfVacationForm />}
+                {modalType === "ADD_FUND" && <FundForm />}
+                {modalType === "OPEN_FUND" && <FundForm />}
+                {modalType === "OPEN_GENERAL" && <GeneralForm />}
                 {modalType === "EDIT_TYPEOFVACATION" && (
                   <TypeOfVacationForm userId={id} />
                 )}
@@ -108,7 +113,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === "STUDENT_FILTER" && <StudentFilterModal />}
                 {modalType === "USER_FILTER" && <UserFilterModal />}
-                {modalType === "SELECTED_PERSTUDENT_FEE_FILTER" && <SelectedPerStudentFeeModal />}
+                {modalType === "SELECTED_PERSTUDENT_FEE_FILTER" && (
+                  <SelectedPerStudentFeeModal />
+                )}
                 {modalType === "SMS_TEMPLATES" && <SMSTemplate />}
                 {modalType === "SMS_BUY" && <SMSBuy />}
                 {modalType === "PAYMENT_GETWAY" && <PaymentGetway />}
@@ -127,10 +134,10 @@ const DefaultModal = () => {
                 {modalType === "USER_SEARCH" && <UserSearch />}
                 {modalType === "POWER_DISTRIBUTION" && <AddLoginUsersModal />}
                 {modalType === "USER_NAME_CHANGE" && (
-                  <UserNamePasswordChangeModal id={id} changeType="username"/>
+                  <UserNamePasswordChangeModal id={id} changeType="username" />
                 )}
                 {modalType === "PASSWORD_CHANGE" && (
-                  <UserNamePasswordChangeModal id={id} changeType="password"/>
+                  <UserNamePasswordChangeModal id={id} changeType="password" />
                 )}
               </div>
             )}
