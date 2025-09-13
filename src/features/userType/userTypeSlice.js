@@ -14,7 +14,7 @@ export const userTypeSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["UserType", "User", "Madrasah"], // Define your tag type
+  tagTypes: ["UserType", "User", "Madrasah", "LoginUsers"], // Define your tag type
   endpoints: (builder) => ({
     getUserTypes: builder.query({
       query: () => "user_type",
@@ -44,12 +44,24 @@ export const userTypeSlice = createApi({
       query: () => "all_madrasah_stats",
       providesTags: ["Madrasah"],
     }),
+    getLoginUsers: builder.query({
+      query: () => "get_all_login_users",
+      providesTags: ["LoginUsers"],
+    }),
     toggleMadrasahAction: builder.mutation({
       query: (id) => ({
         url: `madrasah/${id}/toggle-action`,
         method: "PATCH",
       }),
       invalidatesTags: ["Madrasah"],
+    }),
+    postLoginUser: builder.mutation({
+      query: (data) => ({
+        url: "create_login_user",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["LoginUsers"],
     }),
   }),
 });
@@ -60,4 +72,6 @@ export const {
   useGetAllMadrasahQuery,
   useGetMadrasahStatsQuery,
   useToggleMadrasahActionMutation,
+  useGetLoginUsersQuery,
+  usePostLoginUserMutation
 } = userTypeSlice;
