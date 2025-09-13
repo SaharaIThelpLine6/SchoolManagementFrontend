@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
 import { NavLink, useLocation } from "react-router-dom";
-
 import { menuData } from "./data";
 import useTranslate from "../../utils/Translate";
 import { useGetAllUserPermissionsQuery } from "../../features/permission/permissionSlice";
@@ -20,18 +19,18 @@ const SideBar = () => {
     data: permissions,
     isLoading,
     isError,
-  } = useGetAllUserPermissionsQuery();
-
-  // console.log(permissions);
+    isFetching,
+  } = useGetAllUserPermissionsQuery(undefined, {
+    refetchOnMountOrArgChange: true, 
+  });
 
   const hasPermission = (...permissionIds) => {
-    if (!permissionIds.length) return false;
+    if (!permissionIds.length || !permissions) return false;
 
     return permissionIds.some((permissionId) => {
       const perm = permissions?.find(
         (p) => p.PermissionListID === permissionId
       );
-
       return (
         perm?.PermissionView === true ||
         perm?.PermissionInsert === true ||
@@ -42,15 +41,12 @@ const SideBar = () => {
   };
 
   const filteredMenuData = useMemo(() => {
-    if (!permissions) return [];
+    if (!permissions || !user) return []; // Wait for both permissions and user to be available
 
-    // Add filtering logic here
     return menuData
       .map((menu) => {
-        // Filter submenus if they exist
         if (Array.isArray(menu.subMenu)) {
           const filteredSubMenu = menu.subMenu.filter((subItem) => {
-            // General Information
             if (subItem.name === "User") {
               return hasPermission(permissionsDataList.user_entry);
             }
@@ -61,128 +57,110 @@ const SideBar = () => {
               return hasPermission(permissionsDataList.sms);
             }
             if (subItem.name === "All Madrasah") {
-              // 1,2,3,4 allowed, 5,6 not allowed
               return typeof permissionType === "number" && permissionType <= 4;
             }
-
             if (subItem.name === "Institution Information") {
               return hasPermission(permissionsDataList.institute_info);
             }
             if (subItem.name === "Month Name") {
               return hasPermission(permissionsDataList.month_name);
             }
-            // StudsubItements
             if (subItem.name === "All Students") {
-              return hasPermission(permissionsDataList.student_admission); // Example
+              return hasPermission(permissionsDataList.student_admission);
             }
             if (subItem.name === "Session") {
-              return hasPermission(permissionsDataList.academic_year); // Example
+              return hasPermission(permissionsDataList.academic_year);
             }
             if (subItem.name === "Section") {
-              return hasPermission(permissionsDataList.sub_class); // Example
+              return hasPermission(permissionsDataList.sub_class);
             }
             if (subItem.name === "Class") {
-              return hasPermission(permissionsDataList.class); // Example
+              return hasPermission(permissionsDataList.class);
             }
             if (subItem.name === "English & Arobi Name") {
               return hasPermission(
                 permissionsDataList.english_name_entry ||
                   permissionsDataList.arabic_name_entry
-              ); // Example
+              );
             }
             if (subItem.name === "Book") {
-              return hasPermission(permissionsDataList.kitab_entry); // Example
+              return hasPermission(permissionsDataList.kitab_entry);
             }
             if (subItem.name === "Group Distribution") {
-              return hasPermission(permissionsDataList.student_group_setting); // Example
+              return hasPermission(permissionsDataList.student_group_setting);
             }
             if (subItem.name === "Character Report") {
-              return hasPermission(permissionsDataList.student_report); // Example
+              return hasPermission(permissionsDataList.student_report);
             }
             if (subItem.name === "Students Report") {
-              return hasPermission(permissionsDataList.student_report); // Example
+              return hasPermission(permissionsDataList.student_report);
             }
             if (subItem.name === "Certificate of Attestation") {
-              return hasPermission(permissionsDataList.certificate); // Example
+              return hasPermission(permissionsDataList.certificate);
             }
             if (subItem.name === "Online Admission") {
-              return hasPermission(permissionsDataList.student_admission); // Example
+              return hasPermission(permissionsDataList.student_admission);
             }
-            // if (subItem.name === "Students Vacation") {
-            //   return hasPermission(permissionsDataList.gate_pass_leave); // Example
-            // }
-            // if (subItem.name === "Type of Vacation") {
-            //   return hasPermission(permissionsDataList.gate_pass_leave); // Example
-            // }
-            // Teachers
             if (subItem.name === "Teacher Info") {
-              return hasPermission(permissionsDataList.teacher_info); // Example
+              return hasPermission(permissionsDataList.teacher_info);
             }
             if (subItem.name === "Pay-role Heading") {
-              return hasPermission(permissionsDataList.teacher_payroll); // Example
+              return hasPermission(permissionsDataList.teacher_payroll);
             }
             if (subItem.name === "Pay-role Name") {
-              return hasPermission(permissionsDataList.teacher_payroll_name); // Example
+              return hasPermission(permissionsDataList.teacher_payroll_name);
             }
             if (subItem.name === "Students Report") {
-              return hasPermission(permissionsDataList.teacher_report); // Example
+              return hasPermission(permissionsDataList.teacher_report);
             }
             if (subItem.name === "Designation") {
-              return hasPermission(permissionsDataList.teacher_designation); // Example
+              return hasPermission(permissionsDataList.teacher_designation);
             }
-            // Exam
             if (subItem.name === "Exam") {
-              return hasPermission(permissionsDataList.exam_name); // Example
+              return hasPermission(permissionsDataList.exam_name);
             }
             if (subItem.name === "Exam Fee Determine") {
-              return hasPermission(permissionsDataList.exam_fee_setting); // Example
+              return hasPermission(permissionsDataList.exam_fee_setting);
             }
             if (subItem.name === "Point V: Condition") {
-              return hasPermission(permissionsDataList.exam_condition); // Example
+              return hasPermission(permissionsDataList.exam_condition);
             }
             if (subItem.name === "Average V: Condition") {
-              return hasPermission(permissionsDataList.exam_condition); // Example
+              return hasPermission(permissionsDataList.exam_condition);
             }
             if (subItem.name === "List of Candidates") {
-              return hasPermission(permissionsDataList.exam_list_generation); // Example
+              return hasPermission(permissionsDataList.exam_list_generation);
             }
             if (subItem.name === "Exam Admit Card") {
-              return hasPermission(permissionsDataList.admit_card); // Example
+              return hasPermission(permissionsDataList.admit_card);
             }
             if (subItem.name === "Exam Routing") {
-              return hasPermission(permissionsDataList.routine_with_signature); // Example
+              return hasPermission(permissionsDataList.routine_with_signature);
             }
             if (subItem.name === "Exam Report") {
-              return hasPermission(permissionsDataList.exam_report); // Example
+              return hasPermission(permissionsDataList.exam_report);
             }
-            // Darul-ikama
             if (subItem.name === "Character Report") {
-              return hasPermission(permissionsDataList.certificate); // Example
+              return hasPermission(permissionsDataList.certificate);
             }
             if (subItem.name === "Gate pass and leave") {
-              return hasPermission(permissionsDataList.gate_pass_leave); // Example
+              return hasPermission(permissionsDataList.gate_pass_leave);
             }
-
-            // Result
             if (subItem.name === "Point Result Entry") {
-              return hasPermission(permissionsDataList.result_entry); // Example
+              return hasPermission(permissionsDataList.result_entry);
             }
             if (subItem.name === "Point V: Result Report") {
-              return hasPermission(permissionsDataList.result_report); // Example
+              return hasPermission(permissionsDataList.result_report);
             }
             if (subItem.name === "Point Based Mark Sheet") {
-              return hasPermission(permissionsDataList.marksheet); // Example
+              return hasPermission(permissionsDataList.marksheet);
             }
             if (subItem.name === "Online Result Public") {
-              return hasPermission(permissionsDataList.result_entry); // Example
+              return hasPermission(permissionsDataList.result_entry);
             }
-
-            // Accounting
             if (subItem.name === "Fee Setting") {
-              return hasPermission(permissionsDataList.fee_setting); // Example
+              return hasPermission(permissionsDataList.fee_setting);
             }
-
-            // Add other submenu permission mappings here
             return true; // Default allow
           });
 
@@ -192,15 +170,15 @@ const SideBar = () => {
         return menu;
       })
       .filter((menu) => {
-        // Hide menus with empty submenus if they originally had submenus
         if (Array.isArray(menu.subMenu)) {
           return menu.subMenu.length > 0;
         }
         return true;
       });
-  }, [permissions]);
+  }, [permissions, user, permissionType]); // Added user and permissionType to dependencies
 
   useEffect(() => {
+    if (!permissions || !user) return; // Wait for both to be available
     filteredMenuData.forEach((menu) => {
       if (Array.isArray(menu.subMenu)) {
         const activeSubMenu = menu.subMenu.find((item) =>
@@ -211,13 +189,13 @@ const SideBar = () => {
         }
       }
     });
-  }, [location.pathname, filteredMenuData]);
+  }, [location.pathname, filteredMenuData, permissions, user]);
 
   const handleToggle = (id) => {
     setOpenMenuId((prev) => (prev === id ? null : id));
   };
 
-  if (isLoading) return <Loading />;
+  if (isLoading || isFetching) return <Loading />;
 
   if (isError)
     return <div className="p-4 text-red-500">Failed to load menu.</div>;
@@ -253,8 +231,12 @@ const SideBar = () => {
 
                   <ul
                     className={`relative text-gray-600 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out
-    ${openMenuId === menu.id ? "max-h-96 opacity-100" : "max-h-0 opacity-0"}
-  `}
+                    ${
+                      openMenuId === menu.id
+                        ? "max-h-96 opacity-100"
+                        : "max-h-0 opacity-0"
+                    }
+                  `}
                   >
                     <div className="absolute top-0 bottom-0 left-6 w-px border-l-2 border-dashed border-[#007af7] z-0" />
 

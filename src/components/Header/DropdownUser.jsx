@@ -27,9 +27,9 @@ const handleLogout = (dispatch) => {
   });
 
   // 4. Delay reload (so logs are visible)
-  // setTimeout(() => {
-  //   window.location.reload();
-  // }, 500);
+  setTimeout(() => {
+    window.location.reload();
+  }, 500);
 };
 
   return (

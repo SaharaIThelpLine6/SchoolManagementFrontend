@@ -45,6 +45,7 @@ const AllMadrasah = ({ pageTitle }) => {
     filter: activeFilter !== "all" ? activeFilter : undefined,
   });
 
+
   // Fetch stats
   const {
     data: statsData,
