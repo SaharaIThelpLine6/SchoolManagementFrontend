@@ -24,6 +24,7 @@ const SideBar = () => {
     refetchOnMountOrArgChange: true,
   });
 
+  console.log(permissions, "permissions");
 
   const hasPermission = (...permissionIds) => {
     if (!permissionIds.length || !permissions?.data) return false;

@@ -48,7 +48,7 @@ const Login = () => {
       Swal.fire({
         icon: "error",
         title: "Login Failed",
-        text: error?.response?.data?.message || "Something went wrong",
+        text: error?.data?.error || "Something went wrong",
         confirmButtonColor: "#3B82F6",
       });
     }

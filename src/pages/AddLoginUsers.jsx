@@ -20,7 +20,7 @@ import { setFilteredUser } from "../features/student/studentSlice";
 import Swal from "sweetalert2";
 
 // Constants
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 100;
 
 const AddLoginUsers = () => {
   // Form setup with dynamic default values from Redux state
