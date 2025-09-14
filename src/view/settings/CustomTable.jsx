@@ -8,14 +8,13 @@ const CustomTable = ({ columns, data }) => {
   const containerRef = useRef(null);
 
   const handleSelect = (item) => {
-    console.log(item, "item");
-
+    const id = selectedRow.ID;
     if (item === "Power Distribution") {
-      showModal("Power Distribution", "POWER_DISTRIBUTION");
+      showModal("Power Distribution", "POWER_DISTRIBUTION", id);
     } else if (item === "Change User Name") {
-      showModal("Change User Name", "USER_NAME_CHANGE");
+      showModal("Change User Name", "USER_NAME_CHANGE", id);
     } else if (item === "Change Password") {
-      showModal("Change Password", "PASSWORD_CHANGE");
+      showModal("Change Password", "PASSWORD_CHANGE", id);
     }
   };
 
@@ -78,7 +77,7 @@ const CustomTable = ({ columns, data }) => {
                     key={cidx}
                     className="px-4 py-2 text-sm text-gray-700 whitespace-nowrap"
                   >
-                    {row[col.field]}
+                    {col.render ? col.render(row) : row[col.field]}
                   </td>
                 ))}
               </tr>

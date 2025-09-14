@@ -10,6 +10,7 @@ import CustomTable from "../view/settings/CustomTable";
 import {
   useGetLoginUsersQuery,
   usePostLoginUserMutation,
+  useUpdateLoginUserStatusChangeMutation,
 } from "../features/userType/userTypeSlice";
 import bnBijoy2Unicode from "../utils/conveter";
 import { useGetPermissionTypesQuery } from "../features/settings/settingsQuerySlice";
@@ -46,6 +47,8 @@ const AddLoginUsers = () => {
   const permissionType = user?.permissionType;
   const { data: permissionTypeData, isLoading: permissionLoading } =
     useGetPermissionTypesQuery();
+  const [updateLoginUserStatus] = useUpdateLoginUserStatusChangeMutation();
+
   const [postLoginUser, { isLoading: isPosting }] = usePostLoginUserMutation();
   const { data, isLoading, isError } = useGetLoginUsersQuery();
   const loginUsers = data?.users || [];
@@ -96,12 +99,13 @@ const AddLoginUsers = () => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return loginUsers.slice(start, start + PAGE_SIZE).map((user, index) => ({
       ID: user.UserID,
+      NewUserID: user.NewUserID,
       Code: user.UserCode,
+      IsVerified: user.IsVerified,
       LoginName: user.LoginName,
       Name: user.UserName ? bnBijoy2Unicode(user.UserName) : "N/A",
       Type: user.TypeName,
       LoginType: user.PermissionName,
-      Residential: user.IsVerified ? "একটিভ" : "ইনএকটিভ",
       Number: index + 1 + (currentPage - 1) * PAGE_SIZE,
     }));
   }, [loginUsers, currentPage]);
@@ -186,6 +190,66 @@ const AddLoginUsers = () => {
     [postLoginUser, user, filteredUser, translate, reset, methods, dispatch]
   );
 
+  const handleToggleAction = async (row) => {
+    try {
+      if (permissionType === 6) {
+        return;
+      }
+      if (!row.ID) {
+        Swal.fire({
+          icon: "error",
+          title: translate("Invalid User ID!"),
+          text: translate("Please try again."),
+        });
+        return;
+      }
+
+      const newStatus = row.IsVerified === 1 ? 0 : 1;
+
+      // ✅ Confirmation alert
+      const result = await Swal.fire({
+        title:
+          newStatus === 1
+            ? translate("Are you sure you want to Activate this user?")
+            : translate("Are you sure you want to Deactivate this user?"),
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: translate("Yes, Confirm"),
+        cancelButtonText: translate("Cancel"),
+        reverseButtons: true,
+      });
+
+      if (!result.isConfirmed) {
+        return; // cancel চাপলে কিছু হবে না
+      }
+
+      // API call
+      await updateLoginUserStatus({
+        id: row.ID,
+        data: { school_id: user?.schoolId, isVerified: newStatus },
+      }).unwrap();
+
+      Swal.fire({
+        icon: "success",
+        title: translate("Success!"),
+        text:
+          newStatus === 1
+            ? translate("User has been Activated!")
+            : translate("User has been Deactivated!"),
+      });
+
+      // Refresh / local update
+      // refetch();
+    } catch (error) {
+      console.error("Update Error:", error);
+      Swal.fire({
+        icon: "error",
+        title: translate("Failed!"),
+        text: translate("Something went wrong. Please try again."),
+      });
+    }
+  };
+
   // Table columns
   const columns = useMemo(
     () => [
@@ -195,8 +259,32 @@ const AddLoginUsers = () => {
       { title: translate("Name"), field: "Name" },
       { title: translate("Type"), field: "Type" },
       { title: translate("Login Type"), field: "LoginType" },
-      { title: translate("Status"), field: "Residential" },
-      { title: translate("Serial"), field: "Number" },
+      // ✅ এখানে custom render (toggle switch)
+      {
+        title: translate("Status"),
+        field: "Action",
+        render: (row) => (
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              checked={row.IsVerified === 1}
+              onChange={() => handleToggleAction(row)}
+              className="sr-only peer"
+            />
+            <div
+              className="w-11 h-6 bg-gray-200 rounded-full
+                    peer-checked:bg-green-600
+                    peer-checked:after:translate-x-full
+                    peer-checked:after:border-white
+                    after:content-[''] after:absolute
+                    after:top-0.5 after:left-[2px]
+                    after:bg-white after:border-gray-300
+                    after:border after:rounded-full
+                    after:h-5 after:w-5 after:transition-all"
+            ></div>
+          </label>
+        ),
+      },
     ],
     [translate]
   );

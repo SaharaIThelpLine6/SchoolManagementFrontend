@@ -3,8 +3,6 @@ const ToggleBox = ({ handleSelect }) => {
     "Power Distribution",
     "Change User Name",
     "Change Password",
-    "Active User",
-    "Inactive User",
     "Permission Type Change",
   ];
 

@@ -41,7 +41,7 @@ export const userTypeSlice = createApi({
       providesTags: ["Madrasah"],
     }),
     getMadrasahStats: builder.query({
-      query: () => "all_madrasah_stats",
+      query: () => "all_madrasah_status",
       providesTags: ["Madrasah"],
     }),
     getLoginUsers: builder.query({
@@ -63,6 +63,30 @@ export const userTypeSlice = createApi({
       }),
       invalidatesTags: ["LoginUsers"],
     }),
+    updateLoginUserNameChange: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `update_login_user_name/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["LoginUsers"],
+    }),
+    updateLoginUserPasswordChange: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `update_login_user_password/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["LoginUsers"],
+    }),
+    updateLoginUserStatusChange: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `update_login_user_status/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["LoginUsers"],
+    }),
   }),
 });
 
@@ -73,5 +97,8 @@ export const {
   useGetMadrasahStatsQuery,
   useToggleMadrasahActionMutation,
   useGetLoginUsersQuery,
-  usePostLoginUserMutation
+  usePostLoginUserMutation,
+  useUpdateLoginUserNameChangeMutation,
+  useUpdateLoginUserPasswordChangeMutation,
+  useUpdateLoginUserStatusChangeMutation
 } = userTypeSlice;

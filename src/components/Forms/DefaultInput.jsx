@@ -12,6 +12,7 @@ const DefaultInput = ({
   disable = false,
   unicode = false,
   labelPosition = "top", // 'top' or 'left'
+  validate, // ✅ নতুন প্রপস
 }) => {
   const {
     register,
@@ -77,6 +78,7 @@ const DefaultInput = ({
                 message: "Phone number must be exactly 11 digits",
               },
             }),
+            ...(validate && { validate }), // ✅ কাস্টম ভ্যালিডেশন এখানে
           })}
           disabled={disable}
         />
