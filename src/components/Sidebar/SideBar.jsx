@@ -21,14 +21,15 @@ const SideBar = () => {
     isError,
     isFetching,
   } = useGetAllUserPermissionsQuery(undefined, {
-    refetchOnMountOrArgChange: true, 
+    refetchOnMountOrArgChange: true,
   });
 
+
   const hasPermission = (...permissionIds) => {
-    if (!permissionIds.length || !permissions) return false;
+    if (!permissionIds.length || !permissions?.data) return false;
 
     return permissionIds.some((permissionId) => {
-      const perm = permissions?.find(
+      const perm = permissions.data.find(
         (p) => p.PermissionListID === permissionId
       );
       return (
@@ -41,7 +42,7 @@ const SideBar = () => {
   };
 
   const filteredMenuData = useMemo(() => {
-    if (!permissions || !user) return []; // Wait for both permissions and user to be available
+    if (!permissions?.data || !user) return []; // Check permissions.data instead of permissions
 
     return menuData
       .map((menu) => {
@@ -175,10 +176,10 @@ const SideBar = () => {
         }
         return true;
       });
-  }, [permissions, user, permissionType]); // Added user and permissionType to dependencies
+  }, [permissions?.data, user, permissionType]); // Updated to permissions.data
 
   useEffect(() => {
-    if (!permissions || !user) return; // Wait for both to be available
+    if (!permissions?.data || !user) return; // Check permissions.data instead of permissions
     filteredMenuData.forEach((menu) => {
       if (Array.isArray(menu.subMenu)) {
         const activeSubMenu = menu.subMenu.find((item) =>
@@ -189,7 +190,7 @@ const SideBar = () => {
         }
       }
     });
-  }, [location.pathname, filteredMenuData, permissions, user]);
+  }, [location.pathname, filteredMenuData, permissions?.data, user]);
 
   const handleToggle = (id) => {
     setOpenMenuId((prev) => (prev === id ? null : id));

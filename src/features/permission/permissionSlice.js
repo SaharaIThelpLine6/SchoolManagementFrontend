@@ -14,11 +14,27 @@ export const permissionSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Permissions'], // Define your tag type
+  tagTypes: ["Permissions"], // Define your tag type
   endpoints: (builder) => ({
     getAllUserPermissions: builder.query({
       query: () => "user_permission_list",
-      providesTags: ['Permissions'], // This query provides this tag
+      providesTags: ["Permissions"], // This query provides this tag
+    }),
+    // ================== Get All Permissions (with search + pagination) ==================
+    getAllUserPermissionListViews: builder.query({
+      query: ({ page = 1, limit = 10, search = "", id }) =>
+        `user_permission_lists?page=${page}&limit=${limit}&search=${search}&id=${id}`,
+      providesTags: ["PermissionLists"],
+    }),
+
+    // ================== Update Permission Toggle ==================
+    updatePermissionToggle: builder.mutation({
+      query: (body) => ({
+        url: "permission_toggle",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["PermissionLists"],
     }),
     // updateInstitutionInfo: builder.mutation({
     //   query: (body) => ({
@@ -31,4 +47,4 @@ export const permissionSlice = createApi({
   }),
 });
 
-export const { useGetAllUserPermissionsQuery } = permissionSlice;
+export const { useGetAllUserPermissionsQuery, useGetAllUserPermissionListViewsQuery, useUpdatePermissionToggleMutation } = permissionSlice;

@@ -132,7 +132,9 @@ const DefaultModal = () => {
                   <BalanceTransferModal />
                 )}
                 {modalType === "USER_SEARCH" && <UserSearch />}
-                {modalType === "POWER_DISTRIBUTION" && <AddLoginUsersModal />}
+                {modalType === "POWER_DISTRIBUTION" && (
+                  <AddLoginUsersModal id={id}/>
+                )}
                 {modalType === "USER_NAME_CHANGE" && (
                   <UserNamePasswordChangeModal id={id} changeType="username" />
                 )}

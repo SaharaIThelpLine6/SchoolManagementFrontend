@@ -480,11 +480,6 @@ const AddLoginUsers = () => {
         {/* Table */}
         <div className="w-full font-SolaimanLipi">
           <CustomTable columns={columns} data={paginatedData} />
-          <DefaultPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
         </div>
       </div>
     </FormProvider>

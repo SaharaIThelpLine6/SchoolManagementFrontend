@@ -13,10 +13,10 @@ export const RequirePermission = ({ permissionId, children }) => {
     return (
      <Loading/>
     );
-    
-  if (isError || !permissions) return <Navigate to="/" />;
 
-  const hasPermission = permissions.some(
+  if (isError || !permissions?.data) return <Navigate to="/" />;
+
+  const hasPermission = permissions?.data.some(
     (p) =>
       p.PermissionListID === permissionId &&
       (p.PermissionView ||

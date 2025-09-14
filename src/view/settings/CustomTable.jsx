@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from "react";
 import ToggleBox from "../../components/ToggleBox/ToggleBox";
 import { showModal } from "../../utils/ModalControlar";
 
+
 const CustomTable = ({ columns, data }) => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [toggleStyle, setToggleStyle] = useState({});
   const containerRef = useRef(null);
+
 
   const handleSelect = (item) => {
     const id = selectedRow.ID;

@@ -1,117 +1,38 @@
 import { FormProvider, useForm } from "react-hook-form";
 import SortableTable from "../../components/Tables/SortableTable";
-import DefaultPagination from "../../components/Pagination/DefaultPagination";
 import useTranslate from "../../utils/Translate";
-import { useCallback, useMemo, useState } from "react";
-import { showModal } from "../../utils/ModalControlar";
+import { useState } from "react";
 import ToggleBox from "../../components/ToggleBox/ToggleBox";
 import Button from "../../components/Button/Button";
+import {
+  useGetAllUserPermissionListViewsQuery,
+  useUpdatePermissionToggleMutation,
+} from "../../features/permission/permissionSlice";
+import Loading from "../../components/Loading/Loading";
 
-const PAGE_SIZE = 5;
-
-const data = [
-  {
-    Serial: 1,
-    PowerName: "শিক্ষার্থীর নাম এডিট",
-    View: 1,
-    Insert: 0,
-    Edit: 1,
-    Delete: 1,
-  },
-  {
-    Serial: 2,
-    PowerName: "Login Name এডিট",
-    View: 1,
-    Insert: 0,
-    Edit: 1,
-    Delete: 0,
-  },
-  {
-    Serial: 3,
-    PowerName: "User Type চেক",
-    View: 1,
-    Insert: 1,
-    Edit: 0,
-    Delete: 0,
-  },
-  {
-    Serial: 4,
-    PowerName: "Login Type চেক",
-    View: 1,
-    Insert: 1,
-    Edit: 1,
-    Delete: 1,
-  },
-  {
-    Serial: 5,
-    PowerName: "Code এডিট",
-    View: 1,
-    Insert: 0,
-    Edit: 1,
-    Delete: 1,
-  },
-  {
-    Serial: 6,
-    PowerName: "Name চেক",
-    View: 1,
-    Insert: 0,
-    Edit: 1,
-    Delete: 0,
-  },
-  {
-    Serial: 7,
-    PowerName: "Type চেক",
-    View: 1,
-    Insert: 1,
-    Edit: 1,
-    Delete: 1,
-  },
-  {
-    Serial: 8,
-    PowerName: "LoginType এডিট",
-    View: 1,
-    Insert: 0,
-    Edit: 0,
-    Delete: 1,
-  },
-  {
-    Serial: 9,
-    PowerName: "Special Permission",
-    View: 1,
-    Insert: 1,
-    Edit: 1,
-    Delete: 1,
-  },
-  {
-    Serial: 10,
-    PowerName: "General Access",
-    View: 1,
-    Insert: 0,
-    Edit: 1,
-    Delete: 1,
-  },
-];
-
-const AddLoginUsersModal = () => {
+const AddLoginUsersModal = ({ id }) => {
+  console.log(id, "id");
   const methods = useForm();
   const translate = useTranslate();
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRow, setSelectedRow] = useState(null); // ✅ selected row রাখার জন্য state
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [search, setSearch] = useState("");
 
-  const totalPages = Math.ceil(data.length / PAGE_SIZE);
+  // 🔹 API থেকে permission list আনছি (pagination ছাড়া, শুধু search)
+  const {
+    data: permissionLists,
+    isLoading,
+    isError,
+  } = useGetAllUserPermissionListViewsQuery({
+    page: 1, // সবসময় প্রথম পেজ
+    limit: 1000, // বেশি লিমিট দিলে সব রেকর্ড আসবে
+    search,
+    id,
+  });
 
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return data.slice(start, start + PAGE_SIZE);
-  }, [currentPage]);
-
-  const handleOpenModal = useCallback(() => {
-    showModal("Filter Student", "STUDENT_FILTER");
-  }, []);
+  const [updatePermissionToggle] = useUpdatePermissionToggleMutation();
 
   const handleRowClick = (row) => {
-    // row এ ক্লিক করলে টগল হবে
     if (selectedRow?.ID === row.ID) {
       setSelectedRow(null);
     } else {
@@ -119,102 +40,153 @@ const AddLoginUsersModal = () => {
     }
   };
 
-const columns = [
-  {
-    title: translate("Serial"),
-    field: "Serial",
-    hozAlign: "center",
-    render: (row) => <p>{row.Serial}</p>,
-  },
-  {
-    title: translate("Power Name"),
-    field: "PowerName",
-    hozAlign: "center",
-    render: (row) => <p>{row.PowerName}</p>,
-  },
-  {
-    title: translate("View"),
-    field: "View",
-    hozAlign: "center",
-    render: (row) => (
-      <Button
-        className={`px-2 w-[90px] py-1 rounded text-white ${
-          row.View === 1 ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"
-        }`}
-      >
-        {row.View === 1 ? "Active" : "UnActive"}
-      </Button>
-    ),
-  },
-  {
-    title: translate("Insert"),
-    field: "Insert",
-    hozAlign: "center",
-    render: (row) => (
-     <Button
-        className={`px-2 w-[90px] py-1 rounded text-white ${
-          row.Insert === 1 ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"
-        }`}
-      >
-        {row.Insert === 1 ? "Active" : "UnActive"}
-      </Button>
-    ),
-  },
-  {
-    title: translate("Edit"),
-    field: "Edit",
-    hozAlign: "center",
-    render: (row) => (
-       <Button
-        className={`px-2 w-[90px] py-1 rounded text-white ${
-          row.Edit === 1 ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"
-        }`}
-      >
-        {row.Edit === 1 ? "Active" : "UnActive"}
-      </Button>
-    ),
-  },
-  {
-    title: translate("Delete"),
-    field: "Delete",
-    hozAlign: "center",
-    render: (row) => (
-      <Button
-        className={`px-2 w-[90px] py-1 rounded text-white ${
-          row.Delete === 1 ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"
-        }`}
-      >
-        {row.Delete === 1 ? "Active" : "UnActive"}
-      </Button>
-    ),
-  },
-];
+  // 🔹 Toggle বাটনে ক্লিক করলে update হবে
+  const handleToggle = async (row, field) => {
+    const body = {
+      UserID: row.UserID,
+      PermissionListID: row.PermissionListID,
+      permissions: {
+        View:
+          field === "View"
+            ? row.PermissionView === 0
+            : row.PermissionView === 1,
+        Insert:
+          field === "Insert"
+            ? row.PermissionInsert === 0
+            : row.PermissionInsert === 1,
+        Edit:
+          field === "Edit"
+            ? row.PermissionEdit === 0
+            : row.PermissionEdit === 1,
+        Delete:
+          field === "Delete"
+            ? row.PermissionDelete === 0
+            : row.PermissionDelete === 1,
+      },
+    };
+
+    try {
+      const res = await updatePermissionToggle(body).unwrap();
+      console.log("✅ Updated:", res);
+    } catch (err) {
+      console.error("❌ Update Error:", err);
+    }
+  };
+
+  const columns = [
+    {
+      title: translate("Serial"),
+      field: "ID",
+      hozAlign: "center",
+      render: (row) => <p>{row.ID}</p>,
+    },
+    {
+      title: translate("Power Name"),
+      field: "PowerName",
+      hozAlign: "center",
+      render: (row) => <p>{row.PowerName}</p>,
+    },
+    {
+      title: translate("View"),
+      field: "PermissionView",
+      hozAlign: "center",
+      render: (row) => (
+        <Button
+          onClick={() => handleToggle(row, "View")}
+          className={`px-2 w-[90px] py-1 rounded text-white ${
+            row.PermissionView === 1
+              ? "bg-green-500 hover:bg-green-600"
+              : "bg-red-500 hover:bg-red-600"
+          }`}
+        >
+          {row.PermissionView === 1 ? "Active" : "UnActive"}
+        </Button>
+      ),
+    },
+    {
+      title: translate("Insert"),
+      field: "PermissionInsert",
+      hozAlign: "center",
+      render: (row) => (
+        <Button
+          onClick={() => handleToggle(row, "Insert")}
+          className={`px-2 w-[90px] py-1 rounded text-white ${
+            row.PermissionInsert === 1
+              ? "bg-green-500 hover:bg-green-600"
+              : "bg-red-500 hover:bg-red-600"
+          }`}
+        >
+          {row.PermissionInsert === 1 ? "Active" : "UnActive"}
+        </Button>
+      ),
+    },
+    {
+      title: translate("Edit"),
+      field: "PermissionEdit",
+      hozAlign: "center",
+      render: (row) => (
+        <Button
+          onClick={() => handleToggle(row, "Edit")}
+          className={`px-2 w-[90px] py-1 rounded text-white ${
+            row.PermissionEdit === 1
+              ? "bg-green-500 hover:bg-green-600"
+              : "bg-red-500 hover:bg-red-600"
+          }`}
+        >
+          {row.PermissionEdit === 1 ? "Active" : "UnActive"}
+        </Button>
+      ),
+    },
+    {
+      title: translate("Delete"),
+      field: "PermissionDelete",
+      hozAlign: "center",
+      render: (row) => (
+        <Button
+          onClick={() => handleToggle(row, "Delete")}
+          className={`px-2 w-[90px] py-1 rounded text-white ${
+            row.PermissionDelete === 1
+              ? "bg-green-500 hover:bg-green-600"
+              : "bg-red-500 hover:bg-red-600"
+          }`}
+        >
+          {row.PermissionDelete === 1 ? "Active" : "UnActive"}
+        </Button>
+      ),
+    },
+  ];
+
+  if (isLoading) return <Loading/>;
+  if (isError) return <p>Error loading permissions</p>;
 
   return (
     <FormProvider {...methods}>
       <div className="bg-white flex flex-col gap-6 font-SolaimanLipi">
-        {/*Table Start*/}
+        {/* 🔍 Search Box */}
+        <div className="flex items-center gap-2">
+          <input
+            type="text"
+            placeholder="Search permissions..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border px-3 py-2 rounded w-1/3"
+          />
+        </div>
+
         <div className="w-full font-SolaimanLipi">
           <SortableTable
             columns={columns}
-            data={paginatedData}
+            data={permissionLists?.data || []}
             isFilterColumn={false}
+            onRowClick={handleRowClick}
           />
 
-          {/* Row select হলে নিচে ToggleBox show হবে */}
           {selectedRow && (
             <div className="mt-4">
               <ToggleBox />
             </div>
           )}
-
-          <DefaultPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}
-          />
         </div>
-        {/*Table End*/}
       </div>
     </FormProvider>
   );
