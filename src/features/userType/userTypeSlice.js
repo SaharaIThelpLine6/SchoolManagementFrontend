@@ -71,6 +71,14 @@ export const userTypeSlice = createApi({
       }),
       invalidatesTags: ["LoginUsers"],
     }),
+    updateLoginUserTypeChange: builder.mutation({
+      query: ({ id, permissionTypeId, school_id }) => ({
+        url: `update_login_user_type/${id}`,
+        method: "PUT",
+        body: { permissionTypeId, school_id },
+      }),
+      invalidatesTags: ["LoginUsers"],
+    }),
     updateLoginUserPasswordChange: builder.mutation({
       query: ({ id, data }) => ({
         url: `update_login_user_password/${id}`,
@@ -100,5 +108,6 @@ export const {
   usePostLoginUserMutation,
   useUpdateLoginUserNameChangeMutation,
   useUpdateLoginUserPasswordChangeMutation,
-  useUpdateLoginUserStatusChangeMutation
+  useUpdateLoginUserStatusChangeMutation,
+  useUpdateLoginUserTypeChangeMutation
 } = userTypeSlice;

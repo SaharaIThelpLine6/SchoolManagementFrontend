@@ -1,22 +1,72 @@
 import { useState, useRef, useEffect } from "react";
 import ToggleBox from "../../components/ToggleBox/ToggleBox";
 import { showModal } from "../../utils/ModalControlar";
+import { useUpdateLoginUserTypeChangeMutation } from "../../features/userType/userTypeSlice";
+import { useSelector } from "react-redux";
+import Swal from "sweetalert2";
 
-
-const CustomTable = ({ columns, data }) => {
+const CustomTable = ({ columns, data, close }) => {
   const [selectedRow, setSelectedRow] = useState(null);
   const [toggleStyle, setToggleStyle] = useState({});
   const containerRef = useRef(null);
+  const { user } = useSelector((state) => state.auth);
 
+  const [updateLoginUserType] = useUpdateLoginUserTypeChangeMutation();
 
-  const handleSelect = (item) => {
+  const handleSelect = async (item) => {
     const id = selectedRow.ID;
-    if (item === "Power Distribution") {
-      showModal("Power Distribution", "POWER_DISTRIBUTION", id);
-    } else if (item === "Change User Name") {
-      showModal("Change User Name", "USER_NAME_CHANGE", id);
-    } else if (item === "Change Password") {
-      showModal("Change Password", "PASSWORD_CHANGE", id);
+
+    try {
+      if (item === "Power Distribution") {
+        showModal("Power Distribution", "POWER_DISTRIBUTION", id);
+      } else if (item === "Change User Name") {
+        showModal("Change User Name", "USER_NAME_CHANGE", id);
+      } else if (item === "Change Password") {
+        showModal("Change Password", "PASSWORD_CHANGE", id);
+      } else if (item === "Admin User") {
+        await updateLoginUserType({
+          id,
+          permissionTypeId: 5,
+          school_id: Number(user?.schoolId),
+        }).unwrap(); // RTK query unwrap for promise
+
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "User role updated to Admin User",
+        });
+
+        // close nested toggle
+
+        if (typeof close === "function") {
+          close(null); // selectedRow clear
+        }
+      } else if (item === "User") {
+        await updateLoginUserType({
+          id,
+          permissionTypeId: 6,
+          school_id: Number(user?.schoolId),
+        }).unwrap();
+
+        Swal.fire({
+          icon: "success",
+          title: "Success",
+          text: "User role updated to User",
+        });
+
+        // close nested toggle
+
+        if (typeof close === "function") {
+          close(null); // selectedRow clear
+        }
+      }
+    } catch (error) {
+      console.error("Update Error:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error?.data?.error || "User role update failed",
+      });
     }
   };
 

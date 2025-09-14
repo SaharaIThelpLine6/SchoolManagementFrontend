@@ -179,6 +179,7 @@ const AddLoginUsersModal = ({ id }) => {
             data={permissionLists?.data || []}
             isFilterColumn={false}
             onRowClick={handleRowClick}
+            close={setSelectedRow}
           />
 
           {selectedRow && (
