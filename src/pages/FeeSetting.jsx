@@ -128,12 +128,11 @@ const FeeSetting = ({ pageTitle }) => {
       Classid: filter.classId,
       ...feeMatrixData,
     };
-    console.log(payload, "payload");
 
     const emptyFields = Object.entries(payload).filter(
       ([key, value]) => value === null || value === "" || value === undefined
     );
-    console.log(payload, "payload");
+    // console.log(payload, "payload");
 
     if (emptyFields.length > 0) {
       Swal.fire({

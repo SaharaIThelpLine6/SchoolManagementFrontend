@@ -171,7 +171,7 @@ const DepositCosts = ({ pageTitle }) => {
   };
 
   const handleOpenModal = useCallback(() => {
-    showModal(translate("Funds"), "OPEN_FUND");
+    showModal(translate("All Funds"), "OPEN_FUND");
   }, [translate]);
 
   const handleGeneralOpenModal = useCallback(() => {

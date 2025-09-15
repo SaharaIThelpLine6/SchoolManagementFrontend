@@ -156,8 +156,8 @@ const FundForm = () => {
           </form>
         </FormProvider>
       ) : (
-        <div className="flex justify-between items-center my-5">
-          <h2 className="text-lg font-semibold">{translate("All Funds")}</h2>
+        <div className="flex justify-end items-center my-5">
+          {/* <h2 className="text-lg font-semibold">{translate("All Funds")}</h2> */}
           <Button
             className="bg-blue-500 hover:bg-blue-600 text-white"
             type="button"

@@ -24,12 +24,12 @@ const FeeMatrix = ({
 
       FemaleAbaNew: studentFemaleData.residential.newAmount,
       FemaleAbaOld: studentFemaleData.residential.oldAmount,
-      FemaleOnaNew: studentFemaleData.nonResidential.oldAmount,
-      FemaleOnaOld: studentFemaleData.nonResidential.newAmount,
+      FemaleOnaNew: studentFemaleData.nonResidential.newAmount,
+      FemaleOnaOld: studentFemaleData.nonResidential.oldAmount,
       FemaleDayNew: studentFemaleData.dayCare.newAmount,
       FemaleDayOld: studentFemaleData.dayCare.oldAmount,
     });
-  }, [studentData, studentFemaleData]);
+  }, [studentData, studentFemaleData, data]);
 
   const categoryTranslations = {
     residential: translate("Residence"),
@@ -94,8 +94,8 @@ const FeeMatrix = ({
           ...initialStudentState[category],
           new: true,
           old: true,
-          newAmount: amounts[gender],
-          oldAmount: amounts[gender],
+          newAmount: amounts[gender] || "",
+          oldAmount: amounts[gender] || "",
         };
       });
       setter(newState);
@@ -126,11 +126,15 @@ const FeeMatrix = ({
     amount,
     onAmountChange,
   }) => {
-    const [localAmount, setLocalAmount] = useState(amount);
+    const [localAmount, setLocalAmount] = useState(amount || "");
 
     useEffect(() => {
-      setLocalAmount(amount);
+      setLocalAmount(amount || "");
     }, [amount]);
+
+    const handleBlur = () => {
+      onAmountChange(gender, category, type, localAmount);
+    };
 
     return (
       <td className="p-1 border border-gray-200 text-center">
@@ -139,9 +143,7 @@ const FeeMatrix = ({
             type="text"
             value={localAmount}
             onChange={(e) => setLocalAmount(e.target.value)}
-            onMouseLeave={() =>
-              onAmountChange(gender, category, type, localAmount)
-            }
+            onBlur={handleBlur}
             className="w-16 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-center text-xs"
           />
           <input
@@ -161,13 +163,13 @@ const FeeMatrix = ({
       (cat) => cat.new && cat.old
     );
 
-    const [localAmount, setLocalAmount] = useState(amounts[gender]);
+    const [localAmount, setLocalAmount] = useState(amounts[gender] || "");
 
     useEffect(() => {
-      setLocalAmount(amounts[gender]);
+      setLocalAmount(amounts[gender] || "");
     }, [amounts[gender]]);
 
-    const handleMouseLeave = () => {
+    const handleBlur = () => {
       handleAmountChange(gender, localAmount);
     };
 
@@ -178,7 +180,7 @@ const FeeMatrix = ({
             type="text"
             value={localAmount}
             onChange={(e) => setLocalAmount(e.target.value)}
-            onMouseLeave={handleMouseLeave}
+            onBlur={handleBlur}
             placeholder={translate("Enter TK")}
             className="w-24 px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition duration-200 text-center text-sm"
           />
@@ -189,7 +191,9 @@ const FeeMatrix = ({
               onChange={() => handleCheckAll(gender)}
               className="h-3 w-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
             />
-            <span className="text-xs text-gray-500">{translate("Check All")}</span>
+            <span className="text-xs text-gray-500">
+              {translate("Check All")}
+            </span>
           </div>
         </div>
       </td>
