@@ -40,6 +40,10 @@ export const userTypeSlice = createApi({
       }),
       providesTags: ["Madrasah"],
     }),
+    getCurrentMadrasah: builder.query({
+      query: (school_id) => `madrasah/${school_id}`,
+      providesTags: ["Madrasah"],
+    }),
     getMadrasahStats: builder.query({
       query: () => "all_madrasah_status",
       providesTags: ["Madrasah"],
@@ -109,5 +113,6 @@ export const {
   useUpdateLoginUserNameChangeMutation,
   useUpdateLoginUserPasswordChangeMutation,
   useUpdateLoginUserStatusChangeMutation,
-  useUpdateLoginUserTypeChangeMutation
+  useUpdateLoginUserTypeChangeMutation,
+  useGetCurrentMadrasahQuery
 } = userTypeSlice;

@@ -10,6 +10,7 @@ import Header from "../components/Header/Header";
 import { useGetInstitutionInfoQuery } from "../features/settings/settingsQuerySlice";
 import TawkMessenger from "@tawk.to/tawk-messenger-react";
 import DeveloperCredit from "../components/DeveloperCredit";
+import { useGetCurrentMadrasahQuery } from "../features/userType/userTypeSlice";
 
 const tawkPropertyId = import.meta.env.VITE_TAWK_PROPERTY_ID;
 const tawkWidgetId = import.meta.env.VITE_TAWK_WIDGET_ID;
@@ -25,9 +26,17 @@ const DefaultLayout = () => {
   const pageName = useSelector((state) => state.auth.pageName);
   const { currectLanguage } = useSelector((state) => state.language);
   const { isOpen } = useSelector((state) => state.modal);
+  const { user } = useSelector((state) => state.auth);
+  const permissionType = user?.permissionType;
+  const school_id = user?.schoolId ? Number(user.schoolId) : null;
 
   const { data: institutionInfo, isSuccess } = useGetInstitutionInfoQuery();
+  // Madrasah list fetch
 
+  const { data: currentMadrasah, isLoading: isLoadingMadrasah } =
+    useGetCurrentMadrasahQuery(school_id, {
+      skip: !school_id, // <-- skip query until school_id is ready
+    });
   // ✅ Set default title
   useEffect(() => {
     document.title = "Qmmsoft - কওমী মাদরাসা ম্যানেজমেন্ট";
@@ -58,6 +67,16 @@ const DefaultLayout = () => {
       navigate("/login");
     }
   }, [dispatch, navigate, token, location.pathname]);
+
+  // ✅ Check Madrasah Action
+  useEffect(() => {
+    if (!currentMadrasah || !school_id) return;
+
+    if (currentMadrasah.action === "Inactive" && permissionType > 4) {
+      dispatch(logout());
+      navigate("/login");
+    }
+  }, [currentMadrasah, permissionType, dispatch, navigate, school_id]);
 
   // ✅ Handle multi-tab logout
   useEffect(() => {

@@ -70,18 +70,31 @@ const CustomTable = ({ columns, data, close }) => {
     }
   };
 
-  const handleRowClick = (row, e) => {
-    e.stopPropagation(); // row click এ parent close হবে না
+const handleRowClick = (row, e) => {
+  e.stopPropagation();
 
-    const containerRect = containerRef.current.getBoundingClientRect();
+  const containerRect = containerRef.current.getBoundingClientRect();
+  const toggleBoxWidth = 200; // ToggleBox-এর আনুমানিক width
+  const toggleBoxHeight = 150; // ToggleBox-এর আনুমানিক height
+  const padding = 10; // extra gap
 
-    setToggleStyle({
-      top: e.clientY - containerRect.top + 5, // 5px gap
-      left: e.clientX - containerRect.left,
-    });
+  let top = e.clientY - containerRect.top + 5;
+  let left = e.clientX - containerRect.left;
 
-    setSelectedRow(selectedRow?.ID === row.ID ? null : row);
-  };
+  // ডানদিকে গেলে adjust করো
+  if (left + toggleBoxWidth > containerRect.width) {
+    left = containerRect.width - toggleBoxWidth - padding;
+  }
+
+  // নিচে গেলে adjust করো
+  if (top + toggleBoxHeight > containerRect.height) {
+    top = containerRect.height - toggleBoxHeight - padding;
+  }
+
+  setToggleStyle({ top, left });
+  setSelectedRow(selectedRow?.ID === row.ID ? null : row);
+};
+
 
   // Click outside handler
   useEffect(() => {
