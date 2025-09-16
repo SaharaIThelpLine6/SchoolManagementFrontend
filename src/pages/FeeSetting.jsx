@@ -31,6 +31,7 @@ const FeeSetting = ({ pageTitle }) => {
   const [amounts, setAmounts] = useState({ male: "", female: "" });
 
   const [SessionID, SubClassID, SLID] = watch([
+
     "SessionID",
     "SubClassID",
     "SLID",
