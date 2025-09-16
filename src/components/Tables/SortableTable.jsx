@@ -3,19 +3,29 @@ import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/light.css";
 import bnBijoy2Unicode from "../../utils/conveter";
 
-const SortableTable = ({ columns, data, isFilterColumn = true }) => {
+
+
+const SortableTable = ({
+  columns,
+  data,
+  isFilterColumn = true,
+  onRowClick,
+  close,
+  checkboxes = {}, // নতুন প্রপ: চেকবক্স স্টেট
+  onCheckboxChange, // নতুন প্রপ: চেকবক্স হ্যান্ডলার
+}) => {
   const [filters, setFilters] = useState({});
+
   const handleFilterChange = (field, value) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
-      [field]: value === "All" ? null : value, // Use null to reset filter
+      [field]: value === "All" ? null : value,
     }));
   };
 
-  // Apply filtering logic
+  // ফিল্টারিং লজিক (অপরিবর্তিত)
   const filteredData = data.filter((row) =>
     columns.every((column) => {
-      // if (!filters[column.field] || filters[column.field] === "All") return true;
       if (!filters[column.field] && filters[column.field] !== 0) return true;
 
       if (column.type === "text") {
@@ -25,43 +35,63 @@ const SortableTable = ({ columns, data, isFilterColumn = true }) => {
           .includes(filters[column.field].toLowerCase());
       }
       if (column.type === "select") {
-        return row[column.field] === Number(filters[column.field]); // Compare as number
+        return row[column.field] === Number(filters[column.field]);
       }
-
       if (column.type === "date") {
         const rowDate = new Date(row[column.field]).setHours(0, 0, 0, 0);
         const filterDate = new Date(filters[column.field]).setHours(0, 0, 0, 0);
         return rowDate === filterDate;
       }
-
       if (column.type === "range") {
         const rowDate = new Date(row[column.field]).setHours(0, 0, 0, 0);
         const [startDate, endDate] = filters[column.field] || [];
         return startDate && endDate
           ? rowDate >= new Date(startDate).setHours(0, 0, 0, 0) &&
-          rowDate <= new Date(endDate).setHours(0, 0, 0, 0)
+              rowDate <= new Date(endDate).setHours(0, 0, 0, 0)
           : true;
       }
-
       return true;
     })
   );
-
+const alignClass = {
+  start: "text-left",
+  center: "text-center",
+  end: "text-right",
+};
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
         <thead className="text-xs sm:text-sm text-theme-dark font-SolaimanLipi uppercase bg-gray-50">
           <tr>
             {columns.map((column, index) => (
-              <th key={index} className={`px-3 py-3 text-nowrap text-${column.hozAlign || "start"}`}>
-                {column.title}
+              <th
+                key={index}
+                className={`px-3 py-3 text-nowrap ${
+                  alignClass[column.hozAlign] || "text-left"
+                }`}
+              >
+                <div className="flex items-center gap-2 justify-center">
+                  <span>{column.title}</span>
+                  {column.hasCheckbox && onCheckboxChange && (
+                    <input
+                      type="checkbox"
+                      checked={checkboxes[column.field] || false}
+                      onChange={() => onCheckboxChange(column.field)}
+                      className="ml-2"
+                    />
+                  )}
+                </div>
               </th>
             ))}
           </tr>
-          {
-            isFilterColumn && <tr>
+
+          {isFilterColumn && (
+            <tr>
               {columns.map((column, index) => (
-                <th key={index} className={`px-3 h-[40px] text-${column.hozAlign || "start"}`}>
+                <th
+                  key={index}
+                  className={`px-3 h-[40px] text-${column.hozAlign || "start"}`}
+                >
                   {column.filterable && (
                     <>
                       {column.type === "text" && (
@@ -70,15 +100,23 @@ const SortableTable = ({ columns, data, isFilterColumn = true }) => {
                           placeholder={`Filter ${column.title}`}
                           className="w-full h-[80%] px-2 py-1 outline-1 border border-gray-300 outline-theme-color rounded-[5px] text-xs font-normal"
                           value={filters[column.field] || ""}
-                          onChange={(e) => handleFilterChange(column.field, e.target.value)}
+                          onChange={(e) =>
+                            handleFilterChange(column.field, e.target.value)
+                          }
                         />
                       )}
-
                       {column.type === "select" && (
                         <select
                           className="w-full h-[80%] px-2 py-1 outline-1 border border-gray-300 outline-theme-color rounded-[5px] text-xs font-normal"
                           value={filters[column.field] ?? "All"}
-                          onChange={(e) => handleFilterChange(column.field, e.target.value === "All" ? null : Number(e.target.value))}
+                          onChange={(e) =>
+                            handleFilterChange(
+                              column.field,
+                              e.target.value === "All"
+                                ? null
+                                : Number(e.target.value)
+                            )
+                          }
                         >
                           <option value="All">All</option>
                           {column.options.map((option, i) => (
@@ -88,9 +126,6 @@ const SortableTable = ({ columns, data, isFilterColumn = true }) => {
                           ))}
                         </select>
                       )}
-
-
-
                       {column.type === "date" && (
                         <Flatpickr
                           className="w-full h-[80%] px-2 py-1 outline-1 border border-gray-300 outline-theme-color rounded-[5px] text-xs font-normal"
@@ -101,14 +136,16 @@ const SortableTable = ({ columns, data, isFilterColumn = true }) => {
                           }
                         />
                       )}
-
                       {column.type === "range" && (
                         <Flatpickr
                           className="w-full h-[80%] px-2 py-1 outline-1 border border-gray-300 outline-theme-color rounded-[5px] text-xs font-normal"
                           options={{ mode: "range", dateFormat: "Y-m-d" }}
                           value={filters[column.field] || ""}
                           onChange={(selectedDates) =>
-                            handleFilterChange(column.field, selectedDates.length ? selectedDates : [])
+                            handleFilterChange(
+                              column.field,
+                              selectedDates.length ? selectedDates : []
+                            )
                           }
                         />
                       )}
@@ -117,18 +154,27 @@ const SortableTable = ({ columns, data, isFilterColumn = true }) => {
                 </th>
               ))}
             </tr>
-          }
-
+          )}
         </thead>
         <tbody>
           {filteredData.map((row, rowIndex) => (
-            <tr key={rowIndex} className="odd:bg-white even:bg-gray-50 border-b border-gray-200">
+            <tr
+              key={rowIndex}
+              className="odd:bg-white even:bg-gray-50 border-b border-gray-200"
+              onClick={() => onRowClick && onRowClick(row)}
+            >
               {columns.map((column, cellIndex) => (
                 <td
                   key={cellIndex}
-                  className={`px-3 py-4 font-medium text-theme-dark whitespace-nowrap font-SolaimanLipi text-${column.hozAlign || "start"}`}
+                  className={`px-3 py-4 font-medium text-theme-dark whitespace-nowrap font-SolaimanLipi text-${
+                    column.hozAlign || "start"
+                  }`}
                 >
-                  {column.render ? column.render(row) : column?.unicode ? bnBijoy2Unicode(row[column.field]) : row[column.field] || "N/A"}
+                  {column.render
+                    ? column.render(row)
+                    : column?.unicode
+                    ? bnBijoy2Unicode(row[column.field])
+                    : row[column.field] || "N/A"}
                 </td>
               ))}
             </tr>

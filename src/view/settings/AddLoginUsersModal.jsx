@@ -6,31 +6,34 @@ import ToggleBox from "../../components/ToggleBox/ToggleBox";
 import Button from "../../components/Button/Button";
 import {
   useGetAllUserPermissionListViewsQuery,
+  useUpdatePermissionCheckedAllMutation,
   useUpdatePermissionToggleMutation,
 } from "../../features/permission/permissionSlice";
 import Loading from "../../components/Loading/Loading";
+import { toast } from "react-toastify";
 
 const AddLoginUsersModal = ({ id }) => {
-  console.log(id, "id");
   const methods = useForm();
   const translate = useTranslate();
 
   const [selectedRow, setSelectedRow] = useState(null);
   const [search, setSearch] = useState("");
+  // নতুন স্টেট: চেকবক্সের জন্য
+  const [checkboxes, setCheckboxes] = useState({});
 
-  // 🔹 API থেকে permission list আনছি (pagination ছাড়া, শুধু search)
   const {
     data: permissionLists,
     isLoading,
     isError,
   } = useGetAllUserPermissionListViewsQuery({
-    page: 1, // সবসময় প্রথম পেজ
-    limit: 1000, // বেশি লিমিট দিলে সব রেকর্ড আসবে
+    page: 1,
+    limit: 1000,
     search,
     id,
   });
 
   const [updatePermissionToggle] = useUpdatePermissionToggleMutation();
+  const [updatePermissionCheckedAll] = useUpdatePermissionCheckedAllMutation();
 
   const handleRowClick = (row) => {
     if (selectedRow?.ID === row.ID) {
@@ -40,7 +43,34 @@ const AddLoginUsersModal = ({ id }) => {
     }
   };
 
-  // 🔹 Toggle বাটনে ক্লিক করলে update হবে
+  // Check Box handler
+ const handleCheckboxChange = async (field) => {
+   setCheckboxes((prev) => ({
+     ...prev,
+     [field]: !prev[field],
+   }));
+
+   try {
+     const body = {
+       permissionItem: field,
+       userID: id,
+     };
+
+     const response = await updatePermissionCheckedAll(body).unwrap();
+
+     toast.success(response.message || `${field} updated successfully`, {
+       position: "top-right",
+       autoClose: 2000,
+     });
+   } catch (err) {
+     toast.error(err?.data?.error || `Failed to update ${field}`, {
+       position: "top-right",
+       autoClose: 2000,
+     });
+   }
+ };
+
+
   const handleToggle = async (row, field) => {
     const body = {
       UserID: row.UserID,
@@ -90,6 +120,7 @@ const AddLoginUsersModal = ({ id }) => {
       title: translate("View"),
       field: "PermissionView",
       hozAlign: "center",
+      hasCheckbox: true,
       render: (row) => (
         <Button
           onClick={() => handleToggle(row, "View")}
@@ -107,6 +138,7 @@ const AddLoginUsersModal = ({ id }) => {
       title: translate("Insert"),
       field: "PermissionInsert",
       hozAlign: "center",
+      hasCheckbox: true,
       render: (row) => (
         <Button
           onClick={() => handleToggle(row, "Insert")}
@@ -124,6 +156,7 @@ const AddLoginUsersModal = ({ id }) => {
       title: translate("Edit"),
       field: "PermissionEdit",
       hozAlign: "center",
+      hasCheckbox: true,
       render: (row) => (
         <Button
           onClick={() => handleToggle(row, "Edit")}
@@ -141,6 +174,7 @@ const AddLoginUsersModal = ({ id }) => {
       title: translate("Delete"),
       field: "PermissionDelete",
       hozAlign: "center",
+      hasCheckbox: true,
       render: (row) => (
         <Button
           onClick={() => handleToggle(row, "Delete")}
@@ -156,7 +190,7 @@ const AddLoginUsersModal = ({ id }) => {
     },
   ];
 
-  if (isLoading) return <Loading/>;
+  if (isLoading) return <Loading />;
   if (isError) return <p>Error loading permissions</p>;
 
   return (
@@ -180,6 +214,8 @@ const AddLoginUsersModal = ({ id }) => {
             isFilterColumn={false}
             onRowClick={handleRowClick}
             close={setSelectedRow}
+            checkboxes={checkboxes} // চেকবক্স স্টেট পাঠানো
+            onCheckboxChange={handleCheckboxChange} // চেকবক্স হ্যান্ডলার পাঠানো
           />
 
           {selectedRow && (

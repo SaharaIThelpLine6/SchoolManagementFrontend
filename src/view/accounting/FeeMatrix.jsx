@@ -102,7 +102,7 @@ const FeeMatrix = ({
     }
   };
 
-  // Components
+  // Componentsz
   const CategoryHeader = ({ category }) => (
     <td
       colSpan={2}

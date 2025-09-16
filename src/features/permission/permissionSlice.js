@@ -36,6 +36,15 @@ export const permissionSlice = createApi({
       }),
       invalidatesTags: ["PermissionLists"],
     }),
+    // ================== Update Permission Checked All ==================
+    updatePermissionCheckedAll: builder.mutation({
+      query: (body) => ({
+        url: "permission_checked_all",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["PermissionLists"],
+    }),
     // updateInstitutionInfo: builder.mutation({
     //   query: (body) => ({
     //     url: `institution_info`,
@@ -47,4 +56,4 @@ export const permissionSlice = createApi({
   }),
 });
 
-export const { useGetAllUserPermissionsQuery, useGetAllUserPermissionListViewsQuery, useUpdatePermissionToggleMutation } = permissionSlice;
+export const { useGetAllUserPermissionsQuery, useGetAllUserPermissionListViewsQuery, useUpdatePermissionToggleMutation, useUpdatePermissionCheckedAllMutation } = permissionSlice;
