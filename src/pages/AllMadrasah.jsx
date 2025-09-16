@@ -38,13 +38,19 @@ const AllMadrasah = ({ pageTitle }) => {
     data: allMadrasah,
     isLoading: isFetchingMadrasah,
     isError: isErrorMadrasah,
-  } = useGetAllMadrasahQuery({
-    page: currentPage,
-    limit: 10,
-    search: searchTerm || undefined,
-    filter: activeFilter !== "all" ? activeFilter : undefined,
-  });
-
+  } = useGetAllMadrasahQuery(
+    {
+      page: currentPage,
+      limit: 10,
+      search: searchTerm || undefined,
+      filter: activeFilter !== "all" ? activeFilter : undefined,
+    },
+    {
+      refetchOnMountOrArgChange: true, // ✅ পেজে আসলেই আবার fetch হবে
+      refetchOnFocus: true, // ✅ tab এ ফিরে আসলেও refetch হবে
+      refetchOnReconnect: true, // ✅ internet reconnect হলে refetch হবে
+    }
+  );
 
   // Fetch stats
   const {
@@ -80,7 +86,6 @@ const AllMadrasah = ({ pageTitle }) => {
       setUsers(allMadrasah);
     }
   }, [allMadrasah]);
-
 
   // Extract paginated data and metadata
   const paginatedData = users?.data || [];
