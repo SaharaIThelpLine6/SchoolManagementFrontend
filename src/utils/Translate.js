@@ -16,6 +16,7 @@ const useTranslate = () => {
     "Last Login": "শেষ লগইন",
     "Payment System": "পেমেন্ট সিস্টেম",
     Quantity: "পরিমাণ",
+    "User Roles": "ব্যবহারকারীর ভূমিকা",
     "New User": "নতুন ব্যবহারকারী",
     "Payment Comments": "পেমেন্ট মন্তব্য",
     "Voucher/Bill": "ভাউচার/বিল",

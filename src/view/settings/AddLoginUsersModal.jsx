@@ -214,8 +214,8 @@ const AddLoginUsersModal = ({ id }) => {
             isFilterColumn={false}
             onRowClick={handleRowClick}
             close={setSelectedRow}
-            checkboxes={checkboxes} // চেকবক্স স্টেট পাঠানো
-            onCheckboxChange={handleCheckboxChange} // চেকবক্স হ্যান্ডলার পাঠানো
+            checkboxes={checkboxes} 
+            onCheckboxChange={handleCheckboxChange}
           />
 
           {selectedRow && (

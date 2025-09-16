@@ -390,7 +390,7 @@ export const menuData = [
     subMenu: [
       {
         id: "1",
-        name: "Add Login Users",
+        name: "User Roles",
         route: "/settings/add-login-users",
       },
       {
