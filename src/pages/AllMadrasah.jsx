@@ -93,40 +93,40 @@ const AllMadrasah = ({ pageTitle }) => {
   const totalRecords = users?.pagination?.totalRecords || 0;
 
   const handleOpenModal = useCallback(() => {
-    showModal(translate("Add new madrasah"), "ADD_MADRASAH");
+    // showModal(translate("Add new madrasah"), "ADD_MADRASAH");
   }, [translate]);
 
   const handleEditOpenModal = useCallback(
-    (id) => {
-      showModal(translate("Edit madrasah"), "EDIT_MADRASAH", id);
-    },
-    [translate]
+    // (id) => {
+    //   showModal(translate("Edit madrasah"), "EDIT_MADRASAH", id);
+    // },
+    // [translate]
   );
 
   const handleDelete = useCallback(async (id) => {
-    Swal.fire({
-      title: "Are you sure?",
-      text: "This action will permanently delete the madrasah.",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!",
-      cancelButtonText: "Cancel",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          setIsLoading(true);
-          // TODO: Replace with actual delete API call
-          await new Promise((resolve) => setTimeout(resolve, 1000));
-          Swal.fire("Deleted!", "The madrasah has been removed.", "success");
-        } catch (error) {
-          Swal.fire("Error!", "Failed to delete the madrasah.", "error");
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    });
+    // Swal.fire({
+    //   title: "Are you sure?",
+    //   text: "This action will permanently delete the madrasah.",
+    //   icon: "warning",
+    //   showCancelButton: true,
+    //   confirmButtonColor: "#d33",
+    //   cancelButtonColor: "#3085d6",
+    //   confirmButtonText: "Yes, delete it!",
+    //   cancelButtonText: "Cancel",
+    // }).then(async (result) => {
+    //   if (result.isConfirmed) {
+    //     try {
+    //       setIsLoading(true);
+    //       // TODO: Replace with actual delete API call
+    //       await new Promise((resolve) => setTimeout(resolve, 1000));
+    //       Swal.fire("Deleted!", "The madrasah has been removed.", "success");
+    //     } catch (error) {
+    //       Swal.fire("Error!", "Failed to delete the madrasah.", "error");
+    //     } finally {
+    //       setIsLoading(false);
+    //     }
+    //   }
+    // });
   }, []);
 
   const handleSearch = useCallback((e) => {
