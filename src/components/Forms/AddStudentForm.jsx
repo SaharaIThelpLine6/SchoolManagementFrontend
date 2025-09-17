@@ -20,9 +20,10 @@ import {
 } from "../../features/userInfo/userInfoSlice";
 import { updateUserInfo } from "../../utils/update/api";
 import DefaultGreen from "../Button/DefaultGreen";
-import { setItemsPerPage } from "../../features/pagination/paginationSlice";
+import useTranslate from "../../utils/Translate";
 
 const AddStudentForm = ({ pageTitle }) => {
+  const translate = useTranslate();
   const [selectedImage, setSelectedImage] = useState(null);
   const defaultData = useSelector((state) => state.userInfo.defaultFormValue);
   const editMode = useSelector((state) => state.userInfo.editMode);
@@ -345,156 +346,145 @@ const AddStudentForm = ({ pageTitle }) => {
   const newButton = "New";
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="font-lato">
-        <div className="px-[24px] text-[14px]">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3 w-full flex-wrap lg:flex-nowrap">
-            {/*Form Start*/}
-            <div className="">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="font-lato bg-gray-50 min-h-screen py-6"
+      >
+        <div className="space-y-8">
+          {/* Section: User Info */}
+          <div className="bg-white rounded-xl shadow-md p-6 space-y-6">
+            <h2 className="text-lg font-bold text-gray-700 border-b pb-2">
+              ব্যবহারকারীর তথ্য
+            </h2>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               <DefaultSelect
                 type="number"
-                label={
-                  <span className="text-red-500">ব্যবহারকারীর ধরণ * :</span>
-                }
+                label="User Type"
                 options={userType}
-                registerKey={"UserTypeID"}
-                valueField={"ID"}
-                nameField={"TypeName"}
+                registerKey="UserTypeID"
+                valueField="ID"
+                nameField="TypeName"
+                require={"User Type Field is required!"}
+                labelColor="text-red-500"
               />
-            </div>
 
-            <div className="">
               <DefaultInput
-                label={
-                  <div className="flex justify-between">
-                    <span className="text-red-500">দাখেলা</span>
-                    <p className="text-blue-700 underline">
-                      <a href="http://">Code Setting</a>
-                    </p>
-                  </div>
-                }
-                type={"number"}
-                placeholder={"100149"}
-                registerKey={"UserCode"}
-                require={"Dakhela is require"}
+                label="New User Code"
+                type="number"
+                placeholder="100149"
+                registerKey="UserCode"
+                require="Dakhela is required!"
+                codeSetting={true}
+                labelColor="text-red-500"
               />
-            </div>
 
-            <div className="">
               <DefaultSelect
-                label={<span className="text-red-500">লিঙ্গ * :</span>}
+                label="Gender"
                 options={gender}
-                registerKey={"GenderID"}
-                require={"Gender Field is require"}
-                nameField={"GenderName"}
-                valueField={"ID"}
+                registerKey="GenderID"
+                require="Gender Field is require"
+                nameField="GenderName"
+                valueField="ID"
+                labelColor="text-red-500"
               />
-            </div>
 
-            <div className="">
               <DefaultInput
-                label={<span className="text-red-500">নাম * :</span>}
-                type={"text"}
-                placeholder={""}
-                registerKey={"UserName"}
+                label="Name"
+                type="text"
+                registerKey="UserName"
+                placeholder={"Enter your name ..."}
+                require="Name is required!"
+                labelColor="text-red-500"
               />
-            </div>
 
-            <div className="">
               <DefaultInput
-                label={"পিতার নাম :"}
-                type={"text"}
-                placeholder={""}
-                registerKey={"FatherName"}
+                label="পিতার নাম"
+                type="text"
+                registerKey="FatherName"
+                placeholder={"Enter your father name ..."}
               />
-            </div>
-
-            <div className="">
               <DefaultInput
-                label={"মাতার নাম :"}
-                type={"text"}
-                placeholder={""}
-                registerKey={"MotherName"}
+                label="মাতার নাম"
+                type="text"
+                registerKey="MotherName"
+                placeholder={"Enter your mother name ..."}
               />
-            </div>
 
-            <div className="flex gap-3">
-              <div className=" w-full">
+              <div className="flex gap-3 col-span-2 sm:col-auto">
                 <DatePickerOne
-                  dateCalender={"জন্ম তারিখ :"}
-                  placeholder={""}
-                  registerKey={"DateOfBirth"}
-                  require={"Date Of Birth Require"}
+                  dateCalender="জন্ম তারিখ"
+                  registerKey="DateOfBirth"
+                  require="Required!"
+                  className="w-full"
+                  placeholder={"DD-MM-YYYY"}
                 />
-              </div>
-              <div className=" w-16">
                 <DefaultInput
-                  label={"বয়স :"}
-                  type={"text"}
-                  placeholder={"৭০"}
-                  registerKey={"age"}
-                />
-              </div>
-            </div>
-            <div className="">
-              <DefaultInput
-                label={"NID/জন্ম নিবন্ধন নং :"}
-                type={"text"}
-                placeholder={""}
-                registerKey={"NIDNO"}
-              />
-            </div>
-            <div className="flex gap-3">
-              <div className="mb-2 w-full">
-                <label className="text-red-500">মোবাইল ১* (SMS যাবে)</label>
-                <DefaultInput
-                  type={"text"}
-                  placeholder={""}
-                  registerKey={"Mobile1"}
+                  label="বয়স"
+                  type="text"
+                  placeholder="Enter your age ..."
+                  registerKey="age"
+                  className="w-20"
                 />
               </div>
 
-              <div className=" w-36">
-                <DefaultSelect
-                  label={"সম্পর্ক:"}
-                  type="number"
-                  options={studentRelation}
-                  valueField={"RelationID"}
-                  nameField={"RelationName"}
-                  registerKey={"Relationship1"}
-                />
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <div className=" w-full">
+              <div className="col-span-2 sm:col-auto">
                 <DefaultInput
-                  label={"মোবাইল ২"}
-                  type={"text"}
-                  placeholder={""}
-                  registerKey={"Mobile2"}
+                  label="NID/জন্ম নিবন্ধন নং"
+                  type="text"
+                  registerKey="NIDNO"
+                  placeholder={"Enter your NID No ..."}
                 />
               </div>
-              <div className=" w-36">
+
+              <div className="flex gap-3 col-span-2">
+                <DefaultInput
+                  label={
+                    <span className="text-red-500">মোবাইল ১* (SMS যাবে)</span>
+                  }
+                  type="text"
+                  registerKey="Mobile1"
+                  className="w-full"
+                  placeholder={"Enter your mobile number ..."}
+                />
                 <DefaultSelect
-                  label={"সম্পর্ক:"}
+                  label="সম্পর্ক"
                   type="number"
                   options={studentRelation}
-                  valueField={"RelationID"}
-                  nameField={"RelationName"}
-                  registerKey={"Relationship2"}
+                  valueField="RelationID"
+                  nameField="RelationName"
+                  registerKey="Relationship1"
+                  className="w-36"
                 />
               </div>
-            </div>
-            <div className="">
+
+              <div className="flex gap-3 col-span-2 sm:col-auto">
+                <DefaultInput
+                  label="মোবাইল ২"
+                  type="text"
+                  registerKey="Mobile2"
+                  placeholder={"Enter your mobile number ..."}
+                />
+                <DefaultSelect
+                  label="সম্পর্ক"
+                  type="number"
+                  options={studentRelation}
+                  valueField="RelationID"
+                  nameField="RelationName"
+                  registerKey="Relationship2"
+                  className="w-36"
+                />
+              </div>
+
               <DefaultInput
-                label={"ই-মেইল"}
-                type={"email"}
-                placeholder={""}
-                registerKey={"Email"}
+                label="ই-মেইল"
+                type="email"
+                registerKey="Email"
+                placeholder={"Enter your email address ..."}
               />
-            </div>
-            <div className="">
+
               <DefaultSelect
-                label={"রক্তের গ্রুপ :"}
+                label="রক্তের গ্রুপ"
                 type="string"
                 options={[
                   { value: "A+" },
@@ -506,181 +496,118 @@ const AddStudentForm = ({ pageTitle }) => {
                   { value: "O+" },
                   { value: "O-" },
                 ]}
-                registerKey={"BloodGroup"}
-                nameField={"value"}
-                valueField={"value"}
+                registerKey="BloodGroup"
+                nameField="value"
+                valueField="value"
               />
             </div>
           </div>
 
-          {/* Permanent address column Start*/}
-          <div className="">
-            <div className="text-center font-bold mt-3 font-noto mb-[-10px] text-[16px]">
-              <p>স্থায়ী ঠিকানা</p>
-            </div>
-
-            <div className="md:grid md:grid-cols-5 gap-3">
-              <div className="">
-                <DefaultSelect
-                  label={"বিভাগ"}
-                  type="number"
-                  options={divition}
-                  registerKey={"DivisionID"}
-                  valueField={"DivisionID"}
-                  nameField={"DivisionName"}
-                />
-              </div>
-              <div className="">
-                <DefaultSelect
-                  label={"জেলা"}
-                  type="number"
-                  options={district[DivisionID]}
-                  registerKey={"DistrictID"}
-                  valueField={"DistrictID"}
-                  nameField={"DistrictName"}
-                />
-              </div>
-              <div className="">
-                <DefaultSelect
-                  label={"থানা"}
-                  type="number"
-                  options={thana[DistrictID]}
-                  registerKey={"permanentPoliceStationID"}
-                  valueField={"PoliceStationID"}
-                  nameField={"PoliceStationName"}
-                />
-              </div>
-              <div className="">
-                <DefaultInput
-                  label={"ডাক"}
-                  type={"text"}
-                  placeholder={""}
-                  registerKey={"permanentPost"}
-                />
-              </div>
-              <div className="">
-                <DefaultInput
-                  label={"গ্রাম"}
-                  type={"text"}
-                  placeholder={""}
-                  registerKey={"permanentVill"}
-                />
-              </div>
-            </div>
-          </div>
-          {/*Permanent address column End*/}
-
-          <div className="flex mb-[14px] mt-[18px] pl-[4px] font-bold relative">
-            <div className="flex gap-[5px] items-start">
-              <div className="flex items-center">
-                <label className="inline-flex items-center">
-                  <input
-                    id="sameAddress"
-                    type="checkbox"
-                    value="male"
-                    name="sameAddress"
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500"
-                    {...register("sameAddress")}
-                  />
-                </label>
-              </div>
-              <label
-                htmlFor="sameAddress"
-                className="items-center text-[16px] font-bold font-noto left-[50%] top-[50%]"
-              >
-                {" "}
-                ঠিকানা একই হলে এখানে ক্লিক করুন{" "}
-              </label>
-            </div>
-
-            <div className="mx-auto font-bold font-noto mb-[-10px] text-[16px] absolute left-[50%] top-[50%] translate-x-[-50%] translate-y-[-35%]">
-              <p>অস্থায়ী ঠিকানা</p>
-            </div>
-          </div>
-
-          {/*Temporary address column Start*/}
-          <div className="md:grid md:grid-cols-5 gap-3">
-            <div className="">
+          {/* Section: Permanent Address */}
+          <div className="bg-white rounded-xl shadow-md p-6 space-y-6">
+            <h2 className="text-lg font-bold text-gray-700 border-b pb-2 text-center">
+              স্থায়ী ঠিকানা
+            </h2>
+            <div className="grid md:grid-cols-5 gap-5">
               <DefaultSelect
-                label={"বিভাগ"}
+                label="বিভাগ"
                 type="number"
                 options={divition}
-                registerKey={"DivisionID2"}
-                valueField={"DivisionID"}
-                nameField={"DivisionName"}
+                registerKey="DivisionID"
+                valueField="DivisionID"
+                nameField="DivisionName"
               />
-            </div>
-            <div className="">
               <DefaultSelect
-                label={"জেলা"}
+                label="জেলা"
                 type="number"
-                options={district[DivisionID2]}
-                registerKey={"DistrictID2"}
-                valueField={"DistrictID"}
-                nameField={"DistrictName"}
+                options={district[DivisionID]}
+                registerKey="DistrictID"
+                valueField="DistrictID"
+                nameField="DistrictName"
               />
-            </div>
-            <div className="">
               <DefaultSelect
-                label={"থানা"}
+                label="থানা"
                 type="number"
-                options={thana[DistrictID2]}
-                registerKey={"TransientPoliceStationID"}
-                valueField={"PoliceStationID"}
-                nameField={"PoliceStationName"}
+                options={thana[DistrictID]}
+                registerKey="permanentPoliceStationID"
+                valueField="PoliceStationID"
+                nameField="PoliceStationName"
               />
-            </div>
-            <div className="">
               <DefaultInput
-                label={"ডাক"}
-                type={"text"}
-                placeholder={""}
-                registerKey={"TransientPost"}
+                label="ডাক"
+                type="text"
+                registerKey="permanentPost"
+                placeholder={"Enter your post office ..."}
               />
-            </div>
-            <div className="">
               <DefaultInput
-                label={"গ্রাম"}
-                type={"text"}
-                placeholder={""}
-                registerKey={"TransientVill"}
+                label="গ্রাম"
+                type="text"
+                registerKey="permanentVill"
+                placeholder={"Enter your village ..."}
               />
             </div>
           </div>
-          {/*Temporary address column End*/}
 
-          {/*Image add start*/}
-          {/* <div className="flex gap-2 mt-1">
-          <p>ছবি সংযুক্ত করুন</p>
-          <input
-            type="file"
-            className="file-input"
-            onChange={handleImageChange}
-          />
-          {selectedImage && <img src={selectedImage} alt="uploaded" className="uploaded-image h-20 w-20 border-4 border-slate-300" />}
-        </div> */}
-          {/*Image add end*/}
+          {/* Section: Temporary Address */}
+          <div className="bg-white rounded-xl shadow-md p-6 space-y-6">
+            <div className="flex items-center justify-center border-b pb-2">
+              <label className="absolute left-4 flex items-center gap-2 font-medium text-gray-700">
+                <input
+                  id="sameAddress"
+                  type="checkbox"
+                  {...register("sameAddress")}
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded"
+                />
+                <span>ঠিকানা একই হলে এখানে ক্লিক করুন</span>
+              </label>
+              <h2 className="text-lg font-bold text-gray-700">
+                অস্থায়ী ঠিকানা
+              </h2>
+            </div>
 
-          {/*Save Button & Filter start*/}
-          <div className="flex mt-[10px] pl-[4px] font-bold relative">
+            <div className="grid md:grid-cols-5 gap-5">
+              <DefaultSelect
+                label="বিভাগ"
+                type="number"
+                options={divition}
+                registerKey="DivisionID2"
+                valueField="DivisionID"
+                nameField="DivisionName"
+              />
+              <DefaultSelect
+                label="জেলা"
+                type="number"
+                options={district[DivisionID2]}
+                registerKey="DistrictID2"
+                valueField="DistrictID"
+                nameField="DistrictName"
+              />
+              <DefaultSelect
+                label="থানা"
+                type="number"
+                options={thana[DistrictID2]}
+                registerKey="TransientPoliceStationID"
+                valueField="PoliceStationID"
+                nameField="PoliceStationName"
+              />
+              <DefaultInput
+                label="ডাক"
+                type="text"
+                registerKey="TransientPost"
+                placeholder={"Enter your post office ..."}
+              />
+              <DefaultInput
+                label="গ্রাম"
+                type="text"
+                registerKey="TransientVill"
+                placeholder={"Enter your village ..."}
+              />
+            </div>
             <div className="flex gap-3">
               <DefaultGreen submitButtonGreen={saveButton} />
               <DefaultGreen submitButtonGreen={newButton} />
             </div>
-            <div className="font-bold text-slate-800  font-noto text-[16px] absolute left-[90%]">
-              <select
-                className="border-2 border-slate-300 rounded-lg py-0.5 px-4 bg-transparent"
-                onChange={(e) => dispatch(setItemsPerPage(e.target.value))}
-                defaultValue={"2"}
-              >
-                <option value="2">2</option>
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-              </select>
-            </div>
           </div>
-          {/*Save Button & Filter end*/}
         </div>
       </form>
     </FormProvider>

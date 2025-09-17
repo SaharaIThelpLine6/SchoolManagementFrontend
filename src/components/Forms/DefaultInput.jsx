@@ -8,6 +8,8 @@ const DefaultInput = ({
   type = "text",
   placeholder,
   registerKey,
+  codeSetting = false,
+  labelColor = "text-black",
   require = false,
   disable = false,
   unicode = false,
@@ -50,7 +52,22 @@ const DefaultInput = ({
               : "mb-1 block"
           }`}
         >
-          {translate(label)}
+          <div className="flex justify-between items-center gap-2">
+            <div className="flex items-center gap-1">
+              <span className={labelColor}>{translate(label)}</span>
+              {require && <span className="text-red-500">*</span>}
+              <span>:</span>
+            </div>
+
+            {codeSetting && (
+              <a
+                href="#"
+                className="text-blue-600 underline text-sm font-medium"
+              >
+                Code Setting
+              </a>
+            )}
+          </div>
         </label>
       )}
 

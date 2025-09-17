@@ -28,7 +28,7 @@ const DatePickerOne = ({
               : "mb-1 block"
           }`}
         >
-          {translate(dateCalender)}
+          {translate(dateCalender)} :
         </label>
       )}
 

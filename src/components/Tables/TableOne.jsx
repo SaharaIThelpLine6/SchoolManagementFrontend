@@ -47,6 +47,20 @@ const TableOne = () => {
 
   return (
     <div className="rounded-sm bg-white pt-2 pb-2.5 shadow-default sm:px-7.5 xl:pb-1">
+      <div className="flex justify-end items-center py-3">
+        <select
+          className="border border-gray-300 rounded-md bg-white py-1.5 px-3 text-sm text-gray-700 shadow-sm
+             focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
+             hover:border-gray-400 transition-colors"
+          onChange={(e) => dispatch(setItemsPerPage(e.target.value))}
+          defaultValue="2"
+        >
+          <option value="2">2</option>
+          <option value="10">10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+      </div>
       <div className="max-w-full overflow-x-auto">
         {/* <select className="bg-transparent pl-2" onChange={(e) => dispatch(setItemsPerPage(e.target.value))}>
           <option value="2">2</option>
