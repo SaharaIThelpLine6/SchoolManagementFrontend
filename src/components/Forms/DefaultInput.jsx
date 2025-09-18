@@ -1,7 +1,8 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 import bnBijoy2Unicode from "../../utils/conveter";
+import { showModal } from "../../utils/ModalControlar";
 
 const DefaultInput = ({
   label,
@@ -15,6 +16,7 @@ const DefaultInput = ({
   unicode = false,
   labelPosition = "top", // 'top' or 'left'
   validate, // ✅ নতুন প্রপস
+  defaultValue = "", // ✅ নতুন প্রপস
 }) => {
   const {
     register,
@@ -24,10 +26,21 @@ const DefaultInput = ({
   } = useFormContext();
   const translate = useTranslate();
 
+  const handleOpenModal = useCallback(() => {
+    showModal("User Code Setting", "CODE_SETTING");
+  }, []);
+
   // ✅ Watch field value
   const currentValue = useWatch({ name: registerKey, control });
 
-  // ✅ Convert whenever value changes (not only on mount)
+  // ✅ প্রথমবারে defaultValue সেট করে দেবে
+  useEffect(() => {
+    if (defaultValue !== undefined && defaultValue !== null) {
+      setValue(registerKey, defaultValue, { shouldValidate: true });
+    }
+  }, [defaultValue, registerKey, setValue]);
+
+  // ✅ Unicode কনভার্সন
   useEffect(() => {
     if (unicode && currentValue) {
       const converted = bnBijoy2Unicode(currentValue);
@@ -60,12 +73,12 @@ const DefaultInput = ({
             </div>
 
             {codeSetting && (
-              <a
-                href="#"
-                className="text-blue-600 underline text-sm font-medium"
+              <span
+                className="text-blue-600 underline text-sm font-medium cursor-pointer"
+                onClick={handleOpenModal}
               >
                 Code Setting
-              </a>
+              </span>
             )}
           </div>
         </label>

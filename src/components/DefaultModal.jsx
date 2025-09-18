@@ -30,6 +30,7 @@ import UserFilterModal from "./Modals/UserFilterModal";
 import SelectedPerStudentFeeModal from "./Modals/SelectedPerStudentFeeModal";
 import FundForm from "../view/accounting/FundForm";
 import GeneralForm from "../view/accounting/GeneralForm";
+import CodeSetting from "./Modals/CodeSetting";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -121,6 +122,7 @@ const DefaultModal = () => {
                 {modalType === "PAYMENT_GETWAY" && <PaymentGetway />}
                 {modalType === "SUCCESSANDERROR" && <SuccessAndError />}
                 {modalType === "ADD_BOOK" && <AddEditBook />}
+                {modalType === "CODE_SETTING" && <CodeSetting />}
                 {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
                 {modalType === "SUB_SIDIARY" && <Subsidiary />}
                 {modalType === "EXAM_REPORT_SETTING" && <ExamReportSetting />}
@@ -133,7 +135,7 @@ const DefaultModal = () => {
                 )}
                 {modalType === "USER_SEARCH" && <UserSearch />}
                 {modalType === "POWER_DISTRIBUTION" && (
-                  <AddLoginUsersModal id={id}/>
+                  <AddLoginUsersModal id={id} />
                 )}
                 {modalType === "USER_NAME_CHANGE" && (
                   <UserNamePasswordChangeModal id={id} changeType="username" />

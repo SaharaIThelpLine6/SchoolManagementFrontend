@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useFormContext, useForm, FormProvider } from "react-hook-form";
-
+import { useForm, FormProvider } from "react-hook-form";
 import "flatpickr/dist/flatpickr.css";
 import DefaultInput from "./DefaultInput";
 import DefaultSelect from "./DefaultSelect";
@@ -21,12 +20,103 @@ import {
 import { updateUserInfo } from "../../utils/update/api";
 import DefaultGreen from "../Button/DefaultGreen";
 import useTranslate from "../../utils/Translate";
+import {
+  useGetCodeSettingsQuery,
+  useGetSettingsQuery,
+} from "../../features/settings/settingsQuerySlice";
+import { useGetUserCodeCheckQuery } from "../../features/userType/userTypeSlice";
 
 const AddStudentForm = ({ pageTitle }) => {
   const translate = useTranslate();
+  const navigate = useNavigate();
+  const methods = useForm({
+    defaultValues: {
+      // Initialize GenderID with a fallback to avoid undefined
+      GenderID: "",
+      UserName: "",
+      UserTypeID: "",
+      UserCode: "",
+      FatherName: "",
+      MotherName: "",
+      DateOfBirth: "",
+      age: "",
+      NIDNO: "",
+      Mobile1: "",
+      Mobile2: "",
+      Relationship2: "",
+      Email: "",
+      BloodGroup: "",
+      DivisionID: "",
+      DistrictID: "",
+      permanentPoliceStationID: "",
+      permanentPost: "",
+      permanentVill: "",
+      sameAddress: false,
+      DivisionID2: "",
+      DistrictID2: "",
+      TransientPoliceStationID: "",
+      TransientPost: "",
+      TransientVill: "",
+    },
+  });
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    getValues,
+    reset,
+    formState: { errors },
+  } = methods;
+
   const [selectedImage, setSelectedImage] = useState(null);
   const defaultData = useSelector((state) => state.userInfo.defaultFormValue);
   const editMode = useSelector((state) => state.userInfo.editMode);
+    const [
+      DivisionID,
+      DistrictID,
+      DivisionID2,
+      DistrictID2,
+      permanentPoliceStationID,
+      sameAddress,
+      TransientPost,
+      TransientVill,
+      UserCode,
+      UserTypeID,
+    ] = watch([
+      "DivisionID",
+      "DistrictID",
+      "DivisionID2",
+      "DistrictID2",
+      "permanentPoliceStationID",
+      "sameAddress",
+      "TransientPost",
+      "TransientVill",
+      "UserCode",
+      "UserTypeID",
+    ]);
+  const {
+    data: codeSettings = [],
+    refetch,
+    isFetching,
+  } = useGetCodeSettingsQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
+
+  const { data: infoSettings = [] } = useGetSettingsQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
+
+ const { data: userCodeCheck = {} } = useGetUserCodeCheckQuery(UserTypeID, {
+   refetchOnFocus: true,
+   refetchOnMountOrArgChange: true,
+ });
+
+  const settingsArray = infoSettings?.data || [];
+  const dataGender = settingsArray.find((c) => c.ID === 28);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -49,40 +139,26 @@ const AddStudentForm = ({ pageTitle }) => {
     error,
   } = useSelector((state) => state.settings);
   const { token } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
-  const methods = useForm();
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    getValues,
-    reset,
-    formState: { errors },
-  } = methods;
 
-  // const [userType, setUserType] = useState([]);
-  const [userMainDetails, setUserMainDetails] = useState([]);
-  const [
-    DivisionID,
-    DistrictID,
-    DivisionID2,
-    DistrictID2,
-    permanentPoliceStationID,
-    sameAddress,
-    TransientPost,
-    TransientVill,
-  ] = watch([
-    "DivisionID",
-    "DistrictID",
-    "DivisionID2",
-    "DistrictID2",
-    "permanentPoliceStationID",
-    "sameAddress",
-    "TransientPost",
-    "TransientVill",
-  ]);
+
   const isSameAddressRef = useRef(false);
+
+  let userCodeData = null;
+  if (UserTypeID && codeSettings?.length) {
+    let existing = codeSettings.find(
+      (c) => Number(c.UserTypeID) === Number(UserTypeID)
+    );
+   const usercode = existing?.IDType === 2 ? null : existing?.Value;
+   const  usercodeData = userCodeCheck?.UserCode ? userCodeCheck?.UserCode : usercode;
+   userCodeData = existing?.IDType === 2 ? null : usercodeData;
+  }
+
+  // Set default GenderID when dataGender is available
+  useEffect(() => {
+    if (dataGender?.Action && !getValues("GenderID")) {
+      setValue("GenderID", dataGender.Action, { shouldValidate: true });
+    }
+  }, [dataGender, setValue, getValues]);
 
   useEffect(() => {
     if (editMode === 0) {
@@ -104,7 +180,7 @@ const AddStudentForm = ({ pageTitle }) => {
         }
       }
     }
-  }, [DivisionID, setValue, editMode]);
+  }, [DivisionID, setValue, editMode, dispatch, defaultData]);
 
   useEffect(() => {
     if (editMode === 0) {
@@ -123,11 +199,9 @@ const AddStudentForm = ({ pageTitle }) => {
         }
       }
     }
-  }, [DistrictID, setValue, editMode]);
+  }, [DistrictID, setValue, editMode, dispatch, defaultData]);
 
-  // permanent address End
-
-  //tempo adress start
+  // Temporary address logic
   useEffect(() => {
     if (editMode === 0) {
       if (!isSameAddressRef.current) {
@@ -155,7 +229,7 @@ const AddStudentForm = ({ pageTitle }) => {
         }
       }
     }
-  }, [DivisionID2, setValue, editMode]);
+  }, [DivisionID2, setValue, editMode, dispatch, defaultData, DistrictID]);
 
   useEffect(() => {
     if (editMode === 0) {
@@ -172,9 +246,6 @@ const AddStudentForm = ({ pageTitle }) => {
       if (DistrictID2 === Number(numberStrT.slice(0, 3))) {
         console.log("Both Are Same");
       } else {
-        console.log("Both Are Not Same");
-        console.log(DistrictID2);
-
         if (!isSameAddressRef.current) {
           setValue("TransientPoliceStationID", "");
           if (DistrictID2) {
@@ -185,59 +256,52 @@ const AddStudentForm = ({ pageTitle }) => {
         }
       }
     }
-  }, [DistrictID2, setValue, editMode]);
-  //tempo adress End
+  }, [
+    DistrictID2,
+    setValue,
+    editMode,
+    dispatch,
+    defaultData,
+    permanentPoliceStationID,
+  ]);
+
   useEffect(() => {
     isSameAddressRef.current = sameAddress;
-    // if (editMode === 0) {
     if (isSameAddressRef.current) {
       setValue("DivisionID2", DivisionID);
       setValue("DistrictID2", DistrictID);
       setValue("TransientPoliceStationID", permanentPoliceStationID);
-
-      // setValue("permanentPost", TransientPost)
-      // setValue("permanentVill", TransientVill)
       setValue("TransientPost", watch("permanentPost"));
       setValue("TransientVill", watch("permanentVill"));
     }
-    // }
   }, [
     sameAddress,
     setValue,
     DivisionID,
     DistrictID,
     permanentPoliceStationID,
-    TransientVill,
-    editMode,
+    watch,
   ]);
 
   useEffect(() => {
-    // dispatch({ type: "SET_PAGE_TITLE", payload: pageTitle });
-    // console.log(editMode);
-
     if (editMode === 2) {
       const formUserid = getValues("UserID");
       const actualUserId = defaultData.UserID;
-      if (formUserid != actualUserId) {
+      if (formUserid !== actualUserId) {
         dispatch(setEditMode(1));
         dispatch(fetchSingleUser(formUserid));
       }
     }
-    // else if(editMode === 0) {
-    // reset()
-    // }
-  }, []);
+  }, [dispatch, editMode, getValues, defaultData]);
 
   useEffect(() => {
     dispatch(fetchSettingsData());
-    console.log(editMode);
-
     if (editMode === 0) {
       reset({
         UserName: "",
         UserTypeID: "",
         UserCode: "",
-        GenderID: "",
+        GenderID: dataGender?.Action || "", // Initialize with dataGender if available
         FatherName: "",
         MotherName: "",
         DateOfBirth: "",
@@ -261,28 +325,10 @@ const AddStudentForm = ({ pageTitle }) => {
         TransientVill: "",
       });
     }
-  }, [dispatch]);
-
-  // useEffect(() => {
-  //   const dataFeatch = async () => {
-  //     try {
-  //       const data = await getUserType();
-  //       const transformedData = data.map(item => ({
-  //         id: String(item.ID),
-  //         value: item.TypeName
-  //       }));
-  //       setUserType(transformedData)
-  //     } catch (error) {
-  //       console.error('Error fetching data:', error);
-  //     }
-  //   }
-
-  //   dataFeatch();
-  // }, [])
+  }, [dispatch, editMode, reset, dataGender]);
 
   useEffect(() => {
     if (defaultData && editMode === 1) {
-      reset(defaultData);
       const numberStrP = defaultData.permanentPoliceStationID.toString();
       const numberStrT = defaultData.TransientPoliceStationID.toString();
 
@@ -292,19 +338,17 @@ const AddStudentForm = ({ pageTitle }) => {
         DistrictID: Number(numberStrP.slice(0, 3)),
         DivisionID2: Number(numberStrT.slice(0, 1)),
         DistrictID2: Number(numberStrT.slice(0, 3)),
-        sameAddress: numberStrP == numberStrT ? true : false,
+        sameAddress: numberStrP === numberStrT,
+        GenderID: defaultData.GenderID || dataGender?.Action || "", // Ensure GenderID is set
       };
 
-      const promises = [
+      Promise.all([
         dispatch(fetchDidata(defaultFormData.DivisionID)),
         dispatch(fetchDidata(defaultFormData.DivisionID2)),
         dispatch(fetchThanadata(defaultFormData.DistrictID)),
         dispatch(fetchThanadata(defaultFormData.DistrictID2)),
-      ];
-
-      Promise.all(promises)
+      ])
         .then(() => {
-          // console.log(defaultFormData);
           reset(defaultFormData);
           dispatch(setEditMode(2));
         })
@@ -312,26 +356,18 @@ const AddStudentForm = ({ pageTitle }) => {
           console.error("Error in dispatching actions:", err);
         });
     }
-  }, [defaultData, reset]);
+  }, [defaultData, editMode, dispatch, reset, dataGender]);
 
   if (status === "failed") {
     console.log(error);
   }
-  if (status === "succeeded") {
-    // console.log(district);
-    // console.log(DistrictID);
-    // console.log(thana);
-    // console.log(userType);
-  }
+
   const onSubmit = async (data) => {
     console.log(data);
-
     try {
-      console.log(editMode);
       if (editMode === 0) {
         const submitRes = await insertUserInfo(token, data);
         console.log(submitRes);
-
         navigate(0);
       } else if (editMode === 2) {
         const submitRes = await updateUserInfo(defaultData.UserID, data);
@@ -342,8 +378,10 @@ const AddStudentForm = ({ pageTitle }) => {
       console.error(err.message);
     }
   };
+
   const saveButton = "Save";
   const newButton = "New";
+
   return (
     <FormProvider {...methods}>
       <form
@@ -365,7 +403,7 @@ const AddStudentForm = ({ pageTitle }) => {
                 registerKey="UserTypeID"
                 valueField="ID"
                 nameField="TypeName"
-                require={"User Type Field is required!"}
+                require="User Type Field is required!"
                 labelColor="text-red-500"
               />
 
@@ -377,23 +415,26 @@ const AddStudentForm = ({ pageTitle }) => {
                 require="Dakhela is required!"
                 codeSetting={true}
                 labelColor="text-red-500"
+                defaultValue={userCodeData ? userCodeData : ""}
+                disable={userCodeData ? true : false}
               />
 
               <DefaultSelect
                 label="Gender"
                 options={gender}
                 registerKey="GenderID"
-                require="Gender Field is require"
+                require="Gender Field is required!" // Corrected typo in error message
                 nameField="GenderName"
                 valueField="ID"
                 labelColor="text-red-500"
+                defaultValue={dataGender?.Action || ""} // Pass default value explicitly
               />
 
               <DefaultInput
                 label="Name"
                 type="text"
                 registerKey="UserName"
-                placeholder={"Enter your name ..."}
+                placeholder="Enter your name ..."
                 require="Name is required!"
                 labelColor="text-red-500"
               />
@@ -402,13 +443,13 @@ const AddStudentForm = ({ pageTitle }) => {
                 label="পিতার নাম"
                 type="text"
                 registerKey="FatherName"
-                placeholder={"Enter your father name ..."}
+                placeholder="Enter your father name ..."
               />
               <DefaultInput
                 label="মাতার নাম"
                 type="text"
                 registerKey="MotherName"
-                placeholder={"Enter your mother name ..."}
+                placeholder="Enter your mother name ..."
               />
 
               <div className="flex gap-3 col-span-2 sm:col-auto">
@@ -417,7 +458,7 @@ const AddStudentForm = ({ pageTitle }) => {
                   registerKey="DateOfBirth"
                   require="Required!"
                   className="w-full"
-                  placeholder={"DD-MM-YYYY"}
+                  placeholder="DD-MM-YYYY"
                 />
                 <DefaultInput
                   label="বয়স"
@@ -433,7 +474,7 @@ const AddStudentForm = ({ pageTitle }) => {
                   label="NID/জন্ম নিবন্ধন নং"
                   type="text"
                   registerKey="NIDNO"
-                  placeholder={"Enter your NID No ..."}
+                  placeholder="Enter your NID No ..."
                 />
               </div>
 
@@ -445,7 +486,7 @@ const AddStudentForm = ({ pageTitle }) => {
                   type="text"
                   registerKey="Mobile1"
                   className="w-full"
-                  placeholder={"Enter your mobile number ..."}
+                  placeholder="Enter your mobile number ..."
                 />
                 <DefaultSelect
                   label="সম্পর্ক"
@@ -463,7 +504,7 @@ const AddStudentForm = ({ pageTitle }) => {
                   label="মোবাইল ২"
                   type="text"
                   registerKey="Mobile2"
-                  placeholder={"Enter your mobile number ..."}
+                  placeholder="Enter your mobile number ..."
                 />
                 <DefaultSelect
                   label="সম্পর্ক"
@@ -480,7 +521,7 @@ const AddStudentForm = ({ pageTitle }) => {
                 label="ই-মেইল"
                 type="email"
                 registerKey="Email"
-                placeholder={"Enter your email address ..."}
+                placeholder="Enter your email address ..."
               />
 
               <DefaultSelect
@@ -537,13 +578,13 @@ const AddStudentForm = ({ pageTitle }) => {
                 label="ডাক"
                 type="text"
                 registerKey="permanentPost"
-                placeholder={"Enter your post office ..."}
+                placeholder="Enter your post office ..."
               />
               <DefaultInput
                 label="গ্রাম"
                 type="text"
                 registerKey="permanentVill"
-                placeholder={"Enter your village ..."}
+                placeholder="Enter your village ..."
               />
             </div>
           </div>
@@ -594,13 +635,13 @@ const AddStudentForm = ({ pageTitle }) => {
                 label="ডাক"
                 type="text"
                 registerKey="TransientPost"
-                placeholder={"Enter your post office ..."}
+                placeholder="Enter your post office ..."
               />
               <DefaultInput
                 label="গ্রাম"
                 type="text"
                 registerKey="TransientVill"
-                placeholder={"Enter your village ..."}
+                placeholder="Enter your village ..."
               />
             </div>
             <div className="flex gap-3">
@@ -613,4 +654,5 @@ const AddStudentForm = ({ pageTitle }) => {
     </FormProvider>
   );
 };
+
 export default AddStudentForm;
