@@ -83,6 +83,7 @@ import SelectedPerStudentFee from "../pages/SelectedPerStudentFee";
 import AllMadrasah from "../pages/AllMadrasah";
 import RFIDCard from "../pages/RFIDCard";
 import OwenGuide from "./OwenGuide";
+import BoardExamName from "../pages/BoardExamName";
 
 const router = createBrowserRouter([
   {
@@ -517,6 +518,33 @@ const router = createBrowserRouter([
               },
             ],
           },
+
+          {
+            path: "board-exam",
+            children: [
+              {
+                index: true,
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.certificate}
+                  // >
+                  // </RequirePermission>
+                  <MadrasahBoardInfo pageTitle="Board Exam" />
+                ),
+              },
+              {
+                path: "name",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.gate_pass_leave}
+                  // >
+                    <BoardExamName pageTitle="Board Exam Name" />
+                  // </RequirePermission>
+                ),
+              },
+            ],
+          },
+
           {
             path: "darul-ikama",
             children: [

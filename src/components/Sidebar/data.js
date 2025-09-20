@@ -257,8 +257,19 @@ export const menuData = [
     id: "6",
     name: "Board Exam",
     route: "/board-exam",
-    icon: "LiaSchoolSolid",
-    subMenu: [],
+    icon: "UniversityIcon",
+    subMenu: [
+      {
+        id: "1",
+        name: "Madrasah Board Info",
+        route: "/board-exam",
+      },
+      {
+        id: "2",
+        name: "Board Exam Name",
+        route: "/board-exam/name",
+      },
+    ],
   },
   {
     id: "7",

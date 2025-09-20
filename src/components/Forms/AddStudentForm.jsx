@@ -58,6 +58,7 @@ const AddStudentForm = ({ pageTitle }) => {
       TransientPost: "",
       TransientVill: "",
     },
+    mode: "onTouched"
   });
   const {
     register,
@@ -427,7 +428,7 @@ const AddStudentForm = ({ pageTitle }) => {
                 nameField="GenderName"
                 valueField="ID"
                 labelColor="text-red-500"
-                defaultValue={dataGender?.Action || ""} // Pass default value explicitly
+                // defaultValue={dataGender?.Action || ""} // Pass default value explicitly
               />
 
               <DefaultInput

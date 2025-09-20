@@ -84,7 +84,7 @@ const TypeOfVacationForm = ({ userId }) => {
             require={translate("Vacation is required")}
             type="text"
             placeholder={translate("Enter type of vacation") + " ..."}
-            label={translate("Type of vacation") + " :"}
+            label={translate("Type of vacation")}
           />
         </div>
         <Button

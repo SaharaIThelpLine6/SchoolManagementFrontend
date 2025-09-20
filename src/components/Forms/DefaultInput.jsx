@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 import bnBijoy2Unicode from "../../utils/conveter";
@@ -14,17 +14,19 @@ const DefaultInput = ({
   require = false,
   disable = false,
   unicode = false,
-  labelPosition = "top", // 'top' or 'left'
-  validate, // ✅ নতুন প্রপস
-  defaultValue = "", // ✅ নতুন প্রপস
+  labelPosition = "top",
+  validate,
+  defaultValue = "",
+  showError = false, // নতুন prop যোগ করা হয়েছে
 }) => {
   const {
     register,
     setValue,
     control,
-    formState: { errors },
+    formState: { errors, touchedFields, isSubmitted },
   } = useFormContext();
   const translate = useTranslate();
+  const [isTouched, setIsTouched] = useState(false);
 
   const handleOpenModal = useCallback(() => {
     showModal("User Code Setting", "CODE_SETTING");
@@ -36,7 +38,7 @@ const DefaultInput = ({
   // ✅ প্রথমবারে defaultValue সেট করে দেবে
   useEffect(() => {
     if (defaultValue !== undefined && defaultValue !== null) {
-      setValue(registerKey, defaultValue, { shouldValidate: true });
+      setValue(registerKey, defaultValue, { shouldValidate: false });
     }
   }, [defaultValue, registerKey, setValue]);
 
@@ -49,6 +51,9 @@ const DefaultInput = ({
       }
     }
   }, [currentValue, unicode, registerKey, setValue]);
+
+  // শুধুমাত্র যখন ফিল্ড touched হয়েছে অথবা form submit করা হয়েছে তখন error show করবে
+  const shouldShowError = showError || isSubmitted || touchedFields[registerKey] || isTouched;
 
   return (
     <div
@@ -92,28 +97,29 @@ const DefaultInput = ({
                       focus:border-custom-focus active:border-custom-focus
                       disabled:cursor-not-allowed disabled:bg-slate-200
                       ${
-                        errors[registerKey]
+                        shouldShowError && errors[registerKey]
                           ? "placeholder:text-red-400 border-red-400"
                           : ""
                       }`}
           {...register(registerKey, {
-            required: require,
+            required: require ? "এই ফিল্ডটি প্রয়োজনীয়" : false,
             ...(type === "number" && {
               validate: (value) =>
-                isNaN(Number(value)) ? "Please enter a valid number" : true,
+                isNaN(Number(value)) ? "দয়া করে একটি বৈধ সংখ্যা লিখুন" : true,
             }),
             ...(type === "phone" && {
               pattern: {
                 value: /^\d{11}$/,
-                message: "Phone number must be exactly 11 digits",
+                message: "ফোন নম্বর অবশ্যই ১১ ডিজিটের হতে হবে",
               },
             }),
-            ...(validate && { validate }), // ✅ কাস্টম ভ্যালিডেশন এখানে
+            ...(validate && { validate }),
           })}
           disabled={disable}
+          onBlur={() => setIsTouched(true)} // ইউজার যখন ফিল্ড থেকে বের হয় তখন touched সেট হয়
         />
 
-        {errors[registerKey] && (
+        {shouldShowError && errors[registerKey] && (
           <p className="text-red-500 text-sm mt-1">
             {errors[registerKey].message}
           </p>
