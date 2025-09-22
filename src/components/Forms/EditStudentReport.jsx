@@ -54,24 +54,24 @@ const EditStudentReport = ({ id }) => {
           </div>
           <DefaultInput
             registerKey={"StudentName"}
-            label={`${translate("Student Name")}: `}
+            label="Student Name"
             disable={true}
             aria-label={translate("Student Name")}
           />
           <DefaultInput
             registerKey={"FatherName"}
-            label={`${translate("Father Name")}: `}
+            label="Father Name"
             disable={true}
             aria-label={translate("Father Name")}
           />
           <DefaultInput
             registerKey={"ClassName"}
-            label={`${translate("Class")}: `}
+            label="Class"
             disable={true}
             aria-label={translate("Class")}
           />
           <DatePickerOne
-            dateCalender={`${translate("Date")}: `}
+            dateCalender="Date"
             placeholder={""}
             registerKey={"Date"}
             require={"Date is required"}
@@ -103,7 +103,6 @@ const EditStudentReport = ({ id }) => {
         <div className="flex gap-4">
           <button
             type="button"
-       
             className="inline-block text-center bg-blue-500 text-white py-2 md:py-3 px-6 rounded-md hover:bg-blue-600 transition-colors font-medium text-sm md:text-base"
           >
             View Report

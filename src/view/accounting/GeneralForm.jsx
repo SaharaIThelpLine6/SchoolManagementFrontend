@@ -146,7 +146,7 @@ const GeneralForm = () => {
       <FormProvider {...methods}>
         <div className="grid grid-cols-3 gap-4 mb-4">
           <DefaultSelect
-            label={translate("Fund") + " :"}
+            label="Fund"
             options={fundNamesData ?? []}
             valueField="FundID"
             nameField="FundName"
@@ -155,7 +155,7 @@ const GeneralForm = () => {
             require={translate("Fund is required!")}
           />
           <DefaultSelect
-            label={translate("Deposit/Cost") + " :"}
+            label="Deposit/Cost"
             options={chartOfAccountData ?? []}
             valueField="CAID"
             nameField="ChartOfAcName"
@@ -176,7 +176,7 @@ const GeneralForm = () => {
                 require={translate("General name is required")}
                 type="text"
                 placeholder={translate("Enter General name") + " ..."}
-                label={translate("General Name") + " :"}
+                label="General Name"
               />
             </div>
             <div className="flex gap-3">

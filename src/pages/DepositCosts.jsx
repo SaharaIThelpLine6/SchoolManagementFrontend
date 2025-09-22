@@ -450,7 +450,7 @@ const DepositCosts = ({ pageTitle }) => {
             <div className="flex items-end gap-3">
               <div className="flex-1">
                 <DefaultSelect
-                  label={translate("Fund") + " :"}
+                  label="Fund"
                   options={fundNamesData ?? []}
                   valueField="FundID"
                   nameField="FundName"
@@ -470,7 +470,7 @@ const DepositCosts = ({ pageTitle }) => {
             </div>
 
             <DefaultSelect
-              label={translate("Deposit/Cost") + " :"}
+              label="Deposit/Cost"
               options={chartOfAccountData ?? []}
               valueField="CAID"
               nameField="ChartOfAcName"
@@ -482,7 +482,7 @@ const DepositCosts = ({ pageTitle }) => {
             <div className="flex items-end gap-3">
               <div className="flex-1">
                 <DefaultSelect
-                  label={translate("General Ledger") + " :"}
+                  label="General Ledger"
                   options={generalLedgersData ?? []}
                   valueField="GLID"
                   nameField="GlName"
@@ -503,7 +503,7 @@ const DepositCosts = ({ pageTitle }) => {
             </div>
 
             <DefaultSelect
-              label={translate("Sectors") + " :"}
+              label="Sectors"
               options={gSLData ?? []}
               valueField="SLID"
               nameField="SlName"
@@ -512,31 +512,31 @@ const DepositCosts = ({ pageTitle }) => {
               require={"Sectors is required!"}
             />
             <DefaultInput
-              label={translate("Voucher/Bill") + " :"}
+              label="Voucher/Bill"
               type="text"
               registerKey={"VoucherNo"}
               disable
             />
             <DefaultInput
-              label={translate("Ledger No") + " :"}
+              label="Ledger No"
               type="number"
               registerKey={"BookNo"}
               placeholder={translate("Enter Book Id ...")}
               require={"BookNo is required!"}
             />
             <DatePickerOne
-              dateCalender={`${translate("English Date")}: `}
+              dateCalender="English Date"
               placeholder="Enter date"
               registerKey="TransactionDateEng"
               require="English date is required!"
             />
             <BanglaDatePicker
-              dateCalender={`${translate("Bangla Date")}: `}
+              dateCalender="Bangla Date"
               placeholder="Enter date"
               registerKey="TransactionBanglaDate"
             />
             <DefaultSelect
-              label={translate("Payment System") + " :"}
+              label="Payment System"
               nameField={"GlName"}
               registerKey="paymentGLID"
               valueField={"GLID"}
@@ -557,7 +557,7 @@ const DepositCosts = ({ pageTitle }) => {
             />
             <div className="col-span-2">
               <DefaultInput
-                label={translate("Payment Comments") + " :"}
+                label="Payment Comments"
                 placeholder={translate("Enter comments")}
                 registerKey="LParticulars"
                 require={"Payment comments is required!"}
@@ -567,7 +567,7 @@ const DepositCosts = ({ pageTitle }) => {
             </div>
             <div className="col-span-2">
               <DefaultInput
-                label={translate("Description") + " :"}
+                label="Description"
                 placeholder={translate("Enter description")}
                 registerKey="Particulars"
                 require={"Description is required!"}
@@ -576,7 +576,7 @@ const DepositCosts = ({ pageTitle }) => {
               />
             </div>
             <DefaultInput
-              label={translate("Amount") + " :"}
+              label="Amount"
               type="text"
               registerKey={"Amount"}
               placeholder={translate("Enter Amount number ...")}

@@ -23,6 +23,7 @@ export const feeCollectionSlice = createApi({
     "StudentFeeSettings",
     "SelectedStudentPerFee",
     "GeneralLedgersByFundAndCaids",
+    "FeeLand",
   ],
   endpoints: (builder) => ({
     getFees: builder.query({
@@ -147,6 +148,14 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["StudentFeeSettings"],
     }),
+    postFeeLand: builder.mutation({
+      query: (data) => ({
+        url: "insert_fee_land",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["FeeLand"],
+    }),
     postGeneralLedgersByFundAndCaids: builder.mutation({
       query: (data) => ({
         url: "insert_general_ledger",
@@ -187,6 +196,10 @@ export const feeCollectionSlice = createApi({
     getTransactionOrders: builder.query({
       query: ({ id }) => `transaction_orders/${id}`,
       providesTags: ["TransactionOrders"],
+    }),
+    getFeeLandByAdmission: builder.query({
+      query: ({ id }) => `fee_land_by_admission_id/${id}`,
+      providesTags: ["FeeLand"],
     }),
     getReceiptNumber: builder.query({
       query: ({ fundid, caid }) => `receipt_number/${fundid}/${caid}`,
@@ -317,5 +330,7 @@ export const {
   useGetGeneralLedgersByFundAndCaidsQuery,
   usePostGeneralLedgersByFundAndCaidsMutation,
   useUpdateGeneralLedgersByFundAndCaidsMutation,
-  useDeleteGeneralLedgersByFundAndCaidsMutation
+  useDeleteGeneralLedgersByFundAndCaidsMutation,
+  usePostFeeLandMutation,
+  useGetFeeLandByAdmissionQuery
 } = feeCollectionSlice;

@@ -89,7 +89,7 @@ const UserNamePasswordChangeModal = ({ changeType = "username", id }) => {
             <>
               <DefaultInput
                 type="text"
-                label="New user name :"
+                label="New user name"
                 placeholder="Enter new user name"
                 registerKey="newUserName"
                 require="User name is required"
@@ -97,7 +97,7 @@ const UserNamePasswordChangeModal = ({ changeType = "username", id }) => {
 
               <DefaultInput
                 type="text"
-                label="Confirm new user name :"
+                label="Confirm new user name"
                 placeholder="Confirm new user name"
                 registerKey="confirmNewUserName"
                 require="Please confirm your new user name"
@@ -111,7 +111,7 @@ const UserNamePasswordChangeModal = ({ changeType = "username", id }) => {
               {permissionType === 6 && (
                 <DefaultInput
                   type="password"
-                  label="Current Password :"
+                  label="Current Password"
                   placeholder="Enter current password"
                   registerKey="currentPassword"
                   require="Current password is required"
@@ -120,7 +120,7 @@ const UserNamePasswordChangeModal = ({ changeType = "username", id }) => {
 
               <DefaultInput
                 type="password"
-                label="New Password :"
+                label="New Password"
                 placeholder="Enter new password"
                 registerKey="newPassword"
                 require="New password is required"
@@ -128,7 +128,7 @@ const UserNamePasswordChangeModal = ({ changeType = "username", id }) => {
 
               <DefaultInput
                 type="password"
-                label="Confirm new password :"
+                label="Confirm new password"
                 placeholder="Confirm new password"
                 registerKey="confirmNewPassword"
                 require="Please confirm your new password"

@@ -84,7 +84,7 @@ const DesignationForm = ({ userId = null }) => {
             require={translate("Designation is required")}
             type="text"
             placeholder={translate("Enter new designation") + " ..."}
-            label={translate("Designation") + " :"}
+            label="Designation"
           />
         </div>
         <DefaultGreen

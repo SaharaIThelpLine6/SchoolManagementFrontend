@@ -22,7 +22,7 @@ const Textarea = ({
         htmlFor={registerKey}
         className="mb-1 block text-black font-SolaimanLipi"
       >
-        {translate(label)}
+        {translate(label)} :
       </label>
 
       <textarea

@@ -112,6 +112,7 @@ const DefaultModal = () => {
                 {modalType === "EDIT_STUDENTVACATION" && (
                   <EditStudentVacationForm userId={id} />
                 )}
+
                 {modalType === "STUDENT_FILTER" && <StudentFilterModal />}
                 {modalType === "USER_FILTER" && <UserFilterModal />}
                 {modalType === "SELECTED_PERSTUDENT_FEE_FILTER" && (

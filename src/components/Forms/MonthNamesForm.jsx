@@ -162,79 +162,78 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
   };
 
   return (
-
     <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(onSubmit)} className="font-lato">
+        <div className="px-6 text-sm">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            {months.map((month, index) => {
+              const fieldName = `monthNames.${index}`;
+              const fieldError = errors?.monthNames?.[index];
 
-    <form onSubmit={handleSubmit(onSubmit)} className="font-lato">
-      <div className="px-6 text-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {months.map((month, index) => {
-            const fieldName = `monthNames.${index}`;
-            const fieldError = errors?.monthNames?.[index];
+              return (
+                <Input
+                  key={month}
+                  label={`${translate(month)}:`}
+                  placeholder={translate(`Enter name or number for ${month}`)}
+                  type="text"
+                  {...register(`monthNames.${index}`, {
+                    required: translate(month + " " + "name is required"),
+                  })}
+                  helperText={fieldError?.message}
+                  error={!!fieldError}
+                  onKeyDown={(e) => {
+                    if (e.key === "Tab" || e.key === "Enter") {
+                      const inputVal = e.target.value.trim();
+                      const convertedVal = autoConvertMonthName(inputVal);
+                      if (convertedVal) {
+                        e.preventDefault();
+                        setValue(fieldName, convertedVal);
+                        e.target.value = convertedVal;
 
-            return (
-              <Input
-                key={month}
-                label={`${translate(month)}:`}
-                placeholder={translate(`Enter name or number for ${month}`)}
-                type="text"
-                {...register(`monthNames.${index}`, {
-                  required: translate(month + " " + "name is required"),
-                })}
-                helperText={fieldError?.message}
-                error={!!fieldError}
-                onKeyDown={(e) => {
-                  if (e.key === "Tab" || e.key === "Enter") {
-                    const inputVal = e.target.value.trim();
-                    const convertedVal = autoConvertMonthName(inputVal);
-                    if (convertedVal) {
-                      e.preventDefault();
-                      setValue(fieldName, convertedVal);
-                      e.target.value = convertedVal;
-
-                      setTimeout(() => {
-                        const formElements = e.target.form.elements;
-                        const i = [...formElements].indexOf(e.target);
-                        const nextElement =
-                          formElements[i + 1] || formElements[0];
-                        nextElement.focus();
-                      }, 0);
+                        setTimeout(() => {
+                          const formElements = e.target.form.elements;
+                          const i = [...formElements].indexOf(e.target);
+                          const nextElement =
+                            formElements[i + 1] || formElements[0];
+                          nextElement.focus();
+                        }, 0);
+                      }
                     }
-                  }
-                }}
-              />
-            );
-          })}
-          <DefaultSelect
-            options={academicSession}
-            require={translate("Session is required")}
-            nameField={"SessionName"}
-            valueField={"SessionID"}
-            registerKey={"SessionID"}
-            type={"number"}
-            label={translate("Session" + ":")}
-            disabled={isEdit ? true : false}
-          />
+                  }}
+                />
+              );
+            })}
+            <DefaultSelect
+              options={academicSession}
+              require={translate("Session is required")}
+              nameField={"SessionName"}
+              valueField={"SessionID"}
+              registerKey={"SessionID"}
+              type={"number"}
+              label="Session"
+              disabled={isEdit ? true : false}
+            />
 
-          <DefaultSelect
-            options={classList}
-            require={translate("Class is required")}
-            nameField={"EnglishClass"}
-            valueField={"ClassID"}
-            registerKey={"ClassID"}
-            type={"number"}
-            label={translate("Class" + ":")}
-            disabled={isEdit ? true : false}
-          />
-        </div>
+            <DefaultSelect
+              options={classList}
+              require={translate("Class is required")}
+              nameField={"EnglishClass"}
+              valueField={"ClassID"}
+              registerKey={"ClassID"}
+              type={"number"}
+              label="Class"
+              disabled={isEdit ? true : false}
+            />
+          </div>
 
-        <div className="flex justify-start mt-6">
-          <Button type="submit">{translate(isEdit ? "Update" : "Save")}</Button>
+          <div className="flex justify-start mt-6">
+            <Button type="submit">
+              {translate(isEdit ? "Update" : "Save")}
+            </Button>
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
     </FormProvider>
-
   );
 };
 

@@ -237,7 +237,7 @@ const FeeSetting = ({ pageTitle }) => {
                   valueField={"SessionID"}
                   registerKey={"SessionID"}
                   type={"number"}
-                  label={translate("Session") + " :"}
+                  label="Session"
                 />
                 <DefaultSelect
                   options={subClassData || []}
@@ -245,7 +245,7 @@ const FeeSetting = ({ pageTitle }) => {
                   nameField={"SubClass"}
                   valueField={"SubClassID"}
                   registerKey={"SubClassID"}
-                  label={translate("Class/Jamaat") + " :"}
+                  label="Class/Jamaat"
                   unicode={true}
                 />
                 <DefaultSelect
@@ -254,7 +254,7 @@ const FeeSetting = ({ pageTitle }) => {
                   nameField={"SlName"}
                   valueField={"SLID"}
                   registerKey={"SLID"}
-                  label={translate("Sub Ledger") + " :"}
+                  label="Sub Ledger"
                   unicode={true}
                 />
               </div>
