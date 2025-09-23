@@ -52,7 +52,7 @@ const DefaultSearchInput = ({
               : "mb-1 block"
           }`}
         >
-          {translate(label)}
+          {translate(label)} :
         </label>
       )}
 

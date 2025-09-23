@@ -223,7 +223,7 @@ const DoesList = ({ pageTitle }) => {
           {/* Top Section - 4 responsive columns */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 my-3">
             <DefaultSelect
-              label={translate("Session") + " :"}
+              label="Session"
               options={sessionData ?? []}
               valueField="SessionID"
               nameField="SessionName"
@@ -231,7 +231,7 @@ const DoesList = ({ pageTitle }) => {
               unicode={true}
             />
             <DefaultSelect
-              label={translate("SubClass") + " :"}
+              label="SubClass"
               options={subClassListData ?? []}
               valueField="SubClassID"
               nameField="SubClass"

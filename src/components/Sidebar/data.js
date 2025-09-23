@@ -256,18 +256,33 @@ export const menuData = [
   {
     id: "6",
     name: "Board Exam",
-    route: "/board-exam",
+    route: "/board-info",
     icon: "UniversityIcon",
     subMenu: [
       {
         id: "1",
         name: "Madrasah Board Info",
-        route: "/board-exam",
+        route: "/board-info",
       },
       {
         id: "2",
         name: "Board Exam Name",
-        route: "/board-exam/name",
+        route: "/board-info/exam-name",
+      },
+      {
+        id: "3",
+        name: "Board Name",
+        route: "/board-info/name",
+      },
+      {
+        id: "4",
+        name: "Board Center Name",
+        route: "/board-info/center-name",
+      },
+      {
+        id: "5",
+        name: "Markas and Registration Fee Determine",
+        route: "/board-info/maskas-registration-fee-determine",
       },
     ],
   },

@@ -84,6 +84,8 @@ import AllMadrasah from "../pages/AllMadrasah";
 import RFIDCard from "../pages/RFIDCard";
 import OwenGuide from "./OwenGuide";
 import BoardExamName from "../pages/BoardExamName";
+import BoardNames from "../pages/BoardNames";
+import BoardCenterName from "../pages/BoardCenterName";
 
 const router = createBrowserRouter([
   {
@@ -520,7 +522,7 @@ const router = createBrowserRouter([
           },
 
           {
-            path: "board-exam",
+            path: "board-info",
             children: [
               {
                 index: true,
@@ -533,12 +535,42 @@ const router = createBrowserRouter([
                 ),
               },
               {
+                path: "exam-name",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.gate_pass_leave}
+                  // >
+                  <BoardExamName pageTitle="Board Exam Name" />
+                  // </RequirePermission>
+                ),
+              },
+              {
                 path: "name",
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.gate_pass_leave}
                   // >
-                    <BoardExamName pageTitle="Board Exam Name" />
+                  <BoardNames pageTitle="Board Name" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: "center-name",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.gate_pass_leave}
+                  // >
+                  <BoardCenterName pageTitle="Board Name" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: "maskas-registration-fee-determine",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.gate_pass_leave}
+                  // >
+                  <BoardCenterName pageTitle="Board Name" />
                   // </RequirePermission>
                 ),
               },

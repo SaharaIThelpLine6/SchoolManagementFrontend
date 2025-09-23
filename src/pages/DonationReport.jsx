@@ -131,7 +131,7 @@ const DonationReport = ({ pageTitle }) => {
             >
               {/* Report Select - Always shown */}
               <DefaultSelect
-                label={translate("Report") + ":"}
+                label="Report"
                 nameField="ReportName"
                 registerKey="ReportID"
                 valueField="ReportID"
@@ -152,7 +152,7 @@ const DonationReport = ({ pageTitle }) => {
               )}{" "}
               {shouldShowFields("AdmissionFeeStatus") && (
                 <DefaultSelect
-                  label={translate("Admission Fee Status") + " :"}
+                  label="Admission Fee Status"
                   nameField="ResidentialName"
                   registerKey="RDID"
                   valueField="RDID"
@@ -164,7 +164,7 @@ const DonationReport = ({ pageTitle }) => {
               {shouldShowFields("Address") && (
                 <>
                   <DefaultSelect
-                    label={translate("Division") + " :"}
+                    label="Division"
                     nameField="DivisionName"
                     registerKey="DivisionID"
                     valueField="DivisionID"
@@ -173,7 +173,7 @@ const DonationReport = ({ pageTitle }) => {
                     unicode={true}
                   />
                   <DefaultSelect
-                    label={translate("District") + " :"}
+                    label="District"
                     nameField="DistrictName"
                     registerKey="DistrictID"
                     valueField="DistrictID"
@@ -182,7 +182,7 @@ const DonationReport = ({ pageTitle }) => {
                     unicode={true}
                   />
                   <DefaultSelect
-                    label={translate("Police Station") + " :"}
+                    label="Police Station"
                     nameField="PoliceStationName"
                     registerKey="PoliceStationID"
                     valueField="PoliceStationID"
@@ -195,7 +195,7 @@ const DonationReport = ({ pageTitle }) => {
               {shouldShowFields("FeeStatus") && (
                 <div className="">
                   <DefaultRadio
-                    label={translate("Fee Status") + " :"}
+                    label="Fee Status"
                     options={feeStatus}
                     registerKey="IsActive"
                     require={
@@ -223,13 +223,13 @@ const DonationReport = ({ pageTitle }) => {
               {shouldShowFields("Date") && (
                 <div className="flex flex-row justify-between gap-3">
                   <DatePickerOne
-                    dateCalender={`${translate("Form")}: `}
+                    dateCalender="Form"
                     placeholder="Enter date"
                     registerKey="VacationDateFrom"
                     require="Date Required"
                   />
                   <DatePickerOne
-                    dateCalender={`${translate("to")}: `}
+                    dateCalender="to"
                     placeholder="Enter date"
                     registerKey="VacationDateTo"
                     require="Date Required"
