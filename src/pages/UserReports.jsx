@@ -120,7 +120,7 @@ const UserReports = ({ pageTitle }) => {
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
               <DefaultSelect
-                label={translate("Report") + ":"}
+                label="Report"
                 nameField="ReportName"
                 registerKey="ReportID"
                 valueField="ReportID"
@@ -135,7 +135,7 @@ const UserReports = ({ pageTitle }) => {
 
               {showUserType && (
                 <DefaultSelect
-                  label={translate("User Types") + ":"}
+                  label="User Types"
                   nameField="TypeName"
                   registerKey="UserTypeID"
                   valueField="ID"
@@ -148,7 +148,7 @@ const UserReports = ({ pageTitle }) => {
               )}
 
               <DefaultSelect
-                label={translate("Gender") + ":"}
+                label="Gender"
                 nameField="ReportName"
                 registerKey="GenderID"
                 valueField="GenderID"
@@ -180,13 +180,13 @@ const UserReports = ({ pageTitle }) => {
                     registerKey="StartID"
                     type="text"
                     placeholder={translate("Enter start user id") + " ..."}
-                    label={translate("Start User ID") + ":"}
+                    label="Start User ID"
                   />
                   <DefaultInput
                     registerKey="EndID"
                     type="text"
                     placeholder={translate("Enter end user id") + " ..."}
-                    label={translate("End User ID") + ":"}
+                    label="End User ID"
                   />
                 </div>
               )}

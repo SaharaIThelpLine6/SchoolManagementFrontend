@@ -292,7 +292,7 @@ const UserImage = ({ pageTitle }) => {
                       require={translate("ID is required")}
                       type="text"
                       placeholder={translate("Enter type of id") + " ..."}
-                      label={translate("ID") + " :"}
+                      label="ID"
                       disable
                     />
                     <DefaultInput
@@ -300,7 +300,7 @@ const UserImage = ({ pageTitle }) => {
                       require={translate("UserCode is required")}
                       type="text"
                       placeholder={translate("Enter type of userCode") + " ..."}
-                      label={translate("Code") + " :"}
+                      label="Code"
                       disable
                     />
                     <DefaultInput
@@ -308,7 +308,7 @@ const UserImage = ({ pageTitle }) => {
                       require={translate("UserName is required")}
                       type="text"
                       placeholder={translate("Enter type of userName") + " ..."}
-                      label={translate("Name") + " :"}
+                      label="Name"
                       disable={true}
                       unicode={true}
                     />

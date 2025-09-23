@@ -173,7 +173,7 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
               return (
                 <Input
                   key={month}
-                  label={`${translate(month)}:`}
+                  label={`${translate(month)}`}
                   placeholder={translate(`Enter name or number for ${month}`)}
                   type="text"
                   {...register(`monthNames.${index}`, {

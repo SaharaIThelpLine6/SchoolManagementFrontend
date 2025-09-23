@@ -166,7 +166,7 @@ const Setting = () => {
                       registerKey={field.key}
                       type={field.type || "text"}
                       placeholder={translate(`Enter ${field.label}`) + " ..."}
-                      label={translate(field.label) + " :"}
+                      label={translate(field.label)}
                     />
                   ))}
                 </React.Fragment>
@@ -196,7 +196,7 @@ const Setting = () => {
                         <DefaultInput
                           registerKey={`${role}Name`}
                           type="text"
-                          label={translate(`${role} Name`) + " :"}
+                          label={translate(`${role} Name`)}
                           placeholder={translate(`Enter ${role} Name`) + " ..."}
                         />
                       </div>
