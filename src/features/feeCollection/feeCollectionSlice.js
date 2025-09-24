@@ -24,6 +24,7 @@ export const feeCollectionSlice = createApi({
     "SelectedStudentPerFee",
     "GeneralLedgersByFundAndCaids",
     "FeeLand",
+    "SubGeneralLedger",
   ],
   endpoints: (builder) => ({
     getFees: builder.query({
@@ -287,6 +288,36 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["SelectedStudentPerFee"],
     }),
+
+    // Sub General Ledger
+    getSubGeneralLedgers: builder.query({
+      query: ({ fundId, caId, glid }) =>
+        `subledger_by_glid/${fundId}/${caId}/${glid}`,
+      providesTags: ["SubGeneralLedger"],
+    }),
+    postSubGeneralLedger: builder.mutation({
+      query: (data) => ({
+        url: "insert_subsidiary_ledger",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["SubGeneralLedger"],
+    }),
+    updateSubGeneralLedger: builder.mutation({
+      query: ({ SlName, slId }) => ({
+        url: `update_subsidiary_ledger/${slId}`,
+        method: "PUT",
+        body: { SlName },
+      }),
+      invalidatesTags: ["SubGeneralLedger"],
+    }),
+    deleteSubGeneralLedger: builder.mutation({
+      query: (slId) => ({
+        url: `/delete_subsidiary_ledger/${slId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["SubGeneralLedger"],
+    }),
   }),
 });
 
@@ -332,5 +363,11 @@ export const {
   useUpdateGeneralLedgersByFundAndCaidsMutation,
   useDeleteGeneralLedgersByFundAndCaidsMutation,
   usePostFeeLandMutation,
-  useGetFeeLandByAdmissionQuery
+  useGetFeeLandByAdmissionQuery,
+
+  // Sub general ledger
+  useGetSubGeneralLedgersQuery,
+  usePostSubGeneralLedgerMutation,
+  useUpdateSubGeneralLedgerMutation,
+  useDeleteSubGeneralLedgerMutation,
 } = feeCollectionSlice;

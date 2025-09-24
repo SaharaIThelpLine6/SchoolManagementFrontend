@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 import { toast } from "react-toastify";
@@ -6,27 +6,27 @@ import { toast } from "react-toastify";
 import DefaultInput from "../../components/Forms/DefaultInput";
 import Button from "../../components/Button/Button";
 import {
-  useDeleteGeneralLedgersByFundAndCaidsMutation,
+  useDeleteSubGeneralLedgerMutation,
   useGetChartOFAccountQuery,
   useGetFundNamesQuery,
   useGetGeneralLedgersByFundAndCaidsQuery,
-  usePostGeneralLedgersByFundAndCaidsMutation,
-  useUpdateGeneralLedgersByFundAndCaidsMutation,
+  useGetSubGeneralLedgersQuery,
+  usePostSubGeneralLedgerMutation,
+  useUpdateSubGeneralLedgerMutation,
 } from "../../features/feeCollection/feeCollectionSlice";
 import SortableTable from "../../components/Tables/SortableTable";
 import EditButton from "../../components/Button/EditButton";
 import DeleteButton from "../../components/Button/DeleteButton";
 import bnBijoy2Unicode from "../../utils/conveter";
 import DefaultSelect from "../../components/Forms/DefaultSelect";
-import { hideModal, showModal } from "../../utils/ModalControlar";
 
-const GeneralForm = () => {
+const SubGeneralForm = () => {
   const translate = useTranslate();
   const methods = useForm();
   const { reset, watch, resetField, setValue } = methods;
 
   // Watch Fund & Chart Account
-  const [FundID, CAID] = watch(["FundID", "CAID"]);
+  const [FundID, CAID, GLID] = watch(["FundID", "CAID", "GLID"]);
 
   // Queries
   const { data: fundNamesData } = useGetFundNamesQuery();
@@ -38,14 +38,22 @@ const GeneralForm = () => {
         skip: !FundID || !CAID,
       }
     );
+  const { data: subGeneralLedgersData, refetch: subGLRefetch } =
+    useGetSubGeneralLedgersQuery(
+      { fundId: FundID, caId: CAID, glid: GLID },
+      {
+        skip: !GLID || !CAID || !GLID,
+      }
+    );
+
 
   // Mutations
-  const [postGeneral, { isLoading: isCreating }] =
-    usePostGeneralLedgersByFundAndCaidsMutation();
-  const [updateLedger, { isLoading: isUpdating }] =
-    useUpdateGeneralLedgersByFundAndCaidsMutation();
-  const [deleteLedger, { isLoading: isDeleting }] =
-    useDeleteGeneralLedgersByFundAndCaidsMutation();
+  const [postSubGeneral, { isLoading: isCreating }] =
+    usePostSubGeneralLedgerMutation();
+  const [updateSubGeneral, { isLoading: isUpdating }] =
+    useUpdateSubGeneralLedgerMutation();
+  const [deleteSubGeneral, { isLoading: isDeleting }] =
+    useDeleteSubGeneralLedgerMutation();
 
   const [showForm, setShowForm] = useState(false);
   const [editRow, setEditRow] = useState(null);
@@ -54,19 +62,17 @@ const GeneralForm = () => {
   const onSubmit = async (data) => {
     try {
       if (editRow) {
-        await updateLedger({
-          FundID,
-          CAID,
-          GLID: editRow.GLID,
-          data,
+        await updateSubGeneral({
+          SlName: data.SlName,
+          slId: editRow,
         }).unwrap();
-        toast.success(translate("General Ledger updated successfully!"));
+        toast.success(translate("Sub General Ledger updated successfully!"));
       } else {
-        await postGeneral({ ...data, FundID, CAID }).unwrap();
-        toast.success(translate("General Ledger created successfully!"));
+        await postSubGeneral({ FundID, GLID, SlName: data.SlName }).unwrap();
+        toast.success(translate("Sub General Ledger created successfully!"));
       }
-      // Reset only GlName field, keep FundID and CAID
-      resetField("GlName");
+      // // Reset only GlName field, keep FundID and CAID
+      resetField("SlName");
       setShowForm(false);
       setEditRow(null);
       refetch();
@@ -76,21 +82,21 @@ const GeneralForm = () => {
   };
 
   // 🔹 Edit
+  // 🔹 Edit
   const handleEditOpen = (row) => {
-    setEditRow(row);
-    setValue("GlName", row.GlName); // Explicitly set GlName value
-    setShowForm(true);
+    console.log(row, "row");
+    setEditRow(row.SLID);
+    setShowForm(true); // আগে form খোলো
+    setTimeout(() => {
+      setValue("SlName", row.SlName, { shouldValidate: true });
+    }, 0); // form ready হওয়ার পর value বসাও
   };
 
   // 🔹 Delete
   const handleDelete = async (row) => {
     try {
-      await deleteLedger({
-        FundID: row.FundID,
-        CAID: row.CAID,
-        GLID: row.GLID,
-      }).unwrap();
-      toast.success(translate("General Ledger deleted successfully!"));
+      await deleteSubGeneral(row.SLID).unwrap();
+      toast.success(translate("Sub General Ledger deleted successfully!"));
       refetch();
     } catch (error) {
       toast.error(
@@ -101,17 +107,8 @@ const GeneralForm = () => {
 
   const handleCreateData = () => {
     setShowForm(true);
-    resetField("GlName", { defaultValue: "" });
+    resetField("SlName", { defaultValue: "" });
   };
-
-    const handleGeneralOpenModal = useCallback(() => {
-      hideModal();
-      // ছোট delay দিয়ে modal আবার show করো
-      setTimeout(() => {
-        showModal(translate("Sub General Ledgers"), "OPEN_SUB_GENERAL");
-      }, 100);
-    }, [translate]);
-
 
   // Table columns
   const columns = [
@@ -140,24 +137,24 @@ const GeneralForm = () => {
       field: "ChartOfAcName",
       hozAlign: "center",
       render: (row) => (
-        <p>{bnBijoy2Unicode(row.AccChartOfAccount?.ChartOfAcName || "")}</p>
+        <p>
+          {bnBijoy2Unicode(
+            row.AccGeneralLedger?.AccChartOfAccount?.ChartOfAcName || ""
+          )}
+        </p>
       ),
+    },
+    {
+      title: translate("Sub General Name"),
+      field: "GlName",
+      hozAlign: "center",
+      render: (row) => <p>{bnBijoy2Unicode(row?.SlName)}</p>,
     },
     {
       title: translate("General Name"),
       field: "GlName",
       hozAlign: "center",
-      render: (row) => <p>{bnBijoy2Unicode(row.GlName)}</p>,
-    },
-    {
-      title: translate("Sub Ledger"),
-      field: "GlName",
-      hozAlign: "center",
-      render: (row) => (
-        <>
-          <Button onClick={handleGeneralOpenModal}>Info</Button>
-        </>
-      ),
+      render: (row) => <p>{bnBijoy2Unicode(row?.AccGeneralLedger?.GlName)}</p>,
     },
   ];
 
@@ -182,6 +179,15 @@ const GeneralForm = () => {
             registerKey="CAID"
             unicode={true}
             require={translate("Deposit/Cost is required!")}
+          />{" "}
+          <DefaultSelect
+            label="General Ledger"
+            options={generalLedgersData ?? []}
+            valueField="GLID"
+            nameField="GlName"
+            registerKey="GLID"
+            unicode={true}
+            require={translate("Deposit/Cost is required!")}
           />
         </div>
 
@@ -192,11 +198,12 @@ const GeneralForm = () => {
           >
             <div className="mb-4">
               <DefaultInput
-                registerKey="GlName"
-                require={translate("General name is required")}
+                registerKey="SlName"
+                require={translate("Sub General name is required")}
                 type="text"
                 placeholder={translate("Enter General name") + " ..."}
-                label="General Name"
+                label="Sub General Name"
+                // unicode={true}
               />
             </div>
             <div className="flex gap-3">
@@ -223,7 +230,7 @@ const GeneralForm = () => {
         ) : (
           <div className="flex justify-between items-center my-5">
             <h2 className="text-lg font-semibold">
-              {translate("All Generals")}
+              {translate("All Sub Generals")}
             </h2>
             {FundID && CAID && (
               <Button
@@ -240,11 +247,11 @@ const GeneralForm = () => {
 
       <SortableTable
         columns={columns}
-        data={generalLedgersData ?? []}
+        data={subGeneralLedgersData ?? []}
         isFilterColumn={false}
       />
     </>
   );
 };
 
-export default GeneralForm;
+export default SubGeneralForm;

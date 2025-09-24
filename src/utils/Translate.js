@@ -53,6 +53,7 @@ const useTranslate = () => {
     "Teach Salary System Setting": "শিক্ষক বেতন সিস্টেম সেটিং",
     "User gender": "ব্যবহারকারীর লিঙ্গ",
     "User Information": "ব্যবহারকারীর তথ্য",
+    "Student Fee Collection": "শিক্ষার্থীর ফি গ্রহণ",
     Description: "ডেসক্রিপশন",
     Renewal: "নবায়ন",
     "Class Name": "ক্লাস নাম",

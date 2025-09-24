@@ -11,7 +11,7 @@ import MonthDetermineFeeTable from "../view/accounting/MonthDetermineFeeTable";
 import { showModal } from "../utils/ModalControlar";
 import { setFilteredSelectedPerStudentFee } from "../features/student/studentSlice";
 
-const SelectedPerStudentFee = () => {
+const StudentsFeeCollection = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const methods = useForm({
@@ -202,4 +202,4 @@ const SelectedPerStudentFee = () => {
   );
 };
 
-export default SelectedPerStudentFee;
+export default StudentsFeeCollection;

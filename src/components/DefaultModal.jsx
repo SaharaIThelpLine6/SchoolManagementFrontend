@@ -31,6 +31,7 @@ import SelectedPerStudentFeeModal from "./Modals/SelectedPerStudentFeeModal";
 import FundForm from "../view/accounting/FundForm";
 import GeneralForm from "../view/accounting/GeneralForm";
 import CodeSetting from "./Modals/CodeSetting";
+import SubGeneralForm from "../view/accounting/SubGeneralForm";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -96,6 +97,7 @@ const DefaultModal = () => {
                 {modalType === "ADD_FUND" && <FundForm />}
                 {modalType === "OPEN_FUND" && <FundForm />}
                 {modalType === "OPEN_GENERAL" && <GeneralForm />}
+                {modalType === "OPEN_SUB_GENERAL" && <SubGeneralForm />}
                 {modalType === "EDIT_TYPEOFVACATION" && (
                   <TypeOfVacationForm userId={id} />
                 )}

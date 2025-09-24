@@ -79,13 +79,13 @@ import DeleteEditRecord from "../pages/DeleteEditRecord";
 import Settings from "../pages/Settings";
 import UserImage from "../pages/UserImage";
 import BulkImage from "../pages/BulkImage";
-import SelectedPerStudentFee from "../pages/SelectedPerStudentFee";
 import AllMadrasah from "../pages/AllMadrasah";
 import RFIDCard from "../pages/RFIDCard";
 import OwenGuide from "./OwenGuide";
 import BoardExamName from "../pages/BoardExamName";
 import BoardNames from "../pages/BoardNames";
 import BoardCenterName from "../pages/BoardCenterName";
+import StudentsFeeCollection from "../pages/StudentsFeeCollection";
 
 const router = createBrowserRouter([
   {
@@ -626,12 +626,12 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "selected-per-student-fee",
+                path: "student-fee-collection",
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
                   // >
-                  <SelectedPerStudentFee pageTitle="Selected Per Student Fee" />
+                  <StudentsFeeCollection pageTitle="Student Fee Collection" />
                   // </RequirePermission>
                 ),
               },

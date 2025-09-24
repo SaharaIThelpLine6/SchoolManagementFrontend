@@ -16,6 +16,7 @@ import {
   useGetAllSubLedgerQuery,
   useGetChartOFAccountQuery,
   useGetFundNamesQuery,
+  useGetGeneralLedgersByFundAndCaidsQuery,
   useGetGeneralLedgersQuery,
   useGetGLedgersQuery,
   useGetPaymentTypeQuery,
@@ -47,7 +48,7 @@ const DepositCosts = ({ pageTitle }) => {
   const [editId, setEditId] = useState(null);
 
   const [
-    caID,
+    CAID,
     ledgerGLID,
     paymentGLID,
     Amount,
@@ -72,16 +73,22 @@ const DepositCosts = ({ pageTitle }) => {
     "LSLID",
   ]);
 
-  const { data: fundNamesData } = useGetFundNamesQuery();
-  const { data: gldgersData = [] } = useGetGLedgersQuery(); // Provide default empty array
-  const { data: allLedgersData = [] } = useGetAllSubLedgerQuery(); // Provide default empty array
-  const { data: generalLedgersData } = useGetGeneralLedgersQuery(caID, {
-    skip: !caID,
-  });
 
+  const { data: fundNamesData } = useGetFundNamesQuery();
+  const { data: gldgersData = [] } = useGetGLedgersQuery();
+  const { data: allLedgersData = [] } = useGetAllSubLedgerQuery();
+
+  const { data: generalLedgersData, refetch: refetchGLData } =
+    useGetGeneralLedgersByFundAndCaidsQuery(
+      { fundId: FundID, caId: CAID },
+      {
+        skip: !FundID || !CAID,
+      }
+    );
   const { data: gSLData } = useGetSubLedgerQuery(ledgerGLID, {
     skip: !ledgerGLID,
   });
+
 
   const { data: pgSLData } = useGetSubLedgerQuery(paymentGLID, {
     skip: !paymentGLID,
@@ -90,10 +97,10 @@ const DepositCosts = ({ pageTitle }) => {
   const { data: receiptNumber, isSuccess } = useGetReceiptNumberQuery(
     {
       fundid: FundID,
-      caid: caID,
+      caid: CAID,
     },
     {
-      skip: !FundID || !caID,
+      skip: !FundID || !CAID,
     }
   );
 
@@ -104,9 +111,8 @@ const DepositCosts = ({ pageTitle }) => {
     isLoading,
     isError,
     refetch,
-  } = useGetTransactionOrdersQuery({ id: caID }, { skip: !caID });
+  } = useGetTransactionOrdersQuery({ id: CAID }, { skip: !CAID });
 
-  console.log(transactionOrdersData, "transactionOrdersData");
 
   const [postInComeExpense] = usePostInComeExpenseMutation();
   const [updateInComeExpense] = useUpdateInComeExpenseMutation();
@@ -260,6 +266,7 @@ const DepositCosts = ({ pageTitle }) => {
           "success"
         );
         refetch();
+        refetchGLData();
       } catch (error) {
         Swal.fire(
           "ত্রুটি!",

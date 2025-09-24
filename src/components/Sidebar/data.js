@@ -322,36 +322,36 @@ export const menuData = [
       },
       {
         id: "3",
-        name: "Selected Per Student Fee",
-        route: "/accounting/selected-per-student-fee",
-      },
-      {
-        id: "4",
         name: "Student Fee Collection",
         route: "/accounting/student-fee-collection",
       },
+      // {
+      //   id: "4",
+      //   name: "Student Fee Collection",
+      //   route: "/accounting/student-fee-collection",
+      // },
       {
-        id: "5",
+        id: "4",
         name: "Dues List",
         route: "/accounting/dues-list",
       },
       {
-        id: "6",
+        id: "5",
         name: "Monthly Dues",
         route: "/accounting/monthly-dues",
       },
       {
-        id: "7",
+        id: "6",
         name: "Fee Collection Report",
         route: "/accounting/fee-collection-report",
       },
       {
-        id: "8",
+        id: "7",
         name: "Balance Transfer",
         route: "/accounting/balance-transfer",
       },
       {
-        id: "9",
+        id: "8",
         name: "Delete Edit Record",
         route: "/accounting/delete-edit-record",
       },
