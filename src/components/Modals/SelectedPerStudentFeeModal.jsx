@@ -8,7 +8,7 @@ import { fetchSettingsData } from "../../features/settings/settingsSlice";
 import LoadingComponent from "../LoadingComponent";
 import SortableTable from "../Tables/SortableTable";
 import { hideModal } from "../../utils/ModalControlar";
-import { useGetSelectedPerStudentFeeBySearchQuery } from "../../features/feeCollection/feeCollectionSlice";
+import { useGetSearchStudentsQuery } from "../../features/feeCollection/feeCollectionSlice";
 import { setFilteredSelectedPerStudentFee } from "../../features/student/studentSlice";
 const SelectedPerStudentFeeModal = () => {
   const methods = useForm();
@@ -61,7 +61,7 @@ const SelectedPerStudentFeeModal = () => {
     data: searchUserInfo,
     error: searchUserError,
     isLoading: userInfoLoading,
-  } = useGetSelectedPerStudentFeeBySearchQuery(debouncedFilters, {
+  } = useGetSearchStudentsQuery(debouncedFilters, {
     skip:
       !debouncedFilters.search &&
       !debouncedFilters.ClassID &&
@@ -75,6 +75,7 @@ const SelectedPerStudentFeeModal = () => {
   const columns = [
     {
       title: "Action",
+      hozAlign: "center",
       render: (row) => {
         return (
           <button
@@ -116,14 +117,15 @@ const SelectedPerStudentFeeModal = () => {
     {
       title: "User Name",
       field: "StudentName",
-      hozAlign: "left",
+      hozAlign: "center",
       unicode: true,
-    }, {
+    },
+    {
       title: "Class Name",
       field: "ClassName",
-      hozAlign: "left",
+      hozAlign: "center",
       unicode: true,
-    }
+    },
   ];
   return (
     <div>
@@ -167,7 +169,7 @@ const SelectedPerStudentFeeModal = () => {
           <li className="text-black mt-4">No users Found.</li>
         ) : searchUserInfo && searchUserInfo.length > 0 ? (
           <div className="relative overflow-x-auto">
-            <SortableTable columns={columns} data={searchUserInfo || []} />
+            <SortableTable columns={columns} data={searchUserInfo || []} isFilterColumn={false}/>
           </div>
         ) : (
           <li className="py-2 px-4">No users found</li>

@@ -182,10 +182,6 @@ export const feeCollectionSlice = createApi({
       invalidatesTags: ["GeneralLedgersByFundAndCaids"],
     }),
 
-    getStudentFeeGroups: builder.query({
-      query: () => `student_fee_groups`,
-      providesTags: ["StudentFeeGroups"],
-    }),
     getChartOFAccount: builder.query({
       query: () => `chart_of_account`,
       providesTags: ["ChartOFAccount"],
@@ -206,14 +202,7 @@ export const feeCollectionSlice = createApi({
       query: ({ fundid, caid }) => `receipt_number/${fundid}/${caid}`,
       providesTags: ["ReceiptNumber"],
     }),
-    postStudentFeeGroup: builder.mutation({
-      query: (data) => ({
-        url: "create_student_fee_group",
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: ["StudentFeeGroups"],
-    }),
+
     postInComeExpense: builder.mutation({
       query: (data) => ({
         url: "income_expense",
@@ -230,21 +219,6 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["TransactionOrders"],
     }),
-    updateStudentFeeGroup: builder.mutation({
-      query: (data) => ({
-        url: `update_student_fee_group/${data.ID}`,
-        method: "PUT",
-        body: data,
-      }),
-      invalidatesTags: ["StudentFeeGroups"],
-    }),
-    deleteStudentFeeGroup: builder.mutation({
-      query: (id) => ({
-        url: `delete_student_fee_group/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["StudentFeeGroups"],
-    }),
     deleteInComeExpense: builder.mutation({
       query: (id) => ({
         url: `income_expense/${id}`,
@@ -260,7 +234,7 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["StudentFeeSettings"],
     }),
-    getSelectedPerStudentFeeBySearch: builder.query({
+    getSearchStudents: builder.query({
       query: ({ search, ClassID, SessionID }) => {
         const params = new URLSearchParams();
         if (search) {
@@ -268,7 +242,7 @@ export const feeCollectionSlice = createApi({
         }
         if (ClassID) params.append("ClassID", ClassID);
         if (SessionID) params.append("SessionID", SessionID);
-        return `/search__selected_per_student_fee?${params.toString()}`;
+        return `/search__students?${params.toString()}`;
       },
       providesTags: ["SelectedStudentPerFee"],
     }),
@@ -318,6 +292,45 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["SubGeneralLedger"],
     }),
+
+    // Get Sub General by FundId and GLID
+    getSubGeneralLedgersByFundIdAndGlId: builder.query({
+      query: ({ fundId, caId, glid }) => `subledger_by_glid/${fundId}/${glid}`,
+      providesTags: ["SubGeneralLedger"],
+    }),
+
+    // Student Fee Group
+    getStudentFeeGroups: builder.query({
+      query: () => `student_fee_groups`,
+      providesTags: ["StudentFeeGroups"],
+    }),
+    postStudentFeeGroup: builder.mutation({
+      query: (data) => ({
+        url: "create_student_fee_group",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["StudentFeeGroups"],
+    }),
+    updateStudentFeeGroup: builder.mutation({
+      query: (data) => ({
+        url: `update_student_fee_group/${data.ID}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["StudentFeeGroups"],
+    }),
+    deleteStudentFeeGroup: builder.mutation({
+      query: (id) => ({
+        url: `delete_student_fee_group/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["StudentFeeGroups"],
+    }),
+    getStudentFeeAdmissions: builder.query({
+      query: ({ fundId, classId }) => `view_student_fee/${fundId}/${classId}`,
+      providesTags: ["StudentFeeAdmissions"],
+    }),
   }),
 });
 
@@ -351,7 +364,7 @@ export const {
   useGetStudentFeeSettingsQuery,
   usePostStudentFeeSettingsMutation,
   useDeleteStudentFeeSettingsMutation,
-  useGetSelectedPerStudentFeeBySearchQuery,
+  useGetSearchStudentsQuery,
   usePostSelectedPerStudentFeeMutation,
   useDeleteSelectedPerStudentFeeMutation,
   usePostFundMutation,
@@ -370,4 +383,7 @@ export const {
   usePostSubGeneralLedgerMutation,
   useUpdateSubGeneralLedgerMutation,
   useDeleteSubGeneralLedgerMutation,
+
+  useGetSubGeneralLedgersByFundIdAndGlIdQuery,
+  useGetStudentFeeAdmissionsQuery
 } = feeCollectionSlice;

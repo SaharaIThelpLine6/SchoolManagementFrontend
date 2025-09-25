@@ -6,17 +6,22 @@ import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
 
 import FeeMatrix from "../view/accounting/FeeMatrix";
 import FeeSettingTable from "../view/accounting/FeeSettingTable";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   useGetSubLedgerQuery,
   usePostStudentFeeSettingsMutation,
 } from "../features/feeCollection/feeCollectionSlice";
 import Button from "../components/Button/Button";
 import Swal from "sweetalert2";
+import { fetchClassData } from "../features/class/classSlice";
+import { useDispatch, useSelector } from "react-redux";
+import SvgIcon from "../components/icons/SvgIcon";
+import { showModal } from "../utils/ModalControlar";
 
 const FeeSetting = ({ pageTitle }) => {
   const translate = useTranslate();
   const methods = useForm();
+  const dispatch = useDispatch();
   const { watch, handleSubmit, reset } = methods;
   // State initialization
   const initialStudentState = {
@@ -30,15 +35,10 @@ const FeeSetting = ({ pageTitle }) => {
     useState(initialStudentState);
   const [amounts, setAmounts] = useState({ male: "", female: "" });
 
-  const [SessionID, SubClassID, SLID] = watch([
-
-    "SessionID",
-    "SubClassID",
-    "SLID",
-  ]);
+  const [SessionID, ClassID, SLID] = watch(["SessionID", "ClassID", "SLID"]);
   const [filter, setFilter] = useState({
     sessionId: SessionID,
-    classId: SubClassID,
+    classId: ClassID,
     SLID: SLID,
   });
   const [feeMatrixData, setFeeMatrixData] = useState(null);
@@ -46,19 +46,25 @@ const FeeSetting = ({ pageTitle }) => {
   const [editId, setEditId] = useState(null);
 
   const { data: sessionData } = useGetSessionsQuery();
-  const { data: subClassData } = useGetSubClassListQuery();
-
+  // const { data: subClassData } = useGetSubClassListQuery();
+  const { classList, status: classStatus } = useSelector(
+    (state) => state.class
+  );
   const { data: subLedgerData } = useGetSubLedgerQuery(101);
   const [postStudentFeeSettings] = usePostStudentFeeSettingsMutation();
 
   console.log(editData, "data");
-
+  useEffect(() => {
+    if (!classList.length) {
+      dispatch(fetchClassData());
+    }
+  }, [dispatch]);
   useEffect(() => {
     if (editData) {
       // reset form fields
       reset({
         SessionID: editData.SessionID,
-        SubClassID: editData.Classid,
+        ClassID: editData.Classid,
         SLID: editData.SLID,
       });
 
@@ -116,10 +122,10 @@ const FeeSetting = ({ pageTitle }) => {
   useEffect(() => {
     setFilter({
       sessionId: SessionID || null,
-      classId: SubClassID || null,
+      classId: ClassID || null,
       SLID: SLID || null,
     });
-  }, [SessionID, SubClassID, SLID]);
+  }, [SessionID, ClassID, SLID]);
 
   const onSubmit = async (data) => {
     console.log(data, "data");
@@ -145,6 +151,7 @@ const FeeSetting = ({ pageTitle }) => {
       return;
     }
 
+
     try {
       if (editData) {
         await postStudentFeeSettings(payload).unwrap();
@@ -159,7 +166,7 @@ const FeeSetting = ({ pageTitle }) => {
         // ✅ form reset with empty values
         reset({
           SessionID: "",
-          SubClassID: "",
+          ClassID: "",
           SLID: "",
         });
 
@@ -183,7 +190,7 @@ const FeeSetting = ({ pageTitle }) => {
         // ✅ form reset with empty values
         reset({
           SessionID: "",
-          SubClassID: "",
+          ClassID: "",
           SLID: "",
         });
 
@@ -207,7 +214,7 @@ const FeeSetting = ({ pageTitle }) => {
   const handleReset = () => {
     reset({
       SessionID: "",
-      SubClassID: "",
+      ClassID: "",
       SLID: "",
     });
     setStudentData(initialStudentState);
@@ -216,7 +223,10 @@ const FeeSetting = ({ pageTitle }) => {
     setFeeMatrixData(null);
     setEditData(null);
   };
-
+  const handleStudentFeeGroup = useCallback(() => {
+    console.log("ewafrgurig");
+    showModal("Student Fee Group", "STUDENT_FEE_GROUP");
+  }, []);
   return (
     <>
       <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-SolaimanLipi hidden_in_print">
@@ -230,33 +240,72 @@ const FeeSetting = ({ pageTitle }) => {
               </h2>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <DefaultSelect
-                  options={sessionData || []}
-                  require={"Session is required"}
-                  nameField={"SessionName"}
-                  valueField={"SessionID"}
-                  registerKey={"SessionID"}
-                  type={"number"}
-                  label="Session"
-                />
-                <DefaultSelect
-                  options={subClassData || []}
-                  require={"SubClass is required"}
-                  nameField={"SubClass"}
-                  valueField={"SubClassID"}
-                  registerKey={"SubClassID"}
-                  label="Class/Jamaat"
-                  unicode={true}
-                />
-                <DefaultSelect
-                  options={subLedgerData || []}
-                  require={"Sub Ledger is required"}
-                  nameField={"SlName"}
-                  valueField={"SLID"}
-                  registerKey={"SLID"}
-                  label="Sub Ledger"
-                  unicode={true}
-                />
+                <div className="flex items-end gap-3">
+                  <div className="flex-1">
+                    <DefaultSelect
+                      options={sessionData || []}
+                      require={"Session is required"}
+                      nameField={"SessionName"}
+                      valueField={"SessionID"}
+                      registerKey={"SessionID"}
+                      type={"number"}
+                      label="Session"
+                    />
+                  </div>
+
+                  <Button
+                    type="button"
+                    className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#007af7] text-white
+                               hover:bg-[#0066cc] transition-colors duration-150"
+                    // onClick={handleGeneralOpenModal}
+                  >
+                    <SvgIcon name="FaPlus" size={16} />
+                  </Button>
+                </div>
+                <div className="flex items-end gap-3">
+                  <div className="flex-1">
+                    <DefaultSelect
+                      options={classList ?? []}
+                      nameField={"ClassName"}
+                      valueField={"ClassID"}
+                      registerKey={"ClassID"}
+                      type={"number"}
+                      label={"Class"}
+                      unicode={true}
+                    />
+                  </div>
+
+                  <Button
+                    type="button"
+                    className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#007af7] text-white
+                               hover:bg-[#0066cc] transition-colors duration-150"
+                    // onClick={handleGeneralOpenModal}
+                  >
+                    <SvgIcon name="FaPlus" size={16} />
+                  </Button>
+                </div>
+                <div className="flex items-end gap-3">
+                  <div className="flex-1">
+                    <DefaultSelect
+                      options={subLedgerData || []}
+                      require={"Sub Ledger is required"}
+                      nameField={"SlName"}
+                      valueField={"SLID"}
+                      registerKey={"SLID"}
+                      label={"Sub Ledger (Fee Name)"}
+                      unicode={true}
+                    />
+                  </div>
+
+                  <Button
+                    onClick={handleStudentFeeGroup}
+                    type="button"
+                    className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#007af7] text-white
+                               hover:bg-[#0066cc] transition-colors duration-150"
+                  >
+                    <SvgIcon name="FaPlus" size={16} />
+                  </Button>
+                </div>
               </div>
             </div>
             <FeeMatrix

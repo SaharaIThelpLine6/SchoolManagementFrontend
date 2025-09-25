@@ -34,7 +34,7 @@ const MonthDetermineFeeTable = () => {
       console.log("Data missing or incomplete:", data);
       return [];
     }
-    const { feeDetails, monthDetails } = data;
+    const { feeDetails, monthDetails } = data; 
     return Array.from({ length: 12 }, (_, i) => {
       const monthKey = `Month${i + 1}`;
       const feeKey = `Fee${i + 1}`;

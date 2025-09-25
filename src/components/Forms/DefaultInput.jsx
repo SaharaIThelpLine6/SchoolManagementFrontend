@@ -57,20 +57,21 @@ const DefaultInput = ({
 
   return (
     <div
-      className={`w-full ${
-        labelPosition === "left" ? "flex items-center gap-4" : ""
-      }`}
+      className={`w-full ${labelPosition === "left" ? "flex items-center gap-4" : ""
+        }`}
     >
       {label && (
         <label
           htmlFor={registerKey}
-          className={`text-black font-SolaimanLipi ${
-            labelPosition === "left"
-              ? "w-1/4 min-w-[100px] mb-0 text-end"
-              : "mb-1 block"
-          }`}
+          className={`text-black font-SolaimanLipi ${labelPosition === "left" ? "w-2/5 mb-0 text-end" : "mb-1 block"
+            }`}
         >
-          <div className="flex justify-between items-center gap-2">
+          <div
+            className={`flex items-center gap-2 ${labelPosition === "left" ? "justify-end" : "justify-between"
+              }`}
+          >
+
+
             <div className="flex items-center gap-1">
               <span className={labelColor}>{translate(label)}</span>
               {require && <span className="text-red-500">*</span>}
@@ -96,11 +97,10 @@ const DefaultInput = ({
           className={`w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition
                       focus:border-custom-focus active:border-custom-focus
                       disabled:cursor-not-allowed disabled:bg-slate-200
-                      ${
-                        shouldShowError && errors[registerKey]
-                          ? "placeholder:text-red-400 border-red-400"
-                          : ""
-                      }`}
+                      ${shouldShowError && errors[registerKey]
+              ? "placeholder:text-red-400 border-red-400"
+              : ""
+            }`}
           {...register(registerKey, {
             required: require ? "এই ফিল্ডটি প্রয়োজনীয়" : false,
             ...(type === "number" && {

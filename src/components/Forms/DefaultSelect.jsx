@@ -74,7 +74,7 @@ const DefaultSelect = ({
           htmlFor={registerKey}
           className={`font-SolaimanLipi ${
             labelPosition === "left"
-              ? "mb-0 w-1/4 text-black"
+              ? "text-black"
               : "mb-1 block text-black"
           }`}
         >
