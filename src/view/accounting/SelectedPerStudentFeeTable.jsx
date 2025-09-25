@@ -30,30 +30,42 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
     },
   });
 
-  const { watch, setValue, handleSubmit, reset } = methods;
+  const { watch, setValue, handleSubmit, reset, getValues } = methods;
   const subLedgerFeeValues = watch("subLedgerFee");
 
   const [postSelectedPerStudentFee] = usePostSelectedPerStudentFeeMutation();
-  const [deleteSelectedPerStudentFee] = useDeleteSelectedPerStudentFeeMutation();
+  const [deleteSelectedPerStudentFee] =
+    useDeleteSelectedPerStudentFeeMutation();
 
-  // Update form data whenever filteredSelectedPerStudentFee changes
   useEffect(() => {
-    console.log("filteredSelectedPerStudentFee in Table:", filteredSelectedPerStudentFee);
+    console.log(
+      "filteredSelectedPerStudentFee:",
+      filteredSelectedPerStudentFee
+    );
     if (filteredSelectedPerStudentFee) {
       const defaultValues = {
         selectedSLID: "",
-        subLedgerFee: filteredSelectedPerStudentFee.subLedgerFee || [],
+        subLedgerFee:
+          filteredSelectedPerStudentFee.subLedgerFee?.map((item) => ({
+            ...item,
+            Amount: Number(item.Amount),
+            Less: Number(item.Less),
+          })) || [],
       };
-      console.log("Setting default values for second form:", defaultValues);
-      reset(defaultValues);
+      console.log("Setting default values for form:", defaultValues);
+      reset(defaultValues, { keepDirty: false, keepTouched: false });
     } else {
-      console.log("Resetting second form to empty values");
-      reset({
-        selectedSLID: "",
-        subLedgerFee: [],
-      });
+      console.log("Resetting form to empty values");
+      reset(
+        {
+          selectedSLID: "",
+          subLedgerFee: [],
+        },
+        { keepDirty: false, keepTouched: false }
+      );
     }
-  }, [filteredSelectedPerStudentFee, reset]);
+    console.log("Form state after reset:", getValues());
+  }, [filteredSelectedPerStudentFee, reset, getValues]);
 
   const handleAddSubLedger = async (selectedSLID) => {
     console.log("Adding subLedger with SLID:", selectedSLID);
@@ -117,14 +129,14 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
         SlName: selectedItem.SlName,
         Amount: 0,
         Less: 0,
-        isNew: true, // নতুন ডেটা চিহ্নিত করার জন্য ফ্ল্যাগ
+        isNew: true,
       },
     ];
 
     console.log("New subLedgerFee:", newSubLedgerFee);
-    setValue("subLedgerFee", newSubLedgerFee);
+    setValue("subLedgerFee", newSubLedgerFee, { shouldValidate: true });
+    console.log("Form state after setValue:", getValues());
 
-    // Success alert with auto-close
     const toast = Swal.mixin({
       toast: true,
       position: "top-end",
@@ -164,14 +176,17 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
       });
 
       if (result.isConfirmed) {
-        // নতুন অ্যাড করা ডেটা হলে শুধু স্টেট থেকে ডিলিট করো
         if (item.isNew) {
-          console.log("Deleting new item (not saved in DB) with SLID:", item.SLID);
+          console.log(
+            "Deleting new item (not saved in DB) with SLID:",
+            item.SLID
+          );
           setValue(
             "subLedgerFee",
-            subLedgerFeeValues.filter((sl) => sl.SLID !== item.SLID)
+            subLedgerFeeValues.filter((sl) => sl.SLID !== item.SLID),
+            { shouldValidate: true }
           );
-          console.log("Updated subLedgerFeeValues:", subLedgerFeeValues);
+          console.log("Updated subLedgerFeeValues:", getValues().subLedgerFee);
           Swal.fire({
             icon: "success",
             title: "Deleted!",
@@ -182,7 +197,6 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
           return;
         }
 
-        // ডাটাবেসের ডেটা হলে API কল করো
         const payload = {
           AdmissionID: filteredSelectedPerStudentFee?.AdmissionID,
           SLID: item.SLID,
@@ -201,7 +215,6 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
           return;
         }
 
-        // Show loading state
         Swal.fire({
           title: "Deleting...",
           text: "Please wait while we delete the item",
@@ -213,12 +226,12 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
 
         await deleteSelectedPerStudentFee(payload).unwrap();
 
-        // API কল সফল হলে স্টেট আপডেট করো
         setValue(
           "subLedgerFee",
-          subLedgerFeeValues.filter((sl) => sl.SLID !== item.SLID)
+          subLedgerFeeValues.filter((sl) => sl.SLID !== item.SLID),
+          { shouldValidate: true }
         );
-        console.log("Updated subLedgerFeeValues:", subLedgerFeeValues);
+        console.log("Updated subLedgerFeeValues:", getValues().subLedgerFee);
 
         Swal.fire({
           icon: "success",
@@ -240,8 +253,8 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
   };
 
   const onSubmit = async (data) => {
-    console.log("Second form submitted with data:", data);
-    const showNoDataAlert = () => {
+    console.log("Form submitted with data:", data);
+    if (!filteredSelectedPerStudentFee) {
       Swal.fire({
         icon: "info",
         title: "No Data",
@@ -249,10 +262,6 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
         confirmButtonText: "OK",
         confirmButtonColor: "#3085d6",
       });
-    };
-    if (!filteredSelectedPerStudentFee) {
-      console.log("No filteredSelectedPerStudentFee available");
-      showNoDataAlert();
       return;
     }
 
@@ -260,21 +269,17 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
     const sessionID = filteredSelectedPerStudentFee.SessionID;
     const classID = filteredSelectedPerStudentFee.ClassID;
 
-    const payload = data.subLedgerFee.map((item) => {
-      const amount = Number(item.Amount);
-      const less = Number(item.Less);
-      return {
-        AdmissionID: admissionID,
-        UserID: item.UserID,
-        SessionID: sessionID,
-        ClassID: classID,
-        SLID: item.SLID,
-        SlName: item.SlName,
-        Amount: amount,
-        Less: less,
-        FainalAmount: amount - less,
-      };
-    });
+    const payload = data.subLedgerFee.map((item) => ({
+      AdmissionID: admissionID,
+      UserID: item.UserID,
+      SessionID: sessionID,
+      ClassID: classID,
+      SLID: item.SLID,
+      SlName: item.SlName,
+      Amount: Number(item.Amount) || 0,
+      Less: Number(item.Less) || 0,
+      FainalAmount: (Number(item.Amount) || 0) - (Number(item.Less) || 0),
+    }));
 
     console.log("Payload for API:", payload);
 
@@ -290,8 +295,6 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
     if (result.isConfirmed) {
       try {
         await postSelectedPerStudentFee(payload).unwrap();
-        console.log("API call successful");
-
         Swal.fire({
           title: "Success!",
           text: "Fees saved/updated successfully.",
@@ -300,17 +303,11 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
           showConfirmButton: false,
         });
 
-        // Reset both forms
-        console.log("Resetting second form");
         reset({
           selectedSLID: "",
           subLedgerFee: [],
         });
-
-        console.log("Resetting first form via resetForm");
-        resetForm();
-
-        console.log("Clearing Redux state");
+        // resetForm();
         dispatch(setFilteredSelectedPerStudentFee(null));
       } catch (error) {
         console.error("API call failed:", error);
@@ -329,7 +326,7 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
         <div className="flex items-end justify-start gap-4 my-5">
           <div className="w-48">
             <DefaultSelect
-              label={translate("Fees") + " :"}
+              label="Fees"
               options={subLedger ?? []}
               valueField="SLID"
               nameField="SlName"
@@ -345,6 +342,14 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
           >
             {translate("Add")}
           </Button>
+          <div className="mt-4">
+            <Button
+              type="submit"
+              className="px-6 py-2 bg-green-500 text-white rounded"
+            >
+              {translate("Save")}
+            </Button>
+          </div>
         </div>
 
         <table className="min-w-full table-auto text-sm md:text-base border border-gray-200">
@@ -352,16 +357,20 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
             <tr>
               <th className="px-4 py-3 text-center">{translate("Action")}</th>
               <th className="px-4 py-3 text-center">{translate("Fee Name")}</th>
-              <th className="px-4 py-3 text-center">{translate("Deduction")}</th>
+              <th className="px-4 py-3 text-center">
+                {translate("Deduction")}
+              </th>
               <th className="px-4 py-3 text-center">{translate("Fee")}</th>
             </tr>
           </thead>
           <tbody>
             {subLedgerFeeValues?.length > 0 ? (
               subLedgerFeeValues.map((item, index) => (
-                <tr key={item.SLID} className="border-t">
+                <tr key={`${item.SLID}-${index}`} className="border-t">
                   <td className="px-4 py-2 text-center">
-                    <DeleteButton onClick={() => handleDelete(item)} />
+                    <div className="flex justify-center items-center h-full">
+                      <DeleteButton onClick={() => handleDelete(item)} />
+                    </div>
                   </td>
                   <td className="px-4 py-2 text-center">
                     {bnBijoy2Unicode(item.SlName)}
@@ -370,12 +379,14 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
                     <DefaultInput
                       registerKey={`subLedgerFee.${index}.Less`}
                       type="number"
+                      defaultValue={Number(item.Less)}
                     />
                   </td>
                   <td className="px-4 py-2 text-center">
                     <DefaultInput
                       registerKey={`subLedgerFee.${index}.Amount`}
                       type="number"
+                      defaultValue={Number(item.Amount)}
                     />
                   </td>
                 </tr>
@@ -389,15 +400,6 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
             )}
           </tbody>
         </table>
-
-        <div className="mt-4">
-          <Button
-            type="submit"
-            className="px-6 py-2 bg-green-500 text-white rounded"
-          >
-            {translate("Save")}
-          </Button>
-        </div>
       </form>
     </FormProvider>
   );

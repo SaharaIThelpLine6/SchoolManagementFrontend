@@ -163,7 +163,7 @@ const EditTeacherForm = ({ userId }) => {
               <DatePickerOne
                 registerKey={"JoiningDate"}
                 placeholder={translate("Inter your date of join") + " ..."}
-                dateCalender={translate("Date of join") + " :"}
+                dateCalender="Date of join"
                 require={"Entry Date is require"}
               />
 
@@ -172,14 +172,14 @@ const EditTeacherForm = ({ userId }) => {
                 require={"Result devision is require"}
                 type={"text"}
                 placeholder={translate("Inter your result devision") + " ..."}
-                label={translate("Result Devision") + " :"}
+                label="Result Devision"
               />
 
               <DefaultInput
                 registerKey={"Name"}
                 placeholder={teacher?.User?.UserName || ""}
                 type={"text"}
-                label={translate("Name") + " :"}
+                label="Name"
                 disable={true}
               />
 
@@ -188,7 +188,7 @@ const EditTeacherForm = ({ userId }) => {
                 placeholder={translate("Inter your passted date") + " ..."}
                 require={"Passing year and date is require"}
                 type={"text"}
-                label={translate("Year") + " :"}
+                label="Year"
               />
 
               <DefaultInput
@@ -196,14 +196,14 @@ const EditTeacherForm = ({ userId }) => {
                 placeholder={translate("Inter your qualification") + " ..."}
                 require={"Qualification is require"}
                 type={"text"}
-                label={translate("Qualification") + " :"}
+                label="Qualification"
               />
 
               <DefaultInput
                 registerKey={"FatherName"}
                 placeholder={teacher?.User?.FatherName || ""}
                 type={"text"}
-                label={translate("Father Name") + " :"}
+                label="Father Name"
                 disable={true}
               />
 
@@ -211,7 +211,7 @@ const EditTeacherForm = ({ userId }) => {
                 registerKey={"ExamBoardName"}
                 require={"Exam Board Name is require"}
                 type={"text"}
-                label={translate("Exam Board Name") + " :"}
+                label="Exam Board Name"
                 placeholder={translate("Inter your Exam Board Name") + " ..."}
               />
 
@@ -219,7 +219,7 @@ const EditTeacherForm = ({ userId }) => {
                 registerKey={"Experience"}
                 require={"Experience is require"}
                 type={"text"}
-                label={translate("Experience") + " :"}
+                label="Experience"
                 placeholder={translate("Inter your experience") + " ..."}
               />
             </div>

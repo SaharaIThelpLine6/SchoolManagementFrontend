@@ -127,147 +127,146 @@ const AddNewDonation = ({ onBack }) => {
 
   return (
     <FormProvider {...methods}>
-  <form
-    onSubmit={methods.handleSubmit(onSubmit)}
-    className="bg-white p-6 space-y-8 font-SolaimanLipi"
-  >
-    {/* Photo & Student Info */}
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-      {/* Photo and Student Code */}
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-28 h-36 md:w-48 md:h-56 border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center text-gray-500">
-          Photo
-        </div>
-        <div className="w-full relative">
-          <label className="block mb-1 text-sm font-medium text-gray-700">
-            {translate("Student Code")} :
-          </label>
-          <div className="flex gap-2">
-            <input
-              {...methods.register("StudentCode", { required: true })}
-              className="w-full rounded-md border border-gray-300 px-3 h-[38px] bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-              onInput={() => setUserTyping(true)}
-            />
-            <button
-              type="button"
-              onClick={handleOpenModal}
-              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 transition"
-              title="Filter"
-            >
-              <SvgIcon name={"TbFilterPlus"} size={20} />
-            </button>
-          </div>
-          {showSuggestions && (
-            <div className="absolute z-30 bg-white shadow-md border rounded-md w-full max-h-[220px] overflow-y-auto mt-1">
-              {searchStudentInfo.map((item, index) => (
-                <div
-                  key={index}
-                  className="p-2 hover:bg-blue-100 cursor-pointer text-sm"
-                  onClick={() => handleSuggestionClick(item)}
-                >
-                  {item.StudentCode} - {bnBijoy2Unicode(item.StudentName)} -{" "}
-                  {bnBijoy2Unicode(item.ClassName)}
-                </div>
-              ))}
+      <form
+        onSubmit={methods.handleSubmit(onSubmit)}
+        className="bg-white p-6 space-y-8 font-SolaimanLipi"
+      >
+        {/* Photo & Student Info */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {/* Photo and Student Code */}
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-28 h-36 md:w-48 md:h-56 border-2 border-dashed border-gray-400 rounded-lg flex items-center justify-center text-gray-500">
+              Photo
             </div>
-          )}
-        </div>
-      </div>
+            <div className="w-full relative">
+              <label className="block mb-1 text-sm font-medium text-gray-700">
+                {translate("Student Code")} :
+              </label>
+              <div className="flex gap-2">
+                <input
+                  {...methods.register("StudentCode", { required: true })}
+                  className="w-full rounded-md border border-gray-300 px-3 h-[38px] bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                  onInput={() => setUserTyping(true)}
+                />
+                <button
+                  type="button"
+                  onClick={handleOpenModal}
+                  className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 transition"
+                  title="Filter"
+                >
+                  <SvgIcon name={"TbFilterPlus"} size={20} />
+                </button>
+              </div>
+              {showSuggestions && (
+                <div className="absolute z-30 bg-white shadow-md border rounded-md w-full max-h-[220px] overflow-y-auto mt-1">
+                  {searchStudentInfo.map((item, index) => (
+                    <div
+                      key={index}
+                      className="p-2 hover:bg-blue-100 cursor-pointer text-sm"
+                      onClick={() => handleSuggestionClick(item)}
+                    >
+                      {item.StudentCode} - {bnBijoy2Unicode(item.StudentName)} -{" "}
+                      {bnBijoy2Unicode(item.ClassName)}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
 
-      {/* Student Info Fields */}
-      <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <DefaultInput
-          type="text"
-          registerKey={`donor`}
-          labelPosition="left"
-          label={translate("Donor") + " :"}
-        />
-        <DefaultInput
-          type="text"
-          registerKey={`subLedger`}
-          labelPosition="left"
-          label={translate("Sub Ledger") + " :"}
-        />
-        <DefaultInput
-          type="text"
-          registerKey={`father`}
-          labelPosition="left"
-          label={translate("Father") + " :"}
-        />
-        <DefaultInput
-          type="text"
-          registerKey={`type`}
-          labelPosition="left"
-          label={translate("Type") + " :"}
-        />
-        <DefaultInput
-          type="text"
-          registerKey={`mobile`}
-          labelPosition="left"
-          label={translate("Mobile") + " :"}
-        />
-        <DatePickerOne
-          dateCalender={translate("Next Date") + " :"}
-          placeholder="YYYY-MM-DD"
-          registerKey="startDate"
-          require="তারিখ দিন"
-          labelPosition="left"
-        />
-        <DatePickerOne
-          dateCalender={translate("Entry Date") + " :"}
-          placeholder="YYYY-MM-DD"
-          registerKey="entryDate"
-          require="তারিখ দিন"
-          labelPosition="left"
-        />
-        <DefaultInput
-          type="text"
-          registerKey={`amount`}
-          labelPosition="left"
-          label={translate("Amount") + " :"}
-        />
-        <DatePickerOne
-          dateCalender={translate("Date") + " :"}
-          placeholder="YYYY-MM-DD"
-          registerKey="donationDate"
-          require="তারিখ দিন"
-          labelPosition="left"
-        />
-
-        {/* Cofils & Sectors with drag button */}
-        {["Cofil 1", "Sectors", "Cofil 2", "Cofil 3"].map((label, i) => (
-          <div key={i} className="flex items-center gap-2">
+          {/* Student Info Fields */}
+          <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-5">
             <DefaultInput
               type="text"
-              registerKey={`${label.toLowerCase().replace(" ", "_")}`}
+              registerKey={`donor`}
               labelPosition="left"
-              label={translate(label) + " :"}
+              label="Donor"
             />
-            <Button
-              type="button"
-              onClick={handleUserSearchOpenModal}
-              className="p-2 border rounded-md hover:bg-gray-100"
-            >
-              <SvgIcon name={"GrDrag"} size={16} />
-            </Button>
+            <DefaultInput
+              type="text"
+              registerKey={`subLedger`}
+              labelPosition="left"
+              label="Sub Ledger"
+            />
+            <DefaultInput
+              type="text"
+              registerKey={`father`}
+              labelPosition="left"
+              label="Father"
+            />
+            <DefaultInput
+              type="text"
+              registerKey={`type`}
+              labelPosition="left"
+              label="Type"
+            />
+            <DefaultInput
+              type="text"
+              registerKey={`mobile`}
+              labelPosition="left"
+              label="Mobile"
+            />
+            <DatePickerOne
+              dateCalender="Next Date"
+              placeholder="YYYY-MM-DD"
+              registerKey="startDate"
+              require="তারিখ দিন"
+              labelPosition="left"
+            />
+            <DatePickerOne
+              dateCalender="Entry Date"
+              placeholder="YYYY-MM-DD"
+              registerKey="entryDate"
+              require="তারিখ দিন"
+              labelPosition="left"
+            />
+            <DefaultInput
+              type="text"
+              registerKey={`amount`}
+              labelPosition="left"
+              label="Amount"
+            />
+            <DatePickerOne
+              dateCalender="Date"
+              placeholder="YYYY-MM-DD"
+              registerKey="donationDate"
+              require="তারিখ দিন"
+              labelPosition="left"
+            />
+
+            {/* Cofils & Sectors with drag button */}
+            {["Cofil 1", "Sectors", "Cofil 2", "Cofil 3"].map((label, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <DefaultInput
+                  type="text"
+                  registerKey={`${label.toLowerCase().replace(" ", "_")}`}
+                  labelPosition="left"
+                  label={label}
+                />
+                <Button
+                  type="button"
+                  onClick={handleUserSearchOpenModal}
+                  className="p-2 border rounded-md hover:bg-gray-100"
+                >
+                  <SvgIcon name={"GrDrag"} size={16} />
+                </Button>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
-    </div>
+        </div>
 
-    {/* Submit Button */}
-    <div className="flex justify-end pt-4">
-      <Button
-        type="submit"
-        className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition font-SolaimanLipi"
-        disabled={isPosting}
-      >
-        {isPosting ? "লোড হচ্ছে..." : translate("Save")}
-      </Button>
-    </div>
-  </form>
-</FormProvider>
-
+        {/* Submit Button */}
+        <div className="flex justify-end pt-4">
+          <Button
+            type="submit"
+            className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition font-SolaimanLipi"
+            disabled={isPosting}
+          >
+            {isPosting ? "লোড হচ্ছে..." : translate("Save")}
+          </Button>
+        </div>
+      </form>
+    </FormProvider>
   );
 };
 

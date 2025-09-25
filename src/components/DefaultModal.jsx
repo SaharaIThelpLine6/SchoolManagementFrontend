@@ -31,6 +31,8 @@ import SelectedPerStudentFeeModal from "./Modals/SelectedPerStudentFeeModal";
 import FundForm from "../view/accounting/FundForm";
 import GeneralForm from "../view/accounting/GeneralForm";
 import ReportSettings from "../view/accounting/ReportSettings";
+import CodeSetting from "./Modals/CodeSetting";
+import SubGeneralForm from "../view/accounting/SubGeneralForm";
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -97,6 +99,7 @@ const DefaultModal = () => {
                 {modalType === "OPEN_FUND" && <FundForm />}
                 {modalType === "OPEN_GENERAL" && <GeneralForm />}
                 {modalType === "OPEN_ACC_REPORT_SETTINGS" && <ReportSettings />}
+                {modalType === "OPEN_SUB_GENERAL" && <SubGeneralForm />}
                 {modalType === "EDIT_TYPEOFVACATION" && (
                   <TypeOfVacationForm userId={id} />
                 )}
@@ -113,6 +116,7 @@ const DefaultModal = () => {
                 {modalType === "EDIT_STUDENTVACATION" && (
                   <EditStudentVacationForm userId={id} />
                 )}
+
                 {modalType === "STUDENT_FILTER" && <StudentFilterModal />}
                 {modalType === "USER_FILTER" && <UserFilterModal />}
                 {modalType === "SELECTED_PERSTUDENT_FEE_FILTER" && (
@@ -123,6 +127,7 @@ const DefaultModal = () => {
                 {modalType === "PAYMENT_GETWAY" && <PaymentGetway />}
                 {modalType === "SUCCESSANDERROR" && <SuccessAndError />}
                 {modalType === "ADD_BOOK" && <AddEditBook />}
+                {modalType === "CODE_SETTING" && <CodeSetting />}
                 {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
                 {modalType === "SUB_SIDIARY" && <Subsidiary />}
                 {modalType === "EXAM_REPORT_SETTING" && <ExamReportSetting />}
@@ -135,7 +140,7 @@ const DefaultModal = () => {
                 )}
                 {modalType === "USER_SEARCH" && <UserSearch />}
                 {modalType === "POWER_DISTRIBUTION" && (
-                  <AddLoginUsersModal id={id}/>
+                  <AddLoginUsersModal id={id} />
                 )}
                 {modalType === "USER_NAME_CHANGE" && (
                   <UserNamePasswordChangeModal id={id} changeType="username" />

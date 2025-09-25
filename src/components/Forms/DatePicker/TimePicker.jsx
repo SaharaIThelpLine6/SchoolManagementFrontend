@@ -21,7 +21,7 @@ const TimePicker = ({
         className="mb-1 block text-black font-SolaimanLipi"
         htmlFor={registerKey}
       >
-        {translate(timeCalender)}
+        {translate(timeCalender)} :
       </label>
 
       <Controller

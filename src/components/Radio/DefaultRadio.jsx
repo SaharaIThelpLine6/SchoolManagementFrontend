@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 
@@ -6,6 +6,7 @@ const DefaultRadio = ({
   label,
   options,
   registerKey,
+  defaultValue = null, // ✅ নতুন props
   labelPosition = "top",
   className = "",
   radioClassName = "",
@@ -16,12 +17,19 @@ const DefaultRadio = ({
   const translate = useTranslate();
   const selectedValue = watch(registerKey);
 
+  // ✅ defaultValue থাকলে প্রথম render এ সেট করে দিচ্ছি
+  useEffect(() => {
+    if (defaultValue !== null) {
+      setValue(registerKey, defaultValue, { shouldValidate: true });
+    }
+  }, [defaultValue, registerKey, setValue]);
+
   const isChecked = (optionId) => {
     return selectedValue != null && Number(selectedValue) === Number(optionId);
   };
 
   const handleChange = (optionId) => {
-    setValue(registerKey, optionId);
+    setValue(registerKey, optionId, { shouldValidate: true });
   };
 
   return (
@@ -38,7 +46,7 @@ const DefaultRadio = ({
               : "block"
           } ${labelClassName}`}
         >
-          {translate(label)}
+          {translate(label)} :
         </label>
       )}
 
@@ -73,6 +81,4 @@ const DefaultRadio = ({
   );
 };
 
-
-
-export default DefaultRadio
+export default DefaultRadio;

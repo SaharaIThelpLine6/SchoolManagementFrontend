@@ -213,7 +213,7 @@ const Statement = ({ pageTitle }) => {
             <div className="flex items-center gap-2 bg-white p-2 rounded-lg">
               <DatePickerOne
                 dateCalender={
-                  <span className="text-red-500 font-medium">From:</span>
+                  <span className="text-red-500 font-medium">From</span>
                 }
                 placeholder={"শুরুর তারিখ"}
                 registerKey={"startDate"}
@@ -223,7 +223,7 @@ const Statement = ({ pageTitle }) => {
             <div className="flex items-center gap-2 bg-white p-2 rounded-lg">
               <DatePickerOne
                 dateCalender={
-                  <span className="text-red-500 font-medium">To:</span>
+                  <span className="text-red-500 font-medium">To</span>
                 }
                 placeholder={"শেষ তারিখ"}
                 registerKey={"endDate"}

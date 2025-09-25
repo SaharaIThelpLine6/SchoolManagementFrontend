@@ -14,7 +14,7 @@ export const settingsSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["InstitutionInfo", "Residential", "Settings", "Acc_Report_Settings"],
+  tagTypes: ["InstitutionInfo", "Residential", "Settings", "Acc_Report_Settings", "CodeSettings"],
   endpoints: (builder) => ({
     getInstitutionInfo: builder.query({
       query: () => "institution_info",
@@ -49,6 +49,18 @@ export const settingsSlice = createApi({
         body,
       }),
       invalidatesTags: ["InstitutionInfo"],
+    }),
+    getCodeSettings: builder.query({
+      query: () => "code_setting",
+      providesTags: ["CodeSettings"],
+    }),
+    updateCodeSetting: builder.mutation({
+      query: (body) => ({
+        url: `code_setting`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["CodeSettings"],
     }),
     updateSettings: builder.mutation({
       query: (body) => ({
@@ -92,5 +104,7 @@ export const {
   useGetPoliceStationsQuery,
   useGetSettingsQuery,
   useUpdateSettingsMutation,
-  useGetPermissionTypesQuery
+  useGetPermissionTypesQuery,
+  useUpdateCodeSettingMutation,
+  useGetCodeSettingsQuery
 } = settingsSlice;

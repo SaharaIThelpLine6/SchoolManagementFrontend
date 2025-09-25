@@ -242,21 +242,21 @@ const RFIDCard = ({ pageTitle }) => {
           </div>
           <div className="grid grid-cols-5 gap-3 my-5">
             <DefaultSelect
-              label={translate("Session") + " :"}
+              label="Session"
               options={sessionData ?? []}
               valueField="SessionID"
               nameField="SessionName"
               registerKey="SessionID"
             />{" "}
             <DefaultSelect
-              label={translate("Class/Jamaat") + " :"}
+              label="Class/Jamaat"
               options={sessionData ?? []}
               valueField="SessionID"
               nameField="SessionName"
               registerKey="SessionID"
             />{" "}
             <DefaultSelect
-              label={translate("Search Id") + " :"}
+              label="Search Id"
               options={sessionData ?? []}
               valueField="SessionID"
               nameField="SessionName"

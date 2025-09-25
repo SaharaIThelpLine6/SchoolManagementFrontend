@@ -289,7 +289,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
             >
               {/* Report Select - Always shown */}
               <DefaultSelect
-                label={translate("Report") + ":"}
+                label="Report"
                 nameField="ReportName"
                 registerKey="ReportID"
                 valueField="ReportID"
@@ -307,7 +307,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
               {/* Conditionally shown fields */}
               {shouldShowFields("SessionID") && (
                 <DefaultSelect
-                  label={translate("Session") + " :"}
+                  label="Session"
                   nameField="SessionName"
                   registerKey="SessionID"
                   valueField="SessionID"
@@ -319,7 +319,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
               )}
               {shouldShowFields("ExamID") && (
                 <DefaultSelect
-                  label={translate("Exam") + " :"}
+                  label="Exam"
                   nameField="ExamName"
                   registerKey="ExamID"
                   valueField="ExamID"
@@ -330,7 +330,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
               )}
               {shouldShowFields("ClassID") && (
                 <DefaultSelect
-                  label={translate("Class") + " :"}
+                  label="Class"
                   nameField="ClassName"
                   registerKey="ClassID"
                   valueField="ClassID"
@@ -341,7 +341,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
               )}
               {shouldShowFields("UserNameID") && (
                 <DefaultSelect
-                  label={`${translate("User Name")}:`}
+                  label="User Name"
                   nameField="UserName"
                   registerKey="UserID"
                   valueField="UserID"
@@ -352,7 +352,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
               )}
               {shouldShowFields("GenderID") && (
                 <DefaultSelect
-                  label={`${translate("Gender")}:`}
+                  label="Gender"
                   nameField="GenderName"
                   registerKey="GenderID"
                   valueField="GenderID"
@@ -363,7 +363,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
               )}
               {shouldShowFields("RDID") && (
                 <DefaultSelect
-                  label={translate("Residential") + " :"}
+                  label="Residential"
                   nameField="ResidentialName"
                   registerKey="RDID"
                   valueField="RDID"
@@ -374,7 +374,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
               )}{" "}
               {shouldShowFields("NewOldID") && (
                 <DefaultSelect
-                  label={translate("New/Old") + " :"}
+                  label="New/Old"
                   nameField="newOldName"
                   registerKey="newOldID"
                   valueField="newOldID"
@@ -384,7 +384,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
               )}
               {shouldShowFields("Langauge") && (
                 <DefaultSelect
-                  label={translate("Langauge") + " :"}
+                  label="Langauge"
                   nameField="name"
                   registerKey="id"
                   valueField="id"
@@ -396,7 +396,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
               {shouldShowFields("ExamVacationStatus") && (
                 <div className="col-span-2">
                   <ExamRoutingCheckbox
-                    label={translate("Exam Routine") + " :"}
+                    label="Exam Routine"
                     options={examVacationStatus}
                     registerKey="IsActive"
                     require={
@@ -410,7 +410,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
               {shouldShowFields("ColorStatus") && (
                 <div className="">
                   <ExamRoutingCheckbox
-                    label={translate("Color Status") + " :"}
+                    label="Color Status"
                     options={colorStatus}
                     registerKey="IsActive"
                     require={
@@ -423,7 +423,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
               )}{" "}
               {shouldShowFields("StatusFeeID") && (
                 <DefaultSelect
-                  label={translate("Status Fee") + " :"}
+                  label="Status Fee"
                   nameField="name"
                   registerKey="id"
                   valueField="id"
@@ -435,13 +435,13 @@ const FeeCollectionReport = ({ pageTitle }) => {
               {shouldShowFields("Date") && (
                 <div className="flex justify-between items-center gap-2">
                   <DatePickerOne
-                    dateCalender={`${translate("Start")}: `}
+                    dateCalender="Start"
                     placeholder="Enter date"
                     registerKey="DateStart"
                     require="Date Required"
                   />{" "}
                   <DatePickerOne
-                    dateCalender={`${translate("End")}: `}
+                    dateCalender="End"
                     placeholder="Enter date"
                     registerKey="DateEnd"
                     require="Date Required"
@@ -451,7 +451,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
               {shouldShowFields("SelectTwoID") && (
                 <div className="flex justify-between items-center gap-2">
                   <DefaultSelect
-                    label={translate("Status One") + " :"}
+                    label="Status One"
                     nameField="name"
                     registerKey="id"
                     valueField="id"
@@ -460,7 +460,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
                     unicode={true}
                   />
                   <DefaultSelect
-                    label={translate("Status Two") + " :"}
+                    label="Status Two"
                     nameField="name"
                     registerKey="id"
                     valueField="id"
@@ -473,13 +473,13 @@ const FeeCollectionReport = ({ pageTitle }) => {
               {shouldShowFields("UserID") && (
                 <div className="flex justify-between items-center gap-2">
                   <DefaultInput
-                    label={`${translate("Start")}: `}
+                    label="Start"
                     placeholder="Enter date"
                     registerKey="DateStart"
                     require="Date Required"
                   />
                   <DefaultInput
-                    label={`${translate("End")}: `}
+                    label="End"
                     placeholder="Enter date"
                     registerKey="DateEnd"
                     require="Date Required"

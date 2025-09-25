@@ -197,9 +197,7 @@ const AdmissionForm = ({ userId }) => {
               valueField={"SessionID"}
               registerKey={"SessionID"}
               type={"number"}
-              label={
-                <span className="text-red-500">{translate("Session")} *</span>
-              }
+              label="Session"
             />
 
             <DefaultSelect
@@ -209,11 +207,7 @@ const AdmissionForm = ({ userId }) => {
               valueField={"ClassID"}
               registerKey={"ClassID"}
               type={"number"}
-              label={
-                <span className="text-red-500">
-                  {translate("Admission Class")} *
-                </span>
-              }
+              label="Admission Class"
             />
 
             {/* <Controller
@@ -247,11 +241,7 @@ const AdmissionForm = ({ userId }) => {
               valueField="SubClassID"
               registerKey="SubClassID"
               type="number"
-              label={
-                <span className="text-red-500">
-                  {translate("Admission Section")} *
-                </span>
-              }
+              label="Admission Section"
             />
 
             <DefaultInput
@@ -259,11 +249,7 @@ const AdmissionForm = ({ userId }) => {
               placeholder={"Admission Serial/ Roll"}
               type={"number"}
               require={"Admission Serial is require"}
-              label={
-                <span className="text-red-500">
-                  {translate("Admission Serial")} *
-                </span>
-              }
+              label="Admission Serial"
             />
 
             <DefaultSelect
@@ -273,11 +259,7 @@ const AdmissionForm = ({ userId }) => {
               valueField={"SFTID"}
               registerKey={"SFTID"}
               type={"number"}
-              label={
-                <span className="text-red-500">
-                  {translate("Financial Condition")} *
-                </span>
-              }
+              label="Financial Condition"
             />
             <DefaultSelect
               options={residential}
@@ -286,11 +268,7 @@ const AdmissionForm = ({ userId }) => {
               valueField={"RDID"}
               registerKey={"ResidentialStatusId"}
               type={"number"}
-              label={
-                <span className="text-red-500">
-                  {translate("Living Condition")} *
-                </span>
-              }
+              label="Living Condition"
             />
             <DefaultSelect
               options={AdmissionType}
@@ -299,11 +277,7 @@ const AdmissionForm = ({ userId }) => {
               valueField={"id"}
               registerKey={"NewOldId"}
               type={"number"}
-              label={
-                <span className="text-red-500">
-                  {translate("Admission Type")} *
-                </span>
-              }
+              label="Admission Type"
             />
           </div>
           <div className="text-center pt-6 pb-3">

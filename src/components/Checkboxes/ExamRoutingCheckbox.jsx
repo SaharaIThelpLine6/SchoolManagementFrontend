@@ -38,7 +38,7 @@ const ExamRoutingCheckbox = ({
               : "block"
           } ${labelClassName}`}
         >
-          {translate(label)}
+          {translate(label)} :
         </label>
       )}
 

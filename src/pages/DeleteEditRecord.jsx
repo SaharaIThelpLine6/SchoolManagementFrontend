@@ -142,7 +142,7 @@ const DeleteEditRecord = () => {
                 placeholder="বছর নির্বাচন করুন"
                 nameField="SessionName"
                 valueField={"SessionID"}
-                label={translate("Account Type") + " :"}
+                label="Account Type"
                 unicode={true}
               />
               <DefaultSelect
@@ -152,7 +152,7 @@ const DeleteEditRecord = () => {
                 nameField="ExamName"
                 valueField={"ExamID"}
                 unicode={true}
-                label={translate("Data Type") + " :"}
+                label="Data Type"
               />
               <DatePickerOne
                 dateCalender={"From"}
@@ -170,7 +170,11 @@ const DeleteEditRecord = () => {
           </FormProvider>
         </div>
 
-        <SortableTable columns={columns} data={paginatedData} isFilterColumn={false}/>
+        <SortableTable
+          columns={columns}
+          data={paginatedData}
+          isFilterColumn={false}
+        />
 
         {/* Pagination Controls */}
 

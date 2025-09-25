@@ -130,7 +130,7 @@ const FundForm = () => {
                 require={translate("Fund name is required")}
                 type="text"
                 placeholder={translate("Enter fund name") + " ..."}
-                label={translate("Fund Name") + " :"}
+                label="Fund Name"
               />
             </div>
             <div className="flex gap-3">

@@ -125,7 +125,7 @@ const Subsidiary = ({ pageTitle }) => {
       hozAlign: "center",
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-        
+
           <EditButton
            // onClick={() => handleEditOpenModal(row.DNID)}
            />
@@ -165,21 +165,21 @@ const Subsidiary = ({ pageTitle }) => {
         <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 my-3">
             <DefaultSelect
-              label={translate("Fund") + " :"}
+              label="Fund"
               options={sessionData ?? []}
               valueField="SessionID"
               nameField="SessionName"
               registerKey="SessionID"
             />
             <DefaultSelect
-              label={translate("Chart account") + " :"}
+              label="Chart account"
               options={classListData ?? []}
               valueField="ClassID"
               nameField="ClassName"
               registerKey="ClassID"
             />
             <DefaultSelect
-              label={translate("Type") + " :"}
+              label="Type"
               options={classListData ?? []}
               valueField="ClassID"
               nameField="ClassName"

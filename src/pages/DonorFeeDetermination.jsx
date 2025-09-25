@@ -131,7 +131,7 @@ const DonorFeeDetermination = ({ pageTitle }) => {
           </h2>
 
           <DefaultSelect
-            label={translate("Search Type") + " :"}
+            label="Search Type"
             options={SearchTypes ?? []}
             valueField="ID"
             nameField="Name"
@@ -139,7 +139,7 @@ const DonorFeeDetermination = ({ pageTitle }) => {
           />
 
           <DefaultSelect
-            label={translate("Search Type") + " :"}
+            label="Search Type"
             options={SearchTypes ?? []}
             valueField="ID"
             nameField="Name"
@@ -166,11 +166,11 @@ const DonorFeeDetermination = ({ pageTitle }) => {
       </div>
 
       {/* Pagination */}
-         <DefaultPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+      <DefaultPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

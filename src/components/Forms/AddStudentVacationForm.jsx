@@ -35,7 +35,7 @@ const AddStudentVacationForm = ({ pageTitle }) => {
   const { academicSession, studentRelation, status } = useSelector(
     (state) => state.settings
   );
-  
+
 
   const translate = useTranslate();
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -300,21 +300,21 @@ const AddStudentVacationForm = ({ pageTitle }) => {
 
               <DefaultInput
                 registerKey="StudentName"
-                label={`${translate("Student Name")}: `}
+                label="Student Name"
                 disable={true}
               />
               <DefaultInput
                 registerKey="FatherName"
-                label={`${translate("Father Name")}: `}
+                label="Father Name"
                 disable={true}
               />
               <DefaultInput
                 registerKey="ClassName"
-                label={`${translate("ClassName")}: `}
+                label="ClassName"
                 disable={true}
               />
               <DefaultSelect
-                label={translate("Date of entry")}
+                label="Date of entry"
                 nameField="SessionName"
                 registerKey="SessionID"
                 valueField="SessionID"
@@ -327,7 +327,7 @@ const AddStudentVacationForm = ({ pageTitle }) => {
               />
               <div className="flex flex-row items-center justify-center gap-2">
                 <DefaultSelect
-                  label={`${translate("Type of vacation")}: `}
+                  label="Type of vacation"
                   nameField="VacationList"
                   registerKey="ID"
                   valueField="ID"
@@ -346,7 +346,7 @@ const AddStudentVacationForm = ({ pageTitle }) => {
                 </Button>
               </div>
               <DefaultSelect
-                label={`${translate("Relationship")}:`}
+                label="Relationship"
                 nameField="RelationName"
                 registerKey="RelationID"
                 valueField="RelationID"
@@ -358,25 +358,25 @@ const AddStudentVacationForm = ({ pageTitle }) => {
                 unicode={true}
               />
               <DatePickerOne
-                dateCalender={`${translate("Start Date of leave")}: `}
+                dateCalender="Start Date of leave"
                 placeholder="Enter date"
                 registerKey="VacationDateFrom"
                 require="Date Required"
               />
               <DatePickerOne
-                dateCalender={`${translate("End Date of leave")}: `}
+                dateCalender="End Date of leave"
                 placeholder="Enter date"
                 registerKey="VacationDateTo"
                 require="Date Required"
               />
               <TimePicker
-                timeCalender={`${translate("Start Time of leave")}: `}
+                timeCalender="Start Time of leave"
                 placeholder={`${translate("Select Time")}...`}
                 registerKey="VacationTimeFrom"
                 require={true}
               />
               <TimePicker
-                timeCalender={`${translate("End Time of leave")}: `}
+                timeCalender="End Time of leave"
                 placeholder={`${translate("Select Time")}...`}
                 registerKey="VacationTimeTo"
                 require={true}

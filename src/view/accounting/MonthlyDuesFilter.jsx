@@ -37,7 +37,7 @@ const MonthlyDuesFilter = ({ onFilter }) => {
             placeholder="বছর নির্বাচন করুন"
             nameField="SessionName"
             valueField={"SessionID"}
-            label={translate("Session") + " :"}
+            label="Session"
             unicode={true}
           />
         </div>
@@ -49,7 +49,7 @@ const MonthlyDuesFilter = ({ onFilter }) => {
             nameField="ExamName"
             valueField={"ExamID"}
             unicode={true}
-            label={translate("Exam") + " :"}
+            label="Exam"
           />
         </div>
         <div>
@@ -59,7 +59,7 @@ const MonthlyDuesFilter = ({ onFilter }) => {
             placeholder="শ্রেণি নির্বাচন করুন"
             nameField="SubClass"
             valueField={"SubClassID"}
-            label={translate("SubClass") + " :"}
+            label="SubClass"
             unicode={true}
           />
         </div>{" "}
@@ -70,7 +70,7 @@ const MonthlyDuesFilter = ({ onFilter }) => {
             placeholder="শ্রেণি নির্বাচন করুন"
             nameField="SubClass"
             valueField={"SubClassID"}
-            label={translate("SubClass") + " :"}
+            label="SubClass"
             unicode={true}
           />
         </div>{" "}
@@ -81,7 +81,7 @@ const MonthlyDuesFilter = ({ onFilter }) => {
             placeholder="শ্রেণি নির্বাচন করুন"
             nameField="SubClass"
             valueField={"SubClassID"}
-            label={translate("SubClass") + " :"}
+            label="SubClass"
             unicode={true}
           />
         </div>

@@ -23,6 +23,8 @@ export const feeCollectionSlice = createApi({
     "StudentFeeSettings",
     "SelectedStudentPerFee",
     "GeneralLedgersByFundAndCaids",
+    "FeeLand",
+    "SubGeneralLedger",
   ],
   endpoints: (builder) => ({
     getFees: builder.query({
@@ -147,6 +149,14 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["StudentFeeSettings"],
     }),
+    postFeeLand: builder.mutation({
+      query: (data) => ({
+        url: "insert_fee_land",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["FeeLand"],
+    }),
     postGeneralLedgersByFundAndCaids: builder.mutation({
       query: (data) => ({
         url: "insert_general_ledger",
@@ -187,6 +197,10 @@ export const feeCollectionSlice = createApi({
     getTransactionOrders: builder.query({
       query: ({ id }) => `transaction_orders/${id}`,
       providesTags: ["TransactionOrders"],
+    }),
+    getFeeLandByAdmission: builder.query({
+      query: ({ id }) => `fee_land_by_admission_id/${id}`,
+      providesTags: ["FeeLand"],
     }),
     getReceiptNumber: builder.query({
       query: ({ fundid, caid }) => `receipt_number/${fundid}/${caid}`,
@@ -274,6 +288,36 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["SelectedStudentPerFee"],
     }),
+
+    // Sub General Ledger
+    getSubGeneralLedgers: builder.query({
+      query: ({ fundId, caId, glid }) =>
+        `subledger_by_glid/${fundId}/${caId}/${glid}`,
+      providesTags: ["SubGeneralLedger"],
+    }),
+    postSubGeneralLedger: builder.mutation({
+      query: (data) => ({
+        url: "insert_subsidiary_ledger",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["SubGeneralLedger"],
+    }),
+    updateSubGeneralLedger: builder.mutation({
+      query: ({ SlName, slId }) => ({
+        url: `update_subsidiary_ledger/${slId}`,
+        method: "PUT",
+        body: { SlName },
+      }),
+      invalidatesTags: ["SubGeneralLedger"],
+    }),
+    deleteSubGeneralLedger: builder.mutation({
+      query: (slId) => ({
+        url: `/delete_subsidiary_ledger/${slId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["SubGeneralLedger"],
+    }),
   }),
 });
 
@@ -317,5 +361,13 @@ export const {
   useGetGeneralLedgersByFundAndCaidsQuery,
   usePostGeneralLedgersByFundAndCaidsMutation,
   useUpdateGeneralLedgersByFundAndCaidsMutation,
-  useDeleteGeneralLedgersByFundAndCaidsMutation
+  useDeleteGeneralLedgersByFundAndCaidsMutation,
+  usePostFeeLandMutation,
+  useGetFeeLandByAdmissionQuery,
+
+  // Sub general ledger
+  useGetSubGeneralLedgersQuery,
+  usePostSubGeneralLedgerMutation,
+  useUpdateSubGeneralLedgerMutation,
+  useDeleteSubGeneralLedgerMutation,
 } = feeCollectionSlice;

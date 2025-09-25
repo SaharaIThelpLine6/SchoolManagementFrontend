@@ -122,7 +122,7 @@ const SMSTemplate = ({ pageTitle, checkedValue }) => {
               require={translate("Message name is required")}
               type="text"
               placeholder={translate("Enter new message name") + " ..."}
-              label={translate("Message Name") + " :"}
+              label="Message Name"
             />
           </div>
           <div className="mb-4">

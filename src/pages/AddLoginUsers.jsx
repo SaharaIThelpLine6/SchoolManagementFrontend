@@ -310,7 +310,7 @@ const AddLoginUsers = () => {
                 <div className="flex items-end gap-2">
                   <DefaultInput
                     type="text"
-                    label={<span>{translate("User Name")} :</span>}
+                    label="User Name"
                     registerKey="UserName"
                     nameField="UserName"
                     disable={true}
@@ -341,7 +341,7 @@ const AddLoginUsers = () => {
 
                 {/* User Power */}
                 <DefaultSelect
-                  label={translate("User Power") + " :"}
+                  label="User Power"
                   options={filteredPermissionTypes}
                   valueField="PermissionTypeID"
                   nameField="PermissionName"
@@ -352,7 +352,7 @@ const AddLoginUsers = () => {
 
                 {/* Login Name */}
                 <DefaultInput
-                  label={translate("Login Name") + " :"}
+                  label="Login Name"
                   type="text"
                   placeholder={translate("Enter login name")}
                   registerKey="loginName"
@@ -364,7 +364,7 @@ const AddLoginUsers = () => {
                 <div className="relative">
                   <DefaultInput
                     type={showPassword ? "text" : "password"}
-                    label={translate("Password") + " :"}
+                    label="Password"
                     placeholder={translate("Enter password")}
                     registerKey="password"
                     require={translate("Password is required!")}
@@ -406,7 +406,7 @@ const AddLoginUsers = () => {
                 <div className="relative">
                   <DefaultInput
                     type={showConfirmPassword ? "text" : "password"}
-                    label={translate("Confirm Password") + " :"}
+                    label="Confirm Password"
                     placeholder={translate("Confirm password")}
                     registerKey="ConfirmPassword"
                     require={translate("Confirm password is required!")}

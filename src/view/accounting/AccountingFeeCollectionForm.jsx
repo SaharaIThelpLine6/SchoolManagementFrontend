@@ -181,9 +181,7 @@ const AccountingFeeCollectionForm = ({ userId }) => {
               valueField={"SessionID"}
               registerKey={"SessionID"}
               type={"number"}
-              label={
-                <span className="text-red-500">{translate("Session")} *</span>
-              }
+              label="Session"
             />
 
             <DefaultSelect
@@ -193,11 +191,7 @@ const AccountingFeeCollectionForm = ({ userId }) => {
               valueField={"ClassID"}
               registerKey={"ClassID"}
               type={"number"}
-              label={
-                <span className="text-red-500">
-                  {translate("Admission Class")} *
-                </span>
-              }
+              label="Admission Class"
             />
 
             <DefaultSelect
@@ -207,11 +201,7 @@ const AccountingFeeCollectionForm = ({ userId }) => {
               valueField="SubClassID"
               registerKey="SubClassID"
               type="number"
-              label={
-                <span className="text-red-500">
-                  {translate("Admission Section")} *
-                </span>
-              }
+              label="Admission Section"
             />
 
             <DefaultInput
@@ -219,11 +209,7 @@ const AccountingFeeCollectionForm = ({ userId }) => {
               placeholder={"Admission Serial/ Roll"}
               type={"number"}
               require={"Admission Serial is require"}
-              label={
-                <span className="text-red-500">
-                  {translate("Admission Serial")} *
-                </span>
-              }
+              label="Admission Serial"
             />
 
             <DefaultSelect
@@ -233,11 +219,7 @@ const AccountingFeeCollectionForm = ({ userId }) => {
               valueField={"SFTID"}
               registerKey={"SFTID"}
               type={"number"}
-              label={
-                <span className="text-red-500">
-                  {translate("Financial Condition")} *
-                </span>
-              }
+              label="Financial Condition"
             />
             <DefaultSelect
               options={residential}
@@ -246,11 +228,7 @@ const AccountingFeeCollectionForm = ({ userId }) => {
               valueField={"RDID"}
               registerKey={"ResidentialStatusId"}
               type={"number"}
-              label={
-                <span className="text-red-500">
-                  {translate("Living Condition")} *
-                </span>
-              }
+              label="Living Condition"
             />
             <DefaultSelect
               options={AdmissionType}
@@ -259,11 +237,7 @@ const AccountingFeeCollectionForm = ({ userId }) => {
               valueField={"id"}
               registerKey={"NewOldId"}
               type={"number"}
-              label={
-                <span className="text-red-500">
-                  {translate("Admission Type")} *
-                </span>
-              }
+              label="Admission Type"
             />
           </div>
           <div className="text-end pt-6 pb-3">

@@ -32,7 +32,7 @@ const SMS = ({ pageTitle }) => {
   );
   const { isOpen, id } = useSelector((state) => state.modal);
 
-  // 
+  //
   const {data: checkBalanceData, isError, isSuccess} = useGetCheckBalanceQuery()
 
 
@@ -260,7 +260,7 @@ const SMS = ({ pageTitle }) => {
                   {/* Mobile Input */}
                   <div className="flex flex-col gap-1">
                     <Input
-                      label={`${translate("Mobile Number")} :`}
+                      label="Mobile Number"
                       placeholder={translate("Enter mobile number")}
                       type="tel"
                       name="mobile"

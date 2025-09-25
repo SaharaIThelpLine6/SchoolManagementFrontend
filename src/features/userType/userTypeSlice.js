@@ -14,11 +14,15 @@ export const userTypeSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["UserType", "User", "Madrasah", "LoginUsers"], // Define your tag type
+  tagTypes: ["UserType", "User", "Madrasah", "LoginUsers", "UserCodeCheck"], // Define your tag type
   endpoints: (builder) => ({
     getUserTypes: builder.query({
       query: () => "user_type",
       providesTags: ["UserType"], // This query provides this tag
+    }),
+    getUserCodeCheck: builder.query({
+      query: (UserTypeID) => `user_code_check?UserTypeID=${UserTypeID}`,
+      providesTags: ["UserCodeCheck"],
     }),
     getUserBySearch: builder.query({
       query: ({ search, ClassID, SessionID, UserTypeID }) => {
@@ -114,5 +118,6 @@ export const {
   useUpdateLoginUserPasswordChangeMutation,
   useUpdateLoginUserStatusChangeMutation,
   useUpdateLoginUserTypeChangeMutation,
-  useGetCurrentMadrasahQuery
+  useGetCurrentMadrasahQuery,
+  useGetUserCodeCheckQuery
 } = userTypeSlice;

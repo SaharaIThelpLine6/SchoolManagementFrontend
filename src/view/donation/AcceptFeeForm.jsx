@@ -180,7 +180,7 @@ const AcceptFeeForm = ({ onBack }) => {
           {/* Student Info Fields */}
           <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-6">
             <DatePickerOne
-              dateCalender={translate("Entry Date") + " :"}
+              dateCalender="Entry Date"
               placeholder="YYYY-MM-DD"
               registerKey="entryDate"
               require="তারিখ দিন"
@@ -190,11 +190,11 @@ const AcceptFeeForm = ({ onBack }) => {
               type="text"
               registerKey={`prescribedFee`}
               labelPosition="left"
-              label={translate("Prescribed Fee") + " :"}
+              label="Prescribed Fee"
             />
 
             <DatePickerOne
-              dateCalender={translate("Renewal Date") + " :"}
+              dateCalender="Renewal Date"
               placeholder="YYYY-MM-DD"
               registerKey="renewalDate"
               require="তারিখ দিন"
@@ -204,12 +204,12 @@ const AcceptFeeForm = ({ onBack }) => {
               type="text"
               registerKey={`total`}
               labelPosition="left"
-              label={translate("Total") + " :"}
+              label="Total"
             />
 
             <div className="flex items-center gap-2">
               <DatePickerOne
-                dateCalender={translate("Sectors") + " :"}
+                dateCalender="Sectors"
                 placeholder="YYYY-MM-DD"
                 registerKey="sectorDate"
                 require="তারিখ দিন"
@@ -227,61 +227,61 @@ const AcceptFeeForm = ({ onBack }) => {
               type="text"
               registerKey="deduction"
               labelPosition="left"
-              label={translate("Deduction") + " :"}
+              label="Deduction"
             />
             <DefaultInput
               type="text"
               registerKey="type"
               labelPosition="left"
-              label={translate("Type") + " :"}
+              label="Type"
             />
             <DefaultInput
               type="text"
               registerKey="grandTotal"
               labelPosition="left"
-              label={translate("Grand Total") + " :"}
+              label="Grand Total"
             />
             <DefaultInput
               type="text"
               registerKey="subLedger"
               labelPosition="left"
-              label={translate("Sub Ledger") + " :"}
+              label="Sub Ledger"
             />
             <DefaultInput
               type="text"
               registerKey="previousBalance"
               labelPosition="left"
-              label={translate("Previous Balance") + " :"}
+              label="Previous Balance"
             />
             <DefaultInput
               type="text"
               registerKey="totalPayable"
               labelPosition="left"
-              label={translate("Total Payable") + " :"}
+              label="Total Payable"
             />
             <DefaultInput
               type="text"
               registerKey="received"
               labelPosition="left"
-              label={translate("Received") + " :"}
+              label="Received"
             />
             <DefaultInput
               type="text"
               registerKey="details"
               labelPosition="left"
-              label={translate("Details") + " :"}
+              label="Details"
             />
             <DefaultInput
               type="text"
               registerKey="due"
               labelPosition="left"
-              label={translate("Due") + " :"}
+              label="Due"
             />
             <DefaultInput
               type="text"
               registerKey="inWords"
               labelPosition="left"
-              label={translate("In Words") + " :"}
+              label="In Words"
             />
           </div>
         </div>

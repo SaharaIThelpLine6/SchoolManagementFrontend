@@ -109,7 +109,7 @@ const UserSearch = () => {
         {/* Filters */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <DefaultSelect
-            label={translate("User Types") + " :"}
+            label="User Types"
             options={UserTypeData ?? []}
             valueField="ID"
             nameField="TypeName"
@@ -117,14 +117,14 @@ const UserSearch = () => {
             unicode={true}
           />{" "}
           <DefaultSelect
-            label={translate("Search Type") + " :"}
+            label="Search Type"
             options={SearchTypes ?? []}
             valueField="ID"
             nameField="Name"
             registerKey={`ID`}
           />
           <DefaultInput
-            label={translate("User Code") + " :"}
+            label="User Code"
             valueField="SessionID"
             nameField="SessionName"
             registerKey={`SessionID`}
@@ -151,11 +151,11 @@ const UserSearch = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-       <DefaultPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+        <DefaultPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
     </div>
   );
