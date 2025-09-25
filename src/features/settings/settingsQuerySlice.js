@@ -14,7 +14,7 @@ export const settingsSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["InstitutionInfo", "Residential", "Settings", "CodeSettings"],
+  tagTypes: ["InstitutionInfo", "Residential", "Settings", "Acc_Report_Settings", "CodeSettings"],
   endpoints: (builder) => ({
     getInstitutionInfo: builder.query({
       query: () => "institution_info",
@@ -37,6 +37,10 @@ export const settingsSlice = createApi({
     }),
     getFinancialStatus: builder.query({
       query: () => "financial_status",
+    }),
+    getAccReportSettings: builder.query({
+      query: () => "acc_report_settings",
+      providesTags: ["Acc_Report_Settings"],
     }),
     updateInstitutionInfo: builder.mutation({
       query: (body) => ({
@@ -66,6 +70,14 @@ export const settingsSlice = createApi({
       }),
       invalidatesTags: ["Settings"],
     }),
+    updateAccReportSetting: builder.mutation({
+      query: (body) => ({
+        url: `update_report_settings`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Acc_Report_Settings"],
+    }),
     // Division, District, Thana Get
     getDivisions: builder.query({
       query: () => "division",
@@ -82,9 +94,11 @@ export const settingsSlice = createApi({
 export const {
   useGetInstitutionInfoQuery,
   useUpdateInstitutionInfoMutation,
+  useUpdateAccReportSettingMutation,
   useGetResidentialQuery,
   useGetStudentRelationsQuery,
   useGetFinancialStatusQuery,
+  useGetAccReportSettingsQuery,
   useGetDivisionsQuery,
   useGetDistrictsQuery,
   useGetPoliceStationsQuery,

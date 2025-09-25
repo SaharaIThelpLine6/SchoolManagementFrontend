@@ -30,6 +30,7 @@ import UserFilterModal from "./Modals/UserFilterModal";
 import SelectedPerStudentFeeModal from "./Modals/SelectedPerStudentFeeModal";
 import FundForm from "../view/accounting/FundForm";
 import GeneralForm from "../view/accounting/GeneralForm";
+import ReportSettings from "../view/accounting/ReportSettings";
 import CodeSetting from "./Modals/CodeSetting";
 import SubGeneralForm from "../view/accounting/SubGeneralForm";
 import FeeAcceptForm from "../view/accounting/student-fee-collection/FeeAcceptForm";
@@ -100,6 +101,7 @@ const DefaultModal = () => {
                 {modalType === "ADD_FUND" && <FundForm />}
                 {modalType === "OPEN_FUND" && <FundForm />}
                 {modalType === "OPEN_GENERAL" && <GeneralForm />}
+                {modalType === "OPEN_ACC_REPORT_SETTINGS" && <ReportSettings />}
                 {modalType === "OPEN_SUB_GENERAL" && <SubGeneralForm />}
                 {modalType === "STUDENT_FEE_GROUP" && <StudentFeeGroup />}
                 {modalType === "EDIT_TYPEOFVACATION" && (
