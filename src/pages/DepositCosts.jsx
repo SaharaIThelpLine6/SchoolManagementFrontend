@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { FormProvider, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-
+import Flatpickr from "react-flatpickr";
 import { setPageName } from "../features/auth/authSlice";
 import useTranslate from "../utils/Translate";
 import bnBijoy2Unicode from "../utils/conveter";
@@ -40,7 +40,11 @@ const PAGE_SIZE = 10;
 const DepositCosts = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
-  const methods = useForm();
+  const methods = useForm({
+    defaultValues: {
+      TransactionDateEng: new Date(), // today
+    },
+  });
   const { watch, handleSubmit, setValue } = methods;
   const [currentPage, setCurrentPage] = useState(1);
   const [defaultData, setDefaultData] = useState([]);
@@ -198,14 +202,26 @@ const DepositCosts = ({ pageTitle }) => {
         SL: editIdDefaultData ? editIdDefaultData : 1 + defaultData.length,
       };
 
+
       if (editIdDefaultData) {
-        console.log(payload, "payload edit data eeeeeeeeeeeeeeeeeeeee");
+        console.log(payload, "payload edit data");
         setDefaultData((prev) =>
           prev.map((item) => (item.SL === editIdDefaultData ? payload : item))
         );
         setEditIdDefaultData(null);
       } else {
-        setDefaultData((prev) => [...prev, payload]);
+        setDefaultData((prev) => {
+          const exists = prev.some((item) => item.SLID === payload.SLID);
+          if (exists) {
+            Swal.fire({
+              icon: "error",
+              title: "Duplicate Entry",
+              text: `SLID ${payload.SLID} already exists!`,
+            });
+            return prev; // prevent insertion
+          }
+          return [...prev, payload];
+        });
       }
 
       Swal.fire({
@@ -393,7 +409,7 @@ const DepositCosts = ({ pageTitle }) => {
     try {
       const payload = {
         FundID,
-        CAID: caID,
+        CAID: CAID,
         VoucherNo: VoucherNo || 1,
         BookNo,
         LParticulars,
@@ -406,33 +422,35 @@ const DepositCosts = ({ pageTitle }) => {
           : TransactionBanglaDate,
         gledger: defaultData,
       };
+      console.log(payload);
 
-      if (editId) {
-        console.log(payload, "payload edit data");
-        await updateInComeExpense({ id: editId, data: payload }).unwrap();
-      } else {
-        await postInComeExpense(payload).unwrap();
-      }
 
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Data submitted successfully!",
-        timer: 2000,
-        showConfirmButton: false,
-      });
-
-      refetch();
-      methods.reset({
-        FundID: "",
-        VoucherNo: methods.getValues("VoucherNo"),
-        BookNo: "",
-        TransactionDateEng: "",
-        TransactionBanglaDate: "",
-        CAID: methods.getValues("CAID"),
-        gledger: [],
-      });
-      setDefaultData([]);
+       if (editId) {
+         console.log(payload, "payload edit data");
+         await updateInComeExpense({ id: editId, data: payload }).unwrap();
+       } else {
+         await postInComeExpense(payload).unwrap();
+       }
+ 
+       Swal.fire({
+         icon: "success",
+         title: "Success",
+         text: "Data submitted successfully!",
+         timer: 2000,
+         showConfirmButton: false,
+       });
+ 
+       refetch();
+       methods.reset({
+         FundID: "",
+         VoucherNo: methods.getValues("VoucherNo"),
+         BookNo: "",
+         TransactionDateEng: "",
+         TransactionBanglaDate: "",
+         CAID: methods.getValues("CAID"),
+         gledger: [],
+       });
+       setDefaultData([]);
     } catch (error) {
       console.error("Submission Error:", error);
       Swal.fire({
@@ -453,7 +471,7 @@ const DepositCosts = ({ pageTitle }) => {
           </h3>
           <button type="button" className="flex items-center justify-center transition-colors duration-150 text-blue-600" onClick={handleSettingsModal}>
 
-            <svg  xmlns="http://www.w3.org/2000/svg"  width={24}  height={24}  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth={2}  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-settings text-dark"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-settings text-dark"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>
           </button>
         </div>
       </div>
@@ -519,15 +537,39 @@ const DepositCosts = ({ pageTitle }) => {
               </Button>
             </div>
 
-            <DefaultSelect
-              label="Sectors"
-              options={gSLData ?? []}
-              valueField="SLID"
-              nameField="SlName"
-              registerKey="SLID"
-              unicode={true}
-              require={"Sectors is required!"}
-            />
+            <div>
+
+              <label htmlFor={"TransactionDateEng"} className={`text-black font-SolaimanLipi w-1/4 min-w-[100px] mb-0 text-end`}>
+                {translate("English Date")} :
+              </label>
+              {/* Date Picker */}
+              <div className="w-full">
+                <Controller
+                  name="TransactionDateEng"
+                  control={methods.control}
+                  rules={{ required: false }}
+                  render={({ field }) => (
+                    <Flatpickr
+                      options={{
+                        dateFormat: "Y-m-d",
+                      }}
+                      className="w-full rounded border-[1.5px] border-stroke bg-white py-1 px-4 text-black outline-none transition
+                        focus:border-custom-focus active:border-custom-focus
+                        disabled:cursor-not-allowed disabled:bg-slate-200 h-[38px]"
+                      value={field.value} // important!
+                      onChange={(date) => field.onChange(date[0])} // flatpickr gives array
+                    />
+                  )}
+                />
+                {methods.formState.errors?.TransactionDateEng && (
+                  <span className="text-red-500 text-sm mt-1">
+                    {methods.formState.errors.TransactionDateEng.message}
+                  </span>
+                )}
+
+              </div>
+            </div>
+
             <DefaultInput
               label="Voucher/Bill"
               type="text"
@@ -539,19 +581,8 @@ const DepositCosts = ({ pageTitle }) => {
               type="number"
               registerKey={"BookNo"}
               placeholder={translate("Enter Book Id ...")}
-              require={"BookNo is required!"}
             />
-            <DatePickerOne
-              dateCalender="English Date"
-              placeholder="Enter date"
-              registerKey="TransactionDateEng"
-              require="English date is required!"
-            />
-            <BanglaDatePicker
-              dateCalender="Bangla Date"
-              placeholder="Enter date"
-              registerKey="TransactionBanglaDate"
-            />
+
             <DefaultSelect
               label="Payment System"
               nameField={"GlName"}
@@ -572,42 +603,45 @@ const DepositCosts = ({ pageTitle }) => {
               require={"Account is required!"}
               unicode={true}
             />
-            <div className="col-span-2">
-              <DefaultInput
-                label="Payment Comments"
-                placeholder={translate("Enter comments")}
-                registerKey="LParticulars"
-                require={"Payment comments is required!"}
+            <DefaultInput
+              label="Payment Comments"
+              placeholder={translate("Enter comments")}
+              registerKey="LParticulars"
+              unicode={true}
+            />
+            <div className="hidden sm:block"></div>
+            <div className="hidden sm:block"></div>
+            <div className="hidden sm:block"></div>
+              <DefaultSelect
+                label="Sectors"
+                options={gSLData ?? []}
+                valueField="SLID"
+                nameField="SlName"
+                registerKey="SLID"
                 unicode={true}
-                className="sm:col-span-2 lg:col-span-3"
+                require={"Sectors is required!"}
               />
-            </div>
-            <div className="col-span-2">
               <DefaultInput
                 label="Description"
                 placeholder={translate("Enter description")}
                 registerKey="Particulars"
-                require={"Description is required!"}
                 unicode={true}
-                className="sm:col-span-2 lg:col-span-3"
               />
-            </div>
-            <DefaultInput
-              label="Amount"
-              type="text"
-              registerKey={"Amount"}
-              placeholder={translate("Enter Amount number ...")}
-              require={"Book is required!"}
-              className="col-span-1"
-            />
-            <div className="flex items-center justify-start w-full pt-6">
-              <Button
-                type="submit"
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-              >
-                {translate("Add")}
-              </Button>
-            </div>
+              <DefaultInput
+                label="Amount"
+                type="text"
+                registerKey={"Amount"}
+                placeholder={translate("Enter Amount number ...")}
+                require={"Book is required!"}
+              />
+              <div className="flex items-center justify-start w-full pt-6">
+                <Button
+                  type="submit"
+                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+                >
+                  {translate("Add")}
+                </Button>
+              </div>
           </div>
         </form>
       </FormProvider>
