@@ -254,52 +254,38 @@ const GLID = watch("GLID");
                     {translate("মোট")}
                   </span>
                   <span className="text-gray-700 w-2 flex-shrink-0">:</span>
-                  <input
-                    type="text"
-                    className="ml-1 w-20 p-1 border border-gray-300 rounded"
-                    placeholder="০০"
-                    defaultValue={studentFeeDataAll?.prescribedFee ?? "0"}
-                    readOnly
-                  />
+                  <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
+                    {studentFeeDataAll?.prescribedFee ?? "0"}
+                  </span>
                 </div>
                 <div className="flex items-center text-sm">
                   <span className="font-semibold text-gray-700 min-w-12 pr-1 flex-shrink-0">
                     {translate("কর্তন")}
                   </span>
                   <span className="text-gray-700 w-2 flex-shrink-0">:</span>
-                  <input
-                    type="text"
-                    className="ml-1 w-20 p-1 border border-gray-300 rounded"
-                    placeholder="০০"
-                    defaultValue={studentFeeDataAll?.deduction ?? "0"}
-                    readOnly
-                  />
+
+                  <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
+                    {studentFeeDataAll?.deduction ?? "0"}
+                  </span>
                 </div>
                 <div className="flex items-center text-sm">
                   <span className="font-semibold text-gray-700 min-w-12 pr-1 flex-shrink-0">
                     {translate("জমা")}
                   </span>
                   <span className="text-gray-700 w-2 flex-shrink-0">:</span>
-                  <input
-                    type="text"
-                    className="ml-1 w-20 p-1 border border-gray-300 rounded"
-                    placeholder="০০"
-                    defaultValue={studentFeeDataAll?.currentDeposit ?? "0"}
-                    readOnly
-                  />
+                  <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
+                    {studentFeeDataAll?.currentDeposit ?? "0"}
+                  </span>
                 </div>
                 <div className="flex items-center text-sm">
                   <span className="font-semibold text-gray-700 min-w-12 pr-1 flex-shrink-0">
                     {translate("বকেয়া")}
                   </span>
                   <span className="text-gray-700 w-2 flex-shrink-0">:</span>
-                  <input
-                    type="text"
-                    className="ml-1 w-20 p-1 border border-gray-300 rounded"
-                    placeholder="০০"
-                    value={totalDue ?? "0"}
-                    readOnly
-                  />
+
+                  <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
+                    {studentFeeDataAll?.totalDue ?? "0"}
+                  </span>
                 </div>
                 <div className="flex items-center text-sm">
                   <span className="font-semibold text-gray-700 min-w-12 pr-1 flex-shrink-0">
