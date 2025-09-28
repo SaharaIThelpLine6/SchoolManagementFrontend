@@ -12,12 +12,28 @@ const ReportSettings = () => {
   const [selected, setSelected] = useState(null);
   const methods = useForm({
     defaultValues: {
-      rows: []
+      rows: [],
+      "14": null,
+      "YearID": null
     }
   });
   const { control, handleSubmit, reset } = methods;
+  const { fields, replace } = useFieldArray({
+    control,
+    name: "rows",
+  });
   useEffect(() => {
-    if (accReportSettingsData) {
+    if (accReportSettingsData?.ReportSettings) {
+      console.log(accReportSettingsData?.ReportSettings);
+      const area = Object.entries(accReportSettingsData.ReportSettings).map(
+        ([id, values]) => ({
+          ID: parseInt(id, 10),
+          ...values,
+        })
+      )
+      console.log(area);
+
+
       reset({
         rows: Object.entries(accReportSettingsData.ReportSettings).map(
           ([id, values]) => ({
@@ -28,16 +44,11 @@ const ReportSettings = () => {
         "14": String(accReportSettingsData.TblPrintView.Action),
         "YearID": accReportSettingsData.AccRasidSetting.YearID,
       });
-      setSelected(String(accReportSettingsData.TblPrintView.Action)); 
-      console.log(accReportSettingsData.TblPrintView.Action);
-      
+      setSelected(String(accReportSettingsData.TblPrintView.Action));
+
     }
-  }, [accReportSettingsData, reset, setSelected]);
-  // dynamic rows
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "rows"
-  });
+  }, [accReportSettingsData, reset]);
+  // dynamic 
 
   const onSubmit = async (data) => {
     const payload = {};
@@ -69,7 +80,6 @@ const ReportSettings = () => {
 
   return (
     <FormProvider {...methods}>
-
 
 
       <form
@@ -230,14 +240,13 @@ const ReportSettings = () => {
 
 
 
-        {fields.map((field, index) => (
-          <div key={field.id} className=" gap-2 mb-4">
-            {/* <DefaultInput registerKey={`rows.${index}.ID`} label="ID" /> */}
+        {/* {fields.map((field, index) => (
+          <div key={field.ID} className=" gap-2 mb-4">
             <input className="hidden" {...methods.register(`rows.${index}.ID`)} />
 
             <div className="grid grid-cols-3 gap-2">
               <div className="flex gap-4 items-center">
-                <label htmlFor={`rows.${index}.SettingColumn1`}>Col 3</label>
+                <label htmlFor={`rows.${index}.SettingColumn1`}>Col 1</label>
                 <input
                   type="checkbox"
                   className="h-3 w-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
@@ -245,7 +254,7 @@ const ReportSettings = () => {
                 />
               </div>
               <div className="flex gap-4 items-center">
-                <label htmlFor={`rows.${index}.SettingColumn2`}>Col 3</label>
+                <label htmlFor={`rows.${index}.SettingColumn2`}>Col 2</label>
                 <input
                   type="checkbox"
                   className="h-3 w-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
@@ -266,12 +275,86 @@ const ReportSettings = () => {
             </div>
 
           </div>
+        ))} */}
+        {fields.map((field, index) => (
+          <div key={field.ID} className="gap-2 mb-4">
+            <input className="hidden" {...methods.register(`rows.${index}.ID`)} />
+
+            <div className="grid grid-cols-3 gap-2">
+              {/* Checkboxes */}
+              <div className="flex gap-2 items-center">
+                <label htmlFor={`rows.${index}.SettingColumn1`}>Col 1</label>
+                <input
+                  type="checkbox"
+                  {...methods.register(`rows.${index}.SettingColumn1`)}
+                  defaultChecked={field.SettingColumn1 === 1}
+                  className="h-3 w-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex gap-2 items-center">
+                <label htmlFor={`rows.${index}.SettingColumn2`}>Col 2</label>
+                <input
+                  type="checkbox"
+                  {...methods.register(`rows.${index}.SettingColumn2`)}
+                  defaultChecked={field.SettingColumn2 === 1}
+                  className="h-3 w-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex gap-2 items-center">
+                <label htmlFor={`rows.${index}.SettingColumn3`}>Col 3</label>
+                <input
+                  type="checkbox"
+                  {...methods.register(`rows.${index}.SettingColumn3`)}
+                  defaultChecked={field.SettingColumn3 === 1}
+                  className="h-3 w-3 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Text Inputs */}
+              <div>
+                <input
+                  type="text"
+                  placeholder="Value 1"
+                  {...methods.register(`rows.${index}.Value1`)}
+                  defaultValue={field.Value1 || ""}
+                  className="w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition
+                      focus:border-custom-focus active:border-custom-focus
+                      disabled:cursor-not-allowed disabled:bg-slate-200"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Value 2"
+                  {...methods.register(`rows.${index}.Value2`)}
+                  defaultValue={field.Value2 || ""}
+                  className="w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition
+                      focus:border-custom-focus active:border-custom-focus
+                      disabled:cursor-not-allowed disabled:bg-slate-200"
+                />
+              </div>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Value 3"
+                  {...methods.register(`rows.${index}.Value3`)}
+                  defaultValue={field.Value3 || ""}
+                  className="w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition
+                      focus:border-custom-focus active:border-custom-focus
+                      disabled:cursor-not-allowed disabled:bg-slate-200"
+                />
+              </div>
+            </div>
+          </div>
         ))}
+
 
         <div className="flex gap-4">
           <Button type="submit">Submit</Button>
         </div>
       </form>
+
+
     </FormProvider>
   );
 };
