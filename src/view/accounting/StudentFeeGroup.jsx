@@ -39,8 +39,7 @@ const StudentFeeGroup = () => {
     useGetSubGeneralLedgersByFundIdAndGlIdQuery(
       { fundId: FundID, glid: GLID },
       { skip: !GLID }
-    ); 
-
+    );
   // Mutations
   const [postStudentFeeGroup, { isLoading: isCreating }] =
     usePostStudentFeeGroupMutation();

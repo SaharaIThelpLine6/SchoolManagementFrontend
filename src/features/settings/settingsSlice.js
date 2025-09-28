@@ -31,12 +31,12 @@ export const fetchSettingsData = createAsyncThunk('settings/fetchSettingsData', 
 
 export const fetchDidata = createAsyncThunk("settings/fetchDidata", async (id, { getState }) => {
     console.log("Fetch thana data");
-    
+
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Token is missing');
     const state = getState();
     if (state.settings.district[id]) {
-        return { id, data: state.settings.district[id] }; 
+        return { id, data: state.settings.district[id] };
     }
     const response = await getSettingsData(token, `/api/settings/district?divition_id=${id}`);
     return { id, data: response };
@@ -67,6 +67,7 @@ const initialState = {
     studentFinancialStatus: [],
     currentDivitionId: null,
     currentDistrictId: null,
+    studentFeeData: null,
     status: 'idle',
     error: null,
 };
@@ -77,6 +78,12 @@ const settingsSlice = createSlice({
     reducers: {
         setDivisionID: (state, action) => {
             state.currentDivitionId = action.payload;
+        },
+        setStudentFeeData: (state, action) => {
+            state.studentFeeData = action.payload;
+        },
+        clearStudentFeeData: (state, action) => {
+            state.studentFeeData = null;
         }
     },
     extraReducers: (builder) => {
@@ -131,5 +138,5 @@ const settingsSlice = createSlice({
             })
     },
 });
-export const { setDivisionID } = settingsSlice.actions;
+export const { setDivisionID, setStudentFeeData, clearStudentFeeData} = settingsSlice.actions;
 export default settingsSlice.reducer;

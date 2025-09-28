@@ -1,19 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import { setPageName } from "../../../features/auth/authSlice";
-import { useGetExamFeeSettingQuery } from "../../../features/exam/examQuerySlice";
 import useTranslate from "../../../utils/Translate";
-import bnBijoy2Unicode from "../../../utils/conveter";
-import SortableTable from "../../../components/Tables/SortableTable";
-import Loading from "../../../components/Loading/Loading";
 import DeleteButton from "../../../components/Button/DeleteButton";
-import DefaultPagination from "../../../components/Pagination/DefaultPagination";
 import DefaultInput from "../../../components/Forms/DefaultInput";
 import Button from "../../../components/Button/Button";
-import SingleCheckbox from "../../../components/Checkboxes/SingleCheckbox";
 import { useGetStudentFeeAdmissionsQuery } from "../../../features/feeCollection/feeCollectionSlice";
+import bnBijoy2Unicode from "../../../utils/conveter";
+import DefaultKeyDownInput from "./DefaultKeyDownInput";
+import { setStudentFeeData } from "../../../features/settings/settingsSlice";
+import { hideModal } from "../../../utils/ModalControlar";
 
 const PAGE_SIZE = 10;
 
@@ -21,126 +19,250 @@ const FeeAcceptForm = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
-  const methods = useForm();
+
+  const [defaultFees, setDefaultFees] = useState([]);
+
+  const methods = useForm({
+    defaultValues: {
+      fees: [],
+      prescribedFee: 0,
+      deduction: 0,
+      currentDeposit: 0,
+    },
+  });
+
+  const { watch, setValue, handleSubmit, getValues, reset } = methods;
   const [currentPage, setCurrentPage] = useState(1);
+
   const { filteredSelectedPerStudentFee } = useSelector(
     (state) => state.student
   );
 
-  console.log(filteredSelectedPerStudentFee, "filteredSelectedPerStudentFee");
-
-  console.log(
-    filteredSelectedPerStudentFee?.SessionID,
-    filteredSelectedPerStudentFee?.ClassID,
-    "filteredSelectedPerStudentFee"
-  );
-
-  // getStudentFeeAdmissions query expects { fundId, classId }
+  // Fetch student fee admissions data
   const { data: studentFeeAdmissionData } = useGetStudentFeeAdmissionsQuery(
+    filteredSelectedPerStudentFee?.UserID,
     {
-      fundId: filteredSelectedPerStudentFee?.SessionID, // note: backend expects fundId
-      classId: filteredSelectedPerStudentFee?.ClassID,
-    },
-    {
-      skip:
-        !filteredSelectedPerStudentFee?.SessionID ||
-        !filteredSelectedPerStudentFee?.ClassID,
+      skip: !filteredSelectedPerStudentFee?.UserID,
     }
   );
 
   console.log(studentFeeAdmissionData, "studentFeeAdmissionData");
 
-  const {
-    data: examFeeSettingData,
-    isLoading: isExamFeeSettingLoading,
-    isError: isExamFeeSettingError,
-    refetch,
-  } = useGetExamFeeSettingQuery();
+  // Initialize default fees from API
+  useEffect(() => {
+    if (studentFeeAdmissionData?.fees) {
+      const fees = studentFeeAdmissionData.fees.map((item) => ({
+        SFSID: item.SFSID,
+        SLID: item.SLID,
+        SlName: item.SlName,
+        sessionName: studentFeeAdmissionData?.sessionName,
+        amount: item.amount,
+        deduction: 0,
+        preDeposit: item.preDeposit || 0,
+        deposit: item.amount,
+        due: 0,
+      }));
 
-  const totalPages = Math.ceil((examFeeSettingData?.length || 0) / PAGE_SIZE);
+      setDefaultFees(fees);
+      reset({ fees });
+    }
+  }, [studentFeeAdmissionData, reset]);
+
+  const fees = watch("fees");
+
+  // Recalculate totals whenever fees change
+  useEffect(() => {
+    if (!fees || fees.length === 0) return;
+
+    const totalPrescribed = fees.reduce(
+      (acc, f) => acc + Number(f.amount || 0),
+      0
+    );
+    const totalDeduction = fees.reduce(
+      (acc, f) => acc + Number(f.deduction || 0),
+      0
+    );
+    const totalDeposit = fees.reduce(
+      (acc, f) => acc + Number(f.deposit || 0),
+      0
+    );
+
+    setValue("prescribedFee", totalPrescribed);
+    setValue("deduction", totalDeduction);
+    setValue("currentDeposit", totalDeposit);
+  }, [fees, setValue]);
+
+  // Handle Deduction change
+  const handleDeductionChange = useCallback(
+    (index) => {
+      const currentFees = getValues("fees");
+      const fee = currentFees[index];
+      if (!fee) return;
+
+      const prescribedFee = Number(fee.amount) || 0;
+      const deduction = Number(fee.deduction) || 0;
+      const newDeposit = prescribedFee - deduction; // Deposit updates
+      // Remove due update
+      // const newDue = prescribedFee - (fee.preDeposit || 0) - newDeposit;
+
+      setValue(`fees.${index}.deposit`, newDeposit);
+      // setValue(`fees.${index}.due`, newDue); // REMOVE THIS
+
+      setDefaultFees((prev) =>
+        prev.map((f, i) =>
+          i === index
+            ? { ...f, deduction, deposit: newDeposit } // only update deposit
+            : f
+        )
+      );
+
+      // Update totals
+      const updatedFees = getValues("fees");
+      const updatedDeduction = updatedFees.reduce(
+        (acc, f) => acc + Number(f.deduction || 0),
+        0
+      );
+      const updatedDeposit = updatedFees.reduce(
+        (acc, f) => acc + Number(f.deposit || 0),
+        0
+      );
+
+      setValue("deduction", updatedDeduction);
+      setValue("currentDeposit", updatedDeposit);
+    },
+    [getValues, setValue]
+  );
+
+  // Handle Deposit change
+  const handleDepositChange = useCallback(
+    (index) => {
+      const currentFees = getValues("fees");
+      const fee = currentFees[index];
+      if (!fee) return;
+
+      const deposit = Number(fee.deposit) || 0;
+      const deduction = Number(fee.deduction) || 0;
+      const prescribedFee = Number(fee.amount) || 0;
+      const newDue = prescribedFee - deduction - deposit;
+
+      setValue(`fees.${index}.due`, newDue);
+
+      setDefaultFees((prev) =>
+        prev.map((f, i) => (i === index ? { ...f, deposit, due: newDue } : f))
+      );
+
+      // Update totals after deposit change
+      const updatedFees = getValues("fees");
+      const updatedDeposit = updatedFees.reduce(
+        (acc, f) => acc + Number(f.deposit || 0),
+        0
+      );
+      setValue("currentDeposit", updatedDeposit);
+    },
+    [getValues, setValue]
+  );
+
+  // Delete a fee row
+  const handleDeleteFee = useCallback(
+    (index) => {
+      const currentFees = getValues("fees");
+      const updatedFees = currentFees.filter((_, i) => i !== index);
+      setValue("fees", updatedFees);
+      setDefaultFees((prev) => prev.filter((_, i) => i !== index));
+    },
+    [getValues, setValue]
+  );
+
+  // Reset form to default values
+  const handleResetForm = useCallback(() => {
+    reset({ fees: defaultFees });
+  }, [reset, defaultFees]);
+
+  const totalPages = Math.ceil((fees?.length || 0) / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
-  }, [examFeeSettingData, currentPage]);
+    return fees?.slice(start, start + PAGE_SIZE) || [];
+  }, [fees, currentPage]);
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  const onSubmit = () => {};
+  const onSubmit = (data) => {
+    dispatch(setStudentFeeData(data));
+    hideModal()
+    console.log("Form Data:", data);
+  };
+
+  const handleKeyDown = (e, index, fieldType) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (fieldType === "deduction") handleDeductionChange(index);
+      else if (fieldType === "deposit") handleDepositChange(index);
+    }
+  };
+
   return (
     <div className="font-SolaimanLipi bg-white p-4 md:px-6 rounded-xl shadow-lg">
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)}>
-          <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-6">
-            <DefaultInput
-              type="text"
-              registerKey={`total`}
-              label="Student Code"
-            />
-            <DefaultInput
-              type="text"
-              registerKey="deduction"
-              label="Month ID"
-            />
-            <DefaultInput type="text" registerKey="type" label="Receipt" />
-            <DefaultInput
-              type="text"
-              registerKey="grandTotal"
-              label="Month Name"
-            />
-          </div>
-          <div className="flex flex-col md:flex-row-reverse gap-4 my-5">
-            {/* Deduction Inputs */}
-            <div className="md:col-span-3">
-              <div className="grid grid-cols-3 md:grid-cols-5 gap-3 items-center">
-                <DefaultInput
-                  type="text"
-                  registerKey="deduction1"
-                  label="Prescribed Fee"
-                />
-                <DefaultInput
-                  type="text"
-                  registerKey="deduction2"
-                  label="East cut"
-                />
-                <DefaultInput
-                  type="text"
-                  registerKey="deduction3"
-                  label="Pre-deposit"
-                />
-                <DefaultInput
-                  type="text"
-                  registerKey="deduction4"
-                  label="Deduction"
-                />
-                <DefaultInput
-                  type="text"
-                  registerKey="deduction5"
-                  label="Current deposit"
-                />
-              </div>
+        <form onSubmit={handleSubmit(onSubmit)}>
+
+
+          <div className="flex flex-col md:flex-row-reverse gap-4 mb-5">
+            <div className="md:col-span-3 grid grid-cols-3 md:grid-cols-5 gap-3 items-center">
+              <DefaultInput
+                type="text"
+                registerKey="prescribedFee"
+                label="Prescribed Fee"
+                disable
+              />
+              <DefaultInput
+                type="text"
+                registerKey="eastCut"
+                label="East cut"
+                disable
+              />
+              <DefaultInput
+                type="text"
+                registerKey="preDeposit"
+                label="Pre-deposit"
+                disable
+              />
+              <DefaultInput
+                type="text"
+                registerKey="deduction"
+                label="Deduction"
+                disable
+              />
+              <DefaultInput
+                type="text"
+                registerKey="currentDeposit"
+                label="Deposit"
+                disable
+              />
             </div>
-            {/* Save / Cancel Buttons */}
+
             <div className="flex justify-start md:justify-center items-center gap-2 mt-5">
               <Button
                 type="button"
-                className="px-6 py-2 rounded-lg font-SolaimanLipi bg-gray-400 text-white hover:bg-gray-500 transition"
+                className="px-6 py-2 rounded-lg bg-gray-400 text-white"
+                onClick={handleResetForm}
               >
-                Close
+                Reset
               </Button>
               <Button
                 type="submit"
-                className="px-6 py-2 rounded-lg font-SolaimanLipi bg-blue-600 text-white hover:bg-blue-700 transition"
+                className="px-6 py-2 rounded-lg bg-blue-600 text-white"
               >
-                Add
+                Save
               </Button>
             </div>
           </div>
         </form>
+
         <div className="overflow-x-auto rounded-md border w-full max-w-6xl mx-auto">
-          <table className="min-w-[800px] sm:text-sm table-auto text-sm md:text-base">
+          <table className="min-w-full sm:text-sm table-auto text-sm md:text-base">
             <thead className="bg-[#e9ebee] text-black">
               <tr>
                 <th className="px-4 py-3 text-center whitespace-nowrap">
@@ -171,54 +293,72 @@ const FeeAcceptForm = ({ pageTitle }) => {
             </thead>
             <tbody>
               {paginatedData.length > 0 ? (
-                paginatedData.map((item, index) => (
-                  <tr key={index} className="border-t">
-                    <td className="px-4 text-center whitespace-nowrap">
-                      <DeleteButton />
-                    </td>
-                    <td className="text-center whitespace-nowrap">
-                      {1003 + index}
-                    </td>
-                    <td className="text-center whitespace-nowrap">ভর্তি ফি</td>
-                    <td className="text-center whitespace-nowrap">
-                      <DefaultInput
-                        registerKey={`monthFeeList.${index}.comment`}
-                        type="text"
-                        disable
-                      />
-                    </td>
-                    <td className="text-center whitespace-nowrap">
-                      <DefaultInput
-                        registerKey={`monthFeeList.${index}.comment`}
-                        type="text"
-                      />
-                    </td>
-                    <td className="text-center whitespace-nowrap">
-                      <DefaultInput
-                        registerKey={`monthFeeList.${index}.comment`}
-                        type="text"
-                        disable
-                      />
-                    </td>
-                    <td className="text-center whitespace-nowrap">
-                      <DefaultInput
-                        registerKey={`monthFeeList.${index}.comment`}
-                        type="text"
-                      />
-                    </td>
-                    <td className="text-center whitespace-nowrap">
-                      <DefaultInput
-                        registerKey={`monthFeeList.${index}.comment`}
-                        type="text"
-                        disable
-                      />
-                    </td>
-                  </tr>
-                ))
+                paginatedData.map((item, index) => {
+                  const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
+                  return (
+                    <tr key={item.SFSID} className="border-t">
+                      <td className="px-4 text-center">
+                        <DeleteButton
+                          onClick={() => handleDeleteFee(globalIndex)}
+                        />
+                      </td>
+                      <td className="text-center">{item.SLID}</td>
+                      <td className="text-center">
+                        {bnBijoy2Unicode(item.SlName)}
+                      </td>
+                      <td className="text-center">
+                        <DefaultInput
+                          registerKey={`fees.${globalIndex}.amount`}
+                          type="number"
+                          defaultValue={item.amount}
+                          disable
+                        />
+                      </td>
+                      <td className="text-center">
+                        <DefaultKeyDownInput
+                          registerKey={`fees.${globalIndex}.deduction`}
+                          type="number"
+                          defaultValue={item.deduction || 0}
+                          onKeyDown={(e) =>
+                            handleKeyDown(e, globalIndex, "deduction")
+                          }
+                          onBlur={() => handleDeductionChange(globalIndex)}
+                        />
+                      </td>
+                      <td className="text-center">
+                        <DefaultInput
+                          registerKey={`fees.${globalIndex}.preDeposit`}
+                          type="number"
+                          defaultValue={item.preDeposit || 0}
+                          disable
+                        />
+                      </td>
+                      <td className="text-center">
+                        <DefaultKeyDownInput
+                          registerKey={`fees.${globalIndex}.deposit`}
+                          type="number"
+                          defaultValue={item.deposit}
+                          onKeyDown={(e) =>
+                            handleKeyDown(e, globalIndex, "deposit")
+                          }
+                          onBlur={() => handleDepositChange(globalIndex)}
+                        />
+                      </td>
+                      <td className="text-center">
+                        <DefaultInput
+                          registerKey={`fees.${globalIndex}.due`}
+                          type="number"
+                          defaultValue={item.due || 0}
+                          disable
+                        />
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-4 py-2 text-center">
-                    {translate("No data available")}
+                  <td colSpan={8} className="text-center">
+                    No data available
                   </td>
                 </tr>
               )}
@@ -226,7 +366,6 @@ const FeeAcceptForm = ({ pageTitle }) => {
           </table>
         </div>
 
-        {/* Pagination Controls */}
         {totalPages > 1 && (
           <div className="flex justify-center mt-4">
             <button

@@ -9,15 +9,24 @@ const DatePickerOne = ({
   require,
   disable = false,
   labelPosition = "top", // 'top' or 'left'
+  defaultValue = null, // নতুন prop
 }) => {
   const {
     control,
+    setValue,
     formState: { errors },
   } = useFormContext();
   const translate = useTranslate();
 
+  // আজকের তারিখ ব্যবহার করবো যদি placeholder বা defaultValue না থাকে
+  const today = new Date();
+
   return (
-    <div className={`w-full ${labelPosition === "left" ? "flex items-center gap-4" : ""}`}>
+    <div
+      className={`w-full ${
+        labelPosition === "left" ? "flex items-center gap-4" : ""
+      }`}
+    >
       {/* Label */}
       {dateCalender && (
         <label
@@ -37,15 +46,14 @@ const DatePickerOne = ({
         <Controller
           name={registerKey}
           control={control}
-          defaultValue={null}
+          defaultValue={defaultValue ?? today} // ✅ defaultValue সেট করা হলো
           rules={{
-            required: require ? require : false,
+            required: require ? "এই ফিল্ডটি প্রয়োজনীয়" : false,
           }}
           render={({ field }) => (
             <Flatpickr
               disabled={disable}
-              placeholder={placeholder}
-              readOnly={true}
+              placeholder={placeholder ?? today.toISOString().split("T")[0]} // ✅ placeholder live date
               options={{
                 dateFormat: "Y-m-d",
               }}

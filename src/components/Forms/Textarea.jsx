@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 
@@ -10,17 +10,26 @@ const Textarea = ({
   disable = false,
   rows = 4,
   labelColor = "text-black",
-  labelPosition = "top", // নতুন prop
-  showError = false, // error control এর জন্য
+  labelPosition = "top",
+  showError = false,
+  defaultValue = "", // নতুন prop
 }) => {
   const {
     register,
+    setValue,
     formState: { errors, touchedFields, isSubmitted },
   } = useFormContext();
+
   const translate = useTranslate();
   const [isTouched, setIsTouched] = useState(false);
 
-  // শুধুমাত্র যখন ফিল্ড touched হয়েছে অথবা form submit করা হয়েছে তখন error show করবে
+  // যখন defaultValue prop পরিবর্তন হবে তখন react-hook-form এর state update হবে
+  useEffect(() => {
+    if (defaultValue !== undefined && defaultValue !== null) {
+      setValue(registerKey, defaultValue);
+    }
+  }, [defaultValue, registerKey, setValue]);
+
   const shouldShowError =
     showError || isSubmitted || touchedFields[registerKey] || isTouched;
 
@@ -34,9 +43,7 @@ const Textarea = ({
         <label
           htmlFor={registerKey}
           className={`font-SolaimanLipi ${
-            labelPosition === "left"
-              ? "text-end mt-1"
-              : "mb-1 block"
+            labelPosition === "left" ? "text-end mt-1" : "mb-1 block"
           }`}
         >
           <div className="flex items-center gap-1 justify-between">

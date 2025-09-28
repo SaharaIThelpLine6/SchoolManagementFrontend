@@ -328,8 +328,17 @@ export const feeCollectionSlice = createApi({
       invalidatesTags: ["StudentFeeGroups"],
     }),
     getStudentFeeAdmissions: builder.query({
-      query: ({ fundId, classId }) => `view_student_fee/${fundId}/${classId}`,
+      query: (userId) => `view_student_fee/${userId}`,
       providesTags: ["StudentFeeAdmissions"],
+    }),
+
+    getGeneralLedgersByCAID: builder.query({
+      query: (id) => `general_ledgers_by_caid`,
+      providesTags: ["GeneralLedgers"],
+    }),
+    getSubLedgersByGLID: builder.query({
+      query: (id) => `subledgers_by_glid/${id}`,
+      providesTags: ["SubGeneralLedger"],
     }),
   }),
 });
@@ -385,5 +394,7 @@ export const {
   useDeleteSubGeneralLedgerMutation,
 
   useGetSubGeneralLedgersByFundIdAndGlIdQuery,
-  useGetStudentFeeAdmissionsQuery
+  useGetStudentFeeAdmissionsQuery,
+  useGetGeneralLedgersByCAIDQuery,
+  useGetSubLedgersByGLIDQuery
 } = feeCollectionSlice;

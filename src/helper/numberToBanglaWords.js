@@ -1,7 +1,7 @@
 export function numberToBanglaWords(num) {
   // ভ্যালিডেশন চেক
   if (typeof num !== 'number' || num < 1 || num > 100000) {
-    return "অকার্যকর সংখ্যা";
+    return "";
   }
 
   // বেসিক শব্দসমূহ
@@ -9,7 +9,7 @@ export function numberToBanglaWords(num) {
   const tens = ["", "দশ", "বিশ", "তিরিশ", "চল্লিশ", "পঞ্চাশ", "ষাট", "সত্তর", "আশি", "নব্বই"];
   const teens = ["দশ", "এগারো", "বারো", "তেরো", "চৌদ্দ", "পনেরো", "ষোল", "সতেরো", "আঠারো", "উনিশ"];
   const hundreds = ["", "একশ", "দুইশ", "তিনশ", "চারশ", "পাঁচশ", "ছয়শ", "সাতশ", "আটশ", "নয়শ"];
-  
+
   // বিশেষ সংখ্যার নাম
   const specialNumbers = {
     11: "এগারো",
@@ -96,7 +96,7 @@ export function numberToBanglaWords(num) {
       words.push(teens[num - 10]);
       num = 0;
     }
-    
+
     if (num > 0) {
       words.push(ones[num]);
     }

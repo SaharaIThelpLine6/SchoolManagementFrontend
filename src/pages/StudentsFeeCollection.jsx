@@ -17,6 +17,12 @@ import Textarea from "../components/Forms/Textarea";
 import DefaultRadio from "../components/Radio/DefaultRadio";
 import { useGetExamFeeSettingQuery } from "../features/exam/examQuerySlice";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
+import bnBijoy2Unicode from "../utils/conveter";
+import { numberToBanglaWords } from "../helper/numberToBanglaWords";
+import {
+  useGetGeneralLedgersByCAIDQuery,
+  useGetSubLedgersByGLIDQuery,
+} from "../features/feeCollection/feeCollectionSlice";
 const PAGE_SIZE = 10;
 
 const StudentsFeeCollection = () => {
@@ -33,13 +39,40 @@ const StudentsFeeCollection = () => {
       Total: "",
     },
   });
-  const { handleSubmit, reset } = methods;
+  const { handleSubmit, reset, watch } = methods;
   const translate = useTranslate();
   const { filteredSelectedPerStudentFee } = useSelector(
     (state) => state.student
   );
+  const [studentFeeDataAll, setstudentFeeDataAll] = useState(null);
+  console.log(studentFeeDataAll?.currentDeposit);
+  const [totalDue, setTotalDue] = useState(null);
+  const { studentFeeData = [] } = useSelector((state) => state.settings);
 
-  console.log(filteredSelectedPerStudentFee, "filteredSelectedPerStudentFee");
+const GLID = watch("GLID");
+  // const GLID = 3
+  const { data: glbc = [] } = useGetGeneralLedgersByCAIDQuery();
+  const { data: sglbc = [] } = useGetSubLedgersByGLIDQuery(GLID, {
+    skip: !GLID,
+  });
+
+  console.log(glbc, "glbc");
+  console.log(sglbc, "sglbc");
+
+  useEffect(() => {
+    if (studentFeeData?.fees) {
+      const feesDue = studentFeeData.fees.reduce(
+        (sum, fee) => sum + (fee.due || 0),
+        0
+      );
+      setTotalDue(feesDue); // 👉 fees এর যোগফল
+    }
+  }, [studentFeeData]);
+  useEffect(() => {
+    setstudentFeeDataAll(studentFeeData);
+  }, [studentFeeData]);
+
+  console.log(studentFeeDataAll, "studentFeeDataAll");
   const { data: sessionData } = useGetSessionsQuery();
 
   useEffect(() => {
@@ -96,21 +129,6 @@ const StudentsFeeCollection = () => {
   const handleResetButton = () => {
     handleReset();
   };
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const {
-    data: examFeeSettingData,
-    isLoading: isExamFeeSettingLoading,
-    isError: isExamFeeSettingError,
-    refetch,
-  } = useGetExamFeeSettingQuery();
-
-  const totalPages = Math.ceil((examFeeSettingData?.length || 0) / PAGE_SIZE);
-
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
-  }, [examFeeSettingData, currentPage]);
 
   const SearchTypes = [];
 
@@ -240,7 +258,8 @@ const StudentsFeeCollection = () => {
                     type="text"
                     className="ml-1 w-20 p-1 border border-gray-300 rounded"
                     placeholder="০০"
-                    disabled
+                    defaultValue={studentFeeDataAll?.prescribedFee ?? "0"}
+                    readOnly
                   />
                 </div>
                 <div className="flex items-center text-sm">
@@ -252,7 +271,8 @@ const StudentsFeeCollection = () => {
                     type="text"
                     className="ml-1 w-20 p-1 border border-gray-300 rounded"
                     placeholder="০০"
-                    disabled
+                    defaultValue={studentFeeDataAll?.deduction ?? "0"}
+                    readOnly
                   />
                 </div>
                 <div className="flex items-center text-sm">
@@ -264,7 +284,8 @@ const StudentsFeeCollection = () => {
                     type="text"
                     className="ml-1 w-20 p-1 border border-gray-300 rounded"
                     placeholder="০০"
-                    disabled
+                    defaultValue={studentFeeDataAll?.currentDeposit ?? "0"}
+                    readOnly
                   />
                 </div>
                 <div className="flex items-center text-sm">
@@ -276,7 +297,8 @@ const StudentsFeeCollection = () => {
                     type="text"
                     className="ml-1 w-20 p-1 border border-gray-300 rounded"
                     placeholder="০০"
-                    disabled
+                    value={totalDue ?? "0"}
+                    readOnly
                   />
                 </div>
                 <div className="flex items-center text-sm">
@@ -288,7 +310,7 @@ const StudentsFeeCollection = () => {
                     type="text"
                     className="ml-1 w-20 p-1 border border-gray-300 rounded"
                     placeholder="::"
-                    disabled
+                    readOnly
                   />
                 </div>
               </div>
@@ -305,32 +327,36 @@ const StudentsFeeCollection = () => {
             <Textarea
               label="কথায়"
               placeholder="Enter your comments ..."
-              registerKey="address"
-              // require={true}
+              registerKey="speakCurrentDeposit"
+              defaultValue={numberToBanglaWords(
+                studentFeeDataAll?.currentDeposit ?? ""
+              )}
+              disable
               rows={2}
             />
             <div className="col-span-2 flex justify-between gap-2">
-              <DefaultSelect
-                label="Entry Date"
-                options={SearchTypes ?? []}
-                valueField="ID"
-                nameField="Name"
-                registerKey="searchType1"
+              <DatePickerOne
+                dateCalender="Entry Date"
+                registerKey="EntryDate"
+                require={"শিক্ষার্থীর জন্ম তারিখ নির্বাচন করতে হবে"}
+                placeholder={""}
               />
               <DefaultSelect
                 label="Account Type"
-                options={SearchTypes ?? []}
-                valueField="ID"
-                nameField="Name"
-                registerKey="searchType1"
+                options={glbc.data ?? []}
+                valueField="GLID"
+                nameField="GlName"
+                unicode
+                registerKey="GLID"
               />
 
               <DefaultSelect
-                label="Account"
-                options={SearchTypes ?? []}
-                valueField="ID"
-                nameField="Name"
-                registerKey="searchType1"
+                label="Sub Ledger"
+                options={sglbc ?? []}
+                valueField="SLID"
+                nameField="SlName"
+                unicode
+                registerKey="SLID"
               />
             </div>
           </div>
@@ -442,7 +468,7 @@ const StudentsFeeCollection = () => {
           <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
             <div className="md:col-span-3">
               <div className=" overflow-x-auto rounded-md border w-full max-w-6xl mx-auto">
-                <table className="min-w-[800px] sm:text-sm table-auto text-sm md:text-base">
+                <table className="min-w-full sm:text-sm table-auto text-sm md:text-base">
                   <thead className="bg-[#e9ebee] text-black">
                     <tr>
                       <th className="px-4 py-3 text-center whitespace-nowrap">
@@ -473,58 +499,70 @@ const StudentsFeeCollection = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedData.length > 0 ? (
-                      paginatedData.map((item, index) => (
-                        <tr key={index} className="border-t">
+                    {studentFeeData?.fees && studentFeeData.fees.length > 0 ? (
+                      studentFeeData.fees.map((item, index) => (
+                        <tr key={item.SFSID} className="border-t">
                           <td className="px-4 text-center whitespace-nowrap">
-                            {1 + index}
+                            {index + 1}
                           </td>
+
                           <td className="text-center whitespace-nowrap">
-                            ভর্তি ফি
+                            {bnBijoy2Unicode(item.SlName)}
                           </td>
+
                           <td className="px-4 text-center whitespace-nowrap">
-                            মে (2025-2026)
+                            {bnBijoy2Unicode(item.sessionName)}
                           </td>
+
                           <td className="text-center whitespace-nowrap">
                             <DefaultInput
-                              registerKey={`monthFeeList.${index}.comment`}
+                              registerKey={`fees.${index}.amount`}
                               type="text"
                               disable
+                              defaultValue={item.amount}
                             />
                           </td>
+
                           <td className="text-center whitespace-nowrap">
                             <DefaultInput
-                              registerKey={`monthFeeList.${index}.comment`}
+                              registerKey={`fees.${index}.deduction`}
                               type="text"
                               disable
+                              defaultValue={item.deduction}
                             />
                           </td>
+
                           <td className="text-center whitespace-nowrap">
                             <DefaultInput
-                              registerKey={`monthFeeList.${index}.comment`}
+                              registerKey={`fees.${index}.preDeposit`}
                               type="text"
                               disable
+                              defaultValue={item.preDeposit}
                             />
                           </td>
+
                           <td className="text-center whitespace-nowrap">
                             <DefaultInput
-                              registerKey={`monthFeeList.${index}.comment`}
+                              registerKey={`fees.${index}.deposit`}
                               type="text"
                               disable
+                              defaultValue={item.deposit}
                             />
                           </td>
+
                           <td className="text-center whitespace-nowrap">
                             <DefaultInput
-                              registerKey={`monthFeeList.${index}.comment`}
+                              registerKey={`fees.${index}.due`}
                               type="text"
                               disable
+                              defaultValue={item.due}
                             />
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={5} className="px-4 py-2 text-center">
+                        <td colSpan={8} className="px-4 py-2 text-center">
                           {translate("No data available")}
                         </td>
                       </tr>
@@ -532,35 +570,9 @@ const StudentsFeeCollection = () => {
                   </tbody>
                 </table>
               </div>
-              {/* Pagination Controls */}
-              {totalPages > 1 && (
-                <div className="flex justify-center mt-4">
-                  <button
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.max(prev - 1, 1))
-                    }
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 mx-1 bg-gray-200 rounded disabled:opacity-50"
-                  >
-                    Previous
-                  </button>
-                  <span className="px-4 py-2">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() =>
-                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                    }
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 mx-1 bg-gray-200 rounded disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
             </div>
             <div className="md:col-span-2">
-              <div className=" overflow-x-auto rounded-md border w-full">
+              {/* <div className=" overflow-x-auto rounded-md border w-full">
                 <table className="min-w-full sm:text-sm table-auto text-sm md:text-base">
                   <thead className="bg-[#e9ebee] text-black">
                     <tr>
@@ -607,20 +619,11 @@ const StudentsFeeCollection = () => {
                     )}
                   </tbody>
                 </table>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
       </FormProvider>
-      {/* <div className="space-y-6">
-        <div className="bg-gray-50 p-3 md:p-4 rounded-xl border">
-          <SelectedPerStudentFeeTable resetForm={handleResetButton} />
-        </div>
-
-        <div className="bg-gray-50 p-3 md:p-4 rounded-xl border">
-          <MonthDetermineFeeTable />
-        </div>
-      </div> */}
     </div>
   );
 };
