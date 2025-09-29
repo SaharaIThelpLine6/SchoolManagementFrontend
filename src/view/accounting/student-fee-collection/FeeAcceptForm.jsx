@@ -27,7 +27,7 @@ const FeeAcceptForm = ({ pageTitle }) => {
       fees: [],
       prescribedFee: 0,
       deduction: 0,
-      currentDeposit: 0,
+      currentDeposit: 0
     },
   });
 
@@ -46,7 +46,6 @@ const FeeAcceptForm = ({ pageTitle }) => {
     }
   );
 
-  console.log(studentFeeAdmissionData, "studentFeeAdmissionData");
 
   // Initialize default fees from API
   useEffect(() => {
@@ -190,9 +189,13 @@ const FeeAcceptForm = ({ pageTitle }) => {
   }, [dispatch, pageTitle]);
 
   const onSubmit = (data) => {
-    dispatch(setStudentFeeData(data));
+    const payload = {
+      ...data,
+      userId: studentFeeAdmissionData.userId,
+      admissionId: studentFeeAdmissionData.admissionId,
+    };
+    dispatch(setStudentFeeData(payload));
     hideModal()
-    console.log("Form Data:", data);
   };
 
   const handleKeyDown = (e, index, fieldType) => {

@@ -167,9 +167,9 @@ const SelectedPerStudentFeeModal = () => {
           <LoadingComponent />
         ) : searchUserError ? (
           <li className="text-black mt-4">No users Found.</li>
-        ) : searchUserInfo && searchUserInfo.length > 0 ? (
+        ) : searchUserInfo && searchUserInfo?.data.length > 0 ? (
           <div className="relative overflow-x-auto">
-            <SortableTable columns={columns} data={searchUserInfo || []} isFilterColumn={false}/>
+            <SortableTable columns={columns} data={searchUserInfo?.data || []} isFilterColumn={false}/>
           </div>
         ) : (
           <li className="py-2 px-4">No users found</li>

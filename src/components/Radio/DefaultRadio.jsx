@@ -6,7 +6,7 @@ const DefaultRadio = ({
   label,
   options,
   registerKey,
-  defaultValue = null, // ✅ নতুন props
+  defaultValue = null,
   labelPosition = "top",
   className = "",
   radioClassName = "",
@@ -17,12 +17,16 @@ const DefaultRadio = ({
   const translate = useTranslate();
   const selectedValue = watch(registerKey);
 
-  // ✅ defaultValue থাকলে প্রথম render এ সেট করে দিচ্ছি
+  // ✅ সংশোধিত useEffect
   useEffect(() => {
-    if (defaultValue !== null) {
+    // শুধুমাত্র যখন selectedValue undefined/null এবং defaultValue আছে
+    if (
+      (selectedValue === undefined || selectedValue === null) &&
+      defaultValue !== null
+    ) {
       setValue(registerKey, defaultValue, { shouldValidate: true });
     }
-  }, [defaultValue, registerKey, setValue]);
+  }, [defaultValue, registerKey, setValue, selectedValue]);
 
   const isChecked = (optionId) => {
     return selectedValue != null && Number(selectedValue) === Number(optionId);
@@ -60,11 +64,13 @@ const DefaultRadio = ({
             >
               <input
                 type="radio"
-                name={registerKey} // ✅ radio group
+                {...register(registerKey)} // ✅ সরাসরি register ব্যবহার করুন
+                value={option.id} // ✅ value prop যোগ করুন
                 checked={isChecked(option.id)}
-                onChange={() => {}}
+                onChange={(e) => handleChange(Number(e.target.value))} // ✅ onChange handler যোগ করুন
                 className={`h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500 flex-shrink-0 ${radioClassName}`}
               />
+
               <span
                 className={`ml-2 text-sm font-SolaimanLipi ${
                   isChecked(option.id) ? "text-black" : "text-gray-700"
@@ -75,7 +81,7 @@ const DefaultRadio = ({
             </div>
           ))}
         </div>
-        <input type="hidden" {...register(registerKey)} />
+        {/* ❌ Hidden input remove করুন - এটা conflict create করে */}
       </div>
     </div>
   );
