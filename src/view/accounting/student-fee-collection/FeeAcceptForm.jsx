@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
-import { FormProvider, useForm } from "react-hook-form";
-import { setPageName } from "../../../features/auth/authSlice";
-import useTranslate from "../../../utils/Translate";
-import DeleteButton from "../../../components/Button/DeleteButton";
-import DefaultInput from "../../../components/Forms/DefaultInput";
-import Button from "../../../components/Button/Button";
-import { useGetStudentFeeAdmissionsQuery } from "../../../features/feeCollection/feeCollectionSlice";
-import bnBijoy2Unicode from "../../../utils/conveter";
-import DefaultKeyDownInput from "./DefaultKeyDownInput";
-import { setStudentFeeData } from "../../../features/settings/settingsSlice";
-import { hideModal } from "../../../utils/ModalControlar";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import Button from '../../../components/Button/Button';
+import DeleteButton from '../../../components/Button/DeleteButton';
+import DefaultInput from '../../../components/Forms/DefaultInput';
+import { setPageName } from '../../../features/auth/authSlice';
+import { useGetStudentFeeAdmissionsQuery } from '../../../features/feeCollection/feeCollectionSlice';
+import { setStudentFeeData } from '../../../features/settings/settingsSlice';
+import bnBijoy2Unicode from '../../../utils/conveter';
+import { hideModal } from '../../../utils/ModalControlar';
+import useTranslate from '../../../utils/Translate';
+import DefaultKeyDownInput from './DefaultKeyDownInput';
 
 const PAGE_SIZE = 10;
 
@@ -27,7 +27,7 @@ const FeeAcceptForm = ({ pageTitle }) => {
       fees: [],
       prescribedFee: 0,
       deduction: 0,
-      currentDeposit: 0
+      currentDeposit: 0,
     },
   });
 
@@ -40,12 +40,13 @@ const FeeAcceptForm = ({ pageTitle }) => {
 
   // Fetch student fee admissions data
   const { data: studentFeeAdmissionData } = useGetStudentFeeAdmissionsQuery(
-    filteredSelectedPerStudentFee?.UserID,
+    filteredSelectedPerStudentFee?.AdmissionID,
     {
-      skip: !filteredSelectedPerStudentFee?.UserID,
+      skip: !filteredSelectedPerStudentFee?.AdmissionID,
     }
   );
 
+  console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
 
   // Initialize default fees from API
   useEffect(() => {
@@ -55,11 +56,15 @@ const FeeAcceptForm = ({ pageTitle }) => {
         SLID: item.SLID,
         SlName: item.SlName,
         sessionName: studentFeeAdmissionData?.sessionName,
-        amount: item.amount,
-        deduction: 0,
-        preDeposit: item.preDeposit || 0,
-        deposit: item.amount,
-        due: 0,
+        amount: item.Fee ? item.Fee : item.amount,
+        deduction: item.BlankField ? item.BlankField : 0,
+        preDeposit: item.PreviousDeposite
+          ? item.PreviousDeposite
+          : item.preDeposit || 0,
+        deposit: item.PreviousDeposite
+          ? item.Fee - item.PreviousDeposite
+          : item.amount,
+        due: item.BlankField ? item.BlankField : 0,
       }));
 
       setDefaultFees(fees);
@@ -67,7 +72,7 @@ const FeeAcceptForm = ({ pageTitle }) => {
     }
   }, [studentFeeAdmissionData, reset]);
 
-  const fees = watch("fees");
+  const fees = watch('fees');
 
   // Recalculate totals whenever fees change
   useEffect(() => {
@@ -86,15 +91,15 @@ const FeeAcceptForm = ({ pageTitle }) => {
       0
     );
 
-    setValue("prescribedFee", totalPrescribed);
-    setValue("deduction", totalDeduction);
-    setValue("currentDeposit", totalDeposit);
+    setValue('prescribedFee', totalPrescribed);
+    setValue('deduction', totalDeduction);
+    setValue('currentDeposit', totalDeposit);
   }, [fees, setValue]);
 
   // Handle Deduction change
   const handleDeductionChange = useCallback(
     (index) => {
-      const currentFees = getValues("fees");
+      const currentFees = getValues('fees');
       const fee = currentFees[index];
       if (!fee) return;
 
@@ -116,7 +121,7 @@ const FeeAcceptForm = ({ pageTitle }) => {
       );
 
       // Update totals
-      const updatedFees = getValues("fees");
+      const updatedFees = getValues('fees');
       const updatedDeduction = updatedFees.reduce(
         (acc, f) => acc + Number(f.deduction || 0),
         0
@@ -126,8 +131,8 @@ const FeeAcceptForm = ({ pageTitle }) => {
         0
       );
 
-      setValue("deduction", updatedDeduction);
-      setValue("currentDeposit", updatedDeposit);
+      setValue('deduction', updatedDeduction);
+      setValue('currentDeposit', updatedDeposit);
     },
     [getValues, setValue]
   );
@@ -135,7 +140,7 @@ const FeeAcceptForm = ({ pageTitle }) => {
   // Handle Deposit change
   const handleDepositChange = useCallback(
     (index) => {
-      const currentFees = getValues("fees");
+      const currentFees = getValues('fees');
       const fee = currentFees[index];
       if (!fee) return;
 
@@ -151,12 +156,12 @@ const FeeAcceptForm = ({ pageTitle }) => {
       );
 
       // Update totals after deposit change
-      const updatedFees = getValues("fees");
+      const updatedFees = getValues('fees');
       const updatedDeposit = updatedFees.reduce(
         (acc, f) => acc + Number(f.deposit || 0),
         0
       );
-      setValue("currentDeposit", updatedDeposit);
+      setValue('currentDeposit', updatedDeposit);
     },
     [getValues, setValue]
   );
@@ -164,9 +169,9 @@ const FeeAcceptForm = ({ pageTitle }) => {
   // Delete a fee row
   const handleDeleteFee = useCallback(
     (index) => {
-      const currentFees = getValues("fees");
+      const currentFees = getValues('fees');
       const updatedFees = currentFees.filter((_, i) => i !== index);
-      setValue("fees", updatedFees);
+      setValue('fees', updatedFees);
       setDefaultFees((prev) => prev.filter((_, i) => i !== index));
     },
     [getValues, setValue]
@@ -195,14 +200,14 @@ const FeeAcceptForm = ({ pageTitle }) => {
       admissionId: studentFeeAdmissionData.admissionId,
     };
     dispatch(setStudentFeeData(payload));
-    hideModal()
+    hideModal();
   };
 
   const handleKeyDown = (e, index, fieldType) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      if (fieldType === "deduction") handleDeductionChange(index);
-      else if (fieldType === "deposit") handleDepositChange(index);
+      if (fieldType === 'deduction') handleDeductionChange(index);
+      else if (fieldType === 'deposit') handleDepositChange(index);
     }
   };
 
@@ -210,8 +215,6 @@ const FeeAcceptForm = ({ pageTitle }) => {
     <div className="font-SolaimanLipi bg-white p-4 md:px-6 rounded-xl shadow-lg">
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-
-
           <div className="flex flex-col md:flex-row-reverse gap-4 mb-5">
             <div className="md:col-span-3 grid grid-cols-3 md:grid-cols-5 gap-3 items-center">
               <DefaultInput
@@ -269,28 +272,28 @@ const FeeAcceptForm = ({ pageTitle }) => {
             <thead className="bg-[#e9ebee] text-black">
               <tr>
                 <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate("Action")}
+                  {translate('Action')}
                 </th>
                 <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate("ID")}
+                  {translate('ID')}
                 </th>
                 <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate("Fee Name")}
+                  {translate('Fee Name')}
                 </th>
                 <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate("Prescribed Fee")}
+                  {translate('Prescribed Fee')}
                 </th>
                 <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate("Deduction")}
+                  {translate('Deduction')}
                 </th>
                 <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate("Pre-deposit")}
+                  {translate('Pre-deposit')}
                 </th>
                 <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate("Deposit")}
+                  {translate('Deposit')}
                 </th>
                 <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate("Due")}
+                  {translate('Due')}
                 </th>
               </tr>
             </thead>
@@ -323,7 +326,7 @@ const FeeAcceptForm = ({ pageTitle }) => {
                           type="number"
                           defaultValue={item.deduction || 0}
                           onKeyDown={(e) =>
-                            handleKeyDown(e, globalIndex, "deduction")
+                            handleKeyDown(e, globalIndex, 'deduction')
                           }
                           onBlur={() => handleDeductionChange(globalIndex)}
                         />
@@ -342,7 +345,7 @@ const FeeAcceptForm = ({ pageTitle }) => {
                           type="number"
                           defaultValue={item.deposit}
                           onKeyDown={(e) =>
-                            handleKeyDown(e, globalIndex, "deposit")
+                            handleKeyDown(e, globalIndex, 'deposit')
                           }
                           onBlur={() => handleDepositChange(globalIndex)}
                         />

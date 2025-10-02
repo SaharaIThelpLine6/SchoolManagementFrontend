@@ -1,29 +1,29 @@
-import { useDispatch, useSelector } from "react-redux";
-import useTranslate from "../utils/Translate";
-import { useLocation } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
-import DefaultInput from "../components/Forms/DefaultInput";
-import { FormProvider, useForm } from "react-hook-form";
-import Button from "../components/Button/Button";
-import { showModal } from "../utils/ModalControlar";
-import { setFilteredSelectedPerStudentFee } from "../features/student/studentSlice";
-import SvgIcon from "../components/icons/SvgIcon";
-import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
-import DefaultSelect from "../components/Forms/DefaultSelect";
-import Textarea from "../components/Forms/Textarea";
-import DefaultRadio from "../components/Radio/DefaultRadio";
-import { useGetSessionsQuery } from "../features/session/sessionSlice";
-import bnBijoy2Unicode from "../utils/conveter";
-import { numberToBanglaWords } from "../helper/numberToBanglaWords";
+import { Buffer } from 'buffer';
+import { useCallback, useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import Button from '../components/Button/Button';
+import DatePickerOne from '../components/Forms/DatePicker/DatePickerOne';
+import DefaultInput from '../components/Forms/DefaultInput';
+import DefaultSelect from '../components/Forms/DefaultSelect';
+import Textarea from '../components/Forms/Textarea';
+import SvgIcon from '../components/icons/SvgIcon';
+import DefaultRadio from '../components/Radio/DefaultRadio';
 import {
   useGetGeneralLedgersByCAIDQuery,
   useGetSearchStudentsQuery,
-  useGetStudentFeeAdmissionsQuery,
   useGetSubLedgersByGLIDQuery,
-} from "../features/feeCollection/feeCollectionSlice";
-import { Buffer } from "buffer";
-import { useDefaultSession } from "../hooks/useDefaultSession";
-import Swal from "sweetalert2";
+  usePostStudentFeeCollectionMutation,
+} from '../features/feeCollection/feeCollectionSlice';
+import { useGetSessionsQuery } from '../features/session/sessionSlice';
+import { setFilteredSelectedPerStudentFee } from '../features/student/studentSlice';
+import { numberToBanglaWords } from '../helper/numberToBanglaWords';
+import { useDefaultSession } from '../hooks/useDefaultSession';
+import bnBijoy2Unicode from '../utils/conveter';
+import { showModal } from '../utils/ModalControlar';
+import useTranslate from '../utils/Translate';
 
 const StudentsFeeCollection = () => {
   const defaultSessionId = useDefaultSession();
@@ -31,8 +31,8 @@ const StudentsFeeCollection = () => {
   const dispatch = useDispatch();
   const methods = useForm({
     defaultValues: {
-      StudentCode: "",
-      SessionID: defaultSessionId || "",
+      StudentCode: '',
+      SessionID: defaultSessionId || '',
       IsActive: 1,
       EntryDate: new Date(),
     },
@@ -43,6 +43,8 @@ const StudentsFeeCollection = () => {
   const { filteredSelectedPerStudentFee } = useSelector(
     (state) => state.student
   );
+
+  console.log(filteredSelectedPerStudentFee, 'filteredSelectedPerStudentFee');
   const [studentFeeDataAll, setstudentFeeDataAll] = useState(null);
   const [totalDue, setTotalDue] = useState(null);
   const [logo, setLogo] = useState(null);
@@ -53,17 +55,19 @@ const StudentsFeeCollection = () => {
   // Session function
   const { data: sessionData, isLoading, isFetching } = useGetSessionsQuery();
 
+  const [postStudentFee] = usePostStudentFeeCollectionMutation();
+
   // default session set
   useEffect(() => {
     if (defaultSessionId) {
-      setValue("SessionID", defaultSessionId, {
+      setValue('SessionID', defaultSessionId, {
         shouldValidate: true,
         shouldDirty: true,
       });
     }
   }, [defaultSessionId, setValue]);
 
-  const [GLID, SessionID] = watch(["GLID", "SessionID"]);
+  const [GLID, SessionID] = watch(['GLID', 'SessionID']);
 
   // const GLID = 3
   const { data: glbc = [] } = useGetGeneralLedgersByCAIDQuery();
@@ -73,19 +77,12 @@ const StudentsFeeCollection = () => {
   // Call search query
   const {
     data: searchUserInfo = { data: [] }, // ✅ ডিফল্ট হিসেবে object এবং data: [] দিন
-    error: searchUserError,
+    error,
     isLoading: userInfoLoading,
+    isError,
   } = useGetSearchStudentsQuery(filterData, {
     skip: !filterData,
     refetchOnFocus: false,
-  });
-
-  const {
-    data: studentFeeAdmissionData,
-    isError,
-    error,
-  } = useGetStudentFeeAdmissionsQuery(filteredSelectedPerStudentFee?.UserID, {
-    skip: !filteredSelectedPerStudentFee?.UserID,
   });
 
   // 👉 useEffect দিয়ে dispatch, প্রথম এলিমেন্ট থাকলে
@@ -100,10 +97,10 @@ const StudentsFeeCollection = () => {
       } else if (searchUserInfo.message) {
         // ✅ data খালি হলে sweetalert2 দেখাবে
         Swal.fire({
-          icon: "info",
-          title: "দুঃখিত!",
+          icon: 'info',
+          title: 'দুঃখিত!',
           text: searchUserInfo.message,
-          confirmButtonText: "ঠিক আছে",
+          confirmButtonText: 'ঠিক আছে',
         });
       }
     }
@@ -112,7 +109,7 @@ const StudentsFeeCollection = () => {
   useEffect(() => {
     if (filteredSelectedPerStudentFee?.Image?.data) {
       const buffer = Buffer.from(filteredSelectedPerStudentFee.Image.data);
-      const base64String = buffer.toString("base64");
+      const base64String = buffer.toString('base64');
       const imageSrc = `data:image/png;base64,${base64String}`;
       setLogo(imageSrc);
     }
@@ -134,78 +131,81 @@ const StudentsFeeCollection = () => {
   useEffect(() => {
     if (filteredSelectedPerStudentFee) {
       const defaultValues = {
-        ID: filteredSelectedPerStudentFee.UserID ?? "",
-        StudentCode: filteredSelectedPerStudentFee.StudentCode ?? "",
-        SessionID: filteredSelectedPerStudentFee.SessionID ?? "",
+        ID: filteredSelectedPerStudentFee.UserID ?? '',
+        StudentCode: filteredSelectedPerStudentFee.StudentCode ?? '',
+        SessionID: filteredSelectedPerStudentFee.SessionID ?? '',
       };
       reset(defaultValues);
     } else {
       reset({
-        StudentCode: "",
-        SessionID: "",
+        StudentCode: '',
+        SessionID: '',
       });
     }
   }, [filteredSelectedPerStudentFee, reset]);
 
   const handleOpenModal = useCallback(() => {
-    showModal("Selected Per Student Fee", "SELECTED_PERSTUDENT_FEE_FILTER");
+    showModal('Selected Per Student Fee', 'SELECTED_PERSTUDENT_FEE_FILTER');
   }, []);
 
   const handleStudentFeeOpenModal = useCallback(() => {
     if (isError && error) {
       Swal.fire({
-        icon: "error",
-        title: "ত্রুটি",
-        text: error?.data?.error || "কিছু একটা ভুল হয়েছে",
+        icon: 'error',
+        title: 'ত্রুটি',
+        text: error?.data?.error || 'কিছু একটা ভুল হয়েছে',
       });
       return; // error থাকলে modal আর খুলবে না
     }
 
-    showModal("Student Admission Fee Accept", "STUDENT_FEE_ACCEPT");
+    showModal('Student Admission Fee Accept', 'STUDENT_FEE_ACCEPT');
   }, [isError, error, showModal]);
 
   const handleStudentMonthFeeOpenModal = useCallback(() => {
-    showModal("Student Month Fee Accept", "STUDENT_MONTH_FEE_ACCEPT");
+    showModal('Student Month Fee Accept', 'STUDENT_MONTH_FEE_ACCEPT');
   }, []);
 
- const onSubmit = (data) => {
-   try {
-     // ✅ Check if fees array exists and has items
-     if (!studentFeeData?.fees || studentFeeData.fees.length === 0) {
-       Swal.fire({
-         icon: "error",
-         title: "ত্রুটি",
-         text: "ফি এর খাত নির্বাচন করুন।",
-       });
-       return;
-     }
+  const onSubmit = async (data) => {
+    try {
+      // ✅ Check if fees array exists and has items
+      if (!studentFeeData?.fees || studentFeeData.fees.length === 0) {
+        Swal.fire({
+          icon: 'error',
+          title: 'ত্রুটি',
+          text: 'ফি এর খাত নির্বাচন করুন।',
+        });
+        return;
+      }
 
-     const payload = {
-       UserID: studentFeeData.userId,
-       AdmissionID: studentFeeData.admissionId,
-       CurrentInvoice: studentFeeData.prescribedFee,
-       InvoiceDiscount: studentFeeData.deduction,
-       CurrentPaid: studentFeeData.currentDeposit,
-       Due: totalDue,
-       AmountInWord: data.speakCurrentDeposit,
-       CreateAt: data.EntryDate,
-       Remark: data.Remark,
-       fees: studentFeeData.fees,
-       //  PreviousDue: "",
-     };
+      const payload = {
+        UserID: studentFeeData.userId,
+        AdmissionID: studentFeeData.admissionId,
+        CurrentInvoice: studentFeeData.prescribedFee,
+        InvoiceDiscount: studentFeeData.deduction,
+        CurrentPaid: studentFeeData.currentDeposit,
+        Due: totalDue,
+        AmountInWord: data.speakCurrentDeposit,
+        CreateAt: data.EntryDate,
+        Remark: data.Remark,
+        AccountType: data.GLID,
+        Account: data.SLID,
+        fees: studentFeeData.fees,
+        //  PreviousDue: "",
+      };
 
-     console.log("First form submitted with data:", payload);
+      await postStudentFee(payload).unwrap;
+      console.log('First form submitted with data:', payload);
 
-     // ✅ আপনার মূল logic এখানে লিখুন
-   } catch (error) {
-     console.error("Submission error:", error);
-     Swal.fire({
-       icon: "error",
-       title: "ত্রুটি",
-       text: "ডেটা সাবমিট করতে সমস্যা হয়েছে",
-     });
-   }
- };
+      // ✅ আপনার মূল logic এখানে লিখুন
+    } catch (error) {
+      console.error('Submission error:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'ত্রুটি',
+        text: 'ডেটা সাবমিট করতে সমস্যা হয়েছে',
+      });
+    }
+  };
 
   const handleReset = () => {
     reset();
@@ -222,14 +222,14 @@ const StudentsFeeCollection = () => {
   };
 
   const feeStatus = [
-    { id: 1, name: "ID" },
-    { id: 2, name: "Card" },
+    { id: 1, name: 'ID' },
+    { id: 2, name: 'Card' },
   ];
   // 👉 handle function
   const handleEnter = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       e.preventDefault();
-      const studentCode = methods.getValues("StudentCode");
+      const studentCode = methods.getValues('StudentCode');
       setFilterData({ search: studentCode, SessionID }); // 👉 query param আকারে পাঠাবো
     }
   };
@@ -241,7 +241,7 @@ const StudentsFeeCollection = () => {
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
             <h3 className="text-lg md:text-xl font-bold text-gray-800">
-              {translate("Student Fee Collection")}
+              {translate('Student Fee Collection')}
             </h3>
           </div>
           <form onSubmit={handleSubmit(onSubmit)}>
@@ -256,17 +256,17 @@ const StudentsFeeCollection = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    "Photo"
+                    'Photo'
                   )}
                 </div>
 
                 <div className="w-full relative">
                   <label className="block mb-1 text-sm font-medium text-gray-700">
-                    {translate("Student Code")}:
+                    {translate('Student Code')}:
                   </label>
                   <div className="flex gap-2">
                     <input
-                      {...methods.register("StudentCode", { required: true })}
+                      {...methods.register('StudentCode', { required: true })}
                       className="w-full rounded-lg border border-gray-300 px-3 h-[38px] bg-gray-100
                  focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
                       onKeyDown={handleEnter} // 👉 এখানে function কল হবে
@@ -278,7 +278,7 @@ const StudentsFeeCollection = () => {
                       className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 transition"
                       title="Filter"
                     >
-                      <SvgIcon name={"TbFilterPlus"} size={20} />
+                      <SvgIcon name={'TbFilterPlus'} size={20} />
                     </button>
                   </div>
                 </div>
@@ -308,7 +308,7 @@ const StudentsFeeCollection = () => {
                 <div className="bg-white space-y-4">
                   <div className="flex items-center text-sm">
                     <span className="font-semibold text-gray-700 min-w-20 max-w-36 pr-1 flex-shrink-0">
-                      {translate("নাম")}
+                      {translate('নাম')}
                     </span>
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
                     <span className="ml-1 text-green-600 font-bold flex-1 truncate">
@@ -319,7 +319,7 @@ const StudentsFeeCollection = () => {
                   </div>
                   <div className="flex items-center text-sm">
                     <span className="font-semibold text-gray-700 min-w-20 max-w-36 pr-1 flex-shrink-0">
-                      {translate("পিতার নাম")}
+                      {translate('পিতার নাম')}
                     </span>
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
                     <span className="ml-1 flex-1 truncate">
@@ -330,7 +330,7 @@ const StudentsFeeCollection = () => {
                   </div>
                   <div className="flex items-center text-sm">
                     <span className="font-semibold text-gray-700 min-w-20 max-w-36 pr-1 flex-shrink-0">
-                      {translate("মোবাইল")}
+                      {translate('মোবাইল')}
                     </span>
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
                     <span className="ml-1 flex-1 truncate">
@@ -339,7 +339,7 @@ const StudentsFeeCollection = () => {
                   </div>
                   <div className="flex items-center text-sm">
                     <span className="font-semibold text-gray-700 min-w-20 max-w-36 pr-1 flex-shrink-0">
-                      {translate("শ্রেণি/জামাত")}
+                      {translate('শ্রেণি/জামাত')}
                     </span>
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
                     <span className="ml-1 flex-1 truncate">
@@ -348,25 +348,28 @@ const StudentsFeeCollection = () => {
                   </div>
                   <div className="flex items-center text-sm">
                     <span className="font-semibold text-gray-700 min-w-20 max-w-36 pr-1 flex-shrink-0">
-                      {translate("শিক্ষার্থীর অবস্থা")}
+                      {translate('শিক্ষার্থীর অবস্থা')}
                     </span>
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
                     {filteredSelectedPerStudentFee?.AdmissionStatus != null && (
                       <span
                         className={`ml-1 font-bold flex-1 truncate ${
-                          filteredSelectedPerStudentFee.AdmissionStatus === 1
-                            ? "text-green-600"
-                            : filteredSelectedPerStudentFee.AdmissionStatus ===
-                              3
-                            ? "text-yellow-600"
-                            : "text-red-600"
+                          {
+                            0: 'text-red-600', // পেন্ডিং
+                            1: 'text-green-600', // পেইড
+                            2: 'text-blue-600', // ফ্রী
+                            3: 'text-yellow-600', // বকেয়া
+                          }[filteredSelectedPerStudentFee.AdmissionStatus]
                         }`}
                       >
-                        {filteredSelectedPerStudentFee.AdmissionStatus === 1
-                          ? "পেইড"
-                          : filteredSelectedPerStudentFee.AdmissionStatus === 3
-                          ? "বকেয়া"
-                          : "পেন্ডিং"}
+                        {
+                          {
+                            0: 'পেন্ডিং',
+                            1: 'পেইড',
+                            2: 'ফ্রী',
+                            3: 'বকেয়া',
+                          }[filteredSelectedPerStudentFee.AdmissionStatus]
+                        }
                       </span>
                     )}
                   </div>
@@ -377,45 +380,45 @@ const StudentsFeeCollection = () => {
                 <div className="bg-white space-y-4">
                   <div className="flex items-center text-sm">
                     <span className="font-semibold text-gray-700 min-w-12 pr-1 flex-shrink-0">
-                      {translate("মোট")}
+                      {translate('মোট')}
                     </span>
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
                     <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
-                      {studentFeeDataAll?.prescribedFee ?? "0"}
+                      {studentFeeDataAll?.prescribedFee ?? '0'}
                     </span>
                   </div>
                   <div className="flex items-center text-sm">
                     <span className="font-semibold text-gray-700 min-w-12 pr-1 flex-shrink-0">
-                      {translate("কর্তন")}
-                    </span>
-                    <span className="text-gray-700 w-2 flex-shrink-0">:</span>
-
-                    <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
-                      {studentFeeDataAll?.deduction ?? "0"}
-                    </span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <span className="font-semibold text-gray-700 min-w-12 pr-1 flex-shrink-0">
-                      {translate("জমা")}
-                    </span>
-                    <span className="text-gray-700 w-2 flex-shrink-0">:</span>
-                    <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
-                      {studentFeeDataAll?.currentDeposit ?? "0"}
-                    </span>
-                  </div>
-                  <div className="flex items-center text-sm">
-                    <span className="font-semibold text-gray-700 min-w-12 pr-1 flex-shrink-0">
-                      {translate("বকেয়া")}
+                      {translate('কর্তন')}
                     </span>
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
 
                     <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
-                      {totalDue ?? "0"}
+                      {studentFeeDataAll?.deduction ?? '0'}
                     </span>
                   </div>
                   <div className="flex items-center text-sm">
                     <span className="font-semibold text-gray-700 min-w-12 pr-1 flex-shrink-0">
-                      {translate("রসিদ")}
+                      {translate('জমা')}
+                    </span>
+                    <span className="text-gray-700 w-2 flex-shrink-0">:</span>
+                    <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
+                      {studentFeeDataAll?.currentDeposit ?? '0'}
+                    </span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <span className="font-semibold text-gray-700 min-w-12 pr-1 flex-shrink-0">
+                      {translate('বকেয়া')}
+                    </span>
+                    <span className="text-gray-700 w-2 flex-shrink-0">:</span>
+
+                    <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
+                      {totalDue ?? '0'}
+                    </span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <span className="font-semibold text-gray-700 min-w-12 pr-1 flex-shrink-0">
+                      {translate('রসিদ')}
                     </span>
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
                     <input
@@ -435,13 +438,13 @@ const StudentsFeeCollection = () => {
                 registerKey="Remark"
                 // require={true}
                 rows={2}
-              />{" "}
+              />{' '}
               <Textarea
                 label="কথায়"
                 placeholder="Enter your comments ..."
                 registerKey="speakCurrentDeposit"
                 defaultValue={numberToBanglaWords(
-                  studentFeeDataAll?.currentDeposit ?? ""
+                  studentFeeDataAll?.currentDeposit ?? ''
                 )}
                 disable
                 rows={2}
@@ -460,7 +463,7 @@ const StudentsFeeCollection = () => {
                   nameField="GlName"
                   unicode
                   registerKey="GLID"
-                  require={"অ্যাকাউন্টের ধরণ নির্বাচন করতে হবে!"}
+                  require={'অ্যাকাউন্টের ধরণ নির্বাচন করতে হবে!'}
                 />
 
                 <DefaultSelect
@@ -470,7 +473,7 @@ const StudentsFeeCollection = () => {
                   nameField="SlName"
                   unicode
                   registerKey="SLID"
-                  require={"অ্যাকাউন্ট নির্বাচন করতে হবে!"}
+                  require={'অ্যাকাউন্ট নির্বাচন করতে হবে!'}
                 />
               </div>
             </div>
@@ -510,11 +513,14 @@ const StudentsFeeCollection = () => {
                       className="w-full max-w-xs px-4 py-2 rounded-lg shadow bg-blue-600 text-white"
                       disabled={
                         !filteredSelectedPerStudentFee?.UserID ||
-                        filteredSelectedPerStudentFee?.AdmissionStatus === 1
+                        ![0, 3].includes(
+                          filteredSelectedPerStudentFee?.AdmissionStatus
+                        )
                       }
                     >
                       ভর্তি
                     </Button>
+
                     <input
                       type="text"
                       className="w-full max-w-xs rounded border border-gray-300 px-2 py-1 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
@@ -602,29 +608,29 @@ const StudentsFeeCollection = () => {
                     <thead className="bg-[#e9ebee] text-black">
                       <tr>
                         <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate("Sequential")}
+                          {translate('Sequential')}
                         </th>
                         <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate("Fee Name")}
+                          {translate('Fee Name')}
                         </th>
                         <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate("Details")}
+                          {translate('Details')}
                         </th>
                         <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate("Prescribed Fee")}
+                          {translate('Prescribed Fee')}
                         </th>
                         <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate("Deduction")}
+                          {translate('Deduction')}
                         </th>
 
                         <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate("Pre-deposit")}
+                          {translate('Pre-deposit')}
                         </th>
                         <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate("Deposit")}
+                          {translate('Deposit')}
                         </th>
                         <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate("Due")}
+                          {translate('Due')}
                         </th>
                       </tr>
                     </thead>
@@ -694,7 +700,7 @@ const StudentsFeeCollection = () => {
                       ) : (
                         <tr>
                           <td colSpan={8} className="px-4 py-2 text-center">
-                            {translate("No data available")}
+                            {translate('No data available')}
                           </td>
                         </tr>
                       )}

@@ -45,8 +45,7 @@ export const feeCollectionSlice = createApi({
     }),
     getDueFee: builder.query({
       query: ({ sessionID, classID, SFGNID, AdmissionID, monthID }) =>
-        `view_student_due_fee/${sessionID}/${classID}/${SFGNID}/${AdmissionID}/${
-          monthID ? monthID : 0
+        `view_student_due_fee/${sessionID}/${classID}/${SFGNID}/${AdmissionID}/${monthID ? monthID : 0
         }`,
     }),
     getFeeById: builder.query({
@@ -130,10 +129,10 @@ export const feeCollectionSlice = createApi({
       providesTags: ["FeeGroupNames"],
     }),
     getStudentFeeSettings: builder.query({
-      query: ({ sessionId, classId, sfgnid } = {}) => {
-        if (sessionId && classId && sfgnid) {
-          return `view_student_fee/${sessionId}/${classId}/${sfgnid}`;
-        } else if (!sessionId && !classId && !sfgnid) {
+      query: ({ sessionId, classId } = {}) => {
+        if (sessionId && classId) {
+          return `view_student_fee/${sessionId}/${classId}`;
+        } else if (!sessionId && !classId) {
           return `view_student_fee_settings`;
         }
         return { url: "", skip: true };
@@ -312,6 +311,7 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["StudentFeeGroups"],
     }),
+
     updateStudentFeeGroup: builder.mutation({
       query: (data) => ({
         url: `update_student_fee_group/${data.ID}`,
@@ -328,7 +328,7 @@ export const feeCollectionSlice = createApi({
       invalidatesTags: ["StudentFeeGroups"],
     }),
     getStudentFeeAdmissions: builder.query({
-      query: (userId) => `view_student_fee/${userId}`,
+      query: (admissionId) => `view_student_fee/${admissionId}`,
       providesTags: ["StudentFeeAdmissions"],
     }),
 
@@ -339,6 +339,15 @@ export const feeCollectionSlice = createApi({
     getSubLedgersByGLID: builder.query({
       query: (id) => `subledgers_by_glid/${id}`,
       providesTags: ["SubGeneralLedger"],
+    }),
+
+    postStudentFeeCollection: builder.mutation({
+      query: (data) => ({
+        url: "create_student_fee",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["StudentFeeCollection"],
     }),
   }),
 });
@@ -396,5 +405,7 @@ export const {
   useGetSubGeneralLedgersByFundIdAndGlIdQuery,
   useGetStudentFeeAdmissionsQuery,
   useGetGeneralLedgersByCAIDQuery,
-  useGetSubLedgersByGLIDQuery
+  useGetSubLedgersByGLIDQuery,
+
+  usePostStudentFeeCollectionMutation
 } = feeCollectionSlice;
