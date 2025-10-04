@@ -178,7 +178,6 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                     </div>
                 </div>
             ) : null}
-
         </div>
     )
 }
