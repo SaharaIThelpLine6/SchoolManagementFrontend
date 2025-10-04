@@ -15,7 +15,7 @@ import DefaultKeyDownInput from './DefaultKeyDownInput';
 
 const PAGE_SIZE = 10;
 
-const FeeAcceptForm = ({ pageTitle }) => {
+const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
@@ -400,4 +400,4 @@ const FeeAcceptForm = ({ pageTitle }) => {
   );
 };
 
-export default FeeAcceptForm;
+export default StudentAdmissionFeeAcceptForm;

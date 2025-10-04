@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-import SingleCheckbox from '../../components/Checkboxes/SingleCheckbox';
-import DefaultInput from '../../components/Forms/DefaultInput';
-import { useGetFeeLandByAdmissionQuery } from '../../features/feeCollection/feeCollectionSlice';
-import bnBijoy2Unicode from '../../utils/conveter';
-import useTranslate from '../../utils/Translate';
+
+import DefaultInput from '../../../components/Forms/DefaultInput';
+import { useGetFeeLandByAdmissionQuery } from '../../../features/feeCollection/feeCollectionSlice';
+import bnBijoy2Unicode from '../../../utils/conveter';
+import useTranslate from '../../../utils/Translate';
 
 const PAGE_SIZE = 6;
 
-const MonthDetermineFeeTable = () => {
+const MonthlyFeeCollectionTable = () => {
   const translate = useTranslate();
   const methods = useForm();
   const [currentPage, setCurrentPage] = useState(1);
@@ -83,7 +83,8 @@ const MonthDetermineFeeTable = () => {
 
   // Render loading, error, or no data states
   if (!admissionId) {
-    return <p>{translate('Please select a student first.')}</p>;
+    return;
+    // return <p>{translate('Please select a student first.')}</p>;
   }
 
   if (isLoading) {
@@ -119,12 +120,6 @@ const MonthDetermineFeeTable = () => {
               <th className="px-4 py-3 text-center whitespace-nowrap">
                 {translate('Accepted Fees')}
               </th>
-              <th className="px-4 py-3 text-center whitespace-nowrap">
-                {translate('Comment')}
-              </th>
-              <th className="px-4 py-3 text-center whitespace-nowrap">
-                {translate('Status')}
-              </th>
             </tr>
           </thead>
           <tbody>
@@ -137,20 +132,13 @@ const MonthDetermineFeeTable = () => {
                   <td className="px-4 py-2 text-center whitespace-nowrap">
                     {item.prescribedFee}
                   </td>
-                  <td className="px-4 py-2 text-center whitespace-nowrap">
-                    {item.acceptedFees}
-                  </td>
+
                   <td className="px-2 py-2 text-center whitespace-nowrap min-w-[120px]">
                     <DefaultInput
                       registerKey={`monthFeeList.${index}.comment`}
                       type="text"
                       className="w-full min-w-[100px] max-w-[150px] mx-auto"
-                    />
-                  </td>
-                  <td className="px-4 py-2 text-center flex justify-center items-center whitespace-nowrap">
-                    <SingleCheckbox
-                      registerKey={`monthFeeList.${index}.status`}
-                      dcn="mb-0"
+                      defaultValue={item.acceptedFees}
                     />
                   </td>
                 </tr>
@@ -194,4 +182,4 @@ const MonthDetermineFeeTable = () => {
   );
 };
 
-export default MonthDetermineFeeTable;
+export default MonthlyFeeCollectionTable;

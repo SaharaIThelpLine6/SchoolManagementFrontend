@@ -1,15 +1,15 @@
-import { useEffect, useState } from "react";
-import DefaultSelect from "../Forms/DefaultSelect";
-import { FormProvider, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
-import DefaultInput from "../Forms/DefaultInput";
-import { fetchClassData } from "../../features/class/classSlice";
-import { fetchSettingsData } from "../../features/settings/settingsSlice";
-import LoadingComponent from "../LoadingComponent";
-import SortableTable from "../Tables/SortableTable";
-import { hideModal } from "../../utils/ModalControlar";
-import { useGetSearchStudentsQuery } from "../../features/feeCollection/feeCollectionSlice";
-import { setFilteredSelectedPerStudentFee } from "../../features/student/studentSlice";
+import { useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchClassData } from '../../features/class/classSlice';
+import { useGetSearchStudentsQuery } from '../../features/feeCollection/feeCollectionSlice';
+import { fetchSettingsData } from '../../features/settings/settingsSlice';
+import { setFilteredSelectedPerStudentFee } from '../../features/student/studentSlice';
+import { hideModal } from '../../utils/ModalControlar';
+import DefaultInput from '../Forms/DefaultInput';
+import DefaultSelect from '../Forms/DefaultSelect';
+import LoadingComponent from '../LoadingComponent';
+import SortableTable from '../Tables/SortableTable';
 const SelectedPerStudentFeeModal = () => {
   const methods = useForm();
   const {
@@ -33,16 +33,16 @@ const SelectedPerStudentFeeModal = () => {
     }
   }, [dispatch]);
 
-  const StudentCode = watch("StudentCode");
-  const ClassID = watch("ClassID");
-  const SessionID = watch("SessionID");
+  const StudentCode = watch('StudentCode');
+  const ClassID = watch('ClassID');
+  const SessionID = watch('SessionID');
 
-  console.log(StudentCode, "StudentCode")
+  console.log(StudentCode, 'StudentCode');
 
   const [debouncedFilters, setDebouncedFilters] = useState({
-    search: "",
-    ClassID: "",
-    SessionID: "",
+    search: '',
+    ClassID: '',
+    SessionID: '',
   });
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -74,8 +74,8 @@ const SelectedPerStudentFeeModal = () => {
   };
   const columns = [
     {
-      title: "Action",
-      hozAlign: "center",
+      title: 'Action',
+      hozAlign: 'center',
       render: (row) => {
         return (
           <button
@@ -113,17 +113,17 @@ const SelectedPerStudentFeeModal = () => {
         );
       },
     },
-    { title: "User Code", field: "StudentCode", hozAlign: "center" },
+    { title: 'User Code', field: 'StudentCode', hozAlign: 'center' },
     {
-      title: "User Name",
-      field: "StudentName",
-      hozAlign: "center",
+      title: 'User Name',
+      field: 'StudentName',
+      hozAlign: 'center',
       unicode: true,
     },
     {
-      title: "Class Name",
-      field: "ClassName",
-      hozAlign: "center",
+      title: 'Class Name',
+      field: 'ClassName',
+      hozAlign: 'center',
       unicode: true,
     },
   ];
@@ -133,33 +133,33 @@ const SelectedPerStudentFeeModal = () => {
         <div
           className="w-full"
           style={{
-            padding: "10px",
-            border: "1px solid #ccc",
-            borderRadius: "5px",
-            margin: "0 auto",
+            padding: '10px',
+            border: '1px solid #ccc',
+            borderRadius: '5px',
+            margin: '0 auto',
           }}
         >
           <div className="flex flex-col md:flex-row gap-2">
             <DefaultInput
-              label={""}
-              placeholder={"Student Code"}
-              registerKey={"StudentCode"}
-              type={"number"}
-              key={"StudentCode"}
+              label={''}
+              placeholder={'Student Code'}
+              registerKey={'StudentCode'}
+              type={'number'}
+              key={'StudentCode'}
             />
             <DefaultSelect
               options={classList}
-              nameField={"ClassName"}
-              valueField={"ClassID"}
-              registerKey={"ClassID"}
-              type={"number"}
+              nameField={'ClassName'}
+              valueField={'ClassID'}
+              registerKey={'ClassID'}
+              type={'number'}
               unicode={true}
             />
             <DefaultSelect
               options={academicSession}
-              nameField={"SessionName"}
-              valueField={"SessionID"}
-              registerKey={"SessionID"}
+              nameField={'SessionName'}
+              valueField={'SessionID'}
+              registerKey={'SessionID'}
             />
           </div>
         </div>
@@ -169,7 +169,11 @@ const SelectedPerStudentFeeModal = () => {
           <li className="text-black mt-4">No users Found.</li>
         ) : searchUserInfo && searchUserInfo?.data.length > 0 ? (
           <div className="relative overflow-x-auto">
-            <SortableTable columns={columns} data={searchUserInfo?.data || []} isFilterColumn={false}/>
+            <SortableTable
+              columns={columns}
+              data={searchUserInfo?.data || []}
+              isFilterColumn={false}
+            />
           </div>
         ) : (
           <li className="py-2 px-4">No users found</li>
@@ -179,6 +183,4 @@ const SelectedPerStudentFeeModal = () => {
   );
 };
 
-
-
-export default SelectedPerStudentFeeModal
+export default SelectedPerStudentFeeModal;

@@ -340,7 +340,6 @@ export const feeCollectionSlice = createApi({
       query: (id) => `subledgers_by_glid/${id}`,
       providesTags: ["SubGeneralLedger"],
     }),
-
     postStudentFeeCollection: builder.mutation({
       query: (data) => ({
         url: "create_student_fee",
@@ -349,6 +348,11 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ["StudentFeeCollection"],
     }),
+    getMonthlyFeeAccept: builder.query({
+      query: (id) => `monthly_fee_accept`,
+      providesTags: ["StudentFeeGroups"],
+    }),
+
   }),
 });
 
@@ -406,6 +410,7 @@ export const {
   useGetStudentFeeAdmissionsQuery,
   useGetGeneralLedgersByCAIDQuery,
   useGetSubLedgersByGLIDQuery,
+  useGetMonthlyFeeAcceptQuery,
 
   usePostStudentFeeCollectionMutation
 } = feeCollectionSlice;

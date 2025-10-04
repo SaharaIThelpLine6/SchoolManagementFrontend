@@ -14,6 +14,7 @@ import DefaultRadio from '../components/Radio/DefaultRadio';
 import {
   useGetGeneralLedgersByCAIDQuery,
   useGetSearchStudentsQuery,
+  useGetStudentFeeAdmissionsQuery,
   useGetSubLedgersByGLIDQuery,
   usePostStudentFeeCollectionMutation,
 } from '../features/feeCollection/feeCollectionSlice';
@@ -24,6 +25,7 @@ import { useDefaultSession } from '../hooks/useDefaultSession';
 import bnBijoy2Unicode from '../utils/conveter';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
+import MonthlyFeeCollectionTable from '../view/accounting/student-fee-collection/MonthlyFeeCollectionTable';
 
 const StudentsFeeCollection = () => {
   const defaultSessionId = useDefaultSession();
@@ -49,6 +51,20 @@ const StudentsFeeCollection = () => {
   const [totalDue, setTotalDue] = useState(null);
   const [logo, setLogo] = useState(null);
   const [filterData, setFilterData] = useState(null);
+
+  // Fetch student fee admissions data
+  const {
+    data: studentFeeAdmissionData,
+    error: admissionError,
+    isError: admissionisError,
+  } = useGetStudentFeeAdmissionsQuery(
+    filteredSelectedPerStudentFee?.AdmissionID,
+    {
+      skip: !filteredSelectedPerStudentFee?.AdmissionID,
+    }
+  );
+
+  console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
 
   const { studentFeeData = [] } = useSelector((state) => state.settings);
 
@@ -149,17 +165,18 @@ const StudentsFeeCollection = () => {
   }, []);
 
   const handleStudentFeeOpenModal = useCallback(() => {
-    if (isError && error) {
+    if (admissionisError && admissionError) {
+      console.log(admissionError, 'admissionError');
       Swal.fire({
         icon: 'error',
         title: 'ত্রুটি',
-        text: error?.data?.error || 'কিছু একটা ভুল হয়েছে',
+        text: admissionError?.data?.error || 'কিছু একটা ভুল হয়েছে',
       });
       return; // error থাকলে modal আর খুলবে না
     }
 
-    showModal('Student Admission Fee Accept', 'STUDENT_FEE_ACCEPT');
-  }, [isError, error, showModal]);
+    showModal('Student Admission Fee Accept', 'STUDENT_ADMISSION_FEE_ACCEPT');
+  }, [admissionisError, admissionError, showModal]);
 
   const handleStudentMonthFeeOpenModal = useCallback(() => {
     showModal('Student Month Fee Accept', 'STUDENT_MONTH_FEE_ACCEPT');
@@ -449,7 +466,7 @@ const StudentsFeeCollection = () => {
                 disable
                 rows={2}
               />
-              <div className="col-span-2 flex justify-between gap-2">
+              <div className="flex flex-col md:flex-row justify-between gap-3 md:col-span-2">
                 <DatePickerOne
                   dateCalender="Entry Date"
                   registerKey="EntryDate"
@@ -533,6 +550,7 @@ const StudentsFeeCollection = () => {
                     <Button
                       onClick={handleStudentMonthFeeOpenModal}
                       className="w-full max-w-xs px-4 py-2 rounded-lg shadow bg-green-600 text-white"
+                      disabled={!filteredSelectedPerStudentFee?.UserID}
                     >
                       মাসিক
                     </Button>
@@ -545,7 +563,10 @@ const StudentsFeeCollection = () => {
 
                   {/* Exam */}
                   <div className="flex flex-col items-center gap-2 w-full">
-                    <Button className="w-full max-w-xs px-4 py-2 rounded-lg shadow bg-purple-600 text-white">
+                    <Button
+                      className="w-full max-w-xs px-4 py-2 rounded-lg shadow bg-purple-600 text-white"
+                      disabled={!filteredSelectedPerStudentFee?.UserID}
+                    >
                       পরীক্ষা
                     </Button>
                     <input
@@ -557,7 +578,10 @@ const StudentsFeeCollection = () => {
 
                   {/* Others */}
                   <div className="flex flex-col items-center gap-2 w-full">
-                    <Button className="w-full max-w-xs px-4 py-2 rounded-lg shadow bg-yellow-500 text-white">
+                    <Button
+                      className="w-full max-w-xs px-4 py-2 rounded-lg shadow bg-yellow-500 text-white"
+                      disabled={!filteredSelectedPerStudentFee?.UserID}
+                    >
                       অন্যান্য
                     </Button>
                     <input
@@ -709,54 +733,7 @@ const StudentsFeeCollection = () => {
                 </div>
               </div>
               <div className="md:col-span-2">
-                {/* <div className=" overflow-x-auto rounded-md border w-full">
-                <table className="min-w-full sm:text-sm table-auto text-sm md:text-base">
-                  <thead className="bg-[#e9ebee] text-black">
-                    <tr>
-                      <th className="px-4 py-3 text-center whitespace-nowrap">
-                        {translate("Month Name")}
-                      </th>
-                      <th className="px-4 py-3 text-center whitespace-nowrap">
-                        {translate("Prescribed Fee")}
-                      </th>
-                      <th className="px-4 py-3 text-center whitespace-nowrap">
-                        {translate("Accepted Fees")}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {paginatedData.length > 0 ? (
-                      paginatedData.map((item, index) => (
-                        <tr key={index} className="border-t">
-                          <td className="px-4 text-center whitespace-nowrap">
-                            মে (2025-2026)
-                          </td>
-                          <td className="text-center whitespace-nowrap">
-                            <DefaultInput
-                              registerKey={`monthFeeList.${index}.comment`}
-                              type="text"
-                              disable
-                            />
-                          </td>
-                          <td className="text-center whitespace-nowrap">
-                            <DefaultInput
-                              registerKey={`monthFeeList.${index}.comment`}
-                              type="text"
-                              disable
-                            />
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={5} className="px-4 py-2 text-center">
-                          {translate("No data available")}
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div> */}
+                <MonthlyFeeCollectionTable />
               </div>
             </div>
           </form>

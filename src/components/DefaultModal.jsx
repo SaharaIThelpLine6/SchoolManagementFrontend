@@ -1,41 +1,41 @@
-import { useDispatch, useSelector } from "react-redux";
-import ClickOutside from "./ClickOutside";
-import { closeModal } from "../features/modal/modalSlice";
-import AdmissionForm from "./Forms/AdmissionForm";
-import FeeCollectionForm from "./Forms/FeeCollectionForm";
-import PaymentModal from "./Modals/PaymentModal";
-import AddTeacherForm from "./Forms/AddTeacherForm";
-import EditTeacherForm from "./Forms/EditTeacherForm";
-import TypeOfVacationForm from "./Forms/TypeOfVacationForm";
-import EditStudentVacationForm from "./Forms/EditStudentVacationForm";
-import AddStudentVacationForm from "./Forms/AddStudentVacationForm";
-import StudentFilterModal from "./Modals/StudentFilterModal";
-import MonthNamesForm from "./Forms/MonthNamesForm";
-import DesignationForm from "./Forms/DesignationForm";
-import EditStudentReport from "./Forms/EditStudentReport";
-import SMSTemplate from "../view/general-information/sms/SMSTemplate";
-import SMSBuy from "../view/general-information/sms/SMSBuy";
-import PaymentGetway from "../view/general-information/sms/PaymentGetway";
-import SuccessAndError from "../view/general-information/sms/SuccessAndError";
-import AddEditBook from "../view/students/book/AddEditBook";
-import useTranslate from "../utils/Translate";
-import Subsidiary from "../view/exam/Subsidiary";
-import ExamReportSetting from "../view/exam/ExamReportSetting";
-import Statement from "../view/accounting/dues-list/Statement";
-import BalanceTransferModal from "../view/accounting/BalanceTransferModal";
-import UserSearch from "./UserSearch";
-import AddLoginUsersModal from "../view/settings/AddLoginUsersModal";
-import UserNamePasswordChangeModal from "../view/settings/UserNamePasswordChangeModal";
-import UserFilterModal from "./Modals/UserFilterModal";
-import SelectedPerStudentFeeModal from "./Modals/SelectedPerStudentFeeModal";
-import FundForm from "../view/accounting/FundForm";
-import GeneralForm from "../view/accounting/GeneralForm";
-import ReportSettings from "../view/accounting/ReportSettings";
-import CodeSetting from "./Modals/CodeSetting";
-import SubGeneralForm from "../view/accounting/SubGeneralForm";
-import FeeAcceptForm from "../view/accounting/student-fee-collection/FeeAcceptForm";
-import MonthStudentFeeForm from "../view/accounting/student-fee-collection/MonthStudentFeeForm";
-import StudentFeeGroup from "../view/accounting/StudentFeeGroup";
+import { useDispatch, useSelector } from 'react-redux';
+import { closeModal } from '../features/modal/modalSlice';
+import useTranslate from '../utils/Translate';
+import BalanceTransferModal from '../view/accounting/BalanceTransferModal';
+import FundForm from '../view/accounting/FundForm';
+import GeneralForm from '../view/accounting/GeneralForm';
+import ReportSettings from '../view/accounting/ReportSettings';
+import StudentFeeGroup from '../view/accounting/StudentFeeGroup';
+import SubGeneralForm from '../view/accounting/SubGeneralForm';
+import Statement from '../view/accounting/dues-list/Statement';
+import MonthStudentFeeForm from '../view/accounting/student-fee-collection/MonthStudentFeeForm';
+import StudentAdmissionFeeAcceptForm from '../view/accounting/student-fee-collection/StudentAdmissionFeeAcceptForm';
+import ExamReportSetting from '../view/exam/ExamReportSetting';
+import Subsidiary from '../view/exam/Subsidiary';
+import PaymentGetway from '../view/general-information/sms/PaymentGetway';
+import SMSBuy from '../view/general-information/sms/SMSBuy';
+import SMSTemplate from '../view/general-information/sms/SMSTemplate';
+import SuccessAndError from '../view/general-information/sms/SuccessAndError';
+import AddLoginUsersModal from '../view/settings/AddLoginUsersModal';
+import UserNamePasswordChangeModal from '../view/settings/UserNamePasswordChangeModal';
+import AddEditBook from '../view/students/book/AddEditBook';
+import ClickOutside from './ClickOutside';
+import AddStudentVacationForm from './Forms/AddStudentVacationForm';
+import AddTeacherForm from './Forms/AddTeacherForm';
+import AdmissionForm from './Forms/AdmissionForm';
+import DesignationForm from './Forms/DesignationForm';
+import EditStudentReport from './Forms/EditStudentReport';
+import EditStudentVacationForm from './Forms/EditStudentVacationForm';
+import EditTeacherForm from './Forms/EditTeacherForm';
+import FeeCollectionForm from './Forms/FeeCollectionForm';
+import MonthNamesForm from './Forms/MonthNamesForm';
+import TypeOfVacationForm from './Forms/TypeOfVacationForm';
+import CodeSetting from './Modals/CodeSetting';
+import PaymentModal from './Modals/PaymentModal';
+import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
+import StudentFilterModal from './Modals/StudentFilterModal';
+import UserFilterModal from './Modals/UserFilterModal';
+import UserSearch from './UserSearch';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -53,7 +53,7 @@ const DefaultModal = () => {
         {/* Tailwind animation */}
         <div
           className={`w-full transform transition-all duration-300 ease-out
-            ${isOpen ? "opacity-100 scale-100" : "opacity-0 scale-0"}`}
+            ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`}
         >
           <div className="bg-white rounded-lg shadow-lg relative w-full max-h-[90vh] overflow-y-auto">
             <div className="header pl-3 pr-2 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
@@ -84,78 +84,78 @@ const DefaultModal = () => {
 
             {modalType && (
               <div className="body p-3">
-                {modalType === "ADD_STUDENT" && <AdmissionForm userId={id} />}
-                {modalType === "FEE_COLLECTION" && (
+                {modalType === 'ADD_STUDENT' && <AdmissionForm userId={id} />}
+                {modalType === 'FEE_COLLECTION' && (
                   <FeeCollectionForm userId={id} />
                 )}
-                {modalType === "PAYMENT" && <PaymentModal />}
-                {modalType === "ADD_TEACHER" && <AddTeacherForm userId={id} />}
-                {modalType === "EDIT_TEACHER" && (
+                {modalType === 'PAYMENT' && <PaymentModal />}
+                {modalType === 'ADD_TEACHER' && <AddTeacherForm userId={id} />}
+                {modalType === 'EDIT_TEACHER' && (
                   <EditTeacherForm userId={id} />
                 )}
-                {modalType === "ADD_DESIGNATION" && <DesignationForm />}
-                {modalType === "EDIT_DESIGNATION" && (
+                {modalType === 'ADD_DESIGNATION' && <DesignationForm />}
+                {modalType === 'EDIT_DESIGNATION' && (
                   <DesignationForm userId={id} />
                 )}
-                {modalType === "ADD_TYPEOFVACATION" && <TypeOfVacationForm />}
-                {modalType === "ADD_FUND" && <FundForm />}
-                {modalType === "OPEN_FUND" && <FundForm />}
-                {modalType === "OPEN_GENERAL" && <GeneralForm />}
-                {modalType === "OPEN_ACC_REPORT_SETTINGS" && <ReportSettings />}
-                {modalType === "OPEN_SUB_GENERAL" && <SubGeneralForm />}
-                {modalType === "STUDENT_FEE_GROUP" && <StudentFeeGroup />}
-                {modalType === "EDIT_TYPEOFVACATION" && (
+                {modalType === 'ADD_TYPEOFVACATION' && <TypeOfVacationForm />}
+                {modalType === 'ADD_FUND' && <FundForm />}
+                {modalType === 'OPEN_FUND' && <FundForm />}
+                {modalType === 'OPEN_GENERAL' && <GeneralForm />}
+                {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
+                {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
+                {modalType === 'STUDENT_FEE_GROUP' && <StudentFeeGroup />}
+                {modalType === 'EDIT_TYPEOFVACATION' && (
                   <TypeOfVacationForm userId={id} />
                 )}
-                {modalType === "EDIT_STUDENTREPORT" && (
+                {modalType === 'EDIT_STUDENTREPORT' && (
                   <EditStudentReport id={id} />
                 )}
-                {modalType === "ADD_STUDENTVACATION" && (
+                {modalType === 'ADD_STUDENTVACATION' && (
                   <AddStudentVacationForm />
                 )}
-                {modalType === "ADD_MONTHNAMES" && <MonthNamesForm />}
-                {modalType === "EDIT_MONTHNAMES" && (
+                {modalType === 'ADD_MONTHNAMES' && <MonthNamesForm />}
+                {modalType === 'EDIT_MONTHNAMES' && (
                   <MonthNamesForm id={id} isEdit={true} />
                 )}
-                {modalType === "EDIT_STUDENTVACATION" && (
+                {modalType === 'EDIT_STUDENTVACATION' && (
                   <EditStudentVacationForm userId={id} />
                 )}
 
-                {modalType === "STUDENT_FILTER" && <StudentFilterModal />}
-                {modalType === "USER_FILTER" && <UserFilterModal />}
-                {modalType === "SELECTED_PERSTUDENT_FEE_FILTER" && (
+                {modalType === 'STUDENT_FILTER' && <StudentFilterModal />}
+                {modalType === 'USER_FILTER' && <UserFilterModal />}
+                {modalType === 'SELECTED_PERSTUDENT_FEE_FILTER' && (
                   <SelectedPerStudentFeeModal />
                 )}
-                {modalType === "SMS_TEMPLATES" && <SMSTemplate />}
-                {modalType === "SMS_BUY" && <SMSBuy />}
-                {modalType === "PAYMENT_GETWAY" && <PaymentGetway />}
-                {modalType === "SUCCESSANDERROR" && <SuccessAndError />}
-                {modalType === "ADD_BOOK" && <AddEditBook />}
-                {modalType === "CODE_SETTING" && <CodeSetting />}
-                {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
-                {modalType === "SUB_SIDIARY" && <Subsidiary />}
-                {modalType === "EXAM_REPORT_SETTING" && <ExamReportSetting />}
-                {modalType === "ACCOUNTING_DUES_LIST_STATEMENT" && (
+                {modalType === 'SMS_TEMPLATES' && <SMSTemplate />}
+                {modalType === 'SMS_BUY' && <SMSBuy />}
+                {modalType === 'PAYMENT_GETWAY' && <PaymentGetway />}
+                {modalType === 'SUCCESSANDERROR' && <SuccessAndError />}
+                {modalType === 'ADD_BOOK' && <AddEditBook />}
+                {modalType === 'CODE_SETTING' && <CodeSetting />}
+                {modalType === 'UPDATE_BOOK' && <AddEditBook id={id} />}
+                {modalType === 'SUB_SIDIARY' && <Subsidiary />}
+                {modalType === 'EXAM_REPORT_SETTING' && <ExamReportSetting />}
+                {modalType === 'ACCOUNTING_DUES_LIST_STATEMENT' && (
                   <Statement />
                 )}
-                {modalType === "BALANCE_TRANSFER" && <BalanceTransferModal />}
-                {modalType === "STUDENT_FEE_ACCEPT" && (
-                  <FeeAcceptForm />
+                {modalType === 'BALANCE_TRANSFER' && <BalanceTransferModal />}
+                {modalType === 'STUDENT_ADMISSION_FEE_ACCEPT' && (
+                  <StudentAdmissionFeeAcceptForm />
                 )}
-                {modalType === "STUDENT_MONTH_FEE_ACCEPT" && (
+                {modalType === 'STUDENT_MONTH_FEE_ACCEPT' && (
                   <MonthStudentFeeForm />
                 )}
-                {modalType === "BALANCE_TRANSFER_UPDATE" && (
+                {modalType === 'BALANCE_TRANSFER_UPDATE' && (
                   <BalanceTransferModal />
                 )}
-                {modalType === "USER_SEARCH" && <UserSearch />}
-                {modalType === "POWER_DISTRIBUTION" && (
+                {modalType === 'USER_SEARCH' && <UserSearch />}
+                {modalType === 'POWER_DISTRIBUTION' && (
                   <AddLoginUsersModal id={id} />
                 )}
-                {modalType === "USER_NAME_CHANGE" && (
+                {modalType === 'USER_NAME_CHANGE' && (
                   <UserNamePasswordChangeModal id={id} changeType="username" />
                 )}
-                {modalType === "PASSWORD_CHANGE" && (
+                {modalType === 'PASSWORD_CHANGE' && (
                   <UserNamePasswordChangeModal id={id} changeType="password" />
                 )}
               </div>
