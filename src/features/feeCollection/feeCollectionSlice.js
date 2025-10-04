@@ -472,6 +472,7 @@ export const {
   useGetMonthlyFeeAcceptQuery,
 
   usePostStudentFeeCollectionMutation,
+  useGetStudentFeeIncreaseDecreaseQuery,
 
   usePostBankInfoLedgerMutation,
   usePutBankInfoLedgerMutation,
