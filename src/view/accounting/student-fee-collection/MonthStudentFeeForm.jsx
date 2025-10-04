@@ -6,6 +6,7 @@ import Button from '../../../components/Button/Button';
 import DefaultInput from '../../../components/Forms/DefaultInput';
 import { setPageName } from '../../../features/auth/authSlice';
 import { useGetExamFeeSettingQuery } from '../../../features/exam/examQuerySlice';
+import { useGetStudentFeeIncreaseDecreaseQuery } from '../../../features/feeCollection/feeCollectionSlice';
 import useTranslate from '../../../utils/Translate';
 import SelectedPerStudentFeeTable from '../../../view/accounting/SelectedPerStudentFeeTable';
 import MonthDetermineFeeTable from '../MonthDetermineFeeTable';
@@ -25,6 +26,30 @@ const MonthStudentFeeForm = ({ pageTitle }) => {
   const methods = useForm();
   const { handleSubmit, reset, watch, setValue } = methods;
   const [currentPage, setCurrentPage] = useState(1);
+
+  const shouldSkip =
+    !filteredSelectedPerStudentFee?.AdmissionID ||
+    !filteredSelectedPerStudentFee?.StudentCode;
+
+  const {
+    data: studentMonthFeeData,
+    isLoading: isLoadingMfd,
+    error: errorMfd,
+    isError: isErrorMfd,
+  } = useGetStudentFeeIncreaseDecreaseQuery(
+    {
+      AdmissionID: filteredSelectedPerStudentFee?.AdmissionID,
+      UserID: filteredSelectedPerStudentFee?.UserID,
+      search: filteredSelectedPerStudentFee?.StudentCode,
+      ClassID: filteredSelectedPerStudentFee?.ClassID,
+      SessionID: filteredSelectedPerStudentFee?.SessionID,
+    },
+    {
+      skip: shouldSkip,
+    }
+  );
+
+  console.log(studentMonthFeeData?.data[0], 'studentMonthFeeData');
 
   const {
     data: examFeeSettingData,

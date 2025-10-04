@@ -352,6 +352,19 @@ export const feeCollectionSlice = createApi({
       query: (id) => `monthly_fee_accept`,
       providesTags: ["StudentFeeGroups"],
     }),
+    getStudentFeeIncreaseDecrease: builder.query({
+      query: ({ AdmissionID, UserID, search, ClassID, SessionID }) => ({
+        url: `search__selected_per_student_fee`,
+        params: {
+          AdmissionID,
+          UserID,
+          search,
+          ClassID,
+          SessionID
+        }
+      }),
+      providesTags: ["StudentFee"],
+    }),
 
   }),
 });
@@ -412,5 +425,6 @@ export const {
   useGetSubLedgersByGLIDQuery,
   useGetMonthlyFeeAcceptQuery,
 
-  usePostStudentFeeCollectionMutation
+  usePostStudentFeeCollectionMutation,
+  useGetStudentFeeIncreaseDecreaseQuery
 } = feeCollectionSlice;

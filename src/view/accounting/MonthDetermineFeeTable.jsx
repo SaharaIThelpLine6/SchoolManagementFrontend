@@ -3,7 +3,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import SingleCheckbox from '../../components/Checkboxes/SingleCheckbox';
 import DefaultInput from '../../components/Forms/DefaultInput';
-import { useGetFeeLandByAdmissionQuery } from '../../features/feeCollection/feeCollectionSlice';
+import { useGetStudentFeeIncreaseDecreaseQuery } from '../../features/feeCollection/feeCollectionSlice';
 import bnBijoy2Unicode from '../../utils/conveter';
 import useTranslate from '../../utils/Translate';
 
@@ -20,41 +20,54 @@ const MonthDetermineFeeTable = () => {
   );
   console.log('filteredSelectedPerStudentFee:', filteredSelectedPerStudentFee);
   const admissionId = filteredSelectedPerStudentFee?.AdmissionID;
-  const { data, error, isLoading } = useGetFeeLandByAdmissionQuery(
-    { id: admissionId },
-    { skip: !admissionId }
+
+  const shouldSkip =
+    !filteredSelectedPerStudentFee?.AdmissionID ||
+    !filteredSelectedPerStudentFee?.StudentCode;
+
+  const {
+    data: studentMonthFeeData,
+    isLoading: isLoadingMfd,
+    error: errorMfd,
+    isError: isErrorMfd,
+  } = useGetStudentFeeIncreaseDecreaseQuery(
+    {
+      AdmissionID: filteredSelectedPerStudentFee?.AdmissionID,
+      UserID: filteredSelectedPerStudentFee?.UserID,
+      search: filteredSelectedPerStudentFee?.StudentCode,
+      ClassID: filteredSelectedPerStudentFee?.ClassID,
+      SessionID: filteredSelectedPerStudentFee?.SessionID,
+    },
+    {
+      skip: shouldSkip,
+    }
   );
+
+  const landFeeWithMonths = studentMonthFeeData?.data[0]?.landFeeWithMonths;
+  const subledgerData = studentMonthFeeData?.data[0]?.subLedgerFee[0];
 
   // Log API response for debugging
   useEffect(() => {
-    console.log('useGetFeeLandByAdmissionQuery response:', {
-      data,
-      error,
-      isLoading,
+    console.log('useGetStudentFeeIncreaseDecreaseQuery response:', {
+      data: studentMonthFeeData,
+      error: errorMfd,
+      isLoading: isLoadingMfd,
     });
-  }, [data, error, isLoading]);
+  }, [studentMonthFeeData, errorMfd, isLoadingMfd]);
 
   // Compute monthFeeList
   const monthFeeList = useMemo(() => {
-    if (!data || !data.feeDetails || !data.monthDetails) {
-      console.log('Data missing or incomplete:', data);
+    if (!landFeeWithMonths || !landFeeWithMonths.months) {
+      console.log('Data missing or incomplete:', landFeeWithMonths);
       return [];
     }
-    const { feeDetails, monthDetails } = data;
-    return Array.from({ length: 12 }, (_, i) => {
-      const monthKey = `Month${i + 1}`;
-      const feeKey = `Fee${i + 1}`;
-      const lessKey = `Less${i + 1}`;
-      const mKey = `M${i + 1}`;
-
-      return {
-        monthName: monthDetails[monthKey] || 'N/A',
-        prescribedFee: feeDetails[feeKey] || 0,
-        acceptedFees: feeDetails[mKey] || 0,
-        discount: feeDetails[lessKey] || 0,
-      };
-    });
-  }, [data]);
+    return landFeeWithMonths.months.map((month) => ({
+      monthName: month.monthName,
+      prescribedFee: month.fee || 0,
+      acceptedFees: month.paid || 0,
+      discount: month.less || 0,
+    }));
+  }, [landFeeWithMonths]);
 
   // Initialize form state with monthFeeList
   useEffect(() => {
@@ -86,21 +99,21 @@ const MonthDetermineFeeTable = () => {
     return <p>{translate('Please select a student first.')}</p>;
   }
 
-  if (isLoading) {
+  if (isLoadingMfd) {
     return <p>{translate('Loading...')}</p>;
   }
 
-  if (error) {
-    console.error('API error:', error);
+  if (errorMfd) {
+    console.error('API error:', errorMfd);
     return (
       <p>
-        {translate('Error loading data:')} {error.message || 'Unknown error'}
+        {translate('Error loading data:')} {errorMfd.message || 'Unknown error'}
       </p>
     );
   }
 
-  if (!data || !data.feeDetails || !data.monthDetails) {
-    console.log('Incomplete data:', data);
+  if (!landFeeWithMonths || !landFeeWithMonths.months) {
+    console.log('Incomplete data:', landFeeWithMonths);
     return <p>{translate('No valid fee data found for this student.')}</p>;
   }
 

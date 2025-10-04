@@ -15,6 +15,7 @@ import {
   useGetGeneralLedgersByCAIDQuery,
   useGetSearchStudentsQuery,
   useGetStudentFeeAdmissionsQuery,
+  useGetStudentFeeIncreaseDecreaseQuery,
   useGetSubLedgersByGLIDQuery,
   usePostStudentFeeCollectionMutation,
 } from '../features/feeCollection/feeCollectionSlice';
@@ -46,11 +47,37 @@ const StudentsFeeCollection = () => {
     (state) => state.student
   );
 
+  const { studentFeeData = [] } = useSelector((state) => state.settings);
+
   console.log(filteredSelectedPerStudentFee, 'filteredSelectedPerStudentFee');
   const [studentFeeDataAll, setstudentFeeDataAll] = useState(null);
   const [totalDue, setTotalDue] = useState(null);
   const [logo, setLogo] = useState(null);
   const [filterData, setFilterData] = useState(null);
+
+  const shouldSkip =
+    !filteredSelectedPerStudentFee?.AdmissionID ||
+    !filteredSelectedPerStudentFee?.StudentCode;
+
+  const {
+    data: studentMonthFeeData,
+    isLoading: isLoadingMfd,
+    error: errorMfd,
+    isError: isErrorMfd,
+  } = useGetStudentFeeIncreaseDecreaseQuery(
+    {
+      AdmissionID: filteredSelectedPerStudentFee?.AdmissionID,
+      UserID: filteredSelectedPerStudentFee?.UserID,
+      search: filteredSelectedPerStudentFee?.StudentCode,
+      ClassID: filteredSelectedPerStudentFee?.ClassID,
+      SessionID: filteredSelectedPerStudentFee?.SessionID,
+    },
+    {
+      skip: shouldSkip,
+    }
+  );
+
+  console.log(studentMonthFeeData, 'studentMonthFeeData');
 
   // Fetch student fee admissions data
   const {
@@ -65,8 +92,6 @@ const StudentsFeeCollection = () => {
   );
 
   console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
-
-  const { studentFeeData = [] } = useSelector((state) => state.settings);
 
   // Session function
   const { data: sessionData, isLoading, isFetching } = useGetSessionsQuery();
@@ -165,7 +190,7 @@ const StudentsFeeCollection = () => {
   }, []);
 
   const handleStudentFeeOpenModal = useCallback(() => {
-    if (admissionisError && admissionError) {
+    if (studentMonthFeeData) {
       console.log(admissionError, 'admissionError');
       Swal.fire({
         icon: 'error',
@@ -179,8 +204,25 @@ const StudentsFeeCollection = () => {
   }, [admissionisError, admissionError, showModal]);
 
   const handleStudentMonthFeeOpenModal = useCallback(() => {
-    showModal('Student Month Fee Accept', 'STUDENT_MONTH_FEE_ACCEPT');
-  }, []);
+    if (studentMonthFeeData?.data?.length > 0) {
+      const student = studentMonthFeeData.data[0];
+
+      // feeSettingsAvailable চেক করা হচ্ছে
+      if (!student.feeSettingsAvailable) {
+        Swal.fire({
+          icon: 'error',
+          title: 'ত্রুটি',
+          text:
+            student.feeSettingsError ||
+            'এই শিক্ষার্থীর ক্লাসে এখনও কোনো ফি সেটিং যোগ করা হয়নি। অনুগ্রহ করে আগে ফি সেটিং যোগ করুন।',
+        });
+        return; // Modal আর খুলবে না
+      }
+
+      // যদি সব ঠিক থাকে → modal open হবে
+      showModal('Student Month Fee Accept', 'STUDENT_MONTH_FEE_ACCEPT');
+    }
+  }, [studentMonthFeeData, showModal]);
 
   const onSubmit = async (data) => {
     try {

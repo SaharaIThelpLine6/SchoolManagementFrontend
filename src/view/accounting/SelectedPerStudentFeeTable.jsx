@@ -9,6 +9,7 @@ import DefaultSelect from '../../components/Forms/DefaultSelect';
 import {
   useDeleteSelectedPerStudentFeeMutation,
   useGetMonthlyFeeAcceptQuery,
+  useGetStudentFeeIncreaseDecreaseQuery,
   usePostSelectedPerStudentFeeMutation,
 } from '../../features/feeCollection/feeCollectionSlice';
 import { setFilteredSelectedPerStudentFee } from '../../features/student/studentSlice';
@@ -23,7 +24,32 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
     (state) => state.student
   );
 
-  console.log(monthlyFees, 'monthlyFees');
+  const shouldSkip =
+    !filteredSelectedPerStudentFee?.AdmissionID ||
+    !filteredSelectedPerStudentFee?.StudentCode;
+
+  const {
+    data: studentMonthFeeData,
+    isLoading: isLoadingMfd,
+    error: errorMfd,
+    isError: isErrorMfd,
+  } = useGetStudentFeeIncreaseDecreaseQuery(
+    {
+      AdmissionID: filteredSelectedPerStudentFee?.AdmissionID,
+      UserID: filteredSelectedPerStudentFee?.UserID,
+      search: filteredSelectedPerStudentFee?.StudentCode,
+      ClassID: filteredSelectedPerStudentFee?.ClassID,
+      SessionID: filteredSelectedPerStudentFee?.SessionID,
+    },
+    {
+      skip: shouldSkip,
+    }
+  );
+
+  // const landFeeWithMonths = studentMonthFeeData?.data[0]?.landFeeWithMonths;
+  const subledgerData = studentMonthFeeData?.data[0]?.subLedgerFee;
+
+  console.log(subledgerData, 'subledgerData');
 
   const methods = useForm({
     defaultValues: {
@@ -40,15 +66,11 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
     useDeleteSelectedPerStudentFeeMutation();
 
   useEffect(() => {
-    console.log(
-      'filteredSelectedPerStudentFee:',
-      filteredSelectedPerStudentFee
-    );
-    if (filteredSelectedPerStudentFee) {
+    if (subledgerData) {
       const defaultValues = {
         selectedSLID: '',
         subLedgerFee:
-          filteredSelectedPerStudentFee.subLedgerFee?.map((item) => ({
+          subledgerData?.map((item) => ({
             ...item,
             Amount: Number(item.Amount),
             Less: Number(item.Less),
@@ -67,7 +89,7 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
       );
     }
     console.log('Form state after reset:', getValues());
-  }, [filteredSelectedPerStudentFee, reset, getValues]);
+  }, [subledgerData, reset, getValues]);
 
   const handleAddSubLedger = async (selectedSLID) => {
     console.log('Adding subLedger with SLID:', selectedSLID);
