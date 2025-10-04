@@ -205,8 +205,4 @@ const BalanceTransferModal = ({ pageTitle }) => {
     </div>
   );
 };
-
-
-
-
 export default BalanceTransferModal

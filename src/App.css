@@ -292,6 +292,9 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
   .break-after-page {
     page-break-after: always;
   }
+  .shadow-lg{
+    box-shadow: none !important;
+  }
 }
 
 

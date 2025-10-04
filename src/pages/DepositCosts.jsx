@@ -19,6 +19,7 @@ import {
   useGetGeneralLedgersByFundAndCaidsQuery,
   useGetGeneralLedgersQuery,
   useGetGLedgersQuery,
+  useGetIncomeExpenseReportByOrderIdQuery,
   useGetPaymentTypeQuery,
   useGetReceiptNumberQuery,
   useGetSubLedgerQuery,
@@ -34,6 +35,7 @@ import DefaultPagination from "../components/Pagination/DefaultPagination";
 import SvgIcon from "../components/icons/SvgIcon";
 import { useCallback } from "react";
 import { showModal } from "../utils/ModalControlar";
+import DepositCostReport from "../components/Document/DepositCostReport";
 
 const PAGE_SIZE = 10;
 
@@ -50,6 +52,7 @@ const DepositCosts = ({ pageTitle }) => {
   const [defaultData, setDefaultData] = useState([]);
   const [editIdDefaultData, setEditIdDefaultData] = useState(null);
   const [editId, setEditId] = useState(null);
+  const [reportOrderID, setReportOrderID] = useState(null);
 
   const [
     CAID,
@@ -116,6 +119,22 @@ const DepositCosts = ({ pageTitle }) => {
     isError,
     refetch,
   } = useGetTransactionOrdersQuery({ id: CAID }, { skip: !CAID });
+  const {
+    data: transactionOrdersReportData,
+    loading: isTransactionOrdersReportDataLoading,
+    isError: isTransactionOrdersReportDataError,
+    refetch: refetchTransactionOrdersReportData,
+  } = useGetIncomeExpenseReportByOrderIdQuery({ orderid: reportOrderID }, { skip: !reportOrderID });
+
+
+  // useEffect(() => {
+  //   if (!isTransactionOrdersReportDataLoading && transactionOrdersReportData) {
+  //     setTimeout(() => {
+  //       window.print();
+  //       setReportOrderID(null);
+  //     }, 300);
+  //   }
+  // }, [isTransactionOrdersReportDataLoading, transactionOrdersReportData]);
 
 
   const [postInComeExpense] = usePostInComeExpenseMutation();
@@ -190,6 +209,14 @@ const DepositCosts = ({ pageTitle }) => {
 
   const handleGeneralOpenModal = useCallback(() => {
     showModal(translate("Generals"), "OPEN_GENERAL");
+  }, [translate]);
+
+  const handleBankInformationModal = useCallback(() => {
+    showModal(translate("Bank Information"), "OPEN_BANK_INFO");
+  }, [translate]);
+
+  const handleTodaysBalanceModal = useCallback(() => {
+    showModal(translate("Todays Balance"), "OPEN_TODAYS_BALANCE");
   }, [translate]);
 
   // Data Create Exam Fee Setting
@@ -323,6 +350,21 @@ const DepositCosts = ({ pageTitle }) => {
     }
   };
 
+  const handlePrint = async (id) => {
+    setReportOrderID(id);
+  };
+
+
+  useEffect(() => {   
+    if (!isTransactionOrdersReportDataLoading && transactionOrdersReportData && transactionOrdersReportData.length > 0) {
+      setTimeout(() => {
+        window.print();
+        setReportOrderID(9999999);
+      }, 300);
+    }
+  }, [isTransactionOrdersReportDataLoading, transactionOrdersReportData]);
+
+
   // Table Data Columns
   const columns = [
     {
@@ -331,7 +373,10 @@ const DepositCosts = ({ pageTitle }) => {
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
           <EditButton onClick={() => handleEdit(row.OrderID)} />
-          <DeleteButton onClick={() => handleDelete(row.OrderID)} />
+          {/* <DeleteButton onClick={() => handleDelete(row.OrderID)} /> */}
+          <button className="p-2 flex justify-center items-center text-white bg-yellow-500 hover:bg-yellow-600 rounded-md" onClick={() => handlePrint(row.OrderID)}>
+            <svg  xmlns="http://www.w3.org/2000/svg"  width={20}  height={20}  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth={2}  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-printer"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" /><path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" /><path d="M7 13m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z" /></svg>
+          </button>
         </div>
       ),
     },
@@ -376,6 +421,7 @@ const DepositCosts = ({ pageTitle }) => {
           {!editId && (
             <DeleteButton onClick={() => handleDeleteDefaultData(row.SL)} />
           )}
+          prinrt
         </div>
       ),
     },
@@ -425,32 +471,32 @@ const DepositCosts = ({ pageTitle }) => {
       console.log(payload);
 
 
-       if (editId) {
-         console.log(payload, "payload edit data");
-         await updateInComeExpense({ id: editId, data: payload }).unwrap();
-       } else {
-         await postInComeExpense(payload).unwrap();
-       }
- 
-       Swal.fire({
-         icon: "success",
-         title: "Success",
-         text: "Data submitted successfully!",
-         timer: 2000,
-         showConfirmButton: false,
-       });
- 
-       refetch();
-       methods.reset({
-         FundID: "",
-         VoucherNo: methods.getValues("VoucherNo"),
-         BookNo: "",
-         TransactionDateEng: "",
-         TransactionBanglaDate: "",
-         CAID: methods.getValues("CAID"),
-         gledger: [],
-       });
-       setDefaultData([]);
+      if (editId) {
+        console.log(payload, "payload edit data");
+        await updateInComeExpense({ id: editId, data: payload }).unwrap();
+      } else {
+        await postInComeExpense(payload).unwrap();
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Data submitted successfully!",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
+      refetch();
+      methods.reset({
+        FundID: "",
+        VoucherNo: methods.getValues("VoucherNo"),
+        BookNo: "",
+        TransactionDateEng: "",
+        TransactionBanglaDate: "",
+        CAID: methods.getValues("CAID"),
+        gledger: [],
+      });
+      setDefaultData([]);
     } catch (error) {
       console.error("Submission Error:", error);
       Swal.fire({
@@ -464,7 +510,7 @@ const DepositCosts = ({ pageTitle }) => {
   return (
     <div className="font-SolaimanLipi bg-white p-4 md:p-6 rounded-xl shadow-lg">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center hidden_in_print">
         <div className="flex items-center gap-2">
           <h3 className="text-lg md:text-xl font-bold">
             {translate("Accounting")}
@@ -474,10 +520,13 @@ const DepositCosts = ({ pageTitle }) => {
             <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-settings text-dark"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>
           </button>
         </div>
+        <button type="button" onClick={handleTodaysBalanceModal}>
+          <h3 className="text-[18px] text-info underline">আজকের তহবিল </h3>
+        </button>
       </div>
 
       <FormProvider {...methods}>
-        <form className="w-full" onSubmit={handleSubmit(onSubmit)}>
+        <form className="w-full hidden_in_print" onSubmit={handleSubmit(onSubmit)}>
           <input type="hidden" {...methods.register("ID")} />
 
           {/* Top Section - 4 responsive columns */}
@@ -603,50 +652,55 @@ const DepositCosts = ({ pageTitle }) => {
               require={"Account is required!"}
               unicode={true}
             />
-            <DefaultInput
-              label="Payment Comments"
-              placeholder={translate("Enter comments")}
-              registerKey="LParticulars"
+            
+            <div className="flex items-end gap-3 flex-1">
+              <DefaultInput
+                label="Payment Comments"
+                placeholder={translate("Enter comments")}
+                registerKey="LParticulars"
+              />
+              <Button type="button" className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#007af7] text-white hover:bg-[#0066cc] transition-colors duration-150" onClick={handleBankInformationModal}>
+                <SvgIcon name="FaPlus" size={16} />
+              </Button>
+            </div>
+
+            <div className="hidden sm:block"></div>
+            <div className="hidden sm:block"></div>
+            <div className="hidden sm:block"></div>
+            <DefaultSelect
+              label="Sectors"
+              options={gSLData ?? []}
+              valueField="SLID"
+              nameField="SlName"
+              registerKey="SLID"
               unicode={true}
+              require={"Sectors is required!"}
             />
-            <div className="hidden sm:block"></div>
-            <div className="hidden sm:block"></div>
-            <div className="hidden sm:block"></div>
-              <DefaultSelect
-                label="Sectors"
-                options={gSLData ?? []}
-                valueField="SLID"
-                nameField="SlName"
-                registerKey="SLID"
-                unicode={true}
-                require={"Sectors is required!"}
-              />
-              <DefaultInput
-                label="Description"
-                placeholder={translate("Enter description")}
-                registerKey="Particulars"
-                unicode={true}
-              />
-              <DefaultInput
-                label="Amount"
-                type="text"
-                registerKey={"Amount"}
-                placeholder={translate("Enter Amount number ...")}
-                require={"Book is required!"}
-              />
-              <div className="flex items-center justify-start w-full pt-6">
-                <Button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-                >
-                  {translate("Add")}
-                </Button>
-              </div>
+            <DefaultInput
+              label="Description"
+              placeholder={translate("Enter description")}
+              registerKey="Particulars"
+            />
+            <DefaultInput
+              label="Amount"
+              type="text"
+              registerKey={"Amount"}
+              placeholder={translate("Enter Amount number ...")}
+              require={"Book is required!"}
+            />
+            <div className="flex items-center justify-start w-full pt-6">
+              <Button
+                type="submit"
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+              >
+                {translate("Add")}
+              </Button>
+            </div>
           </div>
         </form>
       </FormProvider>
 
-      <div className="my-5">
+      <div className="my-5 hidden_in_print">
         {defaultData && defaultData.length > 0 && (
           <SortableTable
             columns={defaultColumns}
@@ -657,7 +711,7 @@ const DepositCosts = ({ pageTitle }) => {
       </div>
 
       {/* Buttons */}
-      <div className="flex justify-end gap-4 px-4 bg-white">
+      <div className="flex justify-end gap-4 px-4 bg-white hidden_in_print">
         <Button
           type="button"
           onClick={handleSubmitButton}
@@ -668,7 +722,7 @@ const DepositCosts = ({ pageTitle }) => {
       </div>
 
       {/* Table Section */}
-      <div className="mt-5">
+      <div className="mt-5 hidden_in_print">
         {/* Loading State */}
         {isLoading && <Loading />}
 
@@ -708,6 +762,10 @@ const DepositCosts = ({ pageTitle }) => {
             </div>
           )}
       </div>
+        {
+         transactionOrdersReportData && transactionOrdersReportData.length > 0 ? <DepositCostReport orderDetails={transactionOrdersReportData} /> : null
+        }
+        
     </div>
   );
 };

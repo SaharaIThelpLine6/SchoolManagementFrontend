@@ -35,6 +35,7 @@ export const feeCollectionSlice = createApi({
     }),
     getSubLedger: builder.query({
       query: (id) => `view_subledger/${id}`,
+      providesTags: ["GetSubLedgers"],
     }),
     getAllSubLedger: builder.query({
       query: () => `view_subledger`,
@@ -181,6 +182,10 @@ export const feeCollectionSlice = createApi({
       invalidatesTags: ["GeneralLedgersByFundAndCaids"],
     }),
 
+    getStudentFeeGroups: builder.query({
+      query: () => `student_fee_groups`,
+      providesTags: ["StudentFeeGroups"],
+    }),
     getChartOFAccount: builder.query({
       query: () => `chart_of_account`,
       providesTags: ["ChartOFAccount"],
@@ -366,6 +371,47 @@ export const feeCollectionSlice = createApi({
       providesTags: ["StudentFee"],
     }),
 
+
+    postBankInfoLedger: builder.mutation({
+      query: (data) => ({
+        url: "insert_subledger",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["GetSubLedgers"],
+    }),
+    putBankInfoLedger: builder.mutation({
+      query: (data) => ({
+        url: `edit_subledger/${data.GLID}/${data.SLID}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["GetSubLedgers"],
+    }),
+
+    deleteBankInfoLedger: builder.mutation({
+      query: (id) => ({
+        url: `/delete_subledger/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["GetSubLedgers"],
+    }),
+
+    getIncomeExpenseReportByOrderId: builder.query({
+      query: ({ orderid }) =>
+        `income_expense_by_orderid/${orderid}`,
+    }),
+
+    getIncomeExpenseTodaysBalance: builder.query({
+      query: () => `get_todays_balance_of_caid`,
+      providesTags: ["IncomeExpenseTodaysBalance"],
+    }),
+    getIncomeExpenseTodaysBalanceByCaid: builder.query({
+      query: ({ caid }) =>
+        `get_todays_balance/${caid}`,
+      providesTags: ["IncomeExpenseTodaysBalanceByCaid"],
+    }),
+
   }),
 });
 
@@ -426,5 +472,11 @@ export const {
   useGetMonthlyFeeAcceptQuery,
 
   usePostStudentFeeCollectionMutation,
-  useGetStudentFeeIncreaseDecreaseQuery
+
+  usePostBankInfoLedgerMutation,
+  usePutBankInfoLedgerMutation,
+  useDeleteBankInfoLedgerMutation,
+  useGetIncomeExpenseReportByOrderIdQuery,
+  useGetIncomeExpenseTodaysBalanceQuery,
+  useGetIncomeExpenseTodaysBalanceByCaidQuery
 } = feeCollectionSlice;
