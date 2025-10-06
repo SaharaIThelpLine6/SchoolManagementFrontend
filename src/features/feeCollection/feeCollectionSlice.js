@@ -25,6 +25,7 @@ export const feeCollectionSlice = createApi({
     "GeneralLedgersByFundAndCaids",
     "FeeLand",
     "SubGeneralLedger",
+    "StudentFee",
   ],
   endpoints: (builder) => ({
     getFees: builder.query({
@@ -368,7 +369,7 @@ export const feeCollectionSlice = createApi({
           SessionID
         }
       }),
-      providesTags: ["StudentFee"],
+      providesTags: ["StudentFee", "SelectedStudentPerFee"],
     }),
 
 

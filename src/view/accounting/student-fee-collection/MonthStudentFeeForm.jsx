@@ -1,17 +1,13 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import Button from '../../../components/Button/Button';
 import DefaultInput from '../../../components/Forms/DefaultInput';
 import { setPageName } from '../../../features/auth/authSlice';
-import { useGetExamFeeSettingQuery } from '../../../features/exam/examQuerySlice';
 import { useGetStudentFeeIncreaseDecreaseQuery } from '../../../features/feeCollection/feeCollectionSlice';
 import useTranslate from '../../../utils/Translate';
 import SelectedPerStudentFeeTable from '../../../view/accounting/SelectedPerStudentFeeTable';
 import MonthDetermineFeeTable from '../MonthDetermineFeeTable';
-
-const PAGE_SIZE = 10;
 
 const MonthStudentFeeForm = ({ pageTitle }) => {
   const location = useLocation();
@@ -25,7 +21,6 @@ const MonthStudentFeeForm = ({ pageTitle }) => {
 
   const methods = useForm();
   const { handleSubmit, reset, watch, setValue } = methods;
-  const [currentPage, setCurrentPage] = useState(1);
 
   const shouldSkip =
     !filteredSelectedPerStudentFee?.AdmissionID ||
@@ -49,33 +44,19 @@ const MonthStudentFeeForm = ({ pageTitle }) => {
     }
   );
 
-  console.log(studentMonthFeeData?.data[0], 'studentMonthFeeData');
-
-  const {
-    data: examFeeSettingData,
-    isLoading: isExamFeeSettingLoading,
-    isError: isExamFeeSettingError,
-    refetch,
-  } = useGetExamFeeSettingQuery();
-
-  const totalPages = Math.ceil((examFeeSettingData?.length || 0) / PAGE_SIZE);
-
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
-  }, [examFeeSettingData, currentPage]);
+  const data = studentMonthFeeData?.data[0];
 
   // ✅ Set values when filteredSelectedPerStudentFee changes
   useEffect(() => {
-    if (filteredSelectedPerStudentFee) {
-      setValue('StudentCode', filteredSelectedPerStudentFee.StudentCode || '');
-      setValue('StudentName', filteredSelectedPerStudentFee.StudentName || '');
-      setValue('ClassName', filteredSelectedPerStudentFee.ClassName || '');
-      setValue('SessionName', filteredSelectedPerStudentFee.SessionName || '');
+    if (data) {
+      setValue('StudentCode', data.StudentCode || '');
+      setValue('StudentName', data.StudentName || '');
+      setValue('ClassName', data.ClassName || '');
+      setValue('SessionName', data.SessionName || '');
       setValue('Comment', '');
-      setValue('AmountTotal', '0');
-      setValue('LessTotal', '0');
-      setValue('Total', '0');
+      setValue('AmountTotal', data.TotalAmount || 0);
+      setValue('LessTotal', data.TotalLess || 0);
+      setValue('Total', data.TotalFinalAmount || 0);
     } else {
       // ✅ Clear form when no student selected
       reset({
@@ -89,26 +70,13 @@ const MonthStudentFeeForm = ({ pageTitle }) => {
         Total: '0',
       });
     }
-  }, [filteredSelectedPerStudentFee, setValue, reset]);
+  }, [data, setValue, reset]);
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
   const onSubmit = () => {};
-
-  const handleResetButton = () => {
-    reset({
-      StudentCode: '',
-      StudentName: '',
-      ClassName: '',
-      SessionName: '',
-      Comment: '',
-      AmountTotal: '0',
-      LessTotal: '0',
-      Total: '0',
-    });
-  };
 
   return (
     <div className="font-SolaimanLipi bg-white p-4 md:p-6 rounded-xl shadow-lg">
@@ -163,6 +131,7 @@ const MonthStudentFeeForm = ({ pageTitle }) => {
                 registerKey="AmountTotal"
                 label="Total Fee"
                 labelPosition="left"
+                defaultValue={data.TotalAmount}
                 disable={true}
               />
               <DefaultInput
@@ -170,6 +139,7 @@ const MonthStudentFeeForm = ({ pageTitle }) => {
                 registerKey="LessTotal"
                 label="Deduction"
                 labelPosition="left"
+                defaultValue={data.TotalLess}
                 disable={true}
               />
               <DefaultInput
@@ -177,23 +147,13 @@ const MonthStudentFeeForm = ({ pageTitle }) => {
                 registerKey="Total"
                 label="Total Deposits"
                 labelPosition="left"
+                defaultValue={data.TotalFinalAmount}
                 disable={true}
               />
-              <div className="mt-6 flex justify-end gap-3">
-                <Button
-                  className="px-6 py-2 bg-gray-400 text-black font-medium rounded-md hover:bg-gray-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                  onClick={handleResetButton}
-                >
-                  {translate('Reset')}
-                </Button>
-                <Button type="submit" className="px-8">
-                  {translate('Save')}
-                </Button>
-              </div>
             </form>
           </FormProvider>
         </div>
-        <div className="col-span-3 bg-gray-50 p-3 md:p-4 rounded-xl border">
+        <div className="col-span-3 rounded-xl">
           <MonthDetermineFeeTable />
         </div>
       </div>

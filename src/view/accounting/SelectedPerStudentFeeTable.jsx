@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import Swal from 'sweetalert2';
+import { toast } from 'react-toastify';
 import Button from '../../components/Button/Button';
 import DeleteButton from '../../components/Button/DeleteButton';
 import DefaultInput from '../../components/Forms/DefaultInput';
@@ -12,11 +12,10 @@ import {
   useGetStudentFeeIncreaseDecreaseQuery,
   usePostSelectedPerStudentFeeMutation,
 } from '../../features/feeCollection/feeCollectionSlice';
-import { setFilteredSelectedPerStudentFee } from '../../features/student/studentSlice';
 import bnBijoy2Unicode from '../../utils/conveter';
 import useTranslate from '../../utils/Translate';
 
-const SelectedPerStudentFeeTable = ({ resetForm }) => {
+const SelectedPerStudentFeeTable = () => {
   const translate = useTranslate();
   const dispatch = useDispatch();
   const { data: monthlyFees } = useGetMonthlyFeeAcceptQuery();
@@ -46,7 +45,6 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
     }
   );
 
-  // const landFeeWithMonths = studentMonthFeeData?.data[0]?.landFeeWithMonths;
   const subledgerData = studentMonthFeeData?.data[0]?.subLedgerFee;
 
   console.log(subledgerData, 'subledgerData');
@@ -94,22 +92,16 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
   const handleAddSubLedger = async (selectedSLID) => {
     console.log('Adding subLedger with SLID:', selectedSLID);
     if (!filteredSelectedPerStudentFee) {
-      await Swal.fire({
-        icon: 'warning',
-        title: 'No Student Selected',
-        text: 'Please select a student to proceed with fee management.',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#3085d6',
+      toast.warning('Please select a student to proceed with fee management.', {
+        position: 'top-right',
+        autoClose: 5000,
       });
       return;
     }
     if (!monthlyFees || !selectedSLID) {
-      await Swal.fire({
-        icon: 'info',
-        title: 'Oops...',
-        text: 'Please select a sub-ledger from the list first',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#3085d6',
+      toast.info('Please select a sub-ledger from the list first', {
+        position: 'top-right',
+        autoClose: 4000,
       });
       return;
     }
@@ -118,30 +110,26 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
     const selectedItem = monthlyFees.find((sl) => sl.SLID === selectedId);
 
     if (!selectedItem) {
-      await Swal.fire({
-        icon: 'error',
-        title: 'Not Found',
-        text: 'The selected sub-ledger could not be found. Please try again.',
-        confirmButtonText: 'OK',
-      });
+      toast.error(
+        'The selected sub-ledger could not be found. Please try again.',
+        {
+          position: 'top-right',
+          autoClose: 5000,
+        }
+      );
       return;
     }
 
     if (subLedgerFeeValues.some((item) => item.SLID === selectedId)) {
-      await Swal.fire({
-        icon: 'warning',
-        title: 'Already Added',
-        html: `
-          <div style="text-align: center;">
-            <p>The sub-ledger <strong>"${bnBijoy2Unicode(
-              selectedItem.SlName
-            )}"</strong> is already in the list.</p>
-            <p>SLID: ${selectedItem.SLID}</p>
-          </div>
-        `,
-        confirmButtonText: 'Understood',
-        confirmButtonColor: '#6c757d',
-      });
+      toast.warning(
+        `The sub-ledger "${bnBijoy2Unicode(
+          selectedItem.SlName
+        )}" is already in the list. SLID: ${selectedItem.SLID}`,
+        {
+          position: 'top-right',
+          autoClose: 5000,
+        }
+      );
       return;
     }
 
@@ -161,95 +149,49 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
     setValue('subLedgerFee', newSubLedgerFee, { shouldValidate: true });
     console.log('Form state after setValue:', getValues());
 
-    const toast = Swal.mixin({
-      toast: true,
-      position: 'top-end',
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: true,
-      didOpen: (toast) => {
-        toast.addEventListener('mouseenter', Swal.stopTimer);
-        toast.addEventListener('mouseleave', Swal.resumeTimer);
-      },
-    });
-
-    await toast.fire({
-      icon: 'success',
-      title: `Added: ${bnBijoy2Unicode(selectedItem.SlName)}`,
+    toast.success(`Added: ${bnBijoy2Unicode(selectedItem.SlName)}`, {
+      position: 'top-right',
+      autoClose: 3000,
     });
   };
 
   const handleDelete = async (item) => {
     console.log('Deleting item with SLID:', item.SLID, 'isNew:', item.isNew);
-    try {
-      const result = await Swal.fire({
-        title: 'Delete Confirmation',
-        html: `Are you sure you want to delete this item?<br><strong>SLID: ${item.SLID}</strong>`,
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Delete',
-        cancelButtonText: 'Keep',
-        confirmButtonColor: '#dc3545',
-        cancelButtonColor: '#6c757d',
-        reverseButtons: true,
-        focusCancel: true,
-        customClass: {
-          confirmButton: 'btn btn-danger',
-          cancelButton: 'btn btn-secondary',
-        },
+
+    // Custom confirmation toast for delete
+    const confirmToast = toast.loading(
+      `Are you sure you want to delete this item? SLID: ${item.SLID}`,
+      {
+        position: 'top-center',
+        closeButton: true,
+        closeOnClick: false,
+        autoClose: false,
+        hideProgressBar: false,
+        style: { minWidth: '400px' },
+      }
+    );
+
+    // We'll use window.confirm for simplicity, or you can create a custom modal
+    const isConfirmed = window.confirm(
+      `Are you sure you want to delete this item? SLID: ${item.SLID}`
+    );
+
+    toast.dismiss(confirmToast);
+
+    if (!isConfirmed) {
+      toast.info('Deletion cancelled', {
+        position: 'top-right',
+        autoClose: 2000,
       });
+      return;
+    }
 
-      if (result.isConfirmed) {
-        if (item.isNew) {
-          console.log(
-            'Deleting new item (not saved in DB) with SLID:',
-            item.SLID
-          );
-          setValue(
-            'subLedgerFee',
-            subLedgerFeeValues.filter((sl) => sl.SLID !== item.SLID),
-            { shouldValidate: true }
-          );
-          console.log('Updated subLedgerFeeValues:', getValues().subLedgerFee);
-          Swal.fire({
-            icon: 'success',
-            title: 'Deleted!',
-            text: 'New item has been successfully deleted',
-            timer: 2000,
-            showConfirmButton: false,
-          });
-          return;
-        }
-
-        const payload = {
-          AdmissionID: filteredSelectedPerStudentFee?.AdmissionID,
-          SLID: item.SLID,
-        };
-
-        console.log('Delete payload:', payload);
-
-        if (!payload.AdmissionID || !payload.SLID) {
-          console.log('Invalid payload for delete:', payload);
-          Swal.fire({
-            icon: 'error',
-            title: 'Delete Failed',
-            text: 'Invalid data for deletion. Please ensure a student is selected.',
-            confirmButtonText: 'OK',
-          });
-          return;
-        }
-
-        Swal.fire({
-          title: 'Deleting...',
-          text: 'Please wait while we delete the item',
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
-        });
-
-        await deleteSelectedPerStudentFee(payload).unwrap();
-
+    try {
+      if (item.isNew) {
+        console.log(
+          'Deleting new item (not saved in DB) with SLID:',
+          item.SLID
+        );
         setValue(
           'subLedgerFee',
           subLedgerFeeValues.filter((sl) => sl.SLID !== item.SLID),
@@ -257,35 +199,72 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
         );
         console.log('Updated subLedgerFeeValues:', getValues().subLedgerFee);
 
-        Swal.fire({
-          icon: 'success',
-          title: 'Deleted!',
-          text: 'Item has been successfully deleted from database',
-          timer: 2000,
-          showConfirmButton: false,
+        toast.success('New item has been successfully deleted', {
+          position: 'top-right',
+          autoClose: 2000,
         });
+        return;
       }
+
+      const payload = {
+        AdmissionID: filteredSelectedPerStudentFee?.AdmissionID,
+        SLID: item.SLID,
+      };
+
+      console.log('Delete payload:', payload);
+
+      if (!payload.AdmissionID || !payload.SLID) {
+        console.log('Invalid payload for delete:', payload);
+        toast.error(
+          'Invalid data for deletion. Please ensure a student is selected.',
+          {
+            position: 'top-right',
+            autoClose: 5000,
+          }
+        );
+        return;
+      }
+
+      const deleteToast = toast.loading('Deleting... Please wait', {
+        position: 'top-right',
+      });
+
+      await deleteSelectedPerStudentFee(payload).unwrap();
+
+      setValue(
+        'subLedgerFee',
+        subLedgerFeeValues.filter((sl) => sl.SLID !== item.SLID),
+        { shouldValidate: true }
+      );
+      console.log('Updated subLedgerFeeValues:', getValues().subLedgerFee);
+
+      toast.update(deleteToast, {
+        render: 'Item has been successfully deleted from database',
+        type: 'success',
+        isLoading: false,
+        autoClose: 2000,
+        hideProgressBar: false,
+      });
     } catch (error) {
       console.error('Delete error:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Delete Failed',
-        text: 'There was an error deleting the item',
-        confirmButtonText: 'OK',
+      toast.error('There was an error deleting the item', {
+        position: 'top-right',
+        autoClose: 5000,
       });
     }
   };
 
-  const onSubmit = async (data) => {
-    console.log('Form submitted with data:', data);
+  const onSubmit = async (data, e) => {
+    e.preventDefault();
+
     if (!filteredSelectedPerStudentFee) {
-      Swal.fire({
-        icon: 'info',
-        title: 'No Data',
-        text: 'Student fee information is not available. Please select a student first.',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#3085d6',
-      });
+      toast.info(
+        'Student fee information is not available. Please select a student first.',
+        {
+          position: 'top-right',
+          autoClose: 5000,
+        }
+      );
       return;
     }
 
@@ -305,42 +284,29 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
       FainalAmount: (Number(item.Amount) || 0) - (Number(item.Less) || 0),
     }));
 
-    console.log('Payload for API:', payload);
+    try {
+      const saveToast = toast.loading('Saving fees...', {
+        position: 'top-right',
+      });
 
-    const result = await Swal.fire({
-      title: 'Are you sure?',
-      text: 'Do you want to save/update the fees?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, save it!',
-      cancelButtonText: 'Cancel',
-    });
+      await postSelectedPerStudentFee(payload).unwrap();
 
-    if (result.isConfirmed) {
-      try {
-        await postSelectedPerStudentFee(payload).unwrap();
-        Swal.fire({
-          title: 'Success!',
-          text: 'Fees saved/updated successfully.',
-          icon: 'success',
-          timer: 2000,
-          showConfirmButton: false,
-        });
+      toast.update(saveToast, {
+        render: 'Fees saved/updated successfully!',
+        type: 'success',
+        isLoading: false,
+        autoClose: 2000,
+      });
 
-        reset({
-          selectedSLID: '',
-          subLedgerFee: [],
-        });
-        // resetForm();
-        dispatch(setFilteredSelectedPerStudentFee(null));
-      } catch (error) {
-        console.error('API call failed:', error);
-        Swal.fire({
-          title: 'Error!',
-          text: 'Something went wrong while saving fees.',
-          icon: 'error',
-        });
-      }
+      // ❌ reset() বা Redux clear দিও না
+      // reset({ selectedSLID: '', subLedgerFee: [] });
+      // dispatch(setFilteredSelectedPerStudentFee(null));
+    } catch (error) {
+      console.error('API call failed:', error);
+      toast.error('Something went wrong while saving fees.', {
+        position: 'top-right',
+        autoClose: 5000,
+      });
     }
   };
 
@@ -398,23 +364,28 @@ const SelectedPerStudentFeeTable = ({ resetForm }) => {
               {subLedgerFeeValues?.length > 0 ? (
                 subLedgerFeeValues.map((item, index) => (
                   <tr key={`${item.SLID}-${index}`} className="border-t">
-                    <td className="px-4 py-2 text-center whitespace-nowrap">
+                    <td className="px-4 text-center whitespace-nowrap">
                       <div className="flex justify-center items-center h-full">
                         <DeleteButton onClick={() => handleDelete(item)} />
                       </div>
                     </td>
-                    <td className="px-4 py-2 text-center whitespace-nowrap">
+                    <td className="px-4 text-center whitespace-nowrap">
                       {bnBijoy2Unicode(item.SlName)}
                     </td>
-                    <td className="px-2 py-2 text-center whitespace-nowrap min-w-[120px]">
+                    <td className="px-2 text-center whitespace-nowrap min-w-[120px]">
                       <DefaultInput
                         registerKey={`subLedgerFee.${index}.Less`}
                         type="number"
-                        defaultValue={Number(item.Less)}
+                        defaultValue={
+                          item?.Less != null
+                            ? Number(item.Less)
+                            : Number(item.Amount)
+                        }
                         className="w-full min-w-[100px] max-w-[150px] mx-auto"
                       />
                     </td>
-                    <td className="px-2 py-2 text-center whitespace-nowrap min-w-[120px]">
+
+                    <td className="px-2 text-center whitespace-nowrap min-w-[120px]">
                       <DefaultInput
                         registerKey={`subLedgerFee.${index}.Amount`}
                         type="number"

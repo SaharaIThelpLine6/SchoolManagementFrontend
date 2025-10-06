@@ -7,7 +7,7 @@ import { useGetStudentFeeIncreaseDecreaseQuery } from '../../features/feeCollect
 import bnBijoy2Unicode from '../../utils/conveter';
 import useTranslate from '../../utils/Translate';
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 12;
 
 const MonthDetermineFeeTable = () => {
   const translate = useTranslate();
@@ -64,7 +64,8 @@ const MonthDetermineFeeTable = () => {
     return landFeeWithMonths.months.map((month) => ({
       monthName: month.monthName,
       prescribedFee: month.fee || 0,
-      acceptedFees: month.paid || 0,
+      // acceptedFees: month.paid || 0,
+      acceptedFees: month.fee || 0,
       discount: month.less || 0,
     }));
   }, [landFeeWithMonths]);
@@ -153,7 +154,7 @@ const MonthDetermineFeeTable = () => {
                   <td className="px-4 py-2 text-center whitespace-nowrap">
                     {item.acceptedFees}
                   </td>
-                  <td className="px-2 py-2 text-center whitespace-nowrap min-w-[120px]">
+                  <td className="px-2 text-center whitespace-nowrap min-w-[120px]">
                     <DefaultInput
                       registerKey={`monthFeeList.${index}.comment`}
                       type="text"
@@ -163,7 +164,7 @@ const MonthDetermineFeeTable = () => {
                   <td className="px-4 py-2 text-center flex justify-center items-center whitespace-nowrap">
                     <SingleCheckbox
                       registerKey={`monthFeeList.${index}.status`}
-                      dcn="mb-0"
+                      dcn="mb-0 mt-1"
                     />
                   </td>
                 </tr>
@@ -178,31 +179,6 @@ const MonthDetermineFeeTable = () => {
           </tbody>
         </table>
       </div>
-
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-4">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 mx-1 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="px-4 py-2">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 mx-1 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
     </FormProvider>
   );
 };

@@ -50,7 +50,8 @@ const MonthlyFeeCollectionTable = () => {
       return {
         monthName: monthDetails[monthKey] || 'N/A',
         prescribedFee: feeDetails[feeKey] || 0,
-        acceptedFees: feeDetails[mKey] || 0,
+        acceptedFees: feeDetails[feeKey] || 0,
+        // acceptedFees: feeDetails[mKey] || 0,
         discount: feeDetails[lessKey] || 0,
       };
     });
@@ -126,14 +127,14 @@ const MonthlyFeeCollectionTable = () => {
             {paginatedData.length > 0 ? (
               paginatedData.map((item, index) => (
                 <tr key={index} className="border-t">
-                  <td className="px-4 py-2 text-center whitespace-nowrap">
+                  <td className="px-4 text-center whitespace-nowrap">
                     {bnBijoy2Unicode(item.monthName)}
                   </td>
-                  <td className="px-4 py-2 text-center whitespace-nowrap">
+                  <td className="px-4 text-center whitespace-nowrap">
                     {item.prescribedFee}
                   </td>
 
-                  <td className="px-2 py-2 text-center whitespace-nowrap min-w-[120px]">
+                  <td className="px-2 text-center whitespace-nowrap min-w-[120px]">
                     <DefaultInput
                       registerKey={`monthFeeList.${index}.comment`}
                       type="text"

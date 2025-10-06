@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
-import { setPageName } from "../features/auth/authSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { FormProvider, useForm } from "react-hook-form";
-import DefaultSelect from "../components/Forms/DefaultSelect";
-import { fetchSettingsData } from "../features/settings/settingsSlice";
-import DefaultInput from "../components/Forms/DefaultInput";
-import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
+import { useCallback, useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import DatePickerOne from '../components/Forms/DatePicker/DatePickerOne';
+import DefaultInput from '../components/Forms/DefaultInput';
+import DefaultSelect from '../components/Forms/DefaultSelect';
+import Loading from '../components/Loading/Loading';
+import StudentReportList from '../components/StudentReportList';
+import { setPageName } from '../features/auth/authSlice';
+import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
+import { fetchSettingsData } from '../features/settings/settingsSlice';
 import {
   useGetStudentBySearchQuery,
   useGetStudentReportCetsQuery,
@@ -13,19 +17,15 @@ import {
   useGetStudentReportTypeQuery,
   usePostStudentCharacterReportMutation,
   useUpdateStudentCharacterReportMutation,
-} from "../features/student/studentQuerySlice";
+} from '../features/student/studentQuerySlice';
 import {
   setCharacterReportEditMode,
   setFilteredStudent,
-} from "../features/student/studentSlice";
-import { toast } from "react-toastify";
-import convertBijoyToBengali from "../utils/uniconveter";
-import bnBijoy2Unicode from "../utils/conveter";
-import useTranslate from "../utils/Translate";
-import { showModal } from "../utils/ModalControlar";
-import StudentReportList from "../components/StudentReportList";
-import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
-import Loading from "../components/Loading/Loading";
+} from '../features/student/studentSlice';
+import bnBijoy2Unicode from '../utils/conveter';
+import { showModal } from '../utils/ModalControlar';
+import useTranslate from '../utils/Translate';
+import convertBijoyToBengali from '../utils/uniconveter';
 
 const CharacterReport = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -75,8 +75,8 @@ const CharacterReport = ({ pageTitle }) => {
   const [subClassId, setSubClassId] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  const studentCodeOrName = methods.watch("StudentCode");
-  const classID = methods.watch("SubClassID");
+  const studentCodeOrName = methods.watch('StudentCode');
+  const classID = methods.watch('SubClassID');
   const {
     data: searchStudentInfo,
     error: searchStudentError,
@@ -172,21 +172,21 @@ const CharacterReport = ({ pageTitle }) => {
 
   // Set default session and date
   useEffect(() => {
-    if (status === "succeeded" && academicSession.length > 0) {
+    if (status === 'succeeded' && academicSession.length > 0) {
       const today = new Date();
-      methods.setValue("SessionID", academicSession[0].SessionID);
-      methods.setValue("Date", today);
+      methods.setValue('SessionID', academicSession[0].SessionID);
+      methods.setValue('Date', today);
     }
   }, [status, academicSession]);
 
   // Handle errors
   useEffect(() => {
     if (academicClassStudentError) {
-      methods.setValue("StudentName", "");
-      methods.setValue("FatherName", "");
-      methods.setValue("ClassName", "");
-      methods.setValue("SubClassID", "");
-      toast.error(academicClassStudentError || "Something went wrong");
+      methods.setValue('StudentName', '');
+      methods.setValue('FatherName', '');
+      methods.setValue('ClassName', '');
+      methods.setValue('SubClassID', '');
+      toast.error(academicClassStudentError || 'Something went wrong');
     }
   }, [academicClassStudentError]);
 
@@ -201,7 +201,7 @@ const CharacterReport = ({ pageTitle }) => {
         (d) => d.SubClassID === reportToEdit.SubClassID
       );
 
-      console.log(subclassOption, "subclassOption");
+      console.log(subclassOption, 'subclassOption');
       if (reportToEdit) {
         setIsEditMode(true);
         methods.reset({
@@ -223,12 +223,12 @@ const CharacterReport = ({ pageTitle }) => {
   }, [reportUpdateId, reportsResponse]);
 
   const onSubmit = async (data) => {
-    const toastId = toast.loading(isEditMode ? "Updating..." : "Submitting...");
+    const toastId = toast.loading(isEditMode ? 'Updating...' : 'Submitting...');
 
     try {
       const convertedData = Object.fromEntries(
         Object.entries(data).map(([key, value]) =>
-          typeof value === "string"
+          typeof value === 'string'
             ? [key, convertBijoyToBengali(value)]
             : [key, value]
         )
@@ -243,9 +243,9 @@ const CharacterReport = ({ pageTitle }) => {
 
       toast.update(toastId, {
         render: isEditMode
-          ? "Updated successfully!"
-          : "Submitted successfully!",
-        type: "success",
+          ? 'Updated successfully!'
+          : 'Submitted successfully!',
+        type: 'success',
         isLoading: false,
         autoClose: 3000,
         closeOnClick: true,
@@ -258,9 +258,9 @@ const CharacterReport = ({ pageTitle }) => {
       methods.reset({
         ...methods.getValues(), // Keep current values
         Date: new Date(),
-        ReportCetID: "",
-        ReportTypID: "",
-        Remark: "",
+        ReportCetID: '',
+        ReportTypID: '',
+        Remark: '',
       });
 
       // Exit edit mode if needed
@@ -272,24 +272,24 @@ const CharacterReport = ({ pageTitle }) => {
       toast.update(toastId, {
         render:
           err?.data?.error ||
-          (isEditMode ? "Update failed!" : "Submission failed!"),
-        type: "error",
+          (isEditMode ? 'Update failed!' : 'Submission failed!'),
+        type: 'error',
         isLoading: false,
         autoClose: 3000,
         closeOnClick: true,
       });
-      console.error("Error:", err);
+      console.error('Error:', err);
     }
   };
 
   const handleSuggestionClick = (item) => {
     setUserTyping(false);
-    methods.setValue("StudentCode", item.StudentCode);
-    methods.setValue("StudentName", bnBijoy2Unicode(item.StudentName));
-    methods.setValue("FatherName", bnBijoy2Unicode(item.FatherName));
-    methods.setValue("ClassName", bnBijoy2Unicode(item.ClassName));
-    methods.setValue("SubClassID", item.SubClassID);
-    methods.setValue("SessionID", item.SessionID);
+    methods.setValue('StudentCode', item.StudentCode);
+    methods.setValue('StudentName', bnBijoy2Unicode(item.StudentName));
+    methods.setValue('FatherName', bnBijoy2Unicode(item.FatherName));
+    methods.setValue('ClassName', bnBijoy2Unicode(item.ClassName));
+    methods.setValue('SubClassID', item.SubClassID);
+    methods.setValue('SessionID', item.SessionID);
 
     dispatch(setCharacterReportEditMode(null));
     dispatch(setFilteredStudent(null));
@@ -306,35 +306,35 @@ const CharacterReport = ({ pageTitle }) => {
   const handleOpenModal = useCallback((id) => {
     dispatch(setFilteredStudent(null));
     setShowSuggestions(false);
-    showModal("Filter Student", "STUDENT_FILTER");
+    showModal('Filter Student', 'STUDENT_FILTER');
   }, []);
 
   const handleCancelEdit = () => {
     setIsEditMode(false);
     setReportUpdateId(null);
     methods.reset({
-      StudentCode: methods.getValues("StudentCode"),
-      StudentName: methods.getValues("StudentName"),
-      FatherName: methods.getValues("FatherName"),
-      ClassName: methods.getValues("ClassName"),
-      SubClassID: methods.getValues("SubClassID"),
-      SessionID: methods.getValues("SessionID"),
+      StudentCode: methods.getValues('StudentCode'),
+      StudentName: methods.getValues('StudentName'),
+      FatherName: methods.getValues('FatherName'),
+      ClassName: methods.getValues('ClassName'),
+      SubClassID: methods.getValues('SubClassID'),
+      SessionID: methods.getValues('SessionID'),
       Date: new Date(),
-      ReportCetID: "",
-      ReportTypID: "",
-      Remark: "",
+      ReportCetID: '',
+      ReportTypID: '',
+      Remark: '',
     });
   };
 
   const handleViewReport = () => {
     setReportParams({
-      userCode: methods.getValues("StudentCode"),
-      classID: methods.getValues("SubClassID"),
-      SessionID: methods.getValues("SessionID"),
+      userCode: methods.getValues('StudentCode'),
+      classID: methods.getValues('SubClassID'),
+      SessionID: methods.getValues('SessionID'),
     });
   };
 
-  if (status === "loading" || isCreating || isUpdating) {
+  if (status === 'loading' || isCreating || isUpdating) {
     return <Loading />;
   }
 
@@ -348,13 +348,13 @@ const CharacterReport = ({ pageTitle }) => {
               className="mx-auto print:hidden"
             >
               <h1 className="text-2xl md:text-3xl font-bold text-center mb-6 md:mb-8 text-blue-600 uppercase font-SolaimanLipi">
-                {translate("Character Report")}
+                {translate('Character Report')}
               </h1>
 
               <div className="grid xl:grid-cols-4 gap-4 md:gap-6 mb-6">
                 <input
-                  {...methods.register("SubClassID", {
-                    required: "Short address is required",
+                  {...methods.register('SubClassID', {
+                    required: 'Short address is required',
                   })}
                   className="hidden"
                 />
@@ -362,17 +362,17 @@ const CharacterReport = ({ pageTitle }) => {
                 <div className="relative">
                   <div className="w-full">
                     <label
-                      htmlFor={"StudentCode"}
+                      htmlFor={'StudentCode'}
                       className="mb-1 block text-black font-SolaimanLipi"
                     >
                       <span className="text-red-500">
-                        {translate("User Code")} * :
+                        {translate('User Code')} * :
                       </span>
                     </label>
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        {...methods.register("StudentCode", { required: " " })}
+                        {...methods.register('StudentCode', { required: ' ' })}
                         className="w-full rounded border-[1.5px] border-stroke bg-[#EDEDED] px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-primary active:border-primary disabled:cursor-not-allowed disabled:bg-slate-200"
                         onInput={() => {
                           setUserTyping(true);
@@ -415,8 +415,8 @@ const CharacterReport = ({ pageTitle }) => {
                           className="p-2 hover:bg-blue-100 cursor-pointer"
                           onClick={() => handleSuggestionClick(item)}
                         >
-                          {item.StudentCode} -{" "}
-                          {bnBijoy2Unicode(item.StudentName)} -{" "}
+                          {item.StudentCode} -{' '}
+                          {bnBijoy2Unicode(item.StudentName)} -{' '}
                           {bnBijoy2Unicode(item.SubClass)}
                         </div>
                       ))}
@@ -427,66 +427,66 @@ const CharacterReport = ({ pageTitle }) => {
                 <DefaultSelect
                   label={
                     <span className="text-red-500">
-                      {translate("Session")} * :
+                      {translate('Session')} * :
                     </span>
                   }
-                  nameField={"SessionName"}
-                  registerKey={"SessionID"}
-                  valueField={"SessionID"}
+                  nameField={'SessionName'}
+                  registerKey={'SessionID'}
+                  valueField={'SessionID'}
                   options={academicSession}
-                  type={"number"}
-                  require={"This Field is require"}
+                  type={'number'}
+                  require={'This Field is require'}
                   disabled={false}
                   defaultSelect={false}
                   unicode={true}
                 />
 
                 <DefaultInput
-                  registerKey={"StudentName"}
-                  label={`${translate("Student Name")}: `}
+                  registerKey={'StudentName'}
+                  label={`${translate('Student Name')}: `}
                   disable={true}
                 />
 
                 <DefaultInput
-                  registerKey={"FatherName"}
-                  label={`${translate("Father Name")}: `}
+                  registerKey={'FatherName'}
+                  label={`${translate('Father Name')}: `}
                   disable={true}
                 />
 
                 <DefaultInput
-                  registerKey={"ClassName"}
-                  label={`${translate("Class")}:`}
+                  registerKey={'ClassName'}
+                  label={`${translate('Class')}:`}
                   disable={true}
                 />
 
                 <DatePickerOne
-                  dateCalender={`${translate("Date")}: `}
-                  placeholder={""}
-                  registerKey={"Date"}
-                  require={"Date Require"}
+                  dateCalender={`${translate('Date')}: `}
+                  placeholder={''}
+                  registerKey={'Date'}
+                  require={'Date Require'}
                 />
 
                 <DefaultSelect
-                  label={`${translate("Varient")}: `}
-                  nameField={"ReportCetName"}
-                  registerKey={"ReportCetID"}
-                  valueField={"ReportCetID"}
+                  label={`${translate('Varient')}: `}
+                  nameField={'ReportCetName'}
+                  registerKey={'ReportCetID'}
+                  valueField={'ReportCetID'}
                   options={studentReportCet}
-                  type={"number"}
-                  require={"This Field is require"}
+                  type={'number'}
+                  require={'This Field is require'}
                   disabled={false}
                   defaultSelect={false}
                   unicode={true}
                 />
 
                 <DefaultSelect
-                  label={`${translate("Type")}: `}
-                  nameField={"ReportTypeName"}
-                  registerKey={"ReportTypID"}
-                  valueField={"ReportTypID"}
+                  label={`${translate('Type')}: `}
+                  nameField={'ReportTypeName'}
+                  registerKey={'ReportTypID'}
+                  valueField={'ReportTypID'}
                   options={studentReportType}
-                  type={"number"}
-                  require={"This Field is require"}
+                  type={'number'}
+                  require={'This Field is require'}
                   disabled={false}
                   defaultSelect={false}
                   unicode={true}
@@ -496,11 +496,11 @@ const CharacterReport = ({ pageTitle }) => {
               <div className="grid grid-cols-1 md:grid-cols-1 gap-4 md:gap-6 mb-6">
                 <div>
                   <label className="block text-[16px] font-400 font-normal text-gray-700 mb-1 md:mb-2 font-SolaimanLipi">
-                    {translate("Remark")}:
+                    {translate('Remark')}:
                   </label>
                   <textarea
-                    {...methods.register("Remark", {
-                      required: "Remark is required",
+                    {...methods.register('Remark', {
+                      required: 'Remark is required',
                     })}
                     className="w-full px-3 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     rows="3"
@@ -518,7 +518,7 @@ const CharacterReport = ({ pageTitle }) => {
                   type="submit"
                   className="lg:inline-block text-center bg-blue-400 text-white py-2 md:py-3 px-6 rounded-md hover:bg-blue-600 transition-colors font-medium text-sm md:text-base"
                 >
-                  {isEditMode ? "Update" : "Submit"}
+                  {isEditMode ? 'Update' : 'Submit'}
                 </button>
 
                 {isEditMode && (
