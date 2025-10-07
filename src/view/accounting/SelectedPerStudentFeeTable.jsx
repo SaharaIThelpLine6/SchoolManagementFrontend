@@ -46,6 +46,7 @@ const SelectedPerStudentFeeTable = () => {
   );
 
   const subledgerData = studentMonthFeeData?.data[0]?.subLedgerFee;
+  const feeSettings = studentMonthFeeData?.data[0]?.feeSettings;
 
   console.log(subledgerData, 'subledgerData');
 
@@ -64,7 +65,7 @@ const SelectedPerStudentFeeTable = () => {
     useDeleteSelectedPerStudentFeeMutation();
 
   useEffect(() => {
-    if (subledgerData) {
+    if (subledgerData.length > 0) {
       const defaultValues = {
         selectedSLID: '',
         subLedgerFee:
@@ -76,15 +77,27 @@ const SelectedPerStudentFeeTable = () => {
       };
       console.log('Setting default values for form:', defaultValues);
       reset(defaultValues, { keepDirty: false, keepTouched: false });
+    } else if (feeSettings && feeSettings.length > 0) {
+      const defaultValues = {
+        selectedSLID: '',
+        subLedgerFee:
+          feeSettings.map((item) => ({
+            ...item,
+            SlName: item.SlName,
+            Amount: Number(item.amount) || 0,
+            Less: 0,
+            isNew: true,
+          })) || [],
+      };
+      console.log('Setting default values from feeSettings:', defaultValues);
+      reset(defaultValues, { keepDirty: false, keepTouched: false });
     } else {
-      console.log('Resetting form to empty values');
-      reset(
-        {
-          selectedSLID: '',
-          subLedgerFee: [],
-        },
-        { keepDirty: false, keepTouched: false }
-      );
+      const defaultValues = {
+        selectedSLID: '',
+        subLedgerFee: [],
+      };
+      console.log('Setting empty default values');
+      reset(defaultValues, { keepDirty: false, keepTouched: false });
     }
     console.log('Form state after reset:', getValues());
   }, [subledgerData, reset, getValues]);
@@ -158,46 +171,18 @@ const SelectedPerStudentFeeTable = () => {
   const handleDelete = async (item) => {
     console.log('Deleting item with SLID:', item.SLID, 'isNew:', item.isNew);
 
-    // Custom confirmation toast for delete
-    const confirmToast = toast.loading(
-      `Are you sure you want to delete this item? SLID: ${item.SLID}`,
-      {
-        position: 'top-center',
-        closeButton: true,
-        closeOnClick: false,
-        autoClose: false,
-        hideProgressBar: false,
-        style: { minWidth: '400px' },
-      }
-    );
-
-    // We'll use window.confirm for simplicity, or you can create a custom modal
-    const isConfirmed = window.confirm(
-      `Are you sure you want to delete this item? SLID: ${item.SLID}`
-    );
-
-    toast.dismiss(confirmToast);
-
-    if (!isConfirmed) {
-      toast.info('Deletion cancelled', {
-        position: 'top-right',
-        autoClose: 2000,
-      });
-      return;
-    }
-
     try {
       if (item.isNew) {
-        console.log(
-          'Deleting new item (not saved in DB) with SLID:',
-          item.SLID
-        );
+        // শুধু form state থেকে remove
         setValue(
           'subLedgerFee',
           subLedgerFeeValues.filter((sl) => sl.SLID !== item.SLID),
           { shouldValidate: true }
         );
-        console.log('Updated subLedgerFeeValues:', getValues().subLedgerFee);
+        console.log(
+          'Updated subLedgerFeeValues (new removed):',
+          getValues().subLedgerFee
+        );
 
         toast.success('New item has been successfully deleted', {
           position: 'top-right',
@@ -206,6 +191,7 @@ const SelectedPerStudentFeeTable = () => {
         return;
       }
 
+      // DB item delete
       const payload = {
         AdmissionID: filteredSelectedPerStudentFee?.AdmissionID,
         SLID: item.SLID,
@@ -236,7 +222,10 @@ const SelectedPerStudentFeeTable = () => {
         subLedgerFeeValues.filter((sl) => sl.SLID !== item.SLID),
         { shouldValidate: true }
       );
-      console.log('Updated subLedgerFeeValues:', getValues().subLedgerFee);
+      console.log(
+        'Updated subLedgerFeeValues (db removed):',
+        getValues().subLedgerFee
+      );
 
       toast.update(deleteToast, {
         render: 'Item has been successfully deleted from database',
@@ -313,25 +302,29 @@ const SelectedPerStudentFeeTable = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="flex items-end justify-start gap-4 my-5">
-          <div className="w-48">
-            <DefaultSelect
-              label="Fees"
-              options={monthlyFees ?? []}
-              valueField="SLID"
-              nameField="SlName"
-              registerKey="selectedSLID"
-              unicode={true}
-            />
-          </div>
+        <div className="flex items-end justify-start gap-4 mb-5">
+          {subledgerData.length > 0 && (
+            <>
+              <div className="w-48">
+                <DefaultSelect
+                  label="Fees"
+                  options={monthlyFees ?? []}
+                  valueField="SLID"
+                  nameField="SlName"
+                  registerKey="selectedSLID"
+                  unicode={true}
+                />
+              </div>
 
-          <Button
-            type="button"
-            className="px-6 h-10"
-            onClick={() => handleAddSubLedger(watch('selectedSLID'))}
-          >
-            {translate('Add')}
-          </Button>
+              <Button
+                type="button"
+                className="px-6 h-10"
+                onClick={() => handleAddSubLedger(watch('selectedSLID'))}
+              >
+                {translate('Add')}
+              </Button>
+            </>
+          )}
           <div className="mt-4">
             <Button
               type="submit"

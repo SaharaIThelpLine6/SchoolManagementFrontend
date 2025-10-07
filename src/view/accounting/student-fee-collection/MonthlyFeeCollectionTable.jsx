@@ -1,25 +1,31 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
-import DefaultInput from '../../../components/Forms/DefaultInput';
 import { useGetFeeLandByAdmissionQuery } from '../../../features/feeCollection/feeCollectionSlice';
+import { setMonthFeeData } from '../../../features/student/studentSlice';
 import bnBijoy2Unicode from '../../../utils/conveter';
+import { showModal } from '../../../utils/ModalControlar';
 import useTranslate from '../../../utils/Translate';
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 12;
 
 const MonthlyFeeCollectionTable = () => {
   const translate = useTranslate();
-  const methods = useForm();
-  const [currentPage, setCurrentPage] = useState(1);
+  const dispatch = useDispatch();
 
-  // Selector and query hooks
+  // Selector hook - always call at the top level
   const { filteredSelectedPerStudentFee } = useSelector(
     (state) => state.student
   );
   console.log('filteredSelectedPerStudentFee:', filteredSelectedPerStudentFee);
   const admissionId = filteredSelectedPerStudentFee?.AdmissionID;
+
+  // All hooks called unconditionally
+  const methods = useForm();
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // API query hook
   const { data, error, isLoading } = useGetFeeLandByAdmissionQuery(
     { id: admissionId },
     { skip: !admissionId }
@@ -36,23 +42,33 @@ const MonthlyFeeCollectionTable = () => {
 
   // Compute monthFeeList
   const monthFeeList = useMemo(() => {
-    if (!data || !data.feeDetails || !data.monthDetails) {
-      console.log('Data missing or incomplete:', data);
-      return [];
-    }
+    if (!data?.feeDetails || !data?.monthDetails) return [];
+
     const { feeDetails, monthDetails } = data;
+
     return Array.from({ length: 12 }, (_, i) => {
-      const monthKey = `Month${i + 1}`;
-      const feeKey = `Fee${i + 1}`;
-      const lessKey = `Less${i + 1}`;
-      const mKey = `M${i + 1}`;
+      const index = i + 1;
+      const fee = feeDetails[`Fee${index}`] ?? 0;
+      const less = feeDetails[`Less${index}`] ?? 0;
+      const paid = feeDetails[`M${index}`] ?? 0;
+
+      const untouched = paid === 0 && less === 0;
+      const isFree =
+        !untouched && (paid === 0 || paid === null) && less === fee && fee > 0;
+      const isFullPaid = !isFree && fee > 0 && paid + less === fee;
+      const due =
+        !isFree && !isFullPaid && !untouched ? fee - (paid + less) : 0;
 
       return {
-        monthName: monthDetails[monthKey] || 'N/A',
-        prescribedFee: feeDetails[feeKey] || 0,
-        acceptedFees: feeDetails[feeKey] || 0,
-        // acceptedFees: feeDetails[mKey] || 0,
-        discount: feeDetails[lessKey] || 0,
+        monthId: index,
+        monthName: monthDetails[`Month${index}`] || 'N/A',
+        prescribedFee: fee,
+        acceptedFees: paid,
+        discount: less,
+        due,
+        isFree,
+        isFullPaid,
+        untouched,
       };
     });
   }, [data]);
@@ -82,12 +98,21 @@ const MonthlyFeeCollectionTable = () => {
     return monthFeeList.slice(start, start + PAGE_SIZE);
   }, [monthFeeList, currentPage]);
 
-  // Render loading, error, or no data states
+  const handleOpenModal = useCallback(
+    (item) => {
+      console.log(item, 'item');
+      dispatch(setMonthFeeData(item)); // ✅ Correct way
+      showModal('Student Month Fee Accept', 'STUDENT_MONTH_FEE_ACCEPT_FORM');
+    },
+    [dispatch, showModal]
+  );
+
+  // Early returns after all hooks
   if (!admissionId) {
-    return;
-    // return <p>{translate('Please select a student first.')}</p>;
+    return <p>{translate('Please select a student first.')}</p>;
   }
 
+  // Render loading, error, or no data states
   if (isLoading) {
     return <p>{translate('Loading...')}</p>;
   }
@@ -135,11 +160,35 @@ const MonthlyFeeCollectionTable = () => {
                   </td>
 
                   <td className="px-2 text-center whitespace-nowrap min-w-[120px]">
-                    <DefaultInput
-                      registerKey={`monthFeeList.${index}.comment`}
+                    <input
                       type="text"
-                      className="w-full min-w-[100px] max-w-[150px] mx-auto"
-                      defaultValue={item.acceptedFees}
+                      className={`w-full rounded border-[1.5px] px-2 h-[38px] text-black outline-none text-[14px] transition
+    focus:border-custom-focus active:border-custom-focus
+    disabled:cursor-not-allowed disabled:bg-slate-200
+    ${
+      item.isFree
+        ? 'bg-blue-100 border-blue-400'
+        : item.isFullPaid
+        ? 'bg-green-100 border-green-400'
+        : item.due > 0
+        ? 'bg-red-100 border-red-400 cursor-pointer'
+        : 'cursor-pointer'
+    }`}
+                      value={
+                        item.isFree
+                          ? `Free Student (${item.prescribedFee})`
+                          : item.isFullPaid
+                          ? `Full Payment Done (${item.prescribedFee})`
+                          : item.due > 0
+                          ? `${item.acceptedFees} (Due: ${item.due})`
+                          : item.acceptedFees
+                      }
+                      onClick={() => {
+                        if (!item.isFullPaid && !item.isFree) {
+                          handleOpenModal(item);
+                        }
+                      }}
+                      readOnly
                     />
                   </td>
                 </tr>
@@ -154,31 +203,6 @@ const MonthlyFeeCollectionTable = () => {
           </tbody>
         </table>
       </div>
-
-      {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="flex justify-center mt-4">
-          <button
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 mx-1 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Previous
-          </button>
-          <span className="px-4 py-2">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
-            className="px-4 py-2 mx-1 bg-gray-200 rounded disabled:opacity-50"
-          >
-            Next
-          </button>
-        </div>
-      )}
     </FormProvider>
   );
 };

@@ -7,9 +7,11 @@ import GeneralForm from '../view/accounting/GeneralForm';
 import ReportSettings from '../view/accounting/ReportSettings';
 import StudentFeeGroup from '../view/accounting/StudentFeeGroup';
 import SubGeneralForm from '../view/accounting/SubGeneralForm';
+import TodaysBalance from '../view/accounting/TodaysBalance';
 import Statement from '../view/accounting/dues-list/Statement';
 import MonthStudentFeeForm from '../view/accounting/student-fee-collection/MonthStudentFeeForm';
 import StudentAdmissionFeeAcceptForm from '../view/accounting/student-fee-collection/StudentAdmissionFeeAcceptForm';
+import StudentMonthFeeAceptForm from '../view/accounting/student-fee-collection/StudentMonthFeeAceptForm';
 import ExamReportSetting from '../view/exam/ExamReportSetting';
 import Subsidiary from '../view/exam/Subsidiary';
 import PaymentGetway from '../view/general-information/sms/PaymentGetway';
@@ -36,7 +38,6 @@ import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
 import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
-import TodaysBalance from '../view/accounting/TodaysBalance';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -85,86 +86,87 @@ const DefaultModal = () => {
 
             {modalType && (
               <div className="body p-3">
-                {modalType === "ADD_STUDENT" && <AdmissionForm userId={id} />}
-                {modalType === "FEE_COLLECTION" && (
+                {modalType === 'ADD_STUDENT' && <AdmissionForm userId={id} />}
+                {modalType === 'FEE_COLLECTION' && (
                   <FeeCollectionForm userId={id} />
                 )}
-                {modalType === "PAYMENT" && <PaymentModal />}
-                {modalType === "ADD_TEACHER" && <AddTeacherForm userId={id} />}
-                {modalType === "EDIT_TEACHER" && (
+                {modalType === 'PAYMENT' && <PaymentModal />}
+                {modalType === 'ADD_TEACHER' && <AddTeacherForm userId={id} />}
+                {modalType === 'EDIT_TEACHER' && (
                   <EditTeacherForm userId={id} />
                 )}
-                {modalType === "ADD_DESIGNATION" && <DesignationForm />}
-                {modalType === "EDIT_DESIGNATION" && (
+                {modalType === 'ADD_DESIGNATION' && <DesignationForm />}
+                {modalType === 'EDIT_DESIGNATION' && (
                   <DesignationForm userId={id} />
                 )}
-                {modalType === "ADD_TYPEOFVACATION" && <TypeOfVacationForm />}
-                {modalType === "ADD_FUND" && <FundForm />}
-                {modalType === "OPEN_FUND" && <FundForm />}
-                {modalType === "OPEN_GENERAL" && <GeneralForm />}
-                {modalType === "OPEN_BANK_INFO" && <BankInfoSettings />}
-                {modalType === "OPEN_ACC_REPORT_SETTINGS" && <ReportSettings />}
-                {modalType === "OPEN_SUB_GENERAL" && <SubGeneralForm />}
+                {modalType === 'ADD_TYPEOFVACATION' && <TypeOfVacationForm />}
+                {modalType === 'ADD_FUND' && <FundForm />}
+                {modalType === 'OPEN_FUND' && <FundForm />}
+                {modalType === 'OPEN_GENERAL' && <GeneralForm />}
+                {modalType === 'OPEN_BANK_INFO' && <BankInfoSettings />}
+                {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
+                {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
                 {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
                 {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
                 {modalType === 'STUDENT_FEE_GROUP' && <StudentFeeGroup />}
-                {modalType === "EDIT_TYPEOFVACATION" && (
+                {modalType === 'EDIT_TYPEOFVACATION' && (
                   <TypeOfVacationForm userId={id} />
                 )}
-                {modalType === "EDIT_STUDENTREPORT" && (
+                {modalType === 'EDIT_STUDENTREPORT' && (
                   <EditStudentReport id={id} />
                 )}
-                {modalType === "ADD_STUDENTVACATION" && (
+                {modalType === 'ADD_STUDENTVACATION' && (
                   <AddStudentVacationForm />
                 )}
-                {modalType === "ADD_MONTHNAMES" && <MonthNamesForm />}
-                {modalType === "EDIT_MONTHNAMES" && (
+                {modalType === 'ADD_MONTHNAMES' && <MonthNamesForm />}
+                {modalType === 'EDIT_MONTHNAMES' && (
                   <MonthNamesForm id={id} isEdit={true} />
                 )}
-                {modalType === "EDIT_STUDENTVACATION" && (
+                {modalType === 'EDIT_STUDENTVACATION' && (
                   <EditStudentVacationForm userId={id} />
                 )}
 
-                {modalType === "STUDENT_FILTER" && <StudentFilterModal />}
-                {modalType === "USER_FILTER" && <UserFilterModal />}
-                {modalType === "SELECTED_PERSTUDENT_FEE_FILTER" && (
+                {modalType === 'STUDENT_FILTER' && <StudentFilterModal />}
+                {modalType === 'USER_FILTER' && <UserFilterModal />}
+                {modalType === 'SELECTED_PERSTUDENT_FEE_FILTER' && (
                   <SelectedPerStudentFeeModal />
                 )}
-                {modalType === "SMS_TEMPLATES" && <SMSTemplate />}
-                {modalType === "SMS_BUY" && <SMSBuy />}
-                {modalType === "PAYMENT_GETWAY" && <PaymentGetway />}
-                {modalType === "SUCCESSANDERROR" && <SuccessAndError />}
-                {modalType === "ADD_BOOK" && <AddEditBook />}
-                {modalType === "CODE_SETTING" && <CodeSetting />}
-                {modalType === "UPDATE_BOOK" && <AddEditBook id={id} />}
-                {modalType === "SUB_SIDIARY" && <Subsidiary />}
-                {modalType === "EXAM_REPORT_SETTING" && <ExamReportSetting />}
-                {modalType === "ACCOUNTING_DUES_LIST_STATEMENT" && (
+                {modalType === 'SMS_TEMPLATES' && <SMSTemplate />}
+                {modalType === 'SMS_BUY' && <SMSBuy />}
+                {modalType === 'PAYMENT_GETWAY' && <PaymentGetway />}
+                {modalType === 'SUCCESSANDERROR' && <SuccessAndError />}
+                {modalType === 'ADD_BOOK' && <AddEditBook />}
+                {modalType === 'CODE_SETTING' && <CodeSetting />}
+                {modalType === 'UPDATE_BOOK' && <AddEditBook id={id} />}
+                {modalType === 'SUB_SIDIARY' && <Subsidiary />}
+                {modalType === 'EXAM_REPORT_SETTING' && <ExamReportSetting />}
+                {modalType === 'ACCOUNTING_DUES_LIST_STATEMENT' && (
                   <Statement />
                 )}
-                {modalType === "BALANCE_TRANSFER" && <BalanceTransferModal />}
-                  {modalType === 'STUDENT_ADMISSION_FEE_ACCEPT' && (
+                {modalType === 'BALANCE_TRANSFER' && <BalanceTransferModal />}
+                {modalType === 'STUDENT_ADMISSION_FEE_ACCEPT' && (
                   <StudentAdmissionFeeAcceptForm />
+                )}
+                {modalType === 'STUDENT_MONTH_FEE_ACCEPT_FORM' && (
+                  <StudentMonthFeeAceptForm />
                 )}
                 {modalType === 'STUDENT_MONTH_FEE_ACCEPT' && (
                   <MonthStudentFeeForm />
                 )}
-                {modalType === "BALANCE_TRANSFER_UPDATE" && (
+                {modalType === 'BALANCE_TRANSFER_UPDATE' && (
                   <BalanceTransferModal />
                 )}
-                {modalType === "USER_SEARCH" && <UserSearch />}
-                {modalType === "POWER_DISTRIBUTION" && (
+                {modalType === 'USER_SEARCH' && <UserSearch />}
+                {modalType === 'POWER_DISTRIBUTION' && (
                   <AddLoginUsersModal id={id} />
                 )}
-                {modalType === "USER_NAME_CHANGE" && (
+                {modalType === 'USER_NAME_CHANGE' && (
                   <UserNamePasswordChangeModal id={id} changeType="username" />
                 )}
-                {modalType === "PASSWORD_CHANGE" && (
+                {modalType === 'PASSWORD_CHANGE' && (
                   <UserNamePasswordChangeModal id={id} changeType="password" />
                 )}
-                {modalType === "OPEN_TODAYS_BALANCE" && (
-                  <TodaysBalance />
-                )}
+                {modalType === 'OPEN_TODAYS_BALANCE' && <TodaysBalance />}
               </div>
             )}
           </div>

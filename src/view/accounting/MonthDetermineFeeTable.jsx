@@ -46,6 +46,8 @@ const MonthDetermineFeeTable = () => {
   const landFeeWithMonths = studentMonthFeeData?.data[0]?.landFeeWithMonths;
   const subledgerData = studentMonthFeeData?.data[0]?.subLedgerFee[0];
 
+  console.log(landFeeWithMonths, 'landFeeWithMonths');
+
   // Log API response for debugging
   useEffect(() => {
     console.log('useGetStudentFeeIncreaseDecreaseQuery response:', {
@@ -57,17 +59,37 @@ const MonthDetermineFeeTable = () => {
 
   // Compute monthFeeList
   const monthFeeList = useMemo(() => {
-    if (!landFeeWithMonths || !landFeeWithMonths.months) {
-      console.log('Data missing or incomplete:', landFeeWithMonths);
-      return [];
-    }
-    return landFeeWithMonths.months.map((month) => ({
-      monthName: month.monthName,
-      prescribedFee: month.fee || 0,
-      // acceptedFees: month.paid || 0,
-      acceptedFees: month.fee || 0,
-      discount: month.less || 0,
-    }));
+    if (!landFeeWithMonths || !landFeeWithMonths.months) return [];
+
+    return landFeeWithMonths.months.map((month) => {
+      const fee = month.fee || 0;
+      const less = month.less || 0;
+      const paid = month.paid || 0;
+
+      let isDisabled = false;
+      let statusText = '';
+
+      // Case 1: Fee == Less → Free Student
+      if (fee && fee === less) {
+        isDisabled = true;
+        statusText = 'Free Student';
+      }
+      // Case 2: Paid == Fee → Full Payment Done
+      else if (paid && paid === fee) {
+        isDisabled = true;
+        statusText = 'Full Payment Done';
+      }
+
+      return {
+        monthName: month.monthName,
+        prescribedFee: fee,
+        acceptedFees: paid,
+        discount: less,
+        statusText,
+        isDisabled,
+        defaultChecked: !isDisabled,
+      };
+    });
   }, [landFeeWithMonths]);
 
   // Initialize form state with monthFeeList
@@ -113,7 +135,7 @@ const MonthDetermineFeeTable = () => {
     );
   }
 
-  if (!landFeeWithMonths || !landFeeWithMonths.months) {
+  if (!landFeeWithMonths || !landFeeWithMonths.months > 0) {
     console.log('Incomplete data:', landFeeWithMonths);
     return <p>{translate('No valid fee data found for this student.')}</p>;
   }
@@ -148,12 +170,15 @@ const MonthDetermineFeeTable = () => {
                   <td className="px-4 py-2 text-center whitespace-nowrap">
                     {bnBijoy2Unicode(item.monthName)}
                   </td>
+
                   <td className="px-4 py-2 text-center whitespace-nowrap">
                     {item.prescribedFee}
                   </td>
+
                   <td className="px-4 py-2 text-center whitespace-nowrap">
                     {item.acceptedFees}
                   </td>
+
                   <td className="px-2 text-center whitespace-nowrap min-w-[120px]">
                     <DefaultInput
                       registerKey={`monthFeeList.${index}.comment`}
@@ -161,11 +186,16 @@ const MonthDetermineFeeTable = () => {
                       className="w-full min-w-[100px] max-w-[150px] mx-auto"
                     />
                   </td>
+
                   <td className="px-4 py-2 text-center flex justify-center items-center whitespace-nowrap">
-                    <SingleCheckbox
-                      registerKey={`monthFeeList.${index}.status`}
-                      dcn="mb-0 mt-1"
-                    />
+                    <div className="flex flex-col items-center">
+                      <SingleCheckbox
+                        registerKey={`monthFeeList.${index}.status`}
+                        dcn="mb-0 mt-1"
+                        disabled={item.isDisabled}
+                        checked={item.defaultChecked}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))

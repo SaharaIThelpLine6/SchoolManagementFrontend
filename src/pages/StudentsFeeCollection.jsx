@@ -20,7 +20,10 @@ import {
   usePostStudentFeeCollectionMutation,
 } from '../features/feeCollection/feeCollectionSlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
-import { setFilteredSelectedPerStudentFee } from '../features/student/studentSlice';
+import {
+  setFilteredSelectedPerStudentFee,
+  setMonthFeeData,
+} from '../features/student/studentSlice';
 import { numberToBanglaWords } from '../helper/numberToBanglaWords';
 import { useDefaultSession } from '../hooks/useDefaultSession';
 import bnBijoy2Unicode from '../utils/conveter';
@@ -43,7 +46,7 @@ const StudentsFeeCollection = () => {
   });
   const { handleSubmit, reset, watch, setValue, control } = methods;
   const translate = useTranslate();
-  const { filteredSelectedPerStudentFee } = useSelector(
+  const { filteredSelectedPerStudentFee, monthFeeData } = useSelector(
     (state) => state.student
   );
 
@@ -249,6 +252,7 @@ const StudentsFeeCollection = () => {
         AccountType: data.GLID,
         Account: data.SLID,
         fees: studentFeeData.fees,
+        MonthId: monthFeeData.monthId ?? null,
         //  PreviousDue: "",
       };
 
@@ -256,6 +260,8 @@ const StudentsFeeCollection = () => {
       console.log('First form submitted with data:', payload);
 
       // ✅ আপনার মূল logic এখানে লিখুন
+      dispatch(setMonthFeeData(null));
+      dispatch(setFilteredSelectedPerStudentFee(null));
     } catch (error) {
       console.error('Submission error:', error);
       Swal.fire({

@@ -372,6 +372,11 @@ export const feeCollectionSlice = createApi({
       providesTags: ["StudentFee", "SelectedStudentPerFee"],
     }),
 
+    getMonthPerStudentsFee: builder.query({
+      query: (admissionId) => `month_per_student_fee/${admissionId}`,
+      providesTags: ["StudentFee", "SelectedStudentPerFee"],
+    }),
+
 
     postBankInfoLedger: builder.mutation({
       query: (data) => ({
@@ -474,6 +479,7 @@ export const {
 
   usePostStudentFeeCollectionMutation,
   useGetStudentFeeIncreaseDecreaseQuery,
+  useGetMonthPerStudentsFeeQuery,
 
   usePostBankInfoLedgerMutation,
   usePutBankInfoLedgerMutation,

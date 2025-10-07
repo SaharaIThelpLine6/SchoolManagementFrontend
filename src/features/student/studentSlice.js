@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { getUserData } from "../../utils/read/api";
-import { set } from "react-hook-form";
 
 export const fetchAdmissionStudentData = createAsyncThunk(
   "student/fetchAdmissionStudentData",
@@ -85,6 +84,7 @@ const initialState = {
   filteredStudent: null,
   filteredUser: null,
   filteredSelectedPerStudentFee: null,
+  monthFeeData: null,
   characterReportEditMode: null,
   parentsData: [],
   allUsers: [],
@@ -111,6 +111,9 @@ const classSlice = createSlice({
     },
     setParentsData: (state, action) => {
       state.parentsData = action.payload;
+    },
+    setMonthFeeData: (state, action) => {
+      state.monthFeeData = action.payload;
     },
     deleteParentData: (state, action) => {
       state.parentsData = state.parentsData.filter(
@@ -223,5 +226,6 @@ export const {
   setAllUsersData,
   deleteAllUsersData,
   clearAllUsersData,
+  setMonthFeeData
 } = classSlice.actions;
 export default classSlice.reducer;

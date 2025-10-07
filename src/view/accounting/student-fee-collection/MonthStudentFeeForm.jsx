@@ -45,6 +45,8 @@ const MonthStudentFeeForm = ({ pageTitle }) => {
   );
 
   const data = studentMonthFeeData?.data[0];
+  const totalAmount =
+    studentMonthFeeData?.data[0].landFeeWithMonths.totalAmount;
 
   // ✅ Set values when filteredSelectedPerStudentFee changes
   useEffect(() => {
@@ -54,9 +56,12 @@ const MonthStudentFeeForm = ({ pageTitle }) => {
       setValue('ClassName', data.ClassName || '');
       setValue('SessionName', data.SessionName || '');
       setValue('Comment', '');
-      setValue('AmountTotal', data.TotalAmount || 0);
+      setValue(
+        'AmountTotal',
+        totalAmount ? totalAmount : data.TotalAmount || 0
+      );
       setValue('LessTotal', data.TotalLess || 0);
-      setValue('Total', data.TotalFinalAmount || 0);
+      setValue('Total', totalAmount ? totalAmount : data.TotalFinalAmount || 0);
     } else {
       // ✅ Clear form when no student selected
       reset({

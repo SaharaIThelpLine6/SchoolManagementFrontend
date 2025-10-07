@@ -1,23 +1,23 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useFormContext, useWatch } from "react-hook-form";
-import useTranslate from "../../utils/Translate";
-import bnBijoy2Unicode from "../../utils/conveter";
-import { showModal } from "../../utils/ModalControlar";
+import { useCallback, useEffect, useState } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
+import bnBijoy2Unicode from '../../utils/conveter';
+import { showModal } from '../../utils/ModalControlar';
+import useTranslate from '../../utils/Translate';
 
 const DefaultInput = ({
   label,
-  type = "text",
+  type = 'text',
   placeholder,
   registerKey,
   codeSetting = false,
-  labelColor = "text-black",
+  labelColor = 'text-black',
   require = false,
   disable = false,
-  readOnly= false,
+  readOnly = false,
   unicode = false,
-  labelPosition = "top",
+  labelPosition = 'top',
   validate,
-  defaultValue = "",
+  defaultValue = '',
   showError = false, // নতুন prop যোগ করা হয়েছে
 }) => {
   const {
@@ -30,7 +30,7 @@ const DefaultInput = ({
   const [isTouched, setIsTouched] = useState(false);
 
   const handleOpenModal = useCallback(() => {
-    showModal("User Code Setting", "CODE_SETTING");
+    showModal('User Code Setting', 'CODE_SETTING');
   }, []);
 
   // ✅ Watch field value
@@ -54,24 +54,25 @@ const DefaultInput = ({
   }, [currentValue, unicode, registerKey, setValue]);
 
   // শুধুমাত্র যখন ফিল্ড touched হয়েছে অথবা form submit করা হয়েছে তখন error show করবে
-  const shouldShowError = showError || isSubmitted || touchedFields[registerKey] || isTouched;
+  const shouldShowError =
+    showError || isSubmitted || touchedFields[registerKey] || isTouched;
 
   return (
     <div
       className={`w-full ${
-        labelPosition === "left" ? "flex items-center gap-4" : ""
+        labelPosition === 'left' ? 'flex items-center gap-4' : ''
       }`}
     >
       {label && (
         <label
           htmlFor={registerKey}
           className={`text-black font-SolaimanLipi ${
-            labelPosition === "left" ? "w-2/5 mb-0 text-end" : "mb-1 block"
+            labelPosition === 'left' ? 'w-2/5 mb-0 text-end' : 'mb-1 block'
           }`}
         >
           <div
             className={`flex items-center gap-2 ${
-              labelPosition === "left" ? "justify-end" : "justify-between"
+              labelPosition === 'left' ? 'justify-end' : 'justify-between'
             }`}
           >
             <div className="flex items-center gap-1">
@@ -92,28 +93,28 @@ const DefaultInput = ({
         </label>
       )}
 
-      <div className={labelPosition === "left" ? "flex-1" : "w-full"}>
+      <div className={labelPosition === 'left' ? 'flex-1' : 'w-full'}>
         <input
-          type={type === "number" || type === "phone" ? "number" : type}
+          type={type === 'number' || type === 'phone' ? 'number' : type}
           placeholder={translate(placeholder)}
           className={`w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition
                       focus:border-custom-focus active:border-custom-focus
                       disabled:cursor-not-allowed disabled:bg-slate-200
                       ${
                         shouldShowError && errors[registerKey]
-                          ? "placeholder:text-red-400 border-red-400"
-                          : ""
+                          ? 'placeholder:text-red-400 border-red-400'
+                          : ''
                       }`}
           {...register(registerKey, {
-            required: require ? "এই ফিল্ডটি প্রয়োজনীয়" : false,
-            ...(type === "number" && {
+            required: require ? 'এই ফিল্ডটি প্রয়োজনীয়' : false,
+            ...(type === 'number' && {
               validate: (value) =>
-                isNaN(Number(value)) ? "দয়া করে একটি বৈধ সংখ্যা লিখুন" : true,
+                isNaN(Number(value)) ? 'দয়া করে একটি বৈধ সংখ্যা লিখুন' : true,
             }),
-            ...(type === "phone" && {
+            ...(type === 'phone' && {
               pattern: {
                 value: /^\d{11}$/,
-                message: "ফোন নম্বর অবশ্যই ১১ ডিজিটের হতে হবে",
+                message: 'ফোন নম্বর অবশ্যই ১১ ডিজিটের হতে হবে',
               },
             }),
             ...(validate && { validate }),
