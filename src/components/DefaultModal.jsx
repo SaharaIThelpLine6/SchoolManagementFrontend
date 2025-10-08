@@ -9,6 +9,7 @@ import StudentFeeGroup from '../view/accounting/StudentFeeGroup';
 import SubGeneralForm from '../view/accounting/SubGeneralForm';
 import TodaysBalance from '../view/accounting/TodaysBalance';
 import Statement from '../view/accounting/dues-list/Statement';
+import AccExamFeeCollector from '../view/accounting/student-exam-fee/AccExamFeeCollector';
 import MonthStudentFeeForm from '../view/accounting/student-fee-collection/MonthStudentFeeForm';
 import StudentAdmissionFeeAcceptForm from '../view/accounting/student-fee-collection/StudentAdmissionFeeAcceptForm';
 import StudentMonthFeeAceptForm from '../view/accounting/student-fee-collection/StudentMonthFeeAceptForm';
@@ -152,6 +153,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'STUDENT_MONTH_FEE_ACCEPT' && (
                   <MonthStudentFeeForm />
+                )}
+                {modalType === 'ACC_EXAM_FEE_COLLECTOR' && (
+                  <AccExamFeeCollector />
                 )}
                 {modalType === 'BALANCE_TRANSFER_UPDATE' && (
                   <BalanceTransferModal />

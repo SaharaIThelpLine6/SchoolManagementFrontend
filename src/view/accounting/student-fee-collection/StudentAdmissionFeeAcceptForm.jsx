@@ -21,6 +21,8 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
   const translate = useTranslate();
 
   const [defaultFees, setDefaultFees] = useState([]);
+  const [feeTotals, setFeeTotals] = useState(null);
+  console.log(feeTotals, 'feeTotals');
 
   const methods = useForm({
     defaultValues: {
@@ -67,6 +69,24 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
         due: item.BlankField ? item.BlankField : 0,
       }));
 
+      // Calculate totals after mapping
+      const totalPreviousDeposite = fees.reduce(
+        (sum, item) => sum + (item.preDeposit || 0),
+        0
+      );
+      const totalDeduction = fees.reduce(
+        (sum, item) => sum + item.deduction,
+        0
+      );
+      const totalAmount = fees.reduce((sum, item) => sum + item.amount, 0);
+      const netPayable = totalAmount - totalPreviousDeposite - totalDeduction;
+      // Set fee totals
+      const calculatedTotals = {
+        totalPreviousDeposite,
+        netPayable,
+      };
+      // Set totals
+      setFeeTotals(calculatedTotals);
       setDefaultFees(fees);
       reset({ fees });
     }
@@ -225,14 +245,16 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
               />
               <DefaultInput
                 type="text"
-                registerKey="eastCut"
+                registerKey="OldDeduction"
                 label="East cut"
+                defaultValue={feeTotals?.netPayable || 0}
                 disable
               />
               <DefaultInput
                 type="text"
-                registerKey="preDeposit"
+                registerKey="OldPreDeposit"
                 label="Pre-deposit"
+                defaultValue={feeTotals?.totalPreviousDeposite || 0}
                 disable
               />
               <DefaultInput

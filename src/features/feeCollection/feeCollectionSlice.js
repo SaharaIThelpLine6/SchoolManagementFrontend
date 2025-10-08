@@ -335,8 +335,14 @@ export const feeCollectionSlice = createApi({
     }),
     getStudentFeeAdmissions: builder.query({
       query: (admissionId) => `view_student_fee/${admissionId}`,
-      providesTags: ["StudentFeeAdmissions"],
+      providesTags: ["StudentFeeAdmissions", "StudentFeeSettings"],
     }),
+    getMonthDuePerStudentFee: builder.query({
+      query: ({ admissionId, monthId }) =>
+        `month_due_per_student_fee/${admissionId}/${monthId}`,
+      providesTags: ["StudentFeeAdmissions", "StudentFeeSettings"],
+    }),
+
 
     getGeneralLedgersByCAID: builder.query({
       query: (id) => `general_ledgers_by_caid`,
@@ -369,7 +375,7 @@ export const feeCollectionSlice = createApi({
           SessionID
         }
       }),
-      providesTags: ["StudentFee", "SelectedStudentPerFee"],
+      providesTags: ["StudentFee", "SelectedStudentPerFee", "StudentFeeSettings"],
     }),
 
     getMonthPerStudentsFee: builder.query({
@@ -480,6 +486,7 @@ export const {
   usePostStudentFeeCollectionMutation,
   useGetStudentFeeIncreaseDecreaseQuery,
   useGetMonthPerStudentsFeeQuery,
+  useGetMonthDuePerStudentFeeQuery,
 
   usePostBankInfoLedgerMutation,
   usePutBankInfoLedgerMutation,

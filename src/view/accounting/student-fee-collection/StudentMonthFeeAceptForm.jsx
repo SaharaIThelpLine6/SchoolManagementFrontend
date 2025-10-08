@@ -6,7 +6,10 @@ import Button from '../../../components/Button/Button';
 import DeleteButton from '../../../components/Button/DeleteButton';
 import DefaultInput from '../../../components/Forms/DefaultInput';
 import { setPageName } from '../../../features/auth/authSlice';
-import { useGetMonthPerStudentsFeeQuery } from '../../../features/feeCollection/feeCollectionSlice';
+import {
+  useGetMonthDuePerStudentFeeQuery,
+  useGetMonthPerStudentsFeeQuery,
+} from '../../../features/feeCollection/feeCollectionSlice';
 import { setStudentFeeData } from '../../../features/settings/settingsSlice';
 import bnBijoy2Unicode from '../../../utils/conveter';
 import { hideModal } from '../../../utils/ModalControlar';
@@ -21,7 +24,12 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
   const translate = useTranslate();
 
   const [defaultFees, setDefaultFees] = useState([]);
-
+  // State
+  const [feeDueData, setFeeDueData] = useState({
+    totalLess: 0,
+    totalPreDeposit: 0,
+    totalDue: 0,
+  });
   const methods = useForm({
     defaultValues: {
       fees: [],
@@ -45,35 +53,109 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       skip: !filteredSelectedPerStudentFee?.AdmissionID,
     }
   );
+  // Fetch student due month fee  data
+  const { data: monthDuePerStudent } = useGetMonthDuePerStudentFeeQuery(
+    {
+      admissionId: filteredSelectedPerStudentFee?.AdmissionID,
+      monthId: monthFeeData.monthId, // ধরো তুমি month select করছো
+    },
+    {
+      skip:
+        !filteredSelectedPerStudentFee?.AdmissionID || !monthFeeData.monthId, // monthId না থাকলে skip করবে
+    }
+  );
 
+  console.log(monthDuePerStudent, 'monthDuePerStudent');
   console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
   console.log(filteredSelectedPerStudentFee, 'filteredSelectedPerStudentFee');
 
   // Initialize default fees from API
+  // useEffect(() => {
+
+  // if (studentFeeAdmissionData && Array.isArray(studentFeeAdmissionData)) {
+  //   const fees = studentFeeAdmissionData.map((item) => ({
+  //     SSFID: item.SSFID,
+  //     SLID: item.SLID,
+  //     SlName: item.SlName,
+  //     sessionId: item.SessionID,
+  //     classId: item.ClassID,
+  //     amount: item.Amount,
+  //     deduction: item.Less || 0,
+  //     deposit: item.FainalAmount || 0,
+  //     preDeposit: 0,
+  //     due: item.Amount - (item.Less || 0) - (item.FainalAmount || 0),
+  //   }));
+
+  //   setDefaultFees(fees);
+  //   reset({ fees });
+  // }
+  //   setValue('studentCode', filteredSelectedPerStudentFee?.StudentCode);
+  //   if (monthFeeData) {
+  //     setValue('monthId', monthFeeData?.monthId);
+  //     setValue('monthName', monthFeeData?.monthName);
+  //   }
+  // }, [studentFeeAdmissionData, reset, setValue]);
   useEffect(() => {
-    if (studentFeeAdmissionData && Array.isArray(studentFeeAdmissionData)) {
+    if (
+      monthDuePerStudent?.data &&
+      Array.isArray(monthDuePerStudent.data) &&
+      monthDuePerStudent.data.length > 0
+    ) {
+      // যদি মাস অনুযায়ী ফি থাকে
+      const fees = monthDuePerStudent.data.map((item) => ({
+        SSFID: item.SSFID,
+        SLID: item.SLID,
+        SlName: item.SlName,
+        sessionId: item.SessionID,
+        classId: item.ClassID,
+        amount: item.Amount || item.Fee || 0,
+        deduction: 0,
+        deposit: item.Fee - item.PreviousDeposite || 0,
+        preDeposit: item.PreDeposite || 0,
+        due: 0,
+      }));
+
+      setDefaultFees(fees);
+      reset({ fees });
+    } else if (
+      studentFeeAdmissionData &&
+      Array.isArray(studentFeeAdmissionData) &&
+      studentFeeAdmissionData.length > 0
+    ) {
+      // fallback: studentFeeAdmissionData ব্যবহার করো
       const fees = studentFeeAdmissionData.map((item) => ({
         SSFID: item.SSFID,
         SLID: item.SLID,
         SlName: item.SlName,
         sessionId: item.SessionID,
         classId: item.ClassID,
-        amount: item.Amount,
+        amount: item.Amount || 0,
         deduction: item.Less || 0,
         deposit: item.FainalAmount || 0,
         preDeposit: 0,
-        due: item.Amount - (item.Less || 0) - (item.FainalAmount || 0),
+        due: (item.Amount || 0) - (item.Less || 0) - (item.FainalAmount || 0),
       }));
 
       setDefaultFees(fees);
       reset({ fees });
     }
+
+    // student info set
     setValue('studentCode', filteredSelectedPerStudentFee?.StudentCode);
+
+    // month info set
     if (monthFeeData) {
       setValue('monthId', monthFeeData?.monthId);
       setValue('monthName', monthFeeData?.monthName);
     }
-  }, [studentFeeAdmissionData, reset, setValue]);
+  }, [
+    studentFeeAdmissionData,
+    monthDuePerStudent,
+    reset,
+    setValue,
+    filteredSelectedPerStudentFee,
+    monthFeeData,
+  ]);
 
   const fees = watch('fees');
 
@@ -194,7 +276,20 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
-  }, [dispatch, pageTitle]);
+
+    // যদি monthDuePerStudent ডেটা আসে, তখনই delay দিই
+    if (monthDuePerStudent?.totals) {
+      const timer = setTimeout(() => {
+        setFeeDueData({
+          totalLess: monthDuePerStudent?.totals?.totalLess || 0,
+          totalPreDeposit: monthDuePerStudent?.totals?.totalPreDeposite || 0,
+        });
+      }, 300); // 300ms delay
+
+      // cleanup timer on unmount or re-run
+      return () => clearTimeout(timer);
+    }
+  }, [dispatch, pageTitle, monthDuePerStudent]);
 
   const onSubmit = (data) => {
     const payload = {
@@ -235,10 +330,16 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                 label="Prescribed Fee"
                 disable
               />
-              <DefaultInput registerKey="eastCut" label="East cut" disable />
+              <DefaultInput
+                registerKey="eastCut"
+                label="East cut"
+                defaultValue={feeDueData?.totalLess}
+                disable
+              />
               <DefaultInput
                 registerKey="preDeposit"
                 label="Pre-deposit"
+                defaultValue={feeDueData?.totalPreDeposit}
                 disable
               />
               <DefaultInput registerKey="deduction" label="Deduction" disable />

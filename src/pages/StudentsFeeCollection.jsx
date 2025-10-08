@@ -227,6 +227,10 @@ const StudentsFeeCollection = () => {
     }
   }, [studentMonthFeeData, showModal]);
 
+  const handleStudentExamFeeOpenModal = useCallback(() => {
+    showModal('Acc Exam Fee Collector', 'ACC_EXAM_FEE_COLLECTOR');
+  }, []);
+
   const onSubmit = async (data) => {
     try {
       // ✅ Check if fees array exists and has items
@@ -252,11 +256,11 @@ const StudentsFeeCollection = () => {
         AccountType: data.GLID,
         Account: data.SLID,
         fees: studentFeeData.fees,
-        MonthId: monthFeeData.monthId ?? null,
+        MonthId: monthFeeData?.monthId || '',
         //  PreviousDue: "",
       };
 
-      await postStudentFee(payload).unwrap;
+      await postStudentFee(payload).unwrap();
       console.log('First form submitted with data:', payload);
 
       // ✅ আপনার মূল logic এখানে লিখুন
@@ -612,6 +616,7 @@ const StudentsFeeCollection = () => {
                   {/* Exam */}
                   <div className="flex flex-col items-center gap-2 w-full">
                     <Button
+                      onClick={handleStudentExamFeeOpenModal}
                       className="w-full max-w-xs px-4 py-2 rounded-lg shadow bg-purple-600 text-white"
                       disabled={!filteredSelectedPerStudentFee?.UserID}
                     >
