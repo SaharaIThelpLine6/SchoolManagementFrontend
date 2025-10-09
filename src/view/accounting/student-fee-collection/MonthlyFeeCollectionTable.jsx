@@ -18,18 +18,24 @@ const MonthlyFeeCollectionTable = () => {
   const { filteredSelectedPerStudentFee } = useSelector(
     (state) => state.student
   );
+
   console.log('filteredSelectedPerStudentFee:', filteredSelectedPerStudentFee);
+
   const admissionId = filteredSelectedPerStudentFee?.AdmissionID;
 
-  // All hooks called unconditionally
+  // All hooks called unconditionally at the top level
   const methods = useForm();
   const [currentPage, setCurrentPage] = useState(1);
 
-  // API query hook
-  const { data, error, isLoading } = useGetFeeLandByAdmissionQuery(
-    { id: admissionId },
-    { skip: !admissionId }
-  );
+  // API query hook with proper error handling
+  const { data, error, isLoading, isError, isSuccess } =
+    useGetFeeLandByAdmissionQuery(
+      { id: admissionId },
+      {
+        skip: !admissionId,
+        refetchOnMountOrArgChange: true,
+      }
+    );
 
   // Log API response for debugging
   useEffect(() => {
@@ -37,59 +43,81 @@ const MonthlyFeeCollectionTable = () => {
       data,
       error,
       isLoading,
+      admissionId,
     });
-  }, [data, error, isLoading]);
+  }, [data, error, isLoading, admissionId]);
 
-  // Compute monthFeeList
+  // Compute monthFeeList with proper error handling
   const monthFeeList = useMemo(() => {
-    if (!data?.feeDetails || !data?.monthDetails) return [];
+    if (!data?.feeDetails || !data?.monthDetails) {
+      console.log('Missing feeDetails or monthDetails in data:', data);
+      return [];
+    }
 
-    const { feeDetails, monthDetails } = data;
+    try {
+      const { feeDetails, monthDetails } = data;
 
-    return Array.from({ length: 12 }, (_, i) => {
-      const index = i + 1;
-      const fee = feeDetails[`Fee${index}`] ?? 0;
-      const less = feeDetails[`Less${index}`] ?? 0;
-      const paid = feeDetails[`M${index}`] ?? 0;
+      return Array.from({ length: 12 }, (_, i) => {
+        const index = i + 1;
+        const fee = Number(feeDetails[`Fee${index}`]) || 0;
+        const less = Number(feeDetails[`Less${index}`]) || 0;
+        const paid = Number(feeDetails[`M${index}`]) || 0;
 
-      const untouched = paid === 0 && less === 0;
-      const isFree =
-        !untouched && (paid === 0 || paid === null) && less === fee && fee > 0;
-      const isFullPaid = !isFree && fee > 0 && paid + less === fee;
-      const due =
-        !isFree && !isFullPaid && !untouched ? fee - (paid + less) : 0;
+        const untouched = paid === 0 && less === 0;
+        const isFree =
+          !untouched &&
+          (paid === 0 || paid === null) &&
+          less === fee &&
+          fee > 0;
+        const isFullPaid = !isFree && fee > 0 && paid + less === fee;
+        const due =
+          !isFree && !isFullPaid && !untouched ? fee - (paid + less) : 0;
 
-      return {
-        monthId: index,
-        monthName: monthDetails[`Month${index}`] || 'N/A',
-        prescribedFee: fee,
-        acceptedFees: paid,
-        discount: less,
-        due,
-        isFree,
-        isFullPaid,
-        untouched,
-      };
-    });
+        return {
+          monthId: index,
+          monthName: monthDetails[`Month${index}`] || 'N/A',
+          prescribedFee: fee,
+          acceptedFees: paid,
+          discount: less,
+          due,
+          isFree,
+          isFullPaid,
+          untouched,
+          originalData: {
+            // Keep original data for reference
+            feeDetails: feeDetails,
+            monthDetails: monthDetails,
+          },
+        };
+      });
+    } catch (error) {
+      console.error('Error processing month fee list:', error);
+      return [];
+    }
   }, [data]);
 
   // Initialize form state with monthFeeList
   useEffect(() => {
-    if (monthFeeList.length > 0) {
-      const defaultValues = {
-        monthFeeList: monthFeeList.map((item) => ({
-          ...item,
-          comment: '',
-          status: false,
-        })),
-      };
-      methods.reset(defaultValues, { keepDirty: false, keepTouched: false });
-      console.log(
-        'Form state initialized with monthFeeList:',
-        methods.getValues()
-      );
+    if (monthFeeList.length > 0 && isSuccess) {
+      try {
+        const defaultValues = {
+          monthFeeList: monthFeeList.map((item) => ({
+            ...item,
+            comment: '',
+            status: false,
+          })),
+        };
+        methods.reset(defaultValues, {
+          keepDirty: false,
+          keepTouched: false,
+          keepDefaultValues: false,
+        });
+        console.log('Form state initialized with monthFeeList:', defaultValues);
+      } catch (error) {
+        console.error('Error initializing form:', error);
+      }
     }
-  }, [monthFeeList, methods]);
+  }, [monthFeeList, methods, isSuccess]);
 
   // Compute paginated data
   const totalPages = Math.ceil(monthFeeList.length / PAGE_SIZE);
@@ -100,35 +128,66 @@ const MonthlyFeeCollectionTable = () => {
 
   const handleOpenModal = useCallback(
     (item) => {
-      console.log(item, 'item');
-      dispatch(setMonthFeeData(item)); // ✅ Correct way
-      showModal('Student Month Fee Accept', 'STUDENT_MONTH_FEE_ACCEPT_FORM');
+      console.log('Opening modal for item:', item);
+      try {
+        dispatch(setMonthFeeData(item));
+        showModal('Student Month Fee Accept', 'STUDENT_MONTH_FEE_ACCEPT_FORM');
+      } catch (error) {
+        console.error('Error opening modal:', error);
+      }
     },
-    [dispatch, showModal]
+    [dispatch]
   );
 
   // Early returns after all hooks
   if (!admissionId) {
-    return <p>{translate('Please select a student first.')}</p>;
-  }
-
-  // Render loading, error, or no data states
-  if (isLoading) {
-    return <p>{translate('Loading...')}</p>;
-  }
-
-  if (error) {
-    console.error('API error:', error);
     return (
-      <p>
-        {translate('Error loading data:')} {error.message || 'Unknown error'}
-      </p>
+      <div className="flex justify-center items-center p-8">
+        <p className="text-lg text-gray-600">
+          {translate('Please select a student first.')}
+        </p>
+      </div>
     );
   }
 
-  if (!data || !data.feeDetails || !data.monthDetails) {
-    console.log('Incomplete data:', data);
-    return <p>{translate('No valid fee data found for this student.')}</p>;
+  // Render loading state
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        <span className="ml-3 text-lg">{translate('Loading fee data...')}</span>
+      </div>
+    );
+  }
+
+  // Render error state
+  if (isError) {
+    console.error('API error:', error);
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="text-red-600 text-center">
+          <p className="text-lg font-semibold">
+            {translate('Error loading data')}
+          </p>
+          <p className="text-sm mt-2">
+            {error?.data?.message ||
+              error?.message ||
+              translate('Unknown error occurred')}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Render no data state
+  if (!data || monthFeeList.length === 0) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <p className="text-lg text-gray-600">
+          {translate('No valid fee data found for this student.')}
+        </p>
+      </div>
+    );
   }
 
   return (

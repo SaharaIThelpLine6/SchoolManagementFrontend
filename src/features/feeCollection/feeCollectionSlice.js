@@ -249,7 +249,7 @@ export const feeCollectionSlice = createApi({
         if (SessionID) params.append("SessionID", SessionID);
         return `/search__students?${params.toString()}`;
       },
-      providesTags: ["SelectedStudentPerFee"],
+      providesTags: ["SelectedStudentPerFee", "FeeLand"],
     }),
     postSelectedPerStudentFee: builder.mutation({
       query: (data) => ({

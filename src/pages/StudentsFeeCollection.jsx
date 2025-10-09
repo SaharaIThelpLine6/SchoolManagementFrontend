@@ -20,6 +20,7 @@ import {
   usePostStudentFeeCollectionMutation,
 } from '../features/feeCollection/feeCollectionSlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
+import { setStudentFeeData } from '../features/settings/settingsSlice';
 import {
   setFilteredSelectedPerStudentFee,
   setMonthFeeData,
@@ -264,7 +265,9 @@ const StudentsFeeCollection = () => {
       console.log('First form submitted with data:', payload);
 
       // ✅ আপনার মূল logic এখানে লিখুন
+      reset();
       dispatch(setMonthFeeData(null));
+      dispatch(setStudentFeeData(null));
       dispatch(setFilteredSelectedPerStudentFee(null));
     } catch (error) {
       console.error('Submission error:', error);
@@ -274,20 +277,6 @@ const StudentsFeeCollection = () => {
         text: 'ডেটা সাবমিট করতে সমস্যা হয়েছে',
       });
     }
-  };
-
-  const handleReset = () => {
-    reset();
-    dispatch(setFilteredSelectedPerStudentFee(null));
-  };
-
-  useEffect(() => {
-    handleReset(); // page change হলে filterData reset করা
-  }, [location.pathname]);
-
-  // Reset Button
-  const handleResetButton = () => {
-    handleReset();
   };
 
   const feeStatus = [
