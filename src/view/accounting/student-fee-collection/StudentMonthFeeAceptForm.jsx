@@ -70,31 +70,6 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
   console.log(filteredSelectedPerStudentFee, 'filteredSelectedPerStudentFee');
 
   // Initialize default fees from API
-  // useEffect(() => {
-
-  // if (studentFeeAdmissionData && Array.isArray(studentFeeAdmissionData)) {
-  //   const fees = studentFeeAdmissionData.map((item) => ({
-  //     SSFID: item.SSFID,
-  //     SLID: item.SLID,
-  //     SlName: item.SlName,
-  //     sessionId: item.SessionID,
-  //     classId: item.ClassID,
-  //     amount: item.Amount,
-  //     deduction: item.Less || 0,
-  //     deposit: item.FainalAmount || 0,
-  //     preDeposit: 0,
-  //     due: item.Amount - (item.Less || 0) - (item.FainalAmount || 0),
-  //   }));
-
-  //   setDefaultFees(fees);
-  //   reset({ fees });
-  // }
-  //   setValue('studentCode', filteredSelectedPerStudentFee?.StudentCode);
-  //   if (monthFeeData) {
-  //     setValue('monthId', monthFeeData?.monthId);
-  //     setValue('monthName', monthFeeData?.monthName);
-  //   }
-  // }, [studentFeeAdmissionData, reset, setValue]);
   useEffect(() => {
     if (
       monthDuePerStudent?.data &&
@@ -421,10 +396,7 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                           registerKey={`fees.${globalIndex}.deduction`}
                           type="number"
                           defaultValue={item.deduction || 0}
-                          onKeyDown={(e) =>
-                            handleKeyDown(e, globalIndex, 'deduction')
-                          }
-                          onBlur={() => handleDeductionChange(globalIndex)}
+                          onChange={() => handleDeductionChange(globalIndex)}
                         />
                       </td>
                       <td className="text-center">
@@ -440,10 +412,7 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                           registerKey={`fees.${globalIndex}.deposit`}
                           type="number"
                           defaultValue={item.deposit}
-                          onKeyDown={(e) =>
-                            handleKeyDown(e, globalIndex, 'deposit')
-                          }
-                          onBlur={() => handleDepositChange(globalIndex)}
+                          onChange={() => handleDepositChange(globalIndex)}
                         />
                       </td>
                       <td className="text-center">

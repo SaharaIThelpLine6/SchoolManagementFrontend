@@ -223,14 +223,6 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
     hideModal();
   };
 
-  const handleKeyDown = (e, index, fieldType) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (fieldType === 'deduction') handleDeductionChange(index);
-      else if (fieldType === 'deposit') handleDepositChange(index);
-    }
-  };
-
   return (
     <div className="font-SolaimanLipi bg-white p-4 md:px-6 rounded-xl shadow-lg">
       <FormProvider {...methods}>
@@ -347,10 +339,7 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
                           registerKey={`fees.${globalIndex}.deduction`}
                           type="number"
                           defaultValue={item.deduction || 0}
-                          onKeyDown={(e) =>
-                            handleKeyDown(e, globalIndex, 'deduction')
-                          }
-                          onBlur={() => handleDeductionChange(globalIndex)}
+                          onChange={() => handleDeductionChange(globalIndex)}
                         />
                       </td>
                       <td className="text-center">
@@ -366,10 +355,7 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
                           registerKey={`fees.${globalIndex}.deposit`}
                           type="number"
                           defaultValue={item.deposit}
-                          onKeyDown={(e) =>
-                            handleKeyDown(e, globalIndex, 'deposit')
-                          }
-                          onBlur={() => handleDepositChange(globalIndex)}
+                          onChange={() => handleDepositChange(globalIndex)}
                         />
                       </td>
                       <td className="text-center">

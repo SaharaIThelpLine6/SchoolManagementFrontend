@@ -257,7 +257,7 @@ export const feeCollectionSlice = createApi({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["SelectedStudentPerFee"],
+      invalidatesTags: ["SelectedStudentPerFee", "FeeLand"],
     }),
     deleteSelectedPerStudentFee: builder.mutation({
       query: (body) => ({
