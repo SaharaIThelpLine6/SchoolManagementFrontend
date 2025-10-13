@@ -11,6 +11,7 @@ import TodaysBalance from '../view/accounting/TodaysBalance';
 import Statement from '../view/accounting/dues-list/Statement';
 import AccExamFeeCollector from '../view/accounting/student-exam-fee/AccExamFeeCollector';
 import MonthStudentFeeForm from '../view/accounting/student-fee-collection/MonthStudentFeeForm';
+import OthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/OthersStudentFeeAcceptForm';
 import StudentAdmissionFeeAcceptForm from '../view/accounting/student-fee-collection/StudentAdmissionFeeAcceptForm';
 import StudentMonthFeeAceptForm from '../view/accounting/student-fee-collection/StudentMonthFeeAceptForm';
 import ExamReportSetting from '../view/exam/ExamReportSetting';
@@ -153,6 +154,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'STUDENT_MONTH_FEE_ACCEPT' && (
                   <MonthStudentFeeForm />
+                )}
+                {modalType === 'OTHERS_STUDENT_FEE_ACCEPT' && (
+                  <OthersStudentFeeAcceptForm />
                 )}
                 {modalType === 'ACC_EXAM_FEE_COLLECTOR' && (
                   <AccExamFeeCollector />

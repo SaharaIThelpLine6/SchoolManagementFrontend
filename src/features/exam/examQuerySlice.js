@@ -1,97 +1,97 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
 export const examSlice = createApi({
-  reducerPath: "exam",
+  reducerPath: 'exam',
   baseQuery: fetchBaseQuery({
     baseUrl: `${API_URL}/api/exam`,
     prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set('Authorization', `Bearer ${token}`);
       }
       return headers;
     },
   }),
   tagTypes: [
-    "ExamNames",
-    "ExamFeeSettings",
-    "ExamCondition",
-    "AverageExamConditionAll",
-    "GetStudentList",
-    "StudentAdmitCard",
-    "ExamTalentCondition",
-    "ReportSettings",
+    'ExamNames',
+    'ExamFeeSettings',
+    'ExamCondition',
+    'AverageExamConditionAll',
+    'GetStudentList',
+    'StudentAdmitCard',
+    'ExamTalentCondition',
+    'ReportSettings',
   ],
   endpoints: (builder) => ({
     postNewExam: builder.mutation({
       query: (body) => ({
         url: `insert_exam`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["ExamNames"],
+      invalidatesTags: ['ExamNames'],
     }),
     updateExamname: builder.mutation({
       query: (body) => ({
         url: `edit_exam/${body.ID}`,
-        method: "PUT",
+        method: 'PUT',
         body,
       }),
-      invalidatesTags: ["ExamNames"],
+      invalidatesTags: ['ExamNames'],
     }),
     deleteExamName: builder.mutation({
       query: (body) => ({
         url: `delete_exam/${body.ID}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["ExamNames"],
+      invalidatesTags: ['ExamNames'],
     }),
     getExamNames: builder.query({
       query: () => `get_exam_names`,
-      providesTags: ["ExamNames"],
+      providesTags: ['ExamNames'],
     }),
     getExamFeeSetting: builder.query({
       query: () => `get_exam_fee_setting`,
-      providesTags: ["ExamFeeSettings"],
+      providesTags: ['ExamFeeSettings'],
     }),
 
     postExamFeeSetting: builder.mutation({
       query: (body) => ({
         url: `insert_exam_fee_setting`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["ExamFeeSettings"],
+      invalidatesTags: ['ExamFeeSettings'],
     }),
     postNewExamCondition: builder.mutation({
       query: (body) => ({
         url: `new_exam_condition`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["NewExamCondition"],
+      invalidatesTags: ['NewExamCondition'],
     }),
     updateExamFeeSetting: builder.mutation({
       query: ({ id, body }) => ({
         url: `update_exam_fee_setting/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body,
       }),
-      invalidatesTags: ["ExamFeeSettings"],
+      invalidatesTags: ['ExamFeeSettings'],
     }),
     deleteExamFeeSetting: builder.mutation({
       query: (id) => ({
         url: `delete_exam_fee_setting/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["ExamFeeSettings"],
+      invalidatesTags: ['ExamFeeSettings'],
     }),
     postExamPointCondition: builder.mutation({
       query: (body) => ({
         url: `pointwise_exam_condition_setting`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
       // invalidatesTags: ["ExamFeeSettings"],
@@ -99,11 +99,11 @@ export const examSlice = createApi({
     getAverageExamConditionAll: builder.query({
       query: ({ SessionID, ExamID, SubClassID }) => ({
         url: `average_exam_condition_all/${SessionID}/${ExamID}/${SubClassID}`,
-        method: "GET",
+        method: 'GET',
       }),
       providesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
         {
-          type: "AverageExamConditionAll",
+          type: 'AverageExamConditionAll',
           id: `${SessionID}-${ExamID}-${SubClassID}`,
         },
       ],
@@ -111,81 +111,81 @@ export const examSlice = createApi({
     postAverageExamConditionSetting: builder.mutation({
       query: (body) => ({
         url: `average_exam_condition_setting`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["AverageExamConditionAll"],
+      invalidatesTags: ['AverageExamConditionAll'],
     }),
 
     updateAverageExamConditionSetting: builder.mutation({
       query: (body) => ({
         url: `average_exam_condition_setting`,
-        method: "PUT",
+        method: 'PUT',
         body,
       }),
-      invalidatesTags: ["AverageExamConditionAll"],
+      invalidatesTags: ['AverageExamConditionAll'],
     }),
     getExamCondition: builder.query({
       query: ({ SessionID, ExamID, SubClassID }) => ({
         url: `exam_condition/${SessionID}/${ExamID}/${SubClassID}`,
-        method: "GET",
+        method: 'GET',
       }),
       providesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
-        { type: "ExamCondition", id: `${SessionID}-${ExamID}-${SubClassID}` },
+        { type: 'ExamCondition', id: `${SessionID}-${ExamID}-${SubClassID}` },
       ],
     }),
     postExamCondition: builder.mutation({
       query: (body) => ({
-        url: "new_exam_condition",
-        method: "POST",
+        url: 'new_exam_condition',
+        method: 'POST',
         body,
       }),
       invalidatesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
-        { type: "ExamCondition", id: `${SessionID}-${ExamID}-${SubClassID}` },
+        { type: 'ExamCondition', id: `${SessionID}-${ExamID}-${SubClassID}` },
       ],
     }),
     updatePointWiseExamCondition: builder.mutation({
       query: (body) => ({
         url: `pointwise_exam_condition_setting`,
-        method: "PUT",
+        method: 'PUT',
         body,
       }),
-      invalidatesTags: ["ExamCondition"],
+      invalidatesTags: ['ExamCondition'],
     }),
     getPointWiseExamCondition: builder.query({
       query: ({ SessionID, ExamID, SubClassID }) => ({
         url: `pointwise_exam_condition/${SessionID}/${ExamID}/${SubClassID}`,
-        method: "GET",
+        method: 'GET',
       }),
       providesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
-        { type: "ExamCondition", id: `${SessionID}-${ExamID}-${SubClassID}` },
+        { type: 'ExamCondition', id: `${SessionID}-${ExamID}-${SubClassID}` },
       ],
     }),
     postAverageSubjectPassNumber: builder.mutation({
       query: (body) => ({
         url: `average_subject_and_passnumber`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["AverageSubjectPassNumberAll"],
+      invalidatesTags: ['AverageSubjectPassNumberAll'],
     }),
 
     updateAverageSubjectPassNumber: builder.mutation({
       query: (body) => ({
         url: `average_subject_and_passnumber`,
-        method: "PUT",
+        method: 'PUT',
         body,
       }),
-      invalidatesTags: ["AverageSubjectPassNumberAll"],
+      invalidatesTags: ['AverageSubjectPassNumberAll'],
     }),
     getAverageSubjectPassNumber: builder.query({
       query: ({ SessionID, ExamID, SubClassID }) => ({
         url: `average_subject_and_passnumber/${SessionID}/${ExamID}/${SubClassID}`,
-        method: "GET",
+        method: 'GET',
       }),
       providesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
         {
-          type: "AverageSubjectPassNumberAll",
+          type: 'AverageSubjectPassNumberAll',
           id: `${SessionID}-${ExamID}-${SubClassID}`,
         },
       ],
@@ -193,11 +193,11 @@ export const examSlice = createApi({
     getGetStudentList: builder.query({
       query: ({ SessionID, ExamID, SubClassID }) => ({
         url: `get_student_list/${SessionID}/${ExamID}/${SubClassID}`,
-        method: "GET",
+        method: 'GET',
       }),
       providesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
         {
-          type: "GetStudentList",
+          type: 'GetStudentList',
           id: `${SessionID}-${ExamID}-${SubClassID}`,
         },
       ],
@@ -209,7 +209,7 @@ export const examSlice = createApi({
           : `student_admit_card/${SessionID}/${ExamID}/${SubClassID}/${RDID}`;
         return {
           url,
-          method: "GET",
+          method: 'GET',
         };
       },
       providesTags: (
@@ -218,9 +218,9 @@ export const examSlice = createApi({
         { SessionID, ExamID, SubClassID, RDID, UserCode }
       ) => [
         {
-          type: "StudentAdmitCard",
+          type: 'StudentAdmitCard',
           id: `${SessionID}-${ExamID}-${SubClassID}-${RDID}-${
-            UserCode || "all"
+            UserCode || 'all'
           }`,
         },
       ],
@@ -228,42 +228,56 @@ export const examSlice = createApi({
     postGetStudentList: builder.mutation({
       query: (body) => ({
         url: `addto_student_list`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["GetStudentList"],
+      invalidatesTags: ['GetStudentList'],
     }),
     postExamTalentCondition: builder.mutation({
       query: (body) => ({
         url: `exam_talent_condition`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["ExamTalentCondition"],
+      invalidatesTags: ['ExamTalentCondition'],
     }),
     getExamTalentCondition: builder.query({
       query: ({ SessionID, ExamID, SubClassID }) => ({
         url: `exam_talent_condition/${SessionID}/${ExamID}/${SubClassID}`,
-        method: "GET",
+        method: 'GET',
       }),
       providesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
         {
-          type: "ExamTalentCondition",
+          type: 'ExamTalentCondition',
           id: `${SessionID}-${ExamID}-${SubClassID}`,
         },
       ],
     }),
     getReportSetting: builder.query({
       query: () => `report_settings`,
-      providesTags: ["ReportSettings"],
+      providesTags: ['ReportSettings'],
     }),
     postReportSetting: builder.mutation({
       query: (body) => ({
         url: `report_settings`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["ReportSettings"],
+      invalidatesTags: ['ReportSettings'],
+    }),
+    getExamFeeSettingByExamID: builder.query({
+      query: ({ examId, userCode, sessionId }) => {
+        let url = `exam_fee_setting_by_examId/${examId}`;
+        const params = new URLSearchParams();
+
+        if (userCode) params.append('userCode', userCode);
+        if (sessionId) params.append('sessionId', sessionId);
+
+        if (params.toString()) url += `?${params.toString()}`;
+
+        return url;
+      },
+      providesTags: ['StudentFee', 'SelectedStudentPerFee'],
     }),
   }),
 });
@@ -295,5 +309,6 @@ export const {
   useGetExamTalentConditionQuery,
   usePostExamTalentConditionMutation,
   useGetReportSettingQuery,
-  usePostReportSettingMutation
+  usePostReportSettingMutation,
+  useGetExamFeeSettingByExamIDQuery,
 } = examSlice;

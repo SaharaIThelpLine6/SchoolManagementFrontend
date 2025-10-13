@@ -6,8 +6,12 @@ import Button from '../../../components/Button/Button';
 import DeleteButton from '../../../components/Button/DeleteButton';
 import DefaultInput from '../../../components/Forms/DefaultInput';
 import { setPageName } from '../../../features/auth/authSlice';
-import { useGetStudentFeeAdmissionsQuery } from '../../../features/feeCollection/feeCollectionSlice';
+import {
+  useGetDueFeeQuery,
+  useGetStudentFeeAdmissionsQuery,
+} from '../../../features/feeCollection/feeCollectionSlice';
 import { setStudentFeeData } from '../../../features/settings/settingsSlice';
+import { setMonthFeeData } from '../../../features/student/studentSlice';
 import bnBijoy2Unicode from '../../../utils/conveter';
 import { hideModal } from '../../../utils/ModalControlar';
 import useTranslate from '../../../utils/Translate';
@@ -15,7 +19,7 @@ import DefaultKeyDownInput from './DefaultKeyDownInput';
 
 const PAGE_SIZE = 10;
 
-const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
+const OthersStudentFeeAcceptForm = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
@@ -39,10 +43,13 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
   const { filteredSelectedPerStudentFee } = useSelector(
     (state) => state.student
   );
+  const sfgnid = 3;
 
-  // Fetch student fee admissions data
-  const sfgnid = 1;
-  const { data: studentFeeAdmissionData } = useGetStudentFeeAdmissionsQuery(
+  const {
+    data: studentFeeAdmissionData,
+    error: admissionError,
+    isError: admissionisError,
+  } = useGetStudentFeeAdmissionsQuery(
     { admissionId: filteredSelectedPerStudentFee?.AdmissionID, sfgnid },
     {
       skip: !filteredSelectedPerStudentFee?.AdmissionID || !sfgnid,
@@ -50,6 +57,26 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
   );
 
   console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
+  const SFGNID = 3;
+  const MonthId = 21;
+  const { data: feeDueData, error: feedueError } = useGetDueFeeQuery(
+    {
+      sessionID: filteredSelectedPerStudentFee?.SessionID,
+      classID: filteredSelectedPerStudentFee?.ClassID,
+      SFGNID,
+      AdmissionID: filteredSelectedPerStudentFee?.AdmissionID,
+      MonthId,
+    },
+    {
+      skip:
+        !filteredSelectedPerStudentFee?.SessionID ||
+        !filteredSelectedPerStudentFee?.ClassID ||
+        !SFGNID ||
+        !filteredSelectedPerStudentFee?.AdmissionID ||
+        !MonthId,
+    }
+  );
+  console.log(feeDueData, 'feeDueData');
 
   // Initialize default fees from API
   useEffect(() => {
@@ -221,6 +248,8 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
       admissionId: studentFeeAdmissionData.admissionId,
     };
     dispatch(setStudentFeeData(payload));
+    dispatch(setMonthFeeData({ monthId: 21 }));
+
     hideModal();
   };
 
@@ -409,4 +438,4 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
   );
 };
 
-export default StudentAdmissionFeeAcceptForm;
+export default OthersStudentFeeAcceptForm;

@@ -1,42 +1,42 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
 export const feeCollectionSlice = createApi({
-  reducerPath: "feeCollection",
+  reducerPath: 'feeCollection',
   baseQuery: fetchBaseQuery({
     baseUrl: `${API_URL}/api/accounts`,
     prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set('Authorization', `Bearer ${token}`);
       }
       return headers;
     },
   }),
   tagTypes: [
-    "ExamNames",
-    "FundNames",
-    "GeneralLedgers",
-    "StudentFeeGroups",
-    "ResceiptNumber",
-    "StudentFeeSettings",
-    "SelectedStudentPerFee",
-    "GeneralLedgersByFundAndCaids",
-    "FeeLand",
-    "SubGeneralLedger",
-    "StudentFee",
+    'ExamNames',
+    'FundNames',
+    'GeneralLedgers',
+    'StudentFeeGroups',
+    'ResceiptNumber',
+    'StudentFeeSettings',
+    'SelectedStudentPerFee',
+    'GeneralLedgersByFundAndCaids',
+    'FeeLand',
+    'SubGeneralLedger',
+    'StudentFee',
   ],
   endpoints: (builder) => ({
     getFees: builder.query({
-      query: () => "view_userfee",
+      query: () => 'view_userfee',
     }),
     getPaymentType: builder.query({
-      query: () => "view_payment_type",
+      query: () => 'view_payment_type',
     }),
     getSubLedger: builder.query({
       query: (id) => `view_subledger/${id}`,
-      providesTags: ["GetSubLedgers"],
+      providesTags: ['GetSubLedgers'],
     }),
     getAllSubLedger: builder.query({
       query: () => `view_subledger`,
@@ -47,7 +47,8 @@ export const feeCollectionSlice = createApi({
     }),
     getDueFee: builder.query({
       query: ({ sessionID, classID, SFGNID, AdmissionID, monthID }) =>
-        `view_student_due_fee/${sessionID}/${classID}/${SFGNID}/${AdmissionID}/${monthID ? monthID : 0
+        `view_student_due_fee/${sessionID}/${classID}/${SFGNID}/${AdmissionID}/${
+          monthID ? monthID : 0
         }`,
     }),
     getFeeById: builder.query({
@@ -56,79 +57,79 @@ export const feeCollectionSlice = createApi({
     }),
     addFee: builder.mutation({
       query: (newFee) => ({
-        url: "fee_insert",
-        method: "POST",
+        url: 'fee_insert',
+        method: 'POST',
         body: newFee,
       }),
     }),
     updateFee: builder.mutation({
       query: ({ id, ...updatedFee }) => ({
         url: `fees/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: updatedFee,
       }),
     }),
     deleteFee: builder.mutation({
       query: (id) => ({
         url: `fees/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
     }),
     getNameOFExamFee: builder.query({
       query: () => `name_of_exam_fee`,
-      providesTags: ["NameOfExamFee"],
+      providesTags: ['NameOfExamFee'],
     }),
     getFundNames: builder.query({
       query: () => `fund_names`,
-      providesTags: ["FundNames"],
+      providesTags: ['FundNames'],
     }),
     postFund: builder.mutation({
       query: (data) => ({
-        url: "insert_fund",
-        method: "POST",
+        url: 'insert_fund',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["FundNames"],
+      invalidatesTags: ['FundNames'],
     }),
     deleteFund: builder.mutation({
       query: (id) => ({
         url: `delete_fund/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["FundNames"],
+      invalidatesTags: ['FundNames'],
     }),
     updateFund: builder.mutation({
       query: ({ id, data }) => ({
         url: `insert_fund/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
       }),
-      invalidatesTags: ["FundNames"],
+      invalidatesTags: ['FundNames'],
     }),
     updateFundStatus: builder.mutation({
       query: ({ id, Action }) => ({
         url: `/update_fund_status/${id}`,
-        method: "PATCH",
+        method: 'PATCH',
         body: { Action },
       }),
-      invalidatesTags: ["FundNames"],
+      invalidatesTags: ['FundNames'],
     }),
     getGeneralLedgers: builder.query({
       query: (id) => `general_ledger/${id}`,
-      providesTags: ["GeneralLedgers"],
+      providesTags: ['GeneralLedgers'],
     }),
     getGeneralLedgersByFundAndCaids: builder.query({
       query: ({ fundId, caId }) => `general_ledger_by_caid/${fundId}/${caId}`,
-      providesTags: ["GeneralLedgersByFundAndCaids"],
+      providesTags: ['GeneralLedgersByFundAndCaids'],
     }),
 
     getGLedgers: builder.query({
       query: () => `general_ledger/`,
-      providesTags: ["GeneralLedgers"],
+      providesTags: ['GeneralLedgers'],
     }),
     getFeeGroupNames: builder.query({
       query: () => `fee_group_name`,
-      providesTags: ["FeeGroupNames"],
+      providesTags: ['FeeGroupNames'],
     }),
     getStudentFeeSettings: builder.query({
       query: ({ sessionId, classId } = {}) => {
@@ -137,232 +138,232 @@ export const feeCollectionSlice = createApi({
         } else if (!sessionId && !classId) {
           return `view_student_fee_settings`;
         }
-        return { url: "", skip: true };
+        return { url: '', skip: true };
       },
-      providesTags: ["StudentFeeSettings"],
+      providesTags: ['StudentFeeSettings'],
     }),
 
     postStudentFeeSettings: builder.mutation({
       query: (data) => ({
-        url: "insert_student_fee_settings",
-        method: "POST",
+        url: 'insert_student_fee_settings',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["StudentFeeSettings"],
+      invalidatesTags: ['StudentFeeSettings'],
     }),
     postFeeLand: builder.mutation({
       query: (data) => ({
-        url: "insert_fee_land",
-        method: "POST",
+        url: 'insert_fee_land',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["FeeLand"],
+      invalidatesTags: ['FeeLand'],
     }),
     postGeneralLedgersByFundAndCaids: builder.mutation({
       query: (data) => ({
-        url: "insert_general_ledger",
-        method: "POST",
+        url: 'insert_general_ledger',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["GeneralLedgersByFundAndCaids"],
+      invalidatesTags: ['GeneralLedgersByFundAndCaids'],
     }),
     updateGeneralLedgersByFundAndCaids: builder.mutation({
       query: ({ FundID, CAID, GLID, data }) => ({
         url: `/update_general_ledger/${FundID}/${CAID}/${GLID}`,
-        method: "PUT",
+        method: 'PUT',
         body: data, // body সরাসরি পাঠানো, { data } না
       }),
-      invalidatesTags: ["GeneralLedgersByFundAndCaids"],
+      invalidatesTags: ['GeneralLedgersByFundAndCaids'],
     }),
 
     deleteGeneralLedgersByFundAndCaids: builder.mutation({
       query: ({ FundID, CAID, GLID }) => ({
         url: `/delete_general_ledger/${FundID}/${CAID}/${GLID}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["GeneralLedgersByFundAndCaids"],
+      invalidatesTags: ['GeneralLedgersByFundAndCaids'],
     }),
 
     getStudentFeeGroups: builder.query({
       query: () => `student_fee_groups`,
-      providesTags: ["StudentFeeGroups"],
+      providesTags: ['StudentFeeGroups'],
     }),
     getChartOFAccount: builder.query({
       query: () => `chart_of_account`,
-      providesTags: ["ChartOFAccount"],
+      providesTags: ['ChartOFAccount'],
     }),
     getTransactionDetails: builder.query({
       query: () => `transaction_details`,
-      providesTags: ["TransactionDetails"],
+      providesTags: ['TransactionDetails'],
     }),
     getTransactionOrders: builder.query({
       query: ({ id }) => `transaction_orders/${id}`,
-      providesTags: ["TransactionOrders"],
+      providesTags: ['TransactionOrders'],
     }),
     getFeeLandByAdmission: builder.query({
       query: ({ id }) => `fee_land_by_admission_id/${id}`,
-      providesTags: ["FeeLand"],
+      providesTags: ['FeeLand'],
     }),
     getReceiptNumber: builder.query({
       query: ({ fundid, caid }) => `receipt_number/${fundid}/${caid}`,
-      providesTags: ["ReceiptNumber"],
+      providesTags: ['ReceiptNumber'],
     }),
 
     postInComeExpense: builder.mutation({
       query: (data) => ({
-        url: "income_expense",
-        method: "POST",
+        url: 'income_expense',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["TransactionOrders"],
+      invalidatesTags: ['TransactionOrders'],
     }),
     updateInComeExpense: builder.mutation({
       query: ({ id, data }) => ({
         url: `income_expense/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
       }),
-      invalidatesTags: ["TransactionOrders"],
+      invalidatesTags: ['TransactionOrders'],
     }),
     deleteInComeExpense: builder.mutation({
       query: (id) => ({
         url: `income_expense/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["TransactionOrders"],
+      invalidatesTags: ['TransactionOrders'],
     }),
     deleteStudentFeeSettings: builder.mutation({
       query: (SFSID) => ({
         url: `delete_student_fee_settings`,
-        method: "DELETE",
+        method: 'DELETE',
         body: { SFSID },
       }),
-      invalidatesTags: ["StudentFeeSettings"],
+      invalidatesTags: ['StudentFeeSettings'],
     }),
     getSearchStudents: builder.query({
       query: ({ search, ClassID, SessionID }) => {
         const params = new URLSearchParams();
         if (search) {
-          params.append("search", search);
+          params.append('search', search);
         }
-        if (ClassID) params.append("ClassID", ClassID);
-        if (SessionID) params.append("SessionID", SessionID);
+        if (ClassID) params.append('ClassID', ClassID);
+        if (SessionID) params.append('SessionID', SessionID);
         return `/search__students?${params.toString()}`;
       },
-      providesTags: ["SelectedStudentPerFee", "FeeLand"],
+      providesTags: ['SelectedStudentPerFee', 'FeeLand'],
     }),
     postSelectedPerStudentFee: builder.mutation({
       query: (data) => ({
-        url: "selected_per_student_fee",
-        method: "POST",
+        url: 'selected_per_student_fee',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["SelectedStudentPerFee", "FeeLand"],
+      invalidatesTags: ['SelectedStudentPerFee', 'FeeLand'],
     }),
     deleteSelectedPerStudentFee: builder.mutation({
       query: (body) => ({
-        url: "/selected_per_student_fee",
-        method: "DELETE",
+        url: '/selected_per_student_fee',
+        method: 'DELETE',
         body, // backend expects JSON body
       }),
-      invalidatesTags: ["SelectedStudentPerFee"],
+      invalidatesTags: ['SelectedStudentPerFee'],
     }),
 
     // Sub General Ledger
     getSubGeneralLedgers: builder.query({
       query: ({ fundId, caId, glid }) =>
         `subledger_by_glid/${fundId}/${caId}/${glid}`,
-      providesTags: ["SubGeneralLedger"],
+      providesTags: ['SubGeneralLedger'],
     }),
     postSubGeneralLedger: builder.mutation({
       query: (data) => ({
-        url: "insert_subsidiary_ledger",
-        method: "POST",
+        url: 'insert_subsidiary_ledger',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["SubGeneralLedger"],
+      invalidatesTags: ['SubGeneralLedger'],
     }),
     updateSubGeneralLedger: builder.mutation({
       query: ({ SlName, slId }) => ({
         url: `update_subsidiary_ledger/${slId}`,
-        method: "PUT",
+        method: 'PUT',
         body: { SlName },
       }),
-      invalidatesTags: ["SubGeneralLedger"],
+      invalidatesTags: ['SubGeneralLedger'],
     }),
     deleteSubGeneralLedger: builder.mutation({
       query: (slId) => ({
         url: `/delete_subsidiary_ledger/${slId}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["SubGeneralLedger"],
+      invalidatesTags: ['SubGeneralLedger'],
     }),
 
     // Get Sub General by FundId and GLID
     getSubGeneralLedgersByFundIdAndGlId: builder.query({
       query: ({ fundId, caId, glid }) => `subledger_by_glid/${fundId}/${glid}`,
-      providesTags: ["SubGeneralLedger"],
+      providesTags: ['SubGeneralLedger'],
     }),
 
     // Student Fee Group
     getStudentFeeGroups: builder.query({
       query: () => `student_fee_groups`,
-      providesTags: ["StudentFeeGroups"],
+      providesTags: ['StudentFeeGroups'],
     }),
     postStudentFeeGroup: builder.mutation({
       query: (data) => ({
-        url: "create_student_fee_group",
-        method: "POST",
+        url: 'create_student_fee_group',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["StudentFeeGroups"],
+      invalidatesTags: ['StudentFeeGroups'],
     }),
 
     updateStudentFeeGroup: builder.mutation({
       query: (data) => ({
         url: `update_student_fee_group/${data.ID}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
       }),
-      invalidatesTags: ["StudentFeeGroups"],
+      invalidatesTags: ['StudentFeeGroups'],
     }),
     deleteStudentFeeGroup: builder.mutation({
       query: (id) => ({
         url: `delete_student_fee_group/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["StudentFeeGroups"],
+      invalidatesTags: ['StudentFeeGroups'],
     }),
     getStudentFeeAdmissions: builder.query({
-      query: (admissionId) => `view_student_fee/${admissionId}`,
-      providesTags: ["StudentFeeAdmissions", "StudentFeeSettings"],
+      query: ({ admissionId, sfgnid }) =>
+        `view_student_fees_by_admissionId_and_sfgnid/${admissionId}/${sfgnid}`,
+      providesTags: ['StudentFeeAdmissions', 'StudentFeeSettings'],
     }),
     getMonthDuePerStudentFee: builder.query({
       query: ({ admissionId, monthId }) =>
         `month_due_per_student_fee/${admissionId}/${monthId}`,
-      providesTags: ["StudentFeeAdmissions", "StudentFeeSettings"],
+      providesTags: ['StudentFeeAdmissions', 'StudentFeeSettings'],
     }),
-
 
     getGeneralLedgersByCAID: builder.query({
       query: (id) => `general_ledgers_by_caid`,
-      providesTags: ["GeneralLedgers"],
+      providesTags: ['GeneralLedgers'],
     }),
     getSubLedgersByGLID: builder.query({
       query: (id) => `subledgers_by_glid/${id}`,
-      providesTags: ["SubGeneralLedger"],
+      providesTags: ['SubGeneralLedger'],
     }),
     postStudentFeeCollection: builder.mutation({
       query: (data) => ({
-        url: "create_student_fee",
-        method: "POST",
+        url: 'create_student_fee',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["StudentFeeCollection"],
+      invalidatesTags: ['StudentFeeCollection', 'StudentFeeAdmissions'],
     }),
     getMonthlyFeeAccept: builder.query({
       query: (id) => `monthly_fee_accept`,
-      providesTags: ["StudentFeeGroups"],
+      providesTags: ['StudentFeeGroups'],
     }),
     getStudentFeeIncreaseDecrease: builder.query({
       query: ({ AdmissionID, UserID, search, ClassID, SessionID }) => ({
@@ -372,58 +373,58 @@ export const feeCollectionSlice = createApi({
           UserID,
           search,
           ClassID,
-          SessionID
-        }
+          SessionID,
+        },
       }),
-      providesTags: ["StudentFee", "SelectedStudentPerFee", "StudentFeeSettings"],
+      providesTags: [
+        'StudentFee',
+        'SelectedStudentPerFee',
+        'StudentFeeSettings',
+      ],
     }),
 
     getMonthPerStudentsFee: builder.query({
       query: (admissionId) => `month_per_student_fee/${admissionId}`,
-      providesTags: ["StudentFee", "SelectedStudentPerFee"],
+      providesTags: ['StudentFee', 'SelectedStudentPerFee'],
     }),
-
 
     postBankInfoLedger: builder.mutation({
       query: (data) => ({
-        url: "insert_subledger",
-        method: "POST",
+        url: 'insert_subledger',
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["GetSubLedgers"],
+      invalidatesTags: ['GetSubLedgers'],
     }),
     putBankInfoLedger: builder.mutation({
       query: (data) => ({
         url: `edit_subledger/${data.GLID}/${data.SLID}`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
       }),
-      invalidatesTags: ["GetSubLedgers"],
+      invalidatesTags: ['GetSubLedgers'],
     }),
 
     deleteBankInfoLedger: builder.mutation({
       query: (id) => ({
         url: `/delete_subledger/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["GetSubLedgers"],
+      invalidatesTags: ['GetSubLedgers'],
     }),
 
     getIncomeExpenseReportByOrderId: builder.query({
-      query: ({ orderid }) =>
-        `income_expense_by_orderid/${orderid}`,
+      query: ({ orderid }) => `income_expense_by_orderid/${orderid}`,
     }),
 
     getIncomeExpenseTodaysBalance: builder.query({
       query: () => `get_todays_balance_of_caid`,
-      providesTags: ["IncomeExpenseTodaysBalance"],
+      providesTags: ['IncomeExpenseTodaysBalance'],
     }),
     getIncomeExpenseTodaysBalanceByCaid: builder.query({
-      query: ({ caid }) =>
-        `get_todays_balance/${caid}`,
-      providesTags: ["IncomeExpenseTodaysBalanceByCaid"],
+      query: ({ caid }) => `get_todays_balance/${caid}`,
+      providesTags: ['IncomeExpenseTodaysBalanceByCaid'],
     }),
-
   }),
 });
 
@@ -493,5 +494,5 @@ export const {
   useDeleteBankInfoLedgerMutation,
   useGetIncomeExpenseReportByOrderIdQuery,
   useGetIncomeExpenseTodaysBalanceQuery,
-  useGetIncomeExpenseTodaysBalanceByCaidQuery
+  useGetIncomeExpenseTodaysBalanceByCaidQuery,
 } = feeCollectionSlice;

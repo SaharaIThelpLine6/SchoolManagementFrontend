@@ -1,27 +1,25 @@
 import { Buffer } from 'buffer';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import Swal from 'sweetalert2';
+import { toast } from 'react-toastify';
 import Button from '../../../components/Button/Button';
 import DefaultSelect from '../../../components/Forms/DefaultSelect';
 import {
-  useGetGeneralLedgersByCAIDQuery,
+  useGetExamFeeSettingByExamIDQuery,
+  useGetExamNamesQuery,
+} from '../../../features/exam/examQuerySlice';
+import {
   useGetSearchStudentsQuery,
-  useGetStudentFeeAdmissionsQuery,
-  useGetStudentFeeIncreaseDecreaseQuery,
-  useGetSubLedgersByGLIDQuery,
   usePostStudentFeeCollectionMutation,
 } from '../../../features/feeCollection/feeCollectionSlice';
-import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
 import {
   setFilteredSelectedPerStudentFee,
   setMonthFeeData,
 } from '../../../features/student/studentSlice';
 import { useDefaultSession } from '../../../hooks/useDefaultSession';
 import bnBijoy2Unicode from '../../../utils/conveter';
-import { showModal } from '../../../utils/ModalControlar';
 import useTranslate from '../../../utils/Translate';
 
 const AccExamFeeCollector = () => {
@@ -35,9 +33,11 @@ const AccExamFeeCollector = () => {
       IsActive: 1,
       EntryDate: new Date(),
     },
-    shouldFocusError: false, //
+    shouldFocusError: false,
   });
-  const { handleSubmit, reset, watch, setValue, control } = methods;
+  const { handleSubmit, reset, watch, setValue } = methods;
+  const [SessionID, ExamID] = watch(['SessionID', 'ExamID']);
+
   const translate = useTranslate();
   const { filteredSelectedPerStudentFee, monthFeeData } = useSelector(
     (state) => state.student
@@ -45,56 +45,36 @@ const AccExamFeeCollector = () => {
 
   const { studentFeeData = [] } = useSelector((state) => state.settings);
 
-  console.log(filteredSelectedPerStudentFee, 'filteredSelectedPerStudentFee');
   const [studentFeeDataAll, setstudentFeeDataAll] = useState(null);
   const [totalDue, setTotalDue] = useState(null);
   const [logo, setLogo] = useState(null);
   const [filterData, setFilterData] = useState(null);
 
-  const shouldSkip =
-    !filteredSelectedPerStudentFee?.AdmissionID ||
-    !filteredSelectedPerStudentFee?.StudentCode;
+  const userCode = filteredSelectedPerStudentFee?.StudentCode;
+  const sessionId = filteredSelectedPerStudentFee?.SessionID;
+  const examId = ExamID;
 
+  // 🧾 Exam Fee Query
   const {
-    data: studentMonthFeeData,
-    isLoading: isLoadingMfd,
-    error: errorMfd,
-    isError: isErrorMfd,
-  } = useGetStudentFeeIncreaseDecreaseQuery(
-    {
-      AdmissionID: filteredSelectedPerStudentFee?.AdmissionID,
-      UserID: filteredSelectedPerStudentFee?.UserID,
-      search: filteredSelectedPerStudentFee?.StudentCode,
-      ClassID: filteredSelectedPerStudentFee?.ClassID,
-      SessionID: filteredSelectedPerStudentFee?.SessionID,
-    },
-    {
-      skip: shouldSkip,
-    }
+    data: examFeeData = [],
+    isLoading: isExamFeeLoading,
+    error: examFeeError,
+  } = useGetExamFeeSettingByExamIDQuery(
+    { examId, userCode, sessionId },
+    { skip: !examId || !userCode || !sessionId }
   );
 
-  console.log(studentMonthFeeData, 'studentMonthFeeData');
+  useEffect(() => {
+    if (examFeeError) toast.error('Exam fee data load failed!');
+  }, [examFeeError]);
 
-  // Fetch student fee admissions data
-  const {
-    data: studentFeeAdmissionData,
-    error: admissionError,
-    isError: admissionisError,
-  } = useGetStudentFeeAdmissionsQuery(
-    filteredSelectedPerStudentFee?.AdmissionID,
-    {
-      skip: !filteredSelectedPerStudentFee?.AdmissionID,
-    }
-  );
-
-  console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
-
-  // Session function
-  const { data: sessionData, isLoading, isFetching } = useGetSessionsQuery();
+  // 🧾 Exam Name List
+  const { data: examNames = [], isLoading: examIsLoading } =
+    useGetExamNamesQuery();
 
   const [postStudentFee] = usePostStudentFeeCollectionMutation();
 
-  // default session set
+  // 🧠 Default session set
   useEffect(() => {
     if (defaultSessionId) {
       setValue('SessionID', defaultSessionId, {
@@ -104,45 +84,28 @@ const AccExamFeeCollector = () => {
     }
   }, [defaultSessionId, setValue]);
 
-  const [GLID, SessionID] = watch(['GLID', 'SessionID']);
+  // 🧍‍♂️ Search Students Query
+  const { data: searchUserInfo = { data: [] }, isLoading: userInfoLoading } =
+    useGetSearchStudentsQuery(filterData, {
+      skip: !filterData,
+      refetchOnFocus: false,
+    });
 
-  // const GLID = 3
-  const { data: glbc = [] } = useGetGeneralLedgersByCAIDQuery();
-  const { data: sglbc = [] } = useGetSubLedgersByGLIDQuery(GLID, {
-    skip: !GLID,
-  });
-  // Call search query
-  const {
-    data: searchUserInfo = { data: [] }, // ✅ ডিফল্ট হিসেবে object এবং data: [] দিন
-    error,
-    isLoading: userInfoLoading,
-    isError,
-  } = useGetSearchStudentsQuery(filterData, {
-    skip: !filterData,
-    refetchOnFocus: false,
-  });
-
-  // 👉 useEffect দিয়ে dispatch, প্রথম এলিমেন্ট থাকলে
+  // 👉 Search result handling
   useEffect(() => {
     if (searchUserInfo) {
       if (
         Array.isArray(searchUserInfo.data) &&
         searchUserInfo.data.length > 0
       ) {
-        // ✅ প্রথম স্টুডেন্ট থাকলে dispatch
         dispatch(setFilteredSelectedPerStudentFee(searchUserInfo.data[0]));
       } else if (searchUserInfo.message) {
-        // ✅ data খালি হলে sweetalert2 দেখাবে
-        Swal.fire({
-          icon: 'info',
-          title: 'দুঃখিত!',
-          text: searchUserInfo.message,
-          confirmButtonText: 'ঠিক আছে',
-        });
+        toast.info(searchUserInfo.message);
       }
     }
   }, [searchUserInfo, dispatch]);
 
+  // 🖼️ Student Image Convert
   useEffect(() => {
     if (filteredSelectedPerStudentFee?.Image?.data) {
       const buffer = Buffer.from(filteredSelectedPerStudentFee.Image.data);
@@ -152,19 +115,22 @@ const AccExamFeeCollector = () => {
     }
   }, [filteredSelectedPerStudentFee]);
 
+  // 💰 Calculate Total Due
   useEffect(() => {
     if (studentFeeData?.fees) {
       const feesDue = studentFeeData.fees.reduce(
         (sum, fee) => sum + (fee.due || 0),
         0
       );
-      setTotalDue(feesDue); // 👉 fees এর যোগফল
+      setTotalDue(feesDue);
     }
   }, [studentFeeData]);
+
   useEffect(() => {
     setstudentFeeDataAll(studentFeeData);
   }, [studentFeeData]);
 
+  // 🔁 Reset form when student changes
   useEffect(() => {
     if (filteredSelectedPerStudentFee) {
       const defaultValues = {
@@ -181,58 +147,11 @@ const AccExamFeeCollector = () => {
     }
   }, [filteredSelectedPerStudentFee, reset]);
 
-  const handleOpenModal = useCallback(() => {
-    showModal('Selected Per Student Fee', 'SELECTED_PERSTUDENT_FEE_FILTER');
-  }, []);
-
-  const handleStudentFeeOpenModal = useCallback(() => {
-    if (studentMonthFeeData) {
-      console.log(admissionError, 'admissionError');
-      Swal.fire({
-        icon: 'error',
-        title: 'ত্রুটি',
-        text: admissionError?.data?.error || 'কিছু একটা ভুল হয়েছে',
-      });
-      return; // error থাকলে modal আর খুলবে না
-    }
-
-    showModal('Student Admission Fee Accept', 'STUDENT_ADMISSION_FEE_ACCEPT');
-  }, [admissionisError, admissionError, showModal]);
-
-  const handleStudentMonthFeeOpenModal = useCallback(() => {
-    if (studentMonthFeeData?.data?.length > 0) {
-      const student = studentMonthFeeData.data[0];
-
-      // feeSettingsAvailable চেক করা হচ্ছে
-      if (!student.feeSettingsAvailable) {
-        Swal.fire({
-          icon: 'error',
-          title: 'ত্রুটি',
-          text:
-            student.feeSettingsError ||
-            'এই শিক্ষার্থীর ক্লাসে এখনও কোনো ফি সেটিং যোগ করা হয়নি। অনুগ্রহ করে আগে ফি সেটিং যোগ করুন।',
-        });
-        return; // Modal আর খুলবে না
-      }
-
-      // যদি সব ঠিক থাকে → modal open হবে
-      showModal('Student Month Fee Accept', 'STUDENT_MONTH_FEE_ACCEPT');
-    }
-  }, [studentMonthFeeData, showModal]);
-
-  const handleStudentExamFeeOpenModal = useCallback(() => {
-    showModal('Student Month Fee Accept', 'STUDENT_MONTH_FEE_ACCEPT');
-  }, [studentMonthFeeData, showModal]);
-
+  // 📨 Submit
   const onSubmit = async (data) => {
     try {
-      // ✅ Check if fees array exists and has items
       if (!studentFeeData?.fees || studentFeeData.fees.length === 0) {
-        Swal.fire({
-          icon: 'error',
-          title: 'ত্রুটি',
-          text: 'ফি এর খাত নির্বাচন করুন।',
-        });
+        toast.warning('ফি এর খাত নির্বাচন করুন।');
         return;
       }
 
@@ -250,51 +169,34 @@ const AccExamFeeCollector = () => {
         Account: data.SLID,
         fees: studentFeeData.fees,
         MonthId: monthFeeData?.monthId || '',
-        //  PreviousDue: "",
       };
 
       await postStudentFee(payload).unwrap();
-      console.log('First form submitted with data:', payload);
+      toast.success('ডেটা সফলভাবে সাবমিট হয়েছে ✅');
 
-      // ✅ আপনার মূল logic এখানে লিখুন
       dispatch(setMonthFeeData(null));
       dispatch(setFilteredSelectedPerStudentFee(null));
     } catch (error) {
       console.error('Submission error:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'ত্রুটি',
-        text: 'ডেটা সাবমিট করতে সমস্যা হয়েছে',
-      });
+      toast.error('ডেটা সাবমিট করতে সমস্যা হয়েছে ❌');
     }
   };
 
-  const handleReset = () => {
-    reset();
-    dispatch(setFilteredSelectedPerStudentFee(null));
-  };
-
-  useEffect(() => {
-    handleReset(); // page change হলে filterData reset করা
-  }, [location.pathname]);
-
-  // Reset Button
-  const handleResetButton = () => {
-    handleReset();
-  };
-
-  const feeStatus = [
-    { id: 1, name: 'ID' },
-    { id: 2, name: 'Card' },
-  ];
-  // 👉 handle function
   const handleEnter = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       const studentCode = methods.getValues('StudentCode');
-      setFilterData({ search: studentCode, SessionID }); // 👉 query param আকারে পাঠাবো
+      setFilterData({ search: studentCode, SessionID });
     }
   };
+
+  // Safe data access with defaults
+  const examFee = examFeeData[0]?.Fee || 0;
+  const deduction = studentFeeDataAll?.deduction || 0;
+  const grandTotal = examFee;
+  const preDeposit = totalDue || 0;
+  const allPaid = totalDue || 0;
+  const currentDeposit = totalDue || 0;
 
   return (
     <div className="font-SolaimanLipi">
@@ -309,7 +211,7 @@ const AccExamFeeCollector = () => {
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-              {/* Photo and Student Code Section */}
+              {/* Photo and Student Code */}
               <div className="flex flex-col items-center gap-4">
                 <div className="w-28 h-28 md:w-40 md:h-36 border-2 border-dashed border-gray-400 flex items-center justify-center rounded-lg overflow-hidden">
                   {logo ? (
@@ -337,18 +239,17 @@ const AccExamFeeCollector = () => {
                 </div>
               </div>
 
-              {/* Student Information Section */}
+              {/* Student Info */}
               <div className="space-y-4">
-                <div>
-                  <DefaultSelect
-                    label="Exam Name"
-                    options={sessionData ?? []}
-                    valueField="SessionID"
-                    nameField="SessionName"
-                    registerKey="SessionID"
-                    labelPosition="left"
-                  />
-                </div>
+                <DefaultSelect
+                  label="Exam Name"
+                  options={examNames}
+                  valueField="ExamID"
+                  nameField="ExamName"
+                  registerKey="ExamID"
+                  labelPosition="left"
+                  unicode
+                />
 
                 <div className="bg-white space-y-3">
                   <InfoRow
@@ -370,41 +271,42 @@ const AccExamFeeCollector = () => {
                   />
                   <InfoRow
                     label={translate('শ্রেণি/জামাত')}
-                    value={filteredSelectedPerStudentFee?.ClassName}
+                    value={bnBijoy2Unicode(
+                      filteredSelectedPerStudentFee?.ClassName
+                    )}
                   />
                   <InfoRow
                     label={translate('Session')}
-                    value={filteredSelectedPerStudentFee?.ClassName}
+                    value={bnBijoy2Unicode(
+                      filteredSelectedPerStudentFee?.SessionName
+                    )}
                   />
                 </div>
               </div>
 
-              {/* Fee Information Section */}
+              {/* Fee Info */}
               <div className="bg-white">
                 <div className="grid grid-cols-2 gap-3">
                   <FeeInfoItem
                     label={translate('Prescribed Fee')}
-                    value={studentFeeDataAll?.prescribedFee ?? '0'}
+                    value={examFee}
                   />
                   <FeeInfoItem
                     label={translate('Deduction')}
-                    value={studentFeeDataAll?.deduction ?? '0'}
+                    value={deduction}
                   />
                   <FeeInfoItem
                     label={translate('Grand Total')}
-                    value={studentFeeDataAll?.currentDeposit ?? '0'}
+                    value={grandTotal}
                   />
                   <FeeInfoItem
                     label={translate('Pre-deposit')}
-                    value={totalDue ?? '0'}
+                    value={preDeposit}
                   />
-                  <FeeInfoItem
-                    label={translate('All paid')}
-                    value={totalDue ?? '0'}
-                  />
+                  <FeeInfoItem label={translate('All paid')} value={allPaid} />
                   <FeeInfoItem
                     label={translate('Current deposit')}
-                    value={totalDue ?? '0'}
+                    value={currentDeposit}
                   />
                   <div className="col-span-2">
                     <FeeInputItem label={translate('Due')} />
@@ -413,9 +315,10 @@ const AccExamFeeCollector = () => {
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 mt-6 md:mt-8">
               <Button
+                disabled
                 type="submit"
                 className="px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg 
                      hover:bg-green-700 transition flex-1 sm:flex-none"
@@ -424,6 +327,7 @@ const AccExamFeeCollector = () => {
               </Button>
 
               <Button
+                disabled
                 type="button"
                 className="px-6 py-3 bg-red-500 text-white text-base font-semibold rounded-lg 
                      hover:bg-red-600 transition flex-1 sm:flex-none"
@@ -438,7 +342,7 @@ const AccExamFeeCollector = () => {
   );
 };
 
-// Reusable Info Row Component
+// 🔹 Reusable Info Row
 const InfoRow = ({ label, value, valueClassName = '' }) => (
   <div className="flex items-center text-sm">
     <span className="font-semibold text-gray-700 min-w-20 max-w-36 pr-2 flex-shrink-0">
@@ -451,7 +355,7 @@ const InfoRow = ({ label, value, valueClassName = '' }) => (
   </div>
 );
 
-// Reusable Fee Info Item Component
+// 🔹 Fee Info Item
 const FeeInfoItem = ({ label, value }) => (
   <div className="flex items-center text-sm">
     <span className="font-semibold text-gray-700 min-w-20 pr-2 flex-shrink-0">
@@ -464,7 +368,7 @@ const FeeInfoItem = ({ label, value }) => (
   </div>
 );
 
-// Reusable Fee Input Item Component
+// 🔹 Fee Input Item
 const FeeInputItem = ({ label }) => (
   <div className="flex items-center text-sm">
     <span className="font-semibold text-gray-700 min-w-20 pr-2 flex-shrink-0">
@@ -479,4 +383,5 @@ const FeeInputItem = ({ label }) => (
     />
   </div>
 );
+
 export default AccExamFeeCollector;
