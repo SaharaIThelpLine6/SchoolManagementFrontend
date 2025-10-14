@@ -82,6 +82,22 @@ export const fetchClassResult = createAsyncThunk("studentResultPublicView/fetchC
 
 })
 
+export const fetchMaritResult = createAsyncThunk(
+  "studentMaritListView/fetchMaritResult",
+  async ({ schoolId, resultUrl }) => {
+    const [maritListResponse, schoolDataResponse] = await Promise.all([
+      getPublicData(`/api/public/result/${schoolId}/marit_list/${resultUrl}`),
+      getPublicData(`/api/public/result/${schoolId}`),
+    ]);
+
+    return {
+      maritList: maritListResponse,
+      schoolData: schoolDataResponse
+    };
+  }
+);
+
+
 const initialState = {
     defaultFormValue: null,
     editMode: 0,
@@ -98,6 +114,7 @@ const initialState = {
     studentRelation: [],
     gender:[],
     divition: [],
+    maritList: [],
     resultStatus: 'idle',
     resultError: null,
     status: 'idle',
@@ -200,6 +217,18 @@ const studentResultPublicViewSlice = createSlice({
                 state.studentRelation = action.payload.studentRelation;
             })
             .addCase(fetchSettingsFieldData.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.error.message;
+            })
+            .addCase(fetchMaritResult.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchMaritResult.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.maritList = action.payload.maritList;
+                state.schoolData = action.payload.schoolData;
+            })
+            .addCase(fetchMaritResult.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.error.message;
             });

@@ -64,7 +64,36 @@ export const userReportsSlice = createApi({
         return `student_report?${params.toString()}`;
       },
     }),
+
+    getDepositCostReport: builder.query({
+      query: ({
+        report_id,
+        FundID,
+        StartDate,
+        EndDate,
+        CAID,
+        start_vouture,
+        end_vouture,
+        report_base
+      }) => {
+        const params = new URLSearchParams({ report_id });
+        if (FundID !== undefined) params.append("FundID", FundID);
+        if (StartDate !== undefined) params.append("StartDate", StartDate);
+        if (EndDate !== undefined) params.append("EndDate", EndDate);
+        // if (ResidentialStatusId !== undefined)
+        //   params.append("ResidentialStatusId", ResidentialStatusId);
+        // if (NewOldId !== undefined) params.append("NewOldId", NewOldId);
+
+        if (CAID !== undefined) params.append("accCaid", CAID);
+        if (start_vouture !== undefined) params.append("startVoucherNumber", start_vouture);
+        if (end_vouture !== undefined) params.append("endVoucherNumber", end_vouture);
+        if (report_base !== undefined) params.append("report_base", report_base);
+
+        console.log(params);
+        return `depositcost_report?${params.toString()}`;
+      },
+    }),
   }),
 });
 
-export const { useGetUserReportQuery, useGetStudentReportQuery } = userReportsSlice;
+export const { useGetUserReportQuery, useGetStudentReportQuery, useGetDepositCostReportQuery } = userReportsSlice;
