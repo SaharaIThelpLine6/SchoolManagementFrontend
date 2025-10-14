@@ -18,7 +18,7 @@ const MonthDetermineFeeTable = () => {
   const { filteredSelectedPerStudentFee } = useSelector(
     (state) => state.student
   );
-  console.log('filteredSelectedPerStudentFee:', filteredSelectedPerStudentFee);
+  // console.log('filteredSelectedPerStudentFee:', filteredSelectedPerStudentFee);
   const admissionId = filteredSelectedPerStudentFee?.AdmissionID;
 
   const shouldSkip =
@@ -46,16 +46,16 @@ const MonthDetermineFeeTable = () => {
   const landFeeWithMonths = studentMonthFeeData?.data[0]?.landFeeWithMonths;
   const subledgerData = studentMonthFeeData?.data[0]?.subLedgerFee[0];
 
-  console.log(landFeeWithMonths, 'landFeeWithMonths');
+  // console.log(landFeeWithMonths, 'landFeeWithMonths');
 
   // Log API response for debugging
-  useEffect(() => {
-    console.log('useGetStudentFeeIncreaseDecreaseQuery response:', {
-      data: studentMonthFeeData,
-      error: errorMfd,
-      isLoading: isLoadingMfd,
-    });
-  }, [studentMonthFeeData, errorMfd, isLoadingMfd]);
+  // useEffect(() => {
+  //   console.log('useGetStudentFeeIncreaseDecreaseQuery response:', {
+  //     data: studentMonthFeeData,
+  //     error: errorMfd,
+  //     isLoading: isLoadingMfd,
+  //   });
+  // }, [studentMonthFeeData, errorMfd, isLoadingMfd]);
 
   // Compute monthFeeList
   const monthFeeList = useMemo(() => {
@@ -103,10 +103,10 @@ const MonthDetermineFeeTable = () => {
         })),
       };
       methods.reset(defaultValues, { keepDirty: false, keepTouched: false });
-      console.log(
-        'Form state initialized with monthFeeList:',
-        methods.getValues()
-      );
+      // console.log(
+      //   'Form state initialized with monthFeeList:',
+      //   methods.getValues()
+      // );
     }
   }, [monthFeeList, methods]);
 
@@ -127,7 +127,7 @@ const MonthDetermineFeeTable = () => {
   }
 
   if (errorMfd) {
-    console.error('API error:', errorMfd);
+    // console.error('API error:', errorMfd);
     return (
       <p>
         {translate('Error loading data:')} {errorMfd.message || 'Unknown error'}
@@ -136,7 +136,7 @@ const MonthDetermineFeeTable = () => {
   }
 
   if (!landFeeWithMonths || !landFeeWithMonths.months > 0) {
-    console.log('Incomplete data:', landFeeWithMonths);
+    // console.log('Incomplete data:', landFeeWithMonths);
     return <p>{translate('No valid fee data found for this student.')}</p>;
   }
 

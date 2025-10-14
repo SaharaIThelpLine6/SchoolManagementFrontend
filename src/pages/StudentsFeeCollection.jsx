@@ -10,12 +10,15 @@ import DefaultInput from '../components/Forms/DefaultInput';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import Textarea from '../components/Forms/Textarea';
 import SvgIcon from '../components/icons/SvgIcon';
+import Loading from '../components/Loading/Loading';
 import DefaultRadio from '../components/Radio/DefaultRadio';
 import {
   useGetGeneralLedgersByCAIDQuery,
+  useGetOthersDueStudentFeeQuery,
   useGetSearchStudentsQuery,
   useGetStudentFeeAdmissionsQuery,
   useGetStudentFeeIncreaseDecreaseQuery,
+  useGetStudentOthersMonthFeesQuery,
   useGetSubLedgersByGLIDQuery,
   usePostStudentFeeCollectionMutation,
 } from '../features/feeCollection/feeCollectionSlice';
@@ -98,6 +101,35 @@ const StudentsFeeCollection = () => {
     {
       skip: !filteredSelectedPerStudentFee?.AdmissionID || !sfgnid,
     }
+  );
+
+  const {
+    data: studentOtherData,
+    error: othersError,
+    isError: otherError,
+  } = useGetStudentOthersMonthFeesQuery(
+    filteredSelectedPerStudentFee?.AdmissionID,
+    {
+      skip: !filteredSelectedPerStudentFee?.AdmissionID,
+    }
+  );
+
+  const {
+    data: studentOtherDueData,
+    error: studentOtherDuesError,
+    isError: studentOtherDueError,
+  } = useGetOthersDueStudentFeeQuery(
+    filteredSelectedPerStudentFee?.AdmissionID,
+    {
+      skip: !filteredSelectedPerStudentFee?.AdmissionID,
+    }
+  );
+
+  console.log(studentFeeAdmissionData, 'studentFeeAdmissionsData');
+  console.log(
+    studentOtherDuesError,
+    studentOtherDueError,
+    'studentOtherDueError'
   );
 
   // default session set
@@ -216,7 +248,7 @@ const StudentsFeeCollection = () => {
   }, []);
 
   const handleOthersFeeOpenModal = useCallback(() => {
-    if (admissionisError || admissionError) {
+    if (otherError || othersError) {
       Swal.fire({
         icon: 'error',
         title: 'ত্রুটি!',
@@ -230,6 +262,23 @@ const StudentsFeeCollection = () => {
     }
 
     showModal('Others student fee accept', 'OTHERS_STUDENT_FEE_ACCEPT');
+  }, [otherError, othersError]);
+
+  const handleDueOthersFeeOpenModal = useCallback(() => {
+    // if (studentOtherDuesError || studentOtherDueError) {
+    //   Swal.fire({
+    //     icon: 'error',
+    //     title: 'ত্রুটি!',
+    //     text:
+    //       admissionError?.data?.error ||
+    //       'Student Fee Admission data লোড করতে সমস্যা হয়েছে।',
+    //     confirmButtonText: 'ঠিক আছে',
+    //     confirmButtonColor: '#3085d6',
+    //   });
+    //   return;
+    // }
+
+    showModal('Due Others student fee accept', 'DUE_OTHERS_STUDENT_FEE_ACCEPT');
   }, [admissionisError, admissionError]);
 
   const handleStudentFeeOpenModal = useCallback(() => {
@@ -437,6 +486,10 @@ const StudentsFeeCollection = () => {
     handleSearch();
   };
 
+  {
+    userInfoLoading && <Loading />;
+  }
+
   return (
     <div className="">
       <FormProvider {...methods}>
@@ -505,9 +558,6 @@ const StudentsFeeCollection = () => {
                       )}
                     </button> */}
                   </div>
-                  {userInfoLoading && (
-                    <div className="text-blue-600 text-xs mt-1">Loading...</div>
-                  )}
                 </div>
                 {/* Radio */}
                 <div className="flex justify-center items-center md:col-span-1">
@@ -792,8 +842,14 @@ const StudentsFeeCollection = () => {
                     </Button>
                     <input
                       type="text"
+                      disabled={
+                        !filteredSelectedPerStudentFee?.UserID ||
+                        studentOtherDuesError
+                      }
+                      onClick={handleDueOthersFeeOpenModal}
                       className="w-full max-w-xs rounded border border-gray-300 px-2 py-1 text-sm outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500"
                       placeholder="0"
+                      value={studentOtherDueData?.totalDue ?? 0}
                     />
                   </div>
                 </div>

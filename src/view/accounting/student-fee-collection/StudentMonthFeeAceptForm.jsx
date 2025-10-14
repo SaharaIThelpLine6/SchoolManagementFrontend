@@ -53,6 +53,7 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       skip: !filteredSelectedPerStudentFee?.AdmissionID,
     }
   );
+
   // Fetch student due month fee  data
   const { data: monthDuePerStudent } = useGetMonthDuePerStudentFeeQuery(
     {

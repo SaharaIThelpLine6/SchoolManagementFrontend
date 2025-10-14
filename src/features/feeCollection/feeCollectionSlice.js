@@ -339,9 +339,17 @@ export const feeCollectionSlice = createApi({
         `view_student_fees_by_admissionId_and_sfgnid/${admissionId}/${sfgnid}`,
       providesTags: ['StudentFeeAdmissions', 'StudentFeeSettings'],
     }),
+    getStudentOthersMonthFees: builder.query({
+      query: (admissionId) => `others_month_fees/${admissionId}`,
+      providesTags: ['StudentFeeAdmissions', 'StudentFeeSettings'],
+    }),
     getMonthDuePerStudentFee: builder.query({
       query: ({ admissionId, monthId }) =>
         `month_due_per_student_fee/${admissionId}/${monthId}`,
+      providesTags: ['StudentFeeAdmissions', 'StudentFeeSettings'],
+    }),
+    getOthersDueStudentFee: builder.query({
+      query: (admissionId) => `others_due_student_fee/${admissionId}`,
       providesTags: ['StudentFeeAdmissions', 'StudentFeeSettings'],
     }),
 
@@ -359,7 +367,11 @@ export const feeCollectionSlice = createApi({
         method: 'POST',
         body: data,
       }),
-      invalidatesTags: ['StudentFeeCollection', 'StudentFeeAdmissions'],
+      invalidatesTags: [
+        'StudentFeeCollection',
+        'StudentFeeAdmissions',
+        'StudentFee',
+      ],
     }),
     getMonthlyFeeAccept: builder.query({
       query: (id) => `monthly_fee_accept`,
@@ -488,6 +500,8 @@ export const {
   useGetStudentFeeIncreaseDecreaseQuery,
   useGetMonthPerStudentsFeeQuery,
   useGetMonthDuePerStudentFeeQuery,
+  useGetStudentOthersMonthFeesQuery,
+  useGetOthersDueStudentFeeQuery,
 
   usePostBankInfoLedgerMutation,
   usePutBankInfoLedgerMutation,

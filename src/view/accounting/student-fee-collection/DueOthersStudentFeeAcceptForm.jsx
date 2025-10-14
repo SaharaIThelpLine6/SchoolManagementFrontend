@@ -6,7 +6,7 @@ import Button from '../../../components/Button/Button';
 import DeleteButton from '../../../components/Button/DeleteButton';
 import DefaultInput from '../../../components/Forms/DefaultInput';
 import { setPageName } from '../../../features/auth/authSlice';
-import { useGetStudentOthersMonthFeesQuery } from '../../../features/feeCollection/feeCollectionSlice';
+import { useGetOthersDueStudentFeeQuery } from '../../../features/feeCollection/feeCollectionSlice';
 import { setStudentFeeData } from '../../../features/settings/settingsSlice';
 import { setMonthFeeData } from '../../../features/student/studentSlice';
 import bnBijoy2Unicode from '../../../utils/conveter';
@@ -16,7 +16,7 @@ import DefaultKeyDownInput from './DefaultKeyDownInput';
 
 const PAGE_SIZE = 10;
 
-const OthersStudentFeeAcceptForm = ({ pageTitle }) => {
+const DueOthersStudentFeeAcceptForm = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
@@ -41,33 +41,32 @@ const OthersStudentFeeAcceptForm = ({ pageTitle }) => {
     (state) => state.student
   );
 
-  const {
-    data: studentOtherData,
-    error: othersError,
-    isError: otherError,
-  } = useGetStudentOthersMonthFeesQuery(
+  const { data: studentFeeAdmissionData } = useGetOthersDueStudentFeeQuery(
     filteredSelectedPerStudentFee?.AdmissionID,
     {
       skip: !filteredSelectedPerStudentFee?.AdmissionID,
     }
   );
 
+  console.log(studentFeeAdmissionData, 'studentFeeAdmissionsData');
+
   // Initialize default fees from API
   useEffect(() => {
-    if (studentOtherData?.fees) {
-      const fees = studentOtherData.fees.map((item) => ({
+    if (studentFeeAdmissionData?.fees) {
+      const fees = studentFeeAdmissionData.fees.map((item) => ({
         SFSID: item.SFSID,
         SLID: item.SLID,
         SlName: item.SlName,
-        sessionName: studentOtherData?.sessionName,
+        sessionName: studentFeeAdmissionData?.sessionName,
         amount: item.Fee ? item.Fee : item.amount,
         deduction: item.BlankField ? item.BlankField : 0,
         preDeposit: item.PreviousDeposite
           ? item.PreviousDeposite
           : item.preDeposit || 0,
-        deposit: item.PreviousDeposite
+        deposit: item.PreviousDeposite ? item.Fee - item.PreviousDeposite : 0,
+        depositFee: item.PreviousDeposite
           ? item.Fee - item.PreviousDeposite
-          : item.amount,
+          : 0,
         due: item.BlankField ? item.BlankField : 0,
       }));
 
@@ -92,7 +91,7 @@ const OthersStudentFeeAcceptForm = ({ pageTitle }) => {
       setDefaultFees(fees);
       reset({ fees });
     }
-  }, [studentOtherData, reset]);
+  }, [studentFeeAdmissionData, reset]);
 
   const fees = watch('fees');
 
@@ -119,42 +118,47 @@ const OthersStudentFeeAcceptForm = ({ pageTitle }) => {
   }, [fees, setValue]);
 
   // Handle Deduction change
+  // Handle Deduction change
   const handleDeductionChange = useCallback(
     (index) => {
       const currentFees = getValues('fees');
       const fee = currentFees[index];
       if (!fee) return;
 
-      const prescribedFee = Number(fee.amount) || 0;
+      const depositFee = Number(fee.depositFee) || 0;
       const deduction = Number(fee.deduction) || 0;
-      const newDeposit = prescribedFee - deduction; // Deposit updates
-      // Remove due update
-      // const newDue = prescribedFee - (fee.preDeposit || 0) - newDeposit;
+      const currentDeposit = Number(fee.deposit) || 0;
+
+      // 👉 নতুন deposit হবে totalFee - deduction (কিন্তু manual deposit থাকলে তা preserve করতে হবে)
+      const newDeposit = Math.min(currentDeposit, depositFee - deduction);
+
+      // 👉 due = depositFee - deduction - newDeposit
+      const newDue = depositFee - deduction - newDeposit;
 
       setValue(`fees.${index}.deposit`, newDeposit);
-      // setValue(`fees.${index}.due`, newDue); // REMOVE THIS
+      setValue(`fees.${index}.due`, newDue);
 
       setDefaultFees((prev) =>
         prev.map((f, i) =>
           i === index
-            ? { ...f, deduction, deposit: newDeposit } // only update deposit
+            ? { ...f, deduction, deposit: newDeposit, due: newDue }
             : f
         )
       );
 
-      // Update totals
+      // ✅ মোট হিসাব আপডেট
       const updatedFees = getValues('fees');
-      const updatedDeduction = updatedFees.reduce(
+      const totalDeduction = updatedFees.reduce(
         (acc, f) => acc + Number(f.deduction || 0),
         0
       );
-      const updatedDeposit = updatedFees.reduce(
+      const totalDeposit = updatedFees.reduce(
         (acc, f) => acc + Number(f.deposit || 0),
         0
       );
 
-      setValue('deduction', updatedDeduction);
-      setValue('currentDeposit', updatedDeposit);
+      setValue('deduction', totalDeduction);
+      setValue('currentDeposit', totalDeposit);
     },
     [getValues, setValue]
   );
@@ -166,24 +170,44 @@ const OthersStudentFeeAcceptForm = ({ pageTitle }) => {
       const fee = currentFees[index];
       if (!fee) return;
 
-      const deposit = Number(fee.deposit) || 0;
+      const depositFee = Number(fee.depositFee) || 0;
       const deduction = Number(fee.deduction) || 0;
-      const prescribedFee = Number(fee.amount) || 0;
-      const newDue = prescribedFee - deduction - deposit;
+      const deposit = Number(fee.deposit) || 0;
+
+      // 👉 depositFee - deduction থেকে বেশি deposit দেওয়া যাবে না
+      const maxAllowedDeposit = depositFee - deduction;
+      const actualDeposit = Math.min(deposit, maxAllowedDeposit);
+
+      // 👉 due = (depositFee - deduction) - actualDeposit
+      const newDue = maxAllowedDeposit - actualDeposit;
+
+      // যদি বেশি deposit দেওয়া হয়, তাহলে actualDeposit set করুন
+      if (deposit !== actualDeposit) {
+        setValue(`fees.${index}.deposit`, actualDeposit);
+      }
 
       setValue(`fees.${index}.due`, newDue);
 
       setDefaultFees((prev) =>
-        prev.map((f, i) => (i === index ? { ...f, deposit, due: newDue } : f))
+        prev.map((f, i) =>
+          i === index
+            ? {
+                ...f,
+                deposit: actualDeposit,
+                due: newDue,
+              }
+            : f
+        )
       );
 
-      // Update totals after deposit change
+      // ✅ মোট deposit আপডেট
       const updatedFees = getValues('fees');
-      const updatedDeposit = updatedFees.reduce(
+      const totalDeposit = updatedFees.reduce(
         (acc, f) => acc + Number(f.deposit || 0),
         0
       );
-      setValue('currentDeposit', updatedDeposit);
+
+      setValue('currentDeposit', totalDeposit);
     },
     [getValues, setValue]
   );
@@ -218,8 +242,8 @@ const OthersStudentFeeAcceptForm = ({ pageTitle }) => {
   const onSubmit = (data) => {
     const payload = {
       ...data,
-      userId: studentOtherData.userId,
-      admissionId: studentOtherData.admissionId,
+      userId: studentFeeAdmissionData.userId,
+      admissionId: studentFeeAdmissionData.admissionId,
     };
     dispatch(setStudentFeeData(payload));
     dispatch(setMonthFeeData({ monthId: 21 }));
@@ -412,4 +436,4 @@ const OthersStudentFeeAcceptForm = ({ pageTitle }) => {
   );
 };
 
-export default OthersStudentFeeAcceptForm;
+export default DueOthersStudentFeeAcceptForm;

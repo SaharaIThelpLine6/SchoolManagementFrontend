@@ -40,6 +40,7 @@ import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
 import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
+import DueOthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/DueOthersStudentFeeAcceptForm';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -157,6 +158,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'OTHERS_STUDENT_FEE_ACCEPT' && (
                   <OthersStudentFeeAcceptForm />
+                )}
+                {modalType === 'DUE_OTHERS_STUDENT_FEE_ACCEPT' && (
+                  <DueOthersStudentFeeAcceptForm />
                 )}
                 {modalType === 'ACC_EXAM_FEE_COLLECTOR' && (
                   <AccExamFeeCollector />
