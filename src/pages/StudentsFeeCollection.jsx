@@ -34,6 +34,7 @@ import bnBijoy2Unicode from '../utils/conveter';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
 import MonthlyFeeCollectionTable from '../view/accounting/student-fee-collection/MonthlyFeeCollectionTable';
+import TodayFeeCollection from '../view/accounting/student-fee-collection/TodayFeeCollection';
 
 const StudentsFeeCollection = () => {
   const defaultSessionId = useDefaultSession();
@@ -118,10 +119,13 @@ const StudentsFeeCollection = () => {
     data: studentOtherDueData,
     error: studentOtherDuesError,
     isError: studentOtherDueError,
+    refetch: studentOthersDueRefetch,
   } = useGetOthersDueStudentFeeQuery(
     filteredSelectedPerStudentFee?.AdmissionID,
     {
       skip: !filteredSelectedPerStudentFee?.AdmissionID,
+      refetchOnFocus: true,
+      refetchOnMountOrArgChange: true,
     }
   );
 
@@ -342,9 +346,14 @@ const StudentsFeeCollection = () => {
         Account: data.SLID,
         fees: studentFeeData.fees,
         MonthId: monthFeeData?.monthId || '',
+        StudentDueFee: monthFeeData?.studentDueFeeData || '',
       };
 
       await postStudentFee(payload).unwrap();
+      // ✅ শুধুমাত্র যখন AdmissionID থাকে তখনই refetch করবে
+      if (filteredSelectedPerStudentFee?.AdmissionID) {
+        studentOthersDueRefetch();
+      }
       console.log('First form submitted with data:', payload);
 
       // ✅ Success message
@@ -849,7 +858,12 @@ const StudentsFeeCollection = () => {
                       onClick={handleDueOthersFeeOpenModal}
                       className="w-full max-w-xs rounded border border-gray-300 px-2 py-1 text-sm outline-none focus:border-yellow-500 focus:ring-1 focus:ring-yellow-500"
                       placeholder="0"
-                      value={studentOtherDueData?.totalDue ?? 0}
+                      value={
+                        studentOtherDuesError ||
+                        !filteredSelectedPerStudentFee?.UserID
+                          ? 0
+                          : studentOtherDueData?.totalDue ?? 0
+                      }
                     />
                   </div>
                 </div>
@@ -997,6 +1011,7 @@ const StudentsFeeCollection = () => {
               </div>
             </div>
           </form>
+          <TodayFeeCollection />
         </div>
       </FormProvider>
     </div>

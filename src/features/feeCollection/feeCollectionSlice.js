@@ -350,7 +350,12 @@ export const feeCollectionSlice = createApi({
     }),
     getOthersDueStudentFee: builder.query({
       query: (admissionId) => `others_due_student_fee/${admissionId}`,
-      providesTags: ['StudentFeeAdmissions', 'StudentFeeSettings'],
+      providesTags: [
+        'StudentFeeAdmissions',
+        'StudentFeeSettings',
+        'StudentFeeCollection',
+        'StudentFee',
+      ],
     }),
 
     getGeneralLedgersByCAID: builder.query({
@@ -368,9 +373,9 @@ export const feeCollectionSlice = createApi({
         body: data,
       }),
       invalidatesTags: [
+        'StudentFee',
         'StudentFeeCollection',
         'StudentFeeAdmissions',
-        'StudentFee',
       ],
     }),
     getMonthlyFeeAccept: builder.query({

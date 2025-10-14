@@ -68,6 +68,7 @@ const DueOthersStudentFeeAcceptForm = ({ pageTitle }) => {
           ? item.Fee - item.PreviousDeposite
           : 0,
         due: item.BlankField ? item.BlankField : 0,
+        GPID: item.GPID,
       }));
 
       // Calculate totals after mapping
@@ -246,7 +247,7 @@ const DueOthersStudentFeeAcceptForm = ({ pageTitle }) => {
       admissionId: studentFeeAdmissionData.admissionId,
     };
     dispatch(setStudentFeeData(payload));
-    dispatch(setMonthFeeData({ monthId: 21 }));
+    dispatch(setMonthFeeData({ monthId: 21, studentDueFeeData: true }));
 
     hideModal();
   };
