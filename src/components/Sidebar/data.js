@@ -316,6 +316,11 @@ export const menuData = [
         route: "/accounting",
       },
       {
+        id: "11",
+        name: "Deposit Costs Report",
+        route: "/accounting/income-expense-report",
+      },
+      {
         id: "2",
         name: "Fee Setting",
         route: "/accounting/fee-setting",

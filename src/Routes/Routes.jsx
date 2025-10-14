@@ -86,6 +86,11 @@ import BoardExamName from "../pages/BoardExamName";
 import BoardNames from "../pages/BoardNames";
 import BoardCenterName from "../pages/BoardCenterName";
 import StudentsFeeCollection from "../pages/StudentsFeeCollection";
+import DepositCostsReport from "../pages/DepositCostsReport";
+import MaritListForm from "../pages/public/MaritListForm";
+import MaritListResult from "../pages/public/MaritListResult";
+import ClassResultForm from "../pages/public/ClassResultForm";
+import ClassResult from "../pages/public/ClassResult";
 
 const router = createBrowserRouter([
   {
@@ -616,6 +621,16 @@ const router = createBrowserRouter([
                 ),
               },
               {
+                path: "income-expense-report",
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.fee_setting}
+                  // >
+                  <DepositCostsReport pageTitle="Deposit Costs Report" />
+                  // </RequirePermission>
+                ),
+              },
+              {
                 path: "fee-setting",
                 element: (
                   <RequirePermission
@@ -789,6 +804,22 @@ const router = createBrowserRouter([
       {
         path: "online_admission/:usercode",
         element: <StudentAdmissionForm />,
+      },
+      {
+        path: "maritlist_request",
+        element: <MaritListForm />,
+      },
+      {
+        path: "maritlist/:seassonid/:examid",
+        element: <MaritListResult />,
+      },
+      {
+        path: "classes",
+        element: <ClassResultForm />,
+      },
+      {
+        path: "classes/:seassonid/:examid/:classid",
+        element: <ClassResult />,
       },
     ],
   },

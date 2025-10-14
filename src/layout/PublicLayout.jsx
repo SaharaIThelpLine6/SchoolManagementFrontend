@@ -83,9 +83,8 @@ const PublicLayout = () => {
         {/* For mobile display end */}
 
         <header
-          className={`lg:flex h-screen overflow-hidden lg:min-w-[410px] w-[410px] max-w-[85%] font-SolaimanLipi hidden_in_print ${
-            isOpen ? "flex fixed z-50" : "hidden"
-          }`}
+          className={`lg:flex h-screen overflow-hidden lg:min-w-[410px] w-[410px] max-w-[85%] font-SolaimanLipi hidden_in_print ${isOpen ? "flex fixed z-50" : "hidden"
+            }`}
         >
           <nav className="w-full">
             <div className="relative shadow-[0_2px_10px_rgba(0,0,0,.3)] text-center pt-[38px] pb-[32px] px-16 bg-theme-color">
@@ -126,12 +125,39 @@ const PublicLayout = () => {
                   ব্যক্তিগত ফলাফল
                 </a>
               </li>
-              {/* <li>
-                <a href={`/${schoolid}/classes`} className='py-3 pl-6 cursor-pointer hover:bg-theme-secondary border border-slate-200 border-y-0 border-r-0 flex items-center gap-[4px]'>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
-                  ক্লাশ/মারহালা ভিত্তিক ফলাফল
+              {
+                schoolData?.isClassResultShowable && schoolData?.isClassResultShowable.Action != 0 ? (
+                  <li>
+                    <a href={`/${schoolid}/classes`} className='py-3 pl-6 cursor-pointer hover:bg-theme-secondary border border-slate-200 border-y-0 border-r-0 flex items-center gap-[4px]'>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 28 28" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 6l6 6l-6 6" /></svg>
+                      ক্লাশ/মারহালা ভিত্তিক ফলাফল
+                    </a>
+                  </li>
+                ) : null
+              }
+
+              <li>
+                <a href={`/${schoolid}/maritlist_request`}
+                  className="py-3 pl-6 cursor-pointer hover:bg-theme-secondary border border-slate-200 border-r-0 flex items-center gap-[4px]"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 28 28"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-right"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M9 6l6 6l-6 6" />
+                  </svg>
+                  মেধা তালিকা
                 </a>
-              </li> */}
+              </li>
               <li>
                 <a
                   href={`/${schoolid}/online_admission`}
@@ -207,6 +233,7 @@ const PublicLayout = () => {
                   আল-হাইআ ফলাফল
                 </a>
               </li>
+
             </ul>
           </nav>
         </header>

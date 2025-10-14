@@ -17,11 +17,17 @@ const ClassResult = () => {
     useEffect(() => {
         dispatch(fetchClassResult({ schoolId: schoolid, resultUrl: `${seassonid}/${examid}/${classid}` }))
     }, [dispatch])
+    useEffect(()=>{
+        if(schoolData && schoolData?.isClassResultShowable?.Action != 1){
+            navigate(`/${schoolid}`)
+        }
+    }, [schoolData])
+
     if (resultStatus === 'failed') {
         navigate(`/${schoolid}/classes`);
     }
 
-    
+
     const bufferConveter = (bufferData) => {
         const buffer = Buffer.from(bufferData);
         const base64String = buffer.toString('base64');
