@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Button from '../../../components/Button/Button';
 import DefaultSelect from '../../../components/Forms/DefaultSelect';
@@ -20,7 +20,9 @@ import {
 } from '../../../features/student/studentSlice';
 import { useDefaultSession } from '../../../hooks/useDefaultSession';
 import bnBijoy2Unicode from '../../../utils/conveter';
+import { hideModal } from '../../../utils/ModalControlar';
 import useTranslate from '../../../utils/Translate';
+import AccExamFeeCollectorTable from '../student-fee-collection/AccExamFeeCollectorTable';
 
 const AccExamFeeCollector = () => {
   const defaultSessionId = useDefaultSession();
@@ -316,28 +318,51 @@ const AccExamFeeCollector = () => {
             </div>
 
             {/* Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 mt-6 md:mt-8">
-              <Button
-                disabled
-                type="submit"
-                className="px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg 
-                     hover:bg-green-700 transition flex-1 sm:flex-none"
-              >
-                Save
-              </Button>
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mt-6 md:mt-8">
+              {/* ✅ Left Side Buttons */}
+              <div className="flex flex-row gap-3">
+                {/* Save Button */}
+                <Button
+                  disabled
+                  type="submit"
+                  className="px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg 
+                 shadow-md hover:bg-green-700 hover:shadow-lg transition-all duration-200"
+                >
+                  💾 Save
+                </Button>
 
-              <Button
-                disabled
-                type="button"
-                className="px-6 py-3 bg-red-500 text-white text-base font-semibold rounded-lg 
-                     hover:bg-red-600 transition flex-1 sm:flex-none"
+                {/* Reset Button */}
+                <Button
+                  disabled
+                  type="button"
+                  className="px-6 py-3 bg-red-500 text-white text-base font-semibold rounded-lg 
+                 shadow-md hover:bg-red-600 hover:shadow-lg transition-all duration-200"
+                >
+                  🔁 Reset
+                </Button>
+              </div>
+
+              {/* 📘 Right Side NavLink */}
+              <NavLink
+                to="/exam/fee-determine"
+                onClick={() => hideModal()}
+                className={({ isActive }) =>
+                  `px-6 py-3 rounded-lg text-base font-semibold transition-all duration-200 
+       flex items-center justify-center gap-2 shadow-md
+       ${
+         isActive
+           ? 'bg-blue-600 text-white shadow-lg scale-105'
+           : 'bg-blue-100 text-blue-700 hover:bg-blue-200 hover:scale-[1.03]'
+       }`
+                }
               >
-                Reset
-              </Button>
+                📘 পরীক্ষার ফি নির্ধারণ
+              </NavLink>
             </div>
           </form>
         </div>
       </FormProvider>
+      <AccExamFeeCollectorTable />
     </div>
   );
 };

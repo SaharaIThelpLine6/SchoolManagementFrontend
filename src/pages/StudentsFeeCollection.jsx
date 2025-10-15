@@ -1011,9 +1011,9 @@ const StudentsFeeCollection = () => {
               </div>
             </div>
           </form>
-          <TodayFeeCollection />
         </div>
       </FormProvider>
+      <TodayFeeCollection />
     </div>
   );
 };

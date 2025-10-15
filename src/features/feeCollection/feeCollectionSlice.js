@@ -399,6 +399,38 @@ export const feeCollectionSlice = createApi({
         'StudentFeeSettings',
       ],
     }),
+    getStudentCompleteFeeFilter: builder.query({
+      query: ({ DateFrom, DateTo, UserCode, UFOID }) => ({
+        url: 'student_complete_fee_filter_get_data',
+        method: 'GET',
+        params: { DateFrom, DateTo, UserCode, UFOID },
+      }),
+      providesTags: ['StudentFee'],
+    }),
+    getExamSeparateFeeFilter: builder.query({
+      query: ({
+        DateFrom,
+        DateTo,
+        UserCode,
+        SessionID,
+        ExamID,
+        SubClassID,
+        type,
+      }) => ({
+        url: 'exam_separate_fee_filter_get_data',
+        method: 'GET',
+        params: {
+          DateFrom,
+          DateTo,
+          UserCode,
+          SessionID,
+          ExamID,
+          SubClassID,
+          type,
+        },
+      }),
+      providesTags: ['ExamSeparateFee'],
+    }),
 
     getMonthPerStudentsFee: builder.query({
       query: (admissionId) => `month_per_student_fee/${admissionId}`,
@@ -507,6 +539,8 @@ export const {
   useGetMonthDuePerStudentFeeQuery,
   useGetStudentOthersMonthFeesQuery,
   useGetOthersDueStudentFeeQuery,
+  useGetStudentCompleteFeeFilterQuery,
+  useGetExamSeparateFeeFilterQuery,
 
   usePostBankInfoLedgerMutation,
   usePutBankInfoLedgerMutation,
