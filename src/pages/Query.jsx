@@ -58,7 +58,10 @@ const Query = () => {
                 { "TABLE_NAME": "Teacher_MonthName", "UNIQUE_ID": "MonthID", "COLUMN_tags": "MontheName" },
                 { "TABLE_NAME": "Teacher_PayNameList", "UNIQUE_ID": "PRID", "COLUMN_tags": "RollName" },
                 { "TABLE_NAME": "Teacher_PayRollAndLableName", "UNIQUE_ID": "PRLNID", "COLUMN_tags": "PayRollName" },
-                { "TABLE_NAME": "User_Info", "UNIQUE_ID": "UserID", "COLUMN_tags": "UserName, FatherName, MotherName, permanentVill, permanentPost, TransientVill, TransientPost" }
+                { "TABLE_NAME": "User_Info", "UNIQUE_ID": "UserID", "COLUMN_tags": "UserName, FatherName, MotherName, permanentVill, permanentPost, TransientVill, TransientPost" },
+                { "TABLE_NAME": "Student_Result", "UNIQUE_ID": "ID", "COLUMN_tags": "Division" },
+                { "TABLE_NAME": "Acc_UserTransaction", "UNIQUE_ID": "UTID", "COLUMN_tags": "Particulars" },
+                { "TABLE_NAME": "Acc_UserFeeOrderDetails", "UNIQUE_ID": "UFODID", "COLUMN_tags": "Particulars" }
             ]
             ,
         },

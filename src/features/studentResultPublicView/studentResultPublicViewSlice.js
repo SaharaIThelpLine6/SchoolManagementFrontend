@@ -110,7 +110,7 @@ const initialState = {
     resultStatistics: null,
     studentResult: [],
     resultSubGroupInfo: {},
-    schoolData: [],
+    schoolData: null,
     studentRelation: [],
     gender:[],
     divition: [],
@@ -118,6 +118,7 @@ const initialState = {
     resultStatus: 'idle',
     resultError: null,
     status: 'idle',
+    maritListStatus: 'idle',
     error: null,
 };
 
@@ -221,17 +222,20 @@ const studentResultPublicViewSlice = createSlice({
                 state.error = action.error.message;
             })
             .addCase(fetchMaritResult.pending, (state) => {
-                state.status = 'loading';
+                state.maritListStatus = 'loading';
             })
             .addCase(fetchMaritResult.fulfilled, (state, action) => {
-                state.status = 'succeeded';
+                state.maritListStatus = 'succeeded';
                 state.maritList = action.payload.maritList;
                 state.schoolData = action.payload.schoolData;
             })
             .addCase(fetchMaritResult.rejected, (state, action) => {
-                state.status = 'failed';
+                state.maritListStatus = 'failed';
                 state.error = action.error.message;
             });
+
+
+
 
     },
 });

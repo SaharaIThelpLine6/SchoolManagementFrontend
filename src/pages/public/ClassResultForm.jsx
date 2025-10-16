@@ -25,10 +25,10 @@ const ClassResultForm = () => {
     const [SessionID, ExamID, SubClassID] = watch(["SessionID", "ExamID", "SubClassID"])
 
     useEffect(()=>{
-        console.log(schoolData?.isClassResultShowable?.Action);
-        
-        if(schoolData && schoolData?.isClassResultShowable?.Action != 0){
-            navigate(`/${schoolid}`)
+        if(schoolData){
+            if(schoolData && schoolData?.isClassResultShowable?.Action != 1){
+                navigate(`/${schoolid}`)
+            }
         }
         
     }, [schoolData])

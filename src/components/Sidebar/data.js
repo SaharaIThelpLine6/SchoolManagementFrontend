@@ -144,148 +144,148 @@ export const menuData = [
       },
     ],
   },
-  {
-    id: "3",
-    name: "Teacher Staff",
-    route: "/teacherinfo",
-    icon: "IoIosPeople",
-    subMenu: [
-      {
-        id: "1",
-        name: "Teacher Info",
-        route: "/teacherinfo",
-        subMenu: false,
-      },
-      {
-        id: "2",
-        name: "Pay-role Heading",
-        route: "/teacherinfo/payRole",
-        subMenu: false,
-      },
-      {
-        id: "3",
-        name: "Pay-role Name",
-        route: "/teacherinfo/pRName",
-        subMenu: false,
-      },
-      {
-        id: "4",
-        name: "Reports",
-        route: "/teacherinfo/report",
-        subMenu: false,
-      },
-      {
-        id: "5",
-        name: "Designation",
-        route: "/teacherinfo/designation",
-        subMenu: false,
-      },
-    ],
-  },
-  {
-    id: "4",
-    name: "Exam",
-    route: "/exam",
-    icon: "PiExam",
-    subMenu: [
-      {
-        id: "1",
-        name: "Exam Name",
-        route: "/exam",
-      },
-      {
-        id: "2",
-        name: "Exam Fee Determine",
-        route: "/exam/fee-determine",
-      },
-      {
-        id: "3",
-        name: "Point V: Condition",
-        route: "/exam/point-v-condition",
-      },
-      {
-        id: "4",
-        name: "Average V: Condition",
-        route: "/exam/average-v-condition",
-      },
-      {
-        id: "5",
-        name: "List of Candidates",
-        route: "/exam/list-of-candidates",
-      },
-      {
-        id: "6",
-        name: "Talent Condition",
-        route: "/exam/talent-condition",
-      },
-      {
-        id: "7",
-        name: "Admit Card",
-        route: "/exam/admit-card",
-      },
-      {
-        id: "8",
-        name: "Exam Routing Create",
-        route: "/exam/routing",
-      },
-      {
-        id: "9",
-        name: "Exam Report",
-        route: "/exam/report",
-      },
-    ],
-  },
-  {
-    id: "5",
-    name: "Result",
-    route: "/result",
-    icon: "GiGraduateCap",
-    subMenu: [
-      {
-        id: "1",
-        name: "Point Result Entry",
-        route: "/result",
-      },
-      {
-        id: "2",
-        name: "Point V: Report",
-        route: "/result/report",
-      },
-    ],
-  },
-  {
-    id: "6",
-    name: "Board Exam",
-    route: "/board-info",
-    icon: "UniversityIcon",
-    subMenu: [
-      {
-        id: "1",
-        name: "Madrasah Board Info",
-        route: "/board-info",
-      },
-      {
-        id: "2",
-        name: "Board Exam Name",
-        route: "/board-info/exam-name",
-      },
-      {
-        id: "3",
-        name: "Board Name",
-        route: "/board-info/name",
-      },
-      {
-        id: "4",
-        name: "Board Center Name",
-        route: "/board-info/center-name",
-      },
-      {
-        id: "5",
-        name: "Markas and Registration Fee Determine",
-        route: "/board-info/maskas-registration-fee-determine",
-      },
-    ],
-  },
+  // {
+  //   id: "3",
+  //   name: "Teacher Staff",
+  //   route: "/teacherinfo",
+  //   icon: "IoIosPeople",
+  //   subMenu: [
+  //     {
+  //       id: "1",
+  //       name: "Teacher Info",
+  //       route: "/teacherinfo",
+  //       subMenu: false,
+  //     },
+  //     {
+  //       id: "2",
+  //       name: "Pay-role Heading",
+  //       route: "/teacherinfo/payRole",
+  //       subMenu: false,
+  //     },
+  //     {
+  //       id: "3",
+  //       name: "Pay-role Name",
+  //       route: "/teacherinfo/pRName",
+  //       subMenu: false,
+  //     },
+  //     {
+  //       id: "4",
+  //       name: "Reports",
+  //       route: "/teacherinfo/report",
+  //       subMenu: false,
+  //     },
+  //     {
+  //       id: "5",
+  //       name: "Designation",
+  //       route: "/teacherinfo/designation",
+  //       subMenu: false,
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "4",
+  //   name: "Exam",
+  //   route: "/exam",
+  //   icon: "PiExam",
+  //   subMenu: [
+  //     {
+  //       id: "1",
+  //       name: "Exam Name",
+  //       route: "/exam",
+  //     },
+  //     {
+  //       id: "2",
+  //       name: "Exam Fee Determine",
+  //       route: "/exam/fee-determine",
+  //     },
+  //     {
+  //       id: "3",
+  //       name: "Point V: Condition",
+  //       route: "/exam/point-v-condition",
+  //     },
+  //     {
+  //       id: "4",
+  //       name: "Average V: Condition",
+  //       route: "/exam/average-v-condition",
+  //     },
+  //     {
+  //       id: "5",
+  //       name: "List of Candidates",
+  //       route: "/exam/list-of-candidates",
+  //     },
+  //     {
+  //       id: "6",
+  //       name: "Talent Condition",
+  //       route: "/exam/talent-condition",
+  //     },
+  //     {
+  //       id: "7",
+  //       name: "Admit Card",
+  //       route: "/exam/admit-card",
+  //     },
+  //     {
+  //       id: "8",
+  //       name: "Exam Routing Create",
+  //       route: "/exam/routing",
+  //     },
+  //     {
+  //       id: "9",
+  //       name: "Exam Report",
+  //       route: "/exam/report",
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "5",
+  //   name: "Result",
+  //   route: "/result",
+  //   icon: "GiGraduateCap",
+  //   subMenu: [
+  //     {
+  //       id: "1",
+  //       name: "Point Result Entry",
+  //       route: "/result",
+  //     },
+  //     {
+  //       id: "2",
+  //       name: "Point V: Report",
+  //       route: "/result/report",
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "6",
+  //   name: "Board Exam",
+  //   route: "/board-info",
+  //   icon: "UniversityIcon",
+  //   subMenu: [
+  //     {
+  //       id: "1",
+  //       name: "Madrasah Board Info",
+  //       route: "/board-info",
+  //     },
+  //     {
+  //       id: "2",
+  //       name: "Board Exam Name",
+  //       route: "/board-info/exam-name",
+  //     },
+  //     {
+  //       id: "3",
+  //       name: "Board Name",
+  //       route: "/board-info/name",
+  //     },
+  //     {
+  //       id: "4",
+  //       name: "Board Center Name",
+  //       route: "/board-info/center-name",
+  //     },
+  //     {
+  //       id: "5",
+  //       name: "Markas and Registration Fee Determine",
+  //       route: "/board-info/maskas-registration-fee-determine",
+  //     },
+  //   ],
+  // },
   {
     id: "7",
     name: "Darul Ikama",
@@ -304,138 +304,138 @@ export const menuData = [
       },
     ],
   },
-  {
-    id: "8",
-    name: "Accounting",
-    route: "/accounting",
-    icon: "FaCalculator",
-    subMenu: [
-      {
-        id: "1",
-        name: "Deposit Costs",
-        route: "/accounting",
-      },
-      {
-        id: "11",
-        name: "Deposit Costs Report",
-        route: "/accounting/income-expense-report",
-      },
-      {
-        id: "2",
-        name: "Fee Setting",
-        route: "/accounting/fee-setting",
-      },
-      {
-        id: "3",
-        name: "Student Fee Collection",
-        route: "/accounting/student-fee-collection",
-      },
-      // {
-      //   id: "4",
-      //   name: "Student Fee Collection",
-      //   route: "/accounting/student-fee-collection",
-      // },
-      {
-        id: "4",
-        name: "Dues List",
-        route: "/accounting/dues-list",
-      },
-      {
-        id: "5",
-        name: "Monthly Dues",
-        route: "/accounting/monthly-dues",
-      },
-      {
-        id: "6",
-        name: "Fee Collection Report",
-        route: "/accounting/fee-collection-report",
-      },
-      {
-        id: "7",
-        name: "Balance Transfer",
-        route: "/accounting/balance-transfer",
-      },
-      {
-        id: "8",
-        name: "Delete Edit Record",
-        route: "/accounting/delete-edit-record",
-      },
-    ],
-  },
-  {
-    id: "9",
-    name: "Payment",
-    route: "/payment",
-    icon: "MdOutlinePayment",
-    subMenu: [
-      {
-        id: "1",
-        name: "Payment History",
-        route: "/payment-history",
-      },
-    ],
-  },
+  // {
+  //   id: "8",
+  //   name: "Accounting",
+  //   route: "/accounting",
+  //   icon: "FaCalculator",
+  //   subMenu: [
+  //     {
+  //       id: "1",
+  //       name: "Deposit Costs",
+  //       route: "/accounting",
+  //     },
+  //     {
+  //       id: "11",
+  //       name: "Deposit Costs Report",
+  //       route: "/accounting/income-expense-report",
+  //     },
+  //     {
+  //       id: "2",
+  //       name: "Fee Setting",
+  //       route: "/accounting/fee-setting",
+  //     },
+  //     {
+  //       id: "3",
+  //       name: "Student Fee Collection",
+  //       route: "/accounting/student-fee-collection",
+  //     },
+  //     // {
+  //     //   id: "4",
+  //     //   name: "Student Fee Collection",
+  //     //   route: "/accounting/student-fee-collection",
+  //     // },
+  //     {
+  //       id: "4",
+  //       name: "Dues List",
+  //       route: "/accounting/dues-list",
+  //     },
+  //     {
+  //       id: "5",
+  //       name: "Monthly Dues",
+  //       route: "/accounting/monthly-dues",
+  //     },
+  //     {
+  //       id: "6",
+  //       name: "Fee Collection Report",
+  //       route: "/accounting/fee-collection-report",
+  //     },
+  //     {
+  //       id: "7",
+  //       name: "Balance Transfer",
+  //       route: "/accounting/balance-transfer",
+  //     },
+  //     {
+  //       id: "8",
+  //       name: "Delete Edit Record",
+  //       route: "/accounting/delete-edit-record",
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "9",
+  //   name: "Payment",
+  //   route: "/payment",
+  //   icon: "MdOutlinePayment",
+  //   subMenu: [
+  //     {
+  //       id: "1",
+  //       name: "Payment History",
+  //       route: "/payment-history",
+  //     },
+  //   ],
+  // },
 
-  {
-    id: "10",
-    name: "Donation",
-    route: "/donation",
-    icon: "FaDonate",
-    subMenu: [
-      {
-        id: "1",
-        name: "Donor Fee Determination",
-        route: "/donation",
-      },
-      {
-        id: "2",
-        name: "Fee Collection",
-        route: "/donation/fee-collection",
-      },
-      {
-        id: "3",
-        name: "Donor Report",
-        route: "/donation/report",
-      },
-    ],
-  },
-  {
-    id: "10",
-    name: "Library",
-    route: "/library",
-    icon: "ImLibrary",
-    subMenu: [],
-  },
-  {
-    id: "11",
-    name: "Others",
-    route: "/others",
-    icon: "HiDotsCircleHorizontal",
-    subMenu: [],
-  },
-  {
-    id: "12",
-    name: "Settings",
-    route: "/settings",
-    icon: "IoMdSettings",
-    subMenu: [
-      {
-        id: "1",
-        name: "User Roles",
-        route: "/settings/add-login-users",
-      },
-      {
-        id: "2",
-        name: "Settings",
-        route: "/settings",
-      },
-    ],
-  },
-  {
-    id: "13",
-    name: "Help",
-    route: "/help",
-    icon: "IoMdHelp",
-    subMenu: [],
-  },
+  // {
+  //   id: "10",
+  //   name: "Donation",
+  //   route: "/donation",
+  //   icon: "FaDonate",
+  //   subMenu: [
+  //     {
+  //       id: "1",
+  //       name: "Donor Fee Determination",
+  //       route: "/donation",
+  //     },
+  //     {
+  //       id: "2",
+  //       name: "Fee Collection",
+  //       route: "/donation/fee-collection",
+  //     },
+  //     {
+  //       id: "3",
+  //       name: "Donor Report",
+  //       route: "/donation/report",
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "10",
+  //   name: "Library",
+  //   route: "/library",
+  //   icon: "ImLibrary",
+  //   subMenu: [],
+  // },
+  // {
+  //   id: "11",
+  //   name: "Others",
+  //   route: "/others",
+  //   icon: "HiDotsCircleHorizontal",
+  //   subMenu: [],
+  // },
+  // {
+  //   id: "12",
+  //   name: "Settings",
+  //   route: "/settings",
+  //   icon: "IoMdSettings",
+  //   subMenu: [
+  //     {
+  //       id: "1",
+  //       name: "User Roles",
+  //       route: "/settings/add-login-users",
+  //     },
+  //     {
+  //       id: "2",
+  //       name: "Settings",
+  //       route: "/settings",
+  //     },
+  //   ],
+  // },
+  // {
+  //   id: "13",
+  //   name: "Help",
+  //   route: "/help",
+  //   icon: "IoMdHelp",
+  //   subMenu: [],
+  // },
 ];
