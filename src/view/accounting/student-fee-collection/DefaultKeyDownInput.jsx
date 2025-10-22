@@ -15,13 +15,14 @@ const DefaultKeyDownInput = React.forwardRef(
       labelColor = 'text-black',
       require = false,
       disable = false,
+      readOnly = false, // ✅ নতুন prop যোগ করা হলো
       unicode = false,
       labelPosition = 'top',
       validate,
       defaultValue = '',
       showError = false,
       onKeyDown,
-      onChange, // 👈 নতুন prop
+      onChange,
     },
     ref
   ) => {
@@ -30,6 +31,7 @@ const DefaultKeyDownInput = React.forwardRef(
       setValue,
       formState: { errors, isSubmitted, touchedFields },
     } = useFormContext();
+
     const translate = useTranslate();
     const [isTouched, setIsTouched] = useState(false);
 
@@ -76,6 +78,7 @@ const DefaultKeyDownInput = React.forwardRef(
                 {require && <span className="text-red-500">*</span>}
                 <span>:</span>
               </div>
+
               {codeSetting && (
                 <span
                   className="text-blue-600 underline text-sm font-medium cursor-pointer"
@@ -119,12 +122,14 @@ const DefaultKeyDownInput = React.forwardRef(
                 className={`w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition
                   focus:border-custom-focus active:border-custom-focus
                   disabled:cursor-not-allowed disabled:bg-slate-200
+                  read-only:bg-slate-100
                   ${
                     shouldShowError && errors[registerKey]
                       ? 'placeholder:text-red-400 border-red-400'
                       : ''
                   }`}
                 disabled={disable}
+                readOnly={readOnly} // ✅ readOnly যোগ করা হলো
                 onBlur={() => setIsTouched(true)}
                 onKeyDown={onKeyDown}
                 onChange={(e) => {
@@ -133,11 +138,9 @@ const DefaultKeyDownInput = React.forwardRef(
                       ? Number(e.target.value) || 0
                       : e.target.value;
 
-                  // react-hook-form এর state আপডেট করবে
                   field.onChange(value);
                   setValue(registerKey, value, { shouldValidate: true });
 
-                  // 👇 এখন তোমার কাস্টম parent function ও ট্রিগার হবে
                   if (onChange) onChange(e);
                 }}
               />

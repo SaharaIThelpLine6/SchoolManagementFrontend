@@ -1,11 +1,11 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getUserData } from "../../utils/read/api";
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { getUserData } from '../../utils/read/api';
 
 export const fetchAdmissionStudentData = createAsyncThunk(
-  "student/fetchAdmissionStudentData",
+  'student/fetchAdmissionStudentData',
   async () => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Token is missing");
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token is missing');
     const [studentListResponse] = await Promise.all([
       getUserData(token, `/api/students/view_students`),
     ]);
@@ -16,10 +16,10 @@ export const fetchAdmissionStudentData = createAsyncThunk(
 );
 
 export const fetchUserOnlyStudentData = createAsyncThunk(
-  "student/fetchUserOnlyStudentData",
+  'student/fetchUserOnlyStudentData',
   async () => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Token is missing");
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token is missing');
     const [studentListResponse] = await Promise.all([
       getUserData(token, `/api/students/view_useronly_students`),
     ]);
@@ -29,10 +29,10 @@ export const fetchUserOnlyStudentData = createAsyncThunk(
   }
 );
 export const fetchSingleStudentData = createAsyncThunk(
-  "student/fetchSingleStudentData",
+  'student/fetchSingleStudentData',
   async (id) => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Token is missing");
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token is missing');
     const [studentResponse] = await Promise.all([
       getUserData(token, `/api/students/view_single_student?id=${id}`),
     ]);
@@ -42,10 +42,10 @@ export const fetchSingleStudentData = createAsyncThunk(
   }
 );
 export const fetchSingleStudentDataByStudentCode = createAsyncThunk(
-  "student/fetchSingleStudentDataByStudentCode",
+  'student/fetchSingleStudentDataByStudentCode',
   async (id) => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Token is missing");
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token is missing');
     const [studentResponse] = await Promise.all([
       getUserData(token, `/api/students/view_single_student_withcode?id=${id}`),
     ]);
@@ -55,10 +55,10 @@ export const fetchSingleStudentDataByStudentCode = createAsyncThunk(
   }
 );
 export const fetchSingleStudentDataByStudentCodeAndSession = createAsyncThunk(
-  "student/fetchSingleStudentDataByStudentCodeAndSession",
+  'student/fetchSingleStudentDataByStudentCodeAndSession',
   async ({ id, sessionId }) => {
-    const token = localStorage.getItem("token");
-    if (!token) throw new Error("Token is missing");
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Token is missing');
     const [studentResponse] = await Promise.all([
       getUserData(
         token,
@@ -76,7 +76,7 @@ const initialState = {
   userOnlyStudents: [],
   singleStudent: null,
   editMode: 0,
-  status: "idle",
+  status: 'idle',
   error: null,
   admittedStudent: {},
   academicClassStudent: {},
@@ -85,13 +85,14 @@ const initialState = {
   filteredUser: null,
   filteredSelectedPerStudentFee: null,
   monthFeeData: null,
+  studentFeeUpdateID: null,
   characterReportEditMode: null,
   parentsData: [],
   allUsers: [],
 };
 
 const classSlice = createSlice({
-  name: "student",
+  name: 'student',
   initialState,
   reducers: {
     setEditMode: (state, action) => {
@@ -114,6 +115,9 @@ const classSlice = createSlice({
     },
     setMonthFeeData: (state, action) => {
       state.monthFeeData = action.payload;
+    },
+    setStudentFeeUpdateID: (state, action) => {
+      state.studentFeeUpdateID = action.payload;
     },
     deleteParentData: (state, action) => {
       state.parentsData = state.parentsData.filter(
@@ -138,77 +142,77 @@ const classSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchAdmissionStudentData.pending, (state) => {
-        state.status = "loading";
+        state.status = 'loading';
         state.error = null;
       })
       .addCase(fetchAdmissionStudentData.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.status = 'succeeded';
         state.studentList = action.payload.studentList;
       })
       .addCase(fetchAdmissionStudentData.rejected, (state, action) => {
-        state.status = "failed";
+        state.status = 'failed';
         state.error = action.error.message;
       })
       .addCase(fetchUserOnlyStudentData.pending, (state) => {
-        state.status = "loading";
+        state.status = 'loading';
         state.error = null;
       })
       .addCase(fetchUserOnlyStudentData.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.status = 'succeeded';
         state.userOnlyStudents = action.payload.userOnlyStudents;
       })
       .addCase(fetchUserOnlyStudentData.rejected, (state, action) => {
-        state.status = "failed";
+        state.status = 'failed';
         state.error = action.error.message;
       })
       .addCase(fetchSingleStudentData.pending, (state) => {
-        state.status = "loading";
+        state.status = 'loading';
         state.error = null;
       })
       .addCase(fetchSingleStudentData.fulfilled, (state, action) => {
-        state.status = "succeeded";
+        state.status = 'succeeded';
         state.singleStudent = action.payload.singleStudent;
       })
       .addCase(fetchSingleStudentData.rejected, (state, action) => {
-        state.status = "failed";
+        state.status = 'failed';
         state.error = action.error.message;
       })
       .addCase(fetchSingleStudentDataByStudentCode.pending, (state) => {
-        state.status = "loading";
+        state.status = 'loading';
         state.error = null;
       })
       .addCase(
         fetchSingleStudentDataByStudentCode.fulfilled,
         (state, action) => {
-          state.status = "succeeded";
+          state.status = 'succeeded';
           state.admittedStudent = action.payload.academicStudent;
         }
       )
       .addCase(
         fetchSingleStudentDataByStudentCode.rejected,
         (state, action) => {
-          state.status = "failed";
+          state.status = 'failed';
           state.error = action.error.message;
         }
       )
       .addCase(
         fetchSingleStudentDataByStudentCodeAndSession.pending,
         (state) => {
-          state.status = "loading";
+          state.status = 'loading';
           state.academicClassStudentError = null;
         }
       )
       .addCase(
         fetchSingleStudentDataByStudentCodeAndSession.fulfilled,
         (state, action) => {
-          state.status = "succeeded";
+          state.status = 'succeeded';
           state.admittedStudent = action.payload.academicClassStudent;
         }
       )
       .addCase(
         fetchSingleStudentDataByStudentCodeAndSession.rejected,
         (state, action) => {
-          state.status = "failed";
+          state.status = 'failed';
           state.academicClassStudentError = action.error.message;
         }
       );
@@ -226,6 +230,7 @@ export const {
   setAllUsersData,
   deleteAllUsersData,
   clearAllUsersData,
-  setMonthFeeData
+  setMonthFeeData,
+  setStudentFeeUpdateID,
 } = classSlice.actions;
 export default classSlice.reducer;

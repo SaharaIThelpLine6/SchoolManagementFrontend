@@ -474,6 +474,18 @@ export const feeCollectionSlice = createApi({
       query: ({ caid }) => `get_todays_balance/${caid}`,
       providesTags: ['IncomeExpenseTodaysBalanceByCaid'],
     }),
+    getStudentFeeUpdateGetDataByUFOID: builder.query({
+      query: (ufoid) => `student_fee_update_get_data/${ufoid}`,
+      providesTags: ['StudentFee'],
+    }),
+    putUpdateStudentFee: builder.mutation({
+      query: (data) => ({
+        url: `update_student_fee/${data.UFOID}/`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['StudentFee'],
+    }),
   }),
 });
 
@@ -541,6 +553,8 @@ export const {
   useGetOthersDueStudentFeeQuery,
   useGetStudentCompleteFeeFilterQuery,
   useGetExamSeparateFeeFilterQuery,
+  useGetStudentFeeUpdateGetDataByUFOIDQuery,
+  usePutUpdateStudentFeeMutation,
 
   usePostBankInfoLedgerMutation,
   usePutBankInfoLedgerMutation,

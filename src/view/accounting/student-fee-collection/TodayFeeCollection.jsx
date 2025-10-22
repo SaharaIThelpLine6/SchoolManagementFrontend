@@ -14,6 +14,7 @@ import SvgIcon from '../../../components/icons/SvgIcon';
 import DefaultPagination from '../../../components/Pagination/DefaultPagination';
 import RadioOption from '../../../components/Radio/RadioOption';
 import { useGetStudentCompleteFeeFilterQuery } from '../../../features/feeCollection/feeCollectionSlice';
+import { setStudentFeeUpdateID } from '../../../features/student/studentSlice';
 
 const PAGE_SIZE = 10;
 
@@ -38,6 +39,8 @@ const TodayFeeCollection = ({ pageTitle }) => {
     UserCode: '',
     UFOID: '',
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [ufoid, setUfoid] = useState(null);
 
   // 🔹 RTK Query
   const {
@@ -46,10 +49,15 @@ const TodayFeeCollection = ({ pageTitle }) => {
     isError,
     refetch,
   } = useGetStudentCompleteFeeFilterQuery(filters);
+  const UFOID = Number(ufoid);
 
-  const [currentPage, setCurrentPage] = useState(1);
+  // 🔹 Set page title / student fee data when fetched
+  useEffect(() => {
+    if (ufoid) {
+      dispatch(setStudentFeeUpdateID(ufoid));
+    }
+  }, [dispatch, ufoid]);
 
-  // 🔹 Set page title
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
@@ -106,7 +114,9 @@ const TodayFeeCollection = ({ pageTitle }) => {
     { id: 'UserCode', label: 'Code' },
     { id: 'UFOID', label: 'Order' },
   ];
-  const handleEditOpenModal = () => {};
+  const handleEditOpenModal = (UFOID) => {
+    setUfoid(UFOID);
+  };
 
   // 🔹 Table columns
   const columns = [
@@ -117,7 +127,7 @@ const TodayFeeCollection = ({ pageTitle }) => {
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
           {' '}
-          <EditButton onClick={() => handleEditOpenModal(row.ID)} />
+          <EditButton onClick={() => handleEditOpenModal(row.UFOID)} />
           <button
             className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 rounded-md shadow-md hover:shadow-lg transition duration-200"
             title="Print"

@@ -12,6 +12,7 @@ import {
   useGetStudentFeeIncreaseDecreaseQuery,
   usePostSelectedPerStudentFeeMutation,
 } from '../../features/feeCollection/feeCollectionSlice';
+import { useGetSettingsQuery } from '../../features/settings/settingsQuerySlice';
 import bnBijoy2Unicode from '../../utils/conveter';
 import useTranslate from '../../utils/Translate';
 
@@ -26,6 +27,16 @@ const SelectedPerStudentFeeTable = () => {
   const shouldSkip =
     !filteredSelectedPerStudentFee?.AdmissionID ||
     !filteredSelectedPerStudentFee?.StudentCode;
+
+  const { data: infoSettings = { data: [] } } = useGetSettingsQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
+
+  const tbiPrintView =
+    infoSettings?.data?.find((item) => item.ID === 30) || null;
+
+  console.log(tbiPrintView, 'tbiPrintView');
 
   const {
     data: studentMonthFeeData,
@@ -248,7 +259,7 @@ const SelectedPerStudentFeeTable = () => {
 
     if (!filteredSelectedPerStudentFee) {
       toast.info(
-        'Student fee information is not available. Please select a student first.',
+        'শিক্ষার্থীর ফি সংক্রান্ত তথ্য পাওয়া যায়নি। আগে একজন শিক্ষার্থী নির্বাচন করুন।',
         {
           position: 'top-right',
           autoClose: 5000,
@@ -261,6 +272,7 @@ const SelectedPerStudentFeeTable = () => {
     const sessionID = filteredSelectedPerStudentFee.SessionID;
     const classID = filteredSelectedPerStudentFee.ClassID;
 
+    // 🔹 Step 1: payload তৈরি
     const payload = data.subLedgerFee.map((item) => ({
       AdmissionID: admissionID,
       UserID: item.UserID,
@@ -273,26 +285,39 @@ const SelectedPerStudentFeeTable = () => {
       FainalAmount: (Number(item.Amount) || 0) - (Number(item.Less) || 0),
     }));
 
+    // 🔹 Step 2: শুধুমাত্র Action = 1 হলে invalid item চেক করবে
+    if (tbiPrintView.Action === 1) {
+      const hasInvalidItem = payload.some((item) => item.Amount === 0);
+
+      if (hasInvalidItem) {
+        toast.warning(
+          'যেসব আইটেমের পরিমাণ ০, সেগুলো সংরক্ষণ করা সম্ভব নয় (Action = 1)।',
+          {
+            position: 'top-right',
+            autoClose: 4000,
+          }
+        );
+        return; // ❌ DB তে যাবে না
+      }
+    }
+
+    // 🔹 Step 3: Action === 2 হলে বা সব valid হলে DB তে যাবে
     try {
-      const saveToast = toast.loading('Saving fees...', {
+      const saveToast = toast.loading('ফি সংরক্ষণ করা হচ্ছে...', {
         position: 'top-right',
       });
 
       await postSelectedPerStudentFee(payload).unwrap();
 
       toast.update(saveToast, {
-        render: 'Fees saved/updated successfully!',
+        render: 'ফি সফলভাবে সংরক্ষিত হয়েছে!',
         type: 'success',
         isLoading: false,
         autoClose: 2000,
       });
-
-      // ❌ reset() বা Redux clear দিও না
-      // reset({ selectedSLID: '', subLedgerFee: [] });
-      // dispatch(setFilteredSelectedPerStudentFee(null));
     } catch (error) {
       console.error('API call failed:', error);
-      toast.error('Something went wrong while saving fees.', {
+      toast.error('ফি সংরক্ষণের সময় কোনো সমস্যা হয়েছে।', {
         position: 'top-right',
         autoClose: 5000,
       });
