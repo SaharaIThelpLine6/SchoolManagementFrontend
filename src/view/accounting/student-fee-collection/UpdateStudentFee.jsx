@@ -423,7 +423,7 @@ useEffect(() => {
         Account: data.SLID,
       };
 
-      // await putStudentFee(payload).unwrap();
+      await putStudentFee(payload).unwrap();
       console.log('Form submitted with data:', payload);
 
       Swal.fire({
