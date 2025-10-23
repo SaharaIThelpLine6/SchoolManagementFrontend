@@ -15,6 +15,8 @@ export const RequirePermission = ({ permissionId, children }) => {
     );
 
   if (isError || !permissions?.data) return <Navigate to="/" />;
+  console.log(permissions);
+  
 
   const hasPermission = permissions?.data.some(
     (p) =>

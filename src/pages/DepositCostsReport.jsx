@@ -9,7 +9,7 @@ import {
   useGetClassListQuery,
   useGetSubClassListQuery,
 } from "../features/class/classQuerySlice";
-import { useGetResidentialQuery } from "../features/settings/settingsQuerySlice";
+import { useGetLoginUsersQuery, useGetResidentialQuery } from "../features/settings/settingsQuerySlice";
 import Checkbox from "../components/Checkboxes/Checkbox";
 import { userStatus } from "../Data/userReportsData";
 import DefaultInput from "../components/Forms/DefaultInput";
@@ -17,39 +17,30 @@ import {
   fetchSingleUser,
   setEditMode,
 } from "../features/userInfo/userInfoSlice";
-import {
-  fetchSettingsData,
-  fetchDidata,
-  fetchThanadata,
-} from "../features/settings/settingsSlice";
-import AdmissionRegisterPrint from "../view/students/reports/AdmissionRegisterPrint";
-import OldNewRegisterList from "../view/students/reports/OldNewRegisterList";
-import JamaatBasedNewOldTotalStudent from "../view/students/reports/JamaatBasedNewOldTotalStudent";
-import StudentsListTwoColumns from "../view/students/reports/StudentsListTwoColumns";
-import ParentsMobileNumberList from "../view/students/reports/ParentsMobileNumberList";
-import JamaatWariBookList from "../view/students/reports/JamaatWariBookList";
-import BanglaAttendence from "../view/students/reports/BanglaAttendence";
-import BanglaAttendenceSubjectWari from "../view/students/reports/BanglaAttendenceSubjectWari";
-import AdmissionRegisterSerial from "../view/students/reports/AdmissionRegisterSerial";
-import AllStudentsStatistics from "../view/students/reports/AllStudentsStatistics";
-import IdAdmissionRegister from "../view/students/reports/IdAdmissionRegister";
-import AdmissionResigterAllStudentsSerial from "../view/students/reports/AdmissionResigterAllStudentsSerial";
 import ImageWithAdmissionRegisterNewOld from "../view/students/reports/ImageWithAdmissionRegisterNewOld";
 import ParentsMobileNumberTwoColumn from "../view/students/reports/ParentsMobileNumberTwoColumn";
-import FinancialStatusBasedStatistics from "../view/students/reports/FinancialStatusBasedStatistics";
 import FinancialStatusBasedAdmissionRegister from "../view/students/reports/FinancialStatusBasedAdmissionRegister";
 import BirthRegistrationBasedList from "../view/students/reports/BirthRegistrationBasedList";
-import ParentsInfo from "../view/students/reports/ParentsInfo";
-import AdmissionFormWithID from "../view/students/reports/AdmissionFormWithID";
 import AddressBasedAdmissionRegister from "../view/students/reports/AddressBasedAdmissionRegister";
 import AttendanceBookWithPhoto from "../view/students/reports/AttendanceBookWithPhoto";
 import { useGetDepositCostReportQuery, useGetStudentReportQuery } from "../features/userReports/userReportsSlice";
 import AdmissionFormPdf from "../view/general-information/user-reports/AdmissionFormPdf";
-import { useGetFundNamesQuery } from "../features/feeCollection/feeCollectionSlice";
+import { useGetFundNamesQuery, useGetGeneralLedgersByFundAndCaidsQuery, useGetSubGeneralLedgersByFundIdAndGlIdQuery } from "../features/feeCollection/feeCollectionSlice";
 import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
 import DepositeCostLedgerWisePrint from "../view/students/reports/DepositeCostLedgerWisePrint";
 import DepositeCostSubLedgerWisePrint from "../view/students/reports/DepositeCostSubLedgerWisePrint";
 import DepositeCostStatementVoucharWisePrint from "../view/students/reports/DepositeCostStatementVoucharWisePrint";
+import DepositeCostStatementLedgerWiseShortPrint from "../view/students/reports/DepositeCostStatementLedgerWiseShortPrint";
+import SubLedgeWisePrint from "../view/students/reports/SubLedgeWisePrint";
+import FundWiseDepositCostPrint from "../view/students/reports/FundWiseDepositCostPrint";
+import LedgerWiseConbineFundPrint from "../view/students/reports/LedgerWiseConbineFundPrint";
+import DipositeCostAllPaymentSystemDetails from "../view/students/reports/DipositeCostAllPaymentSystemDetails";
+import DipositeCostGeneralLedegerReport from "../view/students/reports/DipositeCostGeneralLedegerReport";
+import DipositeCostAllPaymentDetails from "../view/students/reports/DipositeCostAllPaymentDetails";
+import DipositeCostBookWiseVouture from "../view/students/reports/DipositeCostBookWiseVouture";
+import DepositCostSubLedgerReport from "../view/students/reports/DepositCostSubLedgerReport";
+import DipositeCostPaymentSystemWise from "../view/students/reports/DipositeCostPaymentSystemWise";
+import DipositeCostUserWiseSeparate from "../view/students/reports/DipositeCostUserWiseSeparate";
 
 const DepositCostsReport = ({ pageTitle }) => {
   const methods = useForm();
@@ -72,6 +63,9 @@ const DepositCostsReport = ({ pageTitle }) => {
   const Chart_of_account = watch("CAID");
   const start_vouture = watch("start_vouture");
   const end_vouture = watch("end_vouture");
+  const GLID = watch("GLID");
+  const SLID = watch("SLID");
+  const UserID = watch("UserID");
 
   const [queryParams, setQueryParams] = useState(null);
 
@@ -80,6 +74,20 @@ const DepositCostsReport = ({ pageTitle }) => {
   const { data: subClassListData } = useGetSubClassListQuery();
   const { data: residentialData } = useGetResidentialQuery();
   const { data: fundNamesData } = useGetFundNamesQuery();
+  const {data: generalLedgersData} =  useGetGeneralLedgersByFundAndCaidsQuery(
+      { fundId: FundID, caId: Chart_of_account },
+      {
+        skip: !FundID || !Chart_of_account,
+      }
+  )
+  const {data: subLedgersData} =  useGetSubGeneralLedgersByFundIdAndGlIdQuery(
+      { fundId: FundID, glid: GLID },
+      {
+        skip: !FundID || !GLID,
+      }
+  )
+
+  const {data: loginUsers} = useGetLoginUsersQuery()
 
   const defaultData = useSelector((state) => state.userInfo.defaultFormValue);
   const editMode = useSelector((state) => state.userInfo.editMode);
@@ -106,8 +114,7 @@ const DepositCostsReport = ({ pageTitle }) => {
   useEffect(() => {
     const numericSelectedID = Number(selectedReportID);
     const reportId = [
-      2, 4, 5, 8, 9, 12, 14, 15, 16, 17, 18, 19, 21, 22, 24, 25, 26,
-      7, 10, 11, 20, 23,
+      2, 15, 19, 21, 22, 24, 25, 26,  20, 23,
     ];
     const params = {
       report_id: reportId.includes(numericSelectedID) ? 1 : numericSelectedID,
@@ -117,16 +124,18 @@ const DepositCostsReport = ({ pageTitle }) => {
       gender,
       NewOldId,
       ResidentialStatusId,
-      // Convert Date objects to ISO strings for serialization
       StartDate: serializeDate(StartDate),
       EndDate: serializeDate(EndDate),
       report_base,
       start_vouture,
       end_vouture,
-      CAID: Chart_of_account
-
+      CAID: Chart_of_account,
+      GLID,
+      SLID,
+      UserID
     };
-
+ 
+    
     console.log(params);
     
 
@@ -136,6 +145,7 @@ const DepositCostsReport = ({ pageTitle }) => {
         ([, value]) => value !== undefined && value !== ""
       )
     );
+       console.log("clean prams");
     console.log(cleanedParams);
     // Only set params if FundID is present and report_id is valid
     if (cleanedParams.FundID && cleanedParams.FundID !== 0 && cleanedParams.report_id) {
@@ -156,8 +166,10 @@ const DepositCostsReport = ({ pageTitle }) => {
     report_base,
     start_vouture,
     end_vouture,
-    Chart_of_account
-
+    Chart_of_account,
+    GLID,
+    SLID,
+    UserID
   ]);
 
   // Query only if queryParams are ready and valid
@@ -235,32 +247,48 @@ const DepositCostsReport = ({ pageTitle }) => {
   ];
 
   const studentReportData = [
-    { id: "1", value: "১. জমা-খরচ স্টেটমেন্ট লেজার ভিত্তিক" },
-    { id: "2", value: "২. জমা-খরচ স্টেটমেন্ট সাব লেজার ভিত্তিক" },
-    { id: "3", value: "৩. জমা-খরচ স্টেটমেন্ট ভাউচার ভিত্তিক" },
-    { id: "4", value: "৪. লেজার ভিত্তিক সংক্ষিপ্ত রির্পোট" },
+    { id: "1", value: "১. জমা-খরচ ষ্টেটমেন্ট লেজার ভিত্তিক" },
+    { id: "2", value: "২. জমা-খরচ ষ্টেটমেন্ট সাব লেজার ভিত্তিক" },
+    { id: "3", value: "৩. জমা-খরচ ষ্টেটমেন্ট ভাউচার ভিত্তিক" },
+    { id: "4", value: "৪. লেজার ভিত্তিক সংক্ষিপ্ত রিপোর্ট" },
+    { id: "5", value: "৫. সাব লেজার ভিত্তিক রিপোর্ট" },
+    { id: "6", value: "৬. সাব লেজার ভিত্তিক পৃথক রিপোর্ট" },
+    { id: "7", value: "৭. জেনারেল লেজার ভিত্তিক রিপোর্ট" },
+    { id: "8", value: "৮. লেজার ভিত্তিক সম্মিলিত ফান্ড ষ্টেটমেন্ট" },
+    { id: "9", value: "৯. ফান্ড ভিত্তিক জমা-খরচ" },
+    { id: "10", value: "১০. রশিদ বই ভিত্তিক সংক্ষিপ্ত রিপোর্ট" },
+    { id: "12", value: "১২. জেনারেল লেজার ভিত্তিক পৃথক রিপোর্ট" },
+    { id: "13", value: "১৩. জমা-খরচ সকল পেমেন্ট সিষ্টেম বিস্তারিত" },
+    { id: "14", value: "১৪.জমা-খরচ পেমেন্ট সিষ্টেম ভিত্তিক সংক্ষিপ্ত" },
+    { id: "16", value: "১৬. জমা-খরচ বই সহ ভাউচার ভিত্তিক" },
+    { id: "17", value: "১৭. সাব লেজার ভিত্তিক রিপোর্ট" },
+    { id: "18", value: "১৮. জমা-খরচ ইউজার ভিত্তিক আলাদা" },
   ];
+
   const CAID = [
     { id: "1", value: "জমা" },
     { id: "2", value: "খরচ" }
   ];
 
   const reportFieldMap = {
-    SessionID: ["5", "8", "9", "10", "11", "12", "13", "14", "16", "17", "18", "19", "20", "21", "22", "23", "24", "26"],
-    ClassID: [ "5", "6", "7", "8", "9", "10", "11", "14", "18", "19", "21", "22", "23", "24", "26"],
-    gender: ["8", "12", "23", "26", "16"],
-    id: ["12", "17", "16", "18", "21"],
-    RDID: ["5", "8", "9", "12", "23", "26"],
-    IsActive: [ "5", "7", "8", "12", "15", "17", "18", "19", "20", "21", "22", "23"],
-    bookOfSubject: ["9", "11"],
-    classAndSubClassData: ["13"],
-    IsActiveAdmissionForm: ["14", "24"],
-    IdAdmissionRegister: ["16"],
+    SessionID: [ "11", "19", "20", "21", "22", "23", "24", "26"],
+    ClassID: [ "11", "19", "21", "22", "23", "24", "26"],
+    gender: ["23", "26"],
+    id: [ "21"],
+    RDID: ["23", "26"],
+    IsActive: ["15", "19", "20", "21", "22", "23"],
+    bookOfSubject: [ "11"],
+    classAndSubClassData: [],
+    IsActiveAdmissionForm: [ "24"],
+    IdAdmissionRegister: [],
     IdAdmissionForm: ["24"],
     addresss: ["25"],
-    dateFilter: ["1", "2"],
-    reportBase: ["3"],
-    CAID: ["3", "4"]
+    dateFilter: ["1", "2", "4", "5","7", "8", "9", "12", "14", "17"],
+    reportBase: ["3", "13", "16", "18"],
+    CAID: ["3", "4", "5", "6", "7", "12", "17"],
+    GLID: ["6", "7", "12", "17"],
+    SLID: ["17"],
+    LoginUaser: ["18"]
   };
 
   const ComingSoon = () => {
@@ -289,49 +317,21 @@ const DepositCostsReport = ({ pageTitle }) => {
         />
       ),
       3: <DepositeCostStatementVoucharWisePrint reportData={reportData} query={queryParams} />,
-      4: <StudentsListTwoColumns reportData={reportData} />,
-      5: (
-        <ParentsMobileNumberList
-          reportData={reportData}
-          SubClassID={SubClassID}
-          SessionID={SessionID}
-        />
-      ),
-      6: <JamaatWariBookList reportData={reportData} SubClassID={SubClassID} />,
-      7: <ComingSoon />,
-      8: (
-        <BanglaAttendence
-          reportData={reportData}
-          SubClassID={SubClassID}
-          SessionID={SessionID}
-        />
-      ),
-      9: (
-        <BanglaAttendenceSubjectWari
-          reportData={reportData}
-          SubClassID={SubClassID}
-          BookLine={BookLine}
-        />
-      ),
-      10: <ComingSoon />,
+      4: <DepositeCostStatementLedgerWiseShortPrint reportData={reportData} query={queryParams} />,
+      5: <DepositeCostStatementLedgerWiseShortPrint reportData={reportData} query={queryParams} />,
+      6: <SubLedgeWisePrint reportData={reportData} query={queryParams}/>,
+      7: <SubLedgeWisePrint reportData={reportData} query={queryParams}/>,
+      8: (<LedgerWiseConbineFundPrint reportData={reportData} query={queryParams}/>),
+      9: (<FundWiseDepositCostPrint reportData={reportData} query={queryParams}/>),
+      10: (<DipositeCostAllPaymentSystemDetails reportData={reportData} query={queryParams}/>),
       11: <ComingSoon />,
-      12: (
-        <AdmissionRegisterSerial
-          reportData={reportData}
-          SessionID={SessionID}
-        />
-      ),
-      13: <ComingSoon />,
-      14: <AdmissionFormPdf SubClassID={SubClassID} SessionID={SessionID} />,
+      12: (<DipositeCostGeneralLedegerReport reportData={reportData} query={queryParams}/>),
+      13: (<DipositeCostAllPaymentDetails reportData={reportData} query={queryParams}/>),
+      14: <DipositeCostPaymentSystemWise reportData={reportData} query={queryParams} />,
       15: <AdmissionFormPdf />,
-      16: <IdAdmissionRegister reportData={reportData} />,
-      17: (
-        <AdmissionResigterAllStudentsSerial
-          reportData={reportData}
-          SessionID={SessionID}
-        />
-      ),
-      18: <ImageWithAdmissionRegisterNewOld reportData={reportData} />,
+      16: <DipositeCostBookWiseVouture reportData={reportData} query={queryParams} />,
+      17: (<DepositCostSubLedgerReport reportData={reportData} query={queryParams}/>),
+      18: <DipositeCostUserWiseSeparate reportData={reportData} query={queryParams} />,
       19: <ParentsMobileNumberTwoColumn reportData={reportData} />,
       20: <ComingSoon />,
       21: <FinancialStatusBasedAdmissionRegister reportData={reportData} />,
@@ -346,13 +346,13 @@ const DepositCostsReport = ({ pageTitle }) => {
     setSelectedReportComponent(component);
 
     // Trigger print only if data is available and component is set
-    if (component && reportData && !isLoading) {
-      setTimeout(() => {
-        window.print();
-      }, 500);
-    } else {
-      console.warn("Cannot print: Data not ready or component not set.");
-    }
+    // if (component && reportData && !isLoading) {
+    //   setTimeout(() => {
+    //     window.print();
+    //   }, 500);
+    // } else {
+    //   console.warn("Cannot print: Data not ready or component not set.");
+    // }
     // reset();
   };
 
@@ -422,7 +422,7 @@ const DepositCostsReport = ({ pageTitle }) => {
                   ) : null
                 }
 
-              {reportFieldMap?.CAID.includes(selectedReportID) && report_base && report_base == 1 && (
+            {(reportFieldMap?.CAID?.includes(selectedReportID) || (report_base && report_base == 1)) && (
                 <DefaultSelect
                   label={translate("Chart Of Account")}
                   options={CAID ?? []}
@@ -431,7 +431,38 @@ const DepositCostsReport = ({ pageTitle }) => {
                   registerKey="CAID"
                   require={"Chart Of Account is Require"}
                 />
-              )}
+            )}
+            {(reportFieldMap?.GLID?.includes(selectedReportID)) && (
+                <DefaultSelect
+                  label={translate("General Ledger")}
+                  options={generalLedgersData ?? []}
+                  valueField="GLID"
+                  nameField="GlName"
+                  registerKey="GLID"
+                  require={"General Ledger is Require"}
+                />
+            )}
+            {(reportFieldMap?.SLID?.includes(selectedReportID)) && (
+                <DefaultSelect
+                  label={translate("Sub Ledger")}
+                  options={subLedgersData ?? []}
+                  valueField="SLID"
+                  nameField="SlName"
+                  registerKey="SLID"
+                  require={"General Ledger is Require"}
+                />
+            )}
+            {(reportFieldMap?.LoginUaser?.includes(selectedReportID)) && (
+                <DefaultSelect
+                  label={translate("User")}
+                  options={loginUsers ?? []}
+                  valueField="UserID"
+                  nameField="UserName"
+                  registerKey="UserID"
+                  require={"User ID is Require"}
+                  unicode={true}
+                />
+            )}
               {report_base == 1 && (
                 <div className="flex col-span-2 gap-4">
                   <DefaultInput
@@ -466,28 +497,8 @@ const DepositCostsReport = ({ pageTitle }) => {
                   registerKey="BookLine"
                 />
               )}
-              
-              {reportFieldMap.ClassID.includes(selectedReportID) && (
-                <DefaultSelect
-                  label={translate("SubClass") + " :"}
-                  options={subClassListData ?? []}
-                  valueField="SubClassID"
-                  nameField="SubClass"
-                  registerKey="SubClassID"
-                  unicode={true}
-                />
-              )}
-              
-              {reportFieldMap.gender.includes(selectedReportID) && (
-                <DefaultSelect
-                  label={<p className="text-gray-700 font-medium">{translate("Gender")}:</p>}
-                  options={genderOptions}
-                  valueField="id"
-                  nameField="value"
-                  registerKey="gender"
-                />
-              )}
-              
+
+
               {reportFieldMap.id.includes(selectedReportID) && (
                 <DefaultSelect
                   label={translate("New/Old") + " :"}

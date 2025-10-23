@@ -41,6 +41,7 @@ import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
 import DueOthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/DueOthersStudentFeeAcceptForm';
+import BankInfoSettings from '../view/accounting/BankInfoSettings';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -106,7 +107,7 @@ const DefaultModal = () => {
                 {modalType === 'ADD_FUND' && <FundForm />}
                 {modalType === 'OPEN_FUND' && <FundForm />}
                 {modalType === 'OPEN_GENERAL' && <GeneralForm />}
-                {modalType === 'OPEN_BANK_INFO' && <BankInfoSettings />}
+                {modalType === 'OPEN_BANK_INFO' && <BankInfoSettings/> }
                 {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
                 {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
                 {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}

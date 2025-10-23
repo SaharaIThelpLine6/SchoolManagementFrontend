@@ -83,22 +83,22 @@ const BankInfoSettings = () => {
     {
       title: translate("Code"),
       hozAlign: "center",
-      render: (row) => <>{row.SLID}</>,
+      render: (row) => <>{row?.SLID}</>,
     },
     {
       title: translate("Account Name"),
       hozAlign: "center",
-      render: (row) => <>{row.SlName}</>,
+      render: (row) => <>{row?.SlName}</>,
     },
     {
       title: translate("Account Number"),
       hozAlign: "center",
-      render: (row) => <>{row.AccBankInfo.AccountNumber}</>,
+      render: (row) => <>{row.AccBankInfo?.AccountNumber}</>,
     },
     {
       title: translate("Mobile"),
       hozAlign: "center",
-      render: (row) => <>{row.AccBankInfo.Phone1}</>,
+      render: (row) => <>{row.AccBankInfo?.Phone1}</>,
     }
   ];
   const onSubmit = async (data) => {

@@ -109,8 +109,8 @@ const AddStudent = ({ pageTitle }) => {
   };
 
   const columnsAdmitedStudent = [
-    { title: "User Id", field: "UserID", hozAlign: 'center' },
-    { title: "Admission No / Roll No", field: "AdmissionID", hozAlign: 'center' },
+    // { title: "User Id", field: "UserID", hozAlign: 'center' },
+    // { title: "Admission No / Roll No", field: "AdmissionID", hozAlign: 'center' },
     { title: "Student Id", field: "StudentCode", hozAlign: 'center', type: 'text', filterable: true },
     { title: "Name", field: "StudentName" },
     { title: "Class", field: "ClassName", hozAlign: 'center' },
@@ -178,7 +178,7 @@ const AddStudent = ({ pageTitle }) => {
     // }
   ];
   const columnsNotAdmitedStudent = [
-    { title: "User Id", field: "UserID", hozAlign: 'center' },
+    // { title: "User Id", field: "UserID", hozAlign: 'center' },
     { title: "Student Id", field: "UserCode", hozAlign: 'center' },
     { title: "Name", field: "UserName" },
     { title: "Class", field: "ClassName", hozAlign: 'center' },

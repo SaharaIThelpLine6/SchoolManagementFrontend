@@ -88,6 +88,9 @@ export const settingsSlice = createApi({
     getPoliceStations: builder.query({
       query: (id) => `thana?district_id=${id}`,
     }),
+    getLoginUsers: builder.query({
+      query: () => `login_users`,
+    }),
   }),
 });
 
@@ -106,5 +109,6 @@ export const {
   useUpdateSettingsMutation,
   useGetPermissionTypesQuery,
   useUpdateCodeSettingMutation,
-  useGetCodeSettingsQuery
+  useGetCodeSettingsQuery,
+  useGetLoginUsersQuery,
 } = settingsSlice;

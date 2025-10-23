@@ -74,7 +74,10 @@ export const userReportsSlice = createApi({
         CAID,
         start_vouture,
         end_vouture,
-        report_base
+        report_base,
+        GLID,
+        SLID,
+        UserID
       }) => {
         const params = new URLSearchParams({ report_id });
         if (FundID !== undefined) params.append("FundID", FundID);
@@ -85,9 +88,12 @@ export const userReportsSlice = createApi({
         // if (NewOldId !== undefined) params.append("NewOldId", NewOldId);
 
         if (CAID !== undefined) params.append("accCaid", CAID);
+        if (GLID !== undefined) params.append("GLID", GLID);
         if (start_vouture !== undefined) params.append("startVoucherNumber", start_vouture);
         if (end_vouture !== undefined) params.append("endVoucherNumber", end_vouture);
         if (report_base !== undefined) params.append("report_base", report_base);
+        if (SLID !== undefined) params.append("SLID", SLID);
+        if (UserID !== undefined) params.append("UserID", UserID);
 
         console.log(params);
         return `depositcost_report?${params.toString()}`;
