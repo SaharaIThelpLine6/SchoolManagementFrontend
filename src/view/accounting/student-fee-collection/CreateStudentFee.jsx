@@ -341,7 +341,7 @@ const CreateStudentFee = () => {
         CurrentPaid: studentFeeData.currentDeposit,
         Due: totalDue,
         AmountInWord: data.speakCurrentDeposit,
-        CreateAt: data.EntryDate,
+        CreateAt: data.EntryDate ? data.EntryDate : new Date(),
         Remark: data.Remark,
         AccountType: data.GLID,
         Account: data.SLID,
@@ -351,6 +351,7 @@ const CreateStudentFee = () => {
       };
 
       await postStudentFee(payload).unwrap();
+
       // ✅ শুধুমাত্র যখন AdmissionID থাকে তখনই refetch করবে
       if (filteredSelectedPerStudentFee?.AdmissionID) {
         studentOthersDueRefetch();
@@ -499,6 +500,7 @@ const CreateStudentFee = () => {
   {
     userInfoLoading && <Loading />;
   }
+
 
   return (
     <div className="">
@@ -741,7 +743,6 @@ const CreateStudentFee = () => {
                 <DatePickerOne
                   dateCalender="Entry Date"
                   registerKey="EntryDate"
-                  require={true}
                   placeholder="তারিখ নির্বাচন করুন"
                 />
                 <DefaultSelect

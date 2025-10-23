@@ -46,7 +46,7 @@ const MonthStudentFeeForm = ({ pageTitle }) => {
 
   const data = studentMonthFeeData?.data[0];
   const totalAmount =
-    studentMonthFeeData?.data[0].landFeeWithMonths.totalAmount;
+    studentMonthFeeData?.data[0].landFeeWithMonths?.totalAmount;
 
   // ✅ Set values when filteredSelectedPerStudentFee changes
   useEffect(() => {

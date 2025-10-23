@@ -8,59 +8,59 @@ const DatePickerOne = ({
   registerKey,
   require,
   disable = false,
-  labelPosition = "top", // 'top' or 'left'
-  defaultValue = null, // নতুন prop
+  labelPosition = 'top',
+  defaultValue = null, // ডাটাবেস থেকে আসা ডেট
 }) => {
   const {
     control,
-    setValue,
     formState: { errors },
   } = useFormContext();
   const translate = useTranslate();
 
-  // আজকের তারিখ ব্যবহার করবো যদি placeholder বা defaultValue না থাকে
   const today = new Date();
+
+  // ✅ Default date নির্ধারণ (যদি defaultValue থাকে সেটাকে Date বানাও)
+  const initialDate = defaultValue ? new Date(defaultValue) : today;
 
   return (
     <div
       className={`w-full ${
-        labelPosition === "left" ? "flex items-center gap-4" : ""
+        labelPosition === 'left' ? 'flex items-center gap-4' : ''
       }`}
     >
-      {/* Label */}
       {dateCalender && (
         <label
           htmlFor={registerKey}
           className={`text-black font-SolaimanLipi ${
-            labelPosition === "left"
-              ? "w-1/4 min-w-[100px] mb-0 text-end"
-              : "mb-1 block"
+            labelPosition === 'left'
+              ? 'w-1/4 min-w-[100px] mb-0 text-end'
+              : 'mb-1 block'
           }`}
         >
           {translate(dateCalender)} :
         </label>
       )}
 
-      {/* Date Picker */}
-      <div className={labelPosition === "left" ? "flex-1" : "w-full"}>
+      <div className={labelPosition === 'left' ? 'flex-1' : 'w-full'}>
         <Controller
           name={registerKey}
           control={control}
-          defaultValue={defaultValue ?? today} // ✅ defaultValue সেট করা হলো
+          defaultValue={initialDate}
           rules={{
-            required: require ? "এই ফিল্ডটি প্রয়োজনীয়" : false,
+            required: require ? 'এই ফিল্ডটি প্রয়োজনীয়' : false,
           }}
-          render={({ field }) => (
+          render={({ field: { onChange, value } }) => (
             <Flatpickr
               disabled={disable}
-              placeholder={placeholder ?? today.toISOString().split("T")[0]} // ✅ placeholder live date
+              value={value}
+              onChange={(dates) => onChange(dates[0])}
+              placeholder={placeholder ?? today.toISOString().split('T')[0]}
               options={{
-                dateFormat: "Y-m-d",
+                dateFormat: 'Y-m-d',
               }}
               className={`w-full rounded border-[1.5px] border-stroke bg-white py-1 px-4 text-black outline-none transition
                 focus:border-custom-focus active:border-custom-focus
                 disabled:cursor-not-allowed disabled:bg-slate-200 h-[38px]`}
-              {...field}
             />
           )}
         />

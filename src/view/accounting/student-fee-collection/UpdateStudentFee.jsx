@@ -21,6 +21,7 @@ import {
   usePutUpdateStudentFeeMutation,
 } from '../../../features/feeCollection/feeCollectionSlice';
 import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
+import { setStudentFeeUpdateID } from '../../../features/student/studentSlice';
 import { numberToBanglaWords } from '../../../helper/numberToBanglaWords';
 import { useDefaultSession } from '../../../hooks/useDefaultSession';
 import bnBijoy2Unicode from '../../../utils/conveter';
@@ -55,11 +56,13 @@ const UpdateStudentFee = () => {
       Remark: '',
       SessionID: defaultSessionId || '',
       IsActive: 1,
-      EntryDate: new Date(),
+      EntryDate: "",
       fees: [],
       prescribedFee: 0,
       deduction: 0,
       currentDeposit: 0,
+      SLID: 0,
+      GLID: 0,
     },
     shouldFocusError: false,
   });
@@ -70,7 +73,7 @@ const UpdateStudentFee = () => {
   const [GLID, SessionID] = watch(['GLID', 'SessionID']);
 
   // Student data query
-  const { data: studentFeeUpdateData } =
+  const { data: studentFeeUpdateData, refetch: refetchData } =
     useGetStudentFeeUpdateGetDataByUFOIDQuery(studentFeeUpdateID, {
       skip: !studentFeeUpdateID,
     });
@@ -156,6 +159,10 @@ const UpdateStudentFee = () => {
         due: item.NetPayable || 0,
         TransactionID: item.TransactionID || 0,
         UFODID: item.UFODID || 0,
+        ExamID: item.ExamID || 0,
+        OrderID: item.OrderID || 0,
+        FundID: item.FundID || 0,
+        MonthID: item.MonthID || 0,
       }));
 
       setDefaultFees(formattedFees);
@@ -167,8 +174,11 @@ const UpdateStudentFee = () => {
         setValue('deduction', studentFeeUpdateData.deduction || 0);
         setValue('currentDeposit', studentFeeUpdateData.currentDeposit || 0);
       }, 0);
+
     }
   }, [studentFeeUpdateData, setValue]);
+
+
 
   // ✅ FIXED: Optimized totals calculation with useMemo
   const recalculateTotals = useCallback(() => {
@@ -263,22 +273,40 @@ const UpdateStudentFee = () => {
   }, [defaultSessionId, setValue]);
 
   // ✅ FIXED: Single effect for form reset on student data change
-  useEffect(() => {
-    const currentSession = getValues('SessionID');
+useEffect(() => {
+  const currentSession = getValues('SessionID');
 
-    if (studentFeeUpdateData) {
-      reset({
-        ID: studentFeeUpdateData.UserID ?? '',
-        StudentCode: studentFeeUpdateData.StudentCode ?? '',
-        SessionID: currentSession || defaultSessionId,
-        Remark: studentFeeUpdateData.Remark ?? '',
-        fees: defaultFees,
-        prescribedFee: 0,
-        deduction: 0,
-        currentDeposit: 0,
-      });
-    }
-  }, [studentFeeUpdateData, reset, getValues, defaultSessionId, defaultFees]);
+  if (studentFeeUpdateData) {
+    // Step 1️⃣: প্রথমে GLID, বেসিক ফর্ম রিসেট করা
+    reset({
+      ID: studentFeeUpdateData.UserID ?? '',
+      StudentCode: studentFeeUpdateData.StudentCode ?? '',
+      GLID: studentFeeUpdateData.AccountType ?? '',
+      EntryDate: studentFeeUpdateData.CreateAt,
+      SessionID: currentSession || defaultSessionId,
+      Remark: studentFeeUpdateData.Remark ?? '',
+      fees: defaultFees,
+      prescribedFee: 0,
+      deduction: 0,
+      currentDeposit: 0,
+    });
+
+    // Step 2️⃣: কিছুক্ষণ পর (GLID সেট হওয়ার পর) SLID সেট করা
+    const timer = setTimeout(() => {
+      setValue('SLID', studentFeeUpdateData.Account ?? '');
+    }, 300); // 300ms delay রাখো যাতে dependent dropdown রেন্ডার হয়ে যায়
+
+    return () => clearTimeout(timer);
+  }
+}, [
+  studentFeeUpdateData,
+  reset,
+  getValues,
+  defaultSessionId,
+  defaultFees,
+  setValue,
+]);
+
 
   // Search and form handlers
   const handleOpenModal = useCallback(() => {
@@ -322,6 +350,7 @@ const UpdateStudentFee = () => {
   };
 
   const handleResetPage = () => {
+    refetchData();
     const currentSession = getValues('SessionID');
 
     reset({
@@ -340,6 +369,7 @@ const UpdateStudentFee = () => {
     });
 
     setFilterData(null);
+    dispatch(setStudentFeeUpdateID(null))
     setTotalDue(0);
     setDefaultFees([]);
     setLogo(null);
@@ -363,6 +393,7 @@ const UpdateStudentFee = () => {
         AdmissionID: studentFeeUpdateData.AdmissionID,
         TransactionID: studentFeeUpdateData?.TransactionID,
         UFOID: studentFeeUpdateData?.UFOID,
+        OrderID: studentFeeUpdateData?.OrderID,
         fees: fees.map((fee) => ({
           SLID: fee.SLID,
           SlName: fee.SlName,
@@ -376,6 +407,10 @@ const UpdateStudentFee = () => {
           due: fee.due ?? 0,
           TransactionID: fee.TransactionID ?? 0,
           UFODID: fee.UFODID ?? 0,
+          ExamID: fee.ExamID || 0,
+          OrderID: fee.OrderID || 0,
+          FundID: fee.FundID || 0,
+          MonthID: fee.MonthID || 0,
         })),
         CurrentInvoice: getValues('prescribedFee'),
         InvoiceDiscount: getValues('deduction'),
@@ -388,7 +423,7 @@ const UpdateStudentFee = () => {
         Account: data.SLID,
       };
 
-      await putStudentFee(payload).unwrap();
+      // await putStudentFee(payload).unwrap();
       console.log('Form submitted with data:', payload);
 
       Swal.fire({
@@ -665,7 +700,10 @@ const UpdateStudentFee = () => {
                   registerKey="EntryDate"
                   require={true}
                   placeholder="তারিখ নির্বাচন করুন"
+                  defaultValue={studentFeeUpdateData?.CreateAt}
+                  disable={false}
                 />
+
                 <DefaultSelect
                   label="Account Type"
                   options={glbc.data ?? []}
