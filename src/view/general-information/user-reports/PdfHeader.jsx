@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
-import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import { Buffer } from "buffer";
+import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import { enToBnNumber } from "../../../helper/languageFormat";
+import bnBijoy2Unicode from "../../../utils/conveter";
 
 const PdfHeader = () => {
   const {
@@ -55,9 +56,13 @@ console.log(institutionInfo);
 
       {/* Text in the center */}
       <div className="flex-1 text-center">
-        <h1 className="text-xl font-bold">{institutionInfo?.InstitutionName}</h1>
-        <p className="text-sm">{institutionInfo?.Address}</p>
-        <p className="text-sm">{enToBnNumber(institutionInfo?.ContactNumber)}</p>
+        <h1 className="text-xl font-bold">
+          {bnBijoy2Unicode(institutionInfo?.InstitutionName)}
+        </h1>
+        <p className="text-sm">{bnBijoy2Unicode(institutionInfo?.Address)}</p>
+        <p className="text-sm">
+          {enToBnNumber(institutionInfo?.ContactNumber)}
+        </p>
       </div>
 
       {/* Empty placeholder for symmetry */}

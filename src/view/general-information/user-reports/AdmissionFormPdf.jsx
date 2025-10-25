@@ -127,23 +127,23 @@ const AdmissionFormPdf = ({SubClassID, SessionID}) => {
               <p className="text-xs font-bold w-20">নাম</p>
               <p className="text-2xs">: </p>
             </div>
-            <div className="mb-0 flex">
+            <div className="mb-1 flex">
               <p className="text-xs font-bold w-20">পিতার নাম</p>
               <p className="text-2xs">: </p>
             </div>
-            <div className="mb-0 flex">
+            <div className="mb-1 flex">
               <p className="text-xs font-bold w-20">মাতার নাম</p>
               <p className="text-2xs">: </p>
             </div>
-            <div className="mb-0 flex">
+            <div className="mb-1 flex">
               <p className="text-xs font-bold w-20">জন্ম তারিখ</p>
               <p className="text-2xs">: </p>
             </div>
-            <div className="mb-0 flex">
+            <div className="mb-1 flex">
               <p className="text-xs font-bold w-24">NID/জন্ম নিবন্ধন নং</p>
               <p className="text-2xs">: </p>
             </div>
-            <div className="mb-0 flex">
+            <div className="mb-1 flex">
               <p className="text-xs font-bold w-26">অভিভাবকের মোবাইল</p>
               <p className="text-2xs">: </p>
             </div>

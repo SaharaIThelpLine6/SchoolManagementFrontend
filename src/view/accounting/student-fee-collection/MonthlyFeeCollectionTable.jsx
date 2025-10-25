@@ -37,6 +37,8 @@ const MonthlyFeeCollectionTable = () => {
       }
     );
 
+    console.log(data, 'data');
+
   // Log API response for debugging
   useEffect(() => {
     console.log('useGetFeeLandByAdmissionQuery response:', {
