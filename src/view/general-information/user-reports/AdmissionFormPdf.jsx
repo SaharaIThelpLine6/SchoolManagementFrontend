@@ -1,17 +1,22 @@
-import React from "react";
-import PdfHeader from "./PdfHeader";
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
+import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../../utils/conveter";
+import PdfHeader from "./PdfHeader";
 
 const AdmissionFormPdf = ({SubClassID, SessionID}) => {
 
    const { data: subClassListData } = useGetSubClassListQuery();
+    const {
+       data: institutionInfo,
+       error: institutionInfoError,
+       isLoading: institutionInfoLoading,
+     } = useGetInstitutionInfoQuery();
     const subClasData = subClassListData?.find(
       (i) => i.SubClassID === Number(SubClassID)
     );
     const { data: sessionSData } = useGetSessionsQuery();
-  
+
     const sessionData = sessionSData?.find(
       (i) => i.SessionID === Number(SessionID)
     );
@@ -24,13 +29,13 @@ const AdmissionFormPdf = ({SubClassID, SessionID}) => {
     <div
       className="w-full"
       style={{
-        width: "210mm",
-        height: "270mm", // Fixed height for one page
-        margin: "0 auto",
+        width: '210mm',
+        height: '270mm', // Fixed height for one page
+        margin: '0 auto',
         fontFamily: "'SolaimanLipi', 'Bangla', sans-serif",
-        fontSize: "12px", // Reduced font size
-        lineHeight: "1.4", // Tighter line height
-        padding: "5mm", // Reduced padding
+        fontSize: '12px', // Reduced font size
+        lineHeight: '1.4', // Tighter line height
+        padding: '5mm', // Reduced padding
       }}
     >
       <div className="bg-white text-black">
@@ -45,8 +50,12 @@ const AdmissionFormPdf = ({SubClassID, SessionID}) => {
               <h2 className="border border-black px-1 text-xs">বিগত তথ্য</h2>
             </div>
             <div className="flex-grow">
-              <p className="text-2xs mb-0">জামায়াত :{SubClassName ? SubClassName : ""} </p>
-              <p className="text-2xs mb-0">শিক্ষাবর্ষ : {SessionName ? SessionName : ""}</p>
+              <p className="text-2xs mb-0">
+                জামায়াত :{SubClassName ? SubClassName : ''}{' '}
+              </p>
+              <p className="text-2xs mb-0">
+                শিক্ষাবর্ষ : {SessionName ? SessionName : ''}
+              </p>
               <p className="text-2xs">আইডি : </p>
             </div>
           </div>
@@ -87,15 +96,23 @@ const AdmissionFormPdf = ({SubClassID, SessionID}) => {
 
         {/* Pledge Section - Made more compact */}
         <div className="mb-2">
-          <p className="text-2xs leading-4 text-justify">
-            মুহাতারাম,
-            <br />
-            <p className="ml-10">আসসালামু আলাইকুম,</p>
-            <p className="ml-30"> হযরত মুহাতামিম সাহেব (দা. বা.),</p>
-            ওয়ারাহমাতুল্লাহ আমি নিজের নামে, আমার পিতা ও মাতা এবং আমার
-            পূর্বপুরুষদের নামে গ্রহণকৃত সকল ধরনের কঠিন শপথ ও প্রতিজ্ঞা সত্ত্বেও
-            আমি এই প্রতিশ্রুতি গ্রহণ করছি যে, আমি জীবনের শেষ দিন পর্যন্ত জামাতে
-            থাকব এবং জামাতের নির্দেশনা মেনে চলব।
+          <p className="text-2xs">মুহতারাম,</p>
+          <p className="ml-8 text-2xs">হযরত মুহতামিম সাহেব (দা. বা.)</p>
+
+          <p className="mt-2 ml-20 text-2xs">
+            আসসালামু আলাইকুম ওয়া রহমাতুল্লাহ
+          </p>
+
+          <p className="mt-2 text-2xs">
+            বিনীত নিবেদন এই যে, আমি{' '}
+            {bnBijoy2Unicode(institutionInfo?.InstitutionName)} এর যাবতীয় কানুন
+            ও নীতিমালা মেনে চলার অঙ্গীকারে আবদ্ধ হয়ে ভর্তি হওয়ার জন্য বিনীত
+            আবেদন করছি।
+          </p>
+
+          <p className=" text-2xs">
+            হুজুরের খেলমতে আরজ এই যে, আমার আবেদন মঞ্জুর করতঃ অত্র মাদরাসা হতে
+            দ্বীন হাসিল করার সুযোগ প্রদানের জন্য আপনার মর্জি হয়।
           </p>
         </div>
 

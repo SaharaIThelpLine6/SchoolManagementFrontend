@@ -128,7 +128,7 @@ const TodayFeeCollection = ({ pageTitle }) => {
       ),
     },
     {
-      title: 'UFOID',
+      title: translate('Receipt No'),
       field: 'UFOID',
       hozAlign: 'center',
       render: (row) => row.UFOID,

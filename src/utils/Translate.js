@@ -35,6 +35,7 @@ const useTranslate = () => {
     'Search Id': 'আইডি দিয়ে সার্চ করুন',
     'Card Name': 'কার্ড নাম',
     Card: 'কার্ড',
+    'Receipt No': 'রশিদ নং',
     'Acc Rosid Satting': 'হিসাব রসিদ সেটিং',
     'Message Admission': 'ভর্তি মেসেজ',
     'Donor SMS': 'দানকারী এসএমএস',
