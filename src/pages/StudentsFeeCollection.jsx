@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { setStudentFeeUpdateID } from '../features/student/studentSlice';
 import CreateStudentFee from '../view/accounting/student-fee-collection/CreateStudentFee';
+import StudentFeeReportPdf from '../view/accounting/student-fee-collection/StudentFeeReportPdf';
 import TodayFeeCollection from '../view/accounting/student-fee-collection/TodayFeeCollection';
 import UpdateStudentFee from '../view/accounting/student-fee-collection/UpdateStudentFee';
 
@@ -25,6 +26,7 @@ const StudentsFeeCollection = () => {
 
       {/* ✅ Always show today's fee collection section */}
       <TodayFeeCollection />
+      {/* <StudentFeeReportPdf /> */}
     </div>
   );
 };
