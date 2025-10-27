@@ -33,6 +33,8 @@ import { useDefaultSession } from '../../../hooks/useDefaultSession';
 import bnBijoy2Unicode from '../../../utils/conveter';
 import { showModal } from '../../../utils/ModalControlar';
 import useTranslate from '../../../utils/Translate';
+import SMSLogo from '/smslogo.png';
+
 import MonthlyFeeCollectionTable from '../../../view/accounting/student-fee-collection/MonthlyFeeCollectionTable';
 
 const CreateStudentFee = () => {
@@ -250,6 +252,9 @@ const CreateStudentFee = () => {
 
   const handleOpenModal = useCallback(() => {
     showModal('Selected Per Student Fee', 'SELECTED_PERSTUDENT_FEE_FILTER');
+  }, []);
+  const handleOpenSmsFeeModal = useCallback(() => {
+    showModal('Student Fee SMS Tamplate', 'STUDENT_FEE_SMS_TAMPLATE');
   }, []);
 
   const handleOthersFeeOpenModal = useCallback(() => {
@@ -500,7 +505,6 @@ const CreateStudentFee = () => {
   {
     userInfoLoading && <Loading />;
   }
-
 
   return (
     <div className="">
@@ -766,21 +770,37 @@ const CreateStudentFee = () => {
                 />
               </div>
             </div>
-            <div className="flex gap-4">
-              <Button
-                type="submit"
-                className="px-8 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition"
-              >
-                Save
-              </Button>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex gap-4">
+                <Button
+                  type="submit"
+                  className="px-8 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition"
+                >
+                  Save
+                </Button>
 
-              <Button
-                type="button"
-                onClick={handleResetPage}
-                className="px-8 py-3 bg-red-500 text-white text-lg font-semibold rounded-lg hover:bg-red-600 transition"
-              >
-                Reset
-              </Button>
+                <Button
+                  type="button"
+                  onClick={handleResetPage}
+                  className="px-8 py-3 bg-red-500 text-white text-lg font-semibold rounded-lg hover:bg-red-600 transition"
+                >
+                  Reset
+                </Button>
+              </div>
+              <div className="flex gap-4">
+                <img
+                  src={SMSLogo}
+                  alt="Logo"
+                  className="h-10 w-auto object-contain mb-1"
+                />
+                <Button
+                  type="button"
+                  onClick={handleOpenSmsFeeModal}
+                  className="px-3 rounded-full py-3 bg-gray-500 text-white text-lg font-semibold hover:bg-gray-600 transition"
+                >
+                  <SvgIcon name={'Setting'} size={20} />
+                </Button>
+              </div>
             </div>
 
             {/* Fee Buttons & Table অংশ অপরিবর্তিত... (পুরোটা কপি করুন আপনার অরিজিনাল থেকে) */}

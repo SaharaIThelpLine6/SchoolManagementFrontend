@@ -117,13 +117,17 @@ const TodayFeeCollection = ({ pageTitle }) => {
         <div className="flex justify-center items-center gap-2">
           {' '}
           <EditButton onClick={() => handleEditOpenModal(row.UFOID)} />
-          <button
-            className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 rounded-md shadow-md hover:shadow-lg transition duration-200"
-            title="Print"
-          >
-            {' '}
-            <SvgIcon name="MdLocalPrintshop" />{' '}
-          </button>{' '}
+          <div className="">
+            <button
+              onClick={() => window.print()}
+              className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 rounded-md shadow-md hover:shadow-lg transition duration-200"
+              title="Print"
+            >
+              {' '}
+              <SvgIcon name="MdLocalPrintshop" />{' '}
+            </button>{' '}
+
+          </div>
         </div>
       ),
     },
@@ -196,10 +200,12 @@ const TodayFeeCollection = ({ pageTitle }) => {
 
   return (
     <FormProvider {...methods}>
-      <div className="font-lato bg-white md:p-4 rounded-xl shadow-lg my-5">
+      <div className="font-lato bg-white md:p-4 rounded-xl shadow-lg my-5 ">
         <form onSubmit={handleSubmit(onFilterSubmit)}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4 bg-gradient-to-br px-3 sm:px-4 from-blue-50 to-blue-100 shadow-lg rounded-xl
-           py-4 sm:py-3 gap-4 sm:gap-5">
+          <div
+            className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4 bg-gradient-to-br px-3 sm:px-4 from-blue-50 to-blue-100 shadow-lg rounded-xl
+           py-4 sm:py-3 gap-4 sm:gap-5"
+          >
             {/* 🔹 Filter Row 1: Date */}
             <div className="flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-3 sm:gap-4 lg:col-span-2 xl:col-span-1">
               <div className="flex-1">

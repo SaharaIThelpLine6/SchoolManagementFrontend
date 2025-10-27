@@ -2,6 +2,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { closeModal } from '../features/modal/modalSlice';
 import useTranslate from '../utils/Translate';
 import BalanceTransferModal from '../view/accounting/BalanceTransferModal';
+import BankInfoSettings from '../view/accounting/BankInfoSettings';
 import FundForm from '../view/accounting/FundForm';
 import GeneralForm from '../view/accounting/GeneralForm';
 import ReportSettings from '../view/accounting/ReportSettings';
@@ -10,6 +11,8 @@ import SubGeneralForm from '../view/accounting/SubGeneralForm';
 import TodaysBalance from '../view/accounting/TodaysBalance';
 import Statement from '../view/accounting/dues-list/Statement';
 import AccExamFeeCollector from '../view/accounting/student-exam-fee/AccExamFeeCollector';
+import DueOthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/DueOthersStudentFeeAcceptForm';
+import FeeSMSTamplateModal from '../view/accounting/student-fee-collection/FeeSMSTamplateModal';
 import MonthStudentFeeForm from '../view/accounting/student-fee-collection/MonthStudentFeeForm';
 import OthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/OthersStudentFeeAcceptForm';
 import StudentAdmissionFeeAcceptForm from '../view/accounting/student-fee-collection/StudentAdmissionFeeAcceptForm';
@@ -40,8 +43,6 @@ import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
 import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
-import DueOthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/DueOthersStudentFeeAcceptForm';
-import BankInfoSettings from '../view/accounting/BankInfoSettings';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -107,12 +108,15 @@ const DefaultModal = () => {
                 {modalType === 'ADD_FUND' && <FundForm />}
                 {modalType === 'OPEN_FUND' && <FundForm />}
                 {modalType === 'OPEN_GENERAL' && <GeneralForm />}
-                {modalType === 'OPEN_BANK_INFO' && <BankInfoSettings/> }
+                {modalType === 'OPEN_BANK_INFO' && <BankInfoSettings />}
                 {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
                 {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
                 {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
                 {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
                 {modalType === 'STUDENT_FEE_GROUP' && <StudentFeeGroup />}
+                {modalType === 'STUDENT_FEE_SMS_TAMPLATE' && (
+                  <FeeSMSTamplateModal />
+                )}
                 {modalType === 'EDIT_TYPEOFVACATION' && (
                   <TypeOfVacationForm userId={id} />
                 )}

@@ -55,6 +55,7 @@ const useTranslate = () => {
     'Add Donor fee to Accounting': 'দান ফি হিসাবেতে যোগ',
     'Gate Pass Receipt': 'গেট পাস রসিদ',
     Receipt: 'রসিদ',
+    "Receipt Type": 'রসিদের ধরণ',
     'Month ID': 'মাস আইডি',
     'Teach Salary System Setting': 'শিক্ষক বেতন সিস্টেম সেটিং',
     'User gender': 'ব্যবহারকারীর লিঙ্গ',

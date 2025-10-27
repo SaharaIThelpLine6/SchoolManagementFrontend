@@ -1,35 +1,29 @@
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import {
-    useCreatePaymentRequestMutation,
-    useGetUserInfoQuery,
+  useCreatePaymentRequestMutation,
+  useGetUserInfoQuery,
 } from '../../features/payment/paymentSlice';
 import DefaultSelect from '../Forms/DefaultSelect';
+
 import BkashLogo from '/banking/BKash.png';
 import CelfinLogo from '/banking/CellFin.png';
 import NagadLogo from '/banking/nagad-removebg-preview.png';
-const BASE_URL = import.meta.env.VITE_BASE_URL;
-const PaymentModal = () => {
-  const [amount, setAmount] = useState('');
-  const [
-    createPaymentRequest,
-    { isLoading, isError, isSuccess, data: paymentMethodData },
-  ] = useCreatePaymentRequestMutation();
-  const { data: userPayInfo } = useGetUserInfoQuery();
-  const [req, setReq] = useState(true);
-  // const {
-  //     watch,
-  //     handleSubmit,
-  //     setValue,
-  //     reset
-  // } = useForm();
-  const methods = useForm();
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+const PaymentModal = () => {
+  const methods = useForm();
   const { user } = useSelector((state) => state.auth);
-  const navigate = useNavigate();
+  const { data: userPayInfo } = useGetUserInfoQuery();
+  const [createPaymentRequest, { isLoading }] =
+    useCreatePaymentRequestMutation();
+  const [req, setReq] = useState(true);
+
   const { service, size } = methods.watch();
+
+  // 🔹 Price Calculation Function
   function calculateServicePlanPrice(oldQuota, newQuota) {
     const pricingTiers = [
       { limit: 100, price: 10000 },
@@ -59,124 +53,78 @@ const PaymentModal = () => {
 
     return totalCost;
   }
+
   useEffect(() => {
     methods.reset({
       size: '',
       service: '',
     });
   }, []);
-  // useEffect(() => {
-  //     setValue("size", 0)
-  // }, [service]);
 
-  const handlePayNow = () => {
-    alert(`Paying ${amount}`);
-  };
+  // 🧾 Unified Payment Function
+  const handlePayment = async (method) => {
+    const data = methods.getValues();
 
-  const onSubmit = async (data) => {
-    // console.log(user.schoolId);
+    if (!data.service || !data.size) {
+      alert('Please select service and size before payment.');
+      return;
+    }
 
     const paymentRequest = {
       ...data,
-      // mode: "0011",
-      // payerReference: "01770618575",
+      method, // 🔹 identifies which gateway is used
       callbackURL: `${BASE_URL}/payment_confirm/${user.schoolId}/${data.service}/${data.size}`,
       schoolId: user.schoolId,
-      // merchantAssociationInfo: "MI05MID54RF09123456One",
-      // amount: "500",
-      // currency: "BDT",
-      // intent: "sale",
-      // merchantInvoiceNumber: "0124456491098",
-      // merchantAssociationInfo: "MI01"
     };
-    // console.log(paymentRequest);
-    if (req) {
+
+    if (!req) return;
+
+    try {
       setReq(false);
-      await createPaymentRequest(paymentRequest)
-        .unwrap()
-        .then((payload) => {
-          sessionStorage.clear();
-          setReq(true);
-          window.location.href = payload.bkashURL;
-        })
-        .catch((error) => {
-          setPaymentStatus(error.data?.error ? error.data.error : 'Failed');
-          setReq(true);
-        });
+      const payload = await createPaymentRequest(paymentRequest).unwrap();
+      sessionStorage.clear();
+      setReq(true);
+
+      // 🔹 Redirect Based on Gateway
+      const redirectMap = {
+        bkash: payload.bkashURL,
+        nagad: payload.nagadURL,
+        cellfin: payload.cellfinURL,
+      };
+
+      if (redirectMap[method]) {
+        window.location.href = redirectMap[method];
+      } else {
+        console.error('Unknown payment method:', method);
+      }
+    } catch (error) {
+      console.error('Payment failed:', error);
+      setReq(true);
     }
   };
 
-  // console.log(service);
   const years = [
-    {
-      id: 1,
-      name: '1',
-    },
-    {
-      id: 2,
-      name: '2',
-    },
-    {
-      id: 3,
-      name: '3',
-    },
+    { id: 1, name: '1' },
+    { id: 2, name: '2' },
+    { id: 3, name: '3' },
   ];
+
   const quota = [
-    {
-      id: 100,
-      name: '100',
-    },
-    {
-      id: 200,
-      name: '200',
-    },
-    {
-      id: 300,
-      name: '300',
-    },
-    {
-      id: 400,
-      name: '400',
-    },
-    {
-      id: 500,
-      name: '500',
-    },
-    {
-      id: 600,
-      name: '600',
-    },
-    {
-      id: 700,
-      name: '700',
-    },
-    {
-      id: 800,
-      name: '800',
-    },
-    {
-      id: 900,
-      name: '900',
-    },
-    {
-      id: 1000,
-      name: '1000',
-    },
+    { id: 100, name: '100' },
+    { id: 200, name: '200' },
+    { id: 300, name: '300' },
+    { id: 400, name: '400' },
+    { id: 500, name: '500' },
+    { id: 600, name: '600' },
+    { id: 700, name: '700' },
+    { id: 800, name: '800' },
+    { id: 900, name: '900' },
+    { id: 1000, name: '1000' },
   ];
-  // if (isSuccess) {
-  //     sessionStorage.clear();
-  //     console.log("session clear");
-  //     setTimeout(() => {
-  //         window.location.href = paymentMethodData.bkashURL;
-  //     }, 100);
 
-  //     // window.location.href = paymentMethodData.bkashURL;
-  // }
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <p className="text-center text-gray-600">Processing Payment...</p>;
   }
-
-  const handlePayment = () => {};
 
   return (
     <div className="flex justify-center items-center min-h-[70vh]">
@@ -186,7 +134,7 @@ const PaymentModal = () => {
         </h2>
 
         <FormProvider {...methods}>
-          <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-5">
+          <form className="space-y-5">
             {/* 🔹 Choose Service */}
             <DefaultSelect
               label="Choose Service"
@@ -218,12 +166,10 @@ const PaymentModal = () => {
                 <p className="text-lg font-bold text-green-700">
                   {service === 1
                     ? `${size * 3000} ৳`
-                    : service === 2
-                    ? `${calculateServicePlanPrice(
-                        userPayInfo.BalanceDr ? userPayInfo.BalanceDr : 0,
-                        size ? size : 0
-                      )} ৳`
-                    : null}
+                    : `${calculateServicePlanPrice(
+                        userPayInfo?.BalanceDr || 0,
+                        size
+                      )} ৳`}
                 </p>
               </div>
             )}
@@ -267,19 +213,19 @@ const PaymentModal = () => {
                   </span>
                 </button>
 
-                {/* Selfin */}
+                {/* CellFin */}
                 <button
                   type="button"
-                  onClick={() => handlePayment('selfin')}
+                  onClick={() => handlePayment('cellfin')}
                   className="flex flex-col items-center justify-center bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl p-3 transition-all duration-200 shadow-sm hover:shadow-md"
                 >
                   <img
                     src={CelfinLogo}
-                    alt="Selfin"
+                    alt="CellFin"
                     className="h-10 w-auto object-contain mb-1"
                   />
                   <span className="text-xs text-blue-700 font-medium">
-                    Selfin
+                    CellFin
                   </span>
                 </button>
               </div>
@@ -292,18 +238,6 @@ const PaymentModal = () => {
 };
 
 export default PaymentModal;
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import React, { useEffect, useState } from 'react';
 // import DefaultSelect from '../Forms/DefaultSelect';

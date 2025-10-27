@@ -20,13 +20,17 @@ const StudentsFeeCollection = () => {
   }, [dispatch, location.pathname]);
 
   return (
-    <div className="space-y-5">
-      {/* ✅ Conditional rendering based on studentFeeUpdateID */}
-      {studentFeeUpdateID ? <UpdateStudentFee /> : <CreateStudentFee />}
+    <div className="">
+      <div className="space-y-5 print:hidden">
+        {/* ✅ Conditional rendering based on studentFeeUpdateID */}
+        {studentFeeUpdateID ? <UpdateStudentFee /> : <CreateStudentFee />}
 
-      {/* ✅ Always show today's fee collection section */}
-      <TodayFeeCollection />
-      {/* <StudentFeeReportPdf /> */}
+        {/* ✅ Always show today's fee collection section */}
+        <TodayFeeCollection />
+      </div>
+      <div className="hidden print:block">
+        <StudentFeeReportPdf />
+      </div>
     </div>
   );
 };

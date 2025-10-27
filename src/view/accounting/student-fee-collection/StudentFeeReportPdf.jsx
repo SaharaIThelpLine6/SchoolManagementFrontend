@@ -45,10 +45,10 @@ const StudentFeeReportPdf = ({ SubClassID, SessionID }) => {
         fontFamily: "'SolaimanLipi', 'Bangla', sans-serif",
         fontSize: '12px',
         lineHeight: '1.4',
-        padding: '5mm',
+        // padding: '5mm',
       }}
     >
-      <div className="bg-white text-black">
+      <div className="bg-white text-black font-SolaimanLipi">
         {/* Header Section */}
         <div className="flex items-center justify-between pb-3 border-b-2 border-gray-300">
           {/* Logo */}
@@ -94,37 +94,51 @@ const StudentFeeReportPdf = ({ SubClassID, SessionID }) => {
           <div className="grid grid-cols-2 gap-4 p-3 text-xs border-b border-gray-300">
             <div className="space-y-1">
               <div className="flex">
-                <span className="font-bold w-24">নাম:</span>
+                <span className="font-bold w-20">নাম</span>
+                <span className="px-3">:</span>
                 <span>মাশকুরা</span>
               </div>
               <div className="flex">
-                <span className="font-bold w-24">পিতা:</span>
+                <span className="font-bold w-20">পিতা</span>
+                <span className="px-3">:</span>
                 <span>এসাদ</span>
               </div>
               <div className="flex">
-                <span className="font-bold w-24">শ্রেণি/ক্লাস:</span>
+                <span className="font-bold w-20">শ্রেণি/ক্লাস</span>
+                <span className="px-3">:</span>
+
                 <span>তৃতীয়</span>
               </div>
               <div className="flex">
-                <span className="font-bold w-24">ছাত্রের ধরণ:</span>
+                <span className="font-bold w-20">ছাত্রের ধরণ</span>
+                <span className="px-3">:</span>
+
                 <span>মুজিব</span>
               </div>
             </div>
             <div className="space-y-1">
               <div className="flex">
-                <span className="font-bold w-24">রশিদ নং:</span>
+                <span className="font-bold w-20">রশিদ নং</span>
+                <span className="px-3">:</span>
+
                 <span>৭৮</span>
               </div>
               <div className="flex">
-                <span className="font-bold w-24">তারিখ:</span>
+                <span className="font-bold w-20">তারিখ</span>
+                <span className="px-3">:</span>
+
                 <span>২৫/১০/২০২৫</span>
               </div>
               <div className="flex">
-                <span className="font-bold w-24">ডাক কোড:</span>
+                <span className="font-bold w-20">ডাক কোড</span>
+                <span className="px-3">:</span>
+
                 <span>৫৬</span>
               </div>
               <div className="flex">
-                <span className="font-bold w-24">আবাস:</span>
+                <span className="font-bold w-20">আবাস</span>
+                <span className="px-3">:</span>
+
                 <span>অনাবাসিক</span>
               </div>
             </div>
@@ -236,23 +250,6 @@ const StudentFeeReportPdf = ({ SubClassID, SessionID }) => {
           </div>
         </div>
 
-        {/* Additional Signature Sections (Optional) */}
-        <div className="mt-8 pt-4 border-t border-gray-300">
-          <div className="grid grid-cols-3 gap-4 text-xs text-center">
-            <div>
-              <div className="h-8 border-b border-gray-400 mb-1 mx-4"></div>
-              <p>প্রধান শিক্ষকের স্বাক্ষর</p>
-            </div>
-            <div>
-              <div className="h-8 border-b border-gray-400 mb-1 mx-4"></div>
-              <p>ক্যাশিয়ারের স্বাক্ষর</p>
-            </div>
-            <div>
-              <div className="h-8 border-b border-gray-400 mb-1 mx-4"></div>
-              <p>অভিভাবকের স্বাক্ষর</p>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
