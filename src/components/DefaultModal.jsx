@@ -11,6 +11,7 @@ import SubGeneralForm from '../view/accounting/SubGeneralForm';
 import TodaysBalance from '../view/accounting/TodaysBalance';
 import Statement from '../view/accounting/dues-list/Statement';
 import AccExamFeeCollector from '../view/accounting/student-exam-fee/AccExamFeeCollector';
+import CommentBoxModal from '../view/accounting/student-fee-collection/CommentBoxModal';
 import DueOthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/DueOthersStudentFeeAcceptForm';
 import FeeSMSTamplateModal from '../view/accounting/student-fee-collection/FeeSMSTamplateModal';
 import MonthStudentFeeForm from '../view/accounting/student-fee-collection/MonthStudentFeeForm';
@@ -114,6 +115,9 @@ const DefaultModal = () => {
                 {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
                 {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
                 {modalType === 'STUDENT_FEE_GROUP' && <StudentFeeGroup />}
+                {modalType === 'UPDATE_STUDENT_FEE_COMMENT_BOX' && (
+                  <CommentBoxModal />
+                )}
                 {modalType === 'STUDENT_FEE_SMS_TAMPLATE' && (
                   <FeeSMSTamplateModal />
                 )}

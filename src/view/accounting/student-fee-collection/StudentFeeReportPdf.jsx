@@ -1,27 +1,19 @@
 import { Buffer } from 'buffer';
 import { useEffect, useState } from 'react';
-import { useGetSubClassListQuery } from '../../../features/class/classQuerySlice';
-import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
+import { useGetStudentFeeUpdateGetDataByUFOIDQuery } from '../../../features/feeCollection/feeCollectionSlice';
 import { useGetInstitutionInfoQuery } from '../../../features/settings/settingsQuerySlice';
 import { enToBnNumber } from '../../../helper/languageFormat';
 import bnBijoy2Unicode from '../../../utils/conveter';
+import toBengaliWords from '../../../utils/numberToBanglaWords';
 
-const StudentFeeReportPdf = ({ SubClassID, SessionID }) => {
-  const { data: subClassListData } = useGetSubClassListQuery();
+const StudentFeeReportPdf = ({ result }) => {
   const {
     data: institutionInfo,
     error: institutionInfoError,
     isLoading: institutionInfoLoading,
   } = useGetInstitutionInfoQuery();
   const [logo, setLogo] = useState(null);
-  const subClasData = subClassListData?.find(
-    (i) => i.SubClassID === Number(SubClassID)
-  );
-  const { data: sessionSData } = useGetSessionsQuery();
 
-  const sessionData = sessionSData?.find(
-    (i) => i.SessionID === Number(SessionID)
-  );
 
   useEffect(() => {
     if (institutionInfo?.Logo?.data) {
@@ -32,8 +24,15 @@ const StudentFeeReportPdf = ({ SubClassID, SessionID }) => {
     }
   }, [institutionInfo]);
 
-  const SubClassName = bnBijoy2Unicode(subClasData?.SubClass);
-  const SessionName = bnBijoy2Unicode(sessionData?.SessionName);
+  // হিসাব নির্ণয়
+  const payable = (
+    Number(result?.CurrentInvoice || 0) - Number(result?.deduction || 0)
+  ).toFixed(2);
+  const due = (
+    Number(result?.CurrentInvoice || 0) - Number(result?.CurrentPaid || 0)
+  ).toFixed(2);
+  const totalPaid =
+    Number(result?.CurrentPaid || 0) + Number(result?.PreDuePaid || 0);
 
   return (
     <div
@@ -96,50 +95,34 @@ const StudentFeeReportPdf = ({ SubClassID, SessionID }) => {
               <div className="flex">
                 <span className="font-bold w-20">নাম</span>
                 <span className="px-3">:</span>
-                <span>মাশকুরা</span>
+                <span>{result?.StudentName}</span>
               </div>
               <div className="flex">
                 <span className="font-bold w-20">পিতা</span>
                 <span className="px-3">:</span>
-                <span>এসাদ</span>
+                <span>{result?.FatherName}</span>
               </div>
               <div className="flex">
                 <span className="font-bold w-20">শ্রেণি/ক্লাস</span>
                 <span className="px-3">:</span>
-
-                <span>তৃতীয়</span>
-              </div>
-              <div className="flex">
-                <span className="font-bold w-20">ছাত্রের ধরণ</span>
-                <span className="px-3">:</span>
-
-                <span>মুজিব</span>
+                <span>{result?.ClassName}</span>
               </div>
             </div>
             <div className="space-y-1">
               <div className="flex">
                 <span className="font-bold w-20">রশিদ নং</span>
                 <span className="px-3">:</span>
-
-                <span>৭৮</span>
+                <span>{result?.UFOID}</span>
               </div>
               <div className="flex">
                 <span className="font-bold w-20">তারিখ</span>
                 <span className="px-3">:</span>
-
-                <span>২৫/১০/২০২৫</span>
+                <span>{result?.CreateAt}</span>
               </div>
               <div className="flex">
-                <span className="font-bold w-20">ডাক কোড</span>
+                <span className="font-bold w-20">দাখেলা</span>
                 <span className="px-3">:</span>
-
-                <span>৫৬</span>
-              </div>
-              <div className="flex">
-                <span className="font-bold w-20">আবাস</span>
-                <span className="px-3">:</span>
-
-                <span>অনাবাসিক</span>
+                <span>{result?.UserCode}</span>
               </div>
             </div>
           </div>
@@ -159,75 +142,78 @@ const StudentFeeReportPdf = ({ SubClassID, SessionID }) => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td className="border border-gray-600 p-1 text-center">১</td>
-                  <td className="border border-gray-600 p-1">খাবার</td>
-                  <td className="border border-gray-600 p-1">
-                    বছরভিত্তিক (২০২৫-২০২৬)
-                  </td>
-                  <td className="border border-gray-600 p-1 text-right">
-                    ২,০০০.০০
-                  </td>
-                  <td className="border border-gray-600 p-1 text-right">
-                    ০.০০
-                  </td>
-                  <td className="border border-gray-600 p-1 text-right">
-                    ২,০০০.০০
-                  </td>
-                  <td className="border border-gray-600 p-1 text-right">
-                    ০.০০
-                  </td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-600 p-1 text-center">২</td>
-                  <td className="border border-gray-600 p-1">বেতন</td>
-                  <td className="border border-gray-600 p-1">
-                    বছরভিত্তিক (২০২৫-২০২৬)
-                  </td>
-                  <td className="border border-gray-600 p-1 text-right">
-                    ২,০০০.০০
-                  </td>
-                  <td className="border border-gray-600 p-1 text-right">
-                    ০.০০
-                  </td>
-                  <td className="border border-gray-600 p-1 text-right">
-                    ১,৯০০.০০
-                  </td>
-                  <td className="border border-gray-600 p-1 text-right">
-                    ১০০.০০
-                  </td>
-                </tr>
+                {result?.fees?.map((item, index) => (
+                  <tr key={item.UFODID || index}>
+                    <td className="border border-gray-600 p-1 text-center">
+                      {index + 1}
+                    </td>
+                    <td className="border border-gray-600 p-1">
+                      {bnBijoy2Unicode(item.SlName)}
+                    </td>
+                    <td className="border border-gray-600 p-1">
+                      {item.Particulars}
+                    </td>
+                    <td className="border border-gray-600 p-1 text-right">
+                      {Number(item.Fee).toLocaleString('bn-BD', {
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                    <td className="border border-gray-600 p-1 text-right">
+                      {Number(item.Less).toLocaleString('bn-BD', {
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                    <td className="border border-gray-600 p-1 text-right">
+                      {Number(item.PayAmount).toLocaleString('bn-BD', {
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                    <td className="border border-gray-600 p-1 text-right">
+                      {Number(item.NetPayable).toLocaleString('bn-BD', {
+                        minimumFractionDigits: 2,
+                      })}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
 
           {/* Summary Section */}
           <div className="grid grid-cols-2 border-t border-gray-800 text-xs">
-            <div className="border-r border-gray-800 p-2">
-              <p className="font-bold mb-1">কথায়:</p>
-              <p className="text-xs">তিন হাজার নয় শত টাকা মাত্র।</p>
+            <div className="border-r border-gray-800 p-2 flex flex-col justify-center items-start gap-3">
+              <div className="">
+                <p className="font-bold mb-1">মন্তব্য:</p>
+                <p className="text-xs">{bnBijoy2Unicode(result?.Remark)}</p>
+              </div>
+              <div className="">
+                <p className="font-bold mb-1">কথায়:</p>
+                <p className="text-xs">
+                  {toBengaliWords(Number(result?.CurrentPaid || 0))}
+                </p>
+              </div>
             </div>
 
             <div className="p-2 space-y-1">
               <div className="flex justify-between">
                 <span>সর্বমোট:</span>
-                <span className="font-bold">৪,০০০.০০</span>
+                <span className="font-bold">{result?.CurrentInvoice}</span>
               </div>
               <div className="flex justify-between">
                 <span>(-) কর্তন:</span>
-                <span>০.০০</span>
+                <span className="font-bold">{result?.deduction}</span>
               </div>
               <div className="flex justify-between border-t border-dashed border-gray-400 pt-1">
-                <span>প্রদেয়:</span>
-                <span className="font-bold">৪,০০০.০০</span>
+                <span>পূর্বের পাওনা:</span>
+                <span className="font-bold">{result?.PreviousDue}</span>
               </div>
               <div className="flex justify-between">
-                <span>পরিশোধ:</span>
-                <span className="font-bold">৩,৯০০.০০</span>
+                <span>বর্তমান জমা:</span>
+                <span className="font-bold">{result?.CurrentPaid}</span>
               </div>
               <div className="flex justify-between border-t border-dashed border-gray-400 pt-1">
                 <span>বকেয়া:</span>
-                <span className="font-bold text-red-600">১০০.০০</span>
+                <span className="font-bold">{result?.Due}</span>
               </div>
             </div>
           </div>
@@ -237,19 +223,19 @@ const StudentFeeReportPdf = ({ SubClassID, SessionID }) => {
         <div className="absolute bottom-4 left-0 right-0 px-6 text-[10px] text-gray-700">
           <div className="flex justify-between items-start w-full">
             {/* 🔸 Left side - Developer info */}
-            <div className="text-left">
-              <p className="leading-tight">সফটওয়্যার ডেভেলপ বাই: সাহার</p>
-              <p className="leading-tight">মোবাইল: ০১৮২৩০০০৫৫৫</p>
+            <div className="text-left mt-3">
+              <p className="leading-tight">
+                Software Develop by: saharait ০১৮২৩০০০৫৫৫
+              </p>
             </div>
 
             {/* 🔸 Right side - Signature line */}
             <div className="text-center">
               <div className="h-6 border-b border-gray-500 mb-1 w-32"></div>
-              <p>অভিভাবকের স্বাক্ষর</p>
+              <p>গ্রহিতার স্বাক্ষর</p>
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );

@@ -35,6 +35,7 @@ import { showModal } from '../../../utils/ModalControlar';
 import useTranslate from '../../../utils/Translate';
 import SMSLogo from '/smslogo.png';
 
+import SubmitLoading from '../../../components/Loading/SubmitLoading';
 import MonthlyFeeCollectionTable from '../../../view/accounting/student-fee-collection/MonthlyFeeCollectionTable';
 
 const CreateStudentFee = () => {
@@ -61,7 +62,11 @@ const CreateStudentFee = () => {
   const { studentFeeData = [] } = useSelector((state) => state.settings);
 
   const { data: sessionData } = useGetSessionsQuery();
-  const [postStudentFee] = usePostStudentFeeCollectionMutation();
+  // 🔹 RTK Mutation Hook
+  const [
+    postStudentFee,
+    { isLoading, isSuccess }, // ✅ RTK states
+  ] = usePostStudentFeeCollectionMutation();
 
   const [studentFeeDataAll, setstudentFeeDataAll] = useState(null);
   const [totalDue, setTotalDue] = useState(null);
@@ -148,6 +153,7 @@ const CreateStudentFee = () => {
   }, [defaultSessionId, setValue]);
 
   const [GLID, SessionID] = watch(['GLID', 'SessionID']);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: glbc = [] } = useGetGeneralLedgersByCAIDQuery();
   const { data: sglbc = [] } = useGetSubLedgersByGLIDQuery(GLID, {
@@ -337,6 +343,21 @@ const CreateStudentFee = () => {
         });
         return;
       }
+      setIsSubmitting(true);
+
+      // 🔹 Step 1: Ask for SMS permission during submit
+      const result = await Swal.fire({
+        title: 'SMS পাঠাবেন?',
+        text: 'আপনি কি এই ইনভয়েসের জন্য SMS পাঠাতে চান?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'হ্যাঁ, পাঠাও',
+        cancelButtonText: 'না, পাঠাব না',
+        confirmButtonColor: '#16a34a',
+        cancelButtonColor: '#d33',
+      });
+
+      const smsPermission = result.isConfirmed ? true : false;
 
       const payload = {
         UserID: studentFeeData.userId,
@@ -353,6 +374,7 @@ const CreateStudentFee = () => {
         fees: studentFeeData.fees,
         MonthId: monthFeeData?.monthId || '',
         StudentDueFee: monthFeeData?.studentDueFeeData || '',
+        smsPermission,
       };
 
       await postStudentFee(payload).unwrap();
@@ -504,6 +526,11 @@ const CreateStudentFee = () => {
 
   {
     userInfoLoading && <Loading />;
+  }
+
+  // Update Submit Loading
+  if (isLoading) {
+    return <SubmitLoading />;
   }
 
   return (
