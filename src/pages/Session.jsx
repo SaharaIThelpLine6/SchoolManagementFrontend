@@ -1,444 +1,602 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { toast } from 'react-toastify';
+import Button from '../components/Button/Button';
+import EditButton from '../components/Button/EditButton';
+import Loading from '../components/Loading/Loading';
+import DefaultPagination from '../components/Pagination/DefaultPagination';
+import ToggleSwitch from '../components/Switchers/ToggleSwitch';
+import SortableTable from '../components/Tables/SortableTable';
+import { setPageName } from '../features/auth/authSlice';
 import {
-  DndContext,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+  useGetSessionsQuery,
+  useStatusUpdateSessionMutation
+} from '../features/session/sessionSlice';
+import { showModal } from '../utils/ModalControlar';
+import useTranslate from '../utils/Translate';
 
-// needed for row & cell level scope DnD setup
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { useDispatch, useSelector } from "react-redux";
-import { setEditMode } from "../features/class/classSlice";
-import { updateInData } from "../utils/update/api";
-import { insertData } from "../utils/create/api";
-import { FormProvider, useForm } from "react-hook-form";
-import ThemeInputBox1 from "../components/Forms/ThemeInputBox1";
-import { setPageName } from "../features/auth/authSlice";
-import { fetchSettingsData } from "../features/settings/settingsSlice";
-import useTranslate from "../utils/Translate";
-import { toast } from "react-toastify";
-import { setReqLoading } from "../features/requestHandeler/requestHandelerSlice";
-import SvgIcon from "../components/icons/SvgIcon";
-
-const RowDragHandleCell = ({ rowId }) => {
-  const { attributes, listeners } = useSortable({
-    id: rowId,
-  });
-  return (
-    <button
-      {...attributes}
-      {...listeners}
-      className="w-full flex items-center justify-center text-theme-dark"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={24}
-        height={24}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="icon icon-tabler icons-tabler-outline icon-tabler-grip-vertical"
-      >
-        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-        <path d="M9 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-        <path d="M9 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-        <path d="M9 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-        <path d="M15 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-        <path d="M15 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-        <path d="M15 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-      </svg>
-    </button>
-  );
-};
-
-const DraggableRow = ({ row, headers, statename }) => {
-  const dispatch = useDispatch();
-
-  const { transform, transition, setNodeRef, isDragging } = useSortable({
-    id: row.CGSL ? row.CGSL : row.SubClassID,
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.8 : 1,
-    zIndex: isDragging ? 1 : 0,
-    position: "relative",
-  };
-
-  return (
-    <tr ref={setNodeRef} style={style}>
-      <td>
-        <div className="w-full">
-          <RowDragHandleCell rowId={row.CGSL ? row.CGSL : row.SubClassID} />
-        </div>
-      </td>
-      {headers.map((header) => (
-        <td key={header} className="py-2 px-4 border border-slate-100">
-          {row[header]}
-        </td>
-      ))}
-      <td className="py-2 text-center">
-        <button
-          type="button"
-          className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-          onClick={() => {
-            dispatch(setEditMode(row.id));
-          }}
-        >
-          <SvgIcon name={"FiEdit"} size={20} />
-        </button>
-        {/* <FaTrash className="text-red-500 cursor-pointer hover:text-red-700" /> */}
-      </td>
-    </tr>
-  );
-};
+const PAGE_SIZE = 10;
 
 const Session = ({ pageTitle }) => {
-  const translate = useTranslate();
-  const [rows, setRows] = useState([]);
-  const tableHeader = ["Session Serial", "Session", "English", "Arabic"];
-  const { editMode } = useSelector((state) => state.class);
-  const { academicSession, status } = useSelector((state) => state.settings);
-  const { reqLoading } = useSelector((state) => state.requestHandeler);
-
-  const [dataUpdate, setDataUpdate] = useState(false);
-  const methods = useForm();
-  const {
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = methods;
-  // const headers = Object.keys(tableRows.length ? tableRows[0] : {});
   const dispatch = useDispatch();
+  const translate = useTranslate();
+
+  // 🔹 Query & Mutations
+  const {
+    data: sessions = [],
+    isLoading: isLoadingSessions,
+    isError: isErrorSessions,
+    refetch,
+  } = useGetSessionsQuery();
+
+  const [statusUpdateSession] = useStatusUpdateSessionMutation();
+
+  // 🔹 Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(sessions.length / PAGE_SIZE);
+
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return sessions.slice(start, start + PAGE_SIZE);
+  }, [sessions, currentPage]);
 
   useEffect(() => {
-    dispatch(setPageName(pageTitle));
-    dispatch(setEditMode(0));
-    if (status === "idle") {
-      dispatch(fetchSettingsData());
-    }
-    if (status === "succeeded") {
-      const transformedData = academicSession.map((item) => ({
-        id: item.SessionID.toString(),
-        "Session Serial": item.Serial,
-        Session: item.SessionName,
-        English: item.SessionEngName,
-        Arabic: item.SessionAraName,
-      }));
-      setRows(transformedData);
-    }
-  }, [status, dispatch]);
+    if (pageTitle) dispatch(setPageName(pageTitle));
+  }, [dispatch, pageTitle]);
 
-  const sensors = useSensors(
-    useSensor(MouseSensor, {}),
-    useSensor(TouchSensor, {}),
-    useSensor(KeyboardSensor, {})
+  // ✅ Status Toggle
+  const handleStatusToggle = async (row, checked) => {
+    try {
+      await statusUpdateSession({
+        id: row.SessionID,
+        SessionAction: checked ? 1 : 0,
+      }).unwrap();
+      toast.success('Session status updated successfully');
+      refetch();
+    } catch (err) {
+      toast.error('Failed to update session status');
+      console.error(err);
+    }
+  };
+
+  const handleCreateOpenForm = useCallback(
+    (id) => {
+      showModal(translate('Session Create'), 'SESSION_CREATE_FORM');
+    },
+    [translate]
   );
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
+  const handleEditOpenForm = useCallback(
+    (id) => {
+      showModal(translate('Session Update'), 'SESSION_EDIT_FORM', id);
+    },
+    [translate]
+  );
 
-    if (active && over && active.id !== over.id) {
-      setRows((currentRows) => {
-        if (!Array.isArray(currentRows)) return currentRows;
+  if (isLoadingSessions) return <Loading />;
+  if (isErrorSessions)
+    return <p className="text-red-500">Failed to load session data</p>;
 
-        const oldIndex = currentRows.findIndex((row) => row.CGSL === active.id);
-        const newIndex = currentRows.findIndex((row) => row.CGSL === over.id);
-
-        const updatedRows = arrayMove(currentRows, oldIndex, newIndex);
-        const updatedRowsWithSerial = updatedRows.map((row, index) => ({
-          ...row,
-          Serial: index + 1,
-        }));
-
-        setDataUpdate(true);
-        return updatedRowsWithSerial;
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (dataUpdate) {
-      setDataUpdate(false);
-
-      async function updateSerial() {
-        try {
-          const response = await updateInData(
-            1,
-            rows,
-            "/api/academic/update_subclass_serial"
-          );
-          // Handle response if needed
-        } catch (error) {
-          console.error("Failed to update serial:", error);
-        }
-      }
-
-      updateSerial();
-    }
-  }, [dataUpdate, rows]);
-
-  useEffect(() => {
-    if (editMode !== 0) {
-      const selectedClass = academicSession.find(
-        (item) => item.SessionID == editMode
-      );
-      reset(selectedClass);
-    }
-  }, [editMode]);
-
-  const onSubmit = async (data) => {
-    if (reqLoading) {
-      console.log("Request already in progress. Please wait...");
-      return false;
-    }
-    dispatch(setReqLoading(true));
-    const id = toast.dark("তথ্য যুক্ত করা হচ্ছে...", {
-      className:
-        " min-h-[50px] max-h-[50px] overflow-hidden text-[14px] font-SolaimanLipi bg-[#323232] text-[#ffffff] py-2 px-2 rounded-[4px] font-normal",
-      style: {
-        boxShadow:
-          "0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)",
-      },
-      // transition: bounce,
-      position: "bottom-center",
-      type: "success",
-      closeButton: false,
-      isLoading: true,
-    });
-
-    try {
-      if (editMode === 0) {
-        const submitedData = { ...data, Serial: rows.length + 1 };
-        const submitRes = await insertData(
-          submitedData,
-          "/api/academic/insert_session"
-        );
-        // console.log(submitRes);
-        if (submitRes.success) {
-          reset({ SessionName: "", SessionEngName: "", SessionAraName: "" });
-          toast.update(id, {
-            render: "তথ্য যুক্ত করা হয়েছে।",
-            type: "success",
-            isLoading: false,
-            autoClose: true,
-          });
-          dispatch(fetchSettingsData());
-          dispatch(setReqLoading(false));
-        } else {
-          toast.update(id, {
-            render: String(submitRes.error),
-            type: "error",
-            isLoading: false,
-            autoClose: true,
-          });
-          dispatch(setReqLoading(false));
-          console.error("Failed to insert data:", submitRes.error);
-        }
-      } else {
-        const submitRes = await updateInData(
-          editMode,
-          data,
-          "/api/academic/update_session"
-        );
-        dispatch(setEditMode(0));
-        reset({ SessionName: "", SessionEngName: "", SessionAraName: "" });
-
-        if (submitRes.success) {
-          reset({ SessionName: "", SessionEngName: "", SessionAraName: "" });
-          toast.update(id, {
-            render: "তথ্য যুক্ত করা হয়েছে।",
-            type: "success",
-            isLoading: false,
-            autoClose: true,
-          });
-          dispatch(fetchSettingsData());
-          dispatch(setReqLoading(false));
-        } else {
-          toast.update(id, {
-            render: String(submitRes.error),
-            type: "error",
-            isLoading: false,
-            autoClose: true,
-          });
-          dispatch(setReqLoading(false));
-          console.error("Failed to insert data:", submitRes.error);
-        }
-      }
-    } catch (err) {
-      reset({ SessionName: "", SessionEngName: "", SessionAraName: "" });
-      toast.update(id, {
-        render: String(err.message),
-        type: "error",
-        isLoading: false,
-        autoClose: true,
-      });
-      dispatch(setReqLoading(false));
-      console.error(err.message);
-    }
-  };
-
-  const FieldValue = [
+  const columns = [
     {
-      serial: 1,
-      type: "input",
-      title: "User Name",
-      key: "username",
-      options: [],
-      required: "true",
+      title: translate('ID'),
+      field: 'SessionID',
+      hozAlign: 'center',
+      render: (row) => <p>{row.SessionID}</p>,
     },
     {
-      serial: 2,
-      type: "select",
-      title: "user req",
-      key: "user req",
-      options: [
-        {
-          title: "book name",
-          value: "book_name",
-        },
-        {
-          title: "class id",
-          value: "class_id",
-        },
-      ],
-      required: "true",
+      title: translate('Session Name'),
+      field: 'SessionName',
+      hozAlign: 'center',
+      render: (row) => <p>{row.SessionName}</p>,
     },
     {
-      type: "list",
-      serial: 3,
-      title: "user req",
-      key: "user req",
-      options: [
-        {
-          title: "book name",
-          value: "book_name",
-        },
-        {
-          title: "class id",
-          value: "class_id",
-        },
-      ],
-      required: "true",
+      title: translate('English'),
+      field: 'SessionEngName',
+      hozAlign: 'center',
+      render: (row) => <p>{row.SessionEngName}</p>,
+    },
+    {
+      title: translate('Arabic'),
+      field: 'SessionAraName',
+      hozAlign: 'center',
+      render: (row) => <p>{row.SessionAraName}</p>,
+    },
+    {
+      title: translate('Status'),
+      field: 'SessionAction',
+      hozAlign: 'center',
+      render: (row) => (
+        <div className="flex justify-center items-center">
+          <ToggleSwitch
+            checked={row.SessionAction === 1}
+            onChange={(e) => handleStatusToggle(row, e.target.checked)}
+          />
+        </div>
+      ),
+    },
+    {
+      title: translate('Action'),
+      field: 'SessionID',
+      hozAlign: 'center',
+      render: (row) => (
+        <div className="flex justify-center items-center">
+
+          <EditButton onClick={() => handleEditOpenForm(row.SessionID)} />
+        </div>
+
+      ),
     },
   ];
 
   return (
-    <div className="p-4">
-      {/* <SortableCompo /> */}
-      <div className="flex gap-3 flex-wrap lg:flex-nowrap">
-        <div className="w-full lg:w-[40%] lg:h-fit lg:sticky lg:top-0  border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
-          <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">
-            {translate("Add Session")}
-          </h1>
-          <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              <div className="mb-3">
-                <ThemeInputBox1
-                  label={"Session"}
-                  registerKey={"SessionName"}
-                  require={"Session Name Name is require"}
-                  type={"text"}
-                />
-              </div>
-              <div className="mb-3">
-                <ThemeInputBox1
-                  label={"English"}
-                  registerKey={"SessionEngName"}
-                  type={"text"}
-                />
-              </div>
-              <div className="mb-3">
-                <ThemeInputBox1
-                  label={"عربي"}
-                  registerKey={"SessionAraName"}
-                  type={"text"}
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="bg-theme-color transation ease-linear font-bold duration-500 inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-[#121212] font-SolaimanLipi"
-              >
-                {translate("Save")}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditMode(0);
-                  reset({
-                    SessionName: "",
-                    SessionEngName: "",
-                    SessionAraName: "",
-                    SessionID: "",
-                  });
-                }}
-                className="bg-[#121212] transation ease-linear duration-500 font-bold inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-slate-700 ms-[20px] font-SolaimanLipi"
-              >
-                {translate("Add New")}
-              </button>
-            </form>
-          </FormProvider>
-        </div>
-
-        <DndContext
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-          sensors={sensors}
-        >
-          <div className="w-full flex-1 border rounded-lg bg-white shadow-sm">
-            <div className="relative overflow-x-auto">
-              <table className="w-full h-fit border-collapse">
-                <thead>
-                  <tr className="bg-theme-dark text-left text-sm text-white font-SolaimanLipi">
-                    <th></th>
-                    {tableHeader.map((title) => (
-                      <th key={title} className="py-2 px-3">
-                        {title}
-                      </th>
-                    ))}
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                {rows.length > 0 ? (
-                  <SortableContext
-                    items={rows.map((row, index) =>
-                      row.CGSL ? row.CGSL : row.SubClassID
-                    )}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <tbody className="font-SolaimanLipi text-semibold">
-                      {rows.map((row) => (
-                        <DraggableRow
-                          key={row.id}
-                          row={row}
-                          headers={tableHeader}
-                        />
-                      ))}
-                    </tbody>
-                  </SortableContext>
-                ) : null}
-              </table>
-            </div>
-          </div>
-        </DndContext>
+    <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+      {/* 🔹 Header */}
+      <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
+        <h3 className="font-SolaimanLipi text-[20px] font-bold">
+          {translate('Session')}
+        </h3>
+        <Button onClick={handleCreateOpenForm}>
+          {translate('Create Session')}
+        </Button>
       </div>
+
+      {/* 🔹 Table */}
+      <SortableTable columns={columns} data={paginatedData} isFilterColumn={false}/>
+
+      {/* 🔹 Pagination */}
+      <DefaultPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };
 
 export default Session;
+
+// import { useEffect, useState } from "react";
+// import {
+//   DndContext,
+//   KeyboardSensor,
+//   MouseSensor,
+//   TouchSensor,
+//   closestCenter,
+//   useSensor,
+//   useSensors,
+// } from "@dnd-kit/core";
+// import {
+//   arrayMove,
+//   SortableContext,
+//   verticalListSortingStrategy,
+// } from "@dnd-kit/sortable";
+
+// // needed for row & cell level scope DnD setup
+// import { useSortable } from "@dnd-kit/sortable";
+// import { CSS } from "@dnd-kit/utilities";
+// import { useDispatch, useSelector } from "react-redux";
+// import { setEditMode } from "../features/class/classSlice";
+// import { updateInData } from "../utils/update/api";
+// import { insertData } from "../utils/create/api";
+// import { FormProvider, useForm } from "react-hook-form";
+// import ThemeInputBox1 from "../components/Forms/ThemeInputBox1";
+// import { setPageName } from "../features/auth/authSlice";
+// import { fetchSettingsData } from "../features/settings/settingsSlice";
+// import useTranslate from "../utils/Translate";
+// import { toast } from "react-toastify";
+// import { setReqLoading } from "../features/requestHandeler/requestHandelerSlice";
+// import SvgIcon from "../components/icons/SvgIcon";
+
+// const RowDragHandleCell = ({ rowId }) => {
+//   const { attributes, listeners } = useSortable({
+//     id: rowId,
+//   });
+//   return (
+//     <button
+//       {...attributes}
+//       {...listeners}
+//       className="w-full flex items-center justify-center text-theme-dark"
+//     >
+//       <svg
+//         xmlns="http://www.w3.org/2000/svg"
+//         width={24}
+//         height={24}
+//         viewBox="0 0 24 24"
+//         fill="none"
+//         stroke="currentColor"
+//         strokeWidth={1}
+//         strokeLinecap="round"
+//         strokeLinejoin="round"
+//         className="icon icon-tabler icons-tabler-outline icon-tabler-grip-vertical"
+//       >
+//         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+//         <path d="M9 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+//         <path d="M9 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+//         <path d="M9 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+//         <path d="M15 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+//         <path d="M15 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+//         <path d="M15 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
+//       </svg>
+//     </button>
+//   );
+// };
+
+// const DraggableRow = ({ row, headers, statename }) => {
+//   const dispatch = useDispatch();
+
+//   const { transform, transition, setNodeRef, isDragging } = useSortable({
+//     id: row.CGSL ? row.CGSL : row.SubClassID,
+//   });
+
+//   const style = {
+//     transform: CSS.Transform.toString(transform),
+//     transition,
+//     opacity: isDragging ? 0.8 : 1,
+//     zIndex: isDragging ? 1 : 0,
+//     position: "relative",
+//   };
+
+//   return (
+//     <tr ref={setNodeRef} style={style}>
+//       <td>
+//         <div className="w-full">
+//           <RowDragHandleCell rowId={row.CGSL ? row.CGSL : row.SubClassID} />
+//         </div>
+//       </td>
+//       {headers.map((header) => (
+//         <td key={header} className="py-2 px-4 border border-slate-100">
+//           {row[header]}
+//         </td>
+//       ))}
+//       <td className="py-2 text-center">
+//         <button
+//           type="button"
+//           className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
+//           onClick={() => {
+//             dispatch(setEditMode(row.id));
+//           }}
+//         >
+//           <SvgIcon name={"FiEdit"} size={20} />
+//         </button>
+//         {/* <FaTrash className="text-red-500 cursor-pointer hover:text-red-700" /> */}
+//       </td>
+//     </tr>
+//   );
+// };
+
+// const Session = ({ pageTitle }) => {
+//   const translate = useTranslate();
+//   const [rows, setRows] = useState([]);
+//   const tableHeader = ["Session Serial", "Session", "English", "Arabic"];
+//   const { editMode } = useSelector((state) => state.class);
+//   const { academicSession, status } = useSelector((state) => state.settings);
+//   const { reqLoading } = useSelector((state) => state.requestHandeler);
+
+//   const [dataUpdate, setDataUpdate] = useState(false);
+//   const methods = useForm();
+//   const {
+//     handleSubmit,
+//     reset,
+//     formState: { errors },
+//   } = methods;
+//   // const headers = Object.keys(tableRows.length ? tableRows[0] : {});
+//   const dispatch = useDispatch();
+
+//   useEffect(() => {
+//     dispatch(setPageName(pageTitle));
+//     dispatch(setEditMode(0));
+//     if (status === "idle") {
+//       dispatch(fetchSettingsData());
+//     }
+//     if (status === "succeeded") {
+//       const transformedData = academicSession.map((item) => ({
+//         id: item.SessionID.toString(),
+//         "Session Serial": item.Serial,
+//         Session: item.SessionName,
+//         English: item.SessionEngName,
+//         Arabic: item.SessionAraName,
+//       }));
+//       setRows(transformedData);
+//     }
+//   }, [status, dispatch]);
+
+//   const sensors = useSensors(
+//     useSensor(MouseSensor, {}),
+//     useSensor(TouchSensor, {}),
+//     useSensor(KeyboardSensor, {})
+//   );
+
+//   const handleDragEnd = (event) => {
+//     const { active, over } = event;
+
+//     if (active && over && active.id !== over.id) {
+//       setRows((currentRows) => {
+//         if (!Array.isArray(currentRows)) return currentRows;
+
+//         const oldIndex = currentRows.findIndex((row) => row.CGSL === active.id);
+//         const newIndex = currentRows.findIndex((row) => row.CGSL === over.id);
+
+//         const updatedRows = arrayMove(currentRows, oldIndex, newIndex);
+//         const updatedRowsWithSerial = updatedRows.map((row, index) => ({
+//           ...row,
+//           Serial: index + 1,
+//         }));
+
+//         setDataUpdate(true);
+//         return updatedRowsWithSerial;
+//       });
+//     }
+//   };
+
+//   useEffect(() => {
+//     if (dataUpdate) {
+//       setDataUpdate(false);
+
+//       async function updateSerial() {
+//         try {
+//           const response = await updateInData(
+//             1,
+//             rows,
+//             "/api/academic/update_subclass_serial"
+//           );
+//           // Handle response if needed
+//         } catch (error) {
+//           console.error("Failed to update serial:", error);
+//         }
+//       }
+
+//       updateSerial();
+//     }
+//   }, [dataUpdate, rows]);
+
+//   useEffect(() => {
+//     if (editMode !== 0) {
+//       const selectedClass = academicSession.find(
+//         (item) => item.SessionID == editMode
+//       );
+//       reset(selectedClass);
+//     }
+//   }, [editMode]);
+
+//   const onSubmit = async (data) => {
+//     if (reqLoading) {
+//       console.log("Request already in progress. Please wait...");
+//       return false;
+//     }
+//     dispatch(setReqLoading(true));
+//     const id = toast.dark("তথ্য যুক্ত করা হচ্ছে...", {
+//       className:
+//         " min-h-[50px] max-h-[50px] overflow-hidden text-[14px] font-SolaimanLipi bg-[#323232] text-[#ffffff] py-2 px-2 rounded-[4px] font-normal",
+//       style: {
+//         boxShadow:
+//           "0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)",
+//       },
+//       // transition: bounce,
+//       position: "bottom-center",
+//       type: "success",
+//       closeButton: false,
+//       isLoading: true,
+//     });
+
+//     try {
+//       if (editMode === 0) {
+//         const submitedData = { ...data, Serial: rows.length + 1 };
+//         const submitRes = await insertData(
+//           submitedData,
+//           "/api/academic/insert_session"
+//         );
+//         // console.log(submitRes);
+//         if (submitRes.success) {
+//           reset({ SessionName: "", SessionEngName: "", SessionAraName: "" });
+//           toast.update(id, {
+//             render: "তথ্য যুক্ত করা হয়েছে।",
+//             type: "success",
+//             isLoading: false,
+//             autoClose: true,
+//           });
+//           dispatch(fetchSettingsData());
+//           dispatch(setReqLoading(false));
+//         } else {
+//           toast.update(id, {
+//             render: String(submitRes.error),
+//             type: "error",
+//             isLoading: false,
+//             autoClose: true,
+//           });
+//           dispatch(setReqLoading(false));
+//           console.error("Failed to insert data:", submitRes.error);
+//         }
+//       } else {
+//         const submitRes = await updateInData(
+//           editMode,
+//           data,
+//           "/api/academic/update_session"
+//         );
+//         dispatch(setEditMode(0));
+//         reset({ SessionName: "", SessionEngName: "", SessionAraName: "" });
+
+//         if (submitRes.success) {
+//           reset({ SessionName: "", SessionEngName: "", SessionAraName: "" });
+//           toast.update(id, {
+//             render: "তথ্য যুক্ত করা হয়েছে।",
+//             type: "success",
+//             isLoading: false,
+//             autoClose: true,
+//           });
+//           dispatch(fetchSettingsData());
+//           dispatch(setReqLoading(false));
+//         } else {
+//           toast.update(id, {
+//             render: String(submitRes.error),
+//             type: "error",
+//             isLoading: false,
+//             autoClose: true,
+//           });
+//           dispatch(setReqLoading(false));
+//           console.error("Failed to insert data:", submitRes.error);
+//         }
+//       }
+//     } catch (err) {
+//       reset({ SessionName: "", SessionEngName: "", SessionAraName: "" });
+//       toast.update(id, {
+//         render: String(err.message),
+//         type: "error",
+//         isLoading: false,
+//         autoClose: true,
+//       });
+//       dispatch(setReqLoading(false));
+//       console.error(err.message);
+//     }
+//   };
+
+//   const FieldValue = [
+//     {
+//       serial: 1,
+//       type: "input",
+//       title: "User Name",
+//       key: "username",
+//       options: [],
+//       required: "true",
+//     },
+//     {
+//       serial: 2,
+//       type: "select",
+//       title: "user req",
+//       key: "user req",
+//       options: [
+//         {
+//           title: "book name",
+//           value: "book_name",
+//         },
+//         {
+//           title: "class id",
+//           value: "class_id",
+//         },
+//       ],
+//       required: "true",
+//     },
+//     {
+//       type: "list",
+//       serial: 3,
+//       title: "user req",
+//       key: "user req",
+//       options: [
+//         {
+//           title: "book name",
+//           value: "book_name",
+//         },
+//         {
+//           title: "class id",
+//           value: "class_id",
+//         },
+//       ],
+//       required: "true",
+//     },
+//   ];
+
+//   return (
+//     <div className="p-4">
+//       {/* <SortableCompo /> */}
+//       <div className="flex gap-3 flex-wrap lg:flex-nowrap">
+//         <div className="w-full lg:w-[40%] lg:h-fit lg:sticky lg:top-0  border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
+//           <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">
+//             {translate("Add Session")}
+//           </h1>
+//           <FormProvider {...methods}>
+//             <form onSubmit={handleSubmit(onSubmit)}>
+//               <div className="mb-3">
+//                 <ThemeInputBox1
+//                   label={"Session"}
+//                   registerKey={"SessionName"}
+//                   require={"Session Name Name is require"}
+//                   type={"text"}
+//                 />
+//               </div>
+//               <div className="mb-3">
+//                 <ThemeInputBox1
+//                   label={"English"}
+//                   registerKey={"SessionEngName"}
+//                   type={"text"}
+//                 />
+//               </div>
+//               <div className="mb-3">
+//                 <ThemeInputBox1
+//                   label={"عربي"}
+//                   registerKey={"SessionAraName"}
+//                   type={"text"}
+//                 />
+//               </div>
+
+//               <button
+//                 type="submit"
+//                 className="bg-theme-color transation ease-linear font-bold duration-500 inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-[#121212] font-SolaimanLipi"
+//               >
+//                 {translate("Save")}
+//               </button>
+//               <button
+//                 type="button"
+//                 onClick={() => {
+//                   setEditMode(0);
+//                   reset({
+//                     SessionName: "",
+//                     SessionEngName: "",
+//                     SessionAraName: "",
+//                     SessionID: "",
+//                   });
+//                 }}
+//                 className="bg-[#121212] transation ease-linear duration-500 font-bold inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-slate-700 ms-[20px] font-SolaimanLipi"
+//               >
+//                 {translate("Add New")}
+//               </button>
+//             </form>
+//           </FormProvider>
+//         </div>
+
+//         <DndContext
+//           collisionDetection={closestCenter}
+//           onDragEnd={handleDragEnd}
+//           sensors={sensors}
+//         >
+//           <div className="w-full flex-1 border rounded-lg bg-white shadow-sm">
+//             <div className="relative overflow-x-auto">
+//               <table className="w-full h-fit border-collapse">
+//                 <thead>
+//                   <tr className="bg-theme-dark text-left text-sm text-white font-SolaimanLipi">
+//                     <th></th>
+//                     {tableHeader.map((title) => (
+//                       <th key={title} className="py-2 px-3">
+//                         {title}
+//                       </th>
+//                     ))}
+//                     <th>Actions</th>
+//                   </tr>
+//                 </thead>
+//                 {rows.length > 0 ? (
+//                   <SortableContext
+//                     items={rows.map((row, index) =>
+//                       row.CGSL ? row.CGSL : row.SubClassID
+//                     )}
+//                     strategy={verticalListSortingStrategy}
+//                   >
+//                     <tbody className="font-SolaimanLipi text-semibold">
+//                       {rows.map((row) => (
+//                         <DraggableRow
+//                           key={row.id}
+//                           row={row}
+//                           headers={tableHeader}
+//                         />
+//                       ))}
+//                     </tbody>
+//                   </SortableContext>
+//                 ) : null}
+//               </table>
+//             </div>
+//           </div>
+//         </DndContext>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Session;

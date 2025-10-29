@@ -1,6 +1,5 @@
 import { Buffer } from 'buffer';
 import { useEffect, useState } from 'react';
-import { useGetStudentFeeUpdateGetDataByUFOIDQuery } from '../../../features/feeCollection/feeCollectionSlice';
 import { useGetInstitutionInfoQuery } from '../../../features/settings/settingsQuerySlice';
 import { enToBnNumber } from '../../../helper/languageFormat';
 import bnBijoy2Unicode from '../../../utils/conveter';
@@ -221,10 +220,10 @@ const StudentFeeReportPdf = ({ result }) => {
 
         {/* 🔹 Footer Section - Fixed at bottom */}
         <div className="absolute bottom-4 left-0 right-0 px-6 text-[10px] text-gray-700">
-          <div className="flex justify-between items-start w-full">
+          <div className="flex justify-between items-end w-full">
             {/* 🔸 Left side - Developer info */}
-            <div className="text-left mt-3">
-              <p className="leading-tight">
+            <div className="text-left">
+              <p className="leading-tight mt-6">
                 Software Develop by: saharait ০১৮২৩০০০৫৫৫
               </p>
             </div>

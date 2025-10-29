@@ -36,6 +36,7 @@ import useTranslate from '../../../utils/Translate';
 import SMSLogo from '/smslogo.png';
 
 import SubmitLoading from '../../../components/Loading/SubmitLoading';
+import { useGetSettingsQuery } from '../../../features/settings/settingsQuerySlice';
 import MonthlyFeeCollectionTable from '../../../view/accounting/student-fee-collection/MonthlyFeeCollectionTable';
 
 const CreateStudentFee = () => {
@@ -62,6 +63,11 @@ const CreateStudentFee = () => {
   const { studentFeeData = [] } = useSelector((state) => state.settings);
 
   const { data: sessionData } = useGetSessionsQuery();
+  const { data: settingsData } = useGetSettingsQuery();
+  const currentPermissionStatus = settingsData?.data?.find(
+    (item) => item.ID === 9
+  )?.Action;
+
   // 🔹 RTK Mutation Hook
   const [
     postStudentFee,
@@ -344,20 +350,23 @@ const CreateStudentFee = () => {
         return;
       }
       setIsSubmitting(true);
+      let smsPermission = false;
 
-      // 🔹 Step 1: Ask for SMS permission during submit
-      const result = await Swal.fire({
-        title: 'SMS পাঠাবেন?',
-        text: 'আপনি কি এই ইনভয়েসের জন্য SMS পাঠাতে চান?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'হ্যাঁ, পাঠাও',
-        cancelButtonText: 'না, পাঠাব না',
-        confirmButtonColor: '#16a34a',
-        cancelButtonColor: '#d33',
-      });
+      // Step 1: Ask for SMS permission during submit (only if currentPermissionStatus is defined)
+      if (currentPermissionStatus == 1) {
+        const result = await Swal.fire({
+          title: 'SMS পাঠাবেন?',
+          text: 'আপনি কি এই ইনভয়েসের জন্য SMS পাঠাতে চান?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'হ্যাঁ, পাঠাও',
+          cancelButtonText: 'না, পাঠাব না',
+          confirmButtonColor: '#16a34a',
+          cancelButtonColor: '#d33',
+        });
 
-      const smsPermission = result.isConfirmed ? true : false;
+        smsPermission = result.isConfirmed;
+      }
 
       const payload = {
         UserID: studentFeeData.userId,

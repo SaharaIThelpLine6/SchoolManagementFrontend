@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { closeModal } from '../features/modal/modalSlice';
 import useTranslate from '../utils/Translate';
+import SessionCreateUpdateModal from '../view/Session/SessionCreateUpdateModal';
 import BalanceTransferModal from '../view/accounting/BalanceTransferModal';
 import BankInfoSettings from '../view/accounting/BankInfoSettings';
 import FundForm from '../view/accounting/FundForm';
@@ -98,6 +99,12 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'PAYMENT' && <PaymentModal />}
                 {modalType === 'ADD_TEACHER' && <AddTeacherForm userId={id} />}
+                {modalType === 'SESSION_CREATE_FORM' && (
+                  <SessionCreateUpdateModal />
+                )}
+                {modalType === 'SESSION_EDIT_FORM' && (
+                  <SessionCreateUpdateModal id={id} />
+                )}
                 {modalType === 'EDIT_TEACHER' && (
                   <EditTeacherForm userId={id} />
                 )}
