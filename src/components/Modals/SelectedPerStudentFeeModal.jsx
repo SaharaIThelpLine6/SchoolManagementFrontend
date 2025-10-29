@@ -14,15 +14,19 @@ const SelectedPerStudentFeeModal = () => {
   const methods = useForm();
   const {
     watch,
+    setValue,
     formState: { errors },
   } = methods;
   const dispatch = useDispatch();
-  const { academicSession, status: settingsStatus } = useSelector(
-    (state) => state.settings
-  );
+  const {
+    academicSession,
+    status: settingsStatus,
+    studentFeeSessionID,
+  } = useSelector((state) => state.settings);
   const { classList, status: classStatus } = useSelector(
     (state) => state.class
   );
+
 
   useEffect(() => {
     if (!academicSession.length) {
@@ -32,6 +36,12 @@ const SelectedPerStudentFeeModal = () => {
       dispatch(fetchClassData());
     }
   }, [dispatch]);
+
+  useEffect(() => {
+    if (academicSession.length && !watch('SessionID')) {
+      setValue('SessionID', studentFeeSessionID);
+    }
+  }, [academicSession, setValue, watch]);
 
   const StudentCode = watch('StudentCode');
   const ClassID = watch('ClassID');
@@ -148,18 +158,18 @@ const SelectedPerStudentFeeModal = () => {
               key={'StudentCode'}
             />
             <DefaultSelect
+              options={academicSession}
+              nameField={'SessionName'}
+              valueField={'SessionID'}
+              registerKey={'SessionID'}
+            />
+            <DefaultSelect
               options={classList}
               nameField={'ClassName'}
               valueField={'ClassID'}
               registerKey={'ClassID'}
               type={'number'}
               unicode={true}
-            />
-            <DefaultSelect
-              options={academicSession}
-              nameField={'SessionName'}
-              valueField={'SessionID'}
-              registerKey={'SessionID'}
             />
           </div>
         </div>

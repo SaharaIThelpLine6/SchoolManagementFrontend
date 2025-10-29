@@ -23,7 +23,10 @@ import {
   usePostStudentFeeCollectionMutation,
 } from '../../../features/feeCollection/feeCollectionSlice';
 import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
-import { setStudentFeeData } from '../../../features/settings/settingsSlice';
+import {
+  setStudentFeeData,
+  setStudentFeeSessionID,
+} from '../../../features/settings/settingsSlice';
 import {
   setFilteredSelectedPerStudentFee,
   setMonthFeeData,
@@ -141,12 +144,6 @@ const CreateStudentFee = () => {
     }
   );
 
-  console.log(studentFeeAdmissionData, 'studentFeeAdmissionsData');
-  console.log(
-    studentOtherDuesError,
-    studentOtherDueError,
-    'studentOtherDueError'
-  );
 
   // default session set
   useEffect(() => {
@@ -182,7 +179,6 @@ const CreateStudentFee = () => {
   // ✅ Search effect - searchTrigger change হলে refetch করবে
   useEffect(() => {
     if (filterData && searchTrigger > 0) {
-      console.log('Refetching data for:', filterData);
       refetch();
     }
   }, [searchTrigger, filterData, refetch]);
@@ -190,7 +186,6 @@ const CreateStudentFee = () => {
   // ✅ useEffect দিয়ে dispatch, প্রথম এলিমেন্ট থাকলে
   useEffect(() => {
     if (searchUserInfo && searchUserInfo.data) {
-      console.log('Search result:', searchUserInfo);
 
       if (
         Array.isArray(searchUserInfo.data) &&
@@ -225,7 +220,6 @@ const CreateStudentFee = () => {
     }
   }, [filteredSelectedPerStudentFee]);
 
-  console.log(studentFeeData, 'studentFeeData');
 
   useEffect(() => {
     if (studentFeeData?.fees) {
@@ -242,6 +236,13 @@ const CreateStudentFee = () => {
   useEffect(() => {
     setstudentFeeDataAll(studentFeeData);
   }, [studentFeeData]);
+
+  // Dispatch whenever it changes
+  useEffect(() => {
+    if (SessionID !== undefined && SessionID !== null) {
+      dispatch(setStudentFeeSessionID(SessionID));
+    }
+  }, [SessionID, dispatch]);
 
   // ✅ Student change হলে form update করুন
   useEffect(() => {
@@ -409,7 +410,7 @@ const CreateStudentFee = () => {
       Swal.fire({
         icon: 'error',
         title: 'ত্রুটি',
-        text: 'ডেটা সাবমিট করতে সমস্যা হয়েছে',
+        text: error.data.error || 'কোনো অজানা ত্রুটি হয়েছে।',
       });
     }
   };
@@ -491,7 +492,6 @@ const CreateStudentFee = () => {
 
     // ✅ যদি একই code আবার search করা হয়, তাহলে force refetch
     if (studentCode === lastSearchedCode) {
-      console.log('Same code searched again, forcing refetch...');
 
       // ✅ Complete state reset
       dispatch(setFilteredSelectedPerStudentFee(null));

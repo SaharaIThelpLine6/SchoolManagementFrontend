@@ -88,6 +88,7 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
         amount: item.Amount || item.Fee || 0,
         deduction: 0,
         deposit: item.Fee - item.PreviousDeposite || 0,
+        depositUpdate: item.Fee - item.PreviousDeposite || 0,
         preDeposit: item.PreDeposite || 0,
         due: 0,
       }));
@@ -137,6 +138,21 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
 
   const fees = watch('fees');
 
+  // Unified calculation function with preDeposit
+  const recalcFee = (fee) => {
+    const prescribedFee = Number(fee.amount || 0);
+    const deduction = Number(fee.deduction || 0);
+    const preDeposit = Number(fee.preDeposit || 0);
+    let deposit = Number(fee.deposit || 0);
+
+    // Ensure deposit does not exceed remaining fee
+    const maxDeposit = prescribedFee - deduction - preDeposit;
+    if (deposit > maxDeposit) deposit = maxDeposit;
+
+    const due = prescribedFee - deduction - preDeposit - deposit;
+    return { deposit, due };
+  };
+
   // Recalculate totals whenever fees change
   const recalculateTotals = useCallback(() => {
     if (!fees || fees.length === 0) {
@@ -146,79 +162,92 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       return;
     }
 
-    const totalPrescribed = fees.reduce(
-      (acc, f) => acc + Number(f.amount || 0),
-      0
-    );
-    const totalDeduction = fees.reduce(
-      (acc, f) => acc + Number(f.deduction || 0),
-      0
-    );
-    const totalDeposit = fees.reduce(
-      (acc, f) => acc + Number(f.deposit || 0),
-      0
-    );
+    let totalPrescribed = 0;
+    let totalDeduction = 0;
+    let totalDeposit = 0;
 
+    // Recalculate deposit/due for each fee
+    const updatedFees = fees.map((fee) => {
+      const { deposit, due } = recalcFee(fee);
+      totalPrescribed += Number(fee.amount || 0);
+      totalDeduction += Number(fee.deduction || 0);
+      totalDeposit += deposit;
+      return { ...fee, deposit, due };
+    });
+
+    // Update defaultFees and form values
+    setDefaultFees(updatedFees);
+    setValue('fees', updatedFees);
     setValue('prescribedFee', totalPrescribed);
     setValue('deduction', totalDeduction);
     setValue('currentDeposit', totalDeposit);
   }, [fees, setValue]);
 
-  // Recalculate totals when fees change
-  useEffect(() => {
-    recalculateTotals();
-  }, [fees, recalculateTotals]);
+  // Recalculate totals whenever fees array changes
+  // useEffect(() => {
+  //   recalculateTotals();
+  // }, [fees, recalculateTotals]);
 
-  // Deduction change
+  // Handle Deduction change
   const handleDeductionChange = useCallback(
     (index) => {
       const currentFees = getValues('fees');
       const fee = currentFees[index];
       if (!fee) return;
 
-      const prescribedFee = Number(fee.amount) || 0;
-      const deduction = Number(fee.deduction) || 0;
-      const deposit = prescribedFee - deduction;
+      const { deposit, due } = recalcFee(fee);
 
       setValue(`fees.${index}.deposit`, deposit);
-      setValue(`fees.${index}.due`, prescribedFee - deduction - deposit);
+      setValue(`fees.${index}.due`, due);
 
       setDefaultFees((prev) =>
-        prev.map((f, i) => (i === index ? { ...f, deduction, deposit } : f))
+        prev.map((f, i) =>
+          i === index ? { ...f, deduction: fee.deduction, deposit, due } : f
+        )
       );
 
-      // Recalculate totals after deduction change
-      setTimeout(() => {
-        recalculateTotals();
-      }, 0);
+      // Recalculate totals
+      const updatedFees = getValues('fees');
+      const totalDeduction = updatedFees.reduce(
+        (acc, f) => acc + Number(f.deduction || 0),
+        0
+      );
+      const totalDeposit = updatedFees.reduce(
+        (acc, f) => acc + Number(f.deposit || 0),
+        0
+      );
+
+      setValue('deduction', totalDeduction);
+      setValue('currentDeposit', totalDeposit);
     },
-    [getValues, setValue, recalculateTotals]
+    [getValues, setValue]
   );
 
-  // Deposit change
+  // Handle Deposit change
   const handleDepositChange = useCallback(
     (index) => {
       const currentFees = getValues('fees');
       const fee = currentFees[index];
       if (!fee) return;
 
-      const prescribedFee = Number(fee.amount) || 0;
-      const deduction = Number(fee.deduction) || 0;
-      const deposit = Number(fee.deposit) || 0;
-      const due = prescribedFee - deduction - deposit;
+      const { deposit, due } = recalcFee(fee);
 
+      setValue(`fees.${index}.deposit`, deposit);
       setValue(`fees.${index}.due`, due);
 
       setDefaultFees((prev) =>
         prev.map((f, i) => (i === index ? { ...f, deposit, due } : f))
       );
 
-      // Recalculate totals after deposit change
-      setTimeout(() => {
-        recalculateTotals();
-      }, 0);
+      // Recalculate total deposit
+      const updatedFees = getValues('fees');
+      const totalDeposit = updatedFees.reduce(
+        (acc, f) => acc + Number(f.deposit || 0),
+        0
+      );
+      setValue('currentDeposit', totalDeposit);
     },
-    [getValues, setValue, recalculateTotals]
+    [getValues, setValue]
   );
 
   // Delete a fee row
@@ -400,6 +429,7 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                           type="number"
                           defaultValue={item.deduction || 0}
                           onChange={() => handleDeductionChange(globalIndex)}
+                          max={item.preDeposit ? item.deposit : item.amount}
                         />
                       </td>
                       <td className="text-center">
@@ -416,6 +446,9 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                           type="number"
                           defaultValue={item.deposit}
                           onChange={() => handleDepositChange(globalIndex)}
+                          max={
+                            item.preDeposit ? item.depositUpdate : item.amount
+                          }
                         />
                       </td>
                       <td className="text-center">
