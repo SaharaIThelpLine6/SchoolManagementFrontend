@@ -58,17 +58,13 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
   const { data: monthDuePerStudent } = useGetMonthDuePerStudentFeeQuery(
     {
       admissionId: filteredSelectedPerStudentFee?.AdmissionID,
-      monthId: monthFeeData.monthId, // ধরো তুমি month select করছো
+      monthId: monthFeeData.monthId,
     },
     {
       skip:
-        !filteredSelectedPerStudentFee?.AdmissionID || !monthFeeData.monthId, // monthId না থাকলে skip করবে
+        !filteredSelectedPerStudentFee?.AdmissionID || !monthFeeData.monthId,
     }
   );
-
-  console.log(monthDuePerStudent, 'monthDuePerStudent');
-  console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
-  console.log(filteredSelectedPerStudentFee, 'filteredSelectedPerStudentFee');
 
   // Initialize default fees from API
   useEffect(() => {
@@ -77,7 +73,6 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       Array.isArray(monthDuePerStudent.data) &&
       monthDuePerStudent.data.length > 0
     ) {
-      // যদি মাস অনুযায়ী ফি থাকে
       const fees = monthDuePerStudent.data.map((item) => ({
         SSFID: item.SSFID,
         SLID: item.SLID,
@@ -100,7 +95,6 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       Array.isArray(studentFeeAdmissionData) &&
       studentFeeAdmissionData.length > 0
     ) {
-      // fallback: studentFeeAdmissionData ব্যবহার করো
       const fees = studentFeeAdmissionData.map((item) => ({
         SSFID: item.SSFID,
         SLID: item.SLID,
@@ -183,10 +177,10 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
     setValue('currentDeposit', totalDeposit);
   }, [fees, setValue]);
 
-  // Recalculate totals whenever fees array changes
-  // useEffect(() => {
-  //   recalculateTotals();
-  // }, [fees, recalculateTotals]);
+  // Recalculate totals whenever fees array changes - IMPORTANT: UNCOMMENT THIS
+  useEffect(() => {
+    recalculateTotals();
+  }, [fees, recalculateTotals]);
 
   // Handle Deduction change
   const handleDeductionChange = useCallback(
@@ -205,20 +199,6 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
           i === index ? { ...f, deduction: fee.deduction, deposit, due } : f
         )
       );
-
-      // Recalculate totals
-      const updatedFees = getValues('fees');
-      const totalDeduction = updatedFees.reduce(
-        (acc, f) => acc + Number(f.deduction || 0),
-        0
-      );
-      const totalDeposit = updatedFees.reduce(
-        (acc, f) => acc + Number(f.deposit || 0),
-        0
-      );
-
-      setValue('deduction', totalDeduction);
-      setValue('currentDeposit', totalDeposit);
     },
     [getValues, setValue]
   );
@@ -238,14 +218,6 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       setDefaultFees((prev) =>
         prev.map((f, i) => (i === index ? { ...f, deposit, due } : f))
       );
-
-      // Recalculate total deposit
-      const updatedFees = getValues('fees');
-      const totalDeposit = updatedFees.reduce(
-        (acc, f) => acc + Number(f.deposit || 0),
-        0
-      );
-      setValue('currentDeposit', totalDeposit);
     },
     [getValues, setValue]
   );
@@ -257,22 +229,13 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       const updatedFees = currentFees.filter((_, i) => i !== index);
       setValue('fees', updatedFees);
       setDefaultFees((prev) => prev.filter((_, i) => i !== index));
-
-      // Recalculate totals after deletion
-      setTimeout(() => {
-        recalculateTotals();
-      }, 0);
     },
-    [getValues, setValue, recalculateTotals]
+    [getValues, setValue]
   );
 
   const handleResetForm = useCallback(() => {
     reset({ fees: defaultFees });
-    // Recalculate totals after reset
-    setTimeout(() => {
-      recalculateTotals();
-    }, 0);
-  }, [reset, defaultFees, recalculateTotals]);
+  }, [reset, defaultFees]);
 
   const totalPages = Math.ceil((fees?.length || 0) / PAGE_SIZE);
 
@@ -284,16 +247,14 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
 
-    // যদি monthDuePerStudent ডেটা আসে, তখনই delay দিই
     if (monthDuePerStudent?.totals) {
       const timer = setTimeout(() => {
         setFeeDueData({
           totalLess: monthDuePerStudent?.totals?.totalLess || 0,
           totalPreDeposit: monthDuePerStudent?.totals?.totalPreDeposite || 0,
         });
-      }, 300); // 300ms delay
+      }, 300);
 
-      // cleanup timer on unmount or re-run
       return () => clearTimeout(timer);
     }
   }, [dispatch, pageTitle, monthDuePerStudent]);
