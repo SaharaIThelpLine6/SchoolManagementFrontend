@@ -93,6 +93,7 @@ const initialState = {
   currentDivitionId: null,
   currentDistrictId: null,
   studentFeeSessionID: null,
+  editUserID: null,
   studentFeeData: null,
   status: 'idle',
   error: null,
@@ -110,6 +111,9 @@ const settingsSlice = createSlice({
     },
     setStudentFeeSessionID: (state, action) => {
       state.studentFeeSessionID = action.payload;
+    },
+    setEditUserID: (state, action) => {
+      state.editUserID = action.payload;
     },
     clearStudentFeeData: (state, action) => {
       state.studentFeeData = null;
@@ -172,5 +176,6 @@ export const {
   setStudentFeeData,
   clearStudentFeeData,
   setStudentFeeSessionID,
+  setEditUserID,
 } = settingsSlice.actions;
 export default settingsSlice.reducer;
