@@ -1,20 +1,20 @@
 import { useEffect, useMemo } from "react";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import useTranslate from "../../utils/Translate";
-import Swal from "sweetalert2";
-import DefaultSelect from "./DefaultSelect";
-import Button from "../Button/Button";
-import Input from "../Input/Input";
-import { hideModal } from "../../utils/ModalControlar";
+import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchSettingsData } from "../../features/settings/settingsSlice";
+import Swal from "sweetalert2";
+import { banglaDigitMap, banglaMonthMap, months } from "../../Data/monthsData";
 import { fetchClassData } from "../../features/class/classSlice";
 import {
   useEditMonthMutation,
   useGetMonthListQuery,
   useInsertMonthMutation,
 } from "../../features/months/montListSlice";
-import { banglaDigitMap, banglaMonthMap, months } from "../../Data/monthsData";
+import { fetchSettingsData } from "../../features/settings/settingsSlice";
+import { hideModal } from "../../utils/ModalControlar";
+import useTranslate from "../../utils/Translate";
+import Button from "../Button/Button";
+import Input from "../Input/Input";
+import DefaultSelect from "./DefaultSelect";
 
 const MonthNamesForm = ({ id, isEdit = false }) => {
   const translate = useTranslate();
@@ -177,12 +177,12 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
                   placeholder={translate(`Enter name or number for ${month}`)}
                   type="text"
                   {...register(`monthNames.${index}`, {
-                    required: translate(month + " " + "name is required"),
+                    required: translate(month + ' ' + 'name is required'),
                   })}
                   helperText={fieldError?.message}
                   error={!!fieldError}
                   onKeyDown={(e) => {
-                    if (e.key === "Tab" || e.key === "Enter") {
+                    if (e.key === 'Tab' || e.key === 'Enter') {
                       const inputVal = e.target.value.trim();
                       const convertedVal = autoConvertMonthName(inputVal);
                       if (convertedVal) {
@@ -205,30 +205,32 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
             })}
             <DefaultSelect
               options={academicSession}
-              require={translate("Session is required")}
-              nameField={"SessionName"}
-              valueField={"SessionID"}
-              registerKey={"SessionID"}
-              type={"number"}
+              require={translate('Session is required')}
+              nameField={'SessionName'}
+              valueField={'SessionID'}
+              registerKey={'SessionID'}
+              type={'number'}
               label="Session"
+              unicode
               disabled={isEdit ? true : false}
             />
 
             <DefaultSelect
               options={classList}
-              require={translate("Class is required")}
-              nameField={"EnglishClass"}
-              valueField={"ClassID"}
-              registerKey={"ClassID"}
-              type={"number"}
+              require={translate('Class is required')}
+              nameField={'EnglishClass'}
+              valueField={'ClassID'}
+              registerKey={'ClassID'}
+              type={'number'}
               label="Class"
+              unicode
               disabled={isEdit ? true : false}
             />
           </div>
 
           <div className="flex justify-start mt-6">
             <Button type="submit">
-              {translate(isEdit ? "Update" : "Save")}
+              {translate(isEdit ? 'Update' : 'Save')}
             </Button>
           </div>
         </div>

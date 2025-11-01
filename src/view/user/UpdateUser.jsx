@@ -4,7 +4,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import DefaultGreen from '../../components/Button/DefaultGreen';
+import Button from '../../components/Button/Button';
 import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
 import DefaultInput from '../../components/Forms/DefaultInput';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
@@ -232,8 +232,10 @@ const UpdateUser = ({ singleUserData }) => {
     }
   };
 
-  const saveButton = 'Update';
-  const newButton = 'Cancel';
+  const handleResetForm = () => {
+    dispatch(setEditUserID(null));
+    reset();
+  };
 
   useEffect(() => {
     // কমপক্ষে 1.5 সেকেন্ড loading দেখাবে
@@ -538,8 +540,19 @@ const UpdateUser = ({ singleUserData }) => {
               />
             </div>
             <div className="flex gap-3">
-              <DefaultGreen submitButtonGreen={saveButton} />
-              <DefaultGreen submitButtonGreen={newButton} />
+              <Button
+                type="submit"
+                className="px-6 py-2 rounded-lg bg-blue-600 text-white"
+              >
+                Save
+              </Button>
+              <Button
+                type="button"
+                className="px-6 py-2 rounded-lg bg-gray-400 text-white"
+                onClick={handleResetForm}
+              >
+                Cencel
+              </Button>
             </div>
           </div>
         </div>

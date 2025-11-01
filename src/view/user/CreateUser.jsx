@@ -2,7 +2,6 @@ import 'flatpickr/dist/flatpickr.css';
 import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import DefaultGreen from '../../components/Button/DefaultGreen';
 import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
 import DefaultInput from '../../components/Forms/DefaultInput';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
@@ -25,6 +24,7 @@ import {
 import { calculateAge } from '../../utils/calculateAge';
 import useTranslate from '../../utils/Translate';
 import validateBDMobile from '../../utils/validateBDMobile';
+import Button from '../../components/Button/Button';
 
 const CreateUser = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -296,8 +296,9 @@ const CreateUser = ({ pageTitle }) => {
     }
   };
 
-  const saveButton = 'Save';
-  const newButton = 'New';
+  const handleResetForm = () => {
+    reset();
+  };
 
   return (
     <FormProvider {...methods}>
@@ -569,8 +570,19 @@ const CreateUser = ({ pageTitle }) => {
               />
             </div>
             <div className="flex gap-3">
-              <DefaultGreen submitButtonGreen={saveButton} />
-              <DefaultGreen submitButtonGreen={newButton} />
+              <Button
+                type="submit"
+                className="px-6 py-2 rounded-lg bg-blue-600 text-white"
+              >
+                Save
+              </Button>
+              <Button
+                type="button"
+                className="px-6 py-2 rounded-lg bg-gray-400 text-white"
+                onClick={handleResetForm}
+              >
+                Reset
+              </Button>
             </div>
           </div>
         </div>
