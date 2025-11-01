@@ -1,6 +1,7 @@
 import 'flatpickr/dist/flatpickr.css';
 import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import DefaultGreen from '../../components/Button/DefaultGreen';
@@ -16,6 +17,7 @@ import {
   useGetSettingsQuery,
   useGetStudentRelationsQuery,
 } from '../../features/settings/settingsQuerySlice';
+import { setEditUserID } from '../../features/settings/settingsSlice';
 import {
   useGetUserCodeCheckQuery,
   useGetUserTypesQuery,
@@ -29,6 +31,7 @@ import validateBDMobile from '../../utils/validateBDMobile';
 const UpdateUser = ({ singleUserData }) => {
   const translate = useTranslate();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const methods = useForm();
   const [showLoading, setShowLoading] = useState(true);
@@ -136,19 +139,11 @@ const UpdateUser = ({ singleUserData }) => {
       PoliceStationID: PoliceStationID2,
     } = extractLocationCodes(singleUserData?.TransientPoliceStationID);
     // basic fields first
-    // setValue('UserName', singleUserData?.UserName);
-    // setValue('UserCode', singleUserData?.UserCode);
     setValue('UserTypeID', singleUserData?.UserTypeID);
-    // setValue('FatherName', singleUserData?.FatherName);
-    // setValue('MotherName', singleUserData?.MotherName);
     setValue('DateOfBirth', singleUserData?.DateOfBirth);
     setValue('GenderID', singleUserData?.GenderID);
-    // setValue('NIDNO', singleUserData?.NIDNO);
-    // setValue('Mobile1', singleUserData?.Mobile1);
     setValue('Relationship1', singleUserData?.Relationship1);
-    // setValue('Mobile2', singleUserData?.Mobile2);
     setValue('Relationship2', singleUserData?.Relationship2);
-    // setValue('Email', singleUserData?.Email);
     setValue('BloodGroup', singleUserData?.BloodGroup);
 
     const permanentTimer = setTimeout(() => {
@@ -225,6 +220,7 @@ const UpdateUser = ({ singleUserData }) => {
 
       reset(); // ✅ Form reset
       console.log('User updated:', response);
+      dispatch(setEditUserID(null));
     } catch (err) {
       // ✅ Error SweetAlert
       Swal.fire({
