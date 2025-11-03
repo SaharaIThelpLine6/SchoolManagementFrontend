@@ -25,7 +25,6 @@ import {
 import bnBijoy2Unicode from '../utils/conveter';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
-import convertBijoyToBengali from '../utils/uniconveter';
 
 const CharacterReport = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -226,21 +225,15 @@ const CharacterReport = ({ pageTitle }) => {
     const toastId = toast.loading(isEditMode ? 'Updating...' : 'Submitting...');
 
     try {
-      const convertedData = Object.fromEntries(
-        Object.entries(data).map(([key, value]) =>
-          typeof value === 'string'
-            ? [key, convertBijoyToBengali(value)]
-            : [key, value]
-        )
-      );
-
+      // 🔹 ConvertedData আর লাগবে না, সরাসরি data ব্যবহার
       if (isEditMode) {
-        convertedData.SRID = reportUpdateId;
-        await updateCharacterStudent(convertedData).unwrap();
+        const updatedData = { ...data, SRID: reportUpdateId };
+        await updateCharacterStudent(updatedData).unwrap();
       } else {
-        await addCharacterStudent(convertedData).unwrap();
+        await addCharacterStudent(data).unwrap();
       }
 
+      // ✅ Success Toast
       toast.update(toastId, {
         render: isEditMode
           ? 'Updated successfully!'
@@ -251,24 +244,25 @@ const CharacterReport = ({ pageTitle }) => {
         closeOnClick: true,
       });
 
-      // Refresh the report list
+      // 🔄 Refresh the report list
       refetchReports();
 
-      // Reset only specific fields while preserving others
+      // 🧹 Reset only specific fields (keeping others)
       methods.reset({
-        ...methods.getValues(), // Keep current values
+        ...methods.getValues(),
         Date: new Date(),
         ReportCetID: '',
         ReportTypID: '',
         Remark: '',
       });
 
-      // Exit edit mode if needed
+      // 🚪 Exit edit mode if needed
       if (isEditMode) {
         setIsEditMode(false);
         setReportUpdateId(null);
       }
     } catch (err) {
+      // ❌ Error Toast
       toast.update(toastId, {
         render:
           err?.data?.error ||

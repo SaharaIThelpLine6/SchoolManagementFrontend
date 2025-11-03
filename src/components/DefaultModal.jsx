@@ -25,6 +25,7 @@ import PaymentGetway from '../view/general-information/sms/PaymentGetway';
 import SMSBuy from '../view/general-information/sms/SMSBuy';
 import SMSTemplate from '../view/general-information/sms/SMSTemplate';
 import SuccessAndError from '../view/general-information/sms/SuccessAndError';
+import SubclassCreateUpdatemodal from '../view/section/SubclassCreateUpdatemodal';
 import AddLoginUsersModal from '../view/settings/AddLoginUsersModal';
 import UserNamePasswordChangeModal from '../view/settings/UserNamePasswordChangeModal';
 import AddEditBook from '../view/students/book/AddEditBook';
@@ -122,6 +123,12 @@ const DefaultModal = () => {
                 {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
                 {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
                 {modalType === 'STUDENT_FEE_GROUP' && <StudentFeeGroup />}
+                {modalType === 'SECTION_CREATE_FORM' && (
+                  <SubclassCreateUpdatemodal />
+                )}
+                {modalType === 'SECTION_EDIT_FORM' && (
+                  <SubclassCreateUpdatemodal id={id} />
+                )}
                 {modalType === 'UPDATE_STUDENT_FEE_COMMENT_BOX' && (
                   <CommentBoxModal />
                 )}

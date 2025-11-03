@@ -1,161 +1,158 @@
-import React, { useState, useEffect } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import ThemeInputBox1 from "../../../components/Forms/ThemeInputBox1";
-import SelectBox1 from "../../../components/Forms/SelectBox1";
-import useTranslate from "../../../utils/Translate";
+import { useEffect } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { toast } from 'react-toastify';
+import Button from '../../../components/Button/Button';
+import DefaultInput from '../../../components/Forms/DefaultInput';
+import DefaultSelect from '../../../components/Forms/DefaultSelect';
 import {
-  useGetSubClasssQuery,
   useCreateAcademicSubjectMutation,
+  useGetAcademicSubjectsQuery,
+  useGetLastSerialSubjectQuery,
+  useGetSubClasssQuery,
   useUpdateAcademicSubjectMutation,
-  useGetAcademicSubjectsQuery
-} from "../../../features/class/classQuerySlice";
-import Swal from "sweetalert2";
+} from '../../../features/class/classQuerySlice';
+import { hideModal } from '../../../utils/ModalControlar';
+import useTranslate from '../../../utils/Translate';
 
 const AddEditBook = ({ id }) => {
   const methods = useForm();
   const translate = useTranslate();
-  const [isEditing, setIsEditing] = useState(!!id);
-  const { handleSubmit, reset, setValue } = methods;
+  const { handleSubmit, reset, setValue, watch } = methods;
 
-  // RTK Query hooks
-  const { data: subClassData, isLoading: isSubClassLoading } = useGetSubClasssQuery();
-  const { data: academicSubjects = [] } = useGetAcademicSubjectsQuery();
-  const [createSubject, { isLoading: isCreating }] = useCreateAcademicSubjectMutation();
-  const [updateSubject, { isLoading: isUpdating }] = useUpdateAcademicSubjectMutation();
+  // 🔹 Check if edit mode
+  const isEditMode = !!id;
+  const SubClassID = watch('SubClassID');
+  // 🔹 Fetch subclass and subjects
+  const { data: subClassData = [], isLoading: isSubClassLoading } =
+    useGetSubClasssQuery();
+  const { data: academicSubjects = [] } = useGetAcademicSubjectsQuery(
+    undefined,
+    {
+      skip: !isEditMode,
+    }
+  );
+  const { data: academicSubjectss = [] } = useGetLastSerialSubjectQuery(
+    SubClassID,
+    {
+      skip: !SubClassID,
+    }
+  );
+  console.log(academicSubjectss, 'academicSubjectss');
 
-  // Find the subject to edit if id is provided
-  const editData = id ? academicSubjects.find(subject => subject.SubjectID == id) : null;
+  // 🔹 Mutations
+  const [createSubject, { isLoading: isCreating }] =
+    useCreateAcademicSubjectMutation();
+  const [updateSubject, { isLoading: isUpdating }] =
+    useUpdateAcademicSubjectMutation();
 
-  const resetForm = () => {
-    reset();
-    // if (onCancelEdit) onCancelEdit();
-  };
+  // 🔹 Find edit data if editing
+  const editData = isEditMode
+    ? academicSubjects.find((subject) => subject.SubjectID == id)
+    : null;
 
-  // Initialize form with edit data if available
+  // 🔹 Prefill data when editing
   useEffect(() => {
     if (editData) {
-      setIsEditing(true);
-      setValue("SubjectID", editData.SubjectID);
-      setValue("SubSerial", editData.SubSerial || "");
-      setValue("SubClassID", editData.SubClassID || "");
-      setValue("SubjectName", editData.SubjectName || "");
-      setValue("ArabicSubject", editData.ArabicSubject || "");
-      setValue("EngSubjectName", editData.EngSubjectName || "");
+      // setValue('SubSerial', editData.SubSerial || '');
+      setValue('SubClassID', editData.SubClassID || '');
+      setValue('SubjectName', editData.SubjectName || '');
+      setValue('ArabicSubject', editData.ArabicSubject || '');
+      setValue('EngSubjectName', editData.EngSubjectName || '');
     } else {
-      setIsEditing(false);
-      resetForm();
+      reset();
     }
   }, [editData, setValue, reset]);
 
-  const onSubmit = async (data) => {
+  // 🔹 Submit logic
+  const onSubmit = async (formData) => {
     try {
-      if (isEditing && editData) {
-        // Handle edit
-        await updateSubject({
-          id: editData.SubjectID,
-          ...data
-        }).unwrap();
-
-        Swal.fire({
-          title: translate("Success"),
-          text: translate("Subject updated successfully"),
-          icon: "success"
-        });
+      if (isEditMode) {
+        await updateSubject({ id, ...formData }).unwrap();
+        toast.success(translate('Subject updated successfully'));
       } else {
-        // Handle create
-        await createSubject(data).unwrap();
-
-        Swal.fire({
-          title: translate("Success"),
-          text: translate("Subject created successfully"),
-          icon: "success"
-        });
+        await createSubject(formData).unwrap();
+        toast.success(translate('Subject created successfully'));
       }
 
-      resetForm();
-      // if (refetchSubjects) refetchSubjects();
-    } catch (error) {
-      console.error("Error:", error);
-      Swal.fire({
-        title: translate("Error"),
-        text: error.data?.message || translate("Something went wrong"),
-        icon: "error"
-      });
+      hideModal();
+      reset();
+    } catch (err) {
+      console.error('Error:', err);
+      toast.error(err?.data?.message || translate('Failed to save subject'));
     }
   };
 
-  // if (isSubClassLoading) return <Loading />;
   return (
-    <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* First Column */}
+    <div className="w-full border rounded-lg p-5 bg-white shadow-inner">
+      <h2 className="text-lg font-semibold mb-4 text-gray-700">
+        {isEditMode ? translate('Update Subject') : translate('Create Subject')}
+      </h2>
+
+      <FormProvider {...methods}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
+          {/* Left Column */}
           <div className="space-y-4">
+            <DefaultInput
+              label={translate('Serial Number')}
+              registerKey="SubSerial"
+              type="number"
+              require={translate('Serial is required')}
+              disable
+              defaultValue={
+                isEditMode ? editData?.SubSerial : academicSubjectss?.nextSerial
+              }
+            />
 
-
-            <div >
-              <ThemeInputBox1
-                label={translate("Serial Number")}
-                registerKey={"SubSerial"}
-                require={translate("Serial is required")}
-                type={"number"}
-              />
-            </div>
-
-            <div >
-              <SelectBox1
-                label={translate("Class Group")}
-                options={subClassData || []}
-                valueField={"SubClassID"}
-                nameField={"SubClass"}
-                registerKey={"SubClassID"}
-                require={translate("Class group is required")}
-              />
-            </div>
+            <DefaultSelect
+              label={translate('Class Group')}
+              options={subClassData || []}
+              valueField="SubClassID"
+              nameField="SubClass"
+              registerKey="SubClassID"
+              require={translate('Class group is required')}
+              loading={isSubClassLoading}
+              unicode
+            />
           </div>
 
-          {/* Second Column */}
+          {/* Right Column */}
           <div className="space-y-4">
-            <div >
-              <ThemeInputBox1
-                label={translate("Subject Name")}
-                registerKey={"SubjectName"}
-                require={translate("Subject name is required")}
-                type={"text"}
-              />
-            </div>
+            <DefaultInput
+              label={translate('Subject Name')}
+              registerKey="SubjectName"
+              require={translate('Subject name is required')}
+            />
 
-
-
-            <div >
-              <ThemeInputBox1
-                label={translate("Arabic Name")}
-                registerKey={"ArabicSubject"}
-                type={"text"}
-              />
-            </div>
+            <DefaultInput
+              label={translate('Arabic Name')}
+              registerKey="ArabicSubject"
+            />
           </div>
-        </div>
 
-        {/* Button Group */}
-        <div className="flex flex-wrap gap-4 mt-8">
-          <button
-            type="submit"
-            disabled={isCreating || isUpdating}
-            className="bg-theme-color transition ease-linear font-bold duration-500 px-10 py-3 text-white rounded-md hover:bg-[#121212] font-SolaimanLipi disabled:opacity-50"
-          >
-            {(isCreating || isUpdating) ? (
-              <span className="flex items-center justify-center">
-                {isEditing ? translate("Updating...") : translate("Creating...")}
-              </span>
-            ) : (
-              isEditing ? translate("Update") : translate("Save")
-            )}
-          </button>
+          {/* Buttons */}
+          <div className="col-span-2 flex justify-end gap-3 mt-6">
+            <Button
+              type="submit"
+              disabled={isCreating || isUpdating}
+              loading={isCreating || isUpdating}
+            >
+              {isEditMode ? translate('Update') : translate('Save')}
+            </Button>
 
-        </div>
-      </form>
-    </FormProvider>
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => hideModal()}
+            >
+              {translate('Cancel')}
+            </Button>
+          </div>
+        </form>
+      </FormProvider>
+    </div>
   );
 };
 
