@@ -8,6 +8,10 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+       direction: {
+        rtl: 'rtl',
+        ltr: 'ltr',
+      },
       screens: {
         print: { raw: "print" },
       },
@@ -286,5 +290,10 @@ export default {
       },
     },
   },
-  plugins: [require("tailwind-scrollbar")],
+  plugins: [require("tailwind-scrollbar"), function ({ addUtilities }) {
+      addUtilities({
+        '.direction-rtl': { direction: 'rtl' },
+        '.direction-ltr': { direction: 'ltr' },
+      });
+    },],
 };
