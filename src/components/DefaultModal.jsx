@@ -28,6 +28,7 @@ import SuccessAndError from '../view/general-information/sms/SuccessAndError';
 import SubclassCreateUpdatemodal from '../view/section/SubclassCreateUpdatemodal';
 import AddLoginUsersModal from '../view/settings/AddLoginUsersModal';
 import UserNamePasswordChangeModal from '../view/settings/UserNamePasswordChangeModal';
+import AdmissionSerialModal from '../view/students/admission/AdmissionSerialModal';
 import AddEditBook from '../view/students/book/AddEditBook';
 import ClickOutside from './ClickOutside';
 import AddStudentVacationForm from './Forms/AddStudentVacationForm';
@@ -153,6 +154,9 @@ const DefaultModal = () => {
                 )}
 
                 {modalType === 'STUDENT_FILTER' && <StudentFilterModal />}
+                {modalType === 'ONLINE_ADMISSION_SERIAL' && (
+                  <AdmissionSerialModal />
+                )}
                 {modalType === 'USER_FILTER' && <UserFilterModal />}
                 {modalType === 'SELECTED_PERSTUDENT_FEE_FILTER' && (
                   <SelectedPerStudentFeeModal />

@@ -36,7 +36,7 @@ const SelectedPerStudentFeeTable = () => {
   const tbiPrintView =
     infoSettings?.data?.find((item) => item.ID === 30) || null;
 
-  console.log(tbiPrintView, 'tbiPrintView');
+
 
   const {
     data: studentMonthFeeData,

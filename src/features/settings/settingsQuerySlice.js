@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -102,6 +102,14 @@ export const settingsSlice = createApi({
     getLoginUsers: builder.query({
       query: () => `login_users`,
     }),
+    getLastAdmissionSerial: builder.query({
+      query: ({ ClassID, SessionID }) => ({
+        url: 'next_admission_serial',
+        method: 'GET',
+        params: { ClassID, SessionID },
+      }),
+      providesTags: ['Settings'],
+    }),
   }),
 });
 
@@ -123,4 +131,5 @@ export const {
   useGetCodeSettingsQuery,
   useGetLoginUsersQuery,
   useGetAllGendersQuery,
+  useGetLastAdmissionSerialQuery,
 } = settingsSlice;
