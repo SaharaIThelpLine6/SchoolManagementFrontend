@@ -64,6 +64,7 @@ const TableOne = () => {
              hover:border-gray-400 transition-colors"
           onChange={(e) => dispatch(setItemsPerPage(Number(e.target.value)))}
           value={itemPerPage}
+          defaultValue={20}
         >
           {[2, 10, 20, 50].map((num) => (
             <option key={num} value={num}>
