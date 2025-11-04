@@ -1,20 +1,20 @@
-import {  useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { setPageName } from "../features/auth/authSlice";
-import { useLocation } from "react-router-dom";
-import useTranslate from "../utils/Translate";
-import Button from "../components/Button/Button";
-import { FormProvider, useForm } from "react-hook-form";
-import DefaultSelect from "../components/Forms/DefaultSelect";
+import { useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import Button from '../components/Button/Button';
+import DefaultSelect from '../components/Forms/DefaultSelect';
+import DefaultPagination from '../components/Pagination/DefaultPagination';
+import { setPageName } from '../features/auth/authSlice';
+import { useGetClassListQuery } from '../features/class/classQuerySlice';
+import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import {
   useGetStudentBySearchQuery,
   usePostChnageStudentGroupMutation,
-} from "../features/student/studentQuerySlice";
-import { useGetSessionsQuery } from "../features/session/sessionSlice";
-import { useGetClassListQuery } from "../features/class/classQuerySlice";
-import bnBijoy2Unicode from "../utils/conveter";
-import Swal from "sweetalert2";
-import DefaultPagination from "../components/Pagination/DefaultPagination";
+} from '../features/student/studentQuerySlice';
+import bnBijoy2Unicode from '../utils/conveter';
+import useTranslate from '../utils/Translate';
 
 const PAGE_SIZE = 10;
 
@@ -27,14 +27,14 @@ const GroupDistribution = ({ pageTitle }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState([]);
   const genderOptions = [
-    { id: "1", value: "পুরুষ" },
-    { id: "2", value: "মহিলা" },
-    { id: "3", value: "উভয়" },
+    { id: '1', value: 'পুরুষ' },
+    { id: '2', value: 'মহিলা' },
+    { id: '3', value: 'উভয়' },
   ];
 
-  const SessionID = watch("SessionID");
-  const ClassID = watch("ClassID");
-  const genderId = watch("gender");
+  const SessionID = watch('SessionID');
+  const ClassID = watch('ClassID');
+  const GenderID = watch('GenderID');
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: classListData } = useGetClassListQuery();
@@ -44,13 +44,12 @@ const GroupDistribution = ({ pageTitle }) => {
   const selectedClass = classListData?.find((item) => item.ClassID == ClassID); // Use == to avoid type mismatch
 
   const { data: searchStudentInfo = [], refetch } = useGetStudentBySearchQuery(
-    { search: null, ClassID, SessionID, GenderID: genderId },
+    { search: null, ClassID, SessionID, GenderID },
     {
-      skip: !ClassID || !SessionID || !genderId,
+      skip: !ClassID || !SessionID || !GenderID,
       refetchOnFocus: false,
     }
   );
-
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
@@ -61,7 +60,6 @@ const GroupDistribution = ({ pageTitle }) => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return searchStudentInfo.slice(start, start + PAGE_SIZE);
   }, [searchStudentInfo, currentPage]);
-
 
   const handleSelectAll = (e) => {
     if (e.target.checked) {
@@ -82,9 +80,9 @@ const GroupDistribution = ({ pageTitle }) => {
     try {
       if (!data.SubClassID || selectedRows.length === 0) {
         Swal.fire({
-          icon: "warning",
-          title: "ফর্ম অসম্পূর্ণ",
-          text: "অনুগ্রহ করে সাব ক্লাস নির্বাচন করুন এবং অন্তত একজন শিক্ষার্থী সিলেক্ট করুন।",
+          icon: 'warning',
+          title: 'ফর্ম অসম্পূর্ণ',
+          text: 'অনুগ্রহ করে সাব ক্লাস নির্বাচন করুন এবং অন্তত একজন শিক্ষার্থী সিলেক্ট করুন।',
         });
         return;
       }
@@ -95,9 +93,9 @@ const GroupDistribution = ({ pageTitle }) => {
       }).unwrap();
 
       Swal.fire({
-        icon: "success",
-        title: "সফলভাবে সংরক্ষণ হয়েছে",
-        text: response?.message || "গ্রুপ পরিবর্তন সফল হয়েছে।",
+        icon: 'success',
+        title: 'সফলভাবে সংরক্ষণ হয়েছে',
+        text: response?.message || 'গ্রুপ পরিবর্তন সফল হয়েছে।',
       }).then(() => {
         refetch();
         setSelectedRows([]);
@@ -105,11 +103,11 @@ const GroupDistribution = ({ pageTitle }) => {
       });
     } catch (error) {
       Swal.fire({
-        icon: "error",
-        title: "ত্রুটি ঘটেছে!",
-        text: error?.data?.error || "ডেটা সংরক্ষণ করতে ব্যর্থ হয়েছে।",
+        icon: 'error',
+        title: 'ত্রুটি ঘটেছে!',
+        text: error?.data?.error || 'ডেটা সংরক্ষণ করতে ব্যর্থ হয়েছে।',
       });
-      console.error("Error updating student group:", error);
+      console.error('Error updating student group:', error);
     }
   };
 
@@ -117,7 +115,7 @@ const GroupDistribution = ({ pageTitle }) => {
     <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
         <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
-          {translate("Group Distribution List")}
+          {translate('Group Distribution List')}
         </h3>
       </div>
 
@@ -127,14 +125,14 @@ const GroupDistribution = ({ pageTitle }) => {
             {/* Left Column */}
             <div className="flex flex-col space-y-4">
               <DefaultSelect
-                label={translate("Session") + " :"}
+                label={translate('Session')}
                 options={sessionData ?? []}
                 valueField="SessionID"
                 nameField="SessionName"
                 registerKey="SessionID"
               />
               <DefaultSelect
-                label={translate("Class") + " :"}
+                label={translate('Class')}
                 options={classListData ?? []}
                 valueField="ClassID"
                 nameField="ClassName"
@@ -144,13 +142,13 @@ const GroupDistribution = ({ pageTitle }) => {
               <DefaultSelect
                 label={
                   <p className="text-gray-700 font-medium">
-                    {translate("Gender")}:
+                    {translate('Gender')}:
                   </p>
                 }
                 options={genderOptions}
                 valueField="id"
                 nameField="value"
-                registerKey="gender"
+                registerKey="GenderID"
               />
             </div>
 
@@ -166,11 +164,7 @@ const GroupDistribution = ({ pageTitle }) => {
               /> */}
 
               <DefaultSelect
-                label={
-                  <p className="text-gray-700 font-medium">
-                    {translate("Sub Class")} :
-                  </p>
-                }
+                label={translate('Sub Class')}
                 options={selectedClass?.ClassGroup}
                 valueField="SubClassID"
                 nameField="SubClass"
@@ -181,7 +175,7 @@ const GroupDistribution = ({ pageTitle }) => {
               {/* Button */}
               <div className="pt-7 w-full">
                 <Button type="submit" className="w-full md:w-auto">
-                  {translate("Save")}
+                  {translate('Save')}
                 </Button>
               </div>
             </div>
@@ -203,11 +197,11 @@ const GroupDistribution = ({ pageTitle }) => {
                   }
                 />
               </th>
-              <th className="p-2 text-left">{translate("User ID")}</th>
-              <th className="p-2 text-left">{translate("Student Name")}</th>
-              <th className="p-2 text-left">{translate("Class")}</th>
-              <th className="p-2 text-left">{translate("Sub Class")}</th>
-              <th className="p-2 text-left">{translate("Residential")}</th>
+              <th className="p-2 text-left">{translate('User ID')}</th>
+              <th className="p-2 text-left">{translate('Student Name')}</th>
+              <th className="p-2 text-left">{translate('Class')}</th>
+              <th className="p-2 text-left">{translate('Sub Class')}</th>
+              <th className="p-2 text-left">{translate('Residential')}</th>
             </tr>
           </thead>
           <tbody>
@@ -230,7 +224,7 @@ const GroupDistribution = ({ pageTitle }) => {
             {paginatedData.length === 0 && (
               <tr>
                 <td colSpan="7" className="text-center p-4">
-                  {translate("No data found")}
+                  {translate('No data found')}
                 </td>
               </tr>
             )}
@@ -238,11 +232,11 @@ const GroupDistribution = ({ pageTitle }) => {
         </table>
       </div>
 
-        <DefaultPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+      <DefaultPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

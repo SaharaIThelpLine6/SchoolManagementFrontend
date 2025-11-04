@@ -1,18 +1,17 @@
-import RightLeft from "/printview/rightLeft.png";
-import TopBottom from "/printview/topBottom.png";
-import {
-  useGetExamNamesQuery,
-  useGetStudentBySearchQuery,
-  useGetStudentsTransferCertificateQuery,
-} from "../../../../features/student/studentQuerySlice";
-import bnBijoy2Unicode from "../../../../utils/conveter";
+import { Buffer } from "buffer";
 import { useEffect, useState } from "react";
 import { useGetInstitutionInfoQuery } from "../../../../features/settings/settingsQuerySlice";
-import { Buffer } from "buffer";
+import {
+  useGetExamNamesQuery,
+  useGetStudentsTransferCertificateQuery
+} from "../../../../features/student/studentQuerySlice";
 import { formatDate } from "../../../../helper/formatTime";
+import bnBijoy2Unicode from "../../../../utils/conveter";
+import RightLeft from "/printview/rightLeft.png";
+import TopBottom from "/printview/topBottom.png";
 
-const PrintOne = ({ id, title }) => {
-  const [cfidCode, setCfidCode] = useState("");
+const PrintOne = ({ id, title, studentData }) => {
+  const [cfidCode, setCfidCode] = useState('');
   const [logo, setLogo] = useState(null);
 
   const { data: stcData = [], isLoading: isStcLoading } =
@@ -24,25 +23,14 @@ const PrintOne = ({ id, title }) => {
 
   const cfidData = stcData?.find((i) => i.CFID === id);
   const examData = examNamesData?.find((i) => i.ExamID === cfidData?.ExamID);
-
-  const {
-    data: searchStudentInfo = [],
-    error: searchStudentError,
-    isLoading: isSearchLoading,
-  } = useGetStudentBySearchQuery(
-    { search: cfidCode, ClassID: null, SessionID: null },
-    {
-      skip: !cfidCode,
-      refetchOnFocus: false,
-    }
-  );
-
-  const student = searchStudentInfo?.find((i) => i.StudentCode === cfidCode);
+  console.log(examData, 'examData');
+  console.log(examNamesData, 'examNamesData');
+  console.log(cfidData?.ExamID, 'cfidData?.ExamID');
 
   useEffect(() => {
     if (instutionInfo?.Logo?.data) {
       const buffer = Buffer.from(instutionInfo.Logo.data);
-      const base64String = buffer.toString("base64");
+      const base64String = buffer.toString('base64');
       const imageSrc = `data:image/png;base64,${base64String}`;
       setLogo(imageSrc);
     }
@@ -53,8 +41,6 @@ const PrintOne = ({ id, title }) => {
       setCfidCode(cfidData.User.UserCode);
     }
   }, [cfidData]);
-
-
 
   return (
     <div className="h-auto mx-auto relative bg-white text-black font-sanskrit overflow-hidden shadow-md print:border-none">
@@ -121,7 +107,7 @@ const PrintOne = ({ id, title }) => {
           <p>
             এই মর্মে প্রত্যয়ন করা যাইতেছে যে,
             <span className="inline-block border-b border-black w-64 ml-2">
-              {cfidData?.User?.UserName || "------"}
+              {cfidData?.User?.UserName || '------'}
             </span>
           </p>
 
@@ -129,37 +115,37 @@ const PrintOne = ({ id, title }) => {
             <p>
               পিতা:
               <span className="inline-block border-b border-black w-60 ml-2">
-                {cfidData?.User?.FatherName || "------"}
+                {cfidData?.User?.FatherName || '------'}
               </span>
             </p>
             <p>
               মাতা:
               <span className="inline-block border-b border-black w-60 ml-2">
-                {cfidData?.User?.MotherName || "------"}
+                {cfidData?.User?.MotherName || '------'}
               </span>
             </p>
             <p>
               গ্রাম:
               <span className="inline-block border-b border-black w-60 ml-2">
-                {student?.permanentVill || "------"}
+                {studentData?.permanentVill || '------'}
               </span>
             </p>
             <p>
               ডাক:
               <span className="inline-block border-b border-black w-60 ml-2">
-                {student?.permanentPost || "------"}
+                {studentData?.permanentPost || '------'}
               </span>
             </p>
             <p>
               থানা:
               <span className="inline-block border-b border-black w-60 ml-2">
-                {student?.PoliceStationName || "------"}
+                {studentData?.PoliceStationName || '------'}
               </span>
             </p>
             <p>
               জেলা:
               <span className="inline-block border-b border-black w-60 ml-2">
-                {student?.PermanentDistrictName || "------"}
+                {studentData?.PermanentDistrictName || '------'}
               </span>
             </p>
           </div>
@@ -167,33 +153,33 @@ const PrintOne = ({ id, title }) => {
           <p>
             ভর্তির রেজিস্ট্রি অনুযায়ী তাহার :
             <span className="inline-block border-b border-black w-28 mx-2 text-center">
-              {cfidCode || "------"}
+              {cfidCode || '------'}
             </span>
             এবং জন্ম তারিখ:
             <span className="inline-block border-b border-black w-40 ml-2 text-center">
-              {student?.DateOfBirth || "------"}
+              {studentData?.DateOfBirth || '------'}
             </span>
             সে অত্র বিদ্যালয়ে
             <span className="inline-block border-b border-black w-28 mx-2 text-center">
-              {student?.SessionName || "------"}
+              {studentData?.SessionName || '------'}
             </span>
             ইং শিক্ষাবর্ষে
             <span className="inline-block border-b border-black w-28 mx-2 text-center">
-              {student?.ClassName || "------"}
+              {bnBijoy2Unicode(studentData?.ClassName) || '------'}
             </span>
             জামাতে অধ্যায়ন করেছে।
             <span className=" border-b border-black w-20 mx-2 text-center">
               {examData?.ExamName
                 ? bnBijoy2Unicode(examData.ExamName)
-                : "------"}
+                : '------'}
             </span>
             তাহার মোট নম্বর
             <span className="inline-block border-b border-black w-20 mx-2 text-center">
-              {cfidData?.TotalMark || "------"}
+              {cfidData?.TotalMark || '------'}
             </span>
             এবং
             <span className="inline-block border-b border-black w-12 mx-2 text-center">
-              {cfidData?.DivisionName || "------"}
+              {cfidData?.DivisionName || '------'}
             </span>
             বিভাগ পেয়ে উত্তীর্ণ হইয়াছে।
           </p>

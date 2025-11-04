@@ -1,46 +1,27 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from 'react';
 import {
   useGetExamNamesQuery,
-  useGetStudentBySearchQuery,
-  useGetStudentsTransferCertificateQuery,
-} from "../../../../features/student/studentQuerySlice";
-import bnBijoy2Unicode from "../../../../utils/conveter";
-import { formatDate } from "../../../../helper/formatTime";
+  useGetStudentsTransferCertificateQuery
+} from '../../../../features/student/studentQuerySlice';
+import { formatDate } from '../../../../helper/formatTime';
+import bnBijoy2Unicode from '../../../../utils/conveter';
 
-const PrintTwo = ({ id }) => {
-  const [cfidCode, setCfidCode] = useState("");
+const PrintTwo = ({ id, studentData }) => {
+  const [cfidCode, setCfidCode] = useState('');
 
-  const { data: stcData = [], isLoading: isStcLoading } = useGetStudentsTransferCertificateQuery();
-  const { data: examNamesData = [], isLoading: isExamNamesLoading } = useGetExamNamesQuery();
+  const { data: stcData = [], isLoading: isStcLoading } =
+    useGetStudentsTransferCertificateQuery();
+  const { data: examNamesData = [], isLoading: isExamNamesLoading } =
+    useGetExamNamesQuery();
 
   const cfidData = stcData?.find((i) => i.CFID === id);
   const examData = examNamesData?.find((i) => i.ExamID === cfidData?.ExamID);
-  
-  const {
-    data: searchStudentInfo = [],
-    error: searchStudentError,
-    isLoading: isSearchLoading,
-  } = useGetStudentBySearchQuery(
-    { search: cfidCode, ClassID: null, SessionID: null },
-    {
-      skip: !cfidCode,
-      refetchOnFocus: false,
-    }
-  );
-
-  const student = searchStudentInfo?.find((i) => i.StudentCode === cfidCode);
-
-  console.log(student);
-
 
   useEffect(() => {
     if (cfidData?.User?.UserCode) {
       setCfidCode(cfidData.User.UserCode);
     }
   }, [cfidData]);
-
-
-
 
   return (
     <div className="w-full h-auto mx-auto px-12 py-10 font-[kalpurush] text-[16px] leading-[32px] text-black border border-black">
@@ -65,90 +46,80 @@ const PrintTwo = ({ id }) => {
         <p>
           এই মর্মে প্রত্যয়ন করা যাইতেছে যে,
           <span className="inline-block border-b border-black w-64 ml-2">
-            {cfidData?.User?.UserName || "------"}
+            {cfidData?.User?.UserName || '------'}
           </span>
         </p>
-
         <div className="grid grid-cols-2 gap-y-2 gap-x-10">
           <p>
             পিতা:
             <span className="inline-block border-b border-black w-60 ml-2">
-              {cfidData?.User?.FatherName || "------"}
+              {cfidData?.User?.FatherName || '------'}
             </span>
           </p>
           <p>
             মাতা:
             <span className="inline-block border-b border-black w-60 ml-2">
-              {cfidData?.User?.MotherName || "------"}
+              {cfidData?.User?.MotherName || '------'}
             </span>
           </p>
           <p>
             গ্রাম:
             <span className="inline-block border-b border-black w-60 ml-2">
-              {student?.permanentVill || "------"}
+              {studentData?.permanentVill || '------'}
             </span>
           </p>
           <p>
             ডাক:
             <span className="inline-block border-b border-black w-60 ml-2">
-              {student?.permanentPost || "------"}
+              {studentData?.permanentPost || '------'}
             </span>
           </p>
           <p>
             থানা:
             <span className="inline-block border-b border-black w-60 ml-2">
-              {student?.PoliceStationName || "------"}
+              {studentData?.PoliceStationName || '------'}
             </span>
           </p>
           <p>
             জেলা:
             <span className="inline-block border-b border-black w-60 ml-2">
-              {student?.PermanentDistrictName || "------"}
+              {studentData?.PermanentDistrictName || '------'}
             </span>
           </p>
         </div>
-
-        
-          ভর্তির রেজিস্ট্রি অনুযায়ী তাহার :
-          <span className="inline-block border-b border-black w-28 mx-2 text-center">
-            {cfidCode || "------"}
-          </span>
-          এবং জন্ম তারিখ:
-          <span className="inline-block border-b border-black w-40 ml-2 text-center">
-            {student?.DateOfBirth || "------"}
-          </span>
-        
-        
-          সে অত্র বিদ্যালয়ে
-          <span className="inline-block border-b border-black w-28 mx-2 text-center">
-            {student?.SessionName || "------"}
-          </span>
-          ইং শিক্ষাবর্ষে
-          <span className="inline-block border-b border-black w-28 mx-2 text-center">
-            {student?.ClassName || "------"}
-          </span>
-         জামাতে অধ্যায়ন করেছে।
-        
-
-        
-          <span className=" border-b border-black w-20 mx-2 text-center">
-            {examData?.ExamName ? bnBijoy2Unicode(examData.ExamName) : "------"}
-          </span>
-          তাহার মোট নম্বর
-          <span className="inline-block border-b border-black w-20 mx-2 text-center">
-            {cfidData?.TotalMark || "------"}
-          </span>
-           এবং
-          <span className="inline-block border-b border-black w-12 mx-2 text-center">
-            {cfidData?.DivisionName || "------"}
-          </span>
-          বিভাগ পেয়ে উত্তীর্ণ হইয়াছে।
-        
-
-
+        ভর্তির রেজিস্ট্রি অনুযায়ী তাহার :
+        <span className="inline-block border-b border-black w-28 mx-2 text-center">
+          {cfidCode || '------'}
+        </span>
+        এবং জন্ম তারিখ:
+        <span className="inline-block border-b border-black w-40 ml-2 text-center">
+          {studentData?.DateOfBirth || '------'}
+        </span>
+        সে অত্র বিদ্যালয়ে
+        <span className="inline-block border-b border-black w-28 mx-2 text-center">
+          {studentData?.SessionName || '------'}
+        </span>
+        ইং শিক্ষাবর্ষে
+        <span className="inline-block border-b border-black w-28 mx-2 text-center">
+          {studentData?.ClassName || '------'}
+        </span>
+        জামাতে অধ্যায়ন করেছে।
+        <span className=" border-b border-black w-20 mx-2 text-center">
+          {examData?.ExamName ? bnBijoy2Unicode(examData.ExamName) : '------'}
+        </span>
+        তাহার মোট নম্বর
+        <span className="inline-block border-b border-black w-20 mx-2 text-center">
+          {cfidData?.TotalMark || '------'}
+        </span>
+        এবং
+        <span className="inline-block border-b border-black w-12 mx-2 text-center">
+          {cfidData?.DivisionName || '------'}
+        </span>
+        বিভাগ পেয়ে উত্তীর্ণ হইয়াছে।
         <p className="mt-4 text-justify">
-        অত্র প্রতিষ্ঠানে অধ্যয়নরত অবস্থায় তাহার আচার-আচরণ ছিল সন্তোষজনক। আমাদের জানা মতে সে কোন রাষ্ট্রদ্রোহী কার্যকলাপে জড়িত না। আমরা তাহার উজ্জল ভবিষ্যৎ ও সর্বাঙ্গীন মঙ্গল কামনা করি।
-
+          অত্র প্রতিষ্ঠানে অধ্যয়নরত অবস্থায় তাহার আচার-আচরণ ছিল সন্তোষজনক।
+          আমাদের জানা মতে সে কোন রাষ্ট্রদ্রোহী কার্যকলাপে জড়িত না। আমরা তাহার
+          উজ্জল ভবিষ্যৎ ও সর্বাঙ্গীন মঙ্গল কামনা করি।
         </p>
       </div>
 

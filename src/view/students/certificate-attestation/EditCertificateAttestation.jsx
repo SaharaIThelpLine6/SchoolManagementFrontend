@@ -1,24 +1,23 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
-import { useDispatch } from "react-redux";
 
-import DefaultSelect from "../../../components/Forms/DefaultSelect";
-import DefaultInput from "../../../components/Forms/DefaultInput";
-import Textarea from "../../../components/Forms/Textarea";
-import Button from "../../../components/Button/Button";
-import LoadingComponent from "../../../components/LoadingComponent";
 import { FormProvider } from "react-hook-form";
+import Button from "../../../components/Button/Button";
+import DefaultInput from "../../../components/Forms/DefaultInput";
+import DefaultSelect from "../../../components/Forms/DefaultSelect";
+import Textarea from "../../../components/Forms/Textarea";
+import LoadingComponent from "../../../components/LoadingComponent";
 
+import { useGetClassListQuery } from "../../../features/class/classQuerySlice";
+import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import {
-  useGetStudentsTransferCertificateQuery,
-  useUpdateStudentsTransferCertificateMutation,
   useGetExamNamesQuery,
   useGetStudentBySearchQuery,
+  useGetStudentsTransferCertificateQuery,
+  useUpdateStudentsTransferCertificateMutation,
 } from "../../../features/student/studentQuerySlice";
 import bnBijoy2Unicode from "../../../utils/conveter";
-import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
-import { useGetClassListQuery } from "../../../features/class/classQuerySlice";
 import useTranslate from "../../../utils/Translate";
 
 const EditCertificateAttestation = ({
@@ -189,32 +188,32 @@ const EditCertificateAttestation = ({
 
           <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <DefaultInput
-              label={translate("Date of entry") + " :"}
+              label={translate("Date of entry")}
               type="date"
               registerKey="CreateAt"
               disable={true}
             />
             <DefaultInput
-              label={translate("Name") + " :"}
+              label={translate("Name")}
               type="text"
               registerKey="name"
               disable={true}
             />
             <DefaultInput
-              label={translate("Father Name") + " :"}
+              label={translate("Father Name")}
               type="text"
               registerKey="fatherName"
               disable={true}
             />
             <DefaultInput
-              label={translate("Mother Name") + " :"}
+              label={translate("Mother Name")}
               type="text"
               registerKey="motherName"
               disable={true}
             />
             <div className="md:col-span-2">
               <Textarea
-                label={translate("Address") + " :"}
+                label={translate("Address")}
                 placeholder="ঠিকানা লিখুন"
                 registerKey="description"
                 require={true}

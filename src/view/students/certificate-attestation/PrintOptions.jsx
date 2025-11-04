@@ -1,19 +1,49 @@
-import React, { useState, useEffect } from "react";
+import { useEffect, useState } from 'react';
 
-import Print1 from "/printview/print1.png";
-import Print2 from "/printview/print2.png";
-import Print3 from "/printview/print3.png";
-import Print4 from "/printview/print4.png";
+import Print1 from '/printview/print1.png';
+import Print2 from '/printview/print2.png';
+import Print3 from '/printview/print3.png';
+import Print4 from '/printview/print4.png';
 
-import PrintTwo from "./print/PrintTwo";
-import Button from "../../../components/Button/Button";
-import PrintOne from "./print/PrintOne";
+import Button from '../../../components/Button/Button';
+import {
+  useGetStudentBySearchQuery,
+  useGetStudentsTransferCertificateQuery,
+} from '../../../features/student/studentQuerySlice';
+import PrintOne from './print/PrintOne';
+import PrintTwo from './print/PrintTwo';
 
 const PrintOptions = ({ onBack, id }) => {
   const [selectedOption, setSelectedOption] = useState(1);
   const [previewImage, setPreviewImage] = useState(Print1);
   const [printComponent, setPrintComponent] = useState(null);
   const [shouldPrint, setShouldPrint] = useState(false); // controls when to trigger print
+
+  /// Print function start
+
+  const { data: stcData = [], isLoading: isStcLoading } =
+    useGetStudentsTransferCertificateQuery();
+
+  const cfidData = stcData?.find((i) => i.CFID === id);
+
+  const {
+    data: searchStudentInfo = [],
+    error: searchStudentError,
+    isLoading: isSearchLoading,
+  } = useGetStudentBySearchQuery(
+    { search: cfidData.User.UserCode, ClassID: null, SessionID: null },
+    {
+      skip: !cfidData.User.UserCode,
+      refetchOnFocus: false,
+    }
+  );
+
+  const student = searchStudentInfo?.find(
+    (i) => i.StudentCode === cfidData.User.UserCode
+  );
+  console.log(student, 'student');
+
+  /// prinit function end
 
   const handleOptionChange = (optionNumber) => {
     setSelectedOption(optionNumber);
@@ -39,19 +69,23 @@ const PrintOptions = ({ onBack, id }) => {
     // Select component based on option
     switch (selectedOption) {
       case 1:
-        setPrintComponent(<PrintOne id={id} title={"প্রত্যয়নপত্র"}/>);
+        setPrintComponent(
+          <PrintOne id={id} title={'প্রত্যয়নপত্র'} studentData={student} />
+        );
         break;
       case 2:
-        setPrintComponent(<PrintTwo id={id}/>);
+        setPrintComponent(<PrintTwo id={id} studentData={student} />);
         break;
       case 3:
-        setPrintComponent(<PrintTwo id={id}/>);
+        setPrintComponent(<PrintTwo id={id} studentData={student} />);
         break;
       case 4:
-        setPrintComponent(<PrintOne id={id} title={"ছাড়পত্র"}/>);
+        setPrintComponent(
+          <PrintOne id={id} title={'ছাড়পত্র'} studentData={student} />
+        );
         break;
       default:
-        setPrintComponent(<PrintTwo id={id}/>);
+        setPrintComponent(<PrintTwo id={id} studentData={student} />);
     }
 
     setShouldPrint(true); // trigger effect
@@ -105,10 +139,10 @@ const PrintOptions = ({ onBack, id }) => {
                   onChange={() => handleOptionChange(num)}
                 />
                 <span className="text-gray-800 font-medium">
-                  {num === 1 && "বাংলা রঙিন"}
-                  {num === 2 && "বাংলা প্রেসে ছাপানো কাগজে"}
-                  {num === 3 && "বাংলা প্রেসে ছাপানো"}
-                  {num === 4 && "ছাড়পত্র"}
+                  {num === 1 && 'বাংলা রঙিন'}
+                  {num === 2 && 'বাংলা প্রেসে ছাপানো কাগজে'}
+                  {num === 3 && 'বাংলা প্রেসে ছাপানো'}
+                  {num === 4 && 'ছাড়পত্র'}
                 </span>
               </label>
             ))}

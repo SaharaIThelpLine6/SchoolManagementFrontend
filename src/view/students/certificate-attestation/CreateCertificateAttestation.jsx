@@ -197,32 +197,32 @@ const CreateCertificateAttestation = ({ onBack }) => {
 
           <div className="col-span-2 grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             <DefaultInput
-              label={translate("Date of entry") + " :"}
+              label={translate("Date of entry")}
               type="date"
               registerKey="CreateAt"
               disable={true}
             />
             <DefaultInput
-              label={translate("Name") + " :"}
+              label={translate("Name")}
               type="text"
               registerKey="name"
               disable={true}
             />
             <DefaultInput
-              label={translate("Father Name") + " :"}
+              label={translate("Father Name")}
               type="text"
               registerKey="fatherName"
               disable={true}
             />
             <DefaultInput
-              label={translate("Mother Name") + " :"}
+              label={translate("Mother Name")}
               type="text"
               registerKey="motherName"
               disable={true}
             />
             <div className="md:col-span-2">
               <Textarea
-                label={translate("Address") + " :"}
+                label={translate("Address")}
                 placeholder="ঠিকানা লিখুন"
                 registerKey="description"
                 require={true}

@@ -19,7 +19,8 @@ import DefaultPagination from "../components/Pagination/DefaultPagination";
 
 const PAGE_SIZE = 10;
 
-const CertificateAttesation = ({ pageTitle }) => {
+const
+CertificateAttesation = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
 

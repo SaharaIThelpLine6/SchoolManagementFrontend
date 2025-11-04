@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import bnBijoy2Unicode from "../../../utils/conveter";
-import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
-import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
+import { useEffect, useState } from "react";
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
+import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
+import bnBijoy2Unicode from "../../../utils/conveter";
 
 const ParentsMobileNumberList = ({ reportData, SubClassID, SessionID }) => {
+  console.log(reportData, 'reportData');
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
