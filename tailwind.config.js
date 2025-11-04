@@ -14,6 +14,7 @@ export default {
       fontFamily: {
         lato: '"Lato", serif',
         SolaimanLipi: "SolaimanLipiNormal, serif",
+        Poppins: ["Poppins", "sans-serif"],
         noto: '"Noto Serif Bengali", serif',
         kalpurush: "'Kalpurush', sans-serif",
         SutonnyMJ: "SutonnyMJ",

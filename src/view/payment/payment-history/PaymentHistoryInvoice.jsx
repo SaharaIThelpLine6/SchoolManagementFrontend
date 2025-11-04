@@ -42,7 +42,7 @@ const PaymentHistoryInvoice = ({ data }) => {
       <div className="mt-8">
         <p className="font-bold">Invoiced To</p>
         <p>{data?.InstituteName}</p>
-        <p>Sender Number: {data?.PayerAccount}</p>
+        {data?.PayerAccount !== 1 ? <p>Sender Number: {data?.PayerAccount}</p> : null}
         <p>{data?.Address}</p>
       </div>
 

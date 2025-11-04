@@ -110,6 +110,9 @@ export const settingsSlice = createApi({
       }),
       providesTags: ['Settings'],
     }),
+    getExamConditionsSettings: builder.query({
+      query: () => `exam_conditions`,
+    }),
   }),
 });
 
@@ -132,4 +135,5 @@ export const {
   useGetLoginUsersQuery,
   useGetAllGendersQuery,
   useGetLastAdmissionSerialQuery,
+  useGetExamConditionsSettingsQuery,
 } = settingsSlice;

@@ -154,11 +154,7 @@ const AverageDetermination = ({ pageTitle }) => {
       }).then(() => {
         refetch();
         setSelectedRows([]);
-        reset({
-          SessionID: averageDetermineFilter.SessionID,
-          ExamID: averageDetermineFilter.ExamID,
-          SubClassID: averageDetermineFilter.SubClassID,
-        });
+        reset();
         setEditingId(null);
       });
     } catch (error) {
@@ -363,7 +359,6 @@ const AverageDetermination = ({ pageTitle }) => {
                           registerKey={`TopNum${i + 1}`}
                           type="number"
                           placeholder={translate("Score value")}
-                          require={true}
                         />
                       </div>
                     </div>

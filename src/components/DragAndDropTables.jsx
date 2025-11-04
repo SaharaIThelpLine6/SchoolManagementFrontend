@@ -218,7 +218,7 @@ export default function DragAndDropTables({
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <h2 className="text-lg font-semibold p-4 border-b border-gray-200">
                 {translate(
-                  "যে সকর শিক্ষার্থী পরীক্ষায় অংশ গ্রহন করছে না তাদের তালিকা।"
+                  "যে সকল শিক্ষার্থী পরীক্ষায় অংশ গ্রহন করছে না তাদের তালিকা।"
                 )}
               </h2>
               <div className="overflow-x-auto">
@@ -298,7 +298,7 @@ export default function DragAndDropTables({
           <DroppableTable id={RIGHT_CONTAINER}>
             <div className="bg-white rounded-lg shadow-sm border border-gray-200">
               <h2 className="text-lg font-semibold p-4 border-b border-gray-200">
-                {translate("যে সকর শিক্ষার্থী পরীক্ষায় অংশ গ্রহন করছে।")}
+                {translate("যে সকল শিক্ষার্থী পরীক্ষায় অংশ গ্রহন করছে।")}
               </h2>
               <div className="overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">

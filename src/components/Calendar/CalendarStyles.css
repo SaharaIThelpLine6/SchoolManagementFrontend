@@ -37,18 +37,18 @@
   background: none !important;
   text-align: center !important;
   line-height: 1 !important;
-  border-radius: 50% !important;
+  border-radius: 5px !important;
   transition: background-color 0.2s ease !important;
 }
 
 /* Hover effects only for specified tiles */
-.react-calendar__tile:hover,
+/* .react-calendar__tile:hover,
 .react-calendar__month-view__days__day:hover,
 .react-calendar__month-view__days__day--weekend:hover,
 .react-calendar__month-view__days__day--neighboringMonth:hover,
 .custom-tile:hover {
   background-color: #f0f0f0 !important;
-}
+} */
 
 /* Active day styles */
 .react-calendar__tile--active {
@@ -56,18 +56,18 @@
   color: white !important;
 }
 
-.react-calendar__tile--active:hover {
+/* .react-calendar__tile--active:hover {
   background: #005bb7 !important;
-}
+} */
 
 /* Current day styles */
-.react-calendar__tile--now {
+/* .react-calendar__tile--now {
   background: #ffff76 !important;
 }
 
 .react-calendar__tile--now:hover {
   background: #ffffa0 !important;
-}
+} */
 
 /* Day alignment */
 .react-calendar__month-view__days__day {

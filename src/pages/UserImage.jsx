@@ -44,7 +44,7 @@ const UserImage = ({ pageTitle }) => {
 
   const users = userResponse?.data ?? [];
 
-  const filterData = users.find((i) => i.UserID === filteredUser?.UserID);
+
 
   const [
     postUserInage,
@@ -57,11 +57,13 @@ const UserImage = ({ pageTitle }) => {
 
   const totalPages = userResponse?.totalPages ?? 0;
 
-  useEffect(() => {}, [filterData]);
-
   useEffect(() => {
-    if (filterData) {
-      const imageBuffer = filterData?.UserImage?.[0]?.Image;
+    console.log(filteredUser);
+    // const filterData = users.find((i) => i.UserID === filteredUser?.UserID);
+    if (filteredUser) {
+      console.log(filteredUser);
+
+      const imageBuffer = filteredUser?.Image;
       if (imageBuffer) {
         const base64String = Buffer.from(imageBuffer).toString("base64");
         const src = `data:image/png;base64,${base64String}`;
@@ -72,13 +74,21 @@ const UserImage = ({ pageTitle }) => {
     } else {
       setPreviewImg(null);
     }
+    console.log("reset satart");
 
     reset({
-      ID: filterData?.UserID || "",
-      UserCode: filterData?.UserCode || "",
-      UserName: filterData?.UserName || "",
+      ID: filteredUser?.UserID || "",
+      UserCode: filteredUser?.UserCode || "",
+      UserName: filteredUser?.UserName || "",
     });
-  }, [filterData, reset]);
+
+  }, [filteredUser, reset]);
+
+  // useEffect(() => {
+  //   console.log(filterData);
+
+
+  // }, [filterData, reset]);
 
   const handleEditOpenModal = (row) => {
     setPreviewUrl(null);
@@ -173,18 +183,19 @@ const UserImage = ({ pageTitle }) => {
     const prefixNumber = match ? parseInt(match[0], 10) : null;
 
     // ✅ UserCode এর সাথে মিলানো
-    if (!prefixNumber || prefixNumber !== Number(data.UserCode)) {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid File",
-        text: `File name must start with UserCode: ${data.UserCode}`,
-      });
-      return;
-    }
+    // if (!prefixNumber || prefixNumber !== Number(data.UserCode)) {
+    //   Swal.fire({
+    //     icon: "error",
+    //     title: "Invalid File",
+    //     text: `File name must start with UserCode: ${data.UserCode}`,
+    //   });
+    //   return;
+    // }
 
     // ✅ সব ঠিক থাকলে submit
     const formData = new FormData();
     formData.append("image", file);
+    formData.append("UserID", data.ID);
 
     try {
       const res = await postUserInage(formData).unwrap();

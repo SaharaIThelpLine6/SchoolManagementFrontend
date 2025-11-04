@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-
-const DropdownDefault = () => {
+const DropdownDefault = ({children}) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const trigger = useRef(null);
@@ -35,31 +34,11 @@ const DropdownDefault = () => {
   return (
     <div className="relative flex">
       <button
-        className="text-[#98A6AD] hover:text-body"
+        className="text-[#000] hover:text-body"
         ref={trigger}
         onClick={() => setDropdownOpen(!dropdownOpen)}
       >
-        <svg
-          className="fill-current"
-          width="18"
-          height="18"
-          viewBox="0 0 18 18"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M2.25 11.25C3.49264 11.25 4.5 10.2426 4.5 9C4.5 7.75736 3.49264 6.75 2.25 6.75C1.00736 6.75 0 7.75736 0 9C0 10.2426 1.00736 11.25 2.25 11.25Z"
-            fill=""
-          />
-          <path
-            d="M9 11.25C10.2426 11.25 11.25 10.2426 11.25 9C11.25 7.75736 10.2426 6.75 9 6.75C7.75736 6.75 6.75 7.75736 6.75 9C6.75 10.2426 7.75736 11.25 9 11.25Z"
-            fill=""
-          />
-          <path
-            d="M15.75 11.25C16.9926 11.25 18 10.2426 18 9C18 7.75736 16.9926 6.75 15.75 6.75C14.5074 6.75 13.5 7.75736 13.5 9C13.5 10.2426 14.5074 11.25 15.75 11.25Z"
-            fill=""
-          />
-        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-dots-vertical"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M12 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /></svg>
       </button>
       <div
         ref={dropdown}
@@ -69,7 +48,8 @@ const DropdownDefault = () => {
           dropdownOpen === true ? 'block' : 'hidden'
         }`}
       >
-        <button className="flex w-full items-center gap-2 rounded-sm px-4 py-1.5 text-left text-sm hover:bg-gray">
+        {children}
+        {/* <button className="flex w-full items-center gap-2 rounded-sm px-4 py-1.5 text-left text-sm hover:bg-gray">
           <svg
             className="fill-current"
             width="16"
@@ -119,7 +99,7 @@ const DropdownDefault = () => {
             />
           </svg>
           Delete
-        </button>
+        </button> */}
       </div>
     </div>
   );

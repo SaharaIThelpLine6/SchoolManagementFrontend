@@ -473,18 +473,25 @@ const CharacterReport = ({ pageTitle }) => {
                   unicode={true}
                 />
 
-                <DefaultSelect
-                  label={`${translate('Type')}: `}
-                  nameField={'ReportTypeName'}
-                  registerKey={'ReportTypID'}
-                  valueField={'ReportTypID'}
-                  options={studentReportType}
-                  type={'number'}
-                  require={'This Field is require'}
-                  disabled={false}
-                  defaultSelect={false}
-                  unicode={true}
-                />
+                <div className='flex items-center'>
+                  <DefaultSelect
+                    label={`${translate('Type')}: `}
+                    nameField={'ReportTypeName'}
+                    registerKey={'ReportTypID'}
+                    valueField={'ReportTypID'}
+                    options={studentReportType}
+                    type={'number'}
+                    require={'This Field is require'}
+                    disabled={false}
+                    defaultSelect={false}
+                    unicode={true}
+                  />
+                  <div>
+                    <button type='button' className='btn '>
+                      <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-1 gap-4 md:gap-6 mb-6">

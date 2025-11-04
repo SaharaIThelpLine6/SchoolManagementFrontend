@@ -7,9 +7,9 @@ import {
 import { toast } from "react-toastify";
 import LoadingComponent from "../components/LoadingComponent";
 import toBengaliWords from "../utils/numberToBanglaWords";
-
-const PaymentConfirm = () => {
-  const { schoolid, service, size } = useParams();
+import Cookies from "js-cookie";
+import { useSelector } from "react-redux";
+const CellfinPaymentConfirm = () => {
   const location = useLocation();
   const [
     executePaymentRequest,
@@ -18,9 +18,12 @@ const PaymentConfirm = () => {
   const queryParams = new URLSearchParams(location.search);
   const navigate = useNavigate();
   const status = queryParams.get("status");
-  const paymentID = queryParams.get("paymentID");
-  const signature = queryParams.get("signature");
-  const apiVersion = queryParams.get("apiVersion");
+  const paymentID = queryParams.get("correlationId");
+
+  const { user } = useSelector((state) => state.auth);
+  const service = Cookies.get("TYPE");
+   const size = Cookies.get("SIZE");
+
   const requestSent = useRef(false);
   const [paymentStatus, setPaymentStatus] = useState(status);
   const { refetch } = useGetUserInfoQuery();
@@ -29,13 +32,11 @@ const PaymentConfirm = () => {
     if (status === 'success' && !requestSent.current) {
       requestSent.current = true;
       executePaymentRequest({
-        schoolid,
+        schoolid: "11",
         service,
         size,
         paymentID,
-        signature,
-        apiVersion,
-  method: "bikash"
+        method: "cellfin"
       })
         .unwrap()
         .then((payload) => {
@@ -48,12 +49,9 @@ const PaymentConfirm = () => {
     }
   }, [
     status,
-    schoolid,
     service,
     size,
     paymentID,
-    signature,
-    apiVersion,
     executePaymentRequest,
   ]);
 
@@ -62,7 +60,7 @@ const PaymentConfirm = () => {
         Payment Done! ✅
     
         🧾 Invoice No: ${data?.InvoiceNumber}
-        🏫 Institution Code: ${schoolid}
+        🏫 Institution Code: 
         💳 Payment ID: ${paymentID}
         📌 Status: ${status}
         🔄 Intent: ${data?.Intent}
@@ -135,7 +133,6 @@ const PaymentConfirm = () => {
               <div className="mt-8">
                 <p className="font-bold">Invoiced To</p>
                 <p>{data?.InstituteName}</p>
-                <p>Sender Number: {data?.PayerAccount}</p>
                 <p>{data?.Address}</p>
               </div>
 
@@ -231,58 +228,6 @@ const PaymentConfirm = () => {
                 </p>
               </div>
             </div>
-            {/* <div className="flex w-full items-center justify-center font-lato">
-                            <div className="w-[400px] rounded bg-gray-50 px-6 pt-8">
-                                <img src="/saharait.png" alt="Sahara IT" className="mx-auto w-16 py-4" />
-                                <div className="flex flex-col justify-center items-center gap-1">
-                                    <h4 className="font-semibold">SAHARA IT</h4>
-                                    <p className="text-[14px]">Vangapress, Jatrabari, Dhaka-1236</p>
-                                </div>
-                                <div className="flex flex-col gap-3 border-b pt-6 pb-2 text-xs">
-                                    <p className="flex justify-between text-[14px]">
-                                        <span className="text-gray-900 text-[14px]">Date:</span>
-                                        <span>{data?.CreateAt ? new Date(data.CreateAt).toLocaleDateString() : 'N/A'}</span>
-                                    </p>
-                                    <p className="flex justify-between text-[14px]">
-                                        <span className="text-gray-900 text-[14px]">Invoice No:</span>
-                                        <span>{data?.InvoiceNumber}</span>
-                                    </p>
-                                    <p className="flex justify-between text-[14px]">
-                                        <span className="text-gray-900 text-[14px]">Order Type:</span>
-                                        <span className='capitalize'>{data?.Intent}</span>
-                                    </p>
-                                    <p className="flex justify-between text-[14px]">
-                                        <span className="text-gray-900 text-[14px]">Institution Code:</span>
-                                        <span>{schoolid}</span>
-                                    </p>
-                                    <p className="flex justify-between text-[14px] flex-col gap-2">
-                                        <span className="text-gray-900">Institution Name:</span>
-                                        <span>{data?.InstituteName}</span>
-                                        <span className='text-[13px]'>{data?.PoliceStationName}, {data?.DistrictName}, {data?.DivisionName}</span>
-                                    </p>
-                                </div>
-                                <div className="flex flex-col gap-3 pb-6 pt-1 text-xs">
-                                    <table className="w-full text-left">
-                                        <thead>
-                                            <tr className="flex">
-                                                <th className="w-full py-2 text-[14px]">Service</th>
-                                                <th className="min-w-[60px] py-2 text-[14px]">QTY</th>
-                                                <th className="min-w-[44px] py-2 text-[14px]">Total</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr className="flex">
-                                                <td className="flex-1 py-1 text-[14px]">{data?.Intent}</td>
-                                                <td className="min-w-[44px] text-[14px]">{data?.size}</td>
-                                                <td className="min-w-[44px] text-[14px]">{data?.PayAmount}Tk.</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <div className=" border-b border border-dashed"></div>
-                                    <p className='text-[14px] text-left'>কথায়: {data?.PayAmount ? toBengaliWords(data.PayAmount): null} টাকা।</p>
-                                </div>
-                            </div>
-                        </div> */}
           </>
         ) : isError ? null : (
           <LoadingComponent />
@@ -407,4 +352,4 @@ const PaymentConfirm = () => {
   );
 };
 
-export default PaymentConfirm;
+export default CellfinPaymentConfirm;

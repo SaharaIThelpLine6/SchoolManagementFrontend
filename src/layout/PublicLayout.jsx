@@ -136,7 +136,7 @@ const PublicLayout = () => {
                 ) : null
               }
 
-              {/* <li>
+              <li>
                 <a href={`/${schoolid}/maritlist_request`}
                   className="py-3 pl-6 cursor-pointer hover:bg-theme-secondary border border-slate-200 border-r-0 flex items-center gap-[4px]"
                 >
@@ -157,7 +157,7 @@ const PublicLayout = () => {
                   </svg>
                   মেধা তালিকা
                 </a>
-              </li> */}
+              </li>
               <li>
                 <a
                   href={`/${schoolid}/online_admission`}

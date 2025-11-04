@@ -14,7 +14,8 @@ const SideBar = () => {
   const translate = useTranslate();
   const { user } = useSelector((state) => state.auth);
   const permissionType = user?.permissionType;
-
+    const { currectLanguage } = useSelector((state) => state.language);
+  const fontClass = currectLanguage === "bn" ? "font-SolaimanLipi" : "font-lato";
   const {
     data: permissions,
     isLoading,
@@ -247,7 +248,7 @@ const SideBar = () => {
                           to={item.route}
                           end
                           className={({ isActive }) =>
-                            `block py-2 font-SolaimanLipi pl-4 ${
+                            `block py-2 ${fontClass} pl-4 ${
                               isActive
                                 ? "bg-[#ddeffe] text-[#007af7]"
                                 : "hover:text-[#007af7] hover:bg-[#ddeffe]"
