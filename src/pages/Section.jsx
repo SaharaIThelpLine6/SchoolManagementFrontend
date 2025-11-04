@@ -1,437 +1,219 @@
-import { useEffect, useState } from "react";
-import {
-  DndContext,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import Swal from 'sweetalert2';
+import Button from '../components/Button/Button';
+import EditButton from '../components/Button/EditButton';
+import Loading from '../components/Loading/Loading';
+import DefaultPagination from '../components/Pagination/DefaultPagination';
+import ToggleSwitch from '../components/Switchers/ToggleSwitch';
+import SortableTable from '../components/Tables/SortableTable';
+import { setPageName } from '../features/auth/authSlice';
+import { useGetSubclassesQuery } from '../features/session/sessionSlice';
+import { showModal } from '../utils/ModalControlar';
+import useTranslate from '../utils/Translate';
 
-// needed for row & cell level scope DnD setup
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchClassData, setEditMode } from "../features/class/classSlice";
-import { updateInData } from "../utils/update/api";
-import { insertData } from "../utils/create/api";
-import { FormProvider, useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import ThemeInputBox1 from "../components/Forms/ThemeInputBox1";
-import { setPageName } from "../features/auth/authSlice";
-import SelectBox1 from "../components/Forms/SelectBox1";
-import { fetchSettingsData } from "../features/settings/settingsSlice";
-import useTranslate from "../utils/Translate";
-import { toast } from "react-toastify";
-import SvgIcon from "../components/icons/SvgIcon";
-
-const RowDragHandleCell = ({ rowId }) => {
-  const { attributes, listeners } = useSortable({
-    id: rowId,
-  });
-  return (
-    <button
-      {...attributes}
-      {...listeners}
-      className="w-full flex items-center justify-center text-theme-dark"
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={24}
-        height={24}
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="icon icon-tabler icons-tabler-outline icon-tabler-grip-vertical"
-      >
-        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-        <path d="M9 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-        <path d="M9 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-        <path d="M9 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-        <path d="M15 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-        <path d="M15 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-        <path d="M15 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" />
-      </svg>
-    </button>
-  );
-};
-
-const DraggableRow = ({ row, headers, statename }) => {
-  const dispatch = useDispatch();
-
-  const { transform, transition, setNodeRef, isDragging } = useSortable({
-    id: row.CGSL ? row.CGSL : row.SubClassID,
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.8 : 1,
-    zIndex: isDragging ? 1 : 0,
-    position: "relative",
-  };
-
-  return (
-    <tr ref={setNodeRef} style={style}>
-      <td>
-        <div className="w-full">
-          <RowDragHandleCell rowId={row.CGSL ? row.CGSL : row.SubClassID} />
-        </div>
-      </td>
-      {headers.map((header) => (
-        <td
-          key={header}
-          className="py-2 px-4 border border-slate-100 whitespace-nowrap"
-        >
-          {row[header]}
-        </td>
-      ))}
-      <td className="py-2 text-center">
-        <button
-          className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-          title="Edit"
-          onClick={() => {
-            dispatch(setEditMode(row.id));
-          }}
-        >
-          <SvgIcon name={"FiEdit"} size={20} />
-        </button>
-        {/* <FaTrash className="text-red-500 cursor-pointer hover:text-red-700" /> */}
-      </td>
-    </tr>
-  );
-};
+const PAGE_SIZE = 10;
 
 const Section = ({ pageTitle }) => {
-  const translate = useTranslate();
-  const [rows, setRows] = useState([]);
-  const tableHeader = [
-    "Class Serial",
-    "Class",
-    "Section Serial",
-    "Section",
-    "English",
-    "Arabic",
-  ];
-  const { classList, subClassList, editMode, status, error } = useSelector(
-    (state) => state.class
-  );
-  const { academicSession } = useSelector((state) => state.settings);
-
-  const [dataUpdate, setDataUpdate] = useState(false);
-
-  const methods = useForm();
-  const {
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = methods;
-  // const headers = Object.keys(tableRows.length ? tableRows[0] : {});
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const translate = useTranslate();
+
+  // 🔹 Query & Mutations
+  const {
+    data: responseData = {},
+    isLoading,
+    isError,
+    refetch,
+  } = useGetSubclassesQuery();
+
+  // const [deleteSubClass] = useDeleteSubclassMutation();
+
+  // 🔹 Extract subClasses from response data
+  const subClasses = useMemo(() => {
+    return responseData?.subClasses || [];
+  }, [responseData]);
+
+  // 🔹 Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = Math.ceil(subClasses.length / PAGE_SIZE);
+
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return subClasses.slice(start, start + PAGE_SIZE);
+  }, [subClasses, currentPage]);
 
   useEffect(() => {
-    console.log(pageTitle);
+    if (pageTitle) dispatch(setPageName(pageTitle));
+  }, [dispatch, pageTitle]);
 
-    dispatch(setPageName(pageTitle));
-    if (status === "idle") {
-      dispatch(fetchClassData());
-      dispatch(fetchSettingsData());
-    }
+  // ✅ Status Toggle
+  const handleStatusToggle = async (row, checked) => {
+    // try {
+    //   await statusUpdateSession({
+    //     id: row.SessionID,
+    //     SessionAction: checked ? 1 : 0,
+    //   }).unwrap();
+    //   toast.success(translate('Session status updated successfully'));
+    //   refetch();
+    // } catch (err) {
+    //   toast.error(translate('Failed to update session status'));
+    //   console.error(err);
+    // }
+  };
 
-    if (status === "succeeded") {
-      const transformedData = subClassList.map((item) => ({
-        id: item.SubClassID.toString(),
-        "Class Serial": item.Serial,
-        Class: item.Class?.ClassName,
-        "Section Serial": item.CGSL,
-        Section: item.SubClass,
-        English: item.SubClassEng,
-        Arabic: item.SubClassAra,
-      }));
-      setRows(transformedData);
-    }
-  }, [status, dispatch]);
+  const handleCreateOpenForm = useCallback(() => {
+    showModal(translate('Section Create'), 'SECTION_CREATE_FORM');
+  }, [translate]);
 
-  const sensors = useSensors(
-    useSensor(MouseSensor, {}),
-    useSensor(TouchSensor, {}),
-    useSensor(KeyboardSensor, {})
+  const handleEditOpenForm = useCallback(
+    (id) => {
+      showModal(translate('Section Update'), 'SECTION_EDIT_FORM', id);
+    },
+    [translate]
   );
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-
-    if (active && over && active.id !== over.id) {
-      setRows((currentRows) => {
-        if (!Array.isArray(currentRows)) return currentRows;
-
-        const oldIndex = currentRows.findIndex((row) => row.CGSL === active.id);
-        const newIndex = currentRows.findIndex((row) => row.CGSL === over.id);
-
-        const updatedRows = arrayMove(currentRows, oldIndex, newIndex);
-        const updatedRowsWithSerial = updatedRows.map((row, index) => ({
-          ...row,
-          Serial: index + 1,
-        }));
-
-        setDataUpdate(true);
-        return updatedRowsWithSerial;
-      });
-    }
-  };
-
-  useEffect(() => {
-    if (dataUpdate) {
-      setDataUpdate(false);
-
-      async function updateSerial() {
-        try {
-          const response = await updateInData(
-            1,
-            rows,
-            "/api/academic/update_subclass_serial"
-          );
-          // Handle response if needed
-        } catch (error) {
-          console.error("Failed to update serial:", error);
-        }
-      }
-
-      updateSerial();
-    }
-  }, [dataUpdate, rows]);
-
-  useEffect(() => {
-    if (editMode !== 0) {
-      const selectedClass = subClassList.find(
-        (item) => item.SubClassID == editMode
-      );
-      // console.log(selectedClass);
-
-      reset(selectedClass);
-    }
-  }, [editMode]);
-
-  const onSubmit = async (data) => {
-    const id = toast.dark("তথ্য যুক্ত করা হচ্ছে...", {
-      type: "success",
-      isLoading: true,
-      className:
-        " min-h-[50px] max-h-[50px] overflow-hidden text-[14px] font-SolaimanLipi bg-[#323232] text-[#ffffff] py-2 px-2 rounded-[4px] font-normal",
-      style: {
-        boxShadow:
-          "0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)",
-      },
+  const handleDeleteOpenForm = async (id) => {
+    const result = await Swal.fire({
+      title: translate('Are you sure?'),
+      text: translate('Do you want to delete this session?'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: translate('Yes, delete it!'),
+      cancelButtonText: translate('Cancel'),
     });
-    function getSerialBySubClassId(subclassId) {
-      const item = subClassList.find((item) => item.SubClassID === subclassId);
 
-      return item ? item.Serial : null; // Return the Serial if found, otherwise return null
-    }
-    try {
-      if (editMode === 0) {
-        const submitedData = {
-          ...data,
-          Serial: getSerialBySubClassId(data.ClassID),
-          CGSL: rows.length + 1,
-        };
-        const submitRes = await insertData(
-          submitedData,
-          "/api/academic/insert_sub_class"
-        );
-        if (submitRes.success) {
-          dispatch(fetchClassData());
-          toast.update(id, {
-            render: submitRes.data.message,
-            type: "success",
-            isLoading: false,
-            autoClose: true,
-          });
-        } else {
-          dispatch(fetchClassData());
-          toast.update(id, {
-            render: submitRes.error,
-            type: "error",
-            isLoading: false,
-            autoClose: true,
-          });
-        }
-      } else {
-        console.log(data);
+    if (result.isConfirmed) {
+      try {
+        // const res = await deleteSubClass(id).unwrap();
 
-        const submitRes = await updateInData(
-          editMode,
-          data,
-          "/api/academic/update_sub_class"
-        );
-        dispatch(setEditMode(0));
-        if (submitRes.success) {
-          reset({
-            SubClass: "",
-            ClassID: "",
-            SubClassEng: "",
-            SubClassAra: "",
-          });
-          dispatch(fetchClassData());
-          toast.update(id, {
-            render: submitRes.data.message,
-            type: "success",
-            isLoading: false,
-            autoClose: true,
-          });
-        } else {
-          toast.update(id, {
-            render: submitRes.error,
-            type: "error",
-            isLoading: false,
-            autoClose: true,
-          });
-        }
+        await Swal.fire({
+          icon: 'success',
+          title: translate('Successfully deleted!'),
+          text: res?.message || translate('Session deleted successfully'),
+          timer: 2000,
+          showConfirmButton: false,
+        });
+
+        refetch(); // Refresh the data after deletion
+      } catch (err) {
+        await Swal.fire({
+          icon: 'error',
+          title: translate('Error!'),
+          text:
+            err?.data?.error ||
+            err?.data?.message ||
+            translate('Error deleting session'),
+        });
       }
-    } catch (err) {
-      toast.update(id, {
-        render: submitRes.error,
-        type: "error",
-        isLoading: false,
-        autoClose: true,
-      });
-      console.error(err.message);
     }
   };
+
+  if (isLoading) return <Loading />;
+  if (isError)
+    return (
+      <p className="text-red-500">{translate('Failed to load session data')}</p>
+    );
+
+  const columns = [
+    {
+      title: translate('ID'),
+      field: 'SubClassID',
+      hozAlign: 'center',
+      render: (row) => <p>{row.SubClassID}</p>,
+    },
+    {
+      title: translate('Class ID'),
+      field: 'ClassID',
+      hozAlign: 'center',
+      render: (row) => <p>{row.ClassID}</p>,
+    },
+    {
+      title: translate('Sub Class'),
+      field: 'SubClass',
+      hozAlign: 'center',
+      render: (row) => <p>{row.SubClass}</p>,
+    },
+    {
+      title: translate('English'),
+      field: 'SubClassEng',
+      hozAlign: 'center',
+      render: (row) => <p>{row.SubClassEng || '-'}</p>,
+    },
+    {
+      title: translate('Arabic'),
+      field: 'SubClassAra',
+      hozAlign: 'center',
+      render: (row) => <p>{row.SubClassAra || '-'}</p>,
+    },
+    {
+      title: translate('Serial'),
+      field: 'Serial',
+      hozAlign: 'center',
+      render: (row) => <p>{row.Serial}</p>,
+    },
+    {
+      title: translate('Status'),
+      field: 'Action',
+      hozAlign: 'center',
+      render: (row) => (
+        <div className="flex justify-center items-center">
+          <ToggleSwitch
+            checked={row.Action === 1} // Assuming 1 = active, 2 = inactive
+            onChange={(e) => handleStatusToggle(row, e.target.checked)}
+          />
+        </div>
+      ),
+    },
+    {
+      title: translate('Action'),
+      field: 'SubClassID',
+      hozAlign: 'center',
+      render: (row) => (
+        <div className="flex justify-center gap-3 items-center">
+          <EditButton onClick={() => handleEditOpenForm(row.SubClassID)} />
+          {/* <DeleteButton onClick={() => handleDeleteOpenForm(row.SubClassID)} /> */}
+        </div>
+      ),
+    },
+  ];
 
   return (
-    <div className="p-4">
-      {/* <SortableCompo /> */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="w-full lg:h-fit lg:sticky lg:top-0  border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
-          <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">
-            {translate("Add Section")}
-          </h1>
-          <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)}>
-              {/* <div className="mb-4">
-                            <SelectBox1
-                                label={"শিক্ষাবর্ষ:"}
-                                options={academicSession}
-                                valueField={"SessionID"}
-                                nameField={"SessionName"}
-                                registerKey={"class"}
-                                require={"Session is require"}
-                            />
-                        </div> */}
-              <div className="mb-4">
-                <SelectBox1
-                  label={"মারহালা/ক্লাশ:"}
-                  options={classList}
-                  valueField={"ClassID"}
-                  nameField={"ClassName"}
-                  registerKey={"ClassID"}
-                  require={"Class is require"}
-                  type={"number"}
-                />
-              </div>
-              <div className="mb-3">
-                <ThemeInputBox1
-                  label={"Section"}
-                  registerKey={"SubClass"}
-                  require={"Sub Class Name is require"}
-                  type={"text"}
-                />
-              </div>
-              <div className="mb-3">
-                <ThemeInputBox1
-                  label={"English"}
-                  registerKey={"SubClassEng"}
-                  type={"text"}
-                />
-              </div>
-              <div className="mb-3">
-                <ThemeInputBox1
-                  label={"عربي"}
-                  registerKey={"SubClassAra"}
-                  type={"text"}
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row justify-center sm:justify-start items-center gap-3 mt-4">
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto bg-theme-color transition ease-linear font-bold duration-300 px-4 py-2 text-white rounded-md hover:bg-[#121212] font-SolaimanLipi text-sm sm:text-base"
-                >
-                  {translate("Save")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditMode(0);
-                    reset({
-                      SubClass: "",
-                      SubClassEng: "",
-                      SubClassAra: "",
-                      ClassID: "",
-                    });
-                  }}
-                  className="w-full sm:w-auto bg-[#121212] transition ease-linear duration-300 font-bold px-4 py-2 text-white rounded-md hover:bg-slate-700 font-SolaimanLipi text-sm sm:text-base"
-                >
-                  {translate(editMode === 0 ? "Clear Form" : "Add New")}
-                </button>
-              </div>
-            </form>
-          </FormProvider>
-        </div>
-
-        <DndContext
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-          sensors={sensors}
-        >
-          <div className="w-full flex-1 border border-gray-200 rounded-lg bg-white shadow-sm overflow-hidden">
-            <div className="relative overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-theme-dark text-left text-sm text-white font-SolaimanLipi">
-                    <th></th>
-                    {tableHeader.map((title) => (
-                      <th key={title} className="py-2 px-3 whitespace-nowrap">
-                        {title}
-                      </th>
-                    ))}
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                {rows.length > 0 ? (
-                  <SortableContext
-                    items={rows.map((row, index) =>
-                      row.CGSL ? row.CGSL : row.SubClassID
-                    )}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <tbody className="font-SolaimanLipi text-semibold">
-                      {rows.map((row) => (
-                        <DraggableRow
-                          key={row.id}
-                          row={row}
-                          headers={tableHeader}
-                        />
-                      ))}
-                    </tbody>
-                  </SortableContext>
-                ) : null}
-              </table>
-            </div>
-          </div>
-        </DndContext>
+    <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+      {/* 🔹 Header */}
+      <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
+        <h3 className="font-SolaimanLipi text-[20px] font-bold">
+          {translate('Session')}
+        </h3>
+        <Button onClick={handleCreateOpenForm}>
+          {translate('Create Session')}
+        </Button>
       </div>
+
+      {/* 🔹 Table */}
+      {subClasses.length > 0 ? (
+        <>
+          <SortableTable
+            columns={columns}
+            data={paginatedData}
+            isFilterColumn={false}
+          />
+
+          {/* 🔹 Pagination */}
+          {totalPages > 1 && (
+            <DefaultPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          )}
+        </>
+      ) : (
+        <p className="text-center py-8 text-gray-500">
+          {translate('No session data found')}
+        </p>
+      )}
     </div>
   );
 };

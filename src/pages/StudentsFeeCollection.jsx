@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { setStudentFeeUpdateID } from '../features/student/studentSlice';
 import CreateStudentFee from '../view/accounting/student-fee-collection/CreateStudentFee';
-import StudentFeeReportPdf from '../view/accounting/student-fee-collection/StudentFeeReportPdf';
 import TodayFeeCollection from '../view/accounting/student-fee-collection/TodayFeeCollection';
 import UpdateStudentFee from '../view/accounting/student-fee-collection/UpdateStudentFee';
 
@@ -21,15 +20,14 @@ const StudentsFeeCollection = () => {
 
   return (
     <div className="">
-      <div className="space-y-5 print:hidden">
-        {/* ✅ Conditional rendering based on studentFeeUpdateID */}
-        {studentFeeUpdateID ? <UpdateStudentFee /> : <CreateStudentFee />}
+      <div className="space-y-5">
+        <div className="print:hidden">
+          {/* ✅ Conditional rendering based on studentFeeUpdateID */}
+          {studentFeeUpdateID ? <UpdateStudentFee /> : <CreateStudentFee />}
+        </div>
 
         {/* ✅ Always show today's fee collection section */}
         <TodayFeeCollection />
-      </div>
-      <div className="hidden print:block">
-        <StudentFeeReportPdf />
       </div>
     </div>
   );

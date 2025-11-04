@@ -1,86 +1,97 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
 export const settingsSlice = createApi({
-  reducerPath: "siteSettings",
+  reducerPath: 'siteSettings',
   baseQuery: fetchBaseQuery({
     baseUrl: `${API_URL}/api/settings`,
     prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set('Authorization', `Bearer ${token}`);
       }
       return headers;
     },
   }),
-  tagTypes: ["InstitutionInfo", "Residential", "Settings", "Acc_Report_Settings", "CodeSettings"],
+  tagTypes: [
+    'InstitutionInfo',
+    'Residential',
+    'Settings',
+    'Acc_Report_Settings',
+    'CodeSettings',
+    'Genders',
+  ],
   endpoints: (builder) => ({
     getInstitutionInfo: builder.query({
-      query: () => "institution_info",
-      providesTags: ["InstitutionInfo"],
+      query: () => 'institution_info',
+      providesTags: ['InstitutionInfo'],
+    }),
+    getAllGenders: builder.query({
+      query: () => 'gender',
+      providesTags: ['Genders'],
     }),
     getResidential: builder.query({
-      query: () => "residential",
-      providesTags: ["Residential"],
+      query: () => 'residential',
+      providesTags: ['Residential'],
     }),
     getPermissionTypes: builder.query({
-      query: () => "permission_type",
-      providesTags: ["PermissionType"],
+      query: () => 'permission_type',
+      providesTags: ['PermissionType'],
     }),
     getSettings: builder.query({
-      query: () => "settings_info",
-      providesTags: ["Settings"],
+      query: () => 'settings_info',
+      providesTags: ['Settings'],
     }),
     getStudentRelations: builder.query({
-      query: () => "student_relation",
+      query: () => 'student_relation',
     }),
     getFinancialStatus: builder.query({
-      query: () => "financial_status",
+      query: () => 'financial_status',
     }),
     getAccReportSettings: builder.query({
-      query: () => "acc_report_settings",
-      providesTags: ["Acc_Report_Settings"],
+      query: () => 'acc_report_settings',
+      providesTags: ['Acc_Report_Settings'],
     }),
     updateInstitutionInfo: builder.mutation({
       query: (body) => ({
         url: `institution_info`,
-        method: "PUT",
+        method: 'PUT',
         body,
       }),
-      invalidatesTags: ["InstitutionInfo"],
+      invalidatesTags: ['InstitutionInfo'],
     }),
     getCodeSettings: builder.query({
-      query: () => "code_setting",
-      providesTags: ["CodeSettings"],
+      query: () => 'code_setting',
+      providesTags: ['CodeSettings'],
     }),
     updateCodeSetting: builder.mutation({
       query: (body) => ({
         url: `code_setting`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["CodeSettings"],
+      invalidatesTags: ['CodeSettings'],
     }),
     updateSettings: builder.mutation({
       query: (body) => ({
         url: `settings_info`,
-        method: "PUT",
+        method: 'PUT',
         body,
       }),
-      invalidatesTags: ["Settings"],
+      invalidatesTags: ['Settings'],
     }),
     updateAccReportSetting: builder.mutation({
       query: (body) => ({
         url: `update_report_settings`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["Acc_Report_Settings"],
+      invalidatesTags: ['Acc_Report_Settings'],
     }),
     // Division, District, Thana Get
     getDivisions: builder.query({
-      query: () => "division",
+      query: () => 'division',
     }),
     getDistricts: builder.query({
       query: (id) => `district?divition_id=${id}`,
@@ -90,6 +101,14 @@ export const settingsSlice = createApi({
     }),
     getLoginUsers: builder.query({
       query: () => `login_users`,
+    }),
+    getLastAdmissionSerial: builder.query({
+      query: ({ ClassID, SessionID }) => ({
+        url: 'next_admission_serial',
+        method: 'GET',
+        params: { ClassID, SessionID },
+      }),
+      providesTags: ['Settings'],
     }),
     getExamConditionsSettings: builder.query({
       query: () => `exam_conditions`,
@@ -114,5 +133,7 @@ export const {
   useUpdateCodeSettingMutation,
   useGetCodeSettingsQuery,
   useGetLoginUsersQuery,
+  useGetAllGendersQuery,
+  useGetLastAdmissionSerialQuery,
   useGetExamConditionsSettingsQuery,
 } = settingsSlice;

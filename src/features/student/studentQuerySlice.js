@@ -1,26 +1,26 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
 export const userStudentSlice = createApi({
-  reducerPath: "userStudent",
+  reducerPath: 'userStudent',
   baseQuery: fetchBaseQuery({
     baseUrl: `${API_URL}/api/students`,
     prepareHeaders: (headers) => {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
+        headers.set('Authorization', `Bearer ${token}`);
       }
       return headers;
     },
   }),
   tagTypes: [
-    "Student",
-    "StudentVacation",
-    "StudentVacationType",
-    "StudentReports",
-    "ExamNames",
-    "UsersOnlineRegInfo",
+    'Student',
+    'StudentVacation',
+    'StudentVacationType',
+    'StudentReports',
+    'ExamNames',
+    'UsersOnlineRegInfo',
   ],
   endpoints: (builder) => ({
     getStudentBySearch: builder.query({
@@ -34,23 +34,23 @@ export const userStudentSlice = createApi({
       }) => {
         const params = new URLSearchParams();
         if (search) {
-          params.append("search", search);
+          params.append('search', search);
         }
-        if (ClassID) params.append("ClassID", ClassID);
-        if (GenderID) params.append("GenderID", GenderID);
-        if (SessionID) params.append("SessionID", SessionID);
-        if (NewOldId) params.append("NewOldId", NewOldId);
+        if (ClassID) params.append('ClassID', ClassID);
+        if (GenderID) params.append('GenderID', GenderID);
+        if (SessionID) params.append('SessionID', SessionID);
+        if (NewOldId) params.append('NewOldId', NewOldId);
         if (ResidentialStatusId)
-          params.append("ResidentialStatusId", ResidentialStatusId);
+          params.append('ResidentialStatusId', ResidentialStatusId);
 
         return `search_student?${params.toString()}`;
       },
-      providesTags: ["Student"],
+      providesTags: ['Student'],
     }),
 
     getStudent: builder.query({
-      query: () => "view_students",
-      providesTags: ["Student"],
+      query: () => 'view_students',
+      providesTags: ['Student'],
     }),
 
     getStudentReportCets: builder.query({
@@ -64,163 +64,167 @@ export const userStudentSlice = createApi({
     getStudentReports: builder.query({
       query: ({ userCode, classID, SessionID }) => {
         const params = new URLSearchParams();
-        if (userCode) params.append("StudentCode", userCode);
-        if (classID) params.append("SubClassID", classID);
-        if (SessionID) params.append("SessionID", SessionID);
+        if (userCode) params.append('StudentCode', userCode);
+        if (classID) params.append('SubClassID', classID);
+        if (SessionID) params.append('SessionID', SessionID);
         return `get_studentreports?${params.toString()}`;
       },
 
-      providesTags: ["StudentReports"],
+      providesTags: ['StudentReports'],
     }),
 
     postStudentCharacterReport: builder.mutation({
       query: (data) => ({
         url: `student_character_report`,
-        method: "POST",
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["StudentReports"],
+      invalidatesTags: ['StudentReports'],
     }),
     updateStudentCharacterReport: builder.mutation({
       query: (data) => ({
         url: `student_character_report`,
-        method: "PUT",
+        method: 'PUT',
         body: data,
       }),
-      invalidatesTags: ["StudentReports"],
+      invalidatesTags: ['StudentReports'],
     }),
     deleteStudentCharacterReport: builder.mutation({
       query: (id) => ({
         url: `student_character_report/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["StudentReports"],
+      invalidatesTags: ['StudentReports'],
     }),
     postEnglishAndArobicName: builder.mutation({
       query: (data) => ({
         url: `student_translate`,
-        method: "POST",
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["Student"],
+      invalidatesTags: ['Student'],
     }),
 
     // Vacation List
     getStudentsVacationList: builder.query({
       query: ({ page = 1, limit = 10 }) =>
         `/get_vacation_list?page=${page}&limit=${limit}`,
-      providesTags: ["StudentVacation"],
+      providesTags: ['StudentVacation'],
     }),
 
     postStudentsVacation: builder.mutation({
       query: (body) => ({
         url: `student_vacation`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["StudentVacation"],
+      invalidatesTags: ['StudentVacation'],
     }),
 
     updateStudentsVacation: builder.mutation({
       query: (body) => ({
         url: `student_vacation/${body.ID}`,
-        method: "PUT",
+        method: 'PUT',
         body,
       }),
-      invalidatesTags: ["StudentVacation"],
+      invalidatesTags: ['StudentVacation'],
     }),
     deleteStudentsVacation: builder.mutation({
       query: (id) => ({
         url: `student_vacation/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["StudentVacation"],
+      invalidatesTags: ['StudentVacation'],
     }),
 
     // Vacation Type List
     getStudentsVacationTypeList: builder.query({
       query: () => `get_studentvacation_type_list`,
-      providesTags: ["StudentVacationType"],
+      providesTags: ['StudentVacationType'],
     }),
     postStudentsVacationType: builder.mutation({
       query: (body) => ({
         url: `studentvacation_type`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["StudentVacationType"],
+      invalidatesTags: ['StudentVacationType'],
     }),
     updateStudentsVacationType: builder.mutation({
       query: ({ id, ...body }) => ({
         url: `studentvacation_type/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body,
       }),
-      invalidatesTags: ["StudentVacationType"],
+      invalidatesTags: ['StudentVacationType'],
     }),
     deleteStudentsVacationType: builder.mutation({
       query: (id) => ({
         url: `studentvacation_type/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["StudentVacationType"], // Ensures the list is refreshed
+      invalidatesTags: ['StudentVacationType'], // Ensures the list is refreshed
     }),
     // Transfer Certificate
     getStudentsTransferCertificate: builder.query({
       query: () => `get_student_transfer_certificate`,
-      providesTags: ["StudentTransferCertificate"],
+      providesTags: ['StudentTransferCertificate'],
     }),
     getExamNames: builder.query({
       query: () => `get_exam_names`,
-      providesTags: ["ExamNames"],
+      providesTags: ['ExamNames'],
+    }),
+    getLastAdmissionUserCode: builder.query({
+      query: () => `next_user_code`,
+      providesTags: ['Users'],
     }),
     postStudentsTransferCertificate: builder.mutation({
       query: (body) => ({
         url: `student_transfer_certificate`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["StudentTransferCertificate"],
+      invalidatesTags: ['StudentTransferCertificate'],
     }),
     updateStudentsTransferCertificate: builder.mutation({
       query: ({ id, body }) => ({
         url: `student_transfer_certificate/${id}`,
-        method: "PUT",
+        method: 'PUT',
         body,
       }),
       invalidatesTags: (result, error, { id }) => [
-        { type: "StudentTransferCertificate", id },
-        "StudentTransferCertificate", // Invalidate both specific and all queries
+        { type: 'StudentTransferCertificate', id },
+        'StudentTransferCertificate', // Invalidate both specific and all queries
       ],
     }),
     postChnageStudentGroup: builder.mutation({
       query: ({ id, body }) => ({
         url: `change_studentgroup/${id}`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["Student"], // Ensures the list is refreshed
+      invalidatesTags: ['Student'], // Ensures the list is refreshed
     }),
 
     deleteStudentsTransferCertificate: builder.mutation({
       query: (id) => ({
         url: `student_transfer_certificate/${id}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
-      invalidatesTags: ["StudentTransferCertificate"], // Ensures the list is refreshed
+      invalidatesTags: ['StudentTransferCertificate'], // Ensures the list is refreshed
     }),
     getUsersOnlineRegInfo: builder.query({
       query: ({ page = 1, limit = 20 }) =>
         `get_User_Onlice_RegInfo?page=${page}&limit=${limit}`,
-      providesTags: ["UsersOnlineRegInfo"],
+      providesTags: ['UsersOnlineRegInfo'],
     }),
     postStudentAdmission: builder.mutation({
       query: (body) => ({
         url: `student_admission`,
-        method: "POST",
+        method: 'POST',
         body,
       }),
-      invalidatesTags: ["UsersOnlineRegInfo"], // Ensures the list is refreshed
+      invalidatesTags: ['UsersOnlineRegInfo'], // Ensures the list is refreshed
     }),
   }),
 });
@@ -251,4 +255,5 @@ export const {
   useUpdateStudentCharacterReportMutation,
   useDeleteStudentCharacterReportMutation,
   useDeleteStudentsVacationMutation,
+  useGetLastAdmissionUserCodeQuery,
 } = userStudentSlice;

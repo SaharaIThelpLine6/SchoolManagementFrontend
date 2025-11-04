@@ -19,7 +19,6 @@ const MonthlyFeeCollectionTable = () => {
     (state) => state.student
   );
 
-  console.log('filteredSelectedPerStudentFee:', filteredSelectedPerStudentFee);
 
   const admissionId = filteredSelectedPerStudentFee?.AdmissionID;
 
@@ -37,22 +36,12 @@ const MonthlyFeeCollectionTable = () => {
       }
     );
 
-    console.log(data, 'data');
 
-  // Log API response for debugging
-  useEffect(() => {
-    console.log('useGetFeeLandByAdmissionQuery response:', {
-      data,
-      error,
-      isLoading,
-      admissionId,
-    });
-  }, [data, error, isLoading, admissionId]);
+
 
   // Compute monthFeeList with proper error handling
   const monthFeeList = useMemo(() => {
     if (!data?.feeDetails || !data?.monthDetails) {
-      console.log('Missing feeDetails or monthDetails in data:', data);
       return [];
     }
 
@@ -93,7 +82,6 @@ const MonthlyFeeCollectionTable = () => {
         };
       });
     } catch (error) {
-      console.error('Error processing month fee list:', error);
       return [];
     }
   }, [data]);
@@ -164,7 +152,6 @@ const MonthlyFeeCollectionTable = () => {
 
   // Render error state
   if (isError) {
-    console.error('API error:', error);
     return (
       <div className="flex justify-center items-center p-8">
         <div className="text-red-600 text-center">

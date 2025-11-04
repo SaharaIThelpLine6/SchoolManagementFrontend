@@ -1,19 +1,20 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { setPageName } from "../features/auth/authSlice";
-import SortableTable from "../components/Tables/SortableTable";
-import { useLocation } from "react-router-dom";
-import useTranslate from "../utils/Translate";
-import { showModal } from "../utils/ModalControlar";
-import Swal from "sweetalert2";
-import Loading from "../components/Loading/Loading";
-import Button from "../components/Button/Button";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import Button from '../components/Button/Button';
+import SvgIcon from '../components/icons/SvgIcon';
+import Loading from '../components/Loading/Loading';
+import DefaultPagination from '../components/Pagination/DefaultPagination';
+import SortableTable from '../components/Tables/SortableTable';
+import { setPageName } from '../features/auth/authSlice';
 import {
   useDeleteAcademicSubjectMutation,
   useGetAcademicSubjectsQuery,
-} from "../features/class/classQuerySlice";
-import SvgIcon from "../components/icons/SvgIcon";
-import DefaultPagination from "../components/Pagination/DefaultPagination";
+} from '../features/class/classQuerySlice';
+import bnBijoy2Unicode from '../utils/conveter';
+import { showModal } from '../utils/ModalControlar';
+import useTranslate from '../utils/Translate';
 
 const PAGE_SIZE = 10;
 
@@ -54,12 +55,12 @@ const Book = ({ pageTitle }) => {
   };
 
   const handleOpenModal = useCallback(() => {
-    showModal(translate("Add Book"), "ADD_BOOK");
+    showModal(translate('Add Book'), 'ADD_BOOK');
   }, [translate]);
 
   const handleEditSubject = useCallback(
     (id) => {
-      showModal(translate("Update Book"), "UPDATE_BOOK", id);
+      showModal(translate('Update Book'), 'UPDATE_BOOK', id);
     },
     [translate]
   );
@@ -67,14 +68,14 @@ const Book = ({ pageTitle }) => {
   const handleDeleteSubject = useCallback(
     (id) => {
       Swal.fire({
-        title: translate("Are you sure?"),
+        title: translate('Are you sure?'),
         text: translate("You won't be able to revert this!"),
-        icon: "warning",
+        icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: translate("Yes, delete it!"),
-        cancelButtonText: translate("Cancel"),
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: translate('Yes, delete it!'),
+        cancelButtonText: translate('Cancel'),
         reverseButtons: true,
       }).then(async (result) => {
         if (result.isConfirmed) {
@@ -82,17 +83,17 @@ const Book = ({ pageTitle }) => {
             await deleteSubject(id).unwrap();
 
             Swal.fire({
-              title: translate("Deleted!"),
-              text: translate("The subject has been deleted."),
-              icon: "success",
+              title: translate('Deleted!'),
+              text: translate('The subject has been deleted.'),
+              icon: 'success',
             });
           } catch (error) {
-            console.error("Delete failed:", error);
+            console.error('Delete failed:', error);
             Swal.fire({
-              title: translate("Error"),
+              title: translate('Error'),
               text:
-                error.data?.message || translate("Failed to delete subject"),
-              icon: "error",
+                error.data?.message || translate('Failed to delete subject'),
+              icon: 'error',
             });
           }
         }
@@ -103,8 +104,8 @@ const Book = ({ pageTitle }) => {
 
   const columnsDistribution = [
     {
-      title: translate("Action"),
-      hozAlign: "center",
+      title: translate('Action'),
+      hozAlign: 'center',
       width: 120,
       headerSort: false,
       render: (data) => (
@@ -114,98 +115,113 @@ const Book = ({ pageTitle }) => {
             title="Edit"
             onClick={() => handleEditSubject(data.SubjectID)}
           >
-            <SvgIcon name={"FiEdit"} size={20} />
+            <SvgIcon name={'FiEdit'} size={20} />
           </button>
           <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
             title="Delete"
             onClick={() => handleDeleteSubject(data.SubjectID)}
           >
-            <SvgIcon name={"FaTrash"} size={20} />
+            <SvgIcon name={'FaTrash'} size={20} />
           </button>
         </div>
       ),
     },
     {
-      title: translate("Subject ID"),
-      field: "SubjectID",
-      hozAlign: "center",
+      title: translate('Subject ID'),
+      field: 'SubjectID',
+      hozAlign: 'center',
       width: 120,
-      sorter: "number",
+      sorter: 'number',
     },
     {
-      title: translate("Subject Name"),
-      field: "SubjectName",
-      hozAlign: "left",
+      title: translate('Subject Name'),
+      field: 'SubjectName',
+      hozAlign: 'left',
       width: 200,
-      sorter: "string",
+      render: (data) => (
+        <div className="flex justify-center items-center">
+          <p>{bnBijoy2Unicode(data.SubjectName)}</p>
+        </div>
+      ),
+      sorter: 'string',
     },
     {
-      title: translate("English Name"),
-      field: "EngSubjectName",
-      hozAlign: "left",
+      title: translate('English Name'),
+      field: 'EngSubjectName',
+      hozAlign: 'left',
       width: 200,
-      sorter: "string",
+      sorter: 'string',
+      render: (data) => (
+        <div className="flex justify-center items-center">
+          <p>{bnBijoy2Unicode(data.EngSubjectName) || '-'}</p>
+        </div>
+      ),
     },
     {
-      title: translate("Arabic Name"),
-      field: "ArabicSubject",
-      hozAlign: "right",
+      title: translate('Arabic Name'),
+      field: 'ArabicSubject',
+      hozAlign: 'right',
       width: 200,
+      render: (data) => (
+        <div className="flex justify-center items-center">
+          <p>{bnBijoy2Unicode(data.ArabicSubject) || '-'}</p>
+        </div>
+      ),
     },
     {
-      title: translate("Class Group"),
-      field: "SubClassID",
-      hozAlign: "center",
+      title: translate('Class Group'),
+      field: 'SubClassID',
+      hozAlign: 'center',
       width: 150,
-      sorter: "number",
+      sorter: 'number',
       formatter: (cell) => {
         // You can map SubClassID to actual group names if needed
         return `Group ${cell.getValue()}`;
       },
     },
     {
-      title: translate("Serial"),
-      field: "SubSerial",
-      hozAlign: "center",
+      title: translate('Serial'),
+      field: 'SubSerial',
+      hozAlign: 'center',
       width: 100,
-      sorter: "number",
+      sorter: 'number',
     },
     {
-      title: translate("Created At"),
-      field: "CreateAt",
-      hozAlign: "center",
+      title: translate('Created At'),
+      field: 'CreateAt',
+      hozAlign: 'center',
       width: 180,
-      sorter: "date",
+      sorter: 'date',
       render: (row) => {
-        return new Date(row.CreateAt).toLocaleDateString("en-GB");
+        return new Date(row.CreateAt).toLocaleDateString('en-GB');
       },
     },
     {
-      title: translate("Updated At"),
-      field: "UpdateAt",
-      hozAlign: "center",
+      title: translate('Updated At'),
+      field: 'UpdateAt',
+      hozAlign: 'center',
       width: 180,
-      sorter: "date",
+      sorter: 'date',
       render: (row) => {
         const date = row.UpdateAt ? new Date(row.UpdateAt) : null;
-        return date && !isNaN(date) ? date.toLocaleDateString("en-GB") : "N/A";
+        return date && !isNaN(date) ? date.toLocaleDateString('en-GB') : '-';
       },
     },
   ];
 
   if (isLoading) return <Loading />;
-  if (isError) return <div>{translate("Error loading data")}</div>;
+  if (isError) return <div>{translate('Error loading data')}</div>;
 
   return (
     <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="block w-full overflow-x-auto">
         <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
           <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
-            {translate("Book List")}
+            {translate('Book List')}
           </h3>
           <Button onClick={() => handleOpenModal()}>
-            {translate("Add Book")}
+            {translate('Add Book')}
           </Button>
         </div>
 
@@ -218,16 +234,16 @@ const Book = ({ pageTitle }) => {
             />
 
             {/* Pagination Controls */}
-          
-              <DefaultPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+
+            <DefaultPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </>
         ) : (
           <div className="text-center py-8">
-            {translate("No data available")}
+            {translate('No data available')}
           </div>
         )}
       </div>

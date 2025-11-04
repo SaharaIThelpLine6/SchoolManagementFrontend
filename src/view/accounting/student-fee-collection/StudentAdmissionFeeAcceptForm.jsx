@@ -67,6 +67,9 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
         deposit: item.PreviousDeposite
           ? item.Fee - item.PreviousDeposite
           : item.amount,
+        depositUpdate: item.PreviousDeposite
+          ? item.Fee - item.PreviousDeposite
+          : item.amount,
         due: item.BlankField ? item.BlankField : 0,
       }));
 
@@ -117,6 +120,23 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
     setValue('currentDeposit', totalDeposit);
   }, [fees, setValue]);
 
+  // Unified calculation function with preDeposit
+  const recalcFee = (fee) => {
+    const prescribedFee = Number(fee.amount || 0);
+    const deduction = Number(fee.deduction || 0);
+    const preDeposit = Number(fee.preDeposit || 0);
+    let deposit = Number(fee.deposit || 0);
+
+    // Ensure deposit does not exceed remaining fee after deduction and preDeposit
+    const maxDeposit = prescribedFee - deduction - preDeposit;
+    if (deposit > maxDeposit) {
+      deposit = maxDeposit;
+    }
+
+    const due = prescribedFee - deduction - preDeposit - deposit;
+    return { deposit, due };
+  };
+
   // Handle Deduction change
   const handleDeductionChange = useCallback(
     (index) => {
@@ -124,36 +144,27 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
       const fee = currentFees[index];
       if (!fee) return;
 
-      const prescribedFee = Number(fee.amount) || 0;
-      const deduction = Number(fee.deduction) || 0;
-      const newDeposit = prescribedFee - deduction; // Deposit updates
-      // Remove due update
-      // const newDue = prescribedFee - (fee.preDeposit || 0) - newDeposit;
+      const { deposit, due } = recalcFee(fee);
 
-      setValue(`fees.${index}.deposit`, newDeposit);
-      // setValue(`fees.${index}.due`, newDue); // REMOVE THIS
+      setValue(`fees.${index}.deposit`, deposit);
+      setValue(`fees.${index}.due`, due);
 
       setDefaultFees((prev) =>
         prev.map((f, i) =>
-          i === index
-            ? { ...f, deduction, deposit: newDeposit } // only update deposit
-            : f
+          i === index ? { ...f, deduction: fee.deduction, deposit, due } : f
         )
       );
 
       // Update totals
       const updatedFees = getValues('fees');
-      const updatedDeduction = updatedFees.reduce(
-        (acc, f) => acc + Number(f.deduction || 0),
-        0
+      setValue(
+        'deduction',
+        updatedFees.reduce((acc, f) => acc + Number(f.deduction || 0), 0)
       );
-      const updatedDeposit = updatedFees.reduce(
-        (acc, f) => acc + Number(f.deposit || 0),
-        0
+      setValue(
+        'currentDeposit',
+        updatedFees.reduce((acc, f) => acc + Number(f.deposit || 0), 0)
       );
-
-      setValue('deduction', updatedDeduction);
-      setValue('currentDeposit', updatedDeposit);
     },
     [getValues, setValue]
   );
@@ -165,24 +176,21 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
       const fee = currentFees[index];
       if (!fee) return;
 
-      const deposit = Number(fee.deposit) || 0;
-      const deduction = Number(fee.deduction) || 0;
-      const prescribedFee = Number(fee.amount) || 0;
-      const newDue = prescribedFee - deduction - deposit;
+      const { deposit, due } = recalcFee(fee);
 
-      setValue(`fees.${index}.due`, newDue);
+      setValue(`fees.${index}.deposit`, deposit);
+      setValue(`fees.${index}.due`, due);
 
       setDefaultFees((prev) =>
-        prev.map((f, i) => (i === index ? { ...f, deposit, due: newDue } : f))
+        prev.map((f, i) => (i === index ? { ...f, deposit, due } : f))
       );
 
-      // Update totals after deposit change
+      // Update totals
       const updatedFees = getValues('fees');
-      const updatedDeposit = updatedFees.reduce(
-        (acc, f) => acc + Number(f.deposit || 0),
-        0
+      setValue(
+        'currentDeposit',
+        updatedFees.reduce((acc, f) => acc + Number(f.deposit || 0), 0)
       );
-      setValue('currentDeposit', updatedDeposit);
     },
     [getValues, setValue]
   );
@@ -341,6 +349,9 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
                           type="number"
                           defaultValue={item.deduction || 0}
                           onChange={() => handleDeductionChange(globalIndex)}
+                          max={
+                            item.preDeposit ? item.depositUpdate : item.amount
+                          }
                         />
                       </td>
                       <td className="text-center">
@@ -357,6 +368,9 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
                           type="number"
                           defaultValue={item.deposit}
                           onChange={() => handleDepositChange(globalIndex)}
+                          max={
+                            item.preDeposit ? item.depositUpdate : item.amount
+                          }
                         />
                       </td>
                       <td className="text-center">

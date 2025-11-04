@@ -1,19 +1,18 @@
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
-import { setPageName } from "../features/auth/authSlice";
-import SortableTable from "../components/Tables/SortableTable";
-import { useLocation } from "react-router-dom";
-import useTranslate from "../utils/Translate";
-import Loading from "../components/Loading/Loading";
-import { useGetUsersOnlineRegInfoQuery } from "../features/student/studentQuerySlice";
-import DefaultSelect from "../components/Forms/DefaultSelect";
-import { FormProvider, useForm } from "react-hook-form";
-import Button from "../components/Button/Button";
-import DefaultInput from "../components/Forms/DefaultInput";
-import { useMemo } from "react";
-import bnBijoy2Unicode from "../utils/conveter";
-import OnlineAdmissionForm from "../view/students/admission/OnlineAdmissionForm";
-import SvgIcon from "../components/icons/SvgIcon";
+import { useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import Button from '../components/Button/Button';
+import DefaultInput from '../components/Forms/DefaultInput';
+import DefaultSelect from '../components/Forms/DefaultSelect';
+import SvgIcon from '../components/icons/SvgIcon';
+import Loading from '../components/Loading/Loading';
+import SortableTable from '../components/Tables/SortableTable';
+import { setPageName } from '../features/auth/authSlice';
+import { useGetUsersOnlineRegInfoQuery } from '../features/student/studentQuerySlice';
+import bnBijoy2Unicode from '../utils/conveter';
+import useTranslate from '../utils/Translate';
+import OnlineAdmissionForm from '../view/students/admission/OnlineAdmissionForm';
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
@@ -24,12 +23,12 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
   const methods = useForm({
     defaultValues: {
       pageSize: 10,
-      applicationNo: "",
+      applicationNo: '',
     },
   });
 
   const { watch } = methods;
-  const applicationNo = watch("applicationNo");
+  const applicationNo = watch('applicationNo');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(100);
   const [showForm, setShowForm] = useState(false);
@@ -72,10 +71,10 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
   }, [studentData, selectedStatus, applicationNo]);
 
   const SUB_CLASS_OPTIONS = [
-    { value: 0, label: "ভর্তি অসম্পূর্ণ" },
-    { value: 2, label: "ভর্তি সম্পূর্ণ" },
-    { value: 1, label: "ইনঅ্যাক্টিভ" },
-    { value: 3, label: "সকল" },
+    { value: 0, label: 'ভর্তি অসম্পূর্ণ' },
+    { value: 2, label: 'ভর্তি সম্পূর্ণ' },
+    { value: 1, label: 'ইনঅ্যাক্টিভ' },
+    { value: 3, label: 'সকল' },
   ];
 
   const handleStatusChange = (selectedOption) => {
@@ -101,7 +100,7 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
   };
 
   const getGenderText = (genderId) => {
-    return genderId === 1 ? "Male" : "Female";
+    return genderId === 1 ? 'Male' : 'Female';
   };
 
   const handleEditStudent = (student) => {
@@ -119,39 +118,39 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
 
   const columns = [
     {
-      title: translate("Action"),
-      hozAlign: "center",
+      title: translate('Action'),
+      hozAlign: 'center',
       render: (row) => {
         const statusOption = SUB_CLASS_OPTIONS.find(
           (opt) => opt.value === row.Status
         );
-        const statusText = statusOption?.label || "অজানা";
+        const statusText = statusOption?.label || 'অজানা';
 
-        let textColor = "text-gray-800";
-        let bgColor = "bg-gray-100";
-        let buttonClass = "";
+        let textColor = 'text-gray-800';
+        let bgColor = 'bg-gray-100';
+        let buttonClass = '';
 
         switch (row.Status) {
           case 0:
-            textColor = "text-yellow-800";
-            bgColor = "bg-yellow-100";
-            buttonClass = "bg-yellow-500 hover:bg-yellow-600 text-white";
+            textColor = 'text-yellow-800';
+            bgColor = 'bg-yellow-100';
+            buttonClass = 'bg-yellow-500 hover:bg-yellow-600 text-white';
             break;
           case 1:
-            textColor = "text-red-800";
-            bgColor = "bg-red-100";
+            textColor = 'text-red-800';
+            bgColor = 'bg-red-100';
             break;
           case 2:
-            textColor = "text-green-800";
-            bgColor = "bg-green-100";
+            textColor = 'text-green-800';
+            bgColor = 'bg-green-100';
             break;
           case 3:
-            textColor = "text-blue-800";
-            bgColor = "bg-blue-100";
+            textColor = 'text-blue-800';
+            bgColor = 'bg-blue-100';
             break;
           default:
-            textColor = "text-gray-800";
-            bgColor = "bg-gray-100";
+            textColor = 'text-gray-800';
+            bgColor = 'bg-gray-100';
         }
 
         return (
@@ -175,65 +174,65 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
       },
     },
     {
-      title: translate("Sequential"),
-      field: "UserID",
-      hozAlign: "center",
+      title: translate('Sequential'),
+      field: 'UserID',
+      hozAlign: 'center',
       width: 80,
       render: (row) => <p>{row.UserID}</p>,
     },
     {
-      title: translate("Application No"),
-      field: "UserCode",
-      hozAlign: "center",
+      title: translate('Application No'),
+      field: 'UserCode',
+      hozAlign: 'center',
       width: 120,
       render: (row) => <p>{row.UserCode}</p>,
     },
     {
-      title: translate("User Name"),
-      field: "UserName",
-      hozAlign: "center",
+      title: translate('User Name'),
+      field: 'UserName',
+      hozAlign: 'center',
       width: 150,
       render: (row) => <p>{bnBijoy2Unicode(row.UserName)}</p>,
     },
     {
-      title: translate("Father Name"),
-      field: "FatherName",
-      hozAlign: "center",
+      title: translate('Father Name'),
+      field: 'FatherName',
+      hozAlign: 'center',
       width: 150,
       render: (row) => <p>{bnBijoy2Unicode(row.FatherName)}</p>,
     },
     {
-      title: translate("Gender"),
-      field: "GenderID",
-      hozAlign: "center",
+      title: translate('Gender'),
+      field: 'GenderID',
+      hozAlign: 'center',
       width: 100,
       render: (row) => <p>{getGenderText(row.GenderID)}</p>,
     },
     {
-      title: translate("Mobile"),
-      field: "Mobile1",
-      hozAlign: "center",
+      title: translate('Mobile'),
+      field: 'Mobile1',
+      hozAlign: 'center',
       width: 120,
       render: (row) => <p>{row.Mobile1}</p>,
     },
     {
-      title: translate("Village"),
-      field: "permanentVill",
-      hozAlign: "center",
+      title: translate('Village'),
+      field: 'permanentVill',
+      hozAlign: 'center',
       width: 120,
       render: (row) => <p>{bnBijoy2Unicode(row.permanentVill)}</p>,
     },
     {
-      title: translate("Post Office"),
-      field: "permanentPost",
-      hozAlign: "center",
+      title: translate('Post Office'),
+      field: 'permanentPost',
+      hozAlign: 'center',
       width: 120,
       render: (row) => <p>{bnBijoy2Unicode(row.permanentPost)}</p>,
     },
     {
-      title: translate("Date of Birth"),
-      field: "DateOfBirth",
-      hozAlign: "center",
+      title: translate('Date of Birth'),
+      field: 'DateOfBirth',
+      hozAlign: 'center',
       width: 120,
       render: (row) => <p>{row.DateOfBirth}</p>,
     },
@@ -241,13 +240,13 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
 
   return (
     <>
-      {!showForm ? (
+      {!showForm && (
         <FormProvider {...methods}>
           <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
             <div className="block w-full overflow-x-auto">
               <div className="flex flex-row justify-start items-center mb-4">
                 <h3 className="font-SolaimanLipi text-[20px] font-bold">
-                  {translate("Online Admission List")}
+                  {translate('Online Admission List')}
                 </h3>
                 {/* <Button onClick={handleNewAdmission}>New Admission</Button> */}
               </div>
@@ -256,10 +255,10 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
                 <div className="flex gap-3 flex-col sm:flex-row w-full sm:w-auto py-3">
                   <DefaultSelect
                     options={SUB_CLASS_OPTIONS}
-                    nameField={"label"}
-                    valueField={"value"}
-                    registerKey={"statusFilter"}
-                    label={translate("")}
+                    nameField={'label'}
+                    valueField={'value'}
+                    registerKey={'statusFilter'}
+                    label={translate('')}
                     onChange={handleStatusChange}
                   />
                   <DefaultInput
@@ -295,8 +294,8 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
 
               <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
                 <div className="text-sm text-gray-600">
-                  Showing {(currentPage - 1) * pageSize + 1} to{" "}
-                  {Math.min(currentPage * pageSize, totalRecords)} of{" "}
+                  Showing {(currentPage - 1) * pageSize + 1} to{' '}
+                  {Math.min(currentPage * pageSize, totalRecords)} of{' '}
                   {totalRecords} entries
                 </div>
                 <div className="flex items-center gap-4">
@@ -305,7 +304,7 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
                     disabled={currentPage === 1}
                     className="flex items-center gap-1 px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <SvgIcon name={"MdKeyboardArrowLeft"} size={18} />
+                    <SvgIcon name={'MdKeyboardArrowLeft'} size={18} />
                     Previous
                   </button>
 
@@ -319,14 +318,16 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
                     className="flex items-center gap-1 px-3 py-1 rounded bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Next
-                    <SvgIcon name={"MdKeyboardArrowRight"} size={18} />
+                    <SvgIcon name={'MdKeyboardArrowRight'} size={18} />
                   </button>
                 </div>
               </div>
             </div>
           </div>
         </FormProvider>
-      ) : (
+      )}
+
+      {selectedStudent && (
         <OnlineAdmissionForm
           studentData={selectedStudent}
           onBack={handleBackToList}

@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { closeModal } from '../features/modal/modalSlice';
 import useTranslate from '../utils/Translate';
+import SessionCreateUpdateModal from '../view/Session/SessionCreateUpdateModal';
 import BalanceTransferModal from '../view/accounting/BalanceTransferModal';
 import BankInfoSettings from '../view/accounting/BankInfoSettings';
 import FundForm from '../view/accounting/FundForm';
@@ -11,6 +12,7 @@ import SubGeneralForm from '../view/accounting/SubGeneralForm';
 import TodaysBalance from '../view/accounting/TodaysBalance';
 import Statement from '../view/accounting/dues-list/Statement';
 import AccExamFeeCollector from '../view/accounting/student-exam-fee/AccExamFeeCollector';
+import CommentBoxModal from '../view/accounting/student-fee-collection/CommentBoxModal';
 import DueOthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/DueOthersStudentFeeAcceptForm';
 import FeeSMSTamplateModal from '../view/accounting/student-fee-collection/FeeSMSTamplateModal';
 import MonthStudentFeeForm from '../view/accounting/student-fee-collection/MonthStudentFeeForm';
@@ -23,8 +25,10 @@ import PaymentGetway from '../view/general-information/sms/PaymentGetway';
 import SMSBuy from '../view/general-information/sms/SMSBuy';
 import SMSTemplate from '../view/general-information/sms/SMSTemplate';
 import SuccessAndError from '../view/general-information/sms/SuccessAndError';
+import SubclassCreateUpdatemodal from '../view/section/SubclassCreateUpdatemodal';
 import AddLoginUsersModal from '../view/settings/AddLoginUsersModal';
 import UserNamePasswordChangeModal from '../view/settings/UserNamePasswordChangeModal';
+import AdmissionSerialModal from '../view/students/admission/AdmissionSerialModal';
 import AddEditBook from '../view/students/book/AddEditBook';
 import ClickOutside from './ClickOutside';
 import AddStudentVacationForm from './Forms/AddStudentVacationForm';
@@ -98,6 +102,12 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'PAYMENT' && <PaymentModal />}
                 {modalType === 'ADD_TEACHER' && <AddTeacherForm userId={id} />}
+                {modalType === 'SESSION_CREATE_FORM' && (
+                  <SessionCreateUpdateModal />
+                )}
+                {modalType === 'SESSION_EDIT_FORM' && (
+                  <SessionCreateUpdateModal id={id} />
+                )}
                 {modalType === 'EDIT_TEACHER' && (
                   <EditTeacherForm userId={id} />
                 )}
@@ -115,6 +125,15 @@ const DefaultModal = () => {
                 {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
                 {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
                 {modalType === 'STUDENT_FEE_GROUP' && <StudentFeeGroup />}
+                {modalType === 'SECTION_CREATE_FORM' && (
+                  <SubclassCreateUpdatemodal />
+                )}
+                {modalType === 'SECTION_EDIT_FORM' && (
+                  <SubclassCreateUpdatemodal id={id} />
+                )}
+                {modalType === 'UPDATE_STUDENT_FEE_COMMENT_BOX' && (
+                  <CommentBoxModal />
+                )}
                 {modalType === 'STUDENT_FEE_SMS_TAMPLATE' && (
                   <FeeSMSTamplateModal />
                 )}
@@ -136,6 +155,9 @@ const DefaultModal = () => {
                 )}
 
                 {modalType === 'STUDENT_FILTER' && <StudentFilterModal />}
+                {modalType === 'ONLINE_ADMISSION_SERIAL' && (
+                  <AdmissionSerialModal />
+                )}
                 {modalType === 'USER_FILTER' && <UserFilterModal />}
                 {modalType === 'SELECTED_PERSTUDENT_FEE_FILTER' && (
                   <SelectedPerStudentFeeModal />

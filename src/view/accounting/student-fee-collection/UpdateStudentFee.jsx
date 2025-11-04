@@ -28,6 +28,7 @@ import bnBijoy2Unicode from '../../../utils/conveter';
 import { showModal } from '../../../utils/ModalControlar';
 import useTranslate from '../../../utils/Translate';
 import DefaultKeyDownInput from '../../../view/accounting/student-fee-collection/DefaultKeyDownInput';
+import SubmitLoading from '../../../components/Loading/SubmitLoading';
 
 const UpdateStudentFee = () => {
   const defaultSessionId = useDefaultSession();
@@ -39,7 +40,7 @@ const UpdateStudentFee = () => {
 
   // API calls
   const { data: sessionData } = useGetSessionsQuery();
-  const [putStudentFee] = usePutUpdateStudentFeeMutation();
+  const [putStudentFee, { isLoading, isSuccess }] = usePutUpdateStudentFeeMutation();
 
   // State
   const [defaultFees, setDefaultFees] = useState([]);
@@ -56,7 +57,7 @@ const UpdateStudentFee = () => {
       Remark: '',
       SessionID: defaultSessionId || '',
       IsActive: 1,
-      EntryDate: "",
+      EntryDate: '',
       fees: [],
       prescribedFee: 0,
       deduction: 0,
@@ -174,11 +175,8 @@ const UpdateStudentFee = () => {
         setValue('deduction', studentFeeUpdateData.deduction || 0);
         setValue('currentDeposit', studentFeeUpdateData.currentDeposit || 0);
       }, 0);
-
     }
   }, [studentFeeUpdateData, setValue]);
-
-
 
   // ✅ FIXED: Optimized totals calculation with useMemo
   const recalculateTotals = useCallback(() => {
@@ -273,44 +271,51 @@ const UpdateStudentFee = () => {
   }, [defaultSessionId, setValue]);
 
   // ✅ FIXED: Single effect for form reset on student data change
-useEffect(() => {
-  const currentSession = getValues('SessionID');
+  useEffect(() => {
+    const currentSession = getValues('SessionID');
 
-  if (studentFeeUpdateData) {
-    // Step 1️⃣: প্রথমে GLID, বেসিক ফর্ম রিসেট করা
-    reset({
-      ID: studentFeeUpdateData.UserID ?? '',
-      StudentCode: studentFeeUpdateData.StudentCode ?? '',
-      GLID: studentFeeUpdateData.AccountType ?? '',
-      EntryDate: studentFeeUpdateData.CreateAt,
-      SessionID: currentSession || defaultSessionId,
-      Remark: studentFeeUpdateData.Remark ?? '',
-      fees: defaultFees,
-      prescribedFee: 0,
-      deduction: 0,
-      currentDeposit: 0,
-    });
+    if (studentFeeUpdateData) {
+      // Step 1️⃣: প্রথমে GLID, বেসিক ফর্ম রিসেট করা
+      reset({
+        ID: studentFeeUpdateData.UserID ?? '',
+        StudentCode: studentFeeUpdateData.StudentCode ?? '',
+        GLID: studentFeeUpdateData.AccountType ?? '',
+        EntryDate: studentFeeUpdateData.CreateAt,
+        SessionID: currentSession || defaultSessionId,
+        Remark: studentFeeUpdateData.Remark ?? '',
+        fees: defaultFees,
+        prescribedFee: 0,
+        deduction: 0,
+        currentDeposit: 0,
+      });
 
-    // Step 2️⃣: কিছুক্ষণ পর (GLID সেট হওয়ার পর) SLID সেট করা
-    const timer = setTimeout(() => {
-      setValue('SLID', studentFeeUpdateData.Account ?? '');
-    }, 300); // 300ms delay রাখো যাতে dependent dropdown রেন্ডার হয়ে যায়
+      // Step 2️⃣: কিছুক্ষণ পর (GLID সেট হওয়ার পর) SLID সেট করা
+      const timer = setTimeout(() => {
+        setValue('SLID', studentFeeUpdateData.Account ?? '');
+      }, 300); // 300ms delay রাখো যাতে dependent dropdown রেন্ডার হয়ে যায়
 
-    return () => clearTimeout(timer);
-  }
-}, [
-  studentFeeUpdateData,
-  reset,
-  getValues,
-  defaultSessionId,
-  defaultFees,
-  setValue,
-]);
-
+      return () => clearTimeout(timer);
+    }
+  }, [
+    studentFeeUpdateData,
+    reset,
+    getValues,
+    defaultSessionId,
+    defaultFees,
+    setValue,
+  ]);
 
   // Search and form handlers
   const handleOpenModal = useCallback(() => {
     showModal('Selected Per Student Fee', 'SELECTED_PERSTUDENT_FEE_FILTER');
+  }, []);
+
+  // Search and form handlers
+  const handleOpenCommentBoxModal = useCallback(() => {
+    showModal(
+      'Update Student fee comment box',
+      'UPDATE_STUDENT_FEE_COMMENT_BOX'
+    );
   }, []);
 
   const handleEnter = (e) => {
@@ -350,7 +355,7 @@ useEffect(() => {
   };
 
   const handleResetPage = () => {
-    refetchData();
+    // refetchData();
     const currentSession = getValues('SessionID');
 
     reset({
@@ -369,12 +374,25 @@ useEffect(() => {
     });
 
     setFilterData(null);
-    dispatch(setStudentFeeUpdateID(null))
+    dispatch(setStudentFeeUpdateID(null));
     setTotalDue(0);
     setDefaultFees([]);
     setLogo(null);
     setSearchTrigger(0);
     setLastSearchedCode('');
+  };
+
+  const onSubmitFirst = async (data) => {
+    // Step 1: Open comment modal
+    handleOpenCommentBoxModal();
+
+    // Step 2: Listen for modal save event
+    const handleCommentSaved = () => {
+      onSubmit(data); // এখন main form submit হবে
+      window.removeEventListener('commentSaved', handleCommentSaved);
+    };
+
+    window.addEventListener('commentSaved', handleCommentSaved);
   };
 
   const onSubmit = async (data) => {
@@ -387,7 +405,7 @@ useEffect(() => {
         });
         return;
       }
-
+      const commentValue = localStorage.getItem('smsMessage') || '';
       const payload = {
         UserID: studentFeeUpdateData.UserID,
         AdmissionID: studentFeeUpdateData.AdmissionID,
@@ -421,6 +439,7 @@ useEffect(() => {
         Remark: data.Remark,
         AccountType: data.GLID,
         Account: data.SLID,
+        Comment: commentValue,
       };
 
       await putStudentFee(payload).unwrap();
@@ -461,6 +480,11 @@ useEffect(() => {
     return <Loading />;
   }
 
+   // Update Submit Loading
+    if (isLoading) {
+      return <SubmitLoading />;
+    }
+
   return (
     <div className="">
       <FormProvider {...methods}>
@@ -471,7 +495,7 @@ useEffect(() => {
               {translate('Student Fee Collection')}
             </h3>
           </div>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmitFirst)}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {/* Photo and Student Code */}
               <div className="p-1 col-span-1 flex flex-col items-center gap-4">

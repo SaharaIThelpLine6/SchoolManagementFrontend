@@ -23,7 +23,10 @@ import {
   usePostStudentFeeCollectionMutation,
 } from '../../../features/feeCollection/feeCollectionSlice';
 import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
-import { setStudentFeeData } from '../../../features/settings/settingsSlice';
+import {
+  setStudentFeeData,
+  setStudentFeeSessionID,
+} from '../../../features/settings/settingsSlice';
 import {
   setFilteredSelectedPerStudentFee,
   setMonthFeeData,
@@ -35,6 +38,8 @@ import { showModal } from '../../../utils/ModalControlar';
 import useTranslate from '../../../utils/Translate';
 import SMSLogo from '/smslogo.png';
 
+import SubmitLoading from '../../../components/Loading/SubmitLoading';
+import { useGetSettingsQuery } from '../../../features/settings/settingsQuerySlice';
 import MonthlyFeeCollectionTable from '../../../view/accounting/student-fee-collection/MonthlyFeeCollectionTable';
 
 const CreateStudentFee = () => {
@@ -61,7 +66,16 @@ const CreateStudentFee = () => {
   const { studentFeeData = [] } = useSelector((state) => state.settings);
 
   const { data: sessionData } = useGetSessionsQuery();
-  const [postStudentFee] = usePostStudentFeeCollectionMutation();
+  const { data: settingsData } = useGetSettingsQuery();
+  const currentPermissionStatus = settingsData?.data?.find(
+    (item) => item.ID === 9
+  )?.Action;
+
+  // 🔹 RTK Mutation Hook
+  const [
+    postStudentFee,
+    { isLoading, isSuccess }, // ✅ RTK states
+  ] = usePostStudentFeeCollectionMutation();
 
   const [studentFeeDataAll, setstudentFeeDataAll] = useState(null);
   const [totalDue, setTotalDue] = useState(null);
@@ -130,12 +144,6 @@ const CreateStudentFee = () => {
     }
   );
 
-  console.log(studentFeeAdmissionData, 'studentFeeAdmissionsData');
-  console.log(
-    studentOtherDuesError,
-    studentOtherDueError,
-    'studentOtherDueError'
-  );
 
   // default session set
   useEffect(() => {
@@ -148,6 +156,7 @@ const CreateStudentFee = () => {
   }, [defaultSessionId, setValue]);
 
   const [GLID, SessionID] = watch(['GLID', 'SessionID']);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: glbc = [] } = useGetGeneralLedgersByCAIDQuery();
   const { data: sglbc = [] } = useGetSubLedgersByGLIDQuery(GLID, {
@@ -170,7 +179,6 @@ const CreateStudentFee = () => {
   // ✅ Search effect - searchTrigger change হলে refetch করবে
   useEffect(() => {
     if (filterData && searchTrigger > 0) {
-      console.log('Refetching data for:', filterData);
       refetch();
     }
   }, [searchTrigger, filterData, refetch]);
@@ -178,7 +186,6 @@ const CreateStudentFee = () => {
   // ✅ useEffect দিয়ে dispatch, প্রথম এলিমেন্ট থাকলে
   useEffect(() => {
     if (searchUserInfo && searchUserInfo.data) {
-      console.log('Search result:', searchUserInfo);
 
       if (
         Array.isArray(searchUserInfo.data) &&
@@ -213,7 +220,6 @@ const CreateStudentFee = () => {
     }
   }, [filteredSelectedPerStudentFee]);
 
-  console.log(studentFeeData, 'studentFeeData');
 
   useEffect(() => {
     if (studentFeeData?.fees) {
@@ -230,6 +236,13 @@ const CreateStudentFee = () => {
   useEffect(() => {
     setstudentFeeDataAll(studentFeeData);
   }, [studentFeeData]);
+
+  // Dispatch whenever it changes
+  useEffect(() => {
+    if (SessionID !== undefined && SessionID !== null) {
+      dispatch(setStudentFeeSessionID(SessionID));
+    }
+  }, [SessionID, dispatch]);
 
   // ✅ Student change হলে form update করুন
   useEffect(() => {
@@ -337,6 +350,24 @@ const CreateStudentFee = () => {
         });
         return;
       }
+      setIsSubmitting(true);
+      let smsPermission = false;
+
+      // Step 1: Ask for SMS permission during submit (only if currentPermissionStatus is defined)
+      if (currentPermissionStatus == 1) {
+        const result = await Swal.fire({
+          title: 'SMS পাঠাবেন?',
+          text: 'আপনি কি এই ইনভয়েসের জন্য SMS পাঠাতে চান?',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonText: 'হ্যাঁ, পাঠাও',
+          cancelButtonText: 'না, পাঠাব না',
+          confirmButtonColor: '#16a34a',
+          cancelButtonColor: '#d33',
+        });
+
+        smsPermission = result.isConfirmed;
+      }
 
       const payload = {
         UserID: studentFeeData.userId,
@@ -353,6 +384,7 @@ const CreateStudentFee = () => {
         fees: studentFeeData.fees,
         MonthId: monthFeeData?.monthId || '',
         StudentDueFee: monthFeeData?.studentDueFeeData || '',
+        smsPermission,
       };
 
       await postStudentFee(payload).unwrap();
@@ -378,7 +410,7 @@ const CreateStudentFee = () => {
       Swal.fire({
         icon: 'error',
         title: 'ত্রুটি',
-        text: 'ডেটা সাবমিট করতে সমস্যা হয়েছে',
+        text: error.data.error || 'কোনো অজানা ত্রুটি হয়েছে।',
       });
     }
   };
@@ -460,7 +492,6 @@ const CreateStudentFee = () => {
 
     // ✅ যদি একই code আবার search করা হয়, তাহলে force refetch
     if (studentCode === lastSearchedCode) {
-      console.log('Same code searched again, forcing refetch...');
 
       // ✅ Complete state reset
       dispatch(setFilteredSelectedPerStudentFee(null));
@@ -504,6 +535,11 @@ const CreateStudentFee = () => {
 
   {
     userInfoLoading && <Loading />;
+  }
+
+  // Update Submit Loading
+  if (isLoading) {
+    return <SubmitLoading />;
   }
 
   return (
