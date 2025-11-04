@@ -12,6 +12,7 @@ import { showModal } from "../utils/ModalControlar";
 import "flatpickr/dist/themes/light.css";
 import { useGetStudentQuery } from "../features/student/studentQuerySlice";
 import Loading from "../components/Loading/Loading";
+import DropdownDefault from "../components/Dropdowns/DropdownDefault";
 
 const AddStudent = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -36,9 +37,13 @@ const AddStudent = ({ pageTitle }) => {
   const handleOpenModal = useCallback((id) => {
     showModal("Admission Details", "ADD_STUDENT", id);
   }, []);
-  const handleFeeCollectionModal = useCallback((id) => {
-    showModal("Fee Collection", "FEE_COLLECTION", id);
+
+  const handleOpenChangeClassModal = useCallback((id) => {
+    showModal("Change Student Class", "CHANGE_STUDENT_CLASS", id);
   }, []);
+  // const handleFeeCollectionModal = useCallback((id) => {
+  //   showModal("Fee Collection", "FEE_COLLECTION", id);
+  // }, []);
 
   useEffect(() => {
     if (filter == 2) {
@@ -141,13 +146,13 @@ const AddStudent = ({ pageTitle }) => {
       ], render: (row) => {
         switch (row.AdmissionStatus) {
           case 0:
-            return <button type="button" onClick={() => { handleFeeCollectionModal(row.UserID) }}><p className="inline-flex rounded-lg bg-warning bg-opacity-10 px-3 py-1 text-sm font-medium text-warning">Pending</p></button>;
+            return <p className="inline-flex rounded-lg bg-warning bg-opacity-10 px-3 py-1 text-sm font-medium text-warning">Pending</p>;
           case 1:
             return <p className="inline-flex rounded-lg bg-success bg-opacity-10 px-3 py-1 text-sm font-medium text-success">Paid</p>;
           case 2:
             return <p className="inline-flex rounded-lg bg-info bg-opacity-10 px-3 py-1 text-sm font-medium text-info">Free</p>;
           case 3:
-            return <button type="button" onClick={() => { handleFeeCollectionModal(row.UserID) }}><p className="inline-flex rounded-lg bg-danger bg-opacity-10 px-3 py-1 text-sm font-medium text-danger">Unpaid</p></button>;
+            return <p className="inline-flex rounded-lg bg-danger bg-opacity-10 px-3 py-1 text-sm font-medium text-danger">Unpaid</p>;
           default:
             return row.AdmissionStatus
         }
@@ -165,17 +170,19 @@ const AddStudent = ({ pageTitle }) => {
         }
       }
     },
-    // {
-    //   title: "Action", field: "SessionSerial", hozAlign: "center",
-    //   render: (row) => (
-    //     <button
-    //       onClick={() => handleActionClick(row)}
-    //       className="px-4 py-2 bg-blue-500 text-white rounded"
-    //     >
-    //       Edit
-    //     </button>
-    //   )
-    // }
+    {
+      title: "Action", field: "SessionSerial", hozAlign: "center",
+      render: (row) => (
+        <div>
+          <DropdownDefault>
+            <button className="flex w-full items-center gap-2 rounded-sm px-4 py-1.5 text-left text-sm hover:bg-gray" onClick={()=>{handleOpenChangeClassModal(row.UserID)}}>
+              <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-transfer"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M20 10h-16l5.5 -6" /><path d="M4 14h16l-5.5 6" /></svg>
+              Change Class
+            </button>
+          </DropdownDefault>
+        </div>
+      )
+    }
   ];
   const columnsNotAdmitedStudent = [
     // { title: "User Id", field: "UserID", hozAlign: 'center' },
@@ -212,7 +219,7 @@ const AddStudent = ({ pageTitle }) => {
       )
     }
   ];
-// console.log(studentList);
+  // console.log(studentList);
 
   return (
     <div className="-translate-y-4 font-lato">
@@ -239,12 +246,12 @@ const AddStudent = ({ pageTitle }) => {
           </div>
         </div>
         {
-         studentList && studentList.data.length > 0 ? <SortableTable
-          columns={filter == 2 ? columnsNotAdmitedStudent : columnsAdmitedStudent}
-          data={filter == 2 ? userOnlyStudents : studentList.data}
-        /> : <Loading/>
+          studentList && studentList.data.length > 0 ? <SortableTable
+            columns={filter == 2 ? columnsNotAdmitedStudent : columnsAdmitedStudent}
+            data={filter == 2 ? userOnlyStudents : studentList.data}
+          /> : <Loading />
         }
-        
+
       </div>
     </div>
 

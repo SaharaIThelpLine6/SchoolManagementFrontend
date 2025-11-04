@@ -614,7 +614,7 @@ const useTranslate = () => {
     Calendar: 'ক্যালেন্ডার',
     Cancel: 'বাতিল করুন',
     Payment: 'পেমেন্ট',
-    'Pay Now': 'এখনই পেমেন্ট করুন',
+    'Pay Now': 'পেমেন্ট করুন',
     'Number of students by class': 'ক্লাস ভিত্তিক শিক্ষার্থীর সংখ্যা',
     'Presence and absence': 'উপস্থিতি ও অনুপস্থিতি',
     'Number of students according to the previous academic year':

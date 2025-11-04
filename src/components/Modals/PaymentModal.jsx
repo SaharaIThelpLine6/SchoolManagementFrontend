@@ -10,7 +10,8 @@ import DefaultSelect from '../Forms/DefaultSelect';
 import BkashLogo from '/banking/BKash.png';
 import CelfinLogo from '/banking/CellFin.png';
 import NagadLogo from '/banking/nagad-removebg-preview.png';
-
+import Cookies from "js-cookie";
+import { toast } from 'react-toastify';
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const PaymentModal = () => {
@@ -89,13 +90,20 @@ const PaymentModal = () => {
       const redirectMap = {
         bkash: payload.bkashURL,
         nagad: payload.nagadURL,
-        cellfin: payload.cellfinURL,
+        cellfin: payload.redirectUrl,
       };
 
       if (redirectMap[method]) {
+        if(method == "cellfin" && payload.token){
+          Cookies.set("CELLFIN_TOKEN", payload.token, { expires: 7 });
+          Cookies.set("CORRELATION_ID", payload.correlationId, { expires: 7 });
+          Cookies.set("TYPE", data.service, { expires: 7 });
+          Cookies.set("SIZE", data.size, { expires: 7 });
+        }
         window.location.href = redirectMap[method];
       } else {
         console.error('Unknown payment method:', method);
+        toast.error(`Unknown payment method: ${method}`)
       }
     } catch (error) {
       console.error('Payment failed:', error);
@@ -192,9 +200,6 @@ const PaymentModal = () => {
                     alt="bKash"
                     className="h-10 w-auto object-contain mb-1"
                   />
-                  <span className="text-xs text-pink-700 font-medium">
-                    bKash
-                  </span>
                 </button>
 
                 {/* Nagad */}
@@ -208,9 +213,6 @@ const PaymentModal = () => {
                     alt="Nagad"
                     className="h-10 w-auto object-contain mb-1"
                   />
-                  <span className="text-xs text-orange-700 font-medium">
-                    Nagad
-                  </span>
                 </button>
 
                 {/* CellFin */}
@@ -224,9 +226,6 @@ const PaymentModal = () => {
                     alt="CellFin"
                     className="h-10 w-auto object-contain mb-1"
                   />
-                  <span className="text-xs text-blue-700 font-medium">
-                    CellFin
-                  </span>
                 </button>
               </div>
             </div>

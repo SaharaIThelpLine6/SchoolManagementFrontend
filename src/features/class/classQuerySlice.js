@@ -21,6 +21,10 @@ export const classSlice = createApi({
       query: () => "view_class",
       providesTags: ["ClassList"],
     }),
+    getSubClassLisByClassID: builder.query({
+      query: (id) => `view_subclass/${id}`,
+      providesTags: ["SubClassList"],
+    }),
     getSubClassList: builder.query({
       query: () => "view_subclass",
       providesTags: ["SubClassList"],
@@ -42,6 +46,13 @@ export const classSlice = createApi({
         body: subjectData,
       }),
       invalidatesTags: ["Academic_Subjects"], 
+    }),
+    changeStudentClass: builder.mutation({
+      query: (studentData) => ({
+        url: "update_student_class",
+        method: "POST",
+        body: studentData,
+      }), 
     }),
 
     // PUT endpoint - Update academic subject
@@ -69,6 +80,8 @@ export const classSlice = createApi({
 export const {
   useGetClassListQuery,
   useGetSubClassListQuery,
+ useGetSubClassLisByClassIDQuery,
+ useChangeStudentClassMutation,
   useGetAcademicSubjectsQuery,
   useGetSubClasssQuery,
   useCreateAcademicSubjectMutation,

@@ -43,6 +43,7 @@ import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
 import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
+import ChangeStudentClass from '../view/accounting/ChangeStudentClass';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -184,6 +185,7 @@ const DefaultModal = () => {
                   <UserNamePasswordChangeModal id={id} changeType="password" />
                 )}
                 {modalType === 'OPEN_TODAYS_BALANCE' && <TodaysBalance />}
+                {modalType === 'CHANGE_STUDENT_CLASS' && <ChangeStudentClass userId={id} />}
               </div>
             )}
           </div>

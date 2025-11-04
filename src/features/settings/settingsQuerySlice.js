@@ -91,6 +91,9 @@ export const settingsSlice = createApi({
     getLoginUsers: builder.query({
       query: () => `login_users`,
     }),
+    getExamConditionsSettings: builder.query({
+      query: () => `exam_conditions`,
+    }),
   }),
 });
 
@@ -111,4 +114,5 @@ export const {
   useUpdateCodeSettingMutation,
   useGetCodeSettingsQuery,
   useGetLoginUsersQuery,
+  useGetExamConditionsSettingsQuery,
 } = settingsSlice;

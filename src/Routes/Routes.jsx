@@ -91,6 +91,8 @@ import MaritListForm from "../pages/public/MaritListForm";
 import MaritListResult from "../pages/public/MaritListResult";
 import ClassResultForm from "../pages/public/ClassResultForm";
 import ClassResult from "../pages/public/ClassResult";
+import CellfinPaymentConfirm from "../pages/CellfinPaymentConfirm";
+import ExamCondition from "../pages/ExamCondition";
 
 const router = createBrowserRouter([
   {
@@ -402,14 +404,8 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "point-v-condition",
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.exam_condition}
-                  >
-                    <PointVCondition pageTitle="Exam Fee Determine" />
-                  </RequirePermission>
-                ),
+                path: "exam-condition",
+                element: (<RequirePermission permissionId={permissionsDataList.exam_condition}><ExamCondition /></RequirePermission>),
               },
               {
                 path: "average-v-condition",
@@ -724,6 +720,14 @@ const router = createBrowserRouter([
                 element: <PaymentHistory pageTitle="Payment History" />,
               },
             ],
+          },
+          {
+            path: "/sucessUrl",
+            element: <CellfinPaymentConfirm />,
+          },
+          {
+            path: "/cancelUrl",
+            element: <PaymentConfirm />,
           },
           {
             path: "donation",

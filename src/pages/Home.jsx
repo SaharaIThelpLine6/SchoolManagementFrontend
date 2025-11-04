@@ -77,7 +77,7 @@ const Home = ({ pageTitle }) => {
         <CardDataStats
           title={translate("Total donor member")} // Total Guardian
           total={donerCount?.totalUsers ?? 0}
-          bgColor="bg-[#C3DCC2]" // Light green
+          bgColor="bg-[#C3DCC2]" 
           titleColor="text-[#0C9444]"
           iconColor="text-[#0C9444]" // Pass the color value without "text-" prefix
           isLoading={!donerCount}

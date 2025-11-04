@@ -6,7 +6,7 @@ import useTranslate from "../../utils/Translate";
 
 const CalendarComponent = () => {
   const translate = useTranslate();
-  const [value, setValue] = useState(new Date("2025-06-01"));
+  const [value, setValue] = useState(new Date());
 
   return (
     <div className="w-full max-w-[600px] h-[450px] 2xl:h-[550px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col">
@@ -17,10 +17,10 @@ const CalendarComponent = () => {
         <Calendar
           onChange={setValue}
           value={value}
-          className="w-full h-full p-2 rounded-md border-0"
+          className="w-full h-full p-2 border-0"
           tileClassName="custom-tile"
           // Add these props for better display
-          calendarType="gregory"
+          calendarType="islamic"
           minDetail="month"
           maxDetail="month"
         />

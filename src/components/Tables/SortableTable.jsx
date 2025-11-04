@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/themes/light.css";
 import bnBijoy2Unicode from "../../utils/conveter";
+import { useSelector } from "react-redux";
 
 
 
@@ -15,6 +16,8 @@ const SortableTable = ({
   onCheckboxChange, // নতুন প্রপ: চেকবক্স হ্যান্ডলার
 }) => {
   const [filters, setFilters] = useState({});
+  const { currectLanguage } = useSelector((state) => state.language);
+  const fontClass = currectLanguage === "bn" ? "font-SolaimanLipi" : "font-lato";
 
   const handleFilterChange = (field, value) => {
     setFilters((prevFilters) => ({
@@ -61,7 +64,7 @@ const alignClass = {
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
-        <thead className="text-xs sm:text-sm text-theme-dark font-SolaimanLipi uppercase bg-gray-50">
+        <thead className={`text-xs sm:text-sm text-theme-dark ${fontClass} uppercase bg-gray-50`}>
           <tr>
             {columns.map((column, index) => (
               <th
@@ -166,7 +169,7 @@ const alignClass = {
               {columns.map((column, cellIndex) => (
                 <td
                   key={cellIndex}
-                  className={`px-3 py-4 font-medium text-theme-dark whitespace-nowrap font-SolaimanLipi text-${
+                  className={`px-3 py-4 font-medium text-theme-dark whitespace-nowrap  ${fontClass} text-${
                     column.hozAlign || "start"
                   }`}
                 >

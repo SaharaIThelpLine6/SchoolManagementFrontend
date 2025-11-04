@@ -368,7 +368,7 @@ const AddStudentForm = ({ pageTitle }) => {
     try {
       if (editMode === 0) {
         const submitRes = await insertUserInfo(token, data);
-        console.log(submitRes);
+        // console.log(submitRes);
         navigate(0);
       } else if (editMode === 2) {
         const submitRes = await updateUserInfo(defaultData.UserID, data);

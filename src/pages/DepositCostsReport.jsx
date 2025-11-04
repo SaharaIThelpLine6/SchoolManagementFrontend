@@ -346,13 +346,13 @@ const DepositCostsReport = ({ pageTitle }) => {
     setSelectedReportComponent(component);
 
     // Trigger print only if data is available and component is set
-    // if (component && reportData && !isLoading) {
-    //   setTimeout(() => {
-    //     window.print();
-    //   }, 500);
-    // } else {
-    //   console.warn("Cannot print: Data not ready or component not set.");
-    // }
+    if (component && reportData && !isLoading) {
+      setTimeout(() => {
+        window.print();
+      }, 500);
+    } else {
+      console.warn("Cannot print: Data not ready or component not set.");
+    }
     // reset();
   };
 

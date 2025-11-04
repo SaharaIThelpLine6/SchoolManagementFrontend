@@ -53,7 +53,7 @@ const TableOne = () => {
              focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
              hover:border-gray-400 transition-colors"
           onChange={(e) => dispatch(setItemsPerPage(e.target.value))}
-          defaultValue="2"
+          defaultValue="20"
         >
           <option value="2">2</option>
           <option value="10">10</option>

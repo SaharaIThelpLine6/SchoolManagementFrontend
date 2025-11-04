@@ -22,7 +22,7 @@ const StudentsListPdf = ({ data, title }) => {
             <tr className="!bg-white">
               <th className="border border-black px-2 py-1 w-1/12">ক্রমিক</th>
               <th className="border border-black px-2 py-1 w-1/12">আইডি নং</th>
-              <th className="border border-black px-2 py-1">উজার নাম</th>
+              <th className="border border-black px-2 py-1">ইউজার নাম</th>
               <th className="border border-black px-2 py-1">পিতার নাম</th>
               <th className="border border-black px-2 py-1">মাতার নাম</th>
               <th className="border border-black px-2 py-1">মোবাইল</th>
@@ -43,7 +43,7 @@ const StudentsListPdf = ({ data, title }) => {
                   {student.FatherName}
                 </td>
                 <td className="border border-black px-2 py-1">
-                  {student.MontherName}
+                  {student.MotherName}
                 </td>
                 <td className="border border-black px-2 py-1">
                   {student.Mobile1}

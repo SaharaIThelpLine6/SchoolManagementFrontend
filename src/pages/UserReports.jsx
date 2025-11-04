@@ -35,7 +35,7 @@ const UserReports = ({ pageTitle }) => {
   const selectedReportID = useWatch({ control, name: "ReportID" });
 
   const showUserType = selectedReportID === 1;
-  const showVacationInputs = selectedReportID === 1;
+  const showVacationInputs = (selectedReportID === 1) || (selectedReportID === 3);
 
   const [queryParams, setQueryParams] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -96,13 +96,15 @@ const UserReports = ({ pageTitle }) => {
         (params[key] === undefined || params[key] === "") && delete params[key]
     );
 
-    if (selectedReportID === 3) {
-      setAdmission(10);
-      setQueryParams(null);
-    } else {
-      setAdmission(null);
+    // if (selectedReportID === 3) {
+    //   setAdmission(10);
+    //   setQueryParams(null);
+    // } else {
+    //   setAdmission(null);
+    //   setQueryParams(params);
+    // }
+       setAdmission(null);
       setQueryParams(params);
-    }
   };
 
   return (

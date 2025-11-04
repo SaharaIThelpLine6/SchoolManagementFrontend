@@ -50,12 +50,12 @@ export const menuData = [
         route: '/general-info/user-image',
         subMenu: false,
       },
-      {
-        id: '8',
-        name: 'Bulk Image',
-        route: '/general-info/bulk-image',
-        subMenu: false,
-      },
+      // {
+      //   id: '8',
+      //   name: 'Bulk Image',
+      //   route: '/general-info/bulk-image',
+      //   subMenu: false,
+      // },
       //   {
       //   id: "5",
       //   name: "Address Entry",
@@ -182,110 +182,110 @@ export const menuData = [
   //     },
   //   ],
   // },
-  // {
-  //   id: "4",
-  //   name: "Exam",
-  //   route: "/exam",
-  //   icon: "PiExam",
-  //   subMenu: [
-  //     {
-  //       id: "1",
-  //       name: "Exam Name",
-  //       route: "/exam",
-  //     },
-  //     {
-  //       id: "2",
-  //       name: "Exam Fee Determine",
-  //       route: "/exam/fee-determine",
-  //     },
-  //     {
-  //       id: "3",
-  //       name: "Point V: Condition",
-  //       route: "/exam/point-v-condition",
-  //     },
-  //     {
-  //       id: "4",
-  //       name: "Average V: Condition",
-  //       route: "/exam/average-v-condition",
-  //     },
-  //     {
-  //       id: "5",
-  //       name: "List of Candidates",
-  //       route: "/exam/list-of-candidates",
-  //     },
-  //     {
-  //       id: "6",
-  //       name: "Talent Condition",
-  //       route: "/exam/talent-condition",
-  //     },
-  //     {
-  //       id: "7",
-  //       name: "Admit Card",
-  //       route: "/exam/admit-card",
-  //     },
-  //     {
-  //       id: "8",
-  //       name: "Exam Routing Create",
-  //       route: "/exam/routing",
-  //     },
-  //     {
-  //       id: "9",
-  //       name: "Exam Report",
-  //       route: "/exam/report",
-  //     },
-  //   ],
-  // },
-  // {
-  //   id: "5",
-  //   name: "Result",
-  //   route: "/result",
-  //   icon: "GiGraduateCap",
-  //   subMenu: [
-  //     {
-  //       id: "1",
-  //       name: "Point Result Entry",
-  //       route: "/result",
-  //     },
-  //     {
-  //       id: "2",
-  //       name: "Point V: Report",
-  //       route: "/result/report",
-  //     },
-  //   ],
-  // },
-  // {
-  //   id: "6",
-  //   name: "Board Exam",
-  //   route: "/board-info",
-  //   icon: "UniversityIcon",
-  //   subMenu: [
-  //     {
-  //       id: "1",
-  //       name: "Madrasah Board Info",
-  //       route: "/board-info",
-  //     },
-  //     {
-  //       id: "2",
-  //       name: "Board Exam Name",
-  //       route: "/board-info/exam-name",
-  //     },
-  //     {
-  //       id: "3",
-  //       name: "Board Name",
-  //       route: "/board-info/name",
-  //     },
-  //     {
-  //       id: "4",
-  //       name: "Board Center Name",
-  //       route: "/board-info/center-name",
-  //     },
-  //     {
-  //       id: "5",
-  //       name: "Markas and Registration Fee Determine",
-  //       route: "/board-info/maskas-registration-fee-determine",
-  //     },
-  //   ],
-  // },
+  {
+    id: "4",
+    name: "Exam",
+    route: "/exam",
+    icon: "PiExam",
+    subMenu: [
+      {
+        id: "1",
+        name: "Exam Name",
+        route: "/exam",
+      },
+      {
+        id: "2",
+        name: "Exam Fee Determine",
+        route: "/exam/fee-determine",
+      },
+      {
+        id: "3",
+        name: "Exam Condition",
+        route: "/exam/exam-condition",
+      },
+      // {
+      //   id: "4",
+      //   name: "Average V: Condition",
+      //   route: "/exam/average-v-condition",
+      // },
+      {
+        id: "5",
+        name: "List of Candidates",
+        route: "/exam/list-of-candidates",
+      },
+      {
+        id: "6",
+        name: "Talent Condition",
+        route: "/exam/talent-condition",
+      },
+      {
+        id: "7",
+        name: "Admit Card",
+        route: "/exam/admit-card",
+      },
+      {
+        id: "8",
+        name: "Exam Routing Create",
+        route: "/exam/routing",
+      },
+      {
+        id: "9",
+        name: "Exam Report",
+        route: "/exam/report",
+      },
+    ],
+  },
+  {
+    id: "5",
+    name: "Result",
+    route: "/result",
+    icon: "GiGraduateCap",
+    subMenu: [
+      {
+        id: "1",
+        name: "Point Result Entry",
+        route: "/result",
+      },
+      {
+        id: "2",
+        name: "Point V: Report",
+        route: "/result/report",
+      },
+    ],
+  },
+  {
+    id: "6",
+    name: "Board Exam",
+    route: "/board-info",
+    icon: "UniversityIcon",
+    subMenu: [
+      {
+        id: "1",
+        name: "Madrasah Board Info",
+        route: "/board-info",
+      },
+      {
+        id: "2",
+        name: "Board Exam Name",
+        route: "/board-info/exam-name",
+      },
+      {
+        id: "3",
+        name: "Board Name",
+        route: "/board-info/name",
+      },
+      {
+        id: "4",
+        name: "Board Center Name",
+        route: "/board-info/center-name",
+      },
+      {
+        id: "5",
+        name: "Markas and Registration Fee Determine",
+        route: "/board-info/maskas-registration-fee-determine",
+      },
+    ],
+  },
   {
     id: '7',
     name: 'Darul Ikama',
@@ -362,19 +362,19 @@ export const menuData = [
       },
     ],
   },
-  // {
-  //   id: "9",
-  //   name: "Payment",
-  //   route: "/payment",
-  //   icon: "MdOutlinePayment",
-  //   subMenu: [
-  //     {
-  //       id: "1",
-  //       name: "Payment History",
-  //       route: "/payment-history",
-  //     },
-  //   ],
-  // },
+  {
+    id: "9",
+    name: "Payment",
+    route: "/payment",
+    icon: "MdOutlinePayment",
+    subMenu: [
+      {
+        id: "1",
+        name: "Payment History",
+        route: "/payment-history",
+      },
+    ],
+  },
 
   // {
   //   id: "10",
@@ -438,4 +438,5 @@ export const menuData = [
   //   icon: "IoMdHelp",
   //   subMenu: [],
   // },
+  
 ];
