@@ -1,23 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { Controller, FormProvider, useForm } from "react-hook-form";
-import Swal from "sweetalert2";
-import Flatpickr from "react-flatpickr";
-import { setPageName } from "../features/auth/authSlice";
-import useTranslate from "../utils/Translate";
-import bnBijoy2Unicode from "../utils/conveter";
-import SortableTable from "../components/Tables/SortableTable";
-import Loading from "../components/Loading/Loading";
-import DefaultInput from "../components/Forms/DefaultInput";
-import DefaultSelect from "../components/Forms/DefaultSelect";
-import Button from "../components/Button/Button";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Flatpickr from 'react-flatpickr';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+import Swal from 'sweetalert2';
+import Button from '../components/Button/Button';
+import DeleteButton from '../components/Button/DeleteButton';
+import EditButton from '../components/Button/EditButton';
+import DepositCostReport from '../components/Document/DepositCostReport';
+import DefaultInput from '../components/Forms/DefaultInput';
+import DefaultSelect from '../components/Forms/DefaultSelect';
+import Loading from '../components/Loading/Loading';
+import DefaultPagination from '../components/Pagination/DefaultPagination';
+import SortableTable from '../components/Tables/SortableTable';
+import SvgIcon from '../components/icons/SvgIcon';
+import { setPageName } from '../features/auth/authSlice';
 import {
   useDeleteInComeExpenseMutation,
   useGetAllSubLedgerQuery,
   useGetChartOFAccountQuery,
   useGetFundNamesQuery,
   useGetGeneralLedgersByFundAndCaidsQuery,
-  useGetGeneralLedgersQuery,
   useGetGLedgersQuery,
   useGetIncomeExpenseReportByOrderIdQuery,
   useGetPaymentTypeQuery,
@@ -25,17 +27,10 @@ import {
   useGetSubLedgerQuery,
   useGetTransactionOrdersQuery,
   usePostInComeExpenseMutation,
-  useUpdateInComeExpenseMutation,
-} from "../features/feeCollection/feeCollectionSlice";
-import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
-import BanglaDatePicker from "../components/Forms/DatePicker/BanglaDatePicker";
-import EditButton from "../components/Button/EditButton";
-import DeleteButton from "../components/Button/DeleteButton";
-import DefaultPagination from "../components/Pagination/DefaultPagination";
-import SvgIcon from "../components/icons/SvgIcon";
-import { useCallback } from "react";
-import { showModal } from "../utils/ModalControlar";
-import DepositCostReport from "../components/Document/DepositCostReport";
+  useUpdateInComeExpenseMutation
+} from '../features/feeCollection/feeCollectionSlice';
+import { showModal } from '../utils/ModalControlar';
+import useTranslate from '../utils/Translate';
 
 const PAGE_SIZE = 10;
 
@@ -67,19 +62,18 @@ const DepositCosts = ({ pageTitle }) => {
     LParticulars,
     LSLID,
   ] = watch([
-    "CAID",
-    "ledgerGLID",
-    "paymentGLID",
-    "Amount",
-    "FundID",
-    "VoucherNo",
-    "BookNo",
-    "TransactionDateEng",
-    "TransactionBanglaDate",
-    "LParticulars",
-    "LSLID",
+    'CAID',
+    'ledgerGLID',
+    'paymentGLID',
+    'Amount',
+    'FundID',
+    'VoucherNo',
+    'BookNo',
+    'TransactionDateEng',
+    'TransactionBanglaDate',
+    'LParticulars',
+    'LSLID',
   ]);
-
 
   const { data: fundNamesData } = useGetFundNamesQuery();
   const { data: gldgersData = [] } = useGetGLedgersQuery();
@@ -95,7 +89,6 @@ const DepositCosts = ({ pageTitle }) => {
   const { data: gSLData } = useGetSubLedgerQuery(ledgerGLID, {
     skip: !ledgerGLID,
   });
-
 
   const { data: pgSLData } = useGetSubLedgerQuery(paymentGLID, {
     skip: !paymentGLID,
@@ -124,8 +117,10 @@ const DepositCosts = ({ pageTitle }) => {
     loading: isTransactionOrdersReportDataLoading,
     isError: isTransactionOrdersReportDataError,
     refetch: refetchTransactionOrdersReportData,
-  } = useGetIncomeExpenseReportByOrderIdQuery({ orderid: reportOrderID }, { skip: !reportOrderID });
-
+  } = useGetIncomeExpenseReportByOrderIdQuery(
+    { orderid: reportOrderID },
+    { skip: !reportOrderID }
+  );
 
   // useEffect(() => {
   //   if (!isTransactionOrdersReportDataLoading && transactionOrdersReportData) {
@@ -135,7 +130,6 @@ const DepositCosts = ({ pageTitle }) => {
   //     }, 300);
   //   }
   // }, [isTransactionOrdersReportDataLoading, transactionOrdersReportData]);
-
 
   const [postInComeExpense] = usePostInComeExpenseMutation();
   const [updateInComeExpense] = useUpdateInComeExpenseMutation();
@@ -153,7 +147,7 @@ const DepositCosts = ({ pageTitle }) => {
   // Set default value when receiptNumber changes
   useEffect(() => {
     if (isSuccess && receiptNumber) {
-      setValue("VoucherNo", receiptNumber.receipt_num);
+      setValue('VoucherNo', receiptNumber.receipt_num);
     }
   }, [isSuccess, receiptNumber, setValue]);
 
@@ -173,50 +167,53 @@ const DepositCosts = ({ pageTitle }) => {
     if (!selectedOrder) return;
 
     // Set main transaction data
-    setValue("FundID", selectedOrder.FundID);
-    setValue("VoucherNo", selectedOrder.VoucherNo);
-    setValue("BookNo", selectedOrder.BookNo);
-    setValue("TransactionDateEng", selectedOrder.TransactionDateEng);
-    setValue("TransactionBanglaDate", selectedOrder.TransactionBanglaDate);
+    setValue('FundID', selectedOrder.FundID);
+    setValue('VoucherNo', selectedOrder.VoucherNo);
+    setValue('BookNo', selectedOrder.BookNo);
+    setValue('TransactionDateEng', selectedOrder.TransactionDateEng);
+    setValue('TransactionBanglaDate', selectedOrder.TransactionBanglaDate);
     setValue(
-      "LParticulars",
-      selectedOrder.AccBankTransaction?.Particulars || ""
+      'LParticulars',
+      selectedOrder.AccBankTransaction?.Particulars || ''
     );
 
     // Safely handle GL data
-    const targetStr = selectedOrder.AccBankTransaction?.SLID?.toString() || "";
+    const targetStr = selectedOrder.AccBankTransaction?.SLID?.toString() || '';
     const match = gldgersData?.find((i) =>
-      targetStr.startsWith(i?.GLID?.toString() || "")
+      targetStr.startsWith(i?.GLID?.toString() || '')
     );
 
     if (match) {
-      setValue("paymentGLID", match.GLID);
+      setValue('paymentGLID', match.GLID);
     }
     setTimeout(() => {
-      setValue("LSLID", selectedOrder.AccBankTransaction?.SLID || "");
+      setValue('LSLID', selectedOrder.AccBankTransaction?.SLID || '');
     }, 500);
 
     setDefaultData(selectedOrder.AccTransactionDetails || []);
   };
 
   const handleOpenModal = useCallback(() => {
-    showModal(translate("All Funds"), "OPEN_FUND");
+    showModal(translate('All Funds'), 'OPEN_FUND');
   }, [translate]);
 
   const handleSettingsModal = useCallback(() => {
-    showModal(translate("Accounting Report Settings"), "OPEN_ACC_REPORT_SETTINGS");
+    showModal(
+      translate('Accounting Report Settings'),
+      'OPEN_ACC_REPORT_SETTINGS'
+    );
   }, [translate]);
 
   const handleGeneralOpenModal = useCallback(() => {
-    showModal(translate("Generals"), "OPEN_GENERAL");
+    showModal(translate('Generals'), 'OPEN_GENERAL');
   }, [translate]);
 
   const handleBankInformationModal = useCallback(() => {
-    showModal(translate("Bank Information"), "OPEN_BANK_INFO");
+    showModal(translate('Bank Information'), 'OPEN_BANK_INFO');
   }, [translate]);
 
   const handleTodaysBalanceModal = useCallback(() => {
-    showModal(translate("Todays Balance"), "OPEN_TODAYS_BALANCE");
+    showModal(translate('Todays Balance'), 'OPEN_TODAYS_BALANCE');
   }, [translate]);
 
   // Data Create Exam Fee Setting
@@ -229,9 +226,8 @@ const DepositCosts = ({ pageTitle }) => {
         SL: editIdDefaultData ? editIdDefaultData : 1 + defaultData.length,
       };
 
-
       if (editIdDefaultData) {
-        console.log(payload, "payload edit data");
+        console.log(payload, 'payload edit data');
         setDefaultData((prev) =>
           prev.map((item) => (item.SL === editIdDefaultData ? payload : item))
         );
@@ -241,8 +237,8 @@ const DepositCosts = ({ pageTitle }) => {
           const exists = prev.some((item) => item.SLID === payload.SLID);
           if (exists) {
             Swal.fire({
-              icon: "error",
-              title: "Duplicate Entry",
+              icon: 'error',
+              title: 'Duplicate Entry',
               text: `SLID ${payload.SLID} already exists!`,
             });
             return prev; // prevent insertion
@@ -252,43 +248,43 @@ const DepositCosts = ({ pageTitle }) => {
       }
 
       Swal.fire({
-        icon: "success",
-        title: "সফলভাবে সংরক্ষণ হয়েছে",
-        text: "Exam Fee Setting সফলভাবে সংরক্ষিত হয়েছে।",
+        icon: 'success',
+        title: 'সফলভাবে সংরক্ষণ হয়েছে',
+        text: 'Exam Fee Setting সফলভাবে সংরক্ষিত হয়েছে।',
       }).then(() => {
         methods.reset({
           ...methods.getValues(),
-          Particulars: "",
-          Amount: "",
+          Particulars: '',
+          Amount: '',
         });
       });
     } catch (error) {
-      const errMsg = error?.data?.message || "অজানা একটি ত্রুটি ঘটেছে।";
+      const errMsg = error?.data?.message || 'অজানা একটি ত্রুটি ঘটেছে।';
       Swal.fire({
-        icon: "error",
-        title: "ত্রুটি ঘটেছে!",
+        icon: 'error',
+        title: 'ত্রুটি ঘটেছে!',
         text: errMsg,
       });
-      console.error("Exam Fee Setting Error:", error);
+      console.error('Exam Fee Setting Error:', error);
     }
   };
 
   // Delete function
   const handleDeleteDefaultData = (id) => {
     Swal.fire({
-      title: "আপনি কি নিশ্চিত?",
-      text: "এই ডেটা মুছে ফেলা হবে!",
-      icon: "warning",
+      title: 'আপনি কি নিশ্চিত?',
+      text: 'এই ডেটা মুছে ফেলা হবে!',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "হ্যাঁ, মুছে ফেলুন",
-      cancelButtonText: "না, বাতিল করুন",
+      confirmButtonText: 'হ্যাঁ, মুছে ফেলুন',
+      cancelButtonText: 'না, বাতিল করুন',
     }).then((result) => {
       if (result.isConfirmed) {
         setDefaultData((prev) => prev.filter((item) => item.SL !== id));
         Swal.fire(
-          "মুছে ফেলা হয়েছে!",
-          "ডেটা সফলভাবে মুছে ফেলা হয়েছে।",
-          "success"
+          'মুছে ফেলা হয়েছে!',
+          'ডেটা সফলভাবে মুছে ফেলা হয়েছে।',
+          'success'
         );
       }
     });
@@ -296,31 +292,31 @@ const DepositCosts = ({ pageTitle }) => {
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: "আপনি কি নিশ্চিত?",
-      text: "এই ডেটা মুছে ফেলা হবে!",
-      icon: "warning",
+      title: 'আপনি কি নিশ্চিত?',
+      text: 'এই ডেটা মুছে ফেলা হবে!',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "হ্যাঁ, মুছে ফেলুন",
-      cancelButtonText: "না, বাতিল করুন",
+      confirmButtonText: 'হ্যাঁ, মুছে ফেলুন',
+      cancelButtonText: 'না, বাতিল করুন',
     });
 
     if (result.isConfirmed) {
       try {
         await deleteInComeExpense(id).unwrap();
         Swal.fire(
-          "মুছে ফেলা হয়েছে!",
-          "ডেটা সফলভাবে মুছে ফেলা হয়েছে।",
-          "success"
+          'মুছে ফেলা হয়েছে!',
+          'ডেটা সফলভাবে মুছে ফেলা হয়েছে।',
+          'success'
         );
         refetch();
         refetchGLData();
       } catch (error) {
         Swal.fire(
-          "ত্রুটি!",
-          "ডেটা মুছে ফেলা যায়নি। আবার চেষ্টা করুন।",
-          "error"
+          'ত্রুটি!',
+          'ডেটা মুছে ফেলা যায়নি। আবার চেষ্টা করুন।',
+          'error'
         );
-        console.error("Delete Error:", error);
+        console.error('Delete Error:', error);
       }
     }
   };
@@ -331,7 +327,7 @@ const DepositCosts = ({ pageTitle }) => {
 
     // existing null/undefined না হলে compare করা যাবে
     const match = allLedgersData?.find((i) =>
-      existing?.SLID?.toString().startsWith(i?.GLID?.toString() || "")
+      existing?.SLID?.toString().startsWith(i?.GLID?.toString() || '')
     );
 
     if (existing) {
@@ -343,9 +339,9 @@ const DepositCosts = ({ pageTitle }) => {
         Amount: existing.Amount,
       });
 
-      setValue("ledgerGLID", match.GLID);
+      setValue('ledgerGLID', match.GLID);
       setTimeout(() => {
-        setValue("SLID", existing.SLID);
+        setValue('SLID', existing.SLID);
       }, 500);
     }
   };
@@ -354,9 +350,12 @@ const DepositCosts = ({ pageTitle }) => {
     setReportOrderID(id);
   };
 
-
-  useEffect(() => {   
-    if (!isTransactionOrdersReportDataLoading && transactionOrdersReportData && transactionOrdersReportData.length > 0) {
+  useEffect(() => {
+    if (
+      !isTransactionOrdersReportDataLoading &&
+      transactionOrdersReportData &&
+      transactionOrdersReportData.length > 0
+    ) {
       setTimeout(() => {
         window.print();
         setReportOrderID(9999999);
@@ -364,18 +363,36 @@ const DepositCosts = ({ pageTitle }) => {
     }
   }, [isTransactionOrdersReportDataLoading, transactionOrdersReportData]);
 
-
   // Table Data Columns
   const columns = [
     {
-      title: translate("Action"),
-      hozAlign: "center",
+      title: translate('Action'),
+      hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
           <EditButton onClick={() => handleEdit(row.OrderID)} />
           {/* <DeleteButton onClick={() => handleDelete(row.OrderID)} /> */}
-          <button className="p-2 flex justify-center items-center text-white bg-yellow-500 hover:bg-yellow-600 rounded-md" onClick={() => handlePrint(row.OrderID)}>
-            <svg  xmlns="http://www.w3.org/2000/svg"  width={20}  height={20}  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  strokeWidth={2}  strokeLinecap="round"  strokeLinejoin="round"  className="icon icon-tabler icons-tabler-outline icon-tabler-printer"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" /><path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" /><path d="M7 13m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z" /></svg>
+          <button
+            className="p-2 flex justify-center items-center text-white bg-yellow-500 hover:bg-yellow-600 rounded-md"
+            onClick={() => handlePrint(row.OrderID)}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={20}
+              height={20}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="icon icon-tabler icons-tabler-outline icon-tabler-printer"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" />
+              <path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" />
+              <path d="M7 13m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z" />
+            </svg>
           </button>
         </div>
       ),
@@ -383,38 +400,38 @@ const DepositCosts = ({ pageTitle }) => {
     {
       title: (
         <div className="flex items-center justify-center gap-1">
-          <SvgIcon name={"GrDrag"} size={16} />
+          <SvgIcon name={'GrDrag'} size={16} />
         </div>
       ),
-      hozAlign: "center",
+      hozAlign: 'center',
       render: (row) => <>{row.SL}</>,
     },
     {
-      title: translate("Order"),
-      hozAlign: "center",
+      title: translate('Order'),
+      hozAlign: 'center',
       render: (row) => <>{row.OrderID}</>,
     },
     {
-      title: translate("Voucher/Bill"),
-      hozAlign: "center",
+      title: translate('Voucher/Bill'),
+      hozAlign: 'center',
       render: (row) => <>{row.VoucherNo}</>,
     },
     {
-      title: translate("Book No"),
-      hozAlign: "center",
+      title: translate('Book No'),
+      hozAlign: 'center',
       render: (row) => <>{row.BookNo}</>,
     },
     {
-      title: translate("Date"),
-      hozAlign: "center",
+      title: translate('Date'),
+      hozAlign: 'center',
       render: (row) => <>{row.TransactionDateEng}</>,
     },
   ];
 
   const defaultColumns = [
     {
-      title: translate("Action"),
-      hozAlign: "center",
+      title: translate('Action'),
+      hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
           <EditButton onClick={() => handleEditOpenModalDefaultData(row.SL)} />
@@ -428,25 +445,25 @@ const DepositCosts = ({ pageTitle }) => {
     {
       title: (
         <div className="flex items-center justify-center gap-1">
-          <SvgIcon name={"GrDrag"} size={16} />
+          <SvgIcon name={'GrDrag'} size={16} />
         </div>
       ),
-      hozAlign: "center",
+      hozAlign: 'center',
       render: (row) => <>{row?.SL}</>,
     },
     {
-      title: translate("SLID"),
-      hozAlign: "center",
+      title: translate('SLID'),
+      hozAlign: 'center',
       render: (row) => <>{row?.SLID}</>,
     },
     {
-      title: translate("Particulars"),
-      hozAlign: "center",
+      title: translate('Particulars'),
+      hozAlign: 'center',
       render: (row) => <>{row?.Particulars}</>,
     },
     {
-      title: translate("Amount"),
-      hozAlign: "center",
+      title: translate('Amount'),
+      hozAlign: 'center',
       render: (row) => <>{row?.Amount}</>,
     },
   ];
@@ -470,39 +487,38 @@ const DepositCosts = ({ pageTitle }) => {
       };
       console.log(payload);
 
-
       if (editId) {
-        console.log(payload, "payload edit data");
+        console.log(payload, 'payload edit data');
         await updateInComeExpense({ id: editId, data: payload }).unwrap();
       } else {
         await postInComeExpense(payload).unwrap();
       }
 
       Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Data submitted successfully!",
+        icon: 'success',
+        title: 'Success',
+        text: 'Data submitted successfully!',
         timer: 2000,
         showConfirmButton: false,
       });
 
       refetch();
       methods.reset({
-        FundID: "",
-        VoucherNo: methods.getValues("VoucherNo"),
-        BookNo: "",
-        TransactionDateEng: "",
-        TransactionBanglaDate: "",
-        CAID: methods.getValues("CAID"),
+        FundID: '',
+        VoucherNo: methods.getValues('VoucherNo'),
+        BookNo: '',
+        TransactionDateEng: '',
+        TransactionBanglaDate: '',
+        CAID: methods.getValues('CAID'),
         gledger: [],
       });
       setDefaultData([]);
     } catch (error) {
-      console.error("Submission Error:", error);
+      console.error('Submission Error:', error);
       Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "Failed to submit data. Please try again.",
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to submit data. Please try again.',
       });
     }
   };
@@ -513,11 +529,29 @@ const DepositCosts = ({ pageTitle }) => {
       <div className="flex justify-between items-center hidden_in_print">
         <div className="flex items-center gap-2">
           <h3 className="text-lg md:text-xl font-bold">
-            {translate("Accounting")}
+            {translate('Accounting')}
           </h3>
-          <button type="button" className="flex items-center justify-center transition-colors duration-150 text-blue-600" onClick={handleSettingsModal}>
-
-            <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-settings text-dark"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" /></svg>
+          <button
+            type="button"
+            className="flex items-center justify-center transition-colors duration-150 text-blue-600"
+            onClick={handleSettingsModal}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={24}
+              height={24}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="icon icon-tabler icons-tabler-outline icon-tabler-settings text-dark"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
+              <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+            </svg>
           </button>
         </div>
         <button type="button" onClick={handleTodaysBalanceModal}>
@@ -526,8 +560,11 @@ const DepositCosts = ({ pageTitle }) => {
       </div>
 
       <FormProvider {...methods}>
-        <form className="w-full hidden_in_print" onSubmit={handleSubmit(onSubmit)}>
-          <input type="hidden" {...methods.register("ID")} />
+        <form
+          className="w-full hidden_in_print"
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <input type="hidden" {...methods.register('ID')} />
 
           {/* Top Section - 4 responsive columns */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 p-4 bg-white rounded-lg shadow-sm">
@@ -540,7 +577,7 @@ const DepositCosts = ({ pageTitle }) => {
                   nameField="FundName"
                   registerKey="FundID"
                   unicode={true}
-                  require={"Fund is required!"}
+                  require={'Fund is required!'}
                 />
               </div>
               <Button
@@ -550,9 +587,8 @@ const DepositCosts = ({ pageTitle }) => {
                 onClick={handleOpenModal}
               >
                 <SvgIcon name="FaPlus" size={16} />
-              </Button>{" "}
+              </Button>{' '}
             </div>
-
             <DefaultSelect
               label="Deposit/Cost"
               options={chartOfAccountData ?? []}
@@ -560,9 +596,8 @@ const DepositCosts = ({ pageTitle }) => {
               nameField="ChartOfAcName"
               registerKey="CAID"
               unicode={true}
-              require={"Deposit/Cost is required!"}
+              require={'Deposit/Cost is required!'}
             />
-
             <div className="flex items-end gap-3">
               <div className="flex-1">
                 <DefaultSelect
@@ -572,7 +607,7 @@ const DepositCosts = ({ pageTitle }) => {
                   nameField="GlName"
                   registerKey="ledgerGLID"
                   unicode={true}
-                  require={"General Ledger is required!"}
+                  require={'General Ledger is required!'}
                 />
               </div>
 
@@ -585,11 +620,46 @@ const DepositCosts = ({ pageTitle }) => {
                 <SvgIcon name="FaPlus" size={16} />
               </Button>
             </div>
+            <DefaultSelect
+              label="Sectors"
+              options={gSLData ?? []}
+              valueField="SLID"
+              nameField="SlName"
+              registerKey="SLID"
+              unicode={true}
+              require={'Sectors is required!'}
+            />
 
+            <DefaultInput
+              label="Voucher/Bill"
+              type="text"
+              registerKey={'VoucherNo'}
+              disable
+            />
+            <DefaultInput
+              label="Ledger No"
+              type="number"
+              registerKey={'BookNo'}
+              placeholder={translate('Enter Book Id ...')}
+            />
+            <DefaultInput
+              label="Description"
+              placeholder={translate('Enter description')}
+              registerKey="Particulars"
+            />
+            <DefaultInput
+              label="Amount"
+              type="text"
+              registerKey={'Amount'}
+              placeholder={translate('Enter Amount number ...')}
+              require={'Book is required!'}
+            />
             <div>
-
-              <label htmlFor={"TransactionDateEng"} className={`text-black font-SolaimanLipi w-1/4 min-w-[100px] mb-0 text-end`}>
-                {translate("English Date")} :
+              <label
+                htmlFor={'TransactionDateEng'}
+                className={`text-black font-SolaimanLipi w-1/4 min-w-[100px] mb-0 text-end`}
+              >
+                {translate('English Date')} :
               </label>
               {/* Date Picker */}
               <div className="w-full">
@@ -600,7 +670,7 @@ const DepositCosts = ({ pageTitle }) => {
                   render={({ field }) => (
                     <Flatpickr
                       options={{
-                        dateFormat: "Y-m-d",
+                        dateFormat: 'Y-m-d',
                       }}
                       className="w-full rounded border-[1.5px] border-stroke bg-white py-1 px-4 text-black outline-none transition
                         focus:border-custom-focus active:border-custom-focus
@@ -615,85 +685,51 @@ const DepositCosts = ({ pageTitle }) => {
                     {methods.formState.errors.TransactionDateEng.message}
                   </span>
                 )}
-
               </div>
             </div>
-
-            <DefaultInput
-              label="Voucher/Bill"
-              type="text"
-              registerKey={"VoucherNo"}
-              disable
-            />
-            <DefaultInput
-              label="Ledger No"
-              type="number"
-              registerKey={"BookNo"}
-              placeholder={translate("Enter Book Id ...")}
-            />
-
-            <DefaultSelect
-              label="Payment System"
-              nameField={"GlName"}
-              registerKey="paymentGLID"
-              valueField={"GLID"}
-              options={paymentTypesData ?? []}
-              type={"number"}
-              require={"Payment System is required!"}
-              unicode={true}
-            />
-            <DefaultSelect
-              label={"Account"}
-              nameField={"SlName"}
-              registerKey={"LSLID"}
-              valueField={"SLID"}
-              options={pgSLData ?? []}
-              type={"number"}
-              require={"Account is required!"}
-              unicode={true}
-            />
-            
             <div className="flex items-end gap-3 flex-1">
               <DefaultInput
                 label="Payment Comments"
-                placeholder={translate("Enter comments")}
+                placeholder={translate('Enter comments')}
                 registerKey="LParticulars"
               />
-              <Button type="button" className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#007af7] text-white hover:bg-[#0066cc] transition-colors duration-150" onClick={handleBankInformationModal}>
+              <Button
+                type="button"
+                className="flex items-center justify-center w-10 h-10 rounded-lg bg-[#007af7] text-white hover:bg-[#0066cc] transition-colors duration-150"
+                onClick={handleBankInformationModal}
+              >
                 <SvgIcon name="FaPlus" size={16} />
               </Button>
             </div>
-
             <div className="hidden sm:block"></div>
             <div className="hidden sm:block"></div>
             <div className="hidden sm:block"></div>
             <DefaultSelect
-              label="Sectors"
-              options={gSLData ?? []}
-              valueField="SLID"
-              nameField="SlName"
-              registerKey="SLID"
+              label="Payment System"
+              nameField={'GlName'}
+              registerKey="paymentGLID"
+              valueField={'GLID'}
+              options={paymentTypesData ?? []}
+              type={'number'}
+              require={'Payment System is required!'}
               unicode={true}
-              require={"Sectors is required!"}
             />
-            <DefaultInput
-              label="Description"
-              placeholder={translate("Enter description")}
-              registerKey="Particulars"
-            />
-            <DefaultInput
-              label="Amount"
-              type="text"
-              registerKey={"Amount"}
-              placeholder={translate("Enter Amount number ...")}
-              require={"Book is required!"}
+            <DefaultSelect
+              label={'Account'}
+              nameField={'SlName'}
+              registerKey={'LSLID'}
+              valueField={'SLID'}
+              options={pgSLData ?? []}
+              type={'number'}
+              require={'Account is required!'}
+              unicode={true}
             />
             <div className="flex items-center justify-start w-full pt-6">
               <Button
                 type="submit"
                 className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
               >
-                {translate("Add")}
+                {translate('Add')}
               </Button>
             </div>
           </div>
@@ -717,7 +753,7 @@ const DepositCosts = ({ pageTitle }) => {
           onClick={handleSubmitButton}
           className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
         >
-          {translate("Submit")}
+          {translate('Submit')}
         </Button>
       </div>
 
@@ -729,7 +765,7 @@ const DepositCosts = ({ pageTitle }) => {
         {/* Error State */}
         {isError && (
           <div className="text-red-500 text-center py-4">
-            {translate("Failed to load exam fee settings. Please try again.")}
+            {translate('Failed to load exam fee settings. Please try again.')}
           </div>
         )}
 
@@ -758,14 +794,13 @@ const DepositCosts = ({ pageTitle }) => {
           !isError &&
           (!paginatedData || paginatedData.length === 0) && (
             <div className="text-center py-8 text-gray-500">
-              {translate("No data found.")}
+              {translate('No data found.')}
             </div>
           )}
       </div>
-        {
-         transactionOrdersReportData && transactionOrdersReportData.length > 0 ? <DepositCostReport orderDetails={transactionOrdersReportData} /> : null
-        }
-        
+      {transactionOrdersReportData && transactionOrdersReportData.length > 0 ? (
+        <DepositCostReport orderDetails={transactionOrdersReportData} />
+      ) : null}
     </div>
   );
 };

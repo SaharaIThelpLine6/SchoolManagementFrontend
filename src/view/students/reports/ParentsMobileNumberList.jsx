@@ -1,9 +1,9 @@
-import { Buffer } from "buffer";
-import { useEffect, useState } from "react";
-import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
-import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
-import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
-import bnBijoy2Unicode from "../../../utils/conveter";
+import { Buffer } from 'buffer';
+import { useEffect, useState } from 'react';
+import { useGetSubClassListQuery } from '../../../features/class/classQuerySlice';
+import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
+import { useGetInstitutionInfoQuery } from '../../../features/settings/settingsQuerySlice';
+import bnBijoy2Unicode from '../../../utils/conveter';
 
 const ParentsMobileNumberList = ({ reportData, SubClassID, SessionID }) => {
   console.log(reportData, 'reportData');
@@ -23,15 +23,14 @@ const ParentsMobileNumberList = ({ reportData, SubClassID, SessionID }) => {
   useEffect(() => {
     if (instutionInfo?.Logo?.data) {
       const buffer = Buffer.from(instutionInfo.Logo.data);
-      const base64String = buffer.toString("base64");
+      const base64String = buffer.toString('base64');
       const imageSrc = `data:image/png;base64,${base64String}`;
       setLogo(imageSrc);
     }
   }, [instutionInfo]);
 
   return (
-       <div className="font-bangla  p-4 bg-white text-xs">
-
+    <div className="font-bangla  p-4 bg-white text-xs">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4 sm:gap-8 bg-white">
         {/* Logo - Centered on mobile, left-aligned on desktop */}
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
@@ -74,9 +73,13 @@ const ParentsMobileNumberList = ({ reportData, SubClassID, SessionID }) => {
             শিক্ষাবর্ষ : {bnBijoy2Unicode(sessionData?.SessionName)}
           </div>
           <div className="text-sm sm:text-base font-medium text-black">
-            প্রিন্ট তারিখ:{" "}
-            <span className="text-gray-600">
-              {new Date().toLocaleDateString("bn-BD")}
+            প্রিন্ট তারিখ:
+            <span>
+              {new Date().toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+              })}
             </span>
           </div>
         </div>
@@ -113,18 +116,19 @@ const ParentsMobileNumberList = ({ reportData, SubClassID, SessionID }) => {
                 <td className="border border-black p-2 text-center bg-white">
                   {bnBijoy2Unicode(row.FatherName)}
                 </td>
-                <td
-                  className="border border-black p-2 text-center bg-white"
-                  colSpan={2}
-                >
-                  {row.Mobile1} {"--->"} {"brother"}
+                <td className="border border-black p-2 text-center bg-white">
+                  {row.Mobile1}
+                </td>
+                <td className="border border-black p-2 text-center bg-white">
+                  {row.Relationship1}
                 </td>
 
-                <td
-                  className="border border-black p-2 text-center bg-white"
-                  colSpan={2}
-                >
-                  {row.Mobile2} {"--->"} {"sister"}
+                <td className="border border-black p-2 text-center bg-white">
+                  {row.Mobile2}
+                </td>
+
+                <td className="border border-black p-2 text-center bg-white">
+                  {row.Relationship2}
                 </td>
               </tr>
             ))}
