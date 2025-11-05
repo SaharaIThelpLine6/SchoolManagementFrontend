@@ -129,6 +129,7 @@ const AddEditBook = ({ id }) => {
             <DefaultInput
               label={translate('Arabic Name')}
               registerKey="ArabicSubject"
+              isRtl={true}
             />
           </div>
 

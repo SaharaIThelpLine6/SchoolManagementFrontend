@@ -18,7 +18,8 @@ const DefaultInput = ({
   labelPosition = 'top',
   validate,
   defaultValue = '',
-  showError = false, // নতুন prop যোগ করা হয়েছে
+  showError = false, 
+  isRtl = false,
 }) => {
   const {
     register,
@@ -104,7 +105,7 @@ const DefaultInput = ({
                         shouldShowError && errors[registerKey]
                           ? 'placeholder:text-red-400 border-red-400'
                           : ''
-                      }`}
+                      } ${isRtl ? 'direction-rtl' : ''}`}
           {...register(registerKey, {
             required: require ? 'এই ফিল্ডটি প্রয়োজনীয়' : false,
             ...(type === 'number' && {
