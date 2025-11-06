@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
-import EditButton from "../../components/Button/EditButton";
-import DeleteButton from "../../components/Button/DeleteButton";
+import { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
+import DeleteButton from '../../components/Button/DeleteButton';
+import EditButton from '../../components/Button/EditButton';
+import Loading from '../../components/Loading/Loading';
 import {
   useDeleteStudentFeeSettingsMutation,
   useGetStudentFeeSettingsQuery,
-} from "../../features/feeCollection/feeCollectionSlice";
-import bnBijoy2Unicode from "../../utils/conveter";
-import Swal from "sweetalert2";
-import useTranslate from "../../utils/Translate";
-import Loading from "../../components/Loading/Loading";
+} from '../../features/feeCollection/feeCollectionSlice';
+import bnBijoy2Unicode from '../../utils/conveter';
+import useTranslate from '../../utils/Translate';
 
 const FeeSettingTable = ({ setEditData, editId, filter }) => {
-  console.log(filter, "filter");
+  console.log(filter, 'filter');
   const translate = useTranslate();
   const [selectedRows, setSelectedRows] = useState([]);
   const [allSelected, setAllSelected] = useState(false);
@@ -59,31 +59,41 @@ const FeeSettingTable = ({ setEditData, editId, filter }) => {
   // Single delete with SweetAlert
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "আপনি কি এই ফি সেটিং মুছে ফেলতে চান?",
-      icon: "warning",
+      title: 'Are you sure?',
+      text: 'আপনি কি এই ফি সেটিং মুছে ফেলতে চান?',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "হ্যাঁ, মুছে ফেলুন",
-      cancelButtonText: "বাতিল করুন",
+      confirmButtonText: 'হ্যাঁ, মুছে ফেলুন',
+      cancelButtonText: 'বাতিল করুন',
     });
 
     if (result.isConfirmed) {
       try {
-        await deleteStudentSettings(id).unwrap();
+        // 🧩 API call — Send body as { SFSID: id }
+        const response = await deleteStudentSettings({ SFSID: id }).unwrap();
+
+        // 🧹 Update UI state
         setSelectedRows((prev) => prev.filter((rowId) => rowId !== id));
 
         Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          text: "ডাটা সফলভাবে মুছে ফেলা হয়েছে।",
-          confirmButtonText: "ঠিক আছে",
+          icon: 'success',
+          title: 'Deleted!',
+          text: response?.message || 'ডাটা সফলভাবে মুছে ফেলা হয়েছে।',
+          confirmButtonText: 'ঠিক আছে',
         });
       } catch (error) {
+        console.log(error, 'error');
+
+        // 🔍 যদি backend থেকে custom error আসে
+        const errorMsg =
+          error?.data?.error ||
+          'ডাটা মুছে ফেলা যায়নি। অনুগ্রহ করে পরে আবার চেষ্টা করুন।';
+
         Swal.fire({
-          icon: "error",
-          title: "Error!",
-          text: "ডাটা মুছে ফেলা যায়নি। আবার চেষ্টা করুন।",
-          confirmButtonText: "ঠিক আছে",
+          icon: 'error',
+          title: 'Error!',
+          text: errorMsg,
+          confirmButtonText: 'ঠিক আছে',
         });
       }
     }
@@ -94,12 +104,12 @@ const FeeSettingTable = ({ setEditData, editId, filter }) => {
     if (selectedRows.length === 0) return;
 
     const result = await Swal.fire({
-      title: "Are you sure?",
+      title: 'Are you sure?',
       text: `আপনি কি ${selectedRows.length}টি ফি সেটিং মুছে ফেলতে চান?`,
-      icon: "warning",
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "হ্যাঁ, মুছে ফেলুন",
-      cancelButtonText: "বাতিল করুন",
+      confirmButtonText: 'হ্যাঁ, মুছে ফেলুন',
+      cancelButtonText: 'বাতিল করুন',
     });
 
     if (result.isConfirmed) {
@@ -108,29 +118,31 @@ const FeeSettingTable = ({ setEditData, editId, filter }) => {
         setSelectedRows([]);
         setAllSelected(false);
         Swal.fire({
-          icon: "success",
-          title: "Deleted!",
-          text: "ডাটা সফলভাবে মুছে ফেলা হয়েছে।",
-          confirmButtonText: "ঠিক আছে",
+          icon: 'success',
+          title: 'Deleted!',
+          text: 'ডাটা সফলভাবে মুছে ফেলা হয়েছে।',
+          confirmButtonText: 'ঠিক আছে',
         });
       } catch (error) {
         Swal.fire({
-          icon: "error",
-          title: "Error!",
-          text: "ডাটা মুছে ফেলা যায়নি। আবার চেষ্টা করুন।",
-          confirmButtonText: "ঠিক আছে",
+          icon: 'error',
+          title: 'Error!',
+          text: 'ডাটা মুছে ফেলা যায়নি। আবার চেষ্টা করুন।',
+          confirmButtonText: 'ঠিক আছে',
         });
       }
     }
   };
   if (isFetching) {
-    return <Loading/>;
+    return <Loading />;
   }
 
   if (error) {
-    return <div className="flex justify-center items-center">
-      <p>No data found!</p>
-    </div>;
+    return (
+      <div className="flex justify-center items-center">
+        <p>No data found!</p>
+      </div>
+    );
   }
   return (
     <div className="bg-white py-4 rounded-lg shadow-sm">
@@ -157,49 +169,49 @@ const FeeSettingTable = ({ setEditData, editId, filter }) => {
                 />
               </th>
               <th className="p-3 border-b border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider w-32">
-                {translate("Action")}
+                {translate('Action')}
               </th>
               <th className="p-3 border-b whitespace-nowrap border-gray-200 text-left text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[150px]">
-                {translate("Class Name")}
+                {translate('Class Name')}
               </th>
               <th className="p-3 border-b whitespace-nowrap border-gray-200 text-left text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[120px]">
-                {translate("Fee Name")}
+                {translate('Fee Name')}
               </th>
               <th className="p-3 whitespace-nowrap border-b border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-                {translate("Male Residence")} <br /> {translate("New")}
+                {translate('Male Residence')} <br /> {translate('New')}
               </th>
               <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-                {translate("Male Residence")} <br /> {translate("Old")}
+                {translate('Male Residence')} <br /> {translate('Old')}
               </th>
               <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-                {translate("Male Non-resident")} <br /> {translate("New")}
+                {translate('Male Non-resident')} <br /> {translate('New')}
               </th>
               <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-                {translate("Male Non-resident")} <br /> {translate("Old")}
+                {translate('Male Non-resident')} <br /> {translate('Old')}
               </th>
               <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-                {translate("Male Daycare")} <br /> {translate("New")}
+                {translate('Male Daycare')} <br /> {translate('New')}
               </th>
               <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-                {translate("Male Daycare")} <br /> {translate("Old")}
+                {translate('Male Daycare')} <br /> {translate('Old')}
               </th>
               <th className="p-3 whitespace-nowrap border-b border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-                {translate("Female Residence")} <br /> {translate("New")}
+                {translate('Female Residence')} <br /> {translate('New')}
               </th>
               <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-                {translate("Female Residence")} <br /> {translate("Old")}
+                {translate('Female Residence')} <br /> {translate('Old')}
               </th>
               <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-                {translate("Female Non-resident")} <br /> {translate("New")}
+                {translate('Female Non-resident')} <br /> {translate('New')}
               </th>
               <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-                {translate("Female Non-resident")} <br /> {translate("Old")}
+                {translate('Female Non-resident')} <br /> {translate('Old')}
               </th>
               <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-                {translate("Female Daycare")} <br /> {translate("New")}
+                {translate('Female Daycare')} <br /> {translate('New')}
               </th>
               <th className="p-3 border-b whitespace-nowrap border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
-                {translate("Female Daycare")} <br /> {translate("Old")}
+                {translate('Female Daycare')} <br /> {translate('Old')}
               </th>
               <th className="p-3 border-b border-gray-200 text-center text-sm font-medium text-gray-500 uppercase tracking-wider min-w-[100px]">
                 SFSID
@@ -212,8 +224,8 @@ const FeeSettingTable = ({ setEditData, editId, filter }) => {
                 key={row.SFSID}
                 className={`${
                   selectedRows.includes(row.SFSID)
-                    ? "bg-orange-50 hover:bg-orange-100"
-                    : "hover:bg-gray-50"
+                    ? 'bg-orange-50 hover:bg-orange-100'
+                    : 'hover:bg-gray-50'
                 } transition-colors duration-150`}
               >
                 <td className="p-3 text-center">
