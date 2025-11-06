@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { update } from 'lodash';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -55,10 +56,45 @@ export const userStudentSlice = createApi({
 
     getStudentReportCets: builder.query({
       query: () => `get_studentreport_cet`,
+      providesTags: ['StudentReportsCet'],
+    }),
+    postStudentReportCets: builder.mutation({
+      query: (data) => ({
+        url: `student_report_cet`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['StudentReportsCet'],
+    }),
+
+    updateStudentReportCets: builder.mutation({
+      query: (data) => ({
+        url: `student_report_cet/${data.catid}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['StudentReportsCet'],
     }),
 
     getStudentReportType: builder.query({
       query: () => `get_studentreport_type`,
+      providesTags: ['StudentReportsType'],
+    }),
+    postStudentReportType: builder.mutation({
+      query: (data) => ({
+        url: `student_report_type`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['StudentReportsType'],
+    }),
+    updateStudentReportType: builder.mutation({
+      query: (data) => ({
+        url: `student_report_type/${data.catid}`, 
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['StudentReportsType'],
     }),
 
     getStudentReports: builder.query({
@@ -233,6 +269,10 @@ export const {
   useGetStudentBySearchQuery,
   useGetStudentQuery,
   useGetStudentReportCetsQuery,
+  usePostStudentReportCetsMutation,
+  useUpdateStudentReportCetsMutation,
+  usePostStudentReportTypeMutation,
+  useUpdateStudentReportTypeMutation,
   useGetStudentReportTypeQuery,
   useGetStudentReportsQuery,
   usePostStudentCharacterReportMutation,

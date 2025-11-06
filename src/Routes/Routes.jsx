@@ -90,6 +90,7 @@ import MaritListForm from "../pages/public/MaritListForm";
 import MaritListResult from "../pages/public/MaritListResult";
 import OwenGuide from "./OwenGuide";
 import { RequirePermission } from "./RequirePermission";
+import PaymentModal from "../components/Modals/PaymentModal";
 
 const router = createBrowserRouter([
   {
@@ -717,6 +718,11 @@ const router = createBrowserRouter([
                 element: <PaymentHistory pageTitle="Payment History" />,
               },
             ],
+          },
+          {
+            path: "checkout",
+            element: <PaymentModal pageTitle="Payment Checkout" />,
+          
           },
           {
             path: "/sucessUrl",
