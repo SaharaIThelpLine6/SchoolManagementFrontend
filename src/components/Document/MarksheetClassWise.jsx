@@ -143,7 +143,7 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                                     }
 
                                                     <p>.....................................</p>
-                                                    <p>মুহতামিম</p>
+                                                    <p>{bnBijoy2Unicode(schoolData?.PrincipalName)}</p>
                                                     <p>তারিখ : </p>
                                                 </div>
                                             </div>
@@ -156,7 +156,7 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                                     }
 
                                                     <p>.....................................</p>
-                                                    <p>নাযেম</p>
+                                                    <p>{bnBijoy2Unicode(schoolData?.NajemName)}</p>
                                                     <p>তারিখ : </p>
                                                 </div>
                                             </div>

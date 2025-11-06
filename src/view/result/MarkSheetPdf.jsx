@@ -218,7 +218,7 @@ const MarkSheetPdf = ({ studentResult }) => {
             className="mx-auto w-[60px] mb-2"
           />
           <p>.....................................</p>
-          <p>মুহতামিম</p>
+          <p>{bnBijoy2Unicode(studentResult?.PrincipalName)}</p>
           <p>তারিখ : </p>
         </div>
         <div className="text-center">
@@ -228,7 +228,7 @@ const MarkSheetPdf = ({ studentResult }) => {
             className="mx-auto w-[60px] mb-2"
           />
           <p>.....................................</p>
-          <p>নাযেম</p>
+          <p>{bnBijoy2Unicode(studentResult?.NajemName)}</p>
           <p>তারিখ : </p>
         </div>
       </div>

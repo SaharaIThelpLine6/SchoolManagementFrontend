@@ -245,13 +245,13 @@ const StudentResultPointPrintView = ({ studentResult }) => {
           <div className="text-center relative mt-4">
             <img src={principal ? principal : ""} alt="" className="w-[60px]" />
             <p>.....................................</p>
-            <p>মুহতামিম</p>
+            <p>{bnBijoy2Unicode(studentResult?.PrincipalName)}</p>
             <p>তারিখ : </p>
           </div>
           <div className="text-center relative mt-4">
             <img src={najem} alt="" className="w-[60px]" />
             <p>.....................................</p>
-            <p>নাযেম</p>
+            <p>{bnBijoy2Unicode(studentResult?.NajemName)}</p>
             <p>তারিখ : </p>
           </div>
         </div>
