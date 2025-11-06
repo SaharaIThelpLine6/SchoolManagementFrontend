@@ -1,22 +1,21 @@
-import useTranslate from "../utils/Translate";
-import DefaultSelect from "../components/Forms/DefaultSelect";
 import { FormProvider, useForm } from "react-hook-form";
+import DefaultSelect from "../components/Forms/DefaultSelect";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
-import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
+import useTranslate from "../utils/Translate";
 
-import FeeMatrix from "../view/accounting/FeeMatrix";
-import FeeSettingTable from "../view/accounting/FeeSettingTable";
 import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import Swal from "sweetalert2";
+import Button from "../components/Button/Button";
+import SvgIcon from "../components/icons/SvgIcon";
+import { fetchClassData } from "../features/class/classSlice";
 import {
   useGetSubLedgerQuery,
   usePostStudentFeeSettingsMutation,
 } from "../features/feeCollection/feeCollectionSlice";
-import Button from "../components/Button/Button";
-import Swal from "sweetalert2";
-import { fetchClassData } from "../features/class/classSlice";
-import { useDispatch, useSelector } from "react-redux";
-import SvgIcon from "../components/icons/SvgIcon";
 import { showModal } from "../utils/ModalControlar";
+import FeeMatrix from "../view/accounting/FeeMatrix";
+import FeeSettingTable from "../view/accounting/FeeSettingTable";
 
 const FeeSetting = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -188,11 +187,11 @@ const FeeSetting = ({ pageTitle }) => {
         });
 
         // ✅ form reset with empty values
-        reset({
-          SessionID: "",
-          ClassID: "",
-          SLID: "",
-        });
+        // reset({
+        //   SessionID: "",
+        //   ClassID: "",
+        //   SLID: "",
+        // });
 
         // ✅ state গুলো initial এ ফিরিয়ে দেওয়া
         setStudentData(initialStudentState);

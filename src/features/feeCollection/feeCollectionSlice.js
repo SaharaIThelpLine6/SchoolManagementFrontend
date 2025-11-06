@@ -233,10 +233,10 @@ export const feeCollectionSlice = createApi({
       invalidatesTags: ['TransactionOrders'],
     }),
     deleteStudentFeeSettings: builder.mutation({
-      query: (SFSID) => ({
-        url: `delete_student_fee_settings`,
+      query: (body) => ({
+        url: 'delete_student_fee_settings',
         method: 'DELETE',
-        body: { SFSID },
+        body,
       }),
       invalidatesTags: ['StudentFeeSettings'],
     }),
