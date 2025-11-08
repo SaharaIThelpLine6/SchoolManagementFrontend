@@ -20,6 +20,7 @@ const Login = lazy(() => import("../pages/Login"));
 import DefaultLayout from "../layout/DefaultLayout";
 
 // Private Pages
+import PaymentModal from "../components/Modals/PaymentModal";
 import StudentVacationListTable from "../components/Tables/StudentVacationListTable";
 import AddLoginUsers from "../pages/AddLoginUsers";
 import AddStudent from "../pages/AddStudent";
@@ -56,6 +57,7 @@ import FeeCollectionReport from "../pages/FeeCollectionReport";
 import FeeSetting from "../pages/FeeSetting";
 import GroupDistribution from "../pages/GroupDistribution";
 import Home from "../pages/Home";
+import InstitutionInfo from "../pages/InstitutionInfo";
 import MadrasahBoardInfo from "../pages/MadrasahBoardInfo";
 import MonthListTable from "../pages/MonthListTable";
 import MonthlyDues from "../pages/MonthlyDues";
@@ -73,7 +75,6 @@ import Report from "../pages/Report";
 import SMS from "../pages/SMS";
 import Section from "../pages/Section";
 import Session from "../pages/Session";
-import Setting from "../pages/Setting";
 import Settings from "../pages/Settings";
 import StudentFeeCollection from "../pages/StudentFeeCollection";
 import StudentsFeeCollection from "../pages/StudentsFeeCollection";
@@ -90,15 +91,14 @@ import MaritListForm from "../pages/public/MaritListForm";
 import MaritListResult from "../pages/public/MaritListResult";
 import OwenGuide from "./OwenGuide";
 import { RequirePermission } from "./RequirePermission";
-import PaymentModal from "../components/Modals/PaymentModal";
 
 const router = createBrowserRouter([
   {
-    path: "/login",
+    path: '/login',
     element: <Login />,
   },
   {
-    path: "/",
+    path: '/',
     element: <PrivateRoute />,
     children: [
       {
@@ -109,10 +109,10 @@ const router = createBrowserRouter([
             element: <Home />,
           },
           {
-            path: "general-info",
+            path: 'general-info',
             children: [
               {
-                path: "users-info",
+                path: 'users-info',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.user_entry}
@@ -122,7 +122,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "user-reports",
+                path: 'user-reports',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.user_report}
@@ -132,7 +132,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "all-madrasah",
+                path: 'all-madrasah',
                 element: (
                   <OwenGuide>
                     <AllMadrasah pageTitle="All Madrasah" />
@@ -140,7 +140,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "rfid-card",
+                path: 'rfid-card',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.user_report}
@@ -150,7 +150,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "sms",
+                path: 'sms',
                 element: (
                   <RequirePermission permissionId={permissionsDataList.sms}>
                     <SMS />
@@ -158,17 +158,17 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "institution-info",
+                path: 'institution-info',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.institute_info}
                   >
-                    <Setting />
+                    <InstitutionInfo />
                   </RequirePermission>
                 ),
               },
               {
-                path: "month-name-list",
+                path: 'month-name-list',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.month_name}
@@ -178,7 +178,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "user-image",
+                path: 'user-image',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.month_name}
@@ -188,7 +188,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "bulk-image",
+                path: 'bulk-image',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.month_name}
@@ -200,7 +200,7 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "students",
+            path: 'students',
             children: [
               {
                 index: true,
@@ -213,7 +213,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "group-distribution",
+                path: 'group-distribution',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.student_group_setting}
@@ -223,7 +223,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "Class",
+                path: 'Class',
                 element: (
                   <RequirePermission permissionId={permissionsDataList.class}>
                     <Class pageTitle="Class" />
@@ -231,7 +231,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "vacation/type-of-vacation",
+                path: 'vacation/type-of-vacation',
                 element: (
                   // <RequirePermission permissionId={permissionsDataList.class}>
                   <TypeOfVacation pageTitle="Class" />
@@ -239,7 +239,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "book-list",
+                path: 'book-list',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.kitab_entry}
@@ -249,7 +249,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "data-export",
+                path: 'data-export',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.student_report}
@@ -259,7 +259,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "english-arobi-name",
+                path: 'english-arobi-name',
                 element: (
                   <RequirePermission
                     permissionId={
@@ -272,7 +272,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "section",
+                path: 'section',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.sub_class}
@@ -282,7 +282,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "sessions",
+                path: 'sessions',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.academic_year}
@@ -292,7 +292,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "report",
+                path: 'report',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.student_report}
@@ -302,7 +302,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "certificate-of-attestation",
+                path: 'certificate-of-attestation',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.certificate}
@@ -312,7 +312,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "online-admission",
+                path: 'online-admission',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.user_entry}
@@ -324,7 +324,7 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "teacherinfo",
+            path: 'teacherinfo',
             children: [
               {
                 index: true,
@@ -337,7 +337,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "payRole",
+                path: 'payRole',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.teacher_payroll}
@@ -347,7 +347,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "pRName",
+                path: 'pRName',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.teacher_payroll_name}
@@ -357,7 +357,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "report",
+                path: 'report',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.teacher_report}
@@ -367,7 +367,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "designation",
+                path: 'designation',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.teacher_designation}
@@ -379,7 +379,7 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "exam",
+            path: 'exam',
             children: [
               {
                 index: true,
@@ -392,7 +392,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "fee-determine",
+                path: 'fee-determine',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.exam_fee_setting}
@@ -402,11 +402,17 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "exam-condition",
-                element: (<RequirePermission permissionId={permissionsDataList.exam_condition}><ExamCondition /></RequirePermission>),
+                path: 'exam-condition',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.exam_condition}
+                  >
+                    <ExamCondition />
+                  </RequirePermission>
+                ),
               },
               {
-                path: "average-v-condition",
+                path: 'average-v-condition',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.exam_condition}
@@ -416,7 +422,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "list-of-candidates",
+                path: 'list-of-candidates',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.exam_list_generation}
@@ -427,7 +433,7 @@ const router = createBrowserRouter([
               },
 
               {
-                path: "talent-condition",
+                path: 'talent-condition',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.admit_card}
@@ -437,7 +443,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "admit-card",
+                path: 'admit-card',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.admit_card}
@@ -447,7 +453,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "routing",
+                path: 'routing',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.routine_with_signature}
@@ -461,7 +467,7 @@ const router = createBrowserRouter([
               //     element: <QueryManage pageTitle="Query Manage" />,
               //   },
               {
-                path: "report",
+                path: 'report',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.exam_report}
@@ -474,7 +480,7 @@ const router = createBrowserRouter([
           },
 
           {
-            path: "result",
+            path: 'result',
             children: [
               {
                 index: true,
@@ -487,7 +493,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: ":id",
+                path: ':id',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.result_report}
@@ -498,7 +504,7 @@ const router = createBrowserRouter([
               },
 
               {
-                path: "report",
+                path: 'report',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.result_report}
@@ -508,7 +514,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "mark-sheet/:id",
+                path: 'mark-sheet/:id',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.marksheet}
@@ -521,7 +527,7 @@ const router = createBrowserRouter([
           },
 
           {
-            path: "board-info",
+            path: 'board-info',
             children: [
               {
                 index: true,
@@ -534,7 +540,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "exam-name",
+                path: 'exam-name',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.gate_pass_leave}
@@ -544,7 +550,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "name",
+                path: 'name',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.gate_pass_leave}
@@ -554,7 +560,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "center-name",
+                path: 'center-name',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.gate_pass_leave}
@@ -564,7 +570,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "maskas-registration-fee-determine",
+                path: 'maskas-registration-fee-determine',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.gate_pass_leave}
@@ -577,7 +583,7 @@ const router = createBrowserRouter([
           },
 
           {
-            path: "darul-ikama",
+            path: 'darul-ikama',
             children: [
               {
                 index: true,
@@ -590,7 +596,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "vacation",
+                path: 'vacation',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.gate_pass_leave}
@@ -602,7 +608,7 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "accounting",
+            path: 'accounting',
             children: [
               {
                 index: true,
@@ -615,7 +621,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "income-expense-report",
+                path: 'income-expense-report',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.fee_setting}
@@ -625,7 +631,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "fee-setting",
+                path: 'fee-setting',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.fee_setting}
@@ -635,7 +641,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "student-fee-collection",
+                path: 'student-fee-collection',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
@@ -645,7 +651,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "student-fee-collection",
+                path: 'student-fee-collection',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
@@ -655,7 +661,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "dues-list",
+                path: 'dues-list',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
@@ -665,7 +671,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "monthly-dues",
+                path: 'monthly-dues',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
@@ -675,7 +681,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "fee-collection-report",
+                path: 'fee-collection-report',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
@@ -685,7 +691,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "balance-transfer",
+                path: 'balance-transfer',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
@@ -695,7 +701,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "delete-edit-record",
+                path: 'delete-edit-record',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
@@ -707,11 +713,11 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "/payment_confirm/:schoolid/:service/:size",
+            path: '/payment_confirm/:schoolid/:service/:size',
             element: <PaymentConfirm />,
           },
           {
-            path: "payment-history",
+            path: 'payment-history',
             children: [
               {
                 index: true,
@@ -720,20 +726,19 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "checkout",
+            path: 'checkout',
             element: <PaymentModal pageTitle="Payment Checkout" />,
-          
           },
           {
-            path: "/sucessUrl",
+            path: '/sucessUrl',
             element: <CellfinPaymentConfirm />,
           },
           {
-            path: "/cancelUrl",
+            path: '/cancelUrl',
             element: <PaymentConfirm />,
           },
           {
-            path: "donation",
+            path: 'donation',
             children: [
               {
                 index: true,
@@ -742,7 +747,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "fee-collection",
+                path: 'fee-collection',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
@@ -752,7 +757,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "report",
+                path: 'report',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
@@ -764,7 +769,7 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: "settings",
+            path: 'settings',
             children: [
               {
                 index: true,
@@ -772,7 +777,7 @@ const router = createBrowserRouter([
               },
 
               {
-                path: "add-login-users",
+                path: 'add-login-users',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
@@ -789,7 +794,7 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/:schoolid",
+    path: '/:schoolid',
     element: <PublicLayout />,
     children: [
       {
@@ -797,49 +802,49 @@ const router = createBrowserRouter([
         element: <ResultRequest pageTitle="Result Page" />,
       },
       {
-        path: "admission-registration",
+        path: 'admission-registration',
         element: <AdmissionRegistration />,
       },
       {
-        path: "students/:seassonid/:examid/:classid/:userid",
+        path: 'students/:seassonid/:examid/:classid/:userid',
         element: <Result />,
       },
       {
-        path: "online_admission",
+        path: 'online_admission',
         element: <OnlineAdmission />,
       },
       {
-        path: "online_admission/:usercode",
+        path: 'online_admission/:usercode',
         element: <StudentAdmissionForm />,
       },
       {
-        path: "maritlist_request",
+        path: 'maritlist_request',
         element: <MaritListForm />,
       },
       {
-        path: "maritlist/:seassonid/:examid",
+        path: 'maritlist/:seassonid/:examid',
         element: <MaritListResult />,
       },
       {
-        path: "classes",
+        path: 'classes',
         element: <ClassResultForm />,
       },
       {
-        path: "classes/:seassonid/:examid/:classid",
+        path: 'classes/:seassonid/:examid/:classid',
         element: <ClassResult />,
       },
     ],
   },
   {
-    path: "/formp",
+    path: '/formp',
     element: <FromP />,
   },
   {
-    path: "/query",
+    path: '/query',
     element: <Query />,
   },
   {
-    path: "*",
+    path: '*',
     element: <NotFound />,
   },
 ]);

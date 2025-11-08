@@ -1,4 +1,8 @@
+import { Buffer } from "buffer";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import Swal from "sweetalert2";
+import { useGetInstitutionInfoQuery } from "../../features/settings/settingsQuerySlice";
 import { useGetStudentsVacationListQuery } from "../../features/student/studentQuerySlice";
 import {
   enToBnNumber,
@@ -7,10 +11,7 @@ import {
   getVacationDaysCount,
 } from "../../helper/languageFormat";
 import bnBijoy2Unicode from "../../utils/conveter";
-import { useGetInstitutionInfoQuery } from "../../features/settings/settingsQuerySlice";
-import { Buffer } from "buffer";
-import Swal from "sweetalert2";
-import { useSelector } from "react-redux";
+import { formatNumberToBangla, getVacationDuration } from "../../utils/dayMinutesFormat";
 import SvgIcon from "../icons/SvgIcon";
 
 const Print = ({ id }) => {
@@ -36,8 +37,8 @@ const Print = ({ id }) => {
   useEffect(() => {
     if (institutionInfoLoading || isStudentsVacationListLoading) {
       Swal.fire({
-        title: "লোড হচ্ছে...",
-        text: "অনুগ্রহ করে অপেক্ষা করুন",
+        title: 'লোড হচ্ছে...',
+        text: 'অনুগ্রহ করে অপেক্ষা করুন',
         allowOutsideClick: false,
         allowEscapeKey: false,
         didOpen: () => {
@@ -53,9 +54,9 @@ const Print = ({ id }) => {
   useEffect(() => {
     if (institutionInfoError || studentsVacationListError) {
       Swal.fire({
-        icon: "error",
-        title: "ত্রুটি!",
-        text: "তথ্য লোড করতে ব্যর্থ হয়েছে!",
+        icon: 'error',
+        title: 'ত্রুটি!',
+        text: 'তথ্য লোড করতে ব্যর্থ হয়েছে!',
       });
     }
   }, [institutionInfoError, studentsVacationListError]);
@@ -64,7 +65,7 @@ const Print = ({ id }) => {
   useEffect(() => {
     if (institutionInfo?.Logo?.data) {
       const buffer = Buffer.from(institutionInfo.Logo.data);
-      const base64String = buffer.toString("base64");
+      const base64String = buffer.toString('base64');
       const imageSrc = `data:image/png;base64,${base64String}`;
       setLogo(imageSrc);
     }
@@ -87,42 +88,51 @@ const Print = ({ id }) => {
 
   const studentInfo = [
     {
-      label: "শিক্ষার্থীর নাম",
-      value: bnBijoy2Unicode(matchedData?.User.UserName) || " ",
+      label: 'শিক্ষার্থীর নাম',
+      value: bnBijoy2Unicode(matchedData?.User.UserName) || ' ',
     },
-    { label: "গেইট পাস নং", value: enToBnNumber(matchedData?.ID || "") },
+    { label: 'গেইট পাস নং', value: enToBnNumber(matchedData?.ID || '') },
     {
-      label: "পিতার নাম",
+      label: 'পিতার নাম',
       value: bnBijoy2Unicode(matchedData?.User?.FatherName),
       bold: true,
     },
-    { label: "রোল", value: enToBnNumber(matchedData?.User?.UserCode || "") },
+    { label: 'রোল', value: enToBnNumber(matchedData?.User?.UserCode || '') },
   ];
 
   const studentDataInfo = [
     {
-      label: "শিক্ষার্থীর নাম",
-      value: bnBijoy2Unicode(matchedData?.User.UserName) || " ",
+      label: 'শিক্ষার্থীর নাম',
+      value: bnBijoy2Unicode(matchedData?.User.UserName) || ' ',
     },
-    { label: "গেইট পাস নং", value: enToBnNumber(matchedData?.ID || "") },
+    { label: 'গেইট পাস নং', value: enToBnNumber(matchedData?.ID || '') },
     {
-      label: "পিতার নাম",
+      label: 'পিতার নাম',
       value: bnBijoy2Unicode(matchedData?.User?.FatherName),
       bold: true,
     },
-    { label: "তারিখ", value: formatDateToBangla(matchedData?.CreateAt) || " " },
+    { label: 'তারিখ', value: formatDateToBangla(matchedData?.CreateAt) || ' ' },
     {
-      label: "শ্রেণি/জামাত",
+      label: 'শ্রেণি/জামাত',
       value: bnBijoy2Unicode(matchedData?.AcademicClass?.ClassName),
       bold: true,
     },
-    { label: "রোল", value: enToBnNumber(matchedData?.User?.UserCode || "") },
+    { label: 'রোল', value: enToBnNumber(matchedData?.User?.UserCode || '') },
     {
-      label: "ছুটির ধরন",
+      label: 'ছুটির ধরন',
       value: bnBijoy2Unicode(matchedData?.VacationType?.VacationList),
     },
-    { label: "ছুটির সংখ্যা", value: banglaVacationDays || "0" },
+    { label: 'ছুটির সংখ্যা', value: banglaVacationDays || '0' },
   ];
+
+
+  // 🔹 হিসাব বের করা
+  const { days, minutes } = getVacationDuration(
+    matchedData?.VacationDateFrom,
+    matchedData?.VacationDateTo,
+    matchedData?.VacationTimeFrom,
+    matchedData?.VacationTimeTo
+  );
 
   return (
     <div className="max-w-3xl bg-white mx-auto border p-4 text-sm font-SolaimanLipi">
@@ -130,7 +140,7 @@ const Print = ({ id }) => {
         {/* Header */}
         <div className="flex justify-between items-center">
           <img
-            src={logo ? logo : "https://i.ibb.co/pnQ5nxp/bd-logo.png"}
+            src={logo ? logo : 'https://i.ibb.co/pnQ5nxp/bd-logo.png'}
             alt="Logo"
             className="w-16 h-16 mb-2 rounded-full"
           />
@@ -154,7 +164,7 @@ const Print = ({ id }) => {
               <span className="w-[110px]">{label}</span>
               <span className="mr-1">:</span>
               <span
-                className={bold ? "font-extrabold text-black text-base" : ""}
+                className={bold ? 'font-extrabold text-black text-base' : ''}
               >
                 {value}
               </span>
@@ -163,30 +173,45 @@ const Print = ({ id }) => {
         </div>
 
         {/* Time Info */}
-        <div className="border border-black my-2">
-          <div className="grid grid-cols-3 text-center font-bold border-b border-black">
-            <div className="border-r border-black p-1">তারিখ</div>
+        <div className="border border-black my-2 text-center text-[12px]">
+          {/* Header Row */}
+          <div className="grid grid-cols-4 font-bold border-b border-black">
+            <div className="border-r border-black p-1"> </div>
             <div className="border-r border-black p-1">প্রস্থান</div>
             <div className="border-r border-black p-1">আগমন</div>
+            <div className="p-1">অবস্থান</div>
           </div>
-          <div className="grid grid-cols-3 text-center">
+
+          {/* Date Row */}
+          <div className="grid grid-cols-4 border-b border-black">
+            <div className="border-r border-black p-1 font-bold">তারিখ</div>
             <div className="border-r border-black p-1">
-              {formatDateToBangla(matchedData?.CreateAt) || " "}
+              {formatDateToBangla(matchedData?.VacationDateFrom) || ''}
             </div>
             <div className="border-r border-black p-1">
-              {formatTimeToBangla(matchedData?.VacationTimeFrom)}
+              {formatDateToBangla(matchedData?.VacationDateTo) || ''}
+            </div>
+            <div className="p-1">{formatNumberToBangla(days)} দিন</div>
+          </div>
+
+          {/* Time Row */}
+          <div className="grid grid-cols-4">
+            <div className="border-r border-black p-1 font-bold">সময়</div>
+            <div className="border-r border-black p-1">
+              {formatTimeToBangla(matchedData?.VacationTimeFrom) || ''}
             </div>
             <div className="border-r border-black p-1">
-              {formatTimeToBangla(matchedData?.VacationTimeTo)}
+              {formatTimeToBangla(matchedData?.VacationTimeTo) || ''}
             </div>
+            <div className="p-1">{formatNumberToBangla(minutes)} মিনিট</div>
           </div>
         </div>
 
         {/* Notes */}
         <div className="mt-2 mb-4">
           <div className="flex flex-row mt-2">
-            {" "}
-            <p className="font-bold">মন্তব্য : &nbsp;</p>{" "}
+            {' '}
+            <p className="font-bold">মন্তব্য : &nbsp;</p>{' '}
             {bnBijoy2Unicode(matchedData?.Comment)}
           </div>
           <div className="border-b border-black h-6"></div>
@@ -201,7 +226,7 @@ const Print = ({ id }) => {
               অনুমতি দেওয়া হলো
             </p>
             <p className="mt-1">
-              তারিখ : &nbsp;{formatDateToBangla(matchedData?.CreateAt) || " "}
+              তারিখ : &nbsp;{formatDateToBangla(matchedData?.CreateAt) || ' '}
             </p>
           </div>
         </div>
@@ -222,7 +247,7 @@ const Print = ({ id }) => {
               <span className="w-[110px]">{label}</span>
               <span className="mr-1">:</span>
               <span
-                className={bold ? "font-extrabold text-black text-base" : ""}
+                className={bold ? 'font-extrabold text-black text-base' : ''}
               >
                 {value}
               </span>

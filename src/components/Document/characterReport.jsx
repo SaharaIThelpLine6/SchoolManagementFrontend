@@ -1,8 +1,7 @@
-import React, { useEffect, useState } from "react";
-import Logo from "/saharaItlogo.png";
-import { Buffer } from "buffer";
-import { useGetInstitutionInfoQuery } from "../../features/settings/settingsQuerySlice";
-import bnBijoy2Unicode from "../../utils/conveter";
+import { Buffer } from 'buffer';
+import { useEffect, useState } from 'react';
+import { useGetInstitutionInfoQuery } from '../../features/settings/settingsQuerySlice';
+import bnBijoy2Unicode from '../../utils/conveter';
 
 function CharacterReport({ report }) {
   const {
@@ -14,7 +13,7 @@ function CharacterReport({ report }) {
   useEffect(() => {
     if (institutionInfo?.Logo?.data) {
       const buffer = Buffer.from(institutionInfo.Logo.data);
-      const base64String = buffer.toString("base64");
+      const base64String = buffer.toString('base64');
       const imageSrc = `data:image/png;base64,${base64String}`;
       setLogo(imageSrc);
     }
@@ -81,9 +80,9 @@ function CharacterReport({ report }) {
                 </td>
                 <td
                   className="border border-gray-300 px-2 py-2 max-w-[300px]"
-                  title={bnBijoy2Unicode(item.Remark)} // হোভার এ পুরো টেক্সট দেখাবে
+                  title={item.Remark} // হোভার এ পুরো টেক্সট দেখাবে
                 >
-                  {bnBijoy2Unicode(item.Remark)}
+                  {item.Remark}
                 </td>
               </tr>
             ))}

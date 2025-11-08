@@ -1,19 +1,19 @@
-import React, { useState, useRef, useEffect } from "react";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import Swal from "sweetalert2";
-import "flatpickr/dist/flatpickr.css";
 import { Buffer } from "buffer";
-import useTranslate from "../utils/Translate";
+import "flatpickr/dist/flatpickr.css";
+import React, { useEffect, useRef, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import Swal from "sweetalert2";
+import Button from "../components/Button/Button";
 import DefaultInput from "../components/Forms/DefaultInput";
 import { formFieldsSettings } from "../components/Forms/FormData/SettingFormData";
+import Loading from "../components/Loading/Loading";
 import {
   useGetInstitutionInfoQuery,
   useUpdateInstitutionInfoMutation,
 } from "../features/settings/settingsQuerySlice";
-import Button from "../components/Button/Button";
-import Loading from "../components/Loading/Loading";
+import useTranslate from "../utils/Translate";
 
-const Setting = () => {
+const InstitutionInfo = () => {
   const translate = useTranslate();
 
   const {
@@ -22,6 +22,8 @@ const Setting = () => {
     isError,
   } = useGetInstitutionInfoQuery();
   const [updateInstitutionInfo] = useUpdateInstitutionInfoMutation();
+
+  console.log(institutionInfo, 'institutionInfo');
 
   const [images, setImages] = useState({
     Logo: null,
@@ -248,4 +250,4 @@ const Setting = () => {
   );
 };
 
-export default Setting;
+export default InstitutionInfo;
