@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import Loading from "../components/Loading/Loading";
 import { useGetExamConditionsSettingsQuery } from "../features/settings/settingsQuerySlice";
 import AverageVCondition from "./AverageVCondition";
 import PointVCondition from "./PointVCondition";
@@ -14,9 +15,7 @@ const ExamCondition = () => {
 
   if (isLoading) {
     return (
-      <div className="p-4 bg-white rounded-md shadow-md text-center">
-        Loading exam conditions...
-      </div>
+      <Loading/>
     );
   }
 

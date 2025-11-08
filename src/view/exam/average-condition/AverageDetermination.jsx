@@ -1,26 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { setPageName } from "../../../features/auth/authSlice";
-import useTranslate from "../../../utils/Translate";
-import Button from "../../../components/Button/Button";
-import { FormProvider, useForm } from "react-hook-form";
-import DefaultInput from "../../../components/Forms/DefaultInput";
-import Swal from "sweetalert2";
-import SortableTable from "../../../components/Tables/SortableTable";
-import FormColumn from "./FormColumn";
-import SingleCheckbox from "../../../components/Checkboxes/SingleCheckbox";
+import { skipToken } from '@reduxjs/toolkit/query';
+import { useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+import Swal from 'sweetalert2';
+import Button from '../../../components/Button/Button';
+import EditButton from '../../../components/Button/EditButton';
+import SingleCheckbox from '../../../components/Checkboxes/SingleCheckbox';
+import DefaultInput from '../../../components/Forms/DefaultInput';
+import Loading from '../../../components/Loading/Loading';
+import DefaultPagination from '../../../components/Pagination/DefaultPagination';
+import SortableTable from '../../../components/Tables/SortableTable';
+import { setPageName } from '../../../features/auth/authSlice';
 import {
   useGetAverageExamConditionAllQuery,
   usePostAverageExamConditionSettingMutation,
   useUpdateAverageExamConditionSettingMutation,
-} from "../../../features/exam/examQuerySlice";
-import bnBijoy2Unicode from "../../../utils/conveter";
-import PointConditionFilteringForm from "../point-condition/PointConditionFilteringForm";
-import { skipToken } from "@reduxjs/toolkit/query";
-import Loading from "../../../components/Loading/Loading";
-import EditButton from "../../../components/Button/EditButton";
-import DeleteButton from "../../../components/Button/DeleteButton";
-import DefaultPagination from "../../../components/Pagination/DefaultPagination";
+} from '../../../features/exam/examQuerySlice';
+import bnBijoy2Unicode from '../../../utils/conveter';
+import useTranslate from '../../../utils/Translate';
+import PointConditionFilteringForm from '../point-condition/PointConditionFilteringForm';
+import FormColumn from './FormColumn';
 
 const PAGE_SIZE = 10;
 
@@ -33,16 +32,16 @@ const AverageDetermination = ({ pageTitle }) => {
       SessionID: null,
       ExamID: null,
       SubClassID: null,
-      DivisionTopNumber: "",
+      DivisionTopNumber: '',
       ...Object.fromEntries(
         Array.from({ length: 6 }).flatMap((_, i) => {
           const index = i + 1;
           return [
-            [`DivisionNumber${index}`, ""],
-            [`Division${index}`, ""],
-            [`DivisionAra${index}`, ""],
+            [`DivisionNumber${index}`, ''],
+            [`Division${index}`, ''],
+            [`DivisionAra${index}`, ''],
             [`Color${index}`, false],
-            [`TopNum${index}`, ""],
+            [`TopNum${index}`, ''],
           ];
         })
       ),
@@ -78,7 +77,7 @@ const AverageDetermination = ({ pageTitle }) => {
       : skipToken
   );
 
-  console.log(averageExamConditionAllData, "averageExamConditionAllData");
+  console.log(averageExamConditionAllData, 'averageExamConditionAllData');
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
@@ -112,11 +111,9 @@ const AverageDetermination = ({ pageTitle }) => {
     return examConditionData.slice(start, start + PAGE_SIZE);
   }, [examConditionData, currentPage]);
 
-
-
   const handleEdit = (row) => {
     setEditingId(row.ID);
-    setValue("DivisionTopNumber", row.DivisionTopNumber);
+    setValue('DivisionTopNumber', row.DivisionTopNumber);
 
     Array.from({ length: 6 }).forEach((_, i) => {
       const index = i + 1;
@@ -148,9 +145,9 @@ const AverageDetermination = ({ pageTitle }) => {
       }
 
       Swal.fire({
-        icon: "success",
-        title: "সফলভাবে সংরক্ষণ হয়েছে",
-        text: response?.message || "গ্রুপ পরিবর্তন সফল হয়েছে।",
+        icon: 'success',
+        title: 'সফলভাবে সংরক্ষণ হয়েছে',
+        text: response?.message || 'গ্রুপ পরিবর্তন সফল হয়েছে।',
       }).then(() => {
         refetch();
         setSelectedRows([]);
@@ -159,134 +156,134 @@ const AverageDetermination = ({ pageTitle }) => {
       });
     } catch (error) {
       Swal.fire({
-        icon: "error",
-        title: "ত্রুটি সৃজিত!",
-        text: error?.data?.error || "ডেটা সংরক্ষণ করতে ব্যর্থ হয়েছে।",
+        icon: 'error',
+        title: 'ত্রুটি সৃজিত!',
+        text: error?.data?.error || 'ডেটা সংরক্ষণ করতে ব্যর্থ হয়েছে।',
       });
     }
   };
 
   const columns = [
     {
-      title: translate("Action"),
-      hozAlign: "center",
+      title: translate('Action'),
+      hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
           <div className="flex justify-center items-center gap-2">
             <EditButton onClick={() => handleEdit(row)} />
-            <DeleteButton onClick={() => handleDelete(row.ID)} />
+            {/* <DeleteButton onClick={() => handleDelete(row.ID)} /> */}
           </div>
         </div>
       ),
     },
-    { title: translate("SL"), field: "ID", hozAlign: "center" },
+    { title: translate('SL'), field: 'ID', hozAlign: 'center' },
     {
-      title: translate("Session"),
-      field: "SessionName",
-      hozAlign: "center",
+      title: translate('Session'),
+      field: 'SessionName',
+      hozAlign: 'center',
       render: (row) => bnBijoy2Unicode(row.Session.SessionName),
     },
     {
-      title: translate("Exam"),
-      field: "ExamID",
-      hozAlign: "center",
+      title: translate('Exam'),
+      field: 'ExamID',
+      hozAlign: 'center',
       render: (row) => bnBijoy2Unicode(row.Exam.ExamName),
     },
     {
-      title: translate("Class/Jamaat"),
-      field: "SubClass",
-      hozAlign: "center",
+      title: translate('Class/Jamaat'),
+      field: 'SubClass',
+      hozAlign: 'center',
       render: (row) => bnBijoy2Unicode(row.SubClass.SubClass),
     },
     {
-      title: translate(">=1"),
-      field: "DivisionNumber1",
-      hozAlign: "center",
+      title: translate('>=1'),
+      field: 'DivisionNumber1',
+      hozAlign: 'center',
     },
     {
-      title: translate("Division-1"),
-      field: "Division1",
-      hozAlign: "center",
+      title: translate('Division-1'),
+      field: 'Division1',
+      hozAlign: 'center',
     },
     {
-      title: translate("Division Arabic-1"),
-      field: "DivisionAra1",
-      hozAlign: "center",
+      title: translate('Division Arabic-1'),
+      field: 'DivisionAra1',
+      hozAlign: 'center',
     },
     {
-      title: translate(">=2"),
-      field: "DivisionNumber2",
-      hozAlign: "center",
+      title: translate('>=2'),
+      field: 'DivisionNumber2',
+      hozAlign: 'center',
     },
     {
-      title: translate("Division-2"),
-      field: "Division2",
-      hozAlign: "center",
+      title: translate('Division-2'),
+      field: 'Division2',
+      hozAlign: 'center',
     },
     {
-      title: translate("Division Arabic-2"),
-      field: "DivisionAra2",
-      hozAlign: "center",
+      title: translate('Division Arabic-2'),
+      field: 'DivisionAra2',
+      hozAlign: 'center',
     },
     {
-      title: translate(">=3"),
-      field: "DivisionNumber3",
-      hozAlign: "center",
+      title: translate('>=3'),
+      field: 'DivisionNumber3',
+      hozAlign: 'center',
     },
     {
-      title: translate("Division-3"),
-      field: "Division3",
-      hozAlign: "center",
+      title: translate('Division-3'),
+      field: 'Division3',
+      hozAlign: 'center',
     },
     {
-      title: translate("Division Arabic-3"),
-      field: "DivisionAra3",
-      hozAlign: "center",
+      title: translate('Division Arabic-3'),
+      field: 'DivisionAra3',
+      hozAlign: 'center',
     },
     {
-      title: translate(">=4"),
-      field: "DivisionNumber4",
-      hozAlign: "center",
+      title: translate('>=4'),
+      field: 'DivisionNumber4',
+      hozAlign: 'center',
     },
     {
-      title: translate("Division-4"),
-      field: "Division4",
-      hozAlign: "center",
+      title: translate('Division-4'),
+      field: 'Division4',
+      hozAlign: 'center',
     },
     {
-      title: translate("Division Arabic-4"),
-      field: "DivisionAra4",
-      hozAlign: "center",
+      title: translate('Division Arabic-4'),
+      field: 'DivisionAra4',
+      hozAlign: 'center',
     },
     {
-      title: translate(">=5"),
-      field: "DivisionNumber5",
-      hozAlign: "center",
+      title: translate('>=5'),
+      field: 'DivisionNumber5',
+      hozAlign: 'center',
     },
     {
-      title: translate("Division-5"),
-      field: "Division5",
-      hozAlign: "center",
+      title: translate('Division-5'),
+      field: 'Division5',
+      hozAlign: 'center',
     },
     {
-      title: translate("Division Arabic-5"),
-      field: "DivisionAra5",
-      hozAlign: "center",
+      title: translate('Division Arabic-5'),
+      field: 'DivisionAra5',
+      hozAlign: 'center',
     },
     {
-      title: translate(">=6"),
-      field: "DivisionNumber6",
-      hozAlign: "center",
+      title: translate('>=6'),
+      field: 'DivisionNumber6',
+      hozAlign: 'center',
     },
     {
-      title: translate("Division-6"),
-      field: "Division6",
-      hozAlign: "center",
+      title: translate('Division-6'),
+      field: 'Division6',
+      hozAlign: 'center',
     },
     {
-      title: translate("Division Arabic-6"),
-      field: "DivisionAra6",
-      hozAlign: "center",
+      title: translate('Division Arabic-6'),
+      field: 'DivisionAra6',
+      hozAlign: 'center',
     },
   ];
 
@@ -300,19 +297,19 @@ const AverageDetermination = ({ pageTitle }) => {
             <div className="flex flex-col space-y-3">
               <DefaultInput
                 registerKey="DivisionTopNumber"
-                label={translate("Highest score")}
+                label={translate('Highest score')}
                 type="number"
                 labelPosition="left"
-                require={"This is required!"}
+                require={'This is required!'}
               />
               {[...Array(6)].map((_, i) => (
                 <DefaultInput
                   key={`score-threshold-${i + 1}`}
                   registerKey={`DivisionNumber${i + 1}`}
-                  label={`${translate(i + 1 === 1 ? "If >=" : "Or If >=")}`}
+                  label={`${translate(i + 1 === 1 ? 'If >=' : 'Or If >=')}`}
                   type="number"
                   labelPosition="left"
-                  require={"This is required!"}
+                  require={'This is required!'}
                 />
               ))}
             </div>
@@ -323,8 +320,8 @@ const AverageDetermination = ({ pageTitle }) => {
                 .fill()
                 .map((_, i) => ({
                   registerKey: `Division${i + 1}`,
-                  label: "তাহলে ডিভিশন",
-                  type: "text",
+                  label: 'তাহলে ডিভিশন',
+                  type: 'text',
                 }))}
             />
 
@@ -334,14 +331,14 @@ const AverageDetermination = ({ pageTitle }) => {
                 .fill()
                 .map((_, i) => ({
                   registerKey: `DivisionAra${i + 1}`,
-                  type: "text",
+                  type: 'text',
                 }))}
             />
 
             <div className="flex flex-col space-y-2">
               <div className="flex justify-center items-center my-4">
                 <h2 className="text-lg font-semibold text-gray-800">
-                  {translate("Highest recitation score")}
+                  {translate('Highest recitation score')}
                 </h2>
               </div>
 
@@ -351,14 +348,14 @@ const AverageDetermination = ({ pageTitle }) => {
                   .map((_, i) => (
                     <div key={i + 1} className="flex items-center gap-2">
                       <SingleCheckbox
-                        label={translate("Silver Color")}
+                        label={translate('Silver Color')}
                         registerKey={`Color${i + 1}`}
                       />
                       <div className="flex-1">
                         <DefaultInput
                           registerKey={`TopNum${i + 1}`}
                           type="number"
-                          placeholder={translate("Score value")}
+                          placeholder={translate('Score value')}
                         />
                       </div>
                     </div>
@@ -369,7 +366,7 @@ const AverageDetermination = ({ pageTitle }) => {
 
           <div className="w-full flex gap-2 flex-wrap">
             <Button type="submit" className="w-full md:w-auto">
-              {translate("Save")}
+              {translate('Save')}
             </Button>
             {editingId && (
               <Button
@@ -381,7 +378,7 @@ const AverageDetermination = ({ pageTitle }) => {
                   setEditingId(null);
                 }}
               >
-                {translate("Reset")}
+                {translate('Reset')}
               </Button>
             )}
           </div>
@@ -395,7 +392,7 @@ const AverageDetermination = ({ pageTitle }) => {
         ) : isError ? (
           <div className="flex flex-col items-center justify-center h-64 rounded-lg">
             <div className="text-center py-8 text-red-500">
-              {translate("Data Not Found")} {isError.message}
+              {translate('Data Not Found')} {isError.message}
             </div>
           </div>
         ) : averageExamConditionAllData?.length > 0 ||
@@ -423,8 +420,8 @@ const AverageDetermination = ({ pageTitle }) => {
               (averageDetermineFilter?.SessionID &&
                 averageDetermineFilter?.ExamID &&
                 averageDetermineFilter?.SubClassID)
-                ? translate("No data available for the selected filters")
-                : translate("Please select all filters to view data")}
+                ? translate('No data available for the selected filters')
+                : translate('Please select all filters to view data')}
             </div>
           </div>
         )}

@@ -1,8 +1,8 @@
-import React, { useEffect } from "react";
-import DefaultSelect from "../../../components/Forms/DefaultSelect";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
+import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
+import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetExamNamesQuery } from "../../../features/student/studentQuerySlice";
 import useTranslate from "../../../utils/Translate";
 
@@ -42,7 +42,7 @@ const PointConditionFilteringForm = ({ onFilter }) => {
             nameField="SessionName"
             valueField={"SessionID"}
             unicode={true}
-            label={translate("Session") + " :"}
+            label={translate("Session")}
           />
         </div>
         <div>
@@ -52,7 +52,7 @@ const PointConditionFilteringForm = ({ onFilter }) => {
             placeholder="পরীক্ষা নির্বাচন করুন"
             nameField="ExamName"
             valueField={"ExamID"}
-            label={translate("Exam") + " :"}
+            label={translate("Exam")}
             unicode={true}
           />
         </div>
@@ -63,7 +63,7 @@ const PointConditionFilteringForm = ({ onFilter }) => {
             placeholder="শ্রেণি নির্বাচন করুন"
             nameField="SubClass"
             valueField={"SubClassID"}
-            label={translate("SubClass") + " :"}
+            label={translate("SubClass")}
             unicode={true}
           />
         </div>
