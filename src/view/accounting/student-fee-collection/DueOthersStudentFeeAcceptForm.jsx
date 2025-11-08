@@ -241,14 +241,16 @@ const DueOthersStudentFeeAcceptForm = ({ pageTitle }) => {
   }, [dispatch, pageTitle]);
 
   const onSubmit = (data) => {
+    const totalDue = data?.fees?.reduce((sum, fee) => sum + (fee.due || 0), 0);
+
     const payload = {
       ...data,
       userId: studentFeeAdmissionData.userId,
       admissionId: studentFeeAdmissionData.admissionId,
+      due:totalDue,
+      type:"others_due"
     };
     dispatch(setStudentFeeData(payload));
-    dispatch(setMonthFeeData({ monthId: 21, studentDueFeeData: true }));
-
     hideModal();
   };
 

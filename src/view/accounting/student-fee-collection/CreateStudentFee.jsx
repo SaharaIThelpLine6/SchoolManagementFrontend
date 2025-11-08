@@ -24,7 +24,8 @@ import {
 } from '../../../features/feeCollection/feeCollectionSlice';
 import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
 import {
-  setStudentFeeData,
+  clearStudentFeeData,
+  clearStudentMonthFeeListsData,
   setStudentFeeSessionID,
 } from '../../../features/settings/settingsSlice';
 import {
@@ -63,7 +64,10 @@ const CreateStudentFee = () => {
     (state) => state.student
   );
 
-  const { studentFeeData = [] } = useSelector((state) => state.settings);
+  const { studentFeeData = [], studentMonthFeeListsData = [] } = useSelector(
+    (state) => state.settings
+  );
+  console.log(studentFeeData, 'studentFeeData');
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: settingsData } = useGetSettingsQuery();
@@ -144,7 +148,6 @@ const CreateStudentFee = () => {
     }
   );
 
-
   // default session set
   useEffect(() => {
     if (defaultSessionId) {
@@ -186,7 +189,6 @@ const CreateStudentFee = () => {
   // ✅ useEffect দিয়ে dispatch, প্রথম এলিমেন্ট থাকলে
   useEffect(() => {
     if (searchUserInfo && searchUserInfo.data) {
-
       if (
         Array.isArray(searchUserInfo.data) &&
         searchUserInfo.data.length > 0
@@ -201,7 +203,7 @@ const CreateStudentFee = () => {
         });
         // ✅ Data না পেলে state clear করুন
         dispatch(setFilteredSelectedPerStudentFee(null));
-        dispatch(setStudentFeeData(null));
+        dispatch(clearStudentFeeData());
         setstudentFeeDataAll(null);
         setTotalDue(null);
         setLogo(null);
@@ -220,18 +222,17 @@ const CreateStudentFee = () => {
     }
   }, [filteredSelectedPerStudentFee]);
 
-
-  useEffect(() => {
-    if (studentFeeData?.fees) {
-      const feesDue = studentFeeData.fees.reduce(
-        (sum, fee) => sum + (fee.due || 0),
-        0
-      );
-      setTotalDue(feesDue);
-    } else {
-      setTotalDue(0);
-    }
-  }, [studentFeeData]);
+  // useEffect(() => {
+  //   if (studentFeeData?.fees) {
+  //     const feesDue = studentFeeData.fees.reduce(
+  //       (sum, fee) => sum + (fee.due || 0),
+  //       0
+  //     );
+  //     setTotalDue(feesDue);
+  //   } else {
+  //     setTotalDue(0);
+  //   }
+  // }, [studentFeeData]);
 
   useEffect(() => {
     setstudentFeeDataAll(studentFeeData);
@@ -262,6 +263,80 @@ const CreateStudentFee = () => {
       });
     }
   }, [filteredSelectedPerStudentFee, reset, getValues, defaultSessionId]);
+
+  // Add this function in your component
+  const calculateFeeTotals = useCallback((data) => {
+    if (!data || !Array.isArray(data)) {
+      return {
+        allCurrentDeposit: 0,
+        allPrescribedFee: 0,
+        allDeduction: 0,
+        allDue: 0,
+        allFees: [],
+        admissionId: null,
+        userId: null,
+      };
+    }
+
+    const allCurrentDeposit = data.reduce(
+      (sum, month) => sum + (month.currentDeposit || 0),
+      0
+    );
+    const allPrescribedFee = data.reduce(
+      (sum, month) => sum + (month.prescribedFee || 0),
+      0
+    );
+    const allDeduction = data.reduce(
+      (sum, month) => sum + (month.deduction || 0),
+      0
+    );
+
+    // Calculate total due across all months and all fees
+    const allDue = data.reduce((sum, month) => {
+      const monthDue =
+        month.fees?.reduce((feeSum, fee) => feeSum + (fee.due || 0), 0) || 0;
+      return sum + monthDue;
+    }, 0);
+
+    // Join all fees from all months into one array
+    const allFees = data.reduce((acc, month) => {
+      if (month.fees && Array.isArray(month.fees)) {
+        // Add month information to each fee for reference
+        const feesWithMonthInfo = month.fees.map((fee) => ({
+          ...fee,
+          monthId: month.monthId,
+          monthName: month.monthName,
+          studentCode: month.studentCode,
+        }));
+        return [...acc, ...feesWithMonthInfo];
+      }
+      return acc;
+    }, []);
+    const admissionId = data[0]?.admissionId;
+    const userId = data[0]?.userId;
+
+    return {
+      allCurrentDeposit,
+      allPrescribedFee,
+      allDeduction,
+      allDue,
+      allFees,
+      admissionId,
+      userId,
+    };
+  }, []);
+
+  // Use it in your component
+  const feeTotals = calculateFeeTotals(studentFeeDataAll);
+
+  // Then you can use these values
+  console.log('Total Current Deposit:', feeTotals.allCurrentDeposit);
+  console.log('Total Prescribed Fee:', feeTotals.allPrescribedFee);
+  console.log('Total Deduction:', feeTotals.allDeduction);
+  console.log('Total Due:', feeTotals.allDue);
+  console.log('Admission ID:', feeTotals.admissionId);
+  console.log('User ID:', feeTotals.userId);
+  console.log('All Fees:', feeTotals.allFees);
 
   const handleOpenModal = useCallback(() => {
     showModal('Selected Per Student Fee', 'SELECTED_PERSTUDENT_FEE_FILTER');
@@ -339,10 +414,14 @@ const CreateStudentFee = () => {
   const handleStudentExamFeeOpenModal = useCallback(() => {
     showModal('Acc Exam Fee Collector', 'ACC_EXAM_FEE_COLLECTOR');
   }, []);
+  const admissionDataCheck = studentFeeData?.find(
+    (i) => i.type === 'admission'
+  );
 
   const onSubmit = async (data) => {
     try {
-      if (!studentFeeData?.fees || studentFeeData.fees.length === 0) {
+      // 🧩 Validation: No fee selected
+      if (!feeTotals.allFees || feeTotals.allFees.length === 0) {
         Swal.fire({
           icon: 'error',
           title: 'ত্রুটি',
@@ -350,10 +429,11 @@ const CreateStudentFee = () => {
         });
         return;
       }
+
       setIsSubmitting(true);
       let smsPermission = false;
 
-      // Step 1: Ask for SMS permission during submit (only if currentPermissionStatus is defined)
+      // 📨 Step 1: Ask for SMS permission (only if allowed)
       if (currentPermissionStatus == 1) {
         const result = await Swal.fire({
           title: 'SMS পাঠাবেন?',
@@ -369,33 +449,86 @@ const CreateStudentFee = () => {
         smsPermission = result.isConfirmed;
       }
 
+      // 🧾 Step 2: Get Fee Category Data
+      const admissionData = studentFeeData?.find((i) => i.type === 'admission');
+      const monthData = studentFeeData?.find((i) => i.type === 'month');
+      const othersData = studentFeeData?.find((i) => i.type === 'others');
+      const othersDueData = studentFeeData?.find(
+        (i) => i.type === 'others_due'
+      );
+
+      console.log(admissionData, 'admissionData');
+      console.log(monthData, 'monthData');
+      console.log(othersDueData, 'othersDueData');
+      console.log(othersData, 'othersData');
+
+      // 🧱 Step 3: Build Final Payload
       const payload = {
-        UserID: studentFeeData.userId,
-        AdmissionID: studentFeeData.admissionId,
-        CurrentInvoice: studentFeeData.prescribedFee,
-        InvoiceDiscount: studentFeeData.deduction,
-        CurrentPaid: studentFeeData.currentDeposit,
-        Due: totalDue,
+        UserID: feeTotals.userId,
+        AdmissionID: feeTotals.admissionId,
+        CurrentInvoice: feeTotals.allPrescribedFee,
+        InvoiceDiscount: feeTotals.allDeduction,
+        CurrentPaid: feeTotals.allCurrentDeposit,
+        Due: feeTotals.allDue,
         AmountInWord: data.speakCurrentDeposit,
-        CreateAt: data.EntryDate ? data.EntryDate : new Date(),
+        CreateAt: data.EntryDate || new Date(),
         Remark: data.Remark,
         AccountType: data.GLID,
         Account: data.SLID,
-        fees: studentFeeData.fees,
-        MonthId: monthFeeData?.monthId || '',
-        StudentDueFee: monthFeeData?.studentDueFeeData || '',
         smsPermission,
+        fees: feeTotals.allFees,
+        feesLists: [
+          {
+            type: 'admission',
+            CurrentInvoice: admissionData?.prescribedFee || 0,
+            InvoiceDiscount: admissionData?.deduction || 0,
+            CurrentPaid: admissionData?.currentDeposit || 0,
+            Due: admissionData?.due || 0,
+            items: [],
+            permission: !!admissionData,
+          },
+          {
+            type: 'others',
+            CurrentInvoice: othersData?.prescribedFee || 0,
+            InvoiceDiscount: othersData?.deduction || 0,
+            CurrentPaid: othersData?.currentDeposit || 0,
+            Due: othersData?.due || 0,
+            items: [],
+            MonthId: 21,
+            permission: !!othersData,
+          },
+          {
+            type: 'others_due',
+            CurrentInvoice: othersDueData?.prescribedFee || 0,
+            InvoiceDiscount: othersDueData?.deduction || 0,
+            CurrentPaid: othersDueData?.currentDeposit || 0,
+            Due: othersDueData?.due || 0,
+            items: [],
+            MonthId: 21,
+            StudentDueFee: true,
+            permission: !!othersDueData,
+          },
+          {
+            type: 'month',
+            monthLists: studentMonthFeeListsData,
+            items: [],
+            permission:
+              Array.isArray(studentMonthFeeListsData) &&
+              studentMonthFeeListsData.length > 0,
+          },
+        ],
       };
+
+      console.log('✅ Final Payload:', payload);
 
       await postStudentFee(payload).unwrap();
 
-      // ✅ শুধুমাত্র যখন AdmissionID থাকে তখনই refetch করবে
+      // 🌀 Refetch when AdmissionID exists
       if (filteredSelectedPerStudentFee?.AdmissionID) {
         studentOthersDueRefetch();
       }
-      console.log('First form submitted with data:', payload);
 
-      // ✅ Success message
+      // 🟢 Success message
       Swal.fire({
         icon: 'success',
         title: 'সফল!',
@@ -403,18 +536,37 @@ const CreateStudentFee = () => {
         confirmButtonText: 'ঠিক আছে',
       });
 
-      // ✅ Reset with session preserved
+      // 🔄 Reset form but preserve session
       handleResetPage();
     } catch (error) {
-      console.error('Submission error:', error);
+      console.error('❌ Submission error:', error);
       Swal.fire({
         icon: 'error',
         title: 'ত্রুটি',
-        text: error.data.error || 'কোনো অজানা ত্রুটি হয়েছে।',
+        text: error?.data?.error || 'কোনো অজানা ত্রুটি হয়েছে।',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  // const payload = {
+  //   UserID: feeTotals.userId,
+  //   AdmissionID: feeTotals.admissionId,
+  //   CurrentInvoice: feeTotals.allPrescribedFee,
+  //   InvoiceDiscount: feeTotals.allDeduction,
+  //   CurrentPaid: feeTotals.allCurrentDeposit,
+  //   Due: feeTotals.allDue,
+  //   AmountInWord: data.speakCurrentDeposit,
+  //   CreateAt: data.EntryDate ? data.EntryDate : new Date(),
+  //   Remark: data.Remark,
+  //   AccountType: data.GLID,
+  //   Account: data.SLID,
+  //   fees: feeTotals.allFees,
+  //   MonthId: monthFeeData?.monthId || '',
+  //   StudentDueFee: monthFeeData?.studentDueFeeData || '',
+  //   smsPermission,
+  // };
   // ✅ Modified reset function - session preserve করে
   const handleResetPage = () => {
     const currentSession = getValues('SessionID');
@@ -431,13 +583,15 @@ const CreateStudentFee = () => {
     });
 
     dispatch(setMonthFeeData(null));
-    dispatch(setStudentFeeData(null));
+    dispatch(clearStudentFeeData());
+    dispatch(clearStudentMonthFeeListsData());
     dispatch(setFilteredSelectedPerStudentFee(null));
     setFilterData(null);
     setTotalDue(null);
     setstudentFeeDataAll(null);
     setLogo(null);
     setSearchTrigger(0);
+
     setLastSearchedCode(''); // ✅ Last searched code reset
   };
 
@@ -455,7 +609,7 @@ const CreateStudentFee = () => {
       speakCurrentDeposit: '',
     });
     dispatch(setMonthFeeData(null));
-    dispatch(setStudentFeeData(null));
+    dispatch(clearStudentFeeData());
     dispatch(setFilteredSelectedPerStudentFee(null));
     setFilterData(null);
     setSearchTrigger(0);
@@ -492,10 +646,9 @@ const CreateStudentFee = () => {
 
     // ✅ যদি একই code আবার search করা হয়, তাহলে force refetch
     if (studentCode === lastSearchedCode) {
-
       // ✅ Complete state reset
       dispatch(setFilteredSelectedPerStudentFee(null));
-      dispatch(setStudentFeeData(null));
+      dispatch(clearStudentFeeData());
       setstudentFeeDataAll(null);
       setTotalDue(null);
       setLogo(null);
@@ -512,7 +665,7 @@ const CreateStudentFee = () => {
     } else {
       // ✅ নতুন code search করা হলে normal process
       dispatch(setFilteredSelectedPerStudentFee(null));
-      dispatch(setStudentFeeData(null));
+      dispatch(clearStudentFeeData());
       setstudentFeeDataAll(null);
       setTotalDue(null);
       setLogo(null);
@@ -716,7 +869,8 @@ const CreateStudentFee = () => {
                     </span>
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
                     <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
-                      {studentFeeDataAll?.prescribedFee ?? '0'}
+                      {/* {studentFeeDataAll?.prescribedFee ?? '0'} */}
+                      {feeTotals?.allPrescribedFee ?? '0'}
                     </span>
                   </div>
                   <div className="flex items-center text-sm">
@@ -725,7 +879,8 @@ const CreateStudentFee = () => {
                     </span>
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
                     <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
-                      {studentFeeDataAll?.deduction ?? '0'}
+                      {/* {studentFeeDataAll?.deduction ?? '0'} */}
+                      {feeTotals?.allDeduction ?? '0'}
                     </span>
                   </div>
                   <div className="flex items-center text-sm">
@@ -734,7 +889,8 @@ const CreateStudentFee = () => {
                     </span>
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
                     <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
-                      {studentFeeDataAll?.currentDeposit ?? '0'}
+                      {/* {studentFeeDataAll?.currentDeposit ?? '0'} */}
+                      {feeTotals?.allCurrentDeposit ?? '0'}
                     </span>
                   </div>
                   <div className="flex items-center text-sm">
@@ -743,7 +899,7 @@ const CreateStudentFee = () => {
                     </span>
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
                     <span className="ml-1 w-20 p-1 border border-gray-300 rounded min-h-[1.5rem]">
-                      {totalDue ?? '0'}
+                      {feeTotals?.allDue ?? '0'}
                     </span>
                   </div>
                   <div className="flex items-center text-sm">
@@ -774,7 +930,7 @@ const CreateStudentFee = () => {
                 placeholder="Enter your comments ..."
                 registerKey="speakCurrentDeposit"
                 defaultValue={numberToBanglaWords(
-                  studentFeeDataAll?.currentDeposit ?? ''
+                  feeTotals?.allCurrentDeposit ?? ''
                 )}
                 disable
                 rows={2}
@@ -854,6 +1010,7 @@ const CreateStudentFee = () => {
                       className="w-full max-w-xs px-4 py-2 rounded-lg shadow bg-blue-600 text-white"
                       disabled={
                         !filteredSelectedPerStudentFee?.UserID ||
+                        admissionDataCheck ||
                         ![0, 3].includes(
                           filteredSelectedPerStudentFee?.AdmissionStatus
                         )
@@ -991,10 +1148,12 @@ const CreateStudentFee = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {studentFeeData?.fees &&
-                      studentFeeData.fees.length > 0 ? (
-                        studentFeeData.fees.map((item, index) => (
-                          <tr key={item.SFSID || index} className="border-t">
+                      {feeTotals.allFees && feeTotals.allFees.length > 0 ? (
+                        feeTotals.allFees.map((item, index) => (
+                          <tr
+                            key={`${item.SSFID}-${item.monthId}-${index}`}
+                            className="border-t"
+                          >
                             <td className="px-4 text-center whitespace-nowrap">
                               {index + 1}
                             </td>
@@ -1007,9 +1166,14 @@ const CreateStudentFee = () => {
                               {bnBijoy2Unicode(item.sessionName)}
                             </td>
 
+                            {/* Add month name column */}
+                            {/* <td className="text-center whitespace-nowrap">
+                              {bnBijoy2Unicode(item.monthName)}
+                            </td> */}
+
                             <td className="text-center whitespace-nowrap">
                               <DefaultInput
-                                registerKey={`fees.${index}.amount`}
+                                registerKey={`allFees.${index}.amount`}
                                 type="text"
                                 readOnly
                                 defaultValue={item.amount}
@@ -1018,7 +1182,7 @@ const CreateStudentFee = () => {
 
                             <td className="text-center whitespace-nowrap">
                               <DefaultInput
-                                registerKey={`fees.${index}.deduction`}
+                                registerKey={`allFees.${index}.deduction`}
                                 type="text"
                                 readOnly
                                 defaultValue={item.deduction}
@@ -1027,7 +1191,7 @@ const CreateStudentFee = () => {
 
                             <td className="text-center whitespace-nowrap">
                               <DefaultInput
-                                registerKey={`fees.${index}.preDeposit`}
+                                registerKey={`allFees.${index}.preDeposit`}
                                 type="text"
                                 readOnly
                                 defaultValue={item.preDeposit}
@@ -1036,7 +1200,7 @@ const CreateStudentFee = () => {
 
                             <td className="text-center whitespace-nowrap">
                               <DefaultInput
-                                registerKey={`fees.${index}.deposit`}
+                                registerKey={`allFees.${index}.deposit`}
                                 type="text"
                                 readOnly
                                 defaultValue={item.deposit}
@@ -1045,7 +1209,7 @@ const CreateStudentFee = () => {
 
                             <td className="text-center whitespace-nowrap">
                               <DefaultInput
-                                registerKey={`fees.${index}.due`}
+                                registerKey={`allFees.${index}.due`}
                                 type="text"
                                 readOnly
                                 defaultValue={item.due}
@@ -1055,7 +1219,7 @@ const CreateStudentFee = () => {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan={8} className="px-4 py-2 text-center">
+                          <td colSpan={9} className="px-4 py-2 text-center">
                             {translate('No data available')}
                           </td>
                         </tr>

@@ -81,7 +81,7 @@ const OthersStudentFeeAcceptForm = ({ pageTitle }) => {
         0
       );
       const totalAmount = fees.reduce((sum, item) => sum + item.amount, 0);
-      const netPayable = totalAmount - totalPreviousDeposite - totalDeduction;
+      const netPayable =  totalDeduction;
       // Set fee totals
       const calculatedTotals = {
         totalPreviousDeposite,
@@ -214,13 +214,16 @@ const OthersStudentFeeAcceptForm = ({ pageTitle }) => {
   }, [dispatch, pageTitle]);
 
   const onSubmit = (data) => {
+    const totalDue = data?.fees?.reduce((sum, fee) => sum + (fee.due || 0), 0);
+
     const payload = {
       ...data,
       userId: studentOtherData.userId,
       admissionId: studentOtherData.admissionId,
+      due: totalDue,
+      type: 'others',
     };
     dispatch(setStudentFeeData(payload));
-    dispatch(setMonthFeeData({ monthId: 21 }));
 
     hideModal();
   };

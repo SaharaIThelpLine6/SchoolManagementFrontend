@@ -18,8 +18,12 @@ const MonthlyFeeCollectionTable = () => {
   const { filteredSelectedPerStudentFee } = useSelector(
     (state) => state.student
   );
+  // Selector hook - always call at the top level
+  const { studentMonthFeeListsData = [] } = useSelector(
+    (state) => state.settings
+  );
 
-
+  console.log(studentMonthFeeListsData, 'monthDataCheck');
   const admissionId = filteredSelectedPerStudentFee?.AdmissionID;
 
   // All hooks called unconditionally at the top level
@@ -35,9 +39,6 @@ const MonthlyFeeCollectionTable = () => {
         refetchOnMountOrArgChange: true,
       }
     );
-
-
-
 
   // Compute monthFeeList with proper error handling
   const monthFeeList = useMemo(() => {
@@ -86,6 +87,22 @@ const MonthlyFeeCollectionTable = () => {
     }
   }, [data]);
 
+  // Check if month is paid from studentMonthFeeListsData
+  const isMonthPaid = useCallback(
+    (monthId) => {
+      return studentMonthFeeListsData.some((item) => item.MonthId === monthId);
+    },
+    [studentMonthFeeListsData]
+  );
+
+  // Get paid month data
+  const getPaidMonthData = useCallback(
+    (monthId) => {
+      return studentMonthFeeListsData.find((item) => item.MonthId === monthId);
+    },
+    [studentMonthFeeListsData]
+  );
+
   // Initialize form state with monthFeeList
   useEffect(() => {
     if (monthFeeList.length > 0 && isSuccess) {
@@ -118,6 +135,11 @@ const MonthlyFeeCollectionTable = () => {
 
   const handleOpenModal = useCallback(
     (item) => {
+      // Don't open modal if month is already paid
+      if (isMonthPaid(item.monthId)) {
+        return;
+      }
+
       console.log('Opening modal for item:', item);
       try {
         dispatch(setMonthFeeData(item));
@@ -126,7 +148,56 @@ const MonthlyFeeCollectionTable = () => {
         console.error('Error opening modal:', error);
       }
     },
-    [dispatch]
+    [dispatch, isMonthPaid]
+  );
+
+  // Get display value for paid months
+  const getDisplayValue = useCallback(
+    (item) => {
+      // If month is paid, show data from studentMonthFeeListsData
+      if (isMonthPaid(item.monthId)) {
+        const paidData = getPaidMonthData(item.monthId);
+        if (paidData) {
+          return `Paid: ${paidData.CurrentPaid} (Discount: ${paidData.InvoiceDiscount})`;
+        }
+      }
+
+      // Otherwise show original logic
+      if (item.isFree) {
+        return `Free Student (${item.prescribedFee})`;
+      } else if (item.isFullPaid) {
+        return `Full Payment Done (${item.prescribedFee})`;
+      } else if (item.due > 0) {
+        return `${item.acceptedFees} (Due: ${item.due})`;
+      } else {
+        return item.acceptedFees;
+      }
+    },
+    [isMonthPaid, getPaidMonthData]
+  );
+
+  // Get input class based on status
+  const getInputClass = useCallback(
+    (item) => {
+      const baseClass = `w-full rounded border-[1.5px] px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-custom-focus active:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200`;
+
+      // If month is paid, show different styling
+      if (isMonthPaid(item.monthId)) {
+        return `${baseClass} bg-purple-100 border-purple-400 cursor-default`;
+      }
+
+      // Original logic for non-paid months
+      if (item.isFree) {
+        return `${baseClass} bg-blue-100 border-blue-400`;
+      } else if (item.isFullPaid) {
+        return `${baseClass} bg-green-100 border-green-400`;
+      } else if (item.due > 0) {
+        return `${baseClass} bg-red-100 border-red-400 cursor-pointer`;
+      } else {
+        return `${baseClass} cursor-pointer`;
+      }
+    },
+    [isMonthPaid]
   );
 
   // Early returns after all hooks
@@ -210,27 +281,8 @@ const MonthlyFeeCollectionTable = () => {
                   <td className="px-2 text-center whitespace-nowrap min-w-[120px]">
                     <input
                       type="text"
-                      className={`w-full rounded border-[1.5px] px-2 h-[38px] text-black outline-none text-[14px] transition
-    focus:border-custom-focus active:border-custom-focus
-    disabled:cursor-not-allowed disabled:bg-slate-200
-    ${
-      item.isFree
-        ? 'bg-blue-100 border-blue-400'
-        : item.isFullPaid
-        ? 'bg-green-100 border-green-400'
-        : item.due > 0
-        ? 'bg-red-100 border-red-400 cursor-pointer'
-        : 'cursor-pointer'
-    }`}
-                      value={
-                        item.isFree
-                          ? `Free Student (${item.prescribedFee})`
-                          : item.isFullPaid
-                          ? `Full Payment Done (${item.prescribedFee})`
-                          : item.due > 0
-                          ? `${item.acceptedFees} (Due: ${item.due})`
-                          : item.acceptedFees
-                      }
+                      className={getInputClass(item)}
+                      value={getDisplayValue(item)}
                       onClick={() => {
                         if (!item.isFullPaid && !item.isFree) {
                           handleOpenModal(item);

@@ -10,7 +10,10 @@ import {
   useGetMonthDuePerStudentFeeQuery,
   useGetMonthPerStudentsFeeQuery,
 } from '../../../features/feeCollection/feeCollectionSlice';
-import { setStudentFeeData } from '../../../features/settings/settingsSlice';
+import {
+  setStudentFeeData,
+  setStudentMonthFeeListsData,
+} from '../../../features/settings/settingsSlice';
 import bnBijoy2Unicode from '../../../utils/conveter';
 import { hideModal } from '../../../utils/ModalControlar';
 import useTranslate from '../../../utils/Translate';
@@ -30,6 +33,7 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
     totalPreDeposit: 0,
     totalDue: 0,
   });
+
   const methods = useForm({
     defaultValues: {
       fees: [],
@@ -132,8 +136,7 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
 
   const fees = watch('fees');
 
-  // Unified calculation function with preDeposit
-  const recalcFee = (fee) => {
+  const recalcFee = useCallback((fee) => {
     const prescribedFee = Number(fee.amount || 0);
     const deduction = Number(fee.deduction || 0);
     const preDeposit = Number(fee.preDeposit || 0);
@@ -144,10 +147,11 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
     if (deposit > maxDeposit) deposit = maxDeposit;
 
     const due = prescribedFee - deduction - preDeposit - deposit;
-    return { deposit, due };
-  };
 
-  // Recalculate totals whenever fees change
+    return { deposit, due };
+  }, []);
+
+  // Recalculate totals whenever fees change - FIXED VERSION
   const recalculateTotals = useCallback(() => {
     if (!fees || fees.length === 0) {
       setValue('prescribedFee', 0);
@@ -175,12 +179,12 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
     setValue('prescribedFee', totalPrescribed);
     setValue('deduction', totalDeduction);
     setValue('currentDeposit', totalDeposit);
-  }, [fees, setValue]);
+  }, [fees, setValue, recalcFee]);
 
-  // Recalculate totals whenever fees array changes - IMPORTANT: UNCOMMENT THIS
+  // Recalculate totals only when fees array length changes or initial load
   useEffect(() => {
     recalculateTotals();
-  }, [fees, recalculateTotals]);
+  }, [fees?.length]); // Only depend on fees array length
 
   // Handle Deduction change
   const handleDeductionChange = useCallback(
@@ -199,8 +203,17 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
           i === index ? { ...f, deduction: fee.deduction, deposit, due } : f
         )
       );
+
+      // Update totals immediately after change
+      setTimeout(() => {
+        const updatedFees = getValues('fees');
+        const totalDeduction = updatedFees.reduce((acc, f) => acc + Number(f.deduction || 0), 0);
+        const totalDeposit = updatedFees.reduce((acc, f) => acc + Number(f.deposit || 0), 0);
+        setValue('deduction', totalDeduction);
+        setValue('currentDeposit', totalDeposit);
+      }, 0);
     },
-    [getValues, setValue]
+    [getValues, setValue, recalcFee]
   );
 
   // Handle Deposit change
@@ -218,8 +231,15 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       setDefaultFees((prev) =>
         prev.map((f, i) => (i === index ? { ...f, deposit, due } : f))
       );
+
+      // Update totals immediately after change
+      setTimeout(() => {
+        const updatedFees = getValues('fees');
+        const totalDeposit = updatedFees.reduce((acc, f) => acc + Number(f.deposit || 0), 0);
+        setValue('currentDeposit', totalDeposit);
+      }, 0);
     },
-    [getValues, setValue]
+    [getValues, setValue, recalcFee]
   );
 
   // Delete a fee row
@@ -229,13 +249,17 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       const updatedFees = currentFees.filter((_, i) => i !== index);
       setValue('fees', updatedFees);
       setDefaultFees((prev) => prev.filter((_, i) => i !== index));
+
+      // Recalculate totals after deletion
+      setTimeout(recalculateTotals, 0);
     },
-    [getValues, setValue]
+    [getValues, setValue, recalculateTotals]
   );
 
   const handleResetForm = useCallback(() => {
     reset({ fees: defaultFees });
-  }, [reset, defaultFees]);
+    setTimeout(recalculateTotals, 0);
+  }, [reset, defaultFees, recalculateTotals]);
 
   const totalPages = Math.ceil((fees?.length || 0) / PAGE_SIZE);
 
@@ -260,12 +284,24 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
   }, [dispatch, pageTitle, monthDuePerStudent]);
 
   const onSubmit = (data) => {
+    const totalDue = data?.fees?.reduce((sum, fee) => sum + (fee.due || 0), 0);
+
     const payload = {
       ...data,
       userId: studentFeeAdmissionData[0]?.UserID,
       admissionId: studentFeeAdmissionData[0]?.AdmissionID,
+      due: totalDue,
+      type: 'month',
     };
     dispatch(setStudentFeeData(payload));
+    const monthPayload = {
+      CurrentInvoice: payload?.prescribedFee,
+      InvoiceDiscount: payload?.deduction,
+      CurrentPaid: payload?.currentDeposit,
+      MonthId: payload?.monthId,
+      Due: totalDue,
+    };
+    dispatch(setStudentMonthFeeListsData(monthPayload));
     hideModal();
   };
 
@@ -366,7 +402,10 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                 paginatedData.map((item, index) => {
                   const globalIndex = (currentPage - 1) * PAGE_SIZE + index;
                   return (
-                    <tr key={item.SSFID} className="border-t">
+                    <tr
+                      key={`${item.SSFID}-${item.SLID}-${globalIndex}`}
+                      className="border-t"
+                    >
                       <td className="px-4 text-center">
                         <DeleteButton
                           onClick={() => handleDeleteFee(globalIndex)}

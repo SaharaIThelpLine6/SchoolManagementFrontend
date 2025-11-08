@@ -61,6 +61,7 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
         sessionName: studentFeeAdmissionData?.sessionName,
         amount: item.Fee ? item.Fee : item.amount,
         deduction: item.BlankField ? item.BlankField : 0,
+        preDeduction: item.Less || 0,
         preDeposit: item.PreviousDeposite
           ? item.PreviousDeposite
           : item.preDeposit || 0,
@@ -79,11 +80,11 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
         0
       );
       const totalDeduction = fees.reduce(
-        (sum, item) => sum + item.deduction,
+        (sum, item) => sum + item.preDeduction,
         0
       );
       const totalAmount = fees.reduce((sum, item) => sum + item.amount, 0);
-      const netPayable = totalAmount - totalPreviousDeposite - totalDeduction;
+      const netPayable =totalDeduction;
       // Set fee totals
       const calculatedTotals = {
         totalPreviousDeposite,
@@ -223,10 +224,13 @@ const StudentAdmissionFeeAcceptForm = ({ pageTitle }) => {
   }, [dispatch, pageTitle]);
 
   const onSubmit = (data) => {
+    const totalDue = data?.fees?.reduce((sum, fee) => sum + (fee.due || 0), 0);
     const payload = {
       ...data,
       userId: studentFeeAdmissionData.userId,
       admissionId: studentFeeAdmissionData.admissionId,
+      due: totalDue,
+      type: 'admission',
     };
     dispatch(setStudentFeeData(payload));
     hideModal();
