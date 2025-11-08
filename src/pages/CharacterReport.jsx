@@ -303,6 +303,14 @@ const CharacterReport = ({ pageTitle }) => {
     showModal('Filter Student', 'STUDENT_FILTER');
   }, []);
 
+  const handleCategoryModal = useCallback(() => {
+    showModal('Category', 'CHARACTER_REPORT_CATEGORY');
+  }, []);
+
+  const handleTypeModal = useCallback(() => {
+    showModal('Type', 'CHARACTER_REPORT_TYPE');
+  }, []);
+
   const handleCancelEdit = () => {
     setIsEditMode(false);
     setReportUpdateId(null);
@@ -459,19 +467,25 @@ const CharacterReport = ({ pageTitle }) => {
                   registerKey={'Date'}
                   require={'Date Require'}
                 />
-
-                <DefaultSelect
-                  label={`${translate('Varient')}: `}
-                  nameField={'ReportCetName'}
-                  registerKey={'ReportCetID'}
-                  valueField={'ReportCetID'}
-                  options={studentReportCet}
-                  type={'number'}
-                  require={'This Field is require'}
-                  disabled={false}
-                  defaultSelect={false}
-                  unicode={true}
-                />
+                <div className='flex items-center'>
+                  <DefaultSelect
+                    label={`${translate('Varient')}: `}
+                    nameField={'ReportCetName'}
+                    registerKey={'ReportCetID'}
+                    valueField={'ReportCetID'}
+                    options={studentReportCet}
+                    type={'number'}
+                    require={'This Field is require'}
+                    disabled={false}
+                    defaultSelect={false}
+                    unicode={true}
+                  />
+                  <div className='pt-[32px]'>
+                    <button type='button' className='btn btn_plus bg-info py-[6px] px-[8px] text-white' onClick={handleCategoryModal}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                    </button>
+                  </div>
+                </div>
 
                 <div className='flex items-center'>
                   <DefaultSelect
@@ -486,9 +500,9 @@ const CharacterReport = ({ pageTitle }) => {
                     defaultSelect={false}
                     unicode={true}
                   />
-                  <div>
-                    <button type='button' className='btn '>
-                      <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                  <div className='pt-[32px]'>
+                    <button type='button' className='btn btn_plus bg-info py-[6px] px-[8px] text-white' onClick={handleTypeModal}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
                     </button>
                   </div>
                 </div>

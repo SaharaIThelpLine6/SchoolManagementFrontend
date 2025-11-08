@@ -48,6 +48,8 @@ import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
 import ChangeStudentClass from '../view/accounting/ChangeStudentClass';
+import CharecterReportCategoryModal from '../view/darulikama/CharecterReportCategoryModal';
+import CharecterReportTypeModal from '../view/darulikama/CharecterReportTypeModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -208,6 +210,8 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'OPEN_TODAYS_BALANCE' && <TodaysBalance />}
                 {modalType === 'CHANGE_STUDENT_CLASS' && <ChangeStudentClass userId={id} />}
+                {modalType === 'CHARACTER_REPORT_CATEGORY' && <CharecterReportCategoryModal />}
+                {modalType === 'CHARACTER_REPORT_TYPE' && <CharecterReportTypeModal />}
               </div>
             )}
           </div>

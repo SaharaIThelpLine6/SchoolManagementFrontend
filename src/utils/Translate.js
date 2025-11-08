@@ -313,10 +313,8 @@ const useTranslate = () => {
     'Data Export': 'ডাটা এক্সপোর্ট',
     'Send single and multiple SMS': 'একক এবং একাধিক এসএমএস পাঠান',
     'SMS Sending Form': 'মেসেজ প্রেরণ ফর্ম',
-    'Missing or invalid data provided':
-      'অনুপস্থিত বা অবৈধ তথ্য সরবরাহ করা হয়েছে',
-    'Buy SMS': 'মেসেজ কিনতে',
-    'Buy SMS': 'মেসেজ কিনতে',
+    'Missing or invalid data provided': 'কোন তথ্য পাওয়া যায়নি',
+    'Buy SMS': 'মেসেজ কিনুন',
     '1st Month': '১ম মাস',
     '2nd Month': '২য় মাস',
     '3rd Month': '৩য় মাস',
@@ -697,6 +695,8 @@ const useTranslate = () => {
     'Division Arabic-4': 'ডিভিশন আরবী-৪',
     'Division Arabic-5': 'ডিভিশন আরবী-৫',
     'Division Arabic-6': 'ডিভিশন আরবী-৬',
+    'Exam Condition': 'পরীক্ষার কন্ডিশন',
+    'Deposit Costs Report': 'জমা খরচের প্রতিবেদন',
   };
 
   return (key) =>

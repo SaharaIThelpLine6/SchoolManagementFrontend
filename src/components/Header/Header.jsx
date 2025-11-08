@@ -14,6 +14,7 @@ import DropdownUser from "./DropdownUser";
 import Button from "../Button/Button";
 import useTranslate from "../../utils/Translate";
 import SvgIcon from "../icons/SvgIcon";
+import { useGetSoftwareDetailsQuery } from "../../features/userInfo/userInfoQuerySlice";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -21,6 +22,7 @@ const Header = () => {
   const isOpen = useSelector((state) => state.sideBar.isOpen);
   const { data: userPayInfo, refetch } = useGetUserInfoQuery();
   const { data: institutionInfo } = useGetInstitutionInfoQuery();
+  const { data: softwareDetails } = useGetSoftwareDetailsQuery();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logo, setLogo] = useState(null);
@@ -33,6 +35,11 @@ const Header = () => {
       setLogo(imageSrc);
     }
   }, [institutionInfo]);
+
+  useEffect(() =>{
+    console.log(softwareDetails);
+    
+  }, [softwareDetails])
 
   const handleOpenModal = useCallback(() => {
     showModal("Payment", "PAYMENT");
@@ -186,7 +193,7 @@ const Header = () => {
             {bnBijoy2Unicode(institutionInfo?.InstitutionName) || ""}
           </h2>
 
-          <form className="w-full max-w-[180px] sm:max-w-[220px] md:max-w-[250px] relative">
+          {/* <form className="w-full max-w-[180px] sm:max-w-[220px] md:max-w-[250px] relative">
             <svg
               stroke="currentColor"
               fill="currentColor"
@@ -205,7 +212,7 @@ const Header = () => {
               placeholder="Search"
               className="w-full rounded-full bg-[#EDEDED] h-8 sm:h-9 pl-10 pr-4 py-2 text-sm sm:text-base placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-custom-focus transition-colors"
             />
-          </form>
+          </form> */}
         </div>
 
         <div className="flex items-center gap-3 flex-shrink-0">
@@ -235,6 +242,11 @@ const Header = () => {
               Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
             </p>
           )}
+
+          {
+            softwareDetails && <a className="btn btn-info bg-blue-500 py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-[14px] text-white whitespace-nowrap d-inline block flex gap-2" href={softwareDetails.UpSoftwareLink}><svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-device-desktop-down"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M13.5 16h-9.5a1 1 0 0 1 -1 -1v-10a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v7.5" /><path d="M7 20h5" /><path d="M9 16v4" /><path d="M19 16v6" /><path d="M22 19l-3 3l-3 -3" /></svg> Download</a>
+          }
+          
 
           <Button onClick={handleOpenModal} className="!rounded-full">
             {translate("Pay Now")}

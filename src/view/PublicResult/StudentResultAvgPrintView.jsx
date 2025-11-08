@@ -224,7 +224,7 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
             className="absolute -top-[40px] left-1/2 w-[60px] -translate-x-1/2"
           />
           <p>.....................................</p>
-          <p>মুহতামিম</p>
+          <p>{bnBijoy2Unicode(studentResult?.PrincipalName)}</p>
           <p>তারিখ : </p>
         </div>
         <div className="text-center">
@@ -234,7 +234,7 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
             className="absolute top-[0px] right-0 w-[60px] -translate-x-1/2"
           />
           <p>.....................................</p>
-          <p>নাযেম</p>
+          <p>{bnBijoy2Unicode(studentResult?.NajemName)}</p>
           <p>তারিখ : </p>
         </div>
       </div>

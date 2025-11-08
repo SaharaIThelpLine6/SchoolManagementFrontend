@@ -369,6 +369,11 @@ export const menuData = [
     icon: "MdOutlinePayment",
     subMenu: [
       {
+        id: "2",
+        name: "Pay Now",
+        route: "/checkout",
+      },
+      {
         id: "1",
         name: "Payment History",
         route: "/payment-history",
