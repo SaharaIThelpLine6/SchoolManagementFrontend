@@ -8,6 +8,7 @@ import bnBijoy2Unicode from '../../../utils/conveter';
 import toBengaliWords from '../../../utils/numberToBanglaWords';
 
 const StudentFeeReportPdf = ({ result }) => {
+  console.log(result, 'result');
   const {
     data: institutionInfo,
     error: institutionInfoError,
