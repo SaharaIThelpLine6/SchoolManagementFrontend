@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -23,14 +23,17 @@ export const classSlice = createApi({
     }),
     getSubClassLisByClassID: builder.query({
       query: (id) => `view_subclass/${id}`,
-      providesTags: ["SubClassList"],
+      providesTags: ['SubClassList'],
     }),
     getSubClassList: builder.query({
       query: () => 'view_subclass',
       providesTags: ['SubClassList'],
     }),
     getAcademicSubjects: builder.query({
-      query: () => 'academic_subjects',
+      query: (SubClassID) => ({
+        url: 'academic_subjects',
+        params: SubClassID ? { SubClassID } : {},
+      }),
       providesTags: ['Academic_Subjects'],
     }),
     getSubClasss: builder.query({
@@ -49,10 +52,10 @@ export const classSlice = createApi({
     }),
     changeStudentClass: builder.mutation({
       query: (studentData) => ({
-        url: "update_student_class",
-        method: "POST",
+        url: 'update_student_class',
+        method: 'POST',
         body: studentData,
-      }), 
+      }),
     }),
 
     // PUT endpoint - Update academic subject
@@ -84,12 +87,12 @@ export const classSlice = createApi({
 export const {
   useGetClassListQuery,
   useGetSubClassListQuery,
- useGetSubClassLisByClassIDQuery,
- useChangeStudentClassMutation,
+  useGetSubClassLisByClassIDQuery,
+  useChangeStudentClassMutation,
   useGetAcademicSubjectsQuery,
   useGetSubClasssQuery,
   useCreateAcademicSubjectMutation,
   useUpdateAcademicSubjectMutation,
   useDeleteAcademicSubjectMutation,
-  useGetLastSerialSubjectQuery
+  useGetLastSerialSubjectQuery,
 } = classSlice;

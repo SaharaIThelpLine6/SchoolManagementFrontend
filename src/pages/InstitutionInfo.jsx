@@ -23,9 +23,15 @@ const InstitutionInfo = () => {
   } = useGetInstitutionInfoQuery();
   const [updateInstitutionInfo] = useUpdateInstitutionInfoMutation();
 
-  console.log(institutionInfo, 'institutionInfo');
 
   const [images, setImages] = useState({
+    Logo: null,
+    SignaturePrincipal: null,
+    SignatureNajem: null,
+    SignatureAccountant: null,
+  });
+
+  const [imageFiles, setImageFiles] = useState({
     Logo: null,
     SignaturePrincipal: null,
     SignatureNajem: null,
@@ -50,45 +56,48 @@ const InstitutionInfo = () => {
       setImages(loadedImages);
     }
   }, [institutionInfo]);
+
   const methods = useForm();
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = methods;
+const {
+  register,
+  handleSubmit,
+  setValue,
+  formState: { errors },
+} = methods;
 
-  useEffect(() => {
-    if (institutionInfo) {
-      reset({
-        AccountantName: institutionInfo.AccountantName || "",
-        Address: institutionInfo.Address || "",
-        AdmissionType: institutionInfo.AdmissionType || false,
-        AraAddress: institutionInfo.AraAddress || "",
-        AraContactNumber: institutionInfo.AraContactNumber || "",
-        AraDistrict: institutionInfo.AraDistrict || "",
-        AraInstitutionName: institutionInfo.AraInstitutionName?.trim() || "",
-        AraPoliceStation: institutionInfo.AraPoliceStation || "",
-        AraPostOffice: institutionInfo.AraPostOffice || "",
-        AraVillage: institutionInfo.AraVillage || "",
-        ContactNumber: institutionInfo.ContactNumber || "",
-        District: institutionInfo.District || "",
-        Elhaq: institutionInfo.Elhaq || "",
-        Email: institutionInfo.Email || "",
-        EngAddress: institutionInfo.EngAddress || "",
-        EngInstitutionName: institutionInfo.EngInstitutionName || "",
-        InstitutionName: institutionInfo.InstitutionName || "",
-        InstitutionCode: institutionInfo.InstitutionCode || "",
-        NajemName: institutionInfo.NajemName || "",
-        PoliceStation: institutionInfo.PoliceStation || "",
-        PostOffice: institutionInfo.PostOffice || "",
-        PrincipalName: institutionInfo.PrincipalName || "",
-        SMSMobile: institutionInfo.SMSMobile || "",
-        Village: institutionInfo.Village || "",
-      });
-    }
-  }, [institutionInfo, reset]);
+useEffect(() => {
+  if (institutionInfo) {
+    setValue('AccountantName', institutionInfo.AccountantName || '');
+    setValue('Address', institutionInfo.Address || '');
+    setValue('AdmissionType', institutionInfo.AdmissionType || false);
+    setValue('AraAddress', institutionInfo.AraAddress || '');
+    setValue('AraContactNumber', institutionInfo.AraContactNumber || '');
+    setValue('AraDistrict', institutionInfo.AraDistrict || '');
+    setValue(
+      'AraInstitutionName',
+      institutionInfo.AraInstitutionName?.trim() || ''
+    );
+    setValue('AraPoliceStation', institutionInfo.AraPoliceStation || '');
+    setValue('AraPostOffice', institutionInfo.AraPostOffice || '');
+    setValue('AraVillage', institutionInfo.AraVillage || '');
+    setValue('ContactNumber', institutionInfo.ContactNumber || '');
+    setValue('District', institutionInfo.District || '');
+    setValue('Elhaq', institutionInfo.Elhaq || '');
+    setValue('Email', institutionInfo.Email || '');
+    setValue('EngAddress', institutionInfo.EngAddress || '');
+    setValue('EngInstitutionName', institutionInfo.EngInstitutionName || '');
+    setValue('InstitutionName', institutionInfo.InstitutionName || '');
+    setValue('InstitutionCode', institutionInfo.InstitutionCode || '');
+    setValue('NajemName', institutionInfo.NajemName || '');
+    setValue('PoliceStation', institutionInfo.PoliceStation || '');
+    setValue('PostOffice', institutionInfo.PostOffice || '');
+    setValue('PrincipalName', institutionInfo.PrincipalName || '');
+    setValue('SMSMobile', institutionInfo.SMSMobile || '');
+    setValue('Village', institutionInfo.Village || '');
+  }
+}, [institutionInfo, setValue]);
+
 
   // Image preview state & refs
   const [imagePreviews, setImagePreviews] = useState(Array(4).fill(null));
@@ -108,29 +117,47 @@ const InstitutionInfo = () => {
         setImagePreviews(updatedPreviews);
       };
       reader.readAsDataURL(file);
+
+      // Store the actual file object
+      const imageKeys = ["Logo", "SignaturePrincipal", "SignatureNajem", "SignatureAccountant"];
+      const key = imageKeys[index];
+
+      setImageFiles(prev => ({
+        ...prev,
+        [key]: file
+      }));
     }
   };
 
   const onSubmit = async (data) => {
     try {
-      const updatedData = {
-        ...data,
-        // Logo: imagePreviews[0] || images.Logo,
-        // SignaturePrincipal: imagePreviews[1] || images.SignaturePrincipal,
-        // SignatureNajem: imagePreviews[2] || images.SignatureNajem,
-        // SignatureAccountant: imagePreviews[3] || images.SignatureAccountant,
-      };
+      // Create FormData to handle file uploads
+      const formData = new FormData();
 
-      await updateInstitutionInfo(updatedData).unwrap();
+      // Append all text fields
+      Object.keys(data).forEach(key => {
+        formData.append(key, data[key]);
+      });
+
+      // Append image files if they exist
+      Object.keys(imageFiles).forEach(key => {
+        if (imageFiles[key]) {
+          formData.append(key, imageFiles[key]);
+        }
+      });
+
+      await updateInstitutionInfo(formData).unwrap();
       Swal.fire({
         title: "Institution info updated successfully!",
         icon: "success",
         draggable: true,
       });
     } catch (error) {
+      console.error("Update error:", error);
       Swal.fire({
         icon: "error",
         title: "Institution update failed",
+        text: error?.data?.message || "Please try again",
         confirmButtonColor: "#3B82F6",
       });
     }
@@ -151,6 +178,7 @@ const InstitutionInfo = () => {
       <form
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white p-6 md:p-4 rounded-xl shadow-lg"
+        encType="multipart/form-data"
       >
         <div className="px-[24px] text-[14px]">
           <div className="flex flex-col gap-5 w-full">
@@ -228,7 +256,6 @@ const InstitutionInfo = () => {
                       ref={(el) => (fileInputs.current[index] = el)}
                       onChange={(e) => handleImageChange(e, index)}
                       className="hidden"
-                      disabled
                     />
 
                     <p className="text-sm font-medium text-gray-700">

@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Button from '../components/Button/Button';
+import DefaultSelect from '../components/Forms/DefaultSelect';
 import SvgIcon from '../components/icons/SvgIcon';
 import Loading from '../components/Loading/Loading';
 import DefaultPagination from '../components/Pagination/DefaultPagination';
@@ -11,6 +13,7 @@ import { setPageName } from '../features/auth/authSlice';
 import {
   useDeleteAcademicSubjectMutation,
   useGetAcademicSubjectsQuery,
+  useGetSubClassListQuery,
 } from '../features/class/classQuerySlice';
 import bnBijoy2Unicode from '../utils/conveter';
 import { showModal } from '../utils/ModalControlar';
@@ -21,13 +24,18 @@ const PAGE_SIZE = 10;
 const Book = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
+  const method = useForm();
+  const { watch } = method;
   const translate = useTranslate();
-
+  const selectedSubClassID = watch('SubClassID');
   const {
     data: academicSubjectData = [],
     isError,
     isLoading,
-  } = useGetAcademicSubjectsQuery();
+  } = useGetAcademicSubjectsQuery(selectedSubClassID);
+
+  const { data: subClassData = [] } = useGetSubClassListQuery();
+
   const [deleteSubject, { isLoading: isDeleting }] =
     useDeleteAcademicSubjectMutation();
 
@@ -147,6 +155,17 @@ const Book = ({ pageTitle }) => {
       sorter: 'string',
     },
     {
+      title: translate('Marhala/Class'),
+      field: 'SubClass',
+      hozAlign: 'left',
+      width: 200,
+      render: (data) => (
+        <div className="flex justify-center items-center">
+          <p>{bnBijoy2Unicode(data?.ClassGroup?.SubClass)}</p>
+        </div>
+      ),
+    },
+    {
       title: translate('English Name'),
       field: 'EngSubjectName',
       hozAlign: 'left',
@@ -212,42 +231,59 @@ const Book = ({ pageTitle }) => {
 
   if (isLoading) return <Loading />;
   if (isError) return <div>{translate('Error loading data')}</div>;
-
   return (
-    <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
-      <div className="block w-full overflow-x-auto">
-        <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
-          <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
-            {translate('Book List')}
-          </h3>
-          <Button onClick={() => handleOpenModal()}>
-            {translate('Add Book')}
-          </Button>
-        </div>
-
-        {currentData.length > 0 ? (
-          <>
-            <SortableTable
-              columns={columnsDistribution}
-              data={paginatedData}
-              isFilterColumn={false}
-            />
-
-            {/* Pagination Controls */}
-
-            <DefaultPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          </>
-        ) : (
-          <div className="text-center py-8">
-            {translate('No data available')}
+    <FormProvider {...method}>
+      <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
+        <div className="block w-full overflow-x-auto">
+          <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
+            <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
+              {translate('Book List')}
+            </h3>
+            <Button onClick={() => handleOpenModal()}>
+              {translate('Add Book')}
+            </Button>
           </div>
-        )}
+          {/* Filter Section */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center w-full">
+              <DefaultSelect
+                options={subClassData || []}
+                require={'Sub Class is required'}
+                nameField={'SubClass'}
+                valueField={'SubClassID'}
+                registerKey={'SubClassID'}
+                type={'number'}
+                label={translate('Sub Class')}
+                unicode={true}
+              />
+            </div>
+            {/* এখানে চাইলে ভবিষ্যতে আরও ফিল্টার ফিল্ড যোগ করা যাবে */}
+          </div>
+
+          {currentData.length > 0 ? (
+            <>
+              <SortableTable
+                columns={columnsDistribution}
+                data={paginatedData}
+                isFilterColumn={false}
+              />
+
+              {/* Pagination Controls */}
+
+              <DefaultPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </>
+          ) : (
+            <div className="text-center py-8">
+              {translate('No data available')}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </FormProvider>
   );
 };
 
