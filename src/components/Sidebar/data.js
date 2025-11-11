@@ -418,24 +418,24 @@ export const menuData = [
   //   icon: "HiDotsCircleHorizontal",
   //   subMenu: [],
   // },
-  // {
-  //   id: "12",
-  //   name: "Settings",
-  //   route: "/settings",
-  //   icon: "IoMdSettings",
-  //   subMenu: [
-  //     {
-  //       id: "1",
-  //       name: "User Roles",
-  //       route: "/settings/add-login-users",
-  //     },
-  //     {
-  //       id: "2",
-  //       name: "Settings",
-  //       route: "/settings",
-  //     },
-  //   ],
-  // },
+  {
+    id: "10",
+    name: "Settings",
+    route: "/settings",
+    icon: "IoMdSettings",
+    subMenu: [
+      {
+        id: "1",
+        name: "User Roles",
+        route: "/settings/add-login-users",
+      },
+      {
+        id: "2",
+        name: "Settings",
+        route: "/settings",
+      },
+    ],
+  },
   // {
   //   id: "13",
   //   name: "Help",
@@ -443,5 +443,5 @@ export const menuData = [
   //   icon: "IoMdHelp",
   //   subMenu: [],
   // },
-  
+
 ];

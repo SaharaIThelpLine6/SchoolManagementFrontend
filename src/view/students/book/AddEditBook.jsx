@@ -94,7 +94,6 @@ const AddEditBook = ({ id }) => {
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
           {/* Left Column */}
-          <div className="space-y-4">
             <DefaultInput
               label={translate('Serial Number')}
               registerKey="SubSerial"
@@ -116,10 +115,8 @@ const AddEditBook = ({ id }) => {
               loading={isSubClassLoading}
               unicode
             />
-          </div>
 
           {/* Right Column */}
-          <div className="space-y-4">
             <DefaultInput
               label={translate('Subject Name')}
               registerKey="SubjectName"
@@ -127,11 +124,15 @@ const AddEditBook = ({ id }) => {
             />
 
             <DefaultInput
+              label={translate('English Name')}
+              registerKey="EngSubjectName"
+              isRtl={true}
+            />
+            <DefaultInput
               label={translate('Arabic Name')}
               registerKey="ArabicSubject"
               isRtl={true}
             />
-          </div>
 
           {/* Buttons */}
           <div className="col-span-2 flex justify-end gap-3 mt-6">

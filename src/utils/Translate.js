@@ -599,6 +599,7 @@ const useTranslate = () => {
     'Institution Details': 'প্রতিষ্ঠানের বিস্তারিত',
     'Institution Logo Upload': 'প্রতিষ্ঠানের লোগো আপলোড',
     Signatories: 'দায়িত্বপ্রাপ্ত ব্যক্তিবর্গ',
+    Logo: 'ছবি',
     'Institution Name is required': 'প্রতিষ্ঠানের নাম আবশ্যক',
     'Exam Board Name is require': 'পরীক্ষা বোর্ডের নাম আবশ্যক',
     'Result devision is require': 'ফলাফল বিভাগ আবশ্যক',

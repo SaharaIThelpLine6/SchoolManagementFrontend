@@ -1,9 +1,10 @@
-import { skipToken } from '@reduxjs/toolkit/query';
 import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import Swal from 'sweetalert2';
 import Button from '../../../components/Button/Button';
+import CopyButton from '../../../components/Button/CopyButton';
+import DeleteButton from '../../../components/Button/DeleteButton';
 import EditButton from '../../../components/Button/EditButton';
 import SingleCheckbox from '../../../components/Checkboxes/SingleCheckbox';
 import DefaultInput from '../../../components/Forms/DefaultInput';
@@ -12,6 +13,7 @@ import DefaultPagination from '../../../components/Pagination/DefaultPagination'
 import SortableTable from '../../../components/Tables/SortableTable';
 import { setPageName } from '../../../features/auth/authSlice';
 import {
+  useDeleteAverageExamConditionSettingMutation,
   useGetAverageExamConditionAllQuery,
   usePostAverageExamConditionSettingMutation,
   useUpdateAverageExamConditionSettingMutation,
@@ -58,6 +60,8 @@ const AverageDetermination = ({ pageTitle }) => {
     usePostAverageExamConditionSettingMutation();
   const [updateAverageExamConditionSetting] =
     useUpdateAverageExamConditionSettingMutation();
+  const [deleteAverageExamConditionSetting] =
+    useDeleteAverageExamConditionSettingMutation();
 
   const {
     data: averageExamConditionAllData = [],
@@ -65,37 +69,35 @@ const AverageDetermination = ({ pageTitle }) => {
     isError,
     isFetching,
     refetch,
-  } = useGetAverageExamConditionAllQuery(
-    averageDetermineFilter?.SessionID &&
-      averageDetermineFilter?.ExamID &&
-      averageDetermineFilter?.SubClassID
-      ? {
-          SessionID: averageDetermineFilter?.SessionID,
-          ExamID: averageDetermineFilter?.ExamID,
-          SubClassID: averageDetermineFilter?.SubClassID,
-        }
-      : skipToken
-  );
+  } = useGetAverageExamConditionAllQuery({
+    SessionID: averageDetermineFilter?.SessionID || 'all',
+    ExamID: averageDetermineFilter?.ExamID || 'all',
+    SubClassID: averageDetermineFilter?.SubClassID || 'all',
+  });
 
-  console.log(averageExamConditionAllData, 'averageExamConditionAllData');
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  useEffect(() => {
-    if (
-      averageDetermineFilter?.SessionID &&
-      averageDetermineFilter?.ExamID &&
-      averageDetermineFilter?.SubClassID
-    ) {
-      reset({
-        SessionID: averageDetermineFilter.SessionID,
-        ExamID: averageDetermineFilter.ExamID,
-        SubClassID: averageDetermineFilter.SubClassID,
-      });
-      setEditingId(null);
-    }
-  }, [averageDetermineFilter, reset]);
+useEffect(() => {
+  if (
+    averageDetermineFilter?.SessionID &&
+    averageDetermineFilter?.ExamID &&
+    averageDetermineFilter?.SubClassID
+  ) {
+    // Get current form values
+    const currentValues = getValues();
+
+    // Reset form with only filter values, preserve other form data
+    reset({
+      ...currentValues, // Keep existing form data
+      SessionID: averageDetermineFilter.SessionID,
+      ExamID: averageDetermineFilter.ExamID,
+      SubClassID: averageDetermineFilter.SubClassID,
+    });
+    setEditingId(null);
+  }
+}, [averageDetermineFilter, reset, getValues]);
 
   const examConditionData = useMemo(() => {
     if (!averageExamConditionAllData) return [];
@@ -111,8 +113,9 @@ const AverageDetermination = ({ pageTitle }) => {
     return examConditionData.slice(start, start + PAGE_SIZE);
   }, [examConditionData, currentPage]);
 
+  // ------------------ Handlers ------------------
   const handleEdit = (row) => {
-    setEditingId(row.ID);
+    setEditingId(row.ID); // update mode
     setValue('DivisionTopNumber', row.DivisionTopNumber);
 
     Array.from({ length: 6 }).forEach((_, i) => {
@@ -121,11 +124,59 @@ const AverageDetermination = ({ pageTitle }) => {
       setValue(`Division${index}`, row[`Division${index}`]);
       setValue(`DivisionAra${index}`, row[`DivisionAra${index}`]);
       setValue(`Color${index}`, row[`Color${index}`] || false);
-      setValue(`TopNum${index}`, row.HifzCondition[`TopNum${index}`]);
+      setValue(`TopNum${index}`, row.HifzCondition?.[`TopNum${index}`] || '');
     });
   };
 
-  const handleDelete = () => {};
+  const handleCopyRowToForm = (row) => {
+    setEditingId(null); // new mode
+
+
+    setValue('DivisionTopNumber', row.DivisionTopNumber);
+
+    Array.from({ length: 6 }).forEach((_, i) => {
+      const index = i + 1;
+      setValue(`DivisionNumber${index}`, row[`DivisionNumber${index}`]);
+      setValue(`Division${index}`, row[`Division${index}`]);
+      setValue(`DivisionAra${index}`, row[`DivisionAra${index}`]);
+      setValue(`Color${index}`, row[`Color${index}`] || false);
+      setValue(`TopNum${index}`, row.HifzCondition?.[`TopNum${index}`] || '');
+    });
+  };
+
+  const handleDelete = async (id) => {
+    if (!id) return;
+
+    Swal.fire({
+      title: 'তুমি কি নিশ্চিত?',
+      text: 'এই ডেটা মুছে ফেলা হবে!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'হ্যাঁ, মুছে ফেলো!',
+      cancelButtonText: 'বাতিল',
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteAverageExamConditionSetting(id).unwrap();
+          Swal.fire({
+            title: 'মুছে ফেলা হয়েছে!',
+            text: 'ডেটাটি সফলভাবে মুছে ফেলা হয়েছে।',
+            icon: 'success',
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        } catch (error) {
+          Swal.fire({
+            title: 'ত্রুটি!',
+            text: error?.data?.error || 'ডেটা মুছে ফেলা সম্ভব হয়নি।',
+            icon: 'error',
+          });
+        }
+      }
+    });
+  };
 
   const onSubmit = async (data) => {
     try {
@@ -139,8 +190,10 @@ const AverageDetermination = ({ pageTitle }) => {
       let response;
 
       if (!editingId) {
+        // New create
         response = await postAverageExamConditionSetting(payload).unwrap();
       } else {
+        // Update
         response = await updateAverageExamConditionSetting(payload).unwrap();
       }
 
@@ -151,7 +204,6 @@ const AverageDetermination = ({ pageTitle }) => {
       }).then(() => {
         refetch();
         setSelectedRows([]);
-        reset();
         setEditingId(null);
       });
     } catch (error) {
@@ -163,16 +215,16 @@ const AverageDetermination = ({ pageTitle }) => {
     }
   };
 
+  // ------------------ Table Columns ------------------
   const columns = [
     {
       title: translate('Action'),
       hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <div className="flex justify-center items-center gap-2">
-            <EditButton onClick={() => handleEdit(row)} />
-            {/* <DeleteButton onClick={() => handleDelete(row.ID)} /> */}
-          </div>
+          <CopyButton onClick={() => handleCopyRowToForm(row)} text="" />
+          <EditButton onClick={() => handleEdit(row)} />
+          <DeleteButton onClick={() => handleDelete(row.ID)} />
         </div>
       ),
     },
@@ -195,98 +247,29 @@ const AverageDetermination = ({ pageTitle }) => {
       hozAlign: 'center',
       render: (row) => bnBijoy2Unicode(row.SubClass.SubClass),
     },
-    {
-      title: translate('>=1'),
-      field: 'DivisionNumber1',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Division-1'),
-      field: 'Division1',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Division Arabic-1'),
-      field: 'DivisionAra1',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('>=2'),
-      field: 'DivisionNumber2',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Division-2'),
-      field: 'Division2',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Division Arabic-2'),
-      field: 'DivisionAra2',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('>=3'),
-      field: 'DivisionNumber3',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Division-3'),
-      field: 'Division3',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Division Arabic-3'),
-      field: 'DivisionAra3',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('>=4'),
-      field: 'DivisionNumber4',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Division-4'),
-      field: 'Division4',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Division Arabic-4'),
-      field: 'DivisionAra4',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('>=5'),
-      field: 'DivisionNumber5',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Division-5'),
-      field: 'Division5',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Division Arabic-5'),
-      field: 'DivisionAra5',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('>=6'),
-      field: 'DivisionNumber6',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Division-6'),
-      field: 'Division6',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Division Arabic-6'),
-      field: 'DivisionAra6',
-      hozAlign: 'center',
-    },
+    ...Array.from({ length: 6 }).flatMap((_, i) => {
+      const index = i + 1;
+      return [
+        {
+          title: translate(`>=${index}`),
+          field: `DivisionNumber${index}`,
+          hozAlign: 'center',
+        },
+        {
+          title: translate(`Division-${index}`),
+          field: `Division${index}`,
+          hozAlign: 'center',
+        },
+        {
+          title: translate(`Division Arabic-${index}`),
+          field: `DivisionAra${index}`,
+          hozAlign: 'center',
+        },
+      ];
+    }),
   ];
 
+  // ------------------ Render ------------------
   return (
     <div>
       <FormProvider {...methods}>
@@ -294,6 +277,7 @@ const AverageDetermination = ({ pageTitle }) => {
           <PointConditionFilteringForm onFilter={setAverageDetermineFilter} />
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-3">
+            {/* Score Threshold Inputs */}
             <div className="flex flex-col space-y-3">
               <DefaultInput
                 registerKey="DivisionTopNumber"
@@ -314,6 +298,7 @@ const AverageDetermination = ({ pageTitle }) => {
               ))}
             </div>
 
+            {/* Bangla Columns */}
             <FormColumn
               title="Bangla"
               inputs={Array(6)
@@ -325,6 +310,7 @@ const AverageDetermination = ({ pageTitle }) => {
                 }))}
             />
 
+            {/* Arabic Columns */}
             <FormColumn
               title="Arabic"
               inputs={Array(6)
@@ -335,13 +321,13 @@ const AverageDetermination = ({ pageTitle }) => {
                 }))}
             />
 
+            {/* Top Score Checkboxes */}
             <div className="flex flex-col space-y-2">
               <div className="flex justify-center items-center my-4">
                 <h2 className="text-lg font-semibold text-gray-800">
                   {translate('Highest recitation score')}
                 </h2>
               </div>
-
               <div className="grid grid-cols-1 gap-2">
                 {Array(6)
                   .fill()
@@ -385,7 +371,7 @@ const AverageDetermination = ({ pageTitle }) => {
         </form>
       </FormProvider>
 
-      {/* Table Section */}
+      {/* Table */}
       <div className="mt-5">
         {isLoading || isFetching ? (
           <Loading />
@@ -404,7 +390,6 @@ const AverageDetermination = ({ pageTitle }) => {
               isLoading={isLoading || isFetching}
               isFilterColumn={false}
             />
-
             {totalPages > 1 && (
               <DefaultPagination
                 currentPage={currentPage}

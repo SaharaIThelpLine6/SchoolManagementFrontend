@@ -97,7 +97,7 @@ export const examSlice = createApi({
       // invalidatesTags: ["ExamFeeSettings"],
     }),
     getAverageExamConditionAll: builder.query({
-      query: ({ SessionID, ExamID, SubClassID }) => ({
+      query: ({ SessionID = 'all', ExamID = 'all', SubClassID = 'all' }) => ({
         url: `average_exam_condition_all/${SessionID}/${ExamID}/${SubClassID}`,
         method: 'GET',
       }),
@@ -108,6 +108,7 @@ export const examSlice = createApi({
         },
       ],
     }),
+
     postAverageExamConditionSetting: builder.mutation({
       query: (body) => ({
         url: `average_exam_condition_setting`,
@@ -122,6 +123,13 @@ export const examSlice = createApi({
         url: `average_exam_condition_setting`,
         method: 'PUT',
         body,
+      }),
+      invalidatesTags: ['AverageExamConditionAll'],
+    }),
+    deleteAverageExamConditionSetting: builder.mutation({
+      query: (id) => ({
+        url: `average_exam_condition_setting/${id}`,
+        method: 'DELETE',
       }),
       invalidatesTags: ['AverageExamConditionAll'],
     }),
@@ -311,4 +319,5 @@ export const {
   useGetReportSettingQuery,
   usePostReportSettingMutation,
   useGetExamFeeSettingByExamIDQuery,
+  useDeleteAverageExamConditionSettingMutation
 } = examSlice;

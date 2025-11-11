@@ -1,22 +1,22 @@
-import { useEffect } from "react";
-import Loading from "../components/Loading/Loading";
-import { useGetExamConditionsSettingsQuery } from "../features/settings/settingsQuerySlice";
-import AverageVCondition from "./AverageVCondition";
-import PointVCondition from "./PointVCondition";
+import { useEffect } from 'react';
+import Loading from '../components/Loading/Loading';
+import { useGetSettingsQuery } from '../features/settings/settingsQuerySlice';
+import AverageVCondition from './AverageVCondition';
+import PointVCondition from './PointVCondition';
 
 const ExamCondition = () => {
-  const { data, error, isLoading } = useGetExamConditionsSettingsQuery();
+  // const { data, error, isLoading } = useGetExamConditionsSettingsQuery();
+  const { data: response, isLoading, error, refetch } = useGetSettingsQuery();
+  const data = response?.data.find((item) => item.ID == 20);
 
   useEffect(() => {
     if (data) {
-      console.log("Exam Condition Data:", data);
+      console.log('Exam Condition Data:', data);
     }
   }, [data]);
 
   if (isLoading) {
-    return (
-      <Loading/>
-    );
+    return <Loading />;
   }
 
   if (error) {
@@ -35,7 +35,9 @@ const ExamCondition = () => {
         ) : data.Action === 2 ? (
           <PointVCondition pageTitle="Pointwise Fee Condition" />
         ) : (
-          <div className="text-gray-500 text-center">No valid exam condition found.</div>
+          <div className="text-gray-500 text-center">
+            No valid exam condition found.
+          </div>
         )
       ) : (
         <div className="text-gray-500 text-center">No data available.</div>
@@ -45,4 +47,3 @@ const ExamCondition = () => {
 };
 
 export default ExamCondition;
-
