@@ -1,29 +1,30 @@
+import { skipToken } from "@reduxjs/toolkit/query";
 import { useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { setPageName } from "../../../features/auth/authSlice";
-import useTranslate from "../../../utils/Translate";
-import Button from "../../../components/Button/Button";
 import { FormProvider, useForm } from "react-hook-form";
-import DefaultSelect from "../../../components/Forms/DefaultSelect";
-import DefaultInput from "../../../components/Forms/DefaultInput";
-import { useGetAcademicSubjectsQuery } from "../../../features/class/classQuerySlice";
+import { useDispatch } from "react-redux";
 import Swal from "sweetalert2";
-import SortableTable from "../../../components/Tables/SortableTable";
-import StudentFeeGroup from "../../../view/exam/StudentFeeGroup";
 import { examPointConditionStatus } from "../../../Data/userReportsData";
+import Button from "../../../components/Button/Button";
+import CopyButton from "../../../components/Button/CopyButton"; // Add this import
+import DeleteButton from "../../../components/Button/DeleteButton";
+import EditButton from "../../../components/Button/EditButton";
 import ExamRoutingCheckbox from "../../../components/Checkboxes/ExamRoutingCheckbox";
+import SingleCheckbox from "../../../components/Checkboxes/SingleCheckbox";
+import DefaultInput from "../../../components/Forms/DefaultInput";
+import DefaultSelect from "../../../components/Forms/DefaultSelect";
+import DefaultPagination from "../../../components/Pagination/DefaultPagination";
+import SortableTable from "../../../components/Tables/SortableTable";
+import { setPageName } from "../../../features/auth/authSlice";
+import { useGetAcademicSubjectsQuery } from "../../../features/class/classQuerySlice";
 import {
   useGetPointWiseExamConditionQuery,
   usePostExamPointConditionMutation,
   useUpdatePointWiseExamConditionMutation,
 } from "../../../features/exam/examQuerySlice";
-import { skipToken } from "@reduxjs/toolkit/query";
-import PointConditionFilteringForm from "./PointConditionFilteringForm";
+import useTranslate from "../../../utils/Translate";
 import bnBijoy2Unicode from "../../../utils/conveter";
-import SingleCheckbox from "../../../components/Checkboxes/SingleCheckbox";
-import EditButton from "../../../components/Button/EditButton";
-import DeleteButton from "../../../components/Button/DeleteButton";
-import DefaultPagination from "../../../components/Pagination/DefaultPagination";
+import StudentFeeGroup from "../../../view/exam/StudentFeeGroup";
+import PointConditionFilteringForm from "./PointConditionFilteringForm";
 
 const PAGE_SIZE = 10;
 
@@ -36,15 +37,15 @@ const PointCondition = ({ pageTitle, title }) => {
       SessionID: null,
       ExamID: null,
       SubClassID: null,
-      SubjectID: "",
-      PassNumber: "",
+      SubjectID: '',
+      PassNumber: '',
       MeariAction: false,
-      MaxNumber: "",
+      MaxNumber: '',
       ...Array.from({ length: 7 }).reduce(
         (acc, _, index) => ({
           ...acc,
-          [`DivisionNumber${index}`]: "",
-          [`Division${index}`]: "",
+          [`DivisionNumber${index}`]: '',
+          [`Division${index}`]: '',
           [`Color${index}`]: false,
         }),
         {}
@@ -109,15 +110,15 @@ const PointCondition = ({ pageTitle, title }) => {
         SessionID: pointConditionFilter.SessionID,
         ExamID: pointConditionFilter.ExamID,
         SubClassID: pointConditionFilter.SubClassID,
-        SubjectID: "",
-        PassNumber: "",
+        SubjectID: '',
+        PassNumber: '',
         MeariAction: false,
-        MaxNumber: "",
+        MaxNumber: '',
         ...Array.from({ length: 7 }).reduce(
           (acc, _, index) => ({
             ...acc,
-            [`DivisionNumber${index}`]: "",
-            [`Division${index}`]: "",
+            [`DivisionNumber${index}`]: '',
+            [`Division${index}`]: '',
             [`Color${index}`]: false,
           }),
           {}
@@ -134,14 +135,29 @@ const PointCondition = ({ pageTitle, title }) => {
     return examConditionData.slice(start, start + PAGE_SIZE);
   }, [examConditionData, currentPage]);
 
-
-
   const handleEdit = (row) => {
     setEditingId(row.ID);
-    setValue("SubjectID", row.BookID);
-    setValue("PassNumber", row.PassNumber);
-    setValue("MeariAction", row.MeariAction);
-    setValue("MaxNumber", row.MaxNumber);
+    setValue('SubjectID', row.BookID);
+    setValue('PassNumber', row.PassNumber);
+    setValue('MeariAction', row.MeariAction);
+    setValue('MaxNumber', row.MaxNumber);
+
+    for (let i = 0; i < 7; i++) {
+      setValue(`DivisionNumber${i}`, row[`DivisionNumber${i + 1}`]);
+      setValue(`Division${i}`, row[`Division${i + 1}`]);
+      setValue(`Color${i}`, row[`Color${i + 1}`] !== null);
+    }
+  };
+
+  // Add Copy functionality
+  const handleCopyRowToForm = (row) => {
+    console.log(row, 'row');
+    setEditingId(null); // Set to null for new entry mode
+
+    setValue('SubjectID', row.BookID);
+    setValue('PassNumber', row.PassNumber);
+    setValue('MeariAction', row.MeariAction);
+    setValue('MaxNumber', row.MaxNumber);
 
     for (let i = 0; i < 7; i++) {
       setValue(`DivisionNumber${i}`, row[`DivisionNumber${i + 1}`]);
@@ -156,15 +172,15 @@ const PointCondition = ({ pageTitle, title }) => {
       SessionID,
       ExamID,
       SubClassID,
-      SubjectID: "",
-      PassNumber: "",
+      SubjectID: '',
+      PassNumber: '',
       MeariAction: false,
-      MaxNumber: "",
+      MaxNumber: '',
       ...Array.from({ length: 7 }).reduce(
         (acc, _, index) => ({
           ...acc,
-          [`DivisionNumber${index}`]: "",
-          [`Division${index}`]: "",
+          [`DivisionNumber${index}`]: '',
+          [`Division${index}`]: '',
           [`Color${index}`]: false,
         }),
         {}
@@ -209,16 +225,16 @@ const PointCondition = ({ pageTitle, title }) => {
       if (editingId) {
         await updateExamPointCondition({ ...payload, ID: editingId }).unwrap();
         Swal.fire({
-          icon: "success",
-          title: "আপডেট সফল হয়েছে!",
-          text: "তথ্যটি সফলভাবে আপডেট করা হয়েছে।",
+          icon: 'success',
+          title: 'আপডেট সফল হয়েছে!',
+          text: 'তথ্যটি সফলভাবে আপডেট করা হয়েছে।',
         });
       } else {
         await postExamPointCondition(payload).unwrap();
         Swal.fire({
-          icon: "success",
-          title: "সংরক্ষণ সফল হয়েছে!",
-          text: "তথ্যটি সফলভাবে সংরক্ষণ করা হয়েছে।",
+          icon: 'success',
+          title: 'সংরক্ষণ সফল হয়েছে!',
+          text: 'তথ্যটি সফলভাবে সংরক্ষণ করা হয়েছে।',
         });
       }
 
@@ -228,86 +244,69 @@ const PointCondition = ({ pageTitle, title }) => {
       const errMsg =
         error?.data?.error ||
         (editingId
-          ? "তথ্য আপডেটে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
-          : "তথ্য সংরক্ষণে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।");
+          ? 'তথ্য আপডেটে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।'
+          : 'তথ্য সংরক্ষণে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
       Swal.fire({
-        icon: "error",
-        title: "ব্যর্থ হয়েছে!",
+        icon: 'error',
+        title: 'ব্যর্থ হয়েছে!',
         text: errMsg,
       });
     }
   };
 
   const handleDelete = async (id) => {
-    // const result = await Swal.fire({
-    //   title: "আপনি কি নিশ্চিত?",
-    //   text: "এই তথ্যটি মুছে ফেলা হবে!",
-    //   icon: "warning",
-    //   showCancelButton: true,
-    //   confirmButtonColor: "#3085d6",
-    //   cancelButtonColor: "#d33",
-    //   confirmButtonText: "হ্যাঁ, মুছে ফেলুন!",
-    //   cancelButtonText: "বাতিল করুন",
-    // });
-    // if (result.isConfirmed) {
-    //   try {
-    //     // You'll need to implement the delete mutation in your API slice
-    //     // await deleteExamPointCondition(id).unwrap();
-    //     await refetch();
-    //     Swal.fire("মুছে ফেলা হয়েছে!", "তথ্যটি মুছে ফেলা হয়েছে।", "success");
-    //   } catch (error) {
-    //     Swal.fire("ব্যর্থ হয়েছে!", "তথ্য মুছে ফেলতে সমস্যা হয়েছে।", "error");
-    //   }
-    // }
+    // Your delete implementation here
   };
 
+  // Update columns to include CopyButton
   const columns = [
     {
-      title: translate("Action"),
-      hozAlign: "center",
+      title: translate('Action'),
+      hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
+          <CopyButton onClick={() => handleCopyRowToForm(row)} text="" />
           <EditButton onClick={() => handleEdit(row)} />
           <DeleteButton onClick={() => handleDelete(row.ID)} />
         </div>
       ),
     },
-    { title: "SL", field: "ID", hozAlign: "center" },
+    { title: 'SL', field: 'ID', hozAlign: 'center' },
     {
-      title: translate("Session"),
-      field: "SessionID",
-      hozAlign: "center",
-      render: (row) => bnBijoy2Unicode(row?.Session?.SessionName) || "",
+      title: translate('Session'),
+      field: 'SessionID',
+      hozAlign: 'center',
+      render: (row) => bnBijoy2Unicode(row?.Session?.SessionName) || '',
     },
     {
-      title: translate("Exam Name"),
-      field: "ExamID",
-      hozAlign: "center",
-      render: (row) => bnBijoy2Unicode(row?.Exam?.ExamName) || "",
+      title: translate('Exam Name'),
+      field: 'ExamID',
+      hozAlign: 'center',
+      render: (row) => bnBijoy2Unicode(row?.Exam?.ExamName) || '',
     },
     {
-      title: translate("Class/Jamaat"),
-      field: "SubClassID",
-      hozAlign: "center",
-      render: (row) => bnBijoy2Unicode(row?.SubClass?.ClassName) || "",
+      title: translate('Class/Jamaat'),
+      field: 'SubClassID',
+      hozAlign: 'center',
+      render: (row) => bnBijoy2Unicode(row?.SubClass?.ClassName) || '',
     },
     {
-      title: translate("Subject"),
-      field: "SubjectID",
-      hozAlign: "center",
-      render: (row) => bnBijoy2Unicode(row?.Subject?.SubjectName) || "",
+      title: translate('Subject'),
+      field: 'SubjectID',
+      hozAlign: 'center',
+      render: (row) => bnBijoy2Unicode(row?.Subject?.SubjectName) || '',
     },
     {
-      title: translate("Pass Number"),
-      field: "PassNumber",
-      hozAlign: "center",
+      title: translate('Pass Number'),
+      field: 'PassNumber',
+      hozAlign: 'center',
     },
-    { title: translate("Max Number"), field: "MaxNumber", hozAlign: "center" },
+    { title: translate('Max Number'), field: 'MaxNumber', hozAlign: 'center' },
     {
-      title: translate("Meari Action"),
-      field: "MeariAction",
-      hozAlign: "center",
-      render: (row) => (row.MeariAction ? "✔️" : "❌"),
+      title: translate('Meari Action'),
+      field: 'MeariAction',
+      hozAlign: 'center',
+      render: (row) => (row.MeariAction ? '✔️' : '❌'),
     },
   ];
 
@@ -323,26 +322,26 @@ const PointCondition = ({ pageTitle, title }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5 my-5">
             <DefaultSelect
-              label={translate("Subject") + " :"}
+              label={translate('Subject') + ' :'}
               options={filteredSubjects ?? []}
               valueField="SubjectID"
               nameField="SubjectName"
               registerKey="SubjectID"
-              require={"This is required!"}
+              require={'This is required!'}
               disabled={editingId ? true : false}
-            />{" "}
+            />{' '}
             <DefaultInput
               registerKey="PassNumber"
-              label={translate("Pass Number") + " :"}
+              label={translate('Pass Number') + ' :'}
               type="number"
-              require={"This is required!"}
+              require={'This is required!'}
             />
             <div className="sm:col-span-2">
               <ExamRoutingCheckbox
-                label={translate("Point Condition Status") + " :"}
+                label={translate('Point Condition Status') + ' :'}
                 options={examPointConditionStatus}
                 registerKey="MeariAction"
-                value={watch("MeariAction")}
+                value={watch('MeariAction')}
               />
             </div>
           </div>
@@ -351,19 +350,19 @@ const PointCondition = ({ pageTitle, title }) => {
             <div className="flex flex-col space-y-3">
               <DefaultInput
                 registerKey="MaxNumber"
-                label={translate("Highest score")}
+                label={translate('Highest score')}
                 type="number"
                 labelPosition="left"
-                require={"This is required!"}
+                require={'This is required!'}
               />
               {[...Array(7)].map((_, index) => (
                 <DefaultInput
                   key={`score-threshold-${index}`}
                   registerKey={`DivisionNumber${index}`}
-                  label={`${translate(index === 0 ? "If >=" : "Or If >=")}`}
+                  label={`${translate(index === 0 ? 'If >=' : 'Or If >=')}`}
                   type="number"
                   labelPosition="left"
-                  require={"This is required!"}
+                  require={'This is required!'}
                 />
               ))}
             </div>
@@ -377,15 +376,15 @@ const PointCondition = ({ pageTitle, title }) => {
                   <div className="flex-1">
                     <DefaultInput
                       registerKey={`Division${index}`}
-                      label={translate("Then Division")}
+                      label={translate('Then Division')}
                       type="text"
                       labelPosition="left"
-                      require={"This is required!"}
+                      require={'This is required!'}
                     />
                   </div>
                   <div className="flex items-center">
                     <SingleCheckbox
-                      label={translate("Silver Color")}
+                      label={translate('Silver Color')}
                       registerKey={`Color${index}`}
                     />
                   </div>
@@ -396,14 +395,14 @@ const PointCondition = ({ pageTitle, title }) => {
 
           <div className="w-full flex gap-4">
             <Button type="submit" className="w-full md:w-auto">
-              {editingId ? translate("Update") : translate("Save")}
+              {editingId ? translate('Update') : translate('Save')}
             </Button>
             <Button
               type="button"
               className="w-full md:w-auto !bg-[#22c55e] text-white"
               onClick={handleCancelEdit}
             >
-              {translate("Reset")}
+              {translate('Reset')}
             </Button>
           </div>
         </form>
@@ -430,8 +429,8 @@ const PointCondition = ({ pageTitle, title }) => {
         ) : (
           <div className="text-center py-8">
             {pointConditionFilter
-              ? translate("No data available for the selected filters")
-              : translate("Please select filters to view exam conditions")}
+              ? translate('No data available for the selected filters')
+              : translate('Please select filters to view exam conditions')}
           </div>
         )}
       </div>
