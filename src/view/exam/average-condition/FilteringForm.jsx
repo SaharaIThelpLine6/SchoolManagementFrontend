@@ -31,20 +31,20 @@ const FilteringForm = ({ onFilter }) => {
     <FormProvider {...methods}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-       
+
           <DefaultSelect
             options={sessionData ?? []}
             registerKey="SessionID"
             placeholder="বছর নির্বাচন করুন"
             nameField="SessionName"
             valueField={"SessionID"}
-            label={translate("Session") + " :"}
+            label={translate("Session")}
 
             unicode={true}
           />
         </div>
         <div>
-   
+
           <DefaultSelect
             options={examNameData ?? []}
             registerKey="ExamID"
@@ -52,19 +52,19 @@ const FilteringForm = ({ onFilter }) => {
             nameField="ExamName"
             valueField={"ExamID"}
             unicode={true}
-            label={translate("Exam") + " :"}
+            label={translate("Exam")}
 
           />
         </div>
         <div>
-   
+
           <DefaultSelect
             options={subClassListData ?? []}
             registerKey="SubClassID"
             placeholder="শ্রেণি নির্বাচন করুন"
             nameField="SubClass"
             valueField={"SubClassID"}
-            label={translate("SubClass") + " :"}
+            label={translate("SubClass")}
             unicode={true}
           />
         </div>

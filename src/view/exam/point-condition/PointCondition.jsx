@@ -322,7 +322,7 @@ const PointCondition = ({ pageTitle, title }) => {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5 my-5">
             <DefaultSelect
-              label={translate('Subject') + ' :'}
+              label={translate('Subject')}
               options={filteredSubjects ?? []}
               valueField="SubjectID"
               nameField="SubjectName"
@@ -332,13 +332,13 @@ const PointCondition = ({ pageTitle, title }) => {
             />{' '}
             <DefaultInput
               registerKey="PassNumber"
-              label={translate('Pass Number') + ' :'}
+              label={translate('Pass Number')}
               type="number"
               require={'This is required!'}
             />
             <div className="sm:col-span-2">
               <ExamRoutingCheckbox
-                label={translate('Point Condition Status') + ' :'}
+                label={translate('Point Condition Status')}
                 options={examPointConditionStatus}
                 registerKey="MeariAction"
                 value={watch('MeariAction')}
