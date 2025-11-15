@@ -91,6 +91,7 @@ import MaritListForm from "../pages/public/MaritListForm";
 import MaritListResult from "../pages/public/MaritListResult";
 import OwenGuide from "./OwenGuide";
 import { RequirePermission } from "./RequirePermission";
+import QueryTwo from "../pages/QueryTwo";
 
 const router = createBrowserRouter([
   {
@@ -842,6 +843,10 @@ const router = createBrowserRouter([
   {
     path: '/query',
     element: <Query />,
+  },
+  {
+    path: '/query-two',
+    element: <QueryTwo />,
   },
   {
     path: '*',
