@@ -70,6 +70,8 @@ import PointBasedMarkSheet from "../pages/PointBasedMarkSheet";
 import PointBasedResultCreateUpdate from "../pages/PointBasedResultCreateUpdate";
 import PointBasedResultEntry from "../pages/PointBasedResultEntry";
 import PointVReport from "../pages/PointVReport";
+import QueryThree from "../pages/QueryThree";
+import QueryTwo from "../pages/QueryTwo";
 import RFIDCard from "../pages/RFIDCard";
 import Report from "../pages/Report";
 import SMS from "../pages/SMS";
@@ -91,7 +93,6 @@ import MaritListForm from "../pages/public/MaritListForm";
 import MaritListResult from "../pages/public/MaritListResult";
 import OwenGuide from "./OwenGuide";
 import { RequirePermission } from "./RequirePermission";
-import QueryTwo from "../pages/QueryTwo";
 
 const router = createBrowserRouter([
   {
@@ -847,6 +848,10 @@ const router = createBrowserRouter([
   {
     path: '/query-two',
     element: <QueryTwo />,
+  },
+  {
+    path: '/query-three',
+    element: <QueryThree />,
   },
   {
     path: '*',

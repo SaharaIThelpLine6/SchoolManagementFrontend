@@ -19,7 +19,7 @@ import { useGetResidentialQuery } from '../features/settings/settingsQuerySlice'
 import { fetchSettingsData } from '../features/settings/settingsSlice';
 import { useGetUserReportQuery } from '../features/userReports/userReportsSlice';
 import useTranslate from '../utils/Translate';
-import ArobicNumberClassBasedTC from '../view/exam/ExamReportPdf/Number class based/ArobicNumberClassBasedTC';
+import StatisticsOfAllExaminees from '../view/exam/ExamReportPdf/Statistics of all examinees/StatisticsOfAllExaminees';
 
 const ExamReport = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -287,7 +287,7 @@ const ExamReport = ({ pageTitle }) => {
         </div>
       </div>
 
-      <ArobicNumberClassBasedTC/>
+      <StatisticsOfAllExaminees />
     </div>
   );
 };
