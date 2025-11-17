@@ -1,14 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchResultFieldData,
-  setResultError,
-} from "../../features/studentResultPublicView/studentResultPublicViewSlice";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import bnBijoy2Unicode from "../../utils/conveter";
 import "animate.css/animate.min.css";
-import { toast, cssTransition } from "react-toastify";
+import { useEffect, useRef, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { cssTransition, toast } from "react-toastify";
+import {
+  setResultError
+} from "../../features/studentResultPublicView/studentResultPublicViewSlice";
+import bnBijoy2Unicode from "../../utils/conveter";
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
   exit: "animate__animated animate__bounceOut",
@@ -29,7 +28,7 @@ const ResultRequest = () => {
   } = useSelector((state) => state.studentResultPublicView);
   const { schoolid } = useParams();
   const [searchParams, setSearchParams] = useSearchParams()
-  
+
   const {
     register,
     handleSubmit,
@@ -155,7 +154,7 @@ const ResultRequest = () => {
       });
     }
 
-    
+
   }, [resultStatus, setResultError]);
   return (
     <FormProvider {...{ methods }}>
@@ -172,7 +171,7 @@ const ResultRequest = () => {
             <div className="w-full">
               <div className="relative z-20 bg-transparent">
                 <select
-                  className={`relative z-20 w-full appearance-none rounded border-2 bg-transparent py-3 px-4 outline-none transition transition ease-linear duration-300	 
+                  className={`relative z-20 w-full appearance-none rounded border-2 bg-transparent py-3 px-4 outline-none transition ease-linear duration-300
                                         ${
                                           errors.SessionID
                                             ? "border-red-500 focus:border-[#f44336]"

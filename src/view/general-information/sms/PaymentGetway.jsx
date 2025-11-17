@@ -1,9 +1,9 @@
-import React, { useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import Button from "../../../components/Button/Button";
+import DefaultInput from "../../../components/Forms/DefaultInput";
 import { showModal } from "../../../utils/ModalControlar";
 import useTranslate from "../../../utils/Translate";
-import DefaultInput from "../../../components/Forms/DefaultInput";
-import Button from "../../../components/Button/Button";
 
 // Mobile Banking Logos
 const nagadLogo = "/banking/Nagad.png";
@@ -36,8 +36,8 @@ const PaymentGetway = () => {
   const paymentMethods = {
     Mobile: [
       { name: "bKash", logo: bkashLogo, account: "01822930055" },
-      { name: "Rocket", logo: rocketLogo, account: "01822930056" },
-      { name: "Nagad", logo: nagadLogo, account: "01822930057" },
+      { name: "Rocket", logo: rocketLogo, account: "018229300554" },
+      { name: "Nagad", logo: nagadLogo, account: "01822930055" },
     ],
     "Net Banking": [
       { name: "Al-Arafah Islami Bank", logo: alArafaIslamicLogo },
@@ -57,7 +57,7 @@ const PaymentGetway = () => {
 
   // Instruction texts for different methods
   const instructions = {
-    Mobile: `টাকা ${selectedMethod.account} নম্বরে ${selectedMethod.name} সেন্ড মানি করুন। ফি সহ মেসেজ হতে Trxid নিয়ে 
+    Mobile: `টাকা ${selectedMethod.account} নম্বরে ${selectedMethod.name} সেন্ড মানি করুন। ফি সহ মেসেজ হতে Trxid নিয়ে
     (Trxid/Varify Code/Chack Number) এ প্রদান করে <strong>Send</strong> বাটনে ক্লিক করুন।
     দ্রঃ উক্ত নম্বরে টাকাই সেন্ড মানি করতে হবে। অন্যথায় রিকোয়েস্ট গ্রহণ করা হবে না।`,
     "Net Banking":

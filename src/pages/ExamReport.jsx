@@ -9,7 +9,12 @@ import {
   colorStatus,
   examReports,
   examVacationStatus,
+  fourLanguageExamReport,
   language,
+  oneLanguageExamReport,
+  sevenLanguageExamReport,
+  sixLanguageExamReport,
+  threeLanguageExamReport,
 } from '../Data/userReportsData';
 import { setPageName } from '../features/auth/authSlice';
 import { useGetClassListQuery } from '../features/class/classQuerySlice';
@@ -19,7 +24,8 @@ import { useGetResidentialQuery } from '../features/settings/settingsQuerySlice'
 import { fetchSettingsData } from '../features/settings/settingsSlice';
 import { useGetUserReportQuery } from '../features/userReports/userReportsSlice';
 import useTranslate from '../utils/Translate';
-import StatisticsOfAllExaminees from '../view/exam/ExamReportPdf/Statistics of all examinees/StatisticsOfAllExaminees';
+import BanglaOneColumn from '../view/exam/ExamReportPdf/Student fee withdrawal lists/BanglaOneColumn';
+import BanglaTwoColumn from '../view/exam/ExamReportPdf/Student fee withdrawal lists/BanglaTwoColumn';
 
 const ExamReport = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -29,7 +35,20 @@ const ExamReport = ({ pageTitle }) => {
 
   const { control, handleSubmit } = methods;
 
-  const selectedReportID = useWatch({ control, name: 'ReportID' });
+  // useWatch দিয়ে form এর values গুলো নিন
+  const formValues = useWatch({ control });
+  const selectedReportID = formValues?.ReportID;
+  const languageID = formValues?.id;
+  const selectedPdfID = formValues?.PdfID;
+
+  console.log(
+    'selectedReportID:',
+    selectedReportID,
+    'languageID:',
+    languageID,
+    'selectedPdfID:',
+    selectedPdfID
+  );
 
   // Define which ReportIDs should show which fields
   const shouldShowFields = (fieldName) => {
@@ -42,6 +61,7 @@ const ExamReport = ({ pageTitle }) => {
           'ExamID',
           'ClassID',
           'Langauge',
+          'PdfSelect',
         ].includes(fieldName);
       case 2:
         return fieldName === 'ReportID';
@@ -54,6 +74,7 @@ const ExamReport = ({ pageTitle }) => {
           'ClassID',
           'Langauge',
           'ExamVacationStatus',
+          'PdfSelect',
         ].includes(fieldName);
       case 4:
         return [
@@ -63,6 +84,7 @@ const ExamReport = ({ pageTitle }) => {
           'ExamID',
           'ClassID',
           'Langauge',
+          'PdfSelect',
         ].includes(fieldName);
       case 5:
         return [
@@ -71,17 +93,28 @@ const ExamReport = ({ pageTitle }) => {
           'RDID',
           'ExamID',
           'ClassID',
-          'Langauge',
           'ColorStatus',
         ].includes(fieldName);
       case 6:
-        return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'ClassID'].includes(
-          fieldName
-        );
+        return [
+          'ReportID',
+          'SessionID',
+          'RDID',
+          'ExamID',
+          'ClassID',
+          'Langauge',
+          'PdfSelect',
+        ].includes(fieldName);
       case 7:
-        return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'ClassID'].includes(
-          fieldName
-        );
+        return [
+          'ReportID',
+          'SessionID',
+          'RDID',
+          'ExamID',
+          'ClassID',
+          'Langauge',
+          'PdfSelect',
+        ].includes(fieldName);
       case 8:
         return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'ClassID'].includes(
           fieldName
@@ -98,6 +131,7 @@ const ExamReport = ({ pageTitle }) => {
 
   const [queryParams, setQueryParams] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [selectedPdfData, setSelectedPdfData] = useState(null);
 
   const { isFetching, isError, error } = useGetUserReportQuery(queryParams, {
     skip: !queryParams,
@@ -141,27 +175,71 @@ const ExamReport = ({ pageTitle }) => {
     }
   }, [errorMessage]);
 
+  const reportMap = {
+    1: oneLanguageExamReport,
+    3: threeLanguageExamReport,
+    4: fourLanguageExamReport,
+    6: sixLanguageExamReport,
+    7: sevenLanguageExamReport,
+  };
+
+  const getPDFOptions = () => {
+    if (!selectedReportID || !languageID) return [];
+
+    const reportList = reportMap[selectedReportID];
+    if (!reportList) return [];
+
+    const found = reportList.find((item) => item.id === Number(languageID));
+    return found?.pdfList || [];
+  };
+
+  const pdfOptions = getPDFOptions();
+
+  // যখন PdfID change হয়, তখন selected PDF data সেট করুন
+  useEffect(() => {
+    if (selectedPdfID && pdfOptions.length > 0) {
+      const foundPdf = pdfOptions.find(
+        (pdf) => pdf.PdfID === Number(selectedPdfID)
+      );
+      setSelectedPdfData(foundPdf || null);
+    } else {
+      setSelectedPdfData(null);
+    }
+  }, [selectedPdfID, pdfOptions]);
+
   const onSubmit = (formData) => {
     const params = {
       report_id: formData.ReportID,
-      session_id: Number(data.session_id),
-      class_id: Number(data.class_id),
-      exam_id: Number(data.exam_id),
-      residential_id: Number(data.residential_id),
-      language_id: Number(data.language_id),
+      session_id: Number(formData.SessionID),
+      class_id: Number(formData.ClassID),
+      exam_id: Number(formData.ExamID),
+      residential_id: Number(formData.RDID),
+      language_id: Number(formData.id),
+      pdf_id: Number(formData.PdfID),
     };
 
     Object.keys(params).forEach(
       (key) =>
         (params[key] === undefined || params[key] === '') && delete params[key]
     );
-    // console.log(params);
-    setQueryParams(params);
+    console.log('Submitted params:', params);
+    // setQueryParams(params);
+    window.print();
+
+  };
+
+  // selected PDF এর নাম বের করার ফাংশন
+  const getSelectedPdfName = () => {
+    if (!selectedPdfID || !pdfOptions.length) return '';
+    const selectedPdf = pdfOptions.find(
+      (pdf) => pdf.PdfID === Number(selectedPdfID)
+    );
+    return selectedPdf ? selectedPdf.name : '';
   };
 
   return (
-    <div className="font-SolaimanLipi">
-      <div className="flex flex-col gap-3">
+    <div className="">
+      <div className="flex flex-col font-SolaimanLipi gap-3 print:hidden">
         <div className="print:hidden w-full border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
           <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">
             {translate('Exam Report')}
@@ -248,6 +326,7 @@ const ExamReport = ({ pageTitle }) => {
                   unicode={true}
                 />
               )}
+
               {shouldShowFields('ExamVacationStatus') && (
                 <div className="col-span-2">
                   <ExamRoutingCheckbox
@@ -262,6 +341,7 @@ const ExamReport = ({ pageTitle }) => {
                   />
                 </div>
               )}
+
               {shouldShowFields('ColorStatus') && (
                 <div className="">
                   <ExamRoutingCheckbox
@@ -277,6 +357,17 @@ const ExamReport = ({ pageTitle }) => {
                 </div>
               )}
 
+              {shouldShowFields('PdfSelect') && pdfOptions.length > 0 && (
+                <DefaultSelect
+                  label={translate('PDF Select')}
+                  nameField="name"
+                  registerKey="PdfID"
+                  valueField="PdfID"
+                  options={pdfOptions}
+                  require="This Field is required"
+                />
+              )}
+
               <div className="md:col-span-4 flex justify-end">
                 <Button type="submit" loading={isFetching}>
                   {translate('Preview')}
@@ -287,7 +378,28 @@ const ExamReport = ({ pageTitle }) => {
         </div>
       </div>
 
-      <StatisticsOfAllExaminees />
+      {/* StatisticsOfAllExaminees কম্পোনেন্টে প্রয়োজনীয় props পাস করুন */}
+        <div className="hidden print:block">
+          {Number(selectedReportID) === 1 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 1 && <BanglaOneColumn />}
+
+          {Number(selectedReportID) === 1 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 2 && <BanglaTwoColumn />}
+        </div>
+
+      {/* <StatisticsOfAllExaminees
+        queryParams={queryParams}
+        selectedPdfID={selectedPdfID}
+        selectedPdfName={getSelectedPdfName()}
+        pdfOptions={pdfOptions}
+        reportData={{
+          reportID: selectedReportID,
+          languageID: languageID,
+          pdfData: selectedPdfData
+        }}
+      /> */}
     </div>
   );
 };
