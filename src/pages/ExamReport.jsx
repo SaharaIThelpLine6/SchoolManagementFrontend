@@ -332,7 +332,7 @@ const ExamReport = ({ pageTitle }) => {
                   <ExamRoutingCheckbox
                     label={translate('Exam Routine')}
                     options={examVacationStatus}
-                    registerKey="IsActive"
+                    registerKey="ERIsActive"
                     require={
                       selectedReportID === 1 || selectedReportID === 2
                         ? 'This Field is required'
@@ -347,7 +347,7 @@ const ExamReport = ({ pageTitle }) => {
                   <ExamRoutingCheckbox
                     label={translate('Color Status')}
                     options={colorStatus}
-                    registerKey="IsActive"
+                    registerKey="CSIsActive"
                     require={
                       selectedReportID === 1 || selectedReportID === 2
                         ? 'This Field is required'
@@ -379,15 +379,15 @@ const ExamReport = ({ pageTitle }) => {
       </div>
 
       {/* StatisticsOfAllExaminees কম্পোনেন্টে প্রয়োজনীয় props পাস করুন */}
-        <div className="hidden print:block">
-          {Number(selectedReportID) === 1 &&
-            Number(languageID) === 1 &&
-            Number(selectedPdfID) === 1 && <BanglaOneColumn />}
+      <div className="hidden print:block">
+        {Number(selectedReportID) === 1 &&
+          Number(languageID) === 1 &&
+          Number(selectedPdfID) === 1 && <BanglaOneColumn />}
 
-          {Number(selectedReportID) === 1 &&
-            Number(languageID) === 1 &&
-            Number(selectedPdfID) === 2 && <BanglaTwoColumn />}
-        </div>
+        {Number(selectedReportID) === 1 &&
+          Number(languageID) === 1 &&
+          Number(selectedPdfID) === 2 && <BanglaTwoColumn />}
+      </div>
 
       {/* <StatisticsOfAllExaminees
         queryParams={queryParams}
