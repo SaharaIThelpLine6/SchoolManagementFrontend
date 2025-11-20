@@ -12,7 +12,7 @@ import AccountingFeeCollectionForm from "../view/accounting/AccountingFeeCollect
 
 const PAGE_SIZE = 10;
 
-const StudentFeeCollection = () => {
+const StudentAdmission = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
@@ -131,4 +131,4 @@ const StudentFeeCollection = () => {
   );
 };
 
-export default StudentFeeCollection;
+export default StudentAdmission;

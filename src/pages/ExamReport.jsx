@@ -216,6 +216,7 @@ const ExamReport = ({ pageTitle }) => {
       residential_id: Number(formData.RDID),
       language_id: Number(formData.id),
       pdf_id: Number(formData.PdfID),
+      ERIsActive: Number(formData.ERIsActive),
     };
 
     Object.keys(params).forEach(
@@ -224,7 +225,7 @@ const ExamReport = ({ pageTitle }) => {
     );
     console.log('Submitted params:', params);
     // setQueryParams(params);
-    window.print();
+    // window.print();
 
   };
 

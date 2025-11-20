@@ -78,8 +78,7 @@ import SMS from "../pages/SMS";
 import Section from "../pages/Section";
 import Session from "../pages/Session";
 import Settings from "../pages/Settings";
-import StudentFeeCollection from "../pages/StudentFeeCollection";
-import StudentsFeeCollection from "../pages/StudentsFeeCollection";
+import StudentAdmission from "../pages/StudentAdmission";
 import StudentsList from "../pages/StudentsList";
 import StudentsReport from "../pages/StudentsReport";
 import TalentCondition from "../pages/TalentCondition";
@@ -93,6 +92,7 @@ import MaritListForm from "../pages/public/MaritListForm";
 import MaritListResult from "../pages/public/MaritListResult";
 import OwenGuide from "./OwenGuide";
 import { RequirePermission } from "./RequirePermission";
+import StudentsFeeCollection from "../pages/StudentsFeeCollection";
 
 const router = createBrowserRouter([
   {
@@ -653,12 +653,12 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: 'student-fee-collection',
+                path: 'student-admission',
                 element: (
                   // <RequirePermission
                   //   permissionId={permissionsDataList.st}
                   // >
-                  <StudentFeeCollection pageTitle="Student Fee Collection" />
+                  <StudentAdmission pageTitle="Student Fee Collection" />
                   // </RequirePermission>
                 ),
               },

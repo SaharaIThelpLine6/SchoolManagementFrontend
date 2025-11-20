@@ -83,7 +83,7 @@ const BanglaOneColumn = () => {
   ];
 
   return (
-    <div className="bg-white text-gray-800 font-[kalpurush] p-6 print:p-4 max-w-4xl mx-auto border border-gray-200 shadow-sm rounded-lg">
+    <div className="bg-white text-gray-800 font-SolaimanLipi p-6 print:p-4 max-w-4xl mx-auto border border-gray-200 shadow-sm rounded-lg">
       {/* Header */}
       <div className="text-center mb-6 border-b border-gray-200 pb-4">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">

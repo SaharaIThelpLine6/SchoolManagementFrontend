@@ -1,21 +1,19 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { setPageName } from "../features/auth/authSlice";
-import SortableTable from "../components/Tables/SortableTable";
 import { useLocation } from "react-router-dom";
-import useTranslate from "../utils/Translate";
-import { showModal } from "../utils/ModalControlar";
 import Swal from "sweetalert2";
-import { io } from "socket.io-client";
-import Loading from "../components/Loading/Loading";
 import Button from "../components/Button/Button";
 import EditButton from "../components/Button/EditButton";
+import Loading from "../components/Loading/Loading";
 import DefaultPagination from "../components/Pagination/DefaultPagination";
+import SortableTable from "../components/Tables/SortableTable";
+import { setPageName } from "../features/auth/authSlice";
 import {
   useGetAllMadrasahQuery,
   useGetMadrasahStatsQuery,
   useToggleMadrasahActionMutation,
 } from "../features/userType/userTypeSlice";
+import useTranslate from "../utils/Translate";
 
 const AllMadrasah = ({ pageTitle }) => {
   const location = useLocation();
@@ -32,6 +30,7 @@ const AllMadrasah = ({ pageTitle }) => {
   const [activeFilter, setActiveFilter] = useState(initialFilter);
   const [isLoading, setIsLoading] = useState(false);
   const [users, setUsers] = useState([]);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   // Fetch data with query parameters
   const {
@@ -41,14 +40,14 @@ const AllMadrasah = ({ pageTitle }) => {
   } = useGetAllMadrasahQuery(
     {
       page: currentPage,
-      limit: 10,
+      limit: 50,
       search: searchTerm || undefined,
       filter: activeFilter !== "all" ? activeFilter : undefined,
     },
     {
-      refetchOnMountOrArgChange: true, // ✅ পেজে আসলেই আবার fetch হবে
-      refetchOnFocus: true, // ✅ tab এ ফিরে আসলেও refetch হবে
-      refetchOnReconnect: true, // ✅ internet reconnect হলে refetch হবে
+      refetchOnMountOrArgChange: true,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
     }
   );
 
@@ -75,12 +74,15 @@ const AllMadrasah = ({ pageTitle }) => {
 
   // Use stats from API
   const stats = statsData || {
-    totalUsers: 0,
-    active: 0,
-    inactive: 0,
-    online: 0,
-    offline: 0,
+    data: {
+      totalUsers: 0,
+      active: 0,
+      inactive: 0,
+      online: 0,
+      offline: 0,
+    }
   };
+
   useEffect(() => {
     if (allMadrasah) {
       setUsers(allMadrasah);
@@ -92,58 +94,79 @@ const AllMadrasah = ({ pageTitle }) => {
   const totalPages = users?.pagination?.totalPages || 1;
   const totalRecords = users?.pagination?.totalRecords || 0;
 
+  // Sorting handler
+  const handleSort = (key, sorterType) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Sorted data
+  const sortedData = useMemo(() => {
+    if (!sortConfig.key) return paginatedData;
+
+    return [...paginatedData].sort((a, b) => {
+      let aValue = a[sortConfig.key];
+      let bValue = b[sortConfig.key];
+
+      // Convert based on data type
+      if (sortConfig.key === 'ID' || sortConfig.key === 'Balance') {
+        // Number sorting
+        aValue = Number(aValue) || 0;
+        bValue = Number(bValue) || 0;
+      } else if (sortConfig.key === 'EntryDate' || sortConfig.key === 'LastLogin') {
+        // Date sorting
+        aValue = new Date(aValue).getTime();
+        bValue = new Date(bValue).getTime();
+        // Handle invalid dates
+        if (isNaN(aValue)) aValue = 0;
+        if (isNaN(bValue)) bValue = 0;
+      } else {
+        // String sorting
+        aValue = String(aValue || '').toLowerCase();
+        bValue = String(bValue || '').toLowerCase();
+      }
+
+      if (aValue < bValue) {
+        return sortConfig.direction === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [paginatedData, sortConfig]);
+
   const handleOpenModal = useCallback(() => {
     // showModal(translate("Add new madrasah"), "ADD_MADRASAH");
   }, [translate]);
 
-  const handleEditOpenModal = useCallback(
-    // (id) => {
-    //   showModal(translate("Edit madrasah"), "EDIT_MADRASAH", id);
-    // },
-    // [translate]
-  );
+  const handleEditOpenModal = useCallback(() => {
+    // showModal(translate("Edit madrasah"), "EDIT_MADRASAH", id);
+  }, []);
 
   const handleDelete = useCallback(async (id) => {
-    // Swal.fire({
-    //   title: "Are you sure?",
-    //   text: "This action will permanently delete the madrasah.",
-    //   icon: "warning",
-    //   showCancelButton: true,
-    //   confirmButtonColor: "#d33",
-    //   cancelButtonColor: "#3085d6",
-    //   confirmButtonText: "Yes, delete it!",
-    //   cancelButtonText: "Cancel",
-    // }).then(async (result) => {
-    //   if (result.isConfirmed) {
-    //     try {
-    //       setIsLoading(true);
-    //       // TODO: Replace with actual delete API call
-    //       await new Promise((resolve) => setTimeout(resolve, 1000));
-    //       Swal.fire("Deleted!", "The madrasah has been removed.", "success");
-    //     } catch (error) {
-    //       Swal.fire("Error!", "Failed to delete the madrasah.", "error");
-    //     } finally {
-    //       setIsLoading(false);
-    //     }
-    //   }
-    // });
+    // Delete logic here
   }, []);
 
   const handleSearch = useCallback((e) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   }, []);
 
   const handleFilterClick = useCallback(
     (filterType) => {
       setActiveFilter(activeFilter === filterType ? "all" : filterType);
-      setCurrentPage(1); // Reset to first page when filtering
+      setCurrentPage(1);
     },
     [activeFilter]
   );
 
   const handleClearFilter = () => {
-    setActiveFilter("all"), setSearchTerm("");
+    setActiveFilter("all");
+    setSearchTerm("");
   };
 
   const handleToggleAction = useCallback(
@@ -177,41 +200,70 @@ const AllMadrasah = ({ pageTitle }) => {
     [toggleMadrasahAction]
   );
 
+  // Custom header formatter with sort indicators
+  const headerFormatter = (title, field, isSortable = true) => {
+    if (!isSortable) return title;
+
+    const isSorted = sortConfig.key === field;
+    const isAsc = sortConfig.direction === 'asc';
+
+    return (
+      <div
+        className="flex items-center justify-center gap-1 cursor-pointer hover:text-blue-600 transition-colors"
+        onClick={() => handleSort(field, 'string')}
+      >
+        <span>{title}</span>
+        <div className="flex flex-col">
+          <span
+            className={`text-[8px] ${isSorted && isAsc ? 'text-blue-600' : 'text-gray-400'}`}
+          >
+            ▲
+          </span>
+          <span
+            className={`text-[8px] ${isSorted && !isAsc ? 'text-blue-600' : 'text-gray-400'}`}
+          >
+            ▼
+          </span>
+        </div>
+      </div>
+    );
+  };
+
   const columnsMadrasah = [
     {
-      title: translate("ID"),
-      field: "ID",
-      hozAlign: "center",
+      title: headerFormatter(translate('ID'), 'ID'),
+      field: 'ID',
+      hozAlign: 'center',
       width: 80,
       render: (row) => <p className="text-sm">{row.ID}</p>,
     },
     {
-      title: translate("Code"),
-      field: "UserCode",
-      hozAlign: "center",
+      title: headerFormatter(translate('Code'), 'UserCode'),
+      field: 'UserCode',
+      hozAlign: 'center',
       width: 90,
       render: (row) => <p className="text-sm">{row.UserCode}</p>,
     },
     {
-      title: translate("Database Name"),
-      field: "DatabaseName",
-      hozAlign: "left",
+      title: headerFormatter(translate('Database Name'), 'DatabaseName'),
+      field: 'DatabaseName',
+      hozAlign: 'left',
       render: (row) => (
         <p className="text-sm truncate max-w-xs">{row.DatabaseName}</p>
       ),
     },
     {
-      title: translate("Institution Name"),
-      field: "InstituteName",
-      hozAlign: "left",
+      title: headerFormatter(translate('Institution Name'), 'InstituteName'),
+      field: 'InstituteName',
+      hozAlign: 'left',
       render: (row) => (
         <p className="text-sm truncate max-w-xs">{row.InstituteName}</p>
       ),
     },
     {
-      title: translate("Created At"),
-      field: "EntryDate",
-      hozAlign: "center",
+      title: headerFormatter(translate('Created At'), 'EntryDate'),
+      field: 'EntryDate',
+      hozAlign: 'center',
       width: 120,
       render: (row) => (
         <p className="text-sm">
@@ -220,34 +272,34 @@ const AllMadrasah = ({ pageTitle }) => {
       ),
     },
     {
-      title: translate("Last Login"),
-      field: "LastLogin",
-      hozAlign: "center",
+      title: headerFormatter(translate('Last Login'), 'LastLogin'),
+      field: 'LastLogin',
+      hozAlign: 'center',
       width: 150,
       render: (row) => (
         <p className="text-sm">
-          {row.LastLogin ? new Date(row.LastLogin).toLocaleString() : "N/A"}
+          {row.LastLogin ? new Date(row.LastLogin).toLocaleString() : 'N/A'}
         </p>
       ),
     },
     {
-      title: translate("Balance"),
-      field: "Balance",
-      hozAlign: "center",
+      title: headerFormatter(translate('Balance'), 'Balance'),
+      field: 'Balance',
+      hozAlign: 'center',
       width: 100,
       render: (row) => <p className="text-sm font-medium">৳{row.Balance}</p>,
     },
     {
-      title: translate("Status"),
-      field: "Action",
-      hozAlign: "center",
+      title: translate('Status'),
+      field: 'Action',
+      hozAlign: 'center',
       width: 110,
       render: (row) => (
         <span
           className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            row.Action === "Active"
-              ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
+            row.Action === 'Active'
+              ? 'bg-green-100 text-green-800'
+              : 'bg-red-100 text-red-800'
           }`}
         >
           {row.Action}
@@ -255,25 +307,25 @@ const AllMadrasah = ({ pageTitle }) => {
       ),
     },
     {
-      title: translate("Online"),
-      field: "LoginStatus",
-      hozAlign: "center",
+      title: translate('Online'),
+      field: 'LoginStatus',
+      hozAlign: 'center',
       width: 100,
       render: (row) => (
         <div className="flex items-center justify-center">
           <span
             className={`inline-block w-3 h-3 rounded-full mr-2 ${
-              row.LoginStatus === 1 ? "bg-green-500" : "bg-gray-400"
+              row.LoginStatus === 1 ? 'bg-green-500' : 'bg-gray-400'
             }`}
           ></span>
-          <span>{row.LoginStatus === 1 ? "Online" : "Offline"}</span>
+          <span>{row.LoginStatus === 1 ? 'Online' : 'Offline'}</span>
         </div>
       ),
     },
     {
-      title: translate("Action"),
-      field: "actions",
-      hozAlign: "center",
+      title: translate('Action'),
+      field: 'actions',
+      hozAlign: 'center',
       width: 150,
       headerSort: false,
       render: (row) => (
@@ -281,7 +333,7 @@ const AllMadrasah = ({ pageTitle }) => {
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              checked={row.Action === "Active"}
+              checked={row.Action === 'Active'}
               onChange={() => handleToggleAction(row.UserCode)}
               className="sr-only peer"
             />
@@ -326,7 +378,7 @@ const AllMadrasah = ({ pageTitle }) => {
       <div className="flex flex-col">
         <div className="filter_header border-b border-[#e9edf4] flex flex-col sm:flex-row items-start sm:items-center justify-between pb-5 mb-6 gap-4">
           <h3 className="font-SolaimanLipi text-2xl font-bold text-gray-800">
-            {translate("All Madrasah List")}
+            {translate('All Madrasah List')}
           </h3>
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <Button
@@ -345,7 +397,7 @@ const AllMadrasah = ({ pageTitle }) => {
                   clipRule="evenodd"
                 />
               </svg>
-              {translate("Add Madrasah")}
+              {translate('Add Madrasah')}
             </Button>
           </div>
         </div>
@@ -356,7 +408,7 @@ const AllMadrasah = ({ pageTitle }) => {
             <div className="relative">
               <input
                 type="text"
-                placeholder={translate("Search madrasah...")}
+                placeholder={translate('Search madrasah...')}
                 value={searchTerm}
                 onChange={handleSearch}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full"
@@ -378,90 +430,100 @@ const AllMadrasah = ({ pageTitle }) => {
             </div>
           </div>
 
-          {/* Stats Buttons with filter functionality */}
+          {/* Stats Buttons */}
           <div
             className={`p-3 rounded-lg text-center border cursor-pointer transition-colors ${
-              activeFilter === "all"
-                ? "bg-blue-100 border-blue-300"
-                : "bg-blue-50 border-blue-100 hover:bg-blue-100"
+              activeFilter === 'all'
+                ? 'bg-blue-100 border-blue-300'
+                : 'bg-blue-50 border-blue-100 hover:bg-blue-100'
             }`}
-            onClick={() => handleFilterClick("all")}
+            onClick={() => handleFilterClick('all')}
           >
-            <div className="text-2xl font-bold text-blue-700">
-              {stats.totalUsers}
-            </div>
-            <div className="text-xs font-medium text-blue-600">
-              {translate("Total Users")}
+            <div className="flex flex-row justify-center items-center gap-3">
+              <div className="text-xs font-medium text-blue-600">
+                {translate('Total Users')}
+              </div>
+              <div className="text-base font-bold text-blue-700">
+                {stats?.data?.totalUsers}
+              </div>
             </div>
           </div>
 
           <div
             className={`p-3 rounded-lg text-center border cursor-pointer transition-colors ${
-              activeFilter === "active"
-                ? "bg-green-100 border-green-300"
-                : "bg-green-50 border-green-100 hover:bg-green-100"
+              activeFilter === 'active'
+                ? 'bg-green-100 border-green-300'
+                : 'bg-green-50 border-green-100 hover:bg-green-100'
             }`}
-            onClick={() => handleFilterClick("active")}
+            onClick={() => handleFilterClick('active')}
           >
-            <div className="text-2xl font-bold text-green-700">
-              {stats.active}
-            </div>
-            <div className="text-xs font-medium text-green-600">
-              {translate("Active")}
+            <div className="flex flex-row justify-center items-center gap-3">
+              <div className="text-xs font-medium text-green-600">
+                {translate('Active')}
+              </div>
+              <div className="text-base font-bold text-green-700">
+                {stats?.data?.active}
+              </div>
             </div>
           </div>
 
           <div
             className={`p-3 rounded-lg text-center border cursor-pointer transition-colors ${
-              activeFilter === "inactive"
-                ? "bg-red-100 border-red-300"
-                : "bg-red-50 border-red-100 hover:bg-red-100"
+              activeFilter === 'inactive'
+                ? 'bg-red-100 border-red-300'
+                : 'bg-red-50 border-red-100 hover:bg-red-100'
             }`}
-            onClick={() => handleFilterClick("inactive")}
+            onClick={() => handleFilterClick('inactive')}
           >
-            <div className="text-2xl font-bold text-red-700">
-              {stats.inactive}
-            </div>
-            <div className="text-xs font-medium text-red-600">
-              {translate("Inactive")}
+            <div className="flex flex-row justify-center items-center gap-3">
+              <div className="text-xs font-medium text-red-600">
+                {translate('Inactive')}
+              </div>
+              <div className="text-base font-bold text-red-700">
+                {stats?.data?.inactive}
+              </div>
             </div>
           </div>
 
           <div
             className={`p-3 rounded-lg text-center border cursor-pointer transition-colors ${
-              activeFilter === "online"
-                ? "bg-purple-100 border-purple-300"
-                : "bg-purple-50 border-purple-100 hover:bg-purple-100"
+              activeFilter === 'online'
+                ? 'bg-purple-100 border-purple-300'
+                : 'bg-purple-50 border-purple-100 hover:bg-purple-100'
             }`}
-            onClick={() => handleFilterClick("online")}
+            onClick={() => handleFilterClick('online')}
           >
-            <div className="text-2xl font-bold text-purple-700">
-              {stats.online}
-            </div>
-            <div className="text-xs font-medium text-purple-600">
-              {translate("Online")}
+            <div className="flex flex-row justify-center items-center gap-3">
+              <div className="text-xs font-medium text-purple-600">
+                {translate('Online')}
+              </div>
+              <div className="text-base font-bold text-purple-700">
+                {stats?.data?.online}
+              </div>
             </div>
           </div>
 
           <div
             className={`p-3 rounded-lg text-center border cursor-pointer transition-colors ${
-              activeFilter === "offline"
-                ? "bg-gray-100 border-gray-300"
-                : "bg-gray-50 border-gray-200 hover:bg-gray-100"
+              activeFilter === 'offline'
+                ? 'bg-gray-100 border-gray-300'
+                : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
             }`}
-            onClick={() => handleFilterClick("offline")}
+            onClick={() => handleFilterClick('offline')}
           >
-            <div className="text-2xl font-bold text-gray-700">
-              {stats.offline}
-            </div>
-            <div className="text-xs font-medium text-gray-600">
-              {translate("Offline")}
+            <div className="flex flex-row justify-center items-center gap-3">
+              <div className="text-xs font-medium text-gray-600">
+                {translate('Offline')}
+              </div>
+              <div className="text-base font-bold text-gray-700">
+                {stats?.data?.offline}
+              </div>
             </div>
           </div>
         </div>
 
         {/* Active filter indicator */}
-        {activeFilter !== "all" && (
+        {activeFilter !== 'all' && (
           <div className="mb-4 flex items-center">
             <span className="text-sm text-gray-600 mr-2">Active filter:</span>
             <span className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded-md capitalize">
@@ -479,7 +541,7 @@ const AllMadrasah = ({ pageTitle }) => {
         <div className="overflow-x-auto rounded-lg border border-gray-200">
           <SortableTable
             columns={columnsMadrasah}
-            data={paginatedData}
+            data={sortedData}
             className="min-w-full"
             isFilterColumn={false}
           />
@@ -488,8 +550,8 @@ const AllMadrasah = ({ pageTitle }) => {
         {/* Pagination Controls */}
         <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-600">
-            Showing {paginatedData.length} of {totalRecords} madrasahs
-            {activeFilter !== "all" && ` (filtered by ${activeFilter})`}
+            Showing {sortedData.length} of {totalRecords} madrasahs
+            {activeFilter !== 'all' && ` (filtered by ${activeFilter})`}
           </p>
           <DefaultPagination
             currentPage={currentPage}

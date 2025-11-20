@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { useForm, FormProvider } from "react-hook-form";
-import useTranslate from "../../utils/Translate";
+import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
+import useTranslate from "../../utils/Translate";
 
 import Button from "../../components/Button/Button";
+import DeleteButton from "../../components/Button/DeleteButton";
+import EditButton from "../../components/Button/EditButton";
+import DefaultSelect from "../../components/Forms/DefaultSelect";
+import SortableTable from "../../components/Tables/SortableTable";
 import {
   useDeleteStudentFeeGroupMutation,
   useGetFeeGroupNamesQuery,
@@ -14,11 +18,7 @@ import {
   usePostStudentFeeGroupMutation,
   useUpdateStudentFeeGroupMutation,
 } from "../../features/feeCollection/feeCollectionSlice";
-import SortableTable from "../../components/Tables/SortableTable";
-import EditButton from "../../components/Button/EditButton";
-import DeleteButton from "../../components/Button/DeleteButton";
 import bnBijoy2Unicode from "../../utils/conveter";
-import DefaultSelect from "../../components/Forms/DefaultSelect";
 
 const StudentFeeGroup = () => {
   const translate = useTranslate();
@@ -65,11 +65,12 @@ const StudentFeeGroup = () => {
         }).unwrap();
         toast.success(translate("Student Fee Group updated successfully!"));
       } else {
+
         await postStudentFeeGroup(payload).unwrap();
         toast.success(translate("Student Fee Group created successfully!"));
       }
 
-      reset(); // form reset
+      // reset(); // form reset
       setEditRow(null);
       refetch(); // refresh table
     } catch (error) {

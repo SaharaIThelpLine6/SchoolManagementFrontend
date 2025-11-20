@@ -287,6 +287,11 @@ export const examSlice = createApi({
       },
       providesTags: ['StudentFee', 'SelectedStudentPerFee'],
     }),
+    getExamRoutine: builder.query({
+      query: ({ sessionID, examID, subclassID, printID }) =>
+        `exam_routine?sessionID=${sessionID}&examID=${examID}&subclassID=${subclassID}&printID=${printID}`,
+      providesTags: ['ExamRoutine'],
+    }),
   }),
 });
 
@@ -319,5 +324,6 @@ export const {
   useGetReportSettingQuery,
   usePostReportSettingMutation,
   useGetExamFeeSettingByExamIDQuery,
-  useDeleteAverageExamConditionSettingMutation
+  useDeleteAverageExamConditionSettingMutation,
+  useGetExamRoutineQuery
 } = examSlice;

@@ -16,6 +16,7 @@ const useTranslate = () => {
     'Database Name': 'ডাটাবেজ নাম',
     'Institution Name': 'প্রতিষ্ঠানের নাম',
     'Last Login': 'শেষ লগইন',
+    'Report/Type': 'রিপোর্ট/ধরণ',
     'Payment System': 'পেমেন্ট সিস্টেম',
     Quantity: 'পরিমাণ',
     'User Roles': 'ব্যবহারকারীর ভূমিকা',

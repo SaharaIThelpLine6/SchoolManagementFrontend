@@ -183,11 +183,6 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ['GeneralLedgersByFundAndCaids'],
     }),
-
-    getStudentFeeGroups: builder.query({
-      query: () => `student_fee_groups`,
-      providesTags: ['StudentFeeGroups'],
-    }),
     getChartOFAccount: builder.query({
       query: () => `chart_of_account`,
       providesTags: ['ChartOFAccount'],

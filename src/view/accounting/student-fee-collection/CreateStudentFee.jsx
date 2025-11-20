@@ -111,7 +111,7 @@ const CreateStudentFee = () => {
   );
 
   // Fetch student fee admissions data
-  const sfgnid = 3;
+  const sfgnid = 1;
   const {
     data: studentFeeAdmissionData,
     error: admissionError,
@@ -122,6 +122,7 @@ const CreateStudentFee = () => {
       skip: !filteredSelectedPerStudentFee?.AdmissionID || !sfgnid,
     }
   );
+
 
   const {
     data: studentOtherData,
@@ -351,8 +352,8 @@ const CreateStudentFee = () => {
         icon: 'error',
         title: 'ত্রুটি!',
         text:
-          admissionError?.data?.error ||
-          'Student Fee Admission data লোড করতে সমস্যা হয়েছে।',
+          studentOtherDueError?.data?.error ||
+          'Student Fee Others data লোড করতে সমস্যা হয়েছে।',
         confirmButtonText: 'ঠিক আছে',
         confirmButtonColor: '#3085d6',
       });
@@ -363,21 +364,8 @@ const CreateStudentFee = () => {
   }, [otherError, othersError]);
 
   const handleDueOthersFeeOpenModal = useCallback(() => {
-    // if (studentOtherDuesError || studentOtherDueError) {
-    //   Swal.fire({
-    //     icon: 'error',
-    //     title: 'ত্রুটি!',
-    //     text:
-    //       admissionError?.data?.error ||
-    //       'Student Fee Admission data লোড করতে সমস্যা হয়েছে।',
-    //     confirmButtonText: 'ঠিক আছে',
-    //     confirmButtonColor: '#3085d6',
-    //   });
-    //   return;
-    // }
-
     showModal('Due Others student fee accept', 'DUE_OTHERS_STUDENT_FEE_ACCEPT');
-  }, [admissionisError, admissionError]);
+  }, [studentOtherDueError, othersError]);
 
   const handleStudentFeeOpenModal = useCallback(() => {
     if (admissionisError || admissionError) {

@@ -1,12 +1,10 @@
-import React, { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchClassResult, fetchResult, setResultError } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
-import bnBijoy2Unicode from '../../utils/conveter';
 import { Buffer } from 'buffer';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
 import MarksheetClassWise from '../../components/Document/MarksheetClassWise';
-
-// import ClassResultTable from '../../components/ClassResultTable';
+import { fetchClassResult } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
+import bnBijoy2Unicode from '../../utils/conveter';
 
 const ClassResult = () => {
     const { schoolid, seassonid, examid, classid, userid } = useParams();
@@ -14,9 +12,11 @@ const ClassResult = () => {
 
     const dispatch = useDispatch()
     const navigate = useNavigate();
+
     useEffect(() => {
         dispatch(fetchClassResult({ schoolId: schoolid, resultUrl: `${seassonid}/${examid}/${classid}` }))
     }, [dispatch])
+
     useEffect(()=>{
         if(schoolData && schoolData?.isClassResultShowable?.Action != 1){
             navigate(`/${schoolid}`)
@@ -27,6 +27,11 @@ const ClassResult = () => {
         navigate(`/${schoolid}/classes`);
     }
 
+    // এসেন্ডিং অর্ডারে সাজানো
+    const sortedClassResult = classResult ? [...classResult].sort((a, b) => {
+        // UserCode সংখ্যায় কনভার্ট করে সাজানো
+        return parseInt(a.UserCode) - parseInt(b.UserCode);
+    }) : [];
 
     const bufferConveter = (bufferData) => {
         const buffer = Buffer.from(bufferData);
@@ -34,6 +39,7 @@ const ClassResult = () => {
         const imageSrc = `data:image/png;base64,${base64String}`;
         return imageSrc
     }
+
     const handlePrint = () => {
         const originalTitle = document.title;
         document.title = `${bnBijoy2Unicode(classResult[0]?.ExamName)} - ${bnBijoy2Unicode(classResult[0]?.SessionName)}`;
@@ -45,15 +51,13 @@ const ClassResult = () => {
         }, 1000);
     };
 
-        console.log('schoolData', schoolData);
     if(resultStatus === 'succeeded'){
-        
         document.title = `${bnBijoy2Unicode(classResult[0]?.ExamName)} - ${bnBijoy2Unicode(classResult[0]?.SessionName)}`;
     }
 
     return (
         <div>
-            {classResult?.length > 0 ? (
+            {sortedClassResult?.length > 0 ? ( // এখানে sortedClassResult ব্যবহার করুন
                 <div>
                     <div className="hidden_in_print">
                         <div className="mx-auto relative bg-white font-SolaimanLipi pt-[80px] lg:pt-0">
@@ -76,9 +80,9 @@ const ClassResult = () => {
                                     <div className="mx-auto text-center py-3 text-white relative z-10">
                                         <h2 className="text-[22px] font-medium">{bnBijoy2Unicode(schoolData?.InstitutionName)}</h2>
                                         <h3 className="">{bnBijoy2Unicode(schoolData?.Address)}</h3>
-                                        <h3 className="">{bnBijoy2Unicode(classResult[0]?.ExamName)} - {bnBijoy2Unicode(classResult[0]?.SessionName)}</h3>
+                                        <h3 className="">{bnBijoy2Unicode(sortedClassResult[0]?.ExamName)} - {bnBijoy2Unicode(sortedClassResult[0]?.SessionName)}</h3>
                                         <h3 className="border-2 border-white rounded-md p-1 w-fit mx-auto">ফলাফল(নম্বরপত্র)</h3>
-                                        <h3 className="">শ্রেনী/জামাত : {bnBijoy2Unicode(classResult[0]?.SubClass)}</h3>
+                                        <h3 className="">শ্রেনী/জামাত : {bnBijoy2Unicode(sortedClassResult[0]?.SubClass)}</h3>
                                     </div>
                                 </div>
                                 {/*Heading Title End*/}
@@ -91,7 +95,7 @@ const ClassResult = () => {
                                                 <td className="border border-black min-w-[70px]">আইডি নং</td>
                                                 <td className="border border-black min-w-[180px]">শিক্ষার্থীর নাম</td>
                                                 {
-                                                    Array.from({ length: classResult[0].SubSonkha }).map((_, index) => (<td key={`view_subject_${index}`} className="border border-black min-w-[100px]">{bnBijoy2Unicode(classResult[0][`Subject${index + 1}`])}</td>))
+                                                    Array.from({ length: sortedClassResult[0].SubSonkha }).map((_, index) => (<td key={`view_subject_${index}`} className="border border-black min-w-[100px]">{bnBijoy2Unicode(sortedClassResult[0][`Subject${index + 1}`])}</td>))
 
                                                 }
                                                 <td className="border border-black px-1 min-w-[50px]">মোট</td>
@@ -102,7 +106,7 @@ const ClassResult = () => {
                                         </thead>
                                         <tbody>
                                             {
-                                                classResult.map((studentResult, index) => {
+                                                sortedClassResult.map((studentResult, index) => { // এখানে sortedClassResult ব্যবহার করুন
                                                     return (
                                                         <tr key={`view_user${studentResult.UserCode}`}>
                                                             <td className="border border-black px-1 min-w-[20px]">{bnBijoy2Unicode(String(index + 1))}</td>
@@ -134,7 +138,7 @@ const ClassResult = () => {
                         </div>
                     </div>
                     <div className='print_canvas'>
-                        <MarksheetClassWise classResult={classResult} schoolData={schoolData} resultStatices={resultStatistics} />
+                        <MarksheetClassWise classResult={sortedClassResult} schoolData={schoolData} resultStatices={resultStatistics} /> {/* এখানে sortedClassResult ব্যবহার করুন */}
                     </div>
                 </div>
             ) : <>Loading...</>}

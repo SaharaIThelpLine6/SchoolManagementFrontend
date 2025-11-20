@@ -1,6 +1,5 @@
-import { useSelector } from "react-redux";
-import bnBijoy2Unicode from "../../utils/conveter";
 import { Buffer } from 'buffer';
+import bnBijoy2Unicode from "../../utils/conveter";
 
 const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
     // console.log(schoolData, classResult);
@@ -138,9 +137,11 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                              </div> */}
                                             <div className="relative h-full">
                                                 <div className="absolute text-center w-auto left-0 top-0 pt-5">
-                                                    {
+                                                  <div className="flex justify-center items-center">
+                                                      {
                                                         schoolData?.SignaturePrincipal?.data ? <img className="w-[60px]" src={bufferConveter(schoolData.SignaturePrincipal.data)} alt="principal Image" /> : null
                                                     }
+                                                  </div>
 
                                                     <p>.....................................</p>
                                                     <p>{bnBijoy2Unicode(schoolData?.PrincipalName)}</p>
@@ -151,9 +152,12 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                         <td className="" height={150} colSpan={11}>
                                             <div className="relative h-full">
                                                 <div className="absolute text-center w-auto right-0 top-0 pt-5">
+                                                  <div className="flex justify-center items-center">
                                                     {
                                                         schoolData?.SignatureNajem?.data ? <img className="w-[60px]" src={bufferConveter(schoolData.SignatureNajem.data)} alt="" /> : null
                                                     }
+                                                  </div>
+
 
                                                     <p>.....................................</p>
                                                     <p>{bnBijoy2Unicode(schoolData?.NajemName)}</p>
@@ -165,14 +169,14 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                 </tfoot>
                             </table>
                             {/* <table className="w-full">
-                                 
+
                              </table> */}
                         </div>
                         {/*Marksheet Body End*/}
                         {/*Signature part start*/}
                         {/* <div className="flex absolute bottom-0 w-full  justify-around text-[14px] pt-[60px]">
-     
-     
+
+
                          </div> */}
                         {/*Signature part end*/}
                     </div>

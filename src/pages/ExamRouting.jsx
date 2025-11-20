@@ -1,33 +1,37 @@
-import { useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
-import { FormProvider, useForm } from "react-hook-form";
-import Swal from "sweetalert2";
+import { useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
-import { setPageName } from "../features/auth/authSlice";
-import { useGetSessionsQuery } from "../features/session/sessionSlice";
-import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
+import { setPageName } from '../features/auth/authSlice';
+import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import {
   useDeleteExamFeeSettingMutation,
   useGetExamFeeSettingQuery,
   useGetExamNamesQuery,
+  useGetExamRoutineQuery,
   usePostExamFeeSettingMutation,
   useUpdateExamFeeSettingMutation,
-} from "../features/exam/examQuerySlice";
+} from '../features/exam/examQuerySlice';
+import { useGetSessionsQuery } from '../features/session/sessionSlice';
 
-import useTranslate from "../utils/Translate";
-import bnBijoy2Unicode from "../utils/conveter";
+import useTranslate from '../utils/Translate';
+import bnBijoy2Unicode from '../utils/conveter';
 
-import SortableTable from "../components/Tables/SortableTable";
-import Loading from "../components/Loading/Loading";
-import DefaultInput from "../components/Forms/DefaultInput";
-import DefaultSelect from "../components/Forms/DefaultSelect";
-import Button from "../components/Button/Button";
-import StudentFeeGroup from "../view/exam/StudentFeeGroup";
-import ExamRoutingCheckbox from "../components/Checkboxes/ExamRoutingCheckbox";
-import DeleteButton from "../components/Button/DeleteButton";
-import EditButton from "../components/Button/EditButton";
-import DefaultPagination from "../components/Pagination/DefaultPagination";
+import Button from '../components/Button/Button';
+import DeleteButton from '../components/Button/DeleteButton';
+import EditButton from '../components/Button/EditButton';
+import ExamRoutingCheckbox from '../components/Checkboxes/ExamRoutingCheckbox';
+import DefaultInput from '../components/Forms/DefaultInput';
+import DefaultSelect from '../components/Forms/DefaultSelect';
+import Loading from '../components/Loading/Loading';
+import DefaultPagination from '../components/Pagination/DefaultPagination';
+import SortableTable from '../components/Tables/SortableTable';
+import AllClassRoutingPDF from '../view/exam/ExamRouting/AllClassRoutingPDF';
+import ExamSignatureRoutingPDF from '../view/exam/ExamRouting/ExamSignatureRoutingPDF';
+import SingleClassRoutingPDF from '../view/exam/ExamRouting/SingleClassRoutingPDF';
+import StudentFeeGroup from '../view/exam/StudentFeeGroup';
 
 const PAGE_SIZE = 10;
 
@@ -48,6 +52,22 @@ const ExamRouting = ({ pageTitle }) => {
     newVisibility[index] = !newVisibility[index];
     setVisibility(newVisibility);
   };
+  const [printView, setPrintView] = useState(false);
+  const [SessionID = '', ExamID = '', SubClassID = '', PrintID = ''] = watch([
+    'SessionID',
+    'ExamID',
+    'SubClassID',
+    'PrintID',
+  ]);
+
+  const { data, isLoading, isError } = useGetExamRoutineQuery({
+    sessionID: SessionID,
+    examID: ExamID,
+    subclassID: SubClassID,
+    printID: PrintID,
+  });
+
+  console.log(data, 'data');
 
   const [postExamFeeSetting] = usePostExamFeeSettingMutation();
   const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
@@ -64,6 +84,8 @@ const ExamRouting = ({ pageTitle }) => {
     refetch,
   } = useGetExamFeeSettingQuery();
 
+  console.log(examFeeSettingData, 'examFeeSettingData');
+
   const totalPages = Math.ceil((examFeeSettingData?.length || 0) / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
@@ -71,13 +93,9 @@ const ExamRouting = ({ pageTitle }) => {
     return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
   }, [examFeeSettingData, currentPage]);
 
- 
-
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
-
-
 
   // Update Handle
   const handleEdit = (row) => {
@@ -94,12 +112,12 @@ const ExamRouting = ({ pageTitle }) => {
   // Delete Exam Feee Setting data
   const handleDelete = async (id) => {
     const result = await Swal.fire({
-      title: "আপনি কি নিশ্চিত?",
-      text: "একবার মুছে ফেলা হলে পুনরুদ্ধার করা যাবে না!",
-      icon: "warning",
+      title: 'আপনি কি নিশ্চিত?',
+      text: 'একবার মুছে ফেলা হলে পুনরুদ্ধার করা যাবে না!',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "হ্যাঁ, মুছে ফেলুন!",
-      cancelButtonText: "বাতিল",
+      confirmButtonText: 'হ্যাঁ, মুছে ফেলুন!',
+      cancelButtonText: 'বাতিল',
     });
 
     if (result.isConfirmed) {
@@ -107,33 +125,51 @@ const ExamRouting = ({ pageTitle }) => {
         const response = await deleteExamFeeSetting(id).unwrap();
 
         Swal.fire({
-          icon: "success",
-          title: "সফলভাবে মুছে ফেলা হয়েছে",
-          text: response?.message || "ডেটা সফলভাবে মুছে ফেলা হয়েছে।",
+          icon: 'success',
+          title: 'সফলভাবে মুছে ফেলা হয়েছে',
+          text: response?.message || 'ডেটা সফলভাবে মুছে ফেলা হয়েছে।',
         });
 
         refetch(); // Reload table
       } catch (error) {
         Swal.fire({
-          icon: "error",
-          title: "ত্রুটি ঘটেছে!",
+          icon: 'error',
+          title: 'ত্রুটি ঘটেছে!',
           text:
             error?.data?.message ||
             error?.data?.error ||
-            "ডেটা মুছে ফেলতে ব্যর্থ হয়েছে।",
+            'ডেটা মুছে ফেলতে ব্যর্থ হয়েছে।',
         });
-        console.error("Delete error:", error);
+        console.error('Delete error:', error);
       }
     }
   };
+  /** ------------------------
+   *  PRINT HANDLER (FIXED)
+   * ------------------------ */
+  const handlePrintView = () => {
+    if (!SessionID || !ExamID || !SubClassID) {
+      Swal.fire('Warning!', 'Session, Exam, SubClass নির্বাচন করুন।', 'warning');
+      return;
+    }
+    if (!PrintID) {
+      Swal.fire('Warning!', 'Report টাইপ নির্বাচন করুন।', 'warning');
+      return;
+    }
 
+    setPrintView(true);
+
+    setTimeout(() => {
+      window.print();
+    }, 500); // ensures PDF is fully rendered before printing
+  };
   // Data Create Exam Fee Setting
   const onSubmit = async (data) => {
     if (!data.SessionID || !data.SubClassID || !data.ExamID) {
       Swal.fire({
-        icon: "warning",
-        title: "ফর্ম অসম্পূর্ণ",
-        text: "Session, SubClass এবং Exam নির্বাচন করুন।",
+        icon: 'warning',
+        title: 'ফর্ম অসম্পূর্ণ',
+        text: 'Session, SubClass এবং Exam নির্বাচন করুন।',
       });
       return;
     }
@@ -158,9 +194,9 @@ const ExamRouting = ({ pageTitle }) => {
       }
 
       Swal.fire({
-        icon: "success",
-        title: "সফলভাবে সংরক্ষণ হয়েছে",
-        text: response?.message || "Exam Fee Setting সফলভাবে সংরক্ষিত হয়েছে।",
+        icon: 'success',
+        title: 'সফলভাবে সংরক্ষণ হয়েছে',
+        text: response?.message || 'Exam Fee Setting সফলভাবে সংরক্ষিত হয়েছে।',
       }).then(() => {
         refetch();
         methods.reset();
@@ -169,21 +205,21 @@ const ExamRouting = ({ pageTitle }) => {
       const errMsg =
         error?.data?.message ||
         error?.data?.error ||
-        "অজানা একটি ত্রুটি ঘটেছে।";
+        'অজানা একটি ত্রুটি ঘটেছে।';
       Swal.fire({
-        icon: "error",
-        title: "ত্রুটি ঘটেছে!",
+        icon: 'error',
+        title: 'ত্রুটি ঘটেছে!',
         text: errMsg,
       });
-      console.error("Exam Fee Setting Error:", error);
+      console.error('Exam Fee Setting Error:', error);
     }
   };
 
   // Table Data Columns
   const columns = [
     {
-      title: translate("Action"),
-      hozAlign: "center",
+      title: translate('Action'),
+      hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
           <EditButton onClick={() => handleEdit(row)} />
@@ -192,34 +228,34 @@ const ExamRouting = ({ pageTitle }) => {
       ),
     },
     {
-      title: translate("ID"),
-      hozAlign: "center",
+      title: translate('ID'),
+      hozAlign: 'center',
       render: (row) => <>{row?.ID}</>,
     },
     {
-      title: translate("Session"),
-      hozAlign: "center",
+      title: translate('Session'),
+      hozAlign: 'center',
       render: (row) => <>{row?.AcademicSession?.SessionName}</>,
     },
     {
-      title: translate("Exam Name"),
-      hozAlign: "center",
+      title: translate('Exam Name'),
+      hozAlign: 'center',
       render: (row) => <>{bnBijoy2Unicode(row?.Exam_Name?.ExamName)}</>,
     },
     {
-      title: translate("Class/Jamaat"),
-      hozAlign: "center",
+      title: translate('Class/Jamaat'),
+      hozAlign: 'center',
       render: (row) => <>{bnBijoy2Unicode(row?.Class?.SubClass)}</>,
     },
     {
-      title: translate("Fee Name"),
-      field: "SLID",
-      hozAlign: "center",
+      title: translate('Fee Name'),
+      field: 'SLID',
+      hozAlign: 'center',
     },
     {
-      title: translate("Fee"),
-      field: "Fee",
-      hozAlign: "center",
+      title: translate('Fee'),
+      field: 'Fee',
+      hozAlign: 'center',
     },
   ];
 
@@ -227,193 +263,246 @@ const ExamRouting = ({ pageTitle }) => {
     return <StudentFeeGroup onBack={setShowStudentFeeGroup} />;
   }
   const dateOptions = [
-    { id: 1, name: "Copy To All Box" }, // You can add more options if needed
+    { id: 1, name: 'Copy To All Box' }, // You can add more options if needed
   ];
+
+  const printData = [
+    {
+      PrintID: 1,
+      PrintName: 'প্রতি ক্লাস প্রতি পৃষ্ঠায় আলাদা বাংলা।',
+    },
+    {
+      PrintID: 2,
+      PrintName: 'সকল ক্লাস একত্রে বাংলা।',
+    },
+    {
+      PrintID: 3,
+      PrintName: 'স্বাক্ষর/দস্তখত পত্র',
+    },
+  ];
+
   return (
-    <div className="font-SolaimanLipi bg-white p-4 md:p-6 rounded-xl shadow-lg">
-      {/* Header */}
-      <div className="filter_header border-b border-[#e9edf4] pb-4 md:pb-5">
-        <h3 className="text-lg md:text-xl font-bold">
-          {translate("Exam Routing")}
-        </h3>
-      </div>
+    <div className="">
+      <div className="font-SolaimanLipi bg-white p-4 md:p-6 rounded-xl shadow-lg print:hidden">
+        {/* Header */}
+        <div className="filter_header border-b border-[#e9edf4] pb-4 md:pb-5">
+          <h3 className="text-lg md:text-xl font-bold">
+            {translate('Exam Routing')}
+          </h3>
+        </div>
 
-      <FormProvider {...methods}>
-        <form
-          className="w-full space-y-4 md:space-y-6"
-          onSubmit={handleSubmit(onSubmit)}
-        >
-          <input type="hidden" {...methods.register("ID")} />
+        <FormProvider {...methods}>
+          <form
+            className="w-full space-y-4 md:space-y-6"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <input type="hidden" {...methods.register('ID')} />
 
-          {/* Top Section - 4 responsive columns */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 my-3">
-            <DefaultSelect
-              label={translate("Session") + " :"}
-              options={sessionData ?? []}
-              valueField="SessionID"
-              nameField="SessionName"
-              registerKey="SessionID"
-              unicode={true}
-            />
-            <DefaultSelect
-              label={translate("Exam Name") + " :"}
-              options={examNameData ?? []}
-              valueField="ExamID"
-              nameField="ExamName"
-              registerKey="ExamID"
-              unicode={true}
-            />
-            <DefaultSelect
-              label={
-                <p className="text-gray-700 font-medium">
-                  {translate("Class/Jamaat")}:
-                </p>
-              }
-              options={subClassListData ?? []}
-              valueField="SubClassID"
-              nameField="SubClass"
-              registerKey="SubClassID"
-              unicode={true}
-            />
-
-            <div className="grid grid-cols-2 gap-3">
-              <DefaultInput
-                registerKey="Fee"
-                label={`${translate("Hall No")} : `}
-                className="w-full"
+            {/* Top Section - 4 responsive columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 my-3">
+              <DefaultSelect
+                label={translate('Session')}
+                options={sessionData ?? []}
+                valueField="SessionID"
+                nameField="SessionName"
+                registerKey="SessionID"
+                unicode={true}
               />
-              <DefaultInput
-                registerKey="Fee"
-                label={`${translate("Hall Name")} : `}
-                className="w-full"
+              <DefaultSelect
+                label={translate('Exam Name')}
+                options={examNameData ?? []}
+                valueField="ExamID"
+                nameField="ExamName"
+                registerKey="ExamID"
+                unicode={true}
+              />
+              <DefaultSelect
+                label={translate('Class/Jamaat')}
+                options={subClassListData ?? []}
+                valueField="SubClassID"
+                nameField="SubClass"
+                registerKey="SubClassID"
+                unicode={true}
+              />
+
+              <div className="grid grid-cols-2 gap-3">
+                <DefaultInput
+                  registerKey="Fee"
+                  label={`${translate('Hall No')}`}
+                  className="w-full"
+                />
+                <DefaultInput
+                  registerKey="Fee"
+                  label={`${translate('Hall Name')}`}
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            {/* Date Checkbox */}
+            <div className="flex items-start w-full mb-4">
+              <ExamRoutingCheckbox
+                label="পরীক্ষার তারিখ"
+                options={dateOptions}
+                registerKey="copyToAll"
+                labelPosition="left"
               />
             </div>
-          </div>
 
-          {/* Date Checkbox */}
-          <div className="flex items-start w-full mb-4">
-            <ExamRoutingCheckbox
-              label="পরীক্ষার তারিখ :"
-              options={dateOptions}
-              registerKey="copyToAll"
-              labelPosition="left"
-            />
-          </div>
-
-          {/* Grid Sections */}
-          <div className="space-y-4">
-            <div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <DefaultInput key={`time-${i}`} registerKey="Fee" />
-                ))}
+            {/* Grid Sections */}
+            <div className="space-y-4">
+              <div>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <DefaultInput key={`time-${i}`} registerKey="Fee" />
+                  ))}
+                </div>
               </div>
-            </div>
-            {/* First 12-column grid */}
-            <div>
-              <h3 className="text-base font-medium mb-2">{translate("বার")}</h3>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <DefaultInput key={`time-${i}`} registerKey="Fee" />
-                ))}
+              {/* First 12-column grid */}
+              <div>
+                <h3 className="text-base font-medium mb-2">
+                  {translate('বার')}
+                </h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <DefaultInput key={`time-${i}`} registerKey="Fee" />
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Second 12-column grid */}
-            <div>
-              <h3 className="text-base font-medium mb-2">{translate("সময়")}</h3>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
-                {Array.from({ length: 12 }).map((_, i) => (
-                  <DefaultInput key={`duration-${i}`} registerKey="Fee" />
-                ))}
+              {/* Second 12-column grid */}
+              <div>
+                <h3 className="text-base font-medium mb-2">
+                  {translate('সময়')}
+                </h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
+                  {Array.from({ length: 12 }).map((_, i) => (
+                    <DefaultInput key={`duration-${i}`} registerKey="Fee" />
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Select with Toggle */}
-            <div>
-              <h3 className="text-base font-medium mb-2">
-                {translate("বিষয়")}
-              </h3>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
-                {Array.from({ length: 12 }).map((_, index) => (
-                  <div key={`select-${index}`} className="flex flex-col gap-1">
-                    <div className="flex items-center justify-end gap-1">
-                      <input
-                        type="checkbox"
-                        checked={!visibility[index]}
-                        onChange={() => toggleVisibility(index)}
-                        className="cursor-pointer h-4 w-4"
-                      />
-                      <label
-                        className="text-xs cursor-pointer"
-                        onClick={() => toggleVisibility(index)}
-                      >
-                        {visibility[index] ? "Hide" : "Show"}
-                      </label>
+              {/* Select with Toggle */}
+              <div>
+                <h3 className="text-base font-medium mb-2">
+                  {translate('বিষয়')}
+                </h3>
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
+                  {Array.from({ length: 12 }).map((_, index) => (
+                    <div
+                      key={`select-${index}`}
+                      className="flex flex-col gap-1"
+                    >
+                      <div className="flex items-center justify-end gap-1">
+                        <input
+                          type="checkbox"
+                          checked={!visibility[index]}
+                          onChange={() => toggleVisibility(index)}
+                          className="cursor-pointer h-4 w-4"
+                        />
+                        <label
+                          className="text-xs cursor-pointer"
+                          onClick={() => toggleVisibility(index)}
+                        >
+                          {visibility[index] ? 'Hide' : 'Show'}
+                        </label>
+                      </div>
+                      {visibility[index] && (
+                        <DefaultSelect
+                          options={examNameData ?? []}
+                          valueField="ExamID"
+                          nameField="ExamName"
+                          registerKey={`ExamID_${index}`}
+                          unicode={true}
+                          className="w-full"
+                        />
+                      )}
                     </div>
-                    {visibility[index] && (
-                      <DefaultSelect
-                        options={examNameData ?? []}
-                        valueField="ExamID"
-                        nameField="ExamName"
-                        registerKey={`ExamID_${index}`}
-                        unicode={true}
-                        className="w-full"
-                      />
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4">
-            <Button type="submit" className="w-full sm:w-auto">
-              {translate("Save")}
-            </Button>
-            <Button
-              type="button"
-              onClick={() =>
-                methods.reset({
-                  SLID: "",
-                  SessionID: "",
-                  ExamID: "",
-                  SubClassID: "",
-                  Fee: "",
-                })
-              }
-              className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white"
-            >
-              {translate("Reset")}
-            </Button>
-          </div>
-        </form>
-      </FormProvider>
+            {/* Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+              <Button type="submit" className="w-full sm:w-auto">
+                {translate('Save')}
+              </Button>
+              <Button
+                type="button"
+                onClick={() =>
+                  methods.reset({
+                    SLID: '',
+                    SessionID: '',
+                    ExamID: '',
+                    SubClassID: '',
+                    Fee: '',
+                  })
+                }
+                className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white"
+              >
+                {translate('Reset')}
+              </Button>
+              <div className="w-64">
+                <DefaultSelect
+                  label={translate('Report/Type')}
+                  labelPosition="left"
+                  options={printData ?? []}
+                  valueField="PrintID"
+                  nameField="PrintName"
+                  registerKey="PrintID"
+                  unicode={true}
+                />
+              </div>
+              <Button
+                type="button"
+                onClick={handlePrintView}
+                className="w-full sm:w-auto"
+              >
+                {translate('Print')}
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
 
-      {/* Table Section */}
-      <div className="mt-5 overflow-x-auto">
-        {isExamFeeSettingLoading ? (
-          <Loading />
-        ) : isExamFeeSettingError ? (
-          <div className="text-red-500 text-center py-4">
-            {translate("Failed to load exam fee settings. Please try again.")}
-          </div>
-        ) : (
-          <SortableTable
-            columns={columns}
-            data={paginatedData}
-            isFilterColumn={false}
-          />
+        {/* Table Section */}
+        <div className="mt-5 overflow-x-auto">
+          {isExamFeeSettingLoading ? (
+            <Loading />
+          ) : isExamFeeSettingError ? (
+            <div className="text-red-500 text-center py-4">
+              {translate('Failed to load exam fee settings. Please try again.')}
+            </div>
+          ) : (
+            <SortableTable
+              columns={columns}
+              data={paginatedData}
+              isFilterColumn={false}
+            />
+          )}
+        </div>
+
+        {/* Pagination */}
+        <DefaultPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      </div>
+      <div className="hidden print:block">
+        {printView && (
+          <>
+            {Number(PrintID) === 1 && (
+              <SingleClassRoutingPDF data={data?.data} />
+            )}
+            {Number(PrintID) === 2 && <AllClassRoutingPDF data={data?.data} />}
+            {Number(PrintID) === 3 && (
+              <ExamSignatureRoutingPDF data={data?.data} />
+            )}
+          </>
         )}
       </div>
-
-      {/* Pagination */}
-      <DefaultPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
+      ;
     </div>
   );
 };
