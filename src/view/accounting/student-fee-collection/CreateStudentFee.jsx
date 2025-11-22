@@ -14,9 +14,11 @@ import Loading from '../../../components/Loading/Loading';
 import DefaultRadio from '../../../components/Radio/DefaultRadio';
 import {
   useGetGeneralLedgersByCAIDQuery,
+  useGetMonthDuePerStudentFeeQuery,
   useGetOthersDueStudentFeeQuery,
   useGetSearchStudentsQuery,
   useGetStudentFeeAdmissionsQuery,
+  useGetStudentFeeDueQuery,
   useGetStudentFeeIncreaseDecreaseQuery,
   useGetStudentOthersMonthFeesQuery,
   useGetSubLedgersByGLIDQuery,
@@ -26,6 +28,7 @@ import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
 import {
   clearStudentFeeData,
   clearStudentMonthFeeListsData,
+  setStudentFeeDueData,
   setStudentFeeSessionID,
 } from '../../../features/settings/settingsSlice';
 import {
@@ -81,7 +84,7 @@ const CreateStudentFee = () => {
     { isLoading, isSuccess }, // ✅ RTK states
   ] = usePostStudentFeeCollectionMutation();
 
-  const [studentFeeDataAll, setstudentFeeDataAll] = useState(null);
+  const [studentFeeDataAll, setStudentFeeDataAll] = useState(null);
   const [totalDue, setTotalDue] = useState(null);
   const [logo, setLogo] = useState(null);
   const [filterData, setFilterData] = useState(null);
@@ -122,7 +125,18 @@ const CreateStudentFee = () => {
       skip: !filteredSelectedPerStudentFee?.AdmissionID || !sfgnid,
     }
   );
+  // Fetch student fee admissions data
+  const {
+    data: studentFeeDueData,
+    isLoading: isLoadingSFDD,
+    isError: isErrorSFDD,
+    error: errorSFDD,
+  } = useGetStudentFeeDueQuery(
+    { AdmissionID: filteredSelectedPerStudentFee?.AdmissionID },
+    { skip: !filteredSelectedPerStudentFee?.AdmissionID }
+  );
 
+  console.log(studentFeeDueData?.lastCreatedOrder?.Due, 'studentFeeDueData');
 
   const {
     data: studentOtherData,
@@ -149,6 +163,36 @@ const CreateStudentFee = () => {
     }
   );
 
+  //// month Due fee
+  const {
+    data: monthDuePerStudent,
+    isLoading: isLoadingMDPS,
+    isError: isErrorMDPS,
+    error: errorMDPS,
+  } = useGetMonthDuePerStudentFeeQuery(
+    {
+      admissionId: filteredSelectedPerStudentFee?.AdmissionID,
+      monthId: monthFeeData?.monthId,
+    },
+    {
+      skip:
+        !filteredSelectedPerStudentFee?.AdmissionID || !monthFeeData?.monthId,
+    }
+  );
+
+  console.log(monthDuePerStudent, 'monthDuePerStudent');
+
+  useEffect(() => {
+    if (isErrorSFDD) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text:
+          errorSFDD?.data?.message ||
+          'Student Fee Due Data load করতে সমস্যা হয়েছে!',
+      });
+    }
+  }, [isErrorSFDD, errorSFDD]);
   // default session set
   useEffect(() => {
     if (defaultSessionId) {
@@ -205,7 +249,7 @@ const CreateStudentFee = () => {
         // ✅ Data না পেলে state clear করুন
         dispatch(setFilteredSelectedPerStudentFee(null));
         dispatch(clearStudentFeeData());
-        setstudentFeeDataAll(null);
+        setStudentFeeDataAll(null);
         setTotalDue(null);
         setLogo(null);
       }
@@ -236,8 +280,14 @@ const CreateStudentFee = () => {
   // }, [studentFeeData]);
 
   useEffect(() => {
-    setstudentFeeDataAll(studentFeeData);
+    setStudentFeeDataAll(studentFeeData);
   }, [studentFeeData]);
+useEffect(() => {
+  if (monthDuePerStudent) {
+    dispatch(setStudentFeeDueData(monthDuePerStudent));
+  }
+}, [monthDuePerStudent, dispatch]);
+
 
   // Dispatch whenever it changes
   useEffect(() => {
@@ -266,66 +316,150 @@ const CreateStudentFee = () => {
   }, [filteredSelectedPerStudentFee, reset, getValues, defaultSessionId]);
 
   // Add this function in your component
-  const calculateFeeTotals = useCallback((data) => {
-    if (!data || !Array.isArray(data)) {
-      return {
-        allCurrentDeposit: 0,
-        allPrescribedFee: 0,
-        allDeduction: 0,
-        allDue: 0,
-        allFees: [],
-        admissionId: null,
-        userId: null,
-      };
-    }
-
-    const allCurrentDeposit = data.reduce(
-      (sum, month) => sum + (month.currentDeposit || 0),
-      0
-    );
-    const allPrescribedFee = data.reduce(
-      (sum, month) => sum + (month.prescribedFee || 0),
-      0
-    );
-    const allDeduction = data.reduce(
-      (sum, month) => sum + (month.deduction || 0),
-      0
-    );
-
-    // Calculate total due across all months and all fees
-    const allDue = data.reduce((sum, month) => {
-      const monthDue =
-        month.fees?.reduce((feeSum, fee) => feeSum + (fee.due || 0), 0) || 0;
-      return sum + monthDue;
-    }, 0);
-
-    // Join all fees from all months into one array
-    const allFees = data.reduce((acc, month) => {
-      if (month.fees && Array.isArray(month.fees)) {
-        // Add month information to each fee for reference
-        const feesWithMonthInfo = month.fees.map((fee) => ({
-          ...fee,
-          monthId: month.monthId,
-          monthName: month.monthName,
-          studentCode: month.studentCode,
-        }));
-        return [...acc, ...feesWithMonthInfo];
+  const calculateFeeTotals = useCallback(
+    (data) => {
+      if (!data || !Array.isArray(data)) {
+        return {
+          allCurrentDeposit: 0,
+          allPrescribedFee: 0,
+          allDeduction: 0,
+          allDue: 0,
+          allFees: [],
+          admissionId: null,
+          userId: null,
+        };
       }
-      return acc;
-    }, []);
-    const admissionId = data[0]?.admissionId;
-    const userId = data[0]?.userId;
 
-    return {
-      allCurrentDeposit,
-      allPrescribedFee,
-      allDeduction,
-      allDue,
-      allFees,
-      admissionId,
-      userId,
-    };
-  }, []);
+      // Base totals
+      const allCurrentDeposit = data.reduce(
+        (sum, month) => sum + (month.currentDeposit || 0),
+        0
+      );
+
+      const allPrescribedFee = data.reduce(
+        (sum, month) => sum + (month.prescribedFee || 0),
+        0
+      );
+
+      const allDeduction = data.reduce(
+        (sum, month) => sum + (month.deduction || 0),
+        0
+      );
+
+      // All month dues
+      const allFeeDue = data.reduce((sum, month) => {
+        const monthDue =
+          month.fees?.reduce((feeSum, fee) => feeSum + (fee.due || 0), 0) || 0;
+        return sum + monthDue;
+      }, 0);
+
+      // Base allDue (before adjustment)
+      let allDue = allFeeDue + (studentFeeDueData?.lastCreatedOrder?.Due || 0);
+
+      // ===================================
+      //   ADJUST allDue BASED ON REQUEST
+      // ===================================
+      data.forEach((month) => {
+        if (month.monthFeeDueRequest === true) {
+          allDue = allDue - (month.currentDeposit || 0);
+        }
+      });
+      // ===================================
+
+      // Collect all fees with month info
+      const allFees = data.reduce((acc, month) => {
+        if (month.fees && Array.isArray(month.fees)) {
+          const withInfo = month.fees.map((fee) => ({
+            ...fee,
+            monthId: month.monthId,
+            monthName: month.monthName,
+            studentCode: month.studentCode,
+          }));
+          return [...acc, ...withInfo];
+        }
+        return acc;
+      }, []);
+
+      const admissionId = data[0]?.admissionId;
+      const userId = data[0]?.userId;
+
+      return {
+        allCurrentDeposit,
+        allPrescribedFee,
+        allDeduction,
+        allDue, // updated allDue
+        allFees,
+        admissionId,
+        userId,
+      };
+    },
+    [studentFeeDueData]
+  );
+
+  // const calculateFeeTotals = useCallback(
+  //   (data) => {
+  //     if (!data || !Array.isArray(data)) {
+  //       return {
+  //         allCurrentDeposit: 0,
+  //         allPrescribedFee: 0,
+  //         allDeduction: 0,
+  //         allDue: 0,
+  //         allFees: [],
+  //         admissionId: null,
+  //         userId: null,
+  //       };
+  //     }
+
+  //     const allCurrentDeposit = data.reduce(
+  //       (sum, month) => sum + (month.currentDeposit || 0),
+  //       0
+  //     );
+  //     const allPrescribedFee = data.reduce(
+  //       (sum, month) => sum + (month.prescribedFee || 0),
+  //       0
+  //     );
+  //     const allDeduction = data.reduce(
+  //       (sum, month) => sum + (month.deduction || 0),
+  //       0
+  //     );
+
+  //     // Calculate total due across all months and all fees
+  //     const allFeeDue = data.reduce((sum, month) => {
+  //       const monthDue =
+  //         month.fees?.reduce((feeSum, fee) => feeSum + (fee.due || 0), 0) || 0;
+  //       return sum + monthDue;
+  //     }, 0);
+  //     const allDue =
+  //       allFeeDue + (studentFeeDueData?.lastCreatedOrder?.Due || 0);
+  //     // Join all fees from all months into one array
+  //     const allFees = data.reduce((acc, month) => {
+  //       if (month.fees && Array.isArray(month.fees)) {
+  //         // Add month information to each fee for reference
+  //         const feesWithMonthInfo = month.fees.map((fee) => ({
+  //           ...fee,
+  //           monthId: month.monthId,
+  //           monthName: month.monthName,
+  //           studentCode: month.studentCode,
+  //         }));
+  //         return [...acc, ...feesWithMonthInfo];
+  //       }
+  //       return acc;
+  //     }, []);
+  //     const admissionId = data[0]?.admissionId;
+  //     const userId = data[0]?.userId;
+
+  //     return {
+  //       allCurrentDeposit,
+  //       allPrescribedFee,
+  //       allDeduction,
+  //       allDue,
+  //       allFees,
+  //       admissionId,
+  //       userId,
+  //     };
+  //   },
+  //   [studentFeeDueData]
+  // );
 
   // Use it in your component
   const feeTotals = calculateFeeTotals(studentFeeDataAll);
@@ -405,7 +539,32 @@ const CreateStudentFee = () => {
   const admissionDataCheck = studentFeeData?.find(
     (i) => i.type === 'admission'
   );
+  const handleResetPage = () => {
+    const currentSession = getValues('SessionID');
 
+    reset({
+      StudentCode: '',
+      SessionID: currentSession || defaultSessionId,
+      IsActive: 1,
+      EntryDate: new Date(),
+      GLID: '',
+      SLID: '',
+      Remark: '',
+      speakCurrentDeposit: '',
+    });
+
+    dispatch(setMonthFeeData(null));
+    dispatch(clearStudentFeeData());
+    dispatch(clearStudentMonthFeeListsData());
+    dispatch(setFilteredSelectedPerStudentFee(null));
+    setFilterData(null);
+    setTotalDue(null);
+    setStudentFeeDataAll(null);
+    setLogo(null);
+    setSearchTrigger(0);
+
+    setLastSearchedCode(''); // ✅ Last searched code reset
+  };
   const onSubmit = async (data) => {
     try {
       // 🧩 Validation: No fee selected
@@ -556,32 +715,6 @@ const CreateStudentFee = () => {
   //   smsPermission,
   // };
   // ✅ Modified reset function - session preserve করে
-  const handleResetPage = () => {
-    const currentSession = getValues('SessionID');
-
-    reset({
-      StudentCode: '',
-      SessionID: currentSession || defaultSessionId,
-      IsActive: 1,
-      EntryDate: new Date(),
-      GLID: '',
-      SLID: '',
-      Remark: '',
-      speakCurrentDeposit: '',
-    });
-
-    dispatch(setMonthFeeData(null));
-    dispatch(clearStudentFeeData());
-    dispatch(clearStudentMonthFeeListsData());
-    dispatch(setFilteredSelectedPerStudentFee(null));
-    setFilterData(null);
-    setTotalDue(null);
-    setstudentFeeDataAll(null);
-    setLogo(null);
-    setSearchTrigger(0);
-
-    setLastSearchedCode(''); // ✅ Last searched code reset
-  };
 
   // ✅ Route change হলে reset - কিন্তু session preserve রাখে
   useEffect(() => {
@@ -619,7 +752,8 @@ const CreateStudentFee = () => {
 
   // ✅ Centralized search function
   const handleSearch = () => {
-    const studentCode = methods.getValues('StudentCode').trim();
+    const studentCode = String(methods.getValues('StudentCode') || '').trim();
+
     const sessionId = methods.getValues('SessionID');
 
     if (!studentCode) {
@@ -637,7 +771,7 @@ const CreateStudentFee = () => {
       // ✅ Complete state reset
       dispatch(setFilteredSelectedPerStudentFee(null));
       dispatch(clearStudentFeeData());
-      setstudentFeeDataAll(null);
+      setStudentFeeDataAll(null);
       setTotalDue(null);
       setLogo(null);
 
@@ -654,7 +788,7 @@ const CreateStudentFee = () => {
       // ✅ নতুন code search করা হলে normal process
       dispatch(setFilteredSelectedPerStudentFee(null));
       dispatch(clearStudentFeeData());
-      setstudentFeeDataAll(null);
+      setStudentFeeDataAll(null);
       setTotalDue(null);
       setLogo(null);
 
@@ -680,6 +814,10 @@ const CreateStudentFee = () => {
 
   // Update Submit Loading
   if (isLoading) {
+    return <SubmitLoading />;
+  }
+  // Update Submit Loading
+  if (isLoadingSFDD) {
     return <SubmitLoading />;
   }
 

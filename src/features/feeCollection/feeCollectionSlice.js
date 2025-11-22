@@ -481,6 +481,15 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ['StudentFee'],
     }),
+
+    getStudentFeeDue: builder.query({
+      query: ({ AdmissionID }) => `student_fee_due/${AdmissionID}`,
+      providesTags: [
+        'StudentFee',
+        'StudentFeeCollection',
+        'StudentFeeAdmissions',
+      ],
+    }),
   }),
 });
 
@@ -557,4 +566,5 @@ export const {
   useGetIncomeExpenseReportByOrderIdQuery,
   useGetIncomeExpenseTodaysBalanceQuery,
   useGetIncomeExpenseTodaysBalanceByCaidQuery,
+  useGetStudentFeeDueQuery
 } = feeCollectionSlice;

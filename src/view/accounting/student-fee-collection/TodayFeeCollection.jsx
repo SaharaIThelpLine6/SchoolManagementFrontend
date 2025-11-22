@@ -59,17 +59,11 @@ const TodayFeeCollection = ({ pageTitle }) => {
     }
   );
 
-
   const tableData = result?.data || [];
   const todayCollection = result?.todayCollection || 0;
   const userCollection = result?.userCollection || 0;
 
-  // 🔹 Trigger print after data loads
-  useEffect(() => {
-    if (singleResult) {
-      window.print();
-    }
-  }, [singleResult]);
+
 
   // 🔹 Set page title
   useEffect(() => {
@@ -125,10 +119,27 @@ const TodayFeeCollection = ({ pageTitle }) => {
     dispatch(setStudentFeeUpdateID(UFOID));
   };
 
-  // 🔹 Handle Print button click
-  const handlePrintOpenModal = (UFOID) => {
-    setPrintID(UFOID); // এই মুহূর্তে query trigger হবে
-  };
+const handlePrintOpenModal = (UFOID) => {
+  // Reset first so that next click always triggers
+  setPrintID(null);
+
+  // Small delay to allow state reset
+  setTimeout(() => {
+    setPrintID(UFOID);
+  }, 50);
+};
+
+useEffect(() => {
+  if (printID !== null) {
+    if (singleResult) {
+      const timer = setTimeout(() => {
+        window.print();
+      }, 700);
+      return () => clearTimeout(timer);
+    }
+  }
+}, [printID, singleResult]);
+
 
   // 🔹 Table columns
   const columns = [

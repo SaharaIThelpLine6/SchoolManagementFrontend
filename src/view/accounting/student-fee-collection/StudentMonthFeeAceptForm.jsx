@@ -7,8 +7,7 @@ import DeleteButton from '../../../components/Button/DeleteButton';
 import DefaultInput from '../../../components/Forms/DefaultInput';
 import { setPageName } from '../../../features/auth/authSlice';
 import {
-  useGetMonthDuePerStudentFeeQuery,
-  useGetMonthPerStudentsFeeQuery,
+  useGetMonthPerStudentsFeeQuery
 } from '../../../features/feeCollection/feeCollectionSlice';
 import {
   setStudentFeeData,
@@ -49,6 +48,8 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
   const { filteredSelectedPerStudentFee, monthFeeData } = useSelector(
     (state) => state.student
   );
+  const { studentMonthFeeDueData } = useSelector((state) => state.settings);
+  console.log(studentMonthFeeDueData, 'studentMonthFeeDueData');
 
   // Fetch student fee admissions data
   const { data: studentFeeAdmissionData } = useGetMonthPerStudentsFeeQuery(
@@ -58,18 +59,8 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
     }
   );
 
-  // Fetch student due month fee  data
-  const { data: monthDuePerStudent } = useGetMonthDuePerStudentFeeQuery(
-    {
-      admissionId: filteredSelectedPerStudentFee?.AdmissionID,
-      monthId: monthFeeData.monthId,
-    },
-    {
-      skip:
-        !filteredSelectedPerStudentFee?.AdmissionID || !monthFeeData.monthId,
-    }
-  );
 
+const monthDuePerStudent = studentMonthFeeDueData;
   // Initialize default fees from API
   useEffect(() => {
     if (
@@ -207,8 +198,14 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       // Update totals immediately after change
       setTimeout(() => {
         const updatedFees = getValues('fees');
-        const totalDeduction = updatedFees.reduce((acc, f) => acc + Number(f.deduction || 0), 0);
-        const totalDeposit = updatedFees.reduce((acc, f) => acc + Number(f.deposit || 0), 0);
+        const totalDeduction = updatedFees.reduce(
+          (acc, f) => acc + Number(f.deduction || 0),
+          0
+        );
+        const totalDeposit = updatedFees.reduce(
+          (acc, f) => acc + Number(f.deposit || 0),
+          0
+        );
         setValue('deduction', totalDeduction);
         setValue('currentDeposit', totalDeposit);
       }, 0);
@@ -235,7 +232,10 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       // Update totals immediately after change
       setTimeout(() => {
         const updatedFees = getValues('fees');
-        const totalDeposit = updatedFees.reduce((acc, f) => acc + Number(f.deposit || 0), 0);
+        const totalDeposit = updatedFees.reduce(
+          (acc, f) => acc + Number(f.deposit || 0),
+          0
+        );
         setValue('currentDeposit', totalDeposit);
       }, 0);
     },
@@ -285,12 +285,20 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
 
   const onSubmit = (data) => {
     const totalDue = data?.fees?.reduce((sum, fee) => sum + (fee.due || 0), 0);
+    let monthFeeDueRequest;
+
+    if (monthDuePerStudent?.data && monthDuePerStudent?.data?.length > 0) {
+      monthFeeDueRequest = true;
+    } else {
+      monthFeeDueRequest = false;
+    }
 
     const payload = {
       ...data,
       userId: studentFeeAdmissionData[0]?.UserID,
       admissionId: studentFeeAdmissionData[0]?.AdmissionID,
       due: totalDue,
+      monthFeeDueRequest,
       type: 'month',
     };
     dispatch(setStudentFeeData(payload));

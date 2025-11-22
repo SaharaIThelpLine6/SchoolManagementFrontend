@@ -95,6 +95,7 @@ const initialState = {
   studentFeeSessionID: null,
   editUserID: null,
   studentFeeData: [],
+  studentMonthFeeDueData: [],
   studentMonthFeeListsData: [],
   status: 'idle',
   error: null,
@@ -106,6 +107,9 @@ const settingsSlice = createSlice({
   reducers: {
     setDivisionID: (state, action) => {
       state.currentDivitionId = action.payload;
+    },
+    setStudentFeeDueData: (state, action) => {
+      state.studentMonthFeeDueData = action.payload;
     },
     setStudentFeeData: (state, action) => {
       state.studentFeeData = [...state.studentFeeData, action.payload];
@@ -188,6 +192,7 @@ export const {
   setStudentFeeSessionID,
   setEditUserID,
   setStudentMonthFeeListsData,
-  clearStudentMonthFeeListsData
+  clearStudentMonthFeeListsData,
+  setStudentFeeDueData,
 } = settingsSlice.actions;
 export default settingsSlice.reducer;

@@ -1,5 +1,4 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { update } from 'lodash';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -17,11 +16,15 @@ export const userInfoSlice = createApi({
   }),
   endpoints: (builder) => ({
     getSoftwareDetails: builder.query({
-      query: () => `get_software_link`
+      query: () => `get_software_link`,
+    }),
+    getSingleUser: builder.query({
+      query: (id) => `get_single_user/${id}`,
     }),
   }),
 });
 
 export const {
   useGetSoftwareDetailsQuery,
+  useGetSingleUserQuery
 } = userInfoSlice;

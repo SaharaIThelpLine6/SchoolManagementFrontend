@@ -60,14 +60,14 @@ const ExamRouting = ({ pageTitle }) => {
     'PrintID',
   ]);
 
-  const { data, isLoading, isError } = useGetExamRoutineQuery({
-    sessionID: SessionID,
-    examID: ExamID,
-    subclassID: SubClassID,
-    printID: PrintID,
-  });
+ const { data, isLoading, isError, error } = useGetExamRoutineQuery({
+   sessionID: SessionID,
+   examID: ExamID,
+   subclassID: SubClassID,
+   printID: PrintID,
+ });
 
-  console.log(data, 'data');
+  // console.log(data, 'data');
 
   const [postExamFeeSetting] = usePostExamFeeSettingMutation();
   const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
@@ -84,7 +84,7 @@ const ExamRouting = ({ pageTitle }) => {
     refetch,
   } = useGetExamFeeSettingQuery();
 
-  console.log(examFeeSettingData, 'examFeeSettingData');
+  // console.log(examFeeSettingData, 'examFeeSettingData');
 
   const totalPages = Math.ceil((examFeeSettingData?.length || 0) / PAGE_SIZE);
 
@@ -145,24 +145,61 @@ const ExamRouting = ({ pageTitle }) => {
     }
   };
   /** ------------------------
-   *  PRINT HANDLER (FIXED)
+   *  SMART PRINT HANDLER (PERFECT)
    * ------------------------ */
   const handlePrintView = () => {
+    // ---- Validation ----
     if (!SessionID || !ExamID || !SubClassID) {
-      Swal.fire('Warning!', 'Session, Exam, SubClass নির্বাচন করুন।', 'warning');
+      Swal.fire(
+        'Warning!',
+        'Session, Exam, SubClass নির্বাচন করুন।',
+        'warning'
+      );
       return;
     }
+
     if (!PrintID) {
       Swal.fire('Warning!', 'Report টাইপ নির্বাচন করুন।', 'warning');
       return;
     }
 
-    setPrintView(true);
+    // ---- Loading popup ----
+    Swal.fire({
+      title: 'লোড হচ্ছে...',
+      text: 'ডাটা লোড হওয়া পর্যন্ত অপেক্ষা করুন',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
 
-    setTimeout(() => {
-      window.print();
-    }, 500); // ensures PDF is fully rendered before printing
+    // ---- Wait until API finished ----
+    const waitForData = setInterval(() => {
+      if (!isLoading) {
+        clearInterval(waitForData);
+
+        if (isError || !data?.data || data?.data?.length === 0) {
+          Swal.fire(
+            'Error!',
+            'রুটিন পাওয়া যায়নি অথবা সার্ভারে সমস্যা হয়েছে',
+            'error'
+          );
+          return;
+        }
+
+        Swal.close(); // remove loading
+
+        // ---- Ready to Print ----
+        setPrintView(true);
+
+        setTimeout(() => {
+          window.print();
+        }, 500); // ensure component rendered fully
+      }
+    }, 100); // check every 100ms
   };
+
   // Data Create Exam Fee Setting
   const onSubmit = async (data) => {
     if (!data.SessionID || !data.SubClassID || !data.ExamID) {
