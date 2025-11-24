@@ -14,7 +14,6 @@ import Loading from '../../../components/Loading/Loading';
 import DefaultRadio from '../../../components/Radio/DefaultRadio';
 import {
   useGetGeneralLedgersByCAIDQuery,
-  useGetMonthDuePerStudentFeeQuery,
   useGetOthersDueStudentFeeQuery,
   useGetSearchStudentsQuery,
   useGetStudentFeeAdmissionsQuery,
@@ -22,14 +21,13 @@ import {
   useGetStudentFeeIncreaseDecreaseQuery,
   useGetStudentOthersMonthFeesQuery,
   useGetSubLedgersByGLIDQuery,
-  usePostStudentFeeCollectionMutation,
+  usePostStudentFeeCollectionMutation
 } from '../../../features/feeCollection/feeCollectionSlice';
 import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
 import {
   clearStudentFeeData,
   clearStudentMonthFeeListsData,
-  setStudentFeeDueData,
-  setStudentFeeSessionID,
+  setStudentFeeSessionID
 } from '../../../features/settings/settingsSlice';
 import {
   setFilteredSelectedPerStudentFee,
@@ -163,24 +161,8 @@ const CreateStudentFee = () => {
     }
   );
 
-  //// month Due fee
-  const {
-    data: monthDuePerStudent,
-    isLoading: isLoadingMDPS,
-    isError: isErrorMDPS,
-    error: errorMDPS,
-  } = useGetMonthDuePerStudentFeeQuery(
-    {
-      admissionId: filteredSelectedPerStudentFee?.AdmissionID,
-      monthId: monthFeeData?.monthId,
-    },
-    {
-      skip:
-        !filteredSelectedPerStudentFee?.AdmissionID || !monthFeeData?.monthId,
-    }
-  );
 
-  console.log(monthDuePerStudent, 'monthDuePerStudent');
+
 
   useEffect(() => {
     if (isErrorSFDD) {
@@ -282,11 +264,7 @@ const CreateStudentFee = () => {
   useEffect(() => {
     setStudentFeeDataAll(studentFeeData);
   }, [studentFeeData]);
-useEffect(() => {
-  if (monthDuePerStudent) {
-    dispatch(setStudentFeeDueData(monthDuePerStudent));
-  }
-}, [monthDuePerStudent, dispatch]);
+
 
 
   // Dispatch whenever it changes

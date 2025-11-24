@@ -4,6 +4,7 @@ import useTranslate from '../utils/Translate';
 import SessionCreateUpdateModal from '../view/Session/SessionCreateUpdateModal';
 import BalanceTransferModal from '../view/accounting/BalanceTransferModal';
 import BankInfoSettings from '../view/accounting/BankInfoSettings';
+import ChangeStudentClass from '../view/accounting/ChangeStudentClass';
 import FundForm from '../view/accounting/FundForm';
 import GeneralForm from '../view/accounting/GeneralForm';
 import ReportSettings from '../view/accounting/ReportSettings';
@@ -18,7 +19,10 @@ import FeeSMSTamplateModal from '../view/accounting/student-fee-collection/FeeSM
 import MonthStudentFeeForm from '../view/accounting/student-fee-collection/MonthStudentFeeForm';
 import OthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/OthersStudentFeeAcceptForm';
 import StudentAdmissionFeeAcceptForm from '../view/accounting/student-fee-collection/StudentAdmissionFeeAcceptForm';
+import StudentMonthDueFeeAceptForm from '../view/accounting/student-fee-collection/StudentMonthDueFeeAceptForm';
 import StudentMonthFeeAceptForm from '../view/accounting/student-fee-collection/StudentMonthFeeAceptForm';
+import CharecterReportCategoryModal from '../view/darulikama/CharecterReportCategoryModal';
+import CharecterReportTypeModal from '../view/darulikama/CharecterReportTypeModal';
 import ExamReportSetting from '../view/exam/ExamReportSetting';
 import Subsidiary from '../view/exam/Subsidiary';
 import PaymentGetway from '../view/general-information/sms/PaymentGetway';
@@ -47,9 +51,6 @@ import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
 import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
-import ChangeStudentClass from '../view/accounting/ChangeStudentClass';
-import CharecterReportCategoryModal from '../view/darulikama/CharecterReportCategoryModal';
-import CharecterReportTypeModal from '../view/darulikama/CharecterReportTypeModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -182,6 +183,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'STUDENT_MONTH_FEE_ACCEPT_FORM' && (
                   <StudentMonthFeeAceptForm />
+                )}
+                {modalType === 'STUDENT_MONTH_DUE_FEE_ACCEPT_FORM' && (
+                  <StudentMonthDueFeeAceptForm/>
                 )}
                 {modalType === 'STUDENT_MONTH_FEE_ACCEPT' && (
                   <MonthStudentFeeForm />

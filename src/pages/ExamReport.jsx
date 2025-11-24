@@ -24,8 +24,9 @@ import { useGetResidentialQuery } from '../features/settings/settingsQuerySlice'
 import { fetchSettingsData } from '../features/settings/settingsSlice';
 import { useGetUserReportQuery } from '../features/userReports/userReportsSlice';
 import useTranslate from '../utils/Translate';
-import BanglaOneColumn from '../view/exam/ExamReportPdf/Student fee withdrawal lists/BanglaOneColumn';
-import BanglaTwoColumn from '../view/exam/ExamReportPdf/Student fee withdrawal lists/BanglaTwoColumn';
+import BanglaOneColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/BanglaOneColumn';
+import BanglaTwoColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/BanglaTwoColumn';
+
 
 const ExamReport = ({ pageTitle }) => {
   const translate = useTranslate();

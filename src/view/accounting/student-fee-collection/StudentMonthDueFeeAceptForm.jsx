@@ -5,9 +5,8 @@ import { useLocation } from 'react-router-dom';
 import Button from '../../../components/Button/Button';
 import DeleteButton from '../../../components/Button/DeleteButton';
 import DefaultInput from '../../../components/Forms/DefaultInput';
-import {
-  useGetMonthPerStudentsFeeQuery
-} from '../../../features/feeCollection/feeCollectionSlice';
+import { setPageName } from '../../../features/auth/authSlice';
+import { useGetMonthPerStudentsFeeQuery } from '../../../features/feeCollection/feeCollectionSlice';
 import {
   setStudentFeeData,
   setStudentMonthFeeListsData,
@@ -19,85 +18,115 @@ import DefaultKeyDownInput from './DefaultKeyDownInput';
 
 const PAGE_SIZE = 10;
 
-const StudentMonthFeeAceptForm = ({ pageTitle }) => {
+const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
 
   const [defaultFees, setDefaultFees] = useState([]);
-  // State
-  const [feeDueData, setFeeDueData] = useState({
-    totalLess: 0,
-    totalPreDeposit: 0,
-    totalDue: 0,
-  });
 
   const methods = useForm({
     defaultValues: {
+      studentCode: '',
+      monthId: '',
+      monthName: '',
       fees: [],
       prescribedFee: 0,
       deduction: 0,
       currentDeposit: 0,
+      eastCut: 0,
+      preDeposit: 0,
     },
   });
 
-  const { watch, setValue, handleSubmit, getValues, reset } = methods;
+  const { watch, setValue, handleSubmit, getValues } = methods;
   const [currentPage, setCurrentPage] = useState(1);
 
   const { filteredSelectedPerStudentFee, monthFeeData } = useSelector(
     (state) => state.student
   );
+  const { studentMonthFeeDueData } = useSelector((state) => state.settings);
 
-  // Fetch student fee admissions data
   const { data: studentFeeAdmissionData } = useGetMonthPerStudentsFeeQuery(
     filteredSelectedPerStudentFee?.AdmissionID,
-    {
-      skip: !filteredSelectedPerStudentFee?.AdmissionID,
-    }
+    { skip: !filteredSelectedPerStudentFee?.AdmissionID }
   );
 
-  // Initialize default fees from API
+  const monthDuePerStudent = studentMonthFeeDueData;
+
+  // Initialize default fees using setValue instead of reset
   useEffect(() => {
+    const studentCode = filteredSelectedPerStudentFee?.StudentCode || '';
+    const monthId = monthFeeData?.monthId || '';
+    const monthName = monthFeeData?.monthName || '';
+
+    let fees = [];
     if (
-      studentFeeAdmissionData &&
-      Array.isArray(studentFeeAdmissionData) &&
-      studentFeeAdmissionData.length > 0
+      monthDuePerStudent?.data &&
+      Array.isArray(monthDuePerStudent.data) &&
+      monthDuePerStudent.data.length > 0
     ) {
-      const fees = studentFeeAdmissionData.map((item) => ({
+      fees = monthDuePerStudent.data.map((item) => ({
         SSFID: item.SSFID,
         SLID: item.SLID,
         SlName: item.SlName,
         sessionId: item.SessionID,
         sessionName: item.SessionName,
         classId: item.ClassID,
-        amount: item.Amount || 0,
-        deduction: item.Less || 0,
-        deposit: item.FainalAmount || 0,
-        preDeposit: 0,
-        due: (item.Amount || 0) - (item.Less || 0) - (item.FainalAmount || 0),
+        amount: item.Amount || item.Fee || 0,
+        deduction: 0,
+        deposit: item.Fee - item.PreviousDeposite || 0,
+        depositUpdate: item.Fee - item.PreviousDeposite || 0,
+        preDeposit: item.PreDeposite || 0,
+        due: 0,
       }));
-
-      setDefaultFees(fees);
-      reset({ fees });
     }
 
-    // student info set
-    setValue('studentCode', filteredSelectedPerStudentFee?.StudentCode);
+    const totalPrescribed = fees.reduce((sum, f) => sum + Number(f.amount), 0);
+    const totalDeduction = fees.reduce(
+      (sum, f) => sum + Number(f.deduction),
+      0
+    );
+    const totalDeposit = fees.reduce((sum, f) => sum + Number(f.deposit), 0);
 
-    // month info set
-    if (monthFeeData) {
-      setValue('monthId', monthFeeData?.monthId);
-      setValue('monthName', monthFeeData?.monthName);
-    }
+    setDefaultFees(fees);
+
+    // Set values individually instead of reset
+    setValue('studentCode', studentCode);
+    setValue('monthId', monthId);
+    setValue('monthName', monthName);
+    setValue('fees', fees);
+    console.log(fees, 'fees');
+    setValue('prescribedFee', totalPrescribed);
+    setValue('deduction', totalDeduction);
+    setValue('currentDeposit', totalDeposit);
+    setValue('eastCut', monthDuePerStudent?.totals?.totalLess || 0);
+    setValue('preDeposit', monthDuePerStudent?.totals?.totalPreDeposite || 0);
   }, [
-    studentFeeAdmissionData,
-    reset,
+    monthDuePerStudent,
     setValue,
     filteredSelectedPerStudentFee,
     monthFeeData,
   ]);
 
-  const fees = watch('fees');
+  const feesData = watch('fees');
+  const [fees, setFees] = useState([]);
+
+  useEffect(() => {
+    if (!feesData || feesData.length === 0) return;
+
+    const timer = setTimeout(() => {
+      setFees(feesData);
+      console.log('fees delayed', feesData);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [feesData]);
+
+  useEffect(() => {
+    if (!fees || fees.length === 0) return; // prevents empty console logs
+    console.log('fees delayed (state)', fees);
+  }, [fees]);
 
   const recalcFee = useCallback((fee) => {
     const prescribedFee = Number(fee.amount || 0);
@@ -105,16 +134,13 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
     const preDeposit = Number(fee.preDeposit || 0);
     let deposit = Number(fee.deposit || 0);
 
-    // Ensure deposit does not exceed remaining fee
     const maxDeposit = prescribedFee - deduction - preDeposit;
     if (deposit > maxDeposit) deposit = maxDeposit;
 
     const due = prescribedFee - deduction - preDeposit - deposit;
-
     return { deposit, due };
   }, []);
 
-  // Recalculate totals whenever fees change - FIXED VERSION
   const recalculateTotals = useCallback(() => {
     if (!fees || fees.length === 0) {
       setValue('prescribedFee', 0);
@@ -127,7 +153,6 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
     let totalDeduction = 0;
     let totalDeposit = 0;
 
-    // Recalculate deposit/due for each fee
     const updatedFees = fees.map((fee) => {
       const { deposit, due } = recalcFee(fee);
       totalPrescribed += Number(fee.amount || 0);
@@ -136,29 +161,20 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       return { ...fee, deposit, due };
     });
 
-    // Update defaultFees and form values
     setDefaultFees(updatedFees);
     setValue('fees', updatedFees);
+    console.log(updatedFees, 'fees');
     setValue('prescribedFee', totalPrescribed);
     setValue('deduction', totalDeduction);
     setValue('currentDeposit', totalDeposit);
-  }, [fees, setValue, recalcFee]);
+  }, [fees, recalcFee, setValue]);
 
-  // Recalculate totals only when fees array length changes or initial load
-  useEffect(() => {
-    recalculateTotals();
-    console.log(fees, 'fees');
-  }, [fees?.length]); // Only depend on fees array length
-
-  // Handle Deduction change
   const handleDeductionChange = useCallback(
     (index) => {
-      const currentFees = getValues('fees');
-      const fee = currentFees[index];
+      const fee = getValues(`fees.${index}`);
       if (!fee) return;
 
       const { deposit, due } = recalcFee(fee);
-
       setValue(`fees.${index}.deposit`, deposit);
       setValue(`fees.${index}.due`, due);
 
@@ -168,33 +184,17 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
         )
       );
 
-      // Update totals immediately after change
-      setTimeout(() => {
-        const updatedFees = getValues('fees');
-        const totalDeduction = updatedFees.reduce(
-          (acc, f) => acc + Number(f.deduction || 0),
-          0
-        );
-        const totalDeposit = updatedFees.reduce(
-          (acc, f) => acc + Number(f.deposit || 0),
-          0
-        );
-        setValue('deduction', totalDeduction);
-        setValue('currentDeposit', totalDeposit);
-      }, 0);
+      setTimeout(recalculateTotals, 0);
     },
-    [getValues, setValue, recalcFee]
+    [getValues, setValue, recalcFee, recalculateTotals]
   );
 
-  // Handle Deposit change
   const handleDepositChange = useCallback(
     (index) => {
-      const currentFees = getValues('fees');
-      const fee = currentFees[index];
+      const fee = getValues(`fees.${index}`);
       if (!fee) return;
 
       const { deposit, due } = recalcFee(fee);
-
       setValue(`fees.${index}.deposit`, deposit);
       setValue(`fees.${index}.due`, due);
 
@@ -202,20 +202,11 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
         prev.map((f, i) => (i === index ? { ...f, deposit, due } : f))
       );
 
-      // Update totals immediately after change
-      setTimeout(() => {
-        const updatedFees = getValues('fees');
-        const totalDeposit = updatedFees.reduce(
-          (acc, f) => acc + Number(f.deposit || 0),
-          0
-        );
-        setValue('currentDeposit', totalDeposit);
-      }, 0);
+      setTimeout(recalculateTotals, 0);
     },
-    [getValues, setValue, recalcFee]
+    [getValues, setValue, recalcFee, recalculateTotals]
   );
 
-  // Delete a fee row
   const handleDeleteFee = useCallback(
     (index) => {
       const currentFees = getValues('fees');
@@ -223,16 +214,19 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
       setValue('fees', updatedFees);
       setDefaultFees((prev) => prev.filter((_, i) => i !== index));
 
-      // Recalculate totals after deletion
       setTimeout(recalculateTotals, 0);
     },
     [getValues, setValue, recalculateTotals]
   );
 
   const handleResetForm = useCallback(() => {
-    reset({ fees: defaultFees });
+    const currentValues = getValues();
+    setValue('fees', defaultFees);
+    setValue('prescribedFee', currentValues.prescribedFee);
+    setValue('deduction', currentValues.deduction);
+    setValue('currentDeposit', currentValues.currentDeposit);
     setTimeout(recalculateTotals, 0);
-  }, [reset, defaultFees, recalculateTotals]);
+  }, [getValues, setValue, defaultFees, recalculateTotals]);
 
   const totalPages = Math.ceil((fees?.length || 0) / PAGE_SIZE);
 
@@ -241,29 +235,38 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
     return fees?.slice(start, start + PAGE_SIZE) || [];
   }, [fees, currentPage]);
 
-
+  useEffect(() => {
+    if (pageTitle) dispatch(setPageName(pageTitle));
+  }, [dispatch, pageTitle]);
 
   const onSubmit = (data) => {
     const totalDue = data?.fees?.reduce((sum, fee) => sum + (fee.due || 0), 0);
-
-
+    const monthFeeDueRequest =
+      monthDuePerStudent?.data && monthDuePerStudent.data.length > 0;
 
     const payload = {
       ...data,
-      userId: studentFeeAdmissionData[0]?.UserID,
-      admissionId: studentFeeAdmissionData[0]?.AdmissionID,
+      userId:
+        studentFeeAdmissionData?.[0]?.UserID ||
+        filteredSelectedPerStudentFee?.UserID,
+      admissionId:
+        studentFeeAdmissionData?.[0]?.AdmissionID ||
+        filteredSelectedPerStudentFee?.AdmissionID,
       due: totalDue,
+      monthFeeDueRequest,
       type: 'month',
     };
     dispatch(setStudentFeeData(payload));
+
     const monthPayload = {
-      CurrentInvoice: payload?.prescribedFee,
-      InvoiceDiscount: payload?.deduction,
-      CurrentPaid: payload?.currentDeposit,
-      MonthId: payload?.monthId,
+      CurrentInvoice: payload.prescribedFee,
+      InvoiceDiscount: payload.deduction,
+      CurrentPaid: payload.currentDeposit,
+      MonthId: payload.monthId,
       Due: totalDue,
     };
     dispatch(setStudentMonthFeeListsData(monthPayload));
+
     hideModal();
   };
 
@@ -288,6 +291,7 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
             <DefaultInput registerKey="monthId" label="Month ID" disable />
             <DefaultInput registerKey="monthName" label="Month Name" disable />
           </div>
+
           {/* summary section */}
           <div className="flex flex-col md:flex-row-reverse gap-4 mb-5">
             <div className="md:col-span-3 grid grid-cols-3 md:grid-cols-5 gap-3 items-center">
@@ -296,16 +300,10 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                 label="Prescribed Fee"
                 disable
               />
-              <DefaultInput
-                registerKey="eastCut"
-                label="East cut"
-                defaultValue={feeDueData?.totalLess}
-                disable
-              />
+              <DefaultInput registerKey="eastCut" label="East cut" disable />
               <DefaultInput
                 registerKey="preDeposit"
                 label="Pre-deposit"
-                defaultValue={feeDueData?.totalPreDeposit}
                 disable
               />
               <DefaultInput registerKey="deduction" label="Deduction" disable />
@@ -381,7 +379,6 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                         <DefaultInput
                           registerKey={`fees.${globalIndex}.amount`}
                           type="number"
-                          defaultValue={item.amount}
                           disable
                         />
                       </td>
@@ -389,7 +386,6 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                         <DefaultKeyDownInput
                           registerKey={`fees.${globalIndex}.deduction`}
                           type="number"
-                          defaultValue={item.deduction || 0}
                           onChange={() => handleDeductionChange(globalIndex)}
                           max={item.preDeposit ? item.deposit : item.amount}
                         />
@@ -398,7 +394,6 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                         <DefaultInput
                           registerKey={`fees.${globalIndex}.preDeposit`}
                           type="number"
-                          defaultValue={item.preDeposit || 0}
                           disable
                         />
                       </td>
@@ -406,7 +401,6 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                         <DefaultKeyDownInput
                           registerKey={`fees.${globalIndex}.deposit`}
                           type="number"
-                          defaultValue={item.deposit}
                           onChange={() => handleDepositChange(globalIndex)}
                           max={
                             item.preDeposit ? item.depositUpdate : item.amount
@@ -417,7 +411,6 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                         <DefaultInput
                           registerKey={`fees.${globalIndex}.due`}
                           type="number"
-                          defaultValue={item.due || 0}
                           disable
                         />
                       </td>
@@ -464,4 +457,4 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
   );
 };
 
-export default StudentMonthFeeAceptForm;
+export default StudentMonthDueFeeAceptForm;
