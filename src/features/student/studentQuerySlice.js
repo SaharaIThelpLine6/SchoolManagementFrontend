@@ -1,5 +1,4 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { update } from 'lodash';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -22,6 +21,7 @@ export const userStudentSlice = createApi({
     'StudentReports',
     'ExamNames',
     'UsersOnlineRegInfo',
+    'StudentAdmissions',
   ],
   endpoints: (builder) => ({
     getStudentBySearch: builder.query({
@@ -58,6 +58,7 @@ export const userStudentSlice = createApi({
       query: () => `get_studentreport_cet`,
       providesTags: ['StudentReportsCet'],
     }),
+
     postStudentReportCets: builder.mutation({
       query: (data) => ({
         url: `student_report_cet`,
@@ -90,7 +91,7 @@ export const userStudentSlice = createApi({
     }),
     updateStudentReportType: builder.mutation({
       query: (data) => ({
-        url: `student_report_type/${data.catid}`, 
+        url: `student_report_type/${data.catid}`,
         method: 'PUT',
         body: data,
       }),
@@ -260,7 +261,20 @@ export const userStudentSlice = createApi({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['UsersOnlineRegInfo'], // Ensures the list is refreshed
+      invalidatesTags: ['UsersOnlineRegInfo', 'Student'], // Ensures the list is refreshed
+    }),
+    postStudentAdmissionInsert: builder.mutation({
+      query: (body) => ({
+        url: `insert_student`,
+        method: 'POST',
+        body: { data: body },
+      }),
+      invalidatesTags: ['StudentAdmissions', 'Student'],
+    }),
+
+    getStudentsAdmissionData: builder.query({
+      query: () => `view_useronly_students`,
+      providesTags: ['StudentAdmissions', 'Student'],
     }),
   }),
 });
@@ -268,6 +282,8 @@ export const userStudentSlice = createApi({
 export const {
   useGetStudentBySearchQuery,
   useGetStudentQuery,
+  useGetStudentsAdmissionDataQuery,
+  usePostStudentAdmissionInsertMutation,
   useGetStudentReportCetsQuery,
   usePostStudentReportCetsMutation,
   useUpdateStudentReportCetsMutation,

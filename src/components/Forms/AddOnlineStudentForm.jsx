@@ -1,25 +1,25 @@
-import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useFormContext, useForm } from "react-hook-form";
+import { useEffect, useRef, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
 
-import "flatpickr/dist/flatpickr.css";
-import DefaultInput from "./DefaultInput";
-import DefaultSelect from "./DefaultSelect";
-import DatePickerOne from "./DatePicker/DatePickerOne";
-import { useNavigate } from "react-router-dom";
+import 'flatpickr/dist/flatpickr.css';
+import { useNavigate } from 'react-router-dom';
 import {
   useAddStudentMutation,
   useGetClassQuery,
   useGetResidentialQuery,
-} from "../../features/onlineAdmission/onlineAdmissionSlice";
+} from '../../features/onlineAdmission/onlineAdmissionSlice';
 import {
   fetchDidata,
   fetchSettingsFieldData,
   fetchThanadata,
   setEditMode,
-} from "../../features/studentResultPublicView/studentResultPublicViewSlice";
-import convertBijoyToBengali from "../../utils/uniconveter";
-import Button from "../Button/Button";
+} from '../../features/studentResultPublicView/studentResultPublicViewSlice';
+import convertBijoyToBengali from '../../utils/uniconveter';
+import Button from '../Button/Button';
+import DatePickerOne from './DatePicker/DatePickerOne';
+import DefaultInput from './DefaultInput';
+import DefaultSelect from './DefaultSelect';
 
 const AddOnlineStudentForm = ({ schoolid }) => {
   const defaultData = useSelector(
@@ -62,14 +62,14 @@ const AddOnlineStudentForm = ({ schoolid }) => {
     TransientPost,
     TransientVill,
   ] = watch([
-    "DivisionID",
-    "DistrictID",
-    "DivisionID2",
-    "DistrictID2",
-    "permanentPoliceStationID",
-    "sameAddress",
-    "TransientPost",
-    "TransientVill",
+    'DivisionID',
+    'DistrictID',
+    'DivisionID2',
+    'DistrictID2',
+    'permanentPoliceStationID',
+    'sameAddress',
+    'TransientPost',
+    'TransientVill',
   ]);
   const [
     addStudent,
@@ -78,8 +78,8 @@ const AddOnlineStudentForm = ({ schoolid }) => {
   const isSameAddressRef = useRef(false);
   useEffect(() => {
     if (editMode === 0) {
-      setValue("DistrictID", "");
-      setValue("permanentPoliceStationID", "");
+      setValue('DistrictID', '');
+      setValue('permanentPoliceStationID', '');
       if (DivisionID) {
         dispatch(fetchDidata({ madrasaId: schoolid, id: DivisionID }));
       }
@@ -87,8 +87,8 @@ const AddOnlineStudentForm = ({ schoolid }) => {
       const numberStrP = defaultData.permanentPoliceStationID.toString();
       if (DivisionID === Number(numberStrP.slice(0, 1))) {
       } else {
-        setValue("DistrictID", "");
-        setValue("permanentPoliceStationID", "");
+        setValue('DistrictID', '');
+        setValue('permanentPoliceStationID', '');
         if (DivisionID) {
           dispatch(fetchDidata({ madrasaId: schoolid, id: DivisionID }));
         }
@@ -98,7 +98,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
 
   useEffect(() => {
     if (editMode === 0) {
-      setValue("permanentPoliceStationID", "");
+      setValue('permanentPoliceStationID', '');
       if (DistrictID) {
         dispatch(fetchThanadata({ madrasaId: schoolid, id: DistrictID }));
       }
@@ -106,7 +106,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
       const numberStrP = defaultData.permanentPoliceStationID.toString();
       if (DistrictID === Number(numberStrP.slice(0, 3))) {
       } else {
-        setValue("permanentPoliceStationID", "");
+        setValue('permanentPoliceStationID', '');
         if (DistrictID) {
           dispatch(fetchThanadata({ madrasaId: schoolid, id: DistrictID }));
         }
@@ -120,26 +120,26 @@ const AddOnlineStudentForm = ({ schoolid }) => {
   useEffect(() => {
     if (editMode === 0) {
       if (!isSameAddressRef.current) {
-        setValue("DistrictID2", "");
-        setValue("TransientPoliceStationID", "");
+        setValue('DistrictID2', '');
+        setValue('TransientPoliceStationID', '');
         if (DivisionID2) {
           dispatch(fetchDidata({ madrasaId: schoolid, id: DivisionID2 }));
         }
       } else {
-        setValue("DistrictID2", DistrictID);
+        setValue('DistrictID2', DistrictID);
       }
     } else if (editMode === 2) {
       const numberStrT = defaultData.TransientPoliceStationID.toString();
       if (DivisionID2 === Number(numberStrT.slice(0, 1))) {
       } else {
         if (!isSameAddressRef.current) {
-          setValue("DistrictID2", "");
-          setValue("TransientPoliceStationID", "");
+          setValue('DistrictID2', '');
+          setValue('TransientPoliceStationID', '');
           if (DivisionID2) {
             dispatch(fetchDidata({ madrasaId: schoolid, id: DivisionID2 }));
           }
         } else {
-          setValue("DistrictID2", DistrictID);
+          setValue('DistrictID2', DistrictID);
         }
       }
     }
@@ -148,24 +148,24 @@ const AddOnlineStudentForm = ({ schoolid }) => {
   useEffect(() => {
     if (editMode === 0) {
       if (!isSameAddressRef.current) {
-        setValue("TransientPoliceStationID", "");
+        setValue('TransientPoliceStationID', '');
         if (DistrictID2) {
           dispatch(fetchThanadata({ madrasaId: schoolid, id: DistrictID2 }));
         }
       } else {
-        setValue("TransientPoliceStationID", permanentPoliceStationID);
+        setValue('TransientPoliceStationID', permanentPoliceStationID);
       }
     } else if (editMode === 2) {
       const numberStrT = defaultData.TransientPoliceStationID.toString();
       if (DistrictID2 === Number(numberStrT.slice(0, 3))) {
       } else {
         if (!isSameAddressRef.current) {
-          setValue("TransientPoliceStationID", "");
+          setValue('TransientPoliceStationID', '');
           if (DistrictID2) {
             dispatch(fetchThanadata({ madrasaId: schoolid, id: DistrictID2 }));
           }
         } else {
-          setValue("DistrictID2", DistrictID);
+          setValue('DistrictID2', DistrictID);
         }
       }
     }
@@ -175,14 +175,14 @@ const AddOnlineStudentForm = ({ schoolid }) => {
     isSameAddressRef.current = sameAddress;
     // if (editMode === 0) {
     if (isSameAddressRef.current) {
-      setValue("DivisionID2", DivisionID);
-      setValue("DistrictID2", DistrictID);
-      setValue("TransientPoliceStationID", permanentPoliceStationID);
+      setValue('DivisionID2', DivisionID);
+      setValue('DistrictID2', DistrictID);
+      setValue('TransientPoliceStationID', permanentPoliceStationID);
 
       // setValue("permanentPost", TransientPost)
       // setValue("permanentVill", TransientVill)
-      setValue("TransientPost", watch("permanentPost"));
-      setValue("TransientVill", watch("permanentVill"));
+      setValue('TransientPost', watch('permanentPost'));
+      setValue('TransientVill', watch('permanentVill'));
     }
     // }
   }, [
@@ -200,31 +200,31 @@ const AddOnlineStudentForm = ({ schoolid }) => {
 
     if (editMode === 0) {
       reset({
-        UserName: "",
-        GenderID: "",
-        FatherName: "",
-        MotherName: "",
-        DateOfBirth: "",
-        NIDNO: "",
-        Mobile1: "",
-        Relationship1: "",
-        Mobile2: "",
-        Relationship2: "",
-        Email: "",
-        BloodGroup: "",
-        DivisionID: "",
-        DistrictID: "",
-        permanentPoliceStationID: "",
-        permanentPost: "",
-        permanentVill: "",
+        UserName: '',
+        GenderID: '',
+        FatherName: '',
+        MotherName: '',
+        DateOfBirth: '',
+        NIDNO: '',
+        Mobile1: '',
+        Relationship1: '',
+        Mobile2: '',
+        Relationship2: '',
+        Email: '',
+        BloodGroup: '',
+        DivisionID: '',
+        DistrictID: '',
+        permanentPoliceStationID: '',
+        permanentPost: '',
+        permanentVill: '',
         sameAddress: false,
-        DivisionID2: "",
-        DistrictID2: "",
-        TransientPoliceStationID: "",
-        TransientPost: "",
-        TransientVill: "",
-        ClassID: "",
-        ResidentialStatusId: "",
+        DivisionID2: '',
+        DistrictID2: '',
+        TransientPoliceStationID: '',
+        TransientPost: '',
+        TransientVill: '',
+        ClassID: '',
+        ResidentialStatusId: '',
       });
     }
   }, [dispatch]);
@@ -271,12 +271,12 @@ const AddOnlineStudentForm = ({ schoolid }) => {
           dispatch(setEditMode(2));
         })
         .catch((err) => {
-          console.error("Error in dispatching actions:", err);
+          console.error('Error in dispatching actions:', err);
         });
     }
   }, [defaultData, reset]);
 
-  if (status === "failed") {
+  if (status === 'failed') {
     console.log(error);
   }
 
@@ -286,7 +286,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
       // Convert all text fields to Bijoy encoding
       const convertedData = Object.fromEntries(
         Object.entries(data).map(([key, value]) =>
-          typeof value === "string"
+          typeof value === 'string'
             ? [key, convertBijoyToBengali(value)]
             : [key, value]
         )
@@ -295,7 +295,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
       await addStudent({ dataBody: convertedData, id: schoolid }).unwrap();
     } catch (err) {
       setButtonDisable(false);
-      console.error("Error submitting data:", err);
+      console.error('Error submitting data:', err);
     }
   };
 
@@ -309,7 +309,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
 
     if (isError) {
       setButtonDisable(false);
-      console.error("API call failed:", error);
+      console.error('API call failed:', error);
     }
   }, [isSuccess, isError]);
   return (
@@ -325,96 +325,84 @@ const AddOnlineStudentForm = ({ schoolid }) => {
         {/* Basic Info */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3">
           <DefaultInput
-            label={<span className="text-red-500">নাম * :</span>}
-            require={"শিক্ষার্থীর নাম অবশ্যই লিখতে হবে"}
+            label="Name"
+            require={'শিক্ষার্থীর নাম অবশ্যই লিখতে হবে'}
             type="text"
             registerKey="UserName"
           />
 
           <DefaultInput
-            label="পিতার নাম :"
+            label="পিতার নাম"
             type="text"
             registerKey="FatherName"
           />
 
           <DefaultInput
-            label="মাতার নাম :"
+            label="মাতার নাম"
             type="text"
             registerKey="MotherName"
           />
 
           <DefaultSelect
-            label={<span className="text-red-500">লিঙ্গ * :</span>}
+            label="লিঙ্গ"
             options={gender}
             registerKey="GenderID"
-            require={"শিক্ষার্থীর লিঙ্গ নির্বাচন করতে হবে"}
+            require={'শিক্ষার্থীর লিঙ্গ নির্বাচন করতে হবে'}
             nameField="GenderName"
             valueField="ID"
           />
 
           <DatePickerOne
-            dateCalender={<span className="text-red-500">জন্ম তারিখ * :</span>}
+            dateCalender="জন্ম তারিখ"
             registerKey="DateOfBirth"
-            require={"শিক্ষার্থীর জন্ম তারিখ নির্বাচন করতে হবে"}
+            require={'শিক্ষার্থীর জন্ম তারিখ নির্বাচন করতে হবে'}
           />
 
           <DefaultInput
-            label="NID/জন্ম নিবন্ধন নং :"
+            label="NID/জন্ম নিবন্ধন নং"
             type="text"
             registerKey="NIDNO"
           />
 
           {/* Mobile 1 with Relation */}
-          <div className="flex gap-3 col-span-full lg:col-span-2">
-            <div className="w-full">
-              <label className="text-red-500 font-SolaimanLipi">
-                মোবাইল ১* (SMS যাবে)
-              </label>
-              <DefaultInput
-                type="phone"
-                registerKey="Mobile1"
-                require={"অভিভাবক মোবাইল নাম্বার লিখতে হবে"}
-              />
-            </div>
-            <div className="w-36">
-              <DefaultSelect
-                label={<span className="text-red-500">সম্পর্ক * :</span>}
-                options={studentRelation}
-                valueField="RelationID"
-                nameField="RelationName"
-                registerKey="Relationship1"
-                require={"শিক্ষার্থীর অভিভাবক সম্পর্ক নির্বাচন করতে হবে"}
-              />
-            </div>
-          </div>
+          <DefaultInput
+            label={<span className="text-red-500">মোবাইল ১* (SMS যাবে)</span>}
+            type="phone"
+            registerKey="Mobile1"
+            require={'অভিভাবক মোবাইল নাম্বার লিখতে হবে'}
+          />
 
-          {/* Mobile 2 with Relation */}
-          <div className="flex gap-3 col-span-full lg:col-span-2">
-            <DefaultInput label="মোবাইল ২" type="text" registerKey="Mobile2" />
-            <div className="w-36">
-              <DefaultSelect
-                label="সম্পর্ক:"
-                options={studentRelation}
-                valueField="RelationID"
-                nameField="RelationName"
-                registerKey="Relationship2"
-              />
-            </div>
-          </div>
+          <DefaultSelect
+            label="Relationship 1"
+            options={studentRelation}
+            valueField="RelationID"
+            nameField="RelationName"
+            registerKey="Relationship1"
+            require={'শিক্ষার্থীর অভিভাবক সম্পর্ক নির্বাচন করতে হবে'}
+          />
+
+          <DefaultInput label="মোবাইল ২" type="text" registerKey="Mobile2" />
+          <DefaultSelect
+            label="Relationship 2"
+            options={studentRelation}
+            valueField="RelationID"
+            nameField="RelationName"
+            registerKey="Relationship2"
+          />
 
           <DefaultInput label="ই-মেইল" type="email" registerKey="Email" />
 
           <DefaultSelect
-            label="রক্তের গ্রুপ :"
+            label="রক্তের গ্রুপ"
             options={[
-              { value: "A+" },
-              { value: "A-" },
-              { value: "B+" },
-              { value: "B-" },
-              { value: "AB+" },
-              { value: "AB-" },
-              { value: "O+" },
-              { value: "O-" },
+              { value: 'A+' },
+              { value: 'A-' },
+              { value: 'B+' },
+              { value: 'B-' },
+              { value: 'AB+' },
+              { value: 'AB-' },
+              { value: 'O+' },
+              { value: 'O-' },
             ]}
             registerKey="BloodGroup"
             nameField="value"
@@ -423,24 +411,24 @@ const AddOnlineStudentForm = ({ schoolid }) => {
 
           {classData && (
             <DefaultSelect
-              label={<span className="text-red-500">শ্রেণী * :</span>}
+              label="Class"
               options={classData}
               nameField="ClassName"
               valueField="ClassID"
               registerKey="ClassID"
-              require={"শিক্ষার্থীর শ্রেণী নির্বাচন করতে হবে"}
+              require={'শিক্ষার্থীর শ্রেণী নির্বাচন করতে হবে'}
               unicode
             />
           )}
 
           {residentialData && (
             <DefaultSelect
-              label={<span className="text-red-500">আবাসন * :</span>}
+              label="Residential"
               options={residentialData}
               nameField="ResidentialName"
               valueField="RDID"
               registerKey="ResidentialStatusId"
-              require={"শিক্ষার্থীর আবাসন নির্বাচন করতে হবে"}
+              require={'শিক্ষার্থীর আবাসন নির্বাচন করতে হবে'}
             />
           )}
         </div>
@@ -496,7 +484,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
             <input
               id="sameAddress"
               type="checkbox"
-              {...register("sameAddress")}
+              {...register('sameAddress')}
               className="h-4 w-4 text-indigo-600 focus:ring-indigo-500"
             />
             ঠিকানা একই হলে এখানে ক্লিক করুন

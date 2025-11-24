@@ -3,22 +3,26 @@ import { useEffect, useState } from 'react';
 import { useGetInstitutionInfoQuery } from '../../../features/settings/settingsQuerySlice';
 import bnBijoy2Unicode from '../../../utils/conveter';
 
-const SingleClassRoutingPDF = ({ data = [] }) => {
+/**
+ * 🟦 pageSize: "A4" | "A5"
+ * A4 = 210mm × 297mm
+ * A5 = 148mm × 210mm
+ */
+const SingleClassRoutingPDF = ({ data = [], pageSize = 'A4' }) => {
   const { data: institutionInfo } = useGetInstitutionInfoQuery();
 
   const [logo, setLogo] = useState(null);
   const [signatureNajem, setSignatureNajem] = useState(null);
   const [principal, setPrincipal] = useState(null);
 
+  // ---------- Convert Buffer Images ----------
   useEffect(() => {
-    // ---------- Institution Logo ----------
     const logoData = institutionInfo?.Logo?.data;
     if (logoData) {
       const buffer = Buffer.from(logoData);
       setLogo(`data:image/png;base64,${buffer.toString('base64')}`);
     }
 
-    // ---------- Signature Najem + Principal ----------
     if (Array.isArray(data) && data.length > 0) {
       const najemData = data[0]?.SignatureNajem?.data;
       const principalData = data[0]?.SignaturePrincipal?.data;
@@ -46,53 +50,63 @@ const SingleClassRoutingPDF = ({ data = [] }) => {
     );
   }
 
-  // ---------- COMMON DATA ----------
   const common = data[0];
 
+  // ---------- PAGE SIZE CONTROL ----------
+  const pageStyle =
+    pageSize === 'A5'
+      ? 'w-[148mm] h-[210mm] p-3 text-[10px]'
+      : 'w-[210mm] h-[297mm] p-6 text-[12px]';
+
+  const titleSize = pageSize === 'A5' ? 'text-lg' : 'text-xl';
+  const tableHeaderSize = pageSize === 'A5' ? 'text-sm' : 'text-base';
+  const rowFont = pageSize === 'A5' ? 'text-sm' : 'text-base';
+
   return (
-    <div className="w-[210mm] h-[297mm]  bg-white text-black p-6 text-[12px] font-SolaimanLipi mx-auto">
+    <div
+      className={`mx-auto bg-white text-black font-SolaimanLipi ${pageStyle}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        {/* Logo */}
-        <div className="w-20 h-20 flex items-center justify-center">
+        <div className="w-16 h-16 flex items-center justify-center">
           {logo ? (
-            <img src={logo} alt="Logo" className="w-20 h-20 object-contain" />
+            <img src={logo} alt="Logo" className="w-16 h-16 object-contain" />
           ) : (
             <div className="w-14 h-14 bg-gray-200 border-2 border-dashed" />
           )}
         </div>
 
-        {/* Title & Info */}
-        <div className="text-center flex-1 mx-4">
-          <h1 className="text-xl font-bold mb-1">
+        <div className="text-center flex-1 mx-2">
+          <h1 className={`${titleSize} font-bold mb-1`}>
             {bnBijoy2Unicode(institutionInfo?.InstitutionName || '')}
           </h1>
-          <p className="text-base mb-1">
+          <p className="mb-1">
             {bnBijoy2Unicode(institutionInfo?.Address || '')}
           </p>
-          <p className="text-base mb-2">
+          <p className="mb-2">
             {bnBijoy2Unicode(institutionInfo?.ContactNumber || '')},{' '}
             {bnBijoy2Unicode(institutionInfo?.AraContactNumber || '')}
           </p>
 
-          <p className="text-xl font-semibold py-1 px-3 rounded inline-block">
+          <p className={`${titleSize} font-semibold`}>
             {bnBijoy2Unicode(common.ExamName)},{' '}
             {bnBijoy2Unicode(common.SessionName)}
           </p>
-          <br />
-          <h2 className="text-xl font-bold border-2 border-black inline-block px-12 py-1 mt-3">
+
+          <h2
+            className={`border-2 border-black inline-block px-10 py-1 mt-2 ${titleSize} font-bold`}
+          >
             পরীক্ষার রুটিন
           </h2>
         </div>
 
-        {/* Right side empty (for symmetry) */}
         <div className="w-16 h-16" />
       </div>
 
-      {/* Main Table */}
-      <table className="w-full border-collapse border border-black  text-center">
+      {/* Table */}
+      <table className="w-full border-collapse border border-black text-center">
         <thead>
-          <tr className="bg-gray-50 text-base">
+          <tr className={`bg-gray-100 ${tableHeaderSize}`}>
             <th className="border border-black py-2 px-1">ক্রমিক</th>
             <th className="border border-black py-2 px-1">বিষয়/ফিকর</th>
             <th className="border border-black py-2 px-1">তারিখ</th>
@@ -104,10 +118,9 @@ const SingleClassRoutingPDF = ({ data = [] }) => {
         </thead>
 
         <tbody>
-          {/* ---- Heading Row (Correct Way) ---- */}
           <tr>
             <td
-              className="border border-black py-2 font-bold text-base !bg-gray-400 !text-white text-center"
+              className="border border-black py-2 font-bold !bg-gray-400 text-white"
               colSpan={7}
             >
               জামাত / ক্লাস : {bnBijoy2Unicode(common.SubClass)}
@@ -115,46 +128,36 @@ const SingleClassRoutingPDF = ({ data = [] }) => {
           </tr>
 
           {data.map((row, idx) => (
-            <tr key={idx} className="bg-white text-base">
-              <td className="border border-black py-2 bg-white">{idx + 1}</td>
+            <tr key={idx} className={`${rowFont}`}>
+              <td className="border border-black py-1">{idx + 1}</td>
 
-              <td className="border border-black py-2 text-left pl-2 bg-white">
+              <td className="border border-black py-1 text-left pl-2">
                 {bnBijoy2Unicode(row.SubjectName)}
               </td>
 
-              <td className="border border-black py-2 bg-white">
-                {row.ExamDate}
-              </td>
-              <td className="border border-black py-2 bg-white">
-                {row.ExamDay}
-              </td>
-              <td className="border border-black py-2 bg-white">
-                {row.StartTime}
-              </td>
-              <td className="border border-black py-2 bg-white">
-                {row.EndTime}
-              </td>
-              <td className="border border-black py-2 bg-white">
-                {row.RoomNo}
-              </td>
+              <td className="border border-black py-1">{row.ExamDate}</td>
+              <td className="border border-black py-1">{row.ExamDay}</td>
+              <td className="border border-black py-1">{row.StartTime}</td>
+              <td className="border border-black py-1">{row.EndTime}</td>
+              <td className="border border-black py-1">{row.RoomNo}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Signature Section */}
-      <div className="mt-5 flex justify-between px-20 text-base">
+      {/* Signatures */}
+      <div className="mt-5 flex justify-between px-10">
         <div className="text-center">
           {signatureNajem && (
             <img
               src={signatureNajem}
               alt="Seal"
-              className="w-16 h-16 mx-auto object-contain mb-2"
+              className="w-14 h-14 mx-auto object-contain mb-1"
             />
           )}
-          <div className="border-t-2 border-black w-40 mt-3"></div>
-          <p className=" mt-2">নাযেমে তালি: স্বাক্ষর</p>
-          <p className="">তারিখ: ..................</p>
+          <div className="border-t-2 border-black w-32 mt-2"></div>
+          <p className="mt-1">নাযেমে তালি: স্বাক্ষর</p>
+          <p>তারিখ: ..................</p>
         </div>
 
         <div className="text-center">
@@ -162,12 +165,12 @@ const SingleClassRoutingPDF = ({ data = [] }) => {
             <img
               src={principal}
               alt="Seal"
-              className="w-16 h-16 mx-auto object-contain mb-2"
+              className="w-14 h-14 mx-auto object-contain mb-1"
             />
           )}
-          <div className="border-t-2 border-black w-40 mt-3"></div>
-          <p className=" mt-2">প্রিন্সিপাল স্বাক্ষর</p>
-          <p className="">তারিখ: ..................</p>
+          <div className="border-t-2 border-black w-32 mt-2"></div>
+          <p className="mt-1">প্রিন্সিপাল স্বাক্ষর</p>
+          <p>তারিখ: ..................</p>
         </div>
       </div>
     </div>

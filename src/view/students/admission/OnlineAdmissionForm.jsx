@@ -7,6 +7,7 @@ import Button from '../../../components/Button/Button';
 import DatePickerOne from '../../../components/Forms/DatePicker/DatePickerOne';
 import DefaultInput from '../../../components/Forms/DefaultInput';
 import DefaultSelect from '../../../components/Forms/DefaultSelect';
+import PhoneNumberInput from '../../../components/Forms/PhoneNumberInput';
 import SvgIcon from '../../../components/icons/SvgIcon';
 import Loading from '../../../components/Loading/Loading';
 import {
@@ -427,16 +428,23 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 placeholder="NID নম্বর লিখুন"
                 defaultValue={studentData?.NIDNO ?? ''}
               />
-
-              <DefaultInput
-                type="tel"
-                registerKey="Mobile1"
+              <PhoneNumberInput
                 label={translate('Mobile No 1')}
-                placeholder="01XXXXXXXXX"
-                require="This field is required!"
+                registerKey="Mobile1"
+                require={true}
+                minLength={11}
+                maxLength={11}
+                allowedPrefixes={[
+                  '013',
+                  '014',
+                  '015',
+                  '016',
+                  '017',
+                  '018',
+                  '019',
+                ]}
                 defaultValue={studentData?.Mobile1 ?? ''}
               />
-
               <DefaultSelect
                 label={translate('Relationship 1')}
                 options={mobileRelationshipData ?? []}
@@ -445,15 +453,23 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 registerKey="Relationship1"
                 require="This field is required!"
               />
-
-              <DefaultInput
-                type="tel"
-                registerKey="Mobile2"
+              <PhoneNumberInput
                 label={translate('Mobile No 2')}
-                placeholder="01XXXXXXXXX"
+                registerKey="Mobile2"
+                // require={true}
+                minLength={11}
+                maxLength={11}
+                allowedPrefixes={[
+                  '013',
+                  '014',
+                  '015',
+                  '016',
+                  '017',
+                  '018',
+                  '019',
+                ]}
                 defaultValue={studentData?.Mobile2 ?? ''}
               />
-
               <DefaultSelect
                 label={translate('Relationship 2')}
                 options={mobileRelationshipData ?? []}

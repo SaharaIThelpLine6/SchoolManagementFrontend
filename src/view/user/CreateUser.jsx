@@ -16,6 +16,8 @@ import {
 } from '../../features/settings/settingsQuerySlice';
 
 import Swal from 'sweetalert2';
+import Button from '../../components/Button/Button';
+import PhoneNumberInput from '../../components/Forms/PhoneNumberInput';
 import {
   useGetUserCodeCheckQuery,
   useGetUserTypesQuery,
@@ -23,8 +25,6 @@ import {
 } from '../../features/userType/userTypeSlice';
 import { calculateAge } from '../../utils/calculateAge';
 import useTranslate from '../../utils/Translate';
-import validateBDMobile from '../../utils/validateBDMobile';
-import Button from '../../components/Button/Button';
 
 const CreateUser = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -313,7 +313,7 @@ const CreateUser = ({ pageTitle }) => {
               ব্যবহারকারীর তথ্য
             </h2>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <div className="grid md:grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               <DefaultSelect
                 type="number"
                 label="User Type"
@@ -369,78 +369,83 @@ const CreateUser = ({ pageTitle }) => {
                 placeholder="Enter your mother name ..."
               />
 
-              <div className="flex gap-3 col-span-2 sm:col-auto">
-                <DatePickerOne
-                  dateCalender="জন্ম তারিখ"
-                  registerKey="DateOfBirth"
-                  require="Required!"
-                  className="w-full"
-                  placeholder="DD-MM-YYYY"
-                />
-                <DefaultInput
-                  label="বয়স"
-                  type="text"
-                  placeholder="Enter your age ..."
-                  registerKey="age"
-                  className="w-20"
-                  defaultValue={ageValue?.years ?? ''}
-                  disable
-                />
-              </div>
+              <DatePickerOne
+                dateCalender="জন্ম তারিখ"
+                registerKey="DateOfBirth"
+                require="Required!"
+                className="w-full"
+                placeholder="DD-MM-YYYY"
+              />
+              <DefaultInput
+                label="বয়স"
+                type="text"
+                placeholder="Enter your age ..."
+                registerKey="age"
+                className="w-20"
+                defaultValue={ageValue?.years ?? ''}
+                disable
+              />
 
-              <div className="col-span-2 sm:col-auto">
-                <DefaultInput
-                  label="NID/জন্ম নিবন্ধন নং"
-                  type="text"
-                  registerKey="NIDNO"
-                  placeholder="Enter your NID No ..."
-                />
-              </div>
+              <DefaultInput
+                label="NID/জন্ম নিবন্ধন নং"
+                type="text"
+                registerKey="NIDNO"
+                placeholder="Enter your NID No ..."
+              />
 
-              <div className="flex gap-3 col-span-2">
-                <DefaultInput
-                  label={
-                    <span className="text-red-500">মোবাইল ১* (SMS যাবে)</span>
-                  }
-                  type="text"
-                  registerKey="Mobile1"
-                  className="w-full"
-                  placeholder="Enter your mobile number ..."
-                  validate={(value) =>
-                    validateBDMobile(value) || 'সঠিক বাংলাদেশী মোবাইল নম্বর দিন'
-                  }
-                />
-                <DefaultSelect
-                  label="সম্পর্ক"
-                  type="number"
-                  options={studentRelation}
-                  valueField="RelationID"
-                  nameField="RelationName"
-                  registerKey="Relationship1"
-                  className="w-36"
-                />
-              </div>
+              <PhoneNumberInput
+                label={
+                  <span className="text-red-500">মোবাইল ১* (SMS যাবে)</span>
+                }
+                registerKey="Mobile1"
+                require={true}
+                minLength={11}
+                maxLength={11}
+                allowedPrefixes={[
+                  '013',
+                  '014',
+                  '015',
+                  '016',
+                  '017',
+                  '018',
+                  '019',
+                ]}
+              />
+              <DefaultSelect
+                label="সম্পর্ক"
+                type="number"
+                options={studentRelation}
+                valueField="RelationID"
+                nameField="RelationName"
+                registerKey="Relationship1"
+              />
 
-              <div className="flex gap-3 col-span-2 sm:col-auto">
-                <DefaultInput
-                  label="মোবাইল ২"
-                  type="text"
-                  registerKey="Mobile2"
-                  placeholder="Enter your mobile number ..."
-                  // validate={(value) =>
-                  //   validateBDMobile(value) || 'সঠিক বাংলাদেশী মোবাইল নম্বর দিন'
-                  // }
-                />
-                <DefaultSelect
-                  label="সম্পর্ক"
-                  type="number"
-                  options={studentRelation}
-                  valueField="RelationID"
-                  nameField="RelationName"
-                  registerKey="Relationship2"
-                  className="w-36"
-                />
-              </div>
+              <PhoneNumberInput
+                label="মোবাইল ২"
+                registerKey="Mobile2"
+                // require={true}
+                minLength={11}
+                maxLength={11}
+                allowedPrefixes={[
+                  '013',
+                  '014',
+                  '015',
+                  '016',
+                  '017',
+                  '018',
+                  '019',
+                ]}
+              />
+
+              <DefaultSelect
+                label="সম্পর্ক"
+                type="number"
+                options={studentRelation}
+                valueField="RelationID"
+                nameField="RelationName"
+                registerKey="Relationship2"
+                className="w-36"
+              />
 
               <DefaultInput
                 label="ই-মেইল"

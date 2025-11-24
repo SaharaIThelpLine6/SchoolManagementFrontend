@@ -60,12 +60,12 @@ const ExamRouting = ({ pageTitle }) => {
     'PrintID',
   ]);
 
- const { data, isLoading, isError, error } = useGetExamRoutineQuery({
-   sessionID: SessionID,
-   examID: ExamID,
-   subclassID: SubClassID,
-   printID: PrintID,
- });
+  const { data, isLoading, isError, error } = useGetExamRoutineQuery({
+    sessionID: SessionID,
+    examID: ExamID,
+    subclassID: SubClassID,
+    printID: PrintID,
+  });
 
   // console.log(data, 'data');
 
@@ -82,7 +82,13 @@ const ExamRouting = ({ pageTitle }) => {
     isLoading: isExamFeeSettingLoading,
     isError: isExamFeeSettingError,
     refetch,
-  } = useGetExamFeeSettingQuery();
+  } = useGetExamFeeSettingQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+
+  console.log(examFeeSettingData, 'examFeeSettdwsingData');
 
   // console.log(examFeeSettingData, 'examFeeSettingData');
 
@@ -178,8 +184,9 @@ const ExamRouting = ({ pageTitle }) => {
     const waitForData = setInterval(() => {
       if (!isLoading) {
         clearInterval(waitForData);
+        console.log(isError, data?.data, '!data?.data');
 
-        if (isError || !data?.data || data?.data?.length === 0) {
+        if (!data?.data || data?.data?.length === 0) {
           Swal.fire(
             'Error!',
             'রুটিন পাওয়া যায়নি অথবা সার্ভারে সমস্যা হয়েছে',
@@ -306,14 +313,22 @@ const ExamRouting = ({ pageTitle }) => {
   const printData = [
     {
       PrintID: 1,
-      PrintName: 'প্রতি ক্লাস প্রতি পৃষ্ঠায় আলাদা বাংলা।',
+      PrintName: 'প্রতি ক্লাস প্রতি পৃষ্ঠায় আলাদা বাংলা A5।',
     },
     {
       PrintID: 2,
-      PrintName: 'সকল ক্লাস একত্রে বাংলা।',
+      PrintName: 'প্রতি ক্লাস প্রতি পৃষ্ঠায় আলাদা বাংলা A4।',
     },
     {
       PrintID: 3,
+      PrintName: 'সকল ক্লাস একত্রে বাংলা A5।',
+    },
+    {
+      PrintID: 4,
+      PrintName: 'সকল ক্লাস একত্রে বাংলা A4।',
+    },
+    {
+      PrintID: 5,
       PrintName: 'স্বাক্ষর/দস্তখত পত্র',
     },
   ];
@@ -488,7 +503,6 @@ const ExamRouting = ({ pageTitle }) => {
                   valueField="PrintID"
                   nameField="PrintName"
                   registerKey="PrintID"
-                  unicode={true}
                 />
               </div>
               <Button
@@ -530,10 +544,14 @@ const ExamRouting = ({ pageTitle }) => {
         {printView && (
           <>
             {Number(PrintID) === 1 && (
-              <SingleClassRoutingPDF data={data?.data} />
+              <SingleClassRoutingPDF data={data?.data} pageSize="A5" />
             )}
-            {Number(PrintID) === 2 && <AllClassRoutingPDF data={data?.data} />}
-            {Number(PrintID) === 3 && (
+            {Number(PrintID) === 2 && (
+              <SingleClassRoutingPDF data={data?.data} pageSize="A4" />
+            )}
+            {Number(PrintID) === 3 && <AllClassRoutingPDF data={data?.data} />}
+            {Number(PrintID) === 4 && <AllClassRoutingPDF data={data?.data} />}
+            {Number(PrintID) === 5 && (
               <ExamSignatureRoutingPDF data={data?.data} />
             )}
           </>

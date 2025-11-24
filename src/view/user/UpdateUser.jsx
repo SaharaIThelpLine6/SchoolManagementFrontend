@@ -8,6 +8,7 @@ import Button from '../../components/Button/Button';
 import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
 import DefaultInput from '../../components/Forms/DefaultInput';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
+import PhoneNumberInput from '../../components/Forms/PhoneNumberInput';
 import {
   useGetAllGendersQuery,
   useGetCodeSettingsQuery,
@@ -26,7 +27,6 @@ import {
 import useTranslate from '../../utils/Translate';
 import { calculateAge } from '../../utils/calculateAge';
 import { extractLocationCodes } from '../../utils/locationUtils';
-import validateBDMobile from '../../utils/validateBDMobile';
 
 const UpdateUser = ({ singleUserData }) => {
   const translate = useTranslate();
@@ -269,29 +269,28 @@ const UpdateUser = ({ singleUserData }) => {
             </h2>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              <DefaultSelect
-                type="number"
-                label="User Type"
-                options={userType}
-                registerKey="UserTypeID"
-                valueField="ID"
-                nameField="TypeName"
-                require="User Type Field is required!"
-                labelColor="text-red-500"
-              />
-
-              <DefaultInput
-                label="User Code"
-                type="number"
-                placeholder="100149"
-                registerKey="UserCode"
-                require="Dakhela is required!"
-                // codeSetting={true}
-                labelColor="text-red-500"
-                // defaultValue={userCodeData ? userCodeData : ''}
-                defaultValue={singleUserData?.UserCode || ''}
-                disable
-              />
+                <DefaultSelect
+                  type="number"
+                  label="User Type"
+                  options={userType}
+                  registerKey="UserTypeID"
+                  valueField="ID"
+                  nameField="TypeName"
+                  require="User Type Field is required!"
+                  labelColor="text-red-500"
+                />
+                <DefaultInput
+                  label="User Code"
+                  type="number"
+                  placeholder="100149"
+                  registerKey="UserCode"
+                  require="Dakhela is required!"
+                  // codeSetting={true}
+                  labelColor="text-red-500"
+                  // defaultValue={userCodeData ? userCodeData : ''}
+                  defaultValue={singleUserData?.UserCode || ''}
+                  disable
+                />
 
               <DefaultSelect
                 label="Gender"
@@ -328,7 +327,6 @@ const UpdateUser = ({ singleUserData }) => {
                 defaultValue={singleUserData?.MotherName || ''}
               />
 
-              <div className="flex gap-3 col-span-2 sm:col-auto">
                 <DatePickerOne
                   dateCalender="জন্ম তারিখ"
                   registerKey="DateOfBirth"
@@ -345,9 +343,7 @@ const UpdateUser = ({ singleUserData }) => {
                   defaultValue={ageValue?.years ?? ''}
                   disable
                 />
-              </div>
 
-              <div className="col-span-2 sm:col-auto">
                 <DefaultInput
                   label="NID/জন্ম নিবন্ধন নং"
                   type="text"
@@ -355,22 +351,25 @@ const UpdateUser = ({ singleUserData }) => {
                   placeholder="Enter your NID No ..."
                   defaultValue={singleUserData?.NIDNO || ''}
                 />
-              </div>
 
-              <div className="flex gap-3 col-span-2">
-                <DefaultInput
+                <PhoneNumberInput
                   label={
                     <span className="text-red-500">মোবাইল ১* (SMS যাবে)</span>
                   }
-                  type="text"
                   registerKey="Mobile1"
-                  className="w-full"
-                  placeholder="Enter your mobile number ..."
-                  defaultValue={singleUserData?.Mobile1 || ''}
                   require={true}
-                  validate={(value) =>
-                    validateBDMobile(value) || 'সঠিক বাংলাদেশী মোবাইল নম্বর দিন'
-                  }
+                  minLength={11}
+                  maxLength={11}
+                  allowedPrefixes={[
+                    '013',
+                    '014',
+                    '015',
+                    '016',
+                    '017',
+                    '018',
+                    '019',
+                  ]}
+                  defaultValue={singleUserData?.Mobile1 || ''}
                 />
                 <DefaultSelect
                   label="সম্পর্ক"
@@ -381,19 +380,23 @@ const UpdateUser = ({ singleUserData }) => {
                   registerKey="Relationship1"
                   className="w-36"
                 />
-              </div>
 
-              <div className="flex gap-3 col-span-2 sm:col-auto">
-                <DefaultInput
+                <PhoneNumberInput
                   label="মোবাইল ২"
-                  type="text"
                   registerKey="Mobile2"
-                  placeholder="Enter your mobile number ..."
-                  defaultValue={singleUserData?.Mobile2 || ''}
                   // require={true}
-                  // validate={(value) =>
-                  //   validateBDMobile(value) || 'সঠিক বাংলাদেশী মোবাইল নম্বর দিন'
-                  // }
+                  minLength={11}
+                  maxLength={11}
+                  allowedPrefixes={[
+                    '013',
+                    '014',
+                    '015',
+                    '016',
+                    '017',
+                    '018',
+                    '019',
+                  ]}
+                  defaultValue={singleUserData?.Mobile2 || ''}
                 />
                 <DefaultSelect
                   label="সম্পর্ক"
@@ -404,7 +407,6 @@ const UpdateUser = ({ singleUserData }) => {
                   registerKey="Relationship2"
                   className="w-36"
                 />
-              </div>
 
               <DefaultInput
                 label="ই-মেইল"

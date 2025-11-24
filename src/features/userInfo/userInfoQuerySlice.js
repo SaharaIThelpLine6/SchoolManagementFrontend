@@ -19,7 +19,7 @@ export const userInfoSlice = createApi({
       query: () => `get_software_link`,
     }),
     getSingleUser: builder.query({
-      query: (id) => `get_single_user/${id}`,
+      query: (userId) => `get_single_user/${userId}`,
     }),
   }),
 });
