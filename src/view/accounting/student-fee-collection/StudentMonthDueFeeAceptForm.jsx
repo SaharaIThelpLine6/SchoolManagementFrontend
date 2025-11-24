@@ -6,7 +6,10 @@ import Button from '../../../components/Button/Button';
 import DeleteButton from '../../../components/Button/DeleteButton';
 import DefaultInput from '../../../components/Forms/DefaultInput';
 import { setPageName } from '../../../features/auth/authSlice';
-import { useGetMonthPerStudentsFeeQuery } from '../../../features/feeCollection/feeCollectionSlice';
+import {
+  useGetMonthDuePerStudentFeeQuery,
+  useGetMonthPerStudentsFeeQuery,
+} from '../../../features/feeCollection/feeCollectionSlice';
 import {
   setStudentFeeData,
   setStudentMonthFeeListsData,
@@ -22,8 +25,6 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
-
-  const [defaultFees, setDefaultFees] = useState([]);
 
   const methods = useForm({
     defaultValues: {
@@ -45,42 +46,46 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
   const { filteredSelectedPerStudentFee, monthFeeData } = useSelector(
     (state) => state.student
   );
-  const { studentMonthFeeDueData } = useSelector((state) => state.settings);
-
   const { data: studentFeeAdmissionData } = useGetMonthPerStudentsFeeQuery(
     filteredSelectedPerStudentFee?.AdmissionID,
     { skip: !filteredSelectedPerStudentFee?.AdmissionID }
   );
 
-  const monthDuePerStudent = studentMonthFeeDueData;
+  // Month due API
+  const monthId = Number(monthFeeData?.monthId);
+  const { data: monthDuePerStudent } = useGetMonthDuePerStudentFeeQuery(
+    {
+      admissionId: filteredSelectedPerStudentFee?.AdmissionID,
+      monthId,
+    },
+    { skip: !filteredSelectedPerStudentFee?.AdmissionID || !monthId }
+  );
 
-  // Initialize default fees using setValue instead of reset
+  // Initialize form values
   useEffect(() => {
-    const studentCode = filteredSelectedPerStudentFee?.StudentCode || '';
-    const monthId = monthFeeData?.monthId || '';
-    const monthName = monthFeeData?.monthName || '';
+    if (!filteredSelectedPerStudentFee || !monthFeeData || !monthDuePerStudent)
+      return;
 
-    let fees = [];
-    if (
-      monthDuePerStudent?.data &&
-      Array.isArray(monthDuePerStudent.data) &&
-      monthDuePerStudent.data.length > 0
-    ) {
-      fees = monthDuePerStudent.data.map((item) => ({
-        SSFID: item.SSFID,
-        SLID: item.SLID,
-        SlName: item.SlName,
-        sessionId: item.SessionID,
-        sessionName: item.SessionName,
-        classId: item.ClassID,
-        amount: item.Amount || item.Fee || 0,
-        deduction: 0,
-        deposit: item.Fee - item.PreviousDeposite || 0,
-        depositUpdate: item.Fee - item.PreviousDeposite || 0,
-        preDeposit: item.PreDeposite || 0,
-        due: 0,
-      }));
-    }
+    const studentCode = filteredSelectedPerStudentFee.StudentCode || '';
+    const monthName = monthFeeData.monthName || '';
+    const monthId = monthFeeData.monthId || '';
+
+    const fees = Array.isArray(monthDuePerStudent.data)
+      ? monthDuePerStudent.data.map((item) => ({
+          SSFID: item.SSFID,
+          SLID: item.SLID,
+          SlName: item.SlName,
+          sessionId: item.SessionID,
+          sessionName: item.SessionName,
+          classId: item.ClassID,
+          amount: item.Amount || item.Fee || 0,
+          deduction: 0,
+          deposit: item.Fee - item.PreviousDeposite || 0,
+          depositUpdate: item.Fee - item.PreviousDeposite || 0,
+          preDeposit: item.PreDeposite || 0,
+          due: 0,
+        }))
+      : [];
 
     const totalPrescribed = fees.reduce((sum, f) => sum + Number(f.amount), 0);
     const totalDeduction = fees.reduce(
@@ -89,60 +94,38 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
     );
     const totalDeposit = fees.reduce((sum, f) => sum + Number(f.deposit), 0);
 
-    setDefaultFees(fees);
-
-    // Set values individually instead of reset
     setValue('studentCode', studentCode);
     setValue('monthId', monthId);
     setValue('monthName', monthName);
     setValue('fees', fees);
-    console.log(fees, 'fees');
     setValue('prescribedFee', totalPrescribed);
     setValue('deduction', totalDeduction);
     setValue('currentDeposit', totalDeposit);
-    setValue('eastCut', monthDuePerStudent?.totals?.totalLess || 0);
-    setValue('preDeposit', monthDuePerStudent?.totals?.totalPreDeposite || 0);
+    setValue('eastCut', monthDuePerStudent.totals?.totalLess || 0);
+    setValue('preDeposit', monthDuePerStudent.totals?.totalPreDeposite || 0);
   }, [
     monthDuePerStudent,
-    setValue,
     filteredSelectedPerStudentFee,
     monthFeeData,
+    setValue,
   ]);
 
-  const feesData = watch('fees');
-  const [fees, setFees] = useState([]);
+  const feesData = watch('fees') || [];
 
-  useEffect(() => {
-    if (!feesData || feesData.length === 0) return;
-
-    const timer = setTimeout(() => {
-      setFees(feesData);
-      console.log('fees delayed', feesData);
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [feesData]);
-
-  useEffect(() => {
-    if (!fees || fees.length === 0) return; // prevents empty console logs
-    console.log('fees delayed (state)', fees);
-  }, [fees]);
-
+  // Recalculate deposit and due
   const recalcFee = useCallback((fee) => {
     const prescribedFee = Number(fee.amount || 0);
     const deduction = Number(fee.deduction || 0);
     const preDeposit = Number(fee.preDeposit || 0);
     let deposit = Number(fee.deposit || 0);
-
     const maxDeposit = prescribedFee - deduction - preDeposit;
     if (deposit > maxDeposit) deposit = maxDeposit;
-
     const due = prescribedFee - deduction - preDeposit - deposit;
     return { deposit, due };
   }, []);
 
   const recalculateTotals = useCallback(() => {
-    if (!fees || fees.length === 0) {
+    if (!feesData || feesData.length === 0) {
       setValue('prescribedFee', 0);
       setValue('deduction', 0);
       setValue('currentDeposit', 0);
@@ -153,37 +136,26 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
     let totalDeduction = 0;
     let totalDeposit = 0;
 
-    const updatedFees = fees.map((fee) => {
+    const updatedFees = feesData.map((fee) => {
       const { deposit, due } = recalcFee(fee);
       totalPrescribed += Number(fee.amount || 0);
       totalDeduction += Number(fee.deduction || 0);
       totalDeposit += deposit;
       return { ...fee, deposit, due };
     });
-
-    setDefaultFees(updatedFees);
     setValue('fees', updatedFees);
-    console.log(updatedFees, 'fees');
     setValue('prescribedFee', totalPrescribed);
     setValue('deduction', totalDeduction);
     setValue('currentDeposit', totalDeposit);
-  }, [fees, recalcFee, setValue]);
+  }, [feesData, recalcFee, setValue]);
 
   const handleDeductionChange = useCallback(
     (index) => {
       const fee = getValues(`fees.${index}`);
       if (!fee) return;
-
       const { deposit, due } = recalcFee(fee);
       setValue(`fees.${index}.deposit`, deposit);
       setValue(`fees.${index}.due`, due);
-
-      setDefaultFees((prev) =>
-        prev.map((f, i) =>
-          i === index ? { ...f, deduction: fee.deduction, deposit, due } : f
-        )
-      );
-
       setTimeout(recalculateTotals, 0);
     },
     [getValues, setValue, recalcFee, recalculateTotals]
@@ -193,15 +165,9 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
     (index) => {
       const fee = getValues(`fees.${index}`);
       if (!fee) return;
-
       const { deposit, due } = recalcFee(fee);
       setValue(`fees.${index}.deposit`, deposit);
       setValue(`fees.${index}.due`, due);
-
-      setDefaultFees((prev) =>
-        prev.map((f, i) => (i === index ? { ...f, deposit, due } : f))
-      );
-
       setTimeout(recalculateTotals, 0);
     },
     [getValues, setValue, recalcFee, recalculateTotals]
@@ -212,8 +178,6 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
       const currentFees = getValues('fees');
       const updatedFees = currentFees.filter((_, i) => i !== index);
       setValue('fees', updatedFees);
-      setDefaultFees((prev) => prev.filter((_, i) => i !== index));
-
       setTimeout(recalculateTotals, 0);
     },
     [getValues, setValue, recalculateTotals]
@@ -221,28 +185,26 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
 
   const handleResetForm = useCallback(() => {
     const currentValues = getValues();
-    setValue('fees', defaultFees);
+    setValue('fees', feesData);
     setValue('prescribedFee', currentValues.prescribedFee);
     setValue('deduction', currentValues.deduction);
     setValue('currentDeposit', currentValues.currentDeposit);
     setTimeout(recalculateTotals, 0);
-  }, [getValues, setValue, defaultFees, recalculateTotals]);
+  }, [getValues, setValue, feesData, recalculateTotals]);
 
-  const totalPages = Math.ceil((fees?.length || 0) / PAGE_SIZE);
-
+  const totalPages = Math.ceil(feesData.length / PAGE_SIZE);
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return fees?.slice(start, start + PAGE_SIZE) || [];
-  }, [fees, currentPage]);
+    return feesData.slice(start, start + PAGE_SIZE);
+  }, [feesData, currentPage]);
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
   const onSubmit = (data) => {
-    const totalDue = data?.fees?.reduce((sum, fee) => sum + (fee.due || 0), 0);
-    const monthFeeDueRequest =
-      monthDuePerStudent?.data && monthDuePerStudent.data.length > 0;
+    const totalDue = data.fees.reduce((sum, fee) => sum + (fee.due || 0), 0);
+    const monthFeeDueRequest = monthDuePerStudent?.data?.length > 0;
 
     const payload = {
       ...data,
@@ -256,6 +218,7 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
       monthFeeDueRequest,
       type: 'month',
     };
+
     dispatch(setStudentFeeData(payload));
 
     const monthPayload = {
@@ -265,23 +228,18 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
       MonthId: payload.monthId,
       Due: totalDue,
     };
-    dispatch(setStudentMonthFeeListsData(monthPayload));
 
+    dispatch(setStudentMonthFeeListsData(monthPayload));
     hideModal();
   };
 
-  const handleKeyDown = (e, index, fieldType) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (fieldType === 'deduction') handleDeductionChange(index);
-      else if (fieldType === 'deposit') handleDepositChange(index);
-    }
-  };
 
+  console.log(feesData, 'feesData');
   return (
     <div className="font-SolaimanLipi bg-white p-4 md:px-6 rounded-xl shadow-lg">
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
+          {/* Header inputs */}
           <div className="grid grid-cols-3 gap-4 mb-5">
             <DefaultInput
               registerKey="studentCode"
@@ -292,7 +250,7 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
             <DefaultInput registerKey="monthName" label="Month Name" disable />
           </div>
 
-          {/* summary section */}
+          {/* Summary */}
           <div className="flex flex-col md:flex-row-reverse gap-4 mb-5">
             <div className="md:col-span-3 grid grid-cols-3 md:grid-cols-5 gap-3 items-center">
               <DefaultInput
@@ -313,7 +271,6 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
                 disable
               />
             </div>
-
             <div className="flex justify-start md:justify-center items-center gap-2 mt-5">
               <Button
                 type="button"
@@ -332,29 +289,19 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
           </div>
         </form>
 
-        {/* table */}
+        {/* Table */}
         <div className="overflow-x-auto rounded-md border w-full max-w-6xl mx-auto">
           <table className="min-w-full sm:text-sm table-auto text-sm md:text-base">
             <thead className="bg-[#e9ebee] text-black">
               <tr>
-                <th className="px-4 py-3 text-center">{translate('Action')}</th>
-                <th className="px-4 py-3 text-center">{translate('ID')}</th>
-                <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate('Fee Name')}
-                </th>
-                <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate('Prescribed Fee')}
-                </th>
-                <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate('Deduction')}
-                </th>
-                <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate('Pre-deposit')}
-                </th>
-                <th className="px-4 py-3 text-center whitespace-nowrap">
-                  {translate('Deposit')}
-                </th>
-                <th className="px-4 py-3 text-center">{translate('Due')}</th>
+                <th className="px-4 py-3 text-center">Action</th>
+                <th className="px-4 py-3 text-center">ID</th>
+                <th className="px-4 py-3 text-center">Fee Name</th>
+                <th className="px-4 py-3 text-center">Prescribed Fee</th>
+                <th className="px-4 py-3 text-center">Deduction</th>
+                <th className="px-4 py-3 text-center">Pre-deposit</th>
+                <th className="px-4 py-3 text-center">Deposit</th>
+                <th className="px-4 py-3 text-center">Due</th>
               </tr>
             </thead>
             <tbody>
@@ -428,7 +375,7 @@ const StudentMonthDueFeeAceptForm = ({ pageTitle }) => {
           </table>
         </div>
 
-        {/* pagination */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex justify-center mt-4">
             <button

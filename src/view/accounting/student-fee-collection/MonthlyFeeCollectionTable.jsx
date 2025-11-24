@@ -23,7 +23,6 @@ const MonthlyFeeCollectionTable = () => {
     (state) => state.settings
   );
 
-  console.log(studentMonthFeeListsData, 'monthDataCheck');
   const admissionId = filteredSelectedPerStudentFee?.AdmissionID;
 
   // All hooks called unconditionally at the top level
@@ -135,15 +134,29 @@ const MonthlyFeeCollectionTable = () => {
 
   const handleOpenModal = useCallback(
     (item) => {
-      // Don't open modal if month is already paid
-      if (isMonthPaid(item.monthId)) {
-        return;
-      }
+      // Don't open modal if month is already fully paid
+      if (isMonthPaid(item.monthId)) return;
 
-      console.log('Opening modal for item:', item);
+      // Compute duePermission dynamically for this item
+      const duePermission = item.due > 0;
+
+      console.log(
+        'Opening modal for item:',
+        item,
+        'duePermission:',
+        duePermission
+      );
+
       try {
         dispatch(setMonthFeeData(item));
-        showModal('Student Month Fee Accept', 'STUDENT_MONTH_FEE_ACCEPT_FORM');
+        showModal(
+          duePermission
+            ? 'Student Month Due Fee Accept'
+            : 'STUDENT_MONTH_FEE_ACCEPT_FORM',
+          duePermission
+            ? 'STUDENT_MONTH_DUE_FEE_ACCEPT_FORM'
+            : 'STUDENT_MONTH_FEE_ACCEPT_FORM'
+        );
       } catch (error) {
         console.error('Error opening modal:', error);
       }
@@ -308,3 +321,13 @@ const MonthlyFeeCollectionTable = () => {
 };
 
 export default MonthlyFeeCollectionTable;
+
+
+
+
+
+
+
+
+
+

@@ -8,7 +8,9 @@ import { setPageName } from '../features/auth/authSlice';
 import { fetchUserOnlyStudentData } from '../features/student/studentSlice';
 // import { Modal } from "../components/ModalSettings";
 import 'flatpickr/dist/themes/light.css';
+import { FormProvider, useForm } from 'react-hook-form';
 import DropdownDefault from '../components/Dropdowns/DropdownDefault';
+import DefaultSelect from '../components/Forms/DefaultSelect';
 import Loading from '../components/Loading/Loading';
 import {
   useGetStudentQuery,
@@ -19,6 +21,7 @@ import useTranslate from '../utils/Translate';
 
 const AddStudent = ({ pageTitle }) => {
   const translate = useTranslate();
+  const methods = useForm();
   const [selectedImage, setSelectedImage] = useState(null);
   const {
     data: userOnlyStudents,
@@ -335,20 +338,28 @@ const AddStudent = ({ pageTitle }) => {
   if (isError) {
     return <div>Error loading data!</div>;
   }
-
+  const filterData = [
+    { FilterID: 1, name: translate('User ID') },
+    { FilterID: 2, name: translate('User Name') },
+    { FilterID: 3, name: translate('Mobile1') },
+    { FilterID: 4, name: translate('Session') },
+    { FilterID: 5, name: translate('Class') },
+    { FilterID: 6, name: translate('ID Serial Admission') },
+  ];
   return (
-    <div className="-translate-y-4 font-lato">
-      <div className="block w-full overflow-x-auto">
-        <div className="filter_header border-b  border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
-          <h3 className="font-SolaimanLipi text-[20px] font-bold ">
-            {filter == 2
-              ? translate('Not Admitted Students List')
-              : translate('Admitted Students List')}
-          </h3>
-          <div className="flex items-center space-x-5">
-            <div className="filter relative">
-              {/* <SelectGroupTwo /> */}
-              {/* <button type="button" onClick={exportToCSV}>Export</button>
+    <FormProvider {...methods}>
+      <div className="-translate-y-4 font-lato">
+        <div className="block w-full overflow-x-auto">
+          <div className="filter_header border-b  border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
+            <h3 className="font-SolaimanLipi text-[20px] font-bold ">
+              {filter == 2
+                ? translate('Not Admitted Students List')
+                : translate('Admitted Students List')}
+            </h3>
+            <div className="flex items-center space-x-5">
+              <div className="filter relative">
+                {/* <SelectGroupTwo /> */}
+                {/* <button type="button" onClick={exportToCSV}>Export</button>
               <Flatpickr
                 className="w-full h-[80%] px-2 py-1 outline-1 border border-gray-300 outline-theme-color rounded-[5px] text-xs font-normal"
                 options={{
@@ -358,30 +369,41 @@ const AddStudent = ({ pageTitle }) => {
                 onChange={(selectedDates) => setSelectedDateRange(selectedDates)}
               /> */}
 
-              <FilterSelectGroup
-                defaultSelect={filter}
-                options={[
-                  { id: 0, value: translate('Admitted students') },
-                  { id: 2, value: translate('Not Admitted students') },
-                ]}
-                nameField={'value'}
-                valueField={'id'}
-              />
+                <FilterSelectGroup
+                  defaultSelect={filter}
+                  options={[
+                    { id: 0, value: translate('Admitted students') },
+                    { id: 2, value: translate('Not Admitted students') },
+                  ]}
+                  nameField={'value'}
+                  valueField={'id'}
+                />
+              </div>
             </div>
           </div>
+          <div className="grid grid-cols-5 mb-3">
+            <DefaultSelect
+              label={translate('Filter')}
+              labelPosition="left"
+              options={filterData}
+              valueField="FilterID"
+              nameField="name"
+              registerKey="FilterID"
+            />
+          </div>
+          {studentList && studentList.data.length > 0 ? (
+            <SortableTable
+              columns={
+                filter == 2 ? columnsNotAdmitedStudent : columnsAdmitedStudent
+              }
+              data={filter == 2 ? userOnlyStudents : studentList.data}
+            />
+          ) : (
+            <Loading />
+          )}
         </div>
-        {studentList && studentList.data.length > 0 ? (
-          <SortableTable
-            columns={
-              filter == 2 ? columnsNotAdmitedStudent : columnsAdmitedStudent
-            }
-            data={filter == 2 ? userOnlyStudents : studentList.data}
-          />
-        ) : (
-          <Loading />
-        )}
       </div>
-    </div>
+    </FormProvider>
   );
 };
 export default AddStudent;
