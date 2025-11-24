@@ -20,17 +20,17 @@ const AverageVCondition = ({ pageTitle }) => {
     {
       id: "average",
       label: "Average Determination",
-      component: <AverageDetermination title="Average Determination"/>
+      component: <AverageDetermination title="Average Determination" />
     },
     {
       id: "subject",
       label: "Subject Pass Number",
-      component: <SubjectPassNumber title="Subject Pass Number"/>
+      component: <SubjectPassNumber title="Subject Pass Number" />
     },
     {
       id: "results",
       label: "Results Condition",
-      component: <ResultsCondition title="Results Condition" colorOption={true}/>
+      component: <ResultsCondition title="Results Condition" colorOption={true} />
     }
   ];
 
@@ -42,11 +42,10 @@ const AverageVCondition = ({ pageTitle }) => {
           <Button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 rounded-md ${
-              activeTab === tab.id
+            className={`px-4 py-2 rounded-md ${activeTab === tab.id
                 ? "bg-blue-600 text-white"
                 : "bg-gray-100 !text-black "
-            }`}
+              }`}
           >
             {translate(tab.label)}
           </Button>
@@ -54,9 +53,20 @@ const AverageVCondition = ({ pageTitle }) => {
       </div>
 
       {/* Active Tab Content */}
-      <div className="mt-4">
+      {/* <div className="mt-4">
         {tabs.find((tab) => tab.id === activeTab)?.component}
+      </div> */}
+      <div className="mt-4">
+        {tabs.map((tab) => (
+          <div
+            key={tab.id}
+            style={{ display: activeTab === tab.id ? "block" : "none" }}
+          >
+            {tab.component}
+          </div>
+        ))}
       </div>
+
     </div>
   );
 };

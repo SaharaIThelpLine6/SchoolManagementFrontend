@@ -49,7 +49,6 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
   const exam_id = watch("ExamID");
   const subclass_id = watch("SubClassID");
   const selectedSubject = watch("subjectSelect");
-
   const {
     data: userResultData,
     isLoading,
@@ -263,7 +262,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
                           key={`header-${index}`}
                           className="p-2 border whitespace-nowrap w-20"
                         >
-                          {bnBijoy2Unicode(subject)}
+                          {subject}
                         </th>
                       );
                     })}

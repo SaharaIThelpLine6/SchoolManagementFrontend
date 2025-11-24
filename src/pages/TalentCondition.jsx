@@ -34,13 +34,12 @@ const TalentCondition = () => {
   const { handleSubmit } = methods;
   const [filter, setFilter] = useState(null);
   const inputs = [
-    { registerKey: "division1" },
-    { registerKey: "division2" },
-    { registerKey: "division3" },
-    { registerKey: "division4" },
-    { registerKey: "division5" },
-    { registerKey: "division6" },
-    { registerKey: "division7" },
+    { registerKey: "Division1" },
+    { registerKey: "Division2" },
+    { registerKey: "Division3" },
+    { registerKey: "Division4" },
+    { registerKey: "Division5" },
+    { registerKey: "Division6" },
   ];
 
   const [checkedInputs, setCheckedInputs] = useState(
@@ -55,46 +54,74 @@ const TalentCondition = () => {
   } = useGetExamTalentConditionQuery(
     filter?.SessionID && filter?.ExamID && filter?.SubClassID
       ? {
-          SessionID: filter?.SessionID,
-          ExamID: filter?.ExamID,
-          SubClassID: filter?.SubClassID,
-        }
+        SessionID: filter?.SessionID,
+        ExamID: filter?.ExamID,
+        SubClassID: filter?.SubClassID,
+      }
       : skipToken
   );
-
   useEffect(() => {
-    if (isLoading || error) {
-      methods.reset({
-        SessionID: filter.SessionID || "",
-        ExamID: filter.ExamID || "",
-        SubClassID: filter.SubClassID || "",
+    if (examTalentConditionData && examTalentConditionData?.length > 0) {
+
+      const updatedChecked = [...checkedInputs];
+      const inputsMap = examTalentConditionData.map((divisionLabel, i) => {
+        // console.log("Found");
+        
+        // const found = examTalentConditionData.find(
+        //   (item) => item.Division === divisionLabel
+        // );
+        // console.log(found);
+        
+        // console.log("==========Found======");
+
+
+        // if (found) {
+        methods.setValue(`Division${i + 1}`, divisionLabel.Division);
+        // }
+        updatedChecked[i] = divisionLabel.TalentAcotin === 1;
+        return divisionLabel?.TalentAcotin === 1;
       });
-      setCheckedInputs(Array(inputs.length).fill(false));
-      return;
+      console.log(updatedChecked);
+      setCheckedInputs(inputsMap);
+      // inputs.map((input, index)=>{
+      //   methods.setValue(`Division${index + 1}`, examTalentConditionData[input.registerKey]);
+      // });
     }
+    // console.log(examTalentConditionData);
+  }, [examTalentConditionData])
+  // useEffect(() => {
+  //   if (isLoading || error) {
+  //     methods.reset({
+  //       SessionID: filter.SessionID || "",
+  //       ExamID: filter.ExamID || "",
+  //       SubClassID: filter.SubClassID || "",
+  //     });
+  //     setCheckedInputs(Array(inputs.length).fill(false));
+  //     return;
+  //   }
 
-    if (
-      !Array.isArray(examTalentConditionData) ||
-      examTalentConditionData.length === 0
-    )
-      return;
+  //   if (
+  //     !Array.isArray(examTalentConditionData) ||
+  //     examTalentConditionData.length === 0
+  //   )
+  //     return;
 
-    const allowedDivisions = ["A+", "A", "A-", "B", "C", "D", "F"];
+  //   const allowedDivisions = ["A+", "A", "A-", "B", "C", "D", "F"];
 
-    const inputsMap = allowedDivisions.map((divisionLabel, i) => {
-      const found = examTalentConditionData.find(
-        (item) => item.Division === divisionLabel
-      );
+  //   const inputsMap = allowedDivisions.map((divisionLabel, i) => {
+  //     const found = examTalentConditionData.find(
+  //       (item) => item.Division === divisionLabel
+  //     );
 
-      if (found) {
-        methods.setValue(`division${i + 1}`, found.Division);
-      }
+  //     if (found) {
+  //       methods.setValue(`division${i + 1}`, found.Division);
+  //     }
 
-      return found?.TalentAcotin === 1;
-    });
+  //     return found?.TalentAcotin === 1;
+  //   });
 
-    setCheckedInputs(inputsMap);
-  }, [examTalentConditionData, isLoading, error, methods]);
+  //   setCheckedInputs(inputsMap);
+  // }, [examTalentConditionData, isLoading, error, methods]);
 
   const [postExamTalentCondition] = usePostExamTalentConditionMutation();
 
