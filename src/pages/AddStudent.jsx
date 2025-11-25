@@ -18,6 +18,8 @@ import {
 } from '../features/student/studentQuerySlice';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
+import { ViewPermission } from '../Routes/ViewPermission';
+import { permissionsDataList } from '../Data/permissions';
 
 const AddStudent = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -257,6 +259,7 @@ const AddStudent = ({ pageTitle }) => {
       render: (row) => (
         <div>
           <DropdownDefault>
+            <ViewPermission permissionId={permissionsDataList.student_class_change} permissionType="insert|edit">
             <button
               className="flex w-full items-center gap-2 rounded-sm px-4 py-1.5 text-left text-sm hover:bg-gray"
               onClick={() => {
@@ -281,6 +284,7 @@ const AddStudent = ({ pageTitle }) => {
               </svg>
               Change Class
             </button>
+            </ViewPermission>
           </DropdownDefault>
         </div>
       ),
@@ -381,7 +385,7 @@ const AddStudent = ({ pageTitle }) => {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-5 mb-3">
+          <div className="grid grid-cols-1 md:grid-cols-5 mb-3">
             <DefaultSelect
               label={translate('Filter')}
               labelPosition="left"
