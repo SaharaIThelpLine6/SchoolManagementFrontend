@@ -1,37 +1,39 @@
-import { useEffect, useState } from "react";
 import {
+  closestCenter,
   DndContext,
   KeyboardSensor,
   MouseSensor,
   TouchSensor,
-  closestCenter,
   useSensor,
   useSensors,
-} from "@dnd-kit/core";
+} from '@dnd-kit/core';
 import {
   arrayMove,
   SortableContext,
   verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+} from '@dnd-kit/sortable';
+import { useEffect, useState } from 'react';
 
 // needed for row & cell level scope DnD setup
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import ThemeInputBox1 from "../Forms/ThemeInputBox1";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchClassData, setEditMode } from "../../features/class/classSlice";
-import { updateInData } from "../../utils/update/api";
-import { insertData } from "../../utils/create/api";
-import { FormProvider, useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { cssTransition, toast } from "react-toastify";
-import { setReqLoading } from "../../features/requestHandeler/requestHandelerSlice";
-import useTranslate from "../../utils/Translate";
-import SvgIcon from "../icons/SvgIcon";
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { cssTransition, toast } from 'react-toastify';
+import { permissionsDataList } from '../../Data/permissions';
+import { fetchClassData, setEditMode } from '../../features/class/classSlice';
+import { setReqLoading } from '../../features/requestHandeler/requestHandelerSlice';
+import { ViewPermission } from '../../Routes/ViewPermission';
+import { insertData } from '../../utils/create/api';
+import useTranslate from '../../utils/Translate';
+import { updateInData } from '../../utils/update/api';
+import ThemeInputBox1 from '../Forms/ThemeInputBox1';
+import SvgIcon from '../icons/SvgIcon';
 
 const bounce = cssTransition({
-  enter: "animate__animated animate__bounceIn",
-  exit: "animate__animated animate__bounceOut",
+  enter: 'animate__animated animate__bounceIn',
+  exit: 'animate__animated animate__bounceOut',
 });
 
 const RowDragHandleCell = ({ rowId }) => {
@@ -80,7 +82,7 @@ const DraggableRow = ({ row, headers, statename }) => {
     transition,
     opacity: isDragging ? 0.8 : 1,
     zIndex: isDragging ? 1 : 0,
-    position: "relative",
+    position: 'relative',
   };
 
   return (
@@ -96,15 +98,21 @@ const DraggableRow = ({ row, headers, statename }) => {
         </td>
       ))}
       <td className="py-2 text-center">
-        <button
-          type="button"
-          className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-          onClick={() => {
-            dispatch(setEditMode(row.id));
-          }}
+        <ViewPermission
+          permissionId={permissionsDataList.class}
+          permissionType="edit"
+          empty={true}
         >
-          <SvgIcon name={"FiEdit"} size={20} />
-        </button>
+          <button
+            type="button"
+            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
+            onClick={() => {
+              dispatch(setEditMode(row.id));
+            }}
+          >
+            <SvgIcon name={'FiEdit'} size={20} />
+          </button>
+        </ViewPermission>
         {/* <FaTrash className="text-red-500 cursor-pointer hover:text-red-700" /> */}
       </td>
     </tr>
@@ -195,20 +203,20 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
 
   const onSubmit = async (data) => {
     if (reqLoading) {
-      console.log("Request already in progress. Please wait...");
+      console.log('Request already in progress. Please wait...');
       return false;
     }
     dispatch(setReqLoading(true));
-    const id = toast.dark("তথ্য যুক্ত করা হচ্ছে...", {
+    const id = toast.dark('তথ্য যুক্ত করা হচ্ছে...', {
       className:
-        " min-h-[50px] max-h-[50px] overflow-hidden text-[14px] font-SolaimanLipi bg-[#323232] text-[#ffffff] py-2 px-2 rounded-[4px] font-normal",
+        ' min-h-[50px] max-h-[50px] overflow-hidden text-[14px] font-SolaimanLipi bg-[#323232] text-[#ffffff] py-2 px-2 rounded-[4px] font-normal',
       style: {
         boxShadow:
-          "0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)",
+          '0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)',
       },
       transition: bounce,
-      position: "bottom-center",
-      type: "success",
+      position: 'bottom-center',
+      type: 'success',
       closeButton: false,
       isLoading: true,
     });
@@ -218,14 +226,14 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
         const submitedData = { ...data, Serial: rows.length + 1 };
         const submitRes = await insertData(
           submitedData,
-          "/api/academic/insert_class"
+          '/api/academic/insert_class'
         );
         // console.log(submitRes);
         if (submitRes.success) {
-          reset({ ClassName: "", EnglishClass: "", ArabicClass: "" });
+          reset({ ClassName: '', EnglishClass: '', ArabicClass: '' });
           toast.update(id, {
-            render: "তথ্য যুক্ত করা হয়েছে।",
-            type: "success",
+            render: 'তথ্য যুক্ত করা হয়েছে।',
+            type: 'success',
             isLoading: false,
             autoClose: true,
           });
@@ -234,24 +242,24 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
         } else {
           toast.update(id, {
             render: String(submitRes.error),
-            type: "error",
+            type: 'error',
             isLoading: false,
             autoClose: true,
           });
           dispatch(setReqLoading(false));
-          console.error("Failed to insert data:", submitRes.error);
+          console.error('Failed to insert data:', submitRes.error);
         }
       } else {
         const submitRes = await updateInData(
           editMode,
           data,
-          "/api/academic/update_class"
+          '/api/academic/update_class'
         );
         dispatch(setEditMode(0));
-        reset({ ClassName: "", EnglishClass: "", ArabicClass: "" });
+        reset({ ClassName: '', EnglishClass: '', ArabicClass: '' });
         toast.update(id, {
-          render: "তথ্য যুক্ত করা হয়েছে।",
-          type: "success",
+          render: 'তথ্য যুক্ত করা হয়েছে।',
+          type: 'success',
           isLoading: false,
           autoClose: true,
         });
@@ -261,10 +269,10 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
         // navigate(0);
       }
     } catch (err) {
-      reset({ ClassName: "", EnglishClass: "", ArabicClass: "" });
+      reset({ ClassName: '', EnglishClass: '', ArabicClass: '' });
       toast.update(id, {
         render: String(err.message),
-        type: "error",
+        type: 'error',
         isLoading: false,
         autoClose: true,
       });
@@ -288,45 +296,51 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
               <div className="mb-3">
                 <ThemeInputBox1
                   label={field}
-                  registerKey={"ClassName"}
-                  require={"Class Name is require"}
-                  type={"text"}
+                  registerKey={'ClassName'}
+                  require={'Class Name is require'}
+                  type={'text'}
                 />
               </div>
               <div className="mb-3">
                 <ThemeInputBox1
-                  label={"English"}
-                  registerKey={"EnglishClass"}
-                  type={"text"}
+                  label={'English'}
+                  registerKey={'EnglishClass'}
+                  type={'text'}
                 />
               </div>
               <div className="mb-3">
                 <ThemeInputBox1
-                  label={"عربي"}
-                  registerKey={"ArabicClass"}
-                  type={"text"}
+                  label={'عربي'}
+                  registerKey={'ArabicClass'}
+                  type={'text'}
                 />
               </div>
-              <button
-                type="submit"
-                className="bg-theme-color transation ease-linear font-bold font-SolaimanLipi duration-500 inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-[#121212]"
+
+              <ViewPermission
+                permissionId={permissionsDataList.class}
+                permissionType="insert"
               >
-                {translate("Save")}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditMode(0);
-                  reset({
-                    ClassName: "",
-                    EnglishClass: "",
-                    ArabicClass: "",
-                  });
-                }}
-                className="bg-[#121212] transation ease-linear duration-500 font-bold font-SolaimanLipi inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-slate-700 ms-[20px]"
-              >
-                {translate("Add New")}
-              </button>
+                <button
+                  type="submit"
+                  className="bg-theme-color transation ease-linear font-bold font-SolaimanLipi duration-500 inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-[#121212]"
+                >
+                  {translate('Save')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditMode(0);
+                    reset({
+                      ClassName: '',
+                      EnglishClass: '',
+                      ArabicClass: '',
+                    });
+                  }}
+                  className="bg-[#121212] transation ease-linear duration-500 font-bold font-SolaimanLipi inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-slate-700 ms-[20px]"
+                >
+                  {translate('Add New')}
+                </button>
+              </ViewPermission>
             </form>
           </FormProvider>
         </div>

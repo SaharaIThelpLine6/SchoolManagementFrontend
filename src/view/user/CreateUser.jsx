@@ -25,6 +25,7 @@ import {
   usePostUserMutation,
 } from '../../features/userType/userTypeSlice';
 import { usePermission } from '../../hooks/usePermission';
+import { ViewPermission } from '../../Routes/ViewPermission';
 import { calculateAge } from '../../utils/calculateAge';
 import useTranslate from '../../utils/Translate';
 
@@ -578,14 +579,18 @@ const CreateUser = ({ pageTitle }) => {
               />
             </div>
             <div className="flex gap-3">
-              {hasPermission(permissionsDataList.user_entry, 'insert') && (
+              <ViewPermission
+                permissionId={permissionsDataList.user_entry}
+                permissionType="insert"
+              >
                 <Button
                   type="submit"
                   className="px-6 py-2 rounded-lg bg-blue-600 text-white"
                 >
                   Save
                 </Button>
-              )}
+              </ViewPermission>
+
               <Button
                 type="button"
                 className="px-6 py-2 rounded-lg bg-gray-400 text-white"

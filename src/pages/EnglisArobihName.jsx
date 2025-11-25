@@ -1,25 +1,27 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { FormProvider, useForm } from "react-hook-form";
-import { setPageName } from "../features/auth/authSlice";
-import { fetchSettingsData } from "../features/settings/settingsSlice";
+import { useCallback, useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useDispatch, useSelector } from 'react-redux';
+import { toast } from 'react-toastify';
+import DefaultInput from '../components/Forms/DefaultInput';
+import DefaultSelect from '../components/Forms/DefaultSelect';
+import SvgIcon from '../components/icons/SvgIcon';
+import Loading from '../components/Loading/Loading';
+import { permissionsDataList } from '../Data/permissions';
+import { setPageName } from '../features/auth/authSlice';
+import { fetchSettingsData } from '../features/settings/settingsSlice';
 import {
   useGetStudentBySearchQuery,
   usePostEnglishAndArobicNameMutation,
-} from "../features/student/studentQuerySlice";
+} from '../features/student/studentQuerySlice';
 import {
   setCharacterReportEditMode,
   setFilteredStudent,
-} from "../features/student/studentSlice";
-import DefaultInput from "../components/Forms/DefaultInput";
-import DefaultSelect from "../components/Forms/DefaultSelect";
-import convertBijoyToBengali from "../utils/uniconveter";
-import bnBijoy2Unicode from "../utils/conveter";
-import useTranslate from "../utils/Translate";
-import { toast } from "react-toastify";
-import { showModal } from "../utils/ModalControlar";
-import Loading from "../components/Loading/Loading";
-import SvgIcon from "../components/icons/SvgIcon";
+} from '../features/student/studentSlice';
+import { ViewPermission } from '../Routes/ViewPermission';
+import bnBijoy2Unicode from '../utils/conveter';
+import { showModal } from '../utils/ModalControlar';
+import useTranslate from '../utils/Translate';
+import convertBijoyToBengali from '../utils/uniconveter';
 
 const EnglisArobihName = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -32,7 +34,7 @@ const EnglisArobihName = ({ pageTitle }) => {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [userTyping, setUserTyping] = useState(false);
 
-  const studentCodeOrName = methods.watch("StudentCode");
+  const studentCodeOrName = methods.watch('StudentCode');
 
   const { data: searchStudentInfo, error: searchStudentError } =
     useGetStudentBySearchQuery(
@@ -53,9 +55,9 @@ const EnglisArobihName = ({ pageTitle }) => {
   }, []);
 
   useEffect(() => {
-    if (status === "succeeded" && academicSession.length > 0) {
-      methods.setValue("SessionID", academicSession[0].SessionID);
-      methods.setValue("Date", new Date());
+    if (status === 'succeeded' && academicSession.length > 0) {
+      methods.setValue('SessionID', academicSession[0].SessionID);
+      methods.setValue('Date', new Date());
     }
   }, [status, academicSession]);
 
@@ -70,14 +72,14 @@ const EnglisArobihName = ({ pageTitle }) => {
         StudentName: bnBijoy2Unicode(filteredStudent.StudentName),
         FatherName: bnBijoy2Unicode(filteredStudent.FatherName),
         MotherName: bnBijoy2Unicode(filteredStudent.MotherName),
-        EnglishName: filteredStudent.EnglishName || "",
-        EnglishFather: filteredStudent.EnglishFather || "",
-        EnglishMother: filteredStudent.EnglishMother || "",
-        EnglishShortAdd: filteredStudent.EnglishShortAdd || "",
-        ArabicName: filteredStudent.ArabicName || "",
-        ArabicFather: filteredStudent.ArabicFather || "",
-        ArabicMother: filteredStudent.ArabicMother || "",
-        ArabicShortAdd: filteredStudent.ArabicShortAdd || "",
+        EnglishName: filteredStudent.EnglishName || '',
+        EnglishFather: filteredStudent.EnglishFather || '',
+        EnglishMother: filteredStudent.EnglishMother || '',
+        EnglishShortAdd: filteredStudent.EnglishShortAdd || '',
+        ArabicName: filteredStudent.ArabicName || '',
+        ArabicFather: filteredStudent.ArabicFather || '',
+        ArabicMother: filteredStudent.ArabicMother || '',
+        ArabicShortAdd: filteredStudent.ArabicShortAdd || '',
         ClassName: bnBijoy2Unicode(filteredStudent.ClassName),
         SubClassID: filteredStudent.SubClassID,
         SessionID: filteredStudent.SessionID,
@@ -107,11 +109,11 @@ const EnglisArobihName = ({ pageTitle }) => {
   const handleOpenModal = useCallback(() => {
     dispatch(setFilteredStudent(null));
     setShowSuggestions(false);
-    showModal("Filter Student", "STUDENT_FILTER");
+    showModal('Filter Student', 'STUDENT_FILTER');
   }, []);
 
   const onSubmit = async (data) => {
-    const toastId = toast.loading("Submitting...");
+    const toastId = toast.loading('Submitting...');
     try {
       const convertedData = {
         UserID: data.UserID, // Make sure UserID
@@ -143,22 +145,22 @@ const EnglisArobihName = ({ pageTitle }) => {
 
       await addEnglishArobicNameStudent(convertedData).unwrap();
       toast.update(toastId, {
-        render: "Submitted successfully!",
-        type: "success",
+        render: 'Submitted successfully!',
+        type: 'success',
         isLoading: false,
         autoClose: 3000,
       });
     } catch (err) {
       toast.update(toastId, {
-        render: err?.data?.error || "Submission failed!",
-        type: "error",
+        render: err?.data?.error || 'Submission failed!',
+        type: 'error',
         isLoading: false,
         autoClose: 3000,
       });
     }
   };
 
-  if (status === "loading") return <Loading />;
+  if (status === 'loading') return <Loading />;
 
   return (
     <div className="bg-white p-4 md:p-8 rounded-xl shadow-lg">
@@ -168,17 +170,17 @@ const EnglisArobihName = ({ pageTitle }) => {
             {translate("Student's English Name")}
           </h1>
 
-          <input type="hidden" {...methods.register("SubClassID")} />
-          <input type="hidden" {...methods.register("UserID")} />
+          <input type="hidden" {...methods.register('SubClassID')} />
+          <input type="hidden" {...methods.register('UserID')} />
 
           <div className="grid grid-cols-1 sm:grid-cols-2">
             <div className="mb-6 relative">
               <label className="font-SolaimanLipi block mb-1">
-                {translate("User Code")}:
+                {translate('User Code')}:
               </label>
               <div className="flex gap-2">
                 <input
-                  {...methods.register("StudentCode", { required: true })}
+                  {...methods.register('StudentCode', { required: true })}
                   className="w-full rounded border border-gray-300 px-2 h-[38px] bg-[#EDEDED]"
                   onInput={() => {
                     setUserTyping(true);
@@ -190,7 +192,7 @@ const EnglisArobihName = ({ pageTitle }) => {
                   onClick={handleOpenModal}
                   className="pr-2"
                 >
-                  <SvgIcon name={"TbFilterPlus"} size={30} />
+                  <SvgIcon name={'TbFilterPlus'} size={30} />
                 </button>
               </div>
               {showSuggestions && (
@@ -201,7 +203,7 @@ const EnglisArobihName = ({ pageTitle }) => {
                       className="p-2 hover:bg-blue-100 cursor-pointer"
                       onClick={() => handleSuggestionClick(item)}
                     >
-                      {item.StudentCode} - {bnBijoy2Unicode(item.StudentName)} -{" "}
+                      {item.StudentCode} - {bnBijoy2Unicode(item.StudentName)} -{' '}
                       {bnBijoy2Unicode(item.ClassName)}
                     </div>
                   ))}
@@ -210,13 +212,13 @@ const EnglisArobihName = ({ pageTitle }) => {
             </div>
 
             <DefaultSelect
-              label={<span>{translate("Session")} :</span>}
-              nameField={"SessionName"}
-              registerKey={"SessionID"}
-              valueField={"SessionID"}
+              label={<span>{translate('Session')} :</span>}
+              nameField={'SessionName'}
+              registerKey={'SessionID'}
+              valueField={'SessionID'}
               options={academicSession}
-              type={"number"}
-              require={"This Field is required"}
+              type={'number'}
+              require={'This Field is required'}
               disabled={false}
               defaultSelect={false}
               unicode={true}
@@ -227,22 +229,22 @@ const EnglisArobihName = ({ pageTitle }) => {
             {/* Bangla Column */}
             <div className="space-y-4">
               <DefaultInput
-                registerKey={"ClassName"}
+                registerKey={'ClassName'}
                 label="মারহালা/শ্রেণি:"
                 disable={true}
               />
               <DefaultInput
-                registerKey={"StudentName"}
+                registerKey={'StudentName'}
                 label="শিক্ষার্থীর নাম :"
                 disable={true}
               />
               <DefaultInput
-                registerKey={"FatherName"}
+                registerKey={'FatherName'}
                 label="পিতার নাম :"
                 disable={true}
               />
               <DefaultInput
-                registerKey={"MotherName"}
+                registerKey={'MotherName'}
                 label="মাতার নাম :"
                 disable={true}
               />
@@ -251,43 +253,51 @@ const EnglisArobihName = ({ pageTitle }) => {
             {/* English Column */}
             <div className="space-y-4">
               <DefaultInput
-                registerKey={"EnglishName"}
+                registerKey={'EnglishName'}
                 label="Student Name :"
               />
               <DefaultInput
-                registerKey={"EnglishFather"}
+                registerKey={'EnglishFather'}
                 label="Father Name :"
               />
               <DefaultInput
-                registerKey={"EnglishMother"}
+                registerKey={'EnglishMother'}
                 label="Mother Name :"
               />
               <DefaultInput
-                registerKey={"EnglishShortAdd"}
+                registerKey={'EnglishShortAdd'}
                 label="English Short Address :"
               />
             </div>
 
             {/* Arabic Column */}
             <div className="space-y-4">
-              <DefaultInput registerKey={"ArabicName"} label="اسم الطالب :" />
-              <DefaultInput registerKey={"ArabicFather"} label="اسم الأب :" />
-              <DefaultInput registerKey={"ArabicMother"} label="اسم الأم :" />
+              <DefaultInput registerKey={'ArabicName'} label="اسم الطالب :" />
+              <DefaultInput registerKey={'ArabicFather'} label="اسم الأب :" />
+              <DefaultInput registerKey={'ArabicMother'} label="اسم الأم :" />
               <DefaultInput
-                registerKey={"ArabicShortAdd"}
+                registerKey={'ArabicShortAdd'}
                 label="عنوان قصير باللغة العربية :"
               />
             </div>
           </div>
 
           <div className="mt-6">
-            <button
-              type="submit"
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded"
-              disabled={isLoading}
+            <ViewPermission
+              permissionId={
+                permissionsDataList.english_name_entry ||
+                permissionsDataList.english_name_entry
+              }
+              permissionType="insert"
             >
-              {isLoading ? "Submitting..." : "Submit"}
-            </button>
+              <button
+                type="submit"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Submitting...' : 'Submit'}
+              </button>
+            </ViewPermission>
           </div>
         </form>
       </FormProvider>

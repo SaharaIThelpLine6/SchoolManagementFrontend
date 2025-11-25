@@ -9,12 +9,14 @@ import SvgIcon from '../components/icons/SvgIcon';
 import Loading from '../components/Loading/Loading';
 import DefaultPagination from '../components/Pagination/DefaultPagination';
 import SortableTable from '../components/Tables/SortableTable';
+import { permissionsDataList } from '../Data/permissions';
 import { setPageName } from '../features/auth/authSlice';
 import {
   useDeleteAcademicSubjectMutation,
   useGetAcademicSubjectsQuery,
   useGetSubClassListQuery,
 } from '../features/class/classQuerySlice';
+import { ViewPermission } from '../Routes/ViewPermission';
 import bnBijoy2Unicode from '../utils/conveter';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
@@ -118,20 +120,32 @@ const Book = ({ pageTitle }) => {
       headerSort: false,
       render: (data) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title="Edit"
-            onClick={() => handleEditSubject(data.SubjectID)}
+          <ViewPermission
+            permissionId={permissionsDataList.kitab_entry}
+            permissionType="edit"
+            empty={true}
           >
-            <SvgIcon name={'FiEdit'} size={20} />
-          </button>
-          <button
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
-            title="Delete"
-            onClick={() => handleDeleteSubject(data.SubjectID)}
+            <button
+              className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
+              title="Edit"
+              onClick={() => handleEditSubject(data.SubjectID)}
+            >
+              <SvgIcon name={'FiEdit'} size={20} />
+            </button>
+          </ViewPermission>
+          <ViewPermission
+            permissionId={permissionsDataList.kitab_entry}
+            permissionType="delete"
+            empty={true}
           >
-            <SvgIcon name={'FaTrash'} size={20} />
-          </button>
+            <button
+              className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
+              title="Delete"
+              onClick={() => handleDeleteSubject(data.SubjectID)}
+            >
+              <SvgIcon name={'FaTrash'} size={20} />
+            </button>
+          </ViewPermission>
         </div>
       ),
     },
@@ -239,9 +253,14 @@ const Book = ({ pageTitle }) => {
             <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
               {translate('Book List')}
             </h3>
-            <Button onClick={() => handleOpenModal()}>
-              {translate('Add Book')}
-            </Button>
+            <ViewPermission
+              permissionId={permissionsDataList.kitab_entry}
+              permissionType="insert"
+            >
+              <Button onClick={() => handleOpenModal()}>
+                {translate('Add Book')}
+              </Button>
+            </ViewPermission>
           </div>
           {/* Filter Section */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">

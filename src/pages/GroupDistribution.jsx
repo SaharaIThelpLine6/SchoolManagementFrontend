@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 import Button from '../components/Button/Button';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import DefaultPagination from '../components/Pagination/DefaultPagination';
+import { permissionsDataList } from '../Data/permissions';
 import { setPageName } from '../features/auth/authSlice';
 import { useGetClassListQuery } from '../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
@@ -13,6 +14,7 @@ import {
   useGetStudentBySearchQuery,
   usePostChnageStudentGroupMutation,
 } from '../features/student/studentQuerySlice';
+import { ViewPermission } from '../Routes/ViewPermission';
 import bnBijoy2Unicode from '../utils/conveter';
 import useTranslate from '../utils/Translate';
 
@@ -174,9 +176,14 @@ const GroupDistribution = ({ pageTitle }) => {
 
               {/* Button */}
               <div className="pt-7 w-full">
-                <Button type="submit" className="w-full md:w-auto">
-                  {translate('Save')}
-                </Button>
+                <ViewPermission
+                  permissionId={permissionsDataList.student_group_setting}
+                  permissionType="insert"
+                >
+                  <Button type="submit" className="w-full md:w-auto">
+                    {translate('Save')}
+                  </Button>
+                </ViewPermission>
               </div>
             </div>
           </div>

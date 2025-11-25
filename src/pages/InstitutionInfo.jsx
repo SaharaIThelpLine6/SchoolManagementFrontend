@@ -1,17 +1,19 @@
-import { Buffer } from "buffer";
-import "flatpickr/dist/flatpickr.css";
-import React, { useEffect, useRef, useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import Swal from "sweetalert2";
-import Button from "../components/Button/Button";
-import DefaultInput from "../components/Forms/DefaultInput";
-import { formFieldsSettings } from "../components/Forms/FormData/SettingFormData";
-import Loading from "../components/Loading/Loading";
+import { Buffer } from 'buffer';
+import 'flatpickr/dist/flatpickr.css';
+import React, { useEffect, useRef, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import Swal from 'sweetalert2';
+import Button from '../components/Button/Button';
+import DefaultInput from '../components/Forms/DefaultInput';
+import { formFieldsSettings } from '../components/Forms/FormData/SettingFormData';
+import Loading from '../components/Loading/Loading';
+import { permissionsDataList } from '../Data/permissions';
 import {
   useGetInstitutionInfoQuery,
   useUpdateInstitutionInfoMutation,
-} from "../features/settings/settingsQuerySlice";
-import useTranslate from "../utils/Translate";
+} from '../features/settings/settingsQuerySlice';
+import { ViewPermission } from '../Routes/ViewPermission';
+import useTranslate from '../utils/Translate';
 
 const InstitutionInfo = () => {
   const translate = useTranslate();
@@ -22,7 +24,6 @@ const InstitutionInfo = () => {
     isError,
   } = useGetInstitutionInfoQuery();
   const [updateInstitutionInfo] = useUpdateInstitutionInfoMutation();
-
 
   const [images, setImages] = useState({
     Logo: null,
@@ -42,14 +43,14 @@ const InstitutionInfo = () => {
     if (institutionInfo) {
       const loadedImages = {};
       [
-        "Logo",
-        "SignaturePrincipal",
-        "SignatureNajem",
-        "SignatureAccountant",
+        'Logo',
+        'SignaturePrincipal',
+        'SignatureNajem',
+        'SignatureAccountant',
       ].forEach((key) => {
         const bufferData = institutionInfo[key]?.data;
         if (bufferData) {
-          const base64 = Buffer.from(bufferData).toString("base64");
+          const base64 = Buffer.from(bufferData).toString('base64');
           loadedImages[key] = `data:image/png;base64,${base64}`;
         }
       });
@@ -59,45 +60,44 @@ const InstitutionInfo = () => {
 
   const methods = useForm();
 
-const {
-  register,
-  handleSubmit,
-  setValue,
-  formState: { errors },
-} = methods;
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = methods;
 
-useEffect(() => {
-  if (institutionInfo) {
-    setValue('AccountantName', institutionInfo.AccountantName || '');
-    setValue('Address', institutionInfo.Address || '');
-    setValue('AdmissionType', institutionInfo.AdmissionType || false);
-    setValue('AraAddress', institutionInfo.AraAddress || '');
-    setValue('AraContactNumber', institutionInfo.AraContactNumber || '');
-    setValue('AraDistrict', institutionInfo.AraDistrict || '');
-    setValue(
-      'AraInstitutionName',
-      institutionInfo.AraInstitutionName?.trim() || ''
-    );
-    setValue('AraPoliceStation', institutionInfo.AraPoliceStation || '');
-    setValue('AraPostOffice', institutionInfo.AraPostOffice || '');
-    setValue('AraVillage', institutionInfo.AraVillage || '');
-    setValue('ContactNumber', institutionInfo.ContactNumber || '');
-    setValue('District', institutionInfo.District || '');
-    setValue('Elhaq', institutionInfo.Elhaq || '');
-    setValue('Email', institutionInfo.Email || '');
-    setValue('EngAddress', institutionInfo.EngAddress || '');
-    setValue('EngInstitutionName', institutionInfo.EngInstitutionName || '');
-    setValue('InstitutionName', institutionInfo.InstitutionName || '');
-    setValue('InstitutionCode', institutionInfo.InstitutionCode || '');
-    setValue('NajemName', institutionInfo.NajemName || '');
-    setValue('PoliceStation', institutionInfo.PoliceStation || '');
-    setValue('PostOffice', institutionInfo.PostOffice || '');
-    setValue('PrincipalName', institutionInfo.PrincipalName || '');
-    setValue('SMSMobile', institutionInfo.SMSMobile || '');
-    setValue('Village', institutionInfo.Village || '');
-  }
-}, [institutionInfo, setValue]);
-
+  useEffect(() => {
+    if (institutionInfo) {
+      setValue('AccountantName', institutionInfo.AccountantName || '');
+      setValue('Address', institutionInfo.Address || '');
+      setValue('AdmissionType', institutionInfo.AdmissionType || false);
+      setValue('AraAddress', institutionInfo.AraAddress || '');
+      setValue('AraContactNumber', institutionInfo.AraContactNumber || '');
+      setValue('AraDistrict', institutionInfo.AraDistrict || '');
+      setValue(
+        'AraInstitutionName',
+        institutionInfo.AraInstitutionName?.trim() || ''
+      );
+      setValue('AraPoliceStation', institutionInfo.AraPoliceStation || '');
+      setValue('AraPostOffice', institutionInfo.AraPostOffice || '');
+      setValue('AraVillage', institutionInfo.AraVillage || '');
+      setValue('ContactNumber', institutionInfo.ContactNumber || '');
+      setValue('District', institutionInfo.District || '');
+      setValue('Elhaq', institutionInfo.Elhaq || '');
+      setValue('Email', institutionInfo.Email || '');
+      setValue('EngAddress', institutionInfo.EngAddress || '');
+      setValue('EngInstitutionName', institutionInfo.EngInstitutionName || '');
+      setValue('InstitutionName', institutionInfo.InstitutionName || '');
+      setValue('InstitutionCode', institutionInfo.InstitutionCode || '');
+      setValue('NajemName', institutionInfo.NajemName || '');
+      setValue('PoliceStation', institutionInfo.PoliceStation || '');
+      setValue('PostOffice', institutionInfo.PostOffice || '');
+      setValue('PrincipalName', institutionInfo.PrincipalName || '');
+      setValue('SMSMobile', institutionInfo.SMSMobile || '');
+      setValue('Village', institutionInfo.Village || '');
+    }
+  }, [institutionInfo, setValue]);
 
   // Image preview state & refs
   const [imagePreviews, setImagePreviews] = useState(Array(4).fill(null));
@@ -119,12 +119,17 @@ useEffect(() => {
       reader.readAsDataURL(file);
 
       // Store the actual file object
-      const imageKeys = ["Logo", "SignaturePrincipal", "SignatureNajem", "SignatureAccountant"];
+      const imageKeys = [
+        'Logo',
+        'SignaturePrincipal',
+        'SignatureNajem',
+        'SignatureAccountant',
+      ];
       const key = imageKeys[index];
 
-      setImageFiles(prev => ({
+      setImageFiles((prev) => ({
         ...prev,
-        [key]: file
+        [key]: file,
       }));
     }
   };
@@ -135,12 +140,12 @@ useEffect(() => {
       const formData = new FormData();
 
       // Append all text fields
-      Object.keys(data).forEach(key => {
+      Object.keys(data).forEach((key) => {
         formData.append(key, data[key]);
       });
 
       // Append image files if they exist
-      Object.keys(imageFiles).forEach(key => {
+      Object.keys(imageFiles).forEach((key) => {
         if (imageFiles[key]) {
           formData.append(key, imageFiles[key]);
         }
@@ -148,17 +153,17 @@ useEffect(() => {
 
       await updateInstitutionInfo(formData).unwrap();
       Swal.fire({
-        title: "Institution info updated successfully!",
-        icon: "success",
+        title: 'Institution info updated successfully!',
+        icon: 'success',
         draggable: true,
       });
     } catch (error) {
-      console.error("Update error:", error);
+      console.error('Update error:', error);
       Swal.fire({
-        icon: "error",
-        title: "Institution update failed",
-        text: error?.data?.message || "Please try again",
-        confirmButtonColor: "#3B82F6",
+        icon: 'error',
+        title: 'Institution update failed',
+        text: error?.data?.message || 'Please try again',
+        confirmButtonColor: '#3B82F6',
       });
     }
   };
@@ -194,8 +199,8 @@ useEffect(() => {
                     <DefaultInput
                       key={field.key}
                       registerKey={field.key}
-                      type={field.type || "text"}
-                      placeholder={translate(`Enter ${field.label}`) + " ..."}
+                      type={field.type || 'text'}
+                      placeholder={translate(`Enter ${field.label}`) + ' ...'}
                       label={translate(field.label)}
                     />
                   ))}
@@ -206,20 +211,20 @@ useEffect(() => {
             {/* Signatories Section */}
             <div className="col-span-3 w-full">
               <h2 className="text-lg font-semibold text-gray-700 border-b pb-1">
-                {translate("Signatories")}
+                {translate('Signatories')}
               </h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
-              {["Logo", "Principal", "Najem", "Accountant"].map(
+              {['Logo', 'Principal', 'Najem', 'Accountant'].map(
                 (role, index) => (
                   <div
                     key={index}
                     className="flex flex-col items-center bg-white p-4 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300"
                   >
-                    {role === "Logo" ? (
+                    {role === 'Logo' ? (
                       <p className="mb-5 text-sm font-semibold text-gray-700 mt-9">
-                        {translate("Institution Logo Upload")}
+                        {translate('Institution Logo Upload')}
                       </p>
                     ) : (
                       <div className="mb-3 w-full">
@@ -227,7 +232,7 @@ useEffect(() => {
                           registerKey={`${role}Name`}
                           type="text"
                           label={translate(`${role} Name`)}
-                          placeholder={translate(`Enter ${role} Name`) + " ..."}
+                          placeholder={translate(`Enter ${role} Name`) + ' ...'}
                         />
                       </div>
                     )}
@@ -241,9 +246,9 @@ useEffect(() => {
                         src={
                           imagePreviews[index] ||
                           images[
-                            role === "Logo" ? "Logo" : `Signature${role}`
+                            role === 'Logo' ? 'Logo' : `Signature${role}`
                           ] ||
-                          "https://live.staticflickr.com/7262/26793943536_523d3176a2_z.jpg"
+                          'https://live.staticflickr.com/7262/26793943536_523d3176a2_z.jpg'
                         }
                         alt={`${role} image`}
                         className="w-full h-full object-cover"
@@ -268,7 +273,12 @@ useEffect(() => {
 
             {/* Submit Button */}
             <div className="flex pl-[4px] font-bold">
-              <Button type="submit">{translate("Save")}</Button>
+              <ViewPermission
+                permissionId={permissionsDataList.institute_info}
+                permissionType="insert|edit"
+              >
+                <Button type="submit">{translate('Save')}</Button>
+              </ViewPermission>
             </div>
           </div>
         </div>

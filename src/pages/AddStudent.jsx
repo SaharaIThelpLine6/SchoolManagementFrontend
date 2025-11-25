@@ -13,16 +13,16 @@ import DropdownDefault from '../components/Dropdowns/DropdownDefault';
 import DefaultInput from '../components/Forms/DefaultInput';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import Loading from '../components/Loading/Loading';
+import { permissionsDataList } from '../Data/permissions';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import {
   useGetStudentQuery,
   useGetStudentsAdmissionDataQuery,
 } from '../features/student/studentQuerySlice';
+import { ViewPermission } from '../Routes/ViewPermission';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
-import { ViewPermission } from '../Routes/ViewPermission';
-import { permissionsDataList } from '../Data/permissions';
 
 const AddStudent = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -267,31 +267,34 @@ const AddStudent = ({ pageTitle }) => {
       render: (row) => (
         <div>
           <DropdownDefault>
-            <ViewPermission permissionId={permissionsDataList.student_class_change} permissionType="insert|edit">
-            <button
-              className="flex w-full items-center gap-2 rounded-sm px-4 py-1.5 text-left text-sm hover:bg-gray"
-              onClick={() => {
-                handleOpenChangeClassModal(row.UserID);
-              }}
+            <ViewPermission
+              permissionId={permissionsDataList.student_class_change}
+              permissionType="insert|edit"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width={24}
-                height={24}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-transfer"
+              <button
+                className="flex w-full items-center gap-2 rounded-sm px-4 py-1.5 text-left text-sm hover:bg-gray"
+                onClick={() => {
+                  handleOpenChangeClassModal(row.UserID);
+                }}
               >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M20 10h-16l5.5 -6" />
-                <path d="M4 14h16l-5.5 6" />
-              </svg>
-              Change Class
-            </button>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={24}
+                  height={24}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="icon icon-tabler icons-tabler-outline icon-tabler-transfer"
+                >
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M20 10h-16l5.5 -6" />
+                  <path d="M4 14h16l-5.5 6" />
+                </svg>
+                Change Class
+              </button>
             </ViewPermission>
           </DropdownDefault>
         </div>
@@ -330,14 +333,22 @@ const AddStudent = ({ pageTitle }) => {
       field: 'SessionSerial',
       hozAlign: 'center',
       render: (row) => (
-        <button
-          onClick={() => {
-            handleOpenModal(row.UserID);
-          }}
-          className="px-4 py-2 bg-rose-500 text-white rounded"
-        >
-          {translate('Complete Admission')}
-        </button>
+        <>
+          <ViewPermission
+            permissionId={permissionsDataList.student_admission}
+            permissionType="insert"
+            empty={true}
+          >
+            <button
+              onClick={() => {
+                handleOpenModal(row.UserID);
+              }}
+              className="px-4 py-2 bg-rose-500 text-white rounded"
+            >
+              {translate('Complete Admission')}
+            </button>
+          </ViewPermission>
+        </>
       ),
     },
   ];

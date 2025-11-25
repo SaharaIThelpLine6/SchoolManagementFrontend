@@ -1,30 +1,32 @@
-import { useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { FormProvider, useForm } from "react-hook-form";
-import Swal from "sweetalert2";
-import { setPageName } from "../features/auth/authSlice";
-import { useGetSessionsQuery } from "../features/session/sessionSlice";
-import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
+import { useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import { setPageName } from '../features/auth/authSlice';
+import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import {
   useGetExamNamesQuery,
   usePostExamFeeSettingMutation,
   useUpdateExamFeeSettingMutation,
-} from "../features/exam/examQuerySlice";
+} from '../features/exam/examQuerySlice';
+import { useGetSessionsQuery } from '../features/session/sessionSlice';
 
-import useTranslate from "../utils/Translate";
-import bnBijoy2Unicode from "../utils/conveter";
+import bnBijoy2Unicode from '../utils/conveter';
+import useTranslate from '../utils/Translate';
 
-import SortableTable from "../components/Tables/SortableTable";
-import Loading from "../components/Loading/Loading";
-import DefaultSelect from "../components/Forms/DefaultSelect";
+import EditButton from '../components/Button/EditButton';
+import DefaultSelect from '../components/Forms/DefaultSelect';
+import SvgIcon from '../components/icons/SvgIcon';
+import Loading from '../components/Loading/Loading';
+import DefaultPagination from '../components/Pagination/DefaultPagination';
+import SortableTable from '../components/Tables/SortableTable';
+import { permissionsDataList } from '../Data/permissions';
 import {
   useGetExamListQuery,
   useUpdateExamListStatusUpdateMutation,
-} from "../features/result/resultSilce";
-import EditButton from "../components/Button/EditButton";
-import SvgIcon from "../components/icons/SvgIcon";
-import DefaultPagination from "../components/Pagination/DefaultPagination";
+} from '../features/result/resultSilce';
+import { ViewPermission } from '../Routes/ViewPermission';
 
 const PAGE_SIZE = 10;
 
@@ -44,9 +46,9 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
-  const session_id = watch("SessionID");
-  const exam_id = watch("ExamID");
-  const subclass_id = watch("SubClassID");
+  const session_id = watch('SessionID');
+  const exam_id = watch('ExamID');
+  const subclass_id = watch('SubClassID');
 
   const {
     data: examListData,
@@ -77,9 +79,9 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   const onSubmit = async (data) => {
     if (!data.SessionID || !data.SubClassID || !data.ExamID) {
       Swal.fire({
-        icon: "warning",
-        title: "ফর্ম অসম্পূর্ণ",
-        text: "Session, SubClass এবং Exam নির্বাচন করুন।",
+        icon: 'warning',
+        title: 'ফর্ম অসম্পূর্ণ',
+        text: 'Session, SubClass এবং Exam নির্বাচন করুন।',
       });
       return;
     }
@@ -104,9 +106,9 @@ const PointBasedResultEntry = ({ pageTitle }) => {
       }
 
       Swal.fire({
-        icon: "success",
-        title: "সফলভাবে সংরক্ষণ হয়েছে",
-        text: response?.message || "Exam Fee Setting সফলভাবে সংরক্ষিত হয়েছে।",
+        icon: 'success',
+        title: 'সফলভাবে সংরক্ষণ হয়েছে',
+        text: response?.message || 'Exam Fee Setting সফলভাবে সংরক্ষিত হয়েছে।',
       }).then(() => {
         refetch();
         methods.reset();
@@ -115,13 +117,13 @@ const PointBasedResultEntry = ({ pageTitle }) => {
       const errMsg =
         error?.data?.message ||
         error?.data?.error ||
-        "অজানা একটি ত্রুটি ঘটেছে।";
+        'অজানা একটি ত্রুটি ঘটেছে।';
       Swal.fire({
-        icon: "error",
-        title: "ত্রুটি ঘটেছে!",
+        icon: 'error',
+        title: 'ত্রুটি ঘটেছে!',
         text: errMsg,
       });
-      console.error("Exam Fee Setting Error:", error);
+      console.error('Exam Fee Setting Error:', error);
     }
   };
 
@@ -129,12 +131,12 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     const newPublished = !currentPublished;
     const confirmResult = await Swal.fire({
       title: `Are you sure you want to mark as ${
-        newPublished ? "Published" : "Unpublished"
+        newPublished ? 'Published' : 'Unpublished'
       }?`,
-      icon: "question",
+      icon: 'question',
       showCancelButton: true,
-      confirmButtonText: "Yes",
-      cancelButtonText: "Cancel",
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'Cancel',
     });
 
     if (!confirmResult.isConfirmed) return;
@@ -142,17 +144,17 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     try {
       await updateStatus({ id, published: newPublished }).unwrap();
       Swal.fire({
-        icon: "success",
-        title: "Updated!",
-        text: `Status has been ${newPublished ? "published" : "unpublished"}.`,
+        icon: 'success',
+        title: 'Updated!',
+        text: `Status has been ${newPublished ? 'published' : 'unpublished'}.`,
         timer: 1500,
         showConfirmButton: false,
       });
     } catch (error) {
       Swal.fire({
-        icon: "error",
-        title: "Oops...",
-        text: "Update failed. Please try again.",
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Update failed. Please try again.',
       });
     }
   };
@@ -160,59 +162,77 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   // Table Data Columns
   const columns = [
     {
-      title: translate("ID"),
-      field: "ID",
-      hozAlign: "center",
+      title: translate('ID'),
+      field: 'ID',
+      hozAlign: 'center',
     },
     {
-      title: translate("Session"),
-      field: "SessionID",
-      hozAlign: "center",
+      title: translate('Session'),
+      field: 'SessionID',
+      hozAlign: 'center',
       render: (row) => bnBijoy2Unicode(row.Session?.SessionName),
     },
     {
-      title: translate("Exam"),
-      field: "ExamID",
-      hozAlign: "center",
+      title: translate('Exam'),
+      field: 'ExamID',
+      hozAlign: 'center',
       render: (row) => bnBijoy2Unicode(row.Exam?.ExamName),
     },
     {
-      title: translate("SubClass"),
-      field: "SubClassID",
-      hozAlign: "center",
+      title: translate('SubClass'),
+      field: 'SubClassID',
+      hozAlign: 'center',
       render: (row) => bnBijoy2Unicode(row.Class?.SubClass),
     },
     {
-      title: translate("Status"),
-      field: "Published",
-      hozAlign: "center",
+      title: translate('Status'),
+      field: 'Published',
+      hozAlign: 'center',
       render: (row) => {
         const isPublished = row?.Published;
         return (
-          <button
-            className={`px-3 py-1 rounded text-sm font-medium ${
-              isPublished ? "bg-green-500 text-white" : "bg-red-500 text-white"
-            }`}
-            onClick={() => handleStatusUpdate(row.ID, isPublished)}
-            disabled={isLoading}
+          <ViewPermission
+            permissionId={permissionsDataList.result_entry}
+            permissionType="edit"
+            empty={true}
           >
-            {isLoading ? "Updating..." : isPublished ? "প্রকাশিত" : "অপ্রকাশিত"}
-          </button>
+            <button
+              className={`px-3 py-1 rounded text-sm font-medium ${
+                isPublished
+                  ? 'bg-green-500 text-white'
+                  : 'bg-red-500 text-white'
+              }`}
+              onClick={() => handleStatusUpdate(row.ID, isPublished)}
+              disabled={isLoading}
+            >
+              {isLoading
+                ? 'Updating...'
+                : isPublished
+                ? 'প্রকাশিত'
+                : 'অপ্রকাশিত'}
+            </button>
+          </ViewPermission>
         );
       },
     },
     {
-      title: translate("Action"),
-      hozAlign: "center",
+      title: translate('Action'),
+      hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <EditButton
-            onClick={() =>
-              navigate(
-                `/result/${row?.ID}?session_id=${row?.SessionID}&exam_id=${row?.ExamID}&subclass_id=${row?.SubClassID}`
-              )
-            }
-          />
+          <ViewPermission
+            permissionId={permissionsDataList.result_entry}
+            permissionType="edit"
+            empty={true}
+          >
+            <EditButton
+              onClick={() =>
+                navigate(
+                  `/result/${row?.ID}?session_id=${row?.SessionID}&exam_id=${row?.ExamID}&subclass_id=${row?.SubClassID}`
+                )
+              }
+            />
+          </ViewPermission>
           <button
             className="p-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md flex items-center gap-1"
             title="Print"
@@ -222,7 +242,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               )
             }
           >
-            <SvgIcon name={"MdLocalPrintshop"} size={20} />
+            <SvgIcon name={'MdLocalPrintshop'} size={20} />
           </button>
         </div>
       ),
@@ -233,15 +253,15 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="filter_header flex items-center justify-between pt-5">
         <h3 className="text-base sm:text-[20px] font-bold">
-          {translate("Point Result Entry")}
-        </h3>{" "}
+          {translate('Point Result Entry')}
+        </h3>{' '}
       </div>
       <FormProvider {...methods}>
         <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <input type="hidden" {...methods.register("ID")} />
+          <input type="hidden" {...methods.register('ID')} />
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <DefaultSelect
-              label={translate("Session") + ":"}
+              label={translate('Session') + ':'}
               options={sessionData ?? []}
               valueField="SessionID"
               nameField="SessionName"
@@ -249,7 +269,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               unicode={true}
             />
             <DefaultSelect
-              label={translate("Exam Name") + ":"}
+              label={translate('Exam Name') + ':'}
               options={examNameData ?? []}
               valueField="ExamID"
               nameField="ExamName"
@@ -257,7 +277,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               unicode={true}
             />
             <DefaultSelect
-              label={translate("Class/Jamaat") + ":"}
+              label={translate('Class/Jamaat') + ':'}
               options={subClassListData ?? []}
               valueField="SubClassID"
               nameField="SubClass"
@@ -273,7 +293,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
           <Loading />
         ) : error ? (
           <div className="text-red-500 text-center py-4">
-            {translate("Failed to load exam fee settings. Please try again.")}
+            {translate('Failed to load exam fee settings. Please try again.')}
           </div>
         ) : (
           <SortableTable

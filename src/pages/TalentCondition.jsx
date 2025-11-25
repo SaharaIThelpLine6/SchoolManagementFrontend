@@ -1,16 +1,17 @@
+import { skipToken } from "@reduxjs/toolkit/query";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
-import { useState } from "react";
+import Swal from "sweetalert2";
 import Button from "../components/Button/Button";
-import useTranslate from "../utils/Translate";
 import DefaultInput from "../components/Forms/DefaultInput";
 import {
   useGetExamTalentConditionQuery,
   usePostExamTalentConditionMutation,
 } from "../features/exam/examQuerySlice";
+import { ViewPermission } from "../Routes/ViewPermission";
+import useTranslate from "../utils/Translate";
 import PointConditionFilteringForm from "../view/exam/point-condition/PointConditionFilteringForm";
-import { skipToken } from "@reduxjs/toolkit/query";
-import { useEffect } from "react";
-import Swal from "sweetalert2";
+import { permissionsDataList } from "../Data/permissions";
 
 // ✅ Input with Label + Checkbox
 const InputWithCheckbox = ({ registerKey, checked, onCheckChange }) => (
@@ -66,12 +67,12 @@ const TalentCondition = () => {
       const updatedChecked = [...checkedInputs];
       const inputsMap = examTalentConditionData.map((divisionLabel, i) => {
         // console.log("Found");
-        
+
         // const found = examTalentConditionData.find(
         //   (item) => item.Division === divisionLabel
         // );
         // console.log(found);
-        
+
         // console.log("==========Found======");
 
 
@@ -186,12 +187,12 @@ const TalentCondition = () => {
     <div className="font-SolaimanLipi bg-white p-5">
       <div className="text-center mb-4">
         <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-2">
-          <span className="text-blue-600">•</span>{" "}
-          {translate("All the divisions whose merit will be mentioned")}
+          <span className="text-blue-600">•</span>{' '}
+          {translate('All the divisions whose merit will be mentioned')}
           <span className="text-blue-600"> •</span>
         </h2>
         <p className="text-gray-600 text-sm md:text-base">
-          {translate("Select it with a check mark.")}
+          {translate('Select it with a check mark.')}
         </p>
         <div className="mt-4 flex justify-center">
           <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"></div>
@@ -217,7 +218,7 @@ const TalentCondition = () => {
                   className="mr-2 cursor-pointer"
                 />
                 <label className="font-semibold">
-                  {translate("Select all inputs")}
+                  {translate('Select all inputs')}
                 </label>
               </div>
 
@@ -235,7 +236,12 @@ const TalentCondition = () => {
             </div>
           </div>
           <div className="flex justify-end gap-4">
-            <Button type="submit">{translate("Save")}</Button>
+            <ViewPermission
+              permissionId={permissionsDataList.merit_condition}
+              permissionType="insert|edit"
+            >
+              <Button type="submit">{translate('Save')}</Button>
+            </ViewPermission>
           </div>
         </form>
       </FormProvider>

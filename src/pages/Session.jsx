@@ -9,12 +9,14 @@ import Loading from '../components/Loading/Loading';
 import DefaultPagination from '../components/Pagination/DefaultPagination';
 import ToggleSwitch from '../components/Switchers/ToggleSwitch';
 import SortableTable from '../components/Tables/SortableTable';
+import { permissionsDataList } from '../Data/permissions';
 import { setPageName } from '../features/auth/authSlice';
 import {
   useDeleteSessionMutation,
   useGetSessionsQuery,
   useStatusUpdateSessionMutation,
 } from '../features/session/sessionSlice';
+import { ViewPermission } from '../Routes/ViewPermission';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
 
@@ -151,10 +153,16 @@ const Session = ({ pageTitle }) => {
       hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center">
-          <ToggleSwitch
-            checked={row.SessionAction === 1}
-            onChange={(e) => handleStatusToggle(row, e.target.checked)}
-          />
+          <ViewPermission
+            permissionId={permissionsDataList.academic_year}
+            permissionType="edit"
+            empty={true}
+          >
+            <ToggleSwitch
+              checked={row.SessionAction === 1}
+              onChange={(e) => handleStatusToggle(row, e.target.checked)}
+            />
+          </ViewPermission>
         </div>
       ),
     },
@@ -164,8 +172,20 @@ const Session = ({ pageTitle }) => {
       hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center gap-3 items-center">
-          <EditButton onClick={() => handleEditOpenForm(row.SessionID)} />
-          <DeleteButton onClick={() => handleDeleteOpenForm(row.SessionID)} />
+          <ViewPermission
+            permissionId={permissionsDataList.academic_year}
+            permissionType="edit"
+            empty={true}
+          >
+            <EditButton onClick={() => handleEditOpenForm(row.SessionID)} />
+          </ViewPermission>
+          <ViewPermission
+            permissionId={permissionsDataList.academic_year}
+            permissionType="delete"
+            empty={true}
+          >
+            <DeleteButton onClick={() => handleDeleteOpenForm(row.SessionID)} />
+          </ViewPermission>
         </div>
       ),
     },
@@ -178,9 +198,14 @@ const Session = ({ pageTitle }) => {
         <h3 className="font-SolaimanLipi text-[20px] font-bold">
           {translate('Session')}
         </h3>
-        <Button onClick={handleCreateOpenForm}>
-          {translate('Create Session')}
-        </Button>
+        <ViewPermission
+          permissionId={permissionsDataList.academic_year}
+          permissionType="insert"
+        >
+          <Button onClick={handleCreateOpenForm}>
+            {translate('Create Session')}
+          </Button>
+        </ViewPermission>
       </div>
 
       {/* 🔹 Table */}

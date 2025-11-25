@@ -10,6 +10,7 @@ import DefaultSelect from '../../../components/Forms/DefaultSelect';
 import PhoneNumberInput from '../../../components/Forms/PhoneNumberInput';
 import SvgIcon from '../../../components/icons/SvgIcon';
 import Loading from '../../../components/Loading/Loading';
+import { permissionsDataList } from '../../../Data/permissions';
 import {
   useGetClassListQuery,
   useGetSubClassListQuery,
@@ -30,6 +31,7 @@ import {
   useGetLastAdmissionUserCodeQuery,
   usePostStudentAdmissionMutation,
 } from '../../../features/student/studentQuerySlice';
+import { ViewPermission } from '../../../Routes/ViewPermission';
 import { showModal } from '../../../utils/ModalControlar';
 import useTranslate from '../../../utils/Translate';
 
@@ -707,12 +709,17 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
               >
                 {translate('Cancel')}
               </button>
-              <button
-                type="submit"
-                className="px-6 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+              <ViewPermission
+                permissionId={permissionsDataList.student_admission}
+                permissionType="insert"
               >
-                {translate('Save')}
-              </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  {translate('Save')}
+                </button>
+              </ViewPermission>
             </div>
           </form>
         </FormProvider>

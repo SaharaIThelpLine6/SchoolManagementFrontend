@@ -1,15 +1,17 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
-import { useDispatch } from "react-redux";
-import { setPageName } from "../features/auth/authSlice";
-import { useGetMonthListQuery } from "../features/months/montListSlice";
-import Loading from "../components/Loading/Loading";
-import SortableTable from "../components/Tables/SortableTable";
-import useTranslate from "../utils/Translate";
-import { showModal } from "../utils/ModalControlar";
-import Button from "../components/Button/Button";
-import { months } from "../Data/monthsData";
-import SvgIcon from "../components/icons/SvgIcon";
-import DefaultPagination from "../components/Pagination/DefaultPagination";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import Button from '../components/Button/Button';
+import SvgIcon from '../components/icons/SvgIcon';
+import Loading from '../components/Loading/Loading';
+import DefaultPagination from '../components/Pagination/DefaultPagination';
+import SortableTable from '../components/Tables/SortableTable';
+import { months } from '../Data/monthsData';
+import { permissionsDataList } from '../Data/permissions';
+import { setPageName } from '../features/auth/authSlice';
+import { useGetMonthListQuery } from '../features/months/montListSlice';
+import { ViewPermission } from '../Routes/ViewPermission';
+import { showModal } from '../utils/ModalControlar';
+import useTranslate from '../utils/Translate';
 
 const PAGE_SIZE = 10;
 
@@ -32,12 +34,12 @@ const MonthListTable = ({ pageTitle }) => {
   }, [monthsList, currentPage]);
 
   const handleOpenModal = useCallback(() => {
-    showModal(translate("Create month names"), "ADD_MONTHNAMES");
+    showModal(translate('Create month names'), 'ADD_MONTHNAMES');
   }, [translate]);
 
   const handleEditOpenModal = useCallback(
     (id) => {
-      showModal(translate("Update month names"), "EDIT_MONTHNAMES", id);
+      showModal(translate('Update month names'), 'EDIT_MONTHNAMES', id);
     },
     [translate]
   );
@@ -57,26 +59,31 @@ const MonthListTable = ({ pageTitle }) => {
   const monthColumns = months.map((month, index) => ({
     title: translate(month),
     field: `Month${index + 1}`,
-    hozAlign: "center",
+    hozAlign: 'center',
   }));
   const columns = [
     {
-      title: translate("Action"),
-      hozAlign: "center",
+      title: translate('Action'),
+      hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <button
-            className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
-            title="Edit"
-            onClick={() => handleEditOpenModal(row.ID)}
+          <ViewPermission
+            permissionId={permissionsDataList.month_name}
+            permissionType="edit"
           >
-            <SvgIcon name={"FiEdit"} size={20} />
-          </button>
+            <button
+              className="p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md"
+              title="Edit"
+              onClick={() => handleEditOpenModal(row.ID)}
+            >
+              <SvgIcon name={'FiEdit'} size={20} />
+            </button>
+          </ViewPermission>
         </div>
       ),
     },
-    { title: translate("Session"), field: "sessionName", hozAlign: "center" },
-    { title: translate("Class"), field: "ClassName", hozAlign: "center" },
+    { title: translate('Session'), field: 'sessionName', hozAlign: 'center' },
+    { title: translate('Class'), field: 'ClassName', hozAlign: 'center' },
     ...monthColumns,
   ];
 
@@ -84,19 +91,26 @@ const MonthListTable = ({ pageTitle }) => {
     <div className="p-4 font-lato bg-white md:p-4 rounded-xl shadow-lg">
       <div className="flex justify-between items-center mb-4 border-b border-[#e9edf4] py-5 pt-0">
         <h3 className="text-xl font-bold">
-          {pageTitle || translate("Months list table")}
+          {pageTitle || translate('Months list table')}
         </h3>
-        <Button onClick={handleOpenModal}>{translate("Months create")}</Button>
+        <ViewPermission
+          permissionId={permissionsDataList.month_name}
+          permissionType="insert"
+        >
+          <Button onClick={handleOpenModal}>
+            {translate('Months create')}
+          </Button>
+        </ViewPermission>
       </div>
 
       <SortableTable columns={columns} data={paginatedData} />
 
       {/* Pagination Controls */}
       <DefaultPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };

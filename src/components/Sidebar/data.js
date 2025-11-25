@@ -39,29 +39,19 @@ export const menuData = [
         route: '/general-info/rfid-card',
         subMenu: false,
       },
-      // {
-      //   id: "5",
-      //   name: "RFID ",
-      //   route: "/general-info/sms",
-      // },
+
       {
         id: '7',
         name: 'User Image',
         route: '/general-info/user-image',
         subMenu: false,
       },
-      // {
-      //   id: '8',
-      //   name: 'Bulk Image',
-      //   route: '/general-info/bulk-image',
-      //   subMenu: false,
-      // },
-      //   {
-      //   id: "5",
-      //   name: "Address Entry",
-      //   route: "/general-info/sms",
-      // },
-
+      {
+        id: '8',
+        name: 'Bulk Image',
+        route: '/general-info/bulk-image',
+        subMenu: false,
+      },
       {
         id: '9',
         name: 'SMS',
@@ -72,11 +62,6 @@ export const menuData = [
         name: 'User Reports',
         route: '/general-info/user-reports',
       },
-      // {
-      //   id: "9",
-      //   name: "User Transaction",
-      //   route: "/general-info/user-reports",
-      // },
     ],
   },
   {
@@ -97,12 +82,12 @@ export const menuData = [
       },
       {
         id: '3',
-        name: 'Class Group',
+        name: 'Sub Class',
         route: '/students/section',
       },
       {
         id: '4',
-        name: 'All Students',
+        name: 'Students Admission',
         route: '/students',
       },
       {
@@ -204,14 +189,14 @@ export const menuData = [
         route: '/exam/exam-condition',
       },
       // {
-      //   id: "4",
-      //   name: "Average V: Condition",
-      //   route: "/exam/average-v-condition",
+      //   id: '5',
+      //   name: 'List of Candidates',
+      //   route: '/exam/list-of-candidates',
       // },
       {
         id: '5',
-        name: 'List of Candidates',
-        route: '/exam/list-of-candidates',
+        name: 'Exam Group Select',
+        route: '/exam/exam-group-create',
       },
       {
         id: '6',
@@ -243,12 +228,12 @@ export const menuData = [
     subMenu: [
       {
         id: '1',
-        name: 'Point Result Entry',
+        name: 'Online F: Publish',
         route: '/result',
       },
       {
         id: '2',
-        name: 'Point V: Report',
+        name: 'Average V: Report',
         route: '/result/report',
       },
     ],

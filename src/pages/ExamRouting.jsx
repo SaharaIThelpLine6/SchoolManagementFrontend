@@ -19,6 +19,8 @@ import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import useTranslate from '../utils/Translate';
 import bnBijoy2Unicode from '../utils/conveter';
 
+import { permissionsDataList } from '../Data/permissions';
+import { ViewPermission } from '../Routes/ViewPermission';
 import Button from '../components/Button/Button';
 import DeleteButton from '../components/Button/DeleteButton';
 import EditButton from '../components/Button/EditButton';
@@ -266,8 +268,20 @@ const ExamRouting = ({ pageTitle }) => {
       hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <EditButton onClick={() => handleEdit(row)} />
-          <DeleteButton onClick={() => handleDelete(row.ID)} />
+          <ViewPermission
+            permissionId={permissionsDataList.routine_with_signature}
+            permissionType="edit"
+            empty={true}
+          >
+            <EditButton onClick={() => handleEdit(row)} />
+          </ViewPermission>
+          <ViewPermission
+            permissionId={permissionsDataList.routine_with_signature}
+            permissionType="delete"
+            empty={true}
+          >
+            <DeleteButton onClick={() => handleDelete(row.ID)} />
+          </ViewPermission>
         </div>
       ),
     },
@@ -477,9 +491,15 @@ const ExamRouting = ({ pageTitle }) => {
 
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <Button type="submit" className="w-full sm:w-auto">
-                {translate('Save')}
-              </Button>
+              <ViewPermission
+                permissionId={permissionsDataList.routine_with_signature}
+                permissionType="insert"
+                empty={true}
+              >
+                <Button type="submit" className="w-full sm:w-auto">
+                  {translate('Save')}
+                </Button>
+              </ViewPermission>
               <Button
                 type="button"
                 onClick={() =>

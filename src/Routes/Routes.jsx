@@ -26,7 +26,6 @@ import AddLoginUsers from '../pages/AddLoginUsers';
 import AddStudent from '../pages/AddStudent';
 import AddTeacher from '../pages/AddTeacher';
 import AllMadrasah from '../pages/AllMadrasah';
-import AverageVCondition from '../pages/AverageVCondition';
 import BalanceTransfer from '../pages/BalanceTransfer';
 import BoardCenterName from '../pages/BoardCenterName';
 import BoardExamName from '../pages/BoardExamName';
@@ -66,8 +65,6 @@ import PayRole from '../pages/PayRole';
 import PayRoleName from '../pages/PayRoleName';
 import PaymentConfirm from '../pages/PaymentConfirm';
 import PaymentHistory from '../pages/PaymentHistory';
-import PointBasedMarkSheet from '../pages/PointBasedMarkSheet';
-import PointBasedResultCreateUpdate from '../pages/PointBasedResultCreateUpdate';
 import PointBasedResultEntry from '../pages/PointBasedResultEntry';
 import PointVReport from '../pages/PointVReport';
 import QueryThree from '../pages/QueryThree';
@@ -79,11 +76,10 @@ import Section from '../pages/Section';
 import Session from '../pages/Session';
 import Settings from '../pages/Settings';
 import StudentAdmission from '../pages/StudentAdmission';
+import StudentGroupCreate from '../pages/StudentGroupCreate';
 import StudentsFeeCollection from '../pages/StudentsFeeCollection';
-import StudentsList from '../pages/StudentsList';
 import StudentsReport from '../pages/StudentsReport';
 import TalentCondition from '../pages/TalentCondition';
-import TypeOfVacation from '../pages/TypeOfVacation';
 import User from '../pages/User';
 import UserImage from '../pages/UserImage';
 import UserReports from '../pages/UserReports';
@@ -180,21 +176,19 @@ const router = createBrowserRouter([
               {
                 path: 'user-image',
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.month_name}
-                  // >
-                  <UserImage />
-                  // </RequirePermission>
+                  <RequirePermission
+                    permissionId={permissionsDataList.user_photo}
+                  >
+                    <UserImage />
+                  </RequirePermission>
                 ),
               },
               {
                 path: 'bulk-image',
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.month_name}
-                  // >
-                  <BulkImage />
-                  // </RequirePermission>
+                  <OwenGuide>
+                    <BulkImage />
+                  </OwenGuide>
                 ),
               },
             ],
@@ -213,12 +207,12 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: 'group-distribution',
+                path: 'sessions',
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.student_group_setting}
+                    permissionId={permissionsDataList.academic_year}
                   >
-                    <GroupDistribution pageTitle="Students Group Set" />
+                    <Session pageTitle="Session" />
                   </RequirePermission>
                 ),
               },
@@ -231,30 +225,12 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: 'vacation/type-of-vacation',
-                element: (
-                  // <RequirePermission permissionId={permissionsDataList.class}>
-                  <TypeOfVacation pageTitle="Class" />
-                  // </RequirePermission>
-                ),
-              },
-              {
-                path: 'book-list',
+                path: 'section',
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.kitab_entry}
+                    permissionId={permissionsDataList.sub_class}
                   >
-                    <Book pageTitle="Book" />
-                  </RequirePermission>
-                ),
-              },
-              {
-                path: 'data-export',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.student_report}
-                  >
-                    <DataExport pageTitle="Data Export" />
+                    <Section pageTitle="Section" />
                   </RequirePermission>
                 ),
               },
@@ -272,22 +248,43 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: 'section',
+                path: 'book-list',
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.sub_class}
+                    permissionId={permissionsDataList.kitab_entry}
                   >
-                    <Section pageTitle="Section" />
+                    <Book pageTitle="Book" />
                   </RequirePermission>
                 ),
               },
               {
-                path: 'sessions',
+                path: 'group-distribution',
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.academic_year}
+                    permissionId={permissionsDataList.student_group_setting}
                   >
-                    <Session pageTitle="Session" />
+                    <GroupDistribution pageTitle="Students Group Set" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'data-export',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.student_report}
+                  >
+                    <DataExport pageTitle="Data Export" />
+                  </RequirePermission>
+                ),
+              },
+
+              {
+                path: 'certificate-of-attestation',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.certificate}
+                  >
+                    <CertificateAttesation pageTitle="Certificate of Attestation" />
                   </RequirePermission>
                 ),
               },
@@ -301,26 +298,25 @@ const router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-              {
-                path: 'certificate-of-attestation',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.certificate}
-                  >
-                    <CertificateAttesation pageTitle="Certificate of Attestation" />
-                  </RequirePermission>
-                ),
-              },
+
               {
                 path: 'online-admission',
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.user_entry}
+                    permissionId={permissionsDataList.student_admission}
                   >
                     <OnlineAdmissionTable pageTitle="Online Admission List" />
                   </RequirePermission>
                 ),
               },
+              // {
+              //   path: 'vacation/type-of-vacation',
+              //   element: (
+              //     // <RequirePermission permissionId={permissionsDataList.class}>
+              //     <TypeOfVacation pageTitle="Class" />
+              //     // </RequirePermission>
+              //   ),
+              // },
             ],
           },
           {
@@ -411,35 +407,35 @@ const router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
+
+              // {
+              //   path: 'list-of-candidates',
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.exam_list_generation}
+              //     >
+              //       <StudentGroupCreate pageTitle="List of Candidates" />
+              //     </RequirePermission>
+              //   ),
+              // },
               {
-                path: 'average-v-condition',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.exam_condition}
-                  >
-                    <AverageVCondition pageTitle="Exam Fee Determine" />
-                  </RequirePermission>
-                ),
-              },
-              {
-                path: 'list-of-candidates',
+                path: 'exam-group-create',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.exam_list_generation}
                   >
-                    <StudentsList pageTitle="List of Candidates" />
+                    <StudentGroupCreate pageTitle="Exam Group Select" />
                   </RequirePermission>
                 ),
               },
-
               {
                 path: 'talent-condition',
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.admit_card}
-                  // >
-                  <TalentCondition pageTitle="Talent Condition" />
-                  // {/* </RequirePermission> */}
+                  <RequirePermission
+                    permissionId={permissionsDataList.merit_condition}
+                  >
+                    <TalentCondition pageTitle="Talent Condition" />
+                  </RequirePermission>
                 ),
               },
               {
@@ -458,7 +454,7 @@ const router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.routine_with_signature}
                   >
-                    <ExamRouting pageTitle="Exam Routing" />
+                    <ExamRouting pageTitle="Exam Routing Create" />
                   </RequirePermission>
                 ),
               },
@@ -488,41 +484,42 @@ const router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.result_entry}
                   >
-                    <PointBasedResultEntry pageTitle="Result" />
+                    <PointBasedResultEntry pageTitle="Online F: Publish" />
                   </RequirePermission>
                 ),
               },
-              {
-                path: ':id',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.result_report}
-                  >
-                    <PointBasedResultCreateUpdate pageTitle="Result" />
-                  </RequirePermission>
-                ),
-              },
-
               {
                 path: 'report',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.result_report}
                   >
-                    <PointVReport pageTitle="Point V: Report" />
+                    <PointVReport pageTitle="Average V: Report" />
                   </RequirePermission>
                 ),
               },
-              {
-                path: 'mark-sheet/:id',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.marksheet}
-                  >
-                    <PointBasedMarkSheet pageTitle="Point Based Mark Sheet" />
-                  </RequirePermission>
-                ),
-              },
+
+              // {
+              //   path: ':id',
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.result_report}
+              //     >
+              //       <PointBasedResultCreateUpdate pageTitle="Result" />
+              //     </RequirePermission>
+              //   ),
+              // },
+
+              // {
+              //   path: 'mark-sheet/:id',
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.marksheet}
+              //     >
+              //       <PointBasedMarkSheet pageTitle="Point Based Mark Sheet" />
+              //     </RequirePermission>
+              //   ),
+              // },
             ],
           },
 

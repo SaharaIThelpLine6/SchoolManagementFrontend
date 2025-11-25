@@ -1,4 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
+import { ViewPermission } from '../../Routes/ViewPermission';
 import { setItemsPerPage } from '../../features/pagination/paginationSlice';
 import { setEditUserID } from '../../features/settings/settingsSlice';
 import { setEditMode } from '../../features/userInfo/userInfoSlice';
@@ -6,6 +7,7 @@ import { useGetAllUsersQuery } from '../../features/userType/userTypeSlice';
 import Fourdots from '../../images/brand/four-dots-square.svg';
 import Pagination from '../Pagination/Pagination';
 import SvgIcon from '../icons/SvgIcon';
+import { permissionsDataList } from '../../Data/permissions';
 
 const TableOne = () => {
   const dispatch = useDispatch();
@@ -27,9 +29,9 @@ const TableOne = () => {
   const totalUsers = usersData?.totalUsers || 0;
 
   const handleEdit = (id) => {
-      dispatch(setEditMode(1));
-      dispatch(setEditUserID(id));
-      // dispatch(fetchSingleUser(brand.UserID));
+    dispatch(setEditMode(1));
+    dispatch(setEditUserID(id));
+    // dispatch(fetchSingleUser(brand.UserID));
   };
 
   // ✅ Loading State
@@ -122,13 +124,18 @@ const TableOne = () => {
                   } border border-white`}
                 >
                   <td className="py-1 px-4 border border-white text-center">
-                    <button
-                      type="button"
-                      className="text-blue-500 hover:text-blue-700"
-                      onClick={() => handleEdit(brand.UserID)}
+                    <ViewPermission
+                      permissionId={permissionsDataList.user_entry}
+                      permissionType="edit"
                     >
-                      <SvgIcon name="FiEdit" size={20} />
-                    </button>
+                      <button
+                        type="button"
+                        className="text-blue-500 hover:text-blue-700"
+                        onClick={() => handleEdit(brand.UserID)}
+                      >
+                        <SvgIcon name="FiEdit" size={20} />
+                      </button>
+                    </ViewPermission>
                   </td>
                   <td className="py-1 px-4 border border-white text-center">
                     <button className="text-red-500 hover:text-red-700">

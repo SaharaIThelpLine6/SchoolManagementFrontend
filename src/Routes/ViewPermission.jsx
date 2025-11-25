@@ -1,8 +1,12 @@
-import { Navigate } from "react-router-dom";
-import { useGetAllUserPermissionsQuery } from "../features/permission/permissionSlice";
-import Loading from "../components/Loading/Loading";
+import Loading from '../components/Loading/Loading';
+import { useGetAllUserPermissionsQuery } from '../features/permission/permissionSlice';
 
-export const ViewPermission = ({ permissionId, permissionType, children }) => {
+export const ViewPermission = ({
+  permissionId,
+  permissionType,
+  children,
+  empty,
+}) => {
   const {
     data: permissions,
     isLoading,
@@ -12,19 +16,19 @@ export const ViewPermission = ({ permissionId, permissionType, children }) => {
   if (isLoading) return <Loading />;
   if (isError || !permissions?.data) return null;
 
-  const types = permissionType?.split("|").map((t) => t.trim().toLowerCase());
+  const types = permissionType?.split('|').map((t) => t.trim().toLowerCase());
   const hasPermission = permissions?.data.some((p) => {
     if (p.PermissionListID !== permissionId) return false;
 
     return types.some((type) => {
       switch (type) {
-        case "view":
+        case 'view':
           return p.PermissionView;
-        case "insert":
+        case 'insert':
           return p.PermissionInsert;
-        case "edit":
+        case 'edit':
           return p.PermissionEdit;
-        case "delete":
+        case 'delete':
           return p.PermissionDelete;
         default:
           return false;
@@ -32,8 +36,7 @@ export const ViewPermission = ({ permissionId, permissionType, children }) => {
     });
   });
   console.log(hasPermission);
-  if (!hasPermission) return null;
+  if (!hasPermission) return empty ? <span>-</span> : null;
 
   return children;
 };
-
