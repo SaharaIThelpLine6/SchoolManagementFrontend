@@ -1,12 +1,12 @@
-import { useState, useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { NavLink, useLocation } from "react-router-dom";
-import { menuData } from "./data";
-import useTranslate from "../../utils/Translate";
-import { useGetAllUserPermissionsQuery } from "../../features/permission/permissionSlice";
 import { permissionsDataList } from "../../Data/permissions";
+import { useGetAllUserPermissionsQuery } from "../../features/permission/permissionSlice";
+import useTranslate from "../../utils/Translate";
 import Loading from "../Loading/Loading";
 import SvgIcon from "../icons/SvgIcon";
-import { useSelector } from "react-redux";
+import { menuData } from "./data";
 
 const SideBar = () => {
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -49,7 +49,7 @@ const SideBar = () => {
       .map((menu) => {
         if (Array.isArray(menu.subMenu)) {
           const filteredSubMenu = menu.subMenu.filter((subItem) => {
-            if (subItem.name === "User") {
+            if (subItem.name === 'New User') {
               return hasPermission(permissionsDataList.user_entry);
             }
             if (subItem.name === "User Reports") {
@@ -60,6 +60,9 @@ const SideBar = () => {
             }
             if (subItem.name === "All Madrasah") {
               return typeof permissionType === "number" && permissionType <= 4;
+            }
+            if (subItem.name === 'RFID Card') {
+              return typeof permissionType === 'number' && permissionType <= 4;
             }
             if (subItem.name === "Institution Information") {
               return hasPermission(permissionsDataList.institute_info);

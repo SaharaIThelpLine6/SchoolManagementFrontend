@@ -1,9 +1,9 @@
-import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { Navigate } from "react-router-dom";
 
 const OwenGuide = ({ children }) => {
   const { user } = useSelector((state) => state.auth);
-  
+
   const permissionType = user?.permissionType;
 
   if (!permissionType) {

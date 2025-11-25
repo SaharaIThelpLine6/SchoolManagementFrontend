@@ -18,17 +18,20 @@ import {
 import Swal from 'sweetalert2';
 import Button from '../../components/Button/Button';
 import PhoneNumberInput from '../../components/Forms/PhoneNumberInput';
+import { permissionsDataList } from '../../Data/permissions';
 import {
   useGetUserCodeCheckQuery,
   useGetUserTypesQuery,
   usePostUserMutation,
 } from '../../features/userType/userTypeSlice';
+import { usePermission } from '../../hooks/usePermission';
 import { calculateAge } from '../../utils/calculateAge';
 import useTranslate from '../../utils/Translate';
 
 const CreateUser = ({ pageTitle }) => {
   const translate = useTranslate();
   const navigate = useNavigate();
+  const { hasPermission } = usePermission();
 
   const methods = useForm({
     defaultValues: {
@@ -575,12 +578,14 @@ const CreateUser = ({ pageTitle }) => {
               />
             </div>
             <div className="flex gap-3">
-              <Button
-                type="submit"
-                className="px-6 py-2 rounded-lg bg-blue-600 text-white"
-              >
-                Save
-              </Button>
+              {hasPermission(permissionsDataList.user_entry, 'insert') && (
+                <Button
+                  type="submit"
+                  className="px-6 py-2 rounded-lg bg-blue-600 text-white"
+                >
+                  Save
+                </Button>
+              )}
               <Button
                 type="button"
                 className="px-6 py-2 rounded-lg bg-gray-400 text-white"

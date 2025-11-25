@@ -1,98 +1,98 @@
 // Routes.jsx
-import { lazy } from "react";
-import { createBrowserRouter } from "react-router-dom";
-import { permissionsDataList } from "../Data/permissions";
-import PublicLayout from "../layout/PublicLayout";
-import AdmissionRegistration from "../pages/AdmissionRegistration";
-import FromP from "../pages/FormP";
-import NotFound from "../pages/NotFound";
-import Query from "../pages/Query";
-import OnlineAdmission from "../pages/public/OnlineAdmission";
-import Result from "../pages/public/Result";
-import ResultRequest from "../pages/public/ResultRequest";
-import StudentAdmissionForm from "../pages/public/studentAddmitionForm";
-import PrivateRoute from "./PrivateRoute";
+import { lazy } from 'react';
+import { createBrowserRouter } from 'react-router-dom';
+import { permissionsDataList } from '../Data/permissions';
+import PublicLayout from '../layout/PublicLayout';
+import AdmissionRegistration from '../pages/AdmissionRegistration';
+import FromP from '../pages/FormP';
+import NotFound from '../pages/NotFound';
+import Query from '../pages/Query';
+import OnlineAdmission from '../pages/public/OnlineAdmission';
+import Result from '../pages/public/Result';
+import ResultRequest from '../pages/public/ResultRequest';
+import StudentAdmissionForm from '../pages/public/studentAddmitionForm';
+import PrivateRoute from './PrivateRoute';
 
 // Public Pages
-const Login = lazy(() => import("../pages/Login"));
+const Login = lazy(() => import('../pages/Login'));
 
 // Layout
-import DefaultLayout from "../layout/DefaultLayout";
+import DefaultLayout from '../layout/DefaultLayout';
 
 // Private Pages
-import PaymentModal from "../components/Modals/PaymentModal";
-import StudentVacationListTable from "../components/Tables/StudentVacationListTable";
-import AddLoginUsers from "../pages/AddLoginUsers";
-import AddStudent from "../pages/AddStudent";
-import AddTeacher from "../pages/AddTeacher";
-import AllMadrasah from "../pages/AllMadrasah";
-import AverageVCondition from "../pages/AverageVCondition";
-import BalanceTransfer from "../pages/BalanceTransfer";
-import BoardCenterName from "../pages/BoardCenterName";
-import BoardExamName from "../pages/BoardExamName";
-import BoardNames from "../pages/BoardNames";
-import Book from "../pages/Book";
-import BulkImage from "../pages/BulkImage";
-import CellfinPaymentConfirm from "../pages/CellfinPaymentConfirm";
-import CertificateAttesation from "../pages/CertificateAttesation";
-import CharacterReport from "../pages/CharacterReport";
-import Class from "../pages/Class";
-import DataExport from "../pages/DataExport";
-import DeleteEditRecord from "../pages/DeleteEditRecord";
-import DepositCosts from "../pages/DepositCosts";
-import DepositCostsReport from "../pages/DepositCostsReport";
-import AddDesignation from "../pages/Designations";
-import DoesList from "../pages/DoesList";
-import DonationReport from "../pages/DonationReport";
-import DonorFeeDetermination from "../pages/DonorFeeDetermination";
-import EnglisArobihName from "../pages/EnglisArobihName";
-import Exam from "../pages/Exam";
-import ExamAdmitCard from "../pages/ExamAdmitCard";
-import ExamCondition from "../pages/ExamCondition";
-import ExamFeeDetermine from "../pages/ExamFeeDetermine";
-import ExamReport from "../pages/ExamReport";
-import ExamRouting from "../pages/ExamRouting";
-import FeeCollection from "../pages/FeeCollection";
-import FeeCollectionReport from "../pages/FeeCollectionReport";
-import FeeSetting from "../pages/FeeSetting";
-import GroupDistribution from "../pages/GroupDistribution";
-import Home from "../pages/Home";
-import InstitutionInfo from "../pages/InstitutionInfo";
-import MadrasahBoardInfo from "../pages/MadrasahBoardInfo";
-import MonthListTable from "../pages/MonthListTable";
-import MonthlyDues from "../pages/MonthlyDues";
-import OnlineAdmissionTable from "../pages/OnlineAdmissionTable";
-import PayRole from "../pages/PayRole";
-import PayRoleName from "../pages/PayRoleName";
-import PaymentConfirm from "../pages/PaymentConfirm";
-import PaymentHistory from "../pages/PaymentHistory";
-import PointBasedMarkSheet from "../pages/PointBasedMarkSheet";
-import PointBasedResultCreateUpdate from "../pages/PointBasedResultCreateUpdate";
-import PointBasedResultEntry from "../pages/PointBasedResultEntry";
-import PointVReport from "../pages/PointVReport";
-import QueryThree from "../pages/QueryThree";
-import QueryTwo from "../pages/QueryTwo";
-import RFIDCard from "../pages/RFIDCard";
-import Report from "../pages/Report";
-import SMS from "../pages/SMS";
-import Section from "../pages/Section";
-import Session from "../pages/Session";
-import Settings from "../pages/Settings";
-import StudentAdmission from "../pages/StudentAdmission";
-import StudentsList from "../pages/StudentsList";
-import StudentsReport from "../pages/StudentsReport";
-import TalentCondition from "../pages/TalentCondition";
-import TypeOfVacation from "../pages/TypeOfVacation";
-import User from "../pages/User";
-import UserImage from "../pages/UserImage";
-import UserReports from "../pages/UserReports";
-import ClassResult from "../pages/public/ClassResult";
-import ClassResultForm from "../pages/public/ClassResultForm";
-import MaritListForm from "../pages/public/MaritListForm";
-import MaritListResult from "../pages/public/MaritListResult";
-import OwenGuide from "./OwenGuide";
-import { RequirePermission } from "./RequirePermission";
-import StudentsFeeCollection from "../pages/StudentsFeeCollection";
+import PaymentModal from '../components/Modals/PaymentModal';
+import StudentVacationListTable from '../components/Tables/StudentVacationListTable';
+import AddLoginUsers from '../pages/AddLoginUsers';
+import AddStudent from '../pages/AddStudent';
+import AddTeacher from '../pages/AddTeacher';
+import AllMadrasah from '../pages/AllMadrasah';
+import AverageVCondition from '../pages/AverageVCondition';
+import BalanceTransfer from '../pages/BalanceTransfer';
+import BoardCenterName from '../pages/BoardCenterName';
+import BoardExamName from '../pages/BoardExamName';
+import BoardNames from '../pages/BoardNames';
+import Book from '../pages/Book';
+import BulkImage from '../pages/BulkImage';
+import CellfinPaymentConfirm from '../pages/CellfinPaymentConfirm';
+import CertificateAttesation from '../pages/CertificateAttesation';
+import CharacterReport from '../pages/CharacterReport';
+import Class from '../pages/Class';
+import DataExport from '../pages/DataExport';
+import DeleteEditRecord from '../pages/DeleteEditRecord';
+import DepositCosts from '../pages/DepositCosts';
+import DepositCostsReport from '../pages/DepositCostsReport';
+import AddDesignation from '../pages/Designations';
+import DoesList from '../pages/DoesList';
+import DonationReport from '../pages/DonationReport';
+import DonorFeeDetermination from '../pages/DonorFeeDetermination';
+import EnglisArobihName from '../pages/EnglisArobihName';
+import Exam from '../pages/Exam';
+import ExamAdmitCard from '../pages/ExamAdmitCard';
+import ExamCondition from '../pages/ExamCondition';
+import ExamFeeDetermine from '../pages/ExamFeeDetermine';
+import ExamReport from '../pages/ExamReport';
+import ExamRouting from '../pages/ExamRouting';
+import FeeCollection from '../pages/FeeCollection';
+import FeeCollectionReport from '../pages/FeeCollectionReport';
+import FeeSetting from '../pages/FeeSetting';
+import GroupDistribution from '../pages/GroupDistribution';
+import Home from '../pages/Home';
+import InstitutionInfo from '../pages/InstitutionInfo';
+import MadrasahBoardInfo from '../pages/MadrasahBoardInfo';
+import MonthListTable from '../pages/MonthListTable';
+import MonthlyDues from '../pages/MonthlyDues';
+import OnlineAdmissionTable from '../pages/OnlineAdmissionTable';
+import PayRole from '../pages/PayRole';
+import PayRoleName from '../pages/PayRoleName';
+import PaymentConfirm from '../pages/PaymentConfirm';
+import PaymentHistory from '../pages/PaymentHistory';
+import PointBasedMarkSheet from '../pages/PointBasedMarkSheet';
+import PointBasedResultCreateUpdate from '../pages/PointBasedResultCreateUpdate';
+import PointBasedResultEntry from '../pages/PointBasedResultEntry';
+import PointVReport from '../pages/PointVReport';
+import QueryThree from '../pages/QueryThree';
+import QueryTwo from '../pages/QueryTwo';
+import RFIDCard from '../pages/RFIDCard';
+import Report from '../pages/Report';
+import SMS from '../pages/SMS';
+import Section from '../pages/Section';
+import Session from '../pages/Session';
+import Settings from '../pages/Settings';
+import StudentAdmission from '../pages/StudentAdmission';
+import StudentsFeeCollection from '../pages/StudentsFeeCollection';
+import StudentsList from '../pages/StudentsList';
+import StudentsReport from '../pages/StudentsReport';
+import TalentCondition from '../pages/TalentCondition';
+import TypeOfVacation from '../pages/TypeOfVacation';
+import User from '../pages/User';
+import UserImage from '../pages/UserImage';
+import UserReports from '../pages/UserReports';
+import ClassResult from '../pages/public/ClassResult';
+import ClassResultForm from '../pages/public/ClassResultForm';
+import MaritListForm from '../pages/public/MaritListForm';
+import MaritListResult from '../pages/public/MaritListResult';
+import OwenGuide from './OwenGuide';
+import { RequirePermission } from './RequirePermission';
 
 const router = createBrowserRouter([
   {
@@ -144,11 +144,9 @@ const router = createBrowserRouter([
               {
                 path: 'rfid-card',
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.user_report}
-                  // >
-                  <RFIDCard pageTitle="All Madrasah" />
-                  // </RequirePermission>
+                  <OwenGuide>
+                    <RFIDCard pageTitle="All Madrasah" />
+                  </OwenGuide>
                 ),
               },
               {

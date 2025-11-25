@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
-import { useGetAllUserPermissionsQuery } from "../features/permission/permissionSlice";
 import Loading from "../components/Loading/Loading";
+import { useGetAllUserPermissionsQuery } from "../features/permission/permissionSlice";
 
 export const RequirePermission = ({ permissionId, children }) => {
   const {
@@ -8,6 +8,7 @@ export const RequirePermission = ({ permissionId, children }) => {
     isLoading,
     isError,
   } = useGetAllUserPermissionsQuery();
+  console.log(permissions, 'permissions');
 
   if (isLoading)
     return (
@@ -16,7 +17,7 @@ export const RequirePermission = ({ permissionId, children }) => {
 
   if (isError || !permissions?.data) return <Navigate to="/" />;
   console.log(permissions);
-  
+
 
   const hasPermission = permissions?.data.some(
     (p) =>

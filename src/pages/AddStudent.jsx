@@ -10,8 +10,11 @@ import { fetchUserOnlyStudentData } from '../features/student/studentSlice';
 import 'flatpickr/dist/themes/light.css';
 import { FormProvider, useForm } from 'react-hook-form';
 import DropdownDefault from '../components/Dropdowns/DropdownDefault';
+import DefaultInput from '../components/Forms/DefaultInput';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import Loading from '../components/Loading/Loading';
+import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
+import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import {
   useGetStudentQuery,
   useGetStudentsAdmissionDataQuery,
@@ -22,6 +25,9 @@ import useTranslate from '../utils/Translate';
 const AddStudent = ({ pageTitle }) => {
   const translate = useTranslate();
   const methods = useForm();
+  const { watch } = methods;
+  const [FilterID, SessionID] = watch(['FilterID', 'SessionID']);
+  console.log(FilterID, 'FilterID');
   const [selectedImage, setSelectedImage] = useState(null);
   const {
     data: userOnlyStudents,
@@ -36,6 +42,8 @@ const AddStudent = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const searchParams = new URLSearchParams(location.search);
   const filter = searchParams.get('filter');
+  const { data: sessionData } = useGetSessionsQuery();
+  const { data: subClassData } = useGetSubClassListQuery();
   const [selectedDateRange, setSelectedDateRange] = useState([]);
   const { data: studentList, error: studentListError } = useGetStudentQuery();
   const handleImageChange = (e) => {
@@ -332,7 +340,7 @@ const AddStudent = ({ pageTitle }) => {
   // console.log(studentList);
 
   if (isLoading) {
-    return <Loading />
+    return <Loading />;
   }
 
   if (isError) {
@@ -381,7 +389,7 @@ const AddStudent = ({ pageTitle }) => {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-5 mb-3">
+          <div className="grid grid-cols-5 mb-3 gap-3">
             <DefaultSelect
               label={translate('Filter')}
               labelPosition="left"
@@ -390,6 +398,50 @@ const AddStudent = ({ pageTitle }) => {
               nameField="name"
               registerKey="FilterID"
             />
+            {Number(FilterID) === 1 && (
+              <DefaultInput
+                registerKey="UserID"
+                placeholder="শিক্ষার্থীর আইডি লিখুন"
+              />
+            )}
+            {Number(FilterID) === 2 && (
+              <DefaultInput
+                registerKey="User Name"
+                placeholder="শিক্ষার্থীর নাম লিখুন"
+              />
+            )}
+            {Number(FilterID) === 3 && (
+              <DefaultInput
+                registerKey="Mobile1"
+                placeholder="মোবাইল নাম্বার লিখুন"
+              />
+            )}
+            {Number(FilterID) === 4 && (
+              <DefaultSelect
+                options={sessionData ?? []}
+                valueField="SessionID"
+                nameField="SessionName"
+                registerKey="SessionID"
+              />
+            )}
+            {SessionID && Number(SessionID) > 0 && (
+              <DefaultSelect
+                options={subClassData ?? []}
+                valueField="SubClassID"
+                nameField="SubClass"
+                registerKey="SubClassID"
+                unicode
+              />
+            )}
+            {Number(FilterID) === 5 && (
+              <DefaultSelect
+                options={subClassData ?? []}
+                valueField="SubClassID"
+                nameField="SubClass"
+                registerKey="SubClassID"
+                unicode
+              />
+            )}
           </div>
           {studentList && studentList.data.length > 0 ? (
             <SortableTable
