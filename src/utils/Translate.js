@@ -702,7 +702,7 @@ const useTranslate = () => {
     'Division Arabic-5': 'ডিভিশন আরবী-৫',
     'Division Arabic-6': 'ডিভিশন আরবী-৬',
     'Exam Condition': 'পরীক্ষার কন্ডিশন',
-    'Deposit Costs Report': 'জমা খরচের প্রতিবেদন',
+    'Deposit Costs Report': 'জমা খরচের রিপোর্ট',
   };
 
   return (key) =>

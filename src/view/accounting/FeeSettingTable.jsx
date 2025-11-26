@@ -3,10 +3,12 @@ import Swal from 'sweetalert2';
 import DeleteButton from '../../components/Button/DeleteButton';
 import EditButton from '../../components/Button/EditButton';
 import Loading from '../../components/Loading/Loading';
+import { permissionsDataList } from '../../Data/permissions';
 import {
   useDeleteStudentFeeSettingsMutation,
   useGetStudentFeeSettingsQuery,
 } from '../../features/feeCollection/feeCollectionSlice';
+import { ViewPermission } from '../../Routes/ViewPermission';
 import bnBijoy2Unicode from '../../utils/conveter';
 import useTranslate from '../../utils/Translate';
 
@@ -148,12 +150,18 @@ const FeeSettingTable = ({ setEditData, editId, filter }) => {
     <div className="bg-white py-4 rounded-lg shadow-sm">
       <div className="flex justify-end mb-2">
         {selectedRows.length > 0 && (
-          <button
-            onClick={handleDeleteSelected}
-            className="bg-red-500 text-white px-4 py-1 rounded"
+          <ViewPermission
+            permissionId={permissionsDataList.fee_setting}
+            permissionType="delete"
+            empty={true}
           >
-            Delete Selected
-          </button>
+            <button
+              onClick={handleDeleteSelected}
+              className="bg-red-500 text-white px-4 py-1 rounded"
+            >
+              Delete Selected
+            </button>
+          </ViewPermission>
         )}
       </div>
       <div className="overflow-x-auto">
@@ -238,10 +246,22 @@ const FeeSettingTable = ({ setEditData, editId, filter }) => {
                 </td>
                 <td className="p-3 text-center">
                   <div className="flex justify-center space-x-2">
-                    <EditButton
-                      onClick={() => handleEditOpenModal(row.SFSID)}
-                    />
-                    <DeleteButton onClick={() => handleDelete(row.SFSID)} />
+                    <ViewPermission
+                      permissionId={permissionsDataList.fee_setting}
+                      permissionType="edit"
+                      empty={true}
+                    >
+                      <EditButton
+                        onClick={() => handleEditOpenModal(row.SFSID)}
+                      />
+                    </ViewPermission>
+                    <ViewPermission
+                      permissionId={permissionsDataList.fee_setting}
+                      permissionType="delete"
+                      empty={true}
+                    >
+                      <DeleteButton onClick={() => handleDelete(row.SFSID)} />
+                    </ViewPermission>
                   </div>
                 </td>
                 <td className="p-3 text-gray-800 font-medium">

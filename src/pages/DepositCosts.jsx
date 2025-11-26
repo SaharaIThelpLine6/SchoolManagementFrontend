@@ -3,6 +3,8 @@ import Flatpickr from 'react-flatpickr';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import Swal from 'sweetalert2';
+import { permissionsDataList } from '../Data/permissions';
+import { ViewPermission } from '../Routes/ViewPermission';
 import Button from '../components/Button/Button';
 import DeleteButton from '../components/Button/DeleteButton';
 import EditButton from '../components/Button/EditButton';
@@ -27,7 +29,7 @@ import {
   useGetSubLedgerQuery,
   useGetTransactionOrdersQuery,
   usePostInComeExpenseMutation,
-  useUpdateInComeExpenseMutation
+  useUpdateInComeExpenseMutation,
 } from '../features/feeCollection/feeCollectionSlice';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
@@ -370,7 +372,13 @@ const DepositCosts = ({ pageTitle }) => {
       hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <EditButton onClick={() => handleEdit(row.OrderID)} />
+          <ViewPermission
+            permissionId={permissionsDataList.income_expense}
+            permissionType="edit"
+            empty={true}
+          >
+            <EditButton onClick={() => handleEdit(row.OrderID)} />
+          </ViewPermission>
           {/* <DeleteButton onClick={() => handleDelete(row.OrderID)} /> */}
           <button
             className="p-2 flex justify-center items-center text-white bg-yellow-500 hover:bg-yellow-600 rounded-md"
@@ -748,13 +756,18 @@ const DepositCosts = ({ pageTitle }) => {
 
       {/* Buttons */}
       <div className="flex justify-end gap-4 px-4 bg-white hidden_in_print">
-        <Button
-          type="button"
-          onClick={handleSubmitButton}
-          className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+        <ViewPermission
+          permissionId={permissionsDataList.income_expense}
+          permissionType="insert"
         >
-          {translate('Submit')}
-        </Button>
+          <Button
+            type="button"
+            onClick={handleSubmitButton}
+            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+          >
+            {translate('Submit')}
+          </Button>
+        </ViewPermission>
       </div>
 
       {/* Table Section */}

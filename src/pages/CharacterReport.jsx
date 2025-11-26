@@ -7,6 +7,7 @@ import DefaultInput from '../components/Forms/DefaultInput';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import Loading from '../components/Loading/Loading';
 import StudentReportList from '../components/StudentReportList';
+import { permissionsDataList } from '../Data/permissions';
 import { setPageName } from '../features/auth/authSlice';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { fetchSettingsData } from '../features/settings/settingsSlice';
@@ -22,6 +23,7 @@ import {
   setCharacterReportEditMode,
   setFilteredStudent,
 } from '../features/student/studentSlice';
+import { ViewPermission } from '../Routes/ViewPermission';
 import bnBijoy2Unicode from '../utils/conveter';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
@@ -467,7 +469,7 @@ const CharacterReport = ({ pageTitle }) => {
                   registerKey={'Date'}
                   require={'Date Require'}
                 />
-                <div className='flex items-center'>
+                <div className="flex items-center">
                   <DefaultSelect
                     label={`${translate('Varient')}: `}
                     nameField={'ReportCetName'}
@@ -480,14 +482,33 @@ const CharacterReport = ({ pageTitle }) => {
                     defaultSelect={false}
                     unicode={true}
                   />
-                  <div className='pt-[32px]'>
-                    <button type='button' className='btn btn_plus bg-info py-[6px] px-[8px] text-white' onClick={handleCategoryModal}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                  <div className="pt-[32px]">
+                    <button
+                      type="button"
+                      className="btn btn_plus bg-info py-[6px] px-[8px] text-white"
+                      onClick={handleCategoryModal}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="icon icon-tabler icons-tabler-outline icon-tabler-plus"
+                      >
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M12 5l0 14" />
+                        <path d="M5 12l14 0" />
+                      </svg>
                     </button>
                   </div>
                 </div>
 
-                <div className='flex items-center'>
+                <div className="flex items-center">
                   <DefaultSelect
                     label={`${translate('Type')}: `}
                     nameField={'ReportTypeName'}
@@ -500,9 +521,28 @@ const CharacterReport = ({ pageTitle }) => {
                     defaultSelect={false}
                     unicode={true}
                   />
-                  <div className='pt-[32px]'>
-                    <button type='button' className='btn btn_plus bg-info py-[6px] px-[8px] text-white' onClick={handleTypeModal}>
-                      <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-plus"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+                  <div className="pt-[32px]">
+                    <button
+                      type="button"
+                      className="btn btn_plus bg-info py-[6px] px-[8px] text-white"
+                      onClick={handleTypeModal}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={24}
+                        height={24}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="icon icon-tabler icons-tabler-outline icon-tabler-plus"
+                      >
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M12 5l0 14" />
+                        <path d="M5 12l14 0" />
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -529,12 +569,17 @@ const CharacterReport = ({ pageTitle }) => {
               </div>
 
               <div className="flex">
-                <button
-                  type="submit"
-                  className="lg:inline-block text-center bg-blue-400 text-white py-2 md:py-3 px-6 rounded-md hover:bg-blue-600 transition-colors font-medium text-sm md:text-base"
+                <ViewPermission
+                  permissionId={permissionsDataList.student_report}
+                  permissionType="insert|edit"
                 >
-                  {isEditMode ? 'Update' : 'Submit'}
-                </button>
+                  <button
+                    type="submit"
+                    className="lg:inline-block text-center bg-blue-400 text-white py-2 md:py-3 px-6 rounded-md hover:bg-blue-600 transition-colors font-medium text-sm md:text-base"
+                  >
+                    {isEditMode ? 'Update' : 'Submit'}
+                  </button>
+                </ViewPermission>
 
                 {isEditMode && (
                   <button

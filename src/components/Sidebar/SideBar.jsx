@@ -162,11 +162,49 @@ const SideBar = () => {
 
             /**
              * Main Route
-             * Result
+             * Darul Ikama
              */
             if (subItem.name === 'Character Report') {
-              return hasPermission(permissionsDataList.student_report);
+              return hasPermission(permissionsDataList.certificate);
             }
+            if (subItem.name === 'Gate pass and leave') {
+              return hasPermission(permissionsDataList.gate_pass_leave);
+            }
+            /**
+             * Main Route
+             * Accounting
+             */
+            if (subItem.name === 'Deposit Costs') {
+              return hasPermission(permissionsDataList.income_expense);
+            }
+            if (subItem.name === 'Deposit Costs Report') {
+              return hasPermission(permissionsDataList.income_expense_report);
+            }
+            if (subItem.name === 'Fee Setting') {
+              return hasPermission(permissionsDataList.fee_setting);
+            }
+            if (subItem.name === 'Student Fee Collection') {
+              return hasPermission(permissionsDataList.collect_student_fee);
+            }
+            if (subItem.name === 'Dues List') {
+              return hasPermission(permissionsDataList.due_list);
+            }
+            if (subItem.name === 'Monthly Dues') {
+              return hasPermission(permissionsDataList.monthly_due_list);
+            }
+            if (subItem.name === 'Fee Collection Report') {
+              return hasPermission(permissionsDataList.transaction_report);
+            }
+            if (subItem.name === 'Balance Transfer') {
+              return hasPermission(permissionsDataList.balance_transfer);
+            }
+            if (subItem.name === 'Delete Edit Record') {
+              return hasPermission(permissionsDataList.user_transaction);
+            }
+            /**
+             * Main Route
+             * Accounting
+             */
             if (subItem.name === 'Teacher Info') {
               return hasPermission(permissionsDataList.teacher_info);
             }
@@ -186,12 +224,7 @@ const SideBar = () => {
             if (subItem.name === 'Exam Report') {
               return hasPermission(permissionsDataList.exam_report);
             }
-            if (subItem.name === 'Character Report') {
-              return hasPermission(permissionsDataList.certificate);
-            }
-            if (subItem.name === 'Gate pass and leave') {
-              return hasPermission(permissionsDataList.gate_pass_leave);
-            }
+
             if (subItem.name === 'Point Result Entry') {
               return hasPermission(permissionsDataList.result_entry);
             }
@@ -200,9 +233,6 @@ const SideBar = () => {
               return hasPermission(permissionsDataList.marksheet);
             }
 
-            if (subItem.name === 'Fee Setting') {
-              return hasPermission(permissionsDataList.fee_setting);
-            }
             return true; // Default allow
           });
 

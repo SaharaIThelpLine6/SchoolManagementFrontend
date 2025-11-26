@@ -238,39 +238,39 @@ export const menuData = [
       },
     ],
   },
-  {
-    id: '6',
-    name: 'Board Exam',
-    route: '/board-info',
-    icon: 'UniversityIcon',
-    subMenu: [
-      {
-        id: '1',
-        name: 'Madrasah Board Info',
-        route: '/board-info',
-      },
-      {
-        id: '2',
-        name: 'Board Exam Name',
-        route: '/board-info/exam-name',
-      },
-      {
-        id: '3',
-        name: 'Board Name',
-        route: '/board-info/name',
-      },
-      {
-        id: '4',
-        name: 'Board Center Name',
-        route: '/board-info/center-name',
-      },
-      {
-        id: '5',
-        name: 'Markas and Registration Fee Determine',
-        route: '/board-info/maskas-registration-fee-determine',
-      },
-    ],
-  },
+  // {
+  //   id: '6',
+  //   name: 'Board Exam',
+  //   route: '/board-info',
+  //   icon: 'UniversityIcon',
+  //   // subMenu: [
+  //   //   {
+  //   //     id: '1',
+  //   //     name: 'Madrasah Board Info',
+  //   //     route: '/board-info',
+  //   //   },
+  //   //   {
+  //   //     id: '2',
+  //   //     name: 'Board Exam Name',
+  //   //     route: '/board-info/exam-name',
+  //   //   },
+  //   //   {
+  //   //     id: '3',
+  //   //     name: 'Board Name',
+  //   //     route: '/board-info/name',
+  //   //   },
+  //   //   {
+  //   //     id: '4',
+  //   //     name: 'Board Center Name',
+  //   //     route: '/board-info/center-name',
+  //   //   },
+  //   //   {
+  //   //     id: '5',
+  //   //     name: 'Markas and Registration Fee Determine',
+  //   //     route: '/board-info/maskas-registration-fee-determine',
+  //   //   },
+  //   // ],
+  // },
   {
     id: '7',
     name: 'Darul Ikama',
@@ -340,11 +340,11 @@ export const menuData = [
         name: 'Delete Edit Record',
         route: '/accounting/delete-edit-record',
       },
-      {
-        id: '9',
-        name: 'Student Admission',
-        route: '/accounting/student-admission',
-      },
+      // {
+      //   id: '9',
+      //   name: 'Student Admission',
+      //   route: '/accounting/student-admission',
+      // },
     ],
   },
   {

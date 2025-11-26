@@ -21,13 +21,13 @@ import {
   useGetStudentFeeIncreaseDecreaseQuery,
   useGetStudentOthersMonthFeesQuery,
   useGetSubLedgersByGLIDQuery,
-  usePostStudentFeeCollectionMutation
+  usePostStudentFeeCollectionMutation,
 } from '../../../features/feeCollection/feeCollectionSlice';
 import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
 import {
   clearStudentFeeData,
   clearStudentMonthFeeListsData,
-  setStudentFeeSessionID
+  setStudentFeeSessionID,
 } from '../../../features/settings/settingsSlice';
 import {
   setFilteredSelectedPerStudentFee,
@@ -43,6 +43,8 @@ import SMSLogo from '/smslogo.png';
 import SubmitLoading from '../../../components/Loading/SubmitLoading';
 import { useGetSettingsQuery } from '../../../features/settings/settingsQuerySlice';
 import MonthlyFeeCollectionTable from '../../../view/accounting/student-fee-collection/MonthlyFeeCollectionTable';
+import { permissionsDataList } from '../../../Data/permissions';
+import { ViewPermission } from '../../../Routes/ViewPermission';
 
 const CreateStudentFee = () => {
   const defaultSessionId = useDefaultSession();
@@ -161,9 +163,6 @@ const CreateStudentFee = () => {
     }
   );
 
-
-
-
   useEffect(() => {
     if (isErrorSFDD) {
       Swal.fire({
@@ -264,8 +263,6 @@ const CreateStudentFee = () => {
   useEffect(() => {
     setStudentFeeDataAll(studentFeeData);
   }, [studentFeeData]);
-
-
 
   // Dispatch whenever it changes
   useEffect(() => {
@@ -1068,12 +1065,17 @@ const CreateStudentFee = () => {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex gap-4">
-                <Button
-                  type="submit"
-                  className="px-8 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition"
+                <ViewPermission
+                  permissionId={permissionsDataList.collect_student_fee}
+                  permissionType="insert"
                 >
-                  Save
-                </Button>
+                  <Button
+                    type="submit"
+                    className="px-8 py-3 bg-green-600 text-white text-lg font-semibold rounded-lg hover:bg-green-700 transition"
+                  >
+                    Save
+                  </Button>
+                </ViewPermission>
 
                 <Button
                   type="button"

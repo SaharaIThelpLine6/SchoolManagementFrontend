@@ -1,21 +1,23 @@
-import { FormProvider, useForm } from "react-hook-form";
-import DefaultSelect from "../components/Forms/DefaultSelect";
-import { useGetSessionsQuery } from "../features/session/sessionSlice";
-import useTranslate from "../utils/Translate";
+import { FormProvider, useForm } from 'react-hook-form';
+import DefaultSelect from '../components/Forms/DefaultSelect';
+import { useGetSessionsQuery } from '../features/session/sessionSlice';
+import useTranslate from '../utils/Translate';
 
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import Swal from "sweetalert2";
-import Button from "../components/Button/Button";
-import SvgIcon from "../components/icons/SvgIcon";
-import { fetchClassData } from "../features/class/classSlice";
+import { useCallback, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import Swal from 'sweetalert2';
+import Button from '../components/Button/Button';
+import SvgIcon from '../components/icons/SvgIcon';
+import { permissionsDataList } from '../Data/permissions';
+import { fetchClassData } from '../features/class/classSlice';
 import {
   useGetSubLedgerQuery,
   usePostStudentFeeSettingsMutation,
-} from "../features/feeCollection/feeCollectionSlice";
-import { showModal } from "../utils/ModalControlar";
-import FeeMatrix from "../view/accounting/FeeMatrix";
-import FeeSettingTable from "../view/accounting/FeeSettingTable";
+} from '../features/feeCollection/feeCollectionSlice';
+import { ViewPermission } from '../Routes/ViewPermission';
+import { showModal } from '../utils/ModalControlar';
+import FeeMatrix from '../view/accounting/FeeMatrix';
+import FeeSettingTable from '../view/accounting/FeeSettingTable';
 
 const FeeSetting = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -24,17 +26,17 @@ const FeeSetting = ({ pageTitle }) => {
   const { watch, handleSubmit, reset } = methods;
   // State initialization
   const initialStudentState = {
-    residential: { new: false, old: false, newAmount: "", oldAmount: "" },
-    nonResidential: { new: false, old: false, newAmount: "", oldAmount: "" },
-    dayCare: { new: false, old: false, newAmount: "", oldAmount: "" },
+    residential: { new: false, old: false, newAmount: '', oldAmount: '' },
+    nonResidential: { new: false, old: false, newAmount: '', oldAmount: '' },
+    dayCare: { new: false, old: false, newAmount: '', oldAmount: '' },
   };
 
   const [studentData, setStudentData] = useState(initialStudentState);
   const [studentFemaleData, setStudentFemaleData] =
     useState(initialStudentState);
-  const [amounts, setAmounts] = useState({ male: "", female: "" });
+  const [amounts, setAmounts] = useState({ male: '', female: '' });
 
-  const [SessionID, ClassID, SLID] = watch(["SessionID", "ClassID", "SLID"]);
+  const [SessionID, ClassID, SLID] = watch(['SessionID', 'ClassID', 'SLID']);
   const [filter, setFilter] = useState({
     sessionId: SessionID,
     classId: ClassID,
@@ -52,7 +54,7 @@ const FeeSetting = ({ pageTitle }) => {
   const { data: subLedgerData } = useGetSubLedgerQuery(101);
   const [postStudentFeeSettings] = usePostStudentFeeSettingsMutation();
 
-  console.log(editData, "data");
+  console.log(editData, 'data');
   useEffect(() => {
     if (!classList.length) {
       dispatch(fetchClassData());
@@ -72,20 +74,20 @@ const FeeSetting = ({ pageTitle }) => {
         residential: {
           new: true,
           old: true,
-          newAmount: editData.MaleAbaNew || "",
-          oldAmount: editData.MaleAbaOld || "",
+          newAmount: editData.MaleAbaNew || '',
+          oldAmount: editData.MaleAbaOld || '',
         },
         nonResidential: {
           new: true,
           old: true,
-          newAmount: editData.MaleOnaNew || "",
-          oldAmount: editData.MaleOnaOld || "",
+          newAmount: editData.MaleOnaNew || '',
+          oldAmount: editData.MaleOnaOld || '',
         },
         dayCare: {
           new: true,
           old: true,
-          newAmount: editData.MaleDayNew || "",
-          oldAmount: editData.MaleDayOld || "",
+          newAmount: editData.MaleDayNew || '',
+          oldAmount: editData.MaleDayOld || '',
         },
       });
 
@@ -94,26 +96,26 @@ const FeeSetting = ({ pageTitle }) => {
         residential: {
           new: true,
           old: true,
-          newAmount: editData.FemaleAbaNew || "",
-          oldAmount: editData.FemaleAbaOld || "",
+          newAmount: editData.FemaleAbaNew || '',
+          oldAmount: editData.FemaleAbaOld || '',
         },
         nonResidential: {
           new: true,
           old: true,
-          newAmount: editData.FemaleOnaNew || "",
-          oldAmount: editData.FemaleOnaOld || "",
+          newAmount: editData.FemaleOnaNew || '',
+          oldAmount: editData.FemaleOnaOld || '',
         },
         dayCare: {
           new: true,
           old: true,
-          newAmount: editData.FemaleDayNew || "",
-          oldAmount: editData.FemaleDayOld || "",
+          newAmount: editData.FemaleDayNew || '',
+          oldAmount: editData.FemaleDayOld || '',
         },
       });
 
       setAmounts({
-        male: editData.MaleAbaNew || "",
-        female: editData.FemaleAbaNew || "",
+        male: editData.MaleAbaNew || '',
+        female: editData.FemaleAbaNew || '',
       });
     }
   }, [editData, reset]);
@@ -127,7 +129,7 @@ const FeeSetting = ({ pageTitle }) => {
   }, [SessionID, ClassID, SLID]);
 
   const onSubmit = async (data) => {
-    console.log(data, "data");
+    console.log(data, 'data');
     const payload = {
       SessionID: filter.sessionId,
       SLID: filter.SLID, // <- এখানে 10105 হার্ডকোড করার দরকার নাই
@@ -136,54 +138,53 @@ const FeeSetting = ({ pageTitle }) => {
     };
 
     const emptyFields = Object.entries(payload).filter(
-      ([key, value]) => value === null || value === "" || value === undefined
+      ([key, value]) => value === null || value === '' || value === undefined
     );
     // console.log(payload, "payload");
 
     if (emptyFields.length > 0) {
       Swal.fire({
-        icon: "error",
-        title: "ত্রুটি!",
-        text: "সব ফিল্ড পূরণ করুন।",
-        confirmButtonText: "ঠিক আছে",
+        icon: 'error',
+        title: 'ত্রুটি!',
+        text: 'সব ফিল্ড পূরণ করুন।',
+        confirmButtonText: 'ঠিক আছে',
       });
       return;
     }
-
 
     try {
       if (editData) {
         await postStudentFeeSettings(payload).unwrap();
 
         Swal.fire({
-          icon: "success",
-          title: "সফলভাবে সংরক্ষণ হয়েছে!",
-          text: "ফি ম্যাট্রিক্স ডাটাবেসে যোগ হয়েছে।",
-          confirmButtonText: "ঠিক আছে",
+          icon: 'success',
+          title: 'সফলভাবে সংরক্ষণ হয়েছে!',
+          text: 'ফি ম্যাট্রিক্স ডাটাবেসে যোগ হয়েছে।',
+          confirmButtonText: 'ঠিক আছে',
         });
 
         // ✅ form reset with empty values
         reset({
-          SessionID: "",
-          ClassID: "",
-          SLID: "",
+          SessionID: '',
+          ClassID: '',
+          SLID: '',
         });
 
         // ✅ state গুলো initial এ ফিরিয়ে দেওয়া
         setEditId(null);
         setStudentData(initialStudentState);
         setStudentFemaleData(initialStudentState);
-        setAmounts({ male: "", female: "" });
+        setAmounts({ male: '', female: '' });
         setFeeMatrixData(null);
         setEditData(null);
       } else {
         await postStudentFeeSettings(payload).unwrap();
 
         Swal.fire({
-          icon: "success",
-          title: "সফলভাবে সংরক্ষণ হয়েছে!",
-          text: "ফি ম্যাট্রিক্স ডাটাবেসে যোগ হয়েছে।",
-          confirmButtonText: "ঠিক আছে",
+          icon: 'success',
+          title: 'সফলভাবে সংরক্ষণ হয়েছে!',
+          text: 'ফি ম্যাট্রিক্স ডাটাবেসে যোগ হয়েছে।',
+          confirmButtonText: 'ঠিক আছে',
         });
 
         // ✅ form reset with empty values
@@ -196,35 +197,35 @@ const FeeSetting = ({ pageTitle }) => {
         // ✅ state গুলো initial এ ফিরিয়ে দেওয়া
         setStudentData(initialStudentState);
         setStudentFemaleData(initialStudentState);
-        setAmounts({ male: "", female: "" });
+        setAmounts({ male: '', female: '' });
         setFeeMatrixData(null);
         setEditData(null);
       }
     } catch (error) {
       Swal.fire({
-        icon: "error",
-        title: "ত্রুটি!",
-        text: error?.data?.message || "কিছু ভুল হয়েছে, আবার চেষ্টা করুন।",
-        confirmButtonText: "ঠিক আছে",
+        icon: 'error',
+        title: 'ত্রুটি!',
+        text: error?.data?.message || 'কিছু ভুল হয়েছে, আবার চেষ্টা করুন।',
+        confirmButtonText: 'ঠিক আছে',
       });
     }
   };
 
   const handleReset = () => {
     reset({
-      SessionID: "",
-      ClassID: "",
-      SLID: "",
+      SessionID: '',
+      ClassID: '',
+      SLID: '',
     });
     setStudentData(initialStudentState);
     setStudentFemaleData(initialStudentState);
-    setAmounts({ male: "", female: "" });
+    setAmounts({ male: '', female: '' });
     setFeeMatrixData(null);
     setEditData(null);
   };
   const handleStudentFeeGroup = useCallback(() => {
-    console.log("ewafrgurig");
-    showModal("Student Fee Group", "STUDENT_FEE_GROUP");
+    console.log('ewafrgurig');
+    showModal('Student Fee Group', 'STUDENT_FEE_GROUP');
   }, []);
   return (
     <>
@@ -243,11 +244,11 @@ const FeeSetting = ({ pageTitle }) => {
                   <div className="flex-1">
                     <DefaultSelect
                       options={sessionData || []}
-                      require={"Session is required"}
-                      nameField={"SessionName"}
-                      valueField={"SessionID"}
-                      registerKey={"SessionID"}
-                      type={"number"}
+                      require={'Session is required'}
+                      nameField={'SessionName'}
+                      valueField={'SessionID'}
+                      registerKey={'SessionID'}
+                      type={'number'}
                       label="Session"
                     />
                   </div>
@@ -265,11 +266,11 @@ const FeeSetting = ({ pageTitle }) => {
                   <div className="flex-1">
                     <DefaultSelect
                       options={classList ?? []}
-                      nameField={"ClassName"}
-                      valueField={"ClassID"}
-                      registerKey={"ClassID"}
-                      type={"number"}
-                      label={"Class"}
+                      nameField={'ClassName'}
+                      valueField={'ClassID'}
+                      registerKey={'ClassID'}
+                      type={'number'}
+                      label={'Class'}
                       unicode={true}
                     />
                   </div>
@@ -287,11 +288,11 @@ const FeeSetting = ({ pageTitle }) => {
                   <div className="flex-1">
                     <DefaultSelect
                       options={subLedgerData || []}
-                      require={"Sub Ledger is required"}
-                      nameField={"SlName"}
-                      valueField={"SLID"}
-                      registerKey={"SLID"}
-                      label={"Sub Ledger (Fee Name)"}
+                      require={'Sub Ledger is required'}
+                      nameField={'SlName'}
+                      valueField={'SLID'}
+                      registerKey={'SLID'}
+                      label={'Sub Ledger (Fee Name)'}
                       unicode={true}
                     />
                   </div>
@@ -324,7 +325,12 @@ const FeeSetting = ({ pageTitle }) => {
               >
                 Reset
               </Button>
-              <Button type="submit">Save</Button>
+              <ViewPermission
+                permissionId={permissionsDataList.fee_setting}
+                permissionType="insert"
+              >
+                <Button type="submit">Save</Button>
+              </ViewPermission>
             </div>
           </form>
         </FormProvider>

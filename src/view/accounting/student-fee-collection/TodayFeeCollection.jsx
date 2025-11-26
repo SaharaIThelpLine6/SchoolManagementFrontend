@@ -10,9 +10,14 @@ import Loading from '../../../components/Loading/Loading';
 import DefaultPagination from '../../../components/Pagination/DefaultPagination';
 import RadioOption from '../../../components/Radio/RadioOption';
 import SortableTable from '../../../components/Tables/SortableTable';
+import { permissionsDataList } from '../../../Data/permissions';
 import { setPageName } from '../../../features/auth/authSlice';
-import { useGetStudentCompleteFeeFilterQuery, useGetStudentFeeUpdateGetDataByUFOIDQuery } from '../../../features/feeCollection/feeCollectionSlice';
+import {
+  useGetStudentCompleteFeeFilterQuery,
+  useGetStudentFeeUpdateGetDataByUFOIDQuery,
+} from '../../../features/feeCollection/feeCollectionSlice';
 import { setStudentFeeUpdateID } from '../../../features/student/studentSlice';
+import { ViewPermission } from '../../../Routes/ViewPermission';
 import useTranslate from '../../../utils/Translate';
 import StudentFeeReportPdf from './StudentFeeReportPdf';
 
@@ -62,8 +67,6 @@ const TodayFeeCollection = ({ pageTitle }) => {
   const tableData = result?.data || [];
   const todayCollection = result?.todayCollection || 0;
   const userCollection = result?.userCollection || 0;
-
-
 
   // 🔹 Set page title
   useEffect(() => {
@@ -119,27 +122,26 @@ const TodayFeeCollection = ({ pageTitle }) => {
     dispatch(setStudentFeeUpdateID(UFOID));
   };
 
-const handlePrintOpenModal = (UFOID) => {
-  // Reset first so that next click always triggers
-  setPrintID(null);
+  const handlePrintOpenModal = (UFOID) => {
+    // Reset first so that next click always triggers
+    setPrintID(null);
 
-  // Small delay to allow state reset
-  setTimeout(() => {
-    setPrintID(UFOID);
-  }, 50);
-};
+    // Small delay to allow state reset
+    setTimeout(() => {
+      setPrintID(UFOID);
+    }, 50);
+  };
 
-useEffect(() => {
-  if (printID !== null) {
-    if (singleResult) {
-      const timer = setTimeout(() => {
-        window.print();
-      }, 700);
-      return () => clearTimeout(timer);
+  useEffect(() => {
+    if (printID !== null) {
+      if (singleResult) {
+        const timer = setTimeout(() => {
+          window.print();
+        }, 700);
+        return () => clearTimeout(timer);
+      }
     }
-  }
-}, [printID, singleResult]);
-
+  }, [printID, singleResult]);
 
   // 🔹 Table columns
   const columns = [
@@ -149,8 +151,14 @@ useEffect(() => {
       hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          {' '}
-          <EditButton onClick={() => handleEditOpenModal(row.UFOID)} />
+          <ViewPermission
+            permissionId={permissionsDataList.collect_student_fee}
+            permissionType="edit"
+            empty={true}
+          >
+            <EditButton onClick={() => handleEditOpenModal(row.UFOID)} />
+          </ViewPermission>
+
           <div className="">
             <button
               onClick={() => handlePrintOpenModal(row.UFOID)}

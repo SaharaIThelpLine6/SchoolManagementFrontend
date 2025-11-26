@@ -27,9 +27,6 @@ import AddStudent from '../pages/AddStudent';
 import AddTeacher from '../pages/AddTeacher';
 import AllMadrasah from '../pages/AllMadrasah';
 import BalanceTransfer from '../pages/BalanceTransfer';
-import BoardCenterName from '../pages/BoardCenterName';
-import BoardExamName from '../pages/BoardExamName';
-import BoardNames from '../pages/BoardNames';
 import Book from '../pages/Book';
 import BulkImage from '../pages/BulkImage';
 import CellfinPaymentConfirm from '../pages/CellfinPaymentConfirm';
@@ -57,7 +54,6 @@ import FeeSetting from '../pages/FeeSetting';
 import GroupDistribution from '../pages/GroupDistribution';
 import Home from '../pages/Home';
 import InstitutionInfo from '../pages/InstitutionInfo';
-import MadrasahBoardInfo from '../pages/MadrasahBoardInfo';
 import MonthListTable from '../pages/MonthListTable';
 import MonthlyDues from '../pages/MonthlyDues';
 import OnlineAdmissionTable from '../pages/OnlineAdmissionTable';
@@ -75,7 +71,6 @@ import SMS from '../pages/SMS';
 import Section from '../pages/Section';
 import Session from '../pages/Session';
 import Settings from '../pages/Settings';
-import StudentAdmission from '../pages/StudentAdmission';
 import StudentGroupCreate from '../pages/StudentGroupCreate';
 import StudentsFeeCollection from '../pages/StudentsFeeCollection';
 import StudentsReport from '../pages/StudentsReport';
@@ -525,58 +520,58 @@ const router = createBrowserRouter([
 
           {
             path: 'board-info',
-            children: [
-              {
-                index: true,
-                element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.certificate}
-                  // >
-                  // </RequirePermission>
-                  <MadrasahBoardInfo pageTitle="Board Exam" />
-                ),
-              },
-              {
-                path: 'exam-name',
-                element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.gate_pass_leave}
-                  // >
-                  <BoardExamName pageTitle="Board Exam Name" />
-                  // </RequirePermission>
-                ),
-              },
-              {
-                path: 'name',
-                element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.gate_pass_leave}
-                  // >
-                  <BoardNames pageTitle="Board Name" />
-                  // </RequirePermission>
-                ),
-              },
-              {
-                path: 'center-name',
-                element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.gate_pass_leave}
-                  // >
-                  <BoardCenterName pageTitle="Board Name" />
-                  // </RequirePermission>
-                ),
-              },
-              {
-                path: 'maskas-registration-fee-determine',
-                element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.gate_pass_leave}
-                  // >
-                  <BoardCenterName pageTitle="Board Name" />
-                  // </RequirePermission>
-                ),
-              },
-            ],
+            // children: [
+            //   {
+            //     index: true,
+            //     element: (
+            //       // <RequirePermission
+            //       //   permissionId={permissionsDataList.certificate}
+            //       // >
+            //       // </RequirePermission>
+            //       <MadrasahBoardInfo pageTitle="Board Exam" />
+            //     ),
+            //   },
+            //   {
+            //     path: 'exam-name',
+            //     element: (
+            //       // <RequirePermission
+            //       //   permissionId={permissionsDataList.gate_pass_leave}
+            //       // >
+            //       <BoardExamName pageTitle="Board Exam Name" />
+            //       // </RequirePermission>
+            //     ),
+            //   },
+            //   {
+            //     path: 'name',
+            //     element: (
+            //       // <RequirePermission
+            //       //   permissionId={permissionsDataList.gate_pass_leave}
+            //       // >
+            //       <BoardNames pageTitle="Board Name" />
+            //       // </RequirePermission>
+            //     ),
+            //   },
+            //   {
+            //     path: 'center-name',
+            //     element: (
+            //       // <RequirePermission
+            //       //   permissionId={permissionsDataList.gate_pass_leave}
+            //       // >
+            //       <BoardCenterName pageTitle="Board Name" />
+            //       // </RequirePermission>
+            //     ),
+            //   },
+            //   {
+            //     path: 'maskas-registration-fee-determine',
+            //     element: (
+            //       // <RequirePermission
+            //       //   permissionId={permissionsDataList.gate_pass_leave}
+            //       // >
+            //       <BoardCenterName pageTitle="Board Name" />
+            //       // </RequirePermission>
+            //     ),
+            //   },
+            // ],
           },
 
           {
@@ -586,7 +581,7 @@ const router = createBrowserRouter([
                 index: true,
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.certificate}
+                    permissionId={permissionsDataList.student_report}
                   >
                     <CharacterReport pageTitle="Character Report" />
                   </RequirePermission>
@@ -610,21 +605,21 @@ const router = createBrowserRouter([
               {
                 index: true,
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.fee_setting}
-                  // >
-                  <DepositCosts pageTitle="Deposit Costs" />
-                  // </RequirePermission>
+                  <RequirePermission
+                    permissionId={permissionsDataList.income_expense}
+                  >
+                    <DepositCosts pageTitle="Deposit Costs" />
+                  </RequirePermission>
                 ),
               },
               {
                 path: 'income-expense-report',
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.fee_setting}
-                  // >
-                  <DepositCostsReport pageTitle="Deposit Costs Report" />
-                  // </RequirePermission>
+                  <RequirePermission
+                    permissionId={permissionsDataList.income_expense_report}
+                  >
+                    <DepositCostsReport pageTitle="Deposit Costs Report" />
+                  </RequirePermission>
                 ),
               },
               {
@@ -640,73 +635,74 @@ const router = createBrowserRouter([
               {
                 path: 'student-fee-collection',
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.st}
-                  // >
-                  <StudentsFeeCollection pageTitle="Student Fee Collection" />
-                  // </RequirePermission>
-                ),
-              },
-              {
-                path: 'student-admission',
-                element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.st}
-                  // >
-                  <StudentAdmission pageTitle="Student Fee Collection" />
-                  // </RequirePermission>
+                  <RequirePermission
+                    permissionId={permissionsDataList.collect_student_fee}
+                  >
+                    <StudentsFeeCollection pageTitle="Student Fee Collection" />
+                  </RequirePermission>
                 ),
               },
               {
                 path: 'dues-list',
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.st}
-                  // >
-                  <DoesList pageTitle="Dues List" />
-                  // </RequirePermission>
+                  <RequirePermission
+                    permissionId={permissionsDataList.due_list}
+                  >
+                    <DoesList pageTitle="Dues List" />
+                  </RequirePermission>
                 ),
               },
               {
                 path: 'monthly-dues',
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.st}
-                  // >
-                  <MonthlyDues pageTitle="Month Dues List" />
-                  // </RequirePermission>
+                  <RequirePermission
+                    permissionId={permissionsDataList.monthly_due_list}
+                  >
+                    <MonthlyDues pageTitle="Month Dues List" />
+                    //{' '}
+                  </RequirePermission>
                 ),
               },
               {
                 path: 'fee-collection-report',
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.st}
-                  // >
-                  <FeeCollectionReport pageTitle="Fee Collection Report" />
-                  // </RequirePermission>
+                  <RequirePermission
+                    permissionId={permissionsDataList.transaction_report}
+                  >
+                    <FeeCollectionReport pageTitle="Fee Collection Report" />
+                  </RequirePermission>
                 ),
               },
               {
                 path: 'balance-transfer',
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.st}
-                  // >
-                  <BalanceTransfer pageTitle="Balance Transfer" />
-                  // </RequirePermission>
+                  <RequirePermission
+                    permissionId={permissionsDataList.balance_transfer}
+                  >
+                    <BalanceTransfer pageTitle="Balance Transfer" />
+                  </RequirePermission>
                 ),
               },
               {
                 path: 'delete-edit-record',
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.st}
-                  // >
-                  <DeleteEditRecord pageTitle="Delete Edit Record" />
-                  // </RequirePermission>
+                  <RequirePermission
+                    permissionId={permissionsDataList.user_transaction}
+                  >
+                    <DeleteEditRecord pageTitle="Delete Edit Record" />
+                  </RequirePermission>
                 ),
               },
+              // {
+              //   path: 'student-admission',
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.due_list}
+              //     >
+              //       <StudentAdmission pageTitle="Student Fee Collection" />
+              //     </RequirePermission>
+              //   ),
+              // },
             ],
           },
           {

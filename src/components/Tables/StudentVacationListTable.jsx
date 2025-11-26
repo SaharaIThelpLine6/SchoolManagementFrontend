@@ -1,25 +1,27 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setPageName } from "../../features/auth/authSlice";
-import SortableTable from "../../components/Tables/SortableTable";
-import Swal from "sweetalert2";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import Swal from 'sweetalert2';
+import SortableTable from '../../components/Tables/SortableTable';
+import { setPageName } from '../../features/auth/authSlice';
 
-import useTranslate from "../../utils/Translate";
-import { showModal } from "../../utils/ModalControlar";
+import Loading from '../../components/Loading/Loading';
+import { permissionsDataList } from '../../Data/permissions';
+import { fetchSettingsData } from '../../features/settings/settingsSlice';
 import {
   useDeleteStudentsVacationMutation,
   useGetStudentsVacationListQuery,
-} from "../../features/student/studentQuerySlice";
-import Button from "../Button/Button";
-import Print from "./Print";
-import { formatTime } from "../../helper/formatTime";
-import { fetchSettingsData } from "../../features/settings/settingsSlice";
-import bnBijoy2Unicode from "../../utils/conveter";
-import EditButton from "../Button/EditButton";
-import DeleteButton from "../Button/DeleteButton";
-import Loading from "../../components/Loading/Loading";
-import SvgIcon from "../icons/SvgIcon";
-import DefaultPagination from "../Pagination/DefaultPagination";
+} from '../../features/student/studentQuerySlice';
+import { formatTime } from '../../helper/formatTime';
+import { ViewPermission } from '../../Routes/ViewPermission';
+import bnBijoy2Unicode from '../../utils/conveter';
+import { showModal } from '../../utils/ModalControlar';
+import useTranslate from '../../utils/Translate';
+import Button from '../Button/Button';
+import DeleteButton from '../Button/DeleteButton';
+import EditButton from '../Button/EditButton';
+import SvgIcon from '../icons/SvgIcon';
+import DefaultPagination from '../Pagination/DefaultPagination';
+import Print from './Print';
 
 const StudentVacationListTable = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -58,10 +60,10 @@ const StudentVacationListTable = ({ pageTitle }) => {
         return {
           ...vacation,
           // Flatten user properties
-          UserCode: vacation.User?.UserCode || "N/A",
-          UserName: vacation.User?.UserName || "N/A",
+          UserCode: vacation.User?.UserCode || 'N/A',
+          UserName: vacation.User?.UserName || 'N/A',
           // Add session name
-          sessionName: session?.SessionName || "N/A",
+          sessionName: session?.SessionName || 'N/A',
           // Remove the nested User object if you want
           ...(vacation.User && { User: undefined }), // Optional: remove nested object
         };
@@ -102,42 +104,40 @@ const StudentVacationListTable = ({ pageTitle }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-
-
   const handleDelete = useCallback(
     (id) => {
-      console.log(id, "id")
+      console.log(id, 'id');
       Swal.fire({
-        title: translate("Are you sure?"),
+        title: translate('Are you sure?'),
         text: translate(
-          "This action will permanently delete the student vacation."
+          'This action will permanently delete the student vacation.'
         ),
-        icon: "warning",
+        icon: 'warning',
         showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: translate("Yes, delete it!"),
-        cancelButtonText: translate("Cancel"),
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: translate('Yes, delete it!'),
+        cancelButtonText: translate('Cancel'),
       }).then(async (result) => {
         if (result.isConfirmed) {
           try {
             await deleteStudentsVacation(id).unwrap();
 
             Swal.fire({
-              icon: "success",
-              title: translate("Deleted!"),
-              text: translate("The record has been removed."),
-              confirmButtonColor: "#3085d6",
-              confirmButtonText: translate("OK"),
+              icon: 'success',
+              title: translate('Deleted!'),
+              text: translate('The record has been removed.'),
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: translate('OK'),
             });
 
             // ✅ এখানে চাইলে refetch বা state update করতে পারো
           } catch (err) {
             Swal.fire({
-              icon: "error",
-              title: translate("Error!"),
-              text: translate("Failed to delete the record."),
-              confirmButtonColor: "#3085d6",
+              icon: 'error',
+              title: translate('Error!'),
+              text: translate('Failed to delete the record.'),
+              confirmButtonColor: '#3085d6',
             });
             console.error(err);
           }
@@ -148,14 +148,14 @@ const StudentVacationListTable = ({ pageTitle }) => {
   );
 
   const handleOpenModal = useCallback(() => {
-    showModal(translate("Create Student Vacation Info"), "ADD_STUDENTVACATION");
+    showModal(translate('Create Student Vacation Info'), 'ADD_STUDENTVACATION');
   }, [translate]);
 
   const handleEditOpenModal = useCallback(
     (id) => {
       showModal(
-        translate("Update Student Vacation Info"),
-        "EDIT_STUDENTVACATION",
+        translate('Update Student Vacation Info'),
+        'EDIT_STUDENTVACATION',
         id
       );
     },
@@ -166,108 +166,120 @@ const StudentVacationListTable = ({ pageTitle }) => {
 
   if (studentsVacationListError) {
     Swal.fire({
-      icon: "error",
-      title: translate("Failed to load student vacation list"),
-      text: translate("Please try again later."),
-      confirmButtonColor: "#d33",
-      confirmButtonText: translate("OK"),
+      icon: 'error',
+      title: translate('Failed to load student vacation list'),
+      text: translate('Please try again later.'),
+      confirmButtonColor: '#d33',
+      confirmButtonText: translate('OK'),
     });
     return null;
   }
 
   const columns = [
     {
-      title: translate("Action"),
-      field: "ID",
-      hozAlign: "center",
+      title: translate('Action'),
+      field: 'ID',
+      hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <EditButton onClick={() => handleEditOpenModal(row.ID)} />
-          <DeleteButton onClick={() => handleDelete(row.ID)} />
+          <ViewPermission
+            permissionId={permissionsDataList.gate_pass_leave}
+            permissionType="edit"
+            empty={true}
+          >
+            <EditButton onClick={() => handleEditOpenModal(row.ID)} />
+          </ViewPermission>
+          <ViewPermission
+            permissionId={permissionsDataList.gate_pass_leave}
+            permissionType="delete"
+            empty={true}
+          >
+            <DeleteButton onClick={() => handleDelete(row.ID)} />
+          </ViewPermission>
 
           <button
             className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md"
-            title={translate("Print")}
+            title={translate('Print')}
             onClick={() => handlePrint(row.ID)}
           >
-            <SvgIcon name={"MdLocalPrintshop"} size={20} />
+            <SvgIcon name={'MdLocalPrintshop'} size={20} />
           </button>
         </div>
       ),
     },
     {
-      title: translate("User Code"), // User Code in Bengali
-      field: "UserCode",
-      hozAlign: "center",
+      title: translate('User Code'), // User Code in Bengali
+      field: 'UserCode',
+      hozAlign: 'center',
       filterable: true,
-      type: "text",
+      type: 'text',
     },
     {
-      title: translate("Student Name"),
-      field: "UserName",
-      hozAlign: "center",
+      title: translate('Student Name'),
+      field: 'UserName',
+      hozAlign: 'center',
       filterable: true,
-      type: "text",
+      type: 'text',
       render: (row) => <p>{bnBijoy2Unicode(row.UserName)}</p>,
     },
     {
-      title: translate("Class/Jamaat"),
-      field: "ClassName",
-      hozAlign: "center",
+      title: translate('Class/Jamaat'),
+      field: 'ClassName',
+      hozAlign: 'center',
       render: (row) => <p>{row.AcademicClass?.ClassName}</p>,
     },
     {
-      title: translate("Vacation Type"),
-      field: "VacationType.VacationList",
-      hozAlign: "center",
+      title: translate('Vacation Type'),
+      field: 'VacationType.VacationList',
+      hozAlign: 'center',
       render: (row) => <p>{row.VacationType?.VacationList}</p>,
     },
     {
-      title: translate("From Date"),
-      field: "VacationDateFrom",
-      hozAlign: "center",
+      title: translate('From Date'),
+      field: 'VacationDateFrom',
+      hozAlign: 'center',
       formatter: (cell) =>
-        new Date(cell.getValue()).toLocaleDateString("bn-BD"),
+        new Date(cell.getValue()).toLocaleDateString('bn-BD'),
     },
     {
-      title: translate("Up to date"),
-      field: "VacationDateTo",
-      hozAlign: "center",
+      title: translate('Up to date'),
+      field: 'VacationDateTo',
+      hozAlign: 'center',
       formatter: (cell) =>
-        new Date(cell.getValue()).toLocaleDateString("bn-BD"),
+        new Date(cell.getValue()).toLocaleDateString('bn-BD'),
     },
     {
-      title: translate("From Time"),
-      field: "VacationTimeFrom",
-      hozAlign: "center",
+      title: translate('From Time'),
+      field: 'VacationTimeFrom',
+      hozAlign: 'center',
       render: (row) => {
         return formatTime(row.VacationTimeFrom);
       },
     },
     {
-      title: translate("Be Time"),
-      field: "VacationTimeTo",
-      hozAlign: "center",
+      title: translate('Be Time'),
+      field: 'VacationTimeTo',
+      hozAlign: 'center',
       render: (row) => {
         return formatTime(row.VacationTimeTo);
       },
     },
     {
-      title: translate("Session"),
-      field: "sessionName",
-      hozAlign: "center",
-      formatter: (cell) => cell.getValue() || "-",
+      title: translate('Session'),
+      field: 'sessionName',
+      hozAlign: 'center',
+      formatter: (cell) => cell.getValue() || '-',
       filterable: true,
-      type: "text",
+      type: 'text',
       // options: academicSession.map((session) => ({
       //   value: session.SessionID,
       //   label: session.SessionName,
       // })),
     },
     {
-      title: translate("Comment"),
-      field: "Comment",
-      hozAlign: "center",
+      title: translate('Comment'),
+      field: 'Comment',
+      hozAlign: 'center',
       render: (row) => (
         <div className="w-[200px] whitespace-pre-wrap">
           <p>{row.Comment}</p>
@@ -275,9 +287,9 @@ const StudentVacationListTable = ({ pageTitle }) => {
       ),
     },
     {
-      title: translate("UserHolidayNo"),
-      field: "UserHolidayNo",
-      hozAlign: "center",
+      title: translate('UserHolidayNo'),
+      field: 'UserHolidayNo',
+      hozAlign: 'center',
     },
   ];
 
@@ -290,14 +302,19 @@ const StudentVacationListTable = ({ pageTitle }) => {
               <div className="flex justify-between w-full gap-5 sm:gap-0 items-center">
                 {/* Left Buttons */}
                 <h3 className="font-SolaimanLipi text-[20px] font-bold">
-                  {translate("List of holidays")}
+                  {translate('List of holidays')}
                 </h3>
-                <Button
-                  onClick={handleOpenModal}
-                  className="bg-[#007af7] text-white hover:bg-blue-600"
+                <ViewPermission
+                  permissionId={permissionsDataList.gate_pass_leave}
+                  permissionType="insert"
                 >
-                  {translate("Create Vacation")}
-                </Button>
+                  <Button
+                    onClick={handleOpenModal}
+                    className="bg-[#007af7] text-white hover:bg-blue-600"
+                  >
+                    {translate('Create Vacation')}
+                  </Button>
+                </ViewPermission>
               </div>
             </div>
           </div>
