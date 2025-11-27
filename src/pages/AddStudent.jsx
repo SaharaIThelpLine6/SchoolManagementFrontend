@@ -9,7 +9,9 @@ import { fetchUserOnlyStudentData } from '../features/student/studentSlice';
 // import { Modal } from "../components/ModalSettings";
 import 'flatpickr/dist/themes/light.css';
 import { FormProvider, useForm } from 'react-hook-form';
+import Button from '../components/Button/Button';
 import DropdownDefault from '../components/Dropdowns/DropdownDefault';
+import AdmissionForm from '../components/Forms/AdmissionForm';
 import DefaultInput from '../components/Forms/DefaultInput';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import Loading from '../components/Loading/Loading';
@@ -27,7 +29,7 @@ import useTranslate from '../utils/Translate';
 const AddStudent = ({ pageTitle }) => {
   const translate = useTranslate();
   const methods = useForm();
-  const { watch } = methods;
+  const { watch, setValue } = methods;
   const [FilterID, SessionID] = watch(['FilterID', 'SessionID']);
   console.log(FilterID, 'FilterID');
   const [selectedImage, setSelectedImage] = useState(null);
@@ -48,6 +50,7 @@ const AddStudent = ({ pageTitle }) => {
   const { data: subClassData } = useGetSubClassListQuery();
   const [selectedDateRange, setSelectedDateRange] = useState([]);
   const { data: studentList, error: studentListError } = useGetStudentQuery();
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -68,6 +71,12 @@ const AddStudent = ({ pageTitle }) => {
   // const handleFeeCollectionModal = useCallback((id) => {
   //   showModal("Fee Collection", "FEE_COLLECTION", id);
   // }, []);
+  useEffect(() => {
+    if (FilterID !== 4) {
+      setValue('SessionID', null);
+      setValue('SubClassID', null);
+    }
+  }, [FilterID]);
 
   useEffect(() => {
     if (filter == 2) {
@@ -373,7 +382,7 @@ const AddStudent = ({ pageTitle }) => {
     <FormProvider {...methods}>
       <div className="-translate-y-4 font-lato">
         <div className="block w-full overflow-x-auto">
-          <div className="filter_header border-b  border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
+          <div className="filter_header flex items-center justify-between px-5 py-5">
             <h3 className="font-SolaimanLipi text-[20px] font-bold ">
               {filter == 2
                 ? translate('Not Admitted Students List')
@@ -404,7 +413,8 @@ const AddStudent = ({ pageTitle }) => {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-5 mb-3 gap-3">
+          <AdmissionForm userId={1}/>
+          <div className="grid grid-cols-1 md:grid-cols-5 my-5 gap-3">
             <DefaultSelect
               label={translate('Filter')}
               labelPosition="left"
@@ -413,41 +423,86 @@ const AddStudent = ({ pageTitle }) => {
               nameField="name"
               registerKey="FilterID"
             />
+
+            {/* FilterID: 1 → User ID */}
             {Number(FilterID) === 1 && (
               <DefaultInput
                 registerKey="UserID"
                 placeholder="শিক্ষার্থীর আইডি লিখুন"
               />
             )}
+
+            {/* FilterID: 2 → User Name */}
             {Number(FilterID) === 2 && (
               <DefaultInput
-                registerKey="User Name"
+                registerKey="UserName"
                 placeholder="শিক্ষার্থীর নাম লিখুন"
               />
             )}
+
+            {/* FilterID: 3 → Mobile */}
             {Number(FilterID) === 3 && (
               <DefaultInput
                 registerKey="Mobile1"
                 placeholder="মোবাইল নাম্বার লিখুন"
               />
             )}
+
+            {/* FilterID: 4 → Session */}
             {Number(FilterID) === 4 && (
-              <DefaultSelect
-                options={sessionData ?? []}
-                valueField="SessionID"
-                nameField="SessionName"
-                registerKey="SessionID"
-              />
+              <>
+                <DefaultSelect
+                  options={sessionData ?? []}
+                  valueField="SessionID"
+                  nameField="SessionName"
+                  registerKey="SessionID"
+                />
+
+                {/* Session select করার পরই SubClass দেখাবো */}
+                {SessionID && Number(SessionID) > 0 && (
+                  <DefaultSelect
+                    options={subClassData ?? []}
+                    valueField="SubClassID"
+                    nameField="SubClass"
+                    registerKey="SubClassID"
+                    unicode
+                  />
+                )}
+              </>
             )}
-            {SessionID && Number(SessionID) > 0 && (
-              <DefaultSelect
-                options={subClassData ?? []}
-                valueField="SubClassID"
-                nameField="SubClass"
-                registerKey="SubClassID"
-                unicode
-              />
+            {/* FilterID: 6 → Session */}
+            {/* FilterID: 6 → Session */}
+            {Number(FilterID) === 6 && (
+              <>
+                {/* Session Select */}
+                <DefaultSelect
+                  options={sessionData ?? []}
+                  valueField="SessionID"
+                  nameField="SessionName"
+                  registerKey="SessionID"
+                />
+
+                {/* SessionID > 0 হলে SubClass দেখাবে */}
+                {SessionID && Number(SessionID) > 0 && (
+                  <>
+                    <DefaultSelect
+                      options={subClassData ?? []}
+                      valueField="SubClassID"
+                      nameField="SubClass"
+                      registerKey="SubClassID"
+                      unicode
+                    />
+
+                    {/* ❗ SubClassData থাকলেই Button দেখাবে */}
+                    {subClassData && subClassData.length > 0 && (
+                      <Button>{translate('Create')}</Button>
+                    )}
+                  </>
+                )}
+              </>
             )}
+
+            {/* FilterID: 5 → Only Class/Subclass */}
             {Number(FilterID) === 5 && (
               <DefaultSelect
                 options={subClassData ?? []}
@@ -458,6 +513,7 @@ const AddStudent = ({ pageTitle }) => {
               />
             )}
           </div>
+
           {studentList && studentList.data.length > 0 ? (
             <SortableTable
               columns={

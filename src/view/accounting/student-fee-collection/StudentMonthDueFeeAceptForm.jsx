@@ -66,7 +66,7 @@ console.log(filteredSelectedPerStudentFee, 'filteredSelectedPerStudentFee');
         sessionName: item.SessionName,
         classId: item.ClassID,
         amount: item.Fee || 0,
-        deduction: item.Less || 0,
+        deduction: 0,
         deposit: item.PreDeposite || 0,
         preDeposit: item.PreDeposite || 0,
         due: (item.Fee || 0) - (item.Less || 0) - (item.PreDeposite || 0),
