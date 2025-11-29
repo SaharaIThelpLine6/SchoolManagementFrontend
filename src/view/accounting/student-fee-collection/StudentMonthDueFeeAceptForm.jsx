@@ -51,7 +51,7 @@ const StudentMonthDueFeeAceptForm = () => {
         !filteredSelectedPerStudentFee?.AdmissionID || !monthFeeData?.monthId,
     }
   );
-console.log(filteredSelectedPerStudentFee, 'filteredSelectedPerStudentFee');
+  console.log(filteredSelectedPerStudentFee, 'filteredSelectedPerStudentFee');
   const feesData = monthDuePerStudent?.data || [];
 
   // ---------------- INITIALIZE FEES ----------------
@@ -101,39 +101,42 @@ console.log(filteredSelectedPerStudentFee, 'filteredSelectedPerStudentFee');
 
     return { deposit, due };
   }, []);
-const recalculateTotals = useCallback(
-  (currentFees = fees) => {
-    if (!currentFees || currentFees.length === 0) {
-      setValue('prescribedFee', 0);
-      setValue('deduction', 0);
-      setValue('currentDeposit', 0);
+  const recalculateTotals = useCallback(
+    (currentFees = fees) => {
+      if (!currentFees || currentFees.length === 0) {
+        setValue('prescribedFee', 0);
+        setValue('deduction', 0);
+        setValue('currentDeposit', 0);
+        setValue('eastCut', monthDuePerStudent?.totals?.totalLess || 0);
+        setValue(
+          'preDeposit',
+          monthDuePerStudent?.totals?.totalPreDeposite || 0
+        );
+        return;
+      }
+
+      let totalPrescribed = 0;
+      let totalDeduction = 0;
+      let totalDeposit = 0;
+
+      const updatedFees = currentFees.map((fee) => {
+        const { deposit, due } = recalcFee(fee);
+        totalPrescribed += Number(fee.amount || 0);
+        totalDeduction += Number(fee.deduction || 0);
+        totalDeposit += deposit;
+        return { ...fee, deposit, due };
+      });
+
+      setDefaultFees(updatedFees);
+      setValue('fees', updatedFees);
+      setValue('prescribedFee', totalPrescribed);
+      setValue('deduction', totalDeduction);
+      setValue('currentDeposit', totalDeposit);
       setValue('eastCut', monthDuePerStudent?.totals?.totalLess || 0);
       setValue('preDeposit', monthDuePerStudent?.totals?.totalPreDeposite || 0);
-      return;
-    }
-
-    let totalPrescribed = 0;
-    let totalDeduction = 0;
-    let totalDeposit = 0;
-
-    const updatedFees = currentFees.map((fee) => {
-      const { deposit, due } = recalcFee(fee);
-      totalPrescribed += Number(fee.amount || 0);
-      totalDeduction += Number(fee.deduction || 0);
-      totalDeposit += deposit;
-      return { ...fee, deposit, due };
-    });
-
-    setDefaultFees(updatedFees);
-    setValue('fees', updatedFees);
-    setValue('prescribedFee', totalPrescribed);
-    setValue('deduction', totalDeduction);
-    setValue('currentDeposit', totalDeposit);
-    setValue('eastCut', monthDuePerStudent?.totals?.totalLess || 0);
-    setValue('preDeposit', monthDuePerStudent?.totals?.totalPreDeposite || 0);
-  },
-  [fees, recalcFee, setValue, monthDuePerStudent]
-);
+    },
+    [fees, recalcFee, setValue, monthDuePerStudent]
+  );
   useEffect(() => {
     recalculateTotals();
   }, [fees?.length]);
@@ -207,15 +210,18 @@ const recalculateTotals = useCallback(
   // ---------------- SUBMIT ----------------
   const onSubmit = (data) => {
     const totalDue = data?.fees?.reduce((sum, fee) => sum + (fee.due || 0), 0);
-
+    const monthFeeDueRequest = monthDuePerStudent?.data?.length > 0;
     const payload = {
       ...data,
       userId: filteredSelectedPerStudentFee?.UserID,
       admissionId: filteredSelectedPerStudentFee?.AdmissionID,
       due: totalDue,
+      monthFeeDueRequest,
+      monthFeeDueRequestCheck: totalDue ? true : false,
       type: 'month',
     };
     dispatch(setStudentFeeData(payload));
+    console.log(payload, 'payload');
 
     const monthPayload = {
       CurrentInvoice: payload?.prescribedFee,
