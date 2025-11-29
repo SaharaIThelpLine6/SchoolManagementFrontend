@@ -1,27 +1,24 @@
+import 'flatpickr/dist/themes/light.css';
 import { useCallback, useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { utils, writeFile } from 'xlsx';
-import FilterSelectGroup from '../components/Forms/SelectGroup/FilterSelectGroup';
-import SortableTable from '../components/Tables/SortableTable';
-import { setPageName } from '../features/auth/authSlice';
-import { fetchUserOnlyStudentData } from '../features/student/studentSlice';
-// import { Modal } from "../components/ModalSettings";
-import 'flatpickr/dist/themes/light.css';
-import { FormProvider, useForm } from 'react-hook-form';
 import Button from '../components/Button/Button';
 import DropdownDefault from '../components/Dropdowns/DropdownDefault';
 import AdmissionForm from '../components/Forms/AdmissionForm';
 import DefaultInput from '../components/Forms/DefaultInput';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import Loading from '../components/Loading/Loading';
+import SortableTable from '../components/Tables/SortableTable';
 import { permissionsDataList } from '../Data/permissions';
+import { setPageName } from '../features/auth/authSlice';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import {
-  useGetStudentQuery,
-  useGetStudentsAdmissionDataQuery,
+  useGetFilteredAdmissionStudentsQuery
 } from '../features/student/studentQuerySlice';
+import { fetchUserOnlyStudentData } from '../features/student/studentSlice';
 import { ViewPermission } from '../Routes/ViewPermission';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
@@ -29,18 +26,10 @@ import useTranslate from '../utils/Translate';
 const AddStudent = ({ pageTitle }) => {
   const translate = useTranslate();
   const methods = useForm();
-  const { watch, setValue } = methods;
+  const { watch, setValue, reset } = methods;
   const [FilterID, SessionID] = watch(['FilterID', 'SessionID']);
-  console.log(FilterID, 'FilterID');
   const [selectedImage, setSelectedImage] = useState(null);
-  const {
-    data: userOnlyStudents,
-    isLoading,
-    isError,
-    error,
-  } = useGetStudentsAdmissionDataQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  });
+  const [currentFilters, setCurrentFilters] = useState({});
 
   const location = useLocation();
   const dispatch = useDispatch();
@@ -49,7 +38,32 @@ const AddStudent = ({ pageTitle }) => {
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassData } = useGetSubClassListQuery();
   const [selectedDateRange, setSelectedDateRange] = useState([]);
-  const { data: studentList, error: studentListError } = useGetStudentQuery();
+  const filters = methods.watch();
+
+  // FilterID change হলে currentFilters update করুন
+  useEffect(() => {
+    if (FilterID) {
+      setCurrentFilters({
+        FilterID: FilterID,
+        UserCode: '',
+        UserName: '',
+        Mobile1: '',
+        SessionID: null,
+        SubClassID: null,
+        AdmissionSerial: ''
+      });
+    }
+  }, [FilterID]);
+
+  const {
+    data: filteredStudents,
+    isLoading,
+    isError,
+    refetch
+  } = useGetFilteredAdmissionStudentsQuery(currentFilters, {
+    skip: !currentFilters.FilterID,
+    refetchOnMountOrArgChange: true
+  });
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -61,29 +75,52 @@ const AddStudent = ({ pageTitle }) => {
       reader.readAsDataURL(file);
     }
   };
-  const handleOpenModal = useCallback((id) => {
-    showModal('Admission Details', 'ADD_STUDENT', id);
-  }, []);
 
   const handleOpenChangeClassModal = useCallback((id) => {
     showModal('Change Student Class', 'CHANGE_STUDENT_CLASS', id);
   }, []);
-  // const handleFeeCollectionModal = useCallback((id) => {
-  //   showModal("Fee Collection", "FEE_COLLECTION", id);
-  // }, []);
+
   useEffect(() => {
-    if (FilterID !== 4) {
+    if (FilterID !== 4 && FilterID !== 6) {
       setValue('SessionID', null);
       setValue('SubClassID', null);
     }
-  }, [FilterID]);
+  }, [FilterID, setValue]);
 
   useEffect(() => {
     if (filter == 2) {
       dispatch(fetchUserOnlyStudentData());
     }
     dispatch(setPageName(pageTitle));
-  }, [dispatch, location]);
+  }, [dispatch, location, pageTitle, filter]);
+
+  // Search handler function
+  const handleSearch = () => {
+    const formValues = methods.getValues();
+    setCurrentFilters({
+      FilterID: formValues.FilterID,
+      UserCode: formValues.UserID || '',
+      UserName: formValues.UserName || '',
+      Mobile1: formValues.Mobile1 || '',
+      SessionID: formValues.SessionID || null,
+      SubClassID: formValues.SubClassID || null,
+      AdmissionSerial: formValues.AdmissionSerial || ''
+    });
+  };
+
+  // Reset filter function
+  const resetFilter = () => {
+    reset({
+      FilterID: '',
+      UserID: '',
+      UserName: '',
+      Mobile1: '',
+      SessionID: null,
+      SubClassID: null,
+      AdmissionSerial: ''
+    });
+    setCurrentFilters({});
+  };
 
   const exportToCSV = () => {
     if (selectedDateRange.length !== 2) {
@@ -92,26 +129,20 @@ const AddStudent = ({ pageTitle }) => {
     }
 
     const [startDate, endDate] = selectedDateRange;
-
-    // Convert selected dates to comparable formats (YYYY-MM-DD)
     const start = new Date(startDate).setHours(0, 0, 0, 0);
     const end = new Date(endDate).setHours(23, 59, 59, 999);
 
-    // Get data from the Redux store based on filter
-    const dataToExport = filter == 2 ? userOnlyStudents : studentList;
-
-    // Filter data based on the CreateAt date
-    const filteredData = dataToExport.filter((student) => {
+    const dataToExport = filteredStudents?.data;
+    const filteredData = dataToExport?.filter((student) => {
       const studentDate = new Date(student.CreateAt).setHours(0, 0, 0, 0);
       return studentDate >= start && studentDate <= end;
     });
 
-    if (filteredData.length === 0) {
+    if (!filteredData || filteredData.length === 0) {
       alert('No data found for the selected date range.');
       return;
     }
 
-    // Define custom headers
     const customHeaders = [
       [
         'User ID',
@@ -127,7 +158,6 @@ const AddStudent = ({ pageTitle }) => {
       ],
     ];
 
-    // Convert filtered data to match custom headers
     const formattedData = filteredData.map((student) => [
       student.UserID,
       student.AdmissionID || 'N/A',
@@ -155,21 +185,14 @@ const AddStudent = ({ pageTitle }) => {
         : 'N/A',
     ]);
 
-    // Merge headers with data
     const finalCSVData = [...customHeaders, ...formattedData];
-
-    // Convert array to worksheet
     const ws = utils.aoa_to_sheet(finalCSVData);
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, 'Students');
-
-    // Export as CSV file
     writeFile(wb, 'students_list.csv', { bookType: 'csv' });
   };
 
   const columnsAdmitedStudent = [
-    // { title: "User Id", field: "UserID", hozAlign: 'center' },
-    // { title: "Admission No / Roll No", field: "AdmissionID", hozAlign: 'center' },
     {
       title: 'Student Id',
       field: 'StudentCode',
@@ -310,58 +333,6 @@ const AddStudent = ({ pageTitle }) => {
       ),
     },
   ];
-  const columnsNotAdmitedStudent = [
-    // { title: "User Id", field: "UserID", hozAlign: 'center' },
-    { title: 'Student Id', field: 'UserCode', hozAlign: 'center' },
-    { title: 'Name', field: 'UserName' },
-    { title: 'Class', field: 'ClassName', hozAlign: 'center' },
-    { title: 'Section', field: 'SubClass', hozAlign: 'center' },
-    {
-      title: 'Gender',
-      field: 'GenderID',
-      hozAlign: 'center',
-      render: (row) => {
-        const genderMap = {
-          1: 'Male',
-          2: 'Female',
-          3: 'Other',
-        };
-        return genderMap[row.GenderID] || 'N/A';
-      },
-    },
-    {
-      title: 'Date of join',
-      field: 'CreateAt',
-      hozAlign: 'center',
-      render: (row) => {
-        return new Date(row.CreateAt).toLocaleDateString('en-GB');
-      },
-    },
-    {
-      title: 'Action',
-      field: 'SessionSerial',
-      hozAlign: 'center',
-      render: (row) => (
-        <>
-          <ViewPermission
-            permissionId={permissionsDataList.student_admission}
-            permissionType="insert"
-            empty={true}
-          >
-            <button
-              onClick={() => {
-                handleOpenModal(row.UserID);
-              }}
-              className="px-4 py-2 bg-rose-500 text-white rounded"
-            >
-              {translate('Complete Admission')}
-            </button>
-          </ViewPermission>
-        </>
-      ),
-    },
-  ];
-  // console.log(studentList);
 
   if (isLoading) {
     return <Loading />;
@@ -370,6 +341,7 @@ const AddStudent = ({ pageTitle }) => {
   if (isError) {
     return <div>Error loading data!</div>;
   }
+
   const filterData = [
     { FilterID: 1, name: translate('User ID') },
     { FilterID: 2, name: translate('User Name') },
@@ -378,113 +350,58 @@ const AddStudent = ({ pageTitle }) => {
     { FilterID: 5, name: translate('Class') },
     { FilterID: 6, name: translate('ID Serial Admission') },
   ];
+
   return (
     <FormProvider {...methods}>
-      <div className="-translate-y-4 font-lato">
-        <div className="block w-full overflow-x-auto">
-          <div className="filter_header flex items-center justify-between px-5 py-5">
-            <h3 className="font-SolaimanLipi text-[20px] font-bold ">
-              {filter == 2
-                ? translate('Not Admitted Students List')
-                : translate('Admitted Students List')}
-            </h3>
-            <div className="flex items-center space-x-5">
-              <div className="filter relative">
-                {/* <SelectGroupTwo /> */}
-                {/* <button type="button" onClick={exportToCSV}>Export</button>
-              <Flatpickr
-                className="w-full h-[80%] px-2 py-1 outline-1 border border-gray-300 outline-theme-color rounded-[5px] text-xs font-normal"
-                options={{
-                  mode: "range",
-                  dateFormat: "Y-m-d"
-                }}
-                onChange={(selectedDates) => setSelectedDateRange(selectedDates)}
-              /> */}
+      <div className="-translate-y-4 font-SolaimanLipi">
+        <div className="block w-full overflow-x-auto mt-5">
+          <AdmissionForm />
+          <div className="rounded-xl border bg-white p-4 shadow-sm mt-3">
+            <div className="grid grid-cols-1 md:grid-cols-5 my-5 gap-3">
+              <DefaultSelect
+                label={translate('Filter')}
+                labelPosition="left"
+                options={filterData}
+                valueField="FilterID"
+                nameField="name"
+                registerKey="FilterID"
+              />
 
-                <FilterSelectGroup
-                  defaultSelect={filter}
-                  options={[
-                    { id: 0, value: translate('Admitted students') },
-                    { id: 2, value: translate('Not Admitted students') },
-                  ]}
-                  nameField={'value'}
-                  valueField={'id'}
+              {/* FilterID: 1 → User ID */}
+              {Number(FilterID) === 1 && (
+                <DefaultInput
+                  registerKey="UserID"
+                  placeholder="শিক্ষার্থীর আইডি লিখুন"
                 />
-              </div>
-            </div>
-          </div>
-          <AdmissionForm userId={1}/>
-          <div className="grid grid-cols-1 md:grid-cols-5 my-5 gap-3">
-            <DefaultSelect
-              label={translate('Filter')}
-              labelPosition="left"
-              options={filterData}
-              valueField="FilterID"
-              nameField="name"
-              registerKey="FilterID"
-            />
+              )}
 
-            {/* FilterID: 1 → User ID */}
-            {Number(FilterID) === 1 && (
-              <DefaultInput
-                registerKey="UserID"
-                placeholder="শিক্ষার্থীর আইডি লিখুন"
-              />
-            )}
-
-            {/* FilterID: 2 → User Name */}
-            {Number(FilterID) === 2 && (
-              <DefaultInput
-                registerKey="UserName"
-                placeholder="শিক্ষার্থীর নাম লিখুন"
-              />
-            )}
-
-            {/* FilterID: 3 → Mobile */}
-            {Number(FilterID) === 3 && (
-              <DefaultInput
-                registerKey="Mobile1"
-                placeholder="মোবাইল নাম্বার লিখুন"
-              />
-            )}
-
-            {/* FilterID: 4 → Session */}
-            {Number(FilterID) === 4 && (
-              <>
-                <DefaultSelect
-                  options={sessionData ?? []}
-                  valueField="SessionID"
-                  nameField="SessionName"
-                  registerKey="SessionID"
+              {/* FilterID: 2 → User Name */}
+              {Number(FilterID) === 2 && (
+                <DefaultInput
+                  registerKey="UserName"
+                  placeholder="শিক্ষার্থীর নাম লিখুন"
                 />
+              )}
 
-                {/* Session select করার পরই SubClass দেখাবো */}
-                {SessionID && Number(SessionID) > 0 && (
+              {/* FilterID: 3 → Mobile */}
+              {Number(FilterID) === 3 && (
+                <DefaultInput
+                  registerKey="Mobile1"
+                  placeholder="মোবাইল নাম্বার লিখুন"
+                />
+              )}
+
+              {/* FilterID: 4 → Session */}
+              {Number(FilterID) === 4 && (
+                <>
                   <DefaultSelect
-                    options={subClassData ?? []}
-                    valueField="SubClassID"
-                    nameField="SubClass"
-                    registerKey="SubClassID"
-                    unicode
+                    options={sessionData ?? []}
+                    valueField="SessionID"
+                    nameField="SessionName"
+                    registerKey="SessionID"
                   />
-                )}
-              </>
-            )}
-            {/* FilterID: 6 → Session */}
-            {/* FilterID: 6 → Session */}
-            {Number(FilterID) === 6 && (
-              <>
-                {/* Session Select */}
-                <DefaultSelect
-                  options={sessionData ?? []}
-                  valueField="SessionID"
-                  nameField="SessionName"
-                  registerKey="SessionID"
-                />
 
-                {/* SessionID > 0 হলে SubClass দেখাবে */}
-                {SessionID && Number(SessionID) > 0 && (
-                  <>
+                  {SessionID && Number(SessionID) > 0 && (
                     <DefaultSelect
                       options={subClassData ?? []}
                       valueField="SubClassID"
@@ -492,41 +409,88 @@ const AddStudent = ({ pageTitle }) => {
                       registerKey="SubClassID"
                       unicode
                     />
+                  )}
+                </>
+              )}
 
-                    {/* ❗ SubClassData থাকলেই Button দেখাবে */}
-                    {subClassData && subClassData.length > 0 && (
-                      <Button>{translate('Create')}</Button>
-                    )}
-                  </>
-                )}
-              </>
-            )}
+              {/* FilterID: 6 → Session with Admission Serial */}
+              {Number(FilterID) === 6 && (
+                <>
+                  <DefaultSelect
+                    options={sessionData ?? []}
+                    valueField="SessionID"
+                    nameField="SessionName"
+                    registerKey="SessionID"
+                  />
 
-            {/* FilterID: 5 → Only Class/Subclass */}
-            {Number(FilterID) === 5 && (
-              <DefaultSelect
-                options={subClassData ?? []}
-                valueField="SubClassID"
-                nameField="SubClass"
-                registerKey="SubClassID"
-                unicode
+                  {SessionID && Number(SessionID) > 0 && (
+                    <>
+                      <DefaultSelect
+                        options={subClassData ?? []}
+                        valueField="SubClassID"
+                        nameField="SubClass"
+                        registerKey="SubClassID"
+                        unicode
+                      />
+
+                      <DefaultInput
+                        registerKey="AdmissionSerial"
+                        placeholder="Admission Serial লিখুন"
+                      />
+                    </>
+                  )}
+                </>
+              )}
+
+              {/* FilterID: 5 → Only Class/Subclass */}
+              {Number(FilterID) === 5 && (
+                <DefaultSelect
+                  options={subClassData ?? []}
+                  valueField="SubClassID"
+                  nameField="SubClass"
+                  registerKey="SubClassID"
+                  unicode
+                />
+              )}
+
+              {/* Search Button */}
+              <Button
+                onClick={handleSearch}
+                disabled={!FilterID}
+              >
+                {translate('Search')}
+              </Button>
+            </div>
+
+            {/* Clear Filter Button */}
+            <div className="mb-4">
+              <Button
+                onClick={resetFilter}
+                className="bg-gray-500 hover:bg-gray-600 text-white"
+              >
+                {translate('Clear Filter')}
+              </Button>
+            </div>
+
+            {filteredStudents?.data && filteredStudents?.data.length > 0 ? (
+              <SortableTable
+                columns={columnsAdmitedStudent}
+                data={filteredStudents.data}
               />
+            ) : currentFilters.FilterID ? (
+              <div className="text-center py-4">
+                {translate('No data found')}
+              </div>
+            ) : (
+              <div className="text-center py-4">
+                {translate('Please select a filter and click Search')}
+              </div>
             )}
           </div>
-
-          {studentList && studentList.data.length > 0 ? (
-            <SortableTable
-              columns={
-                filter == 2 ? columnsNotAdmitedStudent : columnsAdmitedStudent
-              }
-              data={filter == 2 ? userOnlyStudents : studentList.data}
-            />
-          ) : (
-            <Loading />
-          )}
         </div>
       </div>
     </FormProvider>
   );
 };
+
 export default AddStudent;

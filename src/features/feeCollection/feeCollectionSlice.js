@@ -247,6 +247,18 @@ export const feeCollectionSlice = createApi({
       },
       providesTags: ['SelectedStudentPerFee', 'FeeLand'],
     }),
+    getSearchStudentWithUser: builder.query({
+      query: ({ search, ClassID, SessionID }) => {
+        const params = new URLSearchParams();
+        if (search) {
+          params.append('search', search);
+        }
+        if (ClassID) params.append('ClassID', ClassID);
+        if (SessionID) params.append('SessionID', SessionID);
+        return `/search_student_with_user?${params.toString()}`;
+      },
+      providesTags: [],
+    }),
     postSelectedPerStudentFee: builder.mutation({
       query: (data) => ({
         url: 'selected_per_student_fee',
@@ -497,6 +509,7 @@ export const {
   useGetFeesQuery,
   useGetPaymentTypeQuery,
   useGetSubLedgerQuery,
+  useGetSearchStudentWithUserQuery,
   useGetAllSubLedgerQuery,
   useGetFeeQuery,
   useGetDueFeeQuery,

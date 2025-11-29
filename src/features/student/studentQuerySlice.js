@@ -48,6 +48,29 @@ export const userStudentSlice = createApi({
       },
       providesTags: ['Student'],
     }),
+    getFilteredAdmissionStudents: builder.query({
+      query: ({
+        FilterID,
+        UserCode,
+        UserName,
+        Mobile1,
+        SessionID,
+        SubClassID,
+        AdmissionSerial,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (FilterID) params.append('FilterID', FilterID);
+        if (UserCode) params.append('UserCode', UserCode);
+        if (UserName) params.append('UserName', UserName);
+        if (Mobile1) params.append('Mobile1', Mobile1);
+        if (SessionID) params.append('SessionID', SessionID);
+        if (SubClassID) params.append('SubClassID', SubClassID);
+        if (AdmissionSerial) params.append('AdmissionSerial', AdmissionSerial);
+
+        return `/filter_admission_students?${params.toString()}`;
+      },
+    }),
 
     getStudent: builder.query({
       query: () => 'view_students',
@@ -282,6 +305,7 @@ export const userStudentSlice = createApi({
 export const {
   useGetStudentBySearchQuery,
   useGetStudentQuery,
+  useGetFilteredAdmissionStudentsQuery,
   useGetStudentsAdmissionDataQuery,
   usePostStudentAdmissionInsertMutation,
   useGetStudentReportCetsQuery,

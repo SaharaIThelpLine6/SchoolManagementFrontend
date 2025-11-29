@@ -35,7 +35,6 @@ export const ViewPermission = ({
       }
     });
   });
-  console.log(hasPermission);
   if (!hasPermission) return empty ? <span>-</span> : null;
 
   return children;
