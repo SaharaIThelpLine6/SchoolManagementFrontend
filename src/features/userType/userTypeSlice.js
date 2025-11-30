@@ -113,12 +113,19 @@ export const userTypeSlice = createApi({
       invalidatesTags: ['Users'],
     }),
     getAllUsers: builder.query({
-      query: ({ page = 1, limit = 10 }) => ({
-        url: `/?page=${page}&limit=${limit}`,
-        method: 'GET',
-      }),
-      providesTags: ['Users'],
+      query: ({ page = 1, limit = 10, userTypeID }) => {
+        let url = `/?page=${page}&limit=${limit}`;
+        if (userTypeID) {
+          url += `&usertype=${userTypeID}`;
+        }
+        return {
+          url,
+          method: "GET",
+        };
+      },
+      providesTags: ["Users"],
     }),
+    //
 
     updateUser: builder.mutation({
       query: ({ id, data }) => ({

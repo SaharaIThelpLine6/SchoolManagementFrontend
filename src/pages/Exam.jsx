@@ -162,7 +162,7 @@ const Exam = ({ pageTitle }) => {
     },
     {
       title: "Exam English",
-      field: "ExamAraName",
+      field: "ExamEngName",
       hozAlign: "left",
       unicode: false,
     },

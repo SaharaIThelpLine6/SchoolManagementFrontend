@@ -18,6 +18,7 @@ import {
 import bnBijoy2Unicode from "../utils/conveter";
 import Loading from "../components/Loading/Loading";
 import DefaultPagination from "../components/Pagination/DefaultPagination";
+import DefaultInput from "../components/Forms/DefaultInput";
 
 const PAGE_SIZE = 10;
 
@@ -97,6 +98,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
           ID: student.ID,
           UserID: student.UserID,
           UserName: student.User?.UserName,
+          UserCode: student.User?.UserCode,
           Subjects: allSubjects.map((s) => s.SubjectName),
           allSubjects,
           Total: student.Total,
@@ -108,11 +110,39 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
     }
   }, [userResultData]);
 
-  const totalPages = Math.ceil(students?.length / PAGE_SIZE) || 1;
 
-  const paginatedData =
-    students?.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE) ||
-    [];
+
+
+
+const startID = watch("StartID");
+const endID = watch("EndID");
+
+// Filter students by ID range
+const filteredByID = students.filter((student) => {
+  const code = Number(student.UserCode);
+
+  if (!startID && !endID) return true;            // no filter
+  if (startID && !endID) return code >= Number(startID); 
+  if (!startID && endID) return code <= Number(endID);
+
+  return code >= Number(startID) && code <= Number(endID);
+});
+
+const totalPages = Math.ceil(filteredByID.length / PAGE_SIZE) || 1;
+
+const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+
+
+
+
+
+
+  // const totalPages = Math.ceil(students?.length / PAGE_SIZE) || 1;
+
+  // const paginatedData =
+  //   students?.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE) ||
+  //   [];
 
   const handleNext = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
@@ -187,6 +217,9 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
   if (isLoading) return <div><Loading/></div>;
   if (error) return <div>Error: {error.message}</div>;
 
+
+  console.log(paginatedData);
+  
   // filter subject funstion
   const filteredSubjects = selectedSubject
     ? paginatedData[0]?.Subjects?.filter(
@@ -206,7 +239,11 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <input type="hidden" {...methods.register("ID")} />
-
+          
+         <div className="flex gap-4">
+           <DefaultInput label={"Start ID"} registerKey="StartID" />
+          <DefaultInput label={"End ID"} registerKey="EndID" />
+         </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <DefaultSelect
               label={translate("Session")}
@@ -279,7 +316,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
                         className="bg-transparent"
                       >
                         <td className="p-2 border text-center whitespace-nowrap bg-white">
-                          {student.ID}
+                          {student?.UserCode}
                         </td>
                         <td className="p-2 border text-center whitespace-nowrap bg-white">
                           {bnBijoy2Unicode(student.UserName)}

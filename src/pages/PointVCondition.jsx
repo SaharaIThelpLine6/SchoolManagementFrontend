@@ -49,8 +49,18 @@ const PointVCondition = ({ pageTitle }) => {
       </div>
 
       {/* Active Tab Content */}
-      <div className="mt-4">
+      {/* <div className="mt-4">
         {tabs.find((tab) => tab.id === activeTab)?.component}
+      </div> */}
+      <div className="mt-4">
+        {tabs.map((tab) => (
+          <div
+            key={tab.id}
+            style={{ display: activeTab === tab.id ? "block" : "none" }}
+          >
+            {tab.component}
+          </div>
+        ))}
       </div>
     </div>
   );

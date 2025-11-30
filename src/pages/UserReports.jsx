@@ -63,8 +63,8 @@ const UserReports = ({ pageTitle }) => {
         error.status === 403
           ? translate("You do not have permission to view this report")
           : error.status === 400
-          ? translate("Missing or invalid data provided")
-          : translate("An error occurred while fetching the report")
+            ? translate("Missing or invalid data provided")
+            : translate("An error occurred while fetching the report")
       );
     } else {
       setErrorMessage(null);
@@ -103,8 +103,8 @@ const UserReports = ({ pageTitle }) => {
     //   setAdmission(null);
     //   setQueryParams(params);
     // }
-       setAdmission(null);
-      setQueryParams(params);
+    setAdmission(null);
+    setQueryParams(params);
   };
 
   return (
@@ -277,7 +277,7 @@ const UserReports = ({ pageTitle }) => {
           )}
 
           {/* Admission Form Report */}
-          {selectedReportID === 3 && admission === 10 && (
+          {reportData && selectedReportID === 3 && (
             <div className="print-container">
               <div className="w-full relative max-w-full overflow-x-auto print:hidden">
                 <div className="min-w-[800px]">
@@ -292,9 +292,14 @@ const UserReports = ({ pageTitle }) => {
                   {translate("Print")}
                 </Button>
               </div>
-              <div className="hidden print:block">
-                <AdmissionFormPdf />
-              </div>
+              {
+                reportData.map((admissionFormData, index) => (
+                  <div className="hidden print:block">
+                    <AdmissionFormPdf />
+                  </div>
+                ))
+              }
+
             </div>
           )}
         </div>

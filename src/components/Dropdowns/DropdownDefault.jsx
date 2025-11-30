@@ -44,7 +44,7 @@ const DropdownDefault = ({children}) => {
         ref={dropdown}
         onFocus={() => setDropdownOpen(true)}
         onBlur={() => setDropdownOpen(false)}
-        className={`absolute right-0 top-full z-40 w-40 space-y-1 rounded-sm border border-stroke bg-white p-1.5 shadow-default ${
+        className={`absolute right-0 top-full z-40 w-auto space-y-1 rounded-sm border border-stroke bg-white p-1.5 shadow-default ${
           dropdownOpen === true ? 'block' : 'hidden'
         }`}
       >

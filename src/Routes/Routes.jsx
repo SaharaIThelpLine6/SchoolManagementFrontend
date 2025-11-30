@@ -74,6 +74,7 @@ import Settings from '../pages/Settings';
 import StudentGroupCreate from '../pages/StudentGroupCreate';
 import StudentsFeeCollection from '../pages/StudentsFeeCollection';
 import StudentsReport from '../pages/StudentsReport';
+import PointBasedResultCreateUpdate from '../pages/PointBasedResultCreateUpdate';
 import TalentCondition from '../pages/TalentCondition';
 import User from '../pages/User';
 import UserImage from '../pages/UserImage';
@@ -494,16 +495,16 @@ const router = createBrowserRouter([
                 ),
               },
 
-              // {
-              //   path: ':id',
-              //   element: (
-              //     <RequirePermission
-              //       permissionId={permissionsDataList.result_report}
-              //     >
-              //       <PointBasedResultCreateUpdate pageTitle="Result" />
-              //     </RequirePermission>
-              //   ),
-              // },
+              {
+                path: ':id',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.result_report}
+                  >
+                    <PointBasedResultCreateUpdate pageTitle="Result" />
+                  </RequirePermission>
+                ),
+              },
 
               // {
               //   path: 'mark-sheet/:id',

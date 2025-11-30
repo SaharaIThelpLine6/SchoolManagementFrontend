@@ -68,7 +68,12 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
       : skipToken
   );
 
-  const { data: subjectsData } = useGetAcademicSubjectsQuery();
+  const { data: subjectsData } = useGetAcademicSubjectsQuery(
+    subjectAndPassNumberFilter?.SubClassId
+      ? subjectAndPassNumberFilter.SubClassId
+      : skipToken
+  );
+
   const [postAverageSubjectPassNumber] =
     usePostAverageSubjectPassNumberMutation();
   const [updateAverageSubjectPassNumber] =

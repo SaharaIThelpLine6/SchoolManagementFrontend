@@ -157,7 +157,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
         text: response?.message || "Exam Fee Setting সফলভাবে সংরক্ষিত হয়েছে।",
       }).then(() => {
         refetch();
-        methods.reset();
+        // methods.reset();
       });
     } catch (error) {
       const errMsg =

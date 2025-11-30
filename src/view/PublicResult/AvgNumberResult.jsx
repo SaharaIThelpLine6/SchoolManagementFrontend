@@ -117,7 +117,7 @@ const AvgNumberResult = ({ studentResult }) => {
                 className="text-[16px] border border-black h-[36px] pl-4"
                 bgcolor="#ffffff"
               >
-                {bnBijoy2Unicode(String(studentResult?.DivisionTopNumber))}
+                {bnBijoy2Unicode(String(studentResult[`MaxNumber${index + 1}`]))}
               </td>
               <td
                 className="text-[16px] border border-black h-[36px] pl-4"

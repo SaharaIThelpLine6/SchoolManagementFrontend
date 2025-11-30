@@ -1,13 +1,17 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { ViewPermission } from '../../Routes/ViewPermission';
 import { setItemsPerPage } from '../../features/pagination/paginationSlice';
-import { setEditUserID } from '../../features/settings/settingsSlice';
+import { fetchSettingsData, setEditUserID } from '../../features/settings/settingsSlice';
 import { setEditMode } from '../../features/userInfo/userInfoSlice';
-import { useGetAllUsersQuery } from '../../features/userType/userTypeSlice';
+import { useGetAllUsersQuery, useGetUserTypesQuery } from '../../features/userType/userTypeSlice';
 import Fourdots from '../../images/brand/four-dots-square.svg';
 import Pagination from '../Pagination/Pagination';
 import SvgIcon from '../icons/SvgIcon';
 import { permissionsDataList } from '../../Data/permissions';
+import DefaultInput from "../Forms/DefaultInput";
+import { FormProvider, useForm } from 'react-hook-form';
+import DefaultSelect from '../Forms/DefaultSelect';
+import { useEffect } from 'react';
 
 const TableOne = () => {
   const dispatch = useDispatch();
@@ -15,6 +19,21 @@ const TableOne = () => {
   const currentPage = useSelector((state) => state.pagination.currentPage);
 
   // ✅ Use RTK Query hook directly
+ 
+  const methods = useForm();
+  const {
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    control,
+    formState: { errors },
+  } = methods;
+
+  const userTypeID = watch("UserTypeID");
+  const ClassID = watch("ClassID");
+  const SessionID = watch("SessionID");
+
   const {
     data: usersData,
     isLoading,
@@ -22,11 +41,17 @@ const TableOne = () => {
   } = useGetAllUsersQuery({
     page: currentPage,
     limit: itemPerPage,
+    userTypeID: userTypeID || undefined,
   });
 
   const brandData = usersData?.users || [];
   const totalPage = usersData?.totalPages || 1;
   const totalUsers = usersData?.totalUsers || 0;
+  const { data: userType = [] } = useGetUserTypesQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });;
+
 
   const handleEdit = (id) => {
     dispatch(setEditMode(1));
@@ -59,7 +84,37 @@ const TableOne = () => {
   return (
     <div className="rounded-sm bg-white pt-2 pb-2.5 shadow-default sm:px-7.5 xl:pb-1">
       {/* Items Per Page */}
-      <div className="flex justify-end items-center py-3">
+      <div className="flex justify-between items-center py-3">
+        <div className="flex gap-4">
+          <FormProvider  {...methods}>
+              <DefaultSelect
+                type="number"
+                label=""
+                options={userType}
+                registerKey="UserTypeID"
+                valueField="ID"
+                nameField="TypeName"
+                require="User Type Field is required!"
+                labelColor="text-red-500"
+              />
+              <DefaultSelect
+                label=""
+                options={[{name: "User Code", value: 1}, {name: "User Name", value: 2}, {name: "Mobile 1", value: 3}]}
+                registerKey="FilterTypeId"
+                valueField="value"
+                nameField="name"
+                require="User Type Field is required!"
+                labelColor="text-red-500"
+              />
+              <DefaultInput
+                label=""
+                registerKey="FilterValue"
+                require="User Type Field is required!"
+                labelColor="text-red-500"
+              />
+          </FormProvider>
+        </div>
+        
         <select
           className="border border-gray-300 rounded-md bg-white py-1.5 px-3 text-sm text-gray-700 shadow-sm
              focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500
@@ -119,9 +174,8 @@ const TableOne = () => {
               brandData.map((brand, key) => (
                 <tr
                   key={key}
-                  className={`${
-                    key % 2 !== 0 ? 'bg-[#f5f3f3]' : ''
-                  } border border-white`}
+                  className={`${key % 2 !== 0 ? 'bg-[#f5f3f3]' : ''
+                    } border border-white`}
                 >
                   <td className="py-1 px-4 border border-white text-center">
                     <ViewPermission
