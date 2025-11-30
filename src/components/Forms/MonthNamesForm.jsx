@@ -218,7 +218,7 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
             <DefaultSelect
               options={classList}
               require={translate('Class is required')}
-              nameField={'EnglishClass'}
+              nameField={'ClassName'}
               valueField={'ClassID'}
               registerKey={'ClassID'}
               type={'number'}
