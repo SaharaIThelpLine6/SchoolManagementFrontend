@@ -21,6 +21,26 @@ export const classSlice = createApi({
       query: () => 'view_class',
       providesTags: ['ClassList'],
     }),
+    createClass: builder.mutation({
+      query: (data) => ({
+        url: 'insert_class',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['ClassList'],
+    }),
+    updateClass: builder.mutation({
+      query: (studentData) => ({
+        url: `update_class/${studentData.id}`,
+        method: 'PUT',
+        body: studentData,
+      }),
+      invalidatesTags: ['ClassList'],
+    }),
+    getSingleClass: builder.query({
+      query: (id) => `single_class/${id}`,
+      providesTags: ['ClassList'],
+    }),
     getSubClassLisByClassID: builder.query({
       query: (id) => `view_subclass/${id}`,
       providesTags: ['SubClassList'],
@@ -50,6 +70,7 @@ export const classSlice = createApi({
       }),
       invalidatesTags: ['Academic_Subjects'],
     }),
+
     changeStudentClass: builder.mutation({
       query: (studentData) => ({
         url: 'update_student_class',
@@ -95,4 +116,7 @@ export const {
   useUpdateAcademicSubjectMutation,
   useDeleteAcademicSubjectMutation,
   useGetLastSerialSubjectQuery,
+  useCreateClassMutation,
+  useUpdateClassMutation,
+  useGetSingleClassQuery,
 } = classSlice;

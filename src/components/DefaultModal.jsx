@@ -21,6 +21,7 @@ import OthersStudentFeeAcceptForm from '../view/accounting/student-fee-collectio
 import StudentAdmissionFeeAcceptForm from '../view/accounting/student-fee-collection/StudentAdmissionFeeAcceptForm';
 import StudentMonthDueFeeAceptForm from '../view/accounting/student-fee-collection/StudentMonthDueFeeAceptForm';
 import StudentMonthFeeAceptForm from '../view/accounting/student-fee-collection/StudentMonthFeeAceptForm';
+import ClassCreateUpdateModal from '../view/class/ClassCreateUpdateModal';
 import CharecterReportCategoryModal from '../view/darulikama/CharecterReportCategoryModal';
 import CharecterReportTypeModal from '../view/darulikama/CharecterReportTypeModal';
 import ExamReportSetting from '../view/exam/ExamReportSetting';
@@ -111,6 +112,12 @@ const DefaultModal = () => {
                 {modalType === 'SESSION_EDIT_FORM' && (
                   <SessionCreateUpdateModal id={id} />
                 )}
+                {modalType === 'CLASS_CREATE_FORM' && (
+                  <ClassCreateUpdateModal />
+                )}
+                {modalType === 'CLASS_EDIT_FORM' && (
+                  <ClassCreateUpdateModal id={id} />
+                )}
                 {modalType === 'EDIT_TEACHER' && (
                   <EditTeacherForm userId={id} />
                 )}
@@ -185,7 +192,7 @@ const DefaultModal = () => {
                   <StudentMonthFeeAceptForm />
                 )}
                 {modalType === 'STUDENT_MONTH_DUE_FEE_ACCEPT_FORM' && (
-                  <StudentMonthDueFeeAceptForm/>
+                  <StudentMonthDueFeeAceptForm />
                 )}
                 {modalType === 'STUDENT_MONTH_FEE_ACCEPT' && (
                   <MonthStudentFeeForm />
@@ -213,9 +220,15 @@ const DefaultModal = () => {
                   <UserNamePasswordChangeModal id={id} changeType="password" />
                 )}
                 {modalType === 'OPEN_TODAYS_BALANCE' && <TodaysBalance />}
-                {modalType === 'CHANGE_STUDENT_CLASS' && <ChangeStudentClass userId={id} />}
-                {modalType === 'CHARACTER_REPORT_CATEGORY' && <CharecterReportCategoryModal />}
-                {modalType === 'CHARACTER_REPORT_TYPE' && <CharecterReportTypeModal />}
+                {modalType === 'CHANGE_STUDENT_CLASS' && (
+                  <ChangeStudentClass userId={id} />
+                )}
+                {modalType === 'CHARACTER_REPORT_CATEGORY' && (
+                  <CharecterReportCategoryModal />
+                )}
+                {modalType === 'CHARACTER_REPORT_TYPE' && (
+                  <CharecterReportTypeModal />
+                )}
               </div>
             )}
           </div>
