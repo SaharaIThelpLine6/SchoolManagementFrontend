@@ -55,6 +55,7 @@ const TodayFeeCollection = ({ pageTitle }) => {
     isError,
     refetch,
   } = useGetStudentCompleteFeeFilterQuery(filters);
+  // console.log(result, 'result');
 
   // 🔹 RTK Query (একটি নির্দিষ্ট PrintID-এর জন্য)
   const { data: singleResult } = useGetStudentFeeUpdateGetDataByUFOIDQuery(
@@ -63,6 +64,7 @@ const TodayFeeCollection = ({ pageTitle }) => {
       skip: !printID,
     }
   );
+  // console.log(singleResult, 'singleResult');
 
   const tableData = result?.data || [];
   const todayCollection = result?.todayCollection || 0;

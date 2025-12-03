@@ -1,25 +1,29 @@
-
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 import { setPageName } from '../features/auth/authSlice';
-import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import {
-  useDeleteExamFeeSettingMutation,
-  useGetExamFeeSettingQuery,
+  useGetAcademicSubjectsBySubClassQuery,
+  useGetSubClassListQuery,
+} from '../features/class/classQuerySlice';
+import {
+  useDeleteExamRoutineMutation,
+  useGetAllExamRoutineQuery,
   useGetExamNamesQuery,
   useGetExamRoutineQuery,
-  usePostExamFeeSettingMutation,
-  useUpdateExamFeeSettingMutation,
+  useGetSingleExamRoutineQuery,
+  usePostExamRoutineMutation,
+  usePutExamRoutineMutation,
 } from '../features/exam/examQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 
 import useTranslate from '../utils/Translate';
-import bnBijoy2Unicode from '../utils/conveter';
 
+import { skipToken } from '@reduxjs/toolkit/query';
+import { useMemo } from 'react';
 import { permissionsDataList } from '../Data/permissions';
 import { ViewPermission } from '../Routes/ViewPermission';
 import Button from '../components/Button/Button';
@@ -100,7 +104,8 @@ const ExamRouting = ({ pageTitle }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false);
   // Create an array to track visibility for each select (12 columns)
-  const [visibility, setVisibility] = useState(Array(12).fill(true));
+  const [editId, setEditId] = useState(null);
+  const [visibility, setVisibility] = useState(Array(14).fill(true));
 
   const toggleVisibility = (index) => {
     const newVisibility = [...visibility];
@@ -124,33 +129,43 @@ const ExamRouting = ({ pageTitle }) => {
     printID: PrintID,
   });
 
-  const [postExamFeeSetting] = usePostExamFeeSettingMutation();
-  const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
-  const [deleteExamFeeSetting] = useDeleteExamFeeSettingMutation();
+  const [postExamRoutine] = usePostExamRoutineMutation();
+  const [updateExamRoutine] = usePutExamRoutineMutation();
+  const [deleteExamRoutine] = useDeleteExamRoutineMutation();
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
 
+  const subClassID = watch('SubClassID');
+
+  const { data: subjectsData = [] } = useGetAcademicSubjectsBySubClassQuery(
+    subClassID ? subClassID : skipToken
+  );
+  const { data: editData = [] } = useGetSingleExamRoutineQuery(
+    editId ? editId : skipToken
+  );
+  console.log(editData, 'editData');
+
+  const examID = watch('ExamID');
+  const sessionID = watch('SessionID');
+
+  // Prevent API call if missing
+  const payload = examID && sessionID ? { examID, sessionID } : skipToken;
+
   const {
-    data: examFeeSettingData,
-    isLoading: isExamFeeSettingLoading,
-    isError: isExamFeeSettingError,
+    data: viewData = [],
+    isLoading: isLoadingExamRoutine,
+    isError: isErrorExamRoutine,
     refetch,
-  } = useGetExamFeeSettingQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-    refetchOnFocus: true,
-    refetchOnReconnect: true,
-  });
+  } = useGetAllExamRoutineQuery(payload);
 
-  console.log(examFeeSettingData, 'examFeeSettdwsingData');
-
-  const totalPages = Math.ceil((examFeeSettingData?.length || 0) / PAGE_SIZE);
+  const totalPages = Math.ceil((viewData?.length || 0) / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
-  }, [examFeeSettingData, currentPage]);
+    return viewData?.slice(start, start + PAGE_SIZE) || [];
+  }, [viewData, currentPage]);
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
@@ -259,16 +274,67 @@ const ExamRouting = ({ pageTitle }) => {
   };
 
   // Update Handle
-  const handleEdit = (row) => {
-    methods.reset({
-      ID: row.ID,
-      SessionID: row.SessionID,
-      ExamID: row.ExamID,
-      SubClassID: row.SubClassID,
-      Fee: row.Fee,
-      SLID: row.SLID,
-    });
+  // Updated handleEdit function
+  const handleEdit = (id) => {
+    setEditId(id);
   };
+
+  useEffect(() => {
+    if (editData?.landView || editData?.routineView) {
+      // console.log('Editing row:', editData);
+
+      // Reset form
+      methods.reset();
+
+      const { landView, routineView } = editData;
+
+      // Set fields from routineView
+      if (routineView) {
+        methods.setValue('RoomNo', routineView.RoomNo || '');
+        methods.setValue('RoomName', routineView.RoomName || '');
+      }
+
+      // Set basic fields from landView
+      const basicFields = {
+        SessionID: landView.SessionID,
+        ExamID: landView.ExamID,
+        SubClassID: landView.SubClassID,
+        ERIDL: landView.ERIDL,
+        SubClass: landView.SubClass || '',
+        StartTime: landView.StartTime ? landView.StartTime.trim() : '',
+        EndTime: landView.EndTime ? landView.EndTime.trim() : '',
+      };
+
+      Object.entries(basicFields).forEach(([key, value]) => {
+        if (value !== undefined) methods.setValue(key, value);
+      });
+
+      // Reset visibility array when editing
+      setVisibility(Array(14).fill(true));
+
+      // Set all 14 columns
+      for (let i = 0; i < 14; i++) {
+        const apiIndex = i + 1;
+        const formIndex = i;
+
+        const date = landView[`Date${apiIndex}`];
+        const day = landView[`Day${apiIndex}`];
+        const time = landView[`Time${apiIndex}`];
+        const subjectId = landView[`Sub${apiIndex}`];
+
+        methods.setValue(
+          `date_${formIndex}`,
+          date ? date.replace(/-/g, '/') : ''
+        );
+        methods.setValue(`day_${formIndex}`, day || '');
+        methods.setValue(`startTime_${formIndex}`, time || '');
+        methods.setValue(`endTime_${formIndex}`, time || '');
+        methods.setValue(`subject_${formIndex}`, subjectId || '');
+      }
+
+      console.log('Form populated successfully');
+    }
+  }, [editData, methods]);
 
   // Delete Exam Feee Setting data
   const handleDelete = async (id) => {
@@ -283,7 +349,7 @@ const ExamRouting = ({ pageTitle }) => {
 
     if (result.isConfirmed) {
       try {
-        const response = await deleteExamFeeSetting(id).unwrap();
+        const response = await deleteExamRoutine(id).unwrap();
 
         Swal.fire({
           icon: 'success',
@@ -365,6 +431,11 @@ const ExamRouting = ({ pageTitle }) => {
 
   // Data Create Exam Fee Setting
   const onSubmit = async (formData) => {
+    console.log(formData, 'formData');
+
+    // ============================
+    // 🔥 1. Basic validation
+    // ============================
     if (!formData.SessionID || !formData.SubClassID || !formData.ExamID) {
       Swal.fire({
         icon: 'warning',
@@ -373,37 +444,108 @@ const ExamRouting = ({ pageTitle }) => {
       });
       return;
     }
+    const totalDateCount = Array.from({ length: 14 }).filter((_, index) => {
+      return formData[`date_${index}`];
+    }).length;
+    // ============================
+    // 🔥 2. Build routine data
+    // ============================
+    const routineData = Array.from({ length: 14 }).map((_, index) => {
+      const startTimeRaw = formData[`startTime_${index}`] || '';
+      const endTimeRaw = formData[`endTime_${index}`] || '';
 
-    // Collect all date, day, and time data
-    const routineData = Array.from({ length: 12 }).map((_, index) => ({
-      date: formData[`date_${index}`] || '',
-      day: formData[`day_${index}`] || '',
-      startTime: formData[`startTime_${index}`] || '',
-      endTime: formData[`endTime_${index}`] || '',
-      subject: formData[`subject_${index}`] || '',
-    }));
+      return {
+        SessionID: Number(formData.SessionID),
+        ExamID: Number(formData.ExamID),
+        SubClassID: Number(formData.SubClassID),
 
+        RoomNo: formData.RoomNo || '',
+        RoomName: formData.RoomName || '',
+
+        StartTime: startTimeRaw.replace(' AM', '').replace(' PM', ''),
+        EndTime: endTimeRaw.replace(' AM', '').replace(' PM', ''),
+
+        Date1: formData[`date_${index}`]
+          ? formData[`date_${index}`].replace(/\//g, '-')
+          : '',
+
+        Day1: formData[`day_${index}`] || '',
+
+        Time1: startTimeRaw.replace(' AM', '').replace(' PM', ''),
+
+        Sub1: formData[`subject_${index}`] || '',
+
+        TotalColumn: totalDateCount,
+      };
+    });
+
+    // ============================
+    // 🔥 3. Remove ALL empty rows
+    // ============================
+    // const filteredRoutineData = routineData.filter((item) => item.Date1 !== '');
+    // ============================
+    // 🔥 3. Remove ALL empty rows
+    // ============================
+    const filteredRoutineData = routineData.filter((item) => {
+      const fields = [item.Date1, item.Day1, item.Time1, item.Sub1];
+
+      const isAnyFilled = fields.some((v) => v && v !== '');
+      const isAllFilled = fields.every((v) => v && v !== '');
+
+      // যদি সব খালি → স্কিপ (false)
+      if (!isAnyFilled) return false;
+
+      // যদি কিছু ভরা, কিছু খালি → error
+      if (isAnyFilled && !isAllFilled) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'অসম্পূর্ণ রুটিন ডাটা',
+          text: 'Date, Day, Time এবং Subject সবগুলো পূরণ করুন।',
+        });
+        throw 'validation error';
+      }
+
+      // সব ঠিক থাকলে row accept হবে
+      return true;
+    });
+
+    // ❌ Bug fix — your old condition was wrong
+    if (
+      filteredRoutineData.length === 0 ||
+      formData.RoomNo === '' ||
+      formData.RoomName === ''
+    ) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'ফর্ম অসম্পূর্ণ',
+        text: 'Room No, Room Name এবং কমপক্ষে ১টি Routine Row পূরণ করুন।',
+      });
+      return;
+    }
+
+    // ============================
+    // 🔥 4. Final payload
+    // ============================
     const payload = {
-      SessionID: Number(formData.SessionID),
-      ExamID: Number(formData.ExamID),
-      SubClassID: Number(formData.SubClassID),
-      HallNo: formData.HallNo || '',
-      HallName: formData.HallName || '',
-      RoutineData: routineData,
-      SLID: formData.SLID,
+      routine: filteredRoutineData,
+    };
+    const payloadUpdate = {
+      routine: filteredRoutineData,
+      ID: formData.ERIDL,
     };
 
     try {
       let response;
-      if (formData.ID) {
-        // Update existing
-        // response = await updateExamFeeSetting({
-        //   id: formData.ID,
-        //   body: payload,
-        // }).unwrap();
+
+      // ============================
+      // 🔥 5. Create / Update logic
+      // ============================
+      if (payloadUpdate.ID) {
+        // update logic চাইলে করে দেবেন
+        response = await updateExamRoutine(payloadUpdate).unwrap();
+        console.log(payloadUpdate, 'payloadUpdate');
       } else {
-        // Create new
-        // response = await postExamFeeSetting(payload).unwrap();
+        response = await postExamRoutine(payload).unwrap();
         console.log(payload, 'payload');
       }
 
@@ -412,19 +554,21 @@ const ExamRouting = ({ pageTitle }) => {
         title: 'সফলভাবে সংরক্ষণ হয়েছে',
         text: response?.message || 'Exam Routine সফলভাবে সংরক্ষিত হয়েছে।',
       }).then(() => {
+        // methods.reset();  // যদি reset করতে চান enable করুন
         // refetch();
-        // methods.reset();
       });
     } catch (error) {
       const errMsg =
         error?.data?.message ||
         error?.data?.error ||
         'অজানা একটি ত্রুটি ঘটেছে।';
+
       Swal.fire({
         icon: 'error',
         title: 'ত্রুটি ঘটেছে!',
         text: errMsg,
       });
+
       console.error('Exam Routine Error:', error);
     }
   };
@@ -437,50 +581,101 @@ const ExamRouting = ({ pageTitle }) => {
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
           <ViewPermission
-            permissionId={permissionsDataList.routine_with_signature}
+            permissionId={permissionsDataList.exam_routine}
             permissionType="edit"
             empty={true}
           >
-            <EditButton onClick={() => handleEdit(row)} />
+            <EditButton onClick={() => handleEdit(row.ERIDL)} />
           </ViewPermission>
           <ViewPermission
-            permissionId={permissionsDataList.routine_with_signature}
+            permissionId={permissionsDataList.exam_routine}
             permissionType="delete"
             empty={true}
           >
-            <DeleteButton onClick={() => handleDelete(row.ID)} />
+            <DeleteButton onClick={() => handleDelete(row.ERIDL)} />
           </ViewPermission>
         </div>
       ),
     },
     {
-      title: translate('ID'),
+      title: translate('ERIDL'),
       hozAlign: 'center',
-      render: (row) => <>{row?.ID}</>,
-    },
-    {
-      title: translate('Session'),
-      hozAlign: 'center',
-      render: (row) => <>{row?.AcademicSession?.SessionName}</>,
-    },
-    {
-      title: translate('Exam Name'),
-      hozAlign: 'center',
-      render: (row) => <>{bnBijoy2Unicode(row?.Exam_Name?.ExamName)}</>,
+      render: (row) => <>{row?.ERIDL}</>,
     },
     {
       title: translate('Class/Jamaat'),
       hozAlign: 'center',
-      render: (row) => <>{bnBijoy2Unicode(row?.Class?.SubClass)}</>,
+      render: (row) => <>{row?.SubClass}</>,
     },
+
     {
-      title: translate('Fee Name'),
-      field: 'SLID',
+      title: translate('Subject-1'),
+      field: 'Subj1',
       hozAlign: 'center',
     },
     {
-      title: translate('Fee'),
-      field: 'Fee',
+      title: translate('Subject-1'),
+      field: 'Subj2',
+      hozAlign: 'center',
+    },
+    {
+      title: translate('Subject-1'),
+      field: 'Subj3',
+      hozAlign: 'center',
+    },
+    {
+      title: translate('Subject-1'),
+      field: 'Subj4',
+      hozAlign: 'center',
+    },
+    {
+      title: translate('Subject-1'),
+      field: 'Subj5',
+      hozAlign: 'center',
+    },
+    {
+      title: translate('Subject-1'),
+      field: 'Subj6',
+      hozAlign: 'center',
+    },
+    {
+      title: translate('Subject-1'),
+      field: 'Subj7',
+      hozAlign: 'center',
+    },
+    {
+      title: translate('Subject-1'),
+      field: 'Subj8',
+      hozAlign: 'center',
+    },
+    {
+      title: translate('Subject-1'),
+      field: 'Subj9',
+      hozAlign: 'center',
+    },
+    {
+      title: translate('Subject-1'),
+      field: 'Subj10',
+      hozAlign: 'center',
+    },
+    {
+      title: translate('Subject-1'),
+      field: 'Subj11',
+      hozAlign: 'center',
+    },
+    {
+      title: translate('Subject-1'),
+      field: 'Subj12',
+      hozAlign: 'center',
+    },
+    {
+      title: translate('Subject-1'),
+      field: 'Subj13',
+      hozAlign: 'center',
+    },
+    {
+      title: translate('Subject-1'),
+      field: 'Subj14',
       hozAlign: 'center',
     },
   ];
@@ -538,7 +733,6 @@ const ExamRouting = ({ pageTitle }) => {
     }
   };
 
-
   return (
     <div className="">
       <div className="font-SolaimanLipi bg-white p-4 md:p-6 rounded-xl shadow-lg print:hidden">
@@ -585,12 +779,12 @@ const ExamRouting = ({ pageTitle }) => {
 
               <div className="grid grid-cols-2 gap-3">
                 <DefaultInput
-                  registerKey="HallNo"
+                  registerKey="RoomNo"
                   label={`${translate('Hall No')}`}
                   className="w-full"
                 />
                 <DefaultInput
-                  registerKey="HallName"
+                  registerKey="RoomName"
                   label={`${translate('Hall Name')}`}
                   className="w-full"
                 />
@@ -719,39 +913,50 @@ const ExamRouting = ({ pageTitle }) => {
                   {translate('বিষয় :')}
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {Array.from({ length: 14 }).map((_, index) => (
-                    <div key={`select-${index}`} className="w-full sm:w-24">
-                      <div
-                        key={`select-${index}`}
-                        className="flex flex-col gap-1"
-                      >
-                        <div className="flex items-center justify-end gap-1">
-                          <input
-                            type="checkbox"
-                            checked={!visibility[index]}
-                            onChange={() => toggleVisibility(index)}
-                            className="cursor-pointer h-4 w-4"
-                          />
-                          <label
-                            className="text-xs cursor-pointer"
-                            onClick={() => toggleVisibility(index)}
-                          >
-                            {visibility[index] ? 'Hide' : 'Show'}
-                          </label>
+                  {Array.from({ length: 14 }).map((_, index) => {
+                    const subjectValue = watch(`subject_${index}`);
+
+                    return (
+                      <div key={`select-${index}`} className="w-full sm:w-24">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center justify-end gap-1">
+                            <input
+                              type="checkbox"
+                              checked={!visibility[index]}
+                              onChange={() => toggleVisibility(index)}
+                              className="cursor-pointer h-4 w-4"
+                            />
+                            <label
+                              className="text-xs cursor-pointer"
+                              onClick={() => toggleVisibility(index)}
+                            >
+                              {visibility[index] ? 'Hide' : 'Show'}
+                            </label>
+                          </div>
+                          {visibility[index] && (
+                            <select
+                              {...register(`subject_${index}`)}
+                              value={subjectValue || ''}
+                              onChange={(e) =>
+                                setValue(`subject_${index}`, e.target.value)
+                              }
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              <option value="">Select Subject</option>
+                              {subjectsData?.data?.map((subject) => (
+                                <option
+                                  key={subject.SubjectID}
+                                  value={subject.SubjectID}
+                                >
+                                  {subject.SubjectName}
+                                </option>
+                              ))}
+                            </select>
+                          )}
                         </div>
-                        {visibility[index] && (
-                          <DefaultSelect
-                            options={examNameData ?? []}
-                            valueField="ExamID"
-                            nameField="ExamName"
-                            registerKey={`subject_${index}`}
-                            unicode={true}
-                            className="w-full"
-                          />
-                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -796,28 +1001,33 @@ const ExamRouting = ({ pageTitle }) => {
         </FormProvider>
 
         {/* Table Section */}
-        <div className="mt-5 overflow-x-auto">
-          {isExamFeeSettingLoading ? (
-            <Loading />
-          ) : isExamFeeSettingError ? (
-            <div className="text-red-500 text-center py-4">
-              {translate('Failed to load exam fee settings. Please try again.')}
-            </div>
-          ) : (
-            <SortableTable
-              columns={columns}
-              data={paginatedData}
-              isFilterColumn={false}
-            />
-          )}
-        </div>
 
-        {/* Pagination */}
-        <DefaultPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+        {viewData?.length > 0 && (
+          <>
+            <div className="mt-5 overflow-x-auto">
+              {isLoadingExamRoutine ? (
+                <Loading />
+              ) : isErrorExamRoutine ? (
+                <div className="text-red-500 text-center py-4">
+                  {translate('Failed to load exam routine. Please try again.')}
+                </div>
+              ) : (
+                <SortableTable
+                  columns={columns}
+                  data={paginatedData}
+                  isFilterColumn={false}
+                />
+              )}
+            </div>
+
+            {/* Pagination */}
+            <DefaultPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        )}
       </div>
       <div className="hidden print:block">
         {printView && (
@@ -841,589 +1051,3 @@ const ExamRouting = ({ pageTitle }) => {
 };
 
 export default ExamRouting;
-// import { useEffect, useMemo, useState } from 'react';
-// import { FormProvider, useForm } from 'react-hook-form';
-// import { useDispatch } from 'react-redux';
-// import { useLocation } from 'react-router-dom';
-// import Swal from 'sweetalert2';
-
-// import { setPageName } from '../features/auth/authSlice';
-// import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
-// import {
-//   useDeleteExamFeeSettingMutation,
-//   useGetExamFeeSettingQuery,
-//   useGetExamNamesQuery,
-//   useGetExamRoutineQuery,
-//   usePostExamFeeSettingMutation,
-//   useUpdateExamFeeSettingMutation,
-// } from '../features/exam/examQuerySlice';
-// import { useGetSessionsQuery } from '../features/session/sessionSlice';
-
-// import useTranslate from '../utils/Translate';
-// import bnBijoy2Unicode from '../utils/conveter';
-
-// import { permissionsDataList } from '../Data/permissions';
-// import { ViewPermission } from '../Routes/ViewPermission';
-// import Button from '../components/Button/Button';
-// import DeleteButton from '../components/Button/DeleteButton';
-// import EditButton from '../components/Button/EditButton';
-// import ExamRoutingCheckbox from '../components/Checkboxes/ExamRoutingCheckbox';
-// import DefaultInput from '../components/Forms/DefaultInput';
-// import DefaultSelect from '../components/Forms/DefaultSelect';
-// import Loading from '../components/Loading/Loading';
-// import DefaultPagination from '../components/Pagination/DefaultPagination';
-// import SortableTable from '../components/Tables/SortableTable';
-// import AllClassRoutingPDF from '../view/exam/ExamRouting/AllClassRoutingPDF';
-// import ExamSignatureRoutingPDF from '../view/exam/ExamRouting/ExamSignatureRoutingPDF';
-// import SingleClassRoutingPDF from '../view/exam/ExamRouting/SingleClassRoutingPDF';
-// import StudentFeeGroup from '../view/exam/StudentFeeGroup';
-
-// const PAGE_SIZE = 10;
-
-// const ExamRouting = ({ pageTitle }) => {
-//   const location = useLocation();
-//   const dispatch = useDispatch();
-//   const translate = useTranslate();
-//   const methods = useForm();
-//   const { watch, handleSubmit } = methods;
-
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false);
-//   // Create an array to track visibility for each select (12 columns)
-//   const [visibility, setVisibility] = useState(Array(12).fill(true));
-
-//   const toggleVisibility = (index) => {
-//     const newVisibility = [...visibility];
-//     newVisibility[index] = !newVisibility[index];
-//     setVisibility(newVisibility);
-//   };
-//   const [printView, setPrintView] = useState(false);
-//   const [SessionID = '', ExamID = '', SubClassID = '', PrintID = ''] = watch([
-//     'SessionID',
-//     'ExamID',
-//     'SubClassID',
-//     'PrintID',
-//   ]);
-
-//   const { data, isLoading, isError, error } = useGetExamRoutineQuery({
-//     sessionID: SessionID,
-//     examID: ExamID,
-//     subclassID: SubClassID,
-//     printID: PrintID,
-//   });
-
-//   // console.log(data, 'data');
-
-//   const [postExamFeeSetting] = usePostExamFeeSettingMutation();
-//   const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
-//   const [deleteExamFeeSetting] = useDeleteExamFeeSettingMutation();
-
-//   const { data: sessionData } = useGetSessionsQuery();
-//   const { data: subClassListData } = useGetSubClassListQuery();
-//   const { data: examNameData } = useGetExamNamesQuery();
-
-//   const {
-//     data: examFeeSettingData,
-//     isLoading: isExamFeeSettingLoading,
-//     isError: isExamFeeSettingError,
-//     refetch,
-//   } = useGetExamFeeSettingQuery(undefined, {
-//     refetchOnMountOrArgChange: true,
-//     refetchOnFocus: true,
-//     refetchOnReconnect: true,
-//   });
-
-//   console.log(examFeeSettingData, 'examFeeSettdwsingData');
-
-//   // console.log(examFeeSettingData, 'examFeeSettingData');
-
-//   const totalPages = Math.ceil((examFeeSettingData?.length || 0) / PAGE_SIZE);
-
-//   const paginatedData = useMemo(() => {
-//     const start = (currentPage - 1) * PAGE_SIZE;
-//     return examFeeSettingData?.slice(start, start + PAGE_SIZE) || [];
-//   }, [examFeeSettingData, currentPage]);
-
-//   useEffect(() => {
-//     if (pageTitle) dispatch(setPageName(pageTitle));
-//   }, [dispatch, pageTitle]);
-
-//   // Update Handle
-//   const handleEdit = (row) => {
-//     methods.reset({
-//       ID: row.ID,
-//       SessionID: row.SessionID,
-//       ExamID: row.ExamID,
-//       SubClassID: row.SubClassID,
-//       Fee: row.Fee,
-//       SLID: row.SLID,
-//     });
-//   };
-
-//   // Delete Exam Feee Setting data
-//   const handleDelete = async (id) => {
-//     const result = await Swal.fire({
-//       title: 'আপনি কি নিশ্চিত?',
-//       text: 'একবার মুছে ফেলা হলে পুনরুদ্ধার করা যাবে না!',
-//       icon: 'warning',
-//       showCancelButton: true,
-//       confirmButtonText: 'হ্যাঁ, মুছে ফেলুন!',
-//       cancelButtonText: 'বাতিল',
-//     });
-
-//     if (result.isConfirmed) {
-//       try {
-//         const response = await deleteExamFeeSetting(id).unwrap();
-
-//         Swal.fire({
-//           icon: 'success',
-//           title: 'সফলভাবে মুছে ফেলা হয়েছে',
-//           text: response?.message || 'ডেটা সফলভাবে মুছে ফেলা হয়েছে।',
-//         });
-
-//         refetch(); // Reload table
-//       } catch (error) {
-//         Swal.fire({
-//           icon: 'error',
-//           title: 'ত্রুটি ঘটেছে!',
-//           text:
-//             error?.data?.message ||
-//             error?.data?.error ||
-//             'ডেটা মুছে ফেলতে ব্যর্থ হয়েছে।',
-//         });
-//         console.error('Delete error:', error);
-//       }
-//     }
-//   };
-//   /** ------------------------
-//    *  SMART PRINT HANDLER (PERFECT)
-//    * ------------------------ */
-//   const handlePrintView = () => {
-//     // ---- Validation ----
-//     if (!SessionID || !ExamID || !SubClassID) {
-//       Swal.fire(
-//         'Warning!',
-//         'Session, Exam, SubClass নির্বাচন করুন।',
-//         'warning'
-//       );
-//       return;
-//     }
-
-//     if (!PrintID) {
-//       Swal.fire('Warning!', 'Report টাইপ নির্বাচন করুন।', 'warning');
-//       return;
-//     }
-
-//     // ---- Loading popup ----
-//     Swal.fire({
-//       title: 'লোড হচ্ছে...',
-//       text: 'ডাটা লোড হওয়া পর্যন্ত অপেক্ষা করুন',
-//       allowOutsideClick: false,
-//       allowEscapeKey: false,
-//       didOpen: () => {
-//         Swal.showLoading();
-//       },
-//     });
-
-//     // ---- Wait until API finished ----
-//     const waitForData = setInterval(() => {
-//       if (!isLoading) {
-//         clearInterval(waitForData);
-//         console.log(isError, data?.data, '!data?.data');
-
-//         if (!data?.data || data?.data?.length === 0) {
-//           Swal.fire(
-//             'Error!',
-//             'রুটিন পাওয়া যায়নি অথবা সার্ভারে সমস্যা হয়েছে',
-//             'error'
-//           );
-//           return;
-//         }
-
-//         Swal.close(); // remove loading
-
-//         // ---- Ready to Print ----
-//         setPrintView(true);
-
-//         setTimeout(() => {
-//           window.print();
-//         }, 500); // ensure component rendered fully
-//       }
-//     }, 100); // check every 100ms
-//   };
-
-//   // Data Create Exam Fee Setting
-//   const onSubmit = async (data) => {
-//     if (!data.SessionID || !data.SubClassID || !data.ExamID) {
-//       Swal.fire({
-//         icon: 'warning',
-//         title: 'ফর্ম অসম্পূর্ণ',
-//         text: 'Session, SubClass এবং Exam নির্বাচন করুন।',
-//       });
-//       return;
-//     }
-
-//     const payload = {
-//       SessionID: Number(data.SessionID),
-//       ExamID: Number(data.ExamID),
-//       SubClassID: Number(data.SubClassID),
-//       Fee: Number(data.Fee),
-//       SLID: data.SLID,
-//     };
-
-//     try {
-//       let response;
-//       if (data.ID) {
-//         // response = await updateExamFeeSetting({
-//         //   id: data.ID,
-//         //   body: payload,
-//         // }).unwrap();
-//       } else {
-//         // response = await postExamFeeSetting(payload).unwrap();
-//         console.log(payload, 'payload');
-//       }
-
-//       Swal.fire({
-//         icon: 'success',
-//         title: 'সফলভাবে সংরক্ষণ হয়েছে',
-//         text: response?.message || 'Exam Fee Setting সফলভাবে সংরক্ষিত হয়েছে।',
-//       }).then(() => {
-//         refetch();
-//         methods.reset();
-//       });
-//     } catch (error) {
-//       const errMsg =
-//         error?.data?.message ||
-//         error?.data?.error ||
-//         'অজানা একটি ত্রুটি ঘটেছে।';
-//       Swal.fire({
-//         icon: 'error',
-//         title: 'ত্রুটি ঘটেছে!',
-//         text: errMsg,
-//       });
-//       console.error('Exam Fee Setting Error:', error);
-//     }
-//   };
-
-//   // Table Data Columns
-//   const columns = [
-//     {
-//       title: translate('Action'),
-//       hozAlign: 'center',
-//       render: (row) => (
-//         <div className="flex justify-center items-center gap-2">
-//           <ViewPermission
-//             permissionId={permissionsDataList.routine_with_signature}
-//             permissionType="edit"
-//             empty={true}
-//           >
-//             <EditButton onClick={() => handleEdit(row)} />
-//           </ViewPermission>
-//           <ViewPermission
-//             permissionId={permissionsDataList.routine_with_signature}
-//             permissionType="delete"
-//             empty={true}
-//           >
-//             <DeleteButton onClick={() => handleDelete(row.ID)} />
-//           </ViewPermission>
-//         </div>
-//       ),
-//     },
-//     {
-//       title: translate('ID'),
-//       hozAlign: 'center',
-//       render: (row) => <>{row?.ID}</>,
-//     },
-//     {
-//       title: translate('Session'),
-//       hozAlign: 'center',
-//       render: (row) => <>{row?.AcademicSession?.SessionName}</>,
-//     },
-//     {
-//       title: translate('Exam Name'),
-//       hozAlign: 'center',
-//       render: (row) => <>{bnBijoy2Unicode(row?.Exam_Name?.ExamName)}</>,
-//     },
-//     {
-//       title: translate('Class/Jamaat'),
-//       hozAlign: 'center',
-//       render: (row) => <>{bnBijoy2Unicode(row?.Class?.SubClass)}</>,
-//     },
-//     {
-//       title: translate('Fee Name'),
-//       field: 'SLID',
-//       hozAlign: 'center',
-//     },
-//     {
-//       title: translate('Fee'),
-//       field: 'Fee',
-//       hozAlign: 'center',
-//     },
-//   ];
-
-//   if (showStudentFeeGroup) {
-//     return <StudentFeeGroup onBack={setShowStudentFeeGroup} />;
-//   }
-//   const dateOptions = [
-//     { id: 1, name: 'Copy To All Box' }, // You can add more options if needed
-//   ];
-
-//   const printData = [
-//     {
-//       PrintID: 1,
-//       PrintName: 'প্রতি ক্লাস প্রতি পৃষ্ঠায় আলাদা বাংলা A5।',
-//     },
-//     {
-//       PrintID: 2,
-//       PrintName: 'প্রতি ক্লাস প্রতি পৃষ্ঠায় আলাদা বাংলা A4।',
-//     },
-//     {
-//       PrintID: 3,
-//       PrintName: 'সকল ক্লাস একত্রে বাংলা A5।',
-//     },
-//     {
-//       PrintID: 4,
-//       PrintName: 'সকল ক্লাস একত্রে বাংলা A4।',
-//     },
-//     {
-//       PrintID: 5,
-//       PrintName: 'স্বাক্ষর/দস্তখত পত্র',
-//     },
-//   ];
-
-//   return (
-//     <div className="">
-//       <div className="font-SolaimanLipi bg-white p-4 md:p-6 rounded-xl shadow-lg print:hidden">
-//         {/* Header */}
-//         <div className="filter_header border-b border-[#e9edf4] pb-4 md:pb-5">
-//           <h3 className="text-lg md:text-xl font-bold">
-//             {translate('Exam Routing')}
-//           </h3>
-//         </div>
-
-//         <FormProvider {...methods}>
-//           <form
-//             className="w-full space-y-4 md:space-y-6"
-//             onSubmit={handleSubmit(onSubmit)}
-//           >
-//             <input type="hidden" {...methods.register('ID')} />
-
-//             {/* Top Section - 4 responsive columns */}
-//             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 my-3">
-//               <DefaultSelect
-//                 label={translate('Session')}
-//                 options={sessionData ?? []}
-//                 valueField="SessionID"
-//                 nameField="SessionName"
-//                 registerKey="SessionID"
-//                 unicode={true}
-//               />
-//               <DefaultSelect
-//                 label={translate('Exam Name')}
-//                 options={examNameData ?? []}
-//                 valueField="ExamID"
-//                 nameField="ExamName"
-//                 registerKey="ExamID"
-//                 unicode={true}
-//               />
-//               <DefaultSelect
-//                 label={translate('Class/Jamaat')}
-//                 options={subClassListData ?? []}
-//                 valueField="SubClassID"
-//                 nameField="SubClass"
-//                 registerKey="SubClassID"
-//                 unicode={true}
-//               />
-
-//               <div className="grid grid-cols-2 gap-3">
-//                 <DefaultInput
-//                   registerKey="Fee"
-//                   label={`${translate('Hall No')}`}
-//                   className="w-full"
-//                 />
-//                 <DefaultInput
-//                   registerKey="Fee"
-//                   label={`${translate('Hall Name')}`}
-//                   className="w-full"
-//                 />
-//               </div>
-//             </div>
-
-//             {/* Date Checkbox */}
-//             <div className="flex items-start w-full mb-4">
-//               <ExamRoutingCheckbox
-//                 label="পরীক্ষার তারিখ"
-//                 options={dateOptions}
-//                 registerKey="copyToAll"
-//                 labelPosition="left"
-//               />
-//             </div>
-
-//             {/* Grid Sections */}
-//             <div className="space-y-4">
-//               <div>
-//                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
-//                   {Array.from({ length: 12 }).map((_, i) => (
-//                     <DefaultInput key={`time-${i}`} registerKey="Fee" />
-//                   ))}
-//                 </div>
-//               </div>
-//               {/* First 12-column grid */}
-//               <div>
-//                 <h3 className="text-base font-medium mb-2">
-//                   {translate('বার')}
-//                 </h3>
-//                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
-//                   {Array.from({ length: 12 }).map((_, i) => (
-//                     <DefaultInput key={`time-${i}`} registerKey="Fee" />
-//                   ))}
-//                 </div>
-//               </div>
-
-//               {/* Second 12-column grid */}
-//               <div>
-//                 <h3 className="text-base font-medium mb-2">
-//                   {translate('সময়')}
-//                 </h3>
-//                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
-//                   {Array.from({ length: 12 }).map((_, i) => (
-//                     <DefaultInput key={`duration-${i}`} registerKey="Fee" />
-//                   ))}
-//                 </div>
-//               </div>
-
-//               {/* Select with Toggle */}
-//               <div>
-//                 <h3 className="text-base font-medium mb-2">
-//                   {translate('বিষয়')}
-//                 </h3>
-//                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-12 gap-2">
-//                   {Array.from({ length: 12 }).map((_, index) => (
-//                     <div
-//                       key={`select-${index}`}
-//                       className="flex flex-col gap-1"
-//                     >
-//                       <div className="flex items-center justify-end gap-1">
-//                         <input
-//                           type="checkbox"
-//                           checked={!visibility[index]}
-//                           onChange={() => toggleVisibility(index)}
-//                           className="cursor-pointer h-4 w-4"
-//                         />
-//                         <label
-//                           className="text-xs cursor-pointer"
-//                           onClick={() => toggleVisibility(index)}
-//                         >
-//                           {visibility[index] ? 'Hide' : 'Show'}
-//                         </label>
-//                       </div>
-//                       {visibility[index] && (
-//                         <DefaultSelect
-//                           options={examNameData ?? []}
-//                           valueField="ExamID"
-//                           nameField="ExamName"
-//                           registerKey={`ExamID_${index}`}
-//                           unicode={true}
-//                           className="w-full"
-//                         />
-//                       )}
-//                     </div>
-//                   ))}
-//                 </div>
-//               </div>
-//             </div>
-
-//             {/* Buttons */}
-//             <div className="flex flex-col sm:flex-row gap-3 pt-4">
-//               <ViewPermission
-//                 permissionId={permissionsDataList.routine_with_signature}
-//                 permissionType="insert"
-//                 empty={true}
-//               >
-//                 <Button type="submit" className="w-full sm:w-auto">
-//                   {translate('Save')}
-//                 </Button>
-//               </ViewPermission>
-//               <Button
-//                 type="button"
-//                 onClick={() =>
-//                   methods.reset({
-//                     SLID: '',
-//                     SessionID: '',
-//                     ExamID: '',
-//                     SubClassID: '',
-//                     Fee: '',
-//                   })
-//                 }
-//                 className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white"
-//               >
-//                 {translate('Reset')}
-//               </Button>
-//               <div className="w-64">
-//                 <DefaultSelect
-//                   label={translate('Report/Type')}
-//                   labelPosition="left"
-//                   options={printData ?? []}
-//                   valueField="PrintID"
-//                   nameField="PrintName"
-//                   registerKey="PrintID"
-//                 />
-//               </div>
-//               <Button
-//                 type="button"
-//                 onClick={handlePrintView}
-//                 className="w-full sm:w-auto"
-//               >
-//                 {translate('Print')}
-//               </Button>
-//             </div>
-//           </form>
-//         </FormProvider>
-
-//         {/* Table Section */}
-//         <div className="mt-5 overflow-x-auto">
-//           {isExamFeeSettingLoading ? (
-//             <Loading />
-//           ) : isExamFeeSettingError ? (
-//             <div className="text-red-500 text-center py-4">
-//               {translate('Failed to load exam fee settings. Please try again.')}
-//             </div>
-//           ) : (
-//             <SortableTable
-//               columns={columns}
-//               data={paginatedData}
-//               isFilterColumn={false}
-//             />
-//           )}
-//         </div>
-
-//         {/* Pagination */}
-//         <DefaultPagination
-//           currentPage={currentPage}
-//           totalPages={totalPages}
-//           onPageChange={setCurrentPage}
-//         />
-//       </div>
-//       <div className="hidden print:block">
-//         {printView && (
-//           <>
-//             {Number(PrintID) === 1 && (
-//               <SingleClassRoutingPDF data={data?.data} pageSize="A5" />
-//             )}
-//             {Number(PrintID) === 2 && (
-//               <SingleClassRoutingPDF data={data?.data} pageSize="A4" />
-//             )}
-//             {Number(PrintID) === 3 && <AllClassRoutingPDF data={data?.data} />}
-//             {Number(PrintID) === 4 && <AllClassRoutingPDF data={data?.data} />}
-//             {Number(PrintID) === 5 && (
-//               <ExamSignatureRoutingPDF data={data?.data} />
-//             )}
-//           </>
-//         )}
-//       </div>
-//       ;
-//     </div>
-//   );
-// };
-
-// export default ExamRouting;

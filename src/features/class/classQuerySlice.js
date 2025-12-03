@@ -101,6 +101,10 @@ export const classSlice = createApi({
       query: (id) => `academic_subjects/last-serial/${id}`,
       providesTags: ['Academic_Subjects'],
     }),
+    getAcademicSubjectsBySubClass: builder.query({
+      query: (id) => `academic_subjects/by-subclass/${id}`,
+      providesTags: ['ClassList', 'Academic_Subjects'],
+    }),
   }),
 });
 
@@ -119,4 +123,5 @@ export const {
   useCreateClassMutation,
   useUpdateClassMutation,
   useGetSingleClassQuery,
+  useGetAcademicSubjectsBySubClassQuery
 } = classSlice;

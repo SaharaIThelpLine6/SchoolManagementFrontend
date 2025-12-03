@@ -23,6 +23,7 @@ export const examSlice = createApi({
     'StudentAdmitCard',
     'ExamTalentCondition',
     'ReportSettings',
+    'ExamRoutine',
   ],
   endpoints: (builder) => ({
     postNewExam: builder.mutation({
@@ -133,6 +134,7 @@ export const examSlice = createApi({
       }),
       invalidatesTags: ['AverageExamConditionAll'],
     }),
+
     getExamCondition: builder.query({
       query: ({ SessionID, ExamID, SubClassID }) => ({
         url: `exam_condition/${SessionID}/${ExamID}/${SubClassID}`,
@@ -265,14 +267,7 @@ export const examSlice = createApi({
       query: () => `report_settings`,
       providesTags: ['ReportSettings'],
     }),
-    postReportSetting: builder.mutation({
-      query: (body) => ({
-        url: `report_settings`,
-        method: 'POST',
-        body,
-      }),
-      invalidatesTags: ['ReportSettings'],
-    }),
+
     getExamFeeSettingByExamID: builder.query({
       query: ({ examId, userCode, sessionId }) => {
         let url = `exam_fee_setting_by_examId/${examId}`;
@@ -292,10 +287,44 @@ export const examSlice = createApi({
         `exam_routine?sessionID=${sessionID}&examID=${examID}&subclassID=${subclassID}&printID=${printID}`,
       providesTags: ['ExamRoutine'],
     }),
+    getAllExamRoutine: builder.query({
+      query: ({ sessionID, examID }) =>
+        `get_all_exam_routine/${sessionID}/${examID}`,
+      providesTags: ['ExamRoutine'],
+    }),
+    getSingleExamRoutine: builder.query({
+      query: (eridl) => `get_single_exam_routine/${eridl}`,
+      providesTags: ['ExamRoutine'],
+    }),
+    postExamRoutine: builder.mutation({
+      query: (body) => ({
+        url: `exam_routine_create`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['ExamRoutine'],
+    }),
+    putExamRoutine: builder.mutation({
+      query: (body) => ({
+        url: `exam_routine_update/${body.ID}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['ExamRoutine'],
+    }),
+    deleteExamRoutine: builder.mutation({
+      query: (id) => ({
+        url: `delete_exam_routine/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['ExamRoutine'],
+    }),
   }),
 });
 
 export const {
+  usePostExamRoutineMutation,
+  useDeleteExamRoutineMutation,
   usePostNewExamMutation,
   useUpdateExamnameMutation,
   useDeleteExamNameMutation,
@@ -325,5 +354,8 @@ export const {
   usePostReportSettingMutation,
   useGetExamFeeSettingByExamIDQuery,
   useDeleteAverageExamConditionSettingMutation,
-  useGetExamRoutineQuery
+  useGetExamRoutineQuery,
+  useGetAllExamRoutineQuery,
+  usePutExamRoutineMutation,
+  useGetSingleExamRoutineQuery
 } = examSlice;
