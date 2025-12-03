@@ -1,4 +1,11 @@
+import { useEffect } from "react";
+
 const PaymentHistoryInvoice = ({ data }) => {
+  useEffect(()=>{
+console.log(data);
+
+  }, [data])
+  
   return (
     <div
       className="p-6 mt-5 pb-3 font-SolaimanLipi bg-white text-sm text-black relative max-w-3xl mx-auto"
@@ -21,10 +28,10 @@ const PaymentHistoryInvoice = ({ data }) => {
         </div>
       </div>
       <div className="text-center text-gray-700 leading-5">
-        <p className="font-bold text-xl">SAHARA IT</p>
-        <p>Masud building, Lift-2, Vangapress, Jatrabari</p>
-        <p>Dhaka, Dhaka, 1236</p>
-        <p>Bangladesh</p>
+        <p className="font-bold text-[32px] leading-[40px]">SAHARA IT</p>
+        <p className="text-[18px] leading-[26px]">Masud building, Lift-2, Vangapress, Jatrabari</p>
+        <p className="text-[18px] leading-[26px]">Dhaka, Dhaka, 1236</p>
+        <p className="text-[18px] leading-[26px]">Bangladesh</p>
       </div>
 
       {/* Invoice Info */}
@@ -33,17 +40,17 @@ const PaymentHistoryInvoice = ({ data }) => {
         <p className="text-base font-medium">
           Invoice Date :{" "}
           {data?.CreateAt
-            ? new Date(data.CreateAt).toLocaleDateString()
+            ? new Date(data.CreateAt).toLocaleDateString('en-GB')
             : "N/A"}
         </p>
       </div>
 
       {/* Invoiced To */}
       <div className="mt-8">
-        <p className="font-bold">Invoiced To</p>
-        <p>{data?.InstituteName}</p>
-        {data?.PayerAccount !== 1 ? <p>Sender Number: {data?.PayerAccount}</p> : null}
-        <p>{data?.Address}</p>
+        <p className="font-bold text-[18px] mb-2">Invoiced To</p>
+        <p className="text-[16px] leading-[26px]">{data?.InstituteName}</p>
+        <p className="text-[16px] leading-[26px]">{data?.Address}</p>
+        {data?.PayerAccount !== 1 ? <p className="text-[16px] leading-[26px]">Sender Number: {data?.PayerAccount}</p> : null}
       </div>
 
       {/* Description Table */}
