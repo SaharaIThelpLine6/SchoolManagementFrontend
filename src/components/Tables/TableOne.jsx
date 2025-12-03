@@ -6,7 +6,7 @@ import { ViewPermission } from '../../Routes/ViewPermission';
 import { setItemsPerPage } from '../../features/pagination/paginationSlice';
 import { setEditUserID } from '../../features/settings/settingsSlice';
 import { setEditMode } from '../../features/userInfo/userInfoSlice';
-import { useGetAllUsersQuery, useGetUserTypesQuery } from '../../features/userType/userTypeSlice';
+import { useGetFilteredUsersQuery, useGetUserTypesQuery } from '../../features/userType/userTypeSlice';
 import Fourdots from '../../images/brand/four-dots-square.svg';
 import DefaultInput from "../Forms/DefaultInput";
 import DefaultSelect from '../Forms/DefaultSelect';
@@ -56,7 +56,7 @@ const TableOne = () => {
     isLoading,
     isError,
     refetch, // refetch ফাংশন যোগ করেছি
-  } = useGetAllUsersQuery(queryParams);
+  } = useGetFilteredUsersQuery(queryParams);
 
   console.log(usersData, "usersData");
 

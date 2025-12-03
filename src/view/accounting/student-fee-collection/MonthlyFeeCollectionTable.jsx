@@ -55,6 +55,8 @@ const MonthlyFeeCollectionTable = () => {
         const paid = Number(feeDetails[`M${index}`]) || 0;
 
         const untouched = paid === 0 && less === 0;
+        const closeMonth = Number(fee) === 0 && Number(paid) === 0;
+
         const isFree =
           !untouched &&
           (paid === 0 || paid === null) &&
@@ -74,6 +76,7 @@ const MonthlyFeeCollectionTable = () => {
           isFree,
           isFullPaid,
           untouched,
+          closeMonth,
           originalData: {
             // Keep original data for reference
             feeDetails: feeDetails,
@@ -180,6 +183,8 @@ const MonthlyFeeCollectionTable = () => {
         return `Free Student (${item.prescribedFee})`;
       } else if (item.isFullPaid) {
         return `Full Payment Done (${item.prescribedFee})`;
+      } else if (item.closeMonth == true) {
+        return `Close Month (${0})`;
       } else if (item.due > 0) {
         return `${item.acceptedFees} (Due: ${item.due})`;
       } else {
@@ -297,7 +302,7 @@ const MonthlyFeeCollectionTable = () => {
                       className={getInputClass(item)}
                       value={getDisplayValue(item)}
                       onClick={() => {
-                        if (!item.isFullPaid && !item.isFree) {
+                        if (!item.isFullPaid && !item.isFree && !item.closeMonth) {
                           handleOpenModal(item);
                         }
                       }}

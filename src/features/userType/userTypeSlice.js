@@ -120,10 +120,10 @@ export const userTypeSlice = createApi({
         }
         return {
           url,
-          method: "GET",
+          method: 'GET',
         };
       },
-      providesTags: ["Users"],
+      providesTags: ['Users'],
     }),
     //
 
@@ -138,6 +138,26 @@ export const userTypeSlice = createApi({
     getSingleUser: builder.query({
       query: (id) => `get_single_user/${id}`,
       providesTags: ['Users'],
+    }),
+    getFilteredUsers: builder.query({
+      query: ({
+        page = 1,
+        limit = 10,
+        userTypeID,
+        filterTypeId,
+        filterValue,
+      }) => {
+        const params = new URLSearchParams();
+
+        params.append('page', page);
+        params.append('limit', limit);
+
+        if (userTypeID) params.append('userTypeID', userTypeID);
+        if (filterTypeId) params.append('filterTypeId', filterTypeId);
+        if (filterValue) params.append('filterValue', filterValue);
+
+        return `/user_filter?${params.toString()}`;
+      },
     }),
   }),
 });
@@ -159,5 +179,6 @@ export const {
   usePostUserMutation,
   useUpdateUserMutation,
   useGetAllUsersQuery,
-  useGetSingleUserQuery
+  useGetSingleUserQuery,
+  useGetFilteredUsersQuery
 } = userTypeSlice;
