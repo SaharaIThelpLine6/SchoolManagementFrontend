@@ -29,6 +29,9 @@ import { permissionSlice } from "../features/permission/permissionSlice";
 import { examSlice } from "../features/exam/examQuerySlice";
 import { resultSilce } from "../features/result/resultSilce";
 import { userInfoSlice } from "../features/userInfo/userInfoQuerySlice";
+import { userPanelRegistrationUser } from "../features/userPanel/userRegistration/userRegistrationQuerySlice";
+import { userPanelUserInfo } from "../features/userPanel/userInfo/userInfoQuerySlice";
+import { userPanelVerifyUser } from "../features/userPanel/userLoginVerify/userloginVerifyQuerySlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -57,11 +60,15 @@ const store = configureStore({
     [classSlice.reducerPath]: classSlice.reducer,
     [smsSlice.reducerPath]: smsSlice.reducer,
     [permissionSlice.reducerPath]: permissionSlice.reducer,
-    [permissionSlice.reducerPath]: permissionSlice.reducer,
     [userTypeSlice.reducerPath]: userTypeSlice.reducer,
     [resultSilce.reducerPath]: resultSilce.reducer,
     [examSlice.reducerPath]: examSlice.reducer,
     [userInfoSlice.reducerPath]: userInfoSlice.reducer,
+
+    [userPanelRegistrationUser.reducerPath]: userPanelRegistrationUser.reducer,
+    [userPanelVerifyUser.reducerPath]: userPanelVerifyUser.reducer,
+    [userPanelUserInfo.reducerPath]: userPanelUserInfo.reducer
+    
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -82,7 +89,10 @@ const store = configureStore({
       .concat(sessionSlice.middleware)
       .concat(resultSilce.middleware)
       .concat(examSlice.middleware)
-      .concat(userInfoSlice.middleware),
+      .concat(userInfoSlice.middleware)
+      .concat(userPanelRegistrationUser.middleware)
+      .concat(userPanelUserInfo.middleware)
+      .concat(userPanelVerifyUser.middleware),
 });
 
 export default store;

@@ -22,6 +22,7 @@ const DefaultPagination = ({ currentPage, totalPages, onPageChange }) => {
           onClick={handlePrev}
           disabled={currentPage === 1}
           aria-label="Previous page"
+          type='button'
         >
           <SvgIcon name="MdKeyboardArrowLeft" size={24} />
         </button>
@@ -35,6 +36,7 @@ const DefaultPagination = ({ currentPage, totalPages, onPageChange }) => {
           onClick={handleNext}
           disabled={currentPage === totalPages}
           aria-label="Next page"
+          type='button'
         >
           <SvgIcon name="MdKeyboardArrowRight" size={24} />
         </button>

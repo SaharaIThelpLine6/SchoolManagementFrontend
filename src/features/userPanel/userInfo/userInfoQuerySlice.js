@@ -1,0 +1,26 @@
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+
+const API_URL = import.meta.env.VITE_SERVER_URL;
+
+export const userPanelUserInfo = createApi({
+  reducerPath: 'userpanelUserInfo',
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${API_URL}/api/userpanel/user/`,
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem('user_panel_token');
+      if (token) {
+        headers.set('Authorization', `Bearer ${token}`);
+      }
+      return headers;
+    },
+  }),
+  endpoints: (builder) => ({
+    getUserDetails: builder.query({
+      query: () => "get_user_details",
+    }),
+  }),
+});
+
+export const {
+  useGetUserDetailsQuery,
+} = userPanelUserInfo;

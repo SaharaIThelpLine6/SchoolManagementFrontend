@@ -4,7 +4,7 @@ import "react-calendar/dist/Calendar.css";
 import "./CalendarStyles.css";
 import useTranslate from "../../utils/Translate";
 
-const CalendarComponent = () => {
+const CalendarOne = () => {
   const translate = useTranslate();
   const [value, setValue] = useState(new Date());
 
@@ -29,4 +29,4 @@ const CalendarComponent = () => {
   );
 };
 
-export default CalendarComponent;
+export default CalendarOne;
