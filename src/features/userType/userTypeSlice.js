@@ -158,6 +158,7 @@ export const userTypeSlice = createApi({
 
         return `/user_filter?${params.toString()}`;
       },
+      providesTags: ['Users'],
     }),
   }),
 });

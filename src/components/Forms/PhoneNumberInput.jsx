@@ -15,7 +15,7 @@ const PhoneNumberInput = ({
   showError = false,
   disable = false,
   readOnly = false,
-  defaultValue = '', // ⭐ নতুন যোগ করা হলো
+  defaultValue = '',
 }) => {
   const {
     register,
@@ -30,6 +30,54 @@ const PhoneNumberInput = ({
   // ⭐ Watch input value
   const currentValue = useWatch({ name: registerKey, control });
 
+  // Bangla to English digit mapping
+  const banglaToEnglishMap = {
+    '০': '0',
+    '১': '1',
+    '২': '2',
+    '৩': '3',
+    '৪': '4',
+    '৫': '5',
+    '৬': '6',
+    '৭': '7',
+    '৮': '8',
+    '৯': '9',
+  };
+
+  // English to Bangla digit mapping (for display)
+  const englishToBanglaMap = {
+    0: '০',
+    1: '১',
+    2: '২',
+    3: '৩',
+    4: '৪',
+    5: '৫',
+    6: '৬',
+    7: '৭',
+    8: '৮',
+    9: '৯',
+  };
+
+  // Convert Bangla digits to English for storage and validation
+  const convertToEnglishDigits = (value) => {
+    if (!value) return '';
+
+    return value
+      .split('')
+      .map((char) => banglaToEnglishMap[char] || char)
+      .join('');
+  };
+
+  // Convert English digits to Bangla for display
+  const convertToBanglaDisplay = (value) => {
+    if (!value) return '';
+
+    return value
+      .split('')
+      .map((char) => englishToBanglaMap[char] || char)
+      .join('');
+  };
+
   // ⭐ প্রথমবার defaultValue বসানো (shouldValidate false)
   useEffect(() => {
     if (
@@ -37,40 +85,147 @@ const PhoneNumberInput = ({
       defaultValue !== null &&
       defaultValue !== ''
     ) {
-      setValue(registerKey, defaultValue, { shouldValidate: false });
+      const convertedValue = convertToEnglishDigits(defaultValue.toString());
+      setValue(registerKey, convertedValue, { shouldValidate: false });
     }
   }, [defaultValue, registerKey, setValue]);
 
-  // ⭐ Max length control + numeric only
+  // ⭐ Max length control + only Bangla and English digits
   const handleInput = (e) => {
     let val = e.target.value;
 
-    val = val.replace(/\D/g, ''); // only digits
+    // শুধুমাত্র English (0-9) এবং Bangla (০-৯) ডিজিট allow করবে
+    const allowedChars = /[0-9০১২৩৪৫৬৭৮৯]/g;
+    const matches = val.match(allowedChars);
+
+    if (!matches) {
+      setValue(registerKey, '', { shouldValidate: true });
+      return;
+    }
+
+    val = matches.join('');
 
     if (val.length > maxLength) {
       val = val.slice(0, maxLength);
     }
 
-    setValue(registerKey, val, { shouldValidate: true });
+    // Store as English digits and trim
+    const englishDigits = convertToEnglishDigits(val).trim();
+    setValue(registerKey, englishDigits, { shouldValidate: true });
   };
 
-  // ⭐ Prefix validation
+  // Display value in Bangla digits
+  const displayValue = currentValue ? convertToBanglaDisplay(currentValue) : '';
+
+  // Helper function to generate consistent prefix error message with Bangla digits
+  const getPrefixErrorMessage = () => {
+    const banglaPrefixes = allowedPrefixes.map((prefix) =>
+      convertToBanglaDisplay(prefix)
+    );
+    return `নম্বর অবশ্যই (${banglaPrefixes.join(', ')}) দিয়ে শুরু হতে হবে`;
+  };
+
+  // ⭐ Prefix validation (English digits এ check করবে) - UPDATED
   const validatePrefix = useCallback(
     (value) => {
-      if (!value) return true;
+      if (!value || value.toString().trim() === '') return true;
 
-      const prefix = value.toString().substring(0, 3);
+      // Convert to English digits for validation and trim
+      const englishDigits = convertToEnglishDigits(value.toString()).trim();
 
-      return allowedPrefixes.includes(prefix)
-        ? true
-        : `নম্বর অবশ্যই (${allowedPrefixes.join(', ')}) দিয়ে শুরু হতে হবে`;
+      // যদি length কম থাকে, তাহলে prefix check করব না
+      // length validation ওটা handle করবে
+      if (englishDigits.length < 3) {
+        return true; // Let length validation handle this
+      }
+
+      // Extract first 3 digits
+      const prefix = englishDigits.substring(0, 3);
+
+      // Check against allowed prefixes
+      const isValid = allowedPrefixes.includes(prefix);
+
+      if (!isValid) {
+        return getPrefixErrorMessage();
+      }
+
+      return true;
     },
     [allowedPrefixes]
+  );
+  // Custom validation for length (English digits এ check করবে)
+  const validateLength = useCallback(
+    (value) => {
+      console.log('validateLength called with:', value);
+
+      if (!value) {
+        console.log('Empty value, require:', require);
+        return require ? 'ফোন নম্বর প্রয়োজন' : true;
+      }
+
+      const englishDigits = convertToEnglishDigits(value.toString()).trim();
+      console.log(
+        'English digits:',
+        englishDigits,
+        'Length:',
+        englishDigits.length
+      );
+      console.log('minLength:', minLength, 'maxLength:', maxLength);
+
+      if (englishDigits.length < minLength) {
+        const banglaMinLength = convertToBanglaDisplay(minLength.toString());
+        console.log(`Too short: ${englishDigits.length} < ${minLength}`);
+        return `ফোন নম্বর অবশ্যই ${banglaMinLength} ডিজিটের হতে হবে`;
+      }
+
+      if (englishDigits.length > maxLength) {
+        const banglaMaxLength = convertToBanglaDisplay(maxLength.toString());
+        console.log(`Too long: ${englishDigits.length} > ${maxLength}`);
+        return `ফোন নম্বর ${banglaMaxLength} ডিজিটের বেশি হতে পারবে না`;
+      }
+
+      console.log('Length validation passed');
+      return true;
+    },
+    [minLength, maxLength, require]
   );
 
   // ⭐ Error কখন দেখাবে
   const shouldShowError =
     showError || isSubmitted || touchedFields[registerKey] || isTouched;
+
+  // Prevent non-digit keys
+  const handleKeyPress = (e) => {
+    const allowedKeys = /[0-9০১২৩৪৫৬৭৮৯]/;
+    if (!allowedKeys.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  // Handle paste event
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData('text');
+    const allowedChars = /[0-9০১২৩৪৫৬৭৮৯]/g;
+    const matches = pastedText.match(allowedChars);
+
+    if (matches) {
+      const digits = matches.join('');
+      const englishDigits = convertToEnglishDigits(digits).trim();
+      const limitedDigits = englishDigits.slice(0, maxLength);
+      setValue(registerKey, limitedDigits, { shouldValidate: true });
+    }
+  };
+
+  // Helper function to validate digits only
+  const validateDigitsOnly = (value) => {
+    if (!value) return true;
+    const englishDigits = convertToEnglishDigits(value.toString()).trim();
+    // শুধু ডিজিট আছে কিনা check করি
+    return /^\d+$/.test(englishDigits)
+      ? true
+      : 'শুধুমাত্র সংখ্যাই লিখতে পারবেন';
+  };
 
   return (
     <div
@@ -101,8 +256,10 @@ const PhoneNumberInput = ({
         <input
           type="text"
           placeholder={translate(placeholder)}
-          value={currentValue || ''}
+          value={displayValue}
           onInput={handleInput}
+          onKeyPress={handleKeyPress}
+          onPaste={handlePaste}
           className={`w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition
             focus:border-custom-focus active:border-custom-focus
             disabled:cursor-not-allowed disabled:bg-slate-200
@@ -113,18 +270,10 @@ const PhoneNumberInput = ({
             }`}
           {...register(registerKey, {
             required: require ? 'ফোন নম্বর প্রয়োজন' : false,
-            minLength: {
-              value: minLength,
-              message: `ফোন নম্বর অবশ্যই ${minLength} ডিজিটের হতে হবে`,
-            },
-            maxLength: {
-              value: maxLength,
-              message: `ফোন নম্বর ${maxLength} ডিজিটের বেশি হতে পারবে না`,
-            },
-            validate: validatePrefix,
-            pattern: {
-              value: /^[0-9]+$/,
-              message: 'শুধুমাত্র সংখ্যাই লিখতে পারবেন',
+            validate: {
+              lengthCheck: validateLength,
+              prefixCheck: validatePrefix,
+              digitsOnly: validateDigitsOnly,
             },
           })}
           disabled={disable}
@@ -137,6 +286,14 @@ const PhoneNumberInput = ({
             {errors[registerKey].message}
           </p>
         )}
+
+        {/* Debug information (remove in production) */}
+        {/* {process.env.NODE_ENV === 'development' && currentValue && (
+          <div className="text-xs text-gray-500 mt-1">
+            Debug: Stored as "{currentValue}", Prefix: "
+            {currentValue.toString().substring(0, 3)}"
+          </div>
+        )} */}
       </div>
     </div>
   );

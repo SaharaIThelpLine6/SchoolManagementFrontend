@@ -3,7 +3,6 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import Button from '../../../components/Button/Button';
-import DeleteButton from '../../../components/Button/DeleteButton';
 import DefaultInput from '../../../components/Forms/DefaultInput';
 import { useGetMonthPerStudentsFeeQuery } from '../../../features/feeCollection/feeCollectionSlice';
 import {
@@ -214,18 +213,18 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
   );
 
   // Delete a fee row
-  const handleDeleteFee = useCallback(
-    (index) => {
-      const currentFees = getValues('fees');
-      const updatedFees = currentFees.filter((_, i) => i !== index);
-      setValue('fees', updatedFees);
-      setDefaultFees((prev) => prev.filter((_, i) => i !== index));
+  // const handleDeleteFee = useCallback(
+  //   (index) => {
+  //     const currentFees = getValues('fees');
+  //     const updatedFees = currentFees.filter((_, i) => i !== index);
+  //     setValue('fees', updatedFees);
+  //     setDefaultFees((prev) => prev.filter((_, i) => i !== index));
 
-      // Recalculate totals after deletion
-      setTimeout(recalculateTotals, 0);
-    },
-    [getValues, setValue, recalculateTotals]
-  );
+  //     // Recalculate totals after deletion
+  //     setTimeout(recalculateTotals, 0);
+  //   },
+  //   [getValues, setValue, recalculateTotals]
+  // );
 
   const handleResetForm = useCallback(() => {
     reset({ fees: defaultFees });
@@ -335,7 +334,7 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
           <table className="min-w-full sm:text-sm table-auto text-sm md:text-base">
             <thead className="bg-[#e9ebee] text-black">
               <tr>
-                <th className="px-4 py-3 text-center">{translate('Action')}</th>
+                {/* <th className="px-4 py-3 text-center">{translate('Action')}</th> */}
                 <th className="px-4 py-3 text-center">{translate('ID')}</th>
                 <th className="px-4 py-3 text-center whitespace-nowrap">
                   {translate('Fee Name')}
@@ -364,11 +363,11 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
                       key={`${item.SSFID}-${item.SLID}-${globalIndex}`}
                       className="border-t"
                     >
-                      <td className="px-4 text-center">
+                      {/* <td className="px-4 text-center">
                         <DeleteButton
                           onClick={() => handleDeleteFee(globalIndex)}
                         />
-                      </td>
+                      </td> */}
                       <td className="text-center">{item.SLID}</td>
                       <td className="text-center">
                         {bnBijoy2Unicode(item.SlName)}
