@@ -5,9 +5,7 @@ import { useLocation } from 'react-router-dom';
 import Button from '../../../components/Button/Button';
 import DeleteButton from '../../../components/Button/DeleteButton';
 import DefaultInput from '../../../components/Forms/DefaultInput';
-import {
-  useGetMonthPerStudentsFeeQuery
-} from '../../../features/feeCollection/feeCollectionSlice';
+import { useGetMonthPerStudentsFeeQuery } from '../../../features/feeCollection/feeCollectionSlice';
 import {
   setStudentFeeData,
   setStudentMonthFeeListsData,
@@ -241,12 +239,8 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
     return fees?.slice(start, start + PAGE_SIZE) || [];
   }, [fees, currentPage]);
 
-
-
   const onSubmit = (data) => {
     const totalDue = data?.fees?.reduce((sum, fee) => sum + (fee.due || 0), 0);
-
-
 
     const payload = {
       ...data,
@@ -276,21 +270,23 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
   };
 
   return (
-    <div className="font-SolaimanLipi bg-white p-4 md:px-6 rounded-xl shadow-lg">
+    <div className="font-SolaimanLipi bg-white sm:p-4 md:px-6 sm:rounded-xl sm:shadow-lg">
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-3 gap-4 mb-5">
-            <DefaultInput
-              registerKey="studentCode"
-              label="Student Code"
-              disable
-            />
-            <DefaultInput registerKey="monthId" label="Month ID" disable />
-            <DefaultInput registerKey="monthName" label="Month Name" disable />
-          </div>
           {/* summary section */}
-          <div className="flex flex-col md:flex-row-reverse gap-4 mb-5">
-            <div className="md:col-span-3 grid grid-cols-3 md:grid-cols-5 gap-3 items-center">
+          <div className="flex flex-col gap-4 mb-5">
+            <div className="grid grid-cols-2 md:col-span-3  sm:grid-cols-3 md:grid-cols-5 gap-3 items-center">
+              <DefaultInput
+                registerKey="studentCode"
+                label="Student Code"
+                disable
+              />
+              <DefaultInput registerKey="monthId" label="Month ID" disable />
+              <DefaultInput
+                registerKey="monthName"
+                label="Month Name"
+                disable
+              />
               <DefaultInput
                 registerKey="prescribedFee"
                 label="Prescribed Fee"
@@ -316,7 +312,7 @@ const StudentMonthFeeAceptForm = ({ pageTitle }) => {
               />
             </div>
 
-            <div className="flex justify-start md:justify-center items-center gap-2 mt-5">
+            <div className="flex justify-start items-center gap-2">
               <Button
                 type="button"
                 className="px-6 py-2 rounded-lg bg-gray-400 text-white"

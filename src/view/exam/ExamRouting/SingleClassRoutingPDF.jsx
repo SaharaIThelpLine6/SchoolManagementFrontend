@@ -135,8 +135,10 @@ const SingleClassRoutingPDF = ({ data = [], pageSize = 'A4' }) => {
                 {bnBijoy2Unicode(row.SubjectName)}
               </td>
 
-              <td className="border border-black py-1">{row.ExamDate}</td>
-              <td className="border border-black py-1">{row.ExamDay}</td>
+              <td className="border border-black py-1">
+                {bnBijoy2Unicode(row.ExamDate)}
+              </td>
+              <td className="border border-black py-1">{bnBijoy2Unicode(row.ExamDay)}</td>
               <td className="border border-black py-1">{row.StartTime}</td>
               <td className="border border-black py-1">{row.EndTime}</td>
               <td className="border border-black py-1">{row.RoomNo}</td>

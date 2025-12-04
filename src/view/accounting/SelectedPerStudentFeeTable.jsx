@@ -36,8 +36,6 @@ const SelectedPerStudentFeeTable = () => {
   const tbiPrintView =
     infoSettings?.data?.find((item) => item.ID === 30) || null;
 
-
-
   const {
     data: studentMonthFeeData,
     isLoading: isLoadingMfd,
@@ -327,10 +325,10 @@ const SelectedPerStudentFeeTable = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="flex items-end justify-start gap-4 mb-5">
-          {subledgerData.length > 0 && (
-            <>
-              <div className="w-48">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+          <div className="sm:col-span-1">
+            {subledgerData.length > 0 && (
+              <div className="w-full max-w-xs">
                 <DefaultSelect
                   label="Fees"
                   options={monthlyFees ?? []}
@@ -338,22 +336,27 @@ const SelectedPerStudentFeeTable = () => {
                   nameField="SlName"
                   registerKey="selectedSLID"
                   unicode={true}
+                  className="w-full"
                 />
               </div>
+            )}
+          </div>
 
+          <div className="sm:col-span-1 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-end">
+            {subledgerData.length > 0 && (
               <Button
                 type="button"
-                className="px-6 h-10"
                 onClick={() => handleAddSubLedger(watch('selectedSLID'))}
+                variant="outline"
+                className="px-4 py-2 border border-blue-500 text-blue-600 hover:bg-blue-50 transition-colors duration-200 rounded-md"
               >
                 {translate('Add')}
               </Button>
-            </>
-          )}
-          <div className="mt-4">
+            )}
+
             <Button
               type="submit"
-              className="px-6 py-2 bg-green-500 text-white rounded"
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
             >
               {translate('Save')}
             </Button>

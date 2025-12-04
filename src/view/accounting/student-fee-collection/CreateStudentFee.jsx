@@ -41,10 +41,10 @@ import useTranslate from '../../../utils/Translate';
 import SMSLogo from '/smslogo.png';
 
 import SubmitLoading from '../../../components/Loading/SubmitLoading';
-import { useGetSettingsQuery } from '../../../features/settings/settingsQuerySlice';
-import MonthlyFeeCollectionTable from '../../../view/accounting/student-fee-collection/MonthlyFeeCollectionTable';
 import { permissionsDataList } from '../../../Data/permissions';
+import { useGetSettingsQuery } from '../../../features/settings/settingsQuerySlice';
 import { ViewPermission } from '../../../Routes/ViewPermission';
+import MonthlyFeeCollectionTable from '../../../view/accounting/student-fee-collection/MonthlyFeeCollectionTable';
 
 const CreateStudentFee = () => {
   const defaultSessionId = useDefaultSession();
@@ -1063,8 +1063,8 @@ const CreateStudentFee = () => {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex gap-4 justify-center items-center">
                 <ViewPermission
                   permissionId={permissionsDataList.collect_student_fee}
                   permissionType="insert"
@@ -1085,7 +1085,7 @@ const CreateStudentFee = () => {
                   Reset
                 </Button>
               </div>
-              <div className="flex gap-4">
+              <div className="flex gap-4 justify-center items-center">
                 <img
                   src={SMSLogo}
                   alt="Logo"
@@ -1222,117 +1222,121 @@ const CreateStudentFee = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
               <div className="md:col-span-3">
-                <div className=" overflow-x-auto rounded-md border w-full max-w-6xl mx-auto">
-                  <table className="min-w-full sm:text-sm table-auto text-sm md:text-base">
-                    <thead className="bg-[#e9ebee] text-black">
-                      <tr>
-                        <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate('Sequential')}
-                        </th>
-                        <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate('Fee Name')}
-                        </th>
-                        <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate('Details')}
-                        </th>
-                        <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate('Prescribed Fee')}
-                        </th>
-                        <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate('Deduction')}
-                        </th>
+              {feeTotals.allFees.length > 0 && (
+                <>
+                    <div className=" overflow-x-auto rounded-md border w-full max-w-6xl mx-auto">
+                      <table className="min-w-full sm:text-sm table-auto text-sm md:text-base">
+                        <thead className="bg-[#e9ebee] text-black">
+                          <tr>
+                            <th className="px-4 py-3 text-center whitespace-nowrap">
+                              {translate('Sequential')}
+                            </th>
+                            <th className="px-4 py-3 text-center whitespace-nowrap">
+                              {translate('Fee Name')}
+                            </th>
+                            <th className="px-4 py-3 text-center whitespace-nowrap">
+                              {translate('Details')}
+                            </th>
+                            <th className="px-4 py-3 text-center whitespace-nowrap">
+                              {translate('Prescribed Fee')}
+                            </th>
+                            <th className="px-4 py-3 text-center whitespace-nowrap">
+                              {translate('Deduction')}
+                            </th>
 
-                        <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate('Pre-deposit')}
-                        </th>
-                        <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate('Deposit')}
-                        </th>
-                        <th className="px-4 py-3 text-center whitespace-nowrap">
-                          {translate('Due')}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {feeTotals.allFees && feeTotals.allFees.length > 0 ? (
-                        feeTotals.allFees.map((item, index) => (
-                          <tr
-                            key={`${item.SSFID}-${item.monthId}-${index}`}
-                            className="border-t"
-                          >
-                            <td className="px-4 text-center whitespace-nowrap">
-                              {index + 1}
-                            </td>
+                            <th className="px-4 py-3 text-center whitespace-nowrap">
+                              {translate('Pre-deposit')}
+                            </th>
+                            <th className="px-4 py-3 text-center whitespace-nowrap">
+                              {translate('Deposit')}
+                            </th>
+                            <th className="px-4 py-3 text-center whitespace-nowrap">
+                              {translate('Due')}
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {feeTotals.allFees && feeTotals.allFees.length > 0 ? (
+                            feeTotals.allFees.map((item, index) => (
+                              <tr
+                                key={`${item.SSFID}-${item.monthId}-${index}`}
+                                className="border-t"
+                              >
+                                <td className="px-4 text-center whitespace-nowrap">
+                                  {index + 1}
+                                </td>
 
-                            <td className="text-center whitespace-nowrap">
-                              {bnBijoy2Unicode(item.SlName)}
-                            </td>
+                                <td className="text-center whitespace-nowrap">
+                                  {bnBijoy2Unicode(item.SlName)}
+                                </td>
 
-                            <td className="px-4 text-center whitespace-nowrap">
-                              {bnBijoy2Unicode(item.sessionName)}
-                            </td>
+                                <td className="px-4 text-center whitespace-nowrap">
+                                  {bnBijoy2Unicode(item.sessionName)}
+                                </td>
 
-                            {/* Add month name column */}
-                            {/* <td className="text-center whitespace-nowrap">
+                                {/* Add month name column */}
+                                {/* <td className="text-center whitespace-nowrap">
                               {bnBijoy2Unicode(item.monthName)}
                             </td> */}
 
-                            <td className="text-center whitespace-nowrap">
-                              <DefaultInput
-                                registerKey={`allFees.${index}.amount`}
-                                type="text"
-                                readOnly
-                                defaultValue={item.amount}
-                              />
-                            </td>
+                                <td className="text-center whitespace-nowrap">
+                                  <DefaultInput
+                                    registerKey={`allFees.${index}.amount`}
+                                    type="text"
+                                    readOnly
+                                    defaultValue={item.amount}
+                                  />
+                                </td>
 
-                            <td className="text-center whitespace-nowrap">
-                              <DefaultInput
-                                registerKey={`allFees.${index}.deduction`}
-                                type="text"
-                                readOnly
-                                defaultValue={item.deduction}
-                              />
-                            </td>
+                                <td className="text-center whitespace-nowrap">
+                                  <DefaultInput
+                                    registerKey={`allFees.${index}.deduction`}
+                                    type="text"
+                                    readOnly
+                                    defaultValue={item.deduction}
+                                  />
+                                </td>
 
-                            <td className="text-center whitespace-nowrap">
-                              <DefaultInput
-                                registerKey={`allFees.${index}.preDeposit`}
-                                type="text"
-                                readOnly
-                                defaultValue={item.preDeposit}
-                              />
-                            </td>
+                                <td className="text-center whitespace-nowrap">
+                                  <DefaultInput
+                                    registerKey={`allFees.${index}.preDeposit`}
+                                    type="text"
+                                    readOnly
+                                    defaultValue={item.preDeposit}
+                                  />
+                                </td>
 
-                            <td className="text-center whitespace-nowrap">
-                              <DefaultInput
-                                registerKey={`allFees.${index}.deposit`}
-                                type="text"
-                                readOnly
-                                defaultValue={item.deposit}
-                              />
-                            </td>
+                                <td className="text-center whitespace-nowrap">
+                                  <DefaultInput
+                                    registerKey={`allFees.${index}.deposit`}
+                                    type="text"
+                                    readOnly
+                                    defaultValue={item.deposit}
+                                  />
+                                </td>
 
-                            <td className="text-center whitespace-nowrap">
-                              <DefaultInput
-                                registerKey={`allFees.${index}.due`}
-                                type="text"
-                                readOnly
-                                defaultValue={item.due}
-                              />
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan={9} className="px-4 py-2 text-center">
-                            {translate('No data available')}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                                <td className="text-center whitespace-nowrap">
+                                  <DefaultInput
+                                    registerKey={`allFees.${index}.due`}
+                                    type="text"
+                                    readOnly
+                                    defaultValue={item.due}
+                                  />
+                                </td>
+                              </tr>
+                            ))
+                          ) : (
+                            <tr>
+                              <td colSpan={9} className="px-4 py-2 text-center">
+                                {translate('No data available')}
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                </>
+              )}
               </div>
               <div className="md:col-span-2">
                 <MonthlyFeeCollectionTable />

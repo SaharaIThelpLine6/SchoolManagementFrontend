@@ -155,7 +155,7 @@ const MonthlyFeeCollectionTable = () => {
         showModal(
           duePermission
             ? 'Student Month Due Fee Accept'
-            : 'STUDENT_MONTH_FEE_ACCEPT_FORM',
+            : 'Student Month Fee Accept Form',
           duePermission
             ? 'STUDENT_MONTH_DUE_FEE_ACCEPT_FORM'
             : 'STUDENT_MONTH_FEE_ACCEPT_FORM'

@@ -243,22 +243,23 @@ const StudentMonthDueFeeAceptForm = () => {
   };
 
   return (
-    <div className="font-SolaimanLipi bg-white p-4 md:px-6 rounded-xl shadow-lg">
+    <div className="font-SolaimanLipi bg-white sm:p-4 md:px-6 sm:rounded-xl sm:shadow-lg">
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="grid grid-cols-3 gap-4 mb-5">
-            <DefaultInput
-              registerKey="studentCode"
-              label="Student Code"
-              disable
-            />
-            <DefaultInput registerKey="monthId" label="Month ID" disable />
-            <DefaultInput registerKey="monthName" label="Month Name" disable />
-          </div>
-
           {/* summary */}
-          <div className="flex flex-col md:flex-row-reverse gap-4 mb-5">
-            <div className="md:col-span-3 grid grid-cols-3 md:grid-cols-5 gap-3 items-center">
+          <div className="flex flex-col gap-4 mb-5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 md:col-span-3 gap-3 items-center">
+              <DefaultInput
+                registerKey="studentCode"
+                label="Student Code"
+                disable
+              />
+              <DefaultInput registerKey="monthId" label="Month ID" disable />
+              <DefaultInput
+                registerKey="monthName"
+                label="Month Name"
+                disable
+              />
               <DefaultInput
                 registerKey="prescribedFee"
                 label="Prescribed Fee"
@@ -278,7 +279,7 @@ const StudentMonthDueFeeAceptForm = () => {
               />
             </div>
 
-            <div className="flex justify-start md:justify-center items-center gap-2 mt-5">
+            <div className="flex justify-start items-center gap-2">
               <Button
                 type="button"
                 className="px-6 py-2 rounded-lg bg-gray-400 text-white"
@@ -301,14 +302,24 @@ const StudentMonthDueFeeAceptForm = () => {
           <table className="min-w-full sm:text-sm table-auto text-sm md:text-base">
             <thead className="bg-[#e9ebee] text-black">
               <tr>
-                <th className="px-4 py-3 text-center">Action</th>
-                <th className="px-4 py-3 text-center">ID</th>
-                <th className="px-4 py-3 text-center">Fee Name</th>
-                <th className="px-4 py-3 text-center">Prescribed Fee</th>
-                <th className="px-4 py-3 text-center">Deduction</th>
-                <th className="px-4 py-3 text-center">Pre-deposit</th>
-                <th className="px-4 py-3 text-center">Deposit</th>
-                <th className="px-4 py-3 text-center">Due</th>
+                <th className="px-4 py-3 text-center">{translate('Action')}</th>
+                <th className="px-4 py-3 text-center">{translate('ID')}</th>
+                <th className="px-4 py-3 text-center whitespace-nowrap">
+                  {translate('Fee Name')}
+                </th>
+                <th className="px-4 py-3 text-center whitespace-nowrap">
+                  {translate('Prescribed Fee')}
+                </th>
+                <th className="px-4 py-3 text-center whitespace-nowrap">
+                  {translate('Deduction')}
+                </th>
+                <th className="px-4 py-3 text-center whitespace-nowrap">
+                  {translate('Pre-deposit')}
+                </th>
+                <th className="px-4 py-3 text-center whitespace-nowrap">
+                  {translate('Deposit')}
+                </th>
+                <th className="px-4 py-3 text-center">{translate('Due')}</th>
               </tr>
             </thead>
             <tbody>

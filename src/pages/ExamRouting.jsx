@@ -820,7 +820,11 @@ const ExamRouting = ({ pageTitle }) => {
                       />
                     </div>
                   ))}
-                  <Button type="button" onClick={clearDateFields}>
+                  <Button
+                    type="button"
+                    className="bg-red-500 hover:bg-red-600"
+                    onClick={clearDateFields}
+                  >
                     Clear
                   </Button>
                 </div>
@@ -847,7 +851,11 @@ const ExamRouting = ({ pageTitle }) => {
                       />
                     </div>
                   ))}
-                  <Button type="button" onClick={clearDayFields}>
+                  <Button
+                    type="button"
+                    className="bg-red-500 hover:bg-red-600"
+                    onClick={clearDayFields}
+                  >
                     Clear
                   </Button>
                 </div>
@@ -874,7 +882,11 @@ const ExamRouting = ({ pageTitle }) => {
                       />
                     </div>
                   ))}
-                  <Button type="button" onClick={clearStartTimeFields}>
+                  <Button
+                    type="button"
+                    className="bg-red-500 hover:bg-red-600"
+                    onClick={clearStartTimeFields}
+                  >
                     Clear
                   </Button>
                 </div>
@@ -901,7 +913,11 @@ const ExamRouting = ({ pageTitle }) => {
                       />
                     </div>
                   ))}
-                  <Button type="button" onClick={clearEndTimeFields}>
+                  <Button
+                    type="button"
+                    className="bg-red-500 hover:bg-red-600"
+                    onClick={clearEndTimeFields}
+                  >
                     Clear
                   </Button>
                 </div>
@@ -1038,8 +1054,10 @@ const ExamRouting = ({ pageTitle }) => {
             {Number(PrintID) === 2 && (
               <SingleClassRoutingPDF data={data?.data} pageSize="A4" />
             )}
-            {Number(PrintID) === 3 && <AllClassRoutingPDF data={data?.data} />}
-            {Number(PrintID) === 4 && <AllClassRoutingPDF data={data?.data} />}
+            {Number(PrintID) === 3 && (
+              <AllClassRoutingPDF data={data?.data} pageSize="A5" />
+            )}
+            {Number(PrintID) === 4 && <AllClassRoutingPDF data={data?.data} pageSize="A4" />}
             {Number(PrintID) === 5 && (
               <ExamSignatureRoutingPDF data={data?.data} />
             )}
