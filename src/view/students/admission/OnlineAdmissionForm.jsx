@@ -323,7 +323,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
       Swal.fire({
         icon: 'error',
         title: 'ভুল হয়েছে',
-        text: error?.data?.message || 'ভর্তি জমা দিতে ব্যর্থ হয়েছে!',
+        text: error?.data?.error || 'ভর্তি জমা দিতে ব্যর্থ হয়েছে!',
         confirmButtonText: 'ঠিক আছে',
       });
     }

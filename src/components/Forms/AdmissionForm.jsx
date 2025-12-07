@@ -78,6 +78,9 @@ const AdmissionForm = ({ userId }) => {
     isLoading: isSessionLoading,
     isError: isSessionError,
   } = useGetSessionsQuery(undefined, { refetchOnMountOrArgChange: true });
+  const activeSession = academicSession?.find(
+    (item) => item.SessionAction === 1
+  );
 
   // Student Financial Status
   const {
@@ -165,7 +168,8 @@ const AdmissionForm = ({ userId }) => {
       // ✅ Student Code ও সেট করে দিন
       setValue('StudentCode', filteredSelectedPerStudentFee.StudentCode || '');
     }
-  }, [filteredSelectedPerStudentFee, reset, setValue]);
+    setValue('SessionID', activeSession?.SessionID || '');
+  }, [filteredSelectedPerStudentFee, activeSession, reset, setValue]);
 
   // ✅ ফর্ম ডেটা ফিল করার ফাংশন
   const fillFormWithStudentData = (studentData) => {
@@ -319,7 +323,7 @@ const AdmissionForm = ({ userId }) => {
       Swal.fire({
         icon: 'error',
         title: 'Oops!',
-        text: error?.data?.message || 'Something went wrong',
+        text: error?.data?.error || 'Something went wrong',
         confirmButtonText: 'OK',
       });
     }
