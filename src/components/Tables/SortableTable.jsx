@@ -174,7 +174,7 @@ const alignClass = {
                   }`}
                 >
                   {column.render
-                    ? column.render(row)
+                    ? column.render(row, rowIndex)
                     : column?.unicode
                     ? bnBijoy2Unicode(row[column.field])
                     : row[column.field] || "N/A"}

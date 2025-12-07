@@ -65,7 +65,8 @@ export default function UserLogin() {
         const token = localStorage.getItem("user_panel_token")
 
         if(token){
-            navigate(`/${schoolid}/dashboard`)
+            // navigate(`/${schoolid}/dashboard`)
+             window.location = `/${schoolid}/dashboard`
         }
     }, [])
 

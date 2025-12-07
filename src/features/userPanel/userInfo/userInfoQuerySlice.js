@@ -18,9 +18,13 @@ export const userPanelUserInfo = createApi({
     getUserDetails: builder.query({
       query: () => "get_user_details",
     }),
+    geAllReports: builder.query({
+      query: () => "user_all_report",
+    }),
   }),
 });
 
 export const {
   useGetUserDetailsQuery,
+  useGeAllReportsQuery
 } = userPanelUserInfo;

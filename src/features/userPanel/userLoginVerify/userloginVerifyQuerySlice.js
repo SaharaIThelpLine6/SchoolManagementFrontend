@@ -6,7 +6,7 @@ export const userPanelVerifyUser = createApi({
   reducerPath: 'userPanelVerifyUser',
 
   baseQuery: fetchBaseQuery({
-    baseUrl: `${API_URL}/api/userpanel/user/`,
+    baseUrl: `${API_URL}/api/userpanel/auth/`,
     prepareHeaders: (headers) => {
       const token = localStorage.getItem('user_panel_token');
       if (token) {
