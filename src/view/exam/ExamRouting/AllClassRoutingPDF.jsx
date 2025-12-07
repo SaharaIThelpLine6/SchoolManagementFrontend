@@ -186,7 +186,7 @@ const AllClassRoutingPDF = ({ data = [], pageSize = 'A4' }) => {
               ক্রমিক
             </th>
             <th
-              className={`border border-black ${tableHeaderPadding} ${tableTextSize}`}
+              className={`border border-black ${tableHeaderPadding} ${tableTextSize} whitespace-nowrap`}
             >
               বিষয়/ফিকর
             </th>
@@ -201,17 +201,17 @@ const AllClassRoutingPDF = ({ data = [], pageSize = 'A4' }) => {
               বার
             </th>
             <th
-              className={`border border-black ${tableHeaderPadding} ${tableTextSize}`}
+              className={`border border-black ${tableHeaderPadding} ${tableTextSize} whitespace-nowrap`}
             >
               সময় শুরু
             </th>
             <th
-              className={`border border-black ${tableHeaderPadding} ${tableTextSize}`}
+              className={`border border-black ${tableHeaderPadding} ${tableTextSize} whitespace-nowrap`}
             >
               সময় শেষ
             </th>
             <th
-              className={`border border-black ${tableHeaderPadding} ${tableTextSize}`}
+              className={`border border-black ${tableHeaderPadding} ${tableTextSize} whitespace-nowrap`}
             >
               কক্ষ নং
             </th>
@@ -248,13 +248,13 @@ const AllClassRoutingPDF = ({ data = [], pageSize = 'A4' }) => {
                   <td
                     className={`border border-black ${tableRowPadding} text-center ${tableTextSize}`}
                   >
-                    {row.ExamDate || ''}
+                    {bnBijoy2Unicode(row.ExamDate) || ''}
                   </td>
 
                   <td
                     className={`border border-black ${tableRowPadding} text-center ${tableTextSize}`}
                   >
-                    {row.ExamDay || ''}
+                    {bnBijoy2Unicode(row.ExamDay) || ''}
                   </td>
 
                   <td

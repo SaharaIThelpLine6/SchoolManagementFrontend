@@ -45,10 +45,10 @@ export const sessionSlice = createApi({
     }),
 
     statusUpdateSession: builder.mutation({
-      query: ({ id, SessionAction }) => ({
+      query: ({ id, SessionStatus }) => ({
         url: `status_update_session/${id}`, // pass id in URL
         method: 'PUT',
-        body: { SessionAction }, // only send SessionAction
+        body: { SessionStatus }, // only send SessionStatus
       }),
       invalidatesTags: ['Sessions'], // ✅ Invalidate list after update
     }),

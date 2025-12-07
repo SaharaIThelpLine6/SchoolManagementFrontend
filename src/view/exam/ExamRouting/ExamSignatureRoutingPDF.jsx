@@ -6,6 +6,8 @@ import bnBijoy2Unicode from '../../../utils/conveter';
 const ExamSignatureRoutingPDF = ({ data = [] }) => {
   const { data: institutionInfo } = useGetInstitutionInfoQuery();
 
+  console.log(data, 'data');
+
   const [logo, setLogo] = useState(null);
   const [signatureNajem, setSignatureNajem] = useState(null);
   const [principal, setPrincipal] = useState(null);

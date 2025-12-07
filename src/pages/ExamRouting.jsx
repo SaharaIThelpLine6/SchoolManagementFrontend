@@ -122,12 +122,19 @@ const ExamRouting = ({ pageTitle }) => {
 
   const copyToAll = watch('copyToAll');
   const firstDate = watch('date_0');
-  const { data, isLoading, isError, error } = useGetExamRoutineQuery({
+const skip = !SessionID || !ExamID || !SubClassID || !PrintID;
+
+const { data, isLoading, error, isError, isFetching } = useGetExamRoutineQuery(
+  {
     sessionID: SessionID,
     examID: ExamID,
     subclassID: SubClassID,
     printID: PrintID,
-  });
+  },
+  { skip }
+);
+
+
 
   const [postExamRoutine] = usePostExamRoutineMutation();
   const [updateExamRoutine] = usePutExamRoutineMutation();
@@ -732,6 +739,32 @@ const ExamRouting = ({ pageTitle }) => {
       setValue(`endTime_${i}`, '');
     }
   };
+useEffect(() => {
+  if (isLoading || isFetching) {
+    Swal.fire({
+      title: 'লোড হচ্ছে...',
+      html: 'অনুগ্রহ করে অপেক্ষা করুন',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+  } else {
+    Swal.close();
+  }
+}, [isLoading, isFetching]);
+
+useEffect(() => {
+  if (isError) {
+    Swal.fire({
+      icon: 'error',
+      title: 'ত্রুটি ঘটেছে!',
+      text: error?.message || 'কিছু ভুল হয়েছে',
+      confirmButtonText: 'ঠিক আছে',
+    });
+  }
+}, [isError, error]);
 
   return (
     <div className="">
@@ -1057,7 +1090,9 @@ const ExamRouting = ({ pageTitle }) => {
             {Number(PrintID) === 3 && (
               <AllClassRoutingPDF data={data?.data} pageSize="A5" />
             )}
-            {Number(PrintID) === 4 && <AllClassRoutingPDF data={data?.data} pageSize="A4" />}
+            {Number(PrintID) === 4 && (
+              <AllClassRoutingPDF data={data?.data} pageSize="A4" />
+            )}
             {Number(PrintID) === 5 && (
               <ExamSignatureRoutingPDF data={data?.data} />
             )}

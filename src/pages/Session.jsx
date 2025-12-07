@@ -34,6 +34,7 @@ const Session = ({ pageTitle }) => {
     refetch,
   } = useGetSessionsQuery();
 
+
   const [statusUpdateSession] = useStatusUpdateSessionMutation();
   const [deleteSession] = useDeleteSessionMutation();
 
@@ -55,7 +56,7 @@ const Session = ({ pageTitle }) => {
     try {
       await statusUpdateSession({
         id: row.SessionID,
-        SessionAction: checked ? 1 : 0,
+        SessionStatus: checked ? 1 : 0,
       }).unwrap();
       toast.success('Session status updated successfully');
       refetch();
@@ -149,7 +150,7 @@ const Session = ({ pageTitle }) => {
     },
     {
       title: translate('Status'),
-      field: 'SessionAction',
+      field: 'SessionStatus',
       hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center">
@@ -159,7 +160,7 @@ const Session = ({ pageTitle }) => {
             empty={true}
           >
             <ToggleSwitch
-              checked={row.SessionAction === 1}
+              checked={row.SessionStatus === 1}
               onChange={(e) => handleStatusToggle(row, e.target.checked)}
             />
           </ViewPermission>
