@@ -85,6 +85,10 @@ import MaritListForm from '../pages/public/MaritListForm';
 import MaritListResult from '../pages/public/MaritListResult';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
+import UserPanel from '../layout/UserPanel';
+import Dashboard from '../pages/userpanel/dashboard';
+import UserRegistration from '../pages/userpanel/UserRegistration';
+import UserLogin from '../pages/userpanel/UserLogin';
 
 const router = createBrowserRouter([
   {
@@ -791,43 +795,39 @@ const router = createBrowserRouter([
     path: '/:schoolid',
     element: <PublicLayout />,
     children: [
+      { index: true, element: <ResultRequest pageTitle="Result Page" /> },
+      { path: 'admission-registration', element: <AdmissionRegistration /> },
+      { path: 'students/:seassonid/:examid/:classid/:userid', element: <Result /> },
+      { path: 'online_admission', element: <OnlineAdmission /> },
+      { path: 'online_admission/:usercode', element: <StudentAdmissionForm /> },
+      { path: 'maritlist_request', element: <MaritListForm /> },
+      { path: 'maritlist/:seassonid/:examid', element: <MaritListResult /> },
+      { path: 'classes', element: <ClassResultForm /> },
+      { path: 'classes/:seassonid/:examid/:classid', element: <ClassResult /> },
+
+
+
+
+
+    ],
+  },
+  {
+    path: '/:schoolid/registration',
+    element: <UserRegistration />
+  },
+  {
+    path: '/:schoolid/login',
+    element: <UserLogin />
+  },
+  {
+    path: '/:schoolid/dashboard',
+    element: <UserPanel />,
+    children: [
       {
         index: true,
-        element: <ResultRequest pageTitle="Result Page" />,
-      },
-      {
-        path: 'admission-registration',
-        element: <AdmissionRegistration />,
-      },
-      {
-        path: 'students/:seassonid/:examid/:classid/:userid',
-        element: <Result />,
-      },
-      {
-        path: 'online_admission',
-        element: <OnlineAdmission />,
-      },
-      {
-        path: 'online_admission/:usercode',
-        element: <StudentAdmissionForm />,
-      },
-      {
-        path: 'maritlist_request',
-        element: <MaritListForm />,
-      },
-      {
-        path: 'maritlist/:seassonid/:examid',
-        element: <MaritListResult />,
-      },
-      {
-        path: 'classes',
-        element: <ClassResultForm />,
-      },
-      {
-        path: 'classes/:seassonid/:examid/:classid',
-        element: <ClassResult />,
-      },
-    ],
+        element: <Dashboard pageTitle="Dashboard" />,
+      }
+    ]
   },
   {
     path: '/formp',
