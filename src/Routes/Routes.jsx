@@ -89,6 +89,7 @@ import UserPanel from '../layout/UserPanel';
 import Dashboard from '../pages/userpanel/dashboard';
 import UserRegistration from '../pages/userpanel/UserRegistration';
 import UserLogin from '../pages/userpanel/UserLogin';
+import StudentReports from '../pages/userpanel/StudentReports';
 
 const router = createBrowserRouter([
   {
@@ -826,6 +827,10 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Dashboard pageTitle="Dashboard" />,
+      },
+      {
+        path: "user_reports",
+        element: <StudentReports pageTitle="Student Reports" />,
       }
     ]
   },
