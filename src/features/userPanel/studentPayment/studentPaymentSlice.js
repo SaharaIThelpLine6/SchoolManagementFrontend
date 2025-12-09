@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
 export const studentPaymentSlice = createApi({
-  reducerPath: 'userpanelUserInfo',
+  reducerPath: 'userpanelStudentPayment',
   baseQuery: fetchBaseQuery({
     baseUrl: `${API_URL}/api/userpanel/student-payment/`,
     prepareHeaders: (headers) => {

@@ -84,19 +84,43 @@ const StudentPaymentHistory = () => {
         {translate('Student Payment History')}
       </h2>
 
-      {/* Table */}
-      <SortableTable
-        columns={columns}
-        data={paginatedData}
-        isFilterColumn={false}
-      />
+      {paginatedData.length > 0 ? (
+        <>
+          <SortableTable
+            columns={columns}
+            data={paginatedData}
+            isFilterColumn={false}
+          />
 
-      {/* Pagination */}
-      <DefaultPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
+          <DefaultPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
+        </>
+      ) : (
+        <div className="flex flex-col items-center justify-center py-16 text-gray-500">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-14 w-14 mb-3 opacity-60"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="1.5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3 16.5V19a2 2 0 002 2h3m10-4v2a2 2 0 01-2 2h-3m-6-6L3 6m0 0l9 6m-9-6l9-6m0 0l9 6m-9-6v12"
+            />
+          </svg>
+
+          <h3 className="text-lg font-medium">No Data Found</h3>
+          <p className="text-sm text-gray-400">
+            Try adjusting your filter or search
+          </p>
+        </div>
+      )}
     </div>
   );
 };

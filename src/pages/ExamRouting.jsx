@@ -122,19 +122,18 @@ const ExamRouting = ({ pageTitle }) => {
 
   const copyToAll = watch('copyToAll');
   const firstDate = watch('date_0');
-const skip = !SessionID || !ExamID || !SubClassID || !PrintID;
+  const skip = !SessionID || !ExamID || !SubClassID || !PrintID;
 
-const { data, isLoading, error, isError, isFetching } = useGetExamRoutineQuery(
-  {
-    sessionID: SessionID,
-    examID: ExamID,
-    subclassID: SubClassID,
-    printID: PrintID,
-  },
-  { skip }
-);
-
-
+  const { data, isLoading, error, isError, isFetching } =
+    useGetExamRoutineQuery(
+      {
+        sessionID: SessionID,
+        examID: ExamID,
+        subclassID: SubClassID,
+        printID: PrintID,
+      },
+      { skip }
+    );
 
   const [postExamRoutine] = usePostExamRoutineMutation();
   const [updateExamRoutine] = usePutExamRoutineMutation();
@@ -517,15 +516,11 @@ const { data, isLoading, error, isError, isFetching } = useGetExamRoutineQuery(
     });
 
     // ❌ Bug fix — your old condition was wrong
-    if (
-      filteredRoutineData.length === 0 ||
-      formData.RoomNo === '' ||
-      formData.RoomName === ''
-    ) {
+    if (filteredRoutineData.length === 0) {
       Swal.fire({
         icon: 'warning',
         title: 'ফর্ম অসম্পূর্ণ',
-        text: 'Room No, Room Name এবং কমপক্ষে ১টি Routine Row পূরণ করুন।',
+        text: 'কমপক্ষে ১টি Routine Row পূরণ করুন।',
       });
       return;
     }
@@ -739,32 +734,32 @@ const { data, isLoading, error, isError, isFetching } = useGetExamRoutineQuery(
       setValue(`endTime_${i}`, '');
     }
   };
-useEffect(() => {
-  if (isLoading || isFetching) {
-    Swal.fire({
-      title: 'লোড হচ্ছে...',
-      html: 'অনুগ্রহ করে অপেক্ষা করুন',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      didOpen: () => {
-        Swal.showLoading();
-      },
-    });
-  } else {
-    Swal.close();
-  }
-}, [isLoading, isFetching]);
+  useEffect(() => {
+    if (isLoading || isFetching) {
+      Swal.fire({
+        title: 'লোড হচ্ছে...',
+        html: 'অনুগ্রহ করে অপেক্ষা করুন',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+    } else {
+      Swal.close();
+    }
+  }, [isLoading, isFetching]);
 
-useEffect(() => {
-  if (isError) {
-    Swal.fire({
-      icon: 'error',
-      title: 'ত্রুটি ঘটেছে!',
-      text: error?.message || 'কিছু ভুল হয়েছে',
-      confirmButtonText: 'ঠিক আছে',
-    });
-  }
-}, [isError, error]);
+  useEffect(() => {
+    if (isError) {
+      Swal.fire({
+        icon: 'error',
+        title: 'ত্রুটি ঘটেছে!',
+        text: error?.message || 'কিছু ভুল হয়েছে',
+        confirmButtonText: 'ঠিক আছে',
+      });
+    }
+  }, [isError, error]);
 
   return (
     <div className="">
