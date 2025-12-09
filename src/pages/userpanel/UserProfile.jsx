@@ -54,7 +54,7 @@ export default function UserProfile() {
             {/* Profile Info */}
             <div className="flex flex-col items-center -mt-20">
                 <img
-                    src={bufferConveter(userDetails?.User?.UserImage[0].Image)}
+                    src={userDetails?.User?.UserImage.length > 0 ? bufferConveter(userDetails?.User?.UserImage[0].Image) : "logo.png"}
                     className="w-40 h-40 object-cover border-4 border-white rounded-full"
                     alt="profile"
                 />
