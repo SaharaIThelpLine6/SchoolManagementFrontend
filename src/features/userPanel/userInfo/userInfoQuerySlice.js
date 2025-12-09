@@ -16,10 +16,10 @@ export const userPanelUserInfo = createApi({
   }),
   endpoints: (builder) => ({
     getUserDetails: builder.query({
-      query: () => "get_user_details",
+      query: (sessionId) => `get_user_details?sessionId=${sessionId}`,
     }),
     geAllReports: builder.query({
-      query: () => "user_all_report",
+      query: (sessionId) => `user_all_report?sessionId=${sessionId}`,
     }),
   }),
 });
