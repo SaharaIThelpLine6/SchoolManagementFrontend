@@ -1,38 +1,39 @@
 import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "../features/auth/authSlice";
-import paginationReducer from "../features/pagination/paginationSlice";
-import settingsReducer from "../features/settings/settingsSlice";
-import userInfoReducer from "../features/userInfo/userInfoSlice";
-import classReducer from "../features/class/classSlice";
-import languageReducer from "../features/language/languageSlice";
-import studentResultPublicViewReducer from "../features/studentResultPublicView/studentResultPublicViewSlice";
-import requestHandelerReducer from "../features/requestHandeler/requestHandelerSlice";
-import studentReducer from "../features/student/studentSlice";
-import modalReducer from "../features/modal/modalSlice";
-import sidebarReducer from "../features/sidebar/sideBarSlice";
-import sessionChangeReducer from "../features/userPanel/SessionChange/SessionChangeSlice";
-import { feeCollectionSlice } from "../features/feeCollection/feeCollectionSlice";
-import { onlineAdmissionSlice } from "../features/onlineAdmission/onlineAdmissionSlice";
-import { teachersSlice } from "../features/teachers/teachersSlice";
-import { paymentSlice } from "../features/payment/paymentSlice";
-import { userStudentSlice } from "../features/student/studentQuerySlice";
-import { monthSlice } from "../features/month/monthSlice";
-import { settingsSlice } from "../features/settings/settingsQuerySlice";
-import { dashboardSlice } from "../features/dashboard/dashboardQuerySlice";
-import { monthListSlice } from "../features/months/montListSlice";
-import { userReportsSlice } from "../features/userReports/userReportsSlice";
-import { sessionSlice } from "../features/session/sessionSlice";
 import { classSlice } from "../features/class/classQuerySlice";
-import { userTypeSlice } from "../features/userType/userTypeSlice";
-import { smsSlice } from "../features/sms/smsSlice";
-import smsReducersSlice from "../features/sms/smsReducersSlice";
-import { permissionSlice } from "../features/permission/permissionSlice";
+import classReducer from "../features/class/classSlice";
+import { dashboardSlice } from "../features/dashboard/dashboardQuerySlice";
 import { examSlice } from "../features/exam/examQuerySlice";
+import { feeCollectionSlice } from "../features/feeCollection/feeCollectionSlice";
+import languageReducer from "../features/language/languageSlice";
+import modalReducer from "../features/modal/modalSlice";
+import { monthSlice } from "../features/month/monthSlice";
+import { monthListSlice } from "../features/months/montListSlice";
+import { onlineAdmissionSlice } from "../features/onlineAdmission/onlineAdmissionSlice";
+import paginationReducer from "../features/pagination/paginationSlice";
+import { paymentSlice } from "../features/payment/paymentSlice";
+import { permissionSlice } from "../features/permission/permissionSlice";
+import requestHandelerReducer from "../features/requestHandeler/requestHandelerSlice";
 import { resultSilce } from "../features/result/resultSilce";
+import { sessionSlice } from "../features/session/sessionSlice";
+import { settingsSlice } from "../features/settings/settingsQuerySlice";
+import settingsReducer from "../features/settings/settingsSlice";
+import sidebarReducer from "../features/sidebar/sideBarSlice";
+import smsReducersSlice from "../features/sms/smsReducersSlice";
+import { smsSlice } from "../features/sms/smsSlice";
+import { userStudentSlice } from "../features/student/studentQuerySlice";
+import studentReducer from "../features/student/studentSlice";
+import studentResultPublicViewReducer from "../features/studentResultPublicView/studentResultPublicViewSlice";
+import { teachersSlice } from "../features/teachers/teachersSlice";
 import { userInfoSlice } from "../features/userInfo/userInfoQuerySlice";
-import { userPanelRegistrationUser } from "../features/userPanel/userRegistration/userRegistrationQuerySlice";
+import userInfoReducer from "../features/userInfo/userInfoSlice";
+import sessionChangeReducer from "../features/userPanel/SessionChange/SessionChangeSlice";
+import { studentPaymentSlice } from "../features/userPanel/studentPayment/studentPaymentSlice";
 import { userPanelUserInfo } from "../features/userPanel/userInfo/userInfoQuerySlice";
 import { userPanelVerifyUser } from "../features/userPanel/userLoginVerify/userloginVerifyQuerySlice";
+import { userPanelRegistrationUser } from "../features/userPanel/userRegistration/userRegistrationQuerySlice";
+import { userReportsSlice } from "../features/userReports/userReportsSlice";
+import { userTypeSlice } from "../features/userType/userTypeSlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -69,8 +70,8 @@ const store = configureStore({
 
     [userPanelRegistrationUser.reducerPath]: userPanelRegistrationUser.reducer,
     [userPanelVerifyUser.reducerPath]: userPanelVerifyUser.reducer,
-    [userPanelUserInfo.reducerPath]: userPanelUserInfo.reducer
-    
+    [userPanelUserInfo.reducerPath]: userPanelUserInfo.reducer,
+    [studentPaymentSlice.reducerPath]: studentPaymentSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -94,6 +95,7 @@ const store = configureStore({
       .concat(userInfoSlice.middleware)
       .concat(userPanelRegistrationUser.middleware)
       .concat(userPanelUserInfo.middleware)
+      .concat(studentPaymentSlice.middleware)
       .concat(userPanelVerifyUser.middleware),
 });
 

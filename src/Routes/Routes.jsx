@@ -22,6 +22,7 @@ import DefaultLayout from '../layout/DefaultLayout';
 // Private Pages
 import PaymentModal from '../components/Modals/PaymentModal';
 import StudentVacationListTable from '../components/Tables/StudentVacationListTable';
+import UserPanel from '../layout/UserPanel';
 import AddLoginUsers from '../pages/AddLoginUsers';
 import AddStudent from '../pages/AddStudent';
 import AddTeacher from '../pages/AddTeacher';
@@ -61,6 +62,7 @@ import PayRole from '../pages/PayRole';
 import PayRoleName from '../pages/PayRoleName';
 import PaymentConfirm from '../pages/PaymentConfirm';
 import PaymentHistory from '../pages/PaymentHistory';
+import PointBasedResultCreateUpdate from '../pages/PointBasedResultCreateUpdate';
 import PointBasedResultEntry from '../pages/PointBasedResultEntry';
 import PointVReport from '../pages/PointVReport';
 import QueryThree from '../pages/QueryThree';
@@ -74,7 +76,6 @@ import Settings from '../pages/Settings';
 import StudentGroupCreate from '../pages/StudentGroupCreate';
 import StudentsFeeCollection from '../pages/StudentsFeeCollection';
 import StudentsReport from '../pages/StudentsReport';
-import PointBasedResultCreateUpdate from '../pages/PointBasedResultCreateUpdate';
 import TalentCondition from '../pages/TalentCondition';
 import User from '../pages/User';
 import UserImage from '../pages/UserImage';
@@ -83,13 +84,14 @@ import ClassResult from '../pages/public/ClassResult';
 import ClassResultForm from '../pages/public/ClassResultForm';
 import MaritListForm from '../pages/public/MaritListForm';
 import MaritListResult from '../pages/public/MaritListResult';
+import StudentPaymentHistory from '../pages/userpanel/StudentPaymentHistory';
+import StudentPaymentHistoryDetails from '../pages/userpanel/StudentPaymentHistoryDetails';
+import StudentReports from '../pages/userpanel/StudentReports';
+import UserLogin from '../pages/userpanel/UserLogin';
+import UserRegistration from '../pages/userpanel/UserRegistration';
+import Dashboard from '../pages/userpanel/dashboard';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
-import UserPanel from '../layout/UserPanel';
-import Dashboard from '../pages/userpanel/dashboard';
-import UserRegistration from '../pages/userpanel/UserRegistration';
-import UserLogin from '../pages/userpanel/UserLogin';
-import StudentReports from '../pages/userpanel/StudentReports';
 
 const router = createBrowserRouter([
   {
@@ -798,27 +800,25 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <ResultRequest pageTitle="Result Page" /> },
       { path: 'admission-registration', element: <AdmissionRegistration /> },
-      { path: 'students/:seassonid/:examid/:classid/:userid', element: <Result /> },
+      {
+        path: 'students/:seassonid/:examid/:classid/:userid',
+        element: <Result />,
+      },
       { path: 'online_admission', element: <OnlineAdmission /> },
       { path: 'online_admission/:usercode', element: <StudentAdmissionForm /> },
       { path: 'maritlist_request', element: <MaritListForm /> },
       { path: 'maritlist/:seassonid/:examid', element: <MaritListResult /> },
       { path: 'classes', element: <ClassResultForm /> },
       { path: 'classes/:seassonid/:examid/:classid', element: <ClassResult /> },
-
-
-
-
-
     ],
   },
   {
     path: '/:schoolid/registration',
-    element: <UserRegistration />
+    element: <UserRegistration />,
   },
   {
     path: '/:schoolid/login',
-    element: <UserLogin />
+    element: <UserLogin />,
   },
   {
     path: '/:schoolid/dashboard',
@@ -829,10 +829,20 @@ const router = createBrowserRouter([
         element: <Dashboard pageTitle="Dashboard" />,
       },
       {
-        path: "user_reports",
+        path: 'user_reports',
         element: <StudentReports pageTitle="Student Reports" />,
-      }
-    ]
+      },
+      {
+        path: 'student-payment-history',
+        element: <StudentPaymentHistory pageTitle="Student Payment History" />,
+      },
+      {
+        path: 'student-payment-history/:id',
+        element: (
+          <StudentPaymentHistoryDetails pageTitle="Student Payment History Details" />
+        ),
+      },
+    ],
   },
   {
     path: '/formp',
