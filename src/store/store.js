@@ -10,6 +10,7 @@ import requestHandelerReducer from "../features/requestHandeler/requestHandelerS
 import studentReducer from "../features/student/studentSlice";
 import modalReducer from "../features/modal/modalSlice";
 import sidebarReducer from "../features/sidebar/sideBarSlice";
+import sessionChangeReducer from "../features/userPanel/SessionChange/SessionChangeSlice";
 import { feeCollectionSlice } from "../features/feeCollection/feeCollectionSlice";
 import { onlineAdmissionSlice } from "../features/onlineAdmission/onlineAdmissionSlice";
 import { teachersSlice } from "../features/teachers/teachersSlice";
@@ -46,6 +47,7 @@ const store = configureStore({
     modal: modalReducer,
     sideBar: sidebarReducer,
     smsSuccessError: smsReducersSlice,
+    sessionChange: sessionChangeReducer,
     [feeCollectionSlice.reducerPath]: feeCollectionSlice.reducer,
     [onlineAdmissionSlice.reducerPath]: onlineAdmissionSlice.reducer,
     [teachersSlice.reducerPath]: teachersSlice.reducer,

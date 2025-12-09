@@ -8,3 +8,7 @@ export const showModal = (title, modalType, id) => {
 export const hideModal = () => {
   store.dispatch(closeModal());
 };
+
+export const showSideBarModal = (title, modalType, id) => {
+  store.dispatch(openModal({ title, modalType, id }));
+};
