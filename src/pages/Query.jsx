@@ -395,6 +395,14 @@ const Query = () => {
                   })}
                 />
               </div>
+              <div className="grid grid-cols-1">
+                <label htmlFor="">CONVERT TYPE</label>
+                <select name="CONVERT_TYPE" id="CONVERT_TYPE" required>
+                  <option value="">Select</option>
+                  <option value="un">Unicode</option>
+                  <option value="bn">bijoy</option>
+                </select>
+              </div>
 
               <div className="d-flex items-center gap-2">
                 <button

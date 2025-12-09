@@ -4,7 +4,9 @@ const initialState = {
   isOpen: false,
   title: "",
   modalType: null,
-  id: null
+  id: null,
+  isDrawers: false,
+
 };
 
 const modalSlice = createSlice({
@@ -15,15 +17,24 @@ const modalSlice = createSlice({
       state.isOpen = true;
       state.title = action.payload.title || "";
       state.modalType = action.payload.modalType || null;
+      state.id = action.payload.id || null;
+      state.isDrawers = false;
+    },
+    openSideDrawer: (state, action) => {
+      state.isDrawers = true;
+      state.title = action.payload.title || "";
+      state.modalType = action.payload.modalType || null;
       state.id = action.payload.id || null
+      state.isOpen = false;
     },
     closeModal: (state) => {
       state.isOpen = false;
+      state.isDrawers = false;
       state.title = "";
       state.content = null;
     },
   },
 });
 
-export const { openModal, closeModal } = modalSlice.actions;
+export const { openModal, closeModal, openSideDrawer } = modalSlice.actions;
 export default modalSlice.reducer;

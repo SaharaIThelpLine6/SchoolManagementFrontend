@@ -16,7 +16,7 @@ export const userPanelUserInfo = createApi({
   }),
   endpoints: (builder) => ({
     getUserDetails: builder.query({
-      query: (sessionId) => `get_user_details?sessionId=${sessionId}`,
+      query: () => `get_user_details`,
     }),
     geAllReports: builder.query({
       query: (sessionId) => `user_all_report?sessionId=${sessionId}`,

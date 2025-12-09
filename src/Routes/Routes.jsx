@@ -92,6 +92,7 @@ import UserRegistration from '../pages/userpanel/UserRegistration';
 import Dashboard from '../pages/userpanel/dashboard';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
+import UserProfile from '../pages/userpanel/UserProfile';
 
 const router = createBrowserRouter([
   {
@@ -840,6 +841,12 @@ const router = createBrowserRouter([
         path: 'student-payment-history/:id',
         element: (
           <StudentPaymentHistoryDetails pageTitle="Student Payment History Details" />
+        ),
+      },
+      {
+        path: 'profile-details',
+        element: (
+          <UserProfile pageTitle="Student Payment History Details" />
         ),
       },
     ],
