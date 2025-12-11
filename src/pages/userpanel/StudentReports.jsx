@@ -44,7 +44,7 @@ const StudentReports = () => {
       hozAlign: 'center',
       filterable: false,
       type: 'text',
-      render: (row) => <p>{row.ReportType.ReportTypeName}</p>,
+      render: (row) => <p>{row?.ReportType?.ReportTypeName}</p>,
     },
     {
       title: 'রির্পোট টাইপ',
@@ -52,7 +52,7 @@ const StudentReports = () => {
       hozAlign: 'center',
       filterable: false,
       type: 'text',
-      render: (row) => <p>{row.ReportType.ReportTypeName}</p>,
+      render: (row) => <p>{row?.ReportType?.ReportTypeName}</p>,
     },
     {
       title: 'মন্তব্য',
@@ -60,6 +60,7 @@ const StudentReports = () => {
       hozAlign: 'center',
       filterable: false,
       type: 'text',
+      class: "w-[300px]"
     },
     {
       title: 'তারিখ',
@@ -88,6 +89,8 @@ const StudentReports = () => {
                 columns={columns}
                 data={userReports}
                 isFilterColumn={false}
+                rowWrap={false}
+                tdclass="w-[300px]"
               />
             )}
           </div>

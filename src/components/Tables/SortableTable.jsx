@@ -14,6 +14,8 @@ const SortableTable = ({
   close,
   checkboxes = {}, // নতুন প্রপ: চেকবক্স স্টেট
   onCheckboxChange, // নতুন প্রপ: চেকবক্স হ্যান্ডলার
+  rowWrap = true,
+  tdclass
 }) => {
   const [filters, setFilters] = useState({});
   const { currectLanguage } = useSelector((state) => state.language);
@@ -169,9 +171,9 @@ const alignClass = {
               {columns.map((column, cellIndex) => (
                 <td
                   key={cellIndex}
-                  className={`px-3 py-4 font-medium text-theme-dark whitespace-nowrap  ${fontClass} text-${
+                  className={`px-3 py-4 font-medium text-theme-dark ${rowWrap ? 'whitespace-nowrap' : 'whitespace-wrap'}  ${fontClass} text-${
                     column.hozAlign || "start"
-                  }`}
+                  } ${tdclass}`}
                 >
                   {column.render
                     ? column.render(row, rowIndex)
