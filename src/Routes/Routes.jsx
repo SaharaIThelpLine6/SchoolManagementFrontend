@@ -84,6 +84,7 @@ import ClassResult from '../pages/public/ClassResult';
 import ClassResultForm from '../pages/public/ClassResultForm';
 import MaritListForm from '../pages/public/MaritListForm';
 import MaritListResult from '../pages/public/MaritListResult';
+import ExamSchedule from '../pages/userpanel/ExamSchedule';
 import StudentPaymentHistory from '../pages/userpanel/StudentPaymentHistory';
 import StudentPaymentHistoryDetails from '../pages/userpanel/StudentPaymentHistoryDetails';
 import StudentReports from '../pages/userpanel/StudentReports';
@@ -851,6 +852,10 @@ const router = createBrowserRouter([
       {
         path: 'student-results',
         element: <StudentResults pageTitle="Student Payment History Details" />,
+      },
+      {
+        path: 'exam-schedule',
+        element: <ExamSchedule pageTitle="Student Payment History Details" />,
       },
     ],
   },

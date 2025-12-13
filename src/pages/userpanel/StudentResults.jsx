@@ -88,7 +88,7 @@ const StudentResults = () => {
   ];
 
   return (
-    <div className="font-SolaimanLipi bg-white rounded-xl shadow-lg print:hidden p-3">
+    <div className="font-SolaimanLipi bg-white rounded-xl shadow-lg print:hidden p-3 mb-5">
       {/* Fix: Pass tableData directly as an array */}
       <div className="py-3">
         <AreaChart tableData={tableData} />

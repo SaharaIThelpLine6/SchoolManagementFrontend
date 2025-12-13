@@ -24,11 +24,15 @@ export const userPanelUserInfo = createApi({
     geStudentResults: builder.query({
       query: () => `user_result_list`,
     }),
+    getStudentRoutines: builder.query({
+      query: () => `exam_routine`,
+    }),
   }),
 });
 
 export const {
   useGetUserDetailsQuery,
   useGeAllReportsQuery,
-  useGeStudentResultsQuery
+  useGeStudentResultsQuery,
+  useGetStudentRoutinesQuery
 } = userPanelUserInfo;

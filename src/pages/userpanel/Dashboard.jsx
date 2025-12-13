@@ -183,7 +183,10 @@ const Dashboard = () => {
             <h4 className="font-bold text-[18px]">চারিত্রিক রির্পোট</h4>
           </a>
 
-          <a href={`#`} className="py-4 px-4  text-center">
+          <a
+            href={`/${schoolid}/dashboard/exam-schedule`}
+            className="py-4 px-4  text-center"
+          >
             <div className="text-white py-2 px-3 bg-[#FFC75F] inline-block rounded-[10px]">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

@@ -279,21 +279,22 @@ export const feeStatus = [
   { id: 1, name: 'বকেয়া' },
   { id: 2, name: 'উভয়' },
 ];
+
 export const oneLanguageExamReport = [
   {
     id: 1, // Bangla
     pdfList: [
-      { name: 'one', PdfID: 1 },
-      { name: 'two', PdfID: 2 },
+      { name: 'এক কলামে স্বাক্ষরসহ', PdfID: 1 },
+      { name: 'শিক্ষার্থীর নামসহ দুই কলামে', PdfID: 2 },
     ],
   },
   {
     id: 2, // Arabic
     pdfList: [
-      { name: 'one', PdfID: 1 },
-      { name: 'two', PdfID: 2 },
-      { name: 'three', PdfID: 3 },
-      { name: 'four', PdfID: 4 },
+      { name: 'শিক্ষার্থীর নামসহ দুই কলামে', PdfID: 1 },
+      { name: 'শিক্ষার্থীর নামসহ A5', PdfID: 2 },
+      { name: 'শিক্ষার্থীর নামসহ দুই হেডিং', PdfID: 3 },
+      { name: 'নামের সাথে ঠিকানাসহ এক কলামে', PdfID: 4 },
     ],
   },
 ];
@@ -302,15 +303,15 @@ export const threeLanguageExamReport = [
   {
     id: 1,
     pdfList: [
-      { name: 'one', PdfID: 1 },
-      { name: 'two', PdfID: 2 },
+      { name: 'পরীক্ষার রুটির থেকে', PdfID: 1 },
+      { name: 'পরীক্ষার রুটির বিহীন', PdfID: 2 },
     ],
   },
   {
     id: 2,
     pdfList: [
-      { name: 'one', PdfID: 1 },
-      { name: 'two', PdfID: 2 },
+      { name: 'পরীক্ষার রুটির থেকে', PdfID: 1 },
+      { name: 'পরীক্ষার রুটির বিহীন', PdfID: 2 },
     ],
   },
 ];
@@ -319,33 +320,36 @@ export const fourLanguageExamReport = [
   {
     id: 1,
     pdfList: [
-      { name: 'one', PdfID: 1 },
-      { name: 'two', PdfID: 2 },
-      { name: 'three', PdfID: 3 },
-      { name: 'four', PdfID: 4 },
+      { name: 'শিক্ষার্থীর নামসহ দুই কলামে', PdfID: 1 },
+      { name: 'শিক্ষার্থীর নাম ছাড়া দুই কলামে', PdfID: 2 },
+      { name: 'শিক্ষার্থীর নামসহ A5', PdfID: 3 },
+      { name: 'শিক্ষার্থীর নাম ছাড়া A5', PdfID: 4 },
     ],
   },
   {
     id: 2,
     pdfList: [
-      { name: 'one', PdfID: 1 },
-      { name: 'two', PdfID: 2 },
-      { name: 'three', PdfID: 3 },
-      { name: 'four', PdfID: 4 },
-      { name: 'five', PdfID: 5 },
-      { name: 'six', PdfID: 6 },
+      { name: 'শিক্ষার্থীর নামসহ দুই কলামে', PdfID: 1 },
+      { name: 'শিক্ষার্থীর নাম ছাড়া দুই কলামে', PdfID: 2 },
+      { name: 'শিক্ষার্থীর নাম ছাড়া A5', PdfID: 3 },
+      { name: 'নামসহ দুই কলামে দুই হেডিং', PdfID: 4 },
+      { name: 'নামসহ এক কলাম Legal', PdfID: 5 },
+      { name: 'নম্বর ও স্বাক্ষরপত্র একত্রে', PdfID: 6 },
     ],
   },
 ];
-
+export const fiveLanguageExamReport = [
+  { PdfID: 1, name: 'শিক্ষার্থীর নামসহ দুই কলামে' },
+  { PdfID: 2, name: 'শিক্ষার্থীর নাম ছাড়া দুই কলামে' },
+];
 export const sixLanguageExamReport = [
   {
     id: 1,
-    pdfList: [{ name: 'one', PdfID: 1 }],
+    pdfList: [{ name: 'নামসহ দুই কলামে দুই হেডিং', PdfID: 1 }],
   },
   {
     id: 2,
-    pdfList: [{ name: 'one', PdfID: 1 }],
+    pdfList: [{ name: 'নামসহ দুই কলামে দুই হেডিং', PdfID: 1 }],
   },
 ];
 
@@ -353,17 +357,17 @@ export const sevenLanguageExamReport = [
   {
     id: 1,
     pdfList: [
-      { name: 'one', PdfID: 1 },
-      { name: 'two', PdfID: 2 },
-      { name: 'three', PdfID: 3 },
+      { name: 'সাদা-কালো', PdfID: 1 },
+      { name: 'রঙিন', PdfID: 2 },
+      { name: 'সীট প্লান', PdfID: 3 },
     ],
   },
   {
     id: 2,
     pdfList: [
-      { name: 'one', PdfID: 1 },
-      { name: 'two', PdfID: 2 },
-      { name: 'three', PdfID: 3 },
+      { name: 'সাদা-কালো', PdfID: 1 },
+      { name: 'রঙিন', PdfID: 2 },
+      { name: 'সীট প্লান', PdfID: 3 },
     ],
   },
 ];

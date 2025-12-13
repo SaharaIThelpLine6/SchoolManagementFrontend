@@ -9,6 +9,7 @@ import {
   colorStatus,
   examReports,
   examVacationStatus,
+  fiveLanguageExamReport,
   fourLanguageExamReport,
   language,
   oneLanguageExamReport,
@@ -26,7 +27,6 @@ import { useGetUserReportQuery } from '../features/userReports/userReportsSlice'
 import useTranslate from '../utils/Translate';
 import BanglaOneColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/BanglaOneColumn';
 import BanglaTwoColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/BanglaTwoColumn';
-
 
 const ExamReport = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -226,8 +226,7 @@ const ExamReport = ({ pageTitle }) => {
     );
     console.log('Submitted params:', params);
     // setQueryParams(params);
-    // window.print();
-
+    window.print();
   };
 
   // selected PDF এর নাম বের করার ফাংশন
@@ -366,6 +365,16 @@ const ExamReport = ({ pageTitle }) => {
                   registerKey="PdfID"
                   valueField="PdfID"
                   options={pdfOptions}
+                  require="This Field is required"
+                />
+              )}
+              {selectedReportID === 5 && (
+                <DefaultSelect
+                  label={translate('PDF Select')}
+                  nameField="name"
+                  registerKey="PdfID"
+                  valueField="PdfID"
+                  options={fiveLanguageExamReport}
                   require="This Field is required"
                 />
               )}
