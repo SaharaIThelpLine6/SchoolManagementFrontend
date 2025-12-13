@@ -34,6 +34,7 @@ import { userPanelVerifyUser } from "../features/userPanel/userLoginVerify/userl
 import { userPanelRegistrationUser } from "../features/userPanel/userRegistration/userRegistrationQuerySlice";
 import { userReportsSlice } from "../features/userReports/userReportsSlice";
 import { userTypeSlice } from "../features/userType/userTypeSlice";
+import { panelNotificationQuerySlice } from "../features/userPanel/panelNotification/panelNotificationQuerySlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -72,6 +73,7 @@ const store = configureStore({
     [userPanelVerifyUser.reducerPath]: userPanelVerifyUser.reducer,
     [userPanelUserInfo.reducerPath]: userPanelUserInfo.reducer,
     [studentPaymentSlice.reducerPath]: studentPaymentSlice.reducer,
+    [panelNotificationQuerySlice.reducerPath]: panelNotificationQuerySlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -96,7 +98,8 @@ const store = configureStore({
       .concat(userPanelRegistrationUser.middleware)
       .concat(userPanelUserInfo.middleware)
       .concat(studentPaymentSlice.middleware)
-      .concat(userPanelVerifyUser.middleware),
+      .concat(userPanelVerifyUser.middleware)
+      .concat(panelNotificationQuerySlice.middleware),
 });
 
 export default store;

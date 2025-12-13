@@ -10,6 +10,8 @@ import { useGetUserDetailsQuery } from '../features/userPanel/userInfo/userInfoQ
 import { useVerifyUserPanelTokenMutation } from '../features/userPanel/userLoginVerify/userloginVerifyQuerySlice';
 import { showModal, showSideBarModal } from '../utils/ModalControlar';
 // import { subscribeUser } from "../pushNotifications";
+import { useNotificationListQuery, useSubscribeNotificationMutation } from "../features/userPanel/panelNotification/panelNotificationQuerySlice";
+import DropdownNotification from "../components/Header/DropdownNotification";
 import logo from '/saharaItlogo.png';
 
 export default function UserPanel({ children }) {
@@ -68,6 +70,59 @@ export default function UserPanel({ children }) {
     isLoading: isuserDetailsLoading,
     isError: isuserDetailsError,
   } = useGetUserDetailsQuery(currentSession);
+  const {
+    data: notificationList,
+    isLoading: isNotificationListLoading,
+    isError: isNotificationListError,
+  } = useNotificationListQuery(currentSession);
+
+  const [
+    subscribeUser,
+    { isLoading, isError, isSuccess, data: newApplicationResponse },
+  ] = useSubscribeNotificationMutation();
+
+  useEffect(() => {
+    console.log("user usee effect");
+
+    if ("Notification" in window) {
+      if (Notification.permission === "default") {
+        setTimeout(async () => {
+          if (!("Notification" in window)) {
+            console.log("This browser does not support notifications.");
+            return;
+          }
+
+          if (!("serviceWorker" in navigator)) {
+            console.log("Service workers are not supported by your browser.");
+            return;
+          }
+          const permission = Notification.permission;
+          if (permission === "granted") {
+            console.log("Notifications already enabled.");
+            return;
+          }
+
+          if (permission === "denied") {
+            console.log("Notifications were previously denied.");
+            return;
+          }
+          try {
+            const register = await navigator.serviceWorker.register("/sw.js");
+
+            const subscription = await register.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: "BM3sD-RZ1a2XI11xcfffRIffkwFo04KnAsgJFPFJepv0-it8BnFC89ksOqg_BIWyXgwHCx3UZXaCdwZtroO4PjQ"
+            });
+            subscribeUser(subscription)
+
+            console.log("Successfully subscribed for notifications!");
+          } catch (error) {
+            console.error("Failed to subscribe:", error);
+          }
+        }, 2000);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     dispatch(fetchResultFieldData(schoolid));
@@ -90,9 +145,9 @@ export default function UserPanel({ children }) {
   const handleProfileModal = useCallback(() => {
     showSideBarModal('', 'USER_PANEL_PROFILE_VIEW');
   }, []);
-  const bufferConveter = (bufferData) => {
+   const bufferConveter = (bufferData) => {
     if (!bufferData) {
-      return '/logo.png';
+      return "/logo.png";
     }
     const buffer = Buffer.from(bufferData);
     const base64String = buffer.toString('base64');
@@ -132,7 +187,7 @@ export default function UserPanel({ children }) {
                 <div className="text-[12px]">{schoolData?.InstitutionName}</div>
               </div>
               <div className="flex items-center gap-2">
-                <div className="icon text-white-600 py-1 px-1 rounded-[4px] relative">
+                {/* <div className="icon text-white-600 py-1 px-1 rounded-[4px] relative">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width={26}
@@ -152,7 +207,8 @@ export default function UserPanel({ children }) {
                   <div className="unread_notification_count absolute text-red-600 bg-red-200 h-[22px] w-[22px] rounded-full flex items-center justify-center -top-[6px] -right-[6px] text-[12px] font-bold">
                     10
                   </div>
-                </div>
+                </div> */}
+              <DropdownNotification notificationList={notificationList} />
                 <div className="icon text-red-600 py-1 px-1">
                   <a href={`/${schoolid}/dashboard/profile-details`}>
                     <img
@@ -171,12 +227,16 @@ export default function UserPanel({ children }) {
               </div>
             </div>
           </div>
+
         </div>
-      </header>
-      <Outlet />
+
+      </div>
       {/* <button onClick={subscribeUser}>
       Enable Notifications
     </button> */}
+    </header>
+    <Outlet />
+
       <div className="mobile_footer_menu shadow-[0_0_10px_rgba(0,0,0,0.25)] bg-white py-2 fixed w-full bottom-0 z-10">
         <div className="grid grid-cols-3">
           <a href={`/${schoolid}/dashboard`} className="text-center">
