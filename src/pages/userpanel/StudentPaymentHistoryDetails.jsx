@@ -81,7 +81,7 @@ const StudentPaymentHistoryDetails = () => {
               <div className="flex flex-wrap justify-center gap-6 mt-4 text-sm">
                 <span className="flex items-center gap-1">
                   <SvgIcon name="FaUser" className="text-blue-600" /> প্রধান
-                  মুহতারিম: {studentInfo.PrincipalName}
+                  মুহতামিম: {studentInfo.PrincipalName}
                 </span>
                 <span className="flex items-center gap-1">
                   <SvgIcon name="FaMoneyBill" className="text-green-600" />

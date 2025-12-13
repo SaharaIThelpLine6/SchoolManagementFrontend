@@ -87,12 +87,13 @@ import MaritListResult from '../pages/public/MaritListResult';
 import StudentPaymentHistory from '../pages/userpanel/StudentPaymentHistory';
 import StudentPaymentHistoryDetails from '../pages/userpanel/StudentPaymentHistoryDetails';
 import StudentReports from '../pages/userpanel/StudentReports';
+import StudentResults from '../pages/userpanel/StudentResults';
 import UserLogin from '../pages/userpanel/UserLogin';
+import UserProfile from '../pages/userpanel/UserProfile';
 import UserRegistration from '../pages/userpanel/UserRegistration';
 import Dashboard from '../pages/userpanel/dashboard';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
-import UserProfile from '../pages/userpanel/UserProfile';
 
 const router = createBrowserRouter([
   {
@@ -845,9 +846,11 @@ const router = createBrowserRouter([
       },
       {
         path: 'profile-details',
-        element: (
-          <UserProfile pageTitle="Student Payment History Details" />
-        ),
+        element: <UserProfile pageTitle="Student Payment History Details" />,
+      },
+      {
+        path: 'student-results',
+        element: <StudentResults pageTitle="Student Payment History Details" />,
       },
     ],
   },
