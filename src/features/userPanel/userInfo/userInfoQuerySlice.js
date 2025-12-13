@@ -21,10 +21,14 @@ export const userPanelUserInfo = createApi({
     geAllReports: builder.query({
       query: (sessionId) => `user_all_report?sessionId=${sessionId}`,
     }),
+    geStudentResults: builder.query({
+      query: () => `user_result_list`,
+    }),
   }),
 });
 
 export const {
   useGetUserDetailsQuery,
-  useGeAllReportsQuery
+  useGeAllReportsQuery,
+  useGeStudentResultsQuery
 } = userPanelUserInfo;
