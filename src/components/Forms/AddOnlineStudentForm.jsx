@@ -284,15 +284,15 @@ const AddOnlineStudentForm = ({ schoolid }) => {
     setButtonDisable(true);
     try {
       // Convert all text fields to Bijoy encoding
-      const convertedData = Object.fromEntries(
-        Object.entries(data).map(([key, value]) =>
-          typeof value === 'string'
-            ? [key, convertBijoyToBengali(value)]
-            : [key, value]
-        )
-      );
+      // const convertedData = Object.fromEntries(
+      //   Object.entries(data).map(([key, value]) =>
+      //     typeof value === 'string'
+      //       ? [key, convertBijoyToBengali(value)]
+      //       : [key, value]
+      //   )
+      // );
 
-      await addStudent({ dataBody: convertedData, id: schoolid }).unwrap();
+      await addStudent({ dataBody: data, id: schoolid }).unwrap();
     } catch (err) {
       setButtonDisable(false);
       console.error('Error submitting data:', err);

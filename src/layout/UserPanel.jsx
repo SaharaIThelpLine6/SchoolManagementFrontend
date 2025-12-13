@@ -230,7 +230,6 @@ export default function UserPanel({ children }) {
 
         </div>
 
-      </div>
       {/* <button onClick={subscribeUser}>
       Enable Notifications
     </button> */}
