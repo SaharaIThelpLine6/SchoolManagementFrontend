@@ -25,8 +25,12 @@ import { useGetResidentialQuery } from '../features/settings/settingsQuerySlice'
 import { fetchSettingsData } from '../features/settings/settingsSlice';
 import { useGetUserReportQuery } from '../features/userReports/userReportsSlice';
 import useTranslate from '../utils/Translate';
+import ArobicOneColumnA5 from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/ArobicOneColumnA5';
+import ArobicTwoColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/ArobicTwoColumn';
 import BanglaOneColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/BanglaOneColumn';
 import BanglaTwoColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/BanglaTwoColumn';
+import NameWithAddressOneColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/NameWithAddressOneColumn';
+import StudentNameWithHolding from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/StudentNameWithHolding';
 
 const ExamReport = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -391,13 +395,33 @@ const ExamReport = ({ pageTitle }) => {
 
       {/* StatisticsOfAllExaminees কম্পোনেন্টে প্রয়োজনীয় props পাস করুন */}
       <div className="hidden print:block">
+        {/* ১. পরীক্ষার ফি উত্তোলন তালিকা */}
         {Number(selectedReportID) === 1 &&
           Number(languageID) === 1 &&
           Number(selectedPdfID) === 1 && <BanglaOneColumn />}
-
         {Number(selectedReportID) === 1 &&
           Number(languageID) === 1 &&
           Number(selectedPdfID) === 2 && <BanglaTwoColumn />}
+        {Number(selectedReportID) === 1 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 1 && <ArobicTwoColumn />}
+        {Number(selectedReportID) === 1 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 2 && <ArobicOneColumnA5 />}
+        {Number(selectedReportID) === 1 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 3 && <NameWithAddressOneColumn />}
+        {Number(selectedReportID) === 1 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 4 && <StudentNameWithHolding />}
+        {/* ২. প্রবেশ পত্র */}
+        {/* ৩. দস্তখত পত্র */}
+        {/* ৪. নম্বর পত্র */}
+        {/* 5. সিট নং */}
+        {/* 6. স্বাক্ষরপত্র ও নম্বরসীট */}
+        {/* 7. সকল পরীক্ষার্থীর পরিসংখ্যান */}
+        {/* 8. নম্বরপত্র ভর্তি সিরিয়ালে */}
+        {/* 9. নম্বরপত্র প্যাকেট */}
       </div>
 
       {/* <StatisticsOfAllExaminees
