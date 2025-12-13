@@ -13,7 +13,7 @@ import { showModal, showSideBarModal } from '../utils/ModalControlar';
 import { useNotificationListQuery, useSubscribeNotificationMutation } from "../features/userPanel/panelNotification/panelNotificationQuerySlice";
 import DropdownNotification from "../components/Header/DropdownNotification";
 import logo from '/saharaItlogo.png';
-
+const WEB_PUSH_PUBLIC_KEY = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY;
 export default function UserPanel({ children }) {
   const token = localStorage.getItem('user_panel_token');
   console.log(token);
@@ -111,7 +111,7 @@ export default function UserPanel({ children }) {
 
             const subscription = await register.pushManager.subscribe({
               userVisibleOnly: true,
-              applicationServerKey: "BM3sD-RZ1a2XI11xcfffRIffkwFo04KnAsgJFPFJepv0-it8BnFC89ksOqg_BIWyXgwHCx3UZXaCdwZtroO4PjQ"
+              applicationServerKey: WEB_PUSH_PUBLIC_KEY
             });
             subscribeUser(subscription)
 
