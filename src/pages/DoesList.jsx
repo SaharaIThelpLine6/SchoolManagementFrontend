@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 
 import { setPageName } from "../features/auth/authSlice";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
-import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
+import { useGetClassListQuery, useGetSubClassListQuery } from "../features/class/classQuerySlice";
 import {
   useGetExamFeeSettingQuery,
   usePostExamFeeSettingMutation,
@@ -45,7 +45,7 @@ const DoesList = ({ pageTitle }) => {
   const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
 
   const { data: sessionData } = useGetSessionsQuery();
-  const { data: subClassListData } = useGetSubClassListQuery();
+  const { data: classListData } = useGetClassListQuery();
 
   const {
     data: examFeeSettingData,
@@ -86,11 +86,13 @@ const DoesList = ({ pageTitle }) => {
 
   // Data Create Exam Fee Setting
   const onSubmit = async (data) => {
-    if (!data.SessionID || !data.SubClassID || !data.ExamID) {
+    console.log(data);
+    
+    if (!data.SessionID || !data.ClassID) {
       Swal.fire({
         icon: "warning",
         title: "ফর্ম অসম্পূর্ণ",
-        text: "Session, SubClass এবং Exam নির্বাচন করুন।",
+        text: "Session, SubClass নির্বাচন করুন।",
       });
       return;
     }
@@ -192,6 +194,7 @@ const DoesList = ({ pageTitle }) => {
   const duesTypeOptions = [
     { id: "1", label: translate("Creditor") },
     { id: "2", label: translate("Debtor") },
+    { id: "3", label: translate("Both") }
   ];
   const searchOptions = [
     { id: "1", label: translate("With ID") },
@@ -231,11 +234,11 @@ const DoesList = ({ pageTitle }) => {
               unicode={true}
             />
             <DefaultSelect
-              label="SubClass"
-              options={subClassListData ?? []}
-              valueField="SubClassID"
-              nameField="SubClass"
-              registerKey="SubClassID"
+              label="Class"
+              options={classListData ?? []}
+              valueField="ClassID"
+              nameField="ClassName"
+              registerKey="ClassID"
               unicode={true}
             />
             {/* Selection Fieldset */}
@@ -249,7 +252,7 @@ const DoesList = ({ pageTitle }) => {
                     key={option.id}
                     option={option}
                     register={methods.register}
-                    name="ClassType"
+                    name="DueType"
                   />
                 ))}
               </div>
@@ -265,7 +268,7 @@ const DoesList = ({ pageTitle }) => {
                     key={option.id}
                     option={option}
                     register={methods.register}
-                    name="ClassType"
+                    name="SearchType"
                   />
                 ))}
               </div>

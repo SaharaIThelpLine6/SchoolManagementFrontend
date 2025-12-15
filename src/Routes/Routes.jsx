@@ -95,6 +95,8 @@ import UserRegistration from '../pages/userpanel/UserRegistration';
 import Dashboard from '../pages/userpanel/dashboard';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
+import ResultReport from '../pages/ResultReport';
+import MadrashaHomePage from '../pages/public/MadrashaHomePage';
 
 const router = createBrowserRouter([
   {
@@ -500,7 +502,8 @@ const router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.result_report}
                   >
-                    <PointVReport pageTitle="Average V: Report" />
+                    {/* result report */}
+                    <ResultReport pageTitle="Average V: Report" />
                   </RequirePermission>
                 ),
               },
@@ -801,7 +804,8 @@ const router = createBrowserRouter([
     path: '/:schoolid',
     element: <PublicLayout />,
     children: [
-      { index: true, element: <ResultRequest pageTitle="Result Page" /> },
+      { index: true, element: <MadrashaHomePage pageTitle="Result Page" /> },
+      { path: 'student_result', element: <ResultRequest pageTitle="Result Page" /> },
       { path: 'admission-registration', element: <AdmissionRegistration /> },
       {
         path: 'students/:seassonid/:examid/:classid/:userid',

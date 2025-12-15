@@ -477,7 +477,7 @@ const StudentsReport = () => {
     } else {
       console.warn('Cannot print: Data not ready or component not set.');
     }
-    reset();
+    // reset();
   };
 
   return (

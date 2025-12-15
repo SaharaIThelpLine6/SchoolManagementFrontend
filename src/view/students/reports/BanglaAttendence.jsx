@@ -87,7 +87,7 @@ const BanglaAttendence = ({ reportData, SubClassID, SessionID }) => {
           মাস:
         </div>
       </div>
-      <div className="">
+      <div>
         <table className="w-full border-collapse table-fixed text-xs">
           {" "}
           {/* Added text-xs */}

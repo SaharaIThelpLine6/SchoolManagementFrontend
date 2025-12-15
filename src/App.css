@@ -288,6 +288,18 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
     
 } */
 
+.up_down_animation {
+    animation: up-down 2s ease-in-out infinite alternate-reverse both;
+}
+@keyframes up-down {
+  0% {
+    transform: translateY(10px);
+  }
+  100% {
+      transform: translateY(-10px);
+  }
+  
+}
 @media print {
   .break-after-page {
     page-break-after: always;
@@ -295,6 +307,24 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
   .shadow-lg{
     box-shadow: none !important;
   }
+
+  @page {
+    margin:2mm;
+    margin-top: 4mm;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
 }
+
 
 

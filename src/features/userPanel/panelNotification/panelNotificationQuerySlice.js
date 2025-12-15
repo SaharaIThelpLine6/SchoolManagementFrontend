@@ -22,14 +22,24 @@ export const panelNotificationQuerySlice = createApi({
             }),
             invalidatesTags: ['Notification'],
         }),
+        viewNotification: builder.mutation({
+            query: (notification) => ({
+                url: '/upadat_notification',
+                method: 'POST',
+                body: notification,
+            }),
+            invalidatesTags: ['Notification'],
+        }),
 
         notificationList: builder.query({
             query: (sessionId) => `notification_list?sessionId=${sessionId}`,
+            providesTags: ['Notification']
         }),
     }),
 });
 
 export const {
     useSubscribeNotificationMutation,
+    useViewNotificationMutation,
     useNotificationListQuery
 } = panelNotificationQuerySlice;

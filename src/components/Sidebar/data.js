@@ -233,7 +233,7 @@ export const menuData = [
       },
       {
         id: '2',
-        name: 'Average V: Report',
+        name: 'Result Report',
         route: '/result/report',
       },
     ],

@@ -73,9 +73,13 @@ const Header = () => {
         </div>
 
         <div className="flex flex-row gap-2">
-          <div className="block sm:hidden">
-            <TranslateButton />
-          </div>
+          
+            <button
+              onClick={handleOpenModal}
+              className="text-white bg-cyan-500 hover:bg-cyan-600 font-medium rounded-full text-xs px-4 py-1.5"
+            >
+              Pay now
+            </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="text-xl text-gray-700"
@@ -143,12 +147,9 @@ const Header = () => {
                 Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
               </p>
             )}
-            <button
-              onClick={handleOpenModal}
-              className="text-white bg-cyan-500 hover:bg-cyan-600 font-medium rounded-full text-xs px-4 py-1.5"
-            >
-              Pay now
-            </button>
+          <div className="block sm:hidden">
+            <TranslateButton />
+          </div>
             <DropdownNotification />
             <DropdownUser />
           </div>

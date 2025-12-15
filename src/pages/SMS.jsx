@@ -210,7 +210,7 @@ const SMS = ({ pageTitle }) => {
           <div className="flex gap-3 text-sm md:text-base text-gray-700 font-medium">
             <h3>mask: {checkBalanceData?.mask}</h3>
             <h3>nonmask: {checkBalanceData?.nonmask}</h3>
-            <h3>voice: {checkBalanceData?.voice}</h3>
+            {/* <h3>voice: {checkBalanceData?.voice}</h3> */}
           </div>
         </div>
       </div>

@@ -1,10 +1,24 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ClickOutside from '../ClickOutside';
+import { useViewNotificationMutation } from '../../features/userPanel/panelNotification/panelNotificationQuerySlice';
 
 const DropdownNotification = ({ notificationList }) => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
+const navigate = useNavigate()
+  const [view_notification] = useViewNotificationMutation()
+    const handleNotificationClick = async (notification) => {
+    try {
+      await view_notification({id: notification.ID}).unwrap();
+      // navigate(notification.link);
+    } catch (error) {
+      console.error(error);
+
+      // Optional: still navigate even if request fails
+      // navigate(notification.link);
+    }
+  };
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -60,16 +74,17 @@ const DropdownNotification = ({ notificationList }) => {
                 {
                   notificationList && notificationList.map((notification)=>(
                      <li key={notification.ID} className={`${notification.isView == 0 ? 'bg-sky-200 hover:bg-sky-200' : ''}`}>
-                      <Link
-                        className="flex flex-col gap-2.5 border-b border-stroke px-4.5 py-3"
-                        to={notification.link}
+                      <button
+                      type='button'
+                        className="flex flex-col gap-2.5 border-b border-stroke px-4.5 py-3 w-full text-start"
+                        onClick={()=>{handleNotificationClick(notification)}}
                       >
                         <p className="text-sm">
                           {notification.message}
                         </p>
 
                         <p className="text-xs">{new Date(notification.CreateAt).toLocaleString()}</p>
-                      </Link>
+                      </button>
                     </li>
                   ))
                 }
