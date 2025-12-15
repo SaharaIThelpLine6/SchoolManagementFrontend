@@ -1,61 +1,57 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
-import { fetchResultFieldData } from "../../features/studentResultPublicView/studentResultPublicViewSlice";
-import { useGeAllReportsQuery, useGetUserDetailsQuery } from "../../features/userPanel/userInfo/userInfoQuerySlice";
-// import { useGetUserDetailsQuery } from "../../features/userPanel/userInfo/userInfoQuerySlice";
-import { Buffer } from "buffer";
+import { Buffer } from 'buffer';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Link, useParams } from 'react-router-dom';
+import { fetchResultFieldData } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
+import {
+  useGeAllReportsQuery,
+  useGetUserDetailsQuery,
+} from '../../features/userPanel/userInfo/userInfoQuerySlice';
+
 const Dashboard = () => {
-  const { schoolid } = useParams()
-  const dispatch = useDispatch()
-  const {
-    data: userDetails,
-    isLoading: isuserDetailsLoading,
-    isError: isuserDetailsError,
-  } = useGetUserDetailsQuery();
-  const {
-    data: userReports,
-    isLoading: isuserReportsLoading,
-    isError: isuserReportsError,
-  } = useGeAllReportsQuery();
+  const { schoolid } = useParams();
+  const dispatch = useDispatch();
+
+  useGetUserDetailsQuery();
+  useGeAllReportsQuery();
+
   const { schoolData } = useSelector((state) => state.studentResultPublicView);
+
   useEffect(() => {
     dispatch(fetchResultFieldData(schoolid));
-  }, [dispatch]);
-  useEffect(() => {
-    console.log(userReports);
-  }, [userReports])
+  }, [dispatch, schoolid]);
 
   const bufferConveter = (bufferData) => {
-    if (!bufferData) {
-      return "/logo.png";
-    }
+    if (!bufferData) return '/logo.png';
     const buffer = Buffer.from(bufferData);
-    const base64String = buffer.toString("base64");
-    const imageSrc = `data:image/png;base64,${base64String}`;
-    return imageSrc;
+    return `data:image/png;base64,${buffer.toString('base64')}`;
   };
 
+  /* ===== COMMON CLASSES (IMAGE LIKE) ===== */
+  const cardClass =
+    'bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center justify-center py-2';
+
+  const titleClass = 'text-sm font-semibold text-blue-700 mt-1';
 
   return (
-    <main className="mian_area pt-4 pb-[100px]">
-      <div className="container mx-auto px-2">
-        <div className="menu grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 mt-4 gap-5">
-          <a href={`#`} className="py-4 px-4  text-center">
-            {/* className="py-4 px-4 shadow-[0_0_10px_rgba(0,0,0,0.25)]
-            rounded-[10px] text-center" */}
-            <div className="text-white py-2 px-3 bg-teal-500 inline-block rounded-[10px]">
+    <main className="min-h-screen pt-4 pb-24 relative z-10">
+      <div className="container mx-auto px-3">
+        {/* ===== MENU GRID ===== */}
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          {/* উপস্থিতি */}
+          <Link to="#" className={cardClass}>
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={40}
-                height={40}
+                width={26}
+                height={26}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-calendar-week"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-calendar-week text-blue-600"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" />
@@ -71,25 +67,26 @@ const Dashboard = () => {
                 <path d="M10.01 17h.005" />
               </svg>
             </div>
-            <h4 className="font-bold text-[18px]">উপস্থিতি</h4>
-          </a>
-          <a
-            href={`/${schoolid}/dashboard/student-results`}
-            target="_parent"
-            className="py-4 px-4  text-center"
+            <h4 className={titleClass}>উপস্থিতি</h4>
+          </Link>
+
+          {/* ফলাফল */}
+          <Link
+            to={`/${schoolid}/dashboard/student-results`}
+            className={cardClass}
           >
-            <div className="text-white py-2 px-3 bg-[#3A0088] inline-block rounded-[10px]">
+            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={40}
-                height={40}
+                width={26}
+                height={26}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-clipboard-text text-center mx-auto"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-clipboard-text text-center mx-auto text-indigo-600"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" />
@@ -98,25 +95,26 @@ const Dashboard = () => {
                 <path d="M9 16h6" />
               </svg>
             </div>
-            <h4 className="font-bold text-[18px]">ফলাফল ও মার্কশীট</h4>
-          </a>
+            <h4 className={titleClass}>ফলাফল ও মার্কশীট</h4>
+          </Link>
 
-          <a
-            href={`/${schoolid}/dashboard/student-payment-history`}
-            className="py-4 px-4  text-center"
+          {/* ফি ও পেমেন্ট */}
+          <Link
+            to={`/${schoolid}/dashboard/student-payment-history`}
+            className={cardClass}
           >
-            <div className="text-white py-2 px-3 bg-lime-500 inline-block rounded-[10px]">
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={40}
-                height={40}
+                width={26}
+                height={26}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-cash-register"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-cash-register text-green-600"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M21 15h-2.5c-.398 0 -.779 .158 -1.061 .439c-.281 .281 -.439 .663 -.439 1.061c0 .398 .158 .779 .439 1.061c.281 .281 .663 .439 1.061 .439h1c.398 0 .779 .158 1.061 .439c.281 .281 .439 .663 .439 1.061c0 .398 -.158 .779 -.439 1.061c-.281 .281 -.663 .439 -1.061 .439h-2.5" />
@@ -129,22 +127,23 @@ const Dashboard = () => {
                 <path d="M12 17v.01" />
               </svg>
             </div>
-            <h4 className="font-bold text-[18px]">ফি ও পেমেন্ট তথ্য</h4>
-          </a>
+            <h4 className={titleClass}>ফি ও পেমেন্ট তথ্য</h4>
+          </Link>
 
-          <a href={`#`} className="py-4 px-4  text-center">
-            <div className="text-white py-2 px-3 bg-rose-600 inline-block rounded-[10px]">
+          {/* হোমওয়ার্ক */}
+          <Link to="#" className={cardClass}>
+            <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={40}
-                height={40}
+                width={26}
+                height={26}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-align-box-left-stretch"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-align-box-left-stretch text-pink-600"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z" />
@@ -153,25 +152,26 @@ const Dashboard = () => {
                 <path d="M11 7h-4" />
               </svg>
             </div>
-            <h4 className="font-bold text-[18px]">হোমওয়ার্ক / বাড়ির কাজ</h4>
-          </a>
+            <h4 className={titleClass}>হোমওয়ার্ক / বাড়ির কাজ</h4>
+          </Link>
 
-          <a
-            href={`/${schoolid}/dashboard/user_reports`}
-            className="py-4 px-4  text-center"
+          {/* চারিত্রিক রিপোর্ট */}
+          <Link
+            to={`/${schoolid}/dashboard/user_reports`}
+            className={cardClass}
           >
-            <div className="text-white py-2 px-3 bg-[#8D448B] inline-block rounded-[10px]">
+            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={40}
-                height={40}
+                width={26}
+                height={26}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-clipboard-text text-center mx-auto"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-clipboard-text text-center mx-auto text-purple-600"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" />
@@ -180,25 +180,26 @@ const Dashboard = () => {
                 <path d="M9 16h6" />
               </svg>
             </div>
-            <h4 className="font-bold text-[18px]">চারিত্রিক রির্পোট</h4>
-          </a>
+            <h4 className={titleClass}>চারিত্রিক রিপোর্ট</h4>
+          </Link>
 
-          <a
-            href={`/${schoolid}/dashboard/exam-schedule`}
-            className="py-4 px-4  text-center"
+          {/* পরীক্ষার শিডিউল */}
+          <Link
+            to={`/${schoolid}/dashboard/exam-schedule`}
+            className={cardClass}
           >
-            <div className="text-white py-2 px-3 bg-[#FFC75F] inline-block rounded-[10px]">
+            <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={40}
-                height={40}
+                width={26}
+                height={26}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-address-book"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-address-book text-yellow-600"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M20 6v12a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2z" />
@@ -209,57 +210,84 @@ const Dashboard = () => {
                 <path d="M4 16h3" />
               </svg>
             </div>
-            <h4 className="font-bold text-[18px]">পরীক্ষার শিডিউল</h4>
-          </a>
+            <h4 className={titleClass}>পরীক্ষার শিডিউল</h4>
+          </Link>
 
-          <a href={`#`} className="py-4 px-4  text-center">
-            <div className="text-white py-2 px-3 bg-[#364F6B] inline-block rounded-[10px]">
+          {/* ক্লাস রুটিন */}
+          <Link to="#" className={cardClass}>
+            <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center mb-2">
+              <svg
+                width="26"
+                height="26"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-violet-600"
+              >
+                {/* Calendar outer */}
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+
+                {/* Top bar */}
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+
+                {/* Divider */}
+                <line x1="3" y1="10" x2="21" y2="10" />
+
+                {/* Time slots */}
+                <rect x="7" y="13" width="3" height="3" rx="0.5" />
+                <rect x="12" y="13" width="3" height="3" rx="0.5" />
+                <rect x="17" y="13" width="3" height="3" rx="0.5" />
+              </svg>
+            </div>
+            <h4 className={titleClass}>ক্লাস রুটিন</h4>
+          </Link>
+
+          {/* যোগাযোগ */}
+          <Link
+            to={`/${schoolid}/dashboard/teacher-contact`}
+            className={cardClass}
+          >
+            <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={40}
-                height={40}
+                width={26}
+                height={26}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-phone"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-phone text-sky-600"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2" />
               </svg>
             </div>
-            <h4 className="font-bold text-[18px]">যোগাযোগ</h4>
-          </a>
-          <a href={`#`} className="py-4 px-4  text-center">
-            <div className="text-white py-2 px-3 bg-[#845EC2] inline-block rounded-[10px]">
+            <h4 className={titleClass}>যোগাযোগ</h4>
+          </Link>
+
+          {/* অনলাইন ভর্তি - UPDATED WITH PROPER COLORS */}
+          <Link
+            to={`/${schoolid}/dashboard/online-admission`}
+            className={cardClass}
+          >
+            <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center mb-2">
               <svg
-                width="40px"
-                height="40px"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M9 4L9 20M15 4L15 20M3 9H21M3 15H21M6.2 20H17.8C18.9201 20 19.4802 20 19.908 19.782C20.2843 19.5903 20.5903 19.2843 20.782 18.908C21 18.4802 21 17.9201 21 16.8V7.2C21 6.0799 21 5.51984 20.782 5.09202C20.5903 4.71569 20.2843 4.40973 19.908 4.21799C19.4802 4 18.9201 4 17.8 4H6.2C5.07989 4 4.51984 4 4.09202 4.21799C3.71569 4.40973 3.40973 4.71569 3.21799 5.09202C3 5.51984 3 6.07989 3 7.2V16.8C3 17.9201 3 18.4802 3.21799 18.908C3.40973 19.2843 3.71569 19.5903 4.09202 19.782C4.51984 20 5.07989 20 6.2 20Z"
-                  stroke="#fff"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </div>
-            <h4 className="font-bold text-[18px]">ক্লাশ রুটিন</h4>
-          </a>
-          <a href={`#`} className="py-4 px-4  text-center">
-            <div className="text-white py-2 px-3 bg-[#FA6868] inline-block rounded-[10px]">
-              <svg
-                fill="#ffffff"
-                width="40px"
-                height="40px"
+                width="26"
+                height="26"
                 viewBox="0 0 1024 1024"
                 xmlns="http://www.w3.org/2000/svg"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="text-teal-600"
               >
                 <path d="M373.253 420.837h199.885c53.836 0 97.485 43.649 97.485 97.485v3.277c0 53.836-43.649 97.485-97.485 97.485h-235.93c-11.311 0-20.48 9.169-20.48 20.48s9.169 20.48 20.48 20.48h235.93c76.458 0 138.445-61.987 138.445-138.445v-3.277c0-76.458-61.987-138.445-138.445-138.445H373.253c-11.311 0-20.48 9.169-20.48 20.48s9.169 20.48 20.48 20.48z" />
                 <path d="M383.508 327.771l-56.771 56.771c-7.998 7.998-7.998 20.965 0 28.963s20.965 7.998 28.963 0l56.771-56.771c7.998-7.998 7.998-20.965 0-28.963s-20.965-7.998-28.963 0z" />
@@ -269,11 +297,12 @@ const Dashboard = () => {
                 <path d="M983.919 363.184v296.233c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48V363.184c0-11.311-9.169-20.48-20.48-20.48s-20.48 9.169-20.48 20.48z" />
               </svg>
             </div>
-            <h4 className="font-bold text-[18px]">অনলাইন ভর্তি</h4>
-          </a>
+            <h4 className={titleClass}>অনলাইন ভর্তি</h4>
+          </Link>
         </div>
       </div>
     </main>
   );
 };
+
 export default Dashboard;

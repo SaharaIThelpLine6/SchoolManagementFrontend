@@ -25,6 +25,18 @@ import { useGetResidentialQuery } from '../features/settings/settingsQuerySlice'
 import { fetchSettingsData } from '../features/settings/settingsSlice';
 import { useGetUserReportQuery } from '../features/userReports/userReportsSlice';
 import useTranslate from '../utils/Translate';
+import ArobicNumberClassBasedTC from '../view/exam/ExamReportPdf/numberClassBased/ArobicNumberClassBasedTC';
+import ArobicNameWithLegal from '../view/exam/ExamReportPdf/numberLetter/ArobicNameWithLegal';
+import ArobicNameWithTwoColumn from '../view/exam/ExamReportPdf/numberLetter/ArobicNameWithTwoColumn';
+import ArobicNumberStudentWithOutNameA5 from '../view/exam/ExamReportPdf/numberLetter/ArobicNumberStudentWithOutNameA5';
+import BanglaNumberStudentNameWithA5 from '../view/exam/ExamReportPdf/numberLetter/BanglaNumberStudentNameWithA5';
+import BanglaNumberStudentWithOutNameA5 from '../view/exam/ExamReportPdf/numberLetter/BanglaNumberStudentWithOutNameA5';
+import BanglaNumberWithTwoColumn from '../view/exam/ExamReportPdf/numberLetter/BanglaNumberWithTwoColumn';
+import BanglaWithOutNameColumn from '../view/exam/ExamReportPdf/numberLetter/BanglaWithOutNameColumn';
+import AdmissionSerialNWOTC from '../view/exam/ExamReportPdf/numberLetterAdmissionSerial/AdmissionSerialNWOTC';
+import AdmissionSerialNWTC from '../view/exam/ExamReportPdf/numberLetterAdmissionSerial/AdmissionSerialNWTC';
+import ExamRoutine from '../view/exam/ExamReportPdf/signatureLetter/ExamRoutine';
+import WithoutExamRoutine from '../view/exam/ExamReportPdf/signatureLetter/WithoutExamRoutine';
 import ArobicOneColumnA5 from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/ArobicOneColumnA5';
 import ArobicTwoColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/ArobicTwoColumn';
 import BanglaOneColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/BanglaOneColumn';
@@ -402,6 +414,7 @@ const ExamReport = ({ pageTitle }) => {
         {Number(selectedReportID) === 1 &&
           Number(languageID) === 1 &&
           Number(selectedPdfID) === 2 && <BanglaTwoColumn />}
+          {/* Arob */}
         {Number(selectedReportID) === 1 &&
           Number(languageID) === 2 &&
           Number(selectedPdfID) === 1 && <ArobicTwoColumn />}
@@ -416,12 +429,66 @@ const ExamReport = ({ pageTitle }) => {
           Number(selectedPdfID) === 4 && <StudentNameWithHolding />}
         {/* ২. প্রবেশ পত্র */}
         {/* ৩. দস্তখত পত্র */}
+        {Number(selectedReportID) === 3 &&
+          Number(languageID) === 1 &&
+          Number(selectedPdfID) === 1 && <ExamRoutine />}
+        {Number(selectedReportID) === 3 &&
+          Number(languageID) === 1 &&
+          Number(selectedPdfID) === 2 && <WithoutExamRoutine />}
+        {/* Arobic 2 pdf baki ase */}
         {/* ৪. নম্বর পত্র */}
-        {/* 5. সিট নং */}
+        {Number(selectedReportID) === 4 &&
+          Number(languageID) === 1 &&
+          Number(selectedPdfID) === 1 && <BanglaNumberWithTwoColumn />}
+        {Number(selectedReportID) === 4 &&
+          Number(languageID) === 1 &&
+          Number(selectedPdfID) === 2 && <BanglaWithOutNameColumn />}
+        {Number(selectedReportID) === 4 &&
+          Number(languageID) === 1 &&
+          Number(selectedPdfID) === 3 && <BanglaNumberStudentNameWithA5 />}
+        {Number(selectedReportID) === 4 &&
+          Number(languageID) === 1 &&
+          Number(selectedPdfID) === 4 && <BanglaNumberStudentWithOutNameA5 />}
+
+        {Number(selectedReportID) === 4 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 1 && <ArobicNameWithTwoColumn />}
+        {Number(selectedReportID) === 4 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 2 && <ArobicNameWithTwoColumn />}
+        {Number(selectedReportID) === 4 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 3 && <ArobicNumberStudentWithOutNameA5 />}
+        {Number(selectedReportID) === 4 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 3 && <ArobicNumberStudentWithOutNameA5 />}
+        {Number(selectedReportID) === 4 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 4 && <ArobicNumberStudentWithOutNameA5 />}
+        {Number(selectedReportID) === 4 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 5 && <ArobicNameWithLegal />}
+        {Number(selectedReportID) === 4 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 6 && <ArobicNameWithLegal />}
+
+        {/* 5. নম্বরপত্র ভর্তি সিরিয়ালে */}
+        {Number(selectedReportID) === 5 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 1 && <AdmissionSerialNWTC />}
+        {Number(selectedReportID) === 5 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 2 && <AdmissionSerialNWOTC />}
         {/* 6. স্বাক্ষরপত্র ও নম্বরসীট */}
-        {/* 7. সকল পরীক্ষার্থীর পরিসংখ্যান */}
+        {Number(selectedReportID) === 6 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 1 && <ArobicNumberClassBasedTC />}
+        {/* 7. সিট নং */}
+        {Number(selectedReportID) === 6 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 1 && <ArobicNumberClassBasedTC />}
         {/* 8. নম্বরপত্র ভর্তি সিরিয়ালে */}
-        {/* 9. নম্বরপত্র প্যাকেট */}
+        {/* 9. সকল পরীক্ষার্থীর পরিসংখ্যান  */}
       </div>
 
       {/* <StatisticsOfAllExaminees

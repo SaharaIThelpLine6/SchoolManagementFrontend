@@ -85,10 +85,12 @@ import ClassResultForm from '../pages/public/ClassResultForm';
 import MaritListForm from '../pages/public/MaritListForm';
 import MaritListResult from '../pages/public/MaritListResult';
 import ExamSchedule from '../pages/userpanel/ExamSchedule';
+import OnlineAdmissionStudent from '../pages/userpanel/OnlineAdmissionStudent';
 import StudentPaymentHistory from '../pages/userpanel/StudentPaymentHistory';
 import StudentPaymentHistoryDetails from '../pages/userpanel/StudentPaymentHistoryDetails';
 import StudentReports from '../pages/userpanel/StudentReports';
 import StudentResults from '../pages/userpanel/StudentResults';
+import TeacherContacts from '../pages/userpanel/TeacherContacts';
 import UserLogin from '../pages/userpanel/UserLogin';
 import UserProfile from '../pages/userpanel/UserProfile';
 import UserRegistration from '../pages/userpanel/UserRegistration';
@@ -851,11 +853,23 @@ const router = createBrowserRouter([
       },
       {
         path: 'student-results',
-        element: <StudentResults pageTitle="Student Payment History Details" />,
+        element: <StudentResults pageTitle="Student Results" />,
       },
       {
         path: 'exam-schedule',
-        element: <ExamSchedule pageTitle="Student Payment History Details" />,
+        element: <ExamSchedule pageTitle="Exam Schedule" />,
+      },
+      {
+        path: 'online-admission',
+        element: (
+          <OnlineAdmissionStudent pageTitle="Online Admission" />
+        ),
+      },
+      {
+        path: 'teacher-contact',
+        element: (
+          <TeacherContacts pageTitle="Teacher Contact" />
+        ),
       },
     ],
   },
