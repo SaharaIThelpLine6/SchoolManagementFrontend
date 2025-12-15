@@ -35,23 +35,23 @@ export const examReports = [
   },
   {
     ReportID: 5,
-    ReportName: '5. সিট নং',
+    ReportName: '5. নম্বরপত্র ভর্তি সিরিয়ালে',
   },
   {
     ReportID: 6,
-    ReportName: '6. স্বাক্ষরপত্র ও নম্বরসীট',
+    ReportName: '6. নম্বরপত্র মূল ক্লাস ভিক্তিক',
   },
   {
     ReportID: 7,
-    ReportName: '7. সকল পরীক্ষার্থীর পরিসংখ্যান',
+    ReportName: '7. সিট নং',
   },
   {
     ReportID: 8,
-    ReportName: '8. নম্বরপত্র ভর্তি সিরিয়ালে',
+    ReportName: '8. স্বাক্ষরপত্র ও নম্বরসীট',
   },
   {
     ReportID: 9,
-    ReportName: '9. নম্বরপত্র প্যাকেট',
+    ReportName: '9. সকল পরীক্ষার্থীর পরিসংখ্যান',
   },
 ];
 export const resultReports = [

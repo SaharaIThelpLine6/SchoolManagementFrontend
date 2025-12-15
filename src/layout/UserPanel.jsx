@@ -1,7 +1,7 @@
 import { Buffer } from 'buffer';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Navigate, Outlet, useParams } from 'react-router-dom';
+import { Link, Navigate, Outlet, useParams } from 'react-router-dom';
 import DefaultModal from '../components/DefaultModal';
 import DefaultSideDrawer from '../components/DefaultSideDrawer';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
@@ -10,8 +10,8 @@ import { useGetUserDetailsQuery } from '../features/userPanel/userInfo/userInfoQ
 import { useVerifyUserPanelTokenMutation } from '../features/userPanel/userLoginVerify/userloginVerifyQuerySlice';
 import { showModal, showSideBarModal } from '../utils/ModalControlar';
 // import { subscribeUser } from "../pushNotifications";
-import { useNotificationListQuery, useSubscribeNotificationMutation } from "../features/userPanel/panelNotification/panelNotificationQuerySlice";
 import DropdownNotification from "../components/Header/DropdownNotification";
+import { useNotificationListQuery, useSubscribeNotificationMutation } from "../features/userPanel/panelNotification/panelNotificationQuerySlice";
 import logo from '/saharaItlogo.png';
 const WEB_PUSH_PUBLIC_KEY = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY;
 export default function UserPanel({ children }) {
@@ -162,14 +162,15 @@ export default function UserPanel({ children }) {
   if (!isValid) return <Navigate to={`/${schoolid}/login`} replace />;
 
   return (
-    <div className="font-SolaimanLipi">
+    <div className="font-SolaimanLipi bg-[#c5e1fd]">
       {/* লোগোকে background image হিসেবে right top এ দেখানোর জন্য নতুন div যোগ করুন */}
       <div
-        className="fixed right-0 top-0 w-50 h-80 opacity-20 pointer-events-none z-0"
+        className="fixed top-0 w-100 h-100 opacity-20 pointer-events-none z-0"
         style={{
+          left: '10%',
           backgroundImage: `url(${logo})`,
           backgroundRepeat: 'no-repeat',
-          backgroundPosition: '10px 10px', // 10px from right, 10px from top
+          backgroundPosition: 'top right',
           backgroundSize: 'contain',
         }}
       />
@@ -178,14 +179,20 @@ export default function UserPanel({ children }) {
         <div className="container mx-auto">
           <div className=" py-4">
             <div className="flex items-center justify-between gap-[10px]">
-              <div className="flex gap-[10px] items-center notice_header_area">
+              <div className="flex gap-3 items-center notice_header_area">
+                {/* Logo */}
                 <img
-                  className="w-[40px]"
+                  className="w-10 h-10 rounded-full object-cover border-2 border-sky-300 shadow-sm"
                   src={bufferConveter(schoolData?.Logo?.data)}
-                  alt=""
+                  alt={schoolData?.InstitutionName}
                 />
-                <div className="text-[12px]">{schoolData?.InstitutionName}</div>
+
+                {/* School Name */}
+                <div className="text-sm font-semibold text-gray-800">
+                  {schoolData?.InstitutionName}
+                </div>
               </div>
+
               <div className="flex items-center gap-2">
                 {/* <div className="icon text-white-600 py-1 px-1 rounded-[4px] relative">
                   <svg
@@ -208,9 +215,9 @@ export default function UserPanel({ children }) {
                     10
                   </div>
                 </div> */}
-              <DropdownNotification notificationList={notificationList} />
+                <DropdownNotification notificationList={notificationList} />
                 <div className="icon text-red-600 py-1 px-1">
-                  <a href={`/${schoolid}/dashboard/profile-details`}>
+                  <Link to={`/${schoolid}/dashboard/profile-details`}>
                     <img
                       src={
                         userDetails?.User?.UserImage.length > 0
@@ -222,28 +229,27 @@ export default function UserPanel({ children }) {
                       className="w-10 h-10 max-w-10 object-cover border-2 border-green-600 rounded-full"
                       alt="profile"
                     />
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
-
         </div>
 
-      {/* <button onClick={subscribeUser}>
+        {/* <button onClick={subscribeUser}>
       Enable Notifications
     </button> */}
-    </header>
-    <Outlet />
+      </header>
+      <Outlet />
 
-      <div className="mobile_footer_menu shadow-[0_0_10px_rgba(0,0,0,0.25)] bg-white py-2 fixed w-full bottom-0 z-10">
+      <div className="mobile_footer_menu shadow-[0_0_10px_rgba(0,0,0,0.25)] bg-white py-2 fixed w-full bottom-0 z-9999">
         <div className="grid grid-cols-3">
-          <a href={`/${schoolid}/dashboard`} className="text-center">
+          <Link to={`/${schoolid}/dashboard`} className="text-center">
             <div className="icon">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={24}
-                height={24}
+                width={26}
+                height={26}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -259,16 +265,16 @@ export default function UserPanel({ children }) {
               </svg>
             </div>
             <p>হোম</p>
-          </a>
-          <a
-            href={`/${schoolid}/dashboard/student-payment-history`}
+          </Link>
+          <Link
+            to={`/${schoolid}/dashboard/student-payment-history`}
             className="text-center"
           >
             <div className="icon">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={24}
-                height={24}
+                width={26}
+                height={26}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -286,7 +292,7 @@ export default function UserPanel({ children }) {
               </svg>
             </div>
             <p>পেমেন্ট</p>
-          </a>
+          </Link>
           <a
             onClick={handleProfileModal}
             className="text-center cursor-pointer"
@@ -294,8 +300,8 @@ export default function UserPanel({ children }) {
             <div className="icon">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width={24}
-                height={24}
+                width={26}
+                height={26}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
