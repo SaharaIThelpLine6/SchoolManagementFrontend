@@ -1,7 +1,13 @@
 import { Buffer } from 'buffer';
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, Navigate, Outlet, useParams } from 'react-router-dom';
+import {
+  Link,
+  Navigate,
+  Outlet,
+  useLocation,
+  useParams,
+} from 'react-router-dom';
 import DefaultModal from '../components/DefaultModal';
 import DefaultSideDrawer from '../components/DefaultSideDrawer';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
@@ -10,9 +16,14 @@ import { useGetUserDetailsQuery } from '../features/userPanel/userInfo/userInfoQ
 import { useVerifyUserPanelTokenMutation } from '../features/userPanel/userLoginVerify/userloginVerifyQuerySlice';
 import { showModal, showSideBarModal } from '../utils/ModalControlar';
 // import { subscribeUser } from "../pushNotifications";
-import DropdownNotification from "../components/Header/DropdownNotification";
-import { useNotificationListQuery, useSubscribeNotificationMutation } from "../features/userPanel/panelNotification/panelNotificationQuerySlice";
+import DropdownNotification from '../components/Header/DropdownNotification';
+import {
+  useNotificationListQuery,
+  useSubscribeNotificationMutation,
+} from '../features/userPanel/panelNotification/panelNotificationQuerySlice';
+import avatar from '/avatar.png';
 import logo from '/saharaItlogo.png';
+
 const WEB_PUSH_PUBLIC_KEY = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY;
 export default function UserPanel({ children }) {
   const token = localStorage.getItem('user_panel_token');
@@ -20,8 +31,13 @@ export default function UserPanel({ children }) {
 
   const [verifyToken] = useVerifyUserPanelTokenMutation();
   const { schoolid } = useParams();
+
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [isValid, setIsValid] = useState(false);
+  const currentPath = location.pathname.replace(`/${schoolid}/dashboard/`, '');
+  const currentPathDashboard = location.pathname.replace(`/${schoolid}/`, '');
+  console.log(currentPath, 'location');
 
   useEffect(() => {
     async function checkToken() {
@@ -82,42 +98,42 @@ export default function UserPanel({ children }) {
   ] = useSubscribeNotificationMutation();
 
   useEffect(() => {
-    console.log("user usee effect");
+    console.log('user usee effect');
 
-    if ("Notification" in window) {
-      if (Notification.permission === "default") {
+    if ('Notification' in window) {
+      if (Notification.permission === 'default') {
         setTimeout(async () => {
-          if (!("Notification" in window)) {
-            console.log("This browser does not support notifications.");
+          if (!('Notification' in window)) {
+            console.log('This browser does not support notifications.');
             return;
           }
 
-          if (!("serviceWorker" in navigator)) {
-            console.log("Service workers are not supported by your browser.");
+          if (!('serviceWorker' in navigator)) {
+            console.log('Service workers are not supported by your browser.');
             return;
           }
           const permission = Notification.permission;
-          if (permission === "granted") {
-            console.log("Notifications already enabled.");
+          if (permission === 'granted') {
+            console.log('Notifications already enabled.');
             return;
           }
 
-          if (permission === "denied") {
-            console.log("Notifications were previously denied.");
+          if (permission === 'denied') {
+            console.log('Notifications were previously denied.');
             return;
           }
           try {
-            const register = await navigator.serviceWorker.register("/sw.js");
+            const register = await navigator.serviceWorker.register('/sw.js');
 
             const subscription = await register.pushManager.subscribe({
               userVisibleOnly: true,
-              applicationServerKey: WEB_PUSH_PUBLIC_KEY
+              applicationServerKey: WEB_PUSH_PUBLIC_KEY,
             });
-            subscribeUser(subscription)
+            subscribeUser(subscription);
 
-            console.log("Successfully subscribed for notifications!");
+            console.log('Successfully subscribed for notifications!');
           } catch (error) {
-            console.error("Failed to subscribe:", error);
+            console.error('Failed to subscribe:', error);
           }
         }, 2000);
       }
@@ -145,9 +161,9 @@ export default function UserPanel({ children }) {
   const handleProfileModal = useCallback(() => {
     showSideBarModal('', 'USER_PANEL_PROFILE_VIEW');
   }, []);
-   const bufferConveter = (bufferData) => {
+  const bufferConveter = (bufferData) => {
     if (!bufferData) {
-      return "/logo.png";
+      return '/logo.png';
     }
     const buffer = Buffer.from(bufferData);
     const base64String = buffer.toString('base64');
@@ -224,7 +240,7 @@ export default function UserPanel({ children }) {
                           ? bufferConveter(
                               userDetails?.User?.UserImage[0].Image
                             )
-                          : 'logo.png'
+                          : avatar
                       }
                       className="w-10 h-10 max-w-10 object-cover border-2 border-green-600 rounded-full"
                       alt="profile"
@@ -256,7 +272,9 @@ export default function UserPanel({ children }) {
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-home mx-auto"
+                className={`icon icon-tabler icons-tabler-outline icon-tabler-device-mobile-dollar mx-auto ${
+                  currentPathDashboard === 'dashboard' ? 'text-blue-500' : ''
+                } `}
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
@@ -264,7 +282,13 @@ export default function UserPanel({ children }) {
                 <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
               </svg>
             </div>
-            <p>হোম</p>
+            <p
+              className={`${
+                currentPathDashboard === 'dashboard' ? 'text-blue-500' : ''
+              }`}
+            >
+              হোম
+            </p>
           </Link>
           <Link
             to={`/${schoolid}/dashboard/student-payment-history`}
@@ -281,7 +305,11 @@ export default function UserPanel({ children }) {
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-device-mobile-dollar mx-auto"
+                className={`icon icon-tabler icons-tabler-outline icon-tabler-device-mobile-dollar mx-auto ${
+                  currentPath === 'student-payment-history'
+                    ? 'text-blue-500'
+                    : ''
+                } `}
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M13 21h-5a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h8a2 2 0 0 1 2 2v5" />
@@ -291,7 +319,13 @@ export default function UserPanel({ children }) {
                 <path d="M19 21v1m0 -8v1" />
               </svg>
             </div>
-            <p>পেমেন্ট</p>
+            <p
+              className={`${
+                currentPath === 'student-payment-history' ? 'text-blue-500' : ''
+              }`}
+            >
+              পেমেন্ট
+            </p>
           </Link>
           <a
             onClick={handleProfileModal}
@@ -308,7 +342,9 @@ export default function UserPanel({ children }) {
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-user-square mx-auto"
+                className={`icon icon-tabler icons-tabler-outline icon-tabler-user-square mx-auto ${
+                  currentPath === 'profile-details' ? 'text-blue-500' : ''
+                }`}
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M9 10a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
@@ -316,7 +352,13 @@ export default function UserPanel({ children }) {
                 <path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z" />
               </svg>
             </div>
-            <p>প্রোফাইল</p>
+            <p
+              className={`${
+                currentPath === 'profile-details' ? 'text-blue-500' : ''
+              }`}
+            >
+              প্রোফাইল
+            </p>
           </a>
         </div>
       </div>
@@ -325,4 +367,3 @@ export default function UserPanel({ children }) {
     </div>
   );
 }
-

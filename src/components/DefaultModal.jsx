@@ -1,7 +1,9 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { closeModal } from '../features/modal/modalSlice';
+import MaddrasahReportEditCreate from '../pages/userpanel/MaddrasahReportEditCreate';
 import useTranslate from '../utils/Translate';
 import SessionCreateUpdateModal from '../view/Session/SessionCreateUpdateModal';
+import SessionChangeModal from '../view/UserPanel/SessionChangeModal';
 import BalanceTransferModal from '../view/accounting/BalanceTransferModal';
 import BankInfoSettings from '../view/accounting/BankInfoSettings';
 import ChangeStudentClass from '../view/accounting/ChangeStudentClass';
@@ -52,7 +54,6 @@ import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
 import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
-import SessionChangeModal from '../view/UserPanel/SessionChangeModal';
 import DataExportModel from '../view/students/pdf/DataExportModel';
 
 const DefaultModal = () => {
@@ -181,6 +182,12 @@ const DefaultModal = () => {
                 {modalType === 'ADD_BOOK' && <AddEditBook />}
                 {modalType === 'CODE_SETTING' && <CodeSetting />}
                 {modalType === 'UPDATE_BOOK' && <AddEditBook id={id} />}
+                {modalType === 'COMPLAINT_BOX_TERMS_AND_CONDITIONS_CREATE' && (
+                  <MaddrasahReportEditCreate />
+                )}
+                {modalType === 'COMPLAINT_BOX_TERMS_AND_CONDITIONS_UPDATE' && (
+                  <MaddrasahReportEditCreate id={id} />
+                )}
                 {modalType === 'SUB_SIDIARY' && <Subsidiary />}
                 {modalType === 'EXAM_REPORT_SETTING' && <ExamReportSetting />}
                 {modalType === 'ACCOUNTING_DUES_LIST_STATEMENT' && (

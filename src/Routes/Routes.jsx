@@ -34,6 +34,7 @@ import CellfinPaymentConfirm from '../pages/CellfinPaymentConfirm';
 import CertificateAttesation from '../pages/CertificateAttesation';
 import CharacterReport from '../pages/CharacterReport';
 import Class from '../pages/Class';
+import ComplaintBoxTermsAndConditions from '../pages/ComplaintBoxTermsAndConditions';
 import DataExport from '../pages/DataExport';
 import DeleteEditRecord from '../pages/DeleteEditRecord';
 import DepositCosts from '../pages/DepositCosts';
@@ -64,15 +65,16 @@ import PaymentConfirm from '../pages/PaymentConfirm';
 import PaymentHistory from '../pages/PaymentHistory';
 import PointBasedResultCreateUpdate from '../pages/PointBasedResultCreateUpdate';
 import PointBasedResultEntry from '../pages/PointBasedResultEntry';
-import PointVReport from '../pages/PointVReport';
 import QueryThree from '../pages/QueryThree';
 import QueryTwo from '../pages/QueryTwo';
 import RFIDCard from '../pages/RFIDCard';
 import Report from '../pages/Report';
+import ResultReport from '../pages/ResultReport';
 import SMS from '../pages/SMS';
 import Section from '../pages/Section';
 import Session from '../pages/Session';
 import Settings from '../pages/Settings';
+import StudentComplaint from '../pages/StudentComplaint';
 import StudentGroupCreate from '../pages/StudentGroupCreate';
 import StudentsFeeCollection from '../pages/StudentsFeeCollection';
 import StudentsReport from '../pages/StudentsReport';
@@ -82,10 +84,12 @@ import UserImage from '../pages/UserImage';
 import UserReports from '../pages/UserReports';
 import ClassResult from '../pages/public/ClassResult';
 import ClassResultForm from '../pages/public/ClassResultForm';
+import MadrashaHomePage from '../pages/public/MadrashaHomePage';
 import MaritListForm from '../pages/public/MaritListForm';
 import MaritListResult from '../pages/public/MaritListResult';
 import ExamSchedule from '../pages/userpanel/ExamSchedule';
 import OnlineAdmissionStudent from '../pages/userpanel/OnlineAdmissionStudent';
+import Reports from '../pages/userpanel/Reports';
 import StudentPaymentHistory from '../pages/userpanel/StudentPaymentHistory';
 import StudentPaymentHistoryDetails from '../pages/userpanel/StudentPaymentHistoryDetails';
 import StudentReports from '../pages/userpanel/StudentReports';
@@ -97,8 +101,6 @@ import UserRegistration from '../pages/userpanel/UserRegistration';
 import Dashboard from '../pages/userpanel/dashboard';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
-import ResultReport from '../pages/ResultReport';
-import MadrashaHomePage from '../pages/public/MadrashaHomePage';
 import YoutubeTutorials from '../pages/YoutubeTutorials';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
 import QueryManage from '../pages/QueryManage';
@@ -619,6 +621,31 @@ const router = createBrowserRouter([
             ],
           },
           {
+            path: 'talimat',
+            children: [
+              {
+                index: true,
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.student_report}
+                  // >
+                  <ComplaintBoxTermsAndConditions pageTitle="Complaint Box Terms and Conditions" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'student-complaint',
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.gate_pass_leave}
+                  // >
+                    <StudentComplaint pageTitle="Student Complaints" />
+                  // </RequirePermission>
+                ),
+              },
+            ],
+          },
+          {
             path: 'accounting',
             children: [
               {
@@ -828,7 +855,10 @@ const router = createBrowserRouter([
     element: <PublicLayout />,
     children: [
       { index: true, element: <MadrashaHomePage pageTitle="Result Page" /> },
-      { path: 'student_result', element: <ResultRequest pageTitle="Result Page" /> },
+      {
+        path: 'student_result',
+        element: <ResultRequest pageTitle="Result Page" />,
+      },
       { path: 'admission-registration', element: <AdmissionRegistration /> },
       {
         path: 'students/:seassonid/:examid/:classid/:userid',
@@ -886,15 +916,15 @@ const router = createBrowserRouter([
       },
       {
         path: 'online-admission',
-        element: (
-          <OnlineAdmissionStudent pageTitle="Online Admission" />
-        ),
+        element: <OnlineAdmissionStudent pageTitle="Online Admission" />,
       },
       {
         path: 'teacher-contact',
-        element: (
-          <TeacherContacts pageTitle="Teacher Contact" />
-        ),
+        element: <TeacherContacts pageTitle="Teacher Contact" />,
+      },
+      {
+        path: 'reports',
+        element: <Reports pageTitle="Teacher Contact" />,
       },
     ],
   },
