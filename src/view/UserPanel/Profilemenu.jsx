@@ -27,7 +27,7 @@ const ProfileMenu = () => {
           <li className="text-[18px] border-b border-[#d3d3d3]">
             <button
               onClick={handleProfileClick}
-              className="py-2 inline-block text-[#007af7] flex gap-2 items-center w-full text-left"
+              className="py-2  text-[#007af7] flex gap-2 items-center w-full text-left"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -53,7 +53,7 @@ const ProfileMenu = () => {
           <li className="text-[18px] border-b border-[#d3d3d3]">
             <button
               onClick={handleLogOut}
-              className="py-2 inline-block text-[#007af7] flex gap-2 items-center w-full text-left"
+              className="py-2  text-[#007af7] flex gap-2 items-center w-full text-left"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
