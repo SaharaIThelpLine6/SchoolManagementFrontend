@@ -39,7 +39,7 @@ export default function UserProfile() {
 
 
     return (
-        <div className="bg-white shadow-xl pb-8 relative">
+        <div className="bg-white shadow-xl pb-8 relative h-screen">
             {/* Settings Button */}
 
             {/* Banner */}
@@ -65,11 +65,11 @@ export default function UserProfile() {
                 {/* <p className="text-sm text-gray-500">New York, USA</p> */}
             </div>
 
-            <div className="my-1 flex flex-col 2xl:flex-row space-y-4 2xl:space-y-0 2xl:space-x-4">
+            <div className="my-1 flex flex-col  space-y-4 2xl:space-y-0 2xl:space-x-4">
                 {/* LEFT PANEL */}
-                <div className="w-full flex flex-col 2xl:w-1/3">
+                <div className="w-full flex flex-col mx-auto">
                     {/* Personal Info */}
-                    <div className="flex-1 bg-white rounded-lg shadow-xl p-4 pt-2">
+                    <div className="flex-1 bg-white rounded-lg p-4 pt-2">
                         <h4 className="text-xl text-gray-900 font-bold">শিক্ষাথীর তথ্য</h4>
                         <ul className="mt-2 text-gray-700">
                             <li className="flex border-b py-2">

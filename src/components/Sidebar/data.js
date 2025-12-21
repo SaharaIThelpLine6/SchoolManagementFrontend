@@ -421,11 +421,17 @@ export const menuData = [
       },
     ],
   },
-  // {
-  //   id: "13",
-  //   name: "Help",
-  //   route: "/help",
-  //   icon: "IoMdHelp",
-  //   subMenu: [],
-  // },
+  {
+    id: "13",
+    name: "Help",
+    route: "/help",
+    icon: "IoMdHelp",
+    subMenu: [
+      {
+        id: '1',
+        name: 'Video Tutorial',
+        route: '/help/videos',
+      },
+    ],
+  },
 ];

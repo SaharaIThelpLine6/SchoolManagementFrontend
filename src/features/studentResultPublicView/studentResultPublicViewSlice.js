@@ -82,6 +82,16 @@ export const fetchClassResult = createAsyncThunk("studentResultPublicView/fetchC
 
 })
 
+
+export const fetchWebsiteSettings = createAsyncThunk("studentResultPublicView/fetchWebsiteSettings", async ({ schoolId }) => {
+    const [websiteSettingsResponse] = await Promise.all([getPublicData(`/api/public/result/${schoolId}/website_settings`)])
+
+    return {
+        websiteSettings: websiteSettingsResponse,
+    }
+
+})
+
 export const fetchMaritResult = createAsyncThunk(
   "studentMaritListView/fetchMaritResult",
   async ({ schoolId, resultUrl }) => {
@@ -115,10 +125,12 @@ const initialState = {
     gender:[],
     divition: [],
     maritList: [],
+    websiteSettings: [],
     resultStatus: 'idle',
     resultError: null,
     status: 'idle',
     maritListStatus: 'idle',
+    websiteSettingStatus: 'idle',
     error: null,
 };
 
@@ -231,6 +243,17 @@ const studentResultPublicViewSlice = createSlice({
             })
             .addCase(fetchMaritResult.rejected, (state, action) => {
                 state.maritListStatus = 'failed';
+                state.error = action.error.message;
+            })
+            .addCase(fetchWebsiteSettings.pending, (state) => {
+                state.websiteSettingStatus = 'loading';
+            })
+            .addCase(fetchWebsiteSettings.fulfilled, (state, action) => {
+                state.websiteSettingStatus = 'succeeded';
+                state.websiteSettings = action.payload.websiteSettings;
+            })
+            .addCase(fetchWebsiteSettings.rejected, (state, action) => {
+                state.websiteSettingStatus = 'failed';
                 state.error = action.error.message;
             });
 

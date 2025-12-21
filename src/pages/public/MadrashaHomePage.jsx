@@ -1,30 +1,304 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
-
+import Counter from '../../components/Counter';
+import { fetchWebsiteSettings } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
+import bnBijoy2Unicode from '../../utils/conveter';
+const API_URL = import.meta.env.VITE_SERVER_URL;
 const MadrashaHomePage = () => {
     const { schoolid } = useParams();
-    const { schoolData } = useSelector((state) => state.studentResultPublicView);
+    const { schoolData, websiteSettings } = useSelector((state) => state.studentResultPublicView);
+    const dispatch = useDispatch();
+    useEffect(() => {
+        // console.log("Emon hasan");
+        // console.log(schoolid);
+
+        dispatch(fetchWebsiteSettings({ schoolId: schoolid }));
+    }, [dispatch]);
+
+    const settingsObject = React.useMemo(() => {
+        if (!websiteSettings || websiteSettings.length === 0) return {};
+
+        return websiteSettings.reduce((acc, item) => {
+            acc[item.FieldKey] = item.FieldValue;
+            return acc;
+        }, {});
+    }, [websiteSettings]);
+
+    function toArray(value) {
+        if (!value) return [];
+
+        // Already an array
+        if (Array.isArray(value)) return value;
+
+        // Try JSON parsing
+        if (typeof value === "string") {
+            try {
+                const parsed = JSON.parse(value);
+                return Array.isArray(parsed) ? parsed : [];
+            } catch {
+                // Fallback: comma-separated string
+                return value.split(",").map(item => item.trim());
+            }
+        }
+
+        return [];
+    }
+
+
+    useEffect(() => {
+        console.log(settingsObject);
+    }, [settingsObject])
     return (
-        <div className="madrasha-home-page h-screen bg-[#f9f9f9] py-[50px] ">
-            <div className="container mx-auto">
+        <div className="madrasha-home-page min-h-screen bg-[#f9f9f9] py-[50px] ">
+            <div className="container mx-auto px-2 lg:px-0">
                 <div className="flex items-center flex-wrap lg:flex-nowrap">
-                    <div className="text_area text-center md:text-start w-full lg:w-[60%] pr-2">
+                    <div className="text_area text-center md:text-start w-full lg:w-1/2 pr-2">
                         <h1 className=' text-[28px] md:text-[40px] text-theme-color'>{schoolData?.InstitutionName}</h1>
                         <h2 className='text-[18px] md:text-[22px] mt-2 mb-4'>
-                            {schoolData?.InstitutionName}, {schoolData?.Address} একটি সুপরিচিত দ্বীনি শিক্ষা প্রতিষ্ঠান। এই মাদরাসায় কুরআন ও সুন্নাহর আলোকে ছাত্র/ছাত্রীদের ধর্মীয় ও নৈতিক শিক্ষা প্রদান করা হয়। এখানে কুরআন তিলাওয়াত, হিফজ, ফিকহ, আকাইদ, আরবি ভাষা ও সাধারণ শিক্ষার সমন্বিত পাঠদান করা হয়।
+                            {schoolData?.InstitutionName}, {schoolData?.Address} {settingsObject.aboutText}
 
-                            মাদরাসার লক্ষ্য হলো ইসলামি আদর্শে আদর্শ মানুষ গড়ে তোলা এবং শিক্ষার্থীদের চরিত্র গঠন ও নৈতিক উন্নয়ন সাধন করা। অভিজ্ঞ ও যোগ্য শিক্ষক-শিক্ষিকাদের মাধ্যমে পাঠদান পরিচালিত হয়। শিক্ষার্থীদের জন্য একটি সুন্দর, নিরাপদ ও শৃঙ্খলাপূর্ণ শিক্ষার পরিবেশ নিশ্চিত করা হয়।
-                            
                         </h2>
                         <Link to={`/${schoolid}/student_result`} className='py-4 px-4 bg-[#4154f1] text-white rounded-[5px] font-Poppins mt-4 inline-block shadow-xl'>Explore Our Result Section</Link>
                     </div>
-                    <div className="image_section pt-[50px] md:pt-0">
-                        <img src="/madrasha1.jpg" alt="madrasha image" className='up_down_animation rounded-[5px]' />
+                    <div className="image_section pt-[50px] md:pt-0 w-1/2">
+                        <img src={`${API_URL}/public/${settingsObject.BannerImage}`} alt="madrasha image" className='up_down_animation rounded-[5px]' />
                     </div>
                 </div>
 
             </div>
+            <div className="container mx-auto px-2 lg:px-0 py-[100px]">
+                <div className="pb-[40px]">
+                    <div className="text_area text-center pr-2">
+                        <h2 className=' text-[28px] md:text-[40px] font-bold'>{settingsObject.whyUsTitle} {settingsObject?.totalUser}</h2>
+                    </div>
+
+                </div>
+
+                <div className="flex gap-[20px] flex-wrap">
+                    <div className="image w-full lg:w-1/2">
+                        <img src="/banner.jpg" alt="" className='rounded-[4px]' />
+                    </div>
+                    <div className="list_of_whychose_us w-full lg:w-1/2">
+                        <ul className='grid grid-cols-1 md:grid-cols-2 gap-[20px] items-center flex-wrap'>
+                            {
+                                toArray(settingsObject.whyUsItems).map((whyUsItem, index) => (
+                                    <li className='flex bg-white px-2 py-4 gap-[15px] items-center rounded-[4px] shadow-md h-full' key={whyUsItem.text}>
+                                        <div className="icon w-[30px] h-[30px] bg-[#ecf3ff] flex items-center justify-center">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l5 5l10 -10" /></svg>
+                                        </div>
+                                        <p className='font-bold text-theme-color'>
+                                            {whyUsItem.text}
+                                        </p>
+                                    </li>
+                                ))
+                            }
+
+                            {/* <li className='flex bg-white px-2 py-4 gap-[15px] items-center rounded-[4px] shadow-md h-full'>
+                                <div className="icon w-[30px] h-[30px] bg-[#ecf3ff] flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l5 5l10 -10" /></svg>
+                                </div>
+                                <p className='font-bold text-theme-color'>
+                                    দ্বীনি ও আধুনিক শিক্ষার সমন্বয়ে একটি আন্তর্জাতিক শিক্ষা মিশন।
+                                </p>
+                            </li>
+                            <li className='flex bg-white px-2 py-4 gap-[15px] items-center rounded-[4px] shadow-md h-full'>
+                                <div className="icon w-[30px] h-[30px] bg-[#ecf3ff] flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l5 5l10 -10" /></svg>
+                                </div>
+                                <p className='font-bold text-theme-color'>
+                                    স্কুল থেকে আসা ছাত্র-ছাত্রীদের স্পেশাল কেয়ারের মাধ্যমে দ্রুত অগ্রসরের ব্যবস্থা।
+                                </p>
+                            </li>
+                            <li className='flex bg-white px-2 py-4 gap-[15px] items-center rounded-[4px] shadow-md'>
+                                <div className="icon w-[30px] h-[30px] bg-[#ecf3ff] flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l5 5l10 -10" /></svg>
+                                </div>
+                                <p className='font-bold text-theme-color'>
+                                    জাতীয় ও আন্তর্জাতিক প্রতিযােগিতায় অংশগ্রহণের ব্যবস্থা।
+                                </p>
+                            </li>
+                            <li className='flex bg-white px-2 py-4 gap-[15px] items-center rounded-[4px] shadow-md'>
+                                <div className="icon w-[30px] h-[30px] bg-[#ecf3ff] flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l5 5l10 -10" /></svg>
+                                </div>
+                                <p className='font-bold text-theme-color'>
+                                    গ্রুপ ভিত্তিক মাশকের (অনুশীলনের) ব্যবস্থা।
+                                </p>
+                            </li>
+                            <li className='flex bg-white px-2 py-4 gap-[15px] items-center rounded-[4px] shadow-md'>
+                                <div className="icon w-[30px] h-[30px] bg-[#ecf3ff] flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l5 5l10 -10" /></svg>
+                                </div>
+                                <p className='font-bold text-theme-color'>
+                                    দৈনিক তাহাজ্জুদ নামাযে তেলাওয়াতের ব্যবস্থা।
+                                </p>
+                            </li>
+                            <li className='flex bg-white px-2 py-4 gap-[15px] items-center rounded-[4px] shadow-md'>
+                                <div className="icon w-[30px] h-[30px] bg-[#ecf3ff] flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l5 5l10 -10" /></svg>
+                                </div>
+                                <p className='font-bold text-theme-color'>
+                                    আন্তর্জাতিক ক্বারীদের নতুন সূর ও তৰ্য্যের মাধ্যমে ছাত্রদের কণ্ঠ অনুযায়ী মাশকৃ প্রদান।
+                                </p>
+                            </li>
+                            <li className='flex bg-white px-2 py-4 gap-[15px] items-center rounded-[4px] shadow-md h-full'>
+                                <div className="icon w-[30px] h-[30px] bg-[#ecf3ff] flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l5 5l10 -10" /></svg>
+                                </div>
+                                <p className='font-bold text-theme-color'>
+                                    পি.এস.সি ও জে.এস.সি পরীক্ষায় অংশ গ্রহনের ব্যবস্থা।
+                                </p>
+                            </li>
+                            <li className='flex bg-white px-2 py-4 gap-[15px] items-center rounded-[4px] shadow-md h-full'>
+                                <div className="icon w-[30px] h-[30px] bg-[#ecf3ff] flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l5 5l10 -10" /></svg>
+                                </div>
+                                <p className='font-bold text-theme-color'>
+                                    সুন্দর-মনােরম ও স্বাস্থ্য সম্মত ক্যাম্পাস।
+                                </p>
+                            </li>
+                            <li className='flex bg-white px-2 py-4 gap-[15px] items-center rounded-[4px] shadow-md h-full'>
+                                <div className="icon w-[30px] h-[30px] bg-[#ecf3ff] flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l5 5l10 -10" /></svg>
+                                </div>
+                                <p className='font-bold text-theme-color'>
+                                    শীতাতপ নিয়ন্ত্রিত ক্যাম্পাস
+                                </p>
+                            </li> */}
+
+                            {/* <li> <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l5 5l10 -10" /></svg> দ্বীনি ও আধুনিক শিক্ষার সমন্বয়ে একটি আন্তর্জাতিক শিক্ষা মিশন।</li> */}
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <div className="px-2 lg:px-0 py-[80px] pb-[100px] relative" style={{
+                backgroundImage: `url("${API_URL}/public/${settingsObject.BannerImage}")`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat"
+            }}>
+                <div className="overly bg-[#00000080] absolute top-0 w-full h-full"></div>
+                <div className="relative z-10">
+                    <div className="pb-[40px]">
+                        <div className="text_area text-center pr-2">
+                            <h2 className=' text-[28px] md:text-[40px] font-bold text-white'> আমাদের শিক্ষাথী সংখ্যা </h2>
+                        </div>
+
+                    </div>
+
+                    <div className="flex gap-[40px] justify-center flex-wrap md:flex-nowrap">
+                        {
+                            settingsObject?.totalUser ? <div className="count-box bg-white px-2 py-4 rounded-[4px] bg-[#00000080]">
+                                <div className='text-center'>
+                                    <div className='text-white text-center'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-users-group mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1" /><path d="M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M17 10h2a2 2 0 0 1 2 2v1" /><path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M3 13v-1a2 2 0 0 1 2 -2h2" /></svg>
+                                    </div>
+                                    <Counter end={settingsObject?.totalUser} duration={2000} />
+                                    <p className='text-[20px] text-white'>মোট শিক্ষাথী {bnBijoy2Unicode(String(settingsObject?.totalUser))} জন।</p>
+                                </div>
+                            </div> : null
+                        }
+                        {
+                            settingsObject?.teacherUser ? <div className="count-box bg-white px-2 py-4 rounded-[4px] bg-[#00000080]">
+                                <div className='text-center'>
+                                    <div className='text-white text-center'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-user-screen mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M19.03 17.818a3 3 0 0 0 1.97 -2.818v-8a3 3 0 0 0 -3 -3h-12a3 3 0 0 0 -3 3v8c0 1.317 .85 2.436 2.03 2.84" /><path d="M10 14a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M8 21a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2" /></svg>
+                                    </div>
+                                    <Counter end={settingsObject?.teacherUser} duration={2000} />
+                                    <p className='text-[20px] text-white'>মোট শিক্ষক {bnBijoy2Unicode(String(settingsObject?.teacherUser))} জন।</p>
+                                </div>
+                            </div> : null
+                        }
+                        {
+                            settingsObject?.totalClass ? <div className="count-box bg-white px-2 py-4 rounded-[4px] bg-[#00000080]">
+                                <div className='text-center'>
+                                    <div className='text-white text-center'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-building-community mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 9l5 5v7h-5v-4m0 4h-5v-7l5 -5m1 1v-6a1 1 0 0 1 1 -1h10a1 1 0 0 1 1 1v17h-8" /><path d="M13 7l0 .01" /><path d="M17 7l0 .01" /><path d="M17 11l0 .01" /><path d="M17 15l0 .01" /></svg>
+                                    </div>
+                                    <Counter end={settingsObject?.totalClass} duration={2000} />
+                                    <p className='text-[20px] text-white'> শ্রেণী/জামাত {bnBijoy2Unicode(String(settingsObject?.totalClass))} টি।</p>
+                                </div>
+                            </div> : null
+                        }
+                        {
+                            settingsObject?.totalClass ? <div className="count-box bg-white px-2 py-4 rounded-[4px] bg-[#00000080]">
+                                <div className='text-center'>
+                                    <div className='text-white text-center'>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-briefcase mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2" /><path d="M12 12l0 .01" /><path d="M3 13a20 20 0 0 0 18 0" /></svg>
+                                    </div>
+                                    <Counter end={settingsObject?.totalClass} duration={2000} />
+                                    <p className='text-[20px] text-white'> সাব-জামাত {bnBijoy2Unicode(String(settingsObject?.totalSubClasseas))} টি।</p>
+                                </div>
+                            </div> : null
+                        }
+
+                        {/* <div className="count-box bg-white px-2 py-4 rounded-[4px]">
+                        <div className='text-center'>
+                            <Counter end={90} duration={2000} />
+                            <p className='text-[18px]'>মোট শিক্ষাথী ৯০ জন।</p>
+                        </div>
+                    </div>
+                    <div className="count-box bg-white px-2 py-4 rounded-[4px]">
+                        <div className='text-center'>
+                            <Counter end={15} duration={2000} />
+                            <p className='text-[18px]'>মোট স্টাফ ১৫ জন।</p>
+                        </div>
+                    </div>
+                    <div className="count-box bg-white px-2 py-4 rounded-[4px]">
+                        <div className='text-center'>
+                            <Counter end={15} duration={2000} />
+                            <p className=' text-[18px]'>মোট স্টাফ ১৫ জন।</p>
+                        </div>
+                    </div> */}
+                    </div>
+                </div>
+
+            </div>
+            <div className="container mx-auto px-2 lg:px-0 py-[60px]">
+                <div className="pb-[40px]">
+                    <div className="text_area text-center pr-2">
+                        <h2 className=' text-[28px] md:text-[40px] font-bold'> কিতাবের তালিকা </h2>
+                    </div>
+
+                </div>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 justify-center">
+                    {
+                        settingsObject?.accademicSubject ? settingsObject.accademicSubject.map((subject) => subject.AcademicSubjects && subject.AcademicSubjects.length > 0 ? (
+                            <div className="card shadow-sm hover:shadow-xl transition-all linear duration-300 border rounded-[4px]">
+                                <div className="header text-center py-2">
+                                    <p className='text-[20px] font-bold border-b border-black-600'>{subject.SubClass}</p>
+                                </div>
+                                <ul className='px-2 py-2'>
+                                    {subject.AcademicSubjects?.map(academicSubject => (
+                                        <li
+                                            key={academicSubject.SubjectID}
+                                            className="text-[18px]"
+                                        >
+                                            {academicSubject.SubjectName}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ) : null) : null
+
+
+                    }
+
+                </div>
+
+            </div>
+
+            <footer className='bg-white'>
+                <div className="container mx-auto">
+                    <img src='' />
+                </div>
+
+            </footer>
+
+
         </div>
     );
 };

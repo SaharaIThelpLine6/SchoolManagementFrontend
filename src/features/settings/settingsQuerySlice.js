@@ -21,6 +21,7 @@ export const settingsSlice = createApi({
     'Acc_Report_Settings',
     'CodeSettings',
     'Genders',
+    'WebSettings'
   ],
   endpoints: (builder) => ({
     getInstitutionInfo: builder.query({
@@ -113,6 +114,19 @@ export const settingsSlice = createApi({
     getExamConditionsSettings: builder.query({
       query: () => `exam_conditions`,
     }),
+    getWebSettings: builder.query({
+      query: () => `website_settings`,
+        // providesTags: ['WebSettings'],
+    }),
+    postWebsitesettings: builder.mutation({
+      query: (body) => ({
+        url: `website_settings`,
+        method: 'POST',
+        body,
+      }),
+      // invalidatesTags: ['WebSettings'],
+
+    }),
   }),
 });
 
@@ -136,4 +150,6 @@ export const {
   useGetAllGendersQuery,
   useGetLastAdmissionSerialQuery,
   useGetExamConditionsSettingsQuery,
+  useGetWebSettingsQuery,
+  usePostWebsitesettingsMutation
 } = settingsSlice;
