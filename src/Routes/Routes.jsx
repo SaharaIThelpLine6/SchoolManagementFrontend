@@ -101,6 +101,9 @@ import UserRegistration from '../pages/userpanel/UserRegistration';
 import Dashboard from '../pages/userpanel/dashboard';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
+import YoutubeTutorials from '../pages/YoutubeTutorials';
+import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
+import QueryManage from '../pages/QueryManage';
 
 const router = createBrowserRouter([
   {
@@ -816,15 +819,33 @@ const router = createBrowserRouter([
                 path: 'add-login-users',
                 element: (
                   // <RequirePermission
-                  //   permissionId={permissionsDataList.st}
+                  //   permissionId={permissionsDataList.st}+
                   // >
                   <AddLoginUsers pageTitle="Add Login Users" />
 
                   // </RequirePermission>
                 ),
               },
+              {
+                path: 'website-settings',
+                element: (
+                  <WebsiteSettings pageTitle="Add Login Users" />
+                ),
+              }
             ],
           },
+          {
+            path: 'help',
+            children: [
+              {
+                path: 'videos',
+                element: (
+                  <YoutubeTutorials pageTitle="Youtube Tutorials" />
+                ),
+              }
+            ],
+          },
+
         ],
       },
     ],

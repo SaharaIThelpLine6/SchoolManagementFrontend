@@ -85,7 +85,7 @@ const PublicLayout = () => {
 
         <header
         // bg-theme-color
-          className={`lg:flex overflow-hidden font-SolaimanLipi shadow-md text-theme-color sticky top-0 left-0 z-1 bg-white h-screen md:h-auto max-w-[320px] md:max-w-full w-full hidden_in_print ${isOpen ? "flex fixed z-50" : "hidden"
+          className={`lg:flex overflow-hidden font-SolaimanLipi shadow-md text-theme-color sticky top-0 left-0 bg-white h-screen md:h-auto max-w-[320px] md:max-w-full w-full hidden_in_print z-[99] ${isOpen ? "flex fixed z-[99]" : "hidden"
             }`}
         >
           <div className="container mx-auto">

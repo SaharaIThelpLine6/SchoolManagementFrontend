@@ -191,7 +191,7 @@ export default function UserPanel({ children }) {
         }}
       />
 
-      <header className="px-2 text-black shadow-[0_0px_10px_rgba(0,0,0,0.25)] relative">
+      <header className="px-2 text-black shadow-[0_0px_10px_rgba(0,0,0,0.25)] relative z-[9999]">
         <div className="container mx-auto">
           <div className=" py-4">
             <div className="flex items-center justify-between gap-[10px]">

@@ -75,7 +75,7 @@ const StudentReports = () => {
 
   return (
 
-      <main className="mian_area pt-4 pb-[100px]">
+      <main className="mian_area pt-4 pb-[100px] min-h-screen">
         <div className="container mx-auto px-2">
           <div className="mt-5 overflow-x-auto">
             {isuserReportsLoading ? (

@@ -55,6 +55,7 @@ import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
 import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
+import DataExportModel from '../view/students/pdf/DataExportModel';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -241,7 +242,9 @@ const DefaultModal = () => {
                 {modalType === 'CHARACTER_REPORT_TYPE' && (
                   <CharecterReportTypeModal />
                 )}
-
+                {modalType === 'DATA_EXPORT_FEILD' && (
+                  <DataExportModel userData={id} />
+                )}
                 {/* User Panel Models */}
                 {modalType === 'SESSION_CHANGE_MODEL' && (
                   <SessionChangeModal id={id} />

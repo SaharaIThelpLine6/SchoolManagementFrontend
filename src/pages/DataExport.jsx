@@ -20,6 +20,7 @@ import {
 } from '../features/student/studentQuerySlice';
 import useTranslate from '../utils/Translate';
 import StudentDataReportPdf from '../view/students/pdf/StudentDataReportPdf';
+import { showModal } from '../utils/ModalControlar';
 
 const PAGE_SIZE = 10;
 
@@ -105,13 +106,19 @@ const DataExport = ({ pageTitle }) => {
   }, [searchStudentInfo]);
 
   const { data: sessionData } = useGetSessionsQuery();
-  const { data: subClassData } = useGetSubClassListQuery();
+  const { data: subClassData, isLoading: subClassDataLoading, isError: subClassDataSuccess } = useGetSubClassListQuery();
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
     dispatch(fetchSettingsData());
   }, [dispatch, pageTitle]);
 
+
+  useEffect(() => {
+    console.log("------------------");
+    console.log(subClassData);
+
+  }, [subClassData])
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedColumns, setSelectedColumns] = useState([]);
   const [errors, setErrors] = useState({ filters: false });
@@ -355,18 +362,26 @@ const DataExport = ({ pageTitle }) => {
     return filteredStudentData.slice(start, start + PAGE_SIZE);
   }, [filteredStudentData, currentPage]);
 
+    const handlePrint = useCallback(() => {
+    // ----------------------------------
+    showModal(translate('Data Export'), 'DATA_EXPORT_FEILD', paginatedData);
+    // if (paginatedData?.length > 0) {
+    //   window.print();
+    // } else {
+    //   toast.error('ডেটা প্রিন্ট করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
+    // }
+  }, [translate]);
+
   if (isSVTLoading || isSearchLoading) return <Loading />;
   if (isSVTError || settingsError)
     return <p className="text-red-500">Failed to load required data</p>;
-  const handlePrint = () => {
-    if (paginatedData?.length > 0) {
-      window.print();
-    } else {
-      toast.error(
-        'ডেটা প্রিন্ট করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।'
-      );
-    }
-  };
+
+
+
+  // if(subClassDataSuccess){
+  //   console.log("================= ======================");
+  //   console.log(subClassData);
+  // }
 
   return (
     <FormProvider {...methods}>

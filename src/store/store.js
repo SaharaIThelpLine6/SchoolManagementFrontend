@@ -35,6 +35,7 @@ import { userPanelRegistrationUser } from "../features/userPanel/userRegistratio
 import { userReportsSlice } from "../features/userReports/userReportsSlice";
 import { userTypeSlice } from "../features/userType/userTypeSlice";
 import { panelNotificationQuerySlice } from "../features/userPanel/panelNotification/panelNotificationQuerySlice";
+import { helpQuerySlice } from "../features/help/helpQuerySlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -68,12 +69,12 @@ const store = configureStore({
     [resultSilce.reducerPath]: resultSilce.reducer,
     [examSlice.reducerPath]: examSlice.reducer,
     [userInfoSlice.reducerPath]: userInfoSlice.reducer,
-
     [userPanelRegistrationUser.reducerPath]: userPanelRegistrationUser.reducer,
     [userPanelVerifyUser.reducerPath]: userPanelVerifyUser.reducer,
     [userPanelUserInfo.reducerPath]: userPanelUserInfo.reducer,
     [studentPaymentSlice.reducerPath]: studentPaymentSlice.reducer,
     [panelNotificationQuerySlice.reducerPath]: panelNotificationQuerySlice.reducer,
+    [helpQuerySlice.reducerPath]: helpQuerySlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -99,7 +100,8 @@ const store = configureStore({
       .concat(userPanelUserInfo.middleware)
       .concat(studentPaymentSlice.middleware)
       .concat(userPanelVerifyUser.middleware)
-      .concat(panelNotificationQuerySlice.middleware),
+      .concat(panelNotificationQuerySlice.middleware)
+      .concat(helpQuerySlice.middleware),
 });
 
 export default store;
