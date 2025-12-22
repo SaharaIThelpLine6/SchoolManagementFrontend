@@ -8,9 +8,10 @@ import useTranslate from '../../utils/Translate';
 
 const Reports = () => {
   const [report, setReport] = useState('');
-  const translate = useTranslate()
+  const translate = useTranslate();
 
-  const { data } = useGetMaddasahReportListQuery();
+  const { data, refetch, isLoading } = useGetMaddasahReportListQuery();
+
   const [postStudentParentsReports] = usePostStudentParentsReportsMutation();
 
   const handleSubmit = async (e) => {
@@ -39,6 +40,7 @@ const Reports = () => {
       });
 
       setReport('');
+      refetch(); // 🔥 list আবার load হবে
     } catch (error) {
       console.error('Submit failed:', error);
 

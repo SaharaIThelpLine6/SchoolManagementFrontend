@@ -1,20 +1,20 @@
+import { Buffer } from "buffer";
 import PropTypes from "prop-types";
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { toggleSidebar } from "../../features/sidebar/sideBarSlice";
-import { showModal } from "../../utils/ModalControlar";
 import TranslateButton from "../../components/Header/TranslateButton";
 import { useGetUserInfoQuery } from "../../features/payment/paymentSlice";
-import LogoAvater from "/saharait-preview.png";
 import { useGetInstitutionInfoQuery } from "../../features/settings/settingsQuerySlice";
+import { toggleSidebar } from "../../features/sidebar/sideBarSlice";
+import { useGetSoftwareDetailsQuery } from "../../features/userInfo/userInfoQuerySlice";
 import bnBijoy2Unicode from "../../utils/conveter";
-import { Buffer } from "buffer";
+import { showModal } from "../../utils/ModalControlar";
+import useTranslate from "../../utils/Translate";
+import Button from "../Button/Button";
+import SvgIcon from "../icons/SvgIcon";
 import DropdownNotification from "./DropdownNotification";
 import DropdownUser from "./DropdownUser";
-import Button from "../Button/Button";
-import useTranslate from "../../utils/Translate";
-import SvgIcon from "../icons/SvgIcon";
-import { useGetSoftwareDetailsQuery } from "../../features/userInfo/userInfoQuerySlice";
+import LogoAvater from "/saharait-preview.png";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -38,7 +38,7 @@ const Header = () => {
 
   useEffect(() =>{
     console.log(softwareDetails);
-    
+
   }, [softwareDetails])
 
   const handleOpenModal = useCallback(() => {
@@ -73,7 +73,7 @@ const Header = () => {
         </div>
 
         <div className="flex flex-row gap-2">
-          
+
             <button
               onClick={handleOpenModal}
               className="text-white bg-cyan-500 hover:bg-cyan-600 font-medium rounded-full text-xs px-4 py-1.5"
@@ -245,9 +245,9 @@ const Header = () => {
           )}
 
           {
-            softwareDetails && <a className="btn btn-info bg-blue-500 py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-[14px] text-white whitespace-nowrap d-inline block flex gap-2" href={softwareDetails.UpSoftwareLink}><svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-device-desktop-down"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M13.5 16h-9.5a1 1 0 0 1 -1 -1v-10a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v7.5" /><path d="M7 20h5" /><path d="M9 16v4" /><path d="M19 16v6" /><path d="M22 19l-3 3l-3 -3" /></svg> Download</a>
+            softwareDetails && <a className="btn btn-info bg-blue-500 py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-[14px] text-white whitespace-nowrap d-inline flex gap-2" href={softwareDetails.UpSoftwareLink}><svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-device-desktop-down"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M13.5 16h-9.5a1 1 0 0 1 -1 -1v-10a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v7.5" /><path d="M7 20h5" /><path d="M9 16v4" /><path d="M19 16v6" /><path d="M22 19l-3 3l-3 -3" /></svg> Download</a>
           }
-          
+
 
           <Button onClick={handleOpenModal} className="!rounded-full">
             {translate("Pay Now")}
