@@ -6,7 +6,7 @@ import { useGetAllUserPermissionsQuery } from '../../features/permission/permiss
 import useTranslate from '../../utils/Translate';
 import Loading from '../Loading/Loading';
 import SvgIcon from '../icons/SvgIcon';
-import { menuData } from "./menuData";
+import { menuData } from "./data";
 
 const SideBar = () => {
   const [openMenuId, setOpenMenuId] = useState(null);

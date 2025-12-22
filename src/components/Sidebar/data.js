@@ -348,6 +348,24 @@ export const menuData = [
     ],
   },
   {
+    id: '18',
+    name: 'Talimat',
+    route: '/talimat',
+    icon: 'IoMdSettings',
+    subMenu: [
+      {
+        id: '1',
+        name: 'Complaint Box Terms and Conditions',
+        route: '/talimat',
+      },
+      {
+        id: '2',
+        name: 'Student Complaints',
+        route: '/talimat/student-complaint',
+      },
+    ],
+  },
+  {
     id: '9',
     name: 'Payment',
     route: '/payment',
@@ -418,6 +436,11 @@ export const menuData = [
         id: '2',
         name: 'Settings',
         route: '/settings',
+      },
+      {
+        id: '3',
+        name: 'Website Settings',
+        route: '/settings/website-settings',
       },
     ],
   },
