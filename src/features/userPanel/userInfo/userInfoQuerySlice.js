@@ -31,71 +31,17 @@ export const userPanelUserInfo = createApi({
     getTeachersInfo: builder.query({
       query: () => `teachers_info`,
     }),
-    getStudentParentsReportList: builder.query({
-      query: () => `student_parents_report_list`,
-      providesTags: ['StudentParentsReports'],
-    }),
     getMaddasahReportList: builder.query({
       query: () => `maddasah_report_list`,
       providesTags: ['MaddrasahReports'],
     }),
-    getSingleMaddasahReport: builder.query({
-      query: (id) => `maddasah_report_get/${id}`,
-      providesTags: ['MaddrasahReports'],
-    }),
-    getSingleStudentReport: builder.query({
-      query: (id) => `student_report_get/${id}`,
-      providesTags: ['StudentParentsReports'],
-    }),
     /* ================= POST ================= */
-
-    postMaddasahReports: builder.mutation({
-      query: (data) => ({
-        url: `maddasah_report_create`,
-        method: 'POST',
-        body: data,
-      }),
-      invalidatesTags: ['MaddrasahReports'],
-    }),
-
     postStudentParentsReports: builder.mutation({
       query: (data) => ({
         url: `student_parents_report_create`,
         method: 'POST',
         body: data,
       }),
-    }),
-    putStudentReportStatusUpdate: builder.mutation({
-      query: ({ id, SeeUnSee }) => ({
-        url: `student_complaint_see_unsee_update/${id}`,
-        method: 'PUT',
-        body: { SeeUnSee },
-      }),
-      invalidatesTags: ['StudentParentsReports'],
-    }),
-
-    deleteMaddrasahReport: builder.mutation({
-      query: (id) => ({
-        url: `maddasah_report/${id}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: ['MaddrasahReports'],
-    }),
-    deleteStudentReport: builder.mutation({
-      query: (id) => ({
-        url: `student_complaint_delete/${id}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: ['StudentParentsReports'],
-    }),
-
-    updateMaddasahReports: builder.mutation({
-      query: (data) => ({
-        url: `maddasah_report_update/${data.id}`,
-        method: 'PUT',
-        body: data,
-      }),
-      invalidatesTags: ['MaddrasahReports'],
     }),
   }),
 });
@@ -107,13 +53,5 @@ export const {
   useGetStudentRoutinesQuery,
   useGetTeachersInfoQuery,
   useGetMaddasahReportListQuery,
-  useGetStudentParentsReportListQuery,
-  usePostMaddasahReportsMutation,
   usePostStudentParentsReportsMutation,
-  useDeleteMaddrasahReportMutation,
-  useUpdateMaddasahReportsMutation,
-  useGetSingleMaddasahReportQuery,
-  usePutStudentReportStatusUpdateMutation,
-  useGetSingleStudentReportQuery,
-  useDeleteStudentReportMutation
 } = userPanelUserInfo;

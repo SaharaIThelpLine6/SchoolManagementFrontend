@@ -5,6 +5,7 @@ import classReducer from "../features/class/classSlice";
 import { dashboardSlice } from "../features/dashboard/dashboardQuerySlice";
 import { examSlice } from "../features/exam/examQuerySlice";
 import { feeCollectionSlice } from "../features/feeCollection/feeCollectionSlice";
+import { helpQuerySlice } from "../features/help/helpQuerySlice";
 import languageReducer from "../features/language/languageSlice";
 import modalReducer from "../features/modal/modalSlice";
 import { monthSlice } from "../features/month/monthSlice";
@@ -24,9 +25,11 @@ import { smsSlice } from "../features/sms/smsSlice";
 import { userStudentSlice } from "../features/student/studentQuerySlice";
 import studentReducer from "../features/student/studentSlice";
 import studentResultPublicViewReducer from "../features/studentResultPublicView/studentResultPublicViewSlice";
+import { talimatQuerySlice } from "../features/talimat/talimatQuerySlice";
 import { teachersSlice } from "../features/teachers/teachersSlice";
 import { userInfoSlice } from "../features/userInfo/userInfoQuerySlice";
 import userInfoReducer from "../features/userInfo/userInfoSlice";
+import { panelNotificationQuerySlice } from "../features/userPanel/panelNotification/panelNotificationQuerySlice";
 import sessionChangeReducer from "../features/userPanel/SessionChange/SessionChangeSlice";
 import { studentPaymentSlice } from "../features/userPanel/studentPayment/studentPaymentSlice";
 import { userPanelUserInfo } from "../features/userPanel/userInfo/userInfoQuerySlice";
@@ -34,8 +37,6 @@ import { userPanelVerifyUser } from "../features/userPanel/userLoginVerify/userl
 import { userPanelRegistrationUser } from "../features/userPanel/userRegistration/userRegistrationQuerySlice";
 import { userReportsSlice } from "../features/userReports/userReportsSlice";
 import { userTypeSlice } from "../features/userType/userTypeSlice";
-import { panelNotificationQuerySlice } from "../features/userPanel/panelNotification/panelNotificationQuerySlice";
-import { helpQuerySlice } from "../features/help/helpQuerySlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -73,7 +74,9 @@ const store = configureStore({
     [userPanelVerifyUser.reducerPath]: userPanelVerifyUser.reducer,
     [userPanelUserInfo.reducerPath]: userPanelUserInfo.reducer,
     [studentPaymentSlice.reducerPath]: studentPaymentSlice.reducer,
-    [panelNotificationQuerySlice.reducerPath]: panelNotificationQuerySlice.reducer,
+    [panelNotificationQuerySlice.reducerPath]:
+      panelNotificationQuerySlice.reducer,
+    [talimatQuerySlice.reducerPath]: talimatQuerySlice.reducer,
     [helpQuerySlice.reducerPath]: helpQuerySlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -101,6 +104,7 @@ const store = configureStore({
       .concat(studentPaymentSlice.middleware)
       .concat(userPanelVerifyUser.middleware)
       .concat(panelNotificationQuerySlice.middleware)
+      .concat(talimatQuerySlice.middleware)
       .concat(helpQuerySlice.middleware),
 });
 

@@ -8,9 +8,8 @@ import Textarea from '../../components/Forms/Textarea';
 import {
   useGetSingleMaddasahReportQuery,
   usePostMaddasahReportsMutation,
-  useUpdateMaddasahReportsMutation
-} from '../../features/userPanel/userInfo/userInfoQuerySlice';
-
+  useUpdateMaddasahReportsMutation,
+} from '../../features/talimat/talimatQuerySlice';
 import { hideModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
 
@@ -33,9 +32,6 @@ const MaddrasahReportEditCreate = ({ id }) => {
     skip: !isEditMode,
   });
 
-
-
-
   const [createMaddrasah, { isLoading: isCreating }] =
     usePostMaddasahReportsMutation();
 
@@ -46,14 +42,13 @@ const MaddrasahReportEditCreate = ({ id }) => {
      Prefill for Edit
   ========================== */
 
-useEffect(() => {
-  if (isEditMode && editData?.data) {
-    setValue('Details', editData.data.Details || '');
-  } else {
-    reset();
-  }
-}, [isEditMode, editData, setValue, reset]);
-
+  useEffect(() => {
+    if (isEditMode && editData?.data) {
+      setValue('Details', editData.data.Details || '');
+    } else {
+      reset();
+    }
+  }, [isEditMode, editData, setValue, reset]);
 
   /* =========================
      Submit Handler

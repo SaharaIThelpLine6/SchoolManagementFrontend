@@ -11,10 +11,11 @@ import Swal from 'sweetalert2';
 import Button from '../components/Button/Button';
 import DeleteButton from '../components/Button/DeleteButton';
 import EditButton from '../components/Button/EditButton';
+
 import {
   useDeleteMaddrasahReportMutation,
-  useGetMaddasahReportListQuery
-} from '../features/userPanel/userInfo/userInfoQuerySlice';
+  useGetMaddasahReportListQuery,
+} from '../features/talimat/talimatQuerySlice';
 import { showModal } from '../utils/ModalControlar';
 
 const PAGE_SIZE = 10;
@@ -130,10 +131,6 @@ const ComplaintBoxTermsAndConditions = ({ pageTitle }) => {
         {translate('Failed to load data')}
       </p>
     );
-  if (!studentData.length)
-    return (
-      <p className="text-gray-500 text-center">{translate('No data found')}</p>
-    );
 
   return (
     <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
@@ -144,24 +141,29 @@ const ComplaintBoxTermsAndConditions = ({ pageTitle }) => {
             {translate('Complaint Box Terms and Conditions')}
           </h3>
 
-          <Button onClick={handleCreateOpenForm}>
-            {translate('Create')}
-          </Button>
+          <Button onClick={handleCreateOpenForm}>{translate('Create')}</Button>
         </div>
+        {studentData.length > 0 ? (
+          <>
+            {/* Table */}
+            <SortableTable
+              columns={columns}
+              data={paginatedData}
+              isFilterColumn={false}
+            />
 
-        {/* Table */}
-        <SortableTable
-          columns={columns}
-          data={paginatedData}
-          isFilterColumn={false}
-        />
-
-        {/* Pagination */}
-        <DefaultPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+            {/* Pagination */}
+            <DefaultPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        ) : (
+          <p className="text-gray-500 text-center">
+            {translate('No data found')}
+          </p>
+        )}
       </div>
     </div>
   );

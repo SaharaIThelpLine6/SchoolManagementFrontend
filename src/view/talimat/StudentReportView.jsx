@@ -1,10 +1,8 @@
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { closeModal } from '../../features/modal/modalSlice';
-import {
-  useDeleteStudentReportMutation,
-  useGetSingleStudentReportQuery,
-} from '../../features/userPanel/userInfo/userInfoQuerySlice';
+import { useDeleteStudentReportMutation, useGetSingleStudentReportQuery } from '../../features/talimat/talimatQuerySlice';
+
 
 const StudentReportView = (id) => {
   const dispatch = useDispatch()

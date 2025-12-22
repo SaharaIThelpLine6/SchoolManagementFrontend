@@ -9,7 +9,7 @@ import { setPageName } from '../features/auth/authSlice';
 import {
   useGetStudentParentsReportListQuery,
   usePutStudentReportStatusUpdateMutation,
-} from '../features/userPanel/userInfo/userInfoQuerySlice';
+} from '../features/talimat/talimatQuerySlice';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
 
@@ -20,32 +20,90 @@ const StudentComplaint = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
 
-  // ✅ Fetch complaints from API
+  // ✅ Filter States
+  const [filters, setFilters] = useState({
+    userName: '',
+    mobile1: '',
+    fatherName: '',
+    seeUnSee: '',
+  });
+
+  const [sortConfig, setSortConfig] = useState({
+    sortBy: 'SCID',
+    sortOrder: 'DESC',
+  });
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // ✅ Query Parameters
+  const queryParams = {
+    page: currentPage,
+    limit: PAGE_SIZE,
+    ...filters,
+    ...sortConfig,
+  };
+
+  // ✅ Fetch complaints from API with pagination and filters
   const {
-    data: studentData,
+    data: apiResponse,
     isLoading,
     error,
-  } = useGetStudentParentsReportListQuery();
+    refetch,
+  } = useGetStudentParentsReportListQuery(queryParams, {
+    refetchOnMountOrArgChange: true,
+  });
 
-  console.log(studentData, 'studentData');
+  console.log('API Response:', apiResponse);
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
+
   const [updateStatus] = usePutStudentReportStatusUpdateMutation();
-  const [currentPage, setCurrentPage] = useState(1);
 
-  // ✅ Safe data extract
-  const complaints = studentData?.data || [];
-
-  // ✅ Pagination logic
+  // ✅ Safe data extract from API response
+  const complaints = apiResponse?.data || [];
   const totalPages = Math.ceil(complaints.length / PAGE_SIZE);
+
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return complaints.slice(start, start + PAGE_SIZE);
   }, [complaints, currentPage]);
+  // ✅ Handle Filter Changes
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
 
-  // ✅ Open "Create Complaint" modal
+  // ✅ Handle Sort
+  const handleSort = (field) => {
+    setSortConfig((prev) => ({
+      sortBy: field,
+      sortOrder: prev.sortOrder === 'ASC' ? 'DESC' : 'ASC',
+    }));
+    setCurrentPage(1); // Reset to first page when sort changes
+  };
+
+  // ✅ Clear Filters
+  const handleClearFilters = () => {
+    setFilters({
+      userName: '',
+      mobile1: '',
+      fatherName: '',
+      seeUnSee: '',
+    });
+    setSortConfig({
+      sortBy: 'SCID',
+      sortOrder: 'DESC',
+    });
+    setCurrentPage(1);
+  };
+
+  // ✅ Open "View Complaint" modal
   const handleOpenModal = useCallback(
     async (id) => {
       try {
@@ -56,6 +114,9 @@ const StudentComplaint = ({ pageTitle }) => {
 
         await updateStatus(payload).unwrap();
 
+        // Refetch data to update the status
+        refetch();
+
         showModal(
           translate('View Student Complaint'),
           'STUDENT_COMPLAINT_VIEW',
@@ -65,8 +126,9 @@ const StudentComplaint = ({ pageTitle }) => {
         console.error('Failed to update complaint status', error);
       }
     },
-    [translate, updateStatus, showModal]
+    [translate, updateStatus, refetch]
   );
+
   const rowTextClass = (row) =>
     row.SeeUnSee === false ? 'font-bold text-gray-900' : 'font-normal';
 
@@ -79,7 +141,7 @@ const StudentComplaint = ({ pageTitle }) => {
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
           <button
-            className="p-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md"
+            className="p-2 text-white bg-[#4284f1]  rounded-md"
             onClick={() => handleOpenModal(row.SCID)}
           >
             <SvgIcon name={'FaEye'} size={20} />
@@ -91,12 +153,16 @@ const StudentComplaint = ({ pageTitle }) => {
       title: translate('ID'),
       field: 'SCID',
       hozAlign: 'center',
+      sortable: true,
+      onClick: () => handleSort('SCID'),
       render: (row) => <p className={rowTextClass(row)}>{row.SCID}</p>,
     },
     {
       title: translate('User Name'),
       field: 'UserName',
       hozAlign: 'center',
+      sortable: true,
+      onClick: () => handleSort('CreatedBy.UserName'),
       render: (row) => (
         <p className={rowTextClass(row)}>
           {row.CreatedBy?.UserName || translate('Unknown')}
@@ -107,6 +173,8 @@ const StudentComplaint = ({ pageTitle }) => {
       title: translate('Father Name'),
       field: 'FatherName',
       hozAlign: 'center',
+      sortable: true,
+      onClick: () => handleSort('CreatedBy.FatherName'),
       render: (row) => (
         <p className={rowTextClass(row)}>
           {row.CreatedBy?.FatherName || translate('Unknown')}
@@ -117,6 +185,8 @@ const StudentComplaint = ({ pageTitle }) => {
       title: translate('Mobile'),
       field: 'Mobile1',
       hozAlign: 'center',
+      sortable: true,
+      onClick: () => handleSort('CreatedBy.Mobile1'),
       render: (row) => (
         <p className={rowTextClass(row)}>
           {row.CreatedBy?.Mobile1 || translate('Unknown')}
@@ -137,6 +207,8 @@ const StudentComplaint = ({ pageTitle }) => {
       title: translate('Created At'),
       field: 'CreateAt',
       hozAlign: 'center',
+      sortable: true,
+      onClick: () => handleSort('CreateAt'),
       render: (row) => (
         <p className={rowTextClass(row)}>
           {new Date(row.CreateAt).toLocaleString()}
@@ -147,6 +219,8 @@ const StudentComplaint = ({ pageTitle }) => {
       title: translate('Status'),
       field: 'SeeUnSee',
       hozAlign: 'center',
+      sortable: true,
+      onClick: () => handleSort('SeeUnSee'),
       render: (row) => (
         <span
           className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -164,19 +238,12 @@ const StudentComplaint = ({ pageTitle }) => {
   // ✅ Loading / Error / Empty states
   if (isLoading) return <Loading />;
 
-  if (error)
-    return (
-      <p className="text-red-500 text-center">
-        {translate('Failed to load student complaints')}
-      </p>
-    );
-
-  if (!complaints.length)
-    return (
-      <p className="text-gray-500 text-center">
-        {translate('No complaints found')}
-      </p>
-    );
+  // if (error)
+  //   return (
+  //     <p className="text-red-500 text-center">
+  //       {translate('Failed to load student complaints')}
+  //     </p>
+  //   );
 
   return (
     <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
@@ -186,9 +253,59 @@ const StudentComplaint = ({ pageTitle }) => {
           <h3 className="font-SolaimanLipi text-[20px] font-bold">
             {translate('Student Complaints')}
           </h3>
-          {/* <Button onClick={handleOpenModal}>
-            {translate('Create Complaint')}
-          </Button> */}
+          <button
+            onClick={handleClearFilters}
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md text-sm"
+          >
+            {translate('Clear Filters')}
+          </button>
+        </div>
+
+        {/* Filter Section */}
+        <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              {translate('User Name')}
+            </label>
+            <input
+              type="text"
+              name="userName"
+              value={filters.userName}
+              onChange={handleFilterChange}
+              placeholder={translate('Search by name...')}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              {translate('Mobile')}
+            </label>
+            <input
+              type="text"
+              name="mobile1"
+              value={filters.mobile1}
+              onChange={handleFilterChange}
+              placeholder={translate('Search by mobile...')}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              {translate('Status')}
+            </label>
+            <select
+              name="seeUnSee"
+              value={filters.seeUnSee}
+              onChange={handleFilterChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">{translate('All')}</option>
+              <option value="0">{translate('Unseen')}</option>
+              <option value="1">{translate('Seen')}</option>
+            </select>
+          </div>
         </div>
 
         {/* Table */}
@@ -198,7 +315,6 @@ const StudentComplaint = ({ pageTitle }) => {
           isFilterColumn={false}
         />
 
-        {/* Pagination */}
         <DefaultPagination
           currentPage={currentPage}
           totalPages={totalPages}
