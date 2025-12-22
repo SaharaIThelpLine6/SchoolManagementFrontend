@@ -14,7 +14,7 @@ export const userPanelUserInfo = createApi({
       return headers;
     },
   }),
-  tagTypes: ['MaddrasahReports'],
+  tagTypes: ['MaddrasahReports', 'StudentParentsReports'],
   endpoints: (builder) => ({
     getUserDetails: builder.query({
       query: (sessionId) => `get_user_details?sessionId=${sessionId}`,
@@ -33,6 +33,7 @@ export const userPanelUserInfo = createApi({
     }),
     getStudentParentsReportList: builder.query({
       query: () => `student_parents_report_list`,
+      providesTags: ['StudentParentsReports'],
     }),
     getMaddasahReportList: builder.query({
       query: () => `maddasah_report_list`,
@@ -42,11 +43,15 @@ export const userPanelUserInfo = createApi({
       query: (id) => `maddasah_report_get/${id}`,
       providesTags: ['MaddrasahReports'],
     }),
+    getSingleStudentReport: builder.query({
+      query: (id) => `student_report_get/${id}`,
+      providesTags: ['StudentParentsReports'],
+    }),
     /* ================= POST ================= */
 
     postMaddasahReports: builder.mutation({
       query: (data) => ({
-        url: `maddasah_report_create`, // ✅ POST
+        url: `maddasah_report_create`,
         method: 'POST',
         body: data,
       }),
@@ -55,17 +60,33 @@ export const userPanelUserInfo = createApi({
 
     postStudentParentsReports: builder.mutation({
       query: (data) => ({
-        url: `student_parents_report_create`, // ✅ FIXED
+        url: `student_parents_report_create`,
         method: 'POST',
         body: data,
       }),
     }),
+    putStudentReportStatusUpdate: builder.mutation({
+      query: ({ id, SeeUnSee }) => ({
+        url: `student_complaint_see_unsee_update/${id}`,
+        method: 'PUT',
+        body: { SeeUnSee },
+      }),
+      invalidatesTags: ['StudentParentsReports'],
+    }),
+
     deleteMaddrasahReport: builder.mutation({
       query: (id) => ({
-        url: `maddasah_report/${id}`, // ✅ FIXED
+        url: `maddasah_report/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['MaddrasahReports'],
+    }),
+    deleteStudentReport: builder.mutation({
+      query: (id) => ({
+        url: `student_complaint_delete/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['StudentParentsReports'],
     }),
 
     updateMaddasahReports: builder.mutation({
@@ -91,5 +112,8 @@ export const {
   usePostStudentParentsReportsMutation,
   useDeleteMaddrasahReportMutation,
   useUpdateMaddasahReportsMutation,
-  useGetSingleMaddasahReportQuery
+  useGetSingleMaddasahReportQuery,
+  usePutStudentReportStatusUpdateMutation,
+  useGetSingleStudentReportQuery,
+  useDeleteStudentReportMutation
 } = userPanelUserInfo;

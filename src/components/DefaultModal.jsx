@@ -1,6 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { closeModal } from '../features/modal/modalSlice';
-import MaddrasahReportEditCreate from '../pages/userpanel/MaddrasahReportEditCreate';
 import useTranslate from '../utils/Translate';
 import SessionCreateUpdateModal from '../view/Session/SessionCreateUpdateModal';
 import SessionChangeModal from '../view/UserPanel/SessionChangeModal';
@@ -37,6 +36,8 @@ import AddLoginUsersModal from '../view/settings/AddLoginUsersModal';
 import UserNamePasswordChangeModal from '../view/settings/UserNamePasswordChangeModal';
 import AdmissionSerialModal from '../view/students/admission/AdmissionSerialModal';
 import AddEditBook from '../view/students/book/AddEditBook';
+import MaddrasahReportEditCreate from '../view/talimat/MaddrasahReportEditCreate';
+import StudentReportView from '../view/talimat/StudentReportView';
 import ClickOutside from './ClickOutside';
 import AddStudentVacationForm from './Forms/AddStudentVacationForm';
 import AddTeacherForm from './Forms/AddTeacherForm';
@@ -186,6 +187,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'COMPLAINT_BOX_TERMS_AND_CONDITIONS_UPDATE' && (
                   <MaddrasahReportEditCreate id={id} />
+                )}
+                {modalType === 'STUDENT_COMPLAINT_VIEW' && (
+                  <StudentReportView id={id} />
                 )}
                 {modalType === 'SUB_SIDIARY' && <Subsidiary />}
                 {modalType === 'EXAM_REPORT_SETTING' && <ExamReportSetting />}

@@ -1,11 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import SvgIcon from '../components/icons/SvgIcon';
 import Loading from '../components/Loading/Loading';
 import DefaultPagination from '../components/Pagination/DefaultPagination';
 import SortableTable from '../components/Tables/SortableTable';
 import { setPageName } from '../features/auth/authSlice';
-import { useGetStudentParentsReportListQuery } from '../features/userPanel/userInfo/userInfoQuerySlice';
+import {
+  useGetStudentParentsReportListQuery,
+  usePutStudentReportStatusUpdateMutation,
+} from '../features/userPanel/userInfo/userInfoQuerySlice';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
 
@@ -23,10 +27,12 @@ const StudentComplaint = ({ pageTitle }) => {
     error,
   } = useGetStudentParentsReportListQuery();
 
+  console.log(studentData, 'studentData');
+
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
-
+  const [updateStatus] = usePutStudentReportStatusUpdateMutation();
   const [currentPage, setCurrentPage] = useState(1);
 
   // ✅ Safe data extract
@@ -40,57 +46,102 @@ const StudentComplaint = ({ pageTitle }) => {
   }, [complaints, currentPage]);
 
   // ✅ Open "Create Complaint" modal
-  const handleOpenModal = useCallback(() => {
-    showModal(translate('Create Complaint'), 'ADD_STUDENT_COMPLAINT');
-  }, [translate]);
+  const handleOpenModal = useCallback(
+    async (id) => {
+      try {
+        const payload = {
+          id,
+          SeeUnSee: 1,
+        };
+
+        await updateStatus(payload).unwrap();
+
+        showModal(
+          translate('View Student Complaint'),
+          'STUDENT_COMPLAINT_VIEW',
+          id
+        );
+      } catch (error) {
+        console.error('Failed to update complaint status', error);
+      }
+    },
+    [translate, updateStatus, showModal]
+  );
+  const rowTextClass = (row) =>
+    row.SeeUnSee === false ? 'font-bold text-gray-900' : 'font-normal';
 
   // ✅ Table columns definition
   const columnsComplaint = [
     {
+      title: translate('Action'),
+      field: 'ID',
+      hozAlign: 'center',
+      render: (row) => (
+        <div className="flex justify-center items-center gap-2">
+          <button
+            className="p-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md"
+            onClick={() => handleOpenModal(row.SCID)}
+          >
+            <SvgIcon name={'FaEye'} size={20} />
+          </button>
+        </div>
+      ),
+    },
+    {
       title: translate('ID'),
       field: 'SCID',
       hozAlign: 'center',
-      render: (row) => <p>{row.SCID}</p>,
+      render: (row) => <p className={rowTextClass(row)}>{row.SCID}</p>,
     },
     {
       title: translate('User Name'),
       field: 'UserName',
       hozAlign: 'center',
-      render: (row) => <p>{row.CreatedBy?.UserName || translate('Unknown')}</p>,
+      render: (row) => (
+        <p className={rowTextClass(row)}>
+          {row.CreatedBy?.UserName || translate('Unknown')}
+        </p>
+      ),
     },
     {
       title: translate('Father Name'),
       field: 'FatherName',
       hozAlign: 'center',
       render: (row) => (
-        <p>{row.CreatedBy?.FatherName || translate('Unknown')}</p>
+        <p className={rowTextClass(row)}>
+          {row.CreatedBy?.FatherName || translate('Unknown')}
+        </p>
       ),
     },
     {
-      title: translate('Mother Name'),
-      field: 'MotherName',
-      hozAlign: 'center',
-      render: (row) => (
-        <p>{row.CreatedBy?.MotherName || translate('Unknown')}</p>
-      ),
-    },
-    {
-      title: translate('Mobile1'),
+      title: translate('Mobile'),
       field: 'Mobile1',
       hozAlign: 'center',
-      render: (row) => <p>{row.CreatedBy?.Mobile1 || translate('Unknown')}</p>,
+      render: (row) => (
+        <p className={rowTextClass(row)}>
+          {row.CreatedBy?.Mobile1 || translate('Unknown')}
+        </p>
+      ),
     },
     {
       title: translate('Complaint Details'),
       field: 'ComplaintDetails',
       hozAlign: 'center',
-      render: (row) => <p>{row.ComplaintDetails}</p>,
+      render: (row) => (
+        <p className={`${rowTextClass(row)} max-w-[250px] truncate mx-auto`}>
+          {row.ComplaintDetails}
+        </p>
+      ),
     },
     {
       title: translate('Created At'),
       field: 'CreateAt',
       hozAlign: 'center',
-      render: (row) => new Date(row.CreateAt).toLocaleString(),
+      render: (row) => (
+        <p className={rowTextClass(row)}>
+          {new Date(row.CreateAt).toLocaleString()}
+        </p>
+      ),
     },
     {
       title: translate('Status'),
