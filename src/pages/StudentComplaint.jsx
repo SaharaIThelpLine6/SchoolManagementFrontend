@@ -308,18 +308,26 @@ const StudentComplaint = ({ pageTitle }) => {
           </div>
         </div>
 
-        {/* Table */}
-        <SortableTable
-          columns={columnsComplaint}
-          data={paginatedData}
-          isFilterColumn={false}
-        />
+        {paginatedData.length > 0 ? (
+          <>
+            {/* Table */}
+            <SortableTable
+              columns={columnsComplaint}
+              data={paginatedData}
+              isFilterColumn={false}
+            />
 
-        <DefaultPagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
+            <DefaultPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        ) : (
+          <p className="text-gray-500 text-center">
+            {translate('No data found')}
+          </p>
+        )}
       </div>
     </div>
   );

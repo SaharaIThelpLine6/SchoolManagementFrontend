@@ -63,9 +63,9 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
 
   useEffect(() => {
     if (isLoading) return;
-  
+
     if (error || !userResultData || userResultData.examList?.length === 0) {
-      Swal.fire({  
+      Swal.fire({
         title: 'Data Not Found',
         text: 'The requested result data could not be found.',
         icon: 'error',
@@ -122,7 +122,7 @@ const filteredByID = students.filter((student) => {
   const code = Number(student.UserCode);
 
   if (!startID && !endID) return true;            // no filter
-  if (startID && !endID) return code >= Number(startID); 
+  if (startID && !endID) return code >= Number(startID);
   if (!startID && endID) return code <= Number(endID);
 
   return code >= Number(startID) && code <= Number(endID);
@@ -219,7 +219,7 @@ const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentP
 
 
   console.log(paginatedData);
-  
+
   // filter subject funstion
   const filteredSubjects = selectedSubject
     ? paginatedData[0]?.Subjects?.filter(
@@ -239,7 +239,7 @@ const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentP
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <input type="hidden" {...methods.register("ID")} />
-          
+
          <div className="flex gap-4">
            <DefaultInput label={"Start ID"} registerKey="StartID" />
           <DefaultInput label={"End ID"} registerKey="EndID" />
@@ -367,7 +367,7 @@ const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentP
               {translate("Save Results")}
             </Button>
 
-          
+
             <DefaultPagination
                 currentPage={currentPage}
                 totalPages={totalPages}

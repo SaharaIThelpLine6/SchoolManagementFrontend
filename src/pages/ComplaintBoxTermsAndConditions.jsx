@@ -125,12 +125,12 @@ const ComplaintBoxTermsAndConditions = ({ pageTitle }) => {
 
   // ✅ Loading / Error / Empty states
   if (isLoading) return <Loading />;
-  if (isError)
-    return (
-      <p className="text-red-500 text-center">
-        {translate('Failed to load data')}
-      </p>
-    );
+  // if (isError)
+  //   return (
+  //     <p className="text-red-500 text-center">
+  //       {translate('Failed to load data')}
+  //     </p>
+  //   );
 
   return (
     <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">

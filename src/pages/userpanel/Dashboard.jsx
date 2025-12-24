@@ -214,7 +214,9 @@ const Dashboard = () => {
           </Link>
 
           {/* ক্লাস রুটিন */}
-          <Link to="#" className={cardClass}>
+          <Link
+            to={`/${schoolid}/dashboard/class-routine`}
+           className={cardClass}>
             <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center mb-2">
               <svg
                 width="26"

@@ -82,11 +82,14 @@ import TalentCondition from '../pages/TalentCondition';
 import User from '../pages/User';
 import UserImage from '../pages/UserImage';
 import UserReports from '../pages/UserReports';
+import YoutubeTutorials from '../pages/YoutubeTutorials';
 import ClassResult from '../pages/public/ClassResult';
 import ClassResultForm from '../pages/public/ClassResultForm';
 import MadrashaHomePage from '../pages/public/MadrashaHomePage';
 import MaritListForm from '../pages/public/MaritListForm';
 import MaritListResult from '../pages/public/MaritListResult';
+import ClassRoutine from '../pages/userpanel/ClassRoutine';
+import Dashboard from '../pages/userpanel/Dashboard';
 import ExamSchedule from '../pages/userpanel/ExamSchedule';
 import OnlineAdmissionStudent from '../pages/userpanel/OnlineAdmissionStudent';
 import Reports from '../pages/userpanel/Reports';
@@ -98,12 +101,9 @@ import TeacherContacts from '../pages/userpanel/TeacherContacts';
 import UserLogin from '../pages/userpanel/UserLogin';
 import UserProfile from '../pages/userpanel/UserProfile';
 import UserRegistration from '../pages/userpanel/UserRegistration';
-import Dashboard from '../pages/userpanel/dashboard';
+import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
-import YoutubeTutorials from '../pages/YoutubeTutorials';
-import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
-import QueryManage from '../pages/QueryManage';
 
 const router = createBrowserRouter([
   {
@@ -925,6 +925,10 @@ const router = createBrowserRouter([
       {
         path: 'reports',
         element: <Reports pageTitle="Teacher Contact" />,
+      },
+      {
+        path: 'class-routine',
+        element: <ClassRoutine pageTitle="Class Routine" />,
       },
     ],
   },

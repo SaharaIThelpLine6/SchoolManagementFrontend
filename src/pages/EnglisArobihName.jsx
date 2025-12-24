@@ -212,7 +212,7 @@ const EnglisArobihName = ({ pageTitle }) => {
             </div>
 
             <DefaultSelect
-              label={<span>{translate('Session')} :</span>}
+              label={<span>{translate('Session')}</span>}
               nameField={'SessionName'}
               registerKey={'SessionID'}
               valueField={'SessionID'}
@@ -230,22 +230,22 @@ const EnglisArobihName = ({ pageTitle }) => {
             <div className="space-y-4">
               <DefaultInput
                 registerKey={'ClassName'}
-                label="মারহালা/শ্রেণি:"
+                label="মারহালা/শ্রেণি"
                 disable={true}
               />
               <DefaultInput
                 registerKey={'StudentName'}
-                label="শিক্ষার্থীর নাম :"
+                label="শিক্ষার্থীর নাম"
                 disable={true}
               />
               <DefaultInput
                 registerKey={'FatherName'}
-                label="পিতার নাম :"
+                label="পিতার নাম"
                 disable={true}
               />
               <DefaultInput
                 registerKey={'MotherName'}
-                label="মাতার নাম :"
+                label="মাতার নাম"
                 disable={true}
               />
             </div>
@@ -254,30 +254,30 @@ const EnglisArobihName = ({ pageTitle }) => {
             <div className="space-y-4">
               <DefaultInput
                 registerKey={'EnglishName'}
-                label="Student Name :"
+                label="Student Name"
               />
               <DefaultInput
                 registerKey={'EnglishFather'}
-                label="Father Name :"
+                label="Father Name"
               />
               <DefaultInput
                 registerKey={'EnglishMother'}
-                label="Mother Name :"
+                label="Mother Name"
               />
               <DefaultInput
                 registerKey={'EnglishShortAdd'}
-                label="English Short Address :"
+                label="English Short Address"
               />
             </div>
 
             {/* Arabic Column */}
             <div className="space-y-4">
-              <DefaultInput registerKey={'ArabicName'} label="اسم الطالب :" />
-              <DefaultInput registerKey={'ArabicFather'} label="اسم الأب :" />
-              <DefaultInput registerKey={'ArabicMother'} label="اسم الأم :" />
+              <DefaultInput registerKey={'ArabicName'} label="اسم الطالب " />
+              <DefaultInput registerKey={'ArabicFather'} label="اسم الأب " />
+              <DefaultInput registerKey={'ArabicMother'} label="اسم الأم " />
               <DefaultInput
                 registerKey={'ArabicShortAdd'}
-                label="عنوان قصير باللغة العربية :"
+                label="عنوان قصير باللغة العربية "
               />
             </div>
           </div>
