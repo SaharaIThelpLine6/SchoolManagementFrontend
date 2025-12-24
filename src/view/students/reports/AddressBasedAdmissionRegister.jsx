@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
-import bnBijoy2Unicode from "../../../utils/conveter";
-import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
+import { useEffect, useState } from "react";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
+import { formatDate } from "../../../helper/formatTime";
+import bnBijoy2Unicode from "../../../utils/conveter";
+import { formatToDDMMYYYY } from "../../../utils/dateFormat";
 
 const AddressBasedAdmissionRegister = ({ reportData }) => {
   const [logo, setLogo] = useState(null);
@@ -18,8 +19,7 @@ const AddressBasedAdmissionRegister = ({ reportData }) => {
   }, [instutionInfo]);
 
   return (
-       <div className="font-bangla  p-4 bg-white text-xs">
-
+    <div className="font-bangla  p-4 bg-white text-xs">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0">
         {/* Logo */}
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
@@ -68,8 +68,12 @@ const AddressBasedAdmissionRegister = ({ reportData }) => {
           <tbody>
             {reportData?.map((student, index) => (
               <tr key={index} className="bg-white">
-                <td className="border border-black p-2 text-center">{index + 1}</td>
-                <td className="border border-black p-2 text-center">{student.StudentCode}</td>
+                <td className="border border-black p-2 text-center">
+                  {index + 1}
+                </td>
+                <td className="border border-black p-2 text-center">
+                  {student.StudentCode}
+                </td>
                 <td className="border border-black p-2 text-center">
                   {bnBijoy2Unicode(student.StudentName)}
                 </td>
@@ -80,7 +84,7 @@ const AddressBasedAdmissionRegister = ({ reportData }) => {
                   {bnBijoy2Unicode(student.MotherName)}
                 </td>
                 <td className="border border-black p-2 text-center">
-                  {student.DateOfBirth ? formatDate(new Date(student.DateOfBirth)) : ''}
+                  {bnBijoy2Unicode(formatToDDMMYYYY(student.DateOfBirth))}
                 </td>
                 <td className="border border-black p-2 text-center">
                   {bnBijoy2Unicode(student.ClassName)}

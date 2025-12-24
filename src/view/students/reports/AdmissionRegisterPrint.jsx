@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
-import bnBijoy2Unicode from "../../../utils/conveter";
-import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
+import { useEffect, useState } from "react";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
+import { formatDate } from "../../../helper/formatTime";
+import bnBijoy2Unicode from "../../../utils/conveter";
+import { formatToDDMMYYYY } from "../../../utils/dateFormat";
 
 const AdmissionRegisterPrint = ({ reportData }) => {
   const [logo, setLogo] = useState(null);
@@ -24,8 +25,7 @@ const AdmissionRegisterPrint = ({ reportData }) => {
   const subClassName = firstItem?.SubClass || "";
 
   return (
-        <div className="font-bangla  p-4 bg-white text-xs">
-
+    <div className="font-bangla  p-4 bg-white text-xs">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
         {/* Logo */}
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
@@ -63,7 +63,9 @@ const AdmissionRegisterPrint = ({ reportData }) => {
             <tr className="bg-white text-sm text-black">
               <th className="border border-black p-2 bg-white">ক্র:</th>
               <th className="border border-black p-2 bg-white">দাখেলা</th>
-              <th className="border border-black p-2 bg-white">শিক্ষার্থীর নাম</th>
+              <th className="border border-black p-2 bg-white">
+                শিক্ষার্থীর নাম
+              </th>
               <th className="border border-black p-2 bg-white">পিতার নাম</th>
               <th className="border border-black p-2 bg-white">মাতার নাম</th>
               <th className="border border-black p-2 bg-white">জন্ম তারিখ</th>
@@ -94,7 +96,7 @@ const AdmissionRegisterPrint = ({ reportData }) => {
                   {bnBijoy2Unicode(row.MotherName)}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {bnBijoy2Unicode(row.DateOfBirth)}
+                  {bnBijoy2Unicode(formatToDDMMYYYY(row.DateOfBirth))}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
                   {row.BloodGroup}

@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
-import bnBijoy2Unicode from "../../../utils/conveter";
-import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
+import { useEffect, useState } from "react";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
+import { formatDate } from "../../../helper/formatTime";
+import bnBijoy2Unicode from "../../../utils/conveter";
+import { formatToDDMMYYYY } from "../../../utils/dateFormat";
 
 const ImageWithAdmissionRegisterNewOld = ({ reportData }) => {
   const [logo, setLogo] = useState(null);
@@ -23,20 +24,22 @@ const ImageWithAdmissionRegisterNewOld = ({ reportData }) => {
       sl: index + 1,
       roll: student.StudentCode,
       studentName: `${bnBijoy2Unicode(student.StudentName)} / ${bnBijoy2Unicode(
-        student.FatherName || ""
+        student.FatherName || ''
       )}`,
       fatherName: `${
-        student.DateOfBirth ? formatDate(new Date(student.DateOfBirth)) : ""
-      } / ${student.Mobile1 || ""}`,
-      motherName: `${student.NIDNO || ""} ${
-        student.NIDNO && student.BloodGroup ? "/" : ""
-      } ${student.BloodGroup || ""}`,
-      dob: `${bnBijoy2Unicode(student.permanentVill || "")}, ${bnBijoy2Unicode(
-        student.PermanentDistrictName || ""
+        formatToDDMMYYYY(student.DateOfBirth)
+          ? bnBijoy2Unicode(formatToDDMMYYYY(student.DateOfBirth)) + ' / '
+          : ''
+      }${student.Mobile1 || ''}`,
+      motherName: `${student.NIDNO || ''} ${
+        student.NIDNO && student.BloodGroup ? '/' : ''
+      } ${student.BloodGroup || ''}`,
+      dob: `${bnBijoy2Unicode(student.permanentVill || '')}, ${bnBijoy2Unicode(
+        student.PermanentDistrictName || ''
       )}`,
       bloodGroup: student.ResidentialName
         ? bnBijoy2Unicode(student.ResidentialName)
-        : "",
+        : '',
       image: student.Photo, // Assuming there might be a photo field
     })) || [];
 

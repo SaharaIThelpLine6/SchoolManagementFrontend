@@ -1,51 +1,47 @@
-import { FormProvider, useForm } from 'react-hook-form';
 import { useEffect, useRef, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import DefaultSelect from '../components/Forms/DefaultSelect';
 import Button from '../components/Button/Button';
-import useTranslate from '../utils/Translate';
-import { useGetSessionsQuery } from '../features/session/sessionSlice';
+import Checkbox from '../components/Checkboxes/Checkbox';
+import DefaultInput from '../components/Forms/DefaultInput';
+import DefaultSelect from '../components/Forms/DefaultSelect';
+import SearchSelect from '../components/Forms/SearchSelect';
+import { userStatus } from '../Data/userReportsData';
 import {
   useGetClassListQuery,
   useGetSubClassListQuery,
 } from '../features/class/classQuerySlice';
-import SearchSelect from '../components/Forms/SearchSelect';
+import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import { useGetResidentialQuery } from '../features/settings/settingsQuerySlice';
-import Checkbox from '../components/Checkboxes/Checkbox';
-import { userStatus } from '../Data/userReportsData';
-import DefaultInput from '../components/Forms/DefaultInput';
+import {
+  fetchDidata,
+  fetchSettingsData,
+  fetchThanadata,
+} from '../features/settings/settingsSlice';
 import {
   fetchSingleUser,
   setEditMode,
 } from '../features/userInfo/userInfoSlice';
-import {
-  fetchSettingsData,
-  fetchDidata,
-  fetchThanadata,
-} from '../features/settings/settingsSlice';
+import { useGetStudentReportQuery } from '../features/userReports/userReportsSlice';
+import useTranslate from '../utils/Translate';
+import AdmissionFormPdf from '../view/general-information/user-reports/AdmissionFormPdf';
+import AddressBasedAdmissionRegister from '../view/students/reports/AddressBasedAdmissionRegister';
 import AdmissionRegisterPrint from '../view/students/reports/AdmissionRegisterPrint';
-import OldNewRegisterList from '../view/students/reports/OldNewRegisterList';
-import JamaatBasedNewOldTotalStudent from '../view/students/reports/JamaatBasedNewOldTotalStudent';
-import StudentsListTwoColumns from '../view/students/reports/StudentsListTwoColumns';
-import ParentsMobileNumberList from '../view/students/reports/ParentsMobileNumberList';
-import JamaatWariBookList from '../view/students/reports/JamaatWariBookList';
+import AdmissionRegisterSerial from '../view/students/reports/AdmissionRegisterSerial';
+import AdmissionResigterAllStudentsSerial from '../view/students/reports/AdmissionResigterAllStudentsSerial';
+import AttendanceBookWithPhoto from '../view/students/reports/AttendanceBookWithPhoto';
 import BanglaAttendence from '../view/students/reports/BanglaAttendence';
 import BanglaAttendenceSubjectWari from '../view/students/reports/BanglaAttendenceSubjectWari';
-import AdmissionRegisterSerial from '../view/students/reports/AdmissionRegisterSerial';
-import AllStudentsStatistics from '../view/students/reports/AllStudentsStatistics';
-import IdAdmissionRegister from '../view/students/reports/IdAdmissionRegister';
-import AdmissionResigterAllStudentsSerial from '../view/students/reports/AdmissionResigterAllStudentsSerial';
-import ImageWithAdmissionRegisterNewOld from '../view/students/reports/ImageWithAdmissionRegisterNewOld';
-import ParentsMobileNumberTwoColumn from '../view/students/reports/ParentsMobileNumberTwoColumn';
-import FinancialStatusBasedStatistics from '../view/students/reports/FinancialStatusBasedStatistics';
-import FinancialStatusBasedAdmissionRegister from '../view/students/reports/FinancialStatusBasedAdmissionRegister';
 import BirthRegistrationBasedList from '../view/students/reports/BirthRegistrationBasedList';
-import ParentsInfo from '../view/students/reports/ParentsInfo';
-import AdmissionFormWithID from '../view/students/reports/AdmissionFormWithID';
-import AddressBasedAdmissionRegister from '../view/students/reports/AddressBasedAdmissionRegister';
-import AttendanceBookWithPhoto from '../view/students/reports/AttendanceBookWithPhoto';
-import { useGetStudentReportQuery } from '../features/userReports/userReportsSlice';
-import AdmissionFormPdf from '../view/general-information/user-reports/AdmissionFormPdf';
+import FinancialStatusBasedAdmissionRegister from '../view/students/reports/FinancialStatusBasedAdmissionRegister';
+import IdAdmissionRegister from '../view/students/reports/IdAdmissionRegister';
+import ImageWithAdmissionRegisterNewOld from '../view/students/reports/ImageWithAdmissionRegisterNewOld';
+import JamaatBasedNewOldTotalStudent from '../view/students/reports/JamaatBasedNewOldTotalStudent';
+import JamaatWariBookList from '../view/students/reports/JamaatWariBookList';
+import OldNewRegisterList from '../view/students/reports/OldNewRegisterList';
+import ParentsMobileNumberList from '../view/students/reports/ParentsMobileNumberList';
+import ParentsMobileNumberTwoColumn from '../view/students/reports/ParentsMobileNumberTwoColumn';
+import StudentsListTwoColumns from '../view/students/reports/StudentsListTwoColumns';
 
 const StudentsReport = () => {
   const methods = useForm();
@@ -125,7 +121,7 @@ const StudentsReport = () => {
     skip: !queryParams || Object.keys(queryParams).length === 0,
     refetchOnMountOrArgChange: true,
   });
-
+console.log(reportData, 'reportData');
   // Debug log
   useEffect(() => {
     if (isError) {
@@ -492,7 +488,7 @@ const StudentsReport = () => {
           <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 my-3">
               <SearchSelect
-                label={translate('Students Report') + ' :'}
+                label={translate('Students Report')}
                 registerKey="studentReport"
                 options={studentReportData ?? []}
                 valueField="id"
@@ -502,7 +498,7 @@ const StudentsReport = () => {
 
               {reportFieldMap.SessionID.includes(selectedReportID) && (
                 <DefaultSelect
-                  label={translate('Session') + ' :'}
+                  label={translate('Session')}
                   options={sessionData ?? []}
                   valueField="SessionID"
                   nameField="SessionName"
@@ -513,7 +509,7 @@ const StudentsReport = () => {
                 selectedReportID
               ) && (
                 <DefaultSelect
-                  label={translate('Class And Subclass') + ' :'}
+                  label={translate('Class And Subclass')}
                   options={classAndSubClassData ?? []}
                   valueField="id"
                   nameField="name"
@@ -522,7 +518,7 @@ const StudentsReport = () => {
               )}
               {reportFieldMap.bookOfSubject.includes(selectedReportID) && (
                 <DefaultSelect
-                  label={translate('Book of subjects') + ' :'}
+                  label={translate('Book of subjects')}
                   options={bookOfSubjectData ?? []}
                   valueField="id"
                   nameField="name"
@@ -531,7 +527,7 @@ const StudentsReport = () => {
               )}
               {reportFieldMap.ClassID.includes(selectedReportID) && (
                 <DefaultSelect
-                  label={translate('SubClass') + ' :'}
+                  label={translate('SubClass')}
                   options={subClassListData ?? []}
                   valueField="SubClassID"
                   nameField="SubClass"
@@ -543,7 +539,7 @@ const StudentsReport = () => {
                 <DefaultSelect
                   label={
                     <p className="text-gray-700 font-medium">
-                      {translate('Gender')}:
+                      {translate('Gender')}
                     </p>
                   }
                   options={genderOptions}
@@ -554,7 +550,7 @@ const StudentsReport = () => {
               )}
               {reportFieldMap.id.includes(selectedReportID) && (
                 <DefaultSelect
-                  label={translate('New/Old') + ' :'}
+                  label={translate('New/Old')}
                   options={newAndOldData ?? []}
                   valueField="id"
                   nameField="value"
@@ -563,7 +559,7 @@ const StudentsReport = () => {
               )}
               {reportFieldMap.RDID.includes(selectedReportID) && (
                 <DefaultSelect
-                  label={translate('Residential') + ' :'}
+                  label={translate('Residential')}
                   options={residentialData ?? []}
                   valueField="RDID"
                   nameField="ResidentialName"
@@ -573,7 +569,7 @@ const StudentsReport = () => {
               {reportFieldMap.addresss.includes(selectedReportID) && (
                 <>
                   <DefaultSelect
-                    label={translate('Division') + ' :'}
+                    label={translate('Division')}
                     type="number"
                     options={Array.isArray(divition) ? divition : []}
                     registerKey="DivisionID"
@@ -581,7 +577,7 @@ const StudentsReport = () => {
                     nameField="DivisionName"
                   />
                   <DefaultSelect
-                    label={translate('District') + ' :'}
+                    label={translate('District') }
                     type="number"
                     options={
                       Array.isArray(district[DivisionID])
@@ -593,7 +589,7 @@ const StudentsReport = () => {
                     nameField="DistrictName"
                   />
                   <DefaultSelect
-                    label={translate('Thana') + ' :'}
+                    label={translate('Thana')}
                     type="number"
                     options={
                       Array.isArray(thana[DistrictID]) ? thana[DistrictID] : []
@@ -609,11 +605,11 @@ const StudentsReport = () => {
               ) && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <DefaultInput
-                    label={translate('Id one') + ' :'}
+                    label={translate('Id one')}
                     registerKey="IdOne"
                   />
                   <DefaultInput
-                    label={translate('Id two') + ' :'}
+                    label={translate('Id two')}
                     registerKey="IdTwo"
                   />
                 </div>
@@ -621,14 +617,14 @@ const StudentsReport = () => {
               {reportFieldMap.IdAdmissionForm.includes(selectedReportID) && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <DefaultInput
-                    label={translate('Id one') + ' :'}
+                    label={translate('Id one')}
                     registerKey="IdOne"
                   />
                 </div>
               )}
               {reportFieldMap.IsActive.includes(selectedReportID) && (
                 <Checkbox
-                  label={translate('User Status') + ':'}
+                  label={translate('User Status')}
                   options={userStatus}
                   registerKey="is_active"
                 />
@@ -637,7 +633,7 @@ const StudentsReport = () => {
                 selectedReportID
               ) && (
                 <Checkbox
-                  label={translate('Admission Status') + ':'}
+                  label={translate('Admission Status')}
                   options={admissionData}
                   registerKey="IsActive"
                 />

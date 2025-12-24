@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import bnBijoy2Unicode from "../../../utils/conveter";
-import { formatDate } from "../../../helper/formatTime";
-import { Buffer } from "buffer";
-import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
+import { Buffer } from 'buffer';
+import { useEffect, useState } from 'react';
+import { useGetInstitutionInfoQuery } from '../../../features/settings/settingsQuerySlice';
+import bnBijoy2Unicode from '../../../utils/conveter';
+import { formatToDDMMYYYY } from '../../../utils/dateFormat';
 
 const BirthRegistrationBasedList = ({ reportData }) => {
   const [logo, setLogo] = useState(null);
@@ -11,15 +11,14 @@ const BirthRegistrationBasedList = ({ reportData }) => {
   useEffect(() => {
     if (instutionInfo?.Logo?.data) {
       const buffer = Buffer.from(instutionInfo.Logo.data);
-      const base64String = buffer.toString("base64");
+      const base64String = buffer.toString('base64');
       const imageSrc = `data:image/png;base64,${base64String}`;
       setLogo(imageSrc);
     }
   }, [instutionInfo]);
 
   return (
-       <div className="font-bangla max-w-5xl mx-auto p-4 bg-white text-xs">
-
+    <div className="font-bangla max-w-5xl mx-auto p-4 bg-white text-xs">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0">
         {/* Logo */}
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
@@ -47,7 +46,10 @@ const BirthRegistrationBasedList = ({ reportData }) => {
 
       <div className="flex justify-between items-center mb-4">
         <div className="flex gap-2 font-semibold text-base items-center">
-          শ্রেণী/জামাত : {reportData?.[0]?.ClassName ? bnBijoy2Unicode(reportData[0].ClassName) : 'কিতাব খানা'}
+          শ্রেণী/জামাত :{' '}
+          {reportData?.[0]?.ClassName
+            ? bnBijoy2Unicode(reportData[0].ClassName)
+            : 'কিতাব খানা'}
         </div>
         <div>{reportData?.[0]?.SessionName || '2025-26 Bs'}</div>
       </div>
@@ -67,8 +69,12 @@ const BirthRegistrationBasedList = ({ reportData }) => {
           <tbody>
             {reportData?.map((row, index) => (
               <tr key={index} className="bg-white">
-                <td className="border border-black p-2 text-center">{index + 1}</td>
-                <td className="border border-black p-2 text-center">{row.StudentCode}</td>
+                <td className="border border-black p-2 text-center">
+                  {index + 1}
+                </td>
+                <td className="border border-black p-2 text-center">
+                  {row.StudentCode}
+                </td>
                 <td className="border border-black p-2 text-center">
                   {bnBijoy2Unicode(row.StudentName)}
                 </td>
@@ -76,7 +82,7 @@ const BirthRegistrationBasedList = ({ reportData }) => {
                   {bnBijoy2Unicode(row.FatherName)}
                 </td>
                 <td className="border border-black p-2 text-center">
-                  {row.DateOfBirth ? formatDate(new Date(row.DateOfBirth)) : ''}
+                  {bnBijoy2Unicode(formatToDDMMYYYY(row.DateOfBirth))}
                 </td>
                 <td className="border border-black p-2 text-center">
                   {row.NIDNO || ''}

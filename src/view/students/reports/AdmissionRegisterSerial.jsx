@@ -4,6 +4,7 @@ import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
+import { formatToDDMMYYYY } from "../../../utils/dateFormat";
 
 const AdmissionRegisterSerial = ({reportData, SessionID}) => {
   const [logo, setLogo] = useState(null);
@@ -11,7 +12,7 @@ const AdmissionRegisterSerial = ({reportData, SessionID}) => {
 
 
     const { data: sessionSData } = useGetSessionsQuery();
-  
+
     const sessionData = sessionSData?.find(
       (i) => i.SessionID === Number(SessionID)
     );
@@ -28,8 +29,7 @@ const AdmissionRegisterSerial = ({reportData, SessionID}) => {
 
 
   return (
-       <div className="font-bangla  p-4 bg-white text-xs">
-
+    <div className="font-bangla  p-4 bg-white text-xs">
       <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
         {/* Logo */}
         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
@@ -54,7 +54,6 @@ const AdmissionRegisterSerial = ({reportData, SessionID}) => {
       </div>
 
       <div className="flex justify-end items-center mb-4 bg-white">
-    
         <div className="bg-white">প্রিন্ট {formatDate(new Date())}</div>
       </div>
 
@@ -71,9 +70,7 @@ const AdmissionRegisterSerial = ({reportData, SessionID}) => {
               <th className="border border-black p-2 bg-white">মাতার নাম</th>
               <th className="border border-black p-2 bg-white">জন্ম তারিখ</th>
               <th className="border border-black p-2 bg-white">শ্রেণী/জামাত</th>
-              <th className="border border-black p-2 bg-white">
-                মোবাইল
-              </th>
+              <th className="border border-black p-2 bg-white">মোবাইল</th>
               <th className="border border-black p-2 bg-white">গ্রাম</th>
               <th className="border border-black p-2 bg-white">ডাক </th>
               <th className="border border-black p-2 bg-white">থানা</th>
@@ -99,7 +96,7 @@ const AdmissionRegisterSerial = ({reportData, SessionID}) => {
                   {bnBijoy2Unicode(row.MotherName)}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
-                  {row.DateOfBirth}
+                  {bnBijoy2Unicode(formatToDDMMYYYY(row.DateOfBirth))}
                 </td>
                 <td className="border border-black p-2 text-center bg-white">
                   {row.BloodGroup}

@@ -1,7 +1,7 @@
-import React from "react";
+import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../../utils/conveter";
-import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
+import { formatToDDMMYYYY } from "../../../utils/dateFormat";
 
 const OldNewRegisterList = ({ reportData, NewOldId, SubClassID }) => {
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
@@ -30,7 +30,9 @@ const OldNewRegisterList = ({ reportData, NewOldId, SubClassID }) => {
       <div className="grid grid-cols-3 gap-4 mb-4 sm:mb-0 p-4 bg-white">
         <div className="flex gap-2 bg-white">
           <span>শ্রেণী/জামাত:</span>
-          <span className="font-bold underline">{bnBijoy2Unicode(subClasData?.SubClass)}</span>
+          <span className="font-bold underline">
+            {bnBijoy2Unicode(subClasData?.SubClass)}
+          </span>
         </div>
         <div className="flex gap-2 justify-center bg-white">
           <span>সর্বমোট শিক্ষার্থী:</span>
@@ -40,10 +42,10 @@ const OldNewRegisterList = ({ reportData, NewOldId, SubClassID }) => {
           <span>শিক্ষার্থীর ধরন:</span>
           <span className="font-bold underline">
             {{
-              1: "নতুন",
-              2: "পুরাতন",
-              3: "উভয়",
-            }[Number(NewOldId)] || ""}
+              1: 'নতুন',
+              2: 'পুরাতন',
+              3: 'উভয়',
+            }[Number(NewOldId)] || ''}
           </span>
         </div>
       </div>
@@ -76,7 +78,7 @@ const OldNewRegisterList = ({ reportData, NewOldId, SubClassID }) => {
                   {bnBijoy2Unicode(s.FatherName)}
                 </td>
                 <td className="border border-black px-2 py-1 bg-white">
-                  {bnBijoy2Unicode(s.DateOfBirth)}
+                  {bnBijoy2Unicode(formatToDDMMYYYY(s.DateOfBirth))}
                 </td>
               </tr>
             ))}
