@@ -36,6 +36,8 @@ import AddLoginUsersModal from '../view/settings/AddLoginUsersModal';
 import UserNamePasswordChangeModal from '../view/settings/UserNamePasswordChangeModal';
 import AdmissionSerialModal from '../view/students/admission/AdmissionSerialModal';
 import AddEditBook from '../view/students/book/AddEditBook';
+import ClassRoutineCreateUpdate from '../view/students/class-routine/ClassRoutineCreateUpdate';
+import DataExportModel from '../view/students/pdf/DataExportModel';
 import MaddrasahReportEditCreate from '../view/talimat/MaddrasahReportEditCreate';
 import StudentReportView from '../view/talimat/StudentReportView';
 import ClickOutside from './ClickOutside';
@@ -55,7 +57,6 @@ import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
 import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
-import DataExportModel from '../view/students/pdf/DataExportModel';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -129,7 +130,14 @@ const DefaultModal = () => {
                 {modalType === 'EDIT_DESIGNATION' && (
                   <DesignationForm userId={id} />
                 )}
+
                 {modalType === 'ADD_TYPEOFVACATION' && <TypeOfVacationForm />}
+                {modalType === 'ADD_CLASS_ROUTINE' && (
+                  <ClassRoutineCreateUpdate />
+                )}
+                {modalType === 'EDIT_CLASS_ROUTINE' && (
+                  <ClassRoutineCreateUpdate id={id} />
+                )}
                 {modalType === 'ADD_FUND' && <FundForm />}
                 {modalType === 'OPEN_FUND' && <FundForm />}
                 {modalType === 'OPEN_GENERAL' && <GeneralForm />}
