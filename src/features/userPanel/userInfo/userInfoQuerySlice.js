@@ -14,7 +14,7 @@ export const userPanelUserInfo = createApi({
       return headers;
     },
   }),
-  tagTypes: ['MaddrasahReports', 'StudentParentsReports'],
+  tagTypes: ['MaddrasahReports', 'StudentParentsReports', 'ClassRoutines'],
   endpoints: (builder) => ({
     getUserDetails: builder.query({
       query: (sessionId) => `get_user_details?sessionId=${sessionId}`,
@@ -35,6 +35,7 @@ export const userPanelUserInfo = createApi({
       query: () => `maddasah_report_list`,
       providesTags: ['MaddrasahReports'],
     }),
+
     /* ================= POST ================= */
     postStudentParentsReports: builder.mutation({
       query: (data) => ({
@@ -42,6 +43,10 @@ export const userPanelUserInfo = createApi({
         method: 'POST',
         body: data,
       }),
+    }),
+    getClassRoutines: builder.query({
+      query: () => `class_routine_list`,
+      providesTags: ['ClassRoutines'],
     }),
   }),
 });
@@ -54,4 +59,5 @@ export const {
   useGetTeachersInfoQuery,
   useGetMaddasahReportListQuery,
   usePostStudentParentsReportsMutation,
+  useGetClassRoutinesQuery,
 } = userPanelUserInfo;
