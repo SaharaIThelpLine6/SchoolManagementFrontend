@@ -19,6 +19,8 @@ export default function WebsiteSettings() {
         defaultValues: {
             aboutText: "",
             whyUsTitle: "",
+            subjectListTitle: "",
+            teacherListTitle: "",
             bannerImage: null,
             singleImage: null,
             whyUsList: [{ text: "" }]
@@ -91,6 +93,8 @@ export default function WebsiteSettings() {
         formData.append("whyUsTitle", data.whyUsTitle);
         // JSON (stringify!)
         formData.append("whyUsList", JSON.stringify(data.whyUsList));
+        formData.append("subjectListTitle", data.subjectListTitle);
+        formData.append("teacherListTitle", data.teacherListTitle);
         // Images (only if selected)
         if (data.bannerImage instanceof File) {
             formData.append("bannerImage", data.bannerImage);
@@ -198,6 +202,23 @@ export default function WebsiteSettings() {
                         </button>
                         
                     </div>
+
+
+                    <div className="mt-2">
+                        <DefaultInput
+                            registerKey="subjectListTitle"
+                            type="text"
+                            label="Subject List Title"
+                        />
+                    </div>
+                    <div className="mt-2">
+                        <DefaultInput
+                            registerKey="teacherListTitle"
+                            type="text"
+                            label="Teacher List Card Title"
+                        />
+                    </div>
+                    {/* subjectListTitle */}
                     <button type="submit" className='btn btn-primary py-2 px-2 bg-cyan-600 text-white rounded-[4px] mt-4 text-center'>Save Settings</button>
                 </form>
             </div>

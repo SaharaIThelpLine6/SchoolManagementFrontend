@@ -104,6 +104,7 @@ import UserRegistration from '../pages/userpanel/UserRegistration';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
+import QueryManage from '../pages/QueryManage';
 
 const router = createBrowserRouter([
   {
@@ -473,10 +474,10 @@ const router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-              //   {
-              //     path: "query-manage",
-              //     element: <QueryManage pageTitle="Query Manage" />,
-              //   },
+                {
+                  path: "query-manage",
+                  element: <QueryManage pageTitle="Query Manage" />,
+                },
               {
                 path: 'report',
                 element: (
