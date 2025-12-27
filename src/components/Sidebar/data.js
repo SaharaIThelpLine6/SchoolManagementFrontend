@@ -100,7 +100,6 @@ export const menuData = [
         name: 'Book',
         route: '/students/book-list',
       },
-
       {
         id: '7',
         name: 'Group Distribution',
@@ -111,7 +110,6 @@ export const menuData = [
         name: 'Data Export',
         route: '/students/data-export',
       },
-
       {
         id: '9',
         name: 'Certificate of Attestation',
@@ -126,6 +124,11 @@ export const menuData = [
         id: '11',
         name: 'Online Admission',
         route: '/students/online-admission',
+      },
+      {
+        id: '12',
+        name: 'Class Routine',
+        route: '/students/class-routine',
       },
     ],
   },
@@ -445,10 +448,10 @@ export const menuData = [
     ],
   },
   {
-    id: "13",
-    name: "Help",
-    route: "/help",
-    icon: "IoMdHelp",
+    id: '13',
+    name: 'Help',
+    route: '/help',
+    icon: 'IoMdHelp',
     subMenu: [
       {
         id: '1',

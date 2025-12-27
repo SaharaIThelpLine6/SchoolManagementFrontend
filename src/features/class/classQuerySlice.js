@@ -14,7 +14,13 @@ export const classSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['ClassList', 'SubClassList', 'Academic_Subjects', 'SubClasss'],
+  tagTypes: [
+    'ClassList',
+    'SubClassList',
+    'Academic_Subjects',
+    'SubClasss',
+    'Class_Routine',
+  ],
   endpoints: (builder) => ({
     // GET endpoints
     getClassList: builder.query({
@@ -105,6 +111,39 @@ export const classSlice = createApi({
       query: (id) => `academic_subjects/by-subclass/${id}`,
       providesTags: ['ClassList', 'Academic_Subjects'],
     }),
+
+    // Class Routine
+    getClassRoutines: builder.query({
+      query: () => `class_routine_list`,
+      providesTags: ['Class_Routine'],
+    }),
+    createClassRoutine: builder.mutation({
+      query: (data) => ({
+        url: 'create_class_routine',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Class_Routine'],
+    }),
+    updateClassRoutine: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `update_class_routine/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Class_Routine'],
+    }),
+    getSingleClassRoutine: builder.query({
+      query: (id) => `class_routine_get/${id}`,
+      providesTags: ['Class_Routine'],
+    }),
+    deleteClassRoutine: builder.mutation({
+      query: (id) => ({
+        url: `delete_class_routine/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Class_Routine'],
+    }),
   }),
 });
 
@@ -123,5 +162,10 @@ export const {
   useCreateClassMutation,
   useUpdateClassMutation,
   useGetSingleClassQuery,
-  useGetAcademicSubjectsBySubClassQuery
+  useGetAcademicSubjectsBySubClassQuery,
+  useGetClassRoutinesQuery,
+  useCreateClassRoutineMutation,
+  useUpdateClassRoutineMutation,
+  useGetSingleClassRoutineQuery,
+  useDeleteClassRoutineMutation,
 } = classSlice;

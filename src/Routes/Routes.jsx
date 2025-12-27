@@ -74,6 +74,7 @@ import SMS from '../pages/SMS';
 import Section from '../pages/Section';
 import Session from '../pages/Session';
 import Settings from '../pages/Settings';
+import StudentClassRoutine from '../pages/StudentClassRoutine';
 import StudentComplaint from '../pages/StudentComplaint';
 import StudentGroupCreate from '../pages/StudentGroupCreate';
 import StudentsFeeCollection from '../pages/StudentsFeeCollection';
@@ -321,6 +322,14 @@ const router = createBrowserRouter([
                     permissionId={permissionsDataList.student_admission}
                   >
                     <OnlineAdmissionTable pageTitle="Online Admission List" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'class-routine',
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.class}>
+                    <StudentClassRoutine pageTitle="Class Student List" />
                   </RequirePermission>
                 ),
               },
@@ -639,7 +648,7 @@ const router = createBrowserRouter([
                   // <RequirePermission
                   //   permissionId={permissionsDataList.gate_pass_leave}
                   // >
-                    <StudentComplaint pageTitle="Student Complaints" />
+                  <StudentComplaint pageTitle="Student Complaints" />
                   // </RequirePermission>
                 ),
               },
@@ -828,10 +837,8 @@ const router = createBrowserRouter([
               },
               {
                 path: 'website-settings',
-                element: (
-                  <WebsiteSettings pageTitle="Add Login Users" />
-                ),
-              }
+                element: <WebsiteSettings pageTitle="Add Login Users" />,
+              },
             ],
           },
           {
@@ -839,13 +846,10 @@ const router = createBrowserRouter([
             children: [
               {
                 path: 'videos',
-                element: (
-                  <YoutubeTutorials pageTitle="Youtube Tutorials" />
-                ),
-              }
+                element: <YoutubeTutorials pageTitle="Youtube Tutorials" />,
+              },
             ],
           },
-
         ],
       },
     ],

@@ -6,7 +6,7 @@ import { useGetAllUserPermissionsQuery } from '../../features/permission/permiss
 import useTranslate from '../../utils/Translate';
 import Loading from '../Loading/Loading';
 import SvgIcon from '../icons/SvgIcon';
-import { menuData } from "./data";
+import { menuData } from './data';
 
 const SideBar = () => {
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -117,6 +117,9 @@ const SideBar = () => {
             }
             if (subItem.name === 'Online Admission') {
               return hasPermission(permissionsDataList.student_admission);
+            }
+            if (subItem.name === 'Class Routine') {
+              return hasPermission(permissionsDataList.class);
             }
             /**
              * Main Route
@@ -302,13 +305,10 @@ const SideBar = () => {
                   </button>
 
                   <ul
-                    className={`relative text-gray-600 overflow-hidden transition-[max-height,opacity] duration-300 ease-in-out
+                    className={`relative text-gray-600 overflow-hidden transition-all duration-300 ease-in-out
                     ${
-                      openMenuId === menu.id
-                        ? 'max-h-96 opacity-100'
-                        : 'max-h-0 opacity-0'
-                    }
-                  `}
+                      openMenuId === menu.id ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                    }`}
                   >
                     <div className="absolute top-0 bottom-0 left-6 w-px border-l-2 border-dashed border-[#007af7] z-0" />
 
@@ -318,7 +318,8 @@ const SideBar = () => {
                           to={item.route}
                           end
                           className={({ isActive }) =>
-                            `block py-2 ${fontClass} pl-4 ${
+                            `block py-2 ${fontClass} pl-4 rounded-md transition
+                            ${
                               isActive
                                 ? 'bg-[#ddeffe] text-[#007af7]'
                                 : 'hover:text-[#007af7] hover:bg-[#ddeffe]'
