@@ -64,12 +64,12 @@ const MadrashaHomePage = () => {
             <div className="container mx-auto px-2 lg:px-0">
                 <div className="flex items-center flex-wrap lg:flex-nowrap">
                     <div className="text_area text-center md:text-start w-full lg:w-1/2 pr-2">
-                        <h1 className=' text-[28px] md:text-[40px] text-theme-color'>{schoolData?.InstitutionName}</h1>
+                        <h1 className=' text-[28px] md:text-[40px] text-theme-color'>{schoolData?.primaryHeading}</h1>
                         <h2 className='text-[18px] md:text-[22px] mt-2 mb-4'>
                             {schoolData?.InstitutionName}, {schoolData?.Address} {settingsObject.aboutText}
 
                         </h2>
-                        <Link to={`/${schoolid}/student_result`} className='py-4 px-4 bg-[#4154f1] text-white rounded-[5px] font-Poppins mt-4 inline-block shadow-xl'>Explore Our Result Section</Link>
+                        {/* <Link to={`/${schoolid}/student_result`} className='py-4 px-4 bg-[#4154f1] text-white rounded-[5px] font-Poppins mt-4 inline-block shadow-xl'>Explore Our Result Section</Link> */}
                     </div>
                     <div className="image_section pt-[50px] w-full md:pt-0 lg:w-1/2">
                         <img src={`${API_URL}/public/${settingsObject.BannerImage}`} alt="madrasha image" className='up_down_animation rounded-[5px]' />
@@ -118,7 +118,7 @@ const MadrashaHomePage = () => {
                 <div className="relative z-10">
                     <div className="pb-[40px]">
                         <div className="text_area text-center pr-2">
-                            <h2 className=' text-[28px] md:text-[40px] font-bold text-white'> আমাদের শিক্ষাথী সংখ্যা </h2>
+                            <h2 className=' text-[28px] md:text-[40px] font-bold text-white'> {settingsObject?.studentListHeading} </h2>
                         </div>
 
                     </div>

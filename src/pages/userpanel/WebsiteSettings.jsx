@@ -17,6 +17,10 @@ export default function WebsiteSettings() {
 
     const methods = useForm({
         defaultValues: {
+            fblink: "",
+            ylink: "",
+            studentListHeading: "",
+            primaryHeading: "",
             aboutText: "",
             whyUsTitle: "",
             subjectListTitle: "",
@@ -89,6 +93,10 @@ export default function WebsiteSettings() {
     const onSubmit = async (data) => {
         const formData = new FormData();
         // Text fields
+        formData.append("fblink", data.fblink);
+        formData.append("ylink", data.ylink);
+        formData.append("primaryHeading", data.primaryHeading);
+        formData.append("studentListHeading", data.studentListHeading);
         formData.append("aboutText", data.aboutText);
         formData.append("whyUsTitle", data.whyUsTitle);
         // JSON (stringify!)
@@ -110,6 +118,13 @@ export default function WebsiteSettings() {
             <div className="website-settings">
 
                 <form onSubmit={methods.handleSubmit(onSubmit)}>
+                    <div className="mt-2">
+                        <DefaultInput
+                            registerKey="primaryHeading"
+                            type="text"
+                            label="Primary Title"
+                        />
+                    </div>
                     <DefaultInput
                         registerKey="aboutText"
                         type="textarea"
@@ -142,6 +157,14 @@ export default function WebsiteSettings() {
                                 previewUrl={bannerUrl}
                             />
                         </div>
+                    </div>
+
+                    <div className="mt-2">
+                        <DefaultInput
+                            registerKey="studentListHeading"
+                            type="text"
+                            label="Student Stats Title"
+                        />
                     </div>
 
 
@@ -218,6 +241,19 @@ export default function WebsiteSettings() {
                             label="Teacher List Card Title"
                         />
                     </div>
+                    <div className="mt-2 flex flex-wrap md:flex-nowrap gap-2">
+                        <DefaultInput
+                            registerKey="fblink"
+                            type="text"
+                            label="Facebook Link"
+                        />
+                        <DefaultInput
+                            registerKey="ylink"
+                            type="text"
+                            label="Youtube Link"
+                        />
+                    </div>
+                  
                     {/* subjectListTitle */}
                     <button type="submit" className='btn btn-primary py-2 px-2 bg-cyan-600 text-white rounded-[4px] mt-4 text-center'>Save Settings</button>
                 </form>
