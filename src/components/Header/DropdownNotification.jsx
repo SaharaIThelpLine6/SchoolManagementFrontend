@@ -62,8 +62,8 @@ const DropdownNotification = ({ notificationList }) => {
               fill="currentColor"
               stroke-width="0"
               viewBox="0 0 24 24"
-              height="2em"
-              width="2em"
+              height="1.5em"
+              width="1.5em"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path fill="none" d="M0 0h24v24H0V0z"></path>
