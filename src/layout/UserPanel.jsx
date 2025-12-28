@@ -388,7 +388,8 @@ export default function UserPanel({ children }) {
           {/* Payment লিঙ্ক - বৃত্তাকার বাটন */}
           <div className="flex justify-center relative">
             <Link
-              to={`/${schoolid}/dashboard/student-payment-history`}
+              // to={`/${schoolid}/dashboard/student-payment-history`}
+              to={`/${schoolid}/dashboard`}
               className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30 -mt-8 border-4 border-white mb-4 bg-gray"
             >
               <img
