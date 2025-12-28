@@ -175,6 +175,54 @@ const QueryManage = ({ pageTitle }) => {
     // // Reset selected rows after running the query
     // setSelectedRows([]);
   }
+  const exportDataset = async () => {
+
+    setDisableButton(true)
+    const confirmed = window.confirm("Are you sure you want to Run this Query?");
+    try {
+      const response = await fetch(`${API_URL}/api/querymanage/export_databases`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: query,
+          databaseids: selectedRows,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setDisableButton(false)
+        console.log("Query Result:", result);
+      } else {
+        setDisableButton(false)
+        console.error("Server Error:", result);
+        alert("Query failed: " + result.message);
+
+      }
+    } catch (error) {
+      setDisableButton(false)
+      console.error("Fetch Error:", error);
+      alert("Network or server error occurred.");
+    }
+
+
+    setDisableButton(false)
+
+
+
+    // Simulate running the query
+    // Swal.fire({
+    //   icon: "success",
+    //   title: translate("Query executed successfully"),
+    //   confirmButtonText: translate("OK"),
+    // });
+
+    // // Reset selected rows after running the query
+    // setSelectedRows([]);
+  }
 
   return (
     <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
@@ -245,6 +293,8 @@ const QueryManage = ({ pageTitle }) => {
               }
 
             </div>
+
+            <button type="button" className="text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 w-[150px] max-h-[40px]" onClick={exportDataset} disabled={disableButton}>Export</button>
 
             <button type="button" className="text-white bg-gradient-to-r from-teal-400 via-teal-500 to-teal-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-teal-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 w-[150px] max-h-[40px]" onClick={handleQueryRun} disabled={disableButton}>Run</button>
           </div>

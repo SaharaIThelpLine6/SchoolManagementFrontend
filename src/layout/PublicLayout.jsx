@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
 import { fetchResultFieldData } from "../features/studentResultPublicView/studentResultPublicViewSlice";
@@ -8,7 +8,7 @@ import { Buffer } from "buffer";
 import DeveloperCredit from "../components/DeveloperCredit";
 
 const PublicLayout = () => {
-  const { schoolData } = useSelector((state) => state.studentResultPublicView);
+  const { schoolData, websiteSettings } = useSelector((state) => state.studentResultPublicView);
 
   const [isOpen, setIsOpen] = useState(false);
   const toggleSidebar = () => {
@@ -17,6 +17,15 @@ const PublicLayout = () => {
   const { schoolid } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const settingsObject = React.useMemo(() => {
+    if (!websiteSettings || websiteSettings.length === 0) return {};
+
+    return websiteSettings.reduce((acc, item) => {
+      acc[item.FieldKey] = item.FieldValue;
+      return acc;
+    }, {});
+  }, [websiteSettings]);
 
   const bufferConveter = (bufferData) => {
     if (!bufferData) {
@@ -84,7 +93,7 @@ const PublicLayout = () => {
         {/* For mobile display end */}
 
         <header
-        // bg-theme-color
+          // bg-theme-color
           className={`lg:flex overflow-hidden font-SolaimanLipi shadow-md text-theme-color sticky top-0 left-0 bg-white h-screen md:h-auto max-w-[320px] md:max-w-full w-full hidden_in_print z-[99] ${isOpen ? "flex fixed z-[99]" : "hidden"
             }`}
         >
@@ -103,7 +112,7 @@ const PublicLayout = () => {
                   </div>
                   <div>
                     <h1 className="text-theme-color font-[500] text-[24px] md:text-[26px]">
-                      {bnBijoy2Unicode(schoolData?.InstitutionName)}
+                      {schoolData?.InstitutionName}
                     </h1>
                   </div>
                 </div>
@@ -111,6 +120,14 @@ const PublicLayout = () => {
 
                 <div className="block md:inline-block">
                   <ul className="pt-[10px] h-full flex flex-col lg:flex-row lg:items-center gap-[30px] text-[16px] font-[400] border-0 text-theme-color overflow-y-auto w-full md:w-auto">
+                    <li>
+                      <a
+                        href={`/${schoolid}`}
+                        className="cursor-pointer  border-0 md:flex md:items-center gap-[4px] font-bold text-[18px]"
+                      >
+                        হোম
+                      </a>
+                    </li>
                     <li>
                       <a
                         href={`/${schoolid}/student_result`}
@@ -179,6 +196,98 @@ const PublicLayout = () => {
             <Outlet />
           </div>
         </main>
+        <footer className='bg-white hidden_in_print pt-8 pb-[100px] px-2'>
+          <div className="container mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              <div className="logo">
+                <Link to={`/${schoolid}`}>
+                  <img
+                    src={bufferConveter(schoolData?.Logo?.data)}
+                    alt={schoolData?.InstitutionName}
+                    className="w-[80px] h-[80px] mx-auto md:mx-[1px]"
+                  />
+                </Link>
+                <h2 className="font-bold text-[26px] mt-4">{schoolData?.InstitutionName}</h2>
+                <p className="text-[16px] text-[##484444]">{schoolData?.Address}, {schoolData?.ContactNumber}</p>
+              </div>
+              <div className="useful-links">
+                <h3 className="text-[20px] font-bold mb-6">Useful Links</h3>
+                <ul>
+                  <li>
+                    <a
+                      href={`/${schoolid}/student_result`}
+                      className="cursor-pointer  border-0 md:flex md:items-center gap-[4px] text-[14px] mb-2"
+                    >
+                      ব্যক্তিগত ফলাফল
+                    </a>
+                  </li>
+                  {
+                    schoolData?.isClassResultShowable && schoolData?.isClassResultShowable.Action != 0 ? (
+                      <li>
+                        <a href={`/${schoolid}/classes`} className='cursor-pointer  border-0 flex items-center gap-[4px] text-[14px] mb-2'>
+                          ক্লাশ/মারহালা ভিত্তিক ফলাফল
+                        </a>
+                      </li>
+                    ) : null
+                  }
+
+                  <li>
+                    <a href={`/${schoolid}/maritlist_request`}
+                      className="cursor-pointer border-0 flex items-center gap-[4px] text-[14px] mb-2"
+                    >
+                      মেধা তালিকা
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href={`/${schoolid}/online_admission`}
+                      className="cursor-pointer border-0 flex items-center gap-[4px] text-[14px] mb-2"
+                    >
+                      অনলাইনে ভর্তি
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href={`https://wifaqresult.com`}
+                      target="_blank"
+                      className="cursor-pointer border-0 flex items-center gap-[4px] text-[14px] mb-2"
+                    >
+                      বেফাক ফলাফল
+                    </a>
+                  </li>
+
+                  <li>
+                    <a
+                      href="https://hems.alhaiatululya.org/exam-result"
+                      target="_blank"
+                      className="cursor-pointer border-0 flex items-center gap-[4px] text-[14px] mb-2"
+                    >
+                      আল-হাইআ ফলাফল
+                    </a>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="contact">
+                <h3 className="text-[20px] font-bold mb-6">Contact</h3>
+                <p className="mb-2 border-b border-[#ddd] inline-block pb-2">
+                  <span className="font-bold">{schoolData?.PrincipalName}</span>  <br />
+                  মোবাইল নং. {schoolData?.ContactNumber}
+                </p>
+                <p>
+                  <span className="font-bold"> {schoolData?.NajemName} </span> <br />
+                  মোবাইল নং. {schoolData?.SMSMobile}
+                </p>
+                <div className="flex gap-4 mt-4">
+                  <a href={settingsObject.fblink} target="_blank" className="text-[#1877F2]"><svg xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-brand-facebook"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3" /></svg></a>
+                  <a href={settingsObject.ylink} className="text-[#FF0000]" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-brand-youtube"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M2 8a4 4 0 0 1 4 -4h12a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4v-8z" /><path d="M10 9l5 3l-5 3z" /></svg></a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </footer>
       </div>
       <DeveloperCredit />
     </>

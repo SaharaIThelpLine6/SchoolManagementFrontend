@@ -2,7 +2,6 @@ import React from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import useTranslate from "../../../utils/Translate";
 import DefaultInput from "../../../components/Forms/DefaultInput";
-import html2pdf from "html2pdf.js";
 
 export default function DataExportModel({userData}) {
     const methods = useForm();
@@ -11,17 +10,28 @@ export default function DataExportModel({userData}) {
 
     const { fields, append, remove } = useFieldArray({
         control,
-        name: "whyUsList",
+        name: "column",
     });
 
     const onSubmit = async (data) => {
         if (!userData || userData.length === 0) return;
 
-        const { ReportName, whyUsList } = data;
+        const { ReportName, column } = data;
 
         const baseColumns = Object.keys(userData[0]);
-        const extraColumns = whyUsList?.map(i => i.text).filter(Boolean);
-        const columns = [...baseColumns, ...extraColumns];
+        // const extraColumns = column?.map(i => i.text).filter(Boolean);
+        const extraColumns = column
+        ?.filter(c => c.text)
+        ?.map(c => ({
+            name: c.text,
+            size: c.size || null
+        }));
+
+        // const columns = [...baseColumns, ...extraColumns];
+        const columns = [
+            ...baseColumns.map(c => ({ name: c, size: null })),
+            ...extraColumns
+        ];
 
         const rows = userData.map(item => [
             ...baseColumns.map(col => item[col] ?? ""),
@@ -29,34 +39,94 @@ export default function DataExportModel({userData}) {
         ]);
 
         const container = document.createElement("div");
+           container.id = "print-container";
         container.innerHTML = `
+            <style>
+                @media print {
+                    body * { visibility: hidden; padding-top: 0; margin-top: 0px;  }
+                    #print-container * { visibility: visible;}
+                    #root{
+                        display: none;
+                    }
+                    table {
+                        page-break-inside: auto;
+                        border-collapse: collapse;
+                    }
+
+                    tr {
+                        page-break-inside: avoid !important;
+                        page-break-after: auto;
+                    }
+
+                    td, th {
+                        page-break-inside: avoid !important;
+                    }
+
+                    thead {
+                        display: table-header-group; /* repeat header on each page */
+                    }
+
+                    tfoot {
+                        display: table-footer-group;
+                    }
+                    #print-container {
+                        position: absolute;   /* 🔴 CRITICAL FIX */
+                        width: 100%;
+                        margin: 0;
+                        padding: 0;
+                    }
+                }
+            </style>
             <div class=" ">
                 <h2 class="text-center pb-4 font-bold text-[40px] font-SolaimanLipi">${ReportName}</h2>
-                <table border="1" width="100%" cellpadding="8">
+                <table border="1" width="100%" cellpadding="8" class="border border-black">
                     <thead>
                         <tr>
-                            ${columns.map(c => `<th class="border border-black text-black align-middle pb-4 font-SolaimanLipi">${c}</th>`).join("")}
+                            ${columns.map(c => `
+                                <th style="${c.size ? `width:${c.size}px;` : ""}"
+                                    class="border-r border-b border-black text-black align-middle pb-4 font-SolaimanLipi">
+                                    ${c.name}
+                                </th>
+                                `).join("")
+                            }
                         </tr>
                     </thead>
                     <tbody>
-                        ${rows.map(r =>
-                            `<tr>${r.map(c => `<td class="text-center border border-black bg-white align-middle text-black pb-4 font-SolaimanLipi">${c}</td>`).join("")}</tr>`
-                        ).join("")}
-                    </tbody>
+                        ${rows.map(r => `
+                            <tr style="page-break-inside: avoid;">
+                                ${r.map((cell, colIndex) => {
+                                const col = columns[colIndex];
+
+                                if (col.name === "logo" && cell) {
+                                    return `
+                                    <td style="${col.size ? `width:${col.size}px;` : ""}"
+                                        class="text-center border-r border-b border-black">
+                                        <img src="${cell}" alt="logo" style="max-height:60px; margin:auto;" />
+                                    </td>
+                                    `;
+                                }
+
+                                return `
+                                    <td style="${col.size ? `width:${col.size}px;` : ""}"
+                                        class="text-center border-r border-b border-black">
+                                    ${cell}
+                                    </td>
+                                `;
+                                }).join("")}
+                            </tr>
+                            `).join("")}
+                        </tbody>
+
                 </table>
             </div>
         `;
 
         document.body.appendChild(container);
-
-        await html2pdf().from(container).set({
-            margin: 10,
-            filename: `${ReportName || "ডেটা-এক্সপোর্ট"}.pdf`,
-            html2canvas: { scale: 2 },
-            jsPDF: { orientation: "landscape" },
-        }).save();
-
-        document.body.removeChild(container);
+        window.print();
+        window.onafterprint = () => {
+            document.body.removeChild(container);
+            window.onafterprint = null;
+        };
     };
 
 
@@ -74,11 +144,17 @@ export default function DataExportModel({userData}) {
 
                 {fields.map((field, index) => (
                     <div key={field.id} className="flex gap-2 items-center mb-2"> 
-                    <DefaultInput registerKey={`whyUsList.${index}.text`} placeholder={`Point ${index + 1}`} /> 
+                    <div className="flex w-full gap-[10px] items-end">
+                        <DefaultInput registerKey={`column.${index}.text`} placeholder={`Point ${index + 1}`} /> 
+                        <div className="w-[120px]">
+                            <DefaultInput label={"Size in px"} type="number" registerKey={`column.${index}.size`} placeholder={`Point ${index + 1}`} /> 
+                        </div>
+                        {fields.length > 0 && (
+                            <button type="button" onClick={() => remove(index)} className="bg-red-500 text-white px-[8px] py-[8px] rounded" > ✕ </button>
+                        )} 
+                    </div>
 
-                    {fields.length > 0 && (
-                        <button type="button" onClick={() => remove(index)} className="bg-red-500 text-white px-2 rounded" > ✕ </button>
-                    )} 
+                  
                     </div>)
                 )}
 
