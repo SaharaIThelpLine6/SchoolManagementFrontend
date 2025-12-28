@@ -65,6 +65,7 @@ import PaymentConfirm from '../pages/PaymentConfirm';
 import PaymentHistory from '../pages/PaymentHistory';
 import PointBasedResultCreateUpdate from '../pages/PointBasedResultCreateUpdate';
 import PointBasedResultEntry from '../pages/PointBasedResultEntry';
+import QueryManage from '../pages/QueryManage';
 import QueryThree from '../pages/QueryThree';
 import QueryTwo from '../pages/QueryTwo';
 import RFIDCard from '../pages/RFIDCard';
@@ -98,6 +99,7 @@ import StudentPaymentHistory from '../pages/userpanel/StudentPaymentHistory';
 import StudentPaymentHistoryDetails from '../pages/userpanel/StudentPaymentHistoryDetails';
 import StudentReports from '../pages/userpanel/StudentReports';
 import StudentResults from '../pages/userpanel/StudentResults';
+import StudentResultsView from '../pages/userpanel/StudentResultsView';
 import TeacherContacts from '../pages/userpanel/TeacherContacts';
 import UserLogin from '../pages/userpanel/UserLogin';
 import UserProfile from '../pages/userpanel/UserProfile';
@@ -105,7 +107,6 @@ import UserRegistration from '../pages/userpanel/UserRegistration';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
-import QueryManage from '../pages/QueryManage';
 
 const router = createBrowserRouter([
   {
@@ -483,10 +484,10 @@ const router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-                {
-                  path: "query-manage",
-                  element: <QueryManage pageTitle="Query Manage" />,
-                },
+              {
+                path: 'query-manage',
+                element: <QueryManage pageTitle="Query Manage" />,
+              },
               {
                 path: 'report',
                 element: (
@@ -914,6 +915,10 @@ const router = createBrowserRouter([
       {
         path: 'student-results',
         element: <StudentResults pageTitle="Student Results" />,
+      },
+      {
+        path: 'student-results/:examId/:subClassId/:sessionId/:userId',
+        element: <StudentResultsView pageTitle="Student Results View" />,
       },
       {
         path: 'exam-schedule',

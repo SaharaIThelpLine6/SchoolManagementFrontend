@@ -3,11 +3,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { Buffer } from "buffer";
-import DefaultInput from "../../components/Forms/DefaultInput";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { usePostLoginUserPanelMutation } from "../../features/userPanel/userLoginVerify/userloginVerifyQuerySlice";
+import DefaultInput from "../../components/Forms/DefaultInput";
 import { fetchResultFieldData } from "../../features/studentResultPublicView/studentResultPublicViewSlice";
+import { usePostLoginUserPanelMutation } from "../../features/userPanel/userLoginVerify/userloginVerifyQuerySlice";
 // Multi-step hook
 export function useMultistepForm(steps) {
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -70,34 +70,28 @@ export default function UserLogin() {
         }
     }, [])
 
-    const onSubmit = async (data) => {
-        try {
-            // const res = await loginUserPanel({
-            //     username: data.username,
-            //     password: data.password,
-            //     school_id: schoolid
-            // }).unwrap();
-            // console.log(data);
-            
-            const response = await loginUserPanel({
-                username: data.username,
-                password: data.password,
-                school_id: schoolid
-            });
-            // console.log(response.data.token);
+  const onSubmit = async (data) => {
+    try {
+      const response = await loginUserPanel({
+        usercode: data.usercode,
+        username: data.username,
+        password: data.password,
+        school_id: schoolid,
+      });
 
-            if (response.data.token) {
-                localStorage.setItem("user_panel_token", response.data.token);
-                navigate(`/${schoolid}/dashboard`);
-            } else {
-                toast.error("Invalid login response");
-            }
-
-        } catch (err) {
-            console.log(err);
-            toast.error(err?.data?.error || "Login failed");
-        }
+      if (response?.data?.token) {
+        localStorage.setItem('user_panel_token', response.data.token);
+        navigate(`/${schoolid}/dashboard`);
+      } else {
+        toast.error(response.error.data.error || 'Invalid login response');
+      }
+    } catch (err) {
+      console.log(err);
+      // server থেকে আসা বাংলা error দেখাবে
+      toast.error(err?.data?.error || err?.error || 'লগইন ব্যর্থ হয়েছে');
     }
+  };
+
 
     const bufferConveter = (bufferData) => {
         if (!bufferData) {
@@ -124,7 +118,8 @@ export default function UserLogin() {
                 </div>
                 <FormProvider {...methods}>
                     <form onSubmit={handleSubmit(onSubmit)} className="max-w-sm mx-auto mt-6 w-full px-4">
-                        <DefaultInput registerKey={"username"} label={"User name"} placeholder={"Enter User name"} type="text" />
+                        <DefaultInput registerKey={"usercode"} label={"User Code"} placeholder={"Enter User code"} type="text" />
+                        <DefaultInput registerKey={"username"} label={"User Name"} placeholder={"Enter User name"} type="text" />
                         <DefaultInput registerKey={"password"} type="password" label={"Password"} placeholder={"Enter Password"} />
 
                         <div className="flex justify-center mt-6 gap-4">

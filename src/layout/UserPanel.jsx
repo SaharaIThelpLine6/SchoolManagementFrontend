@@ -391,6 +391,11 @@ export default function UserPanel({ children }) {
               to={`/${schoolid}/dashboard/student-payment-history`}
               className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30 -mt-8 border-4 border-white mb-4 bg-gray"
             >
+              <img
+                src="https://media.istockphoto.com/id/828088276/de/vektor/qr-code-illustration.jpg?s=612x612&w=0&k=20&c=L7Jd-LaeDqSC29RfvZkh-UTgI5g0g6PCDFS-VxhO44I="
+                alt="QR"
+                className="w-full h-full object-cover rounded-full"
+              />
               {/* <svg
                 stroke="white"
                 fill="white"

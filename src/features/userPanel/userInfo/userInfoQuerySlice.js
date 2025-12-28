@@ -48,6 +48,17 @@ export const userPanelUserInfo = createApi({
       query: () => `class_routine_list`,
       providesTags: ['ClassRoutines'],
     }),
+
+    getSingleExamData: builder.query({
+      query: ({ examId, subClassId, sessionId }) => ({
+        url: '/get_single_exam',
+        params: {
+          examId,
+          subClassId,
+          sessionId,
+        },
+      }),
+    }),
   }),
 });
 
@@ -60,4 +71,5 @@ export const {
   useGetMaddasahReportListQuery,
   usePostStudentParentsReportsMutation,
   useGetClassRoutinesQuery,
+  useGetSingleExamDataQuery
 } = userPanelUserInfo;

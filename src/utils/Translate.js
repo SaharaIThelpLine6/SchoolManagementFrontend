@@ -10,6 +10,8 @@ const useTranslate = () => {
     'List of Candidates': 'পরীক্ষার্থীর তালিকা',
     Status: 'স্ট্যাটাস',
     Reset: 'রিসেট',
+    Password: 'পাসওয়ার্ড',
+    'Student Performance Chart': 'শিক্ষার্থীদের কর্মক্ষমতা চার্ট',
     'Sub Class Bangla': 'সাব ক্লাস বাংলা',
     'Exam Group Select': 'পরীক্ষার গ্রুপ তৈরি',
     CurrentPaid: 'বর্তমান জমা',

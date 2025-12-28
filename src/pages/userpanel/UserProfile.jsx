@@ -1,10 +1,12 @@
 import { Buffer } from 'buffer';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
 import { useGetUserDetailsQuery } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 export default function UserProfile() {
   const [openSettings, setOpenSettings] = useState(false);
   const settingsRef = useRef();
+  const { schoolid } = useParams();
 
   const currentSession = useSelector(
     (state) => state.sessionChange.currentSession
@@ -37,6 +39,10 @@ export default function UserProfile() {
     return imageSrc;
   };
 
+ const handleLogOut = () => {
+   localStorage.removeItem('user_panel_token');
+   window.location.href = `/${schoolid}/login`;
+ };
   return (
     <div className="bg-white shadow-xl pb-8 relative h-screen">
       {/* Settings Button */}
@@ -118,7 +124,30 @@ export default function UserProfile() {
                   {userDetails?.User?.UserAction === 1 ? 'Active' : 'Inactive'}
                 </span>
               </li>
-
+              <li className="flex border-b py-2">
+                <button
+                  onClick={handleLogOut}
+                  className="py-2  text-[#007af7] flex gap-2 items-center w-full text-left"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width={30}
+                    height={30}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                    <path d="M10 8v-2a2 2 0 0 1 2 -2h7a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-7a2 2 0 0 1 -2 -2v-2" />
+                    <path d="M15 12h-12l3 -3" />
+                    <path d="M6 15l-3 -3" />
+                  </svg>
+                  লগআউট
+                </button>
+              </li>
               {/* <li className="flex border-b py-2">
                                 <span className="font-bold w-24">Languages:</span>
                                 <span className="text-gray-700">English, Spanish</span>

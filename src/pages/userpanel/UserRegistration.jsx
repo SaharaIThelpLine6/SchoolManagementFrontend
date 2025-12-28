@@ -1,16 +1,16 @@
+import { Buffer } from 'buffer';
 import { useEffect, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Buffer } from 'buffer';
-import DefaultInput from '../../components/Forms/DefaultInput';
-import { FormProvider, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
+import DefaultInput from '../../components/Forms/DefaultInput';
+import { fetchResultFieldData } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
 import {
   usePostUserPhoneMutation,
   usePostUserRegisterMutation,
   usePostVerifyTokenMutation,
 } from '../../features/userPanel/userRegistration/userRegistrationQuerySlice';
-import { fetchResultFieldData } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
 // Multi-step hook
 export function useMultistepForm(steps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -111,15 +111,15 @@ export function StepOne({ phone, otpTimer, onResend, studentCode }) {
 
       {phone && (
         <div className="">
-          <p className="text-[#d6d6d6] text-[18px] bg-white block border border-[#d6d6d6] rounded-[5px] py-1 pl-2">
+          <p className="text-[#d6d6d6] text-[18px] bg-gray-400 block border border-[#d6d6d6] rounded-[5px] py-1 pl-2">
             {studentCode}
           </p>
-          <p className="text-[#d6d6d6] text-[18px] bg-white block border border-[#d6d6d6] rounded-[5px] py-1 mt-2 pl-2">
+          <p className="text-[#d6d6d6] text-[18px] bg-gray-400 block border border-[#d6d6d6] rounded-[5px] py-1 mt-2 pl-2">
             {phone}
           </p>
 
           <p className="text-blue-700 text-sm mt-1">
-            OTP sent to your phone. Time left: <strong>{otpTimer}s</strong>
+            OTP পাঠানো হয়েছে উপরের নাম্বারে। Time left: <strong>{otpTimer}s</strong>
           </p>
 
           <DefaultInput
@@ -314,7 +314,7 @@ export default function UserRegistration() {
         username: data.username,
         password: data.password,
       });
-      console.log(res);
+      console.log(res, "response");
 
       if (res.data && res.data.token) {
         localStorage.setItem('user_panel_token', res.data.token);
