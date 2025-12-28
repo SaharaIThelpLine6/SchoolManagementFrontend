@@ -119,7 +119,8 @@ export function StepOne({ phone, otpTimer, onResend, studentCode }) {
           </p>
 
           <p className="text-blue-700 text-sm mt-1">
-            OTP পাঠানো হয়েছে উপরের নাম্বারে। Time left: <strong>{otpTimer}s</strong>
+            উপরের নাম্বারে OTP পাঠানো হয়েছে। Time left:{' '}
+            <strong>{otpTimer}s</strong>
           </p>
 
           <DefaultInput
