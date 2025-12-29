@@ -1,5 +1,8 @@
 import { useParams } from 'react-router-dom';
-import { useGetSingleExamDataQuery } from '../../features/userPanel/userInfo/userInfoQuerySlice';
+import {
+  useGetLabelNamesQuery,
+  useGetSingleExamDataQuery,
+} from '../../features/userPanel/userInfo/userInfoQuerySlice';
 
 const StudentResults = () => {
   const { examId, subClassId, sessionId } = useParams();
@@ -8,7 +11,9 @@ const StudentResults = () => {
     { examId, subClassId, sessionId },
     { skip: !examId || !subClassId || !sessionId }
   );
+  const { data: labelNameData } = useGetLabelNamesQuery();
 
+  const labelData = labelNameData?.[0]?.AdmissionIDLabel || '';
   console.log(data, 'data');
   const getSubjects = (student) => {
     const arr = [];
@@ -33,6 +38,7 @@ const StudentResults = () => {
         <ResultImage
           key={student.ID}
           student={student}
+          labelData={labelData}
           getSubjects={getSubjects}
         />
       ))}
@@ -45,7 +51,7 @@ export default StudentResults;
 /* ===============================
    IMAGE STYLE RESULT
 ================================ */
-const ResultImage = ({ student, getSubjects }) => {
+const ResultImage = ({ student, getSubjects, labelData }) => {
   const subjects = getSubjects(student);
   const calculateAverage = (student) => {
     let total = 0;
@@ -73,7 +79,7 @@ const ResultImage = ({ student, getSubjects }) => {
       <div className="grid grid-cols-2 gap-3 p-3 bg-blue-50 rounded-lg border border-blue-300">
         <Info label="শিক্ষাবর্ষ" value={student.SessionName} />
         <Info label="শ্রেণী" value={student.SubClass} />
-        <Info label="রোল" value={student.AdmissionSerial} />
+        <Info label={labelData} value={student?.AdmissionSerial || ''} />
         <Info label="গড়" value={calculateAverage(student)} />
         <Info label="বিভাগ" value={student.Division} />
         <Info label="মোট" value={student.Total} />
@@ -97,8 +103,6 @@ const ResultImage = ({ student, getSubjects }) => {
             <div className="w-1/6 text-right font-bold">{s.mark}</div>
           </div>
         ))}
-
-
       </div>
     </div>
   );

@@ -48,6 +48,9 @@ export const userPanelUserInfo = createApi({
       query: () => `class_routine_list`,
       providesTags: ['ClassRoutines'],
     }),
+    getLabelNames: builder.query({
+      query: () => `get_label_name`,
+    }),
 
     getSingleExamData: builder.query({
       query: ({ examId, subClassId, sessionId }) => ({
@@ -71,5 +74,6 @@ export const {
   useGetMaddasahReportListQuery,
   usePostStudentParentsReportsMutation,
   useGetClassRoutinesQuery,
-  useGetSingleExamDataQuery
+  useGetSingleExamDataQuery,
+  useGetLabelNamesQuery,
 } = userPanelUserInfo;

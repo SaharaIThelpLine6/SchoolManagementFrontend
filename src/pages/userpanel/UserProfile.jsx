@@ -2,11 +2,17 @@ import { Buffer } from 'buffer';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { useGetUserDetailsQuery } from '../../features/userPanel/userInfo/userInfoQuerySlice';
+import {
+  useGetLabelNamesQuery,
+  useGetUserDetailsQuery,
+} from '../../features/userPanel/userInfo/userInfoQuerySlice';
+import { formatToDDMMYYYY } from '../../utils/dateFormat';
+import useTranslate from '../../utils/Translate';
 export default function UserProfile() {
   const [openSettings, setOpenSettings] = useState(false);
   const settingsRef = useRef();
   const { schoolid } = useParams();
+  const translate = useTranslate();
 
   const currentSession = useSelector(
     (state) => state.sessionChange.currentSession
@@ -14,9 +20,11 @@ export default function UserProfile() {
 
   const {
     data: userDetails,
-    isLoading: isuserDetailsLoading,
+    isLoading,
     isError: isuserDetailsError,
   } = useGetUserDetailsQuery(currentSession);
+
+  console.log(userDetails, 'userDetails');
 
   // Close on outside click
   useEffect(() => {
@@ -39,12 +47,15 @@ export default function UserProfile() {
     return imageSrc;
   };
 
- const handleLogOut = () => {
-   localStorage.removeItem('user_panel_token');
-   window.location.href = `/${schoolid}/login`;
- };
+  const handleLogOut = () => {
+    localStorage.removeItem('user_panel_token');
+    window.location.href = `/${schoolid}/login`;
+  };
+  if (isLoading) {
+    return <UserProfileSkeleton />;
+  }
   return (
-    <div className="bg-white shadow-xl pb-8 relative h-screen">
+    <div className="bg-white shadow-xl relative mb-16">
       {/* Settings Button */}
 
       {/* Banner */}
@@ -60,18 +71,16 @@ export default function UserProfile() {
       <div className="flex flex-col items-center -mt-20">
         <img
           src={
-            userDetails?.User?.UserImage.length > 0
-              ? bufferConveter(userDetails?.User?.UserImage[0].Image)
-              : 'logo.png'
+            userDetails?.Image ? bufferConveter(userDetails?.Image) : 'logo.png'
           }
           className="w-40 h-40 object-cover border-4 border-white rounded-full"
           alt="profile"
         />
         <div className="flex items-center space-x-2 mt-2">
-          <p className="text-2xl">{userDetails?.User.UserName}</p>
+          <p className="text-2xl">{userDetails?.StudentName}</p>
         </div>
         <p className="text-gray-700">
-          {userDetails?.User.permanentPost}, {userDetails?.User.permanentVill}
+          {userDetails?.permanentPost}, {userDetails?.permanentVill}
         </p>
         {/* <p className="text-sm text-gray-500">New York, USA</p> */}
       </div>
@@ -84,50 +93,93 @@ export default function UserProfile() {
             <h4 className="text-xl text-gray-900 font-bold">শিক্ষাথীর তথ্য</h4>
             <ul className="mt-2 text-gray-700">
               <li className="flex border-b py-2">
-                <span className="font-bold w-24">বাবার নাম:</span>
+                <span className="font-bold w-26">বাবার নাম</span>
+                <span className="mx-2">:</span>
                 <span className="text-gray-700">
-                  {userDetails?.User.FatherName}
+                  {userDetails?.StudentFatherName}
+                </span>
+              </li>
+
+              <li className="flex border-b py-2">
+                <span className="font-bold w-26">বর্তমান শিক্ষাবর্ষ</span>
+                <span className="mx-2">:</span>
+
+                <span className="text-gray-700">
+                  {userDetails?.SessionName}
                 </span>
               </li>
               <li className="flex border-b py-2">
-                <span className="font-bold w-24">বর্তমান ক্লাস:</span>
+                <span className="font-bold w-26">বর্তমান ক্লাস</span>
+
+                <span className="mx-2">:</span>
+
+                <span className="text-gray-700">{userDetails?.ClassName}</span>
+              </li>
+              <li className="flex border-b py-2">
+                <span className="font-bold w-26">মোবাইল</span>
+                <span className="mx-2">:</span>
+
+                <span className="text-gray-700">{userDetails?.Mobile1}</span>
+              </li>
+
+              <li className="flex border-b py-2">
+                <span className="font-bold w-26">জন্ম তারিখ</span>
+                <span className="mx-2">:</span>
+
                 <span className="text-gray-700">
-                  {userDetails?.Class.ClassName}
+                  {translate(formatToDDMMYYYY(userDetails?.DateOfBirth))}
                 </span>
               </li>
               <li className="flex border-b py-2">
-                <span className="font-bold w-24">মোবাইল:</span>
+                <span className="font-bold w-26">গ্রাম</span>
+                <span className="mx-2">:</span>
+
                 <span className="text-gray-700">
-                  {userDetails?.User.Mobile1}
+                  {userDetails?.permanentVill}
                 </span>
               </li>
               <li className="flex border-b py-2">
-                <span className="font-bold w-24">ই-মেইল:</span>
-                <span className="text-gray-700">{userDetails?.User.Email}</span>
-              </li>
-              <li className="flex border-b py-2">
-                <span className="font-bold w-24">জন্ম তারিখ:</span>
+                <span className="font-bold w-26">ডাক</span>
+                <span className="mx-2">:</span>
+
                 <span className="text-gray-700">
-                  {userDetails?.User.DateOfBirth}
+                  {userDetails?.permanentPost}
                 </span>
               </li>
               <li className="flex border-b py-2">
-                <span className="font-bold w-24">স্টেটাস:</span>
+                <span className="font-bold w-26">থানা</span>
+                <span className="mx-2">:</span>
+
+                <span className="text-gray-700">
+                  {userDetails?.PoliceStationName}
+                </span>
+              </li>
+              <li className="flex border-b py-2">
+                <span className="font-bold w-26">জেলা</span>
+                <span className="mx-2">:</span>
+
+                <span className="text-gray-700">
+                  {userDetails?.DistrictName}
+                </span>
+              </li>
+              <li className="flex border-b py-2">
+                <span className="font-bold w-26">স্টেটাস</span>
+                <span className="mx-2">:</span>
 
                 <span
                   className={`${
-                    userDetails?.User?.UserAction === 1
+                    userDetails?.UserAction === 1
                       ? 'font-bold text-green-600'
-                      : 'text-gray-500'
+                      : 'text-red-500'
                   }`}
                 >
-                  {userDetails?.User?.UserAction === 1 ? 'Active' : 'Inactive'}
+                  {userDetails?.UserAction === 1 ? 'Active' : 'Inactive'}
                 </span>
               </li>
-              <li className="flex border-b py-2">
+              <li className="py-2">
                 <button
                   onClick={handleLogOut}
-                  className="py-2  text-[#007af7] flex gap-2 items-center w-full text-left"
+                  className="py-2 text-red-500 flex gap-2 items-center justify-center mx-auto"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -148,8 +200,9 @@ export default function UserProfile() {
                   লগআউট
                 </button>
               </li>
+
               {/* <li className="flex border-b py-2">
-                                <span className="font-bold w-24">Languages:</span>
+                                <span className="font-bold w-26">Languages:</span>
                                 <span className="text-gray-700">English, Spanish</span>
                             </li> */}
             </ul>
@@ -165,6 +218,42 @@ export default function UserProfile() {
                         </p>
                     </div> */}
         </div>
+      </div>
+    </div>
+  );
+}
+function UserProfileSkeleton() {
+  return (
+    <div className="bg-white shadow-xl relative mb-16 animate-pulse">
+      {/* Banner Skeleton */}
+      <div className="w-full h-[100px] bg-gray-200" />
+
+      {/* Profile Skeleton */}
+      <div className="flex flex-col items-center -mt-20">
+        <div className="w-40 h-40 rounded-full bg-gray-300 border-4 border-white" />
+
+        <div className="h-6 w-48 bg-gray-300 rounded mt-4" />
+        <div className="h-4 w-56 bg-gray-200 rounded mt-2" />
+      </div>
+
+      {/* Content Skeleton */}
+      <div className="my-4 px-4">
+        <div className="h-6 w-40 bg-gray-300 rounded mb-4" />
+
+        <ul className="space-y-3">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <li key={i} className="flex items-center border-b pb-2">
+              <div className="w-32 h-4 bg-gray-300 rounded" />
+              <div className="mx-2">:</div>
+              <div className="flex-1 h-4 bg-gray-200 rounded" />
+            </li>
+          ))}
+
+          {/* Logout Button Skeleton */}
+          <li className="flex justify-center pt-4">
+            <div className="h-10 w-32 bg-gray-300 rounded" />
+          </li>
+        </ul>
       </div>
     </div>
   );
