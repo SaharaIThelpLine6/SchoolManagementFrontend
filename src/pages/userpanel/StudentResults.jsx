@@ -109,7 +109,7 @@ const StudentResults = () => {
       {/* Table */}
       <div className="bg-white rounded-xl shadow-lg p-3">
         <h2 className="text-xl font-semibold text-center mb-3">
-          {translate('Student Results History')}
+          শিক্ষার্থীর ফলাফল লিষ্ট
         </h2>
 
         {isLoading ? (
