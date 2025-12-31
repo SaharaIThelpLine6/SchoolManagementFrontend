@@ -1,10 +1,10 @@
+import { Buffer } from "buffer";
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Counter from '../../components/Counter';
 import { fetchWebsiteSettings } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
 import bnBijoy2Unicode from '../../utils/conveter';
-import { Buffer } from "buffer";
 const API_URL = import.meta.env.VITE_SERVER_URL;
 const MadrashaHomePage = () => {
     const { schoolid } = useParams();
@@ -25,6 +25,8 @@ const MadrashaHomePage = () => {
             return acc;
         }, {});
     }, [websiteSettings]);
+
+    console.log(settingsObject, 'settingsObject');
 
     function toArray(value) {
         if (!value) return [];
@@ -288,7 +290,7 @@ const MadrashaHomePage = () => {
 
             </div>
 
-            
+
 
 
         </div>
