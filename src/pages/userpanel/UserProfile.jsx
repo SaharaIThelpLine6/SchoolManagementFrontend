@@ -2,10 +2,7 @@ import { Buffer } from 'buffer';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import {
-  useGetLabelNamesQuery,
-  useGetUserDetailsQuery,
-} from '../../features/userPanel/userInfo/userInfoQuerySlice';
+import { useGetUserDetailsQuery } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import { formatToDDMMYYYY } from '../../utils/dateFormat';
 import useTranslate from '../../utils/Translate';
 export default function UserProfile() {
@@ -92,6 +89,11 @@ export default function UserProfile() {
           <div className="flex-1 bg-white rounded-lg p-4 pt-2">
             <h4 className="text-xl text-gray-900 font-bold">শিক্ষাথীর তথ্য</h4>
             <ul className="mt-2 text-gray-700">
+              <li className="flex border-b py-2">
+                <span className="font-bold w-26"> ইউজার কোড</span>
+                <span className="mx-2">:</span>
+                <span className="text-gray-700">{userDetails?.UserCode}</span>
+              </li>
               <li className="flex border-b py-2">
                 <span className="font-bold w-26">বাবার নাম</span>
                 <span className="mx-2">:</span>

@@ -204,7 +204,7 @@ export default function UserPanel({ children }) {
                 />
 
                 {/* School Name */}
-                <div className="text-sm font-semibold text-gray-800">
+                <div className="text-base font-semibold text-gray-800">
                   {schoolData?.InstitutionName}
                 </div>
               </div>

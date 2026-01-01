@@ -35,8 +35,15 @@ import BanglaNumberWithTwoColumn from '../view/exam/ExamReportPdf/numberLetter/B
 import BanglaWithOutNameColumn from '../view/exam/ExamReportPdf/numberLetter/BanglaWithOutNameColumn';
 import AdmissionSerialNWOTC from '../view/exam/ExamReportPdf/numberLetterAdmissionSerial/AdmissionSerialNWOTC';
 import AdmissionSerialNWTC from '../view/exam/ExamReportPdf/numberLetterAdmissionSerial/AdmissionSerialNWTC';
+import BSeatNoColor from '../view/exam/ExamReportPdf/seatNo/Bangla/BSeatNoColor';
+import BSeatNoWhite from '../view/exam/ExamReportPdf/seatNo/Bangla/BSeatNoWhite';
+import ASeatNoColor from '../view/exam/ExamReportPdf/seatNo/English/ASeatNoColor';
+import ASeatNoSeatPlain from '../view/exam/ExamReportPdf/seatNo/English/ASeatNoSeatPlain';
+import ASeatNoWhite from '../view/exam/ExamReportPdf/seatNo/English/ASeatNoWhite';
 import ExamRoutine from '../view/exam/ExamReportPdf/signatureLetter/ExamRoutine';
 import WithoutExamRoutine from '../view/exam/ExamReportPdf/signatureLetter/WithoutExamRoutine';
+import SingatureSheetNS from '../view/exam/ExamReportPdf/signatureSheetndNumberSheet/SingatureSheetNS';
+import StatisticsOfAllStudents from '../view/exam/ExamReportPdf/StatisticsOfAllStudents';
 import ArobicOneColumnA5 from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/ArobicOneColumnA5';
 import ArobicTwoColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/ArobicTwoColumn';
 import BanglaOneColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/BanglaOneColumn';
@@ -414,7 +421,7 @@ const ExamReport = ({ pageTitle }) => {
         {Number(selectedReportID) === 1 &&
           Number(languageID) === 1 &&
           Number(selectedPdfID) === 2 && <BanglaTwoColumn />}
-          {/* Arob */}
+        {/* Arob */}
         {Number(selectedReportID) === 1 &&
           Number(languageID) === 2 &&
           Number(selectedPdfID) === 1 && <ArobicTwoColumn />}
@@ -484,11 +491,29 @@ const ExamReport = ({ pageTitle }) => {
           Number(languageID) === 2 &&
           Number(selectedPdfID) === 1 && <ArobicNumberClassBasedTC />}
         {/* 7. সিট নং */}
-        {Number(selectedReportID) === 6 &&
+        {Number(selectedReportID) === 7 &&
+          Number(languageID) === 1 &&
+          Number(selectedPdfID) === 1 && <BSeatNoWhite />}
+        {Number(selectedReportID) === 7 &&
+          Number(languageID) === 1 &&
+          Number(selectedPdfID) === 2 && <BSeatNoColor />}
+        {Number(selectedReportID) === 7 &&
+          Number(languageID) === 1 &&
+          Number(selectedPdfID) === 3 && <BSeatNoWhite />}
+
+        {Number(selectedReportID) === 7 &&
           Number(languageID) === 2 &&
-          Number(selectedPdfID) === 1 && <ArobicNumberClassBasedTC />}
-        {/* 8. নম্বরপত্র ভর্তি সিরিয়ালে */}
+          Number(selectedPdfID) === 1 && <ASeatNoWhite />}
+        {Number(selectedReportID) === 7 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 2 && <ASeatNoColor />}
+        {Number(selectedReportID) === 7 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 3 && <ASeatNoSeatPlain />}
+        {/* 8. নম্বরপত্র ভর্তি সিরিয়ালে */}
+        {Number(selectedReportID) === 8 && <SingatureSheetNS />}
         {/* 9. সকল পরীক্ষার্থীর পরিসংখ্যান  */}
+        {Number(selectedReportID) === 9 && <StatisticsOfAllStudents />}
       </div>
 
       {/* <StatisticsOfAllExaminees

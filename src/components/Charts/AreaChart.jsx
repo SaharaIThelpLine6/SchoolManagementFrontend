@@ -119,7 +119,7 @@ const AreaChart = ({ tableData }) => {
         rotate: categories.length > 3 ? -45 : 0,
       },
       title: {
-        text: translate('Exams'),
+        // text: translate('Exams'),
         style: {
           fontSize: '14px',
           fontWeight: 600,
@@ -302,7 +302,7 @@ const AreaChart = ({ tableData }) => {
       {/* Summary Stats */}
       <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-blue-50 p-3 rounded-lg text-center border border-blue-100 hover:shadow-md transition-shadow">
-          <p className="text-xs text-gray-600 font-medium">
+          <p className="text-sm text-gray-600 font-medium">
             মোট পরীক্ষার সংখ্যা
           </p>
           <p className="text-xl font-bold text-blue-700 mt-1">
@@ -327,7 +327,7 @@ const AreaChart = ({ tableData }) => {
         </div>
 
         <div className="bg-green-50 p-3 rounded-lg text-center border border-green-100 hover:shadow-md transition-shadow">
-          <p className="text-xs text-gray-600 font-medium">মোট প্রাপ্ত নম্বর</p>
+          <p className="text-sm text-gray-600 font-medium">মোট প্রাপ্ত নম্বর</p>
           <p className="text-xl font-bold text-green-700 mt-1">{totalMarks}</p>
           <div className="mt-2 text-xs text-green-500">
             <span className="inline-flex items-center">
@@ -348,7 +348,7 @@ const AreaChart = ({ tableData }) => {
         </div>
 
         <div className="bg-purple-50 p-3 rounded-lg text-center border border-purple-100 hover:shadow-md transition-shadow">
-          <p className="text-xs text-gray-600 font-medium">
+          <p className="text-sm text-gray-600 font-medium">
             সর্বোচ্চ প্রাপ্ত নম্বর
           </p>
           <p className="text-xl font-bold text-purple-700 mt-1">
@@ -369,7 +369,7 @@ const AreaChart = ({ tableData }) => {
         </div>
 
         <div className="bg-yellow-50 p-3 rounded-lg text-center border border-yellow-100 hover:shadow-md transition-shadow">
-          <p className="text-xs text-gray-600 font-medium">গড় নম্বর</p>
+          <p className="text-sm text-gray-600 font-medium">গড় নম্বর</p>
           <p className="text-xl font-bold text-yellow-700 mt-1">
             {averageMark}
           </p>
