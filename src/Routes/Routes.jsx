@@ -879,7 +879,7 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: '/:schoolid/registration',
+    path: '/:schoolid/rg',
     element: <UserRegistration />,
   },
   {

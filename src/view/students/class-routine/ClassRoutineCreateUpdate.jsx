@@ -20,7 +20,7 @@ import { useGetTeacherInfoQuery } from '../../../features/teachers/teachersSlice
 const ClassRoutineCreateUpdate = ({ id }) => {
   const methods = useForm();
   const translate = useTranslate();
-  const { handleSubmit, reset, setValue } = methods;
+  const { handleSubmit, reset, setValue, watch } = methods;
 
   const isEditMode = !!id;
   console.log(id, 'id');
@@ -31,10 +31,26 @@ const ClassRoutineCreateUpdate = ({ id }) => {
   });
 
   console.log(routineData, 'routineData');
+  const subClassId = watch('SubClassID');
 
-  const { data: subjects } = useGetAcademicSubjectsQuery();
   const { data: teachers } = useGetTeacherInfoQuery();
-  const { data: classList } = useGetSubClassListQuery();
+  const { data: classListResponse } = useGetSubClassListQuery();
+
+  const { data: subjectsResponse } = useGetAcademicSubjectsQuery();
+  const classList = classListResponse || [];
+  const subjects = subjectsResponse || [];7
+
+  // subClassId যদি স্ট্রিং হয় তাহলে নাম্বারে কনভার্ট করুন
+  const subClassIdNum = Number(subClassId);
+
+  // ফিল্টারিং
+  const filteredSubjects = subjects.filter((subject) => {
+    // সব টাইপের জন্য সেট করা
+    const subjectSubClassId = Number(subject.SubClassID);
+    return subjectSubClassId === subClassIdNum;
+  });
+
+  console.log(filteredSubjects, 'filteredSubjects');
 
   // 🔹 Mutations
   const [createRoutine, { isLoading: isCreating }] =
@@ -126,12 +142,20 @@ const ClassRoutineCreateUpdate = ({ id }) => {
               placeholder="8:00 - 9:30 AM"
               require={translate('Time slot is required')}
             />
-
+            {/* Class */}
+            <DefaultSelect
+              label={translate('Sub Class')}
+              registerKey="SubClassID"
+              options={classList ?? []}
+              valueField="SubClassID"
+              nameField="SubClass"
+              require={translate('Class is required')}
+            />
             {/* Subject */}
             <DefaultSelect
               label={translate('Subject')}
               registerKey="SubjectID"
-              options={subjects ?? []}
+              options={filteredSubjects ?? []}
               valueField="SubjectID"
               nameField="SubjectName"
               require={translate('Subject is required')}
@@ -145,16 +169,6 @@ const ClassRoutineCreateUpdate = ({ id }) => {
               valueField="TIID"
               nameField="UserName"
               require={translate('Teacher is required')}
-            />
-
-            {/* Class */}
-            <DefaultSelect
-              label={translate('Sub Class')}
-              registerKey="SubClassID"
-              options={classList ?? []}
-              valueField="SubClassID"
-              nameField="SubClass"
-              require={translate('Class is required')}
             />
 
             {/* Prayer Break */}

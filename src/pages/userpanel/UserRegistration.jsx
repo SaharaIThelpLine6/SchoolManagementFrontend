@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import DefaultInput from '../../components/Forms/DefaultInput';
 import { fetchResultFieldData } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
@@ -315,7 +315,7 @@ export default function UserRegistration() {
         username: data.username,
         password: data.password,
       });
-      console.log(res, "response");
+      console.log(res, 'response');
 
       if (res.data && res.data.token) {
         localStorage.setItem('user_panel_token', res.data.token);
@@ -402,6 +402,23 @@ export default function UserRegistration() {
                 {isLastStep ? 'Submit' : 'Next'}
               </button>
             </div>
+            {/* Divider */}
+            <div className="flex items-center my-6">
+              <div className="flex-grow h-px bg-gray-300" />
+              <span className="px-3 text-sm text-gray-500">OR</span>
+              <div className="flex-grow h-px bg-gray-300" />
+            </div>
+
+            {/* Back to Login */}
+            <p className="text-center text-sm text-gray-600">
+              ইতিমধ্যে অ্যাকাউন্ট আছে?{' '}
+              <Link
+                to={`/${schoolid}/login`}
+                className="text-blue-600 font-medium hover:underline hover:text-blue-700"
+              >
+                লগইন করুন
+              </Link>
+            </p>
           </form>
         </FormProvider>
       </div>

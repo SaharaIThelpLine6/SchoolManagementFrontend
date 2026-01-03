@@ -18,12 +18,12 @@ import {
   threeLanguageExamReport,
 } from '../Data/userReportsData';
 import { setPageName } from '../features/auth/authSlice';
-import { useGetClassListQuery } from '../features/class/classQuerySlice';
+import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetExamNamesQuery } from '../features/exam/examQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import { useGetResidentialQuery } from '../features/settings/settingsQuerySlice';
 import { fetchSettingsData } from '../features/settings/settingsSlice';
-import { useGetUserReportQuery } from '../features/userReports/userReportsSlice';
+import { useGetExamReportQuery } from '../features/userReports/userReportsSlice';
 import useTranslate from '../utils/Translate';
 import ArobicNumberClassBasedTC from '../view/exam/ExamReportPdf/numberClassBased/ArobicNumberClassBasedTC';
 import ArobicNameWithLegal from '../view/exam/ExamReportPdf/numberLetter/ArobicNameWithLegal';
@@ -57,7 +57,7 @@ const ExamReport = ({ pageTitle }) => {
   const methods = useForm();
   const { status } = useSelector((state) => state.settings);
 
-  const { control, handleSubmit } = methods;
+  const { control, handleSubmit, watch } = methods;
 
   // useWatch দিয়ে form এর values গুলো নিন
   const formValues = useWatch({ control });
@@ -156,15 +156,62 @@ const ExamReport = ({ pageTitle }) => {
   const [queryParams, setQueryParams] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [selectedPdfData, setSelectedPdfData] = useState(null);
+  const [
+    ReportID,
+    SessionID,
+    ExamID,
+    SubClassID,
+    RDID,
+    ERIsActive,
+    sevenColor,
+    id,
+  ] = watch([
+    'ReportID',
+    'SessionID',
+    'ExamID',
+    'SubClassID',
+    'RDID',
+    'ERIsActive',
+    'sevenColor',
+    'id',
+  ]);
+  const shouldSkip = !ReportID || !SessionID || !ExamID || !SubClassID;
 
-  const { isFetching, isError, error } = useGetUserReportQuery(queryParams, {
-    skip: !queryParams,
+  console.log({
+    ReportID: ReportID,
+    SessionID: SessionID,
+    ExamID: ExamID,
+    SubClassID: SubClassID,
+    RDID: RDID,
+    ERIsActive: ERIsActive,
+    Language: id,
+    sevenColor: sevenColor,
   });
 
+  const { data, isLoading, isError, error } = useGetExamReportQuery(
+    {
+      report_id: ReportID,
+      SessionID,
+      ExamID,
+      SubClassID,
+      RDID,
+      ERIsActive,
+      Language: id,
+      sevenColor,
+    },
+    {
+      skip: shouldSkip,
+    }
+  );
+
+  console.log(data, 'data');
+  // const { isFetching, isError, error } = useGetUserReportQuery(queryParams, {
+  //   skip: !queryParams,
+  // });
   console.log(error, 'error');
 
   const { data: sessionData } = useGetSessionsQuery();
-  const { data: classListData } = useGetClassListQuery();
+  const { data: SubClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
   const { data: residentialData } = useGetResidentialQuery();
 
@@ -317,11 +364,11 @@ const ExamReport = ({ pageTitle }) => {
 
               {shouldShowFields('ClassID') && (
                 <DefaultSelect
-                  label={translate('Class')}
-                  nameField="ClassName"
-                  registerKey="ClassID"
-                  valueField="ClassID"
-                  options={classListData ?? []}
+                  label={translate('SubClass')}
+                  nameField="SubClass"
+                  registerKey="SubClassID"
+                  valueField="SubClassID"
+                  options={SubClassListData ?? []}
                   require={'This Field is required'}
                   unicode={true}
                 />
@@ -403,9 +450,7 @@ const ExamReport = ({ pageTitle }) => {
               )}
 
               <div className="md:col-span-4 flex justify-end">
-                <Button type="submit" loading={isFetching}>
-                  {translate('Preview')}
-                </Button>
+                <Button type="submit">{translate('Preview')}</Button>
               </div>
             </form>
           </FormProvider>
