@@ -5,12 +5,13 @@ import Swal from "sweetalert2";
 import { useGetIncomeExpenseTodaysBalanceByCaidQuery, useGetIncomeExpenseTodaysBalanceQuery } from "../../features/feeCollection/feeCollectionSlice";
 import { useEffect, useState } from "react";
 import DefaultSelect from "../../components/Forms/DefaultSelect";
-import { useChangeStudentClassMutation, useGetClassListQuery, useGetSubClassLisByClassIDQuery, useGetSubClassListQuery } from "../../features/class/classQuerySlice";
+import { useGetClassListQuery, useGetSubClassLisByClassIDQuery, useGetSubClassListQuery } from "../../features/class/classQuerySlice";
 import { fetchSettingsData } from "../../features/settings/settingsSlice";
 import { fetchSingleStudentData } from "../../features/student/studentSlice";
 import UserOne from "../../images/user/checking.jpeg";
 import { useGetSessionsQuery } from "../../features/session/sessionSlice";
 import DefaultGreen from "../../components/Button/DefaultGreen";
+import { useChangeStudentClassMutation } from "../../features/student/studentQuerySlice";
 
 const ChangeStudentClass = ({ userId }) => {
   const methods = useForm({

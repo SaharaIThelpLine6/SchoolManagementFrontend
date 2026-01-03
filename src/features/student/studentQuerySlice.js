@@ -70,8 +70,16 @@ export const userStudentSlice = createApi({
 
         return `/filter_admission_students?${params.toString()}`;
       },
+      providesTags: ['Student'],
     }),
-
+    changeStudentClass: builder.mutation({
+      query: (studentData) => ({
+        url: 'update_student_class',
+        method: 'POST',
+        body: studentData,
+      }),
+      invalidatesTags: ['Student'],
+    }),
     getStudent: builder.query({
       query: () => 'view_students',
       providesTags: ['Student'],
@@ -336,4 +344,5 @@ export const {
   useDeleteStudentCharacterReportMutation,
   useDeleteStudentsVacationMutation,
   useGetLastAdmissionUserCodeQuery,
+  useChangeStudentClassMutation
 } = userStudentSlice;

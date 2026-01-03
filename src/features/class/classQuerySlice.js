@@ -77,14 +77,6 @@ export const classSlice = createApi({
       invalidatesTags: ['Academic_Subjects'],
     }),
 
-    changeStudentClass: builder.mutation({
-      query: (studentData) => ({
-        url: 'update_student_class',
-        method: 'POST',
-        body: studentData,
-      }),
-    }),
-
     // PUT endpoint - Update academic subject
     updateAcademicSubject: builder.mutation({
       query: ({ id, ...subjectData }) => ({
@@ -152,7 +144,6 @@ export const {
   useGetClassListQuery,
   useGetSubClassListQuery,
   useGetSubClassLisByClassIDQuery,
-  useChangeStudentClassMutation,
   useGetAcademicSubjectsQuery,
   useGetSubClasssQuery,
   useCreateAcademicSubjectMutation,
