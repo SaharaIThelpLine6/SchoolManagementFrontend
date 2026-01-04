@@ -1,5 +1,5 @@
 // src/features/userReports/userReportsSlice.js
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -62,6 +62,27 @@ export const userReportsSlice = createApi({
         if (NewOldId !== undefined) params.append('NewOldId', NewOldId);
 
         return `student_report?${params.toString()}`;
+      },
+    }),
+    getPointVReport: builder.query({
+      query: ({
+        report_id,
+        session_id,
+        class_id,
+        exam_id,
+        start_id,
+        end_id,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (report_id !== undefined) params.append('report_id', report_id);
+        if (session_id !== undefined) params.append('session_id', session_id);
+        if (class_id !== undefined) params.append('class_id', class_id);
+        if (exam_id !== undefined) params.append('exam_id', exam_id);
+        if (start_id !== undefined) params.append('start_id', start_id);
+        if (end_id !== undefined) params.append('end_id', end_id);
+
+        return `/pointV_report?${params.toString()}`;
       },
     }),
 
@@ -134,5 +155,6 @@ export const {
   useGetUserReportQuery,
   useGetStudentReportQuery,
   useGetDepositCostReportQuery,
-  useGetExamReportQuery
+  useGetExamReportQuery,
+  useGetPointVReportQuery
 } = userReportsSlice;

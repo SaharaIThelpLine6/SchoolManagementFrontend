@@ -59,26 +59,26 @@ export const resultReports = [
     ReportID: 1,
     ReportName: '1. আইডি সিরিয়ালে ফলাফল',
   },
-  {
-    ReportID: 2,
-    ReportName: '2. আইডি সিরিয়ালে ফলাফল লিগেল',
-  },
-  {
-    ReportID: 3,
-    ReportName: '3. বিভাগ অনুসারে ফলাফল',
-  },
-  {
-    ReportID: 4,
-    ReportName: '4. নাম্বার অনুসারে ফলাফল',
-  },
+  // {
+  //   ReportID: 2,
+  //   ReportName: '2. আইডি সিরিয়ালে ফলাফল লিগেল',
+  // },
+  // {
+  //   ReportID: 3,
+  //   ReportName: '3. বিভাগ অনুসারে ফলাফল',
+  // },
+  // {
+  //   ReportID: 4,
+  //   ReportName: '4. নাম্বার অনুসারে ফলাফল',
+  // },
   {
     ReportID: 5,
     ReportName: '5. ভর্তি ফরম A4',
   },
-  {
-    ReportID: 6,
-    ReportName: '6. ভর্তি ফরম লিগেল',
-  },
+  // {
+  //   ReportID: 6,
+  //   ReportName: '6. ভর্তি ফরম লিগেল',
+  // },
   {
     ReportID: 7,
     ReportName: '7. মেধা অনুসারে হাজিরা খাতা',

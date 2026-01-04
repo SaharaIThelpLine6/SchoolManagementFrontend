@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
 import Loading from '../components/Loading/Loading';
 import { useGetSettingsQuery } from '../features/settings/settingsQuerySlice';
-import AverageVCondition from './AverageVCondition';
-import PointVCondition from './PointVCondition';
 import AverageVReport from './AverageVReport';
 import PointVReport from './PointVReport';
 
@@ -30,7 +28,7 @@ const ResultReport = () => {
   }
 
   return (
-    <div className="p-4 bg-white rounded-md shadow-md">
+    <div className="">
       {data ? (
         data.Action === 1 ? (
           <AverageVReport pageTitle="Average V: Report" />

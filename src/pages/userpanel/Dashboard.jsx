@@ -99,7 +99,7 @@ const Dashboard = () => {
           </Link>
 
           {/* ফি ও পেমেন্ট */}
-          {/* <Link
+          <Link
             to={`/${schoolid}/dashboard/student-payment-history`}
             className={cardClass}
           >
@@ -128,7 +128,7 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>ফি ও পেমেন্ট তথ্য</h4>
-          </Link> */}
+          </Link>
 
           {/* হোমওয়ার্ক */}
           {/* <Link to="#" className={cardClass}>
@@ -156,7 +156,7 @@ const Dashboard = () => {
           </Link> */}
 
           {/* চারিত্রিক রিপোর্ট */}
-          {/* <Link
+          <Link
             to={`/${schoolid}/dashboard/user_reports`}
             className={cardClass}
           >
@@ -181,7 +181,7 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>চারিত্রিক রিপোর্ট</h4>
-          </Link> */}
+          </Link>
 
           {/* পরীক্ষার শিডিউল */}
           {/* <Link
@@ -210,13 +210,14 @@ const Dashboard = () => {
                 <path d="M4 16h3" />
               </svg>
             </div>
-            <h4 className={titleClass}>পরীক্ষার শিডিউল</h4>
+            <h4 className={titleClass}>পরীক্ষার রুটিন</h4>
           </Link> */}
 
           {/* ক্লাস রুটিন */}
           {/* <Link
             to={`/${schoolid}/dashboard/class-routine`}
-           className={cardClass}>
+            className={cardClass}
+          >
             <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center mb-2">
               <svg
                 width="26"
@@ -246,7 +247,7 @@ const Dashboard = () => {
           </Link> */}
 
           {/* যোগাযোগ */}
-          {/* <Link
+          <Link
             to={`/${schoolid}/dashboard/teacher-contact`}
             className={cardClass}
           >
@@ -268,7 +269,7 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>যোগাযোগ</h4>
-          </Link> */}
+          </Link>
 
           {/* অনলাইন ভর্তি - UPDATED WITH PROPER COLORS */}
           {/* <Link
@@ -298,10 +299,7 @@ const Dashboard = () => {
             <h4 className={titleClass}>অনলাইন ভর্তি</h4>
           </Link> */}
           {/* Report */}
-          {/* <Link
-            to={`/${schoolid}/dashboard/reports`}
-            className={cardClass}
-          >
+          <Link to={`/${schoolid}/dashboard/reports`} className={cardClass}>
             <div className="w-10 h-10 rounded-full bg-[#c0dbfd] flex items-center justify-center mb-2">
               <svg
                 stroke="currentColor"
@@ -319,7 +317,7 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>রিপোর্ট</h4>
-          </Link> */}
+          </Link>
         </div>
       </div>
     </main>

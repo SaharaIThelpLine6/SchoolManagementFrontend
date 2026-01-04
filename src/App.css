@@ -300,6 +300,9 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
   }
 
 }
+.print-only {
+  display: none;
+}
 @media print {
   .break-after-page {
     page-break-after: always;
@@ -323,6 +326,9 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
 
   tr {
     page-break-inside: avoid;
+  }
+    .print-only {
+    display: block !important;
   }
 }
 
