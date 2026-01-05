@@ -93,6 +93,7 @@ import MaritListResult from '../pages/public/MaritListResult';
 import ClassRoutine from '../pages/userpanel/ClassRoutine';
 import Dashboard from '../pages/userpanel/Dashboard';
 import ExamSchedule from '../pages/userpanel/ExamSchedule';
+import InstitutionInfoUserPanel from '../pages/userpanel/InstitutionInfoUserPanel';
 import OnlineAdmissionStudent from '../pages/userpanel/OnlineAdmissionStudent';
 import Reports from '../pages/userpanel/Reports';
 import StudentPaymentHistory from '../pages/userpanel/StudentPaymentHistory';
@@ -100,7 +101,6 @@ import StudentPaymentHistoryDetails from '../pages/userpanel/StudentPaymentHisto
 import StudentReports from '../pages/userpanel/StudentReports';
 import StudentResults from '../pages/userpanel/StudentResults';
 import StudentResultsView from '../pages/userpanel/StudentResultsView';
-import TeacherContacts from '../pages/userpanel/TeacherContacts';
 import UserLogin from '../pages/userpanel/UserLogin';
 import UserProfile from '../pages/userpanel/UserProfile';
 import UserRegistration from '../pages/userpanel/UserRegistration';
@@ -929,8 +929,8 @@ const router = createBrowserRouter([
         element: <OnlineAdmissionStudent pageTitle="Online Admission" />,
       },
       {
-        path: 'teacher-contact',
-        element: <TeacherContacts pageTitle="Teacher Contact" />,
+        path: 'institution-contact',
+        element: <InstitutionInfoUserPanel pageTitle="Institution Contact" />,
       },
       {
         path: 'reports',

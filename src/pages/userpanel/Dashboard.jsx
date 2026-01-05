@@ -248,7 +248,7 @@ const Dashboard = () => {
 
           {/* যোগাযোগ */}
           <Link
-            to={`/${schoolid}/dashboard/teacher-contact`}
+            to={`/${schoolid}/dashboard/institution-contact`}
             className={cardClass}
           >
             <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center mb-2">
@@ -316,7 +316,7 @@ const Dashboard = () => {
                 <path d="M11 7h2v7h-2z"></path>
               </svg>
             </div>
-            <h4 className={titleClass}>রিপোর্ট</h4>
+            <h4 className={titleClass}>অভিযোগ ও পরামর্শ </h4>
           </Link>
         </div>
       </div>

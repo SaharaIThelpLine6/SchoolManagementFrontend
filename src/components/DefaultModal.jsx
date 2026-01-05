@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { closeModal } from '../features/modal/modalSlice';
+import StudentSingleReport from '../pages/userpanel/Modal/StudentsingleReport';
 import useTranslate from '../utils/Translate';
 import SessionCreateUpdateModal from '../view/Session/SessionCreateUpdateModal';
 import SessionChangeModal from '../view/UserPanel/SessionChangeModal';
@@ -256,6 +257,9 @@ const DefaultModal = () => {
                 {/* User Panel Models */}
                 {modalType === 'SESSION_CHANGE_MODEL' && (
                   <SessionChangeModal id={id} />
+                )}
+                {modalType === 'MOBILE_PANEL_STUDENT_REPORT' && (
+                  <StudentSingleReport id={id} />
                 )}
               </div>
             )}

@@ -62,6 +62,16 @@ export const userPanelUserInfo = createApi({
         },
       }),
     }),
+    getUserSingleReport: builder.query({
+      query: ({ SRID }) => ({
+        url: `/user_single_report/${SRID}`,
+      }),
+    }),
+    getInstitutionInfoUserPanel: builder.query({
+      query: () => ({
+        url: `/get_institution_info`,
+      }),
+    }),
   }),
 });
 
@@ -76,4 +86,6 @@ export const {
   useGetClassRoutinesQuery,
   useGetSingleExamDataQuery,
   useGetLabelNamesQuery,
+  useGetUserSingleReportQuery,
+  useGetInstitutionInfoUserPanelQuery,
 } = userPanelUserInfo;
