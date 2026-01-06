@@ -58,6 +58,7 @@ import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
 import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
+import ClassVideoCreateUpdate from '../pages/userpanel/ClassVideoCreateUpdate';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -162,6 +163,12 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'EDIT_TYPEOFVACATION' && (
                   <TypeOfVacationForm userId={id} />
+                )}
+                {modalType === 'EDIT_CLASS_VIDEO' && (
+                  <ClassVideoCreateUpdate videoId={id} />
+                )}
+                {modalType === 'CREATE_CLASS_VIDEO' && (
+                  <ClassVideoCreateUpdate />
                 )}
                 {modalType === 'EDIT_STUDENTREPORT' && (
                   <EditStudentReport id={id} />

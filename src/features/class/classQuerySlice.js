@@ -20,6 +20,7 @@ export const classSlice = createApi({
     'Academic_Subjects',
     'SubClasss',
     'Class_Routine',
+    'Class_Videos',
   ],
   endpoints: (builder) => ({
     // GET endpoints
@@ -117,6 +118,7 @@ export const classSlice = createApi({
       }),
       invalidatesTags: ['Class_Routine'],
     }),
+
     updateClassRoutine: builder.mutation({
       query: ({ id, data }) => ({
         url: `update_class_routine/${id}`,
@@ -129,12 +131,59 @@ export const classSlice = createApi({
       query: (id) => `class_routine_get/${id}`,
       providesTags: ['Class_Routine'],
     }),
+
     deleteClassRoutine: builder.mutation({
       query: (id) => ({
         url: `delete_class_routine/${id}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['Class_Routine'],
+    }),
+    getVideoTutorialLinks: builder.query({
+      query: ({ SessionID, SubClassID }) => ({
+        url: `/get_video_tutorial_link`,
+        params: {
+          ...(SessionID && { SessionID }),
+          ...(SubClassID && { SubClassID }),
+        },
+      }),
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.videos.map(({ ID }) => ({
+                type: 'Class_Videos',
+                id: ID,
+              })),
+              { type: 'Class_Videos', id: 'LIST' },
+            ]
+          : [{ type: 'Class_Videos', id: 'LIST' }],
+    }),
+
+    createClassVideo: builder.mutation({
+      query: (data) => ({
+        url: 'video_tutorial_link',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: [{ type: 'Class_Videos', id: 'LIST' }],
+    }),
+    updateClassVideo: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `video_tutorial_link/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Class_Videos', id },
+      ],
+    }),
+    deleteClassVideo: builder.mutation({
+      query: (id) => ({ url: `video_tutorial_link/${id}`, method: 'DELETE' }),
+      invalidatesTags: (result, error, id) => [{ type: 'Class_Videos', id }],
+    }),
+    getSingleClassVideo: builder.query({
+      query: ({id}) => `video_tutorial_link/${id}`,
+      providesTags: ['Class_Videos'],
     }),
   }),
 });
@@ -159,4 +208,9 @@ export const {
   useUpdateClassRoutineMutation,
   useGetSingleClassRoutineQuery,
   useDeleteClassRoutineMutation,
+  useGetVideoTutorialLinksQuery,
+  useCreateClassVideoMutation,
+  useUpdateClassVideoMutation,
+  useDeleteClassVideoMutation,
+  useGetSingleClassVideoQuery
 } = classSlice;

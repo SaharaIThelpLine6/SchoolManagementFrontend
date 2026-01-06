@@ -130,6 +130,11 @@ export const menuData = [
         name: 'Class Routine',
         route: '/students/class-routine',
       },
+      {
+        id: '12',
+        name: 'Class Video',
+        route: '/students/class-video',
+      },
     ],
   },
   // {

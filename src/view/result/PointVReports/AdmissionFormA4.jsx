@@ -144,58 +144,76 @@ const AdmissionFormA4 = ({ data }) => {
 
         {/* Student Details - Made more compact */}
 
-        <div className="flex gap-2 mb-2">
+        <div className="flex gap-2 mb-2 text-black">
           {/* Left Box */}
-          <div className="w-1/2 border border-black p-2 h-40">
-            <div className="mb-0 flex">
-              <p className="text-xs font-bold w-20">নাম</p>
-              <p className="text-sm font-bold">: {data?.UserName}</p>
-            </div>
-            <div className="mb-1 flex">
-              <p className="text-xs font-bold w-20">পিতার নাম</p>
-              <p className="text-sm font-bold">: {data?.FatherName}</p>
-            </div>
-            <div className="mb-1 flex">
-              <p className="text-xs font-bold w-20">মাতার নাম</p>
-              <p className="text-sm font-bold">: {data?.MotherName}</p>
-            </div>
-            <div className="mb-1 flex">
-              <p className="text-xs font-bold w-20">জন্ম তারিখ</p>
-              <p className="text-sm font-bold">
-                : {bnBijoy2Unicode(formatToDDMMYYYY(data.DateOfBirth))}
+          <div className="w-1/2 border border-black p-2 h-[175px] text-xs">
+            <div className="grid grid-cols-[90px_10px_1fr] gap-y-1">
+              <p className="font-bold">নাম</p>
+              <p>:</p>
+              <p className="font-bold">{data?.UserName}</p>
+
+              <p className="font-bold">পিতার নাম</p>
+              <p>:</p>
+              <p className="font-bold">{data?.FatherName}</p>
+
+              <p className="font-bold">মাতার নাম</p>
+              <p>:</p>
+              <p className="font-bold">{data?.MotherName}</p>
+
+              <p className="font-bold">জন্ম তারিখ</p>
+              <p>:</p>
+              <p className="font-bold">
+                {bnBijoy2Unicode(formatToDDMMYYYY(data?.DateOfBirth))}
               </p>
-            </div>
-            <div className="mb-1 flex">
-              <p className="text-xs font-bold w-24">NID/জন্ম নিবন্ধন নং</p>
-              <p className="text-sm font-bold">: {data?.NIDNO}</p>
-            </div>
-            <div className="mb-1 flex">
-              <p className="text-xs font-bold w-26">অভিভাবকের মোবাইল</p>
-              <p className="text-sm font-bold">
-                : {data?.Mobile1 ? data?.Mobile1 : data?.Mobile2}
-              </p>
+
+              <p className="font-bold">NID/জন্ম নিবন্ধন নং</p>
+              <p>:</p>
+              <p className="font-bold">{data?.NIDNO}</p>
+
+              <p className="font-bold">অভিভাবকের মোবাইল</p>
+              <p>:</p>
+              <p className="font-bold">{data?.Mobile1 || data?.Mobile2}</p>
             </div>
           </div>
 
           {/* Right Box */}
-          <div className="w-1/2 border border-black p-2 h-40">
-            <div className="text-center border-b border-black text-xs mb-1">
-              <h2 className="font-bold">স্থায়ী ঠিকানা</h2>
+          <div className="w-1/2 border border-black p-2 text-xs">
+            {/* Permanent Address */}
+            <div className="text-center font-bold border-b border-black pb-0.5 mb-1">
+              স্থায়ী ঠিকানা
             </div>
-            <div className="grid grid-cols-2 text-2xs">
-              <p className="font-bold">গ্রাম/মহল্লা: {data?.PermanentVill}</p>
-              <p className="font-bold">থানা: {data?.PoliceStationName}</p>
-              <p className="font-bold">ডাক: {data?.PermanentPost}</p>
-              <p className="font-bold">জেলা: {data?.DistrictName}</p>
+
+            <div className="grid grid-cols-[80px_1fr_70px_1fr] gap-y-1">
+              <p className="font-bold">গ্রাম</p>
+              <p>: {data?.PermanentVill}</p>
+
+              <p className="font-bold">থানা</p>
+              <p>: {data?.PoliceStationName}</p>
+
+              <p className="font-bold">ডাক</p>
+              <p>: {data?.PermanentPost}</p>
+
+              <p className="font-bold">জেলা</p>
+              <p>: {data?.DistrictName}</p>
             </div>
-            <div className="text-center border-b border-black text-xs mb-1 mt-1">
-              <h2 className="font-bold">অস্থায়ী ঠিকানা</h2>
+
+            {/* Temporary Address */}
+            <div className="text-center font-bold border-b border-black pb-0.5 mt-2 mb-1">
+              অস্থায়ী ঠিকানা
             </div>
-            <div className="grid grid-cols-2 text-2xs">
-              <p className="font-bold">গ্রাম/মহল্লা: {data?.TransientVill}</p>
-              <p className="font-bold">থানা: {data?.TransientPoliceName}</p>
-              <p className="font-bold">ডাক: {data?.TransientPost}</p>
-              <p className="font-bold">জেলা: {data?.TransientDistrict}</p>
+
+            <div className="grid grid-cols-[80px_1fr_70px_1fr] gap-y-1">
+              <p className="font-bold">গ্রাম</p>
+              <p>: {data?.TransientVill}</p>
+
+              <p className="font-bold">থানা</p>
+              <p>: {data?.TransientPoliceName}</p>
+
+              <p className="font-bold">ডাক</p>
+              <p>: {data?.TransientPost}</p>
+
+              <p className="font-bold">জেলা</p>
+              <p>: {data?.TransientDistrict}</p>
             </div>
           </div>
         </div>

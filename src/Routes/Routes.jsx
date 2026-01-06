@@ -34,6 +34,7 @@ import CellfinPaymentConfirm from '../pages/CellfinPaymentConfirm';
 import CertificateAttesation from '../pages/CertificateAttesation';
 import CharacterReport from '../pages/CharacterReport';
 import Class from '../pages/Class';
+import ClassVideo from '../pages/ClassVideo';
 import ComplaintBoxTermsAndConditions from '../pages/ComplaintBoxTermsAndConditions';
 import DataExport from '../pages/DataExport';
 import DeleteEditRecord from '../pages/DeleteEditRecord';
@@ -92,7 +93,7 @@ import MaritListForm from '../pages/public/MaritListForm';
 import MaritListResult from '../pages/public/MaritListResult';
 import ClassRoutine from '../pages/userpanel/ClassRoutine';
 import Dashboard from '../pages/userpanel/Dashboard';
-import ExamSchedule from '../pages/userpanel/ExamSchedule';
+import ExamRoutine from '../pages/userpanel/ExamRoutine';
 import InstitutionInfoUserPanel from '../pages/userpanel/InstitutionInfoUserPanel';
 import OnlineAdmissionStudent from '../pages/userpanel/OnlineAdmissionStudent';
 import Reports from '../pages/userpanel/Reports';
@@ -104,6 +105,7 @@ import StudentResultsView from '../pages/userpanel/StudentResultsView';
 import UserLogin from '../pages/userpanel/UserLogin';
 import UserProfile from '../pages/userpanel/UserProfile';
 import UserRegistration from '../pages/userpanel/UserRegistration';
+import VideoTutorialLink from '../pages/userpanel/VideoTutorialLink';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
@@ -333,6 +335,14 @@ const router = createBrowserRouter([
                   <RequirePermission permissionId={permissionsDataList.class}>
                     <StudentClassRoutine pageTitle="Class Student List" />
                   </RequirePermission>
+                ),
+              },
+              {
+                path: 'class-video',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <ClassVideo pageTitle="Class Video" />
+                  // </RequirePermission>
                 ),
               },
               // {
@@ -921,8 +931,8 @@ const router = createBrowserRouter([
         element: <StudentResultsView pageTitle="Student Results View" />,
       },
       {
-        path: 'exam-schedule',
-        element: <ExamSchedule pageTitle="Exam Schedule" />,
+        path: 'exam-routine',
+        element: <ExamRoutine pageTitle="Exam Routine" />,
       },
       {
         path: 'online-admission',
@@ -939,6 +949,10 @@ const router = createBrowserRouter([
       {
         path: 'class-routine',
         element: <ClassRoutine pageTitle="Class Routine" />,
+      },
+      {
+        path: 'video-tutorial',
+        element: <VideoTutorialLink pageTitle="Video Tutorial" />,
       },
     ],
   },

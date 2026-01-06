@@ -73,7 +73,7 @@ export const resultReports = [
   // },
   {
     ReportID: 5,
-    ReportName: '5. ভর্তি ফরম A4',
+    ReportName: '5. ভর্তি ফরম',
   },
   // {
   //   ReportID: 6,

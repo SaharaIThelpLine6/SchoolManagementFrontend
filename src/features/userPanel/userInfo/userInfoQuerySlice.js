@@ -72,6 +72,36 @@ export const userPanelUserInfo = createApi({
         url: `/get_institution_info`,
       }),
     }),
+
+    getVideoTutorialLinkUserPanel: builder.query({
+      query: ({ SessionID }) => ({
+        url: `/get_video_tutorial_link`,
+        params: {
+          ...(SessionID && { SessionID }),
+        },
+      }),
+      keepUnusedDataFor: 0, // Optional: auto refetch on param change
+    }),
+    getExamRoutineView: builder.query({
+      query: ({ sessionId, examId }) => ({
+        url: `/get_exam_routine`,
+        params: {
+          ...(sessionId && { sessionId }),
+          ...(examId && { examId }),
+        },
+      }),
+      keepUnusedDataFor: 0, // Optional: auto refetch on param change
+    }),
+    getSessionUserPanel: builder.query({
+      query: () => ({
+        url: `/academic_session_user_panel`,
+      }),
+    }),
+    getExamListUserPanel: builder.query({
+      query: () => ({
+        url: `/exam_list_user_panel`,
+      }),
+    }),
   }),
 });
 
@@ -88,4 +118,8 @@ export const {
   useGetLabelNamesQuery,
   useGetUserSingleReportQuery,
   useGetInstitutionInfoUserPanelQuery,
+  useGetVideoTutorialLinkUserPanelQuery,
+  useGetExamRoutineViewQuery,
+  useGetExamListUserPanelQuery,
+  useGetSessionUserPanelQuery
 } = userPanelUserInfo;

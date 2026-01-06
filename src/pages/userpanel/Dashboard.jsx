@@ -184,8 +184,8 @@ const Dashboard = () => {
           </Link>
 
           {/* পরীক্ষার শিডিউল */}
-          {/* <Link
-            to={`/${schoolid}/dashboard/exam-schedule`}
+          <Link
+            to={`/${schoolid}/dashboard/exam-routine`}
             className={cardClass}
           >
             <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2">
@@ -211,7 +211,7 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>পরীক্ষার রুটিন</h4>
-          </Link> */}
+          </Link>
 
           {/* ক্লাস রুটিন */}
           {/* <Link
@@ -317,6 +317,28 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>অভিযোগ ও পরামর্শ </h4>
+          </Link>
+          <Link
+            to={`/${schoolid}/dashboard/video-tutorial`}
+            className={cardClass}
+          >
+            <div className="w-10 h-10 rounded-full bg-[#c0dbfd] flex items-center justify-center mb-2">
+              {/* Video Icon */}
+              <svg
+                stroke="currentColor"
+                fill="currentColor"
+                strokeWidth="0"
+                viewBox="0 0 24 24"
+                height="1.2em"
+                width="1.2em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M3 5.75C3 4.78 3.78 4 4.75 4h14.5C20.22 4 21 4.78 21 5.75v12.5c0 .97-.78 1.75-1.75 1.75H4.75C3.78 20 3 19.22 3 18.25V5.75z" />
+                <path d="M10 8.5v7l6-3.5-6-3.5z" fill="#fff" />
+              </svg>
+            </div>
+
+            <h4 className={titleClass}>ক্লাস ভিডিও</h4>
           </Link>
         </div>
       </div>
