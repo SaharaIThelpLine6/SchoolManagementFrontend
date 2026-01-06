@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 import DefaultInput from '../../components/Forms/DefaultInput';
 import { fetchResultFieldData } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
 import {
+  useGetSoftwareLinkUserPanelQuery,
   usePostUserPhoneMutation,
   usePostUserRegisterMutation,
   usePostVerifyTokenMutation,
@@ -263,6 +264,9 @@ export default function UserRegistration() {
   } = methods;
 
   const studentCode = methods.watch('StudentCode');
+  const { data } = useGetSoftwareLinkUserPanelQuery();
+  const mobileAppInstallLink = data?.MobileAppInstall;
+
 
   const { steps, step, currentStepIndex, isFirstStep, isLastStep, next, back } =
     useMultistepForm([<StepOne />, <StepTwo />]);
@@ -419,6 +423,17 @@ export default function UserRegistration() {
                 লগইন করুন
               </Link>
             </p>
+            {mobileAppInstallLink && (
+              <p className="text-center text-sm text-gray-600 mt-2">
+                <Link
+                  target="_blank"
+                  to={mobileAppInstallLink}
+                  className="text-blue-600 font-medium hover:underline hover:text-blue-700"
+                >
+                  রেজিস্ট্রেশন না করতে পারলে ভিডিও দেখুন।
+                </Link>
+              </p>
+            )}
           </form>
         </FormProvider>
       </div>

@@ -121,5 +121,5 @@ export const {
   useGetVideoTutorialLinkUserPanelQuery,
   useGetExamRoutineViewQuery,
   useGetExamListUserPanelQuery,
-  useGetSessionUserPanelQuery
+  useGetSessionUserPanelQuery,
 } = userPanelUserInfo;

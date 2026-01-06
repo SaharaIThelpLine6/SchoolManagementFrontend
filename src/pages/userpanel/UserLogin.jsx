@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import DefaultInput from '../../components/Forms/DefaultInput';
 import { fetchResultFieldData } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
 import { usePostLoginUserPanelMutation } from '../../features/userPanel/userLoginVerify/userloginVerifyQuerySlice';
+import { useGetSoftwareLinkUserPanelQuery } from '../../features/userPanel/userRegistration/userRegistrationQuerySlice';
 // Multi-step hook
 export function useMultistepForm(steps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -50,6 +51,8 @@ export default function UserLogin() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loginUserPanel] = usePostLoginUserPanelMutation();
+    const { data } = useGetSoftwareLinkUserPanelQuery();
+    const mobileAppInstallLink = data?.MobileAppInstall;
   useEffect(() => {
     dispatch(fetchResultFieldData(schoolid));
   }, [dispatch, navigate]);
@@ -167,6 +170,17 @@ export default function UserLogin() {
                 অ্যাকাউন্ট তৈরি করুন
               </Link>
             </p>
+            {mobileAppInstallLink && (
+              <p className="text-center text-sm text-gray-600 mt-2">
+                <Link
+                  target="_blank"
+                  to={mobileAppInstallLink}
+                  className="text-blue-600 font-medium hover:underline hover:text-blue-700"
+                >
+                  রেজিস্ট্রেশন না করতে পারলে ভিডিও দেখুন।
+                </Link>
+              </p>
+            )}
           </form>
         </FormProvider>
       </div>

@@ -16,22 +16,22 @@ export const userPanelRegistrationUser = createApi({
     },
   }),
 
-  tagTypes: ["UserPanelUser222", "LoginUserPanel333"],
+  tagTypes: ['UserPanelUser222', 'LoginUserPanel333'],
 
   endpoints: (builder) => ({
     postUserPhone: builder.mutation({
       query: (data) => ({
         url: `check_user_phone`,
-        method: "POST",
+        method: 'POST',
         body: data,
       }),
-      invalidatesTags: ["UserPanelUser222"],
+      invalidatesTags: ['UserPanelUser222'],
     }),
 
     postVerifyToken: builder.mutation({
       query: (data) => ({
         url: `verify_otp`,
-        method: "POST",
+        method: 'POST',
         body: data,
       }),
     }),
@@ -39,11 +39,15 @@ export const userPanelRegistrationUser = createApi({
     postUserRegister: builder.mutation({
       query: (data) => ({
         url: `register`,
-        method: "POST",
+        method: 'POST',
         body: data,
       }),
     }),
-
+    getSoftwareLinkUserPanel: builder.query({
+      query: () => ({
+        url: `/get_software_link_user_panel`,
+      }),
+    }),
     // postLoginUserPanel: builder.mutation({
     //   query: (data) => ({
     //     url: 'login',
@@ -66,10 +70,10 @@ export const {
   usePostUserPhoneMutation,
   usePostVerifyTokenMutation,
   usePostUserRegisterMutation,
+  useGetSoftwareLinkUserPanelQuery,
   // usePostLoginUserPanelMutation,
   // useVerifyUserPanelTokenMutation,
 } = userPanelRegistrationUser;
-
 
 // import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
@@ -103,7 +107,6 @@ export const {
 //       invalidatesTags: ['UserLogins'],
 //     }),
 
-   
 //   }),
 // });
 
