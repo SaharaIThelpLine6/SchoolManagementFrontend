@@ -1,16 +1,15 @@
-import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
 import { hideModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
 import Button from '../Button/Button';
-import DefaultInput from './DefaultInput';
 
 import {
   useGetExamRuleQuery,
   usePostExamRuleMutation,
   usePutExamRuleMutation,
 } from '../../features/exam/examQuerySlice';
+import Textarea from './Textarea';
 
 const ExamRuleCreateUpdateForm = ({ id }) => {
   const translate = useTranslate();
@@ -21,19 +20,16 @@ const ExamRuleCreateUpdateForm = ({ id }) => {
     useGetExamRuleQuery(id, {
       skip: !id,
     });
-console.log(examRules, 'examRules');
+  console.log(examRules, 'examRules');
   const [createExamRule, { isLoading: isCreating }] = usePostExamRuleMutation();
   const [updateExamRule, { isLoading: isUpdating }] = usePutExamRuleMutation();
 
-
   // Reset form when ID changes or selected rule changes
-  useEffect(() => {
-    if (id && examRules) {
-      setValue('ExamRule', examRules.ExamRule || '');
-    } else {
-      reset({ ExamRule: '' });
-    }
-  }, [id, examRules, reset]);
+  // useEffect(() => {
+  //   if (id && examRules) {
+  //     setValue('ExamRule', examRules.ExamRule || '');
+  //   }
+  // }, [id, examRules]);
 
   const onSubmit = async (formData) => {
     const payload = { ExamRule: formData.ExamRule };
@@ -71,12 +67,13 @@ console.log(examRules, 'examRules');
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSubmit)} className="font-lato p-6">
         <div className="mb-4">
-          <DefaultInput
+          <Textarea
             registerKey="ExamRule"
             require={translate('Rule name is required')}
             type="text"
             placeholder={`${translate('Enter type of rule')}...`}
             label={translate('Exam Rule')}
+            defaultValue={examRules.ExamRule ?? ''}
           />
         </div>
 

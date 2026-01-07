@@ -338,8 +338,8 @@ export const examSlice = createApi({
       invalidatesTags: ['ExamRules'],
     }),
     putExamRule: builder.mutation({
-      query: (body) => ({
-        url: `exam_rule/${body.ID}`,
+      query: ({ id, ...body }) => ({
+        url: `exam_rule/${id}`,
         method: 'PUT',
         body,
       }),
