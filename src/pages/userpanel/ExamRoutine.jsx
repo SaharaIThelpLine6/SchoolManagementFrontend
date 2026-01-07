@@ -4,6 +4,7 @@ import DefaultSelect from '../../components/Forms/DefaultSelect';
 import {
   useGetExamListUserPanelQuery,
   useGetExamRoutineViewQuery,
+  useGetExamRulesUserPanelQuery,
   useGetSessionUserPanelQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import useTranslate from '../../utils/Translate';
@@ -25,9 +26,12 @@ const ExamRoutine = () => {
 
   const { data: examListData = [] } = useGetExamListUserPanelQuery();
   const { data: sessionData = [] } = useGetSessionUserPanelQuery();
+  const { data = [] } = useGetExamRulesUserPanelQuery();
+  // console.log(data, 'data');
+
   const activeSession = sessionData?.find((item) => item.SessionAction === 1);
 
-  console.log(examRoutineData, 'examRoutineData');
+  // console.log(examRoutineData, 'examRoutineData');
 
   useEffect(() => {
     setValue('SessionID', activeSession?.SessionID || '');
@@ -119,50 +123,26 @@ const ExamRoutine = () => {
         </div>
 
         {/* 📌 Mobile Only Exam Instructions */}
-        <div className="md:hidden mt-4 mb-20">
+        <div className="block md:hidden mt-4 mb-20">
           <div className="bg-[#E9F1FF] border border-[#BFD4FF] rounded-2xl p-4 shadow-sm">
+            {/* Title */}
+            <h2 className="text-center text-[16px] font-bold text-sky-700 mb-3">
+              পরীক্ষার নিয়মাবলি
+            </h2>
+
             <ul className="space-y-3 text-[14px] leading-relaxed text-gray-800">
-              <li className="flex gap-2">
-                <span className="mt-2 h-2 w-2 rounded-full bg-sky-500 flex-shrink-0"></span>
-                <span>
-                  পরীক্ষার সময়সূচি: রুটিনে বর্ণিত সময় অনুযায়ী পরীক্ষা
-                  অনুষ্ঠিত হবে।
-                </span>
-              </li>
-
-              <li className="flex gap-2">
-                <span className="mt-2 h-2 w-2 rounded-full bg-sky-500 flex-shrink-0"></span>
-                <span>
-                  সকল পরীক্ষার্থী পরীক্ষার হলে প্রবেশের সময় প্রবেশপত্র সাথে
-                  রাখতে হবে। কোন শিক্ষার্থী পরীক্ষার হলে প্রবেশ করতে পারবে না
-                  যদি সে প্রবেশপত্র অথবা প্রয়োজনীয় নথিপত্র সাথে না রাখে।
-                </span>
-              </li>
-
-              <li className="flex gap-2">
-                <span className="mt-2 h-2 w-2 rounded-full bg-sky-500 flex-shrink-0"></span>
-                <span>
-                  পরীক্ষার হলে মোবাইল ফোন, স্মার্ট ঘড়ি অথবা অন্য কোনো
-                  ইলেকট্রনিক ডিভাইস বহন সম্পূর্ণভাবে নিষিদ্ধ।
-                </span>
-              </li>
-
-              <li className="flex gap-2">
-                <span className="mt-2 h-2 w-2 rounded-full bg-sky-500 flex-shrink-0"></span>
-                <span>
-                  পরীক্ষার আগে যথাসময়ে পরীক্ষাকেন্দ্রে উপস্থিত থাকতে হবে।
-                  দেরিতে উপস্থিত হলে পরীক্ষায় অংশগ্রহণের অনুমতি দেওয়া হবে না।
-                </span>
-              </li>
-
-              <li className="flex gap-2">
-                <span className="mt-2 h-2 w-2 rounded-full bg-sky-500 flex-shrink-0"></span>
-                <span>
-                  পরীক্ষার সময় কোনো প্রকার অসদুপায় অবলম্বন করলে পরীক্ষার্থীকে
-                  পরীক্ষার হল থেকে বহিষ্কার করা হবে এবং প্রয়োজনীয় ব্যবস্থা
-                  গ্রহণ করা হবে।
-                </span>
-              </li>
+              {data.length > 0 ? (
+                data.map((rule) => (
+                  <li key={rule.ERID} className="flex gap-2">
+                    <span className="mt-2 h-2 w-2 rounded-full bg-sky-500 flex-shrink-0"></span>
+                    <span>{rule.ExamRule}</span>
+                  </li>
+                ))
+              ) : (
+                <li className="text-center text-gray-500">
+                  কোনো পরীক্ষার নিয়ম পাওয়া যায়নি
+                </li>
+              )}
             </ul>
           </div>
         </div>

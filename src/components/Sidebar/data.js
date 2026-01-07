@@ -131,7 +131,7 @@ export const menuData = [
         route: '/students/class-routine',
       },
       {
-        id: '12',
+        id: '13',
         name: 'Class Video',
         route: '/students/class-video',
       },
@@ -223,6 +223,11 @@ export const menuData = [
       },
       {
         id: '9',
+        name: 'Exam Rules',
+        route: '/exam/rules',
+      },
+      {
+        id: '10',
         name: 'Exam Report',
         route: '/exam/report',
       },

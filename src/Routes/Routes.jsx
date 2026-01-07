@@ -51,6 +51,7 @@ import ExamCondition from '../pages/ExamCondition';
 import ExamFeeDetermine from '../pages/ExamFeeDetermine';
 import ExamReport from '../pages/ExamReport';
 import ExamRouting from '../pages/ExamRouting';
+import ExamRules from '../pages/ExamRules';
 import FeeCollection from '../pages/FeeCollection';
 import FeeCollectionReport from '../pages/FeeCollectionReport';
 import FeeSetting from '../pages/FeeSetting';
@@ -497,6 +498,16 @@ const router = createBrowserRouter([
               {
                 path: 'query-manage',
                 element: <QueryManage pageTitle="Query Manage" />,
+              },
+              {
+                path: 'rules',
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.exam_report}
+                  // >
+                    <ExamRules pageTitle="Exam Rules" />
+                  // </RequirePermission>
+                ),
               },
               {
                 path: 'report',

@@ -24,6 +24,7 @@ export const examSlice = createApi({
     'ExamTalentCondition',
     'ReportSettings',
     'ExamRoutine',
+    'ExamRules',
   ],
   endpoints: (builder) => ({
     postNewExam: builder.mutation({
@@ -296,6 +297,7 @@ export const examSlice = createApi({
       query: (eridl) => `get_single_exam_routine/${eridl}`,
       providesTags: ['ExamRoutine'],
     }),
+
     postExamRoutine: builder.mutation({
       query: (body) => ({
         url: `exam_routine_create`,
@@ -318,6 +320,37 @@ export const examSlice = createApi({
         method: 'DELETE',
       }),
       invalidatesTags: ['ExamRoutine'],
+    }),
+    getExamRules: builder.query({
+      query: () => `get_exam_rules`,
+      providesTags: ['ExamRules'],
+    }),
+    getExamRule: builder.query({
+      query: (id) => `get_exam_rule/${id}`,
+      providesTags: ['ExamRules'],
+    }),
+    postExamRule: builder.mutation({
+      query: (body) => ({
+        url: `exam_rule`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['ExamRules'],
+    }),
+    putExamRule: builder.mutation({
+      query: (body) => ({
+        url: `exam_rule/${body.ID}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['ExamRules'],
+    }),
+    deleteExamRule: builder.mutation({
+      query: (id) => ({
+        url: `exam_rule/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['ExamRules'],
     }),
   }),
 });
@@ -357,5 +390,11 @@ export const {
   useGetExamRoutineQuery,
   useGetAllExamRoutineQuery,
   usePutExamRoutineMutation,
-  useGetSingleExamRoutineQuery
+  useGetSingleExamRoutineQuery,
+
+  useGetExamRuleQuery,
+  useGetExamRulesQuery,
+  usePostExamRuleMutation,
+  usePutExamRuleMutation,
+  useDeleteExamRuleMutation
 } = examSlice;

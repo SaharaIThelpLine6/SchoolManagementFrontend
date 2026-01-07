@@ -22,6 +22,9 @@ export const userPanelUserInfo = createApi({
     geAllReports: builder.query({
       query: (sessionId) => `user_all_report?sessionId=${sessionId}`,
     }),
+    getExamRulesUserPanel: builder.query({
+      query: () => `get_exam_rules`,
+    }),
     geStudentResults: builder.query({
       query: () => `user_result_list`,
     }),
@@ -107,6 +110,7 @@ export const userPanelUserInfo = createApi({
 
 export const {
   useGetUserDetailsQuery,
+  useGetExamRulesUserPanelQuery,
   useGeAllReportsQuery,
   useGeStudentResultsQuery,
   useGetStudentRoutinesQuery,

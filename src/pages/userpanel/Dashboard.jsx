@@ -26,7 +26,6 @@ const Dashboard = () => {
     const buffer = Buffer.from(bufferData);
     return `data:image/png;base64,${buffer.toString('base64')}`;
   };
-
   /* ===== COMMON CLASSES (IMAGE LIKE) ===== */
   const cardClass =
     'bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 flex flex-col items-center justify-center py-2';
@@ -304,7 +303,7 @@ const Dashboard = () => {
               <svg
                 stroke="currentColor"
                 fill="currentColor"
-                stroke-width="0"
+                strokeWidth="0"
                 viewBox="0 0 24 24"
                 height="1em"
                 width="1em"

@@ -21,6 +21,7 @@ const useTranslate = () => {
     'Last Login': 'শেষ লগইন',
     'Class Video': 'ক্লাস ভিডিও',
     'Class Routine': 'ক্লাস রুটিন',
+    'Exam Rules': 'পরীক্ষার নিয়ম',
     'Report/Type': 'রিপোর্ট/ধরণ',
     'Payment System': 'পেমেন্ট সিস্টেম',
     Quantity: 'পরিমাণ',

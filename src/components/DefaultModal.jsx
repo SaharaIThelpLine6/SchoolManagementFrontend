@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { closeModal } from '../features/modal/modalSlice';
+import ClassVideoCreateUpdate from '../pages/userpanel/ClassVideoCreateUpdate';
 import StudentSingleReport from '../pages/userpanel/Modal/StudentsingleReport';
 import useTranslate from '../utils/Translate';
 import SessionCreateUpdateModal from '../view/Session/SessionCreateUpdateModal';
@@ -49,6 +50,7 @@ import DesignationForm from './Forms/DesignationForm';
 import EditStudentReport from './Forms/EditStudentReport';
 import EditStudentVacationForm from './Forms/EditStudentVacationForm';
 import EditTeacherForm from './Forms/EditTeacherForm';
+import ExamRuleCreateUpdateForm from './Forms/ExamRuleCreateUpdateForm';
 import FeeCollectionForm from './Forms/FeeCollectionForm';
 import MonthNamesForm from './Forms/MonthNamesForm';
 import TypeOfVacationForm from './Forms/TypeOfVacationForm';
@@ -58,7 +60,6 @@ import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
 import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
-import ClassVideoCreateUpdate from '../pages/userpanel/ClassVideoCreateUpdate';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -132,7 +133,12 @@ const DefaultModal = () => {
                 {modalType === 'EDIT_DESIGNATION' && (
                   <DesignationForm userId={id} />
                 )}
-
+                {modalType === 'CREATE_EXAM_RULE' && (
+                  <ExamRuleCreateUpdateForm />
+                )}
+                {modalType === 'UPDATE_EXAM_RULE' && (
+                  <ExamRuleCreateUpdateForm id={id} />
+                )}
                 {modalType === 'ADD_TYPEOFVACATION' && <TypeOfVacationForm />}
                 {modalType === 'ADD_CLASS_ROUTINE' && (
                   <ClassRoutineCreateUpdate />
