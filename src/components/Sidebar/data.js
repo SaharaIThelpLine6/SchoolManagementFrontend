@@ -135,6 +135,11 @@ export const menuData = [
         name: 'Class Video',
         route: '/students/class-video',
       },
+      {
+        id: '14',
+        name: 'Home Work',
+        route: '/students/home-work',
+      },
     ],
   },
   // {

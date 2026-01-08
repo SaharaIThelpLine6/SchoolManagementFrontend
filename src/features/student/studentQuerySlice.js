@@ -22,6 +22,7 @@ export const userStudentSlice = createApi({
     'ExamNames',
     'UsersOnlineRegInfo',
     'StudentAdmissions',
+    'HomeWorks',
   ],
   endpoints: (builder) => ({
     getStudentBySearch: builder.query({
@@ -307,6 +308,38 @@ export const userStudentSlice = createApi({
       query: () => `view_useronly_students`,
       providesTags: ['StudentAdmissions', 'Student'],
     }),
+
+    getHomeWorks: builder.query({
+      query: () => `home_works`,
+      providesTags: ['HomeWorks'],
+    }),
+    getHomeWork: builder.query({
+      query: (id) => `home_work/${id}`,
+      providesTags: ['HomeWorks'],
+    }),
+    postHomeWork: builder.mutation({
+      query: (body) => ({
+        url: `home_work`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['HomeWorks'],
+    }),
+    putHomeWork: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `home_work/${id}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['HomeWorks'],
+    }),
+    deleteHomeWork: builder.mutation({
+      query: (id) => ({
+        url: `home_work/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['HomeWorks'],
+    }),
   }),
 });
 
@@ -344,5 +377,11 @@ export const {
   useDeleteStudentCharacterReportMutation,
   useDeleteStudentsVacationMutation,
   useGetLastAdmissionUserCodeQuery,
-  useChangeStudentClassMutation
+  useChangeStudentClassMutation,
+
+  useGetHomeWorksQuery,
+  useGetHomeWorkQuery,
+  usePostHomeWorkMutation,
+  usePutHomeWorkMutation,
+  useDeleteHomeWorkMutation
 } = userStudentSlice;

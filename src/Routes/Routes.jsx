@@ -56,6 +56,7 @@ import FeeCollection from '../pages/FeeCollection';
 import FeeCollectionReport from '../pages/FeeCollectionReport';
 import FeeSetting from '../pages/FeeSetting';
 import GroupDistribution from '../pages/GroupDistribution';
+import HomWork from '../pages/HomWork';
 import Home from '../pages/Home';
 import InstitutionInfo from '../pages/InstitutionInfo';
 import MonthListTable from '../pages/MonthListTable';
@@ -95,6 +96,7 @@ import MaritListResult from '../pages/public/MaritListResult';
 import ClassRoutine from '../pages/userpanel/ClassRoutine';
 import Dashboard from '../pages/userpanel/Dashboard';
 import ExamRoutine from '../pages/userpanel/ExamRoutine';
+import HomeWorkUserPanel from '../pages/userpanel/HomeWorkUserPanel';
 import InstitutionInfoUserPanel from '../pages/userpanel/InstitutionInfoUserPanel';
 import OnlineAdmissionStudent from '../pages/userpanel/OnlineAdmissionStudent';
 import Reports from '../pages/userpanel/Reports';
@@ -346,6 +348,14 @@ const router = createBrowserRouter([
                   // </RequirePermission>
                 ),
               },
+              {
+                path: 'home-work',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <HomWork pageTitle="Class Video" />
+                  // </RequirePermission>
+                ),
+              },
               // {
               //   path: 'vacation/type-of-vacation',
               //   element: (
@@ -505,7 +515,7 @@ const router = createBrowserRouter([
                   // <RequirePermission
                   //   permissionId={permissionsDataList.exam_report}
                   // >
-                    <ExamRules pageTitle="Exam Rules" />
+                  <ExamRules pageTitle="Exam Rules" />
                   // </RequirePermission>
                 ),
               },
@@ -964,6 +974,10 @@ const router = createBrowserRouter([
       {
         path: 'video-tutorial',
         element: <VideoTutorialLink pageTitle="Video Tutorial" />,
+      },
+      {
+        path: 'home-work',
+        element: <HomeWorkUserPanel pageTitle="Home Work" />,
       },
     ],
   },

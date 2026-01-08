@@ -11,6 +11,7 @@ import useTranslate from '../utils/Translate';
 import Button from '../components/Button/Button';
 import DeleteButton from '../components/Button/DeleteButton';
 import EditButton from '../components/Button/EditButton';
+import ViewButton from '../components/Button/ViewButton';
 import DefaultPagination from '../components/Pagination/DefaultPagination';
 import {
   useDeleteExamRuleMutation,
@@ -61,6 +62,12 @@ const ExamRules = ({ pageTitle }) => {
     },
     [translate]
   );
+  const handleViewOpenModal = useCallback(
+    (id) => {
+      showModal(translate('Exam rule view'), 'VIEW_EXAM_RULE', id);
+    },
+    [translate]
+  );
 
   const handleDelete = useCallback(
     async (ERID) => {
@@ -108,6 +115,7 @@ const ExamRules = ({ pageTitle }) => {
         <div className="flex justify-center items-center gap-2">
           <EditButton onClick={() => handleEditOpenModal(row.ERID)} />
           <DeleteButton onClick={() => handleDelete(row.ERID)} />
+          <ViewButton onClick={() => handleViewOpenModal(row.ERID)} />
         </div>
       ),
     },

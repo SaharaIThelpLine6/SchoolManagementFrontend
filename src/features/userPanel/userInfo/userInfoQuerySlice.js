@@ -14,7 +14,12 @@ export const userPanelUserInfo = createApi({
       return headers;
     },
   }),
-  tagTypes: ['MaddrasahReports', 'StudentParentsReports', 'ClassRoutines'],
+  tagTypes: [
+    'MaddrasahReports',
+    'StudentParentsReports',
+    'ClassRoutines',
+    'HomeWorks',
+  ],
   endpoints: (builder) => ({
     getUserDetails: builder.query({
       query: (sessionId) => `get_user_details?sessionId=${sessionId}`,
@@ -105,6 +110,10 @@ export const userPanelUserInfo = createApi({
         url: `/exam_list_user_panel`,
       }),
     }),
+    getHomeWorksUserPanel: builder.query({
+      query: () => `home_works`,
+      providesTags: ['HomeWorks'],
+    }),
   }),
 });
 
@@ -126,4 +135,5 @@ export const {
   useGetExamRoutineViewQuery,
   useGetExamListUserPanelQuery,
   useGetSessionUserPanelQuery,
+  useGetHomeWorksUserPanelQuery,
 } = userPanelUserInfo;

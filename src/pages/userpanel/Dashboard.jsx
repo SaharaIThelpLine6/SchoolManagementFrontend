@@ -98,7 +98,7 @@ const Dashboard = () => {
           </Link>
 
           {/* ফি ও পেমেন্ট */}
-          <Link
+          {/* <Link
             to={`/${schoolid}/dashboard/student-payment-history`}
             className={cardClass}
           >
@@ -127,10 +127,13 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>ফি ও পেমেন্ট তথ্য</h4>
-          </Link>
+          </Link> */}
 
           {/* হোমওয়ার্ক */}
-          {/* <Link to="#" className={cardClass}>
+          {/* <Link
+            to={`/${schoolid}/dashboard/home-work`}
+            className={cardClass}
+          >
             <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mb-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -155,7 +158,7 @@ const Dashboard = () => {
           </Link> */}
 
           {/* চারিত্রিক রিপোর্ট */}
-          <Link
+          {/* <Link
             to={`/${schoolid}/dashboard/user_reports`}
             className={cardClass}
           >
@@ -180,10 +183,10 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>চারিত্রিক রিপোর্ট</h4>
-          </Link>
+          </Link> */}
 
           {/* পরীক্ষার শিডিউল */}
-          <Link
+          {/* <Link
             to={`/${schoolid}/dashboard/exam-routine`}
             className={cardClass}
           >
@@ -210,7 +213,7 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>পরীক্ষার রুটিন</h4>
-          </Link>
+          </Link> */}
 
           {/* ক্লাস রুটিন */}
           {/* <Link
@@ -246,7 +249,7 @@ const Dashboard = () => {
           </Link> */}
 
           {/* যোগাযোগ */}
-          <Link
+          {/* <Link
             to={`/${schoolid}/dashboard/institution-contact`}
             className={cardClass}
           >
@@ -268,7 +271,7 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>যোগাযোগ</h4>
-          </Link>
+          </Link> */}
 
           {/* অনলাইন ভর্তি - UPDATED WITH PROPER COLORS */}
           {/* <Link
@@ -298,7 +301,7 @@ const Dashboard = () => {
             <h4 className={titleClass}>অনলাইন ভর্তি</h4>
           </Link> */}
           {/* Report */}
-          <Link to={`/${schoolid}/dashboard/reports`} className={cardClass}>
+          {/* <Link to={`/${schoolid}/dashboard/reports`} className={cardClass}>
             <div className="w-10 h-10 rounded-full bg-[#c0dbfd] flex items-center justify-center mb-2">
               <svg
                 stroke="currentColor"
@@ -316,13 +319,12 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>অভিযোগ ও পরামর্শ </h4>
-          </Link>
-          <Link
+          </Link> */}
+          {/* <Link
             to={`/${schoolid}/dashboard/video-tutorial`}
             className={cardClass}
           >
             <div className="w-10 h-10 rounded-full bg-[#c0dbfd] flex items-center justify-center mb-2">
-              {/* Video Icon */}
               <svg
                 stroke="currentColor"
                 fill="currentColor"
@@ -338,7 +340,7 @@ const Dashboard = () => {
             </div>
 
             <h4 className={titleClass}>ক্লাস ভিডিও</h4>
-          </Link>
+          </Link> */}
         </div>
       </div>
     </main>

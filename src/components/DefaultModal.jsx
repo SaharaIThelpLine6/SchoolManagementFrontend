@@ -51,7 +51,10 @@ import EditStudentReport from './Forms/EditStudentReport';
 import EditStudentVacationForm from './Forms/EditStudentVacationForm';
 import EditTeacherForm from './Forms/EditTeacherForm';
 import ExamRuleCreateUpdateForm from './Forms/ExamRuleCreateUpdateForm';
+import ExamRuleView from './Forms/ExamRuleView';
 import FeeCollectionForm from './Forms/FeeCollectionForm';
+import HomeWorkCreateUpdateForm from './Forms/HomeWorkCreateUpdateForm';
+import HomeWorkView from './Forms/HomeWorkView';
 import MonthNamesForm from './Forms/MonthNamesForm';
 import TypeOfVacationForm from './Forms/TypeOfVacationForm';
 import CodeSetting from './Modals/CodeSetting';
@@ -139,6 +142,14 @@ const DefaultModal = () => {
                 {modalType === 'UPDATE_EXAM_RULE' && (
                   <ExamRuleCreateUpdateForm id={id} />
                 )}
+                {modalType === 'CREATE_HOME_WORK' && (
+                  <HomeWorkCreateUpdateForm />
+                )}
+                {modalType === 'UPDATE_HOME_WORK' && (
+                  <HomeWorkCreateUpdateForm id={id} />
+                )}
+                {modalType === 'VIEW_HOME_WORK' && <HomeWorkView id={id} />}
+                {modalType === 'VIEW_EXAM_RULE' && <ExamRuleView id={id} />}
                 {modalType === 'ADD_TYPEOFVACATION' && <TypeOfVacationForm />}
                 {modalType === 'ADD_CLASS_ROUTINE' && (
                   <ClassRoutineCreateUpdate />
