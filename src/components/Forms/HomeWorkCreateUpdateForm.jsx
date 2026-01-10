@@ -20,6 +20,7 @@ import { useGetTeacherInfoQuery } from '../../features/teachers/teachersSlice';
 
 import { hideModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
+import DefaultSwitch from './DefaultSwitch';
 
 const HomeWorkCreateUpdateForm = ({ id }) => {
   const translate = useTranslate();
@@ -43,12 +44,13 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
   const { data: homeWorks } = useGetHomeWorkQuery(id, { skip: !id });
   const { data: subClassData = [] } = useGetSubClassListQuery();
   const { data: sessionData = [] } = useGetSessionsQuery();
+  const activeSession = sessionData?.find((item) => item.SessionAction === 1);
+
   const { data: teacherData = [] } = useGetTeacherInfoQuery();
   const { data: academicSubjectsData = [] } = useGetAcademicSubjectsQuery();
 
   const [createHomeWork, { isLoading: isCreating }] = usePostHomeWorkMutation();
   const [updateHomeWork, { isLoading: isUpdating }] = usePutHomeWorkMutation();
-
 
   /* -------------------- SUBJECT OPTIONS -------------------- */
   const subjectOptions = useMemo(() => {
@@ -71,7 +73,9 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
       })),
     [teacherData]
   );
-
+  useEffect(() => {
+    setValue('SessionID', activeSession?.SessionID || '');
+  }, [activeSession, setValue]);
   /* -------------------- EDIT MODE INIT -------------------- */
   useEffect(() => {
     if (!id || !homeWorks || initializedRef.current) return;
@@ -191,6 +195,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
             label="Home Work"
             defaultValue={homeWorks?.HomeWork ?? ''}
           />
+          <DefaultSwitch label="পড়া হয়নি" registerKey="IsDone" />
         </div>
 
         <Button

@@ -130,7 +130,7 @@ const Dashboard = () => {
           </Link> */}
 
           {/* হোমওয়ার্ক */}
-          {/* <Link
+          <Link
             to={`/${schoolid}/dashboard/home-work`}
             className={cardClass}
           >
@@ -155,7 +155,7 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>হোমওয়ার্ক / বাড়ির কাজ</h4>
-          </Link> */}
+          </Link>
 
           {/* চারিত্রিক রিপোর্ট */}
           {/* <Link

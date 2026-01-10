@@ -111,7 +111,11 @@ export const userPanelUserInfo = createApi({
       }),
     }),
     getHomeWorksUserPanel: builder.query({
-      query: () => `home_works`,
+      query: ({ SessionID, DateValue }) => ({
+        url: 'home_works',
+        params: { SessionID, DateValue },
+      }),
+      // transformResponse: (response) => response?.data || [],
       providesTags: ['HomeWorks'],
     }),
   }),

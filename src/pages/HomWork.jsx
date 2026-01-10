@@ -8,12 +8,16 @@ import { setPageName } from '../features/auth/authSlice';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
 
+import { FormProvider, useForm } from 'react-hook-form';
 import Button from '../components/Button/Button';
 import CopyButton from '../components/Button/CopyButton';
 import DeleteButton from '../components/Button/DeleteButton';
 import EditButton from '../components/Button/EditButton';
 import ViewButton from '../components/Button/ViewButton';
+import DefaultSelect from '../components/Forms/DefaultSelect';
 import DefaultPagination from '../components/Pagination/DefaultPagination';
+import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
+import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import {
   useDeleteHomeWorkMutation,
   useGetHomeWorksQuery,
@@ -24,14 +28,23 @@ const PAGE_SIZE = 10;
 const HomWork = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
+  const methods = useForm();
+  const { setValue, watch } = methods;
   const translate = useTranslate();
+
+  const [SessionID, SubClassID] = watch(['SessionID', 'SubClassID']);
 
   const {
     data: homeWorkData = [],
     isSVTError,
     isSVTLoading,
-  } = useGetHomeWorksQuery();
+  } = useGetHomeWorksQuery({ SessionID, SubClassID });
 
+  // console.log(homeWorkData, 'homeWorkData');
+
+  const { data: sessionData = [] } = useGetSessionsQuery();
+  const { data: subClassData = [] } = useGetSubClassListQuery();
+  const activeSession = sessionData?.find((item) => item.SessionAction === 1);
   const [
     deleteHomeWork,
     { isLoading: isDeleteLoading, isError: isDeleteError },
@@ -43,6 +56,10 @@ const HomWork = ({ pageTitle }) => {
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
+
+  useEffect(() => {
+    setValue('SessionID', activeSession?.SessionID || '');
+  }, [activeSession, setValue]);
 
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -168,7 +185,7 @@ const HomWork = ({ pageTitle }) => {
       title: translate('Session'),
       field: 'SessionID',
       hozAlign: 'center',
-      render: (row) => <p>{row.SessionID}</p>,
+      render: (row) => <p>{row.Session?.SessionName}</p>,
     },
     {
       title: translate('Subject'),
@@ -213,36 +230,63 @@ const HomWork = ({ pageTitle }) => {
   ];
 
   return (
-    <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
-      <div className="block w-full overflow-x-auto">
-        <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
-          <h3 className="font-SolaimanLipi text-[20px] font-bold">
-            {translate('Home Work')}
-          </h3>
-          <Button onClick={() => handleOpenModal()}>
-            {translate('Create')}
-          </Button>
-        </div>
-        {paginatedData.length > 0 ? (
-          <>
-            <SortableTable
-              columns={columns}
-              data={paginatedData}
-              isFilterColumn={false}
-            />
+    <FormProvider {...methods}>
+      <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+        <div className="block w-full overflow-x-auto">
+          <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
+            <h3 className="font-SolaimanLipi text-[20px] font-bold">
+              {translate('Home Work')}
+            </h3>
+            <Button onClick={() => handleOpenModal()}>
+              {translate('Create')}
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 mb-3">
+            <div className="flex flex-col sm:flex-row gap-2 w-full">
+              <DefaultSelect
+                label="Session"
+                registerKey="SessionID"
+                options={sessionData}
+                valueField="SessionID"
+                nameField="SessionName"
+              />
+              <DefaultSelect
+                label="SubClass"
+                registerKey="SubClassID"
+                options={subClassData}
+                valueField="SubClassID"
+                nameField="SubClass"
+              />
+              {/* <DefaultSelect
+                label="Subject"
+                registerKey="SubjectID"
+                options={subjectData}
+                valueField="SubjectID"
+                nameField="SubjectName"
+              /> */}
+            </div>
+          </div>
+          {paginatedData.length > 0 ? (
+            <>
+              <SortableTable
+                columns={columns}
+                data={paginatedData}
+                isFilterColumn={false}
+              />
 
-            {/* Pagination Controls */}
-            <DefaultPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          </>
-        ) : (
-          <p className="text-center text-gray-500 mt-4">Data Not Found</p>
-        )}
+              {/* Pagination Controls */}
+              <DefaultPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </>
+          ) : (
+            <p className="text-center text-gray-500 mt-4">Data Not Found</p>
+          )}
+        </div>
       </div>
-    </div>
+    </FormProvider>
   );
 };
 

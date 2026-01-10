@@ -310,9 +310,13 @@ export const userStudentSlice = createApi({
     }),
 
     getHomeWorks: builder.query({
-      query: () => `home_works`,
+      query: ({ SessionID, SubClassID }) => ({
+        url: 'home_works',
+        params: { SessionID, SubClassID },
+      }),
       providesTags: ['HomeWorks'],
     }),
+
     getHomeWork: builder.query({
       query: (id) => `home_work/${id}`,
       providesTags: ['HomeWorks'],
@@ -383,5 +387,5 @@ export const {
   useGetHomeWorkQuery,
   usePostHomeWorkMutation,
   usePutHomeWorkMutation,
-  useDeleteHomeWorkMutation
+  useDeleteHomeWorkMutation,
 } = userStudentSlice;
