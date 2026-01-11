@@ -19,6 +19,7 @@ export const userPanelUserInfo = createApi({
     'StudentParentsReports',
     'ClassRoutines',
     'HomeWorks',
+    'HomeWorkStudyTracks',
   ],
   endpoints: (builder) => ({
     getUserDetails: builder.query({
@@ -115,8 +116,14 @@ export const userPanelUserInfo = createApi({
         url: 'home_works',
         params: { SessionID, DateValue },
       }),
-      // transformResponse: (response) => response?.data || [],
       providesTags: ['HomeWorks'],
+    }),
+    getHomeWorkStudyTracksHistoryUserPanel: builder.query({
+      query: ({ SessionID, DateValue }) => ({
+        url: 'home_work_study_track_history',
+        params: { SessionID, DateValue },
+      }),
+      providesTags: ['HomeWorkStudyTracks'],
     }),
   }),
 });
@@ -140,4 +147,5 @@ export const {
   useGetExamListUserPanelQuery,
   useGetSessionUserPanelQuery,
   useGetHomeWorksUserPanelQuery,
+  useGetHomeWorkStudyTracksHistoryUserPanelQuery
 } = userPanelUserInfo;

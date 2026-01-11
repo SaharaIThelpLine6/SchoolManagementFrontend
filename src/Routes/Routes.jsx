@@ -112,6 +112,7 @@ import VideoTutorialLink from '../pages/userpanel/VideoTutorialLink';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
+import HomeWorkHistoryUserPanel from '../pages/userpanel/HomeWorkHistoryUserPanel';
 
 const router = createBrowserRouter([
   {
@@ -978,6 +979,10 @@ const router = createBrowserRouter([
       {
         path: 'home-work',
         element: <HomeWorkUserPanel pageTitle="Home Work" />,
+      },
+      {
+        path: 'home-work-history',
+        element: <HomeWorkHistoryUserPanel pageTitle="Home Work History" />,
       },
     ],
   },

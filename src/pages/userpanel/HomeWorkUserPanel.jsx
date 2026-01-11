@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { Link, useParams } from 'react-router-dom';
 import Button from '../../components/Button/Button';
 import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
 import SvgIcon from '../../components/icons/SvgIcon';
 import {
   useGetHomeWorksUserPanelQuery,
-  useGetSessionUserPanelQuery,
+  useGetSessionUserPanelQuery
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import { showModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
@@ -54,7 +55,7 @@ const HomeworkItem = ({
         </div>
 
         {/* ✅ Homework status checkbox (centered vertically) */}
-        <label className="inline-flex items-center cursor-pointer">
+        {/* <label className="inline-flex items-center cursor-pointer">
           <input
             type="checkbox"
             checked={homework?.IsDone}
@@ -72,23 +73,25 @@ const HomeworkItem = ({
           >
             {homework?.IsDone ? '✓' : '✕'}
           </span>
-        </label>
+        </label> */}
 
-        <svg
-          className={`w-5 h-5 text-gray-400 transition-transform ${
-            isOpen ? 'rotate-180' : ''
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
+        <div className="rounded-full p-3 bg-[#aac5e6] flex items-center justify-center cursor-pointer hover:bg-[#92b4d4] transition-colors">
+          <svg
+            className={`w-5 h-5 text-gray-700 transition-transform duration-300 ${
+              isOpen ? 'rotate-180' : ''
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </div>
       </button>
 
       {/* Content */}
@@ -139,6 +142,8 @@ const HomeWorkUserPanel = () => {
   const [openIndex, setOpenIndex] = useState(null);
   const translate = useTranslate();
   const methods = useForm();
+  const { schoolid } = useParams();
+
   const { setValue, watch } = methods;
   const { data: sessionData = [] } = useGetSessionUserPanelQuery();
   // console.log(sessionData, 'sessionData');
@@ -156,15 +161,23 @@ const HomeWorkUserPanel = () => {
   const dateString =
     DateValue instanceof Date ? DateValue.toISOString() : DateValue;
 
+  console.log(dateString, 'dateString');
+  const dateOnly = dateString ? dateString.split('T')[0] : null;
+
   const { data = [], isLoading } = useGetHomeWorksUserPanelQuery(
-    { SessionID, DateValue: dateString },
+    { SessionID, DateValue: dateOnly },
     { skip: !SessionID }
   );
 
 
+
+  const homeWorkData = Array.isArray(data) ? data : data?.data || [];
+  console.log(homeWorkData, 'homeWorkData');
+
   useEffect(() => {
     setValue('SessionID', activeSession?.SessionID || '');
   }, [activeSession, setValue]);
+
   if (isLoading) {
     return (
       <div className="p-4 max-w-md mx-auto space-y-3">
@@ -178,6 +191,9 @@ const HomeWorkUserPanel = () => {
   return (
     <FormProvider {...methods}>
       <div className="max-w-md mx-auto p-4 space-y-2 mb-20">
+        <div className="flex justify-center items-center">
+          <Link to={`/${schoolid}/dashboard/home-work-history`}>History</Link>
+        </div>
         {/* Header */}
         <div className="flex flex-col justify-between items-center gap-2 mb-4">
           <DefaultSelect
@@ -199,12 +215,12 @@ const HomeWorkUserPanel = () => {
         </div>
 
         {/* Homework List */}
-        {data.length === 0 ? (
+        {homeWorkData.length === 0 ? (
           <p className="text-center text-gray-500">
             কোনো হোমওয়ার্ক পাওয়া যায়নি
           </p>
         ) : (
-          data.map((hw, index) => (
+          homeWorkData?.map((hw, index) => (
             <HomeworkItem
               key={hw.HWID || index}
               homework={hw}

@@ -344,6 +344,13 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ['HomeWorks'],
     }),
+        getStudentsBySubClassID: builder.query({
+          query: ({ SessionID, SubClassID }) => ({
+            url: 'get_students_by_subclassid',
+            params: { SessionID, SubClassID },
+          }),
+          providesTags: ['HomeWorks'],
+        }),
   }),
 });
 
@@ -388,4 +395,5 @@ export const {
   usePostHomeWorkMutation,
   usePutHomeWorkMutation,
   useDeleteHomeWorkMutation,
+  useGetStudentsBySubClassIDQuery
 } = userStudentSlice;

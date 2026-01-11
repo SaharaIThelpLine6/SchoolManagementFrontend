@@ -13,6 +13,7 @@ import {
 import { useGetSessionsQuery } from '../../features/session/sessionSlice';
 import {
   useGetHomeWorkQuery,
+  useGetStudentsBySubClassIDQuery,
   usePostHomeWorkMutation,
   usePutHomeWorkMutation,
 } from '../../features/student/studentQuerySlice';
@@ -20,7 +21,7 @@ import { useGetTeacherInfoQuery } from '../../features/teachers/teachersSlice';
 
 import { hideModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
-import DefaultSwitch from './DefaultSwitch';
+import SearchableMultiStudentSelect from './SearchableMultiStudentSelect';
 
 const HomeWorkCreateUpdateForm = ({ id }) => {
   const translate = useTranslate();
@@ -38,6 +39,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
 
   const { reset, watch, setValue } = methods;
   const SubClassID = Number(watch('SubClassID'));
+  const SessionID = Number(watch('SessionID'));
 
   const initializedRef = useRef(false);
 
@@ -48,6 +50,15 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
 
   const { data: teacherData = [] } = useGetTeacherInfoQuery();
   const { data: academicSubjectsData = [] } = useGetAcademicSubjectsQuery();
+  const { data: studentsBySubClassID = [] } = useGetStudentsBySubClassIDQuery(
+    { SessionID, SubClassID },
+    { skip: !SubClassID }
+  );
+  console.log(studentsBySubClassID, '');
+  const studentOptions = (studentsBySubClassID || []).map((item) => ({
+    UserID: item.UserID,
+    StudentName: item.User?.UserName + '-' + item.User?.UserCode,
+  }));
 
   const [createHomeWork, { isLoading: isCreating }] = usePostHomeWorkMutation();
   const [updateHomeWork, { isLoading: isUpdating }] = usePutHomeWorkMutation();
@@ -137,6 +148,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
         });
       } else {
         await createHomeWork(data).unwrap();
+        console.log(data, "data");
         Swal.fire({
           icon: 'success',
           title: translate('Created successfully'),
@@ -155,7 +167,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
           <DefaultSelect
             label="Session"
             registerKey="SessionID"
-            options={sessionData}
+            options={sessionData ?? []}
             valueField="SessionID"
             nameField="SessionName"
           />
@@ -163,7 +175,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
           <DefaultSelect
             label="SubClass"
             registerKey="SubClassID"
-            options={subClassData}
+            options={subClassData ?? []}
             valueField="SubClassID"
             nameField="SubClass"
           />
@@ -171,7 +183,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
           <DefaultSelect
             label="Subject"
             registerKey="SubjectID"
-            options={subjectOptions}
+            options={subjectOptions ?? []}
             valueField="SubjectID"
             nameField="SubjectName"
             disabled={!SubClassID}
@@ -180,11 +192,18 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
           <DefaultSelect
             label="Teacher"
             registerKey="TIID"
-            options={teacherOptions}
+            options={teacherOptions ?? []}
             valueField="TIID"
             nameField="TeacherName"
           />
 
+          {/* <DefaultSelect
+            label="Student"
+            registerKey="UserID"
+            options={studentOptions}
+            valueField="UserID"
+            nameField="StudentName"
+          /> */}
           <Textarea
             registerKey="ClassWork"
             label="Class Work"
@@ -195,7 +214,19 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
             label="Home Work"
             defaultValue={homeWorks?.HomeWork ?? ''}
           />
-          <DefaultSwitch label="পড়া হয়নি" registerKey="IsDone" />
+          {/* <DefaultSwitch
+            label="পড়া হয়েছে"
+            registerKey="IsDone"
+            defaultValue={true}
+          /> */}
+          <SearchableMultiStudentSelect
+            label="যে শিক্ষার্থীরা কাজ করেনি"
+            registerKey="notDoneStudents"
+            options={studentOptions} // full student list
+            valueField="UserID"
+            nameField="StudentName"
+            unicode
+          />
         </div>
 
         <Button
