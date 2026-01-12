@@ -79,7 +79,7 @@ const AdmissionForm = ({ userId }) => {
     isError: isSessionError,
   } = useGetSessionsQuery(undefined, { refetchOnMountOrArgChange: true });
   const activeSession = academicSession?.find(
-    (item) => item.SessionAction === 1
+    (item) => item.SessionStatus === 1
   );
 
   // Student Financial Status
@@ -179,7 +179,7 @@ const AdmissionForm = ({ userId }) => {
       UserName: studentData.StudentName || '',
       FatherName: studentData.FatherName || '',
       Mobile1: studentData.Mobile1 || '',
-      SessionID: studentData.SessionID || '',
+      SessionID: activeSession?.SessionID || '',
       ClassID: studentData.ClassID || '',
       SubClassID: studentData.SubClassID || '',
       ResidentialStatusId: studentData.ResidentialStatusId || '',
@@ -227,7 +227,7 @@ const AdmissionForm = ({ userId }) => {
       setTimeout(() => {
         setFilterData({
           search: studentCode,
-          SessionID: sessionId,
+          // SessionID: sessionId,
           timestamp: Date.now(),
         });
         setSearchTrigger((prev) => prev + 1);
@@ -235,7 +235,7 @@ const AdmissionForm = ({ userId }) => {
     } else {
       setFilterData({
         search: studentCode,
-        SessionID: sessionId,
+        // SessionID: sessionId,
         timestamp: Date.now(),
       });
       setSearchTrigger((prev) => prev + 1);

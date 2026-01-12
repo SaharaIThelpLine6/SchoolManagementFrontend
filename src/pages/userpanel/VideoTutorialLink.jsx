@@ -32,7 +32,7 @@ const VideoTutorialLink = () => {
 
   const { data: sessionData = [] } = useGetSessionUserPanelQuery();
   // console.log(sessionData, 'sessionData');
-  const activeSession = sessionData?.find((item) => item.SessionAction === 1);
+  const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
   // ✅ Normalize for Bangla + English search
   const normalizeText = (text = '') =>
     text

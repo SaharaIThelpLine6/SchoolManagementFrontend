@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { Link, useParams } from 'react-router-dom';
+import Button from '../../components/Button/Button';
 import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
 import {
@@ -12,9 +14,10 @@ const HomeWorkHistoryUserPanel = () => {
   const translate = useTranslate();
   const methods = useForm();
   const { setValue, watch } = methods;
+  const { schoolid } = useParams();
 
   const { data: sessionData = [] } = useGetSessionUserPanelQuery();
-  const activeSession = sessionData?.find((item) => item.SessionAction === 1);
+  const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
 
   const [SessionID, DateValue] = watch(['SessionID', 'DateValue']);
 
@@ -43,7 +46,11 @@ const HomeWorkHistoryUserPanel = () => {
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
           Homework History
         </h1>
-
+        <div className="flex my-3 justify-end">
+          <Link to={`/${schoolid}/dashboard/home-work`}>
+            <Button>Back</Button>
+          </Link>
+        </div>
         {/* Filters */}
         <div className="flex flex-col md:flex-row justify-start items-center gap-4 mb-6">
           <DefaultSelect

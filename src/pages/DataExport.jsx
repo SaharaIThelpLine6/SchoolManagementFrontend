@@ -18,9 +18,9 @@ import {
   useGetStudentBySearchQuery,
   useGetStudentsVacationTypeListQuery,
 } from '../features/student/studentQuerySlice';
+import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
 import StudentDataReportPdf from '../view/students/pdf/StudentDataReportPdf';
-import { showModal } from '../utils/ModalControlar';
 
 const PAGE_SIZE = 10;
 
@@ -54,7 +54,7 @@ const DataExport = ({ pageTitle }) => {
     isLoading: isSearchLoading,
   } = useGetStudentBySearchQuery(
     {
-      ClassID: SubClassID ? SubClassID : null,
+      SubClassID: SubClassID ? SubClassID : null,
       SessionID: SessionID ? SessionID : null,
       NewOldId: NewOldId ? NewOldId : null,
       ResidentialStatusId: ResidentialStatusId ? ResidentialStatusId : null,
@@ -210,26 +210,29 @@ const DataExport = ({ pageTitle }) => {
             width: 80,
             render: (row) =>
               row[col.id] && row[col.id] !== '-' ? (
-                <div className="flex justify-center">
-                  <img
-                    src={row[col.id]}
-                    alt="Student Logo"
-                    className="w-10 h-10 object-cover rounded-full border border-gray-300"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'block';
-                    }}
-                  />
-                  <span
-                    style={{ display: 'none' }}
-                    className="text-gray-400 text-xs"
-                  >
-                    No Image
-                  </span>
+                <div className="flex justify-center items-center">
+                  <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-300 flex items-center justify-center bg-gray-100">
+                    <img
+                      src={row[col.id]}
+                      alt="Student Logo"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.parentElement.querySelector(
+                          '.no-img'
+                        ).style.display = 'block';
+                      }}
+                    />
+                    <span className="no-img hidden text-gray-400 text-[10px]">
+                      No Image
+                    </span>
+                  </div>
                 </div>
               ) : (
-                <div className="flex justify-center">
-                  <span className="text-gray-400 text-xs">No Logo</span>
+                <div className="flex justify-center items-center">
+                  <div className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 text-[10px]">
+                    No Logo
+                  </div>
                 </div>
               ),
           };
@@ -361,6 +364,8 @@ const DataExport = ({ pageTitle }) => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return filteredStudentData.slice(start, start + PAGE_SIZE);
   }, [filteredStudentData, currentPage]);
+
+  console.log(paginatedData, 'paginatedData');
 
     const handlePrint = useCallback(() => {
     // ----------------------------------

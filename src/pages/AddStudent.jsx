@@ -65,6 +65,8 @@ const AddStudent = ({ pageTitle }) => {
     refetchOnMountOrArgChange: true
   });
 
+
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -225,6 +227,12 @@ const AddStudent = ({ pageTitle }) => {
       render: (row) => {
         return new Date(row.CreateAt).toLocaleDateString('en-GB');
       },
+    },
+    {
+      title: 'Session',
+      field: 'SessionName',
+      hozAlign: 'center',
+      filterable: true,
     },
     {
       title: 'Admission Payment status',

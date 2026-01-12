@@ -19,8 +19,8 @@ import DefaultPagination from '../components/Pagination/DefaultPagination';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import {
-  useDeleteHomeWorkMutation,
-  useGetHomeWorksQuery,
+    useDeleteHomeWorkMutation,
+    useGetHomeWorksQuery,
 } from '../features/student/studentQuerySlice';
 
 const PAGE_SIZE = 10;
@@ -44,7 +44,7 @@ const HomWork = ({ pageTitle }) => {
 
   const { data: sessionData = [] } = useGetSessionsQuery();
   const { data: subClassData = [] } = useGetSubClassListQuery();
-  const activeSession = sessionData?.find((item) => item.SessionAction === 1);
+  const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
   const [
     deleteHomeWork,
     { isLoading: isDeleteLoading, isError: isDeleteError },

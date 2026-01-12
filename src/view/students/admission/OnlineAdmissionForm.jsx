@@ -12,24 +12,24 @@ import SvgIcon from '../../../components/icons/SvgIcon';
 import Loading from '../../../components/Loading/Loading';
 import { permissionsDataList } from '../../../Data/permissions';
 import {
-  useGetClassListQuery,
-  useGetSubClassListQuery,
+    useGetClassListQuery,
+    useGetSubClassListQuery,
 } from '../../../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
 import {
-  useGetCodeSettingsQuery,
-  useGetDistrictsQuery,
-  useGetDivisionsQuery,
-  useGetFinancialStatusQuery,
-  useGetLastAdmissionSerialQuery,
-  useGetPoliceStationsQuery,
-  useGetResidentialQuery,
-  useGetSettingsQuery,
-  useGetStudentRelationsQuery,
+    useGetCodeSettingsQuery,
+    useGetDistrictsQuery,
+    useGetDivisionsQuery,
+    useGetFinancialStatusQuery,
+    useGetLastAdmissionSerialQuery,
+    useGetPoliceStationsQuery,
+    useGetResidentialQuery,
+    useGetSettingsQuery,
+    useGetStudentRelationsQuery,
 } from '../../../features/settings/settingsQuerySlice';
 import {
-  useGetLastAdmissionUserCodeQuery,
-  usePostStudentAdmissionMutation,
+    useGetLastAdmissionUserCodeQuery,
+    usePostStudentAdmissionMutation,
 } from '../../../features/student/studentQuerySlice';
 import { ViewPermission } from '../../../Routes/ViewPermission';
 import { showModal } from '../../../utils/ModalControlar';
@@ -52,7 +52,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
   const { data: divisionsData } = useGetDivisionsQuery();
   const { data: settings } = useGetSettingsQuery();
 
-  const activeSession = sessionData?.find((item) => item.SessionAction === 1);
+  const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
   const settingInfo = Array.isArray(settings?.data)
     ? settings.data.find((item) => item.ID === 3)
     : null;

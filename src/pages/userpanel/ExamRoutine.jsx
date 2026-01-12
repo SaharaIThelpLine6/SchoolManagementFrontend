@@ -2,10 +2,10 @@ import { useEffect } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
 import {
-  useGetExamListUserPanelQuery,
-  useGetExamRoutineViewQuery,
-  useGetExamRulesUserPanelQuery,
-  useGetSessionUserPanelQuery,
+    useGetExamListUserPanelQuery,
+    useGetExamRoutineViewQuery,
+    useGetExamRulesUserPanelQuery,
+    useGetSessionUserPanelQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import useTranslate from '../../utils/Translate';
 import bnBijoy2Unicode from '../../utils/conveter';
@@ -29,7 +29,7 @@ const ExamRoutine = () => {
   const { data = [] } = useGetExamRulesUserPanelQuery();
   // console.log(data, 'data');
 
-  const activeSession = sessionData?.find((item) => item.SessionAction === 1);
+  const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
 
   // console.log(examRoutineData, 'examRoutineData');
 

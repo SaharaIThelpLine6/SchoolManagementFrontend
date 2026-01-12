@@ -215,12 +215,12 @@ export function StepTwo() {
         </li>
       </ol>
 
-      <DefaultInput
+      {/* <DefaultInput
         registerKey={'username'}
         label={'User name'}
         placeholder={'Enter User name'}
         type="text"
-      />
+      /> */}
       <DefaultInput
         registerKey={'password'}
         type="password"
@@ -316,7 +316,7 @@ export default function UserRegistration() {
     }
     if (currentStepIndex === 1) {
       const res = await registerUserPanel({
-        username: data.username,
+        // username: data.username,
         password: data.password,
       });
       console.log(res, 'response');

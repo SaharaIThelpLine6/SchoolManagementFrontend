@@ -147,7 +147,7 @@ const HomeWorkUserPanel = () => {
   const { setValue, watch } = methods;
   const { data: sessionData = [] } = useGetSessionUserPanelQuery();
   // console.log(sessionData, 'sessionData');
-  const activeSession = sessionData?.find((item) => item.SessionAction === 1);
+  const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
 
   const handleViewTeacherDetials = useCallback(
     (id) => {
@@ -192,7 +192,9 @@ const HomeWorkUserPanel = () => {
     <FormProvider {...methods}>
       <div className="max-w-md mx-auto p-4 space-y-2 mb-20">
         <div className="flex justify-center items-center">
-          <Link to={`/${schoolid}/dashboard/home-work-history`}>History</Link>
+          <Link to={`/${schoolid}/dashboard/home-work-history`}>
+            <Button>History</Button>
+          </Link>
         </div>
         {/* Header */}
         <div className="flex flex-col justify-between items-center gap-2 mb-4">

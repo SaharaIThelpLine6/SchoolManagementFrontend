@@ -32,6 +32,7 @@ export const userStudentSlice = createApi({
         SessionID,
         NewOldId,
         GenderID,
+        SubClassID,
         ResidentialStatusId,
       }) => {
         const params = new URLSearchParams();
@@ -42,6 +43,7 @@ export const userStudentSlice = createApi({
         if (GenderID) params.append('GenderID', GenderID);
         if (SessionID) params.append('SessionID', SessionID);
         if (NewOldId) params.append('NewOldId', NewOldId);
+        if (SubClassID) params.append('SubClassID', SubClassID);
         if (ResidentialStatusId)
           params.append('ResidentialStatusId', ResidentialStatusId);
 

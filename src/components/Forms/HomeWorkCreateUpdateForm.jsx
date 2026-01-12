@@ -46,7 +46,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
   const { data: homeWorks } = useGetHomeWorkQuery(id, { skip: !id });
   const { data: subClassData = [] } = useGetSubClassListQuery();
   const { data: sessionData = [] } = useGetSessionsQuery();
-  const activeSession = sessionData?.find((item) => item.SessionAction === 1);
+  const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
 
   const { data: teacherData = [] } = useGetTeacherInfoQuery();
   const { data: academicSubjectsData = [] } = useGetAcademicSubjectsQuery();
@@ -197,13 +197,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
             nameField="TeacherName"
           />
 
-          {/* <DefaultSelect
-            label="Student"
-            registerKey="UserID"
-            options={studentOptions}
-            valueField="UserID"
-            nameField="StudentName"
-          /> */}
+
           <Textarea
             registerKey="ClassWork"
             label="Class Work"
@@ -214,13 +208,9 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
             label="Home Work"
             defaultValue={homeWorks?.HomeWork ?? ''}
           />
-          {/* <DefaultSwitch
-            label="পড়া হয়েছে"
-            registerKey="IsDone"
-            defaultValue={true}
-          /> */}
+
           <SearchableMultiStudentSelect
-            label="যে শিক্ষার্থীরা কাজ করেনি"
+            label="যে শিক্ষার্থীর পড়া হয়নি:"
             registerKey="notDoneStudents"
             options={studentOptions} // full student list
             valueField="UserID"

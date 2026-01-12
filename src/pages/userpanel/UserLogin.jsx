@@ -77,7 +77,7 @@ export default function UserLogin() {
     try {
       const response = await loginUserPanel({
         usercode: data.usercode,
-        username: data.username,
+        // username: data.username,
         password: data.password,
         school_id: schoolid,
       });
@@ -129,12 +129,12 @@ export default function UserLogin() {
               placeholder={'Enter User code'}
               type="text"
             />
-            <DefaultInput
+            {/* <DefaultInput
               registerKey={'username'}
               label={'User Name'}
               placeholder={'Enter User name'}
               type="text"
-            />
+            /> */}
             <DefaultInput
               registerKey={'password'}
               type="password"
