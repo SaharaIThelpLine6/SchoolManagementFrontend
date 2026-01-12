@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Link, useParams } from 'react-router-dom';
 import Button from '../../components/Button/Button';
-import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
 import {
   useGetHomeWorkStudyTracksHistoryUserPanelQuery,
   useGetSessionUserPanelQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import useTranslate from '../../utils/Translate';
+import HomeWorkHistory from './HomeWorkHistory';
 
 const HomeWorkHistoryUserPanel = () => {
   const translate = useTranslate();
@@ -36,13 +36,41 @@ const HomeWorkHistoryUserPanel = () => {
     ? homeWorkStudyTrackData
     : homeWorkStudyTrackData?.data || [];
 
+  console.log(homeWorkData, 'homeWorkData');
+
   useEffect(() => {
     setValue('SessionID', activeSession?.SessionID || '');
   }, [activeSession, setValue]);
+  const stats = [
+    {
+      value: 50,
+      label: 'মোট বিষয়',
+      color: 'bg-purple-400',
+      circle: 'bg-purple-500',
+    },
+    {
+      value: 32,
+      label: 'উপস্থিত হয়েছে',
+      color: 'bg-blue-400',
+      circle: 'bg-blue-500',
+    },
+    {
+      value: 18,
+      label: 'পড়া দিয়েছে',
+      color: 'bg-green-400',
+      circle: 'bg-green-500',
+    },
+    {
+      value: 7,
+      label: 'পড়া দেয়নি',
+      color: 'bg-red-400',
+      circle: 'bg-red-500',
+    },
+  ];
 
   return (
     <FormProvider {...methods}>
-      <div className="p-6 bg-gray-100 min-h-screen mb-20">
+      <div className="py-6 px-3 bg-gray-100 min-h-screen mb-20">
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
           Homework History
         </h1>
@@ -63,16 +91,16 @@ const HomeWorkHistoryUserPanel = () => {
             unicode
           />
 
-          <DatePickerOne
+          {/* <DatePickerOne
             dateCalender={`${translate('Date')}`}
             placeholder={translate('Select Date')}
             registerKey={'DateValue'}
             require={'Date Require'}
-          />
+          /> */}
         </div>
 
         {/* Homework Cards */}
-        {homeWorkData.length === 0 ? (
+        {/* {homeWorkData.length === 0 ? (
           <p className="text-gray-500">No homework found.</p>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -107,7 +135,6 @@ const HomeWorkHistoryUserPanel = () => {
                   {hw.User?.UserName || 'Unknown'}
                 </p>
 
-                {/* Homework / ClassWork */}
                 <div className="mt-3">
                   <h3 className="font-semibold text-gray-700 mb-1">Homework</h3>
                   {hw.HomeWork?.HomeWork ? (
@@ -126,21 +153,7 @@ const HomeWorkHistoryUserPanel = () => {
                   )}
                 </div>
 
-                {/* Contact Info */}
-                {/* <div className="mt-4">
-                  <h3 className="font-semibold text-gray-700 mb-1">Contact</h3>
-                  {hw.User?.Mobile1 && (
-                    <p className="text-gray-600">📱 {hw.User.Mobile1}</p>
-                  )}
-                  {hw.User?.Mobile2 && (
-                    <p className="text-gray-600">📱 {hw.User.Mobile2}</p>
-                  )}
-                  {hw.User?.Email && (
-                    <p className="text-gray-600">✉️ {hw.User.Email}</p>
-                  )}
-                </div> */}
 
-                {/* Homework ID */}
                 <div className="mt-4">
                   <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
                     Homework ID: {hw.HSTID}
@@ -149,7 +162,79 @@ const HomeWorkHistoryUserPanel = () => {
               </div>
             ))}
           </div>
-        )}
+        )} */}
+        {/* Header Filters */}
+
+        <div className="flex justify-center gap-2 mb-6 shadow-md rounded-sm p-2 bg-white">
+          <button
+            className="px-4 py-1.5 rounded-full text-sm font-semibold
+               text-gray-600 hover:bg-gray-100 transition border"
+          >
+            1D
+          </button>
+
+          <button
+            className="px-4 py-1.5 rounded-full text-sm font-semibold
+               text-gray-600 hover:bg-gray-100 transition border"
+          >
+            10D
+          </button>
+
+          <button
+            className="px-4 py-1.5 rounded-full text-sm font-semibold
+               bg-blue-600 text-white shadow-sm border"
+          >
+            1M
+          </button>
+
+          <button
+            className="px-4 py-1.5 rounded-full text-sm font-semibold
+               text-gray-600 hover:bg-gray-100 transition border"
+          >
+            6M
+          </button>
+
+          <button
+            className="px-4 py-1.5 rounded-full text-sm font-semibold
+               text-gray-600 hover:bg-gray-100 transition border"
+          >
+            1Y
+          </button>
+        </div>
+
+        <div className="grid grid-cols-4 gap-2 my-5">
+          {stats.map((item, index) => (
+            <div
+              key={index}
+              className={`
+        rounded-xl shadow-sm p-2 flex flex-col items-center justify-center
+        text-white ${item.color} md:bg-white md:text-gray-800 md:shadow-md /* Desktop white */
+      `}
+            >
+              {/* Circle */}
+              <span
+                className={`
+        h-12 w-12 flex items-center justify-center rounded-full
+        ${item.circle} text-white font-semibold
+      `}
+              >
+                {item.value}
+              </span>
+
+              {/* Label */}
+              <span
+                className="
+        mt-2 text-xs font-medium text-white
+        md:text-gray-700
+        text-center
+      "
+              >
+                {item.label}
+              </span>
+            </div>
+          ))}
+        </div>
+        <HomeWorkHistory />
       </div>
     </FormProvider>
   );

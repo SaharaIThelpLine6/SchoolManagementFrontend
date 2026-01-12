@@ -12,15 +12,14 @@ import { FormProvider, useForm } from 'react-hook-form';
 import Button from '../components/Button/Button';
 import CopyButton from '../components/Button/CopyButton';
 import DeleteButton from '../components/Button/DeleteButton';
-import EditButton from '../components/Button/EditButton';
 import ViewButton from '../components/Button/ViewButton';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import DefaultPagination from '../components/Pagination/DefaultPagination';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import {
-    useDeleteHomeWorkMutation,
-    useGetHomeWorksQuery,
+  useDeleteHomeWorkMutation,
+  useGetHomeWorksQuery,
 } from '../features/student/studentQuerySlice';
 
 const PAGE_SIZE = 10;
@@ -130,7 +129,7 @@ const HomWork = ({ pageTitle }) => {
       hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <EditButton onClick={() => handleEditOpenModal(row.HWID)} />
+          {/* <EditButton onClick={() => handleEditOpenModal(row.HWID)} /> */}
           <DeleteButton onClick={() => handleDelete(row.HWID)} />
           <ViewButton onClick={() => handleViewOpenModal(row.HWID)} />
           <CopyButton
