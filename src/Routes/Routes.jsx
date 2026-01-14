@@ -96,6 +96,7 @@ import MaritListResult from '../pages/public/MaritListResult';
 import ClassRoutine from '../pages/userpanel/ClassRoutine';
 import Dashboard from '../pages/userpanel/Dashboard';
 import ExamRoutine from '../pages/userpanel/ExamRoutine';
+import HomeWorkHistoryUserPanel from '../pages/userpanel/HomeWorkHistoryUserPanel';
 import HomeWorkUserPanel from '../pages/userpanel/HomeWorkUserPanel';
 import InstitutionInfoUserPanel from '../pages/userpanel/InstitutionInfoUserPanel';
 import OnlineAdmissionStudent from '../pages/userpanel/OnlineAdmissionStudent';
@@ -105,6 +106,7 @@ import StudentPaymentHistoryDetails from '../pages/userpanel/StudentPaymentHisto
 import StudentReports from '../pages/userpanel/StudentReports';
 import StudentResults from '../pages/userpanel/StudentResults';
 import StudentResultsView from '../pages/userpanel/StudentResultsView';
+import SubjectHistoryUserPanel from '../pages/userpanel/SubjectHistoryUserPanel';
 import UserLogin from '../pages/userpanel/UserLogin';
 import UserProfile from '../pages/userpanel/UserProfile';
 import UserRegistration from '../pages/userpanel/UserRegistration';
@@ -112,7 +114,6 @@ import VideoTutorialLink from '../pages/userpanel/VideoTutorialLink';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
-import HomeWorkHistoryUserPanel from '../pages/userpanel/HomeWorkHistoryUserPanel';
 
 const router = createBrowserRouter([
   {
@@ -333,12 +334,28 @@ const router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
+
+              // {
+              //   path: 'vacation/type-of-vacation',
+              //   element: (
+              //     // <RequirePermission permissionId={permissionsDataList.class}>
+              //     <TypeOfVacation pageTitle="Class" />
+              //     // </RequirePermission>
+              //   ),
+              // },
+            ],
+          },
+          {
+            path: 'user-panel',
+            children: [
               {
-                path: 'class-routine',
+                index: true,
                 element: (
-                  <RequirePermission permissionId={permissionsDataList.class}>
-                    <StudentClassRoutine pageTitle="Class Student List" />
-                  </RequirePermission>
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.teacher_info}
+                  // >
+                  <StudentClassRoutine pageTitle="Employee" />
+                  // </RequirePermission>
                 ),
               },
               {
@@ -357,14 +374,6 @@ const router = createBrowserRouter([
                   // </RequirePermission>
                 ),
               },
-              // {
-              //   path: 'vacation/type-of-vacation',
-              //   element: (
-              //     // <RequirePermission permissionId={permissionsDataList.class}>
-              //     <TypeOfVacation pageTitle="Class" />
-              //     // </RequirePermission>
-              //   ),
-              // },
             ],
           },
           {
@@ -983,6 +992,10 @@ const router = createBrowserRouter([
       {
         path: 'home-work-history',
         element: <HomeWorkHistoryUserPanel pageTitle="Home Work History" />,
+      },
+      {
+        path: 'home-work-history/:subjectName',
+        element: <SubjectHistoryUserPanel pageTitle="Subject History" />,
       },
     ],
   },

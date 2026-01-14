@@ -1,84 +1,68 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Link, useParams } from 'react-router-dom';
-import Button from '../../components/Button/Button';
+import { useParams } from 'react-router-dom';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
+import HomeworkAreaChart from '../../components/HomeworkAreaChart';
 import {
   useGetHomeWorkStudyTracksHistoryUserPanelQuery,
   useGetSessionUserPanelQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import useTranslate from '../../utils/Translate';
-import HomeWorkHistory from './HomeWorkHistory';
 
 const HomeWorkHistoryUserPanel = () => {
   const translate = useTranslate();
   const methods = useForm();
   const { setValue, watch } = methods;
   const { schoolid } = useParams();
+  const [range, setRange] = useState('10D'); // Default range
 
   const { data: sessionData = [] } = useGetSessionUserPanelQuery();
   const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
 
-  const [SessionID, DateValue] = watch(['SessionID', 'DateValue']);
+  const [SessionID] = watch(['SessionID']);
 
-  // Convert to ISO string if DateValue is a Date object
-  const dateString =
-    DateValue instanceof Date ? DateValue.toISOString() : DateValue;
-  const dateOnly = dateString ? dateString.split('T')[0] : null;
-
-  const { data: homeWorkStudyTrackData = [] } =
+  const { data: homeWorkStudyTrackData, isLoading } =
     useGetHomeWorkStudyTracksHistoryUserPanelQuery(
-      { SessionID, DateValue: dateOnly },
+      { SessionID, range },
       { skip: !SessionID }
     );
 
-  const homeWorkData = Array.isArray(homeWorkStudyTrackData)
-    ? homeWorkStudyTrackData
-    : homeWorkStudyTrackData?.data || [];
+  // Extract data from response
+  const responseData = homeWorkStudyTrackData?.data || {};
+  const subjects = responseData.subjects || [];
+  const dates = responseData.dates || [];
+  const historyData = responseData.historyData || {};
+  const stats = responseData.stats || [];
+  const rawData = responseData.rawData || {};
 
-  console.log(homeWorkData, 'homeWorkData');
+  // Range buttons configuration
+  const rangeButtons = [
+    { key: '1D', label: '1D' },
+    { key: '10D', label: '10D' },
+    { key: '1M', label: '1M' },
+    { key: '6M', label: '6M' },
+    { key: '1Y', label: '1Y' },
+  ];
 
   useEffect(() => {
     setValue('SessionID', activeSession?.SessionID || '');
   }, [activeSession, setValue]);
-  const stats = [
-    {
-      value: 50,
-      label: 'মোট বিষয়',
-      color: 'bg-purple-400',
-      circle: 'bg-purple-500',
-    },
-    {
-      value: 32,
-      label: 'উপস্থিত হয়েছে',
-      color: 'bg-blue-400',
-      circle: 'bg-blue-500',
-    },
-    {
-      value: 18,
-      label: 'পড়া দিয়েছে',
-      color: 'bg-green-400',
-      circle: 'bg-green-500',
-    },
-    {
-      value: 7,
-      label: 'পড়া দেয়নি',
-      color: 'bg-red-400',
-      circle: 'bg-red-500',
-    },
-  ];
+
+  const handleRangeChange = (newRange) => {
+    setRange(newRange);
+  };
 
   return (
     <FormProvider {...methods}>
       <div className="py-6 px-3 bg-gray-100 min-h-screen mb-20">
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
-          Homework History
+          {translate('Homework History')}
         </h1>
-        <div className="flex my-3 justify-end">
+        {/* <div className="flex my-3 justify-end">
           <Link to={`/${schoolid}/dashboard/home-work`}>
             <Button>Back</Button>
           </Link>
-        </div>
+        </div> */}
         {/* Filters */}
         <div className="flex flex-col md:flex-row justify-start items-center gap-4 mb-6">
           <DefaultSelect
@@ -90,133 +74,45 @@ const HomeWorkHistoryUserPanel = () => {
             defaultSelect={false}
             unicode
           />
-
-          {/* <DatePickerOne
-            dateCalender={`${translate('Date')}`}
-            placeholder={translate('Select Date')}
-            registerKey={'DateValue'}
-            require={'Date Require'}
-          /> */}
         </div>
 
-        {/* Homework Cards */}
-        {/* {homeWorkData.length === 0 ? (
-          <p className="text-gray-500">No homework found.</p>
-        ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {homeWorkData.map((hw) => (
-              <div
-                key={hw.HSTID}
-                className="bg-white p-5 rounded-xl shadow hover:shadow-lg transition-shadow duration-300"
-              >
-                <div className="flex justify-between items-start mb-3">
-                  <h2 className="text-lg font-semibold text-gray-800">
-                    {hw.Subject?.SubjectName || 'Unknown Subject'}
-                  </h2>
-                  <span className="text-sm text-gray-500">
-                    {new Date(hw.CreateAt).toLocaleDateString('bn-BD', {
-                      day: 'numeric',
-                      month: 'long',
-                      year: 'numeric',
-                    })}
-                  </span>
-                </div>
-
-                <p className="text-gray-600 mb-2">
-                  <span className="font-semibold">Class: </span>
-                  {hw.SubClass?.SubClass || 'Unknown Class'}
-                </p>
-                <p className="text-gray-600 mb-2">
-                  <span className="font-semibold">Session: </span>
-                  {hw.Session?.SessionName || 'Unknown Session'}
-                </p>
-                <p className="text-gray-600 mb-2">
-                  <span className="font-semibold">Teacher: </span>
-                  {hw.User?.UserName || 'Unknown'}
-                </p>
-
-                <div className="mt-3">
-                  <h3 className="font-semibold text-gray-700 mb-1">Homework</h3>
-                  {hw.HomeWork?.HomeWork ? (
-                    <p className="text-gray-600">{hw.HomeWork.HomeWork}</p>
-                  ) : (
-                    <p className="text-gray-500 italic">No homework assigned</p>
-                  )}
-
-                  {hw.HomeWork?.ClassWork && (
-                    <>
-                      <h3 className="font-semibold text-gray-700 mt-2 mb-1">
-                        Classwork
-                      </h3>
-                      <p className="text-gray-600">{hw.HomeWork.ClassWork}</p>
-                    </>
-                  )}
-                </div>
-
-
-                <div className="mt-4">
-                  <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">
-                    Homework ID: {hw.HSTID}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )} */}
-        {/* Header Filters */}
-
+        {/* Range Filters */}
         <div className="flex justify-center gap-2 mb-6 shadow-md rounded-sm p-2 bg-white">
-          <button
-            className="px-4 py-1.5 rounded-full text-sm font-semibold
-               text-gray-600 hover:bg-gray-100 transition border"
-          >
-            1D
-          </button>
-
-          <button
-            className="px-4 py-1.5 rounded-full text-sm font-semibold
-               text-gray-600 hover:bg-gray-100 transition border"
-          >
-            10D
-          </button>
-
-          <button
-            className="px-4 py-1.5 rounded-full text-sm font-semibold
-               bg-blue-600 text-white shadow-sm border"
-          >
-            1M
-          </button>
-
-          <button
-            className="px-4 py-1.5 rounded-full text-sm font-semibold
-               text-gray-600 hover:bg-gray-100 transition border"
-          >
-            6M
-          </button>
-
-          <button
-            className="px-4 py-1.5 rounded-full text-sm font-semibold
-               text-gray-600 hover:bg-gray-100 transition border"
-          >
-            1Y
-          </button>
+          {rangeButtons.map((button) => (
+            <button
+              key={button.key}
+              onClick={() => handleRangeChange(button.key)}
+              className={`
+                px-4 py-1.5 rounded-full text-sm font-semibold
+                transition border
+                ${
+                  range === button.key
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }
+              `}
+            >
+              {button.label}
+            </button>
+          ))}
         </div>
 
+        {/* Stats Cards */}
         <div className="grid grid-cols-4 gap-2 my-5">
           {stats.map((item, index) => (
             <div
               key={index}
               className={`
-        rounded-xl shadow-sm p-2 flex flex-col items-center justify-center
-        text-white ${item.color} md:bg-white md:text-gray-800 md:shadow-md /* Desktop white */
-      `}
+                rounded-xl shadow-sm p-2 flex flex-col items-center justify-center
+                text-white ${item.bgColor}  md:text-gray-800
+              `}
             >
               {/* Circle */}
               <span
                 className={`
-        h-12 w-12 flex items-center justify-center rounded-full
-        ${item.circle} text-white font-semibold
-      `}
+                  h-12 w-12 flex items-center justify-center rounded-full
+                  ${item.circle} text-white font-semibold
+                `}
               >
                 {item.value}
               </span>
@@ -224,17 +120,155 @@ const HomeWorkHistoryUserPanel = () => {
               {/* Label */}
               <span
                 className="
-        mt-2 text-xs font-medium text-white
-        md:text-gray-700
-        text-center
-      "
+                  mt-2 text-xs font-medium text-white
+                  md:text-gray-700
+                  text-center
+                "
               >
                 {item.label}
               </span>
             </div>
           ))}
         </div>
-        <HomeWorkHistory />
+
+        {/* Chart */}
+        <div className="my-3">
+          <HomeworkAreaChart
+            subjects={subjects}
+            dates={dates}
+            historyData={historyData}
+          />
+        </div>
+
+        {/* Homework History Grid */}
+        {isLoading ? (
+          <div className="text-center py-10">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-gray-600">Loading homework history...</p>
+          </div>
+        ) : subjects.length > 0 && dates.length > 0 ? (
+          <div className="bg-sky-100 rounded-xl overflow-x-auto max-w-full">
+            <div className="grid grid-flow-col auto-cols-[48px] w-fit">
+              {/* Date Column */}
+              <div className="min-w-[48px]">
+                <div
+                  className={`
+        overflow-hidden w-full flex items-center justify-center bg-white h-[150px] border
+      `}
+                >
+                  <span
+                    className="text-black text-[12px] font-semibold
+               [writing-mode:vertical-rl] rotate-180"
+                  >
+                    তারিখ-মাস
+                  </span>
+                </div>
+                {dates.map((d) => (
+                  <div
+                    key={d}
+                    className="h-10 w-full flex items-center justify-center
+                     text-xs font-semibold text-gray-700 border border-white "
+                  >
+                    {d}
+                  </div>
+                ))}
+              </div>
+
+              {subjects.map((subject, index) => (
+                <div key={subject.id} className="min-w-[48px] text-center">
+                  {/* Header */}
+                  <div
+                    className="group block rounded-xl border
+  hover:shadow-md"
+                  >
+                    <div
+                      className="
+      overflow-hidden w-full flex items-center justify-center
+      bg-white h-[150px] border
+    "
+                    >
+                      <span
+                        className="
+        text-black text-[12px] font-semibold
+        [writing-mode:vertical-rl] rotate-180
+      "
+                      >
+                        {subject.name}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* <div
+                    className={`
+        overflow-hidden w-full flex items-center justify-center bg-white h-[150px] border
+      `}
+                  >
+                    <span
+                      className="text-black text-[12px] font-semibold
+               [writing-mode:vertical-rl] rotate-180"
+                    >
+                      {subject.name}
+                    </span>
+                  </div> */}
+
+                  {/* Cells */}
+                  {historyData[subject.name]?.map((status, i) => {
+                    let bgColor = '';
+                    let symbol = '';
+
+                    if (status === 1) {
+                      bgColor = 'bg-green-500';
+                      symbol = '✓';
+                    } else if (status === 2) {
+                      bgColor = 'bg-red-500';
+                      symbol = '✕';
+                    } else if (status === 3) {
+                      bgColor = 'bg-yellow-400';
+                      symbol = '●';
+                    }
+
+                    return (
+                      <div
+                        key={i}
+                        className="h-10 w-full flex items-center justify-center border border-white"
+                      >
+                        {status ? (
+                          <div
+                            className={`w-4 h-4 ${bgColor} rounded flex items-center justify-center text-[10px] text-white font-bold`}
+                          >
+                            {symbol}
+                          </div>
+                        ) : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-10 bg-white rounded-lg shadow">
+            <div className="text-gray-400 mb-2">
+              <svg
+                className="w-16 h-16 mx-auto"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <p className="text-gray-600">No homework history found</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Select a different session or range
+            </p>
+          </div>
+        )}
       </div>
     </FormProvider>
   );

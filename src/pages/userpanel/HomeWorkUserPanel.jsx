@@ -192,9 +192,9 @@ const HomeWorkUserPanel = () => {
     <FormProvider {...methods}>
       <div className="max-w-md mx-auto p-4 space-y-2 mb-20">
         <div className="flex justify-center items-center">
-          {/* <Link to={`/${schoolid}/dashboard/home-work-history`}>
+          <Link to={`/${schoolid}/dashboard/home-work-history`}>
             <Button>History</Button>
-          </Link> */}
+          </Link>
         </div>
         {/* Header */}
         <div className="flex flex-col justify-between items-center gap-2 mb-4">

@@ -1,5 +1,5 @@
 import 'flatpickr/dist/themes/light.css';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -10,18 +10,19 @@ import AdmissionForm from '../components/Forms/AdmissionForm';
 import DefaultInput from '../components/Forms/DefaultInput';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import Loading from '../components/Loading/Loading';
+import DefaultPagination from '../components/Pagination/DefaultPagination';
 import SortableTable from '../components/Tables/SortableTable';
 import { permissionsDataList } from '../Data/permissions';
 import { setPageName } from '../features/auth/authSlice';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
-import {
-  useGetFilteredAdmissionStudentsQuery
-} from '../features/student/studentQuerySlice';
+import { useGetFilteredAdmissionStudentsQuery } from '../features/student/studentQuerySlice';
 import { fetchUserOnlyStudentData } from '../features/student/studentSlice';
 import { ViewPermission } from '../Routes/ViewPermission';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
+
+const PAGE_SIZE = 10;
 
 const AddStudent = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -30,6 +31,7 @@ const AddStudent = ({ pageTitle }) => {
   const [FilterID, SessionID] = watch(['FilterID', 'SessionID']);
   const [selectedImage, setSelectedImage] = useState(null);
   const [currentFilters, setCurrentFilters] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
 
   const location = useLocation();
   const dispatch = useDispatch();
@@ -50,7 +52,7 @@ const AddStudent = ({ pageTitle }) => {
         Mobile1: '',
         SessionID: null,
         SubClassID: null,
-        AdmissionSerial: ''
+        AdmissionSerial: '',
       });
     }
   }, [FilterID]);
@@ -59,13 +61,11 @@ const AddStudent = ({ pageTitle }) => {
     data: filteredStudents,
     isLoading,
     isError,
-    refetch
+    refetch,
   } = useGetFilteredAdmissionStudentsQuery(currentFilters, {
     skip: !currentFilters.FilterID,
-    refetchOnMountOrArgChange: true
+    refetchOnMountOrArgChange: true,
   });
-
-
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -106,7 +106,7 @@ const AddStudent = ({ pageTitle }) => {
       Mobile1: formValues.Mobile1 || '',
       SessionID: formValues.SessionID || null,
       SubClassID: formValues.SubClassID || null,
-      AdmissionSerial: formValues.AdmissionSerial || ''
+      AdmissionSerial: formValues.AdmissionSerial || '',
     });
   };
 
@@ -119,11 +119,11 @@ const AddStudent = ({ pageTitle }) => {
       Mobile1: '',
       SessionID: null,
       SubClassID: null,
-      AdmissionSerial: ''
+      AdmissionSerial: '',
     });
     setCurrentFilters({});
   };
-
+  const usersData = filteredStudents?.data || [];
   const exportToCSV = () => {
     if (selectedDateRange.length !== 2) {
       alert('Please select a valid date range before exporting.');
@@ -193,7 +193,12 @@ const AddStudent = ({ pageTitle }) => {
     utils.book_append_sheet(wb, ws, 'Students');
     writeFile(wb, 'students_list.csv', { bookType: 'csv' });
   };
-
+  // 🔹 Pagination
+  const totalPages = Math.ceil(usersData.length / PAGE_SIZE);
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return usersData.slice(start, start + PAGE_SIZE);
+  }, [usersData, currentPage]);
   const columnsAdmitedStudent = [
     {
       title: 'Student Id',
@@ -462,10 +467,7 @@ const AddStudent = ({ pageTitle }) => {
               )}
 
               {/* Search Button */}
-              <Button
-                onClick={handleSearch}
-                disabled={!FilterID}
-              >
+              <Button onClick={handleSearch} disabled={!FilterID}>
                 {translate('Search')}
               </Button>
             </div>
@@ -481,10 +483,19 @@ const AddStudent = ({ pageTitle }) => {
             </div>
 
             {filteredStudents?.data && filteredStudents?.data.length > 0 ? (
-              <SortableTable
-                columns={columnsAdmitedStudent}
-                data={filteredStudents.data}
-              />
+              <div className="">
+                <SortableTable
+                  columns={columnsAdmitedStudent}
+                  data={paginatedData}
+                />
+                <div className="flex justify-center mt-4">
+                  <DefaultPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                  />
+                </div>
+              </div>
             ) : currentFilters.FilterID ? (
               <div className="text-center py-4">
                 {translate('No data found')}

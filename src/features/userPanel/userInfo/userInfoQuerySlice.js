@@ -119,9 +119,9 @@ export const userPanelUserInfo = createApi({
       providesTags: ['HomeWorks'],
     }),
     getHomeWorkStudyTracksHistoryUserPanel: builder.query({
-      query: ({ SessionID, DateValue }) => ({
+      query: ({ SessionID, range }) => ({
         url: 'home_work_study_track_history',
-        params: { SessionID, DateValue },
+        params: { SessionID, range },
       }),
       providesTags: ['HomeWorkStudyTracks'],
     }),

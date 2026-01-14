@@ -138,27 +138,40 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
   // }, [SubClassID, subjectOptions, homeWorks]);
 
   /* -------------------- SUBMIT -------------------- */
-  const onSubmit = async (data) => {
-    try {
-      if (id) {
-        await updateHomeWork({ id, ...data }).unwrap();
-        Swal.fire({
-          icon: 'success',
-          title: translate('Updated successfully'),
-        });
-      } else {
-        await createHomeWork(data).unwrap();
-        console.log(data, "data");
-        Swal.fire({
-          icon: 'success',
-          title: translate('Created successfully'),
-        });
-      }
-      hideModal();
-    } catch {
-      Swal.fire({ icon: 'error', title: translate('Something went wrong') });
+const onSubmit = async (data) => {
+  try {
+    if (id) {
+      await updateHomeWork({ id, ...data }).unwrap();
+      Swal.fire({
+        icon: 'success',
+        title: translate('Updated successfully'),
+      });
+    } else {
+      const res = await createHomeWork(data).unwrap();
+      console.log(data, 'data');
+      console.log(res, 'res');
+      Swal.fire({
+        icon: 'success',
+        title: translate('Created successfully'),
+      });
     }
-  };
+    hideModal();
+  } catch (error) {
+    // Check if error has a data.message from backend
+    let message = translate('Something went wrong'); // default
+    if (error?.data?.error) {
+      message = error.data.error; // use backend message
+    } else if (error?.message) {
+      message = error.message; // fallback
+    }
+
+    Swal.fire({
+      icon: 'error',
+      title: message,
+    });
+  }
+};
+
 
   return (
     <FormProvider {...methods}>
