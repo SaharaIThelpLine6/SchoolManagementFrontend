@@ -21,6 +21,7 @@ import {
   useDeleteHomeWorkMutation,
   useGetHomeWorksQuery,
 } from '../features/student/studentQuerySlice';
+import EditButton from '../components/Button/EditButton';
 
 const PAGE_SIZE = 10;
 
@@ -129,7 +130,7 @@ const HomWork = ({ pageTitle }) => {
       hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          {/* <EditButton onClick={() => handleEditOpenModal(row.HWID)} /> */}
+          <EditButton onClick={() => handleEditOpenModal(row.HWID)} />
           <DeleteButton onClick={() => handleDelete(row.HWID)} />
           <ViewButton onClick={() => handleViewOpenModal(row.HWID)} />
           <CopyButton

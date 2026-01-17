@@ -19,7 +19,7 @@ import {
 } from '../../features/student/studentQuerySlice';
 import {
   useGetLoginTeacherInfoQuery,
-  useGetTeachersInfoQuery
+  useGetTeachersInfoQuery,
 } from '../../features/teachers/teachersSlice';
 
 import { hideModal } from '../../utils/ModalControlar';
@@ -122,7 +122,17 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
 
       return () => clearTimeout(timeoutId);
     }
-  }, [id, homeWorks?.SessionID, homeWorks?.SubClassID, homeWorks?.UserID, homeWorks?.SubjectID, homeWorks?.ClassWork, homeWorks?.HomeWork, homeWorks?.notDoneStudents, setValue]);
+  }, [
+    id,
+    homeWorks?.SessionID,
+    homeWorks?.SubClassID,
+    homeWorks?.UserID,
+    homeWorks?.SubjectID,
+    homeWorks?.ClassWork,
+    homeWorks?.HomeWork,
+    homeWorks?.notDoneStudents,
+    setValue,
+  ]);
 
   /* -------------------- RESET FORM WHEN ID CHANGES -------------------- */
   useEffect(() => {
@@ -149,48 +159,51 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
   }, [SubClassID, id, homeWorks?.SubClassID, setValue]);
 
   /* -------------------- SUBMIT -------------------- */
-  const onSubmit = useCallback(async (data) => {
-    try {
-      // Prepare the data with proper structure
-      const submissionData = {
-        ...data,
-        SessionID: Number(data.SessionID),
-        SubClassID: Number(data.SubClassID),
-        SubjectID: Number(data.SubjectID),
-        UserID: Number(data.UserID),
-        notDoneStudents: Array.isArray(data.notDoneStudents)
-          ? data.notDoneStudents.map(id => Number(id))
-          : [],
-      };
+  const onSubmit = useCallback(
+    async (data) => {
+      try {
+        // Prepare the data with proper structure
+        const submissionData = {
+          ...data,
+          SessionID: Number(data.SessionID),
+          SubClassID: Number(data.SubClassID),
+          SubjectID: Number(data.SubjectID),
+          UserID: Number(data.UserID),
+          notDoneStudents: Array.isArray(data.notDoneStudents)
+            ? data.notDoneStudents.map((id) => Number(id))
+            : [],
+        };
 
-      if (id) {
-        await updateHomeWork({ id, ...submissionData }).unwrap();
+        if (id) {
+          await updateHomeWork({ id, ...submissionData }).unwrap();
+          Swal.fire({
+            icon: 'success',
+            title: translate('Updated successfully'),
+          });
+        } else {
+          await createHomeWork(submissionData).unwrap();
+          Swal.fire({
+            icon: 'success',
+            title: translate('Created successfully'),
+          });
+        }
+        hideModal();
+      } catch (error) {
+        let message = translate('Something went wrong');
+        if (error?.data?.error) {
+          message = error.data.error;
+        } else if (error?.message) {
+          message = error.message;
+        }
+
         Swal.fire({
-          icon: 'success',
-          title: translate('Updated successfully'),
-        });
-      } else {
-        await createHomeWork(submissionData).unwrap();
-        Swal.fire({
-          icon: 'success',
-          title: translate('Created successfully'),
+          icon: 'error',
+          title: message,
         });
       }
-      hideModal();
-    } catch (error) {
-      let message = translate('Something went wrong');
-      if (error?.data?.error) {
-        message = error.data.error;
-      } else if (error?.message) {
-        message = error.message;
-      }
-
-      Swal.fire({
-        icon: 'error',
-        title: message,
-      });
-    }
-  }, [id, updateHomeWork, createHomeWork, translate]);
+    },
+    [id, updateHomeWork, createHomeWork, translate]
+  );
 
   return (
     <FormProvider {...methods}>
@@ -210,6 +223,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
             options={subClassData ?? []}
             valueField="SubClassID"
             nameField="SubClass"
+            disabled={id ? true : false}
           />
 
           <DefaultSelect
@@ -233,17 +247,19 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
 
           <Textarea registerKey="HomeWork" label="Home Work" />
 
-          <div className="sm:col-span-2">
-            <SearchableMultiStudentSelect
-              label="যে শিক্ষার্থীর পড়া হয়নি:"
-              registerKey="notDoneStudents"
-              options={studentOptions}
-              valueField="UserID"
-              nameField="StudentName"
-              unicode
-              disabled={!SubClassID || !SessionID}
-            />
-          </div>
+          {!id && (
+            <div className="sm:col-span-2">
+              <SearchableMultiStudentSelect
+                label="যে শিক্ষার্থীর পড়া হয়নি:"
+                registerKey="notDoneStudents"
+                options={studentOptions}
+                valueField="UserID"
+                nameField="StudentName"
+                unicode
+                disabled={!SubClassID || !SessionID}
+              />
+            </div>
+          )}
         </div>
 
         <Button

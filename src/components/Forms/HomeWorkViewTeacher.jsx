@@ -86,7 +86,7 @@ const HomeWorkViewTeacher = ({ id }) => {
           </div> */}
 
           {/* Email */}
-          <div className="flex items-center gap-2 text-sm text-gray-600">
+          {/* <div className="flex items-center gap-2 text-sm text-gray-600">
             <svg
               className="w-4 h-4 text-purple-500"
               fill="none"
@@ -102,7 +102,7 @@ const HomeWorkViewTeacher = ({ id }) => {
             </svg>
 
             <span>{data?.User?.Email || 'N/A'}</span>
-          </div>
+          </div> */}
         </div>
 
         {/* Right Date */}
