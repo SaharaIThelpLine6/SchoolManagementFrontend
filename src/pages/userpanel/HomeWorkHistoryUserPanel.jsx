@@ -14,7 +14,7 @@ const HomeWorkHistoryUserPanel = () => {
   const methods = useForm();
   const { setValue, watch } = methods;
   const { schoolid } = useParams();
-  const [range, setRange] = useState('10D'); // Default range
+  const [range, setRange] = useState('1M'); // Default range
 
   const { data: sessionData = [] } = useGetSessionUserPanelQuery();
   const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
@@ -132,12 +132,8 @@ const HomeWorkHistoryUserPanel = () => {
         </div>
 
         {/* Chart */}
-        <div className="my-3">
-          <HomeworkAreaChart
-            subjects={subjects}
-            dates={dates}
-            historyData={historyData}
-          />
+        <div className="">
+          <HomeworkAreaChart data={responseData} />
         </div>
 
         {/* Homework History Grid */}
@@ -148,9 +144,9 @@ const HomeWorkHistoryUserPanel = () => {
           </div>
         ) : subjects.length > 0 && dates.length > 0 ? (
           <div className="bg-sky-100 rounded-xl overflow-x-auto max-w-full">
-            <div className="grid grid-flow-col auto-cols-[48px] w-fit">
+            <div className="grid grid-flow-col auto-cols-[28px] w-fit">
               {/* Date Column */}
-              <div className="min-w-[48px]">
+              <div className="min-w-[28px]">
                 <div
                   className={`
         overflow-hidden w-full flex items-center justify-center bg-white h-[150px] border
@@ -175,7 +171,7 @@ const HomeWorkHistoryUserPanel = () => {
               </div>
 
               {subjects.map((subject, index) => (
-                <div key={subject.id} className="min-w-[48px] text-center">
+                <div key={subject.id} className="min-w-[28px] text-center">
                   {/* Header */}
                   <div
                     className="group block rounded-xl border
@@ -223,8 +219,11 @@ const HomeWorkHistoryUserPanel = () => {
                       bgColor = 'bg-red-500';
                       symbol = '✕';
                     } else if (status === 3) {
-                      bgColor = 'bg-yellow-400';
+                      bgColor = 'bg-blue-400';
                       symbol = '●';
+                    } else if (status === 4) {
+                      bgColor = 'bg-yellow-400';
+                      symbol = '✕';
                     }
 
                     return (

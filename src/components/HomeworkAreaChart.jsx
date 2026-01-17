@@ -1,109 +1,131 @@
-// components/HomeworkAreaChart.jsx
-import Chart from 'react-apexcharts';
+import PropTypes from 'prop-types';
+import ReactApexChart from 'react-apexcharts';
 
-const HomeworkAreaChart = ({ subjects = [], dates = [], historyData = {} }) => {
-  // =========================
-  // 1️⃣ Build chart data
-  // =========================
-  const chartData = dates.map((date, i) => {
-    let completed = 0;
-    let pending = 0;
+const colors = ['#4CAF50', '#2196F3', '#F44336']; // Green, Blue, Red
 
-    subjects.forEach((subject) => {
-      const status = historyData[subject.name]?.[i];
-      if (status === 1) completed++;
-      else if (status === 2) pending++;
-    });
+const HomeworkAreaChart = (props) => {
+  // ✅ Use default parameters with proper fallback structure
+  const {
+    data = {
+      chartData: {
+        completed: [],
+        pending: [],
+        classNotDone: [],
+        categories: []
+      }
+    }
+  } = props || {};
 
-    return {
-      x: `2026-${date.replace('.', '-')}`, // example: 2026-1-10
-      completed,
-      pending,
-    };
-  });
+  // ✅ Safely extract chartData with fallback
+  const chartData = data?.chartData || {
+    completed: [],
+    pending: [],
+    classNotDone: [],
+    categories: []
+  };
 
-  // =========================
-  // 2️⃣ Prepare series (only two series)
-  // =========================
+  // Use safe extraction for all arrays
+  const completed = Array.isArray(chartData.completed) ? chartData.completed : [];
+  const pending = Array.isArray(chartData.pending) ? chartData.pending : [];
+  const classNotDone = Array.isArray(chartData.classNotDone) ? chartData.classNotDone : [];
+  const categories = Array.isArray(chartData.categories) ? chartData.categories : [];
+
+  // Provide default categories if empty
+  const defaultCategories = categories.length > 0
+    ? categories
+    : ['কোন তথ্য নেই'];
+
+  // Ensure we have at least one data point for each series
   const series = [
     {
-      name: 'পড়া দিয়েছে',
-      data: chartData.map((d) => d.completed),
+      name: 'পড়া দিয়েছে',
+      data: completed.length > 0 ? completed : defaultCategories.map(() => 0)
     },
     {
-      name: 'পড়া দেয়নি',
-      data: chartData.map((d) => d.pending),
+      name: 'পড়া দেয়নি',
+      data: pending.length > 0 ? pending : defaultCategories.map(() => 0)
+    },
+    {
+      name: 'ক্লাস করেনি',
+      data: classNotDone.length > 0 ? classNotDone : defaultCategories.map(() => 0)
     },
   ];
 
-  // =========================
-  // 3️⃣ Apex chart options
-  // =========================
   const options = {
     chart: {
-      type: 'area',
-      stacked: true,
+      type: 'bar',
+      stacked: false,
+      height: 350,
       toolbar: { show: false },
-      zoom: { enabled: false },
     },
-    dataLabels: { enabled: false },
-    stroke: { curve: 'smooth', width: 2 },
-    fill: {
-      type: 'gradient',
-      gradient: { opacityFrom: 0.6, opacityTo: 0.15 },
-    },
-    colors: ['#22c55e', '#ef4444'], // Green and Red only
-    xaxis: {
-      type: 'datetime',
-      categories: chartData.map((d) => d.x),
-      labels: {
-        format: 'dd MMM',
-        datetimeFormatter: {
-          year: 'yyyy',
-          month: 'MMM',
-          day: 'dd',
-          hour: 'HH:mm'
-        }
+    plotOptions: {
+      bar: {
+        horizontal: false,
+        columnWidth: '50%',
+        borderRadius: 4,
       },
+    },
+    colors: colors,
+    xaxis: {
+      categories: defaultCategories,
+      labels: {
+        rotate: -45,
+        style: { fontSize: '12px' },
+      },
+      labels: { show: false },
     },
     yaxis: {
+      title: { text: 'ক্লাস সংখ্যা' },
       min: 0,
-      tickAmount: subjects.length,
-      title: { text: 'মোট বিষয়' },
-      labels: {
-        formatter: (val) => Math.round(val)
-      }
+      forceNiceScale: true,
     },
     tooltip: {
-      shared: true,
-      intersect: false,
-      x: {
-        format: 'dd MMM yyyy'
-      },
       y: {
-        formatter: (value, { seriesIndex }) => {
-          if (seriesIndex === 0) return `${value} জন পড়া দিয়েছে`;
-          if (seriesIndex === 1) return `${value} জন পড়া দেয়নি`;
-          return `${value}`;
-        },
+        formatter: (val) => `${val} ক্লাস`,
       },
     },
+    dataLabels: { enabled: false },
     legend: {
-      position: 'top',
-      horizontalAlign: 'center'
+      show: false,
+      // position: 'top',
+      // horizontalAlign: 'center'
     },
-    grid: { strokeDashArray: 4 },
+    grid: {
+      borderColor: '#e7e7e7',
+      strokeDashArray: 4,
+    },
+    noData: {
+      text: 'কোন তথ্য নেই',
+      align: 'center',
+      verticalAlign: 'middle',
+      style: {
+        color: '#666',
+        fontSize: '16px',
+        fontFamily: 'Arial, sans-serif',
+      },
+    },
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-4">
-      <h2 className="text-lg font-semibold text-gray-800 mb-3">
-        📊 সকল বিষয়ের হোমওয়ার্ক অগ্রগতি
-      </h2>
-
-      <Chart options={options} series={series} type="area" height={300} />
-    </div>
+    <ReactApexChart
+      options={options}
+      series={series}
+      type="bar"
+      height={350}
+    />
   );
+};
+
+// ✅ Keep PropTypes for development validation
+HomeworkAreaChart.propTypes = {
+  data: PropTypes.shape({
+    chartData: PropTypes.shape({
+      completed: PropTypes.arrayOf(PropTypes.number),
+      pending: PropTypes.arrayOf(PropTypes.number),
+      classNotDone: PropTypes.arrayOf(PropTypes.number),
+      categories: PropTypes.arrayOf(PropTypes.string),
+    }),
+  }),
 };
 
 export default HomeworkAreaChart;

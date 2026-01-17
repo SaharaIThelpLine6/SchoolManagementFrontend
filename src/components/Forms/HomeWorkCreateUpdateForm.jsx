@@ -49,6 +49,8 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
   const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
 
   const { data: teacherData = [] } = useGetTeacherInfoQuery();
+
+  console.log(teacherData, 'teacherData');
   const { data: academicSubjectsData = [] } = useGetAcademicSubjectsQuery();
   const { data: studentsBySubClassID = [] } = useGetStudentsBySubClassIDQuery(
     { SessionID, SubClassID },
