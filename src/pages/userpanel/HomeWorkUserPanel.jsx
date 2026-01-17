@@ -124,7 +124,7 @@ const HomeworkItem = ({
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-700">
                 <span className="font-semibold">ক্লাস নিয়েছেন:</span>{' '}
-                {homework?.Teacher.User.UserName}
+                {homework.User.UserName}
               </p>
 
               <Button onClick={() => handleViewTeacherDetials(homework?.HWID)}>

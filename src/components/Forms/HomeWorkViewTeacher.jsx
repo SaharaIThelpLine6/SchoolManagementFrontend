@@ -59,7 +59,7 @@ const HomeWorkViewTeacher = ({ id }) => {
             </svg>
             <div>
               <div className="font-semibold text-gray-800">
-                {data.Teacher?.User?.UserName || 'Unknown'}
+                {data?.User?.UserName || 'Unknown'}
               </div>
             </div>
           </div>
@@ -101,7 +101,7 @@ const HomeWorkViewTeacher = ({ id }) => {
               />
             </svg>
 
-            <span>{data.Teacher?.User?.Email || 'N/A'}</span>
+            <span>{data?.User?.Email || 'N/A'}</span>
           </div>
         </div>
 

@@ -140,8 +140,8 @@ const HomWork = ({ pageTitle }) => {
                 Class: ${row.SubClass.SubClass}
                 Session: ${row.Session.SessionName}
                 Subject: ${row.Subject.SubjectName}
-                Teacher: ${row.Teacher.User.UserName}
-                Mobile: ${row.Teacher.User.Mobile1}
+                Teacher: ${row.User.UserName}
+                Mobile: ${row.User.Mobile1}
 
                 *Homework:*
                 ${row.HomeWork}
@@ -196,7 +196,7 @@ const HomWork = ({ pageTitle }) => {
       title: translate('Teacher'),
       field: 'TeacherID',
       hozAlign: 'center',
-      render: (row) => <p>{row.Teacher?.User?.UserName}</p>,
+      render: (row) => <p>{row?.User?.UserName}</p>,
     },
     {
       title: translate('Home Work'),

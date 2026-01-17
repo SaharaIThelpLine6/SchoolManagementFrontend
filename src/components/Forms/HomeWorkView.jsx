@@ -71,14 +71,14 @@ const HomeWorkView = ({ id }) => {
         <div>
           <div className="text-sm text-gray-500 mb-1">Teacher</div>
           <div className="font-medium text-gray-800">
-            {data.Teacher?.User?.UserName || 'Unknown'}
+            {data?.User?.UserName || 'Unknown'}
           </div>
           <div className="text-sm text-gray-600">
-            Mobile: {data.Teacher?.User?.Mobile1 || 'N/A'}{' '}
-            {data.Teacher?.User?.Mobile2 && `, ${data.Teacher.User.Mobile2}`}
+            Mobile: {data?.User?.Mobile1 || 'N/A'}{' '}
+            {data?.User?.Mobile2 && `, ${data.User.Mobile2}`}
           </div>
           <div className="text-sm text-gray-600">
-            Email: {data.Teacher?.User?.Email || 'N/A'}
+            Email: {data?.User?.Email || 'N/A'}
           </div>
         </div>
         <div className="text-sm text-gray-500">

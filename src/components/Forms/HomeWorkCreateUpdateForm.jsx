@@ -17,7 +17,10 @@ import {
   usePostHomeWorkMutation,
   usePutHomeWorkMutation,
 } from '../../features/student/studentQuerySlice';
-import { useGetLoginTeacherInfoQuery, useGetTeacherInfoQuery } from '../../features/teachers/teachersSlice';
+import {
+  useGetLoginTeacherInfoQuery,
+  useGetTeacherInfoQuery,
+} from '../../features/teachers/teachersSlice';
 
 import { hideModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
@@ -31,15 +34,17 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
       SessionID: '',
       SubClassID: '',
       SubjectID: '',
-      TIID: '',
+      UserID: '',
       ClassWork: '',
       HomeWork: '',
+      notDoneStudents: [],
     },
   });
 
   const { reset, watch, setValue } = methods;
   const SubClassID = Number(watch('SubClassID'));
   const SessionID = Number(watch('SessionID'));
+  const SubjectID = Number(watch('SubjectID'));
 
   const initializedRef = useRef(false);
 
@@ -54,7 +59,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
   const { data: academicSubjectsData = [] } = useGetAcademicSubjectsQuery();
   const { data: studentsBySubClassID = [] } = useGetStudentsBySubClassIDQuery(
     { SessionID, SubClassID },
-    { skip: !SubClassID }
+    { skip: !SubClassID || !SessionID }
   );
   const studentOptions = (studentsBySubClassID || []).map((item) => ({
     UserID: item.UserID,
@@ -76,19 +81,16 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
       }));
   }, [academicSubjectsData, SubClassID]);
 
-  /* -------------------- TEACHER OPTIONS -------------------- */
-  const teacherOptions = useMemo(
-    () =>
-      teacherData.map((t) => ({
-        TIID: t.TIID,
-        TeacherName: t.User?.UserName,
-      })),
-    [teacherData]
-  );
+  /* -------------------- TEACHER OPTIONS & INITIAL VALUES -------------------- */
   useEffect(() => {
-    setValue('SessionID', activeSession?.SessionID || '');
-    setValue('TIID', loginTeacherData?.TIID || '');
+    if (activeSession?.SessionID) {
+      setValue('SessionID', activeSession.SessionID);
+    }
+    if (loginTeacherData?.[0]?.UserID) {
+      setValue('UserID', loginTeacherData[0].UserID);
+    }
   }, [activeSession, loginTeacherData, setValue]);
+
   /* -------------------- EDIT MODE INIT -------------------- */
   useEffect(() => {
     if (!id || !homeWorks || initializedRef.current) return;
@@ -97,83 +99,96 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
     if (
       homeWorks.SessionID &&
       homeWorks.SubClassID &&
-      homeWorks.TIID &&
+      homeWorks.UserID &&
       homeWorks.SubjectID
     ) {
-      // First set SessionID, SubClassID, and TIID
+      // Set initial values
       setValue('SessionID', homeWorks.SessionID);
       setValue('SubClassID', homeWorks.SubClassID);
-      setValue('TIID', homeWorks.TIID);
+      setValue('UserID', homeWorks.UserID);
 
-      // Now we need to wait for subjectOptions to be ready
-      // We'll use a timeout to allow React to update the state
+      // We need to set SubjectID after a small delay to ensure
+      // subjectOptions are calculated based on the new SubClassID
       const timeoutId = setTimeout(() => {
-        // Check if subjectOptions has the current subject
-        const currentSubjectExists = subjectOptions.some(
-          (subject) => Number(subject.SubjectID) === Number(homeWorks.SubjectID)
-        );
-
-        if (currentSubjectExists) {
-          setValue('SubjectID', homeWorks.SubjectID);
-        } else {
-          // If subject not found, set to empty and show error
-          setValue('SubjectID', '');
-          console.warn('Subject not found in current SubClass');
-        }
-
-        // Set textareas
+        setValue('SubjectID', homeWorks.SubjectID);
         setValue('ClassWork', homeWorks.ClassWork || '');
         setValue('HomeWork', homeWorks.HomeWork || '');
+        setValue('notDoneStudents', homeWorks.notDoneStudents || []);
 
         initializedRef.current = true;
-      }, 100);
+      }, 0);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [id, homeWorks, setValue, subjectOptions]);
+  }, [id, homeWorks, setValue]); // Removed subjectOptions from dependencies
 
-  /* -------------------- EFFECT TO DEBUG -------------------- */
-  // useEffect(() => {
-  //   console.log('Current SubClassID:', SubClassID);
-  //   console.log('Subject Options:', subjectOptions);
-  //   console.log('Homeworks data:', homeWorks);
-  // }, [SubClassID, subjectOptions, homeWorks]);
+  /* -------------------- RESET FORM WHEN ID CHANGES -------------------- */
+  useEffect(() => {
+    if (!id) {
+      reset({
+        SessionID: activeSession?.SessionID || '',
+        SubClassID: '',
+        SubjectID: '',
+        UserID: loginTeacherData?.[0]?.UserID || '',
+        ClassWork: '',
+        HomeWork: '',
+        notDoneStudents: [],
+      });
+      initializedRef.current = false;
+    }
+  }, [id, reset, activeSession, loginTeacherData]);
+
+  /* -------------------- HANDLE SUBJECT CHANGE WHEN SUBCLASS CHANGES IN EDIT MODE -------------------- */
+  useEffect(() => {
+    if (id && homeWorks && SubClassID && SubClassID !== homeWorks.SubClassID) {
+      // If SubClassID changed in edit mode, reset SubjectID
+      setValue('SubjectID', '');
+    }
+  }, [SubClassID, id, homeWorks, setValue]);
 
   /* -------------------- SUBMIT -------------------- */
-const onSubmit = async (data) => {
-  try {
-    if (id) {
-      await updateHomeWork({ id, ...data }).unwrap();
+  const onSubmit = async (data) => {
+    try {
+      // Prepare the data with proper structure
+      const submissionData = {
+        ...data,
+        SessionID: Number(data.SessionID),
+        SubClassID: Number(data.SubClassID),
+        SubjectID: Number(data.SubjectID),
+        UserID: Number(data.UserID),
+        notDoneStudents: Array.isArray(data.notDoneStudents)
+          ? data.notDoneStudents.map(id => Number(id))
+          : [],
+      };
+
+      if (id) {
+        await updateHomeWork({ id, ...submissionData }).unwrap();
+        Swal.fire({
+          icon: 'success',
+          title: translate('Updated successfully'),
+        });
+      } else {
+        await createHomeWork(submissionData).unwrap();
+        Swal.fire({
+          icon: 'success',
+          title: translate('Created successfully'),
+        });
+      }
+      hideModal();
+    } catch (error) {
+      let message = translate('Something went wrong');
+      if (error?.data?.error) {
+        message = error.data.error;
+      } else if (error?.message) {
+        message = error.message;
+      }
+
       Swal.fire({
-        icon: 'success',
-        title: translate('Updated successfully'),
-      });
-    } else {
-      const res = await createHomeWork(data).unwrap();
-      console.log(data, 'data');
-      console.log(res, 'res');
-      Swal.fire({
-        icon: 'success',
-        title: translate('Created successfully'),
+        icon: 'error',
+        title: message,
       });
     }
-    hideModal();
-  } catch (error) {
-    // Check if error has a data.message from backend
-    let message = translate('Something went wrong'); // default
-    if (error?.data?.error) {
-      message = error.data.error; // use backend message
-    } else if (error?.message) {
-      message = error.message; // fallback
-    }
-
-    Swal.fire({
-      icon: 'error',
-      title: message,
-    });
-  }
-};
-
+  };
 
   return (
     <FormProvider {...methods}>
@@ -206,32 +221,28 @@ const onSubmit = async (data) => {
 
           <DefaultSelect
             label="Teacher"
-            registerKey="TIID"
-            options={teacherOptions ?? []}
-            valueField="TIID"
-            nameField="TeacherName"
-          />
-
-
-          <Textarea
-            registerKey="ClassWork"
-            label="Class Work"
-            defaultValue={homeWorks?.ClassWork ?? ''}
-          />
-          <Textarea
-            registerKey="HomeWork"
-            label="Home Work"
-            defaultValue={homeWorks?.HomeWork ?? ''}
-          />
-
-          <SearchableMultiStudentSelect
-            label="যে শিক্ষার্থীর পড়া হয়নি:"
-            registerKey="notDoneStudents"
-            options={studentOptions} // full student list
+            registerKey="UserID"
+            options={loginTeacherData ?? []}
             valueField="UserID"
-            nameField="StudentName"
-            unicode
+            nameField="UserName"
+            disabled={true}
           />
+
+          <Textarea registerKey="ClassWork" label="Class Work" />
+
+          <Textarea registerKey="HomeWork" label="Home Work" />
+
+          <div className="sm:col-span-2">
+            <SearchableMultiStudentSelect
+              label="যে শিক্ষার্থীর পড়া হয়নি:"
+              registerKey="notDoneStudents"
+              options={studentOptions}
+              valueField="UserID"
+              nameField="StudentName"
+              unicode
+              disabled={!SubClassID || !SessionID}
+            />
+          </div>
         </div>
 
         <Button
