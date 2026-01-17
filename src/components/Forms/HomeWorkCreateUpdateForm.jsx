@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
 
@@ -19,7 +19,7 @@ import {
 } from '../../features/student/studentQuerySlice';
 import {
   useGetLoginTeacherInfoQuery,
-  useGetTeacherInfoQuery,
+  useGetTeachersInfoQuery
 } from '../../features/teachers/teachersSlice';
 
 import { hideModal } from '../../utils/ModalControlar';
@@ -53,7 +53,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
   const { data: sessionData = [] } = useGetSessionsQuery();
   const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
 
-  const { data: teacherData = [] } = useGetTeacherInfoQuery();
+  const { data: teacherData = [] } = useGetTeachersInfoQuery();
   const { data: loginTeacherData = [] } = useGetLoginTeacherInfoQuery();
 
   const { data: academicSubjectsData = [] } = useGetAcademicSubjectsQuery();
@@ -61,10 +61,13 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
     { SessionID, SubClassID },
     { skip: !SubClassID || !SessionID }
   );
-  const studentOptions = (studentsBySubClassID || []).map((item) => ({
-    UserID: item.UserID,
-    StudentName: item.User?.UserName + '-' + item.User?.UserCode,
-  }));
+
+  const studentOptions = useMemo(() => {
+    return (studentsBySubClassID || []).map((item) => ({
+      UserID: item.UserID,
+      StudentName: item.User?.UserName + '-' + item.User?.UserCode,
+    }));
+  }, [studentsBySubClassID]);
 
   const [createHomeWork, { isLoading: isCreating }] = usePostHomeWorkMutation();
   const [updateHomeWork, { isLoading: isUpdating }] = usePutHomeWorkMutation();
@@ -89,7 +92,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
     if (loginTeacherData?.[0]?.UserID) {
       setValue('UserID', loginTeacherData[0].UserID);
     }
-  }, [activeSession, loginTeacherData, setValue]);
+  }, [activeSession?.SessionID, loginTeacherData?.[0]?.UserID, setValue]);
 
   /* -------------------- EDIT MODE INIT -------------------- */
   useEffect(() => {
@@ -107,8 +110,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
       setValue('SubClassID', homeWorks.SubClassID);
       setValue('UserID', homeWorks.UserID);
 
-      // We need to set SubjectID after a small delay to ensure
-      // subjectOptions are calculated based on the new SubClassID
+      // Use a timeout to ensure subjectOptions are calculated
       const timeoutId = setTimeout(() => {
         setValue('SubjectID', homeWorks.SubjectID);
         setValue('ClassWork', homeWorks.ClassWork || '');
@@ -116,11 +118,11 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
         setValue('notDoneStudents', homeWorks.notDoneStudents || []);
 
         initializedRef.current = true;
-      }, 0);
+      }, 10);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [id, homeWorks, setValue]); // Removed subjectOptions from dependencies
+  }, [id, homeWorks?.SessionID, homeWorks?.SubClassID, homeWorks?.UserID, homeWorks?.SubjectID, homeWorks?.ClassWork, homeWorks?.HomeWork, homeWorks?.notDoneStudents, setValue]);
 
   /* -------------------- RESET FORM WHEN ID CHANGES -------------------- */
   useEffect(() => {
@@ -136,7 +138,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
       });
       initializedRef.current = false;
     }
-  }, [id, reset, activeSession, loginTeacherData]);
+  }, [id, activeSession?.SessionID, loginTeacherData?.[0]?.UserID, reset]);
 
   /* -------------------- HANDLE SUBJECT CHANGE WHEN SUBCLASS CHANGES IN EDIT MODE -------------------- */
   useEffect(() => {
@@ -144,10 +146,10 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
       // If SubClassID changed in edit mode, reset SubjectID
       setValue('SubjectID', '');
     }
-  }, [SubClassID, id, homeWorks, setValue]);
+  }, [SubClassID, id, homeWorks?.SubClassID, setValue]);
 
   /* -------------------- SUBMIT -------------------- */
-  const onSubmit = async (data) => {
+  const onSubmit = useCallback(async (data) => {
     try {
       // Prepare the data with proper structure
       const submissionData = {
@@ -188,7 +190,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
         title: message,
       });
     }
-  };
+  }, [id, updateHomeWork, createHomeWork, translate]);
 
   return (
     <FormProvider {...methods}>
@@ -222,10 +224,9 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
           <DefaultSelect
             label="Teacher"
             registerKey="UserID"
-            options={loginTeacherData ?? []}
+            options={teacherData ?? []}
             valueField="UserID"
             nameField="UserName"
-            disabled={true}
           />
 
           <Textarea registerKey="ClassWork" label="Class Work" />
