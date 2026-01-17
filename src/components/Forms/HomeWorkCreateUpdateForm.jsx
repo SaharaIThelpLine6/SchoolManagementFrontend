@@ -17,7 +17,7 @@ import {
   usePostHomeWorkMutation,
   usePutHomeWorkMutation,
 } from '../../features/student/studentQuerySlice';
-import { useGetTeacherInfoQuery } from '../../features/teachers/teachersSlice';
+import { useGetLoginTeacherInfoQuery, useGetTeacherInfoQuery } from '../../features/teachers/teachersSlice';
 
 import { hideModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
@@ -49,14 +49,13 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
   const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
 
   const { data: teacherData = [] } = useGetTeacherInfoQuery();
+  const { data: loginTeacherData = [] } = useGetLoginTeacherInfoQuery();
 
-  console.log(teacherData, 'teacherData');
   const { data: academicSubjectsData = [] } = useGetAcademicSubjectsQuery();
   const { data: studentsBySubClassID = [] } = useGetStudentsBySubClassIDQuery(
     { SessionID, SubClassID },
     { skip: !SubClassID }
   );
-  console.log(studentsBySubClassID, '');
   const studentOptions = (studentsBySubClassID || []).map((item) => ({
     UserID: item.UserID,
     StudentName: item.User?.UserName + '-' + item.User?.UserCode,
@@ -88,7 +87,8 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
   );
   useEffect(() => {
     setValue('SessionID', activeSession?.SessionID || '');
-  }, [activeSession, setValue]);
+    setValue('TIID', loginTeacherData?.TIID || '');
+  }, [activeSession, loginTeacherData, setValue]);
   /* -------------------- EDIT MODE INIT -------------------- */
   useEffect(() => {
     if (!id || !homeWorks || initializedRef.current) return;

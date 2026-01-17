@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import ReactApexChart from 'react-apexcharts';
 
-const colors = ['#4CAF50', '#2196F3', '#F44336']; // Green, Blue, Red
+const colors = ['#4CAF50', '#F44336', '#FFC107']; // Green, Red, Yellow
 
 const HomeworkAreaChart = (props) => {
   // ✅ Use default parameters with proper fallback structure
