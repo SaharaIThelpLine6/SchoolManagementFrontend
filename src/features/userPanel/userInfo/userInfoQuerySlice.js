@@ -76,6 +76,7 @@ export const userPanelUserInfo = createApi({
         url: `/user_single_report/${SRID}`,
       }),
     }),
+
     getInstitutionInfoUserPanel: builder.query({
       query: () => ({
         url: `/get_institution_info`,
@@ -125,6 +126,12 @@ export const userPanelUserInfo = createApi({
       }),
       providesTags: ['HomeWorkStudyTracks'],
     }),
+    getFeeLandByAdmissionIdUserPanel: builder.query({
+      query: (admissionId) => ({
+        url: `/fee_land_by_admission_id_user_panel/${admissionId}`,
+        method: 'GET',
+      }),
+    }),
   }),
 });
 
@@ -147,5 +154,6 @@ export const {
   useGetExamListUserPanelQuery,
   useGetSessionUserPanelQuery,
   useGetHomeWorksUserPanelQuery,
-  useGetHomeWorkStudyTracksHistoryUserPanelQuery
+  useGetHomeWorkStudyTracksHistoryUserPanelQuery,
+  useGetFeeLandByAdmissionIdUserPanelQuery,
 } = userPanelUserInfo;

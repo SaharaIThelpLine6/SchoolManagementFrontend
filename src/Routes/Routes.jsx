@@ -101,6 +101,7 @@ import HomeWorkUserPanel from '../pages/userpanel/HomeWorkUserPanel';
 import InstitutionInfoUserPanel from '../pages/userpanel/InstitutionInfoUserPanel';
 import OnlineAdmissionStudent from '../pages/userpanel/OnlineAdmissionStudent';
 import Reports from '../pages/userpanel/Reports';
+import StudentFeeUserPanel from '../pages/userpanel/StudentFeeUserPanel';
 import StudentPaymentHistory from '../pages/userpanel/StudentPaymentHistory';
 import StudentPaymentHistoryDetails from '../pages/userpanel/StudentPaymentHistoryDetails';
 import StudentReports from '../pages/userpanel/StudentReports';
@@ -996,6 +997,10 @@ const router = createBrowserRouter([
       {
         path: 'home-work-history/:subjectName',
         element: <SubjectHistoryUserPanel pageTitle="Subject History" />,
+      },
+      {
+        path: 'monthly-fee',
+        element: <StudentFeeUserPanel pageTitle="Month Fee" />,
       },
     ],
   },
