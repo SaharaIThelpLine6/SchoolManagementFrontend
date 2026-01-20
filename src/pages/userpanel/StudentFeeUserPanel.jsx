@@ -6,11 +6,13 @@ import MultiMonthSelect from '../../components/Forms/MultiMonthSelect';
 import { useGetMonthPerStudentsFeeQuery } from '../../features/feeCollection/feeCollectionSlice';
 import {
   useGetFeeLandByAdmissionIdUserPanelQuery,
+  useGetMonthPerStudentsFeeUserPanelQuery,
   useGetSessionUserPanelQuery,
   useGetUserDetailsQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import { showModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
+import { useInitPaymentMutation } from '../../features/userPanel/studentPayment/studentPaymentSlice';
 
 const StudentFeeUserPanel = () => {
   const methods = useForm();
@@ -44,12 +46,10 @@ const StudentFeeUserPanel = () => {
   // API query hook with proper error handling
 
   // Fetch student fee admissions data
-  const { data: studentFeeAdmissionData } = useGetMonthPerStudentsFeeQuery(
-    admissionId,
-    {
+  const { data: studentFeeAdmissionData } =
+    useGetMonthPerStudentsFeeUserPanelQuery(admissionId, {
       skip: !admissionId,
-    }
-  );
+    });
   const totalFee =
     studentFeeAdmissionData?.reduce(
       (sum, item) => sum + Number(item.FainalAmount || 0),
@@ -59,7 +59,6 @@ const StudentFeeUserPanel = () => {
   const {
     data: feeLandData = [],
     error,
-    isLoading,
     isError,
     isSuccess,
   } = useGetFeeLandByAdmissionIdUserPanelQuery(admissionId, {
@@ -118,8 +117,19 @@ const StudentFeeUserPanel = () => {
   // console.log(monthFeeList, 'monthFeeList');
   // console.log(feeLandData, 'feeLandData');
 
-  const handlePayment = () => {
-    showModal('Month Fee', 'OPEN_PAYMENT_USER_PANEL_MODAL');
+  const [initPayment, { isLoading }] = useInitPaymentMutation();
+  const amount = 10;
+  const handlePayment = async () => {
+    try {
+      const res = await initPayment({ amount }).unwrap();
+
+      if (res.gateway_url) {
+        window.location.href = res.gateway_url;
+      }
+    } catch (err) {
+      alert('Payment init failed');
+      console.error(err);
+    }
   };
 
   return (
@@ -243,6 +253,7 @@ const StudentFeeUserPanel = () => {
         </form>
 
         {/* Bottom Padding for Mobile */}
+
         <div className="h-20"></div>
       </div>
     </FormProvider>

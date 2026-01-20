@@ -132,6 +132,10 @@ export const userPanelUserInfo = createApi({
         method: 'GET',
       }),
     }),
+    getMonthPerStudentsFeeUserPanel: builder.query({
+      query: (admissionId) => `month_per_student_fee_userpanel/${admissionId}`,
+      providesTags: [],
+    }),
   }),
 });
 
@@ -156,4 +160,5 @@ export const {
   useGetHomeWorksUserPanelQuery,
   useGetHomeWorkStudyTracksHistoryUserPanelQuery,
   useGetFeeLandByAdmissionIdUserPanelQuery,
+  useGetMonthPerStudentsFeeUserPanelQuery
 } = userPanelUserInfo;

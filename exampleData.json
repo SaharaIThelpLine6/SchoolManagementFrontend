@@ -1,0 +1,80 @@
+{
+  "UserID": 40,
+  "AdmissionID": 67,
+  "CurrentInvoice": 2300,
+  "InvoiceDiscount": 0,
+  "CurrentPaid": 2300,
+  "Due": 500,
+  "AmountInWord": "দুই হাজার তিনশ",
+  "CreateAt": "2026-01-19T12:21:28.318Z",
+  "Remark": "",
+  "AccountType": "301",
+  "Account": "301001",
+  "smsPermission": false,
+  "fees": [
+    {
+      "SSFID": 233,
+      "SLID": 10104,
+      "SlName": "খাবার ফি",
+      "sessionId": 3,
+      "sessionName": "২০২৬",
+      "classId": 8,
+      "amount": 1500,
+      "deduction": 0,
+      "deposit": 1500,
+      "preDeposit": 0,
+      "due": 0,
+      "monthId": 3,
+      "monthName": "মার্চ",
+      "studentCode": 100021
+    },
+    {
+      "SSFID": 234,
+      "SLID": 10105,
+      "SlName": "মাসিক বেতন",
+      "sessionId": 3,
+      "sessionName": "২০২৬",
+      "classId": 8,
+      "amount": 700,
+      "deduction": 0,
+      "deposit": 700,
+      "preDeposit": 0,
+      "due": 0,
+      "monthId": 3,
+      "monthName": "মার্চ",
+      "studentCode": 100021
+    },
+    {
+      "SSFID": 235,
+      "SLID": 10111,
+      "SlName": "বিদ্যুৎ বিল",
+      "sessionId": 3,
+      "sessionName": "২০২৬",
+      "classId": 8,
+      "amount": 100,
+      "deduction": 0,
+      "deposit": 100,
+      "preDeposit": 0,
+      "due": 0,
+      "monthId": 3,
+      "monthName": "মার্চ",
+      "studentCode": 100021
+    }
+  ],
+  "feesLists": [
+    {
+      "type": "month",
+      "monthLists": [
+        {
+          "CurrentInvoice": 2300,
+          "InvoiceDiscount": 0,
+          "CurrentPaid": 2300,
+          "MonthId": 3,
+          "Due": 0
+        }
+      ],
+      "items": [],
+      "permission": true
+    }
+  ]
+}

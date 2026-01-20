@@ -21,7 +21,18 @@ export const studentPaymentSlice = createApi({
     getStudentPaymentDetails: builder.query({
       query: (UFOID) => `history/details/${UFOID}`,
     }),
+    initPayment: builder.mutation({
+      query: (payload) => ({
+        url: '/init',
+        method: 'POST',
+        body: payload,
+      }),
+    }),
   }),
 });
 
-export const { useGetStudentPaymentsQuery, useGetStudentPaymentDetailsQuery } = studentPaymentSlice;
+export const {
+  useGetStudentPaymentsQuery,
+  useGetStudentPaymentDetailsQuery,
+  useInitPaymentMutation,
+} = studentPaymentSlice;
