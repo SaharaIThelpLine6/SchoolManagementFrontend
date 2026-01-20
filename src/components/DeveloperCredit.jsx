@@ -2,7 +2,7 @@ const DeveloperCredit = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="fixed bottom-0 left-0 right-0 py-3 bg-gray-50 text-gray-500 text-sm border-t border-gray-200 text-center print:hidden">
+    <footer className="fixed bottom-0 left-0 right-0 py-3 bg-gray-50 text-gray-500 text-sm border-t border-gray-200 text-center print:hidden z-[99]">
       &copy; {year} Developed by{" "}
       <a
         href="https://saharait.com/"

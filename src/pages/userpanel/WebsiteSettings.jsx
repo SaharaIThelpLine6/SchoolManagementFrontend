@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
-import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
+import { Controller, FormProvider, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import Select from "react-select";
 import Swal from 'sweetalert2';
 import DefaultImageUpload from '../../components/Forms/DefaultImageUpload';
 import DefaultInput from '../../components/Forms/DefaultInput';
 import {
-    useGetWebSettingsQuery,
-    usePostWebsitesettingsMutation,
+  useGetWebSettingsQuery,
+  usePostWebsitesettingsMutation,
 } from '../../features/settings/settingsQuerySlice';
 import useTranslate from '../../utils/Translate';
+import Keyword from '../../components/Keywords/Keywords';
+import DefaultSelect from '../../components/Forms/DefaultSelect';
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
 export default function WebsiteSettings() {
@@ -30,18 +33,35 @@ export default function WebsiteSettings() {
       bannerImage: null,
       singleImage: null,
       whyUsList: [{ text: '' }],
+      classList: [{ text: '' }],
+      teachers: [],
     },
   });
   const translate = useTranslate();
-  const { reset, control, register, setValue } = methods;
+  const { reset, control, register, setValue, watch } = methods;
   const { fields, append, remove, replace, insert } = useFieldArray({
     control,
     name: 'whyUsList',
   });
+  const { fields: classSubjectFields, append: appendClassSubjectFields, remove: removeClassSubjectFields, replace: replaceClassSubjectFields, insert: insertClassSubjectFields } = useFieldArray({
+    control,
+    name: 'classList',
+  });
 
   const [sendWebsiteSettings] = usePostWebsitesettingsMutation();
   const { data, error, isLoading } = useGetWebSettingsQuery();
+  const [teacherOptions, setTeacherOptions] = useState([]);
 
+
+
+  const [classSubjectList, setClassSubjectList] = useState([]);
+  const [subjectOptions, setSubjectOptions] = useState([]);
+  const [selectedClassId, setSelectedClassId] = useState(null);
+
+  const watchedClassList = useWatch({
+    control,
+    name: 'classList'
+  });
   useEffect(() => {
     if (data) {
       console.log(data);
@@ -83,11 +103,38 @@ export default function WebsiteSettings() {
         if (key == 'whyUsImage') {
           setAboutUrl(`${API_URL}/public${value}`);
         }
+
+        if (key == 'teachers') {
+          const teachersData = Array.isArray(value) ? value : [];
+          const options = teachersData.map((t) => ({
+            value: t.UserID,
+            label: t.UserName,
+          }));
+          const activeTeachers = teachersData.filter((t) =>
+            Number(t.OnlineAction) === 1
+          );
+
+          const teacherIds = activeTeachers.map((t) => t.UserID);
+
+          setValue("teachers", teacherIds);
+          setTeacherOptions(options);
+        }
+        if (key == 'subjectClass') {
+          try {
+            const classSubjectsData = Array.isArray(value) ? value : [];
+            setClassSubjectList(classSubjectsData);
+          } catch (error) {
+            console.error('Error parsing subjectClass:', error);
+            setClassSubjectList([]);
+          }
+        }
       });
     }
   }, [data, setValue, append]);
 
   const onSubmit = async (data) => {
+    console.log(data);
+
     const formData = new FormData();
     // Text fields
     formData.append('fblink', data.fblink);
@@ -107,10 +154,10 @@ export default function WebsiteSettings() {
     if (data.singleImage instanceof File) {
       formData.append('singleImage', data.singleImage);
     }
+    formData.append("teachers", JSON.stringify(data.teachers));
+
     try {
       await sendWebsiteSettings(formData).unwrap();
-
-      // ✅ SUCCESS ALERT
       Swal.fire({
         icon: 'success',
         title: 'সফল!',
@@ -119,7 +166,6 @@ export default function WebsiteSettings() {
         showConfirmButton: false,
       });
     } catch (error) {
-      // ❌ ERROR ALERT
       Swal.fire({
         icon: 'error',
         title: 'ব্যর্থ!',
@@ -129,6 +175,48 @@ export default function WebsiteSettings() {
       });
     }
   };
+
+  const [checkedSubjects, setCheckedSubjects] = useState({});
+
+  const isAllChecked = (index, academicSubjects) => {
+    return (
+      checkedSubjects[index]?.length === academicSubjects.length &&
+      academicSubjects.length > 0
+    );
+  };
+
+  const toggleAll = (index, academicSubjects) => {
+    setCheckedSubjects(prev => ({
+      ...prev,
+      [index]: isAllChecked(index, academicSubjects)
+        ? []
+        : academicSubjects.map(s => s.SubjectID)
+    }));
+  };
+
+  const toggleOne = (index, subjectId) => {
+    setCheckedSubjects(prev => {
+      const current = prev[index] || [];
+      return {
+        ...prev,
+        [index]: current.includes(subjectId)
+          ? current.filter(id => id !== subjectId)
+          : [...current, subjectId]
+      };
+    });
+  };
+
+
+  const getAcademicSubjects = (index) => {
+    const selectedSubClassID = watchedClassList?.[index]?.text;
+    if (!selectedSubClassID) return [];
+    const found = classSubjectList.find(
+      item => item.SubClassID === Number(selectedSubClassID)
+    );
+
+    return found?.AcademicSubjects || [];
+  };
+
 
   return (
     <FormProvider {...methods}>
@@ -140,6 +228,7 @@ export default function WebsiteSettings() {
               type="text"
               label="Primary Title"
             />
+
           </div>
           <DefaultInput
             registerKey="aboutText"
@@ -251,6 +340,89 @@ export default function WebsiteSettings() {
               label="Subject List Title"
             />
           </div>
+
+
+
+          {classSubjectFields.map((field, index) => {
+            const academicSubjects = getAcademicSubjects(index);
+
+            return (
+              <div key={field.id} className="flex flex-wrap md:flex-nowrap gap-6 items-start mb-4 mt-4">
+
+
+                <div className="w-full md:w-1/2">
+                  {classSubjectList?.length > 0 && (
+                    <DefaultSelect
+                      options={classSubjectList}
+                      nameField="SubClass"
+                      valueField="SubClassID"
+                      registerKey={`classList.${index}.text`}
+
+                    />
+                  )}
+                </div>
+
+                {academicSubjects.length > 0 && (
+                  <div className="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default w-full md:w-1/2">
+                    <table className="w-full text-xl text-left text-body">
+                      <thead className="bg-neutral-secondary-soft border-b border-default">
+                        <tr>
+                          <th className="px-4 py-2" width="50">
+                            <input
+                              type="checkbox"
+                              checked={isAllChecked(index, academicSubjects)}
+                              onChange={() => toggleAll(index, academicSubjects)}
+                            />
+                          </th>
+                          <th>Subject Name</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {academicSubjects.map(subject => (
+                          <tr key={subject.SubjectID} className="border-b">
+                            <td className="px-4">
+                              <input
+                                type="checkbox"
+                                checked={checkedSubjects[index]?.includes(subject.SubjectID) || false}
+                                onChange={() => toggleOne(index, subject.SubjectID)}
+                              />
+                            </td>
+                            <td>{subject.SubjectName}</td>
+                            <td>{subject.ArabicSubject}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {classSubjectFields.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeClassSubjectFields(index)}
+                    className="bg-red-500 text-white px-2 rounded h-8"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            );
+          })}
+
+
+          <div className="mt-2">
+            <div className="gap-4 flex items-center">
+              <button
+                type="button"
+                onClick={() => appendClassSubjectFields({ text: '' })}
+                className="mt-2 bg-blue-500 text-white px-3 py-1 rounded"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+
           <div className="mt-2">
             <DefaultInput
               registerKey="teacherListTitle"
@@ -270,6 +442,85 @@ export default function WebsiteSettings() {
               label="Youtube Link"
             />
           </div>
+          <div className="mt-2">
+            <label>Add Teacher Profile</label>
+
+            <Controller
+              name="teachers"
+              control={control}
+              defaultValue={[]}
+              render={({ field }) => {
+                const isAllChecked =
+                  teacherOptions.length > 0 &&
+                  teacherOptions.every(opt => field.value?.includes(opt.value));
+
+                const toggleAll = () => {
+                  if (isAllChecked) {
+                    field.onChange([]);
+                  } else {
+                    field.onChange(teacherOptions.map(opt => opt.value));
+                  }
+                };
+
+                const toggleOne = (id) => {
+                  if (field.value?.includes(id)) {
+                    field.onChange(field.value.filter(v => v !== id));
+                  } else {
+                    field.onChange([...field.value, id]);
+                  }
+                };
+
+                return (
+                  <>
+                    {/* <button
+                      type="button"
+                      className="btn btn-sm btn-secondary mb-2"
+                      onClick={toggleAll}
+                    >
+                      {isAllChecked ? 'Uncheck All' : 'Check All'}
+                    </button> */}
+
+                    <div className='relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default'>
+                      <table className="w-full text-xl text-left rtl:text-right text-body">
+                        <thead className='text-xl text-body bg-neutral-secondary-soft border-b rounded-base border-default'>
+                          <tr>
+                            <th width="50" height="20" className='px-4'>
+                              <input
+                                type="checkbox"
+                                checked={isAllChecked}
+                                onChange={toggleAll}
+                                className='h-full w-full'
+                              />
+                            </th>
+                            <th>Teacher Name</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {teacherOptions.map((teacher) => (
+                            <tr className='bg-neutral-primary border-b border-default' key={teacher.value}>
+                              <td width="50" height="20" className='px-4'>
+                                <input
+                                  type="checkbox"
+                                  className='h-full w-full'
+                                  checked={field.value?.includes(teacher.value)}
+                                  onChange={() => toggleOne(teacher.value)}
+                                />
+                              </td>
+                              <td>{teacher.label}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+
+
+                  </>
+                );
+              }}
+            />
+          </div>
+
+
 
           {/* subjectListTitle */}
           <button

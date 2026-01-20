@@ -345,7 +345,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
 
           <DefaultSelect
             label="লিঙ্গ"
-            options={[{ID: 1, GenderName: "পুরুষ"}, {ID: 1, GenderName: "উভয়"}]}
+            options={[{ID: 1, GenderName: "পুরুষ"}, {ID: 2, GenderName: "মহিলা"}]}
             registerKey="GenderID"
             require={'শিক্ষার্থীর লিঙ্গ নির্বাচন করতে হবে'}
             nameField="GenderName"

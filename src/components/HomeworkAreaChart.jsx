@@ -71,8 +71,8 @@ const HomeworkAreaChart = (props) => {
       labels: {
         rotate: -45,
         style: { fontSize: '12px' },
+        show: false
       },
-      labels: { show: false },
     },
     yaxis: {
       title: { text: 'ক্লাস সংখ্যা' },

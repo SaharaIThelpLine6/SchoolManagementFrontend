@@ -90,7 +90,7 @@ const MadrashaHomePage = () => {
         <div className="pb-[40px]">
           <div className="text_area text-center pr-2">
             <h2 className=" text-[28px] md:text-[40px] font-bold">
-              {settingsObject.whyUsTitle} {settingsObject?.totalUser}
+              {settingsObject.whyUsTitle}
             </h2>
           </div>
         </div>
@@ -445,7 +445,6 @@ const MadrashaHomePage = () => {
           after:block
           after:h-[80px]
           after:bg-no-repeat
-          after:-translate-y-full
           after:bg-cover"
                 >
                   <img
