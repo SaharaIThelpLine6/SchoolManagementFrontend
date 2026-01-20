@@ -73,13 +73,13 @@ const HomeWorkView = ({ id }) => {
           <div className="font-medium text-gray-800">
             {data?.User?.UserName || 'Unknown'}
           </div>
-          <div className="text-sm text-gray-600">
+          {/* <div className="text-sm text-gray-600">
             Mobile: {data?.User?.Mobile1 || 'N/A'}{' '}
             {data?.User?.Mobile2 && `, ${data.User.Mobile2}`}
           </div>
           <div className="text-sm text-gray-600">
             Email: {data?.User?.Email || 'N/A'}
-          </div>
+          </div> */}
         </div>
         <div className="text-sm text-gray-500">
           Created: {new Date(data.CreateAt).toLocaleDateString()}
