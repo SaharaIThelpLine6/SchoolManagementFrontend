@@ -33,7 +33,7 @@ export default function WebsiteSettings() {
       bannerImage: null,
       singleImage: null,
       whyUsList: [{ text: '' }],
-      classList: [{ text: '' }],
+      classList: [{ text: '', subjects: [] }],
       teachers: [],
     },
   });
@@ -133,7 +133,18 @@ export default function WebsiteSettings() {
   }, [data, setValue, append]);
 
   const onSubmit = async (data) => {
-    console.log(data);
+    // console.log(data);
+
+
+    const formattedSubjects = data.classList
+      .filter(item => item.text && item.subjects.length > 0)
+      .map(item => ({
+        subClassId: Number(item.text),
+        subjectIds: item.subjects
+      }));
+      // console.log(formattedSubjects);
+      
+
 
     const formData = new FormData();
     // Text fields
@@ -155,7 +166,7 @@ export default function WebsiteSettings() {
       formData.append('singleImage', data.singleImage);
     }
     formData.append("teachers", JSON.stringify(data.teachers));
-
+    formData.append('subjectClasses', JSON.stringify(formattedSubjects));
     try {
       await sendWebsiteSettings(formData).unwrap();
       Swal.fire({
@@ -176,35 +187,32 @@ export default function WebsiteSettings() {
     }
   };
 
-  const [checkedSubjects, setCheckedSubjects] = useState({});
+  const toggleAll = (index, academicSubjects) => {
+    const allIds = academicSubjects.map(s => s.SubjectID);
+    const selected = watchedClassList?.[index]?.subjects || [];
 
-  const isAllChecked = (index, academicSubjects) => {
-    return (
-      checkedSubjects[index]?.length === academicSubjects.length &&
-      academicSubjects.length > 0
+    setValue(
+      `classList.${index}.subjects`,
+      selected.length === allIds.length ? [] : allIds
     );
   };
 
-  const toggleAll = (index, academicSubjects) => {
-    setCheckedSubjects(prev => ({
-      ...prev,
-      [index]: isAllChecked(index, academicSubjects)
-        ? []
-        : academicSubjects.map(s => s.SubjectID)
-    }));
+  const toggleOne = (index, subjectId) => {
+    const selected = watchedClassList?.[index]?.subjects || [];
+
+    setValue(
+      `classList.${index}.subjects`,
+      selected.includes(subjectId)
+        ? selected.filter(id => id !== subjectId)
+        : [...selected, subjectId]
+    );
   };
 
-  const toggleOne = (index, subjectId) => {
-    setCheckedSubjects(prev => {
-      const current = prev[index] || [];
-      return {
-        ...prev,
-        [index]: current.includes(subjectId)
-          ? current.filter(id => id !== subjectId)
-          : [...current, subjectId]
-      };
-    });
+  const isAllChecked = (index, academicSubjects) => {
+    const selected = watchedClassList?.[index]?.subjects || [];
+    return selected.length === academicSubjects.length && academicSubjects.length;
   };
+
 
 
   const getAcademicSubjects = (index) => {
@@ -365,6 +373,7 @@ export default function WebsiteSettings() {
                 {academicSubjects.length > 0 && (
                   <div className="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default w-full md:w-1/2">
                     <table className="w-full text-xl text-left text-body">
+
                       <thead className="bg-neutral-secondary-soft border-b border-default">
                         <tr>
                           <th className="px-4 py-2" width="50">
@@ -379,23 +388,29 @@ export default function WebsiteSettings() {
                       </thead>
 
                       <tbody>
-                        {academicSubjects.map(subject => (
-                          <tr key={subject.SubjectID} className="border-b">
-                            <td className="px-4">
-                              <input
-                                type="checkbox"
-                                checked={checkedSubjects[index]?.includes(subject.SubjectID) || false}
-                                onChange={() => toggleOne(index, subject.SubjectID)}
-                              />
-                            </td>
-                            <td>{subject.SubjectName}</td>
-                            <td>{subject.ArabicSubject}</td>
-                          </tr>
-                        ))}
+                        {academicSubjects.map(subject => {
+                          const selected =
+                            watchedClassList?.[index]?.subjects?.includes(subject.SubjectID);
+
+                          return (
+                            <tr key={subject.SubjectID} className="border-b">
+                              <td className="px-4">
+                                <input
+                                  type="checkbox"
+                                  checked={selected || false}
+                                  onChange={() => toggleOne(index, subject.SubjectID)}
+                                />
+                              </td>
+                              <td>{subject.SubjectName}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
+
                     </table>
                   </div>
                 )}
+
 
                 {classSubjectFields.length > 1 && (
                   <button
