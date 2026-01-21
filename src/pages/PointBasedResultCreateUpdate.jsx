@@ -213,6 +213,23 @@ const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentP
       });
     }
   };
+  const handleVerticalNavigation = (e) => {
+    if (e.key !== "Enter" && e.key !== "Tab") return;
+
+    e.preventDefault();
+
+    const row = Number(e.target.dataset.row);
+    const col = Number(e.target.dataset.col);
+
+    // Find next row same column
+    const nextInput = document.querySelector(
+      `input[data-row="${row + 1}"][data-col="${col}"]`
+    );
+
+    if (nextInput) {
+      nextInput.focus();
+    }
+  };
 
   if (isLoading) return <div><Loading/></div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -237,7 +254,11 @@ const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentP
           </h3>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" onKeyDown={(e) => {
+          if (e.key === "Enter" && e.target.tagName !== "TEXTAREA") {
+            e.preventDefault();
+          }
+        }}>
           <input type="hidden" {...methods.register("ID")} />
 
          <div className="flex gap-4">
@@ -339,6 +360,7 @@ const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentP
                                 min="0"
                                 max="100"
                                 defaultValue={subject.Value}
+                                onKeyDown={handleVerticalNavigation}
                                 registerKey={`students.${student.ID}.${subject.SubValKey}`}
                               />
                             </td>

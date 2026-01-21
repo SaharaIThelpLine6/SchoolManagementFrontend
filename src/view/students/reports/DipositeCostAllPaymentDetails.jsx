@@ -19,18 +19,18 @@ const DipositeCostAllPaymentDetails = ({ reportData, query }) => {
     }
   }, [instutionInfo]);
 
-  const totals = Object.entries(reportData).reduce(
-    (acc, [fundId, fund]) => {
-      const id = Number(fundId);
-      if (id === 1) acc.deposit += fund.grandTotal;
-      else if (id === 2) acc.expense += fund.grandTotal;
+  // const totals = Object.entries(reportData).reduce(
+  //   (acc, [fundId, fund]) => {
+  //     const id = Number(fundId);
+  //     if (id === 1) acc.deposit += fund.grandTotal;
+  //     else if (id === 2) acc.expense += fund.grandTotal;
 
-      return acc;
-    },
-    { deposit: 0, expense: 0 }
-  );
+  //     return acc;
+  //   },
+  //   { deposit: 0, expense: 0 }
+  // );
 
-  const surplus = totals.deposit - totals.expense;
+  // const surplus = totals.deposit - totals.expense;
   return (
     <div className="font-bangla  p-4 bg-white text-xs">
 
@@ -50,15 +50,17 @@ const DipositeCostAllPaymentDetails = ({ reportData, query }) => {
             </div>
             <p className="text-end">রিপোর্ট প্রিন্ট তারিখ: 07/10/2025</p>
           </div>
+
+          <h2></h2>
         </div>
       </div>
 
 
       <div className="bg-white pt-8">
 
-        {Object.values(reportData).map((fund, fundIndex) => (
+        {reportData && reportData.map((chartOfAc, fundIndex) => (
           <table
-            key={fundIndex}
+            key={`chart_of_ac${chartOfAc.CAID}`}
             className="w-full border-collapse border border-black bg-white mb-8"
           >
             <thead>
@@ -67,7 +69,7 @@ const DipositeCostAllPaymentDetails = ({ reportData, query }) => {
                   colSpan={6}
                   className="border border-black bg-[#d5d5d5] text-white p-2 text-[20px]"
                 >
-                  {fund.title}
+                  {chartOfAc.ChartOfAcName}
                 </th>
               </tr>
               <tr className="bg-white text-black">
@@ -81,76 +83,48 @@ const DipositeCostAllPaymentDetails = ({ reportData, query }) => {
             </thead>
 
             <tbody>
-              {fund.paymentMediums.map((medium, i) => (
-                <React.Fragment key={i}>
+              {chartOfAc.users.map((userInfo, UserIndex) => (
+                <React.Fragment key={`user_${userInfo.UserID}`}>
                   <tr>
-                    <td
-                      colSpan={6}
-                      className="text-center text-[20px] py-3 border-b border-transparent"
-                    >
+                    <td colSpan={6} className="text-center text-[20px] py-3">
                       <span className="border-b-4 border-double border-black pb-1">
-                        পেমেন্ট মাধ্যম : {medium.name}
+                        পেমেন্ট মাধ্যম : {userInfo.UserName}
                       </span>
                     </td>
                   </tr>
-
-                  {medium.ledgers.map((ledger, j) => (
-                    <React.Fragment key={j}>
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className="px-2 bg-white text-[18px] pt-2 pb-1"
-                        >
-                          জেনারেল লেজার : {ledger.name}
-                        </td>
-                      </tr>
-                      {ledger.transactions.map((t, k) => (
-                        <tr key={k}>
-                          <td className="text-[16px] py-2 px-1 border border-black text-center">
-                            {t.serial}
-                          </td>
-                          <td className="text-[16px] py-2 px-1 border border-black">
-                            {t.date}
-                          </td>
-                          <td className="text-[16px] py-2 px-1 border border-black">
-                            {t.voucher}
-                          </td>
-                          <td className="text-[16px] py-2 px-1 border border-black">
-                            {t.subLedger}
-                          </td>
-                          <td className="text-[16px] py-2 px-1 border border-black">
-                            {t.description}
-                          </td>
-                          <td className="text-[16px] py-2 px-1 border border-black text-end">
-                            {t.amount}
+                  {
+                    userInfo.gls.map((ledger) => 
+                      (<React.Fragment key={`gl_${ledger.GLID}`}>
+                        <tr>
+                          <td colSpan={6} className="text-center text-[20px] py-3">
+                            <span className="border-b-4 border-double border-black pb-1">
+                              পেমেন্ট মাধ্যম : {ledger.GlName}
+                            </span>
                           </td>
                         </tr>
-                      ))}
-                    </React.Fragment>
-                  ))}
-
-                  {/* Subtotal per payment method */}
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="text-[16px] py-2 px-2 border-b border-b-transparent text-end bg-white font-bold"
-                    >
-                      মোট: {medium.subtotal}
-                    </td>
-                  </tr>
+                        {ledger.transactions.map((t, k) => (
+                          <tr key={k}>
+                            <td className="border border-black text-center text-[16px] py-4">{k + 1}</td>
+                            <td className="border border-black text-[16px] py-4 px-2">{t.TransactionDateEng}</td>
+                            <td className="border border-black text-[16px] py-4 px-2">{t.VoucherNo}</td>
+                            <td className="border border-black text-[16px] py-4 px-2">{t.SlName}</td>
+                            <td className="border border-black text-[16px] py-4 px-2 w-[200px] leading-[24px]">{t.Particulars}</td>
+                            <td className="border border-black text-end text-[16px] py-4 px-2">{t.PamantAmount}</td>
+                          </tr>
+                        ))}
+                      </React.Fragment>)
+                    )
+                  }
                 </React.Fragment>
               ))}
-
-              {/* Grand total per fund */}
+              {/* Grand Total */}
               <tr>
-                <td
-                  colSpan={6}
-                  className="text-[16px] py-2 px-2 border border-transparent text-end bg-white font-bold"
-                >
-                  মোট: {fund.grandTotal}
+                <td colSpan={6} className="text-end font-bold py-2">
+                  মোট: 
                 </td>
               </tr>
             </tbody>
+
           </table>
         ))}
 
@@ -309,7 +283,7 @@ const DipositeCostAllPaymentDetails = ({ reportData, query }) => {
                 সর্বমোট জমা =
               </th>
               <td className="text-[16px] text-end border border-transparent bg-white">
-                {totals.deposit}
+                {/* {totals.deposit} */}
               </td>
             </tr>
             <tr>
@@ -317,7 +291,7 @@ const DipositeCostAllPaymentDetails = ({ reportData, query }) => {
                 সর্বমোট খরচ =
               </th>
               <td className="text-[16px] text-end border border-transparent bg-white">
-                {totals.expense}
+                {/* {totals.expense} */}
               </td>
             </tr>
             <tr>
@@ -325,7 +299,7 @@ const DipositeCostAllPaymentDetails = ({ reportData, query }) => {
                 উদ্বৃত্ত =
               </th>
               <td className="border-t-2 border-black text-[16px] text-end bg-white">
-                {surplus}
+                {/* {surplus} */}
               </td>
             </tr>
           </tbody>
