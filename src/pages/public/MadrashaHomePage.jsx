@@ -69,7 +69,7 @@ const MadrashaHomePage = () => {
         <div className="flex items-center flex-wrap lg:flex-nowrap">
           <div className="text_area text-center md:text-start w-full lg:w-1/2 pr-2">
             <h1 className=" text-[28px] md:text-[40px] text-theme-color">
-              {schoolData?.primaryHeading}
+              {settingsObject?.primaryHeading}
             </h1>
             <h2 className="text-[18px] md:text-[22px] mt-2 mb-4">
               {schoolData?.InstitutionName}, {schoolData?.Address}{' '}
@@ -322,7 +322,7 @@ const MadrashaHomePage = () => {
                     </svg>
                   </div>
                   <Counter
-                    end={settingsObject?.active_session_student}
+                    end={settingsObject?.teacherUser}
                     duration={2000}
                   />
                   <p className="text-[20px] text-white">

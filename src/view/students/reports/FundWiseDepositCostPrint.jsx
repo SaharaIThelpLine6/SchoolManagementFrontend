@@ -55,27 +55,27 @@ const FundWiseDepositCostPrint = ({ reportData, query }) => {
           </thead>
 
           <tbody>
-            {Object.entries(reportData).map(([groupKey, totalAmount], index) => (
-              <React.Fragment key={groupKey}>
-                <tr>
-                  <td className="border border-black bg-white p-3 font-semibold text-start text-[18px]">
-                    {index + 1}
-                  </td>
-                  <td className="border border-black bg-white p-3 font-semibold text-start text-[18px]">
-                    {groupKey === "1" ? "জমা" : "খরচ"}
-                  </td>
-                  <td className="border border-black bg-white p-3 font-semibold text-center text-[18px]">
-                    {groupKey === "1" ? totalAmount : ""}
-                     
-                  </td>
-                  <td className="border border-black bg-white p-3 font-semibold text-center text-[18px]">
-                    {groupKey === "1" ? "" : totalAmount}
-                     
-                  </td>
-                </tr>           
-              </React.Fragment>
+            {reportData.map((row, index) => (
+              <tr key={row.CAID}>
+                <td className="border border-black bg-white p-3 font-semibold text-start text-[18px]">
+                  {index + 1}
+                </td>
+
+                <td className="border border-black bg-white p-3 font-semibold text-start text-[18px]">
+                  {row.ChartOfAcName}
+                </td>
+
+                <td className="border border-black bg-white p-3 font-semibold text-center text-[18px]">
+                  {row.CAID === 1 ? row.totalAmount.toLocaleString() : ""}
+                </td>
+
+                <td className="border border-black bg-white p-3 font-semibold text-center text-[18px]">
+                  {row.CAID === 2 ? row.totalAmount.toLocaleString() : ""}
+                </td>
+              </tr>
             ))}
           </tbody>
+
         </table>
       </div>
 

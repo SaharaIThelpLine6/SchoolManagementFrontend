@@ -69,7 +69,7 @@ const LedgerWiseConbineFundPrint = ({ reportData, query }) => {
                     <td className="border border-black p-3 text-start text-[16px] font-samibold ">{item.GLID}</td>
                     <td className="border border-black p-3 text-start text-[16px] font-samibold ">{item.GlName}</td>
                     <td className="border border-black p-3 text-start text-[16px] font-samibold ">
-                      {item.TotalAmount}
+                      {item.totalAmount}
                     </td>
                   </tr>
                 ))}
@@ -81,7 +81,7 @@ const LedgerWiseConbineFundPrint = ({ reportData, query }) => {
                     <p className="text-end text-[18px] font-semibold leading-[26px]">
                       মোট:{" "}
                       {
-                        rows.reduce((sum, item) => sum + item.TotalAmount, 0)
+                        rows.reduce((sum, item) => sum + item.totalAmount, 0)
                       }
                     </p>
                   </td>

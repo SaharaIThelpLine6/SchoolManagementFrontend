@@ -15,6 +15,7 @@ const TableInput = ({
   defaultValue,
   min,
   max,
+  onKeyDown = undefined
 }) => {
   const {
     register,
@@ -114,6 +115,7 @@ const TableInput = ({
           min={min}
           max={max}
           onChange={handleChange}
+          onKeyDown={onKeyDown}
         />
 
         {errors[registerKey] && (
