@@ -115,6 +115,7 @@ import VideoTutorialLink from '../pages/userpanel/VideoTutorialLink';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
+import PaymentSuccess from '../pages/userpanel/payment/PaymentSuccess';
 
 const router = createBrowserRouter([
   {
@@ -1001,6 +1002,10 @@ const router = createBrowserRouter([
       {
         path: 'monthly-fee',
         element: <StudentFeeUserPanel pageTitle="Month Fee" />,
+      },
+      {
+        path: 'payment-success',
+        element: <PaymentSuccess pageTitle="Payment Success" />,
       },
     ],
   },

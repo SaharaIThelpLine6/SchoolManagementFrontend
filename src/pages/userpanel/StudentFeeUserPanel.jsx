@@ -1,18 +1,17 @@
 import { useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
+import Swal from 'sweetalert2';
 import Button from '../../components/Button/Button';
 import MultiMonthSelect from '../../components/Forms/MultiMonthSelect';
-import { useGetMonthPerStudentsFeeQuery } from '../../features/feeCollection/feeCollectionSlice';
+import { useInitPaymentMutation } from '../../features/userPanel/studentPayment/studentPaymentSlice';
 import {
   useGetFeeLandByAdmissionIdUserPanelQuery,
   useGetMonthPerStudentsFeeUserPanelQuery,
   useGetSessionUserPanelQuery,
   useGetUserDetailsQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
-import { showModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
-import { useInitPaymentMutation } from '../../features/userPanel/studentPayment/studentPaymentSlice';
 
 const StudentFeeUserPanel = () => {
   const methods = useForm();
@@ -21,7 +20,7 @@ const StudentFeeUserPanel = () => {
   const { handleSubmit, reset, watch, getValues, setValue } = methods;
 
   const months = watch('months');
-  // console.log(months, 'months azam');
+  console.log(months, 'months');
 
   const currentSession = useSelector(
     (state) => state.sessionChange.currentSession
@@ -114,21 +113,105 @@ const StudentFeeUserPanel = () => {
     }
   }, [feeLandData]);
 
-  // console.log(monthFeeList, 'monthFeeList');
-  // console.log(feeLandData, 'feeLandData');
+  console.log(monthFeeList, 'monthFeeList');
+  console.log(feeLandData, 'feeLandData');
+  console.log(userDetails, 'userDetails');
+  console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
 
   const [initPayment, { isLoading }] = useInitPaymentMutation();
   const amount = 10;
+  const fees = months?.flatMap((monthId) => {
+    const month = monthFeeList.find((m) => m.monthId === monthId);
+
+    return studentFeeAdmissionData.map((item) => ({
+      SSFID: item.SSFID,
+      SLID: item.SLID,
+      SlName: item.SlName,
+      sessionId: item.SessionID,
+      sessionName: item.SessionName,
+      classId: item.ClassID,
+      amount: item.Amount,
+      deduction: 0,
+      deposit: item.Amount,
+      preDeposit: 0,
+      due: 0,
+      monthId: month.monthId,
+      monthName: month.monthName,
+      studentCode: userDetails?.StudentCode,
+    }));
+  });
+  const monthListData = months?.flatMap((monthId) => {
+    const month = monthFeeList.find((m) => m.monthId === monthId);
+
+    return {
+      CurrentInvoice: totalFee,
+      InvoiceDiscount: 0,
+      CurrentPaid: totalFee,
+      MonthId: month.monthId,
+      Due: 0,
+    };
+  });
+
   const handlePayment = async () => {
     try {
-      const res = await initPayment({ amount }).unwrap();
+      // const payload = {
+      //   UserID: userDetails?.UserID,
+      //   AdmissionID: userDetails?.AdmissionID,
+      //   CurrentInvoice: totalFee * months?.length,
+      //   InvoiceDiscount: 0,
+      //   CurrentPaid: totalFee * months?.length,
+      //   Due: 0,
+      //   AmountInWord: 'দুই হাজার তিনশ',
+      //   // CreateAt: '2026-01-19T12:21:28.318Z',
+      //   Remark: '',
+      //   AccountType: '301',
+      //   Account: '301001',
+      //   // smsPermission: false,
+      //   fees,
+      //   feesLists: [
+      //     {
+      //       type: 'month',
+      //       monthLists: monthListData,
+      //       items: [],
+      //       permission: true,
+      //     },
+      //   ],
+      // };
+      // console.log(payload, 'payload');
+       const res = await initPayment({ amount }).unwrap();
 
-      if (res.gateway_url) {
-        window.location.href = res.gateway_url;
-      }
+       if (res?.gateway_url) {
+         Swal.fire({
+           title: 'Redirecting...',
+           text: 'You are being redirected to the payment gateway',
+           icon: 'success',
+           timer: 2000,
+           showConfirmButton: false,
+         });
+
+         setTimeout(() => {
+           window.location.href = res.gateway_url;
+         }, 2000);
+       } else {
+         Swal.fire({
+           title: 'Payment Failed',
+           text: 'Gateway URL not found',
+           icon: 'error',
+           confirmButtonText: 'OK',
+         });
+       }
     } catch (err) {
-      alert('Payment init failed');
-      console.error(err);
+      const errorMessage =
+        err?.data?.error || err?.data?.message || 'Payment init failed';
+
+      Swal.fire({
+        title: 'Payment Error',
+        text: errorMessage, // 👉 "SSL School Data not found!"
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+
+      console.error('Payment Error:', err);
     }
   };
 
