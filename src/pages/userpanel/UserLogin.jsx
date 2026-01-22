@@ -170,6 +170,15 @@ export default function UserLogin() {
                 অ্যাকাউন্ট তৈরি করুন
               </Link>
             </p>
+            <p className="text-center text-sm text-gray-600 mt-2">
+              পাসওয়ার্ড ভুলে গেছেন?{' '}
+              <Link
+                to={`/${schoolid}/forget_pass`}
+                className="text-blue-600 font-medium hover:underline hover:text-blue-700"
+              >
+                পাসওয়ার্ড রিসেট করুন
+              </Link>
+            </p>
             {mobileAppInstallLink && (
               <p className="text-center text-sm text-gray-600 mt-2">
                 <Link

@@ -27,7 +27,6 @@ export const userPanelRegistrationUser = createApi({
       }),
       invalidatesTags: ['UserPanelUser222'],
     }),
-
     postVerifyToken: builder.mutation({
       query: (data) => ({
         url: `verify_otp`,
@@ -48,6 +47,29 @@ export const userPanelRegistrationUser = createApi({
         url: `/get_software_link_user_panel`,
       }),
     }),
+
+    postForgetPass: builder.mutation({
+      query: (data) => ({
+        url: `forgot_password`,
+        method: 'POST',
+        body: data,
+      })
+    }),
+    postVerifyResetOtp: builder.mutation({
+      query: (data) => ({
+        url: `verify_reset_otp`,
+        method: 'POST',
+        body: data,
+      })
+    }),
+    postResetPassword: builder.mutation({
+      query: (data) => ({
+        url: `reset_password`,
+        method: 'POST',
+        body: data,
+      })
+    }),
+
     // postLoginUserPanel: builder.mutation({
     //   query: (data) => ({
     //     url: 'login',
@@ -71,6 +93,9 @@ export const {
   usePostVerifyTokenMutation,
   usePostUserRegisterMutation,
   useGetSoftwareLinkUserPanelQuery,
+  usePostForgetPassMutation,
+  usePostVerifyResetOtpMutation,
+  usePostResetPasswordMutation
   // usePostLoginUserPanelMutation,
   // useVerifyUserPanelTokenMutation,
 } = userPanelRegistrationUser;

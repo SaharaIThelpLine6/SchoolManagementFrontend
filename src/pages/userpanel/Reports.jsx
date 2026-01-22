@@ -56,7 +56,7 @@ const Reports = () => {
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 pt-2 rounded-xl shadow-lg relative mb-20">
-      {/* হেডার */}
+      {/* হেডার বক্স*/}
       <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-4 border-gray-800 inline-block">
         অভিযোগ বক্স
       </h2>
