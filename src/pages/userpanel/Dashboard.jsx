@@ -301,7 +301,7 @@ const Dashboard = () => {
             <h4 className={titleClass}>অনলাইন ভর্তি</h4>
           </Link> */}
           {/* Month fee */}
-          {/* <Link
+          <Link
             to={`/${schoolid}/dashboard/monthly-fee`}
             className={cardClass}
           >
@@ -326,7 +326,7 @@ const Dashboard = () => {
               </svg>
             </div>
             <h4 className={titleClass}>মাসের ফি</h4>
-          </Link> */}
+          </Link>
           {/* Report */}
           {/* <Link to={`/${schoolid}/dashboard/reports`} className={cardClass}>
             <div className="w-10 h-10 rounded-full bg-[#c0dbfd] flex items-center justify-center mb-2">
