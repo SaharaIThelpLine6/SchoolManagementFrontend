@@ -16,6 +16,7 @@ const useTranslate = () => {
     'Homework Subject History': 'বিষয় ভিত্তিক হোমওয়ার্ক',
     'Homework History': 'হোমওয়ার্ক রিপোর্ট',
     Password: 'পাসওয়ার্ড',
+    "New Password": 'নতুন পাসওয়ার্ড',
     'Student Performance Chart': 'শিক্ষার্থীদের কর্মক্ষমতা চার্ট',
     'Sub Class Bangla': 'সাব ক্লাস বাংলা',
     'Exam Group Select': 'পরীক্ষার গ্রুপ তৈরি',

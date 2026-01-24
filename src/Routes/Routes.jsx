@@ -115,6 +115,7 @@ import VideoTutorialLink from '../pages/userpanel/VideoTutorialLink';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
+import UserForgetPassword from '../pages/userpanel/UserForgetPassword';
 import PaymentSuccess from '../pages/userpanel/payment/PaymentSuccess';
 
 const router = createBrowserRouter([
@@ -924,6 +925,10 @@ const router = createBrowserRouter([
   {
     path: '/:schoolid/rg',
     element: <UserRegistration />,
+  },
+  {
+    path: '/:schoolid/forget_pass',
+    element: <UserForgetPassword />,
   },
   {
     path: '/:schoolid/login',
