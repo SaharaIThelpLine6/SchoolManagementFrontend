@@ -154,31 +154,36 @@ const StudentFeeUserPanel = () => {
 
   const handlePayment = async () => {
     try {
-      // const payload = {
-      //   UserID: userDetails?.UserID,
-      //   AdmissionID: userDetails?.AdmissionID,
-      //   CurrentInvoice: totalFee * months?.length,
-      //   InvoiceDiscount: 0,
-      //   CurrentPaid: totalFee * months?.length,
-      //   Due: 0,
-      //   AmountInWord: 'দুই হাজার তিনশ',
-      //   // CreateAt: '2026-01-19T12:21:28.318Z',
-      //   Remark: '',
-      //   AccountType: '301',
-      //   Account: '301001',
-      //   // smsPermission: false,
-      //   fees,
-      //   feesLists: [
-      //     {
-      //       type: 'month',
-      //       monthLists: monthListData,
-      //       items: [],
-      //       permission: true,
-      //     },
-      //   ],
-      // };
-      // console.log(payload, 'payload');
-       const res = await initPayment({ amount }).unwrap();
+      const payload = {
+        UserID: userDetails?.UserID,
+        UserName: userDetails?.UserName,
+        Email: userDetails?.Email,
+        DistrictName: userDetails?.DistrictName,
+        PoliceStationName: userDetails?.PoliceStationName,
+        Mobile1: userDetails?.Mobile1,
+        AdmissionID: userDetails?.AdmissionID,
+        CurrentInvoice: totalFee * months?.length,
+        InvoiceDiscount: 0,
+        CurrentPaid: totalFee * months?.length,
+        Due: 0,
+        // AmountInWord: 'দুই হাজার তিনশ',
+        // CreateAt: '2026-01-19T12:21:28.318Z',
+        // Remark: '',
+        // AccountType: '301',
+        // Account: '301001',
+        // smsPermission: false,
+        fees,
+        feesLists: [
+          {
+            type: 'month',
+            monthLists: monthListData,
+            items: [],
+            permission: true,
+          },
+        ],
+      };
+      console.log(payload, 'payload');
+       const res = await initPayment({ payload }).unwrap();
 
        if (res?.gateway_url) {
          Swal.fire({
