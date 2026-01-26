@@ -1023,6 +1023,14 @@ const router = createBrowserRouter([
         path: 'payment-success',
         element: <PaymentSuccess pageTitle="Payment Success" />,
       },
+      {
+        path: 'payment-fail',
+        element: <PaymentSuccess pageTitle="Payment Fail" />,
+      },
+      {
+        path: 'payment-cancel',
+        element: <PaymentSuccess pageTitle="Payment Cancel" />,
+      },
     ],
   },
   {

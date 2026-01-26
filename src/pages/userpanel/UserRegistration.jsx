@@ -12,6 +12,7 @@ import {
   usePostUserRegisterMutation,
   usePostVerifyTokenMutation,
 } from '../../features/userPanel/userRegistration/userRegistrationQuerySlice';
+import Swal from 'sweetalert2';
 // Multi-step hook
 export function useMultistepForm(steps) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -267,7 +268,6 @@ export default function UserRegistration() {
   const { data } = useGetSoftwareLinkUserPanelQuery();
   const mobileAppInstallLink = data?.MobileAppInstall;
 
-
   const { steps, step, currentStepIndex, isFirstStep, isLastStep, next, back } =
     useMultistepForm([<StepOne />, <StepTwo />]);
 
@@ -303,7 +303,21 @@ export default function UserRegistration() {
     // }
     if (currentStepIndex === 0) {
       if (!data.otp) {
-        await requestOtp(data.StudentCode, schoolid);
+        try {
+          await requestOtp(data.StudentCode, schoolid);
+        } catch (error) {
+          // console.log(error);
+
+          const message =
+            error?.data?.error || 'Something went wrong. Please try again.';
+
+          Swal.fire({
+            icon: 'warning',
+            title: 'Oops!',
+            text: message,
+            confirmButtonText: 'OK',
+          });
+        }
       } else {
         const res = await verifyUserPanelToken({
           school_id: schoolid,
