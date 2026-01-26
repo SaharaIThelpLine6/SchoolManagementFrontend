@@ -63,7 +63,7 @@ const DipositeCostBookWiseVouture = ({ reportData, query }) => {
             <thead>
               <tr>
                 <th
-                  colSpan={6}
+                  colSpan={7}
                   className="border border-black bg-[#d5d5d5] text-white p-2 text-[20px]"
                 >
                   {fund.title}
@@ -73,6 +73,7 @@ const DipositeCostBookWiseVouture = ({ reportData, query }) => {
                 <th className="border border-black p-2 text-[20px]">ক্র:</th>
                 <th className="border border-black p-2 text-[20px]">তারিখ</th>
                 <th className="border border-black p-2 text-[20px]">ভাউচার</th>
+                <th className="border border-black p-2 text-[20px]">বই</th>
                 <th className="border border-black p-2 text-[20px]">সাব লেজার</th>
                 <th className="border border-black p-2 text-[20px]">বিবরন</th>
                 <th className="border border-black p-2 text-[20px]">পরিমান</th>
@@ -103,6 +104,9 @@ const DipositeCostBookWiseVouture = ({ reportData, query }) => {
                           </td>
                           <td className="text-[16px] py-2 px-1 border border-black">
                             {t.voucher}
+                          </td>
+                          <td className="text-[16px] py-2 px-1 border border-black">
+                            {t.book}
                           </td>
                           <td className="text-[16px] py-2 px-1 border border-black">
                             {t.subLedger}

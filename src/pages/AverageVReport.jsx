@@ -12,7 +12,7 @@ import {
   resultReportSizeStatus,
 } from "../Data/userReportsData";
 import { fetchSettingsData } from "../features/settings/settingsSlice";
-import { useGetUserReportQuery } from "../features/userReports/userReportsSlice";
+import { useGetAverageVReportQuery, useGetUserReportQuery } from "../features/userReports/userReportsSlice";
 import Swal from "sweetalert2";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetClassListQuery } from "../features/class/classQuerySlice";
@@ -101,7 +101,7 @@ const AverageVReport = ({ pageTitle }) => {
   const [queryParams, setQueryParams] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  const { isFetching, isError, error } = useGetUserReportQuery(queryParams, {
+  const { isFetching, isError, error } = useGetAverageVReportQuery(queryParams, {
     skip: !queryParams,
   });
 

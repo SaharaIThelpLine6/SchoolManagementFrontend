@@ -285,7 +285,7 @@ const DepositCostsReport = ({ pageTitle }) => {
     addresss: ["25"],
     dateFilter: ["1", "2", "4", "5","7", "8", "9", "12", "14", "17"],
     reportBase: ["3", "13", "16", "18"],
-    CAID: ["3", "4", "5", "6", "7", "12", "17"],
+    CAID: ["3", "4", "5", "6", "7", "12"],
     GLID: ["6", "7", "12", "17"],
     SLID: ["17"],
     LoginUaser: ["18"]
@@ -422,7 +422,7 @@ const DepositCostsReport = ({ pageTitle }) => {
                   ) : null
                 }
 
-            {(reportFieldMap?.CAID?.includes(selectedReportID) || (report_base && report_base == 1)) && (
+            {(reportFieldMap?.CAID?.includes(selectedReportID) || (report_base && report_base == 1 && selectedReportID != 16)) && (
                 <DefaultSelect
                   label={translate("Chart Of Account")}
                   options={CAID ?? []}
