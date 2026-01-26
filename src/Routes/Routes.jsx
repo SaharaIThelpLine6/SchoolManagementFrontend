@@ -26,6 +26,7 @@ import UserPanel from '../layout/UserPanel';
 import AddLoginUsers from '../pages/AddLoginUsers';
 import AddStudent from '../pages/AddStudent';
 import AddTeacher from '../pages/AddTeacher';
+import AllMaddrasahPaymentInfo from '../pages/AllMaddrasahPaymentInfo';
 import AllMadrasah from '../pages/AllMadrasah';
 import BalanceTransfer from '../pages/BalanceTransfer';
 import Book from '../pages/Book';
@@ -108,15 +109,15 @@ import StudentReports from '../pages/userpanel/StudentReports';
 import StudentResults from '../pages/userpanel/StudentResults';
 import StudentResultsView from '../pages/userpanel/StudentResultsView';
 import SubjectHistoryUserPanel from '../pages/userpanel/SubjectHistoryUserPanel';
+import UserForgetPassword from '../pages/userpanel/UserForgetPassword';
 import UserLogin from '../pages/userpanel/UserLogin';
 import UserProfile from '../pages/userpanel/UserProfile';
 import UserRegistration from '../pages/userpanel/UserRegistration';
 import VideoTutorialLink from '../pages/userpanel/VideoTutorialLink';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
+import PaymentSuccess from '../pages/userpanel/payment/PaymentSuccess';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
-import UserForgetPassword from '../pages/userpanel/UserForgetPassword';
-import PaymentSuccess from '../pages/userpanel/payment/PaymentSuccess';
 
 const router = createBrowserRouter([
   {
@@ -816,6 +817,16 @@ const router = createBrowserRouter([
               {
                 index: true,
                 element: <PaymentHistory pageTitle="Payment History" />,
+              },
+              {
+                path: 'maddrasah-payment-info',
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.st}
+                  // >
+                  <AllMaddrasahPaymentInfo pageTitle="All Maddrasah Payment Info" />
+                  // </RequirePermission>
+                ),
               },
             ],
           },

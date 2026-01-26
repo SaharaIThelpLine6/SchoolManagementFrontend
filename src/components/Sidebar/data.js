@@ -398,14 +398,19 @@ export const menuData = [
     icon: 'MdOutlinePayment',
     subMenu: [
       {
-        id: '2',
+        id: '1',
         name: 'Pay Now',
         route: '/checkout',
       },
       {
-        id: '1',
+        id: '2',
         name: 'Payment History',
         route: '/payment-history',
+      },
+      {
+        id: '3',
+        name: 'Maddrasah Payment Info',
+        route: '/payment-history/maddrasah-payment-info',
       },
     ],
   },
@@ -447,6 +452,7 @@ export const menuData = [
   //   icon: "HiDotsCircleHorizontal",
   //   subMenu: [],
   // },
+
   {
     id: '10',
     name: 'Settings',
@@ -471,7 +477,7 @@ export const menuData = [
     ],
   },
   {
-    id: '13',
+    id: '11',
     name: 'Help',
     route: '/help',
     icon: 'IoMdHelp',

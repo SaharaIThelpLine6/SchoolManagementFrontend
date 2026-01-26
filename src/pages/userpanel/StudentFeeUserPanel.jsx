@@ -12,6 +12,7 @@ import {
   useGetUserDetailsQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import useTranslate from '../../utils/Translate';
+import toBengaliWords from '../../utils/numberToBanglaWords';
 
 const StudentFeeUserPanel = () => {
   const methods = useForm();
@@ -166,7 +167,7 @@ const StudentFeeUserPanel = () => {
         InvoiceDiscount: 0,
         CurrentPaid: totalFee * months?.length,
         Due: 0,
-        // AmountInWord: 'দুই হাজার তিনশ',
+        AmountInWord: toBengaliWords(totalFee * months?.length),
         // CreateAt: '2026-01-19T12:21:28.318Z',
         // Remark: '',
         // AccountType: '301',
@@ -183,28 +184,28 @@ const StudentFeeUserPanel = () => {
         ],
       };
       console.log(payload, 'payload');
-       const res = await initPayment({ payload }).unwrap();
+      const res = await initPayment({ payload }).unwrap();
 
-       if (res?.gateway_url) {
-         Swal.fire({
-           title: 'Redirecting...',
-           text: 'You are being redirected to the payment gateway',
-           icon: 'success',
-           timer: 2000,
-           showConfirmButton: false,
-         });
+      if (res?.gateway_url) {
+        Swal.fire({
+          title: 'Redirecting...',
+          text: 'You are being redirected to the payment gateway',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+        });
 
-         setTimeout(() => {
-           window.location.href = res.gateway_url;
-         }, 2000);
-       } else {
-         Swal.fire({
-           title: 'Payment Failed',
-           text: 'Gateway URL not found',
-           icon: 'error',
-           confirmButtonText: 'OK',
-         });
-       }
+        setTimeout(() => {
+          window.location.href = res.gateway_url;
+        }, 2000);
+      } else {
+        Swal.fire({
+          title: 'Payment Failed',
+          text: 'Gateway URL not found',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
     } catch (err) {
       const errorMessage =
         err?.data?.error || err?.data?.message || 'Payment init failed';
