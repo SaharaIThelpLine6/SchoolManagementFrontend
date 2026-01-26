@@ -14,6 +14,14 @@ const SideBar = () => {
   const translate = useTranslate();
   const { user } = useSelector((state) => state.auth);
   const permissionType = user?.permissionType;
+
+  const checkPaymentRoute = () => {
+    if (permissionType === 1) {
+      return true;
+    }
+    return false;
+  };
+
   const { currectLanguage } = useSelector((state) => state.language);
   const fontClass =
     currectLanguage === 'bn' ? 'font-SolaimanLipi' : 'font-lato';
@@ -236,6 +244,12 @@ const SideBar = () => {
               return hasPermission(permissionsDataList.marksheet);
             }
 
+            // Payment
+
+            if (subItem.name === 'Maddrasah Payment Info') {
+              return checkPaymentRoute();
+            }
+
             return true; // Default allow
           });
 
@@ -307,7 +321,9 @@ const SideBar = () => {
                   <ul
                     className={`relative text-gray-600 overflow-hidden transition-all duration-300 ease-in-out
                     ${
-                      openMenuId === menu.id ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+                      openMenuId === menu.id
+                        ? 'max-h-[1000px] opacity-100'
+                        : 'max-h-0 opacity-0'
                     }`}
                   >
                     <div className="absolute top-0 bottom-0 left-6 w-px border-l-2 border-dashed border-[#007af7] z-0" />

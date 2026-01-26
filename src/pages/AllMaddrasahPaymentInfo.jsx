@@ -23,6 +23,7 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
 
+
   // Fetch all Maddrasah SSL config
   const {
     data: responseData = {},

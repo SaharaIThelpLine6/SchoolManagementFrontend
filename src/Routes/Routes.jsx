@@ -118,6 +118,7 @@ import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
 import PaymentSuccess from '../pages/userpanel/payment/PaymentSuccess';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
+import PaymentRouteGuard from './PaymentRouteGuard';
 
 const router = createBrowserRouter([
   {
@@ -821,11 +822,11 @@ const router = createBrowserRouter([
               {
                 path: 'maddrasah-payment-info',
                 element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.st}
-                  // >
-                  <AllMaddrasahPaymentInfo pageTitle="All Maddrasah Payment Info" />
-                  // </RequirePermission>
+                    <PaymentRouteGuard>
+
+                      <AllMaddrasahPaymentInfo pageTitle="All Maddrasah Payment Info" />
+                    </PaymentRouteGuard>
+
                 ),
               },
             ],
