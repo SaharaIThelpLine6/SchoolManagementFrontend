@@ -67,7 +67,7 @@ const DipositeCostPaymentSystemWise = ({ reportData, query }) => {
                         {i + 1}
                       </td>
                       <td className="border border-black p-2 text-[18px] bg-white">
-                        {detail.UserName}
+                        {bank.UserName}
                       </td>
                       <td className="border border-black p-2 text-[18px] bg-white">
                         {detail.CAID === 1 ? detail.Amount : ''}

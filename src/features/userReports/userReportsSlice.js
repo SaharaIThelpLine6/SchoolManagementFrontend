@@ -85,6 +85,27 @@ export const userReportsSlice = createApi({
         return `/pointV_report?${params.toString()}`;
       },
     }),
+    getAverageVReport: builder.query({
+      query: ({
+        report_id,
+        session_id,
+        class_id,
+        exam_id,
+        start_id,
+        end_id,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (report_id !== undefined) params.append('report_id', report_id);
+        if (session_id !== undefined) params.append('session_id', session_id);
+        if (class_id !== undefined) params.append('class_id', class_id);
+        if (exam_id !== undefined) params.append('exam_id', exam_id);
+        if (start_id !== undefined) params.append('start_id', start_id);
+        if (end_id !== undefined) params.append('end_id', end_id);
+
+        return `/pointV_report?${params.toString()}`;
+      },
+    }),
 
     getDepositCostReport: builder.query({
       query: ({
@@ -155,6 +176,7 @@ export const {
   useGetUserReportQuery,
   useGetStudentReportQuery,
   useGetDepositCostReportQuery,
+  useGetAverageVReportQuery,
   useGetExamReportQuery,
   useGetPointVReportQuery
 } = userReportsSlice;
