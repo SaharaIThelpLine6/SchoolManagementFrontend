@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 const PaymentSuccess = () => {
   const [params] = useSearchParams();
@@ -12,7 +12,7 @@ const PaymentSuccess = () => {
     // optional: auto redirect after 5 seconds
     const timer = setTimeout(() => {
       navigate(`/${schoolid}/dashboard/monthly-fee`); // বা যেটা চাই
-    }, 30000);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [navigate]);

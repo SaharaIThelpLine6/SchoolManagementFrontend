@@ -643,7 +643,7 @@ const CreateStudentFee = () => {
 
       console.log('✅ Final Payload:', payload);
 
-      // await postStudentFee(payload).unwrap();
+      await postStudentFee(payload).unwrap();
 
       // 🌀 Refetch when AdmissionID exists
       if (filteredSelectedPerStudentFee?.AdmissionID) {
