@@ -36,7 +36,7 @@ const StudentSingleReport = (id) => {
     );
 
   return (
-    <div className="max-w-md mx-auto p-4 bg-white shadow-md border border-gray-200 rounded-lg text-gray-800 font-sans sm:hidden">
+    <div className="max-w-md mx-auto p-4 bg-white shadow-md border border-gray-200 rounded-lg text-gray-800 font-SolaimanLipi">
       {/* Header */}
       <div className="text-center mb-4">
         <h1 className="text-xl font-bold mb-1 flex items-center justify-center gap-2">

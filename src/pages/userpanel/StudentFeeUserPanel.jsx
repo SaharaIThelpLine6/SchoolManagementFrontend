@@ -120,7 +120,6 @@ const StudentFeeUserPanel = () => {
   console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
 
   const [initPayment, { isLoading }] = useInitPaymentMutation();
-  const amount = 10;
   const fees = months?.flatMap((monthId) => {
     const month = monthFeeList.find((m) => m.monthId === monthId);
 
@@ -155,6 +154,17 @@ const StudentFeeUserPanel = () => {
 
   const handlePayment = async () => {
     try {
+      const checkAmount = totalFee * months?.length;
+      if (!checkAmount) {
+        Swal.fire({
+          title: 'Payment Error',
+          text: 'Invalid payment amount',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+        return;
+      }
+
       const payload = {
         UserID: userDetails?.UserID,
         UserName: userDetails?.UserName,
