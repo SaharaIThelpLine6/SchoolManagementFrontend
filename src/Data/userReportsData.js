@@ -118,7 +118,8 @@ export const colorStatus = [
 ];
 export const resultReportSizeStatus = [
   { id: 1, name: 'অটো সাইজ' },
-  { id: 2, name: 'হরিজন্টাল' },
+  { id: 2, name: 'আরবি' },
+  { id: 3, name: 'হরিজন্টাল' },
 ];
 export const resultReportOptional = [
   { id: 1, name: 'With Optional' },

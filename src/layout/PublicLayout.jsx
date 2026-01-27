@@ -111,7 +111,7 @@ const PublicLayout = () => {
                     </Link>
                   </div>
                   <div>
-                    <h1 className="text-theme-color font-[500] text-[24px] md:text-[26px]">
+                    <h1 className="text-theme-color font-[500] text-[24px] md:text-[26px] w-[290px]">
                       {schoolData?.InstitutionName}
                     </h1>
                   </div>

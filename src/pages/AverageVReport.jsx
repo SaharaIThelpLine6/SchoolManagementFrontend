@@ -101,8 +101,8 @@ const AverageVReport = ({ pageTitle }) => {
   const [queryParams, setQueryParams] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  const { isFetching, isError, error } = useGetAverageVReportQuery(queryParams, {
-    skip: !queryParams,
+  const { data, isFetching, isError, error } = useGetAverageVReportQuery(queryParams, {
+    skip: !queryParams
   });
 
   const { data: sessionData } = useGetSessionsQuery();
@@ -149,15 +149,25 @@ const AverageVReport = ({ pageTitle }) => {
       exam_id: formData.ExamID,
       residential_id: formData.RDID,
       language_id: formData.id,
+      is_active: formData.IsActive
     };
-
     Object.keys(params).forEach(
       (key) =>
         (params[key] === undefined || params[key] === "") && delete params[key]
     );
 
-    setQueryParams(params);
+    setQueryParams({ ...params });
   };
+
+
+  useEffect(()=>{
+    console.log(data);
+  }, [data])
+
+  // if(isFetching){
+  //   console.log("Fetching......");
+  
+  // }
 
   return (
     <div className="font-SolaimanLipi">

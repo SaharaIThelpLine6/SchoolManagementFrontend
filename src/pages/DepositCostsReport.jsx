@@ -172,6 +172,12 @@ const DepositCostsReport = ({ pageTitle }) => {
     UserID
   ]);
 
+
+
+  useEffect(()=>{
+    setValue("report_base", '')
+  }, [selectedReportID])
+
   // Query only if queryParams are ready and valid
   const {
     data: reportData,
@@ -285,7 +291,7 @@ const DepositCostsReport = ({ pageTitle }) => {
     addresss: ["25"],
     dateFilter: ["1", "2", "4", "5","7", "8", "9", "12", "14", "17"],
     reportBase: ["3", "13", "16", "18"],
-    CAID: ["3", "4", "5", "6", "7", "12"],
+    CAID: ["3", "4", "5", "6", "7", "12", "17"],
     GLID: ["6", "7", "12", "17"],
     SLID: ["17"],
     LoginUaser: ["18"]
