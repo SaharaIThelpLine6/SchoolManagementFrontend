@@ -91,6 +91,12 @@ export const paymentSlice = createApi({
       }),
       invalidatesTags: ['AllSchoolsSSL'], // ✅ Invalidate list after delete
     }),
+    getMaddrasahSSL: builder.query({
+      query: (id) => ({
+        url: `get_ssl/${id}`,
+      }),
+      invalidatesTags: ['AllSchoolsSSL'], // ✅ Invalidate list after delete
+    }),
   }),
 });
 
@@ -101,5 +107,7 @@ export const {
   useGetPaymentHistoryQuery,
   useGetAllMaddrasahSSLInfoQuery,
   useUpdateMaddrasahSSLMutation,
-  useDeleteMaddrasahSSLMutation
+  usePostMaddrasahSSLMutation,
+  useDeleteMaddrasahSSLMutation,
+  useGetMaddrasahSSLQuery
 } = paymentSlice;

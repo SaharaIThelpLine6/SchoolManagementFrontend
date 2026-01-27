@@ -65,6 +65,7 @@ import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
 import PaymentModalUserPanel from '../pages/userpanel/PaymentModalUserPanel';
+import CreateEditPaymentInfoModal from './Modals/CreateEditPaymentInfoModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -219,6 +220,12 @@ const DefaultModal = () => {
                 {modalType === 'PAYMENT_GETWAY' && <PaymentGetway />}
                 {modalType === 'SUCCESSANDERROR' && <SuccessAndError />}
                 {modalType === 'ADD_BOOK' && <AddEditBook />}
+                {modalType === 'CREATE_PAYMENT_INFO' && (
+                  <CreateEditPaymentInfoModal />
+                )}
+                {modalType === 'EDIT_PAYMENT_INFO' && (
+                  <CreateEditPaymentInfoModal id={id}/>
+                )}
                 {modalType === 'CODE_SETTING' && <CodeSetting />}
                 {modalType === 'UPDATE_BOOK' && <AddEditBook id={id} />}
                 {modalType === 'COMPLAINT_BOX_TERMS_AND_CONDITIONS_CREATE' && (

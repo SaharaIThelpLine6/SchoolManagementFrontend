@@ -15,6 +15,7 @@ import {
   useGetAllMaddrasahSSLInfoQuery,
 } from '../features/payment/paymentSlice';
 import useTranslate from '../utils/Translate';
+import { showModal } from '../utils/ModalControlar';
 
 const PAGE_SIZE = 10;
 
@@ -22,7 +23,6 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
-
 
   // Fetch all Maddrasah SSL config
   const {
@@ -86,6 +86,16 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
   if (isError)
     return <p className="text-red-500">Failed to load SSL config data</p>;
 
+  const handleOpenModal = useCallback(() => {
+    showModal(translate('Create Payment Info'), 'CREATE_PAYMENT_INFO');
+  }, [translate]);
+  const handleEditOpenModal = useCallback(
+    (id) => {
+      showModal(translate('Edit Payment Info'), 'EDIT_PAYMENT_INFO', id);
+    },
+    [translate]
+  );
+
   // Table columns
   const columns = [
     {
@@ -94,7 +104,7 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
       hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
-          <EditButton onClick={() => console.log('Edit', row.SchoolID)} />
+          <EditButton onClick={() => handleEditOpenModal(row.SchoolID)} />
           {/* <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
             title="Delete"
@@ -157,9 +167,7 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
           <h3 className="font-SolaimanLipi text-[20px] font-bold">
             {translate('All Maddrasah Payment Info')}
           </h3>
-          <Button onClick={() => console.log('Create new SSL config')}>
-            {translate('Create')}
-          </Button>
+          <Button onClick={handleOpenModal}>{translate('Create')}</Button>
         </div>
 
         <SortableTable columns={columns} data={paginatedData} />
