@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import Cookies from "js-cookie";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import Cookies from 'js-cookie';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 export const paymentSlice = createApi({
@@ -97,6 +97,42 @@ export const paymentSlice = createApi({
       }),
       invalidatesTags: ['AllSchoolsSSL'], // ✅ Invalidate list after delete
     }),
+    getMaddrasahDatabases: builder.query({
+      query: (params = {}) => {
+        const {
+          page = 1,
+          limit = 50,
+          search,
+          instituteName,
+          userCode,
+          databaseName,
+          loginStatus,
+          qmmStatus,
+          sortBy = 'ID',
+          sortOrder = 'ASC',
+        } = params;
+
+        const queryParams = new URLSearchParams({
+          page: page.toString(),
+          limit: limit.toString(),
+          sortBy,
+          sortOrder,
+        });
+
+        if (search) queryParams.append('search', search);
+        if (instituteName) queryParams.append('instituteName', instituteName);
+        if (userCode) queryParams.append('userCode', userCode);
+        if (databaseName) queryParams.append('databaseName', databaseName);
+        if (loginStatus) queryParams.append('loginStatus', loginStatus);
+        if (qmmStatus) queryParams.append('qmmStatus', qmmStatus);
+
+        return {
+          url: `/get_databases?${queryParams.toString()}`,
+          method: 'GET',
+        };
+      },
+      providesTags: ['AllSchoolsSSL'],
+    }),
   }),
 });
 
@@ -109,5 +145,6 @@ export const {
   useUpdateMaddrasahSSLMutation,
   usePostMaddrasahSSLMutation,
   useDeleteMaddrasahSSLMutation,
-  useGetMaddrasahSSLQuery
+  useGetMaddrasahSSLQuery,
+  useGetMaddrasahDatabasesQuery,
 } = paymentSlice;

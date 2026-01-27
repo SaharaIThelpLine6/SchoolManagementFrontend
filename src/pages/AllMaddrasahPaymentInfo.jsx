@@ -10,12 +10,14 @@ import DefaultPagination from '../components/Pagination/DefaultPagination';
 import SortableTable from '../components/Tables/SortableTable';
 import { setPageName } from '../features/auth/authSlice';
 
+import DeleteButton from '../components/Button/DeleteButton';
+import SvgIcon from '../components/icons/SvgIcon';
 import {
   useDeleteMaddrasahSSLMutation,
   useGetAllMaddrasahSSLInfoQuery,
 } from '../features/payment/paymentSlice';
-import useTranslate from '../utils/Translate';
 import { showModal } from '../utils/ModalControlar';
+import useTranslate from '../utils/Translate';
 
 const PAGE_SIZE = 10;
 
@@ -29,7 +31,11 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
     data: responseData = {},
     isLoading,
     isError,
-  } = useGetAllMaddrasahSSLInfoQuery();
+  } = useGetAllMaddrasahSSLInfoQuery({
+    refetchOnMountOrArgChange: true,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
   console.log(responseData, 'responseData');
 
   // Extract the array data from response
@@ -82,19 +88,28 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
     [deleteMaddrasahInfo]
   );
 
-  if (isLoading) return <Loading />;
-  if (isError)
-    return <p className="text-red-500">Failed to load SSL config data</p>;
-
+  // 🔥 MOVE THESE UP (before isLoading / isError)
   const handleOpenModal = useCallback(() => {
     showModal(translate('Create Payment Info'), 'CREATE_PAYMENT_INFO');
   }, [translate]);
+
   const handleEditOpenModal = useCallback(
     (id) => {
       showModal(translate('Edit Payment Info'), 'EDIT_PAYMENT_INFO', id);
     },
     [translate]
   );
+  const handleViewOpenModal = useCallback(
+    (id) => {
+      showModal(translate('View Payment Info'), 'VIEW_PAYMENT_INFO', id);
+    },
+    [translate]
+  );
+
+  // ✅ NOW conditional returns are safe
+  if (isLoading) return <Loading />;
+  if (isError)
+    return <p className="text-red-500">Failed to load SSL config data</p>;
 
   // Table columns
   const columns = [
@@ -104,14 +119,15 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
       hozAlign: 'center',
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
+          <DeleteButton onClick={() => handleDelete(row.SchoolID)} />
           <EditButton onClick={() => handleEditOpenModal(row.SchoolID)} />
-          {/* <button
-            className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md"
+          <button
+            className="p-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md"
             title="Delete"
-            onClick={() => handleDelete(row.SchoolID)}
+            onClick={() => handleViewOpenModal(row.SchoolID)}
           >
-            Delete
-          </button> */}
+            <SvgIcon name={'FaEye'} />
+          </button>
         </div>
       ),
     },
@@ -183,6 +199,6 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
       </div>
     </div>
   );
-};
+};;
 
 export default AllMaddrasahPaymentInfo;

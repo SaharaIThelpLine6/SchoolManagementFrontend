@@ -66,6 +66,7 @@ import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
 import PaymentModalUserPanel from '../pages/userpanel/PaymentModalUserPanel';
 import CreateEditPaymentInfoModal from './Modals/CreateEditPaymentInfoModal';
+import PaymentSSLInfoView from './Modals/PaymentSSLInfoVierw';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -224,7 +225,7 @@ const DefaultModal = () => {
                   <CreateEditPaymentInfoModal />
                 )}
                 {modalType === 'EDIT_PAYMENT_INFO' && (
-                  <CreateEditPaymentInfoModal id={id}/>
+                  <CreateEditPaymentInfoModal id={id} />
                 )}
                 {modalType === 'CODE_SETTING' && <CodeSetting />}
                 {modalType === 'UPDATE_BOOK' && <AddEditBook id={id} />}
@@ -236,6 +237,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'STUDENT_COMPLAINT_VIEW' && (
                   <StudentReportView id={id} />
+                )}
+                {modalType === 'VIEW_PAYMENT_INFO' && (
+                  <PaymentSSLInfoView id={id} />
                 )}
                 {modalType === 'SUB_SIDIARY' && <Subsidiary />}
                 {modalType === 'EXAM_REPORT_SETTING' && <ExamReportSetting />}
