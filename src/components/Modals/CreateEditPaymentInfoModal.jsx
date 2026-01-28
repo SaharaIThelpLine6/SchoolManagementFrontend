@@ -12,6 +12,7 @@ import {
 import { hideModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
 import SearchableSingleStudentSelect from '../Forms/SearchableSingleStudentSelect';
+import Loading from '../Loading/Loading';
 
 const CreateEditPaymentInfoModal = ({ id }) => {
   const methods = useForm();
@@ -26,7 +27,7 @@ const CreateEditPaymentInfoModal = ({ id }) => {
   // State for database search
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const limit = 50;
+  const limit = 10000;
 
   // Fetch databases with search
   const { data: databaseResponse, isLoading: isDatabasesLoading } =
@@ -116,6 +117,8 @@ const CreateEditPaymentInfoModal = ({ id }) => {
     }
   };
 
+  if (isDatabasesLoading) return <Loading />;
+
   return (
     <div className="w-full border rounded-lg p-5 bg-white shadow-inner">
       <FormProvider {...methods}>
@@ -137,9 +140,13 @@ const CreateEditPaymentInfoModal = ({ id }) => {
               onSearchChange={handleSearchChange}
               onChange={handleSelectionChange}
               defaultValue={isEditMode ? editData?.SchoolID : undefined}
-              defaultLabel={isEditMode ?
-                (maddrasaOptions.find(opt => opt.UserCode === editData?.SchoolID)?.InstituteName || '')
-                : undefined}
+              defaultLabel={
+                isEditMode
+                  ? maddrasaOptions.find(
+                      (opt) => opt.UserCode === editData?.SchoolID
+                    )?.InstituteName || ''
+                  : undefined
+              }
             />
           </div>
 

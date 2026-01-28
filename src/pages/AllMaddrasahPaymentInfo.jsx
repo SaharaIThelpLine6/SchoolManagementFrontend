@@ -1,32 +1,37 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 
 import Button from '../components/Button/Button';
+import DeleteButton from '../components/Button/DeleteButton';
 import EditButton from '../components/Button/EditButton';
+import DefaultInput from '../components/Forms/DefaultInput';
 import Loading from '../components/Loading/Loading';
 import DefaultPagination from '../components/Pagination/DefaultPagination';
 import SortableTable from '../components/Tables/SortableTable';
-import { setPageName } from '../features/auth/authSlice';
-
-import DeleteButton from '../components/Button/DeleteButton';
 import SvgIcon from '../components/icons/SvgIcon';
+
+import { setPageName } from '../features/auth/authSlice';
 import {
   useDeleteMaddrasahSSLMutation,
   useGetAllMaddrasahSSLInfoQuery,
 } from '../features/payment/paymentSlice';
+
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
 
 const PAGE_SIZE = 10;
 
 const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
-  const location = useLocation();
   const dispatch = useDispatch();
+  const method = useForm();
   const translate = useTranslate();
 
-  // Fetch all Maddrasah SSL config
+  /* ---------------- react-hook-form ---------------- */
+  const { watch } = method;
+
+  /* ---------------- API ---------------- */
   const {
     data: responseData = {},
     isLoading,
@@ -36,29 +41,55 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
     refetchOnFocus: true,
     refetchOnReconnect: true,
   });
-  console.log(responseData, 'responseData');
 
-  // Extract the array data from response
   const maddrasahData = responseData?.data || [];
 
-  // Delete mutation
   const [deleteMaddrasahInfo] = useDeleteMaddrasahSSLMutation();
 
+  /* ---------------- State ---------------- */
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchValue, setSearchValue] = useState('');
 
+  /* ---------------- Page title ---------------- */
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  const totalPages = Math.ceil(maddrasahData.length / PAGE_SIZE);
+  /* ---------------- 🔍 WATCH SEARCH ---------------- */
+  const searchWatch = watch('Search');
 
-  // Paginate data with defensive check
+  useEffect(() => {
+    if (searchWatch !== undefined) {
+      setSearchValue(searchWatch);
+      setCurrentPage(1); // search করলে page reset
+    }
+  }, [searchWatch]);
+
+  /* ---------------- FILTER DATA ---------------- */
+  const filteredData = useMemo(() => {
+    if (!searchValue) return maddrasahData;
+
+    const search = searchValue.toLowerCase();
+
+    return maddrasahData.filter((item) => {
+      return (
+        item.UserName?.toLowerCase().includes(search) ||
+        item.InstituteName?.toLowerCase().includes(search) ||
+        item.UserCode?.toString().includes(search) ||
+        item.SchoolID?.toString().includes(search)
+      );
+    });
+  }, [maddrasahData, searchValue]);
+
+  /* ---------------- PAGINATION ---------------- */
+  const totalPages = Math.ceil(filteredData.length / PAGE_SIZE);
+
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
-    return maddrasahData.slice(start, start + PAGE_SIZE);
-  }, [maddrasahData, currentPage]);
+    return filteredData.slice(start, start + PAGE_SIZE);
+  }, [filteredData, currentPage]);
 
-  // Delete handler
+  /* ---------------- DELETE ---------------- */
   const handleDelete = useCallback(
     async (schoolId) => {
       Swal.fire({
@@ -69,18 +100,13 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
         confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel',
       }).then(async (result) => {
         if (result.isConfirmed) {
           try {
             await deleteMaddrasahInfo(schoolId).unwrap();
-            Swal.fire(
-              'Deleted!',
-              'The SSL config has been removed.',
-              'success'
-            );
-          } catch (error) {
-            Swal.fire('Error!', 'Failed to delete the SSL config.', 'error');
+            Swal.fire('Deleted!', 'SSL config deleted.', 'success');
+          } catch {
+            Swal.fire('Error!', 'Delete failed.', 'error');
           }
         }
       });
@@ -88,7 +114,7 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
     [deleteMaddrasahInfo]
   );
 
-  // 🔥 MOVE THESE UP (before isLoading / isError)
+  /* ---------------- MODALS ---------------- */
   const handleOpenModal = useCallback(() => {
     showModal(translate('Create Payment Info'), 'CREATE_PAYMENT_INFO');
   }, [translate]);
@@ -99,6 +125,7 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
     },
     [translate]
   );
+
   const handleViewOpenModal = useCallback(
     (id) => {
       showModal(translate('View Payment Info'), 'VIEW_PAYMENT_INFO', id);
@@ -106,27 +133,25 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
     [translate]
   );
 
-  // ✅ NOW conditional returns are safe
   if (isLoading) return <Loading />;
   if (isError)
     return <p className="text-red-500">Failed to load SSL config data</p>;
 
-  // Table columns
+  /* ---------------- TABLE COLUMNS ---------------- */
   const columns = [
     {
       title: translate('Action'),
       field: 'SchoolID',
       hozAlign: 'center',
       render: (row) => (
-        <div className="flex justify-center items-center gap-2">
+        <div className="flex justify-center gap-2">
           <DeleteButton onClick={() => handleDelete(row.SchoolID)} />
           <EditButton onClick={() => handleEditOpenModal(row.SchoolID)} />
           <button
-            className="p-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md"
-            title="Delete"
+            className="p-2 text-white bg-yellow-500 rounded-md"
             onClick={() => handleViewOpenModal(row.SchoolID)}
           >
-            <SvgIcon name={'FaEye'} />
+            <SvgIcon name="FaEye" />
           </button>
         </div>
       ),
@@ -135,61 +160,65 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
       title: translate('User Name'),
       field: 'UserName',
       hozAlign: 'center',
-      render: (row) => <p>{row.UserName}</p>,
     },
     {
       title: translate('Maddrasah Name'),
       field: 'InstituteName',
       hozAlign: 'center',
-      render: (row) => <p>{row.InstituteName}</p>,
     },
     {
       title: translate('School ID'),
       field: 'SchoolID',
       hozAlign: 'center',
-      render: (row) => <p>{row.SchoolID}</p>,
     },
     {
       title: translate('Store ID'),
       field: 'StoreID',
-      // hozAlign: 'center',
-      width: 100, // কলামের width সেট করুন
-      formatter: 'textarea', // অথবা formatter ব্যবহার করুন
+      width: 120,
       render: (row) => (
-        <div className="flex justify-center items-center ">
-          <p className="w-24 text-center truncate">{row.StoreID}</p>
-        </div>
+        <p className="w-28 mx-auto truncate text-center">{row.StoreID}</p>
       ),
     },
     {
       title: translate('Store Password'),
       field: 'StorePass',
-      // hozAlign: 'center',
-      width: 100, // কলামের width সেট করুন
+      width: 120,
       render: (row) => (
-        <div className="flex justify-center items-center ">
-          <p className="w-24 text-center truncate font-mono bg-gray-100 p-1 rounded">
-            {row.StorePass}
-          </p>
-        </div>
+        <p className="w-28 mx-auto truncate text-center font-mono bg-gray-100 p-1 rounded">
+          {row.StorePass}
+        </p>
       ),
     },
   ];
 
+  /* ---------------- RENDER ---------------- */
   return (
-    <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
-      <div className="block w-full overflow-x-auto">
-        <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
-          <h3 className="font-SolaimanLipi text-[20px] font-bold">
-            {translate('All Maddrasah Payment Info')}
+    <FormProvider {...method}>
+      <div className="bg-white p-6 rounded-xl shadow-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-bold text-lg">
+            {translate('Maddrasah Payment Info')}
           </h3>
           <Button onClick={handleOpenModal}>{translate('Create')}</Button>
         </div>
 
-        <SortableTable columns={columns} data={paginatedData} />
+        {/* 🔍 SEARCH INPUT */}
+        <div className="grid grid-cols-1 sm:grid-cols-6 mb-4">
+          <DefaultInput
+            label={'Search'}
+            type={'text'}
+            placeholder={'Search by User Code or User Name'}
+            registerKey={'Search'}
+          />
+        </div>
 
-        {/* Pagination */}
-        {maddrasahData.length > 0 && (
+        <SortableTable
+          columns={columns}
+          data={paginatedData}
+          isFilterColumn={false}
+        />
+
+        {filteredData.length > 0 && (
           <DefaultPagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -197,8 +226,8 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
           />
         )}
       </div>
-    </div>
+    </FormProvider>
   );
-};;
+};
 
 export default AllMaddrasahPaymentInfo;
