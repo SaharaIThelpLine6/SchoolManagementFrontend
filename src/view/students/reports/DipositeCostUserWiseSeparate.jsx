@@ -21,7 +21,6 @@ const DipositeCostBookWiseVouture = ({ reportData, query }) => {
 
   return (
     <div className="font-bangla  p-4 bg-white text-xs">
-
       <div className="bg-white">
         {/* Title Section */}
         <div className="text-center w-full bg-white">
@@ -41,15 +40,9 @@ const DipositeCostBookWiseVouture = ({ reportData, query }) => {
         </div>
       </div>
 
-
       <div className="bg-white pt-8">
-
-
-        <table
-          className="w-full border-collapse border border-black bg-white mb-8"
-        >
+        <table className="w-full border-collapse border border-black bg-white mb-8">
           <thead>
-
             <tr>
               <th
                 colSpan={6}
@@ -93,10 +86,8 @@ const DipositeCostBookWiseVouture = ({ reportData, query }) => {
           </tbody>
         </table>
 
-
-
+        
       </div>
-
     </div>
   );
 };
