@@ -66,6 +66,7 @@ import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
 import PaymentModalUserPanel from '../pages/userpanel/PaymentModalUserPanel';
 import CreateEditPaymentInfoModal from './Modals/CreateEditPaymentInfoModal';
+import StudentCardModel from '../view/students/id-card-model/StudentCardModel';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -292,6 +293,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'DATA_EXPORT_FEILD' && (
                   <DataExportModel userData={id} />
+                )}
+                {modalType === 'STUDENT_ID_CARD' && (
+                  <StudentCardModel  />
                 )}
                 {/* User Panel Models */}
                 {modalType === 'SESSION_CHANGE_MODEL' && (

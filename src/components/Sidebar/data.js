@@ -125,6 +125,11 @@ export const menuData = [
         name: 'Online Admission',
         route: '/students/online-admission',
       },
+      {
+        id: '11',
+        name: 'Student ID Card',
+        route: '/students/student-id-card',
+      },
     ],
   },
   {
