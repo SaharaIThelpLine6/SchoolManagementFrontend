@@ -89,6 +89,7 @@ const initialState = {
   characterReportEditMode: null,
   parentsData: [],
   allUsers: [],
+  PrintableStudentList: []
 };
 
 const classSlice = createSlice({
@@ -137,6 +138,9 @@ const classSlice = createSlice({
     },
     clearAllUsersData: (state) => {
       state.allUsers = [];
+    },
+    setPrintableStudentList: (state, action) => {
+      state.PrintableStudentList = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -232,5 +236,6 @@ export const {
   clearAllUsersData,
   setMonthFeeData,
   setStudentFeeUpdateID,
+  setPrintableStudentList,
 } = classSlice.actions;
 export default classSlice.reducer;

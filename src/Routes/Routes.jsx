@@ -119,6 +119,8 @@ import PaymentSuccess from '../pages/userpanel/payment/PaymentSuccess';
 import OwenGuide from './OwenGuide';
 import { RequirePermission } from './RequirePermission';
 import PaymentRouteGuard from './PaymentRouteGuard';
+import StudentIdCardPrint from '../pages/StudentIdCardPrint';
+import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
 
 const router = createBrowserRouter([
   {
@@ -336,6 +338,26 @@ const router = createBrowserRouter([
                     permissionId={permissionsDataList.student_admission}
                   >
                     <OnlineAdmissionTable pageTitle="Online Admission List" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'student-id-card',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.student_admission}
+                  >
+                    <StudentIdCardPrint pageTitle="Student Id Card" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'student-id-card-print',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.student_admission}
+                  >
+                    <StudentIdCardGenerate pageTitle="Student Id Card Print" />
                   </RequirePermission>
                 ),
               },

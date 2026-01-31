@@ -151,14 +151,27 @@ const DataExport = ({ pageTitle }) => {
       field: 'NIDNO',
     },
     { id: 'Blood Group', label: 'Blood Group', field: 'BloodGroup' },
-    { id: 'Village', label: 'Village', field: 'permanentVill' },
-    { id: 'Post Office', label: 'Post Office', field: 'permanentPost' },
+    { id: 'Village', label: 'Permanent Village', field: 'permanentVill' },
+    { id: 'Post Office', label: 'Permanent Post Office', field: 'permanentPost' },
     {
       id: 'Police Station',
-      label: 'Police Station',
+      label: 'Permanent Police Station',
       field: 'PoliceStationName',
     },
-    { id: 'District', label: 'District', field: 'PermanentDistrictName' },
+    { id: 'District', label: 'Permanent District', field: 'PermanentDistrictName' },
+
+
+
+    { id: 'primaryVillage', label: 'Primary Village', field: 'permanentVill' },
+    { id: 'primaryPost Office', label: 'Primary Post Office', field: 'permanentPost' },
+    {
+      id: 'primaryPolice Station',
+      label: 'Primary Police Station',
+      field: 'PoliceStationName',
+    },
+    { id: 'primaryDistrict', label: 'Primary District', field: 'PermanentDistrictName' },
+
+
     {
       id: 'Financial Status',
       label: 'Financial Status',
