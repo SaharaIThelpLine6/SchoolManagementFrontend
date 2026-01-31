@@ -587,6 +587,7 @@ const CreateStudentFee = () => {
       // 🧱 Step 3: Build Final Payload
       const payload = {
         UserID: feeTotals.userId,
+        StudentCode: filteredSelectedPerStudentFee?.StudentCode,
         AdmissionID: feeTotals.admissionId,
         CurrentInvoice: feeTotals.allPrescribedFee,
         InvoiceDiscount: feeTotals.allDeduction,
