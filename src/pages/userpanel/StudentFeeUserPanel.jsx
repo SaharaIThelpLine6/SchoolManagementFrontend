@@ -12,7 +12,7 @@ import {
   useGetUserDetailsQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import useTranslate from '../../utils/Translate';
-import toBengaliWords from '../../utils/numberToBanglaWords';
+import { numberToBanglaWords } from '../../helper/numberToBanglaWords';
 
 const StudentFeeUserPanel = () => {
   const methods = useForm();
@@ -177,7 +177,7 @@ const StudentFeeUserPanel = () => {
         InvoiceDiscount: 0,
         CurrentPaid: totalFee * months?.length,
         Due: 0,
-        AmountInWord: toBengaliWords(totalFee * months?.length),
+        AmountInWord: numberToBanglaWords(totalFee * months?.length),
         // CreateAt: '2026-01-19T12:21:28.318Z',
         // Remark: '',
         // AccountType: '301',
