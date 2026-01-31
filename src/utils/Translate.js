@@ -11,6 +11,8 @@ const useTranslate = () => {
     'List of Candidates': 'পরীক্ষার্থীর তালিকা',
     Status: 'স্ট্যাটাস',
     Reset: 'রিসেট',
+    Delete: 'ডিলিট',
+    Edit: 'এডিট',
     'Class Work': 'পড়া',
     'Home Work': 'বাড়ির কাজ',
     'User Panel': 'ইউজার প্যানেল',

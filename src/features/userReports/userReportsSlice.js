@@ -169,6 +169,25 @@ export const userReportsSlice = createApi({
         },
       }),
     }),
+    // In your API slice
+    getEditDeleteRecords: builder.query({
+      query: ({
+        monthFilter,
+        dataType,
+        startDate,
+        endDate,
+      }) => {
+        // Construct query string
+        const params = new URLSearchParams();
+
+        if (monthFilter) params.append('monthFilter', monthFilter);
+        if (dataType) params.append('dataType', dataType);
+        if (startDate) params.append('startDate', startDate);
+        if (endDate) params.append('endDate', endDate);
+
+        return `edit_delete_record?${params.toString()}`;
+      },
+    }),
   }),
 });
 
@@ -178,5 +197,6 @@ export const {
   useGetDepositCostReportQuery,
   useGetAverageVReportQuery,
   useGetExamReportQuery,
-  useGetPointVReportQuery
+  useGetPointVReportQuery,
+  useGetEditDeleteRecordsQuery,
 } = userReportsSlice;
