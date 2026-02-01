@@ -11,7 +11,7 @@ const PaymentCancel = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       navigate(`/${schoolid}/dashboard/monthly-fee`);
-    }, 1000);
+    }, 10000);
 
     return () => clearTimeout(timer);
   }, [navigate, schoolid]);
@@ -27,7 +27,7 @@ const PaymentCancel = () => {
         </p>
       )}
 
-      <p>১ সেকেন্ড পরে ফি পেজে নিয়ে যাওয়া হবে…</p>
+      {/* <p>১ সেকেন্ড পরে ফি পেজে নিয়ে যাওয়া হবে…</p> */}
 
       <button onClick={() => navigate(`/${schoolid}/dashboard/monthly-fee`)}>
         আবার চেষ্টা করুন

@@ -138,17 +138,17 @@ const HomWork = ({ pageTitle }) => {
             // onClick={() => handleCopyRowToForm(row)}
             text={`
                 *Homework Details 📚*
-                Class: ${row.SubClass.SubClass}
-                Session: ${row.Session.SessionName}
-                Subject: ${row.Subject.SubjectName}
-                Teacher: ${row.User.UserName}
-                Mobile: ${row.User.Mobile1}
+                Class: ${row.SubClass?.SubClass}
+                Session: ${row.Session?.SessionName}
+                Subject: ${row.Subject?.SubjectName}
+                Teacher: ${row.User?.UserName}
+                Mobile: ${row.User?.Mobile1}
 
                 *Homework:*
-                ${row.HomeWork}
+                ${row?.HomeWork}
 
                 *Class Work:*
-                ${row.ClassWork}
+                ${row?.ClassWork}
                   `.trim()}
           />
         </div>

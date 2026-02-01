@@ -36,8 +36,8 @@ const Dashboard = () => {
     <main className="min-h-screen pt-4 pb-24 relative z-10">
       <div className="container mx-auto px-3">
         {/* ===== MENU GRID ===== */}
+        {/* only for main */}
         <div className="grid grid-cols-2 gap-4 mt-4">
-          {/* ফলাফল */}
           <Link
             to={`/${schoolid}/dashboard/student-results`}
             className={cardClass}
@@ -64,7 +64,6 @@ const Dashboard = () => {
             </div>
             <h4 className={titleClass}>ফলাফল ও মার্কশীট</h4>
           </Link>
-          {/* হোমওয়ার্ক */}
           <Link to={`/${schoolid}/dashboard/home-work`} className={cardClass}>
             <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mb-2">
               <svg
@@ -89,7 +88,6 @@ const Dashboard = () => {
             <h4 className={titleClass}>হোমওয়ার্ক / বাড়ির কাজ</h4>
           </Link>
 
-          {/* চারিত্রিক রিপোর্ট */}
           <Link
             to={`/${schoolid}/dashboard/user_reports`}
             className={cardClass}
@@ -116,7 +114,105 @@ const Dashboard = () => {
             </div>
             <h4 className={titleClass}>চারিত্রিক রিপোর্ট</h4>
           </Link>
-          {/* উপস্থিতি */}
+          {/* <Link to={`/${schoolid}/dashboard/monthly-fee`} className={cardClass}>
+            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mb-2">
+              <svg
+                stroke="currentColor"
+                fill="none"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                height="1em"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M16.5 15.5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"></path>
+                <path d="M7 7a2 2 0 1 1 4 0v9a3 3 0 0 0 6 0v-.5"></path>
+                <path d="M8 11h6"></path>
+              </svg>
+            </div>
+            <h4 className={titleClass}>মাসের ফি</h4>
+          </Link> */}
+        </div>
+        {/* only for test */}
+        {/* <div className="grid grid-cols-2 gap-4 mt-4">
+          <Link
+            to={`/${schoolid}/dashboard/student-results`}
+            className={cardClass}
+          >
+            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mb-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={26}
+                height={26}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-clipboard-text text-center mx-auto text-indigo-600"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" />
+                <path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
+                <path d="M9 12h6" />
+                <path d="M9 16h6" />
+              </svg>
+            </div>
+            <h4 className={titleClass}>ফলাফল ও মার্কশীট</h4>
+          </Link>
+          <Link to={`/${schoolid}/dashboard/home-work`} className={cardClass}>
+            <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center mb-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={26}
+                height={26}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-align-box-left-stretch text-pink-600"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z" />
+                <path d="M9 17h-2" />
+                <path d="M13 12h-6" />
+                <path d="M11 7h-4" />
+              </svg>
+            </div>
+            <h4 className={titleClass}>হোমওয়ার্ক / বাড়ির কাজ</h4>
+          </Link>
+
+          <Link
+            to={`/${schoolid}/dashboard/user_reports`}
+            className={cardClass}
+          >
+            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mb-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={26}
+                height={26}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-clipboard-text text-center mx-auto text-purple-600"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2" />
+                <path d="M9 3m0 2a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v0a2 2 0 0 1 -2 2h-2a2 2 0 0 1 -2 -2z" />
+                <path d="M9 12h6" />
+                <path d="M9 16h6" />
+              </svg>
+            </div>
+            <h4 className={titleClass}>চারিত্রিক রিপোর্ট</h4>
+          </Link>
           <Link to="#" className={cardClass}>
             <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2">
               <svg
@@ -147,7 +243,6 @@ const Dashboard = () => {
             </div>
             <h4 className={titleClass}>উপস্থিতি</h4>
           </Link>
-          {/* ফি ও পেমেন্ট */}
           <Link
             to={`/${schoolid}/dashboard/student-payment-history`}
             className={cardClass}
@@ -179,7 +274,6 @@ const Dashboard = () => {
             <h4 className={titleClass}>ফি ও পেমেন্ট তথ্য</h4>
           </Link>
 
-          {/* পরীক্ষার শিডিউল */}
           <Link
             to={`/${schoolid}/dashboard/exam-routine`}
             className={cardClass}
@@ -209,7 +303,6 @@ const Dashboard = () => {
             <h4 className={titleClass}>পরীক্ষার রুটিন</h4>
           </Link>
 
-          {/* ক্লাস রুটিন */}
           <Link
             to={`/${schoolid}/dashboard/class-routine`}
             className={cardClass}
@@ -242,7 +335,6 @@ const Dashboard = () => {
             <h4 className={titleClass}>ক্লাস রুটিন</h4>
           </Link>
 
-          {/* যোগাযোগ */}
           <Link
             to={`/${schoolid}/dashboard/institution-contact`}
             className={cardClass}
@@ -267,7 +359,6 @@ const Dashboard = () => {
             <h4 className={titleClass}>যোগাযোগ</h4>
           </Link>
 
-          {/* অনলাইন ভর্তি - UPDATED WITH PROPER COLORS */}
           <Link
             to={`/${schoolid}/dashboard/online-admission`}
             className={cardClass}
@@ -294,7 +385,6 @@ const Dashboard = () => {
             </div>
             <h4 className={titleClass}>অনলাইন ভর্তি</h4>
           </Link>
-          {/* Month fee */}
           <Link to={`/${schoolid}/dashboard/monthly-fee`} className={cardClass}>
             <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mb-2">
               <svg
@@ -315,7 +405,6 @@ const Dashboard = () => {
             </div>
             <h4 className={titleClass}>মাসের ফি</h4>
           </Link>
-          {/* Report */}
           <Link to={`/${schoolid}/dashboard/reports`} className={cardClass}>
             <div className="w-10 h-10 rounded-full bg-[#c0dbfd] flex items-center justify-center mb-2">
               <svg
@@ -356,7 +445,7 @@ const Dashboard = () => {
 
             <h4 className={titleClass}>ক্লাস ভিডিও</h4>
           </Link>
-        </div>
+        </div> */}
       </div>
     </main>
   );
