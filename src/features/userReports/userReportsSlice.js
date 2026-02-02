@@ -37,6 +37,26 @@ export const userReportsSlice = createApi({
         return `user_report?${params.toString()}`;
       },
     }),
+    getFeeCollectionReport: builder.query({
+      query: ({
+        report_id,
+        user_type,
+        gender,
+        is_active,
+        start_id,
+        end_id,
+      }) => {
+        const params = new URLSearchParams({ report_id });
+
+        if (user_type !== undefined) params.append('user_type', user_type);
+        if (gender !== undefined) params.append('gender', gender);
+        if (is_active !== undefined) params.append('is_active', is_active);
+        if (start_id !== undefined) params.append('start_id', start_id);
+        if (end_id !== undefined) params.append('end_id', end_id);
+
+        return `user_fee_report?${params.toString()}`;
+      },
+    }),
     getStudentReport: builder.query({
       query: ({
         report_id,
@@ -193,6 +213,7 @@ export const userReportsSlice = createApi({
 
 export const {
   useGetUserReportQuery,
+  useGetFeeCollectionReportQuery,
   useGetStudentReportQuery,
   useGetDepositCostReportQuery,
   useGetAverageVReportQuery,

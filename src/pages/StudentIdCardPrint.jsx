@@ -206,7 +206,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                 permissionType="insert"
             >
                 <Button type="submit" className="w-full md:w-auto">
-                {translate('Save')}
+                {translate('Preview')}
                 </Button>
             </ViewPermission>
             </div>

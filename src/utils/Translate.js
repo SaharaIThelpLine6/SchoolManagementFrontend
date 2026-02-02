@@ -727,6 +727,12 @@ const useTranslate = () => {
     'Division Arabic-6': 'ডিভিশন আরবী-৬',
     'Exam Condition': 'পরীক্ষার কন্ডিশন',
     'Deposit Costs Report': 'জমা খরচের রিপোর্ট',
+    'Field 1': 'ফিল্ড ১',
+    'Field 2': 'ফিল্ড ২',
+    'Field 3': 'ফিল্ড ৩',
+    'Field 4': 'ফিল্ড ৪',
+    'Field 5': 'ফিল্ড ৫',
+    'Field 6': 'ফিল্ড ৬',
   };
 
   return (key) =>
