@@ -187,19 +187,24 @@ const ExamRouting = ({ pageTitle }) => {
     }
   }, [copyToAll, firstDate, setValue]);
 
-  // Handle date input with auto-format
+  // // Handle date input with auto-format
+  // const handleDateInput = (index, value) => {
+  //   const cleanedValue = value.replace(/[^\d/]/g, '');
+  //   if (cleanedValue.length === 2 && !cleanedValue.includes('/')) {
+  //     setValue(`date_${index}`, cleanedValue + '/');
+  //   } else if (
+  //     cleanedValue.length === 5 &&
+  //     cleanedValue.split('/')[1]?.length === 2
+  //   ) {
+  //     setValue(`date_${index}`, cleanedValue + '/');
+  //   } else {
+  //     setValue(`date_${index}`, cleanedValue);
+  //   }
+  // };
+  // Handle date input as plain text (all languages)
   const handleDateInput = (index, value) => {
-    const cleanedValue = value.replace(/[^\d/]/g, '');
-    if (cleanedValue.length === 2 && !cleanedValue.includes('/')) {
-      setValue(`date_${index}`, cleanedValue + '/');
-    } else if (
-      cleanedValue.length === 5 &&
-      cleanedValue.split('/')[1]?.length === 2
-    ) {
-      setValue(`date_${index}`, cleanedValue + '/');
-    } else {
-      setValue(`date_${index}`, cleanedValue);
-    }
+    // শুধু input 그대로 state-এ রাখবে, কোন filter/auto-format নেই
+    setValue(`date_${index}`, value);
   };
 
   // Handle day input with auto-completion (like MonthNamesForm)
@@ -436,13 +441,160 @@ const ExamRouting = ({ pageTitle }) => {
   };
 
   // Data Create Exam Fee Setting
+  // const onSubmit = async (formData) => {
+  //   console.log(formData, 'formData');
+
+  //   // ============================
+  //   // 🔥 1. Basic validation
+  //   // ============================
+  //   if (
+  //     !Number(formData.SessionID) ||
+  //     !Number(formData.SubClassID) ||
+  //     !Number(formData.ExamID)
+  //   ) {
+  //     Swal.fire({
+  //       icon: 'warning',
+  //       title: 'ফর্ম অসম্পূর্ণ',
+  //       text: 'Session, SubClass এবং Exam নির্বাচন করুন।',
+  //     });
+  //     return;
+  //   }
+  //   const totalDateCount = Array.from({ length: 14 }).filter((_, index) => {
+  //     return formData[`date_${index}`];
+  //   }).length;
+  //   // ============================
+  //   // 🔥 2. Build routine data
+  //   // ============================
+  //   const routineData = Array.from({ length: 14 }).map((_, index) => {
+  //     const startTimeRaw = formData[`startTime_${index}`] || '';
+  //     const endTimeRaw = formData[`endTime_${index}`] || '';
+
+  //     return {
+  //       SessionID: Number(formData.SessionID),
+  //       ExamID: Number(formData.ExamID),
+  //       SubClassID: Number(formData.SubClassID),
+
+  //       RoomNo: formData.RoomNo || '',
+  //       RoomName: formData.RoomName || '',
+
+  //       StartTime: startTimeRaw.replace(' AM', '').replace(' PM', ''),
+  //       EndTime: endTimeRaw.replace(' AM', '').replace(' PM', ''),
+
+  //       Date1: formData[`date_${index}`]
+  //         ? formData[`date_${index}`].replace(/\//g, '-')
+  //         : '',
+
+  //       Day1: formData[`day_${index}`] || '',
+
+  //       Time1: startTimeRaw.replace(' AM', '').replace(' PM', ''),
+
+  //       Sub1: formData[`subject_${index}`] || '',
+
+  //       TotalColumn: totalDateCount,
+  //     };
+  //   });
+
+  //   // ============================
+  //   // 🔥 3. Remove ALL empty rows
+  //   // ============================
+  //   // const filteredRoutineData = routineData.filter((item) => item.Date1 !== '');
+  //   // ============================
+  //   // 🔥 3. Remove ALL empty rows
+  //   // ============================
+  //   const filteredRoutineData = routineData.filter((item) => {
+  //     const fields = [item.Date1, item.Day1, item.Time1, item.Sub1];
+
+  //     const isAnyFilled = fields.some((v) => v && v !== '');
+  //     const isAllFilled = fields.every((v) => v && v !== '');
+
+  //     // যদি সব খালি → স্কিপ (false)
+  //     if (!isAnyFilled) return false;
+
+  //     // যদি কিছু ভরা, কিছু খালি → error
+  //     if (isAnyFilled && !isAllFilled) {
+  //       Swal.fire({
+  //         icon: 'warning',
+  //         title: 'অসম্পূর্ণ রুটিন ডাটা',
+  //         text: 'Date, Day, Time এবং Subject সবগুলো পূরণ করুন।',
+  //       });
+  //       throw 'validation error';
+  //     }
+
+  //     // সব ঠিক থাকলে row accept হবে
+  //     return true;
+  //   });
+
+  //   // ❌ Bug fix — your old condition was wrong
+  //   if (filteredRoutineData.length === 0) {
+  //     Swal.fire({
+  //       icon: 'warning',
+  //       title: 'ফর্ম অসম্পূর্ণ',
+  //       text: 'কমপক্ষে ১টি Routine Row পূরণ করুন।',
+  //     });
+  //     return;
+  //   }
+
+  //   // ============================
+  //   // 🔥 4. Final payload
+  //   // ============================
+  //   const payload = {
+  //     routine: filteredRoutineData,
+  //   };
+  //   const payloadUpdate = {
+  //     routine: filteredRoutineData,
+  //     ID: formData.ERIDL,
+  //   };
+
+  //   try {
+  //     let response;
+
+  //     // ============================
+  //     // 🔥 5. Create / Update logic
+  //     // ============================
+  //     if (payloadUpdate.ID) {
+  //       // update logic চাইলে করে দেবেন
+  //       response = await updateExamRoutine(payloadUpdate).unwrap();
+  //       console.log(payloadUpdate, 'payloadUpdate');
+  //     } else {
+  //       response = await postExamRoutine(payload).unwrap();
+  //       console.log(payload, 'payload');
+  //     }
+
+  //     Swal.fire({
+  //       icon: 'success',
+  //       title: 'সফলভাবে সংরক্ষণ হয়েছে',
+  //       text: response?.message || 'Exam Routine সফলভাবে সংরক্ষিত হয়েছে।',
+  //     }).then(() => {
+  //       // methods.reset();  // যদি reset করতে চান enable করুন
+  //       // refetch();
+  //     });
+  //   } catch (error) {
+  //     const errMsg =
+  //       error?.data?.message ||
+  //       error?.data?.error ||
+  //       'অজানা একটি ত্রুটি ঘটেছে।';
+
+  //     Swal.fire({
+  //       icon: 'error',
+  //       title: 'ত্রুটি ঘটেছে!',
+  //       text: errMsg,
+  //     });
+
+  //     console.error('Exam Routine Error:', error);
+  //   }
+  // };
+
   const onSubmit = async (formData) => {
     console.log(formData, 'formData');
 
     // ============================
-    // 🔥 1. Basic validation
+    // 1️⃣ Basic validation
     // ============================
-    if (!formData.SessionID || !formData.SubClassID || !formData.ExamID) {
+    if (
+      !Number(formData.SessionID) ||
+      !Number(formData.SubClassID) ||
+      !Number(formData.ExamID)
+    ) {
       Swal.fire({
         icon: 'warning',
         title: 'ফর্ম অসম্পূর্ণ',
@@ -450,11 +602,13 @@ const ExamRouting = ({ pageTitle }) => {
       });
       return;
     }
+
     const totalDateCount = Array.from({ length: 14 }).filter((_, index) => {
       return formData[`date_${index}`];
     }).length;
+
     // ============================
-    // 🔥 2. Build routine data
+    // 2️⃣ Build routine data
     // ============================
     const routineData = Array.from({ length: 14 }).map((_, index) => {
       const startTimeRaw = formData[`startTime_${index}`] || '';
@@ -486,38 +640,33 @@ const ExamRouting = ({ pageTitle }) => {
     });
 
     // ============================
-    // 🔥 3. Remove ALL empty rows
+    // 3️⃣ Filter & validate rows
     // ============================
-    // const filteredRoutineData = routineData.filter((item) => item.Date1 !== '');
-    // ============================
-    // 🔥 3. Remove ALL empty rows
-    // ============================
-    const filteredRoutineData = routineData.filter((item) => {
+    const filteredRoutineData = [];
+    for (let item of routineData) {
       const fields = [item.Date1, item.Day1, item.Time1, item.Sub1];
-
       const isAnyFilled = fields.some((v) => v && v !== '');
       const isAllFilled = fields.every((v) => v && v !== '');
 
-      // যদি সব খালি → স্কিপ (false)
-      if (!isAnyFilled) return false;
+      // skip completely empty rows
+      if (!isAnyFilled) continue;
 
-      // যদি কিছু ভরা, কিছু খালি → error
+      // If partially filled → warning and stop submission
       if (isAnyFilled && !isAllFilled) {
-        Swal.fire({
+        await Swal.fire({
           icon: 'warning',
           title: 'অসম্পূর্ণ রুটিন ডাটা',
           text: 'Date, Day, Time এবং Subject সবগুলো পূরণ করুন।',
         });
-        throw 'validation error';
+        return; // ✅ stop submission
       }
 
-      // সব ঠিক থাকলে row accept হবে
-      return true;
-    });
+      // Valid row → add to filtered list
+      filteredRoutineData.push(item);
+    }
 
-    // ❌ Bug fix — your old condition was wrong
     if (filteredRoutineData.length === 0) {
-      Swal.fire({
+      await Swal.fire({
         icon: 'warning',
         title: 'ফর্ম অসম্পূর্ণ',
         text: 'কমপক্ষে ১টি Routine Row পূরণ করুন।',
@@ -526,7 +675,7 @@ const ExamRouting = ({ pageTitle }) => {
     }
 
     // ============================
-    // 🔥 4. Final payload
+    // 4️⃣ Prepare payload
     // ============================
     const payload = {
       routine: filteredRoutineData,
@@ -540,10 +689,9 @@ const ExamRouting = ({ pageTitle }) => {
       let response;
 
       // ============================
-      // 🔥 5. Create / Update logic
+      // 5️⃣ Create / Update
       // ============================
       if (payloadUpdate.ID) {
-        // update logic চাইলে করে দেবেন
         response = await updateExamRoutine(payloadUpdate).unwrap();
         console.log(payloadUpdate, 'payloadUpdate');
       } else {
@@ -551,21 +699,22 @@ const ExamRouting = ({ pageTitle }) => {
         console.log(payload, 'payload');
       }
 
-      Swal.fire({
+      await Swal.fire({
         icon: 'success',
         title: 'সফলভাবে সংরক্ষণ হয়েছে',
         text: response?.message || 'Exam Routine সফলভাবে সংরক্ষিত হয়েছে।',
-      }).then(() => {
-        // methods.reset();  // যদি reset করতে চান enable করুন
-        // refetch();
       });
+
+      // Optional: reset or refetch
+      // methods.reset();
+      // refetch();
     } catch (error) {
       const errMsg =
         error?.data?.message ||
         error?.data?.error ||
         'অজানা একটি ত্রুটি ঘটেছে।';
 
-      Swal.fire({
+      await Swal.fire({
         icon: 'error',
         title: 'ত্রুটি ঘটেছে!',
         text: errMsg,
@@ -574,6 +723,7 @@ const ExamRouting = ({ pageTitle }) => {
       console.error('Exam Routine Error:', error);
     }
   };
+
 
   // Table Data Columns
   const columns = [
@@ -841,7 +991,7 @@ const ExamRouting = ({ pageTitle }) => {
                     <div key={`date-${index}`} className="w-full sm:w-24">
                       <Input
                         {...register(`date_${index}`)}
-                        placeholder="MM/DD/YYYY"
+                        placeholder="date"
                         type="text"
                         onChange={(e) => handleDateInput(index, e.target.value)}
                         className="w-full"
@@ -1096,6 +1246,6 @@ const ExamRouting = ({ pageTitle }) => {
       </div>
     </div>
   );
-};
+};;
 
 export default ExamRouting;

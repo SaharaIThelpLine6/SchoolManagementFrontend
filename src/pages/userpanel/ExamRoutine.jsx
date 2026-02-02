@@ -96,7 +96,7 @@ const ExamRoutine = () => {
                       className="text-sm font-medium text-gray-800"
                     >
                       <td className="px-1 py-1  rounded-l-lg text-center border">
-                        {item.ERID}
+                        {index + 1}
                       </td>
                       <td className="px-1 py-1 bg-[#BCDAF3] text-center">
                         {item.SubjectName}

@@ -19,3 +19,19 @@ export const formatToDDMMYYYY = (dateString) => {
     return '';
   }
 };
+
+
+export const formatDateToYMD = (date) => {
+  if (!date) return ''; // no date, return empty string
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return ''; // invalid date
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Example:
+// const fromDate = new Date('Thu Jan 01 2026 00:00:00 GMT+0600');
+//  const formattedFromDate = formatDateToYMD(fromDate);
+// console.log(formattedFromDate); // "2026-01-01"

@@ -12,7 +12,7 @@ const PaymentSuccess = () => {
     // optional: auto redirect after 5 seconds
     const timer = setTimeout(() => {
       navigate(`/${schoolid}/dashboard/monthly-fee`); // বা যেটা চাই
-    }, 1000);
+    }, 10000);
 
     return () => clearTimeout(timer);
   }, [navigate]);
@@ -28,7 +28,7 @@ const PaymentSuccess = () => {
         </p>
       )}
 
-      <p>৫ সেকেন্ড পরে ড্যাশবোর্ডে নিয়ে যাওয়া হবে…</p>
+      {/* <p>৫ সেকেন্ড পরে ড্যাশবোর্ডে নিয়ে যাওয়া হবে…</p> */}
 
       <button onClick={() => navigate('/dashboard')}>ড্যাশবোর্ডে যান</button>
     </div>

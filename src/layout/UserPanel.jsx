@@ -236,10 +236,8 @@ export default function UserPanel({ children }) {
                   <Link to={`/${schoolid}/dashboard/profile-details`}>
                     <img
                       src={
-                        userDetails?.User?.UserImage.length > 0
-                          ? bufferConveter(
-                              userDetails?.User?.UserImage[0].Image
-                            )
+                        userDetails?.Image
+                          ? bufferConveter(userDetails?.Image)
                           : avatar
                       }
                       className="w-12 h-12 max-w-12 object-cover border-2 border-green-600 rounded-full"

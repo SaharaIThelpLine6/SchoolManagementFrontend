@@ -11,8 +11,8 @@ import {
   useGetSessionUserPanelQuery,
   useGetUserDetailsQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
+import { numberToBanglaWords } from '../../helper/numberToBanglaWords';
 import useTranslate from '../../utils/Translate';
-import toBengaliWords from '../../utils/numberToBanglaWords';
 
 const StudentFeeUserPanel = () => {
   const methods = useForm();
@@ -34,7 +34,7 @@ const StudentFeeUserPanel = () => {
   } = useGetUserDetailsQuery(currentSession);
   const { data: sessionData } = useGetSessionUserPanelQuery();
   const activeSession = sessionData?.find(
-    (s) => s.SessionAction === 1 && s.SessionStatus === 1
+    (s) => s.SessionStatus === 1
   );
 
   // console.log(activeSession, 'activeSession');
@@ -177,7 +177,8 @@ const StudentFeeUserPanel = () => {
         InvoiceDiscount: 0,
         CurrentPaid: totalFee * months?.length,
         Due: 0,
-        AmountInWord: toBengaliWords(totalFee * months?.length),
+        AmountInWord: numberToBanglaWords(totalFee * months?.length),
+        studentCode: userDetails?.StudentCode,
         // CreateAt: '2026-01-19T12:21:28.318Z',
         // Remark: '',
         // AccountType: '301',

@@ -121,6 +121,9 @@ import { RequirePermission } from './RequirePermission';
 import PaymentRouteGuard from './PaymentRouteGuard';
 import StudentIdCardPrint from '../pages/StudentIdCardPrint';
 import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
+import PaymentFail from '../pages/userpanel/payment/PaymentFail';
+import PaymentCancel from '../pages/userpanel/payment/PaymentCancel';
+import OnlinePaymentInvoice from '../pages/OnlinePaymentInvoice';
 
 const router = createBrowserRouter([
   {
@@ -844,11 +847,17 @@ const router = createBrowserRouter([
               {
                 path: 'maddrasah-payment-info',
                 element: (
-                    <PaymentRouteGuard>
-
-                      <AllMaddrasahPaymentInfo pageTitle="All Maddrasah Payment Info" />
-                    </PaymentRouteGuard>
-
+                  <PaymentRouteGuard>
+                    <AllMaddrasahPaymentInfo pageTitle="All Maddrasah Payment Info" />
+                  </PaymentRouteGuard>
+                ),
+              },
+              {
+                path: 'online-payment-invoice',
+                element: (
+                  // <PaymentRouteGuard>
+                    <OnlinePaymentInvoice pageTitle="Online Payment Invoice" />
+                  // </PaymentRouteGuard>
                 ),
               },
             ],
@@ -1048,11 +1057,11 @@ const router = createBrowserRouter([
       },
       {
         path: 'payment-fail',
-        element: <PaymentSuccess pageTitle="Payment Fail" />,
+        element: <PaymentFail pageTitle="Payment Fail" />,
       },
       {
         path: 'payment-cancel',
-        element: <PaymentSuccess pageTitle="Payment Cancel" />,
+        element: <PaymentCancel pageTitle="Payment Cancel" />,
       },
     ],
   },
