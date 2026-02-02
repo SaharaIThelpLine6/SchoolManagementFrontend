@@ -237,6 +237,11 @@ tr:nth-child(even) {
   td, th {
     background-color: white !important;
   }
+
+
+    .print-id-card:nth-child(9n):last-child {
+    page-break-after: auto;
+  }
 }
 
 

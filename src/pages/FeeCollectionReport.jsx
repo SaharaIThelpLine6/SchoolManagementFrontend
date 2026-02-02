@@ -12,7 +12,7 @@ import {
   language,
 } from "../Data/userReportsData";
 import { fetchSettingsData } from "../features/settings/settingsSlice";
-import { useGetUserReportQuery } from "../features/userReports/userReportsSlice";
+import { useGetFeeCollectionReportQuery, useGetUserReportQuery } from "../features/userReports/userReportsSlice";
 import Swal from "sweetalert2";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetClassListQuery } from "../features/class/classQuerySlice";
@@ -193,7 +193,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
   const [queryParams, setQueryParams] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  const { isFetching, isError, error } = useGetUserReportQuery(queryParams, {
+  const { isFetching, isError, error } = useGetFeeCollectionReportQuery(queryParams, {
     skip: !queryParams,
   });
 
@@ -234,32 +234,39 @@ const FeeCollectionReport = ({ pageTitle }) => {
   }, [errorMessage]);
 
   const onSubmit = (formData) => {
+    // console.log(formData);
+    
     const params = {
       report_id: formData.ReportID,
+      GenderID: formData.GenderID,
       session_id: formData.SessionID,
       class_id: formData.ClassID,
       exam_id: formData.ExamID,
       residential_id: formData.RDID,
       language_id: formData.id,
+      StartDate: formData.DateStart,
+      EndDate: formData.DateEnd,
     };
 
     Object.keys(params).forEach(
       (key) =>
         (params[key] === undefined || params[key] === "") && delete params[key]
     );
+    console.log(params);
+    
 
     setQueryParams(params);
   };
 
   const genderData = [
-    { GenderID: 1, GenderName: "Male" },
-    { GenderID: 2, GenderName: "Female" },
-    { GenderID: 3, GenderName: "Both" },
+    { GenderID: 1, GenderName: "ছেলে" },
+    { GenderID: 2, GenderName: "মেয়ে" },
+    { GenderID: 3, GenderName: "উভয়" },
   ];
   const newOldData = [
-    { newOldID: 1, newOldName: "New" },
-    { newOldID: 2, newOldName: "Old" },
-    { newOldID: 3, newOldName: "Both" },
+    { newOldID: 1, newOldName: "নতুন" },
+    { newOldID: 2, newOldName: "পুরাতন" },
+    { newOldID: 3, newOldName: "উভয়" },
   ];
   const userNameData = [
     { UserID: 1, UserName: "JohnDoe" },
