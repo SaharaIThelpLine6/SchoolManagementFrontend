@@ -14,7 +14,7 @@ export const paymentSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['AllSchoolsSSL'],
+  tagTypes: ['AllSchoolsSSL', 'OnlinePaymentInvoice'],
   endpoints: (builder) => ({
     createPaymentRequest: builder.mutation({
       query: (paymentRequest) => {
@@ -133,6 +133,13 @@ export const paymentSlice = createApi({
       },
       providesTags: ['AllSchoolsSSL'],
     }),
+    getOnlinePaymentInvoice: builder.query({
+      query: ({ page = 1, limit = 10, search = '' }) => ({
+        url: '/get_online_payment_invoice',
+        params: { page, limit, search }, // 🔥 UserCode search
+      }),
+      providesTags: ['OnlinePaymentInvoice'],
+    }),
   }),
 });
 
@@ -147,4 +154,5 @@ export const {
   useDeleteMaddrasahSSLMutation,
   useGetMaddrasahSSLQuery,
   useGetMaddrasahDatabasesQuery,
+  useGetOnlinePaymentInvoiceQuery
 } = paymentSlice;
