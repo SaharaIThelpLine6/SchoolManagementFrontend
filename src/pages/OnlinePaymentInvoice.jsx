@@ -52,14 +52,12 @@ const OnlinePaymentInvoice = ({ pageTitle }) => {
       hozAlign: 'center',
       render: (row) => (
         <div>
-          <p className="font-semibold">{row.UserDetails?.[0].UserName}</p>{' '}
+          <p className="font-semibold text-sm">{row.UserDetails?.UserName}</p>{' '}
           <p className="text-xs text-gray-500">
-            {translate('Code')}: {row.UserDetails?.[0].UserCode}{' '}
+            {translate('Code')}: {row.UserDetails?.UserCode}
           </p>
-          <p className="text-xs text-gray-500">
-            {row.UserDetails?.[0].Mobile1}{' '}
-          </p>
-          <p className="text-xs text-gray-500">{row.UserDetails?.[0].Email}</p>
+          <p className="text-xs text-gray-500">{row.UserDetails?.Mobile1}</p>
+          <p className="text-xs text-gray-500">{row.UserDetails?.Email}</p>
         </div>
       ),
     },
@@ -71,8 +69,10 @@ const OnlinePaymentInvoice = ({ pageTitle }) => {
         <div className="text-sm space-y-1 flex flex-col justify-center items-center">
           {row.InvoiceDetails?.map((d, index) => (
             <p key={index}>
-              • {d.FeeType} ({d.SessionName} - {d.MonthName}) :{' '}
-              <span className="font-semibold ml-1">{d.Amount} টাকা</span>
+              {d.FeeType} ({d.SessionName} - {d.MonthName}) :{' '}
+              <span className="font-semibold ml-1 text-green-600">
+                ৳{d.Amount}
+              </span>
             </p>
           ))}
         </div>
@@ -83,7 +83,7 @@ const OnlinePaymentInvoice = ({ pageTitle }) => {
       field: 'TotalAmount',
       hozAlign: 'center',
       render: (row) => (
-        <span className="font-semibold">{row.TotalAmount} টাকা</span>
+        <span className="font-semibold text-green-600">৳{row.TotalAmount}</span>
       ),
     },
     {

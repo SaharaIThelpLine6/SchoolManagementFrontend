@@ -63,6 +63,7 @@ import InstitutionInfo from '../pages/InstitutionInfo';
 import MonthListTable from '../pages/MonthListTable';
 import MonthlyDues from '../pages/MonthlyDues';
 import OnlineAdmissionTable from '../pages/OnlineAdmissionTable';
+import OnlinePaymentInvoice from '../pages/OnlinePaymentInvoice';
 import PayRole from '../pages/PayRole';
 import PayRoleName from '../pages/PayRoleName';
 import PaymentConfirm from '../pages/PaymentConfirm';
@@ -82,6 +83,8 @@ import Settings from '../pages/Settings';
 import StudentClassRoutine from '../pages/StudentClassRoutine';
 import StudentComplaint from '../pages/StudentComplaint';
 import StudentGroupCreate from '../pages/StudentGroupCreate';
+import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
+import StudentIdCardPrint from '../pages/StudentIdCardPrint';
 import StudentsFeeCollection from '../pages/StudentsFeeCollection';
 import StudentsReport from '../pages/StudentsReport';
 import TalentCondition from '../pages/TalentCondition';
@@ -101,6 +104,7 @@ import HomeWorkHistoryUserPanel from '../pages/userpanel/HomeWorkHistoryUserPane
 import HomeWorkUserPanel from '../pages/userpanel/HomeWorkUserPanel';
 import InstitutionInfoUserPanel from '../pages/userpanel/InstitutionInfoUserPanel';
 import OnlineAdmissionStudent from '../pages/userpanel/OnlineAdmissionStudent';
+import OnlinePaymentInvoiceDownload from '../pages/userpanel/OnlinePaymentInvoiceDownload';
 import Reports from '../pages/userpanel/Reports';
 import StudentFeeUserPanel from '../pages/userpanel/StudentFeeUserPanel';
 import StudentPaymentHistory from '../pages/userpanel/StudentPaymentHistory';
@@ -115,15 +119,12 @@ import UserProfile from '../pages/userpanel/UserProfile';
 import UserRegistration from '../pages/userpanel/UserRegistration';
 import VideoTutorialLink from '../pages/userpanel/VideoTutorialLink';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
+import PaymentCancel from '../pages/userpanel/payment/PaymentCancel';
+import PaymentFail from '../pages/userpanel/payment/PaymentFail';
 import PaymentSuccess from '../pages/userpanel/payment/PaymentSuccess';
 import OwenGuide from './OwenGuide';
-import { RequirePermission } from './RequirePermission';
 import PaymentRouteGuard from './PaymentRouteGuard';
-import StudentIdCardPrint from '../pages/StudentIdCardPrint';
-import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
-import PaymentFail from '../pages/userpanel/payment/PaymentFail';
-import PaymentCancel from '../pages/userpanel/payment/PaymentCancel';
-import OnlinePaymentInvoice from '../pages/OnlinePaymentInvoice';
+import { RequirePermission } from './RequirePermission';
 
 const router = createBrowserRouter([
   {
@@ -1062,6 +1063,10 @@ const router = createBrowserRouter([
       {
         path: 'payment-cancel',
         element: <PaymentCancel pageTitle="Payment Cancel" />,
+      },
+      {
+        path: 'payment-invoice',
+        element: <OnlinePaymentInvoiceDownload pageTitle="Payment Invoice" />,
       },
     ],
   },

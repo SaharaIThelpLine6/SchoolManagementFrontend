@@ -13,6 +13,7 @@ import {
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import { numberToBanglaWords } from '../../helper/numberToBanglaWords';
 import useTranslate from '../../utils/Translate';
+import MonthlyFeeSkeleton from './skeleton/MonthlyFeeSkeleton';
 
 const StudentFeeUserPanel = () => {
   const methods = useForm();
@@ -33,9 +34,7 @@ const StudentFeeUserPanel = () => {
     isError: isuserDetailsError,
   } = useGetUserDetailsQuery(currentSession);
   const { data: sessionData } = useGetSessionUserPanelQuery();
-  const activeSession = sessionData?.find(
-    (s) => s.SessionStatus === 1
-  );
+  const activeSession = sessionData?.find((s) => s.SessionStatus === 1);
 
   // console.log(activeSession, 'activeSession');
 
@@ -61,6 +60,7 @@ const StudentFeeUserPanel = () => {
     error,
     isError,
     isSuccess,
+    isLoading: feeIsLoading,
   } = useGetFeeLandByAdmissionIdUserPanelQuery(admissionId, {
     skip: !userDetails?.AdmissionID,
     refetchOnMountOrArgChange: true,
@@ -178,7 +178,7 @@ const StudentFeeUserPanel = () => {
         CurrentPaid: totalFee * months?.length,
         Due: 0,
         AmountInWord: numberToBanglaWords(totalFee * months?.length),
-        studentCode: userDetails?.StudentCode,
+        studentCode: userDetails?.UserCode,
         // CreateAt: '2026-01-19T12:21:28.318Z',
         // Remark: '',
         // AccountType: '301',
@@ -231,6 +231,11 @@ const StudentFeeUserPanel = () => {
       console.error('Payment Error:', err);
     }
   };
+
+  // 🔥 LOADING STATE (Skeleton)
+  if (feeIsLoading || isuserDetailsLoading) {
+    return <MonthlyFeeSkeleton />;
+  }
 
   return (
     <FormProvider {...methods}>
@@ -358,6 +363,6 @@ const StudentFeeUserPanel = () => {
       </div>
     </FormProvider>
   );
-};
+};;
 
 export default StudentFeeUserPanel;
