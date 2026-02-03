@@ -37,7 +37,7 @@ const Dashboard = () => {
       <div className="container mx-auto px-3">
         {/* ===== MENU GRID ===== */}
         {/* only for main */}
-        {/* <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="grid grid-cols-2 gap-4 mt-4">
           <Link
             to={`/${schoolid}/dashboard/student-results`}
             className={cardClass}
@@ -114,10 +114,37 @@ const Dashboard = () => {
             </div>
             <h4 className={titleClass}>চারিত্রিক রিপোর্ট</h4>
           </Link>
-
-        </div> */}
+          <Link
+            to={`/${schoolid}/dashboard/exam-routine`}
+            className={cardClass}
+          >
+            <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center mb-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={26}
+                height={26}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-address-book text-yellow-600"
+              >
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M20 6v12a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2z" />
+                <path d="M10 16h6" />
+                <path d="M13 11m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                <path d="M4 8h3" />
+                <path d="M4 12h3" />
+                <path d="M4 16h3" />
+              </svg>
+            </div>
+            <h4 className={titleClass}>পরীক্ষার রুটিন</h4>
+          </Link>
+        </div>
         {/* only for test */}
-        <div className="grid grid-cols-2 gap-4 mt-4">
+        {/*  <div className="grid grid-cols-2 gap-4 mt-4">
           <Link
             to={`/${schoolid}/dashboard/student-results`}
             className={cardClass}
@@ -426,7 +453,7 @@ const Dashboard = () => {
 
             <h4 className={titleClass}>ক্লাস ভিডিও</h4>
           </Link>
-        </div>
+        </div> */}
       </div>
     </main>
   );

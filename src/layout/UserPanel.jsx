@@ -23,6 +23,7 @@ import {
 } from '../features/userPanel/panelNotification/panelNotificationQuerySlice';
 import avatar from '/avatar.png';
 import logo from '/saharaItlogo.png';
+import Loading from '../components/Loading/Loading';
 
 const WEB_PUSH_PUBLIC_KEY = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY;
 export default function UserPanel({ children }) {
@@ -173,7 +174,7 @@ export default function UserPanel({ children }) {
 
   // sessionsData.find(s => s.SessionStatus === 1)
   // sessionsData
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loading/>;
 
   if (!isValid) return <Navigate to={`/${schoolid}/login`} replace />;
 
