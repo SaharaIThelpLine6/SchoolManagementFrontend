@@ -1,11 +1,13 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import useTranslate from '../utils/Translate';
 import { Buffer } from 'buffer';
-const StudentIdCardGenerate = ({ pageTitle }) => {
+import { useEffect } from 'react';
+import { hideModal } from '../utils/ModalControlar';
+const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
 
   const { state } = useLocation();
-const { layoutId, fields = {} } = state || {};
+  // const { layoutId, fields = [] } = state || {};
   const dispatch = useDispatch();
   const printableStudentList = useSelector(
     (state) => state.student.PrintableStudentList
@@ -20,7 +22,8 @@ const { layoutId, fields = {} } = state || {};
     }
   }
 
-    const FIELD_LABELS = {
+
+  const FIELD_LABELS = {
     StudentName: "নাম",
     FatherName: "পিতার নাম",
     MotherName: "মাতার নাম",
@@ -29,13 +32,20 @@ const { layoutId, fields = {} } = state || {};
     SessionName: "সেশন",
     BloodGroup: "রক্তের গ্রুপ",
   };
+  const handleClick = () =>{
+    hideModal();
+    // window.print()
+    setTimeout(()=>{
+      window.print()
+    }, 300)
+  }
 
   return (
 
     <div>
-      <div className='hidden_in_print flex justify-between'>
-        <a href="/students/student-id-card" className='btn py-[8px] px-[15px] bg-blue-600 text-white rounded-[4px]'>Go Back</a>
-        <button onClick={() => window.print()} className='btn py-[8px] px-[15px] bg-blue-600 text-white rounded-[4px]'>Print</button>
+      <div className='hidden_in_print flex justify-end'>
+        {/* <Link to="/students/student-id-card" className='btn py-[8px] px-[15px] bg-blue-600 text-white rounded-[4px]'>Go Back</Link> */}
+        <button onClick={handleClick} className='btn py-[8px] px-[15px] bg-blue-600 text-white rounded-[4px]'>Print</button>
       </div>
       <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg grid grid-cols-3 w-[800px] gap-x-[20px] gap-y-[10px] mx-auto">
 
@@ -57,19 +67,14 @@ const { layoutId, fields = {} } = state || {};
                 </div>
                 <div className='pt-1 pb-2'>
                   <h3 className='text-red pl-[20px] text-[16px]'>আইডি নং: {translate(printableStudentDetails.StudentCode)}</h3>
-                  {Object.entries(fields).map(([fieldName, fieldKey]) => {
-                    if (!fieldKey) return null;
+                  {fields.map((fieldName) => {
+                    if (!fieldName) return null;
                     return (
                       <p key={fieldName} className='text-[15px]'>
-                        {FIELD_LABELS[fieldKey]}: {printableStudentDetails[fieldKey]}
+                        {printableStudentDetails[`fieldkey_${fieldName}`]}: {printableStudentDetails[fieldName]}
                       </p>
                     );
                   })}
-
-                  {/* <p className=''>নাম: {printableStudentDetails.StudentName}</p>
-                  <p className=''>পিতার নাম: {printableStudentDetails.FatherName}</p>
-                  <p className=''>মাতার নাম: {printableStudentDetails.MotherName}</p> */}
-
                 </div>
               </div>
 

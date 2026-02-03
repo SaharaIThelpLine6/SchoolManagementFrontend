@@ -68,6 +68,7 @@ import PaymentModalUserPanel from '../pages/userpanel/PaymentModalUserPanel';
 import CreateEditPaymentInfoModal from './Modals/CreateEditPaymentInfoModal';
 import StudentCardModel from '../view/students/id-card-model/StudentCardModel';
 import PaymentSSLInfoView from './Modals/PaymentSSLInfoVierw';
+import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -299,7 +300,7 @@ const DefaultModal = () => {
                   <DataExportModel userData={id} />
                 )}
                 {modalType === 'STUDENT_ID_CARD' && (
-                  <StudentCardModel  />
+                  <StudentIdCardGenerate  fields={id} />
                 )}
                 {/* User Panel Models */}
                 {modalType === 'SESSION_CHANGE_MODEL' && (

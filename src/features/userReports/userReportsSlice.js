@@ -40,16 +40,22 @@ export const userReportsSlice = createApi({
     getFeeCollectionReport: builder.query({
       query: ({
         report_id,
-        user_type,
+        session_id,
+        class_id,
+        exam_id,
         gender,
         is_active,
+        residential_id,
         start_id,
         end_id,
       }) => {
         const params = new URLSearchParams({ report_id });
 
-        if (user_type !== undefined) params.append('user_type', user_type);
+        if (session_id !== undefined) params.append('session_id', session_id);
         if (gender !== undefined) params.append('gender', gender);
+        if (class_id !== undefined) params.append('class_id', class_id);
+        if (exam_id !== undefined) params.append('exam_id', exam_id);
+        if (residential_id !== undefined) params.append('residential_id', residential_id);
         if (is_active !== undefined) params.append('is_active', is_active);
         if (start_id !== undefined) params.append('start_id', start_id);
         if (end_id !== undefined) params.append('end_id', end_id);
