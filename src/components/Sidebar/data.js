@@ -134,24 +134,29 @@ export const menuData = [
   },
   {
     id: '3',
-    name: 'User Panel',
-    route: '/user-panel',
+    name: 'Parent Panel',
+    route: '/parent-panel',
     icon: 'FaUsers',
     subMenu: [
       {
         id: '1',
         name: 'Class Routine',
-        route: '/user-panel',
+        route: '/parent-panel',
       },
       {
         id: '2',
         name: 'Class Video',
-        route: '/user-panel/class-video',
+        route: '/parent-panel/class-video',
       },
       {
         id: '3',
         name: 'Home Work',
-        route: '/user-panel/home-work',
+        route: '/parent-panel/home-work',
+      },
+      {
+        id: '4',
+        name: 'Student Complaints',
+        route: '/parent-panel/student-complaint',
       },
     ],
   },
@@ -388,11 +393,6 @@ export const menuData = [
         id: '1',
         name: 'Complaint Box Terms and Conditions',
         route: '/talimat',
-      },
-      {
-        id: '2',
-        name: 'Student Complaints',
-        route: '/talimat/student-complaint',
       },
     ],
   },

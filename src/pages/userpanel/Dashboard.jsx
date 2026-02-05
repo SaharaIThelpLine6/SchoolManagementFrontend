@@ -37,7 +37,7 @@ const Dashboard = () => {
       <div className="container mx-auto px-3">
         {/* ===== MENU GRID ===== */}
         {/* only for main */}
-        <div className="grid grid-cols-2 gap-4 mt-4">
+         <div className="grid grid-cols-2 gap-4 mt-4">
           <Link
             to={`/${schoolid}/dashboard/student-results`}
             className={cardClass}
@@ -142,9 +142,28 @@ const Dashboard = () => {
             </div>
             <h4 className={titleClass}>পরীক্ষার রুটিন</h4>
           </Link>
+                    <Link to={`/${schoolid}/dashboard/reports`} className={cardClass}>
+            <div className="w-10 h-10 rounded-full bg-[#c0dbfd] flex items-center justify-center mb-2">
+              <svg
+                stroke="currentColor"
+                fill="currentColor"
+                strokeWidth="0"
+                viewBox="0 0 24 24"
+                height="1em"
+                width="1em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path fill="none" d="M0 0h24v24H0V0z"></path>
+                <path d="M15.73 3H8.27L3 8.27v7.46L8.27 21h7.46L21 15.73V8.27L15.73 3zM19 14.9 14.9 19H9.1L5 14.9V9.1L9.1 5h5.8L19 9.1v5.8z"></path>
+                <circle cx="12" cy="16" r="1"></circle>
+                <path d="M11 7h2v7h-2z"></path>
+              </svg>
+            </div>
+            <h4 className={titleClass}>অভিযোগ ও পরামর্শ </h4>
+          </Link>
         </div>
         {/* only for test */}
-        {/*  <div className="grid grid-cols-2 gap-4 mt-4">
+         {/* <div className="grid grid-cols-2 gap-4 mt-4">
           <Link
             to={`/${schoolid}/dashboard/student-results`}
             className={cardClass}
