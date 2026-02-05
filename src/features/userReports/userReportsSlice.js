@@ -46,6 +46,8 @@ export const userReportsSlice = createApi({
         gender,
         is_active,
         residential_id,
+        start_date,
+        end_date,
         start_id,
         end_id,
       }) => {
@@ -57,6 +59,10 @@ export const userReportsSlice = createApi({
         if (exam_id !== undefined) params.append('exam_id', exam_id);
         if (residential_id !== undefined) params.append('residential_id', residential_id);
         if (is_active !== undefined) params.append('is_active', is_active);
+
+        if (start_date !== undefined) params.append('startDate', start_date);
+        if (end_date !== undefined) params.append('endDate', end_date);
+
         if (start_id !== undefined) params.append('start_id', start_id);
         if (end_id !== undefined) params.append('end_id', end_id);
 

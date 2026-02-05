@@ -23,6 +23,7 @@ import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
 import DefaultInput from "../components/Forms/DefaultInput";
 import StudentsListPdf from "../view/general-information/user-reports/StudentsListPdf";
 import DailyFeeCollection from "../view/students/fee-collection-reports/DailyFeeCollection";
+import DailyFeeCollectionSessonWise from "../view/students/fee-collection-reports/DailyFeeCollectionSessonWise";
 
 const FeeCollectionReport = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -30,7 +31,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
   const methods = useForm();
   const { status } = useSelector((state) => state.settings);
 
-  const { control, handleSubmit } = methods;
+  const { control, handleSubmit, setValue } = methods;
 
   const selectedReportID = useWatch({ control, name: "ReportID" });
 
@@ -44,6 +45,8 @@ const FeeCollectionReport = ({ pageTitle }) => {
       case 2:
         return ["ReportID", "GenderID", "RDID", "Date"].includes(fieldName);
       case 3:
+        setValue("DateStart", null)
+        setValue("DateEnd", null)
         return ["ReportID", "SessionID", "GenderID", "RDID", "UserID"].includes(
           fieldName
         );
@@ -236,7 +239,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
   }, [errorMessage]);
 
   const onSubmit = (formData) => {
-    // console.log(formData);
+    console.log(formData);
 
     const params = {
       report_id: formData.ReportID,
@@ -245,8 +248,10 @@ const FeeCollectionReport = ({ pageTitle }) => {
       class_id: formData.ClassID,
       exam_id: formData.ExamID,
       residential_id: formData.RDID,
-      start_id: new Date(formData.DateStart).toISOString(),
-      end_id: new Date(formData.DateEnd).toISOString(),
+      start_date: formData.DateStart ? new Date(formData.DateStart).toDateString() : null,
+      end_date: formData.DateEnd ? new Date(formData.DateEnd).toDateString() : null,
+      start_id: formData.StartId,
+      end_id: formData.EndId
     };
 
     Object.keys(params).forEach(
@@ -347,7 +352,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
                   unicode={true}
                 />
               )}
-              {shouldShowFields("UserNameID") && (
+              {/* {shouldShowFields("UserNameID") && (
                 <DefaultSelect
                   label="User Name"
                   nameField="UserName"
@@ -357,7 +362,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
                   required="This field is required"
                   defaultSelect={false}
                 />
-              )}
+              )} */}
               {shouldShowFields("GenderID") && (
                 <DefaultSelect
                   label="Gender"
@@ -481,15 +486,15 @@ const FeeCollectionReport = ({ pageTitle }) => {
               {shouldShowFields("UserID") && (
                 <div className="flex justify-between items-center gap-2">
                   <DefaultInput
-                    label="Start"
-                    placeholder="Enter date"
-                    registerKey="DateStart"
+                    label="Start Book ID"
+                    placeholder=""
+                    registerKey="StartId"
                     require="Date Required"
                   />
                   <DefaultInput
-                    label="End"
-                    placeholder="Enter date"
-                    registerKey="DateEnd"
+                    label="End Book ID"
+                    placeholder=""
+                    registerKey="EndId"
                     require="Date Required"
                   />
                 </div>
@@ -513,8 +518,9 @@ const FeeCollectionReport = ({ pageTitle }) => {
                 <div className="w-full relative max-w-full overflow-x-auto print:hidden">
                   <div className="min-w-[800px]">
                     <DailyFeeCollection
-                      data={reportData}
+                      reportData={reportData}
                       title={"শিক্ষার্থীদের তালিকা"}
+                      query={queryParams}
                     />
                   </div>
                 </div>
@@ -523,10 +529,111 @@ const FeeCollectionReport = ({ pageTitle }) => {
                     {translate("Print")}
                   </Button>
                 </div>
-                <div className="hidden print:block">
+                <div className="w-full relative max-w-full print_canvas">
                   <DailyFeeCollection
-                    data={reportData}
+                    reportData={reportData}
                     title={"শিক্ষার্থীদের তালিকা"}
+                    query={queryParams}
+                  />
+                </div>
+              </div>
+            )}
+
+            {reportData && selectedReportID === 2 && (
+              <div className="print-container">
+                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                  <div className="min-w-[800px]">
+                    <DailyFeeCollectionSessonWise
+                      reportData={reportData}
+                      title={"রিপোর্ট ২ এর শিরোনাম"}
+                      query={queryParams}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-2 print:hidden">
+                  <Button onClick={() => window.print()}>
+                    {translate("Print")}
+                  </Button>
+                </div>
+                <div className="w-full relative max-w-full print_canvas">
+                  <DailyFeeCollectionSessonWise
+                    reportData={reportData}
+                    title={"রিপোর্ট ২ এর শিরোনাম"}
+                    query={queryParams}
+                  />
+                </div>
+              </div>
+            )}
+            {reportData && selectedReportID === 3 && (
+              <div className="print-container">
+                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                  <div className="min-w-[800px]">
+                    <DailyFeeCollection
+                      reportData={reportData}
+                      title={"রিপোর্ট ২ এর শিরোনাম"}
+                      query={queryParams}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-2 print:hidden">
+                  <Button onClick={() => window.print()}>
+                    {translate("Print")}
+                  </Button>
+                </div>
+                <div className="w-full relative max-w-full print_canvas">
+                  <DailyFeeCollection
+                    reportData={reportData}
+                    title={"রিপোর্ট ২ এর শিরোনাম"}
+                    query={queryParams}
+                  />
+                </div>
+              </div>
+            )}
+            {reportData && selectedReportID === 4 && (
+              <div className="print-container">
+                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                  <div className="min-w-[800px]">
+                    <DailyFeeCollection
+                      reportData={reportData}
+                      title={"রিপোর্ট ২ এর শিরোনাম"}
+                      query={queryParams}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-2 print:hidden">
+                  <Button onClick={() => window.print()}>
+                    {translate("Print")}
+                  </Button>
+                </div>
+                <div className="w-full relative max-w-full print_canvas">
+                  <DailyFeeCollection
+                    reportData={reportData}
+                    title={"রিপোর্ট ২ এর শিরোনাম"}
+                    query={queryParams}
+                  />
+                </div>
+              </div>
+            )}
+            {reportData && selectedReportID === 5 && (
+              <div className="print-container">
+                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                  <div className="min-w-[800px]">
+                    <DailyFeeCollection
+                      reportData={reportData}
+                      title={"রিপোর্ট ২ এর শিরোনাম"}
+                      query={queryParams}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-2 print:hidden">
+                  <Button onClick={() => window.print()}>
+                    {translate("Print")}
+                  </Button>
+                </div>
+                <div className="w-full relative max-w-full print_canvas">
+                  <DailyFeeCollection
+                    reportData={reportData}
+                    title={"রিপোর্ট ২ এর শিরোনাম"}
                     query={queryParams}
                   />
                 </div>

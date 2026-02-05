@@ -212,6 +212,23 @@ const StudentIdCardPrint = ({ pageTitle }) => {
     Mobile1: "মোবাইল",
     SessionName: "সেশন",
     BloodGroup: "রক্তের গ্রুপ",
+    ResidentialName: "অবস্থান",
+    NIDNO: "NID",
+    DateOfBirth: "জন্ম তারিখ",
+    NewOldId: "আবস্থা",
+  };
+  const FIELD_Value_Demo = {
+    StudentName: "মো: আজাদ হাসান",
+    FatherName: "মো: সোলায়মান হাসান",
+    MotherName: "মোসা: ফাতেমা বেগম",
+    ClassName: "প্রথম",
+    Mobile1: "০১৮৭৬৮৬২৩৮৬",
+    SessionName: "২০২৬",
+    BloodGroup: "এ +",
+    ResidentialName: "আবাসিক",
+    NIDNO: "01234567898",
+    DateOfBirth: "12/06/2021",
+    NewOldId: "",
   };
   return (
     <div>
@@ -248,7 +265,10 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                     if (!fieldName) return null;
                     return (
                       <p key={fieldName} className='text-[15px]'>
-                        <input {...register(`fieldkey_${fieldName}`)} defaultValue={FIELD_LABELS[fieldName]} />: ""
+                        <input className='w-fit inline-block' style={{
+                          width: `${(watch(`fieldkey_${fieldName}`)?.length || FIELD_LABELS[fieldName]?.length || 1) - 0}ch`,
+                          minWidth: "0.1ch",
+                        }} {...register(`fieldkey_${fieldName}`)} defaultValue={FIELD_LABELS[fieldName]} />: {FIELD_Value_Demo[fieldName]}
                       </p>
                     );
                   })}
@@ -264,7 +284,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
 
         <FormProvider {...methods}>
           <form className="w-full space-y-4 hidden_in_print" onSubmit={handleSubmit(onSubmit)}>
-            <p className='mt-2'>{checkboxState.length == 0 ? "সর্বাধিক ৫টি এন্ট্রি নির্বাচন করুন" : checkboxState.length < 5 ? `আরও ${convertToBanglaDisplay(String(5 - checkboxState.length))}টি ফিল্ড নির্বাচন করতে পারবেন` : "সর্বোচ্চ এন্ট্রি নির্বাচন করা হয়েছে"}</p>
+            <p className='mt-4 font-bold text-[18px]'>{checkboxState.length == 0 ? "সর্বাধিক ৫টি এন্ট্রি নির্বাচন করুন" : checkboxState.length < 5 ? `আরও ${convertToBanglaDisplay(String(5 - checkboxState.length))}টি ফিল্ড নির্বাচন করতে পারবেন` : "সর্বোচ্চ এন্ট্রি নির্বাচন করা হয়েছে"}</p>
             <div className='flex gap-4 mt-[40px] mb-[40px]'>
               {[
                 { ID: "StudentName", Name: "User Name" },
@@ -274,6 +294,10 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                 { ID: "Mobile1", Name: "Mobile" },
                 { ID: "SessionName", Name: "Session" },
                 { ID: "BloodGroup", Name: "Blood Group" },
+                { ID: "ResidentialName", Name: "Residential Name" },
+                { ID: "NIDNO", Name: "NID" },
+                { ID: "DateOfBirth", Name: "Date Of Birth" },
+                { ID: "NewOldId", Name: "Position" },
               ].map((i) => (
                 <div className='flex items-center gap-2'>
                   <input

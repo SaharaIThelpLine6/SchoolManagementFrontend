@@ -182,7 +182,7 @@ const MadrashaHomePage = () => {
                   </div>
                   <Counter end={settingsObject?.totalUser} duration={2000} />
                   <p className="text-[20px] text-white">
-                    মোট শিক্ষাথী{' '}
+                    মোট শিক্ষার্থী{' '}
                     {bnBijoy2Unicode(String(settingsObject?.totalUser))} জন।
                   </p>
                 </div>
@@ -216,7 +216,7 @@ const MadrashaHomePage = () => {
                   />
                   <p className="text-[20px] text-white">
                     {' '}
-                    এবছর মোট শিক্ষাথী{' '}
+                    এবছর মোট শিক্ষার্থী{' '}
                     {bnBijoy2Unicode(
                       String(settingsObject?.active_session_student)
                     )}{' '}
@@ -253,7 +253,7 @@ const MadrashaHomePage = () => {
                   />
                   <p className="text-[20px] text-white">
                     {' '}
-                    এবছর মোট ছাএ{' '}
+                    এবছর মোট ছাত্র{' '}
                     {bnBijoy2Unicode(
                       String(settingsObject?.active_male_student)
                     )}{' '}
@@ -290,7 +290,7 @@ const MadrashaHomePage = () => {
                   />
                   <p className="text-[20px] text-white">
                     {' '}
-                    এবছর মোট ছাএী{' '}
+                    এবছর মোট ছাত্রী {' '}
                     {bnBijoy2Unicode(
                       String(settingsObject?.active_female_student)
                     )}{' '}
@@ -359,7 +359,7 @@ const MadrashaHomePage = () => {
             {/* <div className="count-box bg-white px-2 py-4 rounded-[4px]">
                         <div className='text-center'>
                             <Counter end={90} duration={2000} />
-                            <p className='text-[18px]'>মোট শিক্ষাথী ৯০ জন।</p>
+                            <p className='text-[18px]'>মোট শিক্ষার্থী ৯০ জন।</p>
                         </div>
                     </div>
                     <div className="count-box bg-white px-2 py-4 rounded-[4px]">

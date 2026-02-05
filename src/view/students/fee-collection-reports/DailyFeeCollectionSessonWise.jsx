@@ -5,7 +5,7 @@ import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 
-const DailyFeeCollection = ({ reportData, query }) => {
+const DailyFeeCollectionSessonWise = ({ reportData, query }) => {
     const [logo, setLogo] = useState(null);
     const { data: instutionInfo } = useGetInstitutionInfoQuery();
     const { data: sessionData } = useGetSessionsQuery();
@@ -91,7 +91,7 @@ const DailyFeeCollection = ({ reportData, query }) => {
                             <React.Fragment key={`user_${userData.UFOID}`}>
                                 <tr>
                                     <td className="border border-black text-center text-[16px] py-4">{UserIndex + 1}</td>
-                                    <td className="border border-black text-[16px] py-4 px-2">{userData.TransactionID}</td>
+                                    <td className="border border-black text-[16px] py-4 px-2">{userData.CurrentInvoice}</td>
                                     <td className="border border-black text-[16px] py-4 px-2">{userData.UserCode}</td>
                                     <td className="border border-black text-[16px] py-4 px-2">{userData.UserName}</td>
                                     <td className="border border-black text-[16px] py-4 px-2">{userData.ClassName}</td>
@@ -133,4 +133,4 @@ const DailyFeeCollection = ({ reportData, query }) => {
     );
 };
 
-export default DailyFeeCollection;
+export default DailyFeeCollectionSessonWise;

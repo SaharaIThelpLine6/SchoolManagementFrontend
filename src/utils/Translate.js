@@ -736,6 +736,9 @@ const useTranslate = () => {
     'Field 4': 'ফিল্ড ৪',
     'Field 5': 'ফিল্ড ৫',
     'Field 6': 'ফিল্ড ৬',
+    'Residential Name': 'আবাসন',
+    'Date Of Birth': 'জন্ম তারিখ',
+    'Position': 'অবস্থান',
   };
 
   return (key) =>
