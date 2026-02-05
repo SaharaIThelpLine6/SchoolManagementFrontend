@@ -21,6 +21,8 @@ import { useGetResidentialQuery } from "../features/settings/settingsQuerySlice"
 import ExamRoutingCheckbox from "../components/Checkboxes/ExamRoutingCheckbox";
 import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
 import DefaultInput from "../components/Forms/DefaultInput";
+import StudentsListPdf from "../view/general-information/user-reports/StudentsListPdf";
+import DailyFeeCollection from "../view/students/fee-collection-reports/DailyFeeCollection";
 
 const FeeCollectionReport = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -193,7 +195,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
   const [queryParams, setQueryParams] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  const { isFetching, isError, error } = useGetFeeCollectionReportQuery(queryParams, {
+  const { isFetching, isError, error, data: reportData } = useGetFeeCollectionReportQuery(queryParams, {
     skip: !queryParams,
   });
 
@@ -215,8 +217,8 @@ const FeeCollectionReport = ({ pageTitle }) => {
         error.status === 403
           ? translate("You do not have permission to view this report")
           : error.status === 400
-          ? translate("Missing or invalid data provided")
-          : translate("An error occurred while fetching the report")
+            ? translate("Missing or invalid data provided")
+            : translate("An error occurred while fetching the report")
       );
     } else {
       setErrorMessage(null);
@@ -235,17 +237,16 @@ const FeeCollectionReport = ({ pageTitle }) => {
 
   const onSubmit = (formData) => {
     // console.log(formData);
-    
+
     const params = {
       report_id: formData.ReportID,
-      GenderID: formData.GenderID,
+      gender: formData.GenderID,
       session_id: formData.SessionID,
       class_id: formData.ClassID,
       exam_id: formData.ExamID,
       residential_id: formData.RDID,
-      language_id: formData.id,
-      StartDate: formData.DateStart,
-      EndDate: formData.DateEnd,
+      start_id: new Date(formData.DateStart).toISOString(),
+      end_id: new Date(formData.DateEnd).toISOString(),
     };
 
     Object.keys(params).forEach(
@@ -253,7 +254,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
         (params[key] === undefined || params[key] === "") && delete params[key]
     );
     console.log(params);
-    
+
 
     setQueryParams(params);
   };
@@ -500,6 +501,42 @@ const FeeCollectionReport = ({ pageTitle }) => {
               </div>
             </form>
           </FormProvider>
+
+          <div className="w-full text-sm text-black bg-white ">
+            {isFetching && (
+              <div className="p-2">{translate("Loading report...")}</div>
+            )}
+
+
+            {reportData && selectedReportID === 1 && (
+              <div className="print-container">
+                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                  <div className="min-w-[800px]">
+                    <DailyFeeCollection
+                      data={reportData}
+                      title={"শিক্ষার্থীদের তালিকা"}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-2 print:hidden">
+                  <Button onClick={() => window.print()}>
+                    {translate("Print")}
+                  </Button>
+                </div>
+                <div className="hidden print:block">
+                  <DailyFeeCollection
+                    data={reportData}
+                    title={"শিক্ষার্থীদের তালিকা"}
+                    query={queryParams}
+                  />
+                </div>
+              </div>
+            )}
+
+
+          </div>
+
+
         </div>
       </div>
     </div>
