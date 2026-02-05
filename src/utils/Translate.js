@@ -19,7 +19,7 @@ const useTranslate = () => {
     'Class Work': 'পড়া',
     'Online Payment Invoice': 'অনলাইন পেমেন্ট ইনভয়েস',
     'Home Work': 'বাড়ির কাজ',
-    'User Panel': 'ইউজার প্যানেল',
+    'Parent Panel': 'অভিভাবক প্যানেল',
     'Maddrasah Payment Info': 'মাদ্রাসা পেমেন্ট তথ্য',
     'Website Settings': 'ওয়েবসাইট সেটিং',
     'Homework Subject History': 'বিষয় ভিত্তিক হোমওয়ার্ক',

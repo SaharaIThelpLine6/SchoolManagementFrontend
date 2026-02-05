@@ -377,7 +377,7 @@ const router = createBrowserRouter([
             ],
           },
           {
-            path: 'user-panel',
+            path: 'parent-panel',
             children: [
               {
                 index: true,
@@ -402,6 +402,24 @@ const router = createBrowserRouter([
                 element: (
                   // <RequirePermission permissionId={permissionsDataList.class}>
                   <HomWork pageTitle="Class Video" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'home-work',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <HomWork pageTitle="Class Video" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'student-complaint',
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.gate_pass_leave}
+                  // >
+                  <StudentComplaint pageTitle="Student Complaints" />
                   // </RequirePermission>
                 ),
               },
@@ -713,16 +731,6 @@ const router = createBrowserRouter([
                   //   permissionId={permissionsDataList.student_report}
                   // >
                   <ComplaintBoxTermsAndConditions pageTitle="Complaint Box Terms and Conditions" />
-                  // </RequirePermission>
-                ),
-              },
-              {
-                path: 'student-complaint',
-                element: (
-                  // <RequirePermission
-                  //   permissionId={permissionsDataList.gate_pass_leave}
-                  // >
-                  <StudentComplaint pageTitle="Student Complaints" />
                   // </RequirePermission>
                 ),
               },
