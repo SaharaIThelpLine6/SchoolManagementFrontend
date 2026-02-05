@@ -243,7 +243,7 @@ export const feeCollectionSlice = createApi({
         }
         if (ClassID) params.append('ClassID', ClassID);
         if (SessionID) params.append('SessionID', SessionID);
-        return `/search__students?${params.toString()}`;
+        return `/search_students?${params.toString()}`;
       },
       providesTags: ['SelectedStudentPerFee', 'FeeLand'],
     }),

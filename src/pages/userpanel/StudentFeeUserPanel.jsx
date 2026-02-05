@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
+import { Link, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Button from '../../components/Button/Button';
 import MultiMonthSelect from '../../components/Forms/MultiMonthSelect';
@@ -18,6 +19,7 @@ import MonthlyFeeSkeleton from './skeleton/MonthlyFeeSkeleton';
 const StudentFeeUserPanel = () => {
   const methods = useForm();
   const translate = useTranslate();
+  const { schoolid } = useParams();
 
   const { handleSubmit, reset, watch, getValues, setValue } = methods;
 
@@ -241,8 +243,11 @@ const StudentFeeUserPanel = () => {
     <FormProvider {...methods}>
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-4">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">মাসিক ফি</h1>
+          <Button>
+            <Link to={`/${schoolid}/dashboard/all-invoices`}>All Invoices</Link>
+          </Button>
           {/* <p className="text-gray-600 mt-1">Fill in the student details below</p> */}
         </div>
 

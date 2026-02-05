@@ -97,6 +97,7 @@ import ClassResultForm from '../pages/public/ClassResultForm';
 import MadrashaHomePage from '../pages/public/MadrashaHomePage';
 import MaritListForm from '../pages/public/MaritListForm';
 import MaritListResult from '../pages/public/MaritListResult';
+import AllUserPanelInvoice from '../pages/userpanel/AllUserPanelInvoice';
 import ClassRoutine from '../pages/userpanel/ClassRoutine';
 import Dashboard from '../pages/userpanel/Dashboard';
 import ExamRoutine from '../pages/userpanel/ExamRoutine';
@@ -121,7 +122,6 @@ import VideoTutorialLink from '../pages/userpanel/VideoTutorialLink';
 import WebsiteSettings from '../pages/userpanel/WebsiteSettings';
 import PaymentCancel from '../pages/userpanel/payment/PaymentCancel';
 import PaymentFail from '../pages/userpanel/payment/PaymentFail';
-import PaymentSuccess from '../pages/userpanel/payment/PaymentSuccess';
 import OwenGuide from './OwenGuide';
 import PaymentRouteGuard from './PaymentRouteGuard';
 import { RequirePermission } from './RequirePermission';
@@ -857,7 +857,7 @@ const router = createBrowserRouter([
                 path: 'online-payment-invoice',
                 element: (
                   // <PaymentRouteGuard>
-                    <OnlinePaymentInvoice pageTitle="Online Payment Invoice" />
+                  <OnlinePaymentInvoice pageTitle="Online Payment Invoice" />
                   // </PaymentRouteGuard>
                 ),
               },
@@ -1052,10 +1052,10 @@ const router = createBrowserRouter([
         path: 'monthly-fee',
         element: <StudentFeeUserPanel pageTitle="Month Fee" />,
       },
-      {
-        path: 'payment-success',
-        element: <PaymentSuccess pageTitle="Payment Success" />,
-      },
+      // {
+      //   path: 'payment-success',
+      //   element: <PaymentSuccess pageTitle="Payment Success" />,
+      // },
       {
         path: 'payment-fail',
         element: <PaymentFail pageTitle="Payment Fail" />,
@@ -1065,8 +1065,12 @@ const router = createBrowserRouter([
         element: <PaymentCancel pageTitle="Payment Cancel" />,
       },
       {
-        path: 'payment-invoice',
+        path: 'payment-success',
         element: <OnlinePaymentInvoiceDownload pageTitle="Payment Invoice" />,
+      },
+      {
+        path: 'all-invoices',
+        element: <AllUserPanelInvoice pageTitle="All Invoice" />,
       },
     ],
   },

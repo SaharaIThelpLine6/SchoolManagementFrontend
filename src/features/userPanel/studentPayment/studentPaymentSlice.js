@@ -21,6 +21,19 @@ export const studentPaymentSlice = createApi({
     getStudentPaymentDetails: builder.query({
       query: (UFOID) => `history/details/${UFOID}`,
     }),
+    getInvoiceByTran: builder.query({
+      query: (tran_id) => `get_invoice_by_tran/${tran_id}`,
+    }),
+    getAllPaymentInvoices: builder.query({
+      query: ({ startDate, endDate }) => ({
+        url: 'get_userpanel_payment_invoice',
+        params: {
+          startDate,
+          endDate,
+        },
+      }),
+    }),
+
     initPayment: builder.mutation({
       query: (payload) => ({
         url: '/init',
@@ -35,4 +48,6 @@ export const {
   useGetStudentPaymentsQuery,
   useGetStudentPaymentDetailsQuery,
   useInitPaymentMutation,
+  useGetInvoiceByTranQuery,
+  useGetAllPaymentInvoicesQuery,
 } = studentPaymentSlice;

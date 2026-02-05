@@ -17,13 +17,13 @@ import { useVerifyUserPanelTokenMutation } from '../features/userPanel/userLogin
 import { showModal, showSideBarModal } from '../utils/ModalControlar';
 // import { subscribeUser } from "../pushNotifications";
 import DropdownNotification from '../components/Header/DropdownNotification';
+import Loading from '../components/Loading/Loading';
 import {
   useNotificationListQuery,
   useSubscribeNotificationMutation,
 } from '../features/userPanel/panelNotification/panelNotificationQuerySlice';
 import avatar from '/avatar.png';
 import logo from '/saharaItlogo.png';
-import Loading from '../components/Loading/Loading';
 
 const WEB_PUSH_PUBLIC_KEY = import.meta.env.VITE_WEB_PUSH_PUBLIC_KEY;
 export default function UserPanel({ children }) {
@@ -192,7 +192,7 @@ export default function UserPanel({ children }) {
         }}
       />
 
-      <header className="px-2 text-black shadow-[0_0px_10px_rgba(0,0,0,0.25)] relative z-[9999]">
+      <header className="px-2 text-black shadow-[0_0px_10px_rgba(0,0,0,0.25)] relative z-[9999] print:hidden">
         <div className="container mx-auto">
           <div className=" py-4">
             <div className="flex items-center justify-between gap-[10px]">
@@ -355,7 +355,7 @@ export default function UserPanel({ children }) {
           </Link>
         </div>
       </div> */}
-      <div className="mobile_footer_menu shadow-[0_0_10px_rgba(0,0,0,0.25)] bg-white py-2 fixed w-full bottom-0 z-50">
+      <div className="mobile_footer_menu shadow-[0_0_10px_rgba(0,0,0,0.25)] bg-white py-2 fixed w-full bottom-0 z-50 print:hidden">
         <div className="grid grid-cols-3 items-center">
           {/* হোম লিঙ্ক */}
           <Link to={`/${schoolid}/dashboard`} className="text-center">
