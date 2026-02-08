@@ -60,7 +60,7 @@ const DailyFeeCollection = ({ reportData, query }) => {
                     </div>
                     <div className="grid grid-cols-3 items-center my-[20px] justify-between w-full">
                         <p className="text-[18px] text-start">শিক্ষাবর্ষ : {selectedSession?.SessionName}</p>
-                        <p className="text-[18px] text-center"> {new Date(query.start_id).toLocaleDateString("bn-BD")} হতে {new Date(query.end_id).toLocaleDateString("bn-BD")} পর্যন্ত </p>
+                        <p className="text-[18px] text-center"> {new Date(query.start_date).toLocaleDateString("bn-BD")} হতে {new Date(query.start_date).toLocaleDateString("bn-BD")} পর্যন্ত </p>
                         <p className="text-end text-[18px]">প্রিন্ট তারিখ: {new Date().toLocaleDateString("bn-BD")} </p>
                     </div>
                 </div>

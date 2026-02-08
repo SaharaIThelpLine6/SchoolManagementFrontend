@@ -17,13 +17,14 @@ import Swal from "sweetalert2";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetClassListQuery } from "../features/class/classQuerySlice";
 import { useGetExamNamesQuery } from "../features/exam/examQuerySlice";
-import { useGetResidentialQuery } from "../features/settings/settingsQuerySlice";
+import { useGetLoginUsersQuery, useGetResidentialQuery } from "../features/settings/settingsQuerySlice";
 import ExamRoutingCheckbox from "../components/Checkboxes/ExamRoutingCheckbox";
 import DatePickerOne from "../components/Forms/DatePicker/DatePickerOne";
 import DefaultInput from "../components/Forms/DefaultInput";
 import StudentsListPdf from "../view/general-information/user-reports/StudentsListPdf";
 import DailyFeeCollection from "../view/students/fee-collection-reports/DailyFeeCollection";
 import DailyFeeCollectionSessonWise from "../view/students/fee-collection-reports/DailyFeeCollectionSessonWise";
+import DailyFeeCollectionUserWise from "../view/students/fee-collection-reports/DailyFeeCollectionUserWise";
 
 const FeeCollectionReport = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -206,6 +207,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
   const { data: classListData } = useGetClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
   const { data: residentialData } = useGetResidentialQuery();
+  const { data: userNameData } = useGetLoginUsersQuery();
 
   useEffect(() => {
     dispatch(setPageName(pageTitle));
@@ -251,7 +253,8 @@ const FeeCollectionReport = ({ pageTitle }) => {
       start_date: formData.DateStart ? new Date(formData.DateStart).toDateString() : null,
       end_date: formData.DateEnd ? new Date(formData.DateEnd).toDateString() : null,
       start_id: formData.StartId,
-      end_id: formData.EndId
+      end_id: formData.EndId,
+      user_id: formData.UserID
     };
 
     Object.keys(params).forEach(
@@ -274,18 +277,18 @@ const FeeCollectionReport = ({ pageTitle }) => {
     { newOldID: 2, newOldName: "পুরাতন" },
     { newOldID: 3, newOldName: "উভয়" },
   ];
-  const userNameData = [
-    { UserID: 1, UserName: "JohnDoe" },
-    { UserID: 2, UserName: "JaneSmith" },
-    { UserID: 3, UserName: "AlexJohnson" },
-    { UserID: 4, UserName: "SarahWilliams" },
-    { UserID: 5, UserName: "MichaelBrown" },
-    { UserID: 6, UserName: "EmilyDavis" },
-    { UserID: 7, UserName: "RobertWilson" },
-    { UserID: 8, UserName: "JessicaTaylor" },
-    { UserID: 9, UserName: "DavidMiller" },
-    { UserID: 10, UserName: "OliviaAnderson" },
-  ];
+  // const userNameData = [
+  //   { UserID: 1, UserName: "JohnDoe" },
+  //   { UserID: 2, UserName: "JaneSmith" },
+  //   { UserID: 3, UserName: "AlexJohnson" },
+  //   { UserID: 4, UserName: "SarahWilliams" },
+  //   { UserID: 5, UserName: "MichaelBrown" },
+  //   { UserID: 6, UserName: "EmilyDavis" },
+  //   { UserID: 7, UserName: "RobertWilson" },
+  //   { UserID: 8, UserName: "JessicaTaylor" },
+  //   { UserID: 9, UserName: "DavidMiller" },
+  //   { UserID: 10, UserName: "OliviaAnderson" },
+  // ];
 
   return (
     <div className="font-SolaimanLipi">
@@ -352,7 +355,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
                   unicode={true}
                 />
               )}
-              {/* {shouldShowFields("UserNameID") && (
+              {shouldShowFields("UserNameID") && (
                 <DefaultSelect
                   label="User Name"
                   nameField="UserName"
@@ -362,7 +365,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
                   required="This field is required"
                   defaultSelect={false}
                 />
-              )} */}
+              )}
               {shouldShowFields("GenderID") && (
                 <DefaultSelect
                   label="Gender"
@@ -513,7 +516,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
             )}
 
 
-            {reportData && selectedReportID === 1 && (
+            {reportData && (selectedReportID === 1 || selectedReportID === 6) && (
               <div className="print-container">
                 <div className="w-full relative max-w-full overflow-x-auto print:hidden">
                   <div className="min-w-[800px]">
@@ -618,9 +621,9 @@ const FeeCollectionReport = ({ pageTitle }) => {
               <div className="print-container">
                 <div className="w-full relative max-w-full overflow-x-auto print:hidden">
                   <div className="min-w-[800px]">
-                    <DailyFeeCollection
+                    <DailyFeeCollectionUserWise
                       reportData={reportData}
-                      title={"রিপোর্ট ২ এর শিরোনাম"}
+                      title={`গ্রহিতা হিসেবে ফি গ্রহণ তালিকা`}
                       query={queryParams}
                     />
                   </div>
@@ -633,7 +636,7 @@ const FeeCollectionReport = ({ pageTitle }) => {
                 <div className="w-full relative max-w-full print_canvas">
                   <DailyFeeCollection
                     reportData={reportData}
-                    title={"রিপোর্ট ২ এর শিরোনাম"}
+                    title={"গ্রহিতা হিসেবে ফি গ্রহণ তালিকা"}
                     query={queryParams}
                   />
                 </div>
