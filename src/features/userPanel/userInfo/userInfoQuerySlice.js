@@ -136,6 +136,18 @@ export const userPanelUserInfo = createApi({
       query: (admissionId) => `month_per_student_fee_userpanel/${admissionId}`,
       providesTags: [],
     }),
+
+    getStudentReportList: builder.query({
+      query: (params) => ({
+        url: 'student_userpanel_report_list',
+        params: {
+          seeUnSee: params?.seeUnSee || '',
+        },
+      }),
+    }),
+    getStudentComplaintReport: builder.query({
+      query: ({ SCID }) => `student_userpanel_report_get/${SCID}`,
+    }),
   }),
 });
 
@@ -160,5 +172,7 @@ export const {
   useGetHomeWorksUserPanelQuery,
   useGetHomeWorkStudyTracksHistoryUserPanelQuery,
   useGetFeeLandByAdmissionIdUserPanelQuery,
-  useGetMonthPerStudentsFeeUserPanelQuery
+  useGetMonthPerStudentsFeeUserPanelQuery,
+  useGetStudentReportListQuery,
+  useGetStudentComplaintReportQuery
 } = userPanelUserInfo;

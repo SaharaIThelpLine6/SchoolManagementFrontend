@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import Button from '../../components/Button/Button';
 import {
   useGetMaddasahReportListQuery,
   usePostStudentParentsReportsMutation,
@@ -9,6 +11,7 @@ import useTranslate from '../../utils/Translate';
 const Reports = () => {
   const [report, setReport] = useState('');
   const translate = useTranslate();
+  const { schoolid } = useParams();
 
   const { data, refetch, isLoading } = useGetMaddasahReportListQuery();
 
@@ -57,9 +60,14 @@ const Reports = () => {
   return (
     <div className="max-w-md mx-auto mt-10 p-6 pt-2 rounded-xl shadow-lg relative mb-20">
       {/* হেডার বক্স*/}
-      <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-4 border-gray-800 inline-block">
-        অভিযোগ বক্স
-      </h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold text-gray-800 mb-4 border-b-4 border-gray-800 inline-block">
+          অভিযোগ বক্স
+        </h2>
+        <Button>
+          <Link to={`/${schoolid}/dashboard/reports-list`}>অভিযোগ লিষ্ট</Link>
+        </Button>
+      </div>
 
       {/* নির্দেশাবলী */}
       <ul className="text-gray-700 font-semibold mb-4 space-y-2">

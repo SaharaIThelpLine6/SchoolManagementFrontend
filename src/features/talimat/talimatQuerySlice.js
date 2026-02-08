@@ -68,6 +68,14 @@ export const talimatQuerySlice = createApi({
       }),
       invalidatesTags: ['StudentParentsReports'],
     }),
+    putStudentReportConfirmDetailsUpdate: builder.mutation({
+      query: ({ id, confirmDetails }) => ({
+        url: `student_complaint_update/${id}`,
+        method: 'PUT',
+        body: { confirmDetails },
+      }),
+      invalidatesTags: ['StudentParentsReports'],
+    }),
 
     deleteMaddrasahReport: builder.mutation({
       query: (id) => ({
@@ -106,4 +114,5 @@ export const {
   usePutStudentReportStatusUpdateMutation,
   useGetSingleStudentReportQuery,
   useDeleteStudentReportMutation,
+  usePutStudentReportConfirmDetailsUpdateMutation,
 } = talimatQuerySlice;

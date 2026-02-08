@@ -125,6 +125,7 @@ import PaymentFail from '../pages/userpanel/payment/PaymentFail';
 import OwenGuide from './OwenGuide';
 import PaymentRouteGuard from './PaymentRouteGuard';
 import { RequirePermission } from './RequirePermission';
+import ReportsList from '../pages/userpanel/ReportsList';
 
 const router = createBrowserRouter([
   {
@@ -1035,6 +1036,10 @@ const router = createBrowserRouter([
       {
         path: 'reports',
         element: <Reports pageTitle="Teacher Contact" />,
+      },
+      {
+        path: 'reports-list',
+        element: <ReportsList pageTitle="Reports List" />,
       },
       {
         path: 'class-routine',
