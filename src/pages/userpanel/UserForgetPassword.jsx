@@ -283,7 +283,7 @@ export default function UserForgetPassword() {
     }).unwrap();
 
     setPhoneNumber(res.phone);
-    setOtpTimer(120);
+    setOtpTimer(300);
   }
 
   async function onSubmit(data) {

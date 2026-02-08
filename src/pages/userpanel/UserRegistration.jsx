@@ -292,7 +292,7 @@ export default function UserRegistration() {
     }).unwrap();
 
     setPhoneNumber(res.phone); // save phone number
-    setOtpTimer(120); // 30 sec timer
+    setOtpTimer(600); // 30 sec timer
   }
 
   async function onSubmit(data) {

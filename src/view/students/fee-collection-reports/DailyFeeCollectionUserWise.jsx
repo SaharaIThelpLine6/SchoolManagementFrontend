@@ -5,7 +5,7 @@ import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 
-const DailyFeeCollection = ({ reportData, query }) => {
+const DailyFeeCollectionUserWise = ({ reportData, query }) => {
     const [logo, setLogo] = useState(null);
     const { data: instutionInfo } = useGetInstitutionInfoQuery();
     const { data: sessionData } = useGetSessionsQuery();
@@ -59,46 +59,54 @@ const DailyFeeCollection = ({ reportData, query }) => {
                         গ্রহিতা হিসেবে ফি গ্রহণ তালিকা - ২০২৪
                     </div>
                     <div className="grid grid-cols-2 items-center my-[20px] justify-between w-full">
-                        <p className="text-[18px] text-start"> {new Date(query.start_id).toLocaleDateString("bn-BD")} হতে {new Date(query.end_id).toLocaleDateString("bn-BD")} পর্যন্ত </p>
+                        <p className="text-[18px] text-start"> {new Date(query.start_date).toLocaleDateString("bn-BD")} হতে {new Date(query.end_date).toLocaleDateString("bn-BD")} পর্যন্ত </p>
                         <p className="text-end text-[18px]">প্রিন্ট তারিখ: {new Date().toLocaleDateString("bn-BD")} </p>
                     </div>
                 </div>
 
                 {/* Optional right-aligned blank space */}
 
-                {reportData && reportData.length > 0 && reportData.map((userData, UserIndex) => (
-                    <table className="w-full border-collapse border border-black bg-white mb-8">
-                        <thead>
-                            <tr className="bg-white text-black">
-                                <th className="border border-black p-2 text-[20px]">ক্রমিক</th>
-                                <th className="border border-black p-2 text-[20px]">ব্যবহার কারীর নাম</th>
-                                <th className="border border-black p-2 text-[20px]">টাকার পরিমাণ</th>
-                            </tr>
-                        </thead>
 
-                        <tbody>
+                <table className="w-full border-collapse border border-black bg-white mb-8">
+                    <thead>
+                        <tr className="bg-white text-black">
+                            <th className="border border-black p-2 text-[20px]"> ক্রমিক </th>
+                            <th className="border border-black p-2 text-[20px]"> ব্যবহার কারীর নাম </th>
+                            <th className="border border-black p-2 text-[20px]"> টাকার পরিমাণ </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {reportData && reportData.length > 0 && reportData.map((userData, UserIndex) => (
                             <React.Fragment key={`user_${userData.UFOID}`}>
                                 <tr>
-                                    <td colSpan={3}>20/04/2025</td>
-                                    <td className="border border-black text-center text-[16px] py-4">2</td>
-                                    <td className="border border-black text-[16px] py-4 px-2">মুফতী সালমান সাহেব</td>
-                                    <td className="border border-black text-[16px] py-4 px-2">550</td>
+                                    <td colSpan={3} className="border border-t-0 border-black text-[20px] py-3 px-2 text-center bg-[#bebebe] text-white">{new Date(userData.CreateAt).toLocaleDateString("bn-BD")}</td>
+                                </tr>
+                                {
+                                    userData.UserDetails.map((user, ind) => (
+                                        <tr>
+                                            <td className="border border-black text-center text-[16px] py-4">{UserIndex + 1}</td>
+                                            <td className="border border-black text-[16px] py-4 px-2">{user.name}</td>
+                                            <td className="border border-black text-[16px] py-4 px-2">{user.amount}</td>
+                                        </tr>
+                                    ))
+                                }
+                                <tr>
+                                    <td colSpan={2} className="border-0 text-end font-bold py-4 px-2 text-[20px] bg-white">
+                                        মোট:
+                                    </td>
+
+                                    <td className="border-0 text-[16px] py-4 px-2 font-bold bg-white">
+                                        550
+                                    </td>
                                 </tr>
                             </React.Fragment>
-                            <tr>
-                                <td colSpan={2} className="border border-black text-end font-bold py-2 px-2">
-                                    মোট:
-                                </td>
 
-                                <td className="border border-black text-[16px] py-2 px-2 font-bold">
-                                    550
-                                </td>
-                            </tr>
+                        ))}
+                    </tbody>
 
-                        </tbody>
+                </table>
 
-                    </table>
-                ))}
 
             </div>
 
@@ -108,4 +116,4 @@ const DailyFeeCollection = ({ reportData, query }) => {
     );
 };
 
-export default DailyFeeCollection;
+export default DailyFeeCollectionUserWise;

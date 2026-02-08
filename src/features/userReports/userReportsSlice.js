@@ -50,6 +50,7 @@ export const userReportsSlice = createApi({
         end_date,
         start_id,
         end_id,
+        user_id
       }) => {
         const params = new URLSearchParams({ report_id });
 
@@ -65,6 +66,7 @@ export const userReportsSlice = createApi({
 
         if (start_id !== undefined) params.append('start_id', start_id);
         if (end_id !== undefined) params.append('end_id', end_id);
+        if (user_id !== undefined) params.append('user_id', user_id);
 
         return `user_fee_report?${params.toString()}`;
       },
