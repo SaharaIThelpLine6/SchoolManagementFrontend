@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { usePutStudentReportStatusUpdateMutation } from '../features/talimat/talimatQuerySlice';
 
 const options = [
@@ -8,17 +9,38 @@ const options = [
 
 const StatusSelect = ({ value, onChange, id }) => {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const buttonRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
 
   const [updateStatus, { isLoading }] =
     usePutStudentReportStatusUpdateMutation();
 
   const selected = options.find((o) => o.value === value);
 
-  // ✅ outside click handler (NO async here)
+  // 🔥 button click → dropdown position calculate
+  const handleToggle = () => {
+    if (!buttonRef.current) return;
+
+    const rect = buttonRef.current.getBoundingClientRect();
+    setCoords({
+      top: rect.bottom + window.scrollY,
+      left: rect.left + window.scrollX,
+      width: rect.width,
+    });
+
+    setOpen((prev) => !prev);
+  };
+
+  // ✅ outside click close (button + dropdown safe)
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) {
+      if (
+        buttonRef.current &&
+        !buttonRef.current.contains(e.target) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target)
+      ) {
         setOpen(false);
       }
     };
@@ -36,8 +58,7 @@ const StatusSelect = ({ value, onChange, id }) => {
       };
 
       await updateStatus(payload).unwrap();
-
-      onChange(newStatus); // parent state update
+      onChange?.(newStatus);
       setOpen(false);
     } catch (error) {
       console.error('Status update failed', error);
@@ -45,12 +66,14 @@ const StatusSelect = ({ value, onChange, id }) => {
   };
 
   return (
-    <div ref={ref} className="relative w-48">
+    <>
+      {/* Button */}
       <button
+        ref={buttonRef}
         type="button"
         disabled={isLoading}
-        onClick={() => setOpen(!open)}
-        className="w-full border rounded-md px-3 py-2 text-sm flex justify-between items-center bg-white hover:border-gray-400 disabled:opacity-50"
+        onClick={handleToggle}
+        className="w-48 border rounded-md px-3 py-2 text-sm flex justify-between items-center bg-white hover:border-gray-400 disabled:opacity-50"
       >
         <span>{selected?.label || 'সিলেক্ট করুন'}</span>
         <svg
@@ -68,25 +91,36 @@ const StatusSelect = ({ value, onChange, id }) => {
         </svg>
       </button>
 
-      {open && (
-        <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg">
-          {options.map((item) => (
-            <button
-              key={item.value}
-              onClick={() => handleStatusChange(item.value)}
-              className={`w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-yellow-100
-                ${value === item.value ? 'bg-yellow-200' : ''}
-              `}
-            >
-              <span>{item.label}</span>
-              {value === item.value && (
-                <span className="text-green-600 font-bold">✔</span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+      {/* Dropdown (PORTAL) */}
+      {open &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            className="fixed z-[9999] bg-white border rounded-md shadow-lg"
+            style={{
+              top: coords.top,
+              left: coords.left,
+              width: coords.width,
+            }}
+          >
+            {options.map((item) => (
+              <button
+                key={item.value}
+                onClick={() => handleStatusChange(item.value)}
+                className={`w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-yellow-100
+                  ${value === item.value ? 'bg-yellow-200' : ''}
+                `}
+              >
+                <span>{item.label}</span>
+                {value === item.value && (
+                  <span className="text-green-600 font-bold">✔</span>
+                )}
+              </button>
+            ))}
+          </div>,
+          document.body
+        )}
+    </>
   );
 };
 
