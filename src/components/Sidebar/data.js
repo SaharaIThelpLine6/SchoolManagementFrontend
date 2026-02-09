@@ -158,6 +158,11 @@ export const menuData = [
         name: 'Student Complaints',
         route: '/parent-panel/student-complaint',
       },
+      {
+        id: '5',
+        name: 'Complaint Box Terms and Conditions',
+        route: '/parent-panel/complaint-box-terms-and-conditions',
+      },
     ],
   },
   // {
@@ -383,19 +388,19 @@ export const menuData = [
       // },
     ],
   },
-  {
-    id: '18',
-    name: 'Talimat',
-    route: '/talimat',
-    icon: 'IoMdSettings',
-    subMenu: [
-      {
-        id: '1',
-        name: 'Complaint Box Terms and Conditions',
-        route: '/talimat',
-      },
-    ],
-  },
+  // {
+  //   id: '18',
+  //   name: 'Talimat',
+  //   route: '/talimat',
+  //   icon: 'IoMdSettings',
+  //   subMenu: [
+  //     {
+  //       id: '1',
+  //       name: 'Complaint Box Terms and Conditions',
+  //       route: '/talimat',
+  //     },
+  //   ],
+  // },
   {
     id: '9',
     name: 'Payment',
