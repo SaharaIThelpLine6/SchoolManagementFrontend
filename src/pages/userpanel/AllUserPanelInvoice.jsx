@@ -77,7 +77,7 @@ const AllUserPanelInvoice = () => {
         </div>
 
         {invoicesList.map((invoice, index) => (
-          <div key={invoice.GOPIID} className="bg-white shadow rounded-xl">
+          <div key={invoice.GOPID} className="bg-white shadow rounded-xl">
             <div className="p-4 border-b bg-gray-50 flex justify-between">
               <h2 className="font-semibold text-lg">Invoice #{index + 1}</h2>
               <Button onClick={() => handleSinglePrintPDf(invoice)}>
