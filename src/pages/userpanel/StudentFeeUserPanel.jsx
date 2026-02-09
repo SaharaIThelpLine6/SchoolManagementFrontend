@@ -245,9 +245,9 @@ const StudentFeeUserPanel = () => {
         {/* Header */}
         <div className="mb-6 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">মাসিক ফি</h1>
-          <Button>
+          {/* <Button>
             <Link to={`/${schoolid}/dashboard/all-invoices`}>All Invoices</Link>
-          </Button>
+          </Button> */}
           {/* <p className="text-gray-600 mt-1">Fill in the student details below</p> */}
         </div>
 
