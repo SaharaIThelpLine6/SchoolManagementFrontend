@@ -126,7 +126,7 @@ export const menuData = [
         route: '/students/online-admission',
       },
       {
-        id: '11',
+        id: '12',
         name: 'Student ID Card',
         route: '/students/student-id-card',
       },
@@ -157,6 +157,11 @@ export const menuData = [
         id: '4',
         name: 'Student Complaints',
         route: '/parent-panel/student-complaint',
+      },
+      {
+        id: '5',
+        name: 'Complaint Box Terms and Conditions',
+        route: '/parent-panel/complaint-box-terms-and-conditions',
       },
     ],
   },
@@ -337,65 +342,65 @@ export const menuData = [
         route: '/accounting',
       },
       {
-        id: '11',
+        id: '2',
         name: 'Deposit Costs Report',
         route: '/accounting/income-expense-report',
       },
       {
-        id: '2',
+        id: '3',
         name: 'Fee Setting',
         route: '/accounting/fee-setting',
       },
       {
-        id: '3',
+        id: '4',
         name: 'Student Fee Collection',
         route: '/accounting/student-fee-collection',
       },
       {
-        id: '4',
+        id: '5',
         name: 'Dues List',
         route: '/accounting/dues-list',
       },
       {
-        id: '5',
+        id: '6',
         name: 'Monthly Dues',
         route: '/accounting/monthly-dues',
       },
       {
-        id: '6',
+        id: '7',
         name: 'Fee Collection Report',
         route: '/accounting/fee-collection-report',
       },
       {
-        id: '7',
+        id: '8',
         name: 'Balance Transfer',
         route: '/accounting/balance-transfer',
       },
       {
-        id: '8',
+        id: '9',
         name: 'Delete Edit Record',
         route: '/accounting/delete-edit-record',
       },
       // {
-      //   id: '9',
+      //   id: '10',
       //   name: 'Student Admission',
       //   route: '/accounting/student-admission',
       // },
     ],
   },
-  {
-    id: '18',
-    name: 'Talimat',
-    route: '/talimat',
-    icon: 'IoMdSettings',
-    subMenu: [
-      {
-        id: '1',
-        name: 'Complaint Box Terms and Conditions',
-        route: '/talimat',
-      },
-    ],
-  },
+  // {
+  //   id: '18',
+  //   name: 'Talimat',
+  //   route: '/talimat',
+  //   icon: 'IoMdSettings',
+  //   subMenu: [
+  //     {
+  //       id: '1',
+  //       name: 'Complaint Box Terms and Conditions',
+  //       route: '/talimat',
+  //     },
+  //   ],
+  // },
   {
     id: '9',
     name: 'Payment',
@@ -417,11 +422,11 @@ export const menuData = [
         name: 'Maddrasah Payment Info',
         route: '/payment-history/maddrasah-payment-info',
       },
-      // {
-      //   id: '4',
-      //   name: 'Online Payment Invoice',
-      //   route: '/payment-history/online-payment-invoice',
-      // },
+      {
+        id: '4',
+        name: 'Online Payment Invoice',
+        route: '/payment-history/online-payment-invoice',
+      },
     ],
   },
 

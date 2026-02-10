@@ -37,7 +37,7 @@ const Dashboard = () => {
       <div className="container mx-auto px-3">
         {/* ===== MENU GRID ===== */}
         {/* only for main */}
-         <div className="grid grid-cols-2 gap-4 mt-4">
+         {/* <div className="grid grid-cols-2 gap-4 mt-4">
           <Link
             to={`/${schoolid}/dashboard/student-results`}
             className={cardClass}
@@ -161,9 +161,9 @@ const Dashboard = () => {
             </div>
             <h4 className={titleClass}>অভিযোগ ও পরামর্শ </h4>
           </Link>
-        </div>
+        </div> */}
         {/* only for test */}
-         {/* <div className="grid grid-cols-2 gap-4 mt-4">
+         <div className="grid grid-cols-2 gap-4 mt-4">
           <Link
             to={`/${schoolid}/dashboard/student-results`}
             className={cardClass}
@@ -472,7 +472,7 @@ const Dashboard = () => {
 
             <h4 className={titleClass}>ক্লাস ভিডিও</h4>
           </Link>
-        </div> */}
+        </div>
       </div>
     </main>
   );

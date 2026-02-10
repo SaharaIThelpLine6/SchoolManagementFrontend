@@ -40,6 +40,7 @@ const OnlinePaymentInvoiceDownload = () => {
 
   // ✅ Move this above normalizedInvoice
   const invoice = data.data;
+  console.log(invoice, 'data');
 
   const normalizedInvoice = invoice.InvoiceDetails.reduce((acc, item) => {
     const monthKey = `${item.MonthName} ${item.SessionName}`;
@@ -68,9 +69,7 @@ const OnlinePaymentInvoiceDownload = () => {
           {/* Header */}
           <div className="text-center">
             <h2 className="text-xl font-semibold">ইনভয়েস</h2>
-            <p className="text-xs text-gray-500 mt-1">
-              #{invoice.TransactionID}
-            </p>
+            <p className="text-2xl font-bold text-gray-500 mt-1">#{invoice.GOPID}</p>
           </div>
 
           {/* Status */}

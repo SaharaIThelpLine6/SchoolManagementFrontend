@@ -1,10 +1,8 @@
-import React, { useState } from "react";
-import Flatpickr from "react-flatpickr";
-import "flatpickr/dist/themes/light.css";
-import bnBijoy2Unicode from "../../utils/conveter";
-import { useSelector } from "react-redux";
-
-
+import React, { useState } from 'react';
+import Flatpickr from 'react-flatpickr';
+import 'flatpickr/dist/themes/light.css';
+import bnBijoy2Unicode from '../../utils/conveter';
+import { useSelector } from 'react-redux';
 
 const SortableTable = ({
   columns,
@@ -15,16 +13,17 @@ const SortableTable = ({
   checkboxes = {}, // নতুন প্রপ: চেকবক্স স্টেট
   onCheckboxChange, // নতুন প্রপ: চেকবক্স হ্যান্ডলার
   rowWrap = true,
-  tdclass
+  tdclass,
 }) => {
   const [filters, setFilters] = useState({});
   const { currectLanguage } = useSelector((state) => state.language);
-  const fontClass = currectLanguage === "bn" ? "font-SolaimanLipi" : "font-lato";
+  const fontClass =
+    currectLanguage === 'bn' ? 'font-SolaimanLipi' : 'font-lato';
 
   const handleFilterChange = (field, value) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
-      [field]: value === "All" ? null : value,
+      [field]: value === 'All' ? null : value,
     }));
   };
 
@@ -33,21 +32,21 @@ const SortableTable = ({
     columns.every((column) => {
       if (!filters[column.field] && filters[column.field] !== 0) return true;
 
-      if (column.type === "text") {
+      if (column.type === 'text') {
         return row[column.field]
           ?.toString()
           .toLowerCase()
           .includes(filters[column.field].toLowerCase());
       }
-      if (column.type === "select") {
+      if (column.type === 'select') {
         return row[column.field] === Number(filters[column.field]);
       }
-      if (column.type === "date") {
+      if (column.type === 'date') {
         const rowDate = new Date(row[column.field]).setHours(0, 0, 0, 0);
         const filterDate = new Date(filters[column.field]).setHours(0, 0, 0, 0);
         return rowDate === filterDate;
       }
-      if (column.type === "range") {
+      if (column.type === 'range') {
         const rowDate = new Date(row[column.field]).setHours(0, 0, 0, 0);
         const [startDate, endDate] = filters[column.field] || [];
         return startDate && endDate
@@ -58,21 +57,23 @@ const SortableTable = ({
       return true;
     })
   );
-const alignClass = {
-  start: "text-left",
-  center: "text-center",
-  end: "text-right",
-};
+  const alignClass = {
+    start: 'text-left',
+    center: 'text-center',
+    end: 'text-right',
+  };
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
-        <thead className={`text-xs sm:text-sm text-theme-dark ${fontClass} uppercase bg-gray-50`}>
+        <thead
+          className={`text-xs sm:text-sm text-theme-dark ${fontClass} uppercase bg-gray-50`}
+        >
           <tr>
             {columns.map((column, index) => (
               <th
                 key={index}
                 className={`px-3 py-3 text-nowrap ${
-                  alignClass[column.hozAlign] || "text-left"
+                  alignClass[column.hozAlign] || 'text-left'
                 }`}
               >
                 <div className="flex items-center gap-2 justify-center">
@@ -95,29 +96,29 @@ const alignClass = {
               {columns.map((column, index) => (
                 <th
                   key={index}
-                  className={`px-3 h-[40px] text-${column.hozAlign || "start"}`}
+                  className={`px-3 h-[40px] text-${column.hozAlign || 'start'}`}
                 >
                   {column.filterable && (
                     <>
-                      {column.type === "text" && (
+                      {column.type === 'text' && (
                         <input
                           type="text"
                           placeholder={`Filter ${column.title}`}
                           className="w-full h-[80%] px-2 py-1 outline-1 border border-gray-300 outline-theme-color rounded-[5px] text-xs font-normal"
-                          value={filters[column.field] || ""}
+                          value={filters[column.field] || ''}
                           onChange={(e) =>
                             handleFilterChange(column.field, e.target.value)
                           }
                         />
                       )}
-                      {column.type === "select" && (
+                      {column.type === 'select' && (
                         <select
                           className="w-full h-[80%] px-2 py-1 outline-1 border border-gray-300 outline-theme-color rounded-[5px] text-xs font-normal"
-                          value={filters[column.field] ?? "All"}
+                          value={filters[column.field] ?? 'All'}
                           onChange={(e) =>
                             handleFilterChange(
                               column.field,
-                              e.target.value === "All"
+                              e.target.value === 'All'
                                 ? null
                                 : Number(e.target.value)
                             )
@@ -131,21 +132,21 @@ const alignClass = {
                           ))}
                         </select>
                       )}
-                      {column.type === "date" && (
+                      {column.type === 'date' && (
                         <Flatpickr
                           className="w-full h-[80%] px-2 py-1 outline-1 border border-gray-300 outline-theme-color rounded-[5px] text-xs font-normal"
-                          options={{ dateFormat: "Y-m-d" }}
-                          value={filters[column.field] || ""}
+                          options={{ dateFormat: 'Y-m-d' }}
+                          value={filters[column.field] || ''}
                           onChange={(selectedDates) =>
                             handleFilterChange(column.field, selectedDates[0])
                           }
                         />
                       )}
-                      {column.type === "range" && (
+                      {column.type === 'range' && (
                         <Flatpickr
                           className="w-full h-[80%] px-2 py-1 outline-1 border border-gray-300 outline-theme-color rounded-[5px] text-xs font-normal"
-                          options={{ mode: "range", dateFormat: "Y-m-d" }}
-                          value={filters[column.field] || ""}
+                          options={{ mode: 'range', dateFormat: 'Y-m-d' }}
+                          value={filters[column.field] || ''}
                           onChange={(selectedDates) =>
                             handleFilterChange(
                               column.field,
@@ -172,14 +173,14 @@ const alignClass = {
                 <td
                   key={cellIndex}
                   className={`px-3 py-4 font-medium text-theme-dark ${rowWrap ? 'whitespace-nowrap' : 'whitespace-wrap'}  ${fontClass} text-${
-                    column.hozAlign || "start"
+                    column.hozAlign || 'start'
                   } ${tdclass}`}
                 >
                   {column.render
                     ? column.render(row, rowIndex)
                     : column?.unicode
-                    ? bnBijoy2Unicode(row[column.field])
-                    : row[column.field] || "N/A"}
+                      ? bnBijoy2Unicode(row[column.field])
+                      : row[column.field] || 'N/A'}
                 </td>
               ))}
             </tr>

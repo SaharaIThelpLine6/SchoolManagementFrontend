@@ -344,13 +344,13 @@ const CreateUser = ({ pageTitle }) => {
               <DefaultSelect
                 label="Gender"
                 options={[
-                  { GenderID: 1, GenderName: "ছেলে" },
-                  { GenderID: 2, GenderName: "মেয়ে" }
+                  { GenderID: 1, GenderName: 'ছেলে' },
+                  { GenderID: 2, GenderName: 'মেয়ে' },
                 ]}
                 registerKey="GenderID"
                 require="Gender Field is required!"
                 nameField="GenderName"
-                valueField="ID"
+                valueField="GenderID"
                 labelColor="text-red-500"
               />
 

@@ -69,6 +69,7 @@ import CreateEditPaymentInfoModal from './Modals/CreateEditPaymentInfoModal';
 import StudentCardModel from '../view/students/id-card-model/StudentCardModel';
 import PaymentSSLInfoView from './Modals/PaymentSSLInfoVierw';
 import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
+import StudentSingleConplaint from '../pages/userpanel/Modal/StudentSingleConplaint';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -300,7 +301,7 @@ const DefaultModal = () => {
                   <DataExportModel userData={id} />
                 )}
                 {modalType === 'STUDENT_ID_CARD' && (
-                  <StudentIdCardGenerate  fields={id} />
+                  <StudentIdCardGenerate fields={id} />
                 )}
                 {/* User Panel Models */}
                 {modalType === 'SESSION_CHANGE_MODEL' && (
@@ -308,6 +309,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'MOBILE_PANEL_STUDENT_REPORT' && (
                   <StudentSingleReport id={id} />
+                )}
+                {modalType === 'STUDENT_COMPLAINT_REPORT' && (
+                  <StudentSingleConplaint id={id} />
                 )}
               </div>
             )}

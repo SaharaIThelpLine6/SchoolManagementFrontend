@@ -14,6 +14,8 @@ const useTranslate = () => {
     Delete: 'ডিলিট',
     Edit: 'এডিট',
     'Transaction ID': 'ট্রানজেকশন আইডি',
+    'Solve User Name': 'সমাধানকারী নাম',
+    'Solution Description': 'সমাধানের বর্ণনা',
     'Invoice Details': 'ইনভয়েস বিস্তারিত',
     'Total Amount': 'মোট পরিমাণ',
     'Class Work': 'পড়া',
@@ -60,7 +62,7 @@ const useTranslate = () => {
     Card: 'কার্ড',
     'Receipt No': 'রশিদ নং',
     Talimat: 'তালিমাত',
-    'Complaint Box Terms and Conditions': 'অভিযোগ বক্স শার্তাবলি',
+    'Complaint Box Terms and Conditions': 'অভিযোগ বক্স শর্তাবলী',
     'Student Complaints': 'শিক্ষার্থী অভিযোগসমূহ',
     'Acc Rosid Satting': 'হিসাব রসিদ সেটিং',
     'Message Admission': 'ভর্তি মেসেজ',
@@ -738,7 +740,7 @@ const useTranslate = () => {
     'Field 6': 'ফিল্ড ৬',
     'Residential Name': 'আবাসন',
     'Date Of Birth': 'জন্ম তারিখ',
-    'Position': 'অবস্থান',
+    Position: 'অবস্থান',
   };
 
   return (key) =>

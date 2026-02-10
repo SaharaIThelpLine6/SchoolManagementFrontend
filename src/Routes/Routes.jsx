@@ -107,6 +107,7 @@ import InstitutionInfoUserPanel from '../pages/userpanel/InstitutionInfoUserPane
 import OnlineAdmissionStudent from '../pages/userpanel/OnlineAdmissionStudent';
 import OnlinePaymentInvoiceDownload from '../pages/userpanel/OnlinePaymentInvoiceDownload';
 import Reports from '../pages/userpanel/Reports';
+import ReportsList from '../pages/userpanel/ReportsList';
 import StudentFeeUserPanel from '../pages/userpanel/StudentFeeUserPanel';
 import StudentPaymentHistory from '../pages/userpanel/StudentPaymentHistory';
 import StudentPaymentHistoryDetails from '../pages/userpanel/StudentPaymentHistoryDetails';
@@ -420,6 +421,17 @@ const router = createBrowserRouter([
                   //   permissionId={permissionsDataList.gate_pass_leave}
                   // >
                   <StudentComplaint pageTitle="Student Complaints" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'complaint-box-terms-and-conditions',
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.gate_pass_leave}
+                  // >
+                  <ComplaintBoxTermsAndConditions pageTitle="Complaint Box Terms and Conditions" />
+
                   // </RequirePermission>
                 ),
               },
@@ -1035,6 +1047,10 @@ const router = createBrowserRouter([
       {
         path: 'reports',
         element: <Reports pageTitle="Teacher Contact" />,
+      },
+      {
+        path: 'reports-list',
+        element: <ReportsList pageTitle="Reports List" />,
       },
       {
         path: 'class-routine',

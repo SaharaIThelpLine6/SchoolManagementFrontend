@@ -1,3 +1,7 @@
+import { Buffer } from 'buffer';
+import { useGetInstitutionInfoUserPanelQuery } from '../../../features/userPanel/userInfo/userInfoQuerySlice';
+import { enToBnNumber } from '../../../helper/languageFormat';
+import bnBijoy2Unicode from '../../../utils/conveter';
 
 const PaymentAllIncoivesPdf = ({ invoices }) => {
   if (!invoices || invoices.length === 0) {
@@ -7,7 +11,10 @@ const PaymentAllIncoivesPdf = ({ invoices }) => {
       </div>
     );
   }
+  const { data, isLoading } = useGetInstitutionInfoUserPanelQuery();
+  const institutionInfo = data?.data[0];
 
+  console.log(institutionInfo, 'institutionInfo');
   // Group invoices by user
   const userInvoices = invoices.reduce((groups, invoice) => {
     const userId = invoice.UserID;
@@ -35,8 +42,43 @@ const PaymentAllIncoivesPdf = ({ invoices }) => {
         return (
           <div
             key={groupIndex}
-            className="border border-gray-300 rounded-lg overflow-hidden shadow-sm"
+            className="border border-gray-300 rounded-lg overflow-hidden shadow-sm bg-blue-50 p-4 border-b"
           >
+            {/* Header Section */}
+            <div className="flex items-center justify-between pb-2 border-blue-300">
+              {/* Logo */}
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img
+                  src={
+                    institutionInfo?.Logo?.data
+                      ? `data:image/png;base64,${Buffer.from(institutionInfo.Logo.data).toString('base64')}`
+                      : ''
+                  }
+                  alt="Logo"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              {/* Institution Info */}
+              <div className="flex-1 text-center px-2">
+                <h1 className="text-2xl font-bold mb-1 text-blue-800">
+                  {bnBijoy2Unicode(institutionInfo?.InstitutionName)}
+                </h1>
+                <p className="text-xl mb-1 text-gray-700">
+                  {bnBijoy2Unicode(institutionInfo?.Address)}
+                </p>
+                <p className="text-xl text-green-600">
+                  ফোন: {enToBnNumber(institutionInfo?.ContactNumber)}
+                </p>
+              </div>
+
+              {/* Receipt Title */}
+              <div className="w-12 h-12 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-xs  px-2 py-1 font-semibold"></div>
+                </div>
+              </div>
+            </div>
             {/* User Details - Show only once at top */}
             <div className="bg-blue-50 p-4 border-b">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -219,7 +261,6 @@ const PaymentAllIncoivesPdf = ({ invoices }) => {
           </div>
         );
       })}
-
     </div>
   );
 };

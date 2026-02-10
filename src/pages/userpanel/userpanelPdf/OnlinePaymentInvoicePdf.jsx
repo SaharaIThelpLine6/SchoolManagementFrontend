@@ -1,8 +1,15 @@
+import { Buffer } from 'buffer';
 import { useRef } from 'react';
+import { useGetInstitutionInfoUserPanelQuery } from '../../../features/userPanel/userInfo/userInfoQuerySlice';
+import { enToBnNumber } from '../../../helper/languageFormat';
+import bnBijoy2Unicode from '../../../utils/conveter';
 
 const OnlinePaymentInvoicePdf = ({ invoice }) => {
   const invoiceRef = useRef();
+  const { data, isLoading } = useGetInstitutionInfoUserPanelQuery();
+  const institutionInfo = data?.data[0];
 
+  console.log(institutionInfo, 'institutionInfo');
   const normalizedInvoice = invoice.InvoiceDetails.reduce((acc, item) => {
     const monthKey = `${item.MonthName} ${item.SessionName}`;
     if (!acc[monthKey]) acc[monthKey] = {};
@@ -12,14 +19,48 @@ const OnlinePaymentInvoicePdf = ({ invoice }) => {
   }, {});
 
   return (
-    <div
-      className="w-full bg-white border p-5 px-10 relative"
-      ref={invoiceRef}
-    >
-      {/* Header */}
+    <div className="w-full bg-white border p-5 px-10 relative" ref={invoiceRef}>
+      {/* Header Section */}
+      <div className="flex items-center justify-between pb-2 border-blue-300">
+        {/* Logo */}
+        <div className="w-12 h-12 flex items-center justify-center">
+          <img
+            src={
+              institutionInfo?.Logo?.data
+                ? `data:image/png;base64,${Buffer.from(institutionInfo.Logo.data).toString('base64')}`
+                : ''
+            }
+            alt="Logo"
+            className="w-full h-full object-contain"
+          />
+        </div>
+
+        {/* Institution Info */}
+        <div className="flex-1 text-center px-2">
+          <h1 className="text-base font-bold mb-1 text-blue-800">
+            {bnBijoy2Unicode(institutionInfo?.InstitutionName)}
+          </h1>
+          <p className="text-xs mb-1 text-gray-700">
+            {bnBijoy2Unicode(institutionInfo?.Address)}
+          </p>
+          <p className="text-xs text-green-600">
+            ফোন: {enToBnNumber(institutionInfo?.ContactNumber)}
+          </p>
+        </div>
+
+        {/* Receipt Title */}
+        <div className="w-12 h-12 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-xs  px-2 py-1 font-semibold"></div>
+          </div>
+        </div>
+      </div>
+
       <div className="text-center mb-4">
         <h2 className="text-xl font-bold">ইনভয়েস</h2>
-        <p className="text-xs text-gray-500 mt-1">#{invoice.TransactionID}</p>
+        <p className="text-2xl font-bold text-gray-500 mt-1">
+          #{invoice.GOPID}
+        </p>
       </div>
 
       {/* Status */}
