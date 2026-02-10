@@ -64,9 +64,8 @@ const DailyFeeCollectionUserWise = ({ reportData, query }) => {
                     </div>
                 </div>
 
+                
                 {/* Optional right-aligned blank space */}
-
-
                 <table className="w-full border-collapse border border-black bg-white mb-8">
                     <thead>
                         <tr className="bg-white text-black">

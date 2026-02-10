@@ -46,46 +46,42 @@ const DepositeCostStatementVoucharWisePrint = ({ reportData, query }) => {
 
 
 
-      {Object.keys(reportData).map((key) => (
-        <div className="bg-white pt-8">
+      {reportData && reportData.length > 0 && reportData.map((CaidDetails) => (
+        <div className="bg-white pt-8" key={CaidDetails.CAID}>
           <table className="w-full border-collapse border border-black bg-white">
             <thead>
               <tr>
-                <th className="bg-[#e2e2e2]"></th>
-                <th className="text-center w-[70%] p-2 text-[18px] font-bold bg-[#e2e2e2] text-white">{reportData[key] == 1 ? "Diposit" : "cost"}</th>
-                <th className="bg-[#e2e2e2]"></th>
+                <th className="text-center w-[70%] p-2 text-[18px] font-bold bg-[#e2e2e2] text-white" colSpan={7}>{CaidDetails.CAID == 1 ? "জমা" : "খরচ"}</th>
               </tr>
               <tr className="bg-white text-sm text-black">
                 <th className="border border-black  bg-white p-2 text-[20px]">ক্র:</th>
-                <th className="border border-black bg-white p-2 text-[20px]">জেনারেল লেজার</th>
-                <th className="border border-black bg-white p-2 text-[20px]">পরিমান</th>
+                <th className="border border-black  bg-white p-2 text-[20px]">তারিখ</th>
+                <th className="border border-black  bg-white p-2 text-[20px]">ভাউচার</th>
+                <th className="border border-black  bg-white p-2 text-[20px]">সাব লেজার</th>
+                <th className="border border-black  bg-white p-2 text-[20px]">বিবরণ</th>
+                <th className="border border-black  bg-white p-2 text-[20px]">পরিমাণ</th>
               </tr>
             </thead>
 
 
             <tbody>
-              {Object.keys(reportData[key]).map((glKey) => (
-                <React.Fragment key={glKey}>
-                  {/* GLID header row */}
+
+              {CaidDetails?.Details && CaidDetails?.Details.length > 0 && CaidDetails.Details.map((glDetails) => (
+                <React.Fragment key={glDetails.GLID}>
                   <tr>
-                    <td></td>
-                    <td className="text-center font-bold text-[18px] p-2">
-                      {reportData[key][glKey][0]["GlName"]}
+                    <td className="text-center font-bold text-[18px] p-2"  colSpan={7}>
+                      {glDetails.GlName}
                     </td>
-                    <td></td>
 
                   </tr>
-                  {reportData[key][glKey].map((val, ind) => (
-                    <tr key={ind}>
-                      <td className="bg-[#fff] border border-black text-center p-2 text-[18px]">
-                        {ind + 1}
-                      </td>
-                      <td className="bg-[#fff] border border-black text-left p-2 text-[18px]">
-                        {val.SlName}
-                      </td>
-                      <td className="bg-[#fff] border border-black text-right p-2 text-[18px]">
-                        {val.Amount ?? 0}
-                      </td>
+                  {glDetails?.subledgerDetails && glDetails.subledgerDetails.length > 0 && glDetails.subledgerDetails.map((val, index) => (
+                    <tr key={index}>
+                      <td className="bg-[#fff] border border-black text-center p-2 text-[18px]">{index + 1}</td>
+                      <td className="bg-[#fff] border border-black text-center p-2 text-[18px]">{val.TransactionDateEng}</td>
+                      <td className="bg-[#fff] border border-black text-center p-2 text-[18px]">{val.VoucherNo}</td>
+                      <td className="bg-[#fff] border border-black text-center p-2 text-[18px]">{val.SlName}</td>
+                      <td className="bg-[#fff] border border-black text-center p-2 text-[18px]">{val.Particulars}</td>
+                      <td className="bg-[#fff] border border-black text-center p-2 text-[18px]">{val.payerAmount}</td>
                     </tr>
                   ))}
                 </React.Fragment>
