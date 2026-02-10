@@ -422,11 +422,11 @@ export const menuData = [
         name: 'Maddrasah Payment Info',
         route: '/payment-history/maddrasah-payment-info',
       },
-      // {
-      //   id: '4',
-      //   name: 'Online Payment Invoice',
-      //   route: '/payment-history/online-payment-invoice',
-      // },
+      {
+        id: '4',
+        name: 'Online Payment Invoice',
+        route: '/payment-history/online-payment-invoice',
+      },
     ],
   },
 

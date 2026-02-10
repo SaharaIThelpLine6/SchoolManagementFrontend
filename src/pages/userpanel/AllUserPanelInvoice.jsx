@@ -12,17 +12,28 @@ const AllUserPanelInvoice = () => {
   const translate = useTranslate();
   const method = useForm();
 
+  const { watch } = method;
+  const [startDate, endDate] = watch(['startDate', 'endDate']);
+
+  const formatDate = (date) => {
+    if (!date) return ''; // handle empty
+    const d = new Date(date);
+    return d.toISOString().split('T')[0];
+  };
+
+  console.log(formatDate(startDate), formatDate(endDate), 'Dates');
+
   const [singleInvoice, setSingleInvoice] = useState(null);
   const [printType, setPrintType] = useState(null); // 'all' | 'single'
 
-  const { data } = useGetAllPaymentInvoicesQuery({
-    startDate: '2026-01-01',
-    endDate: '2026-02-04',
+  const { data: filteredInvoices } = useGetAllPaymentInvoicesQuery({
+    startDate: formatDate(startDate),
+    endDate: formatDate(endDate),
   });
 
-  const invoicesList = data?.data || [];
+  const invoicesList = filteredInvoices?.data || [];
 
-
+  console.log(invoicesList, 'invoicesList');
 
   // ✅ Print All
   const handlePrintPDf = () => {
@@ -63,26 +74,32 @@ const AllUserPanelInvoice = () => {
           <Button onClick={handlePrintPDf}>Print All Invoices</Button>
         </div>
 
-        <div className="flex gap-3">
+        {/* <div className="flex gap-3">
           <DatePickerOne
-            dateCalender={translate('Date')}
+            dateCalender={translate('Start Date')}
             registerKey="startDate"
             require="Date Required"
           />
           <DatePickerOne
-            dateCalender={translate('Date')}
+            dateCalender={translate('EndDate')}
             registerKey="endDate"
             require="Date Required"
           />
-        </div>
+        </div> */}
 
         {invoicesList.map((invoice, index) => (
           <div key={invoice.GOPID} className="bg-white shadow rounded-xl">
             <div className="p-4 border-b bg-gray-50 flex justify-between">
               <h2 className="font-semibold text-lg">Invoice #{index + 1}</h2>
-              <Button onClick={() => handleSinglePrintPDf(invoice)}>
+              {/* <Button onClick={() => handleSinglePrintPDf(invoice)}>
                 Print Invoice
-              </Button>
+              </Button> */}
+              <div>
+                <span className="font-medium text-gray-700">তারিখ:</span>
+                <span className="ml-2 text-gray-800">
+                  {new Date(invoice.CreatedAt).toLocaleDateString('bn-BD')}
+                </span>
+              </div>
             </div>
 
             <div className="overflow-x-auto">
@@ -131,11 +148,11 @@ const AllUserPanelInvoice = () => {
         </div>
       )}
 
-      {printType === 'single' && singleInvoice && (
+      {/* {printType === 'single' && singleInvoice && (
         <div className="bg-white relative hidden print:block">
           <PaymentSingleIncoivesPdf invoice={singleInvoice} />
         </div>
-      )}
+      )} */}
     </FormProvider>
   );
 };

@@ -24,12 +24,13 @@ export const studentPaymentSlice = createApi({
     getInvoiceByTran: builder.query({
       query: (tran_id) => `get_invoice_by_tran/${tran_id}`,
     }),
+    // In your RTK Query API slice
     getAllPaymentInvoices: builder.query({
-      query: ({ startDate, endDate }) => ({
+      query: ({ startDate, endDate } = {}) => ({
         url: 'get_userpanel_payment_invoice',
         params: {
-          startDate,
-          endDate,
+          ...(startDate && { startDate }), // only include if defined
+          ...(endDate && { endDate }),
         },
       }),
     }),

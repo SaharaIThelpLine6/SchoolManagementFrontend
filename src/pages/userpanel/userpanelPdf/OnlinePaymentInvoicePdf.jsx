@@ -51,15 +51,16 @@ const OnlinePaymentInvoicePdf = ({ invoice }) => {
         {/* Receipt Title */}
         <div className="w-12 h-12 flex items-center justify-center">
           <div className="text-center">
-            <div className="text-xs  px-2 py-1 font-semibold">
-            </div>
+            <div className="text-xs  px-2 py-1 font-semibold"></div>
           </div>
         </div>
       </div>
-      {/* Header */}
+
       <div className="text-center mb-4">
         <h2 className="text-xl font-bold">ইনভয়েস</h2>
-        <p className="text-xs text-gray-500 mt-1">#{invoice.TransactionID}</p>
+        <p className="text-2xl font-bold text-gray-500 mt-1">
+          #{invoice.GOPID}
+        </p>
       </div>
 
       {/* Status */}
