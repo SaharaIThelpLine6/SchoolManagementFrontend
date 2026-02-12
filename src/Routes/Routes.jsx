@@ -80,6 +80,7 @@ import SMS from '../pages/SMS';
 import Section from '../pages/Section';
 import Session from '../pages/Session';
 import Settings from '../pages/Settings';
+import StateMent from '../pages/StateMent';
 import StudentClassRoutine from '../pages/StudentClassRoutine';
 import StudentComplaint from '../pages/StudentComplaint';
 import StudentGroupCreate from '../pages/StudentGroupCreate';
@@ -788,6 +789,16 @@ const router = createBrowserRouter([
                     permissionId={permissionsDataList.collect_student_fee}
                   >
                     <StudentsFeeCollection pageTitle="Student Fee Collection" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'student-fee-collection/state-ment',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.collect_student_fee}
+                  >
+                    <StateMent pageTitle="Student Fee Collection" />
                   </RequirePermission>
                 ),
               },

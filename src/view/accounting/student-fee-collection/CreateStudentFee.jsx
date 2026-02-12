@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 import { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Button from '../../../components/Button/Button';
 import DatePickerOne from '../../../components/Forms/DatePicker/DatePickerOne';
@@ -1184,7 +1184,7 @@ const CreateStudentFee = () => {
                         studentOtherDuesError ||
                         !filteredSelectedPerStudentFee?.UserID
                           ? 0
-                          : studentOtherDueData?.totalDue ?? 0
+                          : (studentOtherDueData?.totalDue ?? 0)
                       }
                     />
                   </div>
@@ -1206,9 +1206,11 @@ const CreateStudentFee = () => {
                     সকল রিপোর্ট
                   </Button>
 
-                  <Button className="max-w-xs px-4 py-2 rounded-lg shadow bg-purple-600 text-white">
-                    স্টেসমেন্ট
-                  </Button>
+                  <Link to="/accounting/student-fee-collection/state-ment">
+                    <Button className="max-w-xs px-4 py-2 rounded-lg shadow bg-purple-600 text-white">
+                      স্টেসমেন্ট
+                    </Button>
+                  </Link>
 
                   <Button className="max-w-xs px-4 py-2 rounded-lg shadow bg-yellow-500 text-white">
                     বাড়ানো কমানো
@@ -1223,8 +1225,8 @@ const CreateStudentFee = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
               <div className="md:col-span-3">
-              {feeTotals.allFees.length > 0 && (
-                <>
+                {feeTotals.allFees.length > 0 && (
+                  <>
                     <div className=" overflow-x-auto rounded-md border w-full max-w-6xl mx-auto">
                       <table className="min-w-full sm:text-sm table-auto text-sm md:text-base">
                         <thead className="bg-[#e9ebee] text-black">
@@ -1336,8 +1338,8 @@ const CreateStudentFee = () => {
                         </tbody>
                       </table>
                     </div>
-                </>
-              )}
+                  </>
+                )}
               </div>
               <div className="md:col-span-2">
                 <MonthlyFeeCollectionTable />
