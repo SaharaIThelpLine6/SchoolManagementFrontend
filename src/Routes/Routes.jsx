@@ -793,7 +793,7 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: 'student-fee-collection/state-ment',
+                path: 'student-fee-collection/state-ment/:userid',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.collect_student_fee}
@@ -1103,10 +1103,10 @@ const router = createBrowserRouter([
         path: 'payment-success',
         element: <OnlinePaymentInvoiceDownload pageTitle="Payment Invoice" />,
       },
-      {
-        path: 'all-invoices',
-        element: <AllUserPanelInvoice pageTitle="All Invoice" />,
-      },
+      // {
+      //   path: 'all-invoices',
+      //   element: <AllUserPanelInvoice pageTitle="All Invoice" />,
+      // },
     ],
   },
   {

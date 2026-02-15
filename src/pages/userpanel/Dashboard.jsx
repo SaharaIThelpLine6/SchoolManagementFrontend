@@ -37,7 +37,7 @@ const Dashboard = () => {
       <div className="container mx-auto px-3">
         {/* ===== MENU GRID ===== */}
         {/* only for main */}
-         <div className="grid grid-cols-2 gap-4 mt-4">
+        <div className="grid grid-cols-2 gap-4 mt-4">
           <Link
             to={`/${schoolid}/dashboard/student-results`}
             className={cardClass}
@@ -142,7 +142,7 @@ const Dashboard = () => {
             </div>
             <h4 className={titleClass}>পরীক্ষার রুটিন</h4>
           </Link>
-                    <Link to={`/${schoolid}/dashboard/reports`} className={cardClass}>
+          <Link to={`/${schoolid}/dashboard/reports`} className={cardClass}>
             <div className="w-10 h-10 rounded-full bg-[#c0dbfd] flex items-center justify-center mb-2">
               <svg
                 stroke="currentColor"
@@ -161,40 +161,53 @@ const Dashboard = () => {
             </div>
             <h4 className={titleClass}>অভিযোগ ও পরামর্শ </h4>
           </Link>
-            <Link
-            to={`/${schoolid}/dashboard/class-routine`}
+          <Link
+            to={`/${schoolid}/dashboard/video-tutorial`}
             className={cardClass}
           >
-            <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center mb-2">
+            <div className="w-10 h-10 rounded-full bg-[#c0dbfd] flex items-center justify-center mb-2">
               <svg
-                width="26"
-                height="26"
+                stroke="currentColor"
+                fill="currentColor"
+                strokeWidth="0"
+                viewBox="0 0 24 24"
+                height="1.2em"
+                width="1.2em"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M3 5.75C3 4.78 3.78 4 4.75 4h14.5C20.22 4 21 4.78 21 5.75v12.5c0 .97-.78 1.75-1.75 1.75H4.75C3.78 20 3 19.22 3 18.25V5.75z" />
+                <path d="M10 8.5v7l6-3.5-6-3.5z" fill="#fff" />
+              </svg>
+            </div>
+
+            <h4 className={titleClass}>ক্লাস ভিডিও</h4>
+          </Link>
+          <Link
+            to={`/${schoolid}/dashboard/institution-contact`}
+            className={cardClass}
+          >
+            <div className="w-10 h-10 rounded-full bg-sky-100 flex items-center justify-center mb-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width={26}
+                height={26}
                 viewBox="0 0 24 24"
                 fill="none"
-                xmlns="http://www.w3.org/2000/svg"
                 stroke="currentColor"
                 strokeWidth={2}
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-violet-600"
+                className="icon icon-tabler icons-tabler-outline icon-tabler-phone text-sky-600"
               >
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-
-                <line x1="3" y1="10" x2="21" y2="10" />
-
-                <rect x="7" y="13" width="3" height="3" rx="0.5" />
-                <rect x="12" y="13" width="3" height="3" rx="0.5" />
-                <rect x="17" y="13" width="3" height="3" rx="0.5" />
+                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                <path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2" />
               </svg>
             </div>
-            <h4 className={titleClass}>ক্লাস রুটিন</h4>
+            <h4 className={titleClass}>যোগাযোগ</h4>
           </Link>
         </div>
         {/* only for test */}
-         {/* <div className="grid grid-cols-2 gap-4 mt-4">
+        {/* <div className="grid grid-cols-2 gap-4 mt-4">
           <Link
             to={`/${schoolid}/dashboard/student-results`}
             className={cardClass}
@@ -301,36 +314,7 @@ const Dashboard = () => {
             </div>
             <h4 className={titleClass}>উপস্থিতি</h4>
           </Link>
-          <Link
-            to={`/${schoolid}/dashboard/student-payment-history`}
-            className={cardClass}
-          >
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width={26}
-                height={26}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="icon icon-tabler icons-tabler-outline icon-tabler-cash-register text-green-600"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M21 15h-2.5c-.398 0 -.779 .158 -1.061 .439c-.281 .281 -.439 .663 -.439 1.061c0 .398 .158 .779 .439 1.061c.281 .281 .663 .439 1.061 .439h1c.398 0 .779 .158 1.061 .439c.281 .281 .439 .663 .439 1.061c0 .398 -.158 .779 -.439 1.061c-.281 .281 -.663 .439 -1.061 .439h-2.5" />
-                <path d="M19 21v1m0 -8v1" />
-                <path d="M13 21h-7c-.53 0 -1.039 -.211 -1.414 -.586c-.375 -.375 -.586 -.884 -.586 -1.414v-10c0 -.53 .211 -1.039 .586 -1.414c.375 -.375 .884 -.586 1.414 -.586h2m12 3.12v-1.12c0 -.53 -.211 -1.039 -.586 -1.414c-.375 -.375 -.884 -.586 -1.414 -.586h-2" />
-                <path d="M16 10v-6c0 -.53 -.211 -1.039 -.586 -1.414c-.375 -.375 -.884 -.586 -1.414 -.586h-4c-.53 0 -1.039 .211 -1.414 .586c-.375 .375 -.586 .884 -.586 1.414v6m8 0h-8m8 0h1m-9 0h-1" />
-                <path d="M8 14v.01" />
-                <path d="M8 17v.01" />
-                <path d="M12 13.99v.01" />
-                <path d="M12 17v.01" />
-              </svg>
-            </div>
-            <h4 className={titleClass}>ফি ও পেমেন্ট তথ্য</h4>
-          </Link>
+
 
           <Link
             to={`/${schoolid}/dashboard/exam-routine`}

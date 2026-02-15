@@ -2,7 +2,7 @@ import { Buffer } from 'buffer';
 import { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Button from '../../../components/Button/Button';
 import DatePickerOne from '../../../components/Forms/DatePicker/DatePickerOne';
@@ -49,6 +49,7 @@ import MonthlyFeeCollectionTable from '../../../view/accounting/student-fee-coll
 const CreateStudentFee = () => {
   const defaultSessionId = useDefaultSession();
   const location = useLocation();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const methods = useForm({
@@ -507,6 +508,9 @@ const CreateStudentFee = () => {
       showModal('Student Month Fee Accept', 'STUDENT_MONTH_FEE_ACCEPT');
     }
   }, [studentMonthFeeData]);
+  const handleMonthlyAttendance = () => {
+    // showModal('Student Monthly Attendance', 'STUDENT_MONTHLY_ATTENDANCE');
+  };
 
   const handleStudentExamFeeOpenModal = useCallback(() => {
     showModal('Acc Exam Fee Collector', 'ACC_EXAM_FEE_COLLECTOR');
@@ -797,6 +801,19 @@ const CreateStudentFee = () => {
     return <SubmitLoading />;
   }
 
+const handleClickNavigate = () => {
+  if (filteredSelectedPerStudentFee?.UserID) {
+    navigate(
+      `/accounting/student-fee-collection/state-ment/${filteredSelectedPerStudentFee.UserID}`
+    );
+  } else {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No student selected!',
+    });
+  }
+};
   return (
     <div className="">
       <FormProvider {...methods}>
@@ -1206,17 +1223,19 @@ const CreateStudentFee = () => {
                     সকল রিপোর্ট
                   </Button>
 
-                  <Link to="/accounting/student-fee-collection/state-ment">
-                    <Button className="max-w-xs px-4 py-2 rounded-lg shadow bg-purple-600 text-white">
-                      স্টেসমেন্ট
-                    </Button>
-                  </Link>
+                  <Button
+                    onClick={handleClickNavigate}
+                    className="max-w-xs px-4 py-2 rounded-lg shadow bg-purple-600 text-white"
+                  >
+                    স্টেসমেন্ট
+                  </Button>
+
 
                   <Button className="max-w-xs px-4 py-2 rounded-lg shadow bg-yellow-500 text-white">
                     বাড়ানো কমানো
                   </Button>
 
-                  <Button className="max-w-xs px-4 py-2 rounded-lg shadow bg-pink-500 text-white">
+                  <Button onClick={handleMonthlyAttendance} className="max-w-xs px-4 py-2 rounded-lg shadow bg-pink-500 text-white">
                     খাবার ফির দিন ও ছুটি
                   </Button>
                 </div>
