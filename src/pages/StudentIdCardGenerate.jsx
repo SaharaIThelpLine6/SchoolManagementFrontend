@@ -65,7 +65,7 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
                   </div>
                   <h3 className='text-center py-[2px] px-[30px] mt-[6px] bg-sky-600 inline-block rounded-[50px] mx-auto text-white text-[16px]'>পরিচয় পত্র</h3>
                 </div>
-                <div className='pt-1 pb-2'>
+                <div className='pt-1 pb-2 h-[160px]'>
                   <h3 className='text-red pl-[20px] text-[16px]'>আইডি নং: {translate(printableStudentDetails.StudentCode)}</h3>
                   {fields.map((fieldName) => {
                     if (!fieldName) return null;

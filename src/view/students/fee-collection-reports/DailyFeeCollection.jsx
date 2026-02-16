@@ -4,6 +4,7 @@ import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
+import ReportHeader from "../../../components/ReportHeader";
 
 const DailyFeeCollection = ({ reportData, query }) => {
     const [logo, setLogo] = useState(null);
@@ -48,25 +49,7 @@ const DailyFeeCollection = ({ reportData, query }) => {
             <div className="bg-white">
                 {/* Title Section */}
                 {/* {JSON.stringify(sessionData)} */}
-                <div className="text-center w-full bg-white">
-                    <h1 className="text-xl sm:text-2xl font-extrabold bg-white">
-                        {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
-                    </h1>
-                    <p className="text-base font-semibold bg-white">
-                        {bnBijoy2Unicode(instutionInfo?.Address)}
-                    </p>
-                    <div className="text-black border border-black px-4 py-1 inline-block mt-2 sm:mt-3 rounded tracking-widest bg-white text-base font-bold sm:text-lg">
-                        দৈনিক ফি গ্রহণ তালিকা
-                    </div>
-                    <div className="grid grid-cols-3 items-center my-[20px] justify-between w-full">
-                        <p className="text-[18px] text-start">শিক্ষাবর্ষ : {selectedSession?.SessionName}</p>
-                        <p className="text-[18px] text-center"> {new Date(query.start_date).toLocaleDateString("bn-BD")} হতে {new Date(query.start_date).toLocaleDateString("bn-BD")} পর্যন্ত </p>
-                        <p className="text-end text-[18px]">প্রিন্ট তারিখ: {new Date().toLocaleDateString("bn-BD")} </p>
-                    </div>
-                </div>
-
-                {/* Optional right-aligned blank space */}
-
+                <ReportHeader query={{...query, title: "দৈনিক ফি গ্রহণ তালিকা"}} />
 
                 <table
 

@@ -21,11 +21,6 @@ const DailyFeeCollectionUserWise = ({ reportData, query }) => {
         }
     }, [instutionInfo]);
 
-
-    // useEffect(() => {
-    //     console.log(sessionData);
-    // }, [])
-
     const totals = reportData?.reduce(
         (acc, item) => {
             acc.currentInvoice += Number(item.CurrentInvoice || 0);
@@ -48,7 +43,7 @@ const DailyFeeCollectionUserWise = ({ reportData, query }) => {
             <div className="bg-white">
                 {/* Title Section */}
                 {/* {JSON.stringify(sessionData)} */}
-                <div className="text-center w-full bg-white">
+                {/* <div className="text-center w-full bg-white">
                     <h1 className="text-xl sm:text-2xl font-extrabold bg-white">
                         {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
                     </h1>
@@ -62,7 +57,8 @@ const DailyFeeCollectionUserWise = ({ reportData, query }) => {
                         <p className="text-[18px] text-start"> {new Date(query.start_date).toLocaleDateString("bn-BD")} হতে {new Date(query.end_date).toLocaleDateString("bn-BD")} পর্যন্ত </p>
                         <p className="text-end text-[18px]">প্রিন্ট তারিখ: {new Date().toLocaleDateString("bn-BD")} </p>
                     </div>
-                </div>
+                </div> */}
+                <ReportHeader query={{...query, title: "গ্রহিতা হিসেবে ফি গ্রহণ তালিকা - ২০২৪"}} />
 
                 
                 {/* Optional right-aligned blank space */}
@@ -82,7 +78,7 @@ const DailyFeeCollectionUserWise = ({ reportData, query }) => {
                                     <td colSpan={3} className="border border-t-0 border-black text-[20px] py-3 px-2 text-center bg-[#bebebe] text-white">{new Date(userData.CreateAt).toLocaleDateString("bn-BD")}</td>
                                 </tr>
                                 {
-                                    userData.UserDetails.map((user, ind) => (
+                                    userData.UserDetails.map((user, ind) => ( 
                                         <tr>
                                             <td className="border border-black text-center text-[16px] py-4">{UserIndex + 1}</td>
                                             <td className="border border-black text-[16px] py-4 px-2">{user.name}</td>

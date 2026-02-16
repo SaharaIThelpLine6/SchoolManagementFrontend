@@ -51,6 +51,7 @@ export const userStudentSlice = createApi({
       },
       providesTags: ['Student'],
     }),
+
     getFilteredAdmissionStudents: builder.query({
       query: ({
         FilterID,
@@ -75,6 +76,7 @@ export const userStudentSlice = createApi({
       },
       providesTags: ['Student'],
     }),
+
     changeStudentClass: builder.mutation({
       query: (studentData) => ({
         url: 'update_student_class',
@@ -83,6 +85,7 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ['Student'],
     }),
+
     getStudent: builder.query({
       query: () => 'view_students',
       providesTags: ['Student'],
@@ -115,6 +118,7 @@ export const userStudentSlice = createApi({
       query: () => `get_studentreport_type`,
       providesTags: ['StudentReportsType'],
     }),
+
     postStudentReportType: builder.mutation({
       query: (data) => ({
         url: `student_report_type`,
@@ -123,6 +127,7 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ['StudentReportsType'],
     }),
+
     updateStudentReportType: builder.mutation({
       query: (data) => ({
         url: `student_report_type/${data.catid}`,
@@ -152,6 +157,7 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ['StudentReports'],
     }),
+
     updateStudentCharacterReport: builder.mutation({
       query: (data) => ({
         url: `student_character_report`,
@@ -160,6 +166,7 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ['StudentReports'],
     }),
+    
     deleteStudentCharacterReport: builder.mutation({
       query: (id) => ({
         url: `student_character_report/${id}`,

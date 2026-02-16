@@ -70,6 +70,7 @@ import StudentCardModel from '../view/students/id-card-model/StudentCardModel';
 import PaymentSSLInfoView from './Modals/PaymentSSLInfoVierw';
 import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
 import StudentSingleConplaint from '../pages/userpanel/Modal/StudentSingleConplaint';
+import ReportHeaderModal from '../view/general-information/ReportHeaderModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -312,6 +313,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'STUDENT_COMPLAINT_REPORT' && (
                   <StudentSingleConplaint id={id} />
+                )}
+                {modalType === 'REPORT_HEADER_MODAL' && (
+                  <ReportHeaderModal id={id} />
                 )}
               </div>
             )}

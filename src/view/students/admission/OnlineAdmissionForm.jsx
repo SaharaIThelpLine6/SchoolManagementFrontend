@@ -270,7 +270,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
   }
 
   const onSubmit = async (data) => {
-    console.log(data);
+    // console.log(data);
     const payload = {
       data: {
         UserID: data.UserID,
@@ -307,7 +307,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
 
     try {
       const response = await postStudentAdmission(payload).unwrap();
-      console.log('Submitted:', response);
+      // console.log('Submitted:', response);
 
       Swal.fire({
         icon: 'success',

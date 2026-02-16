@@ -112,9 +112,9 @@ const PaymentModal = () => {
   };
 
   const years = [
-    { id: 1, name: '1' },
-    { id: 2, name: '2' },
-    { id: 3, name: '3' },
+    { id: 1, name: '1 Year' },
+    { id: 2, name: '2 Year' },
+    { id: 3, name: '3 Year' },
   ];
 
   const quota = [
@@ -159,7 +159,7 @@ const PaymentModal = () => {
 
             {/* 🔹 Choose Size */}
             <DefaultSelect
-              label="Choose Size"
+              label={service == 1 ? "Select Number of Years" : "Select Number of Quota"}
               registerKey="size"
               options={service == 1 ? years : quota}
               type="number"
