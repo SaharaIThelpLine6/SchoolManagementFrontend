@@ -163,6 +163,11 @@ export const menuData = [
         name: 'Complaint Box Terms and Conditions',
         route: '/parent-panel/complaint-box-terms-and-conditions',
       },
+      // {
+      //   id: '6',
+      //   name: 'Online Admission',
+      //   route: '/parent-panel/online-admission',
+      // },
     ],
   },
   // {

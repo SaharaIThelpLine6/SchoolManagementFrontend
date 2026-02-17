@@ -127,6 +127,7 @@ import PaymentFail from '../pages/userpanel/payment/PaymentFail';
 import OwenGuide from './OwenGuide';
 import PaymentRouteGuard from './PaymentRouteGuard';
 import { RequirePermission } from './RequirePermission';
+import OnlineAdmissionForUserPanel from '../pages/OnlineAdmissionForUserPanel';
 
 const router = createBrowserRouter([
   {
@@ -432,6 +433,17 @@ const router = createBrowserRouter([
                   //   permissionId={permissionsDataList.gate_pass_leave}
                   // >
                   <ComplaintBoxTermsAndConditions pageTitle="Complaint Box Terms and Conditions" />
+
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'online-admission',
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.gate_pass_leave}
+                  // >
+                  <OnlineAdmissionForUserPanel pageTitle="Online Admission" />
 
                   // </RequirePermission>
                 ),
