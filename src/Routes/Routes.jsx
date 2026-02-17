@@ -80,6 +80,7 @@ import SMS from '../pages/SMS';
 import Section from '../pages/Section';
 import Session from '../pages/Session';
 import Settings from '../pages/Settings';
+import StateMent from '../pages/StateMent';
 import StudentClassRoutine from '../pages/StudentClassRoutine';
 import StudentComplaint from '../pages/StudentComplaint';
 import StudentGroupCreate from '../pages/StudentGroupCreate';
@@ -792,6 +793,16 @@ const router = createBrowserRouter([
                 ),
               },
               {
+                path: 'student-fee-collection/state-ment/:userid',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.collect_student_fee}
+                  >
+                    <StateMent pageTitle="Student Fee Collection" />
+                  </RequirePermission>
+                ),
+              },
+              {
                 path: 'dues-list',
                 element: (
                   <RequirePermission
@@ -1092,10 +1103,10 @@ const router = createBrowserRouter([
         path: 'payment-success',
         element: <OnlinePaymentInvoiceDownload pageTitle="Payment Invoice" />,
       },
-      {
-        path: 'all-invoices',
-        element: <AllUserPanelInvoice pageTitle="All Invoice" />,
-      },
+      // {
+      //   path: 'all-invoices',
+      //   element: <AllUserPanelInvoice pageTitle="All Invoice" />,
+      // },
     ],
   },
   {

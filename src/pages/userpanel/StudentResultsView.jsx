@@ -58,15 +58,17 @@ const ResultImage = ({ student, getSubjects, labelData }) => {
     let count = 0;
 
     for (let i = 1; i <= 14; i++) {
-      const mark = student[`SubVal${i}`];
-      if (mark !== null && mark !== undefined && mark !== '') {
-        total += Number(mark);
+      const mark = Number(student[`SubVal${i}`]);
+
+      if (!isNaN(mark) && mark > 0) {
+        total += mark;
         count++;
       }
     }
 
-    return count ? (total / count).toFixed(1) : 0;
+    return count > 0 ? (total / count).toFixed(1) : 0;
   };
+
 
   return (
     <div className="max-w-md mx-auto border-2 border-[#4099f9] rounded-lg bg-blue-50 overflow-hidden mb-20">

@@ -1,7 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
 import { closeModal } from '../features/modal/modalSlice';
+import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
 import ClassVideoCreateUpdate from '../pages/userpanel/ClassVideoCreateUpdate';
+import StudentSingleConplaint from '../pages/userpanel/Modal/StudentSingleConplaint';
 import StudentSingleReport from '../pages/userpanel/Modal/StudentsingleReport';
+import PaymentModalUserPanel from '../pages/userpanel/PaymentModalUserPanel';
 import useTranslate from '../utils/Translate';
 import SessionCreateUpdateModal from '../view/Session/SessionCreateUpdateModal';
 import SessionChangeModal from '../view/UserPanel/SessionChangeModal';
@@ -10,6 +13,7 @@ import BankInfoSettings from '../view/accounting/BankInfoSettings';
 import ChangeStudentClass from '../view/accounting/ChangeStudentClass';
 import FundForm from '../view/accounting/FundForm';
 import GeneralForm from '../view/accounting/GeneralForm';
+import MonthlyAttendance from '../view/accounting/MonthlyAttendance';
 import ReportSettings from '../view/accounting/ReportSettings';
 import StudentFeeGroup from '../view/accounting/StudentFeeGroup';
 import SubGeneralForm from '../view/accounting/SubGeneralForm';
@@ -59,17 +63,13 @@ import HomeWorkViewTeacher from './Forms/HomeWorkViewTeacher';
 import MonthNamesForm from './Forms/MonthNamesForm';
 import TypeOfVacationForm from './Forms/TypeOfVacationForm';
 import CodeSetting from './Modals/CodeSetting';
+import CreateEditPaymentInfoModal from './Modals/CreateEditPaymentInfoModal';
 import PaymentModal from './Modals/PaymentModal';
+import PaymentSSLInfoView from './Modals/PaymentSSLInfoVierw';
 import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
 import StudentFilterModal from './Modals/StudentFilterModal';
 import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
-import PaymentModalUserPanel from '../pages/userpanel/PaymentModalUserPanel';
-import CreateEditPaymentInfoModal from './Modals/CreateEditPaymentInfoModal';
-import StudentCardModel from '../view/students/id-card-model/StudentCardModel';
-import PaymentSSLInfoView from './Modals/PaymentSSLInfoVierw';
-import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
-import StudentSingleConplaint from '../pages/userpanel/Modal/StudentSingleConplaint';
 import ReportHeaderModal from '../view/general-information/ReportHeaderModal';
 
 const DefaultModal = () => {
@@ -262,6 +262,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'STUDENT_MONTH_FEE_ACCEPT' && (
                   <MonthStudentFeeForm />
+                )}
+                {modalType === 'STUDENT_MONTHLY_ATTENDANCE' && (
+                  <MonthlyAttendance />
                 )}
                 {modalType === 'OTHERS_STUDENT_FEE_ACCEPT' && (
                   <OthersStudentFeeAcceptForm />

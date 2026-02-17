@@ -58,23 +58,21 @@ const StudentPaymentHistory = () => {
       ),
     },
     { title: translate('Receipt No'), field: 'UFOID', hozAlign: 'center' },
-    { title: translate('User ID'), field: 'UserCode', hozAlign: 'center' },
-    { title: translate('Name'), field: 'UserName', hozAlign: 'center' },
-    {
-      title: translate('Father Name'),
-      field: 'FatherName',
-      hozAlign: 'center',
-    },
+
     { title: translate('Class'), field: 'ClassName', hozAlign: 'center' },
-    { title: translate('Deposit'), field: 'Total', hozAlign: 'center' },
+    // { title: translate('Deposit'), field: 'Total', hozAlign: 'center' },
     {
       title: translate('CurrentPaid'),
       field: 'CurrentPaid',
       hozAlign: 'center',
     },
-    { title: translate('Due'), field: 'Due', hozAlign: 'center' },
+    // { title: translate('Due'), field: 'Due', hozAlign: 'center' },
     { title: translate('Date'), field: 'CreateAt', hozAlign: 'center' },
-    { title: translate('Phone Number'), field: 'Mobile1', hozAlign: 'center' },
+    { title: translate('Payment Type'), field: 'Mobile1', hozAlign: 'center',
+       render: (row) => (
+      <span>-</span>
+      )
+     },
   ];
 
   return (

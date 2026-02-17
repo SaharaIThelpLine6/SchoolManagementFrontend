@@ -502,6 +502,21 @@ export const feeCollectionSlice = createApi({
         'StudentFeeAdmissions',
       ],
     }),
+    getUserTransactionFilter: builder.query({
+      query: ({ page = 1, limit = 10, DateFrom, DateTo, userId }) => {
+        let params = `page=${page}&limit=${limit}`;
+
+        if (DateFrom && DateTo) {
+          params += `&DateFrom=${DateFrom}&DateTo=${DateTo}`;
+        }
+
+        if (userId) {
+          params += `&userId=${userId}`;
+        }
+
+        return `user_transaction_filter?${params}`;
+      },
+    }),
   }),
 });
 
@@ -579,5 +594,7 @@ export const {
   useGetIncomeExpenseReportByOrderIdQuery,
   useGetIncomeExpenseTodaysBalanceQuery,
   useGetIncomeExpenseTodaysBalanceByCaidQuery,
-  useGetStudentFeeDueQuery
+  useGetStudentFeeDueQuery,
+
+  useGetUserTransactionFilterQuery,
 } = feeCollectionSlice;

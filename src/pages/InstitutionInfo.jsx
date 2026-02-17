@@ -90,6 +90,11 @@ const InstitutionInfo = () => {
       setValue('District', institutionInfo.District || '');
       setValue('Elhaq', institutionInfo.Elhaq || '');
       setValue('Email', institutionInfo.Email || '');
+      setValue('Website', institutionInfo.Website || '');
+      setValue('Youtube', institutionInfo.Website || '');
+      setValue('Facebook', institutionInfo.Facebook || '');
+      setValue('WhatsApp', institutionInfo.WhatsApp || '');
+      setValue('Telegram', institutionInfo.Telegram || '');
       setValue('EngAddress', institutionInfo.EngAddress || '');
       setValue('EngInstitutionName', institutionInfo.EngInstitutionName || '');
       setValue('InstitutionName', institutionInfo.InstitutionName || '');
