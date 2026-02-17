@@ -145,8 +145,8 @@ export const userReportsSlice = createApi({
       query: ({
         report_id,
         FundID,
-        StartDate,
-        EndDate,
+        start_date,
+        end_date,
         CAID,
         start_vouture,
         end_vouture,
@@ -157,8 +157,8 @@ export const userReportsSlice = createApi({
       }) => {
         const params = new URLSearchParams({ report_id });
         if (FundID !== undefined) params.append('FundID', FundID);
-        if (StartDate !== undefined) params.append('StartDate', StartDate);
-        if (EndDate !== undefined) params.append('EndDate', EndDate);
+        if (start_date !== undefined) params.append('StartDate', start_date);
+        if (end_date !== undefined) params.append('EndDate', end_date);
         // if (ResidentialStatusId !== undefined)
         //   params.append("ResidentialStatusId", ResidentialStatusId);
         // if (NewOldId !== undefined) params.append("NewOldId", NewOldId);

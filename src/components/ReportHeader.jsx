@@ -20,11 +20,11 @@ const ReportHeader = ({ query }) => {
     );
 
 
-    useEffect(()=>{
+    useEffect(() => {
 
         console.log(query);
-        
-    },[query])
+
+    }, [query])
 
     const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
@@ -43,14 +43,53 @@ const ReportHeader = ({ query }) => {
         <div>
             {
                 instutionInfo.ActiveReportHeader == 2 ? (
-            
-                    <div className='flex justify-end'>
-                        <div className="text-center w-full bg-white">
-                            <img className='w-full' src={`/reaport-heading-template/${instutionInfo.ActiveReportTemplate}.jpg`} alt="" />
-                        </div>
-                    </div>
-         
+                    instutionInfo.ActiveReportTemplate == 1 ? (
+                        <div className='mx-auto'>
+                            <div className='flex justify-center items-center flex-col gap-4  w-[80%] mx-auto'>
+                                <div className="logo">
+                                    <img src={logo} alt="logo" className=' w-[100px]' />
+                                </div>
+                                <div className="w-full bg-white text-center">
+                                    <h1 className="text-[20px] leading-[20px] font-samibold bg-white tracking-[1.6px]">
+                                        {instutionInfo?.AraInstitutionName}
+                                    </h1>
+                                    <h1 className=" text-[20px] font-bold bg-white leading-[40px] uppercase tracking-[1.3px]">
+                                        {instutionInfo?.EngInstitutionName}
+                                    </h1>
+                                    <h1 className="text-[20px] leading-[20px] font-samibold bg-white tracking-[1.3px]">
+                                        {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
+                                    </h1>
+                                </div>
 
+                            </div>
+                            <p className="text-[16px] font-normal bg-white mt-[10px] text-center">
+                                {bnBijoy2Unicode(instutionInfo?.Address)}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className='mx-auto'>
+                            <div className='flex justify-center items-center flex-col gap-4  w-[80%] mx-auto'>
+                                <div className="logo">
+                                    <img src={logo} alt="logo" className=' w-[100px]' />
+                                </div>
+                                <div className="w-full bg-white text-center">
+                                    <h1 className="text-[20px] leading-[20px] font-samibold bg-white tracking-[1.6px]">
+                                        {instutionInfo?.AraInstitutionName}
+                                    </h1>
+                                    <h1 className=" text-[20px] font-bold bg-white leading-[40px] uppercase tracking-[1.3px]">
+                                        {instutionInfo?.EngInstitutionName}
+                                    </h1>
+                                    <h1 className="text-[20px] leading-[20px] font-samibold bg-white tracking-[1.3px]">
+                                        {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
+                                    </h1>
+                                </div>
+
+                            </div>
+                            <p className="text-[16px] font-normal bg-white mt-[10px] text-center">
+                                {bnBijoy2Unicode(instutionInfo?.Address)}
+                            </p>
+                        </div>
+                    )
                 ) : instutionInfo.ActiveReportHeader == 3 ? (
                     <div className='flex justify-end'>
                         <div className="text-center w-full bg-white">
@@ -70,8 +109,8 @@ const ReportHeader = ({ query }) => {
                                 {query.title}
                             </div>
                             <div className="grid grid-cols-3 items-center my-[20px] justify-between w-full">
-                                <p className="text-[18px] text-start">শিক্ষাবর্ষ : {selectedSession?.SessionName}</p>
-                                <p className="text-[18px] text-center"> {new Date(query.start_date).toLocaleDateString("bn-BD")} হতে {new Date(query.start_date).toLocaleDateString("bn-BD")} পর্যন্ত </p>
+                                <p className="text-[18px] text-start"> {selectedSession ? `শিক্ষাবর্ষ : ${selectedSession?.SessionName}` : null} </p>
+                                <p className="text-[18px] text-center"> {new Date(query.start_date).toLocaleDateString("bn-BD")} হতে {new Date(query.end_date).toLocaleDateString("bn-BD")} পর্যন্ত </p>
                                 <p className="text-end text-[18px]">প্রিন্ট তারিখ: {new Date().toLocaleDateString("bn-BD")} </p>
                             </div>
                         </div>
