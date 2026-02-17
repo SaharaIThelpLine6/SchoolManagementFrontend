@@ -105,7 +105,7 @@ const DefaultImageUpload = ({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
-          className="relative w-32 h-32 md:w-40 md:h-40 rounded-lg overflow-hidden border-2 border-dashed border-gray-300 cursor-pointer bg-gray-50 flex flex-col items-center justify-center transition-all duration-200 hover:border-blue-400 hover:bg-blue-50"
+          className="relative w-full rounded-lg overflow-hidden border-2 border-dashed border-gray-300 cursor-pointer bg-gray-50 flex flex-col items-center justify-center transition-all duration-200 hover:border-blue-400 hover:bg-blue-50"
         >
           {previewUrl || image ? (
             <>

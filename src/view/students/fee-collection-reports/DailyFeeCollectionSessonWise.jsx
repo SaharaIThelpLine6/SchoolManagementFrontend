@@ -4,6 +4,7 @@ import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
+import ReportHeader from "../../../components/ReportHeader";
 
 const DailyFeeCollectionSessonWise = ({ reportData, query }) => {
     const [logo, setLogo] = useState(null);
@@ -48,7 +49,7 @@ const DailyFeeCollectionSessonWise = ({ reportData, query }) => {
             <div className="bg-white">
                 {/* Title Section */}
                 {/* {JSON.stringify(sessionData)} */}
-                <div className="text-center w-full bg-white">
+                {/* <div className="text-center w-full bg-white">
                     <h1 className="text-xl sm:text-2xl font-extrabold bg-white">
                         {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
                     </h1>
@@ -63,8 +64,10 @@ const DailyFeeCollectionSessonWise = ({ reportData, query }) => {
                         <p className="text-[18px] text-center"> {new Date(query.start_id).toLocaleDateString("bn-BD")} হতে {new Date(query.end_id).toLocaleDateString("bn-BD")} পর্যন্ত </p>
                         <p className="text-end text-[18px]">প্রিন্ট তারিখ: {new Date().toLocaleDateString("bn-BD")} </p>
                     </div>
-                </div>
+                </div> */}
+                
 
+                <ReportHeader query={{...query, title: "দৈনিক ফি গ্রহণ তালিকা"}} />
                 {/* Optional right-aligned blank space */}
 
 

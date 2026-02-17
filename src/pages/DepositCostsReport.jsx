@@ -124,8 +124,8 @@ const DepositCostsReport = ({ pageTitle }) => {
       gender,
       NewOldId,
       ResidentialStatusId,
-      StartDate: serializeDate(StartDate),
-      EndDate: serializeDate(EndDate),
+      start_date: serializeDate(StartDate),
+      end_date: serializeDate(EndDate),
       report_base,
       start_vouture,
       end_vouture,
@@ -134,6 +134,7 @@ const DepositCostsReport = ({ pageTitle }) => {
       SLID,
       UserID
     };
+
  
     
     console.log(params);

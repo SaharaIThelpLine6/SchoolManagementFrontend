@@ -14,7 +14,10 @@ import {
 } from '../features/settings/settingsQuerySlice';
 import { ViewPermission } from '../Routes/ViewPermission';
 import useTranslate from '../utils/Translate';
-
+import bnBijoy2Unicode from '../utils/conveter';
+import DefaultImageUpload from '../components/Forms/DefaultImageUpload';
+import { showModal } from '../utils/ModalControlar';
+const API_URL = import.meta.env.VITE_SERVER_URL;
 const InstitutionInfo = () => {
   const translate = useTranslate();
 
@@ -30,6 +33,7 @@ const InstitutionInfo = () => {
     SignaturePrincipal: null,
     SignatureNajem: null,
     SignatureAccountant: null,
+    ReportHeaderImg: null,
   });
 
   const [imageFiles, setImageFiles] = useState({
@@ -37,8 +41,10 @@ const InstitutionInfo = () => {
     SignaturePrincipal: null,
     SignatureNajem: null,
     SignatureAccountant: null,
+    ReportHeaderImg: null
   });
-
+  const [previewImg, setPreviewImg] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   useEffect(() => {
     if (institutionInfo) {
       const loadedImages = {};
@@ -64,6 +70,7 @@ const InstitutionInfo = () => {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = methods;
 
@@ -75,10 +82,7 @@ const InstitutionInfo = () => {
       setValue('AraAddress', institutionInfo.AraAddress || '');
       setValue('AraContactNumber', institutionInfo.AraContactNumber || '');
       setValue('AraDistrict', institutionInfo.AraDistrict || '');
-      setValue(
-        'AraInstitutionName',
-        institutionInfo.AraInstitutionName?.trim() || ''
-      );
+      setValue('AraInstitutionName', institutionInfo.AraInstitutionName?.trim() || '');
       setValue('AraPoliceStation', institutionInfo.AraPoliceStation || '');
       setValue('AraPostOffice', institutionInfo.AraPostOffice || '');
       setValue('AraVillage', institutionInfo.AraVillage || '');
@@ -101,6 +105,9 @@ const InstitutionInfo = () => {
       setValue('PrincipalName', institutionInfo.PrincipalName || '');
       setValue('SMSMobile', institutionInfo.SMSMobile || '');
       setValue('Village', institutionInfo.Village || '');
+      setValue('ActiveReportHeader', institutionInfo.ActiveReportHeader || '1');
+      setValue('ReportHeaderImg', institutionInfo.ReportHeaderImg || '');
+      setPreviewUrl(institutionInfo.ReportHeaderImg ? `${API_URL}/public${institutionInfo.ReportHeaderImg}` : '' )
     }
   }, [institutionInfo, setValue]);
 
@@ -129,6 +136,7 @@ const InstitutionInfo = () => {
         'SignaturePrincipal',
         'SignatureNajem',
         'SignatureAccountant',
+        'ReportHeaderImg'
       ];
       const key = imageKeys[index];
 
@@ -140,6 +148,7 @@ const InstitutionInfo = () => {
   };
 
   const onSubmit = async (data) => {
+    console.log(data);
     try {
       // Create FormData to handle file uploads
       const formData = new FormData();
@@ -172,6 +181,25 @@ const InstitutionInfo = () => {
       });
     }
   };
+
+  const ActiveReportHeader = watch("ActiveReportHeader")
+  const ActiveReportTemplate = watch("ActiveReportTemplate")
+  const tem2 = {
+    ActiveReportHeader,
+    templateHandler: (val) => {
+      console.log(val);
+      setValue("ActiveReportTemplate", val)
+    }
+  }
+  const handleReportHaderOption = (val) => {
+    setValue("ActiveReportHeader", val)
+    switch (val) {
+      case 2:
+        showModal("Choose report header template", "REPORT_HEADER_MODAL", tem2)
+      default: null
+    }
+  }
+
 
   if (isLoading) return <Loading />;
   if (isError)
@@ -251,7 +279,7 @@ const InstitutionInfo = () => {
                         src={
                           imagePreviews[index] ||
                           images[
-                            role === 'Logo' ? 'Logo' : `Signature${role}`
+                          role === 'Logo' ? 'Logo' : `Signature${role}`
                           ] ||
                           'https://live.staticflickr.com/7262/26793943536_523d3176a2_z.jpg'
                         }
@@ -275,6 +303,52 @@ const InstitutionInfo = () => {
                 )
               )}
             </div>
+            <div className="col-span-3 w-full">
+              <h2 className="text-lg font-semibold text-gray-700 border-b pb-1">
+                রির্পোট হেডার
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="flex flex-col items-center bg-white p-4 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 relative" onClick={() => { handleReportHaderOption(1) }}>
+                <p className='mb-5 text-sm font-semibold text-gray-700 mt-9'>Default Report Header</p>
+
+                <div className="text-center w-full bg-white opacity-[0.8] pointer-events-none">
+                  <h1 className="text-[14px] bg-white">
+                    {bnBijoy2Unicode(institutionInfo.InstitutionName)}
+                  </h1>
+                  <p className="text-[10px] bg-white">
+                    {bnBijoy2Unicode(institutionInfo?.Address)}
+                  </p>
+                  <div className="text-black border border-black px-1 py-1 inline-block mt-1 rounded tracking-widest bg-white font-bold text-[12px]">
+                    দৈনিক ফি গ্রহণ তালিকা
+                  </div>
+                  <div className="grid grid-cols-3 items-center my-[10px] justify-between w-full">
+                    <p className="text-[10px] text-start">শিক্ষাবর্ষ : ২০২৬ ইং</p>
+                    <p className="text-[10px] text-center"> {new Date().toLocaleDateString("bn-BD")} হতে {new Date().toLocaleDateString("bn-BD")} পর্যন্ত </p>
+                    <p className="text-end text-[10px]">প্রিন্ট তারিখ: {new Date().toLocaleDateString("bn-BD")} </p>
+                  </div>
+                </div>
+
+                <div className={`absolute top-[10px] right-[10px] h-[20px] w-[20px] rounded-full border border-black ${ActiveReportHeader == 1 ? 'bg-blue-500 border-blue-500' : 'border-black'}`}></div>
+              </div>
+              <div className="flex flex-col items-center bg-white p-4 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 relative" onClick={() => { handleReportHaderOption(2) }}>
+                <p className='mb-5 text-sm font-semibold text-gray-700 mt-9'>Select Report Header Template</p>
+
+                <img src='/reaport-heading-template/1.jpg' className='w-full' />
+                <div className={`absolute top-[10px] right-[10px] h-[20px] w-[20px] rounded-full border border-black ${ActiveReportHeader == 2 ? 'bg-blue-500 border-blue-500' : 'border-black'}`}></div>
+              </div>
+              <div className="flex flex-col items-center bg-white p-4 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 relative" onClick={() => { handleReportHaderOption(3) }}>
+                <p className='mb-5 text-sm font-semibold text-gray-700 mt-9'>Upload Customize Report Header</p>
+                <div className='w-full'>
+                  <DefaultImageUpload registerKey="ReportHeaderImg"          image={previewImg}
+                      setPreviewUrl={setPreviewUrl}
+                      previewUrl={previewUrl} />
+                </div>
+                <div className={`absolute top-[10px] right-[10px] h-[20px] w-[20px] rounded-full border border-black ${ActiveReportHeader == 3 ? 'bg-blue-500 border-blue-500' : 'border-black'}`}></div>
+              </div>
+            </div>
+
 
             {/* Submit Button */}
             <div className="flex pl-[4px] font-bold">

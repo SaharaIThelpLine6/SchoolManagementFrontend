@@ -151,8 +151,12 @@ const PaymentConfirm = () => {
                 <div className="grid grid-cols-4 border-b border-gray-300 h-10">
                   <div className="col-span-3 p-1 border-r border-gray-300">
                     {data?.Intent === "quota"
-                      ? `Addon ${data?.size} Quota`
-                      : `Renew For ${data?.size} years`}
+                      ? data?.Description
+                        ? `${data?.Description}`
+                        : `Addon ${data?.size} Quota`
+                      : data?.Description
+                        ? `${data?.Description}`
+                        : `Renew For ${data?.size} years`}
                   </div>
                   <div className="p-1 text-center">BDT {data?.PayAmount}TK</div>
                 </div>

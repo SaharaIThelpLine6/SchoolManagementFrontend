@@ -3,6 +3,7 @@ import bnBijoy2Unicode from "../../../utils/conveter";
 import { formatDate } from "../../../helper/formatTime";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
+import ReportHeader from "../../../components/ReportHeader";
 
 const DepositeCostLedgerWisePrint = ({ reportData, query }) => {
   const [logo, setLogo] = useState(null);
@@ -32,9 +33,8 @@ const DepositeCostLedgerWisePrint = ({ reportData, query }) => {
 
   return (
     <div className="font-bangla  p-4 bg-white text-xs">
-
+{/* 
       <div className="bg-white">
-        {/* Title Section */}
         <div className="text-center w-full bg-white">
           <h1 className="text-xl sm:text-2xl font-extrabold bg-white">
             {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
@@ -53,10 +53,8 @@ const DepositeCostLedgerWisePrint = ({ reportData, query }) => {
             <p className="text-end">রিপোর্ট প্রিন্ট তারিখ: 07/10/2025</p>
           </div>
         </div>
-
-        {/* Optional right-aligned blank space */}
-      </div>
-
+      </div> */}
+      <ReportHeader query={{...query, title: "জমা-খরচ লেজার ভিত্তিক"}} />
 
 
       {Object.keys(reportData).map((key) => (
