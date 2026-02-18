@@ -338,6 +338,7 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ['HomeWorks'],
     }),
+
     putHomeWork: builder.mutation({
       query: ({ id, ...body }) => ({
         url: `home_work/${id}`,
@@ -353,13 +354,27 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ['HomeWorks'],
     }),
-        getStudentsBySubClassID: builder.query({
-          query: ({ SessionID, SubClassID }) => ({
-            url: 'get_students_by_subclassid',
-            params: { SessionID, SubClassID },
-          }),
-          providesTags: ['HomeWorks'],
-        }),
+    getStudentsBySubClassID: builder.query({
+      query: ({ SessionID, SubClassID }) => ({
+        url: 'get_students_by_subclassid',
+        params: { SessionID, SubClassID },
+      }),
+      providesTags: ['HomeWorks'],
+    }),
+    getAdmissionStudents: builder.query({
+      query: ({ sessionid, examid, classid }) => ({
+        url: `get_online_admission_student/${sessionid}/${examid}/${classid}`,
+      }),
+      providesTags: ['AdmissionStudents'],
+    }),
+    postNewClassStudentamission: builder.mutation({
+      query: (body) => ({
+        url: `new_class_student_admission`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['NewClassStudentAdmissions'],
+    }),
   }),
 });
 
@@ -404,5 +419,7 @@ export const {
   usePostHomeWorkMutation,
   usePutHomeWorkMutation,
   useDeleteHomeWorkMutation,
-  useGetStudentsBySubClassIDQuery
+  useGetStudentsBySubClassIDQuery,
+  useGetAdmissionStudentsQuery,
+  usePostNewClassStudentamissionMutation
 } = userStudentSlice;
