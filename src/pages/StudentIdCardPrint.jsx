@@ -491,7 +491,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
 
                     <div className='h-[100px]'>
                       <div className="header_logo h-[40px] w-[40px] rounded-[4px] mx-auto overflow-hidden my-[10px]">
-                        <img className='w-full h-full object-cover' src={convert_logto_buffer(institutionInfo.Logo)} alt="" />
+                        <img className='w-full h-full object-cover' src={convert_logto_buffer(institutionInfo?.Logo)} alt="" />
                       </div>
 
                       <h2 className="group text-center text-[18px] text-white font-bold truncate">
