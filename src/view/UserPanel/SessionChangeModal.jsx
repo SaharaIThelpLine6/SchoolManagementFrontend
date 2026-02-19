@@ -5,7 +5,7 @@ import Button from '../../components/Button/Button';
 import { useGetSessionsQuery } from '../../features/session/sessionSlice';
 import useTranslate from '../../utils/Translate';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
-import { setCurrentSession } from '../../features/userPanel/SessionChange/SessionChangeSlice';
+import { setCurrentSession } from '../../features/userPanel/sessionChange/sessionChangeSlice';
 import { hideModal } from '../../utils/ModalControlar';
 
 const SessionChangeModal = ({ id }) => {

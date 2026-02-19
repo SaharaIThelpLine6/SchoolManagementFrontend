@@ -3,7 +3,7 @@ import { closeModal } from '../features/modal/modalSlice';
 import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
 import ClassVideoCreateUpdate from '../pages/userpanel/ClassVideoCreateUpdate';
 import StudentSingleConplaint from '../pages/userpanel/Modal/StudentSingleConplaint';
-import StudentSingleReport from '../pages/userpanel/Modal/StudentsingleReport';
+import StudentSingleReport from '../pages/userpanel/Modal/StudentSingleReport';
 import PaymentModalUserPanel from '../pages/userpanel/PaymentModalUserPanel';
 import useTranslate from '../utils/Translate';
 import SessionCreateUpdateModal from '../view/Session/SessionCreateUpdateModal';

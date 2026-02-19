@@ -21,7 +21,7 @@ import { setPrintableStudentList } from '../features/student/studentSlice';
 import { showModal } from '../utils/ModalControlar';
 import { useGetInstitutionInfoQuery } from '../features/settings/settingsQuerySlice';
 import StudentIdCardGenerate from './StudentIdCardGenerate';
-
+import { Buffer } from 'buffer';
 const PAGE_SIZE = 10;
 
 const StudentIdCardPrint = ({ pageTitle }) => {
@@ -29,16 +29,18 @@ const StudentIdCardPrint = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
+    const [selectedLayout, setSelectedLayout] = useState(null);
   const methods = useForm({
     defaultValues: {
-      "schoolname_color_field": "#fff",
-      "schooladdress_color_field": "#fff"
+      [`schoolname_color_field_${selectedLayout}`]: "#ffffff",
+      [`schooladdress_color_field_${selectedLayout}`]: "#ffffff"
+  
     }
   });
   const { register, watch, handleSubmit } = methods;
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState([]);
-  const [selectedLayout, setSelectedLayout] = useState(null);
+
 
   const [checkboxState, setCheckboxState] = useState([]);
 
@@ -48,12 +50,12 @@ const StudentIdCardPrint = ({ pageTitle }) => {
   const ClassID = watch('ClassID');
   const SubClassID = watch('SubClassID');
   const ResidentialStatusId = watch('ResidentialStatusId');
-  const SchoolNameSize = watch('schoolname_fontside');
-  const SchoolNameColor = watch('schoolname_color_field');
 
+  const SchoolNameSize = watch(`schoolname_fontside_${selectedLayout}`);
+  const SchoolNameColor = watch(`schoolname_color_field_${selectedLayout}`) || "#ffffff";
+  const SchoolAddressSize = watch(`schooladdress_fontside_${selectedLayout}`);
+  const SchoolAddressColor = watch(`schooladdress_color_field_${selectedLayout}`) || "#ffffff";
 
-  const SchoolAddressSize = watch('schooladdress_fontside');
-  const SchoolAddressColor = watch('schooladdress_color_field');
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
@@ -124,7 +126,14 @@ const StudentIdCardPrint = ({ pageTitle }) => {
       );
     }
   };
-
+  function convert_logto_buffer(Logo) {
+    if (Logo?.data) {
+      const buffer = Buffer.from(Logo.data);
+      const base64String = buffer.toString('base64');
+      const imageSrc = `data:image/png;base64,${base64String}`;
+      return imageSrc;
+    }
+  }
 
   const onSubmit = async (data) => {
     try {
@@ -145,21 +154,26 @@ const StudentIdCardPrint = ({ pageTitle }) => {
             newRow[`fieldkey_${key}`] = data[fieldKeyName];
           }
         });
-        newRow[`institute_name`] = data.institute_name
-        newRow[`schoolname_color_field`] = data.schoolname_color_field
-        newRow[`schoolname_fontside`] = data.schoolname_fontside
+        newRow[`institute_name`] = data[`institute_name_${selectedLayout}`]
+        newRow[`schoolname_color_field`] = SchoolNameColor
+        newRow[`schoolname_fontside`] = SchoolNameSize
 
 
-        newRow[`institute_address`] = data.institute_address
-        newRow[`schooladdress_color_field`] = data.schooladdress_color_field
-        newRow[`schooladdress_fontside`] = data.schooladdress_fontside
+        newRow[`institute_address`] = data[`institute_address_${selectedLayout}`]
+        newRow[`schooladdress_color_field`] = SchoolAddressColor
+        newRow[`schooladdress_fontside`] = SchoolAddressSize
+
+
 
         return newRow;
       });
-      // ০১৭০৮৪৮৯৪৬৩
 
       dispatch(setPrintableStudentList(updatedSelectedRows));
-      showModal('', 'STUDENT_ID_CARD', checkboxState);
+      // showModal('', 'STUDENT_ID_CARD', checkboxState);
+      setTimeout(() => {
+        window.print()
+      }, 300)
+
 
     } catch (error) {
       Swal.fire({
@@ -177,6 +191,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
   const layouts = [
     { id: "1", image: "/student_id_image.png" },
     { id: "2", image: "/card2.png" },
+    { id: "3", image: "/card3.jpeg" },
 
   ];
 
@@ -231,16 +246,16 @@ const StudentIdCardPrint = ({ pageTitle }) => {
   const customizeableFields =
   {
     StudentName: ["1"],
-    FatherName: ["1", "2"],
-    MotherName: ["1", "2"],
-    ClassName: ["1", "2"],
-    Mobile1: ["1", "2"],
-    SessionName: ["1", "2"],
-    BloodGroup: ["1", "2"],
-    ResidentialName: ["1", "2"],
-    NIDNO: ["1", "2"],
-    DateOfBirth: ["1", "2"],
-    NewOldId: ["1", "2"]
+    FatherName: ["1", "2", "3"],
+    MotherName: ["1", "2", "3"],
+    ClassName: ["1", "2", "3"],
+    Mobile1: ["1", "2", "3"],
+    SessionName: ["1", "2", "3"],
+    BloodGroup: ["1", "2", "3"],
+    ResidentialName: ["1", "2", "3"],
+    NIDNO: ["1", "2", "3"],
+    DateOfBirth: ["1", "2", "3"],
+    NewOldId: ["1", "2", "3"]
   }
 
 
@@ -282,9 +297,9 @@ const StudentIdCardPrint = ({ pageTitle }) => {
     window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", stopResize);
   };
-const isFieldAllowedForLayout = (fieldId, layoutId) => {
-  return customizeableFields[fieldId]?.includes(String(layoutId));
-};
+  const isFieldAllowedForLayout = (fieldId, layoutId) => {
+    return customizeableFields[fieldId]?.includes(String(layoutId));
+  };
 
   return (
     <div>
@@ -294,7 +309,7 @@ const isFieldAllowedForLayout = (fieldId, layoutId) => {
             {translate('Id Card Print')}
           </h3>
         </div>
-        <div className='flex'>
+        <div className='flex gap-[30px] flex-nowrap'>
           {layouts.map((layout) => (
             <button
               key={layout.id}
@@ -302,43 +317,43 @@ const isFieldAllowedForLayout = (fieldId, layoutId) => {
               className={`border rounded-xl hidden_in_print p-2 mx-2 ${selectedLayout === layout.id ? "border-blue-500" : ""
                 }`}
             >
+       
+              <input
+                type="hidden"
+                {...register(`layout_identifier`)}
+                value={layout.id}
+              />
 
               {layout.id == 1 && (
                 <div className='w-[250px] border border-[#000] mb-[1px] relative print-id-card'>
                   <img src="/student_id_card_top.jpeg" alt="card header" className='h-[110px]' />
                   <div className="absolute top-[2px] w-full">
-                    <h2 className="group text-center text-[16px] text-red font-bold truncate">
+                    <h2 className="group text-center text-[18px] text-white font-bold truncate">
                       <textarea
                         ref={textareaRef}
                         onMouseDown={startResize}
                         id="school-name"
                         className={`
-                        w-full
-                        bg-transparent
-                        text-center
-                        outline-none
-                        resize-y
-                        cursor-ns-resize
-                        text-[${SchoolNameSize}px]
-                        leading-[${SchoolNameSize}px]
-                      `}
+                          w-full
+                          bg-transparent
+                          text-center
+                          outline-none
+                          resize-y
+                          cursor-ns-resize
+                        `}
                         defaultValue={institutionInfo?.InstitutionName}
-                        style={{ color: SchoolNameColor }}
-                        {...register("institute_name")}
+                        style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
+                        {...register(`institute_name_${layout.id}`)}
                       />
 
-
                       <div
-                        className="absolute bg-white right-0 top-0 translate-x-full opacity-0 group-focus-within:translate-x-[100%] group-focus-within:opacity-100 transition-all duration-300 ease-out text-black shadow-xl border-2 border-purple-300 rounded-[4px]
-                      "
+                        className="absolute bg-white right-0 top-0 translate-x-full opacity-0 group-focus-within:translate-x-[100%] group-focus-within:opacity-100 transition-all duration-300 ease-out text-black shadow-xl border-2 border-purple-300 rounded-[4px]"
                       >
-
-
                         <div>
-                          <input type="number" className="w-[60px]" defaultValue={20} {...register(`schoolname_fontside`)} />
+                          <input type="number" className="w-[60px]" defaultValue={18} {...register(`schoolname_fontside_${layout.id}`)} />
                         </div>
                         <div>
-                          <input type="color" className="w-[60px]" {...register(`schoolname_color_field`)} />
+                          <input type="color" className="w-[60px]" defaultValue={"#ffffff"} {...register(`schoolname_color_field_${layout.id}`)} />
                         </div>
                       </div>
                     </h2>
@@ -348,16 +363,16 @@ const isFieldAllowedForLayout = (fieldId, layoutId) => {
                         className={`w-full border-black inline-block bg-transparent text-center outline-none text-[${SchoolAddressSize}px] leading-[${SchoolAddressSize}px]]`}
                         defaultValue={institutionInfo?.Address}
                         style={{ color: `${SchoolAddressColor}` }}
-                        {...register("institute_address")}
+                        {...register(`institute_address_${layout.id}`)}
                       />
 
                       <div className="absolute bg-white right-0 top-0 translate-x-full opacity-0 group-focus-within:translate-x-[100%] group-focus-within:opacity-100 transition-all duration-300 ease-out text-black shadow-xl border-2 border-purple-300 rounded-[4px]"
                       >
                         <div>
-                          <input type="number" className="w-[60px]" defaultValue={20} {...register(`schooladdress_fontside`)} />
+                          <input type="number" className="w-[60px]" defaultValue={16} {...register(`schooladdress_fontside_${layout.id}`)} />
                         </div>
                         <div>
-                          <input type="color" className="w-[60px]" {...register(`schooladdress_color_field`)} />
+                          <input type="color" className="w-[60px]" defaultValue={"#ffffff"} {...register(`schooladdress_color_field_${layout.id}`)} />
                         </div>
                       </div>
                     </p>
@@ -369,7 +384,7 @@ const isFieldAllowedForLayout = (fieldId, layoutId) => {
                       </div>
                       <h3 className='text-center py-[2px] px-[30px] mt-[6px] bg-sky-600 inline-block rounded-[50px] mx-auto text-white text-[16px]'>পরিচয় পত্র</h3>
                     </div>
-                    <div className='pt-1 pb-2  text-left h-[160px]'>
+                    <div className='pt-1 pb-2 text-left h-[160px]'>
                       <h3 className='text-red pl-[20px] text-[16px]'>আইডি নং: 123</h3>
 
                       {selectedLayout == 1 && checkboxState.map((fieldName) => {
@@ -395,71 +410,63 @@ const isFieldAllowedForLayout = (fieldId, layoutId) => {
                   <img src={`${layout.image}`} alt="card header" className='h-full w-full' />
                   <div className="absolute top-[2px] w-full">
 
-                 <div className='h-[90px]'>
-                     <h2 className="group text-center text-[16px] text-red font-bold truncate">
-                      <textarea
+                    <div className='h-[80px]'>
+                      <h2 className="group text-center text-[18px] text-white font-bold truncate">
+                           <textarea
                         ref={textareaRef}
                         onMouseDown={startResize}
                         id="school-name"
                         className={`
-                        w-full
-                        bg-transparent
-                        text-center
-                        outline-none
-                        resize-y
-                        cursor-ns-resize
-                        text-[${SchoolNameSize}px]
-                        leading-[${SchoolNameSize}px]
-                      `}
+                          w-full
+                          bg-transparent
+                          text-center
+                          outline-none
+                          resize-y
+                          cursor-ns-resize
+                        `}
                         defaultValue={institutionInfo?.InstitutionName}
-                        style={{ color: SchoolNameColor }}
-                        {...register("institute_name")}
+                        style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
+                        {...register(`institute_name_${layout.id}`)}
                       />
 
-
-                      <div
-                        className="absolute bg-white right-0 top-0 translate-x-full opacity-0 group-focus-within:translate-x-[100%] group-focus-within:opacity-100 transition-all duration-300 ease-out text-black shadow-xl border-2 border-purple-300 rounded-[4px]
-                      "
-                      >
-
-
-                        <div>
-                          <input type="number" className="w-[60px]" defaultValue={20} {...register(`schoolname_fontside`)} />
+                        <div
+                          className="absolute bg-white right-0 top-0 translate-x-full opacity-0 group-focus-within:translate-x-[100%] group-focus-within:opacity-100 transition-all duration-300 ease-out text-black shadow-xl border-2 border-purple-300 rounded-[4px]"
+                        >
+                          <div>
+                            <input type="number" className="w-[60px]" defaultValue={18} {...register(`schoolname_fontside_${layout.id}`)} />
+                          </div>
+                          <div>
+                            <input type="color" className="w-[60px]" defaultValue={"#ffffff"} {...register(`schoolname_color_field_${layout.id}`)} />
+                          </div>
                         </div>
-                        <div>
-                          <input type="color" className="w-[60px]" {...register(`schoolname_color_field`)} />
-                        </div>
-                      </div>
-                    </h2>
-                    <p className='text-[16px] text-center text-white group relative'>
-                      <textarea
-                        id='school-address'
-                        className={`w-full border-black inline-block bg-transparent text-center outline-none text-[${SchoolAddressSize}px] leading-[${SchoolAddressSize}px]]`}
-                        defaultValue={institutionInfo?.Address}
-                        style={{ color: `${SchoolAddressColor}` }}
-                        {...register("institute_address")}
-                      />
+                      </h2>
+                      <p className='text-[16px] text-center text-white group relative'>
+                        <textarea
+                          id='school-address'
+                          className={`w-full border-black inline-block bg-transparent text-center outline-none text-[${SchoolAddressSize}px] leading-[${SchoolAddressSize}px]]`}
+                          defaultValue={institutionInfo?.Address}
+                          style={{ color: `${SchoolAddressColor}` }}
+                          {...register(`institute_address_${layout.id}`)}
+                        />
 
-                      <div className="absolute bg-white right-0 top-0 translate-x-full opacity-0 group-focus-within:translate-x-[100%] group-focus-within:opacity-100 transition-all duration-300 ease-out text-black shadow-xl border-2 border-purple-300 rounded-[4px]"
-                      >
-                        <div>
-                          <input type="number" className="w-[60px]" defaultValue={20} {...register(`schooladdress_fontside`)} />
+                        <div className="absolute bg-white right-0 top-0 translate-x-full opacity-0 group-focus-within:translate-x-[100%] group-focus-within:opacity-100 transition-all duration-300 ease-out text-black shadow-xl border-2 border-purple-300 rounded-[4px]"
+                        >
+                          <div>
+                            <input type="number" className="w-[60px]" defaultValue={16} {...register(`schooladdress_fontside_${layout.id}`)} />
+                          </div>
+                          <div>
+                            <input type="color" className="w-[60px]" defaultValue={"#ffffff"} {...register(`schooladdress_color_field_${layout.id}`)} />
+                          </div>
                         </div>
-                        <div>
-                          <input type="color" className="w-[60px]" {...register(`schooladdress_color_field`)} />
-                        </div>
-                      </div>
-                    </p>
-                 </div>
-
-
+                      </p>
+                    </div>
 
                     <div className="middle_area px-2">
                       <div className="image overflow-hidden h-[92px] w-[92px] shadow-lg mx-auto rounded-[5px]">
                         <img className='w-full h-full object-cover' src="/avatar.png" alt="" />
                       </div>
 
-                      <div className='pt-1 pb-2  text-left h-[160px]'>
+                      <div className='pt-1 pb-2 text-left h-[160px]'>
                         <h3 className='text-red text-[18px] font-bold text-center'>মো: আজাদ হাসান</h3>
                         {selectedLayout == 2 && checkboxState.map((fieldName) => {
                           if (!fieldName) return null;
@@ -474,15 +481,93 @@ const isFieldAllowedForLayout = (fieldId, layoutId) => {
                         })}
                       </div>
                     </div>
-
-
-
                   </div>
-
-
                 </div>
               )}
+              {layout.id == 3 && (
+                <div className='w-[250px] border border-[#000] mb-[1px] relative print-id-card'>
+                  <img src={`${layout.image}`} alt="card header" className='h-full w-full' />
+                  <div className="absolute top-[2px] w-full">
 
+                    <div className='h-[100px]'>
+                      <div className="header_logo h-[40px] w-[40px] rounded-[4px] mx-auto overflow-hidden my-[10px]">
+                        <img className='w-full h-full object-cover' src={convert_logto_buffer(institutionInfo.Logo)} alt="" />
+                      </div>
+
+                      <h2 className="group text-center text-[18px] text-white font-bold truncate">
+                            <textarea
+                        ref={textareaRef}
+                        onMouseDown={startResize}
+                        id="school-name"
+                        className={`
+                          w-full
+                          bg-transparent
+                          text-center
+                          outline-none
+                          resize-y
+                          cursor-ns-resize
+                        `}
+                        defaultValue={institutionInfo?.InstitutionName}
+                        style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
+                        {...register(`institute_name_${layout.id}`)}
+                      />
+
+                        <div
+                          className="absolute bg-white right-0 top-0 translate-x-full opacity-0 group-focus-within:translate-x-[100%] group-focus-within:opacity-100 transition-all duration-300 ease-out text-black shadow-xl border-2 border-purple-300 rounded-[4px]"
+                        >
+                          <div>
+                            <input type="number" className="w-[60px]" defaultValue={18} {...register(`schoolname_fontside_${layout.id}`)} />
+                          </div>
+                          <div>
+                            <input type="color" className="w-[60px]" defaultValue={"#000000"} {...register(`schoolname_color_field_${layout.id}`)} />
+                          </div>
+                        </div>
+                      </h2>
+                      <p className='text-[16px] text-center text-white group relative'>
+                        <textarea
+                          id='school-address'
+                          className={`w-full border-black inline-block bg-transparent text-center outline-none`}
+                          defaultValue={institutionInfo?.Address}
+                          style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
+                          {...register(`institute_address_${layout.id}`)}
+                        />
+
+                        <div className="absolute bg-white right-0 top-0 translate-x-full opacity-0 group-focus-within:translate-x-[100%] group-focus-within:opacity-100 transition-all duration-300 ease-out text-black shadow-xl border-2 border-purple-300 rounded-[4px]"
+                        >
+                          <div>
+                            <input type="number" className="w-[60px]" defaultValue={16} {...register(`schooladdress_fontside_${layout.id}`)} />
+                          </div>
+                          <div>
+                            <input type="color" className="w-[60px]" defaultValue={"#000000"} {...register(`schooladdress_color_field_${layout.id}`)} />
+                          </div>
+                        </div>
+                      </p>
+                    </div>
+
+                    <div className="middle_area px-2">
+                      <div className="image overflow-hidden h-[92px] w-[92px] shadow-lg mx-auto rounded-[5px]">
+                        <img className='w-full h-full object-cover' src="/avatar.png" alt="" />
+                      </div>
+
+                      <div className='pt-1 pb-2 text-left h-[160px]'>
+                        <h3 className='text-sky-600 text-[18px] font-bold text-center'>মো: আজাদ হাসান</h3>
+
+                        {selectedLayout == 3 && checkboxState.map((fieldName) => {
+                          if (!fieldName) return null;
+                          return (
+                            <p key={fieldName} className='text-[15px]'>
+                              <input className='w-fit inline-block bg-transparent' style={{
+                                width: `${(watch(`fieldkey_${fieldName}`)?.length || FIELD_LABELS[fieldName]?.length || 1) - 0}ch`,
+                                minWidth: "0.1ch",
+                              }} {...register(`fieldkey_${fieldName}`)} defaultValue={FIELD_LABELS[fieldName]} />: {FIELD_Value_Demo[fieldName]}
+                            </p>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </button>
           ))}
         </div>

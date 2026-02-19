@@ -30,7 +30,7 @@ import { teachersSlice } from "../features/teachers/teachersSlice";
 import { userInfoSlice } from "../features/userInfo/userInfoQuerySlice";
 import userInfoReducer from "../features/userInfo/userInfoSlice";
 import { panelNotificationQuerySlice } from "../features/userPanel/panelNotification/panelNotificationQuerySlice";
-import sessionChangeReducer from "../features/userPanel/SessionChange/SessionChangeSlice";
+import sessionChangeReducer from "../features/userPanel/sessionChange/sessionChangeSlice";
 import { studentPaymentSlice } from "../features/userPanel/studentPayment/studentPaymentSlice";
 import { userPanelUserInfo } from "../features/userPanel/userInfo/userInfoQuerySlice";
 import { userPanelVerifyUser } from "../features/userPanel/userLoginVerify/userloginVerifyQuerySlice";

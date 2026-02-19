@@ -75,7 +75,7 @@ const Home = ({ pageTitle }) => {
         </CardDataStats>
 
         <CardDataStats
-          title={translate("Total donor member")} // Total Guardian
+          title={translate("Total Donor Member")} // Total Guardian
           total={donerCount?.totalUsers ?? 0}
           bgColor="bg-[#C3DCC2]" 
           titleColor="text-[#0C9444]"
