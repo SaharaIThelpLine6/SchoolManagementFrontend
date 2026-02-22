@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import Swal from 'sweetalert2';
 import Button from '../components/Button/Button';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import SvgIcon from '../components/icons/SvgIcon';
+import Loading from '../components/Loading/Loading';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import {
+  useDeleteNewClassStudentAdmissionMutation,
   useGetAdmissionStudentsQuery,
   useGetExamNamesQuery,
   usePostNewClassStudentamissionMutation,
@@ -22,52 +25,53 @@ const OnlineAdmissionForUserPanel = () => {
   const [selectedLeft, setSelectedLeft] = useState([]);
   const [selectedRight, setSelectedRight] = useState([]);
 
-  console.log(rightData, 'rightData');
-
-  // Form watch
   const [SessionID, ExamID, SubClassID] = watch([
     'SessionID',
     'ExamID',
     'SubClassID',
   ]);
 
-  // API calls
+  // API
   const { data: sessionData = [] } = useGetSessionsQuery();
   const { data: examData = [] } = useGetExamNamesQuery();
   const { data: subClassData = [] } = useGetSubClassListQuery();
-  const [postNewClassStudentAdmission] =
+  const [postNewClassStudentAdmission, { isLoading: isPostLoading }] =
     usePostNewClassStudentamissionMutation();
+  const [deleteNewClassStudentAdmission, { isLoading: isDeleteLoading }] =
+    useDeleteNewClassStudentAdmissionMutation();
 
   const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
 
-  // Skip logic
-  const shouldSkip = !activeSession?.SessionID || !ExamID || !SubClassID;
+  const shouldSkip = !SessionID || !ExamID || !SubClassID;
 
-  const { data: admissionData = [], isLoading } = useGetAdmissionStudentsQuery(
-    {
-      sessionid: SessionID,
-      examid: ExamID,
-      classid: SubClassID,
-    },
-    { skip: shouldSkip }
-  );
+  const { data: admissionData, isLoading: isAdmissionLoading } =
+    useGetAdmissionStudentsQuery(
+      {
+        sessionid: SessionID,
+        examid: ExamID,
+        classid: SubClassID,
+      },
+      { skip: shouldSkip }
+    );
 
-  // Set default session
+  // Default Session
   useEffect(() => {
-    setValue('SessionID', activeSession?.SessionID || '');
+    if (activeSession) {
+      setValue('SessionID', activeSession.SessionID);
+    }
   }, [activeSession, setValue]);
 
-  // Update leftData when API data changes
+  // 🔥 IMPORTANT FIX — handle left/right from backend
   useEffect(() => {
-    if (admissionData?.length) {
-      setLeftData(admissionData);
-      setRightData([]);
+    if (admissionData) {
+      setLeftData(admissionData.leftData || []);
+      setRightData(admissionData?.rightData || []);
       setSelectedLeft([]);
       setSelectedRight([]);
     }
   }, [admissionData]);
 
-  // Toggle checkbox
+  // Checkbox Select
   const handleSelect = (id, side) => {
     if (side === 'left') {
       setSelectedLeft((prev) =>
@@ -80,87 +84,168 @@ const OnlineAdmissionForUserPanel = () => {
     }
   };
 
-  // Delete row
-  const handleDelete = (id, side) => {
-    if (side === 'left') {
-      setLeftData((prev) => prev.filter((item) => item.ID !== id));
-      setSelectedLeft((prev) => prev.filter((item) => item !== id));
-    } else {
-      setRightData((prev) => prev.filter((item) => item.ID !== id));
-      setSelectedRight((prev) => prev.filter((item) => item !== id));
+  // Delete (UI only)
+  const handleDelete = async (id, side, graid) => {
+    // 1️⃣ Confirm before delete
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
+    });
+
+    if (!result.isConfirmed) return; // user cancelled
+
+    try {
+      // 2️⃣ Set loading
+      Swal.showLoading();
+
+
+      // 4️⃣ Update UI
+      if (side === 'left') {
+        setLeftData((prev) => prev.filter((item) => item.ID !== id));
+        setSelectedLeft((prev) => prev.filter((item) => item !== id));
+      } else {
+        // 3️⃣ Call delete API
+        await deleteNewClassStudentAdmission({ graid }).unwrap();
+        setRightData((prev) => prev.filter((item) => item.ID !== id));
+        setSelectedRight((prev) => prev.filter((item) => item !== id));
+      }
+
+      // 5️⃣ Success alert
+      Swal.fire({
+        icon: 'success',
+        title: 'Deleted!',
+        text: 'Admission deleted successfully.',
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error('Delete error:', error);
+
+      // Permission or other errors alert
+      Swal.fire({
+        icon: 'error',
+        title: 'Failed',
+        text:
+          error?.data?.error ||
+          'You do not have permission to delete or some error occurred.',
+      });
     }
   };
 
-  // Move to right
-  const moveToRight = () => {
+  // Move →
+  const moveToRight = async () => {
     const selectedItems = leftData.filter((item) =>
       selectedLeft.includes(item.ID)
     );
-    setRightData([...rightData, ...selectedItems]);
-    setLeftData(leftData.filter((item) => !selectedLeft.includes(item.ID)));
+
+    const payload = selectedItems.map((item) => ({
+      UserID: item.UserID,
+      PassedClassID: item.SubClassID,
+      AdmissionID: item.AdmissionID,
+      SessionID: item.SessionID,
+      Action: 1,
+    }));
+
+    try {
+      await postNewClassStudentAdmission({
+        data: payload,
+      }).unwrap();
+    } catch (error) {
+      console.error('Submit error:', error);
+    }
+
+    setRightData((prev) => [...prev, ...selectedItems]);
+    setLeftData((prev) =>
+      prev.filter((item) => !selectedLeft.includes(item.ID))
+    );
     setSelectedLeft([]);
   };
 
-  // Move to left
+  // Move ←
   const moveToLeft = () => {
     const selectedItems = rightData.filter((item) =>
       selectedRight.includes(item.ID)
     );
-    setLeftData([...leftData, ...selectedItems]);
-    setRightData(rightData.filter((item) => !selectedRight.includes(item.ID)));
+
+    setLeftData((prev) => [...prev, ...selectedItems]);
+    setRightData((prev) =>
+      prev.filter((item) => !selectedRight.includes(item.ID))
+    );
     setSelectedRight([]);
   };
 
- const handleSubmit = async () => {
-   const selectedItems = rightData.map((item) => ({
-     UserID: item.UserID,
-     PassedClassID: item.SubClassID,
-     AdmissionID: item.AdmissionID,
-     Action: 1
-   }));
+  // Save
+  const handleSubmit = async () => {
+    const selectedItems = rightData.map((item) => ({
+      UserID: item.UserID,
+      PassedClassID: item.SubClassID,
+      AdmissionID: item.AdmissionID,
+      SessionID: item.SessionID,
+      Action: 1,
+    }));
 
-   try {
-     console.log(selectedItems, 'selectedItems');
-     // Wrap in { data: [...] } so backend receives it correctly
-     const response = await postNewClassStudentAdmission({
-       data: selectedItems,
-     });
-     console.log(response);
-   } catch (error) {
-     console.error('Error submitting new class student admission:', error);
-   }
- };
+    try {
+      await postNewClassStudentAdmission({
+        data: selectedItems,
+      });
+    } catch (error) {
+      console.error('Submit error:', error);
+    }
+  };
 
+  if (isAdmissionLoading) {
+    return <Loading />;
+  }
+  if (isPostLoading) {
+    return <Loading />;
+  }
+  if (isDeleteLoading) {
+    return <Loading />;
+  }
+const action1Count = rightData.filter((item) => item.Action === 1).length;
+const action2Count = rightData.filter((item) => item.Action === 2).length;
   // Table component
-  const Table = ({ data, selected, side }) => (
+  const Table = ({ data, selected, side, rightPermission = false }) => (
     <div className="w-full h-[400px] bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
       <div className="flex-1 overflow-y-auto">
         <table className="w-full text-sm text-left border-collapse">
           <thead className="bg-gradient-to-r from-blue-50 to-blue-100 text-gray-700 uppercase text-xs">
             <tr className="text-center">
-              <th className="p-3">
+                {!rightPermission && (
+                  <th className="p-3">
                 <input
                   type="checkbox"
                   checked={data.length > 0 && selected.length === data.length}
                   onChange={() =>
                     data.forEach((item) => handleSelect(item.ID, side))
                   }
-                />
+                  />
               </th>
+                )}
               <th className="p-3">{translate('User Code')}</th>
               <th className="p-3">{translate('Name')}</th>
               <th className="p-3">{translate('Total')}</th>
               <th className="p-3">{translate('Division')}</th>
+              {rightPermission && (
+                <th className="p-3">{translate('Admission Status')}</th>
+              )}
               <th className="p-3 text-center">{translate('Action')}</th>
             </tr>
           </thead>
 
           <tbody>
-            {data.map((item) => (
+            {data.map((item, index) => (
               <tr
-                key={item.ID}
+                key={`${side}-${item.ID}-${index}`}
                 className="border-b hover:bg-blue-50 transition duration-200 text-center"
               >
+                {!rightPermission && (
+
                 <td className="p-3">
                   <input
                     type="checkbox"
@@ -168,6 +253,7 @@ const OnlineAdmissionForUserPanel = () => {
                     onChange={() => handleSelect(item.ID, side)}
                   />
                 </td>
+                )}
 
                 <td className="p-3 font-medium text-gray-700">
                   {item.UserCode}
@@ -176,9 +262,31 @@ const OnlineAdmissionForUserPanel = () => {
                 <td className="p-3">{item.Total}</td>
                 <td className="p-3">{item.Division}</td>
 
+                {rightPermission && (
+                  <td className="p-3">
+                    {item.Action === 1 && (
+                      <span className="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-700 border border-yellow-300 shadow-sm">
+                        Pending
+                      </span>
+                    )}
+
+                    {item.Action === 2 && (
+                      <span className="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-700 border border-green-300 shadow-sm">
+                        Complete
+                      </span>
+                    )}
+
+                    {!item.Action && (
+                      <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600 border border-gray-300">
+                        Not Set
+                      </span>
+                    )}
+                  </td>
+                )}
+
                 <td className="p-3 text-center">
                   <button
-                    onClick={() => handleDelete(item.ID, side)}
+                    onClick={() => handleDelete(item.ID, side, item.GRAID)}
                     className="p-2 text-xs font-semibold text-white bg-red-500 rounded-lg hover:bg-red-600 transition shadow"
                   >
                     <SvgIcon name={'FaTrash'} />
@@ -206,7 +314,7 @@ const OnlineAdmissionForUserPanel = () => {
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-4 mb-6">
           <h3 className="text-xl font-bold">{translate('Online Admission')}</h3>
-          <Button onClick={handleSubmit}>Save</Button>
+          {/* <Button onClick={handleSubmit}>Save</Button> */}
         </div>
 
         {/* Filters */}
@@ -232,24 +340,27 @@ const OnlineAdmissionForUserPanel = () => {
             valueField="SubClassID"
             nameField="SubClass"
           />
-
           {/* Status Cards */}
-
-          {/* ভর্তি সম্পন্ন */}
-          <div className="w-64 bg-green-50 border border-green-300 rounded p-4">
-            <h2 className="text-md font-semibold text-green-700">
-              ভর্তি সম্পন্ন
-            </h2>
-            <p className="text-sm text-green-600 mt-1">২৩২৫ জন</p>
-          </div>
-
-          {/* ভর্তি বাকি */}
-          <div className="w-64 bg-yellow-50 border border-yellow-300 rounded p-4">
-            <h2 className="text-md font-semibold text-yellow-700">
-              ভর্তি বাকি
-            </h2>
-            <p className="text-sm text-yellow-600 mt-1">৪৫৬ জন</p>
-          </div>01
+          {rightData.length > 0 && (
+            <>
+              {/* ভর্তি সম্পন্ন */}
+              <div className="w-64 bg-green-50 border border-green-300 rounded p-4">
+                <h2 className="text-md font-semibold text-green-700">
+                  ভর্তি সম্পন্ন
+                </h2>
+                <p className="text-sm text-green-600 mt-1">{action2Count} জন</p>
+              </div>
+              {/* ভর্তি বাকি */}
+              <div className="w-64 bg-yellow-50 border border-yellow-300 rounded p-4">
+                <h2 className="text-md font-semibold text-yellow-700">
+                  ভর্তি বাকি
+                </h2>
+                <p className="text-sm text-yellow-600 mt-1">
+                  {action1Count} জন
+                </p>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Tables */}
@@ -268,17 +379,22 @@ const OnlineAdmissionForUserPanel = () => {
               →
             </button>
 
-            <button
+            {/* <button
               onClick={moveToLeft}
               className="px-6 py-2 bg-green-600 text-white rounded-xl shadow-md hover:bg-green-700 transition"
             >
               ←
-            </button>
+            </button> */}
           </div>
 
           {/* Right Table */}
           <div className="md:col-span-5">
-            <Table data={rightData} selected={selectedRight} side="right" />
+            <Table
+              data={rightData}
+              selected={selectedRight}
+              side="right"
+              rightPermission={true}
+            />
           </div>
         </div>
       </div>

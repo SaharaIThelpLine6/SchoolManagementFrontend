@@ -166,7 +166,7 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ['StudentReports'],
     }),
-    
+
     deleteStudentCharacterReport: builder.mutation({
       query: (id) => ({
         url: `student_character_report/${id}`,
@@ -365,13 +365,20 @@ export const userStudentSlice = createApi({
       query: ({ sessionid, examid, classid }) => ({
         url: `get_online_admission_student/${sessionid}/${examid}/${classid}`,
       }),
-      providesTags: ['AdmissionStudents'],
+      providesTags: ['NewClassStudentAdmissions'],
     }),
     postNewClassStudentamission: builder.mutation({
       query: (body) => ({
         url: `new_class_student_admission`,
         method: 'POST',
         body,
+      }),
+      invalidatesTags: ['NewClassStudentAdmissions'],
+    }),
+    deleteNewClassStudentAdmission: builder.mutation({
+      query: ({graid}) => ({
+        url: `delete_class_student_admission/${graid}`,
+        method: 'DELETE',
       }),
       invalidatesTags: ['NewClassStudentAdmissions'],
     }),
@@ -421,5 +428,6 @@ export const {
   useDeleteHomeWorkMutation,
   useGetStudentsBySubClassIDQuery,
   useGetAdmissionStudentsQuery,
-  usePostNewClassStudentamissionMutation
+  usePostNewClassStudentamissionMutation,
+  useDeleteNewClassStudentAdmissionMutation
 } = userStudentSlice;

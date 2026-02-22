@@ -186,7 +186,7 @@ export default function UserLogin() {
                   to={mobileAppInstallLink}
                   className="text-blue-600 font-medium hover:underline hover:text-blue-700"
                 >
-                  রেজিস্ট্রেশন না করতে পারলে ভিডিও দেখুন।
+                  অ্যাকাউন্ট না করতে পারলে ভিডিও দেখুন।
                 </Link>
               </p>
             )}

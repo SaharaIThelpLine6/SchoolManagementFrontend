@@ -128,6 +128,7 @@ import OwenGuide from './OwenGuide';
 import PaymentRouteGuard from './PaymentRouteGuard';
 import { RequirePermission } from './RequirePermission';
 import OnlineAdmissionForUserPanel from '../pages/OnlineAdmissionForUserPanel';
+import StudentClassRoutineTimeSlots from '../pages/StudentClassRoutineTimeSlots';
 
 const router = createBrowserRouter([
   {
@@ -389,6 +390,14 @@ const router = createBrowserRouter([
                   //   permissionId={permissionsDataList.teacher_info}
                   // >
                   <StudentClassRoutine pageTitle="Employee" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'time-slots',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <StudentClassRoutineTimeSlots pageTitle="Class Video" />
                   // </RequirePermission>
                 ),
               },

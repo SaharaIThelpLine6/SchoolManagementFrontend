@@ -24,6 +24,10 @@ export const teachersSlice = createApi({
       query: () => 'teacher_info',
       providesTags: ['Teacher'], // cache tagging
     }),
+    getTeacherInfoWhitUser: builder.query({
+      query: () => 'teacher_info_with_user',
+      providesTags: ['Teacher'], // cache tagging
+    }),
     getTeachersInfo: builder.query({
       query: () => 'teachers_info',
       providesTags: ['Teacher'], // cache tagging
@@ -88,5 +92,6 @@ export const {
   useUpdateDesignationMutation,
   useDeleteDesignationMutation,
   useGetLoginTeacherInfoQuery,
-  useGetTeachersInfoQuery
+  useGetTeachersInfoQuery,
+  useGetTeacherInfoWhitUserQuery
 } = teachersSlice;

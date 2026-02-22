@@ -21,6 +21,7 @@ export const classSlice = createApi({
     'SubClasss',
     'Class_Routine',
     'Class_Videos',
+    'TimeSlot',
   ],
   endpoints: (builder) => ({
     // GET endpoints
@@ -104,41 +105,7 @@ export const classSlice = createApi({
       query: (id) => `academic_subjects/by-subclass/${id}`,
       providesTags: ['ClassList', 'Academic_Subjects'],
     }),
-
-    // Class Routine
-    getClassRoutines: builder.query({
-      query: () => `class_routine_list`,
-      providesTags: ['Class_Routine'],
-    }),
-    createClassRoutine: builder.mutation({
-      query: (data) => ({
-        url: 'create_class_routine',
-        method: 'POST',
-        body: data,
-      }),
-      invalidatesTags: ['Class_Routine'],
-    }),
-
-    updateClassRoutine: builder.mutation({
-      query: ({ id, data }) => ({
-        url: `update_class_routine/${id}`,
-        method: 'PUT',
-        body: data,
-      }),
-      invalidatesTags: ['Class_Routine'],
-    }),
-    getSingleClassRoutine: builder.query({
-      query: (id) => `class_routine_get/${id}`,
-      providesTags: ['Class_Routine'],
-    }),
-
-    deleteClassRoutine: builder.mutation({
-      query: (id) => ({
-        url: `delete_class_routine/${id}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: ['Class_Routine'],
-    }),
+    // ==================== Video Tutorial ====================
     getVideoTutorialLinks: builder.query({
       query: ({ SessionID, SubClassID }) => ({
         url: `/get_video_tutorial_link`,
@@ -182,8 +149,67 @@ export const classSlice = createApi({
       invalidatesTags: (result, error, id) => [{ type: 'Class_Videos', id }],
     }),
     getSingleClassVideo: builder.query({
-      query: ({id}) => `video_tutorial_link/${id}`,
+      query: ({ id }) => `video_tutorial_link/${id}`,
       providesTags: ['Class_Videos'],
+    }),
+    // ============= Time Slots ===================
+    getTimeSlots: builder.query({
+      query: () => `gr_time_slot`,
+      providesTags: ['TimeSlot'],
+    }),
+    createTimeSlot: builder.mutation({
+      query: (data) => ({
+        url: 'gr_time_slot',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['TimeSlot'],
+    }),
+    deleteTimeSlot: builder.mutation({
+      query: (id) => ({
+        url: `gr_time_slot/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['TimeSlot'],
+    }),
+    // ============= Class Routine day ===================
+    getClassRoutineDays: builder.query({
+      query: () => `gr_days`,
+      providesTags: ['Days'],
+    }),
+    // ============= Class Routine ===================
+    getClassRoutines: builder.query({
+      query: () => `gr_class_routine`,
+      providesTags: ['Class_Routine'],
+    }),
+    createClassRoutine: builder.mutation({
+      query: (data) => ({
+        url: 'gr_class_routine',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Class_Routine'],
+    }),
+
+    updateClassRoutine: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `gr_class_routine/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Class_Routine'],
+    }),
+    getSingleClassRoutine: builder.query({
+      query: (id) => `gr_class_routine/${id}`,
+      providesTags: ['Class_Routine'],
+    }),
+
+    deleteClassRoutine: builder.mutation({
+      query: (id) => ({
+        url: `gr_class_routine/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Class_Routine'],
     }),
   }),
 });
@@ -212,5 +238,10 @@ export const {
   useCreateClassVideoMutation,
   useUpdateClassVideoMutation,
   useDeleteClassVideoMutation,
-  useGetSingleClassVideoQuery
+  useGetSingleClassVideoQuery,
+
+  useGetTimeSlotsQuery,
+  useGetClassRoutineDaysQuery,
+  useCreateTimeSlotMutation,
+  useDeleteTimeSlotMutation
 } = classSlice;

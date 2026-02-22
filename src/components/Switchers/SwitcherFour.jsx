@@ -7,6 +7,8 @@ const SwitcherFour = ({
   disabled = false,
   activeColor = '#007af7', // ✅ Add custom active color prop
 }) => {
+
+  console.log(defaultValue, 'defaultValue');
   const { register, setValue, watch } = useFormContext();
   const enabled = watch(name, defaultValue);
 

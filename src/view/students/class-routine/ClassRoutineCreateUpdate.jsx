@@ -1,105 +1,178 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import Button from '../../../components/Button/Button';
-import DefaultInput from '../../../components/Forms/DefaultInput';
 import DefaultSelect from '../../../components/Forms/DefaultSelect';
+import SwitcherFour from '../../../components/Switchers/SwitcherFour';
 import { hideModal } from '../../../utils/ModalControlar';
 import useTranslate from '../../../utils/Translate';
 
-import SwitcherFour from '../../../components/Switchers/SwitcherFour';
 import {
   useCreateClassRoutineMutation,
-  useGetAcademicSubjectsQuery,
+  useGetAcademicSubjectsBySubClassQuery,
+  useGetClassRoutineDaysQuery,
   useGetSingleClassRoutineQuery,
   useGetSubClassListQuery,
+  useGetTimeSlotsQuery,
   useUpdateClassRoutineMutation,
 } from '../../../features/class/classQuerySlice';
-import { useGetTeacherInfoQuery } from '../../../features/teachers/teachersSlice';
+
+import Loading from '../../../components/Loading/Loading';
+import {
+  useGetLoginTeacherInfoQuery,
+  useGetTeacherInfoWhitUserQuery,
+} from '../../../features/teachers/teachersSlice';
 
 const ClassRoutineCreateUpdate = ({ id }) => {
   const methods = useForm();
-  const translate = useTranslate();
   const { handleSubmit, reset, setValue, watch } = methods;
+  const translate = useTranslate();
 
-  const isEditMode = !!id;
-  console.log(id, 'id');
+  const isEditMode = Boolean(id);
 
-  // 🔹 Fetch routine only in edit mode
-  const { data: routineData, isLoading } = useGetSingleClassRoutineQuery(id, {
+  /* =========================
+     🔹 Queries
+  ========================= */
+
+  const {
+    data: daysData = [],
+    isLoading: daysLoading,
+    isError: daysError,
+  } = useGetClassRoutineDaysQuery();
+
+  const {
+    data: timeSlotsDatas = [],
+    isLoading: timeSlotsLoading,
+    isError: timeSlotsError,
+  } = useGetTimeSlotsQuery();
+
+  const {
+    data: loginTeacherData = [],
+    isLoading: loginTeacherLoading,
+    isError: loginTeacherError,
+  } = useGetLoginTeacherInfoQuery();
+
+  const {
+    data: teachers = [],
+    isLoading: teachersLoading,
+    isError: teachersError,
+  } = useGetTeacherInfoWhitUserQuery();
+
+  const {
+    data: classListResponse = [],
+    isLoading: classLoading,
+    isError: classError,
+  } = useGetSubClassListQuery();
+
+  const {
+    data: routineResponse,
+    isLoading: routineLoading,
+    isError: routineError,
+  } = useGetSingleClassRoutineQuery(id, {
     skip: !isEditMode,
   });
+  const isLoading =
+    daysLoading ||
+    timeSlotsLoading ||
+    loginTeacherLoading ||
+    teachersLoading ||
+    classLoading ||
+    routineLoading;
 
+  const isError =
+    daysError ||
+    timeSlotsError ||
+    loginTeacherError ||
+    teachersError ||
+    classError ||
+    routineError;
+  const routineData = routineResponse?.data;
   console.log(routineData, 'routineData');
-  const subClassId = watch('SubClassID');
 
-  const { data: teachers } = useGetTeacherInfoQuery();
-  const { data: classListResponse } = useGetSubClassListQuery();
+  const subClassId = Number(watch('SubClassID'));
 
-  const { data: subjectsResponse } = useGetAcademicSubjectsQuery();
-  const classList = classListResponse || [];
-  const subjects = subjectsResponse || [];7
+  const { data: subjectsResponse } = useGetAcademicSubjectsBySubClassQuery(
+    subClassId,
+    {
+      skip: !subClassId,
+    }
+  );
 
-  // subClassId যদি স্ট্রিং হয় তাহলে নাম্বারে কনভার্ট করুন
-  const subClassIdNum = Number(subClassId);
+  /* =========================
+     🔹 Memo Data
+  ========================= */
 
-  // ফিল্টারিং
-  const filteredSubjects = subjects.filter((subject) => {
-    // সব টাইপের জন্য সেট করা
-    const subjectSubClassId = Number(subject.SubClassID);
-    return subjectSubClassId === subClassIdNum;
-  });
+  const timeSlotOptions = useMemo(() => {
+    return (timeSlotsDatas ?? []).map((item) => ({
+      TimeSlotID: item.TimeSlotID,
+      Label: `${item.StartTime} - ${item.EndTime}`, // use template literal
+    }));
+  }, [timeSlotsDatas]);
+
+  const filteredSubjects = subjectsResponse?.data ?? [];
 
   console.log(filteredSubjects, 'filteredSubjects');
 
-  // 🔹 Mutations
+  /* =========================
+     🔹 Prefill (Edit Mode)
+  ========================= */
+
+  useEffect(() => {
+    if (isEditMode && routineData) {
+      reset({
+        DayID: routineData.DayID,
+        TimeSlotID: routineData.TimeSlotID,
+        TeacherID: routineData.TeacherID,
+        SubClassID: routineData.SubClassID,
+        ISPrayerBreak: routineData.IsBreak,
+      });
+    } else if (!isEditMode && loginTeacherData?.[0]?.UserID) {
+      setValue('TeacherID', loginTeacherData[0].UserID);
+    }
+  }, [isEditMode, routineData, loginTeacherData, reset, setValue]);
+
+  useEffect(() => {
+    if (isEditMode && routineData) {
+      if (subClassId && filteredSubjects?.length > 0) {
+        setValue('SubjectID', routineData.SubjectID);
+      }
+    }
+  }, [subClassId, filteredSubjects, setValue]);
+
+  /* =========================
+     🔹 Mutations
+  ========================= */
+
   const [createRoutine, { isLoading: isCreating }] =
     useCreateClassRoutineMutation();
+
   const [updateRoutine, { isLoading: isUpdating }] =
     useUpdateClassRoutineMutation();
-  // 🔹 Pre-fill form (Edit mode)
-  useEffect(() => {
-    if (routineData?.data) {
-      const routine = routineData.data;
-      setValue('ISPrayerBreak', routine.ISPrayerBreak);
-      setValue('DayName', routine.DayName);
-      setValue('TimeSlot', routine.TimeSlot);
-    }
-  }, [routineData, setValue]);
-  useEffect(() => {
-    if (routineData?.data) {
-      const routine = routineData.data;
-      const timer = setTimeout(() => {
-        setValue('TIID', routine.TeacherID);
-        setValue('SubClassID', routine.SubClassID);
-        setValue('SubjectID', routine.SubjectID);
-      }, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [routineData, setValue]);
 
-  // 🔹 Submit handler
+  /* =========================
+     🔹 Submit
+  ========================= */
+
   const onSubmit = async (formData) => {
+    const payload = {
+      DayID: Number(formData.DayID),
+      TimeSlotID: Number(formData.TimeSlotID),
+      TeacherID: Number(formData.TeacherID),
+      SubjectID: Number(formData.SubjectID),
+      SubClassID: Number(formData.SubClassID),
+      ISPrayerBreak: Boolean(formData.ISPrayerBreak),
+    };
+
     try {
       if (isEditMode) {
-        const payload = {
-          DayName: formData.DayName,
-          TimeSlot: formData.TimeSlot,
-          TeacherID: formData.TIID,
-          SubjectID: formData.SubjectID,
-          SubClassID: formData.SubClassID,
-          ISPrayerBreak: formData.ISPrayerBreak,
-        };
-        await updateRoutine({
-          id: id,
-          data: payload,
-        }).unwrap();
+        await updateRoutine({ id, data: payload }).unwrap();
         toast.success(translate('Class routine updated successfully'));
       } else {
-        console.log(formData, 'formData');
-        await createRoutine(formData).unwrap();
+        console.log(payload, 'payload');
+        await createRoutine(payload).unwrap();
         toast.success(translate('Class routine created successfully'));
       }
+
       hideModal();
       reset();
     } catch (error) {
@@ -107,79 +180,84 @@ const ClassRoutineCreateUpdate = ({ id }) => {
       console.error(error);
     }
   };
-  const teacherOptions = (teachers ?? []).map((item) => ({
-    TIID: item.TIID,
-    UserName: item.User?.UserName ?? '',
-  }));
+
+  /* =========================
+     🔹 UI
+  ========================= */
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <Loading />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center text-red-500 py-10">
+        Failed to load data. Please try again.
+      </div>
+    );
+  }
 
   return (
     <div className="w-full border rounded-lg p-5 bg-white">
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Day */}
             <DefaultSelect
               label={translate('Day')}
-              registerKey="DayName"
-              options={[
-                { ID: '1', value: 'Sunday' },
-                { ID: '2', value: 'Monday' },
-                { ID: '3', value: 'Tuesday' },
-                { ID: '4', value: 'Wednesday' },
-                { ID: '5', value: 'Thursday' },
-                { ID: '6', value: 'Friday' },
-                { ID: '7', value: 'Saturday' },
-              ]}
-              valueField="value"
-              nameField="value"
+              registerKey="DayID"
+              options={daysData}
+              valueField="DayID"
+              nameField="DayName"
               require={translate('Day is required')}
             />
 
-            {/* Time Slot */}
-            <DefaultInput
-              label={translate('Time Slot')}
-              registerKey="TimeSlot"
-              placeholder="8:00 - 9:30 AM"
+            <DefaultSelect
+              label={translate('Time')}
+              registerKey="TimeSlotID"
+              options={timeSlotOptions || []}
+              valueField="TimeSlotID"
+              nameField="Label"
               require={translate('Time slot is required')}
             />
-            {/* Class */}
+
             <DefaultSelect
               label={translate('Sub Class')}
               registerKey="SubClassID"
-              options={classList ?? []}
+              options={classListResponse}
               valueField="SubClassID"
               nameField="SubClass"
               require={translate('Class is required')}
             />
-            {/* Subject */}
+
             <DefaultSelect
               label={translate('Subject')}
               registerKey="SubjectID"
-              options={filteredSubjects ?? []}
+              options={filteredSubjects}
               valueField="SubjectID"
               nameField="SubjectName"
               require={translate('Subject is required')}
             />
 
-            {/* Teacher */}
             <DefaultSelect
               label={translate('Teacher')}
-              registerKey="TIID"
-              options={teacherOptions}
-              valueField="TIID"
+              registerKey="TeacherID"
+              options={teachers?.data || []}
+              valueField="UserID"
               nameField="UserName"
               require={translate('Teacher is required')}
             />
 
-            {/* Prayer Break */}
-            {/* Prayer Break */}
-            <SwitcherFour
+            {/* <SwitcherFour
               name="ISPrayerBreak"
               label={translate('Prayer Break')}
-            />
+              defaultValue={isEditMode ? routineData.ISPrayerBreak : ''}
+            /> */}
           </div>
 
-          {/* Buttons */}
           <div className="flex gap-3 mt-4 justify-end">
             <Button
               type="submit"
