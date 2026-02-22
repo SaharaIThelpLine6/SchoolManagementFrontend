@@ -154,7 +154,7 @@ const MadrashaHomePage = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 lg:gap-4 container mx-auto px-2 lg:px-0">
+          <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 lg:gap-4 place-content-center container mx-auto px-2 lg:px-0`}>
             {settingsObject?.totalUser ? (
               <div className="count-box px-2 py-4 rounded-[4px] bg-[#00000080]">
                 <div className="text-center">
@@ -333,47 +333,6 @@ const MadrashaHomePage = () => {
                 </div>
               </div>
             ) : null}
-            {/* {
-                            settingsObject?.totalClass ? <div className="count-box px-2 py-4 rounded-[4px] bg-[#00000080]">
-                                <div className='text-center'>
-                                    <div className='text-white text-center'>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-building-community mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M8 9l5 5v7h-5v-4m0 4h-5v-7l5 -5m1 1v-6a1 1 0 0 1 1 -1h10a1 1 0 0 1 1 1v17h-8" /><path d="M13 7l0 .01" /><path d="M17 7l0 .01" /><path d="M17 11l0 .01" /><path d="M17 15l0 .01" /></svg>
-                                    </div>
-                                    <Counter end={settingsObject?.totalClass} duration={2000} />
-                                    <p className='text-[20px] text-white'> শ্রেণী/জামাত {bnBijoy2Unicode(String(settingsObject?.totalClass))} টি।</p>
-                                </div>
-                            </div> : null
-                        }
-                        {
-                            settingsObject?.totalClass ? <div className="count-box px-2 py-4 rounded-[4px] bg-[#00000080]">
-                                <div className='text-center'>
-                                    <div className='text-white text-center'>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width={40} height={40} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-briefcase mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2" /><path d="M12 12l0 .01" /><path d="M3 13a20 20 0 0 0 18 0" /></svg>
-                                    </div>
-                                    <Counter end={settingsObject?.totalClass} duration={2000} />
-                                    <p className='text-[20px] text-white'> সাব-জামাত {bnBijoy2Unicode(String(settingsObject?.totalSubClasseas))} টি।</p>
-                                </div>
-                            </div> : null
-                        } */}
-
-            {/* <div className="count-box bg-white px-2 py-4 rounded-[4px]">
-                        <div className='text-center'>
-                            <Counter end={90} duration={2000} />
-                            <p className='text-[18px]'>মোট শিক্ষার্থী ৯০ জন।</p>
-                        </div>
-                    </div>
-                    <div className="count-box bg-white px-2 py-4 rounded-[4px]">
-                        <div className='text-center'>
-                            <Counter end={15} duration={2000} />
-                            <p className='text-[18px]'>মোট স্টাফ ১৫ জন।</p>
-                        </div>
-                    </div>
-                    <div className="count-box bg-white px-2 py-4 rounded-[4px]">
-                        <div className='text-center'>
-                            <Counter end={15} duration={2000} />
-                            <p className=' text-[18px]'>মোট স্টাফ ১৫ জন।</p>
-                        </div>
-                    </div> */}
           </div>
         </div>
       </div>

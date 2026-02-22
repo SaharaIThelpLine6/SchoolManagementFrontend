@@ -2,7 +2,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
 import useTranslate from '../utils/Translate';
 import { Buffer } from 'buffer';
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { hideModal } from '../utils/ModalControlar';
 const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
 
@@ -22,6 +22,11 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
     }
   }
 
+  useEffect(() => {
+    console.log(layoutId);
+
+  }, [layoutId])
+
 
   const FIELD_LABELS = {
     StudentName: "নাম",
@@ -32,14 +37,21 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
     SessionName: "সেশন",
     BloodGroup: "রক্তের গ্রুপ",
   };
-  const handleClick = () =>{
+  const handleClick = () => {
     hideModal();
     // window.print()
-    setTimeout(()=>{
+    setTimeout(() => {
       window.print()
     }, 300)
   }
-
+ function convert_logto_buffer(Logo) {
+    if (Logo?.data) {
+      const buffer = Buffer.from(Logo.data);
+      const base64String = buffer.toString('base64');
+      const imageSrc = `data:image/png;base64,${base64String}`;
+      return imageSrc;
+    }
+  }
   return (
 
     <div>
@@ -52,33 +64,110 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
         {
           printableStudentList && printableStudentList.length &&
           printableStudentList && printableStudentList.length && printableStudentList.map((printableStudentDetails) => (
-            <div className='w-[250px] border border-[#000] mb-[1px] relative print-id-card'>
-              <img src="/student_id_card_top.jpeg" alt="card header" className='h-[110px]' />
-              <div className="absolute top-[2px] w-full">
-                <h2 className='text-center text-[20px] text-white font-bold'>{printableStudentDetails?.InstitutionName}</h2>
-                <p className='text-[16px] text-center text-white'>{printableStudentDetails?.Address}</p>
-              </div>
-              <div className="middle_area px-2 -mt-[40px]">
-                <div className="proile_image_shape text-center">
-                  <div className="image overflow-hidden h-[92px] w-[92px] shadow-lg mx-auto rounded-[5px]">
-                    <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
-                  </div>
-                  <h3 className='text-center py-[2px] px-[30px] mt-[6px] bg-sky-600 inline-block rounded-[50px] mx-auto text-white text-[16px]'>পরিচয় পত্র</h3>
-                </div>
-                <div className='pt-1 pb-2 h-[160px]'>
-                  <h3 className='text-red pl-[20px] text-[16px]'>আইডি নং: {translate(printableStudentDetails.StudentCode)}</h3>
-                  {fields.map((fieldName) => {
-                    if (!fieldName) return null;
-                    return (
-                      <p key={fieldName} className='text-[15px]'>
-                        {printableStudentDetails[`fieldkey_${fieldName}`]}: {printableStudentDetails[fieldName]}
-                      </p>
-                    );
-                  })}
-                </div>
-              </div>
+            <div className={`w-[250px] border border-[#000] mb-[1px] relative print-id-card ${layoutId == 2 ? 'rounded-[20px]' : null}`}>
+              {
+                layoutId == 1 ? (
+                  <React.Fragment>
+                    <img src="/student_id_card_top.jpeg" alt="card header" className='h-[110px]' />
+                    <div className="absolute top-[2px] w-full">
+                      <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{printableStudentDetails?.institute_name}</h2>
+                      <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{printableStudentDetails?.institute_address}</p>
+                    </div>
+                    <div className="middle_area px-2 -mt-[40px]">
+                      <div className="proile_image_shape text-center">
+                        <div className="image overflow-hidden h-[92px] w-[92px] shadow-lg mx-auto rounded-[5px]">
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
+                        </div>
+                        <h3 className='text-center py-[2px] px-[30px] mt-[6px] bg-sky-600 inline-block rounded-[50px] mx-auto text-white text-[16px]'>পরিচয় পত্র</h3>
+                      </div>
+                      <div className='pt-1 pb-2 h-[160px]'>
+                        <h3 className='text-red pl-[20px] text-[16px]'>আইডি নং: {translate(printableStudentDetails.StudentCode)}</h3>
+                        {fields.map((fieldName) => {
+                          if (!fieldName) return null;
+                          return (
+                            <p key={fieldName} className='text-[15px]'>
+                              {printableStudentDetails[`fieldkey_${fieldName}`]}: {printableStudentDetails[fieldName]}
+                            </p>
+                          );
+                        })}
+                      </div>
+                    </div>
 
-              <img src="/student_id_card_bottom.jpeg" alt="card footer" className='h-[15px] w-full' />
+                    <img src="/student_id_card_bottom.jpeg" alt="card footer" className='h-[15px] w-full' />
+                  </React.Fragment>
+                ) : layoutId == 2 ? (
+                  <React.Fragment>
+                    <img src={`/card2.png`} alt="card header" className='h-full w-full' />
+                    <div className="absolute top-[2px] w-full">
+
+                      <div className='h-[80px] pt-2'>
+                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{printableStudentDetails?.institute_name}</h2>
+                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{printableStudentDetails?.institute_address}</p>
+                      </div>
+                      <div className="middle_area px-2">
+                        <div className="image overflow-hidden h-[92px] w-[92px] shadow-lg mx-auto rounded-[5px]">
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
+                        </div>
+
+                        <div className='pt-1 pb-2  text-left h-[160px]'>
+                          <h3 className='text-red text-[18px] font-bold text-center'>{printableStudentDetails.StudentName}</h3>
+                          {fields.map((fieldName) => {
+                            if (!fieldName) return null;
+                            return (
+                              <p key={fieldName} className='text-[15px]'>
+                                {printableStudentDetails[`fieldkey_${fieldName}`]}: {printableStudentDetails[fieldName]}
+                              </p>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+
+
+                    </div>
+
+                  </React.Fragment>
+                ) : (
+                  (
+                  <React.Fragment>
+                    <img src={`/card3.jpeg`} alt="card header" className='h-full w-full' />
+                    <div className="absolute top-[2px] w-full">
+
+                      <div className='h-[100px] pt-2'>
+                        <div className="header_logo h-[40px] w-[40px] rounded-[4px] mx-auto overflow-hidden mb-[8px]">
+                          <img className='w-full h-full object-cover' src={convert_logto_buffer(printableStudentDetails.Logo)} alt="" />
+                        </div>
+
+                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{printableStudentDetails?.institute_name}</h2>
+                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{printableStudentDetails?.institute_address}</p>
+                      </div>
+                      <div className="middle_area px-2">
+                        <div className="image overflow-hidden h-[92px] w-[92px] shadow-lg mx-auto rounded-[5px]">
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
+                        </div>
+
+                        <div className='pt-1 pb-2  text-left h-[160px]'>
+                          <h3 className='text-sky-600 text-[18px] font-bold text-center'>{printableStudentDetails.StudentName}</h3>
+                          {fields.map((fieldName) => {
+                            if (!fieldName) return null;
+                            return (
+                              <p key={fieldName} className='text-[15px]'>
+                                {printableStudentDetails[`fieldkey_${fieldName}`]}: {printableStudentDetails[fieldName]}
+                              </p>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+
+
+                    </div>
+
+                  </React.Fragment>
+                )
+                )
+              }
+
             </div>
           ))
         }

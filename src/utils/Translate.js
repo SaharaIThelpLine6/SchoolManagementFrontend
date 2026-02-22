@@ -658,7 +658,7 @@ const useTranslate = () => {
     'No.': 'ক্র: নং',
     'Total students': 'মোট শিক্ষার্থী',
     'Total teachers': 'মোট শিক্ষক',
-    'Total donor member': 'মোট দাতা সদস্য',
+    'Total Donor Member': 'মোট দাতা সদস্য',
     'Total owed': 'মোট পাওনা',
     'Class-based student distribution': 'শ্রেণি ভিত্তিক শিক্ষার্থী বন্টন',
     Calendar: 'ক্যালেন্ডার',
