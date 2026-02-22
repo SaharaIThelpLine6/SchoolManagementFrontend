@@ -116,22 +116,22 @@ const StudentClassRoutine = ({ pageTitle }) => {
     { title: translate('Subject'), field: 'SubjectName', hozAlign: 'center' },
     { title: translate('Teacher'), field: 'TeacherName', hozAlign: 'center' },
     { title: translate('Class'), field: 'ClassName', hozAlign: 'center' },
-    {
-      title: translate('Prayer Break'),
-      field: 'ISPrayerBreak',
-      hozAlign: 'center',
-      render: (row) => (
-        <span
-          className={`px-2 py-1 rounded text-sm ${
-            row.ISPrayerBreak
-              ? 'bg-green-100 text-green-700'
-              : 'bg-gray-100 text-gray-600'
-          }`}
-        >
-          {row.ISPrayerBreak ? translate('Yes') : translate('No')}
-        </span>
-      ),
-    },
+    // {
+    //   title: translate('Prayer Break'),
+    //   field: 'ISPrayerBreak',
+    //   hozAlign: 'center',
+    //   render: (row) => (
+    //     <span
+    //       className={`px-2 py-1 rounded text-sm ${
+    //         row.ISPrayerBreak
+    //           ? 'bg-green-100 text-green-700'
+    //           : 'bg-gray-100 text-gray-600'
+    //       }`}
+    //     >
+    //       {row.ISPrayerBreak ? translate('Yes') : translate('No')}
+    //     </span>
+    //   ),
+    // },
   ];
 
   const tabs = [
