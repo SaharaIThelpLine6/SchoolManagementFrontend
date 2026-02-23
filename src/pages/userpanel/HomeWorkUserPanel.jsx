@@ -158,21 +158,19 @@ const HomeWorkUserPanel = () => {
   const [SessionID, DateValue] = watch(['SessionID', 'DateValue']);
 
   // Convert to ISO string if DateValue is a Date object
-  const dateString =
-    DateValue instanceof Date ? DateValue.toISOString() : DateValue;
+  const dateOnly = DateValue
+  ? new Date(DateValue).toLocaleDateString('en-CA')
+  : null;
 
-  console.log(dateString, 'dateString');
-  const dateOnly = dateString ? dateString.split('T')[0] : null;
 
-  const { data = [], isLoading } = useGetHomeWorksUserPanelQuery(
-    { SessionID, DateValue: dateOnly },
-    { skip: !SessionID }
-  );
+const { data = [], isLoading } = useGetHomeWorksUserPanelQuery(
+  { SessionID, DateValue: dateOnly },
+  { skip: !SessionID }
+);
 
 
 
   const homeWorkData = Array.isArray(data) ? data : data?.data || [];
-  console.log(homeWorkData, 'homeWorkData');
 
   useEffect(() => {
     setValue('SessionID', activeSession?.SessionID || '');
