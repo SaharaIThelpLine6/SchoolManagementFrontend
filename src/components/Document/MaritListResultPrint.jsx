@@ -83,8 +83,6 @@ const MaritListResultPrint = () => {
 
                                                         </tr>
                                                     ))}
-
-
                                                 </tbody>
                                             </table>
                                         </div>

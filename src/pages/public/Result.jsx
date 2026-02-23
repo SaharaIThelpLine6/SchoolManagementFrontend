@@ -16,7 +16,7 @@ const Result = () => {
         dispatch(fetchResult(`/${schoolid}/students/${seassonid}/${examid}/${classid}/${userid}`))
     }, [dispatch])
     if (resultStatus === 'failed') {
-        navigate(`/${schoolid}?sessionid=${seassonid}&examid=${examid}&classid=${classid}&usercode=${userid}`);
+        navigate(`/${schoolid}/student_result?sessionid=${seassonid}&examid=${examid}&classid=${classid}&usercode=${userid}`);
     }
 
     return (
