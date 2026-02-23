@@ -138,11 +138,11 @@ export const menuData = [
     route: '/parent-panel',
     icon: 'FaUsers',
     subMenu: [
-      {
-        id: '1',
-        name: 'Class Routine',
-        route: '/parent-panel',
-      },
+      // {
+      //   id: '1',
+      //   name: 'Class Routine',
+      //   route: '/parent-panel',
+      // },
       {
         id: '2',
         name: 'Class Video',
@@ -163,11 +163,11 @@ export const menuData = [
         name: 'Complaint Box Terms and Conditions',
         route: '/parent-panel/complaint-box-terms-and-conditions',
       },
-      {
-        id: '6',
-        name: 'Online Admission',
-        route: '/parent-panel/online-admission',
-      },
+      // {
+      //   id: '6',
+      //   name: 'Online Admission',
+      //   route: '/parent-panel/online-admission',
+      // },
     ],
   },
   // {

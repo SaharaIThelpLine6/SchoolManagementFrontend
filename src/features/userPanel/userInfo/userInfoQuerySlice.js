@@ -151,6 +151,11 @@ export const userPanelUserInfo = createApi({
     getGrClassRoutineForUserPanel: builder.query({
       query: () => `gr_class_routine_for_userpanel`,
     }),
+    getUserPanelStudentFeeAdmissions: builder.query({
+      query: ({ admissionId, sfgnid }) =>
+        `get_user_panel_student_admission/${admissionId}/${sfgnid}`,
+      providesTags: [],
+    }),
   }),
 });
 
@@ -178,5 +183,6 @@ export const {
   useGetMonthPerStudentsFeeUserPanelQuery,
   useGetStudentReportListQuery,
   useGetStudentComplaintReportQuery,
-  useGetGrClassRoutineForUserPanelQuery
+  useGetGrClassRoutineForUserPanelQuery,
+  useGetUserPanelStudentFeeAdmissionsQuery
 } = userPanelUserInfo;

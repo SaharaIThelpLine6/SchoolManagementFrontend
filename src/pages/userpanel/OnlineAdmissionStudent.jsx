@@ -1,7 +1,11 @@
+import { skipToken } from '@reduxjs/toolkit/query';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import Button from '../../components/Button/Button';
-import { useGetUserDetailsQuery } from '../../features/userPanel/userInfo/userInfoQuerySlice';
+import {
+  useGetUserDetailsQuery,
+  useGetUserPanelStudentFeeAdmissionsQuery,
+} from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import useTranslate from '../../utils/Translate';
 
 const OnlineAdmissionStudent = () => {
@@ -12,22 +16,44 @@ const OnlineAdmissionStudent = () => {
     (state) => state.sessionChange.currentSession
   );
 
+  /* ================= USER DETAILS ================= */
   const {
     data: userDetails,
-    isLoading: isuserDetailsLoading,
-    isError: isuserDetailsError,
+    isLoading: isUserDetailsLoading,
+    isError: isUserDetailsError,
   } = useGetUserDetailsQuery(currentSession);
+
+  const sfgnid = 1;
+
+  // 🔥 SAFE ACCESS
+  const admissionId = userDetails?.AdmissionID ?? null;
+
+  /* ================= STUDENT FEE ADMISSION ================= */
+  const {
+    data: studentFeeAdmissionData,
+    isLoading: isFeeLoading,
+    error: feeError,
+  } = useGetUserPanelStudentFeeAdmissionsQuery(
+    admissionId && sfgnid
+      ? { admissionId, sfgnid }
+      : skipToken
+  );
+
+  console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
   console.log(currentSession, 'currentSession');
   console.log(userDetails, 'userDetails');
-  const { handleSubmit, reset, watch, getValues, setValue } = methods;
-  const data = [];
+
+  if (isUserDetailsLoading) return <div>Loading...</div>;
+  if (isUserDetailsError) return <div>User Load Error</div>;
 
   return (
     <FormProvider {...methods}>
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-4">
         {/* Header */}
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">Online Admission</h1>
+          <h1 className="text-2xl font-bold text-gray-800">
+            {translate('Online Admission')}
+          </h1>
           {/* <p className="text-gray-600 mt-1">Fill in the student details below</p> */}
         </div>
 
