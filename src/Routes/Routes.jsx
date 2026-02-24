@@ -62,6 +62,7 @@ import Home from '../pages/Home';
 import InstitutionInfo from '../pages/InstitutionInfo';
 import MonthListTable from '../pages/MonthListTable';
 import MonthlyDues from '../pages/MonthlyDues';
+import OnlineAdmissionForUserPanel from '../pages/OnlineAdmissionForUserPanel';
 import OnlineAdmissionTable from '../pages/OnlineAdmissionTable';
 import OnlinePaymentInvoice from '../pages/OnlinePaymentInvoice';
 import PayRole from '../pages/PayRole';
@@ -82,6 +83,7 @@ import Session from '../pages/Session';
 import Settings from '../pages/Settings';
 import StateMent from '../pages/StateMent';
 import StudentClassRoutine from '../pages/StudentClassRoutine';
+import StudentClassRoutineTimeSlots from '../pages/StudentClassRoutineTimeSlots';
 import StudentComplaint from '../pages/StudentComplaint';
 import StudentGroupCreate from '../pages/StudentGroupCreate';
 import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
@@ -98,7 +100,6 @@ import ClassResultForm from '../pages/public/ClassResultForm';
 import MadrashaHomePage from '../pages/public/MadrashaHomePage';
 import MaritListForm from '../pages/public/MaritListForm';
 import MaritListResult from '../pages/public/MaritListResult';
-import AllUserPanelInvoice from '../pages/userpanel/AllUserPanelInvoice';
 import ClassRoutine from '../pages/userpanel/ClassRoutine';
 import Dashboard from '../pages/userpanel/Dashboard';
 import ExamRoutine from '../pages/userpanel/ExamRoutine';
@@ -127,8 +128,6 @@ import PaymentFail from '../pages/userpanel/payment/PaymentFail';
 import OwenGuide from './OwenGuide';
 import PaymentRouteGuard from './PaymentRouteGuard';
 import { RequirePermission } from './RequirePermission';
-import OnlineAdmissionForUserPanel from '../pages/OnlineAdmissionForUserPanel';
-import StudentClassRoutineTimeSlots from '../pages/StudentClassRoutineTimeSlots';
 
 const router = createBrowserRouter([
   {
@@ -413,15 +412,7 @@ const router = createBrowserRouter([
                 path: 'home-work',
                 element: (
                   // <RequirePermission permissionId={permissionsDataList.class}>
-                  <HomWork pageTitle="Class Video" />
-                  // </RequirePermission>
-                ),
-              },
-              {
-                path: 'home-work',
-                element: (
-                  // <RequirePermission permissionId={permissionsDataList.class}>
-                  <HomWork pageTitle="Class Video" />
+                  <HomWork pageTitle="Home Work" />
                   // </RequirePermission>
                 ),
               },
