@@ -116,7 +116,7 @@ export const settingsSlice = createApi({
     }),
     getWebSettings: builder.query({
       query: () => `website_settings`,
-        // providesTags: ['WebSettings'],
+      // providesTags: ['WebSettings'],
     }),
     postWebsitesettings: builder.mutation({
       query: (body) => ({
@@ -125,7 +125,21 @@ export const settingsSlice = createApi({
         body,
       }),
       // invalidatesTags: ['WebSettings'],
-
+    }),
+    getStudentAdmissionMessage: builder.query({
+      query: () => ({
+        url: 'student_admission_message',
+        method: 'GET',
+      }),
+      providesTags: ['StudentAdmissionMessage'],
+    }),
+    updateStudentAdmissionMessage: builder.mutation({
+      query: (body) => ({
+        url: `student_admission_message`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['StudentAdmissionMessage'],
     }),
   }),
 });
@@ -151,5 +165,7 @@ export const {
   useGetLastAdmissionSerialQuery,
   useGetExamConditionsSettingsQuery,
   useGetWebSettingsQuery,
-  usePostWebsitesettingsMutation
+  usePostWebsitesettingsMutation,
+  useGetStudentAdmissionMessageQuery,
+  useUpdateStudentAdmissionMessageMutation
 } = settingsSlice;

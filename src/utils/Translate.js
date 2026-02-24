@@ -18,6 +18,7 @@ const useTranslate = () => {
     SubLedger: 'সাবলেজার',
     'Transaction ID': 'ট্রানজেকশন আইডি',
     'Prayer Break': 'শুক্রবার ছুটি',
+    'Online Admission Message': 'অনলাইন ভর্তির মেসেজ',
     Time: 'সময়',
     'Time Slots': 'সময়-স্লট',
     'Solve User Name': 'সমাধানকারী নাম',

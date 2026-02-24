@@ -7,10 +7,16 @@ import {
   useGetUserPanelStudentFeeAdmissionsQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import useTranslate from '../../utils/Translate';
+import { useDefaultSessionForUserPanel } from '../../hooks/useDefaultSessionForUserPanel';
+import { useEffect } from 'react';
 
 const OnlineAdmissionStudent = () => {
   const methods = useForm();
+  const defaultSession = useDefaultSessionForUserPanel();
+
+
   const translate = useTranslate();
+  const { setValue } = methods;
 
   const currentSession = useSelector(
     (state) => state.sessionChange.currentSession
@@ -38,6 +44,8 @@ const OnlineAdmissionStudent = () => {
       ? { admissionId, sfgnid }
       : skipToken
   );
+
+
 
   console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
   console.log(currentSession, 'currentSession');
@@ -78,7 +86,7 @@ const OnlineAdmissionStudent = () => {
                   </svg>
                 </div>
                 <div className="flex justify-start items-center">
-                  <h2>২০২৫-২০২৬ ইং</h2>
+                  <h2>{defaultSession?.SessionName}</h2>
                 </div>
                 <div className="flex justify-between items-center bg-[#daedf8] p-2 rounded-sm">
                   <h2>পড়েছেন</h2>
@@ -95,7 +103,7 @@ const OnlineAdmissionStudent = () => {
                   </svg>
                 </div>
                 <div className="flex justify-start items-center">
-                  <h2>মিশকাত</h2>
+                  <h2>{studentFeeAdmissionData?.className}</h2>
                 </div>
                 <div className="flex justify-between items-center bg-[#fdddbb] p-2 rounded-sm">
                   <h2>ভর্তি হতে পারবে</h2>
@@ -112,7 +120,7 @@ const OnlineAdmissionStudent = () => {
                   </svg>
                 </div>
                 <div className="flex justify-start items-center">
-                  <h2>তাকমীল (দাওরায়ে হাদীস)</h2>
+                  <h2>{studentFeeAdmissionData?.admissionClassName}</h2>
                 </div>
               </div>
             </div>

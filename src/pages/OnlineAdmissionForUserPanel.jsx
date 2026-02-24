@@ -14,6 +14,7 @@ import {
   usePostNewClassStudentamissionMutation,
 } from '../features/student/studentQuerySlice';
 import useTranslate from '../utils/Translate';
+import { Link } from 'react-router-dom';
 
 const OnlineAdmissionForUserPanel = () => {
   const translate = useTranslate();
@@ -307,14 +308,45 @@ const action2Count = rightData.filter((item) => item.Action === 2).length;
       </div>
     </div>
   );
-
+ const tabs = [
+    {
+      name: translate('Online Admission'),
+      path: '/parent-panel/online-admission',
+    },
+    {
+      name: translate('Online Admission Message'),
+      path: '/parent-panel/online-admission-message',
+    },
+  ];
   return (
     <FormProvider {...method}>
       <div className="font-SolaimanLipi bg-white p-6 rounded-xl shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b pb-4 mb-6">
-          <h3 className="text-xl font-bold">{translate('Online Admission')}</h3>
-          {/* <Button onClick={handleSubmit}>Save</Button> */}
+             {/* Header */}
+        <div className="border-b border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
+          <div className="flex items-center gap-6">
+            {tabs.map((tab, index) => {
+              const isActive = location.pathname === tab.path;
+
+              return (
+                <Link
+                  key={index}
+                  to={tab.path}
+                  className={`relative pb-2 text-[18px] font-SolaimanLipi font-bold transition-all duration-300 ${isActive
+                      ? 'text-blue-600'
+                      : 'text-gray-500 hover:text-blue-500'
+                    }`}
+                >
+                  {tab.name}
+
+                  {/* Active underline animation */}
+                  {isActive && (
+                    <span className="absolute left-0 -bottom-[6px] w-full h-[3px] bg-blue-600 rounded-full transition-all duration-300"></span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
         </div>
 
         {/* Filters */}
