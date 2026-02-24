@@ -112,22 +112,22 @@ const PaymentModal = () => {
   };
 
   const years = [
-    { id: 1, name: '1 Year' },
-    { id: 2, name: '2 Year' },
-    { id: 3, name: '3 Year' },
+    { id: 1, name: '১ বছর' },
+    { id: 2, name: '২ বছর' },
+    { id: 3, name: '৩ বছর' },
   ];
 
   const quota = [
-    { id: 100, name: '100' },
-    { id: 200, name: '200' },
-    { id: 300, name: '300' },
-    { id: 400, name: '400' },
-    { id: 500, name: '500' },
-    { id: 600, name: '600' },
-    { id: 700, name: '700' },
-    { id: 800, name: '800' },
-    { id: 900, name: '900' },
-    { id: 1000, name: '1000' },
+    { id: 100, name: '১০০ কোটা' },
+    { id: 200, name: '২০০ কোটা' },
+    { id: 300, name: '৩০০ কোটা' },
+    { id: 400, name: '৪০০ কোটা' },
+    { id: 500, name: '৫০০ কোটা' },
+    { id: 600, name: '৬০০ কোটা' },
+    { id: 700, name: '৭০০ কোটা' },
+    { id: 800, name: '৮০০ কোটা' },
+    { id: 900, name: '৯০০ কোটা' },
+    { id: 1000, name: '১০০০ কোটা' },
   ];
 
   if (isLoading) {
@@ -145,11 +145,11 @@ const PaymentModal = () => {
           <form className="space-y-5">
             {/* 🔹 Choose Service */}
             <DefaultSelect
-              label="Choose Service"
+              label="সার্ভিস নির্বাচন করুন"
               registerKey="service"
               options={[
-                { id: 1, name: 'Renew' },
-                { id: 2, name: 'Quota' },
+                { id: 1, name: 'রিনিউ' },
+                { id: 2, name: 'কোটা' },
               ]}
               type="number"
               valueField="id"
@@ -159,7 +159,7 @@ const PaymentModal = () => {
 
             {/* 🔹 Choose Size */}
             <DefaultSelect
-              label={service == 1 ? "Select Number of Years" : "Select Number of Quota"}
+              label={service == 1 ? "বছর নির্বাচন করুন" : "কোটা সংখ্যা নির্বাচন করুন"}
               registerKey="size"
               options={service == 1 ? years : quota}
               type="number"

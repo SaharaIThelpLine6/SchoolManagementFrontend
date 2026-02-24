@@ -15,11 +15,14 @@ import { fetchSettingsData } from "../features/settings/settingsSlice";
 import { useGetAverageVReportQuery, useGetUserReportQuery } from "../features/userReports/userReportsSlice";
 import Swal from "sweetalert2";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
-import { useGetClassListQuery } from "../features/class/classQuerySlice";
+import { useGetClassListQuery, useGetSubClassListQuery } from "../features/class/classQuerySlice";
 import { useGetExamNamesQuery } from "../features/exam/examQuerySlice";
 import { useGetResidentialQuery } from "../features/settings/settingsQuerySlice";
 import ExamRoutingCheckbox from "../components/Checkboxes/ExamRoutingCheckbox";
 import DefaultInput from "../components/Forms/DefaultInput";
+import ReportByIDSerial from "../view/students/reports/result-reports/ReportByIDSerial";
+import ShortFormatReport from "../view/students/reports/result-reports/ShortFormatReport";
+import AdmissionFormWithResult from "../view/students/reports/result-reports/AdmissionFormWithResult";
 
 const AverageVReport = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -30,6 +33,7 @@ const AverageVReport = ({ pageTitle }) => {
   const { control, handleSubmit } = methods;
 
   const selectedReportID = useWatch({ control, name: "ReportID" });
+  const [selectedReportComponent, setSelectedReportComponent] = useState(null);
 
   // Define which ReportIDs should show which fields
   const shouldShowFields = (fieldName) => {
@@ -40,12 +44,12 @@ const AverageVReport = ({ pageTitle }) => {
           "SessionID",
           "RDID",
           "ExamID",
-          "ClassID",
+          "SubClassID",
           "Optional",
           "SizeStatus",
         ].includes(fieldName);
       case 2:
-        return ["ReportID", "SessionID", "RDID", "ExamID", "ClassID"].includes(
+        return ["ReportID", "SessionID", "RDID", "ExamID", "SubClassID"].includes(
           fieldName
         );
       case 3:
@@ -54,7 +58,7 @@ const AverageVReport = ({ pageTitle }) => {
           "SessionID",
           "RDID",
           "ExamID",
-          "ClassID",
+          "SubClassID",
           "Optional",
           "SizeStatus",
         ].includes(fieldName);
@@ -64,7 +68,7 @@ const AverageVReport = ({ pageTitle }) => {
           "SessionID",
           "RDID",
           "ExamID",
-          "ClassID",
+          "SubClassID",
           "Optional",
         ].includes(fieldName);
       case 5:
@@ -72,16 +76,14 @@ const AverageVReport = ({ pageTitle }) => {
           "ReportID",
           "SessionID",
           "ExamID",
-          "ClassID",
-          "DefaultInput",
+          "SubClassID",
         ].includes(fieldName);
       case 6:
         return [
           "ReportID",
           "SessionID",
           "ExamID",
-          "ClassID",
-          "DefaultInput",
+          "SubClassID",
         ].includes(fieldName);
       case 7:
         return [
@@ -101,12 +103,13 @@ const AverageVReport = ({ pageTitle }) => {
   const [queryParams, setQueryParams] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  const { data, isFetching, isError, error } = useGetAverageVReportQuery(queryParams, {
+  const { data, isFetching, isError, error, data: reportData } = useGetAverageVReportQuery(queryParams, {
     skip: !queryParams
   });
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: classListData } = useGetClassListQuery();
+  const { data: subclassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
   const { data: residentialData } = useGetResidentialQuery();
 
@@ -123,8 +126,8 @@ const AverageVReport = ({ pageTitle }) => {
         error.status === 403
           ? translate("You do not have permission to view this report")
           : error.status === 400
-          ? translate("Missing or invalid data provided")
-          : translate("An error occurred while fetching the report")
+            ? translate("Missing or invalid data provided")
+            : translate("An error occurred while fetching the report")
       );
     } else {
       setErrorMessage(null);
@@ -142,10 +145,13 @@ const AverageVReport = ({ pageTitle }) => {
   }, [errorMessage]);
 
   const onSubmit = (formData) => {
+    console.log(formData);
+
     const params = {
       report_id: formData.ReportID,
       session_id: formData.SessionID,
       class_id: formData.ClassID,
+      subclass_id: formData.SubClassID,
       exam_id: formData.ExamID,
       residential_id: formData.RDID,
       language_id: formData.id,
@@ -160,13 +166,13 @@ const AverageVReport = ({ pageTitle }) => {
   };
 
 
-  useEffect(()=>{
+  useEffect(() => {
     console.log(data);
   }, [data])
 
   // if(isFetching){
   //   console.log("Fetching......");
-  
+
   // }
 
   return (
@@ -233,6 +239,18 @@ const AverageVReport = ({ pageTitle }) => {
                 />
               )}
 
+              {shouldShowFields("SubClassID") && (
+                <DefaultSelect
+                  label={translate("Sub Class") + " :"}
+                  nameField="SubClass"
+                  registerKey="SubClassID"
+                  valueField="SubClassID"
+                  options={subclassListData ?? []}
+                  require={"This Field is required"}
+                  unicode={true}
+                />
+              )}
+
               {shouldShowFields("RDID") && (
                 <DefaultSelect
                   label={translate("Residential") + " :"}
@@ -276,11 +294,11 @@ const AverageVReport = ({ pageTitle }) => {
                 <div className="flex flex-col md:flex-row gap-4 ">
                   <DefaultInput
                     registerKey="Fee"
-                    // label={`${translate("Fee")}: `}
+                  // label={`${translate("Fee")}: `}
                   />
                   <DefaultInput
                     registerKey="Fee"
-                    // label={`${translate("Fee")}: `}
+                  // label={`${translate("Fee")}: `}
                   />
                 </div>
               )}
@@ -292,8 +310,93 @@ const AverageVReport = ({ pageTitle }) => {
               </div>
             </form>
           </FormProvider>
+
+
+          <div className="w-full text-sm text-black bg-white ">
+            {isFetching && (
+              <div className="p-2">{translate("Loading report...")}</div>
+            )}
+
+
+            {reportData && (selectedReportID === 1 || selectedReportID === 2) && (
+              <div className="print-container">
+                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                  <div className="min-w-[800px]">
+                    <ReportByIDSerial reportData={reportData} query={queryParams} />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-2 print:hidden">
+                  <Button onClick={() => window.print()}>
+                    {translate("Print")}
+                  </Button>
+                </div>
+                <div className="w-full relative max-w-full print_canvas">
+                  <ReportByIDSerial reportData={reportData} query={queryParams} />
+                </div>
+              </div>
+            )}
+
+            {reportData && selectedReportID === 4 && (
+              <div className="print-container">
+                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                  <div className="min-w-[800px]">
+                    <ReportByIDSerial reportData={reportData} query={queryParams} />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-2 print:hidden">
+                  <Button onClick={() => window.print()}>
+                    {translate("Print")}
+                  </Button>
+                </div>
+                <div className="w-full relative max-w-full print_canvas">
+                  <ReportByIDSerial reportData={reportData} query={queryParams} />
+                </div>
+              </div>
+            )}
+
+            {reportData && selectedReportID === 5 && (
+              <div className="print-container">
+                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                  <div className="min-w-[800px]">
+                    <ShortFormatReport reportData={reportData} query={queryParams} />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-2 print:hidden">
+                  <Button onClick={() => window.print()}>
+                    {translate("Print")}
+                  </Button>
+                </div>
+                <div className="w-full relative max-w-full print_canvas">
+                  <ShortFormatReport reportData={reportData} query={queryParams} />
+                </div>
+              </div>
+            )}
+
+            {reportData && selectedReportID === 6 && (
+              <div className="print-container">
+                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                  <div className="min-w-[800px]">
+                    <AdmissionFormWithResult reportData={reportData} query={queryParams} />
+                  </div>
+                </div>
+                <div className="flex justify-end mt-2 print:hidden">
+                  <Button onClick={() => window.print()}>
+                    {translate("Print")}
+                  </Button>
+                </div>
+                <div className="w-full relative max-w-full print_canvas">
+                  <AdmissionFormWithResult reportData={reportData} query={queryParams} />
+                </div>
+              </div>
+            )}
+
+
+
+
+          </div>
         </div>
       </div>
+
     </div>
   );
 };
