@@ -546,7 +546,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                           id='school-address'
                           className={`w-full border-black inline-block bg-transparent text-center outline-none`}
                           defaultValue={institutionInfo?.Address}
-                          style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
+                          style={{ color: SchoolAddressColor, fontSize: `${SchoolAddressSize}px`, lineHeight: `${SchoolAddressSize}px` }}
                           {...register(`institute_address_${layout.id}`)}
                         />
 
