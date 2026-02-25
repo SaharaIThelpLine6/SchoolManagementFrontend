@@ -178,7 +178,7 @@ const AverageVReport = ({ pageTitle }) => {
   return (
     <div className="font-SolaimanLipi">
       <div className="flex flex-col gap-3">
-        <div className="print:hidden w-full border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
+        <div className=" w-full border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite print:hidden">
           <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">
             {translate(pageTitle)}
           </h1>
@@ -312,88 +312,89 @@ const AverageVReport = ({ pageTitle }) => {
           </FormProvider>
 
 
-          <div className="w-full text-sm text-black bg-white ">
-            {isFetching && (
-              <div className="p-2">{translate("Loading report...")}</div>
-            )}
+
+        </div>
+        <div className="w-full text-sm text-black bg-white ">
+          {isFetching && (
+            <div className="p-2">{translate("Loading report...")}</div>
+          )}
 
 
-            {reportData && (selectedReportID === 1 || selectedReportID === 2) && (
-              <div className="print-container">
-                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
-                  <div className="min-w-[800px]">
-                    <ReportByIDSerial reportData={reportData} query={queryParams} />
-                  </div>
-                </div>
-                <div className="flex justify-end mt-2 print:hidden">
-                  <Button onClick={() => window.print()}>
-                    {translate("Print")}
-                  </Button>
-                </div>
-                <div className="w-full relative max-w-full print_canvas">
+          {reportData && (selectedReportID === 1 || selectedReportID === 2) && (
+            <div className="print-container">
+              <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                <div className="min-w-[800px]">
                   <ReportByIDSerial reportData={reportData} query={queryParams} />
                 </div>
               </div>
-            )}
+              <div className="flex justify-end mt-2 print:hidden">
+                <Button onClick={() => window.print()}>
+                  {translate("Print")}
+                </Button>
+              </div>
+              <div className="w-full relative max-w-full print_canvas">
+                <ReportByIDSerial reportData={reportData} query={queryParams} />
+              </div>
+            </div>
+          )}
 
-            {reportData && selectedReportID === 4 && (
-              <div className="print-container">
-                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
-                  <div className="min-w-[800px]">
-                    <ReportByIDSerial reportData={reportData} query={queryParams} />
-                  </div>
-                </div>
-                <div className="flex justify-end mt-2 print:hidden">
-                  <Button onClick={() => window.print()}>
-                    {translate("Print")}
-                  </Button>
-                </div>
-                <div className="w-full relative max-w-full print_canvas">
+          {reportData && selectedReportID === 4 && (
+            <div className="print-container">
+              <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                <div className="min-w-[800px]">
                   <ReportByIDSerial reportData={reportData} query={queryParams} />
                 </div>
               </div>
-            )}
+              <div className="flex justify-end mt-2 print:hidden">
+                <Button onClick={() => window.print()}>
+                  {translate("Print")}
+                </Button>
+              </div>
+              <div className="w-full relative max-w-full print_canvas">
+                <ReportByIDSerial reportData={reportData} query={queryParams} />
+              </div>
+            </div>
+          )}
 
-            {reportData && selectedReportID === 5 && (
-              <div className="print-container">
-                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
-                  <div className="min-w-[800px]">
-                    <ShortFormatReport reportData={reportData} query={queryParams} />
-                  </div>
-                </div>
-                <div className="flex justify-end mt-2 print:hidden">
-                  <Button onClick={() => window.print()}>
-                    {translate("Print")}
-                  </Button>
-                </div>
-                <div className="w-full relative max-w-full print_canvas">
+          {reportData && selectedReportID === 5 && (
+            <div className="print-container">
+              <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                <div className="min-w-[800px]">
                   <ShortFormatReport reportData={reportData} query={queryParams} />
                 </div>
               </div>
-            )}
+              <div className="flex justify-end mt-2 print:hidden">
+                <Button onClick={() => window.print()}>
+                  {translate("Print")}
+                </Button>
+              </div>
+              <div className="w-full relative max-w-full print_canvas">
+                <ShortFormatReport reportData={reportData} query={queryParams} />
+              </div>
+            </div>
+          )}
 
-            {reportData && selectedReportID === 6 && (
-              <div className="print-container">
-                <div className="w-full relative max-w-full overflow-x-auto print:hidden">
-                  <div className="min-w-[800px]">
-                    <AdmissionFormWithResult reportData={reportData} query={queryParams} />
-                  </div>
-                </div>
-                <div className="flex justify-end mt-2 print:hidden">
-                  <Button onClick={() => window.print()}>
-                    {translate("Print")}
-                  </Button>
-                </div>
-                <div className="w-full relative max-w-full print_canvas">
+          {reportData && selectedReportID === 6 && (
+            <div className="">
+              <div className="w-full relative max-w-full overflow-x-auto">
+                <div className="min-w-[800px]">
                   <AdmissionFormWithResult reportData={reportData} query={queryParams} />
                 </div>
               </div>
-            )}
+              <div className="flex justify-end mt-2">
+                <Button onClick={() => window.print()}>
+                  {translate("Print")}
+                </Button>
+              </div>
+              <div className="w-full relative max-w-full">
+                <AdmissionFormWithResult reportData={reportData} query={queryParams} />
+              </div>
+            </div>
+          )}
 
 
 
 
-          </div>
         </div>
       </div>
 

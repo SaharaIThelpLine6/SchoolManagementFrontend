@@ -81,7 +81,7 @@ export const resultReports = [
   },
   {
     ReportID: 7,
-    ReportName: '7. মেধা অনুসারে হাজিরা খাতা',
+    ReportName: '7. ভর্তি ফরম আইডি দিয়ে',
   },
 ];
 
