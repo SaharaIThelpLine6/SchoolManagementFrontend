@@ -164,6 +164,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
         newRow[`schooladdress_color_field`] = SchoolAddressColor
         newRow[`schooladdress_fontside`] = SchoolAddressSize
         newRow[`SignaturePrincipal`] = institutionInfo?.SignaturePrincipal
+        newRow[`PrincipalName`] = institutionInfo?.PrincipalName
        
 
 
