@@ -1,31 +1,71 @@
 .animate-pulse-custom {
   animation: pulse-custom 1.5s cubic-bezier(0.8, 0, 0.8, 1) infinite;
 }
+
 @keyframes pulse-custom {
+
   0%,
   100% {
-    background-color: #e5e7eb; /* Light gray */
+    background-color: #e5e7eb;
+    /* Light gray */
   }
+
   50% {
-    background-color: #d1d5db; /* Darker gray */
+    background-color: #d1d5db;
+    /* Darker gray */
   }
 }
-.animation_label + label{
+
+.animation_label+label {
   height: 100%;
   z-index: 22;
   pointer-events: none;
 }
 
-.animation_label:focus + label, .animation_label + label.active{
+.animation_label:focus+label,
+.animation_label+label.active {
   transform: translateY(-80%) !important;
 }
+.input-table > div{
+  box-shadow: none;
+}
+.input-table input{
+  width: 100px;
+  background: transparent;
+  height: 100%;
+}
+.input-table td .w-full{
+  height: 100%;
+  min-height: 30px;
+}
+.input-table td{
+  padding-top: 0;
+  padding-bottom: 4px;
+}
+::-webkit-scrollbar {
+  height: 5px;
+  width: 5px;
+  border-radius: 50px !important;
+}
+::-webkit-scrollbar-thumb, ::-webkit-scrollbar-thumb:hover {
+  background: rgb(205, 208, 215);
+}
+::-webkit-scrollbar-track {
+  background: rgb(244, 246, 250);
+}
+::selection {
+  color: rgb(255, 255, 255);
+  text-shadow: none;
+  background: rgb(61, 94, 225);
+}
 
-  /* .table-container {
+/* .table-container {
     width: 100%;
-    overflow-x: auto;   
+
+    overflow-x: auto;
   } */
 
-/* 
+/*
 :root {
   --loading-grey: #ededed;
 }
@@ -70,23 +110,58 @@
   border-radius: 4px;
   animation-delay: .06s;
 } */
+
 @font-face {
   font-family: "SolaimanLipiNormal";
-  src: local('SolaimanLipiNormal'), local('solaimanlipi'), url('./assets/fonts/solaimanlipi.woff') format('woff');
+  src: local('SolaimanLipiNormal'), local('solaimanlipi'), url('./assets/font/solaimanlipi.woff') format('woff');
   /* font-display: swap;
   unicode-range: U+0980-09FF; */
   /* local('SolaimanLipiNormal'), url('solaimanlipi.woff') format('woff') */
 }
+@font-face {
+  font-display: swap;
+  font-family: SutonnyMJ;
+  src: url("./assets/font/SutonnyMJ.ttf") format("truetype")
+}
+
+/* @font-face {
+  font-family: 'Kalpurush';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url('./assets/fonts/kalpurush/kalpurush-v0.256.eot');
+  src: url('./assets/fonts/kalpurush/kalpurush-v0.256.woff') format('woff'),
+    url('./assets/fonts/kalpurush/kalpurush-v0.256.ttf') format('truetype'),
+    url('./assets/fonts/kalpurush/kalpurush-v0.256.svg#AdorshoLipi') format('svg'),
+    url('./assets/fonts/kalpurush/kalpurush-v0.256.eot?#iefix') format('embedded-opentype');
+  unicode-range: U+0951-0952, U+0964-0965, U+0980-09FE, U+1CD0, U+1CD2, U+1CD5-1CD6, U+1CD8, U+1CE1, U+1CEA, U+1CED, U+1CF2, U+1CF5-1CF7, U+200C-200D, U+20B9, U+25CC, U+A8F1;
+} */
+/* @font-face {
+  font-family: 'Kalpurush';
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 100%;
+  font-display: swap;
+  src: url('/assets/font/kalpurush-v0.256.woff') format('woff'),
+    url('/assets/font/kalpurush-v0.256.ttf') format('truetype'),
+    url('/assets/font/kalpurush-v0.256.svg#AdorshoLipi') format('svg'),
+    url('/assets/font/kalpurush-v0.256.eot?#iefix') format('embedded-opentype');
+} */
 
 
 .sub_menu_area {
   width: calc(100% - 64px);
 }
 
-tr:nth-child(even) {background-color: #F0F0F0;}
-.print_canvas{
+tr:nth-child(even) {
+  background-color: #F0F0F0;
+}
+
+.print_canvas {
   display: none;
 }
+
 /* .Toastify__toast{
   padding-top: 0;
   padding-bottom: 0;
@@ -95,29 +170,176 @@ tr:nth-child(even) {background-color: #F0F0F0;}
   height: 100%;
   margin-bottom: 0;
 } */
-
+tr:nth-child(even) {
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+}
 @media print {
   @page {
     margin-top: 10px;
     margin-bottom: 0;
-    background-color: white;
   }
-  .print_canvas{
-    display: block;
-  }
-  .hidden_in_print{
-    display: none;
-  }
-  body  {
-    background-color: white;
+
+  body {
+    margin: 0;
+    background-color: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
     width: 100%;
   }
-  main{
+
+  main {
     width: 100%;
-    background-color: white !important; 
+    background-color: white !important;
+    border: none;
     overflow: visible !important;
   }
-  table tr, td{
+
+  .print_canvas {
+    display: block;
+    page-break-inside: avoid;
+    break-inside: avoid;
     background-color: white;
   }
+
+  .hidden_in_print {
+    display: none !important;
+  }
+
+  .show_in_print {
+    overflow: hidden !important;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white !important;
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tfoot {
+    display: table-footer-group;
+  }
+
+  tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  tr:last-child td {
+    border-bottom: 1px solid #000 !important;
+  }
+
+  td, th {
+    background-color: white !important;
+  }
+
+
+  .print-id-card:nth-child(9n):last-child {
+    page-break-after: auto !important;
+    break-after: page !important;
+  }
+}
+
+
+/* .swal2-icon.swal2-error.swal2-icon-show{
+  width: 30px;
+  height: 20px;
+} */
+
+/* div:where(.swal2-icon) {
+
+  width: 60px !important;
+  height: 60px !important;
+
+}
+div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line][class$=left] {
+  left: 10px !important;
+
+}
+div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
+
+top: 28px !important;
+  width: 37px !important;
+  height: 4px !important;
+
+}
+div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line][class$=right] {
+  right: 13px !important;
+
+}
+div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
+
+  top: 28px !important;
+  width: 37px !important;
+  height: 4px !important;
+
+}
+
+.swal2-title{
+  font-size: 20px  !important;
+
+}
+
+.swal2-loader{
+
+
+    width: 10px !important;
+    height: 10px !important;
+    margin: 10px !important;
+
+} */
+
+.up_down_animation {
+    animation: up-down 2s ease-in-out infinite alternate-reverse both;
+}
+@keyframes up-down {
+  0% {
+    transform: translateY(10px);
+  }
+  100% {
+      transform: translateY(-10px);
+  }
+
+}
+.print-only {
+  display: none;
+}
+@media print {
+  .break-after-page {
+    page-break-after: always;
+  }
+  .shadow-lg{
+    box-shadow: none !important;
+  }
+
+  @page {
+    margin:2mm;
+    margin-top: 4mm;
+  }
+
+  table {
+    page-break-inside: auto;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+    .print-only {
+    display: block !important;
+  }
+}
+
+
+
+.apexcharts-toolbar{
+  display: none !important;
 }

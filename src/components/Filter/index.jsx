@@ -1,4 +1,3 @@
-import Translate from "../../utils/Translate";
 
 const Filter = () => {
     return (
@@ -9,22 +8,22 @@ const Filter = () => {
 
        
                 {/*Filter by Last Modified */}
-                <div className="relative outline-none">
+                {/* <div className="relative outline-none">
                     <select className="rounded-full outline-none py-0.5 px-2 bg-[#EDEDED]">
                         <option value="">{Translate("Last Modified")}</option>
                         <option value="">{Translate("Today")}</option>
                         <option value="">{Translate("Last Week")}</option>
                         <option value="">{Translate("Last Month")}</option>
                     </select>
-                </div>
+                </div> */}
                 {/* Filter by Date Added*/}
-                <div className="relative outline-none">
+                {/* <div className="relative outline-none">
                     <select className="rounded-full outline-none px-2 py-0.5 bg-[#EDEDED]">
                         <option value="">{Translate("Date Added")}</option>
                         <option value="">{Translate("Newest First")}</option>
                         <option value="">{Translate("Oldest First")}</option>
                     </select>
-                </div>
+                </div> */}
             </div>
         </div>
 

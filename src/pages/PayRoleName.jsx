@@ -1,101 +1,133 @@
-import { FaEdit, FaTrash } from "react-icons/fa";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import DefaultInput from "../components/Forms/DefaultInput";
-import DefaultGreen from "../components/Button/DefaultGreen";
+import { FormProvider, useForm } from "react-hook-form";
+import EditButton from "../components/Button/EditButton";
+import Button from "../components/Button/Button";
+import SortableTable from "../components/Tables/SortableTable";
+import DefaultPagination from "../components/Pagination/DefaultPagination";
+import useTranslate from "../utils/Translate";
+import { useMemo, useState } from "react";
+import { useGetStudentsVacationTypeListQuery } from "../features/student/studentQuerySlice";
+import DeleteButton from "../components/Button/DeleteButton";
+import OwenGuide from "../Routes/OwenGuide";
+
+const PAGE_SIZE = 5;
 
 const PayRoleName = () => {
-    return (
-        <div className="md:flex w-full px-3 gap-3 font-lato">
-            {/*Input form Start*/}
-            <div className="md:w-[50%]">
-                <div className="text-sm font-medium text-black items-center gap-2 grid grid-cols-1 lg:grid-cols-2">
+  const methods = useForm();
+  const translate = useTranslate();
 
-                    <div className="">
-                        <DefaultSelect
-                            type="number"
-                            label={
-                                <span>
-                                    ফান্ড :
-                                </span>
-                            }
-                            registerKey={"UserTypeID"}
-                            valueField={"id"}
-                            nameField={"value"}
-                        />
-                    </div>
-                    <div className="">
-                        <DefaultSelect
-                            type="number"
-                            label={
-                                <span>
-                                    জে-লেজার :
-                                </span>
-                            }
-                            registerKey={"UserTypeID"}
-                            valueField={"id"}
-                            nameField={"value"}
-                        />
-                    </div>
-                    <div className="">
-                        <DefaultSelect
-                            type="number"
-                            label={
-                                <span>
-                                    সাব-লেজার :
-                                </span>
-                            }
-                            registerKey={"UserTypeID"}
-                            valueField={"id"}
-                            nameField={"value"}
-                        />
-                    </div>
-                    <div className="">
-                        <DefaultInput label={"পে-খাতের নাম :"} type={'text'} placeholder={""} registerKey={"FatherName"} />
-                    </div>
-                    <div className="">
-                        <DefaultInput label={"সিরিয়াল :"} type={'text'} placeholder={""} registerKey={"FatherName"} />
-                    </div>
+  const {
+    data: studentVacationTypeData = [],
+    isSVTError,
+    isSVTLoading,
+  } = useGetStudentsVacationTypeListQuery();
 
-                </div>
-                <div className='text-center flex py-3 gap-3'>
-                    <DefaultGreen submitButtonGreen={"Save"} />
-                    <DefaultGreen submitButtonGreen={"New"} />
-                </div>
-            </div>
-            {/*Input form End*/}
+  const [currentPage, setCurrentPage] = useState(1);
 
-            {/*Table start*/}
-            <div className="md:w-[50%] font-lato">
-                <table className='w-full'>
-                    <thead className="text-left bg-slate-700 ">
-                        <tr className="font-normal text-sm text-white">
-                            <th className='px-2 py-1'>সিরিয়াল</th>
-                            <th>পে-রোলের নাম</th>
-                            <th className='w-[10%]'>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody className='text-left'>
-                        <tr className="font-normal text-sm text-slate-800">
-                            <td>১</td>
-                            <td>মূল বেতন</td>
-                            <td className='flex gap-2 w-8 h-8'>
-                                <FaEdit /><FaTrash />
-                            </td>
-                        </tr>
-                        <tr className="font-normal text-sm text-slate-800 ">
-                            <td>২</td>
-                            <td>চিকিৎসা ভাতা</td>
-                            <td className='flex gap-2 w-8 h-8'>
-                                <FaEdit /><FaTrash />
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+  const totalPages = Math.ceil(studentVacationTypeData.length / PAGE_SIZE);
 
-            </div>
-            {/*Table End*/}
+  const paginatedData = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return studentVacationTypeData.slice(start, start + PAGE_SIZE);
+  }, [studentVacationTypeData, currentPage]);
+
+  const columns = [
+    {
+      title: translate("Action"),
+      field: "ID",
+      hozAlign: "center",
+      render: (row) => (
+        <div className="flex justify-center items-center gap-2">
+          <EditButton onClick={() => handleEditOpenModal(row.ID)} />
+          <DeleteButton onClick={() => handleEditOpenModal(row.ID)} />
         </div>
-    )
-}
+      ),
+    },
+    {
+      title: translate("পে-রোলের নাম"),
+      field: "VacationList",
+      hozAlign: "center",
+      render: (row) => <p>{row.VacationList}</p>,
+    },
+  ];
 
-export default PayRoleName;
+  return (
+    <FormProvider {...methods}>
+      <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-SolaimanLipi">
+        <OwenGuide/>
+        <div className="md:flex w-full px-3 gap-3">
+          {/*Input form Start*/}
+          <div className="md:w-[50%]">
+            <div className="text-sm font-medium space-y-1 text-black items-center gap-2 grid grid-cols-1 lg:grid-cols-2">
+              <div className="">
+                <DefaultSelect
+                  type="number"
+                  label={<span>ফান্ড :</span>}
+                  registerKey={"UserTypeID"}
+                  valueField={"id"}
+                  nameField={"value"}
+                />
+              </div>
+              <div className="">
+                <DefaultSelect
+                  type="number"
+                  label={<span>জে-লেজার :</span>}
+                  registerKey={"UserTypeID"}
+                  valueField={"id"}
+                  nameField={"value"}
+                />
+              </div>
+              <div className="">
+                <DefaultSelect
+                  type="number"
+                  label={<span>সাব-লেজার :</span>}
+                  registerKey={"UserTypeID"}
+                  valueField={"id"}
+                  nameField={"value"}
+                />
+              </div>
+              <div className="">
+                <DefaultInput
+                  label={"পে-খাতের নাম :"}
+                  type={"text"}
+                  placeholder={""}
+                  registerKey={"FatherName"}
+                />
+              </div>
+              <div className="">
+                <DefaultInput
+                  label={"সিরিয়াল :"}
+                  type={"text"}
+                  placeholder={""}
+                  registerKey={"FatherName"}
+                />
+              </div>
+            </div>
+            <div className="text-center flex py-3 gap-3">
+              <Button>Save</Button>
+              <Button>New</Button>
+            </div>
+          </div>
+          {/*Input form End*/}
+
+          {/*Table start*/}
+          <div className="md:w-[50%] font-lato">
+            <SortableTable columns={columns} data={paginatedData} />
+
+            {/* Pagination Controls */}
+            <DefaultPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        </div>
+      </div>
+    </FormProvider>
+  );
+};
+
+
+
+export default PayRoleName

@@ -1,25 +1,38 @@
-import React, { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchClassResult, fetchResult, setResultError } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
-import bnBijoy2Unicode from '../../utils/conveter';
 import { Buffer } from 'buffer';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
 import MarksheetClassWise from '../../components/Document/MarksheetClassWise';
-
-// import ClassResultTable from '../../components/ClassResultTable';
+import { fetchClassResult } from '../../features/studentResultPublicView/studentResultPublicViewSlice';
+import bnBijoy2Unicode from '../../utils/conveter';
 
 const ClassResult = () => {
     const { schoolid, seassonid, examid, classid, userid } = useParams();
-    const { resultStatus, resultError, classResult, schoolData, resultStatistics } = useSelector((state) => state.studentResultPublicView)
+    const { resultStatus, resultError, classResult, schoolData, resultStatistics, resultSubGroupInfo } = useSelector((state) => state.studentResultPublicView)
 
     const dispatch = useDispatch()
     const navigate = useNavigate();
+
     useEffect(() => {
-        dispatch(fetchClassResult({schoolId: schoolid, resultUrl: `${seassonid}/${examid}/${classid}`}))
+        dispatch(fetchClassResult({ schoolId: schoolid, resultUrl: `${seassonid}/${examid}/${classid}` }))
     }, [dispatch])
+
+    useEffect(()=>{
+        if(schoolData && schoolData?.isClassResultShowable?.Action != 1){
+            navigate(`/${schoolid}`)
+        }
+    }, [schoolData])
+
     if (resultStatus === 'failed') {
         navigate(`/${schoolid}/classes`);
     }
+
+    // এসেন্ডিং অর্ডারে সাজানো
+    const sortedClassResult = classResult ? [...classResult].sort((a, b) => {
+        // UserCode সংখ্যায় কনভার্ট করে সাজানো
+        return parseInt(a.UserCode) - parseInt(b.UserCode);
+    }) : [];
+
     const bufferConveter = (bufferData) => {
         const buffer = Buffer.from(bufferData);
         const base64String = buffer.toString('base64');
@@ -27,26 +40,49 @@ const ClassResult = () => {
         return imageSrc
     }
 
+    const handlePrint = () => {
+        const originalTitle = document.title;
+        document.title = `${bnBijoy2Unicode(classResult[0]?.ExamName)} - ${bnBijoy2Unicode(classResult[0]?.SessionName)}`;
+
+        window.print();
+
+        setTimeout(() => {
+            document.title = originalTitle;
+        }, 1000);
+    };
+
+    if(resultStatus === 'succeeded'){
+        document.title = `${bnBijoy2Unicode(classResult[0]?.ExamName)} - ${bnBijoy2Unicode(classResult[0]?.SessionName)}`;
+    }
+
     return (
         <div>
-            {classResult?.length > 0 ? (
+            {sortedClassResult?.length > 0 ? ( // এখানে sortedClassResult ব্যবহার করুন
                 <div>
                     <div className="hidden_in_print">
                         <div className="mx-auto relative bg-white font-SolaimanLipi pt-[80px] lg:pt-0">
+
+                            <div className="lg:text-end relative">
+                                <button className="print absolute top-4 right-5 inline-flex items-center px-4 py-1 gap-2  bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium rounded-[4px] font-SolaimanLipi z-30" onClick={handlePrint}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-printer"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M17 17h2a2 2 0 0 0 2 -2v-4a2 2 0 0 0 -2 -2h-14a2 2 0 0 0 -2 2v4a2 2 0 0 0 2 2h2" /><path d="M17 9v-4a2 2 0 0 0 -2 -2h-6a2 2 0 0 0 -2 2v4" /><path d="M7 13m0 2a2 2 0 0 1 2 -2h6a2 2 0 0 1 2 2v4a2 2 0 0 1 -2 2h-6a2 2 0 0 1 -2 -2z" /></svg>
+                                    <span className="pt-1">প্রিন্ট</span>
+                                </button>
+                            </div>
+
                             <div className=" pt-0 pb-1 px-2 bg-white">
-                                <div className="bg-theme-color">
+                                <div className="bg-theme-color lg:flex">
                                     {/*Logo*/}
-                                    <div className="absolute pt-5 pl-5 opacity-0 lg:opacity-100">
-                                        <img src={bufferConveter(schoolData?.Logo?.data)} alt="logo" width={100} height={100} className="" />
+                                    <div className="pt-5 lg:pl-5">
+                                        <img src={bufferConveter(schoolData?.Logo?.data)} alt="logo" className="rounded-full lg:rounded-sm  w-[80px] h-[80px] lg:h-[100px] lg:w-[100px] mx-auto" />
                                     </div>
 
                                     {/*Heading Title Start*/}
                                     <div className="mx-auto text-center py-3 text-white relative z-10">
                                         <h2 className="text-[22px] font-medium">{bnBijoy2Unicode(schoolData?.InstitutionName)}</h2>
                                         <h3 className="">{bnBijoy2Unicode(schoolData?.Address)}</h3>
-                                        <h3 className="">{bnBijoy2Unicode(classResult[0]?.ExamName)} - {bnBijoy2Unicode(classResult[0]?.SessionName)}</h3>
+                                        <h3 className="">{bnBijoy2Unicode(sortedClassResult[0]?.ExamName)} - {bnBijoy2Unicode(sortedClassResult[0]?.SessionName)}</h3>
                                         <h3 className="border-2 border-white rounded-md p-1 w-fit mx-auto">ফলাফল(নম্বরপত্র)</h3>
-                                        <h3 className="">শ্রেনী/জামাত : {bnBijoy2Unicode(classResult[0]?.SubClass)}</h3>
+                                        <h3 className="">শ্রেনী/জামাত : {bnBijoy2Unicode(sortedClassResult[0]?.SubClass)}</h3>
                                     </div>
                                 </div>
                                 {/*Heading Title End*/}
@@ -59,7 +95,7 @@ const ClassResult = () => {
                                                 <td className="border border-black min-w-[70px]">আইডি নং</td>
                                                 <td className="border border-black min-w-[180px]">শিক্ষার্থীর নাম</td>
                                                 {
-                                                    Array.from({ length: classResult[0].SubSonkha }).map((_, index) => (<td key={`view_subject_${index}`} className="border border-black min-w-[100px]">{bnBijoy2Unicode(classResult[0][`Subject${index + 1}`])}</td>))
+                                                    Array.from({ length: sortedClassResult[0].SubSonkha }).map((_, index) => (<td key={`view_subject_${index}`} className="border border-black min-w-[100px]">{bnBijoy2Unicode(sortedClassResult[0][`Subject${index + 1}`])}</td>))
 
                                                 }
                                                 <td className="border border-black px-1 min-w-[50px]">মোট</td>
@@ -70,7 +106,7 @@ const ClassResult = () => {
                                         </thead>
                                         <tbody>
                                             {
-                                                classResult.map((studentResult, index) => {
+                                                sortedClassResult.map((studentResult, index) => { // এখানে sortedClassResult ব্যবহার করুন
                                                     return (
                                                         <tr key={`view_user${studentResult.UserCode}`}>
                                                             <td className="border border-black px-1 min-w-[20px]">{bnBijoy2Unicode(String(index + 1))}</td>
@@ -92,15 +128,6 @@ const ClassResult = () => {
                                                     )
                                                 })
                                             }
-                                            {/* <tr>
-                                        <td className="border border-black">১</td>
-                                        <td className="border border-black">৪১৭১৩</td>
-                                        <td className="border border-black pl-1 text-left">খাজিদা আক্তার সাজিয়া</td>
-
-                                        <td className="border border-black">৯৫.৮৮</td>
-                                        <td className="border border-black">মুমতায</td>
-                                        <td className="border border-black">১</td>
-                                    </tr> */}
 
                                         </tbody>
                                     </table>
@@ -111,7 +138,7 @@ const ClassResult = () => {
                         </div>
                     </div>
                     <div className='print_canvas'>
-                        <MarksheetClassWise classResult={classResult} schoolData={schoolData} resultStatices={resultStatistics} />
+                        <MarksheetClassWise classResult={sortedClassResult} schoolData={schoolData} resultStatices={resultStatistics} /> {/* এখানে sortedClassResult ব্যবহার করুন */}
                     </div>
                 </div>
             ) : <>Loading...</>}

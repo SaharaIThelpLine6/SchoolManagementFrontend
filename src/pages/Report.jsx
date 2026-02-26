@@ -1,9 +1,14 @@
+import { FormProvider, useForm } from "react-hook-form"
 import DefaultGreen from "../components/Button/DefaultGreen"
 import DefaultSelect from "../components/Forms/DefaultSelect"
 
 const Report = () => {
+    const methods = useForm()
     return (
-        <div className="font-lato">
+        <FormProvider {...methods}>
+
+      <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-SolaimanLipi">
+
             {/*Find form Start*/}
             <div className="px-5">
 
@@ -41,6 +46,7 @@ const Report = () => {
             {/*Find form End*/}
 
         </div>
+        </FormProvider>
     )
 }
 

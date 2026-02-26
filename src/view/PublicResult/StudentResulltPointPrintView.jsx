@@ -1,0 +1,264 @@
+import React, { useEffect, useState } from "react";
+import bnBijoy2Unicode from "../../utils/conveter";
+import { Buffer } from "buffer";
+const StudentResultPointPrintView = ({ studentResult }) => {
+  const [logo, setLogo] = useState(null);
+  const [principal, setPrincipal] = useState(null);
+  const [najem, setNajem] = useState(null);
+  useEffect(() => {
+    if (studentResult?.Logo?.data) {
+      if (studentResult?.Logo?.data) {
+        const buffer = Buffer.from(studentResult.Logo.data);
+        const base64String = buffer.toString("base64");
+        const imageSrc = `data:image/png;base64,${base64String}`;
+        setLogo(imageSrc);
+      }
+      if (studentResult?.SignaturePrincipal?.data) {
+        const signaturePrincipalBuffer = Buffer.from(
+          studentResult.SignaturePrincipal.data
+        );
+        const base64StringPrincipalBuffer =
+          signaturePrincipalBuffer.toString("base64");
+        const PrincipalimageSrc = `data:image/png;base64,${base64StringPrincipalBuffer}`;
+        setPrincipal(PrincipalimageSrc);
+      }
+
+      if (studentResult?.SignatureNajem?.data) {
+        const signatureNajemBuffer = Buffer.from(
+          studentResult.SignatureNajem.data
+        );
+        const base64StringNajemBuffer = signatureNajemBuffer.toString("base64");
+        const NajemimageSrc = `data:image/png;base64,${base64StringNajemBuffer}`;
+        setNajem(NajemimageSrc);
+      }
+    }
+  }, [studentResult]);
+  const greadPoints = ["5", "4", "3.5", "3", "2", "1", "0"];
+
+  return (
+    <div>
+      <div className="flex">
+        <div className="pt-6">
+          <img src={logo} alt="Logo" className=" w-[80px] h-[80px]" />
+        </div>
+        <div className="mx-auto text-center">
+          <h2 className="text-[24px] font-medium">
+            {bnBijoy2Unicode(studentResult?.InstitutionName)}
+          </h2>
+          <h3 className="text-md">{bnBijoy2Unicode(studentResult?.Address)}</h3>
+          <h3 className="text-md">
+            শিক্ষাবর্ষঃ {bnBijoy2Unicode(studentResult?.SessionName)}
+          </h3>
+          <h3 className="text-md">
+            পরীক্ষাঃ {bnBijoy2Unicode(studentResult?.ExamName)}
+          </h3>
+        </div>
+      </div>
+      <div className="flex items-center justify-between">
+        <div className="pt-3">
+          <table>
+            <tbody className="">
+              <tr>
+                <td className="text-end font-semibold">পরীক্ষার্থীর নাম</td>
+                <td className="w-10 text-center"> : </td>
+                <td className="text-start">
+                  {" "}
+                  {bnBijoy2Unicode(studentResult?.UserName)}{" "}
+                </td>
+              </tr>
+              <tr>
+                <td className="text-end">
+                  {bnBijoy2Unicode(studentResult?.ClassNameLabel)}:
+                </td>
+                <td className="w-10 text-center"> : </td>
+                <td> {bnBijoy2Unicode(studentResult?.SubClass)} </td>
+              </tr>
+              <tr>
+                <td className="text-end">
+                  {bnBijoy2Unicode(studentResult?.StudentIDLabel)}:
+                </td>
+                <td className="w-10 text-center"> : </td>
+                <td> {bnBijoy2Unicode(String(studentResult?.UserCode))} </td>
+              </tr>
+              <tr>
+                <td className="text-end">পিতার নাম</td>
+                <td className="w-10 text-center"> : </td>
+                <td> {bnBijoy2Unicode(studentResult?.FatherName)} </td>
+              </tr>
+              <tr>
+                <td className="text-end">জন্ম তারিখ</td>
+                <td className="w-10 text-center"> : </td>
+                <td>
+                  {studentResult?.DateOfBirth
+                    ? bnBijoy2Unicode(studentResult.DateOfBirth.split("T")[0])
+                    : ""}{" "}
+                  ইং
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="pt-5">
+          <h1 className="bg-[#a8a6a6] text-white text-center text-[16px]">
+            গ্রেডিং পদ্ধতি
+          </h1>
+          <table className="w-[295px]">
+            <tbody className="border border-black w-full">
+              {Array.from({ length: studentResult?.SubSonkha || 0 }).map(
+                (_, index) => {
+                  const division = studentResult[`Division${index + 1}`];
+                  const divisionNumber =
+                    studentResult[`DivisionNumber${index + 1}`];
+                  const subSonkha = studentResult?.SubSonkha;
+                  if (
+                    division == undefined ||
+                    divisionNumber == undefined ||
+                    subSonkha == undefined ||
+                    division == ""
+                  ) {
+                    return null;
+                  }
+
+                  return (
+                    <tr key={index}>
+                      <td className="text-start pl-2">{divisionNumber}</td>
+                      <td className="pl-3">{division}</td>
+                      <td className="pr-2">{greadPoints[index]}</td>
+                    </tr>
+                  );
+                }
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div className="pt-2 w-full">
+        <table className="w-full border border-collapse">
+          <thead className="border border-black">
+            <tr className="border border-b-[2px] border-t-[2px] border-black">
+              <th className="border border-black">ক্রমিক নং</th>
+              <th className="border border-black w-60">বিষয়</th>
+              <th className="border border-black">পূর্ণমান</th>
+              <th className="border border-black">পাশ নম্বর</th>
+              <th className="border border-black">প্রাপ্ত নম্বর</th>
+              <th className="border border-black" bgcolor="#ffffff">
+                গ্রেড
+              </th>
+              <th className="border border-black" bgcolor="#ffffff">
+                জিপিএ
+              </th>
+            </tr>
+          </thead>
+          <tbody className="text-center">
+            {Array.from({ length: studentResult.SubSonkha }).map((_, index) => (
+              <tr
+                key={studentResult[`Subject${index + 1}`]}
+                className="border border-black"
+              >
+                <td className="border border-black pl-2">
+                  {bnBijoy2Unicode(String(index + 1))}
+                </td>
+                <td className="border border-black text-left pl-2">
+                  {bnBijoy2Unicode(studentResult[`Subject${index + 1}`])}
+                </td>
+                <td className="border border-black pl-2">
+                  {bnBijoy2Unicode(String(studentResult[`DVTop${index + 1}`]))}
+                </td>
+                <td className="border border-black pl-2">
+                  {bnBijoy2Unicode(
+                    String(studentResult[`PassNumber${index + 1}`])
+                  )}
+                </td>
+                <td className="border border-black pl-2">
+                  {bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}
+                </td>
+                <td
+                  className="text-[16px] border border-black h-[36px] pl-4 font-bold"
+                  bgcolor="#ffffff"
+                >
+                  {studentResult[`GPA${index + 1}`] == 5
+                    ? "A+"
+                    : studentResult[`GPA${index + 1}`] == 4
+                    ? "A"
+                    : studentResult[`GPA${index + 1}`] == 3.5
+                    ? "A-"
+                    : studentResult[`GPA${index + 1}`] == 3
+                    ? "B"
+                    : studentResult[`GPA${index + 1}`] == 2
+                    ? "C"
+                    : studentResult[`GPA${index + 1}`] == 1
+                    ? "D"
+                    : "F"}
+                </td>
+                {index === 0 && (
+                  <td
+                    className="text-[16px] border border-black text-center align-middle font-bold"
+                    bgcolor="#ffffff"
+                    rowSpan={studentResult.SubSonkha}
+                  >
+                    {studentResult.GPA.toFixed(2)}
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {/*Subject wise number and table end*/}
+      {/*Total Mark Start*/}
+      <div className="w-full pt-8">
+        <table className="border w-full border-black">
+          <tbody>
+            <tr>
+              <td className="pl-2 font-bold">
+                প্রাপ্তি বিভাগ : {studentResult?.Division}
+              </td>
+              <td>
+                মেধা স্থান : {bnBijoy2Unicode(String(studentResult?.Positions))}
+              </td>
+              <td>
+                মোট নম্বর : {bnBijoy2Unicode(String(studentResult?.Total))}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      {/*Total Mark End*/}
+      {/*Comment Part Start*/}
+      <div className=" pt-5 flex gap-2">
+        <div className="w-full h-[100px] border border-black">
+          <p className="text-[12px] pl-2 pt-1">
+            শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :
+          </p>
+        </div>
+        <div className="w-full h-[100px] border border-black">
+          <p className="text-[12px] pl-2 pt-1">
+            অভিভাবকের মন্তব্য ও স্বাক্ষর :
+          </p>
+        </div>
+      </div>
+      {/*Comment Part End*/}
+      {/*Signature part start*/}
+      <div className="absolute bottom-0 left-0 w-full  text-[14px]">
+        <div className="relative h-[100px] flex justify-between">
+          <div className="text-center relative mt-4">
+            <img src={principal ? principal : ""} alt="" className="w-[60px]" />
+            <p>.....................................</p>
+            <p>{bnBijoy2Unicode(studentResult?.PrincipalName)}</p>
+            <p>তারিখ : </p>
+          </div>
+          <div className="text-center relative mt-4">
+            <img src={najem} alt="" className="w-[60px]" />
+            <p>.....................................</p>
+            <p>{bnBijoy2Unicode(studentResult?.NajemName)}</p>
+            <p>তারিখ : </p>
+          </div>
+        </div>
+      </div>
+      {/*Signature part end*/}
+    </div>
+  );
+};
+
+export default StudentResultPointPrintView;

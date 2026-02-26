@@ -1,34 +1,54 @@
 /** @type {import('tailwindcss').Config} */
-const defaultTheme = require('tailwindcss/defaultTheme');
-const colors = require('tailwindcss/colors');
+const defaultTheme = require("tailwindcss/defaultTheme");
+const colors = require("tailwindcss/colors");
 export default {
   corePlugins: {
     animation: true,
   },
-  content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+  safelist: [
+    'bg-purple-400',
+    'bg-blue-400',
+    'bg-green-400',
+    'bg-red-400',
+    'bg-purple-500',
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-red-500',
   ],
   theme: {
     extend: {
+      direction: {
+        rtl: 'rtl',
+        ltr: 'ltr',
+      },
+      screens: {
+        print: { raw: 'print' },
+      },
       fontFamily: {
-        'lato': '"Lato", serif',
-        'SolaimanLipi': 'SolaimanLipiNormal, serif',
-        'noto': '"Noto Serif Bengali", serif'
+        lato: '"Lato", serif',
+        SolaimanLipi: 'SolaimanLipiNormal, serif',
+        Poppins: ['Poppins', 'sans-serif'],
+        noto: '"Noto Serif Bengali", serif',
+        kalpurush: "'Kalpurush', sans-serif",
+        SutonnyMJ: 'SutonnyMJ',
       },
       boxShadow: {
-        'sub_menu': '0 0 15px -5px rgba(0, 0, 0, 0.2)',
+        sub_menu: '0 0 15px -5px rgba(0, 0, 0, 0.2)',
+      },
+      height: {
+        svh: '100svh',
       },
       colors: {
         'theme-offwhite': '#ededed',
         'theme-dark': '#121212',
         'theme-color': '#0B7ED3',
         'theme-secondary': '#0b7ed333',
-        'warning': '#ffa70b',
-        'danger': '#d34053',
-        'success': '#219653',
-        'info': '#6577f3',
-
+        warning: '#ffa70b',
+        danger: '#d34053',
+        success: '#219653',
+        info: '#6577f3',
+        'custom-focus': '#007af7',
         current: 'currentColor',
         transparent: 'transparent',
         white: '#FFFFFF',
@@ -41,12 +61,12 @@ export default {
           ...colors.red,
           DEFAULT: '#FB5454',
         },
-        body: '#64748B',
-        bodydark: '#AEB7C0',
-        bodydark1: '#DEE4EE',
-        bodydark2: '#8A99AF',
-        primary: '#3C50E0',
-        secondary: '#80CAEE',
+        // body: '#64748B',
+        // bodydark: '#AEB7C0',
+        // bodydark1: '#DEE4EE',
+        // bodydark2: '#8A99AF',
+        // primary: '#3C50E0',
+        // secondary: '#80CAEE',
         stroke: '#E2E8F0',
         gray: {
           ...colors.gray,
@@ -77,7 +97,6 @@ export default {
         // success: '#219653',
         // danger: '#D34053',
         // warning: '#FFA70B',
-
       },
       fontSize: {
         'title-xxl': ['44px', '55px'],
@@ -211,6 +230,7 @@ export default {
         35: '8.75rem',
         70: '17.5rem',
         90: '22.5rem',
+        96: '24rem',
         550: '34.375rem',
         300: '18.75rem',
       },
@@ -238,7 +258,11 @@ export default {
       content: {
         'icon-copy': 'url("../images/icon/icon-copy-alt.svg")',
       },
-      transitionProperty: { width: 'width', stroke: 'stroke' },
+      transitionProperty: {
+        width: 'width',
+        stroke: 'stroke',
+        height: 'max-height',
+      },
       borderWidth: {
         6: '6px',
       },
@@ -264,16 +288,29 @@ export default {
       },
       keyframes: {
         shimmer: {
-          "0%": { backgroundPositionX: "180%" },
-          "100%": { backgroundPositionX: "-20%" },
+          '0%': { backgroundPositionX: '180%' },
+          '100%': { backgroundPositionX: '-20%' },
+        },
+        scaleIn: {
+          '0%': { opacity: '0', transform: 'scale(0)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
         },
       },
       animation: {
-        shimmer: "shimmer 1s ease-in-out infinite",
-        "pulse-custom": "pulse-custom 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        shimmer: 'shimmer 1s ease-in-out infinite',
+        'pulse-custom':
+          'pulse-custom 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        scaleIn: 'scaleIn 0.4s ease-out',
       },
     },
   },
-  plugins: [],
-}
-
+  plugins: [
+    require('tailwind-scrollbar'),
+    function ({ addUtilities }) {
+      addUtilities({
+        '.direction-rtl': { direction: 'rtl' },
+        '.direction-ltr': { direction: 'ltr' },
+      });
+    },
+  ],
+};

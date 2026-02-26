@@ -1,79 +1,145 @@
-import { useFormContext } from "react-hook-form";
-import DefaultInput from "../components/Forms/DefaultInput";
-import { useDispatch, useSelector } from 'react-redux';
+import { useForm, FormProvider } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { login } from "../features/auth/authSlice";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-const API_URL = import.meta.env.VITE_SERVER_URL;
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+import LoginInput from "../components/Forms/LoginInput";
+import SvgIcon from "../components/icons/SvgIcon";
+import { usePostLoginMutation } from "../features/dashboard/dashboardQuerySlice";
+import { initSocket } from "../helper/socket";
+
+// const API_URL = import.meta.env.VITE_SERVER_URL;
 
 const Login = () => {
-    const {
-        handleSubmit
-    } = useFormContext();
-    const dispatch = useDispatch()
-    const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
+  const methods = useForm();
+  const { handleSubmit } = methods;
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const auth = useSelector((state) => state.auth);
+  const [ postLogin ] = usePostLoginMutation()
 
-    const auth = useSelector((state) => state.auth); // Get auth state from Redux
+  useEffect(() => {
+    if (auth.token) {
+      navigate("/");
+    }
+  }, [auth.token, navigate]);
 
-    useEffect(() => {
-        if (auth.token) {
-            navigate("/"); // Redirect to home if already logged in
-        }
-    }, [auth.token, navigate]);
+  const onSubmit = async (data) => {
+    try {
+      const response = await postLogin(data).unwrap();
+      if (response.token) {
+        dispatch(
+          login({ token: response.token, user: response.user })
+        );
+        initSocket(response.token);
+        navigate("/");
+        // window.location.reload();
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Login Failed",
+          text: "Invalid credentials",
+          confirmButtonColor: "#3B82F6",
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: error?.data?.error || "Something went wrong",
+        confirmButtonColor: "#3B82F6",
+      });
+    }
+  };
 
-    const onSubmit = async (data) => {
-        console.log(data);
+  return (
+    <FormProvider {...methods}>
+      <section className="sm:h-[100svh] md:h-screen w-full flex items-center justify-center bg-gradient-to-b from-white to-blue-100 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="w-full h-full sm:h-auto md:max-w-md bg-[#ddeffe] rounded-lg shadow-lg border-b-8 border-[#ffa500] flex flex-col">
+          {/* Header */}
+          <div className="bg-[#007af7] p-6 sm:p-8 md:p-6 text-center sm:rounded-t-xl rounded-b-[40px] md:rounded-b-none relative min-h-[200px] md:min-h-[150px] flex flex-col items-center justify-center">
+            <img
+              src="/saharaITnewlogo.svg"
+              alt="Logo"
+              className="mx-auto w-[16rem] md:w-[12rem] filter brightness-0 invert"
+            />
+            <p className="text-white text-xs md:text-sm mt-2 md:mt-3 font-lato">
+              কওমি মাদরাসার জন্য একটি পূর্ণ সমাধান
+            </p>
+            <img
+              src="/QMMSoftIcon.svg"
+              alt="Icon"
+              className="absolute top-2 right-2 w-[13rem] md:w-[6rem] opacity-10 filter brightness-0 invert"
+            />
+          </div>
 
-        try {
-            // Make the POST request to the API
-            const response = await axios.post(
-                `${API_URL}/api/users/login`,
-                data,
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                }
-            );
-            if (response.status === 200) {
-                console.log(response.data.token);
-
-                dispatch(login({ token: response.data.token, user: response.data.user }));
-                navigate('/');
-                console.log('Login successful:', response.data);
-            } else {
-                console.log('Login failed:', response.data);
-            }
-        } catch (error) {
-            console.error('Error during login request:', error);
-        }
-    };
-
-    return (
-        <section className="bg-gray-50">
-            <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-                <div className="w-full bg-white rounded-lg shadow max-w-[400px]">
-                    <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-                        <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl">
-                            Login to your account
-                        </h1>
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                            <div className="space-y-2 md:space-y-2">
-                                <DefaultInput label={"School ID"} type={'number'} placeholder={"Enter School ID"} registerKey={"school_id"} />
-                                <DefaultInput label={"Username"} type={'text'} placeholder={"Username"} registerKey={"username"} />
-                                <DefaultInput label={"Password"} type={'password'} placeholder={"Password"} registerKey={"password"} />
-                            </div>
-
-                            <div className="mt-5">
-                                <button type="submit" className="text-white bg-gradient-to-r from-green-400 via-green-500 to-green-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-green-300  shadow-lg shadow-green-500/50 font-medium rounded-lg text-sm px-5 py-2.5 text-center mb-2 block w-full ">Login</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+          {/* Form */}
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="p-6 sm:p-8 md:px-12 md:py-6 font-lato flex flex-col gap-5 md:gap-4 md:flex-1 md:justify-between"
+          >
+            <div className="flex justify-center">
+              <img
+                src="/lock.png"
+                alt="Lock Icon"
+                className="w-[3.5rem] md:w-[4rem] mb-2 md:mb-4"
+              />
             </div>
-        </section>
-    )
-}
+
+            <div className="flex flex-col gap-4 md:gap-4">
+              <LoginInput
+                label="মাদ্রাসার কোড :"
+                type="number"
+                placeholder="Madrasa Code"
+                registerKey="school_id"
+                icon="FaPhone"
+              />
+
+              <LoginInput
+                label="ইউজার নাম :"
+                type="text"
+                placeholder="Username"
+                registerKey="username"
+                icon="FaUser"
+              />
+
+              <div className="relative">
+                <LoginInput
+                  label="পাসওয়ার্ড :"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Password"
+                  registerKey="password"
+                  icon="FaLock"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2.5 top-[2.5rem] text-gray-400 hover:text-gray-600 text-lg focus:outline-none"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <SvgIcon name="FiEyeOff" size={18} />
+                  ) : (
+                    <SvgIcon name="FaEye" size={18} />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="w-full flex justify-center items-center gap-2 md:gap-1 bg-[#007af7] hover:bg-blue-600 text-white py-2.5 rounded-full md:rounded-md text-base font-semibold md:font-medium transition-all duration-200 md:mt-auto"
+            >
+              <SvgIcon name="FiArrowRight" size={18} />
+              লগিন অথবা সাইন আপ
+            </button>
+          </form>
+        </div>
+      </section>
+    </FormProvider>
+  );
+};
 
 export default Login;
