@@ -138,11 +138,11 @@ export const menuData = [
     route: '/parent-panel',
     icon: 'FaUsers',
     subMenu: [
-      // {
-      //   id: '1',
-      //   name: 'Class Routine',
-      //   route: '/parent-panel',
-      // },
+      {
+        id: '1',
+        name: 'Class Routine',
+        route: '/parent-panel',
+      },
       {
         id: '2',
         name: 'Class Video',
@@ -167,7 +167,7 @@ export const menuData = [
       //   id: '6',
       //   name: 'Online Admission',
       //   route: '/parent-panel/online-admission',
-      // },
+      // }
     ],
   },
   // {

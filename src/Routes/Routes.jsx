@@ -128,6 +128,7 @@ import PaymentFail from '../pages/userpanel/payment/PaymentFail';
 import OwenGuide from './OwenGuide';
 import PaymentRouteGuard from './PaymentRouteGuard';
 import { RequirePermission } from './RequirePermission';
+import StudentAdmissionMessage from '../pages/StudentAdmissionMessage';
 
 const router = createBrowserRouter([
   {
@@ -433,6 +434,17 @@ const router = createBrowserRouter([
                   //   permissionId={permissionsDataList.gate_pass_leave}
                   // >
                   <ComplaintBoxTermsAndConditions pageTitle="Complaint Box Terms and Conditions" />
+
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'online-admission-message',
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.gate_pass_leave}
+                  // >
+                  <StudentAdmissionMessage pageTitle="Online Admission Message" />
 
                   // </RequirePermission>
                 ),
