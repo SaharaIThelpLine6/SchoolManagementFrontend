@@ -72,6 +72,7 @@ import UserFilterModal from './Modals/UserFilterModal';
 import UserSearch from './UserSearch';
 import ReportHeaderModal from '../view/general-information/ReportHeaderModal';
 import TimeSlotsCreateUpdate from '../view/students/class-routine/TimeSlotsCreateUpdate';
+import AdmissionMessageModal from '../view/students/admission/AdmissionMessageModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -243,6 +244,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'STUDENT_COMPLAINT_VIEW' && (
                   <StudentReportView id={id} />
+                )} 
+                 {modalType === 'ONLINE_ADMISSION_MESSAGE_UPDATE' && (
+                  <AdmissionMessageModal id={id} />
                 )}
                 {modalType === 'VIEW_PAYMENT_INFO' && (
                   <PaymentSSLInfoView id={id} />

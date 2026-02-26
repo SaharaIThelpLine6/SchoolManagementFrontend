@@ -136,7 +136,7 @@ export const settingsSlice = createApi({
     updateStudentAdmissionMessage: builder.mutation({
       query: (body) => ({
         url: `student_admission_message`,
-        method: 'POST',
+        method: 'PUT',
         body,
       }),
       invalidatesTags: ['StudentAdmissionMessage'],

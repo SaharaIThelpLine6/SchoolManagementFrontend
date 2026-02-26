@@ -145,6 +145,7 @@ export const userPanelUserInfo = createApi({
         },
       }),
     }),
+
     getStudentComplaintReport: builder.query({
       query: ({ SCID }) => `student_userpanel_report_get/${SCID}`,
     }),
@@ -155,6 +156,11 @@ export const userPanelUserInfo = createApi({
       query: ({ admissionId, sfgnid }) =>
         `get_user_panel_student_admission/${admissionId}/${sfgnid}`,
       providesTags: [],
+    }),
+    getStudentAdmissionMessageForUserPanel: builder.query({
+      query: () => ({
+        url: 'student_admission_message_for_userpanel',
+      }),
     }),
   }),
 });
@@ -184,5 +190,6 @@ export const {
   useGetStudentReportListQuery,
   useGetStudentComplaintReportQuery,
   useGetGrClassRoutineForUserPanelQuery,
-  useGetUserPanelStudentFeeAdmissionsQuery
+  useGetUserPanelStudentFeeAdmissionsQuery,
+  useGetStudentAdmissionMessageForUserPanelQuery
 } = userPanelUserInfo;

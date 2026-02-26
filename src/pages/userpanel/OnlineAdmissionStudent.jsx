@@ -3,17 +3,17 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import Button from '../../components/Button/Button';
 import {
+  useGetStudentAdmissionMessageForUserPanelQuery,
   useGetUserDetailsQuery,
   useGetUserPanelStudentFeeAdmissionsQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
-import useTranslate from '../../utils/Translate';
 import { useDefaultSessionForUserPanel } from '../../hooks/useDefaultSessionForUserPanel';
-import { useEffect } from 'react';
+import useTranslate from '../../utils/Translate';
+import Countdown from './Countdown';
 
 const OnlineAdmissionStudent = () => {
   const methods = useForm();
   const defaultSession = useDefaultSessionForUserPanel();
-
 
   const translate = useTranslate();
   const { setValue } = methods;
@@ -22,6 +22,12 @@ const OnlineAdmissionStudent = () => {
     (state) => state.sessionChange.currentSession
   );
 
+  /* ================= USER DETAILS ================= */
+  const {
+    data: messageData,
+    isLoading: isLoading,
+    isError: isError,
+  } = useGetStudentAdmissionMessageForUserPanelQuery();
   /* ================= USER DETAILS ================= */
   const {
     data: userDetails,
@@ -40,12 +46,8 @@ const OnlineAdmissionStudent = () => {
     isLoading: isFeeLoading,
     error: feeError,
   } = useGetUserPanelStudentFeeAdmissionsQuery(
-    admissionId && sfgnid
-      ? { admissionId, sfgnid }
-      : skipToken
+    admissionId && sfgnid ? { admissionId, sfgnid } : skipToken
   );
-
-
 
   console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
   console.log(currentSession, 'currentSession');
@@ -54,6 +56,7 @@ const OnlineAdmissionStudent = () => {
   if (isUserDetailsLoading) return <div>Loading...</div>;
   if (isUserDetailsError) return <div>User Load Error</div>;
 
+  // API তে পাঠান
   return (
     <FormProvider {...methods}>
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 p-4">
@@ -64,7 +67,42 @@ const OnlineAdmissionStudent = () => {
           </h1>
           {/* <p className="text-gray-600 mt-1">Fill in the student details below</p> */}
         </div>
+        {/* Countdown */}
+        <div className="max-w-4xl mx-auto mb-4">
+          {/* Main White Card */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+            {/* Header */}
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl font-bold text-gray-800">
+                🎓 {translate('Admission Deadline')}
+              </h2>
+              {/* <p className="text-gray-500 mt-2">
+                ভর্তি শেষ হওয়ার আগে দ্রুত সম্পন্ন করুন
+              </p> */}
+            </div>
 
+            {/* Message Section */}
+            {messageData?.data?.Message2ndPart && (
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+                <p className="text-gray-800 font-SolaimanLipi text-lg leading-relaxed text-center">
+                  {messageData?.data?.Message2ndPart}
+                </p>
+              </div>
+            )}
+            {/* Countdown Section */}
+            <div className="bg-gray-50 rounded-xl p-6 my-4 border border-gray-100">
+              <Countdown targetDate="Fri Feb 28 2026 16:30:48 GMT+0600" />
+            </div>
+          </div>
+        </div>
+
+        {/* {messageData?.data.Message1stPart && (
+            <div className="bg-white border border-gray-200 rounded-lg p-5 hover:border-indigo-300 transition-colors">
+              <p className="text-gray-800 font-SolaimanLipi leading-relaxed">
+                {messageData?.data.Message1stPart}
+              </p>
+            </div>
+          )} */}
         <form>
           {/* Form Sections with Accordion-like styling */}
           <div className="space-y-4">
@@ -218,7 +256,6 @@ const OnlineAdmissionStudent = () => {
             </div>
           </div>
         </form>
-
         {/* Bottom Padding for Mobile */}
         <div className="h-20"></div>
       </div>
