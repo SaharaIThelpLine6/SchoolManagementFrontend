@@ -129,6 +129,7 @@ import OwenGuide from './OwenGuide';
 import PaymentRouteGuard from './PaymentRouteGuard';
 import { RequirePermission } from './RequirePermission';
 import StudentAdmissionMessage from '../pages/StudentAdmissionMessage';
+import UserNotice from '../pages/UserNotice';
 
 const router = createBrowserRouter([
   {
@@ -406,6 +407,14 @@ const router = createBrowserRouter([
                 element: (
                   // <RequirePermission permissionId={permissionsDataList.class}>
                   <ClassVideo pageTitle="Class Video" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'user-notice',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <UserNotice pageTitle="User Notice" />
                   // </RequirePermission>
                 ),
               },

@@ -141,6 +141,56 @@ export const settingsSlice = createApi({
       }),
       invalidatesTags: ['StudentAdmissionMessage'],
     }),
+    getUserNotices: builder.query({
+      query: ({ page = 1, limit = 10, UserCode, UserName, UserTypeID, SessionID }) => {
+        const params = new URLSearchParams();
+
+        params.append('page', page);
+        params.append('limit', limit);
+
+        if (UserCode) params.append('UserCode', UserCode);
+        if (UserName) params.append('UserName', UserName);
+        if (UserTypeID) params.append('UserTypeID', UserTypeID);
+        if (SessionID) params.append('SessionID', SessionID);
+
+        return `/user_notice?${params.toString()}`;
+      },
+      providesTags: ['UserNotice'],
+    }),
+    createUserNotice: builder.mutation({
+      query: (body) => ({
+        url: '/user_notice',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['UserNotice'],
+
+    }),
+
+    updateUserNotice: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/user_notice/${id}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['UserNotice'],
+
+    }),
+
+    deleteUserNotice: builder.mutation({
+      query: (id) => ({
+        url: `user_notice/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['UserNotice'], // ✅ Invalidate list after delete
+    }),
+    getUsersWithType: builder.query({
+      query: ({ id, page = 1, limit = 10, search = "" }) => ({
+        url: `/get_user_data_with_type/${id}`,
+        method: "GET",
+        params: { page, limit, search }, // ✅ query params
+      }),
+    }),
   }),
 });
 
@@ -167,5 +217,10 @@ export const {
   useGetWebSettingsQuery,
   usePostWebsitesettingsMutation,
   useGetStudentAdmissionMessageQuery,
-  useUpdateStudentAdmissionMessageMutation
+  useUpdateStudentAdmissionMessageMutation,
+  useCreateUserNoticeMutation,
+  useGetUserNoticesQuery,
+  useUpdateUserNoticeMutation,
+  useDeleteUserNoticeMutation,
+  useGetUsersWithTypeQuery
 } = settingsSlice;

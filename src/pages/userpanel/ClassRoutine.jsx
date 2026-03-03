@@ -47,9 +47,8 @@ const ClassRoutine = () => {
     apiData.data.forEach((item) => {
       const dayName = item.Day?.DayName;
 
-      const timeSlot = `${item.TimeSlot?.StartTime || ''} - ${
-        item.TimeSlot?.EndTime || ''
-      }`;
+      const timeSlot = `${item.TimeSlot?.StartTime || ''} - ${item.TimeSlot?.EndTime || ''
+        }`;
 
       if (!structuredData[dayName]) structuredData[dayName] = {};
 
@@ -59,6 +58,7 @@ const ClassRoutine = () => {
         class: item.Classes?.SubClass || '',
         isBreak: item.IsBreak,
         isSpecial: item.IsSpecial,
+        Comment: item.Comment,
       };
     });
 
@@ -125,11 +125,10 @@ const ClassRoutine = () => {
                 <button
                   key={day.DayID}
                   onClick={() => setActiveDay(day.DayName)}
-                  className={`px-4 py-2 rounded-lg ${
-                    activeDay === day.DayName
-                      ? 'bg-green-700 text-white'
-                      : 'bg-white text-gray-700 hover:bg-green-100'
-                  }`}
+                  className={`px-4 py-2 rounded-lg ${activeDay === day.DayName
+                    ? 'bg-green-700 text-white'
+                    : 'bg-white text-gray-700 hover:bg-green-100'
+                    }`}
                 >
                   {day.DayName}
                 </button>
@@ -255,7 +254,15 @@ const ClassRoutine = () => {
                         </div>
                       </div>
                     )}
-
+                    {/* Comment - larger touch target */}
+                    <div className="flex items-center justify-start gap-3 mb-2 pl-2">
+                      <p className="text-sm text-gray-600 py-1.5 font-medium">
+                        {translate('Comment')} :
+                      </p>
+                      <p className="text-sm text-gray-600 py-1.5 font-medium">
+                        {classInfo.Comment}
+                      </p>
+                    </div>
                     {/* Hover & touch feedback glow */}
                     <div className="absolute inset-0 rounded-2xl ring-0 group-active:ring-2 group-active:ring-green-200 group-active:ring-opacity-70 transition-all duration-150 pointer-events-none"></div>
 

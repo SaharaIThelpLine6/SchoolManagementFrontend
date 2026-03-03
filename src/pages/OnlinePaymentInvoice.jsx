@@ -30,8 +30,8 @@ const OnlinePaymentInvoice = ({ pageTitle }) => {
   const pagination = data?.pagination ?? {};
   const totalPages = pagination.totalPages || 1; // ✅ dynamic total pages
 
-  console.log(invoices, 'invoices');
-  console.log(pagination, 'pagination');
+  // console.log(invoices, 'invoices');
+  // console.log(pagination, 'pagination');
 
   const columnsVacationType = [
     {

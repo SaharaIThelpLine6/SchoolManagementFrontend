@@ -18,6 +18,8 @@ const useTranslate = () => {
     SubLedger: 'সাবলেজার',
     'Transaction ID': 'ট্রানজেকশন আইডি',
     'Prayer Break': 'শুক্রবার ছুটি',
+    'User Select': 'ইউজার নির্বাচন করুন',
+    'User Notice': 'ইউজার নোটিশ',
     'Admission Deadline Date': 'ভর্তির সময়সীমা তারিখ',
     'Admission Deadline': 'ভর্তির সময়সীমা',
     'Online Admission Message': 'অনলাইন ভর্তির মেসেজ',

@@ -22,6 +22,8 @@ import {
   useGetLoginTeacherInfoQuery,
   useGetTeacherInfoWhitUserQuery,
 } from '../../../features/teachers/teachersSlice';
+import SearchableMultiDaySelect from '../../../components/Forms/SearchableMultiDaySelect';
+import Textarea from '../../../components/Forms/Textarea';
 
 const ClassRoutineCreateUpdate = ({ id }) => {
   const methods = useForm();
@@ -125,6 +127,7 @@ const ClassRoutineCreateUpdate = ({ id }) => {
         TeacherID: routineData.TeacherID,
         SubClassID: routineData.SubClassID,
         ISPrayerBreak: routineData.IsBreak,
+        Comment: routineData.Comment,
       });
     } else if (!isEditMode && loginTeacherData?.[0]?.UserID) {
       setValue('TeacherID', loginTeacherData[0].UserID);
@@ -155,12 +158,13 @@ const ClassRoutineCreateUpdate = ({ id }) => {
 
   const onSubmit = async (formData) => {
     const payload = {
-      DayID: Number(formData.DayID),
+      DayIDs: (formData.DayIDs),
       TimeSlotID: Number(formData.TimeSlotID),
       TeacherID: Number(formData.TeacherID),
       SubjectID: Number(formData.SubjectID),
       SubClassID: Number(formData.SubClassID),
       ISPrayerBreak: Boolean(formData.ISPrayerBreak),
+      Comment: (formData.Comment),
     };
 
     try {
@@ -173,7 +177,7 @@ const ClassRoutineCreateUpdate = ({ id }) => {
         toast.success(translate('Class routine created successfully'));
       }
 
-      hideModal();
+      // hideModal();
       reset();
     } catch (error) {
       toast.error(translate('Failed to save class routine'));
@@ -206,14 +210,18 @@ const ClassRoutineCreateUpdate = ({ id }) => {
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <DefaultSelect
-              label={translate('Day')}
-              registerKey="DayID"
-              options={daysData}
-              valueField="DayID"
-              nameField="DayName"
-              require={translate('Day is required')}
-            />
+
+            {
+              isEditMode &&
+              <DefaultSelect
+                label={translate('Day')}
+                registerKey="DayID"
+                options={daysData}
+                valueField="DayID"
+                nameField="DayName"
+                require={translate('Day is required')}
+              />
+            }
 
             <DefaultSelect
               label={translate('Time')}
@@ -250,6 +258,17 @@ const ClassRoutineCreateUpdate = ({ id }) => {
               nameField="UserName"
               require={translate('Teacher is required')}
             />
+
+            {
+              !isEditMode &&
+              <SearchableMultiDaySelect
+                label="Day"
+                registerKey="DayIDs"
+                options={daysData}
+                require={true}
+              />
+            }
+            <Textarea registerKey="Comment" label="Comment" />
 
             {/* <SwitcherFour
               name="ISPrayerBreak"

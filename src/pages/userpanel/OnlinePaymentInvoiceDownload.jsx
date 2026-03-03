@@ -1,6 +1,7 @@
 import { useSearchParams } from 'react-router-dom';
 import { useGetInvoiceByTranQuery } from '../../features/userPanel/studentPayment/studentPaymentSlice';
 import OnlinePaymentInvoicePdf from './userpanelPdf/OnlinePaymentInvoicePdf';
+import { useSelector } from 'react-redux';
 
 const SkeletonLine = ({ width = 'w-full' }) => (
   <div className={`h-3 bg-gray-200 rounded ${width} animate-pulse`} />
@@ -10,7 +11,10 @@ const OnlinePaymentInvoiceDownload = () => {
   const [searchParams] = useSearchParams();
   const tranId = searchParams.get('tran_id');
 
+  const { schoolData } = useSelector((state) => state.studentResultPublicView);
+  console.log(schoolData, "schoolData")
   const { data, isLoading, isError } = useGetInvoiceByTranQuery(tranId);
+
 
   if (isLoading) {
     return (
@@ -59,8 +63,13 @@ const OnlinePaymentInvoiceDownload = () => {
   }, {});
 
   const handlePdf = () => {
-       window.print();
-  }
+    const originalTitle = document.title;
+    document.title = `মাসিক-ফি-${schoolData?.InstitutionName}`;
+
+    window.print();
+
+    document.title = originalTitle; // আগের title ফিরিয়ে দাও
+  };
 
   return (
     <>
@@ -69,7 +78,7 @@ const OnlinePaymentInvoiceDownload = () => {
           {/* Header */}
           <div className="text-center">
             <h2 className="text-xl font-semibold">ইনভয়েস</h2>
-            <p className="text-2xl font-bold text-gray-500 mt-1">#{invoice.GOPID}</p>
+            <p className="text-2xl font-bold text-gray-500 mt-1">#{invoice.UFOID}</p>
           </div>
 
           {/* Status */}

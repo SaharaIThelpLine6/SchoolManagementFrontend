@@ -121,6 +121,7 @@ const StudentFeeUserPanel = () => {
   console.log(userDetails, 'userDetails');
   console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
 
+
   const [initPayment, { isLoading }] = useInitPaymentMutation();
   const fees = months?.flatMap((monthId) => {
     const month = monthFeeList.find((m) => m.monthId === monthId);

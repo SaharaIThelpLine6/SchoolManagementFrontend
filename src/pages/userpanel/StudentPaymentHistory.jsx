@@ -21,6 +21,8 @@ const StudentPaymentHistory = () => {
   // API data
   const { data = [], isLoading } = useGetStudentPaymentsQuery();
 
+  console.log(data, "data")
+
   // pagination state
   const [currentPage, setCurrentPage] = useState(1);
 
@@ -68,11 +70,12 @@ const StudentPaymentHistory = () => {
     },
     // { title: translate('Due'), field: 'Due', hozAlign: 'center' },
     { title: translate('Date'), field: 'CreateAt', hozAlign: 'center' },
-    { title: translate('Payment Type'), field: 'Mobile1', hozAlign: 'center',
-       render: (row) => (
-      <span>-</span>
+    {
+      title: translate('Payment Type'), field: 'SlName', hozAlign: 'center',
+      render: (row) => (
+        <span>{row.SlName === "অনলাইন পেমেন্ট" ? row.SlName : "অফলাইন পেমেন্ট"}</span>
       )
-     },
+    },
   ];
 
   return (

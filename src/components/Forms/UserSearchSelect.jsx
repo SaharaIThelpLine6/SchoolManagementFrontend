@@ -2,16 +2,17 @@ import React, { useState, useEffect, useRef } from "react";
 import { useFormContext } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 import bnBijoy2Unicode from "../../utils/conveter";
+import { useGetUsersWithTypeQuery } from "../../features/settings/settingsQuerySlice";
 
-const SearchSelect = ({
+const UserSearchSelect = ({
   label,
-  options = [],
   registerKey,
   require,
-  valueField,
-  nameField,
-  disabled,
+  valueField = "UserID",
+  nameField = "UserName",
+  selectedUserType,
   unicode = false,
+  disabled,
 }) => {
   const {
     register,
@@ -21,63 +22,81 @@ const SearchSelect = ({
   } = useFormContext();
 
   const translate = useTranslate();
+
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [selectedOption, setSelectedOption] = useState(null);
+
   const dropdownRef = useRef(null);
 
   const selectedValue = watch(registerKey);
 
-  const getSelectedLabel = () => {
-    const selected = options.find((o) => o[valueField] === selectedValue);
-    if (!selected) return "";
-    return unicode ? bnBijoy2Unicode(selected[nameField]) : selected[nameField];
-  };
-
-  const filteredOptions = options.filter((option) =>
-    unicode
-      ? bnBijoy2Unicode(option[nameField])
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-      : option[nameField].toLowerCase().includes(searchTerm.toLowerCase())
+  // ✅ Server-side search
+  const { data: apiData = {}, isLoading } = useGetUsersWithTypeQuery(
+    { id: selectedUserType, page, limit: 50, search: searchTerm },
+    { skip: !selectedUserType }
   );
 
+  const options = apiData.data || [];
+
+  // ✅ Sync selected option when form value changes (edit mode support)
+  useEffect(() => {
+    if (selectedValue && options.length) {
+      const found = options.find(
+        (o) => String(o[valueField]) === String(selectedValue)
+      );
+      if (found) {
+        setSelectedOption(found);
+      }
+    }
+  }, [selectedValue, options, valueField]);
+
+  const getSelectedLabel = () => {
+    if (!selectedOption) return "";
+    return unicode
+      ? bnBijoy2Unicode(selectedOption[nameField])
+      : selectedOption[nameField];
+  };
+
   const handleSelect = (value) => {
-    setValue(registerKey, value);
-    const selected = options.find((o) => o[valueField] === value);
-    setSearchTerm(
-      selected
-        ? unicode
-          ? bnBijoy2Unicode(selected[nameField])
-          : selected[nameField]
-        : ""
+    const selected = options.find(
+      (o) => String(o[valueField]) === String(value)
     );
+
+    setValue(registerKey, value);
+    setSelectedOption(selected);
+    setSearchTerm("");
     setIsOpen(false);
   };
 
   const handleToggle = () => {
     if (!disabled) {
-      setIsOpen((prev) => {
-        const next = !prev;
-        if (!next) setSearchTerm("");
-        return next;
-      });
+      setIsOpen((prev) => !prev);
     }
   };
 
+  // ✅ Close dropdown only (do NOT reset searchTerm)
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target)
+      ) {
         setIsOpen(false);
-        setSearchTerm("");
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
     <div className="w-full relative" ref={dropdownRef}>
-      <label className="mb-1 block text-black font-SolaimanLipi">{label}</label>
+      <label className="mb-1 block text-black font-SolaimanLipi">
+        {label} :
+      </label>
 
       <div
         className={`relative border rounded bg-[#EDEDED] border-stroke cursor-pointer font-SolaimanLipi ${disabled ? "cursor-not-allowed opacity-60" : ""
@@ -90,6 +109,7 @@ const SearchSelect = ({
           value={isOpen ? searchTerm : getSelectedLabel()}
           onChange={(e) => {
             setSearchTerm(e.target.value);
+            setPage(1);
             setIsOpen(true);
           }}
           disabled={disabled}
@@ -108,17 +128,30 @@ const SearchSelect = ({
 
       {isOpen && (
         <ul className="absolute z-50 w-full max-h-48 overflow-y-auto bg-white shadow-md border mt-1 rounded text-sm font-SolaimanLipi">
-          {filteredOptions.length ? (
-            filteredOptions.map((option) => (
+          {isLoading ? (
+            <li className="px-4 py-2 text-gray-500">
+              {translate("Loading...")}
+            </li>
+          ) : options.length ? (
+            options.map((option) => (
               <li
                 key={option[valueField]}
                 onClick={() => handleSelect(option[valueField])}
-                className={`px-4 py-2 hover:bg-blue-100 cursor-pointer ${selectedValue === option[valueField] ? "bg-blue-200" : ""
+                className={`px-4 py-2 hover:bg-blue-100 cursor-pointer ${String(selectedValue) ===
+                  String(option[valueField])
+                  ? "bg-blue-200"
+                  : ""
                   }`}
               >
                 {unicode
                   ? bnBijoy2Unicode(option[nameField])
                   : option[nameField]}
+
+                {option.UserCode && (
+                  <span className="text-xs text-gray-500 ml-2">
+                    ({option.UserCode})
+                  </span>
+                )}
               </li>
             ))
           ) : (
@@ -129,6 +162,7 @@ const SearchSelect = ({
         </ul>
       )}
 
+      {/* Hidden input for react-hook-form */}
       <input
         type="hidden"
         {...register(registerKey, { required: require })}
@@ -144,4 +178,4 @@ const SearchSelect = ({
   );
 };
 
-export default SearchSelect;
+export default UserSearchSelect;

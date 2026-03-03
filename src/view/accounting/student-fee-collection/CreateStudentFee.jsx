@@ -801,19 +801,19 @@ const CreateStudentFee = () => {
     return <SubmitLoading />;
   }
 
-const handleClickNavigate = () => {
-  if (filteredSelectedPerStudentFee?.UserID) {
-    navigate(
-      `/accounting/student-fee-collection/state-ment/${filteredSelectedPerStudentFee.UserID}`
-    );
-  } else {
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'No student selected!',
-    });
-  }
-};
+  const handleClickNavigate = () => {
+    if (filteredSelectedPerStudentFee?.UserID) {
+      navigate(
+        `/accounting/student-fee-collection/state-ment/${filteredSelectedPerStudentFee.UserID}`
+      );
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No student selected!',
+      });
+    }
+  };
   return (
     <div className="">
       <FormProvider {...methods}>
@@ -956,14 +956,13 @@ const handleClickNavigate = () => {
                     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
                     {filteredSelectedPerStudentFee?.AdmissionStatus != null && (
                       <span
-                        className={`ml-1 font-bold flex-1 truncate ${
-                          {
+                        className={`ml-1 font-bold flex-1 truncate ${{
                             0: 'text-red-600',
                             1: 'text-green-600',
                             2: 'text-blue-600',
                             3: 'text-yellow-600',
                           }[filteredSelectedPerStudentFee.AdmissionStatus]
-                        }`}
+                          }`}
                       >
                         {
                           {
@@ -1199,7 +1198,7 @@ const handleClickNavigate = () => {
                       placeholder="0"
                       value={
                         studentOtherDuesError ||
-                        !filteredSelectedPerStudentFee?.UserID
+                          !filteredSelectedPerStudentFee?.UserID
                           ? 0
                           : (studentOtherDueData?.totalDue ?? 0)
                       }

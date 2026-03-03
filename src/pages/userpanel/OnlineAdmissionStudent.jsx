@@ -10,6 +10,9 @@ import {
 import { useDefaultSessionForUserPanel } from '../../hooks/useDefaultSessionForUserPanel';
 import useTranslate from '../../utils/Translate';
 import Countdown from './Countdown';
+import Swal from 'sweetalert2';
+import { numberToBanglaWords } from '../../helper/numberToBanglaWords';
+import { useInitPaymentMutation } from '../../features/userPanel/studentPayment/studentPaymentSlice';
 
 const OnlineAdmissionStudent = () => {
   const methods = useForm();
@@ -17,6 +20,7 @@ const OnlineAdmissionStudent = () => {
 
   const translate = useTranslate();
   const { setValue } = methods;
+  const [initPayment] = useInitPaymentMutation();
 
   const currentSession = useSelector(
     (state) => state.sessionChange.currentSession
@@ -49,12 +53,106 @@ const OnlineAdmissionStudent = () => {
     admissionId && sfgnid ? { admissionId, sfgnid } : skipToken
   );
 
-  console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
-  console.log(currentSession, 'currentSession');
-  console.log(userDetails, 'userDetails');
+  const totalFee = studentFeeAdmissionData?.fees?.reduce(
+    (sum, item) => sum + (item.Fee || 0),
+    0
+  );
+
+  console.log(totalFee);
+  console.log(studentFeeAdmissionData?.fees, 'studentFeeAdmissionData');
+  // console.log(currentSession, 'currentSession');
+  // console.log(userDetails, 'userDetails');
+  // console.log(messageData, 'messageData');
+
+
+
+
+  const handlePayment = async () => {
+    try {
+      if (!totalFee) {
+        Swal.fire({
+          title: 'Payment Error',
+          text: 'Invalid payment amount',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+        return;
+      }
+
+      const payload = {
+        UserID: userDetails?.UserID,
+        UserName: userDetails?.UserName,
+        Email: userDetails?.Email,
+        DistrictName: userDetails?.DistrictName,
+        PoliceStationName: userDetails?.PoliceStationName,
+        Mobile1: userDetails?.Mobile1,
+        AdmissionID: userDetails?.AdmissionID,
+        CurrentInvoice: totalFee,
+        InvoiceDiscount: 0,
+        CurrentPaid: totalFee,
+        Due: 0,
+        AmountInWord: numberToBanglaWords(totalFee),
+        studentCode: userDetails?.UserCode,
+        // CreateAt: '2026-01-19T12:21:28.318Z',
+        // Remark: '',
+        // AccountType: '301',
+        // Account: '301001',
+        // smsPermission: false,
+        fees: studentFeeAdmissionData?.fees,
+        feesLists: [
+          {
+            type: 'admission',
+            CurrentInvoice: totalFee || 0,
+            InvoiceDiscount: 0,
+            CurrentPaid: totalFee,
+            Due: 0,
+            items: [],
+            permission: true,
+          },
+        ],
+      };
+      console.log(payload, 'payload');
+      const res = await initPayment({ payload }).unwrap();
+
+      if (res?.gateway_url) {
+        Swal.fire({
+          title: 'Redirecting...',
+          text: 'You are being redirected to the payment gateway',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false,
+        });
+
+        setTimeout(() => {
+          window.location.href = res.gateway_url;
+        }, 2000);
+      } else {
+        Swal.fire({
+          title: 'Payment Failed',
+          text: 'Gateway URL not found',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+      }
+    } catch (err) {
+      const errorMessage =
+        err?.data?.error || err?.data?.message || 'Payment init failed';
+
+      Swal.fire({
+        title: 'Payment Error',
+        text: errorMessage, // 👉 "SSL School Data not found!"
+        icon: 'error',
+        confirmButtonText: 'OK',
+      });
+
+      console.error('Payment Error:', err);
+    }
+  };
 
   if (isUserDetailsLoading) return <div>Loading...</div>;
   if (isUserDetailsError) return <div>User Load Error</div>;
+
+
 
   // API তে পাঠান
   return (
@@ -91,7 +189,7 @@ const OnlineAdmissionStudent = () => {
             )}
             {/* Countdown Section */}
             <div className="bg-gray-50 rounded-xl p-6 my-4 border border-gray-100">
-              <Countdown targetDate="Fri Feb 28 2026 16:30:48 GMT+0600" />
+              <Countdown targetDate={messageData?.data.Message3rdPart} />
             </div>
           </div>
         </div>
@@ -176,70 +274,26 @@ const OnlineAdmissionStudent = () => {
 
               {/* Table Body */}
               <div className="divide-y divide-blue-100">
-                {/* Row 1 */}
-                <div className="grid grid-cols-12 text-sm hover:bg-blue-50/50 transition-colors duration-150">
-                  <div className="p-3 text-center border-r border-blue-100 col-span-2 font-medium">
-                    ১
-                  </div>
-                  <div className="p-3 border-r border-blue-100 col-span-7">
-                    ভর্তি ফি
-                  </div>
-                  <div className="p-3 text-right col-span-3 font-medium">
-                    ২,০০০
-                  </div>
-                </div>
+                {studentFeeAdmissionData?.fees?.map((item, index) => {
+                  return (
+                    <div
+                      key={index}
+                      className="grid grid-cols-12 text-sm hover:bg-blue-50/50 transition-colors duration-150"
+                    >
+                      <div className="p-3 text-center border-r border-blue-100 col-span-2 font-medium">
+                        {index + 1}
+                      </div>
 
-                {/* Row 2 */}
-                <div className="grid grid-cols-12 text-sm hover:bg-blue-50/50 transition-colors duration-150">
-                  <div className="p-3 text-center border-r border-blue-100 col-span-2 font-medium">
-                    ২
-                  </div>
-                  <div className="p-3 border-r border-blue-100 col-span-7">
-                    বার্ষিক ফি (রেজি ভর্তুকি)
-                  </div>
-                  <div className="p-3 text-right col-span-3 font-medium">
-                    ৩,০০০
-                  </div>
-                </div>
+                      <div className="p-3 border-r border-blue-100 col-span-7">
+                        {item.SlName}
+                      </div>
 
-                {/* Row 3 */}
-                <div className="grid grid-cols-12 text-sm hover:bg-blue-50/50 transition-colors duration-150">
-                  <div className="p-3 text-center border-r border-blue-100 col-span-2 font-medium">
-                    ৩
-                  </div>
-                  <div className="p-3 border-r border-blue-100 col-span-7">
-                    মাসিক বেতন
-                  </div>
-                  <div className="p-3 text-right col-span-3 font-medium">
-                    ২,৫০০
-                  </div>
-                </div>
-
-                {/* Row 4 */}
-                <div className="grid grid-cols-12 text-sm hover:bg-blue-50/50 transition-colors duration-150">
-                  <div className="p-3 text-center border-r border-blue-100 col-span-2 font-medium">
-                    ৪
-                  </div>
-                  <div className="p-3 border-r border-blue-100 col-span-7">
-                    অন্যান্য খরচ
-                  </div>
-                  <div className="p-3 text-right col-span-3 font-medium">
-                    ৩০০
-                  </div>
-                </div>
-
-                {/* Row 5 */}
-                <div className="grid grid-cols-12 text-sm hover:bg-blue-50/50 transition-colors duration-150">
-                  <div className="p-3 text-center border-r border-blue-100 col-span-2 font-medium">
-                    ৫
-                  </div>
-                  <div className="p-3 border-r border-blue-100 col-span-7">
-                    বিদ্যুৎ বিল
-                  </div>
-                  <div className="p-3 text-right col-span-3 font-medium">
-                    ৫০০
-                  </div>
-                </div>
+                      <div className="p-3 text-right col-span-3 font-medium">
+                        {item.Fee}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Total */}
@@ -252,7 +306,7 @@ const OnlineAdmissionStudent = () => {
               </div>
             </div>
             <div className="w-full col-span-2">
-              <Button className="w-full">Pay</Button>
+              <Button className="w-full" onClick={handlePayment}>Pay</Button>
             </div>
           </div>
         </form>
