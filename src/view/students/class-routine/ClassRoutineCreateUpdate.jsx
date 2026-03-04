@@ -190,7 +190,10 @@ const ClassRoutineCreateUpdate = ({ id }) => {
 
       // hideModal();
       setSelected([])
-      reset();
+      // 🔥 SubClassID থাকবে, বাকিগুলো reset
+      reset({
+        SubClassID: formData.SubClassID,
+      });
     } catch (error) {
       toast.error(translate('Failed to save class routine'));
       console.error(error);
