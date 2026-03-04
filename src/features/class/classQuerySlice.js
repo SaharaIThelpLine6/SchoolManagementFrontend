@@ -117,12 +117,12 @@ export const classSlice = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.videos.map(({ ID }) => ({
-                type: 'Class_Videos',
-                id: ID,
-              })),
-              { type: 'Class_Videos', id: 'LIST' },
-            ]
+            ...result.videos.map(({ ID }) => ({
+              type: 'Class_Videos',
+              id: ID,
+            })),
+            { type: 'Class_Videos', id: 'LIST' },
+          ]
           : [{ type: 'Class_Videos', id: 'LIST' }],
     }),
 
@@ -179,7 +179,19 @@ export const classSlice = createApi({
     }),
     // ============= Class Routine ===================
     getClassRoutines: builder.query({
-      query: () => `gr_class_routine`,
+      // query function receives params for pagination & filter
+      query: ({ page = 1, limit = 20, SessionID, SubClassID } = {}) => {
+        // build query string dynamically
+        const params = new URLSearchParams();
+
+        params.append('page', page);
+        params.append('limit', limit);
+
+        if (SessionID) params.append('SessionID', SessionID);
+        if (SubClassID) params.append('SubClassID', SubClassID);
+
+        return `gr_class_routine?${params.toString()}`;
+      },
       providesTags: ['Class_Routine'],
     }),
     createClassRoutine: builder.mutation({

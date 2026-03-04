@@ -12,12 +12,13 @@ const SearchableMultiDaySelect = ({
   require = false,
   unicode = false,
   disabled = false,
+  setSelected,
+  selected
 }) => {
   const { setValue, getValues } = useFormContext();
   const translate = useTranslate();
 
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState([]);
 
   // ✅ Load default value once (Edit mode safe)
   useEffect(() => {

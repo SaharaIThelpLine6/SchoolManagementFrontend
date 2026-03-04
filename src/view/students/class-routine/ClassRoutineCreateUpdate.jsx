@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import Button from '../../../components/Button/Button';
@@ -24,6 +24,7 @@ import {
 } from '../../../features/teachers/teachersSlice';
 import SearchableMultiDaySelect from '../../../components/Forms/SearchableMultiDaySelect';
 import Textarea from '../../../components/Forms/Textarea';
+import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
 
 const ClassRoutineCreateUpdate = ({ id }) => {
   const methods = useForm();
@@ -31,11 +32,13 @@ const ClassRoutineCreateUpdate = ({ id }) => {
   const translate = useTranslate();
 
   const isEditMode = Boolean(id);
+  const [selected, setSelected] = useState([]);
 
   /* =========================
      🔹 Queries
   ========================= */
-
+  const { data: sessionData } = useGetSessionsQuery();
+  const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
   const {
     data: daysData = [],
     isLoading: daysLoading,
@@ -142,6 +145,13 @@ const ClassRoutineCreateUpdate = ({ id }) => {
     }
   }, [subClassId, filteredSubjects, setValue]);
 
+  // Default Session
+  useEffect(() => {
+    reset({
+      SessionID: activeSession?.SessionID || "",
+    });
+  }, [activeSession, reset]);
+
   /* =========================
      🔹 Mutations
   ========================= */
@@ -158,13 +168,14 @@ const ClassRoutineCreateUpdate = ({ id }) => {
 
   const onSubmit = async (formData) => {
     const payload = {
-      DayIDs: (formData.DayIDs),
+      DayIDs: formData.DayIDs,
+      SessionID: formData.SessionID,
       TimeSlotID: Number(formData.TimeSlotID),
       TeacherID: Number(formData.TeacherID),
       SubjectID: Number(formData.SubjectID),
       SubClassID: Number(formData.SubClassID),
       ISPrayerBreak: Boolean(formData.ISPrayerBreak),
-      Comment: (formData.Comment),
+      Comment: formData.Comment,
     };
 
     try {
@@ -178,6 +189,7 @@ const ClassRoutineCreateUpdate = ({ id }) => {
       }
 
       // hideModal();
+      setSelected([])
       reset();
     } catch (error) {
       toast.error(translate('Failed to save class routine'));
@@ -224,6 +236,14 @@ const ClassRoutineCreateUpdate = ({ id }) => {
             }
 
             <DefaultSelect
+              label={translate('Session')}
+              registerKey="SessionID"
+              options={sessionData || []}
+              valueField="SessionID"
+              nameField="SessionName"
+              require={translate('Session is required')}
+            />
+            <DefaultSelect
               label={translate('Time')}
               registerKey="TimeSlotID"
               options={timeSlotOptions || []}
@@ -258,17 +278,19 @@ const ClassRoutineCreateUpdate = ({ id }) => {
               nameField="UserName"
               require={translate('Teacher is required')}
             />
+            <Textarea registerKey="Comment" label="Comment" />
 
             {
               !isEditMode &&
               <SearchableMultiDaySelect
                 label="Day"
                 registerKey="DayIDs"
+                setSelected={setSelected}
+                selected={selected}
                 options={daysData}
                 require={true}
               />
             }
-            <Textarea registerKey="Comment" label="Comment" />
 
             {/* <SwitcherFour
               name="ISPrayerBreak"
