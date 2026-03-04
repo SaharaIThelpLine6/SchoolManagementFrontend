@@ -97,7 +97,7 @@ const Header = () => {
       {mobileMenuOpen && (
         <div className="px-4 pb-4 flex flex-col gap-3 sm:hidden origin-top animate-scaleFadeIn">
           <h2 className="text-center text-base font-semibold text-gray-800">
-            {bnBijoy2Unicode(institutionInfo?.InstitutionName) || ""}
+            {institutionInfo?.InstitutionName || ""}
           </h2>
           <form className="w-full relative max-w-[250px]">
             <svg

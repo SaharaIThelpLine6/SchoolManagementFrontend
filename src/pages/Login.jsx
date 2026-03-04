@@ -1,7 +1,7 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../features/auth/authSlice";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import LoginInput from "../components/Forms/LoginInput";
@@ -135,6 +135,16 @@ const Login = () => {
               <SvgIcon name="FiArrowRight" size={18} />
               লগিন অথবা সাইন আপ
             </button>
+
+            <p className="text-center text-sm text-gray-600 mt-2">
+              পাসওয়ার্ড ভুলে গেছেন?{' '}
+              <Link
+                to={`/forget_password`}
+                className="text-blue-600 font-medium hover:underline hover:text-blue-700"
+              >
+                পাসওয়ার্ড রিসেট করুন
+              </Link>
+            </p>
           </form>
         </div>
       </section>

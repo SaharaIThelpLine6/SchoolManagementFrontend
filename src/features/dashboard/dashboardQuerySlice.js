@@ -64,6 +64,31 @@ export const dashboardSlice = createApi({
         body: data,
       }),
     }),
+
+    postForgetPassword: builder.mutation({
+      query: (data) => ({
+        url: "/forget_password",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    postVerifyOTP: builder.mutation({
+      query: (data) => ({
+        url: "/verify_otp",
+        method: "POST",
+        body: data,
+      }),
+    }),
+    postResetPassword: builder.mutation({
+      query: (data) => ({
+        url: "/reset_password",
+        method: "POST",
+        body: data,
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('passwordreset_token')}`,
+        },
+      }),
+    }),
   }),
 });
 
@@ -78,4 +103,7 @@ export const {
   usePostLoginMutation,
   usePostUserSingleImageUploadMutation,
   usePostUserMultipleImagesUploadMutation,
+  usePostForgetPasswordMutation,
+  usePostVerifyOTPMutation,
+  usePostResetPasswordMutation,
 } = dashboardSlice;

@@ -23,6 +23,7 @@ import DefaultInput from "../components/Forms/DefaultInput";
 import ReportByIDSerial from "../view/students/reports/result-reports/ReportByIDSerial";
 import ShortFormatReport from "../view/students/reports/result-reports/ShortFormatReport";
 import AdmissionFormWithResult from "../view/students/reports/result-reports/AdmissionFormWithResult";
+import DailyAttendenceList from "../view/students/reports/result-reports/DailyAttendenceList";
 
 const AverageVReport = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -93,6 +94,14 @@ const AverageVReport = ({ pageTitle }) => {
           "ExamID",
           "ClassID",
           "Optional",
+          "UserCode",
+        ].includes(fieldName);
+      case 8:
+        return [
+          "ReportID",
+          "SessionID",
+          "ExamID",
+          "SubClassID",
         ].includes(fieldName);
 
       default:
@@ -155,7 +164,8 @@ const AverageVReport = ({ pageTitle }) => {
       exam_id: formData.ExamID,
       residential_id: formData.RDID,
       language_id: formData.id,
-      is_active: formData.IsActive
+      is_active: formData.IsActive,
+      usercode: formData.UserCode
     };
     Object.keys(params).forEach(
       (key) =>
@@ -182,6 +192,7 @@ const AverageVReport = ({ pageTitle }) => {
           <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">
             {translate(pageTitle)}
           </h1>
+          
 
           <FormProvider {...methods}>
             <form
@@ -195,7 +206,7 @@ const AverageVReport = ({ pageTitle }) => {
                 registerKey="ReportID"
                 valueField="ReportID"
                 options={resultReports.filter((r) =>
-                  [1, 2, 3, 4, 5, 6, 7].includes(r.ReportID)
+                  [1, 2, 3, 4, 5, 6, 7, 8].includes(r.ReportID)
                 )}
                 type="number"
                 require="This Field is required"
@@ -250,6 +261,7 @@ const AverageVReport = ({ pageTitle }) => {
                   unicode={true}
                 />
               )}
+              {/*  */}
 
               {shouldShowFields("RDID") && (
                 <DefaultSelect
@@ -290,16 +302,13 @@ const AverageVReport = ({ pageTitle }) => {
                   />
                 </div>
               )}
-              {shouldShowFields("DefaultInput") && (
+              {shouldShowFields("UserCode") && (
                 <div className="flex flex-col md:flex-row gap-4 ">
                   <DefaultInput
-                    registerKey="Fee"
-                  // label={`${translate("Fee")}: `}
+                    registerKey="UserCode"
+                    label={`${translate("User Code")}: `}
                   />
-                  <DefaultInput
-                    registerKey="Fee"
-                  // label={`${translate("Fee")}: `}
-                  />
+                  
                 </div>
               )}
 
@@ -376,18 +385,80 @@ const AverageVReport = ({ pageTitle }) => {
 
           {reportData && selectedReportID === 6 && (
             <div className="">
-              <div className="w-full relative max-w-full overflow-x-auto">
-                <div className="min-w-[800px]">
+              <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                <div className="max-w-[750px] mx-auto">
                   <AdmissionFormWithResult reportData={reportData} query={queryParams} />
                 </div>
               </div>
-              <div className="flex justify-end mt-2">
+              <div className="flex justify-end mt-2 print:hidden">
                 <Button onClick={() => window.print()}>
                   {translate("Print")}
                 </Button>
               </div>
-              <div className="w-full relative max-w-full">
-                <AdmissionFormWithResult reportData={reportData} query={queryParams} />
+              <div className="w-full relative max-w-full print_canvas">
+                <div className="min-w-[750px]  mx-auto">
+                  <AdmissionFormWithResult reportData={reportData} query={queryParams} />
+                </div>
+              </div>
+            </div>
+          )}
+
+           {reportData && selectedReportID === 7 && (
+            <div className="">
+              <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                <div className="max-w-[750px] mx-auto">
+                  <AdmissionFormWithResult reportData={reportData} query={queryParams} />
+                </div>
+              </div>
+              <div className="flex justify-end mt-2 print:hidden">
+                <Button onClick={() => window.print()}>
+                  {translate("Print")}
+                </Button>
+              </div>
+              <div className="w-full relative max-w-full print_canvas">
+                <div className="min-w-[750px]  mx-auto">
+                  <AdmissionFormWithResult reportData={reportData} query={queryParams} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {reportData && selectedReportID === 8 && (
+            <div className="">
+              <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                <div className="mx-auto">
+                  <DailyAttendenceList reportData={reportData} query={queryParams} />
+                </div>
+              </div>
+              <div className="flex justify-end mt-2 print:hidden">
+                <Button onClick={() => window.print()}>
+                  {translate("Print")}
+                </Button>
+              </div>
+              <div className="w-full relative max-w-full print_canvas">
+                <div className="mx-auto">
+                  <DailyAttendenceList reportData={reportData} query={queryParams} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {reportData && selectedReportID === 10 && (
+            <div className="">
+              <div className="w-full relative max-w-full overflow-x-auto print:hidden">
+                <div className="max-w-[750px] mx-auto">
+                  <AdmissionFormWithResult reportData={reportData} query={queryParams} />
+                </div>
+              </div>
+              <div className="flex justify-end mt-2 print:hidden">
+                <Button onClick={() => window.print()}>
+                  {translate("Print")}
+                </Button>
+              </div>
+              <div className="w-full relative max-w-full print_canvas">
+                <div className="min-w-[750px]  mx-auto">
+                  <AdmissionFormWithResult reportData={reportData} query={queryParams} />
+                </div>
               </div>
             </div>
           )}

@@ -64,7 +64,7 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
         {
           printableStudentList && printableStudentList.length &&
           printableStudentList && printableStudentList.length && printableStudentList.map((printableStudentDetails) => (
-            <div className={`w-[250px] h-[360px] m-0 overflow-hidden border border-[#000] relative print-id-card ${layoutId == 2 ? 'rounded-[20px]' : null}`}>
+            <div className={`w-[240px] h-[360px] m-0 overflow-hidden border border-[#000] relative print-id-card ${layoutId == 2 ? 'rounded-[20px]' : null}`}>
               {
                 layoutId == 1 ? (
                   <React.Fragment>
@@ -153,9 +153,9 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
                           })}
                         </div>
                       </div>
-                      <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
+                      <div className="w-[100px] h-[30px] absolute bottom-0 right-0">
                         <img className='object-cover h-full mx-auto' src={convert_logto_buffer(printableStudentDetails?.SignaturePrincipal)} alt="" />
-                        <p> প্রিন্সিপাল স্বাক্ষর </p>
+                        <p className='text-[12px] text-center'> {printableStudentDetails.PrincipalName} স্বাক্ষর </p>
                       </div>
 
 
@@ -188,9 +188,9 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
                           })}
                         </div>
                       </div>
-                       <div className="w-[100px] h-[60px] absolute bottom-[5px] right-[5px]">
+                      <div className="w-[100px] h-[30px] absolute bottom-0 right-0">
                         <img className='object-cover h-full mx-auto' src={convert_logto_buffer(printableStudentDetails?.SignaturePrincipal)} alt="" />
-                        <p> প্রিন্সিপাল স্বাক্ষর </p>
+                        <p className='text-[12px] text-center'> {printableStudentDetails.PrincipalName} স্বাক্ষর </p>
                       </div>
 
 
@@ -224,9 +224,9 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
                           })}
                         </div>
                       </div>
-                       <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
+                      <div className="w-[100px] h-[30px] absolute bottom-0 right-0">
                         <img className='object-cover h-full mx-auto' src={convert_logto_buffer(printableStudentDetails?.SignaturePrincipal)} alt="" />
-                        <p> প্রিন্সিপাল স্বাক্ষর </p>
+                        <p className='text-[12px] text-center'> {printableStudentDetails.PrincipalName} স্বাক্ষর </p>
                       </div>
 
 
@@ -260,9 +260,9 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
                           })}
                         </div>
                       </div>
-                       <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
+                      <div className="w-[100px] h-[30px] absolute bottom-0 right-0">
                         <img className='object-cover h-full mx-auto' src={convert_logto_buffer(printableStudentDetails?.SignaturePrincipal)} alt="" />
-                        <p> প্রিন্সিপাল স্বাক্ষর </p>
+                        <p className='text-[12px] text-center'> {printableStudentDetails.PrincipalName} স্বাক্ষর </p>
                       </div>
 
 
@@ -296,9 +296,9 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
                           })}
                         </div>
                       </div>
-                       <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
+                      <div className="w-[100px] h-[30px] absolute bottom-0 right-0">
                         <img className='object-cover h-full mx-auto' src={convert_logto_buffer(printableStudentDetails?.SignaturePrincipal)} alt="" />
-                        <p> প্রিন্সিপাল স্বাক্ষর </p>
+                        <p className='text-[12px] text-center'> {printableStudentDetails.PrincipalName} স্বাক্ষর </p>
                       </div>
 
 
@@ -332,9 +332,9 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
                           })}
                         </div>
                       </div>
-                       <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
+                      <div className="w-[100px] h-[30px] absolute bottom-0 right-[0px]">
                         <img className='object-cover h-full mx-auto' src={convert_logto_buffer(printableStudentDetails?.SignaturePrincipal)} alt="" />
-                        <p>  {printableStudentDetails?.PrincipalName} স্বাক্ষর </p>
+                        <p className='text-[12px] text-center'> {printableStudentDetails.PrincipalName} স্বাক্ষর </p>
                       </div>
 
 
