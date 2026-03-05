@@ -129,7 +129,8 @@ export const userReportsSlice = createApi({
         start_id,
         end_id,
         residential_id,
-        is_active
+        is_active,
+        usercode,
       }) => {
         const params = new URLSearchParams();
 
@@ -142,6 +143,7 @@ export const userReportsSlice = createApi({
         if (end_id !== undefined) params.append('end_id', end_id);
         if (residential_id !== undefined) params.append('residential_id', residential_id);
         if (is_active !== undefined) params.append('is_active', is_active);
+        if (usercode !== undefined) params.append('usercode', usercode);
 
         return `/avarageV_report?${params.toString()}`;
       },

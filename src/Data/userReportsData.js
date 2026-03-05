@@ -83,6 +83,10 @@ export const resultReports = [
     ReportID: 7,
     ReportName: '7. ভর্তি ফরম আইডি দিয়ে',
   },
+   {
+    ReportID: 8,
+    ReportName: '8. প্রাপ্ত নম্বার অনুসারে হাজিরা খাতা',
+  },
 ];
 
 export const genders = [

@@ -170,7 +170,8 @@ const StudentIdCardPrint = ({ pageTitle }) => {
 
         return newRow;
       });
-
+      console.log(updatedSelectedRows);
+      
       dispatch(setPrintableStudentList(updatedSelectedRows));
       // showModal('', 'STUDENT_ID_CARD', checkboxState);
       setTimeout(() => {
@@ -1035,9 +1036,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
             </button>
           ))}
         </div>
-
-
-
+        
         <FormProvider {...methods}>
           <form className="w-full space-y-4 hidden_in_print" onSubmit={handleSubmit(onSubmit)}>
             <p className='mt-4 font-bold text-[18px]'>{checkboxState.length == 0 ? "সর্বাধিক ৫টি এন্ট্রি নির্বাচন করুন" : checkboxState.length < 5 ? `আরও ${convertToBanglaDisplay(String(5 - checkboxState.length))}টি ফিল্ড নির্বাচন করতে পারবেন` : "সর্বোচ্চ এন্ট্রি নির্বাচন করা হয়েছে"}</p>
@@ -1202,7 +1201,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
           onPageChange={setCurrentPage}
         />
       </div>
-      <div className='print_canvas'>
+      <div className=''>
         <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} />
       </div>
     </div>

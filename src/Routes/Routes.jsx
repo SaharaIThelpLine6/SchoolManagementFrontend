@@ -130,8 +130,13 @@ import PaymentRouteGuard from './PaymentRouteGuard';
 import { RequirePermission } from './RequirePermission';
 import StudentAdmissionMessage from '../pages/StudentAdmissionMessage';
 import UserNotice from '../pages/UserNotice';
+import ForgetPassword from '../pages/ForgetPassword';
 
 const router = createBrowserRouter([
+    {
+    path: '/forget_password',
+    element: <ForgetPassword />,
+  },
   {
     path: '/login',
     element: <Login />,

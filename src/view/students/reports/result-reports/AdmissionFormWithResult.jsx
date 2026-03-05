@@ -30,7 +30,7 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
             {
                 reportData?.result.length > 0 && reportData.result.map(maritData => (
                     <React.Fragment>
-                        <div className="max-w-[750px] pt-[100px] lg:pt-0 px-2 lg:px-0 relative mx-auto">
+                        <div className="w-full relative px-[30px] py-[30px]">
                             <div className="pt-4 pb-1 px-0">
                                 <div className="header text-center border-b-2 border-black">
                                     <h1 className='text-[24px]'>{instutionInfo?.InstitutionName}</h1>
@@ -38,7 +38,7 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                     <p className='text-[14px]'>{instutionInfo?.ContactNumber}</p>
                                 </div>
                                 <div className="body pt-3">
-                                    <div className='flex justify-between gap-[40px] items-center mb-6 flex-wrap lg:flex-nowrap'>
+                                    <div className='flex justify-between gap-[40px] items-center mb-6 flex-nowrap'>
                                         <div className="card border border-black w-full pt-5 px-2 pb-3 relative" style={{ alignSelf: "start" }}>
                                             <div className="label absolute top-[1px] left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-black bg-white">
                                                 <p className='text-[12px] py-1 px-4'>বিগত তথ্য</p>
@@ -118,7 +118,7 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                         বিনীত নিবেদন এই যে, আমি রাহাতুল জান্নাত মহিলা মাদরাসা এর যাবতীয় কানুন ও নীতিমালা মেনে চলার অঙ্গীকারে আবদ্ধ হয়ে ভর্তি হওয়ার জন্য বিনীত আবেদন করছি।
 
                                     </p>
-                                    <div className="flex gap-3 flex-wrap lg:flex-nowrap font-bold">
+                                    <div className="flex gap-3 flex-nowrap font-bold">
                                         <div className="box border border-black w-full  md:w-[45%] px-4 py-2 ">
                                             <p className="text-[18px] leading-[20px] whitespace-nowrap mb-3">নাম: {maritData.UserName}</p>
                                             <p className="text-[18px] leading-[20px] whitespace-nowrap mb-3">পিতার নাম: {maritData.FatherName}</p>
@@ -206,10 +206,10 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                
+
                                                 {maritData.SubSonkha > 6 &&
                                                     Array.from({ length: maritData.SubSonkha - 6 }).map((_, index) => {
-                                                        const subIndex = index + 6; 
+                                                        const subIndex = index + 6;
                                                         return (
                                                             <tr key={subIndex}>
                                                                 <td className="border border-black pl-2 text-[20px]">
@@ -230,10 +230,43 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                             </tbody>
                                         </table>
                                     </div>
+                                    <div className="grid grid-cols-4 pt-4">
+                                        <p className="text-[18px] font-bold">সর্বমোট প্রাপ্ত নম্বর : 569</p>
+                                        <p className="text-[18px] font-bold">গড় নম্বর : 94.83</p>
+                                        <p className="text-[18px] font-bold">বিভাগ : মুমতাজ</p>
+                                        <p className="text-[18px] font-bold">মেধাস্থান : 0</p>
+                                    </div>
+                                    <div className="grid grid-cols-4 mt-[20px]">
+                                        <p className="text-[18px] col-span-3">যে বিভাগে/জামাতে ভর্তি হবে ইচ্ছুক :............................................................ </p>
+                                        <p className="text-[18px]">স্বাক্ষর :.............</p>
+                                    </div>
+                                    <p className="text-[18px] mt-4">দারুল ইকামা/শ্রেণী শিক্ষকের মতামত :</p>
 
                                     <div className="text-end mt-6">
-                                        <p className='border-t-2 border-black inline-block'>অভিভাবকের স্বাক্ষর</p>
+                                        <p className='border-t-2 border-black inline-block text-[16px]'>অভিভাবকের স্বাক্ষর</p>
                                     </div>
+                                    <div className="text-center">
+                                        <h3 className="text-[20px] border-[2px] border-black font-bold inline-block py-2 px-2 rounded-[4px]">অফিসের অংশ</h3>
+                                    </div>
+                                    <div className="grid grid-cols-4">
+                                        <p className="text-[18px] col-span-3">নিরীক্ষকের মন্তব্য ..........................................................................................................  </p>
+                                        <p className="text-[18px]">স্বাক্ষর ও তাং :................................</p>
+                                    </div>
+                                    <h4 className="text-[18px] font-bold mt-2">* নাযিমে তালিমাতের মন্তব্য :</h4>
+                                    <p className="text-[16px] mt-[16px] leading-[28px]">আমি আবেদনকারীকে ................................................................. জামাতে ভর্তির উপযুক্ত মনে করছি/করছি না, তাকে ................................................................ জামাতে ভর্তি হওয়ার পরামর্শ দিচ্ছি।</p>
+                                    <div className="text-end mt-6">
+                                        <p className='border-t-2 border-black border-dotted inline-block text-[16px] font-bold'>নাযিমে তালীমাতের স্বাক্ষর/সীল</p>
+                                    </div>
+                                    <h4 className="text-[18px] font-bold mt-2">* মুহতামিমের মঞ্জুরী :</h4>
+                                    <p className="text-[16px] mt-[16px] leading-[28px]">
+                                        আবেদনকারীকে ....................................................................... জামাতে ভর্তির আবেদন মঞ্জুর করা হল।
+                                        ভর্তি ফি.......................টাকা, মাসিক খোরাকি.......................টাকা, বেতন.......................টাকা,
+                                        আবাসিক চার্জ/অন্যান্য.......................টাকা নির্ধারণ করা হল।
+                                    </p>
+                                    <div className="text-end mt-6">
+                                        <p className='border-t-2 border-black border-dotted inline-block text-[16px] font-bold'>মুহতামিম সাহেবের স্বাক্ষর/সীল</p>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
