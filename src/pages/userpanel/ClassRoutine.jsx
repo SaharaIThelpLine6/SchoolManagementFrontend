@@ -16,6 +16,7 @@ const ClassRoutine = () => {
     isError,
   } = useGetGrClassRoutineForUserPanelQuery();
 
+
   const [routineData, setRoutineData] = useState({});
   const [viewMode, setViewMode] = useState('day');
   const [activeDay, setActiveDay] = useState('');

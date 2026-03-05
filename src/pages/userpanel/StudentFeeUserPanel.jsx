@@ -116,10 +116,18 @@ const StudentFeeUserPanel = () => {
     }
   }, [feeLandData]);
 
-  console.log(monthFeeList, 'monthFeeList');
-  console.log(feeLandData, 'feeLandData');
-  console.log(userDetails, 'userDetails');
-  console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
+  // console.log(monthFeeList, 'monthFeeList');
+  // console.log(feeLandData, 'feeLandData');
+  // console.log(userDetails, 'userDetails');
+  // console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
+
+  const SessionIDMatch =
+    userDetails?.SessionID === activeSession?.SessionID;
+
+
+  // console.log(userDetails?.SessionID, "userDetails");
+  // console.log(activeSession?.SessionID, "activeSession");
+  // console.log(SessionIDMatch, "SessionIDMatch");
 
 
   const [initPayment, { isLoading }] = useInitPaymentMutation();
@@ -157,6 +165,19 @@ const StudentFeeUserPanel = () => {
 
   const handlePayment = async () => {
     try {
+
+
+      if (!SessionIDMatch) {
+        Swal.fire({
+          title: 'Payment Error',
+          text: 'Session not match',
+          icon: 'error',
+          confirmButtonText: 'OK',
+        });
+        return;
+      }
+
+
       const checkAmount = totalFee * months?.length;
       if (!checkAmount) {
         Swal.fire({
@@ -279,14 +300,17 @@ const StudentFeeUserPanel = () => {
                 </div>
               </div>
             </div>
-            <MultiMonthSelect
-              label="Select Months"
-              registerKey="months"
-              options={monthFeeList}
-              valueField="monthId"
-              nameField="monthName"
-              unicode={true}
-            />
+            {
+              SessionIDMatch &&
+              <MultiMonthSelect
+                label="Select Months"
+                registerKey="months"
+                options={monthFeeList}
+                valueField="monthId"
+                nameField="monthName"
+                unicode={true}
+              />
+            }
 
             <div className="max-w-2xl mx-auto bg-gradient-to-b from-blue-50 to-white rounded-xl border border-blue-200 shadow-md overflow-hidden relative z-10">
               {/* Table Header */}

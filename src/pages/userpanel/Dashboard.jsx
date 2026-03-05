@@ -296,7 +296,7 @@ const Dashboard = () => {
                     <path d="M11 7h-4" />
                   </svg>
                 </div>
-                <h4 className={titleClass}>হোমওয়ার্ক / বাড়ির কাজ</h4>
+                <h4 className={titleClass}>হোমওয়ার্ক / ডায়েরী</h4>
               </Link>
 
               <Link
