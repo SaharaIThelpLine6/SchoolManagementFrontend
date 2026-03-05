@@ -162,6 +162,11 @@ export const userPanelUserInfo = createApi({
         url: 'student_admission_message_for_userpanel',
       }),
     }),
+    // ============= Class Routine day ===================
+    getClassRoutineDaysForUserPanel: builder.query({
+      query: () => `gr_days`,
+      providesTags: ['Days'],
+    }),
   }),
 });
 
@@ -191,5 +196,6 @@ export const {
   useGetStudentComplaintReportQuery,
   useGetGrClassRoutineForUserPanelQuery,
   useGetUserPanelStudentFeeAdmissionsQuery,
-  useGetStudentAdmissionMessageForUserPanelQuery
+  useGetStudentAdmissionMessageForUserPanelQuery,
+  useGetClassRoutineDaysForUserPanelQuery
 } = userPanelUserInfo;

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useGetClassRoutineDaysQuery } from '../../features/class/classQuerySlice';
-import { useGetGrClassRoutineForUserPanelQuery } from '../../features/userPanel/userInfo/userInfoQuerySlice';
+import { useGetClassRoutineDaysForUserPanelQuery, useGetGrClassRoutineForUserPanelQuery } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import useTranslate from '../../utils/Translate';
 
 const ClassRoutine = () => {
@@ -8,7 +7,9 @@ const ClassRoutine = () => {
   /* ============================
      Fetch Days From Backend
   ============================ */
-  const { data: dayData = [] } = useGetClassRoutineDaysQuery();
+  const { data: dayData = [] } = useGetClassRoutineDaysForUserPanelQuery();
+  console.log(dayData, "dayData")
+
 
   const {
     data: apiData,
@@ -73,8 +74,22 @@ const ClassRoutine = () => {
     new Set(Object.values(routineData).flatMap((d) => Object.keys(d)))
   ).sort();
 
-  if (isLoading) return <p>Loading class routine...</p>;
-  if (isError) return <p>Error loading data.</p>;
+
+  if (isLoading) return <p className="p-4 text-center">লোড হচ্ছে...</p>;
+  if (isError)
+    return (
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <div className="bg-white border border-red-200 rounded-xl shadow-md p-6 text-center max-w-md w-full">
+          <div className="text-red-500 text-3xl mb-2">⚠️</div>
+          <h2 className="text-lg font-semibold text-gray-800">
+            ক্লাস রুটিন পাওয়া যায়নি
+          </h2>
+          <p className="text-gray-500 text-sm mt-1">
+            এই সেশনের ক্লাস রুটিন বর্তমানে উপলব্ধ নেই।
+          </p>
+        </div>
+      </div>
+    );
 
   return (
     <div className="min-h-screen p-4 md:p-8 mb-20">
@@ -117,7 +132,6 @@ const ClassRoutine = () => {
             </button>
           </div> */}
         </div>
-
         {/* Day Selector (Dynamic) */}
         {viewMode === 'day' && (
           <div className="mb-8">
