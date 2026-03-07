@@ -128,10 +128,10 @@ export const userTypeSlice = createApi({
     //
 
     updateUser: builder.mutation({
-      query: ({ id, data }) => ({
+      query: ({ id, payload }) => ({
         url: `update_user_info/${id}`,
         method: 'PUT',
-        body: data,
+        body: payload,
       }),
       invalidatesTags: ['Users'],
     }),

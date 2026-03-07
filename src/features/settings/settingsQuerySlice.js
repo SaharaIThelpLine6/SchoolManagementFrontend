@@ -184,6 +184,22 @@ export const settingsSlice = createApi({
       }),
       invalidatesTags: ['UserNotice'], // ✅ Invalidate list after delete
     }),
+    deleteUserNotices: builder.mutation({
+      query: (ids) => ({
+        url: 'user_notices',
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }, // ✅ Required for DELETE body
+        body: { ids }, // ✅ wrap in object
+      }),
+      invalidatesTags: ['UserNotice'], // ✅ refresh list after delete
+    }),
+    getUserNotice: builder.mutation({
+      query: (id) => ({
+        url: `user_notice/${id}`,
+        method: 'GET',
+      }),
+      invalidatesTags: ['UserNotice'], // ✅ Invalidate list after delete
+    }),
     getUsersWithType: builder.query({
       query: ({ id, page = 1, limit = 10, search = "" }) => ({
         url: `/get_user_data_with_type/${id}`,
@@ -220,7 +236,9 @@ export const {
   useUpdateStudentAdmissionMessageMutation,
   useCreateUserNoticeMutation,
   useGetUserNoticesQuery,
+  useGetUserNoticeQuery,
   useUpdateUserNoticeMutation,
   useDeleteUserNoticeMutation,
-  useGetUsersWithTypeQuery
+  useGetUsersWithTypeQuery,
+  useDeleteUserNoticesMutation
 } = settingsSlice;

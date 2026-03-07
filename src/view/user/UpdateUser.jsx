@@ -202,33 +202,47 @@ const UpdateUser = ({ singleUserData }) => {
   };
 
   const onSubmit = async (data) => {
-    console.log('Submitting data:', data);
+    console.log("Submitting data:", data);
+
+    // ✅ Date format fix
+    const formattedDate = data.DateOfBirth
+      ? new Date(data.DateOfBirth).toLocaleDateString("en-CA")
+      : "";
+
+    // ✅ Final payload
+    const payload = {
+      ...data,
+      DateOfBirth: formattedDate,
+    };
+
+    console.log("payload:", payload);
+
     try {
       const response = await updateUser({
         id: singleUserData.UserID,
-        data,
+        payload: payload,
       }).unwrap();
 
-      // ✅ Success SweetAlert
       await Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: 'User updated successfully',
+        icon: "success",
+        title: "Success!",
+        text: "User updated successfully",
         timer: 2000,
         showConfirmButton: false,
       });
 
-      reset(); // ✅ Form reset
-      console.log('User updated:', response);
+      reset();
       dispatch(setEditUserID(null));
+
+      console.log("User updated:", response);
     } catch (err) {
-      // ✅ Error SweetAlert
       Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: err?.message || 'Something went wrong!',
+        icon: "error",
+        title: "Oops...",
+        text: err?.data?.message || "Something went wrong!",
       });
-      console.error('Error creating user:', err);
+
+      console.error("Error updating user:", err);
     }
   };
 
@@ -269,28 +283,28 @@ const UpdateUser = ({ singleUserData }) => {
             </h2>
 
             <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                <DefaultSelect
-                  type="number"
-                  label="User Type"
-                  options={userType}
-                  registerKey="UserTypeID"
-                  valueField="ID"
-                  nameField="TypeName"
-                  require="User Type Field is required!"
-                  labelColor="text-red-500"
-                />
-                <DefaultInput
-                  label="User Code"
-                  type="number"
-                  placeholder="100149"
-                  registerKey="UserCode"
-                  require="Dakhela is required!"
-                  // codeSetting={true}
-                  labelColor="text-red-500"
-                  // defaultValue={userCodeData ? userCodeData : ''}
-                  defaultValue={singleUserData?.UserCode || ''}
-                  disable
-                />
+              <DefaultSelect
+                type="number"
+                label="User Type"
+                options={userType}
+                registerKey="UserTypeID"
+                valueField="ID"
+                nameField="TypeName"
+                require="User Type Field is required!"
+                labelColor="text-red-500"
+              />
+              <DefaultInput
+                label="User Code"
+                type="number"
+                placeholder="100149"
+                registerKey="UserCode"
+                require="Dakhela is required!"
+                // codeSetting={true}
+                labelColor="text-red-500"
+                // defaultValue={userCodeData ? userCodeData : ''}
+                defaultValue={singleUserData?.UserCode || ''}
+                disable
+              />
 
               <DefaultSelect
                 label="Gender"
@@ -327,86 +341,86 @@ const UpdateUser = ({ singleUserData }) => {
                 defaultValue={singleUserData?.MotherName || ''}
               />
 
-                <DatePickerOne
-                  dateCalender="জন্ম তারিখ"
-                  registerKey="DateOfBirth"
-                  require="Required!"
-                  className="w-full"
-                  placeholder="DD-MM-YYYY"
-                />
-                <DefaultInput
-                  label="বয়স"
-                  type="text"
-                  placeholder="Enter your age ..."
-                  registerKey="age"
-                  className="w-20"
-                  defaultValue={ageValue?.years ?? ''}
-                  disable
-                />
+              <DatePickerOne
+                dateCalender="জন্ম তারিখ"
+                registerKey="DateOfBirth"
+                require="Required!"
+                className="w-full"
+                placeholder="DD-MM-YYYY"
+              />
+              <DefaultInput
+                label="বয়স"
+                type="text"
+                placeholder="Enter your age ..."
+                registerKey="age"
+                className="w-20"
+                defaultValue={ageValue?.years ?? ''}
+                disable
+              />
 
-                <DefaultInput
-                  label="NID/জন্ম নিবন্ধন নং"
-                  type="text"
-                  registerKey="NIDNO"
-                  placeholder="Enter your NID No ..."
-                  defaultValue={singleUserData?.NIDNO || ''}
-                />
+              <DefaultInput
+                label="NID/জন্ম নিবন্ধন নং"
+                type="text"
+                registerKey="NIDNO"
+                placeholder="Enter your NID No ..."
+                defaultValue={singleUserData?.NIDNO || ''}
+              />
 
-                <PhoneNumberInput
-                  label={
-                    <span className="text-red-500">মোবাইল ১* (SMS যাবে)</span>
-                  }
-                  registerKey="Mobile1"
-                  require={true}
-                  minLength={11}
-                  maxLength={11}
-                  allowedPrefixes={[
-                    '013',
-                    '014',
-                    '015',
-                    '016',
-                    '017',
-                    '018',
-                    '019',
-                  ]}
-                  defaultValue={singleUserData?.Mobile1 || ''}
-                />
-                <DefaultSelect
-                  label="সম্পর্ক"
-                  type="number"
-                  options={studentRelation}
-                  valueField="RelationID"
-                  nameField="RelationName"
-                  registerKey="Relationship1"
-                  className="w-36"
-                />
+              <PhoneNumberInput
+                label={
+                  <span className="text-red-500">মোবাইল ১* (SMS যাবে)</span>
+                }
+                registerKey="Mobile1"
+                require={true}
+                minLength={11}
+                maxLength={11}
+                allowedPrefixes={[
+                  '013',
+                  '014',
+                  '015',
+                  '016',
+                  '017',
+                  '018',
+                  '019',
+                ]}
+                defaultValue={singleUserData?.Mobile1 || ''}
+              />
+              <DefaultSelect
+                label="সম্পর্ক"
+                type="number"
+                options={studentRelation}
+                valueField="RelationID"
+                nameField="RelationName"
+                registerKey="Relationship1"
+                className="w-36"
+              />
 
-                <PhoneNumberInput
-                  label="মোবাইল ২"
-                  registerKey="Mobile2"
-                  // require={true}
-                  minLength={11}
-                  maxLength={11}
-                  allowedPrefixes={[
-                    '013',
-                    '014',
-                    '015',
-                    '016',
-                    '017',
-                    '018',
-                    '019',
-                  ]}
-                  defaultValue={singleUserData?.Mobile2 || ''}
-                />
-                <DefaultSelect
-                  label="সম্পর্ক"
-                  type="number"
-                  options={studentRelation}
-                  valueField="RelationID"
-                  nameField="RelationName"
-                  registerKey="Relationship2"
-                  className="w-36"
-                />
+              <PhoneNumberInput
+                label="মোবাইল ২"
+                registerKey="Mobile2"
+                // require={true}
+                minLength={11}
+                maxLength={11}
+                allowedPrefixes={[
+                  '013',
+                  '014',
+                  '015',
+                  '016',
+                  '017',
+                  '018',
+                  '019',
+                ]}
+                defaultValue={singleUserData?.Mobile2 || ''}
+              />
+              <DefaultSelect
+                label="সম্পর্ক"
+                type="number"
+                options={studentRelation}
+                valueField="RelationID"
+                nameField="RelationName"
+                registerKey="Relationship2"
+                className="w-36"
+              />
 
               <DefaultInput
                 label="ই-মেইল"
