@@ -193,12 +193,12 @@ export const settingsSlice = createApi({
       }),
       invalidatesTags: ['UserNotice'], // ✅ refresh list after delete
     }),
-    getUserNotice: builder.mutation({
+    getUserNotice: builder.query({
       query: (id) => ({
         url: `user_notice/${id}`,
         method: 'GET',
       }),
-      invalidatesTags: ['UserNotice'], // ✅ Invalidate list after delete
+      providesTags: ['UserNotice'],
     }),
     getUsersWithType: builder.query({
       query: ({ id, page = 1, limit = 10, search = "" }) => ({
@@ -236,9 +236,9 @@ export const {
   useUpdateStudentAdmissionMessageMutation,
   useCreateUserNoticeMutation,
   useGetUserNoticesQuery,
-  useGetUserNoticeQuery,
   useUpdateUserNoticeMutation,
   useDeleteUserNoticeMutation,
   useGetUsersWithTypeQuery,
-  useDeleteUserNoticesMutation
+  useDeleteUserNoticesMutation,
+  useGetUserNoticeQuery
 } = settingsSlice;

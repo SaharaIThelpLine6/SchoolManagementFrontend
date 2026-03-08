@@ -131,9 +131,10 @@ import { RequirePermission } from './RequirePermission';
 import StudentAdmissionMessage from '../pages/StudentAdmissionMessage';
 import UserNotice from '../pages/UserNotice';
 import ForgetPassword from '../pages/ForgetPassword';
+import UserPanelNotice from '../pages/userpanel/UserPanelNotice';
 
 const router = createBrowserRouter([
-    {
+  {
     path: '/forget_password',
     element: <ForgetPassword />,
   },
@@ -1100,6 +1101,10 @@ const router = createBrowserRouter([
       {
         path: 'reports-list',
         element: <ReportsList pageTitle="Reports List" />,
+      },
+      {
+        path: 'notice',
+        element: <UserPanelNotice pageTitle="Notice List" />,
       },
       {
         path: 'class-routine',

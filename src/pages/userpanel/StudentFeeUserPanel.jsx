@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
 import { Link, useParams } from 'react-router-dom';
@@ -15,6 +15,7 @@ import {
 import { numberToBanglaWords } from '../../helper/numberToBanglaWords';
 import useTranslate from '../../utils/Translate';
 import MonthlyFeeSkeleton from './skeleton/MonthlyFeeSkeleton';
+import DefaultSelect from '../../components/Forms/DefaultSelect';
 
 const StudentFeeUserPanel = () => {
   const methods = useForm();
@@ -37,6 +38,11 @@ const StudentFeeUserPanel = () => {
   } = useGetUserDetailsQuery(currentSession);
   const { data: sessionData } = useGetSessionUserPanelQuery();
   const activeSession = sessionData?.find((s) => s.SessionStatus === 1);
+
+  useEffect(() => {
+    setValue('SessionID', activeSession?.SessionID || '');
+  }, [activeSession, setValue]);
+
 
   // console.log(activeSession, 'activeSession');
 
@@ -296,7 +302,16 @@ const StudentFeeUserPanel = () => {
                   </svg>
                 </div>
                 <div className="flex justify-start items-center">
-                  <h2>{activeSession?.SessionName}</h2>
+                  {/* <h2>{activeSession?.SessionName}</h2> */}
+                  <DefaultSelect
+                    // label={translate('Session')}
+                    nameField="SessionName"
+                    registerKey="SessionID"
+                    valueField="SessionID"
+                    options={sessionData}
+                    defaultSelect={false}
+                    unicode
+                  />
                 </div>
               </div>
             </div>
