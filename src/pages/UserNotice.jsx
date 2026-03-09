@@ -23,6 +23,7 @@ import {
 import { useGetUserTypesQuery } from "../features/userType/userTypeSlice";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import SvgIcon from "../components/icons/SvgIcon";
+import { useGetSubClassListQuery } from "../features/class/classQuerySlice";
 
 const PAGE_SIZE = 10;
 
@@ -46,6 +47,8 @@ const UserNotice = ({ pageTitle }) => {
   const UserCode = useWatch({ control, name: "UserCode" });
   const UserName = useWatch({ control, name: "UserName" });
   const SessionID = useWatch({ control, name: "SessionID" });
+  const id = useWatch({ control, name: "id" });
+
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -74,6 +77,7 @@ const UserNotice = ({ pageTitle }) => {
   });
 
   const { data: sessionData } = useGetSessionsQuery();
+  const { data: subClassData } = useGetSubClassListQuery();
   const { data: userType = [] } = useGetUserTypesQuery();
   const [deleteUserNotice] = useDeleteUserNoticeMutation();
   const [deleteUserNotices] = useDeleteUserNoticesMutation();
@@ -294,21 +298,22 @@ const UserNotice = ({ pageTitle }) => {
     },
   ];
 
+  const selectData = [
+    { id: 1, name: translate("User Name") },
+    { id: 2, name: translate("User Code") }
+  ]
   return (
     <FormProvider {...method}>
       <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
         {/* Header & Filters */}
         <div className="filter_header border-b border-[#e9edf4] flex flex-col sm:flex-row items-start sm:items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6 gap-4">
           <h3 className="font-SolaimanLipi text-[20px] font-bold">{translate("User Notice")}</h3>
-
-
           <Button onClick={handleOpenModal}>{translate("Create New")}</Button>
-
         </div>
 
         <div className="bg-gray-50 p-4 rounded-lg mb-6">
           <h4 className="font-semibold mb-3">{translate("Filter Options")}</h4>
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
             <DefaultSelect
               label={translate("User Type")}
               options={userType}
@@ -324,17 +329,41 @@ const UserNotice = ({ pageTitle }) => {
               nameField="SessionName"
               registerKey="SessionID"
             />
-            <DefaultInput
-              label={translate("User Code")}
-              registerKey="UserCode"
-              type="number"
-              placeholder={translate("Search by user code...")}
+            {
+              Number(UserTypeID) === 1 &&
+              <DefaultSelect
+                label={"Sub Class"}
+                options={subClassData ?? []}
+                valueField="SubClassID"
+                nameField="SubClass"
+                registerKey="SubClassID"
+              />
+            }
+            <DefaultSelect
+              label={"Select Type"}
+              options={selectData ?? []}
+              valueField="id"
+              nameField="name"
+              registerKey="id"
             />
-            <DefaultInput
-              label={translate("User Name")}
-              registerKey="UserName"
-              placeholder={translate("Search by user name...")}
-            />
+            {
+              Number(id) === 1 &&
+              <DefaultInput
+                label={translate("User Name")}
+                registerKey="UserName"
+                placeholder={translate("Search by user name...")}
+              />
+            }
+            {
+              Number(id) === 2 &&
+              <DefaultInput
+                label={translate("User Code")}
+                registerKey="UserCode"
+                type="number"
+                placeholder={translate("Search by user code...")}
+              />
+            }
+
             <div className="flex items-end">
               <Button variant="secondary" onClick={handleResetFilters} className="w-full">
                 {translate("Reset Filters")}

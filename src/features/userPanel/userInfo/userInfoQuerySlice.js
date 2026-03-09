@@ -149,6 +149,12 @@ export const userPanelUserInfo = createApi({
     getStudentComplaintReport: builder.query({
       query: ({ SCID }) => `student_userpanel_report_get/${SCID}`,
     }),
+    getUserNoticeForUserPanel: builder.query({
+      query: (id) => {
+        if (!id) return ''; // skip করার জন্য safety
+        return `user_notice_user_panel/${id}`;
+      },
+    }),
     getGrClassRoutineForUserPanel: builder.query({
       query: () => `gr_class_routine_for_userpanel`,
     }),
@@ -166,6 +172,16 @@ export const userPanelUserInfo = createApi({
     getClassRoutineDaysForUserPanel: builder.query({
       query: () => `gr_days`,
       providesTags: ['Days'],
+    }),
+    getNoticesForUserPanel: builder.query({
+      query: ({ UserCode, DateFrom, DateTo } = {}) => ({
+        url: `user_panel_notice`,
+        params: {
+          UserCode: UserCode || "",
+          DateFrom: DateFrom || "",
+          DateTo: DateTo || "",
+        },
+      }),
     }),
   }),
 });
@@ -197,5 +213,7 @@ export const {
   useGetGrClassRoutineForUserPanelQuery,
   useGetUserPanelStudentFeeAdmissionsQuery,
   useGetStudentAdmissionMessageForUserPanelQuery,
-  useGetClassRoutineDaysForUserPanelQuery
+  useGetClassRoutineDaysForUserPanelQuery,
+  useGetNoticesForUserPanelQuery,
+  useGetUserNoticeForUserPanelQuery
 } = userPanelUserInfo;

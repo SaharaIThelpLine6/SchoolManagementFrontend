@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, Links, NavLink, useNavigate } from 'react-router-dom';
 import { useViewNotificationMutation } from '../../features/userPanel/panelNotification/panelNotificationQuerySlice';
 import ClickOutside from '../ClickOutside';
 
 const DropdownNotification = ({ notificationList }) => {
+
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
   const navigate = useNavigate();
@@ -11,15 +12,23 @@ const DropdownNotification = ({ notificationList }) => {
   const handleNotificationClick = async (notification) => {
     try {
       await view_notification({ id: notification.ID }).unwrap();
-      // navigate(notification.link);
+
+      if (notification.link) {
+        navigate(notification.link);
+        setDropdownOpen(false); // 🔥 dropdown বন্ধ হবে
+      }
     } catch (error) {
       console.error(error);
+      setDropdownOpen(false); // 🔥 dropdown বন্ধ হবে
 
       // Optional: still navigate even if request fails
 
       // navigate(notification.link);
     }
   };
+
+
+
 
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
@@ -86,22 +95,21 @@ const DropdownNotification = ({ notificationList }) => {
                   notificationList.map((notification) => (
                     <li
                       key={notification.ID}
-                      className={`${
-                        notification.isView == 0
-                          ? 'bg-sky-200 hover:bg-sky-200'
-                          : ''
-                      }`}
+                      className={`${notification.isView == 0
+                        ? 'bg-sky-200 hover:bg-sky-200'
+                        : ''
+                        }`}
                     >
                       <button
                         type="button"
                         className="flex flex-col gap-2.5 border-b border-stroke px-4.5 py-3 w-full text-start"
-                        onClick={() => {
-                          handleNotificationClick(notification);
-                        }}
+                        onClick={() => handleNotificationClick(notification)}
                       >
-                        <p className="text-sm">{notification.message}</p>
+                        <p className="text-sm break-words">
+                          {notification.message}
+                        </p>
 
-                        <p className="text-xs">
+                        <p className="text-xs text-gray-500">
                           {new Date(notification.CreateAt).toLocaleString()}
                         </p>
                       </button>
