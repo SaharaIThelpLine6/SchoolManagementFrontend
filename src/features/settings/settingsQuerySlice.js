@@ -142,7 +142,7 @@ export const settingsSlice = createApi({
       invalidatesTags: ['StudentAdmissionMessage'],
     }),
     getUserNotices: builder.query({
-      query: ({ page = 1, limit = 10, UserCode, UserName, UserTypeID, SessionID }) => {
+      query: ({ page = 1, limit = 10, UserCode, UserName, UserTypeID, SessionID, SubClassID }) => {
         const params = new URLSearchParams();
 
         params.append('page', page);
@@ -152,6 +152,7 @@ export const settingsSlice = createApi({
         if (UserName) params.append('UserName', UserName);
         if (UserTypeID) params.append('UserTypeID', UserTypeID);
         if (SessionID) params.append('SessionID', SessionID);
+        if (SubClassID) params.append('SubClassID', SubClassID);
 
         return `/user_notice?${params.toString()}`;
       },

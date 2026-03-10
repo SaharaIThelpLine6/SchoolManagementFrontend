@@ -41,10 +41,10 @@ const UserNoticeCreateForm = () => {
 
   // Default Session
   useEffect(() => {
-    reset({
-      SessionID: activeSession?.SessionID || "",
-    });
-  }, [mode, activeSession, reset]);
+    if (activeSession?.SessionID) {
+      setValue("SessionID", activeSession.SessionID);
+    }
+  }, [mode, activeSession, setValue]);
 
   const onSubmit = async (data) => {
     try {
@@ -52,8 +52,10 @@ const UserNoticeCreateForm = () => {
 
       const payload = {
         ...data,
-        mode: data.ClassID ? "class" : mode, // যদি ClassID থাকে → class mode
+        mode: mode, // যদি ClassID থাকে → class mode
       };
+
+      console.log(payload, "payload")
 
       // 🔥 আগে API call হবে
       const response = await createUserNotice(payload).unwrap();
@@ -139,6 +141,18 @@ const UserNoticeCreateForm = () => {
                 nameField="SessionName"
                 registerKey="SessionID"
               />
+              {Number(selectedUserType) === 1
+                && (
+                  <DefaultSelect
+                    label={translate("Class/Jammat")}
+                    options={responseData?.subClasses ?? []}
+                    valueField="SubClassID"
+                    nameField="SubClass"
+                    registerKey="SubClassID"
+                    placeholder={translate("Select Class")}
+                    require={"Class is required!"}
+                  />
+                )}
               <UserSearchSelect
                 label="Select User"
                 registerKey="UserID"              // the field name in the form
@@ -180,9 +194,9 @@ const UserNoticeCreateForm = () => {
                 <DefaultSelect
                   label={translate("Class/Jammat")}
                   options={responseData?.subClasses ?? []}
-                  valueField="ID"
+                  valueField="SubClassID"
                   nameField="SubClass"
-                  registerKey="ClassID"
+                  registerKey="SubClassID"
                   placeholder={translate("Select Class")}
                 />
               )}

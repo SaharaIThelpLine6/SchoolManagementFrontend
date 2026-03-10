@@ -167,7 +167,7 @@ const AllMaddrasahPaymentInfo = ({ pageTitle }) => {
       hozAlign: 'center',
     },
     {
-      title: translate('School ID'),
+      title: translate('Maddrasah ID'),
       field: 'SchoolID',
       hozAlign: 'center',
     },

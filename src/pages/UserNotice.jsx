@@ -38,6 +38,7 @@ const UserNotice = ({ pageTitle }) => {
       UserCode: "",
       UserName: "",
       SessionID: "",
+      SubClassID: "",
     },
   });
 
@@ -47,6 +48,7 @@ const UserNotice = ({ pageTitle }) => {
   const UserCode = useWatch({ control, name: "UserCode" });
   const UserName = useWatch({ control, name: "UserName" });
   const SessionID = useWatch({ control, name: "SessionID" });
+  const SubClassID = useWatch({ control, name: "SubClassID" });
   const id = useWatch({ control, name: "id" });
 
 
@@ -60,6 +62,7 @@ const UserNotice = ({ pageTitle }) => {
     UserCode: "",
     UserName: "",
     SessionID: "",
+    SubClassID: "",
   });
 
   const queryParams = {
@@ -69,8 +72,8 @@ const UserNotice = ({ pageTitle }) => {
     ...(filters.UserCode && { UserCode: filters.UserCode }),
     ...(filters.UserName && { UserName: filters.UserName }),
     ...(filters.SessionID && { SessionID: filters.SessionID }),
+    ...(filters.SubClassID && { SubClassID: filters.SubClassID }),
   };
-
   const { data, isError, isLoading, refetch } = useGetUserNoticesQuery(queryParams, {
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
@@ -103,11 +106,12 @@ const UserNotice = ({ pageTitle }) => {
         UserCode: UserCode || "",
         UserName: UserName || "",
         SessionID: SessionID || "",
+        SubClassID: SubClassID || "",
       });
       setCurrentPage(1);
     }, 500);
     return () => clearTimeout(timer);
-  }, [UserTypeID, UserCode, UserName, SessionID]);
+  }, [UserTypeID, UserCode, UserName, SessionID, SubClassID]);
 
   useEffect(() => {
     setFilters((prev) => ({

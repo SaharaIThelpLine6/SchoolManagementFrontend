@@ -168,11 +168,11 @@ export const menuData = [
       //   name: 'Online Admission',
       //   route: '/parent-panel/online-admission',
       // },
-      // {
-      //   id: '7',
-      //   name: 'User Notice',
-      //   route: '/parent-panel/user-notice',
-      // }
+      {
+        id: '7',
+        name: 'User Notice',
+        route: '/parent-panel/user-notice',
+      }
     ],
   },
   // {

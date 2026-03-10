@@ -191,13 +191,13 @@ const StudentPaymentHistoryDetails = () => {
               </h4>
               <div className="space-y-3">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">মোট চালান</span>
+                  <span className="text-gray-600">নির্ধারিত ফি</span>
                   <span className="font-bold">
                     {studentInfo.CurrentInvoice.toLocaleString()} টাকা
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">ছাড়</span>
+                  <span className="text-gray-600">কর্তন</span>
                   <span className="text-red-600">
                     {studentInfo.InvoiceDiscount.toLocaleString()} টাকা
                   </span>
