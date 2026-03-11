@@ -25,7 +25,7 @@ const OnlinePaymentInvoice = ({ pageTitle }) => {
     limit,
     search: searchValue,
   });
-
+  console.log(data, "data")
   const invoices = data?.data ?? [];
   const pagination = data?.pagination ?? {};
   const totalPages = pagination.totalPages || 1; // ✅ dynamic total pages
@@ -84,6 +84,16 @@ const OnlinePaymentInvoice = ({ pageTitle }) => {
       hozAlign: 'center',
       render: (row) => (
         <span className="font-semibold text-green-600">৳{row.TotalAmount}</span>
+      ),
+    },
+    {
+      title: translate('Invoice Type'),
+      field: 'InvoiceType',
+      hozAlign: 'center',
+      render: (row) => (
+        <span className="font-semibold">
+          {row?.InvoiceDetails?.[0]?.InvoiceType?.trim() || "-"}
+        </span>
       ),
     },
     {

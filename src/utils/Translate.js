@@ -18,6 +18,7 @@ const useTranslate = () => {
     SubLedger: 'সাবলেজার',
     'Transaction ID': 'ট্রানজেকশন আইডি',
     'Student Payment History': 'পেমেন্ট তথ্য',
+    'Invoice Type': 'ইনভয়েস ধরণ',
     'Maddrasah Name': 'মাদ্রাসার নাম',
     'Select Type': 'ধরণ নির্বাচন করুন',
     'Maddrasah ID': 'মাদ্রাসার আইডি',

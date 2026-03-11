@@ -112,7 +112,7 @@ const OnlineAdmissionStudent = () => {
         ],
       };
       console.log(payload, 'payload');
-      // const res = await initPayment({ payload }).unwrap();
+      const res = await initPayment({ payload }).unwrap();
 
       if (res?.gateway_url) {
         Swal.fire({
