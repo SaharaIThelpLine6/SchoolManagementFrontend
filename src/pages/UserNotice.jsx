@@ -278,9 +278,9 @@ const UserNotice = ({ pageTitle }) => {
       </div>
     },
     {
-      title: translate("Notice Message"),
+      title: translate("Notice"),
       field: "NoticeMessage",
-      hozAlign: "left",
+      hozAlign: "center",
       width: 300,
       render: (row) => (
         <div className="flex justify-center items-center max-w-xs truncate" title={row.NoticeMessage}>
@@ -306,6 +306,8 @@ const UserNotice = ({ pageTitle }) => {
     { id: 1, name: translate("User Name") },
     { id: 2, name: translate("User Code") }
   ]
+
+
   return (
     <FormProvider {...method}>
       <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
@@ -380,17 +382,13 @@ const UserNotice = ({ pageTitle }) => {
         <div className="block w-full overflow-x-auto">
 
           <div className="flex gap-3 items-center justify-start mb-3">
-
             <div className="text-sm text-gray-600">
               {translate("Total Records")}: {totalRecords}
             </div>
-
             {
               selectedRows.length > 0 &&
-
               <DeleteButton onClick={handleDeletes} />
             }
-
           </div>
 
           <SortableTable columns={columns} data={notices} isFilterColumn={false} />
