@@ -191,7 +191,7 @@ const Header = () => {
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 flex-1 min-w-0">
           <h2 className="text-sm sm:text-base md:text-3xl font-semibold text-gray-800 text-center sm:text-left truncate">
-            {bnBijoy2Unicode(institutionInfo?.InstitutionName) || ""}
+            {institutionInfo?.InstitutionName || ""}
           </h2>
 
           {/* <form className="w-full max-w-[180px] sm:max-w-[220px] md:max-w-[250px] relative">

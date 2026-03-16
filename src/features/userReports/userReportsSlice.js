@@ -230,6 +230,14 @@ export const userReportsSlice = createApi({
         return `edit_delete_record?${params.toString()}`;
       },
     }),
+
+    postResultReportSettings: builder.mutation({
+      query: (body) => ({
+        url: 'save_result_form',
+        method: 'POST',
+        body: body,
+      }),
+    }),
   }),
 });
 
@@ -242,4 +250,5 @@ export const {
   useGetExamReportQuery,
   useGetPointVReportQuery,
   useGetEditDeleteRecordsQuery,
+  usePostResultReportSettingsMutation,
 } = userReportsSlice;

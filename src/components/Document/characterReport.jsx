@@ -19,16 +19,16 @@ function CharacterReport({ report }) {
     }
   }, [institutionInfo]);
   return (
-    <div className="w-full bg-white mx-auto font-SolaimanLipi print_canvas">
+    <div className="w-full bg-white mx-auto font-SolaimanLipi print_canvas px-2">
       <div className="header relative text-center border-b-2 border-black pb-4 mb-6">
         <h2 className="text-[28px] text-black font-bold">
-          {bnBijoy2Unicode(institutionInfo?.InstitutionName)}
+          {institutionInfo?.InstitutionName}
         </h2>
         <p className="text-[18px] font-semibold">
-          {bnBijoy2Unicode(institutionInfo?.Address)}
+          {institutionInfo?.Address}
         </p>
         <p className="text-[18px] font-semibold">
-          {bnBijoy2Unicode(institutionInfo?.AraContactNumber)}
+          {institutionInfo?.AraContactNumber}
         </p>
         <div className="logo absolute top-0 left-0 h-[76px] w-[60px] ">
           <img src={logo} alt="Logo" className="w-full h-auto" />

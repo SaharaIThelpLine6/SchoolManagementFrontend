@@ -4,6 +4,9 @@ import { useGetInstitutionInfoQuery, useGetResidentialQuery } from "../../../../
 import { useGetSessionsQuery } from "../../../../features/session/sessionSlice";
 import ReportHeader from "../../../../components/ReportHeader";
 import bnBijoy2Unicode from "../../../../utils/conveter";
+import parse from 'html-react-parser';
+
+import 'quill/dist/quill.snow.css';
 const AdmissionFormWithResult = ({ reportData, query }) => {
     const [logo, setLogo] = useState(null);
     const { data: instutionInfo } = useGetInstitutionInfoQuery();
@@ -30,9 +33,10 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
             {
                 reportData?.result.length > 0 && reportData.result.map(maritData => (
                     <React.Fragment>
-                        <div className="w-full relative px-[30px] py-[30px]">
+                        <div className="w-full relative px-[30px] pb-[30px] pt-2">
                             <div className="pt-4 pb-1 px-0">
-                                <div className="header text-center border-b-2 border-black">
+                                <div className="relative header text-center border-b-2 border-black min-h-[90px] pb-2">
+                                    <img className="absolute left-0 top-0 h-[80px] w-[80px]" src={logo} alt="logo" />
                                     <h1 className='text-[24px]'>{instutionInfo?.InstitutionName}</h1>
                                     <p className='text-[14px] my-[4px]'>{instutionInfo?.Address}</p>
                                     <p className='text-[14px]'>{instutionInfo?.ContactNumber}</p>
@@ -57,9 +61,9 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                             <div className="label absolute top-[1px] left-1/2 -translate-x-1/2 -translate-y-1/2 border-2 border-black bg-white">
                                                 <p className='text-[12px] py-1 px-4'>বর্তমান তথ্য</p>
                                             </div>
-                                            <p className='text-[14px] mt-1'>শ্রেণি/জামাত: : {reportData.SubClass}</p>
-                                            <p className='text-[14px] mt-1'>শিক্ষাবর্ষ: {maritData.usercode}</p>
-                                            <p className='text-[14px] mt-1'>আইডি নং: {maritData.usercode}</p>
+                                            <p className='text-[14px] mt-1'>শ্রেণি/জামাত: : </p>
+                                            <p className='text-[14px] mt-1'>শিক্ষাবর্ষ: </p>
+                                            <p className='text-[14px] mt-1'>আইডি নং: </p>
                                             {/* {JSON.stringify(residentialData)} */}
                                             <ul className='flex gap-4 mt-1'>
                                                 {
@@ -112,12 +116,14 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                     </div>
 
                                     <p className='text-[18px] mb-2 mt-4 leading-[32px]'>
-                                        মুহতারাম,<br />
+                                        {/* মুহতারাম,<br />
                                         <p className="ml-[30px]">হযরত মুহতামিম সাহেব (দা. বা.)</p>
                                         আসসালামু আলাইকুম ওয়া রহমাতুল্লাহ
-                                        বিনীত নিবেদন এই যে, আমি রাহাতুল জান্নাত মহিলা মাদরাসা এর যাবতীয় কানুন ও নীতিমালা মেনে চলার অঙ্গীকারে আবদ্ধ হয়ে ভর্তি হওয়ার জন্য বিনীত আবেদন করছি।
+                                        বিনীত নিবেদন এই যে, আমি রাহাতুল জান্নাত মহিলা মাদরাসা এর যাবতীয় কানুন ও নীতিমালা মেনে চলার অঙ্গীকারে আবদ্ধ হয়ে ভর্তি হওয়ার জন্য বিনীত আবেদন করছি। */}
 
+                                        {parse(String(reportData?.formSettings?.Description1))}
                                     </p>
+                                    
                                     <div className="flex gap-3 flex-nowrap font-bold">
                                         <div className="box border border-black w-full  md:w-[45%] px-4 py-2 ">
                                             <p className="text-[18px] leading-[20px] whitespace-nowrap mb-3">নাম: {maritData.UserName}</p>
@@ -164,7 +170,7 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
 
                                     </div>
                                     <div className="text-center pt-[20px]">
-                                        <h3 className='font-bold text-[20px] border-[3px] border-black inline-block px-4 py-2'>প্রথম সাময়িক পরীক্ষার ফলাফল</h3>
+                                        <h3 className='font-bold text-[20px] border-[3px] border-black inline-block px-4 py-2'>{reportData.ExamName}</h3>
                                     </div>
                                     <div className="grid grid-cols-2 pt-4 gap-5">
                                         {/* First table */}
@@ -206,23 +212,22 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                                 </tr>
                                             </thead>
                                             <tbody>
-
                                                 {maritData.SubSonkha > 6 &&
                                                     Array.from({ length: maritData.SubSonkha - 6 }).map((_, index) => {
                                                         const subIndex = index + 6;
                                                         return (
                                                             <tr key={subIndex}>
                                                                 <td className="border border-black pl-2 text-[20px]">
-                                                                    {bnBijoy2Unicode(String(maritData[`SubVal${subIndex + 1}`]))}
+                                                                    {maritData[`SubVal${subIndex + 1}`] ? String(maritData[`SubVal${subIndex + 1}`]) : ""}
                                                                 </td>
                                                                 <td className="border border-black pl-2 text-[20px]">
-                                                                    {bnBijoy2Unicode(String(maritData[`SubName${subIndex + 1}`]))}
+                                                                    {maritData[`SubName${subIndex + 1}`] ? String(maritData[`SubName${subIndex + 1}`]) : ''}
                                                                 </td>
                                                                 <td className="border border-black pl-2 text-[20px]">
-                                                                    {bnBijoy2Unicode(String(maritData[`SubPass${subIndex + 1}`]))}
+                                                                    {maritData[`SubPass${subIndex + 1}`] ? String(maritData[`SubPass${subIndex + 1}`]) : ''}
                                                                 </td>
                                                                 <td className="border border-black pl-2 text-[20px]">
-                                                                    {bnBijoy2Unicode(String(maritData[`SubObtained${subIndex + 1}`]))}
+                                                                    { maritData[`SubObtained${subIndex + 1}`] ? String(maritData[`SubObtained${subIndex + 1}`]) : ''}
                                                                 </td>
                                                             </tr>
                                                         );
@@ -248,6 +253,11 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                     <div className="text-center">
                                         <h3 className="text-[20px] border-[2px] border-black font-bold inline-block py-2 px-2 rounded-[4px]">অফিসের অংশ</h3>
                                     </div>
+                                    <div className="mt-4 text-[18px]">
+                                        <p dangerouslySetInnerHTML={{ __html: reportData?.formSettings?.Description2 }} />
+                                        {/* {parse(String(reportData?.formSettings?.Description2))} */}
+                                    </div>
+{/*                                     
                                     <div className="grid grid-cols-4">
                                         <p className="text-[18px] col-span-3">নিরীক্ষকের মন্তব্য ..........................................................................................................  </p>
                                         <p className="text-[18px]">স্বাক্ষর ও তাং :................................</p>
@@ -265,14 +275,11 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                     </p>
                                     <div className="text-end mt-6">
                                         <p className='border-t-2 border-black border-dotted inline-block text-[16px] font-bold'>মুহতামিম সাহেবের স্বাক্ষর/সীল</p>
-                                    </div>
+                                    </div> */}
 
                                 </div>
                             </div>
                         </div>
-
-
-
                     </React.Fragment>
                 ))
             }

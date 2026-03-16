@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { setPageName } from "../features/auth/authSlice";
@@ -12,7 +12,7 @@ import {
   resultReportSizeStatus,
 } from "../Data/userReportsData";
 import { fetchSettingsData } from "../features/settings/settingsSlice";
-import { useGetAverageVReportQuery, useGetUserReportQuery } from "../features/userReports/userReportsSlice";
+import { useGetAverageVReportQuery, useGetUserReportQuery, usePostResultReportSettingsMutation } from "../features/userReports/userReportsSlice";
 import Swal from "sweetalert2";
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import { useGetClassListQuery, useGetSubClassListQuery } from "../features/class/classQuerySlice";
@@ -24,13 +24,15 @@ import ReportByIDSerial from "../view/students/reports/result-reports/ReportByID
 import ShortFormatReport from "../view/students/reports/result-reports/ShortFormatReport";
 import AdmissionFormWithResult from "../view/students/reports/result-reports/AdmissionFormWithResult";
 import DailyAttendenceList from "../view/students/reports/result-reports/DailyAttendenceList";
+import AdmissionDynamicFormWithResult from "../view/students/reports/result-reports/AdmissionDynamicFormWithResult";
+import { useAddStudentMutation } from "../features/onlineAdmission/onlineAdmissionSlice";
 
 const AverageVReport = ({ pageTitle }) => {
   const translate = useTranslate();
   const dispatch = useDispatch();
   const methods = useForm();
   const { status } = useSelector((state) => state.settings);
-
+ const formRef = useRef();
   const { control, handleSubmit } = methods;
 
   const selectedReportID = useWatch({ control, name: "ReportID" });
@@ -121,7 +123,10 @@ const AverageVReport = ({ pageTitle }) => {
   const { data: subclassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
   const { data: residentialData } = useGetResidentialQuery();
-
+  // const [
+  //   updateResultReport,
+  //   { isLoading: resultReportUpdating, isError: resultReportUpdatingError, isSuccess: resultReportUpdateSuccess, data: resultReportUpdatingResponse },
+  // ] = usePostResultReportSettingsMutation();
   useEffect(() => {
     dispatch(setPageName(pageTitle));
     if (status === "idle") {
@@ -185,6 +190,12 @@ const AverageVReport = ({ pageTitle }) => {
 
   // }
 
+  // const handelFromEdit = async () => {
+  //   const content = formRef.current?.getEditorContent();
+  //   await updateResultReport({
+  //     "Description1": content
+  //   }).unwrap()
+  // };
   return (
     <div className="font-SolaimanLipi">
       <div className="flex flex-col gap-3">
@@ -312,9 +323,12 @@ const AverageVReport = ({ pageTitle }) => {
                 </div>
               )}
 
-              <div className="md:col-span-4 flex justify-end">
+              <div className="md:col-span-4 flex justify-end gap-2">
                 <Button type="submit" loading={isFetching}>
                   {translate("Preview")}
+                </Button>
+                <Button onClick={() => window.print()} className="bg-yellow-600">
+                  {translate("Print")}
                 </Button>
               </div>
             </form>
@@ -387,14 +401,10 @@ const AverageVReport = ({ pageTitle }) => {
             <div className="">
               <div className="w-full relative max-w-full overflow-x-auto print:hidden">
                 <div className="max-w-[750px] mx-auto">
-                  <AdmissionFormWithResult reportData={reportData} query={queryParams} />
+                  <AdmissionFormWithResult reportData={reportData} query={queryParams} ref={formRef} />
                 </div>
               </div>
-              <div className="flex justify-end mt-2 print:hidden">
-                <Button onClick={() => window.print()}>
-                  {translate("Print")}
-                </Button>
-              </div>
+            
               <div className="w-full relative max-w-full print_canvas">
                 <div className="min-w-[750px]  mx-auto">
                   <AdmissionFormWithResult reportData={reportData} query={queryParams} />

@@ -191,6 +191,23 @@ export const settingsSlice = createApi({
         params: { page, limit, search }, // ✅ query params
       }),
     }),
+
+
+    createSupportTickets: builder.mutation({
+      query: (body) => ({
+        url: '/support_ticket/create',
+        method: 'POST',
+        body,
+      }),
+      // invalidatesTags: ['UserNotice'],
+
+    }),
+
+
+
+
+
+
   }),
 });
 
@@ -222,5 +239,6 @@ export const {
   useGetUserNoticesQuery,
   useUpdateUserNoticeMutation,
   useDeleteUserNoticeMutation,
-  useGetUsersWithTypeQuery
+  useGetUsersWithTypeQuery,
+  useCreateSupportTicketsMutation,
 } = settingsSlice;

@@ -131,6 +131,7 @@ import { RequirePermission } from './RequirePermission';
 import StudentAdmissionMessage from '../pages/StudentAdmissionMessage';
 import UserNotice from '../pages/UserNotice';
 import ForgetPassword from '../pages/ForgetPassword';
+import SupportTicket from '../pages/SupportTicket';
 
 const router = createBrowserRouter([
     {
@@ -997,6 +998,10 @@ const router = createBrowserRouter([
               {
                 path: 'website-settings',
                 element: <WebsiteSettings pageTitle="Add Login Users" />,
+              },
+              {
+                path: 'support-tickets',
+                element: <SupportTicket pageTitle="Add Login Users" />,
               },
             ],
           },
