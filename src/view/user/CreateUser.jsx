@@ -96,6 +96,15 @@ const CreateUser = ({ pageTitle }) => {
     'UserTypeID',
     'DateOfBirth',
   ]);
+  const formattedDate =
+    DateOfBirth
+      ? new Date(DateOfBirth.getTime() - DateOfBirth.getTimezoneOffset() * 60000)
+        .toISOString()
+        .split("T")[0]
+      : "";
+  // console.log(DateOfBirth, "DateOfBirth")
+  // console.log(formattedDate, "formattedDate")
+
   const ageValue = calculateAge(DateOfBirth);
   // RTK Query hooks
   const { data: codeSettings = [] } = useGetCodeSettingsQuery(undefined, {
@@ -276,7 +285,12 @@ const CreateUser = ({ pageTitle }) => {
   const onSubmit = async (data) => {
     console.log('Submitting data:', data);
     try {
-      const response = await postUser(data).unwrap();
+
+      const payload = {
+        ...data,
+        DateOfBirth: formattedDate
+      }
+      const response = await postUser(payload).unwrap();
 
       // ✅ Success SweetAlert
       await Swal.fire({

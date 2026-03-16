@@ -37,7 +37,6 @@ const MultiMonthSelect = ({
     const hasDue = month.due > 0;
     const isPaid = month.isFullPaid;
 
-    // 🚫 Paid বা Due থাকলে select হবে না
     if (isPaid || hasDue) return;
 
     const exists = selected.find((s) => s[valueField] === month[valueField]);
@@ -96,19 +95,21 @@ const MultiMonthSelect = ({
         {filteredOptions.map((month) => {
           const hasDue = month.due > 0;
           const isPaid = month.isFullPaid;
-
-          // ❌ Paid OR Due → Disabled
           const isDisabled = isPaid || hasDue;
+
+          // ✅ check if already selected
+          const isSelected = selected.some(
+            (s) => s[valueField] === month[valueField]
+          );
 
           return (
             <div
               key={month[valueField]}
               onClick={() => !isDisabled && handleSelect(month)}
               className={`px-3 py-2 flex justify-between items-center
-                ${
-                  isDisabled
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'cursor-pointer hover:bg-gray-100'
+                ${isDisabled
+                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                  : 'cursor-pointer hover:bg-gray-100'
                 }
               `}
             >
@@ -126,7 +127,12 @@ const MultiMonthSelect = ({
                 )}
               </span>
 
-              {!isDisabled && <span className="text-green-600 text-sm">+</span>}
+              {/* ✅ Tick mark or + */}
+              {!isDisabled && (
+                <span className="text-green-600 text-sm">
+                  {isSelected ? '✔' : '+'}
+                </span>
+              )}
             </div>
           );
         })}

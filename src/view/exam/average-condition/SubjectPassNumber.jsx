@@ -61,10 +61,10 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
       subjectAndPassNumberFilter?.ExamId &&
       subjectAndPassNumberFilter?.SubClassId
       ? {
-          SessionID: subjectAndPassNumberFilter?.SessionId,
-          ExamID: subjectAndPassNumberFilter?.ExamId,
-          SubClassID: subjectAndPassNumberFilter?.SubClassId,
-        }
+        SessionID: subjectAndPassNumberFilter?.SessionId,
+        ExamID: subjectAndPassNumberFilter?.ExamId,
+        SubClassID: subjectAndPassNumberFilter?.SubClassId,
+      }
       : skipToken
   );
 
@@ -327,7 +327,6 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
               nameField="SubjectName"
               valueField={"SubjectID"}
               label={translate("Subject") + " :"}
-              unicode={true}
             />
             <DefaultInput
               registerKey="SubjectArabic"
@@ -444,9 +443,9 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
           <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg">
             <div className="text-gray-500 text-xl">
               {subjectAndPassNumberFilter ||
-              (subjectAndPassNumberFilter?.SessionID &&
-                subjectAndPassNumberFilter?.ExamID &&
-                subjectAndPassNumberFilter?.SubClassID)
+                (subjectAndPassNumberFilter?.SessionID &&
+                  subjectAndPassNumberFilter?.ExamID &&
+                  subjectAndPassNumberFilter?.SubClassID)
                 ? translate("No data available for the selected filters")
                 : translate("Please select all filters to view data")}
             </div>

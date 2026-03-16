@@ -208,8 +208,8 @@ const OnlineAdmissionForUserPanel = () => {
   if (isDeleteLoading) {
     return <Loading />;
   }
-const action1Count = rightData.filter((item) => item.Action === 1).length;
-const action2Count = rightData.filter((item) => item.Action === 2).length;
+  const action1Count = rightData.filter((item) => item.Action === 1).length;
+  const action2Count = rightData.filter((item) => item.Action === 2).length;
   // Table component
   const Table = ({ data, selected, side, rightPermission = false }) => (
     <div className="w-full h-[400px] bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
@@ -217,17 +217,17 @@ const action2Count = rightData.filter((item) => item.Action === 2).length;
         <table className="w-full text-sm text-left border-collapse">
           <thead className="bg-gradient-to-r from-blue-50 to-blue-100 text-gray-700 uppercase text-xs">
             <tr className="text-center">
-                {!rightPermission && (
-                  <th className="p-3">
-                <input
-                  type="checkbox"
-                  checked={data.length > 0 && selected.length === data.length}
-                  onChange={() =>
-                    data.forEach((item) => handleSelect(item.ID, side))
-                  }
+              {!rightPermission && (
+                <th className="p-3">
+                  <input
+                    type="checkbox"
+                    checked={data.length > 0 && selected.length === data.length}
+                    onChange={() =>
+                      data.forEach((item) => handleSelect(item.ID, side))
+                    }
                   />
-              </th>
-                )}
+                </th>
+              )}
               <th className="p-3">{translate('User Code')}</th>
               <th className="p-3">{translate('Name')}</th>
               <th className="p-3">{translate('Total')}</th>
@@ -247,13 +247,13 @@ const action2Count = rightData.filter((item) => item.Action === 2).length;
               >
                 {!rightPermission && (
 
-                <td className="p-3">
-                  <input
-                    type="checkbox"
-                    checked={selected.includes(item.ID)}
-                    onChange={() => handleSelect(item.ID, side)}
-                  />
-                </td>
+                  <td className="p-3">
+                    <input
+                      type="checkbox"
+                      checked={selected.includes(item.ID)}
+                      onChange={() => handleSelect(item.ID, side)}
+                    />
+                  </td>
                 )}
 
                 <td className="p-3 font-medium text-gray-700">
@@ -308,7 +308,7 @@ const action2Count = rightData.filter((item) => item.Action === 2).length;
       </div>
     </div>
   );
- const tabs = [
+  const tabs = [
     {
       name: translate('Online Admission'),
       path: '/parent-panel/online-admission',
@@ -322,7 +322,7 @@ const action2Count = rightData.filter((item) => item.Action === 2).length;
     <FormProvider {...method}>
       <div className="font-SolaimanLipi bg-white p-6 rounded-xl shadow-xl">
         {/* Header */}
-             {/* Header */}
+        {/* Header */}
         <div className="border-b border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
           <div className="flex items-center gap-6">
             {tabs.map((tab, index) => {
@@ -333,8 +333,8 @@ const action2Count = rightData.filter((item) => item.Action === 2).length;
                   key={index}
                   to={tab.path}
                   className={`relative pb-2 text-[18px] font-SolaimanLipi font-bold transition-all duration-300 ${isActive
-                      ? 'text-blue-600'
-                      : 'text-gray-500 hover:text-blue-500'
+                    ? 'text-blue-600'
+                    : 'text-gray-500 hover:text-blue-500'
                     }`}
                 >
                   {tab.name}

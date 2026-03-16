@@ -42,6 +42,18 @@ export const studentPaymentSlice = createApi({
         body: payload,
       }),
     }),
+    admissionCheck: builder.query({
+      query: ({ AdmissionID, ClassID, SessionID, UserID }) => ({
+        url: `/admission_check_user_panel`,
+        method: 'GET',
+        params: {
+          AdmissionID,
+          ClassID,
+          SessionID,
+          UserID
+        },
+      }),
+    }),
   }),
 });
 
@@ -51,4 +63,6 @@ export const {
   useInitPaymentMutation,
   useGetInvoiceByTranQuery,
   useGetAllPaymentInvoicesQuery,
+  useAdmissionCheckQuery,
+  useLazyAdmissionCheckQuery
 } = studentPaymentSlice;

@@ -142,7 +142,7 @@ export const settingsSlice = createApi({
       invalidatesTags: ['StudentAdmissionMessage'],
     }),
     getUserNotices: builder.query({
-      query: ({ page = 1, limit = 10, UserCode, UserName, UserTypeID, SessionID }) => {
+      query: ({ page = 1, limit = 10, UserCode, UserName, UserTypeID, SessionID, SubClassID }) => {
         const params = new URLSearchParams();
 
         params.append('page', page);
@@ -152,6 +152,7 @@ export const settingsSlice = createApi({
         if (UserName) params.append('UserName', UserName);
         if (UserTypeID) params.append('UserTypeID', UserTypeID);
         if (SessionID) params.append('SessionID', SessionID);
+        if (SubClassID) params.append('SubClassID', SubClassID);
 
         return `/user_notice?${params.toString()}`;
       },
@@ -183,6 +184,22 @@ export const settingsSlice = createApi({
         method: 'DELETE',
       }),
       invalidatesTags: ['UserNotice'], // ✅ Invalidate list after delete
+    }),
+    deleteUserNotices: builder.mutation({
+      query: (ids) => ({
+        url: 'user_notices',
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }, // ✅ Required for DELETE body
+        body: { ids }, // ✅ wrap in object
+      }),
+      invalidatesTags: ['UserNotice'], // ✅ refresh list after delete
+    }),
+    getUserNotice: builder.query({
+      query: (id) => ({
+        url: `user_notice/${id}`,
+        method: 'GET',
+      }),
+      providesTags: ['UserNotice'],
     }),
     getUsersWithType: builder.query({
       query: ({ id, page = 1, limit = 10, search = "" }) => ({
@@ -240,5 +257,7 @@ export const {
   useUpdateUserNoticeMutation,
   useDeleteUserNoticeMutation,
   useGetUsersWithTypeQuery,
+  useDeleteUserNoticesMutation,
+  useGetUserNoticeQuery,
   useCreateSupportTicketsMutation,
 } = settingsSlice;

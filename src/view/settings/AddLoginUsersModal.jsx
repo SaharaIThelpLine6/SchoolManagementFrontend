@@ -44,31 +44,31 @@ const AddLoginUsersModal = ({ id }) => {
   };
 
   // Check Box handler
- const handleCheckboxChange = async (field) => {
-   setCheckboxes((prev) => ({
-     ...prev,
-     [field]: !prev[field],
-   }));
+  const handleCheckboxChange = async (field) => {
+    setCheckboxes((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
 
-   try {
-     const body = {
-       permissionItem: field,
-       userID: id,
-     };
+    try {
+      const body = {
+        permissionItem: field,
+        userID: id,
+      };
 
-     const response = await updatePermissionCheckedAll(body).unwrap();
+      const response = await updatePermissionCheckedAll(body).unwrap();
 
-     toast.success(response.message || `${field} updated successfully`, {
-       position: "top-right",
-       autoClose: 2000,
-     });
-   } catch (err) {
-     toast.error(err?.data?.error || `Failed to update ${field}`, {
-       position: "top-right",
-       autoClose: 2000,
-     });
-   }
- };
+      toast.success(response.message || `${field} updated successfully`, {
+        position: "top-right",
+        autoClose: 2000,
+      });
+    } catch (err) {
+      toast.error(err?.data?.error || `Failed to update ${field}`, {
+        position: "top-right",
+        autoClose: 2000,
+      });
+    }
+  };
 
 
   const handleToggle = async (row, field) => {
@@ -124,13 +124,12 @@ const AddLoginUsersModal = ({ id }) => {
       render: (row) => (
         <Button
           onClick={() => handleToggle(row, "View")}
-          className={`px-2 w-[90px] py-1 rounded text-white ${
-            row.PermissionView === 1
-              ? "bg-green-500 hover:bg-green-600"
-              : "bg-red-500 hover:bg-red-600"
-          }`}
+          className={`px-2 w-[90px] py-1 rounded text-white ${row.PermissionView === 1
+            ? "bg-green-500 hover:bg-green-600"
+            : "bg-red-500 hover:bg-red-600"
+            }`}
         >
-          {row.PermissionView === 1 ? "Active" : "UnActive"}
+          {row.PermissionView === 1 ? "Active" : "InActive"}
         </Button>
       ),
     },
@@ -142,13 +141,12 @@ const AddLoginUsersModal = ({ id }) => {
       render: (row) => (
         <Button
           onClick={() => handleToggle(row, "Insert")}
-          className={`px-2 w-[90px] py-1 rounded text-white ${
-            row.PermissionInsert === 1
-              ? "bg-green-500 hover:bg-green-600"
-              : "bg-red-500 hover:bg-red-600"
-          }`}
+          className={`px-2 w-[90px] py-1 rounded text-white ${row.PermissionInsert === 1
+            ? "bg-green-500 hover:bg-green-600"
+            : "bg-red-500 hover:bg-red-600"
+            }`}
         >
-          {row.PermissionInsert === 1 ? "Active" : "UnActive"}
+          {row.PermissionInsert === 1 ? "Active" : "InActive"}
         </Button>
       ),
     },
@@ -160,13 +158,12 @@ const AddLoginUsersModal = ({ id }) => {
       render: (row) => (
         <Button
           onClick={() => handleToggle(row, "Edit")}
-          className={`px-2 w-[90px] py-1 rounded text-white ${
-            row.PermissionEdit === 1
-              ? "bg-green-500 hover:bg-green-600"
-              : "bg-red-500 hover:bg-red-600"
-          }`}
+          className={`px-2 w-[90px] py-1 rounded text-white ${row.PermissionEdit === 1
+            ? "bg-green-500 hover:bg-green-600"
+            : "bg-red-500 hover:bg-red-600"
+            }`}
         >
-          {row.PermissionEdit === 1 ? "Active" : "UnActive"}
+          {row.PermissionEdit === 1 ? "Active" : "InActive"}
         </Button>
       ),
     },
@@ -178,13 +175,12 @@ const AddLoginUsersModal = ({ id }) => {
       render: (row) => (
         <Button
           onClick={() => handleToggle(row, "Delete")}
-          className={`px-2 w-[90px] py-1 rounded text-white ${
-            row.PermissionDelete === 1
-              ? "bg-green-500 hover:bg-green-600"
-              : "bg-red-500 hover:bg-red-600"
-          }`}
+          className={`px-2 w-[90px] py-1 rounded text-white ${row.PermissionDelete === 1
+            ? "bg-green-500 hover:bg-green-600"
+            : "bg-red-500 hover:bg-red-600"
+            }`}
         >
-          {row.PermissionDelete === 1 ? "Active" : "UnActive"}
+          {row.PermissionDelete === 1 ? "Active" : "InActive"}
         </Button>
       ),
     },
@@ -214,7 +210,7 @@ const AddLoginUsersModal = ({ id }) => {
             isFilterColumn={false}
             onRowClick={handleRowClick}
             close={setSelectedRow}
-            checkboxes={checkboxes} 
+            checkboxes={checkboxes}
             onCheckboxChange={handleCheckboxChange}
           />
 
