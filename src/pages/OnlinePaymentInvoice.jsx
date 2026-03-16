@@ -92,7 +92,7 @@ const OnlinePaymentInvoice = ({ pageTitle }) => {
       hozAlign: 'center',
       render: (row) => (
         <span className="font-semibold">
-          {row?.InvoiceDetails?.[0]?.InvoiceType?.trim() || "-"}
+          {row?.InvoiceDetails?.[0]?.["InvoiceType "]?.trim() || "-"}
         </span>
       ),
     },

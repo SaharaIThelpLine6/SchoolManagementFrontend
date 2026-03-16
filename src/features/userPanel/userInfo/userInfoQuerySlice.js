@@ -107,6 +107,7 @@ export const userPanelUserInfo = createApi({
         url: `/academic_session_user_panel`,
       }),
     }),
+
     getExamListUserPanel: builder.query({
       query: () => ({
         url: `/exam_list_user_panel`,
@@ -183,6 +184,11 @@ export const userPanelUserInfo = createApi({
         },
       }),
     }),
+    getResidentialsUserPanel: builder.query({
+      query: () => ({
+        url: `/residential_userpanel`,
+      }),
+    }),
   }),
 });
 
@@ -215,5 +221,6 @@ export const {
   useGetStudentAdmissionMessageForUserPanelQuery,
   useGetClassRoutineDaysForUserPanelQuery,
   useGetNoticesForUserPanelQuery,
-  useGetUserNoticeForUserPanelQuery
+  useGetUserNoticeForUserPanelQuery,
+  useGetResidentialsUserPanelQuery
 } = userPanelUserInfo;
