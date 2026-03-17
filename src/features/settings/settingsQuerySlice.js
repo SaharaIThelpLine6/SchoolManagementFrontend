@@ -209,6 +209,24 @@ export const settingsSlice = createApi({
       }),
     }),
 
+    getSupportTicketsList: builder.query({
+      query: ({ type = "", page = 1, limit = 10, search = "" } = {}) => ({
+        url: `/support_ticket/list`,
+        method: "GET",
+        params: { type, page, limit, search }, // ✅ query params
+      }),
+       providesTags: ['SupportTicketList'],
+    }),
+
+    getSupportTicketDetails: builder.query({
+      query: (id ) => ({
+        url: `/support_ticket/details/${id}`,
+        method: "GET"
+      }),
+      providesTags: ['SupportTicketDetails'],
+    }),
+
+
 
     createSupportTickets: builder.mutation({
       query: (body) => ({
@@ -216,7 +234,19 @@ export const settingsSlice = createApi({
         method: 'POST',
         body,
       }),
-      // invalidatesTags: ['UserNotice'],
+      invalidatesTags: ['SupportTicketList'],
+
+    }),
+
+
+    replySupportTickets: builder.mutation({
+      query: ({ id, formData }) => ({
+        url: `/support_ticket/reply/${id}`,
+        method: 'POST',
+        body: formData,
+
+      }),
+      invalidatesTags: ['SupportTicketDetails'],
 
     }),
 
@@ -259,5 +289,8 @@ export const {
   useGetUsersWithTypeQuery,
   useDeleteUserNoticesMutation,
   useGetUserNoticeQuery,
+  useGetSupportTicketsListQuery,
+  useGetSupportTicketDetailsQuery,
   useCreateSupportTicketsMutation,
+  useReplySupportTicketsMutation,
 } = settingsSlice;
