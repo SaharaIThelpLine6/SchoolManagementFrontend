@@ -7,10 +7,10 @@ import Button from '../../components/Button/Button';
 import MultiMonthSelect from '../../components/Forms/MultiMonthSelect';
 import { useInitPaymentMutation } from '../../features/userPanel/studentPayment/studentPaymentSlice';
 import {
-  useGetFeeLandByAdmissionIdUserPanelQuery,
+  useGetFeeLandBySessionIdUserPanelQuery,
   useGetMonthPerStudentsFeeUserPanelQuery,
   useGetSessionUserPanelQuery,
-  useGetUserDetailsQuery,
+  useGetUserSessionDetailsQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import { numberToBanglaWords } from '../../helper/numberToBanglaWords';
 import useTranslate from '../../utils/Translate';
@@ -25,6 +25,7 @@ const StudentFeeUserPanel = () => {
   const { handleSubmit, reset, watch, getValues, setValue } = methods;
 
   const months = watch('months');
+  const SessionID = watch('SessionID');
   console.log(months, 'months');
 
   const currentSession = useSelector(
@@ -35,7 +36,7 @@ const StudentFeeUserPanel = () => {
     data: userDetails,
     isLoading: isuserDetailsLoading,
     isError: isuserDetailsError,
-  } = useGetUserDetailsQuery(currentSession);
+  } = useGetUserSessionDetailsQuery(SessionID);
   const { data: sessionData } = useGetSessionUserPanelQuery();
   const activeSession = sessionData?.find((s) => s.SessionStatus === 1);
 
@@ -46,7 +47,7 @@ const StudentFeeUserPanel = () => {
 
   // console.log(activeSession, 'activeSession');
 
-  // console.log(userDetails, 'userDetails');
+  console.log(userDetails, 'userDetails');
   const data = [];
 
   const admissionId = userDetails?.AdmissionID;
@@ -54,8 +55,8 @@ const StudentFeeUserPanel = () => {
 
   // Fetch student fee admissions data
   const { data: studentFeeAdmissionData } =
-    useGetMonthPerStudentsFeeUserPanelQuery(admissionId, {
-      skip: !admissionId,
+    useGetMonthPerStudentsFeeUserPanelQuery(SessionID, {
+      skip: !SessionID,
     });
   const totalFee =
     studentFeeAdmissionData?.reduce(
@@ -69,8 +70,8 @@ const StudentFeeUserPanel = () => {
     isError,
     isSuccess,
     isLoading: feeIsLoading,
-  } = useGetFeeLandByAdmissionIdUserPanelQuery(admissionId, {
-    skip: !userDetails?.AdmissionID,
+  } = useGetFeeLandBySessionIdUserPanelQuery(SessionID, {
+    skip: !SessionID,
     refetchOnMountOrArgChange: true,
   });
   const monthFeeList = useMemo(() => {
@@ -122,8 +123,8 @@ const StudentFeeUserPanel = () => {
     }
   }, [feeLandData]);
 
-  // console.log(monthFeeList, 'monthFeeList');
-  // console.log(feeLandData, 'feeLandData');
+  console.log(monthFeeList, 'monthFeeList');
+  console.log(feeLandData, 'feeLandData');
   // console.log(userDetails, 'userDetails');
   // console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
 
@@ -173,15 +174,15 @@ const StudentFeeUserPanel = () => {
     try {
 
 
-      if (!SessionIDMatch) {
-        Swal.fire({
-          title: 'Payment Error',
-          text: 'Session not match',
-          icon: 'error',
-          confirmButtonText: 'OK',
-        });
-        return;
-      }
+      // if (!SessionIDMatch) {
+      //   Swal.fire({
+      //     title: 'Payment Error',
+      //     text: 'Session not match',
+      //     icon: 'error',
+      //     confirmButtonText: 'OK',
+      //   });
+      //   return;
+      // }
 
 
       const checkAmount = totalFee * months?.length;
@@ -224,6 +225,7 @@ const StudentFeeUserPanel = () => {
           },
         ],
       };
+
       console.log(payload, 'payload');
       const res = await initPayment({ payload }).unwrap();
 
@@ -315,17 +317,17 @@ const StudentFeeUserPanel = () => {
                 </div>
               </div>
             </div>
-            {
-              SessionIDMatch &&
-              <MultiMonthSelect
-                label="Select Months"
-                registerKey="months"
-                options={monthFeeList}
-                valueField="monthId"
-                nameField="monthName"
-                unicode={true}
-              />
-            }
+            {/* {
+              SessionIDMatch && */}
+            <MultiMonthSelect
+              label="Select Months"
+              registerKey="months"
+              options={monthFeeList}
+              valueField="monthId"
+              nameField="monthName"
+              unicode={true}
+            />
+            {/* } */}
 
             <div className="max-w-2xl mx-auto bg-gradient-to-b from-blue-50 to-white rounded-xl border border-blue-200 shadow-md overflow-hidden relative z-10">
               {/* Table Header */}

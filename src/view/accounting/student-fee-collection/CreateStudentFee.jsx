@@ -814,6 +814,11 @@ const CreateStudentFee = () => {
       });
     }
   };
+
+  console.log(numberToBanglaWords(1500), "check vALUES")
+
+  console.log(feeTotals?.allCurrentDeposit, "feeTotals?.allCurrentDeposit")
+
   return (
     <div className="">
       <FormProvider {...methods}>
@@ -957,11 +962,11 @@ const CreateStudentFee = () => {
                     {filteredSelectedPerStudentFee?.AdmissionStatus != null && (
                       <span
                         className={`ml-1 font-bold flex-1 truncate ${{
-                            0: 'text-red-600',
-                            1: 'text-green-600',
-                            2: 'text-blue-600',
-                            3: 'text-yellow-600',
-                          }[filteredSelectedPerStudentFee.AdmissionStatus]
+                          0: 'text-red-600',
+                          1: 'text-green-600',
+                          2: 'text-blue-600',
+                          3: 'text-yellow-600',
+                        }[filteredSelectedPerStudentFee.AdmissionStatus]
                           }`}
                       >
                         {
@@ -1050,6 +1055,7 @@ const CreateStudentFee = () => {
                 defaultValue={numberToBanglaWords(
                   feeTotals?.allCurrentDeposit ?? ''
                 )}
+
                 disable
                 rows={2}
               />
@@ -1226,7 +1232,7 @@ const CreateStudentFee = () => {
                     onClick={handleClickNavigate}
                     className="max-w-xs px-4 py-2 rounded-lg shadow bg-purple-600 text-white"
                   >
-                    স্টেসমেন্ট
+                    ষ্টেটমেন্ট
                   </Button>
 
 
@@ -1235,7 +1241,7 @@ const CreateStudentFee = () => {
                   </Button>
 
                   <Button onClick={handleMonthlyAttendance} className="max-w-xs px-4 py-2 rounded-lg shadow bg-pink-500 text-white">
-                    খাবার ফির দিন ও ছুটি
+                    খাবার ফি দিন
                   </Button>
                 </div>
               </div>

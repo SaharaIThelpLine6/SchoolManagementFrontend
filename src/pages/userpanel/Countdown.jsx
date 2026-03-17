@@ -1,32 +1,14 @@
 import { useEffect, useState } from "react";
+import { calculateTimeLeft } from "../../utils/calculateTimeLeft";
 
 const Countdown = ({ targetDate }) => {
-  const calculateTimeLeft = () => {
-    const difference = new Date(targetDate).getTime() - new Date().getTime();
-
-    if (difference <= 0) {
-      return null;
-    }
-
-    return {
-      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-      hours: Math.floor(
-        (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-      ),
-      minutes: Math.floor(
-        (difference % (1000 * 60 * 60)) / (1000 * 60)
-      ),
-      seconds: Math.floor(
-        (difference % (1000 * 60)) / 1000
-      ),
-    };
-  };
-
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  const [timeLeft, setTimeLeft] = useState(
+    calculateTimeLeft(targetDate)
+  );
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
+      setTimeLeft(calculateTimeLeft(targetDate));
     }, 1000);
 
     return () => clearInterval(timer);
@@ -34,29 +16,41 @@ const Countdown = ({ targetDate }) => {
 
   if (!timeLeft) {
     return (
-      <div className="text-red-600 font-bold text-lg">
+      <div className="text-red-600 font-bold text-center text-lg sm:text-xl mt-4">
         Time's Up!
       </div>
     );
   }
 
+  const boxStyle =
+    "flex flex-col items-center justify-center bg-gray-100 rounded-xl shadow p-3 sm:p-4 w-16 sm:w-20 md:w-24";
+
+  const numberStyle =
+    "text-lg sm:text-xl md:text-2xl font-bold";
+
+  const labelStyle =
+    "text-[10px] sm:text-xs md:text-sm text-gray-500";
+
   return (
-    <div className="flex gap-4 text-center mt-4">
-      <div>
-        <div className="text-2xl font-bold">{timeLeft.days}</div>
-        <div className="text-sm text-gray-500">Days</div>
+    <div className="flex justify-center gap-2 sm:gap-4 md:gap-6 mt-4 flex-wrap">
+      <div className={boxStyle}>
+        <span className={numberStyle}>{timeLeft.days}</span>
+        <span className={labelStyle}>Days</span>
       </div>
-      <div>
-        <div className="text-2xl font-bold">{timeLeft.hours}</div>
-        <div className="text-sm text-gray-500">Hours</div>
+
+      <div className={boxStyle}>
+        <span className={numberStyle}>{timeLeft.hours}</span>
+        <span className={labelStyle}>Hours</span>
       </div>
-      <div>
-        <div className="text-2xl font-bold">{timeLeft.minutes}</div>
-        <div className="text-sm text-gray-500">Minutes</div>
+
+      <div className={boxStyle}>
+        <span className={numberStyle}>{timeLeft.minutes}</span>
+        <span className={labelStyle}>Minutes</span>
       </div>
-      <div>
-        <div className="text-2xl font-bold">{timeLeft.seconds}</div>
-        <div className="text-sm text-gray-500">Seconds</div>
+
+      <div className={boxStyle}>
+        <span className={numberStyle}>{timeLeft.seconds}</span>
+        <span className={labelStyle}>Seconds</span>
       </div>
     </div>
   );

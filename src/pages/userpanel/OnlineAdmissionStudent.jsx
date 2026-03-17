@@ -14,8 +14,9 @@ import Countdown from './Countdown';
 import Swal from 'sweetalert2';
 import { numberToBanglaWords } from '../../helper/numberToBanglaWords';
 import { useInitPaymentMutation, useLazyAdmissionCheckQuery } from '../../features/userPanel/studentPayment/studentPaymentSlice';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
+import { calculateTimeLeft } from '../../utils/calculateTimeLeft';
 
 const OnlineAdmissionStudent = () => {
   const methods = useForm();
@@ -25,6 +26,9 @@ const OnlineAdmissionStudent = () => {
   const translate = useTranslate();
   const { setValue, watch } = methods;
   const [initPayment] = useInitPaymentMutation();
+  const [hasPermission, setHasPermission] = useState(null);
+  console.log(hasPermission, "hasPermission")
+
 
   const ResidentialStatusId = watch("ResidentialStatusId")
 
@@ -50,6 +54,9 @@ const OnlineAdmissionStudent = () => {
     isLoading: isLoadingMessage,
     isError: isError,
   } = useGetStudentAdmissionMessageForUserPanelQuery();
+  const [timeLeft, setTimeLeft] = useState(
+    calculateTimeLeft(messageData?.data.Message3rdPart)
+  );
   /* ================= USER DETAILS ================= */
   const {
     data: userDetails,
@@ -85,6 +92,36 @@ const OnlineAdmissionStudent = () => {
   // console.log(userDetails, 'userDetails');
   // console.log(messageData, 'messageData');
 
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft(messageData?.data.Message3rdPart));
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [messageData?.data.Message3rdPart]);
+
+  useEffect(() => {
+    const checkPermission = async () => {
+      try {
+        const res = await checkAdmission({
+          AdmissionID: userDetails?.AdmissionID,
+          ClassID: studentFeeAdmissionData?.admissionClassId,
+          SessionID: defaultSession?.SessionID,
+          UserID: userDetails?.UserID
+        }).unwrap();
+
+        setHasPermission(res?.permission === true);
+
+      } catch (error) {
+        setHasPermission(false);
+        console.error(error);
+      }
+    };
+
+    if (userDetails && studentFeeAdmissionData && defaultSession) {
+      checkPermission();
+    }
+  }, [userDetails, studentFeeAdmissionData, defaultSession]);
 
   const handleChangePermission = async () => {
 
@@ -221,6 +258,18 @@ const OnlineAdmissionStudent = () => {
       console.error('Payment Error:', err);
     }
   };
+  let message;
+
+  if (!timeLeft && hasPermission) {
+    // time is over but has permission
+    message = messageData?.data?.Message4thPart;
+  } else if (hasPermission) {
+    // time left and has permission
+    message = messageData?.data?.Message2ndPart;
+  } else {
+    // either no permission, regardless of timeLeft
+    message = messageData?.data?.Message1stPart;
+  }
 
   if (isUserDetailsLoading) return <div>Loading...</div>;
   if (isUserDetailsError) return <div>User Load Error</div>;
@@ -254,20 +303,27 @@ const OnlineAdmissionStudent = () => {
               </div>
 
               {/* Message Section */}
-              {messageData?.data?.Message2ndPart && (
+              {messageData?.data && (
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
                   <p className="text-gray-800 font-SolaimanLipi text-lg leading-relaxed text-center">
-                    {messageData?.data?.Message2ndPart}
+                    {message}
                   </p>
                 </div>
               )}
-              {/* Countdown Section */}
-              <div className="bg-gray-50 rounded-xl p-6 my-4 border border-gray-100">
-                <Countdown targetDate={messageData?.data.Message3rdPart} />
-              </div>
-              <div className="w-full col-span-2">
-                <Button className="w-full" onClick={handleChangePermission}>Confirm Pay</Button>
-              </div>
+              {
+                hasPermission && (
+                  <>
+
+                    {/* Countdown Section */}
+                    <div className="bg-gray-50 rounded-xl p-6 my-4 border border-gray-100">
+                      <Countdown targetDate={messageData?.data.Message3rdPart} />
+                    </div>
+                    <div className="w-full col-span-2">
+                      <Button className="w-full" onClick={handleChangePermission}>Confirm Pay</Button>
+                    </div>
+                  </>
+                )
+              }
             </div>
 
           </div>

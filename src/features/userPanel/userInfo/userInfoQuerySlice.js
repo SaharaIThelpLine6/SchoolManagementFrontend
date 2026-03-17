@@ -25,6 +25,12 @@ export const userPanelUserInfo = createApi({
     getUserDetails: builder.query({
       query: (sessionId) => `get_user_details?sessionId=${sessionId}`,
     }),
+    getUserSessionDetails: builder.query({
+      query: (sessionId) => ({
+        url: `get_user_session_details/${sessionId}`,
+        method: 'GET',
+      }),
+    }),
     geAllReports: builder.query({
       query: (sessionId) => `user_all_report?sessionId=${sessionId}`,
     }),
@@ -127,14 +133,14 @@ export const userPanelUserInfo = createApi({
       }),
       providesTags: ['HomeWorkStudyTracks'],
     }),
-    getFeeLandByAdmissionIdUserPanel: builder.query({
-      query: (admissionId) => ({
-        url: `/fee_land_by_admission_id_user_panel/${admissionId}`,
+    getFeeLandBySessionIdUserPanel: builder.query({
+      query: (session_id) => ({
+        url: `/fee_land_by_session_id_user_panel/${session_id}`,
         method: 'GET',
       }),
     }),
     getMonthPerStudentsFeeUserPanel: builder.query({
-      query: (admissionId) => `month_per_student_fee_userpanel/${admissionId}`,
+      query: (session_id) => `month_per_student_fee_userpanel/${session_id}`,
       providesTags: [],
     }),
 
@@ -212,7 +218,6 @@ export const {
   useGetSessionUserPanelQuery,
   useGetHomeWorksUserPanelQuery,
   useGetHomeWorkStudyTracksHistoryUserPanelQuery,
-  useGetFeeLandByAdmissionIdUserPanelQuery,
   useGetMonthPerStudentsFeeUserPanelQuery,
   useGetStudentReportListQuery,
   useGetStudentComplaintReportQuery,
@@ -222,5 +227,7 @@ export const {
   useGetClassRoutineDaysForUserPanelQuery,
   useGetNoticesForUserPanelQuery,
   useGetUserNoticeForUserPanelQuery,
-  useGetResidentialsUserPanelQuery
+  useGetResidentialsUserPanelQuery,
+  useGetFeeLandBySessionIdUserPanelQuery,
+  useGetUserSessionDetailsQuery
 } = userPanelUserInfo;

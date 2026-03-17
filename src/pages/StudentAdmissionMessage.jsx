@@ -48,12 +48,12 @@ const StudentAdmissionMessage = ({ pageTitle }) => {
         </div>
       ),
     },
-    {
-      title: translate('ID'),
-      field: 'ID',
-      hozAlign: 'center',
-      render: (row) => <p>{row.ID}</p>,
-    },
+    // {
+    //   title: translate('ID'),
+    //   field: 'ID',
+    //   hozAlign: 'center',
+    //   render: (row) => <p>{row.ID}</p>,
+    // },
     {
       title: translate('Admission Deadline Date'),
       field: 'Message3rdPart',
@@ -90,6 +90,18 @@ const StudentAdmissionMessage = ({ pageTitle }) => {
         </div>
       ),
     },
+    {
+      title: translate('Message 3rd Part'),
+      field: 'Message2ndPart',
+      hozAlign: 'center',
+      render: (row) => (
+        <div className="flex justify-center items-center">
+          <p className="max-w-[250px] truncate overflow-hidden whitespace-nowrap">
+            {row.Message4thPart}
+          </p>
+        </div>
+      ),
+    },
   ];
 
   if (isLoading) return <Loading />;
@@ -118,11 +130,10 @@ const StudentAdmissionMessage = ({ pageTitle }) => {
                 <Link
                   key={index}
                   to={tab.path}
-                  className={`relative pb-2 text-[18px] font-bold transition-all duration-300 ${
-                    isActive
-                      ? 'text-blue-600'
-                      : 'text-gray-500 hover:text-blue-500'
-                  }`}
+                  className={`relative pb-2 text-[18px] font-bold transition-all duration-300 ${isActive
+                    ? 'text-blue-600'
+                    : 'text-gray-500 hover:text-blue-500'
+                    }`}
                 >
                   {tab.name}
                   {isActive && (
