@@ -77,7 +77,8 @@ const SupportTicket = ({ pageTitle }) => {
 
     ];
     return (
-        <div className="font-SolaimanLipi">
+        <div className="font-SolaimanLipi pt-[20px]">
+            <Link to={"/help/create-support-tickets"} className="btn bg-[#5ac146] text-white py-2 px-2 rounded-[4px] mb-5">Open New Ticket</Link>
             <div className="mt-5 overflow-x-auto">
                 {createSupportTicketLoading ? (
                     <Loading />
