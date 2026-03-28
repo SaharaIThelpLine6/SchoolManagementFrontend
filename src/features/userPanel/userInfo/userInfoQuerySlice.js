@@ -195,6 +195,9 @@ export const userPanelUserInfo = createApi({
         url: `/residential_userpanel`,
       }),
     }),
+    getClassListUserPanel: builder.query({
+      query: () => 'view_class_userpanel',
+    }),
   }),
 });
 
@@ -229,5 +232,6 @@ export const {
   useGetUserNoticeForUserPanelQuery,
   useGetResidentialsUserPanelQuery,
   useGetFeeLandBySessionIdUserPanelQuery,
-  useGetUserSessionDetailsQuery
+  useGetUserSessionDetailsQuery,
+  useGetClassListUserPanelQuery
 } = userPanelUserInfo;

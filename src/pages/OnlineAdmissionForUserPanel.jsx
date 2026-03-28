@@ -55,6 +55,8 @@ const OnlineAdmissionForUserPanel = () => {
       { skip: shouldSkip }
     );
 
+  console.log(admissionData, "admissionData")
+
   // Default Session
   useEffect(() => {
     if (activeSession) {
