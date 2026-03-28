@@ -9,15 +9,19 @@ import 'quill/dist/quill.snow.css';
 import Editor from "../../../../components/Editor";
 import DefaultImageUpload from "../../../../components/Forms/DefaultImageUpload";
 import { FormProvider, useForm } from "react-hook-form";
+import { useGetResultSettingsDetailsQuery } from "../../../../features/userReports/userReportsSlice";
 
 const Delta = Quill.import('delta');
 const AdmissionDynamicFormWithResult = forwardRef(({ reportData, query }, ref) => {
     const [logo, setLogo] = useState(null);
     const { data: instutionInfo } = useGetInstitutionInfoQuery();
     const { data: sessionData } = useGetSessionsQuery();
+    const {data: getResultSettingsDetails} = useGetResultSettingsDetailsQuery();
     const { data: residentialData, error: residentialError, isLoading: residentialDataLoading } = useGetResidentialQuery();
     const quillRef = useRef();
     const quillRef2 = useRef();
+    var refdiv = useRef(null);
+    var rte;
 
     const [range, setRange] = useState();
     const [lastChange, setLastChange] = useState();
@@ -29,13 +33,13 @@ const AdmissionDynamicFormWithResult = forwardRef(({ reportData, query }, ref) =
 
     const methods = useForm();
 
-    const {watch, getValues} = methods;
+    const { watch, getValues } = methods;
 
     // Expose getContent method to parent
     useImperativeHandle(ref, () => ({
         getEditorContent: () => ({
             Description1: quillRef.current?.root?.innerHTML,
-            Description2: quillRef2.current?.root?.innerHTML,  // ✅
+            Description2: rte.getHTMLCode(),  // ✅
             reportPadImage: getValues("report_pad")
         })
     }))
@@ -83,6 +87,13 @@ const AdmissionDynamicFormWithResult = forwardRef(({ reportData, query }, ref) =
 </div>
 
 `;
+
+    setTimeout(function () {
+        console.log(getResultSettingsDetails);
+        
+        rte = new window.RichTextEditor(refdiv.current);
+        rte.setHTMLCode(getResultSettingsDetails.Description2 ? getResultSettingsDetails.Description2 : defaultHTML2);
+    }, 0)
     return (
         <div>
             {
@@ -197,6 +208,7 @@ const AdmissionDynamicFormWithResult = forwardRef(({ reportData, query }, ref) =
                                             setPreviewUrl={setPreviewUrl}
                                             previewUrl={previewUrl} />
                                     </FormProvider>
+                                    <div ref={refdiv}></div>
 
                                     {/* <div className="grid grid-cols-4">
                                         <p className="text-[18px] col-span-3">নিরীক্ষকের মন্তব্য ..........................................................................................................  </p>
