@@ -292,7 +292,7 @@ const SideBar = () => {
   return (
     <aside className="h-[calc(100vh-64px)] lg:h-full overflow-y-auto w-[250px] bg-white shadow-[2px_0_4px_rgba(0,0,0,0.1)] text-sm text-black scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 scrollbar-thumb-rounded-full print:hidden">
       <nav className="mt-4">
-        <ul className="space-y-2 pb-4">
+        <ul className="space-y-2 pb-[100px]">
           {filteredMenuData.map((menu) => (
             <li key={menu.id}>
               {Array.isArray(menu.subMenu) ? (
