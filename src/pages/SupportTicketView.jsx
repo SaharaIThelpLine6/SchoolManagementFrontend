@@ -144,22 +144,15 @@ const SupportTicketView = ({ pageTitle }) => {
                                     <p className="text-[16px] leading-1 mt-2">{supportTicketDetails.Department}</p>
                                 </div>
 
+
+
                                 <div className="card-body bg-[f6f8f9] p-5">
                                     <p className="text-[16px] leading-1 mt-2">Status:
                                         <span className={`items-center gap-1.5 px-3 py-1 ml-[2px] inline-block rounded-[5px] text-[13px] font-semibold
                                             ${supportTicketDetails.Status == 0 ? 'bg-blue-500 text-white' :
-                                                supportTicketDetails.Status == 1 ? 'bg-blue-100 text-blue-700' :
-                                                    supportTicketDetails.Status == 2 ? 'bg-yellow-100 text-yellow-700' :
-                                                        supportTicketDetails.Status == 3 ? 'bg-green-100 text-green-700' :
-                                                            supportTicketDetails.Status == 4 ? 'bg-red-100 text-red-700' :
-                                                                'bg-gray-100 text-gray-600'}
-        `}>
+                                                supportTicketDetails.Status == 1 ? 'bg-blue-100 text-blue-700' : supportTicketDetails.Status == 2 ? 'bg-yellow-100 text-yellow-700' : supportTicketDetails.Status == 3 ? 'bg-green-100 text-green-700' : supportTicketDetails.Status == 4 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600'}`}>
 
-                                            {supportTicketDetails.Status == 0 ? 'Pending' :
-                                                supportTicketDetails.Status == 1 ? 'Open' :
-                                                    supportTicketDetails.Status == 2 ? 'In Progress' :
-                                                        supportTicketDetails.Status == 3 ? 'Resolved' :
-                                                            supportTicketDetails.Status == 4 ? 'Closed' : 'Pending'}
+                                            {supportTicketDetails.Status == 0 ? 'Pending' : supportTicketDetails.Status == 1 ? 'Open' : supportTicketDetails.Status == 2 ? 'In Progress' : supportTicketDetails.Status == 3 ? 'Resolved' : supportTicketDetails.Status == 4 ? 'Closed' : 'Pending'}
                                         </span>
                                     </p>
                                 </div>
