@@ -7,6 +7,8 @@ import bnBijoy2Unicode from "../../../../utils/conveter";
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 import Editor from "../../../../components/Editor";
+import DefaultImageUpload from "../../../../components/Forms/DefaultImageUpload";
+import { FormProvider, useForm } from "react-hook-form";
 
 const Delta = Quill.import('delta');
 const AdmissionDynamicFormWithResult = forwardRef(({ reportData, query }, ref) => {
@@ -15,22 +17,29 @@ const AdmissionDynamicFormWithResult = forwardRef(({ reportData, query }, ref) =
     const { data: sessionData } = useGetSessionsQuery();
     const { data: residentialData, error: residentialError, isLoading: residentialDataLoading } = useGetResidentialQuery();
     const quillRef = useRef();
-    const quillRef2 = useRef();   
+    const quillRef2 = useRef();
 
     const [range, setRange] = useState();
     const [lastChange, setLastChange] = useState();
     const [readOnly, setReadOnly] = useState(false);
 
 
+    const [previewImg, setPreviewImg] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+
+    const methods = useForm();
+
+    const {watch, getValues} = methods;
 
     // Expose getContent method to parent
     useImperativeHandle(ref, () => ({
         getEditorContent: () => ({
             Description1: quillRef.current?.root?.innerHTML,
             Description2: quillRef2.current?.root?.innerHTML,  // ✅
+            reportPadImage: getValues("report_pad")
         })
     }))
-    
+
     useEffect(() => {
         console.log(query);
 
@@ -46,14 +55,14 @@ const AdmissionDynamicFormWithResult = forwardRef(({ reportData, query }, ref) =
     const selectedSession = sessionData?.find(
         (item) => item.SessionID == query.session_id
     );
-const defaultHTML = `
+    const defaultHTML = `
   <p style="font-size: 18px">মুহতারাম,<br/>
     <span style="margin-left:30px">হযরত মুহতামিম সাহেব (দা. বা.)</span>
   </p>
   <p>আসসালামু আলাইকুম ওয়া রহমাতুল্লাহ</p>
   <p>বিনীত নিবেদন এই যে, আমি রাহাতুল জান্নাত মহিলা মাদরাসা এর যাবতীয় কানুন ও নীতিমালা মেনে চলার অঙ্গীকারে আবদ্ধ হয়ে ভর্তি হওয়ার জন্য বিনীত আবেদন করছি।</p>
 `;
-const defaultHTML2 = `
+    const defaultHTML2 = `
 <div class="grid grid-cols-4">
     <p class="text-[18px] col-span-3">নিরীক্ষকের মন্তব্য ..........................................................................................................  </p>
     <p class="text-[18px]">স্বাক্ষর ও তাং :................................</p>
@@ -77,7 +86,7 @@ const defaultHTML2 = `
     return (
         <div>
             {
-               reportData?.result.length > 0 && reportData.result.slice(0, 1).map(maritData => (
+                reportData?.result.length > 0 && reportData.result.slice(0, 1).map(maritData => (
                     <React.Fragment>
                         <div className="w-full relative px-[30px] py-[30px]">
                             <div className="pt-4 pb-1 px-0">
@@ -92,7 +101,7 @@ const defaultHTML2 = `
                                         <Editor
                                             ref={quillRef}
                                             readOnly={readOnly}
-                                            htmlDefaultValue={defaultHTML}   
+                                            htmlDefaultValue={defaultHTML}
                                             onSelectionChange={setRange}
                                             onTextChange={setLastChange}
                                         />
@@ -152,7 +161,7 @@ const defaultHTML2 = `
                                     </div>
                                     <div className="grid grid-cols-2 pt-4 gap-5">
                                         {/* First table */}
-                                   
+
                                     </div>
                                     <div className="grid grid-cols-4 pt-4">
                                         <p className="text-[18px] font-bold">সর্বমোট প্রাপ্ত নম্বর : 569</p>
@@ -182,6 +191,12 @@ const defaultHTML2 = `
                                             onTextChange={setLastChange}
                                         />
                                     </div>
+                                    <FormProvider {...methods}>
+                                        <p className='mb-5 text-sm font-semibold text-gray-700 mt-9'>Madrasha Pad Image (A4 size)</p>
+                                        <DefaultImageUpload registerKey="report_pad" image={previewImg}
+                                            setPreviewUrl={setPreviewUrl}
+                                            previewUrl={previewUrl} />
+                                    </FormProvider>
 
                                     {/* <div className="grid grid-cols-4">
                                         <p className="text-[18px] col-span-3">নিরীক্ষকের মন্তব্য ..........................................................................................................  </p>
