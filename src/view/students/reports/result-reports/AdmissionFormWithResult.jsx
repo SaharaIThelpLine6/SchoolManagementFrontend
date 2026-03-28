@@ -5,6 +5,7 @@ import { useGetSessionsQuery } from "../../../../features/session/sessionSlice";
 import ReportHeader from "../../../../components/ReportHeader";
 import bnBijoy2Unicode from "../../../../utils/conveter";
 import parse from 'html-react-parser';
+const API_URL = import.meta.env.VITE_SERVER_URL;
 
 import 'quill/dist/quill.snow.css';
 const AdmissionFormWithResult = ({ reportData, query }) => {
@@ -33,8 +34,20 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
             {
                 reportData?.result.length > 0 && reportData.result.map(maritData => (
                     <React.Fragment>
-                        <div className="w-full relative px-[30px] pb-[30px] pt-2">
-                            <div className="pt-4 pb-1 px-0">
+                        <div className="w-full relative px-[30px] pb-[30px] pt-2 relative">
+                            <div
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    backgroundImage: `url('${API_URL}/public/${reportData.formSettings?.ReportPadImage}')`,
+                                    backgroundSize: 'cover',
+                                    backgroundPosition: 'center',
+                                    backgroundRepeat: 'no-repeat',
+                                    opacity: 0.2,
+                                    zIndex: 0,
+                                }}
+                            />
+                            <div className="pt-4 pb-1 px-0 relative z-1">
                                 <div className="relative header text-center border-b-2 border-black min-h-[90px] pb-2">
                                     <img className="absolute left-0 top-0 h-[80px] w-[80px]" src={logo} alt="logo" />
                                     <h1 className='text-[24px]'>{instutionInfo?.InstitutionName}</h1>
@@ -123,7 +136,7 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
 
                                         {parse(String(reportData?.formSettings?.Description1))}
                                     </p>
-                                    
+
                                     <div className="flex gap-3 flex-nowrap font-bold">
                                         <div className="box border border-black w-full  md:w-[45%] px-4 py-2 ">
                                             <p className="text-[18px] leading-[20px] whitespace-nowrap mb-3">নাম: {maritData.UserName}</p>
@@ -227,7 +240,7 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                                                     {maritData[`SubPass${subIndex + 1}`] ? String(maritData[`SubPass${subIndex + 1}`]) : ''}
                                                                 </td>
                                                                 <td className="border border-black pl-2 text-[20px]">
-                                                                    { maritData[`SubObtained${subIndex + 1}`] ? String(maritData[`SubObtained${subIndex + 1}`]) : ''}
+                                                                    {maritData[`SubObtained${subIndex + 1}`] ? String(maritData[`SubObtained${subIndex + 1}`]) : ''}
                                                                 </td>
                                                             </tr>
                                                         );
@@ -257,7 +270,7 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                         <p dangerouslySetInnerHTML={{ __html: reportData?.formSettings?.Description2 }} />
                                         {/* {parse(String(reportData?.formSettings?.Description2))} */}
                                     </div>
-{/*                                     
+                                    {/*                                     
                                     <div className="grid grid-cols-4">
                                         <p className="text-[18px] col-span-3">নিরীক্ষকের মন্তব্য ..........................................................................................................  </p>
                                         <p className="text-[18px]">স্বাক্ষর ও তাং :................................</p>

@@ -512,6 +512,12 @@ export const menuData = [
         name: 'Video Tutorial',
         route: '/help/videos',
       },
+
+       {
+        id: '2',
+        name: 'Support Tickets',
+        route: '/help/support-tickets',
+      },
     ],
   },
 ];

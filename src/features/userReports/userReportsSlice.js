@@ -238,6 +238,12 @@ export const userReportsSlice = createApi({
         body: body,
       }),
     }),
+    getResultSettingsDetails: builder.query({
+      query: () => ({
+        url: `get_result_form`,
+      }),
+    }),
+
   }),
 });
 
@@ -251,4 +257,5 @@ export const {
   useGetPointVReportQuery,
   useGetEditDeleteRecordsQuery,
   usePostResultReportSettingsMutation,
+  useGetResultSettingsDetailsQuery,
 } = userReportsSlice;

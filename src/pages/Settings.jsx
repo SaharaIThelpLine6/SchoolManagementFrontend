@@ -16,9 +16,9 @@ const Settings = () => {
   const { data: response, isLoading, isError, refetch } = useGetSettingsQuery();
   const [updateSetting] = useUpdateSettingsMutation();
   const [
-      updateResultReport,
-      { isLoading: resultReportUpdating, isError: resultReportUpdatingError, isSuccess: resultReportUpdateSuccess, data: resultReportUpdatingResponse },
-    ] = usePostResultReportSettingsMutation();
+    updateResultReport,
+    { isLoading: resultReportUpdating, isError: resultReportUpdatingError, isSuccess: resultReportUpdateSuccess, data: resultReportUpdatingResponse },
+  ] = usePostResultReportSettingsMutation();
   const formRef = useRef();
   const allSettingInfo = response?.data || [];
 
@@ -354,15 +354,29 @@ const Settings = () => {
 
     ]
   };
+
+  
   const handelFromEdit = async () => {
     const content = formRef.current?.getEditorContent();
-    
+
+    console.log(content);
 
     try {
-      await updateResultReport({
-      "Description1": content.Description1,
-      "Description2": content.Description2,
-    }).unwrap()
+      //   await updateResultReport({
+      //   "Description1": content.Description1,
+      //   "Description2": content.Description2,
+      //   "ReportPadImage": content.reportPadImage
+      // }).unwrap()
+      const formData = new FormData();
+      formData.append("Description1", content.Description1 || "");
+      formData.append("Description2", content.Description2 || "");
+
+      // Only append if it's an actual File object
+      if (content.reportPadImage instanceof File) {
+        formData.append("ReportPadImage", content.reportPadImage);
+      }
+
+      await updateResultReport(formData).unwrap();
       Swal.fire({
         icon: 'success',
         title: 'Auto-saved successfully',
@@ -371,7 +385,7 @@ const Settings = () => {
       });
     } catch (err) {
       // Revert formData on error
-     
+
       Swal.fire({
         icon: 'error',
         title: 'Auto-save failed',
@@ -447,8 +461,8 @@ const Settings = () => {
           );
         })}
       </div>
-    
-       <div className="bg-blue-600 text-white text-center py-3 rounded-t-lg text-lg md:text-xl font-semibold">
+
+      <div className="bg-blue-600 text-white text-center py-3 rounded-t-lg text-lg md:text-xl font-semibold">
         {translate('Result Form Description')}
       </div>
       <AdmissionDynamicFormWithResult reportData={reportData} query={{
@@ -457,10 +471,10 @@ const Settings = () => {
         subclass_id: 1,
         exam_id: 5
       }} ref={formRef} />
-          <div className="p-4 md:p-6 space-y-4 md:space-y-5">
-      <Button onClick={handelFromEdit}>
-        {translate("Save")}
-      </Button>
+      <div className="p-4 md:p-6 space-y-4 md:space-y-5">
+        <Button onClick={handelFromEdit}>
+          {translate("Save")}
+        </Button>
       </div>
     </div>
   );

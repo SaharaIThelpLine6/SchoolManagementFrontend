@@ -133,6 +133,8 @@ import UserNotice from '../pages/UserNotice';
 import ForgetPassword from '../pages/ForgetPassword';
 import UserPanelNotice from '../pages/userpanel/UserPanelNotice';
 import SupportTicket from '../pages/SupportTicket';
+import SupportTicketCreate from '../pages/SupportTicketCreate';
+import SupportTicketView from '../pages/SupportTicketView';
 
 const router = createBrowserRouter([
   {
@@ -1000,10 +1002,6 @@ const router = createBrowserRouter([
                 path: 'website-settings',
                 element: <WebsiteSettings pageTitle="Add Login Users" />,
               },
-              {
-                path: 'support-tickets',
-                element: <SupportTicket pageTitle="Add Login Users" />,
-              },
             ],
           },
           {
@@ -1012,6 +1010,18 @@ const router = createBrowserRouter([
               {
                 path: 'videos',
                 element: <YoutubeTutorials pageTitle="Youtube Tutorials" />,
+              },
+                            {
+                path: 'support-tickets',
+                element: <SupportTicket pageTitle="Add Login Users" />,
+              },
+              {
+                path: 'create-support-tickets',
+                element: <SupportTicketCreate pageTitle="Add Login Users" />,
+              },
+              {
+                path: 'view-support-ticket/:id',
+                element: <SupportTicketView pageTitle="Add Login Users" />,
               },
             ],
           },
