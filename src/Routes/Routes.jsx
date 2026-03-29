@@ -4,7 +4,6 @@ import { createBrowserRouter } from 'react-router-dom';
 import { permissionsDataList } from '../Data/permissions';
 import PublicLayout from '../layout/PublicLayout';
 import AdmissionRegistration from '../pages/AdmissionRegistration';
-import FromP from '../pages/FormP';
 import NotFound from '../pages/NotFound';
 import Query from '../pages/Query';
 import OnlineAdmission from '../pages/public/OnlineAdmission';
@@ -135,6 +134,7 @@ import UserPanelNotice from '../pages/userpanel/UserPanelNotice';
 import SupportTicket from '../pages/SupportTicket';
 import SupportTicketCreate from '../pages/SupportTicketCreate';
 import SupportTicketView from '../pages/SupportTicketView';
+import AdmissionForm from '../pages/AdmissionForm';
 
 const router = createBrowserRouter([
   {
@@ -670,6 +670,16 @@ const router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
+              {
+                path: 'admission_form',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.result_report}
+                  >
+                    <AdmissionForm pageTitle="Admission Form Print" />
+                  </RequirePermission>
+                ),
+              },
 
               {
                 path: ':id',
@@ -1166,10 +1176,6 @@ const router = createBrowserRouter([
       //   element: <AllUserPanelInvoice pageTitle="All Invoice" />,
       // },
     ],
-  },
-  {
-    path: '/formp',
-    element: <FromP />,
   },
   {
     path: '/query',

@@ -34,12 +34,12 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
             {
                 reportData?.result.length > 0 && reportData.result.map(maritData => (
                     <React.Fragment>
-                        <div className="w-full relative px-[30px] pb-[30px] pt-2 relative">
+                        <div className="w-full relative px-[30px] pb-[35px] mb-2 pt-2 relative lg:border-black lg:border print:border-0 ">
                             <div
                                 style={{
                                     position: 'absolute',
                                     inset: 0,
-                                    backgroundImage: `url('${API_URL}/public/${reportData.formSettings?.ReportPadImage}')`,
+                                    backgroundImage: `url('${API_URL}/public${reportData.formSettings?.ReportPadImage}')`,
                                     backgroundSize: 'cover',
                                     backgroundPosition: 'center',
                                     backgroundRepeat: 'no-repeat',
@@ -96,11 +96,11 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                     <div className="form_details flex items-center justify-between">
                                         <div className="form_no flex items-center gap-2">
                                             <p className="text-[18px]">ফরম নং :</p>
-                                            <div className="area h-[40px] w-[100px] border border-black"></div>
+                                            <div className="area h-[30px] w-[100px] border border-black"></div>
                                         </div>
                                         <div className="form_no flex items-center gap-2">
                                             <p className="text-[18px]">ভর্তি নং :</p>
-                                            <div className="area h-[40px] w-[100px] border border-black"></div>
+                                            <div className="area h-[30px] w-[100px] border border-black"></div>
                                         </div>
 
                                         <div className="form_no flex items-center gap-[20px]">

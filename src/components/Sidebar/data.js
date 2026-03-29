@@ -287,6 +287,11 @@ export const menuData = [
         name: 'Result Report',
         route: '/result/report',
       },
+       {
+        id: '3',
+        name: 'Admission Form',
+        route: '/result/admission_form',
+      },
     ],
   },
   // {

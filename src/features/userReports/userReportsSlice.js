@@ -147,6 +147,7 @@ export const userReportsSlice = createApi({
 
         return `/avarageV_report?${params.toString()}`;
       },
+      providesTags: ['AverageVReport'],
     }),
 
     getDepositCostReport: builder.query({
@@ -237,6 +238,7 @@ export const userReportsSlice = createApi({
         method: 'POST',
         body: body,
       }),
+      invalidatesTags: ['AverageVReport'],
     }),
     getResultSettingsDetails: builder.query({
       query: () => ({

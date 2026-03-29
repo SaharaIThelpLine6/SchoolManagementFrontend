@@ -780,6 +780,14 @@ const useTranslate = () => {
     'Residential Name': 'আবাসন',
     'Date Of Birth': 'জন্ম তারিখ',
     Position: 'অবস্থান',
+    "Individual": "ব্যক্তিগত ফরম",
+    "All User": "সকল শিক্ষার্থী",
+    "Form Content Settings": "ফর্ম বিষয়বস্তু সেটিংস",
+    "Principal Quote": "প্রিন্সিপালের উক্তি",
+    "Madrasha Pad Image": "মাদ্রাসার প্যাডের ছবি",
+    "Office Part text": "অফিসের টেক্সট পার্ট",
+    "Admission Form": "ভর্তি ফরম",
+    "Admission Form Print": "ভর্তি ফরম প্রিন্ট",
   };
 
   return (key) =>

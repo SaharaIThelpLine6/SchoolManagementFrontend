@@ -113,7 +113,7 @@ const DefaultImageUpload = ({
                 <img
                   src={previewUrl || image}
                   alt="preview"
-                  className="w-full h-full object-cover"
+                  className=" mx-auto w-full h-[200px] object-cover"
                 />
               </div>
 
@@ -148,7 +148,12 @@ const DefaultImageUpload = ({
               </p>
               <p className="text-gray-500 text-xs mt-1">
                 {translate("Click or drag here")}
+                
               </p>
+              <p className="text-rose-500 text-xs mt-1">
+                Maximum upload file size: 5 MB.
+              </p>
+              
             </div>
           )}
         </div>
@@ -162,5 +167,6 @@ const DefaultImageUpload = ({
     </div>
   );
 };
+3110
 
 export default DefaultImageUpload;
