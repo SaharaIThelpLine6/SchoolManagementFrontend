@@ -134,9 +134,9 @@ export const paymentSlice = createApi({
       providesTags: ['AllSchoolsSSL'],
     }),
     getOnlinePaymentInvoice: builder.query({
-      query: ({ page = 1, limit = 10, search = '' }) => ({
+      query: ({ page = 1, limit = 10, search = '', classId, DateFrom, DateTo }) => ({
         url: '/get_online_payment_invoice',
-        params: { page, limit, search }, // 🔥 UserCode search
+        params: { page, limit, search, classId, DateFrom, DateTo }, // ✅ add date range
       }),
       providesTags: ['OnlinePaymentInvoice'],
     }),

@@ -79,7 +79,13 @@ const SMS = ({ pageTitle }) => {
   }, [translate]);
 
   const handleSMSBuyOpenModal = useCallback(() => {
-    showModal(translate('SMS Buy'), 'SMS_BUY');
+    // showModal(translate('SMS Buy'), 'SMS_BUY');
+    Swal.fire({
+      title: translate("SMS Buy"),
+      text: "এসএমএস ক্রয় করতে অনুগ্রহ করে এই নাম্বারে যোগাযোগ করুন: 01822930055",
+      icon: "info",
+      confirmButtonText: "ঠিক আছে"
+    });
   }, [translate]);
 
   const handleSuccessAndErrorOpenModal = useCallback(() => {
@@ -338,11 +344,11 @@ const SMS = ({ pageTitle }) => {
                       {smsCount} {translate('SMS')} (
                       {messageType === 'bangla'
                         ? `${translate('70 Char/SMS')}, ${translate(
-                            'next SMS from 67 chars'
-                          )}`
+                          'next SMS from 67 chars'
+                        )}`
                         : `${translate('160 Char/SMS')}, ${translate(
-                            'next SMS from 153 chars'
-                          )}`}
+                          'next SMS from 153 chars'
+                        )}`}
                       )
                     </p>
                   </div>
