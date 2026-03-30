@@ -325,7 +325,7 @@ const OnlineAdmissionForUserPanel = () => {
       <div className="font-SolaimanLipi bg-white p-6 rounded-xl shadow-xl">
         {/* Header */}
         {/* Header */}
-        <div className="border-b border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
+        <div className="border-b border-[#e9edf4] flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-6">
             {tabs.map((tab, index) => {
               const isActive = location.pathname === tab.path;

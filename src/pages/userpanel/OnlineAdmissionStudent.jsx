@@ -1,3 +1,5 @@
+
+
 import { skipToken } from '@reduxjs/toolkit/query';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useSelector } from 'react-redux';
@@ -6,6 +8,7 @@ import {
   useGetResidentialsUserPanelQuery,
   useGetStudentAdmissionMessageForUserPanelQuery,
   useGetUserDetailsQuery,
+  useGetUserPanelAdmissionTimeMessageQuery,
   useGetUserPanelStudentFeeAdmissionsQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import { useDefaultSessionForUserPanel } from '../../hooks/useDefaultSessionForUserPanel';
@@ -37,7 +40,7 @@ const OnlineAdmissionStudent = () => {
     (state) => state.sessionChange.currentSession
   );
 
-  const [checkAdmission, { data, isLoading }] = useLazyAdmissionCheckQuery();
+  const [checkAdmission, { data }] = useLazyAdmissionCheckQuery();
 
   // Residential
   const {
@@ -80,6 +83,22 @@ const OnlineAdmissionStudent = () => {
     admissionId && sfgnid ? { admissionId, sfgnid } : skipToken
   );
 
+  const SessionID = studentFeeAdmissionData?.admissionSessionID;
+  const ClassID = studentFeeAdmissionData?.admissionClassId;
+
+  const { data: timeMessageData, isLoading, refetch } =
+    useGetUserPanelAdmissionTimeMessageQuery(
+      { SessionID, ClassID },
+      {
+        skip: !SessionID || !ClassID,
+      }
+    );
+
+  // console.log(studentFeeAdmissionData, "studentFeeAdmissionData")
+  console.log(timeMessageData, "timeMessageData")
+  console.log(messageData, "messageData")
+
+
   const totalFee = studentFeeAdmissionData?.fees?.reduce(
     (sum, item) => sum + (item.amount || 0),
     0
@@ -94,11 +113,11 @@ const OnlineAdmissionStudent = () => {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft(messageData?.data.Message3rdPart));
+      setTimeLeft(calculateTimeLeft(timeMessageData?.data.CreatedAt));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [messageData?.data.Message3rdPart]);
+  }, [timeMessageData?.data.CreatedAt]);
 
   useEffect(() => {
     const checkPermission = async () => {
@@ -109,6 +128,8 @@ const OnlineAdmissionStudent = () => {
           SessionID: defaultSession?.SessionID,
           UserID: userDetails?.UserID
         }).unwrap();
+
+        console.log(res, "res")
 
         setHasPermission(res?.permission === true);
 
@@ -262,13 +283,13 @@ const OnlineAdmissionStudent = () => {
 
   if (!timeLeft && hasPermission) {
     // time is over but has permission
-    message = messageData?.data?.Message4thPart;
+    message = timeMessageData?.data?.Message3rdPart;
   } else if (hasPermission) {
     // time left and has permission
-    message = messageData?.data?.Message2ndPart;
+    message = timeMessageData?.data?.Message2ndPart;
   } else {
     // either no permission, regardless of timeLeft
-    message = messageData?.data?.Message1stPart;
+    message = timeMessageData?.data?.Message1stPart;
   }
 
   if (isUserDetailsLoading) return <div>Loading...</div>;
@@ -303,7 +324,7 @@ const OnlineAdmissionStudent = () => {
               </div>
 
               {/* Message Section */}
-              {messageData?.data && (
+              {timeMessageData?.data && (
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
                   <p className="text-gray-800 font-SolaimanLipi text-lg leading-relaxed text-center">
                     {message}
@@ -316,7 +337,7 @@ const OnlineAdmissionStudent = () => {
 
                     {/* Countdown Section */}
                     <div className="bg-gray-50 rounded-xl p-6 my-4 border border-gray-100">
-                      <Countdown targetDate={messageData?.data.Message3rdPart} />
+                      <Countdown targetDate={timeMessageData?.data.CreatedAt} />
                     </div>
                     <div className="w-full col-span-2">
                       <Button className="w-full" onClick={handleChangePermission}>Confirm Pay</Button>

@@ -23,6 +23,7 @@ export const userStudentSlice = createApi({
     'UsersOnlineRegInfo',
     'StudentAdmissions',
     'HomeWorks',
+    'AdmissionTimeMessage',
   ],
   endpoints: (builder) => ({
     getStudentBySearch: builder.query({
@@ -375,12 +376,53 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ['NewClassStudentAdmissions'],
     }),
+
     deleteNewClassStudentAdmission: builder.mutation({
-      query: ({graid}) => ({
+      query: ({ graid }) => ({
         url: `delete_class_student_admission/${graid}`,
         method: 'DELETE',
       }),
       invalidatesTags: ['NewClassStudentAdmissions'],
+    }),
+    // Get admission time message
+    getAdmissionTimeMessage: builder.query({
+      query: () => ({
+        url: 'admission_time_message',
+      }),
+      providesTags: ['AdmissionTimeMessage'],
+    }),
+    // Post admission time message
+    postAdmissionTimeMessage: builder.mutation({
+      query: (body) => ({
+        url: `admission_time_message`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['AdmissionTimeMessage'],
+    }),
+    // Update admission time message
+    putAdmissionTimeMessage: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `admission_time_message/${id}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['AdmissionTimeMessage'],
+    }),
+    // Delete admission time message
+    deleteAdmissionTimeMessage: builder.mutation({
+      query: (id) => ({
+        url: `admission_time_message/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['AdmissionTimeMessage'],
+    }),
+    // Get admission time message by id
+    getSingleAdmissionTimeMessage: builder.query({
+      query: (id) => ({
+        url: `admission_time_message/${id}`,
+      }),
+      providesTags: ['AdmissionTimeMessage'],
     }),
   }),
 });
@@ -429,5 +471,12 @@ export const {
   useGetStudentsBySubClassIDQuery,
   useGetAdmissionStudentsQuery,
   usePostNewClassStudentamissionMutation,
-  useDeleteNewClassStudentAdmissionMutation
+  useDeleteNewClassStudentAdmissionMutation,
+
+  // Admission Time Message
+  useGetAdmissionTimeMessageQuery,
+  usePostAdmissionTimeMessageMutation,
+  usePutAdmissionTimeMessageMutation,
+  useDeleteAdmissionTimeMessageMutation,
+  useGetSingleAdmissionTimeMessageQuery
 } = userStudentSlice;

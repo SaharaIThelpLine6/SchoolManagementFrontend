@@ -198,6 +198,10 @@ export const userPanelUserInfo = createApi({
     getClassListUserPanel: builder.query({
       query: () => 'view_class_userpanel',
     }),
+    getUserPanelAdmissionTimeMessage: builder.query({
+      query: ({ SessionID, ClassID }) =>
+        `/user_panel_admission_time_message?SessionID=${SessionID}&ClassID=${ClassID}`,
+    }),
   }),
 });
 
@@ -233,5 +237,6 @@ export const {
   useGetResidentialsUserPanelQuery,
   useGetFeeLandBySessionIdUserPanelQuery,
   useGetUserSessionDetailsQuery,
-  useGetClassListUserPanelQuery
+  useGetClassListUserPanelQuery,
+  useGetUserPanelAdmissionTimeMessageQuery
 } = userPanelUserInfo;

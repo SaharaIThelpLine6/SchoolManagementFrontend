@@ -135,6 +135,7 @@ import UserPanelNotice from '../pages/userpanel/UserPanelNotice';
 import SupportTicket from '../pages/SupportTicket';
 import SupportTicketCreate from '../pages/SupportTicketCreate';
 import SupportTicketView from '../pages/SupportTicketView';
+import StudentAdmissionMessageCreate from '../pages/StudentAdmissionMessageCreate';
 
 const router = createBrowserRouter([
   {
@@ -467,6 +468,7 @@ const router = createBrowserRouter([
                   // </RequirePermission>
                 ),
               },
+
               {
                 path: 'online-admission',
                 element: (
@@ -1011,7 +1013,7 @@ const router = createBrowserRouter([
                 path: 'videos',
                 element: <YoutubeTutorials pageTitle="Youtube Tutorials" />,
               },
-                            {
+              {
                 path: 'support-tickets',
                 element: <SupportTicket pageTitle="Add Login Users" />,
               },
