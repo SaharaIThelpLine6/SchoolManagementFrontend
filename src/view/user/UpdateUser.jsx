@@ -1,7 +1,7 @@
 import 'flatpickr/dist/flatpickr.css';
 import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Button from '../../components/Button/Button';
@@ -246,6 +246,7 @@ const UpdateUser = ({ singleUserData }) => {
     }
   };
 
+ 
   const handleResetForm = () => {
     dispatch(setEditUserID(null));
     reset();
@@ -273,7 +274,7 @@ const UpdateUser = ({ singleUserData }) => {
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="font-lato bg-gray-50 min-h-screen py-6"
+        className="font-SolaimanLipi bg-gray-50 min-h-screen py-6"
       >
         <div className="space-y-8">
           {/* Section: User Info */}
@@ -292,6 +293,7 @@ const UpdateUser = ({ singleUserData }) => {
                 nameField="TypeName"
                 require="User Type Field is required!"
                 labelColor="text-red-500"
+                disabled
               />
               <DefaultInput
                 label="User Code"
@@ -316,15 +318,19 @@ const UpdateUser = ({ singleUserData }) => {
                 labelColor="text-red-500"
               />
 
-              <DefaultInput
-                label="Name"
-                type="text"
-                registerKey="UserName"
-                placeholder="Enter your name ..."
-                require="Name is required!"
-                labelColor="text-red-500"
-                defaultValue={singleUserData?.UserName || ''}
-              />
+              <div>
+                <DefaultInput
+                  label="Name"
+                  type="text"
+                  registerKey="UserName"
+                  placeholder="Enter your name ..."
+                  require="Name is required!"
+                  labelColor="text-red-500"
+                  defaultValue={singleUserData?.UserName || ''}
+                />
+               
+                {singleUserData.UserTypeID == 1 ?  <p className='text-rose-600 text-[13px] pt-1'> নাম এডিটের ক্ষেত্রে ১ টি কোটা কর্তন হবে</p> : null}
+              </div>
 
               <DefaultInput
                 label="পিতার নাম"
@@ -560,7 +566,7 @@ const UpdateUser = ({ singleUserData }) => {
                 type="submit"
                 className="px-6 py-2 rounded-lg bg-blue-600 text-white"
               >
-                Save
+                এডিট সম্পূর্ণ করুন
               </Button>
               <Button
                 type="button"

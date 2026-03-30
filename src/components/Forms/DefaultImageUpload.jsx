@@ -18,7 +18,7 @@ const DefaultImageUpload = ({
   } = useFormContext();
   const [fileSizeError, setFileSizeError] = useState('');
   const translate = useTranslate();
-
+const [removed, setRemoved] = useState(false);
   // পূর্বে থাকা image থাকলে form value এ সেট করো
   useEffect(() => {
     if (image) {
@@ -64,21 +64,20 @@ const DefaultImageUpload = ({
     // your existing drop handling logic here
   };
 
-  // const handleFileChange = (e) => {
-  //   const file = e.target.files?.[0];
-  //   if (file) {
-  //     setPreviewUrl(URL.createObjectURL(file));
-  //     setValue(registerKey, file, { shouldValidate: true });
-  //   } else {
-  //     setPreviewUrl(null);
-  //     setValue(registerKey, null, { shouldValidate: true });
-  //   }
+
+  // const handleRemoveImage = (e) => {
+  //   e.stopPropagation();
+  //   setPreviewUrl(null);
+  //   setValue(registerKey, null, { shouldValidate: true });
+  //   const fileInput = document.getElementById(registerKey);
+  //   if (fileInput) fileInput.value = "";
   // };
 
   const handleRemoveImage = (e) => {
     e.stopPropagation();
     setPreviewUrl(null);
     setValue(registerKey, null, { shouldValidate: true });
+    setRemoved(true);
     const fileInput = document.getElementById(registerKey);
     if (fileInput) fileInput.value = "";
   };
@@ -93,15 +92,6 @@ const DefaultImageUpload = ({
     e.currentTarget.classList.remove("ring-2", "ring-blue-400", "bg-blue-50");
   };
 
-  // const handleDrop = (e) => {
-  //   e.preventDefault();
-  //   e.currentTarget.classList.remove("ring-2", "ring-blue-400", "bg-blue-50");
-  //   const file = e.dataTransfer.files?.[0];
-  //   if (file && file.type.startsWith("image/")) {
-  //     setPreviewUrl(URL.createObjectURL(file));
-  //     setValue(registerKey, file, { shouldValidate: true });
-  //   }
-  // };
 
   return (
     <div
@@ -143,7 +133,7 @@ const DefaultImageUpload = ({
           onDrop={handleDrop}
           className="relative w-full rounded-lg overflow-hidden border-2 border-dashed border-gray-300 cursor-pointer bg-gray-50 flex flex-col items-center justify-center transition-all duration-200 hover:border-blue-400 hover:bg-blue-50"
         >
-          {previewUrl || image ? (
+          {!removed && (previewUrl || image) ? (
             <>
               <div className="w-full h-full">
                 <img

@@ -28,6 +28,7 @@ import { usePermission } from '../../hooks/usePermission';
 import { ViewPermission } from '../../Routes/ViewPermission';
 import { calculateAge } from '../../utils/calculateAge';
 import useTranslate from '../../utils/Translate';
+import { useSelector } from 'react-redux';
 
 const CreateUser = ({ pageTitle }) => {
   const translate = useTranslate();
@@ -104,7 +105,15 @@ const CreateUser = ({ pageTitle }) => {
       : "";
   // console.log(DateOfBirth, "DateOfBirth")
   // console.log(formattedDate, "formattedDate")
+  const editMode = useSelector((state) => state.userInfo.editMode);
 
+
+  useEffect(()=>{
+      console.log(editMode);
+      console.log("=================");
+      
+      
+  }, [editMode])
   const ageValue = calculateAge(DateOfBirth);
   // RTK Query hooks
   const { data: codeSettings = [] } = useGetCodeSettingsQuery(undefined, {
@@ -376,6 +385,9 @@ const CreateUser = ({ pageTitle }) => {
                 require="Name is required!"
                 labelColor="text-red-500"
               />
+              {
+                editMode == 1 ? "Changing username will take the qouta" : ""
+              }
 
               <DefaultInput
                 label="পিতার নাম"
