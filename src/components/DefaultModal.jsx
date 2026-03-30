@@ -76,6 +76,7 @@ import AdmissionMessageModal from '../view/students/admission/AdmissionMessageMo
 import UserNoticeCreateForm from './Forms/UserNoticeCreateForm';
 import UserNoticeUpdateForm from './Forms/UserNoticeUpdateForm';
 import NoticeView from './Forms/NoticeView';
+import AdmissionFormContentEditModal from '../view/result/AdmissionFormContentEditModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -335,6 +336,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'REPORT_HEADER_MODAL' && (
                   <ReportHeaderModal id={id} />
+                )}
+                {modalType === 'ADMISSION_CONTENT_SETTINGS' && (
+                  <AdmissionFormContentEditModal id={id} />
                 )}
               </div>
             )}

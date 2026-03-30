@@ -462,7 +462,7 @@ const Settings = () => {
         })}
       </div>
 
-      <div className="bg-blue-600 text-white text-center py-3 rounded-t-lg text-lg md:text-xl font-semibold">
+      {/* <div className="bg-blue-600 text-white text-center py-3 rounded-t-lg text-lg md:text-xl font-semibold">
         {translate('Result Form Description')}
       </div>
       <AdmissionDynamicFormWithResult reportData={reportData} query={{
@@ -475,7 +475,7 @@ const Settings = () => {
         <Button onClick={handelFromEdit}>
           {translate("Save")}
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 };
