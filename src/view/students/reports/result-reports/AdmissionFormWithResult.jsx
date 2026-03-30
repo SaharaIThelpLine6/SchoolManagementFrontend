@@ -128,14 +128,14 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                         </div>
                                     </div>
 
-                                    <p className='text-[18px] mb-2 mt-4 leading-[32px]'>
+                                    <div className='text-[18px] mb-2 mt-4 leading-[32px] editor_block'>
                                         {/* মুহতারাম,<br />
                                         <p className="ml-[30px]">হযরত মুহতামিম সাহেব (দা. বা.)</p>
                                         আসসালামু আলাইকুম ওয়া রহমাতুল্লাহ
                                         বিনীত নিবেদন এই যে, আমি রাহাতুল জান্নাত মহিলা মাদরাসা এর যাবতীয় কানুন ও নীতিমালা মেনে চলার অঙ্গীকারে আবদ্ধ হয়ে ভর্তি হওয়ার জন্য বিনীত আবেদন করছি। */}
 
                                         {parse(String(reportData?.formSettings?.Description1))}
-                                    </p>
+                                    </div>
 
                                     <div className="flex gap-3 flex-nowrap font-bold">
                                         <div className="box border border-black w-full  md:w-[45%] px-4 py-2 ">
@@ -266,7 +266,7 @@ const AdmissionFormWithResult = ({ reportData, query }) => {
                                     <div className="text-center">
                                         <h3 className="text-[20px] border-[2px] border-black font-bold inline-block py-2 px-2 rounded-[4px]">অফিসের অংশ</h3>
                                     </div>
-                                    <div className="mt-4 text-[18px]">
+                                    <div className="mt-4 text-[18px] editor_block">
                                         <p dangerouslySetInnerHTML={{ __html: reportData?.formSettings?.Description2 }} />
                                         {/* {parse(String(reportData?.formSettings?.Description2))} */}
                                     </div>

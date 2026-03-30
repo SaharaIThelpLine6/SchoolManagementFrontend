@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 
@@ -16,6 +16,7 @@ const DefaultImageUpload = ({
     formState: { errors },
     setValue,
   } = useFormContext();
+  const [fileSizeError, setFileSizeError] = useState('');
   const translate = useTranslate();
 
   // পূর্বে থাকা image থাকলে form value এ সেট করো
@@ -27,7 +28,16 @@ const DefaultImageUpload = ({
   }, [image, registerKey, setValue, setPreviewUrl]);
 
   const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      setFileSizeError('ফাইলের সাইজ ৫ MB এর বেশি হতে পারবে না।');
+      e.target.value = '';
+      return;
+    }
+
     if (file) {
       setPreviewUrl(URL.createObjectURL(file));
       setValue(registerKey, file, { shouldValidate: true });
@@ -35,7 +45,35 @@ const DefaultImageUpload = ({
       setPreviewUrl(null);
       setValue(registerKey, null, { shouldValidate: true });
     }
+
+    setFileSizeError('');
   };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setFileSizeError('ফাইলের সাইজ ৫ MB এর বেশি হতে পারবে না।');
+      return;
+    }
+
+    setFileSizeError('');
+    // your existing drop handling logic here
+  };
+
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files?.[0];
+  //   if (file) {
+  //     setPreviewUrl(URL.createObjectURL(file));
+  //     setValue(registerKey, file, { shouldValidate: true });
+  //   } else {
+  //     setPreviewUrl(null);
+  //     setValue(registerKey, null, { shouldValidate: true });
+  //   }
+  // };
 
   const handleRemoveImage = (e) => {
     e.stopPropagation();
@@ -55,30 +93,28 @@ const DefaultImageUpload = ({
     e.currentTarget.classList.remove("ring-2", "ring-blue-400", "bg-blue-50");
   };
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.currentTarget.classList.remove("ring-2", "ring-blue-400", "bg-blue-50");
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      setPreviewUrl(URL.createObjectURL(file));
-      setValue(registerKey, file, { shouldValidate: true });
-    }
-  };
+  // const handleDrop = (e) => {
+  //   e.preventDefault();
+  //   e.currentTarget.classList.remove("ring-2", "ring-blue-400", "bg-blue-50");
+  //   const file = e.dataTransfer.files?.[0];
+  //   if (file && file.type.startsWith("image/")) {
+  //     setPreviewUrl(URL.createObjectURL(file));
+  //     setValue(registerKey, file, { shouldValidate: true });
+  //   }
+  // };
 
   return (
     <div
-      className={`mb-4 ${
-        labelPosition === "left" ? "md:flex md:items-start md:gap-4" : ""
-      }`}
+      className={`mb-4 ${labelPosition === "left" ? "md:flex md:items-start md:gap-4" : ""
+        }`}
     >
       {label && (
         <label
           htmlFor={registerKey}
-          className={`text-gray-700 font-medium ${
-            labelPosition === "left"
+          className={`text-gray-700 font-medium ${labelPosition === "left"
               ? "md:w-1/4 md:min-w-[120px] md:pt-2 md:text-end mb-2 block md:mb-0"
               : "mb-2 block"
-          }`}
+            }`}
         >
           {translate(label)}
           {require && <span className="text-red-500 ml-1">*</span>}
@@ -113,7 +149,7 @@ const DefaultImageUpload = ({
                 <img
                   src={previewUrl || image}
                   alt="preview"
-                  className=" mx-auto w-full h-[200px] object-cover"
+                  className=" mx-auto w-auto h-[200px] object-cover"
                 />
               </div>
 
@@ -148,15 +184,20 @@ const DefaultImageUpload = ({
               </p>
               <p className="text-gray-500 text-xs mt-1">
                 {translate("Click or drag here")}
-                
+
               </p>
               <p className="text-rose-500 text-xs mt-1">
                 Maximum upload file size: 5 MB.
               </p>
-              
+
             </div>
           )}
         </div>
+        {fileSizeError ? (
+          <p className="text-rose-500 text-xs mt-1">⚠ {fileSizeError}</p>
+        ) : (
+          <p className="text-gray-400 text-xs mt-1">Maximum upload file size: 5 MB.</p>
+        )}
 
         {errors[registerKey] && (
           <div className="flex items-center mt-1 text-red-600 text-xs">

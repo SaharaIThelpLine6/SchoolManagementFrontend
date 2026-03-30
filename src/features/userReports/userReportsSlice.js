@@ -238,12 +238,14 @@ export const userReportsSlice = createApi({
         method: 'POST',
         body: body,
       }),
-      invalidatesTags: ['AverageVReport'],
+      invalidatesTags: ['AverageVReport', 'ResultSettingsDetails'],
     }),
     getResultSettingsDetails: builder.query({
       query: () => ({
         url: `get_result_form`,
       }),
+     providesTags: ['ResultSettingsDetails']
+
     }),
 
   }),

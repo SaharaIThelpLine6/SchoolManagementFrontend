@@ -33,39 +33,41 @@ const AdmissionDynamicFormWithResult = forwardRef(({ query }, ref) => {
         })
     }))
     useEffect(() => {
+
+        
         if (getResultSettingsDetails?.ReportPadImage) {
             setPreviewImg(`${API_URL}/public${getResultSettingsDetails.ReportPadImage}`);
             setPreviewUrl(`${API_URL}/public${getResultSettingsDetails.ReportPadImage}`);
         }
     }, [getResultSettingsDetails]);
     const defaultHTML = `
-  <p style="font-size: 18px">মুহতারাম,<br/>
-    <span style="margin-left:30px">হযরত মুহতামিম সাহেব (দা. বা.)</span>
-  </p>
-  <p>আসসালামু আলাইকুম ওয়া রহমাতুল্লাহ</p>
-  <p>বিনীত নিবেদন এই যে, আমি রাহাতুল জান্নাত মহিলা মাদরাসা এর যাবতীয় কানুন ও নীতিমালা মেনে চলার অঙ্গীকারে আবদ্ধ হয়ে ভর্তি হওয়ার জন্য বিনীত আবেদন করছি।</p>
-`;
+    <p style="font-size: 18px">মুহতারাম,<br/>
+        <span style="margin-left:30px">হযরত মুহতামিম সাহেব (দা. বা.)</span>
+    </p>
+    <p>আসসালামু আলাইকুম ওয়া রহমাতুল্লাহ</p>
+    <p>বিনীত নিবেদন এই যে, আমি রাহাতুল জান্নাত মহিলা মাদরাসা এর যাবতীয় কানুন ও নীতিমালা মেনে চলার অঙ্গীকারে আবদ্ধ হয়ে ভর্তি হওয়ার জন্য বিনীত আবেদন করছি।</p>
+    `;
     const defaultHTML2 = `
-<div class="grid grid-cols-4">
-    <p class="text-[18px] col-span-3">নিরীক্ষকের মন্তব্য ..........................................................................................................  </p>
-    <p class="text-[18px]">স্বাক্ষর ও তাং :................................</p>
-</div>
-<h4 class="text-[18px] font-bold mt-2">* নাযিমে তালিমাতের মন্তব্য :</h4>
-<p class="text-[16px] mt-[16px] leading-[28px]">আমি আবেদনকারীকে ................................................................. জামাতে ভর্তির উপযুক্ত মনে করছি/করছি না, তাকে ................................................................ জামাতে ভর্তি হওয়ার পরামর্শ দিচ্ছি।</p>
-<div class="text-end mt-6">
-    <p class="border-t-2 border-black border-dotted inline-block text-[16px] font-bold">নাযিমে তালীমাতের স্বাক্ষর/সীল</p>
-</div>
-<h4 class="text-[18px] font-bold mt-2">* মুহতামিমের মঞ্জুরী :</h4>
-<p class="text-[16px] mt-[16px] leading-[28px]">
-    আবেদনকারীকে ....................................................................... জামাতে ভর্তির আবেদন মঞ্জুর করা হল।
-    ভর্তি ফি.......................টাকা, মাসিক খোরাকি.......................টাকা, বেতন.......................টাকা,
-    আবাসিক চার্জ/অন্যান্য.......................টাকা নির্ধারণ করা হল।
-</p>
-<div class="text-end mt-6">
-    <p class="border-t-2 border-black border-dotted inline-block text-[16px] font-bold">মুহতামিম সাহেবের স্বাক্ষর/সীল</p>
-</div>
+        <div class="grid grid-cols-4">
+            <p class="text-[18px] col-span-3">নিরীক্ষকের মন্তব্য ..........................................................................................................  </p>
+            <p class="text-[18px]">স্বাক্ষর ও তাং :................................</p>
+        </div>
+        <h4 class="text-[18px] font-bold mt-2">* নাযিমে তালিমাতের মন্তব্য :</h4>
+        <p class="text-[16px] mt-[16px] leading-[28px]">আমি আবেদনকারীকে ................................................................. জামাতে ভর্তির উপযুক্ত মনে করছি/করছি না, তাকে ................................................................ জামাতে ভর্তি হওয়ার পরামর্শ দিচ্ছি।</p>
+        <div class="text-end mt-6">
+            <p class="border-t-2 border-black border-dotted inline-block text-[16px] font-bold">নাযিমে তালীমাতের স্বাক্ষর/সীল</p>
+        </div>
+        <h4 class="text-[18px] font-bold mt-2">* মুহতামিমের মঞ্জুরী :</h4>
+        <p class="text-[16px] mt-[16px] leading-[28px]">
+            আবেদনকারীকে ....................................................................... জামাতে ভর্তির আবেদন মঞ্জুর করা হল।
+            ভর্তি ফি.......................টাকা, মাসিক খোরাকি.......................টাকা, বেতন.......................টাকা,
+            আবাসিক চার্জ/অন্যান্য.......................টাকা নির্ধারণ করা হল।
+        </p>
+        <div class="text-end mt-6">
+            <p class="border-t-2 border-black border-dotted inline-block text-[16px] font-bold">মুহতামিম সাহেবের স্বাক্ষর/সীল</p>
+        </div>
 
-`;
+    `;
 
     setTimeout(function () {
         console.log(getResultSettingsDetails);
@@ -98,13 +100,14 @@ const AdmissionDynamicFormWithResult = forwardRef(({ query }, ref) => {
 
                     <p className='mb-5 text-sm font-semibold text-gray-700 mt-9'>{translate("From pad template")} (Optional)</p>
                     <div className="flex gap-3">
-                        {["1.jpg"].map((template, i) => (
+                        {["1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg"].map((template, i) => (
+                            
                             <div
                                 key={i}
                                 onClick={() => {
                                     setSelectedTemplate(template);
                                     methods.setValue("report_pad", null);
-                                    setPreviewImg(template);
+                                    setPreviewImg(`/admissionForm/${template}`);
                                     setPreviewUrl(template);
                                 }}
                                 className={`cursor-pointer border-2 rounded-lg p-1 ${selectedTemplate === template

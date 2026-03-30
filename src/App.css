@@ -345,3 +345,12 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
 .apexcharts-toolbar{
   display: none !important;
 }
+.editor_block table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.editor_block table td,
+.editor_block table th {
+  border: 1px solid #000;
+}
