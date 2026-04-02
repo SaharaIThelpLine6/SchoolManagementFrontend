@@ -24,6 +24,7 @@ const [removed, setRemoved] = useState(false);
     if (image) {
       setPreviewUrl(image);
       setValue(registerKey, image, { shouldValidate: true });
+      setRemoved(false);
     }
   }, [image, registerKey, setValue, setPreviewUrl]);
 
@@ -37,7 +38,7 @@ const [removed, setRemoved] = useState(false);
       e.target.value = '';
       return;
     }
-
+    setRemoved(false);
     if (file) {
       setPreviewUrl(URL.createObjectURL(file));
       setValue(registerKey, file, { shouldValidate: true });
