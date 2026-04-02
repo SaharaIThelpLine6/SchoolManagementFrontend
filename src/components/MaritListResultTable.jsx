@@ -90,10 +90,10 @@ const MaritListResultTable = () => {
                                                         <tr className="" key={maritData.ID}>
                                                             <td className="p-3 border border-black text-[14px] bg-white">{index + 1}</td>
                                                             <td className="p-3 border border-black text-[14px] bg-white text-center">{bnBijoy2Unicode(String(maritData.UserCode))}</td>
-                                                            <td className="p-3 border border-black text-[14px] bg-white">{bnBijoy2Unicode(maritData.UserName)}</td>
-                                                            <td className="p-3 border border-black text-[14px] bg-white">{bnBijoy2Unicode(maritData.FatherName)}</td>
-                                                            <td className="p-3 border border-black text-[14px] bg-white text-center">{bnBijoy2Unicode(String(maritData.Total))}</td>
-                                                            <td className="p-3 border border-black text-[14px] bg-white text-center font-bold">{bnBijoy2Unicode(maritData.Division)}</td>
+                                                            <td className="p-3 border border-black text-[14px] bg-white">{maritData.UserName}</td>
+                                                            <td className="p-3 border border-black text-[14px] bg-white">{maritData.FatherName}</td>
+                                                            <td className="p-3 border border-black text-[14px] bg-white text-center">{String(maritData.Total)}</td>
+                                                            <td className="p-3 border border-black text-[14px] bg-white text-center font-bold">{maritData.Division}</td>
                                                             <td className="p-3 border border-black text-[14px] bg-white text-center">{maritData.Positions}</td>
 
                                                         </tr>

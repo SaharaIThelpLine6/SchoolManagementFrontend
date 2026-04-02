@@ -136,6 +136,8 @@ import SupportTicketCreate from '../pages/SupportTicketCreate';
 import SupportTicketView from '../pages/SupportTicketView';
 import AdmissionForm from '../pages/AdmissionForm';
 import StudentAdmissionMessageCreate from '../pages/StudentAdmissionMessageCreate';
+import ResultLayout from '../pages/public/ResultLayout';
+import Donation from '../pages/public/Donation';
 
 const router = createBrowserRouter([
   {
@@ -623,7 +625,9 @@ const router = createBrowserRouter([
               },
               {
                 path: 'query-manage',
-                element: <QueryManage pageTitle="Query Manage" />,
+                element:  <OwenGuide> 
+                      <QueryManage pageTitle="Query Manage" /> 
+                  </OwenGuide>,
               },
               {
                 path: 'rules',
@@ -1061,6 +1065,7 @@ const router = createBrowserRouter([
       { path: 'maritlist/:seassonid/:examid', element: <MaritListResult /> },
       { path: 'classes', element: <ClassResultForm /> },
       { path: 'classes/:seassonid/:examid/:classid', element: <ClassResult /> },
+      { path: 'donation', element: <Donation /> },
     ],
   },
   {

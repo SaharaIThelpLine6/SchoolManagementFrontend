@@ -12,6 +12,9 @@ import DefaultInput from "../Forms/DefaultInput";
 import DefaultSelect from '../Forms/DefaultSelect';
 import Pagination from '../Pagination/Pagination';
 import SvgIcon from '../icons/SvgIcon';
+import Button from '../Button/Button';
+import { Link } from 'react-router-dom';
+import { useGetInstitutionInfoQuery } from '../../features/settings/settingsQuerySlice';
 
 const TableOne = () => {
   const dispatch = useDispatch();
@@ -45,7 +48,7 @@ const TableOne = () => {
     queryParams.userTypeID = userTypeID;
   }
 
-  if (filterTypeId && filterValue) {
+  if ((filterTypeId && filterValue) || filterTypeId == 4) {
     queryParams.filterTypeId = filterTypeId;
     queryParams.filterValue = filterValue;
   }
@@ -57,6 +60,7 @@ const TableOne = () => {
     isError,
     refetch, // refetch ফাংশন যোগ করেছি
   } = useGetFilteredUsersQuery(queryParams);
+  const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
   console.log(usersData, "usersData");
 
@@ -88,6 +92,11 @@ const TableOne = () => {
     dispatch(setEditMode(1));
     dispatch(setEditUserID(id));
   };
+
+  const handleuserPanelLogin = (token) =>{
+    localStorage.setItem("user_panel_token", token)
+    window.open(`/${instutionInfo?.InstitutionCode}/dashboard`, "_blank");
+  }
 
   // ✅ Loading State
   if (isLoading) {
@@ -140,7 +149,8 @@ const TableOne = () => {
                     {name: "সব দেখুন", value: ""},
                     {name: "ইউজার কোড", value: 1},
                     {name: "ইউজার নাম", value: 2},
-                    {name: "মোবাইল নাম্বার", value: 3}
+                    {name: "মোবাইল নাম্বার", value: 3},
+                    {name: "User Accounts", value: 4}
                   ]}
                   registerKey="FilterTypeId"
                   valueField="value"
@@ -214,6 +224,7 @@ const TableOne = () => {
                 'পিতার নাম',
                 'মোবাইল নাম্বার',
                 'ইউজার ধরন',
+                'Accounts'
               ].map((header, i) => (
                 <th
                   key={i}
@@ -270,6 +281,9 @@ const TableOne = () => {
                   </td>
                   <td className="py-1 px-4 border border-white text-center">
                     {brand?.UserType?.TypeName}
+                  </td>
+                  <td className="py-1 px-4 border border-white text-center">
+                    {brand?.UserTypeID == 1 && brand?.LoginInfo?.UserID ? <Button onClick={()=>{handleuserPanelLogin(brand?.LoginInfo?.AccessToken)}} className='text-center'><svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-login-2 mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 8v-2a2 2 0 0 1 2 -2h7a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-7a2 2 0 0 1 -2 -2v-2" /><path d="M3 12h13l-3 -3" /><path d="M13 15l3 -3" /></svg></Button> : ""}
                   </td>
                 </tr>
               ))

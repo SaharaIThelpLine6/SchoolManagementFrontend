@@ -1,21 +1,33 @@
-import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { Navigate } from "react-router-dom";
+import { verifyUser } from "../features/auth/authSlice";
+// import { verifyUser } from "../redux/slices/authSlice"; // adjust path
 
 const OwenGuide = ({ children }) => {
-  const { user } = useSelector((state) => state.auth);
+  const { user, token, status } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
-  const permissionType = user?.permissionType;
+  useEffect(() => {
+    // If we have a token but no user yet, verify the token
+    if (token && !user && status === 'idle') {
+      dispatch(verifyUser(token));
+    }
+  }, [token, user, status, dispatch]);
 
-  if (!permissionType) {
-    return <Navigate to="/login" replace />; // লগিন না থাকলে
+  // Still loading — don't redirect yet
+  if (status === 'loading' || (token && !user && status === 'idle')) {
+    return <div>Loading...</div>; // or a spinner
   }
 
-  // 1,2,3,4 হলে allow 5, 6, হলে not allow
- if (typeof permissionType === "number" && permissionType > 4) {
-   return <Navigate to="/" replace />;
- }
+  if (!user?.permissionType) {
+    return <Navigate to="/login" replace />;
+  }
 
-  // allow
+  if (typeof user.permissionType === "number" && user.permissionType > 4) {
+    return <Navigate to="/" replace />;
+  }
+
   return children;
 };
 

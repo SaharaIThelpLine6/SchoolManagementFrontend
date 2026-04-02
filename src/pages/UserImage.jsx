@@ -23,6 +23,7 @@ import { ViewPermission } from '../Routes/ViewPermission';
 import bnBijoy2Unicode from '../utils/conveter';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
+import CropImageUpload from '../components/Forms/CropImageUpload';
 const PAGE_SIZE = 10;
 
 const UserImage = ({ pageTitle }) => {
@@ -266,7 +267,7 @@ const UserImage = ({ pageTitle }) => {
                     {translate('Upload Profile Image')}
                   </h3>
                   <div className="flex justify-center items-center">
-                    <DefaultImageUpload
+                    <CropImageUpload
                       registerKey="singleImage"
                       require="This is required"
                       image={previewImg}

@@ -128,15 +128,15 @@ const PublicLayout = () => {
                         হোম
                       </a>
                     </li>
-                    <li>
+                    {/* <li>
                       <a
                         href={`/${schoolid}/student_result`}
                         className="cursor-pointer  border-0 md:flex md:items-center gap-[4px] font-bold text-[18px]"
                       >
                         ব্যক্তিগত ফলাফল
                       </a>
-                    </li>
-                    {
+                    </li> */}
+                    {/* {
                       schoolData?.isClassResultShowable && schoolData?.isClassResultShowable.Action != 0 ? (
                         <li>
                           <a href={`/${schoolid}/classes`} className='cursor-pointer  border-0 flex items-center gap-[4px] font-bold text-[18px]'>
@@ -144,15 +144,15 @@ const PublicLayout = () => {
                           </a>
                         </li>
                       ) : null
-                    }
-
+                    } */}
+{/* 
                     <li>
                       <a href={`/${schoolid}/maritlist_request`}
                         className="cursor-pointer border-0 flex items-center gap-[4px] font-bold text-[18px]"
                       >
                         মেধা তালিকা
                       </a>
-                    </li>
+                    </li> */}
                     <li>
                       <a
                         href={`/${schoolid}/online_admission`}
@@ -163,15 +163,14 @@ const PublicLayout = () => {
                     </li>
                     <li>
                       <a
-                        href={`https://wifaqresult.com`}
-                        target="_blank"
+                        href={`/${schoolid}/student_result`}
                         className="cursor-pointer border-0 flex items-center gap-[4px] font-bold text-[18px]"
                       >
-                        বেফাক ফলাফল
+                        ফলাফল
                       </a>
                     </li>
 
-                    <li>
+                    {/* <li>
                       <a
                         href="https://hems.alhaiatululya.org/exam-result"
                         target="_blank"
@@ -179,7 +178,7 @@ const PublicLayout = () => {
                       >
                         আল-হাইআ ফলাফল
                       </a>
-                    </li>
+                    </li> */}
                     <li>
                       <a
                         href={`/${schoolid}/login`}

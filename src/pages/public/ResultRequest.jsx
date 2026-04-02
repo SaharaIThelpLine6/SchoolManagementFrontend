@@ -2,12 +2,13 @@ import "animate.css/animate.min.css";
 import { useEffect, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { cssTransition, toast } from "react-toastify";
 import {
   setResultError
 } from "../../features/studentResultPublicView/studentResultPublicViewSlice";
 import bnBijoy2Unicode from "../../utils/conveter";
+import ResultLayout from "./ResultLayout";
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
   exit: "animate__animated animate__bounceOut",
@@ -28,7 +29,7 @@ const ResultRequest = () => {
   } = useSelector((state) => state.studentResultPublicView);
   const { schoolid } = useParams();
   const [searchParams, setSearchParams] = useSearchParams()
-
+  const { schoolData, websiteSettings } = useSelector((state) => state.studentResultPublicView);
   const {
     register,
     handleSubmit,
@@ -54,21 +55,21 @@ const ResultRequest = () => {
     }
   }, [SessionID, ExamID, SubClassID, userid]);
 
-  useEffect(()=>{
+  useEffect(() => {
     const classid = searchParams.get("classid")
     const sessionid = searchParams.get("sessionid")
     const examid = searchParams.get("examid")
     const usercode = searchParams.get("usercode")
-    if(classid){
+    if (classid) {
       setValue("SubClassID", classid)
     }
-    if(sessionid){
+    if (sessionid) {
       setValue("SessionID", sessionid)
     }
-    if(examid){
+    if (examid) {
       setValue("ExamID", examid)
     }
-    if(usercode){
+    if (usercode) {
       setValue("userid", usercode)
     }
   }, [classList])
@@ -158,6 +159,7 @@ const ResultRequest = () => {
   }, [resultStatus, setResultError]);
   return (
     <FormProvider {...{ methods }}>
+      <ResultLayout />
       <div className=" pt-20 lg:pt-10 px-8 lg:px-0 mx-auto w-full lg:w-[60%] text-center place-items-center font-SolaimanLipi">
         <form
           className="w-full  shadow-[rgba(0,0,0,0.5)_0px_1px_0px_0px] rounded-md"
@@ -172,11 +174,10 @@ const ResultRequest = () => {
               <div className="relative z-20 bg-transparent">
                 <select
                   className={`relative z-20 w-full appearance-none rounded border-2 bg-transparent py-3 px-4 outline-none transition ease-linear duration-300
-                                        ${
-                                          errors.SessionID
-                                            ? "border-red-500 focus:border-[#f44336]"
-                                            : "border-stroke focus:border-primary"
-                                        }`}
+                                        ${errors.SessionID
+                      ? "border-red-500 focus:border-[#f44336]"
+                      : "border-stroke focus:border-primary"
+                    }`}
                   {...register("SessionID", { required: true })}
                 >
                   <option value="" className="text-body">
@@ -218,11 +219,10 @@ const ResultRequest = () => {
             <div className="w-full">
               <div className="relative z-20 bg-transparent">
                 <select
-                  className={`relative z-20 w-full appearance-none rounded border-2 border-stroke bg-transparent py-3 px-4 outline-none transition focus:border-primary active:border-primary  ${
-                    errors.ExamID
-                      ? "border-red-500 focus:border-[#f44336]"
-                      : "border-stroke focus:border-primary"
-                  }`}
+                  className={`relative z-20 w-full appearance-none rounded border-2 border-stroke bg-transparent py-3 px-4 outline-none transition focus:border-primary active:border-primary  ${errors.ExamID
+                    ? "border-red-500 focus:border-[#f44336]"
+                    : "border-stroke focus:border-primary"
+                    }`}
                   {...register("ExamID", { required: true })}
                 >
                   <option value="" className="text-body">
@@ -265,11 +265,10 @@ const ResultRequest = () => {
             <div className="w-full">
               <div className="relative z-20 bg-transparent">
                 <select
-                  className={`relative z-20 w-full appearance-none rounded border-2 border-stroke bg-transparent py-4 px-4 outline-none transition focus:border-primary active:border-primary ${
-                    errors.SubClassID
-                      ? "border-red-500 focus:border-[#f44336]"
-                      : "border-stroke focus:border-primary"
-                  }`}
+                  className={`relative z-20 w-full appearance-none rounded border-2 border-stroke bg-transparent py-4 px-4 outline-none transition focus:border-primary active:border-primary ${errors.SubClassID
+                    ? "border-red-500 focus:border-[#f44336]"
+                    : "border-stroke focus:border-primary"
+                    }`}
                   {...register("SubClassID", { required: true })}
                 >
                   <option value="" className="text-body">
@@ -313,11 +312,10 @@ const ResultRequest = () => {
                 type="text"
                 placeholder="আইডি"
                 {...register("userid", { required: true })}
-                className={`w-full rounded border-2 border-stroke bg-transparent py-4 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter  ${
-                  errors.userid
-                    ? "border-red-500 focus:border-[#f44336]"
-                    : "border-stroke focus:border-primary"
-                }`}
+                className={`w-full rounded border-2 border-stroke bg-transparent py-4 px-4 text-black outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter  ${errors.userid
+                  ? "border-red-500 focus:border-[#f44336]"
+                  : "border-stroke focus:border-primary"
+                  }`}
               />
             </div>
 
@@ -325,9 +323,8 @@ const ResultRequest = () => {
               <button
                 type="submit"
                 disabled={buttonDisable}
-                className={`${
-                  buttonDisable ? "bg-[#E0E0E0]" : "bg-theme-color text-white"
-                } transition ease-in-out delay-300 text-slate-400 py-[10px] px-16 rounded-md`}
+                className={`${buttonDisable ? "bg-[#E0E0E0]" : "bg-theme-color text-white"
+                  } transition ease-in-out delay-300 text-slate-400 py-[10px] px-16 rounded-md`}
               >
                 দাখিল করুন
               </button>

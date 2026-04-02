@@ -43,16 +43,16 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                             {/*Total Student Table end*/}
                             {/*Heading Title Start*/}
                             <div className="mx-auto text-center">
-                                <h2 className="text-[22px] font-medium">      {bnBijoy2Unicode(schoolData?.InstitutionName)}</h2>
-                                <h3 className="">{bnBijoy2Unicode(schoolData?.Address)}</h3>
-                                <h3 className="">{bnBijoy2Unicode(classResult[0]?.ExamName)} - {bnBijoy2Unicode(classResult[0]?.SessionName)}</h3>
+                                <h2 className="text-[22px] font-medium">      {schoolData?.InstitutionName}</h2>
+                                <h3 className="">{schoolData?.Address}</h3>
+                                <h3 className="">{classResult[0]?.ExamName} - {classResult[0]?.SessionName}</h3>
                                 <h3 className="font-semibold border-2 border-black rounded-md p-1 w-fit mx-auto">ফলাফল(নম্বরপত্র)</h3>
-                                <h3 className="">শ্রেনী/জামাত : {bnBijoy2Unicode(classResult[0]?.SubClass)}</h3>
+                                <h3 className="">শ্রেনী/জামাত : {classResult[0]?.SubClass}</h3>
                             </div>
                             {/*Heading Title End*/}
                             {/*Grade Determination Start*/}
                             <div className="text-[14px] pt-1">
-                                <p className="bg-[#a8a6a6] text-white text-center text-[14px]">মোট বিষয় {bnBijoy2Unicode(String(classResult[0]?.SubSonkha))} টি - পূর্ণমান {bnBijoy2Unicode(String(classResult[0]?.DivisionTopNumber))}* = {bnBijoy2Unicode(String(classResult[0]?.DivisionTopNumber * classResult[0]?.SubSonkha))}</p>
+                                <p className="bg-[#a8a6a6] text-white text-center text-[14px]">মোট বিষয় {String(classResult[0]?.SubSonkha)} টি - পূর্ণমান {String(classResult[0]?.DivisionTopNumber)}* = {String(classResult[0]?.DivisionTopNumber * classResult[0]?.SubSonkha)}</p>
                                 <table className="w-[220px]">
                                     <tbody className="border border-black w-full">
                                         {Array.from({ length: classResult[0].SubSonkha }).map((_, index) => {
@@ -66,11 +66,11 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
 
                                             return (
                                                 <tr key={index}>
-                                                    <td className="text-start pl-2">{bnBijoy2Unicode(division)}</td>
+                                                    <td className="text-start pl-2">{division}</td>
                                                     <td className="">:</td>
-                                                    <td className="pl-3">{bnBijoy2Unicode(String(divisionNumber))} X</td>
+                                                    <td className="pl-3">{String(divisionNumber)} X</td>
                                                     <td className="pr-1">
-                                                        {bnBijoy2Unicode(String(subSonkha))} = {bnBijoy2Unicode(String(subSonkha * divisionNumber))}
+                                                        {String(subSonkha)} = {String(subSonkha * divisionNumber)}
                                                     </td>
                                                 </tr>
                                             );
@@ -91,7 +91,7 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                         <td className="border border-black">আইডি নং</td>
                                         <td className="border border-black w-52">শিক্ষার্থীর নাম</td>
                                         {
-                                            Array.from({ length: classResult[0].SubSonkha }).map((_, index) => (<td className="border border-black [writing-mode:vertical-rl] py-2 max-h-[100px]" key={index}>{bnBijoy2Unicode(classResult[0][`Subject${index + 1}`])}</td>))
+                                            Array.from({ length: classResult[0].SubSonkha }).map((_, index) => (<td className="border border-black [writing-mode:vertical-rl] py-2 max-h-[100px]" key={index}>{classResult[0][`Subject${index + 1}`]}</td>))
 
                                         }
 
@@ -106,19 +106,19 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                         classResult.map((studentResult, index) => {
                                             return (
                                                 <tr key={`user_${String(studentResult?.UserCode)}`}>
-                                                    <td className="border border-black">{bnBijoy2Unicode(String(index + 1))}</td>
-                                                    <td className="border border-black">{bnBijoy2Unicode(String(studentResult.UserCode))}</td>
-                                                    <td className="border border-black text-left pl-1">{bnBijoy2Unicode(studentResult.UserName)}</td>
+                                                    <td className="border border-black">{String(index + 1)}</td>
+                                                    <td className="border border-black">{String(studentResult.UserCode)}</td>
+                                                    <td className="border border-black text-left pl-1">{studentResult.UserName}</td>
 
                                                     {
-                                                        Array.from({ length: studentResult.SubSonkha }).map((_, index) => (<td key={`subject_${index}`} className="border border-black">{bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}</td>))
+                                                        Array.from({ length: studentResult.SubSonkha }).map((_, index) => (<td key={`subject_${index}`} className="border border-black">{String(studentResult[`SubVal${index + 1}`])}</td>))
 
                                                     }
 
-                                                    <td className="border border-black">{bnBijoy2Unicode(String(studentResult?.Total))}</td>
-                                                    <td className="border border-black">{bnBijoy2Unicode(String(studentResult?.Average))}</td>
-                                                    <td className="border border-black">{bnBijoy2Unicode(String(studentResult?.Division))}</td>
-                                                    <td className="border border-black">{bnBijoy2Unicode(String(studentResult?.Positions))}</td>
+                                                    <td className="border border-black">{String(studentResult?.Total)}</td>
+                                                    <td className="border border-black">{String(studentResult?.Average)}</td>
+                                                    <td className="border border-black">{String(studentResult?.Division)}</td>
+                                                    <td className="border border-black">{String(studentResult?.Positions)}</td>
                                                 </tr>
                                             )
                                         })}
@@ -144,7 +144,7 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                                   </div>
 
                                                     <p>.....................................</p>
-                                                    <p>{bnBijoy2Unicode(schoolData?.PrincipalName)}</p>
+                                                    <p>{schoolData?.PrincipalName}</p>
                                                     <p>তারিখ : </p>
                                                 </div>
                                             </div>
@@ -160,7 +160,7 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
 
 
                                                     <p>.....................................</p>
-                                                    <p>{bnBijoy2Unicode(schoolData?.NajemName)}</p>
+                                                    <p>{schoolData?.NajemName}</p>
                                                     <p>তারিখ : </p>
                                                 </div>
                                             </div>

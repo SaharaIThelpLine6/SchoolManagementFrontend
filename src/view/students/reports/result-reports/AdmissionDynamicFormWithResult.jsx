@@ -70,13 +70,14 @@ const AdmissionDynamicFormWithResult = forwardRef(({ query }, ref) => {
     `;
 
     setTimeout(function () {
-        console.log(getResultSettingsDetails);
+        // console.log("===============");
+        // console.log(getResultSettingsDetails);
 
         rte = new window.RichTextEditor(refdiv.current);
-        rte.setHTMLCode(getResultSettingsDetails.Description2 ? getResultSettingsDetails.Description2 : defaultHTML2);
+        rte.setHTMLCode(getResultSettingsDetails?.Description2 ? getResultSettingsDetails.Description2 : defaultHTML2);
 
         princepalText = new window.RichTextEditor(princepalTextRef.current);
-        princepalText.setHTMLCode(getResultSettingsDetails.Description1 ? getResultSettingsDetails.Description1 : defaultHTML);
+        princepalText.setHTMLCode(getResultSettingsDetails?.Description1 ? getResultSettingsDetails.Description1 : defaultHTML);
     }, 0)
     return (
         <div>
@@ -89,6 +90,7 @@ const AdmissionDynamicFormWithResult = forwardRef(({ query }, ref) => {
                     <div className="mt-4">
                         <div ref={princepalTextRef}></div>
                     </div>
+                    
                     <FormProvider {...methods}>
                         <p className='mb-5 text-sm font-semibold text-gray-700 mt-9'>{translate("Madrasha Pad Image")} (A4 size)</p>
                         <div>

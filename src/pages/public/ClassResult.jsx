@@ -78,11 +78,11 @@ const ClassResult = () => {
 
                                     {/*Heading Title Start*/}
                                     <div className="mx-auto text-center py-3 text-white relative z-10">
-                                        <h2 className="text-[22px] font-medium">{bnBijoy2Unicode(schoolData?.InstitutionName)}</h2>
-                                        <h3 className="">{bnBijoy2Unicode(schoolData?.Address)}</h3>
-                                        <h3 className="">{bnBijoy2Unicode(sortedClassResult[0]?.ExamName)} - {bnBijoy2Unicode(sortedClassResult[0]?.SessionName)}</h3>
+                                        <h2 className="text-[22px] font-medium">{schoolData?.InstitutionName}</h2>
+                                        <h3 className="">{schoolData?.Address}</h3>
+                                        <h3 className="">{sortedClassResult[0]?.ExamName} - {sortedClassResult[0]?.SessionName}</h3>
                                         <h3 className="border-2 border-white rounded-md p-1 w-fit mx-auto">ফলাফল(নম্বরপত্র)</h3>
-                                        <h3 className="">শ্রেনী/জামাত : {bnBijoy2Unicode(sortedClassResult[0]?.SubClass)}</h3>
+                                        <h3 className="">শ্রেনী/জামাত : {sortedClassResult[0]?.SubClass}</h3>
                                     </div>
                                 </div>
                                 {/*Heading Title End*/}
@@ -109,20 +109,18 @@ const ClassResult = () => {
                                                 sortedClassResult.map((studentResult, index) => { // এখানে sortedClassResult ব্যবহার করুন
                                                     return (
                                                         <tr key={`view_user${studentResult.UserCode}`}>
-                                                            <td className="border border-black px-1 min-w-[20px]">{bnBijoy2Unicode(String(index + 1))}</td>
-                                                            <td className="border border-black px-1 min-w-[20px]">{bnBijoy2Unicode(String(studentResult.UserCode))}</td>
-                                                            <td className="border border-black px-1 min-w-[20px]">{bnBijoy2Unicode(studentResult.UserName)}</td>
+                                                            <td className="border border-black px-1 min-w-[20px]">{String(index + 1)}</td>
+                                                            <td className="border border-black px-1 min-w-[20px]">{String(studentResult.UserCode)}</td>
+                                                            <td className="border border-black px-1 min-w-[20px]">{studentResult.UserName}</td>
                                                             {
-                                                                Array.from({ length: studentResult.SubSonkha }).map((_, index) => (<td key={`subind_${index}`} className="border border-black min-w-[100px]">{bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}</td>))
-
+                                                                Array.from({ length: studentResult.SubSonkha }).map((_, index) => (<td key={`subind_${index}`} className="border border-black min-w-[100px]">{String(studentResult[`SubVal${index + 1}`])}</td>))
                                                             }
-                                                            <td className="border border-black px-1 min-w-[20px]">{bnBijoy2Unicode(String(studentResult?.Total))}</td>
+                                                            <td className="border border-black px-1 min-w-[20px]">{String(studentResult?.Total)}</td>
 
-                                                            <td className="border border-black px-1 min-w-[20px]">{bnBijoy2Unicode(String(studentResult?.Average))}</td>
-                                                            <td className="border border-black px-1 min-w-[20px]">{bnBijoy2Unicode(String(studentResult?.Division))}</td>
+                                                            <td className="border border-black px-1 min-w-[20px]">{String(studentResult?.Average)}</td>
+                                                            <td className="border border-black px-1 min-w-[20px]">{String(studentResult?.Division)}</td>
 
-                                                            <td className="border border-black px-1 min-w-[20px]">{bnBijoy2Unicode(String(studentResult?.Positions))}</td>
-
+                                                            <td className="border border-black px-1 min-w-[20px]">{String(studentResult?.Positions)}</td>
 
                                                         </tr>
                                                     )
