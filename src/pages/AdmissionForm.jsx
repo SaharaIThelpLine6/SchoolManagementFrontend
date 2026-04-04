@@ -87,10 +87,13 @@ const AdmissionForm = ({ pageTitle }) => {
                         ? translate("Missing or invalid data provided")
                         : translate("An error occurred while fetching the report")
             );
+        } else if (!isFetching && reportData && Object.keys(reportData).length === 0) {
+            // ✅ Handle empty object response
+            setErrorMessage(translate("No report data available"));
         } else {
             setErrorMessage(null);
         }
-    }, [isError, error, translate]);
+    }, [isError, error, isFetching, reportData, translate]);
 
     useEffect(() => {
         if (errorMessage) {
@@ -279,7 +282,7 @@ const AdmissionForm = ({ pageTitle }) => {
                                 <div className="p-2">{translate("Loading report...")}</div>
                             )}
                             {
-                                reportData && (
+                                reportData && Object.keys(reportData).length > 0 && (
                                     <div className="">
                                         <div className="w-full relative max-w-full overflow-x-auto print:hidden pt-5">
                                             <div className="max-w-[750px] mx-auto">
