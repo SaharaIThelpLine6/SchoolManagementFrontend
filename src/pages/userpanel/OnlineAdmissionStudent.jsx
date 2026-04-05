@@ -291,7 +291,8 @@ const OnlineAdmissionStudent = () => {
     // either no permission, regardless of timeLeft
     message = timeMessageData?.data?.Message1stPart;
   }
-
+  console.log(message, "message")
+  console.log(hasPermission, "hasPermission")
   if (isUserDetailsLoading) return <div>Loading...</div>;
   if (isUserDetailsError) return <div>User Load Error</div>;
 

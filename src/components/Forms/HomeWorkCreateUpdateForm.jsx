@@ -25,6 +25,7 @@ import {
 import { hideModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
 import SearchableMultiStudentSelect from './SearchableMultiStudentSelect';
+import { toast } from 'react-toastify';
 
 const HomeWorkCreateUpdateForm = ({ id }) => {
   const translate = useTranslate();
@@ -162,7 +163,6 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
   const onSubmit = useCallback(
     async (data) => {
       try {
-        // Prepare the data with proper structure
         const submissionData = {
           ...data,
           SessionID: Number(data.SessionID),
@@ -176,30 +176,22 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
 
         if (id) {
           await updateHomeWork({ id, ...submissionData }).unwrap();
-          Swal.fire({
-            icon: 'success',
-            title: translate('Updated successfully'),
-          });
+          toast.success(translate('Updated successfully'));
         } else {
           await createHomeWork(submissionData).unwrap();
-          Swal.fire({
-            icon: 'success',
-            title: translate('Created successfully'),
-          });
+          toast.success(translate('Created successfully'));
         }
-        hideModal();
+
       } catch (error) {
         let message = translate('Something went wrong');
+
         if (error?.data?.error) {
           message = error.data.error;
         } else if (error?.message) {
           message = error.message;
         }
 
-        Swal.fire({
-          icon: 'error',
-          title: message,
-        });
+        toast.error(message);
       }
     },
     [id, updateHomeWork, createHomeWork, translate]

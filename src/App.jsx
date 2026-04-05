@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import Loading from "./components/Loading/Loading";
 import SocketManager from "./components/socket/SocketManager";
 import { useSelector } from "react-redux";
-
+import 'react-toastify/dist/ReactToastify.css';
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
   exit: "animate__animated animate__bounceOut",
@@ -22,7 +22,7 @@ export default function App() {
       <Suspense fallback={<Loading />}>
         <RouterProvider router={router} />
         <ToastContainer
-          position="bottom-center"
+          position="top-right"
           autoClose={5000}
           hideProgressBar={false}
           newestOnTop={false}
