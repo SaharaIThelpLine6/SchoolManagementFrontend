@@ -6,7 +6,7 @@ import { ViewPermission } from '../../Routes/ViewPermission';
 import { setItemsPerPage } from '../../features/pagination/paginationSlice';
 import { setEditUserID } from '../../features/settings/settingsSlice';
 import { setEditMode } from '../../features/userInfo/userInfoSlice';
-import { useGetFilteredUsersQuery, useGetUserTypesQuery } from '../../features/userType/userTypeSlice';
+import { useGetFilteredUsersQuery, useGetNewAccessTokenMutation, useGetUserTypesQuery } from '../../features/userType/userTypeSlice';
 import Fourdots from '../../images/brand/four-dots-square.svg';
 import DefaultInput from "../Forms/DefaultInput";
 import DefaultSelect from '../Forms/DefaultSelect';
@@ -15,11 +15,13 @@ import SvgIcon from '../icons/SvgIcon';
 import Button from '../Button/Button';
 import { Link } from 'react-router-dom';
 import { useGetInstitutionInfoQuery } from '../../features/settings/settingsQuerySlice';
+import OwenGuide from '../../Routes/OwenGuide';
 
 const TableOne = () => {
   const dispatch = useDispatch();
   const itemPerPage = useSelector((state) => state.pagination.itemsPerPage);
   const currentPage = useSelector((state) => state.pagination.currentPage);
+  const { user, token, status } = useSelector((state) => state.auth);
 
   // ✅ ফর্ম স্টেট ম্যানেজমেন্ট
   const methods = useForm();
@@ -72,7 +74,7 @@ const TableOne = () => {
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
-
+  const [triggerGetToken, { data, isLoading: accessTokenLogin, error }] = useGetNewAccessTokenMutation();
   // ✅ ফর্ম ভ্যালু পরিবর্তন হলে API রিফেচ করব
   useEffect(() => {
     // যখন userTypeID, filterTypeId, বা filterValue পরিবর্তন হবে
@@ -93,10 +95,17 @@ const TableOne = () => {
     dispatch(setEditUserID(id));
   };
 
-  const handleuserPanelLogin = (token) =>{
-    localStorage.setItem("user_panel_token", token)
-    window.open(`/${instutionInfo?.InstitutionCode}/dashboard`, "_blank");
-  }
+  const handleuserPanelLogin = async (token) => {
+    try {
+      const result = await triggerGetToken({ user_code: token }).unwrap();
+      console.log(result);
+
+      localStorage.setItem("user_panel_token", result)
+      window.open(`/${instutionInfo?.InstitutionCode}/dashboard`, "_blank");
+    } catch (err) {
+      console.error("Error:", err);
+    }
+  };
 
   // ✅ Loading State
   if (isLoading) {
@@ -146,11 +155,11 @@ const TableOne = () => {
                 <DefaultSelect
                   label=""
                   options={[
-                    {name: "সব দেখুন", value: ""},
-                    {name: "ইউজার কোড", value: 1},
-                    {name: "ইউজার নাম", value: 2},
-                    {name: "মোবাইল নাম্বার", value: 3},
-                    {name: "User Accounts", value: 4}
+                    { name: "সব দেখুন", value: "" },
+                    { name: "ইউজার কোড", value: 1 },
+                    { name: "ইউজার নাম", value: 2 },
+                    { name: "মোবাইল নাম্বার", value: 3 },
+                    { name: "User Accounts", value: 4 }
                   ]}
                   registerKey="FilterTypeId"
                   valueField="value"
@@ -283,7 +292,22 @@ const TableOne = () => {
                     {brand?.UserType?.TypeName}
                   </td>
                   <td className="py-1 px-4 border border-white text-center">
-                    {brand?.UserTypeID == 1 && brand?.LoginInfo?.UserID ? <Button onClick={()=>{handleuserPanelLogin(brand?.LoginInfo?.AccessToken)}} className='text-center'><svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-login-2 mx-auto"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 8v-2a2 2 0 0 1 2 -2h7a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-7a2 2 0 0 1 -2 -2v-2" /><path d="M3 12h13l-3 -3" /><path d="M13 15l3 -3" /></svg></Button> : ""}
+                    {brand?.UserTypeID == 1 && brand?.LoginInfo?.UserID ? (
+                      typeof user.permissionType === "number" && user.permissionType < 4 ? (
+                        <>
+                          <Button onClick={() => { handleuserPanelLogin(brand?.UserCode) }} className='text-center'>
+                            <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-login-2 mx-auto">
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                              <path d="M9 8v-2a2 2 0 0 1 2 -2h7a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-7a2 2 0 0 1 -2 -2v-2" />
+                              <path d="M3 12h13l-3 -3" />
+                              <path d="M13 15l3 -3" />
+                            </svg>
+                          </Button>
+                        </>
+                      ) : (
+                        <p className='text-green-600 text-[13px]'>Active</p>
+                      )
+                    ) : ""}
                   </td>
                 </tr>
               ))

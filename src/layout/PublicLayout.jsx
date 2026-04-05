@@ -36,6 +36,7 @@ const PublicLayout = () => {
     const imageSrc = `data:image/png;base64,${base64String}`;
     return imageSrc;
   };
+  const [resultOpen, setResultOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchResultFieldData(schoolid));
@@ -94,7 +95,7 @@ const PublicLayout = () => {
 
         <header
           // bg-theme-color
-          className={`lg:flex overflow-hidden font-SolaimanLipi shadow-md text-theme-color sticky top-0 left-0 bg-white h-screen md:h-auto max-w-[320px] md:max-w-full w-full hidden_in_print z-[99] ${isOpen ? "flex fixed z-[99]" : "hidden"
+          className={`lg:flex font-SolaimanLipi shadow-md text-theme-color sticky top-0 left-0 bg-white h-screen md:h-auto max-w-[320px] md:max-w-full w-full hidden_in_print z-[99] ${isOpen ? "flex fixed z-[99]" : "hidden"
             }`}
         >
           <div className="container mx-auto">
@@ -119,75 +120,69 @@ const PublicLayout = () => {
 
 
                 <div className="block md:inline-block">
-                  <ul className="pt-[10px] h-full flex flex-col lg:flex-row lg:items-center gap-[30px] text-[16px] font-[400] border-0 text-theme-color overflow-y-auto w-full md:w-auto">
+                  <ul className="pt-[10px] h-full flex flex-col lg:flex-row lg:items-center gap-[30px] text-[16px] font-[400] border-0 text-theme-color w-full md:w-auto">
                     <li>
-                      <a
-                        href={`/${schoolid}`}
-                        className="cursor-pointer  border-0 md:flex md:items-center gap-[4px] font-bold text-[18px]"
-                      >
+                      <a href={`/${schoolid}`} className="cursor-pointer border-0 md:flex md:items-center gap-[4px] font-bold text-[18px]">
                         হোম
                       </a>
                     </li>
-                    {/* <li>
-                      <a
-                        href={`/${schoolid}/student_result`}
-                        className="cursor-pointer  border-0 md:flex md:items-center gap-[4px] font-bold text-[18px]"
-                      >
-                        ব্যক্তিগত ফলাফল
-                      </a>
-                    </li> */}
-                    {/* {
-                      schoolData?.isClassResultShowable && schoolData?.isClassResultShowable.Action != 0 ? (
-                        <li>
-                          <a href={`/${schoolid}/classes`} className='cursor-pointer  border-0 flex items-center gap-[4px] font-bold text-[18px]'>
-                            ক্লাশ/মারহালা ভিত্তিক ফলাফল
-                          </a>
-                        </li>
-                      ) : null
-                    } */}
-{/* 
+
                     <li>
-                      <a href={`/${schoolid}/maritlist_request`}
-                        className="cursor-pointer border-0 flex items-center gap-[4px] font-bold text-[18px]"
-                      >
-                        মেধা তালিকা
-                      </a>
-                    </li> */}
-                    <li>
-                      <a
-                        href={`/${schoolid}/online_admission`}
-                        className="cursor-pointer border-0 flex items-center gap-[4px] font-bold text-[18px]"
-                      >
+                      <a href={`/${schoolid}/online_admission`} className="cursor-pointer border-0 flex items-center gap-[4px] font-bold text-[18px]">
                         অনলাইনে ভর্তি
                       </a>
                     </li>
-                    <li>
-                      <a
-                        href={`/${schoolid}/student_result`}
-                        className="cursor-pointer border-0 flex items-center gap-[4px] font-bold text-[18px]"
+
+                    <li className="relative group">
+                      <button
+                        onClick={() => setResultOpen(!resultOpen)}
+                        className="cursor-pointer font-bold text-[18px] flex items-center gap-1 text-theme-color w-full"
                       >
                         ফলাফল
-                      </a>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width={16} height={16}
+                          fill="none" stroke="currentColor" strokeWidth={2}
+                          viewBox="0 0 24 24"
+                          className={`transition-transform duration-200 lg:group-hover:rotate-180 ${resultOpen ? "rotate-180" : ""}`}
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+
+                      {/* Desktop dropdown (hover) */}
+                      <ul className="hidden lg:block absolute top-full left-0 w-[300px] bg-white border border-[#d5d5d5] rounded-md shadow-md z-[100]
+      invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
+                        <li><a href={`/${schoolid}/student_result`} className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">ব্যক্তিগত ফলাফল</a></li>
+                        {schoolData?.isClassResultShowable?.Action != 0 && (
+                          <li><a href={`/${schoolid}/classes`} className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">ক্লাশ/মারহালা ভিত্তিক ফলাফল</a></li>
+                        )}
+                        <li><a href={`/${schoolid}/maritlist_request`} className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">মেধা তালিকা</a></li>
+                        <li><a href="https://wifaqresult.com" target="_blank" className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">বেফাক ফলাফল</a></li>
+                        <li><a href="https://hems.alhaiatululya.org/exam-result" target="_blank" className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">আল-হাইআ ফলাফল</a></li>
+                        <li><a href="https://www.tanjimulmadaris.com" target="_blank" className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">তানযীমুল মাদারিসিদ দ্বীনিয়া বাংলাদেশ</a></li>
+                      </ul>
+
+                      {/* Mobile accordion (click) */}
+                      {resultOpen && (
+                        <ul className="lg:hidden pl-4 mt-1 flex flex-col gap-1 border-l-2 border-theme-color">
+                          <li><a href={`/${schoolid}/student_result`} className="block py-2 font-bold text-[16px]">ব্যক্তিগত ফলাফল</a></li>
+                          {schoolData?.isClassResultShowable?.Action != 0 && (
+                            <li><a href={`/${schoolid}/classes`} className="block py-2 font-bold text-[16px]">ক্লাশ/মারহালা ভিত্তিক ফলাফল</a></li>
+                          )}
+                          <li><a href={`/${schoolid}/maritlist_request`} className="block py-2 font-bold text-[16px]">মেধা তালিকা</a></li>
+                          <li><a href="https://wifaqresult.com" target="_blank" className="block py-2 font-bold text-[16px]">বেফাক ফলাফল </a></li>
+                          <li><a href="https://hems.alhaiatululya.org/exam-result" target="_blank" className="block py-2 font-bold text-[16px]">আল-হাইআ ফলাফল</a></li>
+                          <li><a href="https://www.tanjimulmadaris.com" target="_blank" className="block py-2 font-bold text-[16px]">তানযীমুল মাদারিসিদ দ্বীনিয়া বাংলাদেশ</a></li>
+                        </ul>
+                      )}
                     </li>
 
-                    {/* <li>
-                      <a
-                        href="https://hems.alhaiatululya.org/exam-result"
-                        target="_blank"
-                        className="cursor-pointer border-0 flex items-center gap-[4px] font-bold text-[18px]"
-                      >
-                        আল-হাইআ ফলাফল
-                      </a>
-                    </li> */}
                     <li>
-                      <a
-                        href={`/${schoolid}/login`}
-                        className="cursor-pointer border-0 flex items-center gap-[4px] font-bold text-[18px] bg-theme-color text-white py-[10px] px-[20px] rounded-[4px]"
-                      >
-                        গার্ডিয়ান পোর্টাল
+                      <a href={`/${schoolid}/login`} className="cursor-pointer border-0 flex items-center gap-[4px] font-bold text-[18px] lg:bg-theme-color lg:text-white lg:py-[10px] lg:px-[20px] rounded-[4px]">
+                        গার্ডিয়ান পোর্টাল
                       </a>
                     </li>
-
                   </ul>
                 </div>
 
@@ -198,7 +193,7 @@ const PublicLayout = () => {
           </div>
         </header>
 
-        <main className="mx-auto w-full overflow-hidden h-full pt-[50px] lg:pt-0">
+        <main className="mx-auto w-full  h-full pt-[50px] lg:pt-0">
           <div className="w-full animate-scaleIn">
             <Outlet />
           </div>
@@ -287,7 +282,7 @@ const PublicLayout = () => {
                 </p>
                 <div className="flex gap-4 mt-4">
                   <a href={settingsObject.fblink} target="_blank" className="text-[#1877F2]"><svg xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-brand-facebook"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3" /></svg></a>
-                  <a href={settingsObject.ylink} className="text-[#FF0000]" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-brand-youtube"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M2 8a4 4 0 0 1 4 -4h12a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4v-8z" /><path d="M10 9l5 3l-5 3z" /></svg></a>
+                  <a href={settingsObject.ylink} className="text-[#FF0000]" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-brand-youtube"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M2 8a4 4 0 0 1 4 -4h12a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4v-8z" /><path d="M10 9l5 3l-5 3z" /></svg></a>
                 </div>
               </div>
 

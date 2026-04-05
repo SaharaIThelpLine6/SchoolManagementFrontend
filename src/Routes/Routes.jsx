@@ -138,6 +138,7 @@ import AdmissionForm from '../pages/AdmissionForm';
 import StudentAdmissionMessageCreate from '../pages/StudentAdmissionMessageCreate';
 import ResultLayout from '../pages/public/ResultLayout';
 import Donation from '../pages/public/Donation';
+import OnlineDonationInvoice from '../view/payment/payment-history/OnlineDonationInvoice';
 
 const router = createBrowserRouter([
   {
@@ -1066,6 +1067,8 @@ const router = createBrowserRouter([
       { path: 'classes', element: <ClassResultForm /> },
       { path: 'classes/:seassonid/:examid/:classid', element: <ClassResult /> },
       { path: 'donation', element: <Donation /> },
+      { path: 'donation/payment-success', element: <OnlineDonationInvoice /> },
+       
     ],
   },
   {
