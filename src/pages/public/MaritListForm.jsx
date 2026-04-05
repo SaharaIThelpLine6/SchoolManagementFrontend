@@ -58,7 +58,6 @@ const MaritListForm = () => {
 
   return (
     <FormProvider {...methods}>
-      <ResultLayout />
       <div className="pt-20 lg:pt-10 px-8 lg:px-0 mx-auto w-full lg:w-[60%] text-center place-items-center font-SolaimanLipi">
         <form
           className="w-full bg-white shadow-[rgba(0,0,0,0.5)_0px_1px_0px_0px] rounded-md"

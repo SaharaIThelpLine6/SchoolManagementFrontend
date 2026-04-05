@@ -160,6 +160,16 @@ export const userTypeSlice = createApi({
       },
       providesTags: ['Users'],
     }),
+    getNewAccessToken: builder.mutation({
+      query: ({ user_code }) => {
+        const params = new URLSearchParams();
+        params.append('user_code', user_code);
+        return {
+          url: `/generate_accesstoken?${params.toString()}`,
+          method: 'GET'
+        };
+      }
+    })
   }),
 });
 
@@ -181,5 +191,6 @@ export const {
   useUpdateUserMutation,
   useGetAllUsersQuery,
   useGetSingleUserQuery,
-  useGetFilteredUsersQuery
+  useGetFilteredUsersQuery,
+  useGetNewAccessTokenMutation,
 } = userTypeSlice;
