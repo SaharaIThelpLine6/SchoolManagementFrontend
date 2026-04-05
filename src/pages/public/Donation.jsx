@@ -8,6 +8,7 @@ import AnimatedSelect from "../../components/Forms/AnimatedSelect";
 import Checkbox from "../../components/Checkboxes/Checkbox";
 import { useDonationInitPaymentMutation } from "../../features/userPanel/onlineDonation/onlineDonationSlice";
 import Swal from "sweetalert2";
+import Button from "../../components/Button/Button";
 
 const Donation = () => {
     const [initPayment, { isLoading }] = useDonationInitPaymentMutation();
@@ -176,13 +177,46 @@ const Donation = () => {
                             />
                             {errors.amount && <p className="text-red-500 text-left text-xs pt-1 pl-1">{errors.amount.message}</p>}
                         </div>
+                        <div className="flex gap-2">
+                            {[100, 200, 500, 1000].map((val) => (
+                                <Button
+                                    key={val}
+                                    type="button"
+                                    onClick={() => {
+                                        setValue("amount", val);
+                                    }}
+                                >
+                                    {val}
+                                </Button>
+                            ))}
+                        </div>
 
                         {/* Anonymous checkbox - always visible */}
-                        <Checkbox
+
+                        <div className="mb-4">
+                            <div className="">
+                                    <label
+                                        className="flex items-center space-x-2 text-gray-800 cursor-pointer"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                                        />
+                                        <span className="text-sm font-SolaimanLipi">
+                                            পরিচয় প্রকাশে আগ্রহী নই
+                                        </span>
+                                    </label>
+                               
+                            </div>
+
+                            {/* Hidden input to register the single value */}
+                            <input type="hidden" {...register("anonymous")} />
+                        </div>
+                        {/* <Checkbox
                             label={""}
-                            options={[{ id: 1, name: "পরিচয় প্রকাশে আগ্রহী নই" }]}
+                            options={[{ id: 1, name: "" }]}
                             registerKey="anonymous"
-                        />
+                        /> */}
 
                         <div>
                             <button
