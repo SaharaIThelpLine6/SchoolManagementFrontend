@@ -179,6 +179,12 @@ const PublicLayout = () => {
                     </li>
 
                     <li>
+                      <a href={`/${schoolid}/donation`} className="block py-2 font-bold text-[16px]">
+                        অনুদান
+                      </a>
+                    </li>
+
+                    <li>
                       <a href={`/${schoolid}/login`} className="cursor-pointer border-0 flex items-center gap-[4px] font-bold text-[18px] lg:bg-theme-color lg:text-white lg:py-[10px] lg:px-[20px] rounded-[4px]">
                         গার্ডিয়ান পোর্টাল
                       </a>
