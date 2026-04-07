@@ -1094,7 +1094,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                 unicode={true}
               />
               <DefaultSelect
-                label={translate('Sub Class')}
+                label={translate('Living Condition')}
                 options={[
                   {
                     ResidentialStatusId: 1,
@@ -1110,6 +1110,10 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                   },
                   {
                     ResidentialStatusId: 4,
+                    value: "নাইট-কেয়ার"
+                  },
+                  {
+                    ResidentialStatusId: 5,
                     value: "উভয়"
                   }
                 ]}

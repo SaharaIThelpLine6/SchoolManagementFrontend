@@ -16,7 +16,6 @@ const Donation = () => {
     const [isAnonymous, setIsAnonymous] = useState(false);
 
     const { schoolid } = useParams();
-
     const methods = useForm();
     const { handleSubmit, watch, setValue, register, trigger, formState: { errors } } = methods;
 
@@ -68,13 +67,12 @@ const Donation = () => {
 
     useEffect(() => {
         console.log(anonymousWatch);
-
         setIsAnonymous(anonymousWatch == 1);
     }, [anonymousWatch]);
 
     // Button disable logic
     useEffect(() => {
-        console.log(isAnonymous);
+        // console.log(isAnonymous);
         if (!donation_category || !amount) {
             setButtonDisable(true);
             return;
@@ -110,7 +108,7 @@ const Donation = () => {
             <div className="pt-20 lg:pt-10 px-8 lg:px-0 mx-auto w-full lg:w-[60%] text-center place-items-center font-SolaimanLipi">
                 <form className="w-full bg-white shadow-[rgba(0,0,0,0.5)_0px_1px_0px_0px] rounded-md" onSubmit={handleSubmit(onSubmit)}>
                     <div className="bg-theme-color font-semibold rounded-t-md">
-                        <h1 className="text-white text-2xl py-4">ক্লাশ/মারহালা ভিত্তিক ফলাফল</h1>
+                        <h1 className="text-white text-2xl py-4">দান/অনুদান</h1>
                     </div>
                     <div className="px-[14px] text-[14px] text-slate-600 border border-slate-200 space-y-8 pt-[26px] pb-[24px]">
 
