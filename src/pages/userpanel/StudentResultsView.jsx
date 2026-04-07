@@ -15,6 +15,7 @@ const StudentResults = () => {
 
   const labelData = labelNameData?.[0]?.AdmissionIDLabel || '';
   console.log(data, 'data');
+  console.log(error, "error");
   const getSubjects = (student) => {
     const arr = [];
     for (let i = 1; i <= 14; i++) {
