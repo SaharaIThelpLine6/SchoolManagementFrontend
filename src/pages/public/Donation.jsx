@@ -84,9 +84,6 @@ const Donation = () => {
                 return;
             }
         }
-        console.log("=====================================");
-
-
 
         setButtonDisable(false);
     }, [SessionID, ExamID, SubClassID, donation_category, amount, isAnonymous, watch("name"), watch("phone"), watch("address")]);
@@ -192,24 +189,21 @@ const Donation = () => {
                         {/* Anonymous checkbox - always visible */}
 
                         <div className="mb-4">
-                            <div className="">
-                                    <label
-                                        className="flex items-center space-x-2 text-gray-800 cursor-pointer"
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            className="h-4 w-4 text-blue-600 border-gray-300 rounded"
-                                        />
-                                        <span className="text-sm font-SolaimanLipi">
-                                            পরিচয় প্রকাশে আগ্রহী নই
-                                        </span>
-                                    </label>
-                               
-                            </div>
-
-                            {/* Hidden input to register the single value */}
-                            <input type="hidden" {...register("anonymous")} />
+                            <label className="flex items-center space-x-2 text-gray-800 cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    className="h-4 w-4 text-blue-600 border-gray-300 rounded"
+                                    {...register("anonymous")}  
+                                    value={1}
+                                />
+                                <span className="text-sm font-SolaimanLipi">
+                                    পরিচয় প্রকাশে আগ্রহী নই
+                                </span>
+                            </label>
                         </div>
+
+                        {/* ❌ Remove the hidden input below — it conflicts with the above */}
+                        {/* <input type="hidden" {...register("anonymous")} /> */}
                         {/* <Checkbox
                             label={""}
                             options={[{ id: 1, name: "" }]}

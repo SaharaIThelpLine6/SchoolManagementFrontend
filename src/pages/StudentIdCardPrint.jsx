@@ -1055,9 +1055,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                 { ID: "DateOfBirth", Name: "Date Of Birth" },
                 { ID: "NewOldId", Name: "Position" },
               
-              ]
-                // ⭐ FILTER BY LAYOUT
-                .filter((i) => isFieldAllowedForLayout(i.ID, selectedLayout))
+              ].filter((i) => isFieldAllowedForLayout(i.ID, selectedLayout))
                 .map((i) => (
                   <div key={i.ID} className='flex items-center gap-2'>
                     <input

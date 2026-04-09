@@ -37,32 +37,52 @@ const CropImageUpload = ({
     }
   }, [image, registerKey, setValue, setPreviewUrl]);
 
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (!file) return;
+
+  //   const maxSize = 5 * 1024 * 1024;
+  //   if (file.size > maxSize) {
+  //     setFileSizeError("ফাইলের সাইজ ৫ MB এর বেশি হতে পারবে না।");
+  //     e.target.value = "";
+  //     return;
+  //   }
+
+  //   setFileSizeError("");
+  //   setRemoved(false);
+
+  //   // Load raw image into cropper modal instead of directly setting preview
+  //   const reader = new FileReader();
+  //   reader.onload = () => {
+  //     setRawImageSrc(reader.result);
+  //     setCropModalOpen(true);
+  //   };
+  //   reader.readAsDataURL(file);
+
+  //   // Clear the file input so the same file can be re-selected after cancel
+  //   e.target.value = "";
+  // };
+
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      setFileSizeError("ফাইলের সাইজ ৫ MB এর বেশি হতে পারবে না।");
-      e.target.value = "";
-      return;
-    }
+    // if (file.size > maxSize) {
+    //   setFileSizeError("ফাইলের সাইজ ৫ MB এর বেশি হতে পারবে না।");
+    //   e.target.value = "";
+    //   return;
+    // }
 
     setFileSizeError("");
     setRemoved(false);
-
-    // Load raw image into cropper modal instead of directly setting preview
-    const reader = new FileReader();
-    reader.onload = () => {
-      setRawImageSrc(reader.result);
-      setCropModalOpen(true);
-    };
-    reader.readAsDataURL(file);
-
-    // Clear the file input so the same file can be re-selected after cancel
+    const imageUrl = URL.createObjectURL(file);
+    setRawImageSrc(imageUrl);
+    setCropModalOpen(true);
+    // Reset input so same file can be selected again
     e.target.value = "";
   };
-
   const handleCropConfirm = () => {
     const cropperInstance = cropperRef.current?.cropper;
     if (!cropperInstance) return;
@@ -70,6 +90,14 @@ const CropImageUpload = ({
     // Get cropped canvas and convert to blob/file
     cropperInstance.getCroppedCanvas({ width: 350, height: 450 }).toBlob(
       (blob) => {
+
+        const maxSize = 5 * 1024 * 1024;
+        
+        if (blob.size > maxSize) {
+          setFileSizeError("Cropped image must be less than 5 MB.");
+          return;
+        }
+
         const croppedFile = new File([blob], "cropped_image.png", {
           type: "image/png",
         });
@@ -81,7 +109,8 @@ const CropImageUpload = ({
         setCropModalOpen(false);
         setRawImageSrc(null);
       },
-      "image/png"
+      "image/png",
+      0.9
     );
   };
 
@@ -109,7 +138,7 @@ const CropImageUpload = ({
     e.currentTarget.classList.remove("ring-2", "ring-blue-400", "bg-blue-50");
   };
 
-  const handleDrop = (e) => {
+  /*const handleDrop = (e) => {
     e.preventDefault();
     e.currentTarget.classList.remove("ring-2", "ring-blue-400", "bg-blue-50");
     const file = e.dataTransfer.files[0];
@@ -130,16 +159,37 @@ const CropImageUpload = ({
       setCropModalOpen(true);
     };
     reader.readAsDataURL(file);
-  };
+  };*/
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove("ring-2", "ring-blue-400", "bg-blue-50");
 
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+
+    // const maxSize = 5 * 1024 * 1024;
+    // if (file.size > maxSize) {
+    //   setFileSizeError("ফাইলের সাইজ ৫ MB এর বেশি হতে পারবে না।");
+    //   return;
+    // }
+
+    setFileSizeError("");
+    setRemoved(false);
+
+    // ✅ Use object URL
+    const imageUrl = URL.createObjectURL(file);
+
+    setRawImageSrc(imageUrl);
+    setCropModalOpen(true);
+  };
   return (
     <div className={`mb-4 ${labelPosition === "left" ? "md:flex md:items-start md:gap-4" : ""}`}>
       {label && (
         <label
           htmlFor={registerKey}
           className={`text-gray-700 font-medium ${labelPosition === "left"
-              ? "md:w-1/4 md:min-w-[120px] md:pt-2 md:text-end mb-2 block md:mb-0"
-              : "mb-2 block"
+            ? "md:w-1/4 md:min-w-[120px] md:pt-2 md:text-end mb-2 block md:mb-0"
+            : "mb-2 block"
             }`}
         >
           {translate(label)}
@@ -151,7 +201,6 @@ const CropImageUpload = ({
         <input
           id={registerKey}
           type="file"
-          accept="image/*"
           {...register(registerKey, {
             required:
               require && !previewUrl && !image
@@ -247,7 +296,7 @@ const CropImageUpload = ({
               <Cropper
                 src={rawImageSrc}
                 style={{ height: 320, width: "100%" }}
-                aspectRatio={35 / 45}        
+                aspectRatio={35 / 45}
                 guides={true}
                 viewMode={1}
                 dragMode="move"
