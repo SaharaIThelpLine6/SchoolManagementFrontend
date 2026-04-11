@@ -35,21 +35,40 @@ export const userStudentSlice = createApi({
         GenderID,
         SubClassID,
         ResidentialStatusId,
+        page,
+        limit,
       }) => {
         const params = new URLSearchParams();
-        if (search) {
-          params.append('search', search);
-        }
+        if (search) params.append('search', search);
         if (ClassID) params.append('ClassID', ClassID);
         if (GenderID) params.append('GenderID', GenderID);
         if (SessionID) params.append('SessionID', SessionID);
         if (NewOldId) params.append('NewOldId', NewOldId);
         if (SubClassID) params.append('SubClassID', SubClassID);
-        if (ResidentialStatusId)
-          params.append('ResidentialStatusId', ResidentialStatusId);
+        if (ResidentialStatusId) params.append('ResidentialStatusId', ResidentialStatusId);
+        if (page) params.append('page', page);
+        if (limit) params.append('limit', limit);
 
         return `search_student?${params.toString()}`;
       },
+      serializeQueryArgs: ({ queryArgs }) => {
+        const { page, ...rest } = queryArgs;
+        return rest;
+      },
+
+      merge: (currentCache, newItems) => {
+        if (newItems.pagination.currentPage === 1) {
+          currentCache.data = newItems.data;
+        } else {
+          currentCache.data.push(...newItems.data);
+        }
+        currentCache.pagination = newItems.pagination;
+      },
+
+      forceRefetch: ({ currentArg, previousArg }) => {
+        return currentArg?.page !== previousArg?.page;
+      },
+
       providesTags: ['Student'],
     }),
 

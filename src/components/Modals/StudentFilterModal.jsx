@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import DefaultSelect from "../Forms/DefaultSelect";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,6 +23,10 @@ const StudentFilterModal = () => {
     formState: { errors },
   } = methods;
   const dispatch = useDispatch();
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const scrollRef = useRef(null);
+
   const { academicSession, status: settingsStatus } = useSelector(
     (state) => state.settings
   );
@@ -61,18 +65,47 @@ const StudentFilterModal = () => {
   }, [usercode, ClassID, SessionID]);
 
   // Call search query
+
+  useEffect(() => {
+    setPage(1);
+  }, [usercode, ClassID, SessionID]);
   const {
     data: searchStudentInfo,
     error: searchStudentError,
     isLoading: studentInfoLoading,
-  } = useGetStudentBySearchQuery(debouncedFilters, {
-    skip:
-      !debouncedFilters.search &&
-      !debouncedFilters.ClassID &&
-      !debouncedFilters.SessionID,
-    refetchOnFocus: false,
-  });
+    isFetching,
+  } = useGetStudentBySearchQuery(
+    { ...debouncedFilters, page, limit },
+    {
+      skip:
+        !debouncedFilters.search &&
+        !debouncedFilters.ClassID &&
+        !debouncedFilters.SessionID,
+      refetchOnFocus: false,
+    }
+  );
+  useEffect(() => {
+    const el = scrollRef?.current;
+    if (!el) return;
 
+    const handleScroll = () => {
+      console.log("scroll working");
+
+      const nearBottom =
+        el.scrollTop + el.clientHeight >= el.scrollHeight - 40;
+
+      const hasNextPage =
+        searchStudentInfo?.pagination?.hasNextPage;
+
+      if (nearBottom && hasNextPage && !isFetching) {
+        setPage((prev) => prev + 1);
+      }
+    };
+
+    el.addEventListener("scroll", handleScroll);
+
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [searchStudentInfo, isFetching]);
   const handleAddToForm = (userDetails) => {
     dispatch(setFilteredStudent(userDetails));
     hideModal();
@@ -143,6 +176,9 @@ const StudentFilterModal = () => {
       unicode: true,
     },
   ];
+
+
+
   return (
     <div>
       <FormProvider {...methods}>
@@ -183,9 +219,9 @@ const StudentFilterModal = () => {
           <LoadingComponent />
         ) : searchStudentError ? (
           <li className="text-black mt-4">No Students Found.</li>
-        ) : searchStudentInfo && searchStudentInfo.length > 0 ? (
-          <div className="relative overflow-x-auto">
-            <SortableTable columns={columns} data={searchStudentInfo || []} />
+        ) : searchStudentInfo && searchStudentInfo?.data.length > 0 ? (
+          <div className="relative overflow-y-auto max-h-96" ref={scrollRef}>
+            <SortableTable columns={columns} data={searchStudentInfo?.data || []} />
           </div>
         ) : (
           <li className="py-2 px-4">No students found</li>

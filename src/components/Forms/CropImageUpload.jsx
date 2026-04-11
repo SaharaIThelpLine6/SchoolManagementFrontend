@@ -24,7 +24,7 @@ const CropImageUpload = ({
 
   // Cropper state
   const [cropModalOpen, setCropModalOpen] = useState(false);
-  const [rawImageSrc, setRawImageSrc] = useState(null); // original file src for cropper
+  const [rawImageSrc, setRawImageSrc] = useState(null);
   const cropperRef = useRef(null);
 
   const translate = useTranslate();
@@ -88,11 +88,9 @@ const CropImageUpload = ({
     if (!cropperInstance) return;
 
     // Get cropped canvas and convert to blob/file
-    cropperInstance.getCroppedCanvas({ width: 350, height: 450 }).toBlob(
-      (blob) => {
+    cropperInstance.getCroppedCanvas({ width: 500, height: 500 }).toBlob((blob) => {
 
         const maxSize = 5 * 1024 * 1024;
-        
         if (blob.size > maxSize) {
           setFileSizeError("Cropped image must be less than 5 MB.");
           return;
@@ -296,13 +294,13 @@ const CropImageUpload = ({
               <Cropper
                 src={rawImageSrc}
                 style={{ height: 320, width: "100%" }}
-                aspectRatio={35 / 45}
+                aspectRatio={4 / 5}
                 guides={true}
                 viewMode={1}
                 dragMode="move"
                 background={false}
                 responsive={true}
-                autoCropArea={0.8}
+                autoCropArea={1}
                 checkOrientation={false}
                 ref={cropperRef}
               />

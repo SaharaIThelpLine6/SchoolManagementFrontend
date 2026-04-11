@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -36,6 +36,8 @@ const CharacterReport = ({ pageTitle }) => {
     reset,
     formState: { errors },
   } = useForm();
+  const scrollRef = useRef(null);
+  const [page, setPage] = useState(1);
   const { academicSession, status } = useSelector((state) => state.settings);
   const {
     admittedStudent,
@@ -48,14 +50,8 @@ const CharacterReport = ({ pageTitle }) => {
     useGetStudentReportCetsQuery();
   const { data: studentReportType, error: studentReportTypeError } =
     useGetStudentReportTypeQuery();
-  const [
-    addCharacterStudent,
-    {
-      isLoading: isCreating,
-      isError: isCreateError,
-      isSuccess: isCreateSuccess,
-    },
-  ] = usePostStudentCharacterReportMutation();
+  const [addCharacterStudent,{ isLoading: isCreating, isError: isCreateError, isSuccess: isCreateSuccess,},] = usePostStudentCharacterReportMutation();
+
   const [
     updateCharacterStudent,
     {
@@ -75,6 +71,7 @@ const CharacterReport = ({ pageTitle }) => {
   const [reportUpdateId, setReportUpdateId] = useState(null);
   const [subClassId, setSubClassId] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [limit, setLimit] = useState(20);
 
   const studentCodeOrName = methods.watch('StudentCode');
   const classID = methods.watch('SubClassID');
@@ -82,13 +79,39 @@ const CharacterReport = ({ pageTitle }) => {
     data: searchStudentInfo,
     error: searchStudentError,
     isLoading: studentInfoLoading,
+    isFetching 
   } = useGetStudentBySearchQuery(
-    { search: studentCodeOrName, ClassID: null, SessionID: null },
+    { search: studentCodeOrName, ClassID: null, SessionID: null, page, limit },
     {
       skip: !userTyping,
       refetchOnFocus: false,
     }
   );
+
+  useEffect(() => {
+    const el = scrollRef?.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      console.log("scroll working");
+
+      const nearBottom =
+        el.scrollTop + el.clientHeight >= el.scrollHeight - 40;
+
+      const hasNextPage =
+        searchStudentInfo?.pagination?.hasNextPage;
+
+      if (nearBottom && hasNextPage && !isFetching) {
+        setPage((prev) => prev + 1);
+      }
+    };
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [searchStudentInfo, isFetching]);
+  
+  useEffect(() => {
+    setPage(1);
+  }, [studentCodeOrName]);
 
   const { data: subClassData, isLoading: isSubClassLoading } =
     useGetSubClassListQuery();
@@ -162,7 +185,7 @@ const CharacterReport = ({ pageTitle }) => {
   useEffect(() => {
     if (
       studentCodeOrName &&
-      searchStudentInfo?.length > 0 &&
+      searchStudentInfo?.data?.length > 0 &&
       !searchStudentError
     ) {
       setShowSuggestions(true);
@@ -412,8 +435,8 @@ const CharacterReport = ({ pageTitle }) => {
                   </div>
 
                   {showSuggestions && (
-                    <div className="search_suggetion h-[200px] overflow-y-auto absolute bottom-[0px] translate-y-full left-0 w-full bg-white shadow-lg z-30">
-                      {searchStudentInfo.map((item, index) => (
+                    <div className="search_suggetion h-[200px] overflow-y-auto absolute bottom-[0px] translate-y-full left-0 w-full bg-white shadow-lg z-30" ref={scrollRef}>
+                      {searchStudentInfo && searchStudentInfo?.data.map((item, index) => (
                         <div
                           key={index}
                           className="p-2 hover:bg-blue-100 cursor-pointer"

@@ -77,13 +77,15 @@ import UserNoticeCreateForm from './Forms/UserNoticeCreateForm';
 import UserNoticeUpdateForm from './Forms/UserNoticeUpdateForm';
 import NoticeView from './Forms/NoticeView';
 import AdmissionFormContentEditModal from '../view/result/AdmissionFormContentEditModal';
+import { useRef } from 'react';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
   const dispatch = useDispatch();
   const translate = useTranslate();
-
+  const scrollRef = useRef(null);
   if (!isOpen) return null;
+
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
@@ -96,7 +98,7 @@ const DefaultModal = () => {
           className={`w-full transform transition-all duration-300 ease-out
             ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`}
         >
-          <div className="bg-white rounded-lg shadow-lg relative w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-lg relative w-full max-h-[90vh] overflow-y-auto" ref={scrollRef}>
             <div className="header pl-3 pr-2 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
               {title && (
                 <h2 className="text-[18px] font-bold">{translate(title)}</h2>

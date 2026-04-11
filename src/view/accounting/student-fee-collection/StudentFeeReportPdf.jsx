@@ -48,7 +48,7 @@ const StudentFeeReportPdf = ({ result }) => {
   // Color Code Style (Action: 2)
   const renderColorStyle = () => (
     <div
-      className="relative w-full bg-white"
+      className="relative w-full bg-white pb-[80px]"
       style={{
         width: '148mm',
         minHeight: '210mm',
