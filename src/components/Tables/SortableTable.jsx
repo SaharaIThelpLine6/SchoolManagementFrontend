@@ -166,7 +166,7 @@ const SortableTable = ({
           {filteredData.map((row, rowIndex) => (
             <tr
               key={rowIndex}
-              className="odd:bg-white even:bg-gray-50 border-b border-gray-200"
+              className="odd:bg-neutral-primary even:bg-neutral-secondary-soft border-b border-gray-200"
               onClick={() => onRowClick && onRowClick(row)}
             >
               {columns.map((column, cellIndex) => (

@@ -18,7 +18,7 @@ import {
   useGetAllUserWithImageQuery,
   usePostUserSingleImageUploadMutation,
 } from '../features/dashboard/dashboardQuerySlice';
-import { setFilteredUser } from '../features/student/studentSlice';
+import { setFilteredStudent } from '../features/student/studentSlice';
 import { ViewPermission } from '../Routes/ViewPermission';
 import bnBijoy2Unicode from '../utils/conveter';
 import { showModal } from '../utils/ModalControlar';
@@ -35,14 +35,16 @@ const UserImage = ({ pageTitle }) => {
   const [previewUrl, setPreviewUrl] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const methods = useForm();
-  const { reset } = methods;
-  const { filteredUser } = useSelector((state) => state.student);
+  const { reset, register } = methods;
+  const { filteredStudent } = useSelector((state) => state.student);
 
   const {
     data: userResponse = { data: [], totalUsers: 0, totalPages: 0 },
     isError,
     isLoading,
-  } = useGetAllUserWithImageQuery({ page: currentPage, limit: PAGE_SIZE });
+  } = useGetAllUserWithImageQuery({ page: currentPage, limit: PAGE_SIZE }, {
+    skip: !currentPage,
+  });
 
   const users = userResponse?.data ?? [];
 
@@ -58,12 +60,12 @@ const UserImage = ({ pageTitle }) => {
   const totalPages = userResponse?.totalPages ?? 0;
 
   useEffect(() => {
-    console.log(filteredUser);
+    console.log(filteredStudent);
     // const filterData = users.find((i) => i.UserID === filteredUser?.UserID);
-    if (filteredUser) {
-      console.log(filteredUser);
+    if (filteredStudent) {
+      console.log(filteredStudent);
 
-      const imageBuffer = filteredUser?.Image;
+      const imageBuffer = filteredStudent?.Image;
       if (imageBuffer) {
         const base64String = Buffer.from(imageBuffer).toString('base64');
         const src = `data:image/png;base64,${base64String}`;
@@ -74,14 +76,12 @@ const UserImage = ({ pageTitle }) => {
     } else {
       setPreviewImg(null);
     }
-    console.log('reset satart');
-
     reset({
-      ID: filteredUser?.UserID || '',
-      UserCode: filteredUser?.UserCode || '',
-      UserName: filteredUser?.UserName || '',
+      ID: filteredStudent?.UserID || '',
+      UserCode: filteredStudent?.StudentCode || '',
+      UserName: filteredStudent?.StudentName || '',
     });
-  }, [filteredUser, reset]);
+  }, [filteredStudent, reset]);
 
   // useEffect(() => {
   //   console.log(filterData);
@@ -120,13 +120,13 @@ const UserImage = ({ pageTitle }) => {
       title: translate('User Code'),
       field: 'UserCode',
       hozAlign: 'center',
-      render: (row) => <p>{row.UserCode}</p>,
+      render: (row) => <p>{row.StudentCode}</p>,
     },
     {
       title: translate('User Name'),
       field: 'UserName',
       hozAlign: 'center',
-      render: (row) => <p>{bnBijoy2Unicode(row.UserName)}</p>,
+      render: (row) => <p>{bnBijoy2Unicode(row.StudentName)}</p>,
     },
     {
       title: translate('Image'),
@@ -159,7 +159,7 @@ const UserImage = ({ pageTitle }) => {
   ];
 
   const handleOpenModal = useCallback(() => {
-    showModal('Filter User', 'USER_FILTER');
+    showModal('Filter User', 'STUDENT_FILTER');
   }, []);
 
   const onSubmit = async (data) => {
@@ -207,7 +207,7 @@ const UserImage = ({ pageTitle }) => {
       reset({ ID: '', UserCode: '', UserName: '', singleImage: null });
       setPreviewImg(null);
       setPreviewUrl(null);
-      dispatch(setFilteredUser(null));
+      dispatch(setFilteredStudent(null));
     } catch (err) {
       Swal.fire({
         icon: 'error',
@@ -221,7 +221,7 @@ const UserImage = ({ pageTitle }) => {
     reset({ ID: '', UserCode: '', UserName: '', singleImage: null });
     setPreviewImg(null);
     setPreviewUrl(null);
-    dispatch(setFilteredUser(null));
+    dispatch(setFilteredStudent(null));
   };
   // page change বা component remount হলে form reset করা
   useEffect(() => {
@@ -296,13 +296,18 @@ const UserImage = ({ pageTitle }) => {
                     {translate('User Information')}
                   </h3>
                   <div className="space-y-4">
-                    <DefaultInput
+                    {/* <DefaultInput
                       registerKey="ID"
                       require={translate('ID is required')}
                       type="text"
                       placeholder={translate('Enter type of id') + ' ...'}
                       label="ID"
                       disable
+                    /> */}
+                    <input
+                      {...register("ID")}
+                      className='hidden'
+                      
                     />
                     <DefaultInput
                       registerKey="UserCode"
@@ -425,7 +430,8 @@ const UserImage = ({ pageTitle }) => {
                 <DefaultPagination
                   currentPage={currentPage}
                   totalPages={totalPages}
-                  onPageChange={setCurrentPage}
+                  onPageChange={(currentPage)=>{ console.log(currentPage);
+                   }}
                 />
               </div>
             </>

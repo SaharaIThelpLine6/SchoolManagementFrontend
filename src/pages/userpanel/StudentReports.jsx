@@ -60,22 +60,6 @@ const StudentReports = () => {
       type: 'text',
       render: (row) => <p>{row.SRID}</p>,
     },
-    // {
-    //   title: 'রির্পোট ক্যাটাগরি',
-    //   field: 'ReportTypeName',
-    //   hozAlign: 'center',
-    //   filterable: false,
-    //   type: 'text',
-    //   render: (row) => <p>{row?.ReportType?.ReportTypeName}</p>,
-    // },
-    // {
-    //   title: 'রির্পোট টাইপ',
-    //   field: 'ReportTypeName',
-    //   hozAlign: 'center',
-    //   filterable: false,
-    //   type: 'text',
-    //   render: (row) => <p>{row?.ReportType?.ReportTypeName}</p>,
-    // },
     {
       title: 'মন্তব্য',
       field: 'Remark',

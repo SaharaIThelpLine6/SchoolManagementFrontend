@@ -13,6 +13,7 @@ import {
   useGetUserBySearchQuery,
   useGetUserTypesQuery,
 } from "../../features/userType/userTypeSlice";
+import { useGetStudentBySearchQuery } from "../../features/student/studentQuerySlice";
 const UserFilterModal = () => {
   const methods = useForm();
   const {
@@ -70,7 +71,7 @@ const UserFilterModal = () => {
     data: searchUserInfo,
     error: searchUserError,
     isLoading: userInfoLoading,
-  } = useGetUserBySearchQuery(debouncedFilters, {
+  } = useGetStudentBySearchQuery(debouncedFilters, {
     skip:
       !debouncedFilters.search &&
       !debouncedFilters.ClassID &&
