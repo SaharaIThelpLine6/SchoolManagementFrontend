@@ -4,17 +4,19 @@ export const fetchResultFieldData = createAsyncThunk(
     "studentResultPublicView/fetchResultFieldData",
     async (madrasaId) => {
         try {
-            const [schoolDataResponse, academicSessionResponse, examsResponse, classListResponse, genderListRespose] = await Promise.all([
+            const [schoolDataResponse, academicSessionResponse, examsResponse, classListResponse, donationLedgerResponse] = await Promise.all([
                 getPublicData(`/api/public/result/${madrasaId}`),
                 getPublicData(`/api/public/result/${madrasaId}/academic_session`),
                 getPublicData(`/api/public/result/${madrasaId}/exam_name`),
-                getPublicData(`/api/public/result/${madrasaId}/sub_class`)
+                getPublicData(`/api/public/result/${madrasaId}/sub_class`),
+                getPublicData(`/api/public/result/${madrasaId}/donation_ledger`)
             ]);
             return {
                 schoolData: schoolDataResponse,
                 academicSession: academicSessionResponse,
                 exam: examsResponse,
-                classList: classListResponse
+                classList: classListResponse,
+                donationLedger: donationLedgerResponse
             };
         } catch (error) {
             console.error("Error fetching result field data:", error);
@@ -116,6 +118,7 @@ const initialState = {
     thana: {},
     exam: [],
     classList: [],
+    donationLedger: [],
     classResult: [],
     resultStatistics: null,
     studentResult: [],
@@ -160,6 +163,7 @@ const studentResultPublicViewSlice = createSlice({
                 state.academicSession = action.payload.academicSession;
                 state.exam = action.payload.exam;
                 state.classList = action.payload.classList;
+                state.donationLedger = action.payload.donationLedger;
 
             })
             .addCase(fetchResultFieldData.rejected, (state, action) => {

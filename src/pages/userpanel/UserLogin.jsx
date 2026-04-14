@@ -126,7 +126,7 @@ export default function UserLogin() {
           >
             <DefaultInput
               registerKey={'usercode'}
-              label={'User Code'}
+              label={'Student ID'}
               placeholder={'Enter User code'}
               type="text"
             />

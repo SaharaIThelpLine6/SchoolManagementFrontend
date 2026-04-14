@@ -2,18 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
-import { setResultError } from "../../features/studentResultPublicView/studentResultPublicViewSlice";
+import { fetchResultFieldData, setResultError } from "../../features/studentResultPublicView/studentResultPublicViewSlice";
 import { toast } from "react-toastify";
 import AnimatedSelect from "../../components/Forms/AnimatedSelect";
 import Checkbox from "../../components/Checkboxes/Checkbox";
 import { useDonationInitPaymentMutation } from "../../features/userPanel/onlineDonation/onlineDonationSlice";
 import Swal from "sweetalert2";
 import Button from "../../components/Button/Button";
+import toBengaliWords from "../../utils/numberToBanglaWords";
 
 const Donation = () => {
     const [initPayment, { isLoading }] = useDonationInitPaymentMutation();
     const [buttonDisable, setButtonDisable] = useState(true);
     const [isAnonymous, setIsAnonymous] = useState(false);
+    const { donationLedger } = useSelector((state) => state.studentResultPublicView);
 
     const { schoolid } = useParams();
     const methods = useForm();
@@ -22,10 +24,16 @@ const Donation = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+     useEffect(() => {
+        dispatch(fetchResultFieldData(schoolid));
+      }, [dispatch, navigate]);
+
     const onSubmit = async (data) => {
         // console.log(data);
         try {
-            const convertedData = { ...data, schoolId: schoolid }
+            const inWord = "টাকা মাত্র।"
+            const convertedData = { ...data, schoolId: schoolid, Inword: inWord }
+
             const res = await initPayment(convertedData).unwrap();
             if (res?.gateway_url) {
                 Swal.fire({
@@ -88,6 +96,11 @@ const Donation = () => {
         setButtonDisable(false);
     }, [SessionID, ExamID, SubClassID, donation_category, amount, isAnonymous, watch("name"), watch("phone"), watch("address")]);
 
+
+    // useEffect(()=>{
+    //     console.log(donationLedger);
+        
+    // }, [donationLedger])
     const categories = [
         { value: "", label: "অনুদানের খাত নির্বাচন করুন" },
         { value: "9", label: "নযর (মান্নত)" },
@@ -155,9 +168,9 @@ const Donation = () => {
                         <AnimatedSelect
                             registerKey={"donation_category"}
                             required={"এই ঘরটি আবশ্যক"}
-                            options={categories}
-                            nameField={"label"}
-                            valueField={"value"}
+                            options={donationLedger}
+                            nameField={"SlName"}
+                            valueField={"ID"}
                             title={"অনুদানের খাত"}
                         />
 

@@ -580,7 +580,7 @@ const useTranslate = () => {
     'Mobile 1': 'মোবাইল এক',
     'Mobile 2': 'মোবাইল দুই',
     'User Code': 'ইউজার কোড',
-    'Student Code': 'শিক্ষার্থীর কোড',
+    'Student Code': 'শিক্ষার্থী আইডি',
     'Date of entry': 'এন্ট্রি তারিখ',
     'Type of vacation': 'ছুটির ধরণ',
     'Date of leave': 'ছুটির তারিখ',
