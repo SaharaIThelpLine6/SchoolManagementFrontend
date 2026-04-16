@@ -16,6 +16,7 @@ import Button from '../Button/Button';
 import { Link } from 'react-router-dom';
 import { useGetInstitutionInfoQuery } from '../../features/settings/settingsQuerySlice';
 import OwenGuide from '../../Routes/OwenGuide';
+import Swal from "sweetalert2"
 
 const TableOne = () => {
   const dispatch = useDispatch();
@@ -96,15 +97,21 @@ const TableOne = () => {
   };
 
   const handleuserPanelLogin = async (token) => {
-    try {
-      const result = await triggerGetToken({ user_code: token }).unwrap();
-      console.log(result);
+    Swal.fire({
+      icon: "warning",
+      title: "সাময়িকভাবে বন্ধ",
+      text: "ইউজার প্যানেলটি কিছু সময়ের জন্য বন্ধ রাখা হয়েছে। অনুগ্রহ করে পরে আবার চেষ্টা করুন।",
+      confirmButtonText: "ঠিক আছে",
+    });
+    // try {
+    //   const result = await triggerGetToken({ user_code: token }).unwrap();
+    //   console.log(result);
 
-      localStorage.setItem("user_panel_token", result)
-      window.open(`/${instutionInfo?.InstitutionCode}/dashboard`, "_blank");
-    } catch (err) {
-      console.error("Error:", err);
-    }
+    //   localStorage.setItem("user_panel_token", result)
+    //   window.open(`/${instutionInfo?.InstitutionCode}/dashboard`, "_blank");
+    // } catch (err) {
+    //   console.error("Error:", err);
+    // }
   };
 
   // ✅ Loading State
