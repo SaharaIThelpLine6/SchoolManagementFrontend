@@ -202,10 +202,10 @@ export const settingsSlice = createApi({
       providesTags: ['UserNotice'],
     }),
     getUsersWithType: builder.query({
-      query: ({ id, page = 1, limit = 10, search = "" }) => ({
+      query: ({ id, page = 1, limit = 10, search = "", sessionID, subClassID }) => ({
         url: `/get_user_data_with_type/${id}`,
         method: "GET",
-        params: { page, limit, search }, // ✅ query params
+        params: { page, limit, search, sessionID, subClassID }, // ✅ query params
       }),
     }),
 
@@ -215,11 +215,11 @@ export const settingsSlice = createApi({
         method: "GET",
         params: { type, page, limit, search }, // ✅ query params
       }),
-       providesTags: ['SupportTicketList'],
+      providesTags: ['SupportTicketList'],
     }),
 
     getSupportTicketDetails: builder.query({
-      query: (id ) => ({
+      query: (id) => ({
         url: `/support_ticket/details/${id}`,
         method: "GET"
       }),

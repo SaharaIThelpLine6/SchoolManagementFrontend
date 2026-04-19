@@ -17,7 +17,9 @@ import UserSearchSelect from "./UserSearchSelect";
 const UserNoticeCreateForm = () => {
   const translate = useTranslate();
   const methods = useForm();
-  const { handleSubmit, reset, control, setValue } = methods;
+  const { handleSubmit, reset, control, setValue, watch } = methods;
+
+  const [SessionID, SubClassID] = watch(["SessionID", "SubClassID"])
 
   const [mode, setMode] = useState("single"); // single | multiple
 
@@ -157,10 +159,12 @@ const UserNoticeCreateForm = () => {
                 label="Select User"
                 registerKey="UserID"              // the field name in the form
                 require={true}                     // required validation
-                selectedUserType={1}               // UserTypeID to fetch users
+                selectedUserType={selectedUserType}               // UserTypeID to fetch users
                 valueField="UserID"                // value to store in form
                 nameField="UserName"               // text to show
                 unicode={false}                                  // use true if you want Bangla Bijoy conversion
+                sessionID={SessionID}
+                subClassID={SubClassID}
               />
             </div>
 
