@@ -294,7 +294,7 @@ const CropImageUpload = ({
               <Cropper
                 src={rawImageSrc}
                 style={{ height: 320, width: "100%" }}
-                aspectRatio={4 / 5}
+                aspectRatio={1 / 1}
                 guides={true}
                 viewMode={1}
                 dragMode="move"
