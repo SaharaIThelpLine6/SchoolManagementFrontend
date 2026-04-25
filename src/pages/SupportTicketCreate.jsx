@@ -6,7 +6,7 @@ import useTranslate from "../utils/Translate";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import Button from "../components/Button/Button";
 import DefaultInput from "../components/Forms/DefaultInput";
-import { useCreateSupportTicketsMutation } from "../features/settings/settingsQuerySlice";
+import { useCreateSupportTicketsMutation, useSupportTicketsDepartmentQuery } from "../features/settings/settingsQuerySlice";
 import Swal from "sweetalert2";
 
 const SupportTicketCreate = ({ pageTitle }) => {
@@ -21,6 +21,7 @@ const SupportTicketCreate = ({ pageTitle }) => {
         createSupportTicket,
         { isLoading: isCreateLoading }
     ] = useCreateSupportTicketsMutation();
+      const { data: apiData = [], isLoading } = useSupportTicketsDepartmentQuery();
     const onSubmit = async (data) => {
         try {
 
@@ -87,15 +88,9 @@ const SupportTicketCreate = ({ pageTitle }) => {
                 >
                     <DefaultSelect
                         label={<span className="">Modeule Type</span>}
-                        options={[
-                            { id: "1", value: "User" },
-                            { id: "2", value: "Payment" },
-                            { id: "3", value: "Exam" },
-                            { id: "4", value: "Accouting" },
-                            { id: "5", value: "Guardian Panel" },
-                        ]}
-                        nameField={"value"}
-                        key={"id"}
+                        options={apiData}
+                        nameField={"Department"}
+                        key={"ID"}
                         registerKey={"user_type"}
                     />
                     <DefaultInput

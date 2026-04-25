@@ -14,6 +14,7 @@ import DefaultPagination from "../components/Pagination/DefaultPagination";
 import { useMemo } from "react";
 import SvgIcon from "../components/icons/SvgIcon";
 import { Link } from "react-router-dom";
+import { showModal } from "../utils/ModalControlar";
 const PAGE_SIZE = 10;
 const SupportTicket = ({ pageTitle }) => {
     const translate = useTranslate();
@@ -56,8 +57,32 @@ const SupportTicket = ({ pageTitle }) => {
         },
         {
             title: translate("Madrasha Code"),
+            field: "UserCode", 
             hozAlign: "center",
-            render: (row) => <>{row?.UserCode}</>,
+            filterable: true,
+            type: 'text'
+        },
+        {
+            title: translate("Madrasha Name"),
+            hozAlign: "center",
+            render: (row) => <>{row?.UserInfo?.InstituteName}</>,
+        },
+        {
+            title: "সার্পোট",
+            hozAlign: "center",
+            render: (row) => (
+                <div className="gap-2">
+                    <h3 className="block">সার্পোট করেছে (<span className="text-green-600">{row?.supportCount1}</span>/<span className="text-rose-600">{row?.supportCount0}</span>)</h3>
+                    <Button onClick={()=>{handleModal(row.ID)}} 
+                        className="p-2 text-white bg-transparent hover:bg-transparent text-center rounded-md"
+                        title="View"
+                        
+                    >
+                        <p className="text-[18px] text-rose-600"> আপনার মতামত দিন!! </p>
+                    </Button>
+                </div>
+            ),
+        
         },
         {
             title: translate("Department"),
@@ -70,12 +95,32 @@ const SupportTicket = ({ pageTitle }) => {
             render: (row) => <>{row?.Subject}</>,
         },
         {
+            title: translate("Details"),
+            render: (row) =>     <div className="truncate max-w-[200px] text-center">{row?.Messages[0]?.Message}</div>,
+        },
+        {
             title: translate("Status"),
+            field: "Status",
             hozAlign: "center",
+            filterable: true,
+            type: 'select',
+            options: [
+                { value: 0, label: "Pending" },
+                { value: 1, label: "Open" },
+                { value: 2, label: "In Progress" },
+                { value: 3, label: "Resolved" },
+                { value: 4, label: "Closed" },
+            ],
             render: (row) => <>{row?.Status == 1 ? "Open" : row?.Status == 2 ? "In Progress" : row?.Status == 3 ? "Resolved" : row?.Status == 4 ? "Closed" : "Pending"}</>,
         },
 
     ];
+
+    const handleModal = (id) =>{
+        console.log(id);
+        
+        showModal("Edit Admission Report Content", "SUPPORT_TICKET_SUPPORT", id)
+    }
     return (
         <div className="font-SolaimanLipi pt-[20px]">
             <Link to={"/help/create-support-tickets"} className="btn bg-[#5ac146] text-white py-2 px-2 rounded-[4px] mb-5">Open New Ticket</Link>
@@ -90,7 +135,7 @@ const SupportTicket = ({ pageTitle }) => {
                     <SortableTable
                         columns={columns}
                         data={paginatedData}
-                        isFilterColumn={false}
+                        isFilterColumn={true}
                     />
                 )}
             </div>

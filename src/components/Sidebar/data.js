@@ -520,7 +520,7 @@ export const menuData = [
 
       {
         id: '2',
-        name: 'Support Tickets',
+        name: 'মতামত ও পরামর্শ',
         route: '/help/support-tickets',
       },
     ],

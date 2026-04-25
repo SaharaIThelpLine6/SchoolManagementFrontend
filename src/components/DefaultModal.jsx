@@ -78,6 +78,7 @@ import UserNoticeUpdateForm from './Forms/UserNoticeUpdateForm';
 import NoticeView from './Forms/NoticeView';
 import AdmissionFormContentEditModal from '../view/result/AdmissionFormContentEditModal';
 import { useRef } from 'react';
+import SupportTicketModal from '../view/support-ticket/SupportTicketModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -341,6 +342,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'ADMISSION_CONTENT_SETTINGS' && (
                   <AdmissionFormContentEditModal id={id} />
+                )}
+                {modalType === 'SUPPORT_TICKET_SUPPORT' && (
+                  <SupportTicketModal id={id} />
                 )}
               </div>
             )}
