@@ -13,6 +13,8 @@ const UserSearchSelect = ({
   selectedUserType,
   unicode = false,
   disabled,
+  sessionID,
+  subClassID
 }) => {
   const {
     register,
@@ -25,6 +27,7 @@ const UserSearchSelect = ({
 
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+
   const [page, setPage] = useState(1);
   const [selectedOption, setSelectedOption] = useState(null);
 
@@ -33,12 +36,37 @@ const UserSearchSelect = ({
   const selectedValue = watch(registerKey);
 
   // ✅ Server-side search
-  const { data: apiData = {}, isLoading } = useGetUsersWithTypeQuery(
-    { id: selectedUserType, page, limit: 50, search: searchTerm },
-    { skip: !selectedUserType }
-  );
+  const isReady = Number(selectedUserType) != null;
+  // const isReady =
+  //   selectedUserType != null &&
+  //   sessionID != null &&
+  //   subClassID != null;
+  const classId = Number(subClassID);
 
-  const options = apiData.data || [];
+  console.log(selectedUserType, "selectedUserType")
+
+  // console.log(sessionID, classId, "sessionId and subClassID")
+  const { data: apiData, isLoading } =
+    useGetUsersWithTypeQuery(
+      isReady
+        ? {
+          id: selectedUserType,
+          page,
+          limit: 50,
+          search: searchTerm,
+          sessionID,
+          subClassID: classId,
+        }
+        : undefined,
+      {
+        skip: !isReady,
+      }
+    );
+
+  // console.log(isReady, "isReady")
+  // console.log(apiData, "apiData")
+
+  const options = apiData?.data || [];
 
   // ✅ Sync selected option when form value changes (edit mode support)
   useEffect(() => {
