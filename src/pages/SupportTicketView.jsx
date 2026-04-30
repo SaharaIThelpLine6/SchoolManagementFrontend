@@ -101,11 +101,7 @@ const SupportTicketView = ({ pageTitle }) => {
                                 <div className="card-body p-5 bg-white text-[#6a7a8c]">
                                     <h3 className="text-[20px] mb-2">Message</h3>
                                     <p className="text-[14px]">{supportTicketDetails.Messages[0].Message}</p>
-
-
                                     <p className="text-[12px] mt-4">Attachments ({supportTicketDetails.Messages[0]["Attachments"].length})</p>
-
-
                                 </div>
                                 {supportTicketDetails.Messages.length > 1 ? (
                                     <div className="card-body p-5 pt-2 bg-white text-[#6a7a8c]">

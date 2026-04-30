@@ -139,6 +139,7 @@ import StudentAdmissionMessageCreate from '../pages/StudentAdmissionMessageCreat
 import ResultLayout from '../pages/public/ResultLayout';
 import Donation from '../pages/public/Donation';
 import OnlineDonationInvoice from '../view/payment/payment-history/OnlineDonationInvoice';
+import DonationHomePage from '../pages/frontsite/DonationHomePage';
 
 const router = createBrowserRouter([
   {
@@ -560,6 +561,16 @@ const router = createBrowserRouter([
                     permissionId={permissionsDataList.exam_fee_setting}
                   >
                     <ExamFeeDetermine pageTitle="Exam Fee Determine" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'fund-test',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.exam_fee_setting}
+                  >
+                    <DonationHomePage pageTitle="Exam Fee Determine" />
                   </RequirePermission>
                 ),
               },
@@ -1074,6 +1085,10 @@ const router = createBrowserRouter([
   {
     path: '/:schoolid/rg',
     element: <UserRegistration />,
+  },
+  {
+    path: '/donation_homepage',
+    element: <DonationHomePage />,
   },
   {
     path: '/:schoolid/forget_pass',

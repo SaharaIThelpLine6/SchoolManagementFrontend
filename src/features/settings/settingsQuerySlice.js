@@ -249,6 +249,30 @@ export const settingsSlice = createApi({
       invalidatesTags: ['SupportTicketDetails'],
 
     }),
+    supportTicketsSupport: builder.mutation({
+      query: ({ id, formData }) => ({
+        url: `/support_ticket/support/${id}`,
+        method: 'POST',
+        body: formData,
+
+      }),
+      invalidatesTags: ['SupportTicketDetails'],
+
+    }),
+    getsupportTicketsSupport: builder.query({
+      query: (id ) => ({
+        url: `/support_ticket/support/${id}`,
+        method: "GET"
+      }),
+      providesTags: ['SupportTicketDetails'],
+    }),
+    supportTicketsDepartment: builder.query({
+      query: (id ) => ({
+        url: `/support_ticket/departments`,
+        method: "GET"
+      }),
+      providesTags: ['SupportTicketDeparmetns'],
+    }),
 
 
 
@@ -293,4 +317,7 @@ export const {
   useGetSupportTicketDetailsQuery,
   useCreateSupportTicketsMutation,
   useReplySupportTicketsMutation,
+  useSupportTicketsSupportMutation,
+  useGetsupportTicketsSupportQuery,
+  useSupportTicketsDepartmentQuery,
 } = settingsSlice;

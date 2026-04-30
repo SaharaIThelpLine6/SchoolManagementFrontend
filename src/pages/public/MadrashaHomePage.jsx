@@ -156,7 +156,7 @@ const MadrashaHomePage = () => {
 
           <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 lg:gap-4 place-content-center container mx-auto px-2 lg:px-0`}>
             {settingsObject?.totalUser ? (
-              <div className="count-box px-2 py-4 rounded-[4px] bg-[#00000080]">
+               <div className="count-box px-2 py-4 rounded-[4px] bg-[#00000080]">
                 <div className="text-center">
                   <div className="text-white text-center">
                     <svg
@@ -348,27 +348,27 @@ const MadrashaHomePage = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 justify-center">
           {settingsObject?.accademicSubject
             ? settingsObject.accademicSubject.map((subject) =>
-                subject.AcademicSubjects &&
+              subject.AcademicSubjects &&
                 subject.AcademicSubjects.length > 0 ? (
-                  <div className="card shadow-sm hover:shadow-xl transition-all linear duration-300 border rounded-[4px]">
-                    <div className="header text-center py-2">
-                      <p className="text-[20px] font-bold border-b border-black-600">
-                        {subject.SubClass}
-                      </p>
-                    </div>
-                    <ul className="px-2 py-2">
-                      {subject.AcademicSubjects?.map((academicSubject) => (
-                        <li
-                          key={academicSubject.SubjectID}
-                          className="text-[18px]"
-                        >
-                          {academicSubject.SubjectName}
-                        </li>
-                      ))}
-                    </ul>
+                <div className="card shadow-sm hover:shadow-xl transition-all linear duration-300 border rounded-[4px]">
+                  <div className="header text-center py-2">
+                    <p className="text-[20px] font-bold border-b border-black-600">
+                      {subject.SubClass}
+                    </p>
                   </div>
-                ) : null
-              )
+                  <ul className="px-2 py-2">
+                    {subject.AcademicSubjects?.map((academicSubject) => (
+                      <li
+                        key={academicSubject.SubjectID}
+                        className="text-[18px]"
+                      >
+                        {academicSubject.SubjectName}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null
+            )
             : null}
         </div>
       </div>
@@ -393,19 +393,7 @@ const MadrashaHomePage = () => {
                 key={teacher.UserID || index}
                 className="card shadow-sm hover:shadow-xl transition-all duration-300 border rounded-[4px]"
               >
-                <div
-                  className="image h-[320px] relative
-          after:bg-[url(/team-shape.ea006852.svg)]
-          after:content-['']
-          after:absolute
-          after:bottom-0
-          after:w-full
-          after:bg-center
-          after:block
-          after:h-[80px]
-          after:bg-no-repeat
-          after:bg-cover"
-                >
+                <div className="image h-[320px] relative after:bg-[url(/team-shape.ea006852.svg)] after:content-[''] after:absolute after:bottom-0 after:w-full after:bg-center after:block after:h-[80px] after:bg-no-repeat after:bg-cover">
                   <img
                     src={bufferConveter(imageData)}
                     alt={teacher.UserName}
