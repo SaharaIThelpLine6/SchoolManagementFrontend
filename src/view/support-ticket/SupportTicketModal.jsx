@@ -66,7 +66,7 @@ const SupportTicketModal = ({ id }) => {
                 confirmButtonText: "ঠিক আছে",
             });
 
-            reset();
+            methods.reset();
 
         } catch (err) {
 

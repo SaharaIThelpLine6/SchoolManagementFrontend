@@ -22,6 +22,11 @@ const SupportTicketCreate = ({ pageTitle }) => {
         { isLoading: isCreateLoading }
     ] = useCreateSupportTicketsMutation();
       const { data: apiData = [], isLoading } = useSupportTicketsDepartmentQuery();
+
+      useEffect(()=>{
+        console.log(apiData);
+        
+      }, [apiData])
     const onSubmit = async (data) => {
         try {
 
@@ -34,10 +39,13 @@ const SupportTicketCreate = ({ pageTitle }) => {
                 }
             });
 
+            console.log(data);
+            
+
             const formData = new FormData();
 
             formData.append("Subject", data.Subject);
-            formData.append("Department", data.user_type);
+            formData.append("DepartmentID", data.user_type);
             formData.append("Message", data.message);
 
             // Attach file
@@ -90,7 +98,7 @@ const SupportTicketCreate = ({ pageTitle }) => {
                         label={<span className="">Modeule Type</span>}
                         options={apiData}
                         nameField={"Department"}
-                        key={"ID"}
+                        valueField={"ID"}
                         registerKey={"user_type"}
                     />
                     <DefaultInput
