@@ -256,7 +256,7 @@ export const settingsSlice = createApi({
         body: formData,
 
       }),
-      invalidatesTags: ['SupportTicketDetails'],
+      invalidatesTags: ['SupportTicketDetails', 'SupportTicketList'],
 
     }),
     getsupportTicketsSupport: builder.query({
@@ -272,6 +272,15 @@ export const settingsSlice = createApi({
         method: "GET"
       }),
       providesTags: ['SupportTicketDeparmetns'],
+    }),
+    deleteSupportTicket: builder.mutation({
+      query: (id) => ({
+        url: `/support_ticket/delete/${id}`,
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: { id },
+      }),
+      invalidatesTags: ['SupportTicketList'],
     }),
 
 
@@ -320,4 +329,5 @@ export const {
   useSupportTicketsSupportMutation,
   useGetsupportTicketsSupportQuery,
   useSupportTicketsDepartmentQuery,
+  useDeleteSupportTicketMutation,
 } = settingsSlice;
