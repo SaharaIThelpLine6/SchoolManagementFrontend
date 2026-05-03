@@ -95,7 +95,7 @@ const SupportTicketCreate = ({ pageTitle }) => {
                     className="mx-auto bg-white p-6 md:p-4 rounded-xl shadow-lg"
                 >
                     <DefaultSelect
-                        label={<span className="">Modeule Type</span>}
+                        label={<span className="">মডিউল টাইপ</span>}
                         options={apiData}
                         nameField={"Department"}
                         valueField={"ID"}

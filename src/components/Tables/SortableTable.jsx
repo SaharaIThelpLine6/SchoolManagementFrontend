@@ -10,8 +10,8 @@ const SortableTable = ({
   isFilterColumn = true,
   onRowClick,
   close,
-  checkboxes = {}, // নতুন প্রপ: চেকবক্স স্টেট
-  onCheckboxChange, // নতুন প্রপ: চেকবক্স হ্যান্ডলার
+  checkboxes = {},
+  onCheckboxChange, 
   rowWrap = true,
   tdclass,
 }) => {

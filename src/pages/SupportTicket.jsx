@@ -17,6 +17,7 @@ import { Link } from "react-router-dom";
 import { showModal } from "../utils/ModalControlar";
 import DeleteButton from "../components/Button/DeleteButton";
 import { useDeleteStudentCharacterReportMutation } from "../features/student/studentQuerySlice";
+import CategoryTable from "../components/Categorytable ";
 const PAGE_SIZE = 10;
 const SupportTicket = ({ pageTitle }) => {
     const translate = useTranslate();
@@ -81,71 +82,75 @@ const SupportTicket = ({ pageTitle }) => {
 
 
     const columns = [
+        // {
+        //     title: translate("Action"),
+        //     hozAlign: "center",
+        //     render: (row) => (
+        //         <div className="flex justify-center items-center gap-2">
+        //             <Link to={`/help/view-support-ticket/${row.ID}`}
+        //                 className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md"
+        //                 title="View"
+
+        //             >
+        //                 <SvgIcon
+        //                     name={"FaEye"}
+        //                     size={14}
+        //                 />
+        //             </Link>
+
+        //             <DeleteButton onClick={() => { handleDelete(row.ID) }} />
+        //         </div>
+        //     ),
+        // },
         {
-            title: translate("Action"),
-            hozAlign: "center",
-            render: (row) => (
-                <div className="flex justify-center items-center gap-2">
-                    <Link to={`/help/view-support-ticket/${row.ID}`}
-                        className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md"
-                        title="View"
-
-                    >
-                        <SvgIcon
-                            name={"FaEye"}
-                            size={14}
-                        />
-                    </Link>
-
-                    <DeleteButton onClick={() => { handleDelete(row.ID) }} />
-                </div>
-            ),
+            title: translate("Details"),
+            render: (row) => <div className="truncate max-w-[200px]">{row?.Messages[0]?.Message}</div>,
         },
         {
             title: translate("Madrasha Code"),
             field: "UserCode",
-            hozAlign: "center",
             filterable: true,
-            type: 'text'
+            type: 'text',
+            render: (row) => <div className="font-bold w-[200px] whitespace-pre-wrap leading-[30px] text-[16px]">({row.UserCode}) {row?.UserInfo?.InstituteName}</div>,
         },
-        {
-            title: translate("Madrasha Name"),
-            render: (row) => <>{row?.UserInfo?.InstituteName}</>,
-        },
-        {
-            title: "সার্পোট",
-            hozAlign: "center",
-            render: (row) => (
-                <div className="gap-2">
-                    <h3 className="flex items-center">
-                        সার্পোট করেছে (<span className="text-green-600">{row?.supportCount1}</span>/<span className="text-rose-600">{row?.supportCount0}</span>)   
-                        <Button onClick={() => { handleModal(row.ID) }}
-                        className="p-2 text-white bg-transparent hover:bg-transparent text-center rounded-md"
-                        title="View"> 
-                            <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-file-descriptio text-black">
-                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-                                <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
-                                <path d="M9 17h6" />
-                                <path d="M9 13h6" />
-                            </svg> 
-                        </Button>
-                    </h3>
-                    {/* <Button onClick={() => { handleModal(row.ID) }}
-                        className="p-2 text-white bg-transparent hover:bg-transparent text-center rounded-md"
-                        title="View"
+        // {
+        //     title: translate("Madrasha Name"),
+        //     render: (row) => <>{row?.UserInfo?.InstituteName}</>,
+        // },
+        // {
+        //     title: "সার্পোট",
+        //     hozAlign: "center",
+        //     render: (row) => (
+        //         <div className="gap-2">
+        //             <h3 className="flex items-center">
+        //                 সার্পোট করেছে (<span className="text-green-600">{row?.supportCount1}</span>/<span className="text-rose-600">{row?.supportCount0}</span>)   
+        //                 <Button onClick={() => { handleModal(row.ID) }}
+        //                 className="p-2 text-white bg-transparent hover:bg-transparent text-center rounded-md"
+        //                 title="View"> 
+        //                     <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-file-descriptio text-black">
+        //                         <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+        //                         <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+        //                         <path d="M17 21h-10a2 2 0 0 1 -2 -2v-14a2 2 0 0 1 2 -2h7l5 5v11a2 2 0 0 1 -2 2" />
+        //                         <path d="M9 17h6" />
+        //                         <path d="M9 13h6" />
+        //                     </svg> 
+        //                 </Button>
+        //             </h3>
+        //             <Button onClick={() => { handleModal(row.ID) }}
+        //                 className="p-2 text-white bg-transparent hover:bg-transparent text-center rounded-md"
+        //                 title="View"
 
-                    >
-                        <p className="text-[18px] text-rose-600"> আপনার মতামত দিন!! </p>
-                    </Button> */}
-                </div>
-            ),
+        //             >
+        //                 <p className="text-[18px] text-rose-600"> আপনার মতামত দিন!! </p>
+        //             </Button>
+        //         </div>
+        //     ),
 
-        },
+        // },
         {
         filterable: true,
         type: 'select',
-        field: 'DepartmentID',  // ✅ must match the actual key in your row data
+        field: 'DepartmentID',  
         options: departmentOptions,
         title: translate("Department"),
         hozAlign: "center",
@@ -154,12 +159,7 @@ const SupportTicket = ({ pageTitle }) => {
         },
         {
             title: translate("Subject"),
-            hozAlign: "center",
-            render: (row) => <>{row?.Subject}</>,
-        },
-        {
-            title: translate("Details"),
-            render: (row) => <div className="truncate max-w-[200px]">{row?.Messages[0]?.Message}</div>,
+            render: (row) => <div className="text-[18px]">{row?.Subject}</div>,
         },
         {
             title: translate("Status"),
@@ -216,7 +216,8 @@ const SupportTicket = ({ pageTitle }) => {
         <div className="font-SolaimanLipi pt-[20px]">
             <Link to={"/help/create-support-tickets"} className="btn bg-[#5ac146] text-white py-2 px-2 rounded-[4px] mb-5">Open New Ticket</Link>
             <div className="mt-5 overflow-x-auto">
-                {createSupportTicketLoading ? (
+                <CategoryTable tableData={paginatedData}/>
+                {/* {createSupportTicketLoading ? (
                     <Loading />
                 ) : createSupportTicketError ? (
                     <div className="text-red-500 text-center py-4">
@@ -228,15 +229,15 @@ const SupportTicket = ({ pageTitle }) => {
                         data={paginatedData}
                         isFilterColumn={true}
                     />
-                )}
+                )} */}
             </div>
-            {totalPages > 1 && (
+            {/* {totalPages > 1 && (
                 <DefaultPagination
                     currentPage={currentPage}
                     totalPages={totalPages}
                     onPageChange={setCurrentPage}
                 />
-            )}
+            )} */}
         </div>
     );
 };
