@@ -141,8 +141,8 @@ const StudentClassRoutine = ({ pageTitle }) => {
     { title: translate('ID'), field: 'RoutineID', hozAlign: 'center' },
     { title: translate('Day'), field: 'DayName', hozAlign: 'center' },
     { title: translate('Time'), field: 'TimeSlot', hozAlign: 'center' },
-    { title: translate('Subject'), field: 'SubjectName', hozAlign: 'center' },
-    { title: translate('Teacher'), field: 'TeacherName', hozAlign: 'center' },
+    { title: translate('Subject'), field: 'SubjectName' },
+    { title: translate('Teacher'), field: 'TeacherName' },
     { title: translate('Class'), field: 'ClassName', hozAlign: 'center' },
     { title: translate('Session'), field: 'SessionName', hozAlign: 'center' },
     {

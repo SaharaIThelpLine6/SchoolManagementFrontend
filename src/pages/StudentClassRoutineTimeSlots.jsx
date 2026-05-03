@@ -90,7 +90,9 @@ const StudentClassRoutineTimeSlots = ({ pageTitle }) => {
         </div>
       ),
     },
-    { title: translate('ID'), field: 'TimeSlotID', hozAlign: 'center' },
+    { title: translate('ID'), field: 'TimeSlotID', hozAlign: 'center',   render: (row, index) => (
+        <p>{index + 1}</p>
+      ), },
     { title: translate('Start Time'), field: 'StartTime', hozAlign: 'center' },
     { title: translate('End Time'), field: 'EndTime', hozAlign: 'center' },
   ];
