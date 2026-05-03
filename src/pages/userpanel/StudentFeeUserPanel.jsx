@@ -26,7 +26,7 @@ const StudentFeeUserPanel = () => {
 
   const months = watch('months');
   const SessionID = watch('SessionID');
-  console.log(months, 'months');
+  // console.log(months, 'months');
 
   const currentSession = useSelector(
     (state) => state.sessionChange.currentSession
@@ -47,7 +47,7 @@ const StudentFeeUserPanel = () => {
 
   // console.log(activeSession, 'activeSession');
 
-  console.log(userDetails, 'userDetails');
+  // console.log(userDetails, 'userDetails');
   const data = [];
 
   const admissionId = userDetails?.AdmissionID;
@@ -58,9 +58,17 @@ const StudentFeeUserPanel = () => {
     useGetMonthPerStudentsFeeUserPanelQuery(SessionID, {
       skip: !SessionID,
     });
+
+  // console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
+
   const totalFee =
     studentFeeAdmissionData?.reduce(
       (sum, item) => sum + Number(item.FainalAmount || 0),
+      0
+    ) || 0;
+  const totalFeeInvoice =
+    studentFeeAdmissionData?.reduce(
+      (sum, item) => sum + Number(item.Amount || 0),
       0
     ) || 0;
 
@@ -123,8 +131,8 @@ const StudentFeeUserPanel = () => {
     }
   }, [feeLandData]);
 
-  console.log(monthFeeList, 'monthFeeList');
-  console.log(feeLandData, 'feeLandData');
+  // console.log(monthFeeList, 'monthFeeList');
+  // console.log(feeLandData, 'feeLandData');
   // console.log(userDetails, 'userDetails');
   // console.log(studentFeeAdmissionData, 'studentFeeAdmissionData');
 
@@ -162,7 +170,7 @@ const StudentFeeUserPanel = () => {
     const month = monthFeeList.find((m) => m.monthId === monthId);
 
     return {
-      CurrentInvoice: totalFee,
+      CurrentInvoice: totalFeeInvoice,
       InvoiceDiscount: 0,
       CurrentPaid: totalFee,
       MonthId: month.monthId,
@@ -204,7 +212,7 @@ const StudentFeeUserPanel = () => {
         PoliceStationName: userDetails?.PoliceStationName,
         Mobile1: userDetails?.Mobile1,
         AdmissionID: userDetails?.AdmissionID,
-        CurrentInvoice: totalFee * months?.length,
+        CurrentInvoice: totalFeeInvoice * months?.length,
         InvoiceDiscount: 0,
         CurrentPaid: totalFee * months?.length,
         Due: 0,
