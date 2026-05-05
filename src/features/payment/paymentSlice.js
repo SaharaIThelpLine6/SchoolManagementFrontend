@@ -14,7 +14,7 @@ export const paymentSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['AllSchoolsSSL', 'OnlinePaymentInvoice'],
+  tagTypes: ['AllSchoolsSSL', 'OnlinePaymentInvoice', 'MadrashaQuotaInfo'],
   endpoints: (builder) => ({
     createPaymentRequest: builder.mutation({
       query: (paymentRequest) => {
@@ -60,6 +60,7 @@ export const paymentSlice = createApi({
 
     getUserInfo: builder.query({
       query: () => 'userinfo',
+      providesTags: ['MadrashaQuotaInfo'],
     }),
     getPaymentHistory: builder.query({
       query: () => 'paymenthistory',
