@@ -1,4 +1,4 @@
-import { useEffect } from 'react'; // Import useEffect and useState
+import { useCallback, useEffect } from 'react'; // Import useEffect and useState
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { permissionsDataList } from '../../Data/permissions';
@@ -17,6 +17,7 @@ import { Link } from 'react-router-dom';
 import { useGetInstitutionInfoQuery } from '../../features/settings/settingsQuerySlice';
 import OwenGuide from '../../Routes/OwenGuide';
 import Swal from "sweetalert2"
+import { showModal } from '../../utils/ModalControlar';
 
 const TableOne = () => {
   const dispatch = useDispatch();
@@ -95,6 +96,11 @@ const TableOne = () => {
     dispatch(setEditMode(1));
     dispatch(setEditUserID(id));
   };
+
+
+  const handleStudentAdmissionModel = useCallback((id) => {
+    showModal('Selected Per Student Fee', 'ADD_STUDENT', id);
+  }, []);
 
   const handleuserPanelLogin = async (token) => {
     Swal.fire({
@@ -274,9 +280,16 @@ const TableOne = () => {
                         className="text-blue-500 hover:text-blue-700"
                         onClick={() => handleEdit(brand.UserID)}
                       >
-                        <SvgIcon name="FiEdit" size={20} />
+                        <SvgIcon name="FiEdit" size={24} />
                       </button>
                     </ViewPermission>
+                    <button
+                        type="button"
+                        className="text-blue-500 hover:text-blue-700 ml-[26px]"
+                        onClick={() => handleStudentAdmissionModel(brand.UserID)}
+                      >
+                        <SvgIcon name="UserPlus" size={24} />
+                      </button>
                   </td>
                   <td className="py-1 px-4 border border-white text-center">
                     <button className="text-red-500 hover:text-red-700">
