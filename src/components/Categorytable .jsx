@@ -3,7 +3,14 @@ import { Link } from "react-router-dom";
 import SvgIcon from "./icons/SvgIcon";
 import DeleteButton from "./Button/DeleteButton";
 import Swal from "sweetalert2";
-import { useDeleteSupportTicketMutation } from "../features/settings/settingsQuerySlice";
+import { useDeleteSupportTicketMutation, useSupportTicketsDepartmentQuery } from "../features/settings/settingsQuerySlice";
+import Button from "./Button/Button";
+import { showModal } from "../utils/ModalControlar";
+import OwenGuide from "../Routes/OwenGuide";
+import { ViewPermission } from "../Routes/ViewPermission";
+import { permissionsDataList } from "../Data/permissions";
+import { useSelector } from "react-redux";
+import bnBijoy2Unicode from "../utils/conveter";
 
 const icons = {
     fork: (
@@ -116,21 +123,35 @@ const initialData = [
     { id: 8, title: "Beverages", desc: "This is a description for this category", icon: "list", date: "10/Mar/2025", products: 20, status: "active", children: [] },
 ];
 
-function StatusBadge({ status }) {
-    const isActive = status === "active";
-    return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${isActive ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-green-500" : "bg-amber-500"}`} />
-            {isActive ? "Active" : "Pending"}
-        </span>
-    );
-}
 
 function IconBadge({ name }) {
     return (
         <div className="w-8 h-8 rounded-full border border-blue-200 bg-blue-50 flex items-center justify-center text-blue-500">
             {icons[name] || icons.fork}
         </div>
+    );
+}
+
+
+function StatusBadge({ status }) {
+    const statusMap = {
+        0: { label: "Pending", color: "blue" },
+        1: { label: "Open", color: "blue" },
+        2: { label: "In Progress", color: "purple" },
+        3: { label: "Resolved", color: "green" },
+        4: { label: "Closed", color: "gray" }
+    };
+
+    const current = statusMap[status] || { label: "Unknown", color: "gray" };
+
+    return (
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[16px] font-medium 
+            bg-${current.color}-50 text-${current.color}-700 whitespace-nowrap`}>
+
+            <span className={`w-1.5 h-1.5 rounded-full bg-${current.color}-500`} />
+
+            {current.label}
+        </span>
     );
 }
 
@@ -143,7 +164,7 @@ function ChildRow({ item, depth = 1 }) {
         <>
             <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                 <td className="w-9 pl-4" />
-                <td colSpan={7} className="py-2.5 pr-4 text-sm">
+                <td colSpan={3} className="py-2.5 pr-4 text-sm">
                     <div className="flex items-center" style={{ paddingLeft }}>
                         <span
                             className="inline-block border-l-2 border-b-2 border-gray-300 w-5 h-4 rounded-bl mr-2 flex-shrink-0"
@@ -159,10 +180,11 @@ function ChildRow({ item, depth = 1 }) {
                                 {item?.Remark}
                             </button>
                         ) : (
-                            <span className="text-gray-600">{ } {item?.Remark}</span>
+                            <span className="text-gray-600 w-[40%]">{ } {item?.Remark}</span>
                         )}
                     </div>
                 </td>
+                <td colSpan={3} className="font-bold text-[16px] text-[#5ac146]">{item?.UserInfo.Usercode}{item?.UserInfo.InstituteName}</td>
             </tr>
             {hasChildren && open &&
                 item.children.map((child) => (
@@ -176,7 +198,13 @@ function CategoryRow({ item }) {
     const [open, setOpen] = useState(item.ID === 1);
     const hasChildren = item.SupportTicketSupport?.length > 0;
     const [expanded, setExpanded] = useState(false);
-       const [deleteSupportTickets] = useDeleteSupportTicketMutation();
+    const [deleteSupportTickets] = useDeleteSupportTicketMutation();
+    const { user } = useSelector((state) => state.auth);
+    const permissionType = user?.permissionType;
+    const handleModal = (id) => {
+        console.log(id);
+        showModal("Edit Admission Report Content", "SUPPORT_TICKET_SUPPORT", id)
+    }
     const handleDelete = useCallback(
         async (id) => {
             if (!id) return;
@@ -214,55 +242,93 @@ function CategoryRow({ item }) {
     return (
         <>
             <tr className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+
                 <td className="pl-4">
                     {/* <input type="checkbox" className="w-3.5 h-3.5 accent-blue-600 cursor-pointer" /> */}
-                    <div className="flex gap-2">
-                        <Link to={`/help/view-support-ticket/${item.ID}`}
-                            className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md" title="View"
+                    <div className="flex gap-2 items-center">
+                        {permissionType > 0 && permissionType <= 4 ? <>
+                            <Link to={`/help/view-support-ticket/${item.ID}`}
+                                className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md" title="View"
 
-                        >
-                            <SvgIcon
-                                name={"FaEye"}
-                                size={14}
-                            />
-                        </Link>
-                        {/* <DeleteButton onClick={() => { handleDelete(item.ID) }} /> */}
+                            >
+                                <SvgIcon
+                                    name={"FaEye"}
+                                    size={14}
+                                />
+                            </Link>
+                            <DeleteButton onClick={() => { handleDelete(item.ID) }} />
+                        </> : null}
 
+
+                        {/* </OwenGuide> */}
                         <div className="flex items-center gap-2 font-medium text-gray-800 text-sm ">
-                            {hasChildren ? (
-                                <button
-                                    onClick={() => setOpen((o) => !o)}
-                                    className={`px-[10px] h-full rounded-[5px] bg-[#d3d3d3] text-blue-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
-                                >
-                                    <ChevronDown />
-                                </button>
-                            ) : (
-                                <span className="w-[18px]" />
-                            )}
-                            {item.title}
+                            {/* {hasChildren ? ( */}
+                            <button
+                                onClick={() => setOpen((o) => !o)}
+                                className={`px-[10px] h-[38px] rounded-[5px] bg-[#d3d3d3] text-blue-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                            >
+                                <ChevronDown />
+                            </button>
+                            {/* ) : null} */}
+
+
+                            <Button className="bg-transparent text-[#333333] hover:bg-transparent px-[0px] py-[0px]" onClick={() => { handleModal(item.ID) }}>
+                                <span className="font-bold text-[18px] text-[#414141]">({item.SupportTicketSupport.length})</span>
+                            </Button>
+
+
+
                         </div>
+
                     </div>
                 </td>
 
 
-                <td className="py-3 pl-2 pr-3 text-[16px] leading-[28px] font-medium text-gray-700 min-w-[200px] max-w-[300px] align-top">
+                <td className="py-3 pl-2 pr-3 text-[16px] leading-[28px] font-medium text-gray-700 min-w-[200px] max-w-[300px] align-center">
                     <div className={`${expanded ? "" : "line-clamp-2"} overflow-hidden`}>
                         {item.Messages[0]?.Message}
-                    </div>
 
-                    {item.Messages[0]?.Message?.length > 100 && (
+                        {item.Messages.slice(1).map((reply, index) => (
+                            <div key={index} className="text-[#000000] pb-[10px]">
+                                <span
+                                    className="inline-block border-l-2 border-b-2 border-gray-300 w-5 h-4 rounded-bl mr-2 flex-shrink-0"
+                                />
+                                <p className="text-[18px] inline">{reply.Message}</p>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="flex gap-[20px] text-[16px] mt-1">
                         <button
                             onClick={() => setExpanded(!expanded)}
-                            className="text-[#5ac146] text-sm mt-1"
+                            className="text-[#5ac146] "
                         >
-                            {expanded ? "Less" : "More"}
+                            {expanded ? (
+                                "Less"
+                            ) : (
+                                <>
+                                    আরও দেখুন <span className="text-black">({bnBijoy2Unicode(String(item.Messages.length - 1))} উত্তর)</span>
+                                </>
+                            )}
                         </button>
-                    )}
+                        <button className="flex items-center gap-[4px] text-[16px]" onClick={() => { handleModal(item.ID) }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-message">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M8 9h8" />
+                                <path d="M8 13h6" />
+                                <path d="M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1 -3 3h-5l-5 3v-3h-2a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12" />
+                            </svg>
+                            মন্তব্য
+                        </button>
+                    </div>
+
+
+
                 </td>
 
-                <td className="py-2 pr-2 text-[16px] text-black font-bold min-w-[180px] max-w-[180px] align-top">{item.Subject}</td>
+                <td className="py-2 pr-2 text-[16px] text-black font-bold min-w-[180px] max-w-[180px] align-center">{item.Subject}</td>
+                <td className="py-2 pr-2 text-[16px] text-black font-bold min-w-[180px] max-w-[180px] align-center">{item.department.Department}</td>
 
-                <td className="py-3 pr-3 text-[16px] text-black leading-[24px] align-top">{item.UserCode} {item?.UserInfo?.InstituteName}</td>
+                <td className="py-3 pr-3 text-[16px] text-black leading-[24px] align-center font-bold">{item.UserCode} {item?.UserInfo?.InstituteName}</td>
 
                 <td className="py-3 pr-3">
                     <StatusBadge status={item.Status} />
@@ -270,11 +336,7 @@ function CategoryRow({ item }) {
                 <td className="py-3 text-center">
                     {new Date(item.CreatedAt).toDateString()}
                 </td>
-                {/* <td className="py-3 pr-4">
-                    <button className="border border-gray-200 rounded-md px-2 py-0.5 text-gray-400 text-base hover:border-gray-300 hover:bg-gray-50 transition-colors leading-none">
-                        ···
-                    </button>
-                </td> */}
+
             </tr>
             {hasChildren && open &&
                 item.SupportTicketSupport.map((child) => <ChildRow key={child.ID} item={child} depth={1} />)}
@@ -283,91 +345,138 @@ function CategoryRow({ item }) {
 }
 
 export default function CategoryTable({ tableData }) {
-    // const [tab, setTab] = useState("categories");
-    const [search, setSearch] = useState("");
+    const [filters, setFilters] = useState({
+        subject: "",
+        department: "",
+        institute: "",
+        status: "",
+    });
+    const { data: departmentData = [], isLoading } = useSupportTicketsDepartmentQuery();
+    // Deep filter: checks the root item AND all its SupportTicketSupport children
+    const matchesFilters = (item, filters) => {
+        const subjectMatch = !filters.subject ||
+            item.Subject?.toLowerCase().includes(filters.subject.toLowerCase());
 
-    const filtered = initialData.filter((d) =>
-        d.title.toLowerCase().includes(search.toLowerCase())
-    );
+        const deptMatch = !filters.department ||
+            String(item.DepartmentID) === String(filters.department);
 
-    useEffect(() => {
-        console.log(tableData);
-    }, [tableData])
+        const instituteMatch = !filters.institute ||
+            item.UserCode?.toLowerCase().includes(filters.institute.toLowerCase()) ||
+            item.UserInfo?.InstituteName?.toLowerCase().includes(filters.institute.toLowerCase());
+
+        const statusMatch = filters.status === "" ||
+            String(item.Status) === String(filters.status);
+
+        return subjectMatch && deptMatch && instituteMatch && statusMatch;
+    };
+
+    // Filter root-level data; also check if any child matches (optional deep match)
+    const filtered = (tableData ?? []).filter((item) => matchesFilters(item, filters));
+
+    const handleFilter = (key, value) => {
+        setFilters((prev) => ({ ...prev, [key]: value }));
+    };
 
     return (
         <div className="bg-white border border-gray-200 rounded-xl overflow-hidden font-sans w-full">
-
-            {/* Tabs */}
-            {/* <div className="flex border-b border-gray-200 px-5">
-                {["categories", "product"].map((t) => (
-                    <button
-                        key={t}
-                        onClick={() => setTab(t)}
-                        className={`py-3 px-3 text-sm border-b-2 -mb-px transition-colors capitalize ${tab === t
-                            ? "border-blue-500 text-blue-600 font-medium"
-                            : "border-transparent text-gray-500 hover:text-gray-700"
-                            }`}
-                    >
-                        {t.charAt(0).toUpperCase() + t.slice(1)}
-                    </button>
-                ))}
-            </div> */}
-
-            {/* Toolbar */}
-            <div className="flex items-center justify-between px-5 py-3 gap-3">
-                <div className="flex items-center gap-2">
-                    <div className="relative flex items-center">
-                        <span className="absolute left-2.5 text-gray-400 pointer-events-none">
-                            <SearchIcon />
-                        </span>
-                        <input
-                            type="text"
-                            placeholder="Search here..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="border border-gray-200 rounded-lg pl-8 pr-3 py-1.5 text-xs text-gray-700 bg-gray-50 outline-none w-48 focus:border-blue-400 focus:bg-white transition-colors"
-                        />
-                    </div>
-                    {/* <button className="flex items-center gap-1.5 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-500 bg-gray-50 hover:bg-gray-100 transition-colors">
-            <FilterIcon /> Filter
-          </button> */}
-                </div>
-                {/* <div className="flex items-center gap-2">
-          <button className="flex items-center gap-1.5 border border-gray-200 rounded-lg px-3 py-1.5 text-xs text-gray-500 bg-white hover:bg-gray-50 transition-colors">
-            <ImportIcon /> Import file
-          </button>
-          <button className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-3 py-1.5 text-xs font-medium transition-colors">
-            <PlusIcon /> Create new category
-          </button>
-        </div> */}
-            </div>
-
-            {/* Table */}
             <div className="overflow-x-auto font-SolaimanLipi">
                 <table className="w-full border-collapse text-sm">
                     <colgroup>
                         <col className="w-[40px]" />
                         <col className="w-[40%]" />
-                        <col className="w-[22%]" />
-                        <col className="w-[10%]" />
-                        <col className="w-[12%]" />
+                        <col className="w-[18%]" />
+                        <col className="w-[2%]" />
+                        <col className="w-[20%]" />
+                        <col className="w-[4%]" />
                         <col className="w-[9%]" />
                     </colgroup>
                     <thead>
+                        {/* ── Header labels ── */}
                         <tr className="border-b border-gray-200 bg-gray-50">
                             <th className="py-2.5 pl-4 text-[16px] w-9 font-bold">মতামত</th>
                             <th className="py-2.5 pr-3 text-left text-[16px] font-bold">বিবরণ</th>
-                            <th className="py-2.5 pr-3 text-left text-[16px] font-bold">বিষয়</th>
+                            <th className="py-2.5 pr-3 text-left text-[16px] font-bold">বিষয়</th>
+                            <th className="py-2.5 pr-3 text-left text-[16px] font-bold">বিভাগ</th>
                             <th className="py-2.5 pr-3 text-left text-[16px] font-bold">প্রতিষ্ঠানের নাম</th>
-                            <th className="py-2.5 pr-3 text-left text-[16px] font-bold"> স্ট্যাটাস </th>
-                            <th className="py-2.5 pr-3 text-center text-[16px] font-bold"> তৈরির তারিখ </th>
+                            <th className="py-2.5 pr-3 text-left text-[16px] font-bold">স্ট্যাটাস</th>
+                            <th className="py-2.5 pr-3 text-center text-[16px] font-bold">তৈরির তারিখ</th>
+                        </tr>
 
+                        {/* ── Filter row ── */}
+                        <tr className="border-b border-gray-200 bg-gray-50">
+                            <th className="py-2.5 pl-4 w-9" />
+                            <th className="py-2.5 pr-3 text-left" />
+
+                            {/* Subject filter */}
+                            <th className="py-2.5 pr-3 text-left">
+                                <input
+                                    type="text"
+                                    placeholder="বিষয় খুঁজুন..."
+                                    value={filters.subject}
+                                    onChange={(e) => handleFilter("subject", e.target.value)}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                                />
+                            </th>
+
+                            {/* Department filter */}
+                            <th className="py-2.5 pr-3 text-left">
+                                <select
+                                    value={filters.department}
+                                    onChange={(e) => handleFilter("department", e.target.value)}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                                >
+                                    <option value="">সব বিভাগ</option>
+                                    {departmentData.map((dept) => (
+                                        <option key={dept.ID} value={dept.ID}>
+                                            {dept.Department}
+                                        </option>
+                                    ))}
+                                </select>
+                            </th>
+
+                            {/* Institute filter */}
+                            <th className="py-2.5 pr-3 text-left">
+                                <input
+                                    type="text"
+                                    placeholder="প্রতিষ্ঠান খুঁজুন..."
+                                    value={filters.institute}
+                                    onChange={(e) => handleFilter("institute", e.target.value)}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                                />
+                            </th>
+
+                            {/* Status filter */}
+                            <th className="py-2.5 pr-3 text-left">
+                                <select
+                                    value={filters.status}
+                                    onChange={(e) => handleFilter("status", e.target.value)}
+                                    className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                                >
+                                    <option value="">সব স্ট্যাটাস</option>
+                                    <option value="0">Pending</option>
+                                    <option value="1">Open</option>
+                                    <option value="2">In Progress</option>
+                                    <option value="3">Resolved</option>
+                                    <option value="4">Closed</option>
+                                </select>
+                            </th>
+
+                            <th className="py-2.5 pr-3 text-center" />
                         </tr>
                     </thead>
+
                     <tbody>
-                        {tableData.map((item) => (
-                            <CategoryRow key={item.ID} item={item} />
-                        ))}
+                        {filtered.length > 0 ? (
+                            filtered.map((item) => (
+                                <CategoryRow key={item.ID} item={item} />
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={7} className="py-8 text-center text-gray-400">
+                                    কোনো ফলাফল পাওয়া যায়নি
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </div>
