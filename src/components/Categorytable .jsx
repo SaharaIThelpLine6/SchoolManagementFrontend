@@ -64,7 +64,7 @@ const icons = {
 };
 
 const ChevronDown = () => (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="35" height="35" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="6 9 12 15 18 9" />
     </svg>
 );
@@ -265,7 +265,7 @@ function CategoryRow({ item }) {
                             {/* {hasChildren ? ( */}
                             <button
                                 onClick={() => setOpen((o) => !o)}
-                                className={`px-[10px] h-[38px] rounded-[5px] bg-[#d3d3d3] text-blue-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                                className={`px-[0px] h-[38px] rounded-[5px] bg-transparent text-blue-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
                             >
                                 <ChevronDown />
                             </button>
