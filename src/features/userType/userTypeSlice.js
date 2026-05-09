@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { paymentSlice } from "../payment/paymentSlice";
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -110,7 +111,17 @@ export const userTypeSlice = createApi({
         method: 'POST',
         body: data,
       }),
-      invalidatesTags: ['Users'],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            paymentSlice.util.invalidateTags(['MadrashaQuotaInfo'])
+          );
+        } catch (err) {
+          console.error(err);
+        }
+      },
+      invalidatesTags: ['User'],
     }),
     getAllUsers: builder.query({
       query: ({ page = 1, limit = 10, userTypeID }) => {
@@ -133,7 +144,17 @@ export const userTypeSlice = createApi({
         method: 'PUT',
         body: payload,
       }),
-      invalidatesTags: ['Users'],
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            paymentSlice.util.invalidateTags(['MadrashaQuotaInfo'])
+          );
+        } catch (err) {
+          console.error(err);
+        }
+      },
+      invalidatesTags: ['Users', 'MadrashaQuotaInfo'],
     }),
     getSingleUser: builder.query({
       query: (id) => `get_single_user/${id}`,

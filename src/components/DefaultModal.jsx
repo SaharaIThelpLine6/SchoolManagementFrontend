@@ -79,6 +79,7 @@ import NoticeView from './Forms/NoticeView';
 import AdmissionFormContentEditModal from '../view/result/AdmissionFormContentEditModal';
 import { useRef } from 'react';
 import SupportTicketModal from '../view/support-ticket/SupportTicketModal';
+import AdmissionFormModal from './Forms/AdmissionFormModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
@@ -128,7 +129,7 @@ const DefaultModal = () => {
 
             {modalType && (
               <div className="body p-3">
-                {modalType === 'ADD_STUDENT' && <AdmissionForm userId={id} />}
+                {modalType === 'ADD_STUDENT' && <AdmissionFormModal userId={id} />}
                 {modalType === 'FEE_COLLECTION' && (
                   <FeeCollectionForm userId={id} />
                 )}
