@@ -120,13 +120,13 @@ const UserImage = ({ pageTitle }) => {
       title: translate('User Code'),
       field: 'UserCode',
       hozAlign: 'center',
-      render: (row) => <p>{row.StudentCode}</p>,
+      render: (row) => <p>{row.UserCode}</p>,
     },
     {
       title: translate('User Name'),
       field: 'UserName',
       hozAlign: 'center',
-      render: (row) => <p>{bnBijoy2Unicode(row.StudentName)}</p>,
+      render: (row) => <p>{bnBijoy2Unicode(row.UserName)}</p>,
     },
     {
       title: translate('Image'),
@@ -307,7 +307,7 @@ const UserImage = ({ pageTitle }) => {
                     <input
                       {...register("ID")}
                       className='hidden'
-                      
+
                     />
                     <DefaultInput
                       registerKey="UserCode"
@@ -430,8 +430,9 @@ const UserImage = ({ pageTitle }) => {
                 <DefaultPagination
                   currentPage={currentPage}
                   totalPages={totalPages}
-                  onPageChange={(currentPage)=>{ console.log(currentPage);
-                   }}
+                  onPageChange={(currentPage) => {
+                    console.log(currentPage);
+                  }}
                 />
               </div>
             </>
