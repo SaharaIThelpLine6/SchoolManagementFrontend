@@ -114,23 +114,23 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
 
 
 
-const startID = watch("StartID");
-const endID = watch("EndID");
+  const startID = watch("StartID");
+  const endID = watch("EndID");
 
-// Filter students by ID range
-const filteredByID = students.filter((student) => {
-  const code = Number(student.UserCode);
+  // Filter students by ID range
+  const filteredByID = students.filter((student) => {
+    const code = Number(student.UserCode);
 
-  if (!startID && !endID) return true;            // no filter
-  if (startID && !endID) return code >= Number(startID);
-  if (!startID && endID) return code <= Number(endID);
+    if (!startID && !endID) return true;            // no filter
+    if (startID && !endID) return code >= Number(startID);
+    if (!startID && endID) return code <= Number(endID);
 
-  return code >= Number(startID) && code <= Number(endID);
-});
+    return code >= Number(startID) && code <= Number(endID);
+  });
 
-const totalPages = Math.ceil(filteredByID.length / PAGE_SIZE) || 1;
+  const totalPages = Math.ceil(filteredByID.length / PAGE_SIZE) || 1;
 
-const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
 
 
@@ -166,29 +166,42 @@ const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentP
       return;
     }
 
-    const studentResults = students.map((student) => {
-      const originalStudentData = userResultData?.examList?.find(
-        (s) => s.ID === student.ID
-      );
+    const studentResults = students
+      .filter((student) => {
+        console.log(student);
+        
+        if (startID && startID > student.UserCode) {
+          return false;
+        }
 
-      const subjectsWithValues = student.Subjects.map((subjectName, index) => {
-        const originalSubject = originalStudentData?.Subjects?.[index];
+        if (endID && endID < student.UserCode) {
+          return false;
+        }
+
+        return true;
+      })
+      .map((student) => {
+        const originalStudentData = userResultData?.examList?.find(
+          (s) => s.ID === student.ID
+        );
+
+        const subjectsWithValues = student.Subjects.map((subjectName, index) => {
+          const originalSubject = originalStudentData?.Subjects?.[index];
+
+          return {
+            SubjectID: originalSubject?.SubjectID || 0,
+            [`SubVal${index + 1}`]:
+              data.students?.[student.ID]?.[`SubVal${index + 1}`] ||
+              student[`SubVal${index + 1}`] ||
+              0,
+          };
+        });
 
         return {
-          SubjectID: originalSubject?.SubjectID || 0,
-          // SubjectName: subjectName,
-          [`SubVal${index + 1}`]:
-            data.students?.[student.ID]?.[`SubVal${index + 1}`] ||
-            student[`SubVal${index + 1}`] ||
-            0,
+          UserID: student.UserID,
+          Subjects: subjectsWithValues,
         };
       });
-
-      return {
-        UserID: student.UserID,
-        Subjects: subjectsWithValues,
-      };
-    });
 
     const payload = {
       SessionID: Number(data.SessionID),
@@ -231,7 +244,7 @@ const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentP
     }
   };
 
-  if (isLoading) return <div><Loading/></div>;
+  if (isLoading) return <div><Loading /></div>;
   if (error) return <div>Error: {error.message}</div>;
 
 
@@ -240,8 +253,8 @@ const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentP
   // filter subject funstion
   const filteredSubjects = selectedSubject
     ? paginatedData[0]?.Subjects?.filter(
-        (subject) => subject === selectedSubject
-      )
+      (subject) => subject === selectedSubject
+    )
     : paginatedData[0]?.Subjects;
 
 
@@ -261,10 +274,10 @@ const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentP
         }}>
           <input type="hidden" {...methods.register("ID")} />
 
-         <div className="flex gap-4">
-           <DefaultInput label={"Start ID"} registerKey="StartID" />
-          <DefaultInput label={"End ID"} registerKey="EndID" />
-         </div>
+          <div className="flex gap-4">
+            <DefaultInput label={"Start ID"} registerKey="StartID" />
+            <DefaultInput label={"End ID"} registerKey="EndID" />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <DefaultSelect
               label={translate("Session")}
@@ -301,6 +314,7 @@ const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentP
                 nameField="SubjectName"
                 registerKey="subjectSelect"
               />
+
             )}
           </div>
 
@@ -391,10 +405,10 @@ const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentP
 
 
             <DefaultPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </form>
       </div>

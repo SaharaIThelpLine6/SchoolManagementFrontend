@@ -288,7 +288,7 @@ const TableOne = () => {
                         className="text-blue-500 hover:text-blue-700 ml-[26px]"
                         onClick={() => handleStudentAdmissionModel(brand.UserID)}
                       >
-                        <SvgIcon name="UserPlus" size={24} />
+                        <SvgIcon name="UserPlus" size={26} />
                       </button>
                   </td>
                   <td className="py-1 px-4 border border-white text-center">

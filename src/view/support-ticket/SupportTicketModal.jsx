@@ -15,7 +15,11 @@ import { useGetsupportTicketsSupportQuery, useSupportTicketsDepartmentQuery, use
 import Swal from "sweetalert2";
 
 const SupportTicketModal = ({ id }) => {
-    const methods = useForm();
+    const methods = useForm({
+        defaultValues: {
+            status: 1
+        }
+    });
     const translate = useTranslate();
 
     const [selectedRow, setSelectedRow] = useState(null);
@@ -91,7 +95,7 @@ const SupportTicketModal = ({ id }) => {
             >
                 <input {...methods.register('id')} className="hidden" value={id} />
                 <input {...methods.register('status')} className="hidden" type="number" />
-                <Button type="button"
+                {/* <Button type="button"
                     onClick={() => handleStatusClick(1)}
                     className={`text-white bg-green-500 hover:bg-green-500 mr-2 ${selectedStatus === 1 ? 'border-4 border-green-700' : ''}`}>
                     সমথর্ন করছি
@@ -100,7 +104,7 @@ const SupportTicketModal = ({ id }) => {
                     onClick={() => handleStatusClick(0)}
                     className={`text-white bg-rose-500 hover:bg-rose-500 ${selectedStatus === 0 ? 'border-4 border-rose-700' : ''}`}>
                     সমথর্ন করছিনা
-                </Button>
+                </Button> */}
 
                 <div className="mt-2">
                     <label className="block text-[16px] font-normal text-gray-700 mb-1 md:mb-2 font-SolaimanLipi">
