@@ -118,8 +118,6 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
   const endID = watch("EndID");
 
   // Filter students by ID range
-  const filteredByID = students.filter((student) => {
-    const code = Number(student.UserCode);
   // Filter students by ID range
   const filteredByID = students.filter((student) => {
     const code = Number(student.UserCode);
@@ -132,14 +130,8 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
   });
 
   const totalPages = Math.ceil(filteredByID.length / PAGE_SIZE) || 1;
-  const totalPages = Math.ceil(filteredByID.length / PAGE_SIZE) || 1;
 
   const paginatedData = filteredByID.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-
-
-
-
-
 
 
   // const totalPages = Math.ceil(students?.length / PAGE_SIZE) || 1;
