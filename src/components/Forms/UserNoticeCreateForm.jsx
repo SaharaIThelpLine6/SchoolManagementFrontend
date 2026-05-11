@@ -37,6 +37,7 @@ const UserNoticeCreateForm = () => {
     createUserNotice,
     { isLoading: isCreateLoading }
   ] = useCreateUserNoticeMutation();
+
   useEffect(() => {
     reset({});
   }, [mode, reset]);
@@ -63,11 +64,11 @@ const UserNoticeCreateForm = () => {
       const response = await createUserNotice(payload).unwrap();
 
       // ✅ API success হলে alert দেখাবে
-      Swal.fire({
-        icon: "success",
-        title: translate("Submitted Successfully"),
-        text: response?.message || "",
-      });
+      // Swal.fire({
+      //   icon: "success",
+      //   title: translate("Submitted Successfully"),
+      //   text: response?.message || "",
+      // });
 
       hideModal();
 
@@ -223,6 +224,7 @@ const UserNoticeCreateForm = () => {
 
         <Button
           type="submit"
+          disabled={isCreateLoading}
           className="bg-blue-500 hover:bg-blue-600 text-white"
         >
           {translate("Submit")}
