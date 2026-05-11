@@ -850,20 +850,25 @@ const CreateStudentFee = () => {
                     {translate('Student Code')}:
                   </label>
                   <div className="flex gap-2">
-                    <input
-                      {...methods.register('StudentCode', {
-                        required: true,
-                        onChange: (e) => {
-                          // ✅ Input change হলে last searched code reset করুন
-                          if (e.target.value.trim() !== lastSearchedCode) {
-                            setLastSearchedCode('');
-                          }
-                        },
-                      })}
-                      className="w-full rounded-lg border border-gray-300 px-3 h-[38px] bg-gray-100 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
-                      onKeyDown={handleEnter}
-                      required
-                    />
+                  <input
+                    type="search"
+                    enterKeyHint="search"
+                    {...methods.register('StudentCode', {
+                      required: true,
+                      onChange: (e) => {
+                        if (e.target.value.trim() !== lastSearchedCode) {
+                          setLastSearchedCode('');
+                        }
+                      },
+                    })}
+                    className="w-full rounded-lg border border-gray-300 px-3 h-[38px] bg-gray-100 focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                    onKeyUp={(e) => {
+                      if (e.key === 'Enter') {
+                        handleEnter(e);
+                      }
+                    }}
+                    required
+                  />
                     <button
                       type="button"
                       onClick={handleOpenModal}
