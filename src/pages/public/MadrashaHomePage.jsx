@@ -134,7 +134,10 @@ const MadrashaHomePage = () => {
           </div>
         </div>
       </div>
-      <div
+
+
+      {schoolid != 1615 ? (
+        <div
         className="px-0 lg:px-0 py-[80px] pb-[100px] relative"
         style={{
           backgroundImage: `url("${API_URL}/public/${settingsObject.BannerImage}")`,
@@ -336,6 +339,11 @@ const MadrashaHomePage = () => {
           </div>
         </div>
       </div>
+      ) : null }
+      
+
+
+
       <div className="container mx-auto px-2 lg:px-0 py-[60px]">
         <div className="pb-[40px]">
           <div className="text_area text-center pr-2">
