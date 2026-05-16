@@ -78,19 +78,19 @@ const SingleClassRoutingPDF = ({ data = [], pageSize = 'A4' }) => {
 
         <div className="text-center flex-1 mx-2">
           <h1 className={`${titleSize} font-bold mb-1`}>
-            {bnBijoy2Unicode(institutionInfo?.InstitutionName || '')}
+            {institutionInfo?.InstitutionName || ''}
           </h1>
           <p className="mb-1">
-            {bnBijoy2Unicode(institutionInfo?.Address || '')}
+            {institutionInfo?.Address || ''}
           </p>
           <p className="mb-2">
-            {bnBijoy2Unicode(institutionInfo?.ContactNumber || '')},{' '}
-            {bnBijoy2Unicode(institutionInfo?.AraContactNumber || '')}
+            {institutionInfo?.ContactNumber || ''},{' '}
+            {institutionInfo?.AraContactNumber || ''}
           </p>
 
           <p className={`${titleSize} font-semibold`}>
-            {bnBijoy2Unicode(common.ExamName)},{' '}
-            {bnBijoy2Unicode(common.SessionName)}
+            {common.ExamName},{' '}
+            {common.SessionName}
           </p>
 
           <h2
@@ -123,7 +123,7 @@ const SingleClassRoutingPDF = ({ data = [], pageSize = 'A4' }) => {
               className="border border-black py-2 font-bold !bg-gray-400 text-white"
               colSpan={7}
             >
-              জামাত / ক্লাস : {bnBijoy2Unicode(common.SubClass)}
+              জামাত / ক্লাস : {common.SubClass}
             </td>
           </tr>
 
@@ -132,13 +132,13 @@ const SingleClassRoutingPDF = ({ data = [], pageSize = 'A4' }) => {
               <td className="border border-black py-1">{idx + 1}</td>
 
               <td className="border border-black py-1 text-left pl-2">
-                {bnBijoy2Unicode(row.SubjectName)}
+                {row.SubjectName}
               </td>
 
               <td className="border border-black py-1">
-                {bnBijoy2Unicode(row.ExamDate)}
+                {row.ExamDate}
               </td>
-              <td className="border border-black py-1">{bnBijoy2Unicode(row.ExamDay)}</td>
+              <td className="border border-black py-1">{row.ExamDay}</td>
               <td className="border border-black py-1">{row.StartTime}</td>
               <td className="border border-black py-1">{row.EndTime}</td>
               <td className="border border-black py-1">{row.RoomNo}</td>

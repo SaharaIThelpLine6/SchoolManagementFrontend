@@ -68,19 +68,19 @@ const ExamSignatureRoutingPDF = ({ data = [] }) => {
         {/* Title & Info */}
         <div className="text-center flex-1 mx-4">
           <h1 className="text-xl font-bold mb-1">
-            {bnBijoy2Unicode(institutionInfo?.InstitutionName || '')}
+            {institutionInfo?.InstitutionName || ''}
           </h1>
           <p className="text-sm mb-1">
-            {bnBijoy2Unicode(institutionInfo?.Address || '')}
+            {institutionInfo?.Address || ''}
           </p>
           <p className="text-sm mb-2">
-            {bnBijoy2Unicode(institutionInfo?.ContactNumber || '')},{' '}
-            {bnBijoy2Unicode(institutionInfo?.AraContactNumber || '')}
+            {institutionInfo?.ContactNumber || ''},{' '}
+            {institutionInfo?.AraContactNumber || ''}
           </p>
 
           <p className="text-base font-semibold py-1 px-3 rounded inline-block">
-            {bnBijoy2Unicode(common.ExamName)},{' '}
-            {bnBijoy2Unicode(common.SessionName)}
+            {common.ExamName},{' '}
+            {common.SessionName}
           </p>
           <br />
           <h2 className="text-base font-bold border-2 border-black inline-block px-12 py-1 mt-3 rounded-md">
