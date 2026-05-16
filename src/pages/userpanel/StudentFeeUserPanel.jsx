@@ -179,97 +179,103 @@ const StudentFeeUserPanel = () => {
   });
 
   const handlePayment = async () => {
-    try {
+    Swal.fire({
+      title: 'সাময়িকভাবে বন্ধ',
+      text: 'দুঃখিত, পেমেন্ট সেবা কিছু সময়ের জন্য বন্ধ রয়েছে। অনুগ্রহ করে পরে আবার চেষ্টা করুন।',
+      icon: 'warning',
+      confirmButtonText: 'ঠিক আছে',
+    });
+    // try {
 
 
-      // if (!SessionIDMatch) {
-      //   Swal.fire({
-      //     title: 'Payment Error',
-      //     text: 'Session not match',
-      //     icon: 'error',
-      //     confirmButtonText: 'OK',
-      //   });
-      //   return;
-      // }
+    //   // if (!SessionIDMatch) {
+    //   //   Swal.fire({
+    //   //     title: 'Payment Error',
+    //   //     text: 'Session not match',
+    //   //     icon: 'error',
+    //   //     confirmButtonText: 'OK',
+    //   //   });
+    //   //   return;
+    //   // }
 
 
-      const checkAmount = totalFee * months?.length;
-      if (!checkAmount) {
-        Swal.fire({
-          title: 'Payment Error',
-          text: 'Invalid payment amount',
-          icon: 'error',
-          confirmButtonText: 'OK',
-        });
-        return;
-      }
+    //   const checkAmount = totalFee * months?.length;
+    //   if (!checkAmount) {
+    //     Swal.fire({
+    //       title: 'Payment Error',
+    //       text: 'Invalid payment amount',
+    //       icon: 'error',
+    //       confirmButtonText: 'OK',
+    //     });
+    //     return;
+    //   }
 
-      const payload = {
-        UserID: userDetails?.UserID,
-        UserName: userDetails?.UserName,
-        Email: userDetails?.Email,
-        DistrictName: userDetails?.DistrictName,
-        PoliceStationName: userDetails?.PoliceStationName,
-        Mobile1: userDetails?.Mobile1,
-        AdmissionID: userDetails?.AdmissionID,
-        CurrentInvoice: totalFeeInvoice * months?.length,
-        InvoiceDiscount: 0,
-        CurrentPaid: totalFee * months?.length,
-        Due: 0,
-        AmountInWord: numberToBanglaWords(totalFee * months?.length),
-        studentCode: userDetails?.UserCode,
-        // CreateAt: '2026-01-19T12:21:28.318Z',
-        // Remark: '',
-        // AccountType: '301',
-        // Account: '301001',
-        // smsPermission: false,
-        fees,
-        feesLists: [
-          {
-            type: 'month',
-            monthLists: monthListData,
-            items: [],
-            permission: true,
-          },
-        ],
-      };
+    //   const payload = {
+    //     UserID: userDetails?.UserID,
+    //     UserName: userDetails?.UserName,
+    //     Email: userDetails?.Email,
+    //     DistrictName: userDetails?.DistrictName,
+    //     PoliceStationName: userDetails?.PoliceStationName,
+    //     Mobile1: userDetails?.Mobile1,
+    //     AdmissionID: userDetails?.AdmissionID,
+    //     CurrentInvoice: totalFeeInvoice * months?.length,
+    //     InvoiceDiscount: 0,
+    //     CurrentPaid: totalFee * months?.length,
+    //     Due: 0,
+    //     AmountInWord: numberToBanglaWords(totalFee * months?.length),
+    //     studentCode: userDetails?.UserCode,
+    //     // CreateAt: '2026-01-19T12:21:28.318Z',
+    //     // Remark: '',
+    //     // AccountType: '301',
+    //     // Account: '301001',
+    //     // smsPermission: false,
+    //     fees,
+    //     feesLists: [
+    //       {
+    //         type: 'month',
+    //         monthLists: monthListData,
+    //         items: [],
+    //         permission: true,
+    //       },
+    //     ],
+    //   };
 
-      console.log(payload, 'payload');
-      const res = await initPayment({ payload }).unwrap();
+    //   console.log(payload, 'payload');
+    //   const res = await initPayment({ payload }).unwrap();
 
-      if (res?.gateway_url) {
-        Swal.fire({
-          title: 'Redirecting...',
-          text: 'You are being redirected to the payment gateway',
-          icon: 'success',
-          timer: 2000,
-          showConfirmButton: false,
-        });
+    //   if (res?.gateway_url) {
+    //     Swal.fire({
+    //       title: 'Redirecting...',
+    //       text: 'You are being redirected to the payment gateway',
+    //       icon: 'success',
+    //       timer: 2000,
+    //       showConfirmButton: false,
+    //     });
 
-        setTimeout(() => {
-          window.location.href = res.gateway_url;
-        }, 2000);
-      } else {
-        Swal.fire({
-          title: 'Payment Failed',
-          text: 'Gateway URL not found',
-          icon: 'error',
-          confirmButtonText: 'OK',
-        });
-      }
-    } catch (err) {
-      const errorMessage =
-        err?.data?.error || err?.data?.message || 'Payment init failed';
+    //     setTimeout(() => {
+    //       window.location.href = res.gateway_url;
+    //     }, 2000);
+    //   } else {
+    //     Swal.fire({
+    //       title: 'Payment Failed',
+    //       text: 'Gateway URL not found',
+    //       icon: 'error',
+    //       confirmButtonText: 'OK',
+    //     });
+    //   }
+    // } catch (err) {
+    //   const errorMessage =
+    //     err?.data?.error || err?.data?.message || 'Payment init failed';
 
-      Swal.fire({
-        title: 'Payment Error',
-        text: errorMessage, // 👉 "SSL School Data not found!"
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
+    //   Swal.fire({
+    //     title: 'Payment Error',
+    //     text: errorMessage, // 👉 "SSL School Data not found!"
+    //     icon: 'error',
+    //     confirmButtonText: 'OK',
+    //   });
 
-      console.error('Payment Error:', err);
-    }
+    //   console.error('Payment Error:', err);
+    // }
   };
 
   // 🔥 LOADING STATE (Skeleton)
