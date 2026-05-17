@@ -145,22 +145,22 @@ const AllClassRoutingPDF = ({ data = [], pageSize = 'A4' }) => {
         {/* Title */}
         <div className="text-center flex-1 mx-4">
           <h1 className={`${institutionNameSize} font-bold mb-1`}>
-            {safeConvert(institutionInfo?.InstitutionName)}
+            {institutionInfo?.InstitutionName}
           </h1>
 
           <p className={`${addressSize} mb-1`}>
-            {safeConvert(institutionInfo?.Address)}
+            {institutionInfo?.Address}
           </p>
 
           <p className={`${addressSize} mb-2`}>
-            {safeConvert(institutionInfo?.ContactNumber)},{' '}
-            {safeConvert(institutionInfo?.AraContactNumber)}
+            {institutionInfo?.ContactNumber},{' '}
+            {institutionInfo?.AraContactNumber}
           </p>
 
           <p
             className={`${examInfoSize} font-semibold py-0.5 px-2 inline-block`}
           >
-            {safeConvert(common.ExamName)}, {safeConvert(common.SessionName)}
+            {common.ExamName}, {common.SessionName}
           </p>
 
           <br />
@@ -226,7 +226,7 @@ const AllClassRoutingPDF = ({ data = [], pageSize = 'A4' }) => {
                   className={`border border-black ${tableRowPadding} font-bold ${classHeaderFont} text-center !bg-gray-400 text-white`}
                   colSpan={7}
                 >
-                  জামাত / ক্লাস : {safeConvert(group.SubClass)}
+                  জামাত / ক্লাস : {group.SubClass}
                 </td>
               </tr>
 
@@ -242,19 +242,19 @@ const AllClassRoutingPDF = ({ data = [], pageSize = 'A4' }) => {
                   <td
                     className={`border border-black ${tableRowPadding} text-left ${tableSubjectPadding} ${tableTextSize}`}
                   >
-                    {safeConvert(row.SubjectName)}
+                    {row.SubjectName}
                   </td>
 
                   <td
                     className={`border border-black ${tableRowPadding} text-center ${tableTextSize}`}
                   >
-                    {bnBijoy2Unicode(row.ExamDate) || ''}
+                    {row.ExamDate || ''}
                   </td>
 
                   <td
                     className={`border border-black ${tableRowPadding} text-center ${tableTextSize}`}
                   >
-                    {bnBijoy2Unicode(row.ExamDay) || ''}
+                    {row.ExamDay || ''}
                   </td>
 
                   <td
