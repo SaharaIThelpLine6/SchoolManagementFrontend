@@ -788,6 +788,7 @@ const useTranslate = () => {
     "Office Part text": "অফিসের টেক্সট পার্ট",
     "Admission Form": "ভর্তি ফরম",
     "Admission Form Print": "ভর্তি ফরম প্রিন্ট",
+    "Collected By": "গ্রহণকারী নাম",
   };
 
   return (key) =>

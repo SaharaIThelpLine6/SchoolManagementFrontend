@@ -69,7 +69,6 @@ const TodayFeeCollection = ({ pageTitle }) => {
   const tableData = result?.data || [];
   const todayCollection = result?.todayCollection || 0;
   const userCollection = result?.userCollection || 0;
-
   // 🔹 Set page title
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
@@ -234,6 +233,12 @@ const TodayFeeCollection = ({ pageTitle }) => {
       field: 'Mobile1',
       hozAlign: 'center',
       render: (row) => row.Mobile1,
+    },
+    {
+      title: translate('Collected By'),
+      field: 'CreateUserName',
+      hozAlign: 'center',
+      render: (row) => row.CreateUserName,
     },
   ];
 
