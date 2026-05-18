@@ -187,7 +187,7 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
           <tbody>
             <tr>
               <td className="pl-2">
-                প্রাপ্তি বিভাগ : {bnBijoy2Unicode(studentResult?.Division)}
+                প্রাপ্তি বিভাগ : {studentResult?.Division}
               </td>
               <td>
                 মেধা স্থান : {bnBijoy2Unicode(String(studentResult?.Positions))}

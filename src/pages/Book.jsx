@@ -187,7 +187,7 @@ const Book = ({ pageTitle }) => {
       sorter: 'string',
       render: (data) => (
         <div className="flex justify-center items-center">
-          <p>{bnBijoy2Unicode(data.EngSubjectName) || '-'}</p>
+          <p>{data.EngSubjectName || '-'}</p>
         </div>
       ),
     },
@@ -198,7 +198,7 @@ const Book = ({ pageTitle }) => {
       width: 200,
       render: (data) => (
         <div className="flex justify-center items-center">
-          <p>{bnBijoy2Unicode(data.ArabicSubject) || '-'}</p>
+          <p>{data.ArabicSubject || '-'}</p>
         </div>
       ),
     },
