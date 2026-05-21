@@ -36,7 +36,7 @@ const UserImage = ({ pageTitle }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const methods = useForm();
   const { reset, register } = methods;
-  const { filteredStudent } = useSelector((state) => state.student);
+  const { filteredUser: filteredStudent } = useSelector((state) => state.student);
 
   const {
     data: userResponse = { data: [], totalUsers: 0, totalPages: 0 },
@@ -65,7 +65,7 @@ const UserImage = ({ pageTitle }) => {
     if (filteredStudent) {
       console.log(filteredStudent);
 
-      const imageBuffer = filteredStudent?.Image;
+      const imageBuffer = filteredStudent?.Images[0]?.Image?.data;
       if (imageBuffer) {
         const base64String = Buffer.from(imageBuffer).toString('base64');
         const src = `data:image/png;base64,${base64String}`;
@@ -78,8 +78,8 @@ const UserImage = ({ pageTitle }) => {
     }
     reset({
       ID: filteredStudent?.UserID || '',
-      UserCode: filteredStudent?.StudentCode || '',
-      UserName: filteredStudent?.StudentName || '',
+      UserCode: filteredStudent?.UserCode || '',
+      UserName: filteredStudent?.UserName || '',
     });
   }, [filteredStudent, reset]);
 
@@ -159,7 +159,7 @@ const UserImage = ({ pageTitle }) => {
   ];
 
   const handleOpenModal = useCallback(() => {
-    showModal('Filter User', 'STUDENT_FILTER');
+    showModal('Filter User', 'USER_FILTER');
   }, []);
 
   const onSubmit = async (data) => {
@@ -225,7 +225,6 @@ const UserImage = ({ pageTitle }) => {
   };
   // page change বা component remount হলে form reset করা
   useEffect(() => {
-    // page change হলে filterData reset করা
     handleReset();
   }, [location.pathname]);
 
@@ -296,14 +295,7 @@ const UserImage = ({ pageTitle }) => {
                     {translate('User Information')}
                   </h3>
                   <div className="space-y-4">
-                    {/* <DefaultInput
-                      registerKey="ID"
-                      require={translate('ID is required')}
-                      type="text"
-                      placeholder={translate('Enter type of id') + ' ...'}
-                      label="ID"
-                      disable
-                    /> */}
+
                     <input
                       {...register("ID")}
                       className='hidden'

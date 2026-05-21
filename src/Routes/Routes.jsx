@@ -140,6 +140,7 @@ import ResultLayout from '../pages/public/ResultLayout';
 import Donation from '../pages/public/Donation';
 import OnlineDonationInvoice from '../view/payment/payment-history/OnlineDonationInvoice';
 import DonationHomePage from '../pages/frontsite/DonationHomePage';
+import HomePage from '../pages/HomePage';
 
 const router = createBrowserRouter([
   {

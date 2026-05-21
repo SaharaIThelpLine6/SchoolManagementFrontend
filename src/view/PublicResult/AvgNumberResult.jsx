@@ -16,17 +16,17 @@ const AvgNumberResult = ({ studentResult }) => {
 
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">
-                {bnBijoy2Unicode(studentResult?.ClassNameLabel)}:
+                {studentResult?.ClassNameLabel}:
               </p>
               <p className="text-[16px]">
-                {bnBijoy2Unicode(studentResult?.SubClass)}
+                {studentResult?.SubClass}
               </p>
             </div>
 
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">প্রাপ্তি বিভাগ:</p>
               <p className="text-[16px]">
-                {bnBijoy2Unicode(studentResult?.Division)}
+                {studentResult?.Division}
               </p>
             </div>
           </div>
@@ -35,7 +35,7 @@ const AvgNumberResult = ({ studentResult }) => {
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">নাম:</p>
               <p className="text-[16px]">
-                {bnBijoy2Unicode(studentResult?.UserName)}
+                {studentResult?.UserName}
               </p>
             </div>
 

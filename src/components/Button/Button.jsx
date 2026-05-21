@@ -7,7 +7,7 @@ const Button = ({
   type = "button",
   onClick,
   disabled = false,
-  loading = false, // NEW: loading prop
+  loading = false,
   ...rest
 }) => {
   const baseClasses = `
@@ -38,7 +38,7 @@ const Button = ({
       type={type}
       onClick={onClick}
       className={combinedClasses}
-      disabled={disabled || loading} // prevent click during loading
+      disabled={disabled || loading}
       {...rest}
     >
       {loading ? (

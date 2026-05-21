@@ -1,88 +1,137 @@
 import { useEffect, useState } from "react";
 import DefaultSelect from "../Forms/DefaultSelect";
 import { FormProvider, useForm } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import DefaultInput from "../Forms/DefaultInput";
-import { fetchClassData } from "../../features/class/classSlice";
-import { fetchSettingsData } from "../../features/settings/settingsSlice";
 import LoadingComponent from "../LoadingComponent";
 import SortableTable from "../Tables/SortableTable";
 import { setFilteredUser } from "../../features/student/studentSlice";
 import { hideModal } from "../../utils/ModalControlar";
-import {
-  useGetUserBySearchQuery,
-  useGetUserTypesQuery,
-} from "../../features/userType/userTypeSlice";
-import { useGetStudentBySearchQuery } from "../../features/student/studentQuerySlice";
+import { useLazyGetUserInfoBySearchQuery } from "../../features/userType/userTypeSlice";
+
 const UserFilterModal = () => {
   const methods = useForm();
-  const {
-    watch,
-    formState: { errors },
-  } = methods;
+
+  const { watch } = methods;
+
   const dispatch = useDispatch();
-  const { academicSession, status: settingsStatus } = useSelector(
-    (state) => state.settings
-  );
-  const { classList, status: classStatus } = useSelector(
-    (state) => state.class
-  );
 
-  useEffect(() => {
-    if (!academicSession.length) {
-      dispatch(fetchSettingsData());
-    }
-    if (!classList.length) {
-      dispatch(fetchClassData());
-    }
-  }, [dispatch]);
+  /*
+    New Filter Options
+  */
 
-  const UserCode = watch("UserCode");
-  const UserTypeID = watch("ID");
-  const ClassID = watch("ClassID");
-  const SessionID = watch("SessionID");
-  const {
-    data: userTypesData = [],
-    isLoading,
-    isError,
-  } = useGetUserTypesQuery();
+  const filterOptions = [
+    {
+      ID: 1,
+      Name: "ইউজার কোড",
+    },
+    {
+      ID: 2,
+      Name: "ইউজার নাম",
+    },
+    {
+      ID: 3,
+      Name: "মোবাইল নাম্বার",
+    },
+  ];
+
+  /*
+    Watch Fields
+  */
+
+  const search = watch("search");
+  const FilterTypeId = watch("FilterTypeId");
+
+  /*
+    Debounce
+  */
 
   const [debouncedFilters, setDebouncedFilters] = useState({
     search: "",
-    ClassID: "",
-    SessionID: "",
-    UserTypeID: "",
+    FilterTypeId: "",
   });
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       setDebouncedFilters({
-        search: UserCode,
-        ClassID,
-        SessionID,
-        UserTypeID,
+        search,
+        FilterTypeId,
       });
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [UserCode, ClassID, SessionID, UserTypeID]);
+  }, [search, FilterTypeId]);
 
-  // Call search query
-  const {
-    data: searchUserInfo,
-    error: searchUserError,
-    isLoading: userInfoLoading,
-  } = useGetStudentBySearchQuery(debouncedFilters, {
-    skip:
-      !debouncedFilters.search &&
-      !debouncedFilters.ClassID &&
-      !debouncedFilters.SessionID &&
-      !debouncedFilters.UserTypeID,
-    refetchOnFocus: false,
-  });
+  /*
+    API Call
+  */
+
+const PAGE_LIMIT = 20;
+
+  const [page, setPage] = useState(1);
+  const [users, setUsers] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  const [trigger, { data: searchUserInfo, error: searchUserError, isFetching: userInfoLoading }] =
+    useLazyGetUserInfoBySearchQuery();
+
+  useEffect(() => {
+    if (!debouncedFilters.search || !debouncedFilters.FilterTypeId) {
+      setUsers([]);
+      setPage(1);
+      setHasMore(true);
+      setIsFetchingMore(false);
+      return;
+    }
+
+    setUsers([]);
+    setPage(1);
+    setHasMore(true);
+    setIsFetchingMore(false);
+    trigger({ ...debouncedFilters, page: 1, limit: PAGE_LIMIT });
+  }, [debouncedFilters, trigger]);
+
+  useEffect(() => {
+    if (!searchUserInfo) return;
+
+    const pageData = Array.isArray(searchUserInfo.data) ? searchUserInfo.data : [];
+    if (page === 1) {
+      setUsers(pageData);
+    } else {
+      setUsers((prev) => [...prev, ...pageData]);
+    }
+
+    setHasMore(pageData.length === PAGE_LIMIT);
+    setIsFetchingMore(false);
+  }, [searchUserInfo, page]);
+
+  const loadNextPage = () => {
+    if (!hasMore || userInfoLoading || isFetchingMore) return;
+    const nextPage = page + 1;
+    setPage(nextPage);
+    setIsFetchingMore(true);
+    trigger({ ...debouncedFilters, page: nextPage, limit: PAGE_LIMIT });
+  };
+
+  const handleScroll = (event) => {
+    const { scrollTop, scrollHeight, clientHeight } = event.target;
+    if (scrollHeight - scrollTop <= clientHeight + 120) {
+      loadNextPage();
+    }
+  };
+
+
+  /*
+    Add User
+  */
+
   const handleAddToForm = (userDetails) => {
     dispatch(setFilteredUser(userDetails));
     hideModal();
   };
+
+
   const columns = [
     {
       title: "Action",
@@ -92,9 +141,9 @@ const UserFilterModal = () => {
             onClick={() => {
               handleAddToForm(row);
             }}
-            className=" text-blue-500"
+            className="text-blue-500"
           >
-            <svg
+                   <svg
               xmlns="http://www.w3.org/2000/svg"
               width={24}
               height={24}
@@ -123,25 +172,34 @@ const UserFilterModal = () => {
         );
       },
     },
-    { title: "User Code", field: "UserCode", hozAlign: "center" },
+
+    {
+      title: "User Code",
+      field: "UserCode",
+      hozAlign: "center",
+    },
+    {
+      title: "User Type",
+      field: "UserCode",
+      hozAlign: "center",
+       render: (row) => {
+        return <>{row?.UserType.TypeName}</>
+      },
+    },
+
     {
       title: "User Name",
       field: "UserName",
       hozAlign: "left",
       unicode: true,
-    }, {
-      title: "Class Name",
-      field: "ClassName",
-      hozAlign: "left",
-      unicode: true,
     },
     {
-      title: "TypeName",
-      field: "TypeName",
-      hozAlign: "left",
-      unicode: true,
+      title: "Mobile",
+      field: "Mobile1",
+      hozAlign: "center",
     },
   ];
+
   return (
     <div>
       <FormProvider {...methods}>
@@ -155,44 +213,50 @@ const UserFilterModal = () => {
           }}
         >
           <div className="flex flex-col md:flex-row gap-2">
+
+            {/* Filter Type */}
+
+            <DefaultSelect
+              options={filterOptions}
+              nameField={"Name"}
+              valueField={"ID"}
+              registerKey={"FilterTypeId"}
+              unicode={true}
+            />
+
+            {/* Search Input */}
+
             <DefaultInput
               label={""}
-              placeholder={"User Code"}
-              registerKey={"UserCode"}
-              type={"number"}
-              key={"UserCode"}
-            />
-            <DefaultSelect
-              options={userTypesData}
-              nameField={"TypeName"}
-              valueField={"ID"}
-              registerKey={"ID"}
-              type={"number"}
-              unicode={true}
-            />{" "}
-            <DefaultSelect
-              options={classList}
-              nameField={"ClassName"}
-              valueField={"ClassID"}
-              registerKey={"ClassID"}
-              type={"number"}
-              unicode={true}
-            />
-            <DefaultSelect
-              options={academicSession}
-              nameField={"SessionName"}
-              valueField={"SessionID"}
-              registerKey={"SessionID"}
+              placeholder={"Search"}
+              registerKey={"search"}
+              type={"text"}
             />
           </div>
         </div>
-        {userInfoLoading ? (
+
+        {(!debouncedFilters.search || !debouncedFilters.FilterTypeId) ? (
+          <li className="text-black mt-4">Please choose a filter type and enter search text.</li>
+        ) : userInfoLoading && page === 1 ? (
           <LoadingComponent />
         ) : searchUserError ? (
-          <li className="text-black mt-4">No users Found.</li>
-        ) : searchUserInfo && searchUserInfo.length > 0 ? (
-          <div className="relative overflow-x-auto">
-            <SortableTable columns={columns} data={searchUserInfo || []} />
+          <li className="text-black mt-4">No users found.</li>
+        ) : users.length > 0 ? (
+          <div
+            className="relative overflow-auto mt-4 max-h-[50vh]"
+            onScroll={handleScroll}
+          >
+            <SortableTable columns={columns} data={users} />
+            {(userInfoLoading || isFetchingMore) && (
+              <div className="py-3 text-center text-sm text-gray-600">
+                Loading more users...
+              </div>
+            )}
+            {!hasMore && users.length > 0 && (
+              <div className="py-3 text-center text-sm text-gray-600">
+                End of user list.
+              </div>
+            )}
           </div>
         ) : (
           <li className="py-2 px-4">No users found</li>

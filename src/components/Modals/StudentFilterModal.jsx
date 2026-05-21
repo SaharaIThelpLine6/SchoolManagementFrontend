@@ -110,6 +110,8 @@ const StudentFilterModal = () => {
     dispatch(setFilteredStudent(userDetails));
     hideModal();
   };
+
+
   const columns = [
     {
       title: "Action",

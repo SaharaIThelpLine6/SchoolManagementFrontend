@@ -32,7 +32,7 @@ const MonthListTable = ({ pageTitle }) => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return monthsList.slice(start, start + PAGE_SIZE);
   }, [monthsList, currentPage]);
-
+// 
   const handleOpenModal = useCallback(() => {
     showModal(translate('Create month names'), 'ADD_MONTHNAMES');
   }, [translate]);
@@ -88,7 +88,7 @@ const MonthListTable = ({ pageTitle }) => {
   ];
 
   return (
-    <div className="p-4 font-lato bg-white md:p-4 rounded-xl shadow-lg">
+    <div className="p-4  bg-white md:p-4 rounded-xl shadow-lg">
       <div className="flex justify-between items-center mb-4 border-b border-[#e9edf4] py-5 pt-0">
         <h3 className="text-xl font-bold">
           {pageTitle || translate('Months list table')}
