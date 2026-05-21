@@ -30,13 +30,13 @@ const SortableTable = ({
   // ফিল্টারিং লজিক (অপরিবর্তিত)
   const filteredData = data.filter((row) =>
     columns.every((column) => {
-      console.log(column.field);
-      console.log(!filters[column.field] && filters[column.field] !== 0);
+      // console.log(column.field);
+      // console.log(!filters[column.field] && filters[column.field] !== 0);
       
       if (!filters[column.field] && filters[column.field] !== 0) return true;
 
       if (column.type === 'text') {
-        console.log("called");
+        // console.log("called");
         
         return row[column.field]
           ?.toString()

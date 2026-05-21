@@ -190,7 +190,7 @@ const studentResultPublicViewSlice = createSlice({
             .addCase(fetchClassResult.fulfilled, (state, action) => {
                 state.resultStatus = 'succeeded'
                 state.classResult = action.payload.classResult;
-                state.resultStatistics = action.payload.classResult[0];
+                state.resultStatistics = action.payload.classResult.data[0];
             })
             .addCase(fetchClassResult.rejected, (state, action) => {
                 state.resultStatus = 'failed';

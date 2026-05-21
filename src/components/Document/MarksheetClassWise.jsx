@@ -9,18 +9,18 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
         const imageSrc = `data:image/png;base64,${base64String}`;
         return imageSrc
     }
-
+    // console.log(classResult);
     const divisionKeys = Object.keys(resultStatices).filter(key => key.startsWith("DC"));
     return (
         <div >
-            {classResult?.length > 0 ? (
+            {classResult?.data?.length > 0 ? (
                 <div className="w-[1076px] h-[750px] mx-auto relative bg-white font-SolaimanLipi landscape-page">
                     <div className="pb-1 px-2 bg-white">
                         {/*Heading part start*/}
                         <div className="flex justify-around">
                             {/*Total Student Table start*/}
                             <div className="text-[14px] pt-1">
-                                <h1 className="bg-[#a8a6a6] text-white text-center text-[14px]">মোট পরীক্ষার্থী = {bnBijoy2Unicode(String(classResult.length))}</h1>
+                                <h1 className="bg-[#a8a6a6] text-white text-center text-[14px]">মোট পরীক্ষার্থী = {bnBijoy2Unicode(String(classResult?.data.length))}</h1>
                                 <table className="w-[180px]">
                                     <tbody className=" border border-black w-full">
                                         {
@@ -45,20 +45,20 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                             <div className="mx-auto text-center">
                                 <h2 className="text-[22px] font-medium">      {schoolData?.InstitutionName}</h2>
                                 <h3 className="">{schoolData?.Address}</h3>
-                                <h3 className="">{classResult[0]?.ExamName} - {classResult[0]?.SessionName}</h3>
+                                <h3 className="">{classResult?.data[0]?.ExamName} - {classResult?.data[0]?.SessionName}</h3>
                                 <h3 className="font-semibold border-2 border-black rounded-md p-1 w-fit mx-auto">ফলাফল(নম্বরপত্র)</h3>
-                                <h3 className="">শ্রেনী/জামাত : {classResult[0]?.SubClass}</h3>
+                                <h3 className="">শ্রেনী/জামাত : {classResult?.data[0]?.SubClass}</h3>
                             </div>
                             {/*Heading Title End*/}
                             {/*Grade Determination Start*/}
                             <div className="text-[14px] pt-1">
-                                <p className="bg-[#a8a6a6] text-white text-center text-[14px]">মোট বিষয় {String(classResult[0]?.SubSonkha)} টি - পূর্ণমান {String(classResult[0]?.DivisionTopNumber)}* = {String(classResult[0]?.DivisionTopNumber * classResult[0]?.SubSonkha)}</p>
+                                <p className="bg-[#a8a6a6] text-white text-center text-[14px]">মোট বিষয় {String(classResult?.data[0]?.SubSonkha)} টি - পূর্ণমান {String(classResult?.data[0]?.DivisionTopNumber)}* = {String(classResult?.data[0]?.DivisionTopNumber * classResult?.data[0]?.SubSonkha)}</p>
                                 <table className="w-[220px]">
                                     <tbody className="border border-black w-full">
-                                        {Array.from({ length: classResult[0].SubSonkha }).map((_, index) => {
-                                            const division = classResult[0][`Division${index + 1}`];
-                                            const divisionNumber = classResult[0][`DivisionNumber${index + 1}`];
-                                            const subSonkha = classResult[0]?.SubSonkha;
+                                        {Array.from({ length: classResult?.data[0].SubSonkha }).map((_, index) => {
+                                            const division = classResult?.data[0][`Division${index + 1}`];
+                                            const divisionNumber = classResult?.data[0][`DivisionNumber${index + 1}`];
+                                            const subSonkha = classResult?.data[0]?.SubSonkha;
 
                                             if (division == undefined || divisionNumber == undefined || subSonkha == undefined || division == '') {
                                                 return null;
@@ -91,19 +91,20 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                         <td className="border border-black">আইডি নং</td>
                                         <td className="border border-black w-52">শিক্ষার্থীর নাম</td>
                                         {
-                                            Array.from({ length: classResult[0].SubSonkha }).map((_, index) => (<td className="border border-black [writing-mode:vertical-rl] py-2 max-h-[100px]" key={index}>{classResult[0][`Subject${index + 1}`]}</td>))
+                                            Array.from({ length: classResult?.data[0].SubSonkha }).map((_, index) => (<td className="border border-black [writing-mode:vertical-rl] py-2 max-h-[100px]" key={index}>{classResult?.data[0][`Subject${index + 1}`]}</td>))
 
                                         }
 
                                         <td className="border border-black">মোট</td>
-                                        <td className="border border-black">গড়</td>
+                                         { classResult.resultType != 2 ? (<td className="border border-black">গড়</td>) : null  }
+                                        
                                         <td className="border border-black">বিভাগ</td>
                                         <td className="border border-black">স্থান</td>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {
-                                        classResult.map((studentResult, index) => {
+                                        classResult.data.map((studentResult, index) => {
                                             return (
                                                 <tr key={`user_${String(studentResult?.UserCode)}`}>
                                                     <td className="border border-black">{String(index + 1)}</td>
@@ -116,7 +117,8 @@ const MarksheetClassWise = ({ schoolData, classResult, resultStatices }) => {
                                                     }
 
                                                     <td className="border border-black">{String(studentResult?.Total)}</td>
-                                                    <td className="border border-black">{String(studentResult?.Average)}</td>
+                                                     { classResult.resultType != 2 ? (<td className="border border-black">{String(studentResult?.Average)}</td>) : null  }
+                                                    {/* <td className="border border-black">{String(studentResult?.Average)}</td> */}
                                                     <td className="border border-black">{String(studentResult?.Division)}</td>
                                                     <td className="border border-black">{String(studentResult?.Positions)}</td>
                                                 </tr>

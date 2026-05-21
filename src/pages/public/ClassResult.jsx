@@ -28,7 +28,7 @@ const ClassResult = () => {
     }
 
     // এসেন্ডিং অর্ডারে সাজানো
-    const sortedClassResult = classResult ? [...classResult].sort((a, b) => {
+    const sortedClassResult = classResult?.data ? [...classResult?.data].sort((a, b) => {
         // UserCode সংখ্যায় কনভার্ট করে সাজানো
         return parseInt(a.UserCode) - parseInt(b.UserCode);
     }) : [];
@@ -42,7 +42,7 @@ const ClassResult = () => {
 
     const handlePrint = () => {
         const originalTitle = document.title;
-        document.title = `${bnBijoy2Unicode(classResult[0]?.ExamName)} - ${bnBijoy2Unicode(classResult[0]?.SessionName)}`;
+        document.title = `${classResult?.data[0]?.ExamName} - ${classResult?.data[0]?.SessionName}`;
 
         window.print();
 
@@ -52,7 +52,7 @@ const ClassResult = () => {
     };
 
     if(resultStatus === 'succeeded'){
-        document.title = `${bnBijoy2Unicode(classResult[0]?.ExamName)} - ${bnBijoy2Unicode(classResult[0]?.SessionName)}`;
+        document.title = `${classResult?.data[0]?.ExamName} - ${classResult?.data[0]?.SessionName}`;
     }
 
     return (
@@ -95,11 +95,12 @@ const ClassResult = () => {
                                                 <td className="border border-black min-w-[70px]">আইডি নং</td>
                                                 <td className="border border-black min-w-[180px]">শিক্ষার্থীর নাম</td>
                                                 {
-                                                    Array.from({ length: sortedClassResult[0].SubSonkha }).map((_, index) => (<td key={`view_subject_${index}`} className="border border-black min-w-[100px]">{bnBijoy2Unicode(sortedClassResult[0][`Subject${index + 1}`])}</td>))
+                                                    Array.from({ length: sortedClassResult[0].SubSonkha }).map((_, index) => (<td key={`view_subject_${index}`} className="border border-black min-w-[100px]">{sortedClassResult[0][`Subject${index + 1}`]}</td>))
 
                                                 }
                                                 <td className="border border-black px-1 min-w-[50px]">মোট</td>
-                                                <td className="border border-black px-1 min-w-[60px]">গড়</td>
+                                                { classResult.resultType != 2 ? (<td className="border border-black px-1 min-w-[60px]">গড়</td>) : null  }
+                                                
                                                 <td className="border border-black px-1 min-w-[60px]">বিভাগ</td>
                                                 <td className="border border-black px-1 min-w-[20px]">স্থান</td>
                                             </tr>
@@ -117,7 +118,8 @@ const ClassResult = () => {
                                                             }
                                                             <td className="border border-black px-1 min-w-[20px]">{String(studentResult?.Total)}</td>
 
-                                                            <td className="border border-black px-1 min-w-[20px]">{String(studentResult?.Average)}</td>
+                                                            { classResult.resultType != 2 ? (<td className="border border-black px-1 min-w-[20px]">{String(studentResult?.Average)}</td>) : null  }
+                                                            
                                                             <td className="border border-black px-1 min-w-[20px]">{String(studentResult?.Division)}</td>
 
                                                             <td className="border border-black px-1 min-w-[20px]">{String(studentResult?.Positions)}</td>
@@ -136,7 +138,7 @@ const ClassResult = () => {
                         </div>
                     </div>
                     <div className='print_canvas'>
-                        <MarksheetClassWise classResult={sortedClassResult} schoolData={schoolData} resultStatices={resultStatistics} /> {/* এখানে sortedClassResult ব্যবহার করুন */}
+                        <MarksheetClassWise classResult={classResult} schoolData={schoolData} resultStatices={resultStatistics} />
                     </div>
                 </div>
             ) : <>Loading...</>}

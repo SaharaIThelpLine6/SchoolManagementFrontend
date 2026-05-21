@@ -42,14 +42,14 @@ const MarkSheetPdf = ({ studentResult }) => {
         </div>
         <div className="mx-auto text-center">
           <h2 className="text-[24px] font-medium">
-            {bnBijoy2Unicode(studentResult?.InstitutionName)}
+            {studentResult?.InstitutionName}
           </h2>
-          <h3 className="text-md">{bnBijoy2Unicode(studentResult?.Address)}</h3>
+          <h3 className="text-md">{studentResult?.Address}</h3>
           <h3 className="text-md">
-            শিক্ষাবর্ষঃ {bnBijoy2Unicode(studentResult?.SessionName)}
+            শিক্ষাবর্ষঃ {studentResult?.SessionName}
           </h3>
           <h3 className="text-md">
-            পরীক্ষাঃ {bnBijoy2Unicode(studentResult?.ExamName)}
+            পরীক্ষাঃ {studentResult?.ExamName}
           </h3>
         </div>
       </div>
@@ -62,32 +62,32 @@ const MarkSheetPdf = ({ studentResult }) => {
                 <td className="w-10 text-center"> : </td>
                 <td className="text-start">
                   {" "}
-                  {bnBijoy2Unicode(studentResult?.UserName)}{" "}
+                  {studentResult?.UserName}{" "}
                 </td>
               </tr>
               <tr>
                 <td className="text-end">
-                  {bnBijoy2Unicode(studentResult?.ClassNameLabel)}:
+                  {studentResult?.ClassNameLabel}:
                 </td>
                 <td className="w-10 text-center"> : </td>
-                <td> {bnBijoy2Unicode(studentResult?.SubClass)} </td>
+                <td> {studentResult?.SubClass} </td>
               </tr>
               <tr>
                 <td className="text-end">
-                  {bnBijoy2Unicode(studentResult?.StudentIDLabel)}:
+                  {studentResult?.StudentIDLabel}:
                 </td>
                 <td className="w-10 text-center"> : </td>
-                <td> {bnBijoy2Unicode(String(studentResult?.UserCode))} </td>
+                <td> {String(studentResult?.UserCode)} </td>
               </tr>
               <tr>
                 <td className="text-end">পিতার নাম</td>
                 <td className="w-10 text-center"> : </td>
-                <td> {bnBijoy2Unicode(String(studentResult?.FatherName))} </td>
+                <td> {String(studentResult?.FatherName)} </td>
               </tr>
               <tr>
                 <td className="text-end">জন্ম তারিখ</td>
                 <td className="w-10 text-center"> : </td>
-                <td> {bnBijoy2Unicode(studentResult?.DateOfBirth)} ইং </td>
+                <td> {studentResult?.DateOfBirth} ইং </td>
               </tr>
             </tbody>
           </table>
@@ -117,7 +117,7 @@ const MarkSheetPdf = ({ studentResult }) => {
                   return (
                     <tr key={index}>
                       <td className="text-start pl-2">
-                        {bnBijoy2Unicode(division)}
+                        {division}
                       </td>
                       <td className="w-12 text-end">:</td>
                       <td className="pl-3">
