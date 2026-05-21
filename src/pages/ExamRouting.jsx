@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
@@ -106,6 +106,7 @@ const ExamRouting = ({ pageTitle }) => {
   // Create an array to track visibility for each select (12 columns)
   const [editId, setEditId] = useState(null);
   const [visibility, setVisibility] = useState(Array(14).fill(true));
+  const isSubmittingRef = useRef(false);
 
   const toggleVisibility = (index) => {
     const newVisibility = [...visibility];
@@ -583,10 +584,10 @@ const ExamRouting = ({ pageTitle }) => {
   //     console.error('Exam Routine Error:', error);
   //   }
   // };
-
   const onSubmit = async (formData) => {
     console.log(formData, 'formData');
-
+    if (isSubmittingRef.current) return; // ✅ double click block
+    isSubmittingRef.current = true;
     // ============================
     // 1️⃣ Basic validation
     // ============================
@@ -721,6 +722,8 @@ const ExamRouting = ({ pageTitle }) => {
       });
 
       console.error('Exam Routine Error:', error);
+    } finally {
+      isSubmittingRef.current = false; // ✅ শেষে unlock
     }
   };
 
@@ -936,7 +939,6 @@ const ExamRouting = ({ pageTitle }) => {
                 valueField="SessionID"
                 nameField="SessionName"
                 registerKey="SessionID"
-                unicode={true}
               />
               <DefaultSelect
                 label={translate('Exam Name')}
@@ -944,7 +946,6 @@ const ExamRouting = ({ pageTitle }) => {
                 valueField="ExamID"
                 nameField="ExamName"
                 registerKey="ExamID"
-                unicode={true}
               />
               <DefaultSelect
                 label={translate('Class/Jamaat')}
@@ -952,7 +953,6 @@ const ExamRouting = ({ pageTitle }) => {
                 valueField="SubClassID"
                 nameField="SubClass"
                 registerKey="SubClassID"
-                unicode={true}
               />
 
               <div className="grid grid-cols-2 gap-3">

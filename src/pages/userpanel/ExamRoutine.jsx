@@ -2,10 +2,10 @@ import { useEffect } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
 import {
-    useGetExamListUserPanelQuery,
-    useGetExamRoutineViewQuery,
-    useGetExamRulesUserPanelQuery,
-    useGetSessionUserPanelQuery,
+  useGetExamListUserPanelQuery,
+  useGetExamRoutineViewQuery,
+  useGetExamRulesUserPanelQuery,
+  useGetSessionUserPanelQuery,
 } from '../../features/userPanel/userInfo/userInfoQuerySlice';
 import useTranslate from '../../utils/Translate';
 import bnBijoy2Unicode from '../../utils/conveter';
@@ -23,6 +23,8 @@ const ExamRoutine = () => {
     { sessionId, examId },
     { skip: !sessionId }
   );
+
+  console.log(examRoutineData, "examRoutineData");
 
   const { data: examListData = [] } = useGetExamListUserPanelQuery();
   const { data: sessionData = [] } = useGetSessionUserPanelQuery();
@@ -55,7 +57,6 @@ const ExamRoutine = () => {
             valueField="SessionID"
             options={sessionData}
             defaultSelect={false}
-            unicode
           />
           <DefaultSelect
             label={translate('Exam')}
@@ -64,7 +65,6 @@ const ExamRoutine = () => {
             valueField="ExamID"
             options={examListData}
             defaultSelect={false}
-            unicode
           />
         </div>
         <div className="overflow-x-auto">
