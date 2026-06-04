@@ -293,20 +293,17 @@ const ExamRouting = ({ pageTitle }) => {
 
   useEffect(() => {
     if (editData?.landView || editData?.routineView) {
-      // console.log('Editing row:', editData);
-
-      // Reset form
       methods.reset();
 
       const { landView, routineView } = editData;
 
-      // Set fields from routineView
-      if (routineView) {
-        methods.setValue('RoomNo', routineView.RoomNo || '');
-        methods.setValue('RoomName', routineView.RoomName || '');
+      // RoomNo, RoomName — routineView array এর প্রথম item থেকে
+      if (routineView?.length > 0) {
+        methods.setValue('RoomNo', routineView[0].RoomNo || '');
+        methods.setValue('RoomName', routineView[0].RoomName || '');
       }
 
-      // Set basic fields from landView
+      // Basic fields from landView
       const basicFields = {
         SessionID: landView.SessionID,
         ExamID: landView.ExamID,
@@ -321,27 +318,26 @@ const ExamRouting = ({ pageTitle }) => {
         if (value !== undefined) methods.setValue(key, value);
       });
 
-      // Reset visibility array when editing
       setVisibility(Array(14).fill(true));
 
       // Set all 14 columns
       for (let i = 0; i < 14; i++) {
         const apiIndex = i + 1;
-        const formIndex = i;
 
         const date = landView[`Date${apiIndex}`];
         const day = landView[`Day${apiIndex}`];
-        const time = landView[`Time${apiIndex}`];
         const subjectId = landView[`Sub${apiIndex}`];
 
-        methods.setValue(
-          `date_${formIndex}`,
-          date ? date.replace(/-/g, '/') : ''
-        );
-        methods.setValue(`day_${formIndex}`, day || '');
-        methods.setValue(`startTime_${formIndex}`, time || '');
-        methods.setValue(`endTime_${formIndex}`, time || '');
-        methods.setValue(`subject_${formIndex}`, subjectId || '');
+        // ✅ routineView array থেকে index অনুযায়ী StartTime ও EndTime নাও
+        const routineRow = routineView?.[i];
+        const startTime = routineRow?.StartTime?.trim() || '';
+        const endTime = routineRow?.EndTime?.trim() || '';
+
+        methods.setValue(`date_${i}`, date ? date.replace(/-/g, '/') : '');
+        methods.setValue(`day_${i}`, day || '');
+        methods.setValue(`startTime_${i}`, startTime);  // ✅ per-row StartTime
+        methods.setValue(`endTime_${i}`, endTime);       // ✅ per-row EndTime
+        methods.setValue(`subject_${i}`, subjectId || '');
       }
 
       console.log('Form populated successfully');

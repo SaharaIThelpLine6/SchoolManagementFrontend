@@ -108,7 +108,7 @@ const ExamRoutine = () => {
                         {item.ExamDay}
                       </td>
                       <td className="px-1 py-1 bg-[#8D94CA] rounded-r-lg text-center">
-                        {item.StartTime}
+                        {item.StartTime} - {item.EndTime}
                       </td>
                     </tr>
                   ))}
