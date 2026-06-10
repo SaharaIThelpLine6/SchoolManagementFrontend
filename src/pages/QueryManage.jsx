@@ -173,7 +173,7 @@ const QueryManage = ({ pageTitle }) => {
     // });
 
     // // Reset selected rows after running the query
-    // setSelectedRows([]);
+    // setSelectedRows([]); 
   }
   const exportDataset = async () => {
 
@@ -335,7 +335,7 @@ const QueryManage = ({ pageTitle }) => {
                   />
                 </td>
                 <td className="p-2">{student.UserCode}</td>
-                <td className="p-2">{bnBijoy2Unicode(student.InstituteName)}</td>
+                <td className="p-2">{student.InstituteName}</td>
                 <td className="p-2">{student.DatabaseName}</td>
                 <td className="p-2">{student.EntryDate}</td>
                 <td className="p-2">{student.ExpryDate}</td>

@@ -195,6 +195,7 @@ export const userReportsSlice = createApi({
         SubClassID,
         RDID,
         ERIsActive,
+        pdf_id,
         Language,
         sevenColor,
       }) => ({
@@ -207,6 +208,7 @@ export const userReportsSlice = createApi({
           SubClassID,
           RDID,
           ERIsActive,
+          pdf_id,
           Language,
           sevenColor,
         },

@@ -53,7 +53,7 @@ const ExamRoutingCheckbox = ({
               <input
                 type="checkbox"
                 checked={isChecked(option.id)}
-                onChange={() => {}} // রিয়্যাক্ট হ্যান্ডলার ওয়ার্নিং এড়াতে
+                onChange={() => {}}
                 className={`h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 flex-shrink-0 ${
                   isChecked(option.id) ? "opacity-100" : "opacity-80 group-hover:opacity-100"
                 } ${checkboxClassName}`}

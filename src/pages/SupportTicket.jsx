@@ -30,10 +30,8 @@ const SupportTicket = ({ pageTitle }) => {
 
     const totalPages = Math.ceil((supportTicketsList?.length || 0) / PAGE_SIZE);
 
-    const paginatedData = useMemo(() => {
-        const start = (currentPage - 1) * PAGE_SIZE;
-        return supportTicketsList?.slice(start, start + PAGE_SIZE) || [];
-    }, [supportTicketsList, currentPage]);
+    const paginatedData = supportTicketsList;
+    
     const { data: apiData = [], isLoading } = useSupportTicketsDepartmentQuery();
     const [departmentOptions, setDepartmentOptions] = useState([]);
 
@@ -214,7 +212,7 @@ const SupportTicket = ({ pageTitle }) => {
     }
     return (
         <div className="font-SolaimanLipi pt-[20px]">
-            <Link to={"/help/create-support-tickets"} className="btn bg-[#5ac146] text-white py-2 px-2 rounded-[4px] mb-5"> নতুন  মতামত ও পরামর্শ </Link>
+            <Link to={"/help/create-support-tickets"} className="btn bg-[#5ac146] text-white py-2 px-2 rounded-[4px] mb-5">নতুন মতামত ও পরামর্শ </Link>
             <div className="mt-5 overflow-x-auto">
                 <CategoryTable tableData={paginatedData}/>
                 {/* {createSupportTicketLoading ? (

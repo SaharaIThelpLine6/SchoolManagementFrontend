@@ -354,3 +354,7 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
 .editor_block table th {
   border: 1px solid #000;
 }
+
+div:where(.swal2-container) div:where(.swal2-html-container){
+  font-family: "SolaimanLipiNormal";
+}

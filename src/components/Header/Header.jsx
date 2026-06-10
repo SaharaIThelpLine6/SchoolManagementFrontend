@@ -79,7 +79,7 @@ const Header = () => {
             onClick={handleOpenModal}
             className="text-white bg-cyan-500 hover:bg-cyan-600 font-medium rounded-full text-xs px-4 py-1.5"
           >
-            Pay now
+            Buy now
           </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -228,7 +228,7 @@ const Header = () => {
 
 
           <Button onClick={handleOpenModal} className="!rounded-full">
-            {translate("Pay Now")}
+            {translate("Buy Now")}
           </Button>
           <TranslateButton />
           <DropdownNotification />

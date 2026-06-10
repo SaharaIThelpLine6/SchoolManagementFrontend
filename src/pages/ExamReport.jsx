@@ -58,21 +58,12 @@ const ExamReport = ({ pageTitle }) => {
   const { status } = useSelector((state) => state.settings);
 
   const { control, handleSubmit, watch } = methods;
-
-  // useWatch দিয়ে form এর values গুলো নিন
   const formValues = useWatch({ control });
   const selectedReportID = formValues?.ReportID;
   const languageID = formValues?.id;
   const selectedPdfID = formValues?.PdfID;
 
-  console.log(
-    'selectedReportID:',
-    selectedReportID,
-    'languageID:',
-    languageID,
-    'selectedPdfID:',
-    selectedPdfID
-  );
+
 
   // Define which ReportIDs should show which fields
   const shouldShowFields = (fieldName) => {
@@ -83,7 +74,7 @@ const ExamReport = ({ pageTitle }) => {
           'SessionID',
           'RDID',
           'ExamID',
-          'ClassID',
+          'SubClassID',
           'Langauge',
           'PdfSelect',
         ].includes(fieldName);
@@ -95,9 +86,8 @@ const ExamReport = ({ pageTitle }) => {
           'SessionID',
           'RDID',
           'ExamID',
-          'ClassID',
+          'SubClassID',
           'Langauge',
-          'ExamVacationStatus',
           'PdfSelect',
         ].includes(fieldName);
       case 4:
@@ -106,7 +96,7 @@ const ExamReport = ({ pageTitle }) => {
           'SessionID',
           'RDID',
           'ExamID',
-          'ClassID',
+          'SubClassID',
           'Langauge',
           'PdfSelect',
         ].includes(fieldName);
@@ -153,6 +143,7 @@ const ExamReport = ({ pageTitle }) => {
     }
   };
 
+
   const [queryParams, setQueryParams] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [selectedPdfData, setSelectedPdfData] = useState(null);
@@ -165,6 +156,7 @@ const ExamReport = ({ pageTitle }) => {
     ERIsActive,
     sevenColor,
     id,
+    PdfID
   ] = watch([
     'ReportID',
     'SessionID',
@@ -174,19 +166,17 @@ const ExamReport = ({ pageTitle }) => {
     'ERIsActive',
     'sevenColor',
     'id',
+    'PdfID'
   ]);
-  const shouldSkip = !ReportID || !SessionID || !ExamID || !SubClassID;
+  const shouldSkip = !ReportID || !SessionID || !ExamID || !SubClassID || !RDID || !PdfID;
 
-  console.log({
-    ReportID: ReportID,
-    SessionID: SessionID,
-    ExamID: ExamID,
-    SubClassID: SubClassID,
-    RDID: RDID,
-    ERIsActive: ERIsActive,
-    Language: id,
-    sevenColor: sevenColor,
-  });
+
+
+  useEffect(()=>{
+    console.log(shouldSkip);
+    
+  }, [shouldSkip])
+
 
   const { data, isLoading, isError, error } = useGetExamReportQuery(
     {
@@ -198,17 +188,13 @@ const ExamReport = ({ pageTitle }) => {
       ERIsActive,
       Language: id,
       sevenColor,
+      pdf_id: PdfID
     },
     {
       skip: shouldSkip,
     }
   );
 
-  console.log(data, 'data');
-  // const { isFetching, isError, error } = useGetUserReportQuery(queryParams, {
-  //   skip: !queryParams,
-  // });
-  console.log(error, 'error');
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: SubClassListData } = useGetSubClassListQuery();
@@ -228,7 +214,7 @@ const ExamReport = ({ pageTitle }) => {
         error.status === 403
           ? translate('You do not have permission to view this report')
           : error.status === 400
-          ? translate('Missing or invalid data provided')
+          ? error.data.error || translate('Missing or invalid data provided')
           : translate('An error occurred while fetching the report')
       );
     } else {
@@ -264,6 +250,8 @@ const ExamReport = ({ pageTitle }) => {
     return found?.pdfList || [];
   };
 
+  
+
   const pdfOptions = getPDFOptions();
 
   // যখন PdfID change হয়, তখন selected PDF data সেট করুন
@@ -283,6 +271,7 @@ const ExamReport = ({ pageTitle }) => {
       report_id: formData.ReportID,
       session_id: Number(formData.SessionID),
       class_id: Number(formData.ClassID),
+      subClass_id: Number(formData.SubClassID),
       exam_id: Number(formData.ExamID),
       residential_id: Number(formData.RDID),
       language_id: Number(formData.id),
@@ -295,17 +284,17 @@ const ExamReport = ({ pageTitle }) => {
         (params[key] === undefined || params[key] === '') && delete params[key]
     );
     console.log('Submitted params:', params);
-    // setQueryParams(params);
+    setQueryParams(params);
     window.print();
   };
 
-  // selected PDF এর নাম বের করার ফাংশন
+  // selected PDF এর নাম বের করার ফাংশন 
   const getSelectedPdfName = () => {
     if (!selectedPdfID || !pdfOptions.length) return '';
     const selectedPdf = pdfOptions.find(
       (pdf) => pdf.PdfID === Number(selectedPdfID)
     );
-    return selectedPdf ? selectedPdf.name : '';
+    return selectedPdf ? selectedPdf?.name : '';
   };
 
   return (
@@ -362,7 +351,7 @@ const ExamReport = ({ pageTitle }) => {
                 />
               )}
 
-              {shouldShowFields('ClassID') && (
+              {shouldShowFields('SubClassID') && (
                 <DefaultSelect
                   label={translate('SubClass')}
                   nameField="SubClass"
@@ -458,14 +447,14 @@ const ExamReport = ({ pageTitle }) => {
       </div>
 
       {/* StatisticsOfAllExaminees কম্পোনেন্টে প্রয়োজনীয় props পাস করুন */}
-      <div className="hidden print:block">
+      <div className="print:block">
         {/* ১. পরীক্ষার ফি উত্তোলন তালিকা */}
         {Number(selectedReportID) === 1 &&
           Number(languageID) === 1 &&
           Number(selectedPdfID) === 1 && <BanglaOneColumn />}
         {Number(selectedReportID) === 1 &&
           Number(languageID) === 1 &&
-          Number(selectedPdfID) === 2 && <BanglaTwoColumn />}
+          Number(selectedPdfID) === 2 && <BanglaTwoColumn reportData={data} queryParams={queryParams} />}
         {/* Arob */}
         {Number(selectedReportID) === 1 &&
           Number(languageID) === 2 &&
@@ -483,40 +472,42 @@ const ExamReport = ({ pageTitle }) => {
         {/* ৩. দস্তখত পত্র */}
         {Number(selectedReportID) === 3 &&
           Number(languageID) === 1 &&
-          Number(selectedPdfID) === 1 && <ExamRoutine />}
+          Number(selectedPdfID) === 1 && <ExamRoutine reportData={data}  queryParams={queryParams} />}
         {Number(selectedReportID) === 3 &&
           Number(languageID) === 1 &&
-          Number(selectedPdfID) === 2 && <WithoutExamRoutine />}
+          Number(selectedPdfID) === 2 && <WithoutExamRoutine reportData={data}  queryParams={queryParams} />}
         {/* Arobic 2 pdf baki ase */}
         {/* ৪. নম্বর পত্র */}
-        {Number(selectedReportID) === 4 &&
+        {Number(selectedReportID) == 4 &&
+          Number(languageID) == 1 && 
+          Number(selectedPdfID) == 1 && <BanglaNumberWithTwoColumn reportData={data} queryParams={queryParams} />}
+
+
+        {Number(selectedReportID) == 4 &&
+          Number(languageID) == 1 &&
+          Number(selectedPdfID) == 2 && <BanglaWithOutNameColumn  reportData={data} queryParams={queryParams} />}
+        {/* {Number(selectedReportID) === 4 &&
           Number(languageID) === 1 &&
-          Number(selectedPdfID) === 1 && <BanglaNumberWithTwoColumn />}
-        {Number(selectedReportID) === 4 &&
+          Number(selectedPdfID) === 3 && <BanglaNumberStudentNameWithA5 />} */}
+        {/* {Number(selectedReportID) === 4 &&
           Number(languageID) === 1 &&
-          Number(selectedPdfID) === 2 && <BanglaWithOutNameColumn />}
-        {Number(selectedReportID) === 4 &&
-          Number(languageID) === 1 &&
-          Number(selectedPdfID) === 3 && <BanglaNumberStudentNameWithA5 />}
-        {Number(selectedReportID) === 4 &&
-          Number(languageID) === 1 &&
-          Number(selectedPdfID) === 4 && <BanglaNumberStudentWithOutNameA5 />}
+          Number(selectedPdfID) === 4 && <BanglaNumberStudentWithOutNameA5 />} */}
 
         {Number(selectedReportID) === 4 &&
           Number(languageID) === 2 &&
-          Number(selectedPdfID) === 1 && <ArobicNameWithTwoColumn />}
+          Number(selectedPdfID) === 1 && <ArobicNameWithTwoColumn reportData={data} queryParams={queryParams} />}
         {Number(selectedReportID) === 4 &&
           Number(languageID) === 2 &&
-          Number(selectedPdfID) === 2 && <ArobicNameWithTwoColumn />}
+          Number(selectedPdfID) === 2 && <ArobicNameWithTwoColumn reportData={data} queryParams={queryParams} />}
+        {/* {Number(selectedReportID) === 4 &&
+          Number(languageID) === 2 &&
+          Number(selectedPdfID) === 3 && <ArobicNumberStudentWithOutNameA5 />}
         {Number(selectedReportID) === 4 &&
           Number(languageID) === 2 &&
           Number(selectedPdfID) === 3 && <ArobicNumberStudentWithOutNameA5 />}
         {Number(selectedReportID) === 4 &&
           Number(languageID) === 2 &&
-          Number(selectedPdfID) === 3 && <ArobicNumberStudentWithOutNameA5 />}
-        {Number(selectedReportID) === 4 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 4 && <ArobicNumberStudentWithOutNameA5 />}
+          Number(selectedPdfID) === 4 && <ArobicNumberStudentWithOutNameA5 />} */}
         {Number(selectedReportID) === 4 &&
           Number(languageID) === 2 &&
           Number(selectedPdfID) === 5 && <ArobicNameWithLegal />}

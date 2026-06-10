@@ -98,7 +98,7 @@ export default function UserProfile() {
                 <span className="font-bold w-26">বাবার নাম</span>
                 <span className="mx-2">:</span>
                 <span className="text-gray-700">
-                  {userDetails?.StudentFatherName}
+                  {userDetails?.FatherName}
                 </span>
               </li>
 

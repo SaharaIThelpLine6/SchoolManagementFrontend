@@ -1,5 +1,4 @@
 import { RouterProvider } from "react-router-dom";
-import router from "./Routes/Routes";
 import { cssTransition, ToastContainer } from "react-toastify";
 import "./App.css";
 import "animate.css/animate.min.css";
@@ -8,6 +7,7 @@ import Loading from "./components/Loading/Loading";
 import SocketManager from "./components/socket/SocketManager";
 import { useSelector } from "react-redux";
 import 'react-toastify/dist/ReactToastify.css';
+import Router from "./Routes/Routes";
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
   exit: "animate__animated animate__bounceOut",
@@ -20,7 +20,7 @@ export default function App() {
     <>
       <SocketManager />
       <Suspense fallback={<Loading />}>
-        <RouterProvider router={router} />
+        <RouterProvider router={Router} />
         <ToastContainer
           position="top-right"
           autoClose={5000}

@@ -141,8 +141,9 @@ import Donation from '../pages/public/Donation';
 import OnlineDonationInvoice from '../view/payment/payment-history/OnlineDonationInvoice';
 import DonationHomePage from '../pages/frontsite/DonationHomePage';
 import HomePage from '../pages/HomePage';
+import ExamHallSetup from '../pages/ExamHallSetup';
 
-const router = createBrowserRouter([
+const Router = createBrowserRouter([
   {
     path: '/forget_password',
     element: <ForgetPassword />,
@@ -566,6 +567,16 @@ const router = createBrowserRouter([
                 ),
               },
               {
+                path: 'exam-hallsetup',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.exam_fee_setting}
+                  >
+                    <ExamHallSetup pageTitle="Exam Fee Determine" />
+                  </RequirePermission>
+                ),
+              },
+              {
                 path: 'fund-test',
                 element: (
                   <RequirePermission
@@ -746,7 +757,7 @@ const router = createBrowserRouter([
             //       <BoardExamName pageTitle="Board Exam Name" />
             //       // </RequirePermission>
             //     ),
-            //   },
+            //   },  
             //   {
             //     path: 'name',
             //     element: (
@@ -778,6 +789,7 @@ const router = createBrowserRouter([
             //     ),
             //   },
             // ],
+            //     
           },
 
           {
@@ -811,7 +823,7 @@ const router = createBrowserRouter([
               {
                 index: true,
                 element: (
-                  // <RequirePermission
+                  // <RequirePermission 
                   //   permissionId={permissionsDataList.student_report}
                   // >
                   <ComplaintBoxTermsAndConditions pageTitle="Complaint Box Terms and Conditions" />
@@ -1221,4 +1233,4 @@ const router = createBrowserRouter([
   },
 ]);
 
-export default router;
+export default Router;

@@ -152,7 +152,7 @@ const ExamRouting = ({ pageTitle }) => {
   const { data: editData = [] } = useGetSingleExamRoutineQuery(
     editId ? editId : skipToken
   );
-  console.log(editData, 'editData');
+
 
   const examID = watch('ExamID');
   const sessionID = watch('SessionID');
@@ -580,109 +580,148 @@ const ExamRouting = ({ pageTitle }) => {
   //     console.error('Exam Routine Error:', error);
   //   }
   // };
+
+
+  const [openSlots, setOpenSlots] = useState({ 0: true })
+
+  const toggleSlot = (index) => {
+    setOpenSlots(prev => ({ ...prev, [index]: !prev[index] }))
+  }
   const onSubmit = async (formData) => {
-    console.log(formData, 'formData');
-    if (isSubmittingRef.current) return; // ✅ double click block
+    if (isSubmittingRef.current) {
+      console.log("❌ Blocked: Already submitting");
+      return;
+    }
+
     isSubmittingRef.current = true;
-    // ============================
-    // 1️⃣ Basic validation
-    // ============================
-    if (
-      !Number(formData.SessionID) ||
-      !Number(formData.SubClassID) ||
-      !Number(formData.ExamID)
-    ) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'ফর্ম অসম্পূর্ণ',
-        text: 'Session, SubClass এবং Exam নির্বাচন করুন।',
-      });
-      return;
-    }
-
-    const totalDateCount = Array.from({ length: 14 }).filter((_, index) => {
-      return formData[`date_${index}`];
-    }).length;
-
-    // ============================
-    // 2️⃣ Build routine data
-    // ============================
-    const routineData = Array.from({ length: 14 }).map((_, index) => {
-      const startTimeRaw = formData[`startTime_${index}`] || '';
-      const endTimeRaw = formData[`endTime_${index}`] || '';
-
-      return {
-        SessionID: Number(formData.SessionID),
-        ExamID: Number(formData.ExamID),
-        SubClassID: Number(formData.SubClassID),
-
-        RoomNo: formData.RoomNo || '',
-        RoomName: formData.RoomName || '',
-
-        StartTime: startTimeRaw.replace(' AM', '').replace(' PM', ''),
-        EndTime: endTimeRaw.replace(' AM', '').replace(' PM', ''),
-
-        Date1: formData[`date_${index}`]
-          ? formData[`date_${index}`].replace(/\//g, '-')
-          : '',
-
-        Day1: formData[`day_${index}`] || '',
-
-        Time1: startTimeRaw.replace(' AM', '').replace(' PM', ''),
-
-        Sub1: formData[`subject_${index}`] || '',
-
-        TotalColumn: totalDateCount,
-      };
-    });
-
-    // ============================
-    // 3️⃣ Filter & validate rows
-    // ============================
-    const filteredRoutineData = [];
-    for (let item of routineData) {
-      const fields = [item.Date1, item.Day1, item.Time1, item.Sub1];
-      const isAnyFilled = fields.some((v) => v && v !== '');
-      const isAllFilled = fields.every((v) => v && v !== '');
-
-      // skip completely empty rows
-      if (!isAnyFilled) continue;
-
-      // If partially filled → warning and stop submission
-      if (isAnyFilled && !isAllFilled) {
-        await Swal.fire({
-          icon: 'warning',
-          title: 'অসম্পূর্ণ রুটিন ডাটা',
-          text: 'Date, Day, Time এবং Subject সবগুলো পূরণ করুন।',
-        });
-        return; // ✅ stop submission
-      }
-
-      // Valid row → add to filtered list
-      filteredRoutineData.push(item);
-    }
-
-    if (filteredRoutineData.length === 0) {
-      await Swal.fire({
-        icon: 'warning',
-        title: 'ফর্ম অসম্পূর্ণ',
-        text: 'কমপক্ষে ১টি Routine Row পূরণ করুন।',
-      });
-      return;
-    }
-
-    // ============================
-    // 4️⃣ Prepare payload
-    // ============================
-    const payload = {
-      routine: filteredRoutineData,
-    };
-    const payloadUpdate = {
-      routine: filteredRoutineData,
-      ID: formData.ERIDL,
-    };
 
     try {
+      // ============================
+      // 1️⃣ Basic validation
+      // ============================
+
+      if (
+        !Number(formData.SessionID) ||
+        !Number(formData.SubClassID) ||
+        !Number(formData.ExamID)
+      ) {
+        console.log("❌ Validation failed: SessionID/SubClassID/ExamID missing");
+
+        Swal.fire({
+          icon: "warning",
+          title: "ফর্ম অসম্পূর্ণ",
+          text: "Session, SubClass এবং Exam নির্বাচন করুন।",
+        });
+
+        return;
+      }
+
+
+      const totalDateCount = Array.from({ length: 14 }).filter((_, index) => {
+        return formData[`date_${index}`];
+      }).length;
+
+
+      // ============================
+      // 2️⃣ Build routine data
+      // ============================
+
+      const routineData = Array.from({ length: 14 }).map((_, index) => {
+        const startTimeRaw = formData[`startTime_${index}`] || "";
+        const endTimeRaw = formData[`endTime_${index}`] || "";
+
+        const row = {
+          SessionID: Number(formData.SessionID),
+          ExamID: Number(formData.ExamID),
+          SubClassID: Number(formData.SubClassID),
+
+          RoomNo: formData.RoomNo || "",
+          RoomName: formData.RoomName || "",
+
+          StartTime: startTimeRaw.replace(" AM", "").replace(" PM", ""),
+          EndTime: endTimeRaw.replace(" AM", "").replace(" PM", ""),
+
+          Date1: formData[`date_${index}`]
+            ? formData[`date_${index}`].replace(/\//g, "-")
+            : "",
+
+          Day1: formData[`day_${index}`] || "",
+
+          Time1: startTimeRaw.replace(" AM", "").replace(" PM", ""),
+
+          Sub1: formData[`subject_${index}`] || "",
+
+          TotalColumn: totalDateCount,
+        };
+
+
+
+        return row;
+      });
+
+
+
+      // ============================
+      // 3️⃣ Filter & validate rows
+      // ============================
+      const filteredRoutineData = [];
+
+      for (let item of routineData) {
+        const fields = [item.Date1, item.Day1, item.Time1, item.Sub1];
+
+        const isAnyFilled = fields.some((v) => v && v !== "");
+        const isAllFilled = fields.every((v) => v && v !== "");
+
+
+
+        if (!isAnyFilled) {
+
+          continue;
+        }
+
+        if (isAnyFilled && !isAllFilled) {
+
+
+          await Swal.fire({
+            icon: "warning",
+            title: "অসম্পূর্ণ রুটিন ডাটা",
+            text: "Date, Day, Time এবং Subject সবগুলো পূরণ করুন।",
+          });
+
+          return;
+        }
+
+        filteredRoutineData.push(item);
+      }
+
+
+
+      if (filteredRoutineData.length === 0) {
+
+
+        await Swal.fire({
+          icon: "warning",
+          title: "ফর্ম অসম্পূর্ণ",
+          text: "কমপক্ষে ১টি Routine Row পূরণ করুন।",
+        });
+
+        return;
+      }
+
+
+
+      // ============================
+      // 4️⃣ Prepare payload
+      // ============================
+      const payload = {
+        routine: filteredRoutineData,
+      };
+
+      const payloadUpdate = {
+        routine: filteredRoutineData,
+        ID: formData.ERIDL,
+      };
+
       let response;
 
       // ============================
@@ -690,36 +729,36 @@ const ExamRouting = ({ pageTitle }) => {
       // ============================
       if (payloadUpdate.ID) {
         response = await updateExamRoutine(payloadUpdate).unwrap();
-        console.log(payloadUpdate, 'payloadUpdate');
       } else {
         response = await postExamRoutine(payload).unwrap();
-        console.log(payload, 'payload');
       }
 
       await Swal.fire({
-        icon: 'success',
-        title: 'সফলভাবে সংরক্ষণ হয়েছে',
-        text: response?.message || 'Exam Routine সফলভাবে সংরক্ষিত হয়েছে।',
+        icon: "success",
+        title: "সফলভাবে সংরক্ষণ হয়েছে",
+        text:
+          response?.message ||
+          "Exam Routine সফলভাবে সংরক্ষিত হয়েছে।",
       });
-
-      // Optional: reset or refetch
-      // methods.reset();
-      // refetch();
     } catch (error) {
+      console.error("❌ CATCH BLOCK EXECUTED");
+      console.error("Full Error:", error);
+      console.error("Error Data:", error?.data);
+      console.error("Error Message:", error?.message);
+
       const errMsg =
         error?.data?.message ||
         error?.data?.error ||
-        'অজানা একটি ত্রুটি ঘটেছে।';
+        error?.message ||
+        "অজানা একটি ত্রুটি ঘটেছে।";
 
       await Swal.fire({
-        icon: 'error',
-        title: 'ত্রুটি ঘটেছে!',
+        icon: "error",
+        title: "ত্রুটি ঘটেছে!",
         text: errMsg,
       });
-
-      console.error('Exam Routine Error:', error);
     } finally {
-      isSubmittingRef.current = false; // ✅ শেষে unlock
+      isSubmittingRef.current = false;
     }
   };
 
@@ -759,83 +798,20 @@ const ExamRouting = ({ pageTitle }) => {
       render: (row) => <>{row?.SubClass}</>,
     },
 
-    {
-      title: translate('Subject-1'),
-      field: 'Subj1',
+    ...Array.from({ length: 14 }, (_, index) => ({
+      title: translate(`Subject-${index + 1}`),
+      field: `Subj${index + 1}`,
       hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj2',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj3',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj4',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj5',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj6',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj7',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj8',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj9',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj10',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj11',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj12',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj13',
-      hozAlign: 'center',
-    },
-    {
-      title: translate('Subject-1'),
-      field: 'Subj14',
-      hozAlign: 'center',
-    },
+    })),
   ];
+
+
 
   if (showStudentFeeGroup) {
     return <StudentFeeGroup onBack={setShowStudentFeeGroup} />;
   }
 
-  const dateOptions = [{ id: 1, name: 'Copy To All Box' }];
+  const dateOptions = [{ id: 1, name: '' }];
 
   const printData = [
     {
@@ -922,7 +898,7 @@ const ExamRouting = ({ pageTitle }) => {
 
         <FormProvider {...methods}>
           <form
-            className="w-full space-y-4 md:space-y-6"
+            className="w-full hidden lg:block space-y-4 md:space-y-6"
             onSubmit={handleSubmit(onSubmit)}
           >
             <input type="hidden" {...register('ID')} />
@@ -966,52 +942,94 @@ const ExamRouting = ({ pageTitle }) => {
             </div>
 
             {/* Date Checkbox */}
-            <div className="flex items-start w-full mb-4">
+
+
+            <div className="flex items-center gap-0 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-6">
+
               <ExamRoutingCheckbox
-                label="পরীক্ষার তারিখ"
+                label=""
                 options={dateOptions}
                 registerKey="copyToAll"
                 labelPosition="left"
               />
+              <label htmlFor="copyToAll" className="text-sm font-medium text-blue-700 cursor-pointer flex items-center gap-2">
+                পরীক্ষার তারিখ সব কলামে কপি করুন
+              </label>
+
             </div>
+            {/* 
+            <div className="flex items-start w-full mb-4">
+
+            </div> */}
 
             {/* Grid Sections */}
             <div className="space-y-4">
-              {/* Date Section */}
-              <div>
-                {/* <h3 className="text-base font-medium mb-2">
-                  {translate('তারিখ')}
-                </h3> */}
-                <div className="flex flex-wrap gap-2">
+
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg font-semibold uppercase tracking-widest text-black">সময়সূচি</span>
+                <div className="flex-1 h-px bg-gray-100 ml-2"></div>
+              </div>
+
+              <div className='rounded-[6px] border border-gray-400 border-b-0 overflow-hidden mb-6'>
+
+                <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900">সারি</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">১</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">২</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">৩</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">৪</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">৫</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">৬</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">৭</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">৮</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">৯</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">১০</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">১১</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">১২</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">১৩</div>
+                  <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">১৪</div>
+                  <div className="border-l border-gray-400"></div>
+                </div>
+
+
+
+                <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">{translate('Date')}</div>
+
+
                   {Array.from({ length: 14 }).map((_, index) => (
-                    <div key={`date-${index}`} className="w-full sm:w-24">
+                    <div key={`date-${index}`} className="border-r border-gray-400 text-center text-xs text-black bg-transparent hover:bg-blue-50 focus:bg-blue-50 focus:ring-inset focus:ring-1 focus:ring-blue-400 transition-colors">
                       <Input
                         {...register(`date_${index}`)}
-                        placeholder="date"
+                        placeholder={translate("Date")}
                         type="text"
                         onChange={(e) => handleDateInput(index, e.target.value)}
-                        className="w-full"
+                        className="w-full h-full px-1 py-2 focus:outline-0"
                       />
                     </div>
                   ))}
-                  <Button
-                    type="button"
-                    className="bg-red-500 hover:bg-red-600"
-                    onClick={clearDateFields}
-                  >
-                    Clear
-                  </Button>
-                </div>
-              </div>
 
-              {/* Day Section */}
-              <div>
-                <h3 className="text-base font-medium mb-2">
-                  {translate('বার :')}
-                </h3>
-                <div className="flex flex-wrap gap-2">
+
+
+                  <div className='p-1 text-center'>
+                    <Button
+                      type="button"
+                      className="bg-rose-600 hover:bg-red-100 border border-red-200 rounded-lg text-xs font-semibold px-2 py-1 transition-colors whitespace-nowrap"
+                      onClick={clearDateFields}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </div>
+
+
+
+                <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">বার</div>
+
+
                   {Array.from({ length: 14 }).map((_, index) => (
-                    <div key={`day-${index}`} className="w-full sm:w-24">
+                    <div key={`day-${index}`} className="border-r border-gray-400 text-center text-xs text-black bg-transparent hover:bg-blue-50 focus:bg-blue-50 focus:ring-inset focus:ring-1 focus:ring-blue-400 transition-colors">
                       <Input
                         key={`day-${index}`}
                         {...register(`day_${index}`)}
@@ -1021,135 +1039,442 @@ const ExamRouting = ({ pageTitle }) => {
                         onKeyDown={(e) =>
                           handleAutoConvertAndTab('day', index, e)
                         }
-                        className="w-full"
+                        className="w-full h-full px-1 py-2 focus:outline-0"
                       />
                     </div>
                   ))}
-                  <Button
-                    type="button"
-                    className="bg-red-500 hover:bg-red-600"
-                    onClick={clearDayFields}
-                  >
-                    Clear
-                  </Button>
+                  <div className='p-1 text-center'>
+                    <Button
+                      type="button"
+                      className="bg-rose-600 hover:bg-red-100 border border-red-200 rounded-lg text-xs font-semibold px-2 py-1 transition-colors whitespace-nowrap"
+                      onClick={clearDayFields}
+                    >
+                      Clear
+                    </Button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Start Time Section */}
-              <div>
-                <h3 className="text-base font-medium mb-2">
-                  {translate('শুরু সময় :')}
-                </h3>
-                <div className="flex flex-wrap gap-2">
+
+
+                {/* Start Time Section */}
+                <div
+                  className="grid grid-cols-16 bg-gray-50 border-b border-gray-400"
+                  style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}
+                >
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">
+                    {translate('শুরু সময়')}
+                  </div>
+
                   {Array.from({ length: 14 }).map((_, index) => (
-                    <div key={`startTime-${index}`} className="w-full sm:w-24">
+                    <div
+                      key={`startTime-${index}`}
+                      className="border-r border-gray-400 text-center text-xs text-black bg-transparent hover:bg-blue-50 focus:bg-blue-50 focus:ring-inset focus:ring-1 focus:ring-blue-400 transition-colors"
+                    >
                       <Input
-                        key={`startTime-${index}`}
                         {...register(`startTime_${index}`)}
                         placeholder="1-4 লিখুন"
                         type="text"
                         onChange={(e) => handleStartTimeInput(index, e)}
-                        onKeyDown={(e) =>
-                          handleAutoConvertAndTab('time', index, e)
-                        }
-                        className="w-full"
+                        onKeyDown={(e) => handleAutoConvertAndTab('time', index, e)}
+                        className="w-full h-full px-1 py-2 focus:outline-0 border-0 rounded-none"
                       />
                     </div>
                   ))}
-                  <Button
-                    type="button"
-                    className="bg-red-500 hover:bg-red-600"
-                    onClick={clearStartTimeFields}
-                  >
-                    Clear
-                  </Button>
+                  <div className='p-1 text-center'>
+                    <Button
+                      type="button"
+                      className="bg-rose-600 hover:bg-red-100 border border-red-200 rounded-lg text-xs font-semibold px-2 py-1 transition-colors whitespace-nowrap"
+                      onClick={clearStartTimeFields}
+                    >
+                      Clear
+                    </Button>
+                  </div>
                 </div>
-              </div>
 
-              {/* End Time Section */}
-              <div>
-                <h3 className="text-base font-medium mb-2">
-                  {translate('শেষ সময় :')}
-                </h3>
-                <div className="flex flex-wrap gap-2">
+                {/* End Time Section */}
+                <div
+                  className="grid grid-cols-16 bg-gray-50 border-b border-gray-400"
+                  style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}
+                >
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">
+                    {translate('শেষ সময়')}
+                  </div>
+
                   {Array.from({ length: 14 }).map((_, index) => (
-                    <div key={`endTime-${index}`} className="w-full sm:w-24">
+                    <div
+                      key={`endTime-${index}`}
+                      className="border-r border-gray-400 text-center text-xs text-black bg-transparent hover:bg-blue-50 focus:bg-blue-50 focus:ring-inset focus:ring-1 focus:ring-blue-400 transition-colors"
+                    >
                       <Input
-                        key={`endTime-${index}`}
                         {...register(`endTime_${index}`)}
                         placeholder="1-4 লিখুন"
                         type="text"
                         onChange={(e) => handleEndTimeInput(index, e)}
-                        onKeyDown={(e) =>
-                          handleAutoConvertAndTab('time', index, e)
-                        }
-                        className="w-full"
+                        onKeyDown={(e) => handleAutoConvertAndTab('time', index, e)}
+                        className="w-full h-full px-1 py-2 focus:outline-0 border-0 rounded-none"
                       />
                     </div>
                   ))}
-                  <Button
-                    type="button"
-                    className="bg-red-500 hover:bg-red-600"
-                    onClick={clearEndTimeFields}
-                  >
-                    Clear
-                  </Button>
+                  <div className='p-1 text-center'>
+                    <Button
+                      type="button"
+                      className="bg-rose-600 hover:bg-red-100 border border-red-200 rounded-lg text-xs font-semibold px-2 py-1 transition-colors whitespace-nowrap"
+                      onClick={clearEndTimeFields}
+                    >
+                      Clear
+                    </Button>
+                  </div>
                 </div>
+
               </div>
 
               {/* Select with Toggle */}
-              <div>
-                <h3 className="text-base font-medium mb-2">
-                  {translate('বিষয় :')}
-                </h3>
-                <div className="flex flex-wrap gap-2">
+
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg font-semibold  tracking-widest text-black">বিষয় (Subjects)</span>
+                <div className="flex-1 h-px bg-gray-100 ml-2"></div>
+              </div>
+
+
+
+
+              <div className='rounded-[6px] border border-gray-400 border-b-0 overflow-hidden mb-6'>
+
+                <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 ">সারি</div>
+                  {Array.from({ length: 14 }).map((_, index) => {
+                    const subjectValue = watch(`subject_${index}`);
+                    return (
+                      <div className="flex items-center justify-center gap-1 border-l border-gray-400">
+                        <input
+                          type="checkbox"
+                          checked={!visibility[index]}
+                          onChange={() => toggleVisibility(index)}
+                          className="cursor-pointer h-4 w-4"
+                        />
+                        <label
+                          className="text-sm cursor-pointer"
+                          onClick={() => toggleVisibility(index)}
+                        >
+                          {visibility[index] ? 'Hide' : 'Show'}
+                        </label>
+                      </div>
+                    )
+
+                  })}
+                  <div className="border-l border-gray-400 border-l border-gray-400"></div>
+                </div>
+
+
+
+                <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">বিষয়</div>
+
+
                   {Array.from({ length: 14 }).map((_, index) => {
                     const subjectValue = watch(`subject_${index}`);
 
                     return (
-                      <div key={`select-${index}`} className="w-full sm:w-24">
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center justify-end gap-1">
-                            <input
-                              type="checkbox"
-                              checked={!visibility[index]}
-                              onChange={() => toggleVisibility(index)}
-                              className="cursor-pointer h-4 w-4"
-                            />
-                            <label
-                              className="text-xs cursor-pointer"
-                              onClick={() => toggleVisibility(index)}
-                            >
-                              {visibility[index] ? 'Hide' : 'Show'}
-                            </label>
-                          </div>
-                          {visibility[index] && (
+                      <div key={`select-${index}`} className="border-r border-gray-200 text-xs text-gray-700 bg-transparent hover:bg-blue-50 focus:bg-blue-50 transition-colors w-full">
+                        {visibility[index] && (
+                          <select
+                            {...register(`subject_${index}`)}
+                            value={subjectValue || ''}
+                            onChange={(e) =>
+                              setValue(`subject_${index}`, e.target.value)
+                            }
+                            className="w-full px-1 py-2 focus:outline-none focus:ring-0 focus:ring-blue-500"
+                          >
+                            <option value="">Select Subject</option>
+                            {subjectsData?.data?.map((subject) => (
+                              <option
+                                key={subject.SubjectID}
+                                value={subject.SubjectID}
+                              >
+                                {subject.SubjectName}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+
+                      </div>
+                    );
+                  })}
+
+                </div>
+              </div>
+
+            </div>
+
+            {/* Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
+              <ViewPermission
+                permissionId={permissionsDataList.routine_with_signature}
+                permissionType="insert"
+                empty={true}
+              >
+                <Button type="submit" className="w-full sm:w-auto">
+                  {translate('Save')}
+                </Button>
+              </ViewPermission>
+              <Button
+                type="button"
+                onClick={() => methods.reset()}
+                className="w-full sm:w-auto bg-red-500 hover:bg-red-600 text-white"
+              >
+                {translate('Reset')}
+              </Button>
+              <div className="w-64">
+                <DefaultSelect
+                  label={translate('Report/Type')}
+                  labelPosition="left"
+                  options={printData ?? []}
+                  valueField="PrintID"
+                  nameField="PrintName"
+                  registerKey="PrintID"
+                />
+              </div>
+              <Button
+                type="button"
+                onClick={handlePrintView}
+                className="w-full sm:w-auto"
+              >
+                {translate('Print')}
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
+
+        <FormProvider  {...methods} className="">
+          <form
+            className="w-full block lg:hidden space-y-4 md:space-y-6"
+            onSubmit={handleSubmit(onSubmit)}
+          >
+            <input type="hidden" {...register('ID')} />
+
+            {/* Top Section - 4 responsive columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 my-3">
+              <DefaultSelect
+                label={translate('Session')}
+                options={sessionData ?? []}
+                valueField="SessionID"
+                nameField="SessionName"
+                registerKey="SessionID"
+              />
+              <DefaultSelect
+                label={translate('Exam Name')}
+                options={examNameData ?? []}
+                valueField="ExamID"
+                nameField="ExamName"
+                registerKey="ExamID"
+              />
+              <DefaultSelect
+                label={translate('Class/Jamaat')}
+                options={subClassListData ?? []}
+                valueField="SubClassID"
+                nameField="SubClass"
+                registerKey="SubClassID"
+              />
+
+              <div className="grid grid-cols-2 gap-3">
+                <DefaultInput
+                  registerKey="RoomNo"
+                  label={`${translate('Hall No')}`}
+                  className="w-full"
+                />
+                <DefaultInput
+                  registerKey="RoomName"
+                  label={`${translate('Hall Name')}`}
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            {/* Date Checkbox */}
+
+
+            <div className="flex items-center gap-0 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 mb-6">
+
+              <ExamRoutingCheckbox
+                label=""
+                options={dateOptions}
+                registerKey="copyToAll"
+                labelPosition="left"
+              />
+              <label htmlFor="copyToAll" className="text-sm font-medium text-blue-700 cursor-pointer flex items-center gap-2">
+                পরীক্ষার তারিখ সব কলামে কপি করুন
+              </label>
+
+            </div>
+            {/* 
+            <div className="flex items-start w-full mb-4">
+
+            </div> */}
+
+            {/* Grid Sections */}
+
+            <div className="block md:hidden space-y-3">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg font-semibold uppercase tracking-widest text-black">সময়সূচি</span>
+                <div className="flex-1 h-px bg-gray-100 ml-2"></div>
+              </div>
+
+              {Array.from({ length: 14 }).map((_, index) => {
+
+                const isOpen = !!openSlots[index]
+
+
+                return (
+                  <div key={`mobile-slot-${index}`} className="rounded-lg border border-gray-200 p-2 bg-white">
+                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+                      <span className="text-xxl font-semibold text-gray-800">পরীক্ষা {index + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => toggleSlot(index)}
+                        className="flex items-center justify-between px-1 py-1 bg-white hover:bg-gray-50 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-blue-700">
+                            {
+                              isOpen ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-up">
+                                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                  <path d="M6 15l6 -6l6 6" />
+                                </svg>
+                              ) : (
+                                <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-down">
+                                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                  <path d="M6 9l6 6l6 -6" />
+                                </svg>
+                              )
+                            }
+
+
+                          </span>
+
+                        </div>
+                      </button>
+                    </div>
+                    {isOpen && (
+                      <div className="space-y-3">
+                        <div>
+                          <label className="block text-xxl font-semibold uppercase tracking-wider text-black mb-1">
+                            তারিখ
+                          </label>
+                          <Input
+                            {...register(`date_${index}`)}
+                            placeholder={translate("Date")}
+                            type="text"
+                            onChange={(e) => handleDateInput(index, e.target.value)}
+                            className="w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-custom-focus active:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xxl font-semibold uppercase tracking-wider text-black mb-1">
+                            বার
+                          </label>
+                          <Input
+                            {...register(`day_${index}`)}
+                            placeholder="1-7 লিখুন"
+                            type="text"
+                            onChange={(e) => handleDayInput(index, e)}
+                            onKeyDown={(e) => handleAutoConvertAndTab('day', index, e)}
+                            className="w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-custom-focus active:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xxl font-semibold uppercase tracking-wider text-black mb-1">
+                            শুরু সময়
+                          </label>
+                          <Input
+                            {...register(`startTime_${index}`)}
+                            placeholder="1-4 লিখুন"
+                            type="text"
+                            onChange={(e) => handleStartTimeInput(index, e)}
+                            onKeyDown={(e) => handleAutoConvertAndTab('time', index, e)}
+                            className="w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-custom-focus active:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold uppercase tracking-wider text-xxl text-black mb-1">
+                            শেষ সময়
+                          </label>
+                          <Input
+                            {...register(`endTime_${index}`)}
+                            placeholder="1-4 লিখুন"
+                            type="text"
+                            onChange={(e) => handleEndTimeInput(index, e)}
+                            onKeyDown={(e) => handleAutoConvertAndTab('time', index, e)}
+                            className="w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-custom-focus active:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-semibold uppercase tracking-wider text-xxl text-black mb-1">
+                            বিষয়
+                          </label>
+                          {visibility[index] ? (
                             <select
                               {...register(`subject_${index}`)}
-                              value={subjectValue || ''}
-                              onChange={(e) =>
-                                setValue(`subject_${index}`, e.target.value)
-                              }
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              value={watch(`subject_${index}`) || ''}
+                              onChange={(e) => setValue(`subject_${index}`, e.target.value)}
+                              className="w-full h-10 border border-gray-200 rounded-lg px-3 text-sm text-gray-800 bg-white focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
                             >
                               <option value="">Select Subject</option>
                               {subjectsData?.data?.map((subject) => (
-                                <option
-                                  key={subject.SubjectID}
-                                  value={subject.SubjectID}
-                                >
+                                <option key={subject.SubjectID} value={subject.SubjectID}>
                                   {subject.SubjectName}
                                 </option>
                               ))}
                             </select>
+                          ) : (
+                            <div className="h-10 border border-dashed border-gray-200 rounded-lg flex items-center justify-center text-xs text-gray-400">
+                              Hidden
+                            </div>
                           )}
+                          <div className="flex items-center gap-2 mt-2">
+                            <input
+                              type="checkbox"
+                              id={`hide-mobile-${index}`}
+                              checked={!visibility[index]}
+                              onChange={() => toggleVisibility(index)}
+                              className="w-4 h-4 accent-blue-600 cursor-pointer"
+                            />
+                            <label
+                              htmlFor={`hide-mobile-${index}`}
+                              className="text-xs text-gray-500 cursor-pointer"
+                            >
+                              {visibility[index] ? 'Hide' : 'Show'}
+                            </label>
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end pt-1">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              clearDateFields(index)
+                              clearDayFields(index)
+                              clearStartTimeFields(index)
+                              clearEndTimeFields(index)
+                            }}
+                            className="text-xs font-semibold text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 hover:bg-red-100 transition-colors"
+                          >
+                            Clear
+                          </button>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
+                    )}
+
+                  </div>
+                )
+              })}
             </div>
+
+
 
             {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4">

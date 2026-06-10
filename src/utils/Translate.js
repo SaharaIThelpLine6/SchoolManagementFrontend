@@ -789,6 +789,7 @@ const useTranslate = () => {
     "Admission Form": "ভর্তি ফরম",
     "Admission Form Print": "ভর্তি ফরম প্রিন্ট",
     "Collected By": "গ্রহণকারী নাম",
+    "Date": "তারিখ",
   };
 
   return (key) =>

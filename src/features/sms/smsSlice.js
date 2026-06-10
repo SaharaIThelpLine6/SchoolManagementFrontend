@@ -14,7 +14,7 @@ export const smsSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Template"],
+  tagTypes: ["Template", "smsBundles"],
   endpoints: (builder) => ({
     postSMSSend: builder.mutation({
       query: (data) => ({
@@ -31,7 +31,18 @@ export const smsSlice = createApi({
       query: () => "check_balance",
       providesTags: ["Template"],
     }),
+    getSMSBundle: builder.query({
+      query: () => "bundles",
+      providesTags: ["smsBundles"],
+    }),
+    getSMSpurchaseLink: builder.mutation({
+      query: (data) => ({
+        url: `purchase-link`,
+        method: "POST",
+        body: data,
+      }),
+    }),
   }),
 });
 
-export const { usePostSMSSendMutation, useGetSMSTemplatesQuery, useGetCheckBalanceQuery } = smsSlice;
+export const { usePostSMSSendMutation, useGetSMSTemplatesQuery, useGetCheckBalanceQuery, useGetSMSBundleQuery, useGetSMSpurchaseLinkMutation } = smsSlice;

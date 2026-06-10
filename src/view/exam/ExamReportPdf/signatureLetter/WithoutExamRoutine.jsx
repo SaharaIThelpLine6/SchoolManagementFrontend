@@ -1,4 +1,9 @@
-const WithoutExamRoutine = () => {
+import bnBijoy2Unicode from "../../../../utils/conveter";
+
+const WithoutExamRoutine = ({ reportData, queryParams }) => {
+
+
+
   return (
     <div className=" mx-auto p-6 bg-white text-black text-[14px] font-[SolaimanLipi]">
       {/* Title */}
@@ -11,7 +16,7 @@ const WithoutExamRoutine = () => {
       {/* Class info */}
       <div className="mb-2">
         <p className="font-semibold text-end">
-           শিক্ষাবর্ষ:____________
+          শিক্ষাবর্ষ:____________
         </p>
       </div>
       {/* Signature Section */}
@@ -51,25 +56,40 @@ const WithoutExamRoutine = () => {
             <td className="border border-black"></td>
             <td className="border border-black"></td>
           </tr>
-          <tr className="border border-black">
-            <td className="border border-black w-[20%]">সময় -------&gt;&gt;</td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-          </tr>
         </tbody>
       </table>
       {/* Signature Section */}
-      <table className="w-full border border-black border-collapse mt-2 text-center">
+
+
+      {reportData?.studentList?.length > 0 && (
+        <table className="w-full border border-black border-collapse mt-2 text-center">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="border border-black w-[6%] bg-white font-bold p-1 text-[18px]">ক্রমিক</th>
+              <th className="border border-black w-[10%] bg-white font-bold p-1 text-[18px]">আইডি</th>
+              <th className="border border-black w-[25%] bg-white font-bold p-1 text-[18px]">পরীক্ষার্থীর নাম</th>
+              {reportData.routine.map((item, i) => (<th key={i} className="border border-black p-1">{item?.subject.SubjectName}</th>))}
+            </tr>
+          </thead>
+          <tbody>
+            {reportData.studentList.map((student, index) => (<tr key={student.ID}>
+              <td className="border border-black bg-white font-bold p-1 text-[16px]">
+                {bnBijoy2Unicode(String(index + 1))}
+              </td>
+              <td className="border border-black bg-white font-bold p-1 text-[16px]">
+                {bnBijoy2Unicode(String(student.User?.UserCode))}
+              </td>
+              <td className="border border-black text-left bg-white p-2 text-[16px]">
+                {student.User?.UserName}
+              </td>
+              {reportData.routine.map((_, i) => (<th key={i} className="border border-black"></th>))} </tr>))}
+          </tbody>
+        </table>
+      )}
+
+
+
+      {/* <table className="w-full border border-black border-collapse mt-2 text-center">
         <thead>
           <tr className="bg-gray-50">
             <th className="border border-black w-[6%] ">ক্রমিক</th>
@@ -110,7 +130,7 @@ const WithoutExamRoutine = () => {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table> */}
       {/* Signature Section */}
       <table className="w-full border border-black border-collapse mt-2 text-center">
         <tbody>
