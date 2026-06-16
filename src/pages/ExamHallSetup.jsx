@@ -11,6 +11,7 @@ import useTranslate from '../utils/Translate';
 import Swal from 'sweetalert2';
 import bnBijoy2Unicode from '../utils/conveter';
 import { useHallEntryMutation } from '../features/examhall/examHallQuerySlice';
+import { useNavigate } from 'react-router-dom';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -162,6 +163,7 @@ const ColumnCard = ({ index, onRemove, label }) => {
 
 const ExamHallSetup = () => {
     const translate = useTranslate();
+    const navigate = useNavigate();
 
     const methods = useForm({
         defaultValues: {
@@ -280,9 +282,9 @@ const ExamHallSetup = () => {
                 <button
                     type="button"
                     onClick={() => navigate('/exam/exam-hallist')}
-                    className=" h-10 px-5 rounded-lg bg-gray-900 text-white text-sm"
+                    className="h-10 px-4 rounded-lg border border-gray-200 bg-white text-sm text-gray-700"
                 >
-                    {translate('Back to hall list')}
+                    {translate('Back')}
                 </button>
             </div>
 
