@@ -133,7 +133,7 @@ const DefaultModal = () => {
                 {modalType === 'FEE_COLLECTION' && (
                   <FeeCollectionForm userId={id} />
                 )}
-                {modalType === 'PAYMENT' && <PaymentModal />}
+                {modalType === 'PAYMENT' && <PaymentModal serviceId={id} />}
                 {modalType === 'ADD_TEACHER' && <AddTeacherForm userId={id} />}
                 {modalType === 'SESSION_CREATE_FORM' && (
                   <SessionCreateUpdateModal />

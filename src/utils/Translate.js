@@ -790,6 +790,14 @@ const useTranslate = () => {
     "Admission Form Print": "ভর্তি ফরম প্রিন্ট",
     "Collected By": "গ্রহণকারী নাম",
     "Date": "তারিখ",
+    "Hall information": "হলের / কক্ষ তথ্য",
+    "Hall Name": "হলের / কক্ষ নাম",
+    "Basic details about the exam hall.": "পরীক্ষার হলের / কক্ষের বিবরণ।",
+    "Columns & rows": "কলাম এবং রো",
+    "Add each column, its rows, and seat count per bench.": "প্রতিটি কলাম, তার সারি এবং বেঞ্চ প্রতি আসন সংখ্যা যোগ করুন।",
+    "Add column": "কলাম যোগ করুন",
+    "Add exam hall": "পরীক্ষা কক্ষের তথ্য যোগ করুন",
+    "Set Exam Room": "পরীক্ষার কক্ষ সেট করুন",
   };
 
   return (key) =>

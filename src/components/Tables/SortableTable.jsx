@@ -28,7 +28,7 @@ const SortableTable = ({
   };
 
   // ফিল্টারিং লজিক (অপরিবর্তিত)
-  const filteredData = data.filter((row) =>
+  const filteredData = data && data.filter((row) =>
     columns.every((column) => {
       // console.log(column.field);
       // console.log(!filters[column.field] && filters[column.field] !== 0);
@@ -168,7 +168,7 @@ const SortableTable = ({
           )}
         </thead>
         <tbody>
-          {filteredData.map((row, rowIndex) => (
+          {filteredData && filteredData.map((row, rowIndex) => (
             <tr
               key={rowIndex}
               className="odd:bg-neutral-primary even:bg-neutral-secondary-soft border-b border-gray-200"

@@ -10,9 +10,67 @@ import {
 import useTranslate from '../utils/Translate';
 import Swal from 'sweetalert2';
 import bnBijoy2Unicode from '../utils/conveter';
-import { useHallEntryMutation } from '../features/examhall/examHallQuerySlice';
+import { useGetExamHallDetailsQuery, useGetExamHallListQuery, useHallEntryMutation, useHallUpdateMutation } from '../features/examhall/examHallQuerySlice';
+import { useEffect, useMemo } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
-// ─── helpers ─────────────────────────────────────────────────────────────────
+const normalizeColumns = (columns) => {
+    if (Array.isArray(columns)) return columns;
+
+    if (typeof columns === 'string') {
+        try {
+            const parsed = JSON.parse(columns);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch {
+            return [];
+        }
+    }
+
+    return [];
+};
+
+
+/*
+const extractHallColumns = (hall) => {
+    if (!hall) return [];
+
+    const candidateFields = [
+        hall.columns,
+        hall.Columns,
+        hall.column,
+        hall.Column,
+        hall.layout,
+        hall.Layout,
+        hall.seatLayout,
+        hall.SeatLayout,
+        hall.hallDetails,
+        hall.HallDetails,
+        hall.hall_details,
+        hall.Hall_Details,
+        hall.details,
+        hall.Details,
+    ];
+
+    for (const candidate of candidateFields) {
+        const normalized = normalizeColumns(candidate);
+        if (normalized.length > 0) return normalized;
+    }
+
+    return [];
+}; */
+
+
+const extractHallColumns = (hall) => {
+    const columns = hall?.columns || hall?.Columns || [];
+
+    return columns.map((column) => ({
+        label: column.label || column.Label || '',
+        rows: (column.rows || []).map((row) => ({
+            label: row.label || row.RowLabel || '',
+            seats: row.seats || row.Seats || 0,
+        })),
+    }));
+};
 
 const createColumn = (index) => ({
     label: `কলাম ${bnBijoy2Unicode(String(index + 1))}`,
@@ -32,8 +90,6 @@ const getTotalSeats = (columns = []) =>
 
 const getTotalRows = (columns = []) =>
     columns.reduce((sum, col) => sum + (col?.rows?.length || 0), 0);
-
-// ─── ColumnCard ───────────────────────────────────────────────────────────────
 
 const ColumnCard = ({ index, onRemove, label }) => {
     const { control, setValue } = useFormContext();
@@ -74,7 +130,6 @@ const ColumnCard = ({ index, onRemove, label }) => {
 
     return (
         <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-            {/* column header */}
             <div className="flex items-center gap-2.5 mb-3">
                 <div className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-xs font-medium text-gray-700 shrink-0">
                     {index + 1}
@@ -95,7 +150,6 @@ const ColumnCard = ({ index, onRemove, label }) => {
                 </button>
             </div>
 
-            {/* rows */}
             <p className="text-xs text-gray-400 mb-2">
                 Rows — {rows.length} row{rows.length !== 1 ? 's' : ''}
             </p>
@@ -158,13 +212,15 @@ const ColumnCard = ({ index, onRemove, label }) => {
     );
 };
 
-// ─── ExamHallSetup ────────────────────────────────────────────────────────────
-
-const ExamHallSetup = () => {
+const ExamHallEdit = () => {
     const translate = useTranslate();
+    const navigate = useNavigate();
+    const { hallId } = useParams();
+    const location = useLocation();
 
     const methods = useForm({
         defaultValues: {
+            HallID: '',
             HallName: '',
             columns: [],
         },
@@ -172,16 +228,39 @@ const ExamHallSetup = () => {
 
     const { handleSubmit, control, reset } = methods;
 
-    const [
-        hallEntry,
-        { isLoading, isError, isSuccess, data: newApplicationResponse },
-    ] = useHallEntryMutation()
+    const [hallEntry, { isLoading }] = useHallUpdateMutation();
+    const { data: hallDetails, isLoading: isHallListLoading } = useGetExamHallDetailsQuery(hallId);
+
+
 
     const {
         fields: columnFields,
         append: appendColumn,
         remove: removeColumn,
+        replace,
     } = useFieldArray({ control, name: 'columns' });
+
+    const selectedHall = useMemo(() => {
+        const stateHall = location.state?.hall;
+        if (stateHall && String(stateHall.HallID) === String(hallId)) {
+            return stateHall;
+        }
+
+        return hallDetails?.find((hall) => String(hall.HallID) === String(hallId));
+    }, [hallId, hallDetails, location.state]);
+
+    useEffect(() => {
+        if (!selectedHall) return;
+
+        const nextColumns = extractHallColumns(selectedHall);
+
+        reset({
+            HallID: selectedHall.HallID ?? hallId ?? '',
+            HallName: selectedHall.HallName ?? '',
+            columns: nextColumns,
+        });
+        replace(nextColumns);
+    }, [hallId, replace, reset, selectedHall]);
 
     const columns = useWatch({ control, name: 'columns' }) || [];
 
@@ -198,44 +277,35 @@ const ExamHallSetup = () => {
             return;
         }
 
-
-        console.log(data);
-
-
-
-        // Show loading indicator
         Swal.fire({
             title: translate('Saving...'),
-            text: translate('Please wait while we save the hall'),
+            text: translate('Please wait while we update the hall'),
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading();
-            }
+            },
         });
 
         try {
             const totalSeats = getTotalSeats(data.columns);
-            const response = await hallEntry(data).unwrap();
-            console.log(response);
-            
-            // Close loading and show success
-            Swal.fire({
+            const payload = {
+                ...data,
+                HallID: data.HallID || hallId,
+            };
+
+            await hallEntry(payload).unwrap();
+
+            await Swal.fire({
                 icon: 'success',
-                title: translate('Hall saved successfully'),
+                title: translate('Hall updated successfully'),
                 html: `<b>${data.HallName}</b><br/>
                ${data.columns.length} columns · ${getTotalRows(data.columns)} rows · ${totalSeats} seats`,
                 confirmButtonText: 'OK',
                 confirmButtonColor: '#3085d6',
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    reset({ HallName: '', columns: [] });
-                }
             });
 
+            navigate('/exam/exam-hallist');
         } catch (err) {
-            console.error('Error submitting data:', err);
-
-            // Handle different error types
             let errorTitle = translate('Error');
             let errorContent = '';
 
@@ -252,10 +322,9 @@ const ExamHallSetup = () => {
                 errorTitle = translate('Server Error');
                 errorContent = translate('Something went wrong on the server');
             } else {
-                errorContent = err.data?.message || err.message || translate('Failed to save hall');
+                errorContent = err.data?.message || err.message || translate('Failed to update hall');
             }
 
-            // Show error popup
             await Swal.fire({
                 icon: 'error',
                 title: errorTitle,
@@ -264,25 +333,47 @@ const ExamHallSetup = () => {
                 confirmButtonColor: '#d33',
             });
         }
-
-
-        if (result.isConfirmed) {
-            reset({ HallName: '', columns: [] });
-        }
     };
+
+    if (!selectedHall && !isHallListLoading) {
+        return (
+            <div className="p-7 font-SolaimanLipi">
+                <div className="bg-white border border-gray-200 rounded-xl p-6 text-center">
+                    <p className="text-lg font-medium text-gray-900">
+                        {translate('Hall not found')}
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                        {translate('The selected hall could not be loaded for editing.')}
+                    </p>
+                    <button
+                        type="button"
+                        onClick={() => navigate('/exam/exam-hallist')}
+                        className="mt-4 h-10 px-5 rounded-lg bg-gray-900 text-white text-sm"
+                    >
+                        {translate('Back to hall list')}
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="p-7 font-SolaimanLipi">
-            <div className="mb-6 flex item-start justify-between">
-                <h1 className="text-xl font-medium text-gray-900">{translate('Add exam hall')}</h1>
-           
-
+            <div className="mb-6 flex items-start justify-between gap-4">
+                <div>
+                    <h1 className="text-xl font-medium text-gray-900">
+                        {translate('Edit exam hall')}
+                    </h1>
+                    <p className="text-sm text-gray-500 mt-1">
+                        {translate('Update the hall name, columns, row labels, and seat counts.')}
+                    </p>
+                </div>
                 <button
                     type="button"
                     onClick={() => navigate('/exam/exam-hallist')}
-                    className=" h-10 px-5 rounded-lg bg-gray-900 text-white text-sm"
+                    className="h-10 px-4 rounded-lg border border-gray-200 bg-white text-sm text-gray-700"
                 >
-                    {translate('Back to hall list')}
+                    {translate('Back')}
                 </button>
             </div>
 
@@ -291,7 +382,6 @@ const ExamHallSetup = () => {
                     onSubmit={handleSubmit(onSubmit)}
                     className="pt-[100px] lg:pt-0 lg:mt-5 lg:ml-5 mb-20"
                 >
-                    {/* hall name */}
                     <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
                         <DefaultInput
                             label="Hall Name"
@@ -301,7 +391,6 @@ const ExamHallSetup = () => {
                         />
                     </div>
 
-                    {/* columns section */}
                     <div className="bg-white border border-gray-200 rounded-xl p-5">
                         <div className="flex items-center justify-between mb-4">
                             <div>
@@ -338,7 +427,6 @@ const ExamHallSetup = () => {
                                     ))}
                                 </div>
 
-                                {/* stats bar */}
                                 <div className="grid grid-cols-3 gap-2.5 mt-4">
                                     <div className="bg-gray-50 rounded-xl p-3 text-center">
                                         <p className="text-xs text-gray-400 mb-0.5">{translate('Columns')}</p>
@@ -360,9 +448,10 @@ const ExamHallSetup = () => {
                     <div className="flex justify-end mt-5">
                         <button
                             type="submit"
-                            className="flex items-center gap-2 h-10 px-6 text-sm rounded-lg bg-gray-900 text-white cursor-pointer hover:opacity-85"
+                            disabled={isLoading}
+                            className="flex items-center gap-2 h-10 px-6 text-sm rounded-lg bg-gray-900 text-white cursor-pointer hover:opacity-85 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            <IconCheck size={15} /> {translate('Save hall')}
+                            <IconCheck size={15} /> {translate('Update hall')}
                         </button>
                     </div>
                 </form>
@@ -371,4 +460,4 @@ const ExamHallSetup = () => {
     );
 };
 
-export default ExamHallSetup;
+export default ExamHallEdit;
