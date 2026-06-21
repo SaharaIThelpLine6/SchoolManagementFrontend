@@ -26,6 +26,7 @@ export const feeCollectionSlice = createApi({
     'FeeLand',
     'SubGeneralLedger',
     'StudentFee',
+    'MonthAttendance',
   ],
   endpoints: (builder) => ({
     getFees: builder.query({
@@ -47,8 +48,7 @@ export const feeCollectionSlice = createApi({
     }),
     getDueFee: builder.query({
       query: ({ sessionID, classID, SFGNID, AdmissionID, monthID }) =>
-        `view_student_due_fee/${sessionID}/${classID}/${SFGNID}/${AdmissionID}/${
-          monthID ? monthID : 0
+        `view_student_due_fee/${sessionID}/${classID}/${SFGNID}/${AdmissionID}/${monthID ? monthID : 0
         }`,
     }),
     getFeeById: builder.query({
@@ -325,6 +325,23 @@ export const feeCollectionSlice = createApi({
       }),
       invalidatesTags: ['StudentFeeGroups'],
     }),
+    updateMonthlyAttendanceLeft: builder.mutation({
+      query: (data) => ({
+        url: 'update-monthly-attendance-left',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['MonthAttendance'],
+
+    }),
+    updateMonthlyAttendanceRight: builder.mutation({
+      query: (data) => ({
+        url: 'update-monthly-attendance-right',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['MonthAttendance'],
+    }),
 
     updateStudentFeeGroup: builder.mutation({
       query: (data) => ({
@@ -404,6 +421,32 @@ export const feeCollectionSlice = createApi({
         'StudentFee',
         'SelectedStudentPerFee',
         'StudentFeeSettings',
+      ],
+
+    }),
+    getStudentFeeLandFilter: builder.query({
+      query: ({ ClassID, SessionID }) => ({
+        url: `student_fee_land_filter`,
+        params: {
+          ClassID,
+          SessionID,
+        },
+      }),
+      providesTags: [
+        'MonthAttendance'
+      ],
+    }),
+    getStudentFeeLandSingleFilter: builder.query({
+      query: ({ ClassID, SessionID, UserCode }) => ({
+        url: `student_fee_land_single_filter`,
+        params: {
+          ClassID,
+          SessionID,
+          UserCode,
+        },
+      }),
+      providesTags: [
+        'MonthAttendance'
       ],
     }),
     getStudentCompleteFeeFilter: builder.query({
@@ -597,4 +640,8 @@ export const {
   useGetStudentFeeDueQuery,
 
   useGetUserTransactionFilterQuery,
+  useGetStudentFeeLandFilterQuery,
+  useGetStudentFeeLandSingleFilterQuery,
+  useUpdateMonthlyAttendanceLeftMutation,
+  useUpdateMonthlyAttendanceRightMutation
 } = feeCollectionSlice;
