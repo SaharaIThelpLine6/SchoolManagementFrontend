@@ -38,6 +38,7 @@ import { userPanelRegistrationUser } from "../features/userPanel/userRegistratio
 import { userReportsSlice } from "../features/userReports/userReportsSlice";
 import { userTypeSlice } from "../features/userType/userTypeSlice";
 import { onlineDonationSlice } from "../features/userPanel/onlineDonation/onlineDonationSlice";
+import { examHallSlice } from "../features/examhall/examHallQuerySlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -80,6 +81,7 @@ const store = configureStore({
     [talimatQuerySlice.reducerPath]: talimatQuerySlice.reducer,
     [helpQuerySlice.reducerPath]: helpQuerySlice.reducer,
     [onlineDonationSlice.reducerPath]: onlineDonationSlice.reducer,
+    [examHallSlice.reducerPath]: examHallSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -108,7 +110,8 @@ const store = configureStore({
       .concat(panelNotificationQuerySlice.middleware)
       .concat(talimatQuerySlice.middleware)
       .concat(helpQuerySlice.middleware)
-      .concat(onlineDonationSlice.middleware),
+      .concat(onlineDonationSlice.middleware)
+      .concat(examHallSlice.middleware),
 });
 
 export default store;

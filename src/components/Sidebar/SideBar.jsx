@@ -159,6 +159,9 @@ const SideBar = () => {
             if (subItem.name === 'Exam Routing Create') {
               return hasPermission(permissionsDataList.routine_with_signature);
             }
+            if (subItem.name === 'Setup Exam Room') {
+              return hasPermission(permissionsDataList.routine_with_signature);
+            }
 
             /**
              * Main Route

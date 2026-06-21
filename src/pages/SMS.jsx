@@ -80,12 +80,7 @@ const SMS = ({ pageTitle }) => {
 
   const handleSMSBuyOpenModal = useCallback(() => {
     // showModal(translate('SMS Buy'), 'SMS_BUY');
-    Swal.fire({
-      title: translate("SMS Buy"),
-      text: "এসএমএস ক্রয় করতে অনুগ্রহ করে এই নাম্বারে যোগাযোগ করুন: 01822930055",
-      icon: "info",
-      confirmButtonText: "ঠিক আছে"
-    });
+   showModal("Payment", "PAYMENT", 3);
   }, [translate]);
 
   const handleSuccessAndErrorOpenModal = useCallback(() => {

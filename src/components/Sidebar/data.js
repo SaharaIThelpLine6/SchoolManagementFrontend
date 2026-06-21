@@ -269,6 +269,11 @@ export const menuData = [
         name: 'Exam Report',
         route: '/exam/report',
       },
+      {
+        id: '11',
+        name: 'Set Exam Room',
+        route: '/exam/exam-hallist',
+      },
     ],
   },
   {

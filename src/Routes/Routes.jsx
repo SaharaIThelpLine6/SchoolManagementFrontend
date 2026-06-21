@@ -141,7 +141,9 @@ import Donation from '../pages/public/Donation';
 import OnlineDonationInvoice from '../view/payment/payment-history/OnlineDonationInvoice';
 import DonationHomePage from '../pages/frontsite/DonationHomePage';
 import HomePage from '../pages/HomePage';
+import ExamHallEdit from '../pages/ExamHallEdit';
 import ExamHallSetup from '../pages/ExamHallSetup';
+import ExamHallList from '../pages/ExamHallList';
 
 const Router = createBrowserRouter([
   {
@@ -567,12 +569,32 @@ const Router = createBrowserRouter([
                 ),
               },
               {
+                path: 'exam-hallist',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.exam_fee_setting}
+                  >
+                    <ExamHallList pageTitle="Exam Fee Determine" />
+                  </RequirePermission>
+                ),
+              },
+              {
                 path: 'exam-hallsetup',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.exam_fee_setting}
                   >
                     <ExamHallSetup pageTitle="Exam Fee Determine" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'exam-halledit/:hallId',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.exam_fee_setting}
+                  >
+                    <ExamHallEdit pageTitle="Exam Fee Determine" />
                   </RequirePermission>
                 ),
               },

@@ -493,6 +493,8 @@ const ExamReport = ({ pageTitle }) => {
           Number(languageID) === 1 &&
           Number(selectedPdfID) === 4 && <BanglaNumberStudentWithOutNameA5 />} */}
 
+
+          {/*  */}
         {Number(selectedReportID) === 4 &&
           Number(languageID) === 2 &&
           Number(selectedPdfID) === 1 && <ArobicNameWithTwoColumn reportData={data} queryParams={queryParams} />}

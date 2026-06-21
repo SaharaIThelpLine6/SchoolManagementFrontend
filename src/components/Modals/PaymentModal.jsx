@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   useCreatePaymentRequestMutation,
@@ -54,8 +54,8 @@ const SERVICES = [
   {
     id: 1,
     key: 'renewal',
-    label: 'সফটওয়্যার রিনিউ',
-    sublabel: 'Software renewal',
+    label: 'সার্ভার রিনিউ',
+    sublabel: 'Server renewal',
     icon: '/images/renewal.png',
     color: 'green',
   },
@@ -81,6 +81,7 @@ const YEARS = [
   { id: 1, name: '১ বছর' },
   { id: 2, name: '২ বছর' },
   { id: 3, name: '৩ বছর' },
+  { id: 4, name: '৪ বছর' },
 ];
 
 const QUOTA = [
@@ -157,7 +158,7 @@ function StepDots({ current, total }) {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-const PaymentModal = () => {
+const PaymentModal = ({serviceId}) => {
   const { user } = useSelector((state) => state.auth);
   const { data: userPayInfo } = useGetUserInfoQuery();
   const [createPaymentRequest, { isLoading }] = useCreatePaymentRequestMutation();
@@ -182,12 +183,25 @@ const PaymentModal = () => {
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
-  function pickService(svc) {
-    setService(svc);
-    setSize(null);
-    setStep(1);
-  }
+  // function pickService(svc) {
+  //   setService(svc);
+  //   setSize(null);
+  //   setStep(1);
+  // }
+  const pickService = useCallback((svc) => {
+      setService(svc);
+      setSize(null);
+      setStep(1);
+  }, []);
 
+
+
+  useEffect(() => {
+    if (serviceId === 3) {
+      const smsSvc = SERVICES.find((s) => s.id === 3);
+      if (smsSvc) pickService(smsSvc);
+    }
+  }, [serviceId, pickService]);
   function pickSize(item) {
     setSize(item);
   }
@@ -356,7 +370,7 @@ const PaymentModal = () => {
                     </div>
                     {service.id == 3 ? (
                       <div className={`mt-1 space-y-0.5 text-[15px] font-bold ${selected ? 'text-blue-600' : 'text-gray-500'}`}>
-                        <div>Qty: {bundleQty.toLocaleString()}</div>
+                        <div>Qty: {bundleQty}</div>
                       </div>
                     ) : null}
                   </button>
