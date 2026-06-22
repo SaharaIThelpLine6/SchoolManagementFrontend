@@ -23,6 +23,7 @@ import { useGetInstitutionInfoQuery } from '../features/settings/settingsQuerySl
 import StudentIdCardGenerate from './StudentIdCardGenerate';
 import { ResizableBox } from "react-resizable";
 import { Buffer } from 'buffer';
+import StudentIdCardGeneratePos from './StudentIdCardGeneratePos';
 const PAGE_SIZE = 10;
 
 const StudentIdCardPrint = ({ pageTitle }) => {
@@ -165,18 +166,55 @@ const StudentIdCardPrint = ({ pageTitle }) => {
         newRow[`schooladdress_fontside`] = SchoolAddressSize
         newRow[`SignaturePrincipal`] = institutionInfo?.SignaturePrincipal
         newRow[`PrincipalName`] = institutionInfo?.PrincipalName
-       
+
 
 
         return newRow;
       });
       console.log(updatedSelectedRows);
-      
+
       dispatch(setPrintableStudentList(updatedSelectedRows));
       // showModal('', 'STUDENT_ID_CARD', checkboxState);
+      // setTimeout(() => {
+      //   window.print()
+      // }, 300)
+
+
+      // hideModal();
+
+      // Inject ZC300-specific print style
+      const style = document.createElement('style');
+      style.id = 'zc300-print-style';
+      style.innerHTML = `
+        @media print {
+          @page {
+            size: 54mm 86mm;
+            margin: 0px;
+          }
+          .print-id-card-wrapper {
+            display: block !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+          }
+          .print-id-card {
+            width: 53.5mm !important;
+            height: 86mm !important;
+            overflow: hidden;
+            page-break-after: always;
+            
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
       setTimeout(() => {
-        window.print()
-      }, 300)
+        window.print();
+        // Remove after print dialog closes
+        const el = document.getElementById('zc300-print-style');
+        if (el) el.remove();
+      }, 300);
+
 
 
     } catch (error) {
@@ -326,7 +364,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
             <button
               key={layout.id}
               onClick={() => handleLayoutSelect(layout.id)}
-              style={{boxShadow: "rgb(0 0 0 / 37%) 0px 0px 14px -2px"}}
+              style={{ boxShadow: "rgb(0 0 0 / 37%) 0px 0px 14px -2px" }}
               className={`border rounded-[10px] hidden_in_print mx-2 ${selectedLayout === layout.id ? "border-blue-500" : ""
                 }`}
             >
@@ -417,7 +455,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                   <img src="/student_id_card_bottom.jpeg" alt="card footer" className='h-[15px] w-full' />
                 </div>
               )}
-              
+
 
               {layout.id == 2 && (
                 <div className='w-[250px] mb-[1px] rounded-[10px] relative print-id-card'>
@@ -427,7 +465,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                   <div className="absolute top-[5px]  w-full px-[10px]">
 
                     <div className='h-[80px]'>
-                   
+
                       <h2 className="group text-center text-[18px] text-white font-bold truncate">
                         <textarea
                           ref={textareaRef}
@@ -499,10 +537,10 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                       </div>
                     </div>
                     <div className="w-[100px] h-[60px] absolute -bottom-[40px] right-1/2 transform translate-x-1/2">
-                        <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
+                      <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
 
-                        <p className='text-white'> প্রিন্সিপাল স্বাক্ষর </p>
-                      </div>
+                      <p className='text-white'> প্রিন্সিপাল স্বাক্ষর </p>
+                    </div>
                   </div>
                 </div>
               )}
@@ -586,22 +624,22 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                       </div>
                     </div>
                     <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
-                        <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
+                      <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
 
-                        <p> প্রিন্সিপাল স্বাক্ষর </p>
-                      </div>
+                      <p> প্রিন্সিপাল স্বাক্ষর </p>
+                    </div>
                   </div>
                 </div>
               )}
               {layout.id == 4 && (
                 <div className='w-[250px] mb-[1px] relative print-id-card'>
-                    <div className="overflow-hidden h-full w-full rounded-[10px]">
+                  <div className="overflow-hidden h-full w-full rounded-[10px]">
                     <img src={`${layout.image}`} alt="card header" className='h-full w-full' />
                   </div>
                   <div className="absolute top-[5px]  w-full px-[10px]">
 
                     <div className='h-[80px]'>
-                  
+
                       <h2 className="group text-center text-[18px] text-white font-bold truncate">
                         <textarea
                           ref={textareaRef}
@@ -672,24 +710,24 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                         })}
                       </div>
                     </div>
-                    
-                      <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
-                        <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
 
-                        <p> প্রিন্সিপাল স্বাক্ষর </p>
-                      </div>
+                    <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
+                      <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
+
+                      <p> প্রিন্সিপাল স্বাক্ষর </p>
+                    </div>
                   </div>
                 </div>
               )}
-               {layout.id == 5 && (
+              {layout.id == 5 && (
                 <div className='w-[250px] mb-[1px] relative print-id-card'>
-                    <div className="overflow-hidden h-full w-full rounded-[10px]">
+                  <div className="overflow-hidden h-full w-full rounded-[10px]">
                     <img src={`${layout.image}`} alt="card header" className='h-full w-full' />
                   </div>
                   <div className="absolute top-[5px]  w-full px-[10px]">
 
                     <div className='h-[80px]'>
-                  
+
                       <h2 className="group text-center text-[18px] text-white font-bold truncate">
                         <textarea
                           ref={textareaRef}
@@ -760,24 +798,24 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                         })}
                       </div>
                     </div>
-                    
-                      <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
-                        <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
 
-                        <p> প্রিন্সিপাল স্বাক্ষর </p>
-                      </div>
+                    <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
+                      <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
+
+                      <p> প্রিন্সিপাল স্বাক্ষর </p>
+                    </div>
                   </div>
                 </div>
               )}
-               {layout.id == 6 && (
+              {layout.id == 6 && (
                 <div className='w-[250px] mb-[1px] relative print-id-card'>
-                    <div className="overflow-hidden h-full w-full rounded-[10px]">
+                  <div className="overflow-hidden h-full w-full rounded-[10px]">
                     <img src={`${layout.image}`} alt="card header" className='h-full w-full' />
                   </div>
                   <div className="absolute top-[5px]  w-full px-[10px]">
 
                     <div className='h-[80px]'>
-                  
+
                       <h2 className="group text-center text-[18px] text-white font-bold truncate">
                         <textarea
                           ref={textareaRef}
@@ -848,24 +886,24 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                         })}
                       </div>
                     </div>
-                    
-                      <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
-                        <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
 
-                        <p> প্রিন্সিপাল স্বাক্ষর </p>
-                      </div>
+                    <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
+                      <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
+
+                      <p> প্রিন্সিপাল স্বাক্ষর </p>
+                    </div>
                   </div>
                 </div>
               )}
-               {layout.id == 7 && (
+              {layout.id == 7 && (
                 <div className='w-[250px] mb-[1px] relative print-id-card'>
-                    <div className="overflow-hidden h-full w-full rounded-[10px]">
+                  <div className="overflow-hidden h-full w-full rounded-[10px]">
                     <img src={`${layout.image}`} alt="card header" className='h-full w-full' />
                   </div>
                   <div className="absolute top-[5px]  w-full px-[10px]">
 
                     <div className='h-[80px]'>
-                  
+
                       <h2 className="group text-center text-[18px] text-white font-bold truncate">
                         <textarea
                           ref={textareaRef}
@@ -936,24 +974,24 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                         })}
                       </div>
                     </div>
-                    
-                      <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
-                        <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
 
-                        <p> প্রিন্সিপাল স্বাক্ষর </p>
-                      </div>
+                    <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
+                      <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
+
+                      <p> প্রিন্সিপাল স্বাক্ষর </p>
+                    </div>
                   </div>
                 </div>
               )}
               {layout.id == 8 && (
                 <div className='w-[250px] mb-[1px] relative print-id-card'>
-                    <div className="overflow-hidden h-full w-full rounded-[10px]">
+                  <div className="overflow-hidden h-full w-full rounded-[10px]">
                     <img src={`${layout.image}`} alt="card header" className='h-full w-full' />
                   </div>
                   <div className="absolute top-[5px]  w-full px-[10px]">
 
                     <div className='h-[80px]'>
-                  
+
                       <h2 className="group text-center text-[18px] text-white font-bold truncate">
                         <textarea
                           ref={textareaRef}
@@ -1024,25 +1062,25 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                         })}
                       </div>
                     </div>
-                    
-                      <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
-                        <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
 
-                        <p> প্রিন্সিপাল স্বাক্ষর </p>
-                      </div>
+                    <div className="w-[100px] h-[60px] absolute bottom-0 right-[15px]">
+                      <img className='object-cover h-full mx-auto' src={convert_logto_buffer(institutionInfo?.SignaturePrincipal)} alt="" />
+
+                      <p> প্রিন্সিপাল স্বাক্ষর </p>
+                    </div>
                   </div>
                 </div>
               )}
             </button>
           ))}
         </div>
-        
+
         <FormProvider {...methods}>
           <form className="w-full space-y-4 hidden_in_print" onSubmit={handleSubmit(onSubmit)}>
             <p className='mt-4 font-bold text-[18px]'>{checkboxState.length == 0 ? "সর্বাধিক ৫টি এন্ট্রি নির্বাচন করুন" : checkboxState.length < 5 ? `আরও ${convertToBanglaDisplay(String(5 - checkboxState.length))}টি ফিল্ড নির্বাচন করতে পারবেন` : "সর্বোচ্চ এন্ট্রি নির্বাচন করা হয়েছে"}</p>
             <div className='flex flex-wrap gap-4 mt-[40px] mb-[40px]'>
               {[
-                  { ID: "StudentCode", Name: "Student Code" },
+                { ID: "StudentCode", Name: "Student Code" },
                 { ID: "StudentName", Name: "User Name" },
                 { ID: "FatherName", Name: "Father Name" },
                 { ID: "MotherName", Name: "Mother Name" },
@@ -1054,7 +1092,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                 { ID: "NIDNO", Name: "NID" },
                 { ID: "DateOfBirth", Name: "Date Of Birth" },
                 { ID: "NewOldId", Name: "Position" },
-              
+
               ].filter((i) => isFieldAllowedForLayout(i.ID, selectedLayout))
                 .map((i) => (
                   <div key={i.ID} className='flex items-center gap-2'>
@@ -1203,8 +1241,10 @@ const StudentIdCardPrint = ({ pageTitle }) => {
           onPageChange={setCurrentPage}
         />
       </div>
-      <div className=''>
-        <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} />
+      {/* print-only */}
+      <div className='print-only'>
+        {/* <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} /> */}
+        <StudentIdCardGeneratePos layoutId={selectedLayout} fields={checkboxState} />
       </div>
     </div>
   );

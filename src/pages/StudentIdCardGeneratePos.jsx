@@ -4,7 +4,7 @@ import useTranslate from '../utils/Translate';
 import { Buffer } from 'buffer';
 import React, { useEffect } from 'react';
 import { hideModal } from '../utils/ModalControlar';
-const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
+const StudentIdCardGeneratePos = ({ pageTitle, layoutId, fields = [] }) => {
 
   const { state } = useLocation();
   // const { layoutId, fields = [] } = state || {};
@@ -55,11 +55,7 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
   return (
 
     <div>
-      {/* <div className='hidden_in_print flex justify-end'>
-        <Link to="/students/student-id-card" className='btn py-[8px] px-[15px] bg-blue-600 text-white rounded-[4px]'>Go Back</Link>
-        <button onClick={handleClick} className='btn py-[8px] px-[15px] bg-blue-600 text-white rounded-[4px]'>Print</button>
-      </div> */}
-      <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg grid grid-cols-3 w-[800px] gap-x-[20px] gap-y-[10px] mx-auto">
+      <div className="font-SolaimanLipi bg-white p-1 py-0 rounded-xl shadow-lg flex flex-col align-center w-[800px] mx-auto print-id-card-wrapper -ml-[3px] ">
 
         {
           printableStudentList && printableStudentList.length &&
@@ -137,6 +133,7 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
                         <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{printableStudentDetails?.institute_address}</p>
                       </div>
                       <div className="middle_area px-2">
+                        
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
                           <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
                         </div>
@@ -194,7 +191,6 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
                       </div>
 
 
-
                     </div>
 
                   </React.Fragment>
@@ -228,8 +224,6 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
                         <img className='object-cover h-full mx-auto' src={convert_logto_buffer(printableStudentDetails?.SignaturePrincipal)} alt="" />
                         <p className='text-[12px] text-center'> {printableStudentDetails.PrincipalName} স্বাক্ষর </p>
                       </div>
-
-
 
                     </div>
 
@@ -355,4 +349,4 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [] }) => {
   );
 };
 
-export default StudentIdCardGenerate;
+export default StudentIdCardGeneratePos;

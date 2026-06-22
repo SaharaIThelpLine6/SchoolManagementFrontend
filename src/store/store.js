@@ -29,6 +29,7 @@ import { talimatQuerySlice } from "../features/talimat/talimatQuerySlice";
 import { teachersSlice } from "../features/teachers/teachersSlice";
 import { userInfoSlice } from "../features/userInfo/userInfoQuerySlice";
 import userInfoReducer from "../features/userInfo/userInfoSlice";
+import multiPartFormReducer from "../features/multistep/multiStepFormSlice";
 import { panelNotificationQuerySlice } from "../features/userPanel/panelNotification/panelNotificationQuerySlice";
 import sessionChangeReducer from "../features/userPanel/sessionChange/sessionChangeSlice";
 import { studentPaymentSlice } from "../features/userPanel/studentPayment/studentPaymentSlice";
@@ -54,6 +55,7 @@ const store = configureStore({
     sideBar: sidebarReducer,
     smsSuccessError: smsReducersSlice,
     sessionChange: sessionChangeReducer,
+    multiPartForm: multiPartFormReducer,
     [feeCollectionSlice.reducerPath]: feeCollectionSlice.reducer,
     [onlineAdmissionSlice.reducerPath]: onlineAdmissionSlice.reducer,
     [teachersSlice.reducerPath]: teachersSlice.reducer,

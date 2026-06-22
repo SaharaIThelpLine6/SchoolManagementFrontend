@@ -798,6 +798,7 @@ const useTranslate = () => {
     "Add column": "কলাম যোগ করুন",
     "Add exam hall": "পরীক্ষা কক্ষের তথ্য যোগ করুন",
     "Set Exam Room": "পরীক্ষার কক্ষ সেট করুন",
+    "Exam Sitplan": "পরীক্ষার সিটপ্ল্যান",
   };
 
   return (key) =>

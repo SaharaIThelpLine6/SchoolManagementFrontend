@@ -102,6 +102,7 @@ const AddLoginUsers = () => {
       NewUserID: user.NewUserID,
       Code: user.UserCode,
       IsVerified: user.IsVerified,
+      UserAction: user.UserAction,
       LoginName: user.LoginName,
       Name: user.UserName ? bnBijoy2Unicode(user.UserName) : "N/A",
       Type: user.TypeName,
@@ -204,7 +205,7 @@ const AddLoginUsers = () => {
         return;
       }
 
-      const newStatus = row.IsVerified === 1 ? 0 : 1;
+      const newStatus = row.UserAction === 1 ? 0 : 1;
 
       // ✅ Confirmation alert
       const result = await Swal.fire({
@@ -267,7 +268,7 @@ const AddLoginUsers = () => {
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
-              checked={row.IsVerified === 1}
+              checked={row.UserAction === 1}
               onChange={() => handleToggleAction(row)}
               className="sr-only peer"
             />

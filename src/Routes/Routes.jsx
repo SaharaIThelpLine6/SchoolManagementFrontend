@@ -144,6 +144,10 @@ import HomePage from '../pages/HomePage';
 import ExamHallEdit from '../pages/ExamHallEdit';
 import ExamHallSetup from '../pages/ExamHallSetup';
 import ExamHallList from '../pages/ExamHallList';
+import SitPlanAssign from '../pages/Sitplanassign';
+import ExamShift from '../pages/ExamShift';
+import ExamSitPlan from '../pages/ExamSitPlan';
+import CreateExamSitPlan from '../pages/CreateExamSitPlan';
 
 const Router = createBrowserRouter([
   {
@@ -595,6 +599,26 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.exam_fee_setting}
                   >
                     <ExamHallEdit pageTitle="Exam Fee Determine" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'exam-setplan',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.exam_fee_setting}
+                  >
+                    <ExamSitPlan pageTitle="Exam Fee Determine" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'create_examshift/:sessionId/:examId',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.exam_fee_setting}
+                  >
+                    <CreateExamSitPlan pageTitle="Exam Fee Determine" />
                   </RequirePermission>
                 ),
               },

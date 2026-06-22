@@ -40,6 +40,8 @@ import AllClassRoutingPDF from '../view/exam/ExamRouting/AllClassRoutingPDF';
 import ExamSignatureRoutingPDF from '../view/exam/ExamRouting/ExamSignatureRoutingPDF';
 import SingleClassRoutingPDF from '../view/exam/ExamRouting/SingleClassRoutingPDF';
 import StudentFeeGroup from '../view/exam/StudentFeeGroup';
+import DatePickerOne from '../components/Forms/DatePicker/DatePickerOne';
+import TimePicker from '../components/Forms/DatePicker/TimePicker';
 
 const PAGE_SIZE = 10;
 
@@ -203,10 +205,10 @@ const ExamRouting = ({ pageTitle }) => {
   //   }
   // };
   // Handle date input as plain text (all languages)
-  const handleDateInput = (index, value) => {
-    // শুধু input 그대로 state-এ রাখবে, কোন filter/auto-format নেই
-    setValue(`date_${index}`, value);
-  };
+  // const handleDateInput = (index, value) => {
+  //   // শুধু input 그대로 state-এ রাখবে, কোন filter/auto-format নেই
+  //   setValue(`date_${index}`, value);
+  // };
 
   // Handle day input with auto-completion (like MonthNamesForm)
   const handleDayInput = (index, e) => {
@@ -333,7 +335,7 @@ const ExamRouting = ({ pageTitle }) => {
         const startTime = routineRow?.StartTime?.trim() || '';
         const endTime = routineRow?.EndTime?.trim() || '';
 
-        methods.setValue(`date_${i}`, date ? date.replace(/-/g, '/') : '');
+        methods.setValue(`date_${i}`, date ? date : '');
         methods.setValue(`day_${i}`, day || '');
         methods.setValue(`startTime_${i}`, startTime);  // ✅ per-row StartTime
         methods.setValue(`endTime_${i}`, endTime);       // ✅ per-row EndTime
@@ -587,27 +589,23 @@ const ExamRouting = ({ pageTitle }) => {
   const toggleSlot = (index) => {
     setOpenSlots(prev => ({ ...prev, [index]: !prev[index] }))
   }
+
   const onSubmit = async (formData) => {
     if (isSubmittingRef.current) {
       console.log("❌ Blocked: Already submitting");
       return;
     }
-
     isSubmittingRef.current = true;
-
     try {
       // ============================
       // 1️⃣ Basic validation
       // ============================
-
       if (
         !Number(formData.SessionID) ||
         !Number(formData.SubClassID) ||
         !Number(formData.ExamID)
       ) {
-        console.log("❌ Validation failed: SessionID/SubClassID/ExamID missing");
-
-        Swal.fire({
+        await Swal.fire({
           icon: "warning",
           title: "ফর্ম অসম্পূর্ণ",
           text: "Session, SubClass এবং Exam নির্বাচন করুন।",
@@ -616,76 +614,69 @@ const ExamRouting = ({ pageTitle }) => {
         return;
       }
 
-
-      const totalDateCount = Array.from({ length: 14 }).filter((_, index) => {
-        return formData[`date_${index}`];
-      }).length;
-
+      // Count total dates
+      const totalDateCount = Array.from({ length: 14 }).filter(
+        (_, index) => formData[`date_${index}`]
+      ).length;
 
       // ============================
       // 2️⃣ Build routine data
       // ============================
+      const routineData = Array.from({ length: 14 }).map((_, index) => ({
+        SessionID: Number(formData.SessionID),
+        ExamID: Number(formData.ExamID),
+        SubClassID: Number(formData.SubClassID),
 
-      const routineData = Array.from({ length: 14 }).map((_, index) => {
-        const startTimeRaw = formData[`startTime_${index}`] || "";
-        const endTimeRaw = formData[`endTime_${index}`] || "";
+        RoomNo: formData.RoomNo || "",
+        RoomName: formData.RoomName || "",
 
-        const row = {
-          SessionID: Number(formData.SessionID),
-          ExamID: Number(formData.ExamID),
-          SubClassID: Number(formData.SubClassID),
+        Date: String(formData[`date_${index}`]),
+        Day: formData[`day_${index}`] || "",
+        Sub: formData[`subject_${index}`] || "",
 
-          RoomNo: formData.RoomNo || "",
-          RoomName: formData.RoomName || "",
+        StartTime:  String(formData[`startTime_${index}`]),
+        EndTime: String(formData[`endTime_${index}`]),
 
-          StartTime: startTimeRaw.replace(" AM", "").replace(" PM", ""),
-          EndTime: endTimeRaw.replace(" AM", "").replace(" PM", ""),
+        TotalColumn: totalDateCount,
+        BnExamDate: formData[`bndate_${index}`] || "",
+      }));
 
-          Date1: formData[`date_${index}`]
-            ? formData[`date_${index}`].replace(/\//g, "-")
-            : "",
-
-          Day1: formData[`day_${index}`] || "",
-
-          Time1: startTimeRaw.replace(" AM", "").replace(" PM", ""),
-
-          Sub1: formData[`subject_${index}`] || "",
-
-          TotalColumn: totalDateCount,
-        };
-
-
-
-        return row;
-      });
-
-
+      console.log("Routine Data:", routineData);
 
       // ============================
       // 3️⃣ Filter & validate rows
       // ============================
       const filteredRoutineData = [];
 
-      for (let item of routineData) {
-        const fields = [item.Date1, item.Day1, item.Time1, item.Sub1];
+      for (const item of routineData) {
+        const fields = [
+          item.Date,
+          item.Day,
+          item.Sub,
+          item.StartTime,
+          item.EndTime,
+        ];
 
-        const isAnyFilled = fields.some((v) => v && v !== "");
-        const isAllFilled = fields.every((v) => v && v !== "");
+        const isAnyFilled = fields.some(
+          (v) => v !== undefined && v !== null && String(v).trim() !== "" && String(v).trim() != 'null'
+        );
 
+        const isAllFilled = fields.every(
+          (v) => v !== undefined && v !== null && String(v).trim() !== "" && String(v).trim() != 'null'
+        );
 
-
+        // Skip completely empty rows
         if (!isAnyFilled) {
-
           continue;
         }
 
-        if (isAnyFilled && !isAllFilled) {
-
-
+        // Partial row validation
+        if (!isAllFilled) {
           await Swal.fire({
             icon: "warning",
             title: "অসম্পূর্ণ রুটিন ডাটা",
-            text: "Date, Day, Time এবং Subject সবগুলো পূরণ করুন।",
+            text:
+              "Date, Day, Subject, Start Time এবং End Time সবগুলো পূরণ করুন।",
           });
 
           return;
@@ -694,11 +685,10 @@ const ExamRouting = ({ pageTitle }) => {
         filteredRoutineData.push(item);
       }
 
-
-
+      // ============================
+      // 4️⃣ Check at least one row
+      // ============================
       if (filteredRoutineData.length === 0) {
-
-
         await Swal.fire({
           icon: "warning",
           title: "ফর্ম অসম্পূর্ণ",
@@ -708,10 +698,10 @@ const ExamRouting = ({ pageTitle }) => {
         return;
       }
 
-
+      console.log("Filtered Routine Data:", filteredRoutineData);
 
       // ============================
-      // 4️⃣ Prepare payload
+      // 5️⃣ Prepare payload
       // ============================
       const payload = {
         routine: filteredRoutineData,
@@ -725,7 +715,7 @@ const ExamRouting = ({ pageTitle }) => {
       let response;
 
       // ============================
-      // 5️⃣ Create / Update
+      // 6️⃣ Create / Update
       // ============================
       if (payloadUpdate.ID) {
         response = await updateExamRoutine(payloadUpdate).unwrap();
@@ -733,6 +723,9 @@ const ExamRouting = ({ pageTitle }) => {
         response = await postExamRoutine(payload).unwrap();
       }
 
+      // ============================
+      // 7️⃣ Success Message
+      // ============================
       await Swal.fire({
         icon: "success",
         title: "সফলভাবে সংরক্ষণ হয়েছে",
@@ -761,6 +754,8 @@ const ExamRouting = ({ pageTitle }) => {
       isSubmittingRef.current = false;
     }
   };
+
+
 
 
   // Table Data Columns
@@ -839,6 +834,11 @@ const ExamRouting = ({ pageTitle }) => {
   const clearDateFields = () => {
     for (let i = 0; i < 14; i++) {
       setValue(`date_${i}`, '');
+    }
+  };
+  const clearBdDateFields = () => {
+    for (let i = 0; i < 14; i++) {
+      setValue(`bndate_${i}`, '');
     }
   };
 
@@ -991,19 +991,42 @@ const ExamRouting = ({ pageTitle }) => {
                   <div className="border-l border-gray-400"></div>
                 </div>
 
-
-
                 <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
                   <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">{translate('Date')}</div>
 
 
                   {Array.from({ length: 14 }).map((_, index) => (
                     <div key={`date-${index}`} className="border-r border-gray-400 text-center text-xs text-black bg-transparent hover:bg-blue-50 focus:bg-blue-50 focus:ring-inset focus:ring-1 focus:ring-blue-400 transition-colors">
+                      <DatePickerOne require={false} registerKey={`date_${index}`} placeholder={"Date"} timestamp={false} />
+
+                    </div>
+                  ))}
+
+
+
+                  <div className='p-1 text-center'>
+                    <Button
+                      type="button"
+                      className="bg-rose-600 hover:bg-red-100 border border-red-200 rounded-lg text-xs font-semibold px-2 py-1 transition-colors whitespace-nowrap"
+                      onClick={clearDateFields}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                </div>
+
+
+
+                <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">{translate('Bangla / Arabic Date')}</div>
+
+
+                  {Array.from({ length: 14 }).map((_, index) => (
+                    <div key={`date-${index}`} className="border-r border-gray-400 text-center text-xs text-black bg-transparent hover:bg-blue-50 focus:bg-blue-50 focus:ring-inset focus:ring-1 focus:ring-blue-400 transition-colors">
                       <Input
-                        {...register(`date_${index}`)}
+                        {...register(`bndate_${index}`)}
                         placeholder={translate("Date")}
                         type="text"
-                        onChange={(e) => handleDateInput(index, e.target.value)}
                         className="w-full h-full px-1 py-2 focus:outline-0"
                       />
                     </div>
@@ -1015,7 +1038,7 @@ const ExamRouting = ({ pageTitle }) => {
                     <Button
                       type="button"
                       className="bg-rose-600 hover:bg-red-100 border border-red-200 rounded-lg text-xs font-semibold px-2 py-1 transition-colors whitespace-nowrap"
-                      onClick={clearDateFields}
+                      onClick={clearBdDateFields}
                     >
                       Clear
                     </Button>
@@ -1070,14 +1093,19 @@ const ExamRouting = ({ pageTitle }) => {
                       key={`startTime-${index}`}
                       className="border-r border-gray-400 text-center text-xs text-black bg-transparent hover:bg-blue-50 focus:bg-blue-50 focus:ring-inset focus:ring-1 focus:ring-blue-400 transition-colors"
                     >
-                      <Input
+                      <TimePicker
+                        placeholder={`${translate("Select Time")}...`}
+                        registerKey={`startTime_${index}`}
+                      />
+
+                      {/* <Input
                         {...register(`startTime_${index}`)}
                         placeholder="1-4 লিখুন"
                         type="text"
                         onChange={(e) => handleStartTimeInput(index, e)}
                         onKeyDown={(e) => handleAutoConvertAndTab('time', index, e)}
                         className="w-full h-full px-1 py-2 focus:outline-0 border-0 rounded-none"
-                      />
+                      /> */}
                     </div>
                   ))}
                   <div className='p-1 text-center'>
@@ -1105,14 +1133,21 @@ const ExamRouting = ({ pageTitle }) => {
                       key={`endTime-${index}`}
                       className="border-r border-gray-400 text-center text-xs text-black bg-transparent hover:bg-blue-50 focus:bg-blue-50 focus:ring-inset focus:ring-1 focus:ring-blue-400 transition-colors"
                     >
-                      <Input
+
+
+
+                      <TimePicker
+                        placeholder={`${translate("Select Time")}...`}
+                        registerKey={`endTime_${index}`}
+                      />
+                      {/* <Input
                         {...register(`endTime_${index}`)}
                         placeholder="1-4 লিখুন"
                         type="text"
                         onChange={(e) => handleEndTimeInput(index, e)}
                         onKeyDown={(e) => handleAutoConvertAndTab('time', index, e)}
                         className="w-full h-full px-1 py-2 focus:outline-0 border-0 rounded-none"
-                      />
+                      /> */}
                     </div>
                   ))}
                   <div className='p-1 text-center'>
@@ -1365,7 +1400,7 @@ const ExamRouting = ({ pageTitle }) => {
                             {...register(`date_${index}`)}
                             placeholder={translate("Date")}
                             type="text"
-                            onChange={(e) => handleDateInput(index, e.target.value)}
+                            // onChange={(e) => handleDateInput(index, e.target.value)}
                             className="w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-custom-focus active:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200"
                           />
                         </div>
