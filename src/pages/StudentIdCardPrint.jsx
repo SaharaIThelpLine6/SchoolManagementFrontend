@@ -206,13 +206,13 @@ const StudentIdCardPrint = ({ pageTitle }) => {
           }
         }
       `;
-      document.head.appendChild(style);
+      // document.head.appendChild(style);
 
       setTimeout(() => {
         window.print();
         // Remove after print dialog closes
-        const el = document.getElementById('zc300-print-style');
-        if (el) el.remove();
+        // const el = document.getElementById('zc300-print-style');
+        // if (el) el.remove();
       }, 300);
 
 
@@ -1242,7 +1242,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
         />
       </div>
       {/* print-only */}
-      <div className='print-only'>
+      <div >
         <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} />
         {/* <StudentIdCardGeneratePos layoutId={selectedLayout} fields={checkboxState} /> */}
       </div>
