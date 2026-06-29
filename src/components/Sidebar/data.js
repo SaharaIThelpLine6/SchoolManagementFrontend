@@ -274,6 +274,11 @@ export const menuData = [
         name: 'Set Exam Room',
         route: '/exam/exam-hallist',
       },
+      {
+        id: '12',
+        name: 'Exam Seat plan',
+        route: '/exam/exam-setplan',
+      },
     ],
   },
   {

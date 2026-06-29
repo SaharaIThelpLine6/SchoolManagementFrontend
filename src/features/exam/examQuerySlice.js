@@ -54,6 +54,10 @@ export const examSlice = createApi({
       query: () => `get_exam_names`,
       providesTags: ['ExamNames'],
     }),
+    getExamName: builder.query({
+      query: (id) => `get_exam_name/${id}`,
+      providesTags: ['ExamName'],
+    }),
     getExamFeeSetting: builder.query({
       query: () => `get_exam_fee_setting`,
       providesTags: ['ExamFeeSettings'],
@@ -362,6 +366,7 @@ export const {
   useUpdateExamnameMutation,
   useDeleteExamNameMutation,
   useGetExamNamesQuery,
+  useGetExamNameQuery,
   useGetExamFeeSettingQuery,
   usePostExamFeeSettingMutation,
   useUpdateExamFeeSettingMutation,

@@ -25,18 +25,27 @@ const multiPartFormSlice = createSlice({
     nextStep: (state, action) => {
       const { formId } = action.payload;
 
-      if (state.forms[formId]) {
-        state.forms[formId].currentStep += 1;
+      if (!state.forms[formId]) {
+        state.forms[formId] = {
+          currentStep: 0,
+          completedSteps: [],
+          formData: {},
+        };
       }
+      state.forms[formId].currentStep += 1;
     },
 
     prevStep: (state, action) => {
       const { formId } = action.payload;
 
-      if (
-        state.forms[formId] &&
-        state.forms[formId].currentStep > 0
-      ) {
+      if (!state.forms[formId]) {
+        state.forms[formId] = {
+          currentStep: 0,
+          completedSteps: [],
+          formData: {},
+        };
+      }
+      if (state.forms[formId].currentStep > 0) {
         state.forms[formId].currentStep -= 1;
       }
     },
@@ -44,20 +53,28 @@ const multiPartFormSlice = createSlice({
     goToStep: (state, action) => {
       const { formId, step } = action.payload;
 
-      if (state.forms[formId]) {
-        state.forms[formId].currentStep = step;
+      if (!state.forms[formId]) {
+        state.forms[formId] = {
+          currentStep: 0,
+          completedSteps: [],
+          formData: {},
+        };
       }
+      state.forms[formId].currentStep = step;
     },
 
     markStepCompleted: (state, action) => {
       const { formId, step } = action.payload;
 
+      if (!state.forms[formId]) {
+        state.forms[formId] = {
+          currentStep: 0,
+          completedSteps: [],
+          formData: {},
+        };
+      }
       const form = state.forms[formId];
-
-      if (
-        form &&
-        !form.completedSteps.includes(step)
-      ) {
+      if (!form.completedSteps.includes(step)) {
         form.completedSteps.push(step);
       }
     },
@@ -65,12 +82,17 @@ const multiPartFormSlice = createSlice({
     updateFormData: (state, action) => {
       const { formId, data } = action.payload;
 
-      if (state.forms[formId]) {
-        state.forms[formId].formData = {
-          ...state.forms[formId].formData,
-          ...data,
+      if (!state.forms[formId]) {
+        state.forms[formId] = {
+          currentStep: 0,
+          completedSteps: [],
+          formData: {},
         };
       }
+      state.forms[formId].formData = {
+        ...state.forms[formId].formData,
+        ...data,
+      };
     },
 
     resetForm: (state, action) => {

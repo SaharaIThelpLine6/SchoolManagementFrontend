@@ -40,6 +40,7 @@ import { userReportsSlice } from "../features/userReports/userReportsSlice";
 import { userTypeSlice } from "../features/userType/userTypeSlice";
 import { onlineDonationSlice } from "../features/userPanel/onlineDonation/onlineDonationSlice";
 import { examHallSlice } from "../features/examhall/examHallQuerySlice";
+import { examSitPlanSlice } from "../features/exam/examSitPlanQuerySlice";
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -84,6 +85,7 @@ const store = configureStore({
     [helpQuerySlice.reducerPath]: helpQuerySlice.reducer,
     [onlineDonationSlice.reducerPath]: onlineDonationSlice.reducer,
     [examHallSlice.reducerPath]: examHallSlice.reducer,
+    [examSitPlanSlice.reducerPath]: examSitPlanSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -113,7 +115,8 @@ const store = configureStore({
       .concat(talimatQuerySlice.middleware)
       .concat(helpQuerySlice.middleware)
       .concat(onlineDonationSlice.middleware)
-      .concat(examHallSlice.middleware),
+      .concat(examHallSlice.middleware)
+      .concat(examSitPlanSlice.middleware),
 });
 
 export default store;
