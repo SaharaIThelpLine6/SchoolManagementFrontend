@@ -20,7 +20,7 @@ const StudentResults = () => {
 
   // API data
   const { data = {}, isLoading } = useGeStudentResultsQuery();
-
+  console.log(data, "data")
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.ceil(data.length / PAGE_SIZE);

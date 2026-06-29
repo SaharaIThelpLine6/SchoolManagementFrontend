@@ -246,7 +246,7 @@ const UpdateUser = ({ singleUserData }) => {
     }
   };
 
- 
+
   const handleResetForm = () => {
     dispatch(setEditUserID(null));
     reset();
@@ -328,8 +328,8 @@ const UpdateUser = ({ singleUserData }) => {
                   labelColor="text-red-500"
                   defaultValue={singleUserData?.UserName || ''}
                 />
-               
-                {singleUserData.UserTypeID == 1 ?  <p className='text-rose-600 text-[13px] pt-1'> নাম এডিটের ক্ষেত্রে ১ টি কোটা কর্তন হবে</p> : null}
+
+                {singleUserData.UserTypeID == 1 ? <p className='text-rose-600 text-[13px] pt-1'> নাম এডিটের ক্ষেত্রে ১ টি কোটা কর্তন হবে</p> : null}
               </div>
 
               <DefaultInput

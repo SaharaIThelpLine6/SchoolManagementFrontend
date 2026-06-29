@@ -202,7 +202,7 @@ const HomWork = ({ pageTitle }) => {
     {
       title: translate('Home Work'),
       field: 'HomeWork',
-      hozAlign: 'left',
+      hozAlign: 'center',
       width: 300,
       render: (row) => (
         <div className="flex justify-center items-center">
@@ -213,7 +213,7 @@ const HomWork = ({ pageTitle }) => {
     {
       title: translate('Class Work'),
       field: 'ClassWork',
-      hozAlign: 'left',
+      hozAlign: 'center',
       width: 300,
       render: (row) => (
         <div className="flex justify-center items-center">
