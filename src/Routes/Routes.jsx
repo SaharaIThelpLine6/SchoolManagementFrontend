@@ -144,8 +144,6 @@ import HomePage from '../pages/HomePage';
 import ExamHallEdit from '../pages/ExamHallEdit';
 import ExamHallSetup from '../pages/ExamHallSetup';
 import ExamHallList from '../pages/ExamHallList';
-import SitPlanAssign from '../pages/Sitplanassign';
-import ExamShift from '../pages/ExamShift';
 import ExamSitPlan from '../pages/ExamSitPlan';
 import CreateExamSitPlan from '../pages/CreateExamSitPlan';
 
@@ -695,9 +693,9 @@ const Router = createBrowserRouter([
               },
               {
                 path: 'query-manage',
-                element:  <OwenGuide> 
-                      <QueryManage pageTitle="Query Manage" /> 
-                  </OwenGuide>,
+                element: <OwenGuide>
+                  <QueryManage pageTitle="Query Manage" />
+                </OwenGuide>,
               },
               {
                 path: 'rules',
@@ -1138,7 +1136,7 @@ const Router = createBrowserRouter([
       { path: 'classes/:seassonid/:examid/:classid', element: <ClassResult /> },
       { path: 'donation', element: <Donation /> },
       { path: 'donation/payment-success', element: <OnlineDonationInvoice /> },
-       
+
     ],
   },
   {

@@ -75,9 +75,9 @@ const extractHallColumns = (hall) => {
 const createColumn = (index) => ({
     label: `কলাম ${bnBijoy2Unicode(String(index + 1))}`,
     rows: [
-        { label: 'রো ১', seats: 2 },
-        { label: 'রো ২', seats: 2 },
-        { label: 'রো ৩', seats: 2 },
+        { label: 'বেঞ্চ নং ১', seats: 2 },
+        { label: 'বেঞ্চ নং ২', seats: 2 },
+        { label: 'বেঞ্চ নং ৩', seats: 2 },
     ],
 });
 
@@ -111,7 +111,7 @@ const ColumnCard = ({ index, onRemove, label }) => {
             [
                 ...rows,
                 {
-                    label: `রো ${bnBijoy2Unicode(String(rows.length + 1))}`,
+                    label: `বেঞ্চ নং ${bnBijoy2Unicode(String(rows.length + 1))}`,
                     seats: 2,
                 },
             ],
@@ -395,7 +395,7 @@ const ExamHallEdit = () => {
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <p className="text-base font-medium text-gray-900">
-                                    {translate('Columns & rows')}
+                                    {translate('Columns & Benches')}
                                 </p>
                                 <p className="text-sm text-gray-400 mt-0.5">
                                     {translate('Add columns and configure rows and seat count per bench.')}

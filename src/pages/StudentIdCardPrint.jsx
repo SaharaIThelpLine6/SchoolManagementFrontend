@@ -184,35 +184,38 @@ const StudentIdCardPrint = ({ pageTitle }) => {
 
       // Inject ZC300-specific print style
       const style = document.createElement('style');
+      
       style.id = 'zc300-print-style';
       style.innerHTML = `
         @media print {
           @page {
-            size: 54mm 86mm;
+            size: 55mm 86mm;
             margin: 0px;
           }
           .print-id-card-wrapper {
-            display: block !important;
-            position: fixed;
-            top: 0;
-            left: 0;
+            display: block !important; 
           }
           .print-id-card {
-            width: 53.5mm !important;
-            height: 86mm !important;
+            width: 56mm !important;
+            height: 87mm !important;
             overflow: hidden;
             page-break-after: always;
             
           }
         }
       `;
-      // document.head.appendChild(style);
-
+      document.head.appendChild(style);
+/**
+ * 
+ * position: fixed;
+            top: 0;
+            left: 0;
+ */
       setTimeout(() => {
         window.print();
         // Remove after print dialog closes
-        // const el = document.getElementById('zc300-print-style');
-        // if (el) el.remove();
+        const el = document.getElementById('zc300-print-style');
+        if (el) el.remove();
       }, 300);
 
 
@@ -1242,9 +1245,9 @@ const StudentIdCardPrint = ({ pageTitle }) => {
         />
       </div>
       {/* print-only */}
-      <div >
-        <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} />
-        {/* <StudentIdCardGeneratePos layoutId={selectedLayout} fields={checkboxState} /> */}
+      <div className='print-only'>
+        {/* <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} /> */}
+        <StudentIdCardGeneratePos layoutId={selectedLayout} fields={checkboxState} />
       </div>
     </div>
   );

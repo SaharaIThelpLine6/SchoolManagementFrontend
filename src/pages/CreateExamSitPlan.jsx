@@ -23,6 +23,9 @@ import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import MultiStepForm from '../components/MultiStepForm';
+import ExamShift from '../view/exam/ExamShift';
+import SitPlanAssign from '../view/exam/SitPlanAssign';
+import { useDeleteSitPlanMutation } from '../features/exam/examSitPlanQuerySlice';
 
 const CreateExamSitPlan = ({ pageTitle }) => {
   const location = useLocation();
@@ -30,15 +33,17 @@ const CreateExamSitPlan = ({ pageTitle }) => {
   const translate = useTranslate();
   const navigate = useNavigate()
 
-  const {sessionID, examID} = useParams();
+  const { sessionId, examId } = useParams();
 
   const methods = useForm({
     defaultValues: {
-      SessionID: sessionID || '',
-      ExamID: examID || '',
+      SessionID: sessionId || '',
+      ExamID: examId || '',
     }
   });
-
+  useEffect(() => {
+    console.log(sessionId, examId, "params");
+  }, [sessionId, examId])
   const {
     handleSubmit,
     watch,
@@ -47,6 +52,7 @@ const CreateExamSitPlan = ({ pageTitle }) => {
   const { data: sessionData } = useGetSessionsQuery();
   const { data: SubClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
+
 
 
   const searchParams = new URLSearchParams(location.search);
@@ -135,7 +141,7 @@ const CreateExamSitPlan = ({ pageTitle }) => {
     return <>sdfsd2</>;
   }
   return (
-    <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+    <div className="font-lato bg-white p-2 lg:p-6 md:p-4 rounded-xl shadow-lg">
       <div className="block w-full overflow-x-auto">
         <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
           <h3 className="font-SolaimanLipi text-[20px] font-bold">
@@ -146,9 +152,24 @@ const CreateExamSitPlan = ({ pageTitle }) => {
         <MultiStepForm
           formId="employeeForm"
           steps={[
-            Step1,
-            Step2,
-            Step3,
+            {
+              component: ExamShift,
+              props: {
+                sessionId: sessionId || 1,
+                examId: examId || 2,
+              },
+            },
+            {
+              component: SitPlanAssign,
+              props: {
+                sessionId: sessionId,
+                examId: examId,
+              },
+            },
+            {
+              component: Step3,
+              props: {},
+            },
           ]}
         />
 

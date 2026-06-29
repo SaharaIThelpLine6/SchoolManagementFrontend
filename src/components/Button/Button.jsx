@@ -11,6 +11,7 @@ const Button = ({
   ...rest
 }) => {
   const baseClasses = `
+    text-white
     font-medium
     rounded-lg
     text-sm
@@ -26,7 +27,6 @@ const Button = ({
     focus:ring-green-300
     bg-blue-500
     hover:bg-blue-600
-    text-white
   `;
 
   const combinedClasses = clsx(baseClasses, className, {

@@ -41,6 +41,8 @@ export const examHallSlice = createApi({
       providesTags: ['ExamHallDetails'],
     }),
 
+
+
   }),
 });
 

@@ -1337,7 +1337,7 @@ const ExamRouting = ({ pageTitle }) => {
                 labelPosition="left"
               />
               <label htmlFor="copyToAll" className="text-sm font-medium text-blue-700 cursor-pointer flex items-center gap-2">
-                পরীক্ষার তারিখ সব কলামে কপি করুন
+                {translate("Keep All The Exam Date Same")}
               </label>
 
             </div>
@@ -1350,7 +1350,7 @@ const ExamRouting = ({ pageTitle }) => {
 
             <div className="block md:hidden space-y-3">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg font-semibold uppercase tracking-widest text-black">সময়সূচি</span>
+                <span className="text-lg font-semibold uppercase tracking-widest text-black">{ translate("Date & Time") }</span>
                 <div className="flex-1 h-px bg-gray-100 ml-2"></div>
               </div>
 
@@ -1392,12 +1392,21 @@ const ExamRouting = ({ pageTitle }) => {
                     </div>
                     {isOpen && (
                       <div className="space-y-3">
-                        <div>
+
+                           <div>
                           <label className="block text-xxl font-semibold uppercase tracking-wider text-black mb-1">
                             তারিখ
                           </label>
+                          <DatePickerOne require={false} registerKey={`date_${index}`} placeholder={"Date"} timestamp={false} />
+                        </div>
+
+                        
+                        <div>
+                          <label className="block text-xxl font-semibold uppercase tracking-wider text-black mb-1">
+                            Bangla / Arabic Date
+                          </label>
                           <Input
-                            {...register(`date_${index}`)}
+                            {...register(`bndate_${index}`)}
                             placeholder={translate("Date")}
                             type="text"
                             // onChange={(e) => handleDateInput(index, e.target.value)}
@@ -1423,13 +1432,17 @@ const ExamRouting = ({ pageTitle }) => {
                           <label className="block text-xxl font-semibold uppercase tracking-wider text-black mb-1">
                             শুরু সময়
                           </label>
-                          <Input
+                          {/* <Input
                             {...register(`startTime_${index}`)}
                             placeholder="1-4 লিখুন"
                             type="text"
                             onChange={(e) => handleStartTimeInput(index, e)}
                             onKeyDown={(e) => handleAutoConvertAndTab('time', index, e)}
                             className="w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-custom-focus active:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200"
+                          /> */}
+                          <TimePicker
+                            placeholder={`${translate("Select Time")}...`}
+                            registerKey={`startTime_${index}`}
                           />
                         </div>
 
@@ -1437,13 +1450,18 @@ const ExamRouting = ({ pageTitle }) => {
                           <label className="block font-semibold uppercase tracking-wider text-xxl text-black mb-1">
                             শেষ সময়
                           </label>
-                          <Input
+                          {/* <Input
                             {...register(`endTime_${index}`)}
                             placeholder="1-4 লিখুন"
                             type="text"
                             onChange={(e) => handleEndTimeInput(index, e)}
                             onKeyDown={(e) => handleAutoConvertAndTab('time', index, e)}
                             className="w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-custom-focus active:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200"
+                          /> */}
+
+                          <TimePicker
+                            placeholder={`${translate("Select Time")}...`}
+                            registerKey={`endTime_${index}`}
                           />
                         </div>
 
