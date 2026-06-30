@@ -15,6 +15,7 @@ import { useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
 import bnBijoy2Unicode from '../../utils/conveter';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import SvgIcon from '../../components/icons/SvgIcon';
 const SCOPE_OPTIONS = [
     {
         value: 'this-column',
@@ -162,6 +163,7 @@ const SitPlanAssign = ({ sessionId, examId, sharedStepData }) => {
     // assignments: { "shiftId-hallId-colIdx-rowIdx-seatNum" -> { cls, userCode, shiftId, assignmentId? } }
     const [assignments, setAssignments] = useState({});
     const [isLocked, setIsLocked] = useState(false); // true when sitPlan isActive = true
+    const navigate = useNavigate();
 
     // ── FIX P1: track which shift each class is locked to ────────────────────
     // classShiftMap: { subClassId -> shiftId }
@@ -685,6 +687,23 @@ const SitPlanAssign = ({ sessionId, examId, sharedStepData }) => {
         }
     };
 
+    const handleExternalLink = async () => {
+        const result = await Swal.fire({
+            icon: "warning",
+            title: translate("Are you sure?"),
+            text: translate("Your assigned seats will be removed. Do you want to continue?"),
+            showCancelButton: true,
+            confirmButtonText: translate("Yes, Continue"),
+            cancelButtonText: translate("Cancel"),
+            confirmButtonColor: "#dd3333",
+            cancelButtonColor: "#3085d6",
+            reverseButtons: true,
+        });
+        if (result.isConfirmed) {
+            navigate("/exam/exam-hallist");
+        }
+    };
+
     // ── render ────────────────────────────────────────────────────────────────
     return (
         <div className={`lg:px-5 lg:py-1 ${currectLanguage == 'en' ? 'font-lato' : 'font-SolaimanLipi'}`}>
@@ -715,8 +734,8 @@ const SitPlanAssign = ({ sessionId, examId, sharedStepData }) => {
                         ) : (translate('Select a hall below to begin assigning seats.'))}
                     </p>
                 </div>
-
-                <Link to="/exam/exam-hallist" className="py-2 px-2 bg-blue-500 text-white rounded-[4px] mb-2">পরীক্ষার কক্ষ সেট করুন</Link>
+                {/* <Link to="/exam/exam-hallist" className="py-2 px-2 bg-blue-500 text-white rounded-[4px] mb-2">পরীক্ষার কক্ষ সেট করুন</Link> */}
+                <button onClick={handleExternalLink} type='button' className='py-2 px-2 bg-blue-500 text-white rounded-[4px] mb-2 flex gap-1 m-0' to='/exam/exam-hallsetup'> <SvgIcon name={"HomePlus"} size={22}/>  {translate("Add Exam Hall")} </button>
             </div>
 
 

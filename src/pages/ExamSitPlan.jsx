@@ -123,12 +123,9 @@ const ExamSitPlan = ({ pageTitle }) => {
       cancelButtonText: "বাতিল",
       reverseButtons: true,
     });
-
     if (!result.isConfirmed) return;
-
     try {
       await updateSeatPlanStatus(sitplanid).unwrap();
-
       Swal.fire({
         icon: "success",
         title: "সফল!",

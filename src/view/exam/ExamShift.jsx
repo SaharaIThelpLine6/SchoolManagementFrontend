@@ -82,13 +82,13 @@ const ExamShift = ({ examId, sessionId, setSharedStepData}) => {
   const onSubmit = async (data) => {
     try {
       const response = await addExamShift(data).unwrap();
-      console.log(response);
+      // console.log(response);
 
       Swal.close();
       Swal.fire({
           icon: "success",
           title: "সাবমিশন সফল!",
-          text: "শিক্ষাথীদের সিট প্লান সফল হয়েছে। ",
+          text: "শিক্ষাথীদের সিট প্লান সফল হয়েছে।",
           confirmButtonColor: "#3085d6",
           confirmButtonText: "ঠিক আছে",
       }).then((result) => {
@@ -188,7 +188,7 @@ const ExamShift = ({ examId, sessionId, setSharedStepData}) => {
             ))}
 
             <div className="flex gap-2">
-              <Button type='button' className='bg-yellow-300 hover:bg-yellow-300 text-[#000]'>Save As Draft</Button>
+              {/* <Button type='button' className='bg-yellow-300 hover:bg-yellow-300 text-[#000]'>Save As Draft</Button> */}
               <Button type='submit'>Save & Continue</Button>
             </div>
 

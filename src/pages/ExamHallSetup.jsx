@@ -12,6 +12,7 @@ import Swal from 'sweetalert2';
 import bnBijoy2Unicode from '../utils/conveter';
 import { useHallEntryMutation } from '../features/examhall/examHallQuerySlice';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -164,7 +165,7 @@ const ColumnCard = ({ index, onRemove, label }) => {
 const ExamHallSetup = () => {
     const translate = useTranslate();
     const navigate = useNavigate();
-
+    const [shouldExit, setShouldExit] = useState(false);
     const methods = useForm({
         defaultValues: {
             HallName: '',
@@ -230,6 +231,9 @@ const ExamHallSetup = () => {
                 confirmButtonColor: '#3085d6',
             }).then((result) => {
                 if (result.isConfirmed) {
+                    if (shouldExit) {
+                        navigate('/exam/exam-hallist')
+                    }
                     reset({ HallName: '', columns: [] });
                 }
             });
@@ -359,12 +363,20 @@ const ExamHallSetup = () => {
                         )}
                     </div>
 
-                    <div className="flex justify-end mt-5">
+                    <div className="flex justify-end mt-5 gap-4">
                         <button
                             type="submit"
-                            className="flex items-center gap-2 h-10 px-6 text-sm rounded-lg bg-gray-900 text-white cursor-pointer hover:opacity-85"
+                            className="flex items-center gap-2 h-10 px-6 text-sm rounded-lg bg-green-500 text-white cursor-pointer hover:opacity-85"
+                            onClick={() => setShouldExit(false)}
                         >
-                            <IconCheck size={15} /> {translate('Save hall')}
+                            <IconCheck size={15} /> {translate('Save')}
+                        </button>
+                        <button
+                            type="submit"
+                            className="flex items-center gap-2 h-10 px-6 text-sm rounded-lg bg-blue-500 text-white cursor-pointer hover:opacity-85"
+                            onClick={() => setShouldExit(true)}
+                        >
+                            <IconCheck size={15} /> {translate('Save & Exit')}
                         </button>
                     </div>
                 </form>
