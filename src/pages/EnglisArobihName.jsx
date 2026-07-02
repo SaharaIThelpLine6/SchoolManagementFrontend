@@ -203,8 +203,9 @@ const EnglisArobihName = ({ pageTitle }) => {
                       className="p-2 hover:bg-blue-100 cursor-pointer"
                       onClick={() => handleSuggestionClick(item)}
                     >
-                      {item.StudentCode} - {bnBijoy2Unicode(item.StudentName)} -{' '}
-                      {bnBijoy2Unicode(item.ClassName)}
+                      {item?.User?.UserCode} -{' '}
+                          {bnBijoy2Unicode(item?.User?.UserName)} -{' '}
+                          {bnBijoy2Unicode(item?.Class?.ClassName)}
                     </div>
                   ))}
                 </div>

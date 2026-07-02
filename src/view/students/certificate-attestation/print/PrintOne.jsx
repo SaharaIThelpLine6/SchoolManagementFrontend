@@ -127,25 +127,25 @@ const PrintOne = ({ id, title, studentData }) => {
             <p>
               গ্রাম:
               <span className="inline-block border-b border-black w-60 ml-2">
-                {studentData?.permanentVill || '------'}
+                {studentData?.User?.permanentVill || '------'}
               </span>
             </p>
             <p>
               ডাক:
               <span className="inline-block border-b border-black w-60 ml-2">
-                {studentData?.permanentPost || '------'}
+                {studentData?.User?.permanentPost|| '------'}
               </span>
             </p>
             <p>
               থানা:
               <span className="inline-block border-b border-black w-60 ml-2">
-                {studentData?.PoliceStationName || '------'}
+                {studentData?.User?.permanentPoliceStation?.PoliceStationName || '------'}
               </span>
             </p>
             <p>
               জেলা:
               <span className="inline-block border-b border-black w-60 ml-2">
-                {studentData?.PermanentDistrictName || '------'}
+                {studentData?.User?.permanentPoliceStation?.District?.DistrictName || '------'}
               </span>
             </p>
           </div>
@@ -157,15 +157,15 @@ const PrintOne = ({ id, title, studentData }) => {
             </span>
             এবং জন্ম তারিখ:
             <span className="inline-block border-b border-black w-40 ml-2 text-center">
-              {studentData?.DateOfBirth || '------'}
+              {studentData?.User?.DateOfBirth || '------'}
             </span>
             সে অত্র বিদ্যালয়ে
             <span className="inline-block border-b border-black w-28 mx-2 text-center">
-              {studentData?.SessionName || '------'}
+              {studentData?.AcademicSession?.SessionName || '------'}
             </span>
             ইং শিক্ষাবর্ষে
             <span className="inline-block border-b border-black w-28 mx-2 text-center">
-              {bnBijoy2Unicode(studentData?.ClassName) || '------'}
+              {bnBijoy2Unicode(studentData?.Class?.ClassName) || '------'}
             </span>
             জামাতে অধ্যায়ন করেছে।
             <span className=" border-b border-black w-20 mx-2 text-center">

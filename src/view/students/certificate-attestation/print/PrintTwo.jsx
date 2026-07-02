@@ -62,30 +62,30 @@ const PrintTwo = ({ id, studentData }) => {
               {cfidData?.User?.MotherName || '------'}
             </span>
           </p>
-          <p>
-            গ্রাম:
-            <span className="inline-block border-b border-black w-60 ml-2">
-              {studentData?.permanentVill || '------'}
-            </span>
-          </p>
-          <p>
-            ডাক:
-            <span className="inline-block border-b border-black w-60 ml-2">
-              {studentData?.permanentPost || '------'}
-            </span>
-          </p>
-          <p>
-            থানা:
-            <span className="inline-block border-b border-black w-60 ml-2">
-              {studentData?.PoliceStationName || '------'}
-            </span>
-          </p>
-          <p>
-            জেলা:
-            <span className="inline-block border-b border-black w-60 ml-2">
-              {studentData?.PermanentDistrictName || '------'}
-            </span>
-          </p>
+           <p>
+              গ্রাম:
+              <span className="inline-block border-b border-black w-60 ml-2">
+                {studentData?.User?.permanentVill || '------'}
+              </span>
+            </p>
+            <p>
+              ডাক:
+              <span className="inline-block border-b border-black w-60 ml-2">
+                {studentData?.User?.permanentPost|| '------'}
+              </span>
+            </p>
+            <p>
+              থানা:
+              <span className="inline-block border-b border-black w-60 ml-2">
+                {studentData?.User?.permanentPoliceStation?.PoliceStationName || '------'}
+              </span>
+            </p>
+            <p>
+              জেলা:
+              <span className="inline-block border-b border-black w-60 ml-2">
+                {studentData?.User?.permanentPoliceStation?.District?.DistrictName || '------'}
+              </span>
+            </p>
         </div>
         ভর্তির রেজিস্ট্রি অনুযায়ী তাহার :
         <span className="inline-block border-b border-black w-28 mx-2 text-center">
@@ -93,15 +93,15 @@ const PrintTwo = ({ id, studentData }) => {
         </span>
         এবং জন্ম তারিখ:
         <span className="inline-block border-b border-black w-40 ml-2 text-center">
-          {studentData?.DateOfBirth || '------'}
+          {studentData?.User?.DateOfBirth || '------'}
         </span>
         সে অত্র বিদ্যালয়ে
         <span className="inline-block border-b border-black w-28 mx-2 text-center">
-          {studentData?.SessionName || '------'}
+          {studentData?.AcademicSession?.SessionName || '------'}
         </span>
         ইং শিক্ষাবর্ষে
         <span className="inline-block border-b border-black w-28 mx-2 text-center">
-          {studentData?.ClassName || '------'}
+          {bnBijoy2Unicode(studentData?.Class?.ClassName) || '------'}
         </span>
         জামাতে অধ্যায়ন করেছে।
         <span className=" border-b border-black w-20 mx-2 text-center">

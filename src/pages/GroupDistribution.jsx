@@ -221,11 +221,11 @@ const GroupDistribution = ({ pageTitle }) => {
                     checked={selectedRows.includes(student.AdmissionID)}
                   />
                 </td>
-                <td className="p-2">{student.StudentCode}</td>
-                <td className="p-2">{bnBijoy2Unicode(student.StudentName)}</td>
-                <td className="p-2">{bnBijoy2Unicode(student.ClassName)}</td>
-                <td className="p-2">{bnBijoy2Unicode(student.SubClass)}</td>
-                <td className="p-2">{student.ResidentialName}</td>
+                <td className="p-2">{student?.User?.UserCode}</td>
+                <td className="p-2">{bnBijoy2Unicode(student?.User?.UserName)}</td>
+                <td className="p-2">{bnBijoy2Unicode(student?.Class.ClassName)}</td>
+                <td className="p-2">{bnBijoy2Unicode(student?.SubClass?.SubClass)}</td>
+                {/* <td className="p-2">{student.ResidentialName}</td> */}
               </tr>
             ))}
             {paginatedData.length === 0 && (
