@@ -14,6 +14,10 @@ export default function DataExportModel({userData}) {
     });
 
     const onSubmit = async (data) => {
+
+
+        console.log(userData);
+        
         if (!userData || userData.length === 0) return;
 
         const { ReportName, column } = data;
@@ -83,9 +87,10 @@ export default function DataExportModel({userData}) {
                     <thead>
                         <tr>
                             ${columns.map(c => `
-                                <th style="${c.size ? `width:${c.size}px;` : ""}"
-                                    class="border-r border-b border-black text-black align-middle pb-4 font-SolaimanLipi">
-                                    ${c.name}
+                                <th style="${c.size ? `width:${c.size}px;` : ""} font-family: 'SolaimanLipiNormal'"
+                                    class="border-r border-b border-black text-black align-middle pb-4">
+                                    ${c.name == 'logo' ? translate('Image') : translate(c.name)}
+                           
                                 </th>
                                 `).join("")
                             }
@@ -96,18 +101,23 @@ export default function DataExportModel({userData}) {
                             <tr style="page-break-inside: avoid;">
                                 ${r.map((cell, colIndex) => {
                                 const col = columns[colIndex];
-
-                                if (col.name === "logo" && cell) {
+                                if (col.name == "logo") {
                                     return `
-                                    <td style="${col.size ? `width:${col.size}px;` : ""}"
-                                        class="text-center border-r border-b border-black">
-                                        <img src="${cell}" alt="logo" style="max-height:60px; margin:auto;" />
-                                    </td>
+                                        <td style="${col.size ? `width:${col.size}px;` : ""}"
+                                            class="text-center border-r border-b border-black p-1">
+                                            <img
+                                                src="${cell || "avatar.png"}"
+                                                alt="logo"
+                                                style="max-height:100px; margin:auto; width: 80px;"
+                                                onerror="this.onerror=null; this.src='/avatar.png';"
+                                                alt="avator"
+                                            />
+                                        </td>
                                     `;
                                 }
 
                                 return `
-                                    <td style="${col.size ? `width:${col.size}px;` : ""}"
+                                    <td style="${col.size ? `width:${col.size}px;` : ""} font-family: 'SolaimanLipiNormal' "
                                         class="text-center border-r border-b border-black">
                                     ${cell}
                                     </td>
@@ -122,11 +132,42 @@ export default function DataExportModel({userData}) {
         `;
 
         document.body.appendChild(container);
-        window.print();
-        window.onafterprint = () => {
-            document.body.removeChild(container);
-            window.onafterprint = null;
-        };
+
+
+        setTimeout(() => {
+            window.print();
+            
+            // Store the container reference
+            const printContainer = container;
+            
+            // Handle both print and cancel scenarios
+            const cleanup = () => {
+                if (printContainer.parentNode) {
+                    document.body.removeChild(printContainer);
+                }
+                window.onafterprint = null;
+                window.onfocus = null;
+            };
+            window.onafterprint = cleanup;
+            let focusTimeout = null;
+            window.onfocus = () => {
+                if (focusTimeout) {
+                    clearTimeout(focusTimeout);
+                    focusTimeout = null;
+                }
+                focusTimeout = setTimeout(() => {
+                    cleanup();
+                    focusTimeout = null;
+                }, 500);
+            };
+            setTimeout(() => {
+                if (printContainer.parentNode) {
+                    cleanup();
+                }
+            }, 1000);
+            
+        }, 1000);
+       
     };
 
 

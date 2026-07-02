@@ -134,8 +134,7 @@ const Navbar = ({ schoolData, bufferConveter }) => {
                   </li>
 
                   <li>
-                    <a href={`/${schoolid}/login`}
-                      className="cursor-pointer font-bold text-[18px] bg-theme-color text-white py-[10px] px-[20px] rounded-[4px] flex items-center gap-1">
+                    <a href={`/${schoolid}/login`} className="cursor-pointer font-bold text-[18px] bg-theme-color text-white py-[10px] px-[20px] rounded-[4px] flex items-center gap-1">
                       গার্ডিয়ান পোর্টাল
                     </a>
                   </li>

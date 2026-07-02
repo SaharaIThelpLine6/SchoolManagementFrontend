@@ -65,17 +65,17 @@ const DataExport = ({ pageTitle }) => {
     }
   );
 
-  // Logo processing - প্রতিটি student এর জন্য আলাদা লোগো প্রসেস
+  // Process student data with proper nested access
   const processedStudentData = useMemo(() => {
     if (!searchStudentInfo || !searchStudentInfo.length) return [];
 
     return searchStudentInfo.map((student) => {
       let studentLogo = null;
 
-      // যদি student এর নিজস্ব লোগো থাকে
-      if (student.Image?.data) {
+      // If student has image
+      if (student.User?.UserImage?.Image?.data) {
         try {
-          const buffer = Buffer.from(student.Image.data);
+          const buffer = Buffer.from(student.User.UserImage.Image.data);
           const base64String = buffer.toString('base64');
           studentLogo = `data:image/png;base64,${base64String}`;
         } catch (error) {
@@ -84,18 +84,69 @@ const DataExport = ({ pageTitle }) => {
         }
       }
 
+      // Extract data from nested structure
       return {
-        ...student,
+        // Basic student info
+        AdmissionID: student.AdmissionID,
+        UserID: student.UserID,
+        StudentCode: student.User?.UserCode || '-',
+        StudentName: student.User?.UserName || '-',
+        FatherName: student.User?.FatherName || '-',
+        MotherName: student.User?.MotherName || '-',
+        Mobile1: student.User?.Mobile1 || '-',
+        Mobile2: student.User?.Mobile2 || '-',
+        Email: student.User?.Email || '-',
+        DateOfBirth: student.User?.DateOfBirth || '-',
+        NIDNO: student.User?.NIDNO || '-',
+        BloodGroup: student.User?.BloodGroup || '-',
+        GenderID: student.User?.GenderID || '-',
+        
+        // Session info
+        SessionName: student.AcademicSession?.SessionName || '-',
+        
+        // Class info
+        ClassName: student.Class?.ClassName || '-',
+        SubClass: student.SubClass?.SubClass || '-',
+        
+        // Admission info
+        AdmissionSerial: student.AdmissionSerial || '-',
+        NewOldId: student.NewOldId || '-',
+        ResidentialStatusId: student.ResidentialStatusId || '-',
+        ResidentialName: student.ResidentialStatusId === 1 ? 'আবাসিক' : 
+                         student.ResidentialStatusId === 2 ? 'অনাবাসিক' : '-',
+        
+        // Permanent address
+        permanentVill: student.User?.permanentVill || '-',
+        permanentPost: student.User?.permanentPost || '-',
+        PoliceStationName: student.User?.permanentPoliceStation?.PoliceStationName || '-',
+        PermanentDistrictName: student.User?.permanentPoliceStation?.District?.DistrictName || '-',
+        PermanentDivisionName: student.User?.permanentPoliceStation?.District?.Division?.DivisionName || '-',
+        
+        // Transient/Primary address
+        TransientVill: student.User?.TransientVill || '-',
+        TransientPost: student.User?.TransientPost || '-',
+        TransientPoliceStationName: student.User?.transientPoliceStation?.PoliceStationName || '-',
+        TransientDistrictName: student.User?.transientPoliceStation?.District?.DistrictName || '-',
+        TransientDivisionName: student.User?.transientPoliceStation?.District?.Division?.DivisionName || '-',
+        
+        // Image
         logo: studentLogo,
+        
+        // Additional fields
+        SFTID: student.SFTID,
+        ExamAction: student.ExamAction,
+        AdmissionStatus: student.AdmissionStatus,
+        AdmissionAction: student.AdmissionAction,
+        FinancialStatus: student.FinancialStatus || '-',
       };
     });
   }, [searchStudentInfo]);
 
-  // Main logo for institutional logo (যদি institutional লোগো থাকে)
+  // Main logo for institutional logo
   useEffect(() => {
-    if (searchStudentInfo?.Image?.data) {
+    if (searchStudentInfo?.[0]?.User?.UserImage?.data) {
       try {
-        const buffer = Buffer.from(searchStudentInfo.Image.data);
+        const buffer = Buffer.from(searchStudentInfo[0].User.UserImage.data);
         const base64String = buffer.toString('base64');
         const imageSrc = `data:image/png;base64,${base64String}`;
         setLogo(imageSrc);
@@ -113,17 +164,11 @@ const DataExport = ({ pageTitle }) => {
     dispatch(fetchSettingsData());
   }, [dispatch, pageTitle]);
 
-
-  useEffect(() => {
-    console.log("------------------");
-    console.log(subClassData);
-
-  }, [subClassData])
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedColumns, setSelectedColumns] = useState([]);
   const [errors, setErrors] = useState({ filters: false });
 
-  // Define all columns (including logo)
+  // Define all columns with updated field mappings
   const allColumns = [
     { id: 'logo', label: 'Logo', field: 'logo', type: 'image' },
     { id: 'ID', label: 'ID', field: 'StudentCode' },
@@ -136,47 +181,30 @@ const DataExport = ({ pageTitle }) => {
     { id: 'Session', label: 'Session', field: 'SessionName' },
     { id: 'Class', label: 'Class', field: 'ClassName' },
     { id: 'Sub Class', label: 'Sub Class', field: 'SubClass' },
-    {
-      id: 'Admission Serial',
-      label: 'Admission Serial',
-      field: 'AdmissionSerial',
-    },
+    { id: 'Admission Serial', label: 'Admission Serial', field: 'AdmissionSerial' },
     { id: 'Gender', label: 'Gender', field: 'GenderID' },
     { id: 'Residence', label: 'Residence', field: 'ResidentialName' },
     { id: 'New/Old', label: 'New/Old', field: 'NewOldId' },
     { id: 'Date Of Birth', label: 'Date of Birth', field: 'DateOfBirth' },
-    {
-      id: 'NID/Birth Registration',
-      label: 'NID/Birth Registration',
-      field: 'NIDNO',
-    },
+    { id: 'NID/Birth Registration', label: 'NID/Birth Registration', field: 'NIDNO' },
     { id: 'Blood Group', label: 'Blood Group', field: 'BloodGroup' },
-    { id: 'Village', label: 'Permanent Village', field: 'permanentVill' },
-    { id: 'Post Office', label: 'Permanent Post Office', field: 'permanentPost' },
-    {
-      id: 'Police Station',
-      label: 'Permanent Police Station',
-      field: 'PoliceStationName',
-    },
-    { id: 'District', label: 'Permanent District', field: 'PermanentDistrictName' },
-
-
-
-    { id: 'primaryVillage', label: 'Primary Village', field: 'permanentVill' },
-    { id: 'primaryPost Office', label: 'Primary Post Office', field: 'permanentPost' },
-    {
-      id: 'primaryPolice Station',
-      label: 'Primary Police Station',
-      field: 'PoliceStationName',
-    },
-    { id: 'primaryDistrict', label: 'Primary District', field: 'PermanentDistrictName' },
-
-
-    {
-      id: 'Financial Status',
-      label: 'Financial Status',
-      field: 'FinancialStatus',
-    },
+    
+    // Permanent Address fields
+    { id: 'permanentDivision', label: 'Permanent Division', field: 'PermanentDivisionName' },
+    { id: 'permanentDistrict', label: 'Permanent District', field: 'PermanentDistrictName' },
+    { id: 'permanentPoliceStation', label: 'Permanent Police Station', field: 'PoliceStationName' },
+    { id: 'permanentPostOffice', label: 'Permanent Post Office', field: 'permanentPost' },
+    { id: 'permanentVillage', label: 'Permanent Village', field: 'permanentVill' },
+    
+    // Transient/Primary Address fields
+    { id: 'transientDivision', label: 'Transient Division', field: 'TransientDivisionName' },
+    { id: 'transientDistrict', label: 'Transient District', field: 'TransientDistrictName' },
+    { id: 'transientPoliceStation', label: 'Transient Police Station', field: 'TransientPoliceStationName' },
+    { id: 'transientPostOffice', label: 'Transient Post Office', field: 'TransientPost' },
+    { id: 'transientVillage', label: 'Transient Village', field: 'TransientVill' },
+    
+    
+    { id: 'Financial Status', label: 'Financial Status', field: 'FinancialStatus' },
   ];
 
   const handleColumnToggle = useCallback((columnId) => {
@@ -202,12 +230,13 @@ const DataExport = ({ pageTitle }) => {
       const filteredStudent = {};
       allColumns.forEach((col) => {
         if (selectedColumns.includes(col.id)) {
-          filteredStudent[col.id] = student[col.field] || '-';
+          const value = student[col.field];
+          filteredStudent[col.id] = value !== undefined && value !== null && value !== '' ? value : '-';
         }
       });
       return filteredStudent;
     });
-  }, [processedStudentData, selectedColumns]);
+  }, [processedStudentData, selectedColumns, allColumns]);
 
   // Generate table columns dynamically based on selection
   const dynamicColumns = useMemo(() => {
@@ -243,8 +272,12 @@ const DataExport = ({ pageTitle }) => {
                 </div>
               ) : (
                 <div className="flex justify-center items-center">
-                  <div className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 text-[10px]">
-                    No Logo
+                  <div className="w-10 h-10 rounded-full border border-gray-300 flex items-center justify-center text-gray-400 text-[10px] overflow-hidden">
+                    <img
+                      src={`/avatar.png`}
+                      alt="Student Logo"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
               ),
@@ -260,7 +293,7 @@ const DataExport = ({ pageTitle }) => {
       });
   }, [selectedColumns, translate]);
 
-  // Enhanced export to Excel with logo information
+  // Enhanced export to Excel
   const exportToExcel = useCallback(async () => {
     if (!validateFilters()) {
       toast.error('অনুগ্রহ করে সব প্রয়োজনীয় ফিল্টার নির্বাচন করুন।');
@@ -278,16 +311,13 @@ const DataExport = ({ pageTitle }) => {
     }
 
     try {
-      // Create workbook and worksheet
       const workbook = XLSX.utils.book_new();
 
-      // Prepare data for Excel
       const exportData = filteredStudentData.map((row) => {
         const rowData = {};
         selectedColumns.forEach((colId) => {
           const column = allColumns.find((c) => c.id === colId);
           if (colId === 'logo') {
-            // For logo column, indicate presence
             rowData[column.label] =
               row[colId] && row[colId] !== '-' ? 'Logo Available' : 'No Logo';
           } else {
@@ -297,13 +327,9 @@ const DataExport = ({ pageTitle }) => {
         return rowData;
       });
 
-      // Create worksheet
       const worksheet = XLSX.utils.json_to_sheet(exportData);
-
-      // Add worksheet to workbook
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Students');
 
-      // Generate Excel file
       const excelBuffer = XLSX.write(workbook, {
         bookType: 'xlsx',
         type: 'array',
@@ -313,7 +339,6 @@ const DataExport = ({ pageTitle }) => {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
 
-      // Save file
       if ('showSaveFilePicker' in window) {
         try {
           const handle = await window.showSaveFilePicker({
@@ -333,7 +358,6 @@ const DataExport = ({ pageTitle }) => {
           await writable.close();
         } catch (error) {
           if (error.name !== 'AbortError') {
-            // Fallback to traditional download
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
@@ -345,7 +369,6 @@ const DataExport = ({ pageTitle }) => {
           }
         }
       } else {
-        // Fallback for browsers that don't support File System Access API
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -378,40 +401,23 @@ const DataExport = ({ pageTitle }) => {
     return filteredStudentData.slice(start, start + PAGE_SIZE);
   }, [filteredStudentData, currentPage]);
 
-  console.log(paginatedData, 'paginatedData');
-
-    const handlePrint = useCallback(() => {
-    // ----------------------------------
-    showModal(translate('Data Export'), 'DATA_EXPORT_FEILD', paginatedData);
-    // if (paginatedData?.length > 0) {
-    //   window.print();
-    // } else {
-    //   toast.error('ডেটা প্রিন্ট করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
-    // }
-  }, [translate]);
+  const handlePrint = useCallback(() => {
+    showModal(translate('Data Export'), 'DATA_EXPORT_FEILD', filteredStudentData);
+  }, [translate, paginatedData]);
 
   if (isSVTLoading || isSearchLoading) return <Loading />;
   if (isSVTError || settingsError)
     return <p className="text-red-500">Failed to load required data</p>;
-
-
-
-  // if(subClassDataSuccess){
-  //   console.log("================= ======================");
-  //   console.log(subClassData);
-  // }
 
   return (
     <FormProvider {...methods}>
       <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-SolaimanLipi print:hidden">
         {/* Top Section - Title and Filters */}
         <div className="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-4">
-          {/* Header Title */}
           <h2 className="text-xl font-bold text-black shrink-0 2xl:mr-6">
             {translate('Export students data')}
           </h2>
 
-          {/* Filter Selects */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-5 gap-4 flex-1">
             <DefaultSelect
               options={sessionData || []}
@@ -460,13 +466,11 @@ const DataExport = ({ pageTitle }) => {
             />
           </div>
 
-          {/* Export Buttons */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:mt-6 w-full 2xl:w-auto">
             <Button
               className="w-full sm:w-auto flex items-center gap-2"
               onClick={exportToExcel}
             >
-              {/* <FileSpreadsheet className="w-4 h-4" /> */}
               {translate('Data Export (Excel)')}
             </Button>
 
@@ -475,7 +479,6 @@ const DataExport = ({ pageTitle }) => {
               className="w-full sm:w-auto flex items-center gap-2 bg-green-500 hover:bg-green-600"
               onClick={handlePrint}
             >
-              {/* <FileDown className="w-4 h-4" /> */}
               {translate('Data Export (PDF)')}
             </Button>
           </div>
@@ -489,7 +492,6 @@ const DataExport = ({ pageTitle }) => {
                 {translate('Select Columns')}
               </h3>
               <div className="p-2">
-                {/* "All Select" checkbox */}
                 <div className="mb-2">
                   <label className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded cursor-pointer">
                     <input
@@ -510,7 +512,6 @@ const DataExport = ({ pageTitle }) => {
                   </label>
                 </div>
 
-                {/* Individual column checkboxes */}
                 <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
                   {allColumns.map((column) => (
                     <label
@@ -554,7 +555,6 @@ const DataExport = ({ pageTitle }) => {
                     />
                   </div>
 
-                  {/* Pagination */}
                   <DefaultPagination
                     currentPage={currentPage}
                     totalPages={totalPages}
@@ -574,11 +574,6 @@ const DataExport = ({ pageTitle }) => {
           )}
         </div>
       </div>
-      {paginatedData && (
-        <div className="hidden print:block">
-          <StudentDataReportPdf data={paginatedData} />
-        </div>
-      )}
     </FormProvider>
   );
 };

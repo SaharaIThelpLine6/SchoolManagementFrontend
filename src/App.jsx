@@ -2,7 +2,7 @@ import { RouterProvider } from "react-router-dom";
 import { cssTransition, ToastContainer } from "react-toastify";
 import "./App.css";
 import "animate.css/animate.min.css";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import Loading from "./components/Loading/Loading";
 import SocketManager from "./components/socket/SocketManager";
 import { useSelector } from "react-redux";
@@ -16,7 +16,13 @@ const bounce = cssTransition({
 export default function App() {
   const { currectLanguage } = useSelector((state) => state.language);
   const fontClass = currectLanguage === "bn" ? "font-SolaimanLipi" : "font-Poppins";
-  return (
+  useEffect(() => {
+    document.documentElement.classList.toggle(
+      "lang-bn",
+      currectLanguage === "bn"
+    );
+  }, [currectLanguage]);
+    return (
     <>
       <SocketManager />
       <Suspense fallback={<Loading />}>

@@ -242,10 +242,10 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
     <>
       {!showForm && (
         <FormProvider {...methods}>
-          <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+          <div className="font-default bg-white p-6 md:p-4 rounded-xl shadow-lg">
             <div className="block w-full overflow-x-auto">
               <div className="flex flex-row justify-start items-center mb-4">
-                <h3 className="font-SolaimanLipi text-[20px] font-bold">
+                <h3 className="font-default text-[20px] font-bold">
                   {translate('Online Admission List')}
                 </h3>
                 {/* <Button onClick={handleNewAdmission}>New Admission</Button> */}

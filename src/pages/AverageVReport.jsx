@@ -197,10 +197,10 @@ const AverageVReport = ({ pageTitle }) => {
   //   }).unwrap()
   // };
   return (
-    <div className="font-SolaimanLipi">
+    <div className="font-default">
       <div className="flex flex-col gap-3">
         <div className=" w-full border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite print:hidden">
-          <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">
+          <h1 className="font-semibold text-lg text-theme-dark font-default mb-4">
             {translate(pageTitle)}
           </h1>
           

@@ -828,6 +828,29 @@ const useTranslate = () => {
     "No skip": "সকল সিটে",
     "Skip 1 row": "১ রো বাদ দিয়ে",
     "Exam Seat plan": "পরীক্ষার আসন বিন্যাস",
+    "Fathar Name": "বাবার নাম",
+    "permanentVillage": "স্থায়ী গ্রাম",
+    "permanentPostOffice": "স্থায়ী ডাক",
+    "permanentPoliceStation": "স্থায়ী থানা",
+    "permanentDistrict": "স্থায়ী জেলা",
+    "permanentDivision": "স্থায়ী বিভাগ",
+     "transientVillage": "বর্তমান গ্রাম",
+    "transientPostOffice": "বর্তমান ডাক",
+    "transientPoliceStation": "বর্তমান থানা",
+    "transientDistrict": "বর্তমান জেলা",
+    "transientDivision": "বর্তমান বিভাগ",
+
+    "Permanent Village": "স্থায়ী গ্রাম",
+    "Permanent Post Office": "স্থায়ী ডাক",
+    "Permanent Police Station": "স্থায়ী থানা",
+    "Permanent District": "স্থায়ী জেলা",
+    "Permanent Division": "স্থায়ী বিভাগ",
+
+    "Transient Village": "বর্তমান গ্রাম",
+    "Transient Post Office": "বর্তমান ডাক",
+    "Transient Police Station": "বর্তমান থানা",
+    "Transient District": "বর্তমান জেলা",
+    "Transient Division": "বর্তমান বিভাগ",
   };
 
   return (key) =>

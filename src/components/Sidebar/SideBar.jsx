@@ -21,10 +21,6 @@ const SideBar = () => {
     }
     return false;
   };
-
-  const { currectLanguage } = useSelector((state) => state.language);
-  const fontClass =
-    currectLanguage === 'bn' ? 'font-SolaimanLipi' : 'font-lato';
   const {
     data: permissions,
     isLoading,
@@ -302,7 +298,7 @@ const SideBar = () => {
                 <>
                   <button
                     onClick={() => handleToggle(menu.id)}
-                    className={`w-full flex px-4 font-SolaimanLipi items-center justify-between border-l-6 border-solid gap-2 py-2.5 ${
+                    className={`w-full flex px-4 font-default items-center justify-between border-l-6 border-solid gap-2 py-2.5 ${
                       location.pathname.startsWith(menu.route)
                         ? 'bg-[#deeff9] text-[#007af7] border-l-[#007af7]'
                         : 'hover:text-[#007af7] hover:bg-[#ddeffe] border-l-transparent'
@@ -337,7 +333,7 @@ const SideBar = () => {
                           to={item.route}
                           end
                           className={({ isActive }) =>
-                            `block py-2 ${fontClass} pl-4 rounded-md transition
+                            `block py-2 font-default pl-4 rounded-md transition
                             ${
                               isActive
                                 ? 'bg-[#ddeffe] text-[#007af7]'

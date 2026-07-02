@@ -125,7 +125,7 @@ const AddDesignation = ({ pageTitle }) => {
   ];
 
   return (
-    <div className="p-4 font-lato bg-white md:p-4 rounded-xl shadow-lg">
+    <div className="p-4 font-default bg-white md:p-4 rounded-xl shadow-lg">
       <div className="flex justify-between items-center mb-4 border-b border-[#e9edf4] py-5 pt-0">
         <h3 className="text-xl font-bold">{pageTitle || "Designation List"}</h3>
         <Button onClick={handleOpenModal}>

@@ -16,10 +16,6 @@ const SortableTable = ({
   tdclass,
 }) => {
   const [filters, setFilters] = useState({});
-  const { currectLanguage } = useSelector((state) => state.language);
-  const fontClass =
-    currectLanguage === 'bn' ? 'font-SolaimanLipi' : 'font-lato';
-
   const handleFilterChange = (field, value) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
@@ -71,7 +67,7 @@ const SortableTable = ({
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
         <thead
-          className={`text-xs sm:text-sm text-theme-dark ${fontClass} uppercase bg-gray-50`}
+          className={`text-xs sm:text-sm text-theme-dark font-default uppercase bg-gray-50`}
         >
           <tr>
             {columns.map((column, index) => (
@@ -177,7 +173,7 @@ const SortableTable = ({
               {columns.map((column, cellIndex) => (
                 <td
                   key={cellIndex}
-                  className={`px-3 py-4 font-medium text-theme-dark ${rowWrap ? 'whitespace-nowrap' : 'whitespace-wrap'}  ${fontClass} text-${
+                  className={`px-3 py-4 font-medium text-theme-dark ${rowWrap ? 'whitespace-nowrap' : 'whitespace-wrap'}  font-default text-${
                     column.hozAlign || 'start'
                   } ${tdclass}`}
                 >

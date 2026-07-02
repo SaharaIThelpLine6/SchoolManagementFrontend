@@ -176,7 +176,7 @@ const AddTeacher = ({ pageTitle }) => {
   ];
 
   return (
-    <div className="-translate-y-4 font-lato bg-white p-6 mt-5 md:p-4 rounded-xl shadow-lg">
+    <div className="-translate-y-4 font-default bg-white p-6 mt-5 md:p-4 rounded-xl shadow-lg">
       <div className="block w-full overflow-x-auto">
         <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
           <h3 className="font-SolaimanLipi text-[20px] font-bold">

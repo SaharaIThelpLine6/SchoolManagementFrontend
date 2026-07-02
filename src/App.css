@@ -123,6 +123,13 @@
   font-family: SutonnyMJ;
   src: url("./assets/font/SutonnyMJ.ttf") format("truetype")
 }
+:root {
+  --app-font: "Plus Jakarta Sans", sans-serif;
+}
+
+html.lang-bn {
+  --app-font: "SolaimanLipiNormal" serif;
+}
 
 /* @font-face {
   font-family: 'Kalpurush';

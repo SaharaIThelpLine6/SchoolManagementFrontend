@@ -92,7 +92,7 @@ const AddTeacherForm = ({ userId }) => {
   const newButton = "New";
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="font-lato">
+      <form onSubmit={handleSubmit(onSubmit)} className="font-default">
         <div className="px-[24px] text-[14px]">
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 2xl:grid-cols-6 gap-3 w-full flex-wrap lg:flex-nowrap">
             {/*Form Start*/}

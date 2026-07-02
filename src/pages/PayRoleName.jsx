@@ -54,7 +54,7 @@ const PayRoleName = () => {
 
   return (
     <FormProvider {...methods}>
-      <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-SolaimanLipi">
+      <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-default">
         <OwenGuide/>
         <div className="md:flex w-full px-3 gap-3">
           {/*Input form Start*/}
@@ -112,7 +112,7 @@ const PayRoleName = () => {
           {/*Input form End*/}
 
           {/*Table start*/}
-          <div className="md:w-[50%] font-lato">
+          <div className="md:w-[50%] font-default">
             <SortableTable columns={columns} data={paginatedData} />
 
             {/* Pagination Controls */}

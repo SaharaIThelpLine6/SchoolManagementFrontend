@@ -98,7 +98,7 @@ const ExamAdmitCard = () => {
       <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg hidden_in_print">
         <div className="filter_header flex items-center justify-between mb-6">
           <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
-            {translate("Exam List Made")}
+            {translate("")}
           </h3>
           <button
             className="rounded-full p-2 bg-gray-200 hover:bg-gray-300 transition"
@@ -207,7 +207,8 @@ const ExamAdmitCard = () => {
           </form>
         </FormProvider>
       </div>
-      <div className="print_canvas">
+      <div className="">
+        
         {color === "poriyat" && (
           <AdmitCardRenderer type={reportType} data={studentAdmitCards.data} />
         )}

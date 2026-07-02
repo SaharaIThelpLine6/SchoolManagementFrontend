@@ -256,10 +256,10 @@ const PointVReport = ({ pageTitle }) => {
   };
 
   return (
-    <div className="font-SolaimanLipi">
+    <div className="font-default">
       <div className="flex flex-col gap-3 print:hidden">
         <div className=" w-full border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
-          <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">
+          <h1 className="font-semibold text-lg text-theme-dark font-default mb-4">
             {translate(pageTitle)}
           </h1>
 

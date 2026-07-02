@@ -295,13 +295,13 @@ const StudentVacationListTable = ({ pageTitle }) => {
 
   return (
     <div className="">
-      <div className="print:hidden font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+      <div className="print:hidden font-default bg-white p-6 md:p-4 rounded-xl shadow-lg">
         <div className="block w-full overflow-x-auto">
           <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
             <div className="w-full flex flex-col gap-5 mb-3">
               <div className="flex justify-between w-full gap-5 sm:gap-0 items-center">
                 {/* Left Buttons */}
-                <h3 className="font-SolaimanLipi text-[20px] font-bold">
+                <h3 className="font-default text-[20px] font-bold">
                   {translate('List of holidays')}
                 </h3>
                 <ViewPermission

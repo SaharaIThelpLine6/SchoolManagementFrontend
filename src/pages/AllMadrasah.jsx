@@ -374,10 +374,10 @@ const AllMadrasah = ({ pageTitle }) => {
   }
 
   return (
-    <div className="font-lato bg-white p-6 rounded-xl shadow-lg">
+    <div className="font-default bg-white p-6 rounded-xl shadow-lg">
       <div className="flex flex-col">
         <div className="filter_header border-b border-[#e9edf4] flex flex-col sm:flex-row items-start sm:items-center justify-between pb-5 mb-6 gap-4">
-          <h3 className="font-SolaimanLipi text-2xl font-bold text-gray-800">
+          <h3 className="font-default text-2xl font-bold text-gray-800">
             {translate('All Madrasah List')}
           </h3>
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
