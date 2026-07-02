@@ -21,7 +21,7 @@ const StudentPaymentHistory = () => {
   // API data
   const { data = [], isLoading } = useGetStudentPaymentsQuery();
 
-  console.log(data, "data")
+  // console.log(data, "data")
 
   // pagination state
   const [currentPage, setCurrentPage] = useState(1);
