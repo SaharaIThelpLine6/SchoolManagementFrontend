@@ -146,6 +146,7 @@ import ExamHallSetup from '../pages/ExamHallSetup';
 import ExamHallList from '../pages/ExamHallList';
 import ExamSitPlan from '../pages/ExamSitPlan';
 import CreateExamSitPlan from '../pages/CreateExamSitPlan';
+import UserAttendance from '../pages/UserAttendance';
 
 const Router = createBrowserRouter([
   {
@@ -435,6 +436,14 @@ const Router = createBrowserRouter([
                 element: (
                   // <RequirePermission permissionId={permissionsDataList.class}>
                   <UserNotice pageTitle="User Notice" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'user-attendance',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <UserAttendance pageTitle="User Notice" />
                   // </RequirePermission>
                 ),
               },

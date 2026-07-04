@@ -410,6 +410,7 @@ export const userStudentSlice = createApi({
       }),
       providesTags: ['AdmissionTimeMessage'],
     }),
+    getStudentAttendance: builder.query({ query: (id) => ({ url: `student_attendance/${id}`, }), }),
     // Post admission time message
     postAdmissionTimeMessage: builder.mutation({
       query: (body) => ({
@@ -497,5 +498,6 @@ export const {
   usePostAdmissionTimeMessageMutation,
   usePutAdmissionTimeMessageMutation,
   useDeleteAdmissionTimeMessageMutation,
-  useGetSingleAdmissionTimeMessageQuery
+  useGetSingleAdmissionTimeMessageQuery,
+  useGetStudentAttendanceQuery
 } = userStudentSlice;
