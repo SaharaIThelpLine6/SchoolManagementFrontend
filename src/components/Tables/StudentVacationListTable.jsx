@@ -252,17 +252,11 @@ const StudentVacationListTable = ({ pageTitle }) => {
       title: translate('From Time'),
       field: 'VacationTimeFrom',
       hozAlign: 'center',
-      render: (row) => {
-        return formatTime(row.VacationTimeFrom);
-      },
     },
     {
       title: translate('Be Time'),
       field: 'VacationTimeTo',
       hozAlign: 'center',
-      render: (row) => {
-        return formatTime(row.VacationTimeTo);
-      },
     },
     {
       title: translate('Session'),

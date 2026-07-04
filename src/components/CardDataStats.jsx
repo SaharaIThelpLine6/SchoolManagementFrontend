@@ -35,11 +35,11 @@ const CardDataStats = ({
   return (
     <div className="flex items-center gap-4 rounded-md bg-white p-4 shadow-sm transition hover:shadow-md">
       <div
-        className={`flex h-14 md:h-16 w-14 md:w-16 items-center justify-center rounded-full ${bgColor}`}
+        className={`font-default flex h-14 md:h-16 w-14 md:w-16 items-center justify-center rounded-full ${bgColor}`}
       >
         {styledIcon}
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col font-default">
         <h4 className="text-xl font-semibold text-gray-800">{total}</h4>
         <span className={`text-sm ${textClass}`}>{title}</span>
       </div>

@@ -37,6 +37,71 @@ const TimePicker = ({
     return timeValue instanceof Date ? timeValue : null;
   };
 
+  /* const parseTimeString = (timeValue) => {
+    if (!timeValue) return null;
+
+    if (timeValue instanceof Date) {
+      return isNaN(timeValue.getTime()) ? null : timeValue;
+    }
+
+    if (typeof timeValue !== "string") return null;
+
+    // ISO date
+    const iso = new Date(timeValue);
+    if (!isNaN(iso.getTime())) {
+      return new Date(
+        2000,
+        0,
+        1,
+        iso.getHours(),
+        iso.getMinutes(),
+        iso.getSeconds()
+      );
+    }
+
+    // Match "3:58:15 PM" or "3:58 PM"
+    const match12 = timeValue.match(
+      /^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)$/i
+    );
+
+    if (match12) {
+      let [, h, m, s = "0", ampm] = match12;
+
+      let hour = parseInt(h, 10);
+      const minute = parseInt(m, 10);
+      const second = parseInt(s, 10);
+
+      ampm = ampm.toUpperCase();
+
+      if (ampm === "PM" && hour !== 12) hour += 12;
+      if (ampm === "AM" && hour === 12) hour = 0;
+
+      return new Date(2000, 0, 1, hour, minute, second);
+    }
+
+    // Match "15:58" or "15:58:15"
+    const match24 = timeValue.match(
+      /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/
+    );
+
+    if (match24) {
+      const [, h, m, s = "0"] = match24;
+
+      return new Date(
+        2000,
+        0,
+        1,
+        parseInt(h, 10),
+        parseInt(m, 10),
+        parseInt(s, 10)
+      );
+    }
+
+    return null;
+  };*/
+
+  
+ 
   // Format date for display
   const formatTimeForDisplay = (date) => {
     if (!date) return '';
@@ -54,7 +119,11 @@ const TimePicker = ({
   };
 
   const initialDate = defaultValue ? parseTimeString(defaultValue) : null;
-
+  console.log("===========Default and intial value");
+  
+  console.log(defaultValue);
+  console.log(initialDate);
+  
   // Get date format for Flatpickr
   const getDateFormat = () => {
     return timeFormat === '24h' ? "H:i" : "h:i K";

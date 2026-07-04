@@ -201,9 +201,15 @@ const StudentFilterModal = () => {
     },
     {
       title: "Residential",
-      field: "ResidentialStatusId",
       hozAlign: "left",
-      unicode: false,
+       render: (row) => {
+        return (
+          <React.Fragment>
+            {row?.userResidential?.ResidentialName}
+
+          </React.Fragment>
+        )
+      }
     },
   ];
 

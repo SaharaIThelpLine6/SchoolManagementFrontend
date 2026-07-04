@@ -61,25 +61,18 @@ const AddNewDonation = ({ onBack }) => {
     if (filteredStudent) {
       setUserTyping(false);
 
-      const fullAddress = `গ্রাম: ${bnBijoy2Unicode(
-        filteredStudent.permanentVill || ""
-      )}, ডাক: ${bnBijoy2Unicode(
-        filteredStudent.permanentPost || ""
-      )}, থানা: ${bnBijoy2Unicode(
-        filteredStudent.PoliceStationName || ""
-      )}, জেলা: ${bnBijoy2Unicode(
-        filteredStudent.PermanentDistrictName || ""
-      )}`;
+       const fullAddress = `গ্রাম: ${filteredStudent?.User?.permanentVill}, ডাক: ${filteredStudent?.User?.permanentPost}, থানা: ${
+        filteredStudent?.User?.permanentPoliceStation?.PoliceStationName}, জেলা: ${filteredStudent?.User?.permanentPoliceStation?.District?.DistrictName }`;
 
       reset({
         UserID: filteredStudent.UserID,
         CreateAt: filteredStudent.CreateAt?.split("T")[0] || "",
-        StudentCode: filteredStudent.StudentCode,
-        name: bnBijoy2Unicode(filteredStudent.StudentName),
-        fatherName: bnBijoy2Unicode(filteredStudent.FatherName),
-        motherName: bnBijoy2Unicode(filteredStudent.MotherName),
-        admissionNumber: filteredStudent.StudentCode,
-        birthDate: filteredStudent.DateOfBirth?.split("T")[0] || "",
+        StudentCode: filteredStudent?.User?.UserCode,
+        name: filteredStudent?.User?.UserName,
+        fatherName: filteredStudent?.User?.FatherName,
+        motherName: filteredStudent?.User?.MotherName,
+        admissionNumber: filteredStudent.AdmissionID,
+        birthDate: filteredStudent?.User?.DateOfBirth?.split("T")[0] || "",
         description: fullAddress,
       });
     }

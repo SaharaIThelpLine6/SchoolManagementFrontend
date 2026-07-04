@@ -31,6 +31,7 @@ const EditStudentVacationForm = ({ pageTitle, userId }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const translate = useTranslate();
+
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [userTyping, setUserTyping] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,7 +56,7 @@ const EditStudentVacationForm = ({ pageTitle, userId }) => {
     data: getStudentsVacationList,
     error: isVacationError,
     isLoading: isStudentsVacationListLoading,
-  } = useGetStudentsVacationListQuery({ page: currentPage, limit: 10 });
+  } = useGetStudentsVacationListQuery({ page: currentPage, limit: 10000000 });
 
   const vacationData = getStudentsVacationList?.data?.find(
     (record) => record.ID === userId
@@ -101,12 +102,20 @@ const EditStudentVacationForm = ({ pageTitle, userId }) => {
 
   // Pre-populate form with vacation data
   useEffect(() => {
+console.log("Student vacation details");
+
+    console.log(getStudentsVacationList);
+    console.log(userId);
+    console.log(vacationData);
+    
     if (vacationData) {
+      console.log(vacationData);
+      
       reset({
-        StudentCode: vacationData.User?.UserCode || "",
-        StudentName: bnBijoy2Unicode(vacationData.User?.UserName || ""),
-        FatherName: bnBijoy2Unicode(vacationData.FatherName || ""),
-        ClassName: bnBijoy2Unicode(vacationData.AcademicClass?.ClassName || ""),
+        StudentCode: vacationData?.User?.UserCode,
+        StudentName: vacationData?.User?.UserName || "MD EMon Hasan",
+        FatherName: vacationData?.User?.FatherName,
+        ClassName: vacationData?.AcademicClass?.ClassName,
         SessionID: vacationData.SessionID || "",
         ID: vacationData.VacationID || "",
         RelationID: vacationData.GuardianID || "",
@@ -117,15 +126,15 @@ const EditStudentVacationForm = ({ pageTitle, userId }) => {
           ? [new Date(vacationData.VacationDateTo)]
           : null,
         VacationTimeFrom: vacationData.VacationTimeFrom
-          ? [new Date(vacationData.VacationTimeFrom)]
+          ? vacationData.VacationTimeFrom
           : null,
         VacationTimeTo: vacationData.VacationTimeTo
-          ? [new Date(vacationData.VacationTimeTo)]
+          ? vacationData.VacationTimeTo
           : null,
         Comment: vacationData.Comment || "",
       });
     }
-  }, [vacationData, reset]);
+  }, [vacationData, userId, reset]);
 
   // Set default session and date
   useEffect(() => {
@@ -196,7 +205,7 @@ const EditStudentVacationForm = ({ pageTitle, userId }) => {
 
       reset();
       hideModal();
-      navigate("/students/vacation"); // Navigate back to vacation list
+      navigate("/darul-ikama/vacation"); // Navigate back to vacation list
     } catch (err) {
       Swal.close();
       Swal.fire({
@@ -231,10 +240,17 @@ const EditStudentVacationForm = ({ pageTitle, userId }) => {
   // Handle suggestion click
   const handleSuggestionClick = (item) => {
     setUserTyping(false);
-    setValue("StudentCode", item.StudentCode);
-    setValue("StudentName", bnBijoy2Unicode(item.StudentName));
-    setValue("FatherName", item.FatherName);
-    setValue("ClassName", item.ClassName);
+
+    setValue('StudentCode', item?.User?.UserCode);
+    setValue('StudentName', item?.User?.UserName);
+    setValue('FatherName', item?.User?.FatherName);
+    setValue('ClassName', item?.Class?.ClassName);
+
+    // setValue("StudentCode", item.StudentCode);
+    // setValue("StudentName", bnBijoy2Unicode(item.StudentName));
+    // setValue("FatherName", item.FatherName);
+    // setValue("ClassName", item.ClassName);
+
     setValue("SessionID", item.SessionID);
     setValue("UserID", item.UserID);
     setValue("ClassID", item.ClassID);
@@ -420,12 +436,15 @@ const EditStudentVacationForm = ({ pageTitle, userId }) => {
                 placeholder={`${translate("Select Time")}...`}
                 registerKey="VacationTimeFrom"
                 require={true}
+                defaultValue={vacationData?.VacationTimeFrom}
               />
+              
               <TimePicker
                 timeCalender="End Time of leave"
                 placeholder={`${translate("Select Time")}...`}
                 registerKey="VacationTimeTo"
                 require={true}
+                defaultValue={vacationData?.VacationDateTo}
               />
             </div>
 

@@ -158,7 +158,7 @@ const ColumnsChart = () => {
 
   return (
     <div className="w-full h-[450px]  mx-auto mt-6 bg-white p-4 md:p-6 rounded-md shadow">
-      <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
+      <h2 className="text-xl font-bold text-gray-800 text-center mb-4 font-default">
         {translate(
           "Number of students according to the previous academic year"
         )}

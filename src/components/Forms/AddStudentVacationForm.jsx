@@ -150,11 +150,13 @@ const AddStudentVacationForm = ({ pageTitle }) => {
         ...rest,
         VacationID: ID,
         GuardianID: RelationID,
-        VacationDateFrom: VacationDateFrom?.[0] || null,
-        VacationDateTo: VacationDateTo?.[0] || null,
-        VacationTimeFrom: VacationTimeFrom?.[0] || null,
-        VacationTimeTo: VacationTimeTo?.[0] || null,
+        VacationDateFrom,
+        VacationDateTo,
+        VacationTimeFrom,
+        VacationTimeTo,
       };
+      // console.log("Submit Data");
+      // console.log(convertedData);
 
       await postStudentsVacation(convertedData).unwrap();
 
@@ -200,10 +202,12 @@ const AddStudentVacationForm = ({ pageTitle }) => {
   // Handle suggestion click
   const handleSuggestionClick = (item) => {
     setUserTyping(false);
-    setValue("StudentCode", item.StudentCode);
-    setValue("StudentName", bnBijoy2Unicode(item.StudentName));
-    setValue("FatherName", item.FatherName);
-    setValue("ClassName", item.ClassName);
+    setValue('StudentCode', item?.User?.UserCode);
+    setValue('StudentName', item?.User?.UserName);
+    setValue('FatherName', item?.User?.FatherName);
+    setValue('ClassName', item?.Class?.ClassName);
+
+
     setValue("SessionID", item.SessionID);
     setValue("UserID", item.UserID);
     setValue("ClassID", item.ClassID);
@@ -243,7 +247,7 @@ const AddStudentVacationForm = ({ pageTitle }) => {
                 <div className="w-full">
                   <label
                     htmlFor="StudentCode"
-                    className="mb-1 block text-black font-SolaimanLipi"
+                    className="mb-1 block text-black font-default"
                   >
                     <span>{translate("User Code")} * :</span>
                   </label>
@@ -290,8 +294,7 @@ const AddStudentVacationForm = ({ pageTitle }) => {
                         className="p-2 hover:bg-blue-100 cursor-pointer"
                         onClick={() => handleSuggestionClick(item)}
                       >
-                        {item?.User?.UserCode} - {bnBijoy2Unicode(item?.User?.UserName)}{" "}
-                        - {bnBijoy2Unicode(item?.SubClass?.SubClass)}
+                        {item?.User?.UserCode} - {item?.User?.UserName} - {item?.SubClass?.SubClass}
                       </div>
                     ))}
                   </div>

@@ -163,10 +163,10 @@ const CharacterReport = ({ pageTitle }) => {
       setUserTyping(false);
       dispatch(setCharacterReportEditMode(null));
       methods.reset({
-        StudentCode: filteredStudent.StudentCode,
-        StudentName: bnBijoy2Unicode(filteredStudent.StudentName),
-        FatherName: bnBijoy2Unicode(filteredStudent.FatherName),
-        ClassName: bnBijoy2Unicode(filteredStudent.ClassName),
+        StudentCode: filteredStudent?.User?.UserCode,
+        StudentName: filteredStudent?.User?.UserName,
+        FatherName: filteredStudent?.User?.FatherName,
+        ClassName: filteredStudent?.Class?.ClassName,
         SubClassID: filteredStudent.SubClassID,
         SessionID: filteredStudent.SessionID,
         Date: new Date(),
@@ -174,7 +174,7 @@ const CharacterReport = ({ pageTitle }) => {
 
       // Set report params when student is filtered
       setReportParams({
-        userCode: filteredStudent.StudentCode,
+        userCode: filteredStudent?.User?.UserCode,
         classID: filteredStudent.SubClassID,
         SessionID: filteredStudent.SessionID,
       });
@@ -303,10 +303,11 @@ const CharacterReport = ({ pageTitle }) => {
 
   const handleSuggestionClick = (item) => {
     setUserTyping(false);
-    methods.setValue('StudentCode', item.StudentCode);
-    methods.setValue('StudentName', bnBijoy2Unicode(item.StudentName));
-    methods.setValue('FatherName', bnBijoy2Unicode(item.FatherName));
-    methods.setValue('ClassName', bnBijoy2Unicode(item.ClassName));
+
+    methods.setValue('StudentCode', item?.User?.UserCode);
+    methods.setValue('StudentName', item?.User?.UserName);
+    methods.setValue('FatherName', item?.User?.FatherName);
+    methods.setValue('ClassName', item?.Class?.ClassName);
     methods.setValue('SubClassID', item.SubClassID);
     methods.setValue('SessionID', item.SessionID);
 
@@ -316,7 +317,7 @@ const CharacterReport = ({ pageTitle }) => {
 
     // Set report params when student is selected from suggestions
     setReportParams({
-      userCode: item.StudentCode,
+      userCode: item?.User?.UserCode,
       classID: item.SubClassID,
       SessionID: item.SessionID,
     });

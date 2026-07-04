@@ -18,7 +18,7 @@ const Checkbox = ({ label, options, registerKey }) => {
 
   return (
     <div className="mb-4">
-      <label className="block mb-2 font-medium text-black font-SolaimanLipi">
+      <label className="block mb-2 font-medium text-black font-default">
         {label}
       </label>
       <div className="grid grid-cols-3 gap-3">
@@ -33,7 +33,7 @@ const Checkbox = ({ label, options, registerKey }) => {
               onChange={() => handleChange(option.id)}
               className="h-4 w-4 text-blue-600 border-gray-300 rounded"
             />
-            <span className="text-sm font-SolaimanLipi">
+            <span className="text-sm font-default">
               {translate(option.name)}
             </span>
           </label>

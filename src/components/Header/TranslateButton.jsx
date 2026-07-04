@@ -18,13 +18,13 @@ const TranslateButton = () => {
       {
         currectLanguage ? (
           <select
-            className="outline-none text-sm text-gray-700 bg-transparent"
+            className="outline-none text-sm text-gray-700 bg-transparent font-default"
             onChange={handleLanguageChange}
             value={currectLanguage}
 
           >
-            <option value="en">English</option>
-            <option value="bn">বাংলা</option>
+            <option className="font-default" value="en">English</option>
+            <option className="font-default" value="bn">বাংলা</option>
           </select>
         ) : null
       }
