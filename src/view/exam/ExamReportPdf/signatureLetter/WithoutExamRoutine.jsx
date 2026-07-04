@@ -22,39 +22,44 @@ const WithoutExamRoutine = ({ reportData, queryParams }) => {
       {/* Signature Section */}
       <table className="w-full border border-black border-collapse mt-2 text-center">
         <tbody>
+          {/* Header row 1: তারিখ */}
           <tr className="border border-black">
-            <td className="border border-black w-[20%]">
+            <td className="border border-black w-[20%]" colSpan={3}>
               তারিখ ------&gt;&gt;
             </td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
+            {Array.from({ length: 14 }).map((_, i) => (
+              <td key={`date-${i}`} className="border border-black"></td>
+            ))}
           </tr>
+
+          {/* Header row 2: বার */}
           <tr className="border border-black">
-            <td className="border border-black w-[20%]">
+            <td className="border border-black w-[20%]" colSpan={3}>
               বার --------&gt;&gt;
             </td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
-            <td className="border border-black"></td>
+            {Array.from({ length: 14 }).map((_, i) => (
+              <td key={`bar-${i}`} className="border border-black"></td>
+            ))}
+          </tr>
+
+          {/* Subject/body rows — each uses the SAME 3-label-column + 14-subject-column layout */}
+          <tr className="border border-black">
+            <td className="border border-black">ক্রঃ নং</td>
+            <td className="border border-black">বিষয়</td>
+            <td className="border border-black">স্বাক্ষর</td>
+            {Array.from({ length: 14 }).map((_, i) => (
+              <td key={`subj-${i}`} className="border border-black"></td>
+            ))}
+          </tr>
+
+          {/* Footer row, same pattern */}
+          <tr className="border border-black">
+            <td className="border border-black" colSpan={3}>
+              মোট
+            </td>
+            {Array.from({ length: 14 }).map((_, i) => (
+              <td key={`footer-${i}`} className="border border-black"></td>
+            ))}
           </tr>
         </tbody>
       </table>

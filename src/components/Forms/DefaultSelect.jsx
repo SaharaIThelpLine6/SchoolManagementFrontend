@@ -72,7 +72,7 @@ const DefaultSelect = ({
       {label && (
         <label
           htmlFor={registerKey}
-          className={`font-SolaimanLipi ${
+          className={`font-default font-medium ${
             labelPosition === "left"
               ? "text-black"
               : "mb-1 block text-black"
@@ -100,12 +100,12 @@ const DefaultSelect = ({
             onClick={toggleDropdown}
             onChange={handleChange} // Add onChange handler
             defaultValue=""
-            className={`relative h-[38px] z-20 w-full appearance-none font-SolaimanLipi rounded border border-stroke bg-white py-1 px-4 outline-none transition
+            className={`relative h-[38px] z-20 w-full appearance-none font-default font-medium rounded border border-stroke bg-white py-1 px-4 outline-none transition
               focus:border-custom-focus active:border-custom-focus
               ${disabled ? "cursor-not-allowed disabled:bg-slate-200" : ""}`}
             disabled={disabled}
           >
-            <option value="" className="text-body">
+            <option value="" className="text-body font-default">
               {translate(defaultValue)}
             </option>
             {options &&
@@ -113,7 +113,7 @@ const DefaultSelect = ({
                 <option
                   key={option[valueField]}
                   value={option[valueField]}
-                  className="text-body"
+                  className="text-body font-default"
                 >
                   {unicode
                     ? bnBijoy2Unicode(option[nameField])

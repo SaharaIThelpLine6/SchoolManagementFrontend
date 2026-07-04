@@ -204,7 +204,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
           }
         }
       `;
-      document.head.appendChild(style);
+      // document.head.appendChild(style);
 /**
  * 
  * position: fixed;
@@ -214,8 +214,8 @@ const StudentIdCardPrint = ({ pageTitle }) => {
       setTimeout(() => {
         window.print();
         // Remove after print dialog closes
-        const el = document.getElementById('zc300-print-style');
-        if (el) el.remove();
+        // const el = document.getElementById('zc300-print-style');
+        // if (el) el.remove();
       }, 300);
 
 
@@ -1220,11 +1220,11 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                       )}
                     />
                   </td>
-                  <td className="p-2">{student.StudentCode}</td>
-                  <td className="p-2">{bnBijoy2Unicode(student.StudentName)}</td>
-                  <td className="p-2">{bnBijoy2Unicode(student.ClassName)}</td>
-                  <td className="p-2">{bnBijoy2Unicode(student.SubClass)}</td>
-                  <td className="p-2">{student.ResidentialName}</td>
+                  <td className="p-2">{student?.User?.UserCode}</td>
+                  <td className="p-2">{bnBijoy2Unicode(student?.User?.UserName)}</td>
+                  <td className="p-2">{bnBijoy2Unicode(student?.Class.ClassName)}</td>
+                  <td className="p-2">{bnBijoy2Unicode(student?.SubClass?.SubClass)}</td>
+                  {/* <td className="p-2">{student.ResidentialName}</td> */}
                 </tr>
               ))}
               {paginatedData.length === 0 && (
@@ -1246,8 +1246,8 @@ const StudentIdCardPrint = ({ pageTitle }) => {
       </div>
       {/* print-only */}
       <div className='print-only'>
-        {/* <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} /> */}
-        <StudentIdCardGeneratePos layoutId={selectedLayout} fields={checkboxState} />
+        <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} />
+        {/* <StudentIdCardGeneratePos layoutId={selectedLayout} fields={checkboxState} /> */}
       </div>
     </div>
   );

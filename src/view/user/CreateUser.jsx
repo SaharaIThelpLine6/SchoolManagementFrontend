@@ -331,7 +331,7 @@ const CreateUser = ({ pageTitle }) => {
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="font-lato bg-gray-50 min-h-screen py-6"
+        className="font-default bg-gray-50 min-h-screen py-6"
       >
         <div className="space-y-8">
           {/* Section: User Info */}

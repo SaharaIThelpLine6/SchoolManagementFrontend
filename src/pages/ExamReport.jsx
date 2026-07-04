@@ -299,9 +299,9 @@ const ExamReport = ({ pageTitle }) => {
 
   return (
     <div className="">
-      <div className="flex flex-col font-SolaimanLipi gap-3 print:hidden">
+      <div className="flex flex-col font-default gap-3 print:hidden">
         <div className="print:hidden w-full border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
-          <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">
+          <h1 className="font-bold text-[20px] text-theme-dark mb-4 font-default">
             {translate('Exam Report')}
           </h1>
 

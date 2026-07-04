@@ -89,7 +89,7 @@ const DatePickerOne = ({
       {dateCalender && (
         <label
           htmlFor={registerKey}
-          className={`text-black font-SolaimanLipi ${labelPosition === 'left'
+          className={`text-black font-default ${labelPosition === 'left'
               ? 'w-1/4 min-w-[100px] mb-0 text-end'
               : 'mb-1 block'
             }`}

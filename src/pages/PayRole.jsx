@@ -110,7 +110,7 @@ const PayRole = () => {
           {/*Input form End*/}
 
           {/*Table start*/}
-          <div className="md:w-[50%] font-lato">
+          <div className="md:w-[50%] font-default">
             <SortableTable columns={columns} data={paginatedData} />
 
             {/* Pagination Controls */}

@@ -67,7 +67,7 @@ const DefaultInput = ({
       {label && (
         <label
           htmlFor={registerKey}
-          className={`text-black font-SolaimanLipi ${
+          className={`text-black font-default ${
             labelPosition === 'left' ? 'w-2/5 mb-0 text-end' : 'mb-1 block'
           }`}
         >
@@ -98,7 +98,7 @@ const DefaultInput = ({
         <input
           type={type === 'number' || type === 'phone' ? 'number' : type}
           placeholder={translate(placeholder)}
-          className={`w-full rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-custom-focus active:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200 ${shouldShowError && errors[registerKey] ? 'placeholder:text-red-400 border-red-400' : ''} ${isRtl ? 'direction-rtl' : ''}`}
+          className={`w-full font-default rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-custom-focus active:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200 ${shouldShowError && errors[registerKey] ? 'placeholder:text-red-400 border-red-400' : ''} ${isRtl ? 'direction-rtl' : ''}`}
           {...register(registerKey, { required: require ? 'এই ফিল্ডটি প্রয়োজনীয়' : false, ...(type === 'number' && {validate: (value) =>
                 isNaN(Number(value)) ? 'দয়া করে একটি বৈধ সংখ্যা লিখুন' : true,
             }),
@@ -116,7 +116,7 @@ const DefaultInput = ({
         />
 
         {shouldShowError && errors[registerKey] && (
-          <p className="text-red-500 text-sm mt-1">
+          <p className="text-red-500 text-sm mt-1 font-default">
             {errors[registerKey].message}
           </p>
         )}

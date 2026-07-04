@@ -73,13 +73,13 @@ const EditCertificateAttestation = ({
       const found = existingData.find((item) => item.CFID === id);
       if (found) {
         const fullAddress = `গ্রাম: ${bnBijoy2Unicode(
-          searchStudentInfo[0].permanentVill || ""
+          searchStudentInfo[0]?.User?.permanentVill || ""
         )}, ডাক: ${bnBijoy2Unicode(
-          searchStudentInfo[0].permanentPost || ""
+          searchStudentInfo[0]?.User?.permanentPost || ""
         )}, থানা: ${bnBijoy2Unicode(
-          searchStudentInfo[0].PoliceStationName || ""
+          searchStudentInfo[0]?.User?.permanentPoliceStation?.PoliceStationName || ""
         )}, জেলা: ${bnBijoy2Unicode(
-          searchStudentInfo[0].PermanentDistrictName || ""
+          searchStudentInfo[0]?.User?.permanentPoliceStation?.District?.DistrictName || ""
         )}`;
 
         reset({
@@ -89,7 +89,7 @@ const EditCertificateAttestation = ({
           motherName: bnBijoy2Unicode(found.User?.MotherName) || "",
           description: fullAddress,
           admissionNumber: found.User?.UserCode || "",
-          birthDate: searchStudentInfo[0].DateOfBirth,
+          birthDate: searchStudentInfo[0].User.DateOfBirth,
           SessionID: found.SessionID || "",
           ClassID: found.ClassIDTo || "",
           ExamID: found.ExamID || "",

@@ -82,7 +82,7 @@ const BulkImage = () => {
   };
 
   return (
-    <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+    <div className="font-default bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="block w-full overflow-x-auto">
         <FormProvider {...methods}>
           <div className="mb-6">

@@ -89,7 +89,7 @@ const UserNoticeCreateForm = () => {
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="font-lato p-6 space-y-4"
+        className="font-default p-6 space-y-4"
       >
         {/* 🔥 MODE BUTTONS */}
         <div className="flex gap-4 mb-4">

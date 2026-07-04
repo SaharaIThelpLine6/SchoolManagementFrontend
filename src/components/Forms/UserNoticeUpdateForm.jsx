@@ -101,7 +101,7 @@ const UserNoticeUpdateForm = ({ id }) => {
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="font-lato p-6 space-y-4"
+        className="font-default p-6 space-y-4"
       >
 
         {/* USER TYPE */}

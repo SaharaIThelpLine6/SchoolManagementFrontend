@@ -41,7 +41,7 @@ const HijriDateFormatter = () => {
   return (
     <div className="w-full max-w-md mx-auto">
       <label
-          className={`font-SolaimanLipi mb-1 block text-black`}
+          className={`font-default mb-1 block text-black`}
         >
        {translate("Arabic Date") + " :"}
         </label>

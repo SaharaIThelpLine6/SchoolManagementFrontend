@@ -61,11 +61,10 @@ const UserImage = ({ pageTitle }) => {
 
   useEffect(() => {
     console.log(filteredStudent);
-    // const filterData = users.find((i) => i.UserID === filteredUser?.UserID);
+    // const filterData = users.find((i) => i.UserID === filteredUser?.UserID); 
     if (filteredStudent) {
-      console.log(filteredStudent);
 
-      const imageBuffer = filteredStudent?.Images[0]?.Image?.data;
+      const imageBuffer = filteredStudent?.UserImage?.Image?.data;
       if (imageBuffer) {
         const base64String = Buffer.from(imageBuffer).toString('base64');
         const src = `data:image/png;base64,${base64String}`;
@@ -90,7 +89,7 @@ const UserImage = ({ pageTitle }) => {
 
   const handleEditOpenModal = (row) => {
     setPreviewUrl(null);
-    const imageBuffer = row?.UserImage?.[0]?.Image;
+    const imageBuffer = row?.UserImage?.Image;
     if (imageBuffer) {
       const base64String = Buffer.from(imageBuffer).toString('base64');
       const src = `data:image/png;base64,${base64String}`;
@@ -136,7 +135,7 @@ const UserImage = ({ pageTitle }) => {
         if (!row.UserImage || row.UserImage.length === 0) return <span>-</span>;
 
         // ধরছি শুধু প্রথম image দেখাব
-        const imageBuffer = row.UserImage[0].Image; // Buffer
+        const imageBuffer = row.UserImage?.Image; // Buffer
         if (!imageBuffer) return <span>-</span>;
 
         // Convert buffer to base64

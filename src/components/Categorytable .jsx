@@ -378,8 +378,8 @@ export default function CategoryTable({ tableData }) {
     };
 
     return (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden font-sans w-full">
-            <div className="overflow-x-auto font-SolaimanLipi">
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden font-default w-full">
+            <div className="overflow-x-auto font-default">
                 <table className="w-full border-collapse text-sm">
                     <colgroup>
                         <col className="w-[40px]" />

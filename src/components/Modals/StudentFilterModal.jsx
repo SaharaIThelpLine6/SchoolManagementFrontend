@@ -152,30 +152,64 @@ const StudentFilterModal = () => {
         );
       },
     },
-    { title: "User Code", field: "StudentCode", hozAlign: "center" },
+    { title: "User Code", hozAlign: "center",
+      render: (row) => {
+        return (
+          <React.Fragment>
+            {row?.User?.UserCode}
+
+          </React.Fragment>
+        )
+      }
+     },
     {
       title: "User Name",
-      field: "StudentName",
       hozAlign: "left",
-      unicode: true,
+      render: (row) => {
+        return (
+          <React.Fragment>
+            {row?.User?.UserName}
+
+          </React.Fragment>
+        )
+      }
     },
     {
       title: "Father Name",
-      field: "FatherName",
       hozAlign: "left",
-      unicode: true,
+      render: (row) => {
+        return (
+          <React.Fragment>
+            {row?.User?.FatherName}
+
+          </React.Fragment>
+        )
+      }
     },
     {
       title: "Class Name",
       field: "ClassName",
       hozAlign: "left",
-      unicode: true,
+      render: (row) => {
+        return (
+          <React.Fragment>
+            {row?.Class?.ClassName}
+
+          </React.Fragment>
+        )
+      }
     },
     {
       title: "Residential",
-      field: "ResidentialName",
       hozAlign: "left",
-      unicode: true,
+       render: (row) => {
+        return (
+          <React.Fragment>
+            {row?.userResidential?.ResidentialName}
+
+          </React.Fragment>
+        )
+      }
     },
   ];
 

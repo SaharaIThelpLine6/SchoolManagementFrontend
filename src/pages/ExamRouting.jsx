@@ -888,7 +888,7 @@ const ExamRouting = ({ pageTitle }) => {
 
   return (
     <div className="">
-      <div className="font-SolaimanLipi bg-white p-4 md:p-6 rounded-xl shadow-lg print:hidden">
+      <div className="font-default bg-white p-4 md:p-6 rounded-xl shadow-lg print:hidden">
         {/* Header */}
         <div className="filter_header border-b border-[#e9edf4] pb-4 md:pb-5">
           <h3 className="text-lg md:text-xl font-bold">

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Buffer } from "buffer";
 import bnBijoy2Unicode from "../../../../utils/conveter";
 import { useGetInstitutionInfoQuery } from "../../../../features/settings/settingsQuerySlice";
+import QRCode from "react-qr-code";
 
 const AdmitCardBanglaA4Two = ({ data }) => {
   const [students] = useState(data);
@@ -34,6 +35,7 @@ const AdmitCardBanglaA4Two = ({ data }) => {
         : null;
       return { najem: sigNajem, principal: sigPrincipal };
     });
+console.log(students);
 
     setSignatures(newSignatures);
   }, [institutionInfo, students]);
@@ -70,18 +72,26 @@ const AdmitCardBanglaA4Two = ({ data }) => {
             <h2 className="text-3xl font-bold mb-2">
               {bnBijoy2Unicode(institutionInfo?.InstitutionName) || "টেস্ট মাদরাসা"}
             </h2>
+           
             <p className="text-base mb-2">
-              {bnBijoy2Unicode(institutionInfo?.Address) || "সরকারি মুজিব কলেজ রোড, সখিপুর, টাংগাইল"}
-             
+              {bnBijoy2Unicode(institutionInfo?.Address)}
             </p>
             <p className="text-base mb-3">{bnBijoy2Unicode(student?.ExamName)}</p>
             <div className="border border-black px-4 py-2 inline-block rounded-3xl">
               <h3 className="text-2xl font-bold">প্রবেশপত্র</h3>
             </div>
           </div>
-          <div className="w-24 h-24" />
+          <div className="w-24 h-24">
+              <QRCode
+                size={140}
+                style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                value={`https://qmmsoft.com/${institutionInfo?.InstitutionCode}/students/${student?.SessionID}/${student?.ExamID}/${student.SubClassID}/${student?.UserCode}`}
+                viewBox={`0 0 256 256`}
+              />
+          </div>
         </div>
 
+        
         {/* Info Grid */}
         <div className="grid grid-cols-2 gap-y-3 gap-x-6 w-full mt-4 text-base">
           <div className="flex items-baseline">

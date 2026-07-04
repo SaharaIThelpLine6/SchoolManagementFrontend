@@ -356,6 +356,14 @@ export const examSlice = createApi({
       }),
       invalidatesTags: ['ExamRules'],
     }),
+     postReportSetting: builder.mutation({
+      query: (body) => ({
+        url: `report_settings`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["ReportSettings"],
+    }),
   }),
 });
 

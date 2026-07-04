@@ -162,19 +162,19 @@ const StudentClassRoutine = ({ pageTitle }) => {
 
   return (
     <FormProvider {...methods}>
-      <div className="font-lato bg-white p-6 md:p-4 rounded-xl shadow-lg">
+      <div className="font-default bg-white p-6 md:p-4 rounded-xl shadow-lg">
         {/* Header Tabs */}
         <div className="border-b border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
           <div className="flex items-center gap-6">
             <Link
               to="/parent-panel"
-              className={`relative pb-2 text-[18px] font-SolaimanLipi font-bold text-blue-600`}
+              className={`relative pb-2 text-[18px] font-default font-bold text-blue-600`}
             >
               {translate('Class Routine')}
             </Link>
             <Link
               to="/parent-panel/time-slots"
-              className={`relative pb-2 text-[18px] font-SolaimanLipi font-bold text-gray-500 hover:text-blue-500`}
+              className={`relative pb-2 text-[18px] font-default font-bold text-gray-500 hover:text-blue-500`}
             >
               {translate('Time Slots')}
             </Link>

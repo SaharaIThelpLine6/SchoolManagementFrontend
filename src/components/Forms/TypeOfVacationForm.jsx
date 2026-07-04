@@ -77,7 +77,7 @@ const TypeOfVacationForm = ({ userId }) => {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={methods.handleSubmit(onSubmit)} className="font-lato p-6">
+      <form onSubmit={methods.handleSubmit(onSubmit)} className="font-default p-6">
         <div className="mb-4">
           <DefaultInput
             registerKey="Vacation"

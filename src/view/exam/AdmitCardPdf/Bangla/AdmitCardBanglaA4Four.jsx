@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Buffer } from "buffer";
 import bnBijoy2Unicode from "../../../../utils/conveter";
 import { useGetInstitutionInfoQuery } from "../../../../features/settings/settingsQuerySlice";
+import QRCode from "react-qr-code";
 
 const AdmitCardBanglaA4Four = ({ data }) => {
   // data is now an array of 1 to 4 students
@@ -75,6 +76,7 @@ const AdmitCardBanglaA4Four = ({ data }) => {
             <h2 className="text-lg font-bold mb-1">
               {bnBijoy2Unicode(institutionInfo?.InstitutionName) || "টেস্ট মাদরাসা"}
             </h2>
+
             <p className="text-xs">
               {bnBijoy2Unicode(institutionInfo?.Address) ||
                 "সরকারি মুজিব কলেজ রোড, সখিপুর, টাংগাইল"}

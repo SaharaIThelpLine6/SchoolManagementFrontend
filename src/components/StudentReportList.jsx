@@ -138,7 +138,7 @@ const StudentReportList = ({
   return (
     <div className="mt-6">
       <div className="py-4 hidden_in_print flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-gray-800 font-SolaimanLipi">
+        <h3 className="text-lg font-semibold text-gray-800 font-default">
           {translate("Student Reports")}
         </h3>
         <button
@@ -157,7 +157,7 @@ const StudentReportList = ({
 
       <div className="relative overflow-x-auto hidden_in_print">
         <table className="w-full text-sm text-center text-gray-500 shadow-md sm:rounded-lg">
-          <thead className="text-xs text-theme-dark font-SolaimanLipi uppercase bg-gray-50">
+          <thead className="text-xs text-theme-dark font-default uppercase bg-gray-50">
             <tr>
               <th className="px-3 py-3 text-nowrap text-[16px]">
                 {translate("Action")}

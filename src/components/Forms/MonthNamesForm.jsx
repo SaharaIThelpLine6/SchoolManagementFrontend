@@ -163,7 +163,7 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="font-lato">
+      <form onSubmit={handleSubmit(onSubmit)} className="font-default">
         <div className="px-6 text-sm">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             {months.map((month, index) => {
