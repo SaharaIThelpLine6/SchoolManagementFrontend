@@ -32,6 +32,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const [selectedLayout, setSelectedLayout] = useState(null);
+  const [testData, setTestData] = useState(null);
   const methods = useForm({
     defaultValues: {
       [`schoolname_color_field_${selectedLayout}`]: "#ffffff",
@@ -47,6 +48,8 @@ const StudentIdCardPrint = ({ pageTitle }) => {
   const [checkboxState, setCheckboxState] = useState([]);
 
   const { data: institutionInfo } = useGetInstitutionInfoQuery();
+
+  console.log(institutionInfo, "institutionInfo")
 
   const SessionID = watch('SessionID');
   const ClassID = watch('ClassID');
@@ -71,6 +74,8 @@ const StudentIdCardPrint = ({ pageTitle }) => {
       refetchOnFocus: false,
     }
   );
+
+  console.log(searchStudentInfo, "searchStudentInfo");
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
@@ -148,8 +153,25 @@ const StudentIdCardPrint = ({ pageTitle }) => {
         });
         return;
       }
+
       const updatedSelectedRows = selectedRows.map(row => {
-        const newRow = { ...row };
+        const newRow = {
+          ...row,
+
+          StudentCode: row.User.UserCode,
+          StudentName: row.User.UserName,
+          FatherName: row.User.FatherName,
+          MotherName: row.User.MotherName,
+          Mobile1: row.User.Mobile1,
+          UserImage: row.User.UserImage,
+          ClassName: row.Class.ClassName,
+          SessionName: row.AcademicSession.SessionName,
+          BloodGroup: row.User.BloodGroup,
+          ResidentialName: row.userResidential.ResidentialName,
+          NIDNO: row.User.NIDNO,
+          DateOfBirth: row.User.DateOfBirth,
+          NewOldId: row.userResidential.ResidentialName,
+        };
         checkboxState.forEach(key => {
           const fieldKeyName = `fieldkey_${key}`;
           if (data[fieldKeyName]) {
@@ -174,6 +196,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
       console.log(updatedSelectedRows);
 
       dispatch(setPrintableStudentList(updatedSelectedRows));
+      setTestData(updatedSelectedRows)
       // showModal('', 'STUDENT_ID_CARD', checkboxState);
       // setTimeout(() => {
       //   window.print()
@@ -184,7 +207,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
 
       // Inject ZC300-specific print style
       const style = document.createElement('style');
-      
+
       style.id = 'zc300-print-style';
       style.innerHTML = `
         @media print {
@@ -205,12 +228,12 @@ const StudentIdCardPrint = ({ pageTitle }) => {
         }
       `;
       // document.head.appendChild(style);
-/**
- * 
- * position: fixed;
-            top: 0;
-            left: 0;
- */
+      /**
+       * 
+       * position: fixed;
+                  top: 0;
+                  left: 0;
+       */
       setTimeout(() => {
         window.print();
         // Remove after print dialog closes
@@ -1246,7 +1269,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
       </div>
       {/* print-only */}
       <div className='print-only'>
-        <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} />
+        <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} data={testData} inName={institutionInfo.InstitutionName} inAdress={institutionInfo.Address} />
         {/* <StudentIdCardGeneratePos layoutId={selectedLayout} fields={checkboxState} /> */}
       </div>
     </div>

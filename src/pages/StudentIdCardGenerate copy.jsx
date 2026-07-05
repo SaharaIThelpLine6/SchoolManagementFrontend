@@ -4,8 +4,9 @@ import useTranslate from '../utils/Translate';
 import { Buffer } from 'buffer';
 import React, { useEffect } from 'react';
 import { hideModal } from '../utils/ModalControlar';
-const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], inName, inAdress }) => {
+const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [] }) => {
 
+  console.log(layoutId, "layoutId")
   const { state } = useLocation();
   // const { layoutId, fields = [] } = state || {};
   const dispatch = useDispatch();
@@ -13,12 +14,8 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
   // const printableStudentList = useSelector(
   //   (state) => state.student.PrintableStudentList
   // );
-
-  console.log(printableStudentList, "printableStudentList")
-  console.log(fields, "fields")
   const translate = useTranslate();
   function convert_to_buffer(studentResult) {
-    console.log(studentResult.Image, "studentResult?.Image?.data")
     if (studentResult?.Image?.data) {
       const buffer = Buffer.from(studentResult.Image.data);
       const base64String = buffer.toString('base64');
@@ -26,7 +23,6 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
       return imageSrc;
     }
   }
-
 
   useEffect(() => {
     console.log(layoutId);
@@ -76,18 +72,17 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                   <React.Fragment>
                     <img src="/student_id_card_top.jpeg" alt="card header" className='h-[110px]' />
                     <div className="absolute top-[2px] w-full">
-                      <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{inName}</h2>
-                      <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{inAdress}</p>
+                      <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{printableStudentDetails?.institute_name}</h2>
+                      <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{printableStudentDetails?.institute_address}</p>
                     </div>
                     <div className="middle_area px-2 -mt-[40px]">
                       <div className="proile_image_shape text-center">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
                         </div>
                         <h3 className='text-center py-[2px] px-[30px] mt-[6px] bg-sky-600 inline-block rounded-[50px] mx-auto text-white text-[16px]'>পরিচয় পত্র</h3>
                       </div>
                       <div className='pt-1 pb-2 h-[160px]'>
-                        <h3 className='text-red text-[18px] font-bold text-center'>{printableStudentDetails.StudentName}</h3>
                         <h3 className='text-red pl-[20px] text-[16px]'>আইডি নং: {translate(printableStudentDetails.StudentCode)}</h3>
                         {fields.map((fieldName) => {
                           if (!fieldName) return null;
@@ -108,12 +103,12 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[60px] pt-2'>
-                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{inName}</h2>
-                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{inAdress}</p>
+                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{printableStudentDetails?.institute_name}</h2>
+                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{printableStudentDetails?.institute_address}</p>
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
@@ -140,12 +135,12 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[60px] pt-2'>
-                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{inName}</h2>
-                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{inAdress}</p>
+                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{printableStudentDetails?.institute_name}</h2>
+                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{printableStudentDetails?.institute_address}</p>
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
@@ -175,12 +170,12 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[70px] pt-2'>
-                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{inName}</h2>
-                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{inAdress}</p>
+                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{printableStudentDetails?.institute_name}</h2>
+                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{printableStudentDetails?.institute_address}</p>
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
@@ -211,12 +206,12 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[60px] pt-2'>
-                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{inName}</h2>
-                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{inAdress}</p>
+                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{printableStudentDetails?.institute_name}</h2>
+                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{printableStudentDetails?.institute_address}</p>
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
@@ -247,12 +242,12 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[60px] pt-2'>
-                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{inName}</h2>
-                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{inAdress}</p>
+                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{printableStudentDetails?.institute_name}</h2>
+                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{printableStudentDetails?.institute_address}</p>
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
@@ -283,12 +278,12 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[60px] pt-2'>
-                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{inName}</h2>
-                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{inAdress}</p>
+                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{printableStudentDetails?.institute_name}</h2>
+                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{printableStudentDetails?.institute_address}</p>
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
@@ -319,12 +314,12 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[60px] pt-2'>
-                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{inName}</h2>
-                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{inAdress}</p>
+                        <h2 className={`text-center text-[${printableStudentDetails.schoolname_fontside}px] text-white font-bold`} style={{ color: printableStudentDetails.schoolname_color_field }}>{printableStudentDetails?.institute_name}</h2>
+                        <p className={`text-[${printableStudentDetails.schooladdress_fontside}px] text-center text-white`} style={{ color: printableStudentDetails.schooladdress_color_field }}>{printableStudentDetails?.institute_address}</p>
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
