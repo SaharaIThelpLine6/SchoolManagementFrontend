@@ -1269,7 +1269,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
       </div>
       {/* print-only */}
       <div className='print-only'>
-        <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} data={testData} inName={institutionInfo.InstitutionName} inAdress={institutionInfo.Address} />
+        <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} data={testData} inName={institutionInfo?.InstitutionName} inAdress={institutionInfo?.Address} />
         {/* <StudentIdCardGeneratePos layoutId={selectedLayout} fields={checkboxState} /> */}
       </div>
     </div>
