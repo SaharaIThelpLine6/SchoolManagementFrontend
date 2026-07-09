@@ -32,6 +32,8 @@ const UserAttendance = () => {
     date: formattedDate,
   });
 
+  console.log(attendanceData, "attendanceData")
+
 
   const total = attendanceData?.summary.totalStudent || 0;
   const present = attendanceData?.summary.totalPresent || 0;
