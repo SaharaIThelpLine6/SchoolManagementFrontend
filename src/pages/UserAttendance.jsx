@@ -32,7 +32,6 @@ const UserAttendance = () => {
     date: formattedDate,
   });
 
-  console.log(attendanceData, "attendanceData")
 
   const total = attendanceData?.summary.totalStudent || 0;
   const present = attendanceData?.summary.totalPresent || 0;
@@ -50,6 +49,7 @@ const UserAttendance = () => {
       String(item.UserCode).toLowerCase().includes(String(UserCode).toLowerCase())
     )
     : currentData;
+
   const formatTime = (time) => {
     if (!time) return "-";
 
@@ -64,6 +64,13 @@ const UserAttendance = () => {
       second: "2-digit",
       hour12: true,
     });
+  };
+
+  const maskPhone = (phone) => {
+    if (!phone) return "";
+    if (phone.length <= 8) return phone;
+
+    return `${phone.slice(0, 5)}...${phone.slice(-3)}`;
   };
 
 
@@ -262,7 +269,7 @@ const UserAttendance = () => {
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-900">
                         <div className="flex items-center gap-2">
-                          <span>{student.Mobile1}</span>
+                          <span>{maskPhone(student.Mobile1)}</span>
 
                           {student.Mobile1 && (
                             <a
