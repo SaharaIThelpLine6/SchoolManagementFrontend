@@ -852,6 +852,7 @@ const useTranslate = () => {
     "Transient Police Station": "বর্তমান থানা",
     "Transient District": "বর্তমান জেলা",
     "Transient Division": "বর্তমান বিভাগ",
+    "BD / AR Date": "বাংলা অথবা আরবি তারিখ",
   };
 
   return (key) =>

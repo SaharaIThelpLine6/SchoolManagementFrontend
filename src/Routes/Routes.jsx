@@ -147,6 +147,7 @@ import ExamHallList from '../pages/ExamHallList';
 import ExamSitPlan from '../pages/ExamSitPlan';
 import CreateExamSitPlan from '../pages/CreateExamSitPlan';
 import UserAttendance from '../pages/UserAttendance';
+import PrivacyPolicy from '../pages/PrivacyPolicy';
 
 const Router = createBrowserRouter([
   {
@@ -156,6 +157,10 @@ const Router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />,
+  },
+  {
+    path: '/privacy-policy',
+    element: <PrivacyPolicy />,
   },
   {
     path: '/',

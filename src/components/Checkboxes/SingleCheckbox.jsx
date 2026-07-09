@@ -30,7 +30,7 @@ const SingleCheckbox = ({
           disabled={disabled}
           className="h-4 w-4 text-blue-600 border-gray-300 rounded"
         />
-        <span className="text-sm font-SolaimanLipi font-medium">
+        <span className="text-sm font-default font-medium">
           {translate(label)}
         </span>
       </label>

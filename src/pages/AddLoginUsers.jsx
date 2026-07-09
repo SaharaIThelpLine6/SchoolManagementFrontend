@@ -301,7 +301,7 @@ const AddLoginUsers = () => {
 
   return (
     <FormProvider {...methods}>
-      <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-SolaimanLipi">
+      <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-default">
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="md:flex w-full px-3 gap-3">
             {/* Input Form */}
@@ -479,7 +479,7 @@ const AddLoginUsers = () => {
         </form>
 
         {/* Table */}
-        <div className="w-full font-SolaimanLipi">
+        <div className="w-full font-default">
           <CustomTable columns={columns} data={paginatedData} />
         </div>
       </div>

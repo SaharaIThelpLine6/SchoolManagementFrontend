@@ -95,9 +95,9 @@ const ExamAdmitCard = () => {
   };
   return (
     <>
-      <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg hidden_in_print">
+      <div className="font-default bg-white p-6 md:p-4 rounded-xl shadow-lg hidden_in_print">
         <div className="filter_header flex items-center justify-between mb-6">
-          <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
+          <h3 className="font-default text-base sm:text-[20px] font-bold">
             {translate("")}
           </h3>
           <button

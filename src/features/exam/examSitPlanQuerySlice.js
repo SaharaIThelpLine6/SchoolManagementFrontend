@@ -57,6 +57,10 @@ export const examSitPlanSlice = createApi({
       query: ({ sitplanid }) => `sit_allocated_students_by_sitplanid/${sitplanid}`,
       providesTags: ['ExamShift'],
     }),
+    getHallwiseSeatPlan: builder.query({
+      query: ({ sessionId, examId, subClassId }) => `hallwise_sit_allocated_students/${sessionId}/${examId}/${subClassId}`,
+      providesTags: ['HallWiseSit'],
+    }),
     deleteSitPlan: builder.mutation({
       query: (seatPlanId) => ({
         url: `delete_exam_seatplan/${seatPlanId}`,
@@ -73,7 +77,6 @@ export const examSitPlanSlice = createApi({
     }),
 
 
-
   }),
 });
 
@@ -83,6 +86,7 @@ export const {
   useGetExamSubClassStudentsQuery,
   usePostExamShiftMutation,
   useGetExamShiftQuery,
+  useGetHallwiseSeatPlanQuery,
   useSaveSitPlanMutation,
   useGetSitPlanBySitPlanIDQuery,
   useDeleteSitPlanMutation,

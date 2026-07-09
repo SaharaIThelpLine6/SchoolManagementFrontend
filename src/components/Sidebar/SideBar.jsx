@@ -352,7 +352,7 @@ const SideBar = () => {
                   to={menu.route}
                   onClick={() => setOpenMenuId(null)}
                   className={({ isActive }) =>
-                    `flex items-center font-SolaimanLipi gap-2 py-2 px-4 border-l-6 border-solid ${
+                    `flex items-center font-default gap-2 py-2 px-4 border-l-6 border-solid ${
                       isActive
                         ? 'bg-[#ddeffe] text-[#007af7] border-l-[#007af7]'
                         : 'hover:text-[#007af7] hover:bg-[#ddeffe] border-l-transparent'

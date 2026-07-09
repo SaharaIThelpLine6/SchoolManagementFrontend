@@ -149,13 +149,10 @@ const dataGender = settingsArray.find((c) => c.ID === 28);
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="max-w-xl mx-auto bg-white shadow-md rounded-lg p-6 space-y-5 font-SolaimanLipi
-               max-h-[90vh] overflow-y-auto"
-      >
+        className="max-w-xl mx-auto bg-white shadow-md rounded-lg p-6 space-y-5 font-default max-h-[90vh] overflow-y-auto">
         <h2 className="text-center text-xl font-semibold text-gray-700">
           {translate("User Code Setting")}
         </h2>
-
         {/* User Type */}
         <DefaultSelect
           label="User Type"

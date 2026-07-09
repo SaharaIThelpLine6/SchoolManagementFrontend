@@ -209,7 +209,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
     dispatch(setReqLoading(true));
     const id = toast.dark('তথ্য যুক্ত করা হচ্ছে...', {
       className:
-        ' min-h-[50px] max-h-[50px] overflow-hidden text-[14px] font-SolaimanLipi bg-[#323232] text-[#ffffff] py-2 px-2 rounded-[4px] font-normal',
+        ' min-h-[50px] max-h-[50px] overflow-hidden text-[14px] font-default bg-[#323232] text-[#ffffff] py-2 px-2 rounded-[4px] font-normal',
       style: {
         boxShadow:
           '0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12)',
@@ -285,13 +285,13 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
     <div className="p-4">
       <div className="flex gap-3 flex-wrap lg:flex-nowrap">
         <div className="w-full lg:w-[40%] lg:h-fit lg:sticky lg:top-0  border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
-          <h1 className="font-semibold text-lg text-theme-dark font-SolaimanLipi mb-4">
+          <h1 className="font-semibold text-lg text-theme-dark font-default mb-4">
             {translate(tableTitle)}
           </h1>
           <FormProvider {...methods}>
             <form
               onSubmit={handleSubmit(onSubmit)}
-              className="font-SolaimanLipi"
+              className="font-default"
             >
               <div className="mb-3">
                 <ThemeInputBox1
@@ -322,7 +322,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
               >
                 <button
                   type="submit"
-                  className="bg-theme-color transation ease-linear font-bold font-SolaimanLipi duration-500 inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-[#121212]"
+                  className="bg-theme-color transation ease-linear font-bold font-default duration-500 inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-[#121212]"
                 >
                   {translate('Save')}
                 </button>
@@ -336,7 +336,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
                       ArabicClass: '',
                     });
                   }}
-                  className="bg-[#121212] transation ease-linear duration-500 font-bold font-SolaimanLipi inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-slate-700 ms-[20px]"
+                  className="bg-[#121212] transation ease-linear duration-500 font-bold font-default inline-block px-[40px] py-2  text-white rounded-md mt-4  hover:bg-slate-700 ms-[20px]"
                 >
                   {translate('Add New')}
                 </button>
@@ -354,7 +354,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
             <div className="relative overflow-x-auto">
               <table className="w-full h-fit border-collapse">
                 <thead>
-                  <tr className="bg-theme-dark text-left text-sm text-white font-SolaimanLipi">
+                  <tr className="bg-theme-dark text-left text-sm text-white font-default">
                     <th></th>
                     {tableHeader.map((title) => (
                       <th key={title} className="py-2 px-3">
@@ -368,7 +368,7 @@ const InputTable2 = ({ tableTitle, field, tableRows, tableHeader }) => {
                   items={rows.map((row) => row.Serial)}
                   strategy={verticalListSortingStrategy}
                 >
-                  <tbody className="font-SolaimanLipi text-semibold">
+                  <tbody className="font-default text-semibold">
                     {rows.map((row) => (
                       <DraggableRow
                         key={row.id}

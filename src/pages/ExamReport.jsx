@@ -84,7 +84,6 @@ const ExamReport = ({ pageTitle }) => {
         return [
           'ReportID',
           'SessionID',
-          'RDID',
           'ExamID',
           'SubClassID',
           'Langauge',
@@ -125,7 +124,7 @@ const ExamReport = ({ pageTitle }) => {
           'SessionID',
           'RDID',
           'ExamID',
-          'ClassID',
+          'SubClassID',
           'Langauge',
           'PdfSelect',
         ].includes(fieldName);
@@ -266,25 +265,31 @@ const ExamReport = ({ pageTitle }) => {
     }
   }, [selectedPdfID, pdfOptions]);
 
-  const onSubmit = (formData) => {
-    const params = {
-      report_id: formData.ReportID,
-      session_id: Number(formData.SessionID),
-      class_id: Number(formData.ClassID),
-      subClass_id: Number(formData.SubClassID),
-      exam_id: Number(formData.ExamID),
-      residential_id: Number(formData.RDID),
-      language_id: Number(formData.id),
-      pdf_id: Number(formData.PdfID),
-      ERIsActive: Number(formData.ERIsActive),
-    };
 
-    Object.keys(params).forEach(
-      (key) =>
-        (params[key] === undefined || params[key] === '') && delete params[key]
-    );
-    console.log('Submitted params:', params);
-    setQueryParams(params);
+
+  useEffect(()=>{
+    setQueryParams(formValues);
+  }, [formValues])
+
+  const onSubmit = (formData) => {
+    // const params = {
+    //   report_id: formData.ReportID,
+    //   session_id: Number(formData.SessionID),
+    //   class_id: Number(formData.ClassID),
+    //   subClass_id: Number(formData.SubClassID),
+    //   exam_id: Number(formData.ExamID),
+    //   residential_id: Number(formData.RDID),
+    //   language_id: Number(formData.id),
+    //   pdf_id: Number(formData.PdfID),
+    //   ERIsActive: Number(formData.ERIsActive),
+    // };
+
+    // Object.keys(params).forEach(
+    //   (key) =>
+    //     (params[key] === undefined || params[key] === '') && delete params[key]
+    // );
+    // console.log('Submitted params:', params);
+    // setQueryParams(params);
     window.print();
   };
 

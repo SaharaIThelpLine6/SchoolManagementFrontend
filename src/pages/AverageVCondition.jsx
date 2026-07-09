@@ -35,7 +35,7 @@ const AverageVCondition = ({ pageTitle }) => {
   ];
 
   return (
-    <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
+    <div className="font-default bg-white p-6 md:p-4 rounded-xl shadow-lg">
       {/* Tab Navigation */}
       <div className="flex flex-wrap gap-2">
         {tabs.map((tab) => (

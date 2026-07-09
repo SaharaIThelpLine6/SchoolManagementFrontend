@@ -136,11 +136,11 @@ const AdmissionForm = ({ pageTitle }) => {
     }
 
     return (
-        <div className="font-SolaimanLipi">
+        <div className="font-default">
             <div className="flex flex-col gap-3">
                 <div className=" w-full border rounded-lg shadow-sm border-theme-offwhite">
                     <div className="flex items-center justify-between bg-white p-4 rounded-tl-lg rounded-tr-lg print:hidden">
-                        <h1 className="font-semibold text-lg text-theme-dark font-SolaimanLipi mb-0">
+                        <h1 className="font-semibold text-lg text-theme-dark font-default mb-0">
                             {translate(pageTitle)}
                         </h1>
                     </div>

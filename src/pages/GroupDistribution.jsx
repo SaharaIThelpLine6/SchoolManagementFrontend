@@ -112,7 +112,6 @@ const GroupDistribution = ({ pageTitle }) => {
       console.error('Error updating student group:', error);
     }
   };
-
   return (
     <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
@@ -120,6 +119,7 @@ const GroupDistribution = ({ pageTitle }) => {
           {translate('Group Distribution List')}
         </h3>
       </div>
+     
 
       <FormProvider {...methods}>
         <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -238,6 +238,7 @@ const GroupDistribution = ({ pageTitle }) => {
           </tbody>
         </table>
       </div>
+
 
       <DefaultPagination
         currentPage={currentPage}

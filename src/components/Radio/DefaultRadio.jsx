@@ -44,7 +44,7 @@ const DefaultRadio = ({
     >
       {label && (
         <label
-          className={`font-medium text-black font-SolaimanLipi ${
+          className={`font-medium text-black font-default ${
             labelPosition === "left"
               ? "w-1/4 min-w-[100px] text-end pt-2"
               : "block"
@@ -72,7 +72,7 @@ const DefaultRadio = ({
               />
 
               <span
-                className={`ml-2 text-sm font-SolaimanLipi ${
+                className={`ml-2 text-sm font-default ${
                   isChecked(option.id) ? "text-black" : "text-gray-700"
                 } ${optionLabelClassName}`}
               >

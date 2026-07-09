@@ -30,7 +30,7 @@ const MaritListResultPrint = () => {
         <div className="portrait-page">
             <div className=" w-full h-[1000px] relative bg-white ">
                 <div className="pt-4 pb-1 px-8 bg-white">
-                    <div className=" bg-white font-SolaimanLipi relative w-[1000px] max-w-full mx-auto pr-[0px]">
+                    <div className=" bg-white font-default relative w-[1000px] max-w-full mx-auto pr-[0px]">
                         <div className="w-full block bg-white">
                             <div className="flex-1">
                                 <div className="flex items-center flex-col md:bg-white md:flex-row">

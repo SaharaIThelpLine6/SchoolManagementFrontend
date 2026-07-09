@@ -199,7 +199,7 @@ const SMS = ({ pageTitle }) => {
   };
 
   return (
-    <div className="sm:gap-3 font-SolaimanLipi bg-white md:p-4 rounded-xl shadow-lg">
+    <div className="sm:gap-3 font-default bg-white md:p-4 rounded-xl shadow-lg">
       <div className="grid grid-cols-1 sm:grid-cols-2">
         <h2 className="text-lg md:text-xl font-bold text-gray-800">
           {translate('Send single and multiple SMS')}
