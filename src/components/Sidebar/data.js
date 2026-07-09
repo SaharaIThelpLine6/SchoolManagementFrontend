@@ -173,11 +173,11 @@ export const menuData = [
         name: 'User Notice',
         route: '/parent-panel/user-notice',
       },
-      // {
-      //   id: '8',
-      //   name: 'User Attendance',
-      //   route: '/parent-panel/user-attendance',
-      // }
+      {
+        id: '8',
+        name: 'User Attendance',
+        route: '/parent-panel/user-attendance',
+      }
     ],
   },
   // {

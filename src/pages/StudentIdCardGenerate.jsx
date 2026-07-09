@@ -18,7 +18,6 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
   console.log(fields, "fields")
   const translate = useTranslate();
   function convert_to_buffer(studentResult) {
-    console.log(studentResult.Image, "studentResult?.Image?.data")
     if (studentResult?.Image?.data) {
       const buffer = Buffer.from(studentResult.Image.data);
       const base64String = buffer.toString('base64');
@@ -82,13 +81,13 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                     <div className="middle_area px-2 -mt-[40px]">
                       <div className="proile_image_shape text-center">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails?.UserImage)} alt="" />
                         </div>
                         <h3 className='text-center py-[2px] px-[30px] mt-[6px] bg-sky-600 inline-block rounded-[50px] mx-auto text-white text-[16px]'>পরিচয় পত্র</h3>
                       </div>
                       <div className='pt-1 pb-2 h-[160px]'>
-                        <h3 className='text-red text-[18px] font-bold text-center'>{printableStudentDetails.StudentName}</h3>
-                        <h3 className='text-red pl-[20px] text-[16px]'>আইডি নং: {translate(printableStudentDetails.StudentCode)}</h3>
+                        <h3 className='text-red text-[18px] font-bold text-center'>{printableStudentDetails?.StudentName}</h3>
+                        <h3 className='text-red pl-[20px] text-[16px]'>আইডি নং: {translate(printableStudentDetails?.StudentCode)}</h3>
                         {fields.map((fieldName) => {
                           if (!fieldName) return null;
                           return (
@@ -113,11 +112,11 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails?.UserImage)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
-                          <h3 className='text-red text-[18px] font-bold text-center'>{printableStudentDetails.StudentName}</h3>
+                          <h3 className='text-red text-[18px] font-bold text-center'>{printableStudentDetails?.StudentName}</h3>
                           {fields.map((fieldName) => {
                             if (!fieldName) return null;
                             return (
@@ -145,11 +144,11 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails?.UserImage)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
-                          <h3 className='text-sky-600 text-[18px] font-bold text-center'>{printableStudentDetails.StudentName}</h3>
+                          <h3 className='text-sky-600 text-[18px] font-bold text-center'>{printableStudentDetails?.StudentName}</h3>
                           {fields.map((fieldName) => {
                             if (!fieldName) return null;
                             return (
@@ -180,11 +179,11 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails?.UserImage)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
-                          <h3 className='text-[#3F83C4] text-[18px] font-bold text-center'>{printableStudentDetails.StudentName}</h3>
+                          <h3 className='text-[#3F83C4] text-[18px] font-bold text-center'>{printableStudentDetails?.StudentName}</h3>
                           {fields.map((fieldName) => {
                             if (!fieldName) return null;
                             return (
@@ -216,11 +215,11 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails?.UserImage)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
-                          <h3 className='text-[#3F83C4] text-[18px] font-bold text-center'>{printableStudentDetails.StudentName}</h3>
+                          <h3 className='text-[#3F83C4] text-[18px] font-bold text-center'>{printableStudentDetails?.StudentName}</h3>
                           {fields.map((fieldName) => {
                             if (!fieldName) return null;
                             return (
@@ -252,11 +251,11 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails?.UserImage)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
-                          <h3 className='text-[#3F83C4] text-[18px] font-bold text-center'>{printableStudentDetails.StudentName}</h3>
+                          <h3 className='text-[#3F83C4] text-[18px] font-bold text-center'>{printableStudentDetails?.StudentName}</h3>
                           {fields.map((fieldName) => {
                             if (!fieldName) return null;
                             return (
@@ -288,11 +287,11 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails?.UserImage)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
-                          <h3 className='text-[#3F83C4] text-[18px] font-bold text-center'>{printableStudentDetails.StudentName}</h3>
+                          <h3 className='text-[#3F83C4] text-[18px] font-bold text-center'>{printableStudentDetails?.StudentName}</h3>
                           {fields.map((fieldName) => {
                             if (!fieldName) return null;
                             return (
@@ -324,11 +323,11 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                       </div>
                       <div className="middle_area px-2">
                         <div className="image overflow-hidden h-[80px] w-[80px] shadow-lg mx-auto rounded-[5px]">
-                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails.UserImage)} alt="" />
+                          <img className='w-full h-full object-cover' src={convert_to_buffer(printableStudentDetails?.UserImage)} alt="" />
                         </div>
 
                         <div className='pt-1 pb-2  text-left h-[160px]'>
-                          <h3 className='text-[#3F83C4] text-[18px] font-bold text-center'>{printableStudentDetails.StudentName}</h3>
+                          <h3 className='text-[#3F83C4] text-[18px] font-bold text-center'>{printableStudentDetails?.StudentName}</h3>
                           {fields.map((fieldName) => {
                             if (!fieldName) return null;
                             return (
