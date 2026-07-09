@@ -410,7 +410,16 @@ export const userStudentSlice = createApi({
       }),
       providesTags: ['AdmissionTimeMessage'],
     }),
-    getStudentAttendance: builder.query({ query: (id) => ({ url: `student_attendance/${id}`, }), }),
+    getStudentAttendanceToday: builder.query({
+      query: ({ sessionId, classId, date } = {}) => ({
+        url: "student_attendance/today",
+        params: {
+          ...(sessionId && { sessionId }),
+          ...(classId && { classId }),
+          ...(date && { date }),
+        },
+      }),
+    }),
     // Post admission time message
     postAdmissionTimeMessage: builder.mutation({
       query: (body) => ({
@@ -499,5 +508,5 @@ export const {
   usePutAdmissionTimeMessageMutation,
   useDeleteAdmissionTimeMessageMutation,
   useGetSingleAdmissionTimeMessageQuery,
-  useGetStudentAttendanceQuery
+  useGetStudentAttendanceTodayQuery
 } = userStudentSlice;
