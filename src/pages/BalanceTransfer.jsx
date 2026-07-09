@@ -129,7 +129,7 @@ const BalanceTransfer = ({ pageTitle }) => {
   ];
 
   return (
-    <div className="font-SolaimanLipi bg-white p-4 md:p-6 rounded-xl shadow-lg">
+    <div className="font-default bg-white p-4 md:p-6 rounded-xl shadow-lg">
       {/* Header */}
       <div className="flex justify-between items-center">
         <h3 className="text-lg md:text-xl font-bold">

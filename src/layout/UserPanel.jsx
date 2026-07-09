@@ -179,7 +179,7 @@ export default function UserPanel({ children }) {
   if (!isValid) return <Navigate to={`/${schoolid}/login`} replace />;
 
   return (
-    <div className="font-SolaimanLipi bg-[#c5e1fd]">
+    <div className="font-default bg-[#c5e1fd]">
       {/* লোগোকে background image হিসেবে right top এ দেখানোর জন্য নতুন div যোগ করুন */}
       <div
         className="fixed top-0 w-100 h-100 opacity-20 pointer-events-none z-0"

@@ -58,7 +58,7 @@ const PublicLayout = () => {
 
   return (
     <>
-      <div className="min-h-screen font-SolaimanLipi">
+      <div className="min-h-screen font-default">
         {isOpen && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-40 hidden_in_print"
@@ -93,11 +93,7 @@ const PublicLayout = () => {
         </div>
         {/* For mobile display end */}
 
-        <header
-          // bg-theme-color
-          className={`lg:flex font-SolaimanLipi shadow-md text-theme-color sticky top-0 left-0 bg-white h-screen md:h-auto max-w-[320px] md:max-w-full w-full hidden_in_print z-[99] ${isOpen ? "flex fixed z-[99]" : "hidden"
-            }`}
-        >
+        <header className={`lg:flex font-default shadow-md text-theme-color sticky top-0 left-0 bg-white h-screen md:h-auto max-w-[320px] md:max-w-full w-full hidden_in_print z-[99] ${isOpen ? "flex fixed z-[99]" : "hidden"}`}>
           <div className="container mx-auto">
             <nav className="w-full">
               <div className="relative md:flex justify-between py-[10px] px-[10px] lg:py-[18px] lg:px-[20px]">
@@ -151,8 +147,7 @@ const PublicLayout = () => {
                       </button>
 
                       {/* Desktop dropdown (hover) */}
-                      <ul className="hidden lg:block absolute top-full left-0 w-[300px] bg-white border border-[#d5d5d5] rounded-md shadow-md z-[100]
-      invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
+                      <ul className="hidden lg:block absolute top-full left-0 w-[300px] bg-white border border-[#d5d5d5] rounded-md shadow-md z-[100] invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
                         <li><a href={`/${schoolid}/student_result`} className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">ব্যক্তিগত ফলাফল</a></li>
                         {schoolData?.isClassResultShowable?.Action != 0 && (
                           <li><a href={`/${schoolid}/classes`} className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">ক্লাশ/মারহালা ভিত্তিক ফলাফল</a></li>

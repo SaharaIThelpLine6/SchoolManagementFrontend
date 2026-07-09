@@ -46,7 +46,7 @@ const DefaultSwitch = ({
       {label && (
         <label
           htmlFor={registerKey}
-          className={`font-SolaimanLipi ${
+          className={`font-default ${
             labelPosition === 'left' ? 'w-2/5 mb-0 text-end' : 'mb-1 block'
           }`}
         >

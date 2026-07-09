@@ -159,14 +159,15 @@ const BanglaNumberWithTwoColumn = ({reportData, queryParams}) => {
         >
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }} className="border border-black">
             <tbody>
-              {reportData && reportData.map((row, i) => (
-                <tr key={i} data-idx={i}>
-                  <td style={{ padding: "5px 6px", width: "36px", border: "1px solid #000" }}>{bnBijoy2Unicode(String(i + 1))}</td>
-                  <td style={{ padding: "5px 6px", width: "56px" }}>{bnBijoy2Unicode(String(row?.User.UserCode))}</td>
-                  <td style={{ padding: "5px 6px" }}>{row?.User.UserName}</td>
-                  <td style={{ padding: "5px 6px", width: "60px" }}></td>
-                </tr>
-              ))}
+             {Array.isArray(reportData) &&
+                reportData.map((row, i) => (
+                  <tr key={i}>
+                    <td>{bnBijoy2Unicode(String(i + 1))}</td>
+                    <td>{bnBijoy2Unicode(String(row?.User?.UserCode ?? ""))}</td>
+                    <td>{row?.User?.UserName}</td>
+                    <td></td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

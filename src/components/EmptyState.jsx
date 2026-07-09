@@ -16,10 +16,10 @@ const EmptyState = ({
       className={`flex flex-col items-center justify-center py-12 px-4 text-center ${className}`}
     >
       <SvgIcon name={"FiFileText"} size={iconSize} className={iconColor} />
-      <h3 className="text-lg font-medium text-gray-700 mb-2 font-SolaimanLipi">
+      <h3 className="text-lg font-medium text-gray-700 mb-2 font-default">
         {message || translate("No data available")}
       </h3>
-      <p className="text-gray-500 mb-6 max-w-md font-SolaimanLipi">
+      <p className="text-gray-500 mb-6 max-w-md font-default">
         {translate("There are currently no items to display.")}
       </p>
       {buttonText && (

@@ -113,7 +113,7 @@ const BoardCenterName = () => {
   ];
 
   return (
-    <div className="font-SolaimanLipi bg-white p-6 rounded-xl shadow-md">
+    <div className="font-default bg-white p-6 rounded-xl shadow-md">
       {/* Title */}
       <h3 className="text-xl md:text-2xl font-bold mb-6 text-center md:text-left">
         {translate("Board Center Names")}

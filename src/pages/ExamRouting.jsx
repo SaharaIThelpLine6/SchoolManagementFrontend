@@ -892,7 +892,7 @@ const ExamRouting = ({ pageTitle }) => {
         {/* Header */}
         <div className="filter_header border-b border-[#e9edf4] pb-4 md:pb-5">
           <h3 className="text-lg md:text-xl font-bold">
-            {translate('Exam Routing')}
+            {translate('Exam Routine')}
           </h3>
         </div>
 
@@ -927,7 +927,7 @@ const ExamRouting = ({ pageTitle }) => {
                 registerKey="SubClassID"
               />
 
-              <div className="grid grid-cols-2 gap-3">
+              {/* <div className="grid grid-cols-2 gap-3">
                 <DefaultInput
                   registerKey="RoomNo"
                   label={`${translate('Hall No')}`}
@@ -938,7 +938,7 @@ const ExamRouting = ({ pageTitle }) => {
                   label={`${translate('Hall Name')}`}
                   className="w-full"
                 />
-              </div>
+              </div> */}
             </div>
 
             {/* Date Checkbox */}
@@ -973,7 +973,7 @@ const ExamRouting = ({ pageTitle }) => {
               <div className='rounded-[6px] border border-gray-400 border-b-0 overflow-hidden mb-6'>
 
                 <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
-                  <div className="px-3 py-2 text-sm font-semibold text-gray-900">সারি</div>
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 opacity-0">সারি</div>
                   <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">১</div>
                   <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">২</div>
                   <div className="py-2 text-center text-sm font-semibold text-gray-900 border-l border-gray-400">৩</div>
@@ -992,7 +992,7 @@ const ExamRouting = ({ pageTitle }) => {
                 </div>
 
                 <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
-                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">{translate('Date')}</div>
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">{translate('Date')} <span className="text-red-500">*</span></div>
 
 
                   {Array.from({ length: 14 }).map((_, index) => (
@@ -1018,7 +1018,7 @@ const ExamRouting = ({ pageTitle }) => {
 
 
                 <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
-                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">{translate('Bangla / Arabic Date')}</div>
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">{translate('BD / AR Date')}</div>
 
 
                   {Array.from({ length: 14 }).map((_, index) => (
@@ -1027,12 +1027,11 @@ const ExamRouting = ({ pageTitle }) => {
                         {...register(`bndate_${index}`)}
                         placeholder={translate("Date")}
                         type="text"
-                        className="w-full h-full px-1 py-2 focus:outline-0"
+                        className="w-full h-full px-1 py-2 focus:outline-0 text-center"
+                        label="hidden"
                       />
                     </div>
                   ))}
-
-
 
                   <div className='p-1 text-center'>
                     <Button
@@ -1048,7 +1047,7 @@ const ExamRouting = ({ pageTitle }) => {
 
 
                 <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
-                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">বার</div>
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">বার <span className="text-red-500">*</span></div>
 
 
                   {Array.from({ length: 14 }).map((_, index) => (
@@ -1062,7 +1061,7 @@ const ExamRouting = ({ pageTitle }) => {
                         onKeyDown={(e) =>
                           handleAutoConvertAndTab('day', index, e)
                         }
-                        className="w-full h-full px-1 py-2 focus:outline-0"
+                        className="w-full h-full px-1 py-2 focus:outline-0 text-center"
                       />
                     </div>
                   ))}
@@ -1085,7 +1084,7 @@ const ExamRouting = ({ pageTitle }) => {
                   style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}
                 >
                   <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">
-                    {translate('শুরু সময়')}
+                    {translate('শুরু সময়')} <span className="text-red-500">*</span>
                   </div>
 
                   {Array.from({ length: 14 }).map((_, index) => (
@@ -1125,7 +1124,7 @@ const ExamRouting = ({ pageTitle }) => {
                   style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}
                 >
                   <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">
-                    {translate('শেষ সময়')}
+                    {translate('শেষ সময়')} <span className="text-red-500">*</span>
                   </div>
 
                   {Array.from({ length: 14 }).map((_, index) => (
@@ -1166,7 +1165,7 @@ const ExamRouting = ({ pageTitle }) => {
               {/* Select with Toggle */}
 
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg font-semibold  tracking-widest text-black">বিষয় (Subjects)</span>
+                <span className="text-lg font-semibold  tracking-widest text-black">বিষয় (Subjects) </span>
                 <div className="flex-1 h-px bg-gray-100 ml-2"></div>
               </div>
 
@@ -1176,7 +1175,7 @@ const ExamRouting = ({ pageTitle }) => {
               <div className='rounded-[6px] border border-gray-400 border-b-0 overflow-hidden mb-6'>
 
                 <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
-                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 ">সারি</div>
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 opacity-0 ">সারি</div>
                   {Array.from({ length: 14 }).map((_, index) => {
                     const subjectValue = watch(`subject_${index}`);
                     return (
@@ -1203,7 +1202,7 @@ const ExamRouting = ({ pageTitle }) => {
 
 
                 <div className="grid grid-cols-16 bg-gray-50 border-b border-gray-400" style={{ gridTemplateColumns: 'repeat(16, minmax(0, 1fr))' }}>
-                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">বিষয়</div>
+                  <div className="px-3 py-2 text-sm font-semibold text-gray-900 border-r border-gray-400">বিষয় <span className="text-red-500">*</span></div>
 
 
                   {Array.from({ length: 14 }).map((_, index) => {

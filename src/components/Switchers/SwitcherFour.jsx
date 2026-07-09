@@ -18,7 +18,7 @@ const SwitcherFour = ({
 
   return (
     <div className="flex items-center gap-3">
-      {label && <label className="font-SolaimanLipi text-black">{label}</label>}
+      {label && <label className="font-default text-black">{label}</label>}
 
       <label className="relative inline-flex cursor-pointer items-center">
         <input

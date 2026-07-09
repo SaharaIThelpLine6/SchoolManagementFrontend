@@ -366,7 +366,7 @@ const AddStudent = ({ pageTitle }) => {
 
   return (
     <FormProvider {...methods}>
-      <div className="-translate-y-4 font-SolaimanLipi">
+      <div className="-translate-y-4 font-default">
         <div className="block w-full overflow-x-auto mt-5">
           <AdmissionForm />
           <div className="rounded-xl border bg-white p-4 shadow-sm mt-3">

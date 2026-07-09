@@ -223,6 +223,10 @@ export const classSlice = createApi({
       }),
       invalidatesTags: ['Class_Routine'],
     }),
+    getSingleSubClass: builder.query({
+      query: (id) => `single_sub_class/${id}`,
+      providesTags: ['SingleSubClass'],
+    }),
   }),
 });
 
@@ -255,5 +259,6 @@ export const {
   useGetTimeSlotsQuery,
   useGetClassRoutineDaysQuery,
   useCreateTimeSlotMutation,
-  useDeleteTimeSlotMutation
+  useDeleteTimeSlotMutation,
+  useGetSingleSubClassQuery,
 } = classSlice;

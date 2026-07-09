@@ -12,7 +12,7 @@ export default function DepositCostReport({ orderDetails }) {
         return imageSrc
     }
     return (
-        <div className='w-[1076px] h-[750px] mx-auto relative bg-white font-SolaimanLipi landscape-page bg-[#f8f8f8] p-4 show_in_print'>
+        <div className='w-[1076px] h-[750px] mx-auto relative bg-white font-default landscape-page bg-[#f8f8f8] p-4 show_in_print'>
             <div className="flex items-end w-full justify-start">
                 <div className="logo w-[70px] absolute left-[40px]">
                     <img src={bufferConveter(orderDetails[0].Logo.data)} alt="logo" />

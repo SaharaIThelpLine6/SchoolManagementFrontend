@@ -19,7 +19,7 @@ function CharacterReport({ report }) {
     }
   }, [institutionInfo]);
   return (
-    <div className="w-full bg-white mx-auto font-SolaimanLipi print_canvas px-2">
+    <div className="w-full bg-white mx-auto font-default print_canvas px-2">
       <div className="header relative text-center border-b-2 border-black pb-4 mb-6">
         <h2 className="text-[28px] text-black font-bold">
           {institutionInfo?.InstitutionName}
