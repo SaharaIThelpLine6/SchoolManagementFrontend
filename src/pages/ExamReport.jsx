@@ -124,7 +124,7 @@ const ExamReport = ({ pageTitle }) => {
           'SessionID',
           'RDID',
           'ExamID',
-          'ClassID',
+          'SubClassID',
           'Langauge',
           'PdfSelect',
         ].includes(fieldName);
