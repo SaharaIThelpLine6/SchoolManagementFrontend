@@ -163,7 +163,7 @@ const SideBar = () => {
              * Main Route
              * Result
              */
-            if (subItem.name === 'Online F: Publish') {
+            if (subItem.name === 'Result Entry & Publish') {
               return hasPermission(permissionsDataList.result_entry);
             }
             if (subItem.name === 'Average V: Report') {

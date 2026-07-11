@@ -86,6 +86,7 @@ const ExamReport = ({ pageTitle }) => {
           'SessionID',
           'ExamID',
           'SubClassID',
+          'RDID',
           'Langauge',
           'PdfSelect',
         ].includes(fieldName);
@@ -536,23 +537,23 @@ const ExamReport = ({ pageTitle }) => {
         {/* 7. সিট নং */}
         {Number(selectedReportID) === 7 &&
           Number(languageID) === 1 &&
-          Number(selectedPdfID) === 1 && <BSeatNoWhite />}
+          Number(selectedPdfID) === 1 && <BSeatNoWhite queryParams={queryParams} />}
         {Number(selectedReportID) === 7 &&
           Number(languageID) === 1 &&
-          Number(selectedPdfID) === 2 && <BSeatNoColor />}
+          Number(selectedPdfID) === 2 && <BSeatNoColor queryParams={queryParams} />}
         {Number(selectedReportID) === 7 &&
           Number(languageID) === 1 &&
-          Number(selectedPdfID) === 3 && <BSeatNoWhite />}
+          Number(selectedPdfID) === 3 && <BSeatNoWhite queryParams={queryParams} />}
 
         {Number(selectedReportID) === 7 &&
           Number(languageID) === 2 &&
-          Number(selectedPdfID) === 1 && <ASeatNoWhite />}
+          Number(selectedPdfID) === 1 && <ASeatNoWhite queryParams={queryParams} />}
+        {Number(selectedReportID) === 7 &&
+          Number(languageID) === 2 && 
+          Number(selectedPdfID) === 2 && <ASeatNoColor queryParams={queryParams} />}
         {Number(selectedReportID) === 7 &&
           Number(languageID) === 2 &&
-          Number(selectedPdfID) === 2 && <ASeatNoColor />}
-        {Number(selectedReportID) === 7 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 3 && <ASeatNoSeatPlain />}
+          Number(selectedPdfID) === 3 && <ASeatNoSeatPlain queryParams={queryParams} />}
         {/* 8. নম্বরপত্র ভর্তি সিরিয়ালে */}
         {Number(selectedReportID) === 8 && <SingatureSheetNS />}
         {/* 9. সকল পরীক্ষার্থীর পরিসংখ্যান  */}

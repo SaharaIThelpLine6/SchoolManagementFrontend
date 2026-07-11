@@ -186,7 +186,7 @@ const DefaultModal = () => {
                 {modalType === 'OPEN_BANK_INFO' && <BankInfoSettings />}
                 {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
                 {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
-                {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
+                {/* {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />} */}
                 {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
                 {modalType === 'STUDENT_FEE_GROUP' && <StudentFeeGroup />}
                 {modalType === 'SECTION_CREATE_FORM' && (

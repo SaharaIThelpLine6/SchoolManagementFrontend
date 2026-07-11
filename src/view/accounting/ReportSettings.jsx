@@ -5,11 +5,13 @@ import { toast } from "react-toastify";
 import DefaultInput from "../../components/Forms/DefaultInput";
 import Button from "../../components/Button/Button";
 import { useGetAccReportSettingsQuery, useUpdateAccReportSettingMutation } from "../../features/settings/settingsQuerySlice";
+import useTranslate from "../../utils/Translate";
 
 const ReportSettings = () => {
   const { data: accReportSettingsData } = useGetAccReportSettingsQuery();
   const [updateUpdateAccReportSettings] = useUpdateAccReportSettingMutation();
   const [selected, setSelected] = useState(null);
+  const translate = useTranslate()
   const methods = useForm({
     defaultValues: {
       rows: [],
@@ -84,7 +86,7 @@ const ReportSettings = () => {
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="font-lato p-6 bg-gray-50 rounded-xl shadow-md mb-6"
+        className="font-default p-6 bg-gray-50 rounded-xl shadow-md mb-6"
       >
         <div className="flex gap-8 mb-4">
           {/* Main options */}
@@ -102,7 +104,7 @@ const ReportSettings = () => {
                 htmlFor="bordered-radio-1"
                 className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
               >
-                Without Number
+                {translate("Receipt Without Number")}
               </label>
             </div>
 
@@ -119,7 +121,7 @@ const ReportSettings = () => {
                 htmlFor="bordered-radio-2"
                 className="ms-2 text-sm font-medium text-gray-900"
               >
-                Auto
+                {translate("Auto")}
               </label>
             </div>
 
@@ -136,7 +138,8 @@ const ReportSettings = () => {
                 htmlFor="bordered-radio-3"
                 className="ms-2 text-sm font-medium text-gray-900"
               >
-                Manual
+                {translate("Manual")}
+                
               </label>
             </div>
 
@@ -153,7 +156,7 @@ const ReportSettings = () => {
                 htmlFor="bordered-radio-4"
                 className="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
               >
-                Selected Recepted
+                {translate("Selected Receipt")}
               </label>
             </div>
           </div>
@@ -173,7 +176,8 @@ const ReportSettings = () => {
                   htmlFor="auto-session"
                   className="ms-2 text-sm font-medium text-gray-900"
                 >
-                  Session Wise
+                  
+                  {translate("Session Wise")}
                 </label>
               </div>
 
@@ -182,6 +186,7 @@ const ReportSettings = () => {
                   id="auto-order"
                   type="radio"
                   value="1"
+
                   {...methods.register("14")}
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500"
                 />
@@ -189,7 +194,8 @@ const ReportSettings = () => {
                   htmlFor="auto-order"
                   className="ms-2 text-sm font-medium text-gray-900"
                 >
-                  Order
+                  {translate("Order")}
+                  
                 </label>
               </div>
             </div>
@@ -211,7 +217,9 @@ const ReportSettings = () => {
                   htmlFor="manual-without"
                   className="ms-2 text-sm font-medium text-gray-900"
                 >
-                  Without Session ID
+                  {translate("Without Session ID")}
+
+                  
                 </label>
               </div>
 
@@ -228,7 +236,9 @@ const ReportSettings = () => {
                   htmlFor="manual-session"
                   className="ms-2 text-sm font-medium text-gray-900"
                 >
-                  Session ID First
+                  {translate("Session ID First")}
+
+                  
                 </label>
               </div>
               {selected === "4" ? <DefaultInput label={"Session ID First"} require={true} registerKey={"YearID"} /> : null}
@@ -283,7 +293,7 @@ const ReportSettings = () => {
             <div className="grid grid-cols-3 gap-2">
               {/* Checkboxes */}
               <div className="flex gap-2 items-center">
-                <label htmlFor={`rows.${index}.SettingColumn1`}>Col 1</label>
+                <label htmlFor={`rows.${index}.SettingColumn1`}>{translate("1st Signature")}</label>
                 <input
                   type="checkbox"
                   {...methods.register(`rows.${index}.SettingColumn1`)}
@@ -292,7 +302,7 @@ const ReportSettings = () => {
                 />
               </div>
               <div className="flex gap-2 items-center">
-                <label htmlFor={`rows.${index}.SettingColumn2`}>Col 2</label>
+                <label htmlFor={`rows.${index}.SettingColumn2`}>{translate("2nd Signature")}</label>
                 <input
                   type="checkbox"
                   {...methods.register(`rows.${index}.SettingColumn2`)}
@@ -301,7 +311,7 @@ const ReportSettings = () => {
                 />
               </div>
               <div className="flex gap-2 items-center">
-                <label htmlFor={`rows.${index}.SettingColumn3`}>Col 3</label>
+                <label htmlFor={`rows.${index}.SettingColumn3`}>{translate("3rd Signature")}</label>
                 <input
                   type="checkbox"
                   {...methods.register(`rows.${index}.SettingColumn3`)}

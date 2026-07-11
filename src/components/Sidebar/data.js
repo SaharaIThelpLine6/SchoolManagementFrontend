@@ -294,7 +294,7 @@ export const menuData = [
     subMenu: [
       {
         id: '1',
-        name: 'Online F: Publish',
+        name: 'Result Entry & Publish',
         route: '/result',
       },
       {

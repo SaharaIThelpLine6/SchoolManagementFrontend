@@ -1,7 +1,10 @@
 import React from 'react';
 import SvgIcon from '../icons/SvgIcon';
+import useTranslate from '../../utils/Translate';
+import bnBijoy2Unicode from '../../utils/conveter';
 
 const DefaultPagination = ({ currentPage, totalPages, onPageChange }) => {
+  const translate = useTranslate();
   const handlePrev = () => {
     if (currentPage > 1) {
       onPageChange(currentPage - 1);
@@ -24,11 +27,11 @@ const DefaultPagination = ({ currentPage, totalPages, onPageChange }) => {
           aria-label="Previous page"
           type='button'
         >
-          <SvgIcon name="MdKeyboardArrowLeft" size={24} />
+          <SvgIcon name="ChevronLeft" size={24} />
         </button>
 
         <span className="px-2 text-sm font-medium">
-          Page {currentPage} of {totalPages}
+          {translate("Page")} { bnBijoy2Unicode(String(currentPage)) } {translate("of")} {bnBijoy2Unicode(String(totalPages))}
         </span>
 
         <button
@@ -38,7 +41,7 @@ const DefaultPagination = ({ currentPage, totalPages, onPageChange }) => {
           aria-label="Next page"
           type='button'
         >
-          <SvgIcon name="MdKeyboardArrowRight" size={24} />
+          <SvgIcon name="ChevronRight" size={24} />
         </button>
       </div>
     </div>

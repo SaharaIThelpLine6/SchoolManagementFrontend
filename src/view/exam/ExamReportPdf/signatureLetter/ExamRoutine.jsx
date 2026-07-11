@@ -132,13 +132,13 @@ const ExamRoutine = ({ reportData, queryParams }) => {
                     key={assignment.AssignmentID ?? index}
                     className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
                   >
-                    <td className="border border-black text-[16px] font-semibold p-1">
+                    <td className="border border-black text-[16px] font-semibold p-1 bg-white">
                       {bnBijoy2Unicode(String(index + 1))}
                     </td>
-                    <td className="border border-black text-[16px] p-1 text-gray-800">
+                    <td className="border border-black text-[16px] p-1 text-gray-800 bg-white">
                       {bnBijoy2Unicode(String(assignment.User?.UserCode))}
                     </td>
-                    <td className="border border-black text-[16px] font-medium p-2 text-left">
+                    <td className="border border-black text-[16px] font-medium p-2 text-left bg-white">
                       {assignment.User?.UserName}
                     </td>
                     {reportData?.routine?.map((_, i) => (
