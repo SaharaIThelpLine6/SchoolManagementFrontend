@@ -743,7 +743,7 @@ const Router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.result_entry}
                   >
-                    <PointBasedResultEntry pageTitle="Online F: Publish" />
+                    <PointBasedResultEntry pageTitle="Result Entry & Publish" />
                   </RequirePermission>
                 ),
               },

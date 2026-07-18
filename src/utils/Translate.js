@@ -275,6 +275,7 @@ const useTranslate = () => {
     'Average V: Condition': 'গড় ভি: কন্ডিশন',
     'Average V: Report': 'গড় ভি: রিপোর্ট',
     'Online F: Publish': 'অনলাইন ফ: প্রকাশ',
+    'Result Entry & Publish': 'ফলাফল এন্ট্রি ও প্রকাশ',
     'General Ledger': 'জেনারেল লেজার',
     'Sub Ledger (Fee Name)': 'সাব লেজার (ফি এর নাম)',
     'Sub Ledger': 'সাব লেজার',
@@ -853,6 +854,20 @@ const useTranslate = () => {
     "Transient District": "বর্তমান জেলা",
     "Transient Division": "বর্তমান বিভাগ",
     "BD / AR Date": "বাংলা অথবা আরবি তারিখ",
+    "Page": "পৃষ্ঠা",
+    "of": "এর",
+    "Receipt Without Number": "রসিদ নাম্বার ছাড়া",
+    "Auto": "অটো",
+    "Manual": "মেনুয়াল",
+    "Selected Receipt": "নির্বাচিত রসিদ",
+    "Session Wise": "সেশন ভিওিক",
+    "Order": "ধারাবাহিক",
+    "Without Session ID": "সেশন আইডি ছাড়া",
+    "Session ID First": "সেশন আইডি সামনে দিয়ে",
+    "1st Signature": "১ম স্বাক্ষর",
+    "2nd Signature": "২য় স্বাক্ষর",
+    "3rd Signature": "৩য় স্বাক্ষর",
+
   };
 
   return (key) =>

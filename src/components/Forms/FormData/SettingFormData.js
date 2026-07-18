@@ -20,19 +20,19 @@ export const formFieldsSettings = [
   },
 
   // Location Information
-  {
-    title: 'Location Information',
-    fields: [
-      { key: 'Village', label: 'Village' },
-      { key: 'PostOffice', label: 'Post Office' },
-      { key: 'PoliceStation', label: 'Police Station' },
-      { key: 'District', label: 'District' },
-      { key: 'AraVillage', label: 'Arabic Village' },
-      { key: 'AraPostOffice', label: 'Arabic Post Office' },
-      { key: 'AraPoliceStation', label: 'Arabic Police Station' },
-      { key: 'AraDistrict', label: 'Arabic District' },
-    ],
-  },
+  // {
+  //   title: 'Location Information',
+  //   fields: [
+  //     { key: 'Village', label: 'Village' },
+  //     { key: 'PostOffice', label: 'Post Office' },
+  //     { key: 'PoliceStation', label: 'Police Station' },
+  //     { key: 'District', label: 'District' },
+  //     { key: 'AraVillage', label: 'Arabic Village' },
+  //     { key: 'AraPostOffice', label: 'Arabic Post Office' },
+  //     { key: 'AraPoliceStation', label: 'Arabic Police Station' },
+  //     { key: 'AraDistrict', label: 'Arabic District' },
+  //   ],
+  // },
 
   // Contact Information
   {
