@@ -299,11 +299,15 @@ const AdmissionFormModal = ({ userId }) => {
     { id: 2, name: 'Old' },
   ];
 
-  useEffect(()=>{
+  useEffect(() => {
     console.log(data);
-    
-    methods.setValue("UserID", userId)
-    methods.setValue("StudentCode", data?.UserCode || 0)
+
+    methods.setValue("UserID", userId);
+    methods.setValue("StudentCode", data?.UserCode || 0);
+    methods.setValue(
+      'CreateAt',
+      data?.CreateAt ? new Date(data.CreateAt) : new Date()
+    );
   }, [data])
 
   const onSubmit = async (formData) => {
@@ -383,7 +387,7 @@ const AdmissionFormModal = ({ userId }) => {
                   <input
                     {...methods.register('StudentCode', {
                       required: true,
-                    
+
                     })}
                     className="h-[38px] w-full rounded-lg border border-gray-300 bg-gray-100 px-3 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                     onKeyDown={handleEnter}
