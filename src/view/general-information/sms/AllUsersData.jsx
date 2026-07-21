@@ -18,6 +18,7 @@ import SvgIcon from "../../../components/icons/SvgIcon";
 import DefaultPagination from "../../../components/Pagination/DefaultPagination";
 // import { isEqual } from "lodash";
 import { isEqual } from "../../../utils/isEqual";
+import { convertOnLanguageChange } from "../../../utils/conveter";
 
 const PAGE_SIZE = 5;
 
@@ -73,12 +74,12 @@ const AllUsersData = ({ pageTitle }) => {
   const handleDelete = async (userCode) => {
     Swal.fire({
       title: translate("Are you sure?"),
-      text: translate("This will permanently delete the user record"),
+      text: translate("This will remove the user from SMS list"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: translate("Yes, delete it!"),
+      confirmButtonText: translate("Yes, remove it!"),
       cancelButtonText: translate("Cancel"),
     }).then((result) => {
       if (result.isConfirmed) {
@@ -86,13 +87,13 @@ const AllUsersData = ({ pageTitle }) => {
           dispatch(deleteAllUsersData(userCode));
           Swal.fire(
             translate("Deleted!"),
-            translate("User record has been deleted."),
+            translate("User remove from the SMS List"),
             "success"
           );
         } catch (error) {
           Swal.fire(
             translate("Error!"),
-            translate("Failed to delete user record"),
+            translate("Failed to  remove from the SMS List"),
             "error"
           );
         }
@@ -131,12 +132,18 @@ const AllUsersData = ({ pageTitle }) => {
       title: translate("User ID"),
       field: "UserCode",
       hozAlign: "center",
+      render: (row) => (
+        <React.Fragment>{convertOnLanguageChange(row?.UserCode)}</React.Fragment>
+      )
     },
     { title: translate("Name"), field: "UserName", hozAlign: "center" },
     {
       title: translate("Mobile Number"),
       field: "Mobile1",
       hozAlign: "center",
+      render: (row) => (
+        <React.Fragment>{convertOnLanguageChange(row?.Mobile1)}</React.Fragment>
+      )
     },
   ];
 
@@ -163,11 +170,11 @@ const AllUsersData = ({ pageTitle }) => {
           isFilterColumn={false}
         />
 
-         <DefaultPagination
-                 currentPage={currentPage}
-                 totalPages={totalPages}
-                 onPageChange={setCurrentPage}
-               />
+        <DefaultPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </FormProvider>
   );

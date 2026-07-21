@@ -319,4 +319,14 @@ function bnBijoy2Unicode(string) {
 
   return convText;
 }
+
+function convertOnLanguageChange(string) {
+ const language = localStorage.getItem("lang");
+ console.log(language)
+ const convertString = String(string);
+
+ return language == "bn" ? bnBijoy2Unicode(convertString) : convertString;
+
+}
+export { convertOnLanguageChange };
 export default bnBijoy2Unicode;

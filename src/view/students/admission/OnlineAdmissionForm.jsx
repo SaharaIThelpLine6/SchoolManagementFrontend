@@ -352,6 +352,11 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
     showModal('Online Admission Serial', 'ONLINE_ADMISSION_SERIAL');
   };
 
+  const selectedClassID = methods.watch("ClassID");
+  const filteredSubClassList = subClassData?.filter(
+    (sub) => sub.ClassID == selectedClassID
+  );
+
   return (
     <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="block w-full overflow-x-auto">
@@ -637,16 +642,16 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 require="This field is required!"
                 unicode
               />
-
-              {/* <DefaultSelect
+{/* asdfas  */}
+              <DefaultSelect
                 label={translate('SubClass')}
-                options={subClassData ?? []}
+                options={filteredSubClassList ?? []}
                 valueField="SubClassID"
                 nameField="SubClass"
                 registerKey="SubClassID"
                 require="This field is required!"
                 unicode
-              /> */}
+              />
 
               <div className="flex items-center gap-2">
                 <DefaultInput

@@ -19,6 +19,7 @@ import {
 import SvgIcon from "../../../components/icons/SvgIcon";
 import DefaultPagination from "../../../components/Pagination/DefaultPagination";
 import { isEqual } from "../../../utils/isEqual";
+import bnBijoy2Unicode, { convertOnLanguageChange } from "../../../utils/conveter";
 
 const PAGE_SIZE = 5;
 
@@ -43,7 +44,7 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
   const { data: sessionData } = useGetSessionsQuery();
   const { data: classData } = useGetClassListQuery();
 
-  const studentData = useSelector((state) => state.student.parentsData); // ✅ Access correct slice
+  const studentData = useSelector((state) => state.student.parentsData); 
 
   const {
     data: studentDatas = [],
@@ -83,12 +84,12 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
   const handleDelete = async (StudentCode) => {
     Swal.fire({
       title: translate("Are you sure?"),
-      text: translate("This will permanently delete the student record"),
+      text: translate("This will remove the student from SMS list"),
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: translate("Yes, delete it!"),
+      confirmButtonText: translate("Yes, remove it!"),
       cancelButtonText: translate("Cancel"),
     }).then((result) => {
       if (result.isConfirmed) {
@@ -96,13 +97,13 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
           dispatch(deleteParentData(StudentCode));
           Swal.fire(
             translate("Deleted!"),
-            translate("Student record has been deleted."),
+            translate("Student remove from the SMS List"),
             "success"
           );
         } catch (error) {
           Swal.fire(
             translate("Error!"),
-            translate("Failed to delete student record"),
+            translate("Failed to  remove from the SMS List"),
             "error"
           );
         }
@@ -129,7 +130,7 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
           <button
             className="p-2 text-white bg-red-500 hover:bg-red-600 rounded-md flex justify-center items-center"
             title={translate("Delete")}
-            onClick={() => handleDelete(row.StudentCode)}
+            onClick={() => handleDelete(row?.User.UserCode)}
           >
             <SvgIcon name={"FaTrash"} size={20} />
           </button>
@@ -138,14 +139,24 @@ const ParentsAndAllUserTable = ({ pageTitle, checkedValue }) => {
     },
     {
       title: translate("Student ID"),
-      field: "StudentCode",
       hozAlign: "center",
+      render: (row) => (
+        <React.Fragment>{convertOnLanguageChange(row?.User.UserCode)}</React.Fragment>
+      )
     },
-    { title: translate("Name"), field: "StudentName", hozAlign: "center" },
+    { 
+      title: translate("Name"), 
+      hozAlign: "center",     
+      render: (row) => (
+        <React.Fragment>{row?.User.UserName}</React.Fragment>
+      ) 
+    },
     {
       title: translate("Mobile Number"),
-      field: "Mobile1",
       hozAlign: "center",
+      render: (row) => (
+        <React.Fragment>{convertOnLanguageChange(row?.User.Mobile1)}</React.Fragment>
+      )
     },
   ];
 

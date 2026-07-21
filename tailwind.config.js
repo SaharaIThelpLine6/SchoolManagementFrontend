@@ -32,6 +32,7 @@ export default {
         noto: '"Noto Serif Bengali", serif',
         kalpurush: "'Kalpurush', sans-serif",
         SutonnyMJ: 'SutonnyMJ',
+        PlusJakarta: 'Plus Jakarta Sans',
         default: ['var(--app-font)'],
       },
       boxShadow: {
