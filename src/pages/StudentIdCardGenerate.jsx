@@ -103,7 +103,7 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                   </React.Fragment>
                 ) : layoutId == 2 ? (
                   <React.Fragment>
-                    <img src={`/card2.png`} alt="card header" className='h-full w-full' />
+                    <img src={`/idcard/card2.png`} alt="card header" className='h-full w-full' />
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[60px] pt-2'>
@@ -135,7 +135,7 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                   </React.Fragment>
                 ) : layoutId == 3 ? (
                   <React.Fragment>
-                    <img src={`/card3.jpeg`} alt="card header" className='h-full w-full' />
+                    <img src={`/idcard/card3.jpeg`} alt="card header" className='h-full w-full' />
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[60px] pt-2'>
@@ -170,7 +170,7 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                   </React.Fragment>
                 ) : layoutId == 4 ? (
                   <React.Fragment>
-                    <img src={`/card4.jpeg`} alt="card header" className='h-full w-full' />
+                    <img src={`/idcard/card4.jpeg`} alt="card header" className='h-full w-full' />
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[70px] pt-2'>
@@ -206,7 +206,7 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                   </React.Fragment>
                 ) : layoutId == 5 ? (
                   <React.Fragment>
-                    <img src={`/card5.jpeg`} alt="card header" className='h-full w-full' />
+                    <img src={`/idcard/card5.jpeg`} alt="card header" className='h-full w-full' />
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[60px] pt-2'>
@@ -242,7 +242,7 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                   </React.Fragment>
                 ) : layoutId == 6 ? (
                   <React.Fragment>
-                    <img src={`/card6.jpeg`} alt="card header" className='h-full w-full' />
+                    <img src={`/idcard/card6.jpeg`} alt="card header" className='h-full w-full' />
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[60px] pt-2'>
@@ -278,7 +278,7 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                   </React.Fragment>
                 ) : layoutId == 7 ? (
                   <React.Fragment>
-                    <img src={`/card7.jpeg`} alt="card header" className='h-full w-full' />
+                    <img src={`/idcard/card7.jpeg`} alt="card header" className='h-full w-full' />
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[60px] pt-2'>
@@ -314,7 +314,7 @@ const StudentIdCardGenerate = ({ pageTitle, layoutId, fields = [], data = [], in
                   </React.Fragment>
                 ) : (
                   <React.Fragment>
-                    <img src={`/card8.jpeg`} alt="card header" className='h-full w-full' />
+                    <img src={`/idcard/card8.jpeg`} alt="card header" className='h-full w-full' />
                     <div className="absolute top-[2px] w-full">
 
                       <div className='h-[60px] pt-2'>

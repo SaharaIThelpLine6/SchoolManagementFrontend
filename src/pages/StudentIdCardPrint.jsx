@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -24,6 +24,7 @@ import StudentIdCardGenerate from './StudentIdCardGenerate';
 import { ResizableBox } from "react-resizable";
 import { Buffer } from 'buffer';
 import StudentIdCardGeneratePos from './StudentIdCardGeneratePos';
+import SvgIcon from '../components/icons/SvgIcon';
 const PAGE_SIZE = 10;
 
 const StudentIdCardPrint = ({ pageTitle }) => {
@@ -60,6 +61,12 @@ const StudentIdCardPrint = ({ pageTitle }) => {
   const SchoolNameColor = watch(`schoolname_color_field_${selectedLayout}`) || "#ffffff";
   const SchoolAddressSize = watch(`schooladdress_fontside_${selectedLayout}`);
   const SchoolAddressColor = watch(`schooladdress_color_field_${selectedLayout}`) || "#ffffff";
+
+  const selectedLayoutFromState = location.state?.layoutId != null ? String(location.state.layoutId) : null;
+  useEffect(()=>{
+    console.log(selectedLayoutFromState);
+    setSelectedLayout(selectedLayoutFromState)
+  }, [selectedLayoutFromState])
 
 
   const { data: sessionData } = useGetSessionsQuery();
@@ -254,17 +261,17 @@ const StudentIdCardPrint = ({ pageTitle }) => {
   };
 
   const handleLayoutSelect = (layoutId) => {
-    setSelectedLayout(layoutId);
+    // setSelectedLayout(layoutId);
   };
   const layouts = [
     // { id: "1", image: "/student_id_image.png" },
-    { id: "2", image: "/card2.png" },
-    { id: "3", image: "/card3.jpeg" },
-    { id: "4", image: "/card4.jpeg" },
-    { id: "5", image: "/card5.jpeg" },
-    { id: "6", image: "/card6.jpeg" },
-    { id: "7", image: "/card7.jpeg" },
-    { id: "8", image: "/card8.jpeg" },
+    { id: "2", image: "/idcard/card2.png" },
+    { id: "3", image: "/idcard/card3.jpeg" },
+    { id: "4", image: "/idcard/card4.jpeg" },
+    { id: "5", image: "/idcard/card5.jpeg" },
+    { id: "6", image: "/idcard/card6.jpeg" },
+    { id: "7", image: "/idcard/card7.jpeg" },
+    { id: "8", image: "/idcard/card8.jpeg" },
 
   ];
 
@@ -377,21 +384,33 @@ const StudentIdCardPrint = ({ pageTitle }) => {
     return customizeableFields[fieldId]?.includes(String(layoutId));
   };
 
+  const handleIdCardModal = ()=>{
+    showModal("STUDENT ID CARD TEMPLATE", "STUDENT_ID_CARD", null, {closeOnOutSide: true})
+  }
+
   return (
     <div>
       <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg hidden_in_print">
-        <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5 hidden_in_print">
-          <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">
-            {translate('Id Card Print')}
-          </h3>
+
+        <div className="quick_action bg-white font-default grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
+          <div className="flex items-center justify-start gap-2">
+            <button className='border border-blue-600 text-blue-600 rounded-[10px] py-1 px-4 flex items-center gap-1 whitespace-nowrap' onClick={handleIdCardModal}> <SvgIcon name={"TbPlus"} />  {translate("Add New")}</button>
+          </div>
+
+          <div className="flex flex-col items-center justify-center gap-2">
+            <h2 className="text-[16px] text-center font-bold">{translate(pageTitle)}</h2>
+          </div>
         </div>
+
+
+
         <div className='flex gap-[50px] flex-nowrap lg:flex-wrap pt-[20px] w-full overflow-x-auto'>
           {layouts.map((layout) => (
             <button
               key={layout.id}
               onClick={() => handleLayoutSelect(layout.id)}
               style={{ boxShadow: "rgb(0 0 0 / 37%) 0px 0px 14px -2px" }}
-              className={`border rounded-[10px] hidden_in_print mx-2 ${selectedLayout === layout.id ? "border-blue-500" : ""
+              className={`border rounded-[10px] hidden_in_print mx-2 ${selectedLayout === layout.id ? "border-blue-500" : "hidden"
                 }`}
             >
 
