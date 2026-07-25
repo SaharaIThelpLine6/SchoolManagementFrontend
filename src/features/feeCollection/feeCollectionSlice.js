@@ -247,6 +247,19 @@ export const feeCollectionSlice = createApi({
       },
       providesTags: ['SelectedStudentPerFee', 'FeeLand'],
     }),
+    getSearchStudentsExamFee: builder.query({
+      query: ({ search, ClassID, SessionID, ExamID }) => {
+        const params = new URLSearchParams();
+
+        if (search) params.append('search', search);
+        if (ClassID) params.append('ClassID', ClassID);
+        if (SessionID) params.append('SessionID', SessionID);
+        if (ExamID) params.append('ExamID', ExamID);
+
+        return `/search_students_exam_fee?${params.toString()}`;
+      },
+      providesTags: ['SelectedStudentPerFee', 'FeeLand'],
+    }),
     getSearchStudentWithUser: builder.query({
       query: ({ search, ClassID }) => {
         const params = new URLSearchParams();
@@ -643,5 +656,6 @@ export const {
   useGetStudentFeeLandFilterQuery,
   useGetStudentFeeLandSingleFilterQuery,
   useUpdateMonthlyAttendanceLeftMutation,
-  useUpdateMonthlyAttendanceRightMutation
+  useUpdateMonthlyAttendanceRightMutation,
+  useGetSearchStudentsExamFeeQuery
 } = feeCollectionSlice;

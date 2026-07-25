@@ -66,7 +66,7 @@ const UserFilterModal = () => {
     API Call
   */
 
-const PAGE_LIMIT = 20;
+  const PAGE_LIMIT = 20;
 
   const [page, setPage] = useState(1);
   const [users, setUsers] = useState([]);
@@ -143,7 +143,7 @@ const PAGE_LIMIT = 20;
             }}
             className="text-blue-500"
           >
-                   <svg
+            <svg
               xmlns="http://www.w3.org/2000/svg"
               width={24}
               height={24}
@@ -182,8 +182,8 @@ const PAGE_LIMIT = 20;
       title: "User Type",
       field: "UserCode",
       hozAlign: "center",
-       render: (row) => {
-        return <>{row?.UserType.TypeName}</>
+      render: (row) => {
+        return <>{row?.UserType?.TypeName}</>
       },
     },
 

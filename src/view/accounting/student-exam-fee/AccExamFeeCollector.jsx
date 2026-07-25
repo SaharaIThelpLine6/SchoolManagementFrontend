@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -8,9 +8,11 @@ import Button from '../../../components/Button/Button';
 import DefaultSelect from '../../../components/Forms/DefaultSelect';
 import {
   useGetExamFeeSettingByExamIDQuery,
+  useGetExamFeeSlidQuery,
   useGetExamNamesQuery,
 } from '../../../features/exam/examQuerySlice';
 import {
+  useGetSearchStudentsExamFeeQuery,
   useGetSearchStudentsQuery,
   usePostStudentFeeCollectionMutation,
 } from '../../../features/feeCollection/feeCollectionSlice';
@@ -23,29 +25,60 @@ import bnBijoy2Unicode from '../../../utils/conveter';
 import { hideModal } from '../../../utils/ModalControlar';
 import useTranslate from '../../../utils/Translate';
 import AccExamFeeCollectorTable from '../student-fee-collection/AccExamFeeCollectorTable';
+import { setStudentFeeData } from '../../../features/settings/settingsSlice';
 
 const AccExamFeeCollector = () => {
   const defaultSessionId = useDefaultSession();
   const location = useLocation();
   const dispatch = useDispatch();
+
   const methods = useForm({
     defaultValues: {
       StudentCode: '',
       SessionID: defaultSessionId || '',
       IsActive: 1,
       EntryDate: new Date(),
+      deduction: 0,
+      currentDeposit: 0,
+      due: 0,
     },
     shouldFocusError: false,
   });
-  const { handleSubmit, reset, watch, setValue } = methods;
-  const [SessionID, ExamID] = watch(['SessionID', 'ExamID']);
+
+  const { handleSubmit, reset, watch, setValue, getValues, register } =
+    methods;
+  const [SessionID, ExamID, deductionWatch, currentDepositWatch, dueWatch] =
+    watch(['SessionID', 'ExamID', 'deduction', 'currentDeposit', 'due']);
 
   const translate = useTranslate();
   const { filteredSelectedPerStudentFee, monthFeeData } = useSelector(
     (state) => state.student
   );
-
   const { studentFeeData = [] } = useSelector((state) => state.settings);
+
+  const shouldSkip =
+    !filteredSelectedPerStudentFee?.StudentCode ||
+    !filteredSelectedPerStudentFee?.ClassID ||
+    !filteredSelectedPerStudentFee?.SessionID ||
+    !ExamID;
+
+  const {
+    data = [],
+    isLoading,
+    error,
+  } = useGetSearchStudentsExamFeeQuery(
+    {
+      search: filteredSelectedPerStudentFee?.StudentCode,
+      ClassID: filteredSelectedPerStudentFee?.ClassID,
+      SessionID: filteredSelectedPerStudentFee?.SessionID,
+      ExamID,
+    },
+    {
+      skip: shouldSkip,
+    }
+  );
+  console.log(data, "data StudentExamFeeStatus")
+  const StudentExamFeeStatus = data?.data?.[0].ExamFeeStatus;
 
   const [studentFeeDataAll, setstudentFeeDataAll] = useState(null);
   const [totalDue, setTotalDue] = useState(null);
@@ -66,15 +99,23 @@ const AccExamFeeCollector = () => {
     { skip: !examId || !userCode || !sessionId }
   );
 
-  useEffect(() => {
-    if (examFeeError) toast.error('Exam fee data load failed!');
-  }, [examFeeError]);
+  const { data: examFeeSLIDData = [], isLoading: examFeeSLIDLoading } = useGetExamFeeSlidQuery(
+    {
+      examId,
+      sessionId: filteredSelectedPerStudentFee.SessionID,
+      subClassId: filteredSelectedPerStudentFee.SubClassID,
+    },
+    {
+      skip: !examId,
+    }
+  );
+  const examSLID = examFeeSLIDData[0]?.SLID;
+
 
   // 🧾 Exam Name List
   const { data: examNames = [], isLoading: examIsLoading } =
     useGetExamNamesQuery();
 
-  const [postStudentFee] = usePostStudentFeeCollectionMutation();
 
   // 🧠 Default session set
   useEffect(() => {
@@ -117,7 +158,7 @@ const AccExamFeeCollector = () => {
     }
   }, [filteredSelectedPerStudentFee]);
 
-  // 💰 Calculate Total Due
+  // 💰 Calculate Total Due (pre-deposit / already paid)
   useEffect(() => {
     if (studentFeeData?.fees) {
       const feesDue = studentFeeData.fees.reduce(
@@ -139,45 +180,136 @@ const AccExamFeeCollector = () => {
         ID: filteredSelectedPerStudentFee.UserID ?? '',
         StudentCode: filteredSelectedPerStudentFee.StudentCode ?? '',
         SessionID: filteredSelectedPerStudentFee.SessionID ?? '',
+        deduction: 0,
+        currentDeposit: 0,
+        due: 0,
       };
       reset(defaultValues);
     } else {
       reset({
         StudentCode: '',
         SessionID: '',
+        deduction: 0,
+        currentDeposit: 0,
+        due: 0,
       });
     }
   }, [filteredSelectedPerStudentFee, reset]);
 
+  // Safe data access with defaults
+  const examFee = examFeeData[0]?.Fee || 0;
+  const grandTotal = examFee;
+  const preDeposit = totalDue || 0;
+  const allPaid = totalDue || 0;
+
+  // 🧮 Same pattern as StudentMonthFeeAceptForm's recalcFee:
+  // deposit gets capped so it never exceeds what's left after deduction + preDeposit,
+  // then due = prescribedFee - deduction - preDeposit - deposit
+  const recalcFee = useCallback((fee) => {
+    const prescribedFee = Number(fee.amount || 0);
+    const deduction = Number(fee.deduction || 0);
+    const preDeposit = Number(fee.preDeposit || 0);
+    let deposit = Number(fee.deposit || 0);
+
+    // Ensure deposit does not exceed remaining fee
+    const maxDeposit = prescribedFee - deduction - preDeposit;
+    if (deposit > maxDeposit) deposit = maxDeposit;
+
+    const due = prescribedFee - deduction - preDeposit - deposit;
+
+    return { deposit, due };
+  }, []);
+
+  // Keep currentDeposit / due in sync when grandTotal / preDeposit itself changes
+  // (e.g. student or exam switched). By default we assume FULL payment,
+  // so currentDeposit = grandTotal - preDeposit and due = 0 on first load.
+  // Due only becomes non-zero once the user manually REDUCES currentDeposit.
+  useEffect(() => {
+    const maxDeposit = Number(grandTotal || 0) - Number(preDeposit || 0);
+    const initialDeposit = maxDeposit > 0 ? maxDeposit : 0;
+
+    setValue('deduction', 0);
+    setValue('currentDeposit', initialDeposit);
+    setValue('due', 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [grandTotal, preDeposit]);
+
+  // ✏️ Deduction change: recalc deposit (capped) + due, exactly like handleDeductionChange in StudentMonthFeeAceptForm
+  const handleDeductionChange = (e) => {
+    const newDeduction = Number(e.target.value) || 0;
+    setValue('deduction', newDeduction);
+
+    const values = getValues();
+    const { deposit, due } = recalcFee({
+      amount: grandTotal,
+      deduction: newDeduction,
+      preDeposit,
+      deposit: values.currentDeposit,
+    });
+
+    setValue('currentDeposit', deposit);
+    setValue('due', due);
+  };
+
+  // ✏️ Direct currentDeposit edit: recalc deposit (capped) + due, exactly like handleDepositChange in StudentMonthFeeAceptForm
+  const handleCurrentDepositChange = (e) => {
+    const newDeposit = Number(e.target.value) || 0;
+
+    const values = getValues();
+    const { deposit, due } = recalcFee({
+      amount: grandTotal,
+      deduction: values.deduction,
+      preDeposit,
+      deposit: newDeposit,
+    });
+
+    setValue('currentDeposit', deposit);
+    setValue('due', due);
+  };
+
   // 📨 Submit
   const onSubmit = async (data) => {
     try {
-      if (!studentFeeData?.fees || studentFeeData.fees.length === 0) {
-        toast.warning('ফি এর খাত নির্বাচন করুন।');
+      if (!examSLID) {
+        toast.warning('শিক্ষার্থীর ফি র্নিধারণ করা হয়নি।');
         return;
       }
+      if (StudentExamFeeStatus === 1) {
+        toast.warning('নির্বাচিত শিক্ষার্থীর ফি গ্রহণ করা হয়েছে।');
+        return;
+      }
+      console.log(StudentExamFeeStatus, "StudentExamFeeStatus")
 
       const payload = {
-        UserID: studentFeeData.userId,
-        AdmissionID: studentFeeData.admissionId,
-        CurrentInvoice: studentFeeData.prescribedFee,
-        InvoiceDiscount: studentFeeData.deduction,
-        CurrentPaid: studentFeeData.currentDeposit,
-        Due: totalDue,
-        AmountInWord: data.speakCurrentDeposit,
-        CreateAt: data.EntryDate,
-        Remark: data.Remark,
-        AccountType: data.GLID,
-        Account: data.SLID,
-        fees: studentFeeData.fees,
-        MonthId: monthFeeData?.monthId || '',
-      };
+        studentCode: data.StudentCode,
+        monthId: 20,
+        deduction: data.deduction,
+        currentDeposit: data.currentDeposit,
+        userId: data.ID,
+        admissionId: filteredSelectedPerStudentFee.AdmissionID,
+        due: data.due,
+        type: "exam",
+        ExamID: examFeeData[0].ExamID,
+        prescribedFee: examFeeData[0].Fee,
+        fees: [{
+          // SSFID: 287,
+          SLID: examSLID,
+          // SlName: "খাবার ফি",
+          ExamName: examFeeData[0].ExamName,
+          sessionId: filteredSelectedPerStudentFee.SessionID,
+          sessionName: filteredSelectedPerStudentFee.SessionName,
+          classId: filteredSelectedPerStudentFee.ClassID,
+          amount: examFeeData[0].Fee,
+          deduction: data.deduction,
+          deposit: data.currentDeposit,
+          preDeposit: 0,
+          due: data.due,
+        }]
+      }
+      console.log(payload, "payload")
+      dispatch(setStudentFeeData(payload));
+      hideModal();
 
-      await postStudentFee(payload).unwrap();
-      toast.success('ডেটা সফলভাবে সাবমিট হয়েছে ✅');
-
-      dispatch(setMonthFeeData(null));
-      dispatch(setFilteredSelectedPerStudentFee(null));
     } catch (error) {
       console.error('Submission error:', error);
       toast.error('ডেটা সাবমিট করতে সমস্যা হয়েছে ❌');
@@ -192,13 +324,48 @@ const AccExamFeeCollector = () => {
     }
   };
 
-  // Safe data access with defaults
-  const examFee = examFeeData[0]?.Fee || 0;
-  const deduction = studentFeeDataAll?.deduction || 0;
-  const grandTotal = examFee;
-  const preDeposit = totalDue || 0;
-  const allPaid = totalDue || 0;
-  const currentDeposit = totalDue || 0;
+  [
+    {
+      "fees": [
+        {
+          "SSFID": 287,
+          "SLID": 10104,
+          "SlName": "খাবার ফি",
+          "sessionId": 3,
+          "sessionName": "২০২৬",
+          "classId": 8,
+          "amount": 1500,
+          "deduction": 0,
+          "deposit": 1500,
+          "preDeposit": 0,
+          "due": 0
+        },
+        {
+          "SSFID": 286,
+          "SLID": 10105,
+          "SlName": "মাসিক বেতন",
+          "sessionId": 3,
+          "sessionName": "২০২৬",
+          "classId": 8,
+          "amount": 700,
+          "deduction": 0,
+          "deposit": 700,
+          "preDeposit": 0,
+          "due": 0
+        }
+      ],
+      "studentCode": 400033,
+      "monthId": 6,
+      "monthName": "জুন",
+      "prescribedFee": 2200,
+      "deduction": 0,
+      "currentDeposit": 2200,
+      "userId": 161,
+      "admissionId": 93,
+      "due": 0,
+      "type": "month"
+    }
+  ]
 
   return (
     <div className="font-SolaimanLipi">
@@ -293,9 +460,12 @@ const AccExamFeeCollector = () => {
                     label={translate('Prescribed Fee')}
                     value={examFee}
                   />
-                  <FeeInfoItem
+                  {/* ✏️ Editable Deduction -> recalculates Due */}
+                  <FeeEditableInput
                     label={translate('Deduction')}
-                    value={deduction}
+                    registerKey="deduction"
+                    register={register}
+                    onChange={handleDeductionChange}
                   />
                   <FeeInfoItem
                     label={translate('Grand Total')}
@@ -306,12 +476,19 @@ const AccExamFeeCollector = () => {
                     value={preDeposit}
                   />
                   <FeeInfoItem label={translate('All paid')} value={allPaid} />
-                  <FeeInfoItem
+                  {/* ✏️ Editable Current deposit -> recalculates Due */}
+                  <FeeEditableInput
                     label={translate('Current deposit')}
-                    value={currentDeposit}
+                    registerKey="currentDeposit"
+                    register={register}
+                    onChange={handleCurrentDepositChange}
                   />
                   <div className="col-span-2">
-                    <FeeInputItem label={translate('Due')} />
+                    {/* 🔒 Due is auto-calculated, read-only */}
+                    <FeeInfoItem
+                      label={translate('Due')}
+                      value={dueWatch ?? 0}
+                    />
                   </div>
                 </div>
               </div>
@@ -323,7 +500,6 @@ const AccExamFeeCollector = () => {
               <div className="flex flex-row gap-3">
                 {/* Save Button */}
                 <Button
-                  disabled
                   type="submit"
                   className="px-6 py-3 bg-green-600 text-white text-base font-semibold rounded-lg 
                  shadow-md hover:bg-green-700 hover:shadow-lg transition-all duration-200"
@@ -333,8 +509,16 @@ const AccExamFeeCollector = () => {
 
                 {/* Reset Button */}
                 <Button
-                  disabled
                   type="button"
+                  onClick={() => {
+                    const maxDeposit =
+                      Number(grandTotal || 0) - Number(preDeposit || 0);
+                    const initialDeposit = maxDeposit > 0 ? maxDeposit : 0;
+
+                    setValue('deduction', 0);
+                    setValue('currentDeposit', initialDeposit);
+                    setValue('due', 0);
+                  }}
                   className="px-6 py-3 bg-red-500 text-white text-base font-semibold rounded-lg 
                  shadow-md hover:bg-red-600 hover:shadow-lg transition-all duration-200"
                 >
@@ -349,11 +533,10 @@ const AccExamFeeCollector = () => {
                 className={({ isActive }) =>
                   `px-6 py-3 rounded-lg text-base font-semibold transition-all duration-200 
        flex items-center justify-center gap-2 shadow-md
-       ${
-         isActive
-           ? 'bg-blue-600 text-white shadow-lg scale-105'
-           : 'bg-blue-100 text-blue-700 hover:bg-blue-200 hover:scale-[1.03]'
-       }`
+       ${isActive
+                    ? 'bg-blue-600 text-white shadow-lg scale-105'
+                    : 'bg-blue-100 text-blue-700 hover:bg-blue-200 hover:scale-[1.03]'
+                  }`
                 }
               >
                 📘 পরীক্ষার ফি নির্ধারণ
@@ -380,7 +563,7 @@ const InfoRow = ({ label, value, valueClassName = '' }) => (
   </div>
 );
 
-// 🔹 Fee Info Item
+// 🔹 Fee Info Item (read-only display)
 const FeeInfoItem = ({ label, value }) => (
   <div className="flex items-center text-sm">
     <span className="font-semibold text-gray-700 min-w-20 pr-2 flex-shrink-0">
@@ -393,18 +576,18 @@ const FeeInfoItem = ({ label, value }) => (
   </div>
 );
 
-// 🔹 Fee Input Item
-const FeeInputItem = ({ label }) => (
+// 🔹 Fee Editable Input (deduction / currentDeposit) — updates Due on change
+const FeeEditableInput = ({ label, registerKey, register, onChange }) => (
   <div className="flex items-center text-sm">
     <span className="font-semibold text-gray-700 min-w-20 pr-2 flex-shrink-0">
       {label}
     </span>
     <span className="text-gray-700 w-2 flex-shrink-0">:</span>
     <input
-      type="text"
-      className="ml-2 w-20 p-1 border border-gray-300 rounded bg-gray-50"
-      placeholder="::"
-      readOnly
+      type="number"
+      {...register(registerKey)}
+      onChange={onChange}
+      className="ml-2 w-20 p-1 border border-gray-300 rounded bg-white focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
     />
   </div>
 );

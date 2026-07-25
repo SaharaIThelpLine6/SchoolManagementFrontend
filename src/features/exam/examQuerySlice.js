@@ -232,13 +232,12 @@ export const examSlice = createApi({
         error,
         { SessionID, ExamID, SubClassID, RDID, UserCode }
       ) => [
-        {
-          type: 'StudentAdmitCard',
-          id: `${SessionID}-${ExamID}-${SubClassID}-${RDID}-${
-            UserCode || 'all'
-          }`,
-        },
-      ],
+          {
+            type: 'StudentAdmitCard',
+            id: `${SessionID}-${ExamID}-${SubClassID}-${RDID}-${UserCode || 'all'
+              }`,
+          },
+        ],
     }),
     postGetStudentList: builder.mutation({
       query: (body) => ({
@@ -286,6 +285,18 @@ export const examSlice = createApi({
         return url;
       },
       providesTags: ['StudentFee', 'SelectedStudentPerFee'],
+    }),
+    getExamFeeSlid: builder.query({
+      query: ({ examId, sessionId, subClassId }) => {
+        const params = new URLSearchParams();
+
+        if (examId) params.append('examId', examId);
+        if (sessionId) params.append('sessionId', sessionId);
+        if (subClassId) params.append('subClassId', subClassId);
+
+        return `exam_fee_slid?${params.toString()}`;
+      },
+      providesTags: ['ExamFeeSetting'],
     }),
     getExamRoutine: builder.query({
       query: ({ sessionID, examID, subclassID, printID }) =>
@@ -356,7 +367,7 @@ export const examSlice = createApi({
       }),
       invalidatesTags: ['ExamRules'],
     }),
-     postReportSetting: builder.mutation({
+    postReportSetting: builder.mutation({
       query: (body) => ({
         url: `report_settings`,
         method: "POST",
@@ -409,5 +420,6 @@ export const {
   useGetExamRulesQuery,
   usePostExamRuleMutation,
   usePutExamRuleMutation,
-  useDeleteExamRuleMutation
+  useDeleteExamRuleMutation,
+  useGetExamFeeSlidQuery
 } = examSlice;

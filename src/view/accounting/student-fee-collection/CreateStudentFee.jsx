@@ -513,8 +513,18 @@ const CreateStudentFee = () => {
   };
 
   const handleStudentExamFeeOpenModal = useCallback(() => {
-    showModal('Acc Exam Fee Collector', 'ACC_EXAM_FEE_COLLECTOR');
-  }, []);
+    const examData = studentFeeData?.find((i) => i.type === 'exam');
+
+    if (!examData) {
+      showModal('Acc Exam Fee Collector', 'ACC_EXAM_FEE_COLLECTOR');
+    } else {
+      Swal.fire({
+        icon: 'warning',
+        title: 'সতর্কবার্তা',
+        text: 'ইতোমধ্যে পরীক্ষার ফি যোগ করা হয়েছে।',
+      });
+    }
+  }, [studentFeeData]);
   const admissionDataCheck = studentFeeData?.find(
     (i) => i.type === 'admission'
   );
@@ -544,6 +554,9 @@ const CreateStudentFee = () => {
 
     setLastSearchedCode(''); // ✅ Last searched code reset
   };
+
+
+
   const onSubmit = async (data) => {
     try {
       // 🧩 Validation: No fee selected
@@ -579,12 +592,14 @@ const CreateStudentFee = () => {
       const admissionData = studentFeeData?.find((i) => i.type === 'admission');
       const monthData = studentFeeData?.find((i) => i.type === 'month');
       const othersData = studentFeeData?.find((i) => i.type === 'others');
+      const examData = studentFeeData?.find((i) => i.type === 'exam');
       const othersDueData = studentFeeData?.find(
         (i) => i.type === 'others_due'
       );
 
       console.log(admissionData, 'admissionData');
       console.log(monthData, 'monthData');
+      console.log(examData, 'examData');
       console.log(othersDueData, 'othersDueData');
       console.log(othersData, 'othersData');
 
@@ -625,6 +640,19 @@ const CreateStudentFee = () => {
             permission: !!othersData,
           },
           {
+            type: 'exam',
+            CurrentInvoice: examData?.prescribedFee || 0,
+            InvoiceDiscount: examData?.deduction || 0,
+            CurrentPaid: examData?.currentDeposit || 0,
+            ExamID: examData?.ExamID || 0,
+            SessionID: filteredSelectedPerStudentFee?.SessionID || 0,
+            SubClassID: filteredSelectedPerStudentFee?.SubClassID || 0,
+            Due: examData?.due || 0,
+            items: [],
+            MonthId: 20,
+            permission: !!examData,
+          },
+          {
             type: 'others_due',
             CurrentInvoice: othersDueData?.prescribedFee || 0,
             InvoiceDiscount: othersDueData?.deduction || 0,
@@ -662,7 +690,8 @@ const CreateStudentFee = () => {
         text: 'ফি সংগ্রহ সফলভাবে সম্পন্ন হয়েছে।',
         confirmButtonText: 'ঠিক আছে',
       });
-
+      // 🔄 Hard reload
+      window.location.reload();
       // 🔄 Reset form but preserve session
       handleResetPage();
     } catch (error) {
@@ -1299,7 +1328,7 @@ const CreateStudentFee = () => {
                                 </td>
 
                                 <td className="text-center whitespace-nowrap">
-                                  {bnBijoy2Unicode(item.SlName)}
+                                  {bnBijoy2Unicode(item.SlName ? item.SlName : item.ExamName)}
                                 </td>
 
                                 <td className="px-4 text-center whitespace-nowrap">
