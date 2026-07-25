@@ -1,113 +1,55 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { closeModal } from "../../../features/modal/modalSlice";
 import { useDispatch } from "react-redux";
-import DefaultSelect from "../../../components/Forms/DefaultSelect";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useState } from "react";
 import useTranslate from "../../../utils/Translate";
 
 const StudentCardModel = () => {
-
   const navigate = useNavigate();
   const translate = useTranslate();
   const dispatch = useDispatch();
-  const methods = useForm();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    setValue,
-    reset,
-    getValues,
-  } = methods;
   const [selectedLayout, setSelectedLayout] = useState(null);
 
-  const handleButtonClick = () => {
-    dispatch(closeModal())
-    navigate("/students/student-id-card-print?id=1")
-  }
-
   const layouts = [
-    { id: "1", image: "/student_id_image.png" },
+    { id: "2", image: "/idcard/template_preview_2.jpg" },
+    { id: "3", image: "/idcard/template_preview_3.jpg" },
+    { id: "4", image: "/idcard/template_preview_4.jpg" },
+    { id: "5", image: "/idcard/template_preview_5.jpg" },
+    { id: "6", image: "/idcard/template_preview_6.jpg" },
+    { id: "7", image: "/idcard/template_preview_7.jpg" },
+    { id: "8", image: "/idcard/template_preview_8.jpg" },
   ];
-  const handleLayoutSelect = (layoutId) => {
-    setSelectedLayout(layoutId);
-  };
-  const onSubmit = (data) => {
-    console.log(data);
+
+ 
+
+  const handleSubmitSelection = (id) => {
+    if (!id) return;
+    setSelectedLayout(id)
     dispatch(closeModal());
-    navigate("/students/student-id-card-print", {
+    navigate("/students/student-id-card", {
       state: {
-        layoutId: selectedLayout,
-        fields: data,
+        layoutId: id,
       },
     });
   };
 
-
   return (
-    <div className="bg-white gap-6 rounded-2xl shadow-md w-full">
-      <div className="grid grid-cols-4 gap-4">
-
-        {/* Layout selection */}
+    <div className="bg-white w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {layouts.map((layout) => (
           <button
             key={layout.id}
-            onClick={() => handleLayoutSelect(layout.id)}
-            className={`border rounded-xl p-2 ${selectedLayout === layout.id ? "border-blue-500" : ""
-              }`}
+            type="button"
+            onClick={() => handleSubmitSelection(layout.id)}
+            className={`border rounded-xl p-2 ${selectedLayout === layout.id ? "border-blue-500" : "border-transparent"}`}
           >
-            <img src={layout.image} alt="layout" />
+            <img src={layout.image} alt="layout" className="object-cover" />
           </button>
         ))}
-
       </div>
-
-      {selectedLayout && (
-        <FormProvider {...methods}>
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="p-2 font-lato mt-5 w-full"
-          >
-            <div className="grid grid-cols-2 gap-[20px]">
-
-
-              {[1, 2, 3, 4, 5].map((i) => (
-                <DefaultSelect
-                  key={i}
-                  label={translate(`Field ${i}`)}
-                  options={[
-                    { ID: "StudentName", Name: "User Name" },
-                    { ID: "FatherName", Name: "Father Name" },
-                    { ID: "MotherName", Name: "Mother Name" },
-                    { ID: "ClassName", Name: "Class Name" },
-                    { ID: "Mobile1", Name: "Mobile" },
-                    { ID: "SessionName", Name: "Session" },
-                    { ID: "BloodGroup", Name: "Blood Group" },
-                  ]}
-                  registerKey={`Field${i}`}
-                  nameField="Name"
-                  valueField="ID"
-                />
-              ))}
-            </div>
-
-            <button
-              type="submit"
-              className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-lg"
-            >
-              Preview
-            </button>
-          </form>
-        </FormProvider>
-      )}
-
-
+      
     </div>
   );
-
-
 };
 
 export default StudentCardModel;

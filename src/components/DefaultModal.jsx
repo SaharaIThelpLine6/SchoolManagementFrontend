@@ -80,9 +80,11 @@ import AdmissionFormContentEditModal from '../view/result/AdmissionFormContentEd
 import { useRef } from 'react';
 import SupportTicketModal from '../view/support-ticket/SupportTicketModal';
 import AdmissionFormModal from './Forms/AdmissionFormModal';
+import AverageVCondition from '../pages/AverageVCondition';
+import StudentCardModel from '../view/students/id-card-model/StudentCardModel';
 
 const DefaultModal = () => {
-  const { isOpen, title, modalType, id } = useSelector((state) => state.modal);
+  const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
   const dispatch = useDispatch();
   const translate = useTranslate();
   const scrollRef = useRef(null);
@@ -93,7 +95,11 @@ const DefaultModal = () => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
       <ClickOutside
         className="max-w-screen-lg w-full overflow-hidden"
-        onClick={() => dispatch(closeModal())}
+          onClick={() => {
+            if (meta?.closeOnOutSide !== false) {
+              dispatch(closeModal());
+            }
+          }}
       >
         {/* Tailwind animation */}
         <div
@@ -326,7 +332,7 @@ const DefaultModal = () => {
                   <DataExportModel userData={id} />
                 )}
                 {modalType === 'STUDENT_ID_CARD' && (
-                  <StudentIdCardGenerate fields={id} />
+                  <StudentCardModel />
                 )}
                 {/* User Panel Models */}
                 {modalType === 'SESSION_CHANGE_MODEL' && (
@@ -346,6 +352,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'SUPPORT_TICKET_SUPPORT' && (
                   <SupportTicketModal id={id} />
+                )}
+                {modalType === 'EXAM_CONDITION_SETTINGS' && (
+                  <AverageVCondition  />
                 )}
               </div>
             )}

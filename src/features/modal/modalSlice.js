@@ -5,6 +5,7 @@ const initialState = {
   title: "",
   modalType: null,
   id: null,
+  meta: {},
   isDrawers: false,
 
 };
@@ -18,6 +19,7 @@ const modalSlice = createSlice({
       state.title = action.payload.title || "";
       state.modalType = action.payload.modalType || null;
       state.id = action.payload.id || null;
+      state.meta = action.payload.meta || {};
       state.isDrawers = false;
     },
     openSideDrawer: (state, action) => {

@@ -876,6 +876,9 @@ const useTranslate = () => {
     "Student remove from the SMS List": "এসএমএস তালিকা থেকে শিক্ষার্থীকে মুছা হয়েছে।",
     "User remove from the SMS List": "এসএমএস তালিকা থেকে ইউজারকে মুছা হয়েছে।",
     "Failed to  remove from the SMS List": "এসএমএস তালিকা থেকে শিক্ষার্থীকে মুছা যায়নি।",
+    "Previous": "পূর্ববর্তী",
+    "Add Subject": "বিষয় যুক্ত করুন",
+    "Student Id Card": "শিক্ষার্থী পরিচয়পত্র",
 
   };
 
