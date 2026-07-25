@@ -155,7 +155,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
       if (!data.SubClassID || selectedRows.length === 0) {
         Swal.fire({
           icon: 'warning',
-          title: 'ফর্ম অসম্পূর্ণ',
+          title: 'শিক্ষার্থী সিলেক্ট করুন',
           text: 'অনুগ্রহ করে সাব ক্লাস নির্বাচন করুন এবং অন্তত একজন শিক্ষার্থী সিলেক্ট করুন।',
         });
         return;
@@ -394,7 +394,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
 
         <div className="quick_action bg-white font-default grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
           <div className="flex items-center justify-start gap-2">
-            <button className='border border-blue-600 text-blue-600 rounded-[10px] py-1 px-4 flex items-center gap-1 whitespace-nowrap' onClick={handleIdCardModal}> <SvgIcon name={"TbPlus"} />  {translate("Add New")}</button>
+            <button className='border border-blue-600 text-blue-600 rounded-[10px] py-1 px-4 flex items-center gap-1 whitespace-nowrap' onClick={handleIdCardModal}> <SvgIcon name={"TbPlus"} />  {translate("Add Design")}</button>
           </div>
 
           <div className="flex flex-col items-center justify-center gap-2">
