@@ -58,7 +58,7 @@ const PublicLayout = () => {
 
   return (
     <>
-      <div className="min-h-screen font-default">
+      <div className="min-h-screen font-SolaimanLipi">
         {isOpen && (
           <div
             className="fixed inset-0 bg-black bg-opacity-50 z-40 hidden_in_print"

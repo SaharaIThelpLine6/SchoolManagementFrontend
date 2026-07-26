@@ -315,7 +315,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="font-lato pt-[100px] lg:pt-0 lg:mt-5 lg:ml-5 mb-20"
+      className="font-SolaimanLipi pt-[100px] lg:pt-0 lg:mt-5 lg:ml-5 mb-20"
     >
       <h5 className="text-[30px] text-center font-bold mb-5 mt-2 font-SolaimanLipi">
         শুধুমাত্র নতুন শিক্ষার্থীদের জন্য আবেদন ফরম
@@ -435,7 +435,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
 
         {/* Permanent Address */}
         <div className="mt-6">
-          <h6 className="text-center font-bold font-noto mb-2 text-base">
+          <h6 className="text-center font-bold font-SolaimanLipi mb-2 text-base">
             <span className="text-red-500">স্থায়ী ঠিকানা * :</span>
           </h6>
           <div className="grid md:grid-cols-5 gap-3">
@@ -480,7 +480,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
 
         {/* Same Address Checkbox */}
         <div className="lg:flex justify-between items-center my-6 relative">
-          <label className="flex items-center gap-2 font-noto">
+          <label className="flex items-center gap-2 font-SolaimanLipi">
             <input
               id="sameAddress"
               type="checkbox"
@@ -489,7 +489,7 @@ const AddOnlineStudentForm = ({ schoolid }) => {
             />
             ঠিকানা একই হলে এখানে ক্লিক করুন
           </label>
-          <p className="text-base font-bold font-noto text-center lg:absolute lg:left-1/2 lg:-translate-x-1/2">
+          <p className="text-base font-bold font-SolaimanLipi text-center lg:absolute lg:left-1/2 lg:-translate-x-1/2">
             <span className="text-red-500">অস্থায়ী ঠিকানা *</span>
           </p>
         </div>
