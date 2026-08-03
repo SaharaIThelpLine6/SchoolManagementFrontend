@@ -1,4 +1,3 @@
-import NotFoundSvg from "../components/NotFoundSvg";
 
 const PageNotFound = () => {
   return (
@@ -77,3 +76,5 @@ const PageNotFound = () => {
     </div>
   );
 };
+
+export default PageNotFound;
