@@ -70,6 +70,7 @@ import PaymentConfirm from '../pages/PaymentConfirm';
 import PaymentHistory from '../pages/PaymentHistory';
 import PointBasedResultCreateUpdate from '../pages/PointBasedResultCreateUpdate';
 import PointBasedResultEntry from '../pages/PointBasedResultEntry';
+import PageNotFound from '../components/PageNotFound';
 import QueryManage from '../pages/QueryManage';
 import QueryThree from '../pages/QueryThree';
 import QueryTwo from '../pages/QueryTwo';
@@ -800,7 +801,8 @@ const Router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.result_entry}
                   >
-                    <PointBasedResultEntry pageTitle="Result Entry & Publish" />
+                    {/* <PointBasedResultEntry pageTitle="Result Entry & Publish" /> */}
+                    <PageNotFound />
                   </RequirePermission>
                 ),
               },
@@ -811,7 +813,9 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.result_report}
                   >
                     {/* result report */}
-                    <ResultReport pageTitle="Average V: Report" />
+                    {/* <ResultReport pageTitle="Average V: Report" /> */}
+                    <PageNotFound />
+
                   </RequirePermission>
                 ),
               },
