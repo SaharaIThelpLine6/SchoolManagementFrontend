@@ -98,13 +98,9 @@ const CreateUser = ({ pageTitle }) => {
     'DateOfBirth',
   ]);
   const formattedDate =
-    DateOfBirth
-      ? new Date(DateOfBirth.getTime() - DateOfBirth.getTimezoneOffset() * 60000)
-        .toISOString()
-        .split("T")[0]
-      : "";
+    DateOfBirth ? new Date(DateOfBirth.getTime() - DateOfBirth.getTimezoneOffset() * 60000).toISOString().split("T")[0] : "";
   // console.log(DateOfBirth, "DateOfBirth")
-  // console.log(formattedDate, "formattedDate")
+  console.log(formattedDate, "formattedDate")
   const editMode = useSelector((state) => state.userInfo.editMode);
 
 
@@ -314,6 +310,7 @@ const CreateUser = ({ pageTitle }) => {
       console.log('User created:', response);
     } catch (err) {
       // ✅ Error SweetAlert
+      console.log(err)
       Swal.fire({
         icon: 'error',
         title: 'Oops...',
@@ -405,7 +402,6 @@ const CreateUser = ({ pageTitle }) => {
               <DatePickerOne
                 dateCalender="জন্ম তারিখ"
                 registerKey="DateOfBirth"
-                require="Required!"
                 className="w-full"
                 placeholder="DD-MM-YYYY"
               />
