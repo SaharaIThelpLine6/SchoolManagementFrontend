@@ -15,3 +15,29 @@ export const formatDate = (date) => {
   const yyyy = date.getFullYear();
   return `তারিখ: ${enToBn(`${dd}/${mm}/${yyyy}`)}`;
 };
+
+
+
+
+export const attendanceFormatTime = (value) => {
+  if (!value) return '';
+
+  let date;
+
+  // যদি HH:mm বা HH:mm:ss format হয়
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(value)) {
+    date = new Date(`1970-01-01T${value}`);
+  } else {
+    // ISO Date
+    date = new Date(value);
+  }
+
+  if (isNaN(date.getTime())) return '';
+
+  return date.toLocaleTimeString('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+    timeZone: 'UTC', // ISO string এর জন্য UTC ধরে
+  });
+};

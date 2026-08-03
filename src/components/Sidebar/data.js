@@ -132,8 +132,46 @@ export const menuData = [
       },
     ],
   },
+  // {
+  //   id: '3',
+  //   name: 'User Attendance',
+  //   route: '/user-attendence',
+  //   icon: 'PiStudentBold',
+  //   subMenu: [
+  //     {
+  //       id: '1',
+  //       name: 'List Create',
+  //       route: '/user-attendence',
+  //     },
+  //     {
+  //       id: '2',
+  //       name: 'Time Settings',
+  //       route: '/user-attendence/time-settings',
+  //     },
+  //     {
+  //       id: '3',
+  //       name: 'Message Settings',
+  //       route: '/user-attendence/message-settings',
+  //     },
+  //     {
+  //       id: '4',
+  //       name: 'Holiday And Leave',
+  //       route: '/user-attendence/holiday-and-leave',
+  //     },
+  //     {
+  //       id: '5',
+  //       name: 'Reports',
+  //       route: '/user-attendence/reports',
+  //     },
+  //     {
+  //       id: '6',
+  //       name: 'Absence List',
+  //       route: '/user-attendence/absence-list',
+  //     },
+  //   ]
+  // },
   {
-    id: '3',
+    id: '4',
     name: 'Parent Panel',
     route: '/parent-panel',
     icon: 'FaUsers',
@@ -219,7 +257,7 @@ export const menuData = [
   //   ],
   // },
   {
-    id: '4',
+    id: '5',
     name: 'Exam',
     route: '/exam',
     icon: 'PiExam',
@@ -287,21 +325,21 @@ export const menuData = [
     ],
   },
   {
-    id: '5',
+    id: '6',
     name: 'Result',
     route: '/result',
     icon: 'GiGraduateCap',
     subMenu: [
-      {
-        id: '1',
-        name: 'Result Entry & Publish',
-        route: '/result',
-      },
-      {
-        id: '2',
-        name: 'Result Report',
-        route: '/result/report',
-      },
+      // {
+      //   id: '1',
+      //   name: 'Result Entry & Publish',
+      //   route: '/result',
+      // },
+      // {
+      //   id: '2',
+      //   name: 'Result Report',
+      //   route: '/result/report',
+      // },
       {
         id: '3',
         name: 'Admission Form',

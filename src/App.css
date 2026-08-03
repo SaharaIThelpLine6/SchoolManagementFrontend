@@ -26,33 +26,42 @@
 .animation_label+label.active {
   transform: translateY(-80%) !important;
 }
-.input-table > div{
+
+.input-table>div {
   box-shadow: none;
 }
-.input-table input{
+
+.input-table input {
   width: 100px;
   background: transparent;
   height: 100%;
 }
-.input-table td .w-full{
+
+.input-table td .w-full {
   height: 100%;
   min-height: 30px;
 }
-.input-table td{
+
+.input-table td {
   padding-top: 0;
   padding-bottom: 4px;
 }
+
 ::-webkit-scrollbar {
   height: 5px;
   width: 5px;
   border-radius: 50px !important;
 }
-::-webkit-scrollbar-thumb, ::-webkit-scrollbar-thumb:hover {
+
+::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-thumb:hover {
   background: rgb(205, 208, 215);
 }
+
 ::-webkit-scrollbar-track {
   background: rgb(244, 246, 250);
 }
+
 ::selection {
   color: rgb(255, 255, 255);
   text-shadow: none;
@@ -118,11 +127,13 @@
   unicode-range: U+0980-09FF; */
   /* local('SolaimanLipiNormal'), url('solaimanlipi.woff') format('woff') */
 }
+
 @font-face {
   font-display: swap;
   font-family: SutonnyMJ;
   src: url("./assets/font/SutonnyMJ.ttf") format("truetype")
 }
+
 :root {
   --app-font: "Plus Jakarta Sans", sans-serif;
 }
@@ -181,6 +192,7 @@ tr:nth-child(even) {
   border-top: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
 }
+
 @media print {
   @page {
     margin-top: 10px;
@@ -241,7 +253,8 @@ tr:nth-child(even) {
     border-bottom: 1px solid #000 !important;
   }
 
-  td, th {
+  td,
+  th {
     background-color: white !important;
   }
 
@@ -302,30 +315,35 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
 } */
 
 .up_down_animation {
-    animation: up-down 2s ease-in-out infinite alternate-reverse both;
+  animation: up-down 2s ease-in-out infinite alternate-reverse both;
 }
+
 @keyframes up-down {
   0% {
     transform: translateY(10px);
   }
+
   100% {
-      transform: translateY(-10px);
+    transform: translateY(-10px);
   }
 
 }
+
 .print-only {
   display: none;
 }
+
 @media print {
   .break-after-page {
     page-break-after: always;
   }
-  .shadow-lg{
+
+  .shadow-lg {
     box-shadow: none !important;
   }
 
   @page {
-    margin:2mm;
+    margin: 2mm;
     margin-top: 4mm;
   }
 
@@ -340,18 +358,21 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
   tr {
     page-break-inside: avoid;
   }
-    .print-only {
+
+  .print-only {
     display: block !important;
   }
 }
-.rte-floatpanel-paragraphop{
+
+.rte-floatpanel-paragraphop {
   display: none;
 }
 
 
-.apexcharts-toolbar{
+.apexcharts-toolbar {
   display: none !important;
 }
+
 .editor_block table {
   width: 100%;
   border-collapse: collapse;
@@ -362,6 +383,30 @@ div:where(.swal2-icon).swal2-error [class^=swal2-x-mark-line] {
   border: 1px solid #000;
 }
 
-div:where(.swal2-container) div:where(.swal2-html-container){
+div:where(.swal2-container) div:where(.swal2-html-container) {
   font-family: "SolaimanLipiNormal";
+}
+
+
+.custom-scrollbar {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #e5e7eb;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
 }

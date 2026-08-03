@@ -148,6 +148,8 @@ import ExamSitPlan from '../pages/ExamSitPlan';
 import CreateExamSitPlan from '../pages/CreateExamSitPlan';
 import UserAttendance from '../pages/UserAttendance';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
+import CreateAttendenceList from '../pages/CreateAttendenceList';
+import AttendenceTimeSetting from '../pages/AttendenceTimeSetting';
 
 const Router = createBrowserRouter([
   {
@@ -405,6 +407,61 @@ const Router = createBrowserRouter([
               //     // </RequirePermission>
               //   ),
               // },
+            ],
+          },
+          {
+            path: 'user-attendence',
+            children: [
+              {
+                index: true,
+                element: (
+                  // <RequirePermission
+                  //   permissionId={permissionsDataList.teacher_info}
+                  // >
+                  <CreateAttendenceList pageTitle="Employee" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'time-settings',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <AttendenceTimeSetting pageTitle="Time Settings" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'message-settings',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <ClassVideo pageTitle="Message Settings" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'holiday-and-leave',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <UserNotice pageTitle="Holiday And Leave" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'reports',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <UserAttendance pageTitle="Reports" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'absence-list',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <HomWork pageTitle="Absence List" />
+                  // </RequirePermission>
+                ),
+              }
             ],
           },
           {

@@ -82,6 +82,8 @@ import SupportTicketModal from '../view/support-ticket/SupportTicketModal';
 import AdmissionFormModal from './Forms/AdmissionFormModal';
 import AverageVCondition from '../pages/AverageVCondition';
 import StudentCardModel from '../view/students/id-card-model/StudentCardModel';
+import ShiftEntry from '../view/attendance/ShiftEntry';
+import ScheduleShiftEntry from '../view/attendance/ScheduleShiftEntry';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
@@ -95,11 +97,11 @@ const DefaultModal = () => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
       <ClickOutside
         className="max-w-screen-lg w-full overflow-hidden"
-          onClick={() => {
-            if (meta?.closeOnOutSide !== false) {
-              dispatch(closeModal());
-            }
-          }}
+        onClick={() => {
+          if (meta?.closeOnOutSide !== false) {
+            dispatch(closeModal());
+          }
+        }}
       >
         {/* Tailwind animation */}
         <div
@@ -249,6 +251,8 @@ const DefaultModal = () => {
                 {modalType === 'PAYMENT_GETWAY' && <PaymentGetway />}
                 {modalType === 'SUCCESSANDERROR' && <SuccessAndError />}
                 {modalType === 'ADD_BOOK' && <AddEditBook />}
+                {modalType === 'SHIFT_ENTRY' && <ShiftEntry />}
+                {modalType === 'SCHEDULE_SHIFT_ENTRY' && <ScheduleShiftEntry />}
                 {modalType === 'CREATE_PAYMENT_INFO' && (
                   <CreateEditPaymentInfoModal />
                 )}
@@ -354,7 +358,7 @@ const DefaultModal = () => {
                   <SupportTicketModal id={id} />
                 )}
                 {modalType === 'EXAM_CONDITION_SETTINGS' && (
-                  <AverageVCondition  />
+                  <AverageVCondition />
                 )}
               </div>
             )}
