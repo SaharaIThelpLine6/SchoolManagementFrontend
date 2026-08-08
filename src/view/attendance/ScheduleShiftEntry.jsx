@@ -70,9 +70,9 @@ const ScheduleShiftEntry = () => {
         setEditID(null)
         toast.success(translate('Switch updated successfully'));
       } else {
-        // await createSwitch(data).unwrap();
+        await createSwitch(data).unwrap();
         console.log(data, "data")
-        // toast.success(translate('Switch created successfully'));
+        toast.success(translate('Switch created successfully'));
       }
 
       // hideModal();
@@ -91,8 +91,13 @@ const ScheduleShiftEntry = () => {
   const handleUpdate = (item) => {
     try {
       setEditID(item.ID);
-      setValue('ShiftNameEnglish', item.ShiftNameEnglish || '');
-      setValue('ShiftNameBangla', item.ShiftNameBangla || '');
+
+      setValue('ShiftID', item.ShiftID || '');
+      setValue('ShiftCheckTypeID', item.CheckTypeID || '');
+
+      setValue('StartTime', attendanceFormatTime(item.StartTime) || '');
+      setValue('StartLate', attendanceFormatTime(item.StartLate) || '');
+      setValue('EndTime', attendanceFormatTime(item.EndTime) || '');
     } catch (error) {
       console.error(error);
       toast.error(translate('Something went wrong'));
@@ -152,7 +157,7 @@ const ScheduleShiftEntry = () => {
             <TimePicker
               timeCalender="শুরুর দেরি সময়"
               placeholder={`${translate("Select Time")}...`}
-              registerKey="StartLateTime"
+              registerKey="StartLate"
               require={true}
             />
             <TimePicker
@@ -212,10 +217,10 @@ const ScheduleShiftEntry = () => {
                     {translate('শুরুর সময়')}
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
-                    {translate('শুরুর দেরি সময়')}
+                    {translate('লেট টাইম')}
                   </th>
 
-                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-slate-600">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
                     {translate('শেষ সময়')}
                   </th>
                 </tr>
@@ -265,9 +270,6 @@ const ScheduleShiftEntry = () => {
                       <td className="px-4 py-3 text-slate-600">
                         {attendanceFormatTime(item.EndTime)}
                       </td>
-
-
-
                     </tr>
                   ))
                 ) : (

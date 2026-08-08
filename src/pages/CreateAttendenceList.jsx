@@ -79,7 +79,7 @@ const CreateAttendenceList = ({ pageTitle }) => {
   const { data: sessionData } = useGetSessionsQuery();
   const { data: classData } = useGetClassListQuery();
   const { data: userType = [] } = useGetUserTypesQuery();
-  const { data: designationData = [] } = useGetDesignationQuery();
+  // const { data: designationData = [] } = useGetDesignationQuery();
 
   /* ----------------------- transfer-panel state ----------------------- */
   const [searchLeft, setSearchLeft] = useState("");

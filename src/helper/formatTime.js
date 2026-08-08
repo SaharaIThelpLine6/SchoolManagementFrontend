@@ -41,3 +41,34 @@ export const attendanceFormatTime = (value) => {
     timeZone: 'UTC', // ISO string এর জন্য UTC ধরে
   });
 };
+
+export const attendanceFormatTimeTest = (value, withAmPm = true) => {
+  if (!value) return '';
+
+  let hours;
+  let minutes;
+
+  // HH:mm বা HH:mm:ss
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(value)) {
+    [hours, minutes] = value.split(':');
+  } else {
+    // ISO Date
+    const match = value.match(/T(\d{2}):(\d{2})/);
+
+    if (!match) return '';
+
+    hours = match[1];
+    minutes = match[2];
+  }
+
+  hours = Number(hours);
+
+  if (!withAmPm) {
+    return `${String(hours).padStart(2, '0')}:${minutes}`;
+  }
+
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  hours = hours % 12 || 12;
+
+  return `${hours}:${minutes} ${ampm}`;
+};
