@@ -16,7 +16,7 @@ export const attendanceSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Attendance', "TimeShifting", "TimeSwitch"],
+  tagTypes: ['Attendance', "TimeShifting", "TimeSwitch", "TimeSettings"],
   endpoints: (builder) => ({
     // ================= Get All Users =================
     getAllUserForAttendances: builder.query({
@@ -60,6 +60,7 @@ export const attendanceSlice = createApi({
         method: "POST",
         body,
       }),
+      invalidatesTags: ['Attendance'],
     }),
     getTimeShiftings: builder.query({
       query: () => '/time_shiftings',
@@ -108,6 +109,7 @@ export const attendanceSlice = createApi({
       }),
       providesTags: ['TimeSwitch'],
     }),
+
     createTimeSwitch: builder.mutation({
       query: (body) => ({
         url: '/time_switch_create',
@@ -118,8 +120,8 @@ export const attendanceSlice = createApi({
     }),
 
     updateTimeSwitch: builder.mutation({
-      query: ({ id, ...body }) => ({
-        url: `/time_switch_update/${id}`,
+      query: ({ ...body }) => ({
+        url: `/time_switch_update`,
         method: 'PUT',
         body,
       }),
@@ -132,6 +134,78 @@ export const attendanceSlice = createApi({
         method: 'DELETE',
       }),
       invalidatesTags: ['TimeSwitch'],
+    }),
+
+    createTimeSetting: builder.mutation({
+      query: (data) => ({
+        url: '/time_settings',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['TimeSettings'],
+    }),
+
+    deleteTimeSetting: builder.mutation({
+      query: (id) => ({
+        url: `/time_settings/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['TimeSettings'],
+    }),
+
+    // ===================== Get Time Settings =====================
+    getTimeSettings: builder.query({
+      query: ({
+        UserTypeID,
+        SessionID,
+        ClassID,
+        ResidentialID,
+        ShiftID,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (UserTypeID) params.append("UserTypeID", UserTypeID);
+        if (SessionID) params.append("SessionID", SessionID);
+        if (ClassID) params.append("ClassID", ClassID);
+        if (ResidentialID) params.append("ResidentialID", ResidentialID);
+        if (ShiftID) params.append("ShiftID", ShiftID);
+
+        return {
+          url: `/time_settings?${params.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["TimeSettings"],
+    }),
+    // ===================== Get Time Settings filtered =====================
+    getTimeSettingsFiltered: builder.query({
+      query: ({
+        UserTypeID,
+        SessionID,
+        ClassID,
+        ShiftID,
+        ResidentialStatusId,
+        UserCode,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (UserTypeID) params.append("UserTypeID", UserTypeID);
+        if (SessionID) params.append("SessionID", SessionID);
+        if (ClassID) params.append("ClassID", ClassID);
+        if (ShiftID) params.append("ShiftID", ShiftID);
+        if (ResidentialStatusId)
+          params.append("ResidentialStatusId", ResidentialStatusId);
+        if (UserCode) params.append("UserCode", UserCode);
+
+        return `/time_settings_filtered?${params.toString()}`;
+      },
+      providesTags: ["TimeSettings"],
+    }),
+    getAttendanceLists: builder.query({
+      query: () => ({
+        url: `/get_attendance_list`,
+        method: 'GET',
+      }),
     }),
   }),
 });
@@ -151,4 +225,9 @@ export const {
   useCreateTimeSwitchMutation,
   useUpdateTimeSwitchMutation,
   useDeleteTimeSwitchMutation,
+  useGetTimeSettingsQuery,
+  useCreateTimeSettingMutation,
+  useDeleteTimeSettingMutation,
+  useGetTimeSettingsFilteredQuery,
+  useGetAttendanceListsQuery
 } = attendanceSlice;

@@ -11,22 +11,9 @@ import { useGetSessionsQuery } from "../features/session/sessionSlice";
 import SvgIcon from "../components/icons/SvgIcon";
 import { useGetClassListQuery, useGetSubClassListQuery } from "../features/class/classQuerySlice";
 import { showModal } from "../utils/ModalControlar";
+import { useGetTimeSettingsFilteredQuery, useGetTimeShiftingsQuery, useDeleteTimeSettingMutation } from "../features/attendance/attendanceSlice";
+import { useGetResidentialQuery } from "../features/settings/settingsQuerySlice";
 
-/* ------------------------------------------------------------------ */
-/*  DEMO / EXAMPLE DATA — remove once the real RTK Query endpoint is wired */
-/* ------------------------------------------------------------------ */
-const STUDENT_LIST = [
-  { id: "10012", name: "আয়েশা আখতার", father: "আবু জাফর", mobile: "017263282..." },
-  { id: "10102", name: "আয়শা আক্তার মাহি", father: "সাইফুল ইসলাম ইম...", mobile: "017320032..." },
-  { id: "10103", name: "ইশতা আক্তার", father: "ইশার আলী", mobile: "017525515..." },
-  { id: "10104", name: "আমেনা আক্তার", father: "মুমিনুল ইসলাম", mobile: "017211999..." },
-  { id: "10105", name: "উম্মে হাবিবা", father: "মো: এলেম", mobile: "017191738..." },
-  { id: "10106", name: "জুই আক্তার ঝুমুর", father: "মো: জুয়েল", mobile: "017754605..." },
-  { id: "10107", name: "সুফিয়া জাহান শোভা", father: "ফরাদ সরকার সুমন", mobile: "013382291..." },
-  { id: "10098", name: "তামিমা সুলতানা", father: "মো: সাইফুল ইসলাম", mobile: "019529359..." },
-  { id: "10109", name: "আফরোজা আক্তার", father: "হোসেন শেখ", mobile: "017807109..." },
-  { id: "10110", name: "রফিকুল ইসলাম", father: "জাহিদুল ইসলাম", mobile: "019852356..." },
-];
 /* ------------------------------------------------------------------ */
 
 const AttendenceTimeSetting = ({ pageTitle }) => {
@@ -41,27 +28,86 @@ const AttendenceTimeSetting = ({ pageTitle }) => {
     },
   });
 
+  const { watch } = method
+  const [ShiftID, UserTypeID, SessionID, ClassID, ResidentialID, UserCode] = watch(["ShiftID", "UserTypeID", "SessionID", "ClassID", "ResidentialID", "UserCode"])
+  const { data, isLoading, error, refetch } = useGetTimeSettingsFilteredQuery({
+    UserTypeID,
+    SessionID,
+    ClassID,
+    ShiftID,
+    ResidentialStatusId: ResidentialID,
+    UserCode,
+  });
+  const [deleteTimeSetting, { isLoading: isDeleting }] = useDeleteTimeSettingMutation();
+
+  console.log(data, "data")
   const { data: sessionData } = useGetSessionsQuery();
   const { data: classData } = useGetClassListQuery();
   const { data: userType = [] } = useGetUserTypesQuery();
+  const { data: residentialData = [] } = useGetResidentialQuery();
+  const { data: shiftLists = [] } = useGetTimeShiftingsQuery();
 
-  const [students, setStudents] = useState(STUDENT_LIST);
+
+
   const [search, setSearch] = useState("");
 
   const filteredStudents = useMemo(() => {
-    if (!search.trim()) return students;
-    return students.filter(
-      (s) =>
-        s.name.includes(search) ||
-        s.father.includes(search) ||
-        s.id.includes(search) ||
-        s.mobile.includes(search)
-    );
-  }, [students, search]);
+    const students = data?.data || [];
 
-  // clicking the delete icon skips/removes that student from the list
-  const handleSkip = (student) => {
-    setStudents((prev) => prev.filter((s) => s.id !== student.id));
+    const keyword = search.trim().toLowerCase();
+
+    if (!keyword) return students;
+
+    return students.filter((s) => {
+      const userName = (s.UserName || "").toLowerCase();
+      const fatherName = (s.FatherName || "").toLowerCase();
+      const userCode = String(s.UserCode || "");
+
+      return (
+        userName.includes(keyword) ||
+        fatherName.includes(keyword) ||
+        userCode.includes(keyword)
+      );
+    });
+  }, [data?.data, search]);
+
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: translate("আপনি কি নিশ্চিত?"),
+      text: translate("এই টাইম সেটিংটি মুছে ফেলা হবে।"),
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: translate("হ্যাঁ, মুছে ফেলুন"),
+      cancelButtonText: translate("বাতিল"),
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#6b7280",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const response = await deleteTimeSetting(id).unwrap();
+
+      Swal.fire({
+        icon: "success",
+        title: translate("সফল"),
+        text:
+          response?.message ||
+          translate("টাইম সেটিং সফলভাবে মুছে ফেলা হয়েছে।"),
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: translate("ত্রুটি"),
+        text:
+          err?.data?.error ||
+          err?.data?.message ||
+          translate("কিছু সমস্যা হয়েছে।"),
+      });
+    }
   };
 
 
@@ -105,13 +151,32 @@ const AttendenceTimeSetting = ({ pageTitle }) => {
               placeholder={translate("Select User Type")}
             />
             <DefaultSelect
+              label={"Session"}
+              options={sessionData ?? []}
+              valueField="SessionID"
+              nameField="SessionName"
+              registerKey="SessionID"
+            />
+            <DefaultSelect
               label={"Class"}
               options={classData ?? []}
               valueField="ClassID"
               nameField="ClassName"
               registerKey="ClassID"
+            />   <DefaultSelect
+              label={translate("Residential")}
+              options={residentialData ?? []}
+              valueField="RDID"
+              nameField="ResidentialName"
+              registerKey="ResidentialID"
             />
-
+            <DefaultSelect
+              label={translate("শিফট নাম")}
+              options={shiftLists?.data ?? []}
+              valueField="ID"
+              nameField="ShiftNameBangla"
+              registerKey="ShiftID"
+            />
             <DefaultInput
               label={translate("User Code")}
               registerKey="UserCode"
@@ -121,9 +186,7 @@ const AttendenceTimeSetting = ({ pageTitle }) => {
           </div>
         </div>
 
-        {/* ------------------------------------------------------------- */}
-        {/* Left student table — example data                             */}
-        {/* ------------------------------------------------------------- */}
+
         <div className="w-full">
           <div className="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
             {/* Panel header — stacks on small screens */}
@@ -143,7 +206,7 @@ const AttendenceTimeSetting = ({ pageTitle }) => {
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder={translate("নাম, আইডি বা মোবাইল দিয়ে খুঁজুন")}
+                  placeholder={translate("নাম, আইডি দিয়ে খুঁজুন")}
                   className="w-full rounded-md bg-blue-600 border border-blue-400 pl-8 pr-2 py-1.5 text-[12px] text-white placeholder:text-blue-200 focus:outline-none focus:ring-2 focus:ring-white focus:border-white"
                 />
               </div>
@@ -151,13 +214,16 @@ const AttendenceTimeSetting = ({ pageTitle }) => {
 
             {/* Table body — horizontally scrollable on small screens so columns never get crushed */}
             <div className="overflow-x-auto">
-              <div className="min-w-[640px]">
-                <div className="grid grid-cols-[56px_90px_1fr_1fr_130px] bg-blue-50 px-2 py-2 text-[12px] font-bold text-blue-700 border-b border-blue-100">
+              <div className="min-w-[900px]">
+                <div className="grid grid-cols-[56px_90px_1fr_1fr_130px_100px_100px_100px] bg-blue-50 px-2 py-2 text-[12px] font-bold text-blue-700 border-b border-blue-100">
                   <span className="text-center">{translate("অ্যাকশন")}</span>
                   <span>{translate("আইডি")}</span>
                   <span>{translate("শিক্ষার্থীর নাম")}</span>
                   <span>{translate("পিতার নাম")}</span>
                   <span>{translate("মোবাইল")}</span>
+                  <span>{translate("শ্রেণী")}</span>
+                  <span>{translate("শিফট")}</span>
+                  <span>{translate("চেক টাইপ")}</span>
                 </div>
 
                 <div className="max-h-[480px] overflow-y-auto">
@@ -165,32 +231,56 @@ const AttendenceTimeSetting = ({ pageTitle }) => {
                     <div className="flex flex-col items-center justify-center gap-2 py-16 text-slate-400">
                       <SvgIcon name="search" className="h-8 w-8" />
                       <p className="text-[13px]">
-                        {students.length === 0
-                          ? translate("কোনো শিক্ষার্থী নেই")
-                          : translate("কোনো ফলাফল পাওয়া যায়নি")}
+                        {translate("কোনো শিক্ষার্থী নেই")}
                       </p>
                     </div>
                   ) : (
                     filteredStudents.map((s, idx) => (
                       <div
-                        key={s.id}
-                        className={`grid grid-cols-[56px_90px_1fr_1fr_130px] items-center px-2 py-2 text-[13px] border-b border-slate-100 last:border-b-0 transition-colors ${idx % 2 === 0 ? "bg-white hover:bg-slate-50" : "bg-slate-50/60 hover:bg-slate-50"
+                        key={`${s.ID}_${s.SwitchID}`}
+                        className={`grid grid-cols-[56px_90px_1fr_1fr_130px_100px_100px_100px] items-center px-2 py-2 text-[13px] border-b border-slate-100 last:border-b-0 transition-colors ${idx % 2 === 0
+                          ? "bg-white hover:bg-slate-50"
+                          : "bg-slate-50/60 hover:bg-slate-50"
                           }`}
                       >
                         <span className="flex items-center justify-center">
                           <button
                             type="button"
-                            onClick={() => handleSkip(s)}
+                            onClick={() => handleDelete(s.ID)}
                             title={translate("এই শিক্ষার্থীকে বাদ দিন")}
                             className="flex items-center justify-center h-7 w-7 rounded-md border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 transition-colors"
                           >
                             <SvgIcon name="FaTrash" className="h-3.5 w-3.5" />
                           </button>
                         </span>
-                        <span className="text-slate-500 font-medium truncate pr-2">{s.id}</span>
-                        <span className="font-SolaimanLipi text-slate-800 truncate pr-2">{s.name}</span>
-                        <span className="font-SolaimanLipi text-slate-600 truncate pr-2">{s.father}</span>
-                        <span className="text-slate-500 truncate pr-2">{s.mobile}</span>
+
+                        <span className="text-slate-500 font-medium truncate pr-2">
+                          {s.UserCode}
+                        </span>
+
+                        <span className="font-SolaimanLipi text-slate-800 truncate pr-2">
+                          {s.UserName}
+                        </span>
+
+                        <span className="font-SolaimanLipi text-slate-600 truncate pr-2">
+                          {s.FatherName}
+                        </span>
+
+                        <span className="text-slate-500 truncate pr-2">
+                          {s.Mobile1}
+                        </span>
+
+                        <span className="text-slate-700 truncate pr-2 text-[12px]">
+                          {s.ClassName || "-"}
+                        </span>
+
+                        <span className="text-slate-700 truncate pr-2 text-[12px]">
+                          {s.ShiftNameBangla || "-"}
+                        </span>
+
+                        <span className="text-slate-700 truncate pr-2 text-[12px]">
+                          {s.TypeNameBangla || "-"}
+                        </span>
                       </div>
                     ))
                   )}
@@ -205,7 +295,7 @@ const AttendenceTimeSetting = ({ pageTitle }) => {
 };
 
 export default AttendenceTimeSetting;
-// import Swal from "sweetalert2";
+
 // import { FormProvider, useForm, useWatch } from "react-hook-form";
 // import Button from "../components/Button/Button";
 // import DefaultSelect from "../components/Forms/DefaultSelect";

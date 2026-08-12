@@ -151,6 +151,7 @@ import UserAttendance from '../pages/UserAttendance';
 import PrivacyPolicy from '../pages/PrivacyPolicy';
 import CreateAttendenceList from '../pages/CreateAttendenceList';
 import AttendenceTimeSetting from '../pages/AttendenceTimeSetting';
+import AttendenceHolidayAndLeave from '../pages/AttendenceHolidayAndLeave';
 
 const Router = createBrowserRouter([
   {
@@ -443,7 +444,7 @@ const Router = createBrowserRouter([
                 path: 'holiday-and-leave',
                 element: (
                   // <RequirePermission permissionId={permissionsDataList.class}>
-                  <UserNotice pageTitle="Holiday And Leave" />
+                  <AttendenceHolidayAndLeave pageTitle="Holiday And Leave" />
                   // </RequirePermission>
                 ),
               },
