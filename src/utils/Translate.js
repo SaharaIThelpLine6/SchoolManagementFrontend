@@ -880,6 +880,25 @@ const useTranslate = () => {
     "Add Subject": "বিষয় যুক্ত করুন",
     "Student Id Card": "শিক্ষার্থী পরিচয়পত্র",
 
+    "Primary Title": "প্রধান শিরোনাম",
+    "Color Palette": "কালার প্যালেট",
+    "Primary Color": "প্রাইমারি কালার",
+    "Secondary Color": "সেকন্ডারি কালার",
+    "About Section Text": "সেকশনের টেক্সট",
+    "Upload About Image": "ছবি আপলোড",
+    "Student Stats Title": "শিক্ষার্থী পরিসংখ্যান শিরোনাম",
+    "Why Choose Us Title": "কেন আমাদের বেছে নেবেন শিরোনাম",
+    "Subject List Title": "বিষয় তালিকার শিরোনাম",
+    "Teacher List Card Title": "শিক্ষক তালিকার শিরোনাম",
+    "Facebook Link": "ফেসবুক লিংক",
+    "Youtube Link": "ইউটিউব লিংক",
+    "Add Teacher Profile": "শিক্ষক প্রোফাইল যোগ করুন",
+    "Reset Colors": "ডিফল্ট কালার",
+    "Add": "যোগ করুন",
+    "Teacher Name": "শিক্ষকের নাম",
+    "Save Settings": "সেটিংস সংরক্ষণ করুন",
+
+
   };
 
   return (key) =>

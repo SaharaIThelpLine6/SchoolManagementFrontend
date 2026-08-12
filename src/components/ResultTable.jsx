@@ -16,12 +16,12 @@ const ResultTable = () => {
             const base64String = buffer.toString('base64');
             const imageSrc = `data:image/png;base64,${base64String}`;
             setLogo(imageSrc)
-            document.title = `${studentResult?.UserCode}-${bnBijoy2Unicode(studentResult?.ExamName)}-${bnBijoy2Unicode(studentResult?.SessionName)}`;
+            document.title = `${studentResult?.UserCode}-${studentResult?.ExamName}-${studentResult?.SessionName}`;
         }
     }, [studentResult])
     const handlePrint = () => {
         const originalTitle = document.title;
-        document.title = `${studentResult?.UserCode}-${bnBijoy2Unicode(studentResult?.ExamName)}-${bnBijoy2Unicode(studentResult?.SessionName)}`;
+        document.title = `${studentResult?.UserCode}-${studentResult?.ExamName}-${studentResult?.SessionName}`;
 
         window.print();
 
@@ -52,16 +52,16 @@ const ResultTable = () => {
                                 <div className="flex justify-end">
                                     <div className="w-full text-center">
                                         <h1 className="text-white text-[32px] pb-2">
-                                            {bnBijoy2Unicode(studentResult?.InstitutionName)}
+                                            {studentResult?.InstitutionName}
                                         </h1>
                                     </div>
                                 </div>
                                 <div className="bg-theme-color text-center">
-                                    <p className="text-white">{bnBijoy2Unicode(studentResult?.Address)}</p>
+                                    <p className="text-white">{studentResult?.Address}</p>
                                 </div>
 
                                 <div className="text-center pt-2 pb-4">
-                                    <p className="text-white mb-0">{bnBijoy2Unicode(studentResult?.ExamName)} - {bnBijoy2Unicode(studentResult?.SessionName)}</p>
+                                    <p className="text-white mb-0">{studentResult?.ExamName} - {studentResult?.SessionName}</p>
 
                                 </div>
                             </div>

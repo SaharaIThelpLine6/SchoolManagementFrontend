@@ -35,6 +35,9 @@ export default function WebsiteSettings() {
       whyUsList: [{ text: '' }],
       classList: [{ text: '', subjects: [] }],
       teachers: [],
+      // Color Palette Default Values
+      primary: '#265d3e',
+      secondary: '#fbbf24',
     },
   });
   const translate = useTranslate();
@@ -51,7 +54,6 @@ export default function WebsiteSettings() {
   const [sendWebsiteSettings] = usePostWebsitesettingsMutation();
   const { data, error, isLoading } = useGetWebSettingsQuery();
   const [teacherOptions, setTeacherOptions] = useState([]);
-
 
 
   const [classSubjectList, setClassSubjectList] = useState([]);
@@ -75,27 +77,11 @@ export default function WebsiteSettings() {
           } catch (e) {
             value = [{ text: '' }];
           }
-          // while (fields.length > 0) {
           remove(0);
-          // }
-          console.log('{=========================');
-
-          // Append items from API
-          console.log(value);
 
           replace(value);
-          // value.forEach((v, i) => {
-          //     console.log({ [`whyUsList.${i}.text`]: v.text });
-          //     // whyUsList.0.text
-          //     // append({ [`whyUsList.${i}.text`]: v.text });
-          //     // setValue(`whyUsList.${i}.text`, v.text)
-          //     // console.log(v.text);
-          //     // insert(i, v.text)
-
-          // });
-          // replace(value.map(v => ({ text: v.text })));
         } else {
-          setValue(key, value); // for single values or images
+          setValue(key, value); // for single values, images, and our new 'primary' / 'secondary' colors
         }
         if (key == 'BannerImage') {
           setBannerUrl(`${API_URL}/public${value}`);
@@ -133,17 +119,12 @@ export default function WebsiteSettings() {
   }, [data, setValue, append]);
 
   const onSubmit = async (data) => {
-    // console.log(data);
-
-
     const formattedSubjects = data.classList
       .filter(item => item.text && item.subjects.length > 0)
       .map(item => ({
         subClassId: Number(item.text),
         subjectIds: item.subjects
       }));
-      // console.log(formattedSubjects);
-      
 
 
     const formData = new FormData();
@@ -158,6 +139,11 @@ export default function WebsiteSettings() {
     formData.append('whyUsList', JSON.stringify(data.whyUsList));
     formData.append('subjectListTitle', data.subjectListTitle);
     formData.append('teacherListTitle', data.teacherListTitle);
+    
+    // Colors
+    formData.append('primary', data.primary);
+    formData.append('secondary', data.secondary);
+
     // Images (only if selected)
     if (data.bannerImage instanceof File) {
       formData.append('bannerImage', data.bannerImage);
@@ -172,7 +158,7 @@ export default function WebsiteSettings() {
       Swal.fire({
         icon: 'success',
         title: 'সফল!',
-        text: 'ওয়েবসাইট সেটিংস সফলভাবে সংরক্ষণ করা হয়েছে।',
+        text: 'ওয়েবসাইট সেটিংস সফলভাবে সংরক্ষণ করা হয়েছে।',
         timer: 2000,
         showConfirmButton: false,
       });
@@ -181,7 +167,7 @@ export default function WebsiteSettings() {
         icon: 'error',
         title: 'ব্যর্থ!',
         text:
-          error?.data?.message || 'কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করুন।',
+          error?.data?.message || 'কিছু একটা সমস্যা হয়েছে, আবার চেষ্টা করুন।',
         confirmButtonText: 'ঠিক আছে',
       });
     }
@@ -234,14 +220,89 @@ export default function WebsiteSettings() {
             <DefaultInput
               registerKey="primaryHeading"
               type="text"
-              label="Primary Title"
+              label={translate("Primary Title")}
             />
-
           </div>
+
+          {/* Color Palette Section */}
+          <div className="mt-4 mb-4 bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-gray-800">{translate('Color Palette')}</h3>
+              <button
+                type="button"
+                onClick={() => {
+                  setValue('primary', '#265d3e');   // default primary
+                  setValue('secondary', '#fbbf24'); // default secondary
+                }}
+                className="px-3 py-1 text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 rounded transition-colors"
+              >
+                {translate("Reset Colors")}
+              </button>
+            </div>
+            <div className="flex gap-6">
+              {/* Primary Color */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-gray-600">{translate('Primary Color')}</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    {...register('primary')}
+                    className="w-10 h-10 cursor-pointer border-0 rounded bg-transparent p-0"
+                  />
+                  <input
+                    type="text"
+                    value={watch('primary') || '#265d3e'}
+                    onChange={(e) => {
+                      let val = e.target.value;
+                      if (val.charAt(0) !== '#') val = '#' + val;
+                      // basic hex validation
+                      if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                        setValue('primary', val);
+                      } else if (val.length <= 7) {
+                        // allow partial input while typing
+                        setValue('primary', val);
+                      }
+                    }}
+                    className="w-24 px-2 py-1 border border-gray-300 rounded text-sm font-mono"
+                    placeholder="#265d3e"
+                  />
+                </div>
+              </div>
+
+              {/* Secondary Color */}
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-gray-600">{translate('Secondary Color')}</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    {...register('secondary')}
+                    className="w-10 h-10 cursor-pointer border-0 rounded bg-transparent p-0"
+                  />
+                  <input
+                    type="text"
+                    value={watch('secondary') || '#fbbf24'}
+                    onChange={(e) => {
+                      let val = e.target.value;
+                      if (val.charAt(0) !== '#') val = '#' + val;
+                      if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                        setValue('secondary', val);
+                      } else if (val.length <= 7) {
+                        setValue('secondary', val);
+                      }
+                    }}
+                    className="w-24 px-2 py-1 border border-gray-300 rounded text-sm font-mono"
+                    placeholder="#fbbf24"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* End Color Palette Section */}
+
           <DefaultInput
             registerKey="aboutText"
             type="textarea"
-            label="About Section Text"
+            label={translate("About Section Text")}
             require="About text is required"
           />
           <div className="bg-blue-50 p-5 rounded-lg border border-blue-100 mt-4 mb-4">
@@ -276,14 +337,14 @@ export default function WebsiteSettings() {
             <DefaultInput
               registerKey="studentListHeading"
               type="text"
-              label="Student Stats Title"
+              label={translate("Student Stats Title")}
             />
           </div>
 
           <DefaultInput
             registerKey="whyUsTitle"
             type="text"
-            label="Why Choose Us Title"
+            label={translate("Why Choose Us Title")}
           />
           <div className="bg-blue-50 p-5 rounded-lg border border-blue-100 mt-4 mb-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
@@ -337,7 +398,7 @@ export default function WebsiteSettings() {
               onClick={() => append({ text: '' })}
               className="mt-2 bg-blue-500 text-white px-3 py-1 rounded"
             >
-              Add
+              {translate("Add")}
             </button>
           </div>
 
@@ -345,7 +406,7 @@ export default function WebsiteSettings() {
             <DefaultInput
               registerKey="subjectListTitle"
               type="text"
-              label="Subject List Title"
+              label={translate("Subject List Title")}
             />
           </div>
 
@@ -383,7 +444,7 @@ export default function WebsiteSettings() {
                               onChange={() => toggleAll(index, academicSubjects)}
                             />
                           </th>
-                          <th>Subject Name</th>
+                          <th>{translate("Subject Name")}</th>
                         </tr>
                       </thead>
 
@@ -433,7 +494,7 @@ export default function WebsiteSettings() {
                 onClick={() => appendClassSubjectFields({ text: '' })}
                 className="mt-2 bg-blue-500 text-white px-3 py-1 rounded"
               >
-                Add
+                {translate("Add")}
               </button>
             </div>
           </div>
@@ -442,23 +503,23 @@ export default function WebsiteSettings() {
             <DefaultInput
               registerKey="teacherListTitle"
               type="text"
-              label="Teacher List Card Title"
+              label={translate("Teacher List Card Title")}
             />
           </div>
           <div className="mt-2 flex flex-wrap md:flex-nowrap gap-2">
             <DefaultInput
               registerKey="fblink"
               type="text"
-              label="Facebook Link"
+              label={translate("Facebook Link")}
             />
             <DefaultInput
               registerKey="ylink"
               type="text"
-              label="Youtube Link"
+              label={translate("Youtube Link")}
             />
           </div>
           <div className="mt-2">
-            <label>Add Teacher Profile</label>
+            <label>{translate('Add Teacher Profile')}</label>
 
             <Controller
               name="teachers"
@@ -487,14 +548,6 @@ export default function WebsiteSettings() {
 
                 return (
                   <>
-                    {/* <button
-                      type="button"
-                      className="btn btn-sm btn-secondary mb-2"
-                      onClick={toggleAll}
-                    >
-                      {isAllChecked ? 'Uncheck All' : 'Check All'}
-                    </button> */}
-
                     <div className='relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default'>
                       <table className="w-full text-xl text-left rtl:text-right text-body">
                         <thead className='text-xl text-body bg-neutral-secondary-soft border-b rounded-base border-default'>
@@ -507,7 +560,7 @@ export default function WebsiteSettings() {
                                 className='h-full w-full'
                               />
                             </th>
-                            <th>Teacher Name</th>
+                            <th>{translate("Teacher Name")}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -527,22 +580,17 @@ export default function WebsiteSettings() {
                         </tbody>
                       </table>
                     </div>
-
-
                   </>
                 );
               }}
             />
           </div>
 
-
-
-          {/* subjectListTitle */}
           <button
             type="submit"
             className="btn btn-primary py-2 px-2 bg-cyan-600 text-white rounded-[4px] mt-4 text-center"
           >
-            Save Settings
+            {translate("Save Settings")}
           </button>
         </form>
       </div>

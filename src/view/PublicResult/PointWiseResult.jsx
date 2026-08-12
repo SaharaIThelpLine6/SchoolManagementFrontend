@@ -9,17 +9,17 @@ const PointWiseResult = ({ studentResult }) => {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">
-                {bnBijoy2Unicode(studentResult?.StudentIDLabel)}:
+                {studentResult?.StudentIDLabel}:
               </p>
               <p>{bnBijoy2Unicode(String(studentResult?.UserCode))}</p>
             </div>
 
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">
-                {bnBijoy2Unicode(studentResult?.ClassNameLabel)}:
+                {studentResult?.ClassNameLabel}:
               </p>
               <p className="text-[16px]">
-                {bnBijoy2Unicode(studentResult?.SubClass)}
+                {studentResult?.SubClass}
               </p>
             </div>
 
@@ -35,14 +35,14 @@ const PointWiseResult = ({ studentResult }) => {
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">নাম:</p>
               <p className="text-[16px]">
-                {bnBijoy2Unicode(studentResult?.UserName)}
+                {studentResult?.UserName}
               </p>
             </div>
 
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">পিতার নাম:</p>
               <p className="text-[16px]">
-                {bnBijoy2Unicode(studentResult?.FatherName)}
+                {studentResult?.FatherName}
               </p>
             </div>
             <div className="flex items-center space-x-2">
@@ -124,7 +124,7 @@ const PointWiseResult = ({ studentResult }) => {
                 className="text-[16px] border border-black h-[36px] pl-4"
                 bgcolor="#ffffff"
               >
-                {bnBijoy2Unicode(studentResult[`Subject${index + 1}`])}
+                {studentResult[`Subject${index + 1}`]}
               </td>
               <td
                 className="text-[16px] border border-black h-[36px] pl-4"
@@ -188,7 +188,7 @@ const PointWiseResult = ({ studentResult }) => {
             </div>
             <div className="flex items-center space-x-2">
               <p className="text-[16px]">মেধা স্থান:</p>
-              <p>{bnBijoy2Unicode(String(studentResult?.Positions))}</p>
+              <p>{String(studentResult?.Positions)}</p>
             </div>
             <div className="flex items-center space-x-2">
               <p className="text-[16px]">মোট নম্বর:</p>
