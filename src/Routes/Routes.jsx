@@ -152,6 +152,8 @@ import PrivacyPolicy from '../pages/PrivacyPolicy';
 import CreateAttendenceList from '../pages/CreateAttendenceList';
 import AttendenceTimeSetting from '../pages/AttendenceTimeSetting';
 import AttendenceHolidayAndLeave from '../pages/AttendenceHolidayAndLeave';
+import AttendenceHolidayAndLeaveEntry from '../pages/AttendenceHolidayAndLeaveEntry';
+import AttendenceEntry from '../pages/AttendenceEntry';
 
 const Router = createBrowserRouter([
   {
@@ -433,6 +435,14 @@ const Router = createBrowserRouter([
                 ),
               },
               {
+                path: 'attendance-entry',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <AttendenceHolidayAndLeaveEntry pageTitle="Time Settings" />
+                  // </RequirePermission>
+                ),
+              },
+              {
                 path: 'message-settings',
                 element: (
                   // <RequirePermission permissionId={permissionsDataList.class}>
@@ -445,6 +455,15 @@ const Router = createBrowserRouter([
                 element: (
                   // <RequirePermission permissionId={permissionsDataList.class}>
                   <AttendenceHolidayAndLeave pageTitle="Holiday And Leave" />
+                  // <AttendenceHolidayAndLeaveEntry pageTitle="Holiday And Leave" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'shift-attendance-entry',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <AttendenceEntry pageTitle="Attendance Entry" />
                   // </RequirePermission>
                 ),
               },

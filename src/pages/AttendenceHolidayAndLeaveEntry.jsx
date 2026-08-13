@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useGetAttendanceListsQuery, useGetAttendanceMonthListsQuery, useUpdateAttendanceMutation } from '../features/attendance/attendanceSlice';
+import {
+  useGetManualAttendanceListQuery,
+  useUpdateAttendanceMutation,
+} from '../features/attendance/attendanceSlice';
 import { useGetUserTypesQuery } from "../features/userType/userTypeSlice";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import useTranslate from "../utils/Translate";
@@ -8,31 +11,23 @@ import { FormProvider, useForm } from "react-hook-form";
 import { liveYears } from '../utils/years';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import { useGetClassListQuery } from '../features/class/classQuerySlice';
+import { useGetAttendanceMonthListsQuery } from '../features/attendance/attendanceSlice';
 import { useNavigate } from 'react-router-dom';
 
 // ==========================================
 // 1. STATUS CODE MAPPING
 // ==========================================
 // Time_MonthRtpDetails টেবিলের D1..D31 কলামে থাকা numeric code অনুযায়ী মিনিং:
-// 0 = Cancel
-// 1 = Present
-// 2 = Leave
-// 3 = Holiday
-// 4 = Weekend Off
-//
-// ⚠️ NOTE: backend route (/attendance_update) বর্তমানে শুধু value: 0,1,2,3 accept করে,
-// 4 (Weekend Off) পাঠালে ভ্যালিডেশন এরর (400) দেবে। Weekend Off ব্যবহার করতে হলে
-// ব্যাকএন্ডের ভ্যালিডেশন লাইনে 4 যোগ করতে হবে:
-//   ![0, 1, 2, 3, 4].includes(attendanceValue)
+// 0 = Cancel, 1 = Present, 2 = Leave, 3 = Holiday, 4 = Weekend Off
 const STATUS_CODE_MAP = {
-  0: 'C', // Cancel
-  1: 'P', // Present
-  2: 'L', // Leave
-  3: 'H', // Holiday
-  4: 'W', // Weekend Off
+  0: 'C',
+  1: 'P',
+  2: 'L',
+  3: 'H',
+  4: 'W',
 };
 
-// UI status letter থেকে ডাটাবেজ কোড এ ফিরিয়ে নেওয়ার জন্য (আপডেট করার সময় দরকার হবে)
+// UI status letter থেকে ডাটাবেজ কোড এ ফিরিয়ে নেওয়ার জন্য (আপডেট করার সময় দরকার)
 const STATUS_TEXT_TO_CODE = {
   C: 0,
   P: 1,
@@ -41,18 +36,18 @@ const STATUS_TEXT_TO_CODE = {
   W: 4,
 };
 
-// dropdown মেনুর অপশন লিস্ট (label + code + রঙ) - একসাথে render আর status color দুই জায়গাতেই ব্যবহার হবে
+// dropdown মেনুর অপশন লিস্ট (label + code + রঙ)
 const STATUS_OPTIONS = [
   { code: 'P', label: 'অপস্থিত', dot: 'bg-green-500' },
+  { code: 'C', label: 'অনুপস্থিত', dot: 'bg-red-500' },
   { code: 'L', label: 'ব্যক্তিগত ছুটি', dot: 'bg-orange-400' },
   { code: 'H', label: 'প্রাতিষ্ঠানিক ছুটি', dot: 'bg-blue-500' },
   { code: 'W', label: 'সাপ্তাহিক ছুটি', dot: 'bg-purple-400' },
-  { code: 'C', label: 'অনুপস্থিত', dot: 'bg-red-500' },
 ];
 
 // dropdown মেনুর আনুমানিক সাইজ - flip up/down এবং left/right clamp করার জন্য দরকার
-const DROPDOWN_WIDTH = 150; // w-32
-const DROPDOWN_HEIGHT = 250; // 5 options + close বাটন এর আনুমানিক উচ্চতা
+const DROPDOWN_WIDTH = 150;
+const DROPDOWN_HEIGHT = 250;
 const GAP = 6;
 
 // একটি row (API থেকে আসা raw object) কে D1..D31 keys থেকে days array এ কনভার্ট করা
@@ -81,7 +76,7 @@ const transformAttendanceData = (apiData = []) => {
 };
 
 // ==========================================
-// 2. SVG ICON COMPONENTS (Pure SVG, No Library Needed)
+// 2. SVG ICON COMPONENTS
 // ==========================================
 
 const CalendarIcon = () => (
@@ -98,28 +93,36 @@ const FilterIcon = () => (
 // 3. MAIN COMPONENT
 // ==========================================
 
-const AttendenceHolidayAndLeave = () => {
+const AttendenceHolidayAndLeaveEntry = () => {
   const translate = useTranslate();
   const method = useForm();
-  const navigate = useNavigate();
   const [attendanceData, setAttendanceData] = useState([]);
   const { data: userType = [] } = useGetUserTypesQuery();
   const [updateAttendance] = useUpdateAttendanceMutation();
+  const navigate = useNavigate();
 
-  // dropdown এখন আর প্রতিটা td এর ভিতরে absolute না, portal দিয়ে body তে render হয়
-  // { key: `${userId}-${dayIndex}`, userId, dayIndex, top, left } থাকলে ওপেন, না হলে বন্ধ
+  // dropdown পোর্টাল দিয়ে body তে render হয়
   const [dropdown, setDropdown] = useState(null);
   const dropdownMenuRef = useRef(null);
+  const [savingKey, setSavingKey] = useState(null);
 
   const { watch } = method;
   const [Year, ClassID, SessionID, UserTypeID, MonthID] = watch(["Year", "ClassID", "SessionID", "UserTypeID", "MonthID"]);
 
+  const noFiltersSelected = !Year || !ClassID || !SessionID || !UserTypeID || !MonthID;
+
+  // ==========================================
+  // MAIN GRID QUERY (useGetAttendanceListsQuery)
+  // D1-D31 পূর্ণ মাসের ডেটা - backend এ এখন এই একই call এ:
+  // Student_Admission থেকে students বের করা -> missing RTP rows create করা ->
+  // merge করে ফেরত দেওয়া হয়। তাই আলাদা priming call আর দরকার নেই।
+  // ==========================================
   const {
     data: attendanceListData,
     isLoading,
     isFetching,
     error,
-  } = useGetAttendanceListsQuery(
+  } = useGetManualAttendanceListQuery(
     {
       Years: Year,
       ClassID,
@@ -128,12 +131,8 @@ const AttendenceHolidayAndLeave = () => {
       MonthID,
     },
     {
-      skip:
-        !Year ||
-        !ClassID ||
-        !SessionID ||
-        !UserTypeID ||
-        !MonthID,
+      skip: noFiltersSelected,
+      refetchOnMountOrArgChange: true,
     }
   );
 
@@ -159,7 +158,6 @@ const AttendenceHolidayAndLeave = () => {
         setDropdown(null);
       }
     };
-    // স্ক্রল বা রিসাইজ হলে পজিশন আর ঠিক থাকবে না, তাই সহজভাবে বন্ধ করে দেওয়া হচ্ছে
     const handleScrollOrResize = () => setDropdown(null);
 
     document.addEventListener('mousedown', handleOutsideClick);
@@ -174,7 +172,6 @@ const AttendenceHolidayAndLeave = () => {
   }, [dropdown]);
 
   // সেলে ক্লিক করলে তার exact অবস্থান হিসাব করে dropdown এর জন্য top/left ঠিক করা হয়
-  // নিচের/ডানের দিকে যথেষ্ট জায়গা না থাকলে flip up / clamp করে খোলে
   const toggleDropdown = (userId, dayIndex, event) => {
     const key = `${userId}-${dayIndex}`;
 
@@ -195,14 +192,16 @@ const AttendenceHolidayAndLeave = () => {
     setDropdown({ key, userId, dayIndex, top, left });
   };
 
-  // স্ট্যাটাস পরিবর্তনের ফাংশন (ড্রপডাউন থেকে সিলেক্ট করলে)
-  // Optimistic UI update: আগে UI তে বদলে দেখানো হয়, পরে backend এ /attendance_update কল করা হয়।
-  // Backend req.query থেকে SL, D, value পড়ে, তাই updateAttendance() এ ঠিক এই তিনটা field পাঠাতে হবে।
+  // স্ট্যাটাস পরিবর্তনের ফাংশন - RTP row backend এ merged endpoint দিয়ে আগেই নিশ্চিত
+  // করা হয়েছে (create হয়ে গেছে), তাই এখানে সরাসরি updateAttendance (SL, D, value)
+  // কল করলেই যথেষ্ট।
+  // Optimistic UI update: আগে UI তে বদলে দেখানো হয়, fail হলে rollback।
   const handleStatusChange = async (userId, dayIndex, newStatus) => {
     const targetRow = attendanceData.find((r) => r.userID === userId);
     if (!targetRow) return;
 
     const previousDays = targetRow.days;
+    const key = `${userId}-${dayIndex}`;
 
     // ১. Optimistic UI update
     const updatedData = attendanceData.map((row) => {
@@ -215,6 +214,7 @@ const AttendenceHolidayAndLeave = () => {
     });
     setAttendanceData(updatedData);
     setDropdown(null);
+    setSavingKey(key);
 
     // ২. Backend আপডেট কল
     try {
@@ -236,6 +236,8 @@ const AttendenceHolidayAndLeave = () => {
           row.userID === userId ? { ...row, days: previousDays } : row
         )
       );
+    } finally {
+      setSavingKey(null);
     }
   };
 
@@ -244,21 +246,22 @@ const AttendenceHolidayAndLeave = () => {
     let cellClass = "w-6 h-6 md:w-7 md:h-7 flex items-center justify-center rounded-full text-[10px] md:text-xs font-medium cursor-pointer transition-colors duration-200";
     let statusText = "";
     let statusColor = "";
+    const isSaving = savingKey === `${userId}-${dayIndex}`;
 
     switch (status) {
-      case 'P': statusText = 'P'; statusColor = 'bg-green-500 text-white hover:bg-green-600'; break; // Present
-      case 'L': statusText = 'L'; statusColor = 'bg-orange-400 text-white hover:bg-orange-500'; break; // Leave
-      case 'H': statusText = 'H'; statusColor = 'bg-blue-500 text-white hover:bg-blue-600'; break; // Holiday
-      case 'W': statusText = 'W'; statusColor = 'bg-purple-400 text-white hover:bg-purple-500'; break; // Weekend Off
-      case 'C': statusText = 'C'; statusColor = 'bg-red-500 text-white hover:bg-red-600'; break; // Cancel
+      case 'P': statusText = 'P'; statusColor = 'bg-green-500 text-white hover:bg-green-600'; break;
+      case 'L': statusText = 'L'; statusColor = 'bg-orange-400 text-white hover:bg-orange-500'; break;
+      case 'H': statusText = 'H'; statusColor = 'bg-blue-500 text-white hover:bg-blue-600'; break;
+      case 'W': statusText = 'W'; statusColor = 'bg-purple-400 text-white hover:bg-purple-500'; break;
+      case 'C': statusText = 'C'; statusColor = 'bg-red-500 text-white hover:bg-red-600'; break;
       default: statusText = '-'; statusColor = 'bg-gray-200 text-gray-400';
     }
 
     return (
       <td key={dayIndex} className="p-0.5 border border-gray-200 text-center">
         <div
-          className={`${cellClass} ${statusColor} mx-auto`}
-          onClick={(e) => toggleDropdown(userId, dayIndex, e)}
+          className={`${cellClass} ${statusColor} mx-auto ${isSaving ? 'opacity-50 cursor-wait' : ''}`}
+          onClick={(e) => !isSaving && toggleDropdown(userId, dayIndex, e)}
         >
           {statusText}
         </div>
@@ -267,10 +270,8 @@ const AttendenceHolidayAndLeave = () => {
   };
 
   const showLoading = isLoading || isFetching;
-  const noFiltersSelected = !Year || !ClassID || !SessionID || !UserTypeID || !MonthID;
-
   const handleAttendanceNewEntry = () => {
-    navigate("/user-attendence/attendance-entry");
+    navigate("/user-attendence/shift-attendance-entry");
   };
 
   return (
@@ -283,7 +284,7 @@ const AttendenceHolidayAndLeave = () => {
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-2">
                 <CalendarIcon />
-                <span className="text-lg font-bold text-gray-700">Attendance Overview</span>
+                <span className="text-lg font-bold text-gray-700">Attendance</span>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-2 w-full">
@@ -329,13 +330,12 @@ const AttendenceHolidayAndLeave = () => {
                 />
               </div>
             </div>
-
             <button
               onClick={handleAttendanceNewEntry}
               className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow-md text-sm font-medium transition-colors"
             >
               <FilterIcon />
-              Apply Filters
+              Attendance
             </button>
           </div>
         </div>
@@ -363,7 +363,6 @@ const AttendenceHolidayAndLeave = () => {
                       <div className="flex items-center gap-2"><UserIcon /> UserID / Name</div>
                     </th>
 
-                    {/* Time_MonthRtpDetails অনুযায়ী D1 to D31 কলাম তৈরি */}
                     {Array.from({ length: 31 }, (_, i) => (
                       <th key={i} className="px-1 py-3 text-center text-xs font-semibold text-gray-500 border-r border-gray-100 w-8 md:w-9">
                         {i + 1}
@@ -376,7 +375,6 @@ const AttendenceHolidayAndLeave = () => {
                   {attendanceData.map((row, index) => (
                     <tr key={row.userID} className={`${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-indigo-50/30 transition-colors`}>
 
-                      {/* Sticky Row Data */}
                       <td className="sticky left-0 bg-inherit z-10 px-4 py-1.5 text-sm text-gray-600 border-r border-gray-200 font-medium">
                         {row.sl}
                       </td>
@@ -384,7 +382,6 @@ const AttendenceHolidayAndLeave = () => {
                         {row.userCode} - {row.name}
                       </td>
 
-                      {/* D1 to D31 Data */}
                       {row.days.map((status, dayIndex) => renderStatus(status, row.userID, dayIndex))}
                     </tr>
                   ))}
@@ -405,9 +402,7 @@ const AttendenceHolidayAndLeave = () => {
 
       </div>
 
-      {/* ===================== Dropdown Menu (Portal) =====================
-          document.body তে fixed position এ render হয়, table এর sticky column/overflow
-          এর সাথে কোনো সম্পর্ক নাই, তাই ডানের/শেষের কলামে/rows এও ঠিকভাবে খুলবে। */}
+      {/* ===================== Dropdown Menu (Portal) ===================== */}
       {dropdown && createPortal(
         <div
           ref={dropdownMenuRef}
@@ -437,4 +432,4 @@ const AttendenceHolidayAndLeave = () => {
   );
 }
 
-export default AttendenceHolidayAndLeave;
+export default AttendenceHolidayAndLeaveEntry;

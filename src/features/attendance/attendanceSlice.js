@@ -16,7 +16,7 @@ export const attendanceSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Attendance', "TimeShifting", "TimeSwitch", "TimeSettings"],
+  tagTypes: ['Attendance', "TimeShifting", "TimeSwitch", "TimeSettings", "AttendanceList"],
   endpoints: (builder) => ({
     // ================= Get All Users =================
     getAllUserForAttendances: builder.query({
@@ -201,10 +201,102 @@ export const attendanceSlice = createApi({
       },
       providesTags: ["TimeSettings"],
     }),
+    getTimeSettingsFilteredAttendance: builder.query({
+      query: ({
+        UserTypeID,
+        SessionID,
+        ClassID,
+        ShiftID,
+        SwitchID,
+        ResidentialStatusId,
+        UserCode,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (UserTypeID) params.append("UserTypeID", UserTypeID);
+        if (SessionID) params.append("SessionID", SessionID);
+        if (ClassID) params.append("ClassID", ClassID);
+        if (ShiftID) params.append("ShiftID", ShiftID);
+        if (SwitchID) params.append("SwitchID", SwitchID);
+        if (ResidentialStatusId)
+          params.append("ResidentialStatusId", ResidentialStatusId);
+        if (UserCode) params.append("UserCode", UserCode);
+
+        return `/time_settings_filtered_attendance?${params.toString()}`;
+      },
+      providesTags: ["TimeSettings"],
+    }),
     getAttendanceLists: builder.query({
+      query: ({
+        Years,
+        ClassID,
+        SessionID,
+        UserTypeID,
+        MonthID,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (Years) params.append("Years", String(Years));
+        if (ClassID) params.append("ClassID", String(ClassID));
+        if (SessionID) params.append("SessionID", String(SessionID));
+        if (UserTypeID) params.append("UserTypeID", String(UserTypeID));
+        if (MonthID) params.append("MonthID", String(MonthID));
+
+        return {
+          url: `/get_attendance_list?${params.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["AttendanceList"],
+
+    }),
+    getManualAttendanceList: builder.query({
+      query: ({
+        Years,
+        ClassID,
+        SessionID,
+        UserTypeID,
+        MonthID,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (Years) params.append("Years", String(Years));
+        if (ClassID) params.append("ClassID", String(ClassID));
+        if (SessionID) params.append("SessionID", String(SessionID));
+        if (UserTypeID) params.append("UserTypeID", String(UserTypeID));
+        if (MonthID) params.append("MonthID", String(MonthID));
+
+        return {
+          url: `/manual-attendance/list?${params.toString()}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["AttendanceList"],
+
+    }),
+    getAttendanceMonthLists: builder.query({
       query: () => ({
-        url: `/get_attendance_list`,
+        url: `/get_attendance_months`,
         method: 'GET',
+      }),
+    }),
+    updateAttendance: builder.mutation({
+      query: ({ SL, D, value, MonthID, Years }) => ({
+        url: `/attendance_update`,
+        method: 'POST',
+        params: { SL, D, value, MonthID, Years }, // ⚠️ body না, query params — backend req.query ব্যবহার করছে
+      }),
+      // লিস্ট ক্যাশ ইনভ্যালিডেট করতে চাইলে (optional, optimistic update থাকায় সাধারণত দরকার নেই):
+      invalidatesTags: ['AttendanceList'],
+    }),
+
+    // একজন স্টুডেন্টের একদিনের status manually মার্ক করা
+    // list বড় হতে পারে বলে পুরো cache invalidate না করে UI তে optimistic update ব্যবহার করা হয়েছে
+    markManualAttendance: builder.mutation({
+      query: (body) => ({
+        url: "/manual-attendance/mark",
+        method: "POST",
+        body,
       }),
     }),
   }),
@@ -229,5 +321,10 @@ export const {
   useCreateTimeSettingMutation,
   useDeleteTimeSettingMutation,
   useGetTimeSettingsFilteredQuery,
-  useGetAttendanceListsQuery
+  useGetAttendanceListsQuery,
+  useGetAttendanceMonthListsQuery,
+  useUpdateAttendanceMutation,
+  useGetManualAttendanceListQuery,
+  useMarkManualAttendanceMutation,
+  useGetTimeSettingsFilteredAttendanceQuery
 } = attendanceSlice;

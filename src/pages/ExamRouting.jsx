@@ -634,7 +634,7 @@ const ExamRouting = ({ pageTitle }) => {
         Day: formData[`day_${index}`] || "",
         Sub: formData[`subject_${index}`] || "",
 
-        StartTime:  String(formData[`startTime_${index}`]),
+        StartTime: String(formData[`startTime_${index}`]),
         EndTime: String(formData[`endTime_${index}`]),
 
         TotalColumn: totalDateCount,
@@ -1196,7 +1196,7 @@ const ExamRouting = ({ pageTitle }) => {
                     )
 
                   })}
-                  <div className="border-l border-gray-400 border-l border-gray-400"></div>
+                  <div className="border-l border-gray-400"></div>
                 </div>
 
 
@@ -1349,7 +1349,7 @@ const ExamRouting = ({ pageTitle }) => {
 
             <div className="block md:hidden space-y-3">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg font-semibold uppercase tracking-widest text-black">{ translate("Date & Time") }</span>
+                <span className="text-lg font-semibold uppercase tracking-widest text-black">{translate("Date & Time")}</span>
                 <div className="flex-1 h-px bg-gray-100 ml-2"></div>
               </div>
 
@@ -1392,14 +1392,14 @@ const ExamRouting = ({ pageTitle }) => {
                     {isOpen && (
                       <div className="space-y-3">
 
-                           <div>
+                        <div>
                           <label className="block text-xxl font-semibold uppercase tracking-wider text-black mb-1">
                             তারিখ
                           </label>
                           <DatePickerOne require={false} registerKey={`date_${index}`} placeholder={"Date"} timestamp={false} />
                         </div>
 
-                        
+
                         <div>
                           <label className="block text-xxl font-semibold uppercase tracking-wider text-black mb-1">
                             Bangla / Arabic Date
