@@ -42,7 +42,7 @@ const AvgNumberResult = ({ studentResult }) => {
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">পিতার নাম:</p>
               <p className="text-[16px]">
-                {bnBijoy2Unicode(studentResult?.FatherName)}
+                {studentResult?.FatherName}
               </p>
             </div>
             <div className="flex items-center space-x-2">

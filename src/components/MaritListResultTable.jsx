@@ -56,14 +56,14 @@ const MaritListResultTable = () => {
                                     <div className="flex justify-end">
                                         <div className="w-full text-center">
                                             <h1 className="text-white text-[32px] pb-2">
-                                                {bnBijoy2Unicode(studentResult?.InstitutionName)}
+                                                {studentResult?.InstitutionName}
                                             </h1>
                                         </div>
                                     </div>
                                     <div className="bg-theme-color text-center">
-                                        <p className="text-white">{bnBijoy2Unicode(studentResult?.Address)}</p>
+                                        <p className="text-white">{studentResult?.Address}</p>
                                     </div>
-                                    <p className="text-center text-[18px] text-white mt-1">{maritList.length > 0 ? bnBijoy2Unicode(maritList[0]["ExamName"]) : null}</p>
+                                    <p className="text-center text-[18px] text-white mt-1">{maritList.length > 0 ? maritList[0]["ExamName"] : null}</p>
                                 </div>
                             </div>
                             {
@@ -73,7 +73,7 @@ const MaritListResultTable = () => {
                                             <table className="w-full">
                                                 <thead>
                                                     <tr>
-                                                        <th className="text-[20px] font-bold mb-2 pl-0 text-start pb-2" colSpan={6}>শ্রেনী/জামাত: {bnBijoy2Unicode(classWiseMaritList.SubClass)}</th>
+                                                        <th className="text-[20px] font-bold mb-2 pl-0 text-start pb-2" colSpan={6}>শ্রেনী/জামাত: {classWiseMaritList.SubClass}</th>
                                                     </tr>
                                                     <tr>
                                                         <th className="p-3 border border-r border-black">ক্রমিক</th>

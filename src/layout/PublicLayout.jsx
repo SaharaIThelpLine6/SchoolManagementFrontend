@@ -1,26 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, Outlet, useNavigate, useParams } from "react-router-dom";
+import { Link, Outlet, useParams } from "react-router-dom";
 import { fetchResultFieldData } from "../features/studentResultPublicView/studentResultPublicViewSlice";
 import bnBijoy2Unicode from "../utils/conveter";
-
 import { Buffer } from "buffer";
 import DeveloperCredit from "../components/DeveloperCredit";
 
 const PublicLayout = () => {
-  const { schoolData, websiteSettings } = useSelector((state) => state.studentResultPublicView);
-
+  const { schoolData, websiteSettings } = useSelector(
+    (state) => state.studentResultPublicView
+  );
   const [isOpen, setIsOpen] = useState(false);
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
+  const toggleSidebar = () => setIsOpen(!isOpen);
   const { schoolid } = useParams();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const settingsObject = React.useMemo(() => {
     if (!websiteSettings || websiteSettings.length === 0) return {};
-
     return websiteSettings.reduce((acc, item) => {
       acc[item.FieldKey] = item.FieldValue;
       return acc;
@@ -28,272 +24,395 @@ const PublicLayout = () => {
   }, [websiteSettings]);
 
   const bufferConveter = (bufferData) => {
-    if (!bufferData) {
-      return "/logo.png";
-    }
+    if (!bufferData) return "/logo.png";
     const buffer = Buffer.from(bufferData);
     const base64String = buffer.toString("base64");
-    const imageSrc = `data:image/png;base64,${base64String}`;
-    return imageSrc;
+    return `data:image/png;base64,${base64String}`;
   };
-  const [resultOpen, setResultOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchResultFieldData(schoolid));
-  }, [dispatch, navigate]);
+  }, [dispatch, schoolid]);
 
-  // Prevent body scrolling when sidebar is open on mobile
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-
-    // Cleanup function to reset overflow when component unmounts
+    document.body.style.overflow = isOpen ? "hidden" : "";
     return () => {
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
   return (
-    <>
-      <div className="min-h-screen font-SolaimanLipi">
-        {isOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 hidden_in_print"
-            onClick={toggleSidebar}
-          ></div>
-        )}
-        {isOpen && (
-          <button
-            className="fixed top-3 right-4 z-9999 text-white p-1 rounded-sm hidden_in_print"
-            onClick={toggleSidebar}
-          >
-            ✖
-          </button>
-        )}
+    <div className="min-h-screen font-SolaimanLipi bg-stone-50 text-gray-800">
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden backdrop-blur-sm"
+          onClick={toggleSidebar}
+        />
+      )}
 
-        {/* For mobile display start */}
-        <div className="fixed flex items-center justify-between z-30 lg:hidden px-4 w-full h-[70px] text-left py-[6px] bg-white hidden_in_print shadow-sm">
-          <button
-            className="lg:hidden left-4 z-50 bg-transparent text-theme-color p-2 rounded-md hidden_in_print"
-            onClick={toggleSidebar}
-          >
-            {isOpen ? "✖" : "☰"}
-          </button>
-          <div className="flex items-center justify-between w-full">
-            <h1 className="text-[20px] text-black font-bold pl-2">{schoolData?.InstitutionName}</h1>
+      {/* ========== SIDEBAR / NAVIGATION ========== */}
+      <aside
+        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out lg:hidden ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between p-6 border-b border-gray-100">
+          <Link to={`/${schoolid}`} onClick={toggleSidebar}>
             <img
               src={bufferConveter(schoolData?.Logo?.data)}
               alt={schoolData?.InstitutionName}
-              className="w-[60px] h-[60px] object-cover"
+              className="w-14 h-14 object-cover rounded-xl"
+            />
+          </Link>
+          <button
+            onClick={toggleSidebar}
+            className="text-gray-500 hover:text-gray-800 p-2 rounded-lg hover:bg-gray-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <nav className="p-6 space-y-1 overflow-y-auto h-[calc(100%-80px)]">
+          {[
+            { href: `/${schoolid}`, label: "হোম" },
+            { href: `/${schoolid}/student_result`, label: "ব্যক্তিগত ফলাফল" },
+            schoolData?.isClassResultShowable?.Action != 0 && {
+              href: `/${schoolid}/classes`,
+              label: "ক্লাশ/মারহালা ভিত্তিক ফলাফল",
+            },
+            { href: `/${schoolid}/maritlist_request`, label: "মেধা তালিকা" },
+            { href: `/${schoolid}/online_admission`, label: "অনলাইনে ভর্তি" },
+            { href: "https://wifaqresult.com", label: "বেফাক ফলাফল", external: true },
+            { href: "https://hems.alhaiatululya.org/exam-result", label: "আল-হাইআ ফলাফল", external: true },
+          ]
+            .filter(Boolean)
+            .map((link) =>
+              link.external ? (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-green-50 hover:text-green-700 text-[18px] font-bold transition-colors"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.href}
+                  to={link.href}
+                  onClick={toggleSidebar}
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-green-50 hover:text-green-700 text-[18px] font-bold transition-colors"
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
+          <Link
+            to={`/${schoolid}/login`}
+            onClick={toggleSidebar}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-600 text-white text-[18px] font-bold mt-4 hover:bg-green-700 transition-colors"
+          >
+            গার্জিয়ান পোর্টাল
+          </Link>
+        </nav>
+      </aside>
+
+      {/* ========== DESKTOP HEADER ========== */}
+      <header className="hidden lg:block sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="container mx-auto px-4 lg:px-8">
+          <div className="flex items-center justify-between py-4">
+            
+            {/* Logo & Name */}
+            <Link to={`/${schoolid}`} className="flex items-center gap-4">
+              <img
+                src={bufferConveter(schoolData?.Logo?.data)}
+                alt={schoolData?.InstitutionName}
+                className="w-12 h-12 object-cover rounded-xl"
+              />
+              <h1 className="text-[24px] md:text-[26px] font-[500] text-theme-color text-gray-800">
+                {schoolData?.InstitutionName}
+              </h1>
+            </Link>
+            
+            {/* Navigation */}
+            <nav className="flex items-center gap-8">
+              <Link to={`/${schoolid}`} className="text-gray-600 hover:text-green-700 transition text-[18px] font-bold">
+                হোম
+              </Link>
+              <Link to={`/${schoolid}/online_admission`} className="text-gray-600 hover:text-green-700 transition text-[18px] font-bold">
+                অনলাইনে ভর্তি
+              </Link>
+
+              {/* --- ড্রপডাউন শুরু --- */}
+              <div className="relative group py-4 -my-4">
+                <button className="flex items-center gap-1 text-gray-600 group-hover:text-green-700 transition text-[18px] font-bold outline-none">
+                  ফলাফল
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 transition-transform duration-300 group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                <div className="absolute top-full left-0 w-72 bg-white border border-gray-100 shadow-xl rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden">
+                  <div className="py-2">
+                    <Link to={`/${schoolid}/student_result`} className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold">
+                      ব্যক্তিগত ফলাফল
+                    </Link>
+                    
+                    {schoolData?.isClassResultShowable?.Action != 0 && (
+                      <Link to={`/${schoolid}/classes`} className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold">
+                        ক্লাশ/মারহালা ভিত্তিক ফলাফল
+                      </Link>
+                    )}
+                    
+                    <Link to={`/${schoolid}/maritlist_request`} className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold">
+                      মেধা তালিকা
+                    </Link>
+                    
+                    <a href="https://wifaqresult.com" target="_blank" rel="noreferrer" className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold">
+                      বেফাক ফলাফল
+                    </a>
+                    
+                    <a href="https://hems.alhaiatululya.org/exam-result" target="_blank" rel="noreferrer" className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold">
+                      আল-হাইআ ফলাফল
+                    </a>
+                    
+                    <a href="https://tanzimboard.com/" target="_blank" rel="noreferrer" className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold">
+                      তানযীমুল মাদারিসিদ্দ দ্বীনিয়া
+                    </a>
+                  </div>
+                </div>
+              </div>
+              {/* --- ড্রপডাউন শেষ --- */}
+
+              <Link to={`/${schoolid}/donation`} className="text-gray-600 hover:text-green-700 transition text-[18px] font-bold">
+                অনুদান
+              </Link>
+
+              <Link
+                to={`/${schoolid}/login`}
+                className="bg-green-600 text-white px-5 py-2.5 rounded-full hover:bg-green-700 transition shadow-md text-[18px] font-bold"
+              >
+                গার্জিয়ান পোর্টাল
+              </Link>
+            </nav>
+            
+          </div>
+        </div>
+      </header>
+
+      {/* ========== MOBILE TOP BAR ========== */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+        <div className="flex items-center justify-between p-4">
+          <button
+            onClick={toggleSidebar}
+            className="text-gray-700 hover:text-green-700 p-2 rounded-lg"
+          >
+            {isOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+          <div className="flex items-center gap-3">
+            <h1 className="text-[20px] font-bold text-black truncate max-w-[200px]">
+              {schoolData?.InstitutionName}
+            </h1>
+            <img
+              src={bufferConveter(schoolData?.Logo?.data)}
+              alt={schoolData?.InstitutionName}
+              className="w-10 h-10 object-cover rounded-lg"
             />
           </div>
         </div>
-        {/* For mobile display end */}
+      </div>
 
-        <header className={`lg:flex font-default shadow-md text-theme-color sticky top-0 left-0 bg-white h-screen md:h-auto max-w-[320px] md:max-w-full w-full hidden_in_print z-[99] ${isOpen ? "flex fixed z-[99]" : "hidden"}`}>
-          <div className="container mx-auto">
-            <nav className="w-full">
-              <div className="relative md:flex justify-between py-[10px] px-[10px] lg:py-[18px] lg:px-[20px]">
-                <div className=" hidden md:flex gap-4 items-center text-center border-b border-[#d5d5d5] md:border-0 pb-[10px] md:pb-0">
-                  <div className="place-items-center">
-                    <Link to={`/${schoolid}`}>
-                      <img
-                        src={bufferConveter(schoolData?.Logo?.data)}
-                        alt={schoolData?.InstitutionName}
-                        className="w-[80px] h-[80px] mx-auto md:mx-[1px]"
-                      />
-                    </Link>
-                  </div>
-                  <div>
-                    <h1 className="text-theme-color font-[500] text-[24px] md:text-[26px] w-[290px]">
-                      {schoolData?.InstitutionName}
-                    </h1>
-                  </div>
-                </div>
+      {/* ========== MAIN CONTENT ========== */}
+      <main className="pt-20 lg:pt-0 min-h-screen">
+        <div className="w-full animate-scaleIn">
+          <Outlet />
+        </div>
+      </main>
 
+      {/* ========== FOOTER (Unique Redesign) ========== */}
+      <footer className="relative bg-gradient-to-br from-[#0a1f13] via-[#0f2d1b] to-[#081a10] text-gray-200 pt-20 pb-10 overflow-hidden">
+        {/* Decorative background blobs */}
+        <div className="absolute -top-20 -left-20 w-64 h-64 bg-green-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
+        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-amber-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
 
-                <div className="block md:inline-block">
-                  <ul className="pt-[10px] h-full flex flex-col lg:flex-row lg:items-center gap-[30px] text-[16px] font-[400] border-0 text-theme-color w-full md:w-auto">
-                    <li>
-                      <a href={`/${schoolid}`} className="cursor-pointer border-0 md:flex md:items-center gap-[4px] font-bold text-[18px]">
-                        হোম
-                      </a>
-                    </li>
-
-                    <li>
-                      <a href={`/${schoolid}/online_admission`} className="cursor-pointer border-0 flex items-center gap-[4px] font-bold text-[18px]">
-                        অনলাইনে ভর্তি
-                      </a>
-                    </li>
-
-                    <li className="relative group">
-                      <button
-                        onClick={() => setResultOpen(!resultOpen)}
-                        className="cursor-pointer font-bold text-[18px] flex items-center gap-1 text-theme-color w-full"
-                      >
-                        ফলাফল
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width={16} height={16}
-                          fill="none" stroke="currentColor" strokeWidth={2}
-                          viewBox="0 0 24 24"
-                          className={`transition-transform duration-200 lg:group-hover:rotate-180 ${resultOpen ? "rotate-180" : ""}`}
-                        >
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-
-                      {/* Desktop dropdown (hover) */}
-                      <ul className="hidden lg:block absolute top-full left-0 w-[300px] bg-white border border-[#d5d5d5] rounded-md shadow-md z-[100] invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all duration-200">
-                        <li><a href={`/${schoolid}/student_result`} className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">ব্যক্তিগত ফলাফল</a></li>
-                        {schoolData?.isClassResultShowable?.Action != 0 && (
-                          <li><a href={`/${schoolid}/classes`} className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">ক্লাশ/মারহালা ভিত্তিক ফলাফল</a></li>
-                        )}
-                        <li><a href={`/${schoolid}/maritlist_request`} className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">মেধা তালিকা</a></li>
-                        <li><a href="https://wifaqresult.com" target="_blank" className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">বেফাক ফলাফল</a></li>
-                        <li><a href="https://hems.alhaiatululya.org/exam-result" target="_blank" className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">আল-হাইআ ফলাফল</a></li>
-                        <li><a href="https://www.tanjimulmadaris.com" target="_blank" className="block px-4 py-2 font-bold text-[16px] hover:bg-gray-100">তানযীমুল মাদারিসিদ দ্বীনিয়া বাংলাদেশ</a></li>
-                      </ul>
-
-                      {/* Mobile accordion (click) */}
-                      {resultOpen && (
-                        <ul className="lg:hidden pl-4 mt-1 flex flex-col gap-1 border-l-2 border-theme-color">
-                          <li><a href={`/${schoolid}/student_result`} className="block py-2 font-bold text-[16px]">ব্যক্তিগত ফলাফল</a></li>
-                          {schoolData?.isClassResultShowable?.Action != 0 && (
-                            <li><a href={`/${schoolid}/classes`} className="block py-2 font-bold text-[16px]">ক্লাশ/মারহালা ভিত্তিক ফলাফল</a></li>
-                          )}
-                          <li><a href={`/${schoolid}/maritlist_request`} className="block py-2 font-bold text-[16px]">মেধা তালিকা</a></li>
-                          <li><a href="https://wifaqresult.com" target="_blank" className="block py-2 font-bold text-[16px]">বেফাক ফলাফল </a></li>
-                          <li><a href="https://hems.alhaiatululya.org/exam-result" target="_blank" className="block py-2 font-bold text-[16px]">আল-হাইআ ফলাফল</a></li>
-                          <li><a href="https://www.tanjimulmadaris.com" target="_blank" className="block py-2 font-bold text-[16px]">তানযীমুল মাদারিসিদ দ্বীনিয়া বাংলাদেশ</a></li>
-                        </ul>
-                      )}
-                    </li>
-
-                    <li>
-                      <a href={`/${schoolid}/donation`} className="block py-2 font-bold text-[16px]">
-                        অনুদান
-                      </a>
-                    </li>
-
-                    <li>
-                      <a href={`/${schoolid}/login`} className="cursor-pointer border-0 flex items-center gap-[4px] font-bold text-[18px] lg:bg-theme-color lg:text-white lg:py-[10px] lg:px-[20px] rounded-[4px]">
-                        গার্ডিয়ান পোর্টাল
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-
-
-              </div>
-
-            </nav>
-          </div>
-        </header>
-
-        <main className="mx-auto w-full  h-full pt-[50px] lg:pt-0">
-          <div className="w-full animate-scaleIn">
-            <Outlet />
-          </div>
-        </main>
-        <footer className='bg-white hidden_in_print pt-8 pb-[100px] px-2'>
-          <div className="container mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-              <div className="logo">
-                <Link to={`/${schoolid}`}>
+        <div className="container mx-auto px-4 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-16 mb-12">
+            {/* Brand Column */}
+            <div className="md:col-span-1">
+              <Link to={`/${schoolid}`} className="inline-flex items-center gap-4 mb-6 group">
+                <div className="relative">
+                  <div className="absolute -inset-1 bg-gradient-to-br from-amber-400 to-green-400 rounded-xl blur opacity-50 group-hover:opacity-80 transition duration-500"></div>
                   <img
                     src={bufferConveter(schoolData?.Logo?.data)}
                     alt={schoolData?.InstitutionName}
-                    className="w-[80px] h-[80px] mx-auto md:mx-[1px]"
+                    className="relative w-16 h-16 object-cover rounded-xl border-2 border-white/20"
                   />
-                </Link>
-                <h2 className="font-bold text-[26px] mt-4">{schoolData?.InstitutionName}</h2>
-                <p className="text-[16px] text-[##484444]">{schoolData?.Address}, {schoolData?.ContactNumber}</p>
-              </div>
-              <div className="useful-links">
-                <h3 className="text-[20px] font-bold mb-6">Useful Links</h3>
-                <ul>
-                  <li>
-                    <a
-                      href={`/${schoolid}/student_result`}
-                      className="cursor-pointer  border-0 md:flex md:items-center gap-[4px] text-[14px] mb-2"
-                    >
-                      ব্যক্তিগত ফলাফল
-                    </a>
-                  </li>
-                  {
-                    schoolData?.isClassResultShowable && schoolData?.isClassResultShowable.Action != 0 ? (
-                      <li>
-                        <a href={`/${schoolid}/classes`} className='cursor-pointer  border-0 flex items-center gap-[4px] text-[14px] mb-2'>
-                          ক্লাশ/মারহালা ভিত্তিক ফলাফল
-                        </a>
-                      </li>
-                    ) : null
-                  }
+                </div>
+                <h2 className="text-2xl lg:text-3xl font-black text-white tracking-tight group-hover:text-amber-300 transition-colors">
+                  {schoolData?.InstitutionName}
+                </h2>
+              </Link>
+              <p className="text-gray-300 text-[22px] leading-relaxed mt-4 border-l-4 border-amber-500 pl-4 italic">
+                {schoolData?.Address}
+              </p>
+              <p className="text-gray-400 mt-3 text-[22px] tracking-wider uppercase opacity-60">
+                📞 {schoolData?.ContactNumber}
+              </p>
+            </div>
 
+            {/* Useful Links */}
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <span className="w-8 h-1 bg-amber-400 rounded-full"></span>
+                Useful Links
+              </h3>
+              <ul className="space-y-4">
+                <li>
+                  <Link
+                    to={`/${schoolid}/student_result`}
+                    className="text-gray-300 text-[22px] hover:text-amber-300 transition duration-300 relative inline-block group"
+                  >
+                    ব্যক্তিগত ফলাফল
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 group-hover:w-full transition-all duration-300"></span>
+                  </Link>
+                </li>
+                {schoolData?.isClassResultShowable?.Action != 0 && (
                   <li>
-                    <a href={`/${schoolid}/maritlist_request`}
-                      className="cursor-pointer border-0 flex items-center gap-[4px] text-[14px] mb-2"
+                    <Link
+                      to={`/${schoolid}/classes`}
+                      className="text-gray-300 text-[22px] hover:text-amber-300 transition duration-300 relative inline-block group"
                     >
-                      মেধা তালিকা
-                    </a>
+                      ক্লাশ/মারহালা ভিত্তিক ফলাফল
+                      <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 group-hover:w-full transition-all duration-300"></span>
+                    </Link>
                   </li>
-                  <li>
+                )}
+                <li>
+                  <Link
+                    to={`/${schoolid}/maritlist_request`}
+                    className="text-gray-300 text-[22px] hover:text-amber-300 transition duration-300 relative inline-block group"
+                  >
+                    মেধা তালিকা
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 group-hover:w-full transition-all duration-300"></span>
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to={`/${schoolid}/online_admission`}
+                    className="text-gray-300 text-[22px] hover:text-amber-300 transition duration-300 relative inline-block group"
+                  >
+                    অনলাইনে ভর্তি
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 group-hover:w-full transition-all duration-300"></span>
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="https://wifaqresult.com"
+                    target="_blank"
+                    className="text-gray-300 text-[22px] hover:text-amber-300 transition duration-300 relative inline-block group"
+                  >
+                    বেফাক ফলাফল
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 group-hover:w-full transition-all duration-300"></span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="https://hems.alhaiatululya.org/exam-result"
+                    target="_blank"
+                    className="text-gray-300 text-[22px] hover:text-amber-300 transition duration-300 relative inline-block group"
+                  >
+                    আল-হাইআ ফলাফল
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 group-hover:w-full transition-all duration-300"></span>
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <span className="w-8 h-1 bg-amber-400 rounded-full"></span>
+                Contact
+              </h3>
+              <div>
+                <div className="mb-5">
+                  <p className="text-white font-semibold text-[22px] mb-1">{schoolData?.PrincipalName}</p>
+                  <p className="text-gray-400 text-[22px]">
+                    মোবাইল নং. {schoolData?.ContactNumber}
+                  </p>
+                </div>
+                <div className="mb-6 pt-4 border-t border-white/10">
+                  <p className="text-white font-semibold text-[22px] mb-1">{schoolData?.NajemName}</p>
+                  <p className="text-gray-400 text-[22px]">
+                    মোবাইল নং. {schoolData?.SMSMobile}
+                  </p>
+                </div>
+                <div className="flex gap-3 mt-4">
+                  {settingsObject.fblink && (
                     <a
-                      href={`/${schoolid}/online_admission`}
-                      className="cursor-pointer border-0 flex items-center gap-[4px] text-[14px] mb-2"
-                    >
-                      অনলাইনে ভর্তি
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href={`https://wifaqresult.com`}
+                      href={settingsObject.fblink}
                       target="_blank"
-                      className="cursor-pointer border-0 flex items-center gap-[4px] text-[14px] mb-2"
+                      className="p-2.5 bg-white/10 rounded-full hover:bg-[#1877F2] transition-all duration-300 group"
                     >
-                      বেফাক ফলাফল
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={22}
+                        height={22}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-white group-hover:scale-110 transition-transform"
+                      >
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3" />
+                      </svg>
                     </a>
-                  </li>
-
-                  <li>
+                  )}
+                  {settingsObject.ylink && (
                     <a
-                      href="https://hems.alhaiatululya.org/exam-result"
+                      href={settingsObject.ylink}
                       target="_blank"
-                      className="cursor-pointer border-0 flex items-center gap-[4px] text-[14px] mb-2"
+                      className="p-2.5 bg-white/10 rounded-full hover:bg-[#FF0000] transition-all duration-300 group"
                     >
-                      আল-হাইআ ফলাফল
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width={22}
+                        height={22}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-white group-hover:scale-110 transition-transform"
+                      >
+                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                        <path d="M2 8a4 4 0 0 1 4 -4h12a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4v-8z" />
+                        <path d="M10 9l5 3l-5 3z" />
+                      </svg>
                     </a>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="contact">
-                <h3 className="text-[20px] font-bold mb-6">Contact</h3>
-                <p className="mb-2 border-b border-[#ddd] inline-block pb-2">
-                  <span className="font-bold">{schoolData?.PrincipalName}</span>  <br />
-                  মোবাইল নং. {schoolData?.ContactNumber}
-                </p>
-                <p>
-                  <span className="font-bold"> {schoolData?.NajemName} </span> <br />
-                  মোবাইল নং. {schoolData?.SMSMobile}
-                </p>
-                <div className="flex gap-4 mt-4">
-                  <a href={settingsObject.fblink} target="_blank" className="text-[#1877F2]"><svg xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-brand-facebook"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 10v4h3v7h4v-7h3l1 -4h-4v-2a1 1 0 0 1 1 -1h3v-4h-3a5 5 0 0 0 -5 5v2h-3" /></svg></a>
-                  <a href={settingsObject.ylink} className="text-[#FF0000]" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width={30} height={30} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-brand-youtube"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M2 8a4 4 0 0 1 4 -4h12a4 4 0 0 1 4 4v8a4 4 0 0 1 -4 4h-12a4 4 0 0 1 -4 -4v-8z" /><path d="M10 9l5 3l-5 3z" /></svg></a>
+                  )}
                 </div>
               </div>
-
             </div>
           </div>
-
-        </footer>
-      </div>
+        </div>
+      </footer>
       <DeveloperCredit />
-    </>
+    </div>
   );
 };
 
