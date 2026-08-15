@@ -931,6 +931,7 @@ const useTranslate = () => {
     "Grade (Bengali)": "গ্রেড (বাংলা)",
     "Highest mark in recitation": "তেলাওয়াতে সর্বোচ্চ নাম্বার",
     "Select Divition": "একটি বিভাগ নির্বাচন করুন",
+    "Document Settings": "ডকুমেন্ট সেটিংস",
 
 
   };
