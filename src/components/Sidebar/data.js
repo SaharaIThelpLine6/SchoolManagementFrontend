@@ -563,6 +563,11 @@ export const menuData = [
         name: 'Website Settings',
         route: '/settings/website-settings',
       },
+      {
+        id: '4',
+        name: 'Document Settings',
+        route: '/settings/document-settings',
+      },
     ],
   },
   {

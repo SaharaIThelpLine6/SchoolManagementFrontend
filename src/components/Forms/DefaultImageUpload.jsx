@@ -34,7 +34,7 @@ const [removed, setRemoved] = useState(false);
 
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      setFileSizeError('ফাইলের সাইজ ৫ MB এর বেশি হতে পারবে না।');
+      setFileSizeError(translate("File size cannot exceed 5 MB."));
       e.target.value = '';
       return;
     }
@@ -57,7 +57,7 @@ const [removed, setRemoved] = useState(false);
 
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
-      setFileSizeError('ফাইলের সাইজ ৫ MB এর বেশি হতে পারবে না।');
+      setFileSizeError(translate("File size cannot exceed 5 MB."));
       return;
     }
 
@@ -120,7 +120,7 @@ const [removed, setRemoved] = useState(false);
           {...register(registerKey, {
             required:
               require && !previewUrl && !image
-                ? require || "This field is required"
+                ? (typeof require === 'string' ? require : translate("This field is required"))
                 : false,
           })}
           onChange={handleFileChange}
@@ -148,7 +148,7 @@ const [removed, setRemoved] = useState(false);
                 type="button"
                 onClick={handleRemoveImage}
                 className="absolute top-1 right-1 bg-white text-red-500 rounded-full w-5 h-5 flex items-center justify-center text-sm shadow-sm hover:bg-red-500 hover:text-white transition-colors duration-200"
-                title="Remove image"
+                title={translate("Remove image")}
               >
                 ×
               </button>
@@ -178,7 +178,7 @@ const [removed, setRemoved] = useState(false);
 
               </p>
               <p className="text-rose-500 text-xs mt-1">
-                Maximum upload file size: 5 MB.
+                {translate("Maximum upload file size: 5 MB.")}
               </p>
 
             </div>
@@ -187,7 +187,7 @@ const [removed, setRemoved] = useState(false);
         {fileSizeError ? (
           <p className="text-rose-500 text-xs mt-1">⚠ {fileSizeError}</p>
         ) : (
-          <p className="text-gray-400 text-xs mt-1">Maximum upload file size: 5 MB.</p>
+          <p className="text-gray-400 text-xs mt-1">{translate("Maximum upload file size: 5 MB.")}</p>
         )}
 
         {errors[registerKey] && (
