@@ -193,26 +193,31 @@ export const menuData = [
       },
       {
         id: '4',
+        name: 'Home Work Teacher Group',
+        route: '/parent-panel/home-work-group',
+      },
+      {
+        id: '5',
         name: 'Student Complaints',
         route: '/parent-panel/student-complaint',
       },
       {
-        id: '5',
+        id: '6',
         name: 'Complaint Box Terms and Conditions',
         route: '/parent-panel/complaint-box-terms-and-conditions',
       },
       // {
-      //   id: '6',
+      //   id: '7',
       //   name: 'Online Admission',
       //   route: '/parent-panel/online-admission',
       // },
       {
-        id: '7',
+        id: '8',
         name: 'User Notice',
         route: '/parent-panel/user-notice',
       },
       {
-        id: '8',
+        id: '9',
         name: 'User Attendance',
         route: '/parent-panel/user-attendance',
       }

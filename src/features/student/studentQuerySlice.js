@@ -24,6 +24,7 @@ export const userStudentSlice = createApi({
     'StudentAdmissions',
     'HomeWorks',
     'AdmissionTimeMessage',
+    'HomeWorkGroups',
   ],
   endpoints: (builder) => ({
     getStudentBySearch: builder.query({
@@ -350,6 +351,14 @@ export const userStudentSlice = createApi({
       query: (id) => `home_work/${id}`,
       providesTags: ['HomeWorks'],
     }),
+    postHomeWorkSingle: builder.mutation({
+      query: (body) => ({
+        url: `home_work_single`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['HomeWorks'],
+    }),
     postHomeWork: builder.mutation({
       query: (body) => ({
         url: `home_work`,
@@ -453,6 +462,59 @@ export const userStudentSlice = createApi({
       }),
       providesTags: ['AdmissionTimeMessage'],
     }),
+
+    // ==================== HomeWork Groups ====================
+
+    getHomeWorkGroups: builder.query({
+      query: (params = {}) => ({
+        url: 'home_work_groups',
+        method: 'GET',
+        params,
+      }),
+      providesTags: ['HomeWorkGroups'],
+    }),
+    getHomeWorkGroupsTeacher: builder.query({
+      query: (params = {}) => ({
+        url: 'home_work_groups_for_teacher',
+        method: 'GET',
+        params,
+      }),
+      providesTags: ['HomeWorkGroups'],
+    }),
+
+    getHomeWorkGroupById: builder.query({
+      query: (id) => ({
+        url: `home_work_groups/${id}`,
+        method: 'GET',
+      }),
+      providesTags: ['HomeWorkGroups'],
+    }),
+
+    postHomeWorkGroup: builder.mutation({
+      query: (body) => ({
+        url: 'home_work_groups',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['HomeWorkGroups'],
+    }),
+
+    updateHomeWorkGroup: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `home_work_groups/${id}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ['HomeWorkGroups'],
+    }),
+
+    deleteHomeWorkGroup: builder.mutation({
+      query: (id) => ({
+        url: `home_work_groups/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['HomeWorkGroups'],
+    }),
   }),
 });
 
@@ -495,6 +557,7 @@ export const {
   useGetHomeWorksQuery,
   useGetHomeWorkQuery,
   usePostHomeWorkMutation,
+  usePostHomeWorkSingleMutation,
   usePutHomeWorkMutation,
   useDeleteHomeWorkMutation,
   useGetStudentsBySubClassIDQuery,
@@ -508,5 +571,13 @@ export const {
   usePutAdmissionTimeMessageMutation,
   useDeleteAdmissionTimeMessageMutation,
   useGetSingleAdmissionTimeMessageQuery,
-  useGetStudentAttendanceTodayQuery
+  useGetStudentAttendanceTodayQuery,
+
+
+  useGetHomeWorkGroupsQuery,
+  useGetHomeWorkGroupByIdQuery,
+  usePostHomeWorkGroupMutation,
+  useUpdateHomeWorkGroupMutation,
+  useDeleteHomeWorkGroupMutation,
+  useGetHomeWorkGroupsTeacherQuery
 } = userStudentSlice;

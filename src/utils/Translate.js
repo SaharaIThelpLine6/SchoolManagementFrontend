@@ -6,6 +6,7 @@ const useTranslate = () => {
   const englishToBangla = {
     Home: 'হোম',
     'Home Work': 'হোম ওয়ার্ক',
+    'Home Work Teacher Group': 'হোম ওয়ার্ক শিক্ষক গ্রুপ',
     Student: 'শিক্ষার্থী',
     'Book List': 'বুক লিস্ট',
     'List of Candidates': 'পরীক্ষার্থীর তালিকা',
@@ -836,7 +837,7 @@ const useTranslate = () => {
     "permanentPoliceStation": "স্থায়ী থানা",
     "permanentDistrict": "স্থায়ী জেলা",
     "permanentDivision": "স্থায়ী বিভাগ",
-     "transientVillage": "বর্তমান গ্রাম",
+    "transientVillage": "বর্তমান গ্রাম",
     "transientPostOffice": "বর্তমান ডাক",
     "transientPoliceStation": "বর্তমান থানা",
     "transientDistrict": "বর্তমান জেলা",

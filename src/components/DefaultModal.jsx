@@ -58,6 +58,7 @@ import ExamRuleCreateUpdateForm from './Forms/ExamRuleCreateUpdateForm';
 import ExamRuleView from './Forms/ExamRuleView';
 import FeeCollectionForm from './Forms/FeeCollectionForm';
 import HomeWorkCreateUpdateForm from './Forms/HomeWorkCreateUpdateForm';
+import HomeWorkGroupCreateUpdateForm from './Forms/HomeWorkGroupCreateUpdateForm';
 import HomeWorkView from './Forms/HomeWorkView';
 import HomeWorkViewTeacher from './Forms/HomeWorkViewTeacher';
 import MonthNamesForm from './Forms/MonthNamesForm';
@@ -175,6 +176,13 @@ const DefaultModal = () => {
                 {modalType === 'UPDATE_HOME_WORK' && (
                   <HomeWorkCreateUpdateForm id={id} />
                 )}
+                {modalType === 'CREATE_HOME_WORK_GROUP' && (
+                  <HomeWorkGroupCreateUpdateForm />
+                )}
+                {modalType === 'UPDATE_HOME_WORK_GROUP' && (
+                  <HomeWorkGroupCreateUpdateForm id={id} />
+                )}
+
                 {modalType === 'VIEW_HOME_WORK' && <HomeWorkView id={id} />}
                 {modalType === 'VIEW_NOTICE_USERPANEL' && <NoticeView id={id} />}
                 {modalType === 'TEACHER_VIEW_HOME_WORK' && (

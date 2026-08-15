@@ -154,6 +154,7 @@ import AttendenceTimeSetting from '../pages/AttendenceTimeSetting';
 import AttendenceHolidayAndLeave from '../pages/AttendenceHolidayAndLeave';
 import AttendenceHolidayAndLeaveEntry from '../pages/AttendenceHolidayAndLeaveEntry';
 import AttendenceEntry from '../pages/AttendenceEntry';
+import HomWorkGroup from '../pages/HomWorkGroup';
 
 const Router = createBrowserRouter([
   {
@@ -535,6 +536,14 @@ const Router = createBrowserRouter([
                 element: (
                   // <RequirePermission permissionId={permissionsDataList.class}>
                   <HomWork pageTitle="Home Work" />
+                  // </RequirePermission>
+                ),
+              },
+              {
+                path: 'home-work-group',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <HomWorkGroup pageTitle="Home Work" />
                   // </RequirePermission>
                 ),
               },
