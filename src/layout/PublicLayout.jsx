@@ -4,7 +4,7 @@ import { Link, Outlet, useParams } from "react-router-dom";
 import { fetchResultFieldData } from "../features/studentResultPublicView/studentResultPublicViewSlice";
 import bnBijoy2Unicode from "../utils/conveter";
 import { Buffer } from "buffer";
-import DeveloperCredit from "../components/DeveloperCredit";
+import DashboardCredit from "../components/DashboardCredit";
 
 const PublicLayout = () => {
   const { schoolData, websiteSettings } = useSelector(
@@ -411,7 +411,7 @@ const PublicLayout = () => {
           </div>
         </div>
       </footer>
-      <DeveloperCredit />
+      <DashboardCredit />
     </div>
   );
 };

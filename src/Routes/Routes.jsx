@@ -154,6 +154,7 @@ import AttendenceTimeSetting from '../pages/AttendenceTimeSetting';
 import AttendenceHolidayAndLeave from '../pages/AttendenceHolidayAndLeave';
 import AttendenceHolidayAndLeaveEntry from '../pages/AttendenceHolidayAndLeaveEntry';
 import AttendenceEntry from '../pages/AttendenceEntry';
+import DocumentSettings from '../pages/userpanel/DocumentSettings';
 
 const Router = createBrowserRouter([
   {
@@ -1181,6 +1182,10 @@ const Router = createBrowserRouter([
               {
                 path: 'website-settings',
                 element: <WebsiteSettings pageTitle="Add Login Users" />,
+              },
+              {
+                path: 'document-settings',
+                element: <DocumentSettings pageTitle="Document Settings" />,
               },
             ],
           },

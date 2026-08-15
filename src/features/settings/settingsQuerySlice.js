@@ -21,7 +21,8 @@ export const settingsSlice = createApi({
     'Acc_Report_Settings',
     'CodeSettings',
     'Genders',
-    'WebSettings'
+    'WebSettings',
+    'DocumentSettings',
   ],
   endpoints: (builder) => ({
     getInstitutionInfo: builder.query({
@@ -282,11 +283,19 @@ export const settingsSlice = createApi({
       }),
       invalidatesTags: ['SupportTicketList'],
     }),
-
-
-
-
-
+    // ================== Document Setting ==================
+    getDocumentSettings: builder.query({
+      query: () => 'document_settings',
+      providesTags: ['DocumentSettings'],
+    }),
+    saveDocumentSettings: builder.mutation({
+      query: (body) => ({
+        url: 'document_settings',
+        method: 'POST',
+        body,           // FormData পাঠানো হবে
+      }),
+      invalidatesTags: ['DocumentSettings'],
+    }),
 
   }),
 });
@@ -330,4 +339,6 @@ export const {
   useGetsupportTicketsSupportQuery,
   useSupportTicketsDepartmentQuery,
   useDeleteSupportTicketMutation,
+  useGetDocumentSettingsQuery,
+  useSaveDocumentSettingsMutation,
 } = settingsSlice;

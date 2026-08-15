@@ -898,6 +898,18 @@ const useTranslate = () => {
     "Teacher Name": "শিক্ষকের নাম",
     "Save Settings": "সেটিংস সংরক্ষণ করুন",
 
+    "Upload Document Logo": "ডকুমেন্ট লোগো আপলোড করুন",
+    "Logo Status": "লোগো স্ট্যাটাস",
+    "Active": "সক্রিয়",
+    "Inactive": "নিষ্ক্রিয়",
+
+    "Upload image": "ছবি আপলোড করুন",
+    "Click or drag here": "এখানে ক্লিক করুন অথবা টেনে আনুন",
+    "Maximum upload file size: 5 MB.": "সর্বোচ্চ আপলোড ফাইল সাইজ: ৫ MB",
+    "Remove image": "ছবি মুছুন",
+    "This field is required": "এই ঘরটি আবশ্যক",
+    "File size cannot exceed 5 MB.": "ফাইলের সাইজ ৫ MB এর বেশি হতে পারবে না।"
+
 
   };
 
