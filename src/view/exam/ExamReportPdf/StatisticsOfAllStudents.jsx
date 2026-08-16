@@ -3,22 +3,22 @@ const StatisticsOfAllStudents = () => {
     { id: 1, className: 'প্লে', total: 13 },
     { id: 2, className: 'নার্সারি', total: 15 },
     { id: 3, className: 'প্রথম', total: 21 },
-    { id: 4, className: 'দ্বিতীয়', total: 16 },
-    { id: 5, className: 'তৃতীয়', total: 26 },
+    { id: 4, className: 'দ্বিতীয়', total: 16 },
+    { id: 5, className: 'তৃতীয়', total: 26 },
   ];
 
   const grandTotal = data.reduce((sum, item) => sum + item.total, 0);
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10">
-      <div className="max-w-[900px] mx-auto bg-white p-8 text-black font-serif shadow-lg">
+    <div className="min-h-screen py-10 print:bg-white print:min-h-0 print:py-0 w-full">
+      <div className="relative max-w-[900px] mx-auto bg-white p-8 text-black font-serif shadow-lg">
         {/* Header - ছবির মতো ডিজাইন */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold tracking-wide">
             মাদরাসা বাবুল উলুম
           </h1>
           <p className="text-lg mt-1 text-gray-700">
-            মুহরি, সোনাগাজী, গাবুরিয়া, চট্টগ্রাম
+            মুহরি, সোনাগাজী, গাবুরিয়া, চট্টগ্রাম
           </p>
 
           {/* ছবির মতো লাইন ডিজাইন */}
@@ -81,14 +81,6 @@ const StatisticsOfAllStudents = () => {
               </tr>
             </tbody>
           </table>
-        </div>
-
-        {/* ছবির মতো নিচের অংশ */}
-        <div className="mt-10 text-center text-gray-700">
-          {/* <div className="border-t-2 border-black pt-4">
-            <p className="text-sm italic">প্রধান শিক্ষক</p>
-            <p className="text-sm mt-2">তারিখ: .........................</p>
-          </div> */}
         </div>
       </div>
     </div>

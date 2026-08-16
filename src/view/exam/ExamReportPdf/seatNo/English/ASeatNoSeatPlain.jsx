@@ -1,9 +1,13 @@
+import SeatCardWatermark from "../../../../../pages/userpanel/SeatCard/SeatCardWatermark"; // path ঠিক করে নিন
 
-const ASeatNoSeatPlain = () => {
+const ASeatNoSeatPlain = ({ queryParams, documentLogo, logoIsActive }) => {
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       {/* Outer Card */}
-      <div className="w-[420px] border-2 border-black bg-white p-3">
+      <div className="relative w-[420px] border-2 border-black bg-white p-3">
+        {/* Watermark inside card wrapper */}
+        <SeatCardWatermark documentLogo={documentLogo} logoIsActive={logoIsActive} />
+
         {/* Top Empty Header */}
         <div className="h-14 border-b-2 border-black flex items-center justify-center">
           <span className="text-sm">-</span>

@@ -43,6 +43,9 @@ import ParentsMobileNumberList from '../view/students/reports/ParentsMobileNumbe
 import ParentsMobileNumberTwoColumn from '../view/students/reports/ParentsMobileNumberTwoColumn';
 import StudentsListTwoColumns from '../view/students/reports/StudentsListTwoColumns';
 
+// API URL নিয়ে আসা হচ্ছে
+const API_URL = import.meta.env.VITE_SERVER_URL;
+
 const StudentsReport = () => {
   const methods = useForm();
   const translate = useTranslate();
@@ -58,7 +61,10 @@ const StudentsReport = () => {
   const ResidentialStatusId = watch('ResidentialStatusId');
   const BookLine = watch('BookLine');
 
+  const [documentLogo, setDocumentLogo] = useState('');
+  const [logoIsActive, setLogoIsActive] = useState(false);
   const [queryParams, setQueryParams] = useState(null);
+  const [watermarkPages, setWatermarkPages] = useState(1);
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: classListData } = useGetClassListQuery();
@@ -190,6 +196,58 @@ console.log(reportData, 'reportData');
       });
     }
   }, [dispatch, reset, editMode]);
+
+  // Fetch document logo for watermark
+  useEffect(() => {
+    const fetchDocumentSettings = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/api/settings/document_settings`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.documentLogo) {
+            setDocumentLogo(`${API_URL}/public${data.documentLogo}`);
+          }
+          setLogoIsActive(data.isActive === true || data.isActive === 'true');
+        }
+      } catch (error) {
+        console.error('Failed to fetch document settings:', error);
+      }
+    };
+    fetchDocumentSettings();
+  }, []);
+
+  // Preload watermark image
+  useEffect(() => {
+    if (documentLogo && logoIsActive) {
+      const img = new Image();
+      img.src = documentLogo;
+    }
+  }, [documentLogo, logoIsActive]);
+
+  // This useEffect was for page calculation, now we use a single fixed img, so it's not needed but kept for reference.
+  useEffect(() => {
+    if (!selectedReportComponent || !documentLogo || !logoIsActive) {
+      setWatermarkPages(1);
+      return;
+    }
+    const timer = setTimeout(() => {
+      const el = reportRef.current;
+      if (el) {
+        const heightPx = el.scrollHeight;
+        const pxPerMm = 96 / 25.4;
+        const heightMm = heightPx / pxPerMm;
+        const pages = Math.max(1, Math.ceil(heightMm / 277) + 1);
+        setWatermarkPages(pages);
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [selectedReportComponent, documentLogo, logoIsActive]);
 
   useEffect(() => {
     if (defaultData && editMode === 1) {
@@ -479,6 +537,52 @@ console.log(reportData, 'reportData');
 
   return (
     <>
+      <style>
+        {`
+          @media print {
+            html, body {
+              height: auto !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            .hidden_in_print {
+              display: none !important;
+            }
+            .print_canvas {
+              margin-top: 0 !important;
+            }
+            /* Watermark fixed at center of each page */
+            .watermark-print {
+              position: fixed;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              opacity: 0.15;
+              z-index: 9999;
+              pointer-events: none;
+              max-width: 60%;
+              max-height: 60%;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          }
+          @media screen {
+            .watermark-print {
+              display: none;
+            }
+          }
+        `}
+      </style>
+
+      {/* Watermark image - single fixed element, repeats on every printed page */}
+      {documentLogo && logoIsActive && (
+        <img
+          src={documentLogo}
+          alt="Watermark"
+          className="watermark-print"
+        />
+      )}
+
       <div className="bg-white p-6 md:p-4 rounded-xl shadow-lg font-SolaimanLipi hidden_in_print">
         <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between py-5">
           <h3 className="font-SolaimanLipi text-base sm:text-[20px] font-bold">

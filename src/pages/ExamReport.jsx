@@ -51,11 +51,17 @@ import BanglaTwoColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalList
 import NameWithAddressOneColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/NameWithAddressOneColumn';
 import StudentNameWithHolding from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/StudentNameWithHolding';
 
+// API URL নিয়ে আসা হচ্ছে
+const API_URL = import.meta.env.VITE_SERVER_URL;
+
 const ExamReport = ({ pageTitle }) => {
   const translate = useTranslate();
   const dispatch = useDispatch();
   const methods = useForm();
   const { status } = useSelector((state) => state.settings);
+
+  const [documentLogo, setDocumentLogo] = useState('');
+  const [logoIsActive, setLogoIsActive] = useState(false);
 
   const { control, handleSubmit, watch } = methods;
   const formValues = useWatch({ control });
@@ -63,7 +69,7 @@ const ExamReport = ({ pageTitle }) => {
   const languageID = formValues?.id;
   const selectedPdfID = formValues?.PdfID;
 
-
+  const isSeatNoReport = Number(selectedReportID) === 7;
 
   // Define which ReportIDs should show which fields
   const shouldShowFields = (fieldName) => {
@@ -208,6 +214,39 @@ const ExamReport = ({ pageTitle }) => {
     }
   }, [status, dispatch, pageTitle]);
 
+  // Fetch document logo for watermark
+  useEffect(() => {
+    const fetchDocumentSettings = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/api/settings/document_settings`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          if (data.documentLogo) {
+            setDocumentLogo(`${API_URL}/public${data.documentLogo}`);
+          }
+          setLogoIsActive(data.isActive === true || data.isActive === 'true');
+        }
+      } catch (error) {
+        console.error('Failed to fetch document settings:', error);
+      }
+    };
+    fetchDocumentSettings();
+  }, []);
+
+  // Preload watermark image
+  useEffect(() => {
+    if (documentLogo && logoIsActive) {
+      const img = new Image();
+      img.src = documentLogo;
+    }
+  }, [documentLogo, logoIsActive]);
+
   useEffect(() => {
     if (isError && error) {
       setErrorMessage(
@@ -273,24 +312,6 @@ const ExamReport = ({ pageTitle }) => {
   }, [formValues])
 
   const onSubmit = (formData) => {
-    // const params = {
-    //   report_id: formData.ReportID,
-    //   session_id: Number(formData.SessionID),
-    //   class_id: Number(formData.ClassID),
-    //   subClass_id: Number(formData.SubClassID),
-    //   exam_id: Number(formData.ExamID),
-    //   residential_id: Number(formData.RDID),
-    //   language_id: Number(formData.id),
-    //   pdf_id: Number(formData.PdfID),
-    //   ERIsActive: Number(formData.ERIsActive),
-    // };
-
-    // Object.keys(params).forEach(
-    //   (key) =>
-    //     (params[key] === undefined || params[key] === '') && delete params[key]
-    // );
-    // console.log('Submitted params:', params);
-    // setQueryParams(params);
     window.print();
   };
 
@@ -304,274 +325,352 @@ const ExamReport = ({ pageTitle }) => {
   };
 
   return (
-    <div className="">
-      <div className="flex flex-col font-default gap-3 print:hidden">
-        <div className="print:hidden w-full border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
-          <h1 className="font-bold text-[20px] text-theme-dark mb-4 font-default">
-            {translate('Exam Report')}
-          </h1>
+    <>
+      {/* Watermark CSS — সিট নং রিপোর্ট ছাড়া বাকি সব রিপোর্টের জন্য */}
+      <style>
+        {`
+          @media print {
+            .watermark-print {
+              position: fixed;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              opacity: 0.15;
+              z-index: 9999;
+              pointer-events: none;
+              max-width: 60%;
+              max-height: 60%;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          }
+          @media screen {
+            .watermark-print {
+              display: none;
+            }
+          }
+        `}
+      </style>
 
-          <FormProvider {...methods}>
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="grid grid-cols-1 md:grid-cols-4 gap-4"
-            >
-              {/* Report Select - Always shown */}
-              <DefaultSelect
-                label={translate('Report')}
-                nameField="ReportName"
-                registerKey="ReportID"
-                valueField="ReportID"
-                options={examReports.filter((r) =>
-                  [1, 2, 3, 4, 5, 6, 7, 8, 9].includes(r.ReportID)
-                )}
-                type="number"
-                require="This Field is required"
-                defaultSelect={false}
-                unicode={true}
-              />
+      {/* একক বড় Watermark — সিট নং রিপোর্ট ছাড়া বাকি সব রিপোর্টে দেখাবে।
+          সিট নং এর watermark প্রতিটা কার্ডের ভিতরে আলাদাভাবে বসবে (নিচে props দিয়ে)।
+          রিপোর্ট ৯ সহ বাকি সব রিপোর্ট এখন এই global watermark পাবে। */}
+      {!isSeatNoReport && documentLogo && logoIsActive && (
+        <img
+          src={documentLogo}
+          alt="Watermark"
+          className="watermark-print"
+        />
+      )}
 
-              {/* Conditionally shown fields */}
-              {shouldShowFields('SessionID') && (
+      <div className="">
+        <div className="flex flex-col font-default gap-3 print:hidden">
+          <div className="print:hidden w-full border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
+            <h1 className="font-bold text-[20px] text-theme-dark mb-4 font-default">
+              {translate('Exam Report')}
+            </h1>
+
+            <FormProvider {...methods}>
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="grid grid-cols-1 md:grid-cols-4 gap-4"
+              >
+                {/* Report Select - Always shown */}
                 <DefaultSelect
-                  label={translate('Session')}
-                  nameField="SessionName"
-                  registerKey="SessionID"
-                  valueField="SessionID"
-                  options={sessionData ?? []}
+                  label={translate('Report')}
+                  nameField="ReportName"
+                  registerKey="ReportID"
+                  valueField="ReportID"
+                  options={examReports.filter((r) =>
+                    [1, 2, 3, 4, 5, 6, 7, 8, 9].includes(r.ReportID)
+                  )}
+                  type="number"
                   require="This Field is required"
                   defaultSelect={false}
                   unicode={true}
                 />
-              )}
 
-              {shouldShowFields('ExamID') && (
-                <DefaultSelect
-                  label={translate('Exam')}
-                  nameField="ExamName"
-                  registerKey="ExamID"
-                  valueField="ExamID"
-                  options={examNameData ?? []}
-                  require={'This Field is required'}
-                  unicode={true}
-                />
-              )}
-
-              {shouldShowFields('SubClassID') && (
-                <DefaultSelect
-                  label={translate('SubClass')}
-                  nameField="SubClass"
-                  registerKey="SubClassID"
-                  valueField="SubClassID"
-                  options={SubClassListData ?? []}
-                  require={'This Field is required'}
-                  unicode={true}
-                />
-              )}
-
-              {shouldShowFields('RDID') && (
-                <DefaultSelect
-                  label={translate('Residential')}
-                  nameField="ResidentialName"
-                  registerKey="RDID"
-                  valueField="RDID"
-                  options={residentialData ?? []}
-                  require={'This Field is required'}
-                  unicode={true}
-                />
-              )}
-
-              {shouldShowFields('Langauge') && (
-                <DefaultSelect
-                  label={translate('Langauge')}
-                  nameField="name"
-                  registerKey="id"
-                  valueField="id"
-                  options={language ?? []}
-                  require={'This Field is required'}
-                  unicode={true}
-                />
-              )}
-
-              {shouldShowFields('ExamVacationStatus') && (
-                <div className="col-span-2">
-                  <ExamRoutingCheckbox
-                    label={translate('Exam Routine')}
-                    options={examVacationStatus}
-                    registerKey="ERIsActive"
-                    require={
-                      selectedReportID === 1 || selectedReportID === 2
-                        ? 'This Field is required'
-                        : false
-                    }
+                {/* Conditionally shown fields */}
+                {shouldShowFields('SessionID') && (
+                  <DefaultSelect
+                    label={translate('Session')}
+                    nameField="SessionName"
+                    registerKey="SessionID"
+                    valueField="SessionID"
+                    options={sessionData ?? []}
+                    require="This Field is required"
+                    defaultSelect={false}
+                    unicode={true}
                   />
-                </div>
-              )}
+                )}
 
-              {shouldShowFields('ColorStatus') && (
-                <div className="">
-                  <ExamRoutingCheckbox
-                    label={translate('Color Status')}
-                    options={colorStatus}
-                    registerKey="CSIsActive"
-                    require={
-                      selectedReportID === 1 || selectedReportID === 2
-                        ? 'This Field is required'
-                        : false
-                    }
+                {shouldShowFields('ExamID') && (
+                  <DefaultSelect
+                    label={translate('Exam')}
+                    nameField="ExamName"
+                    registerKey="ExamID"
+                    valueField="ExamID"
+                    options={examNameData ?? []}
+                    require={'This Field is required'}
+                    unicode={true}
                   />
+                )}
+
+                {shouldShowFields('SubClassID') && (
+                  <DefaultSelect
+                    label={translate('SubClass')}
+                    nameField="SubClass"
+                    registerKey="SubClassID"
+                    valueField="SubClassID"
+                    options={SubClassListData ?? []}
+                    require={'This Field is required'}
+                    unicode={true}
+                  />
+                )}
+
+                {shouldShowFields('RDID') && (
+                  <DefaultSelect
+                    label={translate('Residential')}
+                    nameField="ResidentialName"
+                    registerKey="RDID"
+                    valueField="RDID"
+                    options={residentialData ?? []}
+                    require={'This Field is required'}
+                    unicode={true}
+                  />
+                )}
+
+                {shouldShowFields('Langauge') && (
+                  <DefaultSelect
+                    label={translate('Langauge')}
+                    nameField="name"
+                    registerKey="id"
+                    valueField="id"
+                    options={language ?? []}
+                    require={'This Field is required'}
+                    unicode={true}
+                  />
+                )}
+
+                {shouldShowFields('ExamVacationStatus') && (
+                  <div className="col-span-2">
+                    <ExamRoutingCheckbox
+                      label={translate('Exam Routine')}
+                      options={examVacationStatus}
+                      registerKey="ERIsActive"
+                      require={
+                        selectedReportID === 1 || selectedReportID === 2
+                          ? 'This Field is required'
+                          : false
+                      }
+                    />
+                  </div>
+                )}
+
+                {shouldShowFields('ColorStatus') && (
+                  <div className="">
+                    <ExamRoutingCheckbox
+                      label={translate('Color Status')}
+                      options={colorStatus}
+                      registerKey="CSIsActive"
+                      require={
+                        selectedReportID === 1 || selectedReportID === 2
+                          ? 'This Field is required'
+                          : false
+                      }
+                    />
+                  </div>
+                )}
+
+                {shouldShowFields('PdfSelect') && pdfOptions.length > 0 && (
+                  <DefaultSelect
+                    label={translate('PDF Select')}
+                    nameField="name"
+                    registerKey="PdfID"
+                    valueField="PdfID"
+                    options={pdfOptions}
+                    require="This Field is required"
+                  />
+                )}
+                {selectedReportID === 5 && (
+                  <DefaultSelect
+                    label={translate('PDF Select')}
+                    nameField="name"
+                    registerKey="PdfID"
+                    valueField="PdfID"
+                    options={fiveLanguageExamReport}
+                    require="This Field is required"
+                  />
+                )}
+
+                <div className="md:col-span-4 flex justify-end">
+                  <Button type="submit">{translate('Preview')}</Button>
                 </div>
-              )}
-
-              {shouldShowFields('PdfSelect') && pdfOptions.length > 0 && (
-                <DefaultSelect
-                  label={translate('PDF Select')}
-                  nameField="name"
-                  registerKey="PdfID"
-                  valueField="PdfID"
-                  options={pdfOptions}
-                  require="This Field is required"
-                />
-              )}
-              {selectedReportID === 5 && (
-                <DefaultSelect
-                  label={translate('PDF Select')}
-                  nameField="name"
-                  registerKey="PdfID"
-                  valueField="PdfID"
-                  options={fiveLanguageExamReport}
-                  require="This Field is required"
-                />
-              )}
-
-              <div className="md:col-span-4 flex justify-end">
-                <Button type="submit">{translate('Preview')}</Button>
-              </div>
-            </form>
-          </FormProvider>
+              </form>
+            </FormProvider>
+          </div>
         </div>
+
+        {/* StatisticsOfAllExaminees কম্পোনেন্টে প্রয়োজনীয় props পাস করুন */}
+        <div className="print:block">
+          {/* ১. পরীক্ষার ফি উত্তোলন তালিকা */}
+          {Number(selectedReportID) === 1 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 1 && <BanglaOneColumn />}
+          {Number(selectedReportID) === 1 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 2 && <BanglaTwoColumn reportData={data} queryParams={queryParams} />}
+          {/* Arob */}
+          {Number(selectedReportID) === 1 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 1 && <ArobicTwoColumn />}
+          {Number(selectedReportID) === 1 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 2 && <ArobicOneColumnA5 />}
+          {Number(selectedReportID) === 1 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 3 && <NameWithAddressOneColumn />}
+          {Number(selectedReportID) === 1 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 4 && <StudentNameWithHolding />}
+          {/* ২. প্রবেশ পত্র */}
+          {/* ৩. দস্তখত পত্র */}
+          {Number(selectedReportID) === 3 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 1 && <ExamRoutine reportData={data}  queryParams={queryParams} />}
+          {Number(selectedReportID) === 3 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 2 && <WithoutExamRoutine reportData={data}  queryParams={queryParams} />}
+          {/* Arobic 2 pdf baki ase */}
+          {/* ৪. নম্বর পত্র */}
+          {Number(selectedReportID) == 4 &&
+            Number(languageID) == 1 && 
+            Number(selectedPdfID) == 1 && <BanglaNumberWithTwoColumn reportData={data} queryParams={queryParams} />}
+
+
+          {Number(selectedReportID) == 4 &&
+            Number(languageID) == 1 &&
+            Number(selectedPdfID) == 2 && <BanglaWithOutNameColumn  reportData={data} queryParams={queryParams} />}
+          {/* {Number(selectedReportID) === 4 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 3 && <BanglaNumberStudentNameWithA5 />} */}
+          {/* {Number(selectedReportID) === 4 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 4 && <BanglaNumberStudentWithOutNameA5 />} */}
+
+
+            {/*  */}
+          {Number(selectedReportID) === 4 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 1 && <ArobicNameWithTwoColumn reportData={data} queryParams={queryParams} />}
+          {Number(selectedReportID) === 4 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 2 && <ArobicNameWithTwoColumn reportData={data} queryParams={queryParams} />}
+          {/* {Number(selectedReportID) === 4 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 3 && <ArobicNumberStudentWithOutNameA5 />}
+          {Number(selectedReportID) === 4 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 3 && <ArobicNumberStudentWithOutNameA5 />}
+          {Number(selectedReportID) === 4 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 4 && <ArobicNumberStudentWithOutNameA5 />} */}
+          {Number(selectedReportID) === 4 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 5 && <ArobicNameWithLegal />}
+          {Number(selectedReportID) === 4 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 6 && <ArobicNameWithLegal />}
+
+          {/* 5. নম্বরপত্র ভর্তি সিরিয়ালে */}
+          {Number(selectedReportID) === 5 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 1 && <AdmissionSerialNWTC />}
+          {Number(selectedReportID) === 5 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 2 && <AdmissionSerialNWOTC />}
+          {/* 6. স্বাক্ষরপত্র ও নম্বরসীট */}
+          {Number(selectedReportID) === 6 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 1 && <ArobicNumberClassBasedTC />}
+
+          {/* 7. সিট নং — প্রতিটা কার্ডের ভিতরে আলাদা watermark বসানোর জন্য
+              documentLogo ও logoIsActive props হিসেবে পাস করা হচ্ছে। */}
+          {Number(selectedReportID) === 7 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 1 && (
+              <BSeatNoWhite
+                queryParams={queryParams}
+                documentLogo={documentLogo}
+                logoIsActive={logoIsActive}
+              />
+            )}
+          {Number(selectedReportID) === 7 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 2 && (
+              <BSeatNoColor
+                queryParams={queryParams}
+                documentLogo={documentLogo}
+                logoIsActive={logoIsActive}
+              />
+            )}
+          {Number(selectedReportID) === 7 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 3 && (
+              <BSeatNoWhite
+                queryParams={queryParams}
+                documentLogo={documentLogo}
+                logoIsActive={logoIsActive}
+              />
+            )}
+
+          {Number(selectedReportID) === 7 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 1 && (
+              <ASeatNoWhite
+                queryParams={queryParams}
+                documentLogo={documentLogo}
+                logoIsActive={logoIsActive}
+              />
+            )}
+          {Number(selectedReportID) === 7 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 2 && (
+              <ASeatNoColor
+                queryParams={queryParams}
+                documentLogo={documentLogo}
+                logoIsActive={logoIsActive}
+              />
+            )}
+          {Number(selectedReportID) === 7 &&
+            Number(languageID) === 2 &&
+            Number(selectedPdfID) === 3 && (
+              <ASeatNoSeatPlain
+                queryParams={queryParams}
+                documentLogo={documentLogo}
+                logoIsActive={logoIsActive}
+              />
+            )}
+          {/* 8. নম্বরপত্র ভর্তি সিরিয়ালে */}
+          {Number(selectedReportID) === 8 && <SingatureSheetNS />}
+
+          {/* 9. সকল পরীক্ষার্থীর পরিসংখ্যান */}
+          {Number(selectedReportID) === 9 && <StatisticsOfAllStudents />}
+        </div>
+
+        {/* <StatisticsOfAllExaminees
+          queryParams={queryParams}
+          selectedPdfID={selectedPdfID}
+          selectedPdfName={getSelectedPdfName()}
+          pdfOptions={pdfOptions}
+          reportData={{
+            reportID: selectedReportID,
+            languageID: languageID,
+            pdfData: selectedPdfData
+          }}
+        /> */}
       </div>
-
-      {/* StatisticsOfAllExaminees কম্পোনেন্টে প্রয়োজনীয় props পাস করুন */}
-      <div className="print:block">
-        {/* ১. পরীক্ষার ফি উত্তোলন তালিকা */}
-        {Number(selectedReportID) === 1 &&
-          Number(languageID) === 1 &&
-          Number(selectedPdfID) === 1 && <BanglaOneColumn />}
-        {Number(selectedReportID) === 1 &&
-          Number(languageID) === 1 &&
-          Number(selectedPdfID) === 2 && <BanglaTwoColumn reportData={data} queryParams={queryParams} />}
-        {/* Arob */}
-        {Number(selectedReportID) === 1 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 1 && <ArobicTwoColumn />}
-        {Number(selectedReportID) === 1 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 2 && <ArobicOneColumnA5 />}
-        {Number(selectedReportID) === 1 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 3 && <NameWithAddressOneColumn />}
-        {Number(selectedReportID) === 1 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 4 && <StudentNameWithHolding />}
-        {/* ২. প্রবেশ পত্র */}
-        {/* ৩. দস্তখত পত্র */}
-        {Number(selectedReportID) === 3 &&
-          Number(languageID) === 1 &&
-          Number(selectedPdfID) === 1 && <ExamRoutine reportData={data}  queryParams={queryParams} />}
-        {Number(selectedReportID) === 3 &&
-          Number(languageID) === 1 &&
-          Number(selectedPdfID) === 2 && <WithoutExamRoutine reportData={data}  queryParams={queryParams} />}
-        {/* Arobic 2 pdf baki ase */}
-        {/* ৪. নম্বর পত্র */}
-        {Number(selectedReportID) == 4 &&
-          Number(languageID) == 1 && 
-          Number(selectedPdfID) == 1 && <BanglaNumberWithTwoColumn reportData={data} queryParams={queryParams} />}
-
-
-        {Number(selectedReportID) == 4 &&
-          Number(languageID) == 1 &&
-          Number(selectedPdfID) == 2 && <BanglaWithOutNameColumn  reportData={data} queryParams={queryParams} />}
-        {/* {Number(selectedReportID) === 4 &&
-          Number(languageID) === 1 &&
-          Number(selectedPdfID) === 3 && <BanglaNumberStudentNameWithA5 />} */}
-        {/* {Number(selectedReportID) === 4 &&
-          Number(languageID) === 1 &&
-          Number(selectedPdfID) === 4 && <BanglaNumberStudentWithOutNameA5 />} */}
-
-
-          {/*  */}
-        {Number(selectedReportID) === 4 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 1 && <ArobicNameWithTwoColumn reportData={data} queryParams={queryParams} />}
-        {Number(selectedReportID) === 4 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 2 && <ArobicNameWithTwoColumn reportData={data} queryParams={queryParams} />}
-        {/* {Number(selectedReportID) === 4 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 3 && <ArobicNumberStudentWithOutNameA5 />}
-        {Number(selectedReportID) === 4 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 3 && <ArobicNumberStudentWithOutNameA5 />}
-        {Number(selectedReportID) === 4 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 4 && <ArobicNumberStudentWithOutNameA5 />} */}
-        {Number(selectedReportID) === 4 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 5 && <ArobicNameWithLegal />}
-        {Number(selectedReportID) === 4 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 6 && <ArobicNameWithLegal />}
-
-        {/* 5. নম্বরপত্র ভর্তি সিরিয়ালে */}
-        {Number(selectedReportID) === 5 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 1 && <AdmissionSerialNWTC />}
-        {Number(selectedReportID) === 5 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 2 && <AdmissionSerialNWOTC />}
-        {/* 6. স্বাক্ষরপত্র ও নম্বরসীট */}
-        {Number(selectedReportID) === 6 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 1 && <ArobicNumberClassBasedTC />}
-        {/* 7. সিট নং */}
-        {Number(selectedReportID) === 7 &&
-          Number(languageID) === 1 &&
-          Number(selectedPdfID) === 1 && <BSeatNoWhite queryParams={queryParams} />}
-        {Number(selectedReportID) === 7 &&
-          Number(languageID) === 1 &&
-          Number(selectedPdfID) === 2 && <BSeatNoColor queryParams={queryParams} />}
-        {Number(selectedReportID) === 7 &&
-          Number(languageID) === 1 &&
-          Number(selectedPdfID) === 3 && <BSeatNoWhite queryParams={queryParams} />}
-
-        {Number(selectedReportID) === 7 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 1 && <ASeatNoWhite queryParams={queryParams} />}
-        {Number(selectedReportID) === 7 &&
-          Number(languageID) === 2 && 
-          Number(selectedPdfID) === 2 && <ASeatNoColor queryParams={queryParams} />}
-        {Number(selectedReportID) === 7 &&
-          Number(languageID) === 2 &&
-          Number(selectedPdfID) === 3 && <ASeatNoSeatPlain queryParams={queryParams} />}
-        {/* 8. নম্বরপত্র ভর্তি সিরিয়ালে */}
-        {Number(selectedReportID) === 8 && <SingatureSheetNS />}
-        {/* 9. সকল পরীক্ষার্থীর পরিসংখ্যান  */}
-        {Number(selectedReportID) === 9 && <StatisticsOfAllStudents />}
-      </div>
-
-      {/* <StatisticsOfAllExaminees
-        queryParams={queryParams}
-        selectedPdfID={selectedPdfID}
-        selectedPdfName={getSelectedPdfName()}
-        pdfOptions={pdfOptions}
-        reportData={{
-          reportID: selectedReportID,
-          languageID: languageID,
-          pdfData: selectedPdfData
-        }}
-      /> */}
-    </div>
+    </>
   );
 };
 

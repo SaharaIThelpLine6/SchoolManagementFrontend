@@ -932,6 +932,8 @@ const useTranslate = () => {
     "Highest mark in recitation": "তেলাওয়াতে সর্বোচ্চ নাম্বার",
     "Select Divition": "একটি বিভাগ নির্বাচন করুন",
     "Document Settings": "ডকুমেন্ট সেটিংস",
+    "Video Tutorial": "ভিডিও টিউটোরিয়াল",
+    "Feedback & Suggestions": "মতামত ও পরামর্শ",
 
 
   };

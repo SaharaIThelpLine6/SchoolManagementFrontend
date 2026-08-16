@@ -584,7 +584,7 @@ export const menuData = [
 
       {
         id: '2',
-        name: 'মতামত ও পরামর্শ',
+        name: 'Feedback & Suggestions',
         route: '/help/support-tickets',
       },
     ],
