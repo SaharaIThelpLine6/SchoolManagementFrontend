@@ -16,7 +16,7 @@
 @layer base {
     @font-face {
         font-family: SolaimanLipi;
-        src: url(/SolaimanLipi.ttf) format('truetype');
+        src: url('./assets/font/solaimanlipi.woff') format('woff');
         font-display: swap;
         unicode-range: U+0980-09FF;
         /* src: url(/SolaimanLipi.ttf) format('ttf'); */

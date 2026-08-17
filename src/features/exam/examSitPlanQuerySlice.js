@@ -61,6 +61,10 @@ export const examSitPlanSlice = createApi({
       query: ({ sessionId, examId, subClassId }) => `hallwise_sit_allocated_students/${sessionId}/${examId}/${subClassId}`,
       providesTags: ['HallWiseSit'],
     }),
+    getExamwiseSeatPlan: builder.query({
+      query: ({ sessionId, examId }) => `examwise_sit_allocated_students/${sessionId}/${examId}`,
+      providesTags: ['HallWiseSit'],
+    }),
     deleteSitPlan: builder.mutation({
       query: (seatPlanId) => ({
         url: `delete_exam_seatplan/${seatPlanId}`,
@@ -87,6 +91,7 @@ export const {
   usePostExamShiftMutation,
   useGetExamShiftQuery,
   useGetHallwiseSeatPlanQuery,
+  useGetExamwiseSeatPlanQuery,
   useSaveSitPlanMutation,
   useGetSitPlanBySitPlanIDQuery,
   useDeleteSitPlanMutation,

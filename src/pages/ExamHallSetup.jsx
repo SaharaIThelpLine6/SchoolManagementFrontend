@@ -9,7 +9,7 @@ import {
 } from 'react-hook-form';
 import useTranslate from '../utils/Translate';
 import Swal from 'sweetalert2';
-import bnBijoy2Unicode from '../utils/conveter';
+import bnBijoy2Unicode, { convertOnLanguageChange } from '../utils/conveter';
 import { useHallEntryMutation } from '../features/examhall/examHallQuerySlice';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
@@ -39,6 +39,7 @@ const getTotalRows = (columns = []) =>
 
 const ColumnCard = ({ index, onRemove, label }) => {
     const { control, setValue } = useFormContext();
+    const translate = useTranslate();
     const rowsPath = `columns.${index}.rows`;
     const rows = useWatch({ control, name: rowsPath }) || [];
 
@@ -75,7 +76,7 @@ const ColumnCard = ({ index, onRemove, label }) => {
     };
 
     return (
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-2 lg:p-4">
             {/* column header */}
             <div className="flex items-center gap-2.5 mb-3">
                 <div className="w-7 h-7 rounded-lg bg-white border border-gray-200 flex items-center justify-center text-xs font-medium text-gray-700 shrink-0">
@@ -105,8 +106,8 @@ const ColumnCard = ({ index, onRemove, label }) => {
             <div className="flex flex-col gap-2">
                 {rows.map((row, rowIndex) => (
                     <div key={rowIndex} className="flex items-center gap-2">
-                        <span className="text-xs text-gray-400 w-5 text-right shrink-0">
-                            {rowIndex + 1}
+                        <span className="text-xs text-gray-400 w-5 text-start shrink-0">
+                            {convertOnLanguageChange(String(rowIndex + 1))}
                         </span>
                         <div className="flex-1">
                             <DefaultInput
@@ -152,9 +153,9 @@ const ColumnCard = ({ index, onRemove, label }) => {
             <button
                 type="button"
                 onClick={addRow}
-                className="mt-2.5 flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer bg-transparent border-none hover:text-gray-700"
+                className="mt-2.5 flex items-center gap-1.5 text-sm text-gray-600 cursor-pointer bg-transparent border border-gray-200 hover:text-gray-700 rounded-[5px] px-4 py-1"
             >
-                <IconPlus size={12} /> Add row
+                <IconPlus size={18} /> {translate("Add Benches")}
             </button>
         </div>
     );
@@ -278,7 +279,7 @@ const ExamHallSetup = () => {
     };
 
     return (
-        <div className="p-7 font-SolaimanLipi">
+        <div className="lg:p-7 font-SolaimanLipi">
             <div className="mb-6 flex item-start justify-between">
                 <h1 className="text-xl font-medium text-gray-900">{translate('Add exam hall')}</h1>
            
@@ -295,10 +296,10 @@ const ExamHallSetup = () => {
             <FormProvider {...methods}>
                 <form
                     onSubmit={handleSubmit(onSubmit)}
-                    className="pt-[100px] lg:pt-0 lg:mt-5 lg:ml-5 mb-20"
+                    className="lg:pt-[100px] lg:pt-0 lg:mt-5 lg:ml-5 mb-20"
                 >
                     {/* hall name */}
-                    <div className="bg-white border border-gray-200 rounded-xl p-5 mb-4">
+                    <div className="bg-white border border-gray-200 rounded-xl p-3 lg:p-5 mb-4">
                         <DefaultInput
                             label="Hall Name"
                             placeholder="e.g. 10001 / বসন্ত"
@@ -308,7 +309,7 @@ const ExamHallSetup = () => {
                     </div>
 
                     {/* columns section */}
-                    <div className="bg-white border border-gray-200 rounded-xl p-5">
+                    <div className="bg-white border border-gray-200 rounded-xl p-3 lg:p-5">
                         <div className="flex items-center justify-between mb-4">
                             <div>
                                 <p className="text-base font-medium text-gray-900">

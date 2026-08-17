@@ -98,9 +98,7 @@ const PaymentHistoryInvoiceTable = ({ data, setInvoice, setInvoiceData }) => {
                   {new Date(row.CreateAt).toLocaleDateString("en-CA")}
                 </td>
                 <td className="px-4 py-2 text-center whitespace-nowrap">
-                  {row.Intent === "quota"
-                    ? `Addon ${row.size ?? 0} Quota`
-                    : `Renew For ${row.size ?? 0} years`}
+                  {row.Intent === "quota" ? `Addon ${row.size ?? 0} Quota`: row.Intent == "renew" ? `Renew For ${row.size ?? 0} years` : `Purchase ${row.size} SMS`}
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex justify-center whitespace-nowrap">

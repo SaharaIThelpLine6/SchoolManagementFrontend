@@ -53,6 +53,14 @@ export const examReports = [
     ReportID: 9,
     ReportName: '9. সকল পরীক্ষার্থীর পরিসংখ্যান',
   },
+  {
+    ReportID: 10,
+    ReportName: '10. পরীক্ষা কক্ষের আসন বিন্যাস',
+  },
+  {
+    ReportID: 11,
+    ReportName: '11. প্রতিষ্ঠানের আসন বিন্যাস',
+  },
 ];
 export const resultReports = [
   {

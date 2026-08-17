@@ -125,10 +125,10 @@ const Header = () => {
             {userPayInfo && (
               <p
                 className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${userPayInfo.RenewDays > 60
-                    ? "bg-green-500"
-                    : userPayInfo.RenewDays > 30
-                      ? "bg-yellow-500"
-                      : "bg-rose-500"
+                  ? "bg-green-500"
+                  : userPayInfo.RenewDays > 30
+                    ? "bg-yellow-500"
+                    : "bg-rose-500"
                   }`}
               >
                 Days: {userPayInfo.RenewDays}
@@ -137,10 +137,10 @@ const Header = () => {
             {userPayInfo && (
               <p
                 className={`text-white py-1 px-2 rounded-full text-xs font-semibold ${userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
-                    ? "bg-green-500"
-                    : userPayInfo.BalanceDr - userPayInfo.BalanceCr > 10
-                      ? "bg-yellow-500"
-                      : "bg-rose-500"
+                  ? "bg-green-500"
+                  : userPayInfo.BalanceDr - userPayInfo.BalanceCr > 10
+                    ? "bg-yellow-500"
+                    : "bg-rose-500"
                   }`}
               >
                 Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
@@ -156,7 +156,7 @@ const Header = () => {
       )}
 
       {/* Desktop Header */}
-      <div className="hidden sm:flex items-center justify-between px-6 py-3 gap-3 2xl:px-11 print:hidden">
+      <div className="hidden sm:flex items-center justify-between px-5 py-2 gap-3 2xl:px-11 print:hidden">
         <div className="flex justify-center items-center w-full max-w-[200px] sm:max-w-[220px] md:max-w-[200px] flex-shrink-0">
           <div className="flex items-center gap-2 sm:gap-3">
             <button
@@ -190,50 +190,51 @@ const Header = () => {
           </div>
         </div>
 
+
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 sm:gap-4 flex-1 min-w-0">
-          <h2 className="text-sm sm:text-base md:text-3xl font-semibold text-gray-800 text-center sm:text-left truncate">
+          <h2 className="pl-2 text-sm sm:text-base md:text-[20px] font-semibold text-gray-800 text-center sm:text-left truncate">
             {institutionInfo?.InstitutionName || ""}
           </h2>
-        </div>
-
-        <div className="flex items-center gap-3 flex-shrink-0">
-          {userPayInfo && (
-            <p
-              className={`text-white py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-nowrap text-[14px] font-semibold  ${userPayInfo.RenewDays > 60
+          <div className="flex items-center gap-3 flex-shrink-0">
+            {userPayInfo && (
+              <p
+                className={`text-white py-[6px] px-[10px] md:px-[20px] rounded-[10px] mb-0 text-nowrap text-[14px] font-semibold  ${userPayInfo.RenewDays > 60
                   ? "bg-green-500"
                   : userPayInfo.RenewDays > 30
                     ? "bg-yellow-500"
                     : "bg-rose-500"
-                }`}
-            >
-              Days: {userPayInfo.RenewDays}
-            </p>
-          )}
-          {userPayInfo && (
-            <p
-              className={`text-white py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-nowrap text-[14px] font-semibold  ${userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
+                  }`}
+              >
+                Days: {userPayInfo.RenewDays}
+              </p>
+            )}
+            {userPayInfo && (
+              <p
+                className={`text-white py-[6px] px-[10px] md:px-[20px] rounded-[10px] mb-0 text-nowrap text-[14px] font-semibold  ${userPayInfo.BalanceDr - userPayInfo.BalanceCr > 20
                   ? "bg-green-500"
                   : userPayInfo.BalanceDr - userPayInfo.BalanceCr > 10
                     ? "bg-yellow-500"
                     : "bg-rose-500"
-                }`}
-            >
-              Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
-            </p>
-          )}
+                  }`}
+              >
+                Quota: {userPayInfo.BalanceDr - userPayInfo.BalanceCr}
+              </p>
+            )}
 
-          {
-            softwareDetails && <a className="btn btn-info bg-blue-500 py-[8px] px-[10px] md:px-[20px] rounded-full mb-0 text-[14px] text-white whitespace-nowrap d-inline flex gap-2" href={softwareDetails.UpSoftwareLink}><svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-device-desktop-down"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M13.5 16h-9.5a1 1 0 0 1 -1 -1v-10a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v7.5" /><path d="M7 20h5" /><path d="M9 16v4" /><path d="M19 16v6" /><path d="M22 19l-3 3l-3 -3" /></svg> Download</a>
-          }
+            {
+              softwareDetails && <a className="btn btn-info bg-blue-500 py-[6px] px-[10px] md:px-[20px] rounded-[10px] mb-0 text-[14px] text-white whitespace-nowrap d-inline flex gap-2 font-bold" href={softwareDetails.UpSoftwareLink}><svg xmlns="http://www.w3.org/2000/svg" width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-device-desktop-down"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M13.5 16h-9.5a1 1 0 0 1 -1 -1v-10a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v7.5" /><path d="M7 20h5" /><path d="M9 16v4" /><path d="M19 16v6" /><path d="M22 19l-3 3l-3 -3" /></svg> {translate("Download")}</a>
+            }
 
 
-          <Button onClick={handleOpenModal} className="!rounded-full">
-            {translate("Buy Now")}
-          </Button>
-          <TranslateButton />
-          <DropdownNotification />
-          <DropdownUser />
+            <Button onClick={handleOpenModal} className="!rounded-[10px] !font-bold !text-[14px] !py-[7px]">
+              {translate("Buy Now")}
+            </Button>
+            <TranslateButton />
+            <DropdownNotification />
+            <DropdownUser />
+          </div>
         </div>
+
       </div>
     </header>
   );

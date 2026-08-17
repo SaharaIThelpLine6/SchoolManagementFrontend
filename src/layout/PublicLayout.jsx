@@ -41,6 +41,25 @@ const PublicLayout = () => {
     };
   }, [isOpen]);
 
+useEffect(() => {
+  const handleLinkClick = (event) => {
+    const anchor = event.target.closest("a, button");
+    if (!anchor) return;
+
+    if (window.self !== window.top) {
+      window.parent.postMessage({
+        type: "LINK_CLICK",
+        href: anchor.getAttribute("href") || null,
+        text: anchor.innerText?.trim().slice(0, 60) || null,
+        timestamp: Date.now(),
+      }, "*");
+    }
+  };
+
+  document.addEventListener("click", handleLinkClick);
+  return () => document.removeEventListener("click", handleLinkClick);
+}, []);
+
   return (
     <div className="min-h-screen font-SolaimanLipi bg-stone-50 text-gray-800">
       {/* Mobile overlay */}
