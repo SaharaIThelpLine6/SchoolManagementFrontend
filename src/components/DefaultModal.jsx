@@ -87,6 +87,9 @@ import ShiftEntry from '../view/attendance/ShiftEntry';
 import ScheduleShiftEntry from '../view/attendance/ScheduleShiftEntry';
 import TimeSettingEntry from '../view/attendance/TimeSettingEntry';
 
+// Admin View
+import MadrasahActionView from '../view/AdminView/madrasah/MadrasahActionView';
+
 const DefaultModal = () => {
   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
   const dispatch = useDispatch();
@@ -369,6 +372,11 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'EXAM_CONDITION_SETTINGS' && (
                   <AverageVCondition />
+                )}
+
+                {/* Admin Panel Model */}
+                {modalType === 'MADRASAH_ACTION_MODAL' && (
+                  <MadrasahActionView id={id} meta={meta} />
                 )}
               </div>
             )}

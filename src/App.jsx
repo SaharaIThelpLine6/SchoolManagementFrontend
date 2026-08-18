@@ -1,3 +1,4 @@
+// src/App.jsx
 import { RouterProvider } from "react-router-dom";
 import { cssTransition, ToastContainer } from "react-toastify";
 import "./App.css";
