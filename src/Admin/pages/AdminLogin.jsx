@@ -9,34 +9,40 @@ import SvgIcon from "../../components/icons/SvgIcon";
 import { usePostLoginMutation } from "../../features/dashboard/dashboardQuerySlice";
 import { initSocket } from "../../helper/socket";
 
-// 👉 Change this to your actual dashboard route
-const DASHBOARD_ROUTE = "/admin/dashboard"; // or "/home", "/admin/dashboard", etc.
+const DASHBOARD_ROUTE = "/admin/dashboard";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const methods = useForm();
+  // ✅ school_id এর জন্য default value 11 সেট করা হলো
+  const methods = useForm({
+    defaultValues: {
+      school_id: "11",
+      username: "",
+      password: "",
+    },
+  });
   const { handleSubmit } = methods;
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
-  const [ postLogin ] = usePostLoginMutation()
+  const [postLogin] = usePostLoginMutation();
 
   useEffect(() => {
     if (auth.token) {
-      navigate(DASHBOARD_ROUTE); // ✅ redirect logged-in users to dashboard
+      navigate(DASHBOARD_ROUTE);
     }
   }, [auth.token, navigate]);
 
   const onSubmit = async (data) => {
     try {
-      const response = await postLogin(data).unwrap();
+      // ✅ school_id সবসময় 11 পাঠানো হবে (যদি ফিল্ড হিডেন থাকে তবু)
+      const payload = { ...data, school_id: "11" };
+      const response = await postLogin(payload).unwrap();
+
       if (response.token) {
-        dispatch(
-          login({ token: response.token, user: response.user })
-        );
+        dispatch(login({ token: response.token, user: response.user }));
         initSocket(response.token);
-        navigate(DASHBOARD_ROUTE); // ✅ redirect after login
-        // window.location.reload();
+        navigate(DASHBOARD_ROUTE);
       } else {
         Swal.fire({
           icon: "error",
@@ -90,13 +96,16 @@ const Login = () => {
             </div>
 
             <div className="flex flex-col gap-4 md:gap-4">
-              <LoginInput
-                label="মাদ্রাসার কোড :"
-                type="number"
-                placeholder="Madrasa Code"
-                registerKey="school_id"
-                icon="FaPhone"
-              />
+              {/* মাদ্রাসার কোড ফিল্ডটি পুরোপুরি হিডেন করা হয়েছে */}
+              <div className="hidden">
+                <LoginInput
+                  label="মাদ্রাসার কোড :"
+                  type="number"
+                  placeholder="Madrasa Code"
+                  registerKey="school_id"
+                  icon="FaPhone"
+                />
+              </div>
 
               <LoginInput
                 label="ইউজার নাম :"

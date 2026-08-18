@@ -1,3 +1,4 @@
+// src/pages/Login.jsx
 import { useForm, FormProvider } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../features/auth/authSlice";
@@ -8,6 +9,7 @@ import LoginInput from "../components/Forms/LoginInput";
 import SvgIcon from "../components/icons/SvgIcon";
 import { usePostLoginMutation } from "../features/dashboard/dashboardQuerySlice";
 import { initSocket } from "../helper/socket";
+import { useLazyGetRedirectStatusQuery } from "../features/Admin/redirectSlice"; // 🌟 NEW IMPORT
 
 // const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -18,13 +20,33 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
-  const [ postLogin ] = usePostLoginMutation()
+  
+  const [ postLogin ] = usePostLoginMutation();
+  const [ checkRedirectStatus ] = useLazyGetRedirectStatusQuery(); // 🌟 NEW QUERY HOOK
 
   useEffect(() => {
+    // 🌟 NEW: URL থেকে টোকেন নেওয়ার লজিক (Auto Login)
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlToken = urlParams.get('token');
+    const urlUser = urlParams.get('user');
+
+    if (urlToken) {
+      // Redux-এ ডিসপ্যাচ করে টোকেন এবং ইউজার ডেটা সেট করা হচ্ছে
+      dispatch(login({ token: urlToken, user: { schoolId: urlUser } }));
+      initSocket(urlToken);
+
+      // URL থেকে token রিমুভ করে ক্লিন URL তৈরি করা (যাতে রিফ্রেশ করলে আবার না আসে)
+      window.history.replaceState(null, '', window.location.pathname);
+
+      navigate("/");
+      return;
+    }
+
+    // EXISTING: আগে থেকে টোকেন থাকলে ড্যাশবোর্ডে যাবে
     if (auth.token) {
       navigate("/");
     }
-  }, [auth.token, navigate]);
+  }, [auth.token, navigate, dispatch]);
 
   const onSubmit = async (data) => {
     try {
@@ -34,6 +56,25 @@ const Login = () => {
           login({ token: response.token, user: response.user })
         );
         initSocket(response.token);
+
+        // 🌟 NEW: Redirect Check Logic
+        try {
+          // data.school_id বা response.user.schoolId ব্যবহার করে স্ট্যাটাস চেক
+          const statusRes = await checkRedirectStatus(response.user.schoolId || data.school_id).unwrap();
+          
+          if (statusRes && statusRes.onTestStatus === 1) {
+            // ইনফিনিট লুপ ঠেকাতে চেক করা হচ্ছে যে সে অলরেডি লাইভ সার্ভারে (qmmsoft.com) আছে কিনা
+            if (window.location.hostname !== "qmmsoft.com") {
+              window.location.href = `https://qmmsoft.com/login?token=${response.token}&user=${response.user.schoolId}`; 
+              return; // রিডাইরেক্ট হয়ে যাবে, তাই নিচের navigate("/") কোড রান করবে না।
+            }
+          }
+        } catch (redirectError) {
+          console.error("❌ Redirect status check failed during login:", redirectError);
+        }
+        // 🌟 END NEW LOGIC
+
+        // 🌟 Normal Flow: যদি onTestStatus 1 না হয় অথবা API এরর দেয়, তবে আগের মতোই ড্যাশবোর্ডে যাবে
         navigate("/");
         // window.location.reload();
       } else {

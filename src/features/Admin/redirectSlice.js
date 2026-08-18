@@ -1,3 +1,4 @@
+// src/features/Admin/redirectSlice
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
@@ -37,4 +38,5 @@ export const redirectSlice = createApi({
 export const {
   useUpdateRedirectMutation,
   useGetRedirectStatusQuery,
+  useLazyGetRedirectStatusQuery,
 } = redirectSlice;

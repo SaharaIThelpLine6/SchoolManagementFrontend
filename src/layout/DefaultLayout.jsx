@@ -1,3 +1,4 @@
+// src/layout/DefaultLayout.jsx
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
@@ -11,6 +12,7 @@ import { useGetInstitutionInfoQuery } from "../features/settings/settingsQuerySl
 import TawkMessenger from "@tawk.to/tawk-messenger-react";
 import DeveloperCredit from "../components/DeveloperCredit";
 import { useGetCurrentMadrasahQuery } from "../features/userType/userTypeSlice";
+import { useGetRedirectStatusQuery } from "../features/Admin/redirectSlice";
 
 const tawkPropertyId = import.meta.env.VITE_TAWK_PROPERTY_ID;
 const tawkWidgetId = import.meta.env.VITE_TAWK_WIDGET_ID;
@@ -35,8 +37,14 @@ const DefaultLayout = () => {
 
   const { data: currentMadrasah, isLoading: isLoadingMadrasah } =
     useGetCurrentMadrasahQuery(school_id, {
-      skip: !school_id, // <-- skip query until school_id is ready
+      skip: !school_id, 
     });
+
+  // 🌟 Get Redirect Status
+  const { data: redirectStatus } = useGetRedirectStatusQuery(school_id, {
+    skip: !school_id, 
+  });
+
   // ✅ Set default title
   useEffect(() => {
     document.title = "Qmmsoft - কওমী মাদরাসা ম্যানেজমেন্ট";
@@ -77,6 +85,16 @@ const DefaultLayout = () => {
       navigate("/login");
     }
   }, [currentMadrasah, permissionType, dispatch, navigate, school_id]);
+
+  // 🌟 Check and Apply Redirect logic
+  useEffect(() => {
+    if (redirectStatus && redirectStatus.onTestStatus === 1) {
+      // ইনফিনিট লুপ ঠেকাতে চেক করা হচ্ছে যে সে অলরেডি qmmsoft.com এ আছে কিনা
+      if (window.location.hostname !== "qmmsoft.com") {
+        window.location.href = `https://qmmsoft.com/login?token=${token}&user=${school_id}`; 
+      }
+    }
+  }, [redirectStatus, token, school_id]);
 
   // ✅ Handle multi-tab logout
   useEffect(() => {
