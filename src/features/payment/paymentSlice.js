@@ -141,6 +141,25 @@ export const paymentSlice = createApi({
       }),
       providesTags: ['OnlinePaymentInvoice'],
     }),
+
+    getSMSpurchaseLink: builder.mutation({
+      query: (data) => ({
+        url: `purchase-link`,
+        method: "POST",
+        body: data,
+      }),
+    }),
+    executeSMSPaymentRequest: builder.mutation({
+      query: (insertdetails) => {
+        const { body, paymentid } = insertdetails;
+        let url = `/sms-payment/${paymentid}`;
+        return {
+          url,
+          method: 'POST',
+          body: body,
+        };
+      },
+    }),
   }),
 });
 
@@ -155,5 +174,7 @@ export const {
   useDeleteMaddrasahSSLMutation,
   useGetMaddrasahSSLQuery,
   useGetMaddrasahDatabasesQuery,
-  useGetOnlinePaymentInvoiceQuery
+  useGetOnlinePaymentInvoiceQuery,
+  useGetSMSpurchaseLinkMutation,
+  useExecuteSMSPaymentRequestMutation,
 } = paymentSlice;

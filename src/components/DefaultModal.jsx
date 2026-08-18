@@ -81,11 +81,12 @@ import AdmissionFormContentEditModal from '../view/result/AdmissionFormContentEd
 import { useRef } from 'react';
 import SupportTicketModal from '../view/support-ticket/SupportTicketModal';
 import AdmissionFormModal from './Forms/AdmissionFormModal';
-import AverageVCondition from '../pages/AverageVCondition';
+import ExamConditionModal from '../view/exam/examCondition/ExamConditionModal';
 import StudentCardModel from '../view/students/id-card-model/StudentCardModel';
 import ShiftEntry from '../view/attendance/ShiftEntry';
 import ScheduleShiftEntry from '../view/attendance/ScheduleShiftEntry';
 import TimeSettingEntry from '../view/attendance/TimeSettingEntry';
+import ExamConditionEditModal from '../view/exam/examCondition/ExamConditionEditModal';
 
 // Admin View
 import MadrasahActionView from '../view/AdminView/madrasah/MadrasahActionView';
@@ -102,11 +103,11 @@ const DefaultModal = () => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
       <ClickOutside
         className="max-w-screen-lg w-full overflow-hidden"
-        onClick={() => {
-          if (meta?.closeOnOutSide !== false) {
-            dispatch(closeModal());
-          }
-        }}
+          onClick={() => {
+            if (meta?.closeOnOutSide !== false) {
+              dispatch(closeModal());
+            }
+          }}
       >
         {/* Tailwind animation */}
         <div
@@ -371,7 +372,10 @@ const DefaultModal = () => {
                   <SupportTicketModal id={id} />
                 )}
                 {modalType === 'EXAM_CONDITION_SETTINGS' && (
-                  <AverageVCondition />
+                  <ExamConditionModal  />
+                )}
+                {modalType === 'EXAM_CONDITION_SETTINGS_EDIT' && (
+                  <ExamConditionEditModal data={id}  />
                 )}
 
                 {/* Admin Panel Model */}

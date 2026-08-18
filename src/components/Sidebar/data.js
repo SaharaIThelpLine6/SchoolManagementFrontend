@@ -292,30 +292,20 @@ export const menuData = [
         name: 'Exam Group Select',
         route: '/exam/exam-group-create',
       },
-      {
-        id: '6',
-        name: 'Talent Condition',
-        route: '/exam/talent-condition',
-      },
+      // {
+      //   id: '6',
+      //   name: 'Talent Condition',
+      //   route: '/exam/talent-condition',
+      // },
       {
         id: '7',
         name: 'Admit Card',
         route: '/exam/admit-card',
       },
       {
-        id: '8',
-        name: 'Exam Routing Create',
-        route: '/exam/routing',
-      },
-      {
         id: '9',
         name: 'Exam Rules',
         route: '/exam/rules',
-      },
-      {
-        id: '10',
-        name: 'Exam Report',
-        route: '/exam/report',
       },
       {
         id: '11',
@@ -326,6 +316,16 @@ export const menuData = [
         id: '12',
         name: 'Exam Seat plan',
         route: '/exam/exam-setplan',
+      },
+      {
+        id: '8',
+        name: 'Exam Routing Create',
+        route: '/exam/routing',
+      },
+      {
+        id: '10',
+        name: 'Exam Report',
+        route: '/exam/report',
       },
     ],
   },

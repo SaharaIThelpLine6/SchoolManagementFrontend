@@ -90,7 +90,7 @@ import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
 import StudentIdCardPrint from '../pages/StudentIdCardPrint';
 import StudentsFeeCollection from '../pages/StudentsFeeCollection';
 import StudentsReport from '../pages/StudentsReport';
-import TalentCondition from '../pages/TalentCondition';
+// import TalentCondition from '../pages/TalentCondition';
 import User from '../pages/User';
 import UserImage from '../pages/UserImage';
 import UserReports from '../pages/UserReports';
@@ -156,6 +156,7 @@ import AttendenceHolidayAndLeaveEntry from '../pages/AttendenceHolidayAndLeaveEn
 import AttendenceEntry from '../pages/AttendenceEntry';
 import HomWorkGroup from '../pages/HomWorkGroup';
 import DocumentSettings from '../pages/userpanel/DocumentSettings';
+import SMSPaymentConfirm from '../pages/SMSPaymentConfirm';
 
 // AdminRoutes
 import AdminRoutes from "../Admin/routes/AdminRoutes";
@@ -227,7 +228,7 @@ const Router = createBrowserRouter([
                 path: 'sms',
                 element: (
                   <RequirePermission permissionId={permissionsDataList.sms}>
-                    <SMS />
+                    <SMS pageTitle="SMS"  />
                   </RequirePermission>
                 ),
               },
@@ -735,14 +736,22 @@ const Router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
+              // {
+              //   path: 'exam-condition',
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.exam_condition}
+              //     >
+              //       <ExamCondition pageTitle="Exam Condition"  />
+              //     </RequirePermission>
+              //   ),
+              // },
               {
                 path: 'exam-condition',
                 element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.exam_condition}
-                  >
-                    <ExamCondition />
-                  </RequirePermission>
+                  <OwenGuide>
+                    <ExamCondition pageTitle="Exam Condition"  />
+                  </OwenGuide>
                 ),
               },
 
@@ -766,16 +775,16 @@ const Router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-              {
-                path: 'talent-condition',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.merit_condition}
-                  >
-                    <TalentCondition pageTitle="Talent Condition" />
-                  </RequirePermission>
-                ),
-              },
+              // {
+              //   path: 'talent-condition',
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.merit_condition}
+              //     >
+              //       <TalentCondition pageTitle="Talent Condition" />
+              //     </RequirePermission>
+              //   ),
+              // },
               {
                 path: 'admit-card',
                 element: (
@@ -834,8 +843,8 @@ const Router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.result_entry}
                   >
-                    {/* <PointBasedResultEntry pageTitle="Result Entry & Publish" /> */}
-                    <PageNotFound />
+                    <PointBasedResultEntry pageTitle="Result Entry & Publish" />
+                    {/* <PageNotFound /> */}
                   </RequirePermission>
                 ),
               },
@@ -847,7 +856,7 @@ const Router = createBrowserRouter([
                   >
                     {/* result report */}
                     {/* <ResultReport pageTitle="Average V: Report" /> */}
-                    <PageNotFound />
+                    {/* <PageNotFound /> */}
 
                   </RequirePermission>
                 ),
@@ -1103,6 +1112,11 @@ const Router = createBrowserRouter([
           {
             path: '/payment_confirm/:schoolid/:service/:size',
             element: <PaymentConfirm />,
+          },
+
+          {
+            path: '/sms-payment/:paymentid',
+            element: <SMSPaymentConfirm />,
           },
           {
             path: 'payment-history',

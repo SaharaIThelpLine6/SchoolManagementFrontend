@@ -6,7 +6,7 @@ import {
   useFormContext,
   useWatch,
 } from "react-hook-form";
-import { setPageName } from "../features/auth/authSlice";
+import { setPageName, setQuickBarConfig } from "../features/auth/authSlice";
 import useTranslate from "../utils/Translate";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import Checkbox from "../components/Checkboxes/Checkbox";
@@ -49,6 +49,12 @@ const UserReports = ({ pageTitle }) => {
   } = useGetUserReportQuery(queryParams, {
     skip: !queryParams,
   });
+
+  dispatch(
+    setQuickBarConfig({
+      visible: false,
+    })
+  );
 
   useEffect(() => {
     dispatch(setPageName(pageTitle));
@@ -112,7 +118,7 @@ const UserReports = ({ pageTitle }) => {
       <div className="flex flex-col gap-3">
         {/* Form */}
         <div className="print:hidden w-full border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
-          <h1 className="font-semibold text-lg text-theme-dark font-lato mb-4">
+          <h1 className="font-semibold text-lg text-theme-dark font-default mb-4">
             {translate("User Based Report")}
           </h1>
 

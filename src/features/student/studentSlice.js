@@ -122,7 +122,7 @@ const classSlice = createSlice({
     },
     deleteParentData: (state, action) => {
       state.parentsData = state.parentsData.filter(
-        (student) => student.StudentCode !== action.payload
+        (student) => student?.User.UserCode !== action.payload
       );
     },
     clearParentsData: (state) => {

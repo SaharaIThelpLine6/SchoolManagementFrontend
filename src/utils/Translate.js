@@ -941,6 +941,7 @@ const useTranslate = () => {
     "Redirect URL": "রিডাইরেক্ট URL",
     "Save Redirect URL": "সেভ রিডাইরেক্ট URL",
     "Redirect":"রিডাইরেক্ট ",
+    "Please fill Subject, Pass Number and Highest score first": "অনুগ্রহ করে প্রথমে বিষয়, পাস নাম্বার এবং সর্বোচ্চ নম্বর পূরণ করুন।",
 
 
   };

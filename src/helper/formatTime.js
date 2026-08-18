@@ -16,9 +16,6 @@ export const formatDate = (date) => {
   return `তারিখ: ${enToBn(`${dd}/${mm}/${yyyy}`)}`;
 };
 
-
-
-
 export const attendanceFormatTime = (value) => {
   if (!value) return '';
 

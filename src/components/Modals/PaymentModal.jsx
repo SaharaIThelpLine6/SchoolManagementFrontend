@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import {
   useCreatePaymentRequestMutation,
+  useGetSMSpurchaseLinkMutation,
   useGetUserInfoQuery,
 } from '../../features/payment/paymentSlice';
 
@@ -10,7 +11,7 @@ import CelfinLogo from '/banking/CellFin.png';
 import NagadLogo from '/banking/nagad-removebg-preview.png';
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
-import { useGetSMSBundleQuery, useGetSMSpurchaseLinkMutation } from '../../features/sms/smsSlice';
+import { useGetSMSBundleQuery } from '../../features/sms/smsSlice';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -169,8 +170,9 @@ const PaymentModal = ({serviceId}) => {
   const [size, setSize] = useState(null);        // selected size item
   const [reqLock, setReqLock] = useState(true);
   const smsBundleOptions = smsBundle?.data ?? [];
+  const [smsType, setSmsType] = useState('non-masking'); // 'non-masking' | 'masking' — defaults to non-masking
 
-  const sizeOptions = service?.id === 1 ? YEARS : service?.id === 2 ? QUOTA : smsBundleOptions;
+  // const sizeOptions = service?.id === 1 ? YEARS : service?.id === 2 ? QUOTA : smsBundleOptions;
 
   const computedPrice =
     service && size
@@ -180,6 +182,20 @@ const PaymentModal = ({serviceId}) => {
         ? Number(size.price || 0)
         : calculateServicePlanPrice(userPayInfo?.BalanceDr || 0, size.id)
       : 0;
+
+
+  const filteredSmsBundleOptions = smsBundleOptions.filter((item) => {
+  const nonMasked = Number(item.non_masked_sms_qty || 0);
+  const masked = Number(item.masked_sms_qty || 0);
+
+  if (nonMasked !== 0 && masked !== 0) return false; // both non-zero → skip
+
+  return smsType === 'masking'
+    ? nonMasked === 0   // non_masked is 0 → belongs to Masking tab
+    : masked === 0;     // masked is 0 → belongs to Non-Masking tab
+});
+
+  const sizeOptions = service?.id === 1 ? YEARS : service?.id === 2 ? QUOTA : filteredSmsBundleOptions;
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -206,25 +222,40 @@ const PaymentModal = ({serviceId}) => {
     setSize(item);
   }
 
+  function pickSmsType(type) {
+    setSmsType(type);
+    setSize(null); // clear previously selected bundle since the list changes
+  }
+
+
   async function handleSmsPurchase() {
-    if (!size || !reqLock) return;
+      if (!size || !reqLock) return;
 
-    try {
-      setReqLock(false);
-      const payload = await getSMSpurchaseLink({ bundle_id: size.id }).unwrap();
-      const purchaseUrl = payload?.data?.url;
+      const smsQty = Number(size.non_masked_sms_qty || 0) + Number(size.masked_sms_qty || 0);
+      const amount = Number(size.price || 0);
 
-      if (purchaseUrl) {
-        window.open(purchaseUrl, '_blank', 'noopener,noreferrer');
-      } else {
-        toast.error('Purchase link not found.');
+      try {
+        setReqLock(false);
+        const payload = await getSMSpurchaseLink({
+          bundle_id: size.id,
+          amount: amount,
+          sms_number: smsQty,
+        }).unwrap();
+        const purchaseUrl = payload?.data?.url;
+
+        if (purchaseUrl) {
+          console.log(payload);
+          
+          window.open(purchaseUrl, '_blank', 'noopener,noreferrer');
+        } else {
+          toast.error('Purchase link not found.');
+        }
+      } catch (err) {
+        console.error('SMS purchase link failed:', err);
+        toast.error('Unable to create SMS purchase link.');
+      } finally {
+        setReqLock(true);
       }
-    } catch (err) {
-      console.error('SMS purchase link failed:', err);
-      toast.error('Unable to create SMS purchase link.');
-    } finally {
-      setReqLock(true);
-    }
   }
 
   function goBack() {
@@ -339,10 +370,40 @@ const PaymentModal = ({serviceId}) => {
               </span>
             </div>
 
-            <div className={`inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg mb-4 border ${cardColors[service.color].base} ${cardColors[service.color].label}`}>
-              ✓ {service.label}
-            </div>
-
+            {
+              service.id != 3 ? (
+              <div className={`inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg mb-4 border ${cardColors[service.color].base} ${cardColors[service.color].label}`}>
+                ✓ {service.label}
+              </div> 
+              ) : null
+            }
+            
+            {service.id == 3 && (
+              <div className="inline-flex rounded-xl border border-gray-200 p-1 mb-4 bg-gray-50">
+                <button
+                  type="button"
+                  onClick={() => pickSmsType('non-masking')}
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+                    smsType === 'non-masking'
+                      ? 'bg-white text-blue-700 shadow-sm border border-blue-200'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Non-Masking
+                </button>
+                <button
+                  type="button"
+                  onClick={() => pickSmsType('masking')}
+                  className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all cursor-pointer ${
+                    smsType === 'masking'
+                      ? 'bg-white text-blue-700 shadow-sm border border-blue-200'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Masking
+                </button>
+              </div>
+            )}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-5">
               {sizeOptions.map((item) => {
                 const price =

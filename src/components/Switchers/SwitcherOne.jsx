@@ -1,33 +1,27 @@
 import { useState } from 'react';
 
-const SwitcherOne = () => {
-  const [enabled, setEnabled] = useState(false);
+const SwitcherOne = ({ label, registerKey }) => (
+  <label className="inline-flex items-center cursor-pointer">
+    <input
+      type="checkbox"
 
-  return (
-    <div>
-      <label
-        htmlFor="toggle1"
-        className="flex cursor-pointer select-none items-center"
-      >
-        <div className="relative">
-          <input
-            type="checkbox"
-            id="toggle1"
-            className="sr-only"
-            onChange={() => {
-              setEnabled(!enabled);
-            }}
-          />
-          <div className="block h-8 w-14 rounded-full bg-meta-9"></div>
-          <div
-            className={`absolute left-1 top-1 h-6 w-6 rounded-full bg-white transition ${
-              enabled && '!right-1 !translate-x-full !bg-primary'
-            }`}
-          ></div>
-        </div>
-      </label>
+      className="sr-only peer"
+    />
+
+    <div className="relative w-9 h-5 rounded-full bg-neutral-quaternary
+      peer-focus:ring-4 peer-focus:ring-brand-soft
+      peer-checked:bg-brand
+      after:absolute after:top-[2px] after:start-[2px]
+      after:h-4 after:w-4 after:rounded-full after:bg-white
+      after:transition-all after:content-['']
+      peer-checked:after:translate-x-full">
     </div>
-  );
-};
 
-export default SwitcherOne;
+    <span className="ms-3 text-sm font-medium text-heading">
+      {label}
+    </span>
+  </label>
+);
+
+
+export default SwitcherOne

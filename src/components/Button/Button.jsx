@@ -8,6 +8,8 @@ const Button = ({
   onClick,
   disabled = false,
   loading = false,
+  tooltip_message="",
+  tooltip_position="top",
   ...rest
 }) => {
   const baseClasses = `
@@ -35,6 +37,13 @@ const Button = ({
 
   return (
     <button
+        {...(tooltip_message
+      ? {
+          "data-tooltip-id": "my-tooltip",
+          "data-tooltip-content": tooltip_message,
+          "data-tooltip-place": tooltip_position,
+        }
+      : {})}
       type={type}
       onClick={onClick}
       className={combinedClasses}

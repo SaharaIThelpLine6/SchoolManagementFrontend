@@ -167,7 +167,17 @@ const TodayFeeCollection = ({ pageTitle }) => {
               title="Print"
             >
               {' '}
-              <SvgIcon name="MdLocalPrintshop" />{' '}
+              <SvgIcon name="TbFileTypePdf" />{' '}
+            </button>{' '}
+          </div>
+          <div className="">
+            <button
+              onClick={() => handlePrintOpenModal(row.UFOID)}
+              className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 active:bg-indigo-700 rounded-md shadow-md hover:shadow-lg transition duration-200"
+              title="Print"
+            >
+              {' '}
+              <SvgIcon name="TbPrinter" />{' '}
             </button>{' '}
           </div>
         </div>
@@ -249,7 +259,7 @@ const TodayFeeCollection = ({ pageTitle }) => {
   return (
     <div className="">
       <FormProvider {...methods}>
-        <div className="font-lato bg-white md:p-4 rounded-xl shadow-lg my-5 print:hidden">
+        <div className="font-default bg-white md:p-4 rounded-xl shadow-lg my-5 print:hidden">
           <form onSubmit={handleSubmit(onFilterSubmit)}>
             <div
               className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-4 bg-gradient-to-br px-3 sm:px-4 from-blue-50 to-blue-100 shadow-lg rounded-xl

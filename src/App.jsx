@@ -3,12 +3,14 @@ import { RouterProvider } from "react-router-dom";
 import { cssTransition, ToastContainer } from "react-toastify";
 import "./App.css";
 import "animate.css/animate.min.css";
+import 'react-tooltip/dist/react-tooltip.css'
 import { Suspense, useEffect } from "react";
 import Loading from "./components/Loading/Loading";
 import SocketManager from "./components/socket/SocketManager";
 import { useSelector } from "react-redux";
 import 'react-toastify/dist/ReactToastify.css';
 import Router from "./Routes/Routes";
+import { Tooltip } from "react-tooltip";
 const bounce = cssTransition({
   enter: "animate__animated animate__bounceIn",
   exit: "animate__animated animate__bounceOut",
@@ -41,6 +43,7 @@ export default function App() {
           closeButton={false}
           className={`min-h-[50px] text-[14px] ${fontClass} text-white rounded-[4px] hidden_in_print`}
         />
+        <Tooltip id="my-tooltip" className="!rounded-[5px] !bg-gray-900 !text-white !px-[1px] !py-[1px] !text-[14px] !font-default !height-[5px]" />
       </Suspense>
     </>
   );
@@ -113,7 +116,6 @@ export default function App() {
 // import { permissionsDataList } from "./Data/permissions";
 // import ExamFeeDetermine from "./pages/ExamFeeDetermine";
 // import QueryManage from "./pages/QueryManage";
-// import AverageVCondition from "./pages/AverageVCondition";
 // import StudentsList from "./pages/StudentsList";
 // import ExamAdmitCard from "./pages/ExamAdmitCard";
 // import ExamRouting from "./pages/ExamRouting";

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import UserOne from "../../images/user/user-01.png";
+import UserOne from "/avatar.png";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../../features/auth/authSlice";
 import ClickOutside from "../ClickOutside";
