@@ -1023,13 +1023,14 @@ const ExamRouting = ({ pageTitle }) => {
 
                   {Array.from({ length: 14 }).map((_, index) => (
                     <div key={`date-${index}`} className="border-r border-gray-400 text-center text-xs text-black bg-transparent hover:bg-blue-50 focus:bg-blue-50 focus:ring-inset focus:ring-1 focus:ring-blue-400 transition-colors">
-                      <Input
+                      {/* <Input
                         {...register(`bndate_${index}`)}
                         placeholder={translate("Date")}
                         type="text"
                         className="w-full h-full px-1 py-2 focus:outline-0 text-center"
-                        label="hidden"
-                      />
+                        label="hidden"  
+                      /> */}
+                      <DefaultInput registerKey={`bndate_${index}`} placeholder={translate("Date")} type="text" label="" />
                     </div>
                   ))}
 
@@ -1196,7 +1197,7 @@ const ExamRouting = ({ pageTitle }) => {
                     )
 
                   })}
-                  <div className="border-l border-gray-400"></div>
+                  <div className="border-l border-gray-400 border-l border-gray-400"></div>
                 </div>
 
 

@@ -934,6 +934,7 @@ const useTranslate = () => {
     "Document Settings": "ডকুমেন্ট সেটিংস",
     "Video Tutorial": "ভিডিও টিউটোরিয়াল",
     "Feedback & Suggestions": "মতামত ও পরামর্শ",
+    "Please fill Subject, Pass Number and Highest score first": "অনুগ্রহ করে প্রথমে বিষয়, পাস নাম্বার এবং সর্বোচ্চ নম্বর পূরণ করুন।",
 
 
   };

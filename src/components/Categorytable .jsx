@@ -247,10 +247,7 @@ function CategoryRow({ item }) {
                     {/* <input type="checkbox" className="w-3.5 h-3.5 accent-blue-600 cursor-pointer" /> */}
                     <div className="flex gap-2 items-center">
                         {permissionType > 0 && permissionType <= 4 ? <>
-                            <Link to={`/help/view-support-ticket/${item.ID}`}
-                                className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md" title="View"
-
-                            >
+                            <Link to={`/help/view-support-ticket/${item.ID}`} className="p-2 text-white bg-indigo-500 hover:bg-indigo-600 rounded-md" title="View">
                                 <SvgIcon
                                     name={"FaEye"}
                                     size={14}

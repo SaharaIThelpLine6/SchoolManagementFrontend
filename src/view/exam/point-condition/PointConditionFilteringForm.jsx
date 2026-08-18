@@ -34,7 +34,7 @@ const PointConditionFilteringForm = ({ onFilter }) => {
   return (
     <FormProvider {...methods}>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div>
+        {/* <div>
           <DefaultSelect
             options={sessionData ?? []}
             registerKey="SessionID"
@@ -66,7 +66,7 @@ const PointConditionFilteringForm = ({ onFilter }) => {
             label={translate("SubClass")}
             unicode={true}
           />
-        </div>
+        </div> */}
       </div>
     </FormProvider>
   );

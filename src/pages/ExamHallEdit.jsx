@@ -95,7 +95,7 @@ const ColumnCard = ({ index, onRemove, label }) => {
     const { control, setValue } = useFormContext();
     const rowsPath = `columns.${index}.rows`;
     const rows = useWatch({ control, name: rowsPath }) || [];
-
+    const translate = useTranslate();
     const changeSeats = (rowIndex, delta) => {
         const next = rows.map((row, i) =>
             i === rowIndex
@@ -206,7 +206,7 @@ const ColumnCard = ({ index, onRemove, label }) => {
                 onClick={addRow}
                 className="mt-2.5 flex items-center gap-1.5 text-xs text-gray-400 cursor-pointer bg-transparent border-none hover:text-gray-700"
             >
-                <IconPlus size={12} /> Add row
+                <IconPlus size={12} /> {translate("Add Benches")}
             </button>
         </div>
     );

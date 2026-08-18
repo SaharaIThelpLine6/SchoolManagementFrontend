@@ -62,7 +62,10 @@ export const examSlice = createApi({
       query: () => `get_exam_fee_setting`,
       providesTags: ['ExamFeeSettings'],
     }),
-
+    getExamConditions: builder.query({
+      query: () => `exam_conditions`,
+      providesTags: ['ExamConditions'],
+    }),
     postExamFeeSetting: builder.mutation({
       query: (body) => ({
         url: `insert_exam_fee_setting`,
@@ -375,6 +378,52 @@ export const examSlice = createApi({
       }),
       invalidatesTags: ["ReportSettings"],
     }),
+
+
+    getExamDivitionByType: builder.query({
+      query: (type) => type ? `exam_divitions_by_type?type=${type}` : `exam_divitions_by_type`,
+      providesTags: ['ExamDivitions'],
+    }),
+    postExamDivition: builder.mutation({
+      query: (body) => ({
+        url: `exam_division`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["ExamDivitions"],
+    }),
+    postExamSettings: builder.mutation({
+      query: (body) => ({
+        url: `exam_condition_entry`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["ExamDivitions", "ExamConditions"],
+    }),
+
+    getExamConditonEntry: builder.query({
+      query: ({SessionID, ExamID, SubClassID}) => `exam_condition_entry/${SessionID}/${ExamID}/${SubClassID}`,
+      providesTags: ['ExamRules'],
+    }),
+
+    updateExamSettings: builder.mutation({
+      query: (body) => ({
+        url: `exam_condition_entry`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["ExamDivitions"],
+    }),
+
+    deleteExamCondition: builder.mutation({
+      query: ({SessionID, ExamID, SubClassID}) => ({
+        url: `exam_condition_entry`,
+        method: "DELETE",
+        body: {SessionID, ExamID, SubClassID},
+      }),
+      invalidatesTags: ["ExamDivitions", "ExamConditions"],
+    }),
+
   }),
 });
 
@@ -387,6 +436,7 @@ export const {
   useGetExamNamesQuery,
   useGetExamNameQuery,
   useGetExamFeeSettingQuery,
+  useGetExamConditionsQuery,
   usePostExamFeeSettingMutation,
   useUpdateExamFeeSettingMutation,
   useDeleteExamFeeSettingMutation,
@@ -421,5 +471,11 @@ export const {
   usePostExamRuleMutation,
   usePutExamRuleMutation,
   useDeleteExamRuleMutation,
-  useGetExamFeeSlidQuery
+  useGetExamFeeSlidQuery,
+  useGetExamDivitionByTypeQuery,
+  usePostExamDivitionMutation,
+  usePostExamSettingsMutation,
+  useLazyGetExamConditonEntryQuery,
+  useUpdateExamSettingsMutation,
+  useDeleteExamConditionMutation,
 } = examSlice;

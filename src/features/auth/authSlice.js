@@ -11,6 +11,10 @@ const initialState = {
   user: null,
   status: 'idle',
   error: null,
+  quickBar: {
+    visible: true,
+    items: [],
+  },
 };
 
 export const verifyUser = createAsyncThunk(
@@ -44,6 +48,27 @@ const authSlice = createSlice({
     },
     setPageName: (state, action)=>{
       state.pageName = action.payload
+    },
+    setQuickBarVisibility: (state, action) => {
+      state.quickBar.visible = action.payload;
+    },
+    setQuickBarItems: (state, action) => {
+      state.quickBar.items = Array.isArray(action.payload) ? action.payload : [];
+    },
+    setQuickBarConfig: (state, action) => {
+      const { visible, items } = action.payload || {};
+
+      if (typeof visible === 'boolean') {
+        state.quickBar.visible = visible;
+      }
+
+      if (Array.isArray(items)) {
+        state.quickBar.items = items;
+      }
+    },
+    resetQuickBarConfig: (state) => {
+      state.quickBar.visible = true;
+      state.quickBar.items = [];
     }
   },
   extraReducers: (builder) => {
@@ -68,5 +93,13 @@ const authSlice = createSlice({
   },
 });
 
-export const { login, logout, setPageName } = authSlice.actions;
+export const {
+  login,
+  logout,
+  setPageName,
+  setQuickBarVisibility,
+  setQuickBarItems,
+  setQuickBarConfig,
+  resetQuickBarConfig,
+} = authSlice.actions;
 export default authSlice.reducer;

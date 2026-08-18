@@ -7,8 +7,8 @@ export default defineConfig({
   plugins: [
     react(),
     visualizer({
-      filename: "bundle-analysis.html", // Build শেষে report file
-      open: true,                       // Automatically browser open
+      filename: "bundle-analysis.html", 
+      open: true,                     
       gzipSize: true,
       brotliSize: true,
     }),

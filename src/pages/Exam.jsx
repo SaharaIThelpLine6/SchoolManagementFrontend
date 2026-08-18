@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import { useGetExamNamesQuery } from "/src/features/exam/examQuerySlice";
 import { useEffect, useState } from "react";
-import { setPageName } from "../features/auth/authSlice";
+import { setPageName, setQuickBarConfig } from "../features/auth/authSlice";
 import SortableTable from "../components/Tables/SortableTable";
 import { FormProvider, useForm } from "react-hook-form";
 import ThemeInputBox1 from "../components/Forms/ThemeInputBox1";

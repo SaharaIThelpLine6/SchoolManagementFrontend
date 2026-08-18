@@ -192,7 +192,9 @@ tr:nth-child(even) {
   border-top: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
 }
-
+.swal2-title{
+  font-family: var(--app-font);
+}
 @media print {
   @page {
     margin-top: 10px;

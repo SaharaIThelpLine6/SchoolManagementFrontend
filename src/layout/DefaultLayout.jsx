@@ -54,6 +54,8 @@ const DefaultLayout = () => {
     const lang = localStorage.getItem("lang");
     if (lang && lang !== currectLanguage) {
       dispatch(setCurrentLanguage(lang));
+    } else if(!lang) {
+      dispatch(setCurrentLanguage(currectLanguage));
     }
 
     if (token) {

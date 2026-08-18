@@ -35,14 +35,8 @@ export const smsSlice = createApi({
       query: () => "bundles",
       providesTags: ["smsBundles"],
     }),
-    getSMSpurchaseLink: builder.mutation({
-      query: (data) => ({
-        url: `purchase-link`,
-        method: "POST",
-        body: data,
-      }),
-    }),
+
   }),
 });
 
-export const { usePostSMSSendMutation, useGetSMSTemplatesQuery, useGetCheckBalanceQuery, useGetSMSBundleQuery, useGetSMSpurchaseLinkMutation } = smsSlice;
+export const { usePostSMSSendMutation, useGetSMSTemplatesQuery, useGetCheckBalanceQuery, useGetSMSBundleQuery } = smsSlice;

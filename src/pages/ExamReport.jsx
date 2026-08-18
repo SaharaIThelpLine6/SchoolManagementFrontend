@@ -50,8 +50,9 @@ import BanglaOneColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalList
 import BanglaTwoColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/BanglaTwoColumn';
 import NameWithAddressOneColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/NameWithAddressOneColumn';
 import StudentNameWithHolding from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/StudentNameWithHolding';
-
-// API URL নিয়ে আসা হচ্ছে
+import { useGetExamHallListQuery } from '../features/examhall/examHallQuerySlice';
+import ExaminationRoomSeatingChart from '../view/exam/ExamReportPdf/ExaminationRoomSeatingChart';
+import InstituteExamSeatingChart from '../view/exam/ExamReportPdf/InstituteExamSeatingChart';
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
 const ExamReport = ({ pageTitle }) => {
@@ -143,7 +144,12 @@ const ExamReport = ({ pageTitle }) => {
         return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'ClassID'].includes(
           fieldName
         );
-
+      case 10:
+        return ['ReportID', 'SessionID', 'ExamID', "HallList"].includes(
+          fieldName
+        );
+      case 11:
+        return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
       default:
         return false;
     }
@@ -178,10 +184,9 @@ const ExamReport = ({ pageTitle }) => {
 
 
 
-  useEffect(()=>{
-    console.log(shouldSkip);
-    
-  }, [shouldSkip])
+  // useEffect(()=>{
+  //   console.log(shouldSkip);
+  // }, [shouldSkip])
 
 
   const { data, isLoading, isError, error } = useGetExamReportQuery(
@@ -206,6 +211,7 @@ const ExamReport = ({ pageTitle }) => {
   const { data: SubClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
   const { data: residentialData } = useGetResidentialQuery();
+  const { data: examHallList } = useGetExamHallListQuery();
 
   useEffect(() => {
     dispatch(setPageName(pageTitle));
@@ -253,8 +259,8 @@ const ExamReport = ({ pageTitle }) => {
         error.status === 403
           ? translate('You do not have permission to view this report')
           : error.status === 400
-          ? error.data.error || translate('Missing or invalid data provided')
-          : translate('An error occurred while fetching the report')
+            ? error.data.error || translate('Missing or invalid data provided')
+            : translate('An error occurred while fetching the report')
       );
     } else {
       setErrorMessage(null);
@@ -289,7 +295,7 @@ const ExamReport = ({ pageTitle }) => {
     return found?.pdfList || [];
   };
 
-  
+
 
   const pdfOptions = getPDFOptions();
 
@@ -307,11 +313,29 @@ const ExamReport = ({ pageTitle }) => {
 
 
 
-  useEffect(()=>{
+  useEffect(() => {
     setQueryParams(formValues);
   }, [formValues])
 
   const onSubmit = (formData) => {
+    // const params = {
+    //   report_id: formData.ReportID,
+    //   session_id: Number(formData.SessionID),
+    //   class_id: Number(formData.ClassID),
+    //   subClass_id: Number(formData.SubClassID),
+    //   exam_id: Number(formData.ExamID),
+    //   residential_id: Number(formData.RDID),
+    //   language_id: Number(formData.id),
+    //   pdf_id: Number(formData.PdfID),
+    //   ERIsActive: Number(formData.ERIsActive),
+    // };
+
+    // Object.keys(params).forEach(
+    //   (key) =>
+    //     (params[key] === undefined || params[key] === '') && delete params[key]
+    // );
+    // console.log('Submitted params:', params);
+    // setQueryParams(params);
     window.print();
   };
 
@@ -362,7 +386,6 @@ const ExamReport = ({ pageTitle }) => {
           className="watermark-print"
         />
       )}
-
       <div className="">
         <div className="flex flex-col font-default gap-3 print:hidden">
           <div className="print:hidden w-full border rounded-lg p-4 bg-white shadow-sm border-theme-offwhite">
@@ -381,9 +404,7 @@ const ExamReport = ({ pageTitle }) => {
                   nameField="ReportName"
                   registerKey="ReportID"
                   valueField="ReportID"
-                  options={examReports.filter((r) =>
-                    [1, 2, 3, 4, 5, 6, 7, 8, 9].includes(r.ReportID)
-                  )}
+                  options={examReports}
                   type="number"
                   require="This Field is required"
                   defaultSelect={false}
@@ -502,6 +523,9 @@ const ExamReport = ({ pageTitle }) => {
                     require="This Field is required"
                   />
                 )}
+                {
+                  shouldShowFields('HallList') && (<DefaultSelect options={examHallList} registerKey={"HallId"} nameField={"HallName"} valueField={"ID"} label={translate('Exam Hall')} />)
+                }
 
                 <div className="md:col-span-4 flex justify-end">
                   <Button type="submit">{translate('Preview')}</Button>
@@ -653,22 +677,23 @@ const ExamReport = ({ pageTitle }) => {
             )}
           {/* 8. নম্বরপত্র ভর্তি সিরিয়ালে */}
           {Number(selectedReportID) === 8 && <SingatureSheetNS />}
-
-          {/* 9. সকল পরীক্ষার্থীর পরিসংখ্যান */}
+          {/* 9. সকল পরীক্ষার্থীর পরিসংখ্যান  */}
           {Number(selectedReportID) === 9 && <StatisticsOfAllStudents />}
+          {Number(selectedReportID) === 10 && <ExaminationRoomSeatingChart queryParams={queryParams} />}
+          {Number(selectedReportID) === 11 && <InstituteExamSeatingChart queryParams={queryParams} />}
         </div>
 
         {/* <StatisticsOfAllExaminees
-          queryParams={queryParams}
-          selectedPdfID={selectedPdfID}
-          selectedPdfName={getSelectedPdfName()}
-          pdfOptions={pdfOptions}
-          reportData={{
-            reportID: selectedReportID,
-            languageID: languageID,
-            pdfData: selectedPdfData
-          }}
-        /> */}
+        queryParams={queryParams}
+        selectedPdfID={selectedPdfID}
+        selectedPdfName={getSelectedPdfName()}
+        pdfOptions={pdfOptions}
+        reportData={{
+          reportID: selectedReportID,
+          languageID: languageID,
+          pdfData: selectedPdfData
+        }}
+      /> */}
       </div>
     </>
   );
