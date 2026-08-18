@@ -2,7 +2,7 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../features/auth/authSlice";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 import LoginInput from "../components/Forms/LoginInput";
@@ -28,21 +28,11 @@ const Login = () => {
     // 🌟 NEW: URL থেকে টোকেন নেওয়ার লজিক (Auto Login)
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get('token');
-    const urlUser = urlParams.get('user');
-
     if (urlToken) {
-      // Redux-এ ডিসপ্যাচ করে টোকেন এবং ইউজার ডেটা সেট করা হচ্ছে
-      dispatch(login({ token: urlToken, user: { schoolId: urlUser } }));
-      initSocket(urlToken);
-
-      // URL থেকে token রিমুভ করে ক্লিন URL তৈরি করা (যাতে রিফ্রেশ করলে আবার না আসে)
-      window.history.replaceState(null, '', window.location.pathname);
-
+      dispatch(login({ token: urlToken }));
       navigate("/");
       return;
     }
-
-    // EXISTING: আগে থেকে টোকেন থাকলে ড্যাশবোর্ডে যাবে
     if (auth.token) {
       navigate("/");
     }
@@ -63,10 +53,10 @@ const Login = () => {
           const statusRes = await checkRedirectStatus(response.user.schoolId || data.school_id).unwrap();
           
           if (statusRes && statusRes.onTestStatus === 1) {
-            // ইনফিনিট লুপ ঠেকাতে চেক করা হচ্ছে যে সে অলরেডি লাইভ সার্ভারে (qmmsoft.com) আছে কিনা
-            if (window.location.hostname !== "qmmsoft.com") {
-              window.location.href = `https://qmmsoft.com/login?token=${response.token}&user=${response.user.schoolId}`; 
-              return; // রিডাইরেক্ট হয়ে যাবে, তাই নিচের navigate("/") কোড রান করবে না।
+            console.log(window.location.hostname);
+            if (window.location.hostname !== "testbda.qmmsoft.com" && window.location.hostname !== "localhost") {
+              window.location.href = `https://testbda.qmmsoft.com/login?token=${response.token}`; 
+              return;
             }
           }
         } catch (redirectError) {

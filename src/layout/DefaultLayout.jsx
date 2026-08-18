@@ -90,10 +90,14 @@ const DefaultLayout = () => {
 
   // 🌟 Check and Apply Redirect logic
   useEffect(() => {
-    if (redirectStatus && redirectStatus.onTestStatus === 1) {
-      // ইনফিনিট লুপ ঠেকাতে চেক করা হচ্ছে যে সে অলরেডি qmmsoft.com এ আছে কিনা
-      if (window.location.hostname !== "qmmsoft.com") {
-        window.location.href = `https://qmmsoft.com/login?token=${token}&user=${school_id}`; 
+    
+    
+    if (redirectStatus && redirectStatus.onTestStatus === 1) {   
+      console.log(window.location.hostname);   
+      console.log(window.location.hostname !== "testbda.qmmsoft.com");   
+      console.log(window.location.hostname !== "localhost");   
+      if (window.location.hostname !== "testbda.qmmsoft.com" && window.location.hostname !== "localhost") {
+        window.location.href = `https://testbda.qmmsoft.com/login?token=${token}`; 
       }
     }
   }, [redirectStatus, token, school_id]);
