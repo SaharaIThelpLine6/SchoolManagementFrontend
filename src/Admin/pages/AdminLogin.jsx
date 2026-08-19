@@ -1,82 +1,48 @@
-// src/pages/Login.jsx
 import { useForm, FormProvider } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../features/auth/authSlice";
+import { login } from "../../features/auth/authSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
-import LoginInput from "../components/Forms/LoginInput";
-import SvgIcon from "../components/icons/SvgIcon";
-import { usePostLoginMutation } from "../features/dashboard/dashboardQuerySlice";
-import { initSocket } from "../helper/socket";
-import { useLazyGetRedirectStatusQuery } from "../features/Admin/redirectSlice"; // 🌟 NEW IMPORT
+import LoginInput from "../../components/Forms/LoginInput";
+import SvgIcon from "../../components/icons/SvgIcon";
+import { usePostLoginMutation } from "../../features/dashboard/dashboardQuerySlice";
+import { initSocket } from "../../helper/socket";
 
-// const API_URL = import.meta.env.VITE_SERVER_URL;
+const DASHBOARD_ROUTE = "/admin/dashboard";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const methods = useForm();
+  // ✅ school_id এর জন্য default value 11 সেট করা হলো
+  const methods = useForm({
+    defaultValues: {
+      school_id: "11",
+      username: "",
+      password: "",
+    },
+  });
   const { handleSubmit } = methods;
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
-  
-  const [ postLogin ] = usePostLoginMutation();
-  const [ checkRedirectStatus ] = useLazyGetRedirectStatusQuery(); // 🌟 NEW QUERY HOOK
+  const [postLogin] = usePostLoginMutation();
 
   useEffect(() => {
-    // 🌟 NEW: URL থেকে টোকেন নেওয়ার লজিক (Auto Login)
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlToken = urlParams.get('token');
-    const urlUser = urlParams.get('user');
-
-    if (urlToken) {
-      // Redux-এ ডিসপ্যাচ করে টোকেন এবং ইউজার ডেটা সেট করা হচ্ছে
-      dispatch(login({ token: urlToken, user: { schoolId: urlUser } }));
-      initSocket(urlToken);
-
-      // URL থেকে token রিমুভ করে ক্লিন URL তৈরি করা (যাতে রিফ্রেশ করলে আবার না আসে)
-      window.history.replaceState(null, '', window.location.pathname);
-
-      navigate("/");
-      return;
-    }
-
-    // EXISTING: আগে থেকে টোকেন থাকলে ড্যাশবোর্ডে যাবে
     if (auth.token) {
-      navigate("/");
+      navigate(DASHBOARD_ROUTE);
     }
-  }, [auth.token, navigate, dispatch]);
+  }, [auth.token, navigate]);
 
   const onSubmit = async (data) => {
     try {
-      const response = await postLogin(data).unwrap();
+      // ✅ school_id সবসময় 11 পাঠানো হবে (যদি ফিল্ড হিডেন থাকে তবু)
+      const payload = { ...data, school_id: "11" };
+      const response = await postLogin(payload).unwrap();
+
       if (response.token) {
-        dispatch(
-          login({ token: response.token, user: response.user })
-        );
+        dispatch(login({ token: response.token, user: response.user }));
         initSocket(response.token);
-
-        // 🌟 NEW: Redirect Check Logic
-        try {
-          // data.school_id বা response.user.schoolId ব্যবহার করে স্ট্যাটাস চেক
-          const statusRes = await checkRedirectStatus(response.user.schoolId || data.school_id).unwrap();
-          
-          if (statusRes && statusRes.onTestStatus === 1) {
-            // ইনফিনিট লুপ ঠেকাতে চেক করা হচ্ছে যে সে অলরেডি লাইভ সার্ভারে (qmmsoft.com) আছে কিনা
-            if (window.location.hostname !== "qmmsoft.com") {
-              window.location.href = `https://qmmsoft.com/login?token=${response.token}&user=${response.user.schoolId}`; 
-              return; // রিডাইরেক্ট হয়ে যাবে, তাই নিচের navigate("/") কোড রান করবে না।
-            }
-          }
-        } catch (redirectError) {
-          console.error("❌ Redirect status check failed during login:", redirectError);
-        }
-        // 🌟 END NEW LOGIC
-
-        // 🌟 Normal Flow: যদি onTestStatus 1 না হয় অথবা API এরর দেয়, তবে আগের মতোই ড্যাশবোর্ডে যাবে
-        navigate("/");
-        // window.location.reload();
+        navigate(DASHBOARD_ROUTE);
       } else {
         Swal.fire({
           icon: "error",
@@ -107,7 +73,7 @@ const Login = () => {
               className="mx-auto w-[16rem] md:w-[12rem] filter brightness-0 invert"
             />
             <p className="text-white text-xs md:text-sm mt-2 md:mt-3 font-lato">
-              কওমি মাদরাসার জন্য একটি পূর্ণ সমাধান
+              Admin Control
             </p>
             <img
               src="/QMMSoftIcon.svg"
@@ -130,13 +96,16 @@ const Login = () => {
             </div>
 
             <div className="flex flex-col gap-4 md:gap-4">
-              <LoginInput
-                label="মাদ্রাসার কোড :"
-                type="number"
-                placeholder="Madrasa Code"
-                registerKey="school_id"
-                icon="FaPhone"
-              />
+              {/* মাদ্রাসার কোড ফিল্ডটি পুরোপুরি হিডেন করা হয়েছে */}
+              <div className="hidden">
+                <LoginInput
+                  label="মাদ্রাসার কোড :"
+                  type="number"
+                  placeholder="Madrasa Code"
+                  registerKey="school_id"
+                  icon="FaPhone"
+                />
+              </div>
 
               <LoginInput
                 label="ইউজার নাম :"
@@ -176,16 +145,6 @@ const Login = () => {
               <SvgIcon name="FiArrowRight" size={18} />
               লগিন অথবা সাইন আপ
             </button>
-
-            <p className="text-center text-sm text-gray-600 mt-2">
-              পাসওয়ার্ড ভুলে গেছেন?{' '}
-              <Link
-                to={`/forget_password`}
-                className="text-blue-600 font-medium hover:underline hover:text-blue-700"
-              >
-                পাসওয়ার্ড রিসেট করুন
-              </Link>
-            </p>
           </form>
         </div>
       </section>

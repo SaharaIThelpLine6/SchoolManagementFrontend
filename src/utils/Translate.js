@@ -934,6 +934,13 @@ const useTranslate = () => {
     "Document Settings": "ডকুমেন্ট সেটিংস",
     "Video Tutorial": "ভিডিও টিউটোরিয়াল",
     "Feedback & Suggestions": "মতামত ও পরামর্শ",
+    "Admin Dashboard": "অ্যাডমিন ড্যাশবোর্ড",
+    "Add Madrasah": "মাদ্রাসা যোগ করুন",
+    "Actions for": "কার্যক্রম - ",
+    "Main Domain": "প্রধান ডোমেইন",
+    "Redirect URL": "রিডাইরেক্ট URL",
+    "Save Redirect URL": "সেভ রিডাইরেক্ট URL",
+    "Redirect":"রিডাইরেক্ট ",
     "Please fill Subject, Pass Number and Highest score first": "অনুগ্রহ করে প্রথমে বিষয়, পাস নাম্বার এবং সর্বোচ্চ নম্বর পূরণ করুন।",
 
 

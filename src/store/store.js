@@ -42,6 +42,10 @@ import { onlineDonationSlice } from "../features/userPanel/onlineDonation/online
 import { examHallSlice } from "../features/examhall/examHallQuerySlice";
 import { examSitPlanSlice } from "../features/exam/examSitPlanQuerySlice";
 import { attendanceSlice } from "../features/attendance/attendanceSlice";
+
+// Admin
+import {redirectSlice} from "../features/Admin/redirectSlice"
+
 const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -88,6 +92,10 @@ const store = configureStore({
     [examHallSlice.reducerPath]: examHallSlice.reducer,
     [attendanceSlice.reducerPath]: attendanceSlice.reducer,
     [examSitPlanSlice.reducerPath]: examSitPlanSlice.reducer,
+
+    // Admin
+    [redirectSlice.reducerPath]: redirectSlice.reducer,
+
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
@@ -119,7 +127,11 @@ const store = configureStore({
       .concat(onlineDonationSlice.middleware)
       .concat(examHallSlice.middleware)
       .concat(attendanceSlice.middleware)
-      .concat(examSitPlanSlice.middleware),
+      .concat(examSitPlanSlice.middleware)
+
+      // Admin
+      .concat(redirectSlice.middleware),
+
 });
 
 export default store;

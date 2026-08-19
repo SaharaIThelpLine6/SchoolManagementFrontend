@@ -1,23 +1,21 @@
-// src/layout/DefaultLayout.jsx
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import DefaultModal from "../components/DefaultModal";
-import { verifyUser, logout } from "../features/auth/authSlice";
-import { setCurrentLanguage } from "../features/language/languageSlice";
-import { closeSidebar } from "../features/sidebar/sideBarSlice";
-import SideBar from "../components/Sidebar/SideBar";
-import Header from "../components/Header/Header";
-import { useGetInstitutionInfoQuery } from "../features/settings/settingsQuerySlice";
+import DefaultModal from "../../components/DefaultModal";
+import { verifyUser, logout } from "../../features/auth/authSlice";
+import { setCurrentLanguage } from "../../features/language/languageSlice";
+import { closeSidebar } from "../../features/sidebar/sideBarSlice";
+import AdminSidebar from "../components/AdminSidebar";
+import AdminHeader from "../components/AdminHeader";
+import { useGetInstitutionInfoQuery } from "../../features/settings/settingsQuerySlice";
 import TawkMessenger from "@tawk.to/tawk-messenger-react";
-import DeveloperCredit from "../components/DeveloperCredit";
-import { useGetCurrentMadrasahQuery } from "../features/userType/userTypeSlice";
-import { useGetRedirectStatusQuery } from "../features/Admin/redirectSlice";
+import DeveloperCredit from "../../components/DeveloperCredit";
+import { useGetCurrentMadrasahQuery } from "../../features/userType/userTypeSlice";
 
 const tawkPropertyId = import.meta.env.VITE_TAWK_PROPERTY_ID;
 const tawkWidgetId = import.meta.env.VITE_TAWK_WIDGET_ID;
 
-const DefaultLayout = () => {
+const AdminLayout = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
@@ -37,14 +35,8 @@ const DefaultLayout = () => {
 
   const { data: currentMadrasah, isLoading: isLoadingMadrasah } =
     useGetCurrentMadrasahQuery(school_id, {
-      skip: !school_id, 
+      skip: !school_id, // <-- skip query until school_id is ready
     });
-
-  // 🌟 Get Redirect Status
-  const { data: redirectStatus } = useGetRedirectStatusQuery(school_id, {
-    skip: !school_id, 
-  });
-
   // ✅ Set default title
   useEffect(() => {
     document.title = "Qmmsoft - কওমী মাদরাসা ম্যানেজমেন্ট";
@@ -62,8 +54,6 @@ const DefaultLayout = () => {
     const lang = localStorage.getItem("lang");
     if (lang && lang !== currectLanguage) {
       dispatch(setCurrentLanguage(lang));
-    } else if(!lang) {
-      dispatch(setCurrentLanguage(currectLanguage));
     }
 
     if (token) {
@@ -88,16 +78,6 @@ const DefaultLayout = () => {
     }
   }, [currentMadrasah, permissionType, dispatch, navigate, school_id]);
 
-  // 🌟 Check and Apply Redirect logic
-  useEffect(() => {
-    if (redirectStatus && redirectStatus.onTestStatus === 1) {
-      // ইনফিনিট লুপ ঠেকাতে চেক করা হচ্ছে যে সে অলরেডি qmmsoft.com এ আছে কিনা
-      if (window.location.hostname !== "qmmsoft.com") {
-        window.location.href = `https://qmmsoft.com/login?token=${token}&user=${school_id}`; 
-      }
-    }
-  }, [redirectStatus, token, school_id]);
-
   // ✅ Handle multi-tab logout
   useEffect(() => {
     const handleStorageChange = (e) => {
@@ -116,9 +96,9 @@ const DefaultLayout = () => {
 
   return (
     <div className="h-screen flex flex-col bg-gray-100 font-SolaimanLipi overflow-hidden print:h-auto print:bg-white print:overflow-visible">
-      {/* Header */}
+      {/* AdminHeader */}
       <div className="z-40 print:hidden">
-        <Header />
+        <AdminHeader />
       </div>
 
       <div className="flex flex-1 overflow-hidden relative print:overflow-visible">
@@ -128,7 +108,7 @@ const DefaultLayout = () => {
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
             lg:top-0 lg:h-full lg:static lg:translate-x-0 lg:transform-none`}
         >
-          <SideBar />
+          <AdminSidebar />
         </div>
 
         {/* Overlay for mobile */}
@@ -160,4 +140,4 @@ const DefaultLayout = () => {
   );
 };
 
-export default DefaultLayout;
+export default AdminLayout;

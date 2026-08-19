@@ -158,6 +158,9 @@ import HomWorkGroup from '../pages/HomWorkGroup';
 import DocumentSettings from '../pages/userpanel/DocumentSettings';
 import SMSPaymentConfirm from '../pages/SMSPaymentConfirm';
 
+// AdminRoutes
+import AdminRoutes from "../Admin/routes/AdminRoutes";
+
 const Router = createBrowserRouter([
   {
     path: '/forget_password',
@@ -1398,6 +1401,10 @@ const Router = createBrowserRouter([
     path: '*',
     element: <NotFound />,
   },
-]);
+
+  // Admin Route
+  ...AdminRoutes,
+]
+);
 
 export default Router;
