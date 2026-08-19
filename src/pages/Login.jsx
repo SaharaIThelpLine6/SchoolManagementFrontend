@@ -10,6 +10,7 @@ import SvgIcon from "../components/icons/SvgIcon";
 import { usePostLoginMutation } from "../features/dashboard/dashboardQuerySlice";
 import { initSocket } from "../helper/socket";
 import { useLazyGetRedirectStatusQuery } from "../features/Admin/redirectSlice"; // 🌟 NEW IMPORT
+import PWAInstallButton from "../components/PWAInstallButton";
 
 // const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -87,7 +88,9 @@ const Login = () => {
 
   return (
     <FormProvider {...methods}>
+      
       <section className="sm:h-[100svh] md:h-screen w-full flex items-center justify-center bg-gradient-to-b from-white to-blue-100 sm:px-6 lg:px-8 overflow-hidden">
+        <PWAInstallButton />
         <div className="w-full h-full sm:h-auto md:max-w-md bg-[#ddeffe] rounded-lg shadow-lg border-b-8 border-[#ffa500] flex flex-col">
           {/* Header */}
           <div className="bg-[#007af7] p-6 sm:p-8 md:p-6 text-center sm:rounded-t-xl rounded-b-[40px] md:rounded-b-none relative min-h-[200px] md:min-h-[150px] flex flex-col items-center justify-center">
