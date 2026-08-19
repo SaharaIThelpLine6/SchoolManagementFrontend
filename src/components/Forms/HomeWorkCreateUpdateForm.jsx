@@ -235,7 +235,7 @@ const HomeWorkCreateUpdateForm = ({ id }) => {
           }
         }
 
-        hideModal();
+        // hideModal();
       } catch (error) {
         let message = translate('Something went wrong');
 
