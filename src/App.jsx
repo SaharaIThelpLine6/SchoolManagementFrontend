@@ -3,7 +3,7 @@ import { RouterProvider } from "react-router-dom";
 import { cssTransition, ToastContainer } from "react-toastify";
 import "./App.css";
 import "animate.css/animate.min.css";
-import 'react-tooltip/dist/react-tooltip.css'
+import 'react-tooltip/dist/react-tooltip.css';
 import { Suspense, useEffect } from "react";
 import Loading from "./components/Loading/Loading";
 import SocketManager from "./components/socket/SocketManager";

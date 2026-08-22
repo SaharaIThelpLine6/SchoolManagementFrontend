@@ -11,25 +11,27 @@ export const AdminmenuData = [
     route: '/admin/all-madrasah',
     icon: 'LuWarehouse',
   },
-  // {
-  //   id: '3',
-  //   name: 'Domain Redirect',
-  //   route: '/admin/domain-redirect',
-  //   icon: 'LuArrowRightLeft',
-  // },
-  // {
-  //   id: '2',
-  //   name: 'General Information',
-  //   route: '/general-info',
-  //   icon: 'LuWarehouse',
-  //   subMenu: [
-  //     {
-  //       id: '1',
-  //       name: 'All Madrasah',
-  //       route: '/general-info/all-madrasah',
-  //       subMenu: false,
-  //     },
-  //   ],
-  // },
+  {
+    id: '3',
+    name: 'Payment Info',
+    route: '/Payment-info',
+    icon: 'LuWarehouse',
+    subMenu: [
+      {
+        id: '1',
+        name: 'ssl comerce ',
+        route: '/admin/ssl-comerce',
+        icon: 'LuWarehouse',
+        subMenu: false,
+      },
+      {
+        id: '2',
+        name: 'All Maddrasah Payment History',
+        route: '/admin/maddrasah-payment-history',
+        icon: 'LuWarehouse',
+        subMenu: false,
+      },
+    ],
+  },
 
 ];

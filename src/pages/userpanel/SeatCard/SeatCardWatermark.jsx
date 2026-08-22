@@ -21,7 +21,7 @@ const SeatCardWatermark = ({ documentLogo, logoIsActive }) => {
         transform: 'translate(-50%, -50%)',
         width: '60%',
         maxWidth: '60%',
-        opacity: 0.13,
+        opacity: 0.05,
         pointerEvents: 'none',
         zIndex: 1, // কার্ডের বর্ডার/টেক্সটের সাথে সমান স্ট্যাকিং কনটেক্সটে থেকে উপরে বসবে,
                    // negative z-index ব্যবহার করা হয়নি যাতে print/PDF এ অদৃশ্য হয়ে না যায়

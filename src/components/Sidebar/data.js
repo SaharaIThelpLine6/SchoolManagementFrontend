@@ -491,11 +491,11 @@ export const menuData = [
         name: 'Payment History',
         route: '/payment-history',
       },
-      {
-        id: '3',
-        name: 'Maddrasah Payment Info',
-        route: '/payment-history/maddrasah-payment-info',
-      },
+      // {
+      //   id: '3',
+      //   name: 'Maddrasah Payment Info',
+      //   route: '/payment-history/maddrasah-payment-info',
+      // },
       {
         id: '4',
         name: 'Online Payment Invoice',

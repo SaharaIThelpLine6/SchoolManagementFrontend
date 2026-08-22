@@ -5,6 +5,8 @@ import AdminLogin from "../pages/AdminLogin";
 import AdminLayout from "../layout/AdminLayout";
 import AdminDashboard from "../pages/AdminDashboard";
 import AdminAllMadrasah from "../pages/AdminAllMadrasah";
+import AdminAllMaddrasahPaymentInfo from "../pages/AdminAllMaddrasahPaymentInfo";
+// import AdminAllMaddrasahPaymentHistory from "../pages/AdminAllMaddrasahPaymentHistory";
 
 const ProtectedRoute = () => {
   const { token, user } = useSelector((state) => state.auth);
@@ -36,8 +38,8 @@ const AdminRoutes = [
         children: [
           { path: "/admin/dashboard", element: <AdminDashboard /> },
           { path: "/admin/all-madrasah", element: <AdminAllMadrasah /> },
-          // { path: "/admin/teachers", element: <Teachers /> },
-          // { path: "/admin/settings", element: <Settings /> },
+          { path: "/admin/ssl-comerce", element: <AdminAllMaddrasahPaymentInfo /> },
+          // { path: "/admin/maddrasah-payment-history", element: <AdminAllMaddrasahPaymentHistory /> },
         ],
       },
     ],

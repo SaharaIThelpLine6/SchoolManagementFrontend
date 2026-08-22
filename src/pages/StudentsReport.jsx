@@ -557,7 +557,7 @@ console.log(reportData, 'reportData');
               top: 50%;
               left: 50%;
               transform: translate(-50%, -50%);
-              opacity: 0.15;
+              opacity: 0.05;
               z-index: 9999;
               pointer-events: none;
               max-width: 60%;

@@ -75,6 +75,12 @@ const AdminSidebar = () => {
             if (subItem.name === 'All Madrasah') {
               return typeof permissionType === 'number' && permissionType <= 4;
             }
+            if (subItem.name === 'ssl comerce') {
+              return typeof permissionType === 'number' && permissionType <= 4;
+            }
+            if (subItem.name === 'All Maddrasah Payment History') {
+              return typeof permissionType === 'number' && permissionType <= 4;
+            }
             return true; // Default allow
           });
 
