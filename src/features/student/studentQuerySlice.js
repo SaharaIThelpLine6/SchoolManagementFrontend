@@ -353,7 +353,7 @@ export const userStudentSlice = createApi({
     }),
     postHomeWorkSingle: builder.mutation({
       query: (body) => ({
-        url: `home_work_single`,
+        url: `home_work`,
         method: 'POST',
         body,
       }),
@@ -361,7 +361,7 @@ export const userStudentSlice = createApi({
     }),
     postHomeWork: builder.mutation({
       query: (body) => ({
-        url: `home_work`,
+        url: `create_group_home_work`,
         method: 'POST',
         body,
       }),
