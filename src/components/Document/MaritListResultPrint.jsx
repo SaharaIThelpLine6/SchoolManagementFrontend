@@ -34,7 +34,7 @@ const MaritListResultPrint = () => {
                         <div className="w-full block bg-white">
                             <div className="flex-1">
                                 <div className="flex items-center flex-col md:bg-white md:flex-row">
-                                    <div className="w-[80px] h-[80px] md:w-[140px] md:h-[140px] mt-6 md:mt-0  flex items-center justify-center bg-white rounded-full overflow-hidden absolute">
+                                    <div className="w-[80px] h-[80px] md:w-[140px] md:h-[140px] mt-6 md:mt-0  flex items-center justify-center bg-white rounded-full overflow-hidden">
                                         {logo ? <img src={logo} alt="Logo" className="max-w-full max-h-full" /> : null}
                                     </div>
 
