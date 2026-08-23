@@ -72,7 +72,7 @@ useEffect(() => {
 
       {/* ========== SIDEBAR / NAVIGATION ========== */}
       <aside
-        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out lg:hidden ${
+        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out hidden_in_print lg:hidden ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -93,7 +93,7 @@ useEffect(() => {
             </svg>
           </button>
         </div>
-        <nav className="p-6 space-y-1 overflow-y-auto h-[calc(100%-80px)]">
+        <nav className="p-6 space-y-1 overflow-y-auto h-[calc(100%-80px)] hidden_in_print">
           {[
             { href: `/${schoolid}`, label: "হোম" },
             { href: `/${schoolid}/student_result`, label: "ব্যক্তিগত ফলাফল" },
@@ -139,7 +139,7 @@ useEffect(() => {
       </aside>
 
       {/* ========== DESKTOP HEADER ========== */}
-      <header className="hidden lg:block sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+      <header className="hidden lg:block sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm hidden_in_print">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between py-4">
             
@@ -222,7 +222,7 @@ useEffect(() => {
       </header>
 
       {/* ========== MOBILE TOP BAR ========== */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm hidden_in_print">
         <div className="flex items-center justify-between p-4">
           <button
             onClick={toggleSidebar}
@@ -252,14 +252,14 @@ useEffect(() => {
       </div>
 
       {/* ========== MAIN CONTENT ========== */}
-      <main className="pt-20 lg:pt-0 min-h-screen">
+      <main className="print:pt-0 pt-20 lg:pt-0 min-h-screen">
         <div className="w-full animate-scaleIn">
           <Outlet />
         </div>
       </main>
 
       {/* ========== FOOTER (Unique Redesign) ========== */}
-      <footer className="relative bg-gradient-to-br from-[#0a1f13] via-[#0f2d1b] to-[#081a10] text-gray-200 pt-20 pb-10 overflow-hidden">
+      <footer className="relative bg-gradient-to-br from-[#0a1f13] via-[#0f2d1b] to-[#081a10] text-gray-200 pt-20 pb-10 overflow-hidden hidden_in_print">
         {/* Decorative background blobs */}
         <div className="absolute -top-20 -left-20 w-64 h-64 bg-green-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
         <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-amber-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>

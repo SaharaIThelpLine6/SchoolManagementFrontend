@@ -45,6 +45,7 @@ import { attendanceSlice } from "../features/attendance/attendanceSlice";
 
 // Admin
 import {redirectSlice} from "../features/Admin/redirectSlice"
+import { domainManageSlice } from "../features/Admin/domainManage/domainManageSlice";
 
 const store = configureStore({
   reducer: {
@@ -95,6 +96,7 @@ const store = configureStore({
 
     // Admin
     [redirectSlice.reducerPath]: redirectSlice.reducer,
+    [domainManageSlice.reducerPath]: domainManageSlice.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -130,7 +132,8 @@ const store = configureStore({
       .concat(examSitPlanSlice.middleware)
 
       // Admin
-      .concat(redirectSlice.middleware),
+      .concat(redirectSlice.middleware)
+      .concat(domainManageSlice.middleware),
 
 });
 

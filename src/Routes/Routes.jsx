@@ -208,14 +208,14 @@ const Router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-              {
-                path: 'all-madrasah',
-                element: (
-                  <OwenGuide>
-                    <AllMadrasah pageTitle="All Madrasah" />
-                  </OwenGuide>
-                ),
-              },
+              // {
+              //   path: 'all-madrasah',
+              //   element: (
+              //     <OwenGuide>
+              //       <AllMadrasah pageTitle="All Madrasah" />
+              //     </OwenGuide>
+              //   ),
+              // },
               {
                 path: 'rfid-card',
                 element: (
