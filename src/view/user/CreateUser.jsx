@@ -334,7 +334,7 @@ const CreateUser = ({ pageTitle }) => {
           {/* Section: User Info */}
           <div className="bg-white rounded-xl shadow-md p-6 space-y-6">
             <h2 className="text-lg font-bold text-gray-700 border-b pb-2">
-              ব্যবহারকারীর তথ্য
+              {translate('User Information')}
             </h2>
 
             <div className="grid md:grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -387,26 +387,26 @@ const CreateUser = ({ pageTitle }) => {
               }
 
               <DefaultInput
-                label="পিতার নাম"
+                label={translate("Father's Name")}
                 type="text"
                 registerKey="FatherName"
                 placeholder="Enter your father name ..."
               />
               <DefaultInput
-                label="মাতার নাম"
+                label={translate("Mother's Name")}
                 type="text"
                 registerKey="MotherName"
                 placeholder="Enter your mother name ..."
               />
 
               <DatePickerOne
-                dateCalender="জন্ম তারিখ"
+                dateCalender={translate("Date of Birth")}
                 registerKey="DateOfBirth"
                 className="w-full"
                 placeholder="DD-MM-YYYY"
               />
               <DefaultInput
-                label="বয়স"
+                label={translate("Age")}
                 type="text"
                 placeholder="Enter your age ..."
                 registerKey="age"
@@ -416,7 +416,7 @@ const CreateUser = ({ pageTitle }) => {
               />
 
               <DefaultInput
-                label="NID/জন্ম নিবন্ধন নং"
+                label={translate("NID/Birth Registration No.")}
                 type="text"
                 registerKey="NIDNO"
                 placeholder="Enter your NID No ..."
@@ -424,7 +424,7 @@ const CreateUser = ({ pageTitle }) => {
 
               <PhoneNumberInput
                 label={
-                  <span className="text-red-500">মোবাইল ১* (SMS যাবে)</span>
+                  <span className="text-red-500">{translate("Mobile 1* (SMS will be sent)")}</span>
                 }
                 registerKey="Mobile1"
                 require={true}
@@ -441,7 +441,7 @@ const CreateUser = ({ pageTitle }) => {
                 ]}
               />
               <DefaultSelect
-                label="সম্পর্ক"
+                label={translate("Relation")}
                 type="number"
                 options={studentRelation}
                 valueField="RelationID"
@@ -450,7 +450,7 @@ const CreateUser = ({ pageTitle }) => {
               />
 
               <PhoneNumberInput
-                label="মোবাইল ২"
+                label={translate("Mobile 2")}
                 registerKey="Mobile2"
                 // require={true}
                 minLength={11}
@@ -467,7 +467,7 @@ const CreateUser = ({ pageTitle }) => {
               />
 
               <DefaultSelect
-                label="সম্পর্ক"
+                label={translate("Relation")}
                 type="number"
                 options={studentRelation}
                 valueField="RelationID"
@@ -477,14 +477,14 @@ const CreateUser = ({ pageTitle }) => {
               />
 
               <DefaultInput
-                label="ই-মেইল"
+                label={translate("Email")}
                 type="email"
                 registerKey="Email"
                 placeholder="Enter your email address ..."
               />
 
               <DefaultSelect
-                label="রক্তের গ্রুপ"
+                label={translate("Bload Group")}
                 type="string"
                 options={[
                   { value: 'A+' },
@@ -506,11 +506,11 @@ const CreateUser = ({ pageTitle }) => {
           {/* Section: Permanent Address */}
           <div className="bg-white rounded-xl shadow-md p-6 space-y-6">
             <h2 className="text-lg font-bold text-gray-700 border-b pb-2 text-center">
-              স্থায়ী ঠিকানা
+              {translate('Permanent Address')}
             </h2>
             <div className="grid md:grid-cols-5 gap-5">
               <DefaultSelect
-                label="বিভাগ"
+                label={translate("Division")}
                 type="number"
                 options={divisions}
                 registerKey="DivisionID"
@@ -518,7 +518,7 @@ const CreateUser = ({ pageTitle }) => {
                 nameField="DivisionName"
               />
               <DefaultSelect
-                label="জেলা"
+                label={translate("District")}
                 type="number"
                 options={districts}
                 registerKey="DistrictID"
@@ -526,7 +526,7 @@ const CreateUser = ({ pageTitle }) => {
                 nameField="DistrictName"
               />
               <DefaultSelect
-                label="থানা"
+                label={translate("Police Station")}
                 type="number"
                 options={policeStations}
                 registerKey="permanentPoliceStationID"
@@ -534,13 +534,13 @@ const CreateUser = ({ pageTitle }) => {
                 nameField="PoliceStationName"
               />
               <DefaultInput
-                label="ডাক"
+                label={translate("Post Office")}
                 type="text"
                 registerKey="permanentPost"
                 placeholder="Enter your post office ..."
               />
               <DefaultInput
-                label="গ্রাম"
+                label={translate("Village")}
                 type="text"
                 registerKey="permanentVill"
                 placeholder="Enter your village ..."
@@ -558,16 +558,16 @@ const CreateUser = ({ pageTitle }) => {
                   {...register('sameAddress')}
                   className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 rounded"
                 />
-                <span>ঠিকানা একই হলে এখানে ক্লিক করুন</span>
+                <span>{translate("Click Here If Address Is Same")}</span>
               </label>
               <h2 className="text-lg font-bold text-gray-700">
-                অস্থায়ী ঠিকানা
+                {translate("Present Address")}
               </h2>
             </div>
 
             <div className="grid md:grid-cols-5 gap-5">
               <DefaultSelect
-                label="বিভাগ"
+                label={translate("Division")}
                 type="number"
                 options={divisions}
                 registerKey="DivisionID2"
@@ -575,7 +575,7 @@ const CreateUser = ({ pageTitle }) => {
                 nameField="DivisionName"
               />
               <DefaultSelect
-                label="জেলা"
+                label={translate("District")}
                 type="number"
                 options={districts2}
                 registerKey="DistrictID2"
@@ -583,7 +583,7 @@ const CreateUser = ({ pageTitle }) => {
                 nameField="DistrictName"
               />
               <DefaultSelect
-                label="থানা"
+                label={translate("Police Station")}
                 type="number"
                 options={policeStations2}
                 registerKey="TransientPoliceStationID"
@@ -591,13 +591,13 @@ const CreateUser = ({ pageTitle }) => {
                 nameField="PoliceStationName"
               />
               <DefaultInput
-                label="ডাক"
+                label={translate("Post Office")}
                 type="text"
                 registerKey="TransientPost"
                 placeholder="Enter your post office ..."
               />
               <DefaultInput
-                label="গ্রাম"
+                label={translate("Village")}
                 type="text"
                 registerKey="TransientVill"
                 placeholder="Enter your village ..."

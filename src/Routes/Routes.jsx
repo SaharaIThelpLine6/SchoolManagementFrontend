@@ -13,6 +13,7 @@ import StudentAdmissionForm from '../pages/public/studentAddmitionForm';
 import PrivateRoute from './PrivateRoute';
 
 // Public Pages
+const LandingpPage = lazy(() => import('../pages/LandingpPage'));
 const Login = lazy(() => import('../pages/Login'));
 
 // Layout
@@ -166,6 +167,10 @@ const Router = createBrowserRouter([
     path: '/forget_password',
     element: <ForgetPassword />,
   },
+  // {
+  //   path: '/',
+  //   element: <LandingpPage />
+  // },
   {
     path: '/login',
     element: <Login />,
@@ -175,6 +180,7 @@ const Router = createBrowserRouter([
     element: <PrivacyPolicy />,
   },
   {
+    // path: 'dashboard',
     path: '/',
     element: <PrivateRoute />,
     children: [
@@ -1110,12 +1116,12 @@ const Router = createBrowserRouter([
             ],
           },
           {
-            path: '/payment_confirm/:schoolid/:service/:size',
+            path: 'payment_confirm/:schoolid/:service/:size',
             element: <PaymentConfirm />,
           },
 
           {
-            path: '/sms-payment/:paymentid',
+            path: 'sms-payment/:paymentid',
             element: <SMSPaymentConfirm />,
           },
           {
@@ -1148,11 +1154,11 @@ const Router = createBrowserRouter([
             element: <PaymentModal pageTitle="Payment Checkout" />,
           },
           {
-            path: '/sucessUrl',
+            path: 'sucessUrl',
             element: <CellfinPaymentConfirm />,
           },
           {
-            path: '/cancelUrl',
+            path: 'cancelUrl',
             element: <PaymentConfirm />,
           },
           {
@@ -1397,13 +1403,14 @@ const Router = createBrowserRouter([
     path: '/query-three',
     element: <QueryThree />,
   },
+
+    // Admin Route
+  ...AdminRoutes,
+
   {
     path: '*',
     element: <NotFound />,
   },
-
-  // Admin Route
-  ...AdminRoutes,
 ]
 );
 

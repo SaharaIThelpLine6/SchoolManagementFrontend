@@ -44,7 +44,8 @@ import { examSitPlanSlice } from "../features/exam/examSitPlanQuerySlice";
 import { attendanceSlice } from "../features/attendance/attendanceSlice";
 
 // Admin
-import {redirectSlice} from "../features/Admin/redirectSlice"
+import { redirectSlice } from "../features/Admin/redirectSlice";
+import { adminPaymentSlice } from "../features/Admin/adminPaymentSlice";
 
 const store = configureStore({
   reducer: {
@@ -95,6 +96,7 @@ const store = configureStore({
 
     // Admin
     [redirectSlice.reducerPath]: redirectSlice.reducer,
+    [adminPaymentSlice.reducerPath]: adminPaymentSlice.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -130,7 +132,8 @@ const store = configureStore({
       .concat(examSitPlanSlice.middleware)
 
       // Admin
-      .concat(redirectSlice.middleware),
+      .concat(redirectSlice.middleware)
+      .concat(adminPaymentSlice.middleware)
 
 });
 

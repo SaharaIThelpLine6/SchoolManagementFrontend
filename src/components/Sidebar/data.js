@@ -2,72 +2,73 @@ export const menuData = [
   {
     id: '1',
     name: 'General Information',
-    route: '/general-info',
+    route: 'general-info',
     icon: 'LuWarehouse',
     subMenu: [
       {
         id: '1',
         name: 'Dashboard',
         route: '/',
+        // route: '/dashboard',
       },
       {
         id: '2',
         name: 'New User',
-        route: '/general-info/users-info',
+        route: 'general-info/users-info',
       },
       {
         id: '3',
         name: 'Month Name',
-        route: '/general-info/month-name-list',
+        route: 'general-info/month-name-list',
         subMenu: false,
       },
       {
         id: '4',
         name: 'All Madrasah',
-        route: '/general-info/all-madrasah',
+        route: 'general-info/all-madrasah',
         subMenu: false,
       },
       {
         id: '5',
         name: 'Institution Information',
-        route: '/general-info/institution-info',
+        route: 'general-info/institution-info',
         subMenu: false,
       },
       {
         id: '6',
         name: 'RFID Card',
-        route: '/general-info/rfid-card',
+        route: 'general-info/rfid-card',
         subMenu: false,
       },
 
       {
         id: '7',
         name: 'User Image',
-        route: '/general-info/user-image',
+        route: 'general-info/user-image',
         subMenu: false,
       },
       {
         id: '8',
         name: 'Bulk Image',
-        route: '/general-info/bulk-image',
+        route: 'general-info/bulk-image',
         subMenu: false,
       },
       {
         id: '9',
         name: 'SMS',
-        route: '/general-info/sms',
+        route: 'general-info/sms',
       },
       {
         id: '10',
         name: 'User Reports',
-        route: '/general-info/user-reports',
+        route: 'general-info/user-reports',
       },
     ],
   },
   {
     id: '2',
     name: 'Student',
-    route: '/students',
+    route: 'students',
     icon: 'PiStudentBold',
     subMenu: [
       {

@@ -19,7 +19,7 @@ export const AdminmenuData = [
     subMenu: [
       {
         id: '1',
-        name: 'ssl comerce ',
+        name: 'ssl comerce',
         route: '/admin/ssl-comerce',
         icon: 'LuWarehouse',
         subMenu: false,
