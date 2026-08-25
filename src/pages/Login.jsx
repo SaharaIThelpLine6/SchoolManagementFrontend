@@ -31,11 +31,11 @@ const Login = () => {
     const urlToken = urlParams.get('token');
     if (urlToken) {
       dispatch(login({ token: urlToken }));
-      navigate("/");
+      navigate("/dashboard");
       return;
     }
     if (auth.token) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [auth.token, navigate, dispatch]);
 
@@ -66,7 +66,7 @@ const Login = () => {
         // 🌟 END NEW LOGIC
 
         // 🌟 Normal Flow: যদি onTestStatus 1 না হয় অথবা API এরর দেয়, তবে আগের মতোই ড্যাশবোর্ডে যাবে
-        navigate("/");
+        navigate("/dashboard");
         // window.location.reload();
       } else {
         Swal.fire({

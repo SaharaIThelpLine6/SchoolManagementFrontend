@@ -8,8 +8,8 @@ export const menuData = [
       {
         id: '1',
         name: 'Dashboard',
-        route: '/',
-        // route: '/dashboard',
+        // route: '/',
+        route: '/dashboard',
       },
       {
         id: '2',

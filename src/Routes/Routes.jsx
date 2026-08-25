@@ -13,10 +13,16 @@ import StudentAdmissionForm from '../pages/public/studentAddmitionForm';
 import PrivateRoute from './PrivateRoute';
 
 // Public Pages
-const LandingpPage = lazy(() => import('../pages/LandingpPage'));
+const LandingPage = lazy(() => import('../pages/LandingPage/Home'));
+const AboutUs = lazy(() => import('../pages/LandingPage/AboutUs'));
+const ManagementTeam = lazy(() => import('../pages/LandingPage/ManagementTeam'));
+const PhotoGallery = lazy(() => import('../pages/LandingPage/PhotoGallery'));
+const ContactUs = lazy(() => import('../pages/LandingPage/ContactUs'));
+const PrivacyPolicy = lazy(() => import('../pages/LandingPage/PrivacyPolicy'));
 const Login = lazy(() => import('../pages/Login'));
 
 // Layout
+import MainLayout from '../layout/LandingPageLayout/MainLayout'
 import DefaultLayout from '../layout/DefaultLayout';
 
 // Private Pages
@@ -149,7 +155,7 @@ import ExamHallList from '../pages/ExamHallList';
 import ExamSitPlan from '../pages/ExamSitPlan';
 import CreateExamSitPlan from '../pages/CreateExamSitPlan';
 import UserAttendance from '../pages/UserAttendance';
-import PrivacyPolicy from '../pages/PrivacyPolicy';
+// import PrivacyPolicy from '../pages/PrivacyPolicy';
 import CreateAttendenceList from '../pages/CreateAttendenceList';
 import AttendenceTimeSetting from '../pages/AttendenceTimeSetting';
 import AttendenceHolidayAndLeave from '../pages/AttendenceHolidayAndLeave';
@@ -167,21 +173,55 @@ const Router = createBrowserRouter([
     path: '/forget_password',
     element: <ForgetPassword />,
   },
+  {
+  path: '/',
+    element: <MainLayout />,
+    children: [
+      {
+        index: true,
+        element: <LandingPage />,
+      },
+      {
+        path: 'about-us',
+        element: <AboutUs />,
+      },
+      {
+        path: 'management-team',
+        element: <ManagementTeam />,
+      },
+      {
+        path: 'photo-gallery',
+        element: <PhotoGallery />,
+      },
+      {
+        path: 'contact-us',
+        element: <ContactUs />,
+      },
+      {
+        path: 'privacy-policy',
+        element: <PrivacyPolicy />,
+      },
+    ],
+  },
   // {
   //   path: '/',
-  //   element: <LandingpPage />
+  //   element: (
+  //     <MainLayout>
+  //       <LandingPage />
+  //     </MainLayout>
+  //   ),
   // },
   {
     path: '/login',
     element: <Login />,
   },
+  // {
+  //   path: '/privacy-policy',
+  //   element: <PrivacyPolicy />,
+  // },
   {
-    path: '/privacy-policy',
-    element: <PrivacyPolicy />,
-  },
-  {
-    // path: 'dashboard',
-    path: '/',
+    path: 'dashboard',
+    // path: '/',
     element: <PrivateRoute />,
     children: [
       {
