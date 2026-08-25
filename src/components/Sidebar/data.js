@@ -74,57 +74,57 @@ export const menuData = [
       {
         id: '1',
         name: 'Session',
-        route: '/students/sessions',
+        route: 'students/sessions',
       },
       {
         id: '2',
         name: 'Class',
-        route: '/students/class',
+        route: 'students/class',
       },
       {
         id: '3',
         name: 'Sub Class',
-        route: '/students/section',
+        route: 'students/section',
       },
       {
         id: '4',
         name: 'Students Admission',
-        route: '/students',
+        route: 'students',
       },
       {
         id: '5',
         name: 'English & Arobi Name',
-        route: '/students/english-arobi-name',
+        route: 'students/english-arobi-name',
       },
       {
         id: '6',
         name: 'Book',
-        route: '/students/book-list',
+        route: 'students/book-list',
       },
       {
         id: '7',
         name: 'Group Distribution',
-        route: '/students/group-distribution',
+        route: 'students/group-distribution',
       },
       {
         id: '8',
         name: 'Data Export',
-        route: '/students/data-export',
+        route: 'students/data-export',
       },
       {
         id: '9',
         name: 'Certificate of Attestation',
-        route: '/students/certificate-of-attestation',
+        route: 'students/certificate-of-attestation',
       },
       {
         id: '10',
         name: 'Students Report',
-        route: '/students/report',
+        route: 'students/report',
       },
       {
         id: '11',
         name: 'Online Admission',
-        route: '/students/online-admission',
+        route: 'students/online-admission',
       },
       {
         id: '12',
@@ -174,38 +174,38 @@ export const menuData = [
   {
     id: '4',
     name: 'Parent Panel',
-    route: '/parent-panel',
+    route: 'parent-panel',
     icon: 'FaUsers',
     subMenu: [
       {
         id: '1',
         name: 'Class Routine',
-        route: '/parent-panel',
+        route: 'parent-panel',
       },
       {
         id: '2',
         name: 'Class Video',
-        route: '/parent-panel/class-video',
+        route: 'parent-panel/class-video',
       },
       {
         id: '3',
         name: 'Home Work',
-        route: '/parent-panel/home-work',
+        route: 'parent-panel/home-work',
       },
       {
         id: '4',
         name: 'Home Work Teacher Group',
-        route: '/parent-panel/home-work-group',
+        route: 'parent-panel/home-work-group',
       },
       {
         id: '5',
         name: 'Student Complaints',
-        route: '/parent-panel/student-complaint',
+        route: 'parent-panel/student-complaint',
       },
       {
         id: '6',
         name: 'Complaint Box Terms and Conditions',
-        route: '/parent-panel/complaint-box-terms-and-conditions',
+        route: 'parent-panel/complaint-box-terms-and-conditions',
       },
       // {
       //   id: '7',
@@ -215,12 +215,12 @@ export const menuData = [
       {
         id: '8',
         name: 'User Notice',
-        route: '/parent-panel/user-notice',
+        route: 'parent-panel/user-notice',
       },
       {
         id: '9',
         name: 'User Attendance',
-        route: '/parent-panel/user-attendance',
+        route: 'parent-panel/user-attendance',
       }
     ],
   },
@@ -271,17 +271,17 @@ export const menuData = [
       {
         id: '1',
         name: 'Exam Name',
-        route: '/exam',
+        route: 'exam',
       },
       {
         id: '2',
         name: 'Exam Fee Determine',
-        route: '/exam/fee-determine',
+        route: 'exam/fee-determine',
       },
       {
         id: '3',
         name: 'Exam Condition',
-        route: '/exam/exam-condition',
+        route: 'exam/exam-condition',
       },
       // {
       //   id: '5',
@@ -291,7 +291,7 @@ export const menuData = [
       {
         id: '5',
         name: 'Exam Group Select',
-        route: '/exam/exam-group-create',
+        route: 'exam/exam-group-create',
       },
       // {
       //   id: '6',
@@ -301,39 +301,39 @@ export const menuData = [
       {
         id: '7',
         name: 'Admit Card',
-        route: '/exam/admit-card',
+        route: 'exam/admit-card',
       },
       {
         id: '9',
         name: 'Exam Rules',
-        route: '/exam/rules',
+        route: 'exam/rules',
       },
       {
         id: '11',
         name: 'Set Exam Room',
-        route: '/exam/exam-hallist',
+        route: 'exam/exam-hallist',
       },
       {
         id: '12',
         name: 'Exam Seat plan',
-        route: '/exam/exam-setplan',
+        route: 'exam/exam-setplan',
       },
       {
         id: '8',
         name: 'Exam Routing Create',
-        route: '/exam/routing',
+        route: 'exam/routing',
       },
       {
         id: '10',
         name: 'Exam Report',
-        route: '/exam/report',
+        route: 'exam/report',
       },
     ],
   },
   {
     id: '6',
     name: 'Result',
-    route: '/result',
+    route: 'result',
     icon: 'GiGraduateCap',
     subMenu: [
       // {
@@ -349,7 +349,7 @@ export const menuData = [
       {
         id: '3',
         name: 'Admission Form',
-        route: '/result/admission_form',
+        route: 'result/admission_form',
       },
     ],
   },
@@ -396,65 +396,65 @@ export const menuData = [
       {
         id: '1',
         name: 'Character Report',
-        route: '/darul-ikama',
+        route: 'darul-ikama',
       },
       {
         id: '2',
         name: 'Gate pass and leave',
-        route: '/darul-ikama/vacation',
+        route: 'darul-ikama/vacation',
       },
     ],
   },
   {
     id: '8',
     name: 'Accounting',
-    route: '/accounting',
+    route: 'accounting',
     icon: 'FaCalculator',
     subMenu: [
       {
         id: '1',
         name: 'Deposit Costs',
-        route: '/accounting',
+        route: 'accounting',
       },
       {
         id: '2',
         name: 'Deposit Costs Report',
-        route: '/accounting/income-expense-report',
+        route: 'accounting/income-expense-report',
       },
       {
         id: '3',
         name: 'Fee Setting',
-        route: '/accounting/fee-setting',
+        route: 'accounting/fee-setting',
       },
       {
         id: '4',
         name: 'Student Fee Collection',
-        route: '/accounting/student-fee-collection',
+        route: 'accounting/student-fee-collection',
       },
       {
         id: '5',
         name: 'Dues List',
-        route: '/accounting/dues-list',
+        route: 'accounting/dues-list',
       },
       {
         id: '6',
         name: 'Monthly Dues',
-        route: '/accounting/monthly-dues',
+        route: 'accounting/monthly-dues',
       },
       {
         id: '7',
         name: 'Fee Collection Report',
-        route: '/accounting/fee-collection-report',
+        route: 'accounting/fee-collection-report',
       },
       {
         id: '8',
         name: 'Balance Transfer',
-        route: '/accounting/balance-transfer',
+        route: 'accounting/balance-transfer',
       },
       {
         id: '9',
         name: 'Delete Edit Record',
-        route: '/accounting/delete-edit-record',
+        route: 'accounting/delete-edit-record',
       },
       // {
       //   id: '10',
@@ -485,12 +485,12 @@ export const menuData = [
       {
         id: '1',
         name: 'Pay Now',
-        route: '/checkout',
+        route: 'checkout',
       },
       {
         id: '2',
         name: 'Payment History',
-        route: '/payment-history',
+        route: 'payment-history',
       },
       // {
       //   id: '3',
@@ -500,7 +500,7 @@ export const menuData = [
       {
         id: '4',
         name: 'Online Payment Invoice',
-        route: '/payment-history/online-payment-invoice',
+        route: 'payment-history/online-payment-invoice',
       },
     ],
   },
@@ -552,22 +552,22 @@ export const menuData = [
       {
         id: '1',
         name: 'User Roles',
-        route: '/settings/add-login-users',
+        route: 'settings/add-login-users',
       },
       {
         id: '2',
         name: 'Settings',
-        route: '/settings',
+        route: 'settings',
       },
       {
         id: '3',
         name: 'Website Settings',
-        route: '/settings/website-settings',
+        route: 'settings/website-settings',
       },
       {
         id: '4',
         name: 'Document Settings',
-        route: '/settings/document-settings',
+        route: 'settings/document-settings',
       },
     ],
   },
@@ -580,13 +580,13 @@ export const menuData = [
       {
         id: '1',
         name: 'Video Tutorial',
-        route: '/help/videos',
+        route: 'help/videos',
       },
 
       {
         id: '2',
         name: 'Feedback & Suggestions',
-        route: '/help/support-tickets',
+        route: '/helpsupport-tickets',
       },
     ],
   },
