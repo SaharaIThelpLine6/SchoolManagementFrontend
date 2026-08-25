@@ -129,9 +129,7 @@ useEffect(() => {
   };
 
   const handleCopyRowToForm = (row) => {
-    setEditingId(null); // new mode
-
-
+    setEditingId(null);
     setValue('DivisionTopNumber', row.DivisionTopNumber);
 
     Array.from({ length: 6 }).forEach((_, i) => {

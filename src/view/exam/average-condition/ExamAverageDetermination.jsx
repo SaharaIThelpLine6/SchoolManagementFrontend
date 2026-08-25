@@ -1,31 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm, useFieldArray, useWatch } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import Swal from 'sweetalert2';
 import Button from '../../../components/Button/Button';
-import CopyButton from '../../../components/Button/CopyButton';
-import DeleteButton from '../../../components/Button/DeleteButton';
-import EditButton from '../../../components/Button/EditButton';
-import SingleCheckbox from '../../../components/Checkboxes/SingleCheckbox';
-// import DefaultInput from '../../../components/Forms/DefaultInput';
-import Loading from '../../../components/Loading/Loading';
-import DefaultPagination from '../../../components/Pagination/DefaultPagination';
 import SortableTable from '../../../components/Tables/SortableTable';
-import { setPageName } from '../../../features/auth/authSlice';
 import {
-  useDeleteAverageExamConditionSettingMutation,
-  useGetAverageExamConditionAllQuery,
   useGetExamDivitionByTypeQuery,
   useGetExamNamesQuery,
-  usePostAverageExamConditionSettingMutation,
   usePostExamDivitionMutation,
-  useUpdateAverageExamConditionSettingMutation,
 } from '../../../features/exam/examQuerySlice';
-import bnBijoy2Unicode from '../../../utils/conveter';
 import useTranslate from '../../../utils/Translate';
-import PointConditionFilteringForm from '../point-condition/PointConditionFilteringForm';
-import FormColumn from './FormColumn';
-import SwitcherOne from '../../../components/Switchers/SwitcherOne';
 import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
 import { useGetSubClassListQuery } from '../../../features/class/classQuerySlice';
 import DefaultSelect from '../../../components/Forms/DefaultSelect';
@@ -37,50 +20,6 @@ const PAGE_SIZE = 10;
 const MIN_GRADE_BANDS = 6;
 const MAX_GRADE_BANDS = 7;
 
-// function DefaultInput({ register, name, placeholder, type = "text", required }) {
-//   return (
-//     <input
-//       type={type}
-//       placeholder={placeholder}
-//       className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm
-//                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-//       {...register(name, required ? { required: true } : {})}
-//     />
-//   );
-// }
-
-
-
-/*function HighlightToggle({ register, control, arrayName, index }) {
-  const isHighlighted = useWatch({
-    control,
-    name: `${arrayName}.${index}.isHighlighted`,
-  });
-
-  return (
-    <div className="flex items-center gap-2">
-      <label className="relative inline-flex items-center cursor-pointer">
-        <input
-          type="checkbox"
-          className="sr-only peer"
-          {...register(`${arrayName}.${index}.isHighlighted`)}
-        />
-        <div className="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 transition-colors" />
-        <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4" />
-      </label>
-
-      {isHighlighted && (
-        <input
-          type="color"
-          defaultValue="#ffeb3b"
-          title="হাইলাইট রঙ নির্বাচন করুন"
-          className="w-8 h-8 p-0 border border-gray-300 rounded cursor-pointer"
-          {...register(`${arrayName}.${index}.highlightColor`)}
-        />
-      )}
-    </div>
-  );
-}*/
 function HighlightToggle({ register, control, arrayName, index }) {
   const isHighlighted = useWatch({
     control,
@@ -393,9 +332,9 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                 <div className="overflow-x-auto border border-gray-200 rounded-lg">
                   <SortableTable columns={[
                     { title: "SL.", render: (row, rowIndex) => <>{rowIndex + 1}</> },
-                    { title: "বিভাগ (বাংলা).", field: "DivisionName" },
-                    { title: "বিভাগ ( ইংরেজি ).", field: "DivisionEnglish", render: (row, rowIndex) => <>{row?.DivisionEnglish ? row.DivisionEnglish : '-'}</>, position: "center" },
-                    { title: "বিভাগ ( আরবি ).", field: "DivisionArabic",  render: (row, rowIndex) => <>{row?.DivisionArabic ? row.DivisionArabic : '-'}</>, position: "center" }
+                    { title: "বিভাগ (বাংলা).", field: "DivisionNames" },
+                    { title: "বিভাগ ( ইংরেজি ).", field: "DivisionEnglishs", render: (row, rowIndex) => <>{row?.DivisionEnglish ? row.DivisionEnglish : '-'}</>, position: "center" },
+                    { title: "বিভাগ ( আরবি ).", field: "DivisionArabics",  render: (row, rowIndex) => <>{row?.DivisionArabic ? row.DivisionArabic : '-'}</>, position: "center" }
                   ]} data={examDivitions} isFilterColumn={false} />
                 </div>
               </div>
@@ -462,7 +401,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                                   label=""
                                   options={examDivitions}
                                   registerKey={`gradeBands.${index}.DivisionID`}
-                                  nameField="DivisionName"
+                                  nameField="DivisionNames"
                                   valueField="ID"
                                   require="Division is Required"
                                   defaultValue={translate("Select Divition")}

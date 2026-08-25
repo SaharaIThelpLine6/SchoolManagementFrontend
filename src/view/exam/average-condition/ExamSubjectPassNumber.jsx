@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { setPageName } from "../../../features/auth/authSlice";
 import useTranslate from "../../../utils/Translate";
 import Button from "../../../components/Button/Button";
 import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
@@ -8,23 +7,11 @@ import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import { useGetAcademicSubjectsQuery } from "../../../features/class/classQuerySlice";
 import Swal from "sweetalert2";
 import SortableTable from "../../../components/Tables/SortableTable";
-import FilteringForm from "./FilteringForm";
 import {
-  useGetAverageSubjectPassNumberQuery,
   useGetExamDivitionByTypeQuery,
-  usePostAverageSubjectPassNumberMutation,
   usePostExamDivitionMutation,
-  useUpdateAverageSubjectPassNumberMutation,
 } from "../../../features/exam/examQuerySlice";
-import { examAveragePasNumberStatus } from "../../../Data/userReportsData";
-import ExamRoutingCheckbox from "../../../components/Checkboxes/ExamRoutingCheckbox";
-import { skipToken } from "@reduxjs/toolkit/query";
-import bnBijoy2Unicode from "../../../utils/conveter";
-import Loading from "../../../components/Loading/Loading";
-import DefaultPagination from "../../../components/Pagination/DefaultPagination";
 import EditButton from "../../../components/Button/EditButton";
-import DeleteButton from "../../../components/Button/DeleteButton";
-import SingleCheckbox from "../../../components/Checkboxes/SingleCheckbox";
 import CheckboxOption from "./CheckboxOption";
 import DefaultInput from "../../../components/Forms/DefaultInput";
 import SvgIcon from "../../../components/icons/SvgIcon";
@@ -583,9 +570,9 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                     <div className="overflow-x-auto border border-gray-200 rounded-lg">
                       <SortableTable columns={[
                         { title: "SL.", render: (row, rowIndex) => <>{rowIndex + 1}</> },
-                        { title: "বিভাগ (বাংলা).", field: "DivisionName" },
-                        { title: "বিভাগ ( ইংরেজি ).", field: "DivisionEnglish" },
-                        { title: "বিভাগ ( আরবি ).", field: "DivisionArabic" }
+                        { title: "বিভাগ (বাংলা).", field: "DivisionNames" },
+                        { title: "বিভাগ ( ইংরেজি ).", field: "DivisionEnglishs" },
+                        { title: "বিভাগ ( আরবি ).", field: "DivisionArabics" }
                       ]} data={examDivitions} isFilterColumn={false} />
                     </div>
                   </div>
@@ -680,7 +667,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                                     label=""
                                     options={examDivitions}
                                     registerKey={`gradeBands.${index}.DivisionID`}
-                                    nameField="DivisionName"
+                                    nameField="DivisionNames"
                                     valueField="ID"
                                     defaultValue={translate("Select Divition")}
                                     disabled={isLocked}
