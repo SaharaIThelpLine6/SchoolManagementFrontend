@@ -1,31 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm, useFieldArray, useWatch } from 'react-hook-form';
-import { useDispatch } from 'react-redux';
 import Swal from 'sweetalert2';
 import Button from '../../../components/Button/Button';
-import CopyButton from '../../../components/Button/CopyButton';
-import DeleteButton from '../../../components/Button/DeleteButton';
-import EditButton from '../../../components/Button/EditButton';
-import SingleCheckbox from '../../../components/Checkboxes/SingleCheckbox';
-// import DefaultInput from '../../../components/Forms/DefaultInput';
-import Loading from '../../../components/Loading/Loading';
-import DefaultPagination from '../../../components/Pagination/DefaultPagination';
 import SortableTable from '../../../components/Tables/SortableTable';
-import { setPageName } from '../../../features/auth/authSlice';
 import {
-  useDeleteAverageExamConditionSettingMutation,
-  useGetAverageExamConditionAllQuery,
   useGetExamDivitionByTypeQuery,
   useGetExamNamesQuery,
-  usePostAverageExamConditionSettingMutation,
   usePostExamDivitionMutation,
-  useUpdateAverageExamConditionSettingMutation,
 } from '../../../features/exam/examQuerySlice';
-import bnBijoy2Unicode from '../../../utils/conveter';
 import useTranslate from '../../../utils/Translate';
-import PointConditionFilteringForm from '../point-condition/PointConditionFilteringForm';
-import FormColumn from './FormColumn';
-import SwitcherOne from '../../../components/Switchers/SwitcherOne';
 import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
 import { useGetSubClassListQuery } from '../../../features/class/classQuerySlice';
 import DefaultSelect from '../../../components/Forms/DefaultSelect';
@@ -98,13 +81,11 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
     }
   });
 
-
   const {
     register,
     control,
     handleSubmit,
     watch,
-    reset,
     setValue,
     formState: { errors },
   } = methods
@@ -470,9 +451,9 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                 <div className="overflow-x-auto border border-gray-200 rounded-lg">
                   <SortableTable columns={[
                     { title: "SL.", render: (row, rowIndex) => <>{rowIndex + 1}</> },
-                    { title: "বিভাগ (বাংলা).", field: "DivisionName" },
-                    { title: "বিভাগ ( ইংরেজি ).", field: "DivisionEnglish" },
-                    { title: "বিভাগ ( আরবি ).", field: "DivisionArabic" }
+                    { title: "বিভাগ (বাংলা).", field: "DivisionNames" },
+                    { title: "বিভাগ ( ইংরেজি ).", field: "DivisionEnglishs" },
+                    { title: "বিভাগ ( আরবি ).", field: "DivisionArabics" }
                   ]} data={examDivitions} isFilterColumn={false} />
                 </div>
               </div>
@@ -530,12 +511,6 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                           return (
                             <tr key={field.id} className="border-t border-gray-100">
                               <td className="px-4 py-2">
-                                {/* <DefaultInput
-                                  registerKey={`gradeBands.${index}.DivisionNumber`}
-                                  placeholder="যেমন: ৮০"
-                                  required
-                                /> */}
-
                                 <input
                                   {...register(`gradeBands.${index}.DivisionNumber`)}
                                   type="text"
@@ -550,7 +525,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                                   label=""
                                   options={examDivitions}
                                   registerKey={`gradeBands.${index}.DivisionID`}
-                                  nameField="DivisionName"
+                                  nameField="DivisionNames"
                                   valueField="ID"
                                   require="Division is Required"
                                   defaultValue={translate("Select Divition")}
@@ -597,7 +572,6 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
           ) : null
         }
         <div className="text-end">
-          {/* <Button type='button' className='bg-yellow-300 hover:bg-yellow-300 text-[#000]'>Save As Draft</Button> */}
           {
             !showDivisionManager ? <Button type='submit'>{translate("Save & Continue")}</Button> : null
           }

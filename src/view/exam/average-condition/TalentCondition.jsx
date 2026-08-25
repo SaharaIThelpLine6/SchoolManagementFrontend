@@ -22,7 +22,7 @@ import DefaultSelect from "../../../components/Forms/DefaultSelect";
 // ✅ Input with Label + Checkbox
 const InputWithCheckbox = ({ registerKey, checked, onCheckChange, filteredExamDivitions }) => (
   <div className="flex flex-row items-center justify-center gap-3">
-    <DefaultSelect nameField={"DivisionName"} valueField={"ID"} registerKey={registerKey} options={filteredExamDivitions} disabled={true} />
+    <DefaultSelect nameField={"DivisionNames"} valueField={"ID"} registerKey={registerKey} options={filteredExamDivitions} disabled={true} />
 
     <label className="flex items-center justify-center gap-2">
       <input

@@ -16,6 +16,11 @@ const ClassRoutine = () => {
   // যদি লোডিং হয়
   if (isLoading) return <StudentClassListSkeleton />;
   if (isError) return <p>ডেটা আনতে সমস্যা হয়েছে!</p>;
+
+
+
+
+  
   return (
     <div className="w-full font-default h-[450px] 2xl:h-[580px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col">
       <h2 className="text-xl font-bold text-gray-800 text-center mb-4 font-default">

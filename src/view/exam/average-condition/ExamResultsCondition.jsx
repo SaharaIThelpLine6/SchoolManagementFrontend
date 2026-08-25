@@ -270,7 +270,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               label=""
                               options={filteredExamDivitions}
                               registerKey={`condition1.row1.DivisionID`}
-                              nameField="DivisionName"
+                              nameField="DivisionNames"
                               valueField="ID"
                               defaultValue={translate("Select Divition")}
 
@@ -294,7 +294,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               label=""
                               options={filteredExamDivitions}
                               registerKey={`condition1.row2.DivisionID`}
-                              nameField="DivisionName"
+                              nameField="DivisionNames"
                               valueField="ID"
                               defaultValue={translate("Select Divition")}
 
@@ -344,7 +344,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               label=""
                               options={filteredExamDivitions}
                               registerKey={`condition2.row1.DivisionID`}
-                              nameField="DivisionName"
+                              nameField="DivisionNames"
                               valueField="ID"
                               defaultValue={translate("Select Divition")}
 
@@ -369,7 +369,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               label=""
                               options={filteredExamDivitions}
                               registerKey={`condition2.row2.DivisionID`}
-                              nameField="DivisionName"
+                              nameField="DivisionNames"
                               valueField="ID"
                               defaultValue={translate("Select Divition")}
 
@@ -420,7 +420,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               label=""
                               options={filteredExamDivitions}
                               registerKey={`condition3.row1.DivisionID`}
-                              nameField="DivisionName"
+                              nameField="DivisionNames"
                               valueField="ID"
                               defaultValue={translate("Select Divition")}
 
@@ -476,7 +476,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                             label=""
                             options={filteredExamDivitions}
                             registerKey={`condition3.row1.DivisionID`}
-                            nameField="DivisionName"
+                            nameField="DivisionNames"
                             valueField="ID"
                             defaultValue={translate("Select Divition")}
 
@@ -520,7 +520,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                         label="যদি কোন এক বিষয়ে নাম্বার এন্ট্রি না হয়"
                         options={examDivitions}
                         registerKey={`DAbsance`}
-                        nameField="DivisionName"
+                        nameField="DivisionNames"
                         valueField="ID"
                         require="This Field is required"
                       />

@@ -18,7 +18,7 @@ export default defineConfig({
     VitePWA({
       registerType: "autoUpdate",
       manifest: {
-        name: "Qmmsoft - কওমী মাদরাসা ম্যানেজমেন্ট",
+        name: "Qmmsoft - মাদরাসা ম্যানেজমেন্ট",
         short_name: "Qmmsoft",
         description: "School Management System",
 

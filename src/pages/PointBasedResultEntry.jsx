@@ -67,6 +67,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   const totalPages = Math.ceil((examListData?.length || 0) / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
+    console.log(examListData);
     const start = (currentPage - 1) * PAGE_SIZE;
     return examListData?.slice(start, start + PAGE_SIZE) || [];
   }, [examListData, currentPage]);
@@ -182,7 +183,13 @@ const PointBasedResultEntry = ({ pageTitle }) => {
       title: translate('SubClass'),
       field: 'SubClassID',
       hozAlign: 'center',
-      render: (row) => bnBijoy2Unicode(row.Class?.SubClass),
+      render: (row) => bnBijoy2Unicode(row.SubClass?.SubClass),
+    },
+    {
+      title: translate('Exam Type'),
+      field: 'SubClassID',
+      hozAlign: 'center',
+      render: (row) => row.ExamType == 1 ? "দরসিয়াত" : row.ExamType == 2 ? "হিফজ কন্ডিশন ভিত্তিক" : row.ExamType == 3 ? "গড়ে যা আসবে তাই" : "পয়েন্ট ভিত্তিক",
     },
     {
       title: translate('Status'),
@@ -242,7 +249,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               )
             }
           >
-            <SvgIcon name={'MdLocalPrintshop'} size={20} />
+            <SvgIcon name={'TbPrinter'} size={20} />
           </button>
         </div>
       ),
