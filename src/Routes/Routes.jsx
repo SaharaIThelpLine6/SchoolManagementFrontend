@@ -851,12 +851,12 @@ const Router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-              {
-                path: 'query-manage',
-                element: <OwenGuide>
-                  <QueryManage pageTitle="Query Manage" />
-                </OwenGuide>,
-              },
+              // {
+              //   path: 'query-manage',
+              //   element: <OwenGuide>
+              //     <QueryManage pageTitle="Query Manage" />
+              //   </OwenGuide>,
+              // },
               {
                 path: 'rules',
                 element: (

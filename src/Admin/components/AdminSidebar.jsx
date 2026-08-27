@@ -81,6 +81,9 @@ const AdminSidebar = () => {
             if (subItem.name === 'All Maddrasah Payment History') {
               return typeof permissionType === 'number' && permissionType <= 4;
             }
+            if (subItem.name === 'Query Manage') {
+              return typeof permissionType === 'number' && permissionType <= 4;
+            }
             return true; // Default allow
           });
 

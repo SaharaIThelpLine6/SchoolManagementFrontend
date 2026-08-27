@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import Button from '../../components/Button/Button';
 import DefaultInput from '../../components/Forms/DefaultInput';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
@@ -26,7 +28,7 @@ const SubclassCreateUpdatemodal = ({ id }) => {
   // 🔹 Query & Mutations
   const { data: classes = [] } = useGetClassListQuery();
 
-  // ✅ সঠিক উপায়
+  // ✅ সঠিক উপায়
   const selectedClass = classes.find(
     (item) => item.ClassID === Number(ClassID)
   );
@@ -40,7 +42,7 @@ const SubclassCreateUpdatemodal = ({ id }) => {
     isError,
   } = useGetSubclassQuery(id, {
     skip: !isEditMode,
-    refetchOnMountOrArgChange: true, // Add this to force refetch
+    refetchOnMountOrArgChange: true,
   });
 
   const { data: singleData = [] } = useGetLastSubclassQuery();
@@ -49,14 +51,12 @@ const SubclassCreateUpdatemodal = ({ id }) => {
   // 🔹 Properly extract data based on your API response structure
   const subClassData = useMemo(() => {
     if (!responseData) return null;
-
-    // Check different possible response structures
     if (responseData.data) {
-      return responseData.data; // If response is { data: {...} }
+      return responseData.data;
     } else if (responseData.subClass) {
-      return responseData.subClass; // If response is { subClass: {...} }
+      return responseData.subClass;
     } else {
-      return responseData; // If response is the direct object
+      return responseData;
     }
   }, [responseData]);
 
@@ -78,21 +78,57 @@ const SubclassCreateUpdatemodal = ({ id }) => {
     }
   }, [isEditMode, reset]);
 
+  // 🔹 Edit with confirmation
+  const handleEditWithConfirm = async (formData) => {
+    const result = await Swal.fire({
+      title: translate('Are you sure?'),
+      text: translate('You want to update this sub class?'),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: translate('Yes, update it!'),
+      cancelButtonText: translate('Cancel'),
+      width: '400px',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await updateSubClass({ id, data: formData }).unwrap();
+        await Swal.fire({
+          icon: 'success',
+          title: translate('Update successfully'),
+          timer: 1500,
+          showConfirmButton: false,
+          width: '400px',
+        });
+        hideModal();
+        reset();
+      } catch (err) {
+        await Swal.fire({
+          icon: 'error',
+          title: translate('Error'),
+          text: err?.data?.message || translate('Failed to update sub class'),
+          width: '400px',
+        });
+      }
+    }
+  };
+
   // 🔹 Submit logic
   const onSubmit = async (formData) => {
-    try {
-      if (isEditMode) {
-        await updateSubClass({ id, data: formData }).unwrap();
-        toast.success(translate('Sub class updated successfully'));
-      } else {
+    if (isEditMode) {
+      await handleEditWithConfirm(formData);
+    } else {
+      try {
         await addSubClass(formData).unwrap();
         toast.success(translate('Sub class created successfully'));
+        hideModal();
+        reset();
+      } catch (err) {
+        toast.error(translate('Failed to save sub class'));
+        console.error(err);
       }
-      hideModal();
-      reset();
-    } catch (err) {
-      toast.error(translate('Failed to save sub class'));
-      console.error(err);
     }
   };
 

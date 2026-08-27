@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 
-import Loading from '../../components/Loading/Loading';
-import DefaultPagination from '../../components/Pagination/DefaultPagination';
-import SortableTable from '../../components/Tables/SortableTable';
+import Loading from '../../../components/Loading/Loading';
+import DefaultPagination from '../../../components/Pagination/DefaultPagination';
+import SortableTable from '../../../components/Tables/SortableTable';
 
-import { setPageName } from '../../features/auth/authSlice';
-import { useGetAllMaddrasahPaymentsQuery } from '../../features/Admin/adminPaymentSlice';
-import useTranslate from '../../utils/Translate';
+import { setPageName } from '../../../features/auth/authSlice';
+import { useGetAllMaddrasahPaymentsQuery } from '../../../features/Admin/adminPaymentSlice';
+import useTranslate from '../../../utils/Translate';
 
 const PAGE_SIZE = 20;
 

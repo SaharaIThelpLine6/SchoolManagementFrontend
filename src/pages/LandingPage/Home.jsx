@@ -1121,14 +1121,13 @@ const Home = () => {
       </section>
 
       {/* ========== GUIDE ACCORDION ========== */}
-      <section className="py-24 px-6 max-w-5xl mx-auto bg-gray-50">
+      {/* <section className="py-24 px-6 max-w-5xl mx-auto bg-gray-50">
           <div ref={guideHeaderRef} className={`text-center mb-12 ${guideHeaderInView ? 'animate-fade-in-up' : 'opacity-0'}`}>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">প্রশ্ন ও উত্তর (FAQ)</h2>
               <p className="text-base text-gray-800 max-w-xl mx-auto">সফটওয়্যার ব্যবহার, সেটআপ ও পরিচালনার সকল প্রশ্নের উত্তর এখানে</p>
           </div>
 
           <div className="flex flex-col gap-3">
-              {/* প্রশ্ন ১ */}
               <GuideItem
                   idx={0}
                   openGuideIndex={openGuideIndex}
@@ -1138,7 +1137,6 @@ const Home = () => {
                       a: 'নতুন শিক্ষাবর্ষ শুরু করতে প্রথমে সেটিংস মেনু থেকে "শিক্ষাবর্ষ ব্যবস্থাপনা" অপশনে যান। সেখান থেকে নতুন সেশন যুক্ত করে প্রয়োজনীয় ক্লাস ও শাখা সেটআপ করুন।'
                   }}
               />
-              {/* প্রশ্ন ২ */}
               <GuideItem
                   idx={1}
                   openGuideIndex={openGuideIndex}
@@ -1148,7 +1146,6 @@ const Home = () => {
                       a: '"ভর্তি" মেনু থেকে "নতুন ভর্তি" অপশনে গিয়ে ছাত্র/ছাত্রীর প্রয়োজনীয় তথ্য পূরণ করে সাবমিট করলেই সিস্টেমে যুক্ত হয়ে যাবে।'
                   }}
               />
-              {/* প্রশ্ন ৩ */}
               <GuideItem
                   idx={2}
                   openGuideIndex={openGuideIndex}
@@ -1158,7 +1155,6 @@ const Home = () => {
                       a: 'হাজিরা মেনু থেকে ম্যানুয়ালি ছাত্র সিলেক্ট করে উপস্থিতি দেওয়া যায়, অথবা QR কোড স্ক্যান করে দ্রুত হাজিরা নেওয়া যায়।'
                   }}
               />
-              {/* প্রশ্ন ৪ */}
               <GuideItem
                   idx={3}
                   openGuideIndex={openGuideIndex}
@@ -1168,7 +1164,6 @@ const Home = () => {
                       a: 'পরীক্ষা মডিউল থেকে বিষয়ভিত্তিক নম্বর এন্ট্রি করার পর সিস্টেম স্বয়ংক্রিয়ভাবে গ্রেড হিসাব করে মার্কশিট তৈরি করে দেয়।'
                   }}
               />
-              {/* প্রশ্ন ৫ */}
               <GuideItem
                   idx={4}
                   openGuideIndex={openGuideIndex}
@@ -1178,7 +1173,6 @@ const Home = () => {
                       a: 'ভর্তি আবেদন তালিকা থেকে প্রতিটি আবেদন যাচাই করে "অনুমোদন" বা "বাতিল" বাটনে ক্লিক করে সিদ্ধান্ত নিতে পারবেন।'
                   }}
               />
-              {/* প্রশ্ন ৬ */}
               <GuideItem
                   idx={5}
                   openGuideIndex={openGuideIndex}
@@ -1188,7 +1182,6 @@ const Home = () => {
                       a: 'ফি ম্যানেজমেন্ট মডিউল থেকে ছাত্র সিলেক্ট করে মাসিক বেতন এন্ট্রি করলে স্বয়ংক্রিয় রশিদ তৈরি হয়ে যায়।'
                   }}
               />
-              {/* প্রশ্ন ৭ */}
               <GuideItem
                   idx={6}
                   openGuideIndex={openGuideIndex}
@@ -1198,7 +1191,6 @@ const Home = () => {
                       a: 'একাউন্টিং মডিউলে দৈনিক আয় ও ব্যয় এন্ট্রি করে রাখতে পারবেন, যা থেকে মাসিক ও বার্ষিক প্রতিবেদন স্বয়ংক্রিয়ভাবে তৈরি হয়।'
                   }}
               />
-              {/* প্রশ্ন ৮ */}
               <GuideItem
                   idx={7}
                   openGuideIndex={openGuideIndex}
@@ -1208,7 +1200,6 @@ const Home = () => {
                       a: 'মেসেজিং মডিউল থেকে টার্গেট গ্রুপ (সকল/শ্রেণি/একক) সিলেক্ট করে বার্তা লিখে পাঠালেই অভিভাবকদের কাছে এসএমএস পৌঁছে যাবে।'
                   }}
               />
-              {/* প্রশ্ন ৯ */}
               <GuideItem
                   idx={8}
                   openGuideIndex={openGuideIndex}
@@ -1218,7 +1209,6 @@ const Home = () => {
                       a: 'প্রমোশন মডিউল থেকে বর্তমান ক্লাস ও নতুন ক্লাস সিলেক্ট করে ছাত্রদের একসাথে বা এককভাবে প্রমোশন দেওয়া যায়।'
                   }}
               />
-              {/* প্রশ্ন ১০ */}
               <GuideItem
                   idx={9}
                   openGuideIndex={openGuideIndex}
@@ -1229,7 +1219,7 @@ const Home = () => {
                   }}
               />
           </div>
-      </section>
+      </section> */}
 
       {/* ========== SUBSCRIBE ========== */}
       <section ref={subscribeRef} className={`py-16 md:py-24 px-4 sm:px-6 bg-gradient-to-br from-primary-navy via-primary-dark to-primary relative overflow-hidden ${subscribeInView ? 'animate-fade-in-up' : 'opacity-0'}`}>

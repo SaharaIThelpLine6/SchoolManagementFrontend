@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import Button from '../components/Button/Button';
 import DefaultInput from '../components/Forms/DefaultInput';
 import DefaultSelect from '../components/Forms/DefaultSelect';
@@ -43,23 +45,19 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
     limit: pageSize,
   });
 
-  // State for selected filter
   const [selectedStatus, setSelectedStatus] = useState(null);
 
   const studentData = apiData?.data || [];
   const totalRecords = apiData?.total || 0;
   const totalPages = Math.ceil(totalRecords / pageSize);
 
-  // Filter data based on selected status and application number
   const filteredData = useMemo(() => {
     let result = studentData;
 
-    // Filter by status if selected
     if (selectedStatus !== null) {
       result = result.filter((student) => student.Status === selectedStatus);
     }
 
-    // Filter by application number if entered
     if (applicationNo) {
       const searchTerm = applicationNo.toString().trim().toLowerCase();
       result = result.filter((student) =>
@@ -103,9 +101,24 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
     return genderId === 1 ? 'Male' : 'Female';
   };
 
-  const handleEditStudent = (student) => {
-    setSelectedStudent(student);
-    setShowForm(true);
+  const handleEditStudent = async (student) => {
+    // ✅ SweetAlert Confirmation before opening edit form
+    const result = await Swal.fire({
+      title: translate('Are you sure?'),
+      text: translate('You want to complete this admission?'),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: translate('Yes, continue'),
+      cancelButtonText: translate('Cancel'),
+      width: '400px',
+    });
+
+    if (result.isConfirmed) {
+      setSelectedStudent(student);
+      setShowForm(true);
+    }
   };
 
   const handleBackToList = () => {
@@ -248,7 +261,6 @@ const OnlineAdmissionTable = ({ pageTitle }) => {
                 <h3 className="font-default text-[20px] font-bold">
                   {translate('Online Admission List')}
                 </h3>
-                {/* <Button onClick={handleNewAdmission}>New Admission</Button> */}
               </div>
 
               <div className="filter_header border-b border-[#e9edf4] flex flex-col sm:flex-row items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">

@@ -33,5 +33,20 @@ export const AdminmenuData = [
       },
     ],
   },
+  {
+    id: '4',
+    name: 'Exam',
+    route: '/Exam',
+    icon: 'LuWarehouse',
+    subMenu: [
+      {
+        id: '1',
+        name: 'Query Manage',
+        route: '/admin/query-manage',
+        icon: 'LuWarehouse',
+        subMenu: false,
+      },
+    ],
+  },
 
 ];

@@ -1023,6 +1023,8 @@ const useTranslate = () => {
     "ssl comerce":"এসএসএল কমার্স",
     "All Maddrasah Payment History":"সকল মাদ্রাসার পেমেন্ট ইতিহাস",
     "Payment Info":"পেমেন্টের তথ্য",
+    "Short Address":"সংক্ষিপ্ত ঠিকানা",
+    "Class Update":"শ্রেণি আপডেট",
 
 
   };

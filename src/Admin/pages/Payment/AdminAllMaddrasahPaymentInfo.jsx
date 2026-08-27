@@ -4,23 +4,23 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
 import Swal from 'sweetalert2';
 
-import Button from '../../components/Button/Button';
-import DeleteButton from '../../components/Button/DeleteButton';
-import EditButton from '../../components/Button/EditButton';
-import DefaultInput from '../../components/Forms/DefaultInput';
-import Loading from '../../components/Loading/Loading';
-import DefaultPagination from '../../components/Pagination/DefaultPagination';
-import SortableTable from '../../components/Tables/SortableTable';
-import SvgIcon from '../../components/icons/SvgIcon';
+import Button from '../../../components/Button/Button';
+import DeleteButton from '../../../components/Button/DeleteButton';
+import EditButton from '../../../components/Button/EditButton';
+import DefaultInput from '../../../components/Forms/DefaultInput';
+import Loading from '../../../components/Loading/Loading';
+import DefaultPagination from '../../../components/Pagination/DefaultPagination';
+import SortableTable from '../../../components/Tables/SortableTable';
+import SvgIcon from '../../../components/icons/SvgIcon';
 
-import { setPageName } from '../../features/auth/authSlice';
+import { setPageName } from '../../../features/auth/authSlice';
 import {
   useDeleteMaddrasahSSLMutation,
   useGetAllMaddrasahSSLInfoQuery,
-} from '../../features/payment/paymentSlice';
+} from '../../../features/payment/paymentSlice';
 
-import { showModal } from '../../utils/ModalControlar';
-import useTranslate from '../../utils/Translate';
+import { showModal } from '../../../utils/ModalControlar';
+import useTranslate from '../../../utils/Translate';
 
 const PAGE_SIZE = 10;
 

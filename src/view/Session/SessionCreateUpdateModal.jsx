@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import Button from '../../components/Button/Button';
 import DefaultInput from '../../components/Forms/DefaultInput';
 import {
@@ -37,25 +39,59 @@ const SessionCreateUpdateModal = ({ id }) => {
     }
   }, [sessionData, setValue]);
 
-  // 🔹 Submit logic
-  const onSubmit = async (formData) => {
-    try {
-      if (isEditMode) {
+  // 🔹 Edit with confirmation
+  const handleEditWithConfirm = async (formData) => {
+    const result = await Swal.fire({
+      title: translate('Are you sure?'),
+      text: translate('You want to update this session?'),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: translate('Yes, update it!'),
+      cancelButtonText: translate('Cancel'),
+      width: '400px',
+    });
+
+    if (result.isConfirmed) {
+      try {
         await updateSession({ id, data: formData }).unwrap();
-        toast.success(translate('Session updated successfully'));
-      } else {
-        await addSession(formData).unwrap();
-        toast.success(translate('Session created successfully'));
+        await Swal.fire({
+          icon: 'success',
+          title: translate('Update successfully'),
+          timer: 1500,
+          showConfirmButton: false,
+          width: '400px',
+        });
+        hideModal();
+        reset();
+      } catch (err) {
+        await Swal.fire({
+          icon: 'error',
+          title: translate('Error'),
+          text: err?.data?.message || translate('Failed to update session'),
+          width: '400px',
+        });
       }
-      hideModal();
-      reset();
-    } catch (err) {
-      toast.error(translate('Failed to save session'));
-      console.error(err);
     }
   };
 
-  // if (isLoading) return <Loading />;
+  // 🔹 Submit logic
+  const onSubmit = async (formData) => {
+    if (isEditMode) {
+      await handleEditWithConfirm(formData);
+    } else {
+      try {
+        await addSession(formData).unwrap();
+        toast.success(translate('Session created successfully'));
+        hideModal();
+        reset();
+      } catch (err) {
+        toast.error(translate('Failed to save session'));
+        console.error(err);
+      }
+    }
+  };
 
   return (
     <div className="w-full border rounded-lg p-5 bg-white shadow-inner">

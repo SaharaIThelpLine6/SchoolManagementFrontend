@@ -69,6 +69,7 @@ const CertificateAttesation = ({ pageTitle }) => {
         cancelButtonColor: '#3085d6',
         confirmButtonText: 'হ্যাঁ, মুছে ফেলুন',
         cancelButtonText: 'না',
+        width: '400px',
       });
 
       if (result.isConfirmed) {
@@ -80,6 +81,7 @@ const CertificateAttesation = ({ pageTitle }) => {
             text: 'সার্টিফিকেটটি সফলভাবে মুছে ফেলা হয়েছে।',
             timer: 1500,
             showConfirmButton: false,
+            width: '400px',
           });
           refetch();
         } catch (error) {
@@ -87,6 +89,7 @@ const CertificateAttesation = ({ pageTitle }) => {
             icon: 'error',
             title: 'ব্যর্থ হয়েছে',
             text: 'সার্টিফিকেটটি মুছে ফেলা যায়নি।',
+            width: '400px',
           });
         }
       }
@@ -95,9 +98,24 @@ const CertificateAttesation = ({ pageTitle }) => {
   );
 
   const handlePrint = useCallback(
-    (id) => {
-      setActiveView('print');
-      setPrintId(id);
+    async (id) => {
+      // ✅ Print করার আগে কনফার্মেশন
+      const result = await Swal.fire({
+        title: translate('Are you sure?'),
+        text: translate('You want to print this certificate?'),
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: translate('Yes, print it!'),
+        cancelButtonText: translate('Cancel'),
+        width: '400px',
+      });
+
+      if (result.isConfirmed) {
+        setActiveView('print');
+        setPrintId(id);
+      }
     },
     [translate]
   );

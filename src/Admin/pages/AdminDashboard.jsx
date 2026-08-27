@@ -41,9 +41,9 @@ const AdminDashboard = () => {
     online: 0,
     offline: 0,
     quotaSold: 0,
+    quotaSoldTotal: 0,
     quotaUnused: 0,
     newMadrasasMonthly: [],
-    // 🌟 নতুন: complaint category + support count
     complaintCategory: {
       interested: 0,
       notReceiving: 0,
@@ -51,6 +51,13 @@ const AdminDashboard = () => {
       notInterested: 0,
     },
     totalSupportLastMonth: 0,
+    activeInRange: 0,
+    inactiveInRange: 0,
+    allTimeActive: 0,
+    allTimeInactive: 0,
+    renewed: 0, 
+    notRenewed: 0,  
+    allTimeQuotaSold: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -297,6 +304,11 @@ const AdminDashboard = () => {
   };
   // ================= End Date Range Picker Logic =================
 
+  // 🌟 Dynamic date label for chart titles
+  const chartDateLabel = (startDate && endDate) 
+    ? `(${startDate} ${translate("to")} ${endDate})` 
+    : "";
+
   // 🌟 সাপোর্ট লিস্ট সার্চ ফিল্টার (client-side)
   const filteredSupportList = supportList.filter((item) => {
     const searchField = activeSupportTab === "team" ? item.fullName : item.instituteName;
@@ -339,9 +351,10 @@ const AdminDashboard = () => {
     tooltip: { theme: "light" },
   };
 
+  // ✅ Renewal Status চার্ট এখন backend এর renewed / notRenewed ভ্যালু ব্যবহার করবে
   const renewData = [
-    { name: translate("Renewed"), value: Number(dashboardData.active) || 0 }, 
-    { name: translate("Not Renewed"), value: Number(dashboardData.inactive) || 0 },
+    { name: translate("Renewed"), value: Number(dashboardData.renewed) || 0 }, 
+    { name: translate("Not Renewed"), value: Number(dashboardData.notRenewed) || 0 },
   ];
 
   const quotaData = [
@@ -349,9 +362,10 @@ const AdminDashboard = () => {
     { name: translate("Unused"), value: Number(dashboardData.quotaUnused) || 0 },
   ];
 
+  // ✅ Madrasah Status চার্ট 
   const activeInactiveData = [
-    { name: translate("Active"), value: Number(dashboardData.active) || 0 }, 
-    { name: translate("Inactive"), value: Number(dashboardData.inactive) || 0 },
+    { name: translate("Active"), value: Number(dashboardData.allTimeActive) || 0 }, 
+    { name: translate("Inactive"), value: Number(dashboardData.allTimeInactive) || 0 },
   ];
 
   const loginData = [
@@ -544,32 +558,46 @@ const AdminDashboard = () => {
 
       {/* ৩. হাইলাইট কার্ড */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl shadow-sm p-6 text-white">
-          <p className="text-blue-100 text-sm mb-1">{translate("Support Provided in Last 1 Month")}</p>
-          <h3 className="text-4xl font-bold">{loading ? "..." : dashboardData.totalSupportLastMonth} </h3>
-          <p className="text-xs mt-2 bg-blue-400/30 inline-flex items-center gap-1 px-2 py-1 rounded">
-            {translate("Successfully Resolved")}
-            {/* 🌟 পপআপ বাটন — সাপোর্ট লিস্ট দেখার জন্য */}
-            <button
-              onClick={() => setIsSupportListOpen(true)}
-              className="ml-1 hover:bg-blue-400/50 rounded-full p-0.5 transition-colors"
-              title={translate("View Support List")}
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-            </button>
-          </p>
+        
+        {/* Card 1: Support */}
+        <div className="bg-blue-600 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border-none p-6 flex flex-col justify-start">
+          <p className="text-blue-100 font-medium text-sm mb-2">{translate("Support Provided in Last 1 Month")}</p>
+          <h3 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+            {loading ? "..." : dashboardData.totalSupportLastMonth}
+          </h3>
+          <div>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/20 text-white text-xs font-semibold border border-white/30 backdrop-blur-sm">
+              {translate("Successfully Resolved")}
+              <button
+                onClick={() => setIsSupportListOpen(true)}
+                className="hover:bg-white/30 transition-colors focus:outline-none flex items-center justify-center p-1 rounded-full -mr-1"
+                title={translate("View Support List")}
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+            </span>
+          </div>
         </div>
-        <div className="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl shadow-sm p-6 text-white">
-          <p className="text-emerald-100 text-sm mb-1">{translate("Total Active Madrasahs")}</p>
-          <h3 className="text-4xl font-bold">{loading ? "..." : dashboardData.active} </h3>
+
+        {/* Card 2: Active Madrasahs */}
+        <div className="bg-emerald-500 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border-none p-6 flex flex-col justify-start">
+          <p className="text-emerald-100 font-medium text-sm mb-2">{translate("Total Active Madrasahs")}</p>
+          <h3 className="text-4xl lg:text-5xl font-bold text-white">
+            {loading ? "..." : dashboardData.allTimeActive}
+          </h3>
         </div>
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl shadow-sm p-6 text-white">
-          <p className="text-purple-100 text-sm mb-1">{translate("Total Sold Quota")}</p>
-          <h3 className="text-4xl font-bold">{loading ? "..." : dashboardData.quotaSold} </h3>
+
+        {/* Card 3: Sold Quota */}
+        <div className="bg-purple-500 rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-300 border-none p-6 flex flex-col justify-start">
+          <p className="text-purple-100 font-medium text-sm mb-2">{translate("Total Sold Quota")}</p>
+          <h3 className="text-4xl lg:text-5xl font-bold text-white">
+            {loading ? "..." : dashboardData.allTimeQuotaSold}
+          </h3>
         </div>
+
       </div>
 
       {/* ৪. চার্টস গ্রিড */}

@@ -22,12 +22,12 @@ export const menuData = [
         route: 'general-info/month-name-list',
         subMenu: false,
       },
-      {
-        id: '4',
-        name: 'All Madrasah',
-        route: 'general-info/all-madrasah',
-        subMenu: false,
-      },
+      // {
+      //   id: '4',
+      //   name: 'All Madrasah',
+      //   route: 'general-info/all-madrasah',
+      //   subMenu: false,
+      // },
       {
         id: '5',
         name: 'Institution Information',
@@ -129,7 +129,7 @@ export const menuData = [
       {
         id: '12',
         name: 'Student ID Card',
-        route: '/students/student-id-card',
+        route: 'students/student-id-card',
       },
     ],
   },
@@ -583,11 +583,11 @@ export const menuData = [
         route: 'help/videos',
       },
 
-      {
-        id: '2',
-        name: 'Feedback & Suggestions',
-        route: '/helpsupport-tickets',
-      },
+      // {
+      //   id: '2',
+      //   name: 'Feedback & Suggestions',
+      //   route: 'helpsupport-tickets',
+      // },
     ],
   },
 ];

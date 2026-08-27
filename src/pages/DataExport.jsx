@@ -4,6 +4,8 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import * as XLSX from 'xlsx';
 import Button from '../components/Button/Button';
 import DefaultSelect from '../components/Forms/DefaultSelect';
@@ -20,7 +22,6 @@ import {
 } from '../features/student/studentQuerySlice';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
-import StudentDataReportPdf from '../view/students/pdf/StudentDataReportPdf';
 
 const PAGE_SIZE = 10;
 
@@ -65,14 +66,12 @@ const DataExport = ({ pageTitle }) => {
     }
   );
 
-  // Process student data with proper nested access
   const processedStudentData = useMemo(() => {
     if (!searchStudentInfo || !searchStudentInfo.length) return [];
 
     return searchStudentInfo.map((student) => {
       let studentLogo = null;
 
-      // If student has image
       if (student.User?.UserImage?.Image?.data) {
         try {
           const buffer = Buffer.from(student.User.UserImage.Image.data);
@@ -84,9 +83,7 @@ const DataExport = ({ pageTitle }) => {
         }
       }
 
-      // Extract data from nested structure
       return {
-        // Basic student info
         AdmissionID: student.AdmissionID,
         UserID: student.UserID,
         StudentCode: student.User?.UserCode || '-',
@@ -100,39 +97,25 @@ const DataExport = ({ pageTitle }) => {
         NIDNO: student.User?.NIDNO || '-',
         BloodGroup: student.User?.BloodGroup || '-',
         GenderID: student.User?.GenderID || '-',
-        
-        // Session info
         SessionName: student.AcademicSession?.SessionName || '-',
-        
-        // Class info
         ClassName: student.Class?.ClassName || '-',
         SubClass: student.SubClass?.SubClass || '-',
-        
-        // Admission info
         AdmissionSerial: student.AdmissionSerial || '-',
         NewOldId: student.NewOldId || '-',
         ResidentialStatusId: student.ResidentialStatusId || '-',
         ResidentialName: student.ResidentialStatusId === 1 ? 'আবাসিক' : 
                          student.ResidentialStatusId === 2 ? 'অনাবাসিক' : '-',
-        
-        // Permanent address
         permanentVill: student.User?.permanentVill || '-',
         permanentPost: student.User?.permanentPost || '-',
         PoliceStationName: student.User?.permanentPoliceStation?.PoliceStationName || '-',
         PermanentDistrictName: student.User?.permanentPoliceStation?.District?.DistrictName || '-',
         PermanentDivisionName: student.User?.permanentPoliceStation?.District?.Division?.DivisionName || '-',
-        
-        // Transient/Primary address
         TransientVill: student.User?.TransientVill || '-',
         TransientPost: student.User?.TransientPost || '-',
         TransientPoliceStationName: student.User?.transientPoliceStation?.PoliceStationName || '-',
         TransientDistrictName: student.User?.transientPoliceStation?.District?.DistrictName || '-',
         TransientDivisionName: student.User?.transientPoliceStation?.District?.Division?.DivisionName || '-',
-        
-        // Image
         logo: studentLogo,
-        
-        // Additional fields
         SFTID: student.SFTID,
         ExamAction: student.ExamAction,
         AdmissionStatus: student.AdmissionStatus,
@@ -142,7 +125,6 @@ const DataExport = ({ pageTitle }) => {
     });
   }, [searchStudentInfo]);
 
-  // Main logo for institutional logo
   useEffect(() => {
     if (searchStudentInfo?.[0]?.User?.UserImage?.data) {
       try {
@@ -168,7 +150,6 @@ const DataExport = ({ pageTitle }) => {
   const [selectedColumns, setSelectedColumns] = useState([]);
   const [errors, setErrors] = useState({ filters: false });
 
-  // Define all columns with updated field mappings
   const allColumns = [
     { id: 'logo', label: 'Logo', field: 'logo', type: 'image' },
     { id: 'ID', label: 'ID', field: 'StudentCode' },
@@ -188,22 +169,16 @@ const DataExport = ({ pageTitle }) => {
     { id: 'Date Of Birth', label: 'Date of Birth', field: 'DateOfBirth' },
     { id: 'NID/Birth Registration', label: 'NID/Birth Registration', field: 'NIDNO' },
     { id: 'Blood Group', label: 'Blood Group', field: 'BloodGroup' },
-    
-    // Permanent Address fields
     { id: 'permanentDivision', label: 'Permanent Division', field: 'PermanentDivisionName' },
     { id: 'permanentDistrict', label: 'Permanent District', field: 'PermanentDistrictName' },
     { id: 'permanentPoliceStation', label: 'Permanent Police Station', field: 'PoliceStationName' },
     { id: 'permanentPostOffice', label: 'Permanent Post Office', field: 'permanentPost' },
     { id: 'permanentVillage', label: 'Permanent Village', field: 'permanentVill' },
-    
-    // Transient/Primary Address fields
     { id: 'transientDivision', label: 'Transient Division', field: 'TransientDivisionName' },
     { id: 'transientDistrict', label: 'Transient District', field: 'TransientDistrictName' },
     { id: 'transientPoliceStation', label: 'Transient Police Station', field: 'TransientPoliceStationName' },
     { id: 'transientPostOffice', label: 'Transient Post Office', field: 'TransientPost' },
     { id: 'transientVillage', label: 'Transient Village', field: 'TransientVill' },
-    
-    
     { id: 'Financial Status', label: 'Financial Status', field: 'FinancialStatus' },
   ];
 
@@ -222,7 +197,6 @@ const DataExport = ({ pageTitle }) => {
     return isValid;
   }, [methods]);
 
-  // Filter student data based on selected columns
   const filteredStudentData = useMemo(() => {
     if (!processedStudentData || !processedStudentData.length) return [];
 
@@ -238,7 +212,6 @@ const DataExport = ({ pageTitle }) => {
     });
   }, [processedStudentData, selectedColumns, allColumns]);
 
-  // Generate table columns dynamically based on selection
   const dynamicColumns = useMemo(() => {
     return allColumns
       .filter((col) => selectedColumns.includes(col.id))
@@ -293,8 +266,21 @@ const DataExport = ({ pageTitle }) => {
       });
   }, [selectedColumns, translate]);
 
-  // Enhanced export to Excel
   const exportToExcel = useCallback(async () => {
+    const result = await Swal.fire({
+      title: translate('Are you sure?'),
+      text: translate('You want to export this data to Excel?'),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: translate('Yes, export it!'),
+      cancelButtonText: translate('Cancel'),
+      width: '400px',
+    });
+
+    if (!result.isConfirmed) return;
+
     if (!validateFilters()) {
       toast.error('অনুগ্রহ করে সব প্রয়োজনীয় ফিল্টার নির্বাচন করুন।');
       return;
@@ -379,12 +365,23 @@ const DataExport = ({ pageTitle }) => {
         URL.revokeObjectURL(url);
       }
 
-      toast.success(translate('Data exported successfully'));
+      await Swal.fire({
+        icon: 'success',
+        title: translate('Data exported successfully'),
+        timer: 1500,
+        showConfirmButton: false,
+        width: '400px',
+      });
+      // toast.success(translate('Data exported successfully')); // ❌ removed as per request
     } catch (error) {
       console.error('Error exporting to Excel:', error);
-      toast.error(
-        'ডেটা প্রিন্ট করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।'
-      );
+      await Swal.fire({
+        icon: 'error',
+        title: translate('Error'),
+        text: translate('Failed to export data. Please try again.'),
+        width: '400px',
+      });
+      toast.error('ডেটা প্রিন্ট করতে ব্যর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
     }
   }, [
     filteredStudentData,
@@ -412,7 +409,6 @@ const DataExport = ({ pageTitle }) => {
   return (
     <FormProvider {...methods}>
       <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-default print:hidden">
-        {/* Top Section - Title and Filters */}
         <div className="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-4">
           <h2 className="text-xl font-bold text-black shrink-0 2xl:mr-6">
             {translate('Export students data')}
@@ -485,7 +481,6 @@ const DataExport = ({ pageTitle }) => {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
-          {/* Left Panel - Column Selection */}
           <div className="w-full lg:w-1/4">
             <div className="bg-gray-50 p-4 rounded-lg">
               <h3 className="font-medium text-gray-700 mb-3">
@@ -534,7 +529,6 @@ const DataExport = ({ pageTitle }) => {
             </div>
           </div>
 
-          {/* Right Panel - Table */}
           {searchStudentError ? (
             <div className="w-full lg:w-3/4">
               <p className="text-red-500 text-center">

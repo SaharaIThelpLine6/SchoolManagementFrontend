@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 import DefaultInput from '../components/Forms/DefaultInput';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import SvgIcon from '../components/icons/SvgIcon';
@@ -67,11 +69,12 @@ const EnglisArobihName = ({ pageTitle }) => {
       dispatch(setCharacterReportEditMode(null));
 
       methods.reset({
-        UserID: filteredStudent.UserID, // UserID
+        UserID: filteredStudent.UserID,
         StudentCode: filteredStudent?.User?.UserCode,
         StudentName: filteredStudent?.User?.UserName,
         FatherName: filteredStudent?.User?.FatherName,
-        MotherName: filteredStudent?.Class?.ClassName,
+        MotherName: filteredStudent?.User?.MotherName,
+        BanglaShortAdd: filteredStudent?.User?.permanentVill || '',
         EnglishName: filteredStudent?.User?.studentEnglishName?.EnglishName || '',
         EnglishFather: filteredStudent?.User?.studentEnglishName?.EnglishFather || '',
         EnglishMother: filteredStudent?.User?.studentEnglishName?.EnglishMother || '',
@@ -113,50 +116,68 @@ const EnglisArobihName = ({ pageTitle }) => {
   }, []);
 
   const onSubmit = async (data) => {
-    const toastId = toast.loading('Submitting...');
-    try {
-      const convertedData = {
-        UserID: data.UserID, // Make sure UserID
-        EnglishName: data.EnglishName
-          ? convertBijoyToBengali(data.EnglishName)
-          : null,
-        EnglishFather: data.EnglishFather
-          ? convertBijoyToBengali(data.EnglishFather)
-          : null,
-        EnglishMother: data.EnglishMother
-          ? convertBijoyToBengali(data.EnglishMother)
-          : null,
-        EnglishShortAdd: data.EnglishShortAdd
-          ? convertBijoyToBengali(data.EnglishShortAdd)
-          : null,
-        ArabicName: data.ArabicName
-          ? convertBijoyToBengali(data.ArabicName)
-          : null,
-        ArabicFather: data.ArabicFather
-          ? convertBijoyToBengali(data.ArabicFather)
-          : null,
-        ArabicMother: data.ArabicMother
-          ? convertBijoyToBengali(data.ArabicMother)
-          : null,
-        ArabicShortAdd: data.ArabicShortAdd
-          ? convertBijoyToBengali(data.ArabicShortAdd)
-          : null,
-      };
+    // ✅ SweetAlert Confirmation (before submit)
+    const result = await Swal.fire({
+      title: translate('Are you sure?'),
+      text: translate('You want to submit this information?'),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: translate('Yes, submit it!'),
+      cancelButtonText: translate('Cancel'),
+      width: '400px',
+    });
 
-      await addEnglishArobicNameStudent(convertedData).unwrap();
-      toast.update(toastId, {
-        render: 'Submitted successfully!',
-        type: 'success',
-        isLoading: false,
-        autoClose: 3000,
-      });
-    } catch (err) {
-      toast.update(toastId, {
-        render: err?.data?.error || 'Submission failed!',
-        type: 'error',
-        isLoading: false,
-        autoClose: 3000,
-      });
+    if (result.isConfirmed) {
+      try {
+        const convertedData = {
+          UserID: data.UserID,
+          EnglishName: data.EnglishName
+            ? convertBijoyToBengali(data.EnglishName)
+            : null,
+          EnglishFather: data.EnglishFather
+            ? convertBijoyToBengali(data.EnglishFather)
+            : null,
+          EnglishMother: data.EnglishMother
+            ? convertBijoyToBengali(data.EnglishMother)
+            : null,
+          EnglishShortAdd: data.EnglishShortAdd
+            ? convertBijoyToBengali(data.EnglishShortAdd)
+            : null,
+          ArabicName: data.ArabicName
+            ? convertBijoyToBengali(data.ArabicName)
+            : null,
+          ArabicFather: data.ArabicFather
+            ? convertBijoyToBengali(data.ArabicFather)
+            : null,
+          ArabicMother: data.ArabicMother
+            ? convertBijoyToBengali(data.ArabicMother)
+            : null,
+          ArabicShortAdd: data.ArabicShortAdd
+            ? convertBijoyToBengali(data.ArabicShortAdd)
+            : null,
+        };
+
+        await addEnglishArobicNameStudent(convertedData).unwrap();
+
+        // ✅ Success SweetAlert (after successful submit)
+        await Swal.fire({
+          icon: 'success',
+          title: translate('Submitted successfully'),
+          timer: 1500,
+          showConfirmButton: false,
+          width: '400px',
+        });
+      } catch (err) {
+        // ✅ Error SweetAlert
+        await Swal.fire({
+          icon: 'error',
+          title: translate('Error'),
+          text: err?.data?.error || translate('Submission failed!'),
+          width: '400px',
+        });
+      }
     }
   };
 
@@ -204,8 +225,8 @@ const EnglisArobihName = ({ pageTitle }) => {
                       onClick={() => handleSuggestionClick(item)}
                     >
                       {item?.User?.UserCode} -{' '}
-                          {bnBijoy2Unicode(item?.User?.UserName)} -{' '}
-                          {bnBijoy2Unicode(item?.Class?.ClassName)}
+                      {bnBijoy2Unicode(item?.User?.UserName)} -{' '}
+                      {bnBijoy2Unicode(item?.Class?.ClassName)}
                     </div>
                   ))}
                 </div>
@@ -230,11 +251,6 @@ const EnglisArobihName = ({ pageTitle }) => {
             {/* Bangla Column */}
             <div className="space-y-4">
               <DefaultInput
-                registerKey={'ClassName'}
-                label="মারহালা/শ্রেণি"
-                disable={true}
-              />
-              <DefaultInput
                 registerKey={'StudentName'}
                 label="শিক্ষার্থীর নাম"
                 disable={true}
@@ -247,6 +263,11 @@ const EnglisArobihName = ({ pageTitle }) => {
               <DefaultInput
                 registerKey={'MotherName'}
                 label="মাতার নাম"
+                disable={true}
+              />
+              <DefaultInput
+                registerKey={'BanglaShortAdd'}
+                label="সংক্ষিপ্ত ঠিকানা"
                 disable={true}
               />
             </div>
