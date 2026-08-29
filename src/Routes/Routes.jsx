@@ -173,44 +173,40 @@ const Router = createBrowserRouter([
     path: '/forget_password',
     element: <ForgetPassword />,
   },
-  {
-  path: '/',
-    element: <MainLayout />,
-    children: [
-      {
-        index: true,
-        element: <LandingPage />,
-      },
-      {
-        path: 'about-us',
-        element: <AboutUs />,
-      },
-      {
-        path: 'management-team',
-        element: <ManagementTeam />,
-      },
-      {
-        path: 'photo-gallery',
-        element: <PhotoGallery />,
-      },
-      {
-        path: 'contact-us',
-        element: <ContactUs />,
-      },
-      {
-        path: 'privacy-policy',
-        element: <PrivacyPolicy />,
-      },
-    ],
-  },
   // {
-  //   path: '/',
-  //   element: (
-  //     <MainLayout>
-  //       <LandingPage />
-  //     </MainLayout>
-  //   ),
+  // path: '/',
+  //   element: <MainLayout />,
+  //   children: [
+  //     {
+  //       index: true,
+  //       element: <LandingPage />,
+  //     },
+  //     {
+  //       path: 'about-us',
+  //       element: <AboutUs />,
+  //     },
+  //     {
+  //       path: 'management-team',
+  //       element: <ManagementTeam />,
+  //     },
+  //     {
+  //       path: 'photo-gallery',
+  //       element: <PhotoGallery />,
+  //     },
+  //     {
+  //       path: 'contact-us',
+  //       element: <ContactUs />,
+  //     },
+  //     {
+  //       path: 'privacy-policy',
+  //       element: <PrivacyPolicy />,
+  //     },
+  //   ],
   // },
+  {
+    path: '/',
+    element: <Login />,
+  },
   {
     path: '/login',
     element: <Login />,
