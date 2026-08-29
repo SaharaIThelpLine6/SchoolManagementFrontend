@@ -95,6 +95,7 @@ export const dashboardSlice = createApi({
 export const {
   useGetTotalStudentQuery,
   useGetAllUserWithImageQuery,
+  useLazyGetAllUserWithImageQuery,
   useGetTotalTeacherQuery,
   useGetTotalDonerQuery,
   useGetTotalDueQuery,
