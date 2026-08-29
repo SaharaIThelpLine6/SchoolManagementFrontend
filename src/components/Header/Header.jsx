@@ -222,7 +222,7 @@ const Header = () => {
             )}
 
             {
-              softwareDetails && <a className="btn btn-info bg-blue-500 py-[6px] px-[10px] md:px-[20px] rounded-[10px] mb-0 text-[14px] text-white whitespace-nowrap d-inline flex gap-2 font-bold" href={softwareDetails.UpSoftwareLink}><svg xmlns="http://www.w3.org/2000/svg" width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-device-desktop-down"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M13.5 16h-9.5a1 1 0 0 1 -1 -1v-10a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v7.5" /><path d="M7 20h5" /><path d="M9 16v4" /><path d="M19 16v6" /><path d="M22 19l-3 3l-3 -3" /></svg> {translate("Download")}</a>
+              softwareDetails && <a target="_blank" className="btn btn-info bg-blue-500 py-[6px] px-[10px] md:px-[20px] rounded-[10px] mb-0 text-[14px] text-white whitespace-nowrap d-inline flex gap-2 font-bold" href={softwareDetails.UpSoftwareLink}><svg xmlns="http://www.w3.org/2000/svg" width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-device-desktop-down"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M13.5 16h-9.5a1 1 0 0 1 -1 -1v-10a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v7.5" /><path d="M7 20h5" /><path d="M9 16v4" /><path d="M19 16v6" /><path d="M22 19l-3 3l-3 -3" /></svg> {translate("Download")}</a>
             }
 
 

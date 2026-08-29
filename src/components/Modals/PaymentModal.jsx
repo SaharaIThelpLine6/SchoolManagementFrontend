@@ -275,7 +275,7 @@ const PaymentModal = ({serviceId}) => {
       service: service.id,
       size: size.id,
       method,
-      callbackURL: `${BASE_URL}/payment_confirm/${user.schoolId}/${service.id}/${size.id}`,
+      callbackURL: `${BASE_URL}/dashboard/payment_confirm/${user.schoolId}/${service.id}/${size.id}`,
       schoolId: user.schoolId,
     };
 
