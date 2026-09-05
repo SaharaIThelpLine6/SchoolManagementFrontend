@@ -145,6 +145,7 @@ import SupportTicketView from '../pages/SupportTicketView';
 import AdmissionForm from '../pages/AdmissionForm';
 import StudentAdmissionMessageCreate from '../pages/StudentAdmissionMessageCreate';
 import ResultLayout from '../pages/public/ResultLayout';
+import Video from '../pages/public/Video';
 import Donation from '../pages/public/Donation';
 import OnlineDonationInvoice from '../view/payment/payment-history/OnlineDonationInvoice';
 import DonationHomePage from '../pages/frontsite/DonationHomePage';
@@ -1302,6 +1303,7 @@ const Router = createBrowserRouter([
       { path: 'maritlist/:seassonid/:examid', element: <MaritListResult /> },
       { path: 'classes', element: <ClassResultForm /> },
       { path: 'classes/:seassonid/:examid/:classid', element: <ClassResult /> },
+      { path: 'support_video', element: <Video /> },
       { path: 'donation', element: <Donation /> },
       { path: 'donation/payment-success', element: <OnlineDonationInvoice /> },
 

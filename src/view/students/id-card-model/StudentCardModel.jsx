@@ -26,7 +26,7 @@ const StudentCardModel = () => {
     if (!id) return;
     setSelectedLayout(id)
     dispatch(closeModal());
-    navigate("/students/student-id-card", {
+    navigate("students/student-id-card", {
       state: {
         layoutId: id,
       },

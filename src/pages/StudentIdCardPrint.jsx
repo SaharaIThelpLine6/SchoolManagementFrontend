@@ -15,7 +15,6 @@ import {
   usePostChnageStudentGroupMutation,
 } from '../features/student/studentQuerySlice';
 import { ViewPermission } from '../Routes/ViewPermission';
-import bnBijoy2Unicode from '../utils/conveter';
 import useTranslate from '../utils/Translate';
 import { setPrintableStudentList } from '../features/student/studentSlice';
 import { showModal } from '../utils/ModalControlar';
@@ -161,42 +160,47 @@ const StudentIdCardPrint = ({ pageTitle }) => {
         return;
       }
 
-      const updatedSelectedRows = selectedRows.map(row => {
+      const updatedSelectedRows = selectedRows.map((row) => {
+        // প্রতিটি নেস্টেড অবজেক্ট null হলে খালি অবজেক্ট ব্যবহার করুন
+        const user = row.User || {};
+        const classInfo = row.Class || {};
+        const sessionInfo = row.AcademicSession || {};
+        const residentialInfo = row.userResidential || {};
+
         const newRow = {
           ...row,
-
-          StudentCode: row.User.UserCode,
-          StudentName: row.User.UserName,
-          FatherName: row.User.FatherName,
-          MotherName: row.User.MotherName,
-          Mobile1: row.User.Mobile1,
-          UserImage: row.User.UserImage,
-          ClassName: row.Class.ClassName,
-          SessionName: row.AcademicSession.SessionName,
-          BloodGroup: row.User.BloodGroup,
-          ResidentialName: row.userResidential.ResidentialName,
-          NIDNO: row.User.NIDNO,
-          DateOfBirth: row.User.DateOfBirth,
-          NewOldId: row.userResidential.ResidentialName,
+          StudentCode: user.UserCode || '',
+          StudentName: user.UserName || '',
+          FatherName: user.FatherName || '',
+          MotherName: user.MotherName || '',
+          Mobile1: user.Mobile1 || '',
+          UserImage: user.UserImage || '',
+          ClassName: classInfo.ClassName || '',
+          SessionName: sessionInfo.SessionName || '',
+          BloodGroup: user.BloodGroup || '',
+          ResidentialName: residentialInfo.ResidentialName || '',
+          NIDNO: user.NIDNO || '',
+          DateOfBirth: user.DateOfBirth || '',
+          NewOldId: residentialInfo.ResidentialName || '',
         };
-        checkboxState.forEach(key => {
+
+        // ফিল্ড কী যোগ করুন
+        checkboxState.forEach((key) => {
           const fieldKeyName = `fieldkey_${key}`;
           if (data[fieldKeyName]) {
             newRow[`fieldkey_${key}`] = data[fieldKeyName];
           }
         });
-        newRow[`institute_name`] = data[`institute_name_${selectedLayout}`]
-        newRow[`schoolname_color_field`] = SchoolNameColor
-        newRow[`schoolname_fontside`] = SchoolNameSize
 
-
-        newRow[`institute_address`] = data[`institute_address_${selectedLayout}`]
-        newRow[`schooladdress_color_field`] = SchoolAddressColor
-        newRow[`schooladdress_fontside`] = SchoolAddressSize
-        newRow[`SignaturePrincipal`] = institutionInfo?.SignaturePrincipal
-        newRow[`PrincipalName`] = institutionInfo?.PrincipalName
-
-
+        // প্রতিষ্ঠানের তথ্য যোগ করুন
+        newRow[`institute_name`] = data[`institute_name_${selectedLayout}`];
+        newRow[`schoolname_color_field`] = SchoolNameColor;
+        newRow[`schoolname_fontside`] = SchoolNameSize;
+        newRow[`institute_address`] = data[`institute_address_${selectedLayout}`];
+        newRow[`schooladdress_color_field`] = SchoolAddressColor;
+        newRow[`schooladdress_fontside`] = SchoolAddressSize;
+        newRow[`SignaturePrincipal`] = institutionInfo?.SignaturePrincipal;
+        newRow[`PrincipalName`] = institutionInfo?.PrincipalName;
 
         return newRow;
       });
@@ -1263,9 +1267,9 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                     />
                   </td>
                   <td className="p-2">{student?.User?.UserCode}</td>
-                  <td className="p-2">{bnBijoy2Unicode(student?.User?.UserName)}</td>
-                  <td className="p-2">{bnBijoy2Unicode(student?.Class.ClassName)}</td>
-                  <td className="p-2">{bnBijoy2Unicode(student?.SubClass?.SubClass)}</td>
+                  <td className="p-2">{student?.User?.UserName}</td>
+                  <td className="p-2">{student?.Class?.ClassName || ''}</td>
+                  <td className="p-2">{student?.SubClass?.SubClass}</td>
                   {/* <td className="p-2">{student.ResidentialName}</td> */}
                 </tr>
               ))}

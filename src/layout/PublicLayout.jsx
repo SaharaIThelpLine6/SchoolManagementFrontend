@@ -105,6 +105,8 @@ useEffect(() => {
             { href: `/${schoolid}/online_admission`, label: "অনলাইনে ভর্তি" },
             { href: "https://wifaqresult.com", label: "বেফাক ফলাফল", external: true },
             { href: "https://hems.alhaiatululya.org/exam-result", label: "আল-হাইআ ফলাফল", external: true },
+            { href: `/${schoolid}/support_video`, label: "ভিডিও" },
+            { href: `/${schoolid}/donation`, label: "অনুদান" },
           ]
             .filter(Boolean)
             .map((link) =>
@@ -204,6 +206,10 @@ useEffect(() => {
                 </div>
               </div>
               {/* --- ড্রপডাউন শেষ --- */}
+
+              <Link to={`/${schoolid}/support_video`} className="text-gray-600 hover:text-green-700 transition text-[18px] font-bold">
+                ভিডিও
+              </Link>
 
               <Link to={`/${schoolid}/donation`} className="text-gray-600 hover:text-green-700 transition text-[18px] font-bold">
                 অনুদান
