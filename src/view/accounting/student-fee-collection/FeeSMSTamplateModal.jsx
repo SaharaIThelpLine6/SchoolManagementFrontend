@@ -130,8 +130,6 @@ const FeeSMSTamplateModal = () => {
             <h2 className="text-xl font-semibold">Demo Madrasa</h2>
             <p className="text-sm opacity-90 mt-1">এসএমএস ও রসিদ সেটিং</p>
           </div>
-          koiselam na tomar aunty 
-
           {/* Form Body */}
           <div className="p-6 space-y-6">
             <div className="grid grid-cols-2 gap-4">
