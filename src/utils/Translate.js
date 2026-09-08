@@ -1025,7 +1025,12 @@ const useTranslate = () => {
     "Payment Info":"পেমেন্টের তথ্য",
     "Short Address":"সংক্ষিপ্ত ঠিকানা",
     "Class Update":"শ্রেণি আপডেট",
-
+    "Teacher Subject Assignment":"শিক্ষকদের বিষয় ব্যবস্থাপনা",
+    "Total Records":"মোট রেকর্ড",
+    "Filter Options":"ফিল্টার অপশন",
+    "Reset Filters":"রিসেট ফিল্টার",
+    "Create New":"নতুন তৈরি করুন",
+    "Create Session":"সাব-ক্লাস তৈরি করুন",
 
   };
 
