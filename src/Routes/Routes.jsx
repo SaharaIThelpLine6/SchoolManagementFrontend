@@ -97,7 +97,7 @@ import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
 import StudentIdCardPrint from '../pages/StudentIdCardPrint';
 import StudentsFeeCollection from '../pages/StudentsFeeCollection';
 import StudentsReport from '../pages/StudentsReport';
-import StudentsReportList from '../pages/StudentsReportList';
+// import StudentsReportList from '../pages/StudentsReportList';
 // import TalentCondition from '../pages/TalentCondition';
 import User from '../pages/User';
 import UserImage from '../pages/UserImage';
@@ -422,16 +422,16 @@ const Router = createBrowserRouter([
                 ),
               },
 
-              {
-                path: 'report_list',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.student_report}
-                  >
-                    <StudentsReportList pageTitle="Students Report List" />
-                  </RequirePermission>
-                ),
-              },
+              // {
+              //   path: 'report_list',
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.student_report}
+              //     >
+              //       <StudentsReportList pageTitle="Students Report List" />
+              //     </RequirePermission>
+              //   ),
+              // },
 
               {
                 path: 'online-admission',
