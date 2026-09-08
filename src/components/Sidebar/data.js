@@ -131,6 +131,11 @@ export const menuData = [
         name: 'Student ID Card',
         route: 'students/student-id-card',
       },
+      {
+        id: '13',
+        name: 'Students Report List',
+        route: 'students/report_list',
+      },
     ],
   },
   // {

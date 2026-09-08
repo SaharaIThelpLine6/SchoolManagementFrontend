@@ -97,6 +97,7 @@ import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
 import StudentIdCardPrint from '../pages/StudentIdCardPrint';
 import StudentsFeeCollection from '../pages/StudentsFeeCollection';
 import StudentsReport from '../pages/StudentsReport';
+import StudentsReportList from '../pages/StudentsReportList';
 // import TalentCondition from '../pages/TalentCondition';
 import User from '../pages/User';
 import UserImage from '../pages/UserImage';
@@ -417,6 +418,17 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.student_report}
                   >
                     <StudentsReport pageTitle="Students Report" />
+                  </RequirePermission>
+                ),
+              },
+
+              {
+                path: 'report_list',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.student_report}
+                  >
+                    <StudentsReportList pageTitle="Students Report List" />
                   </RequirePermission>
                 ),
               },
@@ -1250,7 +1262,7 @@ const Router = createBrowserRouter([
               },
               {
                 path: 'website-settings',
-                element: <WebsiteSettings pageTitle="Add Login Users" />,
+                element: <WebsiteSettings pageTitle="Website Settings" />,
               },
               {
                 path: 'document-settings',

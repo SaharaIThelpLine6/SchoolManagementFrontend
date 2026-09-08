@@ -35,6 +35,7 @@ export default function WebsiteSettings() {
       whyUsList: [{ text: '' }],
       classList: [{ text: '', subjects: [] }],
       teachers: [],
+      videoLinks: [], // <-- নতুন ভিডিও লিংক ফিল্ড
       // Color Palette Default Values
       primary: '#265d3e',
       secondary: '#fbbf24',
@@ -42,19 +43,29 @@ export default function WebsiteSettings() {
   });
   const translate = useTranslate();
   const { reset, control, register, setValue, watch } = methods;
+
+  // whyUsList field array
   const { fields, append, remove, replace, insert } = useFieldArray({
     control,
     name: 'whyUsList',
   });
+
+  // classList field array
   const { fields: classSubjectFields, append: appendClassSubjectFields, remove: removeClassSubjectFields, replace: replaceClassSubjectFields, insert: insertClassSubjectFields } = useFieldArray({
     control,
     name: 'classList',
   });
 
-  const [sendWebsiteSettings] = usePostWebsitesettingsMutation();
-  const { data, error, isLoading } = useGetWebSettingsQuery();
-  const [teacherOptions, setTeacherOptions] = useState([]);
+  // videoLinks field array
+  const { fields: videoFields, append: appendVideo, remove: removeVideo, replace: replaceVideo } = useFieldArray({
+    control,
+    name: 'videoLinks',
+  });
 
+  const [sendWebsiteSettings] = usePostWebsitesettingsMutation();
+  // ✅ refetch যোগ করা হয়েছে
+  const { data, error, isLoading, refetch } = useGetWebSettingsQuery();
+  const [teacherOptions, setTeacherOptions] = useState([]);
 
   const [classSubjectList, setClassSubjectList] = useState([]);
   const [subjectOptions, setSubjectOptions] = useState([]);
@@ -64,6 +75,46 @@ export default function WebsiteSettings() {
     control,
     name: 'classList'
   });
+
+  // Helper: YouTube video ID extractor
+  const getYouTubeVideoId = (url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  // Helper: get preview JSX for video link
+  const getVideoPreview = (url) => {
+    if (!url) {
+      return <div className="w-20 h-14 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-500">No video</div>;
+    }
+
+    const youtubeId = getYouTubeVideoId(url);
+    if (youtubeId) {
+      return (
+        <img
+          src={`https://img.youtube.com/vi/${youtubeId}/default.jpg`}
+          alt="Video thumbnail"
+          className="w-20 h-14 object-cover rounded"
+        />
+      );
+    }
+
+    const isDirectVideo = /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
+    if (isDirectVideo) {
+      return (
+        <video className="w-20 h-14 object-cover rounded" muted>
+          <source src={url} type={`video/${url.split('.').pop().toLowerCase()}`} />
+          Your browser does not support the video tag.
+        </video>
+      );
+    }
+
+    return <div className="w-20 h-14 bg-gray-200 rounded flex items-center justify-center text-xs">Unsupported</div>;
+  };
+
+  // Load existing settings
   useEffect(() => {
     if (data) {
       console.log(data);
@@ -78,10 +129,16 @@ export default function WebsiteSettings() {
             value = [{ text: '' }];
           }
           remove(0);
-
           replace(value);
+        } else if (key == 'videoLinks') { // <-- নতুন ভিডিও লিংক লোড
+          try {
+            const videos = JSON.parse(value);
+            replaceVideo(Array.isArray(videos) ? videos : []);
+          } catch (e) {
+            replaceVideo([]);
+          }
         } else {
-          setValue(key, value); // for single values, images, and our new 'primary' / 'secondary' colors
+          setValue(key, value);
         }
         if (key == 'BannerImage') {
           setBannerUrl(`${API_URL}/public${value}`);
@@ -116,7 +173,7 @@ export default function WebsiteSettings() {
         }
       });
     }
-  }, [data, setValue, append]);
+  }, [data, setValue, append, replace, replaceVideo]);
 
   const onSubmit = async (data) => {
     const formattedSubjects = data.classList
@@ -125,7 +182,6 @@ export default function WebsiteSettings() {
         subClassId: Number(item.text),
         subjectIds: item.subjects
       }));
-
 
     const formData = new FormData();
     // Text fields
@@ -153,6 +209,9 @@ export default function WebsiteSettings() {
     }
     formData.append("teachers", JSON.stringify(data.teachers));
     formData.append('subjectClasses', JSON.stringify(formattedSubjects));
+    // Video Links
+    formData.append('videoLinks', JSON.stringify(data.videoLinks)); // <-- নতুন
+
     try {
       await sendWebsiteSettings(formData).unwrap();
       Swal.fire({
@@ -162,6 +221,8 @@ export default function WebsiteSettings() {
         timer: 2000,
         showConfirmButton: false,
       });
+      // ✅ সফল সেভের পর ডাটা রিফেচ করুন
+      refetch();
     } catch (error) {
       Swal.fire({
         icon: 'error',
@@ -199,8 +260,6 @@ export default function WebsiteSettings() {
     return selected.length === academicSubjects.length && academicSubjects.length;
   };
 
-
-
   const getAcademicSubjects = (index) => {
     const selectedSubClassID = watchedClassList?.[index]?.text;
     if (!selectedSubClassID) return [];
@@ -210,7 +269,6 @@ export default function WebsiteSettings() {
 
     return found?.AcademicSubjects || [];
   };
-
 
   return (
     <FormProvider {...methods}>
@@ -410,15 +468,11 @@ export default function WebsiteSettings() {
             />
           </div>
 
-
-
           {classSubjectFields.map((field, index) => {
             const academicSubjects = getAcademicSubjects(index);
 
             return (
               <div key={field.id} className="flex flex-wrap md:flex-nowrap gap-6 items-start mb-4 mt-4">
-
-
                 <div className="w-full md:w-1/2">
                   {classSubjectList?.length > 0 && (
                     <DefaultSelect
@@ -426,7 +480,6 @@ export default function WebsiteSettings() {
                       nameField="SubClass"
                       valueField="SubClassID"
                       registerKey={`classList.${index}.text`}
-
                     />
                   )}
                 </div>
@@ -434,7 +487,6 @@ export default function WebsiteSettings() {
                 {academicSubjects.length > 0 && (
                   <div className="relative overflow-x-auto bg-neutral-primary-soft shadow-xs rounded-base border border-default w-full md:w-1/2">
                     <table className="w-full text-xl text-left text-body">
-
                       <thead className="bg-neutral-secondary-soft border-b border-default">
                         <tr>
                           <th className="px-4 py-2" width="50">
@@ -447,12 +499,10 @@ export default function WebsiteSettings() {
                           <th>{translate("Subject Name")}</th>
                         </tr>
                       </thead>
-
                       <tbody>
                         {academicSubjects.map(subject => {
                           const selected =
                             watchedClassList?.[index]?.subjects?.includes(subject.SubjectID);
-
                           return (
                             <tr key={subject.SubjectID} className="border-b">
                               <td className="px-4">
@@ -467,11 +517,9 @@ export default function WebsiteSettings() {
                           );
                         })}
                       </tbody>
-
                     </table>
                   </div>
                 )}
-
 
                 {classSubjectFields.length > 1 && (
                   <button
@@ -485,7 +533,6 @@ export default function WebsiteSettings() {
               </div>
             );
           })}
-
 
           <div className="mt-2">
             <div className="gap-4 flex items-center">
@@ -585,6 +632,49 @@ export default function WebsiteSettings() {
               }}
             />
           </div>
+
+          {/* ---------- নতুন ভিডিও লিংক সেকশন ---------- */}
+          <div className="mt-4 p-5 bg-white rounded-lg border border-gray-200 shadow-sm">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">
+              {translate("Video Links")}
+            </h3>
+            <p className="text-sm text-gray-500 mb-4">
+              {translate("Add as many video links as needed. A preview is shown to identify each.")}
+            </p>
+
+            {videoFields.map((field, index) => (
+              <div key={field.id} className="flex items-center gap-3 mb-3">
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    {...register(`videoLinks.${index}.url`)}
+                    placeholder={translate("Enter video URL (YouTube, direct MP4, etc.)")}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="w-20 h-14 flex-shrink-0">
+                  {getVideoPreview(watch(`videoLinks.${index}.url`))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeVideo(index)}
+                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md text-sm"
+                  title={translate("Delete video")}
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={() => appendVideo({ url: '' })}
+              className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+            >
+              {translate("Add Video Link")}
+            </button>
+          </div>
+          {/* ---------- ভিডিও লিংক সেকশন শেষ ---------- */}
 
           <button
             type="submit"
