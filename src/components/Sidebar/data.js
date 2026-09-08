@@ -588,11 +588,11 @@ export const menuData = [
         route: 'help/videos',
       },
 
-      // {
-      //   id: '2',
-      //   name: 'Feedback & Suggestions',
-      //   route: 'helpsupport-tickets',
-      // },
+      {
+        id: '2',
+        name: 'Feedback & Suggestions',
+        route: 'help/support-tickets',
+      },
     ],
   },
 ];
