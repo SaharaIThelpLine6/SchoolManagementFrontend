@@ -411,16 +411,16 @@ const Router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-              {
-                path: 'report',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.student_report}
-                  >
-                    <StudentsReport pageTitle="Students Report" />
-                  </RequirePermission>
-                ),
-              },
+              // {
+              //   path: 'report',
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.student_report}
+              //     >
+              //       <StudentsReport pageTitle="Students Report" />
+              //     </RequirePermission>
+              //   ),
+              // },
 
               {
                 path: 'report_list',
