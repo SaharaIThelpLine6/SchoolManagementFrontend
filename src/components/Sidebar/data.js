@@ -116,11 +116,11 @@ export const menuData = [
         name: 'Certificate of Attestation',
         route: 'students/certificate-of-attestation',
       },
-      {
-        id: '10',
-        name: 'Students Report',
-        route: 'students/report',
-      },
+      // {
+      //   id: '10',
+      //   name: 'Students Report',
+      //   route: 'students/report',
+      // },
       {
         id: '11',
         name: 'Online Admission',

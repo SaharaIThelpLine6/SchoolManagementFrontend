@@ -100,11 +100,11 @@ const StudentClassRoutineTimeSlots = ({ pageTitle }) => {
   const tabs = [
     {
       name: translate('Class Routine'),
-      path: '/parent-panel',
+      path: '/dashboard/parent-panel',
     },
     {
       name: translate('Time Slots'),
-      path: '/parent-panel/time-slots',
+      path: '/dashboard/parent-panel/time-slots',
     },
   ];
   return (

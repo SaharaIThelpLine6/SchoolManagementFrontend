@@ -82,6 +82,9 @@ export const userReportsSlice = createApi({
         SubClassID,
         ResidentialStatusId,
         NewOldId,
+        DivisionID,
+        DistrictID,
+        permanentPoliceStationID,
       }) => {
         const params = new URLSearchParams({ report_id });
 
@@ -94,6 +97,9 @@ export const userReportsSlice = createApi({
         if (ResidentialStatusId !== undefined)
           params.append('ResidentialStatusId', ResidentialStatusId);
         if (NewOldId !== undefined) params.append('NewOldId', NewOldId);
+        if (DivisionID !== undefined) params.append('DivisionID', DivisionID);
+        if (DistrictID !== undefined) params.append('DistrictID', DistrictID);
+        if (permanentPoliceStationID !== undefined) params.append('permanentPoliceStationID', permanentPoliceStationID);
 
         return `student_report?${params.toString()}`;
       },

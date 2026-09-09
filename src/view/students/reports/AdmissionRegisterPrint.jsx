@@ -1,8 +1,7 @@
 import { Buffer } from "buffer";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import { formatDate } from "../../../helper/formatTime";
-import bnBijoy2Unicode from "../../../utils/conveter";
 import { formatToDDMMYYYY } from "../../../utils/dateFormat";
 
 const AdmissionRegisterPrint = ({ reportData }) => {
@@ -18,109 +17,198 @@ const AdmissionRegisterPrint = ({ reportData }) => {
     }
   }, [instutionInfo]);
 
-  // Get the first item's session and class info to display in header
+  // ইংরেজি সংখ্যাকে বাংলায় রূপান্তরের ফাংশন
+  const toBengaliNumber = (num) => {
+    if (!num) return '';
+    const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    return num.toString().replace(/\d/g, (x) => bengaliDigits[x]);
+  };
+
+  // প্রতি পেজে ২২টি রো
+  const ROWS_PER_PAGE = 22;
+
+  // রিপোর্ট ডেটাকে ২২টি করে ভাগ করুন
+  const chunks = useMemo(() => {
+    if (!reportData || reportData.length === 0) return [];
+    const chunked = [];
+    for (let i = 0; i < reportData.length; i += ROWS_PER_PAGE) {
+      chunked.push(reportData.slice(i, i + ROWS_PER_PAGE));
+    }
+    return chunked;
+  }, [reportData]);
+
+  // প্রথম আইটেম থেকে সেশন ও শ্রেণির নাম
   const firstItem = reportData?.[0];
   const sessionName = firstItem?.SessionName || "2025-26 Bs";
-  const className = firstItem?.ClassName || "কিতাব খানা";
-  const subClassName = firstItem?.SubClass || "";
 
   return (
-    <div className="font-bangla  p-4 bg-white text-xs">
-      <div className="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-0 gap-4 sm:gap-0 bg-white">
-        {/* Logo */}
-        <div className="flex justify-center sm:justify-start w-full sm:w-auto">
-          <img src={logo} alt="Logo" className="w-20 h-20 bg-white" />
-        </div>
+    <div className="font-bangla bg-white text-xs p-2 sm:p-4">
+      <style>
+        {`
+          @media print {
+            @page {
+              size: A4 portrait;
+              margin: 10mm;
+            }
+            html, body {
+              margin: 0;
+              padding: 0;
+              box-sizing: border-box;
+            }
+            .print-page-container {
+              page-break-after: always;
+              page-break-inside: avoid;
+              break-after: page;
+              height: 277mm;
+              position: relative;
+              box-sizing: border-box;
+              margin-bottom: 10mm;
+            }
+            .print-page-container:last-child {
+              page-break-after: auto;
+              break-after: auto;
+              margin-bottom: 0;
+            }
+            .print-border-wrapper {
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+            }
+            table {
+              page-break-inside: auto;
+              border-collapse: collapse !important;
+              table-layout: fixed;
+              width: 100%;
+            }
+            tr {
+              page-break-inside: avoid;
+              page-break-after: auto;
+            }
+            thead {
+              display: table-header-group;
+            }
+            th, td {
+              border: 1px solid black !important;
+              word-wrap: break-word;
+              overflow-wrap: break-word;
+            }
+          }
+        `}
+      </style>
 
-        {/* Title Section */}
-        <div className="text-center flex-1 bg-white">
-          <h1 className="text-xl sm:text-2xl font-extrabold bg-white">
-            {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
-          </h1>
-          <p className="text-base font-semibold bg-white">
-            {bnBijoy2Unicode(instutionInfo?.Address)}
-          </p>
-          <div className="text-black border border-black px-4 py-1 inline-block mt-2 sm:mt-3 rounded tracking-widest bg-white text-base font-bold sm:text-lg">
-            ভর্তি রেজিস্টার : {bnBijoy2Unicode(sessionName)}
+      {chunks.map((chunk, pageIndex) => {
+        return (
+          <div key={pageIndex} className="print-page-container mb-4">
+            <div className="print-border-wrapper p-3 sm:p-4 bg-white min-h-[277mm]">
+              
+              {/* Header Area: ৩ কলাম */}
+              <div className="flex justify-between items-start mb-4">
+                {/* Left: Logo */}
+                <div className="w-[20%] flex justify-start items-start">
+                  {logo && (
+                    <img src={logo} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
+                  )}
+                </div>
+
+                {/* Center: Title Section */}
+                <div className="w-[60%] text-center flex flex-col items-center justify-start">
+                  <h1 className="text-xl sm:text-[22px] font-extrabold text-black leading-tight">
+                    {instutionInfo?.InstitutionName}
+                  </h1>
+                  <p className="text-sm sm:text-[15px] font-semibold text-black mt-1">
+                    {instutionInfo?.Address}
+                  </p>
+                  {/* Round Box Title */}
+                  <div className="border-[1.5px] border-black rounded-full px-6 sm:px-8 py-[4px] mt-2 inline-block bg-white">
+                    <span className="text-[14px] sm:text-[16px] font-bold text-black tracking-wide">
+                      ভর্তি রেজিস্টার : {toBengaliNumber(sessionName)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Right: Print Date */}
+                <div className="w-[20%] flex flex-col justify-end items-end h-[85px] sm:h-[95px]">
+                  <span className="text-[12px] sm:text-[13px] font-bold text-black pb-1">
+                    প্রিন্ট {toBengaliNumber(formatDate(new Date()))}
+                  </span>
+                </div>
+              </div>
+
+              {/* Table Content */}
+              <div className="w-full flex-grow">
+                <table className="w-full border-collapse border border-black text-black">
+                  <thead>
+                    <tr className="bg-white">
+                      <th className="border border-black p-1 text-center align-middle font-bold w-[3%]">ক্র:</th>
+                      <th className="border border-black p-1 text-center align-middle font-bold w-[6%]">দাখেলা</th>
+                      <th className="border border-black p-1 text-center align-middle font-bold w-[12%]">শিক্ষার্থীর নাম</th>
+                      <th className="border border-black p-1 text-center align-middle font-bold w-[11%]">পিতার নাম</th>
+                      <th className="border border-black p-1 text-center align-middle font-bold w-[11%]">মাতার নাম</th>
+                      <th className="border border-black p-1 text-center align-middle font-bold w-[8%] pl-3">জন্ম তারিখ</th>
+                      <th className="border border-black p-1 text-right align-middle font-bold w-[8%] pl-3">রক্তের গ্রুপ</th>
+                      <th className="border border-black p-1 text-center align-middle font-bold w-[11%]">মোবাইল</th>
+                      <th className="border border-black p-1 text-center align-middle font-bold w-[7%]">গ্রাম</th>
+                      <th className="border border-black p-1 text-center align-middle font-bold w-[7%]">ডাক</th>
+                      <th className="border border-black p-1 text-center align-middle font-bold w-[7%]">থানা</th>
+                      <th className="border border-black p-1 text-center align-middle font-bold w-[7%]">জেলা</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {chunk.map((row, index) => {
+                      const serial = pageIndex * ROWS_PER_PAGE + index + 1;
+                      return (
+                        <tr key={index} className="bg-white print:break-inside-avoid break-inside-avoid">
+                          <td className="border border-black p-1 text-center font-bold">
+                            {toBengaliNumber(serial)}
+                          </td>
+                          <td className="border border-black p-1 text-center whitespace-nowrap">
+                            {toBengaliNumber(row.StudentCode)}
+                          </td>
+                          <td className="border border-black p-1 text-left pl-2 font-medium">
+                            {row.StudentName}
+                          </td>
+                          <td className="border border-black p-1 text-left pl-2 font-medium">
+                            {row.FatherName}
+                          </td>
+                          <td className="border border-black p-1 text-left pl-2 font-medium">
+                            {row.MotherName}
+                          </td>
+                          <td className="border border-black p-1 text-center whitespace-nowrap">
+                            {toBengaliNumber(formatToDDMMYYYY(row.DateOfBirth))}
+                          </td>
+                          <td className="border border-black p-1 text-center font-medium">
+                            {row.BloodGroup}
+                          </td>
+                          <td className="border border-black p-1 text-center tracking-wide">
+                            {toBengaliNumber(row.Mobile1)}
+                          </td>
+                          <td className="border border-black p-1 text-left pl-2 font-medium">
+                            {row.permanentVill}
+                          </td>
+                          <td className="border border-black p-1 text-left pl-2 font-medium">
+                            {row.permanentPost}
+                          </td>
+                          <td className="border border-black p-1 text-left pl-2 font-medium">
+                            {row.PoliceStationName}
+                          </td>
+                          <td className="border border-black p-1 text-left pl-2 font-medium">
+                            {row.PermanentDistrictName}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Footer Text (পৃষ্ঠা নম্বর) */}
+              <div className="mt-auto pt-3 text-center w-full text-black text-[14px] font-bold">
+                পৃষ্ঠা : {toBengaliNumber(pageIndex + 1)}
+              </div>
+            </div>
           </div>
-        </div>
-
-        {/* Optional right-aligned blank space */}
-        <div className="hidden sm:block w-20 h-20 bg-white" />
-      </div>
-
-      <div className="flex justify-between items-center mb-4 bg-white">
-        <div className="flex gap-2 font-semibold text-base items-center bg-white">
-          শ্রেণী/জামাত : {bnBijoy2Unicode(className)}
-          {subClassName && ` (${bnBijoy2Unicode(subClassName)})`}
-        </div>
-        <div className="bg-white">প্রিন্ট {formatDate(new Date())}</div>
-      </div>
-
-      <div className="bg-white">
-        <table className="w-full border-collapse border border-black bg-white">
-          <thead>
-            <tr className="bg-white text-sm text-black">
-              <th className="border border-black p-2 bg-white">ক্র:</th>
-              <th className="border border-black p-2 bg-white">দাখেলা</th>
-              <th className="border border-black p-2 bg-white">
-                শিক্ষার্থীর নাম
-              </th>
-              <th className="border border-black p-2 bg-white">পিতার নাম</th>
-              <th className="border border-black p-2 bg-white">মাতার নাম</th>
-              <th className="border border-black p-2 bg-white">জন্ম তারিখ</th>
-              <th className="border border-black p-2 bg-white">রক্তের গ্রুপ</th>
-              <th className="border border-black p-2 bg-white">মোবাইল</th>
-              <th className="border border-black p-2 bg-white">গ্রাম</th>
-              <th className="border border-black p-2 bg-white">ডাক</th>
-              <th className="border border-black p-2 bg-white">থানা</th>
-              <th className="border border-black p-2 bg-white">জেলা</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reportData?.map((row, index) => (
-              <tr key={index} className="bg-white">
-                <td className="border border-black p-2 text-center bg-white">
-                  {index + 1}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.StudentCode}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {bnBijoy2Unicode(row.StudentName)}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {bnBijoy2Unicode(row.FatherName)}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {bnBijoy2Unicode(row.MotherName)}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {bnBijoy2Unicode(formatToDDMMYYYY(row.DateOfBirth))}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.BloodGroup}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {row.Mobile1}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {bnBijoy2Unicode(row.permanentVill)}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {bnBijoy2Unicode(row.permanentPost)}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {bnBijoy2Unicode(row.PoliceStationName)}
-                </td>
-                <td className="border border-black p-2 text-center bg-white">
-                  {bnBijoy2Unicode(row.PermanentDistrictName)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        );
+      })}
     </div>
   );
 };

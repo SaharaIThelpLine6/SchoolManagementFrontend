@@ -167,13 +167,13 @@ const StudentClassRoutine = ({ pageTitle }) => {
         <div className="border-b border-[#e9edf4] flex items-center justify-between px-5 py-5 mb-6">
           <div className="flex items-center gap-6">
             <Link
-              to="/parent-panel"
+              to="/dashboard/parent-panel"
               className={`relative pb-2 text-[18px] font-default font-bold text-blue-600`}
             >
               {translate('Class Routine')}
             </Link>
             <Link
-              to="/parent-panel/time-slots"
+              to="/dashboard/parent-panel/time-slots"
               className={`relative pb-2 text-[18px] font-default font-bold text-gray-500 hover:text-blue-500`}
             >
               {translate('Time Slots')}
