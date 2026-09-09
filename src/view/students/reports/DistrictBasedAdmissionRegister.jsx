@@ -4,7 +4,7 @@ import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQ
 import { formatDate } from "../../../helper/formatTime";
 import { formatToDDMMYYYY } from "../../../utils/dateFormat";
 
-const AddressBasedAdmissionRegister = ({ reportData }) => {
+const DistrictBasedAdmissionRegister = ({ reportData }) => {
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
@@ -60,15 +60,16 @@ const AddressBasedAdmissionRegister = ({ reportData }) => {
               position: relative;
               box-sizing: border-box;
               margin-bottom: 10mm;
-              border: none !important;   /* বাইরের কোনো বর্ডার থাকবে না */
             }
             .print-page-container:last-child {
               page-break-after: auto;
               break-after: auto;
               margin-bottom: 0;
             }
-            .page-content {
-              border: none !important;   /* ভেতরের মূল কন্টেইনারেও কোনো বর্ডার নেই */
+            .print-border-wrapper {
+              height: 100%;
+              display: flex;
+              flex-direction: column;
             }
             table {
               page-break-inside: auto;
@@ -95,8 +96,7 @@ const AddressBasedAdmissionRegister = ({ reportData }) => {
       {chunks.map((chunk, pageIndex) => {
         return (
           <div key={pageIndex} className="print-page-container mb-4">
-            {/* page-content ক্লাস যোগ করা হয়েছে, প্রিন্টে কোনো বর্ডার থাকবে না */}
-            <div className="page-content p-3 sm:p-4 bg-white min-h-[277mm] flex flex-col">
+            <div className="print-border-wrapper p-3 sm:p-4 bg-white min-h-[277mm]">
               
               {/* Header Area: ৩ কলাম (বামে লোগো, মাঝে টাইটেল, ডানে তারিখ) */}
               <div className="flex justify-between items-start mb-4">
@@ -118,7 +118,7 @@ const AddressBasedAdmissionRegister = ({ reportData }) => {
                   {/* Round Box Title */}
                   <div className="border-[1.5px] border-black rounded-full px-6 sm:px-8 py-[4px] mt-2 inline-block bg-white">
                     <span className="text-[14px] sm:text-[16px] font-bold text-black tracking-wide">
-                      ঠিকানা ভিত্তিক ভর্তি রেজিস্টার :{" "}
+                      জেলা ভিত্তিক ভর্তি রেজিস্টার :{" "}
                       {toBengaliNumber(reportData?.[0]?.SessionName || "2025-26 Bs")}
                     </span>
                   </div>
@@ -214,4 +214,4 @@ const AddressBasedAdmissionRegister = ({ reportData }) => {
   );
 };
 
-export default AddressBasedAdmissionRegister;
+export default DistrictBasedAdmissionRegister;

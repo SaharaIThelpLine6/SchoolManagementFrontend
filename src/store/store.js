@@ -42,6 +42,7 @@ import { onlineDonationSlice } from "../features/userPanel/onlineDonation/online
 import { examHallSlice } from "../features/examhall/examHallQuerySlice";
 import { examSitPlanSlice } from "../features/exam/examSitPlanQuerySlice";
 import { attendanceSlice } from "../features/attendance/attendanceSlice";
+import { reportQuerySlice } from "../features/reports/reportQuerySlice";
 
 // Admin
 import { redirectSlice } from "../features/Admin/redirectSlice";
@@ -94,6 +95,7 @@ const store = configureStore({
     [examHallSlice.reducerPath]: examHallSlice.reducer,
     [attendanceSlice.reducerPath]: attendanceSlice.reducer,
     [examSitPlanSlice.reducerPath]: examSitPlanSlice.reducer,
+    [reportQuerySlice.reducerPath]: reportQuerySlice.reducer,
 
     // Admin
     [redirectSlice.reducerPath]: redirectSlice.reducer,
@@ -132,6 +134,7 @@ const store = configureStore({
       .concat(examHallSlice.middleware)
       .concat(attendanceSlice.middleware)
       .concat(examSitPlanSlice.middleware)
+      .concat(reportQuerySlice.middleware)
 
       // Admin
       .concat(redirectSlice.middleware)

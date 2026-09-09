@@ -1025,6 +1025,8 @@ const useTranslate = () => {
     "Payment Info":"পেমেন্টের তথ্য",
     "Short Address":"সংক্ষিপ্ত ঠিকানা",
     "Class Update":"শ্রেণি আপডেট",
+    "Students Report List":"শিক্ষার্থীদের রিপোর্ট তালিকা",
+    "1. Custom Template Builder":"১. কাস্টম টেমপ্লেট বিল্ডার",
 
 
   };
