@@ -20,7 +20,7 @@ import {
 import Loading from '../../../components/Loading/Loading';
 import {
   useGetLoginTeacherInfoQuery,
-  useGetTeacherInfoWhitUserQuery,
+  useGetTeachersInfoQuery,
 } from '../../../features/teachers/teachersSlice';
 import SearchableMultiDaySelect from '../../../components/Forms/SearchableMultiDaySelect';
 import Textarea from '../../../components/Forms/Textarea';
@@ -61,7 +61,7 @@ const ClassRoutineCreateUpdate = ({ id }) => {
     data: teachers = [],
     isLoading: teachersLoading,
     isError: teachersError,
-  } = useGetTeacherInfoWhitUserQuery();
+  } = useGetTeachersInfoQuery();
 
   const {
     data: classListResponse = [],
@@ -276,7 +276,7 @@ const ClassRoutineCreateUpdate = ({ id }) => {
             <DefaultSelect
               label={translate('Teacher')}
               registerKey="TeacherID"
-              options={teachers?.data || []}
+              options={teachers || []}
               valueField="UserID"
               nameField="UserName"
               require={translate('Teacher is required')}
