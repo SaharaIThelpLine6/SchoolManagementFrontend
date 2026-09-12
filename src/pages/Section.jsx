@@ -126,12 +126,6 @@ const Section = ({ pageTitle }) => {
       render: (row) => <p>{row.SubClassID}</p>,
     },
     {
-      title: translate('Class ID'),
-      field: 'ClassID',
-      hozAlign: 'center',
-      render: (row) => <p>{row.ClassID}</p>,
-    },
-    {
       title: translate('Sub Class'),
       field: 'SubClass',
       hozAlign: 'center',
@@ -141,7 +135,7 @@ const Section = ({ pageTitle }) => {
       title: translate('English'),
       field: 'SubClassEng',
       hozAlign: 'center',
-      render: (row) => <p>{row.SubClassEng || '-'}</p>,
+      render: (row) => <p className="font-PlusJakarta">{row.SubClassEng || '-'}</p>,
     },
     {
       title: translate('Arabic'),

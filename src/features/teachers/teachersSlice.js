@@ -79,6 +79,13 @@ export const teachersSlice = createApi({
       }),
       invalidatesTags: ['Teacher'],
     }),
+    postSubjectToTeacher: builder.mutation({
+      query: (body) => ({
+        url: 'teacher_subject',
+        method: 'POST',
+        body: body,
+      }),
+    }),
   }),
 });
 
@@ -93,5 +100,5 @@ export const {
   useDeleteDesignationMutation,
   useGetLoginTeacherInfoQuery,
   useGetTeachersInfoQuery,
-  useGetTeacherInfoWhitUserQuery
+  usePostSubjectToTeacherMutation
 } = teachersSlice;
