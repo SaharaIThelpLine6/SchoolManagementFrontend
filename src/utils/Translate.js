@@ -1026,6 +1026,8 @@ const useTranslate = () => {
     "Short Address": "সংক্ষিপ্ত ঠিকানা",
     "Class Update": "শ্রেণি আপডেট",
 
+    "Students Report List": "শিক্ষার্থী রিপোর্ট লিস্ট",
+
 
   };
 
