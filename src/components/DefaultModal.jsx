@@ -1,69 +1,68 @@
-import { useDispatch, useSelector } from 'react-redux';
-import { closeModal } from '../features/modal/modalSlice';
-import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
-import ClassVideoCreateUpdate from '../pages/userpanel/ClassVideoCreateUpdate';
-import StudentSingleConplaint from '../pages/userpanel/Modal/StudentSingleConplaint';
-import StudentSingleReport from '../pages/userpanel/Modal/StudentSingleReport';
-import PaymentModalUserPanel from '../pages/userpanel/PaymentModalUserPanel';
-import useTranslate from '../utils/Translate';
-import SessionCreateUpdateModal from '../view/Session/SessionCreateUpdateModal';
-import SessionChangeModal from '../view/UserPanel/SessionChangeModal';
-import BalanceTransferModal from '../view/accounting/BalanceTransferModal';
-import BankInfoSettings from '../view/accounting/BankInfoSettings';
-import ChangeStudentClass from '../view/accounting/ChangeStudentClass';
-import FundForm from '../view/accounting/FundForm';
-import GeneralForm from '../view/accounting/GeneralForm';
-import MonthlyAttendance from '../view/accounting/MonthlyAttendance';
-import ReportSettings from '../view/accounting/ReportSettings';
-import StudentFeeGroup from '../view/accounting/StudentFeeGroup';
-import SubGeneralForm from '../view/accounting/SubGeneralForm';
-import TodaysBalance from '../view/accounting/TodaysBalance';
-import Statement from '../view/accounting/dues-list/Statement';
-import AccExamFeeCollector from '../view/accounting/student-exam-fee/AccExamFeeCollector';
-import CommentBoxModal from '../view/accounting/student-fee-collection/CommentBoxModal';
 import DueOthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/DueOthersStudentFeeAcceptForm';
-import FeeSMSTamplateModal from '../view/accounting/student-fee-collection/FeeSMSTamplateModal';
-import MonthStudentFeeForm from '../view/accounting/student-fee-collection/MonthStudentFeeForm';
-import OthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/OthersStudentFeeAcceptForm';
 import StudentAdmissionFeeAcceptForm from '../view/accounting/student-fee-collection/StudentAdmissionFeeAcceptForm';
 import StudentMonthDueFeeAceptForm from '../view/accounting/student-fee-collection/StudentMonthDueFeeAceptForm';
+import OthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/OthersStudentFeeAcceptForm';
 import StudentMonthFeeAceptForm from '../view/accounting/student-fee-collection/StudentMonthFeeAceptForm';
-import ClassCreateUpdateModal from '../view/class/ClassCreateUpdateModal';
-import CharecterReportCategoryModal from '../view/darulikama/CharecterReportCategoryModal';
-import CharecterReportTypeModal from '../view/darulikama/CharecterReportTypeModal';
-import ExamReportSetting from '../view/exam/ExamReportSetting';
-import Subsidiary from '../view/exam/Subsidiary';
-import PaymentGetway from '../view/general-information/sms/PaymentGetway';
-import SMSBuy from '../view/general-information/sms/SMSBuy';
-import SMSTemplate from '../view/general-information/sms/SMSTemplate';
-import SuccessAndError from '../view/general-information/sms/SuccessAndError';
-import SubclassCreateUpdatemodal from '../view/section/SubclassCreateUpdatemodal';
-import AddLoginUsersModal from '../view/settings/AddLoginUsersModal';
-import UserNamePasswordChangeModal from '../view/settings/UserNamePasswordChangeModal';
-import AdmissionSerialModal from '../view/students/admission/AdmissionSerialModal';
-import AddEditBook from '../view/students/book/AddEditBook';
+import FeeSMSTamplateModal from '../view/accounting/student-fee-collection/FeeSMSTamplateModal';
+import MonthStudentFeeForm from '../view/accounting/student-fee-collection/MonthStudentFeeForm';
 import ClassRoutineCreateUpdate from '../view/students/class-routine/ClassRoutineCreateUpdate';
-import DataExportModel from '../view/students/pdf/DataExportModel';
+import CharecterReportCategoryModal from '../view/darulikama/CharecterReportCategoryModal';
+import AccExamFeeCollector from '../view/accounting/student-exam-fee/AccExamFeeCollector';
+import CommentBoxModal from '../view/accounting/student-fee-collection/CommentBoxModal';
+import UserNamePasswordChangeModal from '../view/settings/UserNamePasswordChangeModal';
+import StudentSingleConplaint from '../pages/userpanel/Modal/StudentSingleConplaint';
+import AdmissionSerialModal from '../view/students/admission/AdmissionSerialModal';
+import CharecterReportTypeModal from '../view/darulikama/CharecterReportTypeModal';
+import SubclassCreateUpdatemodal from '../view/section/SubclassCreateUpdatemodal';
 import MaddrasahReportEditCreate from '../view/talimat/MaddrasahReportEditCreate';
-import StudentReportView from '../view/talimat/StudentReportView';
-import ClickOutside from './ClickOutside';
-import AddStudentVacationForm from './Forms/AddStudentVacationForm';
-import AddTeacherForm from './Forms/AddTeacherForm';
-import AdmissionForm from './Forms/AdmissionForm';
-import DesignationForm from './Forms/DesignationForm';
-import EditStudentReport from './Forms/EditStudentReport';
-import EditStudentVacationForm from './Forms/EditStudentVacationForm';
-import EditTeacherForm from './Forms/EditTeacherForm';
+import SessionCreateUpdateModal from '../view/Session/SessionCreateUpdateModal';
+import StudentSingleReport from '../pages/userpanel/Modal/StudentSingleReport';
+import ClassVideoCreateUpdate from '../pages/userpanel/ClassVideoCreateUpdate';
+import SuccessAndError from '../view/general-information/sms/SuccessAndError';
+import PaymentModalUserPanel from '../pages/userpanel/PaymentModalUserPanel';
+import BalanceTransferModal from '../view/accounting/BalanceTransferModal';
+import ClassCreateUpdateModal from '../view/class/ClassCreateUpdateModal';
+import PaymentGetway from '../view/general-information/sms/PaymentGetway';
 import ExamRuleCreateUpdateForm from './Forms/ExamRuleCreateUpdateForm';
-import ExamRuleView from './Forms/ExamRuleView';
+import ChangeStudentClass from '../view/accounting/ChangeStudentClass';
+import SMSTemplate from '../view/general-information/sms/SMSTemplate';
+import SessionChangeModal from '../view/UserPanel/SessionChangeModal';
+import EditStudentVacationForm from './Forms/EditStudentVacationForm';
+import AddLoginUsersModal from '../view/settings/AddLoginUsersModal';
+import MonthlyAttendance from '../view/accounting/MonthlyAttendance';
+import AddStudentVacationForm from './Forms/AddStudentVacationForm';
+import DataExportModel from '../view/students/pdf/DataExportModel';
+import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
+import BankInfoSettings from '../view/accounting/BankInfoSettings';
+import StudentReportView from '../view/talimat/StudentReportView';
+import StudentFeeGroup from '../view/accounting/StudentFeeGroup';
+import ReportSettings from '../view/accounting/ReportSettings';
+import Statement from '../view/accounting/dues-list/Statement';
+import SubGeneralForm from '../view/accounting/SubGeneralForm';
+import ExamReportSetting from '../view/exam/ExamReportSetting';
+import TodaysBalance from '../view/accounting/TodaysBalance';
+import SMSBuy from '../view/general-information/sms/SMSBuy';
+import AddEditBook from '../view/students/book/AddEditBook';
+import EditStudentReport from './Forms/EditStudentReport';
+import { closeModal } from '../features/modal/modalSlice';
 import FeeCollectionForm from './Forms/FeeCollectionForm';
+import GeneralForm from '../view/accounting/GeneralForm';
+import { useDispatch, useSelector } from 'react-redux';
+import DesignationForm from './Forms/DesignationForm';
+import EditTeacherForm from './Forms/EditTeacherForm';
+import AddTeacherForm from './Forms/AddTeacherForm';
+import FundForm from '../view/accounting/FundForm';
+import Subsidiary from '../view/exam/Subsidiary';
+import ExamRuleView from './Forms/ExamRuleView';
+import CodeSetting from './Modals/CodeSetting';
+import useTranslate from '../utils/Translate';
+import ClickOutside from './ClickOutside';
 import HomeWorkCreateUpdateForm from './Forms/HomeWorkCreateUpdateForm';
 import HomeWorkGroupCreateUpdateForm from './Forms/HomeWorkGroupCreateUpdateForm';
 import HomeWorkView from './Forms/HomeWorkView';
 import HomeWorkViewTeacher from './Forms/HomeWorkViewTeacher';
 import MonthNamesForm from './Forms/MonthNamesForm';
 import TypeOfVacationForm from './Forms/TypeOfVacationForm';
-import CodeSetting from './Modals/CodeSetting';
 import CreateEditPaymentInfoModal from './Modals/CreateEditPaymentInfoModal';
 import PaymentModal from './Modals/PaymentModal';
 import PaymentSSLInfoView from './Modals/PaymentSSLInfoVierw';
@@ -90,6 +89,7 @@ import ExamConditionEditModal from '../view/exam/examCondition/ExamConditionEdit
 
 // Admin View
 import MadrasahActionView from '../view/AdminView/madrasah/MadrasahActionView';
+import TeacherAssignModal from '../view/exam/TeacherAssignModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
@@ -377,10 +377,11 @@ const DefaultModal = () => {
                 {modalType === 'EXAM_CONDITION_SETTINGS_EDIT' && (
                   <ExamConditionEditModal data={id}  />
                 )}
-
-                {/* Admin Panel Model */}
                 {modalType === 'MADRASAH_ACTION_MODAL' && (
                   <MadrasahActionView id={id} meta={meta} />
+                )}
+                {modalType === 'HANDLE_RESULT_ENTRY_ASSIGN' && (
+                  <TeacherAssignModal examDetails={id} />
                 )}
               </div>
             )}
