@@ -288,7 +288,7 @@ const AdminAllMadrasah = ({ pageTitle }) => {
       openModal({
         title: `Actions for ${row.InstituteName}`,
         modalType: "MADRASAH_ACTION_MODAL",
-        id: row.ID,
+        id: row.UserCode,
         meta: { rowData: row }
       })
     );

@@ -4,7 +4,7 @@ import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQ
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import { formatDate } from "../../../helper/formatTime";
 
-const BanglaAttendenceSubjectWari = ({ reportData, SubClassID, BookLine }) => {
+const BanglaAttendenceSubjectWari = ({ reportData, SubClassID, BookLine, rowsPerPage }) => {
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
@@ -23,22 +23,48 @@ const BanglaAttendenceSubjectWari = ({ reportData, SubClassID, BookLine }) => {
 
   // ইংরেজি সংখ্যাকে বাংলায় রূপান্তরের ফাংশন
   const toBengaliNumber = (num) => {
-    if (!num) return '';
+    if (num === null || num === undefined || num === '') return '';
     const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
     return num.toString().replace(/\d/g, (x) => bengaliDigits[x]);
   };
 
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+  // অ্যাটেনডেন্স স্টেট (প্রতি সাব-রো এর জন্য আলাদা)
   const [attendance, setAttendance] = useState({});
-  const toggleAttendance = (studentId, day) => {
+
+  const toggleAttendance = (studentId, day, subRowIndex) => {
     setAttendance((prev) => ({
       ...prev,
-      [`${studentId}-${day}`]: !prev[`${studentId}-${day}`],
+      [`${studentId}-${day}-${subRowIndex}`]: !prev[`${studentId}-${day}-${subRowIndex}`],
     }));
   };
 
-  // প্রতি পেজে ২২ জন
-  const ROWS_PER_PAGE = 22;
+  // 🟢 প্রতি শিক্ষার্থীর কয়টি সাব-রো হবে (ফিল্টার থেকে ৩ থেকে ১০ পর্যন্ত সিলেক্ট করা যায়)
+  const subjectCount = Number(BookLine) || 3;
+
+  // 🟢 A4 পেজে মোটামুটি ৫০টা সাব-রো ফিট করে (হেডার/ফুটার বাদ দিয়ে) —
+  // তাই subjectCount যত বেশি, পেজ-প্রতি ছাত্র সংখ্যা তত কমবে
+  // rowsPerPage prop থেকে একটা উপরের cap ও মানা হয়, দুইটার মধ্যে যেটা ছোট সেটাই নেওয়া হবে
+  const MAX_ROWS_PER_A4_PAGE = 50; 
+  // 🟢 নতুন — BookLine অনুযায়ী প্রতি পেজে শিক্ষার্থীর সংখ্যা (নির্দিষ্ট টেবিল)
+  const SUBJECT_TO_STUDENTS_MAP = {
+    3: 10,
+    4: 8,
+    5: 6,
+    6: 5,
+    7: 4,
+    8: 4,
+    9: 3,
+    10: 3,
+  };
+  const autoStudentsPerPage =
+    SUBJECT_TO_STUDENTS_MAP[subjectCount] ||
+    Math.max(1, Math.floor(MAX_ROWS_PER_A4_PAGE / subjectCount));
+  const ROWS_PER_PAGE = rowsPerPage?.portrait
+    ? Math.min(rowsPerPage.portrait, autoStudentsPerPage)
+    : autoStudentsPerPage;
+
   const chunks = useMemo(() => {
     if (!reportData || reportData.length === 0) return [];
     const chunked = [];
@@ -46,12 +72,38 @@ const BanglaAttendenceSubjectWari = ({ reportData, SubClassID, BookLine }) => {
       chunked.push(reportData.slice(i, i + ROWS_PER_PAGE));
     }
     return chunked;
-  }, [reportData]);
+  }, [reportData, ROWS_PER_PAGE]);
 
   return (
     <div className="font-bangla bg-white text-xs p-2 sm:p-4">
       <style>
         {`
+          .writing-vertical {
+            writing-mode: vertical-rl;
+            text-orientation: upright;
+            letter-spacing: 3px;
+            padding: 4px 0;
+          }
+          /* 🟢 আপডেট করা ক্লাস - ডাটা লম্বালম্বি এবং র্যাপিং (Wrapping) এর জন্য */
+          .data-vertical {
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            white-space: normal; /* nowrap এর বদলে normal করা হয়েছে যাতে ভেঙে পরের লাইনে যায় */
+            word-break: break-word;
+            margin: 0 auto;
+            padding: 4px 0;
+            max-height: 100%;        /* 🟢 ঘরের উচ্চতা ছাড়িয়ে যাবে না → ২ কলামে ভাঙবে */
+            line-height: 1.2;      /* 🟢 ২ কলামের মাঝে ফাঁকা কম */
+            text-align: center;
+          }
+          /* 🟢 আপডেট — হেডারের নিচের পুরো লাইন bold */
+          thead tr th {
+            border-bottom: 2px solid black !important;
+          }
+          /* 🟢 আপডেট — শিক্ষার্থী কলামের ডান পাশের লাইন (হেডার থেকে নিচ পর্যন্ত) bold */
+          .header-right-bold {
+            border-right: 2px solid black !important;
+          }
           @media print {
             @page {
               size: A4 portrait;
@@ -95,131 +147,162 @@ const BanglaAttendenceSubjectWari = ({ reportData, SubClassID, BookLine }) => {
               word-wrap: break-word;
               overflow-wrap: break-word;
             }
+            /* 🟢 প্রিন্টেও হেডারের নিচের পুরো লাইন bold থাকবে */
+            thead tr th {
+              border-bottom: 2px solid black !important;
+            }
+            /* 🟢 প্রিন্টেও শিক্ষার্থী কলামের ডান পাশের লাইন (হেডার থেকে নিচ পর্যন্ত) bold থাকবে */
+            .header-right-bold {
+              border-right: 2px solid black !important;
+            }
           }
         `}
       </style>
 
-      {chunks.map((chunk, pageIndex) => (
-        <div key={pageIndex} className="print-page-container">
-          <div className="p-3 sm:p-4 bg-white min-h-[277mm] flex flex-col">
-            {/* হেডার */}
-            <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4 sm:gap-0 bg-white">
-              <div className="flex justify-center sm:justify-start w-full sm:w-auto">
-                {logo && (
-                  <img src={logo} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 bg-white object-contain" />
-                )}
-              </div>
-              <div className="text-center flex-1 bg-white">
-                <h1 className="text-lg sm:text-xl font-extrabold bg-white">
-                  {instutionInfo?.InstitutionName}
-                </h1>
-                <p className="text-xs sm:text-sm font-semibold bg-white">
-                  {instutionInfo?.Address}
-                </p>
-                <div className="text-black border-2 border-black px-3 py-1 inline-block mt-1 sm:mt-2 rounded-xl tracking-widest bg-white text-sm font-medium">
-                  দৈনিক শিক্ষার্থীর হাজিরা খাতা (বিষয়ওয়ারী)
-                </div>
-              </div>
-              <div className="hidden sm:block w-16 h-16 sm:w-20 sm:h-20 bg-white" />
-            </div>
+      {chunks.map((chunk, pageIndex) => {
+        const isLastPage = pageIndex === chunks.length - 1;
+        return (
+          <div key={pageIndex} className="print-page-container">
+            <div className="p-3 sm:p-4 bg-white min-h-[277mm] flex flex-col">
 
-            {/* তথ্য সারি */}
-            <div className="grid grid-cols-2 my-2 bg-white">
-              <div className="font-normal text-xs sm:text-sm py-1 px-2 text-start">
-                শ্রেণী/জামাত: {subClasData?.SubClass || ''}
-              </div>
-              <div className="grid grid-cols-2 px-2">
-                <div className="font-normal text-xs sm:text-sm py-1 text-start">
-                  মাস:{" "}
+              {/* 🟢 আপডেট করা হেডার সেকশন: লোগো বামে, টেক্সট মাঝে এবং আন্ডারলাইন */}
+              <div className="w-full relative mb-2 flex flex-col items-center justify-center bg-white">
+                <div className="absolute left-0 top-0 flex justify-start items-start">
+                  {logo && (
+                    <img src={logo} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 bg-white object-contain" />
+                  )}
                 </div>
-                <div className="font-normal text-xs sm:text-sm py-1 text-start">
-                  বছর:{" "}
+                <div className="text-center flex-1 bg-white">
+                  <h1 className="text-lg sm:text-[22px] font-extrabold text-black bg-white leading-tight">
+                    {instutionInfo?.InstitutionName}
+                  </h1>
+                  <p className="text-xs sm:text-[15px] font-bold text-black bg-white mt-1">
+                    {instutionInfo?.Address}
+                  </p>
+                  <h2 className="text-sm sm:text-[17px] font-extrabold border-b-[1.5px] border-black inline-block pb-0.5 mt-2 text-black">
+                    দৈনন্দিন শিক্ষার্থীর হাজিরা খাতা
+                  </h2>
                 </div>
               </div>
-            </div>
 
-            {/* টেবিল */}
-            <div className="w-full flex-grow overflow-x-auto">
-              <table className="w-full border-collapse table-fixed text-xs">
-                <thead>
-                  <tr>
-                    <th className="border border-black bg-white text-center w-8 h-5 sm:w-10 sm:h-6">
-                      ক্র.নং
-                    </th>
-                    <th className="border border-black bg-white text-center w-10 h-5 sm:w-16 sm:h-6">
-                      দাখেলা
-                    </th>
-                    <th className="border border-black bg-white min-w-[120px] sm:min-w-[150px] h-5 sm:h-6" colSpan={2}>
-                      ছাত্র/ছাত্রীর নাম
-                    </th>
-                    {days.map((day) => (
-                      <th key={day} className="border border-black text-center bg-white w-5 h-5 sm:w-6 sm:h-6">
-                        {toBengaliNumber(day)}
+              {/* 🟢 আপডেট করা তথ্য সারি: স্পেসিং, ফন্ট-বোল্ড এবং ডান পাশে 'বছর' */}
+              <div className="flex justify-between items-center mb-2 mt-4 bg-white px-1">
+                <div className="font-bold text-sm sm:text-[15px] text-black w-1/3 text-left">
+                  শ্রেণি/জামাত : {subClasData?.SubClass || ''}
+                </div>
+                <div className="font-bold text-sm sm:text-[15px] text-black w-1/3 text-center">
+                  মাস :
+                </div>
+                <div className="font-bold text-sm sm:text-[15px] text-black w-1/3 text-center">
+                  বছর :
+                </div>
+              </div>
+
+              {/* টেবিল */}
+              <div className="w-full flex-grow overflow-x-auto">
+                <table className="w-full border-collapse table-fixed text-xs border-2 border-black">
+                  <thead>
+                    <tr>
+                      {/* 🟢 আপডেট করা হেডারগুলো (ছবি অনুযায়ী বোল্ড এবং সাইজ ঠিক করা) */}
+                      <th className="border border-black bg-white text-center font-bold text-black p-0 w-[5%] h-6 sm:h-8 text-[11px] sm:text-sm">
+                        ক্র:
                       </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {chunk.map((student, index) => {
-                    const serial = pageIndex * ROWS_PER_PAGE + index + 1;
-                    return (
-                      <tr key={index}>
-                        <td className="border border-black text-center bg-white w-8 h-5 sm:w-10 sm:h-6 p-0 align-middle">
-                          {toBengaliNumber(serial)}
-                        </td>
-                        <td className="border border-black text-center bg-white w-10 h-5 sm:w-14 sm:h-6 p-0 align-middle">
-                          {toBengaliNumber(student.StudentCode)}
-                        </td>
-                        <td className="border border-black bg-white min-w-[120px] sm:min-w-[150px] h-5 sm:h-6 px-1 py-0.5">
-                          {student.StudentName}
-                        </td>
-                        <td className="border border-black bg-white w-5 h-5 sm:w-6 sm:h-6 text-center p-0">
-                          {Array.from({ length: BookLine ? BookLine : 3 }).map((_, i) => (
-                            <div key={i} className="border-b border-black h-2 text-sm sm:h-6">
-                              {toBengaliNumber(i + 1)}
-                            </div>
+                      <th className="border border-black bg-white text-center font-bold text-black p-0 w-[5%] h-6 sm:h-8 text-[11px] sm:text-sm">
+                        আইডি নং
+                      </th>
+                      {/* 🟢 শিক্ষার্থী কলামটি এখন colSpan=2 দিয়ে নাম এবং সিরিয়াল দুটি কলাম জুড়ে থাকবে */}
+                      <th colSpan={2} className="header-right-bold border border-black bg-white text-center font-bold text-black p-0 w-[11%] h-6 sm:h-8 text-[11px] sm:text-sm">
+                        শিক্ষার্থী
+                      </th>
+                      {days.map((day) => (
+                        <th key={day} className="border border-black text-center bg-white font-bold text-black p-0 h-6 sm:h-8 text-[11px] sm:text-sm">
+                          {toBengaliNumber(day)}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {chunk.map((student, index) => {
+                      const serial = pageIndex * ROWS_PER_PAGE + index + 1;
+                      return (
+                        <React.Fragment key={student.id || index}>
+                          {Array.from({ length: subjectCount }).map((_, subRowIndex) => (
+                            <tr key={subRowIndex} className="border-b border-black">
+                              {subRowIndex === 0 && (
+                                <>
+                                  {/* 🟢 আপডেট করা ডাটা সেলগুলো: সিরিয়াল নম্বর বোল্ড করা হয়েছে */}
+                                  <td rowSpan={subjectCount} className="border border-black text-center bg-white p-0 align-middle font-bold text-sm sm:text-base text-black">
+                                    {toBengaliNumber(serial)}
+                                  </td>
+                                  <td rowSpan={subjectCount} className="border border-black text-center bg-white p-0 align-middle text-black">
+                                    <div className="data-vertical">{toBengaliNumber(student.StudentCode)}</div>
+                                  </td>
+                                  {/* 🟢 শিক্ষার্থীর নাম এখন একটি আলাদা Native Column (রো-এর উচ্চতা ভাঙবে না) */}
+                                  <td rowSpan={subjectCount} style={{ width: '8%' }} className="border border-black text-center bg-white p-0 align-middle text-black">
+                                    <div className="data-vertical leading-tight">{student.StudentName}</div>
+                                  </td>
+                                </>
+                              )}
+                              {/* 🟢 প্রতি সাব-রো এর সিরিয়াল নম্বর (১, ২, ৩ ... subjectCount) এখন নিজস্ব <td> তে থাকবে — ডান পাশের লাইন bold */}
+                              <td style={subRowIndex === 0 ? { width: '3%' } : {}} className="header-right-bold border border-black text-center bg-white p-0 align-middle font-bold text-[11px] sm:text-[13px] h-5 sm:h-6 text-black">
+                                {toBengaliNumber(subRowIndex + 1)}
+                              </td>
+                              {days.map((day) => (
+                                <td
+                                  key={day}
+                                  className="border border-black text-center p-0 align-middle h-5 sm:h-6 bg-white"
+                                >
+                                  {attendance[`${student.id}-${day}-${subRowIndex}`] ? "✓" : ""}
+                                </td>
+                              ))}
+                            </tr>
                           ))}
-                        </td>
-                        {days.map((day) => (
-                          <td
-                            key={day}
-                            className={`border border-black text-center cursor-pointer w-5 h-5 sm:w-6 sm:h-6 p-0 align-middle ${
-                              attendance[`${student.id}-${day}`] ? "bg-green-200" : "bg-white"
-                            }`}
-                            onClick={() => toggleAttendance(student.id, day)}
-                          >
-                            {Array.from({ length: BookLine ? BookLine : 3 }).map((_, i) => (
-                              <div
-                                key={i}
-                                className="border-b border-black h-2 sm:h-6 w-5 sm:w-6"
-                              >
-                                {attendance[`${student.id}-${day}-${i}`] ? "✓" : ""}
-                              </div>
-                            ))}
-                          </td>
-                        ))}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                        </React.Fragment>
+                      );
+                    })}
 
-            {/* ফুটার */}
-            <div className="flex flex-wrap justify-between mt-4 pt-3 text-xs">
-              <div className="border-t border-black w-50 text-center">
-                <span className="font-normal">মোট কার্য দিবস: </span>
+                    {/* 🟢 শুধু শেষ পেজে — মোট উপস্থিত/অনুপস্থিত এর জন্য দুইটা ফাঁকা রো (প্রিন্টের পর হাতে লেখার জন্য) */}
+                    {isLastPage && (
+                      <>
+                        <tr className="border-b border-black">
+                          <td colSpan={4} className="header-right-bold border border-black bg-white px-1 py-0.5 font-bold text-black text-left">
+                            মোট উপস্থিত :
+                          </td>
+                          {days.map((day) => (
+                            <td key={day} className="border border-black bg-white p-0"></td>
+                          ))}
+                        </tr>
+                        <tr className="border-b border-black">
+                          <td colSpan={4} className="header-right-bold border border-black bg-white px-1 py-0.5 font-bold text-black text-left">
+                            মোট অনুপস্থিত :
+                          </td>
+                          {days.map((day) => (
+                            <td key={day} className="border border-black bg-white p-0"></td>
+                          ))}
+                        </tr>
+                      </>
+                    )}
+                  </tbody>
+                </table>
               </div>
-              <div className="border-t border-black w-50 text-center">
-                <span className="font-normal">শিক্ষক/শিক্ষিকার স্বাক্ষর: </span>
+
+              {/* ফুটার */}
+              <div className="flex flex-wrap justify-between mt-4 pt-3 text-xs font-bold text-black">
+                <div className="border-t border-black w-48 text-center">
+                  <span>মোট কার্য দিবস: </span>
+                </div>
+                <div className="border-t border-black w-48 text-center">
+                  <span>শিক্ষক/শিক্ষিকার স্বাক্ষর: </span>
+                </div>
+                <div className="text-center w-full text-[14px] mt-3">
+                  পৃষ্ঠা : {toBengaliNumber(pageIndex + 1)}
+                </div>
               </div>
-              <div className="text-center w-full text-black text-[14px] font-bold mt-3">
-                পৃষ্ঠা : {toBengaliNumber(pageIndex + 1)}
-              </div>
+
             </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 };
@@ -233,22 +316,39 @@ export default BanglaAttendenceSubjectWari;
 
 
 
-// import React, { useEffect, useState } from "react";
-// import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
-// import bnBijoy2Unicode from "../../../utils/conveter";
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useEffect, useMemo, useState } from "react";
 // import { Buffer } from "buffer";
+// import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 // import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
+// import { formatDate } from "../../../helper/formatTime";
 
-// const BanglaAttendenceSubjectWari = ({ reportData, SubClassID, BookLine }) => {
+// const BanglaAttendenceSubjectWari = ({ reportData, SubClassID, BookLine, rowsPerPage }) => {
 //   const [logo, setLogo] = useState(null);
-
-
-//  const { data: subClassListData } = useGetSubClassListQuery();
+//   const { data: instutionInfo } = useGetInstitutionInfoQuery();
+//   const { data: subClassListData } = useGetSubClassListQuery();
 //   const subClasData = subClassListData?.find(
 //     (i) => i.SubClassID === Number(SubClassID)
 //   );
 
-//   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 //   useEffect(() => {
 //     if (instutionInfo?.Logo?.data) {
 //       const buffer = Buffer.from(instutionInfo.Logo.data);
@@ -258,132 +358,910 @@ export default BanglaAttendenceSubjectWari;
 //     }
 //   }, [instutionInfo]);
 
-  
+//   // ইংরেজি সংখ্যাকে বাংলায় রূপান্তরের ফাংশন
+//   const toBengaliNumber = (num) => {
+//     if (num === null || num === undefined || num === '') return '';
+//     const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+//     return num.toString().replace(/\d/g, (x) => bengaliDigits[x]);
+//   };
 
 //   const days = Array.from({ length: 31 }, (_, i) => i + 1);
 
+//   // অ্যাটেনডেন্স স্টেট (প্রতি সাব-রো এর জন্য আলাদা)
 //   const [attendance, setAttendance] = useState({});
 
-//   const toggleAttendance = (studentId, day) => {
+//   const toggleAttendance = (studentId, day, subRowIndex) => {
 //     setAttendance((prev) => ({
 //       ...prev,
-//       [`${studentId}-${day}`]: !prev[`${studentId}-${day}`],
+//       [`${studentId}-${day}-${subRowIndex}`]: !prev[`${studentId}-${day}-${subRowIndex}`],
 //     }));
 //   };
 
+//   // 🟢 প্রতি শিক্ষার্থীর কয়টি সাব-রো হবে (ফিল্টার থেকে ৩ থেকে ১০ পর্যন্ত সিলেক্ট করা যায়)
+//   const subjectCount = Number(BookLine) || 3;
+
+//   // 🟢 A4 পেজে মোটামুটি ৫০টা সাব-রো ফিট করে (হেডার/ফুটার বাদ দিয়ে) —
+//   // তাই subjectCount যত বেশি, পেজ-প্রতি ছাত্র সংখ্যা তত কমবে
+//   // rowsPerPage prop থেকে একটা উপরের cap ও মানা হয়, দুইটার মধ্যে যেটা ছোট সেটাই নেওয়া হবে
+//   const MAX_ROWS_PER_A4_PAGE = 50; 
+//   const autoStudentsPerPage = Math.max(1, Math.floor(MAX_ROWS_PER_A4_PAGE / subjectCount));
+//   const ROWS_PER_PAGE = rowsPerPage?.portrait
+//     ? Math.min(rowsPerPage.portrait, autoStudentsPerPage)
+//     : autoStudentsPerPage;
+
+//   const chunks = useMemo(() => {
+//     if (!reportData || reportData.length === 0) return [];
+//     const chunked = [];
+//     for (let i = 0; i < reportData.length; i += ROWS_PER_PAGE) {
+//       chunked.push(reportData.slice(i, i + ROWS_PER_PAGE));
+//     }
+//     return chunked;
+//   }, [reportData, ROWS_PER_PAGE]);
+
 //   return (
-//        <div className="font-bangla  p-4 bg-white text-xs">
+//     <div className="font-bangla bg-white text-xs p-2 sm:p-4">
+//       <style>
+//         {`
+//           .writing-vertical {
+//             writing-mode: vertical-rl;
+//             text-orientation: upright;
+//             letter-spacing: 3px;
+//             padding: 4px 0;
+//           }
+//           /* 🟢 আপডেট করা ক্লাস - ডাটা লম্বালম্বি এবং র্যাপিং (Wrapping) এর জন্য */
+//           .data-vertical {
+//             writing-mode: vertical-rl;
+//             transform: rotate(180deg);
+//             white-space: normal; /* nowrap এর বদলে normal করা হয়েছে যাতে ভেঙে পরের লাইনে যায় */
+//             word-break: break-word;
+//             margin: 0 auto;
+//             padding: 4px 0;
+//             max-height: 100%;        /* 🟢 ঘরের উচ্চতা ছাড়িয়ে যাবে না → ২ কলামে ভাঙবে */
+//             line-height: 1.2;      /* 🟢 ২ কলামের মাঝে ফাঁকা কম */
+//             text-align: center;
+//           }
+//           /* 🟢 আপডেট — হেডারের নিচের পুরো লাইন bold */
+//           thead tr th {
+//             border-bottom: 2px solid black !important;
+//           }
+//           /* 🟢 আপডেট — শিক্ষার্থী কলামের ডান পাশের লাইন (হেডার থেকে নিচ পর্যন্ত) bold */
+//           .header-right-bold {
+//             border-right: 2px solid black !important;
+//           }
+//           @media print {
+//             @page {
+//               size: A4 portrait;
+//               margin: 10mm;
+//             }
+//             html, body {
+//               margin: 0;
+//               padding: 0;
+//               box-sizing: border-box;
+//             }
+//             .print-page-container {
+//               page-break-after: always;
+//               page-break-inside: avoid;
+//               break-after: page;
+//               height: 277mm;
+//               position: relative;
+//               box-sizing: border-box;
+//               margin-bottom: 10mm;
+//             }
+//             .print-page-container:last-child {
+//               page-break-after: auto;
+//               break-after: auto;
+//               margin-bottom: 0;
+//             }
+//             table {
+//               page-break-inside: auto;
+//               border-collapse: collapse !important;
+//               table-layout: fixed;
+//               width: 100%;
+//               font-size: 8px;
+//             }
+//             tr {
+//               page-break-inside: avoid;
+//               page-break-after: auto;
+//             }
+//             thead {
+//               display: table-header-group;
+//             }
+//             th, td {
+//               border: 1px solid black !important;
+//               word-wrap: break-word;
+//               overflow-wrap: break-word;
+//             }
+//             /* 🟢 প্রিন্টেও হেডারের নিচের পুরো লাইন bold থাকবে */
+//             thead tr th {
+//               border-bottom: 2px solid black !important;
+//             }
+//             /* 🟢 প্রিন্টেও শিক্ষার্থী কলামের ডান পাশের লাইন (হেডার থেকে নিচ পর্যন্ত) bold থাকবে */
+//             .header-right-bold {
+//               border-right: 2px solid black !important;
+//             }
+//           }
+//         `}
+//       </style>
 
-//       <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-0 gap-4 sm:gap-0 bg-white">
-//         <div className="flex justify-center sm:justify-start w-full sm:w-auto">
-//           <img
-//             src={logo}
-//             alt="Logo"
-//             className="w-16 h-16 sm:w-20 sm:h-20 bg-white"
-//           />
-//         </div>
+//       {chunks.map((chunk, pageIndex) => {
+//         const isLastPage = pageIndex === chunks.length - 1;
+//         return (
+//           <div key={pageIndex} className="print-page-container">
+//             <div className="p-3 sm:p-4 bg-white min-h-[277mm] flex flex-col">
 
-//         <div className="text-center flex-1 bg-white">
-//           <h1 className="text-lg sm:text-xl font-extrabold bg-white">
-//             {bnBijoy2Unicode(instutionInfo?.InstitutionName)}
-//           </h1>
-//           <p className="text-xs sm:text-sm font-semibold bg-white">
-//             {bnBijoy2Unicode(instutionInfo?.Address)}
-//           </p>
-//           <div className="text-black border-2 border-black px-3 py-1 inline-block mt-1 sm:mt-2 rounded-xl tracking-widest bg-white text-sm font-medium">
-//             দৈনিক শিক্ষার্থীর হাজিরা খাতা
+//               {/* 🟢 আপডেট করা হেডার সেকশন: লোগো বামে, টেক্সট মাঝে এবং আন্ডারলাইন */}
+//               <div className="w-full relative mb-2 flex flex-col items-center justify-center bg-white">
+//                 <div className="absolute left-0 top-0 flex justify-start items-start">
+//                   {logo && (
+//                     <img src={logo} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 bg-white object-contain" />
+//                   )}
+//                 </div>
+//                 <div className="text-center flex-1 bg-white">
+//                   <h1 className="text-lg sm:text-[22px] font-extrabold text-black bg-white leading-tight">
+//                     {instutionInfo?.InstitutionName}
+//                   </h1>
+//                   <p className="text-xs sm:text-[15px] font-bold text-black bg-white mt-1">
+//                     {instutionInfo?.Address}
+//                   </p>
+//                   <h2 className="text-sm sm:text-[17px] font-extrabold border-b-[1.5px] border-black inline-block pb-0.5 mt-2 text-black">
+//                     দৈনন্দিন শিক্ষার্থীর হাজিরা খাতা
+//                   </h2>
+//                 </div>
+//               </div>
+
+//               {/* 🟢 আপডেট করা তথ্য সারি: স্পেসিং, ফন্ট-বোল্ড এবং ডান পাশে 'বছর' */}
+//               <div className="flex justify-between items-center mb-2 mt-4 bg-white px-1">
+//                 <div className="font-bold text-sm sm:text-[15px] text-black w-1/3 text-left">
+//                   শ্রেণি/জামাত : {subClasData?.SubClass || ''}
+//                 </div>
+//                 <div className="font-bold text-sm sm:text-[15px] text-black w-1/3 text-center">
+//                   মাস :
+//                 </div>
+//                 <div className="font-bold text-sm sm:text-[15px] text-black w-1/3 text-center">
+//                   বছর :
+//                 </div>
+//               </div>
+
+//               {/* টেবিল */}
+//               <div className="w-full flex-grow overflow-x-auto">
+//                 <table className="w-full border-collapse table-fixed text-xs border-2 border-black">
+//                   <thead>
+//                     <tr>
+//                       {/* 🟢 আপডেট করা হেডারগুলো (ছবি অনুযায়ী বোল্ড এবং সাইজ ঠিক করা) */}
+//                       <th className="border border-black bg-white text-center font-bold text-black p-0 w-[5%] h-6 sm:h-8 text-[11px] sm:text-sm">
+//                         ক্র:
+//                       </th>
+//                       <th className="border border-black bg-white text-center font-bold text-black p-0 w-[5%] h-6 sm:h-8 text-[11px] sm:text-sm">
+//                         আইডি নং
+//                       </th>
+//                       {/* 🟢 শিক্ষার্থী কলামটি এখন colSpan=2 দিয়ে নাম এবং সিরিয়াল দুটি কলাম জুড়ে থাকবে */}
+//                       <th colSpan={2} className="header-right-bold border border-black bg-white text-center font-bold text-black p-0 w-[11%] h-6 sm:h-8 text-[11px] sm:text-sm">
+//                         শিক্ষার্থী
+//                       </th>
+//                       {days.map((day) => (
+//                         <th key={day} className="border border-black text-center bg-white font-bold text-black p-0 h-6 sm:h-8 text-[11px] sm:text-sm">
+//                           {toBengaliNumber(day)}
+//                         </th>
+//                       ))}
+//                     </tr>
+//                   </thead>
+//                   <tbody>
+//                     {chunk.map((student, index) => {
+//                       const serial = pageIndex * ROWS_PER_PAGE + index + 1;
+//                       return (
+//                         <React.Fragment key={student.id || index}>
+//                           {Array.from({ length: subjectCount }).map((_, subRowIndex) => (
+//                             <tr key={subRowIndex} className="border-b border-black">
+//                               {subRowIndex === 0 && (
+//                                 <>
+//                                   {/* 🟢 আপডেট করা ডাটা সেলগুলো: সিরিয়াল নম্বর বোল্ড করা হয়েছে */}
+//                                   <td rowSpan={subjectCount} className="border border-black text-center bg-white p-0 align-middle font-bold text-sm sm:text-base text-black">
+//                                     {toBengaliNumber(serial)}
+//                                   </td>
+//                                   <td rowSpan={subjectCount} className="border border-black text-center bg-white p-0 align-middle text-black">
+//                                     <div className="data-vertical">{toBengaliNumber(student.StudentCode)}</div>
+//                                   </td>
+//                                   {/* 🟢 শিক্ষার্থীর নাম এখন একটি আলাদা Native Column (রো-এর উচ্চতা ভাঙবে না) */}
+//                                   <td rowSpan={subjectCount} style={{ width: '8%' }} className="border border-black text-center bg-white p-0 align-middle text-black">
+//                                     <div className="data-vertical leading-tight">{student.StudentName}</div>
+//                                   </td>
+//                                 </>
+//                               )}
+//                               {/* 🟢 প্রতি সাব-রো এর সিরিয়াল নম্বর (১, ২, ৩ ... subjectCount) এখন নিজস্ব <td> তে থাকবে — ডান পাশের লাইন bold */}
+//                               <td style={subRowIndex === 0 ? { width: '3%' } : {}} className="header-right-bold border border-black text-center bg-white p-0 align-middle font-bold text-[11px] sm:text-[13px] h-5 sm:h-6 text-black">
+//                                 {toBengaliNumber(subRowIndex + 1)}
+//                               </td>
+//                               {days.map((day) => (
+//                                 <td
+//                                   key={day}
+//                                   className={`border border-black text-center cursor-pointer p-0 align-middle h-5 sm:h-6 ${
+//                                     attendance[`${student.id}-${day}-${subRowIndex}`] ? "bg-green-200" : "bg-white"
+//                                   }`}
+//                                   onClick={() => toggleAttendance(student.id, day, subRowIndex)}
+//                                 >
+//                                   {attendance[`${student.id}-${day}-${subRowIndex}`] ? "✓" : ""}
+//                                 </td>
+//                               ))}
+//                             </tr>
+//                           ))}
+//                         </React.Fragment>
+//                       );
+//                     })}
+
+//                     {/* 🟢 শুধু শেষ পেজে — মোট উপস্থিত/অনুপস্থিত এর জন্য দুইটা ফাঁকা রো (প্রিন্টের পর হাতে লেখার জন্য) */}
+//                     {isLastPage && (
+//                       <>
+//                         <tr className="border-b border-black">
+//                           <td colSpan={4} className="header-right-bold border border-black bg-white px-1 py-0.5 font-bold text-black text-left">
+//                             মোট উপস্থিত :
+//                           </td>
+//                           {days.map((day) => (
+//                             <td key={day} className="border border-black bg-white p-0"></td>
+//                           ))}
+//                         </tr>
+//                         <tr className="border-b border-black">
+//                           <td colSpan={4} className="header-right-bold border border-black bg-white px-1 py-0.5 font-bold text-black text-left">
+//                             মোট অনুপস্থিত :
+//                           </td>
+//                           {days.map((day) => (
+//                             <td key={day} className="border border-black bg-white p-0"></td>
+//                           ))}
+//                         </tr>
+//                       </>
+//                     )}
+//                   </tbody>
+//                 </table>
+//               </div>
+
+//               {/* ফুটার */}
+//               <div className="flex flex-wrap justify-between mt-4 pt-3 text-xs font-bold text-black">
+//                 <div className="border-t border-black w-48 text-center">
+//                   <span>মোট কার্য দিবস: </span>
+//                 </div>
+//                 <div className="border-t border-black w-48 text-center">
+//                   <span>শিক্ষক/শিক্ষিকার স্বাক্ষর: </span>
+//                 </div>
+//                 <div className="text-center w-full text-[14px] mt-3">
+//                   পৃষ্ঠা : {toBengaliNumber(pageIndex + 1)}
+//                 </div>
+//               </div>
+
+//             </div>
 //           </div>
-//         </div>
+//         );
+//       })}
+//     </div>
+//   );
+// };
 
-//         <div className="hidden sm:block w-16 h-16 sm:w-20 sm:h-20 bg-white" />
-//       </div>
+// export default BanglaAttendenceSubjectWari;
 
-//       <div className="grid grid-cols-2 my-2">
-//         <div className="font-normal text-xs sm:text-sm py-1 px-2 text-start">
-//           শ্রেণী/জামাত: {bnBijoy2Unicode(subClasData?.SubClass)}
-//         </div>
-//         <div className="grid grid-cols-2 px-2">
-//           <div className="font-normal text-xs sm:text-sm py-1 text-start">
-//             মাস:{" "}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useEffect, useMemo, useState } from "react";
+// import { Buffer } from "buffer";
+// import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
+// import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
+// import { formatDate } from "../../../helper/formatTime";
+
+// const BanglaAttendenceSubjectWari = ({ reportData, SubClassID, BookLine, rowsPerPage }) => {
+//   const [logo, setLogo] = useState(null);
+//   const { data: instutionInfo } = useGetInstitutionInfoQuery();
+//   const { data: subClassListData } = useGetSubClassListQuery();
+//   const subClasData = subClassListData?.find(
+//     (i) => i.SubClassID === Number(SubClassID)
+//   );
+
+//   useEffect(() => {
+//     if (instutionInfo?.Logo?.data) {
+//       const buffer = Buffer.from(instutionInfo.Logo.data);
+//       const base64String = buffer.toString("base64");
+//       const imageSrc = `data:image/png;base64,${base64String}`;
+//       setLogo(imageSrc);
+//     }
+//   }, [instutionInfo]);
+
+//   // ইংরেজি সংখ্যাকে বাংলায় রূপান্তরের ফাংশন
+//   const toBengaliNumber = (num) => {
+//     if (num === null || num === undefined || num === '') return '';
+//     const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+//     return num.toString().replace(/\d/g, (x) => bengaliDigits[x]);
+//   };
+
+//   const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+//   // অ্যাটেনডেন্স স্টেট (প্রতি সাব-রো এর জন্য আলাদা)
+//   const [attendance, setAttendance] = useState({});
+
+//   const toggleAttendance = (studentId, day, subRowIndex) => {
+//     setAttendance((prev) => ({
+//       ...prev,
+//       [`${studentId}-${day}-${subRowIndex}`]: !prev[`${studentId}-${day}-${subRowIndex}`],
+//     }));
+//   };
+
+//   // 🟢 প্রতি শিক্ষার্থীর কয়টি সাব-রো হবে (ফিল্টার থেকে ৩ থেকে ১০ পর্যন্ত সিলেক্ট করা যায়)
+//   const subjectCount = Number(BookLine) || 3;
+
+//   // 🟢 A4 পেজে মোটামুটি ৫০টা সাব-রো ফিট করে (হেডার/ফুটার বাদ দিয়ে) —
+//   // তাই subjectCount যত বেশি, পেজ-প্রতি ছাত্র সংখ্যা তত কমবে
+//   // rowsPerPage prop থেকে একটা উপরের cap ও মানা হয়, দুইটার মধ্যে যেটা ছোট সেটাই নেওয়া হবে
+//   const MAX_ROWS_PER_A4_PAGE = 50; 
+//   const autoStudentsPerPage = Math.max(1, Math.floor(MAX_ROWS_PER_A4_PAGE / subjectCount));
+//   const ROWS_PER_PAGE = rowsPerPage?.portrait
+//     ? Math.min(rowsPerPage.portrait, autoStudentsPerPage)
+//     : autoStudentsPerPage;
+
+//   const chunks = useMemo(() => {
+//     if (!reportData || reportData.length === 0) return [];
+//     const chunked = [];
+//     for (let i = 0; i < reportData.length; i += ROWS_PER_PAGE) {
+//       chunked.push(reportData.slice(i, i + ROWS_PER_PAGE));
+//     }
+//     return chunked;
+//   }, [reportData, ROWS_PER_PAGE]);
+
+//   return (
+//     <div className="font-bangla bg-white text-xs p-2 sm:p-4">
+//       <style>
+//         {`
+//           .writing-vertical {
+//             writing-mode: vertical-rl;
+//             text-orientation: upright;
+//             letter-spacing: 3px;
+//             padding: 4px 0;
+//           }
+//           /* 🟢 আপডেট করা ক্লাস - ডাটা লম্বালম্বি এবং র্যাপিং (Wrapping) এর জন্য */
+//           .data-vertical {
+//             writing-mode: vertical-rl;
+//             transform: rotate(180deg);
+//             white-space: normal; /* nowrap এর বদলে normal করা হয়েছে যাতে ভেঙে পরের লাইনে যায় */
+//             word-break: break-word;
+//             margin: 0 auto;
+//             padding: 4px 0;
+//             max-height: 100%;        /* 🟢 ঘরের উচ্চতা ছাড়িয়ে যাবে না → ২ কলামে ভাঙবে */
+//             line-height: 1.2;      /* 🟢 ২ কলামের মাঝে ফাঁকা কম */
+//             text-align: center;
+//           }
+//           /* 🟢 আপডেট — হেডারের নিচের পুরো লাইন bold */
+//           thead tr th {
+//             border-bottom: 2px solid black !important;
+//           }
+//           /* 🟢 নতুন — শিক্ষার্থী হেডারের ডান পাশের লাইন bold করার জন্য */
+//           .header-right-bold {
+//             border-right: 2px solid black !important;
+//           }
+//           @media print {
+//             @page {
+//               size: A4 portrait;
+//               margin: 10mm;
+//             }
+//             html, body {
+//               margin: 0;
+//               padding: 0;
+//               box-sizing: border-box;
+//             }
+//             .print-page-container {
+//               page-break-after: always;
+//               page-break-inside: avoid;
+//               break-after: page;
+//               height: 277mm;
+//               position: relative;
+//               box-sizing: border-box;
+//               margin-bottom: 10mm;
+//             }
+//             .print-page-container:last-child {
+//               page-break-after: auto;
+//               break-after: auto;
+//               margin-bottom: 0;
+//             }
+//             table {
+//               page-break-inside: auto;
+//               border-collapse: collapse !important;
+//               table-layout: fixed;
+//               width: 100%;
+//               font-size: 8px;
+//             }
+//             tr {
+//               page-break-inside: avoid;
+//               page-break-after: auto;
+//             }
+//             thead {
+//               display: table-header-group;
+//             }
+//             th, td {
+//               border: 1px solid black !important;
+//               word-wrap: break-word;
+//               overflow-wrap: break-word;
+//             }
+//             /* 🟢 প্রিন্টেও হেডারের নিচের পুরো লাইন bold থাকবে */
+//             thead tr th {
+//               border-bottom: 2px solid black !important;
+//             }
+//             th.header-right-bold {
+//               border-right: 2px solid black !important;
+//             }
+//           }
+//         `}
+//       </style>
+
+//       {chunks.map((chunk, pageIndex) => {
+//         const isLastPage = pageIndex === chunks.length - 1;
+//         return (
+//           <div key={pageIndex} className="print-page-container">
+//             <div className="p-3 sm:p-4 bg-white min-h-[277mm] flex flex-col">
+
+//               {/* 🟢 আপডেট করা হেডার সেকশন: লোগো বামে, টেক্সট মাঝে এবং আন্ডারলাইন */}
+//               <div className="w-full relative mb-2 flex flex-col items-center justify-center bg-white">
+//                 <div className="absolute left-0 top-0 flex justify-start items-start">
+//                   {logo && (
+//                     <img src={logo} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 bg-white object-contain" />
+//                   )}
+//                 </div>
+//                 <div className="text-center flex-1 bg-white">
+//                   <h1 className="text-lg sm:text-[22px] font-extrabold text-black bg-white leading-tight">
+//                     {instutionInfo?.InstitutionName}
+//                   </h1>
+//                   <p className="text-xs sm:text-[15px] font-bold text-black bg-white mt-1">
+//                     {instutionInfo?.Address}
+//                   </p>
+//                   <h2 className="text-sm sm:text-[17px] font-extrabold border-b-[1.5px] border-black inline-block pb-0.5 mt-2 text-black">
+//                     দৈনন্দিন শিক্ষার্থীর হাজিরা খাতা
+//                   </h2>
+//                 </div>
+//               </div>
+
+//               {/* 🟢 আপডেট করা তথ্য সারি: স্পেসিং, ফন্ট-বোল্ড এবং ডান পাশে 'বছর' */}
+//               <div className="flex justify-between items-center mb-2 mt-4 bg-white px-1">
+//                 <div className="font-bold text-sm sm:text-[15px] text-black w-1/3 text-left">
+//                   শ্রেণি/জামাত : {subClasData?.SubClass || ''}
+//                 </div>
+//                 <div className="font-bold text-sm sm:text-[15px] text-black w-1/3 text-center">
+//                   মাস :
+//                 </div>
+//                 <div className="font-bold text-sm sm:text-[15px] text-black w-1/3 text-center">
+//                   বছর :
+//                 </div>
+//               </div>
+
+//               {/* টেবিল */}
+//               <div className="w-full flex-grow overflow-x-auto">
+//                 <table className="w-full border-collapse table-fixed text-xs border-2 border-black">
+//                   <thead>
+//                     <tr>
+//                       {/* 🟢 আপডেট করা হেডারগুলো (ছবি অনুযায়ী বোল্ড এবং সাইজ ঠিক করা) */}
+//                       <th className="border border-black bg-white text-center font-bold text-black p-0 w-[5%] h-6 sm:h-8 text-[11px] sm:text-sm">
+//                         ক্র:
+//                       </th>
+//                       <th className="border border-black bg-white text-center font-bold text-black p-0 w-[5%] h-6 sm:h-8 text-[11px] sm:text-sm">
+//                         আইডি নং
+//                       </th>
+//                       {/* 🟢 শিক্ষার্থী কলামটি এখন colSpan=2 দিয়ে নাম এবং সিরিয়াল দুটি কলাম জুড়ে থাকবে */}
+//                       <th colSpan={2} className="header-right-bold border border-black bg-white text-center font-bold text-black p-0 w-[11%] h-6 sm:h-8 text-[11px] sm:text-sm">
+//                         শিক্ষার্থী
+//                       </th>
+//                       {days.map((day) => (
+//                         <th key={day} className="border border-black text-center bg-white font-bold text-black p-0 h-6 sm:h-8 text-[11px] sm:text-sm">
+//                           {toBengaliNumber(day)}
+//                         </th>
+//                       ))}
+//                     </tr>
+//                   </thead>
+//                   <tbody>
+//                     {chunk.map((student, index) => {
+//                       const serial = pageIndex * ROWS_PER_PAGE + index + 1;
+//                       return (
+//                         <React.Fragment key={student.id || index}>
+//                           {Array.from({ length: subjectCount }).map((_, subRowIndex) => (
+//                             <tr key={subRowIndex} className="border-b border-black">
+//                               {subRowIndex === 0 && (
+//                                 <>
+//                                   {/* 🟢 আপডেট করা ডাটা সেলগুলো: সিরিয়াল নম্বর বোল্ড করা হয়েছে */}
+//                                   <td rowSpan={subjectCount} className="border border-black text-center bg-white p-0 align-middle font-bold text-sm sm:text-base text-black">
+//                                     {toBengaliNumber(serial)}
+//                                   </td>
+//                                   <td rowSpan={subjectCount} className="border border-black text-center bg-white p-0 align-middle text-black">
+//                                     <div className="data-vertical">{toBengaliNumber(student.StudentCode)}</div>
+//                                   </td>
+//                                   {/* 🟢 শিক্ষার্থীর নাম এখন একটি আলাদা Native Column (রো-এর উচ্চতা ভাঙবে না) */}
+//                                   <td rowSpan={subjectCount} style={{ width: '8%' }} className="border border-black text-center bg-white p-0 align-middle text-black">
+//                                     <div className="data-vertical leading-tight">{student.StudentName}</div>
+//                                   </td>
+//                                 </>
+//                               )}
+//                               {/* 🟢 প্রতি সাব-রো এর সিরিয়াল নম্বর (১, ২, ৩ ... subjectCount) এখন নিজস্ব <td> তে থাকবে */}
+//                               <td style={subRowIndex === 0 ? { width: '3%' } : {}} className="border border-black text-center bg-white p-0 align-middle font-bold text-[11px] sm:text-[13px] h-5 sm:h-6 text-black">
+//                                 {toBengaliNumber(subRowIndex + 1)}
+//                               </td>
+//                               {days.map((day) => (
+//                                 <td
+//                                   key={day}
+//                                   className={`border border-black text-center cursor-pointer p-0 align-middle h-5 sm:h-6 ${
+//                                     attendance[`${student.id}-${day}-${subRowIndex}`] ? "bg-green-200" : "bg-white"
+//                                   }`}
+//                                   onClick={() => toggleAttendance(student.id, day, subRowIndex)}
+//                                 >
+//                                   {attendance[`${student.id}-${day}-${subRowIndex}`] ? "✓" : ""}
+//                                 </td>
+//                               ))}
+//                             </tr>
+//                           ))}
+//                         </React.Fragment>
+//                       );
+//                     })}
+
+//                     {/* 🟢 শুধু শেষ পেজে — মোট উপস্থিত/অনুপস্থিত এর জন্য দুইটা ফাঁকা রো (প্রিন্টের পর হাতে লেখার জন্য) */}
+//                     {isLastPage && (
+//                       <>
+//                         <tr className="border-b border-black">
+//                           <td colSpan={4} className="border border-black bg-white px-1 py-0.5 font-bold text-black text-left">
+//                             মোট উপস্থিত :
+//                           </td>
+//                           {days.map((day) => (
+//                             <td key={day} className="border border-black bg-white p-0"></td>
+//                           ))}
+//                         </tr>
+//                         <tr className="border-b border-black">
+//                           <td colSpan={4} className="border border-black bg-white px-1 py-0.5 font-bold text-black text-left">
+//                             মোট অনুপস্থিত :
+//                           </td>
+//                           {days.map((day) => (
+//                             <td key={day} className="border border-black bg-white p-0"></td>
+//                           ))}
+//                         </tr>
+//                       </>
+//                     )}
+//                   </tbody>
+//                 </table>
+//               </div>
+
+//               {/* ফুটার */}
+//               <div className="flex flex-wrap justify-between mt-4 pt-3 text-xs font-bold text-black">
+//                 <div className="border-t border-black w-48 text-center">
+//                   <span>মোট কার্য দিবস: </span>
+//                 </div>
+//                 <div className="border-t border-black w-48 text-center">
+//                   <span>শিক্ষক/শিক্ষিকার স্বাক্ষর: </span>
+//                 </div>
+//                 <div className="text-center w-full text-[14px] mt-3">
+//                   পৃষ্ঠা : {toBengaliNumber(pageIndex + 1)}
+//                 </div>
+//               </div>
+
+//             </div>
 //           </div>
-//           <div className="font-normal text-xs sm:text-sm py-1 text-start">
-//             বছর:{" "}
-//           </div>
-//         </div>
-//       </div>
+//         );
+//       })}
+//     </div>
+//   );
+// };
 
-//       <div>
-//         <table className="w-full border-collapse table-fixed text-xs">
-//           <thead>
-//             <tr>
-//               <th className="border border-black bg-white text-center w-8 h-5 sm:w-10 sm:h-6">
-//                 ক্র.নং
-//               </th>
-//               <th className="border border-black bg-white text-center w-10 h-5 sm:w-16 sm:h-6">
-//                 দাখেলা
-//               </th>
-//               <th
-//                 className="border border-black bg-white min-w-[120px] sm:min-w-[150px] h-5 sm:h-6"
-//                 colSpan={2}
-//               >
-//                 ছাত্র/ছাত্রীর নাম
-//               </th>
-//               {days.map((day) => (
-//                 <th
-//                   key={day}
-//                   className="border border-black text-center bg-white w-5 h-5 sm:w-6 sm:h-6"
-//                 >
-//                   {day}
-//                 </th>
-//               ))}
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {reportData?.map((student, index) => (
-//               <tr key={index}>
-//                 <td className="border border-black text-center bg-white w-8 h-5 sm:w-10 sm:h-6 p-0 align-middle">
-//                   {index + 1}
-//                 </td>
-//                 <td className="border border-black text-center bg-white w-10 h-5 sm:w-14 sm:h-6 p-0 align-middle">
-//                   {student.StudentCode}
-//                 </td>
-//                 <td className="border border-black bg-white min-w-[120px] sm:min-w-[150px] h-5 sm:h-6 px-1 py-0.5">
-//                   {bnBijoy2Unicode(student.StudentName)}
-//                 </td>
-//                 <td className="border border-black bg-white w-5 h-5 sm:w-6 sm:h-6 text-center p-0">
-//                   {Array.from({ length: BookLine ? BookLine : 3}).map((_, i) => (
-//                     <div key={i} className="border-b border-black h-2 text-sm sm:h-6">
-//                       {i + 1}
-//                     </div>
-//                   ))}
-//                 </td>
-//                 {days.map((day) => (
-//                   <td
-//                     key={day}
-//                     className={`border border-black text-center cursor-pointer w-5 h-5 sm:w-6 sm:h-6 p-0 align-middle ${
-//                       attendance[`${student.id}-${day}`]
-//                         ? "bg-green-200"
-//                         : "bg-white"
-//                     }`}
-//                     onClick={() => toggleAttendance(student.id, day)}
-//                   >
-//                     {Array.from({ length: BookLine ? BookLine : 3 }).map((_, i) => (
-//                       <div
-//                         key={i}
-//                         className="border-b border-black h-2 sm:h-6 w-5 sm:w-6"
-//                       >
-//                         {attendance[`${student.id}-${day}`] === i + 1
-//                           ? "✓"
-//                           : ""}
-//                       </div>
-//                     ))}
-//                   </td>
-//                 ))}
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       </div>
+// export default BanglaAttendenceSubjectWari;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useEffect, useMemo, useState } from "react";
+// import { Buffer } from "buffer";
+// import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
+// import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
+// import { formatDate } from "../../../helper/formatTime";
+
+// const BanglaAttendenceSubjectWari = ({ reportData, SubClassID, BookLine, rowsPerPage }) => {
+//   const [logo, setLogo] = useState(null);
+//   const { data: instutionInfo } = useGetInstitutionInfoQuery();
+//   const { data: subClassListData } = useGetSubClassListQuery();
+//   const subClasData = subClassListData?.find(
+//     (i) => i.SubClassID === Number(SubClassID)
+//   );
+
+//   useEffect(() => {
+//     if (instutionInfo?.Logo?.data) {
+//       const buffer = Buffer.from(instutionInfo.Logo.data);
+//       const base64String = buffer.toString("base64");
+//       const imageSrc = `data:image/png;base64,${base64String}`;
+//       setLogo(imageSrc);
+//     }
+//   }, [instutionInfo]);
+
+//   // ইংরেজি সংখ্যাকে বাংলায় রূপান্তরের ফাংশন
+//   const toBengaliNumber = (num) => {
+//     if (num === null || num === undefined || num === '') return '';
+//     const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+//     return num.toString().replace(/\d/g, (x) => bengaliDigits[x]);
+//   };
+
+//   const days = Array.from({ length: 31 }, (_, i) => i + 1);
+
+//   // অ্যাটেনডেন্স স্টেট (প্রতি সাব-রো এর জন্য আলাদা)
+//   const [attendance, setAttendance] = useState({});
+
+//   const toggleAttendance = (studentId, day, subRowIndex) => {
+//     setAttendance((prev) => ({
+//       ...prev,
+//       [`${studentId}-${day}-${subRowIndex}`]: !prev[`${studentId}-${day}-${subRowIndex}`],
+//     }));
+//   };
+
+//   // 🟢 প্রতি শিক্ষার্থীর কয়টি সাব-রো হবে (ফিল্টার থেকে ৩ থেকে ১০ পর্যন্ত সিলেক্ট করা যায়)
+//   const subjectCount = Number(BookLine) || 3;
+
+//   // 🟢 A4 পেজে মোটামুটি ৪৫টা সাব-রো ফিট করে (হেডার/ফুটার বাদ দিয়ে) —
+//   // তাই subjectCount যত বেশি, পেজ-প্রতি ছাত্র সংখ্যা তত কমবে (khata.pdf-এ subjectCount=১০ এ ৪ জন/পেজ দেখা যায়)
+//   // rowsPerPage prop থেকে একটা উপরের cap ও মানা হয়, দুইটার মধ্যে যেটা ছোট সেটাই নেওয়া হবে
+//   const MAX_ROWS_PER_A4_PAGE = 45;
+//   const autoStudentsPerPage = Math.max(1, Math.floor(MAX_ROWS_PER_A4_PAGE / subjectCount));
+//   const ROWS_PER_PAGE = rowsPerPage?.portrait
+//     ? Math.min(rowsPerPage.portrait, autoStudentsPerPage)
+//     : autoStudentsPerPage;
+
+//   const chunks = useMemo(() => {
+//     if (!reportData || reportData.length === 0) return [];
+//     const chunked = [];
+//     for (let i = 0; i < reportData.length; i += ROWS_PER_PAGE) {
+//       chunked.push(reportData.slice(i, i + ROWS_PER_PAGE));
+//     }
+//     return chunked;
+//   }, [reportData, ROWS_PER_PAGE]);
+
+//   return (
+//     <div className="font-bangla bg-white text-xs p-2 sm:p-4">
+//       <style>
+//         {`
+//           .writing-vertical {
+//             writing-mode: vertical-rl;
+//             text-orientation: upright;
+//             letter-spacing: 3px;
+//             padding: 4px 0;
+//           }
+//           /* 🟢 নতুন ক্লাস - ডাটা লম্বালম্বি দেখানোর জন্য */
+//           .data-vertical {
+//             writing-mode: vertical-rl;
+//             transform: rotate(180deg);
+//             white-space: nowrap;
+//             margin: 0 auto;
+//             padding: 8px 0;
+//           }
+//           @media print {
+//             @page {
+//               size: A4 portrait;
+//               margin: 10mm;
+//             }
+//             html, body {
+//               margin: 0;
+//               padding: 0;
+//               box-sizing: border-box;
+//             }
+//             .print-page-container {
+//               page-break-after: always;
+//               page-break-inside: avoid;
+//               break-after: page;
+//               height: 277mm;
+//               position: relative;
+//               box-sizing: border-box;
+//               margin-bottom: 10mm;
+//             }
+//             .print-page-container:last-child {
+//               page-break-after: auto;
+//               break-after: auto;
+//               margin-bottom: 0;
+//             }
+//             table {
+//               page-break-inside: auto;
+//               border-collapse: collapse !important;
+//               table-layout: fixed;
+//               width: 100%;
+//               font-size: 8px;
+//             }
+//             tr {
+//               page-break-inside: avoid;
+//               page-break-after: auto;
+//             }
+//             thead {
+//               display: table-header-group;
+//             }
+//             th, td {
+//               border: 1px solid black !important;
+//               word-wrap: break-word;
+//               overflow-wrap: break-word;
+//             }
+//           }
+//         `}
+//       </style>
+
+//       {chunks.map((chunk, pageIndex) => {
+//         const isLastPage = pageIndex === chunks.length - 1;
+//         return (
+//           <div key={pageIndex} className="print-page-container">
+//             <div className="p-3 sm:p-4 bg-white min-h-[277mm] flex flex-col">
+
+//               {/* হেডার */}
+//               <div className="flex flex-col sm:flex-row items-center justify-between mb-4 gap-4 sm:gap-0 bg-white">
+//                 <div className="flex justify-center sm:justify-start w-full sm:w-auto">
+//                   {logo && (
+//                     <img src={logo} alt="Logo" className="w-16 h-16 sm:w-20 sm:h-20 bg-white object-contain" />
+//                   )}
+//                 </div>
+//                 <div className="text-center flex-1 bg-white">
+//                   <h1 className="text-lg sm:text-xl font-extrabold bg-white">
+//                     {instutionInfo?.InstitutionName}
+//                   </h1>
+//                   <p className="text-xs sm:text-sm font-semibold bg-white">
+//                     {instutionInfo?.Address}
+//                   </p>
+//                   <h2 className="text-sm sm:text-base font-bold border-b-2 border-black inline-block pb-1 mt-1 sm:mt-2">
+//                     দৈনন্দিন শিক্ষার্থীর হাজিরা খাতা
+//                   </h2>
+//                 </div>
+//                 <div className="hidden sm:block w-16 h-16 sm:w-20 sm:h-20 bg-white" />
+//               </div>
+
+//               {/* তথ্য সারি */}
+//               <div className="flex justify-between items-center my-3 bg-white px-2">
+//                 <div className="font-normal text-xs sm:text-sm">
+//                   শ্রেণি/জামাত : {subClasData?.SubClass || ''}
+//                 </div>
+//                 <div className="font-normal text-xs sm:text-sm">
+//                   মাস :
+//                 </div>
+//                 <div className="font-normal text-xs sm:text-sm">
+//                   বছর :
+//                 </div>
+//               </div>
+
+//               {/* টেবিল */}
+//               <div className="w-full flex-grow overflow-x-auto">
+//                 <table className="w-full border-collapse table-fixed text-xs">
+//                   <thead>
+//                     <tr>
+//                       {/* 🟢 আপডেট করা হেডারগুলো (ছবি অনুযায়ী নরমাল/Horizontal টেক্সট এবং পার্সেন্টেজ উইডথ) */}
+//                       <th className="border border-black bg-white text-center p-0 w-[5%] h-6">
+//                         ক্র:
+//                       </th>
+//                       <th className="border border-black bg-white text-center p-0 w-[8%] h-6">
+//                         আইডি নং
+//                       </th>
+//                       <th className="border border-black bg-white text-center p-0 w-[14%] h-6">
+//                         শিক্ষার্থী
+//                       </th>
+//                       {/* 🟢 নতুন কলাম — প্রতিটি সাব-রো এর সিরিয়াল (১ থেকে subjectCount) */}
+//                       <th className="border border-black text-center bg-white p-0 w-[3%] h-6"></th>
+//                       {days.map((day) => (
+//                         <th key={day} className="border border-black text-center bg-white p-0 h-6 text-[10px] sm:text-xs">
+//                           {toBengaliNumber(day)}
+//                         </th>
+//                       ))}
+//                     </tr>
+//                   </thead>
+//                   <tbody>
+//                     {chunk.map((student, index) => {
+//                       const serial = pageIndex * ROWS_PER_PAGE + index + 1;
+//                       return (
+//                         <React.Fragment key={student.id || index}>
+//                           {Array.from({ length: subjectCount }).map((_, subRowIndex) => (
+//                             <tr key={subRowIndex} className="border-b border-black">
+//                               {subRowIndex === 0 && (
+//                                 <>
+//                                   {/* 🟢 আপডেট করা ডাটা সেলগুলো */}
+//                                   <td rowSpan={subjectCount} className="border border-black text-center bg-white p-0 align-middle">
+//                                     {toBengaliNumber(serial)}
+//                                   </td>
+//                                   <td rowSpan={subjectCount} className="border border-black text-center bg-white p-0 align-middle">
+//                                     <div className="data-vertical">{toBengaliNumber(student.StudentCode)}</div>
+//                                   </td>
+//                                   <td rowSpan={subjectCount} className="border border-black text-center bg-white p-0 align-middle">
+//                                     <div className="data-vertical">{student.StudentName}</div>
+//                                   </td>
+//                                 </>
+//                               )}
+//                               {/* 🟢 প্রতি সাব-রো এর সিরিয়াল নম্বর (১, ২, ৩ ... subjectCount) */}
+//                               <td className="border border-black text-center bg-white p-0 align-middle">
+//                                 {toBengaliNumber(subRowIndex + 1)}
+//                               </td>
+//                               {days.map((day) => (
+//                                 <td
+//                                   key={day}
+//                                   className={`border border-black text-center cursor-pointer p-0 align-middle ${
+//                                     attendance[`${student.id}-${day}-${subRowIndex}`] ? "bg-green-200" : "bg-white"
+//                                   }`}
+//                                   onClick={() => toggleAttendance(student.id, day, subRowIndex)}
+//                                 >
+//                                   {attendance[`${student.id}-${day}-${subRowIndex}`] ? "✓" : ""}
+//                                 </td>
+//                               ))}
+//                             </tr>
+//                           ))}
+//                         </React.Fragment>
+//                       );
+//                     })}
+
+//                     {/* 🟢 শুধু শেষ পেজে — মোট উপস্থিত/অনুপস্থিত এর জন্য দুইটা ফাঁকা রো (প্রিন্টের পর হাতে লেখার জন্য) */}
+//                     {isLastPage && (
+//                       <>
+//                         <tr className="border-b border-black">
+//                           <td colSpan={4} className="border border-black bg-white px-1 py-0.5 font-semibold text-left">
+//                             মোট উপস্থিত :
+//                           </td>
+//                           {days.map((day) => (
+//                             <td key={day} className="border border-black bg-white p-0"></td>
+//                           ))}
+//                         </tr>
+//                         <tr className="border-b border-black">
+//                           <td colSpan={4} className="border border-black bg-white px-1 py-0.5 font-semibold text-left">
+//                             মোট অনুপস্থিত :
+//                           </td>
+//                           {days.map((day) => (
+//                             <td key={day} className="border border-black bg-white p-0"></td>
+//                           ))}
+//                         </tr>
+//                       </>
+//                     )}
+//                   </tbody>
+//                 </table>
+//               </div>
+
+//               {/* ফুটার */}
+//               <div className="flex flex-wrap justify-between mt-4 pt-3 text-xs">
+//                 <div className="border-t border-black w-48 text-center">
+//                   <span className="font-normal">মোট কার্য দিবস: </span>
+//                 </div>
+//                 <div className="border-t border-black w-48 text-center">
+//                   <span className="font-normal">শিক্ষক/শিক্ষিকার স্বাক্ষর: </span>
+//                 </div>
+//                 <div className="text-center w-full text-black text-[14px] font-bold mt-3">
+//                   পৃষ্ঠা : {toBengaliNumber(pageIndex + 1)}
+//                 </div>
+//               </div>
+
+//             </div>
+//           </div>
+//         );
+//       })}
 //     </div>
 //   );
 // };

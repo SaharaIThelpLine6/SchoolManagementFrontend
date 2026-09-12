@@ -35,6 +35,7 @@ export default function FilterableReportView({
   title,
   note,
   defaultRowsPerPage = 20,
+  showBookLine = false,
   children,
 }) {
   const {
@@ -93,6 +94,7 @@ export default function FilterableReportView({
           loading={dataLoading}
           onReset={resetFilters}
           note={note}
+          showBookLine={showBookLine}
         />
 
       </div>

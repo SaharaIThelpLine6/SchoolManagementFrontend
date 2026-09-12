@@ -11,6 +11,7 @@ import ReportBuilder from '../view/students/reports/student-report-list/ReportBu
 import FilterableReportView from '../view/students/reports/student-report-list/FilterableReportView';
 // বাংলা হাজিরা খাতা কম্পোনেন্ট
 import BanglaAttendence from '../view/students/reports/BanglaAttendence';
+import BanglaAttendenceSubjectWari from '../view/students/reports/BanglaAttendenceSubjectWari';
 
 // প্রতিটি রিপোর্টের জন্য আলাদা সেটিং
 const REPORT_CONFIGS = {
@@ -21,6 +22,10 @@ const REPORT_CONFIGS = {
   '2': {
     component: 'BanglaAttendence',
     rowsPerPage: { portrait: 38, landscape: 20 },  // বাংলা হাজিরা খাতা — বেশি ডেটা
+  },
+    '3': {
+    component: 'BanglaAttendenceSubjectWari',
+    rowsPerPage: { portrait: 10, landscape: 12 },
   },
   '15': {
     component: 'ComingSoon',
@@ -37,6 +42,7 @@ export default function StudentsReportList() {
   const reportOptions = [
     { id: '1', value: translate('1. Custom Template Builder') },
     { id: '2', value: translate('৮. বাংলা হাজিরা খাতা 30 দিনের') },
+    { id: '3', value: translate('৮. বাংলা হাজিরা খাতা 30 দিনের (বিষয়ওয়ারী)') },
     { id: '15', value: translate('2. Other reports coming soon') },
   ];
 
@@ -67,6 +73,26 @@ export default function StudentsReportList() {
                 SubClassID={filters.SubClassID}
                 SessionID={filters.SessionID}
                 rowsPerPage={cfg.rowsPerPage}   // 👈 কম্পোনেন্টেও পাঠান
+              />
+            )}
+          </FilterableReportView>
+        );
+
+      // 👈 নতুন কম্পোনেন্টের জন্য কেস (প্যাচ যুক্ত করা হয়েছে)
+      case 'BanglaAttendenceSubjectWari':
+        return (
+          <FilterableReportView
+            title="ফিল্টার"
+            note="ফিল্টার করে ও বিষয়ের খাতার সংখ্যা বেছে নিয়ে নিচে প্রিভিউতে দেখে প্রিন্ট করুন।"
+            rowsPerPage={cfg.rowsPerPage}
+            showBookLine
+          >
+            {({ filters, filteredData }) => (
+              <BanglaAttendenceSubjectWari
+                reportData={filteredData}
+                SubClassID={filters.SubClassID}
+                BookLine={filters.BookLine} // ফিল্টার থেকে BookLine আসলে পাস হবে, না আসলে ডিফল্ট ৩ হবে
+                rowsPerPage={cfg.rowsPerPage}
               />
             )}
           </FilterableReportView>
