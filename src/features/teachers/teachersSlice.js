@@ -14,7 +14,7 @@ export const teachersSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Teacher'], // define tag type
+  tagTypes: ['Teacher', "Teacher_Subject"], // define tag type
   endpoints: (builder) => ({
     getDesignation: builder.query({
       query: () => 'designation',
@@ -40,6 +40,7 @@ export const teachersSlice = createApi({
       query: () => 'teacher_info_not_registered',
       providesTags: ['Teacher'],
     }),
+
     postTeacherInfoRegistered: builder.mutation({
       query: (body) => ({
         url: 'insert_teacher',
@@ -85,6 +86,31 @@ export const teachersSlice = createApi({
         method: 'POST',
         body: body,
       }),
+      invalidatesTags: ['Teacher_Subject'],
+    }),
+    getTeacherSubjects: builder.query({
+      query: () => 'teacher_subject',
+      providesTags: ['Teacher_Subject'],
+    }),
+    getTeacherSubjectsByFilter: builder.query({
+      query: ({ SessionID, ExamID, SubClassID, SubjectID } = {}) => {
+        const params = new URLSearchParams();
+        if (SessionID) params.append("SessionID", SessionID);
+        if (ExamID) params.append("ExamID", ExamID);
+        if (SubClassID) params.append("SubClassID", SubClassID);
+        if (SubjectID) params.append("SubjectID", SubjectID);
+
+        return `/teacher_subject/filter?${params.toString()}`;
+      },
+      providesTags: ["TeacherSubjects"],
+    }),
+    updateTeacherSubject: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/teacher_subject/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Teacher_Subject"],
     }),
   }),
 });
@@ -100,5 +126,8 @@ export const {
   useDeleteDesignationMutation,
   useGetLoginTeacherInfoQuery,
   useGetTeachersInfoQuery,
-  usePostSubjectToTeacherMutation
+  usePostSubjectToTeacherMutation,
+  useGetTeacherSubjectsQuery,
+  useUpdateTeacherSubjectMutation,
+  useGetTeacherSubjectsByFilterQuery
 } = teachersSlice;

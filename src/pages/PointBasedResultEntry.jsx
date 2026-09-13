@@ -133,9 +133,8 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   const handleStatusUpdate = async (id, currentPublished) => {
     const newPublished = !currentPublished;
     const confirmResult = await Swal.fire({
-      title: `Are you sure you want to mark as ${
-        newPublished ? 'Published' : 'Unpublished'
-      }?`,
+      title: `Are you sure you want to mark as ${newPublished ? 'Published' : 'Unpublished'
+        }?`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Yes',
@@ -162,7 +161,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     }
   };
 
-  const handleTeacherAssign = async (row) =>{
+  const handleTeacherAssign = async (row) => {
     showModal("Teacher Subject Assignment", "HANDLE_RESULT_ENTRY_ASSIGN", row, { closeOnOutSide: false })
   }
 
@@ -210,19 +209,18 @@ const PointBasedResultEntry = ({ pageTitle }) => {
             empty={true}
           >
             <button
-              className={`px-3 py-1 rounded text-sm font-medium ${
-                isPublished
+              className={`px-3 py-1 rounded text-sm font-medium ${isPublished
                   ? 'bg-green-500 text-white'
                   : 'bg-red-500 text-white'
-              }`}
+                }`}
               onClick={() => handleStatusUpdate(row.ID, isPublished)}
               disabled={isLoading}
             >
               {isLoading
                 ? 'Updating...'
                 : isPublished
-                ? 'প্রকাশিত'
-                : 'অপ্রকাশিত'}
+                  ? 'প্রকাশিত'
+                  : 'অপ্রকাশিত'}
             </button>
           </ViewPermission>
         );
@@ -239,9 +237,9 @@ const PointBasedResultEntry = ({ pageTitle }) => {
             empty={true}
           >
 
-           <Button className='' onClick={()=>{handleTeacherAssign(row)}} tooltip_message='Teacher Result Entry Permission'>
+            <Button className='' onClick={() => { handleTeacherAssign(row) }} tooltip_message='Teacher Result Entry Permission'>
               <SvgIcon name={"TbUserShare"} size={20} />
-           </Button>
+            </Button>
             <EditButton
               onClick={() =>
                 navigate(

@@ -21,12 +21,12 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
-  
-  const [ postLogin ] = usePostLoginMutation();
-  const [ checkRedirectStatus ] = useLazyGetRedirectStatusQuery(); // 🌟 NEW QUERY HOOK
+
+  const [postLogin] = usePostLoginMutation();
+  const [checkRedirectStatus] = useLazyGetRedirectStatusQuery(); // 🌟 NEW QUERY HOOK
 
   useEffect(() => {
-    // 🌟 NEW: URL থেকে টোকেন নেওয়ার লজিক (Auto Login)
+    // 🌟 NEW: URL থেকে টোকেন নেওয়ার লজিক (Auto Login)
     const urlParams = new URLSearchParams(window.location.search);
     const urlToken = urlParams.get('token');
     if (urlToken) {
@@ -38,6 +38,47 @@ const Login = () => {
       navigate("/dashboard");
     }
   }, [auth.token, navigate, dispatch]);
+
+  // 🌟 NEW: Enter চাপলে পরের input এ ফোকাস যাবে (তবে current input খালি থাকলে Swal message দেখাবে)
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const form = e.target.form;
+      if (!form) return;
+
+      // 🌟 Current input এ value না থাকলে Swal message দেখাবে
+      const currentValue = (e.target.value ?? "").toString().trim();
+      if (currentValue === "") {
+        Swal.fire({
+          icon: "warning",
+          title: "ফিল্ড খালি!",
+          text: "অনুগ্রহ করে এই ফিল্ডটি পূরণ করুন।",
+          confirmButtonColor: "#3B82F6",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        return;
+      }
+
+      const inputs = Array.from(form.elements).filter(
+        (el) =>
+          el.tagName === "INPUT" &&
+          !el.disabled &&
+          el.type !== "hidden" &&
+          el.type !== "submit" &&
+          el.type !== "button"
+      );
+
+      const currentIndex = inputs.indexOf(e.target);
+
+      if (currentIndex > -1 && currentIndex < inputs.length - 1) {
+        inputs[currentIndex + 1].focus();
+      } else {
+        // শেষ input এ Enter চাপলে form submit হবে
+        handleSubmit(onSubmit)();
+      }
+    }
+  };
 
   const onSubmit = async (data) => {
     try {
@@ -52,11 +93,11 @@ const Login = () => {
         try {
           // data.school_id বা response.user.schoolId ব্যবহার করে স্ট্যাটাস চেক
           const statusRes = await checkRedirectStatus(response.user.schoolId || data.school_id).unwrap();
-          
+
           if (statusRes && statusRes.onTestStatus === 1) {
             console.log(window.location.hostname);
             if (window.location.hostname !== "testbda.qmmsoft.com" && window.location.hostname !== "localhost") {
-              window.location.href = `https://testbda.qmmsoft.com/login?token=${response.token}`; 
+              window.location.href = `https://testbda.qmmsoft.com/login?token=${response.token}`;
               return;
             }
           }
@@ -65,7 +106,7 @@ const Login = () => {
         }
         // 🌟 END NEW LOGIC
 
-        // 🌟 Normal Flow: যদি onTestStatus 1 না হয় অথবা API এরর দেয়, তবে আগের মতোই ড্যাশবোর্ডে যাবে
+        // 🌟 Normal Flow: যদি onTestStatus 1 না হয় অথবা API এরর দেয়, তবে আগের মতোই ড্যাশবোর্ডে যাবে
         navigate("/dashboard");
         // window.location.reload();
       } else {
@@ -88,7 +129,7 @@ const Login = () => {
 
   return (
     <FormProvider {...methods}>
-      
+
       <section className="sm:h-[100svh] md:h-screen w-full flex items-center justify-center bg-gradient-to-b from-white to-blue-100 sm:px-6 lg:px-8 overflow-hidden">
         <PWAInstallButton />
         <div className="w-full h-full sm:h-auto md:max-w-md bg-[#ddeffe] rounded-lg shadow-lg border-b-8 border-[#ffa500] flex flex-col">
@@ -112,6 +153,7 @@ const Login = () => {
           {/* Form */}
           <form
             onSubmit={handleSubmit(onSubmit)}
+            onKeyDown={handleKeyDown}
             className="p-6 sm:p-8 md:px-12 md:py-6 font-lato flex flex-col gap-5 md:gap-4 md:flex-1 md:justify-between"
           >
             <div className="flex justify-center">
