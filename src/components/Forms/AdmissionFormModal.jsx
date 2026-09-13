@@ -119,7 +119,13 @@ const AdmissionFormModal = ({ userId }) => {
 
   // ✅ Filter Sub Class by ClassID
   const [ClassID, SessionID] = watch(['ClassID', 'SessionID']);
+  useEffect(() => {
+    const firstSubClass = (subClassList || [])
+      .filter((subClass) => String(subClass.ClassID) === String(ClassID))
+      .sort((a, b) => (a.Serial || 0) - (b.Serial || 0))[0];
 
+    setValue('SubClassID', firstSubClass?.SubClassID || '');
+  }, [ClassID, subClassList, setValue]);
   // const handleOpenModal = useCallback(() => {
   //   showModal('Selected Per Student Fee', 'SELECTED_PERSTUDENT_FEE_FILTER');
   // }, []);
@@ -489,7 +495,8 @@ const AdmissionFormModal = ({ userId }) => {
                 nameField="SubClassName"
                 valueField="SubClassID"
                 registerKey="SubClassID"
-                label="Admission Section"
+                label="Sub Class"
+                require={"Sub Class is required"}
               />
 
               <DefaultInput
