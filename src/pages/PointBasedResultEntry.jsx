@@ -27,6 +27,8 @@ import {
   useUpdateExamListStatusUpdateMutation,
 } from '../features/result/resultSilce';
 import { ViewPermission } from '../Routes/ViewPermission';
+import Button from '../components/Button/Button';
+import { showModal } from '../utils/ModalControlar';
 
 const PAGE_SIZE = 10;
 
@@ -76,7 +78,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  // Data Create Exam Fee Setting
+  // Data Create Exam Fee Setting 
   const onSubmit = async (data) => {
     if (!data.SessionID || !data.SubClassID || !data.ExamID) {
       Swal.fire({
@@ -160,7 +162,11 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     }
   };
 
-  // Table Data Columns
+  const handleTeacherAssign = async (row) =>{
+    showModal("Teacher Subject Assignment", "HANDLE_RESULT_ENTRY_ASSIGN", row, { closeOnOutSide: false })
+  }
+
+  // Table Data Columns 
   const columns = [
     {
       title: translate('ID'),
@@ -232,10 +238,14 @@ const PointBasedResultEntry = ({ pageTitle }) => {
             permissionType="edit"
             empty={true}
           >
+
+           <Button className='' onClick={()=>{handleTeacherAssign(row)}} tooltip_message='Teacher Result Entry Permission'>
+              <SvgIcon name={"TbUserShare"} size={20} />
+           </Button>
             <EditButton
               onClick={() =>
                 navigate(
-                  `/result/${row?.ID}?session_id=${row?.SessionID}&exam_id=${row?.ExamID}&subclass_id=${row?.SubClassID}`
+                  `/dashboard/result/${row?.ID}?session_id=${row?.SessionID}&exam_id=${row?.ExamID}&subclass_id=${row?.SubClassID}`
                 )
               }
             />
@@ -245,7 +255,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
             title="Print"
             onClick={() =>
               navigate(
-                `/result/mark-sheet/${row?.ID}?session_id=${row?.SessionID}&exam_id=${row?.ExamID}&subclass_id=${row?.SubClassID}`
+                `/dashboard/result/mark-sheet/${row?.ID}?session_id=${row?.SessionID}&exam_id=${row?.ExamID}&subclass_id=${row?.SubClassID}`
               )
             }
           >
@@ -273,7 +283,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               valueField="SessionID"
               nameField="SessionName"
               registerKey="SessionID"
-              unicode={true}
             />
             <DefaultSelect
               label={translate('Exam Name') + ':'}
@@ -281,7 +290,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               valueField="ExamID"
               nameField="ExamName"
               registerKey="ExamID"
-              unicode={true}
             />
             <DefaultSelect
               label={translate('Class/Jamaat') + ':'}
@@ -289,7 +297,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               valueField="SubClassID"
               nameField="SubClass"
               registerKey="SubClassID"
-              unicode={true}
             />
           </div>
         </form>

@@ -72,7 +72,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
         icon: 'error',
         confirmButtonText: 'OK'
       }).then(() => {
-        navigate("/result");
+        navigate("/dashboard/result");
       });
     }
   }, [userResultData, isLoading, error, navigate]);
