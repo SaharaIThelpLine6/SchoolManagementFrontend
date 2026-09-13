@@ -1,12 +1,7 @@
 import Loading from '../components/Loading/Loading';
 import { useGetAllUserPermissionsQuery } from '../features/permission/permissionSlice';
 
-export const ViewPermission = ({
-  permissionId,
-  permissionType,
-  children,
-  empty,
-}) => {
+export const ViewPermission = ({ permissionId, permissionType, children, empty}) => {
   const {
     data: permissions,
     isLoading,
