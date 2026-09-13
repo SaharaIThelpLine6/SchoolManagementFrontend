@@ -21,6 +21,7 @@ export function defaultReportFilters() {
     is_active: "",
     DistrictID: "",
     permanentPoliceStationID: "",
+    BookLine: "3",
   };
 }
 

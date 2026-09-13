@@ -115,13 +115,14 @@ const MadrashaHomePage = () => {
               <div className="inline-block px-4 py-1.5 bg-white/20 backdrop-blur-sm rounded-full text-white mb-4">
                 {schoolData?.InstitutionName}
               </div>
-              <h1 className="text-[28px] md:text-[40px] text-white leading-tight drop-shadow-2xl">
+              <h1 className="text-[28px] md:text-[40px] text-white leading-tight drop-shadow-2xl text-justify hyphens-auto">
                 {settingsObject?.primaryHeading}
               </h1>
-              <p className="text-[18px] md:text-[22px] mt-2 mb-4 text-[#D8F3DC] max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              <p className="text-[18px] md:text-[22px] mt-2 mb-4 text-[#D8F3DC] max-w-xl mx-auto lg:mx-0 leading-relaxed text-justify hyphens-auto">
                 {settingsObject.aboutText}
               </p>
             </div>
+
             {/* Image */}
             <div className="flex-1 flex justify-center lg:justify-end">
               <div className="relative">
