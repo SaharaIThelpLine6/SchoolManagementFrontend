@@ -104,11 +104,11 @@ const CreateUser = ({ pageTitle }) => {
   const editMode = useSelector((state) => state.userInfo.editMode);
 
 
-  useEffect(()=>{
-      console.log(editMode);
-      console.log("=================");
-      
-      
+  useEffect(() => {
+    console.log(editMode);
+    console.log("=================");
+
+
   }, [editMode])
   const ageValue = calculateAge(DateOfBirth);
   // RTK Query hooks
@@ -306,7 +306,7 @@ const CreateUser = ({ pageTitle }) => {
         showConfirmButton: false,
       });
 
-      // reset(); // ✅ Form reset
+      reset(); // ✅ Form reset
       console.log('User created:', response);
     } catch (err) {
       // ✅ Error SweetAlert

@@ -121,7 +121,7 @@ export const userTypeSlice = createApi({
           console.error(err);
         }
       },
-      invalidatesTags: ['User'],
+      invalidatesTags: ['Users'],
     }),
     getAllUsers: builder.query({
       query: ({ page = 1, limit = 10, userTypeID }) => {
