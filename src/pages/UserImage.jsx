@@ -8,6 +8,7 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import Button from '../components/Button/Button';
 import EditButton from '../components/Button/EditButton';
+import DeleteButton from '../components/Button/DeleteButton';
 import FilterButton from '../components/Filter/FilterButton';
 import DefaultImageUpload from '../components/Forms/DefaultImageUpload';
 import DefaultInput from '../components/Forms/DefaultInput';
@@ -20,6 +21,7 @@ import {
   useGetAllUserWithImageQuery,
   useLazyGetAllUserWithImageQuery,
   usePostUserSingleImageUploadMutation,
+  useDeleteUserSingleImageMutation
 } from '../features/dashboard/dashboardQuerySlice';
 import { setFilteredStudent } from '../features/student/studentSlice';
 import { ViewPermission } from '../Routes/ViewPermission';
@@ -50,6 +52,8 @@ const UserImage = ({ pageTitle }) => {
   } = useGetAllUserWithImageQuery({ page: currentPage, limit: PAGE_SIZE }, {
     skip: !currentPage,
   });
+  const [deleteUserSingleImage, { isLoading: isDeleting }] =
+    useDeleteUserSingleImageMutation();
 
   const users = userResponse?.data ?? [];
 
@@ -103,6 +107,54 @@ const UserImage = ({ pageTitle }) => {
     });
   };
 
+  const handleDeleteOpenModal = async (ImageID) => {
+    console.log("Delete ImageID:", ImageID);
+
+
+    if (!ImageID) {
+      Swal.fire({
+        title: "ত্রুটি!",
+        text: "ছবির ID পাওয়া যায়নি।",
+        icon: "error",
+        confirmButtonText: "ঠিক আছে",
+      });
+
+      return;
+    }
+
+    const result = await Swal.fire({
+      title: "আপনি কি নিশ্চিত?",
+      text: "এই ছবিটি ডিলিট করলে আর ফিরে পাওয়া যাবে না।",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "হ্যাঁ, ডিলিট করুন",
+      cancelButtonText: "বাতিল",
+      reverseButtons: true,
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      await deleteUserSingleImage(ImageID).unwrap();
+
+      await Swal.fire({
+        title: "ডিলিট হয়েছে!",
+        text: "ছবিটি সফলভাবে ডিলিট করা হয়েছে।",
+        icon: "success",
+        confirmButtonText: "ঠিক আছে",
+      });
+    } catch (error) {
+      console.error("Delete image error:", error);
+
+      Swal.fire({
+        title: "ব্যর্থ!",
+        text: "ছবিটি ডিলিট করা যায়নি। আবার চেষ্টা করুন।",
+        icon: "error",
+        confirmButtonText: "ঠিক আছে",
+      });
+    }
+  };
+
   const columns = [
     {
       title: translate('Action'),
@@ -111,6 +163,7 @@ const UserImage = ({ pageTitle }) => {
       render: (row) => (
         <div className="flex justify-center items-center gap-2">
           <EditButton onClick={() => handleEditOpenModal(row)} />
+          <DeleteButton onClick={() => handleDeleteOpenModal(row?.UserImage?.ImageID)} />
         </div>
       ),
     },
@@ -521,7 +574,7 @@ export default UserImage;
 
 //   useEffect(() => {
 //     console.log(filteredStudent);
-//     // const filterData = users.find((i) => i.UserID === filteredUser?.UserID); 
+//     // const filterData = users.find((i) => i.UserID === filteredUser?.UserID);
 //     if (filteredStudent) {
 
 //       const imageBuffer = filteredStudent?.UserImage?.Image?.data;
@@ -1054,7 +1107,7 @@ export default UserImage;
 
 //   useEffect(() => {
 //     console.log(filteredStudent);
-//     // const filterData = users.find((i) => i.UserID === filteredUser?.UserID); 
+//     // const filterData = users.find((i) => i.UserID === filteredUser?.UserID);
 //     if (filteredStudent) {
 
 //       const imageBuffer = filteredStudent?.UserImage?.Image?.data;

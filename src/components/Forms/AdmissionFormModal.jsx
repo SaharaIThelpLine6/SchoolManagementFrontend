@@ -295,8 +295,8 @@ const AdmissionFormModal = ({ userId }) => {
     .sort((a, b) => (a.Serial || 0) - (b.Serial || 0));
 
   const AdmissionType = [
-    { id: 1, name: 'New' },
-    { id: 2, name: 'Old' },
+    { id: 1, name: 'নতুন' },
+    { id: 2, name: 'পুরাতন' },
   ];
 
   useEffect(() => {

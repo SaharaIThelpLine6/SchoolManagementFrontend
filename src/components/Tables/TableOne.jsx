@@ -283,13 +283,22 @@ const TableOne = () => {
                         <SvgIcon name="FiEdit" size={24} />
                       </button>
                     </ViewPermission>
-                    <button
+                    {brand?.UserType?.ID === 1 && (
+                      <button
                         type="button"
                         className="text-blue-500 hover:text-blue-700 ml-[26px]"
                         onClick={() => handleStudentAdmissionModel(brand.UserID)}
                       >
                         <SvgIcon name="UserPlus" size={26} />
                       </button>
+                    )}
+                    {/* <button
+                      type="button"
+                      className="text-blue-500 hover:text-blue-700 ml-[26px]"
+                      onClick={() => handleStudentAdmissionModel(brand.UserID)}
+                    >
+                      <SvgIcon name="UserPlus" size={26} />
+                    </button> */}
                   </td>
                   <td className="py-1 px-4 border border-white text-center">
                     <button className="text-red-500 hover:text-red-700">
