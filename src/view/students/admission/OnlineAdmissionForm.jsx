@@ -12,24 +12,24 @@ import SvgIcon from '../../../components/icons/SvgIcon';
 import Loading from '../../../components/Loading/Loading';
 import { permissionsDataList } from '../../../Data/permissions';
 import {
-    useGetClassListQuery,
-    useGetSubClassListQuery,
+  useGetClassListQuery,
+  useGetSubClassListQuery,
 } from '../../../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
 import {
-    useGetCodeSettingsQuery,
-    useGetDistrictsQuery,
-    useGetDivisionsQuery,
-    useGetFinancialStatusQuery,
-    useGetLastAdmissionSerialQuery,
-    useGetPoliceStationsQuery,
-    useGetResidentialQuery,
-    useGetSettingsQuery,
-    useGetStudentRelationsQuery,
+  useGetCodeSettingsQuery,
+  useGetDistrictsQuery,
+  useGetDivisionsQuery,
+  useGetFinancialStatusQuery,
+  useGetLastAdmissionSerialQuery,
+  useGetPoliceStationsQuery,
+  useGetResidentialQuery,
+  useGetSettingsQuery,
+  useGetStudentRelationsQuery,
 } from '../../../features/settings/settingsQuerySlice';
 import {
-    useGetLastAdmissionUserCodeQuery,
-    usePostStudentAdmissionMutation,
+  useGetLastAdmissionUserCodeQuery,
+  usePostStudentAdmissionMutation,
 } from '../../../features/student/studentQuerySlice';
 import { ViewPermission } from '../../../Routes/ViewPermission';
 import { showModal } from '../../../utils/ModalControlar';
@@ -40,7 +40,6 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
   const translate = useTranslate();
   const location = useLocation();
 
-  console.log(studentData, 'studentData');
 
   // API Data Hooks
   const { data: mobileRelationshipData } = useGetStudentRelationsQuery();
@@ -51,6 +50,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
   const { data: financialStatusData } = useGetFinancialStatusQuery();
   const { data: divisionsData } = useGetDivisionsQuery();
   const { data: settings } = useGetSettingsQuery();
+
 
   const activeSession = sessionData?.find((item) => item.SessionStatus === 1);
   const settingInfo = Array.isArray(settings?.data)
@@ -259,15 +259,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
     onBack();
   };
 
-  // Render loading states if needed
-  if (
-    isLoadingDistricts ||
-    isLoadingThanas ||
-    isLoadingPermDistricts ||
-    isLoadingPermThanas
-  ) {
-    return <Loading />;
-  }
+
 
   const onSubmit = async (data) => {
     // console.log(data);
@@ -356,7 +348,21 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
   const filteredSubClassList = subClassData?.filter(
     (sub) => sub.ClassID == selectedClassID
   );
-
+  useEffect(() => {
+    if (filteredSubClassList?.length > 0) {
+      setValue('SubClassID', filteredSubClassList[0]?.SubClassID);
+    }
+  }, [filteredSubClassList, setValue]);
+  console.log(filteredSubClassList, "filteredSubClassList")
+  // Render loading states if needed
+  if (
+    isLoadingDistricts ||
+    isLoadingThanas ||
+    isLoadingPermDistricts ||
+    isLoadingPermThanas
+  ) {
+    return <Loading />;
+  }
   return (
     <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="block w-full overflow-x-auto">
@@ -642,7 +648,7 @@ const OnlineAdmissionForm = ({ studentData, onBack, pageTitle }) => {
                 require="This field is required!"
                 unicode
               />
-{/* asdfas  */}
+              {/* asdfas  */}
               <DefaultSelect
                 label={translate('SubClass')}
                 options={filteredSubClassList ?? []}

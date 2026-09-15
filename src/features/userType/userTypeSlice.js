@@ -217,7 +217,17 @@ export const userTypeSlice = createApi({
           method: 'GET'
         };
       }
-    })
+    }),
+    updateUserStatus: builder.mutation({
+      query: ({ id, UserAction }) => ({
+        url: `user_status_update/${id}`,
+        method: 'PUT',
+        body: {
+          UserAction,
+        },
+      }),
+      invalidatesTags: ['Users'],
+    }),
   }),
 });
 
@@ -242,4 +252,5 @@ export const {
   useGetFilteredUsersQuery,
   useLazyGetUserInfoBySearchQuery,
   useGetNewAccessTokenMutation,
+  useUpdateUserStatusMutation
 } = userTypeSlice;
