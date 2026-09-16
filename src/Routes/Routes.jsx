@@ -40,6 +40,7 @@ import BulkImage from '../pages/BulkImage';
 import CellfinPaymentConfirm from '../pages/CellfinPaymentConfirm';
 import CertificateAttesation from '../pages/CertificateAttesation';
 import CharacterReport from '../pages/CharacterReport';
+import ListOfExpelledStudents from '../pages/ListOfExpelledStudents';
 import Class from '../pages/Class';
 import ClassVideo from '../pages/ClassVideo';
 import ComplaintBoxTermsAndConditions from '../pages/ComplaintBoxTermsAndConditions';
@@ -1018,6 +1019,16 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.student_report}
                   >
                     <CharacterReport pageTitle="Character Report" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'list-of-expelled',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.gate_pass_leave}
+                  >
+                    <ListOfExpelledStudents pageTitle="List Of Expelled Students" />
                   </RequirePermission>
                 ),
               },

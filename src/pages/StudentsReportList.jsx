@@ -12,6 +12,7 @@ import FilterableReportView from '../view/students/reports/student-report-list/F
 // বাংলা হাজিরা খাতা কম্পোনেন্ট
 import BanglaAttendence from '../view/students/reports/BanglaAttendence';
 import BanglaAttendenceSubjectWari from '../view/students/reports/BanglaAttendenceSubjectWari';
+import AdmissionFormPdf from '../view/general-information/user-reports/AdmissionFormPdf';
 
 // প্রতিটি রিপোর্টের জন্য আলাদা সেটিং
 const REPORT_CONFIGS = {
@@ -27,6 +28,10 @@ const REPORT_CONFIGS = {
     component: 'BanglaAttendenceSubjectWari',
     rowsPerPage: { portrait: 10, landscape: 12 },
   },
+    '4': {
+    component: 'AdmissionFormPdf',
+    rowsPerPage: { portrait: 1, landscape: 1 }, // একক ফরম, rowsPerPage প্রয়োজন নেই
+  },
   '15': {
     component: 'ComingSoon',
     rowsPerPage: { portrait: 20, landscape: 20 },
@@ -41,8 +46,9 @@ export default function StudentsReportList() {
 
   const reportOptions = [
     { id: '1', value: translate('1. Custom Template Builder') },
-    { id: '2', value: translate('৮. বাংলা হাজিরা খাতা 30 দিনের') },
-    { id: '3', value: translate('৮. বাংলা হাজিরা খাতা 30 দিনের (বিষয়ওয়ারী)') },
+    { id: '2', value: translate('2. বাংলা হাজিরা খাতা 30 দিনের') },
+    { id: '3', value: translate('3. বাংলা হাজিরা খাতা 30 দিনের (বিষয়ওয়ারী)') },
+    { id: '4', value: translate('4. ছাত্র ভর্তি ফরম') },
     { id: '15', value: translate('2. Other reports coming soon') },
   ];
 
@@ -77,8 +83,7 @@ export default function StudentsReportList() {
             )}
           </FilterableReportView>
         );
-
-      // 👈 নতুন কম্পোনেন্টের জন্য কেস (প্যাচ যুক্ত করা হয়েছে)
+        
       case 'BanglaAttendenceSubjectWari':
         return (
           <FilterableReportView
@@ -94,6 +99,40 @@ export default function StudentsReportList() {
                 BookLine={filters.BookLine} // ফিল্টার থেকে BookLine আসলে পাস হবে, না আসলে ডিফল্ট ৩ হবে
                 rowsPerPage={cfg.rowsPerPage}
               />
+            )}
+          </FilterableReportView>
+        );
+      
+      case 'AdmissionFormPdf':
+        return (
+          <FilterableReportView
+            title="ফিল্টার"
+            note="শ্রেণি ও শিক্ষাবর্ষ নির্বাচন করে নিচে প্রিভিউতে দেখে প্রিন্ট করুন।"
+            showAdmissionStatus
+          >
+            {({ filters, filteredData }) => (
+              <>
+                {filteredData && filteredData.length > 0 ? (
+                  filteredData.map((student, i) => (
+                    <div key={student.StudentCode || i} className="admission-form-page">
+                      <AdmissionFormPdf
+                        SubClassID={filters.SubClassID}
+                        SessionID={filters.SessionID}
+                        student={student}
+                        admissionStatus={filters.IsActive}
+                      />
+                    </div>
+                  ))
+                ) : (
+                  <div className="admission-form-page">
+                    <AdmissionFormPdf
+                      SubClassID={filters.SubClassID}
+                      SessionID={filters.SessionID}
+                      admissionStatus={filters.IsActive}
+                    />
+                  </div>
+                )}
+              </>
             )}
           </FilterableReportView>
         );
