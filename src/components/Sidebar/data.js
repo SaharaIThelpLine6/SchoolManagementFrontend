@@ -341,11 +341,11 @@ export const menuData = [
     route: 'result',
     icon: 'GiGraduateCap',
     subMenu: [
-      // {
-      //   id: '1',
-      //   name: 'Result Entry & Publish',
-      //   route: '/result',
-      // },
+      {
+        id: '1',
+        name: 'Result Entry & Publish',
+        route: 'result',
+      },
       // {
       //   id: '2',
       //   name: 'Result Report',

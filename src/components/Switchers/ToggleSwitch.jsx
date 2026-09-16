@@ -2,7 +2,7 @@ import React from "react";
 
 const ToggleSwitch = ({ checked, onChange, label }) => {
   return (
-    <label className="flex items-center cursor-pointer gap-3">
+    <label className="flex items-center justify-center cursor-pointer gap-3">
       {label && <span className="text-sm font-medium">{label}</span>}
       <div className="relative">
         <input

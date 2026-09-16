@@ -1002,7 +1002,7 @@ const useTranslate = () => {
     "Date of Birth": "জন্ম তারিখ",
     "Age": "বয়স",
     "NID/Birth Registration No.": "এনআইডি/জন্ম নিবন্ধন নং",
-    "Mobile 1* (SMS will be sent)": "মোবাইল ১* (এসমস যাবে)",
+    "Mobile 1* (SMS will be sent)": "মোবাইল ১* (এসএমএস যাবে)",
     "Relation": "সম্পর্ক",
     "Mobile 2": "মোবাইল ২",
     "Email": "ই-মেইল",

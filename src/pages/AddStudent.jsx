@@ -21,6 +21,9 @@ import { fetchUserOnlyStudentData } from '../features/student/studentSlice';
 import { ViewPermission } from '../Routes/ViewPermission';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
+import ToggleSwitch from '../components/Switchers/ToggleSwitch';
+import { useUpdateUserStatusMutation } from '../features/userType/userTypeSlice';
+import { toast } from 'react-toastify';
 
 const PAGE_SIZE = 10;
 
@@ -41,6 +44,7 @@ const AddStudent = ({ pageTitle }) => {
   const { data: subClassData } = useGetSubClassListQuery();
   const [selectedDateRange, setSelectedDateRange] = useState([]);
   const filters = methods.watch();
+  const [updateUserStatus] = useUpdateUserStatusMutation();
 
   // FilterID change হলে currentFilters update করুন
   useEffect(() => {
@@ -170,21 +174,21 @@ const AddStudent = ({ pageTitle }) => {
       student.GenderID === 1
         ? 'Male'
         : student.GenderID === 2
-        ? 'Female'
-        : 'Other',
+          ? 'Female'
+          : 'Other',
       new Date(student.CreateAt).toLocaleDateString('en-GB'),
       student.AdmissionStatus === 0
         ? 'Pending'
         : student.AdmissionStatus === 1
-        ? 'Paid'
-        : student.AdmissionStatus === 2
-        ? 'Free'
-        : 'Unpaid',
+          ? 'Paid'
+          : student.AdmissionStatus === 2
+            ? 'Free'
+            : 'Unpaid',
       student.SessionAction === 0
         ? 'Pending'
         : student.SessionAction === 1
-        ? 'Active'
-        : 'N/A',
+          ? 'Active'
+          : 'N/A',
     ]);
 
     const finalCSVData = [...customHeaders, ...formattedData];
@@ -199,19 +203,47 @@ const AddStudent = ({ pageTitle }) => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return usersData.slice(start, start + PAGE_SIZE);
   }, [usersData, currentPage]);
+
+  console.log(paginatedData, "paginatedData")
+
+  // ✅ Status Toggle
+  const handleStatusToggle = async (
+    UserID,
+    checked
+  ) => {
+    try {
+      await updateUserStatus({
+        id: UserID,
+        UserAction: checked ? 1 : 0,
+      }).unwrap();
+
+      toast.success(
+        checked
+          ? 'ইউজার সফলভাবে সক্রিয় করা হয়েছে'
+          : 'ইউজার সফলভাবে নিষ্ক্রিয় করা হয়েছে'
+      );
+
+      refetch();
+    } catch (err) {
+      toast.error('ইউজারের স্ট্যাটাস আপডেট করতে ব্যর্থ হয়েছে');
+      console.error('User status update error:', err);
+    }
+  };
+
+
   const columnsAdmitedStudent = [
     {
-      title: 'Student Id',
+      title: 'শিক্ষার্থী আইডি',
       field: 'StudentCode',
       hozAlign: 'center',
       type: 'text',
       filterable: true,
     },
-    { title: 'Name', field: 'StudentName' },
-    { title: 'Class', field: 'ClassName', hozAlign: 'center' },
-    { title: 'Section', field: 'SubClass', hozAlign: 'center' },
+    { title: 'নাম', field: 'StudentName' },
+    { title: 'ক্লাস', field: 'ClassName', hozAlign: 'center' },
+    { title: 'সাব ক্লাস', field: 'SubClass', hozAlign: 'center' },
     {
-      title: 'Gender',
+      title: 'লিঙ্গ',
       field: 'GenderID',
       hozAlign: 'center',
       render: (row) => {
@@ -224,7 +256,7 @@ const AddStudent = ({ pageTitle }) => {
       },
     },
     {
-      title: 'Date of join',
+      title: 'তারিখ',
       field: 'CreateAt',
       hozAlign: 'center',
       type: 'range',
@@ -234,13 +266,13 @@ const AddStudent = ({ pageTitle }) => {
       },
     },
     {
-      title: 'Session',
+      title: 'সেশন',
       field: 'SessionName',
       hozAlign: 'center',
       filterable: true,
     },
     {
-      title: 'Admission Payment status',
+      title: 'ভর্তি পেমেন্ট স্ট্যাটাস',
       field: 'AdmissionStatus',
       hozAlign: 'center',
       type: 'select',
@@ -283,7 +315,7 @@ const AddStudent = ({ pageTitle }) => {
       },
     },
     {
-      title: 'Status',
+      title: 'স্ট্যাটাস',
       field: 'SessionAction',
       hozAlign: 'center',
       render: (row) => {
@@ -306,7 +338,20 @@ const AddStudent = ({ pageTitle }) => {
       },
     },
     {
-      title: 'Action',
+      title: 'অ্যাক্টিভ/ইনঅ্যাক্টিভ',
+      field: 'UserAction',
+      hozAlign: 'center',
+      render: (row) => (
+        <ToggleSwitch
+          checked={row.UserAction === 1}
+          onChange={(e) =>
+            handleStatusToggle(row?.UserID, e.target.checked)
+          }
+        />
+      ),
+    },
+    {
+      title: 'অ্যাকশন',
       field: 'SessionSerial',
       hozAlign: 'center',
       render: (row) => (

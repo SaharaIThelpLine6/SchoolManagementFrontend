@@ -89,6 +89,13 @@ export const dashboardSlice = createApi({
         },
       }),
     }),
+    deleteUserSingleImage: builder.mutation({
+      query: (ImageID) => ({
+        url: `delete_single/${ImageID}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["UserWithImages"],
+    }),
   }),
 });
 
@@ -107,4 +114,5 @@ export const {
   usePostForgetPasswordMutation,
   usePostVerifyOTPMutation,
   usePostResetPasswordMutation,
+  useDeleteUserSingleImageMutation
 } = dashboardSlice;
