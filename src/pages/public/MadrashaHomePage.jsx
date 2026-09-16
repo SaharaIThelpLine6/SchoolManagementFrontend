@@ -231,8 +231,11 @@ const MadrashaHomePage = () => {
 
                       {/* Text */}
                       <p
-                        className="font-bold text-xl lg:text-2xl transition-colors duration-300 leading-snug"
-                        style={{ color: settingsObject.primary || '#065f46' }}
+                        className="font-bold text-xl lg:text-2xl transition-colors duration-300 leading-snug text-justify"
+                        style={{
+                          color: settingsObject.primary || '#065f46',
+                          textAlignLast: 'justify',
+                        }}
                       >
                         {item.text}
                       </p>
