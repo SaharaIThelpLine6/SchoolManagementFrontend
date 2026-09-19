@@ -96,6 +96,39 @@ export const dashboardSlice = createApi({
       }),
       invalidatesTags: ["UserWithImages"],
     }),
+    downloadUserImagesZip: builder.query({
+      query: () => ({
+        url: 'download_user_images_zip',
+        method: 'GET',
+        // ⚠️ RTK Query default ভাবে JSON parse করে, তাই blob এর জন্য custom handler লাগবে
+        responseHandler: async (response) => {
+          // ❌ Server error হলে
+          if (!response.ok) {
+            let message = `Download failed (${response.status})`;
+            try {
+              const errData = await response.json();
+              message = errData.error || errData.message || message;
+            } catch {
+              // JSON না হলে default message
+            }
+            throw new Error(message);
+          }
+
+          // ✅ Blob নামাও
+          const blob = await response.blob();
+
+          // ✅ Filename বের করো header থেকে
+          const contentDisposition = response.headers.get('content-disposition') || '';
+          let fileName = 'user_photos.zip';
+          const match = contentDisposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+          if (match && match[1]) {
+            fileName = decodeURIComponent(match[1]);
+          }
+
+          return { blob, fileName };
+        },
+      }),
+    }),
   }),
 });
 
@@ -114,5 +147,6 @@ export const {
   usePostForgetPasswordMutation,
   usePostVerifyOTPMutation,
   usePostResetPasswordMutation,
-  useDeleteUserSingleImageMutation
+  useDeleteUserSingleImageMutation,
+  useLazyDownloadUserImagesZipQuery,
 } = dashboardSlice;
