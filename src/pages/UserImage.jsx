@@ -246,15 +246,74 @@ const UserImage = ({ pageTitle }) => {
     dispatch(setFilteredStudent(null));
   };
 
+  // const handleDownloadAllPhotos = async () => {
+  //   setIsDownloading(true);
+  //   try {
+  //     // নতুন রুট থেকে সব ইউজারের ছবি আনুন
+  //     const token = localStorage.getItem('token');
+  //     const response = await fetch(
+  //       `${import.meta.env.VITE_SERVER_URL}/api/users/download_user_images_zip`,
+  //       {
+  //         method: 'GET',
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+
+  //     if (!response.ok) {
+  //       const errData = await response.json();
+  //       throw new Error(errData.error || 'Failed to fetch users');
+  //     }
+
+  //     const result = await response.json();
+  //     const users = result.data || [];
+  //     const zip = new JSZip();
+  //     let hasImages = false;
+
+  //     users.forEach((user) => {
+  //       const imageBuffer = user?.UserImage?.Image;
+  //       if (imageBuffer) {
+  //         hasImages = true;
+  //         const fileName = `${user.UserCode ?? user.UserID}.png`;
+  //         // বাফারকে base64-তে রূপান্তর
+  //         const base64String = Buffer.from(imageBuffer).toString('base64');
+  //         zip.file(fileName, base64String, { base64: true });
+  //       }
+  //     });
+
+  //     if (!hasImages) {
+  //       Swal.fire({
+  //         icon: 'info',
+  //         title: 'No Images',
+  //         text: 'No user images found to download.',
+  //       });
+  //       return;
+  //     }
+
+  //     const content = await zip.generateAsync({ type: 'blob' });
+  //     saveAs(content, 'user_photos.zip');
+  //   } catch (error) {
+  //     console.error('Download error:', error);
+  //     Swal.fire({
+  //       icon: 'error',
+  //       title: 'Download Failed',
+  //       text: error.message || 'Failed to download photos.',
+  //     });
+  //   } finally {
+  //     setIsDownloading(false);
+  //   }
+  // };
   const handleDownloadAllPhotos = async () => {
     setIsDownloading(true);
+
     try {
-      // নতুন রুট থেকে সব ইউজারের ছবি আনুন
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
+
       const response = await fetch(
-        `${import.meta.env.VITE_SERVER_URL}/api/users/all_user_images`,
+        `${import.meta.env.VITE_SERVER_URL}/api/users/download_user_images_zip`,
         {
-          method: 'GET',
+          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -262,49 +321,41 @@ const UserImage = ({ pageTitle }) => {
       );
 
       if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || 'Failed to fetch users');
-      }
+        let message = "Failed to download photos.";
 
-      const result = await response.json();
-      const users = result.data || [];
-      const zip = new JSZip();
-      let hasImages = false;
-
-      users.forEach((user) => {
-        const imageBuffer = user?.UserImage?.Image;
-        if (imageBuffer) {
-          hasImages = true;
-          const fileName = `${user.UserCode ?? user.UserID}.png`;
-          // বাফারকে base64-তে রূপান্তর
-          const base64String = Buffer.from(imageBuffer).toString('base64');
-          zip.file(fileName, base64String, { base64: true });
+        try {
+          const errorData = await response.json();
+          message = errorData.error || message;
+        } catch {
+          // Response was not JSON.
         }
-      });
 
-      if (!hasImages) {
-        Swal.fire({
-          icon: 'info',
-          title: 'No Images',
-          text: 'No user images found to download.',
-        });
-        return;
+        throw new Error(message);
       }
 
-      const content = await zip.generateAsync({ type: 'blob' });
-      saveAs(content, 'user_photos.zip');
+      const blob = await response.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = downloadUrl;
+      link.download = "user_photos.zip";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
-      console.error('Download error:', error);
+      console.error("Download error:", error);
+
       Swal.fire({
-        icon: 'error',
-        title: 'Download Failed',
-        text: error.message || 'Failed to download photos.',
+        icon: "error",
+        title: "Download Failed",
+        text: error.message || "Failed to download photos.",
       });
     } finally {
       setIsDownloading(false);
     }
   };
-
   useEffect(() => {
     handleReset();
   }, [location.pathname]);
