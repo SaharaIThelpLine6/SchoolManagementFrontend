@@ -405,6 +405,11 @@ export const menuData = [
       },
       {
         id: '2',
+        name: 'List Of Expelled Students',
+        route: 'darul-ikama/list-of-expelled',
+      },
+      {
+        id: '3',
         name: 'Gate pass and leave',
         route: 'darul-ikama/vacation',
       },
