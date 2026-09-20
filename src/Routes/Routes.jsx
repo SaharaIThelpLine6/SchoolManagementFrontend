@@ -176,36 +176,6 @@ const Router = createBrowserRouter([
     path: '/forget_password',
     element: <ForgetPassword />,
   },
-  // {
-  // path: '/',
-  //   element: <MainLayout />,
-  //   children: [
-  //     {
-  //       index: true,
-  //       element: <LandingPage />,
-  //     },
-  //     {
-  //       path: 'about-us',
-  //       element: <AboutUs />,
-  //     },
-  //     {
-  //       path: 'management-team',
-  //       element: <ManagementTeam />,
-  //     },
-  //     {
-  //       path: 'photo-gallery',
-  //       element: <PhotoGallery />,
-  //     },
-  //     {
-  //       path: 'contact-us',
-  //       element: <ContactUs />,
-  //     },
-  //     {
-  //       path: 'privacy-policy',
-  //       element: <PrivacyPolicy />,
-  //     },
-  //   ],
-  // },
   {
     path: '/',
     element: <Login />,
@@ -214,10 +184,6 @@ const Router = createBrowserRouter([
     path: '/login',
     element: <Login />,
   },
-  // {
-  //   path: '/privacy-policy',
-  //   element: <PrivacyPolicy />,
-  // },
   {
     path: 'dashboard',
     // path: '/',
@@ -911,7 +877,7 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.result_report}
                   >
                     {/* result report */}
-                    {/* <ResultReport pageTitle="Average V: Report" /> */}
+                    <ResultReport pageTitle="Result Report" />
                     {/* <PageNotFound /> */}
 
                   </RequirePermission>
