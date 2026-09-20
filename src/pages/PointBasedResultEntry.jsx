@@ -176,19 +176,19 @@ const PointBasedResultEntry = ({ pageTitle }) => {
       title: translate('Session'),
       field: 'SessionID',
       hozAlign: 'center',
-      render: (row) => bnBijoy2Unicode(row.Session?.SessionName),
+      render: (row) => row.Session?.SessionName,
     },
     {
       title: translate('Exam'),
       field: 'ExamID',
       hozAlign: 'center',
-      render: (row) => bnBijoy2Unicode(row.Exam?.ExamName),
+      render: (row) => row.Exam?.ExamName,
     },
     {
       title: translate('SubClass'),
       field: 'SubClassID',
       hozAlign: 'center',
-      render: (row) => bnBijoy2Unicode(row.SubClass?.SubClass),
+      render: (row) => row.SubClass?.SubClass,
     },
     {
       title: translate('Exam Type'),
@@ -324,5 +324,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     </div>
   );
 };
+//  
 
 export default PointBasedResultEntry;

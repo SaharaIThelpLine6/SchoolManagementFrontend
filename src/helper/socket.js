@@ -4,7 +4,7 @@ let socket = null;
 let pingInterval = null;
 
 // Browser-safe environment variable (Vite example)
-const BackendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+const BackendUrl = import.meta.env.VITE_SERVER_URL;
 
 export const initSocket = (token) => {
   if (!socket) {
@@ -68,6 +68,19 @@ export const initSocket = (token) => {
   }
 
   return socket;
+};
+
+export const updateResultCell = (payload) => {
+  if (!socket?.connected) {
+    return Promise.reject(new Error("Result socket is not connected"));
+  }
+  return new Promise((resolve, reject) => {
+    console.log(payload);
+    socket.emit("update_result_cell", payload, (response) => {
+      if (response?.success) resolve(response);
+      else reject(new Error(response?.message || "Could not save result cell"));
+    });
+  });
 };
 
 // Optional: manually disconnect

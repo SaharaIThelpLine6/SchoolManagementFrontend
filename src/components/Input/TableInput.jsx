@@ -15,6 +15,7 @@ const TableInput = ({
   defaultValue,
   min,
   max,
+  saveStatus = "idle",
   onKeyDown = undefined,
   ...rest   // ← এটা যোগ হয়েছে: data-row, data-col সহ যেকোনো extra prop ধরবে
 }) => {
@@ -76,9 +77,15 @@ const TableInput = ({
           type={type === "number" || type === "phone" ? "number" : type}
           placeholder={translate(placeholder)}
           className={`w-full rounded px-2 h-[38px] outline-none text-[14px] transition
-            ${hasChanged ? "bg-green-100 border-green-300" : "bg-white border-gray-300"}
+            ${saveStatus === "failed"
+              ? "bg-red-100 border-red-300"
+              : hasChanged
+                ? "bg-green-100 border-green-300"
+                : "bg-white border-gray-300"}
             ${errors[registerKey] ? "border-red-400 placeholder:text-red-400" : "border"}
-            focus:ring-2 focus:ring-green-200 focus:border-green-500
+            ${saveStatus === "failed"
+              ? "focus:ring-red-200 focus:border-red-500"
+              : "focus:ring-2 focus:ring-green-200 focus:border-green-500"}
             disabled:cursor-not-allowed disabled:bg-slate-200`}
           {...register(registerKey, {
             required: require && "This field is required",

@@ -20,6 +20,7 @@ import Loading from "../components/Loading/Loading";
 import DefaultPagination from "../components/Pagination/DefaultPagination";
 import DefaultInput from "../components/Forms/DefaultInput";
 import { useGetTeacherSubjectsByFilterQuery } from "../features/teachers/teachersSlice";
+import { updateResultCell } from "../helper/socket";
 
 const PAGE_SIZE = 10;
 
@@ -42,6 +43,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [students, setStudents] = useState([]);
+  const [cellSaveStatus, setCellSaveStatus] = useState({});
 
   const [updateAndPostResult] = useUpdateAndPostResultMutation();
 
@@ -164,6 +166,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
           if (subVal !== null && subVal !== undefined) {
             allSubjects.push({
               SubjectName: subject.SubjectName,
+              SubjectID: subject.SubjectID,
               SubValKey: subValKey,
               Value: subVal,
             });
@@ -220,6 +223,30 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
   const handlePrev = () => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
   };
+
+  const handleResultCellBlur = async (student, subject, event) => {
+    const cellKey = `students.${student.ID}.${subject.SubValKey}`;
+    const rawValue = event.target.value;
+    const payload = {
+      UserID: student.UserID,
+      SessionID: Number(session_id),
+      ExamID: Number(exam_id),
+      SubClassID: Number(subclass_id),
+      SubjectID: subject.SubjectID,
+      SubValKey: subject.SubValKey,
+      Value: rawValue === "" ? null : Number(rawValue),
+    };
+    setCellSaveStatus((previous) => ({ ...previous, [cellKey]: "saving" }));
+    try {
+      await updateResultCell(payload);
+      setCellSaveStatus((previous) => ({ ...previous, [cellKey]: "saved" }));
+    } catch (error) {
+      console.error("Result cell update error:", error.message);
+      setCellSaveStatus((previous) => ({ ...previous, [cellKey]: "failed" }));
+    }
+  };
+
+  
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
@@ -496,6 +523,14 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
                               data-row={rowIndex}
                               data-col={colIndex}
                               onKeyDown={handleKeyboardNavigation}
+                              onBlur={(event) =>
+                                handleResultCellBlur(student, subject, event)
+                              }
+                              saveStatus={
+                                cellSaveStatus[
+                                  `students.${student.ID}.${subject.SubValKey}`
+                                ]
+                              }
                               registerKey={`students.${student.ID}.${subject.SubValKey}`}
                             />
                           </td>
@@ -536,6 +571,7 @@ const PointBasedResultCreateUpdate = ({ pageTitle }) => {
 };
 
 export default PointBasedResultCreateUpdate;
+
 // import { useEffect, useMemo, useState } from "react";
 // import { useDispatch } from "react-redux";
 // import { useNavigate, useParams, useSearchParams } from "react-router-dom";
