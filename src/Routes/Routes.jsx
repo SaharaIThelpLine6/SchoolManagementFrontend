@@ -169,6 +169,7 @@ import SMSPaymentConfirm from '../pages/SMSPaymentConfirm';
 
 // AdminRoutes
 import AdminRoutes from "../Admin/routes/AdminRoutes";
+import TeacherInfo from '../components/Tables/TeacherInfo';
 
 const Router = createBrowserRouter([
   {
@@ -272,7 +273,7 @@ const Router = createBrowserRouter([
                 path: 'sms',
                 element: (
                   <RequirePermission permissionId={permissionsDataList.sms}>
-                    <SMS pageTitle="SMS"  />
+                    <SMS pageTitle="SMS" />
                   </RequirePermission>
                 ),
               },
@@ -662,7 +663,8 @@ const Router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.teacher_info}
                   >
-                    <AddTeacher pageTitle="Employee" />
+                    <TeacherInfo pageTitle="Employee" />
+                    {/* <AddTeacher pageTitle="Employee" /> */}
                   </RequirePermission>
                 ),
               },
@@ -805,7 +807,7 @@ const Router = createBrowserRouter([
                 path: 'exam-condition',
                 element: (
                   <OwenGuide>
-                    <ExamCondition pageTitle="Exam Condition"  />
+                    <ExamCondition pageTitle="Exam Condition" />
                   </OwenGuide>
                 ),
               },
@@ -1454,7 +1456,7 @@ const Router = createBrowserRouter([
     element: <QueryThree />,
   },
 
-    // Admin Route
+  // Admin Route
   ...AdminRoutes,
 
   {

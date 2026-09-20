@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import CardDataStats from "../components/CardDataStats";
 import {
@@ -44,9 +45,9 @@ const Home = ({ pageTitle }) => {
   const countBySession =
     Array.isArray(studentList) && studentList.length > 0
       ? studentList.reduce((acc, student) => {
-          acc[student.SessionName] = (acc[student.SessionName] || 0) + 1;
-          return acc;
-        }, {})
+        acc[student.SessionName] = (acc[student.SessionName] || 0) + 1;
+        return acc;
+      }, {})
       : {};
 
   return (
@@ -60,7 +61,7 @@ const Home = ({ pageTitle }) => {
           titleColor="text-[#06AEEF]"
           isLoading={!studentCount}
         >
-          <SvgIcon name={"FaGraduationCap"} size={20}  />
+          <SvgIcon name={"FaGraduationCap"} size={20} />
         </CardDataStats>
 
         <CardDataStats
@@ -77,7 +78,7 @@ const Home = ({ pageTitle }) => {
         <CardDataStats
           title={translate("Total Donor Member")} // Total Guardian
           total={donerCount?.totalUsers ?? 0}
-          bgColor="bg-[#C3DCC2]" 
+          bgColor="bg-[#C3DCC2]"
           titleColor="text-[#0C9444]"
           iconColor="text-[#0C9444]" // Pass the color value without "text-" prefix
           isLoading={!donerCount}

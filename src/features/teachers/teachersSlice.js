@@ -40,7 +40,33 @@ export const teachersSlice = createApi({
       query: () => 'teacher_info_not_registered',
       providesTags: ['Teacher'],
     }),
+    getTeacherLastSerial: builder.query({
+      query: () => 'teacher_last_serial',
+      providesTags: ['Teacher'],
+    }),
+    getTeacherInfoList: builder.query({
+      query: ({ UserID, UserCode, Serial, DNID } = {}) => {
+        const params = new URLSearchParams();
 
+        if (UserID) params.append('UserID', String(UserID));
+        if (UserCode) params.append('UserCode', String(UserCode));
+        if (Serial) params.append('Serial', String(Serial));
+        if (DNID) params.append('DNID', String(DNID));
+
+        const queryString = params.toString();
+
+        return `get_teacher_info${queryString ? `?${queryString}` : ''}`;
+      },
+      providesTags: ['Teacher'],
+    }),
+    updateTeacher: builder.mutation({
+      query: (data) => ({
+        url: "update_teacher_info",
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['Teacher'],
+    }),
     postTeacherInfoRegistered: builder.mutation({
       query: (body) => ({
         url: 'insert_teacher',
@@ -49,6 +75,7 @@ export const teachersSlice = createApi({
       }),
       invalidatesTags: ['Teacher'],
     }),
+
     createDesignation: builder.mutation({
       query: (body) => ({
         url: 'designation',
@@ -112,6 +139,47 @@ export const teachersSlice = createApi({
       }),
       invalidatesTags: ["Teacher_Subject"],
     }),
+    postInsertTeacherInfo: builder.mutation({
+      query: (body) => ({
+        url: 'insert_teacher_info',
+        method: 'POST',
+        body: body,
+      }),
+      invalidatesTags: ['Teacher'],
+    }),
+    getFilteredTeachers: builder.query({
+      query: ({
+        page = 1,
+        limit = 10,
+        userTypeID,
+        filterTypeId,
+        filterValue,
+        DNID,          // ✅ NEW
+        UserAction,    // ✅ NEW
+      }) => {
+        const params = new URLSearchParams();
+
+        params.append('page', page);
+        params.append('limit', limit);
+
+        if (userTypeID) params.append('userTypeID', userTypeID);
+        if (filterTypeId) params.append('filterTypeId', filterTypeId);
+        if (filterValue) params.append('filterValue', filterValue);
+
+        // ✅ DNID filter (Teacher_Info.DNID)
+        if (DNID !== undefined && DNID !== null && DNID !== '') {
+          params.append('DNID', DNID);
+        }
+
+        // ✅ UserAction filter (User_Info.UserAction: 1 = Active, 0 = Inactive)
+        if (UserAction !== undefined && UserAction !== null && UserAction !== '') {
+          params.append('UserAction', UserAction);
+        }
+
+        return `/teacher_filter?${params.toString()}`;
+      },
+      providesTags: ['Teacher'],
+    }),
   }),
 });
 
@@ -129,5 +197,10 @@ export const {
   usePostSubjectToTeacherMutation,
   useGetTeacherSubjectsQuery,
   useUpdateTeacherSubjectMutation,
-  useGetTeacherSubjectsByFilterQuery
+  useGetTeacherSubjectsByFilterQuery,
+  useGetTeacherLastSerialQuery,
+  usePostInsertTeacherInfoMutation,
+  useGetTeacherInfoListQuery,
+  useUpdateTeacherMutation,
+  useGetFilteredTeachersQuery
 } = teachersSlice;

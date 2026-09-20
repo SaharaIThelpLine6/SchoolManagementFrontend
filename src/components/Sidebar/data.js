@@ -229,44 +229,44 @@ export const menuData = [
       }
     ],
   },
-  // {
-  //   id: "3",
-  //   name: "Teacher Staff",
-  //   route: "/teacherinfo",
-  //   icon: "IoIosPeople",
-  //   subMenu: [
-  //     {
-  //       id: "1",
-  //       name: "Teacher Info",
-  //       route: "/teacherinfo",
-  //       subMenu: false,
-  //     },
-  //     {
-  //       id: "2",
-  //       name: "Pay-role Heading",
-  //       route: "/teacherinfo/payRole",
-  //       subMenu: false,
-  //     },
-  //     {
-  //       id: "3",
-  //       name: "Pay-role Name",
-  //       route: "/teacherinfo/pRName",
-  //       subMenu: false,
-  //     },
-  //     {
-  //       id: "4",
-  //       name: "Reports",
-  //       route: "/teacherinfo/report",
-  //       subMenu: false,
-  //     },
-  //     {
-  //       id: "5",
-  //       name: "Designation",
-  //       route: "/teacherinfo/designation",
-  //       subMenu: false,
-  //     },
-  //   ],
-  // },
+  {
+    id: "3",
+    name: "Teacher Staff",
+    route: "teacherinfo",
+    icon: "IoIosPeople",
+    subMenu: [
+      {
+        id: "1",
+        name: "Teacher Info",
+        route: "teacherinfo",
+        subMenu: false,
+      },
+      // {
+      //   id: "2",
+      //   name: "Pay-role Heading",
+      //   route: "/teacherinfo/payRole",
+      //   subMenu: false,
+      // },
+      // {
+      //   id: "3",
+      //   name: "Pay-role Name",
+      //   route: "/teacherinfo/pRName",
+      //   subMenu: false,
+      // },
+      // {
+      //   id: "4",
+      //   name: "Reports",
+      //   route: "/teacherinfo/report",
+      //   subMenu: false,
+      // },
+      // {
+      //   id: "5",
+      //   name: "Designation",
+      //   route: "/teacherinfo/designation",
+      //   subMenu: false,
+      // },
+    ],
+  },
   {
     id: '5',
     name: 'Exam',

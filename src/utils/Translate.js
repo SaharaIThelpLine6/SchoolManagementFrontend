@@ -359,6 +359,7 @@ const useTranslate = () => {
     'All Students': 'সকল শিক্ষার্থী',
     'Students Report': 'শিক্ষার্থী রিপোর্ট',
     'Student Vacation': 'শিক্ষার্থী ছুটি',
+    'Teacher Info': 'শিক্ষক তালিকা',
     'Group Distribution': 'শিক্ষার্থী গ্রুপ সেটিং',
     'Certificate of Attestation': 'প্রত্যয়ন পত্র',
     'Online Admission': 'অনলাইন ভর্তি',

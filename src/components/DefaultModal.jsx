@@ -77,7 +77,7 @@ import UserNoticeCreateForm from './Forms/UserNoticeCreateForm';
 import UserNoticeUpdateForm from './Forms/UserNoticeUpdateForm';
 import NoticeView from './Forms/NoticeView';
 import AdmissionFormContentEditModal from '../view/result/AdmissionFormContentEditModal';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import SupportTicketModal from '../view/support-ticket/SupportTicketModal';
 import AdmissionFormModal from './Forms/AdmissionFormModal';
 import ExamConditionModal from '../view/exam/examCondition/ExamConditionModal';
@@ -90,43 +90,82 @@ import ExamConditionEditModal from '../view/exam/examCondition/ExamConditionEdit
 // Admin View
 import MadrasahActionView from '../view/AdminView/madrasah/MadrasahActionView';
 import TeacherAssignModal from '../view/exam/TeacherAssignModal';
+import AddUserFormModal from './Forms/AddUserFormModal';
+import AddTeacherFormModal from './Forms/AddTeacherFormModal';
+import UpdateStudentFormModal from './Forms/UpdateStudentFormModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
   const dispatch = useDispatch();
   const translate = useTranslate();
   const scrollRef = useRef(null);
+
+  // Local state to drive enter/exit animations
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Trigger enter animation on next frame
+      const raf = requestAnimationFrame(() => setShow(true));
+      return () => cancelAnimationFrame(raf);
+    } else {
+      // Trigger exit animation
+      setShow(false);
+    }
+  }, [isOpen]);
+
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-4">
+    <div
+      className={`fixed inset-0 flex justify-center items-center z-50 px-4
+        transition-all duration-300 ease-out
+        ${show ? 'bg-black/50 opacity-100' : 'bg-black/0 backdrop-blur-0 opacity-0'}`}
+    >
       <ClickOutside
         className="max-w-screen-lg w-full overflow-hidden"
-          onClick={() => {
-            if (meta?.closeOnOutSide !== false) {
-              dispatch(closeModal());
-            }
-          }}
+        onClick={() => {
+          if (meta?.closeOnOutSide !== false) {
+            dispatch(closeModal());
+          }
+        }}
       >
-        {/* Tailwind animation */}
         <div
           className={`w-full transform transition-all duration-300 ease-out
-            ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}`}
+            ${show
+              ? 'opacity-100 translate-y-0 scale-100'
+              : 'opacity-0 translate-y-6 scale-95'}`}
         >
-          <div className="bg-white rounded-lg shadow-lg relative w-full max-h-[90vh] overflow-y-auto" ref={scrollRef}>
-            <div className="header pl-3 pr-2 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
+          <div
+            className="bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 relative w-full max-h-[90vh] overflow-y-auto scroll-smooth"
+            ref={scrollRef}
+          >
+            <div className="header sticky top-0 z-10 bg-white/95 backdrop-blur pl-4 pr-3 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
               {title && (
-                <h2 className="text-[18px] font-bold">{translate(title)}</h2>
+                <h2 className="text-[18px] font-bold text-slate-800">
+                  {translate(title)}
+                </h2>
               )}
               <button
                 onClick={() => dispatch(closeModal())}
-                className="text-xl"
+                className="text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full p-1 transition-colors"
+                aria-label="Close"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width={24}
-                  height={24}
+                  width={22}
+                  height={22}
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -142,8 +181,12 @@ const DefaultModal = () => {
             </div>
 
             {modalType && (
-              <div className="body p-3">
+              <div className="body p-4">
                 {modalType === 'ADD_STUDENT' && <AdmissionFormModal userId={id} />}
+                {modalType === 'UPDATE_STUDENT' && <UpdateStudentFormModal userId={id} />}
+                {modalType === 'ADD_USER' && <AddUserFormModal />}
+                {modalType === 'ADD_TEACHER_INFO' && <AddTeacherFormModal />}
+                {modalType === 'UPDATE_TEACHER_INFO' && <AddTeacherFormModal userId={id} />}
                 {modalType === 'FEE_COLLECTION' && (
                   <FeeCollectionForm userId={id} />
                 )}
@@ -372,10 +415,10 @@ const DefaultModal = () => {
                   <SupportTicketModal id={id} />
                 )}
                 {modalType === 'EXAM_CONDITION_SETTINGS' && (
-                  <ExamConditionModal  />
+                  <ExamConditionModal />
                 )}
                 {modalType === 'EXAM_CONDITION_SETTINGS_EDIT' && (
-                  <ExamConditionEditModal data={id}  />
+                  <ExamConditionEditModal data={id} />
                 )}
                 {modalType === 'MADRASAH_ACTION_MODAL' && (
                   <MadrasahActionView id={id} meta={meta} />
@@ -391,6 +434,5 @@ const DefaultModal = () => {
     </div>
   );
 };
-
 
 export default DefaultModal;
