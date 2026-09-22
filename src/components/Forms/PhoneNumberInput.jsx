@@ -181,7 +181,7 @@ const PhoneNumberInput = ({
 
   return (
     <div
-      className={`w-full font-hind ${labelPosition === 'left' ? 'flex items-center gap-4' : ''
+      className={`w-full font-SolaimanLipi ${labelPosition === 'left' ? 'flex items-center gap-4' : ''
         }`}
     >
       {label && (

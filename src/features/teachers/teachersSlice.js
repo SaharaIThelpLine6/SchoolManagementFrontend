@@ -180,6 +180,18 @@ export const teachersSlice = createApi({
       },
       providesTags: ['Teacher'],
     }),
+    deleteTeacherSubject: builder.mutation({
+      query: (ids) => {
+        // ids can be: number | array
+        const body = Array.isArray(ids) ? ids : [ids];
+        return {
+          url: "/teacher_subject",
+          method: "DELETE",
+          body,
+        };
+      },
+      invalidatesTags: ["Teacher_Subject"],
+    }),
   }),
 });
 
@@ -202,5 +214,6 @@ export const {
   usePostInsertTeacherInfoMutation,
   useGetTeacherInfoListQuery,
   useUpdateTeacherMutation,
-  useGetFilteredTeachersQuery
+  useGetFilteredTeachersQuery,
+  useDeleteTeacherSubjectMutation
 } = teachersSlice;

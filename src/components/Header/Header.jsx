@@ -51,7 +51,7 @@ const Header = () => {
   }, [refetch]);
 
   return (
-    <header className="w-full bg-white shadow-sm sticky top-0 z-30 font-hind">
+    <header className="w-full bg-white shadow-sm sticky top-0 z-30 font-SolaimanLipi">
       {/* Top Bar */}
       <div className="flex items-center justify-between px-4 py-2 sm:py-3 md:px-6 2xl:px-11 sm:hidden">
         <button

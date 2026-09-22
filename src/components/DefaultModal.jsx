@@ -93,6 +93,8 @@ import TeacherAssignModal from '../view/exam/TeacherAssignModal';
 import AddUserFormModal from './Forms/AddUserFormModal';
 import AddTeacherFormModal from './Forms/AddTeacherFormModal';
 import UpdateStudentFormModal from './Forms/UpdateStudentFormModal';
+import AddParentFormModal from './Forms/AddParentFormModal';
+import TeacherAssignModalNew from '../view/exam/TeacherAssignModalNew';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
@@ -185,6 +187,7 @@ const DefaultModal = () => {
                 {modalType === 'ADD_STUDENT' && <AdmissionFormModal userId={id} />}
                 {modalType === 'UPDATE_STUDENT' && <UpdateStudentFormModal userId={id} />}
                 {modalType === 'ADD_USER' && <AddUserFormModal />}
+                {modalType === 'ADD_PARENT_ACCOUNT' && <AddParentFormModal userId={id} />}
                 {modalType === 'ADD_TEACHER_INFO' && <AddTeacherFormModal />}
                 {modalType === 'UPDATE_TEACHER_INFO' && <AddTeacherFormModal userId={id} />}
                 {modalType === 'FEE_COLLECTION' && (
@@ -424,7 +427,7 @@ const DefaultModal = () => {
                   <MadrasahActionView id={id} meta={meta} />
                 )}
                 {modalType === 'HANDLE_RESULT_ENTRY_ASSIGN' && (
-                  <TeacherAssignModal examDetails={id} />
+                  <TeacherAssignModalNew />
                 )}
               </div>
             )}

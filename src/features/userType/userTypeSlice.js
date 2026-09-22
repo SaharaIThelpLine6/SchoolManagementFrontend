@@ -25,7 +25,9 @@ export const userTypeSlice = createApi({
       query: (UserTypeID) => `user_code_check?UserTypeID=${UserTypeID}`,
       providesTags: ['UserCodeCheck'],
     }),
-
+    getGuardianOccupationType: builder.query({
+      query: () => `guardian_occupation_type`,
+    }),
     getUserBySearch: builder.query({
       query: ({ search, ClassID, SessionID, UserTypeID }) => {
         const params = new URLSearchParams();
@@ -252,5 +254,6 @@ export const {
   useGetFilteredUsersQuery,
   useLazyGetUserInfoBySearchQuery,
   useGetNewAccessTokenMutation,
-  useUpdateUserStatusMutation
+  useUpdateUserStatusMutation,
+  useGetGuardianOccupationTypeQuery
 } = userTypeSlice;

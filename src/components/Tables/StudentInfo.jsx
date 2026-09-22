@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
@@ -19,6 +20,7 @@ import avaterImage from '/avatar.png';
 import { useGetFilteredStudentsQuery } from '../../features/student/studentQuerySlice';
 import DefaultSelect from '../Forms/DefaultSelect';
 import ToggleSwitch from '../Switchers/ToggleSwitch';
+import Button from '../Button/Button';
 
 const StudentInfo = () => {
   const dispatch = useDispatch();
@@ -27,6 +29,12 @@ const StudentInfo = () => {
   const { user } = useSelector((state) => state.auth);
   const [preview, setPreview] = useState({});
 
+  // ✅ More menu states
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+  const buttonRefs = useRef({});
+  const menuRef = useRef(null);
+
   // ✅ ফর্ম স্টেট
   const methods = useForm();
   const { watch, reset, formState: { errors } } = methods;
@@ -34,7 +42,7 @@ const StudentInfo = () => {
   const userTypeID = watch("UserTypeID");
   const filterTypeId = watch("FilterTypeId");
   const filterValue = watch("FilterValue");
-  const userAction = watch("UserAction");   // ✅ NEW
+  const userAction = watch("UserAction");
 
   // ✅ Debounce
   const [debouncedFilterValue, setDebouncedFilterValue] = useState("");
@@ -44,6 +52,34 @@ const StudentInfo = () => {
     }, 500);
     return () => clearTimeout(handler);
   }, [filterValue]);
+
+  // ✅ Close menu on outside click + scroll + resize
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const clickedButton = Object.values(buttonRefs.current).some(
+        (btn) => btn && btn.contains(event.target)
+      );
+      if (clickedButton) return;
+
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenuId(null);
+      }
+    };
+
+    const handleScrollOrResize = () => {
+      setOpenMenuId(null);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", handleScrollOrResize, true);
+    window.addEventListener("resize", handleScrollOrResize);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", handleScrollOrResize, true);
+      window.removeEventListener("resize", handleScrollOrResize);
+    };
+  }, []);
 
   // ✅ Query params
   const queryParams = {
@@ -57,7 +93,6 @@ const StudentInfo = () => {
     queryParams.filterValue = debouncedFilterValue;
   }
 
-  // ✅ UserAction dynamic
   if (userAction !== undefined && userAction !== "" && userAction !== null) {
     queryParams.UserAction = userAction;
   }
@@ -107,6 +142,70 @@ const StudentInfo = () => {
     showModal('শিক্ষার্থী ভর্তি', 'ADD_USER');
   }, []);
 
+  // ✅ More menu actions
+  const handleAddParentAccount = useCallback((id) => {
+    showModal('Add Guardian Account', 'ADD_PARENT_ACCOUNT', id);
+  }, []);
+
+  const handleViewProfile = useCallback((id) => {
+    // showModal('Student Profile', 'VIEW_STUDENT_PROFILE', id);
+    toast.info('এই ফিচারটি বর্তমানে সক্রিয় নয়।');
+  }, []);
+
+  const handleSendSMS = useCallback((id) => {
+    // showModal('Send SMS', 'SEND_SMS', id);
+    toast.info('এই ফিচারটি বর্তমানে সক্রিয় নয়।');
+  }, []);
+
+  const handleGenerateIDCard = useCallback((id) => {
+    // showModal('Generate ID Card', 'GENERATE_ID_CARD', id);
+    toast.info('এই ফিচারটি বর্তমানে সক্রিয় নয়।');
+  }, []);
+
+  const handleDelete = useCallback((id) => {
+    toast.info('এই ফিচারটি বর্তমানে বন্ধ রয়েছে।');
+    // showModal('Delete Student', 'DELETE_STUDENT', id);
+  }, []);
+
+  // ✅ Menu open with smart positioning
+  const handleMenuToggle = (brand, event) => {
+    if (openMenuId === brand.UserID) {
+      setOpenMenuId(null);
+      return;
+    }
+
+    const button = event.currentTarget;
+    const rect = button.getBoundingClientRect();
+    const menuWidth = 256; // w-64
+    const menuHeight = 400; // approximate
+    const gap = 8;
+
+    // Horizontal alignment
+    let left = rect.right - menuWidth;
+    if (left < 8) left = 8;
+    if (left + menuWidth > window.innerWidth - 8) {
+      left = window.innerWidth - menuWidth - 8;
+    }
+
+    // Vertical - smart placement
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    let top;
+    if (spaceBelow < menuHeight + gap && spaceAbove > spaceBelow) {
+      top = rect.top - menuHeight - gap;
+    } else {
+      top = rect.bottom + gap;
+    }
+
+    if (top < 8) top = 8;
+    if (top + menuHeight > window.innerHeight - 8) {
+      top = window.innerHeight - menuHeight - 8;
+    }
+
+    setMenuPosition({ top, left });
+    setOpenMenuId(brand.UserID);
+  };
 
   if (isLoading) {
     return <div className="p-8 text-center text-gray-500 bg-white rounded-xl shadow-sm border border-gray-100 font-sans">Loading users...</div>;
@@ -124,9 +223,23 @@ const StudentInfo = () => {
     { FilterTypeId: "2", FilterTypeName: "নাম" },
     { FilterTypeId: "3", FilterTypeName: "মোবাইল" },
   ];
-
+  const handleTeacherAssign = async () => {
+    showModal("Teacher Subject Assignment", "HANDLE_RESULT_ENTRY_ASSIGN", { closeOnOutSide: false })
+  }
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden font-sans">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden font-SolaimanLipi">
+      {/* ✅ Custom CSS for smooth dropdown animation */}
+      <style>{`
+        @keyframes studentMenuIn {
+          from { opacity: 0; transform: scale(0.95) translateY(-4px); }
+          to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .student-menu-anim {
+          animation: studentMenuIn 0.15s ease-out;
+          transform-origin: top right;
+        }
+      `}</style>
+
       <FormProvider {...methods}>
 
         {/* Header */}
@@ -148,6 +261,9 @@ const StudentInfo = () => {
             </svg>
             ভর্তি করুন
           </button>
+          <Button className='' onClick={() => { handleTeacherAssign() }} tooltip_message='Teacher Result Entry Permission'>
+            <SvgIcon name={"TbUserShare"} size={20} />
+          </Button>
         </div>
 
         {/* Filters */}
@@ -231,10 +347,10 @@ const StudentInfo = () => {
                     }
 
                     const isActive = brand.UserAction === 1;
-                    const statusText = isActive ? "Active" : "Inactive";
                     const statusClass = isActive
                       ? "bg-[#ecfdf5] text-[#059669]"
                       : "bg-[#fef2f2] text-[#dc2626]";
+                    const statusText = isActive ? "Active" : "Inactive";
 
                     return (
                       <tr key={key} className="hover:bg-gray-50/50 transition-colors">
@@ -269,6 +385,12 @@ const StudentInfo = () => {
                           {brand?.FatherName || '-'}
                         </td>
                         <td className="py-2 px-4 text-center">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-medium tracking-wide ${statusClass}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${isActive ? 'bg-[#059669]' : 'bg-[#dc2626]'}`}></span>
+                            {statusText}
+                          </span>
+                        </td>
+                        {/* <td className="py-2 px-4 text-center">
                           <ViewPermission
                             permissionId={permissionsDataList.user_entry}
                             permissionType="edit"
@@ -283,12 +405,6 @@ const StudentInfo = () => {
                               }
                             />
                           </ViewPermission>
-                        </td>
-                        {/* <td className="py-2 px-4 text-center">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-medium tracking-wide ${statusClass}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${isActive ? 'bg-[#059669]' : 'bg-[#dc2626]'}`}></span>
-                            {statusText}
-                          </span>
                         </td> */}
                         <td className="py-2 px-4">
                           <div className="flex items-center justify-center gap-2">
@@ -315,13 +431,28 @@ const StudentInfo = () => {
                               </ViewPermission>
                             )}
 
-                            <button className="w-8 h-8 flex items-center justify-center bg-[#ef4444] text-white rounded-md hover:bg-red-600 transition-colors" title="Delete">
+                            <button
+                              onClick={() => handleDelete(brand.UserID)}
+                              className="w-8 h-8 flex items-center justify-center bg-[#ef4444] text-white rounded-md hover:bg-red-600 transition-colors"
+                              title="Delete"
+                            >
                               <SvgIcon name="FaTrash" size={13} />
                             </button>
 
-                            {/* <button className="w-8 h-8 flex items-center justify-center bg-gray-50 text-gray-500 rounded-md hover:bg-gray-100 border border-gray-200 transition-colors" title="More">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-                            </button> */}
+                            {/* ✅ More button */}
+                            <button
+                              ref={(el) => (buttonRefs.current[brand.UserID] = el)}
+                              onClick={(e) => handleMenuToggle(brand, e)}
+                              className={`w-8 h-8 flex items-center justify-center rounded-md border transition-all ${openMenuId === brand.UserID
+                                ? 'bg-blue-50 text-blue-600 border-blue-200'
+                                : 'bg-gray-50 text-gray-500 hover:bg-gray-100 border-gray-200'
+                                }`}
+                              title="More"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                              </svg>
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -384,6 +515,382 @@ const StudentInfo = () => {
         </div>
 
       </FormProvider>
+
+      {/* ✅ Portal Dropdown - Table এর বাইরে render হবে, কোনো clipping হবে না */}
+      {openMenuId &&
+        (() => {
+          const brand = brandData.find((b) => b.UserID === openMenuId);
+          if (!brand) return null;
+
+          const isActive = brand.UserAction === 1;
+
+          return createPortal(
+            <div
+              ref={menuRef}
+              style={{
+                position: 'fixed',
+                top: `${menuPosition.top}px`,
+                left: `${menuPosition.left}px`,
+                width: '290px',
+              }}
+              className="student-menu-anim bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.25)] border border-gray-200/80 z-[9999] overflow-hidden"
+            >
+              {/* ================= HEADER ================= */}
+              <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 px-4 pt-4 pb-5">
+                {/* Decorative circles */}
+                <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-white/10" />
+                <div className="absolute -right-2 top-10 w-12 h-12 rounded-full bg-blue-400/10" />
+
+                <div className="relative flex items-start gap-3">
+                  {/* Avatar */}
+                  <div className="relative shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-lg font-bold shadow-lg ring-2 ring-white/20">
+                      {brand.UserName?.charAt(0)?.toUpperCase() || 'U'}
+                    </div>
+
+                    {/* Online status */}
+                    <span
+                      className={`absolute -right-1 -bottom-1 w-3.5 h-3.5 rounded-full border-2 border-slate-900 ${isActive ? 'bg-emerald-400' : 'bg-gray-400'
+                        }`}
+                    />
+                  </div>
+
+                  {/* User Info */}
+                  <div className="min-w-0 flex-1 pt-0.5">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold text-white truncate">
+                        {brand.UserName || 'Unknown Student'}
+                      </p>
+
+                      <span
+                        className={`shrink-0 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide ${isActive
+                          ? 'bg-emerald-400/15 text-emerald-300'
+                          : 'bg-gray-400/15 text-gray-300'
+                          }`}
+                      >
+                        {isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+
+                    <p className="text-[11px] text-blue-200/80 mt-1 truncate">
+                      ID: {brand.UserCode || 'No Code'}
+                    </p>
+
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-300" />
+                      <span className="text-[10px] text-blue-200/70">
+                        Student Account
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* ================= QUICK STATUS ================= */}
+              <div className="px-3 pt-3">
+                <button
+                  onClick={() => {
+                    handleStatusToggle(brand.UserID, !isActive);
+                    setOpenMenuId(null);
+                  }}
+                  className={`group w-full flex items-center justify-between p-3 rounded-xl border transition-all duration-200 ${isActive
+                    ? 'bg-emerald-50/70 border-emerald-100 hover:bg-emerald-50 hover:border-emerald-200'
+                    : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                    }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-9 h-9 rounded-lg flex items-center justify-center ${isActive ? 'bg-emerald-100' : 'bg-gray-200'
+                        }`}
+                    >
+                      <span
+                        className={`w-2.5 h-2.5 rounded-full ${isActive ? 'bg-emerald-500' : 'bg-gray-400'
+                          }`}
+                      />
+                    </div>
+
+                    <div className="text-left">
+                      <p
+                        className={`text-[12px] font-semibold ${isActive ? 'text-emerald-700' : 'text-gray-700'
+                          }`}
+                      >
+                        Account {isActive ? 'Active' : 'Inactive'}
+                      </p>
+
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        {isActive
+                          ? 'Student can access the account'
+                          : 'Account access is currently disabled'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Toggle */}
+                  <div
+                    className={`relative w-9 h-5 rounded-full transition-colors ${isActive ? 'bg-emerald-500' : 'bg-gray-300'
+                      }`}
+                  >
+                    <span
+                      className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-all ${isActive ? 'left-[18px]' : 'left-0.5'
+                        }`}
+                    />
+                  </div>
+                </button>
+              </div>
+
+              {/* ================= ACTIONS ================= */}
+              <div className="px-3 pt-4 pb-2">
+                <div className="flex items-center justify-between px-2 mb-2">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.12em]">
+                    Quick Actions
+                  </p>
+
+                  <span className="text-[9px] text-gray-300">
+                    {4} available
+                  </span>
+                </div>
+
+                {/* Add Parent */}
+                <button
+                  onClick={() => {
+                    handleAddParentAccount(brand.UserID);
+                    setOpenMenuId(null);
+                  }}
+                  className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-purple-50 transition-all duration-200"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-purple-100 group-hover:bg-purple-200 flex items-center justify-center shrink-0 transition-colors">
+                    <svg
+                      className="w-4 h-4 text-purple-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold text-gray-700 group-hover:text-purple-700">
+                      Add Parent Account
+                    </p>
+                    <p className="text-[10px] text-gray-400">
+                      Create parent access
+                    </p>
+                  </div>
+
+                  <svg
+                    className="w-3.5 h-3.5 text-gray-300 group-hover:text-purple-400 group-hover:translate-x-0.5 transition-all"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+
+                {/* View Profile */}
+                <button
+                  onClick={() => {
+                    handleViewProfile(brand.UserID);
+                    setOpenMenuId(null);
+                  }}
+                  className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-blue-50 transition-all duration-200"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-blue-100 group-hover:bg-blue-200 flex items-center justify-center shrink-0 transition-colors">
+                    <svg
+                      className="w-4 h-4 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold text-gray-700 group-hover:text-blue-700">
+                      View Profile
+                    </p>
+                    <p className="text-[10px] text-gray-400">
+                      View complete student details
+                    </p>
+                  </div>
+
+                  <svg
+                    className="w-3.5 h-3.5 text-gray-300 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+
+                {/* Send SMS */}
+                <button
+                  onClick={() => {
+                    handleSendSMS(brand.UserID);
+                    setOpenMenuId(null);
+                  }}
+                  className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-emerald-50 transition-all duration-200"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-emerald-100 group-hover:bg-emerald-200 flex items-center justify-center shrink-0 transition-colors">
+                    <svg
+                      className="w-4 h-4 text-emerald-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold text-gray-700 group-hover:text-emerald-700">
+                      Send SMS
+                    </p>
+                    <p className="text-[10px] text-gray-400">
+                      Send a message to student
+                    </p>
+                  </div>
+
+                  <svg
+                    className="w-3.5 h-3.5 text-gray-300 group-hover:text-emerald-400 group-hover:translate-x-0.5 transition-all"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+
+                {/* ID Card */}
+                <button
+                  onClick={() => {
+                    handleGenerateIDCard(brand.UserID);
+                    setOpenMenuId(null);
+                  }}
+                  className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-amber-50 transition-all duration-200"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-amber-100 group-hover:bg-amber-200 flex items-center justify-center shrink-0 transition-colors">
+                    <svg
+                      className="w-4 h-4 text-amber-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.418.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[12px] font-semibold text-gray-700 group-hover:text-amber-700">
+                      Generate ID Card
+                    </p>
+                    <p className="text-[10px] text-gray-400">
+                      Create printable student ID
+                    </p>
+                  </div>
+
+                  <svg
+                    className="w-3.5 h-3.5 text-gray-300 group-hover:text-amber-400 group-hover:translate-x-0.5 transition-all"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {/* ================= DANGER ZONE ================= */}
+              <div className="mx-3 mb-3 border-t border-gray-100 pt-2">
+                <button
+                  onClick={() => {
+                    handleDelete(brand.UserID);
+                    setOpenMenuId(null);
+                  }}
+                  className="group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left hover:bg-red-50 transition-all duration-200"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-red-50 group-hover:bg-red-100 flex items-center justify-center shrink-0 transition-colors">
+                    <svg
+                      className="w-4 h-4 text-red-500"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="flex-1">
+                    <p className="text-[12px] font-semibold text-red-600">
+                      Delete Student
+                    </p>
+                    <p className="text-[10px] text-red-400/80">
+                      Permanently remove this account
+                    </p>
+                  </div>
+                </button>
+              </div>
+
+              {/* Bottom subtle line */}
+              <div className="h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
+            </div>,
+            document.body
+          );
+        })()}
     </div>
   );
 };

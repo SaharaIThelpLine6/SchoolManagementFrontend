@@ -135,6 +135,14 @@ export const userStudentSlice = createApi({
       },
       invalidatesTags: ['Student', "MadrashaQuotaInfo"],
     }),
+    postGuardianInfo: builder.mutation({
+      query: (data) => ({
+        url: `insert_guardian_info`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Student'],
+    }),
     getUserById: builder.query({
       query: (userId) => `/user/${userId}`,
       providesTags: ['Student'],
@@ -654,5 +662,6 @@ export const {
   usePostStudentInfoMutation,
   useGetFilteredStudentsQuery,
   useGetUserByIdQuery,
-  useUpdateUserMutation
+  useUpdateUserMutation,
+  usePostGuardianInfoMutation
 } = userStudentSlice;

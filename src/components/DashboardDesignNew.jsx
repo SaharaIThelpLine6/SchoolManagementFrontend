@@ -1,7 +1,16 @@
 import React from 'react';
 import SvgIcon from "../components/icons/SvgIcon";
+import { useGetStudentCountInfoQuery } from '../features/class/classQuerySlice';
 
-const Dashboard = () => {
+const DashboardDesignNew = () => {
+
+  const {
+    data: studentData,
+  } = useGetStudentCountInfoQuery();
+
+  console.log(studentData, "studentData")
+
+
   const toolbarItems = [
     { name: 'Admission', icon: 'TbUserPlus', color: 'from-sky-400 to-cyan-500' },
     { name: 'New Staff', icon: 'TbUserCheck', color: 'from-emerald-400 to-teal-500' },
@@ -15,10 +24,10 @@ const Dashboard = () => {
   ];
 
   const statCards = [
-    { title: 'মোট শিক্ষার্থী', value: '৫০০', subtitle: 'সকল সেশনের', icon: 'TbGraduationCap', accent: 'sky' },
-    { title: 'মোট শিক্ষার্থী', value: '২০০', subtitle: 'চলতি সেশন', icon: 'TbUserGroup', accent: 'emerald' },
-    { title: 'সক্রিয় শিক্ষার্থী', value: '১৫০', subtitle: 'চলতি সেশন', icon: 'TbUserCheck', accent: 'violet' },
-    { title: 'নিষ্ক্রিয় শিক্ষার্থী', value: '৫০', subtitle: 'চলতি সেশন', icon: 'TbUserOff', accent: 'rose' },
+    { title: 'মোট শিক্ষার্থী', value: studentData?.totalAllSessionStudent, subtitle: 'সকল সেশনের', icon: 'TbGraduationCap', accent: 'sky' },
+    { title: 'মোট শিক্ষার্থী', value: studentData?.runningSession?.totalStudent, subtitle: 'চলতি সেশন', icon: 'TbUserGroup', accent: 'emerald' },
+    { title: 'সক্রিয় শিক্ষার্থী', value: studentData?.runningSession?.activeStudent, subtitle: 'চলতি সেশন', icon: 'TbUserCheck', accent: 'violet' },
+    { title: 'নিষ্ক্রিয় শিক্ষার্থী', value: studentData?.runningSession?.inactiveStudent, subtitle: 'চলতি সেশন', icon: 'TbUserOff', accent: 'rose' },
     { title: 'মোট শিক্ষক/স্টাফ', value: '৫০', subtitle: 'সক্রিয়', icon: 'TbUserGroup', accent: 'indigo' },
     { title: 'দাতা সদস্য', value: '৫০', subtitle: 'এন্ট্রি হিসাবে', icon: 'TbHeartHandshake', accent: 'pink' },
     { title: 'মোট আয়', value: '********', subtitle: '০১/০৯/২০২৬', icon: 'TbCoin', accent: 'emerald' },
@@ -131,7 +140,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-sky-50 to-indigo-50 font-hind">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-sky-50 to-indigo-50 font-SolaimanLipi">
       {/* ==== Background mesh glow (advanced) ==== */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl" />
@@ -220,4 +229,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default DashboardDesignNew;

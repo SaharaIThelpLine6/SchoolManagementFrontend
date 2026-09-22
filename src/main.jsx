@@ -4,7 +4,6 @@ import { Provider } from 'react-redux'
 import App from './App.jsx'
 import './index.css'
 import store from './store/store.js'
-import '@fontsource/hind-siliguri';
 
 
 createRoot(document.getElementById('root')).render(

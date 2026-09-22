@@ -303,7 +303,7 @@ const SideBar = () => {
     return <div className="p-4 text-red-500">Failed to load menu.</div>;
 
   return (
-    <aside className="h-[calc(100vh-64px)]  font-hind lg:h-full overflow-y-auto w-[250px] bg-white shadow-[2px_0_4px_rgba(0,0,0,0.1)] text-sm text-black scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 scrollbar-thumb-rounded-full print:hidden">
+    <aside className="h-[calc(100vh-64px)]  font-SolaimanLipi lg:h-full overflow-y-auto w-[250px] bg-white shadow-[2px_0_4px_rgba(0,0,0,0.1)] text-sm text-black scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 scrollbar-thumb-rounded-full print:hidden">
       <nav className="mt-4">
         <ul className="space-y-2 pb-[100px] sideb">
           {filteredMenuData.map((menu) => (
@@ -314,8 +314,8 @@ const SideBar = () => {
                   <button
                     onClick={() => handleToggle(menu.id)}
                     className={`w-full flex px-4 items-center justify-between border-l-6 border-solid gap-2 py-2.5 ${location.pathname.includes(menu.route) // was: .startsWith(menu.route)
-                        ? 'bg-[#deeff9] text-[#007af7] border-l-[#007af7]'
-                        : 'hover:text-[#007af7] hover:bg-[#ddeffe] border-l-transparent'
+                      ? 'bg-[#deeff9] text-[#007af7] border-l-[#007af7]'
+                      : 'hover:text-[#007af7] hover:bg-[#ddeffe] border-l-transparent'
                       }`}
                   >
                     <div className="flex items-center justify-center gap-2">

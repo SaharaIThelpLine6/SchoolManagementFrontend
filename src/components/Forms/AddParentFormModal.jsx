@@ -2,27 +2,25 @@ import 'flatpickr/dist/flatpickr.css';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import DatePickerOne from '../../components/Forms/DatePicker/DatePickerOne';
-import DefaultInput from '../../components/Forms/DefaultInput';
-import DefaultSelect from '../../components/Forms/DefaultSelect';
+import DatePickerOne from './DatePicker/DatePickerOne';
+import DefaultInput from './DefaultInput';
+import DefaultSelect from './DefaultSelect';
 import {
   useGetAllGendersQuery,
   useGetCodeSettingsQuery,
   useGetDistrictsQuery,
   useGetDivisionsQuery,
-  useGetFinancialStatusQuery,
-  useGetLastAdmissionSerialQuery,
   useGetPoliceStationsQuery,
-  useGetResidentialQuery,
   useGetSettingsQuery,
   useGetStudentRelationsQuery,
 } from '../../features/settings/settingsQuerySlice';
 
 import Swal from 'sweetalert2';
-import Button from '../../components/Button/Button';
-import PhoneNumberInput from '../../components/Forms/PhoneNumberInput';
+import Button from '../Button/Button';
+import PhoneNumberInput from './PhoneNumberInput';
 import { permissionsDataList } from '../../Data/permissions';
 import {
+  useGetGuardianOccupationTypeQuery,
   useGetUserCodeCheckQuery,
   useGetUserTypesQuery,
   usePostUserMutation,
@@ -31,16 +29,12 @@ import { usePermission } from '../../hooks/usePermission';
 import { ViewPermission } from '../../Routes/ViewPermission';
 import { calculateAge } from '../../utils/calculateAge';
 import useTranslate from '../../utils/Translate';
-import { useDispatch, useSelector } from 'react-redux';   // ✅ added useDispatch
-import { useGetSessionsQuery } from '../../features/session/sessionSlice';
-import {
-  useGetClassListQuery,
-  useGetSubClassListQuery,
-} from '../../features/class/classQuerySlice';
-import { usePostStudentInfoMutation } from '../../features/student/studentQuerySlice';
+import { useDispatch } from 'react-redux';   // ✅ added useDispatch
+import { usePostGuardianInfoMutation } from '../../features/student/studentQuerySlice';
 import { closeModal } from '../../features/modal/modalSlice';
+import { toast } from 'react-toastify';
 
-const AddUserFormModal = () => {
+const AddParentFormModal = ({ userId }) => {
   const translate = useTranslate();
   const navigate = useNavigate();
   const dispatch = useDispatch();                        // ✅ dispatch hook
@@ -53,7 +47,7 @@ const AddUserFormModal = () => {
     defaultValues: {
       GenderID: '',
       UserName: '',
-      UserTypeID: 1,
+      UserTypeID: 4,
       UserCode: '',
       FatherName: '',
       MotherName: '',
@@ -77,12 +71,8 @@ const AddUserFormModal = () => {
       TransientPoliceStationID: '',
       TransientPost: '',
       TransientVill: '',
-      SessionID: '',
-      ClassID: '',
-      SubClassID: '',
-      ResidentialStatusId: '',
-      SFTID: '',
-      AdmissionSerial: '',
+      Occupation: '',
+      Relation: '',
     },
     mode: 'onTouched',
     shouldUnregister: false, // ⭐ unmounted fields এর value persist করবে
@@ -98,7 +88,6 @@ const AddUserFormModal = () => {
     formState: { errors },
   } = methods;
 
-  const [selectedImage, setSelectedImage] = useState(null);
 
   // Watch form values
   const [
@@ -131,12 +120,7 @@ const AddUserFormModal = () => {
       .split('T')[0]
     : '';
 
-  const editMode = useSelector((state) => state.userInfo.editMode);
 
-  useEffect(() => {
-    console.log(editMode);
-    console.log('=================');
-  }, [editMode]);
 
   const ageValue = calculateAge(DateOfBirth);
 
@@ -165,6 +149,12 @@ const AddUserFormModal = () => {
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
+  const { data: guardianOccupationTypeData = [] } = useGetGuardianOccupationTypeQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
+
+
 
   const { data: userCodeCheck = {} } = useGetUserCodeCheckQuery(UserTypeID, {
     refetchOnFocus: true,
@@ -190,82 +180,10 @@ const AddUserFormModal = () => {
     }
   );
 
-  // Academic Session
-  const {
-    data: academicSession,
-    isLoading: isSessionLoading,
-    isError: isSessionError,
-  } = useGetSessionsQuery(undefined, { refetchOnMountOrArgChange: true });
 
-  const activeSession = academicSession?.find(
-    (item) => item.SessionStatus === 1
-  );
 
-  // Student Financial Status
-  const {
-    data: studentFinancialStatus,
-    isLoading: isstudentFinancialStatusLoading,
-    isError: isstudentFinancialStatusError,
-  } = useGetFinancialStatusQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  });
 
-  // Residential
-  const {
-    data: residential,
-    isLoading: isresidentialLoading,
-    isError: isresidentialError,
-  } = useGetResidentialQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  });
-
-  // Class List
-  const {
-    data: classList,
-    isLoading: isClassLoading,
-    isError: isClassError,
-  } = useGetClassListQuery(undefined, { refetchOnMountOrArgChange: true });
-
-  // Sub Class List
-  const {
-    data: subClassList,
-    isLoading: isSubClassLoading,
-    isError: isSubClassError,
-  } = useGetSubClassListQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  });
-
-  // ⭐ Filter sub-class list based on selected ClassID (memoized)
-  const filteredSubClassList = useMemo(() => {
-    if (!subClassList) return [];
-    return subClassList
-      .filter((sub) => {
-        if (!ClassID) return false;
-        return sub?.ClassID?.toString() === ClassID.toString();
-      })
-      .map((sub) => ({
-        SubClassID: sub.SubClassID,
-        SubClassName: sub.SubClass,
-        SubClassAra: sub.SubClassAra,
-        SubClassEng: sub.SubClassEng,
-        Serial: sub.Serial,
-      }))
-      .sort((a, b) => (a.Serial || 0) - (b.Serial || 0));
-  }, [subClassList, ClassID]);
-
-  // ✅ Last Admission Serial Query
-  const { data: SerialData, error: serialError } =
-    useGetLastAdmissionSerialQuery(
-      {
-        ClassID,
-        SessionID: watch('SessionID'),
-      },
-      {
-        skip: !ClassID || !watch('SessionID'),
-      }
-    );
-
-  const [postStudentAdmission] = usePostStudentInfoMutation();
+  const [postGuardianInfo] = usePostGuardianInfoMutation();
 
   const settingsArray = infoSettings?.data || [];
   const dataGender = settingsArray.find((c) => c.ID === 28);
@@ -348,37 +266,13 @@ const AddUserFormModal = () => {
     watch,
   ]);
 
-  // ⭐ When ClassID changes → auto-select the FIRST SubClass
-  useEffect(() => {
-    if (!ClassID) {
-      setValue('SubClassID', '', { shouldValidate: false });
-      return;
-    }
 
-    if (filteredSubClassList && filteredSubClassList.length > 0) {
-      setValue('SubClassID', filteredSubClassList[0].SubClassID, {
-        shouldValidate: true,
-      });
-    } else {
-      setValue('SubClassID', '', { shouldValidate: false });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ClassID, subClassList]);
-
-  // Auto set AdmissionSerial when SerialData arrives
-  useEffect(() => {
-    if (SerialData?.nextSerial) {
-      setValue('AdmissionSerial', SerialData.nextSerial, {
-        shouldValidate: true,
-      });
-    }
-  }, [SerialData, setValue]);
 
   // Reset form on component mount
   useEffect(() => {
     reset({
       UserName: '',
-      UserTypeID: 1,
+      UserTypeID: 4,
       UserCode: '',
       GenderID: dataGender?.Action || '',
       FatherName: '',
@@ -403,12 +297,9 @@ const AddUserFormModal = () => {
       TransientPoliceStationID: '',
       TransientPost: '',
       TransientVill: '',
-      SessionID: '',
-      ClassID: '',
-      SubClassID: '',
-      ResidentialStatusId: '',
-      SFTID: '',
-      AdmissionSerial: '',
+      Occupation: '',
+      Relation: '',
+
     });
     setCurrentStep(1);
   }, [reset, dataGender]);
@@ -418,26 +309,12 @@ const AddUserFormModal = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentStep]);
 
-  // Auto set SessionID = activeSession
-  useEffect(() => {
-    if (activeSession?.SessionID) {
-      setValue('SessionID', activeSession.SessionID, { shouldValidate: true });
-    }
-  }, [activeSession, setValue]);
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+
+
 
   const onSubmit = async (data) => {
-    console.log('Submitting data:', data);
+
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -458,11 +335,10 @@ const AddUserFormModal = () => {
       const payload = {
         ...data,
         DateOfBirth: formattedDate,
-        NewOldId: 1,
-        IsActive: 1,
+        StudentUserID: userId
       };
       console.log('payload:', payload);
-      const response = await postStudentAdmission(payload).unwrap();
+      const response = await postGuardianInfo(payload).unwrap();
 
       await Swal.fire({
         icon: 'success',
@@ -497,14 +373,14 @@ const AddUserFormModal = () => {
     { id: 1, name: 'ব্যক্তিগত তথ্য' },
     { id: 2, name: 'স্থায়ী ঠিকানা' },
     { id: 3, name: 'অস্থায়ী ঠিকানা' },
-    { id: 4, name: 'ভর্তি তথ্য' },
+    { id: 4, name: 'অভিভাবক তথ্য' },
   ];
 
   const handleNext = async () => {
     let fieldsToValidate = [];
 
     if (currentStep === 1) {
-      fieldsToValidate = ['GenderID', "DateOfBirth", 'UserName', 'Mobile1'];
+      fieldsToValidate = ['UserCode', 'GenderID', "DateOfBirth", 'UserName', 'Mobile1'];
     } else if (currentStep === 2) {
       fieldsToValidate = [];
     } else if (currentStep === 3) {
@@ -581,7 +457,13 @@ const AddUserFormModal = () => {
         </div>
 
         {/* Form Container */}
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
+        {/* <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6"> */}
+        <form
+          onSubmit={handleSubmit(
+            onSubmit,
+            (errors) => console.log('VALIDATION ERRORS:', errors)
+          )}
+        >
           {/* ============================= STEP 1: User Info ============================= */}
           <div className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in w-full ${currentStep !== 1 ? 'hidden' : ''}`}>
             <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex items-center gap-3">
@@ -615,7 +497,7 @@ const AddUserFormModal = () => {
               <DefaultInput
                 label={<span className="text-red-500">দাখেলা</span>}
                 type="number"
-                placeholder="100149"
+                placeholder=""
                 registerKey="UserCode"
                 require="Dakhela is required!"
                 codeSetting={true}
@@ -895,70 +777,30 @@ const AddUserFormModal = () => {
                 </svg>
               </div>
               <h2 className="text-lg font-bold text-gray-800">
-                {translate('৪. ভর্তি তথ্য')}
+                {translate('৪. অভিভাবক তথ্য')}
               </h2>
             </div>
 
             {/* Body */}
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <DefaultSelect
-                options={academicSession}
-                nameField="SessionName"
-                valueField="SessionID"
-                registerKey="SessionID"
-                label="Session"
-                require="সেশন নির্বাচন করা আবশ্যক"
-                defaultValue="সেশন নির্বাচন করুন"
+                label="সম্পর্ক"
+                options={studentRelation}
+                valueField="RelationID"
+                nameField="RelationName"
+                registerKey="Relation"
+                require="সম্পর্ক নির্বাচন করা আবশ্যক"
               />
 
               <DefaultSelect
-                options={classList}
-                nameField="ClassName"
-                valueField="ClassID"
-                registerKey="ClassID"
-                label="Admission Class"
-                require="শ্রেণি নির্বাচন করা আবশ্যক"
-                defaultValue="শ্রেণি নির্বাচন করুন"
+                options={guardianOccupationTypeData ?? []}
+                nameField="OccupationName"
+                valueField="OccupationID"
+                registerKey="Occupation"
+                label="পেশা"
+                require="পেশা নির্বাচন করা আবশ্যক"
               />
 
-              <DefaultSelect
-                options={filteredSubClassList}
-                nameField="SubClassName"
-                valueField="SubClassID"
-                registerKey="SubClassID"
-                label="সাব ক্লাস"
-                defaultValue="শাখা নির্বাচন করুন"
-              />
-
-              <DefaultInput
-                type="text"
-                registerKey="AdmissionSerial"
-                label={translate('Admission Serial')}
-                placeholder="ভর্তি সিরিয়াল নম্বর"
-                require="এই ঘরটি পূরণ করা আবশ্যক!"
-                defaultValue={SerialData?.nextSerial ?? ''}
-                disable={SerialData?.nextSerial ? true : false}
-              />
-
-              <DefaultSelect
-                options={studentFinancialStatus}
-                nameField="FinancialName"
-                valueField="SFTID"
-                registerKey="SFTID"
-                label="Financial Condition"
-                require="আর্থিক অবস্থা নির্বাচন করা আবশ্যক"
-                defaultValue="আর্থিক অবস্থা নির্বাচন করুন"
-              />
-
-              <DefaultSelect
-                options={residential}
-                nameField="ResidentialName"
-                valueField="RDID"
-                registerKey="ResidentialStatusId"
-                label="আবাসিক অবস্থা"
-                require="আবাসিক অবস্থা নির্বাচন করা আবশ্যক"
-                defaultValue="আবাসিক অবস্থা নির্বাচন করুন"
-              />
             </div>
           </div>
 
@@ -1070,4 +912,4 @@ const AddUserFormModal = () => {
   );
 };
 
-export default AddUserFormModal;
+export default AddParentFormModal;

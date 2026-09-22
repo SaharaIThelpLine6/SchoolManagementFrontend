@@ -64,15 +64,15 @@ const DefaultSelect = ({
 
   return (
     <div
-      className={` font-hind w-full ${labelPosition === "left" ? "flex items-center gap-4" : ""
+      className={` font-SolaimanLipi w-full ${labelPosition === "left" ? "flex items-center gap-4" : ""
         }`}
     >
       {label && (
         <label
           htmlFor={registerKey}
           className={`font-bold text-sm ${labelPosition === "left"
-              ? "text-black"
-              : "mb-1 block text-black"
+            ? "text-black"
+            : "mb-1 block text-black"
             }`}
         >
           <div className="flex items-center gap-1">

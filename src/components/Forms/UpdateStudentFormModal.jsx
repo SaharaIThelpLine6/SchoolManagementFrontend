@@ -617,7 +617,7 @@ const UpdateStudentFormModal = ({ userId }) => {
 
   return (
     <FormProvider {...methods}>
-      <div className="font-hind mb-5 w-full">
+      <div className="font-SolaimanLipi mb-5 w-full">
         {/* ================= Stepper ================= */}
         <div className="w-full mb-6 bg-blue-600 rounded-xl overflow-hidden shadow-md">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 px-6 gap-4 md:gap-0 w-full">

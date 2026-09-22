@@ -227,6 +227,19 @@ export const classSlice = createApi({
       query: (id) => `single_sub_class/${id}`,
       providesTags: ['SingleSubClass'],
     }),
+    getStudentCountInfo: builder.query({
+      query: () => '/student_count',
+    }),
+    getExamClassSubjects: builder.query({
+      query: ({ SessionID, ExamID }) => ({
+        url: `/get_exam_class_subjects`,
+        method: 'GET',
+        params: {
+          SessionID,
+          ExamID,
+        },
+      }),
+    }),
   }),
 });
 
@@ -261,4 +274,6 @@ export const {
   useCreateTimeSlotMutation,
   useDeleteTimeSlotMutation,
   useGetSingleSubClassQuery,
+  useGetStudentCountInfoQuery,
+  useGetExamClassSubjectsQuery
 } = classSlice;
