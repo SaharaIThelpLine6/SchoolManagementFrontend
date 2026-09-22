@@ -833,7 +833,7 @@ const CreateStudentFee = () => {
   const handleClickNavigate = () => {
     if (filteredSelectedPerStudentFee?.UserID) {
       navigate(
-        `/dashboard/accounting/student-fee-collection/state-ment/${filteredSelectedPerStudentFee.UserID}`
+        `/accounting/student-fee-collection/state-ment/${filteredSelectedPerStudentFee.UserID}`
       );
     } else {
       Swal.fire({

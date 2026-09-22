@@ -142,21 +142,6 @@ export const settingsSlice = createApi({
       }),
       invalidatesTags: ['StudentAdmissionMessage'],
     }),
-    // ================== External API Key ==================
-    generateApiKey: builder.mutation({
-      query: () => ({
-        url: `${API_URL}/api/users/generate_api_key`,   // 👈 absolute URL
-        method: 'POST',
-      }),
-      invalidatesTags: ['Settings'],
-    }),
-    regenerateApiKey: builder.mutation({
-      query: () => ({
-        url: `${API_URL}/api/users/regenerate_api_key`, // 👈 absolute URL
-        method: 'POST',
-      }),
-      invalidatesTags: ['Settings'],
-    }),
     getUserNotices: builder.query({
       query: ({ page = 1, limit = 10, UserCode, UserName, UserTypeID, SessionID, SubClassID }) => {
         const params = new URLSearchParams();
@@ -356,6 +341,4 @@ export const {
   useDeleteSupportTicketMutation,
   useGetDocumentSettingsQuery,
   useSaveDocumentSettingsMutation,
-  useGenerateApiKeyMutation,
-  useRegenerateApiKeyMutation,
 } = settingsSlice;

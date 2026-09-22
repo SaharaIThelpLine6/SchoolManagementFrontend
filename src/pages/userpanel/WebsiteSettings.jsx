@@ -35,8 +35,8 @@ export default function WebsiteSettings() {
       whyUsList: [{ text: '' }],
       classList: [{ text: '', subjects: [] }],
       teachers: [],
-      videoLinks: [],
-      importantLinks: [{ title: '', link: '' }],
+      videoLinks: [], // <-- নতুন ভিডিও লিংক ফিল্ড
+      // Color Palette Default Values
       primary: '#265d3e',
       secondary: '#fbbf24',
     },
@@ -60,16 +60,6 @@ export default function WebsiteSettings() {
   const { fields: videoFields, append: appendVideo, remove: removeVideo, replace: replaceVideo } = useFieldArray({
     control,
     name: 'videoLinks',
-  });
-
-  const {
-    fields: importantLinkFields,
-    append: appendImportantLink,
-    remove: removeImportantLink,
-    replace: replaceImportantLinks,
-  } = useFieldArray({
-    control,
-    name: 'importantLinks',
   });
 
   const [sendWebsiteSettings] = usePostWebsitesettingsMutation();
@@ -147,16 +137,7 @@ export default function WebsiteSettings() {
           } catch (e) {
             replaceVideo([]);
           }
-        } 
-        else if (key == 'importantLinks') {
-          try {
-            const links = JSON.parse(value);
-            replaceImportantLinks(Array.isArray(links) ? links : [{ title: '', link: '' }]);
-          } catch (e) {
-            replaceImportantLinks([{ title: '', link: '' }]);
-          }
-        }
-        else {
+        } else {
           setValue(key, value);
         }
         if (key == 'BannerImage') {
@@ -192,7 +173,7 @@ export default function WebsiteSettings() {
         }
       });
     }
-  }, [data, setValue, append, replace, replaceVideo, replaceImportantLinks]);
+  }, [data, setValue, append, replace, replaceVideo]);
 
   const onSubmit = async (data) => {
     const formattedSubjects = data.classList
@@ -229,9 +210,7 @@ export default function WebsiteSettings() {
     formData.append("teachers", JSON.stringify(data.teachers));
     formData.append('subjectClasses', JSON.stringify(formattedSubjects));
     // Video Links
-    formData.append('videoLinks', JSON.stringify(data.videoLinks));
-
-    formData.append('importantLinks', JSON.stringify(data.importantLinks));
+    formData.append('videoLinks', JSON.stringify(data.videoLinks)); // <-- নতুন
 
     try {
       await sendWebsiteSettings(formData).unwrap();
@@ -382,7 +361,7 @@ export default function WebsiteSettings() {
             registerKey="aboutText"
             type="textarea"
             label={translate("About Section Text")}
-            // require="About text is required"
+            require="About text is required"
           />
           <div className="bg-blue-50 p-5 rounded-lg border border-blue-100 mt-4 mb-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
@@ -653,59 +632,6 @@ export default function WebsiteSettings() {
               }}
             />
           </div>
-
-          {/* ---------- নতুন Important Links সেকশন ---------- */}
-          <div className="mt-4 p-5 bg-white rounded-lg border border-gray-200 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3">
-              {translate("Board Result Links")}
-            </h3>
-            <p className="text-sm text-gray-500 mb-4">
-              {translate("Add Board Result links with a title. You can add as many as you need.")}
-            </p>
-
-            {importantLinkFields.map((field, index) => (
-              <div key={field.id} className="flex flex-wrap md:flex-nowrap items-center gap-3 mb-3">
-                {/* 🟢 Title */}
-                <div className="w-full md:w-1/3">
-                  <input
-                    type="text"
-                    {...register(`importantLinks.${index}.title`)}
-                    placeholder={translate("Title (e.g., Notice Board)")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* 🟢 Link */}
-                <div className="w-full md:flex-1">
-                  <input
-                    type="text"
-                    {...register(`importantLinks.${index}.link`)}
-                    placeholder={translate("Link (https://example.com)")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                {/* 🟢 Delete Button */}
-                <button
-                  type="button"
-                  onClick={() => removeImportantLink(index)}
-                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md text-sm"
-                  title={translate("Delete link")}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-
-            <button
-              type="button"
-              onClick={() => appendImportantLink({ title: '', link: '' })}
-              className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
-            >
-              {translate("Add Important Link")}
-            </button>
-          </div>
-          {/* ---------- Important Links সেকশন শেষ ---------- */}
 
           {/* ---------- নতুন ভিডিও লিংক সেকশন ---------- */}
           <div className="mt-4 p-5 bg-white rounded-lg border border-gray-200 shadow-sm">

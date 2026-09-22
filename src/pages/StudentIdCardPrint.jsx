@@ -40,7 +40,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
 
     }
   });
-  const { register, watch, handleSubmit, setValue } = methods;
+  const { register, watch, handleSubmit } = methods;
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState([]);
 
@@ -66,13 +66,6 @@ const StudentIdCardPrint = ({ pageTitle }) => {
     console.log(selectedLayoutFromState);
     setSelectedLayout(selectedLayoutFromState)
   }, [selectedLayoutFromState])
-
-  useEffect(() => {
-    if (!selectedLayout || !institutionInfo) return;
-
-    setValue(`institute_name_${selectedLayout}`, institutionInfo.InstitutionName || '');
-    setValue(`institute_address_${selectedLayout}`, institutionInfo.Address || '');
-  }, [institutionInfo, selectedLayout, setValue]);
 
 
   const { data: sessionData } = useGetSessionsQuery();
@@ -200,10 +193,10 @@ const StudentIdCardPrint = ({ pageTitle }) => {
         });
 
         // প্রতিষ্ঠানের তথ্য যোগ করুন
-        newRow[`institute_name`] = data[`institute_name_${selectedLayout}`] || institutionInfo?.InstitutionName || '';
+        newRow[`institute_name`] = data[`institute_name_${selectedLayout}`];
         newRow[`schoolname_color_field`] = SchoolNameColor;
         newRow[`schoolname_fontside`] = SchoolNameSize;
-        newRow[`institute_address`] = data[`institute_address_${selectedLayout}`] || institutionInfo?.Address || '';
+        newRow[`institute_address`] = data[`institute_address_${selectedLayout}`];
         newRow[`schooladdress_color_field`] = SchoolAddressColor;
         newRow[`schooladdress_fontside`] = SchoolAddressSize;
         newRow[`SignaturePrincipal`] = institutionInfo?.SignaturePrincipal;
@@ -448,7 +441,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                           resize-y
                           cursor-ns-resize
                         `}
-                        value={watch(`institute_name_${layout.id}`) ?? institutionInfo?.InstitutionName ?? ''}
+                        defaultValue={institutionInfo?.InstitutionName}
                         style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
                         {...register(`institute_name_${layout.id}`)}
                       />
@@ -468,7 +461,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                       <textarea
                         id='school-address'
                         className={`w-full border-black inline-block bg-transparent text-center outline-none text-[${SchoolAddressSize}px] leading-[${SchoolAddressSize}px]]`}
-                        value={watch(`institute_address_${layout.id}`) ?? institutionInfo?.Address ?? ''}
+                        defaultValue={institutionInfo?.Address}
                         style={{ color: `${SchoolAddressColor}` }}
                         {...register(`institute_address_${layout.id}`)}
                       />
@@ -535,7 +528,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                           resize-y
                           cursor-ns-resize
                         `}
-                          value={watch(`institute_name_${layout.id}`) ?? institutionInfo?.InstitutionName ?? ''}
+                          defaultValue={institutionInfo?.InstitutionName}
                           style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
                           {...register(`institute_name_${layout.id}`)}
                         />
@@ -555,7 +548,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                         <textarea
                           id='school-address'
                           className={`w-full border-black inline-block bg-transparent text-center outline-none text-[${SchoolAddressSize}px] leading-[${SchoolAddressSize}px]]`}
-                          value={watch(`institute_address_${layout.id}`) ?? institutionInfo?.Address ?? ''}
+                          defaultValue={institutionInfo?.Address}
                           style={{ color: `${SchoolAddressColor}` }}
                           {...register(`institute_address_${layout.id}`)}
                         />
@@ -621,7 +614,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                           resize-y
                           cursor-ns-resize
                         `}
-                          value={watch(`institute_name_${layout.id}`) ?? institutionInfo?.InstitutionName ?? ''}
+                          defaultValue={institutionInfo?.InstitutionName}
                           style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
                           {...register(`institute_name_${layout.id}`)}
                         />
@@ -641,7 +634,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                         <textarea
                           id='school-address'
                           className={`w-full border-black inline-block bg-transparent text-center outline-none`}
-                          value={watch(`institute_address_${layout.id}`) ?? institutionInfo?.Address ?? ''}
+                          defaultValue={institutionInfo?.Address}
                           style={{ color: SchoolAddressColor, fontSize: `${SchoolAddressSize}px`, lineHeight: `${SchoolAddressSize}px` }}
                           {...register(`institute_address_${layout.id}`)}
                         />
@@ -709,7 +702,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                           resize-y
                           cursor-ns-resize
                         `}
-                          value={watch(`institute_name_${layout.id}`) ?? institutionInfo?.InstitutionName ?? ''}
+                          defaultValue={institutionInfo?.InstitutionName}
                           style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
                           {...register(`institute_name_${layout.id}`)}
                         />
@@ -729,7 +722,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                         <textarea
                           id='school-address'
                           className={`w-full border-black inline-block bg-transparent text-center outline-none text-[${SchoolAddressSize}px] leading-[${SchoolAddressSize}px]]`}
-                          value={watch(`institute_address_${layout.id}`) ?? institutionInfo?.Address ?? ''}
+                          defaultValue={institutionInfo?.Address}
                           style={{ color: `${SchoolAddressColor}` }}
                           {...register(`institute_address_${layout.id}`)}
                         />
@@ -797,7 +790,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                           resize-y
                           cursor-ns-resize
                         `}
-                          value={watch(`institute_name_${layout.id}`) ?? institutionInfo?.InstitutionName ?? ''}
+                          defaultValue={institutionInfo?.InstitutionName}
                           style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
                           {...register(`institute_name_${layout.id}`)}
                         />
@@ -817,7 +810,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                         <textarea
                           id='school-address'
                           className={`w-full border-black inline-block bg-transparent text-center outline-none text-[${SchoolAddressSize}px] leading-[${SchoolAddressSize}px]]`}
-                          value={watch(`institute_address_${layout.id}`) ?? institutionInfo?.Address ?? ''}
+                          defaultValue={institutionInfo?.Address}
                           style={{ color: `${SchoolAddressColor}` }}
                           {...register(`institute_address_${layout.id}`)}
                         />
@@ -885,7 +878,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                           resize-y
                           cursor-ns-resize
                         `}
-                          value={watch(`institute_name_${layout.id}`) ?? institutionInfo?.InstitutionName ?? ''}
+                          defaultValue={institutionInfo?.InstitutionName}
                           style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
                           {...register(`institute_name_${layout.id}`)}
                         />
@@ -905,7 +898,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                         <textarea
                           id='school-address'
                           className={`w-full border-black inline-block bg-transparent text-center outline-none text-[${SchoolAddressSize}px] leading-[${SchoolAddressSize}px]]`}
-                          value={watch(`institute_address_${layout.id}`) ?? institutionInfo?.Address ?? ''}
+                          defaultValue={institutionInfo?.Address}
                           style={{ color: `${SchoolAddressColor}` }}
                           {...register(`institute_address_${layout.id}`)}
                         />
@@ -973,7 +966,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                           resize-y
                           cursor-ns-resize
                         `}
-                          value={watch(`institute_name_${layout.id}`) ?? institutionInfo?.InstitutionName ?? ''}
+                          defaultValue={institutionInfo?.InstitutionName}
                           style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
                           {...register(`institute_name_${layout.id}`)}
                         />
@@ -993,7 +986,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                         <textarea
                           id='school-address'
                           className={`w-full border-black inline-block bg-transparent text-center outline-none text-[${SchoolAddressSize}px] leading-[${SchoolAddressSize}px]]`}
-                          value={watch(`institute_address_${layout.id}`) ?? institutionInfo?.Address ?? ''}
+                          defaultValue={institutionInfo?.Address}
                           style={{ color: `${SchoolAddressColor}` }}
                           {...register(`institute_address_${layout.id}`)}
                         />
@@ -1061,7 +1054,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                           resize-y
                           cursor-ns-resize
                         `}
-                          value={watch(`institute_name_${layout.id}`) ?? institutionInfo?.InstitutionName ?? ''}
+                          defaultValue={institutionInfo?.InstitutionName}
                           style={{ color: SchoolNameColor, fontSize: `${SchoolNameSize}px`, lineHeight: `${SchoolNameSize}px` }}
                           {...register(`institute_name_${layout.id}`)}
                         />
@@ -1081,7 +1074,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
                         <textarea
                           id='school-address'
                           className={`w-full border-black inline-block bg-transparent text-center outline-none text-[${SchoolAddressSize}px] leading-[${SchoolAddressSize}px]]`}
-                          value={watch(`institute_address_${layout.id}`) ?? institutionInfo?.Address ?? ''}
+                          defaultValue={institutionInfo?.Address}
                           style={{ color: `${SchoolAddressColor}` }}
                           {...register(`institute_address_${layout.id}`)}
                         />

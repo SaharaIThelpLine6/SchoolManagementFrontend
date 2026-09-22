@@ -4,8 +4,6 @@ import Loading from '../components/Loading/Loading';
 import {
   useGetSettingsQuery,
   useUpdateSettingsMutation,
-  useGenerateApiKeyMutation,
-  useRegenerateApiKeyMutation,
 } from '../features/settings/settingsQuerySlice';
 import { debounce } from '../utils/debounce';
 import useTranslate from '../utils/Translate';
@@ -17,11 +15,6 @@ const Settings = () => {
   const translate = useTranslate();
   const { data: response, isLoading, isError, refetch } = useGetSettingsQuery();
   const [updateSetting] = useUpdateSettingsMutation();
-
-  // 👇 API Key এর জন্য নতুন mutation hooks
-  const [generateApiKey, { isLoading: generatingKey }] = useGenerateApiKeyMutation();
-  const [regenerateApiKey, { isLoading: regeneratingKey }] = useRegenerateApiKeyMutation();
-
   const [
     updateResultReport,
     { isLoading: resultReportUpdating, isError: resultReportUpdatingError, isSuccess: resultReportUpdateSuccess, data: resultReportUpdatingResponse },
@@ -29,21 +22,44 @@ const Settings = () => {
   const formRef = useRef();
   const allSettingInfo = response?.data || [];
 
-  // 👇 API Key state (response থেকে আসলে সেটা দিয়ে initialize হবে)
-  const [apiKey, setApiKey] = useState('');
-  const [showApiKey, setShowApiKey] = useState(false);
-
   // Updateable data
   const updateableData = [
-    { id: 20, Action: [1, 2] },
-    { id: 16, Action: [0, 1] },
-    { id: 17, Action: [0, 1] },
-    { id: 26, Action: [0, 1] },
-    { id: 19, Action: [1, 2] },
-    { id: 27, Action: [0, 1] },
-    { id: 31, Action: [1, 2] },
-    { id: 32, Action: [0, 1] },
-    { id: 29, Action: [0, 1] },
+    {
+      id: 20,
+      Action: [1, 2],
+    },
+    {
+      id: 16,
+      Action: [0, 1],
+    },
+    {
+      id: 17,
+      Action: [0, 1],
+    },
+    {
+      id: 26,
+      Action: [0, 1],
+    },
+    {
+      id: 19,
+      Action: [1, 2],
+    },
+    {
+      id: 27,
+      Action: [0, 1],
+    },
+    {
+      id: 31,
+      Action: [1, 2],
+    },
+    {
+      id: 32,
+      Action: [0, 1],
+    },
+    {
+      id: 29,
+      Action: [0, 1],
+    },
   ];
 
   // Map for easy lookup
@@ -60,8 +76,8 @@ const Settings = () => {
     26: 'শিক্ষক/স্টাপ বেতন মূল অ্যাকাউন্টে থেকে কর্তন হবে',
     19: 'শিক্ষার্থীর পরীক্ষার ফি গ্রহণ',
     27: 'শিক্ষার্থীর একত্রে পরীক্ষার ফি অ্যাকাউন্টে এ যুক্ত হবে',
-    31: 'গড় ভিত্তিক ফলাফল এন্ট্রি ধরন',
-    32: 'অনলাইনে ক্লাস ভিত্তিক ফলাফল প্রকাশ',
+    31: 'গড় ভিক্তিক ফলাফল এন্ট্রি ধরন',
+    32: 'অনলাইনে ক্লাস ভিক্তিক ফলাফল প্রকাশ',
     29: 'একই শিক্ষার্থী ডাবল এন্ট্রি হবে',
   };
 
@@ -97,6 +113,7 @@ const Settings = () => {
       allSettingInfo.forEach((row) => {
         if (updateableDataMap[row.ID]) {
           const allowed = updateableDataMap[row.ID];
+          // API তে existing value থাকলে সেটা নেবে, নাহলে default value
           initialFormData[row.ID] =
             row.Action !== null && row.Action !== undefined
               ? row.Action
@@ -105,26 +122,14 @@ const Settings = () => {
       });
       setFormData(initialFormData);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allSettingInfo]);
-
-  // 👇 response থেকে API key থাকলে সেটা state এ সেট করা
-  useEffect(() => {
-    const key =
-      response?.apiKey ||
-      response?.data?.apiKey ||
-      allSettingInfo?.find((s) => s.ID === 100)?.Action ||
-      '';
-    if (key) setApiKey(key);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [response, allSettingInfo]);
+  }, [allSettingInfo]); // শুধুমাত্র allSettingInfo change হলে
 
   const debouncedSave = debounce(async (updatedData, prevValue) => {
     if (!updatedData.ID) return;
     console.log('Sending update to server:', updatedData);
     try {
       await updateSetting(updatedData).unwrap();
-      refetch();
+      refetch(); // Refetch to confirm server sync
       Swal.fire({
         icon: 'success',
         title: 'Auto-saved successfully',
@@ -132,6 +137,7 @@ const Settings = () => {
         timer: 1500,
       });
     } catch (err) {
+      // Revert formData on error
       setFormData((prev) => ({
         ...prev,
         [updatedData.ID]: prevValue,
@@ -150,112 +156,35 @@ const Settings = () => {
 
     if (allowed && allowed.includes(value)) {
       console.log(`Changing ID ${rowId} from ${prevValue} to ${value}`);
+
+      // Immediate UI update
       setFormData((prev) => ({
         ...prev,
         [rowId]: value,
       }));
+
+      // Debounced API call
       debouncedSave({ ID: rowId, Action: value }, prevValue);
     } else {
       console.warn(`Value ${value} not allowed for ID ${rowId}:`, allowed);
     }
   };
 
-  // 👇 API Key Generate Handler
-  const handleGenerateApiKey = async () => {
-    const confirm = await Swal.fire({
-      icon: 'question',
-      title: 'API Key তৈরি করবেন?',
-      text: 'একটি নতুন API Key তৈরি হবে। এটি সংরক্ষণ করে রাখুন।',
-      showCancelButton: true,
-      confirmButtonText: 'হ্যাঁ, তৈরি করুন',
-      cancelButtonText: 'বাতিল',
-    });
-    if (!confirm.isConfirmed) return;
-
-    try {
-      const res = await generateApiKey().unwrap();
-      const key = res?.apiKey || res?.ApiKey || res?.data?.apiKey || res?.key || '';
-      setApiKey(key);
-      setShowApiKey(true);
-      Swal.fire({
-        icon: 'success',
-        title: 'API Key তৈরি হয়েছে',
-        text: 'নিচে দেখানো হয়েছে। কপি করে সংরক্ষণ করুন।',
-        timer: 2000,
-        showConfirmButton: false,
-      });
-    } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'ব্যর্থ হয়েছে',
-        text: err?.data?.message || err?.message || 'Something went wrong!',
-      });
-    }
-  };
-
-  // 👇 API Key Regenerate Handler
-  const handleRegenerateApiKey = async () => {
-    const confirm = await Swal.fire({
-      icon: 'warning',
-      title: 'API Key পুনরায় তৈরি করবেন?',
-      text: 'পুরাতন API Key আর কাজ করবে না। আপনি নিশ্চিত?',
-      showCancelButton: true,
-      confirmButtonText: 'হ্যাঁ, পুনরায় তৈরি করুন',
-      cancelButtonText: 'বাতিল',
-      confirmButtonColor: '#d33',
-    });
-    if (!confirm.isConfirmed) return;
-
-    try {
-      const res = await regenerateApiKey().unwrap();
-      const key = res?.apiKey || res?.ApiKey || res?.data?.apiKey || res?.key || '';
-      setApiKey(key);
-      setShowApiKey(true);
-      Swal.fire({
-        icon: 'success',
-        title: 'API Key পুনরায় তৈরি হয়েছে',
-        text: 'নতুন Key কপি করে সংরক্ষণ করুন।',
-        timer: 2000,
-        showConfirmButton: false,
-      });
-    } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'ব্যর্থ হয়েছে',
-        text: err?.data?.message || err?.message || 'Something went wrong!',
-      });
-    }
-  };
-
-  // 👇 API Key কপি হ্যান্ডলার
-  const handleCopyApiKey = async () => {
-    if (!apiKey) return;
-    try {
-      await navigator.clipboard.writeText(apiKey);
-      Swal.fire({
-        icon: 'success',
-        title: 'কপি হয়েছে!',
-        timer: 1000,
-        showConfirmButton: false,
-      });
-    } catch {
-      Swal.fire({ icon: 'error', title: 'কপি ব্যর্থ হয়েছে' });
-    }
-  };
-
-  // শুধু updateable গুলো filter
+  // শুধু updateable গুলো filter (original API data থেকে)
   const filteredSettings = allSettingInfo.filter((row) =>
     updateableDataMap.hasOwnProperty(row.ID)
   );
 
+
   if (isLoading) return <Loading />;
   if (isError) return <div>Error loading settings</div>;
+
 
   const reportData = {
     "SubClassID": 1,
     "SubClass": "নূরানী",
     "ExamID": 5,
-    "ExamName": "প্রথম সাময়িক পরীক্ষা",
+    "ExamName": "প্রথম সাময়িক পরীক্ষা",
     "result": [
       {
         "ID": 5519,
@@ -263,13 +192,13 @@ const Settings = () => {
         "UserID": 896,
         "UserCode": 223128,
         "AdmissionSerial": 6,
-        "UserName": "মুছা. মাফিয়া আক্তার",
-        "FatherName": "মো: রিপন মিয়া",
+        "UserName": "মুছা. মাফিয়া আক্তার",
+        "FatherName": "মো: রিপন মিয়া",
         "MotherName": "",
         "SessionID": 4,
         "SessionName": "২০২৫-২৬ইং",
         "ExamID": 5,
-        "ExamName": "প্রথম সাময়িক পরীক্ষা",
+        "ExamName": "প্রথম সাময়িক পরীক্ষা",
         "ClassSerial": 1,
         "ClassID": 1,
         "SubClassSerial": 101,
@@ -282,15 +211,15 @@ const Settings = () => {
         "SFTID": 1,
         "FinancialName": "স্বচ্ছল",
         "NIDNO": "",
-        "PermanentVill": "ঢোলাদিয়া",
+        "PermanentVill": "ঢোলাদিয়া",
         "PermanentPost": "সদর",
-        "PoliceStationName": "ময়মনসিংহ সদর",
-        "DistrictName": "ময়মনসিংহ\r\n",
-        "DivisionName": "ময়মনসিংহ",
-        "TransientVill": "ঢোলাদিয়া",
+        "PoliceStationName": "ময়মনসিংহ সদর",
+        "DistrictName": "ময়মনসিংহ\r\n",
+        "DivisionName": "ময়মনসিংহ",
+        "TransientVill": "ঢোলাদিয়া",
         "TransientPost": "সদর",
-        "TransientPoliceStation": "ময়মনসিংহ সদর",
-        "TransientDistrict": "ময়মনসিংহ\r\n",
+        "TransientPoliceStation": "ময়মনসিংহ সদর",
+        "TransientDistrict": "ময়মনসিংহ\r\n",
         "Subject1": "নূরানী",
         "SubVal1": 98,
         "PassNumber1": 35,
@@ -299,7 +228,7 @@ const Settings = () => {
         "SubVal2": 98,
         "PassNumber2": 35,
         "MaxNumber2": 100,
-        "Subject3": "মাসায়েল ও দোয়া",
+        "Subject3": "মাসায়েল ও দোয়া",
         "SubVal3": 99,
         "PassNumber3": 35,
         "MaxNumber3": 100,
@@ -380,8 +309,8 @@ const Settings = () => {
         "DivisionNumber6": 0,
         "DivisionNumber7": null,
         "Division1": "মুমতাজ",
-        "Division2": "জায়্যিদ জিদ্দান",
-        "Division3": "জায়্যিদ",
+        "Division2": "জায়্যিদ জিদ্দান",
+        "Division3": "জায়্যিদ",
         "Division4": "মাকবূল",
         "Division5": "রাসিব",
         "Division6": "অনুপস্থিত",
@@ -422,18 +351,27 @@ const Settings = () => {
         "PrincipalName": "মুহতামিম",
         "NajemName": "নাযিমে তা'লীমাত"
       }
+
     ]
   };
 
+  
   const handelFromEdit = async () => {
     const content = formRef.current?.getEditorContent();
+
     console.log(content);
 
     try {
+      //   await updateResultReport({
+      //   "Description1": content.Description1,
+      //   "Description2": content.Description2,
+      //   "ReportPadImage": content.reportPadImage
+      // }).unwrap()
       const formData = new FormData();
       formData.append("Description1", content.Description1 || "");
       formData.append("Description2", content.Description2 || "");
 
+      // Only append if it's an actual File object
       if (content.reportPadImage instanceof File) {
         formData.append("ReportPadImage", content.reportPadImage);
       }
@@ -446,6 +384,8 @@ const Settings = () => {
         timer: 1500,
       });
     } catch (err) {
+      // Revert formData on error
+
       Swal.fire({
         icon: 'error',
         title: 'Auto-save failed',
@@ -453,7 +393,6 @@ const Settings = () => {
       });
     }
   };
-
   return (
     <div className="w-full max-w-full bg-blue-50 shadow-lg rounded-lg border border-blue-200">
       <div className="bg-blue-600 text-white text-center py-3 rounded-t-lg text-lg md:text-xl font-semibold">
@@ -473,6 +412,7 @@ const Settings = () => {
             allowedActions.includes(opt.value)
           );
 
+          // Wait until formData is populated
           if (currentValue === undefined) {
             return (
               <div
@@ -520,71 +460,6 @@ const Settings = () => {
             </div>
           );
         })}
-      </div>
-
-      {/* ================= API KEY SECTION ================= */}
-      <div className="bg-blue-600 text-white text-center py-3 text-lg md:text-xl font-semibold">
-        {translate('API Key Management')}
-      </div>
-
-      <div className="p-4 md:p-6 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
-          <label className="w-full md:w-1/3 text-left md:text-right font-medium text-gray-700">
-            {translate('API Key')} :
-          </label>
-          <div className="flex flex-wrap items-center gap-3 bg-white p-3 rounded-md shadow-sm w-full md:w-2/3">
-            {apiKey ? (
-              <>
-                <input
-                  type={showApiKey ? 'text' : 'password'}
-                  value={apiKey}
-                  readOnly
-                  className="flex-1 min-w-[200px] border border-slate-300 rounded px-2 py-1.5 text-sm bg-slate-50 font-mono"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowApiKey((p) => !p)}
-                  className="px-3 py-1.5 bg-slate-200 text-slate-700 rounded text-sm font-semibold hover:bg-slate-300 transition-colors"
-                >
-                  {showApiKey ? translate('Hide') : translate('Show')}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleCopyApiKey}
-                  className="px-3 py-1.5 bg-slate-200 text-slate-700 rounded text-sm font-semibold hover:bg-slate-300 transition-colors"
-                >
-                  {translate('Copy')}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleRegenerateApiKey}
-                  disabled={regeneratingKey}
-                  className="px-3 py-1.5 bg-red-600 text-white rounded text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-50"
-                >
-                  {regeneratingKey ? translate('Regenerating...') : translate('Regenerate API Key')}
-                </button>
-              </>
-            ) : (
-              <>
-                <span className="text-gray-500 text-sm">
-                  {translate('No API Key generated yet.')}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleGenerateApiKey}
-                  disabled={generatingKey}
-                  className="px-4 py-2 bg-[#1B3A57] text-white rounded text-sm font-semibold hover:bg-[#1B3A57]/90 transition-colors disabled:opacity-50"
-                >
-                  {generatingKey ? translate('Generating...') : translate('Generate API Key')}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-
-        <p className="text-xs text-slate-500 md:ml-[33%]">
-          ⚠️ API Key গোপন রাখুন। Regenerate করলে পুরাতন Key আর কাজ করবে না।
-        </p>
       </div>
 
       {/* <div className="bg-blue-600 text-white text-center py-3 rounded-t-lg text-lg md:text-xl font-semibold">
