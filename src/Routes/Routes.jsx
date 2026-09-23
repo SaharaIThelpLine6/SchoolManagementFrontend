@@ -94,6 +94,7 @@ import StudentClassRoutine from '../pages/StudentClassRoutine';
 import StudentClassRoutineTimeSlots from '../pages/StudentClassRoutineTimeSlots';
 import StudentComplaint from '../pages/StudentComplaint';
 import StudentGroupCreate from '../pages/StudentGroupCreate';
+import ExamStudentList from '../pages/ExamStudentList';
 import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
 import StudentIdCardPrint from '../pages/StudentIdCardPrint';
 import StudentsFeeCollection from '../pages/StudentsFeeCollection';
@@ -689,6 +690,16 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.exam_name}
                   >
                     <Exam pageTitle="Exam" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'exam-student-list',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.exam_fee_setting}
+                  >
+                    <ExamStudentList pageTitle="Exam Student List" />
                   </RequirePermission>
                 ),
               },
