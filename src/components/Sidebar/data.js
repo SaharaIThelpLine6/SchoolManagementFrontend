@@ -346,11 +346,11 @@ export const menuData = [
         name: 'Result Entry & Publish',
         route: 'result',
       },
-      // {
-      //   id: '2',
-      //   name: 'Result Report',
-      //   route: '/result/report',
-      // },
+      {
+        id: '2',
+        name: 'Result Report',
+        route: 'result/report',
+      },
       {
         id: '3',
         name: 'Admission Form',

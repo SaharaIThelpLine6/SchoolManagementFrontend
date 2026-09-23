@@ -3,10 +3,15 @@ import Loading from '../components/Loading/Loading';
 import { useGetSettingsQuery } from '../features/settings/settingsQuerySlice';
 import AverageVReport from './AverageVReport';
 import PointVReport from './PointVReport';
+import useTranslate from '../utils/Translate';
+import { useDispatch } from 'react-redux';
+import { useForm } from 'react-hook-form';
 
 const ResultReport = () => {
-  // const { data, error, isLoading } = useGetExamConditionsSettingsQuery();
+  const translate = useTranslate();
+  const dispatch = useDispatch();
   const { data: response, isLoading, error, refetch } = useGetSettingsQuery();
+  const methods = useForm();
   const data = response?.data.find((item) => item.ID == 20);
 
   useEffect(() => {
@@ -29,19 +34,7 @@ const ResultReport = () => {
 
   return (
     <div className="">
-      {data ? (
-        data.Action === 1 ? (
-          <AverageVReport pageTitle="Average V: Report" />
-        ) : data.Action === 2 ? (
-          <PointVReport pageTitle="Point V: Report" />
-        ) : (
-          <div className="text-gray-500 text-center">
-            No valid exam condition found.
-          </div>
-        )
-      ) : (
-        <div className="text-gray-500 text-center">No data available.</div>
-      )}
+      
     </div>
   );
 };

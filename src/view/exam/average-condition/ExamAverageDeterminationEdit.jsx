@@ -545,6 +545,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                                     <DefaultInput
                                       registerKey={`gradeBands.${index}.TopNum`}
                                       placeholder="যেমন: ৮০"
+                                      defaultValue={field.TopNum}
                                     />
                                   </td>
                                 ) : null
