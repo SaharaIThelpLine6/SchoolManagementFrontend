@@ -25,6 +25,10 @@ export const examSlice = createApi({
     'ReportSettings',
     'ExamRoutine',
     'ExamRules',
+    'ExamStudentList',
+    'ExamStudentListFilters',
+    'StudentGroupFilters',
+    'StudentGroup',
   ],
   endpoints: (builder) => ({
     postNewExam: builder.mutation({
@@ -424,6 +428,89 @@ export const examSlice = createApi({
       invalidatesTags: ["ExamDivitions", "ExamConditions"],
     }),
 
+    // ==========================================
+    // পরীক্ষার্থী তালিকা (ExamStudentList) — Student_Admission ⇄ Student_Result
+    // ==========================================
+    getExamStudentListFilters: builder.query({
+      query: () => `exam_student_list_filters`,
+      providesTags: ['ExamStudentListFilters'],
+    }),
+
+    getExamStudentList: builder.query({
+      query: ({ SessionID, ExamID, SubClassID }) =>
+        `exam_student_list/${SessionID}/${ExamID}/${SubClassID}`,
+      providesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
+        { type: 'ExamStudentList', id: `${SessionID}-${ExamID}-${SubClassID}` },
+      ],
+    }),
+
+    // বাম → ডান: Student_Result-এ যোগ
+    addExamStudents: builder.mutation({
+      query: (body) => ({
+        url: `exam_student_list`,
+        method: 'POST',
+        body, // { SessionID, ExamID, SubClassID, AdmissionIDs }
+      }),
+      invalidatesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
+        { type: 'ExamStudentList', id: `${SessionID}-${ExamID}-${SubClassID}` },
+        'StudentFee',
+      ],
+    }),
+
+    // ডান → বাম: Student_Result থেকে মুছে ফেলা
+    removeExamStudents: builder.mutation({
+      query: (body) => ({
+        url: `exam_student_list`,
+        method: 'DELETE',
+        body, // { SessionID, ExamID, SubClassID, ResultIDs }
+      }),
+      invalidatesTags: (result, error, { SessionID, ExamID, SubClassID }) => [
+        { type: 'ExamStudentList', id: `${SessionID}-${ExamID}-${SubClassID}` },
+        'StudentFee',
+      ],
+    }),
+
+    // ==========================================
+    // Student Group — From SubClass ⇄ To SubClass
+    // ==========================================
+    getStudentGroupFilters: builder.query({
+      query: () => `student_group_filters`,
+      providesTags: ['StudentGroupFilters'],
+    }),
+
+    getStudentGroupList: builder.query({
+      query: ({ SessionID, ExamID, FromSubClassID, ToSubClassID }) => {
+        const params = new URLSearchParams({
+          SessionID: String(SessionID),
+          ExamID: String(ExamID),
+          FromSubClassID: String(FromSubClassID),
+        });
+        if (ToSubClassID) params.append('ToSubClassID', String(ToSubClassID));
+        return `student_group_list?${params.toString()}`;
+      },
+      providesTags: (result, error, { SessionID, ExamID, FromSubClassID, ToSubClassID }) => [
+        { type: 'StudentGroup', id: `${SessionID}-${ExamID}-${FromSubClassID}-${ToSubClassID || 'all'}` },
+      ],
+    }),
+
+    addStudentGroup: builder.mutation({
+      query: (body) => ({
+        url: `student_group_list`,
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['StudentGroup'],
+    }),
+
+    removeStudentGroup: builder.mutation({
+      query: (body) => ({
+        url: `student_group_list`,
+        method: 'DELETE',
+        body,
+      }),
+      invalidatesTags: ['StudentGroup'],
+    }),
+
   }),
 });
 
@@ -478,4 +565,13 @@ export const {
   useLazyGetExamConditonEntryQuery,
   useUpdateExamSettingsMutation,
   useDeleteExamConditionMutation,
+
+  useGetExamStudentListFiltersQuery,
+  useGetExamStudentListQuery,
+  useAddExamStudentsMutation,
+  useRemoveExamStudentsMutation,
+  useGetStudentGroupFiltersQuery,
+  useGetStudentGroupListQuery,
+  useAddStudentGroupMutation,
+  useRemoveStudentGroupMutation,
 } = examSlice;

@@ -173,14 +173,75 @@ export default function ReportBuilder({
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
 
+  // useEffect(() => {
+  //   if (instutionInfo?.Logo?.data) {
+  //     const buffer = Buffer.from(instutionInfo.Logo.data);
+  //     const base64String = buffer.toString("base64");
+  //     const imageSrc = `data:image/png;base64,${base64String}`;
+  //     setLogo(imageSrc);
+  //   }
+  // }, [instutionInfo]);
+
   useEffect(() => {
-    if (instutionInfo?.Logo?.data) {
-      const buffer = Buffer.from(instutionInfo.Logo.data);
-      const base64String = buffer.toString("base64");
-      const imageSrc = `data:image/png;base64,${base64String}`;
-      setLogo(imageSrc);
+    const logoField = instutionInfo?.Logo;
+    if (!logoField) return;
+
+    try {
+      let src = null;
+
+      // ১) সোজা string এলো (base64 অথবা data URL)
+      if (typeof logoField === "string") {
+        src = logoField.startsWith("data:")
+          ? logoField
+          : `data:image/png;base64,${logoField}`;
+      } else {
+        // ২) Buffer object { type:'Buffer', data:[...] } অথবা { data: [...] } অথবা raw array
+        const raw = logoField.data ?? logoField;
+
+        if (Array.isArray(raw)) {
+          src = `data:image/png;base64,${Buffer.from(raw).toString("base64")}`;
+        } else if (raw && typeof raw === "object" && Array.isArray(raw.data)) {
+          // কখনো { data: { type:'Buffer', data:[...] } } ও আসতে পারে
+          src = `data:image/png;base64,${Buffer.from(raw.data).toString("base64")}`;
+        } else if (typeof raw === "string") {
+          src = raw.startsWith("data:") ? raw : `data:image/png;base64,${raw}`;
+        }
+      }
+
+      if (src) setLogo(src);
+    } catch (err) {
+      console.error("Logo render error:", err);
     }
   }, [instutionInfo]);
+
+  // ✅ DB থেকে আসা Image যেকোনো ফরম্যাটে (Buffer object / raw array / base64 string) হ্যান্ডেল করে
+  const buildPhotoSrc = (imgData) => {
+    if (!imgData) return null;
+    try {
+      // ১) সোজা string (base64 বা data URL)
+      if (typeof imgData === "string") {
+        return imgData.startsWith("data:")
+          ? imgData
+          : `data:image/png;base64,${imgData}`;
+      }
+
+      // ২) Buffer object { type:'Buffer', data:[...] } অথবা raw array
+      const raw = imgData.data ?? imgData;
+      if (Array.isArray(raw)) {
+        return `data:image/png;base64,${Buffer.from(raw).toString("base64")}`;
+      }
+      if (raw && typeof raw === "object" && Array.isArray(raw.data)) {
+        return `data:image/png;base64,${Buffer.from(raw.data).toString("base64")}`;
+      }
+      if (typeof raw === "string") {
+        return raw.startsWith("data:") ? raw : `data:image/png;base64,${raw}`;
+      }
+      return null;
+    } catch (err) {
+      console.error("Student photo render error:", err);
+      return null;
+    }
+  };
 
   /* ---------------- Templates (DB-backed) ---------------- */
   const {
@@ -952,7 +1013,7 @@ export default function ReportBuilder({
                                 >
                                   {bn(pageIndex * rowsPerPage + idx + 1)}
                                 </td>
-                                {allRenderColumns.map((c) => {
+                                {/* {allRenderColumns.map((c) => {
                                   if (c.key === "photo") {
                                     return (
                                       <td
@@ -979,6 +1040,44 @@ export default function ReportBuilder({
                                       style={{
                                         padding: isLandscape ? "2px 4px" : "4px 6px",
                                       }}
+                                    >
+                                      {renderCellValue(row, c.key)}
+                                    </td>
+                                  );
+                                })} */}
+                                {allRenderColumns.map((c) => {
+                                  if (c.key === "photo") {
+                                    // ✅ প্রতি রো-এর আসল ছবি রেন্ডার
+                                    const photoSrc = buildPhotoSrc(row.Photo);
+                                    const w = isLandscape ? 20 : 24;
+                                    const h = isLandscape ? 24 : 28;
+                                    return (
+                                      <td
+                                        key={c.key || c.id}
+                                        className="border border-black text-center align-middle"
+                                        style={{ padding: isLandscape ? "2px 3px" : "4px 4px" }}
+                                      >
+                                        {photoSrc ? (
+                                          <img
+                                            src={photoSrc}
+                                            alt=""
+                                            className="mx-auto object-cover border border-black"
+                                            style={{ width: w, height: h }}
+                                          />
+                                        ) : (
+                                          <div
+                                            className="mx-auto bg-slate-100 border border-black"
+                                            style={{ width: w, height: h }}
+                                          />
+                                        )}
+                                      </td>
+                                    );
+                                  }
+                                  return (
+                                    <td
+                                      key={c.key || c.id}
+                                      className="border border-black text-left font-medium"
+                                      style={{ padding: isLandscape ? "2px 4px" : "4px 6px" }}
                                     >
                                       {renderCellValue(row, c.key)}
                                     </td>

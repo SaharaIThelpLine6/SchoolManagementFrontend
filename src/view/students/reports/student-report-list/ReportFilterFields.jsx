@@ -1,9 +1,3 @@
-// view/students/reports/student-report-list/ReportFilterFields.jsx
-//
-// শুধু ফিল্টার ফর্মটা রেন্ডার করে — ডাটা আনা বা স্টেট রাখার কাজ করে না
-// (সেটা useReportFilters হুক করে)। তাই ReportBuilder এবং
-// FilterableReportView (BanglaAttendence-এর মতো অন্য রিপোর্টের জন্য)
-// দুই জায়গাতেই এক কপি কোড দিয়ে reuse করা যায়।
 import SvgIcon from "../../../../components/icons/SvgIcon";
 import { GENDER_OPTIONS, ADMISSION_TYPE_OPTIONS, USER_STATUS_OPTIONS } from "./reportFilterConstants";
 

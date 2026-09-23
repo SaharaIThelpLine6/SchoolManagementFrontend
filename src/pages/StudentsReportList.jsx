@@ -5,12 +5,9 @@ import useTranslate from '../utils/Translate';
 
 // টেমপ্লেট বিল্ডার কম্পোনেন্ট
 import ReportBuilder from '../view/students/reports/student-report-list/ReportBuilder';
-// শেয়ার্ড ফিল্টার wrapper — এখন থেকে যেকোনো রিপোর্ট এটার ভেতরে বসিয়ে
-// দিলেই session/subClass/gender/admissionType/residential/userStatus/
-// district/thana ফিল্টার + প্রিন্ট বাটন ফ্রি তে পেয়ে যাবে
 import FilterableReportView from '../view/students/reports/student-report-list/FilterableReportView';
-// বাংলা হাজিরা খাতা কম্পোনেন্ট
 import BanglaAttendence from '../view/students/reports/BanglaAttendence';
+import ArabicAttendence from '../view/students/reports/ArabicAttendence';
 import BanglaAttendenceSubjectWari from '../view/students/reports/BanglaAttendenceSubjectWari';
 import AdmissionFormPdf from '../view/general-information/user-reports/AdmissionFormPdf';
 
@@ -18,11 +15,11 @@ import AdmissionFormPdf from '../view/general-information/user-reports/Admission
 const REPORT_CONFIGS = {
   '1': {
     component: 'ReportBuilder',
-    rowsPerPage: { portrait: 25, landscape: 24 },  // Custom Template Builder
+    rowsPerPage: { portrait: 21, landscape: 24 },
   },
   '2': {
     component: 'BanglaAttendence',
-    rowsPerPage: { portrait: 38, landscape: 20 },  // বাংলা হাজিরা খাতা — বেশি ডেটা
+    rowsPerPage: { portrait: 38, landscape: 20 },
   },
     '3': {
     component: 'BanglaAttendenceSubjectWari',
@@ -30,7 +27,7 @@ const REPORT_CONFIGS = {
   },
     '4': {
     component: 'AdmissionFormPdf',
-    rowsPerPage: { portrait: 1, landscape: 1 }, // একক ফরম, rowsPerPage প্রয়োজন নেই
+    rowsPerPage: { portrait: 1, landscape: 1 },
   },
   '15': {
     component: 'ComingSoon',
@@ -43,10 +40,12 @@ export default function StudentsReportList() {
   const translate = useTranslate();
   const { watch } = methods;
   const selectedReportID = watch('studentReport');
+  const [printMode, setPrintMode] = useState('data');
+  const [attendanceLanguage, setAttendanceLanguage] = useState('bangla');
 
   const reportOptions = [
     { id: '1', value: translate('1. Custom Template Builder') },
-    { id: '2', value: translate('2. বাংলা হাজিরা খাতা 30 দিনের') },
+    { id: '2', value: translate('2. হাজিরা খাতা 30 দিনের') },
     { id: '3', value: translate('3. বাংলা হাজিরা খাতা 30 দিনের (বিষয়ওয়ারী)') },
     { id: '4', value: translate('4. ছাত্র ভর্তি ফরম') },
     { id: '15', value: translate('2. Other reports coming soon') },
@@ -68,20 +67,59 @@ export default function StudentsReportList() {
 
       case 'BanglaAttendence':
         return (
-          <FilterableReportView
-            title="ফিল্টার"
-            note="ফিল্টার করে নিচে প্রিভিউতে দেখে প্রিন্ট করুন।"
-            rowsPerPage={cfg.rowsPerPage}   // 👈 ফিল্টার-ভিউকেও পাঠিয়ে দিন
-          >
-            {({ filters, filteredData }) => (
-              <BanglaAttendence
-                reportData={filteredData}
-                SubClassID={filters.SubClassID}
-                SessionID={filters.SessionID}
-                rowsPerPage={cfg.rowsPerPage}   // 👈 কম্পোনেন্টেও পাঠান
-              />
-            )}
-          </FilterableReportView>
+          <>
+            {/* ✅ ভাষা পরিবর্তনের সুইচ — রিপোর্টের উপরে */}
+            <div className="print:hidden mb-4 flex justify-center">
+              <div className="inline-flex bg-slate-100 rounded-lg p-1 border border-slate-200 shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setAttendanceLanguage('bangla')}
+                  className={`px-5 py-2 rounded-md text-sm font-semibold transition-all ${
+                    attendanceLanguage === 'bangla'
+                      ? 'bg-[#1B3A57] text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-800'
+                  }`}
+                >
+                  🇧🇩 বাংলা
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAttendanceLanguage('arabic')}
+                  className={`px-5 py-2 rounded-md text-sm font-semibold transition-all ${
+                    attendanceLanguage === 'arabic'
+                      ? 'bg-[#1B3A57] text-white shadow-sm'
+                      : 'text-slate-600 hover:text-slate-800'
+                  }`}
+                >
+                  🇸🇦 العربية
+                </button>
+              </div>
+            </div>
+
+            <FilterableReportView
+              title="ফিল্টার"
+              note="ফিল্টার করে নিচে প্রিভিউতে দেখে প্রিন্ট করুন।"
+              rowsPerPage={cfg.rowsPerPage}
+            >
+              {({ filters, filteredData }) =>
+                attendanceLanguage === 'bangla' ? (
+                  <BanglaAttendence
+                    reportData={filteredData}
+                    SubClassID={filters.SubClassID}
+                    SessionID={filters.SessionID}
+                    rowsPerPage={cfg.rowsPerPage}
+                  />
+                ) : (
+                  <ArabicAttendence
+                    reportData={filteredData}
+                    SubClassID={filters.SubClassID}
+                    SessionID={filters.SessionID}
+                    rowsPerPage={cfg.rowsPerPage}
+                  />
+                )
+              }
+            </FilterableReportView>
+          </>
         );
         
       case 'BanglaAttendenceSubjectWari':
@@ -110,20 +148,10 @@ export default function StudentsReportList() {
             note="শ্রেণি ও শিক্ষাবর্ষ নির্বাচন করে নিচে প্রিভিউতে দেখে প্রিন্ট করুন।"
             showAdmissionStatus
           >
-            {({ filters, filteredData }) => (
-              <>
-                {filteredData && filteredData.length > 0 ? (
-                  filteredData.map((student, i) => (
-                    <div key={student.StudentCode || i} className="admission-form-page">
-                      <AdmissionFormPdf
-                        SubClassID={filters.SubClassID}
-                        SessionID={filters.SessionID}
-                        student={student}
-                        admissionStatus={filters.IsActive}
-                      />
-                    </div>
-                  ))
-                ) : (
+            {({ filters, filteredData }) => {
+              // 🟢🟢🟢 "খালি ফরম" মোড বাছাই করা হলে → একটি blank form
+              if (printMode === 'blank') {
+                return (
                   <div className="admission-form-page">
                     <AdmissionFormPdf
                       SubClassID={filters.SubClassID}
@@ -131,9 +159,38 @@ export default function StudentsReportList() {
                       admissionStatus={filters.IsActive}
                     />
                   </div>
-                )}
-              </>
-            )}
+                );
+              }
+
+              // 🟢 "ডেটা" মোড → filtered ডেটা যত আছে সব form
+              if (filteredData && filteredData.length > 0) {
+                return (
+                  <>
+                    {filteredData.map((student, i) => (
+                      <div key={student.StudentCode || i} className="admission-form-page">
+                        <AdmissionFormPdf
+                          SubClassID={filters.SubClassID}
+                          SessionID={filters.SessionID}
+                          student={student}
+                          admissionStatus={filters.IsActive}
+                        />
+                      </div>
+                    ))}
+                  </>
+                );
+              }
+
+              // 🟢 কোনো ডেটা না পেলে → খালি form
+              return (
+                <div className="admission-form-page">
+                  <AdmissionFormPdf
+                    SubClassID={filters.SubClassID}
+                    SessionID={filters.SessionID}
+                    admissionStatus={filters.IsActive}
+                  />
+                </div>
+              );
+            }}
           </FilterableReportView>
         );
 
@@ -167,6 +224,37 @@ export default function StudentsReportList() {
           </div>
         </form>
       </FormProvider>
+
+      {/* 🟢🟢🟢 Print Mode Toggle — শুধু ছাত্র ভর্তি ফরম (id=4) নির্বাচিত হলে দেখাবে */}
+      {selectedReportID === '4' && (
+        <div className="flex flex-wrap gap-2 mt-4 mb-2 p-3 bg-slate-50 border border-slate-200 rounded-lg print:hidden">
+          <span className="text-sm font-semibold text-slate-600 self-center mr-2">
+            {translate('Print Mode')}:
+          </span>
+          <button
+            type="button"
+            onClick={() => setPrintMode('data')}
+            className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
+              printMode === 'data'
+                ? 'bg-[#1E4D2B] text-white shadow-md'
+                : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'
+            }`}
+          >
+            📄 {translate('ডেটা সহ ফরম')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setPrintMode('blank')}
+            className={`px-4 py-2 rounded-md text-sm font-semibold transition-all ${
+              printMode === 'blank'
+                ? 'bg-[#1E4D2B] text-white shadow-md'
+                : 'bg-white text-slate-700 border border-slate-300 hover:bg-slate-100'
+            }`}
+          >
+            📝 {translate('খালি ফরম (হাতে লিখার জন্য)')}
+          </button>
+        </div>
+      )}
 
       {/* রিপোর্ট ডিসপ্লে */}
       <div className="mt-6 print:mt-0">

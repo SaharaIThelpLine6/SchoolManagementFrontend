@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
-import bnBijoy2Unicode from "../../../utils/conveter";
+// import bnBijoy2Unicode from "../../../utils/conveter";
 import PdfHeader from "./PdfHeader";
 
 const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) => {
@@ -34,7 +34,7 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
   const conv = (val) => {
     if (val === null || val === undefined || val === "") return "";
     try {
-      return bnBijoy2Unicode(val);
+      return (val);
     } catch {
       return val;
     }
@@ -113,7 +113,8 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
           }
           .af-row { display: flex; }
           .af-label { font-weight: 700; }
-          .af-pledge p { margin: 2px 0; text-align: justify; }
+          // .af-pledge p { margin: 2px 0; text-align: justify; }
+          .af-pledge p { text-align: justify; }
           .af-dotline {
             display: inline-block;
             border-bottom: 1px dotted #000;
@@ -156,44 +157,44 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
       >
         {/* ================= HEADER ================= */}
         <PdfHeader compact={true} />
-        <div style={{ borderBottom: "1px solid #000", margin: "4px 0 4px 0" }}></div>
+        <div style={{ borderBottom: "2px solid #000", margin: "4px 0 4px 0" }}></div>
 
         {/* ================= TOP INFO (Past | Form | Current) ================= */}
         <div className="af-row" style={{ marginTop: "6px", justifyContent: "space-between", alignItems: "flex-start" }}>
 
           {/* LEFT: বিগত তথ্য */}
-          <div style={{ position: "relative", border: "1px solid #000", width: "38%", padding: "14px 8px 8px 8px" }}>
-            <div style={{ position: "absolute", top: "-10px", left: "50%", transform: "translateX(-50%)", background: "#fff", padding: "0 10px", border: "1px solid #000", fontWeight: "bold", fontSize: "13px" }}>
+          <div style={{ position: "relative", border: "1px solid #000", width: "38%", padding: "14px 8px 8px 8px", fontSize: "15px" }}>
+            <div style={{ position: "absolute", top: "-10px", left: "50%", transform: "translateX(-50%)", background: "#fff", padding: "0 10px", border: "1px solid #000", fontWeight: "bold" }}>
               বিগত তথ্য
             </div>
             <div>
-              <span className="af-label">শ্রেণি/জামাত : </span>
+              <span className="">শ্রেণি/জামাত : </span>
               <span>{pastSubClassName}</span>
             </div>
-            <div style={{ marginTop: "4px" }}>
-              <span className="af-label">শিক্ষাবর্ষ : </span>
+            <div style={{ }}>
+              <span className="">শিক্ষাবর্ষ : </span>
               <span>{pastSessionName}</span>
             </div>
-            <div style={{ marginTop: "4px" }}>
-              <span className="af-label">আইডি নং : </span>
+            <div style={{ }}>
+              <span className="">আইডি নং : </span>
               <span>{pastStudentCode}</span>
             </div>
-            <div style={{ marginTop: "4px", display: "flex", alignItems: "center" }}>
-              <span className="af-label">আবাসিক </span>
+            <div style={{ display: "flex", alignItems: "center" }}>
+              <span className="">আবাসিক </span>
               <input
                 type="checkbox"
                 readOnly
                 checked={pastResidentialStatus === 1}
                 style={{ width: 12, height: 12, margin: "0 4px 0 6px", verticalAlign: "middle" }}
               />
-              <span className="af-label" style={{ marginLeft: 4 }}>অনাবাসিক </span>
+              <span className="" style={{ marginLeft: 4 }}>অনাবাসিক </span>
               <input
                 type="checkbox"
                 readOnly
                 checked={pastResidentialStatus === 2}
                 style={{ width: 12, height: 12, margin: "0 4px 0 6px", verticalAlign: "middle" }}
               />
-              <span className="af-label" style={{ marginLeft: 4 }}>ডে কেয়ার </span>
+              <span className="" style={{ marginLeft: 4 }}>ডে কেয়ার </span>
               <input
                 type="checkbox"
                 readOnly
@@ -205,46 +206,46 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
 
           {/* MIDDLE: ভর্তি ফরম */}
           <div style={{ width: "24%", display: "flex", justifyContent: "center", alignItems: "center", paddingTop: "10px" }}>
-            <div style={{ border: "1px solid #000", padding: "4px 18px", fontSize: "16px", fontWeight: "bold", boxShadow: "4px 4px 0px #000", background: "#fff" }}>
+            <div style={{ border: "1px solid #000", padding: "8px 28px", fontSize: "18px", fontWeight: "bold", boxShadow: "4px 4px 0px #000", background: "#fff" }}>
               ভর্তি ফরম
             </div>
           </div>
 
           {/* RIGHT: বর্তমান তথ্য */}
-          <div style={{ position: "relative", border: "1px solid #000", width: "38%", padding: "14px 8px 8px 8px" }}>
-            <div style={{ position: "absolute", top: "-10px", left: "50%", transform: "translateX(-50%)", background: "#fff", padding: "0 10px", border: "1px solid #000", fontWeight: "bold", fontSize: "13px" }}>
+          <div style={{ position: "relative", border: "1px solid #000", width: "38%", padding: "14px 8px 8px 8px", fontSize: "16px" }}>
+            <div style={{ position: "absolute", top: "-10px", left: "50%", transform: "translateX(-50%)", background: "#fff", padding: "0 10px", border: "1px solid #000", fontWeight: "bold" }}>
               বর্তমান
             </div>
             <div>
-              <span className="af-label">শ্রেণি/জামাত : </span>
+              <span className="">শ্রেণি/জামাত : </span>
               <span>{currentSubClassName}</span>
             </div>
-            <div style={{ marginTop: "4px" }}>
-              <span className="af-label">শিক্ষাবর্ষ : </span>
+            <div style={{ }}>
+              <span className="">শিক্ষাবর্ষ : </span>
               <span>{currentSessionName}</span>
             </div>
-            <div style={{ marginTop: "4px" }}>
-              <span className="af-label">আইডি নং : </span>
+            <div style={{ }}>
+              <span className="">আইডি নং : </span>
               <span>{currentStudentCode}</span>
             </div>
             {/* 🟢 ভর্তির পরে (IsActive === "2") অবস্থায় বর্তমান বক্সেও আবাসিক/অনাবাসিক/ডে-কেয়ার দেখাবে */}
             {showCurrent && (
-              <div style={{ marginTop: "4px", display: "flex", alignItems: "center" }}>
-                <span className="af-label">আবাসিক </span>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <span className="">আবাসিক </span>
                 <input
                   type="checkbox"
                   readOnly
                   checked={currentResidentialStatus === 1}
                   style={{ width: 12, height: 12, margin: "0 4px 0 6px", verticalAlign: "middle" }}
                 />
-                <span className="af-label" style={{ marginLeft: 4 }}>অনাবাসিক </span>
+                <span className="" style={{ marginLeft: 4 }}>অনাবাসিক </span>
                 <input
                   type="checkbox"
                   readOnly
                   checked={currentResidentialStatus === 2}
                   style={{ width: 12, height: 12, margin: "0 4px 0 6px", verticalAlign: "middle" }}
                 />
-                <span className="af-label" style={{ marginLeft: 4 }}>ডে কেয়ার </span>
+                <span className="" style={{ marginLeft: 4 }}>ডে কেয়ার </span>
                 <input
                   type="checkbox"
                   readOnly
@@ -257,19 +258,19 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
         </div>
 
         {/* ================= PLEDGE ================= */}
-        <div className="af-pledge" style={{ marginTop: "12px" }}>
+        <div className="af-pledge" style={{ fontSize: "14px" }}>
           <p style={{ marginLeft: 0 }}>
-            <span className="af-label">মুহতারাম,</span>
+            <span >মুহতারাম,</span>
           </p>
           <p style={{ marginLeft: "30px" }}>হযরত মুহতামিম সাহেব (দা. বা.)</p>
 
-          <p style={{ textAlign: "center", marginTop: "4px" }}>
+          <p style={{ textAlign: "center" }}>
             আসসালামু আলাইকুম ওয়া রহমাতুল্লাহ
           </p>
 
-          <p style={{ marginTop: "4px" }}>
+          <p style={{ }}>
             বিনীত নিবেদন এই যে, আমি{" "}
-            <b>{bnBijoy2Unicode(institutionInfo?.InstitutionName)}</b> এর যাবতীয়
+            {institutionInfo?.InstitutionName} এর যাবতীয়
             কানুন ও নীতিমালা মেনে চলার অঙ্গীকারে আবদ্ধ হয়ে ভর্তি হওয়ার জন্য
             বিনীত আবেদন করছি।
           </p>
@@ -281,7 +282,7 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
         </div>
 
         {/* ================= STUDENT DETAILS ================= */}
-        <div style={{ marginTop: "4px" }}>
+        <div style={{ fontSize: "16px" }}>
           আমার বিস্তারিত তথ্যাদি নিম্নে প্রদান করা হলো-
         </div>
 
@@ -289,7 +290,7 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
         <div className="af-row" style={{ marginTop: "4px", gap: "8px", alignItems: "stretch" }}>
 
           {/* LEFT: Personal info */}
-          <div style={{ width: "50%", border: "1px solid #000", padding: "4px 8px" }}>
+          <div style={{ width: "40%", border: "1px solid #000", padding: "0px 8px", fontSize: "16px" }}>
             {[
               { label: "নাম", value: studentName },
               { label: "পিতার নাম", value: fatherName },
@@ -316,13 +317,13 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
           </div>
 
           {/* RIGHT: Addresses */}
-          <div style={{ width: "50%", border: "1px solid #000" }}>
+          <div style={{ width: "60%", border: "1px solid #000" }}>
 
-            <div style={{ textAlign: "center", fontWeight: 700, borderBottom: "1px solid #000", padding: "2px 0" }}>
+            <div style={{ textAlign: "center", fontWeight: 700, borderBottom: "1px solid #000", padding: "2px 0", fontSize: "16px" }}>
               স্থায়ী ঠিকানা
             </div>
 
-            <div className="af-row" style={{ padding: "4px 8px", alignItems: "center" }}>
+            <div className="af-row" style={{ padding: "4px 8px", alignItems: "center", fontSize: "16px" }}>
               <span className="af-label" style={{ width: "75px" }}>গ্রাম/মহল্লা</span>
               <span style={{ width: "8px", textAlign: "center" }}>:</span>
               <span style={{ width: "90px", paddingLeft: "4px" }}>{permanentVill}</span>
@@ -331,7 +332,7 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
               <span style={{ flex: 1, paddingLeft: "4px" }}>{policeStation}</span>
             </div>
 
-            <div className="af-row" style={{ padding: "0 8px 4px 8px", alignItems: "center" }}>
+            <div className="af-row" style={{ padding: "0 8px 4px 8px", alignItems: "center", fontSize: "16px" }}>
               <span className="af-label" style={{ width: "75px" }}>ডাক</span>
               <span style={{ width: "8px", textAlign: "center" }}>:</span>
               <span style={{ width: "90px", paddingLeft: "4px" }}>{permanentPost}</span>
@@ -340,11 +341,11 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
               <span style={{ flex: 1, paddingLeft: "4px" }}>{district}</span>
             </div>
 
-            <div style={{ textAlign: "center", fontWeight: 700, borderTop: "1px solid #000", borderBottom: "1px solid #000", padding: "2px 0" }}>
+            <div style={{ textAlign: "center", fontWeight: 700, borderTop: "1px solid #000", borderBottom: "1px solid #000", padding: "2px 0", fontSize: "16px" }}>
               অস্থায়ী ঠিকানা
             </div>
 
-            <div className="af-row" style={{ padding: "4px 8px", alignItems: "center" }}>
+            <div className="af-row" style={{ padding: "4px 8px", alignItems: "center", fontSize: "16px" }}>
               <span className="af-label" style={{ width: "75px" }}>গ্রাম/মহল্লা</span>
               <span style={{ width: "8px", textAlign: "center" }}>:</span>
               <span style={{ width: "90px", paddingLeft: "4px" }}></span>
@@ -353,7 +354,7 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
               <span style={{ flex: 1, paddingLeft: "4px" }}></span>
             </div>
 
-            <div className="af-row" style={{ padding: "0 8px 4px 8px", alignItems: "center" }}>
+            <div className="af-row" style={{ padding: "0 8px 4px 8px", alignItems: "center", fontSize: "16px" }}>
               <span className="af-label" style={{ width: "75px" }}>ডাক</span>
               <span style={{ width: "8px", textAlign: "center" }}>:</span>
               <span style={{ width: "90px", paddingLeft: "4px" }}></span>
@@ -366,7 +367,7 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
         </div>
 
         {/* ================= GUARDIAN INFO ================= */}
-        <div className="af-row" style={{ marginTop: "12px", gap: "16px", alignItems: "center" }}>
+        <div className="af-row" style={{ marginTop: "6px", gap: "16px", alignItems: "center", fontSize: "16px" }}>
           <div style={{ flex: 5, display: "flex", alignItems: "center" }}>
             <span style={{ whiteSpace: "nowrap" }}>অভিভাবকের নাম :</span>
             <span style={{ flex: 1, borderBottom: "1px dashed #000", marginLeft: "6px", transform: "translateY(-4px)" }} />
@@ -382,9 +383,9 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
         </div>
 
         {/* ================= OFFICE SECTION ================= */}
-        <div className="af-row" style={{ marginTop: "10px", alignItems: "center" }}>
+        <div className="af-row" style={{ marginTop: "10px", alignItems: "center", fontSize: "16px" }}>
           <div style={{ flex: 1 }} />
-          <span className="af-section-label">অফিসের অংশ</span>
+          <span className="af-section-label !text-base">অফিসের অংশ</span>
           <div style={{ flex: 1, textAlign: "center" }}>
             <div className="af-dotline" style={{ minWidth: "150px" }} />
             <div>আবেদনকারীর স্বাক্ষর</div>
@@ -392,20 +393,23 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
         </div>
 
         {/* ================= TALIMI MURUBBI ================= */}
-        <div className="af-row" style={{ marginTop: "10px", gap: "8px" }}>
-          <div style={{ flex: 1, display: "flex" }}>
-            তালিমি মুরুব্বির নাম : <span className="af-dotline" />
+        <div className="af-row" style={{ gap: "16px", alignItems: "center", fontSize: "16px" }}>
+          <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+            <span style={{ whiteSpace: "nowrap" }}>তালিমি মুরুব্বির নাম :</span>
+            <span style={{ flex: 1, borderBottom: "1px dashed #000", marginLeft: "6px", transform: "translateY(-4px)" }} />
           </div>
-          <div style={{ flex: 1, display: "flex" }}>
-            স্বাক্ষর : <span className="af-dotline" />
+          <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+            <span style={{ whiteSpace: "nowrap" }}>স্বাক্ষর :</span>
+            <span style={{ flex: 1, borderBottom: "1px dashed #000", marginLeft: "6px", transform: "translateY(-4px)" }} />
           </div>
-          <div style={{ flex: 1, display: "flex" }}>
-            তারিখ : <span className="af-dotline" />
+          <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+            <span style={{ whiteSpace: "nowrap" }}>তারিখ :</span>
+            <span style={{ flex: 1, borderBottom: "1px dashed #000", marginLeft: "6px", transform: "translateY(-4px)" }} />
           </div>
         </div>
 
         {/* ================= TEACHER COMMENTS ================= */}
-        <div style={{ marginTop: "8px" }}>
+        <div style={{ marginTop: "8px", fontSize: "16px" }}>
           <div>দারুল ইকামা/শ্রেণী শিক্ষকের মতামত:</div>
           <div className="af-row" style={{ marginTop: "4px", justifyContent: "space-between", gap: "16px" }}>
             <div style={{ flex: 1, display: "flex" }}>
@@ -418,20 +422,20 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
         </div>
 
         {/* ================= RESULT SECTION ================= */}
-        <div style={{ textAlign: "center", marginTop: "8px" }}>
-          <span className="af-section-label">ফলাফল</span>
+        <div style={{ textAlign: "center", marginTop: "8px", fontSize: "16px" }}>
+          <span className="af-section-label !text-base">ফলাফল</span>
         </div>
-        <div className="af-row" style={{ marginTop: "4px", alignItems: "center", gap: "6px" }}>
-          <div style={{ flex: 2 }}>বিগত তালিমাতের মন্তব্য :</div>
-          <div className="af-box" style={{ flex: 1, textAlign: "center", padding: "2px 0" }}>মোট :</div>
-          <div className="af-box" style={{ flex: 1, textAlign: "center", padding: "2px 0" }}>গড় :</div>
-          <div className="af-box" style={{ flex: 1, textAlign: "center", padding: "2px 0" }}>বিভাগ :</div>
-          <div className="af-box" style={{ flex: 1, textAlign: "center", padding: "2px 0" }}>স্থান :</div>
+        <div className="af-row" style={{ marginTop: "4px", alignItems: "center", gap: "6px", fontSize: "16px" }}>
+          <div style={{ flex: 2 }}>বিগত পরীক্ষার ফলাফল :</div>
+          <div className="af-box" style={{ flex: 1, textAlign: "left", padding: "2px 10px" }}>মোট :</div>
+          <div className="af-box" style={{ flex: 1, textAlign: "left", padding: "2px 10px" }}>গড় :</div>
+          <div className="af-box" style={{ flex: 1, textAlign: "left", padding: "2px 10px" }}>বিভাগ :</div>
+          <div className="af-box" style={{ flex: 1, textAlign: "left", padding: "2px 10px" }}>স্থান :</div>
         </div>
 
         {/* ================= NAZIM COMMENTS ================= */}
-        <div style={{ marginTop: "8px" }}>
-          <div style={{ fontWeight: 700 }}>নাযিমে তালিমাতের মন্তব্য:</div>
+        <div style={{ marginTop: "8px", fontSize: "16px" }}>
+          <div style={{ fontWeight: 700 }}>* নাযিমে তালিমাতের মন্তব্য:</div>
           <p style={{ textAlign: "justify", marginTop: "2px" }}>
             আমি আবেদনকারীকে <span className="af-dotline" style={{ minWidth: "220px" }} />{" "}
             জামাআতে ভর্তি উপযুক্ত মনে করতেছি/করছি না। তাহাকে{" "}
@@ -441,23 +445,23 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
         </div>
 
         {/* ================= FINANCIAL STATUS ================= */}
-        <div className="af-row" style={{ marginTop: "8px" }}>
+        <div className="af-row" style={{ marginTop: "8px", fontSize: "16px" }}>
           <div style={{ flex: 3 }}>
             <div style={{ fontWeight: 700 }}>আর্থিক অবস্থা :</div>
-            <div className="af-row" style={{ alignItems: "center", marginTop: "4px", marginLeft: "20px" }}>
-              <span style={{ marginRight: 4 }}>সচ্ছল</span>
+            <div className="af-row" style={{ alignItems: "center", marginTop: "4px", marginLeft: "100px" }}>
+              <span style={{ marginRight: 4 }}>সচ্ছল :</span>
               <input type="checkbox" style={{ width: 10, height: 10 }} />
-              <span style={{ marginLeft: 8, marginRight: 4 }}>এতিম</span>
+              <span style={{ marginLeft: 8, marginRight: 4 }}>এতিম :</span>
               <input type="checkbox" style={{ width: 10, height: 10 }} />
-              <span style={{ marginLeft: 8, marginRight: 4 }}>গরিব</span>
+              <span style={{ marginLeft: 8, marginRight: 4 }}>গরিব :</span>
               <input type="checkbox" style={{ width: 10, height: 10 }} />
-              <span style={{ marginLeft: 8, marginRight: 4 }}>অসহায়</span>
+              <span style={{ marginLeft: 8, marginRight: 4 }}>অসহায় :</span>
               <input type="checkbox" style={{ width: 10, height: 10 }} />
             </div>
           </div>
-          <div style={{ flex: 2, textAlign: "center" }}>
+          <div style={{ flex: 2, textAlign: "center", alignSelf: "flex-start", marginTop: "-20px" }}>
             <div className="af-dotline" style={{ minWidth: "150px" }} />
-            <div>নাযিমে তালিমাতের স্বাক্ষর/সীল</div>
+            <div><b>নাযিমে তালিমাতের স্বাক্ষর/সীল</b></div>
             <div style={{ marginTop: "4px" }}>
               তারিখ <span className="af-dotline" style={{ minWidth: "100px" }} />
             </div>
@@ -465,18 +469,18 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
         </div>
 
         {/* ================= PAYMENT SECTION ================= */}
-        <div style={{ textAlign: "center", marginTop: "8px" }}>
-          <span className="af-section-label">প্রদেয় টাকার পরিমাণ</span>
+        <div style={{ textAlign: "center", marginTop: "8px", fontSize: "16px" }}>
+          <span className="af-section-label !text-base">প্রদেয় টাকার পরিমাণ</span>
         </div>
-        <div className="af-row" style={{ marginTop: "2px", border: "1px solid #000" }}>
+        <div className="af-row" style={{ marginTop: "2px", border: "1px solid #000", fontSize: "16px" }}>
           {["ভর্তি ফ্রি :", "মাসিক বেতন :", "আবাসিক ফ্রি :", "অন্যান্য ফ্রি :"].map(
             (label, i) => (
               <div
                 key={i}
                 style={{
                   flex: 1,
-                  textAlign: "center",
-                  padding: "4px 0",
+                  textAlign: "left",
+                  padding: "4px 6px",
                   borderRight: i < 3 ? "1px solid #000" : "none",
                 }}
               >
@@ -487,7 +491,7 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
         </div>
 
         {/* ================= APPROVAL ================= */}
-        <div style={{ marginTop: "8px" }}>
+        <div style={{ marginTop: "8px", fontSize: "16px" }}>
           <div style={{ fontWeight: 700 }}>মুহতামিমের মঞ্জুরি:</div>
           <p style={{ textAlign: "justify", marginTop: "2px" }}>
             আবেদনকারীর <span className="af-dotline" style={{ minWidth: "280px" }} />{" "}
@@ -496,7 +500,7 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
         </div>
 
         {/* ================= FINAL SIGNATURE ================= */}
-        <div className="af-row" style={{ marginTop: "14px", justifyContent: "flex-end" }}>
+        <div className="af-row" style={{ marginTop: "14px", justifyContent: "flex-end", fontSize: "16px" }}>
           <div style={{ textAlign: "center" }}>
             <div className="af-dotline" style={{ minWidth: "180px" }} />
             <div>মুহতামিম সাহেবের স্বাক্ষর/সীল</div>
@@ -511,503 +515,3 @@ const AdmissionFormPdf = ({ SubClassID, SessionID, student, admissionStatus }) =
 };
 
 export default AdmissionFormPdf;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { useEffect } from "react";
-// import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
-// import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
-// import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
-// import bnBijoy2Unicode from "../../../utils/conveter";
-// import PdfHeader from "./PdfHeader";
-
-// const AdmissionFormPdf = ({ SubClassID, SessionID, student }) => {
-//   const { data: subClassListData } = useGetSubClassListQuery();
-//   const { data: institutionInfo } = useGetInstitutionInfoQuery();
-
-//   const subClasData = subClassListData?.find(
-//     (i) => i.SubClassID === Number(SubClassID)
-//   );
-
-//   const { data: sessionSData } = useGetSessionsQuery();
-//   const sessionData = sessionSData?.find(
-//     (i) => i.SessionID === Number(SessionID)
-//   );
-
-//   useEffect(() => {
-//     if (student) {
-//       console.log("🎓 AdmissionFormPdf student:", {
-//         StudentCode: student?.StudentCode,
-//         StudentName: student?.StudentName,
-//         FatherName: student?.FatherName,
-//         SubClass: student?.SubClass,
-//         SessionName: student?.SessionName,
-//       });
-//     }
-//   }, [student]);
-
-//   const conv = (val) => {
-//     if (val === null || val === undefined || val === "") return "";
-//     try {
-//       return bnBijoy2Unicode(val);
-//     } catch {
-//       return val;
-//     }
-//   };
-
-//   const SubClassName = conv(subClasData?.SubClass || student?.SubClass);
-//   const SessionName = conv(sessionData?.SessionName || student?.SessionName);
-
-//   const studentCode = conv(student?.StudentCode);
-//   const studentName = conv(student?.StudentName);
-//   const fatherName = conv(student?.FatherName);
-//   const motherName = conv(student?.MotherName);
-
-//   const formatDob = (dob) => {
-//     if (!dob) return "";
-//     try {
-//       const d = new Date(dob);
-//       if (isNaN(d.getTime())) return String(dob);
-//       const dd = String(d.getDate()).padStart(2, "0");
-//       const mm = String(d.getMonth() + 1).padStart(2, "0");
-//       const yyyy = d.getFullYear();
-//       return `${dd}/${mm}/${yyyy}`;
-//     } catch {
-//       return String(dob);
-//     }
-//   };
-
-//   const dateOfBirth = formatDob(student?.DateOfBirth);
-//   const nidNo = conv(student?.NIDNO);
-//   const mobile = conv(student?.Mobile1 || student?.Mobile2);
-
-//   const permanentVill = conv(student?.permanentVill);
-//   const permanentPost = conv(student?.permanentPost);
-//   const policeStation = conv(student?.PoliceStationName);
-//   const district = conv(student?.PermanentDistrictName);
-
-//   const residentialStatus = student?.ResidentialStatusId;
-
-//   return (
-//     <>
-//       <style>
-//         {`
-//           .af-form * { box-sizing: border-box; }
-//           .af-form {
-//             font-family: 'SolaimanLipi', 'Bangla', sans-serif;
-//             color: #000;
-//           }
-//           .af-box { border: 1px solid #000; }
-//           .af-title-bar {
-//             border-bottom: 1px solid #000;
-//             text-align: center;
-//             font-weight: 700;
-//             padding: 3px 0;
-//             font-size: 13px;
-//           }
-//           .af-section-label {
-//             display: inline-block;
-//             border: 1px solid #000;
-//             padding: 2px 26px;
-//             font-weight: 700;
-//             font-size: 13px;
-//             background: #fff;
-//           }
-//           .af-row { display: flex; }
-//           .af-label { font-weight: 700; }
-//           .af-pledge p { margin: 2px 0; text-align: justify; }
-//           .af-dotline {
-//             display: inline-block;
-//             border-bottom: 1px dotted #000;
-//             flex: 1;
-//             margin-left: 4px;
-//           }
-//           @media print {
-//             @page { size: A4 portrait; margin: 5mm; }
-//             html, body { margin: 0; padding: 0; }
-//             .admission-form-page {
-//               page-break-after: always;
-//               page-break-inside: avoid;
-//               break-after: page;
-//             }
-//             .admission-form-page:last-child {
-//               page-break-after: auto;
-//               break-after: auto;
-//             }
-//           }
-//           @media screen {
-//             .admission-form-page {
-//               margin-bottom: 24px;
-//               box-shadow: 0 0 6px rgba(0,0,0,0.15);
-//             }
-//           }
-//         `}
-//       </style>
-
-//       <div
-//         className="af-form w-full admission-form-page"
-//         style={{
-//           width: "210mm",
-//           height: "277mm",
-//           margin: "0 auto",
-//           padding: "6mm 6mm",
-//           fontSize: "12px",
-//           lineHeight: "1.35",
-//           background: "#fff",
-//         }}
-//       >
-//         {/* ================= HEADER ================= */}
-//         <PdfHeader compact={true} />
-//         <div style={{ borderBottom: "1px solid #000", margin: "4px 0 4px 0" }}></div>
-
-//         {/* ================= TOP INFO (Past | Form | Current) ================= */}
-//         <div className="af-row" style={{ marginTop: "6px", justifyContent: "space-between", alignItems: "flex-start" }}>
-          
-//           {/* LEFT: বিগত তথ্য */}
-//           <div style={{ position: "relative", border: "1px solid #000", width: "38%", padding: "14px 8px 8px 8px" }}>
-//             <div style={{ position: "absolute", top: "-10px", left: "50%", transform: "translateX(-50%)", background: "#fff", padding: "0 10px", border: "1px solid #000", fontWeight: "bold", fontSize: "13px" }}>
-//               বিগত তথ্য
-//             </div>
-//             <div>
-//               <span className="af-label">শ্রেণি/জামাত : </span>
-//               <span>{SubClassName}</span>
-//             </div>
-//             <div style={{ marginTop: "4px" }}>
-//               <span className="af-label">শিক্ষাবর্ষ : </span>
-//               <span>{SessionName}</span>
-//             </div>
-//             <div style={{ marginTop: "4px" }}>
-//               <span className="af-label">আইডি নং : </span>
-//               <span>{studentCode}</span>
-//             </div>
-//             <div style={{ marginTop: "4px", display: "flex", alignItems: "center" }}>
-//               <span className="af-label">আবাসিক </span>
-//               <input
-//                 type="checkbox"
-//                 readOnly
-//                 checked={residentialStatus === 1}
-//                 style={{ width: 12, height: 12, margin: "0 4px 0 6px", verticalAlign: "middle" }}
-//               />
-//               <span className="af-label" style={{ marginLeft: 4 }}>অনাবাসিক </span>
-//               <input
-//                 type="checkbox"
-//                 readOnly
-//                 checked={residentialStatus === 2}
-//                 style={{ width: 12, height: 12, margin: "0 4px 0 6px", verticalAlign: "middle" }}
-//               />
-//               <span className="af-label" style={{ marginLeft: 4 }}>ডে কেয়ার </span>
-//               <input
-//                 type="checkbox"
-//                 readOnly
-//                 checked={residentialStatus === 3}
-//                 style={{ width: 12, height: 12, margin: "0 4px 0 6px", verticalAlign: "middle" }}
-//               />
-//             </div>
-//           </div>
-
-//           {/* MIDDLE: ভর্তি ফরম */}
-//           <div style={{ width: "24%", display: "flex", justifyContent: "center", alignItems: "center", paddingTop: "10px" }}>
-//             <div style={{ border: "1px solid #000", padding: "4px 18px", fontSize: "16px", fontWeight: "bold", boxShadow: "4px 4px 0px #000", background: "#fff" }}>
-//               ভর্তি ফরম
-//             </div>
-//           </div>
-
-//           {/* RIGHT: বর্তমান তথ্য */}
-//           <div style={{ position: "relative", border: "1px solid #000", width: "38%", padding: "14px 8px 8px 8px" }}>
-//             <div style={{ position: "absolute", top: "-10px", left: "50%", transform: "translateX(-50%)", background: "#fff", padding: "0 10px", border: "1px solid #000", fontWeight: "bold", fontSize: "13px" }}>
-//               বর্তমান
-//             </div>
-//             <div>
-//               <span className="af-label">শ্রেণি/জামাত : </span>
-//             </div>
-//             <div style={{ marginTop: "4px" }}>
-//               <span className="af-label">শিক্ষাবর্ষ : </span>
-//             </div>
-//             <div style={{ marginTop: "4px" }}>
-//               <span className="af-label">আইডি নং : </span>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* ================= PLEDGE ================= */}
-//         <div className="af-pledge" style={{ marginTop: "12px" }}>
-//           <p style={{ marginLeft: 0 }}>
-//             <span className="af-label">মুহতারাম,</span>
-//           </p>
-//           <p style={{ marginLeft: "30px" }}>হযরত মুহতামিম সাহেব (দা. বা.)</p>
-
-//           <p style={{ textAlign: "center", marginTop: "4px" }}>
-//             আসসালামু আলাইকুম ওয়া রহমাতুল্লাহ
-//           </p>
-
-//           <p style={{ marginTop: "4px" }}>
-//             বিনীত নিবেদন এই যে, আমি{" "}
-//             <b>{bnBijoy2Unicode(institutionInfo?.InstitutionName)}</b> এর যাবতীয়
-//             কানুন ও নীতিমালা মেনে চলার অঙ্গীকারে আবদ্ধ হয়ে ভর্তি হওয়ার জন্য
-//             বিনীত আবেদন করছি।
-//           </p>
-
-//           <p>
-//             হুজুরের খেদমতে আরজ এই যে, আমার আবেদন মঞ্জুর করতঃ অত্র মাদরাসা হতে
-//             ইলমে দ্বীন হাসিল করার সুযোগ প্রদানে আপনার মর্জি হয়।
-//           </p>
-//         </div>
-
-//         {/* ================= STUDENT DETAILS ================= */}
-//         <div style={{ marginTop: "4px" }}>
-//           আমার বিস্তারিত তথ্যাদি নিম্নে প্রদান করা হলো-
-//         </div>
-
-//         {/* 🟢 Left & Right Boxes with Gap */}
-//         <div className="af-row" style={{ marginTop: "4px", gap: "8px", alignItems: "stretch" }}>
-          
-//           {/* LEFT: Personal info */}
-//           <div style={{ width: "50%", border: "1px solid #000", padding: "4px 8px" }}>
-//             {[
-//               { label: "নাম", value: studentName },
-//               { label: "পিতার নাম", value: fatherName },
-//               { label: "মাতার নাম", value: motherName },
-//               { label: "জন্ম তারিখ", value: dateOfBirth },
-//               { label: "NID/জন্ম নিবন্ধন নং", value: nidNo },
-//               { label: "অভিভাবকের মোবাইল", value: mobile },
-//             ].map((item, idx) => (
-//               <div
-//                 key={idx}
-//                 className="af-row"
-//                 style={{
-//                   padding: "3px 0",
-//                   alignItems: "center",
-//                 }}
-//               >
-//                 {/* লেবেল উইড্থ ফিক্সড করা হলো যাতে কোলন (:) সোজাসুজি থাকে */}
-//                 <span className="af-label" style={{ width: "135px" }}>
-//                   {item.label}
-//                 </span>
-//                 <span style={{ width: "12px", textAlign: "center" }}>:</span>
-//                 <span style={{ flex: 1, paddingLeft: "4px" }}>{item.value || ""}</span>
-//               </div>
-//             ))}
-//           </div>
-
-//           {/* RIGHT: Addresses */}
-//           <div style={{ width: "50%", border: "1px solid #000" }}>
-            
-//             <div style={{ textAlign: "center", fontWeight: 700, borderBottom: "1px solid #000", padding: "2px 0" }}>
-//               স্থায়ী ঠিকানা
-//             </div>
-
-//             <div className="af-row" style={{ padding: "4px 8px", alignItems: "center" }}>
-//               <span className="af-label" style={{ width: "75px" }}>গ্রাম/মহল্লা</span>
-//               <span style={{ width: "8px", textAlign: "center" }}>:</span>
-//               <span style={{ width: "90px", paddingLeft: "4px" }}>{permanentVill}</span>
-//               <span className="af-label" style={{ width: "40px", paddingLeft: "8px" }}>থানা</span>
-//               <span style={{ width: "8px", textAlign: "center" }}>:</span>
-//               <span style={{ flex: 1, paddingLeft: "4px" }}>{policeStation}</span>
-//             </div>
-
-//             <div className="af-row" style={{ padding: "0 8px 4px 8px", alignItems: "center" }}>
-//               <span className="af-label" style={{ width: "75px" }}>ডাক</span>
-//               <span style={{ width: "8px", textAlign: "center" }}>:</span>
-//               <span style={{ width: "90px", paddingLeft: "4px" }}>{permanentPost}</span>
-//               <span className="af-label" style={{ width: "40px", paddingLeft: "8px" }}>জেলা</span>
-//               <span style={{ width: "8px", textAlign: "center" }}>:</span>
-//               <span style={{ flex: 1, paddingLeft: "4px" }}>{district}</span>
-//             </div>
-
-//             <div style={{ textAlign: "center", fontWeight: 700, borderTop: "1px solid #000", borderBottom: "1px solid #000", padding: "2px 0" }}>
-//               অস্থায়ী ঠিকানা
-//             </div>
-
-//             <div className="af-row" style={{ padding: "4px 8px", alignItems: "center" }}>
-//               <span className="af-label" style={{ width: "75px" }}>গ্রাম/মহল্লা</span>
-//               <span style={{ width: "8px", textAlign: "center" }}>:</span>
-//               <span style={{ width: "90px", paddingLeft: "4px" }}></span>
-//               <span className="af-label" style={{ width: "40px", paddingLeft: "8px" }}>থানা</span>
-//               <span style={{ width: "8px", textAlign: "center" }}>:</span>
-//               <span style={{ flex: 1, paddingLeft: "4px" }}></span>
-//             </div>
-
-//             <div className="af-row" style={{ padding: "0 8px 4px 8px", alignItems: "center" }}>
-//               <span className="af-label" style={{ width: "75px" }}>ডাক</span>
-//               <span style={{ width: "8px", textAlign: "center" }}>:</span>
-//               <span style={{ width: "90px", paddingLeft: "4px" }}></span>
-//               <span className="af-label" style={{ width: "40px", paddingLeft: "8px" }}>জেলা</span>
-//               <span style={{ width: "8px", textAlign: "center" }}>:</span>
-//               <span style={{ flex: 1, paddingLeft: "4px" }}></span>
-//             </div>
-//           </div>
-
-//         </div>
-
-//         {/* ================= GUARDIAN INFO ================= */}
-//         {/* 🟢 ডটেড লাইনগুলো লেখার নিচ থেকে একটু উপরে উঠানোর জন্য translateY(-4px) ব্যবহার করা হয়েছে */}
-//         <div className="af-row" style={{ marginTop: "12px", gap: "16px", alignItems: "center" }}>
-//           <div style={{ flex: 5, display: "flex", alignItems: "center" }}>
-//             <span style={{ whiteSpace: "nowrap" }}>অভিভাবকের নাম :</span>
-//             <span style={{ flex: 1, borderBottom: "1px dashed #000", marginLeft: "6px", transform: "translateY(-4px)" }} />
-//           </div>
-//           <div style={{ flex: 4, display: "flex", alignItems: "center" }}>
-//             <span style={{ whiteSpace: "nowrap" }}>সম্পর্ক :</span>
-//             <span style={{ flex: 1, borderBottom: "1px dashed #000", marginLeft: "6px", transform: "translateY(-4px)" }} />
-//           </div>
-//           <div style={{ flex: 4, display: "flex", alignItems: "center" }}>
-//             <span style={{ whiteSpace: "nowrap" }}>স্বাক্ষর :</span>
-//             <span style={{ flex: 1, borderBottom: "1px dashed #000", marginLeft: "6px", transform: "translateY(-4px)" }} />
-//           </div>
-//         </div>
-
-//         {/* ================= OFFICE SECTION ================= */}
-//         <div className="af-row" style={{ marginTop: "10px", alignItems: "center" }}>
-//           <div style={{ flex: 1 }} />
-//           <span className="af-section-label">অফিসের অংশ</span>
-//           <div style={{ flex: 1, textAlign: "center" }}>
-//             <div className="af-dotline" style={{ minWidth: "150px" }} />
-//             <div>আবেদনকারীর স্বাক্ষর</div>
-//           </div>
-//         </div>
-
-//         {/* ================= TALIMI MURUBBI ================= */}
-//         <div className="af-row" style={{ marginTop: "10px", gap: "8px" }}>
-//           <div style={{ flex: 1, display: "flex" }}>
-//             তালিমি মুরুব্বির নাম : <span className="af-dotline" />
-//           </div>
-//           <div style={{ flex: 1, display: "flex" }}>
-//             স্বাক্ষর : <span className="af-dotline" />
-//           </div>
-//           <div style={{ flex: 1, display: "flex" }}>
-//             তারিখ : <span className="af-dotline" />
-//           </div>
-//         </div>
-
-//         {/* ================= TEACHER COMMENTS ================= */}
-//         <div style={{ marginTop: "8px" }}>
-//           <div>দারুল ইকামা/শ্রেণী শিক্ষকের মতামত:</div>
-//           <div className="af-row" style={{ marginTop: "4px", justifyContent: "space-between", gap: "16px" }}>
-//             <div style={{ flex: 1, display: "flex" }}>
-//               নিরীক্ষকের মন্তব্য : <span className="af-dotline" />
-//             </div>
-//             <div style={{ flex: 1, display: "flex" }}>
-//               স্বাক্ষর ও তারিখ : <span className="af-dotline" />
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* ================= RESULT SECTION ================= */}
-//         <div style={{ textAlign: "center", marginTop: "8px" }}>
-//           <span className="af-section-label">ফলাফল</span>
-//         </div>
-//         <div className="af-row" style={{ marginTop: "4px", alignItems: "center", gap: "6px" }}>
-//           <div style={{ flex: 2 }}>বিগত তালিমাতের মন্তব্য :</div>
-//           <div className="af-box" style={{ flex: 1, textAlign: "center", padding: "2px 0" }}>মোট :</div>
-//           <div className="af-box" style={{ flex: 1, textAlign: "center", padding: "2px 0" }}>গড় :</div>
-//           <div className="af-box" style={{ flex: 1, textAlign: "center", padding: "2px 0" }}>বিভাগ :</div>
-//           <div className="af-box" style={{ flex: 1, textAlign: "center", padding: "2px 0" }}>স্থান :</div>
-//         </div>
-
-//         {/* ================= NAZIM COMMENTS ================= */}
-//         <div style={{ marginTop: "8px" }}>
-//           <div style={{ fontWeight: 700 }}>নাযিমে তালিমাতের মন্তব্য:</div>
-//           <p style={{ textAlign: "justify", marginTop: "2px" }}>
-//             আমি আবেদনকারীকে <span className="af-dotline" style={{ minWidth: "220px" }} />{" "}
-//             জামাআতে ভর্তি উপযুক্ত মনে করতেছি/করছি না। তাহাকে{" "}
-//             <span className="af-dotline" style={{ minWidth: "150px" }} /> জামাআতে
-//             ভর্তি হওয়ার পরামর্শ দিতেছি।
-//           </p>
-//         </div>
-
-//         {/* ================= FINANCIAL STATUS ================= */}
-//         <div className="af-row" style={{ marginTop: "8px" }}>
-//           <div style={{ flex: 3 }}>
-//             <div style={{ fontWeight: 700 }}>আর্থিক অবস্থা :</div>
-//             <div className="af-row" style={{ alignItems: "center", marginTop: "4px", marginLeft: "20px" }}>
-//               <span style={{ marginRight: 4 }}>সচ্ছল</span>
-//               <input type="checkbox" style={{ width: 10, height: 10 }} />
-//               <span style={{ marginLeft: 8, marginRight: 4 }}>এতিম</span>
-//               <input type="checkbox" style={{ width: 10, height: 10 }} />
-//               <span style={{ marginLeft: 8, marginRight: 4 }}>গরিব</span>
-//               <input type="checkbox" style={{ width: 10, height: 10 }} />
-//               <span style={{ marginLeft: 8, marginRight: 4 }}>অসহায়</span>
-//               <input type="checkbox" style={{ width: 10, height: 10 }} />
-//             </div>
-//           </div>
-//           <div style={{ flex: 2, textAlign: "center" }}>
-//             <div className="af-dotline" style={{ minWidth: "150px" }} />
-//             <div>নাযিমে তালিমাতের স্বাক্ষর/সীল</div>
-//             <div style={{ marginTop: "4px" }}>
-//               তারিখ <span className="af-dotline" style={{ minWidth: "100px" }} />
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* ================= PAYMENT SECTION ================= */}
-//         <div style={{ textAlign: "center", marginTop: "8px" }}>
-//           <span className="af-section-label">প্রদেয় টাকার পরিমাণ</span>
-//         </div>
-//         <div className="af-row" style={{ marginTop: "2px", border: "1px solid #000" }}>
-//           {["ভর্তি ফ্রি :", "মাসিক বেতন :", "আবাসিক ফ্রি :", "অন্যান্য ফ্রি :"].map(
-//             (label, i) => (
-//               <div
-//                 key={i}
-//                 style={{
-//                   flex: 1,
-//                   textAlign: "center",
-//                   padding: "4px 0",
-//                   borderRight: i < 3 ? "1px solid #000" : "none",
-//                 }}
-//               >
-//                 {label}
-//               </div>
-//             )
-//           )}
-//         </div>
-
-//         {/* ================= APPROVAL ================= */}
-//         <div style={{ marginTop: "8px" }}>
-//           <div style={{ fontWeight: 700 }}>মুহতামিমের মঞ্জুরি:</div>
-//           <p style={{ textAlign: "justify", marginTop: "2px" }}>
-//             আবেদনকারীর <span className="af-dotline" style={{ minWidth: "280px" }} />{" "}
-//             জামাআতে ভর্তির আবেদন মঞ্জুর করা হলো।
-//           </p>
-//         </div>
-
-//         {/* ================= FINAL SIGNATURE ================= */}
-//         <div className="af-row" style={{ marginTop: "14px", justifyContent: "flex-end" }}>
-//           <div style={{ textAlign: "center" }}>
-//             <div className="af-dotline" style={{ minWidth: "180px" }} />
-//             <div>মুহতামিম সাহেবের স্বাক্ষর/সীল</div>
-//             <div style={{ marginTop: "4px" }}>
-//               তারিখ <span className="af-dotline" style={{ minWidth: "100px" }} />
-//             </div>
-//           </div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// };
-
-// export default AdmissionFormPdf;

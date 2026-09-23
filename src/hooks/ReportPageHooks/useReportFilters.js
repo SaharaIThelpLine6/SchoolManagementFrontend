@@ -1,9 +1,3 @@
-// hooks/useReportFilters.js
-//
-// ReportBuilder এর ফিল্টার লজিক এখান থেকে বের করে আনা হলো, যাতে
-// BanglaAttendence-এর মতো অন্য যেকোনো রিপোর্টও একই ফিল্টার + লাইভ ডাটা
-// (session/subClass/gender/admissionType/residential/userStatus/district/
-// thana অনুযায়ী ফিল্টার করা student_report_list) ব্যবহার করতে পারে।
 import { useMemo, useState } from "react";
 import { useGetResidentialQuery } from "../../features/settings/settingsQuerySlice";
 import {
