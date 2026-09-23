@@ -195,7 +195,7 @@ export default function StudentResultSheet({ reportData, query, }) {
                                     {bnBijoy2Unicode(String(studentResult.Total))}
                                 </td>
                                 <td className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]">
-                                    {bnBijoy2Unicode(String(studentResult.Total / conditionAverage.AverageSubsonkha || 1))}
+                                    {bnBijoy2Unicode(String((Number(studentResult.Total) / Number(conditionAverage.AverageSubsonkha || 1)).toFixed(2)))}
                                 </td>
 
                                 <td className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]">
