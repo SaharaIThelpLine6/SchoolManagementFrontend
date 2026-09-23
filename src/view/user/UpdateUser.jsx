@@ -305,7 +305,6 @@ const UpdateUser = ({ singleUserData }) => {
                 labelColor="text-red-500"
                 // defaultValue={userCodeData ? userCodeData : ''}
                 defaultValue={singleUserData?.UserCode || ''}
-                disable
               />
 
               <DefaultSelect

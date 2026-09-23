@@ -77,6 +77,7 @@ import PaymentConfirm from '../pages/PaymentConfirm';
 import PaymentHistory from '../pages/PaymentHistory';
 import PointBasedResultCreateUpdate from '../pages/PointBasedResultCreateUpdate';
 import PointBasedResultEntry from '../pages/PointBasedResultEntry';
+import TeacherSubjectsInfo from '../pages/TeacherSubjectsInfo';
 import PageNotFound from '../components/PageNotFound';
 import QueryManage from '../pages/QueryManage';
 import QueryThree from '../pages/QueryThree';
@@ -93,6 +94,7 @@ import StudentClassRoutine from '../pages/StudentClassRoutine';
 import StudentClassRoutineTimeSlots from '../pages/StudentClassRoutineTimeSlots';
 import StudentComplaint from '../pages/StudentComplaint';
 import StudentGroupCreate from '../pages/StudentGroupCreate';
+import ExamStudentList from '../pages/ExamStudentList';
 import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
 import StudentIdCardPrint from '../pages/StudentIdCardPrint';
 import StudentsFeeCollection from '../pages/StudentsFeeCollection';
@@ -169,6 +171,8 @@ import SMSPaymentConfirm from '../pages/SMSPaymentConfirm';
 
 // AdminRoutes
 import AdminRoutes from "../Admin/routes/AdminRoutes";
+import TeacherInfo from '../components/Tables/TeacherInfo';
+import DashboardDesignNew from '../components/DashboardDesignNew';
 
 const Router = createBrowserRouter([
   {
@@ -194,6 +198,7 @@ const Router = createBrowserRouter([
           {
             index: true,
             element: <Home />,
+            // element: <DashboardDesignNew />,
           },
           {
             path: 'general-info',
@@ -238,7 +243,7 @@ const Router = createBrowserRouter([
                 path: 'sms',
                 element: (
                   <RequirePermission permissionId={permissionsDataList.sms}>
-                    <SMS pageTitle="SMS"  />
+                    <SMS pageTitle="SMS" />
                   </RequirePermission>
                 ),
               },
@@ -628,7 +633,8 @@ const Router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.teacher_info}
                   >
-                    <AddTeacher pageTitle="Employee" />
+                    <TeacherInfo pageTitle="Employee" />
+                    {/* <AddTeacher pageTitle="Employee" /> */}
                   </RequirePermission>
                 ),
               },
@@ -684,6 +690,16 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.exam_name}
                   >
                     <Exam pageTitle="Exam" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'exam-student-list',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.exam_fee_setting}
+                  >
+                    <ExamStudentList pageTitle="Exam Student List" />
                   </RequirePermission>
                 ),
               },
@@ -771,21 +787,21 @@ const Router = createBrowserRouter([
                 path: 'exam-condition',
                 element: (
                   <OwenGuide>
-                    <ExamCondition pageTitle="Exam Condition"  />
+                    <ExamCondition pageTitle="Exam Condition" />
                   </OwenGuide>
                 ),
               },
 
-              // {
-              //   path: 'list-of-candidates',
-              //   element: (
-              //     <RequirePermission
-              //       permissionId={permissionsDataList.exam_list_generation}
-              //     >
-              //       <StudentGroupCreate pageTitle="List of Candidates" />
-              //     </RequirePermission>
-              //   ),
-              // },
+              {
+                path: 'list-of-candidates',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.exam_list_generation}
+                  >
+                    <StudentGroupCreate pageTitle="List of Candidates" />
+                  </RequirePermission>
+                ),
+              },
               {
                 path: 'exam-group-create',
                 element: (
@@ -866,6 +882,16 @@ const Router = createBrowserRouter([
                   >
                     <PointBasedResultEntry pageTitle="Result Entry & Publish" />
                     {/* <PageNotFound /> */}
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'teacher_asign_subject',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.result_entry}
+                  >
+                    <TeacherSubjectsInfo pageTitle="Result Entry & Publish" />
                   </RequirePermission>
                 ),
               },
@@ -1420,7 +1446,7 @@ const Router = createBrowserRouter([
     element: <QueryThree />,
   },
 
-    // Admin Route
+  // Admin Route
   ...AdminRoutes,
 
   {

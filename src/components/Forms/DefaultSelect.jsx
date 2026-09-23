@@ -33,15 +33,12 @@ const DefaultSelect = ({
     }
   };
 
-  // Handle select change
   const handleChange = (e) => {
     const selectedValue =
       type === "number" ? parseInt(e.target.value) : e.target.value;
 
-    // Update form value
     setValue(registerKey, selectedValue);
 
-    // Call external onChange if provided
     if (onChange) {
       const selectedOption = options.find(
         (opt) => String(opt[valueField]) === String(e.target.value)
@@ -63,20 +60,20 @@ const DefaultSelect = ({
     };
   }, [registerKey]);
 
+  const hasError = errors[registerKey];
+
   return (
     <div
-      className={`w-full ${
-        labelPosition === "left" ? "flex items-center gap-4" : ""
-      }`}
+      className={` font-SolaimanLipi w-full ${labelPosition === "left" ? "flex items-center gap-4" : ""
+        }`}
     >
       {label && (
         <label
           htmlFor={registerKey}
-          className={`font-default font-medium ${
-            labelPosition === "left"
-              ? "text-black"
-              : "mb-1 block text-black"
-          }`}
+          className={`font-bold text-sm ${labelPosition === "left"
+            ? "text-black"
+            : "mb-1 block text-black"
+            }`}
         >
           <div className="flex items-center gap-1">
             <span className={labelColor}>{translate(label)}</span>
@@ -98,14 +95,18 @@ const DefaultSelect = ({
               valueAsNumber: type === "number",
             })}
             onClick={toggleDropdown}
-            onChange={handleChange} // Add onChange handler
+            onChange={handleChange}
             defaultValue=""
-            className={`relative h-[38px] z-20 w-full appearance-none font-default font-medium rounded border border-stroke bg-white py-1 px-4 outline-none transition
-              focus:border-custom-focus active:border-custom-focus
-              ${disabled ? "cursor-not-allowed disabled:bg-slate-200" : ""}`}
             disabled={disabled}
+            className={`relative z-20 w-full appearance-none font-default rounded-lg border text-sm h-11 px-3 pr-10 outline-none transition-all duration-200 ease-in-out bg-white text-gray-900
+              ${hasError
+                ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"
+                : "border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 hover:border-gray-400"
+              }
+              disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-gray-500
+            `}
           >
-            <option value="" className="text-body font-default">
+            <option value="" className="text-body">
               {translate(defaultValue)}
             </option>
             {options &&
@@ -113,7 +114,7 @@ const DefaultSelect = ({
                 <option
                   key={option[valueField]}
                   value={option[valueField]}
-                  className="text-body font-default"
+                  className="text-body"
                 >
                   {unicode
                     ? bnBijoy2Unicode(option[nameField])
@@ -123,16 +124,15 @@ const DefaultSelect = ({
           </select>
 
           <span
-            className={`absolute pointer-events-none transform transition-transform duration-300 top-1/2 right-4 z-30 -translate-y-1/2 ${
-              isOpen ? "rotate-180" : "rotate-0"
-            }`}
+            className={`absolute pointer-events-none transform transition-transform duration-300 top-1/2 right-4 z-30 -translate-y-1/2 ${isOpen ? "rotate-180" : "rotate-0"
+              }`}
           >
             {/* Chevron icon */}
           </span>
         </div>
 
-        {errors[registerKey] && (
-          <p className="text-red-500 text-sm mt-1">
+        {hasError && (
+          <p className="text-red-500 text-xs font-medium mt-1.5 font-default animate-fade-in">
             {errors[registerKey].message}
           </p>
         )}

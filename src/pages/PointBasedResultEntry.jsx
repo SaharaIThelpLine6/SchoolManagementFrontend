@@ -161,10 +161,12 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     }
   };
 
-  const handleTeacherAssign = async (row) => {
-    showModal("Teacher Subject Assignment", "HANDLE_RESULT_ENTRY_ASSIGN", row, { closeOnOutSide: false })
-  }
 
+  const handleTeacherAssign = async () => {
+    navigate(
+      `/dashboard/result/teacher_asign_subject`
+    )
+  }
   // Table Data Columns 
   const columns = [
     {
@@ -210,8 +212,8 @@ const PointBasedResultEntry = ({ pageTitle }) => {
           >
             <button
               className={`px-3 py-1 rounded text-sm font-medium ${isPublished
-                  ? 'bg-green-500 text-white'
-                  : 'bg-red-500 text-white'
+                ? 'bg-green-500 text-white'
+                : 'bg-red-500 text-white'
                 }`}
               onClick={() => handleStatusUpdate(row.ID, isPublished)}
               disabled={isLoading}
@@ -237,9 +239,9 @@ const PointBasedResultEntry = ({ pageTitle }) => {
             empty={true}
           >
 
-            <Button className='' onClick={() => { handleTeacherAssign(row) }} tooltip_message='Teacher Result Entry Permission'>
+            {/* <Button className='' onClick={() => { handleTeacherAssign(row) }} tooltip_message='Teacher Result Entry Permission'>
               <SvgIcon name={"TbUserShare"} size={20} />
-            </Button>
+            </Button> */}
             <EditButton
               onClick={() =>
                 navigate(
@@ -270,6 +272,9 @@ const PointBasedResultEntry = ({ pageTitle }) => {
         <h3 className="text-base sm:text-[20px] font-bold">
           {translate('Point Result Entry')}
         </h3>{' '}
+        <Button className='' onClick={() => { handleTeacherAssign() }}>
+          শিক্ষক-বিষয় গ্রুপ
+        </Button>
       </div>
       <FormProvider {...methods}>
         <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>

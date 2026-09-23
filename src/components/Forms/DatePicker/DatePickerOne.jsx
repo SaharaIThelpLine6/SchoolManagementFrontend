@@ -22,20 +22,17 @@ const DatePickerOne = ({
   const translate = useTranslate();
 
   const today = new Date();
-  
+
   // ✅ Convert UTC string to local Date object
   const parseDateFromUTC = (dateValue) => {
     if (!dateValue) return null;
-    
-    // If it's a string with Z (UTC)
+
     if (typeof dateValue === 'string' && dateValue.includes('Z')) {
       const date = new Date(dateValue);
-      // Convert UTC to local by adding timezone offset
       const localDate = new Date(date.getTime() + (date.getTimezoneOffset() * 60000));
       return localDate;
     }
-    
-    // If it's a string without Z
+
     if (typeof dateValue === 'string') {
       const parts = dateValue.split(/[- :]/);
       if (timestamp && parts.length >= 5) {
@@ -54,7 +51,7 @@ const DatePickerOne = ({
         );
       }
     }
-    
+
     return dateValue instanceof Date ? dateValue : new Date(dateValue);
   };
 
@@ -64,23 +61,21 @@ const DatePickerOne = ({
     if (!(date instanceof Date)) {
       date = new Date(date);
     }
-    // Create UTC date string without timezone offset
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    
+
     if (timestamp) {
-      // For datetime: send as UTC
       return new Date(Date.UTC(year, date.getMonth(), date.getDate(), date.getHours(), date.getMinutes())).toISOString();
     } else {
-      // For date only: send as UTC date at midnight
       return new Date(Date.UTC(year, date.getMonth(), date.getDate())).toISOString();
     }
   };
 
   const initialDate = defaultValue ? parseDateFromUTC(defaultValue) : null;
+  const hasError = errors[registerKey];
 
   return (
     <div
@@ -89,9 +84,9 @@ const DatePickerOne = ({
       {dateCalender && (
         <label
           htmlFor={registerKey}
-          className={`text-black font-default ${labelPosition === 'left'
-              ? 'w-1/4 min-w-[100px] mb-0 text-end'
-              : 'mb-1 block'
+          className={`text-black font-bold text-sm ${labelPosition === 'left'
+            ? 'w-1/4 min-w-[100px] mb-0 text-end'
+            : 'mb-1 block'
             }`}
         >
           {translate(dateCalender)} :
@@ -114,7 +109,6 @@ const DatePickerOne = ({
                 const selectedDate = dates[0];
                 if (selectedDate) {
                   if (timestamp) {
-                    // For timestamp: store as UTC
                     const utcDate = new Date(Date.UTC(
                       selectedDate.getFullYear(),
                       selectedDate.getMonth(),
@@ -124,7 +118,6 @@ const DatePickerOne = ({
                     ));
                     onChange(utcDate);
                   } else {
-                    // For date only: store as UTC date at midnight
                     const utcDate = new Date(Date.UTC(
                       selectedDate.getFullYear(),
                       selectedDate.getMonth(),
@@ -142,9 +135,7 @@ const DatePickerOne = ({
                 noCalendar: false,
                 time_24hr: timeFormat === 'H:i',
                 dateFormat: timestamp ? "Y-m-d H:i" : "Y-m-d",
-                // ✅ Use local timezone for display
                 timezone: useLocalTime ? 'local' : 'UTC',
-                // ✅ Format date in local time for display
                 formatDate: (date) => {
                   if (timestamp) {
                     const year = date.getFullYear();
@@ -159,7 +150,6 @@ const DatePickerOne = ({
                   const day = String(date.getDate()).padStart(2, '0');
                   return `${year}-${month}-${day}`;
                 },
-                // ✅ Parse date string in local time
                 parseDate: (dateStr) => {
                   if (!dateStr) return null;
                   const parts = dateStr.split(/[- :]/);
@@ -181,17 +171,21 @@ const DatePickerOne = ({
                   return null;
                 }
               }}
-              className={`w-full rounded border-[1.5px] border-stroke bg-white py-1 px-1 text-center text-black outline-none transition
-    focus:border-custom-focus active:border-custom-focus
-    disabled:cursor-not-allowed disabled:bg-slate-200 h-[38px]`}
+              className={`w-full font-default rounded-lg border text-sm h-11 px-3 outline-none transition-all duration-200 ease-in-out bg-white text-gray-900
+                ${hasError
+                  ? 'border-red-500 placeholder:text-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200'
+                  : 'border-gray-300 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 hover:border-gray-400'
+                }
+                disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-gray-500
+              `}
             />
           )}
         />
 
-        {errors[registerKey] && (
-          <span className="text-red-500 text-sm mt-1">
+        {hasError && (
+          <p className="text-red-500 text-xs font-medium mt-1.5 font-default animate-fade-in">
             {errors[registerKey].message}
-          </span>
+          </p>
         )}
       </div>
     </div>

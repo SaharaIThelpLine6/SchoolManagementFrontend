@@ -28,7 +28,7 @@ const AddStudentForm = () => {
   // ✅ Loading state UI
   if (isSingleUserLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[300px]">
+      <div className="flex flex-col items-center justify-center min-h-[300px] font-SolaimanLipi">
         <div className="animate-spin rounded-full h-10 w-10 border-t-4 border-green-500 border-solid"></div>
         <p className="mt-3 text-gray-600 font-medium">ডেটা লোড হচ্ছে...</p>
       </div>

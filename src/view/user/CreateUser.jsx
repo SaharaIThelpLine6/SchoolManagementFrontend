@@ -1,3 +1,4 @@
+
 import 'flatpickr/dist/flatpickr.css';
 import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -290,7 +291,22 @@ const CreateUser = ({ pageTitle }) => {
   const onSubmit = async (data) => {
     console.log('Submitting data:', data);
     try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
+      const dob = new Date(formattedDate);
+      dob.setHours(0, 0, 0, 0);
+
+      if (dob > today) {
+        await Swal.fire({
+          icon: 'warning',
+          title: 'তারিখ সঠিক নয়!',
+          text: 'জন্ম তারিখ আজকের তারিখের পর হতে পারবে না।',
+          confirmButtonText: 'ঠিক আছে',
+        });
+
+        return; // API call হবে না }
+      }
       const payload = {
         ...data,
         DateOfBirth: formattedDate
@@ -365,7 +381,7 @@ const CreateUser = ({ pageTitle }) => {
                 label="Gender"
                 options={[
                   { GenderID: 1, GenderName: 'ছেলে' },
-                  { GenderID: 2, GenderName: 'মেয়ে' },
+                  { GenderID: 2, GenderName: 'মহিলা' },
                 ]}
                 registerKey="GenderID"
                 require="Gender Field is required!"
@@ -449,21 +465,12 @@ const CreateUser = ({ pageTitle }) => {
                 registerKey="Relationship1"
               />
 
-              <PhoneNumberInput
+
+              <DefaultInput
                 label={translate("Mobile 2")}
+                type="number"
                 registerKey="Mobile2"
-                // require={true}
-                minLength={11}
-                maxLength={11}
-                allowedPrefixes={[
-                  '013',
-                  '014',
-                  '015',
-                  '016',
-                  '017',
-                  '018',
-                  '019',
-                ]}
+                placeholder="ফোন নম্বর লিখুন"
               />
 
               <DefaultSelect

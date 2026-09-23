@@ -229,44 +229,44 @@ export const menuData = [
       }
     ],
   },
-  // {
-  //   id: "3",
-  //   name: "Teacher Staff",
-  //   route: "/teacherinfo",
-  //   icon: "IoIosPeople",
-  //   subMenu: [
-  //     {
-  //       id: "1",
-  //       name: "Teacher Info",
-  //       route: "/teacherinfo",
-  //       subMenu: false,
-  //     },
-  //     {
-  //       id: "2",
-  //       name: "Pay-role Heading",
-  //       route: "/teacherinfo/payRole",
-  //       subMenu: false,
-  //     },
-  //     {
-  //       id: "3",
-  //       name: "Pay-role Name",
-  //       route: "/teacherinfo/pRName",
-  //       subMenu: false,
-  //     },
-  //     {
-  //       id: "4",
-  //       name: "Reports",
-  //       route: "/teacherinfo/report",
-  //       subMenu: false,
-  //     },
-  //     {
-  //       id: "5",
-  //       name: "Designation",
-  //       route: "/teacherinfo/designation",
-  //       subMenu: false,
-  //     },
-  //   ],
-  // },
+  {
+    id: "3",
+    name: "Teacher Staff",
+    route: "teacherinfo",
+    icon: "IoIosPeople",
+    subMenu: [
+      {
+        id: "1",
+        name: "Teacher Info",
+        route: "teacherinfo",
+        subMenu: false,
+      },
+      // {
+      //   id: "2",
+      //   name: "Pay-role Heading",
+      //   route: "/teacherinfo/payRole",
+      //   subMenu: false,
+      // },
+      // {
+      //   id: "3",
+      //   name: "Pay-role Name",
+      //   route: "/teacherinfo/pRName",
+      //   subMenu: false,
+      // },
+      // {
+      //   id: "4",
+      //   name: "Reports",
+      //   route: "/teacherinfo/report",
+      //   subMenu: false,
+      // },
+      // {
+      //   id: "5",
+      //   name: "Designation",
+      //   route: "/teacherinfo/designation",
+      //   subMenu: false,
+      // },
+    ],
+  },
   {
     id: '5',
     name: 'Exam',
@@ -294,6 +294,11 @@ export const menuData = [
       //   route: '/exam/list-of-candidates',
       // },
       {
+        id: '4',
+        name: 'Exam Student List',
+        route: 'exam/exam-student-list',
+      },
+      {
         id: '5',
         name: 'Exam Group Select',
         route: 'exam/exam-group-create',
@@ -304,32 +309,32 @@ export const menuData = [
       //   route: '/exam/talent-condition',
       // },
       {
-        id: '7',
+        id: '6',
         name: 'Admit Card',
         route: 'exam/admit-card',
       },
       {
-        id: '9',
+        id: '7',
         name: 'Exam Rules',
         route: 'exam/rules',
       },
       {
-        id: '11',
+        id: '8',
         name: 'Set Exam Room',
         route: 'exam/exam-hallist',
       },
       {
-        id: '12',
+        id: '9',
         name: 'Exam Seat plan',
         route: 'exam/exam-setplan',
       },
       {
-        id: '8',
+        id: '10',
         name: 'Exam Routing Create',
         route: 'exam/routing',
       },
       {
-        id: '10',
+        id: '11',
         name: 'Exam Report',
         route: 'exam/report',
       },

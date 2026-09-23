@@ -26,6 +26,7 @@ export default {
         print: { raw: 'print' },
       },
       fontFamily: {
+        hind: ['Hind Siliguri', 'sans-serif'], // 'font-hind' ক্লাস তৈরি হবে
         lato: '"Lato", serif',
         SolaimanLipi: 'SolaimanLipiNormal, serif',
         Poppins: ['Poppins', 'sans-serif'],

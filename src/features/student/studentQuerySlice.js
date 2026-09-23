@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { paymentSlice } from '../payment/paymentSlice';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -116,7 +117,63 @@ export const userStudentSlice = createApi({
       query: () => `get_studentreport_cet`,
       providesTags: ['StudentReportsCet'],
     }),
+    postStudentInfo: builder.mutation({
+      query: (data) => ({
+        url: `insert_student_info`,
+        method: 'POST',
+        body: data,
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            paymentSlice.util.invalidateTags(['MadrashaQuotaInfo'])
+          );
+        } catch (err) {
+          console.error(err);
+        }
+      },
+      invalidatesTags: ['Student', "MadrashaQuotaInfo"],
+    }),
+    postGuardianInfo: builder.mutation({
+      query: (data) => ({
+        url: `insert_guardian_info`,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['Student'],
+    }),
+    getUserById: builder.query({
+      query: (userId) => `/user/${userId}`,
+      providesTags: ['Student'],
+    }),
+    getFilteredStudents: builder.query({
+      query: ({
+        page = 1,
+        limit = 10,
+        userTypeID,
+        filterTypeId,
+        filterValue,
+        UserAction,    // ✅ NEW
+      }) => {
+        const params = new URLSearchParams();
 
+        params.append('page', page);
+        params.append('limit', limit);
+
+        if (userTypeID) params.append('userTypeID', userTypeID);
+        if (filterTypeId) params.append('filterTypeId', filterTypeId);
+        if (filterValue) params.append('filterValue', filterValue);
+
+        // ✅ UserAction filter (0 বা 1 দুটোই পাঠাবে)
+        if (UserAction !== undefined && UserAction !== null && UserAction !== '') {
+          params.append('UserAction', UserAction);
+        }
+
+        return `/student_filter?${params.toString()}`;
+      },
+      providesTags: ['Student'],
+    }),
     postStudentReportCets: builder.mutation({
       query: (data) => ({
         url: `student_report_cet`,
@@ -515,6 +572,27 @@ export const userStudentSlice = createApi({
       }),
       invalidatesTags: ['HomeWorkGroups'],
     }),
+
+
+    // ✅ UPDATE (PUT)
+    updateUser: builder.mutation({
+      query: ({ userId, body }) => ({
+        url: `/user/${userId}`,
+        method: "PUT",
+        body,
+      }),
+      async onQueryStarted(arg, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            paymentSlice.util.invalidateTags(['MadrashaQuotaInfo'])
+          );
+        } catch (err) {
+          console.error(err);
+        }
+      },
+      invalidatesTags: ['Student', "MadrashaQuotaInfo"],
+    }),
   }),
 });
 
@@ -579,5 +657,11 @@ export const {
   usePostHomeWorkGroupMutation,
   useUpdateHomeWorkGroupMutation,
   useDeleteHomeWorkGroupMutation,
-  useGetHomeWorkGroupsTeacherQuery
+  useGetHomeWorkGroupsTeacherQuery,
+
+  usePostStudentInfoMutation,
+  useGetFilteredStudentsQuery,
+  useGetUserByIdQuery,
+  useUpdateUserMutation,
+  usePostGuardianInfoMutation
 } = userStudentSlice;

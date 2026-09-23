@@ -359,6 +359,7 @@ const useTranslate = () => {
     'All Students': 'সকল শিক্ষার্থী',
     'Students Report': 'শিক্ষার্থী রিপোর্ট',
     'Student Vacation': 'শিক্ষার্থী ছুটি',
+    'Teacher Info': 'শিক্ষক তালিকা',
     'Group Distribution': 'শিক্ষার্থী গ্রুপ সেটিং',
     'Certificate of Attestation': 'প্রত্যয়ন পত্র',
     'Online Admission': 'অনলাইন ভর্তি',
@@ -1002,7 +1003,7 @@ const useTranslate = () => {
     "Date of Birth": "জন্ম তারিখ",
     "Age": "বয়স",
     "NID/Birth Registration No.": "এনআইডি/জন্ম নিবন্ধন নং",
-    "Mobile 1* (SMS will be sent)": "মোবাইল ১* (এসমস যাবে)",
+    "Mobile 1* (SMS will be sent)": "মোবাইল ১* (এসএমএস যাবে)",
     "Relation": "সম্পর্ক",
     "Mobile 2": "মোবাইল ২",
     "Email": "ই-মেইল",
@@ -1027,7 +1028,8 @@ const useTranslate = () => {
     "Class Update": "শ্রেণি আপডেট",
 
     "Students Report List": "শিক্ষার্থী রিপোর্ট লিস্ট",
-
+    "List Of Expelled Students": "বহিস্কারকৃত শিক্ষার্থীর তালিকা",
+    "Exam Student List": "পরীক্ষার্থী তালিকা",
 
   };
 

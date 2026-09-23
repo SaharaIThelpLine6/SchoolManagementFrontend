@@ -10,7 +10,7 @@ const DefaultInput = ({
   placeholder,
   registerKey,
   codeSetting = false,
-  labelColor = 'text-black',
+  labelColor = 'text-gray-700', // Updated default label color to match Image 2
   require = false,
   disable = false,
   readOnly = false,
@@ -58,23 +58,22 @@ const DefaultInput = ({
   const shouldShowError =
     showError || isSubmitted || touchedFields[registerKey] || isTouched;
 
+  const hasError = shouldShowError && errors[registerKey];
+
   return (
     <div
-      className={`w-full ${
-        labelPosition === 'left' ? 'flex items-center gap-4' : ''
-      }`}
+      className={`w-full ${labelPosition === 'left' ? 'flex items-center gap-4' : ''
+        }`}
     >
       {label && (
         <label
           htmlFor={registerKey}
-          className={`text-black font-default ${
-            labelPosition === 'left' ? 'w-2/5 mb-0 text-end' : 'mb-1 block'
-          }`}
+          className={`font-bold text-sm ${labelPosition === 'left' ? 'w-2/5 mb-0 text-end' : 'mb-1.5 block'
+            }`}
         >
           <div
-            className={`flex items-center gap-2 ${
-              labelPosition === 'left' ? 'justify-end' : 'justify-between'
-            }`}
+            className={`flex items-center gap-2 ${labelPosition === 'left' ? 'justify-end' : 'justify-between'
+              }`}
           >
             <div className="flex items-center gap-1">
               <span className={labelColor}>{translate(label)}</span>
@@ -84,7 +83,7 @@ const DefaultInput = ({
 
             {codeSetting && (
               <span
-                className="text-blue-600 underline text-sm font-medium cursor-pointer"
+                className="text-blue-600 hover:text-blue-700 underline text-xs font-semibold cursor-pointer transition-colors"
                 onClick={handleOpenModal}
               >
                 Code Setting
@@ -98,8 +97,19 @@ const DefaultInput = ({
         <input
           type={type === 'number' || type === 'phone' ? 'number' : type}
           placeholder={translate(placeholder)}
-          className={`w-full font-default rounded border-[1.5px] border-stroke bg-white px-2 h-[38px] text-black outline-none text-[14px] transition focus:border-custom-focus active:border-custom-focus disabled:cursor-not-allowed disabled:bg-slate-200 ${shouldShowError && errors[registerKey] ? 'placeholder:text-red-400 border-red-400' : ''} ${isRtl ? 'direction-rtl' : ''}`}
-          {...register(registerKey, { required: require ? 'এই ফিল্ডটি প্রয়োজনীয়' : false, ...(type === 'number' && {validate: (value) =>
+          // Updated className for smooth, modern focus effect matching Image 2
+          className={`w-full font-default rounded-lg border text-sm h-11 px-3 outline-none transition-all duration-200 ease-in-out bg-white text-gray-900
+            ${hasError
+              ? 'border-red-500 placeholder:text-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-200'
+              : 'border-gray-300 placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 hover:border-gray-400'
+            }
+            disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-gray-500
+            ${isRtl ? 'direction-rtl' : ''}
+          `}
+          {...register(registerKey, {
+            required: require ? 'এই ফিল্ডটি প্রয়োজনীয়' : false,
+            ...(type === 'number' && {
+              validate: (value) =>
                 isNaN(Number(value)) ? 'দয়া করে একটি বৈধ সংখ্যা লিখুন' : true,
             }),
             ...(type === 'phone' && {
@@ -112,11 +122,11 @@ const DefaultInput = ({
           })}
           disabled={disable}
           readOnly={readOnly}
-          onBlur={() => setIsTouched(true)} // ইউজার যখন ফিল্ড থেকে বের হয় তখন touched সেট হয়
+          onBlur={() => setIsTouched(true)}
         />
 
-        {shouldShowError && errors[registerKey] && (
-          <p className="text-red-500 text-sm mt-1 font-default">
+        {hasError && (
+          <p className="text-red-500 text-xs font-medium mt-1.5 font-default animate-fade-in">
             {errors[registerKey].message}
           </p>
         )}

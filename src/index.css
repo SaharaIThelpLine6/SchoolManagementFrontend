@@ -115,18 +115,17 @@
 
 
 @layer base {
-    @font-face {
-        font-family: SolaimanLipi;
-        src: url('./assets/font/solaimanlipi.woff') format('truetype');
-        font-display: swap;
-        unicode-range: U+0980-09FF;
-    }
-}
-
-@layer base {
-  body {
-    font-family: 'SolaimanLipi', sans-serif;
+  @font-face {
+    font-family: SolaimanLipi;
+    src: url('./assets/font/solaimanlipi.woff') format('truetype');
+    font-display: swap;
+    unicode-range: U+0980-09FF;
   }
 }
 
-
+/* 
+@layer base {
+  body {
+    font-family: 'Hind Siliguri', sans-serif;
+  }
+} */
