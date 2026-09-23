@@ -1,10 +1,11 @@
+import { useEffect } from "react";
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 // import bnBijoy2Unicode from "../../../utils/conveter";
 import PdfHeader from "./PdfHeader";
 
-const AdmissionFormPdf = ({SubClassID, SessionID}) => {
+const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) => {
 
    const { data: subClassListData } = useGetSubClassListQuery();
     const {
@@ -211,7 +212,7 @@ const AdmissionFormPdf = ({SubClassID, SessionID}) => {
           <div style={{ width: "24%", display: "flex", justifyContent: "center", alignItems: "center", paddingTop: "10px" }}>
             <div style={{ border: "1px solid #000", padding: "8px 28px", fontSize: "18px", fontWeight: "bold", boxShadow: "4px 4px 0px #000", background: "#fff" }}>
               ভর্তি ফরম
-            </h2>
+            </div>
           </div>
 
           {/* RIGHT: বর্তমান তথ্য */}
@@ -256,7 +257,7 @@ const AdmissionFormPdf = ({SubClassID, SessionID}) => {
                   style={{ width: 12, height: 12, margin: "0 4px 0 6px", verticalAlign: "middle" }}
                 />
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -532,7 +533,7 @@ const AdmissionFormPdf = ({SubClassID, SessionID}) => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
