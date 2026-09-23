@@ -9,6 +9,7 @@ import FilterableReportView from '../view/students/reports/student-report-list/F
 import BanglaAttendence from '../view/students/reports/BanglaAttendence';
 import ArabicAttendence from '../view/students/reports/ArabicAttendence';
 import BanglaAttendenceSubjectWari from '../view/students/reports/BanglaAttendenceSubjectWari';
+import AdmissionFormPdf from '../view/general-information/user-reports/AdmissionFormPdf';
 
 // প্রতিটি রিপোর্টের জন্য আলাদা সেটিং
 const REPORT_CONFIGS = {
