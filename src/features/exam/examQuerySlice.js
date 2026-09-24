@@ -511,6 +511,22 @@ export const examSlice = createApi({
       invalidatesTags: ['StudentGroup'],
     }),
 
+    getExamSession: builder.query({
+      query: () => `exam_filter_sessions`,
+      providesTags: ['ExamSession'],
+    }),
+
+    getExamFilterExams: builder.query({
+      query: ({ SessionID }) => `exam_filter_exams/${SessionID}`,
+      providesTags: ['ExamNames'],
+    }),
+
+    getExamFilterSubclasses: builder.query({
+      query: ({ SessionID, ExamID }) =>
+        `exam_filter_subclasses/${SessionID}/${ExamID}`,
+      providesTags: ['ExamConditions'],
+    }),
+
   }),
 });
 
@@ -574,4 +590,8 @@ export const {
   useGetStudentGroupListQuery,
   useAddStudentGroupMutation,
   useRemoveStudentGroupMutation,
+
+  useGetExamSessionQuery,
+  useGetExamFilterExamsQuery,
+  useGetExamFilterSubclassesQuery
 } = examSlice;
