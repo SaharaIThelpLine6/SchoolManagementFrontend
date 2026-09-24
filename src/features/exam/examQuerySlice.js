@@ -67,7 +67,16 @@ export const examSlice = createApi({
       providesTags: ['ExamFeeSettings'],
     }),
     getExamConditions: builder.query({
-      query: () => `exam_conditions`,
+      query: ({ SessionID, ExamID, SubClassID } = {}) => {
+        const params = new URLSearchParams();
+
+        if (SessionID) params.append('SessionID', SessionID);
+        if (ExamID) params.append('ExamID', ExamID);
+        if (SubClassID) params.append('SubClassID', SubClassID);
+
+        const queryString = params.toString();
+        return queryString ? `exam_conditions?${queryString}` : 'exam_conditions';
+      },
       providesTags: ['ExamConditions'],
     }),
     postExamFeeSetting: builder.mutation({
@@ -396,6 +405,14 @@ export const examSlice = createApi({
       }),
       invalidatesTags: ["ExamDivitions"],
     }),
+    updateExamDivition: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `exam_division/${id}`,
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: ["ExamDivitions"],
+    }),
     postExamSettings: builder.mutation({
       query: (body) => ({
         url: `exam_condition_entry`,
@@ -577,6 +594,7 @@ export const {
   useGetExamFeeSlidQuery,
   useGetExamDivitionByTypeQuery,
   usePostExamDivitionMutation,
+  useUpdateExamDivitionMutation,
   usePostExamSettingsMutation,
   useLazyGetExamConditonEntryQuery,
   useUpdateExamSettingsMutation,
