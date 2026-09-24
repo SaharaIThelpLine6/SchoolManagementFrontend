@@ -48,12 +48,50 @@ const TableInput = ({
   }, [currentValue, defaultValue, registerKey, setValue, type, unicode]);
 
   const handleChange = (e) => {
-    const value = e.target.value;
+    const isNumericInput = type === "number" || type === "phone";
+    const value = isNumericInput
+      ? e.target.value.replace(type === "number" ? /[^0-9.]/g : /[^0-9]/g, "")
+      : e.target.value;
+
+    if (isNumericInput) {
+      e.target.value = value;
+      setValue(registerKey, value, { shouldValidate: true, shouldDirty: true });
+    }
+
     const isChanged =
       type === "number"
         ? Number(value) !== Number(defaultValue)
         : value !== defaultValue;
     setHasChanged(isChanged);
+  };
+
+  const handleKeyDown = (event) => {
+    onKeyDown?.(event);
+
+    if (event.defaultPrevented || (type !== "number" && type !== "phone")) {
+      return;
+    }
+
+    const allowedKeys = [
+      "Backspace",
+      "Delete",
+      "Tab",
+      "Enter",
+      "ArrowLeft",
+      "ArrowRight",
+      "Home",
+      "End",
+    ];
+    const isDecimalPoint = type === "number" && event.key === ".";
+
+    if (
+      !/^[0-9]$/.test(event.key) &&
+      !allowedKeys.includes(event.key) &&
+      !isDecimalPoint &&
+      !(event.ctrlKey || event.metaKey)
+    ) {
+      event.preventDefault();
+    }
   };
 
   const selectInputValue = (event) => {
@@ -91,7 +129,8 @@ const TableInput = ({
 
       <div className={labelPosition === "left" ? "flex-1" : "w-full"}>
         <input
-          type={type === "number" || type === "phone" ? "number" : type}
+          type={type === "number" || type === "phone" ? "text" : type}
+          inputMode={type === "number" || type === "phone" ? "numeric" : undefined}
           placeholder={translate(placeholder)}
           className={`w-full rounded px-2 h-[38px] outline-none text-[14px] transition
             ${saveStatus === "failed"
@@ -124,7 +163,7 @@ const TableInput = ({
           min={min}
           max={max}
           onChange={handleChange}
-          onKeyDown={onKeyDown}
+          onKeyDown={handleKeyDown}
           {...rest}  // ← data-row, data-col এখানে input-এ বসবে
           onFocus={selectInputValue}
           onMouseDown={handleMouseDown}
