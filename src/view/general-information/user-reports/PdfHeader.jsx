@@ -58,7 +58,7 @@ const PdfHeader = ({ admissionFormImage }) => {
   }, [institutionInfoLoading, institutionInfoError]);
 
   return (
-    <div className="flex items-center justify-between pb-3 print:flex-row print:items-start">
+    <div className="flex items-center justify-between print:flex-row print:items-start">
       {/* Logo on the left */}
       <div className="w-20 h-20">
         <img src={logo} alt="Logo" className="w-full h-full object-contain" />
@@ -66,7 +66,7 @@ const PdfHeader = ({ admissionFormImage }) => {
 
       {/* Text in the center */}
       <div className="flex-1 text-center">
-        <h1 className="text-xl font-bold">
+        <h1 className="text-xl font-bold" style={{ fontSize: '1.5rem' }}>
           {bnBijoy2Unicode(institutionInfo?.InstitutionName)}
         </h1>
         <p className="text-sm">{bnBijoy2Unicode(institutionInfo?.Address)}</p>

@@ -248,59 +248,6 @@ const UserImage = ({ pageTitle }) => {
     dispatch(setFilteredStudent(null));
   };
   
-  // const handleDownloadAllPhotos = async () => {
-  //   setIsDownloading(true);
-
-  //   try {
-  //     const token = localStorage.getItem("token");
-
-  //     const response = await fetch(
-  //       `${import.meta.env.VITE_SERVER_URL}/api/users/download_user_images_zip`,
-  //       {
-  //         method: "GET",
-  //         headers: {
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //       }
-  //     );
-
-  //     if (!response.ok) {
-  //       let message = "Failed to download photos.";
-
-  //       try {
-  //         const errorData = await response.json();
-  //         message = errorData.error || message;
-  //       } catch {
-  //         // Response was not JSON.
-  //       }
-
-  //       throw new Error(message);
-  //     }
-
-  //     const blob = await response.blob();
-  //     const downloadUrl = window.URL.createObjectURL(blob);
-  //     const link = document.createElement("a");
-
-  //     link.href = downloadUrl;
-  //     link.download = "user_photos.zip";
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     link.remove();
-
-  //     window.URL.revokeObjectURL(downloadUrl);
-  //   } catch (error) {
-  //     console.error("Download error:", error);
-
-  //     Swal.fire({
-  //       icon: "error",
-  //       title: "Download Failed",
-  //       text: error.message || "Failed to download photos.",
-  //     });
-  //   } finally {
-  //     setIsDownloading(false);
-  //   }
-  // };
-
   const handleDownloadAllPhotos = async () => {
     if (isDownloading) return;
 

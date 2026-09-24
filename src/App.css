@@ -223,6 +223,33 @@ tr:nth-child(even) {
     background-color: white;
   }
 
+  .result-report-print {
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+  
+  .result-report-print,
+  .result-report-print * {
+    overflow: visible !important;
+  }
+
+  .result-report-header {
+    display: table-header-group !important;
+  }
+
+  .result-report-table thead {
+    display: table-header-group !important;
+  }
+
+  .result-report-table tbody {
+    display: table-row-group !important;
+  }
+
+  .result-report-table thead tr,
+  .result-report-table tbody tr {
+    display: table-row !important;
+  }
+
   .hidden_in_print {
     display: none !important;
   }

@@ -1028,7 +1028,8 @@ const useTranslate = () => {
     "Class Update": "শ্রেণি আপডেট",
 
     "Students Report List": "শিক্ষার্থী রিপোর্ট লিস্ট",
-
+    "List Of Expelled Students": "বহিস্কারকৃত শিক্ষার্থীর তালিকা",
+    "Exam Student List": "পরীক্ষার্থী তালিকা",
 
   };
 

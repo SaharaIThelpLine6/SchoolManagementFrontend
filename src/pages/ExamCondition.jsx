@@ -133,7 +133,7 @@ const ExamCondition = ({ pageTitle }) => {
     {
       title: translate('Session'), hozAlign: 'center', render: (row) => {
         return (
-          <>{row?.Session.SessionName}</>
+          <>{row?.Session?.SessionName}</>
         );
       },
     },
@@ -143,7 +143,7 @@ const ExamCondition = ({ pageTitle }) => {
       unicode: true,
       render: (row) => {
         return (
-          <>{row?.Exam.ExamName}</>
+          <>{row?.Exam?.ExamName}</>
         );
       }
     },
@@ -153,7 +153,7 @@ const ExamCondition = ({ pageTitle }) => {
       unicode: true,
       render: (row) => {
         return (
-          <>{row?.SubClass.SubClass}</>
+          <>{row?.SubClass?.SubClass}</>
         );
       }
     },
