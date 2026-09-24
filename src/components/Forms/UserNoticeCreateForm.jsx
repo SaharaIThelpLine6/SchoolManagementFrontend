@@ -186,24 +186,27 @@ const UserNoticeCreateForm = () => {
 
         {mode === "multiple" && (
           <>
-            <DefaultSelect
-              label={"Session"}
-              options={sessionData ?? []}
-              valueField="SessionID"
-              nameField="SessionName"
-              registerKey="SessionID"
-            />
+
             {/* 👉 যদি UserTypeID == 1 হয় তাহলে Class দেখাবে */}
             {Number(selectedUserType) === 1
               && (
-                <DefaultSelect
-                  label={translate("Class/Jammat")}
-                  options={responseData?.subClasses ?? []}
-                  valueField="SubClassID"
-                  nameField="SubClass"
-                  registerKey="SubClassID"
-                  placeholder={translate("Select Class")}
-                />
+                <>
+                  <DefaultSelect
+                    label={"Session"}
+                    options={sessionData ?? []}
+                    valueField="SessionID"
+                    nameField="SessionName"
+                    registerKey="SessionID"
+                  />
+                  <DefaultSelect
+                    label={translate("Class/Jammat")}
+                    options={responseData?.subClasses ?? []}
+                    valueField="SubClassID"
+                    nameField="SubClass"
+                    registerKey="SubClassID"
+                    placeholder={translate("Select Class")}
+                  />
+                </>
               )}
 
 
