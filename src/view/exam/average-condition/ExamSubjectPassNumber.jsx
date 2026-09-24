@@ -302,7 +302,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
         PassNumber: passNumber,
         MaxNumber: maxNumber,
         gradeBands: currentGradeBands,
-        mayeri: mayeri,
+        mayeri: mayeri != 4 ? 3 : mayeri ,
       };
 
       if (editingSubjectGradeIndex !== null) {
@@ -750,7 +750,20 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                   </table>
                 </div>
               )}
-              <Button type="submit" className="mt-6">{translate("Save & Continue")}</Button>
+
+              <div className="mt-6 flex justify-between gap-4">
+                <div>
+                  <Button type="button" onClick={handleSaveAndPrevious}>
+                    {translate("Previous")}
+                  </Button>
+                </div>
+                <div className="text-end">
+                  <Button type="submit">
+                    {translate("Save & Continue")}
+                  </Button>
+                </div>
+              </div>
+              {/* <Button type="submit" className="mt-6">{translate("Save & Continue")}</Button> */}
             </form>
           </FormProvider>
         )

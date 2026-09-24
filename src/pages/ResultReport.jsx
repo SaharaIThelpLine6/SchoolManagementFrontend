@@ -1,16 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Loading from '../components/Loading/Loading';
-import { useGetResidentialQuery } from '../features/settings/settingsQuerySlice';
 import useTranslate from '../utils/Translate';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import { resultReports } from '../Data/userReportsData';
-import { useGetSessionsQuery } from '../features/session/sessionSlice';
-import { useGetClassListQuery, useGetSubClassListQuery } from '../features/class/classQuerySlice';
-import { useGetExamNamesQuery } from '../features/exam/examQuerySlice';
+import { useGetClassListQuery } from '../features/class/classQuerySlice';
+import { useGetExamFilterExamsQuery, useGetExamFilterSubclassesQuery, useGetExamSessionQuery } from '../features/exam/examQuerySlice';
 import Button from '../components/Button/Button';
 import { useGetResultReportDataQuery } from '../features/result/resultSilce';
-import AdmissionFormWithResult from '../view/students/reports/result-reports/AdmissionFormWithResult';
 import StudentResultSheet from '../view/result/Reports/StudentResultSheet';
 import StudentResultSheetTwoColumn from '../view/result/Reports/StudentResultSheetTwoColumn';
 import AttendanceSheet from '../view/result/Reports/AttendanceSheet';
@@ -27,17 +24,31 @@ const ResultReport = () => {
     error,
   } = useGetResultReportDataQuery(queryParams, { skip: !queryParams });
 
-  const { data: sessionData } = useGetSessionsQuery();
+  const { data: sessionData } = useGetExamSessionQuery();
   const { data: classListData } = useGetClassListQuery();
-  const { data: subclassListData } = useGetSubClassListQuery();
-  const { data: examNameData } = useGetExamNamesQuery();
-  const { data: residentialData } = useGetResidentialQuery();
-
-
   const methods = useForm();
-  const { control, handleSubmit } = methods;
+  const { control, handleSubmit, setValue } = methods;
 
   const selectedReportID = useWatch({ control, name: "ReportID" });
+  const sessionID = useWatch({ control, name: "SessionID" });
+  const examID = useWatch({ control, name: "ExamID" });
+  const { data: examNameData } = useGetExamFilterExamsQuery(
+    { SessionID: sessionID },
+    { skip: !sessionID }
+  );
+  const { data: subclassListData } = useGetExamFilterSubclassesQuery(
+    { SessionID: sessionID, ExamID: examID },
+    { skip: !sessionID || !examID }
+  );
+
+  useEffect(() => {
+    setValue("ExamID", "");
+    setValue("SubClassID", "");
+  }, [sessionID, setValue]);
+
+  useEffect(() => {
+    setValue("SubClassID", "");
+  }, [examID, setValue]);
   const shouldShowFields = (fieldName) => {
     switch (selectedReportID) {
       case 1:

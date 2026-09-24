@@ -75,7 +75,7 @@ import PayRole from '../pages/PayRole';
 import PayRoleName from '../pages/PayRoleName';
 import PaymentConfirm from '../pages/PaymentConfirm';
 import PaymentHistory from '../pages/PaymentHistory';
-import PointBasedResultCreateUpdate from '../pages/PointBasedResultCreateUpdate';
+import ResultEntryAndUpdate from '../pages/ResultEntryAndUpdate';
 import PointBasedResultEntry from '../pages/PointBasedResultEntry';
 import TeacherSubjectsInfo from '../pages/TeacherSubjectsInfo';
 import PageNotFound from '../components/PageNotFound';
@@ -923,7 +923,7 @@ const Router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.result_report}
                   >
-                    <PointBasedResultCreateUpdate pageTitle="Result" />
+                    <ResultEntryAndUpdate pageTitle="Result" />
                   </RequirePermission>
                 ),
               },

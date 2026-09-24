@@ -14,9 +14,6 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import Swal from "sweetalert2";
 import FilteringForm from "./FilteringForm";
 import useTranslate from "../../../utils/Translate";
-import CheckboxOption from "./CheckboxOption";
-import RadioOption from "../../../components/Radio/RadioOption";
-import SingleCheckbox from "../../../components/Checkboxes/SingleCheckbox";
 import bnBijoy2Unicode, { convertOnLanguageChange } from "../../../utils/conveter";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import { set } from "lodash";
@@ -96,6 +93,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
   const translate = useTranslate();
   const { handleSubmit, watch, register, control } = methods;
   const [filter, setFilter] = useState(null);
+  const [pointbaseOptional, setPointBasedOptional] = useState(false);
   const [submittedData, setSubmittedData] = useState(null);
   const [addExamSettings] = usePostExamSettingsMutation();
   const [updateExamSettings] = useUpdateExamSettingsMutation();
@@ -125,10 +123,23 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
     if (!examDivitions) return [];
 
     if (Number(sharedStepData?.ExamType) === 4) {
+      const subjectGradeList = sharedStepData?.subjectGradeList || [];
+
+      const isPointBasedOptional = subjectGradeList.some(
+        (subject) => Number(subject?.mayeri) === 4
+      );
+
+      setPointBasedOptional(isPointBasedOptional);
+
       const allowedDivisionIds = new Set(
-        (sharedStepData?.subjectGradeList || [])
+        subjectGradeList
           .flatMap((subject) => subject?.gradeBands || [])
-          .filter((band) => band?.DivisionID !== "" && band?.DivisionID !== null && band?.DivisionID !== undefined)
+          .filter(
+            (band) =>
+              band?.DivisionID !== "" &&
+              band?.DivisionID !== null &&
+              band?.DivisionID !== undefined
+          )
           .map((band) => String(band.DivisionID))
       );
 
@@ -447,7 +458,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
               sharedStepData?.ExamType == 4 ? (
                 <div className="border border-gray-200 rounded-md p-4">
                   <label className="flex items-center gap-2 mb-3 font-medium text-gray-800">
-                    <input type="checkbox" className="h-4 w-4" {...register("condition3.enabled")}   checked={true} />
+                    <input type="checkbox" className="h-4 w-4" {...register("condition3.enabled")} checked={true} />
                     কন্ডিশন-১ :  কিতাবে ফেল সংক্রান্ত
                   </label>
 
@@ -541,7 +552,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                     </td>
                     <td className="px-4 pt-6 align-middle">
                       {
-                        sharedStepData?.ExamType == 4 ? <DefaultInput label={"অপশনাল বিষয়ের গ্রেড কত এর বেশি হলে মূল গ্রেডের সাথে যোগ হবে"} registerKey="optionalSubjectGrade" type="number" require="This Field is required" defaultValue={getValues("optionalSubjectGrade")} /> : null
+                        sharedStepData?.ExamType == 4 && pointbaseOptional ? <DefaultInput label={"If the grade in the optional subject is above how much, will it be added to the main grade"} registerKey="optionalSubjectGrade" type="number" require="This Field is required" defaultValue={getValues("optionalSubjectGrade")} /> : null
                       }
 
                     </td>

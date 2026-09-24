@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 import bnBijoy2Unicode from "../../utils/conveter";
@@ -26,6 +26,7 @@ const TableInput = ({
     formState: { errors },
   } = useFormContext();
   const translate = useTranslate();
+  const firstMouseClick = useRef(false);
   const [hasChanged, setHasChanged] = useState(false);
   const currentValue = useWatch({ name: registerKey, control });
 
@@ -53,6 +54,22 @@ const TableInput = ({
         ? Number(value) !== Number(defaultValue)
         : value !== defaultValue;
     setHasChanged(isChanged);
+  };
+
+  const selectInputValue = (event) => {
+    event.currentTarget.select();
+  };
+
+  const handleMouseDown = (event) => {
+    firstMouseClick.current = document.activeElement !== event.currentTarget;
+  };
+
+  const keepInputValueSelected = (event) => {
+    if (firstMouseClick.current) {
+      event.preventDefault();
+      event.currentTarget.select();
+    }
+    firstMouseClick.current = false;
   };
 
   return (
@@ -109,6 +126,9 @@ const TableInput = ({
           onChange={handleChange}
           onKeyDown={onKeyDown}
           {...rest}  // ← data-row, data-col এখানে input-এ বসবে
+          onFocus={selectInputValue}
+          onMouseDown={handleMouseDown}
+          onMouseUp={keepInputValueSelected}
         />
 
         {errors[registerKey] && (

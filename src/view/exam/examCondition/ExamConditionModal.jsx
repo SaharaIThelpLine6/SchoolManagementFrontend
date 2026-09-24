@@ -1,18 +1,12 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setPageName } from "../../../features/auth/authSlice";
-import AverageDetermination from "../average-condition/AverageDetermination";
-import SubjectPassNumber from "../average-condition/SubjectPassNumber";
-import Button from "../../../components/Button/Button";
-import ResultsCondition from "../average-condition/ResultsCondition";
 import useTranslate from "../../../utils/Translate";
-import { FiCheck, FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import ExamSubjectPassNumber from "../average-condition/ExamSubjectPassNumber";
 import MultiStepForm from "../../../components/MultiStepForm";
 import ExamAverageDetermination from "../average-condition/ExamAverageDetermination";
 import ExamResultsCondition from "../average-condition/ExamResultsCondition";
 import TalentCondition from "../average-condition/TalentCondition";
-// import TalentCondition from "../../../pages/TalentCondition";
 
 const ExamConditionModal = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -23,32 +17,8 @@ const ExamConditionModal = ({ pageTitle }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  // const steps = [
-  //   {
-  //     id: "average",
-  //     label: "Average Determination",
-  //     description: "",
-  //     component: <AverageDetermination title="Average Determination" />
-  //   },
-  //   {
-  //     id: "subject",
-  //     label: "Subject Pass Number",
-  //     description: "",
-  //     component: <ExamSubjectPassNumber title="Subject Pass Number" />
-  //   },
-  //   {
-  //     id: "results",
-  //     label: "Results Condition",
-  //     description: "",
-  //     component: <ResultsCondition title="Results Condition" colorOption={true} />
-  //   }
-  // ];
-
-  // const isLast = activeStep === steps.length - 1;
-  // const isFirst = activeStep === 0;
-
   return (
-    <div className="font-default bg-white overflow-hidden">
+    <div className="font-default bg-white">
       <MultiStepForm
         formId="examCondition"
         showStepper
