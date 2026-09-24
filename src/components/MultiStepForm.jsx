@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 import { FiCheck } from "react-icons/fi";
-import { registerForm, goToStep } from "../features/multistep/multiStepFormSlice";
+import {
+  registerForm,
+  resetForm,
+  goToStep,
+} from "../features/multistep/multiStepFormSlice";
 import { useMultiStepForm } from "../hooks/useMultiStepForm";
 import useTranslate from "../utils/Translate";
 
@@ -18,6 +22,7 @@ export default function MultiStepForm({
   const [sharedStepData, setSharedStepData] = useState(defaultData);
 
   useEffect(() => {
+    dispatch(resetForm({ formId }));
     dispatch(registerForm({ formId }));
   }, [dispatch, formId]);
 
