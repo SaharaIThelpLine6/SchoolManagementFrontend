@@ -786,9 +786,7 @@ const Router = createBrowserRouter([
               {
                 path: 'exam-condition',
                 element: (
-                  <OwenGuide>
-                    <ExamCondition pageTitle="Exam Condition" />
-                  </OwenGuide>
+                  <ExamCondition pageTitle="Exam Condition" />
                 ),
               },
 

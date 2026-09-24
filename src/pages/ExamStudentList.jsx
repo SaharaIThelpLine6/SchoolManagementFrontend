@@ -1,9 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useForm, FormProvider, useWatch } from "react-hook-form";              // ← লাইন ১
 import DefaultSelect from "../components/Forms/DefaultSelect";
-import DefaultInput from "../components/Forms/DefaultInput";
 import SvgIcon from "../components/icons/SvgIcon";
-import bnBijoy2Unicode from "../utils/conveter";
 import {
   useGetExamStudentListFiltersQuery,
   useGetExamStudentListQuery,
@@ -34,7 +32,7 @@ const bn = (num) => {
 const toRow = (id, user) => ({
   id,
   code: user?.UserCode ?? "",
-  name: user?.UserName ? bnBijoy2Unicode(user.UserName) : "",
+  name: user?.UserName ? user.UserName : "",
   deduction: 0,
 });
 
@@ -260,7 +258,7 @@ export default function ExamStudentList() {
     () =>
       (selectedSession?.exams || []).map((e) => ({
         value: e.ExamID,
-        name: e.ExamName ? bnBijoy2Unicode(e.ExamName) : "",
+        name: e.ExamName ? e.ExamName : "",
       })),
     [selectedSession]
   );
@@ -274,7 +272,7 @@ export default function ExamStudentList() {
     () =>
       (selectedExam?.subClasses || []).map((c) => ({
         value: c.SubClassID,
-        name: c.SubClass ? bnBijoy2Unicode(c.SubClass) : "",
+        name: c.SubClass ? c.SubClass : "",
       })),
     [selectedExam]
   );
