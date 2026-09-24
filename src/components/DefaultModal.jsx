@@ -136,7 +136,7 @@ const DefaultModal = () => {
         ${show ? 'bg-black/50 opacity-100' : 'bg-black/0 backdrop-blur-0 opacity-0'}`}
     >
       <ClickOutside
-        className="max-w-screen-lg w-full overflow-hidden"
+        className="max-w-screen-lg w-full"
         onClick={() => {
           if (meta?.closeOnOutSide !== false) {
             dispatch(closeModal());

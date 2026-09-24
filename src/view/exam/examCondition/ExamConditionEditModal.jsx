@@ -13,7 +13,7 @@ const ExamConditionEditModal = ({data}) => {
   const [activeStep, setActiveStep] = useState(0);
      const translate = useTranslate()
   return (
-    <div className="font-default bg-white overflow-hidden">
+    <div className="font-default bg-white">
       <MultiStepForm
         formId="examConditionEdit"
         showStepper
