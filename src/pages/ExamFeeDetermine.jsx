@@ -16,7 +16,6 @@ import {
 } from "../features/exam/examQuerySlice";
 
 import useTranslate from "../utils/Translate";
-import bnBijoy2Unicode from "../utils/conveter";
 
 import SortableTable from "../components/Tables/SortableTable";
 import Loading from "../components/Loading/Loading";
@@ -198,12 +197,12 @@ const ExamFeeDetermine = ({ pageTitle }) => {
     {
       title: translate("Exam Name"),
       hozAlign: "center",
-      render: (row) => <>{bnBijoy2Unicode(row?.Exam_Name?.ExamName)}</>,
+      render: (row) => <>{(row?.Exam_Name?.ExamName)}</>,
     },
     {
       title: translate("Class/Jamaat"),
       hozAlign: "center",
-      render: (row) => <>{bnBijoy2Unicode(row?.Class?.SubClass)}</>,
+      render: (row) => <>{(row?.Class?.SubClass)}</>,
     },
     {
       title: translate("Fee Name"),

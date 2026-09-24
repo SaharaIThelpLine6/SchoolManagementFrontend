@@ -93,7 +93,8 @@ import StateMent from '../pages/StateMent';
 import StudentClassRoutine from '../pages/StudentClassRoutine';
 import StudentClassRoutineTimeSlots from '../pages/StudentClassRoutineTimeSlots';
 import StudentComplaint from '../pages/StudentComplaint';
-import StudentGroupCreate from '../pages/StudentGroupCreate';
+// import StudentGroupCreate from '../pages/StudentGroupCreate';
+import ExamStudentGroupCreate from '../pages/ExamStudentGroupCreate';
 import ExamStudentList from '../pages/ExamStudentList';
 import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
 import StudentIdCardPrint from '../pages/StudentIdCardPrint';
@@ -697,7 +698,7 @@ const Router = createBrowserRouter([
                 path: 'exam-student-list',
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.exam_fee_setting}
+                    permissionId={permissionsDataList.exam_group_create}
                   >
                     <ExamStudentList pageTitle="Exam Student List" />
                   </RequirePermission>
@@ -789,24 +790,13 @@ const Router = createBrowserRouter([
                   <ExamCondition pageTitle="Exam Condition" />
                 ),
               },
-
-              {
-                path: 'list-of-candidates',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.exam_list_generation}
-                  >
-                    <StudentGroupCreate pageTitle="List of Candidates" />
-                  </RequirePermission>
-                ),
-              },
               {
                 path: 'exam-group-create',
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.exam_list_generation}
+                    permissionId={permissionsDataList.exam_group_create}
                   >
-                    <StudentGroupCreate pageTitle="Exam Group Select" />
+                    <ExamStudentGroupCreate pageTitle="Exam Group Select" />
                   </RequirePermission>
                 ),
               },
