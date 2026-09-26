@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useForm, FormProvider, useWatch } from "react-hook-form";              // ← লাইন ১
+import { useForm, FormProvider, useWatch } from "react-hook-form";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import SvgIcon from "../components/icons/SvgIcon";
 import {
@@ -16,9 +16,14 @@ import {
 // legacy UI-র মতোই সবসময় ১৪টা বিষয়ের সারি — এখন আর "মোট বিষয়" সংখ্যার সাথে বাঁধা না
 const SUBJECT_COUNT = 14;
 
-// permission না থাকলে দেখানোর মেসেজ (backend-এর সাথে হুবহু)
+// permission না থাকলে দেখানোর মেসেজ (backend-এর সাথে হুবহু)।
+// ⚠️ এগুলো আগে থেকে দেখাবে না — শুধু ড্র্যাগ করে ছাড়ার পর উপরের লাল বক্সে আসবে।
 const PERM_INSERT_MSG = "সেইভ করতে এডমিনের সাথে যোগাযোগ করুন";
 const PERM_DELETE_MSG = "ফলাফলের-তালিকা হতে বাতিল/ডিলিট করতে এডমিনের সাথে যোগাযোগ করুন";
+
+// ফি সংক্রান্ত মেসেজ — শুধু নির্ধারিত/কর্তন/জমা কলাম দেখানো থাকলে ব্যবহার হয়
+const FEE_NOT_SET_MSG = "এই শিক্ষাবর্ষ, পরীক্ষা ও সাব ক্লাসের ফি নির্ধারণ করা নেই — আগে ফি নির্ধারণ করুন";
+const FEE_ZERO_MSG = "নির্ধারিত ফি ০ — আগে ফি নির্ধারণ করুন";
 
 // old code-এর মতোই bn() — একই কনভেনশন
 const bn = (num) => {
@@ -133,17 +138,18 @@ const inputClass = "border border-slate-300 rounded-xl px-3 py-2.5 text-base foc
    drag & drop টার্গেট + সোর্স — সিলেক্টেড রো টেনে অন্য পাশে ছাড়লেই মুভ হয়
    editable = true হলে কর্তন কলামে ইনপুট বসবে (বাম পাশে)
    showStatChips = false হলে নির্ধারিত/কর্তন/জমা — উপরের StatChip ও টেবিলের কলাম দুইটাই লুকাবে
-   canDrag = false হলে রো ড্র্যাগ করা যাবে না (permission অনুযায়ী)
+
+   ⚠️ permission নিয়ে এই কম্পোনেন্ট কিছুই জানে না — ড্র্যাগ সবসময় চালু।
+     permission না থাকলে ড্রপ করার পর উপরের লাল বক্সে মেসেজ আসবে।
 --------------------------------------------------------- */
 
 function ListPanel({
   title, titleColor, rows, totalCount, checkedSet, onToggleAll, onToggleOne,
   filter, onFilterChange, totals, onDeductionChange, filterLabel, filterLabelColor,
   side, onRowDragStart, onRowDragEnd, onPanelDragOver, onPanelDragLeave, onPanelDrop,
-  isDragTarget, draggingIds, emptyText, busy, editable, showStatChips, canDrag,
+  isDragTarget, draggingIds, emptyText, busy, editable, showStatChips,
 }) {
   const allChecked = rows.length > 0 && rows.every((r) => checkedSet.has(r.id));
-  const dragAllowed = !busy && canDrag;
 
   return (
     <div
@@ -163,7 +169,7 @@ function ListPanel({
         </div>
 
         {/* Stat chips + Search bar একসাথে */}
-        <div className="flex items-center gap-2 mt-3 flex-wra">
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
           {showStatChips && (
             <>
               <StatChip label="নির্ধারিত" value={totals.assigned} />
@@ -221,12 +227,12 @@ function ListPanel({
                 return (
                   <tr
                     key={s.id}
-                    draggable={dragAllowed}
+                    draggable={!busy}
                     onDragStart={onRowDragStart(side, s.id)}
                     onDragEnd={onRowDragEnd}
-                    title={dragAllowed ? "ড্র্যাগ করে অন্য পাশে ছেড়ে দিন" : "এই কাজের অনুমতি নেই"}
+                    title="ড্র্যাগ করে অন্য পাশে ছেড়ে দিন"
                     className={`border-b border-slate-50 last:border-0 transition-colors select-none ${
-                      !dragAllowed ? "cursor-not-allowed" : busy ? "cursor-wait" : "cursor-grab active:cursor-grabbing"
+                      busy ? "cursor-wait" : "cursor-grab active:cursor-grabbing"
                     } ${checked ? "bg-[#1B3A57]/5" : "hover:bg-slate-50"} ${isDragging ? "opacity-40" : ""}`}
                   >
                     <td className="px-3 py-3">
@@ -284,20 +290,28 @@ export default function ExamStudentList() {
   const [subClass, setSubClass] = useState(null);
 
   const [subjects, setSubjects] = useState(
-  Array.from({ length: SUBJECT_COUNT }, () => ({ name: "", fee: "" }))
-);
+    Array.from({ length: SUBJECT_COUNT }, () => ({ name: "", fee: "" }))
+  );
 
   /* ---------------- Cascading ফিল্টার: শিক্ষাবর্ষ → পরীক্ষা → সাব ক্লাস ---------------- */
   const { data: filterData } = useGetExamStudentListFiltersQuery();
   const sessionTree = useMemo(() => filterData?.sessions || [], [filterData]);
+
   // TblPrintView-এ ID=19 এর Action=1 হলে StatChip ও টেবিলের ৩টা কলাম দেখাবে,
   // Action=2 হলে সব লুকাবে। API না আসা পর্যন্ত বা key না থাকলে ডিফল্ট true।
+  //
+  // ⭐ এই ফ্ল্যাগটাই ঠিক করে ফি বাধ্যতামূলক কিনা:
+  //    showStatChips = true  → নির্ধারিত ফি ০ / সেট না থাকলে INSERT আটকাবে
+  //    showStatChips = false → ফি একদমই যাচাই হবে না, ০ থাকলেও INSERT-DELETE চলবে
   const showStatChips = filterData?.showStatChips !== false;
 
   // ── Permission ──
   // Left → Right ড্র্যাগ  = INSERT permission
   // Right → Left ড্র্যাগ = DELETE permission
   // API থেকে না এলে (undefined) allow ধরে নেওয়া হয় — যাতে backend পুরনো থাকলেও UI কাজ করে।
+  //
+  // ⚠️ UI-তে আগে থেকে কিছু দেখানো হয় না — ড্র্যাগ সবসময় চালু।
+  //   permission না থাকলে ছাড়ার পর উপরের লাল বক্সে মেসেজ আসবে (backend-এও 403 আটকাবে)।
   const permissions = filterData?.permissions;
   const canInsert = permissions ? Boolean(permissions.insert) : true;
   const canDelete = permissions ? Boolean(permissions.delete) : true;
@@ -400,8 +414,22 @@ export default function ExamStudentList() {
   // API কল চলাকালীন ড্র্যাগ বন্ধ — যাতে রিফ্রেশের আগে ভুল ID নিয়ে আবার মুভ না হয়
   const busy = isAdding || isRemoving || isListFetching;
 
-  // Exam_FeeSetting-এ এই কম্বিনেশনের ফি সেট করা আছে কিনা
-  const feeMissing = Boolean(filtersReady && listData && (listData.feeSettings?.length ?? 0) === 0);
+  /* ---------------- ফি গেট ----------------
+     কলাম লুকানো থাকলে (showStatChips = false) ফি নিয়ে কোনো শর্তই নেই।
+     কলাম দেখানো থাকলে — ফি সেট না থাকা বা নির্ধারিত ফি ০ — দুইটাই INSERT আটকাবে।
+     DELETE কোনো অবস্থাতেই আটকাবে না।
+  --------------------------------------------------------- */
+  const feeSettingCount = listData?.feeSettings?.length ?? 0;
+  const feeAmount = Number(listData?.fee) || 0;
+
+  // backend যদি feeRequired পাঠায় সেটাই মানবে, নাহলে showStatChips থেকে ধরে নেবে
+  const feeRequired =
+    listData?.feeRequired !== undefined ? Boolean(listData.feeRequired) : showStatChips;
+
+  const feeNotSet = Boolean(feeRequired && filtersReady && listData && feeSettingCount === 0);
+  const feeZero = Boolean(feeRequired && filtersReady && listData && feeSettingCount > 0 && feeAmount <= 0);
+  const feeBlocked = feeNotSet || feeZero;
+  const feeBlockedMsg = feeNotSet ? FEE_NOT_SET_MSG : feeZero ? FEE_ZERO_MSG : null;
 
   const [unpaid, setUnpaid] = useState([]);
   const [paid, setPaid] = useState([]);
@@ -449,7 +477,7 @@ export default function ExamStudentList() {
   };
 
   /* ---------------- কর্তন এডিট ---------------- */
-  // কর্তন কখনো ওই রো-এর নির্ধারিত ফি-র চেয়ে বেশি বা ০-এর কম হবে না
+  // কর্তন কখনো ওই রো-এর নির্ধারিত ফি-র চেয়ে বেশি বা ০-এর কম হবে, না
   const updateDeduction = (side, id, value) => {
     const setter = side === "unpaid" ? setUnpaid : setPaid;
     setter((prev) =>
@@ -510,14 +538,26 @@ export default function ExamStudentList() {
   /* ---------------- নির্দিষ্ট id-লিস্ট এক পাশ থেকে অন্য পাশে move করার জেনেরিক ফাংশন ---------------- */
 
   // বাম → ডান: Student_Result + Exam_FeeAccept-এ INSERT (ids = AdmissionID)
-  // permission backend-এ check হয় — না থাকলে 403 + message আসবে।
   const moveIdsToPaid = async (ids) => {
+    // permission গার্ড — API কল করার আগেই থামবে, মেসেজ উপরের লাল বক্সে দেখাবে
+    if (!canInsert) {
+      setApiError(PERM_INSERT_MSG);
+      return;
+    }
+
     const idSet = new Set(ids);
     const moving = unpaid.filter((s) => idSet.has(s.id));
     if (moving.length === 0 || !filtersReady) return;
 
-    if (feeMissing) {
-      setApiError("এই শিক্ষাবর্ষ, পরীক্ষা ও সাব ক্লাসের ফি নির্ধারণ করা নেই");
+    // ⭐ ফি গেট — শুধু নির্ধারিত/কর্তন/জমা কলাম দেখানো থাকলেই
+    if (feeBlocked) {
+      setApiError(feeBlockedMsg);
+      return;
+    }
+
+    // কলাম দেখানো থাকলে কারো নির্ধারিত ফি ০ হলে তাকে যোগ করা যাবে না
+    if (feeRequired && moving.some((s) => (Number(s.assigned) || 0) <= 0)) {
+      setApiError(FEE_ZERO_MSG);
       return;
     }
 
@@ -537,7 +577,7 @@ export default function ExamStudentList() {
         Deductions,
       }).unwrap();
     } catch (err) {
-      setApiError(err?.data?.detail || err?.data?.error || "শিক্ষার্থী যোগ করা যায়নি");
+      setApiError(err?.data?.error || err?.data?.detail || "শিক্ষার্থী যোগ করা যায়নি");
       return;
     }
 
@@ -554,9 +594,15 @@ export default function ExamStudentList() {
   };
 
   // ডান → বাম: Student_Result + Exam_FeeAccept থেকে DELETE (ids = Student_Result.ID)
-  // permission backend-এ check হয় — না থাকলে 403 + message আসবে।
+  // ⚠️ এখানে ফি নিয়ে কোনো শর্ত নেই — নির্ধারিত/কর্তন/জমা ০ থাকলেও ডিলিট চলবে।
   // Student_Admission অপরিবর্তিত
   const moveIdsToUnpaid = async (ids) => {
+    // permission গার্ড — API কল করার আগেই থামবে, মেসেজ উপরের লাল বক্সে দেখাবে
+    if (!canDelete) {
+      setApiError(PERM_DELETE_MSG);
+      return;
+    }
+
     const idSet = new Set(ids);
     const moving = paid.filter((s) => idSet.has(s.id));
     if (moving.length === 0 || !filtersReady) return;
@@ -570,7 +616,7 @@ export default function ExamStudentList() {
         ResultIDs: moving.map((s) => s.id),
       }).unwrap();
     } catch (err) {
-      setApiError(err?.data?.detail || err?.data?.error || "শিক্ষার্থী সরানো যায়নি");
+      setApiError(err?.data?.error || err?.data?.detail || "শিক্ষার্থী সরানো যায়নি");
       return;
     }
 
@@ -595,7 +641,7 @@ export default function ExamStudentList() {
   const [dragInfo, setDragInfo] = useState(null); // { side: "unpaid" | "paid", ids: number[] } | null
   const [dragOverSide, setDragOverSide] = useState(null);
 
-  // ড্র্যাগ সবসময় enabled — permission backend-এ check হবে, না থাকলে UI-তে message দেখাবে
+  // ড্র্যাগ সবসময় enabled — permission ছাড়ার পর চেক হবে, না থাকলে UI-তে message দেখাবে
   const handleRowDragStart = (side, id) => (e) => {
     if (busy) {
       e.preventDefault();
@@ -657,7 +703,8 @@ export default function ExamStudentList() {
       className="w-full min-h-screen overflow-x-hidden bg-slate-50 p-4 sm:p-6"
       style={{ fontFamily: "'Noto Sans Bengali','Kalpurush','SolaimanLipi',sans-serif" }}
     >
-      <div className="max-w-7xl mx-auto">
+      {/* max-w-7xl সরিয়ে w-full করে দেওয়া হয়েছে ফুল উইডথের জন্য */}
+      <div className="w-full mx-auto">
         {/* Header */}
         <header className="mb-5 flex items-center gap-3">
           <div>
@@ -668,7 +715,7 @@ export default function ExamStudentList() {
 
         {/* Filters — cascading: শিক্ষাবর্ষ → পরীক্ষা → সাব ক্লাস */}
         <FormProvider {...filterMethods}>
-          <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-4">
+          <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-4 w-full">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <DefaultSelect
                 label="Session"
@@ -700,38 +747,41 @@ export default function ExamStudentList() {
           </section>
         </FormProvider>
 
-        {/* Fee — StatChip-এর মতোই দেখতে, টাকা আসে Exam_FeeSetting থেকে */}
-        <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="h-[38px] flex items-center gap-1 border border-stroke rounded bg-white px-4 whitespace-nowrap">
-              <span className="text-sm font-medium text-slate-800">নির্ধারিত ফি:</span>
-              <span className="text-sm font-semibold text-slate-800">{bn(fixedFee)}</span>
-            </div>
+        {/* Fee — StatChip-এর মতোই দেখতে, টাকা আসে Exam_FeeSetting থেকে।
+            কলাম লুকানো থাকলে (Action = 2) এই ব্লকটাও লুকাবে। */}
+        {showStatChips && (
+          <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-4 w-full">
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="h-[38px] flex items-center gap-1 border border-stroke rounded bg-white px-4 whitespace-nowrap">
+                <span className="text-sm font-medium text-slate-800">নির্ধারিত ফি:</span>
+                <span className="text-sm font-semibold text-slate-800">{bn(fixedFee)}</span>
+              </div>
 
-            <div className="h-[38px] flex items-center gap-1 border border-stroke rounded bg-white px-4 whitespace-nowrap">
-              <span className="text-sm font-medium text-slate-800">মোট বিষয়:</span>
-              <span className="text-sm font-semibold text-slate-800">{bn(totalSubjects)}</span>
+              <div className="h-[38px] flex items-center gap-1 border border-stroke rounded bg-white px-4 whitespace-nowrap">
+                <span className="text-sm font-medium text-slate-800">মোট বিষয়:</span>
+                <span className="text-sm font-semibold text-slate-800">{bn(totalSubjects)}</span>
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
-        {/* ফি নির্ধারণ করা না থাকলে সতর্কবার্তা */}
-        {feeMissing && (
-          <div className="mb-4 rounded border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700">
-            এই শিক্ষাবর্ষ, পরীক্ষা ও সাব ক্লাসের ফি নির্ধারণ করা নেই — আগে ফি নির্ধারণ করুন
+        {/* ফি সংক্রান্ত সতর্কবার্তা — শুধু কলাম দেখানো থাকলে */}
+        {feeBlocked && (
+          <div className="mb-4 rounded border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 w-full">
+            {feeBlockedMsg}
           </div>
         )}
 
-        {/* API এরর */}
+        {/* API এরর — permission না থাকলে এখানেই মেসেজ দেখাবে */}
         {apiError && (
-          <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600">
+          <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 w-full">
             {apiError}
           </div>
         )}
 
         {/* Dual panel — বাটন/ড্রপডাউন ছাড়াই, ড্র্যাগ করে এক পাশ থেকে অন্য পাশে নেওয়া যায় */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
-          {/* বাম প্যানেল — ডান দিকে ড্র্যাগ = INSERT permission (backend check) */}
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start w-full">
+          {/* বাম প্যানেল — ডান দিকে ড্র্যাগ = INSERT permission */}
           <ListPanel
             title="যাদের ফি নিবেন তাদের নির্বাচন করুন"
             titleColor="text-slate-800"
@@ -758,10 +808,9 @@ export default function ExamStudentList() {
             busy={busy}
             editable
             showStatChips={showStatChips}
-            canDrag={true}
           />
 
-          {/* ডান প্যানেল — বাম দিকে ড্র্যাগ = DELETE permission (backend check) */}
+          {/* ডান প্যানেল — বাম দিকে ড্র্যাগ = DELETE permission */}
           <ListPanel
             title="নিম্নোক্ত শিক্ষার্থীদের ফি গ্রহণ করা হয়েছে"
             titleColor="text-slate-800"
@@ -787,7 +836,6 @@ export default function ExamStudentList() {
             emptyText={emptyText}
             busy={busy}
             showStatChips={showStatChips}
-            canDrag={true}
           />
         </section>
       </div>
