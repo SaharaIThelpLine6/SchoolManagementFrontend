@@ -120,14 +120,13 @@ export const teachersSlice = createApi({
       providesTags: ['Teacher_Subject'],
     }),
     getTeacherSubjectsByFilter: builder.query({
-      query: ({ SessionID, ExamID, SubClassID, SubjectID } = {}) => {
+      query: ({ SessionID, ExamID, SubClassID } = {}) => {
         const params = new URLSearchParams();
         if (SessionID) params.append("SessionID", SessionID);
         if (ExamID) params.append("ExamID", ExamID);
         if (SubClassID) params.append("SubClassID", SubClassID);
-        if (SubjectID) params.append("SubjectID", SubjectID);
 
-        return `/teacher_subject/filter?${params.toString()}`;
+        return `/teacher_subject/filter/list?${params.toString()}`;
       },
       providesTags: ["TeacherSubjects"],
     }),
