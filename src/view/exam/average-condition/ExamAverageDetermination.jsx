@@ -4,9 +4,11 @@ import Swal from 'sweetalert2';
 import Button from '../../../components/Button/Button';
 import SortableTable from '../../../components/Tables/SortableTable';
 import {
+  useGetExamConditionQuery,
   useGetExamDivitionByTypeQuery,
   useGetExamNamesQuery,
   usePostExamDivitionMutation,
+  useUpdateExamDivitionMutation,
 } from '../../../features/exam/examQuerySlice';
 import useTranslate from '../../../utils/Translate';
 import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
@@ -82,12 +84,37 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
     formState: { errors },
   } = methods
 
+  const sessionID = watch("SessionID");
+  const examID = watch("ExamID");
+  const subClassID = watch("SubClassID");
+
   const [showDivisionManager, setShowDivisionManager] = useState(false);
   const [divisionOptions, setDivisionOptions] = useState([]);
-  const [divisionForm, setDivisionForm] = useState({
-    divisionNameBn: "",
-    divisionNameAr: "",
-  });
+  const [editingDivision, setEditingDivision] = useState(null);
+
+  const {
+    data: examConditionData,
+    isLoading: isExamConditionLoading,
+    isFetching: isExamConditionFetching,
+  } = useGetExamConditionQuery(
+    {
+      SessionID: sessionID,
+      ExamID: examID,
+      SubClassID: subClassID,
+    },
+    {
+      skip: !sessionID || !examID || !subClassID,
+    }
+  );
+
+  const existingCondition = examConditionData?.data ?? examConditionData;
+  const hasExistingExamCondition = Array.isArray(existingCondition)
+    ? existingCondition.length > 0
+    : Boolean(
+      existingCondition &&
+      typeof existingCondition === "object" &&
+      Object.keys(existingCondition).length > 0
+    );
 
   useEffect(() => {
     if (sharedStepData) {
@@ -122,6 +149,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
   });
 
   const [addDivition] = usePostExamDivitionMutation();
+  const [updateDivition] = useUpdateExamDivitionMutation();
   const {
     fields: gradeFields,
     append: appendGrade,
@@ -164,6 +192,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
     }
 
     try {
+      const isEditingDivision = Boolean(editingDivision);
       const payload = {
         DivisionName: divisionName,
         DivisionArabic: divisionArabic,
@@ -171,24 +200,36 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
         ExamType: ExamType,
       };
 
-      const response = await addDivition(payload).unwrap();
+      const response = editingDivision
+        ? await updateDivition({
+          id: editingDivision.ID || editingDivision.id,
+          body: payload,
+        }).unwrap()
+        : await addDivition(payload).unwrap();
 
       setValue("DivisionName", "");
       setValue("DivisionArabic", "");
       setValue("DivisionEnglish", "");
+      setEditingDivision(null);
 
-      setDivisionOptions((prev) => [
-        ...prev,
-        {
-          id: response?.ID || `${Date.now()}`,
-          divisionNameBn: divisionName,
-          divisionNameAr: divisionArabic,
-          divisionNameEn: divisionEnglish,
-        },
-      ]);
+      if (!isEditingDivision) {
+        setDivisionOptions((prev) => [
+          ...prev,
+          {
+            id: response?.ID || `${Date.now()}`,
+            divisionNameBn: divisionName,
+            divisionNameAr: divisionArabic,
+            divisionNameEn: divisionEnglish,
+          },
+        ]);
+      }
 
       Swal.fire({
-        title: translate("Division added successfully"),
+        title: translate(
+          isEditingDivision
+            ? "Division updated successfully"
+            : "Division added successfully"
+        ),
         icon: "success",
         timer: 1500,
         showConfirmButton: false,
@@ -202,7 +243,39 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
     }
   };
 
+  const handleEditDivision = (division) => {
+    setEditingDivision(division);
+    setValue("DivisionName", division?.DivisionNames || "");
+    setValue("DivisionArabic", division?.DivisionArabics || "");
+    setValue("DivisionEnglish", division?.DivisionEnglishs || "");
+    setShowDivisionManager(true);
+  };
+
+  const handleCloseDivisionManager = () => {
+    setEditingDivision(null);
+    setValue("DivisionName", "");
+    setValue("DivisionArabic", "");
+    setValue("DivisionEnglish", "");
+    setShowDivisionManager(false);
+  };
+
   const onSubmit = (data) => {
+    if (isExamConditionLoading || isExamConditionFetching) {
+      Swal.fire({
+        icon: "info",
+        title: translate("Checking exam condition..."),
+      });
+      return;
+    }
+
+    if (hasExistingExamCondition) {
+      Swal.fire({
+        icon: "error",
+        title: translate("Exam condition already exist."),
+      });
+      return;
+    }
+
     const payload = {
       ...data,
       divisionOptions,
@@ -295,7 +368,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               <div className="w-full space-y-6 bg-white">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-lg font-semibold text-gray-800 pl-1">
-                    নতুন বিভাগ যোগ করুন
+                    {editingDivision ? "বিভাগ সম্পাদনা করুন" : "নতুন বিভাগ যোগ করুন"}
                   </h2>
                 </div>
 
@@ -303,12 +376,15 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                   <div>
                     <DefaultInput type='text' registerKey={"DivisionName"} placeholder={"বিভাগ (বাংলা)"} required />
                   </div>
-                  <div>
-                    <DefaultInput registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
-                  </div>
+
                   <div>
                     <DefaultInput registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
                   </div>
+                  
+                  <div>
+                    <DefaultInput registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
+                  </div>
+
                 </div>
 
                 <div className="flex flex-wrap gap-2">
@@ -317,12 +393,12 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                     className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                     onClick={handleCreateDivision}
                   >
-                    সাবমিট ও নতুন যোগ করুন
+                    {editingDivision ? "আপডেট করুন" : "সাবমিট ও নতুন যোগ করুন"}
                   </button>
                   <button
                     type="button"
                     className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                    onClick={() => setShowDivisionManager(false)}
+                    onClick={handleCloseDivisionManager}
                   >
                     এক্সাম কন্ডিশনে ফিরে যান
                   </button>
@@ -333,8 +409,21 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                   <SortableTable columns={[
                     { title: "SL.", render: (row, rowIndex) => <>{rowIndex + 1}</> },
                     { title: "বিভাগ (বাংলা).", field: "DivisionNames" },
-                    { title: "বিভাগ ( ইংরেজি ).", field: "DivisionEnglishs", render: (row, rowIndex) => <>{row?.DivisionEnglish ? row.DivisionEnglish : '-'}</>, position: "center" },
-                    { title: "বিভাগ ( আরবি ).", field: "DivisionArabics",  render: (row, rowIndex) => <>{row?.DivisionArabic ? row.DivisionArabic : '-'}</>, position: "center" }
+                    { title: "বিভাগ ( ইংরেজি ).", field: "DivisionEnglishs", render: (row, rowIndex) => <>{row?.DivisionEnglishs ? row?.DivisionEnglishs : '-'}</>, position: "center" },
+                    { title: "বিভাগ ( আরবি ).", field: "DivisionArabics", render: (row, rowIndex) => <>{row?.DivisionArabics ? row?.DivisionArabics : '-'}</>, position: "center" },
+                    {
+                      title: "Action",
+                      render: (row) => (
+                        <button
+                          type="button"
+                          className="text-blue-600 hover:text-blue-800"
+                          onClick={() => handleEditDivision(row)}
+                          title="Edit division"
+                        >
+                          <SvgIcon name="FiEdit" size={16} />
+                        </button>
+                      ),
+                    },
                   ]} data={examDivitions} isFilterColumn={false} />
                 </div>
               </div>

@@ -19,6 +19,10 @@ const bn = (num) => {
   return num.toString().replace(/\d/g, (x) => d[x]);
 };
 
+// permission না থাকলে যে মেসেজ backend থেকে আসে — fallback হিসাবে ব্যবহৃত
+const INSERT_DENIED_MSG = "সেইভ করতে এডমিনের সাথে যোগাযোগ করুন";
+const DELETE_DENIED_MSG = "ফলাফলের-তালিকা হতে বাতিল/ডিলিট করতে এডমিনের সাথে যোগাযোগ করুন";
+
 // API রেসপন্স → প্যানেলের রো।
 // বাম পাশে id = Student_Admission.AdmissionID, ডান পাশে id = Student_Result.ID
 const toRow = (id, user, subClass = "") => ({
@@ -78,13 +82,16 @@ function Checkbox({ checked, onChange, label, disabled }) {
 /* ---------------------------------------------------------
    List panel — বামে "সাব ক্লাস হতে", ডানে "সাব ক্লাশ পর্যন্ত" (গ্রুপ)
    drag & drop টার্গেট + সোর্স — সিলেক্টেড রো টেনে অন্য পাশে ছাড়লেই মুভ হয়
+
+   canDrag = false হলে এই প্যানেলের রো ড্র্যাগ করা যাবে কাশী (permission নেই)
+   deniedMsg = permission না থাকলে হেডারে দেখানোর মেসেজ
 --------------------------------------------------------- */
 
 function ListPanel({
   title, subTitle, titleColor, rows, totalCount, checkedSet, onToggleAll, onToggleOne,
   filter, onFilterChange, filterLabel, filterLabelColor,
   side, onRowDragStart, onRowDragEnd, onPanelDragOver, onPanelDragLeave, onPanelDrop,
-  isDragTarget, draggingIds, emptyText, busy,
+  isDragTarget, draggingIds, emptyText, busy, canDrag = true, deniedMsg,
 }) {
   const allChecked = rows.length > 0 && rows.every((r) => checkedSet.has(r.id));
 
@@ -108,6 +115,14 @@ function ListPanel({
           </span>
         </div>
 
+        {/* permission না থাকলে প্যানেলের উপরেই জানিয়ে দেওয়া */}
+        {!canDrag && deniedMsg && (
+          <div className="mb-3 flex items-center gap-2 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700">
+            <SvgIcon name="FiLock" size={13} />
+            <span>{deniedMsg}</span>
+          </div>
+        )}
+
         <div className="flex items-center gap-2 mt-3">
           <div className="flex items-center gap-1.5 ml-auto">
             {filterLabel && (
@@ -121,7 +136,8 @@ function ListPanel({
                 value={filter}
                 onChange={(e) => onFilterChange(e.target.value)}
                 placeholder="নাম / আইডি খুঁজুন"
-                className="h-[38px] pl-8 pr-4 text-sm font-medium border border-stroke rounded bg-white w-10 sm:w-40 outline-none transition focus:border-custom-focus"
+                /* এখানে w-10 এর পরিবর্তে w-36 ব্যবহার করা হয়েছে */
+                className="h-[38px] pl-8 pr-4 text-sm font-medium border border-stroke rounded bg-white w-36 sm:w-40 outline-none transition focus:border-custom-focus"
               />
             </div>
           </div>
@@ -133,7 +149,7 @@ function ListPanel({
           <thead className="sticky top-0 bg-slate-50 text-xs tracking-wide z-10">
             <tr>
               <th className="px-3 py-2.5 text-left w-8">
-                <Checkbox checked={allChecked} onChange={onToggleAll} />
+                <Checkbox checked={allChecked} onChange={onToggleAll} disabled={!canDrag} />
               </th>
               <th className="px-3 py-2.5 text-left">আইডি</th>
               <th className="px-3 py-2.5 text-left">শিক্ষার্থীর নাম</th>
@@ -151,19 +167,32 @@ function ListPanel({
               rows.map((s) => {
                 const checked = checkedSet.has(s.id);
                 const isDragging = draggingIds.includes(s.id);
+                const draggable = !busy && canDrag;
                 return (
                   <tr
                     key={s.id}
-                    draggable={!busy}
+                    draggable={draggable}
                     onDragStart={onRowDragStart(side, s.id)}
                     onDragEnd={onRowDragEnd}
-                    title="ড্র্যাগ করে অন্য পাশে ছেড়ে দিন"
+                    title={
+                      canDrag
+                        ? "ড্র্যাগ করে অন্য পাশে ছেড়ে দিন"
+                        : deniedMsg || "আপনার অনুমতি নেই"
+                    }
                     className={`border-b border-slate-50 last:border-0 transition-colors select-none ${
-                      busy ? "cursor-wait" : "cursor-grab active:cursor-grabbing"
+                      !canDrag
+                        ? "cursor-not-allowed"
+                        : busy
+                        ? "cursor-wait"
+                        : "cursor-grab active:cursor-grabbing"
                     } ${checked ? "bg-[#1B3A57]/5" : "hover:bg-slate-50"} ${isDragging ? "opacity-40" : ""}`}
                   >
                     <td className="px-3 py-3">
-                      <Checkbox checked={checked} onChange={(v) => onToggleOne(s.id, v)} />
+                      <Checkbox
+                        checked={checked}
+                        onChange={(v) => onToggleOne(s.id, v)}
+                        disabled={!canDrag}
+                      />
                     </td>
                     <td className="px-3 py-3 font-mono">{bn(s.code || s.id)}</td>
                     <td className="px-3 py-3 font-medium text-slate-800 whitespace-nowrap">{s.name}</td>
@@ -183,7 +212,7 @@ function ListPanel({
    Main component
 --------------------------------------------------------- */
 
-export default function StudentGroupCreate() {
+export default function ExamStudentGroupCreate() {
   // ফিল্টার ID রাখে
   const [session, setSession] = useState(null);
   const [examId, setExamId] = useState(null);
@@ -194,6 +223,15 @@ export default function StudentGroupCreate() {
   const { data: filterData } = useGetStudentGroupFiltersQuery();
   const sessionTree = useMemo(() => filterData?.sessions || [], [filterData]);
   const allSubClasses = useMemo(() => filterData?.subClasses || [], [filterData]);
+
+  // ── Permission ──
+  // Left → Right ড্র্যাগ  = INSERT permission
+  // Right → Left ড্র্যাগ = DELETE permission
+  // ExamStudentList-এর মতোই: frontend-এ কিছু আটকানো হয় না, backend 403 ফেরালে
+  // apiError ব্যানারে message দেখানো হয়।
+  const permissions = filterData?.permissions;
+  const canInsert = permissions ? Boolean(permissions.insert) : true;
+  const canDelete = permissions ? Boolean(permissions.delete) : true;
 
   // ১) শিক্ষাবর্ষ
   const sessionOptions = useMemo(
@@ -375,6 +413,7 @@ export default function StudentGroupCreate() {
   /* ---------------- এক পাশ থেকে অন্য পাশে move ---------------- */
 
   // বাম → ডান: গ্রুপে INSERT (ids = AdmissionID)
+  // permission backend-এ check হয় — না থাকলে 403 + message আসবে, যা apiError-তে দেখাবে
   const moveIdsToGroup = async (ids) => {
     if (!toSubClass) {
       setApiError("আগে 'সাব ক্লাশ পর্যন্ত' নির্বাচন করুন");
@@ -411,6 +450,7 @@ export default function StudentGroupCreate() {
   };
 
   // ডান → বাম: গ্রুপ থেকে DELETE (ids = Student_Result.ID) — Student_Admission অপরিবর্তিত
+  // permission backend-এ check হয় — না থাকলে 403 + message আসবে, যা apiError-তে দেখাবে
   const moveIdsToAvailable = async (ids) => {
     const idSet = new Set(ids);
     const moving = group.filter((s) => idSet.has(s.id));
@@ -430,7 +470,11 @@ export default function StudentGroupCreate() {
     }
 
     setGroup((prev) => prev.filter((s) => !idSet.has(s.id)));
-    setAvailableChecked((prev) => prev);
+    setGroupChecked((prev) => {
+      const next = new Set(prev);
+      idSet.forEach((id) => next.delete(id));
+      return next;
+    });
     setToast(`${bn(moving.length)} জন শিক্ষার্থীকে গ্রুপ থেকে সরানো হয়েছে`);
     setTimeout(() => setToast(null), 2600);
   };
@@ -439,6 +483,7 @@ export default function StudentGroupCreate() {
   const [dragInfo, setDragInfo] = useState(null); // { side: "available" | "group", ids: number[] } | null
   const [dragOverSide, setDragOverSide] = useState(null);
 
+  // ড্র্যাগ সবসময় enabled — permission backend-এ check হবে, না থাকলে UI-তে message দেখাবে
   const handleRowDragStart = (side, id) => (e) => {
     if (busy) {
       e.preventDefault();
@@ -517,7 +562,8 @@ export default function StudentGroupCreate() {
       className="w-full min-h-screen overflow-x-hidden bg-slate-50 p-4 sm:p-6"
       style={{ fontFamily: "'Noto Sans Bengali','Kalpurush','SolaimanLipi',sans-serif" }}
     >
-      <div className="max-w-7xl mx-auto">
+      {/* max-w-7xl সরিয়ে w-full করে দেওয়া হয়েছে ফুল উইডথের জন্য */}
+      <div className="w-full mx-auto">
         {/* Header */}
         <header className="mb-5 flex items-center gap-3">
           <div>
@@ -529,66 +575,57 @@ export default function StudentGroupCreate() {
           </div>
         </header>
 
-        {/* Filters — বাম: শিক্ষাবর্ষ, পরীক্ষা, সাব ক্লাস হতে | ডান: সাব ক্লাশ পর্যন্ত */}
+        {/* Filters — এক লাইনে ৪টি কলাম (Responsive Grid) */}
         <FormProvider {...filterMethods}>
-          <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* বাম ব্লক */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <DefaultSelect
-                  label="শিক্ষাবর্ষ"
-                  options={sessionOptions}
-                  valueField="value"
-                  nameField="name"
-                  registerKey="Session"
-                  onChange={handleSessionChange}
-                />
-                <DefaultSelect
-                  label="পরীক্ষা"
-                  options={examOptions}
-                  valueField="value"
-                  nameField="name"
-                  registerKey="Exam"
-                  disabled={!session}
-                  onChange={handleExamChange}
-                />
-                <DefaultSelect
-                  label="সাব ক্লাস হতে"
-                  options={fromSubClassOptions}
-                  valueField="value"
-                  nameField="name"
-                  registerKey="FromSubClass"
-                  onChange={handleFromSubClassChange}
-                />
-              </div>
-
-              {/* ডান ব্লক — সাব ক্লাশ পর্যন্ত + যোগ করার বাটন */}
-              <div className="flex items-end gap-3">
-                <div className="flex-1">
-                  <DefaultSelect
-                    label="সাব ক্লাশ পর্যন্ত"
-                    options={toSubClassOptions}
-                    valueField="value"
-                    nameField="name"
-                    registerKey="ToSubClass"
-                    disabled={!examId}
-                    onChange={handleToSubClassChange}
-                  />
-                </div>
-              </div>
+          <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-4 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
+              <DefaultSelect
+                label="শিক্ষাবর্ষ"
+                options={sessionOptions}
+                valueField="value"
+                nameField="name"
+                registerKey="Session"
+                onChange={handleSessionChange}
+              />
+              <DefaultSelect
+                label="পরীক্ষা"
+                options={examOptions}
+                valueField="value"
+                nameField="name"
+                registerKey="Exam"
+                disabled={!session}
+                onChange={handleExamChange}
+              />
+              <DefaultSelect
+                label="সাব ক্লাস হতে"
+                options={fromSubClassOptions}
+                valueField="value"
+                nameField="name"
+                registerKey="FromSubClass"
+                onChange={handleFromSubClassChange}
+              />
+              <DefaultSelect
+                label="সাব ক্লাশ পর্যন্ত"
+                options={toSubClassOptions}
+                valueField="value"
+                nameField="name"
+                registerKey="ToSubClass"
+                disabled={!examId}
+                onChange={handleToSubClassChange}
+              />
             </div>
           </section>
         </FormProvider>
 
         {/* API এরর */}
         {apiError && (
-          <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600">
+          <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 w-full">
             {apiError}
           </div>
         )}
 
         {/* Dual panel — ড্র্যাগ করে এক পাশ থেকে অন্য পাশে নেওয়া যায় */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start w-full">
           <ListPanel
             title="যাদের গ্রুপে নিবেন তাদের নির্বাচন করুন"
             subTitle={fromSubClassName ? `সাব ক্লাস: ${fromSubClassName}` : ""}
@@ -612,6 +649,7 @@ export default function StudentGroupCreate() {
             draggingIds={dragInfo?.side === "available" ? dragInfo.ids : []}
             emptyText={availableEmptyText}
             busy={busy}
+            canDrag={true}
           />
 
           <ListPanel
@@ -637,6 +675,7 @@ export default function StudentGroupCreate() {
             draggingIds={dragInfo?.side === "group" ? dragInfo.ids : []}
             emptyText={groupEmptyText}
             busy={busy}
+            canDrag={true}
           />
         </section>
       </div>

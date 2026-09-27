@@ -1,28 +1,61 @@
 import { useEffect } from 'react';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import Loading from '../components/Loading/Loading';
 import { useGetSettingsQuery } from '../features/settings/settingsQuerySlice';
-import PointVCondition from './PointVCondition';
-import MultiStepForm from '../components/MultiStepForm';
-import ExamShift from '../view/exam/ExamShift';
-import SitPlanAssign from '../view/exam/SitPlanAssign';
 import { useDispatch } from 'react-redux';
 import { setPageName, setQuickBarConfig } from '../features/auth/authSlice';
-import { useDeleteExamConditionMutation, useGetExamConditionsQuery, useLazyGetExamConditonEntryQuery } from '../features/exam/examQuerySlice';
+import { useDeleteExamConditionMutation, useGetExamConditionsQuery, useGetExamFilterExamsQuery, useGetExamFilterSubclassesQuery, useGetExamSessionQuery, useLazyGetExamConditonEntryQuery } from '../features/exam/examQuerySlice';
 import SortableTable from '../components/Tables/SortableTable';
 import useTranslate from '../utils/Translate';
 import Button from '../components/Button/Button';
+import DefaultSelect from '../components/Forms/DefaultSelect';
 import SvgIcon from '../components/icons/SvgIcon';
 import { showModal } from '../utils/ModalControlar';
 import Swal from 'sweetalert2';
 import DeleteButton from '../components/Button/DeleteButton';
 const ExamCondition = ({ pageTitle }) => {
   // const { data, error, isLoading } = useGetExamConditionsSettingsQuery();
-  const { data: response, isLoading, error, refetch } = useGetSettingsQuery();
-  const { data: examConditions } = useGetExamConditionsQuery();
+  const { data: response, isLoading, error } = useGetSettingsQuery();
   const [deleteExamCondition] = useDeleteExamConditionMutation();
   const data = response?.data.find((item) => item.ID == 20);
   const dispatch = useDispatch();
   const translate = useTranslate();
+
+  const methods = useForm({
+    defaultValues: {
+      SessionID: '',
+      ExamID: '',
+      SubClassID: '',
+    },
+  });
+  const { control, setValue } = methods;
+  const sessionID = useWatch({ control, name: 'SessionID' });
+  const examID = useWatch({ control, name: 'ExamID' });
+  const subClassID = useWatch({ control, name: 'SubClassID' });
+  const { data: examConditions, refetch: refetchExamConditions } = useGetExamConditionsQuery({
+    SessionID: sessionID,
+    ExamID: examID,
+    SubClassID: subClassID,
+  });
+
+  const { data: sessionData } = useGetExamSessionQuery();
+  const { data: examNameData } = useGetExamFilterExamsQuery(
+    { SessionID: sessionID },
+    { skip: !sessionID }
+  );
+  const { data: subclassListData } = useGetExamFilterSubclassesQuery(
+    { SessionID: sessionID, ExamID: examID },
+    { skip: !sessionID || !examID }
+  );
+  useEffect(() => {
+    setValue('ExamID', '');
+    setValue('SubClassID', '');
+  }, [sessionID, setValue]);
+
+  useEffect(() => {
+    setValue('SubClassID', '');
+  }, [examID, setValue]);
+
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
@@ -86,9 +119,9 @@ const ExamCondition = ({ pageTitle }) => {
           ExamID: data.ExamID,
           SubClassID: data.SubClassID,
         }).then((response) => {
-          if(response?.data) {
+          if (response?.data) {
             Swal.fire("Deleted!", response?.data?.message, "success");
-            refetch();
+            refetchExamConditions();
           } else if (response.error) {
             throw new Error(response.error.data?.error || response.error.data?.message || "Delete operation failed");
           }
@@ -227,11 +260,42 @@ const ExamCondition = ({ pageTitle }) => {
         </div>
       </div>
 
+      <FormProvider {...methods}>
+        <div className="mt-5 mb-4 grid grid-cols-1 gap-3 md:grid-cols-3 print:hidden">
+          <DefaultSelect
+            label={translate('Session')}
+            options={sessionData ?? []}
+            registerKey="SessionID"
+            nameField="SessionName"
+            valueField="SessionID"
+            defaultSelect={false}
+          />
+          <DefaultSelect
+            label={translate('Exam')}
+            options={examNameData ?? []}
+            registerKey="ExamID"
+            nameField="ExamName"
+            valueField="ExamID"
+            disabled={!sessionID}
+            unicode
+          />
+          <DefaultSelect
+            label={translate('Sub Class')}
+            options={subclassListData ?? []}
+            registerKey="SubClassID"
+            nameField="SubClass"
+            valueField="SubClassID"
+            disabled={!sessionID || !examID}
+            unicode
+          />
+        </div>
+      </FormProvider>
+
       <div className="mt-5 overflow-x-auto">
         <SortableTable
           columns={columns}
           isFilterColumn={false}
-          data={examConditions}
+          data={examConditions ?? []}
         />
       </div>
 

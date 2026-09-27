@@ -7,6 +7,7 @@ import {
   useGetExamDivitionByTypeQuery,
   useGetExamNamesQuery,
   usePostExamDivitionMutation,
+  useUpdateExamDivitionMutation,
 } from '../../../features/exam/examQuerySlice';
 import useTranslate from '../../../utils/Translate';
 import { useGetSessionsQuery } from '../../../features/session/sessionSlice';
@@ -92,10 +93,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
 
   const [showDivisionManager, setShowDivisionManager] = useState(false);
   const [divisionOptions, setDivisionOptions] = useState([]);
-  const [divisionForm, setDivisionForm] = useState({
-    divisionNameBn: "",
-    divisionNameAr: "",
-  });
+  const [editingDivision, setEditingDivision] = useState(null);
   const [isDataInitialized, setIsDataInitialized] = useState(false);
   const translate = useTranslate()
   const ExamType = watch("ExamType")
@@ -141,6 +139,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
   // }, [examDivitions, sharedStepData?.gradeBands, setValue]);
 
   const [addDivition] = usePostExamDivitionMutation();
+  const [updateDivition] = useUpdateExamDivitionMutation();
   const {
     fields: gradeFields,
     append: appendGrade,
@@ -274,6 +273,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
     }
 
     try {
+      const isEditingDivision = Boolean(editingDivision);
       const payload = {
         DivisionName: divisionName,
         DivisionArabic: divisionArabic,
@@ -281,24 +281,36 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
         ExamType: ExamType,
       };
 
-      const response = await addDivition(payload).unwrap();
+      const response = isEditingDivision
+        ? await updateDivition({
+          id: editingDivision.ID || editingDivision.id,
+          body: payload,
+        }).unwrap()
+        : await addDivition(payload).unwrap();
 
       setValue("DivisionName", "");
       setValue("DivisionArabic", "");
       setValue("DivisionEnglish", "");
+      setEditingDivision(null);
 
-      setDivisionOptions((prev) => [
-        ...prev,
-        {
-          id: response?.ID || `${Date.now()}`,
-          divisionNameBn: divisionName,
-          divisionNameAr: divisionArabic,
-          divisionNameEn: divisionEnglish,
-        },
-      ]);
+      if (!isEditingDivision) {
+        setDivisionOptions((prev) => [
+          ...prev,
+          {
+            id: response?.ID || `${Date.now()}`,
+            divisionNameBn: divisionName,
+            divisionNameAr: divisionArabic,
+            divisionNameEn: divisionEnglish,
+          },
+        ]);
+      }
 
       Swal.fire({
-        title: translate("Division added successfully"),
+        title: translate(
+          isEditingDivision
+            ? "Division updated successfully"
+            : "Division added successfully"
+        ),
         icon: "success",
         timer: 1500,
         showConfirmButton: false,
@@ -310,6 +322,22 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
         text: error?.data?.message || error?.data?.error || translate("Please try again."),
       });
     }
+  };
+
+  const handleEditDivision = (division) => {
+    setEditingDivision(division);
+    setValue("DivisionName", division?.DivisionNames || "");
+    setValue("DivisionArabic", division?.DivisionArabics || "");
+    setValue("DivisionEnglish", division?.DivisionEnglishs || "");
+    setShowDivisionManager(true);
+  };
+
+  const handleCloseDivisionManager = () => {
+    setEditingDivision(null);
+    setValue("DivisionName", "");
+    setValue("DivisionArabic", "");
+    setValue("DivisionEnglish", "");
+    setShowDivisionManager(false);
   };
   const onSubmit = (data) => {
     const payload = {
@@ -414,7 +442,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
               <div className="w-full space-y-6 bg-white">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-lg font-semibold text-gray-800 pl-1">
-                    নতুন বিভাগ যোগ করুন
+                    {editingDivision ? "বিভাগ সম্পাদনা করুন" : "নতুন বিভাগ যোগ করুন"}
                   </h2>
                 </div>
 
@@ -436,12 +464,12 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                     className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
                     onClick={handleCreateDivision}
                   >
-                    সাবমিট ও নতুন যোগ করুন
+                    {editingDivision ? "আপডেট করুন" : "সাবমিট ও নতুন যোগ করুন"}
                   </button>
                   <button
                     type="button"
                     className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
-                    onClick={() => setShowDivisionManager(false)}
+                    onClick={handleCloseDivisionManager}
                   >
                     এক্সাম কন্ডিশনে ফিরে যান
                   </button>
@@ -450,6 +478,19 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
 
                 <div className="overflow-x-auto border border-gray-200 rounded-lg">
                   <SortableTable columns={[
+                    {
+                      title: "Action",
+                      render: (row) => (
+                        <button
+                          type="button"
+                          className="text-blue-600 hover:text-blue-800"
+                          onClick={() => handleEditDivision(row)}
+                          title="Edit division"
+                        >
+                          <SvgIcon name="FiEdit" size={16} />
+                        </button>
+                      ),
+                    },
                     { title: "SL.", render: (row, rowIndex) => <>{rowIndex + 1}</> },
                     { title: "বিভাগ (বাংলা).", field: "DivisionNames" },
                     { title: "বিভাগ ( ইংরেজি ).", field: "DivisionEnglishs" },
