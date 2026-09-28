@@ -25,12 +25,44 @@ const DELETE_DENIED_MSG = "ফলাফলের-তালিকা হতে �
 
 // API রেসপন্স → প্যানেলের রো।
 // বাম পাশে id = Student_Admission.AdmissionID, ডান পাশে id = Student_Result.ID
-const toRow = (id, user, subClass = "") => ({
+// ⭐ serial = Student_Admission.AdmissionSerial (ক্রম ঠিক রাখতে + কলামে দেখাতে)
+// ⭐ admissionId = দুই পাশেই Student_Admission.AdmissionID — সিরিয়াল এক হলে টাই ভাঙতে লাগে
+const toRow = (id, user, subClass = "", serial = null, admissionId = null) => ({
   id,
   code: user?.UserCode ?? "",
   name: user?.UserName ? (user.UserName) : "",
   subClass: subClass ? (subClass) : "",
+  serial: serial ?? null,
+  admissionId: admissionId ?? null,
 });
+
+// ⭐ AdmissionSerial ধরে ascending — backend-এর নিয়মের সাথে মিলিয়ে।
+//    কলামটা STRING, তাই সংখ্যা ধরে তুলনা। সিরিয়াল খালি থাকলে সবার শেষে।
+//    সিরিয়াল এক হলে AdmissionID দিয়ে টাই-ব্রেক।
+const serialValue = (value) => {
+  if (value === null || value === undefined || String(value).trim() === "") return null;
+  const num = Number(String(value).trim());
+  return Number.isFinite(num) ? num : null;
+};
+
+const compareBySerial = (a, b) => {
+  const sa = serialValue(a?.serial);
+  const sb = serialValue(b?.serial);
+
+  if (sa !== null && sb !== null) {
+    if (sa !== sb) return sa - sb;
+  } else if (sa !== null) {
+    return -1;
+  } else if (sb !== null) {
+    return 1;
+  } else {
+    const ta = String(a?.serial ?? "");
+    const tb = String(b?.serial ?? "");
+    if (ta !== tb) return ta.localeCompare(tb, "bn");
+  }
+
+  return (Number(a?.admissionId) || 0) - (Number(b?.admissionId) || 0);
+};
 
 function matchesFilter(s, filter) {
   if (!filter.trim()) return true;
@@ -38,6 +70,7 @@ function matchesFilter(s, filter) {
   return (
     (s.name || "").toLowerCase().includes(q) ||
     String(s.code ?? "").toLowerCase().includes(q) ||
+    String(s.serial ?? "").toLowerCase().includes(q) ||
     String(s.id).includes(q)
   );
 }
@@ -80,11 +113,7 @@ function Checkbox({ checked, onChange, label, disabled }) {
 }
 
 /* ---------------------------------------------------------
-   List panel — বামে "সাব ক্লাস হতে", ডানে "সাব ক্লাশ পর্যন্ত" (গ্রুপ)
-   drag & drop টার্গেট + সোর্স — সিলেক্টেড রো টেনে অন্য পাশে ছাড়লেই মুভ হয়
-
-   canDrag = false হলে এই প্যানেলের রো ড্র্যাগ করা যাবে কাশী (permission নেই)
-   deniedMsg = permission না থাকলে হেডারে দেখানোর মেসেজ
+   List panel
 --------------------------------------------------------- */
 
 function ListPanel({
@@ -136,7 +165,6 @@ function ListPanel({
                 value={filter}
                 onChange={(e) => onFilterChange(e.target.value)}
                 placeholder="নাম / আইডি খুঁজুন"
-                /* এখানে w-10 এর পরিবর্তে w-36 ব্যবহার করা হয়েছে */
                 className="h-[38px] pl-8 pr-4 text-sm font-medium border border-stroke rounded bg-white w-36 sm:w-40 outline-none transition focus:border-custom-focus"
               />
             </div>
@@ -145,12 +173,17 @@ function ListPanel({
       </div>
 
       <div className={`overflow-auto max-h-80 transition-opacity ${busy ? "opacity-60" : ""}`}>
-        <table className="w-full min-w-[460px] text-sm">
+        {/* ⭐ নতুন কলাম যোগ হওয়ায় min-w 520 → 580 */}
+        <table className="w-full min-w-[580px] text-sm">
           <thead className="sticky top-0 bg-slate-50 text-xs tracking-wide z-10">
             <tr>
               <th className="px-3 py-2.5 text-left w-8">
                 <Checkbox checked={allChecked} onChange={onToggleAll} disabled={!canDrag} />
               </th>
+              {/* ⭐ ক্রম (ইনডেক্স) */}
+              <th className="px-3 py-2.5 text-left w-10">ক্র:</th>
+              {/* ⭐ ভর্তি সিরিয়াল — এই কলাম ধরেই তালিকা সাজানো */}
+              <th className="px-3 py-2.5 text-left">ভর্তি সিরিয়াল</th>
               <th className="px-3 py-2.5 text-left">আইডি</th>
               <th className="px-3 py-2.5 text-left">শিক্ষার্থীর নাম</th>
               <th className="px-3 py-2.5 text-left">সাব ক্লাস</th>
@@ -159,12 +192,13 @@ function ListPanel({
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={4} className="text-center text-slate-400 italic py-8 text-sm">
+                {/* ⭐ কলাম সংখ্যা ৫ → ৬ */}
+                <td colSpan={6} className="text-center text-slate-400 italic py-8 text-sm">
                   {isDragTarget ? "এখানে ছেড়ে দিন" : emptyText || "কোনো শিক্ষার্থী পাওয়া যায়নি"}
                 </td>
               </tr>
             ) : (
-              rows.map((s) => {
+              rows.map((s, index) => {
                 const checked = checkedSet.has(s.id);
                 const isDragging = draggingIds.includes(s.id);
                 const draggable = !busy && canDrag;
@@ -194,6 +228,12 @@ function ListPanel({
                         disabled={!canDrag}
                       />
                     </td>
+                    {/* ⭐ ক্রম — সাজানো তালিকার ইনডেক্স */}
+                    <td className="px-3 py-3 text-slate-500">{bn(index + 1)}</td>
+                    {/* ⭐ ভর্তি সিরিয়াল */}
+                    <td className="px-3 py-3 font-mono text-slate-600">
+                      {s.serial ? bn(s.serial) : "—"}
+                    </td>
                     <td className="px-3 py-3 font-mono">{bn(s.code || s.id)}</td>
                     <td className="px-3 py-3 font-medium text-slate-800 whitespace-nowrap">{s.name}</td>
                     <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{s.subClass || "—"}</td>
@@ -213,33 +253,25 @@ function ListPanel({
 --------------------------------------------------------- */
 
 export default function ExamStudentGroupCreate() {
-  // ফিল্টার ID রাখে
   const [session, setSession] = useState(null);
   const [examId, setExamId] = useState(null);
-  const [fromSubClass, setFromSubClass] = useState(null); // সাব ক্লাস হতে — সব সাব ক্লাস
-  const [toSubClass, setToSubClass] = useState(null); // সাব ক্লাশ পর্যন্ত — cascading
+  const [fromSubClass, setFromSubClass] = useState(null);
+  const [toSubClass, setToSubClass] = useState(null);
 
   /* ---------------- ফিল্টার ডাটা ---------------- */
   const { data: filterData } = useGetStudentGroupFiltersQuery();
   const sessionTree = useMemo(() => filterData?.sessions || [], [filterData]);
   const allSubClasses = useMemo(() => filterData?.subClasses || [], [filterData]);
 
-  // ── Permission ──
-  // Left → Right ড্র্যাগ  = INSERT permission
-  // Right → Left ড্র্যাগ = DELETE permission
-  // ExamStudentList-এর মতোই: frontend-এ কিছু আটকানো হয় না, backend 403 ফেরালে
-  // apiError ব্যানারে message দেখানো হয়।
   const permissions = filterData?.permissions;
   const canInsert = permissions ? Boolean(permissions.insert) : true;
   const canDelete = permissions ? Boolean(permissions.delete) : true;
 
-  // ১) শিক্ষাবর্ষ
   const sessionOptions = useMemo(
     () => sessionTree.map((s) => ({ value: s.SessionID, name: s.SessionName })),
     [sessionTree]
   );
 
-  // ২) নির্বাচিত শিক্ষাবর্ষের নিচের পরীক্ষাগুলো
   const selectedSession = useMemo(
     () => sessionTree.find((s) => String(s.SessionID) === String(session)),
     [sessionTree, session]
@@ -253,7 +285,6 @@ export default function ExamStudentGroupCreate() {
     [selectedSession]
   );
 
-  // ৩) বাম পাশের "সাব ক্লাস হতে" — cascading না, সব সাব ক্লাস
   const fromSubClassOptions = useMemo(
     () =>
       allSubClasses.map((c) => ({
@@ -263,7 +294,6 @@ export default function ExamStudentGroupCreate() {
     [allSubClasses]
   );
 
-  // ৪) ডান পাশের "সাব ক্লাশ পর্যন্ত" — নির্বাচিত পরীক্ষার নিচের সাব ক্লাস
   const selectedExam = useMemo(
     () => (selectedSession?.exams || []).find((e) => String(e.ExamID) === String(examId)),
     [selectedSession, examId]
@@ -277,11 +307,9 @@ export default function ExamStudentGroupCreate() {
     [selectedExam]
   );
 
-  // নির্বাচিত সাব ক্লাসের নাম — প্যানেলের সাবটাইটেলে দেখানোর জন্য
   const fromSubClassName = fromSubClassOptions.find((o) => String(o.value) === String(fromSubClass))?.name || "";
   const toSubClassName = toSubClassOptions.find((o) => String(o.value) === String(toSubClass))?.name || "";
 
-  // উপরের লেভেল বদলালে নিচের লেভেলগুলো রিসেট
   const handleSessionChange = (opt) => {
     if (!opt) return;
     setSession(opt.value);
@@ -323,7 +351,6 @@ export default function ExamStudentGroupCreate() {
   }, [toSubClass, filterMethods]);
 
   /* ---------------- তালিকা API ---------------- */
-  // বাম = Student_Admission (উৎস সাব ক্লাস), ডান = Student_Result (গ্রুপ)
   const filtersReady = Boolean(session && examId && fromSubClass);
   const {
     currentData: listData,
@@ -342,7 +369,6 @@ export default function ExamStudentGroupCreate() {
   const [addStudentGroup, { isLoading: isAdding }] = useAddStudentGroupMutation();
   const [removeStudentGroup, { isLoading: isRemoving }] = useRemoveStudentGroupMutation();
 
-  // API কল চলাকালীন ড্র্যাগ বন্ধ — যাতে রিফ্রেশের আগে ভুল ID নিয়ে আবার মুভ না হয়
   const busy = isAdding || isRemoving || isListFetching;
 
   const [available, setAvailable] = useState([]);
@@ -356,27 +382,33 @@ export default function ExamStudentGroupCreate() {
   const [toast, setToast] = useState(null);
   const [apiError, setApiError] = useState(null);
 
-  // API ডাটা → লোকাল state (প্রতিবার রিফেচের পর আসল ID দিয়ে রিসেট)
   useEffect(() => {
-    setAvailable((listData?.available || []).map((a) => toRow(a.AdmissionID, a.User, fromSubClassName)));
-    setGroup((listData?.added || []).map((r) => toRow(r.ID, r.User, r.SourceSubClass)));
+    setAvailable(
+      (listData?.available || []).map((a) =>
+        toRow(a.AdmissionID, a.User, fromSubClassName, a.AdmissionSerial, a.AdmissionID)
+      )
+    );
+    setGroup(
+      (listData?.added || []).map((r) =>
+        toRow(r.ID, r.User, r.SourceSubClass, r.AdmissionSerial, r.AdmissionID)
+      )
+    );
     setAvailableChecked(new Set());
     setGroupChecked(new Set());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listData]);
 
-  // ফিল্টার বদলালে পুরনো এরর মুছে যাবে
   useEffect(() => {
     setApiError(null);
   }, [session, examId, fromSubClass, toSubClass]);
 
   /* ---------------- ফিল্টার ---------------- */
   const availableRows = useMemo(
-    () => available.filter((s) => matchesFilter(s, availableFilter)),
+    () => available.filter((s) => matchesFilter(s, availableFilter)).sort(compareBySerial),
     [available, availableFilter]
   );
   const groupRows = useMemo(
-    () => group.filter((s) => matchesFilter(s, groupFilter)),
+    () => group.filter((s) => matchesFilter(s, groupFilter)).sort(compareBySerial),
     [group, groupFilter]
   );
 
@@ -412,8 +444,6 @@ export default function ExamStudentGroupCreate() {
 
   /* ---------------- এক পাশ থেকে অন্য পাশে move ---------------- */
 
-  // বাম → ডান: গ্রুপে INSERT (ids = AdmissionID)
-  // permission backend-এ check হয় — না থাকলে 403 + message আসবে, যা apiError-তে দেখাবে
   const moveIdsToGroup = async (ids) => {
     if (!toSubClass) {
       setApiError("আগে 'সাব ক্লাশ পর্যন্ত' নির্বাচন করুন");
@@ -424,8 +454,10 @@ export default function ExamStudentGroupCreate() {
     if (moving.length === 0 || !filtersReady) return;
 
     setApiError(null);
+
+    let result;
     try {
-      await addStudentGroup({
+      result = await addStudentGroup({
         SessionID: session,
         ExamID: examId,
         FromSubClassID: fromSubClass,
@@ -433,24 +465,38 @@ export default function ExamStudentGroupCreate() {
         AdmissionIDs: moving.map((s) => s.id),
       }).unwrap();
     } catch (err) {
-      setApiError(err?.data?.detail || err?.data?.error || "শিক্ষার্থী যোগ করা যায়নি");
+      setApiError(err?.data?.error || err?.data?.detail || "শিক্ষার্থী যোগ করা যায়নি");
       return;
     }
 
-    // সফল হলে সাথে সাথে UI-তে দেখাও — রিফেচ এলে আসল Student_Result ID দিয়ে রিসেট হবে
-    setAvailable((prev) => prev.filter((s) => !idSet.has(s.id)));
-    setGroup((prev) => [...prev, ...moving]);
+    const conflictStudents = result?.conflictStudents || [];
+    const conflictIDs = new Set(conflictStudents.map((c) => c.AdmissionID));
+
+    const movedRows = moving.filter((s) => !conflictIDs.has(s.id));
+    const movedIDs = new Set(movedRows.map((s) => s.id));
+
+    setAvailable((prev) => prev.filter((s) => !movedIDs.has(s.id)));
+    setGroup((prev) => [...prev, ...movedRows]);
     setAvailableChecked((prev) => {
       const next = new Set(prev);
-      idSet.forEach((id) => next.delete(id));
+      movedIDs.forEach((id) => next.delete(id));
       return next;
     });
-    setToast(`${bn(moving.length)} জন শিক্ষার্থী গ্রুপে যোগ হয়েছে`);
-    setTimeout(() => setToast(null), 2600);
+
+    if (conflictStudents.length > 0) {
+      const names = conflictStudents
+        .map((c) => c.UserName || `আইডি ${c.UserCode ?? c.UserID}`)
+        .join(", ");
+
+      setApiError(
+        result?.message || `পূর্বে অন্য কোন ক্লাসে ${names}কে তালিকা তৈরি করা হয়েছে।`
+      );
+    } else {
+      setToast(`${bn(movedRows.length)} জন শিক্ষার্থী গ্রুপে যোগ হয়েছে`);
+      setTimeout(() => setToast(null), 2600);
+    }
   };
 
-  // ডান → বাম: গ্রুপ থেকে DELETE (ids = Student_Result.ID) — Student_Admission অপরিবর্তিত
-  // permission backend-এ check হয় — না থাকলে 403 + message আসবে, যা apiError-তে দেখাবে
   const moveIdsToAvailable = async (ids) => {
     const idSet = new Set(ids);
     const moving = group.filter((s) => idSet.has(s.id));
@@ -480,16 +526,14 @@ export default function ExamStudentGroupCreate() {
   };
 
   /* ---------------- Drag & Drop ---------------- */
-  const [dragInfo, setDragInfo] = useState(null); // { side: "available" | "group", ids: number[] } | null
+  const [dragInfo, setDragInfo] = useState(null);
   const [dragOverSide, setDragOverSide] = useState(null);
 
-  // ড্র্যাগ সবসময় enabled — permission backend-এ check হবে, না থাকলে UI-তে message দেখাবে
   const handleRowDragStart = (side, id) => (e) => {
     if (busy) {
       e.preventDefault();
       return;
     }
-    // রো-টা আগে থেকে সিলেক্ট করা থাকলে পুরো সিলেকশনটাই টানা হবে, নাহলে শুধু ওই একজন
     const checkedSet = side === "available" ? availableChecked : groupChecked;
     const ids = checkedSet.has(id) ? Array.from(checkedSet) : [id];
     setDragInfo({ side, ids });
@@ -527,7 +571,6 @@ export default function ExamStudentGroupCreate() {
     setDragOverSide(null);
   };
 
-  // legacy স্ক্রিনের "+" বাটন — সিলেক্ট করা শিক্ষার্থীদের একসাথে গ্রুপে পাঠায়
   const handleAddSelected = () => {
     if (availableChecked.size === 0) {
       setApiError("আগে বাম পাশ থেকে শিক্ষার্থী নির্বাচন করুন");
@@ -536,7 +579,6 @@ export default function ExamStudentGroupCreate() {
     moveIdsToGroup(Array.from(availableChecked));
   };
 
-  // খালি টেবিলে কী লেখা দেখাবে — ধাপে ধাপে গাইড
   const availableEmptyText = !session
     ? "প্রথমে শিক্ষাবর্ষ নির্বাচন করুন"
     : !examId
@@ -562,9 +604,7 @@ export default function ExamStudentGroupCreate() {
       className="w-full min-h-screen overflow-x-hidden bg-slate-50 p-4 sm:p-6"
       style={{ fontFamily: "'Noto Sans Bengali','Kalpurush','SolaimanLipi',sans-serif" }}
     >
-      {/* max-w-7xl সরিয়ে w-full করে দেওয়া হয়েছে ফুল উইডথের জন্য */}
       <div className="w-full mx-auto">
-        {/* Header */}
         <header className="mb-5 flex items-center gap-3">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-800">শিক্ষার্থী গ্রুপ তৈরি</h1>
@@ -575,7 +615,6 @@ export default function ExamStudentGroupCreate() {
           </div>
         </header>
 
-        {/* Filters — এক লাইনে ৪টি কলাম (Responsive Grid) */}
         <FormProvider {...filterMethods}>
           <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-4 w-full">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
@@ -617,14 +656,12 @@ export default function ExamStudentGroupCreate() {
           </section>
         </FormProvider>
 
-        {/* API এরর */}
         {apiError && (
           <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 w-full">
             {apiError}
           </div>
         )}
 
-        {/* Dual panel — ড্র্যাগ করে এক পাশ থেকে অন্য পাশে নেওয়া যায় */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start w-full">
           <ListPanel
             title="যাদের গ্রুপে নিবেন তাদের নির্বাচন করুন"
