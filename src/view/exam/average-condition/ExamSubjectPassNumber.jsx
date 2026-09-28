@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import useTranslate from "../../../utils/Translate";
 import Button from "../../../components/Button/Button";
-import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import { useGetAcademicSubjectsQuery } from "../../../features/class/classQuerySlice";
 import Swal from "sweetalert2";
@@ -33,20 +33,78 @@ const getUniqueDivisionIds = (gradeBands = []) =>
       .map((band) => String(band.DivisionID))
   );
 
-
-function HighlightToggle({ register, control, arrayName, index }) {
-  const isHighlighted = useWatch({
-    control,
-    name: `${arrayName}.${index}.isHighlighted`,
+const normalizeGradeColorSettings = (settings, subjectGradeList = []) => {
+  const serialByDivisionId = new Map();
+  (subjectGradeList || []).forEach((subject) => {
+    (subject?.gradeBands || []).forEach((band, index) => {
+      if (band?.DivisionID !== "" && band?.DivisionID != null) {
+        const divisionId = String(band.DivisionID);
+        if (!serialByDivisionId.has(divisionId)) {
+          serialByDivisionId.set(divisionId, Number(band.Serial) || index + 1);
+        }
+      }
+    });
   });
 
+  const entries = Array.isArray(settings)
+    ? settings
+    : Object.entries(settings || {}).map(([DivisionID, color], index) => ({
+      DivisionID,
+      Serial: index + 1,
+      ...color,
+    }));
+  const normalized = new Map();
+
+  entries.forEach((entry, index) => {
+    if (!entry || entry.DivisionID === "" || entry.DivisionID == null) return;
+    const divisionId = String(entry.DivisionID);
+    normalized.set(divisionId, {
+      DivisionID: divisionId,
+      Serial:
+        serialByDivisionId.get(divisionId) || Number(entry.Serial) || index + 1,
+      isHighlighted: Boolean(entry.isHighlighted),
+      highlightColor: entry.highlightColor || "#ffeb3b",
+    });
+  });
+
+  return [...normalized.values()].sort((left, right) => left.Serial - right.Serial);
+};
+
+const getGradeColorSettings = (subjectGradeList = []) => {
+  const settings = [];
+
+  (subjectGradeList || []).forEach((subject) => {
+    (subject?.gradeBands || []).forEach((band, index) => {
+      if (
+        band?.DivisionID !== "" &&
+        band?.DivisionID !== null &&
+        band?.DivisionID !== undefined &&
+        !settings.some((setting) => String(setting.DivisionID) === String(band.DivisionID))
+      ) {
+        settings.push({
+          DivisionID: String(band.DivisionID),
+          Serial: Number(band.Serial) || index + 1,
+          ...(band.color || {
+            isHighlighted: false,
+            highlightColor: "#ffeb3b",
+          }),
+        });
+      }
+    });
+  });
+
+  return normalizeGradeColorSettings(settings, subjectGradeList);
+};
+
+function HighlightToggle({ isHighlighted, highlightColor, onChange }) {
   return (
     <div className="flex items-center gap-2">
       <label className="relative inline-flex items-center cursor-pointer">
         <input
           type="checkbox"
           className="sr-only peer"
-          {...register(`${arrayName}.${index}.isHighlighted`)}
+          checked={isHighlighted}
+          onChange={(event) => onChange({ isHighlighted: event.target.checked })}
         />
         <div className="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 transition-colors" />
         <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4" />
@@ -55,10 +113,10 @@ function HighlightToggle({ register, control, arrayName, index }) {
       {isHighlighted && (
         <input
           type="color"
-          defaultValue="#ffeb3b"
+          value={highlightColor}
           title="হাইলাইট রঙ নির্বাচন করুন"
           className="w-8 h-8 p-0 border border-gray-300 rounded cursor-pointer"
-          {...register(`${arrayName}.${index}.highlightColor`)}
+          onChange={(event) => onChange({ highlightColor: event.target.value })}
         />
       )}
     </div>
@@ -77,6 +135,16 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
   const [showDivisionManager, setShowDivisionManager] = useState(false);
   const [editingDivision, setEditingDivision] = useState(null);
   const [editingSubjectGradeIndex, setEditingSubjectGradeIndex] = useState(null);
+  const [divitionList, setDivitionList] = useState()
+  const persistedSubjectIds = useRef(
+    new Set(
+      sharedStepData?.isEditMode
+        ? (sharedStepData?.subjectGradeList || []).map((subject) =>
+          String(subject.SubjectID)
+        )
+        : []
+    )
+  );
   const methods = useForm({
     defaultValues: {
       SessionID: sharedStepData?.SessionID,
@@ -93,13 +161,18 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
         { DivisionNumber: "", DivisionID: "", TopNum: "", Serial: 7 },
       ],
       subjectPassNumbers: sharedStepData?.subjectPassNumbers?.length ? sharedStepData.subjectPassNumbers : [{ SubjectID: "", mayeri: "", optional: false, PassNumber: "" }],
+      gradeColorSettings:
+        normalizeGradeColorSettings(
+          sharedStepData?.gradeColorSettings ||
+          getGradeColorSettings(sharedStepData?.subjectGradeList),
+          sharedStepData?.subjectGradeList
+        ),
 
     },
   });
   const { data: subjectsListData } = useGetAcademicSubjectsQuery();
 
   const {
-    register,
     control,
     handleSubmit,
     watch,
@@ -112,8 +185,10 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
   useEffect(() => {
     if (!sharedStepData) return;
 
-
-    console.log(getValues("subjectPassNumbers"));
+    const savedBands = sharedStepData?.subjectGradeList?.[0]?.gradeBands;
+    if (savedBands?.length > 0) {
+      setDivitionList(savedBands);
+    }
 
     methods.reset({
       SessionID: sharedStepData?.SessionID,
@@ -127,6 +202,12 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
         ? sharedStepData.subjectPassNumbers
         : [{ SubjectID: "", mayeri: "", optional: false, PassNumber: "" }],
       subjectGradeList: sharedStepData?.subjectGradeList || [],
+      gradeColorSettings:
+        normalizeGradeColorSettings(
+          sharedStepData?.gradeColorSettings ||
+          getGradeColorSettings(sharedStepData?.subjectGradeList),
+          sharedStepData?.subjectGradeList
+        ),
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sharedStepData?.SessionID, sharedStepData?.ExamID, sharedStepData?.SubClassID, sharedStepData?.ExamType]);
@@ -144,6 +225,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
     fields: gradeFields,
     append: appendGrade,
     remove: removeGrade,
+    replace: replaceGradeBands,
   } = useFieldArray({ control, name: "gradeBands" });
 
   const {
@@ -161,10 +243,51 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
     replace: replaceSubjectGrade,
   } = useFieldArray({ control, name: "subjectGradeList" });
 
+  const divisionsPrefilled = useRef(false);
+
+  useEffect(() => {
+    if (divisionsPrefilled.current) return;
+    if (!divitionList?.length || !examDivitions?.length) return;
+
+    divitionList.forEach((band, index) => {
+      if (band?.DivisionID !== "" && band?.DivisionID != null) {
+        setValue(`gradeBands.${index}.DivisionID`, String(band.DivisionID));
+      }
+    });
+    divisionsPrefilled.current = true;
+  }, [divitionList, examDivitions, setValue]);
+
   const onSubmit = (data) => {
+    const gradeColorSettings = normalizeGradeColorSettings(
+      data.gradeColorSettings,
+      data.subjectGradeList
+    );
+    const subjectGradeList = (data.subjectGradeList || []).map((subject) => ({
+      ...subject,
+      gradeBands: (subject.gradeBands || []).map((band) => {
+        const colorSetting = gradeColorSettings.find(
+          (setting) => String(setting.DivisionID) === String(band.DivisionID)
+        );
+
+        return {
+          ...band,
+          color: colorSetting
+            ? {
+              isHighlighted: colorSetting.isHighlighted,
+              highlightColor: colorSetting.highlightColor,
+            }
+            : band.color || {
+              isHighlighted: false,
+              highlightColor: "#ffeb3b",
+            },
+        };
+      }),
+    }));
     const payload = {
       ...sharedStepData,
       ...data,
+      gradeColorSettings,
+      subjectGradeList,
     };
 
     console.log("Old:", sharedStepData);
@@ -231,7 +354,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
     setValue("PassNumber", "");
     setValue("MaxNumber", "");
     setValue("mayeri", "");
-    setValue("gradeBands", emptyGradeBands);
+    replaceGradeBands(emptyGradeBands);
     setEditingSubjectGradeIndex(null);
   };
 
@@ -246,7 +369,11 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
     setValue("PassNumber", rowData.PassNumber || "");
     setValue("MaxNumber", rowData.MaxNumber || "");
     setValue("mayeri", rowData.mayeri || "");
-    setValue("gradeBands", rowData.gradeBands || emptyGradeBands);
+    replaceGradeBands(
+      Array.isArray(rowData.gradeBands)
+        ? rowData.gradeBands.map((band) => ({ ...band }))
+        : emptyGradeBands
+    );
     setEditingSubjectGradeIndex(index);
   };
 
@@ -262,6 +389,33 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
       const existingSubjectGradeBands = existingSubjectList
         .filter((_, rowIndex) => rowIndex !== editingSubjectGradeIndex)
         .flatMap((item) => item?.gradeBands || []);
+      const incompleteGrade = currentGradeBands.some(
+        (band) =>
+          !String(band?.DivisionNumber ?? "").trim() ||
+          band?.DivisionID === "" ||
+          band?.DivisionID === null ||
+          band?.DivisionID === undefined
+      );
+
+      if (incompleteGrade) {
+        Swal.fire({
+          icon: "warning",
+          title: translate("Complete all grade rows before adding this subject"),
+        });
+        return;
+      }
+
+      const selectedDivisionIds = currentGradeBands.map((band) =>
+        String(band.DivisionID)
+      );
+      if (new Set(selectedDivisionIds).size !== selectedDivisionIds.length) {
+        Swal.fire({
+          icon: "error",
+          title: translate("A grade division can only be selected once per subject"),
+        });
+        return;
+      }
+
       const uniqueDivisionIdsInSavedRows = getUniqueDivisionIds(existingSubjectGradeBands);
       const uniqueDivisionIdsForCurrentRow = getUniqueDivisionIds(currentGradeBands);
       const totalUniqueDivisionIds = new Set([
@@ -304,13 +458,18 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
         SubjectID: subjectID,
         PassNumber: passNumber,
         MaxNumber: maxNumber,
-        gradeBands: currentGradeBands,
-        mayeri: mayeri != 4 ? 3 : mayeri ,
+        gradeBands: currentGradeBands.map((band) => ({ ...band })),
+        mayeri: mayeri != 4 ? 3 : mayeri,
       };
 
       if (editingSubjectGradeIndex !== null) {
         setValue(`subjectGradeList.${editingSubjectGradeIndex}`, newSubjectGrade);
-        clearSubjectGradeForm();
+        // Clear only the subject fields. Keep gradeBands, same as the "add" path.
+        setValue("SubjectID", "");
+        setValue("PassNumber", "");
+        setValue("MaxNumber", "");
+        setValue("mayeri", "");
+        setEditingSubjectGradeIndex(null);
       } else {
         appendSubjectGrade(newSubjectGrade);
         clearSubjectIDOnly();
@@ -404,6 +563,70 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
     setValue("DivisionArabic", "");
     setValue("DivisionEnglish", "");
     setShowDivisionManager(false);
+  };
+
+  const colorDivisionIds = new Set(
+    [
+      ...(watch("subjectGradeList") || []).flatMap((subject) =>
+        (subject?.gradeBands || []).map((band) => band?.DivisionID)
+      ),
+      ...(watch("gradeBands") || []).map((band) => band?.DivisionID),
+    ]
+      .filter((divisionId) => divisionId !== "" && divisionId != null)
+      .map(String)
+  );
+  const gradeBandsInEditor = watch("gradeBands") || [];
+  const gradeColorSettings = watch("gradeColorSettings") || [];
+  const editingSubjectId =
+    editingSubjectGradeIndex === null
+      ? null
+      : watch(`subjectGradeList.${editingSubjectGradeIndex}.SubjectID`);
+  const isPersistedSubjectGradeEdit =
+    editingSubjectId != null &&
+    persistedSubjectIds.current.has(String(editingSubjectId));
+  const shouldDisableDivisionSelect = isPersistedSubjectGradeEdit || (editingSubjectGradeIndex === null && subjectGradeFields.length > 0);
+  const colorDivisions = (examDivitions || []).filter((division) =>
+    colorDivisionIds.has(String(division.ID))
+  );
+  const updateGradeColorSetting = (divisionId, changes) => {
+    const subjectGradeList = getValues("subjectGradeList") || [];
+    const settings = normalizeGradeColorSettings(
+      getValues("gradeColorSettings"),
+      subjectGradeList
+    );
+    const divisionKey = String(divisionId);
+    const current = settings.find(
+      (setting) => String(setting.DivisionID) === divisionKey
+    );
+    const selectedBand = [
+      ...subjectGradeList.flatMap((subject) => subject?.gradeBands || []),
+      ...(getValues("gradeBands") || []),
+    ].find((band) => String(band?.DivisionID) === divisionKey);
+    const serial =
+      Number(current?.Serial || selectedBand?.Serial) ||
+      colorDivisions.findIndex((division) => String(division.ID) === divisionKey) + 1;
+    const nextSettings = current
+      ? settings.map((setting) =>
+        String(setting.DivisionID) === divisionKey
+          ? { ...setting, ...changes }
+          : setting
+      )
+      : [
+        ...settings,
+        {
+          DivisionID: divisionKey,
+          Serial: serial,
+          isHighlighted: false,
+          highlightColor: "#ffeb3b",
+          ...changes,
+        },
+      ];
+
+    setValue(
+      "gradeColorSettings",
+      normalizeGradeColorSettings(nextSettings, subjectGradeList),
+      { shouldDirty: true }
+    );
   };
 
   return (
@@ -665,19 +888,28 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                         </thead>
                         <tbody>
                           {gradeFields.map((field, index) => {
-                            const selectedDivisionValue = watch(`gradeBands.${index}.DivisionID`);
-                            const savedRowsWithoutCurrent = (watch("subjectGradeList") || []).filter(
-                              (_, rowIndex) => rowIndex !== editingSubjectGradeIndex
+                            const selectedDivisionValue = gradeBandsInEditor[index]?.DivisionID;
+                            const divisionsUsedInOtherRows = new Set(
+                              gradeBandsInEditor
+                                .filter((_, rowIndex) => rowIndex !== index)
+                                .map((band) => String(band?.DivisionID ?? ""))
+                                .filter(Boolean)
                             );
-                            const allUsedDivisionIds = getUniqueDivisionIds(
-                              savedRowsWithoutCurrent.flatMap((subject) => subject?.gradeBands || [])
+                            const availableDivisions = (examDivitions || []).filter(
+                              (division) =>
+                                String(division.ID) === String(selectedDivisionValue) ||
+                                !divisionsUsedInOtherRows.has(String(division.ID))
                             );
-                            const currentRowDivisionIds = getUniqueDivisionIds(watch("gradeBands") || []);
-                            // const isLocked =
-                            //   !selectedDivisionValue &&
-                            //   allUsedDivisionIds.size + currentRowDivisionIds.size >= MAX_GRADE_BANDS;
-                            const isLocked = !selectedDivisionValue && allUsedDivisionIds.size >= MAX_GRADE_BANDS;
 
+                            const division = colorDivisions[index]
+                            const rowDivisionId = selectedDivisionValue;
+                            const hasRowDivision =
+                              rowDivisionId !== "" && rowDivisionId !== null && rowDivisionId !== undefined;
+                            const rowColorSetting = hasRowDivision
+                              ? gradeColorSettings.find(
+                                (setting) => String(setting.DivisionID) === String(rowDivisionId)
+                              )
+                              : null;
                             return (
                               <tr key={field.id} className="border-t border-gray-100">
                                 <td className="px-4 py-2">
@@ -691,21 +923,24 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                                 <td className="px-4 py-2">
                                   <DefaultSelect
                                     label=""
-                                    options={examDivitions}
+                                    options={availableDivisions}
                                     registerKey={`gradeBands.${index}.DivisionID`}
                                     nameField="DivisionNames"
                                     valueField="ID"
                                     defaultValue={translate("Select Divition")}
-                                    disabled={isLocked}
+                                    disabled={shouldDisableDivisionSelect}
                                   />
                                 </td>
                                 <td className="px-4 py-2">
-                                  <HighlightToggle
-                                    register={register}
-                                    control={control}
-                                    arrayName={`gradeBands.${index}`}
-                                    index={"color"}
-                                  />
+                                  <td className="px-4 py-2">
+                                    {hasRowDivision && (
+                                      <HighlightToggle
+                                        isHighlighted={rowColorSetting?.isHighlighted || false}
+                                        highlightColor={rowColorSetting?.highlightColor || "#ffeb3b"}
+                                        onChange={(changes) => updateGradeColorSetting(rowDivisionId, changes)}
+                                      />
+                                    )}
+                                  </td>
                                 </td>
 
                               </tr>
@@ -714,6 +949,21 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                         </tbody>
                       </table>
                     </div>
+                    {/* {colorDivisions.length > 0 && (
+                      <div className="mt-4">
+                        <h3 className="mb-2 text-sm font-medium text-gray-700">
+                          {translate("Grade highlight colors")}
+                        </h3>
+                        <div className="flex flex-wrap gap-x-6 gap-y-3">
+                          {colorDivisions.map((division) => (
+                            <div key={division.ID} className="flex items-center gap-2">
+                              <span>{division.DivisionNames}</span>
+
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )} */}
                     <div className="mt-2">
                       <Button type="button" onClick={handleAddAnotherSubject} className="flex gap-1"> <SvgIcon name={"TbPlus"} /> {translate("Add Now")}</Button>
                     </div>
