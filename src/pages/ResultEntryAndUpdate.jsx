@@ -15,7 +15,7 @@ import {
   useGetUserResultQuery,
   useUpdateAndPostResultMutation,
 } from "../features/result/resultSilce";
-import bnBijoy2Unicode from "../utils/conveter";
+import bnBijoy2Unicode, { convertOnLanguageChange } from "../utils/conveter";
 import Loading from "../components/Loading/Loading";
 import DefaultPagination from "../components/Pagination/DefaultPagination";
 import DefaultInput from "../components/Forms/DefaultInput";
@@ -199,6 +199,7 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
           UserID: student.UserID,
           UserName: student.User?.UserName,
           UserCode: student.User?.UserCode,
+          AdmissionSerial: student.User?.Admission?.AdmissionSerial,
           Subjects: allSubjects.map((s) => s.SubjectName),
           allSubjects,
           Total:
@@ -477,7 +478,10 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
                 <thead>
                   <tr className="bg-gray-100">
                     <th className="p-2 border whitespace-nowrap w-16">
-                      {translate("ID")}
+                      {translate("Admission Serial")}
+                    </th>
+                    <th className="p-2 border whitespace-nowrap w-16">
+                      {translate("UserCode")}
                     </th>
                     <th className="p-2 border whitespace-nowrap w-40">
                       {translate("Student Name")}
@@ -515,7 +519,10 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
                     return (
                       <tr key={`student-${student.ID}`} className="bg-transparent">
                         <td className="p-2 border text-center whitespace-nowrap bg-white">
-                          {student?.UserCode}
+                          {convertOnLanguageChange(student?.AdmissionSerial)}
+                        </td>
+                        <td className="p-2 border text-center whitespace-nowrap bg-white">
+                          {convertOnLanguageChange(student?.UserCode)}
                         </td>
                         <td className="p-2 border text-center whitespace-nowrap bg-white">
                           {student.UserName}
