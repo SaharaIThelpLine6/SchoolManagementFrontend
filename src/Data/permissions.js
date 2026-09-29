@@ -124,5 +124,4 @@ export const permissionsDataList = {
   exam_group_create: 125, // পরীক্ষার্থীর গ্রুপ তৈরি
   guardian_check: 126, // অভিভাবক চেক
   sms_result_publish: 127, // SMS এর মাধ্যমে ফলাফল
-  result_teacher_subject_asign: 147, // ফলাফলের শিক্ষক বিষয় বরাদ্দ
 };

@@ -174,7 +174,6 @@ import SMSPaymentConfirm from '../pages/SMSPaymentConfirm';
 import AdminRoutes from "../Admin/routes/AdminRoutes";
 import TeacherInfo from '../components/Tables/TeacherInfo';
 import DashboardDesignNew from '../components/DashboardDesignNew';
-import TeacherSubjectsAsignPage from '../pages/TeacherSubjectsAsignPage';
 
 const Router = createBrowserRouter([
   {
@@ -878,9 +877,9 @@ const Router = createBrowserRouter([
                 path: 'teacher_asign_subject',
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.result_teacher_subject_asign}
+                    permissionId={permissionsDataList.result_entry}
                   >
-                    <TeacherSubjectsAsignPage pageTitle="Result Entry & Publish" />
+                    <TeacherSubjectsInfo pageTitle="Result Entry & Publish" />
                   </RequirePermission>
                 ),
               },

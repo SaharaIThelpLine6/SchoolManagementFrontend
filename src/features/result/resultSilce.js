@@ -59,7 +59,7 @@ export const resultSilce = createApi({
         method: "POST",
         body: body,
       }),
-      invalidatesTags: ["Result", "getResultReportData"],
+      invalidatesTags: ["Result"],
     }),
     getUserSingleResult: builder.query({
       query: ({ session_id, exam_id, class_id, user_id }) => {

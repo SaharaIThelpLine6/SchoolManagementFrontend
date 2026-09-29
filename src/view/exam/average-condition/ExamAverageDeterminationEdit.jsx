@@ -79,7 +79,6 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
           highlightColor: '#ffeb3b'
         }
       })),
-      gradeColorSettings: sharedStepData?.gradeColorSettings || []
     }
   });
 
@@ -200,7 +199,6 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
       }));
 
       console.log("New Grade Bands:", newGradeBands);
-
 
       // Replace all fields with the new data
       replaceGrade(newGradeBands);
@@ -345,10 +343,6 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
     const payload = {
       ...sharedStepData,
       ...data,
-      gradeColorSettings:
-        Number(data.ExamType) === 4
-          ? sharedStepData?.gradeColorSettings ?? data.gradeColorSettings
-          : data.gradeColorSettings,
     };
 
     console.log("Old:", sharedStepData);

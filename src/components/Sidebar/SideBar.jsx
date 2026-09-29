@@ -243,10 +243,6 @@ const SideBar = () => {
               return hasPermission(permissionsDataList.marksheet);
             }
 
-            if (subItem.name === 'Teacher Subject Assign') {
-              return hasPermission(permissionsDataList.result_teacher_subject_asign);
-            }
-
             // Payment
 
             if (subItem.name === 'Maddrasah Payment Info') {
