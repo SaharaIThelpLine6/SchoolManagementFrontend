@@ -348,16 +348,21 @@ export const menuData = [
     subMenu: [
       {
         id: '1',
+        name: 'Teacher Subject Assign',
+        route: 'result/teacher_asign_subject',
+      },
+      {
+        id: '2',
         name: 'Result Entry & Publish',
         route: 'result',
       },
       {
-        id: '2',
+        id: '3',
         name: 'Result Report',
         route: 'result/report',
       },
       {
-        id: '3',
+        id: '',
         name: 'Admission Form',
         route: 'result/admission_form',
       },

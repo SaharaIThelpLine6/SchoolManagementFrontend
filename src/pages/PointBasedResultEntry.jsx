@@ -280,7 +280,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
         {/* <Button className='' onClick={() => { handleTeacherAssign() }}>
           শিক্ষক-বিষয় গ্রুপ
         </Button> */}
-        <ViewPermission
+        {/* <ViewPermission
           permissionId={permissionsDataList.result_teacher_subject_asign}
           permissionType="view"
         >
@@ -303,7 +303,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               শিক্ষক বিষয় বরাদ্দ
             </span>
           </Button>
-        </ViewPermission>
+        </ViewPermission> */}
       </div>
       <FormProvider {...methods}>
         <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>

@@ -7,6 +7,7 @@ const useTranslate = () => {
     Home: 'হোম',
     'Home Work': 'হোম ওয়ার্ক',
     'Home Work Teacher Group': 'হোম ওয়ার্ক শিক্ষক গ্রুপ',
+    'Teacher Subject Assign': 'শিক্ষক বিষয় বরাদ্দ',
     Student: 'শিক্ষার্থী',
     'Book List': 'বুক লিস্ট',
     'List of Candidates': 'পরীক্ষার্থীর তালিকা',
