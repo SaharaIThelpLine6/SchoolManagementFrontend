@@ -1,5 +1,6 @@
+import { useEffect } from "react";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
-import bnBijoy2Unicode from "../../../utils/conveter";
+import bnBijoy2Unicode, { convertOnLanguageChange } from "../../../utils/conveter";
 
 const divisionLabels = {
     1: "মুমতাজ",
@@ -54,6 +55,11 @@ export default function StudentResultSheet({ reportData, query, }) {
             : "0.00";
         return { total, average };
     };
+
+
+    useEffect(()=>{
+        console.log(reportData);
+    }, [reportData])
 
     return (
         <div className="w-full bg-white text-black">
@@ -151,7 +157,8 @@ export default function StudentResultSheet({ reportData, query, }) {
                     </tr>
                     <tr>
                         <th className="border border-black border-t-0 px-1 py-1 w-10 text-[16px] text-[#1f2937]">ক্রমিক</th>
-                        <th className="border border-black border-t-0 px-1 py-1 w-16 text-[16px] text-[#1f2937]">আইডি নং</th>
+                        <th className="border border-black border-t-0 px-1 py-1 w-16 text-[16px] text-[#1f2937]">ভর্তি নাম্বার</th>
+                        <th className="border border-black border-t-0 px-1 py-1 w-16 text-[16px] text-[#1f2937]">আইডি নাম্বার</th>
                         <th className="border border-black border-t-0 px-2 py-1 min-w-[140px] text-left text-[16px] text-[#1f2937]">
                             শিক্ষার্থীর নাম
                         </th>
@@ -181,10 +188,13 @@ export default function StudentResultSheet({ reportData, query, }) {
                                     {bnBijoy2Unicode(String(index + 1))}
                                 </td>
                                 <td className="border border-black px-1 py-1 text-center  text-[16px] text-[#1f2937]">
-                                    {bnBijoy2Unicode(String(studentResult.AdmissionID))}
+                                    {convertOnLanguageChange(studentResult?.User?.Admission[0]?.AdmissionSerial)}
+                                </td>
+                                <td className="border border-black px-1 py-1 text-center  text-[16px] text-[#1f2937]">
+                                    {bnBijoy2Unicode(String(studentResult?.User?.UserCode))}
                                 </td>
                                 <td className="border border-black px-2 py-1 text-left  text-[16px] text-[#1f2937]">
-                                    {studentResult.User.UserName}
+                                    {studentResult?.User?.UserName}
                                 </td>
                                 {Array.from({ length: conditionAverage.SubSonkha }).map((_, markIndex) => (
                                     <td key={markIndex} className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]">
