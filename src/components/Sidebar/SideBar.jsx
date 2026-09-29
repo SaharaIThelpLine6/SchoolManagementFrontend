@@ -242,6 +242,9 @@ const SideBar = () => {
             if (subItem.name === 'Point Based Mark Sheet') {
               return hasPermission(permissionsDataList.marksheet);
             }
+            if (subItem.name === 'Teacher Subject Assign') {
+              return hasPermission(permissionsDataList.marksheet);
+            }
 
             // Payment
 

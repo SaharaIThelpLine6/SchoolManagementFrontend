@@ -17,7 +17,7 @@ import {
 } from "../features/teachers/teachersSlice";
 import { useGetExamNamesQuery } from "../features/exam/examQuerySlice";
 
-const TeacherSubjectsAsignPage = ({ id }) => {
+const TeacherSubjectsAsignPage = () => {
   const translate = useTranslate();
 
   const methods = useForm({
