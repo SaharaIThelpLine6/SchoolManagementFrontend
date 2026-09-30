@@ -42,6 +42,10 @@ export const feeCollectionSlice = createApi({
     getAllSubLedger: builder.query({
       query: () => `view_subledger`,
     }),
+    getPaymentTransactionReport: builder.query({
+      query: ({ startDate, endDate }) =>
+        `payment_transaction_report?startDate=${startDate}&endDate=${endDate}`,
+    }),
     getFee: builder.query({
       query: ({ sessionID, classID, SFGNID }) =>
         `view_student_fee/${sessionID}/${classID}/${SFGNID}`,
@@ -657,5 +661,6 @@ export const {
   useGetStudentFeeLandSingleFilterQuery,
   useUpdateMonthlyAttendanceLeftMutation,
   useUpdateMonthlyAttendanceRightMutation,
-  useGetSearchStudentsExamFeeQuery
+  useGetSearchStudentsExamFeeQuery,
+  useGetPaymentTransactionReportQuery
 } = feeCollectionSlice;

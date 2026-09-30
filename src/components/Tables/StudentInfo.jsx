@@ -261,9 +261,7 @@ const StudentInfo = () => {
             </svg>
             ভর্তি করুন
           </button>
-          <Button className='' onClick={() => { handleTeacherAssign() }} tooltip_message='Teacher Result Entry Permission'>
-            <SvgIcon name={"TbUserShare"} size={20} />
-          </Button>
+
         </div>
 
         {/* Filters */}

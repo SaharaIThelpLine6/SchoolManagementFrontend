@@ -12,6 +12,7 @@ const useTranslate = () => {
     'Book List': 'বুক লিস্ট',
     'List of Candidates': 'পরীক্ষার্থীর তালিকা',
     Status: 'স্ট্যাটাস',
+    "Student Lists": 'শিক্ষার্থীর তালিকা',
     Reset: 'রিসেট',
     Delete: 'ডিলিট',
     Edit: 'এডিট',

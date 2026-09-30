@@ -26,9 +26,9 @@ export default {
         print: { raw: 'print' },
       },
       fontFamily: {
-        hind: ['Hind Siliguri', 'sans-serif'], // 'font-hind' ক্লাস তৈরি হবে
+        SolaimanLipi: ['Hind Siliguri', 'sans-serif'], // 'font-hind' ক্লাস তৈরি হবে
         lato: '"Lato", serif',
-        SolaimanLipi: 'SolaimanLipiNormal, serif',
+        // SolaimanLipi: 'SolaimanLipiNormal, serif',
         Poppins: ['Poppins', 'sans-serif'],
         noto: '"Noto Serif Bengali", serif',
         kalpurush: "'Kalpurush', sans-serif",

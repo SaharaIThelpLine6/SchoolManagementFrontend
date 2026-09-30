@@ -175,6 +175,7 @@ import AdminRoutes from "../Admin/routes/AdminRoutes";
 import TeacherInfo from '../components/Tables/TeacherInfo';
 import DashboardDesignNew from '../components/DashboardDesignNew';
 import TeacherSubjectsAsignPage from '../pages/TeacherSubjectsAsignPage';
+import StudentInfo from '../components/Tables/StudentInfo';
 
 const Router = createBrowserRouter([
   {
@@ -199,8 +200,9 @@ const Router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Home />,
-            // element: <DashboardDesignNew />,
+            // path: '/',
+            // element: <Home />,
+            element: <DashboardDesignNew />,
           },
           {
             path: 'general-info',
@@ -413,6 +415,16 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.student_admission}
                   >
                     <OnlineAdmissionTable pageTitle="Online Admission List" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'lists',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.student_admission}
+                  >
+                    <StudentInfo pageTitle="Online Admission List" />
                   </RequirePermission>
                 ),
               },

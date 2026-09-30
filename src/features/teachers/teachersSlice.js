@@ -119,6 +119,10 @@ export const teachersSlice = createApi({
       query: () => 'teacher_subject',
       providesTags: ['Teacher_Subject'],
     }),
+    getTeachersAttendances: builder.query({
+      query: () => 'teacher_attendance_today_count',
+      providesTags: ['Teacher'],
+    }),
     getTeacherSubjectsByFilter: builder.query({
       query: ({ SessionID, ExamID, SubClassID } = {}) => {
         const params = new URLSearchParams();
@@ -214,5 +218,6 @@ export const {
   useGetTeacherInfoListQuery,
   useUpdateTeacherMutation,
   useGetFilteredTeachersQuery,
-  useDeleteTeacherSubjectMutation
+  useDeleteTeacherSubjectMutation,
+  useGetTeachersAttendancesQuery
 } = teachersSlice;

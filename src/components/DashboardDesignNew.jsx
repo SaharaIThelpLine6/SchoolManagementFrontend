@@ -1,6 +1,8 @@
 import React from 'react';
 import SvgIcon from "../components/icons/SvgIcon";
 import { useGetStudentCountInfoQuery } from '../features/class/classQuerySlice';
+import { useGetPaymentTransactionReportQuery } from '../features/feeCollection/feeCollectionSlice';
+import { useGetTeachersInfoQuery, useGetTeachersAttendancesQuery } from '../features/teachers/teachersSlice';
 
 const DashboardDesignNew = () => {
 
@@ -8,7 +10,53 @@ const DashboardDesignNew = () => {
     data: studentData,
   } = useGetStudentCountInfoQuery();
 
-  console.log(studentData, "studentData")
+  const {
+    data: teacherAttendancesData,
+  } = useGetTeachersAttendancesQuery();
+
+  /* =========================================================
+      Format Date
+   ========================================================= */
+
+  const formatDate = (date) => {
+    return new Date(date)
+      .toISOString()
+      .split("T")[0];
+  };
+
+  /* =========================================================
+     Payment Transaction Report
+  ========================================================= */
+  const today = new Date();
+
+  const {
+    data: paymentTransactionData,
+    isLoading,
+    isFetching,
+    error,
+    refetch,
+  } = useGetPaymentTransactionReportQuery(
+    {
+      startDate: formatDate(today),
+      endDate: formatDate(today),
+    },
+    {
+      skip: false,
+    }
+  );
+
+  console.log(teacherAttendancesData, "teacherAttendancesData")
+  console.log(paymentTransactionData, "paymentTransactionData")
+  const getLiveBanglaDate = () => {
+    return new Intl.DateTimeFormat("bn-BD", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      timeZone: "Asia/Dhaka",
+    }).format(new Date());
+  };
+
+  const todayDate = getLiveBanglaDate();
 
 
   const toolbarItems = [
@@ -28,15 +76,40 @@ const DashboardDesignNew = () => {
     { title: 'মোট শিক্ষার্থী', value: studentData?.runningSession?.totalStudent, subtitle: 'চলতি সেশন', icon: 'TbUserGroup', accent: 'emerald' },
     { title: 'সক্রিয় শিক্ষার্থী', value: studentData?.runningSession?.activeStudent, subtitle: 'চলতি সেশন', icon: 'TbUserCheck', accent: 'violet' },
     { title: 'নিষ্ক্রিয় শিক্ষার্থী', value: studentData?.runningSession?.inactiveStudent, subtitle: 'চলতি সেশন', icon: 'TbUserOff', accent: 'rose' },
-    { title: 'মোট শিক্ষক/স্টাফ', value: '৫০', subtitle: 'সক্রিয়', icon: 'TbUserGroup', accent: 'indigo' },
-    { title: 'দাতা সদস্য', value: '৫০', subtitle: 'এন্ট্রি হিসাবে', icon: 'TbHeartHandshake', accent: 'pink' },
-    { title: 'মোট আয়', value: '********', subtitle: '০১/০৯/২০২৬', icon: 'TbCoin', accent: 'emerald' },
-    { title: 'মোট ব্যয়', value: '********', subtitle: '০১/০৯/২০২৬', icon: 'TbReceipt', accent: 'orange' },
-    { title: 'বকেয়া', value: '********', subtitle: 'শিক্ষার্থী ফি', icon: 'TbAlertCircle', accent: 'amber' },
-    { title: 'আজকের উপস্থিত', value: '১০০', subtitle: 'শিক্ষার্থী', icon: 'TbCheckSquare', accent: 'teal' },
-    { title: 'আজকের অনুপস্থিত', value: '৫০', subtitle: 'শিক্ষার্থী', icon: 'TbUserOff', accent: 'red' },
-    { title: 'আজকের উপস্থিত', value: '৫০', subtitle: 'শিক্ষক', icon: 'TbUserCheck', accent: 'cyan' },
-    { title: 'আজকের অনুপস্থিত', value: '৫০', subtitle: 'শিক্ষক', icon: 'TbUserOff', accent: 'slate' },
+    { title: 'মোট শিক্ষক/স্টাফ', value: teacherAttendancesData?.totalActiveTeachers, subtitle: 'সক্রিয়', icon: 'TbUserGroup', accent: 'indigo' },
+    { title: 'দাতা সদস্য', value: teacherAttendancesData?.totalActiveDonars, subtitle: 'এন্ট্রি হিসাবে', icon: 'TbHeartHandshake', accent: 'pink' },
+    {
+      title: 'জমা',
+      value: paymentTransactionData?.summary?.totalDr,
+      subtitle: todayDate,
+      icon: 'TbCoin',
+      accent: 'emerald',
+    },
+    {
+      title: 'খরচ',
+      value: paymentTransactionData?.summary?.totalCr,
+      subtitle: todayDate,
+      icon: 'TbWallet',
+      accent: 'rose',
+    },
+    {
+      title: 'শিক্ষার্থীর ফি',
+      value: paymentTransactionData?.summary?.studentFeeTotal,
+      subtitle: todayDate,
+      icon: 'TbCoin',
+      accent: 'sky',
+    },
+    {
+      title: 'দান অনুদান',
+      value: paymentTransactionData?.summary?.donationTotal,
+      subtitle: todayDate,
+      icon: 'TbHeartHandshake',
+      accent: 'violet',
+    },
+    { title: 'আজকের উপস্থিত', value: teacherAttendancesData?.student?.present, subtitle: 'শিক্ষার্থী', icon: 'TbCheckSquare', accent: 'teal' },
+    { title: 'আজকের অনুপস্থিত', value: teacherAttendancesData?.student?.absent, subtitle: 'শিক্ষার্থী', icon: 'TbUserOff', accent: 'red' },
+    { title: 'আজকের উপস্থিত', value: teacherAttendancesData?.teacher?.present, subtitle: 'শিক্ষক', icon: 'TbUserCheck', accent: 'cyan' },
+    { title: 'আজকের অনুপস্থিত', value: teacherAttendancesData?.teacher?.absent, subtitle: 'শিক্ষক', icon: 'TbUserOff', accent: 'slate' },
   ];
 
   // প্রতিটি accent এর জন্য স্মুথ গ্রেডিয়েন্ট কনফিগ

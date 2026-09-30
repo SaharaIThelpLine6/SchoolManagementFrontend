@@ -1,16 +1,22 @@
 export const menuData = [
   {
     id: '1',
+    name: 'Dashboard',
+    route: '/dashboard',
+    icon: 'RiDashboard3Fill',
+  },
+  {
+    id: '2',
     name: 'General Information',
     route: 'general-info',
     icon: 'LuWarehouse',
     subMenu: [
-      {
-        id: '1',
-        name: 'Dashboard',
-        // route: '/',
-        route: '/dashboard',
-      },
+      // {
+      //   id: '1',
+      //   name: 'Dashboard',
+      //   // route: '/',
+      //   route: '/dashboard',
+      // },
       {
         id: '2',
         name: 'New User',
@@ -66,7 +72,7 @@ export const menuData = [
     ],
   },
   {
-    id: '2',
+    id: '3',
     name: 'Student',
     route: 'students',
     icon: 'PiStudentBold',
@@ -88,58 +94,64 @@ export const menuData = [
       },
       {
         id: '4',
-        name: 'Students Admission',
-        route: 'students',
+        name: 'Student Lists',
+        route: 'students/lists',
       },
       {
         id: '5',
+        name: 'Students Admission',
+        route: 'students',
+      },
+
+      {
+        id: '6',
         name: 'English & Arobi Name',
         route: 'students/english-arobi-name',
       },
       {
-        id: '6',
+        id: '7',
         name: 'Book',
         route: 'students/book-list',
       },
       {
-        id: '7',
+        id: '8',
         name: 'Group Distribution',
         route: 'students/group-distribution',
       },
       {
-        id: '8',
+        id: '9',
         name: 'Data Export',
         route: 'students/data-export',
       },
       {
-        id: '9',
+        id: '10',
         name: 'Certificate of Attestation',
         route: 'students/certificate-of-attestation',
       },
       {
-        id: '10',
+        id: '11',
         name: 'Students Report',
         route: 'students/report',
       },
       {
-        id: '11',
+        id: '12',
         name: 'Online Admission',
         route: 'students/online-admission',
       },
       {
-        id: '12',
+        id: '13',
         name: 'Student ID Card',
         route: 'students/student-id-card',
       },
       {
-        id: '13',
+        id: '14',
         name: 'Students Report List',
         route: 'students/report_list',
       },
     ],
   },
   // {
-  //   id: '3',
+  //   id: '4',
   //   name: 'User Attendance',
   //   route: '/user-attendence',
   //   icon: 'PiStudentBold',
@@ -177,7 +189,7 @@ export const menuData = [
   //   ]
   // },
   {
-    id: '4',
+    id: '5',
     name: 'Parent Panel',
     route: 'parent-panel',
     icon: 'FaUsers',
@@ -230,7 +242,7 @@ export const menuData = [
     ],
   },
   {
-    id: "3",
+    id: "6",
     name: "Teacher Staff",
     route: "teacherinfo",
     icon: "IoIosPeople",
@@ -268,7 +280,7 @@ export const menuData = [
     ],
   },
   {
-    id: '5',
+    id: '7',
     name: 'Exam',
     route: '/exam',
     icon: 'PiExam',
@@ -341,7 +353,7 @@ export const menuData = [
     ],
   },
   {
-    id: '6',
+    id: '8',
     name: 'Result',
     route: 'result',
     icon: 'GiGraduateCap',
@@ -369,7 +381,7 @@ export const menuData = [
     ],
   },
   // {
-  //   id: '6',
+  //   id: '9',
   //   name: 'Board Exam',
   //   route: '/board-info',
   //   icon: 'UniversityIcon',
@@ -403,7 +415,7 @@ export const menuData = [
   // },
   //   
   {
-    id: '7',
+    id: '10',
     name: 'Darul Ikama',
     route: '/darul-ikama',
     icon: 'RiSchoolFill',
@@ -421,7 +433,7 @@ export const menuData = [
     ],
   },
   {
-    id: '8',
+    id: '11',
     name: 'Accounting',
     route: 'accounting',
     icon: 'FaCalculator',
@@ -479,7 +491,7 @@ export const menuData = [
     ],
   },
   // {
-  //   id: '18',
+  //   id: '12',
   //   name: 'Talimat',
   //   route: '/talimat',
   //   icon: 'IoMdSettings',
@@ -492,7 +504,7 @@ export const menuData = [
   //   ],
   // },
   {
-    id: '9',
+    id: '13',
     name: 'Payment',
     route: '/payment',
     icon: 'MdOutlinePayment',
@@ -521,7 +533,7 @@ export const menuData = [
   },
 
   // {
-  //   id: "10",
+  //   id: "14",
   //   name: "Donation",
   //   route: "/donation",
   //   icon: "FaDonate",
@@ -559,7 +571,7 @@ export const menuData = [
   // },
 
   {
-    id: '10',
+    id: '15',
     name: 'Settings',
     route: '/settings',
     icon: 'IoMdSettings',
@@ -587,7 +599,7 @@ export const menuData = [
     ],
   },
   {
-    id: '11',
+    id: '16',
     name: 'Help',
     route: '/help',
     icon: 'IoMdHelp',
