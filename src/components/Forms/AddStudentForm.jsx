@@ -8,8 +8,6 @@ import UpdateUser from '../../view/user/UpdateUser';
 const AddStudentForm = () => {
   const dispatch = useDispatch();
   const { editUserID } = useSelector((state) => state.settings);
-
-  // ✅ Fetch single user data only when editUserID exists
   const {
     data: singleUserData,
     isLoading: isSingleUserLoading,
@@ -24,7 +22,6 @@ const AddStudentForm = () => {
       dispatch(setEditUserID(null));
     };
   }, [dispatch]);
-
   // ✅ Loading state UI
   if (isSingleUserLoading) {
     return (

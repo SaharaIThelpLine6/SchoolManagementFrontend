@@ -13,19 +13,14 @@ import {
    Static definitions
 --------------------------------------------------------- */
 
-// legacy UI-র মতোই সবসময় ১৪টা বিষয়ের সারি — এখন আর "মোট বিষয়" সংখ্যার সাথে বাঁধা না
 const SUBJECT_COUNT = 14;
 
-// permission না থাকলে দেখানোর মেসেজ (backend-এর সাথে হুবহু)।
-// ⚠️ এগুলো আগে থেকে দেখাবে না — শুধু ড্র্যাগ করে ছাড়ার পর উপরের লাল বক্সে আসবে।
 const PERM_INSERT_MSG = "সেইভ করতে এডমিনের সাথে যোগাযোগ করুন";
 const PERM_DELETE_MSG = "ফলাফলের-তালিকা হতে বাতিল/ডিলিট করতে এডমিনের সাথে যোগাযোগ করুন";
 
-// ফি সংক্রান্ত মেসেজ — শুধু নির্ধারিত/কর্তন/জমা কলাম দেখানো থাকলে ব্যবহার হয়
 const FEE_NOT_SET_MSG = "এই শিক্ষাবর্ষ, পরীক্ষা ও সাব ক্লাসের ফি নির্ধারণ করা নেই — আগে ফি নির্ধারণ করুন";
 const FEE_ZERO_MSG = "নির্ধারিত ফি ০ — আগে ফি নির্ধারণ করুন";
 
-// old code-এর মতোই bn() — একই কনভেনশন
 const bn = (num) => {
   if (num === "" || num === null || num === undefined) return "";
   const d = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
@@ -40,16 +35,16 @@ const bn = (num) => {
 // বাম পাশে id = Student_Admission.AdmissionID, ডান পাশে id = Student_Result.ID
 // assigned  = নির্ধারিত  (বাম: Exam_FeeSetting-এর ফি | ডান: Exam_FeeAccept.Fee)
 // deduction = কর্তন      (বাম: হাতে লেখা, শুরুতে ০ | ডান: Exam_FeeAccept.Less)
-const toRow = (id, user, { assigned = 0, deduction = 0 } = {}) => ({
+// serial    = Student_Admission.AdmissionSerial (দুই পাশেই দেখানো হয়)
+const toRow = (id, user, { assigned = 0, deduction = 0, serial = "" } = {}) => ({
   id,
   code: user?.UserCode ?? "",
   name: user?.UserName ? (user.UserName) : "",
+  serial: serial === null || serial === undefined ? "" : serial,
   assigned: Number(assigned) || 0,
   deduction: Number(deduction) || 0,
 });
 
-// জমা = নির্ধারিত − কর্তন। রো-এর নিজের নির্ধারিত ফি ধরেই হিসাব হয়,
-// তাই বাম আর ডান দুই পাশেই একই কলাম একইভাবে দেখায়।
 function computeRows(rows) {
   let assigned = 0, deduction = 0, net = 0;
   const computed = rows.map((s) => {
@@ -75,7 +70,7 @@ function matchesFilter(s, filter) {
 }
 
 /* ---------------------------------------------------------
-   Small UI bits (old code-এর Checkbox/SectionTitle pattern অনুসরণ করে)
+   Small UI bits
 --------------------------------------------------------- */
 
 function Checkbox({ checked, onChange, label, disabled }) {
@@ -135,12 +130,7 @@ const inputClass = "border border-slate-300 rounded-xl px-3 py-2.5 text-base foc
 
 /* ---------------------------------------------------------
    List panel — বামে "যাদের ফি নিবেন", ডানে "ফি গ্রহণ করা হয়েছে"
-   drag & drop টার্গেট + সোর্স — সিলেক্টেড রো টেনে অন্য পাশে ছাড়লেই মুভ হয়
-   editable = true হলে কর্তন কলামে ইনপুট বসবে (বাম পাশে)
-   showStatChips = false হলে নির্ধারিত/কর্তন/জমা — উপরের StatChip ও টেবিলের কলাম দুইটাই লুকাবে
-
    ⚠️ permission নিয়ে এই কম্পোনেন্ট কিছুই জানে না — ড্র্যাগ সবসময় চালু।
-     permission না থাকলে ড্রপ করার পর উপরের লাল বক্সে মেসেজ আসবে।
 --------------------------------------------------------- */
 
 function ListPanel({
@@ -168,7 +158,6 @@ function ListPanel({
           </span>
         </div>
 
-        {/* Stat chips + Search bar একসাথে */}
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           {showStatChips && (
             <>
@@ -196,12 +185,17 @@ function ListPanel({
       </div>
 
       <div className={`overflow-auto max-h-80 transition-opacity ${busy ? "opacity-60" : ""}`}>
-        <table className="w-full min-w-[560px] text-sm">
+        {/* ⭐ নতুন কলাম যোগ হওয়ায় min-w 620 → 680 */}
+        <table className="w-full min-w-[680px] text-sm">
           <thead className="sticky top-0 bg-slate-50 text-xs tracking-wide z-10">
             <tr>
               <th className="px-3 py-2.5 text-left w-8">
                 <Checkbox checked={allChecked} onChange={onToggleAll} />
               </th>
+              {/* ⭐ ক্রম (ইনডেক্স) */}
+              <th className="px-3 py-2.5 text-left w-10">ক্র:</th>
+              {/* ⭐ ভর্তি সিরিয়াল — এখন আইডি-এর আগে */}
+              <th className="px-3 py-2.5 text-left">ভর্তি সিরিয়াল</th>
               <th className="px-3 py-2.5 text-left">আইডি</th>
               <th className="px-3 py-2.5 text-left">শিক্ষার্থীর নাম</th>
               {showStatChips && (
@@ -216,12 +210,13 @@ function ListPanel({
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={showStatChips ? 6 : 3} className="text-center text-slate-400 italic py-8 text-sm">
+                {/* ⭐ কলাম সংখ্যা ১ বেড়েছে: showStatChips ? 7→8 : 4→5 */}
+                <td colSpan={showStatChips ? 8 : 5} className="text-center text-slate-400 italic py-8 text-sm">
                   {isDragTarget ? "এখানে ছেড়ে দিন" : emptyText || "কোনো শিক্ষার্থী পাওয়া যায়নি"}
                 </td>
               </tr>
             ) : (
-              rows.map((s) => {
+              rows.map((s, index) => {
                 const checked = checkedSet.has(s.id);
                 const isDragging = draggingIds.includes(s.id);
                 return (
@@ -238,6 +233,10 @@ function ListPanel({
                     <td className="px-3 py-3">
                       <Checkbox checked={checked} onChange={(v) => onToggleOne(s.id, v)} />
                     </td>
+                    {/* ⭐ ক্রম — সাজানো তালিকার ইনডেক্স */}
+                    <td className="px-3 py-3 text-slate-500">{bn(index + 1)}</td>
+                    {/* ⭐ ভর্তি সিরিয়াল — এখন আইডি-এর আগে */}
+                    <td className="px-3 py-3 text-slate-800">{bn(s.serial) || "—"}</td>
                     <td className="px-3 py-3 font-mono ">{bn(s.code || s.id)}</td>
                     <td className="px-3 py-3 font-medium text-slate-800 whitespace-nowrap">{s.name}</td>
                     {showStatChips && (
@@ -252,7 +251,6 @@ function ListPanel({
                               value={s.deduction}
                               disabled={busy}
                               onChange={(e) => onDeductionChange(s.id, e.target.value)}
-                              // ইনপুট থেকে যেন রো-ড্র্যাগ শুরু না হয়
                               draggable={false}
                               onDragStart={(e) => {
                                 e.preventDefault();
@@ -284,7 +282,6 @@ function ListPanel({
 --------------------------------------------------------- */
 
 export default function ExamStudentList() {
-  // ফিল্টার এখন ID রাখে — session = SessionID, examId = ExamID, subClass = SubClassID
   const [session, setSession] = useState(null);
   const [examId, setExamId] = useState(null);
   const [subClass, setSubClass] = useState(null);
@@ -297,32 +294,17 @@ export default function ExamStudentList() {
   const { data: filterData } = useGetExamStudentListFiltersQuery();
   const sessionTree = useMemo(() => filterData?.sessions || [], [filterData]);
 
-  // TblPrintView-এ ID=19 এর Action=1 হলে StatChip ও টেবিলের ৩টা কলাম দেখাবে,
-  // Action=2 হলে সব লুকাবে। API না আসা পর্যন্ত বা key না থাকলে ডিফল্ট true।
-  //
-  // ⭐ এই ফ্ল্যাগটাই ঠিক করে ফি বাধ্যতামূলক কিনা:
-  //    showStatChips = true  → নির্ধারিত ফি ০ / সেট না থাকলে INSERT আটকাবে
-  //    showStatChips = false → ফি একদমই যাচাই হবে না, ০ থাকলেও INSERT-DELETE চলবে
   const showStatChips = filterData?.showStatChips !== false;
 
-  // ── Permission ──
-  // Left → Right ড্র্যাগ  = INSERT permission
-  // Right → Left ড্র্যাগ = DELETE permission
-  // API থেকে না এলে (undefined) allow ধরে নেওয়া হয় — যাতে backend পুরনো থাকলেও UI কাজ করে।
-  //
-  // ⚠️ UI-তে আগে থেকে কিছু দেখানো হয় না — ড্র্যাগ সবসময় চালু।
-  //   permission না থাকলে ছাড়ার পর উপরের লাল বক্সে মেসেজ আসবে (backend-এও 403 আটকাবে)।
   const permissions = filterData?.permissions;
   const canInsert = permissions ? Boolean(permissions.insert) : true;
   const canDelete = permissions ? Boolean(permissions.delete) : true;
 
-  // ১) শিক্ষাবর্ষ
   const sessionOptions = useMemo(
     () => sessionTree.map((s) => ({ value: s.SessionID, name: s.SessionName })),
     [sessionTree]
   );
 
-  // ২) নির্বাচিত শিক্ষাবর্ষের নিচের পরীক্ষাগুলো
   const selectedSession = useMemo(
     () => sessionTree.find((s) => String(s.SessionID) === String(session)),
     [sessionTree, session]
@@ -336,7 +318,6 @@ export default function ExamStudentList() {
     [selectedSession]
   );
 
-  // ৩) নির্বাচিত পরীক্ষার নিচের সাব ক্লাসগুলো
   const selectedExam = useMemo(
     () => (selectedSession?.exams || []).find((e) => String(e.ExamID) === String(examId)),
     [selectedSession, examId]
@@ -350,7 +331,6 @@ export default function ExamStudentList() {
     [selectedExam]
   );
 
-  // উপরের লেভেল বদলালে নিচের লেভেলগুলো রিসেট
   const handleSessionChange = (opt) => {
     if (!opt) return;
     setSession(opt.value);
@@ -367,8 +347,6 @@ export default function ExamStudentList() {
     setSubClass(opt.value);
   };
 
-  // filterMethods-এ Fee আর TotalSubjects যোগ
-  // Fee এখন হাতে লেখা না — Exam_FeeSetting থেকে API-তে আসে
   const filterMethods = useForm({
     defaultValues: {
       Session: "",
@@ -379,7 +357,6 @@ export default function ExamStudentList() {
     },
   });
 
-  // form → state sync
   const watchedFee = useWatch({ control: filterMethods.control, name: "Fee" });
   const watchedTotalSubjects = useWatch({ control: filterMethods.control, name: "TotalSubjects" });
   const fixedFee = Number(watchedFee) || 0;
@@ -398,7 +375,6 @@ export default function ExamStudentList() {
   }, [subClass, filterMethods]);
 
   /* ---------------- পরীক্ষার্থী তালিকা API ---------------- */
-  // বাম = Student_Admission (Student_Result-এ নেই এমন), ডান = Student_Result + Exam_FeeAccept
   const filtersReady = Boolean(session && examId && subClass);
   const {
     currentData: listData,
@@ -411,18 +387,11 @@ export default function ExamStudentList() {
   const [addExamStudents, { isLoading: isAdding }] = useAddExamStudentsMutation();
   const [removeExamStudents, { isLoading: isRemoving }] = useRemoveExamStudentsMutation();
 
-  // API কল চলাকালীন ড্র্যাগ বন্ধ — যাতে রিফ্রেশের আগে ভুল ID নিয়ে আবার মুভ না হয়
   const busy = isAdding || isRemoving || isListFetching;
 
-  /* ---------------- ফি গেট ----------------
-     কলাম লুকানো থাকলে (showStatChips = false) ফি নিয়ে কোনো শর্তই নেই।
-     কলাম দেখানো থাকলে — ফি সেট না থাকা বা নির্ধারিত ফি ০ — দুইটাই INSERT আটকাবে।
-     DELETE কোনো অবস্থাতেই আটকাবে না।
-  --------------------------------------------------------- */
   const feeSettingCount = listData?.feeSettings?.length ?? 0;
   const feeAmount = Number(listData?.fee) || 0;
 
-  // backend যদি feeRequired পাঠায় সেটাই মানবে, নাহলে showStatChips থেকে ধরে নেবে
   const feeRequired =
     listData?.feeRequired !== undefined ? Boolean(listData.feeRequired) : showStatChips;
 
@@ -442,21 +411,31 @@ export default function ExamStudentList() {
   const [toast, setToast] = useState(null);
   const [apiError, setApiError] = useState(null);
 
-  // API ডাটা → লোকাল state (প্রতিবার রিফেচের পর আসল ID + আসল টাকা দিয়ে রিসেট)
+  // API ডাটা → লোকাল state (প্রতিবার রিফেচের পর আসল ID + আসল টাকা + সিরিয়াল দিয়ে রিসেট)
   useEffect(() => {
     const fee = Number(listData?.fee) || 0;
 
-    // বাম পাশ — নির্ধারিত = Exam_FeeSetting-এর ফি, কর্তন শুরুতে ০ (হাতে বদলানো যাবে)
+    // বাম পাশ — নির্ধারিত = Exam_FeeSetting-এর ফি, কর্তন শুরুতে ০
+    // ⭐ AdmissionSerial বেকএন্ড থেকেই available রো-তে আসে
     setUnpaid(
       (listData?.available || []).map((a) =>
-        toRow(a.AdmissionID, a.User, { assigned: fee, deduction: 0 })
+        toRow(a.AdmissionID, a.User, {
+          assigned: fee,
+          deduction: 0,
+          serial: a.AdmissionSerial,
+        })
       )
     );
 
     // ডান পাশ — Exam_FeeAccept-এ সেভ করা টাকা
+    // ⭐ added রো-তেও বেকএন্ড AdmissionSerial বসিয়ে পাঠায়
     setPaid(
       (listData?.added || []).map((r) =>
-        toRow(r.ID, r.User, { assigned: r.Fee, deduction: r.Less })
+        toRow(r.ID, r.User, {
+          assigned: r.Fee,
+          deduction: r.Less,
+          serial: r.AdmissionSerial,
+        })
       )
     );
 
@@ -466,7 +445,6 @@ export default function ExamStudentList() {
     filterMethods.setValue("TotalSubjects", listData?.subjectCount ?? 0);
   }, [listData, filterMethods]);
 
-  // ফিল্টার বদলালে পুরনো এরর মুছে যাবে
   useEffect(() => {
     setApiError(null);
   }, [session, examId, subClass]);
@@ -477,7 +455,6 @@ export default function ExamStudentList() {
   };
 
   /* ---------------- কর্তন এডিট ---------------- */
-  // কর্তন কখনো ওই রো-এর নির্ধারিত ফি-র চেয়ে বেশি বা ০-এর কম হবে, না
   const updateDeduction = (side, id, value) => {
     const setter = side === "unpaid" ? setUnpaid : setPaid;
     setter((prev) =>
@@ -535,11 +512,9 @@ export default function ExamStudentList() {
     });
   };
 
-  /* ---------------- নির্দিষ্ট id-লিস্ট এক পাশ থেকে অন্য পাশে move করার জেনেরিক ফাংশন ---------------- */
+  /* ---------------- এক পাশ থেকে অন্য পাশে move ---------------- */
 
-  // বাম → ডান: Student_Result + Exam_FeeAccept-এ INSERT (ids = AdmissionID)
   const moveIdsToPaid = async (ids) => {
-    // permission গার্ড — API কল করার আগেই থামবে, মেসেজ উপরের লাল বক্সে দেখাবে
     if (!canInsert) {
       setApiError(PERM_INSERT_MSG);
       return;
@@ -549,19 +524,16 @@ export default function ExamStudentList() {
     const moving = unpaid.filter((s) => idSet.has(s.id));
     if (moving.length === 0 || !filtersReady) return;
 
-    // ⭐ ফি গেট — শুধু নির্ধারিত/কর্তন/জমা কলাম দেখানো থাকলেই
     if (feeBlocked) {
       setApiError(feeBlockedMsg);
       return;
     }
 
-    // কলাম দেখানো থাকলে কারো নির্ধারিত ফি ০ হলে তাকে যোগ করা যাবে না
     if (feeRequired && moving.some((s) => (Number(s.assigned) || 0) <= 0)) {
       setApiError(FEE_ZERO_MSG);
       return;
     }
 
-    // প্রতি শিক্ষার্থীর কর্তন — সার্ভারে Exam_FeeAccept.Less হিসেবে যাবে
     const Deductions = {};
     moving.forEach((s) => {
       Deductions[s.id] = Number(s.deduction) || 0;
@@ -581,7 +553,6 @@ export default function ExamStudentList() {
       return;
     }
 
-    // সফল হলে সাথে সাথে UI-তে দেখাও — রিফেচ এলে আসল Student_Result ID দিয়ে রিসেট হবে
     setUnpaid((prev) => prev.filter((s) => !idSet.has(s.id)));
     setPaid((prev) => [...prev, ...moving]);
     setUnpaidChecked((prev) => {
@@ -593,11 +564,7 @@ export default function ExamStudentList() {
     setTimeout(() => setToast(null), 2600);
   };
 
-  // ডান → বাম: Student_Result + Exam_FeeAccept থেকে DELETE (ids = Student_Result.ID)
-  // ⚠️ এখানে ফি নিয়ে কোনো শর্ত নেই — নির্ধারিত/কর্তন/জমা ০ থাকলেও ডিলিট চলবে।
-  // Student_Admission অপরিবর্তিত
   const moveIdsToUnpaid = async (ids) => {
-    // permission গার্ড — API কল করার আগেই থামবে, মেসেজ উপরের লাল বক্সে দেখাবে
     if (!canDelete) {
       setApiError(PERM_DELETE_MSG);
       return;
@@ -621,7 +588,7 @@ export default function ExamStudentList() {
     }
 
     setPaid((prev) => prev.filter((s) => !idSet.has(s.id)));
-    // বাম পাশে ফিরে গেলে আবার বর্তমান নির্ধারিত ফি, কর্তন ০
+    // বাম পাশে ফিরে গেলে আবার বর্তমান নির্ধারিত ফি, কর্তন ০ — serial অপরিবর্তিত থাকে
     setUnpaid((prev) => [
       ...prev,
       ...moving.map((s) => ({ ...s, assigned: fixedFee, deduction: 0 })),
@@ -637,17 +604,15 @@ export default function ExamStudentList() {
 
   const selectedTotal = unpaidChecked.size + paidChecked.size;
 
-  /* ---------------- Drag & Drop — কোনো বাটন ছাড়াই মাউস দিয়ে ধরে এক পাশ থেকে অন্য পাশে নেওয়া ---------------- */
-  const [dragInfo, setDragInfo] = useState(null); // { side: "unpaid" | "paid", ids: number[] } | null
+  /* ---------------- Drag & Drop ---------------- */
+  const [dragInfo, setDragInfo] = useState(null);
   const [dragOverSide, setDragOverSide] = useState(null);
 
-  // ড্র্যাগ সবসময় enabled — permission ছাড়ার পর চেক হবে, না থাকলে UI-তে message দেখাবে
   const handleRowDragStart = (side, id) => (e) => {
     if (busy) {
       e.preventDefault();
       return;
     }
-    // রো-টা আগে থেকে সিলেক্ট করা থাকলে পুরো সিলেকশনটাই টানা হবে, নাহলে শুধু ওই একজন
     const checkedSet = side === "unpaid" ? unpaidChecked : paidChecked;
     const ids = checkedSet.has(id) ? Array.from(checkedSet) : [id];
     setDragInfo({ side, ids });
@@ -685,7 +650,6 @@ export default function ExamStudentList() {
     setDragOverSide(null);
   };
 
-  // খালি টেবিলে কী লেখা দেখাবে — ধাপে ধাপে গাইড
   const emptyText = !session
     ? "প্রথমে শিক্ষাবর্ষ নির্বাচন করুন"
     : !examId
@@ -703,9 +667,7 @@ export default function ExamStudentList() {
       className="w-full min-h-screen overflow-x-hidden bg-slate-50 p-4 sm:p-6"
       style={{ fontFamily: "'Noto Sans Bengali','Kalpurush','SolaimanLipi',sans-serif" }}
     >
-      {/* max-w-7xl সরিয়ে w-full করে দেওয়া হয়েছে ফুল উইডথের জন্য */}
       <div className="w-full mx-auto">
-        {/* Header */}
         <header className="mb-5 flex items-center gap-3">
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-slate-800">পরীক্ষার্থী তালিকা</h1>
@@ -713,7 +675,6 @@ export default function ExamStudentList() {
           </div>
         </header>
 
-        {/* Filters — cascading: শিক্ষাবর্ষ → পরীক্ষা → সাব ক্লাস */}
         <FormProvider {...filterMethods}>
           <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-4 w-full">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -747,8 +708,6 @@ export default function ExamStudentList() {
           </section>
         </FormProvider>
 
-        {/* Fee — StatChip-এর মতোই দেখতে, টাকা আসে Exam_FeeSetting থেকে।
-            কলাম লুকানো থাকলে (Action = 2) এই ব্লকটাও লুকাবে। */}
         {showStatChips && (
           <section className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 sm:p-5 mb-4 w-full">
             <div className="flex flex-wrap items-center gap-4">
@@ -765,23 +724,19 @@ export default function ExamStudentList() {
           </section>
         )}
 
-        {/* ফি সংক্রান্ত সতর্কবার্তা — শুধু কলাম দেখানো থাকলে */}
         {feeBlocked && (
           <div className="mb-4 rounded border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 w-full">
             {feeBlockedMsg}
           </div>
         )}
 
-        {/* API এরর — permission না থাকলে এখানেই মেসেজ দেখাবে */}
         {apiError && (
           <div className="mb-4 rounded border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600 w-full">
             {apiError}
           </div>
         )}
 
-        {/* Dual panel — বাটন/ড্রপডাউন ছাড়াই, ড্র্যাগ করে এক পাশ থেকে অন্য পাশে নেওয়া যায় */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start w-full">
-          {/* বাম প্যানেল — ডান দিকে ড্র্যাগ = INSERT permission */}
           <ListPanel
             title="যাদের ফি নিবেন তাদের নির্বাচন করুন"
             titleColor="text-slate-800"
@@ -810,7 +765,6 @@ export default function ExamStudentList() {
             showStatChips={showStatChips}
           />
 
-          {/* ডান প্যানেল — বাম দিকে ড্র্যাগ = DELETE permission */}
           <ListPanel
             title="নিম্নোক্ত শিক্ষার্থীদের ফি গ্রহণ করা হয়েছে"
             titleColor="text-slate-800"
