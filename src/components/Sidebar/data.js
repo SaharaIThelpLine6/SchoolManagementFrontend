@@ -1,22 +1,22 @@
 export const menuData = [
-  {
-    id: '1',
-    name: 'Dashboard',
-    route: '/dashboard',
-    icon: 'RiDashboard3Fill',
-  },
+  // {
+  //   id: '1',
+  //   name: 'Dashboard',
+  //   route: '/dashboard',
+  //   icon: 'RiDashboard3Fill',
+  // },
   {
     id: '2',
     name: 'General Information',
     route: 'general-info',
     icon: 'LuWarehouse',
     subMenu: [
-      // {
-      //   id: '1',
-      //   name: 'Dashboard',
-      //   // route: '/',
-      //   route: '/dashboard',
-      // },
+      {
+        id: '1',
+        name: 'Dashboard',
+        // route: '/',
+        route: '/dashboard',
+      },
       {
         id: '2',
         name: 'New User',

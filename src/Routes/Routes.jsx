@@ -200,9 +200,8 @@ const Router = createBrowserRouter([
         children: [
           {
             index: true,
-            // path: '/',
-            // element: <Home />,
-            element: <DashboardDesignNew />,
+            element: <Home />,
+            // element: <DashboardDesignNew />,
           },
           {
             path: 'general-info',
