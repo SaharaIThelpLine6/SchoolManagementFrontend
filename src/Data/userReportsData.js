@@ -89,6 +89,13 @@ export const resultReports = [
   },
 ];
 
+export const markSheetResultReports = [
+  {
+    ReportID: 1,
+    ReportName: '1. ব্যক্তিগত মার্কসীট',
+  }
+];
+
 export const genders = [
   {
     GenderID: 1,

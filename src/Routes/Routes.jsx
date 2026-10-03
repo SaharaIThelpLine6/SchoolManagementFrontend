@@ -175,6 +175,7 @@ import AdminRoutes from "../Admin/routes/AdminRoutes";
 import TeacherInfo from '../components/Tables/TeacherInfo';
 import DashboardDesignNew from '../components/DashboardDesignNew';
 import TeacherSubjectsAsignPage from '../pages/TeacherSubjectsAsignPage';
+import MarkSheet from '../pages/MarkSheet';
 
 const Router = createBrowserRouter([
   {
@@ -892,6 +893,19 @@ const Router = createBrowserRouter([
                   >
                     {/* result report */}
                     <ResultReport pageTitle="Result Report" />
+                    {/* <PageNotFound /> */}
+
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'mark-sheet',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.result_report}
+                  >
+                    {/* result report */}
+                    <MarkSheet pageTitle="Result Report" />
                     {/* <PageNotFound /> */}
 
                   </RequirePermission>

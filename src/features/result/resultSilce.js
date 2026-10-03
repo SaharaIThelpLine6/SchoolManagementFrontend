@@ -72,18 +72,28 @@ export const resultSilce = createApi({
       providesTags: ["Result"],
     }),
     getResultReportData: builder.query({
-      query: ({ session_id, exam_id, subclass_id, report_data}) => {
+      query: ({ session_id, exam_id, subclass_id, report_data }) => {
         const params = new URLSearchParams();
         if (report_data) params.append("reportid", report_data);
         if (session_id) params.append("sessionid", session_id);
         if (exam_id) params.append("examid", exam_id);
         if (subclass_id) params.append("subclassid", subclass_id);
-   
+
 
         const queryString = params.toString();
         return queryString ? `result_report?${queryString}` : "result_report";
       },
       providesTags: ["getResultReportData"],
+    }),
+    getMarkSheet: builder.query({
+      query: ({ sessionid, examid, classid, recordName, UserCode1, UserCode2 }) => ({
+        url: "/mark-sheet",
+        method: "GET",
+        params: { sessionid, examid, classid, recordName, UserCode1, UserCode2 },
+      }),
+      providesTags: (result, error, arg) => [
+        { type: "MarkSheet", id: `${arg.sessionid}-${arg.examid}-${arg.classid}` },
+      ],
     }),
   }),
 });
@@ -95,4 +105,5 @@ export const {
   useUpdateAndPostResultMutation,
   useGetUserSingleResultQuery,
   useGetResultReportDataQuery,
+  useGetMarkSheetQuery,
 } = resultSilce;
