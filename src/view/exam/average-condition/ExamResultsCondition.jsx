@@ -206,6 +206,49 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
   };
 
   const onSubmit = async (data) => {
+
+    const missingFields = [];
+
+    [1, 2, 3].forEach((id) => {
+      const condition = data[`condition${id}`];
+
+      if (!condition?.enabled) return;
+
+      const conditionName =
+        id === 1
+          ? "কন্ডিশন-১"
+          : id === 2
+            ? "কন্ডিশন-২"
+            : "কন্ডিশন-৩";
+
+      if (!condition?.row1?.value) {
+        missingFields.push(`${conditionName}: কিতাব সংখ্যার ঘর পূরণ করুন`);
+      }
+
+      if (!condition?.row1?.DivisionID) {
+        missingFields.push(`${conditionName}: প্রথম ডিভিশন নির্বাচন করুন`);
+      }
+
+      if ((id === 1 || id === 2) && !condition?.row2?.DivisionID) {
+        missingFields.push(`${conditionName}: দ্বিতীয় ডিভিশন নির্বাচন করুন`);
+      }
+    });
+
+    if (missingFields.length > 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "প্রয়োজনীয় তথ্য পূরণ করুন",
+        html: `
+        <div style="text-align: left;">
+          ${missingFields.map(item => `<div>• ${item}</div>`).join("")}
+        </div>
+      `,
+        confirmButtonText: "ঠিক আছে",
+      });
+
+      return;
+    }
+
     const updatedData = {
       ...sharedStepData,
       ...data,
@@ -402,7 +445,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                   {/* কন্ডিশন-৩ */}
                   <div className="border border-gray-200 rounded-md p-4">
                     <label className="flex items-center gap-2 mb-3 font-medium text-gray-800">
-                      <input type="checkbox" className="h-4 w-4" {...register("condition3.enabled")} />
+                      <input type="checkbox" className="h-4 w-4" {...register("condition3.enabled")} disabled />
                       কন্ডিশন-৩ : অধিকতর মি'ইয়ারী কিতাবে ফেল সংক্রান্ত
                     </label>
 
