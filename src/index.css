@@ -103,6 +103,27 @@
 
 }
 
+
+@font-face {
+  font-family: "Kalpurush";
+  src: url("./assets/font/kalpurush.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0980-09FF, U+200C-200D, U+0964-0965;
+}
+
+/* Print-er somoy shudhu marksheet-e Kalpurush, baki page unchanged */
+@media print {
+
+  #marksheet-print-area,
+  #marksheet-print-area *,
+  #marksheet-print-area .marksheet-page,
+  #marksheet-print-area .marksheet-page * {
+    font-family: "Kalpurush", "Noto Sans Bengali", "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", sans-serif !important;
+  }
+}
+
 @layer base {
   @font-face {
     font-family: SolaimanLipi;
