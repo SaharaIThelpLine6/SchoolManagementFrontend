@@ -4,7 +4,8 @@ import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQ
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 
-// ✅ আরবি সংখ্যায় রূপান্তর
+// ✅ আরবি সংখ্যায় রূপান্তর — টেক্সটের ভেতরের ইংরেজি ডিজিটও বদলে যাবে
+// (যেমন SessionAraName = "1448 هـ" → "١٤٤٨ هـ")
 const toArabicNumber = (num) => {
   if (num === "" || num === null || num === undefined) return "";
   const arabicDigits = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
@@ -39,44 +40,70 @@ const WEEKDAYS_AR = [
 ];
 const FRIDAY_INDEX = 6;
 
-// ✅ Demo students — পরে backend থেকে আসবে
-const DEMO_STUDENTS = [
-  { id: 1, StudentCode: 5278, ArabicName: "محمد أحمد الله" },
-  { id: 2, StudentCode: 5974, ArabicName: "محمد يونس" },
-  { id: 3, StudentCode: 80792, ArabicName: "محمد قاسم" },
-  { id: 4, StudentCode: 5475, ArabicName: "راشد الإسلام" },
-  { id: 5, StudentCode: 114712, ArabicName: "خير الإسلام" },
-  { id: 6, StudentCode: 1187442, ArabicName: "محمد ريحان حسن بابل" },
-  { id: 7, StudentCode: 128716, ArabicName: "محمد سهيل بالا" },
-  { id: 8, StudentCode: 1197164, ArabicName: "محمد سالك الرحمن" },
-  { id: 9, StudentCode: 114799, ArabicName: "محفوظ الرحمن" },
-  { id: 10, StudentCode: 76444201, ArabicName: "محمد الرحيم" },
-  { id: 11, StudentCode: 76444202, ArabicName: "عبد الرحمن" },
-  { id: 12, StudentCode: 76444212, ArabicName: "محمد نورو حسين" },
-  { id: 13, StudentCode: 76444237, ArabicName: "عبيد الرحمن" },
-  { id: 14, StudentCode: 76444253, ArabicName: "محمد حسين أحمد" },
-];
+// ✅ লোডিং ও খালি অবস্থার আরবি বার্তা
+const LOADING_MSG_AR = "جاري تحميل البيانات ...";
+const EMPTY_MSG_AR = "لم يتم العثور على أي بيانات";
+const EMPTY_HINT_AR = "يرجى اختيار العام الدراسي والفئة ثم المحاولة مرة أخرى";
+
+// ✅ কলামের প্রস্থ — table-fixed এ min-w কাজ করে না, তাই ফিক্সড px
+const COL_W = {
+  serial: 24,    // م
+  admission: 30, // رقم القيد — Student_Admission.AdmissionSerial
+  code: 36,      // الرقم الأكاديمي
+  name: 120,     // أسماء الطالبة
+  day: 14,       // তারিখের ঘর
+  total: 24,     // المجموع
+};
 
 const ArabicAttendence = ({
   reportData,
   SubClassID,
   SessionID,
+  isLoading = false,
   rowsPerPage = { portrait: 35, landscape: 30 },
 }) => {
   const [logo, setLogo] = useState(null);
 
-  const { data: instutionInfo } = useGetInstitutionInfoQuery();
-  const { data: subClassListData } = useGetSubClassListQuery();
+  const { data: instutionInfo, isLoading: institutionLoading } =
+    useGetInstitutionInfoQuery();
+  const { data: subClassListData, isLoading: subClassLoading } =
+    useGetSubClassListQuery();
   const subClasData = subClassListData?.find(
     (i) => i.SubClassID === Number(SubClassID)
   );
-  const { data: sessionSData } = useGetSessionsQuery();
+  const { data: sessionSData, isLoading: sessionLoading } = useGetSessionsQuery();
   const sessionData = sessionSData?.find(
     (i) => i.SessionID === Number(SessionID)
   );
 
-  const students =
-    reportData && reportData.length > 0 ? reportData : DEMO_STUDENTS;
+  // ✅ parent এর reportData লোডিং + নিজের query গুলোর লোডিং একসাথে
+  const showLoading =
+    isLoading || institutionLoading || subClassLoading || sessionLoading;
+
+  // ✅ Institution_Information এর আরবি ফিল্ড — না থাকলে বাংলা/ইংরেজিতে ফallback
+  const araInstitutionName =
+    instutionInfo?.AraInstitutionName || instutionInfo?.InstitutionName || "";
+  const araAddress = instutionInfo?.AraAddress || instutionInfo?.Address || "";
+
+  // ✅ Academic_Session এর SessionAraName — ইংরেজি ডিজিট থাকলে আরবিতে রূপান্তর
+  const araSessionName =
+    toArabicNumber(sessionData?.SessionAraName) ||
+    toArabicNumber(sessionData?.SessionName) ||
+    "______";
+
+  // 🔹 DEMO ডাটা সরানো হয়েছে — শুধু backend এর reportData ব্যবহার হবে
+  const students = useMemo(
+    () => (Array.isArray(reportData) ? reportData : []),
+    [reportData]
+  );
+
+  // ✅ Academic_Class.ArabicClass — স্টুডেন্ট ডাটার সাথেই আসে।
+  // না পেলে subClassList থেকে ফallback (রুট ভেদে nested বা flat হতে পারে)।
+  const araClassName =
+    students[0]?.ArabicClass ||
+    subClasData?.Class?.ArabicClass ||
+    subClasData?.ArabicClass ||
+    "";
 
   useEffect(() => {
     if (instutionInfo?.Logo?.data) {
@@ -133,6 +160,12 @@ const ArabicAttendence = ({
     >
       <style>
         {`
+          @keyframes arabic-attendence-spin {
+            to { transform: rotate(360deg); }
+          }
+          .arabic-attendence-spinner {
+            animation: arabic-attendence-spin 0.8s linear infinite;
+          }
           @media print {
             @page {
               size: A4 portrait;
@@ -176,6 +209,11 @@ const ArabicAttendence = ({
               border: 1px solid black !important;
               padding: 0 !important;
             }
+            td.name-cell,
+            th.name-cell {
+              padding-left: 6px !important;
+              padding-right: 6px !important;
+            }
             .vertical-text {
               writing-mode: vertical-rl;
               text-orientation: mixed;
@@ -189,6 +227,28 @@ const ArabicAttendence = ({
           }
         `}
       </style>
+
+      {/* ✅ লোডিং পপআপ — ডাটা আসতে দেরি হলে এটা দেখা যাবে (প্রিন্টে যাবে না) */}
+      {showLoading && (
+        <div
+          className="no-print fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="bg-white rounded-lg shadow-xl px-8 py-6 flex flex-col items-center gap-3 min-w-[240px]">
+            <span
+              className="arabic-attendence-spinner inline-block w-9 h-9 rounded-full border-4 border-slate-200"
+              style={{ borderTopColor: "#1B3A57" }}
+            />
+            <span className="text-[15px] font-bold text-[#1B3A57]">
+              {LOADING_MSG_AR}
+            </span>
+            <span className="text-xs text-slate-500">
+              অনুগ্রহ করে অপেক্ষা করুন...
+            </span>
+          </div>
+        </div>
+      )}
 
       {/* ✅ কন্ট্রোল প্যানেল */}
       <div
@@ -310,6 +370,16 @@ const ArabicAttendence = ({
         </div>
       )}
 
+      {/* ✅ কোনো ডাটা না পেলে — আরবিতে বার্তা */}
+      {!showLoading && chunks.length === 0 && (
+        <div className="border border-dashed border-slate-300 rounded py-16 flex flex-col items-center justify-center gap-2 text-center">
+          <span className="text-[17px] font-bold text-slate-700">
+            {EMPTY_MSG_AR}
+          </span>
+          <span className="text-[13px] text-slate-500">{EMPTY_HINT_AR}</span>
+        </div>
+      )}
+
       {chunks.map((chunk, pageIndex) => {
         const isLastPage = pageIndex === chunks.length - 1;
         const emptyRowsOnThisPage = isLastPage ? manualEmptyRows : 0;
@@ -338,27 +408,23 @@ const ArabicAttendence = ({
                       ? ARABIC_MONTHS[Number(selectedMonthIdx)]
                       : "______"}
                   </div>
-                  <div className="text-[13px] font-bold">
-                    عام : {sessionData?.SessionName || "١٤٤٨ هـ"}
-                  </div>
+                  {/* 🔹 Academic_Session.SessionAraName — আরবি সংখ্যায় */}
+                  <div className="text-[13px] font-bold">عام : {araSessionName}</div>
                 </div>
 
-                {/* 🌟 মাঝে — প্রতিষ্ঠানের নাম (৩ লাইন) */}
+                {/* 🌟 মাঝে — প্রতিষ্ঠানের আরবি নাম (উপরে) ও আরবি ঠিকানা (নিচে) */}
                 <div className="border-l border-black p-2 flex flex-col items-center justify-center text-center leading-tight">
                   <div className="text-[14px] font-extrabold">
-                    {instutionInfo?.InstitutionName || "الجامعة الإسلامية"}
+                    {araInstitutionName || "______"}
                   </div>
                   <div className="text-[12px] font-semibold mt-0.5">
-                    {instutionInfo?.Address || "ناماهو، فنكوري، شيتاغونغ"}
+                    {araAddress || "______"}
                   </div>
                 </div>
 
                 {/* 🌟 বাঁয়ে — الفئة */}
                 <div className="p-2 flex flex-col items-center justify-center gap-1">
-                  <div className="text-[13px] font-bold">الفئة</div>
-                  <div className="border border-black px-3 py-0.5 text-[12px] font-bold min-w-[50px] text-center">
-                    {subClasData?.SubClass || "أول/ي"}
-                  </div>
+                  <div className="text-[13px] font-bold">{araClassName || "______"}</div>
                 </div>
               </div>
 
@@ -387,15 +453,30 @@ const ArabicAttendence = ({
               {/* ============ টেবিল ============ */}
               <div className="w-full flex-grow">
                 <table className="w-full border-collapse table-fixed text-[11px]">
+                  {/* ✅ কলামের প্রস্থ একজায়গায় — নাম বড়, বাকিগুলো সরু */}
+                  <colgroup>
+                    <col style={{ width: `${COL_W.serial}px` }} />
+                    <col style={{ width: `${COL_W.admission}px` }} />
+                    <col style={{ width: `${COL_W.code}px` }} />
+                    <col style={{ width: `${COL_W.name}px` }} />
+                    {days.map((day) => (
+                      <col key={day} style={{ width: `${COL_W.day}px` }} />
+                    ))}
+                    <col style={{ width: `${COL_W.total}px` }} />
+                  </colgroup>
                   <thead>
                     <tr>
-                      <th className="border border-black bg-white text-center w-7 h-6 font-bold">
+                      <th className="border border-black bg-white text-center h-6 font-bold">
                         م
                       </th>
-                      <th className="border border-black bg-white text-center w-12 h-6 font-bold vertical-text">
+                      {/* 🔹 নতুন — Student_Admission.AdmissionSerial */}
+                      <th className="border border-black bg-white text-center h-6 font-bold vertical-text">
+                        رقم القيد
+                      </th>
+                      <th className="border border-black bg-white text-center h-6 font-bold vertical-text">
                         الرقم الأكاديمي
                       </th>
-                      <th className="border border-black bg-white text-right px-2 min-w-[130px] h-6 font-bold">
+                      <th className="border border-black bg-white text-right px-2 h-6 font-bold name-cell">
                         أسماء الطالبة
                       </th>
                       {days.map((day) => {
@@ -403,7 +484,7 @@ const ArabicAttendence = ({
                         return (
                           <th
                             key={day}
-                            className="border border-black text-center bg-white w-[16px] h-6 text-[10px] font-bold"
+                            className="border border-black text-center bg-white h-6 text-[10px] font-bold"
                           >
                             <span
                               className={
@@ -415,7 +496,7 @@ const ArabicAttendence = ({
                           </th>
                         );
                       })}
-                      <th className="border border-black bg-white text-center w-9 h-6 font-bold vertical-text">
+                      <th className="border border-black bg-white text-center h-6 font-bold vertical-text">
                         المجموع
                       </th>
                     </tr>
@@ -424,22 +505,30 @@ const ArabicAttendence = ({
                     {chunk.map((student, index) => {
                       const serial = pageIndex * ROWS_PER_PAGE + index + 1;
                       return (
-                        <tr key={student.id ?? index} className="h-[22px]">
-                          <td className="border border-black text-center bg-white w-7 align-middle font-bold">
+                        <tr
+                          key={student.AdmissionID ?? student.id ?? index}
+                          className="h-[22px]"
+                        >
+                          <td className="border border-black text-center bg-white align-middle font-bold">
                             {toArabicNumber(serial)}
                           </td>
-                          <td className="border border-black text-center bg-white w-12 align-middle font-semibold">
+                          {/* 🔹 Student_Admission.AdmissionSerial */}
+                          <td className="border border-black text-center bg-white align-middle font-semibold">
+                            {toArabicNumber(student.AdmissionSerial)}
+                          </td>
+                          <td className="border border-black text-center bg-white align-middle font-semibold">
                             {toArabicNumber(student.StudentCode)}
                           </td>
-                          <td className="border border-black bg-white min-w-[130px] px-2 align-middle text-right">
-                            {student.ArabicName || student.StudentName}
+                          {/* 🔹 Student_ArabicName.ArabicName — না থাকলে বাংলা নাম */}
+                          <td className="border border-black bg-white px-2 align-middle text-right leading-tight name-cell">
+                            {student.ArabicName || student.StudentName || ""}
                           </td>
                           {days.map((day) => {
                             const friday = isFriday(day);
                             return (
                               <td
                                 key={day}
-                                className={`border border-black text-center w-[16px] align-middle ${
+                                className={`border border-black text-center align-middle ${
                                   friday ? "bg-red-50" : "bg-white"
                                 }`}
                               >
@@ -465,7 +554,7 @@ const ArabicAttendence = ({
                               </td>
                             );
                           })}
-                          <td className="border border-black bg-white w-9 align-middle"></td>
+                          <td className="border border-black bg-white align-middle"></td>
                         </tr>
                       );
                     })}
@@ -474,15 +563,16 @@ const ArabicAttendence = ({
                     {emptyRowsOnThisPage > 0 &&
                       Array.from({ length: emptyRowsOnThisPage }).map((_, i) => (
                         <tr key={`manual-empty-${i}`} className="h-[22px]">
-                          <td className="border border-black text-center bg-white w-7"></td>
-                          <td className="border border-black text-center bg-white w-12"></td>
-                          <td className="border border-black bg-white min-w-[130px]"></td>
+                          <td className="border border-black text-center bg-white"></td>
+                          <td className="border border-black text-center bg-white"></td>
+                          <td className="border border-black text-center bg-white"></td>
+                          <td className="border border-black bg-white name-cell"></td>
                           {days.map((day) => {
                             const friday = isFriday(day);
                             return (
                               <td
                                 key={day}
-                                className={`border border-black text-center w-[16px] align-middle ${
+                                className={`border border-black text-center align-middle ${
                                   friday ? "bg-red-50" : "bg-white"
                                 }`}
                               >
@@ -508,7 +598,7 @@ const ArabicAttendence = ({
                               </td>
                             );
                           })}
-                          <td className="border border-black bg-white w-9"></td>
+                          <td className="border border-black bg-white"></td>
                         </tr>
                       ))}
                   </tbody>
@@ -557,13 +647,23 @@ export default ArabicAttendence;
 
 
 
+
+
+
+
+
+
+
+
+
 // import React, { useEffect, useMemo, useState } from "react";
 // import { Buffer } from "buffer";
 // import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 // import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 // import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 
-// // ✅ আরবি সংখ্যায় রূপান্তর
+// // ✅ আরবি সংখ্যায় রূপান্তর — টেক্সটের ভেতরের ইংরেজি ডিজিটও বদলে যাবে
+// // (যেমন SessionAraName = "1448 هـ" → "١٤٤٨ هـ")
 // const toArabicNumber = (num) => {
 //   if (num === "" || num === null || num === undefined) return "";
 //   const arabicDigits = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
@@ -598,40 +698,62 @@ export default ArabicAttendence;
 // ];
 // const FRIDAY_INDEX = 6;
 
-// // ✅ Demo students — পরে backend থেকে আসবে
-// const DEMO_STUDENTS = [
-//   { id: 1, StudentCode: 100018, ArabicName: "محمد أحمد" },
-//   { id: 2, StudentCode: 100019, ArabicName: "عبد الله" },
-//   { id: 3, StudentCode: 100020, ArabicName: "يوسف إسلام" },
-//   { id: 4, StudentCode: 100021, ArabicName: "إبراهيم خان" },
-//   { id: 5, StudentCode: 100022, ArabicName: "عمر فاروق" },
-//   { id: 6, StudentCode: 100023, ArabicName: "علي حسين" },
-//   { id: 7, StudentCode: 100024, ArabicName: "حسن محمود" },
-//   { id: 8, StudentCode: 100025, ArabicName: "خالد رحمن" },
-//   { id: 9, StudentCode: 100026, ArabicName: "بلال حسين" },
-//   { id: 10, StudentCode: 100027, ArabicName: "أنيس الرحمن" },
-// ];
+// // ✅ লোডিং ও খালি অবস্থার আরবি বার্তা
+// const LOADING_MSG_AR = "جاري تحميل البيانات ...";
+// const EMPTY_MSG_AR = "لم يتم العثور على أي بيانات";
+// const EMPTY_HINT_AR = "يرجى اختيار العام الدراسي والفئة ثم المحاولة مرة أخرى";
+
+// // ✅ কলামের প্রস্থ — table-fixed এ min-w কাজ করে না, তাই ফিক্সড px
+// const COL_W = {
+//   serial: 24,    // م
+//   admission: 30, // رقم القيد — Student_Admission.AdmissionSerial
+//   code: 36,      // الرقم الأكاديمي
+//   name: 120,     // أسماء الطالبة
+//   day: 14,       // তারিখের ঘর
+//   total: 24,     // المجموع
+// };
 
 // const ArabicAttendence = ({
 //   reportData,
 //   SubClassID,
 //   SessionID,
+//   isLoading = false,
 //   rowsPerPage = { portrait: 35, landscape: 30 },
 // }) => {
 //   const [logo, setLogo] = useState(null);
 
-//   const { data: instutionInfo } = useGetInstitutionInfoQuery();
-//   const { data: subClassListData } = useGetSubClassListQuery();
+//   const { data: instutionInfo, isLoading: institutionLoading } =
+//     useGetInstitutionInfoQuery();
+//   const { data: subClassListData, isLoading: subClassLoading } =
+//     useGetSubClassListQuery();
 //   const subClasData = subClassListData?.find(
 //     (i) => i.SubClassID === Number(SubClassID)
 //   );
-//   const { data: sessionSData } = useGetSessionsQuery();
+//   const { data: sessionSData, isLoading: sessionLoading } = useGetSessionsQuery();
 //   const sessionData = sessionSData?.find(
 //     (i) => i.SessionID === Number(SessionID)
 //   );
 
-//   const students =
-//     reportData && reportData.length > 0 ? reportData : DEMO_STUDENTS;
+//   // ✅ parent এর reportData লোডিং + নিজের query গুলোর লোডিং একসাথে
+//   const showLoading =
+//     isLoading || institutionLoading || subClassLoading || sessionLoading;
+
+//   // ✅ Institution_Information এর আরবি ফিল্ড — না থাকলে বাংলা/ইংরেজিতে ফallback
+//   const araInstitutionName =
+//     instutionInfo?.AraInstitutionName || instutionInfo?.InstitutionName || "";
+//   const araAddress = instutionInfo?.AraAddress || instutionInfo?.Address || "";
+
+//   // ✅ Academic_Session এর SessionAraName — ইংরেজি ডিজিট থাকলে আরবিতে রূপান্তর
+//   const araSessionName =
+//     toArabicNumber(sessionData?.SessionAraName) ||
+//     toArabicNumber(sessionData?.SessionName) ||
+//     "______";
+
+//   // 🔹 DEMO ডাটা সরানো হয়েছে — শুধু backend এর reportData ব্যবহার হবে
+//   const students = useMemo(
+//     () => (Array.isArray(reportData) ? reportData : []),
+//     [reportData]
+//   );
 
 //   useEffect(() => {
 //     if (instutionInfo?.Logo?.data) {
@@ -646,8 +768,8 @@ export default ArabicAttendence;
 //   const [selectedMonthIdx, setSelectedMonthIdx] = useState("");
 //   const [startWeekday, setStartWeekday] = useState("");
 
-//   // ✅ ১ থেকে ৩১ দিন ফিক্সড
-//   const days = Array.from({ length: 31 }, (_, i) => i + 1);
+//   // ✅ ১ থেকে ৩০ দিন (নতুন ডিজাইন অনুযায়ী)
+//   const days = Array.from({ length: 30 }, (_, i) => i + 1);
 
 //   // ✅ শুক্রবার (الجمعة) কিনা নির্ধারণ
 //   const isFriday = (dayNum) => {
@@ -688,6 +810,12 @@ export default ArabicAttendence;
 //     >
 //       <style>
 //         {`
+//           @keyframes arabic-attendence-spin {
+//             to { transform: rotate(360deg); }
+//           }
+//           .arabic-attendence-spinner {
+//             animation: arabic-attendence-spin 0.8s linear infinite;
+//           }
 //           @media print {
 //             @page {
 //               size: A4 portrait;
@@ -718,7 +846,7 @@ export default ArabicAttendence;
 //               border-collapse: collapse !important;
 //               table-layout: fixed;
 //               width: 100%;
-//               font-size: 10px;
+//               font-size: 11px;
 //             }
 //             tr {
 //               page-break-inside: avoid;
@@ -731,11 +859,16 @@ export default ArabicAttendence;
 //               border: 1px solid black !important;
 //               padding: 0 !important;
 //             }
+//             td.name-cell,
+//             th.name-cell {
+//               padding-left: 6px !important;
+//               padding-right: 6px !important;
+//             }
 //             .vertical-text {
 //               writing-mode: vertical-rl;
 //               text-orientation: mixed;
-//               transform: rotate(0deg);
-//               height: 50px;
+//               transform: rotate(180deg);
+//               height: 55px;
 //               padding: 2px !important;
 //               font-size: 11px;
 //               font-weight: bold;
@@ -745,7 +878,29 @@ export default ArabicAttendence;
 //         `}
 //       </style>
 
-//       {/* ✅ কন্ট্রোল প্যানেল — স্ক্রিনে (LTR রাখা হলো যাতে বোঝা সহজ হয়) */}
+//       {/* ✅ লোডিং পপআপ — ডাটা আসতে দেরি হলে এটা দেখা যাবে (প্রিন্টে যাবে না) */}
+//       {showLoading && (
+//         <div
+//           className="no-print fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+//           role="status"
+//           aria-live="polite"
+//         >
+//           <div className="bg-white rounded-lg shadow-xl px-8 py-6 flex flex-col items-center gap-3 min-w-[240px]">
+//             <span
+//               className="arabic-attendence-spinner inline-block w-9 h-9 rounded-full border-4 border-slate-200"
+//               style={{ borderTopColor: "#1B3A57" }}
+//             />
+//             <span className="text-[15px] font-bold text-[#1B3A57]">
+//               {LOADING_MSG_AR}
+//             </span>
+//             <span className="text-xs text-slate-500">
+//               অনুগ্রহ করে অপেক্ষা করুন...
+//             </span>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* ✅ কন্ট্রোল প্যানেল */}
 //       <div
 //         dir="ltr"
 //         className="no-print mb-3 p-3 bg-slate-50 border border-slate-200 rounded flex flex-wrap items-end gap-3"
@@ -865,6 +1020,16 @@ export default ArabicAttendence;
 //         </div>
 //       )}
 
+//       {/* ✅ কোনো ডাটা না পেলে — আরবিতে বার্তা */}
+//       {!showLoading && chunks.length === 0 && (
+//         <div className="border border-dashed border-slate-300 rounded py-16 flex flex-col items-center justify-center gap-2 text-center">
+//           <span className="text-[17px] font-bold text-slate-700">
+//             {EMPTY_MSG_AR}
+//           </span>
+//           <span className="text-[13px] text-slate-500">{EMPTY_HINT_AR}</span>
+//         </div>
+//       )}
+
 //       {chunks.map((chunk, pageIndex) => {
 //         const isLastPage = pageIndex === chunks.length - 1;
 //         const emptyRowsOnThisPage = isLastPage ? manualEmptyRows : 0;
@@ -880,50 +1045,63 @@ export default ArabicAttendence;
 //             }}
 //           >
 //             <div className="bg-white flex flex-col h-full p-2">
-//               {/* ============ হেডার ============ */}
-//               <div className="flex items-stretch border border-black mb-2">
-//                 {/* 🌟 ডানে (RTL: প্রথম child) — الشهر / عام */}
-//                 <div className="w-40 border-l border-black p-2 flex flex-col justify-center gap-1">
-//                   <div className="text-[14px] font-bold">
+//               {/* ============ হেডার রো ১ — ৩ কলাম ============ */}
+//               <div
+//                 className="grid border border-black mb-1"
+//                 style={{ gridTemplateColumns: "1.4fr 2.4fr 1fr" }}
+//               >
+//                 {/* 🌟 ডানে — الشهر / عام */}
+//                 <div className="border-l border-black p-2 flex flex-col justify-center gap-1">
+//                   <div className="text-[13px] font-bold">
 //                     الشهر :{" "}
 //                     {selectedMonthIdx !== ""
 //                       ? ARABIC_MONTHS[Number(selectedMonthIdx)]
 //                       : "______"}
 //                   </div>
-//                   <div className="text-[14px] font-bold">
-//                     عام : {sessionData?.SessionName || "______"}
+//                   {/* 🔹 Academic_Session.SessionAraName — আরবি সংখ্যায় */}
+//                   <div className="text-[13px] font-bold">عام : {araSessionName}</div>
+//                 </div>
+
+//                 {/* 🌟 মাঝে — প্রতিষ্ঠানের আরবি নাম (উপরে) ও আরবি ঠিকানা (নিচে) */}
+//                 <div className="border-l border-black p-2 flex flex-col items-center justify-center text-center leading-tight">
+//                   <div className="text-[14px] font-extrabold">
+//                     {araInstitutionName || "______"}
+//                   </div>
+//                   <div className="text-[12px] font-semibold mt-0.5">
+//                     {araAddress || "______"}
 //                   </div>
 //                 </div>
 
-//                 {/* 🌟 মাঝে — دفتر حضور الطلاب */}
-//                 <div className="flex-1 flex items-center justify-center py-3">
-//                   <div className="border-2 border-black rounded-md px-8 py-1">
-//                     <span className="text-[18px] font-extrabold tracking-wide">
-//                       دفتر حضور الطلاب
-//                     </span>
+//                 {/* 🌟 বাঁয়ে — الفئة */}
+//                 <div className="p-2 flex flex-col items-center justify-center gap-1">
+//                   <div className="text-[13px] font-bold">الفئة</div>
+//                   <div className="border border-black px-3 py-0.5 text-[12px] font-bold min-w-[50px] text-center">
+//                     {/* 🔹 Academic_Class.ArabicClass */}
+//                     {subClasData?.Class?.ArabicClass ||
+//                       subClasData?.ArabicClass ||
+//                       "______"}
 //                   </div>
-//                 </div>
-
-//                 {/* 🌟 বাঁয়ে (RTL: শেষ child) — লোগো */}
-//                 <div className="w-40 border-r border-black flex items-center justify-center p-1">
-//                   {logo ? (
-//                     <img
-//                       src={logo}
-//                       alt="Logo"
-//                       className="w-16 h-16 object-contain"
-//                     />
-//                   ) : (
-//                     <div className="w-16 h-16" />
-//                   )}
 //                 </div>
 //               </div>
 
-//               {/* ============ ২য় সারি ============ */}
-//               <div className="flex items-stretch border border-black mb-2">
-//                 <div className="flex-1 border-l border-black p-2 text-[14px] font-bold">
-//                   اسم الكتاب : {subClasData?.SubClass || "______"}
+//               {/* ============ হেডার রো ২ — টাইটেল ============ */}
+//               <div className="border border-black mb-1 py-1.5 flex items-center justify-center">
+//                 <div className="border-2 border-black px-6 py-[2px]">
+//                   <span className="text-[15px] font-extrabold tracking-wide">
+//                     دفتر حضور الطلاب
+//                   </span>
 //                 </div>
-//                 <div className="flex-1 border-l border-black p-2 text-[14px] font-bold">
+//               </div>
+
+//               {/* ============ হেডার রো ৩ — اسم الكتاب / اسم الاستاذ ============ */}
+//               <div
+//                 className="grid border border-black mb-2"
+//                 style={{ gridTemplateColumns: "1fr 1fr" }}
+//               >
+//                 <div className="border-l border-black p-1.5 text-[13px] font-bold">
+//                   اسم الكتاب : ______
+//                 </div>
+//                 <div className="p-1.5 text-[13px] font-bold">
 //                   اسم الاستاذ : ______
 //                 </div>
 //               </div>
@@ -931,46 +1109,82 @@ export default ArabicAttendence;
 //               {/* ============ টেবিল ============ */}
 //               <div className="w-full flex-grow">
 //                 <table className="w-full border-collapse table-fixed text-[11px]">
+//                   {/* ✅ কলামের প্রস্থ একজায়গায় — নাম বড়, বাকিগুলো সরু */}
+//                   <colgroup>
+//                     <col style={{ width: `${COL_W.serial}px` }} />
+//                     <col style={{ width: `${COL_W.admission}px` }} />
+//                     <col style={{ width: `${COL_W.code}px` }} />
+//                     <col style={{ width: `${COL_W.name}px` }} />
+//                     {days.map((day) => (
+//                       <col key={day} style={{ width: `${COL_W.day}px` }} />
+//                     ))}
+//                     <col style={{ width: `${COL_W.total}px` }} />
+//                   </colgroup>
 //                   <thead>
 //                     <tr>
-//                       <th className="border border-black bg-white text-center w-8 h-6 font-bold">
+//                       <th className="border border-black bg-white text-center h-6 font-bold">
 //                         م
 //                       </th>
-//                       <th className="border border-black bg-white text-right px-2 min-w-[150px] h-6 font-bold">
-//                         أسماء الطلبة
+//                       {/* 🔹 নতুন — Student_Admission.AdmissionSerial */}
+//                       <th className="border border-black bg-white text-center h-6 font-bold vertical-text">
+//                         رقم القيد
+//                       </th>
+//                       <th className="border border-black bg-white text-center h-6 font-bold vertical-text">
+//                         الرقم الأكاديمي
+//                       </th>
+//                       <th className="border border-black bg-white text-right px-2 h-6 font-bold name-cell">
+//                         أسماء الطالبة
 //                       </th>
 //                       {days.map((day) => {
 //                         const friday = isFriday(day);
 //                         return (
 //                           <th
 //                             key={day}
-//                             className="border border-black text-center bg-white w-[17px] vertical-text"
+//                             className="border border-black text-center bg-white h-6 text-[10px] font-bold"
 //                           >
-//                             <span className={friday ? "text-red-600 font-extrabold" : ""}>
+//                             <span
+//                               className={
+//                                 friday ? "text-red-600 font-extrabold" : ""
+//                               }
+//                             >
 //                               {toArabicNumber(day)}
 //                             </span>
 //                           </th>
 //                         );
 //                       })}
+//                       <th className="border border-black bg-white text-center h-6 font-bold vertical-text">
+//                         المجموع
+//                       </th>
 //                     </tr>
 //                   </thead>
 //                   <tbody>
 //                     {chunk.map((student, index) => {
 //                       const serial = pageIndex * ROWS_PER_PAGE + index + 1;
 //                       return (
-//                         <tr key={student.id ?? index} className="h-[22px]">
-//                           <td className="border border-black text-center bg-white w-8 align-middle">
+//                         <tr
+//                           key={student.AdmissionID ?? student.id ?? index}
+//                           className="h-[22px]"
+//                         >
+//                           <td className="border border-black text-center bg-white align-middle font-bold">
 //                             {toArabicNumber(serial)}
 //                           </td>
-//                           <td className="border border-black bg-white min-w-[150px] px-2 align-middle text-right">
-//                             {student.ArabicName || student.StudentName}
+//                           {/* 🔹 Student_Admission.AdmissionSerial */}
+//                           <td className="border border-black text-center bg-white align-middle font-semibold">
+//                             {toArabicNumber(student.AdmissionSerial)}
+//                           </td>
+//                           <td className="border border-black text-center bg-white align-middle font-semibold">
+//                             {toArabicNumber(student.StudentCode)}
+//                           </td>
+//                           {/* 🔹 Student_ArabicName.ArabicName — না থাকলে বাংলা নাম */}
+//                           <td className="border border-black bg-white px-2 align-middle text-right leading-tight name-cell">
+//                             {student.ArabicName || student.StudentName || ""}
 //                           </td>
 //                           {days.map((day) => {
 //                             const friday = isFriday(day);
 //                             return (
 //                               <td
 //                                 key={day}
-//                                 className={`border border-black text-center w-[17px] align-middle ${
+//                                 className={`border border-black text-center align-middle ${
 //                                   friday ? "bg-red-50" : "bg-white"
 //                                 }`}
 //                               >
@@ -980,12 +1194,12 @@ export default ArabicAttendence;
 //                                       display: "inline-flex",
 //                                       alignItems: "center",
 //                                       justifyContent: "center",
-//                                       width: "12px",
-//                                       height: "12px",
+//                                       width: "11px",
+//                                       height: "11px",
 //                                       borderRadius: "50%",
 //                                       border: "1px solid #dc2626",
 //                                       color: "#dc2626",
-//                                       fontSize: "8px",
+//                                       fontSize: "7px",
 //                                       fontWeight: "bold",
 //                                       lineHeight: "1",
 //                                     }}
@@ -996,22 +1210,25 @@ export default ArabicAttendence;
 //                               </td>
 //                             );
 //                           })}
+//                           <td className="border border-black bg-white align-middle"></td>
 //                         </tr>
 //                       );
 //                     })}
 
-//                     {/* ✅ ইউজারের যোগ করা খালি রো — শুক্রবারে ✕ বসবে */}
+//                     {/* ✅ ইউজারের যোগ করা খালি রো */}
 //                     {emptyRowsOnThisPage > 0 &&
 //                       Array.from({ length: emptyRowsOnThisPage }).map((_, i) => (
 //                         <tr key={`manual-empty-${i}`} className="h-[22px]">
-//                           <td className="border border-black text-center bg-white w-8"></td>
-//                           <td className="border border-black bg-white min-w-[150px]"></td>
+//                           <td className="border border-black text-center bg-white"></td>
+//                           <td className="border border-black text-center bg-white"></td>
+//                           <td className="border border-black text-center bg-white"></td>
+//                           <td className="border border-black bg-white name-cell"></td>
 //                           {days.map((day) => {
 //                             const friday = isFriday(day);
 //                             return (
 //                               <td
 //                                 key={day}
-//                                 className={`border border-black text-center w-[17px] align-middle ${
+//                                 className={`border border-black text-center align-middle ${
 //                                   friday ? "bg-red-50" : "bg-white"
 //                                 }`}
 //                               >
@@ -1021,12 +1238,12 @@ export default ArabicAttendence;
 //                                       display: "inline-flex",
 //                                       alignItems: "center",
 //                                       justifyContent: "center",
-//                                       width: "12px",
-//                                       height: "12px",
+//                                       width: "11px",
+//                                       height: "11px",
 //                                       borderRadius: "50%",
 //                                       border: "1px solid #dc2626",
 //                                       color: "#dc2626",
-//                                       fontSize: "8px",
+//                                       fontSize: "7px",
 //                                       fontWeight: "bold",
 //                                       lineHeight: "1",
 //                                     }}
@@ -1037,6 +1254,7 @@ export default ArabicAttendence;
 //                               </td>
 //                             );
 //                           })}
+//                           <td className="border border-black bg-white"></td>
 //                         </tr>
 //                       ))}
 //                   </tbody>
