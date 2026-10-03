@@ -1,15 +1,6 @@
 import { useEffect } from "react";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode, { convertOnLanguageChange } from "../../../utils/conveter";
-
-const divisionLabels = {
-    1: "মুমতাজ",
-    2: "জায়েদ জিদ্দান",
-    3: "জায়েদ",
-    4: "মাকবুল",
-    5: "রাসিব",
-};
-
 const getFirstValue = (...values) =>
     values.find((value) => value !== undefined && value !== null && value !== "");
 
@@ -57,7 +48,7 @@ export default function StudentResultSheet({ reportData, query, }) {
     };
 
 
-    useEffect(()=>{
+    useEffect(() => {
         console.log(reportData);
     }, [reportData])
 
@@ -208,7 +199,7 @@ export default function StudentResultSheet({ reportData, query, }) {
                                     {bnBijoy2Unicode(String((Number(studentResult.Total) / Number(conditionAverage.AverageSubsonkha || 1)).toFixed(2)))}
                                 </td>
 
-                                <td className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]">
+                                <td className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]" style={{ backgroundColor: studentResult?.Dcolor ? studentResult?.DColorType : undefined }}>
                                     {studentResult.Division.DivisionNames}
                                 </td>
                                 <td className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]">

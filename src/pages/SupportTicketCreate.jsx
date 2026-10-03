@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import { setPageName } from "../features/auth/authSlice";
 import useTranslate from "../utils/Translate";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 import Button from "../components/Button/Button";
