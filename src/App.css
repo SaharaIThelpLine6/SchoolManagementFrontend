@@ -192,9 +192,11 @@ tr:nth-child(even) {
   border-top: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
 }
-.swal2-title{
+
+.swal2-title {
   font-family: var(--app-font);
 }
+
 @media print {
   @page {
     margin-top: 10px;
@@ -204,8 +206,8 @@ tr:nth-child(even) {
   body {
     margin: 0;
     background-color: white !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
     width: 100%;
   }
 
@@ -227,7 +229,7 @@ tr:nth-child(even) {
     page-break-inside: auto;
     break-inside: auto;
   }
-  
+
   .result-report-print,
   .result-report-print * {
     overflow: visible !important;
@@ -456,6 +458,7 @@ div:where(.swal2-container) div:where(.swal2-html-container) {
   &:hover {
     border-color: var(--accent-border);
   }
+
   &:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
@@ -487,8 +490,7 @@ div:where(.swal2-container) div:where(.swal2-html-container) {
     z-index: 1;
     top: 34px;
     height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg) scale(1.4);
   }
 
   .vite {
@@ -496,8 +498,7 @@ div:where(.swal2-container) div:where(.swal2-html-container) {
     top: 107px;
     height: 26px;
     width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg) scale(0.8);
   }
 }
 
@@ -520,9 +521,10 @@ div:where(.swal2-container) div:where(.swal2-html-container) {
   border-top: 1px solid var(--border);
   text-align: left;
 
-  & > div {
+  &>div {
     flex: 1 1 0;
     padding: 32px;
+
     @media (max-width: 1024px) {
       padding: 24px 20px;
     }
@@ -575,6 +577,7 @@ div:where(.swal2-container) div:where(.swal2-html-container) {
     &:hover {
       box-shadow: var(--shadow);
     }
+
     .button-icon {
       height: 18px;
       width: 18px;
@@ -601,6 +604,7 @@ div:where(.swal2-container) div:where(.swal2-html-container) {
 #spacer {
   height: 88px;
   border-top: 1px solid var(--border);
+
   @media (max-width: 1024px) {
     height: 48px;
   }
@@ -622,6 +626,7 @@ div:where(.swal2-container) div:where(.swal2-html-container) {
     left: 0;
     border-left-color: var(--border);
   }
+
   &::after {
     right: 0;
     border-right-color: var(--border);
@@ -632,6 +637,7 @@ div:where(.swal2-container) div:where(.swal2-html-container) {
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-50%);
   }
@@ -643,8 +649,15 @@ div:where(.swal2-container) div:where(.swal2-html-container) {
 }
 
 @keyframes fade-in-up {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in-up {
@@ -652,13 +665,25 @@ div:where(.swal2-container) div:where(.swal2-html-container) {
 }
 
 @keyframes bounce-in {
-  0% { opacity: 0; transform: scale(0.3); }
-  50% { opacity: 1; transform: scale(1.05); }
-  70% { transform: scale(0.9); }
-  100% { transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 .animate-bounce-in {
   animation: bounce-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
 }
-

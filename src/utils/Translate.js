@@ -230,6 +230,7 @@ const useTranslate = () => {
     Staff: 'স্টাফ',
     SubClass: 'সাব ক্লাস',
     'Point Based Mark Sheet': 'পয়েন্ট ভিত্তিক মার্ক শীট',
+    'Mark Sheet': 'মার্ক শীট',
     'A4 Mark Sheet': 'A4 মার্কশীট',
     'A5 Mark Sheet': 'A5 মার্কশীট',
     'Exam Name': 'পরীক্ষার নাম',
