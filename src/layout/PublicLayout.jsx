@@ -23,6 +23,17 @@ const PublicLayout = () => {
     }, {});
   }, [websiteSettings]);
 
+  const importantLinksList = React.useMemo(() => {
+    if (!settingsObject?.importantLinks) return [];
+    try {
+      const parsed = JSON.parse(settingsObject.importantLinks);
+      if (!Array.isArray(parsed)) return [];
+      return parsed.filter((l) => l?.title && l?.link);
+    } catch {
+      return [];
+    }
+  }, [settingsObject.importantLinks]);
+
   const bufferConveter = (bufferData) => {
     if (!bufferData) return "/logo.png";
     const buffer = Buffer.from(bufferData);
@@ -102,9 +113,12 @@ useEffect(() => {
               label: "ক্লাশ/মারহালা ভিত্তিক ফলাফল",
             },
             { href: `/${schoolid}/maritlist_request`, label: "মেধা তালিকা" },
-            { href: `/${schoolid}/online_admission`, label: "অনলাইনে ভর্তি" },
-            { href: "https://wifaqresult.com", label: "বেফাক ফলাফল", external: true },
-            { href: "https://hems.alhaiatululya.org/exam-result", label: "আল-হাইআ ফলাফল", external: true },
+            { href: `/${schoolid}/online_admission`, label: "অনলাইন ভর্তি" },
+            ...importantLinksList.map((l) => ({
+              href: l.link,
+              label: l.title,
+              external: true,
+            })),
             { href: `/${schoolid}/support_video`, label: "ভিডিও" },
             { href: `/${schoolid}/donation`, label: "অনুদান" },
           ]
@@ -163,7 +177,7 @@ useEffect(() => {
                 হোম
               </Link>
               <Link to={`/${schoolid}/online_admission`} className="text-gray-600 hover:text-green-700 transition text-[18px] font-bold">
-                অনলাইনে ভর্তি
+                অনলাইন ভর্তি
               </Link>
 
               {/* --- ড্রপডাউন শুরু --- */}
@@ -191,17 +205,17 @@ useEffect(() => {
                       মেধা তালিকা
                     </Link>
                     
-                    <a href="https://wifaqresult.com" target="_blank" rel="noreferrer" className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold">
-                      বেফাক ফলাফল
-                    </a>
-                    
-                    <a href="https://hems.alhaiatululya.org/exam-result" target="_blank" rel="noreferrer" className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold">
-                      আল-হাইআ ফলাফল
-                    </a>
-                    
-                    <a href="https://tanzimboard.com/" target="_blank" rel="noreferrer" className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold">
-                      তানযীমুল মাদারিসিদ্দ দ্বীনিয়া
-                    </a>
+                    {importantLinksList.map((l, idx) => (
+                      <a
+                        key={idx}
+                        href={l.link}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold"
+                      >
+                        {l.title}
+                      </a>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -336,11 +350,24 @@ useEffect(() => {
                     to={`/${schoolid}/online_admission`}
                     className="text-gray-300 text-[22px] hover:text-amber-300 transition duration-300 relative inline-block group"
                   >
-                    অনলাইনে ভর্তি
+                    অনলাইন ভর্তি
                     <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 group-hover:w-full transition-all duration-300"></span>
                   </Link>
                 </li>
-                <li>
+                {importantLinksList.map((l, idx) => (
+                  <li key={idx}>
+                    <a
+                      href={l.link}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-gray-300 text-[22px] hover:text-amber-300 transition duration-300 relative inline-block group"
+                    >
+                      {l.title}
+                      <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 group-hover:w-full transition-all duration-300"></span>
+                    </a>
+                  </li>
+                ))}
+                {/* <li>
                   <a
                     href="https://wifaqresult.com"
                     target="_blank"
@@ -360,6 +387,16 @@ useEffect(() => {
                     <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 group-hover:w-full transition-all duration-300"></span>
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="https://tanzimboard.com/"
+                    target="_blank"
+                    className="text-gray-300 text-[22px] hover:text-amber-300 transition duration-300 relative inline-block group"
+                  >
+                    তানযীমুল মাদারিসিদ্দ দ্বীনিয়া
+                    <span className="absolute left-0 bottom-0 w-0 h-0.5 bg-amber-400 group-hover:w-full transition-all duration-300"></span>
+                  </a>
+                </li> */}
               </ul>
             </div>
 
