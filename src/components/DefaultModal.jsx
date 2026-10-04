@@ -95,6 +95,7 @@ import AddTeacherFormModal from './Forms/AddTeacherFormModal';
 import UpdateStudentFormModal from './Forms/UpdateStudentFormModal';
 import AddParentFormModal from './Forms/AddParentFormModal';
 import TeacherAssignModalNew from '../view/exam/TeacherAssignModalNew';
+import DivisionMarkSheetNoteModal from '../view/result/DivisionMarkSheetNoteModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
@@ -428,6 +429,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'HANDLE_RESULT_ENTRY_ASSIGN' && (
                   <TeacherAssignModalNew />
+                )}
+                {modalType === 'STUDENT_MARK_SHEET_NOTE' && (
+                  <DivisionMarkSheetNoteModal />
                 )}
               </div>
             )}
