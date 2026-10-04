@@ -205,7 +205,7 @@ console.log("Student vacation details");
 
       reset();
       hideModal();
-      navigate("/darul-ikama/vacation"); // Navigate back to vacation list
+      navigate("/dashboard/darul-ikama/vacation"); // Navigate back to vacation list
     } catch (err) {
       Swal.close();
       Swal.fire({

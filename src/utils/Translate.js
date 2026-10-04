@@ -1034,7 +1034,7 @@ const useTranslate = () => {
     "Students Report List": "শিক্ষার্থী রিপোর্ট লিস্ট",
     "List Of Expelled Students": "বহিস্কারকৃত শিক্ষার্থীর তালিকা",
     "Exam Student List": "পরীক্ষার্থী তালিকা",
-
+    "Exam Hall List": "পরীক্ষা কেন্দ্রের তালিকা",
   };
 
   return (key) =>

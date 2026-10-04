@@ -173,7 +173,7 @@ const BanglaAttendence = ({
             }
             th, td {
               border: 1px solid black !important;
-              padding: 0 !important;
+              padding: 0;
             }
             .vertical-text {
               writing-mode: vertical-rl;
@@ -396,10 +396,10 @@ const BanglaAttendence = ({
                       </th>
                       {/* 🔹 Student_Admission.AdmissionSerial */}
                       <th className="border border-black bg-white text-center h-5 text-[9px] leading-tight px-0">
-                        ভর্তি
+                        ভর্তি নং
                       </th>
                       <th className="border border-black bg-white text-center h-5 text-[9px] leading-tight px-0">
-                        আইডি
+                        আইডি নং
                       </th>
                       <th className="border border-black bg-white text-left px-2 h-5">
                         শিক্ষার্থীর নাম
