@@ -13,6 +13,7 @@ const DefaultSelect = ({
   nameField,
   labelColor = "text-black",
   disabled,
+  readOnly = false,
   unicode = false,
   labelPosition = "top",
   onChange,
@@ -94,10 +95,13 @@ const DefaultSelect = ({
               required: require,
               valueAsNumber: type === "number",
             })}
-            onClick={toggleDropdown}
-            onChange={handleChange}
+            onClick={readOnly ? (event) => event.preventDefault() : toggleDropdown}
+            onChange={readOnly ? (event) => event.preventDefault() : handleChange}
+            onMouseDown={readOnly ? (event) => event.preventDefault() : undefined}
+            onKeyDown={readOnly ? (event) => event.preventDefault() : undefined}
             defaultValue=""
             disabled={disabled}
+            aria-readonly={readOnly}
             className={`relative z-20 w-full appearance-none font-default rounded-lg border text-sm h-11 px-3 pr-10 outline-none transition-all duration-200 ease-in-out bg-white text-gray-900
               ${hasError
                 ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"

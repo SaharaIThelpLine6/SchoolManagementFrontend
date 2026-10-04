@@ -19,12 +19,32 @@ import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import { set } from "lodash";
 import { useMultiStepForm } from "../../../hooks/useMultiStepForm";
 
+const createEmptyCondition = (id) => {
+  const emptyRow = () => ({
+    value: "",
+    DivisionID: "",
+    color: { isHighlighted: false, highlightColor: "#ffeb3b" },
+  });
 
-function HighlightToggle({ register, control, arrayName, index }) {
+  return {
+    enabled: false,
+    row1: emptyRow(),
+    ...(id < 3 ? { row2: emptyRow() } : {}),
+  };
+};
+
+
+function HighlightToggle({ register, control, arrayName, index, readOnly = false }) {
   const isHighlighted = useWatch({
     control,
     name: `${arrayName}.${index}.isHighlighted`,
   });
+  const highlightColor = useWatch({
+    control,
+    name: `${arrayName}.${index}.highlightColor`,
+  });
+  const highlightRegistration = register(`${arrayName}.${index}.isHighlighted`);
+  const colorRegistration = register(`${arrayName}.${index}.highlightColor`);
 
   return (
     <div className="flex items-center gap-2">
@@ -32,7 +52,10 @@ function HighlightToggle({ register, control, arrayName, index }) {
         <input
           type="checkbox"
           className="sr-only peer"
-          {...register(`${arrayName}.${index}.isHighlighted`)}
+          {...highlightRegistration}
+          checked={Boolean(isHighlighted)}
+          onChange={readOnly ? (event) => event.preventDefault() : highlightRegistration.onChange}
+          aria-readonly={readOnly}
         />
         <div className="w-9 h-5 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 transition-colors" />
         <div className="absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4" />
@@ -41,10 +64,15 @@ function HighlightToggle({ register, control, arrayName, index }) {
       {isHighlighted && (
         <input
           type="color"
-          defaultValue="#ffeb3b"
+          value={highlightColor || "#ffeb3b"}
           title="হাইলাইট রঙ নির্বাচন করুন"
           className="w-8 h-8 p-0 border border-gray-300 rounded cursor-pointer"
-          {...register(`${arrayName}.${index}.highlightColor`)}
+          {...colorRegistration}
+          onChange={readOnly ? (event) => event.preventDefault() : colorRegistration.onChange}
+          onClick={readOnly ? (event) => event.preventDefault() : undefined}
+          onMouseDown={readOnly ? (event) => event.preventDefault() : undefined}
+          onKeyDown={readOnly ? (event) => event.preventDefault() : undefined}
+          aria-readonly={readOnly}
         />
       )}
     </div>
@@ -55,9 +83,9 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
 
   const getDefaultValues = () => {
     const defaults = {
-      condition1: { enabled: false, row1: { value: '', DivisionID: '' }, row2: { value: '', DivisionID: '' } },
-      condition2: { enabled: false, row1: { value: '', DivisionID: '' }, row2: { value: '', DivisionID: '' } },
-      condition3: { enabled: false, row1: { value: '', DivisionID: '' } },
+      condition1: createEmptyCondition(1),
+      condition2: createEmptyCondition(2),
+      condition3: createEmptyCondition(3),
       SubSonkha: '',
       DAbsance: '',
       DAbsanceColor: { color: '' },
@@ -166,18 +194,30 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
   const { setValue, getValues } = methods;
 
   useEffect(() => {
-    [1, 2, 3].forEach(id => {
-      setValue(`condition${id}.enabled`, false);
+    const conditionSubjects = Number(sharedStepData?.ExamType) === 4
+      ? sharedStepData?.subjectGradeList || []
+      : sharedStepData?.subjectPassNumbers || [];
+    const availableConditions = new Set(
+      conditionSubjects
+        .map((subject) => Number(subject?.mayeri))
+        .filter((mayeri) => Number.isInteger(mayeri) && mayeri >= 1 && mayeri <= 3)
+    );
+
+    [1, 2, 3].forEach((id) => {
+      const conditionName = `condition${id}`;
+      const isAvailable = availableConditions.has(id);
+      setValue(`${conditionName}.enabled`, isAvailable);
+
+      if (!isAvailable) {
+        setValue(conditionName, createEmptyCondition(id));
+      }
     });
+
     if (sharedStepData?.subjectPassNumbers?.length && sharedStepData?.ExamType != 4) {
 
       let subjectCount = 0
 
       sharedStepData.subjectPassNumbers.forEach(item => {
-        if (item.mayeri) {
-          setValue(`condition${item.mayeri}.enabled`, true);
-        }
-
         !item?.optional ? subjectCount++ : null;
       });
       if (sharedStepData?.isEditMode) {
@@ -192,12 +232,6 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
       }
 
 
-    } else if (sharedStepData?.ExamType == 4) {
-      sharedStepData?.subjectGradeList.forEach(item => {
-        if (item.mayeri) {
-          setValue(`condition${item.mayeri}.enabled`, true);
-        }
-      });
     }
   }, [sharedStepData, setValue]);
 
@@ -277,6 +311,9 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
 
   const condition_one_val = watch("condition1.row1.value");
   const condition_two_val = watch("condition2.row1.value");
+  const condition1Enabled = Boolean(watch("condition1.enabled"));
+  const condition2Enabled = Boolean(watch("condition2.enabled"));
+  const condition3Enabled = Boolean(watch("condition3.enabled"));
 
   return (
     <FormProvider {...methods}>
@@ -296,7 +333,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                   {/* কন্ডিশন-১ */}
                   <div className="border border-gray-200 rounded-md p-4">
                     <label className="flex items-center gap-2 mb-3 font-medium text-gray-800">
-                      <input type="checkbox" className="h-4 w-4" {...register("condition1.enabled")} />
+                      <input type="checkbox" className="h-4 w-4" {...register("condition1.enabled")} checked={Boolean(watch("condition1.enabled"))} onChange={(event) => event.preventDefault()} aria-readonly="true" />
                       কন্ডিশন-১ : গর মি'ইয়ারী কিতাবে ফেল সংক্রান্ত
                     </label>
 
@@ -317,7 +354,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                       <tbody>
                         <tr className="border-t border-gray-100">
                           <td className="px-4 py-2 align-top">
-                            <DefaultInput registerKey="condition1.row1.value" type="text" defaultValue={getValues("condition1.row1.value")} />
+                            <DefaultInput registerKey="condition1.row1.value" type="text" defaultValue={getValues("condition1.row1.value")} readOnly={!condition1Enabled} />
                           </td>
                           <td className="px-4 py-2 align-top">
                             <DefaultSelect
@@ -327,7 +364,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               nameField="DivisionNames"
                               valueField="ID"
                               defaultValue={translate("Select Divition")}
-
+                              readOnly={!condition1Enabled}
                             />
                           </td>
                           <td className="px-4 py-2">
@@ -336,6 +373,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               control={control}
                               arrayName="condition1.row1"
                               index={"color"}
+                              readOnly={!condition1Enabled}
                             />
                           </td>
                         </tr>
@@ -351,7 +389,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               nameField="DivisionNames"
                               valueField="ID"
                               defaultValue={translate("Select Divition")}
-
+                              readOnly={!condition1Enabled}
                             />
                           </td>
                           <td className="px-4 py-2">
@@ -360,6 +398,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               control={control}
                               arrayName="condition1.row2"
                               index={"color"}
+                              readOnly={!condition1Enabled}
                             />
                           </td>
                         </tr>
@@ -370,7 +409,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                   {/* কন্ডিশন-২ */}
                   <div className="border border-gray-200 rounded-md p-4">
                     <label className="flex items-center gap-2 mb-3 font-medium text-gray-800">
-                      <input type="checkbox" className="h-4 w-4" {...register("condition2.enabled")} />
+                      <input type="checkbox" className="h-4 w-4" {...register("condition2.enabled")} checked={Boolean(watch("condition2.enabled"))} onChange={(event) => event.preventDefault()} aria-readonly="true" />
                       কন্ডিশন-২ : মি'ইয়ারী কিতাবে ফেল সংক্রান্ত
                     </label>
 
@@ -391,7 +430,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                       <tbody>
                         <tr className="border-t border-gray-100">
                           <td className="px-4 py-2 align-top">
-                            <DefaultInput registerKey="condition2.row1.value" type="number" defaultValue={getValues("condition2.row1.value")} />
+                            <DefaultInput registerKey="condition2.row1.value" type="number" defaultValue={getValues("condition2.row1.value")} readOnly={!condition2Enabled} />
                           </td>
                           <td className="px-4 py-2 align-top">
                             <DefaultSelect
@@ -401,7 +440,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               nameField="DivisionNames"
                               valueField="ID"
                               defaultValue={translate("Select Divition")}
-
+                              readOnly={!condition2Enabled}
                             />
                           </td>
                           <td className="px-4 py-2 align-top text-gray-400">
@@ -410,6 +449,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               control={control}
                               arrayName="condition2.row1"
                               index={'color'}
+                              readOnly={!condition2Enabled}
                             />
 
                           </td>
@@ -426,7 +466,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               nameField="DivisionNames"
                               valueField="ID"
                               defaultValue={translate("Select Divition")}
-
+                              readOnly={!condition2Enabled}
                             />
                           </td>
                           <td className="px-4 py-2 align-top">
@@ -435,6 +475,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               control={control}
                               arrayName="condition2.row2"
                               index={'color'}
+                              readOnly={!condition2Enabled}
                             />
                           </td>
                         </tr>
@@ -445,7 +486,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                   {/* কন্ডিশন-৩ */}
                   <div className="border border-gray-200 rounded-md p-4">
                     <label className="flex items-center gap-2 mb-3 font-medium text-gray-800">
-                      <input type="checkbox" className="h-4 w-4" {...register("condition3.enabled")} disabled />
+                      <input type="checkbox" className="h-4 w-4" {...register("condition3.enabled")} checked={Boolean(watch("condition3.enabled"))} onChange={(event) => event.preventDefault()} aria-readonly="true" />
                       কন্ডিশন-৩ : অধিকতর মি'ইয়ারী কিতাবে ফেল সংক্রান্ত
                     </label>
 
@@ -467,7 +508,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                         <tr className="border-t border-gray-100">
                           <td className="px-4 py-2 align-top">
 
-                            <DefaultInput registerKey="condition3.row1.value" type="number" defaultValue={getValues("condition3.row1.value")} />
+                            <DefaultInput registerKey="condition3.row1.value" type="number" defaultValue={getValues("condition3.row1.value")} readOnly={!condition3Enabled} />
                           </td>
                           <td className="px-4 py-2 align-top">
                             <DefaultSelect
@@ -477,7 +518,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               nameField="DivisionNames"
                               valueField="ID"
                               defaultValue={translate("Select Divition")}
-
+                              readOnly={!condition3Enabled}
                             />
                           </td>
                           <td className="px-4 py-2 align-top">
@@ -486,6 +527,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                               control={control}
                               arrayName="condition3.row1"
                               index={'color'}
+                              readOnly={!condition3Enabled}
                             />
                           </td>
                         </tr>
@@ -501,7 +543,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
               sharedStepData?.ExamType == 4 ? (
                 <div className="border border-gray-200 rounded-md p-4">
                   <label className="flex items-center gap-2 mb-3 font-medium text-gray-800">
-                    <input type="checkbox" className="h-4 w-4" {...register("condition3.enabled")} checked={true} />
+                    <input type="checkbox" className="h-4 w-4" {...register("condition3.enabled")} checked={Boolean(watch("condition3.enabled"))} onChange={(event) => event.preventDefault()} aria-readonly="true" />
                     কন্ডিশন-১ :  কিতাবে ফেল সংক্রান্ত
                   </label>
 
@@ -523,7 +565,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                       <tr className="border-t border-gray-100">
                         <td className="px-4 py-2 align-top">
 
-                          <DefaultInput registerKey="condition3.row1.value" type="number" defaultValue={getValues("condition3.row1.value")} />
+                          <DefaultInput registerKey="condition3.row1.value" type="number" defaultValue={getValues("condition3.row1.value")} readOnly={!condition3Enabled} />
                         </td>
                         <td className="px-4 py-2 align-top">
                           <DefaultSelect
@@ -533,7 +575,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                             nameField="DivisionNames"
                             valueField="ID"
                             defaultValue={translate("Select Divition")}
-
+                            readOnly={!condition3Enabled}
                           />
                         </td>
                         <td className="px-4 py-2 align-top">
@@ -542,6 +584,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                             control={control}
                             arrayName="condition3.row1"
                             index={'color'}
+                            readOnly={!condition3Enabled}
                           />
                         </td>
                       </tr>
