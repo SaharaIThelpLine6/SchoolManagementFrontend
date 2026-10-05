@@ -294,10 +294,7 @@ const ExamHallSetup = () => {
             </div>
 
             <FormProvider {...methods}>
-                <form
-                    onSubmit={handleSubmit(onSubmit)}
-                    className="lg:pt-[100px] lg:pt-0 lg:mt-5 lg:ml-5 mb-20"
-                >
+                <form onSubmit={handleSubmit(onSubmit)}>
                     {/* hall name */}
                     <div className="bg-white border border-gray-200 rounded-xl p-3 lg:p-5 mb-4">
                         <DefaultInput

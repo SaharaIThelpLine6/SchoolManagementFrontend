@@ -101,8 +101,8 @@ const TalentCondition = ({ sharedStepData, setSharedStepData }) => {
     }
   }, [examTalentConditionData])
 
-    const [addExamSettings] = usePostExamSettingsMutation();
-    const [updateExamSettings] = useUpdateExamSettingsMutation();
+  const [addExamSettings] = usePostExamSettingsMutation();
+  const [updateExamSettings] = useUpdateExamSettingsMutation();
 
   const handleCheckChange = (index) => {
     const updated = [...checkedInputs];
@@ -114,20 +114,20 @@ const TalentCondition = ({ sharedStepData, setSharedStepData }) => {
     setCheckedInputs(Array(inputs.length).fill(e.target.checked));
   };
 
-const onSubmit = async (data) => {
-  const divisionConditions = sharedStepData.examDivitions.map(
-    (division, index) => ({
-      DivisionID: division.ID,
-      checked: checkedInputs[index] || false,
-    })
-  );
+  const onSubmit = async (data) => {
+    const divisionConditions = sharedStepData.examDivitions.map(
+      (division, index) => ({
+        DivisionID: division.ID,
+        checked: checkedInputs[index] || false,
+      })
+    );
 
-  const updatedData = {
-    ...sharedStepData,
-    telenetCondition: divisionConditions,
-  };
+    const updatedData = {
+      ...sharedStepData,
+      telenetCondition: divisionConditions,
+    };
 
-  setSharedStepData(updatedData)
+    setSharedStepData(updatedData)
 
     try {
       console.log(updatedData);
@@ -140,13 +140,17 @@ const onSubmit = async (data) => {
       });
     } catch (error) {
       console.error("Error submitting data:", error);
+
+      // unwrap() error shape: { status, data: { error: 'বাংলা মেসেজ' } }
+      const serverMessage = error?.data?.error || error?.data?.message;
+
       Swal.fire({
         icon: "error",
         title: "Submission Failed",
-        text: "There was an error submitting the data. Please try again.",
+        text: serverMessage || "সার্ভারের সাথে সংযোগ করা যায়নি। আবার চেষ্টা করুন।",
       });
     }
-};
+  };
 
   if (error) {
     Swal.fire({

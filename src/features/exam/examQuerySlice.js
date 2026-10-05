@@ -433,7 +433,7 @@ export const examSlice = createApi({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["ExamDivitions"],
+      invalidatesTags: ["ExamDivitions", "ExamConditions"],
     }),
 
     deleteExamCondition: builder.mutation({
