@@ -70,7 +70,7 @@ const ExamSitPlan = ({ pageTitle }) => {
     }
     // sessionID, examID check if sit plan already ready skip edit
 
-    navigate(`/exam/create_examshift/${sessionID}/${examID}`);
+    navigate(`/dashboard/exam/create_examshift/${sessionID}/${examID}`);
   }
 
   const handleDeleteSitPlan = async (sitplanid) => {
@@ -160,7 +160,7 @@ const ExamSitPlan = ({ pageTitle }) => {
       title: translate('Action'),
       hozAlign: 'center',
       render: (row, rowIndex) => <div className='flex gap-2 items-center justify-center'>
-        <Link to={`/exam/create_examshift/${row.SessionID}/${row.ExamID}`} className='p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md inline-block'>
+        <Link to={`/dashboard/exam/create_examshift/${row.SessionID}/${row.ExamID}`} className='p-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md inline-block'>
           <SvgIcon name="FiEdit" size={18} />
         </Link>
 
