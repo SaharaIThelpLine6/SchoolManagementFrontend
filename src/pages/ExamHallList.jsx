@@ -15,7 +15,7 @@ const ExamHallList = () => {
     const { data: examHallList } = useGetExamHallListQuery();
 
     const handleHallEdit = (hall) => {
-        navigate(`/exam/exam-halledit/${hall.HallID}`, {
+        navigate(`/dashboard/exam/exam-halledit/${hall.HallID}`, {
             state: { hall },
         });
     };
