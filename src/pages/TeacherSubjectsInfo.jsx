@@ -128,15 +128,6 @@ const TeacherSubjectsInfo = ({ pageTitle }) => {
     setSelectedIds([]);
   }, [currentPage]);
 
-  // =========================
-  // HANDLERS
-  // =========================
-  const handleTeacherAssign = () => {
-    showModal('শিক্ষক বিষয় বরাদ্দ', 'HANDLE_RESULT_ENTRY_ASSIGN', {
-      closeOnOutSide: false,
-    });
-  };
-
   const handleClearFilters = () => {
     reset({
       SessionID: '',
@@ -436,27 +427,6 @@ const TeacherSubjectsInfo = ({ pageTitle }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button onClick={handleTeacherAssign}>
-              <span className="flex items-center gap-1.5">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width={18}
-                  height={18}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 5v14" />
-                  <path d="M5 12h14" />
-                </svg>
-                শিক্ষক বিষয় বরাদ্দ
-              </span>
-            </Button>
-          </div>
         </div>
       </div>
 

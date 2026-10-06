@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import useTranslate from "../utils/Translate";
 import Button from "../components/Button/Button";
+import TeacherKhataSubmission from "../components/TeacherKhataSubmission";
 import DefaultSelect from "../components/Forms/DefaultSelect";
 
 import { useGetSessionsQuery } from "../features/session/sessionSlice";
@@ -12,7 +13,6 @@ import {
   useGetTeachersInfoQuery,
   useGetTeacherSubjectsQuery,
   usePostSubjectToTeacherMutation,
-  useUpdateTeacherSubjectMutation,
   useDeleteTeacherSubjectMutation,
 } from "../features/teachers/teachersSlice";
 import { useGetExamNamesQuery } from "../features/exam/examQuerySlice";
@@ -38,6 +38,11 @@ const TeacherSubjectsAsignPage = () => {
   ]);
 
   // =========================
+  // PAGE SWITCH STATE
+  // =========================
+  const [showKhataPage, setShowKhataPage] = useState(false);
+
+  // =========================
   // EDIT STATE
   // =========================
   const [editingId, setEditingId] = useState(null);
@@ -53,12 +58,11 @@ const TeacherSubjectsAsignPage = () => {
   // =========================
   const [postSubjectToTeacher, { isLoading: isPostLoading }] =
     usePostSubjectToTeacherMutation();
-  const [updateSubjectToTeacher, { isLoading: isUpdateLoading }] =
-    useUpdateTeacherSubjectMutation();
+
   const [deleteSubjectToTeacher, { isLoading: isDeleteLoading }] =
     useDeleteTeacherSubjectMutation();
 
-  const isSaving = isPostLoading || isUpdateLoading || isDeleteLoading;
+  const isSaving = isPostLoading || isDeleteLoading;
 
   // =========================
   // QUERIES
@@ -89,7 +93,6 @@ const TeacherSubjectsAsignPage = () => {
         await refetchTeacherSubjects();
       }
     } catch (err) {
-      // Query not started / unmounted — ignore silently
       console.warn("refetchTeacherSubjects skipped:", err?.message);
     }
   };
@@ -155,7 +158,6 @@ const TeacherSubjectsAsignPage = () => {
       return;
     }
 
-    // Same teacher already assigned → cannot re-select here
     if (info.assigned && info.isSameTeacher) {
       return;
     }
@@ -218,15 +220,13 @@ const TeacherSubjectsAsignPage = () => {
   };
 
   // =========================
-  // DELETE ASSIGNED SUBJECT (from TOP BAR — direct delete)
+  // DELETE ASSIGNED SUBJECT
   // =========================
   const handleDeleteAssigned = async (item) => {
     try {
       const response = await deleteSubjectToTeacher([item.ID]).unwrap();
 
-      toast.success(
-        response?.message || "Subject সফলভাবে ডিলিট হয়েছে।"
-      );
+      toast.success(response?.message || "Subject সফলভাবে ডিলিট হয়েছে।");
 
       await safeRefetchTeacherSubjects();
     } catch (error) {
@@ -272,21 +272,11 @@ const TeacherSubjectsAsignPage = () => {
         SubjectID: Number(item.SubjectID),
       }));
 
-      let response;
-      if (isEditMode) {
-        response = await updateSubjectToTeacher({
-          id: editingId,
-          ...payloads[0],
-        }).unwrap();
-      } else {
-        response = await postSubjectToTeacher(payloads).unwrap();
-      }
+      const response = await postSubjectToTeacher(payloads).unwrap();
 
-      // state reset BEFORE await Swal (avoid unmount refetch issue)
       setSelectedItems([]);
       setEditingId(null);
 
-      // safe refetch (component may unmount during Swal)
       await safeRefetchTeacherSubjects();
 
       await Swal.fire({
@@ -339,6 +329,40 @@ const TeacherSubjectsAsignPage = () => {
   };
 
   // =========================
+  // KHATA SUBMISSION PAGE VIEW
+  // =========================
+  if (showKhataPage) {
+    return (
+      <div className="relative h-screen overflow-hidden">
+        {/* Back Button */}
+        <button
+          type="button"
+          onClick={() => setShowKhataPage(false)}
+          className="absolute top-4 right-4 z-[100] inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white/95 backdrop-blur-md border border-gray-200 text-gray-700 text-xs font-bold shadow-md hover:bg-white hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 focus:outline-none"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={14}
+            height={14}
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <line x1="19" y1="12" x2="5" y2="12" />
+            <polyline points="12 19 5 12 12 5" />
+          </svg>
+          ফিরে যান
+        </button>
+
+        <TeacherKhataSubmission />
+      </div>
+    );
+  }
+
+  // =========================
   // RENDER
   // =========================
   return (
@@ -365,7 +389,7 @@ const TeacherSubjectsAsignPage = () => {
                   strokeLinejoin="round"
                 >
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
+                  <circle cx="9" cy="7" r={4} />
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
@@ -380,8 +404,33 @@ const TeacherSubjectsAsignPage = () => {
               </div>
             </div>
 
-            {/* Header stat pills */}
+            {/* Header stat pills + Khata Button */}
             <div className="flex items-center gap-2">
+              {/* ✅ খাতা জমা Button */}
+              <button
+                type="button"
+                onClick={() => setShowKhataPage(true)}
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-[#1D4ED8] text-xs sm:text-sm font-bold shadow-lg shadow-blue-900/20 hover:bg-blue-50 hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/60"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={16}
+                  height={16}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2.5}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="12" y1="18" x2="12" y2="12" />
+                  <line x1="9" y1="15" x2="15" y2="15" />
+                </svg>
+                খাতা জমা
+              </button>
+
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/15 backdrop-blur-md border border-white/25 shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-200 shadow-[0_0_8px_2px_rgba(167,243,208,0.8)]" />
                 <span className="text-white text-xs font-semibold">
@@ -432,12 +481,12 @@ const TeacherSubjectsAsignPage = () => {
             </div>
 
             {/* ============================
-                STICKY WRAPPER (BOTH BARS STACK TOGETHER)
+                STICKY WRAPPER
             ============================ */}
             {(currentTeacherAssigned.length > 0 ||
               selectedItems.length > 0) && (
                 <div className="sticky top-0 z-20 space-y-3 rounded-2xl">
-                  {/* ALREADY ASSIGNED SUBJECTS (TOP BAR - DIRECT DELETE) */}
+                  {/* ALREADY ASSIGNED SUBJECTS */}
                   {currentTeacherAssigned.length > 0 && (
                     <div className="rounded-2xl border border-emerald-200/80 bg-white/95 backdrop-blur-xl shadow-lg shadow-emerald-100/70 p-3">
                       <div className="flex items-center justify-between mb-2.5">
@@ -493,7 +542,7 @@ const TeacherSubjectsAsignPage = () => {
                     </div>
                   )}
 
-                  {/* SELECTED ITEMS TOP BAR (NEW SELECTIONS) */}
+                  {/* SELECTED ITEMS TOP BAR */}
                   {selectedItems.length > 0 && (
                     <div className="rounded-2xl border border-sky-200/80 bg-white/95 backdrop-blur-xl shadow-lg shadow-sky-100/70 p-3">
                       <div className="flex items-center justify-between mb-2.5">
@@ -591,7 +640,6 @@ const TeacherSubjectsAsignPage = () => {
                     key={subClass.SubClassID}
                     className="rounded-2xl border border-gray-200/80 bg-white shadow-sm hover:shadow-lg hover:shadow-emerald-100/60 hover:border-emerald-200 transition-all duration-300 overflow-hidden"
                   >
-                    {/* Class header */}
                     <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-slate-50 via-emerald-50/70 to-transparent border-b border-gray-100">
                       <h3 className="text-[15px] font-bold text-gray-800 flex items-center gap-2.5">
                         <span className="w-1.5 h-5 rounded-full bg-gradient-to-b from-emerald-400 to-teal-500 shadow-sm" />
@@ -602,7 +650,6 @@ const TeacherSubjectsAsignPage = () => {
                       </span>
                     </div>
 
-                    {/* Subjects */}
                     <div className="flex flex-wrap gap-2 p-4">
                       {subClass.Subjects?.map((subject) => {
                         const info = getAssignedInfo(

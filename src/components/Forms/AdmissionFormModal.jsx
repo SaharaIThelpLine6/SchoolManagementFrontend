@@ -356,7 +356,7 @@ const AdmissionFormModal = ({ userId }) => {
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="font-SolaimanLipi">
+      <form onSubmit={handleSubmit(onSubmit)} className="font-SolaimanLipi pb-12 sm:pb-0">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
           {/* PHOTO + STUDENT CODE + RADIO */}
           <div className="col-span-1 rounded-xl border bg-white p-4 shadow-sm">

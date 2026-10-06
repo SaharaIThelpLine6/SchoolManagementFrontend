@@ -162,16 +162,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   };
 
 
-  const handleTeacherAssign = () => {
-    showModal('শিক্ষক বিষয় বরাদ্দ', 'HANDLE_RESULT_ENTRY_ASSIGN', {
-      closeOnOutSide: false,
-    });
-  };
-  // const handleTeacherAssign = async () => {
-  //   navigate(
-  //     `/dashboard/result/teacher_asign_subject`
-  //   )
-  // }
+
   // Table Data Columns 
   const columns = [
     {
@@ -244,9 +235,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
             empty={true}
           >
 
-            {/* <Button className='' onClick={() => { handleTeacherAssign(row) }} tooltip_message='Teacher Result Entry Permission'>
-              <SvgIcon name={"TbUserShare"} size={20} />
-            </Button> */}
+
             <EditButton
               onClick={() =>
                 navigate(
@@ -277,28 +266,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
         <h3 className="text-base sm:text-[20px] font-bold">
           {translate('Point Result Entry')}
         </h3>{' '}
-        {/* <Button className='' onClick={() => { handleTeacherAssign() }}>
-          শিক্ষক-বিষয় গ্রুপ
-        </Button> */}
-        <Button onClick={handleTeacherAssign}>
-          <span className="flex items-center gap-1.5">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width={18}
-              height={18}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M12 5v14" />
-              <path d="M5 12h14" />
-            </svg>
-            শিক্ষক বিষয় বরাদ্দ
-          </span>
-        </Button>
       </div>
       <FormProvider {...methods}>
         <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
