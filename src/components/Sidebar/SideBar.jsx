@@ -33,7 +33,6 @@ const SideBar = () => {
 
   const hasPermission = (...permissionIds) => {
     if (!permissionIds.length || !permissions?.data) return false;
-
     return permissionIds.some((permissionId) => {
       const perm = permissions.data.find(
         (p) => p.PermissionListID === permissionId
