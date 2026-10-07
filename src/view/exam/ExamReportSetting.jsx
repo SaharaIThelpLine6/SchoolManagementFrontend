@@ -37,6 +37,13 @@ const settingConfig = [
     options: ["Unhide", "Hide"], // 1 = Unhide, 0 = Hide
     values: [1, 0],
   },
+  // ✅ নতুন — QR কোড দেখানো/লুকানোর সেটিং
+  {
+    label: "QR Code",
+    name: "SettingColumn6",
+    options: ["Unhide", "Hide"], // 1 = Unhide, 0 = Hide
+    values: [1, 0],
+  },
 ];
 
 const ExamReportSetting = () => {
@@ -56,6 +63,7 @@ const ExamReportSetting = () => {
         SettingColumn3: setting.SettingColumn3,
         SettingColumn4: setting.SettingColumn4,
         SettingColumn5: setting.SettingColumn5,
+        SettingColumn6: setting.SettingColumn6, // ✅ নতুন
       });
     }
   }, [setting]);

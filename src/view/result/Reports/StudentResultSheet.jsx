@@ -199,7 +199,7 @@ export default function StudentResultSheet({ reportData, query, }) {
                                     {bnBijoy2Unicode(String((Number(studentResult.Total) / Number(conditionAverage.AverageSubsonkha || 1)).toFixed(2)))}
                                 </td>
 
-                                <td className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]" style={{ backgroundColor: studentResult?.Dcolor ? studentResult?.DColorType : undefined }}>
+                                <td className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]" style={{ backgroundColor: studentResult?.DColor ? studentResult?.DColorType : undefined }}>
                                     {studentResult.Division.DivisionNames}
                                 </td>
                                 <td className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]">

@@ -56,17 +56,26 @@ const ExamHallList = () => {
 
 
     return (
-        <div className="p-7 font-SolaimanLipi">
-            <div className='mb-4 text-end gap-4 flex'>
-                <Link className='py-2 px-2 bg-blue-500 text-white rounded-[4px] mb-2 flex gap-2' to='/dashboard/exam/exam-hallsetup'> <SvgIcon name={"HomePlus"} size={22}/>  {translate("Add Exam Hall")} </Link>
-                <Link className='py-2 px-2 bg-blue-500 text-white rounded-[4px] mb-2 flex gap-2' to='/dashboard/exam/exam-setplan'> <SvgIcon name="TableShortcut" size={22} /> {translate("Exam Seat plan")} </Link>
+
+        <div className="font-default bg-white p-6 md:p-4 rounded-xl shadow-lg">
+            <div className="block w-full overflow-x-auto">
+                <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between mb-0">
+                    <h3 className="font-default text-[20px] font-bold">
+                        {translate('Exam Hall List')}
+                    </h3>
+                    <div className='mb-4 text-end gap-4 flex'>
+                        <Link className='py-2 px-2 bg-blue-500 text-white rounded-[4px] mb-2 flex gap-2' to='/dashboard/exam/exam-hallsetup'> <SvgIcon name={"HomePlus"} size={22} />  {translate("Add Exam Hall")} </Link>
+                        <Link className='py-2 px-2 bg-blue-500 text-white rounded-[4px] mb-2 flex gap-2' to='/dashboard/exam/exam-setplan'> <SvgIcon name="TableShortcut" size={22} /> {translate("Exam Seat plan")} </Link>
+                    </div>
+                </div>
+                <SortableTable
+                    columns={columns}
+                    data={examHallList}
+                    isFilterColumn={false}
+                />
             </div>
-            <SortableTable
-                columns={columns}
-                data={examHallList}
-                isFilterColumn={false}
-            />
         </div>
+
     );
 };
 

@@ -114,7 +114,7 @@ export default function AttendanceSheet({ reportData, query, }) {
                                     {bnBijoy2Unicode(String(index + 1))}
                                 </td>
                                 <td className="border border-black px-1 py-1 text-center  text-[16px] text-[#1f2937]">
-                                    {bnBijoy2Unicode(String(studentResult.AdmissionID))}
+                                    {bnBijoy2Unicode(String(studentResult?.User?.UserCode))}
                                 </td>
                                 <td className="border border-black px-2 py-1 text-left  text-[16px] text-[#1f2937]">
                                     {studentResult.User.UserName}

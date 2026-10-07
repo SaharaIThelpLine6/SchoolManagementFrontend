@@ -43,6 +43,7 @@ import { examHallSlice } from "../features/examhall/examHallQuerySlice";
 import { examSitPlanSlice } from "../features/exam/examSitPlanQuerySlice";
 import { attendanceSlice } from "../features/attendance/attendanceSlice";
 import { reportQuerySlice } from "../features/reports/reportQuerySlice";
+import studentReportReducer, { studentReportSlice } from "../features/student/studentReportSlice";
 
 // Admin
 import { redirectSlice } from "../features/Admin/redirectSlice";
@@ -96,6 +97,7 @@ const store = configureStore({
     [attendanceSlice.reducerPath]: attendanceSlice.reducer,
     [examSitPlanSlice.reducerPath]: examSitPlanSlice.reducer,
     [reportQuerySlice.reducerPath]: reportQuerySlice.reducer,
+    [studentReportSlice.reducerPath]: studentReportReducer,
 
     // Admin
     [redirectSlice.reducerPath]: redirectSlice.reducer,
@@ -135,6 +137,7 @@ const store = configureStore({
       .concat(attendanceSlice.middleware)
       .concat(examSitPlanSlice.middleware)
       .concat(reportQuerySlice.middleware)
+      .concat(studentReportSlice.middleware)
 
       // Admin
       .concat(redirectSlice.middleware)
