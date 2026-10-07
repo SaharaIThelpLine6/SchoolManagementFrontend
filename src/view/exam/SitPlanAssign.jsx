@@ -1338,7 +1338,7 @@ const SitPlanAssign = ({ sessionId, examId, sharedStepData }) => {
                             className="w-1/2 bg-blue-500 hover:bg-blue-600 text-white font-SolaimanLipi"
                             onClick={handleAssignNextStep}
                         >
-                            {translate("Save & Continue")}
+                            {translate("Save")}
                         </Button>
                     </div>
 

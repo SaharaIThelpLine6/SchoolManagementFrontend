@@ -49,7 +49,7 @@ const StudentIdCardPrint = ({ pageTitle }) => {
 
   const { data: institutionInfo } = useGetInstitutionInfoQuery();
 
-  console.log(institutionInfo, "institutionInfo")
+  console.log(institutionInfo, "institutionInfo =========================================")
 
   const SessionID = watch('SessionID');
   const ClassID = watch('ClassID');
@@ -245,7 +245,10 @@ const StudentIdCardPrint = ({ pageTitle }) => {
           }
         }
       `;
-      // document.head.appendChild(style);
+      if(institutionInfo?.InstitutionCode && institutionInfo?.InstitutionCode == 1189) {
+          document.head.appendChild(style);
+      }
+      
       /**
        * 
        * position: fixed;
@@ -1299,8 +1302,11 @@ const StudentIdCardPrint = ({ pageTitle }) => {
       </div>
       {/* print-only */}
       <div className='print-only'>
-        <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} data={testData} inName={institutionInfo?.InstitutionName} inAdress={institutionInfo?.Address} />
-        {/* <StudentIdCardGeneratePos layoutId={selectedLayout} fields={checkboxState} data={testData} inName={institutionInfo?.InstitutionName} inAdress={institutionInfo?.Address} /> */}
+        {
+          institutionInfo?.InstitutionCode && institutionInfo?.InstitutionCode == 1189 ? <StudentIdCardGeneratePos layoutId={selectedLayout} fields={checkboxState} data={testData} inName={institutionInfo?.InstitutionName} inAdress={institutionInfo?.Address} /> : <StudentIdCardGenerate layoutId={selectedLayout} fields={checkboxState} data={testData} inName={institutionInfo?.InstitutionName} inAdress={institutionInfo?.Address} />
+        }
+        
+
       </div>
     </div>
   );
