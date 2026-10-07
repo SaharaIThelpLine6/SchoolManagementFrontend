@@ -575,6 +575,12 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
 
   const remaining = MAX_FIELD_SELECT - checkboxState.length;
 
+  // হেডারের ড্রপডাউন-চেহারার বোতাম — পাশের ভাষা select এর সাথে মিলিয়ে
+  const dropdownBtn =
+    'flex items-center gap-2 min-w-0 rounded-[8px] border border-gray-200 bg-white ' +
+    'px-3 py-2 text-[14px] font-medium text-gray-700 shadow-sm ' +
+    'hover:border-blue-400 hover:text-blue-700 transition';
+
   return (
     <FormProvider {...methods}>
       {/* max-w-full + overflow-x-hidden — ভিতরের ৫২০px কার্ড যেন পুরো পেজ চওড়া না করে */}
@@ -583,13 +589,46 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
         dir={uiDir}
       >
         {/* ================================================== হেডার
-            উপরের সারি — শিরোনাম, টেমপ্লেট সিলেক্ট, ভাষা, টেমপ্লেট ও ডাটা সেটিং।
-            নিচের সারি — ফিল্টার। আগে পপআপে ছিল, এখন হেডারেই বসে থাকে। */}
-        <div className="mb-6 pb-4 border-b border-gray-200">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <h3 className="text-[18px] font-bold">{ui('pageTitle')}</h3>
+            তিন ভাগ — বাঁয়ে টেমপ্লেট ও রুটিংয়ের ড্রপডাউন, মাঝে শিরোনাম,
+            ডানে ভাষা ও সেটিং। দুই পাশের ঘরেই flex-1 দেওয়া, তাই শিরোনামটা
+            ঠিক মাঝখানেই বসে — দুই পাশের বোতামের চওড়া সমান না হলেও। */}
+        <div className="mb-4 pb-4 border-b border-gray-200">
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* বাঁ পাশ — টেমপ্লেট নির্বাচন, ড্রপডাউনের চেহারায় */}
+            <div className="flex flex-1 min-w-0 items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setShowTemplateModal(true)}
+                className={dropdownBtn}
+                title={ui('currentTemplate')}
+              >
+                <div className="w-[34px] shrink-0 overflow-hidden rounded-[3px] border border-gray-200">
+                  <TemplateThumb template={template} lang={lang} />
+                </div>
+                <span className="truncate max-w-[140px]">{template.title}</span>
+              </button>
 
-            <div className="flex items-center gap-2 flex-wrap">
+              {/* রুটিংসহ টেমপ্লেট — এখনো তৈরি হয়নি, চাপলে আপকামিং */}
+              <button
+                type="button"
+                onClick={() => setShowRoutingModal(true)}
+                className={dropdownBtn}
+                title={ui('routingTemplate')}
+              >
+                <span className="truncate max-w-[150px]">{ui('routingTemplate')}</span>
+                <span className="text-[12px] text-gray-400 shrink-0">
+                  {ui('upcoming')}
+                </span>
+              </button>
+            </div>
+
+            {/* মাঝে — পেজের শিরোনাম */}
+            <h3 className="text-[18px] font-bold text-center whitespace-nowrap order-first w-full sm:order-none sm:w-auto">
+              {ui('pageTitle')}
+            </h3>
+
+            {/* ডান পাশ — ভাষা ও সেটিং */}
+            <div className="flex flex-1 min-w-0 items-center justify-end gap-2 flex-wrap">
               {/* ভাষা — আগে তিনটা বোতাম ছিল, এখন একটা ড্রপডাউন */}
               <select
                 className="rounded-[8px] border border-gray-200 bg-white px-3 py-2 text-[14px] font-medium text-gray-700 shadow-sm cursor-pointer"
@@ -614,210 +653,182 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               </button>
             </div>
           </div>
+        </div>
 
-          {/* ---------------------------------------- ফিল্টার (হেডারের ভিতরেই) */}
-          <div className="mt-4 rounded-[10px] border border-gray-200 bg-gray-50/70 p-4">
-            <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
-              <p className="text-[15px] font-bold text-gray-700">{ui('filterBtn')}</p>
-              <button
-                type="button"
-                className="rounded-[8px] border border-gray-300 bg-white px-3 py-1.5 text-[13px] text-gray-700 hover:bg-gray-100"
-                onClick={handleResetFilter}
-              >
-                {ui('resetFilter')}
-              </button>
+        {/* ====================================== ফিল্টার — এক লাইনে ছয়টা ঘর
+            বড় স্ক্রিনে ছয়টা পাশাপাশি; জায়গা কমলে ধাপে ধাপে ভেঙে যায়। */}
+        <div className="rounded-[10px] border border-gray-200 bg-gray-50/70 p-4">
+          <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+            <p className="text-[15px] font-bold text-gray-700">{ui('filterBtn')}</p>
+            <button
+              type="button"
+              className="rounded-[8px] border border-gray-300 bg-white px-3 py-1.5 text-[13px] text-gray-700 hover:bg-gray-100"
+              onClick={handleResetFilter}
+            >
+              {ui('resetFilter')}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+            <DefaultSelect
+              label={`${ui('session')} :`}
+              options={sessionData ?? []}
+              valueField="SessionID"
+              nameField="SessionName"
+              registerKey="SessionID"
+              unicode
+            />
+            <DefaultSelect
+              label={`${ui('examName')} :`}
+              options={examNameData ?? []}
+              valueField="ExamID"
+              nameField="ExamName"
+              registerKey="ExamID"
+              unicode
+            />
+            <DefaultSelect
+              label={`${ui('classJamaat')} :`}
+              options={subClassData ?? []}
+              valueField="SubClassID"
+              nameField="SubClass"
+              registerKey="SubClassID"
+              unicode
+            />
+            <DefaultSelect
+              label={`${ui('residential')} :`}
+              options={residentialData ?? []}
+              valueField="RDID"
+              nameField="ResidentialName"
+              registerKey="RDID"
+              unicode
+            />
+            <DefaultInput
+              label={ui('studentId')}
+              valueField="UserCode"
+              nameField="UserCode"
+              registerKey="UserCode"
+            />
+            <DefaultSelect
+              label={`${ui('reportType')} :`}
+              options={reportOptions}
+              valueField="id"
+              nameField="label"
+              registerKey="ReportID"
+            />
+          </div>
+        </div>
+
+        {/* ================================ শিক্ষার্থীর ডাটা — পুরো পেজ জুড়ে
+            ঘরটার উচ্চতা স্থির। কয়জন শিক্ষার্থী এল তার উপর আকার নির্ভর করে না —
+            ডাটা কম হলেও ঘরটা ছোট হয় না, বেশি হলে ভিতরেই স্ক্রল হয়। ফলে
+            নিচের পেজিনেশন ও বোতামের জায়গা কখনো লাফায় না।
+            h-[calc(...)] দিয়ে পর্দার বাকি অংশটুকু নেয়, min-h ছোট পর্দার জন্য। */}
+        <div className="mt-6 flex h-[calc(100vh-340px)] min-h-[160px] flex-col overflow-hidden rounded-[10px] border border-gray-200">
+          {/* ---------------------------------------- তালিকা, ভিতরে স্ক্রল হয় */}
+          <div className="flex-1 min-h-0 overflow-auto">
+            <table className="w-full min-w-[520px] border-collapse">
+              {/* স্ক্রল করলেও হেডার সারিটা উপরে লেগে থাকে */}
+              <thead className="sticky top-0 z-10 bg-gray-100">
+                <tr>
+                  <th className="p-2 text-start w-[44px] border-b border-gray-300">
+                    <input
+                      type="checkbox"
+                      onChange={handleSelectAll}
+                      disabled={!studentList.length}
+                      checked={
+                        studentList.length > 0 &&
+                        selectedRows.length === studentList.length
+                      }
+                    />
+                  </th>
+                  <th className="p-2 text-start border-b border-gray-300">
+                    {fieldLabels.StudentCode}
+                  </th>
+                  <th className="p-2 text-start border-b border-gray-300">
+                    {fieldLabels.StudentName}
+                  </th>
+                  <th className="p-2 text-start border-b border-gray-300">
+                    {fieldLabels.SubClass}
+                  </th>
+                  <th className="p-2 text-start border-b border-gray-300">
+                    {fieldLabels.RollNo}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedData.map((student) => (
+                  <tr key={student.AdmissionID} className="border-t border-gray-200">
+                    <td className="p-2">
+                      <input
+                        type="checkbox"
+                        onChange={(e) => handleRowSelect(e, student)}
+                        checked={selectedRows.some(
+                          (r) => r.AdmissionID === student.AdmissionID
+                        )}
+                      />
+                    </td>
+                    <td className="p-2">{toLangDigit(student.StudentCode, lang)}</td>
+                    <td className="p-2">{getFieldValue(student, 'StudentName', lang)}</td>
+                    <td className="p-2">
+                      {getFieldValue(student, 'SubClass', lang) ||
+                        getFieldValue(student, 'ClassName', lang)}
+                    </td>
+                    <td className="p-2">{toLangDigit(student.RollNo, lang)}</td>
+                  </tr>
+                ))}
+
+                {/* কেউ না থাকলে বার্তাটা পুরো সারি জুড়ে, ঠিক মাঝখানে */}
+                {paginatedData.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="p-12 text-center align-middle">
+                      <span className="text-[15px] text-gray-600">
+                        {isFetching
+                          ? ui('loading')
+                          : filterReady
+                          ? ui('searchHint')
+                          : ui('filterFirst')}
+                      </span>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* ------------------------------------------- ঘরের নিচের স্থির সারি
+              পেজিনেশন ঠিক মাঝে — দুই পাশের ঘরেই flex-1, তাই ডানের বোতাম
+              দুইটা থাকলেও মাঝেরটা নড়ে না। shrink-0 বলে এটা কখনো চেপে যায় না। */}
+          <div className="shrink-0 flex items-center gap-3 border-t border-gray-200 bg-white px-3 py-2">
+            <div className="flex-1 min-w-0" />
+
+            <div className="shrink-0">
+              <DefaultPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              <DefaultSelect
-                label={`${ui('session')} :`}
-                options={sessionData ?? []}
-                valueField="SessionID"
-                nameField="SessionName"
-                registerKey="SessionID"
-                unicode
-              />
-              <DefaultSelect
-                label={`${ui('examName')} :`}
-                options={examNameData ?? []}
-                valueField="ExamID"
-                nameField="ExamName"
-                registerKey="ExamID"
-                unicode
-              />
-              <DefaultSelect
-                label={`${ui('classJamaat')} :`}
-                options={subClassData ?? []}
-                valueField="SubClassID"
-                nameField="SubClass"
-                registerKey="SubClassID"
-                unicode
-              />
-              <DefaultSelect
-                label={`${ui('residential')} :`}
-                options={residentialData ?? []}
-                valueField="RDID"
-                nameField="ResidentialName"
-                registerKey="RDID"
-                unicode
-              />
-              <DefaultInput
-                label={ui('studentId')}
-                valueField="UserCode"
-                nameField="UserCode"
-                registerKey="UserCode"
-              />
-              <DefaultSelect
-                label={`${ui('reportType')} :`}
-                options={reportOptions}
-                valueField="id"
-                nameField="label"
-                registerKey="ReportID"
-              />
+            <div className="flex flex-1 min-w-0 items-center justify-end gap-3">
+              <Button type="button" onClick={handlePreview}>
+                {ui('preview')}
+              </Button>
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="px-5 py-2 rounded-[8px] bg-blue-600 text-white whitespace-nowrap"
+              >
+                {ui('print')}
+              </button>
             </div>
           </div>
         </div>
 
-        {/* ===================================== বাম পাশ: দুইটা টেমপ্লেট কার্ড
-            লাইভ প্রিভিউ এখানে আর নেই — সেটা টেমপ্লেট সিলেক্ট পপআপের ভিতরে */}
-        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-8">
-          <div className="min-w-0 space-y-4">
-            {/* বর্তমান টেমপ্লেট — চাপ দিলে সোজা টেমপ্লেট নির্বাচনের ছোট পপআপ।
-                পুরো সেটিং পপআপ নয়, শুধু ডিজাইন বদলানোর জন্য এক ধাপেই। */}
-            <div>
-              <p className="mb-2 text-[14px] text-gray-500">{ui('currentTemplate')}</p>
-              <button
-                type="button"
-                onClick={() => setShowTemplateModal(true)}
-                className="flex items-center gap-4 rounded-[10px] border-2 border-blue-200 p-3 hover:border-blue-500 transition w-full text-start"
-                style={{ boxShadow: 'rgb(0 0 0 / 20%) 0px 0px 12px -4px' }}
-              >
-                <div className="w-[110px] shrink-0 overflow-hidden rounded-[6px] border border-gray-200">
-                  <TemplateThumb template={template} lang={lang} />
-                </div>
-                <div className={`min-w-0 ${uiDir === 'rtl' ? 'text-right' : 'text-left'}`}>
-                  <p className="text-[15px] font-bold truncate">{template.title}</p>
-                  <p className="text-[13px] text-blue-600 mt-1">{ui('changeDesign')}</p>
-                </div>
-              </button>
-            </div>
-
-            {/* একই চেহারার দ্বিতীয় কার্ড — রুটিংসহ টেমপ্লেট।
-                ভবিষ্যতে এখান থেকেই রুটিং যুক্ত টেমপ্লেট যোগ হবে; এখন আপকামিং। */}
-            <div>
-              <p className="mb-2 text-[14px] text-gray-500">{ui('routingTemplate')}</p>
-              <button
-                type="button"
-                onClick={() => setShowRoutingModal(true)}
-                className="flex items-center gap-4 rounded-[10px] border-2 border-gray-200 p-3 hover:border-blue-400 transition w-full text-start"
-                style={{ boxShadow: 'rgb(0 0 0 / 20%) 0px 0px 12px -4px' }}
-              >
-                <div
-                  className="w-[110px] shrink-0 rounded-[6px] border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center text-gray-400 text-[26px] leading-none"
-                  style={{ aspectRatio: `${CARD_W} / ${CARD_H}` }}
-                >
-                  +
-                </div>
-                <div className={`min-w-0 ${uiDir === 'rtl' ? 'text-right' : 'text-left'}`}>
-                  <p className="text-[15px] font-bold truncate">{ui('routingSelect')}</p>
-                  <p className="text-[13px] text-gray-500 mt-1">{ui('upcoming')}</p>
-                </div>
-              </button>
-            </div>
-          </div>
-
-          {/* ============================ ডান পাশ: ফিল্টারের ফল ও প্রিন্ট */}
-          <div className="min-w-0">
-            {!filterReady ? (
-              <div className="h-full flex flex-col items-center justify-center rounded-[10px] border-2 border-dashed border-gray-300 bg-gray-50 px-6 py-16 text-center">
-                <p className="text-[15px] text-gray-600">{ui('filterFirst')}</p>
-              </div>
-            ) : (
-              <>
-                {/* শিক্ষার্থীর তালিকা */}
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[520px] border border-gray-300">
-                    <thead className="bg-gray-100">
-                      <tr>
-                        <th className="p-2 text-start">
-                          <input
-                            type="checkbox"
-                            onChange={handleSelectAll}
-                            checked={
-                              studentList.length > 0 &&
-                              selectedRows.length === studentList.length
-                            }
-                          />
-                        </th>
-                        <th className="p-2 text-start">{fieldLabels.StudentCode}</th>
-                        <th className="p-2 text-start">{fieldLabels.StudentName}</th>
-                        <th className="p-2 text-start">{fieldLabels.SubClass}</th>
-                        <th className="p-2 text-start">{fieldLabels.RollNo}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {paginatedData.map((student) => (
-                        <tr key={student.AdmissionID} className="border-t">
-                          <td className="p-2">
-                            <input
-                              type="checkbox"
-                              onChange={(e) => handleRowSelect(e, student)}
-                              checked={selectedRows.some(
-                                (r) => r.AdmissionID === student.AdmissionID
-                              )}
-                            />
-                          </td>
-                          <td className="p-2">{toLangDigit(student.StudentCode, lang)}</td>
-                          <td className="p-2">
-                            {getFieldValue(student, 'StudentName', lang)}
-                          </td>
-                          <td className="p-2">
-                            {getFieldValue(student, 'SubClass', lang) ||
-                              getFieldValue(student, 'ClassName', lang)}
-                          </td>
-                          <td className="p-2">{toLangDigit(student.RollNo, lang)}</td>
-                        </tr>
-                      ))}
-                      {paginatedData.length === 0 && (
-                        <tr>
-                          <td colSpan="5" className="text-center p-4">
-                            {isFetching ? ui('loading') : ui('searchHint')}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-
-                <DefaultPagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={setCurrentPage}
-                />
-
-                {/* ফিল্টার হয়ে গেলেই প্রিভিউ ও প্রিন্ট */}
-                <div className="mt-6 flex flex-wrap items-center justify-end gap-3">
-                  <Button type="button" onClick={handlePreview}>
-                    {ui('preview')}
-                  </Button>
-                  <button
-                    type="button"
-                    onClick={handlePrint}
-                    className="px-5 py-2 rounded-[8px] bg-blue-600 text-white"
-                  >
-                    {ui('print')}
-                  </button>
-                </div>
-
-                {printData?.length ? (
-                  <p className="mt-3 text-[14px] text-green-700">
-                    {ui('ready')(toLangDigit(printData.length, lang))}
-                  </p>
-                ) : null}
-              </>
-            )}
-          </div>
-        </div>
+        {printData?.length ? (
+          <p className="mt-2 text-[14px] text-green-700 text-center">
+            {ui('ready')(toLangDigit(printData.length, lang))}
+          </p>
+        ) : null}
       </div>
 
       {/* ------------------------------------------------------------------
@@ -873,12 +884,20 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
         }
       >
         <div className="grid grid-cols-1 xl:grid-cols-[560px_1fr] gap-7">
-          {/* ------------------------------------------------- লাইভ প্রিভিউ */}
+          {/* =================================================== বাম পাশ
+              টেমপ্লেটের নাম → লাইভ প্রিভিউ → তিনটা ঘর (টেমপ্লেট, নাম, ঠিকানা)।
+              কার্ডের চেহারা যা বদলায় সেগুলো প্রিভিউর গা ঘেঁষেই রাখা হলো,
+              তাই বদল করলে সাথে সাথে ফলটা চোখে পড়ে। */}
           <div className="min-w-0">
             <div className="xl:sticky xl:top-0 xl:z-10 bg-white pb-3">
-              <p className="mb-2 text-[15px] font-bold text-gray-700">
-                {ui('livePreview')}
-              </p>
+              {/* টেমপ্লেটের নাম — আগে প্রিভিউর নিচে ছিল, এখন উপরে */}
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <p className="text-[15px] font-bold text-gray-700">{ui('livePreview')}</p>
+                <p className="text-[14px] font-medium text-gray-600 truncate">
+                  {template.title}
+                </p>
+              </div>
+
               {/* কার্ডটা ৫২০px স্থির — ছোট স্ক্রিনে এই ঘরটাই পাশে স্ক্রল হবে */}
               <div className="overflow-x-auto overscroll-x-contain -mx-1 px-1 pb-2">
                 <div className="w-[520px] shrink-0" dir="ltr">
@@ -901,72 +920,74 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                   />
                 </div>
               </div>
-              <p className="text-[13px] text-gray-500">{template.title}</p>
+
+              {/* ------------------------------------------------- তিনটা ঘর */}
+              <div className="mt-2 grid grid-cols-3 gap-3">
+                {/* ঘর ১ — টেমপ্লেট সিলেক্ট, তালিকাটা উপরের পপআপে খোলে */}
+                <button
+                  type="button"
+                  onClick={() => setShowTemplateModal(true)}
+                  className="rounded-[8px] border-2 border-blue-200 p-2 min-w-0 text-start hover:border-blue-500 transition"
+                >
+                  <p className="text-[12px] text-gray-500 mb-1 truncate">
+                    {ui('templateSelect')}
+                  </p>
+                  <div className="overflow-hidden rounded-[4px] border border-gray-200">
+                    <TemplateThumb template={template} lang={lang} />
+                  </div>
+                  <p className="mt-1 text-[12px] text-blue-600 truncate">
+                    {ui('changeDesign')}
+                  </p>
+                </button>
+
+                {/* ঘর ২ — প্রতিষ্ঠানের নামের ফন্ট ও কালার */}
+                <div className="rounded-[8px] border border-gray-200 p-2 min-w-0">
+                  <p className="text-[12px] text-gray-500 mb-2 truncate">
+                    {ui('instituteName')}
+                  </p>
+                  <div className="flex items-center gap-2" dir="ltr">
+                    <input
+                      type="number"
+                      className="w-[56px] min-w-0 border rounded px-2 py-1 text-[13px]"
+                      defaultValue={template.nameSize}
+                      {...register(`institute_name_size_${selectedTemplate}`)}
+                    />
+                    <input
+                      type="color"
+                      className="w-[36px] h-[28px] shrink-0"
+                      defaultValue={template.nameColor}
+                      {...register(`institute_name_color_${selectedTemplate}`)}
+                    />
+                  </div>
+                </div>
+
+                {/* ঘর ৩ — ঠিকানার ফন্ট ও কালার */}
+                <div className="rounded-[8px] border border-gray-200 p-2 min-w-0">
+                  <p className="text-[12px] text-gray-500 mb-2 truncate">{ui('address')}</p>
+                  <div className="flex items-center gap-2" dir="ltr">
+                    <input
+                      type="number"
+                      className="w-[56px] min-w-0 border rounded px-2 py-1 text-[13px]"
+                      defaultValue={template.addressSize}
+                      {...register(`institute_address_size_${selectedTemplate}`)}
+                    />
+                    <input
+                      type="color"
+                      className="w-[36px] h-[28px] shrink-0"
+                      defaultValue={template.addressColor}
+                      {...register(`institute_address_color_${selectedTemplate}`)}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* ------------------------------------------------------ সব সেটিং */}
+          {/* ================================================== ডান পাশ
+              শুধু ডাটার সেটিং — কী দেখাবে, কোন ফিল্ড, আর রুটিং। */}
           <div className="min-w-0">
-            {/* টেমপ্লেট নির্বাচন — তালিকাটা নিজেই আরেকটা পপআপে খোলে,
-                এই পপআপের উপরে। এখানে শুধু বর্তমান টেমপ্লেটটা দেখায়। */}
-            <p className="font-bold text-[16px] mb-1">{ui('templateSelect')}</p>
-            <p className="text-[14px] text-gray-500 mb-3">{ui('chooseDesign')}</p>
-            <button
-              type="button"
-              onClick={() => setShowTemplateModal(true)}
-              className="flex items-center gap-4 rounded-[10px] border-2 border-blue-200 p-3 hover:border-blue-500 transition w-full text-start"
-              style={{ boxShadow: 'rgb(0 0 0 / 20%) 0px 0px 12px -4px' }}
-            >
-              <div className="w-[110px] shrink-0 overflow-hidden rounded-[6px] border border-gray-200">
-                <TemplateThumb template={template} lang={lang} />
-              </div>
-              <div className={`min-w-0 ${uiDir === 'rtl' ? 'text-right' : 'text-left'}`}>
-                <p className="text-[15px] font-bold truncate">{template.title}</p>
-                <p className="text-[13px] text-blue-600 mt-1">{ui('changeDesign')}</p>
-              </div>
-            </button>
-
-            {/* ফন্ট সাইজ ও কালার */}
-            <p className="font-bold text-[16px] mt-7 mb-3">{ui('fontSettings')}</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-[560px]">
-              <div className="border rounded-[8px] p-3 min-w-0">
-                <p className="text-[14px] mb-2">{ui('instituteName')}</p>
-                <div className="flex items-center gap-3" dir="ltr">
-                  <input
-                    type="number"
-                    className="w-[70px] border rounded px-2 py-1"
-                    defaultValue={template.nameSize}
-                    {...register(`institute_name_size_${selectedTemplate}`)}
-                  />
-                  <input
-                    type="color"
-                    className="w-[50px] h-[32px]"
-                    defaultValue={template.nameColor}
-                    {...register(`institute_name_color_${selectedTemplate}`)}
-                  />
-                </div>
-              </div>
-              <div className="border rounded-[8px] p-3 min-w-0">
-                <p className="text-[14px] mb-2">{ui('address')}</p>
-                <div className="flex items-center gap-3" dir="ltr">
-                  <input
-                    type="number"
-                    className="w-[70px] border rounded px-2 py-1"
-                    defaultValue={template.addressSize}
-                    {...register(`institute_address_size_${selectedTemplate}`)}
-                  />
-                  <input
-                    type="color"
-                    className="w-[50px] h-[32px]"
-                    defaultValue={template.addressColor}
-                    {...register(`institute_address_color_${selectedTemplate}`)}
-                  />
-                </div>
-              </div>
-            </div>
-
             {/* কী কী দেখাবে */}
-            <p className="font-bold text-[16px] mt-7 mb-2">{ui('displaySettings')}</p>
+            <p className="font-bold text-[16px] mb-2">{ui('displaySettings')}</p>
             <div className="flex items-center gap-2 flex-wrap">
               {displayToggles.map((tg) => (
                 <label
