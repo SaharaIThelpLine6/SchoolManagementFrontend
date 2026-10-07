@@ -53,6 +53,7 @@ import StudentNameWithHolding from '../view/exam/ExamReportPdf/studentFeeWithdra
 import { useGetExamHallListQuery } from '../features/examhall/examHallQuerySlice';
 import ExaminationRoomSeatingChart from '../view/exam/ExamReportPdf/ExaminationRoomSeatingChart';
 import InstituteExamSeatingChart from '../view/exam/ExamReportPdf/InstituteExamSeatingChart';
+import ExamReportFive from '../view/exam/ExamReportPdf/numberLetterAdmissionSerial/ExamReportFive';
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
 const ExamReport = ({ pageTitle }) => {
@@ -113,6 +114,7 @@ const ExamReport = ({ pageTitle }) => {
           'SessionID',
           'RDID',
           'ExamID',
+          "SubClassID",
           'ClassID',
           'ColorStatus',
         ].includes(fieldName);
@@ -205,6 +207,19 @@ const ExamReport = ({ pageTitle }) => {
       skip: shouldSkip,
     }
   );
+
+  console.log(data, "data from useGetExamReportQuery");
+  console.log({
+    report_id: ReportID,
+    SessionID,
+    ExamID,
+    SubClassID,
+    RDID,
+    ERIsActive,
+    Language: id,
+    sevenColor,
+    pdf_id: PdfID
+  }, "query params")
 
 
   const { data: sessionData } = useGetSessionsQuery();
@@ -561,20 +576,20 @@ const ExamReport = ({ pageTitle }) => {
           {/* ৩. দস্তখত পত্র */}
           {Number(selectedReportID) === 3 &&
             Number(languageID) === 1 &&
-            Number(selectedPdfID) === 1 && <ExamRoutine reportData={data}  queryParams={queryParams} />}
+            Number(selectedPdfID) === 1 && <ExamRoutine reportData={data} queryParams={queryParams} />}
           {Number(selectedReportID) === 3 &&
             Number(languageID) === 1 &&
-            Number(selectedPdfID) === 2 && <WithoutExamRoutine reportData={data}  queryParams={queryParams} />}
+            Number(selectedPdfID) === 2 && <WithoutExamRoutine reportData={data} queryParams={queryParams} />}
           {/* Arobic 2 pdf baki ase */}
           {/* ৪. নম্বর পত্র */}
           {Number(selectedReportID) == 4 &&
-            Number(languageID) == 1 && 
+            Number(languageID) == 1 &&
             Number(selectedPdfID) == 1 && <BanglaNumberWithTwoColumn reportData={data} queryParams={queryParams} />}
 
 
           {Number(selectedReportID) == 4 &&
             Number(languageID) == 1 &&
-            Number(selectedPdfID) == 2 && <BanglaWithOutNameColumn  reportData={data} queryParams={queryParams} />}
+            Number(selectedPdfID) == 2 && <BanglaWithOutNameColumn reportData={data} queryParams={queryParams} />}
           {/* {Number(selectedReportID) === 4 &&
             Number(languageID) === 1 &&
             Number(selectedPdfID) === 3 && <BanglaNumberStudentNameWithA5 />} */}
@@ -583,7 +598,7 @@ const ExamReport = ({ pageTitle }) => {
             Number(selectedPdfID) === 4 && <BanglaNumberStudentWithOutNameA5 />} */}
 
 
-            {/*  */}
+          {/*  */}
           {Number(selectedReportID) === 4 &&
             Number(languageID) === 2 &&
             Number(selectedPdfID) === 1 && <ArobicNameWithTwoColumn reportData={data} queryParams={queryParams} />}
@@ -607,12 +622,10 @@ const ExamReport = ({ pageTitle }) => {
             Number(selectedPdfID) === 6 && <ArobicNameWithLegal />}
 
           {/* 5. নম্বরপত্র ভর্তি সিরিয়ালে */}
-          {Number(selectedReportID) === 5 &&
+          {Number(selectedReportID) === 5 && <ExamReportFive data={data} />}
+          {/* {Number(selectedReportID) === 5 &&
             Number(languageID) === 2 &&
-            Number(selectedPdfID) === 1 && <AdmissionSerialNWTC />}
-          {Number(selectedReportID) === 5 &&
-            Number(languageID) === 2 &&
-            Number(selectedPdfID) === 2 && <AdmissionSerialNWOTC />}
+            Number(selectedPdfID) === 2 && <AdmissionSerialNWOTC />} */}
           {/* 6. স্বাক্ষরপত্র ও নম্বরসীট */}
           {Number(selectedReportID) === 6 &&
             Number(languageID) === 2 &&

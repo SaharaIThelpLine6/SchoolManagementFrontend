@@ -223,9 +223,7 @@ const StudentInfo = () => {
     { FilterTypeId: "2", FilterTypeName: "নাম" },
     { FilterTypeId: "3", FilterTypeName: "মোবাইল" },
   ];
-  const handleTeacherAssign = async () => {
-    showModal("Teacher Subject Assignment", "HANDLE_RESULT_ENTRY_ASSIGN", { closeOnOutSide: false })
-  }
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden font-SolaimanLipi">
       {/* ✅ Custom CSS for smooth dropdown animation */}
@@ -261,9 +259,6 @@ const StudentInfo = () => {
             </svg>
             ভর্তি করুন
           </button>
-          <Button className='' onClick={() => { handleTeacherAssign() }} tooltip_message='Teacher Result Entry Permission'>
-            <SvgIcon name={"TbUserShare"} size={20} />
-          </Button>
         </div>
 
         {/* Filters */}

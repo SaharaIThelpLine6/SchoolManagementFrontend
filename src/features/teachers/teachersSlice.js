@@ -14,7 +14,7 @@ export const teachersSlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Teacher', "Teacher_Subject"], // define tag type
+  tagTypes: ['Teacher', "Teacher_Subject", "TeacherSubjectSubmission"], // define tag type
   endpoints: (builder) => ({
     getDesignation: builder.query({
       query: () => 'designation',
@@ -130,14 +130,6 @@ export const teachersSlice = createApi({
       },
       providesTags: ["TeacherSubjects"],
     }),
-    updateTeacherSubject: builder.mutation({
-      query: ({ id, ...body }) => ({
-        url: `/teacher_subject/${id}`,
-        method: "PUT",
-        body,
-      }),
-      invalidatesTags: ["Teacher_Subject"],
-    }),
     postInsertTeacherInfo: builder.mutation({
       query: (body) => ({
         url: 'insert_teacher_info',
@@ -191,6 +183,22 @@ export const teachersSlice = createApi({
       },
       invalidatesTags: ["Teacher_Subject"],
     }),
+    getTeacherSubjectSubmissions: builder.query({
+      query: ({ SessionID, ExamID, TeacherID }) => ({
+        url: `/teacher_subject_submission`,
+        params: { SessionID, ExamID, TeacherID },
+      }),
+      providesTags: ["Teacher_Subject"],
+    }),
+
+    submitTeacherKhata: builder.mutation({
+      query: (body) => ({
+        url: `/teacher_subject_submission`,
+        method: "PUT",
+        body, // { ids: [], submitted: true/false }
+      }),
+      invalidatesTags: ["Teacher_Subject"],
+    }),
   }),
 });
 
@@ -207,12 +215,13 @@ export const {
   useGetTeachersInfoQuery,
   usePostSubjectToTeacherMutation,
   useGetTeacherSubjectsQuery,
-  useUpdateTeacherSubjectMutation,
   useGetTeacherSubjectsByFilterQuery,
   useGetTeacherLastSerialQuery,
   usePostInsertTeacherInfoMutation,
   useGetTeacherInfoListQuery,
   useUpdateTeacherMutation,
   useGetFilteredTeachersQuery,
-  useDeleteTeacherSubjectMutation
+  useDeleteTeacherSubjectMutation,
+  useGetTeacherSubjectSubmissionsQuery,
+  useSubmitTeacherKhataMutation,
 } = teachersSlice;

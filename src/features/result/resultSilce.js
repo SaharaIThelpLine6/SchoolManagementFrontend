@@ -14,7 +14,7 @@ export const resultSilce = createApi({
       return headers;
     },
   }),
-  tagTypes: ["ExamList", "Result"],
+  tagTypes: ["ExamList", "Result", "StudentMarksheetNote"],
   endpoints: (builder) => ({
     getExamList: builder.query({
       query: ({ session_id, exam_id, subclass_id } = {}) => {
@@ -95,6 +95,42 @@ export const resultSilce = createApi({
         { type: "MarkSheet", id: `${arg.sessionid}-${arg.examid}-${arg.classid}` },
       ],
     }),
+    getLabelNameLists: builder.query({
+      query: () => `get_label_names`,
+    }),
+
+    getExamDivisionName: builder.query({
+      query: ({ ExamType }) => ({
+        url: '/get_exam_division_name',
+        method: 'GET',
+        params: {
+          ExamType,
+        },
+      }),
+    }),
+
+    // GET: /get_exam_division_note/:ExamType/:ID
+    getExamDivisionNote: builder.query({
+      query: ({ ExamType, ID }) => ({
+        url: `/get_exam_division_note/${ExamType}/${ID}`, // apnar baseUrl/prefix onujayi
+        method: 'GET',
+      }),
+      providesTags: (result, error, { ExamType, ID }) => [
+        { type: 'ExamDivisionNote', id: `${ExamType}-${ID}` },
+      ],
+    }),
+
+    // PUT: /update_exam_division_note
+    updateExamDivisionNote: builder.mutation({
+      query: ({ DivisionID, ExamType, Note }) => ({
+        url: `/update_exam_division_note`,
+        method: 'PUT',
+        body: { DivisionID, ExamType, Note },
+      }),
+      invalidatesTags: (result, error, { ExamType, DivisionID }) => [
+        { type: 'ExamDivisionNote', id: `${ExamType}-${DivisionID}` },
+      ],
+    }),
   }),
 });
 
@@ -106,4 +142,9 @@ export const {
   useGetUserSingleResultQuery,
   useGetResultReportDataQuery,
   useGetMarkSheetQuery,
+  useGetLabelNameListsQuery,
+
+  useGetExamDivisionNameQuery,
+  useGetExamDivisionNoteQuery,
+  useUpdateExamDivisionNoteMutation,
 } = resultSilce;

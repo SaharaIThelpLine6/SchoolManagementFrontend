@@ -1,11 +1,31 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Buffer } from 'buffer';
 import QRCode from "react-qr-code";
+
+// ⚠️ Path ta tomar file location onujayi thik koro.
+// Font file: src/assets/font/kalpurush.ttf  (choto hater k)
+// "?url" Vite-ke bole file-ta asset hishebe URL return korte.
+import kalpurushUrl from '../../assets/font/kalpurush.ttf?url';
+import { useGetLabelNameListsQuery } from '../../features/result/resultSilce';
+
 
 // ==========================================
 // Print CSS (A4 Portrait, 1 student = 1 page)
 // ==========================================
 const PRINT_CSS = `
+@font-face {
+  font-family: 'KalpurushLocal';
+  src: url('${kalpurushUrl}') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Screen + print dutoy Kalpurush. Child element gulo inherit korbe */
+#marksheet-print-area {
+  font-family: 'KalpurushLocal', 'Kalpurush', 'Noto Sans Bengali', 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
+}
+
 @page {
   size: A4 portrait;
   margin: 6mm;
@@ -92,7 +112,7 @@ const PRINT_CSS = `
     page-break-inside: avoid !important;
   }
 
-  /* ✅ Table header color (th-te direct, tr-e na) */
+  /* Table header color (th-te direct, tr-e na) */
   .marksheet-page .marks-table-wrap thead th {
     background-color: #0f766e !important;
     background-image: none !important;
@@ -100,7 +120,7 @@ const PRINT_CSS = `
     border-color: #0f766e !important;
   }
 
-  /* ✅ Zebra row color (td-te direct) */
+  /* Zebra row color (td-te direct) */
   .marksheet-page .marks-table-wrap tbody tr.row-alt td {
     background-color: #f0fdfa !important;
   }
@@ -173,14 +193,20 @@ const SingleMarkSheet = ({
   isLast = false,
   ExamID,
   SubClassID,
-  ExamName
+  ExamName,
+  DivisionID,
+  SessionID
 }) => {
   const studentSubjects = Array.isArray(student?.subjects) ? student.subjects : [];
+
 
   const findSubject = (subjectId) =>
     studentSubjects.find(
       (m) => m?.SubjectID === subjectId || m?.SubjectId === subjectId || m?.subjectId === subjectId
     );
+  const { data } = useGetLabelNameListsQuery();
+
+  const labels = data?.[0] || {};
 
   const getObtainedMark = (subjectId) => {
     const found = findSubject(subjectId);
@@ -218,12 +244,6 @@ const SingleMarkSheet = ({
         ? 'print:py-1'
         : 'print:py-1.5';
 
-  // const rowText = ultraDense
-  //   ? 'print:text-[9px]'
-  //   : veryDense
-  //     ? 'print:text-[10px]'
-  //     : 'print:text-[11px]';
-
   const rowText = ultraDense
     ? 'print:text-[10px]'
     : veryDense
@@ -242,9 +262,7 @@ const SingleMarkSheet = ({
     // Division ID না থাকলে skip
     if (dId === null || dId === undefined || dId === '') continue;
 
-    const found = divisions.find(
-      (d) => Number(d.ID) === Number(dId)
-    );
+    const found = divisions.find((d) => Number(d.ID) === Number(dId));
 
     if (!found) continue;
 
@@ -269,7 +287,7 @@ const SingleMarkSheet = ({
   return (
     <div
       className={`marksheet-page ${isLast ? '' : 'not-last'
-        } relative mx-auto w-full max-w-[900px] overflow-hidden bg-white shadow-xl rounded-xl border border-slate-200 font-['Noto_Sans_Bengali',sans-serif] text-slate-800 mb-10 print:mb-0 print:flex print:flex-col`}
+        } relative mx-auto w-full max-w-[900px] overflow-hidden bg-white shadow-xl rounded-xl border border-slate-200 text-slate-800 mb-10 print:mb-0 print:flex print:flex-col`}
     >
       {/* Header */}
       <div className="relative flex flex-col md:flex-row print:flex-row items-center justify-between bg-gradient-to-r from-teal-800 to-emerald-600 px-8 py-6 print:px-5 print:py-3 text-white print:shrink-0">
@@ -329,8 +347,8 @@ const SingleMarkSheet = ({
               <InfoRow label="নাম" value={studentName} />
               <InfoRow label="পিতার নাম" value={fatherName} />
               <InfoRow label="জন্ম তারিখ" value={birthDate} />
-              <InfoRow label="দাখেলা" value={registration} />
-              <InfoRow label="ভর্তি নং" value={rollNumber} />
+              <InfoRow label={labels?.StudentIDLabel ?? "দাখেলা"} value={registration} />
+              <InfoRow label={labels?.AdmissionIDLabel ?? "ভর্তি নং"} value={rollNumber} />
             </div>
           </div>
 
@@ -401,7 +419,7 @@ const SingleMarkSheet = ({
                       className={`${isAlt ? 'row-alt' : 'row-plain'} text-center`}
                     >
                       <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[13px] ${rowText}`}>{toBn(index + 1)}</td>
-                      <td style={cellStyle} className={`border-b border-slate-100 px-4 py-2.5 print:px-2 ${rowPad} text-left text-[13px] ${rowText} font-medium text-slate-800`}>{item.subject}</td>
+                      <td style={cellStyle} className={`border-b border-slate-100 px-4 py-2.5 print:px-2 ${rowPad} text-left text-[13px] ${rowText} font-medium text-slate-800`}>{toBn(item.subject)}</td>
                       <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[13px] ${rowText}`}>{toBn(item.fullMark)}</td>
                       <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[13px] ${rowText}`}>{toBn(item.passMark)}</td>
                       <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[13px] ${rowText}`}>{toBn(item.highestMark)}</td>
@@ -440,18 +458,22 @@ const SingleMarkSheet = ({
         {/* Comments & Signature (baki jaiga automatic nibe) */}
         <div className="marksheet-comments mt-8 pt-6 print:mt-2 print:pt-2 border-t border-slate-200 print:flex print:flex-col">
           <div className="flex flex-col md:flex-row print:flex-row gap-6 print:gap-3 print:flex-1 print:min-h-0">
-            <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[50px] flex flex-col justify-between">
+            <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[50px]">
               <p className="text-slate-700 font-semibold text-sm print:text-[11px]">
                 শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :
               </p>
-              <div className="border-b border-dashed border-slate-300 w-1/2 mt-8 print:mt-3"></div>
+
+              <div className="border-b border-dashed border-slate-300 w-1/2 mt-1 print:mt-1">
+                {student?.Note ?? ""}
+              </div>
             </div>
 
-            <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[50px] flex flex-col justify-between">
+            <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[50px] flex flex-col">
               <p className="text-slate-700 font-semibold text-sm print:text-[11px]">
                 অভিভাবকের মন্তব্য ও স্বাক্ষর :
               </p>
-              <div className="border-b border-dashed border-slate-300 w-1/2 mt-8 print:mt-3"></div>
+
+              <div className="border-b border-dashed border-slate-300 w-1/2 mt-2 print:mt-1"></div>
             </div>
           </div>
         </div>
@@ -463,11 +485,6 @@ const SingleMarkSheet = ({
         {/* QR Code - Small */}
         <div className="col-span-1 flex w-full flex-col items-center mt-2">
           <div className="mt-3 print:mt-1">
-            {/* <img
-              src="https://pngimg.com/uploads/qr_code/qr_code_PNG29.png"
-              alt="QR Code"
-              className="h-16 w-16 object-contain print:h-10 print:w-10"
-            /> */}
             <QRCode
               size={75}
               style={{ height: "auto", maxWidth: "100%", width: "100%" }}
@@ -482,7 +499,6 @@ const SingleMarkSheet = ({
             </p>
           </div>
         </div>
-
 
         {/* মুহতামিম - Large */}
         <div className="col-span-2 flex w-full flex-col items-center">
@@ -508,7 +524,6 @@ const SingleMarkSheet = ({
             </p>
           </div>
         </div>
-
 
         {/* নায়েবে তালিমাত - Large */}
         <div className="col-span-2 flex w-full flex-col items-center">
@@ -539,7 +554,6 @@ const SingleMarkSheet = ({
 
       {/* Bottom line */}
       <div className="mx-8 print:mx-5 flex flex-col md:flex-row print:flex-row justify-between items-center border-t border-slate-200 py-3 print:py-1.5 text-[10px] print:text-[8px] text-slate-400 gap-2 print:shrink-0">
-        {/* <span>বেফাকুল মাদারিসিল আরাবিয়া বাংলাদেশ — ২০১৪ সালের কেন্দ্রীয় পরীক্ষার ফলাফল</span> */}
         <span className="text-[11px] font-medium text-slate-500">
           Software Developed by{' '}
           <span className="font-bold tracking-wide text-emerald-600">
@@ -555,11 +569,20 @@ const SingleMarkSheet = ({
 // Main Component
 // ==========================================
 const MarkSheetPdf = ({ data }) => {
-
   console.log(data, "data")
+  // Font age thekei load kore rakhbe, jate print preview-te fallback na dhore
+  useEffect(() => {
+    const load = () =>
+      document.fonts
+        .load("16px 'KalpurushLocal'", 'অআকখ০১২৩ABC')
+        .catch(() => { });
+    load();
+    window.addEventListener('beforeprint', load);
+    return () => window.removeEventListener('beforeprint', load);
+  }, []);
+
   const institution = data?.institution;
-  const ExamName = data?.exam[0].ExamName;
-  console.log(ExamName, "ExamName")
+  const ExamName = data?.exam?.[0]?.ExamName;
 
   const imageSrc = bufferToDataUrl(institution?.Logo);
   const signatureNajemSrc = bufferToDataUrl(institution?.SignatureNajem);
@@ -585,9 +608,8 @@ const MarkSheetPdf = ({ data }) => {
     );
   }
 
-  // Test-er jonno 3 jon. Production-e: const visibleStudents = students;
+  // Test-er jonno 3 jon: const visibleStudents = students.slice(0, 3);
   const visibleStudents = students;
-  // const visibleStudents = students.slice(0, 3);
 
   return (
     <>
@@ -605,6 +627,7 @@ const MarkSheetPdf = ({ data }) => {
             signatureNajemSrc={signatureNajemSrc}
             signaturePrincipalSrc={signaturePrincipalSrc}
             session={session}
+            SessionID={session?.SessionID}
             classInfo={classInfo}
             SubClassID={classGroupInfo?.SubClassID}
             ExamName={ExamName}
@@ -612,6 +635,7 @@ const MarkSheetPdf = ({ data }) => {
             examSubjects={examSubjects}
             divisions={divisions}
             examConfig={examConfig}
+            DivisionID={student?.DivisionID}
             isLast={idx === visibleStudents.length - 1}
           />
         ))}
@@ -621,4 +645,3 @@ const MarkSheetPdf = ({ data }) => {
 };
 
 export default MarkSheetPdf;
-

@@ -880,7 +880,7 @@ const Router = createBrowserRouter([
                 path: 'teacher_asign_subject',
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.result_entry}
+                    permissionId={permissionsDataList.result_teacher_subject_asign}
                   >
                     <TeacherSubjectsAsignPage pageTitle="Result Entry & Publish" />
                   </RequirePermission>
@@ -903,7 +903,7 @@ const Router = createBrowserRouter([
                 path: 'mark-sheet',
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.result_report}
+                    permissionId={permissionsDataList.marksheet}
                   >
                     {/* result report */}
                     <MarkSheet pageTitle="Result Report" />
