@@ -25,7 +25,7 @@ const COLS = [
   { w: '8%', label: 'ক্রম', align: 'center' },
   { w: '12%', label: 'রোল নং', align: 'center' },
   { w: '19%', label: 'পরীক্ষার্থী নং', align: 'center' },
-  { w: 'auto', label: 'পরীক্ষার্থীর নাম', align: 'left' },
+  { w: 'auto', label: 'পরীক্ষার্থীর নাম', align: 'center' },
   { w: '14%', label: 'নম্বর', align: 'center' },
 ];
 
@@ -153,7 +153,7 @@ const Page = ({ chunk, pageIndex, pageCount, total, first }) => {
           {first.Address || 'সুতারপাড়া-২২৫০, ফুলপুর, ময়মনসিংহ'}
         </div>
         <div style={{ fontSize: '6.8pt', color: '#55635b', marginTop: '0.5mm' }}>
-          মোবাইল: {contact[0] || '০১৯১১০৯৪৯২৭'} | ইমেইল: {contact[1] || 'qmmsoft.com/1585'}
+          মোবাইল: {contact[0] || '০১৯১১০৯৪৯২৭'}
         </div>
       </header>
 
@@ -209,7 +209,17 @@ const Page = ({ chunk, pageIndex, pageCount, total, first }) => {
         </span>
         <span>
           তারিখ:{' '}
-          <span style={{ display: 'inline-block', width: '24mm', borderBottom: `0.25mm dotted ${INK}` }} />
+          <span
+            style={{
+              display: 'inline-block',
+              width: '24mm',
+              borderBottom: `0.25mm dotted ${INK}`,
+            }}
+          >
+            {new Date()
+              .toLocaleDateString('bn-BD')
+              .replace(/\//g, '-')}
+          </span>
         </span>
       </div>
 
@@ -233,7 +243,7 @@ const Page = ({ chunk, pageIndex, pageCount, total, first }) => {
         }}
       >
         <Sign label="প্রধান পরীক্ষকের স্বাক্ষর" />
-        <div style={{ textAlign: 'center' }}>
+        {/* <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: '6.6pt', fontWeight: 600, marginBottom: '0.8mm' }}>মোট পরীক্ষার্থী</div>
           <div
             style={{
@@ -251,7 +261,7 @@ const Page = ({ chunk, pageIndex, pageCount, total, first }) => {
           >
             {toBn(total)}
           </div>
-        </div>
+        </div> */}
         <Sign label="হল পরিদর্শকের স্বাক্ষর" />
       </footer>
 
