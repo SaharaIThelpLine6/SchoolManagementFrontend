@@ -42,6 +42,12 @@ const ENGLISH_MONTHS = [
 const WEEKDAYS = ["শনিবার", "রবিবার", "সোমবার", "মঙ্গলবার", "বুধবার", "বৃহস্পতিবার", "শুক্রবার"];
 const FRIDAY_INDEX = 6;
 
+// ✅ লোডিং ও খালি অবস্থার বার্তা
+const LOADING_MSG = "ডাটা লোড হচ্ছে ...";
+const LOADING_HINT = "শিক্ষার্থীর তালিকা আনা হচ্ছে, একটু সময় লাগতে পারে...";
+const EMPTY_MSG = "কোনো তথ্য পাওয়া যায়নি";
+const EMPTY_HINT = "শিক্ষাবর্ষ ও শ্রেণী নির্বাচন করে আবার চেষ্টা করুন";
+
 // ✅ কলামের প্রস্থ — table-fixed এ min-w কাজ করে না, তাই ফিক্সড px
 const COL_W = {
   serial: 24,   // ক্র.নং
@@ -56,19 +62,29 @@ const BanglaAttendence = ({
   reportData, 
   SubClassID, 
   SessionID,
+  isLoading = false,
   rowsPerPage = { portrait: 35, landscape: 30 }
 }) => {
   const [logo, setLogo] = useState(null);
 
-  const { data: instutionInfo } = useGetInstitutionInfoQuery();
-  const { data: subClassListData } = useGetSubClassListQuery();
+  const { data: instutionInfo, isLoading: institutionLoading } =
+    useGetInstitutionInfoQuery();
+  const { data: subClassListData, isLoading: subClassLoading } =
+    useGetSubClassListQuery();
   const subClasData = subClassListData?.find(
     (i) => i.SubClassID === Number(SubClassID)
   );
-  const { data: sessionSData } = useGetSessionsQuery();
+  const { data: sessionSData, isLoading: sessionLoading } = useGetSessionsQuery();
   const sessionData = sessionSData?.find(
     (i) => i.SessionID === Number(SessionID)
   );
+
+  // 🔹 reportData এখনো অ্যারে না হলে ধরে নেওয়া হবে ডাটা আসেনি (লোড হচ্ছে)।
+  // ব্যাকএন্ড ফলাফল খালি হলেও [] পাঠায়, তাই সত্যিকারের খালি অবস্থা আলাদা করা যায়।
+  const dataPending = !Array.isArray(reportData);
+
+  const showLoading =
+    isLoading || dataPending || institutionLoading || subClassLoading || sessionLoading;
 
   useEffect(() => {
     if (instutionInfo?.Logo?.data) {
@@ -132,6 +148,12 @@ const BanglaAttendence = ({
     <div className="font-bangla bg-white text-xs p-4 sm:p-6">
       <style>
         {`
+          @keyframes bangla-attendence-spin {
+            to { transform: rotate(360deg); }
+          }
+          .bangla-attendence-spinner {
+            animation: bangla-attendence-spin 0.8s linear infinite;
+          }
           @media print {
             @page {
               size: A4 portrait;
@@ -314,6 +336,30 @@ const BanglaAttendence = ({
           <span className="text-xs text-slate-500 ml-auto">
             পেজে জায়গা আছে: {toBengaliNumber(remainingSpace)} টি ঘর
           </span>
+        </div>
+      )}
+
+      {/* ✅ ডাটা লোড হচ্ছে — প্রিভিউ এরিয়াতেই দেখাবে (প্রিন্টে যাবে না) */}
+      {showLoading && (
+        <div
+          className="no-print border border-slate-200 bg-slate-50 rounded py-16 flex flex-col items-center justify-center gap-3 text-center"
+          role="status"
+          aria-live="polite"
+        >
+          <span
+            className="bangla-attendence-spinner inline-block w-9 h-9 rounded-full border-4 border-slate-200"
+            style={{ borderTopColor: "#1B3A57" }}
+          />
+          <span className="text-[17px] font-bold text-[#1B3A57]">{LOADING_MSG}</span>
+          <span className="text-[13px] text-slate-500">{LOADING_HINT}</span>
+        </div>
+      )}
+
+      {/* ✅ লোডিং শেষ, কিন্তু কোনো ডাটা নেই */}
+      {!showLoading && chunks.length === 0 && (
+        <div className="border border-dashed border-slate-300 rounded py-16 flex flex-col items-center justify-center gap-2 text-center">
+          <span className="text-[17px] font-bold text-slate-700">{EMPTY_MSG}</span>
+          <span className="text-[13px] text-slate-500">{EMPTY_HINT}</span>
         </div>
       )}
 

@@ -86,7 +86,7 @@ const StudentsReport = () => {
     'IdTwo'
   ]);
 
-  // Checkbox থেকে আসা ভ্যালুগুলো অনেকসময় অ্যারে হিসেবে আসে, তাই প্রথম আইটেম নেওয়া হলো
+  // Checkbox থেকে আসা ভ্যালুগুলো অনেকসময় অ্যারেকে আসে, তাই প্রথম আইটেম নেওয়া হলো
   const is_active = Array.isArray(is_active_raw) ? is_active_raw[0] : is_active_raw;
   const IsActive = Array.isArray(IsActive_raw) ? IsActive_raw[0] : IsActive_raw;
 
@@ -172,9 +172,11 @@ const StudentsReport = () => {
     BookLine
   ]);
 
+  // 🔹 isLoading এর সাথে isFetching-ও নেওয়া হলো, যেন ফিল্টার বদলানোর সময়ও loading state পাওয়া যায়
   const {
     data: reportData,
     isLoading,
+    isFetching,
     isError,
     refetch,
   } = useGetStudentReportQuery(queryParams, {
@@ -392,6 +394,7 @@ const StudentsReport = () => {
           reportData={reportData}
           SubClassID={SubClassID}
           SessionID={SessionID}
+          isLoading={isLoading || isFetching}
         />
       ),
       9: (

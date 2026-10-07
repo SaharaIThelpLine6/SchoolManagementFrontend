@@ -104,7 +104,7 @@ const AdminLayout = () => {
       <div className="flex flex-1 overflow-hidden relative print:overflow-visible">
         {/* Sidebar */}
         <div
-          className={`fixed top-20 sm:top-16 left-0 z-30 w-[250px] h-[calc(100vh-64px)] bg-white shadow-[2px_0_8px_rgba(0,0,0,0.15)] transform transition-transform duration-300 ease-in-out print:hidden
+          className={`fixed top-20 sm:top-16 left-0 z-50 w-[250px] h-[calc(100vh-64px)] bg-white shadow-[2px_0_8px_rgba(0,0,0,0.15)] transform transition-transform duration-300 ease-in-out print:hidden
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
             lg:top-0 lg:h-full lg:static lg:translate-x-0 lg:transform-none`}
         >
@@ -114,7 +114,7 @@ const AdminLayout = () => {
         {/* Overlay for mobile */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black opacity-30 z-20 lg:hidden"
+            className="fixed inset-0 bg-black opacity-30 z-40 lg:hidden"
             onClick={() => dispatch(closeSidebar())}
           ></div>
         )}
