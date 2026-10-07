@@ -29,6 +29,7 @@ export const examSlice = createApi({
     'ExamStudentListFilters',
     'StudentGroupFilters',
     'StudentGroup',
+    'AdmitCardSettings',
   ],
   endpoints: (builder) => ({
     postNewExam: builder.mutation({
@@ -543,6 +544,19 @@ export const examSlice = createApi({
         `exam_filter_subclasses/${SessionID}/${ExamID}`,
       providesTags: ['ExamConditions'],
     }),
+    // ================== Admit Card Setting ==================
+    getAdmitCardSettings: builder.query({
+      query: () => '/admit_card_settings',
+      providesTags: ['AdmitCardSettings'],
+    }),
+    saveAdmitCardSettings: builder.mutation({
+      query: (body) => ({
+        url: '/admit_card_settings',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: ['AdmitCardSettings'],   // 👈 ইন্ডেন্টেশন ঠিক করা
+    }),
 
   }),
 });
@@ -611,5 +625,7 @@ export const {
 
   useGetExamSessionQuery,
   useGetExamFilterExamsQuery,
-  useGetExamFilterSubclassesQuery
+  useGetExamFilterSubclassesQuery,
+  useGetAdmitCardSettingsQuery,
+  useSaveAdmitCardSettingsMutation,
 } = examSlice;

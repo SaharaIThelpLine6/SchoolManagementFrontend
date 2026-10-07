@@ -5,6 +5,7 @@ import {
   CARD_H,
   CARD_W,
   DEFAULT_ADMIT_LANG,
+  WATERMARK_DEFAULTS,
   buildAdmitQrValue,
   formatAdmitValue,
   getAdmitDir,
@@ -110,9 +111,11 @@ const FitText = ({ children, baseSize, minSize = 7, lineHeight, className, style
  * @param grayscale        সাদা-কালা প্রিন্ট
  * @param inName           প্রতিষ্ঠানের নাম
  * @param inAddress        প্রতিষ্ঠানের ঠিকানা
- * @param inLogo           প্রতিষ্ঠানের লোগো
+ * @param inLogo           প্রতিষ্ঠানের লোগো (হেডারের বাম পাশে)
+ * @param inWatermark      কার্ডের মাঝের ওয়াটারমার্ক লোগো — আলাদা উৎস
  * @param institutionCode  QR এর ভেরিফিকেশন URL বানাতে
  * @param showQR           QR দেখাবে কি না; না দিলে টেমপ্লেটের সেটিং
+ * @param showWatermark    মাঝের ওয়াটারমার্ক দেখাবে কি না; না দিলে দেখাবে
  * @param showPhoto        শিক্ষার্থীর ছবির ঘর দেখাবে কি না
  * @param showSign         স্বাক্ষরের ছবি দেখাবে কি না
  * @param showSignName     স্বাক্ষরের নাম ও রেখা দেখাবে কি না
@@ -128,8 +131,10 @@ const AdmitCardGenerate = ({
   inName,
   inAddress,
   inLogo,
+  inWatermark,
   institutionCode,
   showQR,
+  showWatermark,
   showPhoto,
   showSign,
   showSignName,
@@ -227,8 +232,10 @@ const AdmitCardGenerate = ({
                   inName={inName}
                   inAddress={inAddress}
                   inLogo={inLogo}
+                  inWatermark={inWatermark}
                   institutionCode={institutionCode}
                   showQR={showQR}
+                  showWatermark={showWatermark}
                   showPhoto={showPhoto}
                   showSign={showSign}
                   showSignName={showSignName}
@@ -353,8 +360,10 @@ export const AdmitCardFace = ({
   inName,
   inAddress,
   inLogo,
+  inWatermark,
   institutionCode,
   showQR,
+  showWatermark,
   showPhoto,
   showSign,
   showSignName,
@@ -375,9 +384,18 @@ export const AdmitCardFace = ({
   const principalSignature = toImageSrc(
     student.SignaturePrincipal || student.signaturePrincipal
   );
+  // হেডারের বাম পাশের প্রতিষ্ঠানের লোগো
   const logo = toImageSrc(
     student.Logo || student.logo || student.InstituteLogo || inLogo
   );
+
+  // কার্ডের মাঝের ওয়াটারমার্ক — সম্পূর্ণ আলাদা উৎস (WebsiteSettings.documentLogo)।
+  // এটা বন্ধ করলেও উপরের হেডার লোগোতে কোনো প্রভাব পড়ে না।
+  // prop না দিলে ডিফল্টে দেখাবে; ছবি না থাকলে এমনিতেই কিছু বসে না।
+  const watermarkOn = showWatermark === undefined ? true : Boolean(showWatermark);
+  const watermark = watermarkOn
+    ? toImageSrc(student.Watermark || student.DocumentLogo || inWatermark)
+    : '';
 
   // prop না পেলে নিজেই আজকের তারিখ বানায় (এডিটরের প্রিভিউ এই পথে আসে)
   const stampDate = printDate || getPrintDate(new Date(), lang);
@@ -459,6 +477,27 @@ export const AdmitCardFace = ({
       ) : (
         <PaintedChrome t={t} />
       )}
+
+      {/* ---------------------------------------------- মাঝের লোগো ওয়াটারমার্ক
+          ব্যাকগ্রাউন্ডের ঠিক পরে, কিন্তু বাকি সব লেখার আগে — তাই লেখাগুলো
+          লোগোর উপরে পড়ে, নিচে চাপা পড়ে না। pointer-events-none দেওয়া আছে
+          যাতে কার্ডের উপর কোনো ক্লিক আটকে না যায়। */}
+      {watermark ? (
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          style={{ opacity: t.watermarkOpacity ?? WATERMARK_DEFAULTS.opacity }}
+        >
+          <img
+            src={watermark}
+            alt=""
+            style={{
+              width: t.watermarkSize ?? WATERMARK_DEFAULTS.size,
+              height: t.watermarkSize ?? WATERMARK_DEFAULTS.size,
+              objectFit: 'contain',
+            }}
+          />
+        </div>
+      ) : null}
 
       {/* ------------------------- হেডার: লোগো | নাম ও ঠিকানা | শিক্ষার্থীর ছবি */}
       <div className="absolute left-0 top-0 w-full" style={{ height: t.headerHeight }}>
