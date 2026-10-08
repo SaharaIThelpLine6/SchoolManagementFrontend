@@ -280,19 +280,30 @@ const AdmissionFormModal = ({ userId }) => {
     setLastSearchedCode('');
   };
 
-  const filteredSubClassList = (subClassList || [])
-    .filter((sub) => {
-      if (!ClassID) return true;
-      return sub?.ClassID?.toString() === ClassID.toString();
-    })
-    .map((sub) => ({
-      SubClassID: sub.SubClassID,
-      SubClassName: sub.SubClass,
-      SubClassAra: sub.SubClassAra,
-      SubClassEng: sub.SubClassEng,
-      Serial: sub.Serial,
-    }))
-    .sort((a, b) => (a.Serial || 0) - (b.Serial || 0));
+  const filteredSubClassList = ClassID
+    ? (subClassList || [])
+      .filter((sub) => sub?.ClassID?.toString() === ClassID.toString())
+      .map((sub) => ({
+        SubClassID: sub.SubClassID,
+        SubClassName: sub.SubClass,
+        SubClassAra: sub.SubClassAra,
+        SubClassEng: sub.SubClassEng,
+        Serial: sub.Serial,
+      }))
+      .sort((a, b) => (a.Serial || 0) - (b.Serial || 0))
+    : [];
+
+  useEffect(() => {
+    if (ClassID && filteredSubClassList.length > 0) {
+      const firstSubClassId = filteredSubClassList[0].SubClassID;
+      setValue('SubClassID', firstSubClassId);
+    } else {
+      setValue('SubClassID', ''); // ClassID না থাকলে SubClassID খালি করে দিন
+    }
+  }, [filteredSubClassList, ClassID, setValue]);
+
+  console.log(ClassID, "ClassID")
+  console.log(filteredSubClassList, "filteredSubClassList")
 
   const AdmissionType = [
     { id: 1, name: 'নতুন' },
@@ -444,7 +455,7 @@ const AdmissionFormModal = ({ userId }) => {
                 registerKey="FatherName"
                 label="Father Name"
                 placeholder="Father Name"
-                require="Father Name is required"
+                // require="Father Name is required"
                 defaultValue={data?.FatherName || ''}
                 disable={true}
               />

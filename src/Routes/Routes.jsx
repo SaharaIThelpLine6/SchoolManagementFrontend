@@ -177,6 +177,7 @@ import TeacherInfo from '../components/Tables/TeacherInfo';
 import DashboardDesignNew from '../components/DashboardDesignNew';
 import TeacherSubjectsAsignPage from '../pages/TeacherSubjectsAsignPage';
 import MarkSheet from '../pages/MarkSheet';
+import TypeOfVacation from '../pages/TypeOfVacation';
 
 const Router = createBrowserRouter([
   {
@@ -437,16 +438,7 @@ const Router = createBrowserRouter([
                     <StudentIdCardGenerate pageTitle="Student Id Card Print" />
                   </RequirePermission>
                 ),
-              },
-
-              // {
-              //   path: 'vacation/type-of-vacation',
-              //   element: (
-              //     // <RequirePermission permissionId={permissionsDataList.class}>
-              //     <TypeOfVacation pageTitle="Class" />
-              //     // </RequirePermission>
-              //   ),
-              // },
+              }
             ],
           },
           {
@@ -1033,6 +1025,14 @@ const Router = createBrowserRouter([
                   >
                     <StudentVacationListTable pageTitle="Type of Vacation" />
                   </RequirePermission>
+                ),
+              },
+              {
+                path: 'vacation-type',
+                element: (
+                  // <RequirePermission permissionId={permissionsDataList.class}>
+                  <TypeOfVacation pageTitle="Type" />
+                  // </RequirePermission>
                 ),
               },
             ],

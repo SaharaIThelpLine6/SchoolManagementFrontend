@@ -232,7 +232,7 @@ const AddStudentVacationForm = ({ pageTitle }) => {
   // Handle navigation to vacation type page
   const handleNavigate = () => {
     hideModal();
-    navigate("/students/vacation/type-of-vacation");
+    navigate('/dashboard/darul-ikama/vacation-type');
   };
   return (
     <div>
@@ -326,7 +326,6 @@ const AddStudentVacationForm = ({ pageTitle }) => {
                 require="This Field is required"
                 disabled={false}
                 defaultSelect={false}
-                unicode={true}
               />
               <div className="flex flex-row items-center justify-center gap-2">
                 <DefaultSelect
@@ -339,7 +338,6 @@ const AddStudentVacationForm = ({ pageTitle }) => {
                   require="This Field is required"
                   disabled={false}
                   defaultSelect={false}
-                  unicode={true}
                 />
                 <Button
                   onClick={handleNavigate}
@@ -358,7 +356,6 @@ const AddStudentVacationForm = ({ pageTitle }) => {
                 require="This Field is required"
                 disabled={false}
                 defaultSelect={false}
-                unicode={true}
               />
               <DatePickerOne
                 dateCalender="Start Date of leave"

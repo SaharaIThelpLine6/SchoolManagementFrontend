@@ -24,7 +24,7 @@ const FONT =
 const COLS = [
   { w: '8%', label: 'ক্রম', align: 'center' },
   { w: '12%', label: 'রোল নং', align: 'center' },
-  { w: '19%', label: 'পরীক্ষার্থী নং', align: 'center' },
+  { w: '19%', label: 'আইডি নং', align: 'center' },
   { w: 'auto', label: 'পরীক্ষার্থীর নাম', align: 'center' },
   { w: '14%', label: 'নম্বর', align: 'center' },
 ];
