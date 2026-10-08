@@ -826,11 +826,9 @@ const Router = createBrowserRouter([
               {
                 path: 'routing',
                 element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.routine_with_signature}
-                  >
+                  <OwenGuide>
                     <ExamRouting pageTitle="Exam Routing Create" />
-                  </RequirePermission>
+                  </OwenGuide>
                 ),
               },
               // {

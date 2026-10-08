@@ -700,7 +700,7 @@ const SitPlanAssign = ({ sessionId, examId, sharedStepData }) => {
             reverseButtons: true,
         });
         if (result.isConfirmed) {
-            navigate("/exam/exam-hallist");
+            navigate("/dashboard/exam/exam-hallist");
         }
     };
 
@@ -734,7 +734,7 @@ const SitPlanAssign = ({ sessionId, examId, sharedStepData }) => {
                         ) : (translate('Select a hall below to begin assigning seats.'))}
                     </p>
                 </div>
-                {/* <Link to="/exam/exam-hallist" className="py-2 px-2 bg-blue-500 text-white rounded-[4px] mb-2">পরীক্ষার কক্ষ সেট করুন</Link> */}
+                {/* <Link to="/dashboard/exam/exam-hallist" className="py-2 px-2 bg-blue-500 text-white rounded-[4px] mb-2">পরীক্ষার কক্ষ সেট করুন</Link> */}
                 <button onClick={handleExternalLink} type='button' className='py-2 px-2 bg-blue-500 text-white rounded-[4px] mb-2 flex gap-1 m-0' to='/exam/exam-hallsetup'> <SvgIcon name={"HomePlus"} size={22}/>  {translate("Add Exam Hall")} </button>
             </div>
 

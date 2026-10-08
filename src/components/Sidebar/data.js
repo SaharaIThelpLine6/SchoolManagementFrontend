@@ -328,11 +328,11 @@ export const menuData = [
         name: 'Exam Seat plan',
         route: 'exam/exam-setplan',
       },
-      {
-        id: '10',
-        name: 'Exam Routing Create',
-        route: 'exam/routing',
-      },
+      // {
+      //   id: '10',
+      //   name: 'Exam Routing Create',
+      //   route: 'exam/routing',
+      // },
       {
         id: '11',
         name: 'Exam Report',
