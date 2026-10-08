@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
 import { setPageName } from "../features/auth/authSlice";
 import SortableTable from "../components/Tables/SortableTable";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useTranslate from "../utils/Translate";
 import { showModal } from "../utils/ModalControlar";
 import Swal from "sweetalert2";
@@ -22,6 +22,7 @@ const TypeOfVacation = ({ pageTitle }) => {
   const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
+  const navigate = useNavigate();
 
   const {
     data: studentVacationTypeData = [],
@@ -122,7 +123,7 @@ const TypeOfVacation = ({ pageTitle }) => {
       render: (row) => <p>{row.ID}</p>,
     },
     {
-      title: translate("Vacation Type"),
+      title: "ছুটির ধরণ",
       field: "VacationList",
       hozAlign: "center",
       render: (row) => <p>{row.VacationList}</p>,
@@ -136,12 +137,37 @@ const TypeOfVacation = ({ pageTitle }) => {
           <h3 className="font-SolaimanLipi text-[20px] font-bold">
             {translate("Vacation type list")}
           </h3>
-          <Button onClick={() => handleOpenModal()}>
-            {translate("Create type")}
-          </Button>
+
+          <div className="flex flex-row gap-2">
+            <Button
+              onClick={() => navigate("/dashboard/darul-ikama/vacation")}
+              className="flex items-center gap-2"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M19 12H5" />
+                <path d="M12 19l-7-7 7-7" />
+              </svg>
+
+              {translate("Back")}
+            </Button>
+
+            <Button onClick={() => handleOpenModal()}>
+              {translate("Create type")}
+            </Button>
+          </div>
         </div>
 
-        <SortableTable columns={columnsVacationType} data={paginatedData} />
+        <SortableTable columns={columnsVacationType} data={paginatedData} isFilterColumn={false} />
 
         {/* Pagination Controls */}
 

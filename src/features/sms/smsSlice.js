@@ -16,6 +16,7 @@ export const smsSlice = createApi({
   }),
   tagTypes: ["Template", "smsBundles"],
   endpoints: (builder) => ({
+    // ✅ SMS Send
     postSMSSend: builder.mutation({
       query: (data) => ({
         url: `send`,
@@ -23,20 +24,63 @@ export const smsSlice = createApi({
         body: data,
       }),
     }),
+
+    // ✅ Update Template (id আলাদা করে নিন, body তে বাকি ডাটা)
+    updateSMSTemplate: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `templates/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Template"],
+    }),
+
+    // ✅ Delete Template (body লাগে না, শুধু id)
+    deleteSMSTemplate: builder.mutation({
+      query: (TempID) => ({
+        url: `templates/${TempID}`,
+        method: "DELETE",
+        // ❌ body: data সরিয়ে দেওয়া হয়েছে
+      }),
+      invalidatesTags: ["Template"],
+    }),
+
+    // ✅ Post Template
+    postSMSTemplate: builder.mutation({
+      query: (data) => ({
+        url: `templates`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Template"],
+    }),
+
+    // ✅ Get Templates
     getSMSTemplates: builder.query({
       query: () => "templates",
       providesTags: ["Template"],
     }),
+
+    // ✅ Check Balance
     getCheckBalance: builder.query({
       query: () => "check_balance",
       providesTags: ["Template"],
     }),
+
+    // ✅ SMS Bundles
     getSMSBundle: builder.query({
       query: () => "bundles",
       providesTags: ["smsBundles"],
     }),
-
   }),
 });
 
-export const { usePostSMSSendMutation, useGetSMSTemplatesQuery, useGetCheckBalanceQuery, useGetSMSBundleQuery } = smsSlice;
+export const {
+  usePostSMSSendMutation,
+  useGetSMSTemplatesQuery,
+  useGetCheckBalanceQuery,
+  useGetSMSBundleQuery,
+  usePostSMSTemplateMutation,
+  useUpdateSMSTemplateMutation,
+  useDeleteSMSTemplateMutation,
+} = smsSlice;
