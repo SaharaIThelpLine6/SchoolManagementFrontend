@@ -20,6 +20,9 @@ const ZONES = {
   bodyTop: 165,
   signatureHeight: 62,
   bodyBottom: 35,
+  examNameSize: 13,
+  logoOffsetY: 0,
+  photoOffsetY: 0,
 };
 
 // হেডারের ডান পাশে শিক্ষার্থীর ছবির মাপ — সব টেমপ্লেটে এক
@@ -69,6 +72,11 @@ export const ADMIT_TEMPLATES = [
     qrPad: 'transparent',
     ...ZONES,
     ...PHOTO,
+    logoOffsetY: -15,
+    photoOffsetY: -15,
+    headerDividerGap: 2,
+    examTop: 97,
+    examHeight: 20,
   },
   {
     id: '2',
@@ -104,8 +112,10 @@ export const ADMIT_TEMPLATES = [
     ...ZONES,
     ...PHOTO,
     headerHeight: 135,
-    examTop: 110,
+    examTop: 106,
     bodyTop: 185,
+    logoOffsetY: -15,
+    photoOffsetY: -15,
   },
   {
     id: '3',
@@ -140,6 +150,8 @@ export const ADMIT_TEMPLATES = [
     headerHeight: 135,
     examTop: 110,
     bodyTop: 185,
+    logoOffsetY: -15,
+    photoOffsetY: -15,
   },
 
   {
@@ -171,6 +183,10 @@ export const ADMIT_TEMPLATES = [
     qrPad: 'transparent',
     ...ZONES,
     ...PHOTO,
+    examTop: 98,
+    examHeight: 20,
+    logoOffsetY: -15,
+    photoOffsetY: -15,
   },
 
   // -------------------------------------------------------------------------
@@ -212,8 +228,10 @@ export const ADMIT_TEMPLATES = [
     ...ZONES,
     ...PHOTO,
     headerHeight: 135,
-    examTop: 109,
+    examTop: 106,
     bodyTop: 185,
+    logoOffsetY: -15,
+    photoOffsetY: -15,
   },
 
   {
@@ -250,8 +268,10 @@ export const ADMIT_TEMPLATES = [
     ...ZONES,
     ...PHOTO,
     headerHeight: 135,
-    examTop: 110,
+    examTop: 106,
     bodyTop: 185,
+    logoOffsetY: -15,
+    photoOffsetY: -15,
   },
 
   {
@@ -288,8 +308,10 @@ export const ADMIT_TEMPLATES = [
     ...ZONES,
     ...PHOTO,
     headerHeight: 135,
-    examTop: 110,
+    examTop: 106,
     bodyTop: 185,
+    logoOffsetY: -15,
+    photoOffsetY: -15,
   },
 
   {
@@ -332,9 +354,87 @@ export const ADMIT_TEMPLATES = [
     logoTop: '66%',
     photoTop: '70%',
     headerHeight: 135,
-    examTop: 110,
+    examTop: 106,
     bodyTop: 185,
+    logoOffsetY: -15,
+    photoOffsetY: -15,
   },
+
+  {
+    id: '9',
+    title: 'রাজকীয় ফ্রেম',
+    variant: 'image',
+    image: '/admitcard/admit-7.jpeg',
+    thumb: '/admitcard/admit-7.jpeg',
+    nameColor: '#1f2937',
+    addressColor: '#4b5563',
+    nameSize: 22,
+    addressSize: 13,
+    valueColor: '#111827',
+    labelColor: '#4b5563',
+    accent: '#1e3a8a',
+    examNameColor: '#374151',
+    photoBorder: '#9ca3af',
+    signLineColor: '#111827',
+    ribbonStyle: 'none',
+    ribbonCoverBg: '#ffffff',
+    ribbonColor: '#1e3a8a',
+    ribbonCoverByLang: {
+      en: { top: 127, height: 28, width: 84, fontSize: 10 },
+      ar: { top: 128, height: 26, width: 78, fontSize: 17 },
+      bn: { top: 128, height: 26, width: 78, fontSize: 17 },
+    },
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: true,
+    showQR: true,
+    qrSize: 56,
+    qrPad: '#ffffff',
+    ...ZONES,
+    ...PHOTO,
+    headerHeight: 135,
+    examTop: 108,
+    bodyTop: 185,
+    logoOffsetY: -15,
+    photoOffsetY: -15,
+  },
+
+  // {
+  //   id: '10',
+  //   title: 'সবুজ ডাবল ফ্রেম',
+  //   variant: 'painted',
+  //   cardBg: '#ffffff',
+  //   frameStyle: 'double',       // 'hairline' | 'double' | 'edgebars' | না দিলে ফ্রেম নেই
+  //   frameColor: '#065f46',
+  //   headerFill: 'none',         // 'none' | 'solid'
+  //   headerBg: '#065f46',        // headerFill: 'solid' হলে দরকার
+  //   headerDivider: 2,           // hেডারের নিচের রেখার পুরুত্ব (0 = নেই)
+  //   ribbonStyle: 'solid',       // 'none' | 'outline' | 'solid'
+  //   ribbonBg: '#065f46',
+  //   ribbonColor: '#ffffff',
+  //   nameColor: '#065f46',
+  //   addressColor: '#4b5563',
+  //   valueColor: '#111827',
+  //   labelColor: '#065f46',
+  //   accent: '#065f46',
+  //   examNameColor: '#065f46',
+  //   photoBorder: '#065f46',
+  //   signLineColor: '#065f46',
+  //   nameSize: 23,
+  //   addressSize: 13,
+  //   showPhoto: true,
+  //   showSignature: true,
+  //   showSignDate: true,
+  //   showQR: true,
+  //   qrSize: 56,
+  //   qrPad: 'transparent',
+  //   ...ZONES,
+  //   ...PHOTO,
+  //   examTop: 95,
+  //   examHeight: 10,
+  //   logoOffsetY: -15,
+  //   photoOffsetY: -15,
+  // },
 ];
 
 export const getTemplate = (id) =>
@@ -384,6 +484,10 @@ export const getAdmitText = (key, lang) =>
 export const ADMIT_UI = {
   bn: {
     pageTitle: 'প্রবেশপত্র',
+    pickFieldTitle: 'কোনো তথ্য যোগ করা হয়নি',
+    pickFieldText:
+      '"টেমপ্লেট ও ডাটা সেটিং" থেকে আগে কার্ডে কী কী তথ্য দেখাবে তা যোগ করুন।',
+    cancel: 'বাতিল',
     templateSelect: 'টেমপ্লেট সিলেক্ট',
     routingSelect: 'টেমপ্লেট রুটিং সিলেক্ট',
     filterBtn: 'ফিল্টার',
@@ -440,9 +544,16 @@ export const ADMIT_UI = {
     pickStudentText: 'অন্তত একজন শিক্ষার্থী সিলেক্ট করুন।',
     pickReportTitle: 'রিপোর্ট টাইপ নির্বাচন করুন',
     pickReportText: 'কয়টি কার্ড এক পৃষ্ঠায় ছাপা হবে তা বেছে নিন।',
+    leftSignature: 'বাঁ পাশের স্বাক্ষর (নায়েম)',
+    rightSignature: 'ডান পাশের স্বাক্ষর (মুহতামিম)',
+    signNamePlaceholder: 'স্বাক্ষরের নাম',
   },
   en: {
     pageTitle: 'Admit Card',
+    pickFieldTitle: 'No fields added',
+    pickFieldText:
+      'Open "Template & data setting" and add the fields the card should show.',
+    cancel: 'Cancel',
     templateSelect: 'Select template',
     routingSelect: 'Template routing select',
     filterBtn: 'Filter',
@@ -499,9 +610,16 @@ export const ADMIT_UI = {
     pickStudentText: 'Select at least one student.',
     pickReportTitle: 'Select a report type',
     pickReportText: 'Choose how many cards print per page.',
+    leftSignature: 'Left signature (Nazim)',
+    rightSignature: 'Right signature (Principal)',
+    signNamePlaceholder: 'Signature name',
   },
   ar: {
     pageTitle: 'بطاقة الدخول',
+    pickFieldTitle: 'لم تتم إضافة أي حقل',
+    pickFieldText:
+      'افتح "إعدادات القالب والبيانات" وأضف الحقول التي ستظهر على البطاقة.',
+    cancel: 'إلغاء',
     templateSelect: 'اختيار القالب',
     routingSelect: 'اختيار توجيه القالب',
     filterBtn: 'تصفية',
@@ -558,6 +676,9 @@ export const ADMIT_UI = {
     pickStudentText: 'اختر طالبًا واحدًا على الأقل.',
     pickReportTitle: 'اختر نوع التقرير',
     pickReportText: 'اختر عدد البطاقات في كل صفحة.',
+    leftSignature: 'التوقيع الأيسر (الناظم)',
+    rightSignature: 'التوقيع الأيمن (المهتمم)',
+    signNamePlaceholder: 'اسم التوقيع',
   },
 };
 
@@ -626,6 +747,32 @@ export const ADMIT_FIELDS = [
     label: 'দাখেলা নং',
     demo: '100021',
   },
+  
+  {
+    id: 'FatherName',
+    name: 'Father Name',
+    nameAr: 'اسم الأب',
+    label: 'পিতার নাম',
+    demo: 'মো: কিবরিয়া',
+    demoEn: 'Md. Kibria',
+    demoAr: 'محمد كبريا',
+  },
+    {
+    id: 'RollNo',
+    name: 'Roll No',
+    nameAr: 'رقم الجلوس',
+    label: 'রোল নং',
+    demo: '07',
+  },
+    {
+    id: 'MotherName',
+    name: 'Mother Name',
+    nameAr: 'اسم الأم',
+    label: 'মাতার নাম',
+    demo: 'মোসা: আমেনা বেগম',
+    demoEn: 'Mst. Amena Begum',
+    demoAr: 'مسماة آمنة بيغم',
+  },
   {
     id: 'SubClass',
     name: 'Sub Class',
@@ -636,11 +783,12 @@ export const ADMIT_FIELDS = [
     demoAr: 'أ',
   },
   {
-    id: 'RollNo',
-    name: 'Roll No',
-    nameAr: 'رقم الجلوس',
-    label: 'রোল নং',
-    demo: '07',
+    id: 'DateOfBirth',
+    name: 'Date Of Birth',
+    nameAr: 'تاريخ الميلاد',
+    label: 'জন্ম তারিখ',
+    demo: '2011-10-12',
+    type: 'date',
   },
   {
     id: 'ExamStartDate',
@@ -651,37 +799,11 @@ export const ADMIT_FIELDS = [
     type: 'date',
   },
   {
-    id: 'FatherName',
-    name: 'Father Name',
-    nameAr: 'اسم الأب',
-    label: 'পিতার নাম',
-    demo: 'মো: কিবরিয়া',
-    demoEn: 'Md. Kibria',
-    demoAr: 'محمد كبريا',
-  },
-  {
-    id: 'MotherName',
-    name: 'Mother Name',
-    nameAr: 'اسم الأم',
-    label: 'মাতার নাম',
-    demo: 'মোসা: আমেনা বেগম',
-    demoEn: 'Mst. Amena Begum',
-    demoAr: 'مسماة آمنة بيغم',
-  },
-  {
     id: 'Mobile1',
     name: 'Mobile',
     nameAr: 'الجوال',
     label: 'মোবাইল',
     demo: '01876862386',
-  },
-  {
-    id: 'DateOfBirth',
-    name: 'Date Of Birth',
-    nameAr: 'تاريخ الميلاد',
-    label: 'জন্ম তারিখ',
-    demo: '2011-10-12',
-    type: 'date',
   },
   {
     id: 'CenterName',
@@ -892,16 +1014,51 @@ export const isFieldAllowedForTemplate = (fieldId, templateId) =>
 export const MAX_FIELD_SELECT = 8;
 
 // ---------------------------------------------------------------------------
+// ডিফল্ট ফিল্ড — সেটিং একবারও সংরক্ষণ না করা থাকলে কার্ডে এই আটটাই বসে।
+// সংখ্যাটা MAX_FIELD_SELECT এর সমান, তাই প্রথমবারেই ঘর পুরো ভরা থাকে।
+// ক্রমটাই কার্ডে বসার ক্রম — দুই কলামে সারি ধরে ভরে:
+//   পরীক্ষার্থীর নাম | দাখেলা নং
+//   পিতার নাম        | রোল নং
+//   মাতার নাম        | শাখা
+//   জন্ম তারিখ       | হল নাম/নং
+// সংরক্ষিত সেটিংয়ে ফিল্ড থাকলে সেটাই জেতে, এটা কেবল শুরুর অবস্থা।
+// ---------------------------------------------------------------------------
+export const DEFAULT_ADMIT_FIELDS = [
+  'StudentName',
+  'StudentCode',
+  'FatherName',
+  'RollNo',
+  'MotherName',
+  'SubClass',
+  'DateOfBirth',
+  'CenterName',
+];
+
+// ---------------------------------------------------------------------------
 // প্রিন্ট লেআউট
 // ---------------------------------------------------------------------------
 
 // CSS স্পেক অনুযায়ী 1mm = 96/25.4 px
 export const MM_TO_PX = 96 / 25.4;
 
+// ---------------------------------------------------------------------------
+// কাগজের মাপ — A4 আর Letter দুইটারই ভিতরে পড়ে এমন "নিরাপদ" মাপ।
+//
+// কার কম্পিউটারে প্রিন্টারের ডিফল্ট কাগজ A4 আর কার Letter — সেটা আমরা
+// ঠিক করতে পারি না, ব্রাউজারের প্রিন্ট ডায়ালগে কাগজ বদলালে আমাদের
+// `@page size` ও উপেক্ষিত হয়। তাই মাপ নেওয়া হয় দুইটার ছোট দিকটা ধরে:
+//
+//   A4      ২১০ × ২৯৭      Letter  ২১৫.৯ × ২৭৯.৪
+//   portrait  → প্রস্থ ২১০ (A4), উচ্চতা ২৭৯.৪ (Letter)
+//   landscape → প্রস্থ ২৭৯.৪ (Letter), উচ্চতা ২১০ (A4)
+//
+// ফলে কাগজ যেটাই হোক, কার্ড কখনো কেটে যায় না — A4 তে নিচে একটু বেশি
+// সাদা জায়গা থাকে, এইটুকুই পার্থক্য। কার্ডের মাপ দুই কাগজেই হুবহু এক।
+// ---------------------------------------------------------------------------
 export const PRINT_PAGES = {
   'A5 landscape': { w: 210, h: 148 },
-  'A4 portrait': { w: 210, h: 297 },
-  'A4 landscape': { w: 297, h: 210 },
+  'A4 portrait': { w: 210, h: 279.4 },
+  'A4 landscape': { w: 279.4, h: 210 },
 };
 
 export const PRINT_LAYOUTS = {
@@ -976,6 +1133,167 @@ export const getPrintLayout = (type) => {
     cellH,
     scale: (cellW * MM_TO_PX) / CARD_W,
   };
+};
+
+// ---------------------------------------------------------------------------
+// ছাপার CSS
+//
+// একই নিয়ম সাধারণ প্রবেশপত্র আর রুটিনসহ প্রবেশপত্র — দুই জায়গাতেই লাগে,
+// তাই এক জায়গায় লেখা। দুই পাতার ছাপা যেন অক্ষরে অক্ষরে এক হয়।
+//
+// কোন কম্পিউটারে কেন আলাদা দেখাত, আর এখানে তার কী সমাধান:
+//
+// ১) ব্রাউজারের মার্জিন সেটিং (Default / None / Custom)
+//    `@page { margin: ... }` দিলে ব্যবহারকারী ডায়ালগ থেকে সেটা বদলে
+//    দিতে পারে — তখন কার্ড সরে যায় বা কেটে যায়। তাই `@page margin: 0`,
+//    আর আমাদের মার্জিনটা পাতার নিজের padding হিসেবে ভিতরে বসানো।
+//    Default আর None — দুইটাতেই এখন একদম একই ছাপা পড়ে। পাশাপাশি
+//    মার্জিন শূন্য হলে ক্রোম নিজের হেডার/ফুটার (তারিখ, URL) ছাপেও না।
+//
+// ২) পর্দার মাপ
+//    আউটপুটটা অ্যাপের ভিতরে বসে — তার উপরে সাইডবার, `max-width`,
+//    `overflow-x: auto` এসব থাকে। পর্দা ছোট হলে ওই ঘরটাও ছোট, আর
+//    ছাপার সময় কার্ডের ডান দিক কেটে যেত। তাই ছাপার সময় কার্ডের উপরের
+//    সব ঘরের মাপ-বাঁধন খুলে দেওয়া হয় (`:has()` দিয়ে), আর বাকি সব
+//    লুকানো হয়। পর্দা ৩২০px হোক বা ২৫৬০px — ছাপা একই।
+//
+// ৩) "Background graphics" চেকবক্স
+//    বন্ধ থাকলে হেডারের রঙিন পট্টি, টেবিলের জেব্রা, ব্যাজ — সব সাদা
+//    হয়ে যেত। `print-color-adjust: exact` এখন প্রতিটা ঘরে দেওয়া।
+//
+// ৪) কাগজ A4 না Letter — উপরে PRINT_PAGES এ সমাধান।
+//
+// যা CSS দিয়ে ঠিক করা যায় না: ডায়ালগের "Scale" যদি কেউ হাতে বদলায়,
+// বা "Custom margins" টানে। সেগুলো ব্যবহারকারীর ইচ্ছাকৃত পরিবর্তন।
+// ---------------------------------------------------------------------------
+
+/** mm ভ্যালু ছোট করে লিখি, নাহলে CSS এ 149.80769230769232mm এর মতো আসে */
+export const mmValue = (v) => `${Math.round(v * 1000) / 1000}mm`;
+
+export const buildPrintCss = ({ layout, cardW, cardH, grayscale = false, prefix }) => {
+  const mm = mmValue;
+  const PAGE = `${prefix}-page`;
+  const CELL = `${prefix}-cell`;
+  const SCALE = `${prefix}-scale`;
+
+  return `
+    /* রঙ — ব্রাউজারের "Background graphics" বন্ধ থাকলেও যেন ছাপে */
+    .admit-print-root,
+    .admit-print-root * {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      color-adjust: exact;
+    }
+
+    .${PAGE} {
+      box-sizing: border-box;
+      width: ${mm(layout.paperW)};
+      padding: ${mm(layout.margin)};
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(${layout.cols}, ${mm(layout.cellW)});
+      grid-template-rows: repeat(${layout.rows}, ${mm(layout.cellH)});
+      gap: ${mm(layout.gap)};
+      justify-content: center;
+      align-content: start;
+    }
+    .${CELL} {
+      width: ${mm(layout.cellW)};
+      height: ${mm(layout.cellH)};
+      overflow: hidden;
+      position: relative;
+      ${grayscale ? 'filter: grayscale(1);' : ''}
+    }
+    .${SCALE} {
+      width: ${cardW}px;
+      height: ${cardH}px;
+      transform: scale(${layout.scale});
+      transform-origin: top left;
+    }
+
+    /* স্ক্রিনে পাতাগুলোর মাঝে ফাঁক ও সীমানা — ছাপায় এর কিছুই যায় না */
+    @media screen {
+      .${PAGE} + .${PAGE} { margin-top: 10mm; }
+    }
+
+    @media print {
+      @page {
+        /* নাম ('A4 portrait') না দিয়ে সরাসরি মাপ — কারণ ব্রাউজারে কাগজ
+           A4 না হয়ে Letter হলে ক্রোম পুরো পাতাটাকে ছোট করে বসিয়ে দেয়
+           (A4 এর ২৯৭ কে ২৭৯.৪ এ আনতে ৯৪%) — তখন এক কম্পিউটারে কার্ড
+           ৬% ছোট ছাপা হতো। মাপটা দুই কাগজেরই ভিতরে পড়ে এমন দিলে
+           ক্রোমকে আর কিছু ছোট করতে হয় না — দুই কাগজেই ঠিক ১০০%। */
+        size: ${mm(layout.paperW)} ${mm(layout.paperH)};
+        /* মার্জিন পাতার padding এ — ডায়ালগের Default/None দুইটাতেই এক ছাপা */
+        margin: 0;
+      }
+
+      html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        width: auto !important;
+        height: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        background: #fff !important;
+        overflow: visible !important;
+      }
+
+      /* কার্ডের উপরের প্রতিটা ঘর — অ্যাপের খোলস, সাইডবারের র‍্যাপার,
+         max-width, overflow, transform — সব নিরপেক্ষ করে দিই।
+         নইলে পর্দার মাপ অনুযায়ী ছাপা বদলে যেত। */
+      body *:has(.admit-print-root) {
+        display: block !important;
+        position: static !important;
+        overflow: visible !important;
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: none !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        transform: none !important;
+        float: none !important;
+        columns: auto !important;
+      }
+
+      /* কার্ড আর তার উপরের ঘরগুলো ছাড়া বাকি সব লুকানো — অ্যাপের
+         হেডার, সাইডবার, টোস্ট কিছুই যেন কাগজে না আসে */
+      body *:not(:has(.admit-print-root)):not(.admit-print-root):not(.admit-print-root *) {
+        display: none !important;
+      }
+
+      .admit-print-root {
+        display: block !important;
+        width: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      .${PAGE} {
+        break-after: page;
+        page-break-after: always;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        margin: 0 auto !important;
+      }
+      .${PAGE}:last-child {
+        break-after: auto;
+        page-break-after: auto;
+      }
+      .${CELL} {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      .${SCALE} img { max-width: none !important; }
+    }
+  `;
 };
 
 // ---------------------------------------------------------------------------
@@ -1087,11 +1405,11 @@ export const normalizeAdmitRow = (row = {}) => {
     ...row,
     StudentName: row.StudentName || row.UserName || user.UserName || '',
     StudentCode: row.StudentCode || row.UserCode || user.UserCode || '',
+    FatherName: row.FatherName || user.FatherName || '',
+    MotherName: row.MotherName || user.MotherName || '',
     AdmissionID: row.AdmissionID ?? row.ID ?? user.UserID,
     RollNo: row.RollNo ?? row.AdmissionSerial ?? '',
     AdmissionSerial: row.AdmissionSerial ?? '',
-    FatherName: row.FatherName || user.FatherName || '',
-    MotherName: row.MotherName || user.MotherName || '',
     ClassName: row.ClassName || cls.ClassName || '',
     SubClass: typeof row.SubClass === 'string' ? row.SubClass : sub.SubClass || '',
     SessionName: row.SessionName || session.SessionName || '',

@@ -7,6 +7,7 @@ import {
   DEFAULT_ADMIT_LANG,
   WATERMARK_DEFAULTS,
   buildAdmitQrValue,
+  buildPrintCss,
   formatAdmitValue,
   getAdmitDir,
   getAdmitText,
@@ -32,9 +33,6 @@ const chunk = (arr, size) => {
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
   return out;
 };
-
-// mm ভ্যালু ছোট করে লিখি, নাহলে CSS এ 149.80769230769232mm এর মতো আসে
-const mm = (v) => `${Math.round(v * 1000) / 1000}mm`;
 
 /**
  * এক লাইনে ফিট করে — লিখা ঘরের চেয়ে লম্বা হলে ফন্ট সাইজ আস্তে আস্তে কমে।
@@ -154,70 +152,13 @@ const AdmitCardGenerate = ({
 
   return (
     <div className="admit-print-root font-SolaimanLipi">
-      <style>{`
-        .admit-print-root {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-          color-adjust: exact;
-        }
-        .admit-page {
-          display: grid;
-          grid-template-columns: repeat(${layout.cols}, ${mm(layout.cellW)});
-          grid-template-rows: repeat(${layout.rows}, ${mm(layout.cellH)});
-          gap: ${mm(layout.gap)};
-          width: ${mm(layout.contentW)};
-          justify-content: center;
-          align-content: start;
-          margin: 0 auto;
-        }
-        .admit-cell {
-          width: ${mm(layout.cellW)};
-          height: ${mm(layout.cellH)};
-          overflow: hidden;
-          position: relative;
-          ${grayscale ? 'filter: grayscale(1);' : ''}
-        }
-        .admit-scale {
-          width: ${CARD_W}px;
-          height: ${CARD_H}px;
-          transform: scale(${layout.scale});
-          transform-origin: top left;
-        }
-
-        /* স্ক্রিনে পেজগুলোর মাঝে ফাঁক, প্রিন্টে এটা থাকবে না */
-        @media screen {
-          .admit-page + .admit-page { margin-top: 10mm; }
-        }
-
-        @media print {
-          @page {
-            size: ${layout.page};
-            margin: ${mm(layout.margin)};
-          }
-          html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #fff !important;
-          }
-          .admit-print-root { width: 100%; margin: 0; padding: 0; }
-          .admit-page {
-            break-after: page;
-            page-break-after: always;
-            break-inside: avoid;
-            page-break-inside: avoid;
-            margin: 0 auto;
-          }
-          .admit-page:last-child {
-            break-after: auto;
-            page-break-after: auto;
-          }
-          .admit-cell {
-            break-inside: avoid;
-            page-break-inside: avoid;
-          }
-          .admit-scale img { max-width: none !important; }
-        }
-      `}</style>
+      <style>{buildPrintCss({
+        layout,
+        cardW: CARD_W,
+        cardH: CARD_H,
+        grayscale,
+        prefix: 'admit',
+      })}</style>
 
       {pages.map((page, pageIndex) => (
         <div className="admit-page" key={`admit-page-${pageIndex}`}>
@@ -298,7 +239,7 @@ const PaintedChrome = ({ t }) => (
       <div
         className="absolute"
         style={{
-          top: (t.examTop ?? t.headerHeight) + (t.examHeight ?? 0) + 10,  // ← +10 যোগ
+          top: (t.examTop ?? t.headerHeight) + (t.examHeight ?? 0) + (t.headerDividerGap ?? 10),
           left: 30,
           right: 30,
           height: t.headerDivider,
@@ -365,19 +306,37 @@ export const AdmitCardFace = ({
   showQR,
   showWatermark,
   showPhoto,
+  // নতুন — বাঁ (নায়েম) ও ডান (মুহতামিম) সম্পূর্ণ আলাদা
+  najemShowSign,
+  najemShowName,
+  najemShowDate,
+  principalShowSign,
+  principalShowName,
+  principalShowDate,
+  // পুরোনো — দুই পাশেই প্রয়োগ হতো। নতুন প্রপ না দিলে এটাই ফলব্যাক।
   showSign,
   showSignName,
   showSignDate,
   printDate,
   labelOverrides = {},
+  cardHeight,
+  bodyEnd,
 }) => {
   const t = template;
   const dir = getAdmitDir(lang);
+
+  // কার্ডের উচ্চতা — না দিলে আগের মতোই CARD_H (৪১০)।
+  // রুটিনসহ টেমপ্লেটে ৭৪০ দেওয়া হয়, তখন ফ্রেম, ব্যাকগ্রাউন্ড ও স্বাক্ষরের
+  // সারি পুরো পৃষ্ঠা জুড়েই বসে — রুটিন তখন এই একই বাক্সের ভিতরে পড়ে।
+  const cardH = cardHeight || CARD_H;
+  const isTall = cardH > CARD_H;
 
   const nameColor = student.admit_name_color || t.nameColor;
   const nameSize = student.admit_name_size || t.nameSize;
   const addressColor = student.admit_address_color || t.addressColor;
   const addressSize = student.admit_address_size || t.addressSize;
+  const examColorVal = student.admit_exam_color || t.examNameColor || t.labelColor;
+  const examSize = student.admit_exam_size || t.examNameSize || 13;
 
   const photo = toImageSrc(student.UserImage);
   const najemSignature = toImageSrc(student.SignatureNajem || student.signatureNajem);
@@ -404,15 +363,44 @@ export const AdmitCardFace = ({
   const qrEnabled = showQR === undefined ? Boolean(t.showQR) : Boolean(showQR);
   const photoEnabled = showPhoto === undefined ? Boolean(t.showPhoto) : Boolean(showPhoto);
 
-  // স্বাক্ষরের তিনটি অংশ আলাদাভাবে নিয়ন্ত্রণযোগ্য
-  const signImageEnabled =
-    showSign === undefined ? Boolean(t.showSignature) : Boolean(showSign);
-  const signNameEnabled =
-    showSignName === undefined ? Boolean(t.showSignature) : Boolean(showSignName);
-  const signDateEnabled =
-    showSignDate === undefined ? t.showSignDate !== false : Boolean(showSignDate);
+  // // স্বাক্ষরের তিনটি অংশ আলাদাভাবে নিয়ন্ত্রণযোগ্য
+  // const signImageEnabled =
+  //   showSign === undefined ? Boolean(t.showSignature) : Boolean(showSign);
+  // const signNameEnabled =
+  //   showSignName === undefined ? Boolean(t.showSignature) : Boolean(showSignName);
+  // const signDateEnabled =
+  //   showSignDate === undefined ? t.showSignDate !== false : Boolean(showSignDate);
 
-  const anySignPart = signImageEnabled || signNameEnabled || signDateEnabled;
+  // const anySignPart = signImageEnabled || signNameEnabled || signDateEnabled;
+
+  // স্বাক্ষরের তিনটি অংশ — বাঁ (নায়েম) ও ডান (মুহতামিম) প্রতিটার জন্য।
+  // অগ্রাধিকার: নতুন প্রপ > পুরোনো প্রপ > টেমপ্লেট ডিফল্ট।
+  const resolveOn = (newProp, oldProp, tplDefault) => {
+    if (newProp !== undefined) return Boolean(newProp);
+    if (oldProp !== undefined) return Boolean(oldProp);
+    return Boolean(tplDefault);
+  };
+
+  const najemSignOn = resolveOn(najemShowSign, showSign, t.showSignature);
+  const najemNameOn = resolveOn(najemShowName, showSignName, t.showSignature);
+  const najemDateOn = resolveOn(
+    najemShowDate,
+    showSignDate,
+    t.showSignDate !== false
+  );
+
+  const principalSignOn = resolveOn(principalShowSign, showSign, t.showSignature);
+  const principalNameOn = resolveOn(principalShowName, showSignName, t.showSignature);
+  const principalDateOn = resolveOn(
+    principalShowDate,
+    showSignDate,
+    t.showSignDate !== false
+  );
+
+  // দুই পাশের কোনো একটা অংশ থাকলেই নিচের সারি আঁকা হয়
+  const anySignPart =
+    najemSignOn || najemNameOn || najemDateOn ||
+    principalSignOn || principalNameOn || principalDateOn;
 
   const qrValue = qrEnabled ? buildAdmitQrValue(student, institutionCode) : '';
   // QR স্বাক্ষরের জোনে বসে, তাই ওই উচ্চতার বেশি হতে পারে না
@@ -458,8 +446,13 @@ export const AdmitCardFace = ({
 
   // যতটুকু জায়গা আছে তার মধ্যেই ফিল্ডগুলো ফিট করানো হয়
   // ফিল্ডগুলো দুই কলামে পাশাপাশি বসে, তাই সারির সংখ্যা অর্ধেক
+  //
+  // bodyEnd না দিলে আগের নিয়মই — স্বাক্ষরের জোনের ঠিক উপরে শেষ।
+  // রুটিনসহ কার্ডে bodyEnd দেওয়া হয়, তাই তথ্যগুলো উপরের দিকেই থাকে
+  // আর নিচের জায়গাটা রুটিনের জন্য খালি থাকে।
   const visibleFields = fields.filter(Boolean);
-  const bodyHeight = CARD_H - t.bodyTop - bodyBottomEdge;
+  const bodyEndY = bodyEnd || cardH - bodyBottomEdge;
+  const bodyHeight = bodyEndY - t.bodyTop;
   const rowCount = Math.max(Math.ceil(visibleFields.length / 2), 1);
   const lineH = Math.max(15, Math.min(26, Math.floor(bodyHeight / rowCount)));
   const fontSize = Math.max(11, Math.min(15, lineH - 9));
@@ -470,10 +463,29 @@ export const AdmitCardFace = ({
   return (
     <div
       className="relative overflow-hidden"
-      style={{ width: CARD_W, height: CARD_H, background: '#ffffff' }}
+      style={{ width: CARD_W, height: cardH, background: '#ffffff' }}
     >
       {t.variant === 'image' ? (
-        <img src={t.image} alt="" className="absolute inset-0 h-full w-full object-fill" />
+        isTall ? (
+          <>
+            {/* PNG টা ৫২০×৪১০ মাপে আঁকা। কার্ড লম্বা হলে ছবিটা টেনে লম্বা
+                করলে কোনার নকশা বিকৃত হতো, তাই ছবিটা উপরের অংশেই থাকে আর
+                পুরো কার্ড ঘিরে একটা পাতলা ফ্রেম বসে — তাতে নিচের রুটিনও
+                একই বাক্সের ভিতরেই পড়ে। */}
+            <img
+              src={t.image}
+              alt=""
+              className="absolute left-0 top-0 w-full object-fill"
+              style={{ height: CARD_H }}
+            />
+            <div
+              className="absolute"
+              style={{ inset: 6, border: `1.5px solid ${t.accent || t.frameColor}` }}
+            />
+          </>
+        ) : (
+          <img src={t.image} alt="" className="absolute inset-0 h-full w-full object-fill" />
+        )
       ) : (
         <PaintedChrome t={t} />
       )}
@@ -501,35 +513,16 @@ export const AdmitCardFace = ({
 
       {/* ------------------------- হেডার: লোগো | নাম ও ঠিকানা | শিক্ষার্থীর ছবি */}
       <div className="absolute left-0 top-0 w-full" style={{ height: t.headerHeight }}>
-        {/* {logo ? (
-          <img
-            src={logo}
-            alt=""
-            className="absolute left-9 top-2/3 -translate-y-1/2 h-[64px] w-[64px] object-contain"
-          />
-        ) : null}
-
-        {photoEnabled ? (
-          <div
-            className="absolute right-9 top-2/3 -translate-y-1/2 overflow-hidden rounded-[3px] bg-white"
-            style={{
-              width: photoW,
-              height: photoH,
-              border: `1px solid ${t.photoBorder || '#9ca3af'}`,
-            }}
-          >
-            {photo ? (
-              <img src={photo} alt="" className="h-full w-full object-cover" />
-            ) : null}
-          </div>
-        ) : null} */}
-
         {logo ? (
           <img
             src={logo}
             alt=""
             className="absolute top-2/3 -translate-y-1/2 h-[64px] w-[64px] object-contain"
-            style={{ left: t.logoInset ?? 36, top: t.logoTop ?? '66%' }}
+            style={{ 
+              left: t.logoInset ?? 36, 
+              top: t.logoTop ?? '66%', 
+              transform: `translateY(calc(-50% + ${t.logoOffsetY ?? 0}px))`, 
+            }}
           />
         ) : null}
 
@@ -542,6 +535,7 @@ export const AdmitCardFace = ({
               width: photoW,
               height: photoH,
               border: `1px solid ${t.photoBorder || '#9ca3af'}`,
+              transform: `translateY(calc(-50% + ${t.photoOffsetY ?? 0}px))`,
             }}
           >
             {photo ? <img src={photo} alt="" className="h-full w-full object-cover" /> : null}
@@ -549,12 +543,13 @@ export const AdmitCardFace = ({
         ) : null}
 
         <div
-          className="h-full flex flex-col justify-end text-center"
+          className="h-full flex flex-col justify-center items-center text-center"
           dir={dir}
           style={{
             paddingLeft: headerSideReserve,
             paddingRight: headerSideReserve,
-            paddingBottom: 25,
+            paddingTop: 8,
+            paddingBottom: 8,
           }}
         >
           <h2
@@ -580,8 +575,12 @@ export const AdmitCardFace = ({
           style={{ top: examTop, height: examHeight }}
         >
           <p
-            className="text-center text-[13px] whitespace-nowrap"
-            style={{ color: t.examNameColor || t.labelColor, lineHeight: 1.5 }}
+            className="text-center whitespace-nowrap"
+            style={{
+              color: examColorVal,
+              fontSize: `${examSize}px`,
+              lineHeight: 1.5,
+            }}
           >
             {examLine}
           </p>
@@ -647,7 +646,10 @@ export const AdmitCardFace = ({
         dir={dir}
         style={{
           top: t.bodyTop,
-          bottom: bodyBottomEdge,
+          // bodyEnd দিলে bottom এর বদলে height — তাই কার্ড লম্বা হলেও
+          // তথ্যের ঘরটা নিচে ছড়িয়ে পড়ে না, নিজের জোনেই থাকে।
+          // না দিলে আগের নিয়মই অক্ষুণ্ন।
+          ...(bodyEnd ? { height: bodyHeight } : { bottom: bodyBottomEdge }),
           paddingLeft: 40,
           paddingRight: 40,
         }}
@@ -706,7 +708,7 @@ export const AdmitCardFace = ({
             paddingRight: t.signPadX ?? 34,
           }}
         >
-          <SignatureBlock
+          {/* <SignatureBlock
             t={t}
             image={najemSignature}
             name={student.NajemName || getAdmitText('najem', lang)}
@@ -715,6 +717,16 @@ export const AdmitCardFace = ({
             showImage={signImageEnabled}
             showName={signNameEnabled}
             showDate={signDateEnabled}
+          /> */}
+          <SignatureBlock
+            t={t}
+            image={najemSignature}
+            name={student.NajemName || getAdmitText('najem', lang)}
+            printDate={stampDate}
+            dateLabel={getAdmitText('dateLabel', lang)}
+            showImage={najemSignOn}
+            showName={najemNameOn}
+            showDate={najemDateOn}
           />
 
           {qrValue ? (
@@ -738,7 +750,7 @@ export const AdmitCardFace = ({
             </div>
           ) : null}
 
-          <SignatureBlock
+          {/* <SignatureBlock
             t={t}
             image={principalSignature}
             name={student.PrincipalName || getAdmitText('principal', lang)}
@@ -747,6 +759,16 @@ export const AdmitCardFace = ({
             showImage={signImageEnabled}
             showName={signNameEnabled}
             showDate={signDateEnabled}
+          /> */}
+          <SignatureBlock
+            t={t}
+            image={principalSignature}
+            name={student.PrincipalName || getAdmitText('principal', lang)}
+            printDate={stampDate}
+            dateLabel={getAdmitText('dateLabel', lang)}
+            showImage={principalSignOn}
+            showName={principalNameOn}
+            showDate={principalDateOn}
           />
         </div>
       ) : null}
