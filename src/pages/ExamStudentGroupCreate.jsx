@@ -27,13 +27,16 @@ const DELETE_DENIED_MSG = "ফলাফলের-তালিকা হতে �
 // বাম পাশে id = Student_Admission.AdmissionID, ডান পাশে id = Student_Result.ID
 // ⭐ serial = Student_Admission.AdmissionSerial (ক্রম ঠিক রাখতে + কলামে দেখাতে)
 // ⭐ admissionId = দুই পাশেই Student_Admission.AdmissionID — সিরিয়াল এক হলে টাই ভাঙতে লাগে
-const toRow = (id, user, subClass = "", serial = null, admissionId = null) => ({
+// ⭐ inactive = ইউজার ইনঅ্যাক্টিভ (UserAction ≠ 1) — শুধু ডান পাশে আসতে পারে,
+//    বাম পাশে বেকএন্ডই ইনঅ্যাক্টিভদের বাদ দিয়ে দেয়
+const toRow = (id, user, subClass = "", serial = null, admissionId = null, inactive = false) => ({
   id,
   code: user?.UserCode ?? "",
   name: user?.UserName ? (user.UserName) : "",
   subClass: subClass ? (subClass) : "",
   serial: serial ?? null,
   admissionId: admissionId ?? null,
+  inactive: Boolean(inactive),
 });
 
 // ⭐ AdmissionSerial ধরে ascending — backend-এর নিয়মের সাথে মিলিয়ে।
@@ -124,6 +127,9 @@ function ListPanel({
 }) {
   const allChecked = rows.length > 0 && rows.every((r) => checkedSet.has(r.id));
 
+  // ⭐ কতজন ইনঅ্যাক্টিভ — হেডারে জানানোর জন্য
+  const inactiveCount = rows.filter((r) => r.inactive).length;
+
   return (
     <div
       onDragOver={onPanelDragOver}
@@ -143,6 +149,13 @@ function ListPanel({
             {bn(totalCount)} জন
           </span>
         </div>
+
+        {/* ⭐ ইনঅ্যাক্টিভ শিক্ষার্থী থাকলে জানিয়ে দেওয়া */}
+        {inactiveCount > 0 && (
+          <div className="mb-3 flex items-center gap-2 rounded border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
+            <span>লাল রো-গুলো ইনঅ্যাক্টিভ শিক্ষার্থী — {bn(inactiveCount)} জন</span>
+          </div>
+        )}
 
         {/* permission না থাকলে প্যানেলের উপরেই জানিয়ে দেওয়া */}
         {!canDrag && deniedMsg && (
@@ -202,6 +215,16 @@ function ListPanel({
                 const checked = checkedSet.has(s.id);
                 const isDragging = draggingIds.includes(s.id);
                 const draggable = !busy && canDrag;
+
+                // ⭐ ইনঅ্যাক্টিভ হলে পুরো রো লাল — সিলেক্ট করা থাকলে একটু গাঢ়
+                const rowTone = s.inactive
+                  ? checked
+                    ? "bg-red-100 hover:bg-red-100"
+                    : "bg-red-50 hover:bg-red-100"
+                  : checked
+                  ? "bg-[#1B3A57]/5"
+                  : "hover:bg-slate-50";
+
                 return (
                   <tr
                     key={s.id}
@@ -209,7 +232,9 @@ function ListPanel({
                     onDragStart={onRowDragStart(side, s.id)}
                     onDragEnd={onRowDragEnd}
                     title={
-                      canDrag
+                      s.inactive
+                        ? "এই শিক্ষার্থী ইনঅ্যাক্টিভ"
+                        : canDrag
                         ? "ড্র্যাগ করে অন্য পাশে ছেড়ে দিন"
                         : deniedMsg || "আপনার অনুমতি নেই"
                     }
@@ -219,7 +244,7 @@ function ListPanel({
                         : busy
                         ? "cursor-wait"
                         : "cursor-grab active:cursor-grabbing"
-                    } ${checked ? "bg-[#1B3A57]/5" : "hover:bg-slate-50"} ${isDragging ? "opacity-40" : ""}`}
+                    } ${rowTone} ${isDragging ? "opacity-40" : ""}`}
                   >
                     <td className="px-3 py-3">
                       <Checkbox
@@ -229,14 +254,32 @@ function ListPanel({
                       />
                     </td>
                     {/* ⭐ ক্রম — সাজানো তালিকার ইনডেক্স */}
-                    <td className="px-3 py-3 text-slate-500">{bn(index + 1)}</td>
+                    <td className={`px-3 py-3 ${s.inactive ? "text-red-500" : "text-slate-500"}`}>
+                      {bn(index + 1)}
+                    </td>
                     {/* ⭐ ভর্তি সিরিয়াল */}
-                    <td className="px-3 py-3 font-mono text-slate-600">
+                    <td className={`px-3 py-3 font-mono ${s.inactive ? "text-red-700" : "text-slate-600"}`}>
                       {s.serial ? bn(s.serial) : "—"}
                     </td>
-                    <td className="px-3 py-3 font-mono">{bn(s.code || s.id)}</td>
-                    <td className="px-3 py-3 font-medium text-slate-800 whitespace-nowrap">{s.name}</td>
-                    <td className="px-3 py-3 text-slate-600 whitespace-nowrap">{s.subClass || "—"}</td>
+                    <td className={`px-3 py-3 font-mono ${s.inactive ? "text-red-700" : ""}`}>
+                      {bn(s.code || s.id)}
+                    </td>
+                    <td
+                      className={`px-3 py-3 font-medium whitespace-nowrap ${
+                        s.inactive ? "text-red-700" : "text-slate-800"
+                      }`}
+                    >
+                      {s.name}
+                      {/* ⭐ ইনঅ্যাক্টিভ ব্যাজ */}
+                      {s.inactive && (
+                        <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600 border border-red-200">
+                          ইনঅ্যাক্টিভ
+                        </span>
+                      )}
+                    </td>
+                    <td className={`px-3 py-3 whitespace-nowrap ${s.inactive ? "text-red-700" : "text-slate-600"}`}>
+                      {s.subClass || "—"}
+                    </td>
                   </tr>
                 );
               })
@@ -383,14 +426,16 @@ export default function ExamStudentGroupCreate() {
   const [apiError, setApiError] = useState(null);
 
   useEffect(() => {
+    // ⭐ বেকএন্ডেই UserAction = 1 ফিল্টার করা, তাই বাম পাশে সবাই একটিভ
     setAvailable(
       (listData?.available || []).map((a) =>
-        toRow(a.AdmissionID, a.User, fromSubClassName, a.AdmissionSerial, a.AdmissionID)
+        toRow(a.AdmissionID, a.User, fromSubClassName, a.AdmissionSerial, a.AdmissionID, false)
       )
     );
+    // ⭐ ডান পাশে ইনঅ্যাক্টিভ শিক্ষার্থীও দেখাবে — IsInactive ফ্ল্যাগ দিয়ে রো লাল হবে
     setGroup(
       (listData?.added || []).map((r) =>
-        toRow(r.ID, r.User, r.SourceSubClass, r.AdmissionSerial, r.AdmissionID)
+        toRow(r.ID, r.User, r.SourceSubClass, r.AdmissionSerial, r.AdmissionID, r.IsInactive)
       )
     );
     setAvailableChecked(new Set());
@@ -662,7 +707,7 @@ export default function ExamStudentGroupCreate() {
           </div>
         )}
 
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start w-full">
+        <section className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-4 items-start w-full">
           <ListPanel
             title="যাদের গ্রুপে নিবেন তাদের নির্বাচন করুন"
             subTitle={fromSubClassName ? `সাব ক্লাস: ${fromSubClassName}` : ""}
@@ -688,6 +733,35 @@ export default function ExamStudentGroupCreate() {
             busy={busy}
             canDrag={true}
           />
+
+          {/* ⭐ বাম ↔ ডান মুভ করার অ্যারো বাটন */}
+          <div className="flex flex-col lg:flex-col items-center justify-center gap-3 lg:self-center lg:py-6">
+            <button
+              type="button"
+              title="নির্বাচিত শিক্ষার্থীদের গ্রুপে নিন"
+              onClick={() => moveIdsToGroup(Array.from(availableChecked))}
+              disabled={busy || availableChecked.size === 0}
+              className="w-11 h-11 flex items-center justify-center rounded-full border border-[#1B3A57]/30 bg-white text-[#1B3A57] shadow-sm transition hover:bg-[#1B3A57] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#1B3A57]"
+            >
+              <svg className="w-5 h-5 rotate-90 lg:rotate-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="13 6 19 12 13 18" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              title="নির্বাচিত শিক্ষার্থীদের গ্রুপ থেকে সরান"
+              onClick={() => moveIdsToAvailable(Array.from(groupChecked))}
+              disabled={busy || groupChecked.size === 0}
+              className="w-11 h-11 flex items-center justify-center rounded-full border border-[#1B3A57]/30 bg-white text-[#1B3A57] shadow-sm transition hover:bg-[#1B3A57] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#1B3A57]"
+            >
+              <svg className="w-5 h-5 rotate-90 lg:rotate-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="11 6 5 12 11 18" />
+              </svg>
+            </button>
+          </div>
 
           <ListPanel
             title="নিম্নোক্ত শিক্ষার্থীরা গ্রুপে যোগ হয়েছে"
