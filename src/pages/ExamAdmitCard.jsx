@@ -135,6 +135,26 @@ const waitForPrintReady = async () => {
   ]);
 };
 
+/** ছোট, নির্ভরতা-মুক্ত স্পিনার — সব জায়গায় একই চেহারা */
+const Spinner = ({ size = 24, stroke = 3, className = '' }) => (
+  <svg
+    className={`animate-spin ${className}`}
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth={stroke} opacity="0.2" />
+    <path
+      d="M22 12a10 10 0 0 1-10 10"
+      stroke="currentColor"
+      strokeWidth={stroke}
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 /**
  * সব পপআপের অভিন্ন খোল — হেডার, স্ক্রলযোগ্য বডি, ব্যাকড্রপে ক্লিকে বন্ধ।
  * খোলা না থাকলে কিছুই রেন্ডার হয় না, তাই ভিতরের কাজও হয় না।
@@ -1050,7 +1070,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
             ডাটা কম হলেও ঘরটা ছোট হয় না, বেশি হলে ভিতরেই স্ক্রল হয়। ফলে
             নিচের পেজিনেশন ও বোতামের জায়গা কখনো লাফায় না।
             h-[calc(...)] দিয়ে পর্দার বাকি অংশটুকু নেয়, min-h ছোট পর্দার জন্য। */}
-        <div className="mt-6 flex h-[calc(100vh-340px)] min-h-[160px] flex-col overflow-hidden rounded-[10px] border border-gray-200">
+        <div className="relative mt-6 flex h-[calc(100vh-340px)] min-h-[160px] flex-col overflow-hidden rounded-[10px] border border-gray-200">
           {/* ---------------------------------------- তালিকা, ভিতরে স্ক্রল হয় */}
           <div className="flex-1 min-h-0 overflow-auto">
             <table className="w-full min-w-[520px] border-collapse">
@@ -1121,6 +1141,21 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               </tbody>
             </table>
           </div>
+
+          {/* ---------------------------------------------- বড় লোডিং ওভারলে
+              ডাটা আনা হচ্ছে — টেবিলের উপরে সাদা পর্দা, মাঝে স্পিনার।
+              user যেন বুঝতে পারে কাজ চলছে। */}
+          {isFetching ? (
+            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/80 backdrop-blur-[2px]">
+              <Spinner size={52} stroke={4} className="text-blue-600" />
+              <p className="mt-3 text-[16px] font-semibold text-gray-700">
+                {ui('loading')}
+              </p>
+              <p className="mt-1 text-[13px] text-gray-500">
+                {ui('searchHint')}
+              </p>
+            </div>
+          ) : null}
 
           {/* ------------------------------------------- ঘরের নিচের স্থির সারি
               শুধু পেজিনেশন, ঠিক মাঝখানে। প্রিভিউ ও প্রিন্ট উপরে ফিল্টারের

@@ -36,13 +36,16 @@ const bn = (num) => {
 // assigned  = নির্ধারিত  (বাম: Exam_FeeSetting-এর ফি | ডান: Exam_FeeAccept.Fee)
 // deduction = কর্তন      (বাম: হাতে লেখা, শুরুতে ০ | ডান: Exam_FeeAccept.Less)
 // serial    = Student_Admission.AdmissionSerial (দুই পাশেই দেখানো হয়)
-const toRow = (id, user, { assigned = 0, deduction = 0, serial = "" } = {}) => ({
+// ⭐ inactive = ইউজার ইনঅ্যাক্টিভ (UserAction ≠ 1) — শুধু ডান পাশে আসতে পারে,
+//    বাম পাশে বেকএন্ডই ইনঅ্যাক্টিভদের বাদ দিয়ে দেয়
+const toRow = (id, user, { assigned = 0, deduction = 0, serial = "", inactive = false } = {}) => ({
   id,
   code: user?.UserCode ?? "",
   name: user?.UserName ? (user.UserName) : "",
   serial: serial === null || serial === undefined ? "" : serial,
   assigned: Number(assigned) || 0,
   deduction: Number(deduction) || 0,
+  inactive: Boolean(inactive),
 });
 
 function computeRows(rows) {
@@ -131,6 +134,7 @@ const inputClass = "border border-slate-300 rounded-xl px-3 py-2.5 text-base foc
 /* ---------------------------------------------------------
    List panel — বামে "যাদের ফি নিবেন", ডানে "ফি গ্রহণ করা হয়েছে"
    ⚠️ permission নিয়ে এই কম্পোনেন্ট কিছুই জানে না — ড্র্যাগ সবসময় চালু।
+   ⭐ রো-তে inactive = true হলে পুরো রো লাল হয়ে থাকবে (ইনঅ্যাক্টিভ শিক্ষার্থী)
 --------------------------------------------------------- */
 
 function ListPanel({
@@ -140,6 +144,9 @@ function ListPanel({
   isDragTarget, draggingIds, emptyText, busy, editable, showStatChips,
 }) {
   const allChecked = rows.length > 0 && rows.every((r) => checkedSet.has(r.id));
+
+  // ⭐ কতজন ইনঅ্যাক্টিভ — হেডারে জানানোর জন্য
+  const inactiveCount = rows.filter((r) => r.inactive).length;
 
   return (
     <div
@@ -157,6 +164,13 @@ function ListPanel({
             {bn(totalCount)} জন
           </span>
         </div>
+
+        {/* ⭐ ইনঅ্যাক্টিভ শিক্ষার্থী থাকলে জানিয়ে দেওয়া */}
+        {inactiveCount > 0 && (
+          <div className="mb-3 flex items-center gap-2 rounded border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-600">
+            <span>লাল রো-গুলো ইনঅ্যাক্টিভ শিক্ষার্থী — {bn(inactiveCount)} জন</span>
+          </div>
+        )}
 
         <div className="flex items-center gap-2 mt-3 flex-wrap">
           {showStatChips && (
@@ -219,30 +233,64 @@ function ListPanel({
               rows.map((s, index) => {
                 const checked = checkedSet.has(s.id);
                 const isDragging = draggingIds.includes(s.id);
+
+                // ⭐ ইনঅ্যাক্টিভ হলে পুরো রো লাল — সিলেক্ট করা থাকলে একটু গাঢ়
+                const rowTone = s.inactive
+                  ? checked
+                    ? "bg-red-100 hover:bg-red-100"
+                    : "bg-red-50 hover:bg-red-100"
+                  : checked
+                  ? "bg-[#1B3A57]/5"
+                  : "hover:bg-slate-50";
+
                 return (
                   <tr
                     key={s.id}
                     draggable={!busy}
                     onDragStart={onRowDragStart(side, s.id)}
                     onDragEnd={onRowDragEnd}
-                    title="ড্র্যাগ করে অন্য পাশে ছেড়ে দিন"
+                    title={
+                      s.inactive
+                        ? "এই শিক্ষার্থী ইনঅ্যাক্টিভ"
+                        : "ড্র্যাগ করে অন্য পাশে ছেড়ে দিন"
+                    }
                     className={`border-b border-slate-50 last:border-0 transition-colors select-none ${
                       busy ? "cursor-wait" : "cursor-grab active:cursor-grabbing"
-                    } ${checked ? "bg-[#1B3A57]/5" : "hover:bg-slate-50"} ${isDragging ? "opacity-40" : ""}`}
+                    } ${rowTone} ${isDragging ? "opacity-40" : ""}`}
                   >
                     <td className="px-3 py-3">
                       <Checkbox checked={checked} onChange={(v) => onToggleOne(s.id, v)} />
                     </td>
                     {/* ⭐ ক্রম — সাজানো তালিকার ইনডেক্স */}
-                    <td className="px-3 py-3 text-slate-500">{bn(index + 1)}</td>
+                    <td className={`px-3 py-3 ${s.inactive ? "text-red-500" : "text-slate-500"}`}>
+                      {bn(index + 1)}
+                    </td>
                     {/* ⭐ ভর্তি সিরিয়াল — এখন আইডি-এর আগে */}
-                    <td className="px-3 py-3 text-slate-800">{bn(s.serial) || "—"}</td>
-                    <td className="px-3 py-3 font-mono ">{bn(s.code || s.id)}</td>
-                    <td className="px-3 py-3 font-medium text-slate-800 whitespace-nowrap">{s.name}</td>
+                    <td className={`px-3 py-3 ${s.inactive ? "text-red-700" : "text-slate-800"}`}>
+                      {bn(s.serial) || "—"}
+                    </td>
+                    <td className={`px-3 py-3 font-mono ${s.inactive ? "text-red-700" : ""}`}>
+                      {bn(s.code || s.id)}
+                    </td>
+                    <td
+                      className={`px-3 py-3 font-medium whitespace-nowrap ${
+                        s.inactive ? "text-red-700" : "text-slate-800"
+                      }`}
+                    >
+                      {s.name}
+                      {/* ⭐ ইনঅ্যাক্টিভ ব্যাজ */}
+                      {s.inactive && (
+                        <span className="ml-2 px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-600 border border-red-200">
+                          ইনঅ্যাক্টিভ
+                        </span>
+                      )}
+                    </td>
                     {showStatChips && (
                       <>
-                        <td className="px-3 py-3 text-slate-800">{bn(s.assigned)}</td>
-                        <td className="px-3 py-3 text-slate-800">
+                        <td className={`px-3 py-3 ${s.inactive ? "text-red-700" : "text-slate-800"}`}>
+                          {bn(s.assigned)}
+                        </td>
+                        <td className={`px-3 py-3 ${s.inactive ? "text-red-700" : "text-slate-800"}`}>
                           {editable ? (
                             <input
                               type="number"
@@ -263,7 +311,13 @@ function ListPanel({
                             bn(s.deduction)
                           )}
                         </td>
-                        <td className="px-3 py-3 font-semibold text-slate-800">{bn(s.net)}</td>
+                        <td
+                          className={`px-3 py-3 font-semibold ${
+                            s.inactive ? "text-red-700" : "text-slate-800"
+                          }`}
+                        >
+                          {bn(s.net)}
+                        </td>
                       </>
                     )}
                   </tr>
@@ -416,25 +470,27 @@ export default function ExamStudentList() {
     const fee = Number(listData?.fee) || 0;
 
     // বাম পাশ — নির্ধারিত = Exam_FeeSetting-এর ফি, কর্তন শুরুতে ০
-    // ⭐ AdmissionSerial বেকএন্ড থেকেই available রো-তে আসে
+    // ⭐ বেকএন্ডেই UserAction = 1 ফিল্টার করা, তাই এখানে সবাই একটিভ
     setUnpaid(
       (listData?.available || []).map((a) =>
         toRow(a.AdmissionID, a.User, {
           assigned: fee,
           deduction: 0,
           serial: a.AdmissionSerial,
+          inactive: false,
         })
       )
     );
 
     // ডান পাশ — Exam_FeeAccept-এ সেভ করা টাকা
-    // ⭐ added রো-তেও বেকএন্ড AdmissionSerial বসিয়ে পাঠায়
+    // ⭐ ইনঅ্যাক্টিভ শিক্ষার্থীও দেখাবে — IsInactive ফ্ল্যাগ দিয়ে রো লাল হবে
     setPaid(
       (listData?.added || []).map((r) =>
         toRow(r.ID, r.User, {
           assigned: r.Fee,
           deduction: r.Less,
           serial: r.AdmissionSerial,
+          inactive: r.IsInactive,
         })
       )
     );
@@ -588,10 +644,13 @@ export default function ExamStudentList() {
     }
 
     setPaid((prev) => prev.filter((s) => !idSet.has(s.id)));
-    // বাম পাশে ফিরে গেলে আবার বর্তমান নির্ধারিত ফি, কর্তন ০ — serial অপরিবর্তিত থাকে
+    // ⭐ ইনঅ্যাক্টিভ শিক্ষার্থী বাম পাশে দেখানোর কথা নয় — রিফেচ এলে এমনিতেই বাদ যাবে,
+    //    তাই optimistic update-এও শুধু একটিভদের ফেরত আনা হচ্ছে
     setUnpaid((prev) => [
       ...prev,
-      ...moving.map((s) => ({ ...s, assigned: fixedFee, deduction: 0 })),
+      ...moving
+        .filter((s) => !s.inactive)
+        .map((s) => ({ ...s, assigned: fixedFee, deduction: 0 })),
     ]);
     setPaidChecked((prev) => {
       const next = new Set(prev);
@@ -736,7 +795,7 @@ export default function ExamStudentList() {
           </div>
         )}
 
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start w-full">
+        <section className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr] gap-4 items-start w-full">
           <ListPanel
             title="যাদের ফি নিবেন তাদের নির্বাচন করুন"
             titleColor="text-slate-800"
@@ -764,6 +823,37 @@ export default function ExamStudentList() {
             editable
             showStatChips={showStatChips}
           />
+
+          {/* ⭐ বাম ↔ ডান মুভ করার অ্যারো বাটন */}
+          <div className="flex flex-col lg:flex-col items-center justify-center gap-3 lg:self-center lg:py-6">
+            <button
+              type="button"
+              title="নির্বাচিত শিক্ষার্থীদের ডান পাশে নিন"
+              onClick={() => moveIdsToPaid(Array.from(unpaidChecked))}
+              disabled={busy || unpaidChecked.size === 0}
+              className="w-11 h-11 flex items-center justify-center rounded-full border border-[#1B3A57]/30 bg-white text-[#1B3A57] shadow-sm transition hover:bg-[#1B3A57] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#1B3A57]"
+            >
+              {/* এখানে rotate-90 যোগ করা হয়েছে */}
+              <svg className="w-5 h-5 rotate-90 lg:rotate-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="13 6 19 12 13 18" />
+              </svg>
+            </button>
+
+            <button
+              type="button"
+              title="নির্বাচিত শিক্ষার্থীদের বাম পাশে ফেরত পাঠান"
+              onClick={() => moveIdsToUnpaid(Array.from(paidChecked))}
+              disabled={busy || paidChecked.size === 0}
+              className="w-11 h-11 flex items-center justify-center rounded-full border border-[#1B3A57]/30 bg-white text-[#1B3A57] shadow-sm transition hover:bg-[#1B3A57] hover:text-white disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:text-[#1B3A57]"
+            >
+              {/* এখানে -rotate-90 যোগ করা হয়েছে */}
+              <svg className="w-5 h-5 rotate-90 lg:rotate-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="11 6 5 12 11 18" />
+              </svg>
+            </button>
+          </div>
 
           <ListPanel
             title="নিম্নোক্ত শিক্ষার্থীদের ফি গ্রহণ করা হয়েছে"
