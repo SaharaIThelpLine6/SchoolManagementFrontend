@@ -396,7 +396,7 @@ const DefaultModal = () => {
                   <CharecterReportTypeModal />
                 )}
                 {modalType === 'DATA_EXPORT_FEILD' && (
-                  <DataExportModel userData={id} />
+                  <DataExportModel dataExport={id} />
                 )}
                 {modalType === 'STUDENT_ID_CARD' && (
                   <StudentCardModel />
