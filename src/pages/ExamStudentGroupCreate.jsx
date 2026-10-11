@@ -607,7 +607,7 @@ export default function ExamStudentGroupCreate() {
       <div className="w-full mx-auto">
         <header className="mb-5 flex items-center gap-3">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-800">শিক্ষার্থী গ্রুপ তৈরি</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-slate-800">পরীক্ষার্থী গ্রুপ তৈরি</h1>
             <p className="text-sm sm:text-base">
               শিক্ষাবর্ষ → পরীক্ষা → সাব ক্লাস হতে নির্বাচন করুন, এরপর সাব ক্লাশ পর্যন্ত বেছে নিয়ে
               শিক্ষার্থী ড্র্যাগ করে গ্রুপে নিন

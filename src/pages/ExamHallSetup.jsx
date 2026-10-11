@@ -233,7 +233,7 @@ const ExamHallSetup = () => {
             }).then((result) => {
                 if (result.isConfirmed) {
                     if (shouldExit) {
-                        navigate('/exam/exam-hallist')
+                        navigate('/dashboard/exam/exam-hallist')
                     }
                     reset({ HallName: '', columns: [] });
                 }
@@ -286,7 +286,7 @@ const ExamHallSetup = () => {
 
                 <button
                     type="button"
-                    onClick={() => navigate('/exam/exam-hallist')}
+                    onClick={() => navigate('/dashboard/exam/exam-hallist')}
                     className="h-10 px-4 rounded-lg border border-gray-200 bg-white text-sm text-gray-700"
                 >
                     {translate('Back')}

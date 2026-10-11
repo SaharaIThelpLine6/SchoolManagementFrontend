@@ -557,6 +557,13 @@ export const examSlice = createApi({
       }),
       invalidatesTags: ['AdmitCardSettings'],   // 👈 ইন্ডেন্টেশন ঠিক করা
     }),
+    getExamRoutineCard: builder.query({
+      query: ({ SessionID, ExamID, SubClassID, HallID }) =>
+        `/exam_routine_card/${SessionID}/${ExamID}/${SubClassID}${
+          HallID ? `/${HallID}` : ''
+        }`,
+      providesTags: ['ExamRoutineCard'],
+    }),
 
   }),
 });
@@ -628,4 +635,5 @@ export const {
   useGetExamFilterSubclassesQuery,
   useGetAdmitCardSettingsQuery,
   useSaveAdmitCardSettingsMutation,
+  useGetExamRoutineCardQuery,
 } = examSlice;

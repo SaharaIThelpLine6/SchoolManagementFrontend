@@ -107,7 +107,7 @@ const BanglaNumberWithTwoColumn = ({reportData, queryParams}) => {
         <p className="text-black text-[16px] leading-snug">{institutionInfo?.Address}</p>
         <div className="py-1 px-4 mx-auto max-w-2xl mt-1">
           <h2 className="text-[18px] font-semibold">
-            {examListData[0]["Exam"]["ExamName"]}
+            {examListData?.[0]?.Exam?.ExamName}
           </h2>
         </div>
 
@@ -161,7 +161,7 @@ const BanglaNumberWithTwoColumn = ({reportData, queryParams}) => {
             <tbody>
              {Array.isArray(reportData) &&
                 reportData.map((row, i) => (
-                  <tr key={i}>
+                  <tr key={i} data-idx={i}>
                     <td>{bnBijoy2Unicode(String(i + 1))}</td>
                     <td>{bnBijoy2Unicode(String(row?.User?.UserCode ?? ""))}</td>
                     <td>{row?.User?.UserName}</td>

@@ -103,10 +103,7 @@ const MadrashaHomePage = () => {
           className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"
           style={{ backgroundColor: settingsObject.secondary || '#D8F3DC' }}
         ></div>
-        <div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000"
-          style={{ backgroundColor: settingsObject.primary || '#95D5B2' }}
-        ></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-4000" style={{ backgroundColor: settingsObject.primary || '#95D5B2' }}></div>
 
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-2xl relative z-10">
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
@@ -214,12 +211,8 @@ const MadrashaHomePage = () => {
                     <div className="relative flex flex-col gap-5 rounded-2xl bg-white p-6 h-full z-10">
                       {/* Icon with floating effect */}
                       <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-50 to-white flex items-center justify-center shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:-translate-y-1 group-hover:rotate-3">
-                        <span
-                          className="flex items-center justify-center w-10 h-10 rounded-xl text-white shadow-sm transition-all duration-300"
-                          style={{
-                            background: `linear-gradient(to bottom right, ${settingsObject.secondary || '#fbbf24'}, ${
-                              settingsObject.secondary ? shadeColor(settingsObject.secondary, -20) : '#f97316'
-                            })`,
+                        <span className="flex items-center justify-center w-10 h-10 rounded-xl text-white shadow-sm transition-all duration-300"
+                          style={{background: `linear-gradient(to bottom right, ${settingsObject.secondary || '#fbbf24'}, ${settingsObject.secondary ? shadeColor(settingsObject.secondary, -20) : '#f97316'})`,
                           }}
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">

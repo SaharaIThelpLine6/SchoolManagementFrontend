@@ -304,7 +304,7 @@ const ExamHallEdit = () => {
                 confirmButtonColor: '#3085d6',
             });
 
-            navigate('/exam/exam-hallist');
+            navigate('/dashboard/exam/exam-hallist');
         } catch (err) {
             let errorTitle = translate('Error');
             let errorContent = '';
@@ -347,7 +347,7 @@ const ExamHallEdit = () => {
                     </p>
                     <button
                         type="button"
-                        onClick={() => navigate('/exam/exam-hallist')}
+                        onClick={() => navigate('/dashboard/exam/exam-hallist')}
                         className="mt-4 h-10 px-5 rounded-lg bg-gray-900 text-white text-sm"
                     >
                         {translate('Back to hall list')}
@@ -370,7 +370,7 @@ const ExamHallEdit = () => {
                 </div>
                 <button
                     type="button"
-                    onClick={() => navigate('/exam/exam-hallist')}
+                    onClick={() => navigate('/dashboard/exam/exam-hallist')}
                     className="h-10 px-4 rounded-lg border border-gray-200 bg-white text-sm text-gray-700"
                 >
                     {translate('Back')}
