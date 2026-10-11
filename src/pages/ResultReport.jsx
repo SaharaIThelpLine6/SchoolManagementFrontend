@@ -5,18 +5,24 @@ import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import { resultReports } from '../Data/userReportsData';
 import { useGetClassListQuery } from '../features/class/classQuerySlice';
-import { useGetExamFilterExamsQuery, useGetExamFilterSubclassesQuery, useGetExamSessionQuery } from '../features/exam/examQuerySlice';
-import Button from '../components/Button/Button';
-import { useGetResultReportDataQuery } from '../features/result/resultSilce';
+import {
+  useGetExamFilterExamsQuery,
+  useGetExamFilterSubclassesQuery,
+  useGetExamSessionQuery,
+} from '../features/exam/examQuerySlice';
+import { useGetLabelNameListsQuery, useGetResultReportDataQuery } from '../features/result/resultSilce';
 import StudentResultSheet from '../view/result/Reports/StudentResultSheet';
-import StudentResultSheetTwoColumn from '../view/result/Reports/StudentResultSheetTwoColumn';
 import AttendanceSheet from '../view/result/Reports/AttendanceSheet';
-import ScaledPreview from '../components/ScaledPreview';
 import StudentResultState from '../view/result/Reports/StudentResultState';
 
 const ResultReport = () => {
   const translate = useTranslate();
   const [queryParams, setQueryParams] = useState(null);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+
+  const { data } = useGetLabelNameListsQuery();
+  const labels = data?.[0] || {};
+
   const {
     data: reportData,
     isLoading,
@@ -29,9 +35,10 @@ const ResultReport = () => {
   const methods = useForm();
   const { control, handleSubmit, setValue } = methods;
 
-  const selectedReportID = useWatch({ control, name: "ReportID" });
-  const sessionID = useWatch({ control, name: "SessionID" });
-  const examID = useWatch({ control, name: "ExamID" });
+  const selectedReportID = useWatch({ control, name: 'ReportID' });
+  const sessionID = useWatch({ control, name: 'SessionID' });
+  const examID = useWatch({ control, name: 'ExamID' });
+
   const { data: examNameData } = useGetExamFilterExamsQuery(
     { SessionID: sessionID },
     { skip: !sessionID }
@@ -42,57 +49,33 @@ const ResultReport = () => {
   );
 
   useEffect(() => {
-    setValue("ExamID", "");
-    setValue("SubClassID", "");
+    setValue('ExamID', '');
+    setValue('SubClassID', '');
   }, [sessionID, setValue]);
 
   useEffect(() => {
-    setValue("SubClassID", "");
+    setValue('SubClassID', '');
   }, [examID, setValue]);
+
+  useEffect(() => {
+    const handler = () => setExportMenuOpen(false);
+    if (exportMenuOpen) {
+      window.addEventListener('click', handler);
+      return () => window.removeEventListener('click', handler);
+    }
+  }, [exportMenuOpen]);
+
   const shouldShowFields = (fieldName) => {
-    switch (selectedReportID) {
+    switch (Number(selectedReportID)) {
       case 1:
-        return [
-          "ReportID",
-          "SessionID",
-          "ExamID",
-          "SubClassID",
-          "UserCode",
-        ].includes(fieldName);
+        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
       case 2:
-        return [
-          "ReportID",
-          "SessionID",
-          "ExamID",
-          "SubClassID",
-        ].includes(fieldName);
       case 3:
-        return [
-          "ReportID",
-          "SessionID",
-          "ExamID",
-          "SubClassID",
-        ].includes(fieldName);
       case 4:
-        return [
-          "ReportID",
-          "SessionID",
-          "ExamID",
-          "SubClassID",
-        ].includes(fieldName);
       case 5:
-        return [
-          "ReportID",
-          "SessionID",
-          "ExamID",
-          "SubClassID",
-        ].includes(fieldName);
+        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID'].includes(fieldName);
       case 6:
-        return [
-          "ReportID",
-          "SessionID",
-          "ExamID",
-        ].includes(fieldName);
+        return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
       default:
         return false;
     }
@@ -107,227 +90,256 @@ const ResultReport = () => {
     };
 
     Object.keys(params).forEach((key) => {
-      if (params[key] === undefined || params[key] === "") {
-        delete params[key];
-      }
+      if (params[key] === undefined || params[key] === '') delete params[key];
     });
 
     setQueryParams(params);
   };
 
-  const hasStudentResults = Array.isArray(reportData?.studentResults)
-    && reportData.studentResults.length > 0;
-  const hasDivisionStatistics = Array.isArray(reportData?.divisionStatistics)
-    && reportData.divisionStatistics.length > 0;
+  const hasStudentResults =
+    Array.isArray(reportData?.studentResults) && reportData.studentResults.length > 0;
+  const hasDivisionStatistics =
+    Array.isArray(reportData?.divisionStatistics) && reportData.divisionStatistics.length > 0;
+  const hasReportContent = hasStudentResults || hasDivisionStatistics;
 
-  if (isLoading) {
-    return <Loading />;
-  }
+  const handlePrintPDF = () => window.print();
+
+  const handleExportExcel = () => {
+    if (!reportData) return;
+    let rows = [];
+    if (hasStudentResults) {
+      rows.push(['SL', 'Name', 'Roll', 'Class', 'Section', 'Total', 'GPA', 'Grade', 'Result']);
+      reportData.studentResults.forEach((s, i) => {
+        rows.push([
+          i + 1,
+          s.StudentName || s?.User?.UserName || '',
+          s.RollNo || '',
+          s.ClassName || '',
+          s.SectionName || '',
+          s.TotalMarks || s.Total || '',
+          s.GPA || '',
+          s.Grade || s?.Division?.DivisionNames || '',
+          s.Result || '',
+        ]);
+      });
+    }
+    const csv = rows
+      .map((row) =>
+        row
+          .map((cell) => {
+            const val = String(cell ?? '');
+            return val.includes(',') || val.includes('"')
+              ? `"${val.replace(/"/g, '""')}"`
+              : val;
+          })
+          .join(',')
+      )
+      .join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `result_report_${selectedReportID}_${Date.now()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportJSON = () => {
+    if (!reportData) return;
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], {
+      type: 'application/json',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `result_report_${selectedReportID}_${Date.now()}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const renderReport = () => {
+    if (!hasReportContent) return null;
+    const props = {
+      reportData,
+      query: queryParams,
+      labels,
+    };
+    switch (Number(selectedReportID)) {
+      case 1:
+        return <StudentResultSheet {...props} />;
+      case 2:
+        return <AttendanceSheet {...props} />;
+      case 3:
+        return <StudentResultState {...props} />;
+      default:
+        return null;
+    }
+  };
+
+  if (isLoading) return <Loading />;
 
   return (
-    <div>
-      <div className='flex items-center justify-between bg-white p-4 rounded-tl-lg rounded-tr-lg print:hidden mb-4'>
-        <h1 className='font-semibold text-lg text-theme-dark font-default mb-0'>ফলাফল রিপোর্ট</h1>
-      </div>
+    <FormProvider {...methods}>
+      <div className="min-h-screen bg-slate-50">
+        {/* ═══════════════ TOP HEADER ═══════════════ */}
+        <header className="bg-white border-b border-slate-200 sticky top-0 z-30 print:hidden">
+          <div className="px-4 lg:px-6 py-3 flex flex-row flex-wrap items-end gap-x-4 gap-y-3">
+            <div className="flex items-center gap-3 shrink-0 self-center">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <h1 className="font-bold text-base text-slate-800 leading-tight">ফলাফল রিপোর্ট</h1>
+                <p className="text-[11px] text-slate-400 leading-tight">Result Report Generator</p>
+              </div>
+            </div>
 
-      <div className='flex flex-col lg:flex-row gap-4 min-h-screen print:min-h-0 print:gap-0'>
-        <div className="p-4 print:hidden bg-white lg:w-[40%]">
-          <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-1 gap-4">
-              <DefaultSelect
-                label={translate("Report") + ":"}
-                nameField="ReportName"
-                registerKey="ReportID"
-                valueField="ReportID"
-                options={resultReports}
-                type="number"
-                require="This Field is required"
-              />
-
-              {shouldShowFields("SessionID") && (
+            <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 min-w-0 flex-row flex-wrap items-end gap-3">
+              <div className="w-[150px] shrink-0">
                 <DefaultSelect
-                  label={translate("Session") + " :"}
-                  nameField="SessionName"
-                  registerKey="SessionID"
-                  valueField="SessionID"
-                  options={sessionData ?? []}
+                  label={translate('Report')}
+                  nameField="ReportName"
+                  registerKey="ReportID"
+                  valueField="ReportID"
+                  options={resultReports}
+                  type="number"
                   require="This Field is required"
-                  defaultSelect={false}
-                  unicode={true}
                 />
+              </div>
+
+              {shouldShowFields('SessionID') && (
+                <div className="w-[150px] shrink-0">
+                  <DefaultSelect label={translate('Session')} nameField="SessionName" registerKey="SessionID" valueField="SessionID" options={sessionData ?? []} require="This Field is required" defaultSelect={false} unicode={true} />
+                </div>
               )}
 
-              {shouldShowFields("ExamID") && (
-                <DefaultSelect
-                  label={translate("Exam") + " :"}
-                  nameField="ExamName"
-                  registerKey="ExamID"
-                  valueField="ExamID"
-                  options={examNameData ?? []}
-                  require={"This Field is required"}
-                  unicode={true}
-                />
+              {shouldShowFields('ExamID') && (
+                <div className="w-[150px] shrink-0">
+                  <DefaultSelect label={translate('Exam')} nameField="ExamName" registerKey="ExamID" valueField="ExamID" options={examNameData ?? []} require="This Field is required" unicode={true} />
+                </div>
               )}
 
-              {shouldShowFields("ClassID") && (
-                <DefaultSelect
-                  label={translate("Class") + " :"}
-                  nameField="ClassName"
-                  registerKey="ClassID"
-                  valueField="ClassID"
-                  options={classListData ?? []}
-                  require={"This Field is required"}
-                  unicode={true}
-                />
+              {shouldShowFields('ClassID') && (
+                <div className="w-[150px] shrink-0">
+                  <DefaultSelect label={translate('Class')} nameField="ClassName" registerKey="ClassID" valueField="ClassID" options={classListData ?? []} require="This Field is required" unicode={true} />
+                </div>
               )}
 
-              {shouldShowFields("SubClassID") && (
-                <DefaultSelect
-                  label={translate("Sub Class") + " :"}
-                  nameField="SubClass"
-                  registerKey="SubClassID"
-                  valueField="SubClassID"
-                  options={subclassListData ?? []}
-                  require={"This Field is required"}
-                  unicode={true}
-                />
+              {shouldShowFields('SubClassID') && (
+                <div className="w-[150px] shrink-0">
+                  <DefaultSelect label={translate('Sub Class')} nameField="SubClass" registerKey="SubClassID" valueField="SubClassID" options={subclassListData ?? []} require="This Field is required" unicode={true} />
+                </div>
               )}
 
-
-              <Button type='submit'>Submit</Button>
-
+              <div className="flex-none">
+                <button type="submit" className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 text-white text-sm font-semibold shadow-lg shadow-emerald-500/25 hover:shadow-emerald-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all whitespace-nowrap">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  রিপোর্ট দেখুন
+                </button>
+              </div>
             </form>
-          </FormProvider>
-        </div>
 
-        <div className="w-full text-sm text-black bg-white relative">
+            {hasReportContent && (
+              <div className="relative shrink-0 self-center" onClick={(e) => e.stopPropagation()}>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={handlePrintPDF} className="hidden md:inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                    Print
+                  </button>
+
+                  {/* <button type="button" onClick={() => setExportMenuOpen(!exportMenuOpen)} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 text-white text-sm font-semibold hover:bg-slate-700 transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                    Export
+                    <svg className={`w-3 h-3 transition-transform ${exportMenuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button> */}
+                </div>
+
+                {/* {exportMenuOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-2xl border border-slate-100 overflow-hidden z-40 py-1">
+                    <MenuItem icon="pdf" label="PDF / Print" desc="Browser print dialog" onClick={handlePrintPDF} />
+                    <MenuItem icon="excel" label="Excel (CSV)" desc="Opens in spreadsheet" onClick={handleExportExcel} />
+                    <MenuItem icon="json" label="JSON Data" desc="Raw data export" onClick={handleExportJSON} />
+                  </div>
+                )} */}
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* ═══════════════ MAIN — report component নিজেই layout handle করবে ═══════════════ */}
+        <main className="print:block">
           {isFetching && (
-            <div className="p-2">{translate("Loading report...")}</div>
+            <div className="fixed inset-0 bg-white/60 backdrop-blur-sm z-20 flex items-center justify-center">
+              <div className="w-10 h-10 border-[3px] border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            </div>
           )}
 
           {error && (
-            <div className="p-4 bg-white rounded-md shadow-md text-red-600 text-center">
-              Failed to load report.
-            </div>
-          )}
-          <div className="print:hidden flex justify-end p-2">
-            <button
-              onClick={() => window.print()}
-              className="px-4 py-2 rounded bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 print:hidden"
-
-            >
-              প্রিন্ট করুন
-            </button>
-          </div>
-          {hasStudentResults && selectedReportID == 1 && (
-            <div className="">
-              <div className="w-full overflow-hidden print:min-h-0 print:gap-0 print:hidden">
-                <ScaledPreview designWidth={750}>
-                  <StudentResultSheet reportData={reportData} query={queryParams} />
-                </ScaledPreview>
-              </div>
-
-              <div className="w-full relative max-w-full print_canvas result-report-print">
-                <div className="min-w-[750px]  mx-auto">
-                  <StudentResultSheet reportData={reportData} query={queryParams} />
-                </div>
-              </div>
+            <div className="m-6 p-5 bg-rose-50 border border-rose-100 rounded-xl text-center">
+              <p className="text-sm font-medium text-rose-700">রিপোর্ট লোড করা যায়নি</p>
+              <p className="text-xs text-rose-500 mt-1">Failed to load report. Please try again.</p>
             </div>
           )}
 
-          {hasStudentResults && selectedReportID == 2 && (
-            <div className="">
-              <div className="w-full overflow-hidden print:min-h-0 print:gap-0 print:hidden">
-                <ScaledPreview designWidth={750}>
-                  <StudentResultSheet reportData={reportData} query={queryParams} />
-                </ScaledPreview>
-              </div>
+          {!hasReportContent && !isFetching && !error && <EmptyState />}
 
-
-
-              <div className="w-full relative max-w-full print_canvas result-report-print">
-                <div className="min-w-[750px]  mx-auto">
-                  <StudentResultSheet reportData={reportData} query={queryParams} />
-                </div>
-              </div>
-            </div>
+          {hasReportContent && (
+            <>
+              <div className="print:hidden">{renderReport()}</div>
+              <div className="hidden print:block">{renderReport()}</div>
+            </>
           )}
-          {hasStudentResults && selectedReportID == 3 && (
-            <div className="">
-
-              <div className="w-full overflow-hidden print:min-h-0 print:gap-0 print:hidden">
-                <ScaledPreview designWidth={750}>
-                  <StudentResultSheet reportData={reportData} query={queryParams} />
-                </ScaledPreview>
-              </div>
-
-
-              <div className="w-full relative max-w-full print_canvas result-report-print">
-                <div className="min-w-[750px]  mx-auto">
-                  <StudentResultSheet reportData={reportData} query={queryParams} />
-                </div>
-              </div>
-            </div>
-          )}
-          {hasStudentResults && selectedReportID == 4 && (
-            <div className="">
-
-              <div className="w-full overflow-hidden print:min-h-0 print:gap-0 print:hidden">
-                <ScaledPreview designWidth={750}>
-                  <StudentResultSheetTwoColumn reportData={reportData} query={queryParams} />
-                </ScaledPreview>
-              </div>
-
-
-
-              <div className="w-full relative max-w-full print_canvas result-report-print">
-                <div className="min-w-[750px]  mx-auto">
-                  <StudentResultSheetTwoColumn reportData={reportData} query={queryParams} />
-                </div>
-              </div>
-            </div>
-          )}
-          {hasStudentResults && selectedReportID == 5 && (
-            <div className="">
-
-
-              <div className="w-full overflow-hidden print:min-h-0 print:gap-0 print:hidden">
-                <ScaledPreview designWidth={750}>
-                  <AttendanceSheet reportData={reportData} query={queryParams} />
-                </ScaledPreview>
-              </div>
-
-
-              <div className="w-full relative max-w-full print_canvas result-report-print">
-                <div className="min-w-[750px]  mx-auto">
-                  <AttendanceSheet reportData={reportData} query={queryParams} />
-                </div>
-              </div>
-            </div>
-          )}
-          {hasDivisionStatistics && selectedReportID == 6 && (
-            <div className="">
-
-              <div className="w-full  overflow-hidden print:min-h-0 print:gap-0 print:hidden">
-                <ScaledPreview designWidth={750}>
-                  <StudentResultState reportData={reportData} query={queryParams} />
-                </ScaledPreview>
-              </div>
-
-              <div className="w-full relative max-w-full print_canvas result-report-print">
-                <div className="min-w-[750px]  mx-auto">
-                  <StudentResultState reportData={reportData} query={queryParams} />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
+        </main>
       </div>
-
-
-
-    </div>
+    </FormProvider>
   );
 };
 
+/* ═══════════════ SUB COMPONENTS ═══════════════ */
+
+const MenuItem = ({ icon, label, desc, onClick }) => {
+  const icons = {
+    pdf: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />,
+    excel: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />,
+    json: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />,
+  };
+  return (
+    <button onClick={onClick} className="w-full flex items-start gap-3 px-3 py-2.5 hover:bg-slate-50 text-left transition-colors">
+      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+        <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">{icons[icon]}</svg>
+      </div>
+      <div>
+        <p className="text-sm font-medium text-slate-700 leading-tight">{label}</p>
+        <p className="text-[11px] text-slate-400 leading-tight mt-0.5">{desc}</p>
+      </div>
+    </button>
+  );
+};
+
+const EmptyState = () => (
+  <div className="flex flex-col items-center justify-center py-20 px-6 text-center">
+    <div className="relative mb-5">
+      <div className="absolute inset-0 bg-emerald-100 rounded-2xl blur-2xl opacity-60" />
+      <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 border border-slate-200 flex items-center justify-center">
+        <svg className="w-9 h-9 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      </div>
+    </div>
+    <h3 className="text-slate-700 font-semibold text-base mb-1">কোনো রিপোর্ট তৈরি হয়নি</h3>
+    <p className="text-slate-400 text-sm max-w-xs">বাম দিকের ফিল্টার থেকে তথ্য নির্বাচন করে "রিপোর্ট দেখুন" বাটনে ক্লিক করুন</p>
+  </div>
+);
+
 export default ResultReport;
+

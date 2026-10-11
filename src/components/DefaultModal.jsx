@@ -94,6 +94,7 @@ import AddTeacherFormModal from './Forms/AddTeacherFormModal';
 import UpdateStudentFormModal from './Forms/UpdateStudentFormModal';
 import AddParentFormModal from './Forms/AddParentFormModal';
 import DivisionMarkSheetNoteModal from '../view/result/DivisionMarkSheetNoteModal';
+import ResultReportSettingModal from '../view/result/Reports/ResultReportSettingModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
@@ -202,6 +203,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'CLASS_CREATE_FORM' && (
                   <ClassCreateUpdateModal />
+                )}
+                {modalType === 'RESULT_REPORT_SETTINGS' && (
+                  <ResultReportSettingModal />
                 )}
                 {modalType === 'CLASS_EDIT_FORM' && (
                   <ClassCreateUpdateModal id={id} />

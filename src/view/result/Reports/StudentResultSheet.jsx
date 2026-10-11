@@ -1,6 +1,12 @@
-import { useEffect } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode, { convertOnLanguageChange } from "../../../utils/conveter";
+import { Buffer } from "buffer";
+import ScaledPreview from "../../../components/ScaledPreview";
+
+/* ═══════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════ */
 const getFirstValue = (...values) =>
     values.find((value) => value !== undefined && value !== null && value !== "");
 
@@ -15,201 +21,1025 @@ const getSubjectLabel = (subject) =>
         `বিষয় ${subject.SubjectSL}`
     );
 
-export default function StudentResultSheet({ reportData, query, }) {
-    const { data: institutionInfo } = useGetInstitutionInfoQuery();
+const getByPath = (obj, path) =>
+    path.split(".").reduce((acc, key) => (acc == null ? undefined : acc[key]), obj);
 
-    const { conditionAverage, subjectPassNumbers } = reportData
+const getExtraValue = (studentResult, option) => {
+    for (const path of option.paths) {
+        const v = getByPath(studentResult, path);
+        if ((typeof v === "string" || typeof v === "number") && String(v).trim() !== "") {
+            return String(v).trim();
+        }
+    }
+    return "";
+};
 
-    const apiSubjects = Array.isArray(subjectPassNumbers)
-        ? [...subjectPassNumbers].sort(
-            (first, second) => (first.SubjectSL ?? 0) - (second.SubjectSL ?? 0)
-        )
-        : [];
-    const studentResultsDetails = Array.isArray(reportData?.studentResults) ? reportData.studentResults : [];
-    const resolvedSubjectColumns = apiSubjects.map(getSubjectLabel);
-    const maxMark = apiSubjects.reduce(
-        (total, subject) => total + (Number(subject.MaxNumber) || 0),
-        0
-    );
-    const resolvedRightSummary = {
-        totalSubjectsLabel: `মোট বিষয় ${apiSubjects.length}টি পূর্ণমান ${maxMark}`,
-        grades: [],
+/* ═══════════════════════════════════════════════════════════
+   EXPORTS
+   ═══════════════════════════════════════════════════════════ */
+export const RESULT_COLUMNS = [
+    { key: "sl", label: "ক্রমিক" },
+    { key: "admission", label: "ভর্তি" },
+    { key: "id", label: "আইডি" },
+    { key: "name", label: "শিক্ষার্থীর নাম" },
+    { key: "total", label: "মোট" },
+    { key: "gpa", label: "জিপিএ" },
+    { key: "grade", label: "গ্রেড" },
+    { key: "pos", label: "স্থান" },
+];
+
+export const DEFAULT_VISIBLE_COLUMNS = Object.fromEntries(
+    RESULT_COLUMNS.map((c) => [c.key, true])
+);
+
+export const NAME_EXTRA_OPTIONS = [
+    {
+        key: "father", label: "পিতার নাম",
+        paths: [
+            "User.FatherName", "User.Father_Name", "User.Father",
+            "User.Admission.0.FatherName", "User.UserDetail.FatherName",
+            "User.UserDetails.FatherName", "User.Detail.FatherName", "FatherName",
+        ],
+    },
+    {
+        key: "mother", label: "মাতার নাম",
+        paths: [
+            "User.MotherName", "User.Mother_Name", "User.Mother",
+            "User.Admission.0.MotherName", "User.UserDetail.MotherName",
+            "User.UserDetails.MotherName", "User.Detail.MotherName", "MotherName",
+        ],
+    },
+    {
+        key: "address", label: "ঠিকানা",
+        paths: [
+            "User.Address", "User.PresentAddress", "User.PermanentAddress",
+            "User.Admission.0.Address", "User.UserDetail.Address",
+            "User.UserDetails.Address", "User.Detail.Address", "Address",
+        ],
+    },
+];
+
+export const DEFAULT_NAME_EXTRAS = Object.fromEntries(
+    NAME_EXTRA_OPTIONS.map((o) => [o.key, false])
+);
+
+export const RESULT_OPTIONS = [
+    { key: "idSerial", label: "আইডি সিরিয়ালে" },
+    { key: "byDivision", label: "বিভাগ অনুসারে" },
+    { key: "byNumber", label: "নাম্বার অনুসারে" },
+    { key: "short", label: "সংক্ষিপ্ত" },
+];
+
+export const DEFAULT_RESULT_OPTIONS = {
+    idSerial: true,
+    byDivision: false,
+    byNumber: false,
+    short: false,
+};
+
+export const COLOR_OPTIONS = [
+    { key: "color", label: "রঙিন" },
+    { key: "bw", label: "সাদা কালো" },
+];
+
+export const DEFAULT_COLOR_MODE = "color";
+
+/* ═══════════════════════════════════════════════════════════
+   THEME
+   ═══════════════════════════════════════════════════════════ */
+const COLOR_GRADE = {
+    "A+": "#15803d", A: "#16a34a", "A-": "#0d9488", B: "#2563eb",
+    C: "#d97706", D: "#ea580c", F: "#dc2626", Absent: "#6b7280",
+};
+
+const BW_GRADE = Object.fromEntries(Object.keys(COLOR_GRADE).map((k) => [k, "#000"]));
+
+const colorTint = (studentResult, avg) => {
+    const name = String(studentResult?.Division?.DivisionNames ?? "");
+    if (/স্থগিত|ছগিত|রাসিব|fail|^F$/i.test(name)) return { bg: "#fee2e2", fg: "#991b1b" };
+    if (avg >= 80) return { bg: "#dcfce7", fg: "#166534" };
+    if (avg >= 70) return { bg: "#cffafe", fg: "#155e75" };
+    if (avg >= 60) return { bg: "#fef9c3", fg: "#854d0e" };
+    if (avg >= 33) return { bg: "#ffedd5", fg: "#9a3412" };
+    return { bg: "#fee2e2", fg: "#991b1b" };
+};
+
+const THEMES = {
+    color: {
+        C: {
+            primary: "#0f766e", primaryDark: "#134e4a", primaryMid: "#99f6e4",
+            primarySoft: "#ccfbf1", primaryFaint: "#f0fdfa", border: "#334155",
+            borderSoft: "#cbd5e1", text: "#0f172a", muted: "#64748b", danger: "#b91c1c",
+        },
+        grade: COLOR_GRADE,
+        medals: { 1: "#fbbf24", 2: "#cbd5e1", 3: "#fdba74" },
+        medalBorder: "1px solid transparent",
+    },
+    bw: {
+        C: {
+            primary: "#000", primaryDark: "#000", primaryMid: "#d4d4d4",
+            primarySoft: "#e5e5e5", primaryFaint: "#f4f4f4", border: "#000",
+            borderSoft: "#737373", text: "#000", muted: "#404040", danger: "#000",
+        },
+        grade: BW_GRADE,
+        medals: { 1: "#d4d4d4", 2: "#e5e5e5", 3: "#f4f4f4" },
+        medalBorder: "1px solid #000",
+    },
+};
+
+const bg = (color) => ({
+    backgroundColor: color,
+    boxShadow: `inset 0 0 0 1000px ${color}`,
+});
+
+const DIVISION_STATS = [
+    { label: "A+", count: 3 }, { label: "A", count: 17 }, { label: "A-", count: 4 },
+    { label: "B", count: 3 }, { label: "C", count: 1 }, { label: "D", count: 3 },
+    { label: "F", count: 3 }, { label: "Absent", count: 3 },
+];
+
+const GRADING_SCALE = [
+    { range: "80-100", grade: "A+", gpa: "5" },
+    { range: "70-79", grade: "A", gpa: "4" },
+    { range: "60-69", grade: "A-", gpa: "3.5" },
+    { range: "50-59", grade: "B", gpa: "3" },
+    { range: "40-49", grade: "C", gpa: "2" },
+    { range: "33-39", grade: "D", gpa: "1" },
+    { range: "1-32", grade: "F", gpa: "0" },
+];
+
+const getTodayBangla = () => {
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return bnBijoy2Unicode(`${dd}/${mm}/${yyyy}`);
+};
+
+/* ═══════════════════════════════════════════════════════════
+   A4 LANDSCAPE
+   ═══════════════════════════════════════════════════════════ */
+const PAGE_W = 1080;
+const PAGE_H = 750;
+const THEAD_H = 100;
+const HEADER_H = 190;
+const HEADER_GAP = 8;
+const MINI_H = 30;
+const FOOTER_RESERVE = 20;
+const SAFETY = 8;
+const SIGNATURE_H = 130;
+const ROW_H_NORMAL = 24;
+const ROW_H_EXTRA = 32;
+
+const COL = { sl: 36, admission: 46, id: 52, total: 46, gpa: 52, grade: 96, pos: 38 };
+const NAME_W_NORMAL = 190;
+const NAME_W_EXTRA = 360;
+
+const SHORT_HEADER_H = 150;
+const SHORT_THEAD_H = 30;
+const SHORT_ROW_H = 28;
+const SHORT_COL_GAP = 14;
+const SHORT_TABLE_W = (PAGE_W - SHORT_COL_GAP) / 2;
+const SHORT_COL = { id: 54, avg: 58, division: 94 };
+const SHORT_NAME_W = Math.floor(
+    (SHORT_TABLE_W - SHORT_COL.id - SHORT_COL.avg - SHORT_COL.division) / 2
+);
+
+const bn = (v) => bnBijoy2Unicode(String(v));
+
+/* ═══════════════════════════════════════════════════════════
+   LOCAL STORAGE
+   ═══════════════════════════════════════════════════════════ */
+const LS_VISIBLE = "resultSheetVisibleColumns";
+const LS_COLOR = "resultSheetColorMode";
+const LS_NAME_EXTRAS = "resultSheetNameExtras";
+const LS_RESULT_OPTS = "resultSheetResultOptions";
+
+const loadObj = (key, fallback) => {
+    try {
+        const saved = JSON.parse(localStorage.getItem(key));
+        if (saved && typeof saved === "object") return { ...fallback, ...saved };
+    } catch (e) { }
+    return { ...fallback };
+};
+
+const loadStr = (key, options, fallback) => {
+    try {
+        const saved = localStorage.getItem(key);
+        if (saved && options.some((o) => o.key === saved)) return saved;
+    } catch (e) { }
+    return fallback;
+};
+
+/* ═══════════════════════════════════════════════════════════
+   SIGNATURE
+   ═══════════════════════════════════════════════════════════ */
+function SignatureSection({ C, dateBangla, NajemName, PrincipalName, najem, principal }) {
+    const signatureBox = {
+        flex: 1, maxWidth: "280px", display: "flex",
+        flexDirection: "column", alignItems: "center", textAlign: "center",
     };
-    const totalMarkColumns = resolvedSubjectColumns.length;
-    const getTotals = (marks) => {
-        const validMarks = marks.filter(
-            (mark) => typeof mark === "number" && !Number.isNaN(mark)
-        );
-        const total = validMarks.reduce((sum, mark) => sum + mark, 0);
-        const average = resolvedSubjectColumns.length
-            ? (total / resolvedSubjectColumns.length).toFixed(2)
-            : "0.00";
-        return { total, average };
+    const sigImgWrap = {
+        height: "52px", display: "flex", alignItems: "flex-end",
+        justifyContent: "center", marginBottom: "0px",
     };
-
-
-    useEffect(() => {
-        console.log(reportData);
-    }, [reportData])
+    const sigImg = {
+        maxHeight: "52px", maxWidth: "150px", objectFit: "contain",
+        mixBlendMode: "multiply", userSelect: "none", pointerEvents: "none",
+    };
+    const dashedLine = {
+        width: "180px", borderTop: `1px dashed ${C.border}`,
+        marginTop: "2px", marginBottom: "3px",
+    };
 
     return (
-        <div className="w-full bg-white text-black">
-            <table className="w-full border-collapse text-[11px] result-report-table">
-                <thead
-                    className="table-header-group result-report-header"
-                    style={{ display: "table-header-group" }}
-                >
-                    <tr>
-                        <th colSpan={conditionAverage.SubSonkha + 7} className="p-0 font-normal">
-
-
-                            <div className="flex items-start justify-between gap-2 p-2 border-b border-black">
-                                {/* <div className="pt-5">
-                                    <h1 className="bg-[#a8a6a6] text-white text-center text-[16px]">
-                                        মোট পরীক্ষার্থী = {String(studentResultsDetails.length)}
-                                    </h1>
-                                    <table className="w-[295px]">
-                                        <tbody className="border border-black w-full">
-                                            {Array.from({ length: reportData?.subjectPassNumbers.length || 0 }).map(
-                                                (_, index) => {
-
-                                                    if (1 == 1) {
-                                                        return (
-                                                            <tr key={index}>
-                                                                <td className="text-start pl-2">
-                                                                    {division}
-                                                                </td>
-                                                                <td className="w-12 text-end">:</td>
-                                                                <td className="pl-3">
-                                                                    {String(divisionNumber)} X
-                                                                </td>
-                                                                <td className="pr-2">
-                                                                    {String(subSonkha)} ={" "}
-                                                                    {String(subSonkha * divisionNumber)}
-                                                                </td>
-                                                            </tr>
-                                                        );
-                                                    }
-                                                }
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div> */}
-
-
-
-                                <div className="flex-1 text-center px-2">
-                                    <h1 className="text-[20px] font-bold leading-tight py-1">
-                                        {institutionInfo?.InstitutionName}
-                                    </h1>
-                                    <p className="text-[16px] font-bold">
-                                        {institutionInfo?.Address}
-                                    </p>
-                                    <h2 className="text-[18px] leading-tight py-1"> {conditionAverage.Exam.ExamName} - {conditionAverage.Session.SessionName}</h2>
-                                    <div className="inline-block border border-black px-4 py-1 my-1 font-bold text-[18px] text-[#1f2937] rounded-[4px]">
-                                        ফলাফল (নম্বরপত্র)
-                                    </div>
-                                    <p className="text-[16px] mt-2">
-                                        শ্রেণি/জামাত : {conditionAverage.SubClass.SubClass}
-                                    </p>
-                                </div>
-
-                                {/* <table className="border border-black text-[10px] w-64 shrink-0">
-                                    <tbody>
-                                        <tr>
-                                            <td
-                                                colSpan={4}
-                                                className="border border-black px-2 py-1 font-semibold text-center bg-gray-50"
-                                            >
-                                                {resolvedRightSummary.totalSubjectsLabel}
-                                            </td>
-                                        </tr>
-                                        {resolvedRightSummary.grades?.map((grade, index) => (
-                                            <tr key={`${grade.label}-${index}`}>
-                                                <td className="border border-black px-2 py-0.5">
-                                                    {grade.label}
-                                                </td>
-                                                <td className="border border-black px-1 py-0.5 text-center w-10">
-                                                    {grade.count}
-                                                </td>
-                                                <td className="border border-black px-1 py-0.5 text-center w-6">
-                                                    x {grade.multiplier}
-                                                </td>
-                                                <td className="border border-black px-1 py-0.5 text-center w-14">
-                                                    = {grade.total}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table> */}
-                            </div>
-
-                        </th>
-                    </tr>
-                    <tr>
-                        <th className="border border-black border-t-0 px-1 py-1 w-10 text-[16px] text-[#1f2937]">ক্রমিক</th>
-                        <th className="border border-black border-t-0 px-1 py-1 w-16 text-[16px] text-[#1f2937]">ভর্তি নাম্বার</th>
-                        <th className="border border-black border-t-0 px-1 py-1 w-16 text-[16px] text-[#1f2937]">আইডি নাম্বার</th>
-                        <th className="border border-black border-t-0 px-2 py-1 min-w-[140px] text-left text-[16px] text-[#1f2937]">
-                            শিক্ষার্থীর নাম
-                        </th>
-                        {subjectPassNumbers.map((subject, index) => (
-                            <th
-                                key={index}
-                                className="border border-black px-0.5 py-1 w-8 align-bottom border-t-0"
-                            >
-                                <span className="inline-block whitespace-nowrap [writing-mode:vertical-rl] rotate-180 text-[16px] text-[#1f2937] font-bold">
-                                    {subject.Subject.SubjectName}
-                                </span>
-                            </th>
-                        ))}
-                        <th className="border border-black px-1 py-1 w-12 text-[16px] text-[#1f2937] font-bold border-t-0">মোট</th>
-                        <th className="border border-black px-1 py-1 w-14 text-[16px] text-[#1f2937] font-bold border-t-0">গড়</th>
-                        <th className="border border-black px-2 py-1 w-24 text-[16px] text-[#1f2937] font-bold border-t-0">বিভাগ</th>
-                        <th className="border border-black px-1 py-1 w-10 text-[16px] text-[#1f2937] font-bold border-t-0">স্থান</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {studentResultsDetails.map((studentResult, index) => {
-                        // const { total, average } = getTotals(student.marks || []);
-                        return (
-                            <tr key={studentResult.ID ?? index} className="break-inside-avoid">
-                                <td className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937] ">
-                                    {bnBijoy2Unicode(String(index + 1))}
-                                </td>
-                                <td className="border border-black px-1 py-1 text-center  text-[16px] text-[#1f2937]">
-                                    {convertOnLanguageChange(studentResult?.User?.Admission[0]?.AdmissionSerial)}
-                                </td>
-                                <td className="border border-black px-1 py-1 text-center  text-[16px] text-[#1f2937]">
-                                    {bnBijoy2Unicode(String(studentResult?.User?.UserCode))}
-                                </td>
-                                <td className="border border-black px-2 py-1 text-left  text-[16px] text-[#1f2937]">
-                                    {studentResult?.User?.UserName}
-                                </td>
-                                {Array.from({ length: conditionAverage.SubSonkha }).map((_, markIndex) => (
-                                    <td key={markIndex} className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]">
-                                        {bnBijoy2Unicode(String(studentResult[`SubVal${markIndex + 1}`]))}
-                                    </td>
-                                ))}
-                                <td className="border border-black px-1 py-1 text-center font-normal text-[16px] text-[#1f2937]">
-                                    {bnBijoy2Unicode(String(studentResult.Total))}
-                                </td>
-                                <td className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]">
-                                    {bnBijoy2Unicode(String((Number(studentResult.Total) / Number(conditionAverage.AverageSubsonkha || 1)).toFixed(2)))}
-                                </td>
-
-                                <td className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]" style={{ backgroundColor: studentResult?.DColor ? studentResult?.DColorType : undefined }}>
-                                    {studentResult.Division.DivisionNames}
-                                </td>
-                                <td className="border border-black px-1 py-1 text-center text-[16px] text-[#1f2937]">
-                                    {bnBijoy2Unicode(String(studentResult.Positions))}
-                                </td>
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+        <div className="signature-section" style={{
+            marginTop: "14px", paddingTop: "10px",
+            borderTop: `2px solid ${C.primary}`,
+            display: "flex", justifyContent: "space-between",
+            alignItems: "flex-end", gap: "24px",
+            height: `${SIGNATURE_H}px`, boxSizing: "border-box", overflow: "hidden",
+        }}>
+            <div style={signatureBox}>
+                <div style={sigImgWrap}><img src={principal} alt="signature" style={sigImg} /></div>
+                <div style={dashedLine} />
+                <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: C.text, lineHeight: 1.4 }}>{PrincipalName}</p>
+                <p style={{ margin: "2px 0 0", fontSize: "12px", fontWeight: 600, color: C.text }}>তারিখ : {dateBangla}</p>
+            </div>
+            <div style={signatureBox}>
+                <div style={sigImgWrap}><img src={najem} alt="signature" style={sigImg} /></div>
+                <div style={dashedLine} />
+                <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: C.text, lineHeight: 1.4 }}>{NajemName}</p>
+                <p style={{ margin: "2px 0 0", fontSize: "12px", fontWeight: 600, color: C.text }}>তারিখ : {dateBangla}</p>
+            </div>
         </div>
     );
 }
+
+/* ═══════════════════════════════════════════════════════════
+   🧾 MAIN
+   ═══════════════════════════════════════════════════════════ */
+export default function StudentResultSheet({ reportData, query, labels }) {
+    const { data: institutionInfo } = useGetInstitutionInfoQuery();
+    const [principal, setPrincipal] = useState(null);
+    const [najem, setNajem] = useState(null);
+
+    /* ✅ নিজের sidebar state */
+    const [visibleColumns, setVisibleColumns] = useState(() => loadObj(LS_VISIBLE, DEFAULT_VISIBLE_COLUMNS));
+    const [nameExtras, setNameExtras] = useState(() => loadObj(LS_NAME_EXTRAS, DEFAULT_NAME_EXTRAS));
+    const [resultOptions, setResultOptions] = useState(() => loadObj(LS_RESULT_OPTS, DEFAULT_RESULT_OPTIONS));
+    const [colorMode, setColorMode] = useState(() => loadStr(LS_COLOR, COLOR_OPTIONS, DEFAULT_COLOR_MODE));
+
+    /* ✅ localStorage save */
+    useEffect(() => { localStorage.setItem(LS_VISIBLE, JSON.stringify(visibleColumns)); }, [visibleColumns]);
+    useEffect(() => { localStorage.setItem(LS_NAME_EXTRAS, JSON.stringify(nameExtras)); }, [nameExtras]);
+    useEffect(() => { localStorage.setItem(LS_RESULT_OPTS, JSON.stringify(resultOptions)); }, [resultOptions]);
+    useEffect(() => { localStorage.setItem(LS_COLOR, colorMode); }, [colorMode]);
+
+    /* ✅ data transform */
+    const activeResultOption = useMemo(() => {
+        if (resultOptions.idSerial) return "idSerial";
+        if (resultOptions.byDivision) return "byDivision";
+        if (resultOptions.byNumber) return "byNumber";
+        if (resultOptions.short) return "short";
+        return "idSerial";
+    }, [resultOptions]);
+
+    const transformedData = useMemo(() => {
+        if (!reportData) return null;
+        const base = {
+            reportid: reportData.reportid,
+            subjectPassNumbers: reportData.subjectPassNumbers,
+            conditionAverage: reportData.conditionAverage,
+            divitionList: reportData.divitionList,
+        };
+        switch (activeResultOption) {
+            case "byDivision":
+                return { ...base, studentResults: reportData.report2Results || [] };
+            case "byNumber": {
+                const list = Array.isArray(reportData.studentResults) ? [...reportData.studentResults] : [];
+                list.sort((a, b) => {
+                    const ca = Number(a?.User?.UserCode);
+                    const cb = Number(b?.User?.UserCode);
+                    if (Number.isNaN(ca) && Number.isNaN(cb)) return 0;
+                    if (Number.isNaN(ca)) return 1;
+                    if (Number.isNaN(cb)) return -1;
+                    return ca - cb;
+                });
+                return { ...base, studentResults: list };
+            }
+            case "short":
+                return {
+                    ...base,
+                    studentResults:
+                        Array.isArray(reportData.report4Results) && reportData.report4Results.length > 0
+                            ? reportData.report4Results
+                            : reportData.studentResults || [],
+                };
+            case "idSerial":
+            default:
+                return { ...base, studentResults: reportData.studentResults || [] };
+        }
+    }, [reportData, activeResultOption]);
+
+    const conditionAverage = transformedData?.conditionAverage || {};
+    const subjectPassNumbers = transformedData?.subjectPassNumbers || [];
+
+    const theme = THEMES[colorMode] || THEMES.color;
+    const C = theme.C;
+    const GRADE_COLORS = theme.grade;
+
+    const LABELS = {
+        sl: labels?.SerialLabel ?? "ক্রমিক",
+        studentId: labels?.StudentIDLabel ?? "আইডি",
+        admission: labels?.AdmissionIDLabel ?? "ভর্তি",
+        name: labels?.StudentNameLabel ?? "শিক্ষার্থীর নাম",
+        father: labels?.FatherNameLabel ?? "পিতার নাম",
+        mother: labels?.MotherNameLabel ?? "মাতার নাম",
+        address: labels?.AddressLabel ?? "ঠিকানা",
+        total: labels?.TotalLabel ?? "মোট",
+        gpa: labels?.GPALabel ?? "জিপিএ",
+        grade: labels?.GradeLabel ?? "গ্রেড",
+        position: labels?.PositionLabel ?? "স্থান",
+        average: labels?.AverageLabel ?? "গড়",
+    };
+
+    const show = { ...DEFAULT_VISIBLE_COLUMNS, ...(visibleColumns || {}) };
+    const extrasState = { ...DEFAULT_NAME_EXTRAS, ...(nameExtras || {}) };
+    const activeExtras = NAME_EXTRA_OPTIONS.filter((o) => extrasState[o.key]);
+    const hasExtras = show.name && activeExtras.length > 0;
+
+    const isShort = activeResultOption === "short";
+    const showCol = show;
+
+    const ROW_H = hasExtras ? ROW_H_EXTRA : ROW_H_NORMAL;
+    const nameW = hasExtras ? NAME_W_EXTRA : NAME_W_NORMAL;
+
+    const studentResultsDetails = Array.isArray(transformedData?.studentResults)
+        ? transformedData.studentResults
+        : [];
+
+    /* signatures */
+    useEffect(() => {
+        if (institutionInfo?.SignaturePrincipal?.data) {
+            const buf = Buffer.from(institutionInfo.SignaturePrincipal.data);
+            setPrincipal(`data:image/png;base64,${buf.toString("base64")}`);
+        }
+        if (institutionInfo?.SignatureNajem?.data) {
+            const buf = Buffer.from(institutionInfo.SignatureNajem.data);
+            setNajem(`data:image/png;base64,${buf.toString("base64")}`);
+        }
+    }, [institutionInfo]);
+
+    /* pagination */
+    const shortRowsPerCol = useMemo(() => {
+        const first = Math.max(1, Math.floor(
+            (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
+        ));
+        const other = Math.max(1, Math.floor(
+            (PAGE_H - MINI_H - SHORT_THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
+        ));
+        return { first, other };
+    }, []);
+
+    const pages = useMemo(() => {
+        const list = studentResultsDetails;
+        if (!list.length) return [[]];
+
+        if (isShort) {
+            const firstCap = shortRowsPerCol.first * 2;
+            const otherCap = shortRowsPerCol.other * 2;
+            const chunks = [list.slice(0, firstCap)];
+            for (let i = firstCap; i < list.length; i += otherCap) {
+                chunks.push(list.slice(i, i + otherCap));
+            }
+            return chunks;
+        }
+
+        const FIRST_ROWS = Math.max(1, Math.floor(
+            (PAGE_H - HEADER_H - HEADER_GAP - THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / ROW_H
+        ));
+        const OTHER_ROWS = Math.max(1, Math.floor(
+            (PAGE_H - MINI_H - THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / ROW_H
+        ));
+
+        const chunks = [list.slice(0, FIRST_ROWS)];
+        for (let i = FIRST_ROWS; i < list.length; i += OTHER_ROWS) {
+            chunks.push(list.slice(i, i + OTHER_ROWS));
+        }
+        return chunks;
+    }, [studentResultsDetails, ROW_H, isShort, shortRowsPerCol]);
+
+    const totalExaminees = DIVISION_STATS.reduce((sum, d) => sum + d.count, 0);
+
+    /* styles */
+    const styles = {
+        td: {
+            border: `1px solid ${C.border}`, padding: "0 3px", textAlign: "center",
+            verticalAlign: "middle", height: `${ROW_H}px`, fontSize: "12px",
+            lineHeight: `${ROW_H - 2}px`, overflow: "hidden",
+            whiteSpace: "nowrap", color: C.text,
+        },
+        th: {
+            border: `1px solid ${C.border}`, padding: "2px", textAlign: "center",
+            verticalAlign: "middle", fontSize: "12px", fontWeight: 700,
+            color: C.primaryDark, overflow: "hidden", ...bg(C.primarySoft),
+        },
+    };
+    const thStrong = { ...styles.th, ...bg(C.primaryMid), color: C.primaryDark };
+
+    const sideTitle = {
+        ...bg(C.primaryMid), color: C.primaryDark, textAlign: "center",
+        fontSize: "13px", fontWeight: 800, height: "26px", lineHeight: "26px",
+        flexShrink: 0, borderBottom: `1px solid ${C.border}`,
+    };
+    const sideBox = {
+        border: `1px solid ${C.border}`, alignSelf: "stretch",
+        borderRadius: "4px", overflow: "hidden", background: "#fff",
+        display: "flex", flexDirection: "column", minHeight: 0,
+    };
+    const sideBody = { flex: 1, display: "flex", flexDirection: "column", minHeight: 0 };
+    const sideRowBase = { flex: 1, display: "grid", alignItems: "stretch", fontSize: "12px", minHeight: 0 };
+    const cellCenter = { display: "flex", alignItems: "center", justifyContent: "center" };
+
+    /* header blocks */
+    const renderCenterTitle = () => (
+        <div style={{ textAlign: "center", alignSelf: "center", minWidth: 0 }}>
+            <h1 style={{ fontSize: "22px", fontWeight: 800, margin: 0, lineHeight: 1.25, color: C.primaryDark }}>
+                {institutionInfo?.InstitutionName}
+            </h1>
+            <p style={{ fontSize: "13px", fontWeight: 600, margin: "3px 0 0", color: C.muted }}>
+                {institutionInfo?.Address}
+            </p>
+            <h2 style={{ fontSize: "14px", margin: "6px 0 0", fontWeight: 600, color: C.text }}>
+                {conditionAverage?.Exam?.ExamName} — {conditionAverage?.Session?.SessionName}
+            </h2>
+            <div style={{
+                display: "inline-block", ...bg(C.primaryMid), color: C.primaryDark,
+                border: `1.5px solid ${C.primary}`, padding: "2px 22px",
+                marginTop: "7px", fontWeight: 800, fontSize: "15px",
+                lineHeight: "22px", borderRadius: "999px",
+            }}>
+                ফলাফল (নম্বরপত্র)
+            </div>
+            <p style={{ fontSize: "14px", margin: "6px 0 0", fontWeight: 600, color: C.text }}>
+                শ্রেণি/জামাত : <span style={{ color: C.primary }}>{conditionAverage?.SubClass?.SubClass}</span>
+            </p>
+        </div>
+    );
+
+    const renderHeaderBlock = () => (
+        <div style={{
+            display: "grid", gridTemplateColumns: "220px 1fr 220px", gridTemplateRows: "1fr",
+            gap: "16px", padding: "10px 0", borderBottom: `3px solid ${C.primary}`,
+            height: `${HEADER_H}px`, boxSizing: "border-box", overflow: "hidden",
+            marginBottom: `${HEADER_GAP}px`,
+        }}>
+            <div style={sideBox}>
+                <div style={sideTitle}>মোট পরীক্ষার্থী = {bn(totalExaminees)}</div>
+                <div style={sideBody}>
+                    {DIVISION_STATS.map((item, i) => (
+                        <div key={i} style={{
+                            ...sideRowBase, gridTemplateColumns: "1fr 16px 42px",
+                            ...bg(i % 2 ? C.primaryFaint : "#fff"),
+                        }}>
+                            <div style={{ display: "flex", alignItems: "center", paddingLeft: "12px" }}>
+                                <span style={{
+                                    display: "inline-block", width: "8px", height: "8px",
+                                    borderRadius: "2px", ...bg(GRADE_COLORS[item.label]), marginRight: "7px",
+                                }} />
+                                <span style={{ fontWeight: 700, color: GRADE_COLORS[item.label] }}>{item.label}</span>
+                            </div>
+                            <div style={{ ...cellCenter, color: C.muted }}>=</div>
+                            <div style={{ ...cellCenter, fontWeight: 700, paddingRight: "6px" }}>{bn(item.count)}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+            {renderCenterTitle()}
+            <div style={sideBox}>
+                <div style={sideTitle}>গ্রেডিং পদ্ধতি</div>
+                <div style={sideBody}>
+                    {GRADING_SCALE.map((item, i) => (
+                        <div key={i} style={{
+                            ...sideRowBase, gridTemplateColumns: "1fr 38px 42px",
+                            ...bg(i % 2 ? C.primaryFaint : "#fff"),
+                        }}>
+                            <div style={{ display: "flex", alignItems: "center", paddingLeft: "12px" }}>{item.range}</div>
+                            <div style={{
+                                ...cellCenter, borderLeft: `1px solid ${C.borderSoft}`,
+                                fontWeight: 700, color: GRADE_COLORS[item.grade],
+                            }}>{item.grade}</div>
+                            <div style={{ ...cellCenter, borderLeft: `1px solid ${C.borderSoft}`, fontWeight: 600 }}>{item.gpa}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderShortHeaderBlock = () => (
+        <div style={{
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "8px 0", borderBottom: `3px solid ${C.primary}`,
+            height: `${SHORT_HEADER_H}px`, boxSizing: "border-box",
+            overflow: "hidden", marginBottom: `${HEADER_GAP}px`,
+        }}>
+            {renderCenterTitle()}
+        </div>
+    );
+
+    const renderMiniHeader = () => (
+        <div style={{
+            height: `${MINI_H}px`, lineHeight: `${MINI_H - 4}px`,
+            boxSizing: "border-box", borderBottom: `3px solid ${C.primary}`,
+            textAlign: "center", fontSize: "13px", fontWeight: 700,
+            color: C.primaryDark, ...bg(C.primaryFaint), overflow: "hidden", whiteSpace: "nowrap",
+        }}>
+            {institutionInfo?.InstitutionName} — {conditionAverage?.Exam?.ExamName} — {conditionAverage?.SubClass?.SubClass}
+        </div>
+    );
+
+    /* table */
+    const renderColGroup = () => (
+        <colgroup>
+            {showCol.sl && <col style={{ width: `${COL.sl}px` }} />}
+            {showCol.admission && <col style={{ width: `${COL.admission}px` }} />}
+            {showCol.id && <col style={{ width: `${COL.id}px` }} />}
+            {showCol.name && <col style={{ width: `${nameW}px` }} />}
+            {subjectPassNumbers.map((_, i) => <col key={i} />)}
+            {showCol.total && <col style={{ width: `${COL.total}px` }} />}
+            {showCol.gpa && <col style={{ width: `${COL.gpa}px` }} />}
+            {showCol.grade && <col style={{ width: `${COL.grade}px` }} />}
+            {showCol.pos && <col style={{ width: `${COL.pos}px` }} />}
+        </colgroup>
+    );
+
+    const nameHeaderLabel = [
+        LABELS.name,
+        ...activeExtras.map((o) => {
+            if (o.key === "father") return LABELS.father;
+            if (o.key === "mother") return LABELS.mother;
+            if (o.key === "address") return LABELS.address;
+            return o.label;
+        }),
+    ].join(" - ");
+
+    const renderColumnHeaderRow = () => (
+        <tr style={{ height: `${THEAD_H}px` }}>
+            {showCol.sl && <th style={styles.th}>{LABELS.sl}</th>}
+            {showCol.admission && <th style={styles.th}>{LABELS.admission}</th>}
+            {showCol.id && <th style={styles.th}>{LABELS.studentId}</th>}
+            {showCol.name && (
+                <th style={{ ...styles.th, textAlign: "left", paddingLeft: "8px" }}>{nameHeaderLabel}</th>
+            )}
+            {subjectPassNumbers.map((subject, i) => (
+                <th key={i} style={{ ...styles.th, padding: "4px 1px" }}>
+                    <span style={{
+                        display: "inline-block", writingMode: "vertical-rl", transform: "rotate(180deg)",
+                        height: `${THEAD_H - 12}px`, fontSize: "12px", fontWeight: 700,
+                        lineHeight: 1.2, textAlign: "center", overflow: "hidden",
+                    }}>{getSubjectLabel(subject)}</span>
+                </th>
+            ))}
+            {showCol.total && <th style={thStrong}>{LABELS.total}</th>}
+            {showCol.gpa && <th style={thStrong}>{LABELS.gpa}</th>}
+            {showCol.grade && <th style={thStrong}>{LABELS.grade}</th>}
+            {showCol.pos && <th style={thStrong}>{LABELS.position}</th>}
+        </tr>
+    );
+
+    const renderNameCell = (studentResult, rowBg) => {
+        if (!hasExtras) {
+            return (
+                <td style={{
+                    ...styles.td, ...bg(rowBg), textAlign: "left",
+                    paddingLeft: "8px", fontWeight: 600, textOverflow: "ellipsis",
+                }}>{studentResult?.User?.UserName}</td>
+            );
+        }
+        const extras = activeExtras.map((o) => getExtraValue(studentResult, o)).filter((v) => v !== "");
+        return (
+            <td style={{ ...styles.td, ...bg(rowBg), textAlign: "left", padding: "0 6px", whiteSpace: "normal" }}>
+                <div style={{
+                    display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2,
+                    overflow: "hidden", fontSize: "11px", lineHeight: "14px",
+                    maxHeight: "28px", wordBreak: "break-word",
+                }}>
+                    <span style={{ fontWeight: 700 }}>{studentResult?.User?.UserName}</span>
+                    {extras.map((v, i) => (<span key={i}>{" - "}{v}</span>))}
+                </div>
+            </td>
+        );
+    };
+
+    const getSerial = (globalIndex) => globalIndex + 1;
+
+    const renderRow = (studentResult, globalIndex) => {
+        const zebra = globalIndex % 2 === 1;
+        const rowBg = zebra ? C.primaryFaint : "#fff";
+        const avg = Number(studentResult.Total) / Number(conditionAverage?.AverageSubsonkha || 1);
+        const tint = colorTint(studentResult, avg);
+        const gradeBg = studentResult?.DColor ? studentResult?.DColorType : tint.bg;
+        const gradeFg = studentResult?.DColor ? "#0f172a" : tint.fg;
+        const position = Number(studentResult.Positions);
+        const medal = theme.medals[position];
+
+        return (
+            <tr key={studentResult.ID ?? globalIndex} style={{ background: rowBg, height: `${ROW_H}px` }}>
+                {showCol.sl && <td style={{ ...styles.td, ...bg(rowBg) }}>{bn(getSerial(globalIndex))}</td>}
+                {showCol.admission && (
+                    <td style={{ ...styles.td, ...bg(rowBg) }}>
+                        {convertOnLanguageChange(studentResult?.User?.Admission?.[0]?.AdmissionSerial)}
+                    </td>
+                )}
+                {showCol.id && <td style={{ ...styles.td, ...bg(rowBg) }}>{bn(studentResult?.User?.UserCode)}</td>}
+                {showCol.name && renderNameCell(studentResult, rowBg)}
+
+                {Array.from({ length: conditionAverage?.SubSonkha || 0 }).map((_, mi) => {
+                    const val = studentResult[`SubVal${mi + 1}`];
+                    const isZero = Number(val) === 0;
+                    return (
+                        <td key={mi} style={{
+                            ...styles.td, ...bg(rowBg),
+                            color: isZero ? C.danger : C.text,
+                            fontWeight: isZero ? 700 : 400,
+                        }}>{bn(val)}</td>
+                    );
+                })}
+
+                {showCol.total && (
+                    <td style={{ ...styles.td, ...bg(C.primaryFaint), fontWeight: 700 }}>{bn(studentResult.Total)}</td>
+                )}
+                {showCol.gpa && (
+                    <td style={{ ...styles.td, ...bg(C.primaryFaint), fontWeight: 700 }}>{bn(avg.toFixed(2))}</td>
+                )}
+                {showCol.grade && (
+                    <td style={{ ...styles.td, ...bg(gradeBg), fontWeight: 700, fontSize: "12px", color: gradeFg }}>
+                        {studentResult.Division?.DivisionNames}
+                    </td>
+                )}
+                {showCol.pos && (
+                    <td style={{ ...styles.td, ...bg(rowBg) }}>
+                        {medal ? (
+                            <span style={{
+                                display: "inline-block", boxSizing: "border-box",
+                                width: "18px", height: "18px", lineHeight: "16px",
+                                borderRadius: "50%", border: theme.medalBorder,
+                                ...bg(medal), fontWeight: 800, fontSize: "11px", verticalAlign: "middle",
+                            }}>{bn(studentResult.Positions)}</span>
+                        ) : bn(studentResult.Positions)}
+                    </td>
+                )}
+            </tr>
+        );
+    };
+
+    const shortTd = { ...styles.td, height: `${SHORT_ROW_H}px`, lineHeight: `${SHORT_ROW_H - 2}px`, fontSize: "12px" };
+    const shortTh = { ...styles.th, height: `${SHORT_THEAD_H}px`, fontSize: "12px" };
+
+    const renderShortRow = (studentResult, globalIndex) => {
+        const zebra = globalIndex % 2 === 1;
+        const rowBg = zebra ? C.primaryFaint : "#fff";
+        const avg = Number(studentResult.Total) / Number(conditionAverage?.AverageSubsonkha || 1);
+        const tint = colorTint(studentResult, avg);
+        const divBg = studentResult?.DColor ? studentResult?.DColorType : tint.bg;
+        const divFg = studentResult?.DColor ? "#0f172a" : tint.fg;
+        const fatherOpt = NAME_EXTRA_OPTIONS.find((o) => o.key === "father");
+        const fatherName = fatherOpt ? getExtraValue(studentResult, fatherOpt) : "";
+
+        return (
+            <tr key={studentResult.ID ?? globalIndex} style={{ background: rowBg, height: `${SHORT_ROW_H}px` }}>
+                <td style={{ ...shortTd, ...bg(rowBg) }}>{bn(studentResult?.User?.UserCode ?? "")}</td>
+                <td style={{
+                    ...shortTd, ...bg(rowBg), textAlign: "left",
+                    paddingLeft: "6px", fontWeight: 600, textOverflow: "ellipsis",
+                }}>{studentResult?.User?.UserName}</td>
+                <td style={{
+                    ...shortTd, ...bg(rowBg), textAlign: "left",
+                    paddingLeft: "6px", textOverflow: "ellipsis",
+                }}>{fatherName}</td>
+                <td style={{ ...shortTd, ...bg(C.primaryFaint), fontWeight: 700 }}>{bn(avg.toFixed(2))}</td>
+                <td style={{ ...shortTd, ...bg(divBg), color: divFg, fontWeight: 700, textOverflow: "ellipsis" }}>
+                    {studentResult.Division?.DivisionNames}
+                </td>
+            </tr>
+        );
+    };
+
+    const renderShortTable = (rows, startIndex) => (
+        <div style={{ width: `${SHORT_TABLE_W}px`, flexShrink: 0 }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+                <colgroup>
+                    <col style={{ width: `${SHORT_COL.id}px` }} />
+                    <col style={{ width: `${SHORT_NAME_W}px` }} />
+                    <col style={{ width: `${SHORT_NAME_W}px` }} />
+                    <col style={{ width: `${SHORT_COL.avg}px` }} />
+                    <col style={{ width: `${SHORT_COL.division}px` }} />
+                </colgroup>
+                <thead>
+                    <tr style={{ height: `${SHORT_THEAD_H}px` }}>
+                        <th style={shortTh}>{LABELS.studentId}</th>
+                        <th style={{ ...shortTh, textAlign: "left", paddingLeft: "6px" }}>{LABELS.name}</th>
+                        <th style={{ ...shortTh, textAlign: "left", paddingLeft: "6px" }}>{LABELS.father}</th>
+                        <th style={thStrong}>{LABELS.average}</th>
+                        <th style={thStrong}>{LABELS.grade}</th>
+                    </tr>
+                </thead>
+                <tbody>{rows.map((s, i) => renderShortRow(s, startIndex + i))}</tbody>
+            </table>
+        </div>
+    );
+
+    const dateBangla = getTodayBangla();
+
+    const renderPage = (pageIndex, students) => {
+        const offset = pages.slice(0, pageIndex).reduce((sum, chunk) => sum + chunk.length, 0);
+
+        const signature = (
+            <SignatureSection
+                C={C}
+                dateBangla={dateBangla}
+                PrincipalName={institutionInfo?.PrincipalName}
+                principal={principal}
+                najem={najem}
+                NajemName={institutionInfo?.NajemName}
+            />
+        );
+
+        const pageFooter = (
+            <div style={{
+                position: "absolute", left: 0, right: 0, bottom: "2px",
+                textAlign: "center", fontSize: "10px", color: C.muted,
+            }}>
+                পৃষ্ঠা {bn(pageIndex + 1)} / {bn(pages.length)}
+            </div>
+        );
+
+        if (isShort) {
+            const cap = pageIndex === 0 ? shortRowsPerCol.first : shortRowsPerCol.other;
+            const leftRows = students.slice(0, cap);
+            const rightRows = students.slice(cap);
+            return (
+                <>
+                    {pageIndex === 0 ? renderShortHeaderBlock() : renderMiniHeader()}
+                    <div style={{
+                        display: "flex", flexDirection: "row",
+                        alignItems: "flex-start", justifyContent: "space-between",
+                        gap: `${SHORT_COL_GAP}px`,
+                    }}>
+                        {renderShortTable(leftRows, offset)}
+                        {renderShortTable(rightRows, offset + leftRows.length)}
+                    </div>
+                    {signature}
+                    {pageFooter}
+                </>
+            );
+        }
+
+        return (
+            <>
+                {pageIndex === 0 ? renderHeaderBlock() : renderMiniHeader()}
+                <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+                    {renderColGroup()}
+                    <thead>{renderColumnHeaderRow()}</thead>
+                    <tbody>{students.map((s, i) => renderRow(s, offset + i))}</tbody>
+                </table>
+                {signature}
+                {pageFooter}
+            </>
+        );
+    };
+
+    const pageBox = {
+        position: "relative", width: `${PAGE_W}px`, height: `${PAGE_H}px`,
+        boxSizing: "border-box", overflow: "hidden", background: "#fff", margin: "0 auto",
+    };
+
+    /* sidebar handlers */
+    const dynamicColumns = useMemo(
+        () => [
+            { key: "sl", label: labels?.SerialLabel ?? "ক্রমিক" },
+            { key: "admission", label: labels?.AdmissionIDLabel ?? "ভর্তি" },
+            { key: "id", label: labels?.StudentIDLabel ?? "আইডি" },
+            { key: "name", label: labels?.StudentNameLabel ?? "শিক্ষার্থীর নাম" },
+            { key: "total", label: labels?.TotalLabel ?? "মোট" },
+            { key: "gpa", label: labels?.GPALabel ?? "জিপিএ" },
+            { key: "grade", label: labels?.GradeLabel ?? "গ্রেড" },
+            { key: "pos", label: labels?.PositionLabel ?? "স্থান" },
+        ],
+        [labels]
+    );
+
+    const toggleColumn = (key) => setVisibleColumns((p) => ({ ...p, [key]: !p[key] }));
+    const toggleNameExtra = (key) => setNameExtras((p) => ({ ...p, [key]: !p[key] }));
+    const toggleResultOption = (key) =>
+        setResultOptions((prev) => {
+            const next = { ...prev, [key]: !prev[key] };
+            if (next[key]) Object.keys(next).forEach((k) => k !== key && (next[k] = false));
+            return next;
+        });
+    const setAllColumns = (value) =>
+        setVisibleColumns(Object.fromEntries(dynamicColumns.map((c) => [c.key, value])));
+
+    /* ═══ RENDER ═══ */
+    return (
+        <div className="flex items-start w-full">
+            {/* ═══════════ SIDEBAR — fixed height, নিজে scroll ═══════════ */}
+            <aside
+                className="hidden lg:flex flex-col w-[300px] shrink-0 bg-white border-r border-slate-200 sticky top-0 h-screen print:hidden"
+                style={{ overflow: "hidden" }}
+            >
+                {/* Header — fixed */}
+                <div className="p-5 border-b border-slate-100 shrink-0">
+                    <div className="flex items-center gap-2 mb-1">
+                        <div className="w-6 h-6 rounded-md bg-emerald-50 flex items-center justify-center">
+                            <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <h2 className="text-sm font-bold text-slate-800">সেটিং</h2>
+                    </div>
+                    <p className="text-xs text-slate-400">রিপোর্টের কলাম ও প্রিন্ট অপশন</p>
+                </div>
+
+                {/* Scrollable content */}
+                <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                    <ColumnSelector value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={dynamicColumns} />
+                    <ResultOptionsSelector value={resultOptions} onToggle={toggleResultOption} />
+                    <PrintSettings colorMode={colorMode} onColorChange={setColorMode} />
+                </div>
+
+                {/* Footer — fixed */}
+                <div className="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0">
+                    <p className="text-[10px] text-slate-400 text-center">© Result Report Generator</p>
+                </div>
+            </aside>
+
+            {/* ═══════════ REPORT BODY — w-full, browser scroll ═══════════ */}
+            <div className="flex-1 min-w-0 w-full">
+                {/* mobile sidebar */}
+                <div className="lg:hidden p-4 pb-0 print:hidden">
+                    <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
+                        <ColumnSelector value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={dynamicColumns} />
+                        <ResultOptionsSelector value={resultOptions} onToggle={toggleResultOption} />
+                        <PrintSettings colorMode={colorMode} onColorChange={setColorMode} />
+                    </div>
+                </div>
+
+                {/* ✅ A4 pages — ScaledPreview ভিতরে */}
+                <div className="result-sheet-wrapper w-full">
+                    <div className="no-print">
+                        <ScaledPreview designWidth={PAGE_W}>
+                            {pages.map((students, pageIndex) => (
+                                <div key={pageIndex} style={{
+                                    ...pageBox,
+                                    boxShadow: "0 1px 6px rgba(15,23,42,0.18)",
+                                    marginBottom: "24px",
+                                }}>
+                                    {renderPage(pageIndex, students)}
+                                </div>
+                            ))}
+                        </ScaledPreview>
+                    </div>
+
+                    <div className="print-only">
+                        {pages.map((students, pageIndex) => (
+                            <div key={pageIndex} style={{
+                                ...pageBox,
+                                pageBreakAfter: pageIndex < pages.length - 1 ? "always" : "auto",
+                                breakAfter: pageIndex < pages.length - 1 ? "page" : "auto",
+                            }}>
+                                {renderPage(pageIndex, students)}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* ═══ CSS ═══ */}
+            <style>{`
+        .print-only { display: none; }
+        @media print {
+          @page { size: A4 landscape; margin: 5mm; }
+          html, body { margin: 0 !important; padding: 0 !important; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          .no-print { display: none !important; }
+          .print-only { display: block !important; }
+          tr, td, th { page-break-inside: avoid !important; break-inside: avoid !important; }
+          .signature-section { page-break-inside: avoid !important; break-inside: avoid !important; }
+        }
+      `}</style>
+        </div>
+    );
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SIDEBAR SUB-COMPONENTS
+   ═══════════════════════════════════════════════════════════ */
+
+const SegmentedControl = ({ label, options, value, onChange }) => (
+    <div>
+        <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{label}</p>
+        <div className="grid grid-flow-col auto-cols-fr gap-1 p-1 rounded-lg bg-slate-100">
+            {options.map((opt) => {
+                const active = value === opt.key;
+                return (
+                    <button key={opt.key} type="button" onClick={() => onChange(opt.key)}
+                        className={`px-2 py-1.5 rounded-md text-xs font-semibold transition-all ${active
+                            ? "bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-200"
+                            : "text-slate-500 hover:text-slate-700"
+                            }`}>{opt.label}</button>
+                );
+            })}
+        </div>
+    </div>
+);
+
+const PrintSettings = ({ colorMode, onColorChange }) => (
+    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-3">
+        <div className="flex items-center justify-between">
+            <p className="text-xs font-bold text-slate-700 leading-tight">প্রিন্ট সেটিং</p>
+            <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 rounded-md px-1.5 py-0.5">
+                A4 Landscape
+            </span>
+        </div>
+        <SegmentedControl label="রঙ" options={COLOR_OPTIONS} value={colorMode} onChange={onColorChange} />
+        <p className="text-[10px] text-slate-400 leading-snug">
+            সাদা কালো মোডে শুধু গ্রেড কলামের রঙ থাকবে।
+        </p>
+    </div>
+);
+
+const RESULT_OPTIONS_LIST = [
+    { key: "idSerial", label: "আইডি সিরিয়ালে" },
+    { key: "byDivision", label: "বিভাগ অনুসারে" },
+    { key: "byNumber", label: "নাম্বার অনুসারে" },
+    { key: "short", label: "সংক্ষিপ্ত" },
+];
+
+const ResultOptionsSelector = ({ value, onToggle }) => (
+    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+        <p className="text-xs font-bold text-slate-700 leading-tight">ফলাফল</p>
+        <p className="text-[10px] text-slate-400 leading-tight mt-0.5 mb-2">
+            ফলাফল প্রদর্শনের ধরন নির্বাচন করুন
+        </p>
+        <div className="grid grid-cols-1 gap-1.5">
+            {RESULT_OPTIONS_LIST.map((opt) => {
+                const checked = !!value[opt.key];
+                return (
+                    <label key={opt.key} className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border cursor-pointer select-none text-xs transition-colors ${checked
+                        ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-medium"
+                        : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                        }`}>
+                        <input type="checkbox" checked={checked} onChange={() => onToggle(opt.key)}
+                            className="w-3.5 h-3.5 accent-emerald-600 cursor-pointer" />
+                        <span>{opt.label}</span>
+                    </label>
+                );
+            })}
+        </div>
+    </div>
+);
+
+const ColumnSelector = ({ value, onToggle, onSetAll, columns = RESULT_COLUMNS }) => {
+    const checkedCount = columns.filter((c) => value[c.key]).length;
+    return (
+        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <div className="flex items-center justify-between mb-2">
+                <div>
+                    <p className="text-xs font-bold text-slate-700 leading-tight">কলাম নির্বাচন</p>
+                    <p className="text-[10px] text-slate-400 leading-tight mt-0.5">
+                        {checkedCount}/{columns.length} টি নির্বাচিত
+                    </p>
+                </div>
+                <div className="flex items-center gap-1">
+                    <button type="button" onClick={() => onSetAll(true)}
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100">
+                        সব
+                    </button>
+                    <button type="button" onClick={() => onSetAll(false)}
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200">
+                        কিছুই না
+                    </button>
+                </div>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+                {columns.map((col) => {
+                    const checked = !!value[col.key];
+                    return (
+                        <label key={col.key} className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border cursor-pointer select-none text-xs transition-colors ${checked
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-medium"
+                            : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                            }`}>
+                            <input type="checkbox" checked={checked} onChange={() => onToggle(col.key)}
+                                className="w-3.5 h-3.5 accent-emerald-600 cursor-pointer" />
+                            <span className="truncate">{col.label}</span>
+                        </label>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};

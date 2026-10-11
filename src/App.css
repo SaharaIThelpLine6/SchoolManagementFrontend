@@ -687,3 +687,14 @@ div:where(.swal2-container) div:where(.swal2-html-container) {
 .animate-bounce-in {
   animation: bounce-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) both;
 }
+
+/* Row কখনো ভাঙবে না */
+tr {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+/* Table header প্রতি page repeat হবে */
+thead {
+  display: table-header-group;
+}

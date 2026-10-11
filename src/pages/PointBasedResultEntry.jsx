@@ -264,7 +264,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
       <div className="filter_header flex items-center justify-between pt-5">
         <h3 className="text-base sm:text-[20px] font-bold">
-          {translate('Point Result Entry')}
+          {translate('Result Entry')}
         </h3>{' '}
       </div>
       <FormProvider {...methods}>

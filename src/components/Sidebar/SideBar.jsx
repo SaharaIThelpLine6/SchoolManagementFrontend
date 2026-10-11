@@ -122,6 +122,9 @@ const SideBar = () => {
             if (subItem.name === 'Online Admission') {
               return hasPermission(permissionsDataList.student_admission);
             }
+            if (subItem.name === 'Student ID Card') {
+              return hasPermission(permissionsDataList.student_id_card);
+            }
             if (subItem.name === 'Class Routine') {
               return hasPermission(permissionsDataList.class);
             }

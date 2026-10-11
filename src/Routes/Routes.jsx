@@ -423,7 +423,7 @@ const Router = createBrowserRouter([
                 path: 'student-id-card',
                 element: (
                   <RequirePermission
-                    permissionId={permissionsDataList.student_admission}
+                    permissionId={permissionsDataList.student_id_card}
                   >
                     <StudentIdCardPrint pageTitle="Student Id Card" />
                   </RequirePermission>

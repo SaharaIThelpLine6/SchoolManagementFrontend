@@ -280,9 +280,15 @@ const SingleMarkSheet = ({
 
   const divisionName = pick(student?.DivisionNames);
   const averageMark =
-    totalSubjects > 0 && student?.Total !== undefined && student?.Total !== null
-      ? (Number(student.Total) / totalSubjects).toFixed(2)
+    examConfig?.AverageSubsonkha > 0 &&
+      student?.Total !== undefined &&
+      student?.Total !== null
+      ? (Number(student.Total) / examConfig.AverageSubsonkha).toFixed(2)
       : '-';
+  // const averageMark =
+  //   totalSubjects > 0 && student?.Total !== undefined && student?.Total !== null
+  //     ? (Number(student.Total) / totalSubjects).toFixed(2)
+  //     : '-';
 
   return (
     <div
@@ -569,7 +575,7 @@ const SingleMarkSheet = ({
 // Main Component
 // ==========================================
 const MarkSheetPdf = ({ data }) => {
-  console.log(data, "data")
+  // console.log(data, "data")
   // Font age thekei load kore rakhbe, jate print preview-te fallback na dhore
   useEffect(() => {
     const load = () =>
