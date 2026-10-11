@@ -268,7 +268,7 @@ const SignatureBlock = ({
   <div className="text-center w-[120px] shrink-0">
     {showImage ? (
       <div className="h-[22px] flex items-end justify-center">
-        {image ? <img src={image} alt="" className="max-h-[30px] object-contain" /> : null}
+        {image ? <img src={image} alt="" className="max-h-[40px] object-contain" /> : null}
       </div>
     ) : null}
 
@@ -362,16 +362,6 @@ export const AdmitCardFace = ({
   // prop দিলে সেটাই চূড়ান্ত, না দিলে টেমপ্লেটের ডিফল্ট
   const qrEnabled = showQR === undefined ? Boolean(t.showQR) : Boolean(showQR);
   const photoEnabled = showPhoto === undefined ? Boolean(t.showPhoto) : Boolean(showPhoto);
-
-  // // স্বাক্ষরের তিনটি অংশ আলাদাভাবে নিয়ন্ত্রণযোগ্য
-  // const signImageEnabled =
-  //   showSign === undefined ? Boolean(t.showSignature) : Boolean(showSign);
-  // const signNameEnabled =
-  //   showSignName === undefined ? Boolean(t.showSignature) : Boolean(showSignName);
-  // const signDateEnabled =
-  //   showSignDate === undefined ? t.showSignDate !== false : Boolean(showSignDate);
-
-  // const anySignPart = signImageEnabled || signNameEnabled || signDateEnabled;
 
   // স্বাক্ষরের তিনটি অংশ — বাঁ (নায়েম) ও ডান (মুহতামিম) প্রতিটার জন্য।
   // অগ্রাধিকার: নতুন প্রপ > পুরোনো প্রপ > টেমপ্লেট ডিফল্ট।

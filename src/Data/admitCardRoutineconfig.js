@@ -582,32 +582,6 @@ export const getRoutineLayoutLabel = (type, lang) => {
   return l.labels[lang] ?? l.labels.bn;
 };
 
-// export const getRoutineLayout = (type) => {
-//   const base = ROUTINE_LAYOUTS[type] || ROUTINE_LAYOUTS[1];
-//   const paper = ROUTINE_PAGES[base.page] || ROUTINE_PAGES['A4 portrait'];
-
-//   const contentW = paper.w - base.margin * 2;
-//   const contentH = paper.h - base.margin * 2;
-
-//   const slotW = (contentW - base.gap * (base.cols - 1)) / base.cols;
-//   const slotH = (contentH - base.gap * (base.rows - 1)) / base.rows;
-
-//   const cellW = Math.min(slotW, slotH * ROUTINE_CARD_RATIO);
-//   const cellH = cellW / ROUTINE_CARD_RATIO;
-
-//   return {
-//     ...base,
-//     perPage: base.cols * base.rows,
-//     paperW: paper.w,
-//     paperH: paper.h,
-//     contentW,
-//     contentH,
-//     cellW,
-//     cellH,
-//     scale: (cellW * MM_TO_PX) / ROUTINE_CARD_W,
-//   };
-// };
-
 export const getRoutineLayout = (type, { stretch = true } = {}) => {
   const base = ROUTINE_LAYOUTS[type] || ROUTINE_LAYOUTS[1];
   const paper = ROUTINE_PAGES[base.page] || ROUTINE_PAGES['A4 portrait'];

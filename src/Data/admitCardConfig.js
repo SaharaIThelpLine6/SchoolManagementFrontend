@@ -777,7 +777,7 @@ export const ADMIT_FIELDS = [
     id: 'SubClass',
     name: 'Sub Class',
     nameAr: 'الشعبة',
-    label: 'শাখা',
+    label: 'শ্রেণি/জামাত',
     demo: 'ক',
     demoEn: 'A',
     demoAr: 'أ',
