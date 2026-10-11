@@ -268,7 +268,7 @@ const SignatureBlock = ({
   <div className="text-center w-[120px] shrink-0">
     {showImage ? (
       <div className="h-[22px] flex items-end justify-center">
-        {image ? <img src={image} alt="" className="max-h-[22px] object-contain" /> : null}
+        {image ? <img src={image} alt="" className="max-h-[30px] object-contain" /> : null}
       </div>
     ) : null}
 
@@ -708,16 +708,6 @@ export const AdmitCardFace = ({
             paddingRight: t.signPadX ?? 34,
           }}
         >
-          {/* <SignatureBlock
-            t={t}
-            image={najemSignature}
-            name={student.NajemName || getAdmitText('najem', lang)}
-            printDate={stampDate}
-            dateLabel={getAdmitText('dateLabel', lang)}
-            showImage={signImageEnabled}
-            showName={signNameEnabled}
-            showDate={signDateEnabled}
-          /> */}
           <SignatureBlock
             t={t}
             image={najemSignature}
@@ -750,16 +740,6 @@ export const AdmitCardFace = ({
             </div>
           ) : null}
 
-          {/* <SignatureBlock
-            t={t}
-            image={principalSignature}
-            name={student.PrincipalName || getAdmitText('principal', lang)}
-            printDate={stampDate}
-            dateLabel={getAdmitText('dateLabel', lang)}
-            showImage={signImageEnabled}
-            showName={signNameEnabled}
-            showDate={signDateEnabled}
-          /> */}
           <SignatureBlock
             t={t}
             image={principalSignature}

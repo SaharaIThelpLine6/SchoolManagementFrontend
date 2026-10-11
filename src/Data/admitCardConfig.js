@@ -1066,7 +1066,7 @@ export const PRINT_LAYOUTS = {
     cols: 1,
     rows: 1,
     page: 'A5 landscape',
-    margin: 6,
+    margin: 0,
     gap: 4,
     labels: {
       bn: 'A5 কাগজে ১টি',
@@ -1078,7 +1078,7 @@ export const PRINT_LAYOUTS = {
     cols: 1,
     rows: 2,
     page: 'A4 portrait',
-    margin: 8,
+    margin: 0,
     gap: 5,
     labels: {
       bn: 'A4 কাগজে ২টি',
@@ -1090,7 +1090,7 @@ export const PRINT_LAYOUTS = {
     cols: 2,
     rows: 2,
     page: 'A4 landscape',
-    margin: 8,
+    margin: 0,
     gap: 5,
     labels: {
       bn: 'A4 ল্যান্ডস্কেপে ৪টি',
@@ -1109,7 +1109,43 @@ export const getLayoutLabel = (type, lang) => {
  * কাগজের প্রিন্টেবল এরিয়ার ভিতরে ratio ঠিক রেখে কার্ডের মাপ বের করে।
  * width আর height — দুইটাই constraint, তাই যেটা ছোট সেটাই নেওয়া হয়।
  */
-export const getPrintLayout = (type) => {
+// export const getPrintLayout = (type) => {
+//   const base = PRINT_LAYOUTS[type] || PRINT_LAYOUTS[1];
+//   const paper = PRINT_PAGES[base.page] || PRINT_PAGES['A4 portrait'];
+
+//   const contentW = paper.w - base.margin * 2;
+//   const contentH = paper.h - base.margin * 2;
+
+//   const slotW = (contentW - base.gap * (base.cols - 1)) / base.cols;
+//   const slotH = (contentH - base.gap * (base.rows - 1)) / base.rows;
+
+//   const cellW = Math.min(slotW, slotH * CARD_RATIO);
+//   const cellH = cellW / CARD_RATIO;
+
+//   return {
+//     ...base,
+//     perPage: base.cols * base.rows,
+//     paperW: paper.w,
+//     paperH: paper.h,
+//     contentW,
+//     contentH,
+//     cellW,
+//     cellH,
+//     scale: (cellW * MM_TO_PX) / CARD_W,
+//   };
+// };
+
+
+/**
+ * কাগজের প্রিন্টেবল এরিয়ার ভিতরে কার্ডের মাপ বের করে।
+ *
+ * stretch:
+ *   true  → ঘরটাই কার্ডের মাপ। কার্ড পুরো পাতা জুড়ে বসে; অনুপাত সামান্য
+ *           বদলাতে পারে (A4-এর অনুপাত ১.৪১৪, কার্ডের ১.২৬৮ — ১৮% চওড়া),
+ *           কিন্তু চারপাশে আর খালি জায়গা থাকে না।
+ *   false → পুরোনো আচরণ — কার্ডের নিজের অনুপাত রক্ষা, পাশে ফাঁকা থাক।
+ */
+export const getPrintLayout = (type, { stretch = true } = {}) => {
   const base = PRINT_LAYOUTS[type] || PRINT_LAYOUTS[1];
   const paper = PRINT_PAGES[base.page] || PRINT_PAGES['A4 portrait'];
 
@@ -1119,8 +1155,8 @@ export const getPrintLayout = (type) => {
   const slotW = (contentW - base.gap * (base.cols - 1)) / base.cols;
   const slotH = (contentH - base.gap * (base.rows - 1)) / base.rows;
 
-  const cellW = Math.min(slotW, slotH * CARD_RATIO);
-  const cellH = cellW / CARD_RATIO;
+  const cellW = stretch ? slotW : Math.min(slotW, slotH * CARD_RATIO);
+  const cellH = stretch ? slotH : cellW / CARD_RATIO;
 
   return {
     ...base,
@@ -1131,9 +1167,14 @@ export const getPrintLayout = (type) => {
     contentH,
     cellW,
     cellH,
-    scale: (cellW * MM_TO_PX) / CARD_W,
+    // transform: scale(sx, sy) — স্ট্রেচ মোডে দুইটা আলাদা হতে পারে
+    scaleX: (cellW * MM_TO_PX) / CARD_W,
+    scaleY: (cellH * MM_TO_PX) / CARD_H,
+    scale: (cellW * MM_TO_PX) / CARD_W, // পুরোনো কোডের ব্যাকওয়ার্ড কম্প্যাট
+    stretch,
   };
 };
+
 
 // ---------------------------------------------------------------------------
 // ছাপার CSS
@@ -1204,10 +1245,18 @@ export const buildPrintCss = ({ layout, cardW, cardH, grayscale = false, prefix 
       position: relative;
       ${grayscale ? 'filter: grayscale(1);' : ''}
     }
+    /* .${SCALE} { */
+    /*   width: ${cardW}px; */
+    /*   height: ${cardH}px; */
+    /*   transform: scale(${layout.scale}); */
+    /*   transform-origin: top left; */
+    /* } */
+
     .${SCALE} {
       width: ${cardW}px;
       height: ${cardH}px;
-      transform: scale(${layout.scale});
+      /* stretch মোডে x ও y আলাদা — নাহলে শুধু scale(layout.scale) হতো */
+      transform: scale(${layout.scaleX ?? layout.scale}, ${layout.scaleY ?? layout.scale});
       transform-origin: top left;
     }
 
