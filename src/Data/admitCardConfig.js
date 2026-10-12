@@ -547,6 +547,17 @@ export const ADMIT_UI = {
     leftSignature: 'বাঁ পাশের স্বাক্ষর (নায়েম)',
     rightSignature: 'ডান পাশের স্বাক্ষর (মুহতামিম)',
     signNamePlaceholder: 'স্বাক্ষরের নাম',
+    mode: 'কাগজ ও ধরণ',
+    modePlain: 'A5 — শুধু প্রবেশপত্র',
+    modeRoutine: 'A4 — রুটিনসহ',
+    modePlainNote: 'শুধু প্রবেশপত্র',
+    modeRoutineNote: 'রুটিনসহ',
+    modePlainShort: 'A5',
+    modeRoutineShort: 'A4',
+    routineColor: 'রুটিনের রঙ',
+    routineColorHint: 'এই রঙটা সব রুটিন টেমপ্লেটের টেবিলে একসাথে বসবে।',
+    routineColorReset: 'টেমপ্লেটের নিজের রঙ',
+    seatLine: 'কার্ডে আসন দেখাও',
   },
   en: {
     pageTitle: 'Admit Card',
@@ -613,6 +624,17 @@ export const ADMIT_UI = {
     leftSignature: 'Left signature (Nazim)',
     rightSignature: 'Right signature (Principal)',
     signNamePlaceholder: 'Signature name',
+    mode: 'Paper & type',
+    modePlain: 'A5 — admit card only',
+    modeRoutine: 'A4 — with routine',
+    modePlainNote: 'Admit card only',
+    modeRoutineNote: 'With routine',
+    modePlainShort: 'A5',
+    modeRoutineShort: 'A4',
+    routineColor: 'Routine colour',
+    routineColorHint: 'This colour is applied to every routine template at once.',
+    routineColorReset: 'Template\'s own colour',
+    seatLine: 'Show seat on card',
   },
   ar: {
     pageTitle: 'بطاقة الدخول',
@@ -679,6 +701,17 @@ export const ADMIT_UI = {
     leftSignature: 'التوقيع الأيسر (الناظم)',
     rightSignature: 'التوقيع الأيمن (المهتمم)',
     signNamePlaceholder: 'اسم التوقيع',
+    mode: 'الورق والنوع',
+    modePlain: 'A5 — بطاقة الدخول فقط',
+    modeRoutine: 'A4 — مع الجدول',
+    modePlainNote: 'بطاقة الدخول فقط',
+    modeRoutineNote: 'مع الجدول',
+    modePlainShort: 'A5',
+    modeRoutineShort: 'A4',
+    routineColor: 'لون الجدول',
+    routineColorHint: 'يُطبَّق هذا اللون على جميع قوالب الجدول دفعة واحدة.',
+    routineColorReset: 'لون القالب نفسه',
+    seatLine: 'إظهار المقعد على البطاقة',
   },
 };
 
@@ -963,7 +996,14 @@ export const getFieldValue = (student = {}, fieldId, lang) => {
 export const ADMIT_FIELD_LABEL_KEYS = {
   StudentCode: 'StudentIDLabel',
   ClassName: 'ClassNameLabel',
+  // রোল নং — কার্ডে ফিল্ডটার আইডি RollNo (মান আসে AdmissionSerial থেকে),
+  // কিন্তু লেবেলটা LabelName টেবিলের AdmissionIDLabel ঘরে বসানো থাকে।
+  // আগে কেবল 'AdmissionSerial' লেখা ছিল, আর ওই নামে কোনো ফিল্ড নেই —
+  // তাই প্রতিষ্ঠান নিজের নাম বসালেও কার্ডে "রোল নং" ই ছাপত।
+  RollNo: 'AdmissionIDLabel',
   AdmissionSerial: 'AdmissionIDLabel',
+  // শ্রেণি/জামাত — বাংলা ও ইংরেজিতে SubClassNameLabel,
+  // আরবীতে নিচের ARA তালিকার SubClassNameAraLabel
   SubClass: 'SubClassNameLabel',
 };
 
@@ -1057,6 +1097,9 @@ export const MM_TO_PX = 96 / 25.4;
 // ---------------------------------------------------------------------------
 export const PRINT_PAGES = {
   'A5 landscape': { w: 210, h: 148 },
+  // A5 খাড়া — এক পাতায় দুইটা কার্ড বসাতে। প্রিন্টারে A5 কাগজ না থাকলেও
+  // ১৪৮×২১০ মাপটা A4 আর Letter দুইটার ভিতরেই পড়ে, তাই ছাপা ১০০% ই থাকে।
+  'A5 portrait': { w: 148, h: 210 },
   'A4 portrait': { w: 210, h: 279.4 },
   'A4 landscape': { w: 279.4, h: 210 },
 };
@@ -1098,7 +1141,45 @@ export const PRINT_LAYOUTS = {
       ar: 'أربع بطاقات في ورقة A4 عرضية',
     },
   },
+  // নতুন — A5 কাগজে দুইটা কার্ড, একটার নিচে আরেকটা
+  4: {
+    cols: 1,
+    rows: 2,
+    page: 'A5 portrait',
+    margin: 0,
+    gap: 4,
+    labels: {
+      bn: 'A5 কাগজে ২টি',
+      en: '2 per A5 sheet',
+      ar: 'بطاقتان في ورقة A5',
+    },
+  },
 };
+
+// ---------------------------------------------------------------------------
+// প্রবেশপত্রের দুইটা মোড
+//
+//   A5  → শুধু প্রবেশপত্র, রুটিন ছাড়া। ডিজাইন আসে ADMIT_TEMPLATES থেকে।
+//   A4  → রুটিনসহ প্রবেশপত্র। ডিজাইন আসে admitCardRoutineconfig.js এর
+//         নিজের আলাদা তালিকা থেকে — এই ফাইলের সাথে তার সম্পর্ক নেই।
+//
+// কোন মোড বাছা হলো তার উপরেই নির্ভর করে "টেমপ্লেট সিলেক্ট" এ কোন তালিকা
+// দেখাবে আর "রিপোর্টের ধরণ" এ কোন কাগজগুলো থাকবে।
+// ---------------------------------------------------------------------------
+export const ADMIT_MODES = {
+  PLAIN: 'A5',
+  ROUTINE: 'A4',
+};
+
+export const DEFAULT_ADMIT_MODE = ADMIT_MODES.PLAIN;
+
+export const isRoutineMode = (mode) => String(mode) === ADMIT_MODES.ROUTINE;
+
+/**
+ * A5 মোডে "রিপোর্টের ধরণ" এ যে কাগজগুলো থাকবে, এই ক্রমেই।
+ * A4 মোডের তালিকা আলাদা ফাইলে (ROUTINE_LAYOUTS) — ওখানে A4 ১টি ও A4 ২টি।
+ */
+export const PLAIN_LAYOUT_ORDER = ['1', '4', '2', '3'];
 
 export const getLayoutLabel = (type, lang) => {
   const l = PRINT_LAYOUTS[type] || PRINT_LAYOUTS[1];
