@@ -218,6 +218,7 @@ const useTranslate = () => {
     'Account Type': 'অ্যাকাউন্টের ধরণ',
     'Data Type': 'ডাটার ধরণ',
     'Add New Donation': 'অনুদান তৈরি করুন',
+    'Add New Template': 'টেমপ্লেট তৈরি করুন',
     'Dues list and dues messages of all students':
       'সকল শিক্ষার্থীর বকেয়া তালিকা ও বকেয়া মেসেজ',
     Debtor: 'দেনাদার',
@@ -385,6 +386,7 @@ const useTranslate = () => {
     'Excel File Name': 'এক্সেল ফাইলের নাম',
     'Export students data': 'শিক্ষার্থীদের তথ্য সেভ করুন',
     'Data Export': 'ডাটা এক্সপোর্ট',
+    'Data Export Template': 'ডাটা এক্সপোর্ট  টেমপ্লেট',
     'Send single and multiple SMS': 'একক এবং একাধিক এসএমএস পাঠান',
     'SMS Sending Form': 'মেসেজ প্রেরণ ফর্ম',
     'Missing or invalid data provided': 'কোন তথ্য পাওয়া যায়নি',

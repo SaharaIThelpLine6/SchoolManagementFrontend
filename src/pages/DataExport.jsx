@@ -601,6 +601,7 @@ const DataExport = ({ pageTitle }) => {
 };
 
 export default DataExport;
+
 // import { Buffer } from 'buffer';
 // import { useCallback, useEffect, useMemo, useState } from 'react';
 // import { FormProvider, useForm } from 'react-hook-form';
@@ -636,11 +637,12 @@ export default DataExport;
 //   const { watch } = methods;
 //   const [logo, setLogo] = useState(null);
 
-//   const [SessionID, SubClassID, NewOldId, ResidentialStatusId] = watch([
+//   const [SessionID, SubClassID, NewOldId, ResidentialStatusId, UserActive] = watch([
 //     'SessionID',
 //     'SubClassID',
 //     'NewOldId',
 //     'ResidentialStatusId',
+//     'UserActive',
 //   ]);
 //   const { residential, error: settingsError } = useSelector(
 //     (state) => state.settings
@@ -662,6 +664,7 @@ export default DataExport;
 //       SessionID: SessionID ? SessionID : null,
 //       NewOldId: NewOldId ? NewOldId : null,
 //       ResidentialStatusId: ResidentialStatusId ? ResidentialStatusId : null,
+//       UserActive: UserActive !== undefined && UserActive !== null ? UserActive : null,
 //     },
 //     {
 //       skip: !SessionID || !SubClassID || !ResidentialStatusId,
@@ -726,6 +729,8 @@ export default DataExport;
 //         AdmissionStatus: student.AdmissionStatus,
 //         AdmissionAction: student.AdmissionAction,
 //         FinancialStatus: student.FinancialStatus || '-',
+//         UserActive: student.User?.UserActive,
+//         UserActiveName: student.User?.UserActive === 1 ? 'Active' : student.User?.UserActive === 0 ? 'InActive' : '-',
 //       };
 //     });
 //   }, [searchStudentInfo]);
@@ -785,6 +790,7 @@ export default DataExport;
 //     { id: 'transientPostOffice', label: 'Transient Post Office', field: 'TransientPost' },
 //     { id: 'transientVillage', label: 'Transient Village', field: 'TransientVill' },
 //     { id: 'Financial Status', label: 'Financial Status', field: 'FinancialStatus' },
+//     { id: 'User Active', label: 'User Active', field: 'UserActiveName' },
 //   ];
 
 //   const handleColumnToggle = useCallback((columnId) => {
@@ -1021,13 +1027,21 @@ export default DataExport;
 
 //   return (
 //     <FormProvider {...methods}>
-//       <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col gap-6 font-default print:hidden">
-//         <div className="flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-4">
-//           <h2 className="text-xl font-bold text-black shrink-0 2xl:mr-6">
-//             {translate('Export students data')}
-//           </h2>
+//       <div className=" flex flex-col gap-6 font-default print:hidden">
+//         <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col 2xl:flex-row 2xl:items-center justify-between gap-4">
 
-//           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-5 gap-4 flex-1">
+
+//           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 xl:grid-cols-6 gap-4 flex-1">
+//             <DefaultSelect
+//               options={sessionData || []}
+//               require={'Session is required'}
+//               nameField={'SessionName'}
+//               valueField={'SessionID'}
+//               registerKey={'SessionID'}
+//               type={'number'}
+//               label={translate('Data Export Template')}
+//               error={errors.filters}
+//             />
 //             <DefaultSelect
 //               options={sessionData || []}
 //               require={'Session is required'}
@@ -1053,7 +1067,7 @@ export default DataExport;
 //               options={[
 //                 { NewOldId: 1, ClassName: 'নতুন' },
 //                 { NewOldId: 2, ClassName: 'পুরাতন' },
-//                 { NewOldId: 3, ClassName: 'উভয়' },
+//                 { NewOldId: 3, ClassName: 'উভয়' },
 //               ]}
 //               require={'New/Old is required'}
 //               nameField={'ClassName'}
@@ -1073,28 +1087,76 @@ export default DataExport;
 //               label={translate('Living Condition')}
 //               error={errors.filters}
 //             />
+//             <DefaultSelect
+//               options={[
+//                 { UserActive: 1, UserActiveName: 'সক্রিয়' },
+//                 { UserActive: 0, UserActiveName: 'নিষ্ক্রিয়' },
+//               ]}
+//               require={'User Active is required'}
+//               nameField={'UserActiveName'}
+//               valueField={'UserActive'}
+//               registerKey={'UserActive'}
+//               type={'number'}
+//               label={"স্ট্যাটাস"}
+//               error={errors.filters}
+//             />
 //           </div>
 
 //           <div className="flex flex-col sm:flex-row justify-center items-center gap-3 sm:mt-6 w-full 2xl:w-auto">
-//             <Button
+//             {/* <Button
 //               className="w-full sm:w-auto flex items-center gap-2"
 //               onClick={exportToExcel}
 //             >
 //               {translate('Data Export (Excel)')}
-//             </Button>
-
-//             <Button
-//               variant="secondary"
-//               className="w-full sm:w-auto flex items-center gap-2 bg-green-500 hover:bg-green-600"
-//               onClick={handlePrint}
+//             </Button> */}
+//             <button
+//               onClick={handlePrint} // আপনার প্রয়োজন অনুযায়ী ফাংশন পরিবর্তন করুন
+//               // onClick={exportToExcel} // আপনার প্রয়োজন অনুযায়ী ফাংশন পরিবর্তন করুন
+//               className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#37c565] hover:bg-[#37c565] text-white px-6 py-2.5 rounded-md shadow-sm transition-all duration-200 text-sm font-medium"
 //             >
-//               {translate('Data Export (PDF)')}
-//             </Button>
+//               {/* প্লাস (+) আইকন (SVG) */}
+//               <svg
+//                 xmlns="http://www.w3.org/2000/svg"
+//                 width="18"
+//                 height="18"
+//                 viewBox="0 0 24 24"
+//                 fill="none"
+//                 stroke="currentColor"
+//                 strokeWidth="2"
+//                 strokeLinecap="round"
+//                 strokeLinejoin="round"
+//               >
+//                 <line x1="12" y1="5" x2="12" y2="19"></line>
+//                 <line x1="5" y1="12" x2="19" y2="12"></line>
+//               </svg>
+//               {translate('Add New Template')}
+//             </button>
+//             <button
+//               // onClick={handlePrint} // আপনার প্রয়োজন অনুযায়ী ফাংশন পরিবর্তন করুন
+//               className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2.5 rounded-md shadow-sm transition-all duration-200 text-sm font-medium"
+//             >
+//               {/* থ্রি-ডট (Three Dot) আইকন (SVG) */}
+//               <svg
+//                 xmlns="http://www.w3.org/2000/svg"
+//                 width="16"
+//                 height="16"
+//                 viewBox="0 0 24 24"
+//                 fill="none"
+//                 stroke="currentColor"
+//                 strokeWidth="2"
+//                 strokeLinecap="round"
+//                 strokeLinejoin="round"
+//               >
+//                 <circle cx="12" cy="12" r="1"></circle>
+//                 <circle cx="12" cy="5" r="1"></circle>
+//                 <circle cx="12" cy="19" r="1"></circle>
+//               </svg>
+//             </button>
 //           </div>
 //         </div>
 
-//         <div className="flex flex-col lg:flex-row gap-6">
-//           <div className="w-full lg:w-1/4">
+//         <div className="bg-white shadow-lg rounded-xl p-6 flex flex-col lg:flex-row gap-6">
+//           {/* <div className="w-full lg:w-1/4">
 //             <div className="bg-gray-50 p-4 rounded-lg">
 //               <h3 className="font-medium text-gray-700 mb-3">
 //                 {translate('Select Columns')}
@@ -1140,10 +1202,10 @@ export default DataExport;
 //                 </div>
 //               </div>
 //             </div>
-//           </div>
+//           </div> */}
 
 //           {searchStudentError ? (
-//             <div className="w-full lg:w-3/4">
+//             <div className="w-full">
 //               <p className="text-red-500 text-center">
 //                 {translate(
 //                   'Failed to load student data. Please check your filters or try again later.'
@@ -1151,7 +1213,7 @@ export default DataExport;
 //               </p>
 //             </div>
 //           ) : (
-//             <div className="w-full lg:w-3/4">
+//             <div className="w-full">
 //               {selectedColumns.length > 0 && filteredStudentData.length > 0 ? (
 //                 <div className="space-y-4">
 //                   <div className="overflow-x-auto border border-gray-200 rounded-lg">

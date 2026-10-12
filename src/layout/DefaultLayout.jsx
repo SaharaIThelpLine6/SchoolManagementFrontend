@@ -37,12 +37,12 @@ const DefaultLayout = () => {
 
   const { data: currentMadrasah, isLoading: isLoadingMadrasah } =
     useGetCurrentMadrasahQuery(school_id, {
-      skip: !school_id, 
+      skip: !school_id,
     });
 
   // 🌟 Get Redirect Status
   const { data: redirectStatus } = useGetRedirectStatusQuery(school_id, {
-    skip: !school_id, 
+    skip: !school_id,
   });
 
   // ✅ Set default title
@@ -62,7 +62,7 @@ const DefaultLayout = () => {
     const lang = localStorage.getItem("lang");
     if (lang && lang !== currectLanguage) {
       dispatch(setCurrentLanguage(lang));
-    } else if(!lang) {
+    } else if (!lang) {
       dispatch(setCurrentLanguage(currectLanguage));
     }
 
@@ -90,14 +90,14 @@ const DefaultLayout = () => {
 
   // 🌟 Check and Apply Redirect logic
   useEffect(() => {
-    
-    
-    if (redirectStatus && redirectStatus.onTestStatus === 1) {   
-      console.log(window.location.hostname);   
-      console.log(window.location.hostname !== "testbda.qmmsoft.com");   
-      console.log(window.location.hostname !== "localhost");   
+
+
+    if (redirectStatus && redirectStatus.onTestStatus === 1) {
+      console.log(window.location.hostname);
+      console.log(window.location.hostname !== "testbda.qmmsoft.com");
+      console.log(window.location.hostname !== "localhost");
       if (window.location.hostname !== "testbda.qmmsoft.com" && window.location.hostname !== "localhost") {
-        window.location.href = `https://testbda.qmmsoft.com/login?token=${token}`; 
+        window.location.href = `https://testbda.qmmsoft.com/login?token=${token}`;
       }
     }
   }, [redirectStatus, token, school_id]);
@@ -119,7 +119,7 @@ const DefaultLayout = () => {
   }, [dispatch, navigate, token]);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100 font-SolaimanLipi overflow-hidden print:h-auto print:bg-white print:overflow-visible">
+    <div className="h-screen flex flex-col bg-[#f4efe2] font-SolaimanLipi overflow-hidden print:h-auto print:bg-white print:overflow-visible">
       {/* Header */}
       <div className="z-40 print:hidden">
         <Header />
