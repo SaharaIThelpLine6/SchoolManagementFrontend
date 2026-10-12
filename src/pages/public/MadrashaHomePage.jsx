@@ -467,9 +467,7 @@ const MadrashaHomePage = () => {
             
             <div
               className="w-24 h-2 mx-auto mt-5 rounded-full shadow-sm"
-              style={{
-                background: `linear-gradient(to right, ${settingsObject.secondary || '#fbbf24'}, ${settingsObject.primary || '#22c55e'})`,
-              }}
+              style={{background: `linear-gradient(to right, ${settingsObject.secondary || '#fbbf24'}, ${settingsObject.primary || '#22c55e'})`,}}
             ></div>
           </div>
 
@@ -482,7 +480,7 @@ const MadrashaHomePage = () => {
                   className="group flex flex-col bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-400 overflow-hidden border border-gray-100 hover:-translate-y-2"
                   style={{ borderColor: 'transparent' }} // will be overridden by hover
                 >
-                  {/* Card Header – dynamic primary gradient */}
+                  {/* Card Header – dynamic primary gradient  */}
                   <div
                     className="relative py-7 px-6 overflow-hidden"
                     style={{
