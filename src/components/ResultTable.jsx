@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Buffer } from 'buffer';
-import bnBijoy2Unicode from "../utils/conveter";
 import PointWiseResult from "../view/PublicResult/PointWiseResult";
 import AvgNumberResult from "../view/PublicResult/AvgNumberResult";
 
@@ -11,12 +10,12 @@ const ResultTable = () => {
     const [principal, setPrincipal] = useState(null)
 
     useEffect(() => {
-        if (studentResult?.Logo?.data) {
-            const buffer = Buffer.from(studentResult.Logo.data);
+        if (studentResult?.institutionInfo?.Logo?.data) {
+            const buffer = Buffer.from(studentResult.institutionInfo.Logo.data);
             const base64String = buffer.toString('base64');
             const imageSrc = `data:image/png;base64,${base64String}`;
             setLogo(imageSrc)
-            document.title = `${studentResult?.UserCode}-${studentResult?.ExamName}-${studentResult?.SessionName}`;
+            document.title = `${studentResult?.User?.UserCode}-${studentResult?.Exam?.ExamName}-${studentResult?.SessionName}`;
         }
     }, [studentResult])
     const handlePrint = () => {
@@ -52,16 +51,16 @@ const ResultTable = () => {
                                 <div className="flex justify-end">
                                     <div className="w-full text-center">
                                         <h1 className="text-white text-[32px] pb-2">
-                                            {studentResult?.InstitutionName}
+                                            {studentResult?.institutionInfo?.InstitutionName}
                                         </h1>
                                     </div>
                                 </div>
                                 <div className="bg-theme-color text-center">
-                                    <p className="text-white">{studentResult?.Address}</p>
+                                    <p className="text-white">{studentResult?.institutionInfo?.Address}</p>
                                 </div>
 
                                 <div className="text-center pt-2 pb-4">
-                                    <p className="text-white mb-0">{studentResult?.ExamName} - {studentResult?.SessionName}</p>
+                                    <p className="text-white mb-0">{studentResult?.Exam?.ExamName} - {studentResult?.SessionName}</p>
 
                                 </div>
                             </div>
@@ -70,7 +69,7 @@ const ResultTable = () => {
 
                 </div>
                 {
-                    resultSubGroupInfo?.ExamStatus == 2 ? (<PointWiseResult studentResult={studentResult} />) : <AvgNumberResult studentResult={studentResult} />
+                    resultSubGroupInfo?.averageCondition?.ExamType == 4 ? (<PointWiseResult studentResult={studentResult} />) : <AvgNumberResult studentResult={studentResult} />
                 }
 
 

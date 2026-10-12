@@ -176,8 +176,10 @@ const studentResultPublicViewSlice = createSlice({
             })
             .addCase(fetchResult.fulfilled, (state, action) => {
                 state.resultStatus = 'succeeded'
-                state.studentResult = action.payload.studentResult.results[0];
-                state.resultSubGroupInfo = action.payload.studentResult.schoolGroup;
+                state.studentResult = action.payload.studentResult;
+                state.resultSubGroupInfo = action.payload.studentResult?.averageCondition
+                    ? { averageCondition: action.payload.studentResult.averageCondition }
+                    : (action.payload.studentResult?.schoolGroup || {});
             })
             .addCase(fetchResult.rejected, (state, action) => {
                 state.resultStatus = 'failed';
@@ -190,7 +192,7 @@ const studentResultPublicViewSlice = createSlice({
             .addCase(fetchClassResult.fulfilled, (state, action) => {
                 state.resultStatus = 'succeeded'
                 state.classResult = action.payload.classResult;
-                state.resultStatistics = action.payload.classResult.data[0];
+                state.resultStatistics = action.payload.classResult?.data?.[0] || null;
             })
             .addCase(fetchClassResult.rejected, (state, action) => {
                 state.resultStatus = 'failed';

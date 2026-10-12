@@ -2,6 +2,7 @@ import React from "react";
 import bnBijoy2Unicode from "../../utils/conveter";
 
 const AvgNumberResult = ({ studentResult }) => {
+  
   return (
     <div className="bg-white px-[5px]">
       <div className="flex flex-col items-center">
@@ -9,24 +10,24 @@ const AvgNumberResult = ({ studentResult }) => {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">
-                {bnBijoy2Unicode(studentResult?.StudentIDLabel)}:
+                শিক্ষার্থী আইডি:
               </p>
-              <p>{studentResult?.UserCode}</p>
+              <p>{studentResult?.User?.UserCode}</p>
             </div>
 
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">
-                {studentResult?.ClassNameLabel}:
+                শ্রেণি:
               </p>
               <p className="text-[16px]">
-                {studentResult?.SubClass}
+                {studentResult?.Class?.SubClass}
               </p>
             </div>
 
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">প্রাপ্তি বিভাগ:</p>
               <p className="text-[16px]">
-                {studentResult?.Division}
+                {studentResult?.Division?.DivisionNames}
               </p>
             </div>
           </div>
@@ -35,21 +36,21 @@ const AvgNumberResult = ({ studentResult }) => {
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">নাম:</p>
               <p className="text-[16px]">
-                {studentResult?.UserName}
+                {studentResult?.User?.UserName}
               </p>
             </div>
 
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">পিতার নাম:</p>
               <p className="text-[16px]">
-                {studentResult?.FatherName}
+                {studentResult?.User?.FatherName}
               </p>
             </div>
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">জন্ম তারিখ:</p>
               <p className="text-[16px]">
-                {studentResult?.DateOfBirth
-                  ? bnBijoy2Unicode(studentResult.DateOfBirth.split("T")[0])
+                {studentResult?.User?.DateOfBirth
+                  ? bnBijoy2Unicode(studentResult.User.DateOfBirth.split("T")[0])
                   : ""}{" "}
                 ইং{" "}
               </p>
@@ -99,7 +100,7 @@ const AvgNumberResult = ({ studentResult }) => {
           </tr>
         </thead>
         <tbody>
-          {Array.from({ length: studentResult.SubSonkha }).map((_, index) => (
+          {Array.from({ length: studentResult?.averageCondition?.SubSonkha }).map((_, index) => (
             <tr>
               <td
                 className="text-[16px] border border-black h-[36px] pl-4"
@@ -111,20 +112,20 @@ const AvgNumberResult = ({ studentResult }) => {
                 className="text-[16px] border border-black h-[36px] pl-4"
                 bgcolor="#ffffff"
               >
-                {bnBijoy2Unicode(studentResult[`Subject${index + 1}`])}
+                {studentResult?.averageCondition?.subjects[index]?.SubjectName}
               </td>
               <td
                 className="text-[16px] border border-black h-[36px] pl-4"
                 bgcolor="#ffffff"
               >
-                {bnBijoy2Unicode(String(studentResult[`MaxNumber${index + 1}`]))}
+                {bnBijoy2Unicode(String(studentResult?.averageCondition[`MaxNumber${index + 1}`]))}
               </td>
               <td
                 className="text-[16px] border border-black h-[36px] pl-4"
                 bgcolor="#ffffff"
               >
                 {bnBijoy2Unicode(
-                  String(studentResult[`PassNumber${index + 1}`])
+                  String(studentResult?.averageCondition[`PassNumber${index + 1}`])
                 )}
               </td>
               <td
@@ -147,7 +148,7 @@ const AvgNumberResult = ({ studentResult }) => {
             </div>
             <div className="flex items-center space-x-2">
               <p className="text-[16px]">গড়:</p>
-              <p>{bnBijoy2Unicode(String(studentResult?.Average))}</p>
+              <p>{bnBijoy2Unicode(String((studentResult?.Total / studentResult?.averageCondition?.AverageSubsonkha).toFixed(2)))}</p>
             </div>
             <div className="flex items-center space-x-2">
               <p className="text-[16px]">মোট নম্বর:</p>

@@ -328,7 +328,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
         setValue(`subjectPassNumbers.${idx}.PassNumber`, band.PassNumber);
       });
     }
-  }, [filteredSubjects, sharedStepData?.subjectPassNumbers, setValue]);
+  }, [subjectsListData, sharedStepData?.SubClassID, sharedStepData?.subjectPassNumbers, setValue]);
 
 
   const handleSaveAndContinue = handleSubmit((data) => {
@@ -699,6 +699,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                           <DefaultInput
                             registerKey={`subjectPassNumbers.${index}.PassNumber`}
                             require="This is required!"
+                            defaultValue={null}
                           />
                         </td>
 

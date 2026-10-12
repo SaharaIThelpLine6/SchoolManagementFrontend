@@ -7,32 +7,31 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
   const [principal, setPrincipal] = useState(null);
   const [najem, setNajem] = useState(null);
 
+  const user = studentResult?.User || {};
+  const averageCondition = studentResult?.averageCondition || {};
+  const subjectCount = averageCondition?.SubSonkha || studentResult?.SubSonkha || 0;
+  console.log(studentResult);
+  
   useEffect(() => {
-    if (studentResult?.Logo?.data) {
-      if (studentResult?.Logo?.data) {
-        const buffer = Buffer.from(studentResult.Logo.data);
-        const base64String = buffer.toString("base64");
-        const imageSrc = `data:image/png;base64,${base64String}`;
-        setLogo(imageSrc);
-      }
-      if (studentResult?.SignaturePrincipal?.data) {
-        const signaturePrincipalBuffer = Buffer.from(
-          studentResult.SignaturePrincipal.data
-        );
-        const base64StringPrincipalBuffer =
-          signaturePrincipalBuffer.toString("base64");
-        const PrincipalimageSrc = `data:image/png;base64,${base64StringPrincipalBuffer}`;
-        setPrincipal(PrincipalimageSrc);
-      }
+    const logoData = studentResult?.institutionInfo?.Logo?.data ?? studentResult?.Logo?.data;
+    if (logoData) {
+      const buffer = Buffer.from(logoData);
+      const base64String = buffer.toString("base64");
+      setLogo(`data:image/png;base64,${base64String}`);
+    }
 
-      if (studentResult?.SignatureNajem?.data) {
-        const signatureNajemBuffer = Buffer.from(
-          studentResult.SignatureNajem.data
-        );
-        const base64StringNajemBuffer = signatureNajemBuffer.toString("base64");
-        const NajemimageSrc = `data:image/png;base64,${base64StringNajemBuffer}`;
-        setNajem(NajemimageSrc);
-      }
+    const principalSignatureData = studentResult?.SignaturePrincipal?.data ?? studentResult?.institutionInfo?.SignaturePrincipal?.data;
+    if (principalSignatureData) {
+      const signaturePrincipalBuffer = Buffer.from(principalSignatureData);
+      const base64StringPrincipalBuffer = signaturePrincipalBuffer.toString("base64");
+      setPrincipal(`data:image/png;base64,${base64StringPrincipalBuffer}`);
+    }
+
+    const najemSignatureData = studentResult?.SignatureNajem?.data ?? studentResult?.institutionInfo?.SignatureNajem?.data;
+    if (najemSignatureData) {
+      const signatureNajemBuffer = Buffer.from(najemSignatureData);
+      const base64StringNajemBuffer = signatureNajemBuffer.toString("base64");
+      setNajem(`data:image/png;base64,${base64StringNajemBuffer}`);
     }
   }, [studentResult]);
   return (
@@ -43,14 +42,14 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
         </div>
         <div className="mx-auto text-center">
           <h2 className="text-[24px] font-medium">
-            {studentResult?.InstitutionName}
+            {studentResult?.institutionInfo?.InstitutionName || studentResult?.InstitutionName}
           </h2>
-          <h3 className="text-md">{studentResult?.Address}</h3>
+          <h3 className="text-md">{studentResult?.institutionInfo?.Address || studentResult?.Address}</h3>
           <h3 className="text-md">
-            শিক্ষাবর্ষঃ {studentResult?.SessionName}
+            শিক্ষাবর্ষঃ {studentResult?.SessionName || studentResult?.Session?.SessionName}
           </h3>
           <h3 className="text-md">
-            পরীক্ষাঃ {studentResult?.ExamName}
+            পরীক্ষাঃ {studentResult?.ExamName || studentResult?.Exam?.ExamName}
           </h3>
         </div>
       </div>
@@ -62,35 +61,34 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
                 <td className="text-end font-semibold">পরীক্ষার্থীর নাম</td>
                 <td className="w-10 text-center"> : </td>
                 <td className="text-start">
-                  {" "}
-                  {studentResult?.UserName}{" "}
+                  {user?.UserName || studentResult?.UserName}
                 </td>
               </tr>
               <tr>
                 <td className="text-end">
-                  {studentResult?.ClassNameLabel}:
+                  শ্রেণি:
                 </td>
                 <td className="w-10 text-center"> : </td>
-                <td> {studentResult?.SubClass} </td>
+                <td> {studentResult?.SubClass || studentResult?.Class?.SubClass} </td>
               </tr>
               <tr>
                 <td className="text-end">
-                  {bnBijoy2Unicode(studentResult?.StudentIDLabel)}:
+                  {bnBijoy2Unicode(studentResult?.StudentIDLabel || "শিক্ষার্থী আইডি")}:
                 </td>
                 <td className="w-10 text-center"> : </td>
-                <td> {bnBijoy2Unicode(String(studentResult?.UserCode))} </td>
+                <td> {bnBijoy2Unicode(String(user?.UserCode ?? studentResult?.UserCode ?? ""))} </td>
               </tr>
               <tr>
                 <td className="text-end">পিতার নাম</td>
                 <td className="w-10 text-center"> : </td>
-                <td> {String(studentResult?.FatherName)} </td>
+                <td> {String(user?.FatherName ?? studentResult?.FatherName ?? "")} </td>
               </tr>
               <tr>
                 <td className="text-end">জন্ম তারিখ</td>
                 <td className="w-10 text-center"> : </td>
                 <td>
-                  {studentResult?.DateOfBirth
-                    ? bnBijoy2Unicode(studentResult.DateOfBirth.split("T")[0])
+                  {(user?.DateOfBirth || studentResult?.DateOfBirth)
+                    ? bnBijoy2Unicode((user?.DateOfBirth || studentResult?.DateOfBirth).split("T")[0])
                     : ""}{" "}
                   ইং{" "}
                 </td>
@@ -101,42 +99,24 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
 
         <div className="pt-5">
           <h1 className="bg-[#a8a6a6] text-white text-center text-[16px]">
-            মোট বিষয় {bnBijoy2Unicode(String(studentResult?.SubSonkha))} টি
+            মোট বিষয় {bnBijoy2Unicode(String(subjectCount))} টি
           </h1>
           <table className="w-[295px]">
             <tbody className="border border-black w-full">
-              {Array.from({ length: studentResult?.SubSonkha || 0 }).map(
-                (_, index) => {
-                  const division = studentResult[`Division${index + 1}`];
-                  const divisionNumber =
-                    studentResult[`DivisionNumber${index + 1}`];
-                  const subSonkha = studentResult?.SubSonkha;
-                  if (
-                    division == undefined ||
-                    divisionNumber == undefined ||
-                    subSonkha == undefined ||
-                    division == ""
-                  ) {
-                    return null;
-                  }
-
+              {
+                studentResult?.averageCondition?.divitionlist && studentResult?.averageCondition?.divitionlist.map((divitionDetails, index) => {
+                  const divisionNumber = studentResult?.[`DivisionNumber${index + 1}`] || studentResult?.averageCondition?.[`DivisionNumber${index + 1}`];
                   return (
-                    <tr key={index}>
-                      <td className="text-start pl-2">
-                        {division}
-                      </td>
+                    <tr key={`division_row_${index}`}>
+                      <td className="text-start pl-2">{divitionDetails?.DivisionNames}</td>
                       <td className="w-12 text-end">:</td>
-                      <td className="pl-3">
-                        {bnBijoy2Unicode(String(divisionNumber))} X
-                      </td>
-                      <td className="pr-2">
-                        {bnBijoy2Unicode(String(subSonkha))} ={" "}
-                        {bnBijoy2Unicode(String(subSonkha * divisionNumber))}
-                      </td>
+                      <td className="pl-3">{bnBijoy2Unicode(String(divisionNumber))} X</td>
+                      <td className="pr-2">{bnBijoy2Unicode(String(subjectCount))} = {bnBijoy2Unicode(String(subjectCount * divisionNumber))}</td>
                     </tr>
                   );
-                }
-              )}
+                })
+              }
+            
             </tbody>
           </table>
         </div>
@@ -153,30 +133,39 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
             </tr>
           </thead>
           <tbody className="text-center">
-            {Array.from({ length: studentResult.SubSonkha }).map((_, index) => (
-              <tr
-                key={studentResult[`Subject${index + 1}`]}
-                className="border border-black"
-              >
-                <td className="border border-black pl-2">
-                  {bnBijoy2Unicode(String(index + 1))}
-                </td>
-                <td className="border border-black text-left pl-2">
-                  {bnBijoy2Unicode(studentResult[`Subject${index + 1}`])}
-                </td>
-                <td className="border border-black pl-2">
-                  {bnBijoy2Unicode(String(studentResult?.DivisionTopNumber))}
-                </td>
-                <td className="border border-black pl-2">
-                  {bnBijoy2Unicode(
-                    String(studentResult[`PassNumber${index + 1}`])
-                  )}
-                </td>
-                <td className="border border-black pl-2">
-                  {bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}
-                </td>
-              </tr>
-            ))}
+            {Array.from({ length: subjectCount }).map((_, index) => {
+              const subjectName =
+                studentResult?.[`Subject${index + 1}`] ||
+                studentResult?.averageCondition?.subjects?.[index]?.SubjectName ||
+                "";
+
+              return (
+                <tr
+                  key={`${subjectName || "subject"}${index}`}
+                  className="border border-black"
+                >
+                  <td className="border border-black pl-2">
+                    {bnBijoy2Unicode(String(index + 1))}
+                  </td>
+                  <td className="border border-black text-left pl-2">
+                    {subjectName}
+                  </td>
+                  <td className="border border-black pl-2">
+                    {bnBijoy2Unicode(
+                      String(studentResult?.averageCondition?.[`MaxNumber${index + 1}`] ?? studentResult?.[`MaxNumber${index + 1}`] ?? "")
+                    )}
+                  </td>
+                  <td className="border border-black pl-2">
+                    {bnBijoy2Unicode(
+                      String(studentResult?.averageCondition?.[`PassNumber${index + 1}`] ?? studentResult?.[`PassNumber${index + 1}`] ?? "")
+                    )}
+                  </td>
+                  <td className="border border-black pl-2">
+                    {bnBijoy2Unicode(String(studentResult?.[`SubVal${index + 1}`] ?? ""))}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -187,12 +176,21 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
           <tbody>
             <tr>
               <td className="pl-2">
-                প্রাপ্তি বিভাগ : {studentResult?.Division}
+                প্রাপ্তি বিভাগ : {studentResult?.Division?.DivisionNames}
               </td>
               <td>
-                মেধা স্থান : {bnBijoy2Unicode(String(studentResult?.Positions))}
+                মেধা স্থান : {bnBijoy2Unicode(String(studentResult?.Positions ?? studentResult?.Position ?? 0))}
               </td>
-              <td>গড় : {bnBijoy2Unicode(String(studentResult?.Average))}</td>
+              <td>
+                গড় : {bnBijoy2Unicode(
+                  String(
+                    (
+                      Number(studentResult?.Total || 0) /
+                      Number(averageCondition?.AverageSubsonkha || subjectCount || 1)
+                    ).toFixed(2)
+                  )
+                )}
+              </td>
               <td>
                 মোট নম্বর : {bnBijoy2Unicode(String(studentResult?.Total))}
               </td>
@@ -205,7 +203,7 @@ const StudentResultAvgPrintView = ({ studentResult }) => {
       <div className=" pt-5 flex gap-2">
         <div className="w-full h-[100px] border border-black">
           <p className="text-[12px] pl-2 pt-1">
-            শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :
+            শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর : {studentResult?.Division?.Note}
           </p>
         </div>
         <div className="w-full h-[100px] border border-black">
