@@ -23,6 +23,7 @@ export const settingsSlice = createApi({
     'Genders',
     'WebSettings',
     'DocumentSettings',
+    'StudentDataExportTemplate',
   ],
   endpoints: (builder) => ({
     getInstitutionInfo: builder.query({
@@ -276,14 +277,14 @@ export const settingsSlice = createApi({
 
     }),
     getsupportTicketsSupport: builder.query({
-      query: (id ) => ({
+      query: (id) => ({
         url: `/support_ticket/support/${id}`,
         method: "GET"
       }),
       providesTags: ['SupportTicketDetails'],
     }),
     supportTicketsDepartment: builder.query({
-      query: (id ) => ({
+      query: (id) => ({
         url: `/support_ticket/departments`,
         method: "GET"
       }),
@@ -312,6 +313,84 @@ export const settingsSlice = createApi({
       invalidatesTags: ['DocumentSettings'],
     }),
 
+
+
+    /* =========== student-data-export-template ✅ ১. GET ALL ============ */
+    getAllStudentDataExportTemplates: builder.query({
+      query: () => ({
+        url: "/student-data-export-template",
+        method: "GET",
+      }),
+      providesTags: (result) =>
+        result?.data
+          ? [
+            ...result.data.map((item) => ({
+              type: "StudentDataExportTemplate",
+              id: item.FieldKey,        // ✅ FieldKey দিয়ে tag
+            })),
+            { type: "StudentDataExportTemplate", id: "LIST" },
+          ]
+          : [{ type: "StudentDataExportTemplate", id: "LIST" }],
+    }),
+
+    /* ================ ✅ ২. GET SINGLE ============================== */
+    getStudentDataExportTemplateByKey: builder.query({
+      query: (fieldKey) => ({
+        url: `/student-data-export-template/${fieldKey}`,
+        method: "GET",
+      }),
+      providesTags: (result, error, fieldKey) => [
+        { type: "StudentDataExportTemplate", id: fieldKey },
+      ],
+    }),
+
+    /* ============= ✅ ৩. CREATE (POST) ============================== */
+    createStudentDataExportTemplate: builder.mutation({
+      query: (body) => ({
+        url: "/student-data-export-template",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [
+        { type: "StudentDataExportTemplate", id: "LIST" },
+      ],
+    }),
+
+    /* ============= ✅ ৪. UPDATE (PUT) =============================== */
+    updateStudentDataExportTemplate: builder.mutation({
+      query: ({ fieldKey, ...body }) => ({
+        url: `/student-data-export-template/${fieldKey}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: (result, error, { fieldKey }) => [
+        { type: "StudentDataExportTemplate", id: fieldKey },
+        { type: "StudentDataExportTemplate", id: "LIST" },
+      ],
+    }),
+
+    /* ============== ✅ ৫. DELETE SINGLE =============================== */
+    deleteStudentDataExportTemplate: builder.mutation({
+      query: (fieldKey) => ({
+        url: `/student-data-export-template/${fieldKey}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, fieldKey) => [
+        { type: "StudentDataExportTemplate", id: fieldKey },
+        { type: "StudentDataExportTemplate", id: "LIST" },
+      ],
+    }),
+
+    /* =================== ✅ ৬. DELETE ALL ============================ */
+    deleteAllStudentDataExportTemplates: builder.mutation({
+      query: () => ({
+        url: "/student-data-export-template",
+        method: "DELETE",
+      }),
+      invalidatesTags: [
+        { type: "StudentDataExportTemplate", id: "LIST" },
+      ],
+    }),
   }),
 });
 
@@ -358,4 +437,13 @@ export const {
   useSaveDocumentSettingsMutation,
   useGenerateApiKeyMutation,
   useRegenerateApiKeyMutation,
+
+  useGetAllStudentDataExportTemplatesQuery,
+  useGetStudentDataExportTemplateByKeyQuery,      // ← নতুন নাম
+  useCreateStudentDataExportTemplateMutation,
+  useUpdateStudentDataExportTemplateMutation,
+  useDeleteStudentDataExportTemplateMutation,
+  useDeleteAllStudentDataExportTemplatesMutation,
+  useLazyGetAllStudentDataExportTemplatesQuery,
+  useLazyGetStudentDataExportTemplateByKeyQuery,  // ← নতুন নাম
 } = settingsSlice;
