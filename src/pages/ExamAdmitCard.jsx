@@ -315,7 +315,20 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  const { data: studentAdmitCards = {}, isFetching } = useGetStudentAdmitCardsQuery(
+  // ⚠️ এখানে `= {}` ডিফল্ট দেওয়া যাবে না।
+  //
+  // ফিল্টার দেওয়ার আগে কুয়েরিটা skipToken এ থাকে, তাই `data` আসে undefined।
+  // ডিফল্ট `= {}` লিখলে প্রতি রেন্ডারে একটা *নতুন* অবজেক্ট তৈরি হতো, আর
+  // নিচের তিনটা useMemo (studentList, watermarkLogo, fieldLabels) এই
+  // অবজেক্টটাকেই ডিপেন্ডেন্সি ধরে — ফলে প্রতিবারই সেগুলো আবার চলত,
+  // নতুন অ্যারে বানাত, আর `[studentList]` এর ইফেক্ট setSelectedRows() ডাকত।
+  // নতুন রেফারেন্স মানে state "বদলেছে" → আবার রেন্ডার → আবার নতুন {} …
+  // অর্থাৎ অনন্ত রেন্ডার লুপ। তখন সাইডবারে ক্লিক করলে URL বদলাত, কিন্তু
+  // React নতুন পেজটা কমিট করার ফুরসত পেত না — রিফ্রেশ ছাড়া পেজ বদলাত না।
+  //
+  // undefined নিজেই একটা স্থির মান, তাই ডিফল্ট না দিলেই সমস্যাটা শেষ।
+  // নিচে সব জায়গায় `?.` আর Array.isArray দিয়ে পাহারা দেওয়াই আছে।
+  const { data: studentAdmitCards, isFetching } = useGetStudentAdmitCardsQuery(
     filterReady
       ? UserCode?.trim()
         ? { SessionID, ExamID, SubClassID, RDID, UserCode }
@@ -497,7 +510,16 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   // উপরের রিসেট ইফেক্টের পরে বসানো — তাই একই রেন্ডারে দুইটা চললে
   // শেষেরটাই টেকে, ফলে তালিকা এসে কখনো ফাঁকা নির্বাচনে আটকে থাকে না।
   useEffect(() => {
-    setSelectedRows(studentList);
+    // তালিকা সত্যিই বদলালে তবেই state ছোঁয়া হয়। অ্যারেটা নতুন রেফারেন্স
+    // হলেও ভিতরের সারিগুলো এক হলে আগেরটাই ফেরত দিই — তাতে React
+    // রেন্ডার বাদ দেয়, আর ভবিষ্যতে কোনো কারণে রেফারেন্স অস্থির হলেও
+    // আর কখনো অনন্ত লুপে পড়বে না।
+    setSelectedRows((prev) =>
+      prev.length === studentList.length &&
+      prev.every((row, i) => row === studentList[i])
+        ? prev
+        : studentList
+    );
   }, [studentList]);
 
   useEffect(() => {

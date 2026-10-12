@@ -811,7 +811,7 @@ const Router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.admit_card}
                   >
-                    <ExamAdmitCard pageTitle="" />
+                    <ExamAdmitCard pageTitle="Exam Admit Card" />
                   </RequirePermission>
                 ),
               },
