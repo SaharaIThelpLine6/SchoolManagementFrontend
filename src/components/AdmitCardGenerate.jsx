@@ -137,6 +137,7 @@ const AdmitCardGenerate = ({
   showSign,
   showSignName,
   showSignDate,
+  seats = null,
 }) => {
   const template = getTemplate(templateId);
   const layout = getPrintLayout(reportType);
@@ -181,6 +182,11 @@ const AdmitCardGenerate = ({
                   showSign={showSign}
                   showSignName={showSignName}
                   showSignDate={showSignDate}
+                  seatText={
+                    seats?.get?.(
+                      String(student.AdmissionID ?? student.UserID ?? student.StudentCode)
+                    ) || ''
+                  }
                   printDate={printDate}
                 />
               </div>
@@ -317,6 +323,10 @@ export const AdmitCardFace = ({
   showSign,
   showSignName,
   showSignDate,
+  // আসনের লাইন — স্বাক্ষর ও QR এর ঠিক উপরে এক পট্টিতে।
+  // ফাঁকা দিলে (বা না দিলে) কিছুই আঁকা হয় না, কার্ড আগের মতোই থাকে।
+  seatText = '',
+  seatStyle = null,
   printDate,
   labelOverrides = {},
   cardHeight,
@@ -431,8 +441,25 @@ export const AdmitCardFace = ({
   const ribbonCoverCfg =
     t.ribbonCoverByLang?.[langKey] ?? t.ribbonCover ?? null;
 
-  // তথ্য ব্লকের নিচের সীমা — স্বাক্ষরের জোনের ঠিক উপরে
-  const bodyBottomEdge = (t.bodyBottom || 28) + (t.signatureHeight || 60);
+  // আসনের পট্টি — A4 রুটিন কার্ডে যেমন, A5 এও হুবহু তেমন, শুধু জায়গাটা
+  // স্বাক্ষর ও QR এর সারির ঠিক উপরে।
+  const seatOn = Boolean(String(seatText || '').trim());
+  const SEAT_H = 18;
+  const SEAT_GAP = 4;
+  const seatBottom = (t.bodyBottom || 28) + (t.signatureHeight || 60) + SEAT_GAP;
+  const seatSkin = {
+    bg: seatStyle?.bg ?? '#f9fafb',
+    border: seatStyle?.border ?? (t.signLineColor || t.labelColor || '#9ca3af'),
+    color: seatStyle?.color ?? (t.valueColor || '#111827'),
+  };
+
+  // তথ্য ব্লকের নিচের সীমা — স্বাক্ষরের জোনের ঠিক উপরে।
+  // আসনের পট্টি বসলে ততটুকু জায়গা ছেড়ে দিতে হয়, নইলে শেষ সারিটার
+  // উপর পট্টিটা চেপে বসত।
+  const bodyBottomEdge =
+    (t.bodyBottom || 28) +
+    (t.signatureHeight || 60) +
+    (seatOn ? SEAT_H + SEAT_GAP : 0);
 
   // যতটুকু জায়গা আছে তার মধ্যেই ফিল্ডগুলো ফিট করানো হয়
   // ফিল্ডগুলো দুই কলামে পাশাপাশি বসে, তাই সারির সংখ্যা অর্ধেক
@@ -686,6 +713,33 @@ export const AdmitCardFace = ({
           );
         })}
       </div>
+
+      {/* ------------------------------- আসন — হল, কলাম, সারি, আসন নম্বর */}
+      {seatOn ? (
+        <div
+          className="absolute flex items-center justify-center rounded-[4px]"
+          style={{
+            left: t.signPadX ?? 150,
+            right: t.signPadX ?? 150,
+            bottom: seatBottom,
+            height: SEAT_H,
+            background: seatSkin.bg,
+            border: `1px solid ${seatSkin.border}`,
+            paddingLeft: 6,
+            paddingRight: 6,
+          }}
+        >
+          <FitText
+            baseSize={11}
+            minSize={8}
+            lineHeight={SEAT_H - 4}
+            className="font-bold text-center"
+            style={{ color: seatSkin.color }}
+          >
+            {seatText}
+          </FitText>
+        </div>
+      ) : null}
 
       {/* ------------------- নায়েম | QR | মুহতামিম */}
       {showBottomRow ? (

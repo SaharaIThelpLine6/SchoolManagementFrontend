@@ -7,13 +7,13 @@ import {
   buildPrintCss,
   getAdmitDir,
   getPrintDate,
-  getTemplate,
   toLangDigit,
 } from '../Data/admitCardConfig';
 import {
   DEFAULT_ROUTINE_COLUMNS,
   ROUTINE_CARD_H,
   ROUTINE_CARD_W,
+  buildRoutineTable,
   formatSeatLine,
   getRoutineBodyMetrics,
   getRoutineCell,
@@ -62,6 +62,9 @@ const AdmitCardRoutinegenerate = ({
   routineColumns = DEFAULT_ROUTINE_COLUMNS,
   showSeatLine = true,
   showSeatMap = false,
+  // রুটিনের টেবিলের রঙ — দিলে সব টেমপ্লেটেই এই রঙ বসে, না দিলে
+  // টেমপ্লেটের নিজের রঙ অটুট থাকে
+  routineColor = null,
   reportType = 1,
   lang = DEFAULT_ADMIT_LANG,
   grayscale = false,
@@ -85,8 +88,11 @@ const AdmitCardRoutinegenerate = ({
   principalShowName,
   principalShowDate,
 }) => {
-  const template = getTemplate(templateId);
-  const routeTemplate = getRoutineTemplate(routineTemplateId);
+  // A4 মোডের কার্ডের ডিজাইন সম্পূর্ণ আলাদা তালিকা থেকে আসে
+  // (admitCardRoutineconfig.js এর ROUTINE_CARD_TEMPLATES)।
+  // প্রবেশপত্রের ADMIT_TEMPLATES এর সাথে এর কোনো সম্পর্ক নেই, তাই
+  // `templateId` এখানে আর ব্যবহার হয় না — A5 মোডের জন্যই ওটা।
+  const template = getRoutineTemplate(routineTemplateId);
   const layout = getRoutineLayout(reportType);
   const rows = Array.isArray(data) ? data : [];
 
@@ -113,7 +119,7 @@ const AdmitCardRoutinegenerate = ({
               <div className="routine-scale">
                 <RoutineCardFace
                   template={template}
-                  routeTemplate={routeTemplate}
+                  routineColor={routineColor}
                   fields={fields}
                   student={student}
                   routine={routine}
@@ -212,7 +218,8 @@ const SeatMap = ({ grid, rt, lang, title, rowWord, seatWord, maxHeight }) => {
  */
 export const RoutineCardFace = ({
   template,
-  routeTemplate,
+  // টেবিলের রঙ — একটা বাছলে সব টেমপ্লেটের টেবিলই ওই রঙে চলে আসে
+  routineColor = null,
   fields = [],
   student = {},
   routine = [],
@@ -244,8 +251,13 @@ export const RoutineCardFace = ({
   printDate,
   labelOverrides = {},
 }) => {
-  const t = template;
-  const rt = routeTemplate || getRoutineTemplate(null);
+  // t  = কার্ডের ডিজাইন (ফ্রেম, হেডার, ব্যাজ, জোন) — টেমপ্লেটের নিজেরটা
+  // rt = রুটিন টেবিলের চেহারা — টেমপ্লেটের `table`, তার উপরে বাছা রঙ বসে
+  const t = template || getRoutineTemplate(null);
+  const rt = useMemo(
+    () => buildRoutineTable(t.table, routineColor),
+    [t, routineColor]
+  );
   const dir = getAdmitDir(lang);
   const rui = (key) => getRoutineUIText(key, lang);
 

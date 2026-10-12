@@ -36,8 +36,10 @@ import {
   CARD_W,
   DEFAULT_ADMIT_FIELDS,
   DEFAULT_ADMIT_LANG,
+  DEFAULT_ADMIT_MODE,
+  ADMIT_MODES,
   MAX_FIELD_SELECT,
-  PRINT_LAYOUTS,
+  PLAIN_LAYOUT_ORDER,
   getAdmitDir,
   getFieldDemo,
   getFieldName,
@@ -48,6 +50,7 @@ import {
   getTemplate,
   getUIText,
   isFieldAllowedForTemplate,
+  isRoutineMode,
   normalizeAdmitRow,
   resolveFieldLabels,
   toLangDigit,
@@ -57,17 +60,18 @@ import {
   ROUTINE_CARD_H,
   ROUTINE_CARD_W,
   ROUTINE_COLUMNS,
+  ROUTINE_CARD_TEMPLATES,
+  ROUTINE_COLOR_PRESETS,
   ROUTINE_DEMO_SEAT,
   ROUTINE_LAYOUTS,
-  ROUTINE_TEMPLATES,
   assignHallSeats,
   buildHallGrid,
+  formatSeatLine,
   getRoutineColumnLabel,
   getRoutineDemoRows,
   getRoutineLayoutLabel,
   getRoutineTemplate,
   getRoutineUIText,
-  isRoutineOn,
   normalizeRoutineRows,
 } from '../Data/admitCardRoutineconfig';
 
@@ -247,16 +251,21 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   // টেমপ্লেট নির্বাচন সেটিং পপআপের ভিতরে, নিজেই আরেকটা পপআপ হয়ে খোলে।
   const [showSetupModal, setShowSetupModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
-  // রুটিং টেমপ্লেটের তালিকা — হেডার আর সেটিং পপআপ, দুই জায়গা থেকেই এটাই খোলে
-  const [showRoutingModal, setShowRoutingModal] = useState(false);
 
   // ------------------------------------------------- রুটিংসহ টেমপ্লেট
   // null = রুটিং বন্ধ, তখন আগের মতো সাধারণ প্রবেশপত্রই ছাপে।
   // আইডি বসালে একই প্রবেশপত্রের নিচে রুটিন ও আসন ছক যোগ হয়।
-  const [routeTemplate, setRouteTemplate] = useState(null);
+  // A5 = শুধু প্রবেশপত্র, A4 = রুটিনসহ। রুটিন চালু/বন্ধ এখন এই একটা
+  // সুইচেই ঠিক হয় — আলাদা "রুটিং বন্ধ" বলে আর কিছু নেই।
+  const [admitMode, setAdmitMode] = useState(DEFAULT_ADMIT_MODE);
+  // A4 মোডের ডিজাইন — সম্পূর্ণ আলাদা তালিকা থেকে
+  const [routeTemplate, setRouteTemplate] = useState(
+    ROUTINE_CARD_TEMPLATES[0]?.id ?? 'r1'
+  );
+  // রুটিনের টেবিলের রঙ — ফাঁকা মানে টেমপ্লেটের নিজের রঙ
+  const [routineColor, setRoutineColor] = useState('');
   const [routineColumns, setRoutineColumns] = useState(DEFAULT_ROUTINE_COLUMNS);
   const [seatEnabled, setSeatEnabled] = useState(true);
-  const [routeReportType, setRouteReportType] = useState('1');
 
   // কার্ড ও এডিটর — দুইটারই ভাষা
   const [lang, setLang] = useState(DEFAULT_ADMIT_LANG);
@@ -299,14 +308,22 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   const RDID = watch('RDID');
   const reportType = watch('ReportID');
 
-  const nameSize = watch(`institute_name_size_${selectedTemplate}`);
-  const nameColor = watch(`institute_name_color_${selectedTemplate}`);
-  const addressSize = watch(`institute_address_size_${selectedTemplate}`);
-  const addressColor = watch(`institute_address_color_${selectedTemplate}`);
-  const examSize = watch(`exam_name_size_${selectedTemplate}`);
-  const examColor = watch(`exam_name_color_${selectedTemplate}`);
+  // ------------------------------------------------- সক্রিয় মোড ও টেমপ্লেট
+  // A5 হলে ডিজাইন আসে ADMIT_TEMPLATES থেকে, A4 হলে রুটিনের নিজের তালিকা
+  // থেকে। ফন্ট/রঙের ঘরগুলোও সক্রিয় টেমপ্লেটের আইডি ধরে আলাদা করে জমা
+  // থাকে, তাই A5 আর A4 এর সাজসজ্জা একে অন্যকে ছোঁয় না।
+  const routineOn = isRoutineMode(admitMode);
+  const routeTpl = getRoutineTemplate(routeTemplate);
+  const template = routineOn ? routeTpl : getTemplate(selectedTemplate);
+  const activeTemplateId = routineOn ? routeTemplate : selectedTemplate;
 
-  const template = getTemplate(selectedTemplate);
+  const nameSize = watch(`institute_name_size_${activeTemplateId}`);
+  const nameColor = watch(`institute_name_color_${activeTemplateId}`);
+  const addressSize = watch(`institute_address_size_${activeTemplateId}`);
+  const addressColor = watch(`institute_address_color_${activeTemplateId}`);
+  const examSize = watch(`exam_name_size_${activeTemplateId}`);
+  const examColor = watch(`exam_name_color_${activeTemplateId}`);
+
 
   // ফিল্টার পূর্ণ হলেই কেবল তালিকা, প্রিভিউ ও প্রিন্ট দেখানো হয়
   const filterReady = Boolean(SessionID && ExamID && SubClassID && RDID);
@@ -363,9 +380,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
 
   const routineRows = useMemo(() => normalizeRoutineRows(routineData), [routineData]);
   const hallGrid = useMemo(() => buildHallGrid(routineData || {}), [routineData]);
-  // রুটিং চালু কি না — আইডিটা চেনা হলেই
-  const routineOn = isRoutineOn(routeTemplate);
-  const routeTpl = getRoutineTemplate(routeTemplate);
 
   // কে কোন আসনে — কলাম → সারি → আসন, ভর্তি সিরিয়ালের ক্রমেই।
   // পুরো তালিকার উপর বসানো হয়, তাই কাকে সিলেক্ট করা হলো তার উপর
@@ -375,6 +389,20 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     [studentList, hallGrid]
   );
 
+  // আসনের এক লাইনের লেখা — A4 তে রুটিনের ঘরে, A5 তে QR এর উপরে।
+  // দুই জায়গাতেই হুবহু একই লেখা, তাই এক জায়গাতেই বানিয়ে রাখি।
+  const seatTexts = useMemo(() => {
+    const out = new Map();
+    const words = {
+      hall: getRoutineUIText('hall', lang),
+      column: getRoutineUIText('column', lang),
+      row: getRoutineUIText('row', lang),
+      seat: getRoutineUIText('seat', lang),
+    };
+    hallSeats.forEach((seat, key) => out.set(key, formatSeatLine(seat, lang, words)));
+    return out;
+  }, [hallSeats, lang]);
+
   // প্রিভিউতে আসল রুটিন থাকলে সেটাই, না থাকলে ডামি — তাই ফিল্টার দেওয়ার
   // আগেও সেটিং পপআপে কার্ডটা কেমন দেখাবে তা বোঝা যায়
   const previewRoutine = routineRows.length ? routineRows : getRoutineDemoRows(lang);
@@ -382,10 +410,18 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     (hallGrid.columns.length ? hallSeats.values().next().value : null) ||
     ROUTINE_DEMO_SEAT;
 
-  const routineReportOptions = Object.keys(ROUTINE_LAYOUTS).map((id) => ({
-    id,
-    label: getRoutineLayoutLabel(id, lang),
-  }));
+  // প্রিভিউতে আসনের লাইনটা কেমন দেখাবে — A5 আর A4 দুই জায়গাতেই একই লেখা
+  const previewSeatText = useMemo(
+    () =>
+      formatSeatLine(previewSeat, lang, {
+        hall: getRoutineUIText('hall', lang),
+        column: getRoutineUIText('column', lang),
+        row: getRoutineUIText('row', lang),
+        seat: getRoutineUIText('seat', lang),
+      }),
+    [previewSeat, lang]
+  );
+
 
   // LabelName টেবিল থেকে আসা লেবেল, ভাষা অনুযায়ী — না এলে config এর ভিত্তি নাম
   const fieldLabels = useMemo(
@@ -450,10 +486,17 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
 
     // রুটিংয়ের সেটিং — আলাদা ঘরে সংরক্ষিত, তাই প্রবেশপত্রের কিছুই ছোঁয় না
     const r = setup.routing || {};
+    // পুরোনো সেটিংয়ে মোড ছিল না — তখন রুটিং টেমপ্লেট বাছা থাকলেই
+    // সেটা A4, না থাকলে A5। নতুন সেটিংয়ে mode সরাসরি লেখা থাকে।
+    if (r.mode) {
+      setAdmitMode(r.mode === ADMIT_MODES.ROUTINE ? ADMIT_MODES.ROUTINE : ADMIT_MODES.PLAIN);
+    } else if (r.templateId) {
+      setAdmitMode(ADMIT_MODES.ROUTINE);
+    }
     if (r.templateId) setRouteTemplate(r.templateId);
+    if (r.color !== undefined && r.color !== null) setRoutineColor(String(r.color));
     if (Array.isArray(r.columns) && r.columns.length) setRoutineColumns(r.columns);
     if (r.seat !== undefined) setSeatEnabled(Boolean(r.seat));
-    if (r.reportType) setRouteReportType(String(r.reportType));
 
     if (setup.reportType) setValue('ReportID', setup.reportType);
 
@@ -539,10 +582,11 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     principalSignName,
     principalSignDate,
     // রুটিংয়ের কিছু বদলালেও আগের আউটপুট বাতিল
+    admitMode,
     routeTemplate,
+    routineColor,
     routineColumns,
     seatEnabled,
-    routeReportType,
   ]);
 
   const totalPages = Math.ceil(studentList.length / PAGE_SIZE) || 1;
@@ -657,7 +701,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     }
     // রুটিং চালু থাকলে কাগজের ধরণ রুটিনের নিজের ঘর থেকে আসে, তাই
     // প্রবেশপত্রের রিপোর্ট টাইপ তখন বাধ্যতামূলক নয়
-    if (!routineOn && !reportType) {
+    if (!reportType) {
       Swal.fire({
         icon: 'warning',
         title: ui('pickReportTitle'),
@@ -726,10 +770,11 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
 
       // রুটিংয়ের সেটিং আলাদা ঘরে — তাই প্রবেশপত্রের পুরোনো সেটিং অটুট
       routing: {
+        mode: admitMode,
         templateId: routeTemplate || null,
+        color: routineColor || null,
         columns: routineColumns,
         seat: seatEnabled,
-        reportType: routeReportType || '1',
       },
       najemName: formData.najem_name_text || '',
       principalName: formData.principal_name_text || '',
@@ -764,10 +809,28 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     }
   };
 
-  const reportOptions = Object.keys(PRINT_LAYOUTS).map((id) => ({
-    id,
-    label: getLayoutLabel(id, lang),
-  }));
+  // "রিপোর্টের ধরণ" — মোড অনুযায়ী তালিকা বদলায়।
+  //   A5 → A5 ১টি, A5 ২টি, A4 ২টি, A4 ৪টি
+  //   A4 → A4 ১টি, A4 ২টি   (রুটিন কার্ড লম্বা, তাই এই দুইটাই চলে)
+  const reportOptions = useMemo(
+    () =>
+      routineOn
+        ? Object.keys(ROUTINE_LAYOUTS).map((id) => ({
+            id,
+            label: getRoutineLayoutLabel(id, lang),
+          }))
+        : PLAIN_LAYOUT_ORDER.map((id) => ({ id, label: getLayoutLabel(id, lang) })),
+    [routineOn, lang]
+  );
+
+  // মোড বদলালে আগের কাগজের ধরণটা নতুন তালিকায় না-ও থাকতে পারে
+  // (যেমন A5 এ "A5 ২টি" বাছা ছিল, এখন A4 এ গেলে ওটা নেই) — তখন
+  // তালিকার প্রথমটাই বসে যায়, নইলে ড্রপডাউনটা ফাঁকা দেখাত।
+  useEffect(() => {
+    const ids = reportOptions.map((o) => String(o.id));
+    if (!ids.length) return;
+    if (!ids.includes(String(reportType || ''))) setValue('ReportID', ids[0]);
+  }, [reportOptions, reportType, setValue]);
 
   // সাধারণ টগল — দুই পাশেই সমানভাবে প্রযোজ্য
   const generalToggles = [
@@ -783,6 +846,14 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
           },
         ]
       : []),
+    // আসনের লাইন — দুই মোডেই চলে। A5 তে QR এর ঠিক উপরে, A4 তে
+    // রুটিনের ঘরে — দুই জায়গাতেই চেহারা এক।
+    {
+      id: 'seatLine',
+      label: ui('seatLine'),
+      checked: seatEnabled,
+      onChange: setSeatEnabled,
+    },
   ];
 
   // বাঁ স্বাক্ষরের তিনটি অংশ — ছবি, নামের রেখা, তারিখ
@@ -888,7 +959,20 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 title={ui('currentTemplate')}
               >
                 <div className="w-[38px] shrink-0 self-center overflow-hidden rounded-[4px] border border-gray-200 bg-white">
-                  <TemplateThumb template={template} lang={lang} />
+                  {routineOn ? (
+                    <RoutineThumb
+                      template={template}
+                      routineColor={routineColor}
+                      lang={lang}
+                      height={54}
+                      routineColumns={routineColumns}
+                      routine={previewRoutine}
+                      seat={previewSeat}
+                      showSeatLine={seatEnabled}
+                    />
+                  ) : (
+                    <TemplateThumb template={template} lang={lang} />
+                  )}
                 </div>
                 <div className="flex flex-col justify-center min-w-0 leading-tight">
                   <span className="text-[11px] font-medium text-gray-500 group-hover:text-blue-600">
@@ -916,67 +1000,43 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               </button>
 
               {/* ----------------------------------------------------------
-                  রুটিংসহ টেমপ্লেট — চাপলে রুটিং টেমপ্লেটের তালিকা খোলে।
-                  বন্ধ থাকলে ড্যাশড বর্ডার (অ্যাকটিভ নয়), চালু থাকলে সবুজ
-                  বর্ডার আর পাশে "চালু" ব্যাজ — এক নজরেই বোঝা যায়।
-                  একই তালিকা সেটিং পপআপের "ঐচ্ছিক রুটিং সেটআপ" ঘর থেকেও খোলে।
+                  A5 / A4 — প্রবেশপত্রের ধরণ। এটাই একমাত্র সুইচ:
+                    A5 → শুধু প্রবেশপত্র, ডিজাইন ADMIT_TEMPLATES থেকে
+                    A4 → রুটিনসহ, ডিজাইন রুটিনের নিজের আলাদা তালিকা থেকে
+                  পাশের "টেমপ্লেট সিলেক্ট" বোতামটাও এই অনুযায়ীই তালিকা খোলে।
               ---------------------------------------------------------- */}
-              <button
-                type="button"
-                onClick={() => setShowRoutingModal(true)}
-                className={`group flex items-stretch gap-2 min-w-0 rounded-[10px] border pl-2 pr-3 py-1.5 text-start shadow-sm transition ${
-                  routineOn
-                    ? 'border-emerald-300 bg-emerald-50/60 hover:border-emerald-500 hover:bg-emerald-50'
-                    : 'border-dashed border-gray-300 bg-gray-50/60 hover:border-blue-300 hover:bg-blue-50/30'
-                }`}
-                title={ui('routingTemplate')}
+              <div
+                className="flex items-center gap-1 rounded-[10px] border border-gray-200 bg-white p-1 shadow-sm shrink-0"
+                dir="ltr"
+                title={ui('mode')}
               >
-                {/* রুট আইকন */}
-                <span
-                  className={`flex self-center items-center justify-center w-[38px] h-[38px] rounded-[6px] shrink-0 ${
-                    routineOn
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-gray-100 text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-600'
-                  }`}
-                >
-                  <svg
-                    className="w-5 h-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    <circle cx="6" cy="19" r="3" />
-                    <path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15" />
-                    <circle cx="18" cy="5" r="3" />
-                  </svg>
-                </span>
-                <div className="flex flex-col justify-center min-w-0 leading-tight">
-                  <span className="text-[11px] font-medium text-gray-500 group-hover:text-blue-600">
-                    {ui('routingSelect')}
-                  </span>
-                  <span className="flex items-center gap-1.5 mt-0.5 min-w-0">
-                    <span
-                      className={`truncate max-w-[130px] text-[14px] font-bold ${
-                        routineOn
-                          ? 'text-emerald-800'
-                          : 'text-gray-700 group-hover:text-blue-700'
+                {[
+                  { id: ADMIT_MODES.PLAIN, short: ui('modePlainShort'), full: ui('modePlain') },
+                  { id: ADMIT_MODES.ROUTINE, short: ui('modeRoutineShort'), full: ui('modeRoutine') },
+                ].map((m) => {
+                  const on = String(admitMode) === String(m.id);
+                  return (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => {
+                        // মোড বদলানোর সাথে সাথেই ওই ধরণের ডিজাইনগুলো
+                        // দেখানো হয় — আলাদা করে আর ক্লিক করতে হয় না
+                        setAdmitMode(m.id);
+                        setShowTemplateModal(true);
+                      }}
+                      title={m.full}
+                      className={`rounded-[7px] px-3 py-1.5 text-[14px] font-bold transition ${
+                        on
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'text-gray-600 hover:bg-gray-100'
                       }`}
                     >
-                      {routineOn ? routeTpl.title : rui('routineOff')}
-                    </span>
-                    {/* চালু থাকলে সবুজ ব্যাজ, নইলে কিছুই নয় */}
-                    {routineOn ? (
-                      <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 shrink-0">
-                        {rui('routineActive')}
-                      </span>
-                    ) : null}
-                  </span>
-                </div>
-              </button>
+                      {m.short}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* মাঝে — পেজের শিরোনাম */}
@@ -1258,15 +1318,15 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               বন্ধ থাকলে একদম আগের মতোই সাধারণ প্রবেশপত্র। */}
           {routineOn ? (
             <AdmitCardRoutinegenerate
-              templateId={selectedTemplate}
               routineTemplateId={routeTemplate}
+              routineColor={routineColor}
               fields={checkboxState}
               data={printData}
               routine={routineRows}
               seats={hallSeats}
               routineColumns={routineColumns}
               showSeatLine={seatEnabled}
-              reportType={routeReportType}
+              reportType={reportType}
               lang={lang}
               grayscale={false}
               inName={instName}
@@ -1292,6 +1352,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               templateId={selectedTemplate}
               fields={checkboxState}
               data={printData}
+              seats={seatEnabled ? seatTexts : null}
               reportType={reportType}
               lang={lang}
               grayscale={false}
@@ -1328,7 +1389,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
         title={ui('setup')}
         dir={uiDir}
         width="max-w-7xl"
-        disableEsc={showTemplateModal || showRoutingModal}
+        disableEsc={showTemplateModal}
         footer={
           <button
             type="button"
@@ -1353,7 +1414,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                   {routineOn ? rui('routinePreview') : ui('livePreview')}
                 </p>
                 <p className="text-[14px] font-medium text-gray-600 truncate">
-                  {routineOn ? `${template.title} + ${routeTpl.title}` : template.title}
+                  {template.title}
                 </p>
               </div>
 
@@ -1381,7 +1442,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                     >
                       <RoutineCardFace
                         template={template}
-                        routeTemplate={routeTpl}
+                        routineColor={routineColor}
                         fields={checkboxState}
                         student={previewStudent}
                         routine={previewRoutine}
@@ -1433,13 +1494,69 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                       principalShowSign={principalSign}
                       principalShowName={principalSignName}
                       principalShowDate={principalSignDate}
+                      seatText={seatEnabled ? previewSeatText : ''}
                     />
                   </div>
                 )}
               </div>
+              
+              {/* ফন্ট ও রঙ — তিনটাই এক সারিতে, সবচেয়ে উপরে।
+                আগে এগুলো নিচে ছিল, এখন উপরে — তাই টেমপ্লেট বাছার আগেই
+                নাম/ঠিকানা/পরীক্ষার ফন্ট ঠিক করে নেওয়া যায়। */}
+              <div className="mt-2 grid grid-cols-3 gap-2">
+                {[
+                  {
+                    key: 'institute_name',
+                    label: ui('instituteName'),
+                    size: template.nameSize,
+                    color: template.nameColor,
+                  },
+                  {
+                    key: 'institute_address',
+                    label: ui('address'),
+                    size: template.addressSize,
+                    color: template.addressColor,
+                  },
+                  {
+                    key: 'exam_name',
+                    label: ui('examName'),
+                    size: template.examNameSize ?? 13,
+                    color: template.examNameColor || template.labelColor,
+                  },
+                ].map((box) => (
+                  <div
+                    key={box.key}
+                    className="rounded-[8px] border border-gray-200 px-2 py-1.5 min-w-0 text-center"
+                  >
+                    <p className="text-[11px] text-gray-500 mb-1 truncate">{box.label}</p>
+                    <div className="flex items-center justify-center gap-1.5" dir="ltr">
+                      <input
+                        type="number"
+                        className="min-w-0 border rounded px-1 py-0.5 text-center text-[13px]"
+                        style={{ width: 52 }}
+                        defaultValue={box.size}
+                        {...register(`${box.key}_size_${activeTemplateId}`)}
+                      />
+                      <input
+                        type="color"
+                        className="shrink-0 cursor-pointer border-0 bg-transparent p-0"
+                        style={{ width: 30, height: 24 }}
+                        defaultValue={box.color}
+                        {...register(`${box.key}_color_${activeTemplateId}`)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
 
               {/* ------------------------------------------------- তিনটা ঘর */}
-              <div className="mt-2 grid grid-cols-2 xl:grid-cols-4 gap-3">
+              {/* নিচের সারি — ডিজাইন আর কাগজের ধরণ, পাশাপাশি।
+                  items-start দেওয়া, নইলে গ্রিড দুইটা ঘরকেই সমান লম্বা
+                  করে দিত আর ছোট ঘরটার নিচে অনেক ফাঁকা পড়ে থাকত। */}
+              <div
+                className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3"
+                style={{ alignItems: 'start' }}
+              >
                 {/* ঘর ১ — টেমপ্লেট সিলেক্ট, তালিকাটা উপরের পপআপে খোলে */}
                 <button
                   type="button"
@@ -1450,73 +1567,85 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                     {ui('templateSelect')}
                   </p>
                   <div className="overflow-hidden rounded-[4px] border border-gray-200">
-                    <TemplateThumb template={template} lang={lang} />
+                    {routineOn ? (
+                      <RoutineThumb
+                        template={template}
+                        routineColor={routineColor}
+                        lang={lang}
+                        height={190}
+                        routineColumns={routineColumns}
+                        routine={previewRoutine}
+                        seat={previewSeat}
+                        showSeatLine={seatEnabled}
+                      />
+                    ) : (
+                      <TemplateThumb template={template} lang={lang} />
+                    )}
                   </div>
                   <p className="mt-1 text-[12px] text-blue-600 truncate">
                     {ui('changeDesign')}
                   </p>
                 </button>
 
-                {/* ঘর ২ — প্রতিষ্ঠানের নামের ফন্ট ও কালার */}
+                {/* ঘর ২ — কাগজ ও ধরণ (A5 / A4)
+                    লেখাটা আর কাটা পড়ে না — মোটা অক্ষরে A5/A4, নিচে
+                    ছোট করে কী ছাপবে তার বর্ণনা, দরকার হলে পরের লাইনে। */}
                 <div className="rounded-[8px] border border-gray-200 p-2 min-w-0">
-                  <p className="text-[12px] text-gray-500 mb-2 truncate">
-                    {ui('instituteName')}
-                  </p>
-                  <div className="flex items-center gap-2" dir="ltr">
-                    <input
-                      type="number"
-                      className="w-[56px] min-w-0 border rounded px-2 py-1 text-[13px]"
-                      defaultValue={template.nameSize}
-                      {...register(`institute_name_size_${selectedTemplate}`)}
-                    />
-                    <input
-                      type="color"
-                      className="w-[36px] h-[28px] shrink-0"
-                      defaultValue={template.nameColor}
-                      {...register(`institute_name_color_${selectedTemplate}`)}
-                    />
-                  </div>
-                </div>
-
-                {/* ঘর ৩ — ঠিকানার ফন্ট ও কালার */}
-                <div className="rounded-[8px] border border-gray-200 p-2 min-w-0">
-                  <p className="text-[12px] text-gray-500 mb-2 truncate">{ui('address')}</p>
-                  <div className="flex items-center gap-2" dir="ltr">
-                    <input
-                      type="number"
-                      className="w-[56px] min-w-0 border rounded px-2 py-1 text-[13px]"
-                      defaultValue={template.addressSize}
-                      {...register(`institute_address_size_${selectedTemplate}`)}
-                    />
-                    <input
-                      type="color"
-                      className="w-[36px] h-[28px] shrink-0"
-                      defaultValue={template.addressColor}
-                      {...register(`institute_address_color_${selectedTemplate}`)}
-                    />
-                  </div>
-                </div>
-                {/* ঘর ৪ — পরীক্ষার নামের ফন্ট ও কালার */}
-                <div className="rounded-[8px] border border-gray-200 p-2 min-w-0">
-                  <p className="text-[12px] text-gray-500 mb-2 truncate">
-                    {ui('examName')}
-                  </p>
-                  <div className="flex items-center gap-2" dir="ltr">
-                    <input
-                      type="number"
-                      className="w-[56px] min-w-0 border rounded px-2 py-1 text-[13px]"
-                      defaultValue={template.examNameSize ?? 13}
-                      {...register(`exam_name_size_${selectedTemplate}`)}
-                    />
-                    <input
-                      type="color"
-                      className="w-[36px] h-[28px] shrink-0"
-                      defaultValue={template.examNameColor || template.labelColor}
-                      {...register(`exam_name_color_${selectedTemplate}`)}
-                    />
+                  <p className="text-[12px] text-gray-500 mb-2">{ui('mode')}</p>
+                  <div className="flex flex-col gap-1.5">
+                    {[
+                      {
+                        id: ADMIT_MODES.PLAIN,
+                        short: ui('modePlainShort'),
+                        note: ui('modePlainNote'),
+                      },
+                      {
+                        id: ADMIT_MODES.ROUTINE,
+                        short: ui('modeRoutineShort'),
+                        note: ui('modeRoutineNote'),
+                      },
+                    ].map((m) => {
+                      const on = String(admitMode) === String(m.id);
+                      return (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => {
+                            setAdmitMode(m.id);
+                            setShowTemplateModal(true);
+                          }}
+                          className={`flex items-center gap-2 rounded-[6px] border px-2 py-1.5 text-start transition ${
+                            on
+                              ? 'border-blue-500 bg-blue-50'
+                              : 'border-gray-200 hover:bg-gray-50'
+                          }`}
+                        >
+                          <span
+                            className={`shrink-0 rounded-full border-[4px] ${
+                              on ? 'border-blue-600' : 'border-gray-300'
+                            }`}
+                            style={{ width: 14, height: 14 }}
+                          />
+                          <span className="min-w-0 leading-tight">
+                            <span
+                              className={`block text-[14px] font-bold ${
+                                on ? 'text-blue-700' : 'text-gray-700'
+                              }`}
+                              dir="ltr"
+                            >
+                              {m.short}
+                            </span>
+                            <span className="block text-[11px] text-gray-500">
+                              {m.note}
+                            </span>
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
 
@@ -1639,155 +1768,79 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 হেডারের বোতামের মতো এখানেও আলাদা করে রুটিং টেমপ্লেট বাছা যায়।
                 দুইটাই একই তালিকা খোলে, তাই যেখান থেকেই বাছুন ফল একই।
                 বন্ধ থাকলে নিচের ঘরগুলো দেখায় না — অযথা ভিড় বাড়ে না। */}
-            <p className="font-bold text-[16px] mt-8 mb-3">{ui('optionalRouting')}</p>
-
-            <div className="grid grid-cols-1 sm:grid-cols-[190px_1fr] gap-3">
-              {/* ঘর — রুটিং টেমপ্লেট সিলেক্ট (উপরের টেমপ্লেটের ঘরের মতোই) */}
-              <button
-                type="button"
-                onClick={() => setShowRoutingModal(true)}
-                className={`rounded-[8px] border-2 p-2 min-w-0 text-start transition ${
-                  routineOn
-                    ? 'border-emerald-300 hover:border-emerald-500'
-                    : 'border-gray-200 hover:border-blue-400'
-                }`}
-              >
-                <p className="text-[12px] text-gray-500 mb-1 truncate">
-                  {ui('routingSelect')}
+            {/* ====================================== রুটিনের সেটিং
+                শুধু A4 মোডে দেখায়। ডিজাইনটা আর এখানে বাছা হয় না —
+                উপরের "টেমপ্লেট সিলেক্ট" ই A4 এর তালিকা খোলে।
+                এখানে থাকে কেবল রুটিনের নিজের দুইটা জিনিস:
+                  • টেবিলে কোন কলামগুলো থাকবে
+                  • টেবিলের রঙ (একবার বাছলে সব টেমপ্লেটেই বসে)
+            ====================================== */}
+            {routineOn ? (
+              <>
+                <p className="font-bold text-[16px] mt-8 mb-3">
+                  {ui('optionalRouting')}
                 </p>
 
-                {routineOn ? (
-                  <div className="overflow-hidden rounded-[4px] border border-gray-200">
-                    <RoutineThumb
-                      template={template}
-                      routeTemplate={routeTpl}
-                      lang={lang}
-                      height={150}
-                      routineColumns={routineColumns}
-                      routine={previewRoutine}
-                      seat={previewSeat}
-                      showSeatLine={seatEnabled}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex h-[150px] items-center justify-center rounded-[4px] border border-dashed border-gray-300 bg-gray-50 px-2 text-center text-[12px] text-gray-500">
-                    {rui('routineOffNote')}
-                  </div>
-                )}
-
-                <p
-                  className={`mt-1 text-[12px] truncate ${
-                    routineOn ? 'text-emerald-700' : 'text-blue-600'
-                  }`}
-                >
-                  {routineOn ? routeTpl.title : ui('changeDesign')}
+                {/* রুটিনে কোন কলাম থাকবে */}
+                <p className="text-[14px] font-bold text-gray-700 mb-2">
+                  {rui('routineColumns')}
                 </p>
-              </button>
-
-              {/* ডান পাশ — কলাম, হল, আসন ও কাগজের ধরণ */}
-              <div className="min-w-0">
-                {routineOn ? (
-                  <>
-                    {/* রুটিনে কোন কলাম থাকবে */}
-                    <p className="text-[14px] font-bold text-gray-700 mb-2">
-                      {rui('routineColumns')}
-                    </p>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {ROUTINE_COLUMNS.map((c) => {
-                        const on = routineColumns.includes(c.id);
-                        return (
-                          <label
-                            key={c.id}
-                            className="flex items-center gap-2 border rounded-full px-3 py-1.5 cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
-                          >
-                            <input
-                              type="checkbox"
-                              className="h-[15px] w-[15px] accent-blue-600"
-                              checked={on}
-                              onChange={(e) =>
-                                setRoutineColumns((prev) =>
-                                  e.target.checked
-                                    ? prev.includes(c.id)
-                                      ? prev
-                                      : [...prev, c.id]
-                                    : prev.filter((x) => x !== c.id)
-                                )
-                              }
-                            />
-                            <span className="text-[13px] font-medium text-gray-700">
-                              {getRoutineColumnLabel(c.id, lang)}
-                            </span>
-                          </label>
-                        );
-                      })}
-                    </div>
-
-                    {/* কাগজের ধরণ — হল নির্বাচন রুটিনে লাগে না, তাই বাদ */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
-                      <div className="min-w-0">
-                        <p className="text-[12px] text-gray-500 mb-1">
-                          {rui('routineReportType')}
-                        </p>
-                        <select
-                          className="w-full rounded-[8px] border border-gray-300 bg-white px-3 py-2 text-[14px]"
-                          value={routeReportType}
-                          onChange={(e) => setRouteReportType(e.target.value)}
-                        >
-                          {routineReportOptions.map((o) => (
-                            <option key={o.id} value={o.id}>
-                              {o.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-wrap mt-3">
-                      <label className="flex items-center gap-2 border rounded-full px-3 py-1.5 cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {ROUTINE_COLUMNS.map((c) => {
+                    const on = routineColumns.includes(c.id);
+                    return (
+                      <label
+                        key={c.id}
+                        className="flex items-center gap-2 border rounded-full px-3 py-1.5 cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
+                      >
                         <input
                           type="checkbox"
                           className="h-[15px] w-[15px] accent-blue-600"
-                          checked={seatEnabled}
-                          onChange={(e) => setSeatEnabled(e.target.checked)}
+                          checked={on}
+                          onChange={(e) =>
+                            setRoutineColumns((prev) =>
+                              e.target.checked
+                                ? prev.includes(c.id)
+                                  ? prev
+                                  : [...prev, c.id]
+                                : prev.filter((x) => x !== c.id)
+                            )
+                          }
                         />
                         <span className="text-[13px] font-medium text-gray-700">
-                          {rui('seatLine')}
+                          {getRoutineColumnLabel(c.id, lang)}
                         </span>
                       </label>
-                    </div>
+                    );
+                  })}
+                </div>
 
-                    {/* ডাটার অবস্থা — রুটিন ও হল আসলেই পাওয়া গেছে কি না */}
-                    <div className="mt-4 rounded-[8px] border border-gray-200 bg-gray-50 px-3 py-2">
-                      <p className="text-[13px] text-gray-700">
-                        {routineFetching
-                          ? ui('loading')
-                          : routineRows.length
-                          ? `${rui('routineReady')} — ${toLangDigit(
-                              routineRows.length,
-                              lang
-                            )} ${rui('routineRows')}`
-                          : rui('noRoutine')}
-                      </p>
-                      <p className="text-[12px] text-gray-500 mt-0.5">
-                        {hallGrid.columns.length
-                          ? `${hallGrid.hallName || rui('hall')} — ${toLangDigit(
-                              hallGrid.columns.length,
-                              lang
-                            )} ${rui('column')}, ${rui('totalSeats')} ${toLangDigit(
-                              hallGrid.totalSeats,
-                              lang
-                            )}`
-                          : rui('noHall')}
-                      </p>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex h-full min-h-[150px] items-center justify-center rounded-[8px] border border-dashed border-gray-300 bg-gray-50 px-4 text-center">
-                    <p className="text-[13px] text-gray-500">{rui('routineOffNote')}</p>
-                  </div>
-                )}
-              </div>
-            </div>
+                {/* ডাটার অবস্থা — রুটিন আসলেই পাওয়া গেছে কি না */}
+                <div className="mt-5 rounded-[8px] border border-gray-200 bg-gray-50 px-3 py-2">
+                  <p className="text-[13px] text-gray-700">
+                    {routineFetching
+                      ? ui('loading')
+                      : routineRows.length
+                      ? `${rui('routineReady')} — ${toLangDigit(
+                          routineRows.length,
+                          lang
+                        )} ${rui('routineRows')}`
+                      : rui('noRoutine')}
+                  </p>
+                  <p className="text-[12px] text-gray-500 mt-0.5">
+                    {hallGrid.columns.length
+                      ? `${hallGrid.hallName || rui('hall')} — ${toLangDigit(
+                          hallGrid.columns.length,
+                          lang
+                        )} ${rui('column')}, ${rui('totalSeats')} ${toLangDigit(
+                          hallGrid.totalSeats,
+                          lang
+                        )}`
+                      : rui('noHall')}
+                  </p>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
       </Modal>
@@ -1800,100 +1853,117 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
         onClose={() => setShowTemplateModal(false)}
         title={ui('selectTemplate')}
         dir={uiDir}
-        width="max-w-4xl"
+        width={routineOn ? 'max-w-5xl' : 'max-w-4xl'}
         zIndex="z-[60]"
       >
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {ADMIT_TEMPLATES.map((tpl) => (
-            <button
-              key={tpl.id}
-              type="button"
-              onClick={() => {
-                handleTemplateSelect(tpl.id);
-                setShowTemplateModal(false);
-              }}
-              className={`rounded-[10px] border-2 p-2 transition min-w-0 ${
-                String(selectedTemplate) === String(tpl.id)
-                  ? 'border-blue-600 shadow-lg'
-                  : 'border-gray-200 hover:border-blue-300'
-              }`}
-            >
-              <div className="overflow-hidden rounded-[6px] border border-gray-100">
-                <TemplateThumb template={tpl} lang={lang} />
-              </div>
-              <p className="mt-2 text-center text-[14px] truncate">{tpl.title}</p>
-            </button>
-          ))}
-        </div>
-      </Modal>
+        {/* ------------------------------------------------- রুটিনের রঙ
+            টেবিলের রঙটা এখানেই বাছা হয়, কারণ নিচের প্রতিটা থাম্বনেইল
+            সাথে সাথেই নতুন রঙে বদলে যায় — কোন টেমপ্লেটে কেমন দেখাবে তা
+            বাছার আগেই দেখা যায়। একটাই রঙ, তাই সব টেমপ্লেটেই এক। */}
+        {routineOn ? (
+          <div className="mb-4 rounded-[10px] border border-gray-200 bg-gray-50/70 p-3">
+            <p className="text-[14px] font-bold text-gray-700 mb-1">
+              {ui('routineColor')}
+            </p>
+            <p className="text-[12px] text-gray-500 mb-2">{ui('routineColorHint')}</p>
 
-      {/* ================================= পপআপ ২ — টেমপ্লেট রুটিং সিলেক্ট
-          হেডারের বোতাম এবং সেটিং পপআপের "ঐচ্ছিক রুটিং সেটআপ" ঘর — দুইটাই
-          এই একই পপআপ খোলে। z-[60] দেওয়া, কারণ সেটিং পপআপের উপরেও বসতে হয়;
-          DOM এ সেটিং পপআপের ভাই, তাই ব্যাকড্রপে ক্লিকে শুধু এটাই বন্ধ হয়।
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* টেমপ্লেটের নিজের রঙে ফিরে যাওয়া */}
+              <button
+                type="button"
+                onClick={() => setRoutineColor('')}
+                className={`rounded-full border px-3 py-1.5 text-[13px] font-medium transition ${
+                  routineColor
+                    ? 'border-gray-200 bg-white text-gray-600 hover:bg-gray-100'
+                    : 'border-blue-500 bg-blue-50 text-blue-700'
+                }`}
+              >
+                {ui('routineColorReset')}
+              </button>
 
-          প্রথম ঘরটা "রুটিং বন্ধ" — ওটা বাছলে আগের মতো সাধারণ প্রবেশপত্রই
-          ছাপে, কোনো কিছু হারায় না। */}
-      <Modal
-        open={showRoutingModal}
-        onClose={() => setShowRoutingModal(false)}
-        title={rui('pickRoutineTemplate')}
-        dir={uiDir}
-        width="max-w-5xl"
-        zIndex="z-[60]"
-      >
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {/* ঘর ০ — রুটিং বন্ধ */}
-          <button
-            type="button"
-            onClick={() => {
-              setRouteTemplate(null);
-              setShowRoutingModal(false);
-            }}
-            className={`rounded-[10px] border-2 p-2 transition min-w-0 ${
-              routineOn
-                ? 'border-gray-200 hover:border-blue-300'
-                : 'border-blue-600 shadow-lg'
-            }`}
-          >
-            <div className="flex h-[200px] items-center justify-center rounded-[6px] border border-dashed border-gray-300 bg-gray-50 px-3 text-center">
-              <p className="text-[12px] text-gray-500">{rui('routineOffNote')}</p>
-            </div>
-            {/* বাকি ঘরগুলোর মতোই নিচে নাম — তাই "বন্ধ"টাও একটা পছন্দ মনে হয় */}
-            <p className="mt-2 text-center text-[14px] truncate">{rui('routineOff')}</p>
-          </button>
+              {ROUTINE_COLOR_PRESETS.map((hex) => {
+                const on = String(routineColor).toLowerCase() === hex.toLowerCase();
+                return (
+                  <button
+                    key={hex}
+                    type="button"
+                    onClick={() => setRoutineColor(hex)}
+                    title={hex}
+                    aria-label={hex}
+                    className={`shrink-0 rounded-full border-2 transition ${
+                      on ? 'border-blue-600 scale-110' : 'border-gray-200 hover:border-gray-400'
+                    }`}
+                    // মাপটা inline — গোল ঘরগুলো যেন কোনো অবস্থাতেই চেপে
+                    // চ্যাপ্টা হয়ে না যায়
+                    style={{ background: hex, width: 28, height: 28 }}
+                  />
+                );
+              })}
 
-          {ROUTINE_TEMPLATES.map((tpl) => (
-            <button
-              key={tpl.id}
-              type="button"
-              onClick={() => {
-                setRouteTemplate(tpl.id);
-                setShowRoutingModal(false);
-              }}
-              className={`rounded-[10px] border-2 p-2 transition min-w-0 ${
-                String(routeTemplate) === String(tpl.id)
-                  ? 'border-blue-600 shadow-lg'
-                  : 'border-gray-200 hover:border-blue-300'
-              }`}
-            >
-              <div className="overflow-hidden rounded-[6px] border border-gray-100">
-                <RoutineThumb
-                  template={template}
-                  routeTemplate={tpl}
-                  lang={lang}
-                  height={200}
-                  routineColumns={routineColumns}
-                  routine={previewRoutine}
-                  seat={previewSeat}
-                  showSeatLine={seatEnabled}
+              {/* নিজের পছন্দের যেকোনো রঙ */}
+              <label className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 cursor-pointer hover:bg-gray-100 transition">
+                <input
+                  type="color"
+                  className="h-[22px] w-[30px] cursor-pointer border-0 bg-transparent p-0"
+                  value={routineColor || routeTpl.table.borderColor || '#111827'}
+                  onChange={(e) => setRoutineColor(e.target.value)}
                 />
-              </div>
-              <p className="mt-2 text-center text-[14px] truncate">{tpl.title}</p>
-            </button>
-          ))}
+                <span className="text-[13px] font-medium text-gray-700" dir="ltr">
+                  {routineColor || '—'}
+                </span>
+              </label>
+            </div>
+          </div>
+        ) : null}
+
+        {/* কোন তালিকাটা দেখাবে তা ঠিক করে A5/A4 মোড —
+            A5 এ প্রবেশপত্রের ডিজাইন, A4 এ রুটিনসহ কার্ডের ডিজাইন।
+            দুইটা তালিকা সম্পূর্ণ আলাদা, একটার সাথে আরেকটার সম্পর্ক নেই। */}
+        <div
+          className={`grid gap-4 ${
+            routineOn
+              ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
+              : 'grid-cols-2 sm:grid-cols-3'
+          }`}
+        >
+          {(routineOn ? ROUTINE_CARD_TEMPLATES : ADMIT_TEMPLATES).map((tpl) => {
+            const on = String(activeTemplateId) === String(tpl.id);
+            return (
+              <button
+                key={tpl.id}
+                type="button"
+                onClick={() => {
+                  if (routineOn) setRouteTemplate(tpl.id);
+                  else handleTemplateSelect(tpl.id);
+                  setShowTemplateModal(false);
+                }}
+                className={`rounded-[10px] border-2 p-2 transition min-w-0 ${
+                  on ? 'border-blue-600 shadow-lg' : 'border-gray-200 hover:border-blue-300'
+                }`}
+              >
+                <div className="overflow-hidden rounded-[6px] border border-gray-100">
+                  {routineOn ? (
+                    <RoutineThumb
+                      template={tpl}
+                      routineColor={routineColor}
+                      lang={lang}
+                      height={200}
+                      routineColumns={routineColumns}
+                      routine={previewRoutine}
+                      seat={previewSeat}
+                      showSeatLine={seatEnabled}
+                    />
+                  ) : (
+                    <TemplateThumb template={tpl} lang={lang} />
+                  )}
+                </div>
+                <p className="mt-2 text-center text-[14px] truncate">{tpl.title}</p>
+              </button>
+            );
+          })}
         </div>
       </Modal>
+
     </FormProvider>
   );
 };
@@ -1906,7 +1976,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
  */
 const RoutineThumb = ({
   template,
-  routeTemplate,
+  routineColor,
   lang,
   height = 200,
   routineColumns,
@@ -1933,7 +2003,7 @@ const RoutineThumb = ({
       >
         <RoutineCardFace
           template={template}
-          routeTemplate={routeTemplate}
+          routineColor={routineColor}
           lang={lang}
           fields={['StudentName', 'FatherName', 'SubClass', 'StudentCode']}
           routine={routine}

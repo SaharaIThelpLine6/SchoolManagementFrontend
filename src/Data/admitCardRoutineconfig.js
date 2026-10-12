@@ -73,94 +73,384 @@ export const getRoutineZones = ({
 };
 
 // ---------------------------------------------------------------------------
-// রুটিং টেমপ্লেট — শুধু রুটিনের টেবিল ও আসন ছকের চেহারা ঠিক করে।
-// প্রবেশপত্রের ডিজাইন (ফ্রেম, রঙ, ব্যাজ, লোগো) আগের টেমপ্লেট থেকেই আসে,
-// এখানে তাতে কোনো হাত পড়ে না।
+// A4 (রুটিনসহ) প্রবেশপত্রের টেমপ্লেট — সম্পূর্ণ আলাদা তালিকা
 //
-// tableStyle:
-//   'grid'  → প্রতিটা ঘরে বর্ডার, হেডারে রঙিন পট্টি
-//   'lines' → শুধু আড়াআড়ি রেখা, হালকা ছিমছাম চেহারা
+// এই তালিকার সাথে admitCardConfig.js এর ADMIT_TEMPLATES এর কোনো সম্পর্ক নেই।
+// A5 মোডে ওই তালিকাটা চলে, A4 মোডে এইটা — দুইটা স্বাধীন।
+//
+// নতুন ডিজাইন যোগ করতে হলে ADMIT_TEMPLATES এ যেভাবে যোগ করেন ঠিক সেভাবেই
+// নিচে একটা অবজেক্ট বসান। পার্থক্য শুধু একটাই — এখানে বাড়তি `table` ঘরে
+// রুটিনের টেবিলের চেহারাটাও থাকে।
+//
+//   {
+//     id: 'r6',
+//     title: 'রুটিন — আমার ডিজাইন',
+//     variant: 'image',                  // বা 'painted'
+//     image: '/admitcard/routine-1.png', // variant: 'image' হলে
+//     thumb: '/admitcard/routine-1.png',
+//     nameColor, addressColor, valueColor, labelColor, accent, …
+//     ...R_ZONES, ...R_PHOTO,            // হেডার, ফিল্ড ও স্বাক্ষরের জোন
+//     table: { … },                      // রুটিনের টেবিলের রঙ
+//   }
+//
+// `table` এর ঘরগুলো:
+//   tableStyle  'grid' → প্রতিটা ঘরে বর্ডার, হেডারে রঙিন পট্টি
+//               'lines' → শুধু আড়াআড়ি রেখা, ছিমছাম চেহারা
+//   headBg/headColor  টেবিলের হেডার সারি
+//   borderColor       টেবিলের বাইরের রেখা ও শিরোনামের নিচের দাগ
+//   gridColor         ভিতরের হালকা রেখা
+//   titleBg/titleColor  "পরীক্ষার রুটিন" শিরোনামের পট্টি ('none' = পট্টি নেই)
+//   zebra             এক সারি পরপর হালকা রঙ
+//   seatBg/seatColor  আসনের পট্টি
+//
+// রঙের ঘর (color picker) থেকে কোনো রঙ বাছলে সেটা এই `table` এর উপরে বসে —
+// তখন সব টেমপ্লেটের টেবিলই এক রঙে চলে আসে। কার্ডের ফ্রেম, হেডার বা ব্যাজে
+// হাত পড়ে না, সেগুলো টেমপ্লেটের নিজের রঙেই থাকে।
 // ---------------------------------------------------------------------------
-export const ROUTINE_TEMPLATES = [
+
+// জোনগুলো A5 কার্ডের মতোই, শুধু কার্ডটা লম্বা (৭৪০px) — নিচের খালি
+// জায়গাটাতেই রুটিন বসে। getRoutineZones() এই মাপগুলোই পড়ে।
+const R_ZONES = {
+  headerHeight: 115,
+  examTop: 90,
+  examHeight: 20,
+  examNameSize: 13,
+  bodyTop: 165,
+  signatureHeight: 62,
+  bodyBottom: 35,
+  logoOffsetY: 0,
+  photoOffsetY: 0,
+};
+
+const R_PHOTO = { photoW: 58, photoH: 74 };
+const R_QR_SIZE = 56;
+
+export const ROUTINE_CARD_TEMPLATES = [
   {
     id: 'r1',
     title: 'রুটিন — সাদা',
-    tableStyle: 'grid',
-    headBg: '#f3f4f6',
-    headColor: '#111827',
-    borderColor: '#9ca3af',
-    gridColor: '#d1d5db',
-    titleColor: '#111827',
-    titleBg: 'none',
-    zebra: '#fafafa',
-    seatBg: '#f9fafb',
-    seatColor: '#111827',
+    variant: 'painted',
+    cardBg: '#ffffff',
+    frameStyle: 'hairline',
+    frameColor: '#1f2937',
+    headerFill: 'none',
+    headerDivider: 2,
+    ribbonStyle: 'outline',
+    ribbonColor: '#111827',
+    nameColor: '#111827',
+    addressColor: '#4b5563',
+    nameSize: 23,
+    addressSize: 13,
+    valueColor: '#111827',
+    labelColor: '#4b5563',
+    accent: '#111827',
+    examNameColor: '#374151',
+    photoBorder: '#9ca3af',
+    signLineColor: '#111827',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: true,
+    showQR: true,
+    qrSize: R_QR_SIZE,
+    qrPad: 'transparent',
+    ...R_ZONES,
+    ...R_PHOTO,
+    table: {
+      tableStyle: 'grid',
+      headBg: '#f3f4f6',
+      headColor: '#111827',
+      borderColor: '#9ca3af',
+      gridColor: '#d1d5db',
+      titleColor: '#111827',
+      titleBg: 'none',
+      zebra: '#fafafa',
+      seatBg: '#f9fafb',
+      seatColor: '#111827',
+    },
   },
+
   {
     id: 'r2',
     title: 'রুটিন — মেরুন',
-    tableStyle: 'grid',
-    headBg: '#7b1f2b',
-    headColor: '#ffffff',
-    borderColor: '#7b1f2b',
-    gridColor: '#e3c9cd',
-    titleColor: '#7b1f2b',
-    titleBg: '#fdf2f3',
-    zebra: '#fdf7f8',
-    seatBg: '#fdf2f3',
-    seatColor: '#7b1f2b',
+    variant: 'painted',
+    cardBg: '#ffffff',
+    frameStyle: 'double',
+    frameColor: '#7b1f2b',
+    headerFill: 'none',
+    headerDivider: 1,
+    ribbonStyle: 'solid',
+    ribbonBg: '#7b1f2b',
+    ribbonColor: '#ffffff',
+    nameColor: '#7b1f2b',
+    addressColor: '#6b5257',
+    nameSize: 23,
+    addressSize: 13,
+    valueColor: '#241014',
+    labelColor: '#7b1f2b',
+    accent: '#7b1f2b',
+    examNameColor: '#6b5257',
+    photoBorder: '#7b1f2b',
+    signLineColor: '#7b1f2b',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: true,
+    showQR: true,
+    qrSize: R_QR_SIZE,
+    qrPad: 'transparent',
+    ...R_ZONES,
+    ...R_PHOTO,
+    table: {
+      tableStyle: 'grid',
+      headBg: '#7b1f2b',
+      headColor: '#ffffff',
+      borderColor: '#7b1f2b',
+      gridColor: '#e3c9cd',
+      titleColor: '#7b1f2b',
+      titleBg: '#fdf2f3',
+      zebra: '#fdf7f8',
+      seatBg: '#fdf2f3',
+      seatColor: '#7b1f2b',
+    },
   },
+
   {
     id: 'r3',
     title: 'রুটিন — নীল',
-    tableStyle: 'grid',
-    headBg: '#1e3a8a',
-    headColor: '#ffffff',
-    borderColor: '#1e3a8a',
-    gridColor: '#c7d2fe',
-    titleColor: '#1e3a8a',
-    titleBg: '#eff6ff',
-    zebra: '#f5f8ff',
-    seatBg: '#eff6ff',
-    seatColor: '#1e3a8a',
+    variant: 'painted',
+    cardBg: '#ffffff',
+    frameStyle: 'hairline',
+    frameColor: '#1e3a8a',
+    headerFill: 'none',
+    headerDivider: 2,
+    ribbonStyle: 'outline',
+    ribbonColor: '#1e3a8a',
+    nameColor: '#1e3a8a',
+    addressColor: '#475569',
+    nameSize: 23,
+    addressSize: 13,
+    valueColor: '#0f172a',
+    labelColor: '#475569',
+    accent: '#1e3a8a',
+    examNameColor: '#1e3a8a',
+    photoBorder: '#1e3a8a',
+    signLineColor: '#1e3a8a',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: true,
+    showQR: true,
+    qrSize: R_QR_SIZE,
+    qrPad: 'transparent',
+    ...R_ZONES,
+    ...R_PHOTO,
+    table: {
+      tableStyle: 'grid',
+      headBg: '#1e3a8a',
+      headColor: '#ffffff',
+      borderColor: '#1e3a8a',
+      gridColor: '#c7d2fe',
+      titleColor: '#1e3a8a',
+      titleBg: '#eff6ff',
+      zebra: '#f5f8ff',
+      seatBg: '#eff6ff',
+      seatColor: '#1e3a8a',
+    },
   },
+
   {
     id: 'r4',
     title: 'রুটিন — সবুজ',
-    tableStyle: 'grid',
-    headBg: '#0f5132',
-    headColor: '#ffffff',
-    borderColor: '#0f5132',
-    gridColor: '#bbf7d0',
-    titleColor: '#0f5132',
-    titleBg: '#f0fdf4',
-    zebra: '#f6fdf8',
-    seatBg: '#f0fdf4',
-    seatColor: '#0f5132',
+    variant: 'painted',
+    cardBg: '#ffffff',
+    frameStyle: 'edgebars',
+    frameColor: '#0f5132',
+    headerFill: 'none',
+    headerDivider: 0,
+    ribbonStyle: 'outline',
+    ribbonColor: '#0f5132',
+    nameColor: '#0f5132',
+    addressColor: '#4b5563',
+    nameSize: 23,
+    addressSize: 13,
+    valueColor: '#14261c',
+    labelColor: '#0f5132',
+    accent: '#0f5132',
+    examNameColor: '#0f5132',
+    photoBorder: '#0f5132',
+    signLineColor: '#0f5132',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: true,
+    showQR: true,
+    qrSize: R_QR_SIZE,
+    qrPad: 'transparent',
+    ...R_ZONES,
+    ...R_PHOTO,
+    table: {
+      tableStyle: 'grid',
+      headBg: '#0f5132',
+      headColor: '#ffffff',
+      borderColor: '#0f5132',
+      gridColor: '#bbf7d0',
+      titleColor: '#0f5132',
+      titleBg: '#f0fdf4',
+      zebra: '#f6fdf8',
+      seatBg: '#f0fdf4',
+      seatColor: '#0f5132',
+    },
   },
+
   {
     // খোপ কাটা ছক না — শুধু আড়াআড়ি রেখা। হালকা, ছিমছাম চেহারা।
     id: 'r5',
     title: 'রুটিন — সরল রেখা',
-    tableStyle: 'lines',
-    headBg: 'transparent',
-    headColor: '#111827',
-    borderColor: '#111827',
-    gridColor: '#d1d5db',
-    titleColor: '#111827',
-    titleBg: 'none',
-    zebra: '#ffffff',
-    seatBg: '#ffffff',
-    seatColor: '#111827',
+    variant: 'painted',
+    cardBg: '#ffffff',
+    frameStyle: 'hairline',
+    frameColor: '#111827',
+    headerFill: 'none',
+    headerDivider: 1,
+    ribbonStyle: 'outline',
+    ribbonColor: '#111827',
+    nameColor: '#111827',
+    addressColor: '#4b5563',
+    nameSize: 23,
+    addressSize: 13,
+    valueColor: '#111827',
+    labelColor: '#4b5563',
+    accent: '#111827',
+    examNameColor: '#374151',
+    photoBorder: '#9ca3af',
+    signLineColor: '#111827',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: true,
+    showQR: true,
+    qrSize: R_QR_SIZE,
+    qrPad: 'transparent',
+    ...R_ZONES,
+    ...R_PHOTO,
+    table: {
+      tableStyle: 'lines',
+      headBg: 'transparent',
+      headColor: '#111827',
+      borderColor: '#111827',
+      gridColor: '#d1d5db',
+      titleColor: '#111827',
+      titleBg: 'none',
+      zebra: '#ffffff',
+      seatBg: '#ffffff',
+      seatColor: '#111827',
+    },
   },
 ];
 
-export const getRoutineTemplate = (id) =>
-  ROUTINE_TEMPLATES.find((t) => String(t.id) === String(id)) || ROUTINE_TEMPLATES[0];
+/** পুরোনো নাম — অন্য ফাইলে import থাকলে ভাঙবে না */
+export const ROUTINE_TEMPLATES = ROUTINE_CARD_TEMPLATES;
 
-/** রুটিং টেমপ্লেট চালু আছে কি না — null/'' মানে শুধু সাধারণ প্রবেশপত্র */
+export const getRoutineTemplate = (id) =>
+  ROUTINE_CARD_TEMPLATES.find((t) => String(t.id) === String(id)) ||
+  ROUTINE_CARD_TEMPLATES[0];
+
+/**
+ * আইডিটা চেনা A4 টেমপ্লেট কি না।
+ * রুটিন চালু/বন্ধ এখন আর এটা দিয়ে ঠিক হয় না — সেটা ঠিক করে A5/A4 মোড
+ * (admitCardConfig.js এর isRoutineMode)। এটা কেবল আইডি যাচাইয়ের জন্য।
+ */
 export const isRoutineOn = (id) =>
-  Boolean(id) && ROUTINE_TEMPLATES.some((t) => String(t.id) === String(id));
+  Boolean(id) && ROUTINE_CARD_TEMPLATES.some((t) => String(t.id) === String(id));
+
+// ---------------------------------------------------------------------------
+// রুটিনের রঙ
+//
+// ব্যবহারকারী একটা রঙ বাছলে সেটা থেকেই টেবিলের পুরো স্কিনটা বানিয়ে নেওয়া হয় —
+// হেডারের পট্টি ওই রঙ, ভিতরের রেখা তার হালকা আভা, জেব্রা সারি আরও হালকা।
+// একটাই রঙ, তাই যে টেমপ্লেটই বাছুন টেবিলের চেহারা একই থাকে।
+//
+// রঙ না বাছলে (null) টেমপ্লেটের নিজের `table` টাই অটুট থাকে।
+// ---------------------------------------------------------------------------
+
+const HEX = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+/** '#7b1f2b' বা '7b1f2b' বা '#abc' → { r, g, b }; বুঝতে না পারলে null */
+export const parseHex = (value) => {
+  const m = String(value ?? '').trim().match(HEX);
+  if (!m) return null;
+  let h = m[1];
+  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+  return {
+    r: parseInt(h.slice(0, 2), 16),
+    g: parseInt(h.slice(2, 4), 16),
+    b: parseInt(h.slice(4, 6), 16),
+  };
+};
+
+const toHex = ({ r, g, b }) =>
+  '#' +
+  [r, g, b]
+    .map((n) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0'))
+    .join('');
+
+/** রঙটাকে সাদার দিকে টানে — amount ০ মানে অপরিবর্তিত, ১ মানে পুরো সাদা */
+export const tintWhite = (value, amount) => {
+  const c = parseHex(value);
+  if (!c) return value;
+  const k = Math.max(0, Math.min(1, amount));
+  return toHex({
+    r: c.r + (255 - c.r) * k,
+    g: c.g + (255 - c.g) * k,
+    b: c.b + (255 - c.b) * k,
+  });
+};
+
+/** রঙটার উপরে সাদা না কালো লেখা পড়া যাবে — আপেক্ষিক উজ্জ্বলতা দিয়ে */
+export const readableOn = (value) => {
+  const c = parseHex(value);
+  if (!c) return '#ffffff';
+  const lum = (0.299 * c.r + 0.587 * c.g + 0.114 * c.b) / 255;
+  return lum > 0.62 ? '#111827' : '#ffffff';
+};
+
+/** রঙের ঘরে যে কয়টা তৈরি রঙ দেখাবে */
+export const ROUTINE_COLOR_PRESETS = [
+  '#111827',
+  '#7b1f2b',
+  '#1e3a8a',
+  '#0f5132',
+  '#115e59',
+  '#92400e',
+  '#5b21b6',
+  '#b91c1c',
+];
+
+/**
+ * টেমপ্লেটের টেবিল-স্কিন + বাছা রঙ → চূড়ান্ত স্কিন।
+ * রঙ না দিলে টেমপ্লেটের নিজেরটাই ফেরত যায়।
+ */
+export const buildRoutineTable = (table, color) => {
+  const base = table || ROUTINE_CARD_TEMPLATES[0].table;
+  if (!parseHex(color)) return base;
+
+  const lines = base.tableStyle === 'lines';
+
+  return {
+    ...base,
+    headBg: lines ? 'transparent' : color,
+    headColor: lines ? color : readableOn(color),
+    borderColor: color,
+    gridColor: tintWhite(color, 0.7),
+    titleColor: color,
+    titleBg: base.titleBg === 'none' ? 'none' : tintWhite(color, 0.93),
+    zebra: lines ? '#ffffff' : tintWhite(color, 0.95),
+    seatBg: lines ? '#ffffff' : tintWhite(color, 0.93),
+    seatColor: color,
+  };
+};
+
+/** টেমপ্লেট + রঙ → কার্ডের ডিজাইন আর টেবিলের স্কিন, দুইটা আলাদা করে */
+export const resolveRoutineTemplate = (id, color) => {
+  const tpl = getRoutineTemplate(id);
+  return { card: tpl, table: buildRoutineTable(tpl.table, color) };
+};
 
 // ---------------------------------------------------------------------------
 // রুটিনের টেবিলের কলাম
