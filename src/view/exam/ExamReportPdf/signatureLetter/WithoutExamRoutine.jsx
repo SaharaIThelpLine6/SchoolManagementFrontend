@@ -128,7 +128,10 @@ const WithoutExamRoutine = ({ reportData, queryParams, requireSeatPlan = false }
                   <th className="border border-[#2d5080] text-[16px] font-bold p-1 align-middle bg-white">
                     আইডি
                   </th>
-                  <th className="border border-[#2d5080] text-[16px] font-bold p-1 align-middle text-center bg-white">
+                  <th
+                    className="border border-[#2d5080] text-[16px] font-bold p-1 align-middle text-center bg-white"
+                    style={{ width: "200px", minWidth: "200px", maxWidth: "200px" }}
+                  >
                     পরীক্ষার্থীর নাম
                   </th>
                   {routineColumns.map((item, i) => (
@@ -147,13 +150,16 @@ const WithoutExamRoutine = ({ reportData, queryParams, requireSeatPlan = false }
                     key={student.UserID ?? student.User?.UserID ?? student.UserCode ?? index}
                     className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
                   >
-                    <td className="border border-black text-[16px] font-semibold p-1">
+                    <td className="border border-black text-[14px] font-semibold p-1">
                       {bnBijoy2Unicode(String(index + 1))}
                     </td>
-                    <td className="border border-black text-[16px] p-1 text-gray-800">
+                    <td className="border border-black text-[14px] p-1 text-gray-800">
                       {bnBijoy2Unicode(String(student.User?.UserCode ?? student.UserCode ?? ""))}
                     </td>
-                    <td className="border border-black text-[16px] font-medium p-2 text-left">
+                    <td
+                      className="border border-black text-[14px] font-medium p-2 text-left"
+                      style={{ width: "200px", minWidth: "200px", maxWidth: "200px" }}
+                    >
                       {student.User?.UserName ?? student.UserName}
                     </td>
                     {routineColumns.map((_, i) => (
