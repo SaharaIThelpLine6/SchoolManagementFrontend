@@ -4,7 +4,6 @@ import { useDispatch } from 'react-redux';
 import Swal from 'sweetalert2';
 import { skipToken } from '@reduxjs/toolkit/query';
 
-import Button from '../components/Button/Button';
 import DefaultInput from '../components/Forms/DefaultInput';
 import DefaultSelect from '../components/Forms/DefaultSelect';
 import DefaultPagination from '../components/Pagination/DefaultPagination';
@@ -238,6 +237,29 @@ const Modal = ({
   );
 };
 
+/**
+ * প্রিন্টারের আইকন — inline SVG, তাই কোনো আইকন প্যাকেজ ইনস্টল করতে হয় না
+ * আর ছাপার সময়ও ঠিকঠাক আসে। রঙটা বোতামের লেখার রঙই নেয় (currentColor)।
+ */
+const PrintIcon = () => (
+  <svg
+    width="17"
+    height="17"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    className="shrink-0"
+  >
+    <path d="M6 9V3h12v6" />
+    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+    <rect x="6" y="14" width="12" height="7" rx="1" />
+  </svg>
+);
+
 const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   const dispatch = useDispatch();
   const methods = useForm();
@@ -384,7 +406,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   const examSize = watch(`exam_name_size_${activeTemplateId}`);
   const examColor = watch(`exam_name_color_${activeTemplateId}`);
 
-
   // ফিল্টার পূর্ণ হলেই কেবল তালিকা, প্রিভিউ ও প্রিন্ট দেখানো হয়
   const filterReady = Boolean(SessionID && ExamID && SubClassID && RDID);
 
@@ -493,7 +514,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
         : getRoutineUIText('noSeatPlan', lang),
     [previewSeat, lang]
   );
-
 
   // LabelName টেবিল থেকে আসা লেবেল, ভাষা অনুযায়ী — না এলে config এর ভিত্তি নাম
   const fieldLabels = useMemo(
@@ -866,11 +886,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     setPrintData(rows);
     return rows;
   };
-
-  const handlePreview = handleSubmit((formData) => {
-    setPrintOnly(false);
-    return onSubmit(formData);
-  });
 
   const handlePrint = handleSubmit(async (formData) => {
     setPrintOnly(true);
@@ -1248,16 +1263,15 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               registerKey="ReportID"
             />
 
-            <div className="grid">
-              <Button type="button" onClick={handlePreview}>
-                {ui('preview')}
-              </Button>
-            </div>
+            {/* প্রিভিউ বোতামটা তুলে দেওয়া হয়েছে — এখন সরাসরি প্রিন্ট।
+                ব্রাউজারের প্রিন্ট পর্দাতেই পুরোটা দেখা যায়, তাই আলাদা করে
+                পর্দায় বসিয়ে দেখার দরকার পড়ে না। */}
             <button
               type="button"
               onClick={handlePrint}
-              className="w-full px-5 py-2 rounded-[8px] bg-blue-600 text-white whitespace-nowrap hover:bg-blue-700 transition"
+              className="flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-[8px] bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700"
             >
+              <PrintIcon />
               {ui('print')}
             </button>
           </div>
@@ -1566,8 +1580,43 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 )}
               </div>
               
-              {/* ফন্ট ও রঙ — তিনটাই এক সারিতে */}
-              <div className="mt-2 grid grid-cols-3 gap-2">
+              {/* ================================================
+                  এক লাইনে — টেমপ্লেট সিলেক্ট ও ফন্ট-রঙের তিনটা বক্স।
+                  চারটে কলাম: প্রথমটায় টেমপ্লেট, তারপর নাম-ঠিকানা-পরীক্ষা।
+                  প্রতিটা বক্সের ভিতরে লেবেল উপরে, নাম্বার মাঝে, রঙ নিচে।
+              ================================================ */}
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 items-stretch">
+                {/* ---- টেমপ্লেট সিলেক্ট ---- */}
+                <button
+                  type="button"
+                  onClick={() => setShowTemplateModal(true)}
+                  className="rounded-[8px] border-2 border-blue-200 p-2 min-w-0 text-start hover:border-blue-500 transition flex flex-col"
+                >
+                  <p className="text-[11px] text-gray-500 mb-1 truncate">
+                    {ui('templateSelect')}
+                  </p>
+                  <div className="overflow-hidden rounded-[4px] border border-gray-200 flex-1 flex items-center justify-center bg-white">
+                    {routineOn ? (
+                      <RoutineThumb
+                        template={template}
+                        routineColor={routineColor}
+                        lang={lang}
+                        height={110}
+                        routineColumns={routineColumns}
+                        routine={previewRoutine}
+                        seat={previewSeat}
+                        showSeatLine={seatEnabled}
+                      />
+                    ) : (
+                      <TemplateThumb template={template} lang={lang} />
+                    )}
+                  </div>
+                  <p className="mt-1 text-[11px] text-blue-600 truncate">
+                    {ui('changeDesign')}
+                  </p>
+                </button>
+
+                {/* ---- ফন্ট ও রঙের ৩টা বক্স ---- */}
                 {[
                   {
                     key: 'institute_name',
@@ -1590,21 +1639,26 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 ].map((box) => (
                   <div
                     key={box.key}
-                    className="rounded-[8px] border border-gray-200 px-2 py-1.5 min-w-0 text-center"
+                    className="rounded-[8px] border border-gray-200 px-2 py-2 min-w-0 flex flex-col"
                   >
-                    <p className="text-[11px] text-gray-500 mb-1 truncate">{box.label}</p>
-                    <div className="flex items-center justify-center gap-1.5" dir="ltr">
+                    {/* লেবেল — সবার উপরে, মাঝ বরাবর */}
+                    <p className="text-[11px] text-gray-500 text-center mb-2 truncate">
+                      {box.label}
+                    </p>
+
+                    {/* নাম্বার ও রঙ — উপর-নিচে, মাঝ বরাবর */}
+                    <div className="flex flex-col items-center gap-1.5">
                       <input
                         type="number"
-                        className="min-w-0 border rounded px-1 py-0.5 text-center text-[13px]"
-                        style={{ width: 52 }}
+                        className="border rounded px-1 py-0.5 text-center text-[13px]"
+                        style={{ width: '100%', maxWidth: 70 }}
                         defaultValue={box.size}
                         {...register(`${box.key}_size_${activeTemplateId}`)}
                       />
                       <input
                         type="color"
-                        className="shrink-0 cursor-pointer border-0 bg-transparent p-0"
-                        style={{ width: 30, height: 24 }}
+                        className="cursor-pointer border-0 bg-transparent p-0"
+                        style={{ width: '100%', maxWidth: 70, height: 26 }}
                         defaultValue={box.color}
                         {...register(`${box.key}_color_${activeTemplateId}`)}
                       />
@@ -1613,93 +1667,59 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 ))}
               </div>
 
-              {/* নিচের সারি — ডিজাইন আর কাগজের ধরণ, পাশাপাশি */}
-              <div
-                className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3"
-                style={{ alignItems: 'start' }}
-              >
-                <button
-                  type="button"
-                  onClick={() => setShowTemplateModal(true)}
-                  className="rounded-[8px] border-2 border-blue-200 p-2 min-w-0 text-start hover:border-blue-500 transition"
-                >
-                  <p className="text-[12px] text-gray-500 mb-1 truncate">
-                    {ui('templateSelect')}
-                  </p>
-                  <div className="overflow-hidden rounded-[4px] border border-gray-200">
-                    {routineOn ? (
-                      <RoutineThumb
-                        template={template}
-                        routineColor={routineColor}
-                        lang={lang}
-                        height={190}
-                        routineColumns={routineColumns}
-                        routine={previewRoutine}
-                        seat={previewSeat}
-                        showSeatLine={seatEnabled}
-                      />
-                    ) : (
-                      <TemplateThumb template={template} lang={lang} />
-                    )}
-                  </div>
-                  <p className="mt-1 text-[12px] text-blue-600 truncate">
-                    {ui('changeDesign')}
-                  </p>
-                </button>
-
-                <div className="rounded-[8px] border border-gray-200 p-2 min-w-0">
-                  <p className="text-[12px] text-gray-500 mb-2">{ui('mode')}</p>
-                  <div className="flex flex-col gap-1.5">
-                    {[
-                      {
-                        id: ADMIT_MODES.PLAIN,
-                        short: ui('modePlainShort'),
-                        note: ui('modePlainNote'),
-                      },
-                      {
-                        id: ADMIT_MODES.ROUTINE,
-                        short: ui('modeRoutineShort'),
-                        note: ui('modeRoutineNote'),
-                      },
-                    ].map((m) => {
-                      const on = String(admitMode) === String(m.id);
-                      return (
-                        <button
-                          key={m.id}
-                          type="button"
-                          onClick={() => {
-                            setAdmitMode(m.id);
-                            setShowTemplateModal(true);
-                          }}
-                          className={`flex items-center gap-2 rounded-[6px] border px-2 py-1.5 text-start transition ${
-                            on
-                              ? 'border-blue-500 bg-blue-50'
-                              : 'border-gray-200 hover:bg-gray-50'
+              {/* ----------------- কাগজের ধরণ (আলাদা সারি) ---------------- */}
+              <div className="mt-3 rounded-[8px] border border-gray-200 p-2 min-w-0">
+                <p className="text-[12px] text-gray-500 mb-2">{ui('mode')}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                  {[
+                    {
+                      id: ADMIT_MODES.PLAIN,
+                      short: ui('modePlainShort'),
+                      note: ui('modePlainNote'),
+                    },
+                    {
+                      id: ADMIT_MODES.ROUTINE,
+                      short: ui('modeRoutineShort'),
+                      note: ui('modeRoutineNote'),
+                    },
+                  ].map((m) => {
+                    const on = String(admitMode) === String(m.id);
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => {
+                          setAdmitMode(m.id);
+                          setShowTemplateModal(true);
+                        }}
+                        className={`flex items-center gap-2 rounded-[6px] border px-2 py-1.5 text-start transition ${
+                          on
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:bg-gray-50'
+                        }`}
+                      >
+                        <span
+                          className={`shrink-0 rounded-full border-[4px] ${
+                            on ? 'border-blue-600' : 'border-gray-300'
                           }`}
-                        >
+                          style={{ width: 14, height: 14 }}
+                        />
+                        <span className="min-w-0 leading-tight">
                           <span
-                            className={`shrink-0 rounded-full border-[4px] ${
-                              on ? 'border-blue-600' : 'border-gray-300'
+                            className={`block text-[14px] font-bold ${
+                              on ? 'text-blue-700' : 'text-gray-700'
                             }`}
-                            style={{ width: 14, height: 14 }}
-                          />
-                          <span className="min-w-0 leading-tight">
-                            <span
-                              className={`block text-[14px] font-bold ${
-                                on ? 'text-blue-700' : 'text-gray-700'
-                              }`}
-                              dir="ltr"
-                            >
-                              {m.short}
-                            </span>
-                            <span className="block text-[11px] text-gray-500">
-                              {m.note}
-                            </span>
+                            dir="ltr"
+                          >
+                            {m.short}
                           </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                          <span className="block text-[11px] text-gray-500">
+                            {m.note}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
