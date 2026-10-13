@@ -30,6 +30,7 @@ export const examSlice = createApi({
     'StudentGroupFilters',
     'StudentGroup',
     'AdmitCardSettings',
+    'AdmitTemplate',
   ],
   endpoints: (builder) => ({
     postNewExam: builder.mutation({
@@ -565,6 +566,42 @@ export const examSlice = createApi({
       providesTags: ['ExamRoutineCard'],
     }),
 
+    getAdmitCardTemplates: builder.query({
+      query: () => `/admit_card_templates`,
+      providesTags: ['AdmitTemplate'],
+    }),
+
+    uploadAdmitCardTemplate: builder.mutation({
+      // ⚠️ body টা FormData — Content-Type নিজে বসাবেন না।
+      // হাতে 'multipart/form-data' লিখলে boundary অংশটা বাদ পড়ে,
+      // সার্ভারে ফাইলটা কখনোই পৌঁছায় না। RTK Query নিজেই চিনে নেয়।
+      query: (formData) => ({
+        url: `/admit_card_template`,
+        method: 'POST',
+        body: formData,
+      }),
+      invalidatesTags: ['AdmitTemplate'],
+    }),
+
+    deleteAdmitCardTemplate: builder.mutation({
+      query: (id) => ({
+        url: `/admit_card_template/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['AdmitTemplate'],
+    }),
+
+    // জমা থাকা ডিজাইনের চারটে ঘর সরানো — ছবিটা অক্ষত থাকে, তাই
+    // FormData নয়, সাধারণ JSON ই যথেষ্ট
+    updateAdmitCardTemplate: builder.mutation({
+      query: ({ id, offsets }) => ({
+        url: `/admit_card_template/${id}`,
+        method: 'PATCH',
+        body: { offsets },
+      }),
+      invalidatesTags: ['AdmitTemplate'],
+    }),
+
   }),
 });
 
@@ -636,4 +673,8 @@ export const {
   useGetAdmitCardSettingsQuery,
   useSaveAdmitCardSettingsMutation,
   useGetExamRoutineCardQuery,
+  useGetAdmitCardTemplatesQuery,
+  useUploadAdmitCardTemplateMutation,
+  useDeleteAdmitCardTemplateMutation,
+  useUpdateAdmitCardTemplateMutation,
 } = examSlice;

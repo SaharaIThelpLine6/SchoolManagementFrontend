@@ -102,6 +102,8 @@ const FitText = ({ children, baseSize, minSize = 7, lineHeight, className, style
  * প্রিন্ট ভিউ — এডিটরে যা সাজানো হয়েছে হুবহু তাই রেন্ডার করে।
  *
  * @param templateId       নির্বাচিত টেমপ্লেট আইডি
+ * @param templateObj      টেমপ্লেট অবজেক্ট — দিলে আইডি দিয়ে আর খোঁজা হয় না
+ *                         (আপলোড করা ডিজাইনের জন্য এটাই পথ)
  * @param fields           নির্বাচিত ফিল্ডের আইডি অ্যারে (ক্রম বজায় থাকে)
  * @param data             normalizeAdmitRow() দিয়ে ফ্ল্যাট করা শিক্ষার্থীর তালিকা
  * @param reportType       1 = A5 এ ১টি, 2 = A4 এ ২টি, 3 = A4 ল্যান্ডস্কেপে ৪টি
@@ -121,6 +123,11 @@ const FitText = ({ children, baseSize, minSize = 7, lineHeight, className, style
  */
 const AdmitCardGenerate = ({
   templateId,
+  // আপলোড করা ডিজাইন ADMIT_TEMPLATES তালিকায় থাকে না (সার্ভার থেকে আসে),
+  // তাই আইডি দিয়ে খুঁজে পাওয়া যায় না — getTemplate() তখন চুপচাপ প্রথম
+  // বিল্ট-ইন ডিজাইনটা ফেরত দিত, আর ছাপা হতো ডিফল্ট নকশায়।
+  // পেজ তাই অবজেক্টটাই পাঠিয়ে দেয়; সেটা থাকলে সেটাই চূড়ান্ত।
+  templateObj = null,
   fields = [],
   data = [],
   reportType = 1,
@@ -139,7 +146,7 @@ const AdmitCardGenerate = ({
   showSignDate,
   seats = null,
 }) => {
-  const template = getTemplate(templateId);
+  const template = templateObj || getTemplate(templateId);
   const layout = getPrintLayout(reportType);
   const rows = Array.isArray(data) ? data : [];
 
@@ -436,6 +443,18 @@ export const AdmitCardFace = ({
   const ribbonTop = Math.max(examTop + examHeight, t.headerHeight);
   const ribbonHeight = Math.max(t.bodyTop - ribbonTop, 0);
 
+  // ---- চারটি ঘরের উপর-নিচ
+  // আপলোড করা ডিজাইনে প্রতিষ্ঠানভেদে ব্যানারের উচ্চতা আলাদা হয়, তাই
+  // ঘরগুলোকে একটু সরানোর দরকার পড়ে। সরানো হয় translateY দিয়ে — ঘরের
+  // উচ্চতা, ভিতরের সাজ, কিছুই বদলায় না, পুরো ঘরটা যেমন আছে তেমনই সরে।
+  // মাইনাস = উপরে, প্লাস = নিচে। টেমপ্লেটে না থাকলে ০, মানে আগের মতোই,
+  // তাই বিল্ট-ইন ডিজাইনগুলোর চেহারা এতে একটুও বদলায় না।
+  const shiftY = (n) => (n ? { transform: `translateY(${n}px)` } : null);
+  const headerShift = shiftY(t.headerOffsetY ?? 0);
+  const ribbonShift = shiftY(t.ribbonOffsetY ?? 0);
+  const bodyShift = shiftY(t.bodyOffsetY ?? 0);
+  const signShift = shiftY(t.signOffsetY ?? 0);
+
   // ভাষা অনুযায়ী স্ট্রিপের মাপ — না থাকলে টেমপ্লেটের ডিফল্ট
   const langKey = lang === 'en' ? 'en' : lang === 'ar' ? 'ar' : 'bn';
   const ribbonCoverCfg =
@@ -483,12 +502,17 @@ export const AdmitCardFace = ({
       style={{ width: CARD_W, height: cardH, background: '#ffffff' }}
     >
       {t.variant === 'image' ? (
-        isTall ? (
+        isTall && !t.imageFull ? (
           <>
-            {/* PNG টা ৫২০×৪১০ মাপে আঁকা। কার্ড লম্বা হলে ছবিটা টেনে লম্বা
+            {/* বিল্ট-ইন রুটিন টেমপ্লেটগুলোর PNG ৫২০×৪১০ মাপে আঁকা — A5 এর
+                ছবিটাই ওরা ব্যবহার করে। কার্ড লম্বা হলে ওটাকে টেনে লম্বা
                 করলে কোনার নকশা বিকৃত হতো, তাই ছবিটা উপরের অংশেই থাকে আর
-                পুরো কার্ড ঘিরে একটা পাতলা ফ্রেম বসে — তাতে নিচের রুটিনও
-                একই বাক্সের ভিতরেই পড়ে। */}
+                পুরো কার্ড ঘিরে একটা পাতলা ফ্রেম বসে।
+
+                আপলোড করা A4 ডিজাইনে এটা খাটে না — ওই ছবিটা পুরো পৃষ্ঠার
+                মাপেই (৫২০×৭৪০, অর্থাৎ ১৫৬০×২২২০) আঁকা। তাই সেখানে
+                `imageFull` থাকে আর ছবিটা পুরো কার্ড জুড়েই বসে, নইলে
+                উপরে A5 এর নকশা আর নিচে খালি সাদা দেখা যেত। */}
             <img
               src={t.image}
               alt=""
@@ -529,7 +553,10 @@ export const AdmitCardFace = ({
       ) : null}
 
       {/* ------------------------- হেডার: লোগো | নাম ও ঠিকানা | শিক্ষার্থীর ছবি */}
-      <div className="absolute left-0 top-0 w-full" style={{ height: t.headerHeight }}>
+      <div
+        className="absolute left-0 top-0 w-full"
+        style={{ height: t.headerHeight, ...headerShift }}
+      >
         {logo ? (
           <img
             src={logo}
@@ -589,7 +616,7 @@ export const AdmitCardFace = ({
         <div
           className="absolute left-0 w-full flex items-center justify-center px-8"
           dir={dir}
-          style={{ top: examTop, height: examHeight }}
+          style={{ top: examTop, height: examHeight, ...headerShift }}
         >
           <p
             className="text-center whitespace-nowrap"
@@ -610,7 +637,7 @@ export const AdmitCardFace = ({
       {t.ribbonStyle && t.ribbonStyle !== 'none' ? (
         <div
           className="absolute left-0 w-full flex items-center justify-center"
-          style={{ top: ribbonTop, height: ribbonHeight }}
+          style={{ top: ribbonTop, height: ribbonHeight, ...ribbonShift }}
         >
           <div
             className="rounded-full px-5 py-[2px]"
@@ -634,6 +661,7 @@ export const AdmitCardFace = ({
           style={{
             top: ribbonCoverCfg?.top ?? ribbonTop,
             height: ribbonCoverCfg?.height ?? ribbonHeight,
+            ...ribbonShift,
           }}
         >
           <div
@@ -669,6 +697,7 @@ export const AdmitCardFace = ({
           ...(bodyEnd ? { height: bodyHeight } : { bottom: bodyBottomEdge }),
           paddingLeft: 40,
           paddingRight: 40,
+          ...bodyShift,
         }}
       >
         {visibleFields.map((fieldName, index) => {
@@ -723,6 +752,7 @@ export const AdmitCardFace = ({
             right: t.signPadX ?? 150,
             bottom: seatBottom,
             height: SEAT_H,
+            ...signShift,
             background: seatSkin.bg,
             border: `1px solid ${seatSkin.border}`,
             paddingLeft: 6,
@@ -750,6 +780,7 @@ export const AdmitCardFace = ({
             height: t.signatureHeight,
             paddingLeft: t.signPadX ?? 34,
             paddingRight: t.signPadX ?? 34,
+            ...signShift,
           }}
         >
           <SignatureBlock

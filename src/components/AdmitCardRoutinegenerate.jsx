@@ -55,6 +55,9 @@ const chunk = (arr, size) => {
 const AdmitCardRoutinegenerate = ({
   templateId,
   routineTemplateId,
+  // আপলোড করা ডিজাইন তালিকায় থাকে না (সার্ভার থেকে আসে), তাই আইডি দিয়ে
+  // খুঁজে পাওয়া যায় না — পেজ তখন অবজেক্টটাই পাঠিয়ে দেয়
+  routineTemplate = null,
   fields = [],
   data = [],
   routine = [],
@@ -93,7 +96,7 @@ const AdmitCardRoutinegenerate = ({
   // (admitCardRoutineconfig.js এর ROUTINE_CARD_TEMPLATES)।
   // প্রবেশপত্রের ADMIT_TEMPLATES এর সাথে এর কোনো সম্পর্ক নেই, তাই
   // `templateId` এখানে আর ব্যবহার হয় না — A5 মোডের জন্যই ওটা।
-  const template = getRoutineTemplate(routineTemplateId);
+  const template = routineTemplate || getRoutineTemplate(routineTemplateId);
   const layout = getRoutineLayout(reportType);
   const rows = Array.isArray(data) ? data : [];
 
@@ -323,6 +326,13 @@ export const RoutineCardFace = ({
     [t, visibleFields.length, showSignRow]
   );
 
+  // তথ্যের ঘর নিচে নামলে রুটিনের ঘরও ততটুকু নামে, নইলে শেষ সারিটার উপর
+  // টেবিলটা চেপে বসত। নিচের কিনারা এক জায়গাতেই থাকে — উচ্চতাটাই কমে —
+  // তাই স্বাক্ষরের সারির গায়ে টেবিল কখনো গিয়ে লাগে না।
+  const bodyOff = t.bodyOffsetY ?? 0;
+  const routineTop = zones.top + bodyOff;
+  const routineHeight = Math.max(zones.height - bodyOff, 80);
+
   // ------------------------------------------------------------ রুটিন টেবিল
   const columns = useMemo(() => {
     const picked = orderRoutineColumns(routineColumns);
@@ -350,7 +360,7 @@ export const RoutineCardFace = ({
   const mapOn = showSeatMap && Boolean(hallGrid?.columns?.length);
 
   const m = getRoutineBodyMetrics({
-    regionH: zones.height,
+    regionH: routineHeight,
     rowCount: routineRows.length,
     hasSeatLine: Boolean(seatText),
     wantMap: mapOn,
@@ -460,10 +470,10 @@ export const RoutineCardFace = ({
         className="absolute"
         dir={dir}
         style={{
-          top: zones.top,
+          top: routineTop,
           left: padX,
           width: innerW,
-          height: zones.height,
+          height: routineHeight,
           overflow: 'hidden',
         }}
       >
@@ -508,19 +518,25 @@ export const RoutineCardFace = ({
               ))}
             </colgroup>
             <thead>
-              <tr style={{ background: lineStyle ? 'transparent' : rt.headBg }}>
+              {/* ⚠️ রঙটা <tr> এ নয়, প্রতিটা <th> এ।
+                  ছাপার সময় অনেক ব্রাউজার সারির (<tr>) ব্যাকগ্রাউন্ড ফেলে
+                  দেয় — তখন রঙিন পট্টিটা উধাও হয়ে সাদার উপর সাদা লেখা
+                  পড়ত, মানে হেডারের লেখাগুলো একদম দেখাই যেত না। ঘরে
+                  (<th>/<td>) দিলে সব ব্রাউজারেই ছাপে। */}
+              <tr>
                 {columns.map((c) => (
                   <th
                     key={c.id}
                     className="font-bold whitespace-nowrap"
                     style={{
                       height: rowH,
+                      background: lineStyle ? 'transparent' : rt.headBg,
                       // td/th এ height শুধু সর্বনিম্ন মাপ — ফন্টের line-height
                       // বড় হলে সারি লম্বা হয়ে কার্ডের বাইরে চলে যেত।
                       // তাই line-height নিজেই বেঁধে দেওয়া হলো।
                       lineHeight: `${Math.max(rowH - 4, 9)}px`,
                       fontSize: cellFont,
-                      color: lineStyle ? rt.headColor : rt.headColor,
+                      color: rt.headColor,
                       border: cellBorder(true),
                       borderBottom: `1.5px solid ${rt.borderColor}`,
                       padding: '0 4px',
@@ -545,18 +561,16 @@ export const RoutineCardFace = ({
             </thead>
             <tbody>
               {routineRows.map((row, i) => (
-                <tr
-                  key={row.SubID ?? `${row.serial}-${i}`}
-                  style={{
-                    background: lineStyle ? 'transparent' : i % 2 ? rt.zebra : '#ffffff',
-                  }}
-                >
+                <tr key={row.SubID ?? `${row.serial}-${i}`}>
                   {columns.map((c) => (
                     <td
                       key={c.id}
                       className="overflow-hidden whitespace-nowrap"
                       style={{
                         height: rowH,
+                        // হেডারের মতোই — জেব্রা ডোরাটাও ঘরে, সারিতে নয়
+                        background:
+                          lineStyle ? 'transparent' : i % 2 ? rt.zebra : '#ffffff',
                         lineHeight: `${Math.max(rowH - 4, 9)}px`,
                         fontSize: cellFont,
                         color: t.valueColor || '#111827',

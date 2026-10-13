@@ -13,12 +13,16 @@ import { setPageName } from '../features/auth/authSlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetExamNamesQuery } from '../features/student/studentQuerySlice';
-// সেটআপের দুইটা hook ও exam স্লাইসেই — রাউটটা /api/exam/admit_card_settings
+// সেটআপ ও টেমপ্লেটের hook গুলো exam স্লাইসেই — রাউট /api/exam/...
 import {
   useGetStudentAdmitCardsQuery,
   useGetAdmitCardSettingsQuery,
   useSaveAdmitCardSettingsMutation,
   useGetExamRoutineCardQuery,
+  useGetAdmitCardTemplatesQuery,
+  useUploadAdmitCardTemplateMutation,
+  useDeleteAdmitCardTemplateMutation,
+  useUpdateAdmitCardTemplateMutation,
 } from '../features/exam/examQuerySlice';
 import {
   useGetInstitutionInfoQuery,
@@ -28,6 +32,8 @@ import {
 import AdmitCardGenerate, { AdmitCardFace } from '../components/AdmitCardGenerate';
 // রুটিংসহ টেমপ্লেট — প্রবেশপত্রের উপরের অংশ হুবহু রেখে নিচে রুটিন ও আসন
 import AdmitCardRoutinegenerate, { RoutineCardFace } from '../components/AdmitCardRoutinegenerate';
+// নিজের ডিজাইন আপলোডের পর্দা
+import AdmitTemplateUpload from '../components/Admittemplateupload';
 import {
   ADMIT_FIELDS,
   ADMIT_LANGS,
@@ -73,6 +79,14 @@ import {
   mapAllocatedSeats,
   normalizeRoutineRows,
 } from '../Data/admitCardRoutineconfig';
+import {
+  buildUploadedTemplates,
+  formatBytes,
+  formatSize,
+  getUploadSpec,
+  getUploadUIText,
+  isUploadedTemplateId,
+} from '../Data/Admitcarduploadconfig';
 
 const PAGE_SIZE = 10;
 
@@ -245,11 +259,10 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   const [printOnly, setPrintOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // দুইটা পপআপ
-  // ফিল্টার আর পপআপে নেই — সেটা হেডারেই ইনলাইন বসে।
-  // টেমপ্লেট নির্বাচন সেটিং পপআপের ভিতরে, নিজেই আরেকটা পপআপ হয়ে খোলে।
+  // পপআপ — সেটিং, টেমপ্লেট তালিকা, আর নিজের ডিজাইন আপলোড
   const [showSetupModal, setShowSetupModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   // ------------------------------------------------- রুটিংসহ টেমপ্লেট
   // A5 = শুধু প্রবেশপত্র, A4 = রুটিনসহ। রুটিন চালু/বন্ধ এই একটা
@@ -269,6 +282,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   const ui = (key) => getUIText(key, lang);
   // রুটিংয়ের নিজের লেখা — ADMIT_UI এ হাত না দিয়ে আলাদা ফাইলে রাখা হয়েছে
   const rui = (key) => getRoutineUIText(key, lang);
+  // আপলোডের নিজের লেখা — ওটাও আলাদা ফাইলে
+  const uui = (key) => getUploadUIText(key, lang);
   const uiDir = getAdmitDir(lang);
 
   // লোকাল টগল — সব ডিফল্টভাবে ON
@@ -294,6 +309,12 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   const [saveAdmitCardSettings, { isLoading: isSaving }] =
     useSaveAdmitCardSettingsMutation();
 
+  // আপলোড করা ডিজাইন
+  const { data: uploadedData } = useGetAdmitCardTemplatesQuery();
+  const [uploadAdmitCardTemplate] = useUploadAdmitCardTemplateMutation();
+  const [deleteAdmitCardTemplate] = useDeleteAdmitCardTemplateMutation();
+  const [updateAdmitCardTemplate] = useUpdateAdmitCardTemplateMutation();
+
   // প্রতিষ্ঠানের নাম ও ঠিকানা — ভাষা অনুযায়ী
   const instName = getInstituteName(institutionInfo, lang);
   const instAddress = getInstituteAddress(institutionInfo, lang);
@@ -305,13 +326,55 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   const RDID = watch('RDID');
   const reportType = watch('ReportID');
 
+  // -------------------------------------------------------------------------
+  // টেমপ্লেটের তালিকা = বিল্ট-ইন + আপলোড করা
+  //
+  // আপলোড করা ডিজাইনের আইডিতে 'u_' উপসর্গ থাকে, তাই বিল্ট-ইন আইডির সাথে
+  // কখনো মেলে না — পুরোনো সংরক্ষিত সেটিং তাই নিরাপদ।
+  // -------------------------------------------------------------------------
+  const uploadedList = uploadedData?.templates;
+
+  const customAdmitTemplates = useMemo(
+    () => buildUploadedTemplates(uploadedList, 'A5', API_URL),
+    [uploadedList]
+  );
+  const customRoutineTemplates = useMemo(
+    () => buildUploadedTemplates(uploadedList, 'A4', API_URL),
+    [uploadedList]
+  );
+
+  const admitTemplateList = useMemo(
+    () => [...ADMIT_TEMPLATES, ...customAdmitTemplates],
+    [customAdmitTemplates]
+  );
+  const routineTemplateList = useMemo(
+    () => [...ROUTINE_CARD_TEMPLATES, ...customRoutineTemplates],
+    [customRoutineTemplates]
+  );
+
   // ------------------------------------------------- সক্রিয় মোড ও টেমপ্লেট
   // A5 হলে ডিজাইন আসে ADMIT_TEMPLATES থেকে, A4 হলে রুটিনের নিজের তালিকা
-  // থেকে। ফন্ট/রঙের ঘরগুলোও সক্রিয় টেমপ্লেটের আইডি ধরে আলাদা করে জমা
-  // থাকে, তাই A5 আর A4 এর সাজসজ্জা একে অন্যকে ছোঁয় না।
+  // থেকে — দুইটার শেষেই আপলোড করা ডিজাইনগুলো যোগ হয়। ফন্ট/রঙের ঘরগুলোও
+  // সক্রিয় টেমপ্লেটের আইডি ধরে আলাদা করে জমা থাকে, তাই A5 আর A4 এর
+  // সাজসজ্জা একে অন্যকে ছোঁয় না।
   const routineOn = isRoutineMode(admitMode);
-  const routeTpl = getRoutineTemplate(routeTemplate);
-  const template = routineOn ? routeTpl : getTemplate(selectedTemplate);
+
+  // আপলোড করা ডিজাইন বাছা থাকলে তালিকা থেকেই নেওয়া হয়; না পাওয়া গেলে
+  // (যেমন ডিজাইনটা মুছে ফেলা হয়েছে) বিল্ট-ইন প্রথমটায় ফিরে যাই
+  const plainTemplate = useMemo(
+    () =>
+      admitTemplateList.find((t) => String(t.id) === String(selectedTemplate)) ||
+      getTemplate(selectedTemplate),
+    [admitTemplateList, selectedTemplate]
+  );
+  const routeTpl = useMemo(
+    () =>
+      routineTemplateList.find((t) => String(t.id) === String(routeTemplate)) ||
+      getRoutineTemplate(routeTemplate),
+    [routineTemplateList, routeTemplate]
+  );
+
+  const template = routineOn ? routeTpl : plainTemplate;
   const activeTemplateId = routineOn ? routeTemplate : selectedTemplate;
 
   const nameSize = watch(`institute_name_size_${activeTemplateId}`);
@@ -383,10 +446,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   // কে কোন আসনে — একমাত্র উৎস শিক্ষকের সাজানো সিট প্ল্যান
   // (Exam_SitAllocation)। কোনো অনুমান নেই: যার বরাদ্দ নেই তার জন্য Map এ
   // কিছুই থাকে না, আর কার্ডে তখন "সিট প্ল্যান তৈরি করা হয়নি" লেখাটাই বসে।
-  //
-  // আগে হলের ছক ধরে ক্রমানুসারে বসানো হতো, তাই প্ল্যানে যে শিক্ষার্থী
-  // কলাম ৩ / সারি ৬ / আসন ২ তে ছিল, কার্ডে তার কলাম ১ / সারি ১ / আসন ১
-  // ছাপত — এখন সেই অনুমানটা পুরোপুরি বাদ।
   // -------------------------------------------------------------------------
   const hallSeats = useMemo(
     () => mapAllocatedSeats(studentList, routineData),
@@ -395,8 +454,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
 
   // আসনের এক লাইনের লেখা — A4 তে রুটিনের ঘরে, A5 তে QR এর উপরে।
   // দুই জায়গাতেই হুবহু একই লেখা, তাই এক জায়গাতেই বানিয়ে রাখি।
-  // বরাদ্দ না থাকলেও ঘরটা ফাঁকা যায় না — বার্তাটা বসে, তাই প্রিন্ট হাতে
-  // নিয়েই বোঝা যায় প্ল্যানটা এখনো করা হয়নি।
   const seatTexts = useMemo(() => {
     const out = new Map();
     const words = {
@@ -424,7 +481,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   // না থাকলে বার্তা। ডামি আসন দেখালে প্রিভিউ দেখে মনে হতো প্ল্যান আছে।
   const previewSeat = hallSeats.values().next().value || null;
 
-  // প্রিভিউতে আসনের লাইনটা কেমন দেখাবে — A5 আর A4 দুই জায়গাতেই একই লেখা
   const previewSeatText = useMemo(
     () =>
       previewSeat
@@ -564,10 +620,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   // ------------------------------------------------- সবাই ডিফল্টে নির্বাচিত
   // তালিকা এলেই সব শিক্ষার্থীর ঘরে টিক বসে — সাধারণত পুরো শাখারই প্রবেশপত্র
   // একসাথে ছাপা হয়, তাই একটা একটা করে টিক দেওয়ার দরকার পড়ে না।
-  // কাউকে বাদ দিতে চাইলে চেকবক্স খুলে নিলেই হলো; ফিল্টার বদলে নতুন তালিকা
-  // এলে আবার সবাই নির্বাচিত হয়ে যায়।
-  // উপরের রিসেট ইফেক্টের পরে বসানো — তাই একই রেন্ডারে দুইটা চললে
-  // শেষেরটাই টেকে, ফলে তালিকা এসে কখনো ফাঁকা নির্বাচনে আটকে থাকে না।
   useEffect(() => {
     // তালিকা সত্যিই বদলালে তবেই state ছোঁয়া হয়। অ্যারেটা নতুন রেফারেন্স
     // হলেও ভিতরের সারিগুলো এক হলে আগেরটাই ফেরত দিই — তাতে React
@@ -616,7 +668,94 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     // বাম পাশের থাম্বনেইল বা পপআপ — দুই জায়গা থেকেই সাথে সাথে ডিজাইন বদলায়।
     // সংরক্ষণ হয় না; সেটা শুধু "টেমপ্লেট ও ডাটা সেটিং" এর সংরক্ষণ বোতামেই।
     setSelectedTemplate(id);
-    setCheckboxState((prev) => prev.filter((f) => isFieldAllowedForTemplate(f, id)));
+    // আপলোড করা ডিজাইনে সব ফিল্ডই চলে, তাই সেখানে ছাঁকার কিছু নেই
+    if (!isUploadedTemplateId(id)) {
+      setCheckboxState((prev) => prev.filter((f) => isFieldAllowedForTemplate(f, id)));
+    }
+  };
+
+  /**
+   * কোন ডিজাইনের ঘর ঠিক করা হচ্ছে — null হলে পর্দাটা নতুন আপলোডের মোডে
+   * খোলে। রেকর্ডটা সার্ভারের তালিকা থেকেই নেওয়া হয় (টেমপ্লেট অবজেক্ট
+   * নয়), কারণ জমা থাকা `design` ঘরটা ওখানেই আছে।
+   */
+  const [editTemplate, setEditTemplate] = useState(null);
+
+  const openTemplateEditor = (tpl) => {
+    const rec = (uploadedList || []).find(
+      (r) => String(r.id) === String(tpl.uploadId)
+    );
+    if (!rec) return;
+    setEditTemplate(rec);
+    setShowUploadModal(true);
+  };
+
+  /** ঘরগুলো সংরক্ষণ — ছবিটা অক্ষত থাকে, কেবল চারটে মান বদলায় */
+  const handleSaveOffsets = async (id, offsets) => {
+    await updateAdmitCardTemplate({ id, offsets }).unwrap();
+
+    Swal.fire({
+      icon: 'success',
+      title: uui('saveOk'),
+      timer: 1600,
+      showConfirmButton: false,
+    });
+  };
+
+  /** নিজের ডিজাইন আপলোড — AdmitTemplateUpload থেকে FormData আসে */
+  const handleUploadTemplate = async (formData) => {
+    const res = await uploadAdmitCardTemplate(formData).unwrap();
+
+    // আপলোডের সাথে সাথেই নতুন ডিজাইনটা বাছা হয়ে যায় — নইলে আবার
+    // তালিকা থেকে খুঁজে বের করতে হতো
+    const fresh = res?.template;
+    if (fresh?.id) {
+      const id = `u_${fresh.id}`;
+      if (String(fresh.mode) === 'A4') setRouteTemplate(id);
+      else setSelectedTemplate(id);
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: uui('uploadOk'),
+      timer: 1600,
+      showConfirmButton: false,
+    });
+  };
+
+  /** আপলোড করা ডিজাইন মুছে ফেলা */
+  const handleDeleteTemplate = async (tpl) => {
+    const ok = await Swal.fire({
+      icon: 'warning',
+      title: uui('deleteAsk'),
+      text: uui('deleteNote'),
+      showCancelButton: true,
+      confirmButtonText: uui('delete'),
+      cancelButtonText: ui('cancel'),
+      confirmButtonColor: '#dc2626',
+    });
+
+    if (!ok.isConfirmed) return;
+
+    try {
+      await deleteAdmitCardTemplate(tpl.uploadId).unwrap();
+
+      // মুছে ফেলা ডিজাইনটাই বাছা ছিল — তাহলে বিল্ট-ইন প্রথমটায় ফিরি,
+      // নইলে কার্ডটা ভাঙা ছবি নিয়ে ছাপা হতো
+      if (String(tpl.mode) === 'A4') {
+        if (String(routeTemplate) === String(tpl.id)) {
+          setRouteTemplate(ROUTINE_CARD_TEMPLATES[0]?.id ?? 'r1');
+        }
+      } else if (String(selectedTemplate) === String(tpl.id)) {
+        setSelectedTemplate(ADMIT_TEMPLATES[0]?.id ?? null);
+      }
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: uui('errUpload'),
+        text: err?.data?.error || '',
+      });
+    }
   };
 
   const handleFieldToggle = (fieldId, checked) => {
@@ -715,8 +854,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
       });
       return null;
     }
-    // রুটিং চালু থাকলে কাগজের ধরণ রুটিনের নিজের ঘর থেকে আসে, তাই
-    // প্রবেশপত্রের রিপোর্ট টাইপ তখন বাধ্যতামূলক নয়
     if (!reportType) {
       Swal.fire({
         icon: 'warning',
@@ -771,7 +908,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
         qr: qrEnabled,
         watermark: watermarkEnabled,
         photo: photoEnabled,
-        // নতুন — বাঁ (নায়েম) ও ডান (মুহতামিম) আলাদা, প্রতিটার তিনটি অংশ
         najemSign,
         najemSignName,
         najemSignDate,
@@ -826,8 +962,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   };
 
   // "রিপোর্টের ধরণ" — মোড অনুযায়ী তালিকা বদলায়।
-  //   A5 → A5 ১টি, A5 ২টি, A4 ২টি, A4 ৪টি
-  //   A4 → A4 ১টি, A4 ২টি   (রুটিন কার্ড লম্বা, তাই এই দুইটাই চলে)
   const reportOptions = useMemo(
     () =>
       routineOn
@@ -839,8 +973,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     [routineOn, lang]
   );
 
-  // মোড বদলালে আগের কাগজের ধরণটা নতুন তালিকায় না-ও থাকতে পারে
-  // (যেমন A5 এ "A5 ২টি" বাছা ছিল, এখন A4 এ গেলে ওটা নেই) — তখন
+  // মোড বদলালে আগের কাগজের ধরণটা নতুন তালিকায় না-ও থাকতে পারে — তখন
   // তালিকার প্রথমটাই বসে যায়, নইলে ড্রপডাউনটা ফাঁকা দেখাত।
   useEffect(() => {
     const ids = reportOptions.map((o) => String(o.id));
@@ -862,8 +995,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
           },
         ]
       : []),
-    // আসনের লাইন — দুই মোডেই চলে। A5 তে QR এর ঠিক উপরে, A4 তে
-    // রুটিনের ঘরে — দুই জায়গাতেই চেহারা এক।
     {
       id: 'seatLine',
       label: ui('seatLine'),
@@ -931,17 +1062,19 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     watch,
   ]);
 
-  const availableFields = ADMIT_FIELDS.filter((f) =>
-    isFieldAllowedForTemplate(f.id, selectedTemplate)
+  // আপলোড করা ডিজাইনে সব ফিল্ডই চলে — ADMIT_ALLOWED_FIELDS এ ওই আইডি নেই,
+  // তাই শর্তটা না রাখলে ফিল্ডের তালিকাটাই ফাঁকা দেখাত
+  const availableFields = ADMIT_FIELDS.filter(
+    (f) =>
+      isUploadedTemplateId(selectedTemplate) ||
+      isFieldAllowedForTemplate(f.id, selectedTemplate)
   );
 
   const remaining = MAX_FIELD_SELECT - checkboxState.length;
 
-  // হেডারের ড্রপডাউন-চেহারার বোতাম — পাশের ভাষা select এর সাথে মিলিয়ে
-  const dropdownBtn =
-    'flex items-center gap-2 min-w-0 rounded-[8px] border border-gray-200 bg-white ' +
-    'px-3 py-2 text-[14px] font-medium text-gray-700 shadow-sm ' +
-    'hover:border-blue-400 hover:text-blue-700 transition';
+  // আপলোডের পর্দার জন্য — এখন কোন ধরণের ডিজাইন আপলোড হচ্ছে
+  const uploadMode = routineOn ? 'A4' : 'A5';
+  const uploadSpec = getUploadSpec(uploadMode);
 
   return (
     <FormProvider {...methods}>
@@ -950,17 +1083,11 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
         className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg hidden_in_print max-w-full overflow-x-hidden"
         dir={uiDir}
       >
-        {/* ================================================== হেডার
-            তিন ভাগ — বাঁয়ে টেমপ্লেট ও রুটিংয়ের ড্রপডাউন, মাঝে শিরোনাম,
-            ডানে ভাষা ও সেটিং। দুই পাশের ঘরেই flex-1 দেওয়া, তাই শিরোনামটা
-            ঠিক মাঝখানেই বসে — দুই পাশের বোতামের চওড়া সমান না হলেও। */}
+        {/* ================================================== হেডার */}
         <div className="mb-4 pb-4 border-b border-gray-200">
           <div className="flex items-center gap-3 flex-wrap">
-            {/* বাঁ পাশ — টেমপ্লেট ও মোড, দুইটারই উপরে ছোট লেবেল */}
+            {/* বাঁ পাশ — টেমপ্লেট ও মোড */}
             <div className="flex flex-1 min-w-0 items-center gap-2 flex-wrap">
-              {/* ----------------------------------------------------------
-                  টেমপ্লেট নির্বাচন — ক্লিক করলে টেমপ্লেটের তালিকা খোলে
-              ---------------------------------------------------------- */}
               <button
                 type="button"
                 onClick={() => setShowTemplateModal(true)}
@@ -991,7 +1118,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                     <span className="truncate max-w-[120px] text-[14px] font-bold text-gray-800 group-hover:text-blue-700">
                       {template.title}
                     </span>
-                    {/* নিচমুখী তীর — ড্রপডাউন বোঝায় */}
                     <svg
                       className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-600 shrink-0"
                       viewBox="0 0 20 20"
@@ -1008,12 +1134,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 </div>
               </button>
 
-              {/* ----------------------------------------------------------
-                  A5 / A4 — প্রবেশপত্রের ধরণ। এটাই একমাত্র সুইচ:
-                    A5 → শুধু প্রবেশপত্র, ডিজাইন ADMIT_TEMPLATES থেকে
-                    A4 → রুটিনসহ, ডিজাইন রুটিনের নিজের আলাদা তালিকা থেকে
-                  পাশের "টেমপ্লেট সিলেক্ট" বোতামটাও এই অনুযায়ীই তালিকা খোলে।
-              ---------------------------------------------------------- */}
+              {/* A5 / A4 — প্রবেশপত্রের ধরণ */}
               <div
                 className="flex items-center gap-1 rounded-[10px] border border-gray-200 bg-white p-1 shadow-sm shrink-0"
                 dir="ltr"
@@ -1029,8 +1150,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                       key={m.id}
                       type="button"
                       onClick={() => {
-                        // মোড বদলানোর সাথে সাথেই ওই ধরণের ডিজাইনগুলো
-                        // দেখানো হয় — আলাদা করে আর ক্লিক করতে হয় না
                         setAdmitMode(m.id);
                         setShowTemplateModal(true);
                       }}
@@ -1055,7 +1174,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
 
             {/* ডান পাশ — ভাষা ও সেটিং */}
             <div className="flex flex-1 min-w-0 items-center justify-end gap-2 flex-wrap">
-              {/* ভাষা — আগে তিনটা বোতাম ছিল, এখন একটা ড্রপডাউন */}
               <select
                 className="rounded-[8px] border border-gray-200 bg-white px-3 py-2 text-[14px] font-medium text-gray-700 shadow-sm cursor-pointer"
                 value={lang}
@@ -1081,13 +1199,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
           </div>
         </div>
 
-        {/* ===================================== ফিল্টার — এক লাইনে আটটা ঘর
-            ছয়টা ফিল্টারের ঘর, তারপর প্রিভিউ ও প্রিন্ট — মোট আটটা।
-            ঘর বদলালেই তালিকা নিজে থেকে আসে, তাই আলাদা প্রয়োগ বা মোছার
-            বোতাম লাগে না।
-
-            items-end — ঘরগুলোর উপরে লেবেল বসে, তাই নিচের কিনারা মিলিয়ে
-            রাখলে বোতাম দুইটা ইনপুটের সাথে এক লাইনে দেখায়। */}
+        {/* ===================================== ফিল্টার — এক লাইনে আটটা ঘর */}
         <div className="rounded-[10px] border border-gray-200 bg-gray-50/70 p-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-8 items-end gap-3">
             <DefaultSelect
@@ -1136,10 +1248,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               registerKey="ReportID"
             />
 
-            {/* ------------------------------------------- ৭ ও ৮ নং ঘর
-                প্রিভিউ ও প্রিন্ট। বাইরের ঘরটা grid — এক কলামের গ্রিডে
-                ভিতরের Button কম্পোনেন্টটা নিজে থেকেই পুরো চওড়া নেয়,
-                তাই দুইটা বোতাম পাশের ইনপুটগুলোর মতোই সমান চওড়া হয়। */}
             <div className="grid">
               <Button type="button" onClick={handlePreview}>
                 {ui('preview')}
@@ -1155,16 +1263,10 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
           </div>
         </div>
 
-        {/* ================================ শিক্ষার্থীর ডাটা — পুরো পেজ জুড়ে
-            ঘরটার উচ্চতা স্থির। কয়জন শিক্ষার্থী এল তার উপর আকার নির্ভর করে না —
-            ডাটা কম হলেও ঘরটা ছোট হয় না, বেশি হলে ভিতরেই স্ক্রল হয়। ফলে
-            নিচের পেজিনেশন ও বোতামের জায়গা কখনো লাফায় না।
-            h-[calc(...)] দিয়ে পর্দার বাকি অংশটুকু নেয়, min-h ছোট পর্দার জন্য। */}
+        {/* ================================ শিক্ষার্থীর ডাটা — পুরো পেজ জুড়ে */}
         <div className="relative mt-6 flex h-[calc(100vh-340px)] min-h-[160px] flex-col overflow-hidden rounded-[10px] border border-gray-200">
-          {/* ---------------------------------------- তালিকা, ভিতরে স্ক্রল হয় */}
           <div className="flex-1 min-h-0 overflow-auto">
             <table className="w-full min-w-[520px] border-collapse">
-              {/* স্ক্রল করলেও হেডার সারিটা উপরে লেগে থাকে */}
               <thead className="sticky top-0 z-10 bg-gray-100">
                 <tr>
                   <th className="p-2 text-start w-[44px] border-b border-gray-300">
@@ -1214,7 +1316,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                   </tr>
                 ))}
 
-                {/* কেউ না থাকলে বার্তাটা পুরো সারি জুড়ে, ঠিক মাঝখানে */}
                 {paginatedData.length === 0 && (
                   <tr>
                     <td colSpan="5" className="p-12 text-center align-middle">
@@ -1232,24 +1333,16 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
             </table>
           </div>
 
-          {/* ---------------------------------------------- বড় লোডিং ওভারলে
-              ডাটা আনা হচ্ছে — টেবিলের উপরে সাদা পর্দা, মাঝে স্পিনার।
-              user যেন বুঝতে পারে কাজ চলছে। */}
           {isFetching ? (
             <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-white/80 backdrop-blur-[2px]">
               <Spinner size={52} stroke={4} className="text-blue-600" />
               <p className="mt-3 text-[16px] font-semibold text-gray-700">
                 {ui('loading')}
               </p>
-              <p className="mt-1 text-[13px] text-gray-500">
-                {ui('searchHint')}
-              </p>
+              <p className="mt-1 text-[13px] text-gray-500">{ui('searchHint')}</p>
             </div>
           ) : null}
 
-          {/* ------------------------------------------- ঘরের নিচের স্থির সারি
-              শুধু পেজিনেশন, ঠিক মাঝখানে। প্রিভিউ ও প্রিন্ট উপরে ফিল্টারের
-              সারিতে উঠে গেছে। shrink-0 বলে এই সারিটা কখনো চেপে যায় না। */}
           <div className="shrink-0 flex items-center justify-center border-t border-gray-200 bg-white px-3 py-2">
             <DefaultPagination
               currentPage={currentPage}
@@ -1259,8 +1352,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
           </div>
         </div>
 
-        {/* "প্রস্তুত — নিচে দেখুন" শুধু প্রিভিউর বেলায়; প্রিন্টে নিচে
-            দেখার মতো কিছু থাকে না, তাই বার্তাটাও বসে না। */}
         {printData?.length && !printOnly ? (
           <p className="mt-2 text-[14px] text-green-700 text-center">
             {ui('ready')(toLangDigit(printData.length, lang))}
@@ -1271,26 +1362,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
       {/* ------------------------------------------------------------------
           একটাই আউটপুট নোড — স্ক্রিনে প্রিভিউ, প্রিন্টে এটাই ছাপে।
       ------------------------------------------------------------------- */}
-      {/* প্রিন্টের জন্য বানানো আউটপুট পর্দা থেকে সরিয়ে রাখার নিয়ম।
-          display:none দেওয়া হয়নি ইচ্ছে করেই — তাতে ভিতরের ছবি ও ফন্টের
-          মাপজোক ঠিকভাবে হতো না, QR আর কার্ডের লেআউট ভেঙে ছাপা হতো।
-          বদলে পুরো ঘরটা পর্দার বাইরে বসানো হয়: লেআউট আগের মতোই হয়,
-          ছবি আগের মতোই লোড হয়, শুধু চোখে পড়ে না।
-          নিয়মটা @media screen এ, তাই ছাপার সময় এর কোনো প্রভাবই থাকে না। */}
       <style>{`
-        /* ছাপার সময় উপরের ফাঁকটুকু থাকলে প্রথম পৃষ্ঠার দ্বিতীয় কার্ডটা
-           নিচে নেমে যেত আর পুরো সিরিজটা একটা করে পৃষ্ঠা পিছিয়ে যেত —
-           ১২টা কার্ড ৬ পৃষ্ঠার বদলে ৭ পৃষ্ঠা নিত, প্রথম পৃষ্ঠায় একটাই
-           কার্ড বসত। পর্দার ফাঁকটা দরকারি, তাই শুধু ছাপার সময় বাদ। */
         @media print {
-          /* এই ঘরটাই কার্ডগুলোকে ধরে রাখে। পর্দায় এর max-width আর
-             overflow-x দরকার (৫২০px কার্ড যেন পেজ চওড়া না করে), কিন্তু
-             ছাপার সময় ওই দুইটাই বিপদ — ছোট পর্দায় ঘরটা সরু হয়ে কার্ডের
-             ডান দিক কেটে দিত। ছাপায় তাই সব বাঁধন খুলে দিই।
-
-             buildPrintCss এও একই কাজ :has() দিয়ে করা আছে, সেটা অ্যাপের
-             বাইরের খোলসটুকুও ধরে। পুরোনো ব্রাউজারে :has() নেই, তাই
-             নিজের ঘরটার জন্য এই নিয়মটা আলাদা করে রাখা। */
           .admit-output {
             margin: 0 !important;
             padding: 0 !important;
@@ -1318,15 +1391,10 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
             printOnly ? ' admit-output--print-only' : ''
           }`}
         >
-          {/* grayscale সবসময় false — কালার নির্বাচন বাদ দেওয়া হয়েছে,
-              প্রবেশপত্র এখন সবসময় রঙিনই ছাপে।
-
-              A4 মোডে রুটিনসহ কার্ড ছাপে — ভিতরের উপরের অংশটা হুবহু এই
-              প্রবেশপত্রই, নিচে রুটিন ও আসন যোগ হয়। A5 তে একদম আগের
-              মতোই সাধারণ প্রবেশপত্র। */}
           {routineOn ? (
             <AdmitCardRoutinegenerate
               routineTemplateId={routeTemplate}
+              routineTemplate={routeTpl}
               routineColor={routineColor}
               fields={checkboxState}
               data={printData}
@@ -1358,6 +1426,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
           ) : (
             <AdmitCardGenerate
               templateId={selectedTemplate}
+              templateObj={plainTemplate}
               fields={checkboxState}
               data={printData}
               seats={seatEnabled ? seatTexts : null}
@@ -1386,18 +1455,14 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
         </div>
       ) : null}
 
-      {/* ============================ পপআপ ১ — টেমপ্লেট ও ডাটা সেটিং (সংরক্ষণ)
-          বাঁ পাশে লাইভ প্রিভিউ, স্ক্রল করলেও আটকে থাকে — তাই টেমপ্লেট বদলালে
-          বা ফিল্ড/টগল বদলালে সাথে সাথেই কার্ডে ফলটা দেখা যায়।
-          ডান পাশে সব সেটিং: টেমপ্লেট নির্বাচন → কী দেখাবে → ফিল্ড ও লেবেল
-          → ফন্ট ও কালার → ঐচ্ছিক রুটিং। */}
+      {/* ============================ পপআপ ১ — টেমপ্লেট ও ডাটা সেটিং */}
       <Modal
         open={showSetupModal}
         onClose={() => setShowSetupModal(false)}
         title={ui('setup')}
         dir={uiDir}
         width="max-w-7xl"
-        disableEsc={showTemplateModal}
+        disableEsc={showTemplateModal || showUploadModal}
         footer={
           <button
             type="button"
@@ -1410,13 +1475,9 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
         }
       >
         <div className="grid grid-cols-1 xl:grid-cols-[560px_1fr] gap-7">
-          {/* =================================================== বাম পাশ
-              টেমপ্লেটের নাম → লাইভ প্রিভিউ → তিনটা ঘর (টেমপ্লেট, নাম, ঠিকানা)।
-              কার্ডের চেহারা যা বদলায় সেগুলো প্রিভিউর গা ঘেঁষেই রাখা হলো,
-              তাই বদল করলে সাথে সাথে ফলটা চোখে পড়ে। */}
+          {/* =================================================== বাম পাশ */}
           <div className="min-w-0">
             <div className="xl:sticky xl:top-0 xl:z-10 bg-white pb-3">
-              {/* টেমপ্লেটের নাম — আগে প্রিভিউর নিচে ছিল, এখন উপরে */}
               <div className="mb-2 flex items-center justify-between gap-3">
                 <p className="text-[15px] font-bold text-gray-700">
                   {routineOn ? rui('routinePreview') : ui('livePreview')}
@@ -1426,9 +1487,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 </p>
               </div>
 
-              {/* কার্ডটা ৫২০px স্থির — ছোট স্ক্রিনে এই ঘরটাই পাশে স্ক্রল হবে।
-                  রুটিং চালু থাকলে কার্ডটা ৭৪০px লম্বা, তাই পপআপে আঁটানোর
-                  জন্য ৭২% এ scale করা হয় — ভিতরের কিছুই বদলায় না। */}
               <div className="overflow-x-auto overscroll-x-contain -mx-1 px-1 pb-2">
                 {routineOn ? (
                   <div
@@ -1508,9 +1566,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 )}
               </div>
               
-              {/* ফন্ট ও রঙ — তিনটাই এক সারিতে, সবচেয়ে উপরে।
-                আগে এগুলো নিচে ছিল, এখন উপরে — তাই টেমপ্লেট বাছার আগেই
-                নাম/ঠিকানা/পরীক্ষার ফন্ট ঠিক করে নেওয়া যায়। */}
+              {/* ফন্ট ও রঙ — তিনটাই এক সারিতে */}
               <div className="mt-2 grid grid-cols-3 gap-2">
                 {[
                   {
@@ -1557,15 +1613,11 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 ))}
               </div>
 
-              {/* ------------------------------------------------- দুইটা ঘর */}
-              {/* নিচের সারি — ডিজাইন আর কাগজের ধরণ, পাশাপাশি।
-                  items-start দেওয়া, নইলে গ্রিড দুইটা ঘরকেই সমান লম্বা
-                  করে দিত আর ছোট ঘরটার নিচে অনেক ফাঁকা পড়ে থাকত। */}
+              {/* নিচের সারি — ডিজাইন আর কাগজের ধরণ, পাশাপাশি */}
               <div
                 className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3"
                 style={{ alignItems: 'start' }}
               >
-                {/* ঘর ১ — টেমপ্লেট সিলেক্ট, তালিকাটা উপরের পপআপে খোলে */}
                 <button
                   type="button"
                   onClick={() => setShowTemplateModal(true)}
@@ -1595,9 +1647,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                   </p>
                 </button>
 
-                {/* ঘর ২ — কাগজ ও ধরণ (A5 / A4)
-                    লেখাটা আর কাটা পড়ে না — মোটা অক্ষরে A5/A4, নিচে
-                    ছোট করে কী ছাপবে তার বর্ণনা, দরকার হলে পরের লাইনে। */}
                 <div className="rounded-[8px] border border-gray-200 p-2 min-w-0">
                   <p className="text-[12px] text-gray-500 mb-2">{ui('mode')}</p>
                   <div className="flex flex-col gap-1.5">
@@ -1657,10 +1706,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
             </div>
           </div>
 
-          {/* ================================================== ডান পাশ
-              শুধু ডাটার সেটিং — কী দেখাবে, কোন ফিল্ড, আর রুটিন। */}
+          {/* ================================================== ডান পাশ */}
           <div className="min-w-0">
-            {/* কী কী দেখাবে */}
             <p className="font-bold text-[16px] mb-2">{ui('displaySettings')}</p>
             <div className="flex items-center gap-2 flex-wrap">
               {generalToggles.map((tg) => (
@@ -1679,9 +1726,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               ))}
             </div>
 
-            {/* ------- আসনের অবস্থা — সিট প্ল্যান আদৌ করা হয়েছে কি না
-                "কার্ডে আসন দেখাও" চালু রেখে প্রিন্ট দিলে কী ছাপবে, সেটা
-                আগেই এখানে দেখা যায় — বরাদ্দ না থাকলে কার্ডে বার্তা বসবে। */}
+            {/* আসনের অবস্থা — সিট প্ল্যান আদৌ করা হয়েছে কি না */}
             {seatEnabled ? (
               <p
                 className="mt-2 text-[12px]"
@@ -1697,9 +1742,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               </p>
             ) : null}
 
-            {/* ---------------- বাঁ পাশের স্বাক্ষর (নায়েম) ----------------
-                তিনটি অংশ আলাদাভাবে বন্ধ/চালু, আর নিচে নাম ইনপুট —
-                ইনপুট ফাঁকা থাকলে প্রতিষ্ঠানের তথ্য থেকে নাম আসবে। */}
+            {/* ---------------- বাঁ পাশের স্বাক্ষর (নায়েম) ---------------- */}
             <p className="font-bold text-[16px] mt-6 mb-2">{ui('leftSignature')}</p>
             <div className="flex items-center gap-2 flex-wrap">
               {najemToggles.map((tg) => (
@@ -1779,7 +1822,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                     <span className="text-[15px] w-[110px] shrink-0 truncate">
                       {getFieldName(f.id, lang)}
                     </span>
-                    {/* মান setValue দিয়ে বসে — defaultValue বা key লাগে না */}
                     <input
                       className="flex-1 min-w-0 border rounded px-2 py-1 text-[14px]"
                       disabled={!checked}
@@ -1790,20 +1832,13 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               })}
             </div>
 
-            {/* ====================================== রুটিনের সেটিং
-                শুধু A4 মোডে দেখায়। ডিজাইনটা আর এখানে বাছা হয় না —
-                উপরের "টেমপ্লেট সিলেক্ট" ই A4 এর তালিকা খোলে।
-                এখানে থাকে কেবল রুটিনের নিজের দুইটা জিনিস:
-                  • টেবিলে কোন কলামগুলো থাকবে
-                  • টেবিলের রঙ (একবার বাছলে সব টেমপ্লেটেই বসে)
-            ====================================== */}
+            {/* ====================================== রুটিনের সেটিং (শুধু A4) */}
             {routineOn ? (
               <>
                 <p className="font-bold text-[16px] mt-8 mb-3">
                   {ui('optionalRouting')}
                 </p>
 
-                {/* রুটিনে কোন কলাম থাকবে */}
                 <p className="text-[14px] font-bold text-gray-700 mb-2">
                   {rui('routineColumns')}
                 </p>
@@ -1860,7 +1895,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                         )}`
                       : rui('noHall')}
                   </p>
-                  {/* আসন — একমাত্র উৎস শিক্ষকের সাজানো সিট প্ল্যান */}
                   <p
                     className="text-[12px] mt-0.5"
                     style={{ color: hallSeats.size ? '#15803d' : '#b45309' }}
@@ -1881,9 +1915,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
         </div>
       </Modal>
 
-      {/* ------------------ পপআপ ১ক — টেমপ্লেট সিলেক্ট (সেটিং পপআপের উপরে)
-          DOM এ এটা সেটিং পপআপের ভাই, ভিতরে নয় — তাই ব্যাকড্রপে ক্লিক করলে
-          শুধু এটাই বন্ধ হয়, নিচেরটা খোলা থাকে। z-[60] দিয়ে উপরে বসানো। */}
+      {/* ------------------ পপআপ ১ক — টেমপ্লেট সিলেক্ট (সেটিং পপআপের উপরে) */}
       <Modal
         open={showTemplateModal}
         onClose={() => setShowTemplateModal(false)}
@@ -1891,11 +1923,9 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
         dir={uiDir}
         width={routineOn ? 'max-w-5xl' : 'max-w-4xl'}
         zIndex="z-[60]"
+        disableEsc={showUploadModal}
       >
-        {/* ------------------------------------------------- রুটিনের রঙ
-            টেবিলের রঙটা এখানেই বাছা হয়, কারণ নিচের প্রতিটা থাম্বনেইল
-            সাথে সাথেই নতুন রঙে বদলে যায় — কোন টেমপ্লেটে কেমন দেখাবে তা
-            বাছার আগেই দেখা যায়। একটাই রঙ, তাই সব টেমপ্লেটেই এক। */}
+        {/* ------------------------------------------------- রুটিনের রঙ */}
         {routineOn ? (
           <div className="mb-4 rounded-[10px] border border-gray-200 bg-gray-50/70 p-3">
             <p className="text-[14px] font-bold text-gray-700 mb-1">
@@ -1904,7 +1934,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
             <p className="text-[12px] text-gray-500 mb-2">{ui('routineColorHint')}</p>
 
             <div className="flex items-center gap-2 flex-wrap">
-              {/* টেমপ্লেটের নিজের রঙে ফিরে যাওয়া */}
               <button
                 type="button"
                 onClick={() => setRoutineColor('')}
@@ -1929,19 +1958,16 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                     className={`shrink-0 rounded-full border-2 transition ${
                       on ? 'border-blue-600 scale-110' : 'border-gray-200 hover:border-gray-400'
                     }`}
-                    // মাপটা inline — গোল ঘরগুলো যেন কোনো অবস্থাতেই চেপে
-                    // চ্যাপ্টা হয়ে না যায়
                     style={{ background: hex, width: 28, height: 28 }}
                   />
                 );
               })}
 
-              {/* নিজের পছন্দের যেকোনো রঙ */}
               <label className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 cursor-pointer hover:bg-gray-100 transition">
                 <input
                   type="color"
                   className="h-[22px] w-[30px] cursor-pointer border-0 bg-transparent p-0"
-                  value={routineColor || routeTpl.table.borderColor || '#111827'}
+                  value={routineColor || routeTpl.table?.borderColor || '#111827'}
                   onChange={(e) => setRoutineColor(e.target.value)}
                 />
                 <span className="text-[13px] font-medium text-gray-700" dir="ltr">
@@ -1952,9 +1978,10 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
           </div>
         ) : null}
 
-        {/* কোন তালিকাটা দেখাবে তা ঠিক করে A5/A4 মোড —
-            A5 এ প্রবেশপত্রের ডিজাইন, A4 এ রুটিনসহ কার্ডের ডিজাইন।
-            দুইটা তালিকা সম্পূর্ণ আলাদা, একটার সাথে আরেকটার সম্পর্ক নেই। */}
+        {/* ============================================ ডিজাইনের তালিকা
+            প্রথম ঘরটা আপলোডের — তাই নিজের ডিজাইন যোগ করার পথটা ঠিক
+            সেখানেই, যেখানে ডিজাইন বাছা হয়। নিচে মাপটাও লেখা থাকে, তাই
+            আপলোডের পর্দা না খুলেও কত মাপের ছবি লাগবে তা জানা যায়। */}
         <div
           className={`grid gap-4 ${
             routineOn
@@ -1962,56 +1989,134 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               : 'grid-cols-2 sm:grid-cols-3'
           }`}
         >
-          {(routineOn ? ROUTINE_CARD_TEMPLATES : ADMIT_TEMPLATES).map((tpl) => {
+          {/* ---- আপলোডের ঘর */}
+          <button
+            type="button"
+            onClick={() => {
+              // নতুন আপলোড — আগের সম্পাদনার রেকর্ড পড়ে থাকলে পর্দাটা
+              // ভুল করে সম্পাদনার মোডে খুলত
+              setEditTemplate(null);
+              setShowUploadModal(true);
+            }}
+            className="flex flex-col items-center justify-center gap-2 rounded-[10px] border-2 border-dashed border-blue-300 bg-blue-50/40 p-3 text-center transition hover:border-blue-500 hover:bg-blue-50"
+            style={{ minHeight: routineOn ? 240 : 180 }}
+          >
+            <span className="flex h-[38px] w-[38px] items-center justify-center rounded-full bg-blue-600 text-[24px] leading-none text-white">
+              +
+            </span>
+            <span className="text-[14px] font-bold text-blue-700">
+              {uui('uploadNew')}
+            </span>
+            {/* মাপটা এখানেই লেখা — আপলোডের পর্দা না খুলেও জানা যায় */}
+            <span className="text-[11px] leading-snug text-gray-600">
+              {formatSize(uploadSpec.width, uploadSpec.height, lang)} px
+              <br />
+              {formatBytes(uploadSpec.maxBytes, lang)} · PNG/JPG
+            </span>
+          </button>
+
+          {(routineOn ? routineTemplateList : admitTemplateList).map((tpl) => {
             const on = String(activeTemplateId) === String(tpl.id);
             return (
-              <button
-                key={tpl.id}
-                type="button"
-                onClick={() => {
-                  if (routineOn) setRouteTemplate(tpl.id);
-                  else handleTemplateSelect(tpl.id);
-                  setShowTemplateModal(false);
-                }}
-                className={`rounded-[10px] border-2 p-2 transition min-w-0 ${
-                  on ? 'border-blue-600 shadow-lg' : 'border-gray-200 hover:border-blue-300'
-                }`}
-              >
-                <div className="overflow-hidden rounded-[6px] border border-gray-100">
-                  {routineOn ? (
-                    <RoutineThumb
-                      template={tpl}
-                      routineColor={routineColor}
-                      lang={lang}
-                      height={200}
-                      routineColumns={routineColumns}
-                      routine={previewRoutine}
-                      seat={previewSeat}
-                      showSeatLine={seatEnabled}
-                    />
-                  ) : (
-                    <TemplateThumb template={tpl} lang={lang} />
-                  )}
-                </div>
-                <p className="mt-2 text-center text-[14px] truncate">{tpl.title}</p>
-              </button>
+              <div key={tpl.id} className="relative min-w-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (routineOn) setRouteTemplate(tpl.id);
+                    else handleTemplateSelect(tpl.id);
+                    setShowTemplateModal(false);
+                  }}
+                  className={`w-full rounded-[10px] border-2 p-2 transition min-w-0 ${
+                    on ? 'border-blue-600 shadow-lg' : 'border-gray-200 hover:border-blue-300'
+                  }`}
+                >
+                  <div className="overflow-hidden rounded-[6px] border border-gray-100">
+                    {routineOn ? (
+                      <RoutineThumb
+                        template={tpl}
+                        routineColor={routineColor}
+                        lang={lang}
+                        height={200}
+                        routineColumns={routineColumns}
+                        routine={previewRoutine}
+                        seat={previewSeat}
+                        showSeatLine={seatEnabled}
+                      />
+                    ) : (
+                      <TemplateThumb template={tpl} lang={lang} />
+                    )}
+                  </div>
+                  <p className="mt-2 text-center text-[14px] truncate">{tpl.title}</p>
+                  {tpl.uploaded ? (
+                    <p className="text-center text-[11px] text-blue-600">
+                      {uui('uploaded')}
+                    </p>
+                  ) : null}
+                </button>
+
+                {/* আপলোড করা ডিজাইনেই কেবল মোছার বোতাম — বিল্ট-ইনগুলো
+                    কোডের অংশ, ওগুলো পর্দা থেকে মোছা যায় না */}
+                {tpl.uploaded ? (
+                  <>
+                    <button
+                      type="button"
+                      title={uui('delete')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTemplate(tpl);
+                      }}
+                      className="absolute right-1 top-1 flex h-[26px] w-[26px] items-center justify-center rounded-full bg-white/90 text-[16px] leading-none text-red-600 shadow hover:bg-red-600 hover:text-white transition"
+                    >
+                      ×
+                    </button>
+
+                    {/* ঘর ঠিক করার বোতাম — ডিজাইনটা নতুন করে আপলোড না
+                        করেই চারটে ঘর উপর-নিচ করা যায় */}
+                    <button
+                      type="button"
+                      title={uui('adjustBtn')}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openTemplateEditor(tpl);
+                      }}
+                      className="absolute left-1 top-1 flex h-[26px] w-[26px] items-center justify-center rounded-full bg-white/90 text-[14px] leading-none text-blue-600 shadow hover:bg-blue-600 hover:text-white transition"
+                    >
+                      ⇕
+                    </button>
+                  </>
+                ) : null}
+              </div>
             );
           })}
         </div>
       </Modal>
 
+      {/* ------------------ পপআপ ১খ — নিজের ডিজাইন আপলোড (সবার উপরে) */}
+      <AdmitTemplateUpload
+        open={showUploadModal}
+        mode={editTemplate?.mode || uploadMode}
+        lang={lang}
+        instName={instName}
+        instAddress={instAddress}
+        institutionInfo={institutionInfo}
+        watermarkLogo={watermarkLogo}
+        apiUrl={API_URL}
+        record={editTemplate}
+        onClose={() => {
+          setShowUploadModal(false);
+          setEditTemplate(null);
+        }}
+        onUpload={handleUploadTemplate}
+        onSaveOffsets={handleSaveOffsets}
+      />
     </FormProvider>
   );
 };
 
 /**
  * রুটিন কার্ডের থাম্বনেইল।
- * কার্ডটা ৫২০ × ৭৪০ — তাই উচ্চতা ধরে scale করা হয়, নইলে ঘরটা অনেক লম্বা
- * হয়ে যেত। ভিতরে আসল RoutineCardFace ই বসে, তাই থাম্বনেইলে যা দেখা যায়
- * প্রিন্টেও হুবহু সেটাই আসে।
- *
- * seat = null হলে RoutineCardFace নিজেই "সিট প্ল্যান তৈরি করা হয়নি"
- * লিখে দেয় — এখানে কোনো ডামি আসন বসানো হয় না।
+ * কার্ডটা ৫২০ × ৭৪০ — তাই উচ্চতা ধরে scale করা হয়। ভিতরে আসল
+ * RoutineCardFace ই বসে, তাই থাম্বনেইলে যা দেখা যায় প্রিন্টেও হুবহু তাই আসে।
  */
 const RoutineThumb = ({
   template,
@@ -2073,7 +2178,7 @@ const RoutineThumb = ({
 
 /**
  * টেমপ্লেটের থাম্বনেইল।
- * কার্ডটা স্থির ৫২০px, আর এই ঘরের প্রস্থ breakpoint ভেদে বদলায় (১১০ / ১৫০ / মোডালে আরও বড়) —
+ * কার্ডটা স্থির ৫২০px, আর এই ঘরের প্রস্থ breakpoint ভেদে বদলায় —
  * তাই scale টা মেপে বসানো হয়, হার্ডকোড করা হয় না।
  */
 const TemplateThumb = ({ template, lang }) => {
@@ -2095,6 +2200,8 @@ const TemplateThumb = ({ template, lang }) => {
     return () => ro.disconnect();
   }, []);
 
+  // ছবি-ভিত্তিক টেমপ্লেটে (বিল্ট-ইন PNG ও আপলোড করা, দুইটাই) থাম্বনেইলে
+  // ছবিটাই দেখাই — পুরো কার্ড আঁকার দরকার নেই, ডিজাইনটা এতেই বোঝা যায়
   if (template.variant === 'image') {
     return (
       <img

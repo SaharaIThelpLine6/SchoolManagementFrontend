@@ -423,19 +423,48 @@ export const ROUTINE_COLOR_PRESETS = [
 ];
 
 /**
+ * টেবিলের হেডার ছাপার উপযোগী করা।
+ *
+ * আগে হেডারের পট্টি ছিল গাঢ় রঙ আর লেখা সাদা। পর্দায় সুন্দর, কিন্তু ছাপার
+ * সময় ব্রাউজারের "Background graphics" বন্ধ থাকলে (ক্রোমে ওটা ডিফল্টে
+ * বন্ধই থাকে) পট্টিটা ছাপা হতো না — তখন সাদা কাগজে সাদা লেখা, মানে
+ * হেডারের কলামের নামগুলো একদম উধাও।
+ *
+ * তাই উল্টে দেওয়া হলো: পট্টি হালকা আভা, লেখা গাঢ় রঙে। ব্যাকগ্রাউন্ড
+ * ছাপা হোক বা না হোক — লেখা দুই ক্ষেত্রেই পড়া যায়।
+ */
+export const makeHeadPrintSafe = (table) => {
+  const base = table || {};
+  const bg = parseHex(base.headBg);
+  if (!bg) return base;                 // 'transparent' ('lines' স্টাইল) — কিছু করার নেই
+
+  const lum = (c) => (0.299 * c.r + 0.587 * c.g + 0.114 * c.b) / 255;
+  const fg = parseHex(base.headColor);
+  if (fg && lum(fg) < 0.7) return base; // লেখা আগে থেকেই গাঢ় — হাত দেওয়ার দরকার নেই
+
+  return {
+    ...base,
+    headBg: tintWhite(base.headBg, 0.88),
+    headColor: base.headBg,
+  };
+};
+
+/**
  * টেমপ্লেটের টেবিল-স্কিন + বাছা রঙ → চূড়ান্ত স্কিন।
- * রঙ না দিলে টেমপ্লেটের নিজেরটাই ফেরত যায়।
+ * রঙ না দিলে টেমপ্লেটের নিজেরটাই ফেরত যায় (হেডারটা ছাপার উপযোগী করে)।
  */
 export const buildRoutineTable = (table, color) => {
   const base = table || ROUTINE_CARD_TEMPLATES[0].table;
-  if (!parseHex(color)) return base;
+  if (!parseHex(color)) return makeHeadPrintSafe(base);
 
   const lines = base.tableStyle === 'lines';
 
   return {
     ...base,
-    headBg: lines ? 'transparent' : color,
-    headColor: lines ? color : readableOn(color),
+    // গাঢ় পট্টি + সাদা লেখা নয় — হালকা আভা + গাঢ় লেখা, যাতে ছাপায়
+    // ব্যাকগ্রাউন্ড বাদ পড়লেও কলামের নাম পড়া যায়
+    headBg: lines ? 'transparent' : tintWhite(color, 0.88),
+    headColor: color,
     borderColor: color,
     gridColor: tintWhite(color, 0.7),
     titleColor: color,
