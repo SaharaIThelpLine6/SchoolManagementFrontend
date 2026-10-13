@@ -2,7 +2,32 @@ export const formatToDDMMYYYY = (dateString) => {
   try {
     if (!dateString) return '';
 
-    const date = new Date(dateString);
+    const dayFirstDate =
+      typeof dateString === 'string'
+        ? dateString.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2}|\d{4})$/)
+        : null;
+    let date;
+
+    if (dayFirstDate) {
+      const day = Number(dayFirstDate[1]);
+      const month = Number(dayFirstDate[2]);
+      const year =
+        dayFirstDate[3].length === 2
+          ? 2000 + Number(dayFirstDate[3])
+          : Number(dayFirstDate[3]);
+      date = new Date(year, month - 1, day);
+
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month - 1 ||
+        date.getDate() !== day
+      ) {
+        return '';
+      }
+    } else {
+      date = new Date(dateString);
+    }
+
     if (isNaN(date)) return '';
 
     const day = String(date.getDate()).padStart(2, '0');
