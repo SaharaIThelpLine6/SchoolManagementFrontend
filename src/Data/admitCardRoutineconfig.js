@@ -5,12 +5,12 @@
 // মতোই আছে। এখানে শুধু নতুন জিনিসগুলো:
 //   • রুটিং টেমপ্লেট (ROUTINE_TEMPLATES)
 //   • রুটিনের টেবিলের কলাম (ROUTINE_COLUMNS)
-//   • হল কলাম/সারি থেকে আসন ছক (buildHallGrid, assignHallSeats)
+//   • শিক্ষকের সাজানো আসন (mapAllocatedSeats)
 //   • রুটিন কার্ডের প্রিন্ট লেআউট (ROUTINE_LAYOUTS)
 //   • এই পর্দার নিজের লেখা (ROUTINE_UI)
 //
 // কার্ডের উপরের অংশটা হুবহু প্রবেশপত্রই — AdmitCardFace ই আঁকে। তাই
-// "আগের সব ডাটা" এক ফোঁটাও বদলায় না; রুটিন ও আসন ছক নিচে যোগ হয়।
+// "আগের সব ডাটা" এক ফোঁটাও বদলায় না; রুটিন ও আসন নিচে যোগ হয়।
 // ---------------------------------------------------------------------------
 
 import {
@@ -24,7 +24,7 @@ import {
 
 // ---------------------------------------------------------------------------
 // কার্ডের মাপ
-// উপরের ৪১০px প্রবেশপত্র, নিচের অংশটা রুটিন ও আসন ছকের।
+// উপরের ৪১০px প্রবেশপত্র, নিচের অংশটা রুটিন ও আসনের।
 // ৫২০ × ৭৪০ ≈ A4 পোর্ট্রেট (০.৭০২৭ vs ০.৭০৭১) — তাই এক পৃষ্ঠায় সুন্দর বসে।
 // ---------------------------------------------------------------------------
 export const ROUTINE_CARD_W = CARD_W;              // ৫২০ — উপরের কার্ড scale ছাড়াই বসে
@@ -701,8 +701,8 @@ export const getRoutineCell = (row = {}, columnId, lang) => {
 // Exam_HallColumns  → এক হলের কলামগুলো (ColumnIndex, Label)
 // Exam_Hall_Rows    → প্রতি কলামের সারি (RowIndex, RowLabel, Seats)
 //
-// কোন শিক্ষার্থী কোন আসনে — এমন কোনো টেবিল নেই, তাই ভর্তি সিরিয়ালের
-// ক্রমেই কলাম → সারি → আসন ধরে ধরে বসানো হয়। ছকটা হুবহু হলের মতোই।
+// ⚠️ এই ছকটা এখন কেবল দেখানোর জন্য — "এই হলে কয়টা কলাম, মোট কত আসন"।
+// কে কোন আসনে তা আর এখান থেকে বের করা হয় না, সেটা সিট প্ল্যানের কাজ।
 // ---------------------------------------------------------------------------
 
 const toIndex = (v, fallback) => {
@@ -752,8 +752,15 @@ export const buildHallGrid = (payload = {}) => {
 };
 
 /**
- * শিক্ষার্থীদের ক্রম অনুযায়ী আসন বসায়।
- * ফেরত দেয় Map — key = AdmissionID, value = { columnLabel, rowLabel, seatNo }
+ * ⚠️ এই ফাংশনটা কার্ডে আর ব্যবহার হয় না।
+ *
+ * আগে হলের ছক ধরে ক্রমানুসারে আসন বসানো হতো, কিন্তু শিক্ষক সিট প্ল্যানে যা
+ * সাজান তার সাথে ওটা মিলত না — সবাই কলাম ১, সারি ১, আসন ১ থেকে শুরু হতো।
+ * এখন আসনের একমাত্র উৎস Exam_SitAllocation (নিচের mapAllocatedSeats)।
+ * বরাদ্দ না থাকলে আর অনুমান করা হয় না; কার্ডে সরাসরি "সিট প্ল্যান তৈরি করা
+ * হয়নি" লেখা বসে — ভুল আসন ছাপার চেয়ে কিছু না ছাপাই ভালো।
+ *
+ * অন্য কোনো পর্দায় import থাকতে পারে, তাই ফাংশনটা মুছে ফেলা হয়নি।
  */
 export const assignHallSeats = (students = [], grid = {}) => {
   const seats = new Map();
@@ -808,6 +815,60 @@ export const assignHallSeats = (students = [], grid = {}) => {
     }
     si += 1;
   }
+
+  return seats;
+};
+
+// ---------------------------------------------------------------------------
+// 👇 শিক্ষকের সাজানো আসন — Exam_SitAllocation
+//
+// কার্ডে আসনের একমাত্র উৎস। সার্ভার `seatAllocations` এ প্রতি শিক্ষার্থীর
+// হল, কলাম, সারি ও আসন নম্বর পাঠায় — এখানে শুধু কার্ডের সারির সাথে
+// মেলানো হয়, কোনো হিসাব হয় না।
+// ---------------------------------------------------------------------------
+
+/**
+ * UserCode মেলানোর জন্য স্বাভাবিক রূপ।
+ * DB তে UserCode int, কার্ডের সারিতে স্ট্রিং ('00135') আসতে পারে —
+ * দুইটাকে এক রূপে এনে তবেই মেলানো হয়, নইলে কোনো মিলই হতো না।
+ */
+const normalizeUserCode = (value) => {
+  if (value === null || value === undefined) return '';
+  const text = String(value).trim();
+  if (!text) return '';
+  const num = Number(text);
+  return Number.isFinite(num) ? String(num) : text;
+};
+
+/**
+ * বরাদ্দের তালিকা → কার্ডে বসানোর Map।
+ * key = AdmissionID, নইলে UserID, নইলে StudentCode।
+ * যার বরাদ্দ নেই তার জন্য Map এ কিছুই থাকে না — কার্ডে তখন বার্তা বসে।
+ */
+export const mapAllocatedSeats = (students = [], payload = {}) => {
+  const seats = new Map();
+  const list = Array.isArray(payload?.seatAllocations) ? payload.seatAllocations : [];
+  if (!list.length || !students.length) return seats;
+
+  const byCode = new Map();
+  list.forEach((a) => {
+    const code = normalizeUserCode(a?.UserCode ?? a?.userCode);
+    if (!code || byCode.has(code)) return;   // একই জনের একাধিক সারি হলে প্রথমটা
+    byCode.set(code, {
+      hallName: a.hallName || '',
+      columnLabel: a.columnLabel || (a.ColumnID != null ? String(a.ColumnID) : ''),
+      rowLabel: a.rowLabel || (a.RowID != null ? String(a.RowID) : ''),
+      seatNo: a.seatNo ?? a.SeatNum ?? null,
+    });
+  });
+
+  students.forEach((s) => {
+    const code = normalizeUserCode(s?.StudentCode ?? s?.UserCode);
+    const hit = code ? byCode.get(code) : null;
+    if (!hit) return;
+    const key = s?.AdmissionID ?? s?.UserID ?? s?.StudentCode;
+    if (key !== null && key !== undefined) seats.set(String(key), hit);
+  });
 
   return seats;
 };
@@ -934,6 +995,10 @@ export const ROUTINE_UI = {
     pickRoutineColText: 'রুটিনে অন্তত একটি কলাম রাখুন।',
     routinePreview: 'রুটিনসহ প্রিভিউ',
     routineActive: 'চালু',
+    // 👇 সিট প্ল্যান — আসন একমাত্র এখান থেকেই আসে
+    noSeatPlan: 'সিট প্ল্যান তৈরি করা হয়নি',
+    seatPlanReady: 'সিট প্ল্যান পাওয়া গেছে',
+    seatPlanRows: 'জনের আসন',
   },
   en: {
     routineTitle: 'Exam Routine',
@@ -962,6 +1027,9 @@ export const ROUTINE_UI = {
     pickRoutineColText: 'Keep at least one column on the routine.',
     routinePreview: 'Preview with routine',
     routineActive: 'On',
+    noSeatPlan: 'Seat plan not created yet',
+    seatPlanReady: 'Seat plan found',
+    seatPlanRows: 'students seated',
   },
   ar: {
     routineTitle: 'جدول الامتحان',
@@ -990,6 +1058,9 @@ export const ROUTINE_UI = {
     pickRoutineColText: 'اختر عموداً واحداً على الأقل للجدول.',
     routinePreview: 'معاينة مع الجدول',
     routineActive: 'مُفعّل',
+    noSeatPlan: 'لم يتم إنشاء مخطط الجلوس',
+    seatPlanReady: 'تم العثور على مخطط الجلوس',
+    seatPlanRows: 'طالباً لهم مقاعد',
   },
 };
 
@@ -1000,6 +1071,9 @@ export const getRoutineUIText = (key, lang) =>
 // প্রিভিউর ডামি ডাটা
 // ফিল্টার দেওয়ার আগেও সেটিং পপআপে রুটিন কার্ডটা কেমন দেখাবে তা দেখানো যায়।
 // আসল রুটিন এলে এগুলো আর ব্যবহার হয় না।
+//
+// ⚠️ আসনের কোনো ডামি নেই — ডামি আসন দেখালে প্রিভিউ দেখে মনে হতো সিট
+// প্ল্যান আছে। প্ল্যান না থাকলে প্রিভিউতেও বার্তাটাই বসে।
 // ---------------------------------------------------------------------------
 
 const DEMO_SUBJECTS = {
@@ -1033,32 +1107,6 @@ export const getRoutineDemoRows = (lang) => {
     SubjectNameEng: DEMO_SUBJECTS.en[i],
     SubjectNameAra: DEMO_SUBJECTS.ar[i],
   }));
-};
-
-/** ডামি আসন ছক — ৩ কলাম, প্রতি কলামে ৩ সারি, সারিতে ২টি আসন */
-export const ROUTINE_DEMO_GRID = {
-  hallId: null,
-  hallName: 'হল নং-১',
-  columns: [1, 2, 3].map((c) => ({
-    columnId: c,
-    index: c,
-    label: `কলাম-${c}`,
-    rows: [1, 2, 3].map((r) => ({
-      rowId: c * 10 + r,
-      index: r,
-      label: String(r),
-      seats: 2,
-    })),
-    seats: 6,
-  })),
-  totalSeats: 18,
-};
-
-export const ROUTINE_DEMO_SEAT = {
-  hallName: 'হল নং-১',
-  columnLabel: 'কলাম-১',
-  rowLabel: '2',
-  seatNo: 1,
 };
 
 // ---------------------------------------------------------------------------

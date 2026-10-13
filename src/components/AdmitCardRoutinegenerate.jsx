@@ -39,13 +39,14 @@ const chunk = (arr, size) => {
  *
  * কার্ডের উপরের ৪১০px হুবহু সাধারণ প্রবেশপত্র — AdmitCardFace ই আঁকে, তাই
  * আগের সব ডাটা, টেমপ্লেট, লোগো, ওয়াটারমার্ক, ছবি সব অপরিবর্তিত।
- * নিচে যোগ হয় পরীক্ষার রুটিন এবং হলের কলাম/সারি থেকে বানানো আসন ছক।
+ * নিচে যোগ হয় পরীক্ষার রুটিন এবং শিক্ষার্থীর আসন।
  *
  * @param templateId       প্রবেশপত্রের টেমপ্লেট (আগের মতোই)
  * @param routineTemplateId রুটিং টেমপ্লেট — 'r1'..'r5'
  * @param routine          normalizeRoutineRows() দিয়ে বানানো সারি
- * @param hallGrid         buildHallGrid() দিয়ে বানানো আসন ছক
- * @param seats            Map — AdmissionID → { columnLabel, rowLabel, seatNo }
+ * @param hallGrid         buildHallGrid() দিয়ে বানানো হলের ছক (শুধু ঐচ্ছিক ম্যাপের জন্য)
+ * @param seats            Map — AdmissionID → { hallName, columnLabel, rowLabel, seatNo }
+ *                         উৎস Exam_SitAllocation; যার বরাদ্দ নেই সে Map এ থাকে না
  * @param routineColumns   রুটিনের টেবিলে কোন কলামগুলো থাকবে
  * @param showSeatLine     কার্ডে শিক্ষার্থীর আসনের লাইন
  * @param showSeatMap      হলের আসন বিন্যাসের ছক
@@ -111,6 +112,16 @@ const AdmitCardRoutinegenerate = ({
         grayscale,
         prefix: 'routine',
       })}</style>
+      <style>{`
+        @media print {
+          .admit-print-root,
+          .admit-print-root * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+          }
+        }
+      `}</style>
 
       {pages.map((page, pageIndex) => (
         <div className="routine-page" key={`routine-page-${pageIndex}`}>
@@ -212,7 +223,7 @@ const SeatMap = ({ grid, rt, lang, title, rowWord, seatWord, maxHeight }) => {
  * পুরোটা একটাই বাক্স। AdmitCardFace কে cardHeight দিয়ে বলা হয় সে যেন
  * ৭৪০px জুড়েই আঁকে — তাতে ফ্রেম, ব্যাকগ্রাউন্ড, ওয়াটারমার্ক আর স্বাক্ষরের
  * সারি পুরো পৃষ্ঠা ঘিরে থাকে। bodyEnd দিয়ে বলা হয় তথ্যের ঘরটা কোথায় শেষ
- * হবে, আর ঠিক তার নিচের খালি জায়গাতেই রুটিন ও আসন ছক বসে।
+ * হবে, আর ঠিক তার নিচের খালি জায়গাতেই রুটিন ও আসন বসে।
  *
  * ফলে রুটিন ডিজাইনের বাইরে ঝোলে না — প্রবেশপত্রের ফ্রেমের ভিতরেই পড়ে।
  */
@@ -224,6 +235,8 @@ export const RoutineCardFace = ({
   student = {},
   routine = [],
   hallGrid = null,
+  // শিক্ষকের সাজানো আসন — Exam_SitAllocation থেকে। না থাকলে null,
+  // তখন ঘরটায় "সিট প্ল্যান তৈরি করা হয়নি" লেখা বসে।
   seat = null,
   routineColumns = DEFAULT_ROUTINE_COLUMNS,
   showSeatLine = true,
@@ -260,22 +273,6 @@ export const RoutineCardFace = ({
   );
   const dir = getAdmitDir(lang);
   const rui = (key) => getRoutineUIText(key, lang);
-
-  // // স্বাক্ষরের সারি আদৌ আঁকা হবে কি না — AdmitCardFace এর নিয়ম হুবহু একই,
-  // // কারণ ওই সারিটা কতটুকু জায়গা নেবে তার উপর রুটিনের ঘরের মাপ নির্ভর করে
-  // const signImageEnabled =
-  //   showSign === undefined ? Boolean(t.showSignature) : Boolean(showSign);
-  // const signNameEnabled =
-  //   showSignName === undefined ? Boolean(t.showSignature) : Boolean(showSignName);
-  // const signDateEnabled =
-  //   showSignDate === undefined ? t.showSignDate !== false : Boolean(showSignDate);
-  // const qrEnabled = showQR === undefined ? Boolean(t.showQR) : Boolean(showQR);
-
-  // const showSignRow =
-  //   signImageEnabled ||
-  //   signNameEnabled ||
-  //   signDateEnabled ||
-  //   Boolean(qrEnabled && buildAdmitQrValue(student, institutionCode));
 
   // স্বাক্ষরের সারি আদৌ আঁকা হবে কি না — AdmitCardFace এর নিয়ম হুবহু একই,
   // কারণ ওই সারিটা কতটুকু জায়গা নেবে তার উপর রুটিনের ঘরের মাপ নির্ভর করে।
@@ -334,15 +331,21 @@ export const RoutineCardFace = ({
 
   const routineRows = Array.isArray(routine) ? routine : [];
 
-  const seatText =
-    showSeatLine && seat
-      ? formatSeatLine(seat, lang, {
-          hall: rui('hall'),
-          column: rui('column'),
-          row: rui('row'),
-          seat: rui('seat'),
-        })
-      : '';
+  // ------------------------------------------------------------------ আসন
+  // বরাদ্দ (seat) না থাকলে ঘরটা লুকানো হয় না — বার্তা বসে, তাই ছাপা কাগজ
+  // হাতে নিয়েই বোঝা যায় সিট প্ল্যানটা এখনো করা হয়নি। কোনো অনুমান করা
+  // আসন এখানে কখনোই বসে না।
+  // "কার্ডে আসন দেখাও" টগল বন্ধ থাকলে অবশ্য কিছুই আঁকা হয় না, আগের মতোই।
+  const seatText = !showSeatLine
+    ? ''
+    : seat
+    ? formatSeatLine(seat, lang, {
+        hall: rui('hall'),
+        column: rui('column'),
+        row: rui('row'),
+        seat: rui('seat'),
+      })
+    : rui('noSeatPlan');
 
   const mapOn = showSeatMap && Boolean(hallGrid?.columns?.length);
 
@@ -407,6 +410,9 @@ export const RoutineCardFace = ({
     return 'none';
   };
 
+  // বরাদ্দ নেই — পট্টিটা তখন সতর্কতার চেহারায়, যাতে চোখ এড়িয়ে না যায়
+  const seatMissing = showSeatLine && !seat;
+
   return (
     <div
       className="relative overflow-hidden"
@@ -449,7 +455,7 @@ export const RoutineCardFace = ({
         bodyEnd={zones.bodyEnd}
       />
 
-      {/* --------------------- রুটিন ও আসন ছক — ঐ কার্ডেরই ভিতরের অংশ */}
+      {/* --------------------- রুটিন ও আসন — ঐ কার্ডেরই ভিতরের অংশ */}
       <div
         className="absolute"
         dir={dir}
@@ -598,20 +604,22 @@ export const RoutineCardFace = ({
           </div>
         )}
 
-        {/* শিক্ষার্থীর আসন */}
+        {/* শিক্ষার্থীর আসন — বরাদ্দ থাকলে আসনের লাইন, না থাকলে বার্তা */}
         {seatText ? (
           <div
             className="flex items-center justify-center rounded-[4px]"
             style={{
               marginTop: 6,
               height: seatLineH,
-              background: rt.seatBg,
-              border: `1px solid ${rt.gridColor}`,
+              background: seatMissing ? '#fffbeb' : rt.seatBg,
+              border: `1px ${seatMissing ? 'dashed' : 'solid'} ${
+                seatMissing ? '#d97706' : rt.gridColor
+              }`,
             }}
           >
             <p
               className="text-[11px] font-bold leading-none whitespace-nowrap"
-              style={{ color: rt.seatColor }}
+              style={{ color: seatMissing ? '#b45309' : rt.seatColor }}
             >
               {seatText}
             </p>

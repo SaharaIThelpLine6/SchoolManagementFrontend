@@ -26,7 +26,7 @@ import {
 } from '../features/settings/settingsQuerySlice';
 
 import AdmitCardGenerate, { AdmitCardFace } from '../components/AdmitCardGenerate';
-// রুটিংসহ টেমপ্লেট — প্রবেশপত্রের উপরের অংশ হুবহু রেখে নিচে রুটিন ও আসন ছক
+// রুটিংসহ টেমপ্লেট — প্রবেশপত্রের উপরের অংশ হুবহু রেখে নিচে রুটিন ও আসন
 import AdmitCardRoutinegenerate, { RoutineCardFace } from '../components/AdmitCardRoutinegenerate';
 import {
   ADMIT_FIELDS,
@@ -62,9 +62,7 @@ import {
   ROUTINE_COLUMNS,
   ROUTINE_CARD_TEMPLATES,
   ROUTINE_COLOR_PRESETS,
-  ROUTINE_DEMO_SEAT,
   ROUTINE_LAYOUTS,
-  assignHallSeats,
   buildHallGrid,
   formatSeatLine,
   getRoutineColumnLabel,
@@ -72,6 +70,7 @@ import {
   getRoutineLayoutLabel,
   getRoutineTemplate,
   getRoutineUIText,
+  mapAllocatedSeats,
   normalizeRoutineRows,
 } from '../Data/admitCardRoutineconfig';
 
@@ -246,16 +245,14 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   const [printOnly, setPrintOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // চারটা পপআপ
+  // দুইটা পপআপ
   // ফিল্টার আর পপআপে নেই — সেটা হেডারেই ইনলাইন বসে।
   // টেমপ্লেট নির্বাচন সেটিং পপআপের ভিতরে, নিজেই আরেকটা পপআপ হয়ে খোলে।
   const [showSetupModal, setShowSetupModal] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
 
   // ------------------------------------------------- রুটিংসহ টেমপ্লেট
-  // null = রুটিং বন্ধ, তখন আগের মতো সাধারণ প্রবেশপত্রই ছাপে।
-  // আইডি বসালে একই প্রবেশপত্রের নিচে রুটিন ও আসন ছক যোগ হয়।
-  // A5 = শুধু প্রবেশপত্র, A4 = রুটিনসহ। রুটিন চালু/বন্ধ এখন এই একটা
+  // A5 = শুধু প্রবেশপত্র, A4 = রুটিনসহ। রুটিন চালু/বন্ধ এই একটা
   // সুইচেই ঠিক হয় — আলাদা "রুটিং বন্ধ" বলে আর কিছু নেই।
   const [admitMode, setAdmitMode] = useState(DEFAULT_ADMIT_MODE);
   // A4 মোডের ডিজাইন — সম্পূর্ণ আলাদা তালিকা থেকে
@@ -368,7 +365,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   );
 
   // -------------------------------------------------------------------------
-  // রুটিন, হলের কলাম ও সারি — আলাদা রাউট।
+  // রুটিন, হলের ছক ও শিক্ষকের সাজানো আসন — আলাদা রাউট।
   // প্রবেশপত্রের মূল রাউটে একটা অক্ষরও বদলানো হয়নি; শিক্ষার্থীর সব ডাটা
   // আগের মতোই ওখান থেকেই আসে, এখান থেকে শুধু বাড়তি জিনিসগুলো।
   // -------------------------------------------------------------------------
@@ -379,18 +376,27 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   );
 
   const routineRows = useMemo(() => normalizeRoutineRows(routineData), [routineData]);
+  // হলের ছকটা এখন শুধু দেখানোর জন্য — কয়টা কলাম, মোট কত আসন
   const hallGrid = useMemo(() => buildHallGrid(routineData || {}), [routineData]);
 
-  // কে কোন আসনে — কলাম → সারি → আসন, ভর্তি সিরিয়ালের ক্রমেই।
-  // পুরো তালিকার উপর বসানো হয়, তাই কাকে সিলেক্ট করা হলো তার উপর
-  // আসন নম্বর নির্ভর করে না — একই শিক্ষার্থী সবসময় একই আসনই পায়।
+  // -------------------------------------------------------------------------
+  // কে কোন আসনে — একমাত্র উৎস শিক্ষকের সাজানো সিট প্ল্যান
+  // (Exam_SitAllocation)। কোনো অনুমান নেই: যার বরাদ্দ নেই তার জন্য Map এ
+  // কিছুই থাকে না, আর কার্ডে তখন "সিট প্ল্যান তৈরি করা হয়নি" লেখাটাই বসে।
+  //
+  // আগে হলের ছক ধরে ক্রমানুসারে বসানো হতো, তাই প্ল্যানে যে শিক্ষার্থী
+  // কলাম ৩ / সারি ৬ / আসন ২ তে ছিল, কার্ডে তার কলাম ১ / সারি ১ / আসন ১
+  // ছাপত — এখন সেই অনুমানটা পুরোপুরি বাদ।
+  // -------------------------------------------------------------------------
   const hallSeats = useMemo(
-    () => assignHallSeats(studentList, hallGrid),
-    [studentList, hallGrid]
+    () => mapAllocatedSeats(studentList, routineData),
+    [studentList, routineData]
   );
 
   // আসনের এক লাইনের লেখা — A4 তে রুটিনের ঘরে, A5 তে QR এর উপরে।
   // দুই জায়গাতেই হুবহু একই লেখা, তাই এক জায়গাতেই বানিয়ে রাখি।
+  // বরাদ্দ না থাকলেও ঘরটা ফাঁকা যায় না — বার্তাটা বসে, তাই প্রিন্ট হাতে
+  // নিয়েই বোঝা যায় প্ল্যানটা এখনো করা হয়নি।
   const seatTexts = useMemo(() => {
     const out = new Map();
     const words = {
@@ -399,26 +405,36 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
       row: getRoutineUIText('row', lang),
       seat: getRoutineUIText('seat', lang),
     };
-    hallSeats.forEach((seat, key) => out.set(key, formatSeatLine(seat, lang, words)));
+    const none = getRoutineUIText('noSeatPlan', lang);
+
+    studentList.forEach((s) => {
+      const key = String(s.AdmissionID ?? s.UserID ?? s.StudentCode);
+      const seat = hallSeats.get(key);
+      out.set(key, seat ? formatSeatLine(seat, lang, words) : none);
+    });
+
     return out;
-  }, [hallSeats, lang]);
+  }, [studentList, hallSeats, lang]);
 
   // প্রিভিউতে আসল রুটিন থাকলে সেটাই, না থাকলে ডামি — তাই ফিল্টার দেওয়ার
   // আগেও সেটিং পপআপে কার্ডটা কেমন দেখাবে তা বোঝা যায়
   const previewRoutine = routineRows.length ? routineRows : getRoutineDemoRows(lang);
-  const previewSeat =
-    (hallGrid.columns.length ? hallSeats.values().next().value : null) ||
-    ROUTINE_DEMO_SEAT;
+
+  // আসনের বেলায় ডামি নেই — প্ল্যানে প্রথম যে আসনটা আছে সেটাই দেখাই,
+  // না থাকলে বার্তা। ডামি আসন দেখালে প্রিভিউ দেখে মনে হতো প্ল্যান আছে।
+  const previewSeat = hallSeats.values().next().value || null;
 
   // প্রিভিউতে আসনের লাইনটা কেমন দেখাবে — A5 আর A4 দুই জায়গাতেই একই লেখা
   const previewSeatText = useMemo(
     () =>
-      formatSeatLine(previewSeat, lang, {
-        hall: getRoutineUIText('hall', lang),
-        column: getRoutineUIText('column', lang),
-        row: getRoutineUIText('row', lang),
-        seat: getRoutineUIText('seat', lang),
-      }),
+      previewSeat
+        ? formatSeatLine(previewSeat, lang, {
+            hall: getRoutineUIText('hall', lang),
+            column: getRoutineUIText('column', lang),
+            row: getRoutineUIText('row', lang),
+            seat: getRoutineUIText('seat', lang),
+          })
+        : getRoutineUIText('noSeatPlan', lang),
     [previewSeat, lang]
   );
 
@@ -937,17 +953,10 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
         {/* ================================================== হেডার
             তিন ভাগ — বাঁয়ে টেমপ্লেট ও রুটিংয়ের ড্রপডাউন, মাঝে শিরোনাম,
             ডানে ভাষা ও সেটিং। দুই পাশের ঘরেই flex-1 দেওয়া, তাই শিরোনামটা
-            ঠিক মাঝখানেই বসে — দুই পাশের বোতামের চওড়া সমান না হলেও।
-
-            বাঁ দিকের দুইটা বোতাম আরও পরিষ্কার করা হয়েছে:
-            - টেমপ্লেট বোতামে ছোট লেবেল "টেমপ্লেট সিলেক্ট", থাম্বনেইল,
-              নাম এবং নিচমুখী তীরচিহ্ন — ড্রপডাউন বোঝায়।
-            - রুটিং বোতামে রুট আইকন, লেবেল "টেমপ্লেট রুটিং সিলেক্ট",
-              নাম এবং "আপকামিং" ব্যাজ — ড্যাশড বর্ডারে তাই "এখনো তৈরি হয়নি"
-              প্রথম দেখাতেই স্পষ্ট। */}
+            ঠিক মাঝখানেই বসে — দুই পাশের বোতামের চওড়া সমান না হলেও। */}
         <div className="mb-4 pb-4 border-b border-gray-200">
           <div className="flex items-center gap-3 flex-wrap">
-            {/* বাঁ পাশ — টেমপ্লেট ও রুটিং, দুইটারই উপরে ছোট লেবেল */}
+            {/* বাঁ পাশ — টেমপ্লেট ও মোড, দুইটারই উপরে ছোট লেবেল */}
             <div className="flex flex-1 min-w-0 items-center gap-2 flex-wrap">
               {/* ----------------------------------------------------------
                   টেমপ্লেট নির্বাচন — ক্লিক করলে টেমপ্লেটের তালিকা খোলে
@@ -1074,9 +1083,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
 
         {/* ===================================== ফিল্টার — এক লাইনে আটটা ঘর
             ছয়টা ফিল্টারের ঘর, তারপর প্রিভিউ ও প্রিন্ট — মোট আটটা।
-            আগে উপরে আলাদা একটা সারি ছিল ("ফিল্টার" শিরোনাম + বোতাম +
-            "ফিল্টার মুছুন")। ওই সারিটা পুরোটা উঠে গেছে — ঘর বদলালেই তালিকা
-            নিজে থেকে আসে, তাই আলাদা প্রয়োগ বা মোছার বোতাম লাগে না।
+            ঘর বদলালেই তালিকা নিজে থেকে আসে, তাই আলাদা প্রয়োগ বা মোছার
+            বোতাম লাগে না।
 
             items-end — ঘরগুলোর উপরে লেবেল বসে, তাই নিচের কিনারা মিলিয়ে
             রাখলে বোতাম দুইটা ইনপুটের সাথে এক লাইনে দেখায়। */}
@@ -1313,9 +1321,9 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
           {/* grayscale সবসময় false — কালার নির্বাচন বাদ দেওয়া হয়েছে,
               প্রবেশপত্র এখন সবসময় রঙিনই ছাপে।
 
-              রুটিং টেমপ্লেট বাছা থাকলে রুটিনসহ কার্ড ছাপে — ভিতরের উপরের
-              অংশটা হুবহু এই প্রবেশপত্রই, নিচে রুটিন ও আসন ছক যোগ হয়।
-              বন্ধ থাকলে একদম আগের মতোই সাধারণ প্রবেশপত্র। */}
+              A4 মোডে রুটিনসহ কার্ড ছাপে — ভিতরের উপরের অংশটা হুবহু এই
+              প্রবেশপত্রই, নিচে রুটিন ও আসন যোগ হয়। A5 তে একদম আগের
+              মতোই সাধারণ প্রবেশপত্র। */}
           {routineOn ? (
             <AdmitCardRoutinegenerate
               routineTemplateId={routeTemplate}
@@ -1549,7 +1557,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 ))}
               </div>
 
-              {/* ------------------------------------------------- তিনটা ঘর */}
+              {/* ------------------------------------------------- দুইটা ঘর */}
               {/* নিচের সারি — ডিজাইন আর কাগজের ধরণ, পাশাপাশি।
                   items-start দেওয়া, নইলে গ্রিড দুইটা ঘরকেই সমান লম্বা
                   করে দিত আর ছোট ঘরটার নিচে অনেক ফাঁকা পড়ে থাকত। */}
@@ -1650,7 +1658,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
           </div>
 
           {/* ================================================== ডান পাশ
-              শুধু ডাটার সেটিং — কী দেখাবে, কোন ফিল্ড, আর রুটিং। */}
+              শুধু ডাটার সেটিং — কী দেখাবে, কোন ফিল্ড, আর রুটিন। */}
           <div className="min-w-0">
             {/* কী কী দেখাবে */}
             <p className="font-bold text-[16px] mb-2">{ui('displaySettings')}</p>
@@ -1670,6 +1678,24 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 </label>
               ))}
             </div>
+
+            {/* ------- আসনের অবস্থা — সিট প্ল্যান আদৌ করা হয়েছে কি না
+                "কার্ডে আসন দেখাও" চালু রেখে প্রিন্ট দিলে কী ছাপবে, সেটা
+                আগেই এখানে দেখা যায় — বরাদ্দ না থাকলে কার্ডে বার্তা বসবে। */}
+            {seatEnabled ? (
+              <p
+                className="mt-2 text-[12px]"
+                style={{ color: hallSeats.size ? '#15803d' : '#b45309' }}
+              >
+                {routineFetching
+                  ? ui('loading')
+                  : hallSeats.size
+                  ? `${rui('seatPlanReady')} — ${toLangDigit(hallSeats.size, lang)} ${rui(
+                      'seatPlanRows'
+                    )}`
+                  : rui('noSeatPlan')}
+              </p>
+            ) : null}
 
             {/* ---------------- বাঁ পাশের স্বাক্ষর (নায়েম) ----------------
                 তিনটি অংশ আলাদাভাবে বন্ধ/চালু, আর নিচে নাম ইনপুট —
@@ -1764,10 +1790,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               })}
             </div>
 
-            {/* ======================= একদম নিচে — ঐচ্ছিক রুটিং সেটআপ
-                হেডারের বোতামের মতো এখানেও আলাদা করে রুটিং টেমপ্লেট বাছা যায়।
-                দুইটাই একই তালিকা খোলে, তাই যেখান থেকেই বাছুন ফল একই।
-                বন্ধ থাকলে নিচের ঘরগুলো দেখায় না — অযথা ভিড় বাড়ে না। */}
             {/* ====================================== রুটিনের সেটিং
                 শুধু A4 মোডে দেখায়। ডিজাইনটা আর এখানে বাছা হয় না —
                 উপরের "টেমপ্লেট সিলেক্ট" ই A4 এর তালিকা খোলে।
@@ -1815,7 +1837,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                   })}
                 </div>
 
-                {/* ডাটার অবস্থা — রুটিন আসলেই পাওয়া গেছে কি না */}
+                {/* ডাটার অবস্থা — রুটিন, হল ও সিট প্ল্যান তিনটাই এক নজরে */}
                 <div className="mt-5 rounded-[8px] border border-gray-200 bg-gray-50 px-3 py-2">
                   <p className="text-[13px] text-gray-700">
                     {routineFetching
@@ -1837,6 +1859,20 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                           lang
                         )}`
                       : rui('noHall')}
+                  </p>
+                  {/* আসন — একমাত্র উৎস শিক্ষকের সাজানো সিট প্ল্যান */}
+                  <p
+                    className="text-[12px] mt-0.5"
+                    style={{ color: hallSeats.size ? '#15803d' : '#b45309' }}
+                  >
+                    {routineFetching
+                      ? ui('loading')
+                      : hallSeats.size
+                      ? `${rui('seatPlanReady')} — ${toLangDigit(
+                          hallSeats.size,
+                          lang
+                        )} ${rui('seatPlanRows')}`
+                      : rui('noSeatPlan')}
                   </p>
                 </div>
               </>
@@ -1973,6 +2009,9 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
  * কার্ডটা ৫২০ × ৭৪০ — তাই উচ্চতা ধরে scale করা হয়, নইলে ঘরটা অনেক লম্বা
  * হয়ে যেত। ভিতরে আসল RoutineCardFace ই বসে, তাই থাম্বনেইলে যা দেখা যায়
  * প্রিন্টেও হুবহু সেটাই আসে।
+ *
+ * seat = null হলে RoutineCardFace নিজেই "সিট প্ল্যান তৈরি করা হয়নি"
+ * লিখে দেয় — এখানে কোনো ডামি আসন বসানো হয় না।
  */
 const RoutineThumb = ({
   template,
