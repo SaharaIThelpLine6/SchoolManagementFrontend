@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FormProvider, useFieldArray, useForm } from "react-hook-form";
 import useTranslate from "../../../utils/Translate";
 import DefaultInput from "../../../components/Forms/DefaultInput";
@@ -6,26 +6,68 @@ import {
     useGetInstitutionInfoQuery,
     useGetAllStudentDataExportTemplatesQuery,
     useCreateStudentDataExportTemplateMutation,
+    useUpdateStudentDataExportTemplateMutation,
     useDeleteStudentDataExportTemplateMutation,
     useDeleteAllStudentDataExportTemplatesMutation,
+    useGetStudentDataExportTemplateByKeyQuery,
 } from "../../../features/settings/settingsQuerySlice";
 import { toast } from "react-toastify";
 import Swal from 'sweetalert2';
 import { useGetLabelNameListsQuery } from "../../../features/result/resultSilce";
 
+/* ============================================================
+   ✅ LIMITS
+============================================================ */
+const MAX_TOTAL_COLUMNS = 10;
+const MIN_COL_SIZE = 5;
+const MAX_COL_SIZE = 40;
+const DEFAULT_COL_SIZE = 12;
 
-
+const CUSTOM_SIZE_SEP = "::";
+const parseCustomColumn = (colId) => {
+    const raw = String(colId).replace(/^custom_/, "");
+    const idx = raw.lastIndexOf(CUSTOM_SIZE_SEP);
+    if (idx === -1) return { label: raw, size: null };
+    const label = raw.slice(0, idx);
+    const size = parseFloat(raw.slice(idx + CUSTOM_SIZE_SEP.length));
+    return { label, size: Number.isFinite(size) && size > 0 ? size : null };
+};
 
 export default function DataExportModel({ dataExport }) {
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
     const userData = dataExport?.data;
     const methods = useForm();
-    const { handleSubmit, control, reset } = methods;
+    const { handleSubmit, control, reset, register, setValue, getValues } = methods;
     const translate = useTranslate();
     const { data } = useGetLabelNameListsQuery();
 
+    /* ============================================================
+       ✅ EDIT STATE
+    ============================================================ */
+    const [editingTemplateKey, setEditingTemplateKey] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
 
-    // ✅ allColumns
+    /* ============================================================
+       ✅ Populate Guard — একই key এ বারবার populate হবে না
+    ============================================================ */
+    const populatedKeyRef = useRef(null);
+
+    /* ============================================================
+       ✅ GET SINGLE — only when editing
+    ============================================================ */
+    const {
+        data: singleTemplateData,
+        isLoading: isLoadingSingleTemplate,
+        isFetching: isFetchingSingleTemplate,
+        isError: isErrorSingleTemplate,
+        error: singleTemplateError,
+    } = useGetStudentDataExportTemplateByKeyQuery(editingTemplateKey, {
+        skip: !editingTemplateKey,
+    });
+
+    /* ============================================================
+       ✅ allColumns
+    ============================================================ */
     const allColumns = [
         { id: 'logo', label: 'Logo', field: 'logo', type: 'image' },
         { id: 'ID', label: `${data?.[0]?.StudentIDLabel ? data?.[0]?.StudentIDLabel : "ID"}`, field: 'StudentCode' },
@@ -69,9 +111,11 @@ export default function DataExportModel({ dataExport }) {
         refetch: refetchTemplates,
     } = useGetAllStudentDataExportTemplatesQuery();
 
-
     const [createTemplate, { isLoading: isCreating }] =
         useCreateStudentDataExportTemplateMutation();
+
+    const [updateTemplate, { isLoading: isUpdating }] =
+        useUpdateStudentDataExportTemplateMutation();
 
     const [deleteTemplate, { isLoading: isDeleting }] =
         useDeleteStudentDataExportTemplateMutation();
@@ -81,44 +125,179 @@ export default function DataExportModel({ dataExport }) {
 
     const reports = templatesData?.data || [];
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove, replace } = useFieldArray({
         control,
         name: "column",
     });
 
     /* ============================================================
-       ✅ Checkbox handlers
+       ✅ Column limits
     ============================================================ */
-    const handleColumnToggle = (colId) => {
-        setSelectedColumns((prev) =>
-            prev.includes(colId)
-                ? prev.filter((id) => id !== colId)
-                : [...prev, colId]
-        );
-    };
+    const totalColumns = selectedColumns.length + fields.length;
+    const limitReached = totalColumns >= MAX_TOTAL_COLUMNS;
+    const remainingColumns = Math.max(MAX_TOTAL_COLUMNS - totalColumns, 0);
 
-    const handleSelectAll = () => {
-        if (selectedColumns.length === allColumns.length) {
-            setSelectedColumns([]);
-            toast.info(translate("All columns deselected"));
-        } else {
-            setSelectedColumns(allColumns.map((col) => col.id));
-            toast.success(translate("All columns selected"));
-        }
+    /* ============================================================
+       ✅ Populate form from template
+    ============================================================ */
+    const populateFormFromTemplate = (template) => {
+        const report = template?.FieldValue || template || {};
+        const selected = Array.isArray(report?.selectedColumns) ? report.selectedColumns : [];
+
+        // ✅ ReportName
+        setValue("ReportName", report?.ReportName || "", { shouldValidate: false });
+
+        const customCols = [];
+        const predefinedCols = [];
+
+        selected.forEach((id) => {
+            if (typeof id === "string" && id.startsWith("custom_")) {
+                const { label, size } = parseCustomColumn(id);
+                customCols.push({
+                    text: label,                          // ✅ raw label (custom_ ছাড়া)
+                    size: size ?? DEFAULT_COL_SIZE,
+                });
+            } else {
+                predefinedCols.push(id);
+            }
+        });
+
+        setSelectedColumns(predefinedCols);
+
+        // ✅ replace দিয়ে column fields reset
+        replace(customCols);
+
+        // ✅ প্রতিটি custom column এর text ও size manually set (safety)
+        setTimeout(() => {
+            customCols.forEach((c, idx) => {
+                setValue(`column.${idx}.text`, c.text, { shouldValidate: false });
+                setValue(`column.${idx}.size`, c.size, { shouldValidate: false });
+            });
+        }, 0);
     };
 
     /* ============================================================
-       ✅ Delete single — FieldKey দিয়ে
+       ✅ useEffect — Edit mode এ form auto-populate
     ============================================================ */
-    const handleRemoveReport = async (fieldKey) => {
-        console.log("🗑️ handleRemoveReport — fieldKey:", fieldKey);
+    useEffect(() => {
+        if (!isEditMode || !editingTemplateKey) return;
+        if (isLoadingSingleTemplate || isFetchingSingleTemplate) return;
 
+        if (isErrorSingleTemplate) {
+            toast.error(singleTemplateError?.data?.error || translate("Failed to load template"));
+            setEditingTemplateKey(null);
+            setIsEditMode(false);
+            populatedKeyRef.current = null;
+            return;
+        }
+
+        // ✅ একই key তে দ্বিতীয়বার populate হবে না
+        if (populatedKeyRef.current === editingTemplateKey) return;
+
+        const template = singleTemplateData?.data;
+        let source = template;
+
+        if (!source) {
+            source = reports.find((r) => r.FieldKey === editingTemplateKey);
+        }
+
+        if (source) {
+            populateFormFromTemplate(source);
+            populatedKeyRef.current = editingTemplateKey;
+        }
+    }, [
+        isEditMode,
+        editingTemplateKey,
+        singleTemplateData,
+        isLoadingSingleTemplate,
+        isFetchingSingleTemplate,
+        isErrorSingleTemplate,
+    ]);
+
+    /* ============================================================
+       ✅ Checkbox handlers
+    ============================================================ */
+    const handleColumnToggle = (colId) => {
+        const isChecked = selectedColumns.includes(colId);
+
+        if (!isChecked && limitReached) {
+            toast.warning(
+                `সর্বোচ্চ ${MAX_TOTAL_COLUMNS}টি কলাম নেওয়া যাবে (নির্বাচিত + নতুন কলাম মিলিয়ে)।`
+            );
+            return;
+        }
+
+        setSelectedColumns((prev) =>
+            isChecked ? prev.filter((id) => id !== colId) : [...prev, colId]
+        );
+    };
+
+    const handleDeselectAll = () => {
+        if (selectedColumns.length === 0) return;
+        setSelectedColumns([]);
+        toast.info(translate("All columns deselected"));
+    };
+
+    /* ============================================================
+       ✅ Add new custom column
+    ============================================================ */
+    const handleAddCustomColumn = () => {
+        if (limitReached) {
+            toast.warning(
+                `সর্বোচ্চ ${MAX_TOTAL_COLUMNS}টি কলাম নেওয়া যাবে (নির্বাচিত + নতুন কলাম মিলিয়ে)।`
+            );
+            return;
+        }
+        append({ text: "", size: DEFAULT_COL_SIZE });
+        toast.success(translate("New column added"));
+    };
+
+    /* ============================================================
+       ✅ handleEditReport
+    ============================================================ */
+    const handleEditReport = (fieldKey) => {
         if (!fieldKey) {
             toast.error(translate("Invalid template"));
             return;
         }
 
-        // ✅ SweetAlert2 Confirm
+        if (editingTemplateKey === fieldKey && isEditMode) {
+            toast.info(translate("Already editing this report"));
+            return;
+        }
+
+        // ✅ নতুন key তে populate হবে
+        populatedKeyRef.current = null;
+        setEditingTemplateKey(fieldKey);
+        setIsEditMode(true);
+
+        setTimeout(() => {
+            const formEl = document.querySelector("form");
+            if (formEl) formEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 150);
+    };
+
+    /* ============================================================
+       ✅ Cancel Edit
+    ============================================================ */
+    const handleCancelEdit = () => {
+        setEditingTemplateKey(null);
+        setIsEditMode(false);
+        populatedKeyRef.current = null;
+        reset({ ReportName: "", column: [] });
+        setSelectedColumns([]);
+        toast.info(translate("Edit cancelled"));
+    };
+
+    /* ============================================================
+       ✅ Delete single
+    ============================================================ */
+    const handleRemoveReport = async (fieldKey) => {
+        if (!fieldKey) {
+            toast.error(translate("Invalid template"));
+            return;
+        }
+
         const result = await Swal.fire({
             title: translate('Are you sure?'),
             text: translate("This report will be permanently deleted."),
@@ -129,25 +308,20 @@ export default function DataExportModel({ dataExport }) {
             confirmButtonText: translate('Yes, remove'),
             cancelButtonText: translate('Cancel'),
             reverseButtons: true,
-            heightAuto: false,           // 👈 modal এর সাথে conflict এড়াতে
-            target: document.body,       // 👈 modal এর বাইরে render
-            didOpen: () => {
-                document.body.style.overflow = 'hidden';
-            },
-            willClose: () => {
-                document.body.style.overflow = '';
-            },
+            heightAuto: false,
+            target: document.body,
+            didOpen: () => { document.body.style.overflow = 'hidden'; },
+            willClose: () => { document.body.style.overflow = ''; },
         });
 
         if (!result.isConfirmed) return;
 
-        // ✅ এখন delete করুন
         try {
-            const res = await deleteTemplate(fieldKey).unwrap();
-            console.log("✅ Deleted:", res);
+            await deleteTemplate(fieldKey).unwrap();
             toast.success(translate("Report removed"));
+
+            if (editingTemplateKey === fieldKey) handleCancelEdit();
         } catch (err) {
-            console.error("❌ Delete error:", err);
             toast.error(err?.data?.error || translate("Failed to delete report"));
         }
     };
@@ -155,9 +329,8 @@ export default function DataExportModel({ dataExport }) {
     /* ============================================================
        ✅ Clear all
     ============================================================ */
-
     const handleClearAllReports = async (e) => {
-        e?.stopPropagation(); // 👈 এইটা add করুন
+        e?.stopPropagation();
 
         if (reports.length === 0) {
             toast.info(translate("No reports to clear"));
@@ -174,13 +347,8 @@ export default function DataExportModel({ dataExport }) {
             confirmButtonText: translate('Yes, clear all'),
             cancelButtonText: translate('Cancel'),
             reverseButtons: true,
-            // 👇 এই line important — SweetAlert2 কে সবচেয়ে উপরে render করবে
-            didOpen: () => {
-                document.body.style.overflow = 'hidden';
-            },
-            willClose: () => {
-                document.body.style.overflow = '';
-            },
+            didOpen: () => { document.body.style.overflow = 'hidden'; },
+            willClose: () => { document.body.style.overflow = ''; },
         });
 
         if (!result.isConfirmed) return;
@@ -188,16 +356,17 @@ export default function DataExportModel({ dataExport }) {
         try {
             const res = await deleteAllTemplates().unwrap();
             toast.success(`${translate("All reports cleared")} — ${res.deletedCount || 0}`);
+            handleCancelEdit();
         } catch (err) {
             toast.error(err?.data?.error || translate("Failed to clear all"));
         }
     };
 
     /* ============================================================
-       ✅ Submit
+       ✅ Submit — CREATE or UPDATE
     ============================================================ */
     const onSubmit = async (data) => {
-        if (selectedColumns.length === 0) {
+        if (selectedColumns.length === 0 && (data.column || []).length === 0) {
             toast.error(translate("Please select at least one column"));
             return;
         }
@@ -207,24 +376,73 @@ export default function DataExportModel({ dataExport }) {
             return;
         }
 
-        const customColumnIds = (data.column || [])
-            .filter((c) => c.text)
-            .map((c) => `custom_${c.text}`);
+        const customCols = (data.column || [])
+            .map((c) => ({
+                text: (c?.text || "").trim().replace(/::/g, ":"),
+                size: Number(c?.size),
+            }))
+            .filter((c) => c.text);
 
-        const payload = {
+        if (selectedColumns.length + customCols.length > MAX_TOTAL_COLUMNS) {
+            toast.error(
+                `সর্বোচ্চ ${MAX_TOTAL_COLUMNS}টি কলাম নেওয়া যাবে (নির্বাচিত + নতুন কলাম মিলিয়ে)।`
+            );
+            return;
+        }
+
+        const badSize = customCols.find(
+            (c) => !Number.isFinite(c.size) || c.size < MIN_COL_SIZE || c.size > MAX_COL_SIZE
+        );
+        if (badSize) {
+            toast.error(
+                `"${badSize.text}" কলামের Size ${MIN_COL_SIZE} থেকে ${MAX_COL_SIZE} (%) এর মধ্যে দিন।`
+            );
+            return;
+        }
+
+        const seen = new Set();
+        for (const c of customCols) {
+            const key = c.text.toLowerCase();
+            if (seen.has(key)) {
+                toast.error(`"${c.text}" নামে একাধিক নতুন কলাম আছে। আলাদা নাম দিন।`);
+                return;
+            }
+            seen.add(key);
+        }
+
+        const customColumnIds = customCols.map(
+            (c) => `custom_${c.text}${CUSTOM_SIZE_SEP}${c.size}`
+        );
+
+        const body = {
             ReportName: data.ReportName.trim(),
             selectedColumns: [...selectedColumns, ...customColumnIds],
         };
 
-        console.log("📤 Payload:", payload);
-
         try {
-            const res = await createTemplate(payload).unwrap();
-            toast.success(
-                `${translate("Report saved")} — ${res?.data?.FieldValue?.ReportName || ""}`
-            );
+            if (isEditMode && editingTemplateKey) {
+                const res = await updateTemplate({
+                    fieldKey: editingTemplateKey,
+                    ...body,
+                }).unwrap();
+
+                toast.success(
+                    `${translate("Report updated")} — ${res?.data?.FieldValue?.ReportName || body.ReportName}`
+                );
+
+                setEditingTemplateKey(null);
+                setIsEditMode(false);
+                populatedKeyRef.current = null;
+            } else {
+                const res = await createTemplate(body).unwrap();
+                toast.success(
+                    `${translate("Report saved")} — ${res?.data?.FieldValue?.ReportName || ""}`
+                );
+            }
+
             reset({ ReportName: "", column: [] });
             setSelectedColumns([]);
+            refetchTemplates();
         } catch (err) {
             console.error("Save error:", err);
             toast.error(err?.data?.error || translate("Failed to save report"));
@@ -239,8 +457,8 @@ export default function DataExportModel({ dataExport }) {
         return selected
             .map((id) => {
                 if (typeof id === "string" && id.startsWith("custom_")) {
-                    const label = id.replace(/^custom_/, "");
-                    return { id, name: label, label, field: label, size: null, type: "text", isCustom: true };
+                    const { label, size } = parseCustomColumn(id);
+                    return { id, name: label, label, field: label, size, type: "text", isCustom: true };
                 }
                 const base = allColumns.find((c) => c.id === id);
                 if (!base) return null;
@@ -264,16 +482,79 @@ export default function DataExportModel({ dataExport }) {
         });
     };
 
+    const isSaving = isCreating || isUpdating;
+
+    /* ============================================================
+       ✅ Loading state — edit mode + fetching
+    ============================================================ */
+    const isEditLoading =
+        isEditMode && (isLoadingSingleTemplate || isFetchingSingleTemplate);
+
     return (
         <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {/* ============================================================
+                ✅ FULL MODAL BLOCK during edit fetch
+            ============================================================ */}
+            {isEditLoading && (
+                <div
+                    className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-center justify-center"
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                >
+                    <div className="bg-white rounded-xl px-8 py-6 shadow-2xl flex flex-col items-center gap-3">
+                        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <p className="text-gray-700 font-semibold text-sm">
+                            {translate("Loading template...")}
+                        </p>
+                        <p className="text-gray-400 text-xs">
+                            {translate("Please wait")}
+                        </p>
+                    </div>
+                </div>
+            )}
+
+            {/* ============================================================
+                ✅ Edit mode indicator bar (fixed top)
+            ============================================================ */}
+            {isEditMode && !isEditLoading && (
+                <div className="fixed top-0 left-0 right-0 z-[9998] bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2 shadow-lg flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm font-semibold">
+                        <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                        {translate("Edit Mode Active")} — {translate("Only the form below is editable")}
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        className="text-xs font-semibold px-3 py-1 rounded-lg bg-white/20 hover:bg-white/30 transition"
+                    >
+                        {translate("Exit Edit")}
+                    </button>
+                </div>
+            )}
+
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className={`space-y-4 ${isEditMode && !isEditLoading ? "pt-12" : ""}`}
+            >
                 {/* ============================================================
                     ✅ FORM SECTION
                 ============================================================ */}
-                <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3">
+                <div className={`rounded-xl border bg-white shadow-sm overflow-hidden ${isEditMode ? "border-amber-400 ring-2 ring-amber-200" : "border-gray-200"
+                    }`}>
+                    <div className={`px-5 py-3 ${isEditMode
+                            ? "bg-gradient-to-r from-amber-500 to-orange-500"
+                            : "bg-gradient-to-r from-blue-600 to-indigo-600"
+                        }`}>
                         <h3 className="text-white font-bold text-base flex items-center gap-2">
-                            {translate("Data Export Configuration")}
+                            {isEditMode
+                                ? translate("Edit Data Export Configuration")
+                                : translate("Data Export Configuration")}
+                            {isEditMode && (
+                                <span className="ml-2 px-2 py-0.5 text-xs font-semibold bg-white/20 rounded-full">
+                                    {translate("Editing")}
+                                </span>
+                            )}
                         </h3>
                     </div>
 
@@ -285,83 +566,41 @@ export default function DataExportModel({ dataExport }) {
                             showError
                         />
 
-                        {/* ✅ Select Columns */}
-                        <div>
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-1 h-5 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></div>
-                                    <label className="font-bold text-gray-800 text-sm">
-                                        {translate("Select Columns")}
-                                    </label>
-                                    <span className="ml-1 px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">
-                                        {selectedColumns.length} / {allColumns.length}
-                                    </span>
-                                </div>
-
-                                <button
-                                    type="button"
-                                    onClick={handleSelectAll}
-                                    className={`text-xs font-semibold px-3 py-1.5 rounded-lg border ${selectedColumns.length === allColumns.length
-                                        ? "bg-red-50 text-red-600 border-red-200"
-                                        : "bg-blue-50 text-blue-600 border-blue-200"
-                                        }`}
-                                >
-                                    {selectedColumns.length === allColumns.length
-                                        ? translate("Deselect All")
-                                        : translate("Select All")}
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 p-4 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-blue-50/30 shadow-sm max-h-[420px] overflow-y-auto">
-                                {allColumns.map((col) => {
-                                    const isChecked = selectedColumns.includes(col.id);
-                                    return (
-                                        <label
-                                            key={col.id}
-                                            className={`group flex items-center gap-2.5 cursor-pointer px-3 py-2 rounded-lg border ${isChecked
-                                                ? "bg-blue-50 border-blue-400 ring-1 ring-blue-200"
-                                                : "bg-white border-gray-200 hover:border-blue-300"
-                                                }`}
-                                        >
-                                            <input
-                                                type="checkbox"
-                                                value={col.id}
-                                                checked={isChecked}
-                                                onChange={() => handleColumnToggle(col.id)}
-                                                className="w-4 h-4 accent-blue-600"
-                                            />
-                                            <span className={`text-sm truncate ${isChecked ? "text-blue-800 font-semibold" : "text-gray-700"
-                                                }`}>
-                                                {translate(col.label)}
-                                            </span>
-                                        </label>
-                                    );
-                                })}
-                            </div>
-                        </div>
-
                         {/* ✅ Add New Column */}
                         <div>
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="w-1 h-5 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full"></div>
-                                <label className="font-bold text-gray-800 text-sm">
-                                    {translate("Add New Column")}
-                                </label>
-                                <span className="ml-1 px-2 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded-full">
-                                    {fields.length}
-                                </span>
-                            </div>
-
                             <div className="space-y-2">
                                 {fields.map((field, index) => (
-                                    <div key={field.id} className="flex gap-2 items-center p-2.5 rounded-lg border border-gray-200 bg-gray-50/60">
+                                    <div
+                                        key={field.id}
+                                        className="flex gap-2 items-center p-2.5 rounded-lg border border-gray-200 bg-gray-50/60"
+                                    >
                                         <div className="flex w-full gap-2.5 items-end">
                                             <div className="flex-1">
+                                                {/* ✅ key দিয়ে force re-mount */}
                                                 <DefaultInput
+                                                    key={`text-${field.id}-${index}`}
                                                     registerKey={`column.${index}.text`}
+                                                    defaultValue={field.text || ""}
                                                     placeholder={`Point ${index + 1}`}
                                                 />
                                             </div>
+
+                                            <div className="w-28">
+                                                <label className="block text-[11px] font-semibold text-gray-600 mb-1">
+                                                    {translate("Size")} (%)
+                                                </label>
+                                                <input
+                                                    key={`size-${field.id}-${index}`}
+                                                    type="number"
+                                                    min={MIN_COL_SIZE}
+                                                    max={MAX_COL_SIZE}
+                                                    step="1"
+                                                    defaultValue={field.size ?? DEFAULT_COL_SIZE}
+                                                    {...register(`column.${index}.size`)}
+                                                    className="w-full h-9 px-2 border border-gray-300 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:border-emerald-400"
+                                                />
+                                            </div>
+
                                             <button
                                                 type="button"
                                                 onClick={() => {
@@ -377,28 +616,163 @@ export default function DataExportModel({ dataExport }) {
                                 ))}
                             </div>
 
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    append({ text: "" });
-                                    toast.success(translate("New column added"));
-                                }}
-                                className="mt-3 inline-flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-lg"
-                            >
-                                <span className="text-lg leading-none">+</span>
-                                {translate("Add New")}
-                            </button>
+                            {fields.length > 0 && (
+                                <p className="mt-2 text-[11px] text-gray-500">
+                                    Size = প্রিন্ট টেবিলের মোট প্রস্থের শতাংশ ({MIN_COL_SIZE}% – {MAX_COL_SIZE}%)
+                                </p>
+                            )}
+                            <div className="flex items-center gap-2 mb-3">
+                                <button
+                                    type="button"
+                                    onClick={handleAddCustomColumn}
+                                    disabled={limitReached}
+                                    className="mt-3 inline-flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <span className="text-lg leading-none">+</span>
+                                    {translate("Add New Column")}
+                                </button>
+                                <span className="ml-1 px-2 mt-3 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-700 rounded-full">
+                                    {fields.length}
+                                </span>
+                            </div>
                         </div>
 
-                        {/* ✅ Save Button */}
-                        <div className="text-end pt-4 border-t border-gray-100">
-                            <button
-                                type="submit"
-                                disabled={isCreating}
-                                className="rounded-lg inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white py-2.5 px-4 font-semibold shadow-sm hover:shadow-md transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-                            >
-                                {isCreating ? translate("Saving...") : translate("Save")}
-                            </button>
+                        {/* ✅ Select Columns */}
+                        <div>
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1 h-5 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></div>
+                                    <label className="font-bold text-gray-800 text-sm">
+                                        {translate("Select Columns")}
+                                    </label>
+                                    <span className="ml-1 px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full">
+                                        {selectedColumns.length} / {MAX_TOTAL_COLUMNS}
+                                    </span>
+                                </div>
+                                <div
+                                    className={`flex items-center justify-between gap-3 rounded-lg border px-4 py-2.5 text-sm ${limitReached
+                                            ? "bg-amber-50 border-amber-300 text-amber-800"
+                                            : "bg-blue-50 border-blue-200 text-blue-800"
+                                        }`}
+                                >
+                                    <span className="font-semibold">
+                                        মোট কলাম (নির্বাচিত + নতুন):{" "}
+                                        <b>{totalColumns}</b> / {MAX_TOTAL_COLUMNS}
+                                    </span>
+                                    <span className="text-xs">
+                                        {limitReached
+                                            ? "সীমা শেষ — আর কলাম যোগ করা যাবে না"
+                                            : `আরও ${remainingColumns}টি কলাম নেওয়া যাবে`}
+                                    </span>
+                                </div>
+                                {selectedColumns.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={handleDeselectAll}
+                                        className="text-xs font-semibold px-3 py-1.5 rounded-lg border bg-red-50 text-red-600 border-red-200"
+                                    >
+                                        {translate("Deselect All")}
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 p-4 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-blue-50/30 shadow-sm max-h-[420px] overflow-y-auto">
+                                {allColumns.map((col) => {
+                                    const isChecked = selectedColumns.includes(col.id);
+                                    const isDisabled = !isChecked && limitReached;
+                                    return (
+                                        <label
+                                            key={col.id}
+                                            className={`group flex items-center gap-2.5 px-3 py-2 rounded-lg border ${isChecked
+                                                    ? "cursor-pointer bg-blue-50 border-blue-400 ring-1 ring-blue-200"
+                                                    : isDisabled
+                                                        ? "cursor-not-allowed bg-gray-100 border-gray-200 opacity-50"
+                                                        : "cursor-pointer bg-white border-gray-200 hover:border-blue-300"
+                                                }`}
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                value={col.id}
+                                                checked={isChecked}
+                                                disabled={isDisabled}
+                                                onChange={() => handleColumnToggle(col.id)}
+                                                className="w-4 h-4 accent-blue-600"
+                                            />
+                                            <span className={`text-sm truncate ${isChecked ? "text-blue-800 font-semibold" : "text-gray-700"
+                                                }`}>
+                                                {translate(col.label)}
+                                            </span>
+                                        </label>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* ✅ Save/Update Button */}
+                        <div className="flex flex-row justify-between text-end pt-4 border-t border-gray-100">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1 h-5 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full"></div>
+                                    <label className="font-bold text-gray-800 text-base">
+                                        {translate("Generated Reports")}
+                                    </label>
+                                    <span className="ml-1 px-2.5 py-0.5 text-xs font-semibold bg-purple-100 text-purple-700 rounded-full">
+                                        {reports.length}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-row gap-3">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => refetchTemplates()}
+                                        className="inline-flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg border bg-blue-50 text-blue-600 border-blue-200 transition-all duration-200"
+                                    >
+                                        {translate("Refresh")}
+                                    </button>
+
+                                    {reports.length > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={handleClearAllReports}
+                                            disabled={isDeleting}
+                                            className="inline-flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:border-red-300 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                <line x1="14" y1="11" x2="14" y2="17"></line>
+                                            </svg>
+                                            {isDeletingAll ? translate("Clearing...") : translate("Clear All")}
+                                        </button>
+                                    )}
+                                </div>
+
+                                {isEditMode && (
+                                    <button
+                                        type="button"
+                                        onClick={handleCancelEdit}
+                                        className="inline-flex items-center justify-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300 transition-all duration-200"
+                                    >
+                                        {translate("Cancel")}
+                                    </button>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    disabled={isSaving}
+                                    className={`inline-flex items-center justify-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg text-white border shadow-sm hover:shadow-md transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${isEditMode
+                                            ? "bg-amber-500 hover:bg-amber-600 border-amber-500 hover:border-amber-600"
+                                            : "bg-emerald-500 hover:bg-emerald-600 border-emerald-500 hover:border-emerald-600"
+                                        }`}
+                                >
+                                    {isSaving
+                                        ? (isEditMode ? translate("Updating...") : translate("Saving..."))
+                                        : (isEditMode ? translate("Update") : translate("Save"))}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -407,59 +781,6 @@ export default function DataExportModel({ dataExport }) {
                     ✅ REPORTS SECTION
                 ============================================================ */}
                 <div className="space-y-5 mt-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                            <div className="w-1 h-5 bg-gradient-to-b from-purple-500 to-pink-600 rounded-full"></div>
-                            <label className="font-bold text-gray-800 text-base">
-                                {translate("Generated Reports")}
-                            </label>
-                            <span className="ml-1 px-2.5 py-0.5 text-xs font-semibold bg-purple-100 text-purple-700 rounded-full">
-                                {reports.length}
-                            </span>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                            <button
-                                type="button"
-                                onClick={() => refetchTemplates()}
-                                className="text-xs font-semibold px-3 py-1.5 rounded-lg border bg-blue-50 text-blue-600 border-blue-200"
-                            >
-                                {translate("Refresh")}
-                            </button>
-
-                            {reports.length > 0 && (
-                                <button
-                                    type="button"
-                                    onClick={handleClearAllReports}
-
-                                    disabled={isDeleting}
-                                    className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:border-red-300 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-                                >
-                                    {/* Trash Icon */}
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="14"
-                                        height="14"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                    >
-                                        <polyline points="3 6 5 6 21 6"></polyline>
-                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                        <line x1="10" y1="11" x2="10" y2="17"></line>
-                                        <line x1="14" y1="11" x2="14" y2="17"></line>
-                                    </svg>
-                                    {isDeletingAll ? translate("Clearing...") : translate("Clear All")}
-
-                                </button>
-
-                            )}
-                        </div>
-                    </div>
-
                     {isLoadingTemplates && reports.length === 0 && (
                         <div className="rounded-xl border border-gray-200 bg-white p-8 text-center text-gray-500">
                             {translate("Loading reports...")}
@@ -481,64 +802,80 @@ export default function DataExportModel({ dataExport }) {
                     )}
 
                     {reports.map((template, rIdx) => {
-                        // ✅ FieldKey is the identifier
                         const templateKey = template.FieldKey;
                         const report = template.FieldValue || {};
                         const columns = buildColumns(report);
                         const rows = buildRows(columns);
+                        const isCurrentlyEditing = editingTemplateKey === templateKey;
 
                         return (
                             <div
                                 key={templateKey}
-                                className="overflow-hidden"
+                                className={`overflow-hidden rounded-lg transition-all duration-200 ${isCurrentlyEditing ? "ring-2 ring-amber-400 ring-offset-2" : ""
+                                    }`}
                             >
-                                <div className=" bg-gray-50">
+                                <div className="bg-gray-50">
                                     <div className="bg-white rounded-lg border border-gray-200 p-5">
-                                        <div className="flex justify-end items-center">
-                                            <button
-                                                type="button"
-                                                onClick={() => handleRemoveReport(templateKey)}
-                                                disabled={isDeleting}
-                                                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:border-red-300 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
-                                            >
-                                                {/* Trash Icon */}
-                                                <svg
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width="14"
-                                                    height="14"
-                                                    viewBox="0 0 24 24"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeWidth="2"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
+                                        <div className="flex flex-row items-center mb-3 relative">
+                                            <div className="flex-1 flex justify-center">
+                                                <h3 className="font-bold text-lg text-gray-900 border-b-2 border-gray-800 pb-1">
+                                                    {report.ReportName}
+                                                    {isCurrentlyEditing && (
+                                                        <span className="ml-2 px-2 py-0.5 text-xs font-semibold bg-amber-100 text-amber-700 rounded-full">
+                                                            {translate("Editing")}
+                                                        </span>
+                                                    )}
+                                                </h3>
+                                            </div>
+
+                                            <div className="absolute right-0 flex items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleEditReport(templateKey)}
+                                                    disabled={isDeleting || isCurrentlyEditing}
+                                                    className={`inline-flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg border transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${isCurrentlyEditing
+                                                            ? "bg-amber-50 text-amber-600 border-amber-300"
+                                                            : "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 hover:border-blue-300"
+                                                        }`}
                                                 >
-                                                    <polyline points="3 6 5 6 21 6"></polyline>
-                                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                                    <line x1="10" y1="11" x2="10" y2="17"></line>
-                                                    <line x1="14" y1="11" x2="14" y2="17"></line>
-                                                </svg>
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                    </svg>
+                                                    {isCurrentlyEditing ? translate("Editing...") : translate("Edit")}
+                                                </button>
 
-                                            </button>
-                                        </div>
-
-                                        <div className="text-center mb-3">
-                                            <h3 className="inline-block font-bold text-lg text-gray-900 border-b-2 border-gray-800 pb-1">
-                                                {report.ReportName}
-                                            </h3>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveReport(templateKey)}
+                                                    disabled={isDeleting}
+                                                    className="inline-flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 hover:border-red-300 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                                                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                                                    </svg>
+                                                    {translate("Delete")}
+                                                </button>
+                                            </div>
                                         </div>
 
                                         <div className="overflow-x-auto rounded-lg border border-gray-300">
                                             <table className="w-full text-sm">
                                                 <thead>
                                                     <tr className="bg-gray-100">
-                                                        {/* <th className="px-3 py-2 text-left font-bold text-gray-800 border-b border-gray-300 border-r w-10">ক্র</th> */}
                                                         {columns.map((col) => (
-                                                            <th key={col.id} className="px-3 py-2 text-center font-bold text-gray-800 border-b border-r whitespace-nowrap">
+                                                            <th
+                                                                key={col.id}
+                                                                style={col.isCustom && col.size ? { width: `${col.size}%` } : undefined}
+                                                                className="px-3 py-2 text-center font-bold text-gray-800 border-b border-r whitespace-nowrap"
+                                                            >
                                                                 {translate(col.label)}
                                                                 {col.isCustom && (
                                                                     <span className="ml-1 text-[9px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-normal">
-                                                                        custom
+                                                                        custom{col.size ? ` · ${col.size}%` : ""}
                                                                     </span>
                                                                 )}
                                                             </th>
@@ -567,10 +904,6 @@ export default function DataExportModel({ dataExport }) {
                                                     ))}
                                                 </tbody>
                                             </table>
-                                        </div>
-
-                                        <div className="mt-4 pt-3 border-t border-dashed text-center text-[10px] text-gray-400">
-                                            {translate("Generated by")} — {institutionInfo?.InstitutionName || "System"}
                                         </div>
                                     </div>
                                 </div>

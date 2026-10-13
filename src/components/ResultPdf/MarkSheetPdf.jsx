@@ -7,6 +7,7 @@ import QRCode from "react-qr-code";
 // "?url" Vite-ke bole file-ta asset hishebe URL return korte.
 import kalpurushUrl from '../../assets/font/kalpurush.ttf?url';
 import { useGetLabelNameListsQuery } from '../../features/result/resultSilce';
+import { bufferToDataUrl } from '../../utils/bufferDataURL';
 
 
 // ==========================================
@@ -146,13 +147,7 @@ const pick = (...vals) => {
   return found === undefined ? '-' : found;
 };
 
-// Buffer -> base64 data URL
-const bufferToDataUrl = (buf) => {
-  if (buf && buf.type === 'Buffer' && Array.isArray(buf.data) && buf.data.length > 0) {
-    return `data:image/png;base64,${Buffer.from(buf.data).toString('base64')}`;
-  }
-  return null;
-};
+
 
 // Print-safe cell colors (inline, jate print-e drop na hoy)
 const EXACT = { WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' };
