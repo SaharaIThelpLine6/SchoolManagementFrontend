@@ -27,39 +27,43 @@ export const examReports = [
   },
   {
     ReportID: 3,
-    ReportName: '3. দস্তখত পত্র',
+    ReportName: '3. সিট প্ল্যান অনুযায়ী দস্তখত পত্র',
+  },
+  {
+    ReportID: 12,
+    ReportName: '4. সিট প্ল্যান ছাড়া দস্তখত পত্র',
   },
   {
     ReportID: 4,
-    ReportName: '4. নম্বর পত্র',
+    ReportName: '5. নম্বর পত্র',
   },
   {
     ReportID: 5,
-    ReportName: '5. নম্বরপত্র ভর্তি সিরিয়ালে',
+    ReportName: '6. নম্বরপত্র ভর্তি সিরিয়ালে',
   },
   {
     ReportID: 6,
-    ReportName: '6. নম্বরপত্র মূল ক্লাস ভিক্তিক',
+    ReportName: '7. নম্বরপত্র মূল ক্লাস ভিক্তিক',
   },
   {
     ReportID: 7,
-    ReportName: '7. সিট নং',
+    ReportName: '8. সিট নং',
   },
   {
     ReportID: 8,
-    ReportName: '8. স্বাক্ষরপত্র ও নম্বরসীট',
+    ReportName: '9. স্বাক্ষরপত্র ও নম্বরসীট',
   },
   {
     ReportID: 9,
-    ReportName: '9. সকল পরীক্ষার্থীর পরিসংখ্যান',
+    ReportName: '10. সকল পরীক্ষার্থীর পরিসংখ্যান',
   },
   {
     ReportID: 10,
-    ReportName: '10. পরীক্ষা কক্ষের আসন বিন্যাস',
+    ReportName: '11. পরীক্ষা কক্ষের আসন বিন্যাস',
   },
   {
     ReportID: 11,
-    ReportName: '11. প্রতিষ্ঠানের আসন বিন্যাস',
+    ReportName: '12. প্রতিষ্ঠানের আসন বিন্যাস',
   },
 ];
 export const resultReports = [

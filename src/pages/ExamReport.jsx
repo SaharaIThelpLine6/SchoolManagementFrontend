@@ -89,6 +89,7 @@ const ExamReport = ({ pageTitle }) => {
       case 2:
         return fieldName === 'ReportID';
       case 3:
+      case 12:
         return [
           'ReportID',
           'SessionID',
@@ -295,6 +296,7 @@ const ExamReport = ({ pageTitle }) => {
   const reportMap = {
     1: oneLanguageExamReport,
     3: threeLanguageExamReport,
+    12: threeLanguageExamReport,
     4: fourLanguageExamReport,
     6: sixLanguageExamReport,
     7: sevenLanguageExamReport,
@@ -579,7 +581,9 @@ const ExamReport = ({ pageTitle }) => {
             Number(selectedPdfID) === 1 && <ExamRoutine reportData={data} queryParams={queryParams} />}
           {Number(selectedReportID) === 3 &&
             Number(languageID) === 1 &&
-            Number(selectedPdfID) === 2 && <WithoutExamRoutine reportData={data} queryParams={queryParams} />}
+            Number(selectedPdfID) === 2 && <WithoutExamRoutine reportData={data} queryParams={queryParams} requireSeatPlan />}
+          {Number(selectedReportID) === 12 &&
+            Number(languageID) === 1 && <WithoutExamRoutine reportData={data} queryParams={queryParams} />}
           {/* Arobic 2 pdf baki ase */}
           {/* ৪. নম্বর পত্র */}
           {Number(selectedReportID) == 4 &&
