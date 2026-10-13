@@ -449,7 +449,7 @@ const useTranslate = () => {
     'Last Month': 'শেষ মাস',
     'Date Added': 'তারিখ যোগ',
     'User Based Report': 'ব্যবহারকারী ভিত্তিক প্রতিবেদন',
-    Report: 'রিপোর্ট',
+    Report: 'রিপোর্টসমূহ',
     "Report Name": 'রিপোর্ট নাম',
     "Add New Column": 'নতুন কলাম তৈরি করুন',
     Preview: 'প্রিভিউ',
