@@ -219,6 +219,7 @@ const useTranslate = () => {
     'Data Type': 'ডাটার ধরণ',
     'Add New Donation': 'অনুদান তৈরি করুন',
     'Add New Template': 'টেমপ্লেট তৈরি করুন',
+    'Add New Report': 'রিপোর্ট তৈরি করুন',
     'Dues list and dues messages of all students':
       'সকল শিক্ষার্থীর বকেয়া তালিকা ও বকেয়া মেসেজ',
     Debtor: 'দেনাদার',
