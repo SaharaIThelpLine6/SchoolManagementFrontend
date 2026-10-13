@@ -83,7 +83,10 @@ const WithoutExamRoutine = ({ reportData, queryParams, requireSeatPlan = false }
                   {routineColumns.map((item, i) => (
                     <td key={i} className="border border-black p-1 bg-white">
                       <div className="text-[16px] text-black font-bold">
-                        {item && bnBijoy2Unicode(formatToDDMMYYYY(item.ExamDate))}
+                        {item &&
+                          bnBijoy2Unicode(
+                            formatToDDMMYYYY(item.ExamDate) || item.ExamDate
+                          )}
                       </div>
                     </td>
                   ))}
