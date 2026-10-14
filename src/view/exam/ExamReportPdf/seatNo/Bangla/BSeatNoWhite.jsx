@@ -3,7 +3,6 @@ import { useGetSessionQuery } from "../../../../../features/session/sessionSlice
 import { useGetExamNameQuery } from "../../../../../features/exam/examQuerySlice";
 import { useGetSingleSubClassQuery } from "../../../../../features/class/classQuerySlice";
 import { useGetInstitutionInfoQuery } from "../../../../../features/settings/settingsQuerySlice";
-import { useGetExamHallListQuery } from "../../../../../features/examhall/examHallQuerySlice";
 import SeatCardWatermark from "../../../../../pages/userpanel/SeatCard/SeatCardWatermark";
 
 /**
@@ -20,19 +19,31 @@ import SeatCardWatermark from "../../../../../pages/userpanel/SeatCard/SeatCardW
  *   ৩) কার্ডে overflow: hidden, লেখাগুলোর line-height বাঁধা — তাই কার্ড
  *      কখনো নিজের ঘর ছাড়িয়ে যায় না, গ্রিডও নড়ে না।
  *
- * "ক্লাস নং" ঘর:
- *   আগে এখানে assignment.SeatNum বসত, তাই কাগজে ১, ২, ৩ এরকম সংখ্যা
- *   উঠত। এখন ওই ঘরে পরীক্ষার্থী কোন হলে বসবে — হলের নাম বসে।
+ * ────────────────────────────────────────────────────────────────────
+ * ডেটা কোথা থেকে আসে
+ * ────────────────────────────────────────────────────────────────────
+ * প্যারেন্ট `studentList` দিলে সেটাই একমাত্র উৎস — exam_report (report 7)
+ * এখন প্রতিটি শিক্ষার্থীর সাথেই কলাম, বেঞ্চ ও আসন নং পাঠায়:
  *
- *   নামটা কোথা থেকে আসে, সেটা API এর গড়নের উপর নির্ভর করে বলে তিন
- *   জায়গায় খোঁজা হয় (যেটা আগে মেলে সেটাই নেওয়া হয়):
- *     ক) seat object এর নিজের ভিতরে — HallName / Hall.HallName /
- *        ExamHall.HallName
- *     খ) seat এর HallID ধরে Exam_Halls লিস্টে
- *     গ) hallwise API টা যেহেতু হল ধরে গ্রুপ করে পাঠায়, সেই group key —
- *        key সংখ্যা হলে সেটা HallID ধরে লিস্টে খোঁজা হয়, নাহলে key টাই নাম
+ *   ColumnNo → Exam_HallColumns.Label   (কলাম)
+ *   BenchNo  → Exam_Hall_Rows.RowLabel  (বেঞ্চ = সারি)
+ *   SeatNum  → Exam_SitAllocation.SeatNum
  *
- *   কোনোটাই না মিললে ঘরটা ফাঁকা (−) যায়, কার্ড বা ছাপা আটকায় না।
+ * আগে hallwise সিট প্ল্যান API থেকে নেওয়া হত, কিন্তু ওই রেসপন্সে কলাম ও
+ * বেঞ্চ থাকে না — তাই ঘর দুইটা সবসময় ফাঁকা পড়ত। `studentList` না এলে
+ * পুরোনো পথটা fallback হিসেবে রয়ে গেছে, তাই কিছু ভাঙে না।
+ *
+ * ────────────────────────────────────────────────────────────────────
+ * দুইটা মোড
+ * ────────────────────────────────────────────────────────────────────
+ *   ক) আসন নং সহ  (showSeatNo = true, ডিফল্ট)
+ *      কার্ডের নিচে কলাম | বেঞ্চ | আসন নং এর সারি বসে। কারো জন্যই কোনো
+ *      বরাদ্দ না থাকলে কার্ড ছাপা হয় না — পর্দায় বার্তা: আগে
+ *      শ্রেণিবিন্যাসের কাজ করে আসুন।
+ *
+ *   খ) আসন নং ছাড়া (showSeatNo = false)
+ *      যারা শ্রেণিবিন্যাসই করেননি তাদের জন্য। সারিটা কার্ডে একেবারেই বসে
+ *      না — কার্ড শেষ হয় আইডি নং এর ঘরে, আর বরাদ্দের শর্তটাও দেখা হয় না।
  *
  * গ্রিডের হিসাব:
  *   কার্ডের চওড়া = (২১০ − ১০×২ − ফাঁক ৪) ÷ ২        = ৯৩mm
@@ -44,71 +55,122 @@ const CARDS_PER_PAGE = 8;
 // কাগজের হিসাব (mm) — বদলাতে হলে শুধু এখানেই
 const PAGE = { width: 210, height: 297, pad: 10, gap: 4 };
 
-const BSeatNoWhite = ({ queryParams, documentLogo, logoIsActive }) => {
-  const { data: examSeatPlanData } = useGetHallwiseSeatPlanQuery({
-    sessionId: queryParams?.SessionID,
-    examId: queryParams?.ExamID,
-    subClassId: queryParams?.SubClassID,
-  });
+// ঘর ফাঁকা থাকলে যা বসবে
+const DASH = "-";
+
+/** মান আছে কি না — 0 ও "0" যেন ফাঁকা হিসেবে না ধরা পড়ে */
+const hasValue = (v) => v !== null && v !== undefined && String(v).trim() !== "";
+
+const BSeatNoWhite = ({
+  queryParams,
+  documentLogo,
+  logoIsActive,
+  showSeatNo,
+  studentList,
+}) => {
+  // আসন নং সহ না ছাড়া — prop এ না এলে queryParams থেকেও নেওয়া যায়,
+  // কিছুই না এলে আগের আচরণ (আসন নং সহ) বহাল থাকে।
+  const withSeat =
+    showSeatNo !== undefined && showSeatNo !== null
+      ? Boolean(Number(showSeatNo))
+      : queryParams?.ShowSeatNo !== undefined && queryParams?.ShowSeatNo !== null
+      ? Boolean(Number(queryParams.ShowSeatNo))
+      : true;
+
+  const listRows = Array.isArray(studentList) ? studentList : [];
+  const hasList = listRows.length > 0;
+
+  // তালিকা হাতে থাকলে hallwise API ছোঁয়ার দরকারই নেই। আসন নং ছাড়া মোডেও
+  // ছোঁয়া হয় না — তাই শ্রেণিবিন্যাস না থাকলেও ছাপা আটকায় না।
+  const { data: examSeatPlanData, isFetching: seatPlanFetching } =
+    useGetHallwiseSeatPlanQuery(
+      {
+        sessionId: queryParams?.SessionID,
+        examId: queryParams?.ExamID,
+        subClassId: queryParams?.SubClassID,
+      },
+      { skip: !withSeat || hasList }
+    );
 
   const { data: sessionData } = useGetSessionQuery(queryParams?.SessionID);
   const { data: examNameData } = useGetExamNameQuery(queryParams?.ExamID);
   const { data: subClassData } = useGetSingleSubClassQuery(queryParams?.SubClassID);
   const { data: institutionInfo } = useGetInstitutionInfoQuery();
-  const { data: examHallList } = useGetExamHallListQuery();
 
-  // HallID → HallName. লিস্টের key কোথাও ID কোথাও HallID হতে পারে,
-  // তাই দুটোই বসিয়ে রাখা হচ্ছে।
-  const hallNameById = {};
-  (Array.isArray(examHallList) ? examHallList : []).forEach((hall) => {
-    const name = hall?.HallName ?? hall?.Name ?? null;
-    if (!name) return;
-    if (hall?.HallID !== undefined && hall?.HallID !== null) {
-      hallNameById[String(hall.HallID)] = name;
-    }
-    if (hall?.ID !== undefined && hall?.ID !== null) {
-      hallNameById[String(hall.ID)] = name;
-    }
+  /**
+   * দুই উৎসের গড়ন আলাদা, তাই এক জায়গাতেই মিলিয়ে নেওয়া হয়:
+   *   exam_report → ColumnNo / BenchNo / SeatNum, নাম User এর ভিতরে
+   *   hallwise    → SeatNum, কলাম ও বেঞ্চ সাধারণত থাকেই না
+   * নাম না পেলে আইডি (ColumnID / RowID) বসে, ফাঁকা রাখার চেয়ে ভালো।
+   */
+  const normalize = (row, index) => ({
+    __key:
+      row?.AssignmentID ?? row?.ID ?? row?.UserID ?? row?.AdmissionID ?? `row-${index}`,
+    User: row?.User ?? {
+      UserName: row?.UserName,
+      UserCode: row?.UserCode,
+    },
+    // ব্যাকএন্ড ColumnNo / BenchNo পাঠায় — ওই দুইটাই আগে, তারপর টেবিলের
+    // নিজের নামের কলাম। আইডি (ColumnID / RowID) ইচ্ছে করেই রাখা হয়নি —
+    // নাম না পেলে ঘরটা ফাঁকা (-) যাবে, আইডি কাগজে যাবে না।
+    __column: row?.ColumnNo ?? row?.Label ?? "",
+    __bench: row?.BenchNo ?? row?.RowLabel ?? "",
+    __seatNum: row?.SeatNum ?? row?.SeatNo ?? "",
   });
 
-  const resolveHallName = (groupKey, seat) => {
-    // ক) seat এর নিজের ভিতরে নাম আছে কি না
-    const own =
-      seat?.HallName ||
-      seat?.Hall?.HallName ||
-      seat?.ExamHall?.HallName ||
-      seat?.ExamHalls?.HallName;
-    if (own) return own;
-
-    // খ) seat এর HallID ধরে লিস্টে
-    const idOnSeat = seat?.HallID ?? seat?.Hall?.HallID ?? null;
-    if (idOnSeat !== null && hallNameById[String(idOnSeat)]) {
-      return hallNameById[String(idOnSeat)];
-    }
-
-    // গ) API এর group key — সংখ্যা হলে ID, নাহলে নামটাই
-    if (groupKey !== undefined && groupKey !== null && groupKey !== "") {
-      const key = String(groupKey);
-      if (/^\d+$/.test(key)) {
-        if (hallNameById[key]) return hallNameById[key];
-      } else {
-        return key;
-      }
-    }
-
-    return "";
-  };
-
-  // flat() এর বদলে flatMap() — আগে group key টা ফেলে দেওয়া হত, অথচ
-  // হলের নামটা ওখানেই থাকে। এখন প্রতিটা seat এর সাথে নামটা জুড়ে যায়।
-  const allSeats = examSeatPlanData
-    ? Object.entries(examSeatPlanData).flatMap(([groupKey, seats]) =>
-        (Array.isArray(seats) ? seats : []).map((seat) => ({
-          ...seat,
-          __hallName: resolveHallName(groupKey, seat),
-        }))
+  // hallwise API হল ধরে গ্রুপ করে পাঠায়, তাই গ্রুপগুলো এক তালিকায় মেলানো হয়
+  const fallbackRows = examSeatPlanData
+    ? Object.values(examSeatPlanData).flatMap((seats) =>
+        Array.isArray(seats) ? seats : []
       )
     : [];
+
+  const allSeats = (hasList ? listRows : fallbackRows).map(normalize);
+
+  // তালিকাই নেই — ফাঁকা পর্দার বদলে কারণটা দেখাই
+  if (allSeats.length === 0 && !seatPlanFetching) {
+    return (
+      <div className="w-full flex justify-center py-10 px-4">
+        <div className="max-w-xl w-full border border-amber-300 bg-amber-50 rounded-md p-5 text-center">
+          <h3 className="text-lg font-semibold text-amber-800">
+            কোনো শিক্ষার্থী পাওয়া যায়নি
+          </h3>
+          <p className="mt-2 text-sm text-amber-800 leading-6">
+            এই শিক্ষাবর্ষ, পরীক্ষা, সাব ক্লাস ও অবস্থান অনুযায়ী ফলাফল তালিকায়
+            কোনো পরীক্ষার্থী নেই। নির্বাচনগুলো একবার মিলিয়ে দেখুন।
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // শ্রেণিবিন্যাস হয়েছে কি না — আসন নং সহ ছাপতে চাইলে এটাই শর্ত।
+  // একজনেরও কলাম/বেঞ্চ/আসন না থাকলে বরাদ্দ হয়নি ধরে নেওয়া হয়।
+  // (আসন নং ছাড়া মোডে এই শর্ত আদৌ দেখা হয় না।)
+  const anyAllocation = allSeats.some(
+    (s) => hasValue(s.__seatNum) || hasValue(s.__column) || hasValue(s.__bench)
+  );
+
+  if (withSeat && !seatPlanFetching && allSeats.length > 0 && !anyAllocation) {
+    return (
+      <div className="w-full flex justify-center py-10 px-4">
+        <div className="max-w-xl w-full border border-red-300 bg-red-50 rounded-md p-5 text-center">
+          <h3 className="text-lg font-semibold text-red-700">
+            আগে শ্রেণিবিন্যাসের কাজ করে আসুন
+          </h3>
+          <p className="mt-2 text-sm text-red-700 leading-6">
+            এই শ্রেণি/পরীক্ষার শ্রেণিবিন্যাস (সিট প্ল্যান) এখনো করা হয়নি, তাই
+            কলাম, বেঞ্চ ও আসন নং বসানো সম্ভব হচ্ছে না।
+          </p>
+          <p className="mt-2 text-sm text-red-700 leading-6">
+            শ্রেণিবিন্যাস ছাড়াই ছাপতে চাইলে{" "}
+            <span className="font-semibold">“আসন নং ছাড়া”</span> অপশনটি বেছে
+            নিন — তখন ঘর তিনটি কার্ডে থাকবেই না।
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const pages = [];
   for (let i = 0; i < allSeats.length; i += CARDS_PER_PAGE) {
@@ -165,21 +227,24 @@ const BSeatNoWhite = ({ queryParams, documentLogo, logoIsActive }) => {
         .seat-card .sc-exam   { font-size: 8.5pt; line-height: 1.3; }
         .seat-card .sc-class  { font-size: 12pt; line-height: 1.2; margin-top: 1mm; }
         .seat-card .sc-name   { font-size: 10.5pt; line-height: 1.25; margin-top: 1mm; }
-        .seat-card .sc-id     { font-size: 12pt; line-height: 1.1; margin-top: 1.5mm;
+        .seat-card .sc-id     { font-size: 12pt; line-height: 1.1; margin-top: 1.2mm;
                                 border: 0.3mm solid #000000; border-radius: 1.5mm;
                                 padding: 1mm 2mm; width: 100%; }
+
+        /* ---- কলাম | বেঞ্চ | আসন নং ---- */
         .seat-card .sc-seat   { display: flex; width: 100%; margin-top: 1.2mm;
                                 border: 0.3mm solid #000000; border-radius: 1.5mm;
-                                font-size: 9pt; line-height: 1.1; }
-        .seat-card .sc-seat > span { width: 50%; padding: 1mm 1mm; }
+                                overflow: hidden; }
+        .seat-card .sc-seat > span { width: 33.3333%; padding: 1mm 0.8mm; min-width: 0; }
         .seat-card .sc-seat > span + span { border-left: 0.3mm solid #000000; }
-
-        /* হলের নাম লম্বা হলে ঘরটা যেন না ফুলে ওঠে — এক লাইনেই কেটে যাবে */
-        .seat-card .sc-seat > span.sc-hall {
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
+        .seat-card .sc-seat .sc-lbl { display: block; font-size: 7.5pt; line-height: 1.1; }
+        .seat-card .sc-seat .sc-val { display: block; font-size: 9.5pt; font-weight: 700;
+                                      line-height: 1.2; margin-top: 0.4mm;
+                                      /* মান লম্বা হলে ঘরটা যেন না ফুলে ওঠে —
+                                         এক লাইনেই কেটে যাবে */
+                                      overflow: hidden;
+                                      text-overflow: ellipsis;
+                                      white-space: nowrap; }
 
         /* দুই লাইনের বেশি হলে কেটে দেওয়া — কার্ডের মাপ তাতে ঠিক থাকে */
         .seat-card .sc-clamp {
@@ -224,7 +289,7 @@ const BSeatNoWhite = ({ queryParams, documentLogo, logoIsActive }) => {
       {pages.map((pageSeats, pageIndex) => (
         <div key={pageIndex} className="seat-page">
           {pageSeats.map((assignment) => (
-            <div key={assignment.AssignmentID} className="seat-card">
+            <div key={assignment.__key} className="seat-card">
               <SeatCardWatermark
                 documentLogo={documentLogo}
                 logoIsActive={logoIsActive}
@@ -242,10 +307,30 @@ const BSeatNoWhite = ({ queryParams, documentLogo, logoIsActive }) => {
                 পরীক্ষার্থী : {assignment.User?.UserName}
               </h2>
               <h1 className="sc-id">আইডি নং : {assignment.User?.UserCode}</h1>
-              <div className="sc-seat">
-                <span>আসন নং</span>
-                <span className="sc-hall">{assignment.SeatNum || "-"}</span>
-              </div>
+
+              {/* আসন নং ছাড়া মোডে সারিটা একেবারেই বসে না — কার্ড এখানেই শেষ */}
+              {withSeat && (
+                <div className="sc-seat">
+                  <span>
+                    <span className="sc-lbl">কলাম</span>
+                    <span className="sc-val">
+                      {hasValue(assignment.__column) ? assignment.__column : DASH}
+                    </span>
+                  </span>
+                  <span>
+                    <span className="sc-lbl">বেঞ্চ</span>
+                    <span className="sc-val">
+                      {hasValue(assignment.__bench) ? assignment.__bench : DASH}
+                    </span>
+                  </span>
+                  <span>
+                    <span className="sc-lbl">আসন নং</span>
+                    <span className="sc-val">
+                      {hasValue(assignment.__seatNum) ? assignment.__seatNum : DASH}
+                    </span>
+                  </span>
+                </div>
+              )}
             </div>
           ))}
 

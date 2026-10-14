@@ -637,7 +637,7 @@ const ExamReport = ({ pageTitle }) => {
 
           {/* 7. সিট নং — প্রতিটা কার্ডের ভিতরে আলাদা watermark বসানোর জন্য
               documentLogo ও logoIsActive props হিসেবে পাস করা হচ্ছে। */}
-          {Number(selectedReportID) === 7 &&
+          {/* {Number(selectedReportID) === 7 &&
             Number(languageID) === 1 &&
             Number(selectedPdfID) === 1 && (
               <BSeatNoWhite
@@ -645,8 +645,20 @@ const ExamReport = ({ pageTitle }) => {
                 documentLogo={documentLogo}
                 logoIsActive={logoIsActive}
               />
-            )}
+            )} */}
+          {/* ১ = সাদা-কালো, আসন নং সহ */}
           {Number(selectedReportID) === 7 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 1 && (
+              <BSeatNoWhite
+                queryParams={queryParams}
+                documentLogo={documentLogo}
+                logoIsActive={logoIsActive}
+                showSeatNo={true}
+                studentList={Array.isArray(data) ? data : data?.data}
+              />
+            )}
+          {/* {Number(selectedReportID) === 7 &&
             Number(languageID) === 1 &&
             Number(selectedPdfID) === 2 && (
               <BSeatNoColor
@@ -654,7 +666,29 @@ const ExamReport = ({ pageTitle }) => {
                 documentLogo={documentLogo}
                 logoIsActive={logoIsActive}
               />
+            )} */}
+          {/* ২ = রঙিন, আসন নং সহ */}
+          {Number(selectedReportID) === 7 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 2 && (
+              <BSeatNoColor
+                queryParams={queryParams}
+                documentLogo={documentLogo}
+                logoIsActive={logoIsActive}
+                showSeatNo={true}
+              />
             )}
+          {/* {Number(selectedReportID) === 7 &&
+            Number(languageID) === 1 &&
+            Number(selectedPdfID) === 3 && (
+              <BSeatNoWhite
+                queryParams={queryParams}
+                documentLogo={documentLogo}
+                logoIsActive={logoIsActive}
+              />
+            )} */}
+
+          {/* ৩ = সাদা-কালো, আসন নং ছাড়া — শ্রেণিবিন্যাস লাগে না */}
           {Number(selectedReportID) === 7 &&
             Number(languageID) === 1 &&
             Number(selectedPdfID) === 3 && (
@@ -662,6 +696,8 @@ const ExamReport = ({ pageTitle }) => {
                 queryParams={queryParams}
                 documentLogo={documentLogo}
                 logoIsActive={logoIsActive}
+                showSeatNo={false}
+                studentList={Array.isArray(data) ? data : data?.data}
               />
             )}
 
