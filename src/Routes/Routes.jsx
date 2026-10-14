@@ -818,9 +818,7 @@ const Router = createBrowserRouter([
               {
                 path: 'routing',
                 element: (
-                  <OwenGuide>
                     <ExamRouting pageTitle="Exam Routing Create" />
-                  </OwenGuide>
                 ),
               },
               // {
