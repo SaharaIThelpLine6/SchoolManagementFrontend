@@ -383,6 +383,7 @@ export const sevenLanguageExamReport = [
     pdfList: [
       { name: 'সাদা-কালো', PdfID: 1 },
       { name: 'রঙিন', PdfID: 2 },
+      { name: 'সাদা-কালো (আসন নং ছাড়া)', PdfID: 3 },
     ],
   },
   {
