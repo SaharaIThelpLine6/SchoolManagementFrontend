@@ -367,10 +367,15 @@ export const menuData = [
       //   route: 'result/report',
       // },
       {
-        id: '',
+        id: '5',
         name: 'Admission Form',
         route: 'result/admission_form',
       },
+      // {
+      //   id: '6',
+      //   name: 'Publication of results via SMS',
+      //   route: 'result/publication-results-sms',
+      // },
     ],
   },
   // {

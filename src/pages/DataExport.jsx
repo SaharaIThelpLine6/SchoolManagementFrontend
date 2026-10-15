@@ -27,6 +27,7 @@ import {
 } from '../features/settings/settingsQuerySlice';
 import { useGetLabelNameListsQuery } from '../features/result/resultSilce';
 import { bufferToDataUrl } from '../utils/bufferDataURL';
+import DefaultSearchSelect from '../components/Forms/DefaultSearchSelect';
 
 const PAGE_SIZE = 10;
 
@@ -967,7 +968,7 @@ const DataExport = ({ pageTitle }) => {
           {/* Filters */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4 flex-1">
             <div className="w-full">
-              <DefaultSelect
+              <DefaultSearchSelect
                 options={
                   templatesData?.data?.map((template) => ({
                     label: template.FieldValue.ReportName,
@@ -984,10 +985,10 @@ const DataExport = ({ pageTitle }) => {
               />
             </div>
             <div className="w-full">
-              <DefaultSelect options={sessionData || []} require={'Session is required'} nameField={'SessionName'} valueField={'SessionID'} registerKey={'SessionID'} type={'number'} label={translate('Session')} error={errors.filters} />
+              <DefaultSearchSelect options={sessionData || []} require={'Session is required'} nameField={'SessionName'} valueField={'SessionID'} registerKey={'SessionID'} type={'number'} label={translate('Session')} error={errors.filters} />
             </div>
             <div className="w-full">
-              <DefaultSelect
+              <DefaultSearchSelect
                 options={subClassData || []}
                 require={true}
                 nameField="SubClass"
@@ -1002,7 +1003,7 @@ const DataExport = ({ pageTitle }) => {
               />
             </div>
             <div className="w-full">
-              <DefaultSelect
+              <DefaultSearchSelect
                 options={[
                   { NewOldId: 1, ClassName: 'নতুন' },
                   { NewOldId: 2, ClassName: 'পুরাতন' },
@@ -1018,10 +1019,10 @@ const DataExport = ({ pageTitle }) => {
               />
             </div>
             <div className="w-full">
-              <DefaultSelect options={residential || []} require={'Living Condition is required'} nameField={'ResidentialName'} valueField={'RDID'} registerKey={'ResidentialStatusId'} type={'number'} label={translate('Living Condition')} error={errors.filters} />
+              <DefaultSearchSelect options={residential || []} require={'Living Condition is required'} nameField={'ResidentialName'} valueField={'RDID'} registerKey={'ResidentialStatusId'} type={'number'} label={translate('Living Condition')} error={errors.filters} />
             </div>
             <div className="w-full">
-              <DefaultSelect
+              <DefaultSearchSelect
                 options={[
                   { UserAction: 1, UserActionName: 'সক্রিয়' },
                   { UserAction: 0, UserActionName: 'নিষ্ক্রিয়' },

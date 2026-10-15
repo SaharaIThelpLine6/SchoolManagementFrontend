@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../../utils/conveter";
+import { Buffer } from "buffer"; // ✅ Buffer import for dynamic logo
 
 /* ═══════════════════════════════════════════════════════════
    HELPERS
@@ -12,7 +13,7 @@ const bg = (color) => ({
     boxShadow: `inset 0 0 0 1000px ${color}`,
 });
 
-/* ✅ Example logo — পরে institution-এর নিজের logo দিয়ে replace করবে */
+/* ✅ Fallback logo if institution logo is not available */
 const EXAMPLE_LOGO =
     "https://images.seeklogo.com/logo-png/42/1/madrasha-logo-png_seeklogo-424804.png";
 
@@ -122,6 +123,7 @@ function FillField({ label, flex = 1, color }) {
    ═══════════════════════════════════════════════════════════ */
 export default function AttendanceSheet({ reportData, query }) {
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
+    const [institutionLogo, setInstitutionLogo] = useState(null); // ✅ State for dynamic logo
 
     const conditionAverage = reportData?.conditionAverage || {};
     const studentResultsDetails = Array.isArray(reportData?.studentResults)
@@ -139,6 +141,27 @@ export default function AttendanceSheet({ reportData, query }) {
     useEffect(() => { localStorage.setItem(LS_COLOR, colorMode); }, [colorMode]);
     useEffect(() => { localStorage.setItem(LS_ORIENTATION, orientation); }, [orientation]);
     useEffect(() => { localStorage.setItem(LS_DAYS, daysCount); }, [daysCount]);
+
+    /* ✅ Dynamic Logo Fetching */
+    useEffect(() => {
+        // Check for common logo property names in institutionInfo
+        const logoData = institutionInfo?.InstitutionLogo || institutionInfo?.Logo || institutionInfo?.InstitutionImage;
+
+        if (logoData?.data) {
+            // If it's a buffer object (like { type: 'Buffer', data: [...] })
+            const buf = Buffer.from(logoData.data);
+            setInstitutionLogo(`data:image/png;base64,${buf.toString("base64")}`);
+        } else if (typeof logoData === "string" && logoData.startsWith("data:image")) {
+            // If it's already a base64 string
+            setInstitutionLogo(logoData);
+        } else if (typeof logoData === "string" && logoData.startsWith("http")) {
+            // If it's a URL
+            setInstitutionLogo(logoData);
+        } else {
+            // Fallback
+            setInstitutionLogo(EXAMPLE_LOGO);
+        }
+    }, [institutionInfo]);
 
     const C = THEMES[colorMode] || THEMES.color;
     const show = { ...DEFAULT_VISIBLE_COLUMNS, ...(visibleColumns || {}) };
@@ -215,7 +238,7 @@ export default function AttendanceSheet({ reportData, query }) {
                                 {/* logo + title */}
                                 <div style={{ position: "relative", textAlign: "center", minHeight: "92px" }}>
                                     <img
-                                        src={EXAMPLE_LOGO}
+                                        src={institutionLogo || EXAMPLE_LOGO}
                                         alt="logo"
                                         style={{
                                             position: "absolute", left: "6px", top: "2px",

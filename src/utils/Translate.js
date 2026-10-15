@@ -18,6 +18,7 @@ const useTranslate = () => {
     Debit: 'ডেবিট',
     Credit: 'ক্রেডিট',
     SubLedger: 'সাবলেজার',
+    'Publication of results via SMS': 'এসএমএস-এর মাধ্যমে ফলাফল প্রকাশ',
     'Transaction ID': 'ট্রানজেকশন আইডি',
     'User Attendance': 'ইউজার হাজিরা',
     'Student Payment History': 'পেমেন্ট তথ্য',

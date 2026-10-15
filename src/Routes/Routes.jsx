@@ -178,6 +178,7 @@ import DashboardDesignNew from '../components/DashboardDesignNew';
 import TeacherSubjectsAsignPage from '../pages/TeacherSubjectsAsignPage';
 import MarkSheet from '../pages/MarkSheet';
 import TypeOfVacation from '../pages/TypeOfVacation';
+import PublicationOfResultsViaSMS from '../pages/PublicationOfResultsViaSMS';
 
 const Router = createBrowserRouter([
   {
@@ -818,7 +819,7 @@ const Router = createBrowserRouter([
               {
                 path: 'routing',
                 element: (
-                    <ExamRouting pageTitle="Exam Routing Create" />
+                  <ExamRouting pageTitle="Exam Routing Create" />
                 ),
               },
               // {
@@ -907,6 +908,16 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.result_report}
                   >
                     <AdmissionForm pageTitle="Admission Form Print" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'publication-results-sms',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.sms_result_publish}
+                  >
+                    <PublicationOfResultsViaSMS pageTitle="Admission Form Print" />
                   </RequirePermission>
                 ),
               },

@@ -34,6 +34,54 @@ const getExtraValue = (studentResult, option) => {
     return "";
 };
 
+const bn = (v) => bnBijoy2Unicode(String(v));
+
+const isFilled = (v) => v !== undefined && v !== null && v !== "";
+
+/* ═══════════════════════════════════════════════════════════
+   DIVISION SCALE (dynamic)
+   ExamType == 4  → subjectPassNumbers (DivisionID/DivisionNumber)
+   others         → conditionAverage   (DivisionID/DivisionNumber)
+   Name আসে divitionList থেকে
+   return: { rows: [{id, name, num}], top }
+   ═══════════════════════════════════════════════════════════ */
+const buildDivisionScale = (conditionAverage, subjectPassNumbers, divisionList) => {
+    const examType = Number(conditionAverage?.ExamType);
+
+    const nameMap = {};
+    (divisionList || []).forEach((d) => {
+        nameMap[Number(d.ID)] = d.DivisionNames;
+    });
+
+    let source = {};
+    let top = 100;
+
+    if (examType === 4) {
+        const subj = (subjectPassNumbers || []).find((s) =>
+            [1, 2, 3, 4, 5, 6, 7].some((i) => isFilled(s?.[`DivisionID${i}`]))
+        );
+        source = subj || {};
+        top = Number(getFirstValue(subj?.TopDivisionNumber, subj?.MaxNumber, 100));
+    } else {
+        source = conditionAverage || {};
+        top = Number(getFirstValue(conditionAverage?.DivisionTopNumber, 100));
+    }
+
+    const rows = [];
+    for (let i = 1; i <= 7; i++) {
+        const id = source?.[`DivisionID${i}`];
+        const num = source?.[`DivisionNumber${i}`];
+        if (!isFilled(id) || !isFilled(num)) continue;
+        rows.push({
+            id: Number(id),
+            name: nameMap[Number(id)] ?? `বিভাগ ${id}`,
+            num: Number(num),
+        });
+    }
+
+    return { rows, top };
+};
+
 /* ═══════════════════════════════════════════════════════════
    EXPORTS
    ═══════════════════════════════════════════════════════════ */
@@ -107,13 +155,6 @@ export const DEFAULT_COLOR_MODE = "color";
 /* ═══════════════════════════════════════════════════════════
    THEME
    ═══════════════════════════════════════════════════════════ */
-const COLOR_GRADE = {
-    "A+": "#15803d", A: "#16a34a", "A-": "#0d9488", B: "#2563eb",
-    C: "#d97706", D: "#ea580c", F: "#dc2626", Absent: "#6b7280",
-};
-
-const BW_GRADE = Object.fromEntries(Object.keys(COLOR_GRADE).map((k) => [k, "#000"]));
-
 const colorTint = (studentResult, avg) => {
     const name = String(studentResult?.Division?.DivisionNames ?? "");
     if (/স্থগিত|ছগিত|রাসিব|fail|^F$/i.test(name)) return { bg: "#fee2e2", fg: "#991b1b" };
@@ -124,6 +165,11 @@ const colorTint = (studentResult, avg) => {
     return { bg: "#fee2e2", fg: "#991b1b" };
 };
 
+const DIVISION_PALETTE = [
+    "#15803d", "#16a34a", "#0d9488", "#2563eb",
+    "#d97706", "#ea580c", "#dc2626", "#6b7280",
+];
+
 const THEMES = {
     color: {
         C: {
@@ -131,7 +177,12 @@ const THEMES = {
             primarySoft: "#ccfbf1", primaryFaint: "#f0fdfa", border: "#334155",
             borderSoft: "#cbd5e1", text: "#0f172a", muted: "#64748b", danger: "#b91c1c",
         },
-        grade: COLOR_GRADE,
+        side: {
+            headBg: "#0f766e", headFg: "#ffffff",
+            bodyBg: "#ffffff", altBg: "#f0fdfa",
+            border: "#334155", text: "#0f172a", divider: "#cbd5e1",
+        },
+        palette: DIVISION_PALETTE,
         medals: { 1: "#fbbf24", 2: "#cbd5e1", 3: "#fdba74" },
         medalBorder: "1px solid transparent",
     },
@@ -141,7 +192,12 @@ const THEMES = {
             primarySoft: "#e5e5e5", primaryFaint: "#f4f4f4", border: "#000",
             borderSoft: "#737373", text: "#000", muted: "#404040", danger: "#000",
         },
-        grade: BW_GRADE,
+        side: {
+            headBg: "#7f7f7f", headFg: "#ffffff",
+            bodyBg: "#ffffff", altBg: "#ffffff",
+            border: "#000", text: "#000", divider: "#737373",
+        },
+        palette: DIVISION_PALETTE, // ✅ divisions always colorful even in bw mode
         medals: { 1: "#d4d4d4", 2: "#e5e5e5", 3: "#f4f4f4" },
         medalBorder: "1px solid #000",
     },
@@ -151,22 +207,6 @@ const bg = (color) => ({
     backgroundColor: color,
     boxShadow: `inset 0 0 0 1000px ${color}`,
 });
-
-const DIVISION_STATS = [
-    { label: "A+", count: 3 }, { label: "A", count: 17 }, { label: "A-", count: 4 },
-    { label: "B", count: 3 }, { label: "C", count: 1 }, { label: "D", count: 3 },
-    { label: "F", count: 3 }, { label: "Absent", count: 3 },
-];
-
-const GRADING_SCALE = [
-    { range: "80-100", grade: "A+", gpa: "5" },
-    { range: "70-79", grade: "A", gpa: "4" },
-    { range: "60-69", grade: "A-", gpa: "3.5" },
-    { range: "50-59", grade: "B", gpa: "3" },
-    { range: "40-49", grade: "C", gpa: "2" },
-    { range: "33-39", grade: "D", gpa: "1" },
-    { range: "1-32", grade: "F", gpa: "0" },
-];
 
 const getTodayBangla = () => {
     const d = new Date();
@@ -184,7 +224,6 @@ const PAGE_H = 750;
 const THEAD_H = 100;
 const HEADER_H = 190;
 const HEADER_GAP = 8;
-const MINI_H = 30;
 const FOOTER_RESERVE = 20;
 const SAFETY = 8;
 const SIGNATURE_H = 130;
@@ -204,8 +243,6 @@ const SHORT_COL = { id: 54, avg: 58, division: 94 };
 const SHORT_NAME_W = Math.floor(
     (SHORT_TABLE_W - SHORT_COL.id - SHORT_COL.avg - SHORT_COL.division) / 2
 );
-
-const bn = (v) => bnBijoy2Unicode(String(v));
 
 /* ═══════════════════════════════════════════════════════════
    LOCAL STORAGE
@@ -284,19 +321,16 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const [principal, setPrincipal] = useState(null);
     const [najem, setNajem] = useState(null);
 
-    /* ✅ নিজের sidebar state */
     const [visibleColumns, setVisibleColumns] = useState(() => loadObj(LS_VISIBLE, DEFAULT_VISIBLE_COLUMNS));
     const [nameExtras, setNameExtras] = useState(() => loadObj(LS_NAME_EXTRAS, DEFAULT_NAME_EXTRAS));
     const [resultOptions, setResultOptions] = useState(() => loadObj(LS_RESULT_OPTS, DEFAULT_RESULT_OPTIONS));
     const [colorMode, setColorMode] = useState(() => loadStr(LS_COLOR, COLOR_OPTIONS, DEFAULT_COLOR_MODE));
 
-    /* ✅ localStorage save */
     useEffect(() => { localStorage.setItem(LS_VISIBLE, JSON.stringify(visibleColumns)); }, [visibleColumns]);
     useEffect(() => { localStorage.setItem(LS_NAME_EXTRAS, JSON.stringify(nameExtras)); }, [nameExtras]);
     useEffect(() => { localStorage.setItem(LS_RESULT_OPTS, JSON.stringify(resultOptions)); }, [resultOptions]);
     useEffect(() => { localStorage.setItem(LS_COLOR, colorMode); }, [colorMode]);
 
-    /* ✅ data transform */
     const activeResultOption = useMemo(() => {
         if (resultOptions.idSerial) return "idSerial";
         if (resultOptions.byDivision) return "byDivision";
@@ -344,10 +378,12 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
     const conditionAverage = transformedData?.conditionAverage || {};
     const subjectPassNumbers = transformedData?.subjectPassNumbers || [];
+    const divisionList = transformedData?.divitionList || [];
 
     const theme = THEMES[colorMode] || THEMES.color;
     const C = theme.C;
-    const GRADE_COLORS = theme.grade;
+    const S = theme.side;
+    const paletteColor = (i) => theme.palette[Math.min(i, theme.palette.length - 1)];
 
     const LABELS = {
         sl: labels?.SerialLabel ?? "ক্রমিক",
@@ -379,7 +415,48 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         ? transformedData.studentResults
         : [];
 
-    /* signatures */
+    const subjectCount = useMemo(() => {
+        const n = Number(conditionAverage?.SubSonkha);
+        if (n > 0) return n;
+        return subjectPassNumbers.length;
+    }, [conditionAverage, subjectPassNumbers]);
+
+    const divisionScale = useMemo(
+        () => buildDivisionScale(conditionAverage, subjectPassNumbers, divisionList),
+        [conditionAverage, subjectPassNumbers, divisionList]
+    );
+
+    const divisionStats = useMemo(() => {
+        const allStudents =
+            Array.isArray(reportData?.studentResults) && reportData.studentResults.length
+                ? reportData.studentResults
+                : studentResultsDetails;
+
+        const counts = {};
+        const extraNames = {};
+        allStudents.forEach((s) => {
+            const id = Number(getFirstValue(s?.DivisionID, s?.Division?.ID));
+            if (Number.isNaN(id)) return;
+            counts[id] = (counts[id] || 0) + 1;
+            if (s?.Division?.DivisionNames) extraNames[id] = s.Division.DivisionNames;
+        });
+
+        const rows = divisionScale.rows.map((d) => ({
+            id: d.id,
+            label: d.name,
+            count: counts[d.id] || 0,
+        }));
+
+        Object.keys(counts).forEach((k) => {
+            const id = Number(k);
+            if (!rows.some((r) => r.id === id)) {
+                rows.push({ id, label: extraNames[id] ?? `বিভাগ ${id}`, count: counts[id] });
+            }
+        });
+
+        return { rows, total: allStudents.length };
+    }, [reportData, studentResultsDetails, divisionScale]);
+
     useEffect(() => {
         if (institutionInfo?.SignaturePrincipal?.data) {
             const buf = Buffer.from(institutionInfo.SignaturePrincipal.data);
@@ -391,48 +468,33 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         }
     }, [institutionInfo]);
 
-    /* pagination */
-    const shortRowsPerCol = useMemo(() => {
-        const first = Math.max(1, Math.floor(
-            (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
-        ));
-        const other = Math.max(1, Math.floor(
-            (PAGE_H - MINI_H - SHORT_THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
-        ));
-        return { first, other };
-    }, []);
+    const shortRowsPerCol = useMemo(
+        () =>
+            Math.max(1, Math.floor(
+                (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
+            )),
+        []
+    );
 
     const pages = useMemo(() => {
         const list = studentResultsDetails;
         if (!list.length) return [[]];
 
-        if (isShort) {
-            const firstCap = shortRowsPerCol.first * 2;
-            const otherCap = shortRowsPerCol.other * 2;
-            const chunks = [list.slice(0, firstCap)];
-            for (let i = firstCap; i < list.length; i += otherCap) {
-                chunks.push(list.slice(i, i + otherCap));
-            }
-            return chunks;
-        }
+        const cap = isShort
+            ? shortRowsPerCol * 2
+            : Math.max(1, Math.floor(
+                (PAGE_H - HEADER_H - HEADER_GAP - THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / ROW_H
+            ));
 
-        const FIRST_ROWS = Math.max(1, Math.floor(
-            (PAGE_H - HEADER_H - HEADER_GAP - THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / ROW_H
-        ));
-        const OTHER_ROWS = Math.max(1, Math.floor(
-            (PAGE_H - MINI_H - THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / ROW_H
-        ));
-
-        const chunks = [list.slice(0, FIRST_ROWS)];
-        for (let i = FIRST_ROWS; i < list.length; i += OTHER_ROWS) {
-            chunks.push(list.slice(i, i + OTHER_ROWS));
+        const chunks = [];
+        for (let i = 0; i < list.length; i += cap) {
+            chunks.push(list.slice(i, i + cap));
         }
         return chunks;
     }, [studentResultsDetails, ROW_H, isShort, shortRowsPerCol]);
 
-    const totalExaminees = DIVISION_STATS.reduce((sum, d) => sum + d.count, 0);
+    const totalExaminees = divisionStats.total;
 
-    /* styles */
     const styles = {
         td: {
             border: `1px solid ${C.border}`, padding: "0 3px", textAlign: "center",
@@ -449,20 +511,25 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const thStrong = { ...styles.th, ...bg(C.primaryMid), color: C.primaryDark };
 
     const sideTitle = {
-        ...bg(C.primaryMid), color: C.primaryDark, textAlign: "center",
-        fontSize: "13px", fontWeight: 800, height: "26px", lineHeight: "26px",
-        flexShrink: 0, borderBottom: `1px solid ${C.border}`,
+        ...bg(S.headBg), color: S.headFg, textAlign: "center",
+        fontSize: "13px", fontWeight: 700, height: "26px", lineHeight: "26px",
+        flexShrink: 0, whiteSpace: "nowrap", overflow: "hidden",
     };
     const sideBox = {
-        border: `1px solid ${C.border}`, alignSelf: "stretch",
-        borderRadius: "4px", overflow: "hidden", background: "#fff",
+        border: `1px solid ${S.border}`, alignSelf: "stretch",
+        overflow: "hidden", ...bg(S.bodyBg),
         display: "flex", flexDirection: "column", minHeight: 0,
     };
-    const sideBody = { flex: 1, display: "flex", flexDirection: "column", minHeight: 0 };
-    const sideRowBase = { flex: 1, display: "grid", alignItems: "stretch", fontSize: "12px", minHeight: 0 };
+    const sideBody = {
+        flex: 1, display: "flex", flexDirection: "column", minHeight: 0,
+        padding: "3px 0",
+    };
+    const sideRowBase = {
+        flex: 1, display: "grid", alignItems: "center",
+        fontSize: "13px", minHeight: 0, color: S.text,
+    };
     const cellCenter = { display: "flex", alignItems: "center", justifyContent: "center" };
 
-    /* header blocks */
     const renderCenterTitle = () => (
         <div style={{ textAlign: "center", alignSelf: "center", minWidth: 0 }}>
             <h1 style={{ fontSize: "22px", fontWeight: 800, margin: 0, lineHeight: 1.25, color: C.primaryDark }}>
@@ -498,39 +565,54 @@ export default function StudentResultSheet({ reportData, query, labels }) {
             <div style={sideBox}>
                 <div style={sideTitle}>মোট পরীক্ষার্থী = {bn(totalExaminees)}</div>
                 <div style={sideBody}>
-                    {DIVISION_STATS.map((item, i) => (
-                        <div key={i} style={{
-                            ...sideRowBase, gridTemplateColumns: "1fr 16px 42px",
-                            ...bg(i % 2 ? C.primaryFaint : "#fff"),
+                    {divisionStats.rows.map((item, i) => (
+                        <div key={item.id ?? i} style={{
+                            ...sideRowBase, gridTemplateColumns: "1fr 22px 52px",
+                            ...bg(i % 2 ? S.altBg : S.bodyBg),
                         }}>
-                            <div style={{ display: "flex", alignItems: "center", paddingLeft: "12px" }}>
-                                <span style={{
-                                    display: "inline-block", width: "8px", height: "8px",
-                                    borderRadius: "2px", ...bg(GRADE_COLORS[item.label]), marginRight: "7px",
-                                }} />
-                                <span style={{ fontWeight: 700, color: GRADE_COLORS[item.label] }}>{item.label}</span>
+                            <div style={{
+                                paddingLeft: "8px", whiteSpace: "nowrap",
+                                overflow: "hidden", textOverflow: "ellipsis",
+                                color: paletteColor(i), fontWeight: 700, // Always bold for division colors
+                            }}>{item.label}</div>
+                            <div style={cellCenter}>=</div>
+                            <div style={{
+                                ...cellCenter, justifyContent: "flex-start", paddingLeft: "6px",
+                                fontWeight: 700,
+                            }}>
+                                {bn(item.count)}
                             </div>
-                            <div style={{ ...cellCenter, color: C.muted }}>=</div>
-                            <div style={{ ...cellCenter, fontWeight: 700, paddingRight: "6px" }}>{bn(item.count)}</div>
                         </div>
                     ))}
                 </div>
             </div>
+
             {renderCenterTitle()}
+
             <div style={sideBox}>
-                <div style={sideTitle}>গ্রেডিং পদ্ধতি</div>
+                <div style={sideTitle}>
+                    মোট বিষয় {bn(subjectCount)}টি পূর্ণমান {bn(divisionScale.top)} × {bn(subjectCount)} = {bn(divisionScale.top * subjectCount)}
+                </div>
                 <div style={sideBody}>
-                    {GRADING_SCALE.map((item, i) => (
-                        <div key={i} style={{
-                            ...sideRowBase, gridTemplateColumns: "1fr 38px 42px",
-                            ...bg(i % 2 ? C.primaryFaint : "#fff"),
+                    {divisionScale.rows.map((item, i) => (
+                        <div key={item.id ?? i} style={{
+                            ...sideRowBase,
+                            gridTemplateColumns: "1fr 12px 30px 16px 16px 14px 40px",
+                            ...bg(i % 2 ? S.altBg : S.bodyBg),
                         }}>
-                            <div style={{ display: "flex", alignItems: "center", paddingLeft: "12px" }}>{item.range}</div>
                             <div style={{
-                                ...cellCenter, borderLeft: `1px solid ${C.borderSoft}`,
-                                fontWeight: 700, color: GRADE_COLORS[item.grade],
-                            }}>{item.grade}</div>
-                            <div style={{ ...cellCenter, borderLeft: `1px solid ${C.borderSoft}`, fontWeight: 600 }}>{item.gpa}</div>
+                                paddingLeft: "8px", whiteSpace: "nowrap",
+                                overflow: "hidden", textOverflow: "ellipsis",
+                                color: paletteColor(i), fontWeight: 700, // Always bold for division colors
+                            }}>{item.name}</div>
+                            <div style={cellCenter}>:</div>
+                            <div style={{ ...cellCenter, justifyContent: "flex-end" }}>{bn(item.num)}</div>
+                            <div style={cellCenter}>X</div>
+                            <div style={cellCenter}>{bn(subjectCount)}</div>
+                            <div style={cellCenter}>=</div>
+                            <div style={{ ...cellCenter, justifyContent: "flex-start", paddingLeft: "2px" }}>
+                                {bn(item.num * subjectCount)}
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -549,18 +631,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         </div>
     );
 
-    const renderMiniHeader = () => (
-        <div style={{
-            height: `${MINI_H}px`, lineHeight: `${MINI_H - 4}px`,
-            boxSizing: "border-box", borderBottom: `3px solid ${C.primary}`,
-            textAlign: "center", fontSize: "13px", fontWeight: 700,
-            color: C.primaryDark, ...bg(C.primaryFaint), overflow: "hidden", whiteSpace: "nowrap",
-        }}>
-            {institutionInfo?.InstitutionName} — {conditionAverage?.Exam?.ExamName} — {conditionAverage?.SubClass?.SubClass}
-        </div>
-    );
-
-    /* table */
     const renderColGroup = () => (
         <colgroup>
             {showCol.sl && <col style={{ width: `${COL.sl}px` }} />}
@@ -777,12 +847,11 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         );
 
         if (isShort) {
-            const cap = pageIndex === 0 ? shortRowsPerCol.first : shortRowsPerCol.other;
-            const leftRows = students.slice(0, cap);
-            const rightRows = students.slice(cap);
+            const leftRows = students.slice(0, shortRowsPerCol);
+            const rightRows = students.slice(shortRowsPerCol);
             return (
                 <>
-                    {pageIndex === 0 ? renderShortHeaderBlock() : renderMiniHeader()}
+                    {renderShortHeaderBlock()}
                     <div style={{
                         display: "flex", flexDirection: "row",
                         alignItems: "flex-start", justifyContent: "space-between",
@@ -799,7 +868,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
         return (
             <>
-                {pageIndex === 0 ? renderHeaderBlock() : renderMiniHeader()}
+                {renderHeaderBlock()}
                 <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
                     {renderColGroup()}
                     <thead>{renderColumnHeaderRow()}</thead>
@@ -816,7 +885,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         boxSizing: "border-box", overflow: "hidden", background: "#fff", margin: "0 auto",
     };
 
-    /* sidebar handlers */
     const dynamicColumns = useMemo(
         () => [
             { key: "sl", label: labels?.SerialLabel ?? "ক্রমিক" },
@@ -842,15 +910,12 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const setAllColumns = (value) =>
         setVisibleColumns(Object.fromEntries(dynamicColumns.map((c) => [c.key, value])));
 
-    /* ═══ RENDER ═══ */
     return (
         <div className="flex items-start w-full">
-            {/* ═══════════ SIDEBAR — fixed height, নিজে scroll ═══════════ */}
             <aside
                 className="hidden lg:flex flex-col w-[300px] shrink-0 bg-white border-r border-slate-200 sticky top-0 h-screen print:hidden"
                 style={{ overflow: "hidden" }}
             >
-                {/* Header — fixed */}
                 <div className="p-5 border-b border-slate-100 shrink-0">
                     <div className="flex items-center gap-2 mb-1">
                         <div className="w-6 h-6 rounded-md bg-emerald-50 flex items-center justify-center">
@@ -864,22 +929,18 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                     <p className="text-xs text-slate-400">রিপোর্টের কলাম ও প্রিন্ট অপশন</p>
                 </div>
 
-                {/* Scrollable content */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-4">
                     <ColumnSelector value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={dynamicColumns} />
                     <ResultOptionsSelector value={resultOptions} onToggle={toggleResultOption} />
                     <PrintSettings colorMode={colorMode} onColorChange={setColorMode} />
                 </div>
 
-                {/* Footer — fixed */}
                 <div className="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0">
                     <p className="text-[10px] text-slate-400 text-center">© Result Report Generator</p>
                 </div>
             </aside>
 
-            {/* ═══════════ REPORT BODY — w-full, browser scroll ═══════════ */}
             <div className="flex-1 min-w-0 w-full">
-                {/* mobile sidebar */}
                 <div className="lg:hidden p-4 pb-0 print:hidden">
                     <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
                         <ColumnSelector value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={dynamicColumns} />
@@ -888,7 +949,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                     </div>
                 </div>
 
-                {/* ✅ A4 pages — ScaledPreview ভিতরে */}
                 <div className="result-sheet-wrapper w-full">
                     <div className="no-print">
                         <ScaledPreview designWidth={PAGE_W}>
@@ -918,7 +978,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 </div>
             </div>
 
-            {/* ═══ CSS ═══ */}
             <style>{`
         .print-only { display: none; }
         @media print {

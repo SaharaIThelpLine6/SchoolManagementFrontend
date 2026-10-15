@@ -250,22 +250,66 @@ const SingleMarkSheet = ({
   // ===== Division rows =====
   const divisionRows = [];
 
-  for (let i = 1; i <= 14; i++) {
-    const dId = examConfig?.[`DivisionID${i}`];
-    const dNum = examConfig?.[`DivisionNumber${i}`];
+  if (Number(examConfig?.ExamType) === 4) {
+    // ExamType 4 → examSubjects থেকে DivisionID & DivisionNumber নাও
+    // examSubjects এর প্রথম subject টাই base ধরা হচ্ছে (সব subject এ একই division থাকে)
+    const source = examSubjects?.[0] || {};
 
-    // Division ID না থাকলে skip
-    if (dId === null || dId === undefined || dId === '') continue;
+    for (let i = 1; i <= 14; i++) {
+      const dId = source?.[`DivisionID${i}`];
+      const dNum = source?.[`DivisionNumber${i}`];
 
-    const found = divisions.find((d) => Number(d.ID) === Number(dId));
+      // Division ID না থাকলে skip
+      if (dId === null || dId === undefined || dId === '') continue;
 
-    if (!found) continue;
+      const found = divisions.find((d) => Number(d.ID) === Number(dId));
+      if (!found) continue;
 
-    divisionRows.push({
-      name: found.DivisionNames,
-      number: dNum ?? 0,
-    });
+      divisionRows.push({
+        name: found.DivisionNames,
+        number: dNum ?? 0,
+      });
+    }
+  } else {
+    // অন্যান্য ExamType → examConfig থেকে নাও (আগের মতো)
+    for (let i = 1; i <= 14; i++) {
+      const dId = examConfig?.[`DivisionID${i}`];
+      const dNum = examConfig?.[`DivisionNumber${i}`];
+
+      if (dId === null || dId === undefined || dId === '') continue;
+
+      const found = divisions.find((d) => Number(d.ID) === Number(dId));
+      if (!found) continue;
+
+      divisionRows.push({
+        name: found.DivisionNames,
+        number: dNum ?? 0,
+      });
+    }
   }
+
+  // console.log(examConfig, "examConfig");
+  // console.log(divisions, "divisions");
+  // console.log(examSubjects, "examSubjects");
+  // console.log(divisionRows, "divisionRows");
+  // const divisionRows = [];
+
+  // for (let i = 1; i <= 14; i++) {
+  //   const dId = examConfig?.[`DivisionID${i}`];
+  //   const dNum = examConfig?.[`DivisionNumber${i}`];
+
+  //   // Division ID না থাকলে skip
+  //   if (dId === null || dId === undefined || dId === '') continue;
+
+  //   const found = divisions.find((d) => Number(d.ID) === Number(dId));
+
+  //   if (!found) continue;
+
+  //   divisionRows.push({
+  //     name: found.DivisionNames,
+  //     number: dNum ?? 0,
+  //   });
+  // }
 
   const studentName = pick(student?.UserName, student?.StudentName, student?.Name);
   const fatherName = pick(student?.FatherName, student?.FathersName, student?.Father);
