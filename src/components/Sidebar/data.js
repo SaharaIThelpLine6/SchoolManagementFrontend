@@ -60,6 +60,11 @@ export const menuData = [
       },
       {
         id: '10',
+        name: 'User Reports Demo',
+        route: 'general-info/user-reports-demo',
+      },
+      {
+        id: '11',
         name: 'User Reports',
         route: 'general-info/user-reports',
       },

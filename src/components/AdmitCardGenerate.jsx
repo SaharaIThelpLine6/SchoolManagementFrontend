@@ -721,12 +721,18 @@ export const AdmitCardFace = ({
                 lineHeight: `${lineH}px`,
               }}
             >
-              {/* লেবেল — কখনো ছোট হবে না */}
-              <span className="shrink-0" style={{ color: t.labelColor }}>
+              {/* লেবেল — মানের মতোই রঙ ও ওজন, যাতে দুইটা একসাথে ভালো দেখায় */}
+              <span
+                className="shrink-0"
+                style={{ color: t.valueColor, fontWeight: 700 }}
+              >
                 {label}
               </span>
 
-              <span className="shrink-0">:</span>
+              <span
+                className="shrink-0"
+                style={{ color: t.valueColor, fontWeight: 700 }}
+              >:</span>
 
               {/* মান — জায়গা কমলে ফন্ট ছোট হবে, কাটবে না */}
               <FitText

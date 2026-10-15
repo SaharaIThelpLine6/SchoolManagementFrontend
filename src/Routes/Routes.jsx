@@ -229,6 +229,29 @@ const Router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
+              {
+                path: 'user-reports-demo',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.user_report}
+                  >
+                    <UserReports pageTitle="User Reports Demo" />
+                  </RequirePermission>
+                ),
+              },
+              // {
+              //   path: 'user-reports',
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.user_report}
+              //     >
+              //       <UserReports pageTitle="User Reports" />
+              //     </RequirePermission>
+              //   ),
+              // },
+
+
+              
               // {
               //   path: 'all-madrasah',
               //   element: (

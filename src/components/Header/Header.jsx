@@ -180,13 +180,31 @@ const Header = () => {
                 <path d="M4 18h16" />
               </svg>
             </button>
-            <Link to={"/general-info/institution-info"}>
+            {/* <Link to={"/general-info/institution-info"}>
               <img
                 src={logo ? logo : LogoAvater}
                 alt="Logo"
                 className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
               />
+            </Link> */}
+            {/* লোগোর উপর ক্লিক করলে প্রতিষ্ঠানের তথ্য পাতায় চলে যাবে */}
+            <Link className='text-center flex flex-col items-center justify-center' to={"/general-info/institution-info"}>
+              <img
+                src={logo ? logo : LogoAvater}
+                alt="Logo"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
+              />
+              {institutionInfo?.InstitutionCode && (
+              <span className="ml-2 text-sm sm:text-base font-semibold text-gray-700">
+                কোড : {institutionInfo.InstitutionCode}
+              </span>
+            )}
             </Link>
+
+            {/* লোগোর পাশে প্রতিষ্ঠান কোড —
+                যদি institutionInfo এবং তার InstitutionCode দুটোই থাকে,
+                তবেই কোডটা দেখাবে; নইলে কিছুই দেখাবে না। */}
+            
           </div>
         </div>
 
