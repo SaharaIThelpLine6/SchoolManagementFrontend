@@ -912,7 +912,7 @@ const ExamRouting = ({ pageTitle }) => {
           </h3>
           <div className="flex flex-row gap-2">
 
-            {/* <Button onClick={handleExamRoutineCreate}>
+            <Button onClick={handleExamRoutineCreate}>
               <span className="flex items-center gap-1.5">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -949,7 +949,7 @@ const ExamRouting = ({ pageTitle }) => {
                 </svg>
                 সেটিং তৈরি করুন
               </span>
-            </Button> */}
+            </Button>
           </div>
         </div>
 

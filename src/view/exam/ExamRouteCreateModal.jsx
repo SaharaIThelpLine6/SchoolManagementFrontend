@@ -26,6 +26,7 @@ import { ViewPermission } from '../../Routes/ViewPermission';
 import Button from '../../components/Button/Button';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
 import { showModal } from '../../utils/ModalControlar';
+import DefaultInput from '../../components/Forms/DefaultInput';
 
 const ExamRouteCreateModal = ({ pageTitle }) => {
   const location = useLocation();
@@ -40,7 +41,6 @@ const ExamRouteCreateModal = ({ pageTitle }) => {
     formState: { errors },
   } = methods;
 
-  const [currentPage, setCurrentPage] = useState(1);
   const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false);
   const [editId, setEditId] = useState(null);
   const [visibility, setVisibility] = useState(Array(14).fill(true));
@@ -65,7 +65,7 @@ const ExamRouteCreateModal = ({ pageTitle }) => {
     { value: '১০৫', label: '১০৫' },
   ];
 
-  // Dynamic Data State
+  // Dynamic Data State - More example data
   const [examRoutineData, setExamRoutineData] = useState([
     {
       id: 1,
@@ -119,6 +119,110 @@ const ExamRouteCreateModal = ({ pageTitle }) => {
       passMarks: '৩৩',
       selected: false,
     },
+    {
+      id: 5,
+      sl: '৫',
+      date: '10-11-2025',
+      day: 'সোমবার',
+      subject: 'ইসলাম শিক্ষা',
+      startTime: '09:00',
+      endTime: '10:30',
+      code: '১০৫',
+      fullMarks: '১০০',
+      passMarks: '৩৩',
+      selected: false,
+    },
+    {
+      id: 6,
+      sl: '৬',
+      date: '12-11-2025',
+      day: 'বুধবার',
+      subject: 'সমাজ বিজ্ঞান',
+      startTime: '09:00',
+      endTime: '10:30',
+      code: '১০৬',
+      fullMarks: '১০০',
+      passMarks: '৩৩',
+      selected: false,
+    },
+    {
+      id: 7,
+      sl: '৭',
+      date: '15-11-2025',
+      day: 'শনিবার',
+      subject: 'বাংলা',
+      startTime: '09:00',
+      endTime: '10:30',
+      code: '১০১',
+      fullMarks: '১০০',
+      passMarks: '৩৩',
+      selected: false,
+    },
+    {
+      id: 8,
+      sl: '৮',
+      date: '17-11-2025',
+      day: 'সোমবার',
+      subject: 'ইংরেজি',
+      startTime: '09:00',
+      endTime: '10:30',
+      code: '১০২',
+      fullMarks: '১০০',
+      passMarks: '৩৩',
+      selected: false,
+    },
+    {
+      id: 9,
+      sl: '৯',
+      date: '19-11-2025',
+      day: 'বুধবার',
+      subject: 'গণিত',
+      startTime: '09:00',
+      endTime: '10:30',
+      code: '১০৩',
+      fullMarks: '১০০',
+      passMarks: '৩৩',
+      selected: false,
+    },
+    {
+      id: 10,
+      sl: '১০',
+      date: '22-11-2025',
+      day: 'শনিবার',
+      subject: 'বিজ্ঞান',
+      startTime: '09:00',
+      endTime: '10:30',
+      code: '১০৪',
+      fullMarks: '১০০',
+      passMarks: '৩৩',
+      selected: false,
+    },
+    {
+      id: 11,
+      sl: '১১',
+      date: '24-11-2025',
+      day: 'সোমবার',
+      subject: 'ইসলাম শিক্ষা',
+      startTime: '09:00',
+      endTime: '10:30',
+      code: '১০৫',
+      fullMarks: '১০০',
+      passMarks: '৩৩',
+      selected: false,
+    },
+    {
+      id: 12,
+      sl: '১২',
+      date: '26-11-2025',
+      day: 'বুধবার',
+      subject: 'সমাজ বিজ্ঞান',
+      startTime: '09:00',
+      endTime: '10:30',
+      code: '১০৬',
+      fullMarks: '১০০',
+      passMarks: '৩৩',
+      selected: false,
+    },
   ]);
 
   // Initialize form values for each row's DefaultSelect
@@ -150,7 +254,6 @@ const ExamRouteCreateModal = ({ pageTitle }) => {
   const { data: examNameData } = useGetExamNamesQuery();
 
   const onSubmit = async (formData) => {
-    // Collect all row data from form
     const updatedRows = examRoutineData.map((item) => ({
       ...item,
       subject: formData[`subject_${item.id}`] || item.subject,
@@ -172,7 +275,7 @@ const ExamRouteCreateModal = ({ pageTitle }) => {
     });
   };
 
-  // Handle Select All
+  // Handle Select All (All Data)
   const handleSelectAll = (e) => {
     const checked = e.target.checked;
     setExamRoutineData((prev) =>
@@ -200,7 +303,6 @@ const ExamRouteCreateModal = ({ pageTitle }) => {
     };
     setExamRoutineData((prev) => [...prev, newItem]);
 
-    // Initialize form values for the new row
     setValue(`subject_${newId}`, newItem.subject);
     setValue(`code_${newId}`, newItem.code);
 
@@ -293,10 +395,9 @@ const ExamRouteCreateModal = ({ pageTitle }) => {
     }
   };
 
-  // Check if all selected
+  // Check if all selected (All Data)
   const isAllSelected =
-    examRoutineData.length > 0 &&
-    examRoutineData.every((item) => item.selected);
+    examRoutineData.length > 0 && examRoutineData.every((item) => item.selected);
 
   // Check if any selected
   const hasSelected = examRoutineData.some((item) => item.selected);
@@ -304,7 +405,6 @@ const ExamRouteCreateModal = ({ pageTitle }) => {
   return (
     <div className="">
       <div className="font-default">
-        {/* FormProvider wraps the entire table so DefaultSelect can use useFormContext */}
         <FormProvider {...methods}>
           <form
             className="w-full hidden lg:block space-y-4 md:space-y-6"
@@ -334,9 +434,9 @@ const ExamRouteCreateModal = ({ pageTitle }) => {
                 registerKey="SubClassID"
               />
             </div>
+
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-[#e9edf4] pb-4 md:pb-5 gap-4">
-              {/* Left Side: Icon & Title */}
               <div className="flex items-center gap-2.5">
                 <div className="text-[#1e3a8a]">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -353,12 +453,7 @@ const ExamRouteCreateModal = ({ pageTitle }) => {
                 </h3>
               </div>
 
-              {/* Right Side: Buttons */}
               <div className="flex flex-wrap items-center gap-2 w-full md:w-auto justify-start md:justify-end">
-
-
-
-                {/* Delete All Selected Button (Only visible when hasSelected is true) */}
                 {hasSelected && (
                   <button
                     type="button"
@@ -384,249 +479,240 @@ const ExamRouteCreateModal = ({ pageTitle }) => {
                 )}
               </div>
             </div>
-            {/* Table Section - Moved inside form to work with react-hook-form */}
-            <div className="mt-6 overflow-x-auto">
-              <table className="w-full min-w-[1000px] border-collapse">
-                <thead>
-                  <tr className="bg-[#f8f9fa] border-b border-gray-200">
-                    <th className="p-3 text-left text-sm font-semibold text-gray-700 w-12">
-                      <div className="flex items-center justify-center">
-                        <input
-                          type="checkbox"
-                          checked={isAllSelected}
-                          onChange={handleSelectAll}
-                          className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                        />
-                      </div>
-                    </th>
-                    <th className="p-3 text-center text-sm font-semibold text-gray-700 w-12">
-                      ক্রম
-                    </th>
-                    <th className="p-3 text-left text-sm font-semibold text-gray-700">
-                      তারিখ
-                    </th>
-                    <th className="p-3 text-left text-sm font-semibold text-gray-700">
-                      বার
-                    </th>
-                    <th className="p-3 text-center text-sm font-semibold text-gray-700">
-                      বিষয়
-                    </th>
-                    <th className="p-3 text-center text-sm font-semibold text-gray-700">
-                      শুরু সময়
-                    </th>
-                    <th className="p-3 text-center text-sm font-semibold text-gray-700">
-                      শেষ সময়
-                    </th>
 
-                    <th className="p-3 text-center text-sm font-semibold text-gray-700 w-36">
-                      কার্যক্রম
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {examRoutineData.map((item, index) => (
-                    <tr
-                      key={item.id}
-                      className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-                    >
-                      {/* Checkbox */}
-                      <td className="p-3">
-                        <div className="flex items-center justify-center gap-2">
+            {/* Table Section with Scroll */}
+            <div className="mt-6 border border-gray-200 rounded-lg overflow-hidden">
+              <div className="max-h-[600px] overflow-y-auto overflow-x-auto relative">
+                <table className="w-full min-w-[1000px] border-collapse">
+                  <thead className="sticky top-0 z-10 bg-[#f8f9fa] shadow-sm">
+                    <tr className="border-b border-gray-200">
+                      <th className="p-3 text-left text-sm font-semibold text-gray-700 w-12 bg-[#f8f9fa]">
+                        <div className="flex items-center justify-center">
                           <input
                             type="checkbox"
-                            checked={item.selected || false}
-                            onChange={() => handleSelectOne(item.id)}
+                            checked={isAllSelected}
+                            onChange={handleSelectAll}
                             className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
                           />
                         </div>
-                      </td>
-
-                      {/* SL */}
-                      <td className="p-3 text-sm text-gray-700">{item.sl}</td>
-
-                      {/* Date */}
-                      <td className="p-3">
-                        <div className="flex items-center gap-2 text-sm text-gray-700">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-gray-400"
-                          >
-                            <rect
-                              x="3"
-                              y="4"
-                              width="18"
-                              height="18"
-                              rx="2"
-                              ry="2"
-                            />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                          </svg>
-                          {item.date}
-                        </div>
-                      </td>
-
-                      {/* Day */}
-                      <td className="p-3 text-sm text-gray-700">{item.day}</td>
-
-                      {/* Subject - Using DefaultSelect */}
-                      <td className="p-3 min-w-[150px]">
-                        <DefaultSelect
-                          label=""
-                          options={subjectOptions}
-                          valueField="value"
-                          nameField="label"
-                          registerKey={`subject_${item.id}`}
-                          defaultValue={item.subject}
-                          onChange={(selectedOption) => {
-                            const newData = [...examRoutineData];
-                            newData[index].subject = selectedOption.value;
-                            setExamRoutineData(newData);
-                          }}
-                        />
-                      </td>
-
-                      {/* Start Time */}
-                      <td className="p-3">
-                        <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50 p-2 rounded-md border border-gray-200">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-gray-400"
-                          >
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          {item.startTime}
-                        </div>
-                      </td>
-
-                      {/* End Time */}
-                      <td className="p-3">
-                        <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50 p-2 rounded-md border border-gray-200">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-gray-400"
-                          >
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          {item.endTime}
-                        </div>
-                      </td>
-
-
-                      {/* Actions */}
-                      <td className="p-3">
-                        <div className="flex items-center justify-center gap-1.5">
-                          {/* Copy Button (Blue) */}
-                          <button
-                            type="button"
-                            onClick={() => handleCopy(item)}
-                            className="flex items-center justify-center w-8 h-8 rounded border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
-                            title="Add"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M12 5v14" />
-                              <path d="M5 12h14" />
-                            </svg>
-                          </button>
-
-                          {/* Edit Button (Orange) */}
-                          <button
-                            type="button"
-                            onClick={() => handleEdit(item)}
-                            className="flex items-center justify-center w-8 h-8 rounded border border-orange-200 bg-orange-50 text-orange-500 hover:bg-orange-100 transition-colors"
-                            title="Edit"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                            </svg>
-                          </button>
-
-
-                          {/* Delete Button (Red) */}
-                          <button
-                            type="button"
-                            onClick={() => handleDelete(item.id)}
-                            className="flex items-center justify-center w-8 h-8 rounded border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
-                            title="Delete"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </button>
-                        </div>
-                      </td>
+                      </th>
+                      <th className="p-3 text-center text-sm font-semibold text-gray-700 w-12 bg-[#f8f9fa]">
+                        ক্রম
+                      </th>
+                      <th className="p-3 text-left text-sm font-semibold text-gray-700 bg-[#f8f9fa]">
+                        ক্যালেন্ডার তারিখ
+                      </th>
+                      <th className="p-3 text-center text-sm font-semibold text-gray-700 bg-[#f8f9fa]">
+                        ইংরেজী/আরবি
+                      </th>
+                      <th className="p-3 text-left text-sm font-semibold text-gray-700 bg-[#f8f9fa]">
+                        বার
+                      </th>
+                      <th className="p-3 text-center text-sm font-semibold text-gray-700 bg-[#f8f9fa]">
+                        বিষয়
+                      </th>
+                      <th className="p-3 text-center text-sm font-semibold text-gray-700 bg-[#f8f9fa]">
+                        শুরু সময়
+                      </th>
+                      <th className="p-3 text-center text-sm font-semibold text-gray-700 bg-[#f8f9fa]">
+                        শেষ সময়
+                      </th>
+                      <th className="p-3 text-center text-sm font-semibold text-gray-700 w-36 bg-[#f8f9fa]">
+                        কার্যক্রম
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {examRoutineData.map((item, index) => (
+                      <tr
+                        key={item.id}
+                        className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="p-3">
+                          <div className="flex items-center justify-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={item.selected || false}
+                              onChange={() => handleSelectOne(item.id)}
+                              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                            />
+                          </div>
+                        </td>
+
+                        <td className="p-3 text-sm text-gray-700">{item.sl}</td>
+
+                        <td className="p-3">
+                          <div className="inline-flex items-center gap-2 whitespace-nowrap rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-700">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="shrink-0 text-gray-400"
+                            >
+                              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                              <line x1="16" y1="2" x2="16" y2="6" />
+                              <line x1="8" y1="2" x2="8" y2="6" />
+                              <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                            {item.date}
+                          </div>
+                        </td>
+
+                        <td className="p-3 text-sm text-gray-700">
+                          <DefaultInput registerKey="dateInput" />
+                        </td>
+                        <td className="p-3 text-sm text-gray-700">{item.day}</td>
+
+                        <td className="p-3 min-w-[150px]">
+                          <DefaultSelect
+                            label=""
+                            options={subjectOptions}
+                            valueField="value"
+                            nameField="label"
+                            registerKey={`subject_${item.id}`}
+                            defaultValue={item.subject}
+                            onChange={(selectedOption) => {
+                              const newData = [...examRoutineData];
+                              const realIndex = examRoutineData.findIndex(
+                                (d) => d.id === item.id
+                              );
+                              newData[realIndex].subject = selectedOption.value;
+                              setExamRoutineData(newData);
+                            }}
+                          />
+                        </td>
+
+                        <td className="p-3">
+                          <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50 p-2 rounded-md border border-gray-200">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="text-gray-400"
+                            >
+                              <circle cx="12" cy="12" r="10" />
+                              <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                            {item.startTime}
+                          </div>
+                        </td>
+
+                        <td className="p-3">
+                          <div className="flex items-center gap-2 text-sm text-gray-700 bg-gray-50 p-2 rounded-md border border-gray-200">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="text-gray-400"
+                            >
+                              <circle cx="12" cy="12" r="10" />
+                              <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                            {item.endTime}
+                          </div>
+                        </td>
+
+                        <td className="p-3">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleCopy(item)}
+                              className="flex items-center justify-center w-8 h-8 rounded border border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                              title="Add"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M12 5v14" />
+                                <path d="M5 12h14" />
+                              </svg>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleEdit(item)}
+                              className="flex items-center justify-center w-8 h-8 rounded border border-orange-200 bg-orange-50 text-orange-500 hover:bg-orange-100 transition-colors"
+                              title="Edit"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                              </svg>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDelete(item.id)}
+                              className="flex items-center justify-center w-8 h-8 rounded border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                              title="Delete"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="3 6 5 6 21 6" />
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+
+                    {examRoutineData.length === 0 && (
+                      <tr>
+                        <td colSpan="9" className="text-center py-10 text-gray-400">
+                          কোনো ডাটা পাওয়া যায়নি
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
-
+            {/* Save Button Section */}
+            <div className="flex justify-end pt-4 border-t border-gray-100">
+              <button
+                type="submit"
+                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                  <polyline points="17 21 17 13 7 13 7 21" />
+                  <polyline points="7 3 7 8 15 8" />
+                </svg>
+                সংরক্ষণ করুন
+              </button>
+            </div>
           </form>
         </FormProvider>
       </div>
     </div>
   );
 };
-
 
 export default ExamRouteCreateModal;

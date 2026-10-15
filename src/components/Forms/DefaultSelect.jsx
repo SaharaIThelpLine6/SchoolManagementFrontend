@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useLayoutEffect } from "react";
 import { createPortal } from "react-dom";
 import { useFormContext } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
@@ -33,10 +33,13 @@ const DefaultSelect = ({
   const translate = useTranslate();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [dropdownPosition, setDropdownPosition] = useState({
+
+  // পজিশন স্টেট
+  const [dropdownStyle, setDropdownStyle] = useState({
     top: 0,
     left: 0,
     width: 0,
+    placement: "bottom",
   });
 
   const triggerRef = useRef(null);
@@ -49,7 +52,6 @@ const DefaultSelect = ({
     register(registerKey, { required: require });
   }, [register, registerKey, require]);
 
-  // 🔍 সার্চ টার্ম অনুযায়ী অপশন ফিল্টার
   const filteredOptions = useMemo(() => {
     if (!searchable || !searchTerm.trim()) return options || [];
     const lowerSearch = searchTerm.toLowerCase();
@@ -61,19 +63,59 @@ const DefaultSelect = ({
     });
   }, [options, searchTerm, nameField, unicode, searchable]);
 
-  // ড্রপডাউন পজিশন ক্যালকুলেট
+  // প্রাথমিক পজিশন ক্যালকুলেশন (রেন্ডারের আগে)
   const updatePosition = () => {
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.bottom + window.scrollY,
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      // আনুমানিক উচ্চতা (পরে আসল উচ্চতা দিয়ে ঠিক করা হবে)
+      const estimatedHeight = 250;
+
+      let placement = "bottom";
+      if (spaceBelow < estimatedHeight && spaceAbove > spaceBelow) {
+        placement = "top";
+      }
+
+      setDropdownStyle((prev) => ({
+        ...prev,
         left: rect.left + window.scrollX,
         width: rect.width,
-      });
+        placement: placement,
+        triggerTop: rect.top + window.scrollY,
+        triggerBottom: rect.bottom + window.scrollY,
+      }));
     }
   };
 
-  // ক্লিক আউটসাইড হ্যান্ডলার (শুধু নিজের dropdown বন্ধ করার জন্য)
+  // 🌟 আসল উচ্চতা মাপার জন্য useLayoutEffect (গ্যাপ দূর করার মূল সমাধান)
+  useLayoutEffect(() => {
+    if (isOpen && dropdownRef.current && triggerRef.current) {
+      const dropdownHeight = dropdownRef.current.getBoundingClientRect().height;
+      const rect = triggerRef.current.getBoundingClientRect();
+
+      const spaceBelow = window.innerHeight - rect.bottom;
+
+      // যদি নিচে পর্যাপ্ত জায়গা না থাকে এবং উপরে জায়গা থাকে
+      if (spaceBelow < dropdownHeight && rect.top > dropdownHeight) {
+        // উপরে পজিশন: ট্রিগারের টপ থেকে ড্রপডাউনের উচ্চতা বিয়োগ
+        setDropdownStyle((prev) => ({
+          ...prev,
+          placement: "top",
+          top: rect.top + window.scrollY - dropdownHeight, // একদম নিখুঁত পজিশন
+        }));
+      } else {
+        // নিচে পজিশন
+        setDropdownStyle((prev) => ({
+          ...prev,
+          placement: "bottom",
+          top: rect.bottom + window.scrollY,
+        }));
+      }
+    }
+  }, [isOpen, filteredOptions]); // filteredOptions পরিবর্তন হলে (সার্চ করলে) উচ্চতা আবার মাপবে
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -86,11 +128,23 @@ const DefaultSelect = ({
         setSearchTerm("");
       }
     };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
-  // স্ক্রল/রিসাইজ পজিশন আপডেট
+    const handleCloseOthers = (e) => {
+      if (e.detail !== registerKey) {
+        setIsOpen(false);
+        setSearchTerm("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("closeOtherSelects", handleCloseOthers);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("closeOtherSelects", handleCloseOthers);
+    };
+  }, [registerKey]);
+
   useEffect(() => {
     if (isOpen) {
       updatePosition();
@@ -103,7 +157,6 @@ const DefaultSelect = ({
     }
   }, [isOpen]);
 
-  // সার্চ ইনপুটে অটো ফোকাস
   useEffect(() => {
     if (isOpen && searchable && searchInputRef.current) {
       setTimeout(() => searchInputRef.current?.focus(), 50);
@@ -116,7 +169,9 @@ const DefaultSelect = ({
       e.preventDefault();
     }
     if (disabled || readOnly) return;
+
     if (!isOpen) {
+      window.dispatchEvent(new CustomEvent("closeOtherSelects", { detail: registerKey }));
       updatePosition();
       setSearchTerm("");
     }
@@ -155,39 +210,27 @@ const DefaultSelect = ({
 
   const hasError = errors[registerKey];
 
-  // 🧩 ড্রপডাউন মেনু (Portal)
   const dropdownMenu = isOpen
     ? createPortal(
       <div
         ref={dropdownRef}
-        data-select-portal="true"   // 👈 Modal এর ClickOutside থেকে exempt করার জন্য
+        data-select-portal="true"
         onMouseDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
         style={{
           position: "absolute",
-          top: `${dropdownPosition.top}px`,
-          left: `${dropdownPosition.left}px`,
-          width: `${dropdownPosition.width}px`,
+          top: `${dropdownStyle.top}px`, // useLayoutEffect থেকে পাওয়া নিখুঁত পজিশন
+          left: `${dropdownStyle.left}px`,
+          width: `${dropdownStyle.width}px`,
           zIndex: 9999,
         }}
         className="bg-white border border-gray-200 rounded-lg shadow-2xl animate-fade-in"
       >
-        {/* 🔍 Search Input (শুধু searchable হলে) */}
         {searchable && (
           <div className="p-2 border-b border-gray-100 sticky top-0 bg-white z-10 rounded-t-lg">
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
@@ -206,17 +249,7 @@ const DefaultSelect = ({
                   onClick={() => setSearchTerm("")}
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" y1="6" x2="6" y2="18"></line>
                     <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
@@ -226,40 +259,21 @@ const DefaultSelect = ({
           </div>
         )}
 
-        {/* 📋 Options List */}
         <ul className="py-1 max-h-60 overflow-y-auto">
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option) => {
-              const isSelected =
-                String(option[valueField]) === String(selectedValue);
-              const labelText = unicode
-                ? bnBijoy2Unicode(option[nameField])
-                : option[nameField];
+              const isSelected = String(option[valueField]) === String(selectedValue);
+              const labelText = unicode ? bnBijoy2Unicode(option[nameField]) : option[nameField];
               return (
                 <li
                   key={option[valueField]}
                   onClick={() => handleSelect(option[valueField], option)}
                   className={`px-3 py-2 text-sm cursor-pointer transition-colors duration-150 flex items-center justify-between
-                      ${isSelected
-                      ? "bg-blue-50 text-blue-700 font-medium"
-                      : "text-gray-700 hover:bg-gray-100"
-                    }
-                    `}
+                      ${isSelected ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700 hover:bg-gray-100"}`}
                 >
                   <span>{labelText}</span>
                   {isSelected && (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="text-blue-600"
-                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">
                       <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
                   )}
@@ -278,16 +292,9 @@ const DefaultSelect = ({
     : null;
 
   return (
-    <div
-      className={`font-SolaimanLipi w-full ${labelPosition === "left" ? "flex items-center gap-4" : ""
-        }`}
-    >
+    <div className={`font-SolaimanLipi w-full ${labelPosition === "left" ? "flex items-center gap-4" : ""}`}>
       {label && (
-        <label
-          htmlFor={registerKey}
-          className={`font-bold text-sm ${labelPosition === "left" ? "text-black" : "mb-1 block text-black"
-            }`}
-        >
+        <label htmlFor={registerKey} className={`font-bold text-sm ${labelPosition === "left" ? "text-black" : "mb-1 block text-black"}`}>
           <div className="flex items-center gap-1">
             <span className={labelColor}>{translate(label)}</span>
             {require && <span className="text-red-500">*</span>}
@@ -297,50 +304,26 @@ const DefaultSelect = ({
       )}
 
       <div className={labelPosition === "left" ? "flex-1" : ""}>
-        {/* ট্রিগার বাটন */}
         <div
           ref={triggerRef}
           onClick={handleToggle}
-          onMouseDown={(e) => e.stopPropagation()}   // 👈 Modal এর ClickOutside কে আটকাতে
+          onMouseDown={(e) => e.stopPropagation()}
           className={`relative flex items-center justify-between w-full rounded-lg border text-sm h-11 px-3 transition-all duration-200 ease-in-out bg-white text-gray-900 cursor-pointer select-none
-            ${hasError
-              ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200"
-              : "border-gray-300 hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-            }
+            ${hasError ? "border-red-500 focus:border-red-500 focus:ring-2 focus:ring-red-200" : "border-gray-300 hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"}
             ${disabled ? "cursor-not-allowed bg-slate-100 text-gray-500" : ""}
-            ${readOnly ? "cursor-default bg-gray-50" : ""}
-          `}
+            ${readOnly ? "cursor-default bg-gray-50" : ""}`}
         >
-          <span
-            className={`truncate ${!selectedValue ? "text-gray-400" : "text-gray-900"
-              }`}
-          >
+          <span className={`truncate ${!selectedValue ? "text-gray-400" : "text-gray-900"}`}>
             {getSelectedLabel()}
           </span>
 
-          {/* Chevron Icon */}
-          <span
-            className={`absolute right-4 top-1/2 transform -translate-y-1/2 transition-transform duration-300 pointer-events-none ${isOpen ? "rotate-180" : "rotate-0"
-              }`}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-gray-500"
-            >
+          <span className={`absolute right-4 top-1/2 transform -translate-y-1/2 transition-transform duration-300 pointer-events-none ${isOpen ? "rotate-180" : "rotate-0"}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
               <polyline points="6 9 12 15 18 9"></polyline>
             </svg>
           </span>
         </div>
 
-        {/* Portal ড্রপডাউন */}
         {dropdownMenu}
 
         {hasError && (
