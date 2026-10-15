@@ -1248,6 +1248,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               nameField="ResidentialName"
               registerKey="RDID"
               unicode
+              hidePlaceholder
+              initialValue={5}
             />
             <DefaultInput
               label={ui('studentId')}
@@ -1263,9 +1265,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               registerKey="ReportID"
             />
 
-            {/* প্রিভিউ বোতামটা তুলে দেওয়া হয়েছে — এখন সরাসরি প্রিন্ট।
-                ব্রাউজারের প্রিন্ট পর্দাতেই পুরোটা দেখা যায়, তাই আলাদা করে
-                পর্দায় বসিয়ে দেখার দরকার পড়ে না। */}
             <button
               type="button"
               onClick={handlePrint}
@@ -1855,11 +1854,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
             {/* ====================================== রুটিনের সেটিং (শুধু A4) */}
             {routineOn ? (
               <>
-                <p className="font-bold text-[16px] mt-8 mb-3">
-                  {ui('optionalRouting')}
-                </p>
-
-                <p className="text-[14px] font-bold text-gray-700 mb-2">
+                <p className="text-[14px] font-bold text-gray-700 mt-8 mb-3">
                   {rui('routineColumns')}
                 </p>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -1894,39 +1889,60 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
 
                 {/* ডাটার অবস্থা — রুটিন, হল ও সিট প্ল্যান তিনটাই এক নজরে */}
                 <div className="mt-5 rounded-[8px] border border-gray-200 bg-gray-50 px-3 py-2">
+                  {/* রুটিন রেডি */}
                   <p className="text-[13px] text-gray-700">
-                    {routineFetching
-                      ? ui('loading')
-                      : routineRows.length
-                      ? `${rui('routineReady')} — ${toLangDigit(
-                          routineRows.length,
-                          lang
-                        )} ${rui('routineRows')}`
-                      : rui('noRoutine')}
+                    {routineFetching ? (
+                      ui('loading')
+                    ) : routineRows.length ? (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="text-gray-500">{'>'}</span>
+                        <span>{rui('routineReady')}</span>
+                        <span className="text-gray-500">{'—'}</span>
+                        <span>
+                          {toLangDigit(routineRows.length, lang)} {rui('routineRows')}
+                        </span>
+                      </span>
+                    ) : (
+                      rui('noRoutine')
+                    )}
                   </p>
+
+                  {/* হল ও কলাম */}
                   <p className="text-[12px] text-gray-500 mt-0.5">
-                    {hallGrid.columns.length
-                      ? `${hallGrid.hallName || rui('hall')} — ${toLangDigit(
-                          hallGrid.columns.length,
-                          lang
-                        )} ${rui('column')}, ${rui('totalSeats')} ${toLangDigit(
-                          hallGrid.totalSeats,
-                          lang
-                        )}`
-                      : rui('noHall')}
+                    {hallGrid.columns.length ? (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="text-gray-500">{'>'}</span>
+                        <span>{hallGrid.hallName || rui('hall')}</span>
+                        <span className="text-gray-400">{'—'}</span>
+                        <span>
+                          {toLangDigit(hallGrid.columns.length, lang)} {rui('column')},{' '}
+                          {rui('totalSeats')} {toLangDigit(hallGrid.totalSeats, lang)}
+                        </span>
+                      </span>
+                    ) : (
+                      rui('noHall')
+                    )}
                   </p>
+
+                  {/* সিট প্ল্যান */}
                   <p
                     className="text-[12px] mt-0.5"
                     style={{ color: hallSeats.size ? '#15803d' : '#b45309' }}
                   >
-                    {routineFetching
-                      ? ui('loading')
-                      : hallSeats.size
-                      ? `${rui('seatPlanReady')} — ${toLangDigit(
-                          hallSeats.size,
-                          lang
-                        )} ${rui('seatPlanRows')}`
-                      : rui('noSeatPlan')}
+                    {routineFetching ? (
+                      ui('loading')
+                    ) : hallSeats.size ? (
+                      <span className="inline-flex items-center gap-1">
+                        <span className="text-gray-500">{'>'}</span>
+                        <span>{rui('seatPlanReady')}</span>
+                        <span className="text-gray-500">{'—'}</span>
+                        <span>
+                          {toLangDigit(hallSeats.size, lang)} {rui('seatPlanRows')}
+                        </span>
+                      </span>
+                    ) : (
+                      rui('noSeatPlan')
+                    )}
                   </p>
                 </div>
               </>
@@ -1954,18 +1970,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
             <p className="text-[12px] text-gray-500 mb-2">{ui('routineColorHint')}</p>
 
             <div className="flex items-center gap-2 flex-wrap">
-              <button
-                type="button"
-                onClick={() => setRoutineColor('')}
-                className={`rounded-full border px-3 py-1.5 text-[13px] font-medium transition ${
-                  routineColor
-                    ? 'border-gray-200 bg-white text-gray-600 hover:bg-gray-100'
-                    : 'border-blue-500 bg-blue-50 text-blue-700'
-                }`}
-              >
-                {ui('routineColorReset')}
-              </button>
-
+              
               {ROUTINE_COLOR_PRESETS.map((hex) => {
                 const on = String(routineColor).toLowerCase() === hex.toLowerCase();
                 return (

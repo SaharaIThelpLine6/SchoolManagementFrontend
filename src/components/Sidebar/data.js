@@ -118,7 +118,7 @@ export const menuData = [
       },
       {
         id: '10',
-        name: 'Students Report',
+        name: 'Students Report (Demo)',
         route: 'students/report',
       },
       {

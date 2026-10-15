@@ -139,8 +139,12 @@ const ExamReport = ({ pageTitle }) => {
           'Langauge',
           'PdfSelect',
         ].includes(fieldName);
+      // case 8:
+      //   return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'ClassID'].includes(
+      //     fieldName
+      //   );
       case 8:
-        return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'ClassID'].includes(
+        return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'SubClassID'].includes(
           fieldName
         );
       case 9:
@@ -183,7 +187,13 @@ const ExamReport = ({ pageTitle }) => {
     'id',
     'PdfID'
   ]);
-  const shouldSkip = !ReportID || !SessionID || !ExamID || !SubClassID || !RDID || !PdfID;
+  // রিপোর্ট ৮ এ PDF বাছাই নেই, তাই PdfID এর শর্তটা ওখানে বসে না —
+  // বসালে query কখনোই চলত না আর তালিকা ফাঁকা থাকত
+  const isSignatureSheet = Number(ReportID) === 8;
+  const shouldSkip = isSignatureSheet
+    ? !ReportID || !SessionID || !ExamID || !SubClassID || !RDID
+    : !ReportID || !SessionID || !ExamID || !SubClassID || !RDID || !PdfID;
+  // const shouldSkip = !ReportID || !SessionID || !ExamID || !SubClassID || !RDID || !PdfID;
 
 
 
@@ -729,7 +739,19 @@ const ExamReport = ({ pageTitle }) => {
               />
             )}
           {/* 8. নম্বরপত্র ভর্তি সিরিয়ালে */}
-          {Number(selectedReportID) === 8 && <SingatureSheetNS />}
+          {/* {Number(selectedReportID) === 8 && <SingatureSheetNS />} */}
+          
+          {/* 8. স্বাক্ষরপত্র ও নম্বরপত্র */}
+          {Number(selectedReportID) === 8 && (
+            <SingatureSheetNS
+              reportData={data}
+              queryParams={queryParams}
+              documentLogo={documentLogo}
+              logoIsActive={logoIsActive}
+            />
+          )}
+
+
           {/* 9. সকল পরীক্ষার্থীর পরিসংখ্যান  */}
           {Number(selectedReportID) === 9 && <StatisticsOfAllStudents />}
           {Number(selectedReportID) === 10 && <ExaminationRoomSeatingChart queryParams={queryParams} />}
