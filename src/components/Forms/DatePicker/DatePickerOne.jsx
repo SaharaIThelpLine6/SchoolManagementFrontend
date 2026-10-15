@@ -89,7 +89,8 @@ const DatePickerOne = ({
             : 'mb-1 block'
             }`}
         >
-          {translate(dateCalender)} :
+          {translate(dateCalender)}
+          {require && <span className="text-red-500 ml-1">*</span>} :
         </label>
       )}
 

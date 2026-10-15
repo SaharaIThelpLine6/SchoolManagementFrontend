@@ -543,8 +543,8 @@ export default function DataExportModel({ dataExport }) {
                 <div className={`rounded-xl border bg-white shadow-sm overflow-hidden ${isEditMode ? "border-amber-400 ring-2 ring-amber-200" : "border-gray-200"
                     }`}>
                     <div className={`px-5 py-3 ${isEditMode
-                            ? "bg-gradient-to-r from-amber-500 to-orange-500"
-                            : "bg-gradient-to-r from-blue-600 to-indigo-600"
+                        ? "bg-gradient-to-r from-amber-500 to-orange-500"
+                        : "bg-gradient-to-r from-blue-600 to-indigo-600"
                         }`}>
                         <h3 className="text-white font-bold text-base flex items-center gap-2">
                             {isEditMode
@@ -562,6 +562,7 @@ export default function DataExportModel({ dataExport }) {
                         <DefaultInput
                             label="Report Name"
                             registerKey="ReportName"
+                            placeholder="রিপোর্টের নাম লিখুন..."
                             require
                             showError
                         />
@@ -651,8 +652,8 @@ export default function DataExportModel({ dataExport }) {
                                 </div>
                                 <div
                                     className={`flex items-center justify-between gap-3 rounded-lg border px-4 py-2.5 text-sm ${limitReached
-                                            ? "bg-amber-50 border-amber-300 text-amber-800"
-                                            : "bg-blue-50 border-blue-200 text-blue-800"
+                                        ? "bg-amber-50 border-amber-300 text-amber-800"
+                                        : "bg-blue-50 border-blue-200 text-blue-800"
                                         }`}
                                 >
                                     <span className="font-semibold">
@@ -684,10 +685,10 @@ export default function DataExportModel({ dataExport }) {
                                         <label
                                             key={col.id}
                                             className={`group flex items-center gap-2.5 px-3 py-2 rounded-lg border ${isChecked
-                                                    ? "cursor-pointer bg-blue-50 border-blue-400 ring-1 ring-blue-200"
-                                                    : isDisabled
-                                                        ? "cursor-not-allowed bg-gray-100 border-gray-200 opacity-50"
-                                                        : "cursor-pointer bg-white border-gray-200 hover:border-blue-300"
+                                                ? "cursor-pointer bg-blue-50 border-blue-400 ring-1 ring-blue-200"
+                                                : isDisabled
+                                                    ? "cursor-not-allowed bg-gray-100 border-gray-200 opacity-50"
+                                                    : "cursor-pointer bg-white border-gray-200 hover:border-blue-300"
                                                 }`}
                                         >
                                             <input
@@ -764,8 +765,8 @@ export default function DataExportModel({ dataExport }) {
                                     type="submit"
                                     disabled={isSaving}
                                     className={`inline-flex items-center justify-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg text-white border shadow-sm hover:shadow-md transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${isEditMode
-                                            ? "bg-amber-500 hover:bg-amber-600 border-amber-500 hover:border-amber-600"
-                                            : "bg-emerald-500 hover:bg-emerald-600 border-emerald-500 hover:border-emerald-600"
+                                        ? "bg-amber-500 hover:bg-amber-600 border-amber-500 hover:border-amber-600"
+                                        : "bg-emerald-500 hover:bg-emerald-600 border-emerald-500 hover:border-emerald-600"
                                         }`}
                                 >
                                     {isSaving
@@ -834,8 +835,8 @@ export default function DataExportModel({ dataExport }) {
                                                     onClick={() => handleEditReport(templateKey)}
                                                     disabled={isDeleting || isCurrentlyEditing}
                                                     className={`inline-flex items-center justify-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg border transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${isCurrentlyEditing
-                                                            ? "bg-amber-50 text-amber-600 border-amber-300"
-                                                            : "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 hover:border-blue-300"
+                                                        ? "bg-amber-50 text-amber-600 border-amber-300"
+                                                        : "bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 hover:border-blue-300"
                                                         }`}
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

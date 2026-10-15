@@ -70,6 +70,11 @@ const ClickOutside = ({
         return;
       }
 
+      // ✅ Select / Portal dropdown এর ভিতরে ক্লিক হলে Modal বন্ধ করবেন না
+      if (event.target.closest('[data-select-portal="true"]')) {
+        return;
+      }
+
       let clickedInside = false;
 
       if (wrapperRef.current && wrapperRef.current.contains(event.target)) {

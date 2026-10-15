@@ -361,11 +361,11 @@ export const menuData = [
         name: 'Mark Sheet',
         route: 'result/mark-sheet',
       },
-      {
-        id: '4',
-        name: 'Result Report',
-        route: 'result/report',
-      },
+      // {
+      //   id: '4',
+      //   name: 'Result Report',
+      //   route: 'result/report',
+      // },
       {
         id: '',
         name: 'Admission Form',

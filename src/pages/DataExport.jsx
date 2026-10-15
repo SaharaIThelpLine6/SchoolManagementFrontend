@@ -562,7 +562,7 @@ const DataExport = ({ pageTitle }) => {
     html, body { margin: 0; padding: 0; background: #fff; }
     .pc-root { font-family: 'SolaimanLipi', sans-serif; color: #000; }
     .pc-root .pc-header { display: flow-root; position: relative; margin-bottom: 8px; }
-    .pc-root .pc-logo { position: absolute; left: 0; top: 0; height: 90px; width: auto; max-width: 140px; object-fit: contain; }
+    .pc-root .pc-logo { position: absolute; left: 0; top: 0; margin-top: 15px;  height:${isLandscape ? "90px" : "60px"}; width: auto; max-width: 140px; object-fit: contain;}
     .pc-root .print-page { 
       box-sizing: border-box; 
       width: ${pageWmm}mm; 
@@ -987,7 +987,19 @@ const DataExport = ({ pageTitle }) => {
               <DefaultSelect options={sessionData || []} require={'Session is required'} nameField={'SessionName'} valueField={'SessionID'} registerKey={'SessionID'} type={'number'} label={translate('Session')} error={errors.filters} />
             </div>
             <div className="w-full">
-              <DefaultSelect options={subClassData || []} require={'Sub Class is required'} nameField={'SubClass'} valueField={'SubClassID'} registerKey={'SubClassID'} type={'number'} label={translate('Sub Class')} error={errors.filters} unicode={true} />
+              <DefaultSelect
+                options={subClassData || []}
+                require={true}
+                nameField="SubClass"
+                valueField="SubClassID"
+                registerKey="SubClassID"
+                type="number"
+                label="Sub Class"
+                unicode={true}
+                searchable={true}                       // 👈 সার্চ চালু
+                searchPlaceholder="খুঁজুন..."           // অপশনাল
+                noResultText="কিছু পাওয়া যায়নি"        // অপশনাল
+              />
             </div>
             <div className="w-full">
               <DefaultSelect

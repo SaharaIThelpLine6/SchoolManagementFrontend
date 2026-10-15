@@ -95,6 +95,8 @@ import UpdateStudentFormModal from './Forms/UpdateStudentFormModal';
 import AddParentFormModal from './Forms/AddParentFormModal';
 import DivisionMarkSheetNoteModal from '../view/result/DivisionMarkSheetNoteModal';
 import ResultReportSettingModal from '../view/result/Reports/ResultReportSettingModal';
+import ExamRouteCreateModal from '../view/exam/ExamRouteCreateModal';
+import ExamRouteSettingCreateModal from '../view/exam/ExamRouteSettingCreateModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
@@ -431,6 +433,12 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'STUDENT_MARK_SHEET_NOTE' && (
                   <DivisionMarkSheetNoteModal />
+                )}
+                {modalType === 'EXAM_ROUTINE_CREATE' && (
+                  <ExamRouteCreateModal />
+                )}
+                {modalType === 'EXAM_ROUTINE_SETTING' && (
+                  <ExamRouteSettingCreateModal />
                 )}
               </div>
             )}

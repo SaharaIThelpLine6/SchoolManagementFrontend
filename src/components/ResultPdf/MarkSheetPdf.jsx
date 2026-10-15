@@ -601,6 +601,9 @@ const MarkSheetPdf = ({ data }) => {
   const divisions = Array.isArray(data?.divisions) ? data.divisions : [];
   const students = Array.isArray(data?.students) ? data.students : [];
 
+  console.log(data, "data")
+  console.log(divisions, "divisions")
+
   if (students.length === 0) {
     return (
       <div className="flex items-center justify-center p-10 text-slate-500 bg-slate-50 rounded-lg border border-slate-200">

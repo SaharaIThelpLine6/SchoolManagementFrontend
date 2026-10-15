@@ -1,3 +1,5 @@
+
+
 import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
@@ -42,6 +44,7 @@ import SingleClassRoutingPDF from '../view/exam/ExamRouting/SingleClassRoutingPD
 import StudentFeeGroup from '../view/exam/StudentFeeGroup';
 import DatePickerOne from '../components/Forms/DatePicker/DatePickerOne';
 import TimePicker from '../components/Forms/DatePicker/TimePicker';
+import { showModal } from '../utils/ModalControlar';
 
 const PAGE_SIZE = 10;
 
@@ -886,14 +889,68 @@ const ExamRouting = ({ pageTitle }) => {
     }
   }, [isError, error]);
 
+
+  const handleExamRoutineCreate = () => {
+    showModal('পরীক্ষার রুটিন তৈরি করুন', 'EXAM_ROUTINE_CREATE', {
+      closeOnOutSide: false,
+    });
+  };
+
+  const handleExamRoutineSetting = () => {
+    showModal('সেটিং তৈরি করুন', 'EXAM_ROUTINE_SETTING', {
+      closeOnOutSide: false,
+    });
+  };
+
   return (
     <div className="">
       <div className="font-default bg-white p-4 md:p-6 rounded-xl shadow-lg print:hidden">
         {/* Header */}
-        <div className="filter_header border-b border-[#e9edf4] pb-4 md:pb-5">
+        <div className="flex flex-row justify-between border-b border-[#e9edf4] pb-4 md:pb-5">
           <h3 className="text-lg md:text-xl font-bold">
             {translate('Exam Routine')}
           </h3>
+          <div className="flex flex-row gap-2">
+
+            {/* <Button onClick={handleExamRoutineCreate}>
+              <span className="flex items-center gap-1.5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={18}
+                  height={18}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 5v14" />
+                  <path d="M5 12h14" />
+                </svg>
+                রুটিন তৈরি করুন
+              </span>
+            </Button>
+            <Button onClick={handleExamRoutineSetting}>
+              <span className="flex items-center gap-1.5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={18}
+                  height={18}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 5v14" />
+                  <path d="M5 12h14" />
+                </svg>
+                সেটিং তৈরি করুন
+              </span>
+            </Button> */}
+          </div>
         </div>
 
         <FormProvider {...methods}>
@@ -957,7 +1014,7 @@ const ExamRouting = ({ pageTitle }) => {
               </label>
 
             </div>
-            {/* 
+            {/*
             <div className="flex items-start w-full mb-4">
 
             </div> */}
@@ -1028,7 +1085,7 @@ const ExamRouting = ({ pageTitle }) => {
                         placeholder={translate("Date")}
                         type="text"
                         className="w-full h-full px-1 py-2 focus:outline-0 text-center"
-                        label="hidden"  
+                        label="hidden"
                       /> */}
                       <DefaultInput registerKey={`bndate_${index}`} placeholder={translate("Date")} type="text" label="" />
                     </div>
@@ -1341,7 +1398,7 @@ const ExamRouting = ({ pageTitle }) => {
               </label>
 
             </div>
-            {/* 
+            {/*
             <div className="flex items-start w-full mb-4">
 
             </div> */}
