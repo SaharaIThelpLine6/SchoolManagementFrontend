@@ -9,6 +9,13 @@ import Loading from '../Loading/Loading';
 import SvgIcon from '../icons/SvgIcon';
 import { menuData } from './data';
 
+const getDashboardPath = (route) => {
+  const normalizedRoute = String(route ?? '')
+    .replace(/^\/+/, '')
+    .replace(/^dashboard\/?/, '');
+  return normalizedRoute ? `/dashboard/${normalizedRoute}` : '/dashboard';
+};
+
 const SideBar = () => {
   const [openMenuId, setOpenMenuId] = useState(null);
   const location = useLocation();
@@ -349,7 +356,7 @@ const SideBar = () => {
                     {menu.subMenu.map((item) => (
                       <li key={item.id} className="relative z-10 pl-[26px]">
                         <NavLink
-                          to={item.route}
+                          to={getDashboardPath(item.route)}
                           end
                           className={({ isActive }) =>
                             `block py-2 pl-4 rounded-md transition
@@ -367,7 +374,7 @@ const SideBar = () => {
                 </>
               ) : (
                 <NavLink
-                  to={menu.route}
+                  to={getDashboardPath(menu.route)}
                   onClick={() => setOpenMenuId(null)}
                   className={({ isActive }) =>
                     `flex items-center gap-2 py-2 px-4 border-l-6 border-solid ${isActive

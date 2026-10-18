@@ -18,7 +18,7 @@ const AboutUs = lazy(() => import('../pages/LandingPage/AboutUs'));
 const ManagementTeam = lazy(() => import('../pages/LandingPage/ManagementTeam'));
 const PhotoGallery = lazy(() => import('../pages/LandingPage/PhotoGallery'));
 const ContactUs = lazy(() => import('../pages/LandingPage/ContactUs'));
-const PrivacyPolicy = lazy(() => import('../pages/LandingPage/PrivacyPolicy'));
+// const PrivacyPolicy = lazy(() => import('../pages/LandingPage/PrivacyPolicy'));
 const Login = lazy(() => import('../pages/Login'));
 
 // Layout
@@ -161,7 +161,7 @@ import ExamHallList from '../pages/ExamHallList';
 import ExamSitPlan from '../pages/ExamSitPlan';
 import CreateExamSitPlan from '../pages/CreateExamSitPlan';
 import UserAttendance from '../pages/UserAttendance';
-// import PrivacyPolicy from '../pages/PrivacyPolicy';
+import PrivacyPolicy from '../pages/PrivacyPolicy';
 import CreateAttendenceList from '../pages/CreateAttendenceList';
 import AttendenceTimeSetting from '../pages/AttendenceTimeSetting';
 import AttendenceHolidayAndLeave from '../pages/AttendenceHolidayAndLeave';
@@ -179,6 +179,9 @@ import TeacherSubjectsAsignPage from '../pages/TeacherSubjectsAsignPage';
 import MarkSheet from '../pages/MarkSheet';
 import TypeOfVacation from '../pages/TypeOfVacation';
 import PublicationOfResultsViaSMS from '../pages/PublicationOfResultsViaSMS';
+import ExamRoutingList from '../pages/ExamRoutingList';
+import ExamRoutingCreate from '../pages/ExamRoutingCreate';
+import ExamRoutineEdit from '../pages/ExamRoutineEdit';
 
 const Router = createBrowserRouter([
   {
@@ -192,6 +195,10 @@ const Router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />,
+  },
+   {
+    path: '/privacy-policy',
+    element: <PrivacyPolicy />,
   },
   {
     path: 'dashboard',
@@ -251,7 +258,7 @@ const Router = createBrowserRouter([
               // },
 
 
-              
+
               // {
               //   path: 'all-madrasah',
               //   element: (
@@ -842,7 +849,19 @@ const Router = createBrowserRouter([
               {
                 path: 'routing',
                 element: (
-                  <ExamRouting pageTitle="Exam Routing Create" />
+                  <ExamRoutingList pageTitle="Exam Routing Create" />
+                ),
+              },
+              {
+                path: 'routine-create',
+                element: (
+                  <ExamRoutingCreate pageTitle="Exam Routing Create" />
+                ),
+              },
+              {
+                path: 'routine-edit/:sessionID/:examID/:subClassID',
+                element: (
+                  <ExamRoutineEdit pageTitle="Exam Routing Edit" />
                 ),
               },
               // {

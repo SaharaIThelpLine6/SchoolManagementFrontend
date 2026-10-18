@@ -543,7 +543,7 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
                     return (
                       <tr key={`student-${student.ID}`} className="bg-transparent">
                         <td className="p-2 border text-center whitespace-nowrap bg-white">
-                          {convertOnLanguageChange(student?.AdmissionSerial)}
+                          {student?.AdmissionSerial ? convertOnLanguageChange(student?.AdmissionSerial) : ''}
                         </td>
                         <td className="p-2 border text-center whitespace-nowrap bg-white">
                           {convertOnLanguageChange(student?.UserCode)}

@@ -1,5 +1,3 @@
-
-
 import { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useDispatch } from 'react-redux';
@@ -350,7 +348,7 @@ const ExamRouting = ({ pageTitle }) => {
   }, [editData, methods]);
 
   // Delete Exam Feee Setting data
-  const handleDelete = async (id) => {
+  const handleDelete = async (routing) => {
     const result = await Swal.fire({
       title: 'আপনি কি নিশ্চিত?',
       text: 'একবার মুছে ফেলা হলে পুনরুদ্ধার করা যাবে না!',
@@ -362,7 +360,11 @@ const ExamRouting = ({ pageTitle }) => {
 
     if (result.isConfirmed) {
       try {
-        const response = await deleteExamRoutine(id).unwrap();
+        const response = await deleteExamRoutine({
+          sessionID: routing.SessionID ?? sessionID,
+          examID: routing.ExamID ?? examID,
+          subClassID: routing.SubClassID ?? SubClassID,
+        }).unwrap();
 
         Swal.fire({
           icon: 'success',
@@ -780,7 +782,7 @@ const ExamRouting = ({ pageTitle }) => {
             permissionType="delete"
             empty={true}
           >
-            <DeleteButton onClick={() => handleDelete(row.ERIDL)} />
+            <DeleteButton onClick={() => handleDelete(row)} />
           </ViewPermission>
         </div>
       ),
