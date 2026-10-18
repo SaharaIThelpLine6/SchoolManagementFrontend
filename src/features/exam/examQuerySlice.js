@@ -24,6 +24,7 @@ export const examSlice = createApi({
     'ExamTalentCondition',
     'ReportSettings',
     'ExamRoutine',
+    'ExamRoutineList',
     'ExamRules',
     'ExamStudentList',
     'ExamStudentListFilters',
@@ -322,9 +323,13 @@ export const examSlice = createApi({
       providesTags: ['ExamRoutine'],
     }),
     getAllExamRoutine: builder.query({
-      query: ({ sessionID, examID }) =>
-        `get_all_exam_routine/${sessionID}/${examID}`,
+      query: ({ sessionID, examID, subClassId}) =>
+        `get_all_exam_routine/${sessionID}/${examID}/${subClassId}`,
       providesTags: ['ExamRoutine'],
+    }),
+    getAllExamRoutineList: builder.query({
+      query: () => `get_all_exam_routine_list`,
+      providesTags: ['ExamRoutineList'],
     }),
     getSingleExamRoutine: builder.query({
       query: (eridl) => `get_single_exam_routine/${eridl}`,
@@ -337,22 +342,21 @@ export const examSlice = createApi({
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['ExamRoutine'],
     }),
     putExamRoutine: builder.mutation({
       query: (body) => ({
-        url: `exam_routine_update/${body.ID}`,
+        url: `exam_routine_update`,
         method: 'PUT',
         body,
       }),
-      invalidatesTags: ['ExamRoutine'],
+      invalidatesTags: ['ExamRoutine', 'ExamRoutineList'],
     }),
     deleteExamRoutine: builder.mutation({
-      query: (id) => ({
-        url: `delete_exam_routine/${id}`,
+      query: ({ sessionID, examID, subClassID }) => ({
+        url: `delete_exam_routine/${sessionID}/${examID}/${subClassID}`,
         method: 'DELETE',
       }),
-      invalidatesTags: ['ExamRoutine'],
+      invalidatesTags: ['ExamRoutine', 'ExamRoutineList'],
     }),
     getExamRules: builder.query({
       query: () => `get_exam_rules`,
@@ -677,4 +681,6 @@ export const {
   useUploadAdmitCardTemplateMutation,
   useDeleteAdmitCardTemplateMutation,
   useUpdateAdmitCardTemplateMutation,
+
+  useGetAllExamRoutineListQuery,
 } = examSlice;

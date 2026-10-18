@@ -95,7 +95,7 @@ const ExamRouteSettingCreateModal = () => {
               require="Date Required"
             />
 
-            <DefaultSelect
+            {/* <DefaultSelect
               label={translate('Exam Start Day')}
               nameField="DayName"
               registerKey="StartDayID"
@@ -111,8 +111,8 @@ const ExamRouteSettingCreateModal = () => {
               ]}
               require={'This Field is required'}
               unicode={true}
-            />
-            <DefaultSelect
+            /> */}
+            {/* <DefaultSelect
               label={translate('Exam End Day')}
               nameField="DayName"
               registerKey="EndDayID"
@@ -128,7 +128,7 @@ const ExamRouteSettingCreateModal = () => {
               ]}
               require={'This Field is required'}
               unicode={true}
-            />
+            /> */}
           </div>
           <div className="flex gap-3 mt-4 justify-end">
             <Button
