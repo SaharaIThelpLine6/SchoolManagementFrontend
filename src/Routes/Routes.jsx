@@ -58,6 +58,7 @@ import ExamAdmitCard from '../pages/ExamAdmitCard';
 import ExamCondition from '../pages/ExamCondition';
 import ExamFeeDetermine from '../pages/ExamFeeDetermine';
 import ExamReport from '../pages/ExamReport';
+import ExamReportList from '../pages/ExamReportList';
 import ExamRouting from '../pages/ExamRouting';
 import ExamRules from '../pages/ExamRules';
 import FeeCollection from '../pages/FeeCollection';
@@ -226,16 +227,6 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.user_report}
                   >
                     <UserReports pageTitle="User Reports" />
-                  </RequirePermission>
-                ),
-              },
-              {
-                path: 'user-reports-demo',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.user_report}
-                  >
-                    <UserReports pageTitle="User Reports Demo" />
                   </RequirePermission>
                 ),
               },
@@ -868,6 +859,16 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.exam_report}
                   >
                     <ExamReport pageTitle="Exam Report" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'report-demo',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.exam_report}
+                  >
+                    <ExamReportList pageTitle="Exam Report Demo" />
                   </RequirePermission>
                 ),
               },
