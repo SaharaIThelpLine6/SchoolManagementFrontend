@@ -128,7 +128,7 @@ export const teachersSlice = createApi({
 
         return `/teacher_subject/filter/list?${params.toString()}`;
       },
-      providesTags: ["TeacherSubjects"],
+      providesTags: ["Teacher_Subject"],
     }),
     postInsertTeacherInfo: builder.mutation({
       query: (body) => ({

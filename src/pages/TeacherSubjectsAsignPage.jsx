@@ -85,7 +85,7 @@ const TeacherSubjectsAsignPage = () => {
   );
 
   // =========================
-  // SAFE REFETCH (fix: Cannot refetch a query that has not been started yet)
+  // SAFE REFETCH
   // =========================
   const safeRefetchTeacherSubjects = async () => {
     try {
@@ -98,13 +98,16 @@ const TeacherSubjectsAsignPage = () => {
   };
 
   // =========================
-  // ASSIGNED INFO
+  // ASSIGNED INFO (FIXED: Added SessionID & ExamID check)
   // =========================
   const getAssignedInfo = (subClassID, subjectID) => {
     const list = teacherSubjects?.data || teacherSubjects || [];
 
+    // FIXED: Added SessionID and ExamID filtering
     const found = list.find(
       (item) =>
+        Number(item.SessionID) === Number(SessionID) &&
+        Number(item.ExamID) === Number(ExamID) &&
         Number(item.SubClassID) === Number(subClassID) &&
         Number(item.SubjectID) === Number(subjectID)
     );
@@ -125,17 +128,24 @@ const TeacherSubjectsAsignPage = () => {
   };
 
   // =========================
-  // CURRENT TEACHER'S ASSIGNED SUBJECTS (for TOP BAR)
+  // CURRENT TEACHER'S ASSIGNED SUBJECTS (FIXED: Added SessionID & ExamID filter)
   // =========================
   const currentTeacherAssigned = (() => {
-    if (!TeacherID) return [];
+    if (!TeacherID || !SessionID || !ExamID) return [];
     const list = teacherSubjects?.data || teacherSubjects || [];
 
     return list
-      .filter((item) => Number(item.TeacherID) === Number(TeacherID))
+      .filter(
+        (item) =>
+          Number(item.TeacherID) === Number(TeacherID) &&
+          Number(item.SessionID) === Number(SessionID) && // FIXED
+          Number(item.ExamID) === Number(ExamID) // FIXED
+      )
       .map((item) => ({
         ID: item.ID,
         TeacherID: item.TeacherID,
+        SessionID: item.SessionID,
+        ExamID: item.ExamID,
         SubClassID: item.SubClassID,
         SubClass: item.SubClass || item.SubClassName || item.SubClassID,
         SubjectID: item.SubjectID,
