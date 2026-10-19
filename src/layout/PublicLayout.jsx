@@ -52,24 +52,24 @@ const PublicLayout = () => {
     };
   }, [isOpen]);
 
-useEffect(() => {
-  const handleLinkClick = (event) => {
-    const anchor = event.target.closest("a, button");
-    if (!anchor) return;
+  useEffect(() => {
+    const handleLinkClick = (event) => {
+      const anchor = event.target.closest("a, button");
+      if (!anchor) return;
 
-    if (window.self !== window.top) {
-      window.parent.postMessage({
-        type: "LINK_CLICK",
-        href: anchor.getAttribute("href") || null,
-        text: anchor.innerText?.trim().slice(0, 60) || null,
-        timestamp: Date.now(),
-      }, "*");
-    }
-  };
+      if (window.self !== window.top) {
+        window.parent.postMessage({
+          type: "LINK_CLICK",
+          href: anchor.getAttribute("href") || null,
+          text: anchor.innerText?.trim().slice(0, 60) || null,
+          timestamp: Date.now(),
+        }, "*");
+      }
+    };
 
-  document.addEventListener("click", handleLinkClick);
-  return () => document.removeEventListener("click", handleLinkClick);
-}, []);
+    document.addEventListener("click", handleLinkClick);
+    return () => document.removeEventListener("click", handleLinkClick);
+  }, []);
 
   return (
     <div className="min-h-screen font-SolaimanLipi bg-stone-50 text-gray-800">
@@ -83,9 +83,8 @@ useEffect(() => {
 
       {/* ========== SIDEBAR / NAVIGATION ========== */}
       <aside
-        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out hidden_in_print lg:hidden ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out hidden_in_print lg:hidden ${isOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <Link to={`/${schoolid}`} onClick={toggleSidebar}>
@@ -145,7 +144,7 @@ useEffect(() => {
               )
             )}
           <Link
-            to={`/${schoolid}/login`}
+            to={`https://play.google.com/store/apps/details?id=com.sahara20251.qmmsoft`}
             onClick={toggleSidebar}
             className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-600 text-white text-[18px] font-bold mt-4 hover:bg-green-700 transition-colors"
           >
@@ -158,7 +157,7 @@ useEffect(() => {
       <header className="hidden lg:block sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm hidden_in_print">
         <div className="container mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between py-4">
-            
+
             {/* Logo & Name */}
             <Link to={`/${schoolid}`} className="flex items-center gap-4">
               <img
@@ -170,7 +169,7 @@ useEffect(() => {
                 {schoolData?.InstitutionName}
               </h1>
             </Link>
-            
+
             {/* Navigation */}
             <nav className="flex items-center gap-8">
               <Link to={`/${schoolid}`} className="text-gray-600 hover:text-green-700 transition text-[18px] font-bold">
@@ -188,23 +187,23 @@ useEffect(() => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-                
+
                 <div className="absolute top-full left-0 w-72 bg-white border border-gray-100 shadow-xl rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 overflow-hidden">
                   <div className="py-2">
                     <Link to={`/${schoolid}/student_result`} className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold">
                       ব্যক্তিগত ফলাফল
                     </Link>
-                    
+
                     {schoolData?.isClassResultShowable?.Action != 0 && (
                       <Link to={`/${schoolid}/classes`} className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold">
                         ক্লাশ/মারহালা ভিত্তিক ফলাফল
                       </Link>
                     )}
-                    
+
                     <Link to={`/${schoolid}/maritlist_request`} className="block px-5 py-2.5 text-[16px] text-gray-600 hover:bg-green-50 hover:text-green-700 transition font-bold">
                       মেধা তালিকা
                     </Link>
-                    
+
                     {importantLinksList.map((l, idx) => (
                       <a
                         key={idx}
@@ -230,13 +229,13 @@ useEffect(() => {
               </Link>
 
               <Link
-                to={`/${schoolid}/login`}
+                to={`https://play.google.com/store/apps/details?id=com.sahara20251.qmmsoft`}
                 className="bg-green-600 text-white px-5 py-2.5 rounded-full hover:bg-green-700 transition shadow-md text-[18px] font-bold"
               >
                 গার্জিয়ান পোর্টাল
               </Link>
             </nav>
-            
+
           </div>
         </div>
       </header>

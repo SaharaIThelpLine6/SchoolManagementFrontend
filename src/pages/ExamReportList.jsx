@@ -128,8 +128,8 @@ const ExamReportList = ({ pageTitle }) => {
   // একই উত্তরে প্রতিষ্ঠানের লোগোও থাকতে পারে, তাই পুরোটাই রেখে দিই
   const [docSettings, setDocSettings] = useState(null);
 
-  // ফি বিহীন (1) নাকি ফি গৃহীত (2)
-  const [feeListType, setFeeListType] = useState(1);
+  // ফি বিহীন (1) নাকি ফি গৃহীত (2) নাকি ফি 
+  const [feeListType, setFeeListType] = useState(3);
 
   // ⭐ সাজানোর ক্রম — ভর্তি নং বা আইডি নং, আরোহী বা অবরোহী
   const [sortBy, setSortBy] = useState('AdmissionSerial');
@@ -497,9 +497,9 @@ const ExamReportList = ({ pageTitle }) => {
                           তালিকার ধরন:
                         </span>
                         {[
+                          { id: 3, text: 'সকল তালিকা' },
                           { id: 1, text: 'ফি বিহীন তালিকা' },
                           { id: 2, text: 'ফি গৃহীত তালিকা' },
-                          { id: 3, text: 'সকল তালিকা' },
                         ].map((opt) => {
                           const on = feeListType === opt.id;
                           return (

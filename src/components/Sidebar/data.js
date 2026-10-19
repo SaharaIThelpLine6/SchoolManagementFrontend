@@ -338,11 +338,11 @@ export const menuData = [
         name: 'Exam Report',
         route: 'exam/report',
       },
-      // {
-      //   id: '12',
-      //   name: 'Exam Report Demo',
-      //   route: 'exam/report-demo',
-      // },
+      {
+        id: '12',
+        name: 'Exam Report Demo',
+        route: 'exam/report-demo',
+      },
     ],
   },
   {

@@ -524,6 +524,7 @@ export const RoutineCardFace = ({
                   পড়ত, মানে হেডারের লেখাগুলো একদম দেখাই যেত না। ঘরে
                   (<th>/<td>) দিলে সব ব্রাউজারেই ছাপে। */}
               <tr>
+              
                 {columns.map((c) => (
                   <th
                     key={c.id}

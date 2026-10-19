@@ -34,7 +34,7 @@ export const MAX_COLUMNS = 8;
 export const FEE_LIST_COLUMNS = [
   // ---- শনাক্তকরণ
   { key: 'SL',              label: 'ক্রমিক',          lang: 'both', defaultOn: true,  align: 'center', weight: 45,  virtual: true },
-  { key: 'AdmissionSerial', label: 'ভর্তি নং',        lang: 'both', defaultOn: false, align: 'center', weight: 65 },
+  { key: 'AdmissionSerial', label: 'ভর্তি নং',        lang: 'both', defaultOn: true, align: 'center', weight: 65 },
   { key: 'UserCode',        label: 'আইডি নং',         lang: 'both', defaultOn: true,  align: 'center', weight: 75 },
 
   // ---- নাম ও পরিচয় (বাংলা) — লেখা বাঁ দিকে
@@ -72,7 +72,7 @@ export const FEE_LIST_COLUMNS = [
 
   // ---- হাতে লেখার ঘর
   { key: 'Signature',       label: 'স্বাক্ষর',        lang: 'both', defaultOn: true,  align: 'center', weight: 120, virtual: true, blank: true },
-  { key: 'Remark',          label: 'মন্তব্য',         lang: 'both', defaultOn: false, align: 'center', weight: 120, virtual: true, blank: true },
+  { key: 'Remark',          label: 'মন্তব্য',         lang: 'both', defaultOn: true, align: 'center', weight: 120, virtual: true, blank: true },
 ];
 
 /** জায়গার সীমা — এর বাইরে গেলে কাগজে ঘরটা বেঢপ লাগে */
