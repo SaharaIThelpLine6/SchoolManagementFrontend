@@ -362,6 +362,11 @@ export const menuData = [
         route: 'result',
       },
       {
+        id: '2',
+        name: 'Result Publish',
+        route: 'result_publish',
+      },
+      {
         id: '3',
         name: 'Mark Sheet',
         route: 'result/mark-sheet',

@@ -147,7 +147,14 @@ const ExamReportList = ({ pageTitle }) => {
 
   const isSeatNoReport = Number(selectedReportID) === 7;
   const isFeeReport = Number(selectedReportID) === 1;
+  const isNumberSheet = Number(selectedReportID) === 4;   // ৩. নম্বর পত্র
   const langId = Number(languageID) || 1;
+
+  // ⭐ কোন কিতাবের নম্বর পত্র — পরীক্ষার রুটিনে যে কিতাবগুলো আছে তার একটা
+  const [kitabId, setKitabId] = useState('');
+
+  // ⭐ "ভর্তি সিরিয়াল অনুযায়ী" কাগজে পরীক্ষার্থীর নামের ঘরটা থাকবে কি না
+  const [serialShowName, setSerialShowName] = useState(true);
 
   // তালিকার ধরন বা ভাষা বদলালে সেই অনুযায়ী সেভ করা সেটিংসটা তুলে আনি
   useEffect(() => {
@@ -343,6 +350,75 @@ const ExamReportList = ({ pageTitle }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [isFeeReport, data, feeRows]
   );
+
+  /* ══════════════════════════════════════════════════════════════════════
+     নম্বর পত্র — সারি, কিতাবের তালিকা আর কাগজের মাথা
+
+     রুট এখন অবজেক্ট পাঠায় ({ data, subjects, header })। পুরোনো পেজগুলো
+     অ্যারে ধরে লেখা, তাই এখানেই খুলে নিয়ে আগের মতো অ্যারে করে পাঠানো হয় —
+     আরবি পেজগুলোয় হাত দিতে হয় না।
+     ══════════════════════════════════════════════════════════════════════ */
+  const numberSheetRows = useMemo(() => {
+    if (!isNumberSheet || !data) return [];
+    return Array.isArray(data) ? data : data.data ?? [];
+  }, [isNumberSheet, data]);
+
+  const examSubjects = useMemo(
+    () => (isNumberSheet && data && Array.isArray(data.subjects) ? data.subjects : []),
+    [isNumberSheet, data]
+  );
+
+  const numberSheetHeader = useMemo(
+    () => (isNumberSheet && data && !Array.isArray(data) ? data.header ?? null : null),
+    [isNumberSheet, data]
+  );
+
+  /** কিতাবের নাম — ভাষা অনুযায়ী */
+  const subjectLabel = (sub) => {
+    if (!sub) return '';
+    return (
+      (langId === 2 ? sub.SubjectNameAra || sub.SubjectName : sub.SubjectName) ||
+      sub.SubjectNameEng ||
+      ''
+    );
+  };
+
+  // তালিকা বদলালে আগের বাছাইটা আর নাও থাকতে পারে — তখন খালি করে দিই,
+  // নইলে কাগজে এমন কিতাবের নাম বসত যেটা এই পরীক্ষায় নেই
+  useEffect(() => {
+    if (!kitabId) return;
+    if (!examSubjects.some((sub) => String(sub.SubID) === String(kitabId))) {
+      setKitabId('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [examSubjects]);
+
+  const selectedKitab = useMemo(
+    () => examSubjects.find((sub) => String(sub.SubID) === String(kitabId)) || null,
+    [examSubjects, kitabId]
+  );
+
+  const kitabName = subjectLabel(selectedKitab);
+
+  /**
+   * শ্রেণি/জামাতের নাম — তিন জায়গায় খোঁজা হয়:
+   *
+   *   ১) রুটের মাথা (header)
+   *   ২) প্রথম সারি
+   *   ৩) ⭐ উপরের "সাব ক্লাস" ড্রপডাউনের নিজের তালিকা
+   *
+   * তিন নম্বরটাই সবচেয়ে নির্ভরযোগ্য — নামটা তো ওই ড্রপডাউনেই লেখা, যেটা
+   * থেকে বাছাই করা হয়েছে। তাই সার্ভার কোনো কারণে নামটা না পাঠালেও কাগজের
+   * ঘরটা আর ফাঁকা যায় না।
+   */
+  const subClassName =
+    (langId === 2
+      ? numberSheetHeader?.SubClassAra || numberSheetHeader?.SubClass
+      : numberSheetHeader?.SubClass) ||
+    numberSheetRows[0]?.SubClassName ||
+    numberSheetRows[0]?.SubClass ||
+    (SubClassListData || []).find((c) => String(c.SubClassID) === String(SubClassID))?.SubClass ||
+    '';
 
   /**
    * প্রতিষ্ঠানের লোগো — আগে রিডাক্সের সেটিংসে, না পেলে document_settings এর
@@ -575,6 +651,89 @@ const ExamReportList = ({ pageTitle }) => {
                     )}
                   </div>
 
+                  {/* ⭐ কিতাব — শুধু নম্বর পত্রের জন্য
+
+                      পরীক্ষা বাছাই করলে ওই পরীক্ষার রুটিনে যে কিতাবগুলো
+                      আছে সেগুলোই এখানে আসে। যেটা বাছবেন সেটাই কাগজের
+                      মাথার "কিতাব" ঘরে বসবে। */}
+                  {isNumberSheet && (
+                    <div className="rounded-xl border border-violet-200 bg-gradient-to-r from-violet-50 via-fuchsia-50 to-violet-50 p-3 flex flex-wrap items-center gap-3">
+                      <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700 px-1">
+                        <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        কিতাব:
+                      </span>
+
+                      <div className="relative min-w-[240px] flex-1 max-w-sm">
+                        <select
+                          value={kitabId}
+                          onChange={(e) => setKitabId(e.target.value)}
+                          disabled={!examSubjects.length}
+                          className={`w-full appearance-none rounded-lg border px-3 py-2 pr-9 text-sm font-medium outline-none transition ${
+                            examSubjects.length
+                              ? 'border-violet-300 bg-white text-slate-700 focus:border-violet-500 focus:ring-2 focus:ring-violet-200'
+                              : 'border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed'
+                          }`}
+                        >
+                          <option value="">
+                            {examSubjects.length ? 'কিতাব বাছুন (ফাঁকা রাখলে ঘরটা খালি যাবে)' : 'এই পরীক্ষার রুটিনে কোনো কিতাব নেই'}
+                          </option>
+                          {examSubjects.map((sub) => (
+                            <option key={sub.SubID} value={sub.SubID}>
+                              {subjectLabel(sub)}
+                            </option>
+                          ))}
+                        </select>
+
+                        <svg
+                          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-500"
+                          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+
+                      {/* নামের ঘর — শুধু "ভর্তি সিরিয়াল অনুযায়ী" কাগজের জন্য।
+                          বাকি দুইটা কাগজ তো নামসহ আর নাম ছাড়া আলাদা
+                          অপশনেই আছে, তাই ওখানে সুইচটা দেখানোর মানে নেই। */}
+                      {Number(selectedPdfID) === 3 && (
+                        <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1">
+                          {[
+                            { on: true, text: 'নামসহ' },
+                            { on: false, text: 'নাম ছাড়া' },
+                          ].map((opt) => (
+                            <button
+                              key={opt.text}
+                              type="button"
+                              onClick={() => setSerialShowName(opt.on)}
+                              className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                                serialShowName === opt.on
+                                  ? 'bg-violet-600 text-white'
+                                  : 'text-slate-600 hover:bg-slate-50'
+                              }`}
+                            >
+                              {opt.text}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* শ্রেণি/জামাত — এটা উপরের ফিল্টার থেকেই আসে, এখানে
+                          শুধু দেখানো হয় যাতে কাগজে কী বসবে আগেই বোঝা যায় */}
+                      {subClassName && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-violet-200 px-3 py-1 text-xs font-semibold text-violet-700">
+                          শ্রেণি/জামাত: {subClassName}
+                        </span>
+                      )}
+
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 ml-auto">
+                        পরীক্ষার্থী: {toBn(numberSheetRows.length)} জন
+                      </span>
+                    </div>
+                  )}
+
                   {/* ⭐ সাজানোর ক্রম — শুধু ফি তালিকার জন্য */}
                   {isFeeReport && (
                     <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-3 flex flex-wrap items-center gap-3">
@@ -679,16 +838,52 @@ const ExamReportList = ({ pageTitle }) => {
           {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 1 && <ExamRoutine reportData={data} queryParams={queryParams} />}
           {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 2 && <WithoutExamRoutine reportData={data} queryParams={queryParams} requireSeatPlan />}
 
-          {/* ৩. নম্বর পত্র */}
-          {Number(selectedReportID) === 4 && Number(languageID) === 1 && Number(selectedPdfID) === 1 && <BanglaNumberWithTwoColumn reportData={data} queryParams={queryParams} />}
-          {Number(selectedReportID) === 4 && Number(languageID) === 1 && Number(selectedPdfID) === 2 && <BanglaWithOutNameColumn reportData={data} queryParams={queryParams} />}
-          {Number(selectedReportID) === 4 && Number(languageID) === 1 && Number(selectedPdfID) === 3 && <ExamReportFive data={data} />}
-          {Number(selectedReportID) === 4 && Number(languageID) === 1 && Number(selectedPdfID) === 4 && <ArobicNumberClassBasedTC />}
+          {/* ৩. নম্বর পত্র
 
-          {Number(selectedReportID) === 4 && Number(languageID) === 2 && Number(selectedPdfID) === 1 && <ArobicNameWithTwoColumn reportData={data} queryParams={queryParams} />}
-          {Number(selectedReportID) === 4 && Number(languageID) === 2 && Number(selectedPdfID) === 2 && <ArobicNameWithLegal />}
-          {Number(selectedReportID) === 4 && Number(languageID) === 2 && Number(selectedPdfID) === 3 && <ExamReportFive data={data} />}
-          {Number(selectedReportID) === 4 && Number(languageID) === 2 && Number(selectedPdfID) === 4 && <ArobicNumberClassBasedTC />}
+              reportData এ অ্যারেটাই যায় (numberSheetRows) — রুট এখন অবজেক্ট
+              পাঠালেও পেজগুলোর আগের চুক্তি অক্ষত। মাথার তথ্য আর বাছাই করা
+              কিতাবটা আলাদা প্রপে। */}
+          {isNumberSheet && langId === 1 && Number(selectedPdfID) === 1 && (
+            <BanglaNumberWithTwoColumn
+              reportData={numberSheetRows}
+              queryParams={queryParams}
+              header={numberSheetHeader}
+              subClassName={subClassName}
+              kitabName={kitabName}
+            />
+          )}
+          {isNumberSheet && langId === 1 && Number(selectedPdfID) === 2 && (
+            <BanglaWithOutNameColumn
+              reportData={numberSheetRows}
+              queryParams={queryParams}
+              header={numberSheetHeader}
+              subClassName={subClassName}
+              kitabName={kitabName}
+            />
+          )}
+          {isNumberSheet && langId === 1 && Number(selectedPdfID) === 3 && (
+            <ExamReportFive
+              data={numberSheetRows}
+              header={numberSheetHeader}
+              subClassName={subClassName}
+              kitabName={kitabName}
+              showName={serialShowName}
+            />
+          )}
+          {isNumberSheet && langId === 1 && Number(selectedPdfID) === 4 && <ArobicNumberClassBasedTC />}
+
+          {isNumberSheet && langId === 2 && Number(selectedPdfID) === 1 && <ArobicNameWithTwoColumn reportData={numberSheetRows} queryParams={queryParams} />}
+          {isNumberSheet && langId === 2 && Number(selectedPdfID) === 2 && <ArobicNameWithLegal />}
+          {isNumberSheet && langId === 2 && Number(selectedPdfID) === 3 && (
+            <ExamReportFive
+              data={numberSheetRows}
+              header={numberSheetHeader}
+              subClassName={subClassName}
+              kitabName={kitabName}
+              showName={serialShowName}
+            />
+          )}
+          {isNumberSheet && langId === 2 && Number(selectedPdfID) === 4 && <ArobicNumberClassBasedTC />}
 
           {/* ৪. সিট নং */}
           {Number(selectedReportID) === 7 && Number(languageID) === 1 && Number(selectedPdfID) === 1 && (
