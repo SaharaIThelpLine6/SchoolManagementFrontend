@@ -333,15 +333,15 @@ export const menuData = [
         name: 'Exam Routing Create',
         route: 'exam/routing',
       },
-      {
-        id: '11',
-        name: 'Exam Report',
-        route: 'exam/report',
-      },
+      // {
+      //   id: '11',
+      //   name: 'Exam Report Demo',
+      //   route: 'exam/report-demo',
+      // },
       {
         id: '12',
-        name: 'Exam Report Demo',
-        route: 'exam/report-demo',
+        name: 'Exam Report',
+        route: 'exam/report',
       },
     ],
   },
@@ -361,11 +361,11 @@ export const menuData = [
         name: 'Result Entry & Publish',
         route: 'result',
       },
-      {
-        id: '2',
-        name: 'Result Publish',
-        route: 'result_publish',
-      },
+      // {
+      //   id: '2',
+      //   name: 'Result Publish',
+      //   route: 'result-publish',
+      // },
       {
         id: '3',
         name: 'Mark Sheet',

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo } from 'react';
 
 import bnBijoy2Unicode from '../../../../utils/conveter';
 import { useGetInstitutionInfoQuery } from '../../../../features/settings/settingsQuerySlice';
@@ -24,12 +24,43 @@ import { useGetExamListQuery } from '../../../../features/result/resultSilce';
 // ⭐ reportData সব সময় অ্যারে — ExamReportList খুলে নিয়ে পাঠায়
 // =============================================================================
 
-const PAGE_HEIGHT = 790;
-const HEADER_ROW_HEIGHT = 30;
+// ⭐ পাতা ভাগ — মাপজোক বাদ, নির্দিষ্ট সংখ্যক সারি ধরে
+//
+//    আগে একটা লুকানো টেবিল দিয়ে সারির উচ্চতা মাপা হত, তারপর সেই হিসাবে
+//    পাতা ভাগ হত। কিন্তু ওই টেবিলের সারিগুলো আসল সারির মতো ছিল না —
+//    আসলটায় padding, বর্ডার আর কলামের চওড়া অনেক আলাদা। তাই মাপা উচ্চতা
+//    আসলের চেয়ে ছোট আসত, হিসাব বলত "সবাই এক পাতায় ধরবে", আর ঘরটার
+//    overflow: hidden বাকিদের চুপচাপ কেটে ফেলত। প্রিন্টেও তাই, কারণ
+//    কাটাটা ঘটত পর্দাতেই।
+//
+//    এখন ভর্তি সিরিয়ালের কাগজটা (ExamReportFive) যে নিয়মে চলে সেটাই —
+//    প্রতি কলামে নির্দিষ্ট সারি, তারপর নতুন কলাম, তারপর নতুন পাতা।
+//    কিছুই মাপা হয় না, তাই কিছুই কাটেও না।
+//
+//    সারি কম-বেশি দরকার হলে শুধু ROWS_PER_COLUMN বদলালেই হবে।
+
+const ROWS_PER_COLUMN = 26;
+const PER_PAGE = ROWS_PER_COLUMN * 2;
+
+const chunk = (arr, size) => {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+};
+
+/** শেষ পাতার কলামটা অসম্পূর্ণ হলে খালি সারি দিয়ে ভরা হয়, যাতে ছকটা কাটা না লাগে */
+const padColumn = (arr) => {
+  const a = [...arr];
+  while (a.length < ROWS_PER_COLUMN) a.push(null);
+  return a;
+};
 
 const ACCENT = '#7c3aed';        // বেগুনি — ফিল্টারের কিতাবের বারের সাথে মিলিয়ে
 const ACCENT_SOFT = '#f5f3ff';
 const RULE = '#1f2937';
+
+/** দুই জায়গায় একই গ্রিড — ঘরের নামের সারি আর সারিগুলো যেন না মেলে না বসে */
+const GRID = '36px 76px 1fr 48px';
 
 const BanglaNumberWithTwoColumn = ({
   reportData,
@@ -49,8 +80,8 @@ const BanglaNumberWithTwoColumn = ({
 
   const rows = useMemo(() => (Array.isArray(reportData) ? reportData : reportData?.data ?? []), [reportData]);
 
-  const measureRef = useRef(null);
-  const [pages, setPages] = useState([]);
+  // সারিগুলো পাতায় পাতায় ভাগ — মাপজোক নেই, তাই হিসাব সব সময় একই
+  const pages = useMemo(() => chunk(rows, PER_PAGE), [rows]);
 
   // ---- মাথার তথ্য: রুট আগে, তারপর হুক, তারপর ফিল্টারের তালিকা
   const institutionName = header?.InstitutionName || institutionInfo?.InstitutionName || '';
@@ -73,48 +104,13 @@ const BanglaNumberWithTwoColumn = ({
     subClassList?.find((i) => String(i.SubClassID) === String(queryParams?.SubClassID))?.SubClass ||
     '';
 
-  useEffect(() => {
-    if (!rows.length || !measureRef.current) {
-      setPages([]);
-      return;
-    }
-
-    const trs = Array.from(measureRef.current.querySelectorAll('tr[data-idx]'));
-    const colHeight = PAGE_HEIGHT - HEADER_ROW_HEIGHT;
-
-    const newPages = [];
-    let pageRows = [];
-    let colUsed = 0;
-    let colCount = 0;
-
-    trs.forEach((tr, i) => {
-      const rh = tr.getBoundingClientRect().height;
-
-      if (colUsed + rh > colHeight) {
-        colCount += 1;
-        if (colCount >= 2) {
-          newPages.push(pageRows);
-          pageRows = [];
-          colCount = 0;
-        }
-        colUsed = 0;
-      }
-
-      pageRows.push(rows[i]);
-      colUsed += rh;
-    });
-
-    if (pageRows.length) newPages.push(pageRows);
-    setPages(newPages);
-  }, [rows]);
-
   /** ঘরের নামের সারি — দুই পাশে একই */
   const ColHeader = () => (
     <div
       className="number-col-head"
       style={{
         display: 'grid',
-        gridTemplateColumns: '36px 76px 1fr 48px',
+        gridTemplateColumns: GRID,
         background: ACCENT_SOFT,
         borderTop: `1px solid ${RULE}`,
         borderBottom: `2px solid ${ACCENT}`,
@@ -127,6 +123,38 @@ const BanglaNumberWithTwoColumn = ({
       <span style={{ padding: '5px 6px', textAlign: 'center', borderRight: `1px solid ${RULE}` }}>আইডি নং</span>
       <span style={{ padding: '5px 6px', borderRight: `1px solid ${RULE}` }}>পরীক্ষার্থীর নাম</span>
       <span style={{ padding: '5px 6px', textAlign: 'center', borderRight: `1px solid ${RULE}` }}>নম্বর</span>
+    </div>
+  );
+
+  /** এক কলাম — ঘরের নামের সারি, তারপর সারিগুলো */
+  const ColumnBlock = ({ rows: colRows, startSerial }) => (
+    <div>
+      <ColHeader />
+      {colRows.map((row, i) => (
+        <div
+          key={i}
+          className="flow-row"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '36px 76px 1fr 48px',
+            borderBottom: `1px solid ${RULE}`,
+            fontSize: '13px',
+            color: '#1f2937',
+            minHeight: '26px',
+          }}
+        >
+                <span style={{ padding: '5px 6px', textAlign: 'center', borderRight: `1px solid ${RULE}`, borderLeft: `1px solid ${RULE}` }}>
+                  {row ? bnBijoy2Unicode(String(startSerial + i)) : ''}
+                </span>
+                <span style={{ padding: '5px 6px', textAlign: 'center', borderRight: `1px solid ${RULE}` }}>
+                  {row ? bnBijoy2Unicode(String(row?.User?.UserCode ?? '')) : ''}
+                </span>
+                <span style={{ padding: '5px 6px', borderRight: `1px solid ${RULE}`, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {row?.User?.UserName ?? ''}
+                </span>
+                <span style={{ padding: '5px 6px', textAlign: 'center', borderRight: `1px solid ${RULE}`, fontSize: '16px' }} />
+        </div>
+      ))}
     </div>
   );
 
@@ -235,87 +263,40 @@ const BanglaNumberWithTwoColumn = ({
         </div>
       )}
 
-      {/* মাপার জন্য লুকানো টেবিল — কয় সারিতে এক কলাম ভরে সেটা বের করে */}
-      <div
-        id="measure-container"
-        ref={measureRef}
-        style={{
-          position: 'fixed',
-          top: '-9999px',
-          left: 0,
-          visibility: 'hidden',
-          pointerEvents: 'none',
-          zIndex: -1,
-        }}
-      >
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }} className="border border-black">
-          <tbody>
-            {rows.map((row, i) => (
-              <tr key={i} data-idx={i}>
-                <td>{bnBijoy2Unicode(String(i + 1))}</td>
-                <td>{bnBijoy2Unicode(String(row?.User?.UserCode ?? ''))}</td>
-                <td>{row?.User?.UserName}</td>
-                <td />
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
       {pages.length === 0 ? (
         <div className="mt-4 rounded-xl border border-dashed border-slate-300 bg-slate-50 py-16 text-center print:hidden">
           <p className="text-slate-500 font-medium">এই শর্তে কোনো পরীক্ষার্থী পাওয়া যায়নি</p>
           <p className="text-slate-400 text-sm mt-1">শিক্ষাবর্ষ, পরীক্ষা, শ্রেণি বা অবস্থান বদলে দেখুন</p>
         </div>
       ) : (
-        pages.map((pageData, pageIndex) => (
-          <div
-            key={pageIndex}
-            className="number-sheet-print bg-white text-gray-800 font-[kalpurush] p-5 max-w-4xl mx-auto border border-gray-200 shadow-sm rounded-b-xl mb-6"
-          >
-            <PageHeader />
+        pages.map((pageRows, pageIndex) => {
+          const offset = pageIndex * PER_PAGE;
+          const left = padColumn(pageRows.slice(0, ROWS_PER_COLUMN));
+          const right = padColumn(pageRows.slice(ROWS_PER_COLUMN, PER_PAGE));
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-              <ColHeader />
-              <ColHeader />
-            </div>
-
+          return (
             <div
-              style={{
-                columns: 2,
-                columnGap: '14px',
-                columnFill: 'auto',
-                height: `${PAGE_HEIGHT}px`,
-                overflow: 'hidden',
-              }}
+              key={pageIndex}
+              className="number-sheet-print bg-white text-gray-800 font-[kalpurush] p-5 max-w-4xl mx-auto border border-gray-200 shadow-sm rounded-b-xl mb-6"
             >
-              {pageData.map((row, i) => (
-                <div
-                  key={i}
-                  className="flow-row"
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '36px 76px 1fr 48px',
-                    borderBottom: `1px solid ${RULE}`,
-                    fontSize: '13px',
-                    color: '#1f2937',
-                  }}
-                >
-                  <span style={{ padding: '5px 6px', textAlign: 'center', borderRight: `1px solid ${RULE}`, borderLeft: `1px solid ${RULE}` }}>
-                    {bnBijoy2Unicode(String(i + 1))}
-                  </span>
-                  <span style={{ padding: '5px 6px', textAlign: 'center', borderRight: `1px solid ${RULE}` }}>
-                    {bnBijoy2Unicode(String(row?.User?.UserCode ?? ''))}
-                  </span>
-                  <span style={{ padding: '5px 6px', borderRight: `1px solid ${RULE}` }}>
-                    {row?.User?.UserName}
-                  </span>
-                  <span style={{ padding: '5px 6px', textAlign: 'center', borderRight: `1px solid ${RULE}`, fontSize: '16px' }} />
+              <PageHeader />
+
+              {/* দুই কলাম পাশাপাশি — আগের CSS columns নয়।
+                  columns + fixed height + overflow:hidden এর কারণেই
+                  বাড়তি সারিগুলো কেটে যেত। */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <ColumnBlock rows={left} startSerial={offset + 1} />
+                <ColumnBlock rows={right} startSerial={offset + ROWS_PER_COLUMN + 1} />
+              </div>
+
+              {pages.length > 1 && (
+                <div className="text-center text-[11px] text-slate-400 mt-2">
+                  পৃষ্ঠা {bnBijoy2Unicode(String(pageIndex + 1))} / {bnBijoy2Unicode(String(pages.length))}
                 </div>
-              ))}
+              )}
             </div>
-          </div>
-        ))
+          );
+        })
       )}
     </>
   );

@@ -871,23 +871,23 @@ const Router = createBrowserRouter([
                   // </RequirePermission>
                 ),
               },
+              // {
+              //   path: 'report-demo',
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.exam_report}
+              //     >
+              //       <ExamReport pageTitle="Exam Report Demo" />
+              //     </RequirePermission>
+              //   ),
+              // },F
               {
                 path: 'report',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.exam_report}
                   >
-                    <ExamReport pageTitle="Exam Report" />
-                  </RequirePermission>
-                ),
-              },
-              {
-                path: 'report-demo',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.exam_report}
-                  >
-                    <ExamReportList pageTitle="Exam Report Demo" />
+                    <ExamReportList pageTitle="Exam Report" />
                   </RequirePermission>
                 ),
               },
@@ -905,6 +905,16 @@ const Router = createBrowserRouter([
                   >
                     <PointBasedResultEntry pageTitle="Result Entry & Publish" />
                     {/* <PageNotFound /> */}
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'result-publish',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.result_entry}
+                  >
+                    <PointBasedResultEntry pageTitle="Result Publish" />
                   </RequirePermission>
                 ),
               },
