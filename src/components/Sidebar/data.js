@@ -366,21 +366,21 @@ export const menuData = [
         name: 'Mark Sheet',
         route: 'result/mark-sheet',
       },
-      // {
-      //   id: '4',
-      //   name: 'Result Report',
-      //   route: 'result/report',
-      // },
+      {
+        id: '4',
+        name: 'Result Report',
+        route: 'result/report',
+      },
       {
         id: '5',
         name: 'Admission Form',
         route: 'result/admission_form',
       },
-      // {
-      //   id: '6',
-      //   name: 'Publication of results via SMS',
-      //   route: 'result/publication-results-sms',
-      // },
+      {
+        id: '6',
+        name: 'Publication of results via SMS',
+        route: 'result/publication-results-sms',
+      },
     ],
   },
   // {
