@@ -197,9 +197,56 @@ export const sanitizeOffsets = (raw = {}) => {
   return out;
 };
 
+/** সার্ভার কখনো design টা JSON স্ট্রিং হিসেবেও পাঠাতে পারে — দুইটাই সামলাই */
+const asDesign = (rec = {}) => {
+  const raw = rec?.design ?? rec?.offsets ?? {};
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return raw && typeof raw === 'object' ? raw : {};
+};
+
 /** রেকর্ডে জমা মাপজোক থেকে শুধু চারটে সমন্বয় — বাকি সব অগ্রাহ্য */
-export const readOffsets = (rec = {}) =>
-  sanitizeOffsets(rec?.design || rec?.offsets || {});
+export const readOffsets = (rec = {}) => sanitizeOffsets(asDesign(rec));
+
+// ---------------------------------------------------------------------------
+// ছাপা কাগজের উপর ছাপা (overlay)
+//
+// অনেক প্রতিষ্ঠান প্রবেশপত্রের নকশাটা আগেই ছাপিয়ে রাখে — প্রেস থেকে বান্ডিল
+// করে আসে। তখন প্রিন্টারে ওই ছাপা কাগজটাই দেওয়া হয়, আর অ্যাপের কাজ শুধু
+// ফাঁকা ঘরগুলো ভরা।
+//
+// এই মোডে ছাপার সময় বাদ যায় — ব্যাকগ্রাউন্ডের ছবি, ওয়াটারমার্ক, হেডারের
+// ঘর (লোগো, নাম, ঠিকানা, ছবির বাক্স) আর "প্রবেশপত্র" ব্যাজ। কারণ এগুলো
+// কাগজে আগে থেকেই ছাপা আছে; আবার ছাপলে দুইটা লেখা একটার উপর আরেকটা পড়ত।
+//
+// যা ছাপে — পরীক্ষার নাম, শিক্ষার্থীর তথ্য (লেবেল ও মান), আসনের পট্টি,
+// স্বাক্ষরের নাম, তারিখ আর QR। অর্থাৎ কেবল ভিতরের লেখাগুলো।
+//
+// ⚠️ পর্দায় কিছুই লুকানো হয় না — ডিজাইনটা দেখা যায় বলেই ঘরগুলো ঠিক
+// জায়গায় বসানো যায়। লুকানো হয় কেবল @media print এ।
+// ---------------------------------------------------------------------------
+
+export const OVERLAY_KEY = 'overlayPrint';
+
+/** ছাপার সময় যে অংশগুলো বাদ যাবে তাদের ক্লাস — CSS নিয়মটা buildPrintCss এ */
+export const OVERLAY_HIDE_CLASS = 'admit-paper-only';
+
+export const readOverlay = (rec = {}) => Boolean(asDesign(rec)[OVERLAY_KEY]);
+
+/**
+ * রেকর্ডে যা জমা হবে — চারটে উপর-নিচ আর overlay এর হ্যাঁ/না, একসাথে।
+ * সার্ভারে এই অবজেক্টটাই `design` হিসেবে যায়।
+ */
+export const sanitizeDesign = (raw = {}) => ({
+  ...sanitizeOffsets(raw),
+  [OVERLAY_KEY]: Boolean(raw?.[OVERLAY_KEY]),
+});
 
 /** চারটের একটাও শূন্য নয় কিনা — "আগের মতো" বোতাম সক্রিয় রাখতে */
 export const hasOffsets = (offsets = {}) =>
@@ -238,7 +285,7 @@ const PHOTO = { photoW: 58, photoH: 74 };
  */
 export const buildUploadedTemplate = (
   rec = {},
-  { apiUrl, image, offsets: overrideOffsets } = {}
+  { apiUrl, image, offsets: overrideOffsets, overlay: overrideOverlay } = {}
 ) => {
   // ঘর, রঙ, মাপ — সবই কোডের UPLOAD_DESIGN থেকে, সবার জন্য একই। রেকর্ড
   // থেকে শুধু চারটে উপর-নিচের সমন্বয় পড়া হয়, কারণ ওটুকুই প্রতিটা
@@ -249,11 +296,16 @@ export const buildUploadedTemplate = (
   const src = image || buildAssetUrl(rec.file, apiUrl);
   const mode = String(rec.mode || 'A5') === 'A4' ? 'A4' : 'A5';
 
+  // ছাপা কাগজের উপর ছাপা — কার্ড আঁকার কোড এই পতাকাটাই দেখে
+  const overlay =
+    overrideOverlay === undefined ? readOverlay(rec) : Boolean(overrideOverlay);
+
   const tpl = {
     id: `${UPLOADED_PREFIX}${rec.id}`,
     uploadId: rec.id,
     uploaded: true,
     mode,
+    overlay,
     title: rec.title || 'নিজের ডিজাইন',
     variant: 'image',
     image: src,
@@ -356,6 +408,15 @@ export const UPLOAD_UI = {
       n === 0
         ? 'নিজের জায়গায়'
         : `${n < 0 ? 'উপরে' : 'নিচে'} ${toLangDigit(Math.abs(n), 'bn')} px (ছবিতে ${toLangDigit(Math.abs(n) * 3, 'bn')} px)`,
+    // ---- ছাপা কাগজের উপর ছাপা
+    overlayTitle: 'ছাপা কাগজের উপর ছাপা',
+    overlayLabel: 'নকশা ছাপা হবে না — শুধু লেখাগুলো বসবে',
+    overlayNote:
+      'প্রেস থেকে ছাপানো প্রবেশপত্রের কাগজ প্রিন্টারে দিলে এটা চালু করুন। তখন নকশা, লোগো, প্রতিষ্ঠানের নাম-ঠিকানা, শিক্ষার্থীর ছবির ঘর আর "প্রবেশপত্র" লেখাটি ছাপা হবে না — কাগজে ওগুলো আগে থেকেই আছে। শুধু পরীক্ষার নাম, শিক্ষার্থীর তথ্য, আসন, স্বাক্ষরের নাম, তারিখ ও QR ছাপবে। পরীক্ষার নামটি "প্রবেশপত্র" এর জায়গায় নেমে আসবে।',
+    overlayOn: 'চালু',
+    previewModeDesign: 'ডিজাইনসহ',
+    previewModePrint: 'যা ছাপা হবে',
+    previewPrintNote: 'ছাপার সময় কেবল এই লেখাগুলোই কাগজে পড়বে।',
     editTitle: 'ডিজাইনের ঘর ঠিক করুন',
     save: 'সংরক্ষণ করুন',
     saving: 'সংরক্ষণ হচ্ছে...',
@@ -405,6 +466,15 @@ export const UPLOAD_UI = {
       n === 0
         ? 'Default position'
         : `${Math.abs(n)} px ${n < 0 ? 'up' : 'down'} (${Math.abs(n) * 3} px on the image)`,
+    // ---- printing onto pre-printed paper
+    overlayTitle: 'Print onto pre-printed paper',
+    overlayLabel: 'Do not print the design — place only the text',
+    overlayNote:
+      'Turn this on when you feed press-printed admit card paper into the printer. The design, logo, institution name and address, the photo box and the "Admit Card" badge are then not printed — the paper already carries them. Only the exam name, student details, seat, signature names, date and QR print. The exam name moves down into the badge\'s place.',
+    overlayOn: 'On',
+    previewModeDesign: 'With design',
+    previewModePrint: 'What will print',
+    previewPrintNote: 'Only this text lands on the paper when printing.',
     editTitle: 'Adjust the design zones',
     save: 'Save',
     saving: 'Saving...',
@@ -454,6 +524,15 @@ export const UPLOAD_UI = {
       n === 0
         ? 'الموضع الأصلي'
         : `${toLangDigit(Math.abs(n), 'ar')} بكسل ${n < 0 ? 'أعلى' : 'أسفل'} (${toLangDigit(Math.abs(n) * 3, 'ar')} بكسل في الصورة)`,
+    // ---- الطباعة على ورق مطبوع مسبقاً
+    overlayTitle: 'الطباعة على ورق مطبوع مسبقاً',
+    overlayLabel: 'لا تطبع التصميم — ضع النصوص فقط',
+    overlayNote:
+      'فعّل هذا عند استخدام ورق بطاقات الدخول المطبوع من المطبعة. عندها لا يُطبع التصميم ولا الشعار ولا اسم المؤسسة وعنوانها ولا إطار الصورة ولا عبارة «بطاقة الدخول» — فهي موجودة على الورق أصلاً. يُطبع فقط اسم الامتحان وبيانات الطالب والمقعد وأسماء التواقيع والتاريخ ورمز QR. وينزل اسم الامتحان إلى موضع العبارة.',
+    overlayOn: 'مُفعّل',
+    previewModeDesign: 'مع التصميم',
+    previewModePrint: 'ما سيُطبع',
+    previewPrintNote: 'هذه النصوص وحدها هي ما يقع على الورق عند الطباعة.',
     editTitle: 'ضبط مناطق التصميم',
     save: 'حفظ',
     saving: 'جارٍ الحفظ...',

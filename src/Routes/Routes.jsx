@@ -18,7 +18,7 @@ const AboutUs = lazy(() => import('../pages/LandingPage/AboutUs'));
 const ManagementTeam = lazy(() => import('../pages/LandingPage/ManagementTeam'));
 const PhotoGallery = lazy(() => import('../pages/LandingPage/PhotoGallery'));
 const ContactUs = lazy(() => import('../pages/LandingPage/ContactUs'));
-const PrivacyPolicy = lazy(() => import('../pages/LandingPage/PrivacyPolicy'));
+// const PrivacyPolicy = lazy(() => import('../pages/LandingPage/PrivacyPolicy'));
 const Login = lazy(() => import('../pages/Login'));
 
 // Layout
@@ -58,6 +58,7 @@ import ExamAdmitCard from '../pages/ExamAdmitCard';
 import ExamCondition from '../pages/ExamCondition';
 import ExamFeeDetermine from '../pages/ExamFeeDetermine';
 import ExamReport from '../pages/ExamReport';
+import ExamReportList from '../pages/ExamReportList';
 import ExamRouting from '../pages/ExamRouting';
 import ExamRules from '../pages/ExamRules';
 import FeeCollection from '../pages/FeeCollection';
@@ -161,7 +162,7 @@ import ExamHallList from '../pages/ExamHallList';
 import ExamSitPlan from '../pages/ExamSitPlan';
 import CreateExamSitPlan from '../pages/CreateExamSitPlan';
 import UserAttendance from '../pages/UserAttendance';
-// import PrivacyPolicy from '../pages/PrivacyPolicy';
+import PrivacyPolicy from '../pages/PrivacyPolicy';
 import CreateAttendenceList from '../pages/CreateAttendenceList';
 import AttendenceTimeSetting from '../pages/AttendenceTimeSetting';
 import AttendenceHolidayAndLeave from '../pages/AttendenceHolidayAndLeave';
@@ -179,6 +180,9 @@ import TeacherSubjectsAsignPage from '../pages/TeacherSubjectsAsignPage';
 import MarkSheet from '../pages/MarkSheet';
 import TypeOfVacation from '../pages/TypeOfVacation';
 import PublicationOfResultsViaSMS from '../pages/PublicationOfResultsViaSMS';
+import ExamRoutingList from '../pages/ExamRoutingList';
+import ExamRoutingCreate from '../pages/ExamRoutingCreate';
+import ExamRoutineEdit from '../pages/ExamRoutineEdit';
 
 const Router = createBrowserRouter([
   {
@@ -192,6 +196,10 @@ const Router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />,
+  },
+   {
+    path: '/privacy-policy',
+    element: <PrivacyPolicy />,
   },
   {
     path: 'dashboard',
@@ -229,16 +237,6 @@ const Router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-              {
-                path: 'user-reports-demo',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.user_report}
-                  >
-                    <UserReports pageTitle="User Reports Demo" />
-                  </RequirePermission>
-                ),
-              },
               // {
               //   path: 'user-reports',
               //   element: (
@@ -251,7 +249,7 @@ const Router = createBrowserRouter([
               // },
 
 
-              
+
               // {
               //   path: 'all-madrasah',
               //   element: (
@@ -842,7 +840,19 @@ const Router = createBrowserRouter([
               {
                 path: 'routing',
                 element: (
-                  <ExamRouting pageTitle="Exam Routing Create" />
+                  <ExamRoutingList pageTitle="Exam Routing Create" />
+                ),
+              },
+              {
+                path: 'routine-create',
+                element: (
+                  <ExamRoutingCreate pageTitle="Exam Routing Create" />
+                ),
+              },
+              {
+                path: 'routine-edit/:sessionID/:examID/:subClassID',
+                element: (
+                  <ExamRoutineEdit pageTitle="Exam Routing Edit" />
                 ),
               },
               // {
@@ -861,13 +871,23 @@ const Router = createBrowserRouter([
                   // </RequirePermission>
                 ),
               },
+              // {
+              //   path: 'report-demo',
+              //   element: (
+              //     <RequirePermission
+              //       permissionId={permissionsDataList.exam_report}
+              //     >
+              //       <ExamReport pageTitle="Exam Report Demo" />
+              //     </RequirePermission>
+              //   ),
+              // },F
               {
                 path: 'report',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.exam_report}
                   >
-                    <ExamReport pageTitle="Exam Report" />
+                    <ExamReportList pageTitle="Exam Report" />
                   </RequirePermission>
                 ),
               },
@@ -885,6 +905,16 @@ const Router = createBrowserRouter([
                   >
                     <PointBasedResultEntry pageTitle="Result Entry & Publish" />
                     {/* <PageNotFound /> */}
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'result-publish',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.result_entry}
+                  >
+                    <PointBasedResultEntry pageTitle="Result Publish" />
                   </RequirePermission>
                 ),
               },

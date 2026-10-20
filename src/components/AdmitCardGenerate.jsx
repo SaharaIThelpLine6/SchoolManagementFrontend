@@ -443,6 +443,23 @@ export const AdmitCardFace = ({
   const ribbonTop = Math.max(examTop + examHeight, t.headerHeight);
   const ribbonHeight = Math.max(t.bodyTop - ribbonTop, 0);
 
+  // ---- ছাপা কাগজের উপর ছাপা
+  // প্রেস থেকে ছাপানো প্রবেশপত্রের কাগজে নকশা, লোগো, প্রতিষ্ঠানের নাম ও
+  // "প্রবেশপত্র" লেখাটা আগে থেকেই আছে। তাই ওই অংশগুলো আমরা আর ছাপি না —
+  // ছাপলে এক লেখার উপর আরেক লেখা পড়ত।
+  //
+  // লুকানোটা হয় কেবল @media print এ (ক্লাসের নিয়মটা buildPrintCss এ), তাই
+  // পর্দায় ডিজাইনটা দেখা যায় আর ঘরগুলো মিলিয়ে নেওয়া যায়।
+  //
+  // overlay না থাকলে ক্লাসটা বসেই না — তাই বাকি সব কার্ড হুবহু আগের মতোই।
+  const overlay = Boolean(t.overlay);
+  const paperOnly = overlay ? ' admit-paper-only' : '';
+
+  // "প্রবেশপত্র" ব্যাজটা বাদ গেলে ওই জায়গাটা খালি পড়ে থাকত, তাই পরীক্ষার
+  // নামের স্ট্রিপটা ঠিক ওখানেই নেমে আসে — কাগজের ছাপা ব্যাজের নিচে।
+  const examStripTop = overlay ? ribbonTop : examTop;
+  const examStripHeight = overlay ? Math.max(ribbonHeight, examHeight) : examHeight;
+
   // ---- চারটি ঘরের উপর-নিচ
   // আপলোড করা ডিজাইনে প্রতিষ্ঠানভেদে ব্যানারের উচ্চতা আলাদা হয়, তাই
   // ঘরগুলোকে একটু সরানোর দরকার পড়ে। সরানো হয় translateY দিয়ে — ঘরের
@@ -501,6 +518,8 @@ export const AdmitCardFace = ({
       className="relative overflow-hidden"
       style={{ width: CARD_W, height: cardH, background: '#ffffff' }}
     >
+      {/* নকশার স্তর — ছবি বা আঁকা ফ্রেম। overlay হলে ছাপায় বাদ। */}
+      <div className={`absolute inset-0${paperOnly}`}>
       {t.variant === 'image' ? (
         isTall && !t.imageFull ? (
           <>
@@ -530,6 +549,7 @@ export const AdmitCardFace = ({
       ) : (
         <PaintedChrome t={t} />
       )}
+      </div>
 
       {/* ---------------------------------------------- মাঝের লোগো ওয়াটারমার্ক
           ব্যাকগ্রাউন্ডের ঠিক পরে, কিন্তু বাকি সব লেখার আগে — তাই লেখাগুলো
@@ -537,7 +557,7 @@ export const AdmitCardFace = ({
           যাতে কার্ডের উপর কোনো ক্লিক আটকে না যায়। */}
       {watermark ? (
         <div
-          className="absolute inset-0 flex items-center justify-center pointer-events-none"
+          className={`absolute inset-0 flex items-center justify-center pointer-events-none${paperOnly}`}
           style={{ opacity: t.watermarkOpacity ?? WATERMARK_DEFAULTS.opacity }}
         >
           <img
@@ -554,7 +574,7 @@ export const AdmitCardFace = ({
 
       {/* ------------------------- হেডার: লোগো | নাম ও ঠিকানা | শিক্ষার্থীর ছবি */}
       <div
-        className="absolute left-0 top-0 w-full"
+        className={`absolute left-0 top-0 w-full${paperOnly}`}
         style={{ height: t.headerHeight, ...headerShift }}
       >
         {logo ? (
@@ -616,7 +636,7 @@ export const AdmitCardFace = ({
         <div
           className="absolute left-0 w-full flex items-center justify-center px-8"
           dir={dir}
-          style={{ top: examTop, height: examHeight, ...headerShift }}
+          style={{ top: examStripTop, height: examStripHeight, ...headerShift }}
         >
           <p
             className="text-center whitespace-nowrap"
@@ -636,7 +656,7 @@ export const AdmitCardFace = ({
       তাই অন্য ভাষায় উপরে সাদা পট্টি দিয়ে ঢেকে নতুন লেখা বসে */}
       {t.ribbonStyle && t.ribbonStyle !== 'none' ? (
         <div
-          className="absolute left-0 w-full flex items-center justify-center"
+          className={`absolute left-0 w-full flex items-center justify-center${paperOnly}`}
           style={{ top: ribbonTop, height: ribbonHeight, ...ribbonShift }}
         >
           <div
@@ -657,7 +677,7 @@ export const AdmitCardFace = ({
         </div>
       ) : lang !== 'bn' && t.ribbonCoverBg ? (
         <div
-          className="absolute left-0 w-full flex items-center justify-center"
+          className={`absolute left-0 w-full flex items-center justify-center${paperOnly}`}
           style={{
             top: ribbonCoverCfg?.top ?? ribbonTop,
             height: ribbonCoverCfg?.height ?? ribbonHeight,

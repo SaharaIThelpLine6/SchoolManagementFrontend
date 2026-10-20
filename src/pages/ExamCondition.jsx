@@ -63,7 +63,7 @@ const ExamCondition = ({ pageTitle }) => {
   const [getExamConditionEntry, { data: examConditionData, isLoading: isExamConditionLoading, error: examConditionError, isFetching: isExamConditionFetching, },] = useLazyGetExamConditonEntryQuery();
 
   const handleExamCondetionModal = () => {
-    showModal("Exam Condition Settings", "EXAM_CONDITION_SETTINGS", null, { closeOnOutSide: false })
+    showModal("Exam Condition Settings", "EXAM_CONDITION_SETTINGS", null, { closeOnOutSide: false, header: "sticky" })
   }
 
   const handleConditionEdit = async (data) => {

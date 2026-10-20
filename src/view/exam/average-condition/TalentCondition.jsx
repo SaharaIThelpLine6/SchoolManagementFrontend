@@ -18,6 +18,7 @@ import { permissionsDataList } from "../../../Data/permissions";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
+import { useMultiStepForm } from "../../../hooks/useMultiStepForm";
 
 // ✅ Input with Label + Checkbox
 const InputWithCheckbox = ({ registerKey, checked, onCheckChange, filteredExamDivitions }) => (
@@ -74,6 +75,7 @@ const TalentCondition = ({ sharedStepData, setSharedStepData }) => {
   const { data: sessionData } = useGetSessionsQuery();
   const { data: examNameData } = useGetExamNamesQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
+   const { next, previous } = useMultiStepForm(sharedStepData?.isEditMode ? 'examConditionEdit' : 'examCondition');
   const {
     data: examTalentConditionData,
     isLoading,
@@ -112,6 +114,9 @@ const TalentCondition = ({ sharedStepData, setSharedStepData }) => {
 
   const handleSelectAll = (e) => {
     setCheckedInputs(Array(inputs.length).fill(e.target.checked));
+  };
+    const handleSaveAndPrevious = () => {
+    previous();
   };
 
   const onSubmit = async (data) => {
@@ -196,7 +201,15 @@ const TalentCondition = ({ sharedStepData, setSharedStepData }) => {
               </div>
             </div>
           </div>
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-between gap-4">
+            <div>
+              <Button
+                type="button"
+                onClick={handleSaveAndPrevious}
+              >
+                {translate("Previous")}
+              </Button>
+            </div>
             <ViewPermission
               permissionId={permissionsDataList.merit_condition}
               permissionType="insert|edit"

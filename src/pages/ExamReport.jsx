@@ -668,15 +668,6 @@ const ExamReport = ({ pageTitle }) => {
                 studentList={Array.isArray(data) ? data : data?.data}
               />
             )}
-          {/* {Number(selectedReportID) === 7 &&
-            Number(languageID) === 1 &&
-            Number(selectedPdfID) === 2 && (
-              <BSeatNoColor
-                queryParams={queryParams}
-                documentLogo={documentLogo}
-                logoIsActive={logoIsActive}
-              />
-            )} */}
           {/* ২ = রঙিন, আসন নং সহ */}
           {Number(selectedReportID) === 7 &&
             Number(languageID) === 1 &&
@@ -688,15 +679,6 @@ const ExamReport = ({ pageTitle }) => {
                 showSeatNo={true}
               />
             )}
-          {/* {Number(selectedReportID) === 7 &&
-            Number(languageID) === 1 &&
-            Number(selectedPdfID) === 3 && (
-              <BSeatNoWhite
-                queryParams={queryParams}
-                documentLogo={documentLogo}
-                logoIsActive={logoIsActive}
-              />
-            )} */}
 
           {/* ৩ = সাদা-কালো, আসন নং ছাড়া — শ্রেণিবিন্যাস লাগে না */}
           {Number(selectedReportID) === 7 &&

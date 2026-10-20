@@ -37,7 +37,7 @@ export default function MultiStepForm({
   return (
     <>
       {showStepper && (
-        <div className="sticky top-0 z-20 border-b border-gray-100 bg-white pt-4 z-[999]">
+        <div className="sticky top-0 z-30 border-b border-gray-100 bg-white pt-4">
           <div className="mx-auto">
             <div className="relative flex items-start justify-between">
               {/* Background line */}

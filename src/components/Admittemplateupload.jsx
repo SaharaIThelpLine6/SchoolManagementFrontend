@@ -29,7 +29,10 @@ import {
   getUploadUIText,
   hasOffsets,
   readOffsets,
+  readOverlay,
   sanitizeOffsets,
+  sanitizeDesign,
+  OVERLAY_KEY,
   uploadErrorText,
 } from '../Data/Admitcarduploadconfig';
 
@@ -156,6 +159,12 @@ const AdmitTemplateUpload = ({
   // চারটে ঘরের উপর-নিচ — এটুকুই প্রতিটা ডিজাইনের সাথে জমা থাকে
   const [offsets, setOffsets] = useState(ZERO_OFFSETS);
 
+  // ছাপা কাগজের উপর ছাপা — এটাও ডিজাইনের সাথেই জমে
+  const [overlay, setOverlay] = useState(false);
+
+  // প্রিভিউতে কী দেখছি — ডিজাইনসহ, নাকি যা ছাপা হবে কেবল সেটুকু
+  const [simPrint, setSimPrint] = useState(false);
+
   const setOffset = (key, value) =>
     setOffsets((prev) => sanitizeOffsets({ ...prev, [key]: value }));
 
@@ -176,6 +185,8 @@ const AdmitTemplateUpload = ({
     setError('');
     setBusy(false);
     setOffsets(ZERO_OFFSETS);
+    setOverlay(false);
+    setSimPrint(false);
     return undefined;
   }, [open]);
 
@@ -187,6 +198,7 @@ const AdmitTemplateUpload = ({
   if (open && editing && loadedId !== record.id) {
     setLoadedId(record.id);
     setOffsets(readOffsets(record));
+    setOverlay(readOverlay(record));
     setTitle(record.title || '');
     setError('');
   }
@@ -253,9 +265,9 @@ const AdmitTemplateUpload = ({
     () =>
       buildUploadedTemplate(
         { id: 'preview', mode, title: title || 'preview' },
-        { image: previewUrl, offsets }
+        { image: previewUrl, offsets, overlay }
       ),
-    [mode, title, previewUrl, offsets]
+    [mode, title, previewUrl, offsets, overlay]
   );
 
   const student = useMemo(() => {
@@ -284,7 +296,10 @@ const AdmitTemplateUpload = ({
       setBusy(true);
       setError('');
       try {
-        await onSaveOffsets?.(record.id, sanitizeOffsets(offsets));
+        await onSaveOffsets?.(
+          record.id,
+          sanitizeDesign({ ...offsets, [OVERLAY_KEY]: overlay })
+        );
         onClose?.();
       } catch (err) {
         setError(err?.data?.error || err?.message || t('errUpload'));
@@ -307,8 +322,12 @@ const AdmitTemplateUpload = ({
       form.append('file', file);
       form.append('mode', mode);
       form.append('title', title.trim().slice(0, 40));
-      // ঘরের মাপ ও রঙ কোডেরটাই; রেকর্ডে শুধু চারটে উপর-নিচ জমে
-      form.append('design', JSON.stringify(sanitizeOffsets(offsets)));
+      // ঘরের মাপ ও রঙ কোডেরটাই; রেকর্ডে শুধু চারটে উপর-নিচ আর
+      // "ছাপা কাগজের উপর ছাপা" চালু কি না — এটুকুই জমে
+      form.append(
+        'design',
+        JSON.stringify(sanitizeDesign({ ...offsets, [OVERLAY_KEY]: overlay }))
+      );
 
       await onUpload?.(form);
       onClose?.();
@@ -421,14 +440,46 @@ const AdmitTemplateUpload = ({
             </div>
           ) : (
             <div className="mt-5">
-              <p className="mb-2 text-[14px] font-bold text-gray-700">
-                {t('preview')}
-              </p>
+              {/* প্রিভিউতে কেবল ছাপার অংশটুকু লুকানোর নিয়ম — ছাপার CSS এর
+                  সেই একই ক্লাসটাই, তাই যা দেখা যায় ছাপাতেও হুবহু তাই। */}
+              <style>{'.admit-print-sim .admit-paper-only{display:none !important}'}</style>
+
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-[14px] font-bold text-gray-700">
+                  {simPrint ? t('previewModePrint') : t('preview')}
+                </p>
+
+                {/* ডিজাইন ছাপা না হলে আগে থেকে দেখে নেওয়াটাই আসল কাজ,
+                    তাই সুইচটা কেবল তখনই দরকার */}
+                {overlay ? (
+                  <div className="flex overflow-hidden rounded-[7px] border border-gray-300">
+                    {[
+                      { on: false, label: t('previewModeDesign') },
+                      { on: true, label: t('previewModePrint') },
+                    ].map((opt) => (
+                      <button
+                        key={String(opt.on)}
+                        type="button"
+                        onClick={() => setSimPrint(opt.on)}
+                        className={`px-3 py-1 text-[12px] font-medium transition ${
+                          simPrint === opt.on
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white text-gray-600 hover:bg-gray-100'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
 
               {/* আসল কার্ড কম্পোনেন্টেই আঁকা — এখানে যা দেখা যায়,
                   ছাপাতেও হুবহু তাই আসে */}
               <div
-                className="relative mx-auto overflow-hidden rounded-[4px] border border-gray-300 shadow-sm"
+                className={`relative mx-auto overflow-hidden rounded-[4px] border border-gray-300 shadow-sm${
+                  overlay && simPrint ? ' admit-print-sim bg-white' : ''
+                }`}
                 style={{ width: cardW * scale, height: cardH * scale }}
                 dir="ltr"
               >
@@ -475,8 +526,35 @@ const AdmitTemplateUpload = ({
               </div>
 
               <p className="mt-2 text-center text-[12px] text-gray-500">
-                {t('previewNote')}
+                {overlay && simPrint ? t('previewPrintNote') : t('previewNote')}
               </p>
+
+              {/* ============================ ছাপা কাগজের উপর ছাপা
+                  ঘর সরানোর ঠিক উপরে — কারণ এটা চালু করলে কোন ঘরগুলো
+                  আদৌ ছাপা হবে সেটাই বদলে যায়। */}
+              <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-[10px] border border-amber-200 bg-amber-50/60 px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={overlay}
+                  onChange={(e) => {
+                    setOverlay(e.target.checked);
+                    // বন্ধ করলে সিমুলেশনটা আর অর্থবহ নয়
+                    if (!e.target.checked) setSimPrint(false);
+                  }}
+                  className="mt-[3px] h-4 w-4 shrink-0 cursor-pointer accent-amber-600"
+                />
+                <span className="min-w-0">
+                  <span className="block text-[14px] font-bold text-amber-900">
+                    {t('overlayTitle')}
+                  </span>
+                  <span className="mt-0.5 block text-[13px] font-medium text-amber-900/90">
+                    {t('overlayLabel')}
+                  </span>
+                  <span className="mt-1 block text-[12px] leading-relaxed text-amber-900/70">
+                    {t('overlayNote')}
+                  </span>
+                </span>
+              </label>
 
               {/* ================================= চারটি ঘরের উপর-নিচ
                   প্রিভিউর ঠিক নিচে, কারণ নাড়ালে উপরের কার্ডেই সাথে সাথে

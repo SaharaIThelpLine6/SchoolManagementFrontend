@@ -151,11 +151,8 @@ const DefaultModal = () => {
               ? 'opacity-100 translate-y-0 scale-100'
               : 'opacity-0 translate-y-6 scale-95'}`}
         >
-          <div
-            className="bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 relative w-full max-h-[90vh] overflow-y-auto scroll-smooth"
-            ref={scrollRef}
-          >
-            <div className="header sticky top-0 z-10 bg-white/95 backdrop-blur pl-4 pr-3 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
+          <div className="bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 relative flex flex-col w-full max-h-[90vh] overflow-hidden">
+            <div className="header relative shrink-0 z-20 bg-white/95 backdrop-blur pl-4 pr-3 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
               {title && (
                 <h2 className="text-[18px] font-bold text-slate-800">
                   {translate(title)}
@@ -185,7 +182,7 @@ const DefaultModal = () => {
             </div>
 
             {modalType && (
-              <div className="body p-4">
+              <div className="body min-h-0 overflow-y-auto scroll-smooth p-4 pt-0" ref={scrollRef}>
                 {modalType === 'ADD_STUDENT' && <AdmissionFormModal userId={id} />}
                 {modalType === 'UPDATE_STUDENT' && <UpdateStudentFormModal userId={id} />}
                 {modalType === 'ADD_USER' && <AddUserFormModal />}

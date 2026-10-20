@@ -4,6 +4,11 @@ import bnBijoy2Unicode from '../../utils/conveter';
 import { showModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
 
+const sanitizeNumber = (value) => {
+  const [whole, ...fraction] = value.replace(/[^0-9.]/g, '').split('.');
+  return fraction.length ? `${whole}.${fraction.join('')}` : whole;
+};
+
 const DefaultInput = ({
   label,
   type = 'text',
@@ -60,6 +65,23 @@ const DefaultInput = ({
 
   const hasError = shouldShowError && errors[registerKey];
 
+  const registeredInput = register(registerKey, {
+    required: require ? 'এই ফিল্ডটি প্রয়োজনীয়' : false,
+    ...(type === 'number' && {
+      pattern: {
+        value: /^(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)$/,
+        message: 'দয়া করে একটি বৈধ সংখ্যা লিখুন',
+      },
+    }),
+    ...(type === 'phone' && {
+      pattern: {
+        value: /^\d{11}$/,
+        message: 'ফোন নম্বর অবশ্যই ১১ ডিজিটের হতে হবে',
+      },
+    }),
+    ...(validate && { validate }),
+  });
+
   return (
     <div
       className={`w-full ${labelPosition === 'left' ? 'flex items-center gap-4' : ''
@@ -95,7 +117,9 @@ const DefaultInput = ({
 
       <div className={labelPosition === 'left' ? 'flex-1' : 'w-full'}>
         <input
-          type={type === 'number' || type === 'phone' ? 'number' : type}
+          type={type === 'number' ? 'text' : type === 'phone' ? 'number' : type}
+          inputMode={type === 'number' ? 'decimal' : undefined}
+          pattern={type === 'number' ? '[0-9]+([.][0-9]*)?|[.][0-9]+' : undefined}
           placeholder={translate(placeholder)}
           // Updated className for smooth, modern focus effect matching Image 2
           className={`w-full font-default rounded-lg border text-sm h-11 px-3 outline-none transition-all duration-200 ease-in-out bg-white text-gray-900
@@ -106,23 +130,25 @@ const DefaultInput = ({
             disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-gray-500
             ${isRtl ? 'direction-rtl' : ''}
           `}
-          {...register(registerKey, {
-            required: require ? 'এই ফিল্ডটি প্রয়োজনীয়' : false,
-            ...(type === 'number' && {
-              validate: (value) =>
-                isNaN(Number(value)) ? 'দয়া করে একটি বৈধ সংখ্যা লিখুন' : true,
-            }),
-            ...(type === 'phone' && {
-              pattern: {
-                value: /^\d{11}$/,
-                message: 'ফোন নম্বর অবশ্যই ১১ ডিজিটের হতে হবে',
-              },
-            }),
-            ...(validate && { validate }),
-          })}
+          {...registeredInput}
           disabled={disable}
           readOnly={readOnly}
-          onBlur={() => setIsTouched(true)}
+          onChange={(event) => {
+            if (type === 'number') {
+              const { value, selectionStart } = event.target;
+              const sanitized = sanitizeNumber(value);
+              if (sanitized !== value) {
+                event.target.value = sanitized;
+                const cursor = sanitizeNumber(value.slice(0, selectionStart)).length;
+                event.target.setSelectionRange(cursor, cursor);
+              }
+            }
+            registeredInput.onChange(event);
+          }}
+          onBlur={(event) => {
+            registeredInput.onBlur(event);
+            setIsTouched(true);
+          }}
         />
 
         {hasError && (

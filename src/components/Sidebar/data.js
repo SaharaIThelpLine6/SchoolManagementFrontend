@@ -60,11 +60,6 @@ export const menuData = [
       },
       {
         id: '10',
-        name: 'User Reports Demo',
-        route: 'general-info/user-reports-demo',
-      },
-      {
-        id: '11',
         name: 'User Reports',
         route: 'general-info/user-reports',
       },
@@ -338,8 +333,13 @@ export const menuData = [
         name: 'Exam Routing Create',
         route: 'exam/routing',
       },
+      // {
+      //   id: '11',
+      //   name: 'Exam Report Demo',
+      //   route: 'exam/report-demo',
+      // },
       {
-        id: '11',
+        id: '12',
         name: 'Exam Report',
         route: 'exam/report',
       },
@@ -361,6 +361,11 @@ export const menuData = [
         name: 'Result Entry & Publish',
         route: 'result',
       },
+      // {
+      //   id: '2',
+      //   name: 'Result Publish',
+      //   route: 'result-publish',
+      // },
       {
         id: '3',
         name: 'Mark Sheet',

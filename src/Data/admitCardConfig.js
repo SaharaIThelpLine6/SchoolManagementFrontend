@@ -1349,6 +1349,13 @@ export const buildPrintCss = ({ layout, cardW, cardH, grayscale = false, prefix 
         margin: 0;
       }
 
+      /* ছাপা কাগজের উপর ছাপা — কাগজে নকশাটা আগে থেকেই ছাপা, তাই এই
+         অংশগুলো আমরা আর ছাপি না। পর্দায় ঠিকই দেখা যায়, নইলে ঘরগুলো
+         কোথায় বসছে মিলিয়ে নেওয়া যেত না। ক্লাসটা বসে কেবল সেই
+         ডিজাইনে যার overlay চালু (Admitcarduploadconfig.js) — তাই
+         বাকি সব কার্ড অবিকল আগের মতোই ছাপে। */
+      .admit-paper-only { display: none !important; }
+
       html, body {
         margin: 0 !important;
         padding: 0 !important;
