@@ -655,6 +655,9 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                       </th>)}
 
                       <th className="text-left px-4 py-2 font-medium text-gray-600">
+                        {translate("Max Number")}
+                      </th>
+                      <th className="text-left px-4 py-2 font-medium text-gray-600">
                         {translate("Pass Number")}
                       </th>
                       <th className="text-left px-4 py-2 font-medium text-gray-600">
@@ -693,15 +696,23 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
 
                         }
 
-
-
                         <td className="px-4 py-2 align-top">
                           <DefaultInput
+                            type="number"
+                            registerKey={`subjectPassNumbers.${index}.MaxNumber`}
+                            require="This is required!"
+                            defaultValue={100}
+                          />
+                        </td>
+                        <td className="px-4 py-2 align-top">
+                          <DefaultInput
+                            type="number"
                             registerKey={`subjectPassNumbers.${index}.PassNumber`}
                             require="This is required!"
                             defaultValue={null}
                           />
                         </td>
+
 
                         <td className="px-4 py-2 align-top">
                           <CheckboxOption
@@ -783,13 +794,13 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
 
                     <div className="grid gap-4 md:grid-cols-3">
                       <div>
-                        <DefaultInput type='text' registerKey={"DivisionName"} placeholder={"বিভাগ (বাংলা)"} required />
+                        <DefaultInput type="number" registerKey={"DivisionName"} placeholder={"বিভাগ (বাংলা)"} required />
                       </div>
                       <div>
-                        <DefaultInput registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
+                        <DefaultInput type="number" registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
                       </div>
                       <div>
-                        <DefaultInput registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
+                        <DefaultInput type="number" registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
                       </div>
                     </div>
 
@@ -855,7 +866,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
 
                       <DefaultSelect
                         options={[
-                          // { id: 1, name: "Gor mayeri" },
+                          // { id: 1, name: "Gor mayeri" }, 
                           // { id: 2, name: "Mayeri" },
                           // { id: 3, name: "Most Mayeri" },
                           { id: 4, name: "Optional" },
@@ -916,6 +927,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                                 <td className="px-4 py-2">
                                   <DefaultInput
                                     registerKey={`gradeBands.${index}.DivisionNumber`}
+                                    type="number"
                                     placeholder="যেমন: ৮০"
                                     required
                                     defaultValue={getValues(`gradeBands.${index}.DivisionNumber`)}

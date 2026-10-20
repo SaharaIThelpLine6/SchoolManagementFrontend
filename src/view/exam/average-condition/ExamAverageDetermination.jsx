@@ -440,6 +440,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                     </label>
                     <DefaultInput
                       registerKey="maxAverageScore"
+                      type='number'
                       placeholder="যেমন: ১০০"
                       required
                     />
@@ -480,6 +481,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                             <tr key={field.id} className="border-t border-gray-100">
                               <td className="px-4 py-2">
                                 <DefaultInput
+                                type='number'
                                   registerKey={`gradeBands.${index}.DivisionNumber`}
                                   placeholder="যেমন: ৮০"
                                   required
