@@ -383,7 +383,7 @@ export const menuData = [
       },
       {
         id: '6',
-        name: 'Publication of results via SMS',
+        name: 'SMS Results Public',
         route: 'result/publication-results-sms',
       },
     ],

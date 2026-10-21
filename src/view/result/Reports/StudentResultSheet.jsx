@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useId } from "react";
+import { createPortal } from "react-dom";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode, { convertOnLanguageChange } from "../../../utils/conveter";
 import { Buffer } from "buffer";
@@ -39,6 +40,16 @@ const TRANSLATIONS = {
         byDivision: "বিভাগ অনুসারে",
         byNumber: "নাম্বার অনুসারে",
         short: "সংক্ষিপ্ত",
+        headingTitle: "কলামের হেডিং",
+        headingNote: "ফাঁকা রাখলে ডিফল্ট নাম ব্যবহার হবে। লিখলে সব ভাষায় এই নামই দেখাবে। শুধু হেডিং বদলাবে, মান একই থাকবে।",
+        gpaLabelTitle: "গড়/জিপিএ কলাম",
+        gpaOpt: "জিপিএ",
+        avgOpt: "গড়",
+        gpaTextLabel: "গড়/জিপিএ কলামের নাম (নিজে লিখুন)",
+        gpaTextPlaceholder: "যেমন: গড় নম্বর",
+        gradeTextLabel: "গ্রেড কলামের নাম (নিজে লিখুন)",
+        gradeTextPlaceholder: "যেমন: গ্রেড / বিভাগ",
+        resetHeading: "ডিফল্টে ফিরুন",
         sl: "ক্রমিক",
         admission: "ভর্তি",
         studentId: "আইডি",
@@ -262,7 +273,7 @@ export const RESULT_COLUMNS = [
     { key: "id", label: "আইডি" },
     { key: "name", label: "শিক্ষার্থীর নাম" },
     { key: "total", label: "মোট" },
-    { key: "gpa", label: "জিপিএ" },
+    { key: "gpa", label: "গড়" },
     { key: "grade", label: "গ্রেড" },
     { key: "pos", label: "স্থান" },
 ];
@@ -323,6 +334,14 @@ export const COLOR_OPTIONS = [
 
 export const DEFAULT_COLOR_MODE = "color";
 
+// গড়/জিপিএ কলামের হেডিং — ডিফল্ট: গড়
+export const GPA_LABEL_OPTIONS = [
+    { key: "avg", label: "গড়" },
+    { key: "gpa", label: "জিপিএ" },
+];
+
+export const DEFAULT_GPA_LABEL = "avg";
+
 /* ═══════════════════════════════════════════════════════════
    THEME
    ═══════════════════════════════════════════════════════════ */
@@ -355,8 +374,11 @@ const THEMES = {
             border: "#334155", text: "#0f172a", divider: "#cbd5e1",
         },
         palette: DIVISION_PALETTE,
-        medals: { 1: "#fbbf24", 2: "#cbd5e1", 3: "#fdba74" },
-        medalBorder: "1px solid transparent",
+        medals: {
+            1: { bg: "#facc15", fg: "#422006", border: "1.5px solid #a16207" }, // উজ্জ্বল সোনালি
+            2: { bg: "#38bdf8", fg: "#ffffff", border: "1.5px solid #0369a1" }, // নীল
+            3: { bg: "#ea580c", fg: "#ffffff", border: "1.5px solid #9a3412" }, // গাঢ় কমলা/ব্রোঞ্জ
+        },
     },
     bw: {
         C: {
@@ -370,10 +392,13 @@ const THEMES = {
             border: "#000", text: "#000", divider: "#737373",
         },
         palette: DIVISION_PALETTE,
-        medals: { 1: "#d4d4d4", 2: "#e5e5e5", 3: "#f4f4f4" },
-        medalBorder: "1px solid #000",
+        medals: {
+            1: { bg: "#facc15", fg: "#422006", border: "1.5px solid #a16207" }, // উজ্জ্বল সোনালি
+            2: { bg: "#38bdf8", fg: "#ffffff", border: "1.5px solid #0369a1" }, // নীল
+            3: { bg: "#ea580c", fg: "#ffffff", border: "1.5px solid #9a3412" }, // গাঢ় কমলা/ব্রোঞ্জ
+        },
     },
-};
+}
 
 const bg = (color) => ({
     backgroundColor: color,
@@ -416,6 +441,16 @@ const LS_COLOR = "resultSheetColorMode";
 const LS_NAME_EXTRAS = "resultSheetNameExtras";
 const LS_RESULT_OPTS = "resultSheetResultOptions";
 const LS_LANG = "resultSheetLanguage";
+const LS_GPA_LABEL = "resultSheetGpaLabel";
+const LS_GPA_TEXT = "resultSheetGpaText";
+const LS_GRADE_TEXT = "resultSheetGradeText";
+
+const loadText = (key) => {
+    try {
+        return localStorage.getItem(key) || "";
+    } catch (e) { }
+    return "";
+};
 
 const loadObj = (key, fallback) => {
     try {
@@ -502,12 +537,20 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     );
     const [colorMode, setColorMode] = useState(() => loadStr(LS_COLOR, COLOR_OPTIONS, DEFAULT_COLOR_MODE));
     const [lang, setLang] = useState(() => loadStr(LS_LANG, LANGUAGE_OPTIONS, DEFAULT_LANGUAGE));
+    const [gpaLabelMode, setGpaLabelMode] = useState(() =>
+        loadStr(LS_GPA_LABEL, GPA_LABEL_OPTIONS, DEFAULT_GPA_LABEL)
+    );
+    const [gpaText, setGpaText] = useState(() => loadText(LS_GPA_TEXT));
+    const [gradeText, setGradeText] = useState(() => loadText(LS_GRADE_TEXT));
 
     useEffect(() => { localStorage.setItem(LS_VISIBLE, JSON.stringify(visibleColumns)); }, [visibleColumns]);
     useEffect(() => { localStorage.setItem(LS_NAME_EXTRAS, JSON.stringify(nameExtras)); }, [nameExtras]);
     useEffect(() => { localStorage.setItem(LS_RESULT_OPTS, JSON.stringify(resultOptions)); }, [resultOptions]);
     useEffect(() => { localStorage.setItem(LS_COLOR, colorMode); }, [colorMode]);
     useEffect(() => { localStorage.setItem(LS_LANG, lang); }, [lang]);
+    useEffect(() => { localStorage.setItem(LS_GPA_LABEL, gpaLabelMode); }, [gpaLabelMode]);
+    useEffect(() => { localStorage.setItem(LS_GPA_TEXT, gpaText); }, [gpaText]);
+    useEffect(() => { localStorage.setItem(LS_GRADE_TEXT, gradeText); }, [gradeText]);
 
     /* ── সাইডবার: সবসময় বাংলা ── */
     const tUI = TRANSLATIONS.bn;
@@ -598,6 +641,15 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const L = (backendKey, tKey) =>
         lang === "bn" ? (labels?.[backendKey] ?? t[tKey]) : t[tKey];
 
+    // গড়/জিপিএ কলামের হেডিং: নির্বাচিত মোড অনুযায়ী (ডিফল্ট গড়)
+    // নিজে লেখা টেক্সট থাকলে সেটাই অগ্রাধিকার পাবে
+    const gpaHeading =
+        gpaText.trim() ||
+        (gpaLabelMode === "gpa"
+            ? L("GPALabel", "gpa")
+            : L("AverageLabel", "average"));
+    const gradeHeading = gradeText.trim() || L("GradeLabel", "grade");
+
     const LABELS = {
         sl: L("SerialLabel", "sl"),
         studentId: L("StudentIDLabel", "studentId"),
@@ -607,8 +659,8 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         mother: L("MotherNameLabel", "mother"),
         address: L("AddressLabel", "address"),
         total: L("TotalLabel", "total"),
-        gpa: L("GPALabel", "gpa"),
-        grade: L("GradeLabel", "grade"),
+        gpa: gpaHeading,
+        grade: gradeHeading,
         position: L("PositionLabel", "position"),
         average: L("AverageLabel", "average"),
     };
@@ -785,7 +837,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
     const renderHeaderBlock = () => (
         <div style={{
-            display: "grid", gridTemplateColumns: "220px 1fr 220px", gridTemplateRows: "1fr",
+            display: "grid", gridTemplateColumns: "220px 1fr 290px", gridTemplateRows: "1fr",
             gap: "16px", padding: "10px 0", borderBottom: `3px solid ${C.primary}`,
             height: `${HEADER_H}px`, boxSizing: "border-box", overflow: "hidden",
             marginBottom: `${HEADER_GAP}px`,
@@ -829,7 +881,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                     {divisionScale.rows.map((item, i) => (
                         <div key={item.id ?? i} style={{
                             ...sideRowBase,
-                            gridTemplateColumns: "1fr 12px 30px 16px 16px 14px 40px",
+                            gridTemplateColumns: "1fr 14px 40px 20px 20px 16px 52px",
                             ...bg(i % 2 ? S.altBg : S.bodyBg),
                         }}>
                             <div style={{
@@ -989,10 +1041,12 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                     <td style={{ ...styles.td, ...bg(rowBg) }}>
                         {medal ? (
                             <span style={{
-                                display: "inline-block", boxSizing: "border-box",
-                                width: "18px", height: "18px", lineHeight: "16px",
-                                borderRadius: "50%", border: theme.medalBorder,
-                                ...bg(medal), fontWeight: 800, fontSize: "11px", verticalAlign: "middle",
+                                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                                boxSizing: "border-box", width: "20px", height: "20px",
+                                borderRadius: "50%", border: medal.border,
+                                ...bg(medal.bg), color: medal.fg,
+                                fontWeight: 800, fontSize: "11px", lineHeight: 1,
+                                verticalAlign: "middle",
                             }}>{num(studentResult.Positions)}</span>
                         ) : num(studentResult.Positions)}
                     </td>
@@ -1048,7 +1102,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                         <th style={shortTh}>{LABELS.studentId}</th>
                         <th style={{ ...shortTh, textAlign: "start", paddingInlineStart: "6px" }}>{LABELS.name}</th>
                         <th style={{ ...shortTh, textAlign: "start", paddingInlineStart: "6px" }}>{LABELS.father}</th>
-                        <th style={thStrong}>{LABELS.average}</th>
+                        <th style={thStrong}>{LABELS.gpa}</th>
                         <th style={thStrong}>{LABELS.grade}</th>
                     </tr>
                 </thead>
@@ -1130,11 +1184,16 @@ export default function StudentResultSheet({ reportData, query, labels }) {
             { key: "id", label: labels?.StudentIDLabel ?? tUI.studentId },
             { key: "name", label: labels?.StudentNameLabel ?? tUI.name },
             { key: "total", label: labels?.TotalLabel ?? tUI.total },
-            { key: "gpa", label: labels?.GPALabel ?? tUI.gpa },
-            { key: "grade", label: labels?.GradeLabel ?? tUI.grade },
+            {
+                key: "gpa",
+                label: gpaText.trim() || (gpaLabelMode === "gpa"
+                    ? (labels?.GPALabel ?? tUI.gpa)
+                    : (labels?.AverageLabel ?? tUI.average)),
+            },
+            { key: "grade", label: gradeText.trim() || (labels?.GradeLabel ?? tUI.grade) },
             { key: "pos", label: labels?.PositionLabel ?? tUI.position },
         ],
-        [labels, tUI]
+        [labels, tUI, gpaLabelMode, gpaText, gradeText]
     );
 
     const toggleColumn = (key) => setVisibleColumns((p) => ({ ...p, [key]: !p[key] }));
@@ -1157,6 +1216,15 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 onSetAll={setAllColumns}
                 columns={dynamicColumns}
             />
+            <HeadingSettings
+                t={tUI}
+                mode={gpaLabelMode}
+                onModeChange={setGpaLabelMode}
+                gpaText={gpaText}
+                onGpaText={setGpaText}
+                gradeText={gradeText}
+                onGradeText={setGradeText}
+            />
             <ResultOptionsSelector t={tUI} value={resultOptions} onSelect={selectResultOption} />
             <PrintSettings t={tUI} colorMode={colorMode} onColorChange={setColorMode} />
         </>
@@ -1167,8 +1235,8 @@ export default function StudentResultSheet({ reportData, query, labels }) {
             <aside
                 className="hidden lg:flex flex-col w-[300px] shrink-0 bg-white border-r border-slate-200 sticky top-0 print:hidden"
                 style={{
-                    height: 'calc(100vh - 100px)', // আপনি চাইলে ফিক্সড পিক্সেলও দিতে পারেন, যেমন: '800px'
-                    overflow: "hidden"
+                    height: "calc(100vh - 100px)",
+                    overflow: "hidden",
                 }}
             >
                 <div className="p-5 border-b border-slate-100 shrink-0">
@@ -1184,11 +1252,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                     <p className="text-xs text-slate-400">{tUI.settingsSub}</p>
                 </div>
 
-                {/* 
-      এই ডিভে flex-1 এবং overflow-y-auto দেওয়া আছে। 
-      প্যারেন্ট aside এর হাইট ফিক্সড থাকায়, এই অংশে কনটেন্ট বেশি হলে 
-      শুধুমাত্র এই ডিভের ভেতরেই স্ক্রলবার আসবে। 
-    */}
+                {/* কনটেন্ট বেশি হলে শুধু এই ডিভের ভেতরেই স্ক্রল হবে */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-4">
                     {renderSettingsPanels()}
                 </div>
@@ -1205,13 +1269,10 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                     </div>
                 </div>
 
-                {/* fixed height + overflow-y-auto দিয়ে স্ক্রল */}
+                {/* প্রিভিউ: fixed height + scroll (প্রিন্টে এটা আর ব্যবহার হয় না) */}
                 <div
                     className="result-sheet-wrapper w-full overflow-x-hidden"
-                    style={{
-                        height: '700px',       // আপনার প্রয়োজনমতো পিক্সেল পরিবর্তন করুন
-                        overflowY: 'auto'
-                    }}
+                    style={{ height: "700px", overflowY: "auto" }}
                 >
                     <div className="no-print p-4">
                         <ScaledPreview designWidth={PAGE_W}>
@@ -1226,29 +1287,38 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                             ))}
                         </ScaledPreview>
                     </div>
-
-                    <div className="print-only">
-                        {pages.map((students, pageIndex) => (
-                            <div key={pageIndex} dir={dir} style={{
-                                ...pageBox,
-                                pageBreakAfter: pageIndex < pages.length - 1 ? "always" : "auto",
-                                breakAfter: pageIndex < pages.length - 1 ? "page" : "auto",
-                            }}>
-                                {renderPage(pageIndex, students)}
-                            </div>
-                        ))}
-                    </div>
                 </div>
             </div>
 
+            {/* প্রিন্ট: document.body এ portal — scroll/overflow container এর বাইরে */}
+            {createPortal(
+                <div className="print-portal">
+                    {pages.map((students, pageIndex) => (
+                        <div key={pageIndex} dir={dir} style={{
+                            ...pageBox,
+                            margin: 0,
+                            pageBreakAfter: pageIndex < pages.length - 1 ? "always" : "auto",
+                            breakAfter: pageIndex < pages.length - 1 ? "page" : "auto",
+                        }}>
+                            {renderPage(pageIndex, students)}
+                        </div>
+                    ))}
+                </div>,
+                document.body
+            )}
+
             <style>{`
-        .print-only { display: none; }
+        .print-portal { display: none; }
         @media print {
           @page { size: A4 landscape; margin: 5mm; }
-          html, body { margin: 0 !important; padding: 0 !important; }
+          html, body {
+            margin: 0 !important; padding: 0 !important;
+            height: auto !important; overflow: visible !important;
+            background: #fff !important;
+          }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          .no-print { display: none !important; }
-          .print-only { display: block !important; }
+          body > *:not(.print-portal) { display: none !important; }
+          .print-portal { display: block !important; }
           tr, td, th { page-break-inside: avoid !important; break-inside: avoid !important; }
           .signature-section { page-break-inside: avoid !important; break-inside: avoid !important; }
         }
@@ -1285,6 +1355,62 @@ const LanguageSelector = ({ t, value, onChange }) => (
         <p className="text-[10px] text-slate-400 leading-snug">{t.printLanguageNote}</p>
     </div>
 );
+
+// কলামের হেডিং সেটিং: গড়/জিপিএ বাছাই + নিজে লেখা টেক্সট (গড়/জিপিএ ও গ্রেড)
+const HeadingSettings = ({ t, mode, onModeChange, gpaText, onGpaText, gradeText, onGradeText }) => {
+    const options = [
+        { key: "avg", label: t.avgOpt },
+        { key: "gpa", label: t.gpaOpt },
+    ];
+    const inputCls =
+        "w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-700 " +
+        "placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300";
+    const hasCustom = gpaText.trim() !== "" || gradeText.trim() !== "";
+    return (
+        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-3">
+            <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-700 leading-tight">{t.headingTitle}</p>
+                {hasCustom && (
+                    <button
+                        type="button"
+                        onClick={() => { onGpaText(""); onGradeText(""); }}
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200"
+                    >
+                        {t.resetHeading}
+                    </button>
+                )}
+            </div>
+
+            <SegmentedControl label={t.gpaLabelTitle} options={options} value={mode} onChange={onModeChange} />
+
+            <div>
+                <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{t.gpaTextLabel}</p>
+                <input
+                    type="text"
+                    value={gpaText}
+                    onChange={(e) => onGpaText(e.target.value)}
+                    placeholder={t.gpaTextPlaceholder}
+                    maxLength={30}
+                    className={inputCls}
+                />
+            </div>
+
+            <div>
+                <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{t.gradeTextLabel}</p>
+                <input
+                    type="text"
+                    value={gradeText}
+                    onChange={(e) => onGradeText(e.target.value)}
+                    placeholder={t.gradeTextPlaceholder}
+                    maxLength={30}
+                    className={inputCls}
+                />
+            </div>
+
+            <p className="text-[10px] text-slate-400 leading-snug">{t.headingNote}</p>
+        </div>
+    );
+};
 
 const PrintSettings = ({ t, colorMode, onColorChange }) => {
     const colorOptions = [

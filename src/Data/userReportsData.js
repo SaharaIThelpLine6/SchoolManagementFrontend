@@ -77,7 +77,7 @@ export const resultReports = [
   },
   {
     ReportID: 3,
-    ReportName: '3. সেশন ভিওিক ফলাফল',
+    ReportName: '3. ফলাফল পরিসংখ্যান',
   },
   {
     ReportID: 4,

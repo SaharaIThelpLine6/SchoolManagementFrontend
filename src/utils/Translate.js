@@ -18,7 +18,7 @@ const useTranslate = () => {
     Debit: 'ডেবিট',
     Credit: 'ক্রেডিট',
     SubLedger: 'সাবলেজার',
-    'Publication of results via SMS': 'এসএমএস-এর মাধ্যমে ফলাফল প্রকাশ',
+    'SMS Results Public': 'SMS ফলাফল প্রকাশ',
     'Transaction ID': 'ট্রানজেকশন আইডি',
     'User Attendance': 'ইউজার হাজিরা',
     'Student Payment History': 'পেমেন্ট তথ্য',
@@ -1051,7 +1051,7 @@ const useTranslate = () => {
     "Exam Student List": "পরীক্ষার্থী তালিকা",
     "Exam Hall List": "পরীক্ষা কেন্দ্রের তালিকা",
 
-    "Students Report (Demo)" : "পরীক্ষার্থী তালিকা (ডেমো)"
+    "Students Report (Demo)": "পরীক্ষার্থী তালিকা (ডেমো)"
   };
 
   return (key) =>
