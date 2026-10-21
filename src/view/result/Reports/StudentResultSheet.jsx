@@ -215,9 +215,64 @@ const getExtraValue = (studentResult, option) => {
 const isFilled = (v) => v !== undefined && v !== null && v !== "";
 
 /* ═══════════════════════════════════════════════════════════
+   PASS NUMBER (বিষয়ভিত্তিক পাস নাম্বার)
+   ⚠️ আপনার backend এ পাস নাম্বারের ফিল্ডের নাম অন্য হলে
+      শুধু নিচের PASS_FIELDS অ্যারেতে সেই নামটা যোগ করুন।
+   ═══════════════════════════════════════════════════════════ */
+const PASS_FIELDS = [
+    "PassNumber", "SubjectPassNumber", "PassMark", "PassMarks",
+    "PassNo", "Pass", "SubjectPass", "MinNumber",
+];
+
+// একটি বিষয়ের পাস নাম্বার; না পেলে null (তখন মার্ক করা হবে না)
+const getPassMark = (subject) => {
+    for (const f of PASS_FIELDS) {
+        const v = getFirstValue(subject?.[f], subject?.Subject?.[f]);
+        if (v !== undefined) {
+            const n = Number(v);
+            if (Number.isFinite(n)) return n;
+        }
+    }
+    return null;
+};
+
+// নম্বর পাস নাম্বারের চেয়ে কম কি না
+const isBelowPass = (val, passMark) => {
+    if (passMark === null || !isFilled(val) || String(val).trim() === "") return false;
+    const n = Number(val);
+    if (!Number.isFinite(n)) return false;
+    return n < passMark;
+};
+
+/* ═══════════════════════════════════════════════════════════
+   KERAT ACTION — মোট নম্বরে যে বিষয় ধরা হবে না
+   subjectPassNumbers[i].KeratAction === true হলে ওই বিষয়
+   (SubVal{i+1}) মোট নম্বরের যোগফল থেকে বাদ যাবে।
+   ═══════════════════════════════════════════════════════════ */
+const isKerat = (subject) => {
+    const v = subject?.KeratAction;
+    return v === true || v === 1 || v === "1" || v === "true";
+};
+
+// KeratAction true বিষয় বাদ দিয়ে বাকি বিষয়ের যোগফল
+const calcTotal = (studentResult, subjects) => {
+    if (!Array.isArray(subjects) || subjects.length === 0) {
+        const n = Number(studentResult?.Total);
+        return Number.isFinite(n) ? n : 0;
+    }
+    let sum = 0;
+    subjects.forEach((s, i) => {
+        if (isKerat(s)) return;
+        const n = Number(studentResult?.[`SubVal${i + 1}`]);
+        if (Number.isFinite(n)) sum += n;
+    });
+    return sum;
+};
+
+/* ═══════════════════════════════════════════════════════════
    DIVISION SCALE (dynamic)
-   ExamType == 4  → subjectPassNumbers (DivisionID/DivisionNumber)
-   others         → conditionAverage   (DivisionID/DivisionNumber)
+   ExamType == 4  → subjectPassNumbers (DivisionID/DivisionNumber)  [পয়েন্ট ভিত্তিক]
+   others         → conditionAverage   (DivisionID/DivisionNumber)  [গড় ভিত্তিক]
    Name আসে divitionList থেকে (ভাষা অনুযায়ী)
    return: { rows: [{id, name, num}], top }
    ═══════════════════════════════════════════════════════════ */
@@ -345,15 +400,38 @@ export const DEFAULT_GPA_LABEL = "avg";
 /* ═══════════════════════════════════════════════════════════
    THEME
    ═══════════════════════════════════════════════════════════ */
+const FAIL_NAME_RE = /স্থগিত|ছগিত|রাসিব|fail|^F$/i;
+
 // দ্রষ্টব্য: ফেল/স্থগিত চেনার জন্য সবসময় মূল বাংলা DivisionNames ব্যবহার হয় (ভাষা বদলালেও রঙ ঠিক থাকে)
+const isFailDivision = (studentResult) =>
+    FAIL_NAME_RE.test(String(studentResult?.Division?.DivisionNames ?? ""));
+
+// গড় দিয়ে fallback রঙ (যখন বিভাগ চেনা যায় না)
 const colorTint = (studentResult, avg) => {
-    const name = String(studentResult?.Division?.DivisionNames ?? "");
-    if (/স্থগিত|ছগিত|রাসিব|fail|^F$/i.test(name)) return { bg: "#fee2e2", fg: "#991b1b" };
+    if (isFailDivision(studentResult)) return { bg: "#fee2e2", fg: "#991b1b" };
     if (avg >= 80) return { bg: "#dcfce7", fg: "#166534" };
     if (avg >= 70) return { bg: "#cffafe", fg: "#155e75" };
     if (avg >= 60) return { bg: "#fef9c3", fg: "#854d0e" };
     if (avg >= 33) return { bg: "#ffedd5", fg: "#9a3412" };
     return { bg: "#fee2e2", fg: "#991b1b" };
+};
+
+// প্রতিটি গ্রেড/বিভাগের জন্য আলাদা আলাদা রঙ (বিভাগের ক্রম অনুযায়ী: ১ম = সেরা)
+const GRADE_COLORS = [
+    { bg: "#bbf7d0", fg: "#14532d" }, // সবুজ
+    { bg: "#99f6e4", fg: "#134e4a" }, // টিল
+    { bg: "#bae6fd", fg: "#075985" }, // আকাশি নীল
+    { bg: "#fef08a", fg: "#854d0e" }, // হলুদ
+    { bg: "#fed7aa", fg: "#9a3412" }, // কমলা
+    { bg: "#e9d5ff", fg: "#6b21a8" }, // বেগুনি
+    { bg: "#fbcfe8", fg: "#9d174d" }, // গোলাপি
+];
+const GRADE_FAIL_COLOR = { bg: "#fecaca", fg: "#991b1b" }; // ফেল/স্থগিত = লাল
+
+// অকৃতকার্য বিষয়ের মার্ক (পাস নাম্বারের চেয়ে কম)
+const FAIL_MARK = {
+    color: { bg: "#fecaca", fg: "#b91c1c", textDecoration: "none" },
+    bw: { bg: "#d4d4d4", fg: "#000", textDecoration: "underline" },
 };
 
 const DIVISION_PALETTE = [
@@ -399,6 +477,9 @@ const THEMES = {
         },
     },
 }
+
+// শিট (প্রিভিউ + প্রিন্ট) এর সব লেখায় এই ফন্ট — প্রিন্ট portal document.body তে থাকায় আলাদা করে সেট করা
+const SHEET_FONT = '"SolaimanLipiNormal", "SolaimanLipi", serif';
 
 const bg = (color) => ({
     backgroundColor: color,
@@ -525,6 +606,8 @@ function SignatureSection({ C, dateText, dateLabel, NajemName, PrincipalName, na
    ═══════════════════════════════════════════════════════════ */
 export default function StudentResultSheet({ reportData, query, labels }) {
 
+    console.log(reportData, "reportData");
+
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
 
     const [principal, setPrincipal] = useState(null);
@@ -598,8 +681,9 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         };
         const all = Array.isArray(reportData.studentResults) ? reportData.studentResults : [];
         const serialOf = (s) => Number(s?.User?.Admission?.[0]?.AdmissionSerial) || 0;
+        // KeratAction true বিষয় বাদ দিয়ে মোট
         const totalOf = (s) => {
-            const n = Number(s?.Total);
+            const n = calcTotal(s, reportData.subjectPassNumbers);
             return Number.isNaN(n) ? -Infinity : n;
         };
 
@@ -692,10 +776,61 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         return subjectPassNumbers.length;
     }, [conditionAverage, subjectPassNumbers]);
 
+    /* ── পয়েন্ট ভিত্তিক (ExamType 4) নাকি গড় ভিত্তিক ── */
+    const isPointBased = Number(conditionAverage?.ExamType) === 4;
+
+    // গড় ভিত্তিক হলে ডান বক্সের "মোট বিষয়" = AverageSubsonkha, পয়েন্ট ভিত্তিক হলে আগের মতোই subjectCount
+    const summarySubjectCount = useMemo(() => {
+        if (isPointBased) return subjectCount;
+        const n = Number(conditionAverage?.AverageSubsonkha);
+        return n > 0 ? n : subjectCount;
+    }, [isPointBased, conditionAverage, subjectCount]);
+
+    /* ── প্রতিটি বিষয়ের পাস নাম্বার (সাবজেক্ট কলামের ক্রম অনুযায়ী) ── */
+    const passMarks = useMemo(
+        () => subjectPassNumbers.map((s) => getPassMark(s)),
+        [subjectPassNumbers]
+    );
+
     const divisionScale = useMemo(
         () => buildDivisionScale(conditionAverage, subjectPassNumbers, divisionList, t.divisionFallback, lang),
         [conditionAverage, subjectPassNumbers, divisionList, t.divisionFallback, lang]
     );
+
+    /* ── গ্রেড/বিভাগ অনুযায়ী আলাদা রঙ: divisionId → রঙ ── */
+    const gradeColorMap = useMemo(() => {
+        const map = {};
+        const used = new Set();
+        let idx = 0;
+        // প্রথমে বিভাগের ক্রম অনুযায়ী (ফেল/স্থগিত বাদে)
+        const ordered = [...(divisionList || [])];
+        const orderIds = divisionScale.rows.map((d) => d.id);
+        ordered.sort((a, b) => {
+            const ia = orderIds.indexOf(Number(a.ID));
+            const ib = orderIds.indexOf(Number(b.ID));
+            return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+        });
+        ordered.forEach((d) => {
+            const id = Number(d.ID);
+            if (used.has(id)) return;
+            used.add(id);
+            if (FAIL_NAME_RE.test(String(d.DivisionNames ?? ""))) {
+                map[id] = GRADE_FAIL_COLOR;
+            } else {
+                map[id] = GRADE_COLORS[idx % GRADE_COLORS.length];
+                idx += 1;
+            }
+        });
+        return map;
+    }, [divisionList, divisionScale]);
+
+    const getGradeColor = (studentResult, avg) => {
+        if (isFailDivision(studentResult)) return GRADE_FAIL_COLOR;
+        const id = Number(getFirstValue(studentResult?.DivisionID, studentResult?.Division?.ID));
+        if (!Number.isNaN(id) && gradeColorMap[id]) return gradeColorMap[id];
+        if (!Number.isNaN(id)) return GRADE_COLORS[id % GRADE_COLORS.length];
+        return colorTint(studentResult, avg);
+    };
 
     const divisionStats = useMemo(() => {
         const allStudents =
@@ -872,9 +1007,9 @@ export default function StudentResultSheet({ reportData, query, labels }) {
             <div style={sideBox}>
                 <div style={sideTitle}>
                     {t.subjectsTitle(
-                        num(subjectCount),
+                        num(summarySubjectCount),
                         num(divisionScale.top),
-                        num(divisionScale.top * subjectCount)
+                        num(divisionScale.top * summarySubjectCount)
                     )}
                 </div>
                 <div style={sideBody}>
@@ -892,10 +1027,10 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                             <div style={cellCenter}>:</div>
                             <div style={{ ...cellCenter, justifyContent: "flex-end" }}>{num(item.num)}</div>
                             <div style={cellCenter}>×</div>
-                            <div style={cellCenter}>{num(subjectCount)}</div>
+                            <div style={cellCenter}>{num(summarySubjectCount)}</div>
                             <div style={cellCenter}>=</div>
                             <div style={{ ...cellCenter, justifyContent: "flex-start", paddingInlineStart: "2px" }}>
-                                {num(item.num * subjectCount)}
+                                {num(item.num * summarySubjectCount)}
                             </div>
                         </div>
                     ))}
@@ -993,13 +1128,17 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const renderAdmission = (serial) =>
         lang === "bn" ? convertOnLanguageChange(serial) : num(serial);
 
+    const failMark = FAIL_MARK[colorMode] || FAIL_MARK.color;
+
     const renderRow = (studentResult, globalIndex) => {
         const zebra = globalIndex % 2 === 1;
         const rowBg = zebra ? C.primaryFaint : "#fff";
-        const avg = Number(studentResult.Total) / Number(conditionAverage?.AverageSubsonkha || 1);
-        const tint = colorTint(studentResult, avg);
-        const gradeBg = studentResult?.DColor ? studentResult?.DColorType : tint.bg;
-        const gradeFg = studentResult?.DColor ? "#0f172a" : tint.fg;
+        // KeratAction true বিষয় বাদ দিয়ে মোট ও গড়
+        const total = calcTotal(studentResult, subjectPassNumbers);
+        const avg = total / Number(conditionAverage?.AverageSubsonkha || 1);
+        const gc = getGradeColor(studentResult, avg);
+        const gradeBg = gc.bg;
+        const gradeFg = gc.fg;
         const position = Number(studentResult.Positions);
         const medal = theme.medals[position];
 
@@ -1016,18 +1155,23 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
                 {Array.from({ length: conditionAverage?.SubSonkha || 0 }).map((_, mi) => {
                     const val = studentResult[`SubVal${mi + 1}`];
-                    const isZero = Number(val) === 0;
+                    const failed = isBelowPass(val, passMarks[mi] ?? null);
+                    // পাস নাম্বার জানা না থাকলে আগের মতো শূন্য হলে লাল
+                    const isZero = passMarks[mi] == null && isFilled(val) && Number(val) === 0;
+                    const warn = failed || isZero;
                     return (
                         <td key={mi} style={{
-                            ...styles.td, ...bg(rowBg),
-                            color: isZero ? C.danger : C.text,
-                            fontWeight: isZero ? 700 : 400,
+                            ...styles.td,
+                            ...bg(failed ? failMark.bg : rowBg),
+                            color: failed ? failMark.fg : (isZero ? C.danger : C.text),
+                            fontWeight: warn ? 700 : 400,
+                            textDecoration: failed ? failMark.textDecoration : "none",
                         }}>{num(val)}</td>
                     );
                 })}
 
                 {showCol.total && (
-                    <td style={{ ...styles.td, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(studentResult.Total)}</td>
+                    <td style={{ ...styles.td, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(total)}</td>
                 )}
                 {showCol.gpa && (
                     <td style={{ ...styles.td, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(avg.toFixed(2))}</td>
@@ -1061,10 +1205,12 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const renderShortRow = (studentResult, globalIndex) => {
         const zebra = globalIndex % 2 === 1;
         const rowBg = zebra ? C.primaryFaint : "#fff";
-        const avg = Number(studentResult.Total) / Number(conditionAverage?.AverageSubsonkha || 1);
-        const tint = colorTint(studentResult, avg);
-        const divBg = studentResult?.DColor ? studentResult?.DColorType : tint.bg;
-        const divFg = studentResult?.DColor ? "#0f172a" : tint.fg;
+        // KeratAction true বিষয় বাদ দিয়ে গড়
+        const total = calcTotal(studentResult, subjectPassNumbers);
+        const avg = total / Number(conditionAverage?.AverageSubsonkha || 1);
+        const gc = getGradeColor(studentResult, avg);
+        const divBg = gc.bg;
+        const divFg = gc.fg;
         const fatherOpt = NAME_EXTRA_OPTIONS.find((o) => o.key === "father");
         const fatherName = fatherOpt ? getExtraValue(studentResult, fatherOpt) : "";
 
@@ -1174,6 +1320,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const pageBox = {
         position: "relative", width: `${PAGE_W}px`, height: `${PAGE_H}px`,
         boxSizing: "border-box", overflow: "hidden", background: "#fff", margin: "0 auto",
+        fontFamily: SHEET_FONT,
     };
 
     /* ── সাইডবারের কলাম লিস্ট: সবসময় বাংলা (backend labels থাকলে সেগুলো) ── */
@@ -1309,6 +1456,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
             <style>{`
         .print-portal { display: none; }
+        .print-portal, .print-portal * { font-family: ${SHEET_FONT}; }
         @media print {
           @page { size: A4 landscape; margin: 5mm; }
           html, body {

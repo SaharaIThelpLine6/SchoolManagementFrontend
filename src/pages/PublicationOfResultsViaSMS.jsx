@@ -77,13 +77,6 @@ const HelpModal = ({ onClose, cost }) => {
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const steps = [
-    { t: 'ক্লাস ও পরীক্ষা বাছাই করুন', d: 'শিক্ষাবর্ষ, পরীক্ষা ও জামাত/ক্লাস নির্বাচন করলে সেই ক্লাসের শিক্ষার্থীদের তালিকা আসবে।' },
-    { t: 'টিক চিহ্ন দেখে নিন', d: 'শুরুতে সবার নামের পাশে টিক দেওয়া থাকে। যার নাম্বারে SMS পাঠাতে চান না, তার টিক তুলে দিন — সে বাদ যাবে।' },
-    { t: 'খরচ মিলিয়ে নিন', d: `প্রতি SMS-এ ${bn(cost)} পয়েন্ট কাটা হয়। উপরে দেখুন কতজন নির্বাচিত এবং মোট কত পয়েন্ট খরচ হবে।` },
-    { t: 'Send SMS চাপুন', d: 'শুধু টিক দেওয়া শিক্ষার্থীদের নাম্বারে ফলাফল SMS যাবে এবং ব্যালেন্স থেকে পয়েন্ট কাটা হবে।' },
-  ];
-
   const sampleSms = `জামিয়া মাদানিয়া বারিধারা
 বার্ষিক পরীক্ষা
 নাম : মাহমুদ হাসান মাসুম
@@ -104,31 +97,110 @@ const HelpModal = ({ onClose, cost }) => {
             <CloseIcon className="h-5 w-5" />
           </button>
         </div>
-        <ol className="space-y-5 px-6 py-5">
-          {steps.map((s, i) => (
-            <li key={i} className="flex gap-4">
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#eaf2ff] text-sm font-bold text-[#2c68d8]">{bn(i + 1)}</span>
-              <div>
-                <p className="font-semibold text-slate-800">{s.t}</p>
-                <p className="mt-0.5 text-sm leading-relaxed text-slate-600">{s.d}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
 
-        <div className="mx-6 mb-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">SMS এর নমুনা</p>
+        <div className="m-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <div className="whitespace-pre-line rounded-xl bg-white px-4 py-3 font-medium leading-relaxed text-slate-800 ring-1 ring-slate-200" style={{ fontFamily: "'Hind Siliguri', 'Noto Sans Bengali', system-ui, sans-serif" }}>
             {sampleSms}
           </div>
         </div>
+      </div>
+    </div>
+  );
+};
 
-        <div className="mx-6 mb-6 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
-          <p className="mb-1 font-semibold text-slate-800">হিসাবের নিয়ম</p>
-          <p>প্রতি SMS-এর পয়েন্ট × নির্বাচিত শিক্ষার্থী = মোট খরচ</p>
-          <p className="mt-2 rounded-xl bg-white px-3 py-2 font-medium tabular-nums text-[#2c68d8] ring-1 ring-slate-200">
-            উদাহরণ: {bn(cost)} × {bn(8)} জন = {bn(cost * 8)} পয়েন্ট
+/* ---------- ✅ কনফার্ম মোডাল (মাদ্রাসার কোড ইনপুট) ---------- */
+const ConfirmSendModal = ({ targets, cost, balance, isSending, onClose, onConfirm }) => {
+  const [code, setCode] = useState('');
+  const [error, setError] = useState('');
+  const inputRef = useRef(null);
+
+  const count = targets.length;
+  const totalCost = count * cost;
+  const insufficient = balance - totalCost < 0;
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && !isSending && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose, isSending]);
+
+  const submit = () => {
+    if (isSending) return;
+    const trimmed = code.trim();
+    if (!trimmed) {
+      setError('মাদ্রাসার কোড দিন।');
+      inputRef.current?.focus();
+      return;
+    }
+    if (insufficient) return;
+    setError('');
+    onConfirm(trimmed);
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="SMS পাঠানোর নিশ্চিতকরণ">
+      <div className="modal-fade absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => !isSending && onClose()} />
+      <div className="modal-rise relative w-full max-w-md overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <h2 className="text-lg font-bold text-slate-800">SMS পাঠানোর নিশ্চিতকরণ</h2>
+          <button onClick={onClose} disabled={isSending} aria-label="বন্ধ করুন"
+            className="grid h-9 w-9 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4284f1] disabled:opacity-50">
+            <CloseIcon className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="px-6 py-5">
+          <p className="text-base font-semibold leading-relaxed text-slate-800">
+            আপনি এসএমএস পাঠাতে নিশ্চিত হলে নিচে মাদ্রাসার কোডটি প্রদান করে সেন্ড ক্লিক করুন
           </p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl bg-[#f3f7ff] px-4 py-2.5 text-sm text-slate-600">
+            <span>প্রাপক: <b className="text-[#2c68d8]">{bn(count)} জন</b></span>
+            <span>খরচ: <b className="text-[#2c68d8]">{bn(totalCost)} পয়েন্ট</b></span>
+          </div>
+
+          <label htmlFor="madrasah-code" className="mt-4 block text-sm font-medium text-slate-600">
+            মাদ্রাসার কোড
+          </label>
+          <input
+            id="madrasah-code"
+            ref={inputRef}
+            type="text"
+            inputMode="numeric"
+            value={code}
+            onChange={(e) => { setCode(e.target.value); if (error) setError(''); }}
+            onKeyDown={(e) => e.key === 'Enter' && submit()}
+            disabled={isSending}
+            placeholder="মাদ্রাসার কোড লিখুন"
+            className={`mt-1.5 w-full rounded-xl border px-4 py-3 text-slate-800 outline-none transition focus:ring-2 focus:ring-[#4284f1] disabled:bg-slate-50 ${error ? 'border-rose-400' : 'border-slate-300'}`}
+          />
+          {error && <p className="mt-1.5 text-sm text-rose-600" role="alert">{error}</p>}
+
+          {insufficient && (
+            <p className="mt-3 flex items-center gap-2 rounded-xl bg-rose-50 px-4 py-2.5 text-sm text-rose-700" role="alert">
+              <AlertIcon className="h-4 w-4 shrink-0" />
+              ব্যালেন্স পর্যাপ্ত নয়।
+            </p>
+          )}
+
+          <div className="mt-5 flex items-center justify-end gap-3">
+            <button onClick={onClose} disabled={isSending}
+              className="rounded-xl px-5 py-2.5 font-medium text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:opacity-50">
+              বাতিল
+            </button>
+            <button onClick={submit} disabled={isSending || insufficient}
+              className="flex items-center gap-2 rounded-xl bg-[#4284f1] px-6 py-2.5 font-semibold text-white shadow-md shadow-[#4284f1]/30 transition hover:bg-[#2c68d8] active:scale-[.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4284f1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none">
+              {isSending ? (
+                <><span className="spinner h-4 w-4 rounded-full border-2 border-white/40 border-t-white" />পাঠানো হচ্ছে…</>
+              ) : (
+                <><SendIcon className="h-4 w-4" />Send</>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -145,6 +217,9 @@ const PublicationOfResultsViaSMS = () => {
 
   // ✅ Selection state
   const [selectedMap, setSelectedMap] = useState({});
+
+  // ✅ Confirm modal state: { targets: [...student objects], isBulk: boolean } | null
+  const [confirm, setConfirm] = useState(null);
 
   const methods = useForm({
     defaultValues: {
@@ -249,7 +324,6 @@ const PublicationOfResultsViaSMS = () => {
     useSendPublishedResultMutation();
 
   // ✅ API students
-  // 🛠️ FIX: SubClassID খালি হলে জোর করে [] রিটার্ন করবে, যাতে ক্যাশে থাকা পুরনো ডাটা না দেখায়
   const apiStudents = useMemo(() => {
     if (!SubClassID) return [];
     const list = smsResultData?.students;
@@ -326,12 +400,30 @@ const PublicationOfResultsViaSMS = () => {
   };
 
   // ======================================================
-  // ✅ handleSend — API call
+  // ✅ মোডাল খোলা — উপরের Send SMS (সব টিক দেওয়া)
   // ======================================================
-  const handleSend = async () => {
+  const openBulkConfirm = () => {
     if (noneSelected || insufficient || isSending) return;
+    setConfirm({ targets: selectedStudents, isBulk: true });
+  };
 
-    const smsTargets = selectedStudents.map((s) => ({
+  // ✅ মোডাল খোলা — row-এর Action Send (শুধু ওই একজন)
+  const openSingleConfirm = (student) => {
+    if (isSending) return;
+    setConfirm({ targets: [student], isBulk: false });
+  };
+
+  // ======================================================
+  // ✅ handleSend — মোডালে কোড দিয়ে কনফার্ম করলে API call
+  // ======================================================
+  const handleConfirmSend = async (madrasahCode) => {
+    if (!confirm || isSending) return;
+
+    const { targets, isBulk } = confirm;
+    const count = targets.length;
+    const cost = count * SMS_COST_PER_MESSAGE;
+
+    const smsTargets = targets.map((s) => ({
       কোড: s.code,
       নাম: s.name,
       গড়: s.gpa,
@@ -341,43 +433,41 @@ const PublicationOfResultsViaSMS = () => {
       মোবাইল: s.mobile,
     }));
 
-    console.log("📤 SMS Targets:", smsTargets);
-    console.table(smsTargets);
-    console.log(
-      `📊 Total: ${selectedCount} জন, খরচ: ${totalCost} পয়েন্ট, বর্তমান ব্যালেন্স: ${smsBalance}`
-    );
-
     try {
       const response = await sendPublishedResult({
         students: smsTargets,
         examName: selectedExamName,
+        madrasahCode, // ✅ মাদ্রাসার কোড
       }).unwrap();
 
-      console.log("✅ Server response:", response);
+      setConfirm(null);
 
       setToast({
-        count: response?.successCount ?? selectedCount,
-        cost: totalCost,
+        count: response?.successCount ?? count,
+        cost,
         fail: response?.failCount ?? 0,
       });
       setTimeout(() => setToast(null), 5000);
 
-      // ✅ শুধু SubClassID reset (SessionID, ExamID অক্ষত)
-      setValue('SubClassID', '');
-      // ✅ Table data ও selection reset
-      setSelectedMap({});
-      setQuery('');
+      if (isBulk) {
+        // ✅ বাল্ক সেন্ডের পর: শুধু SubClassID reset (SessionID, ExamID অক্ষত)
+        setValue('SubClassID', '');
+        setSelectedMap({});
+        setQuery('');
+      }
+      // একজনকে পাঠালে টেবিল যেমন আছে তেমনই থাকবে
 
       // ✅ ব্যালেন্স refetch
       refetchBalance?.();
     } catch (err) {
-      console.error("❌ SMS send failed:", err);
+      console.error('❌ SMS send failed:', err);
+      setConfirm(null);
       setToast({
         error: true,
         message:
           err?.data?.error ||
           err?.error ||
-          "SMS পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।",
+          'SMS পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।',
       });
       setTimeout(() => setToast(null), 5000);
     }
@@ -410,7 +500,7 @@ const PublicationOfResultsViaSMS = () => {
             <button onClick={() => setHelpOpen(true)} aria-label="কীভাবে SMS যাবে দেখুন"
               className="flex shrink-0 items-center gap-2 rounded-full bg-white/15 px-3 py-2 text-sm font-medium text-white ring-1 ring-white/25 transition hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
               <HelpIcon className="h-5 w-5" />
-              <span className="hidden sm:inline">কীভাবে কাজ করে</span>
+              <span className="hidden sm:inline">মোবাইলে মেসেজ কেমন দেখাবে</span>
             </button>
           </header>
 
@@ -445,19 +535,21 @@ const PublicationOfResultsViaSMS = () => {
                   require="This Field is required"
                   unicode={true}
                 />
-                <div className="relative ml-auto w-full sm:w-64">
-                  <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <input type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="নাম বা কোড খুঁজুন"
-                    className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-9 pr-3 text-sm text-slate-700 transition focus:border-[#4284f1] focus:outline-none focus:ring-2 focus:ring-[#4284f1]/20" />
-                </div>
+
               </div>
 
-              <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-5">
+              <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-6">
                 <StatCard icon={<WalletIcon />} label="মোট ব্যালেন্স" value={bn(smsBalance)} tone="teal" hint="SMS" />
                 <StatCard icon={<TagIcon />} label="প্রতি SMS-এ কর্তন" value={bn(SMS_COST_PER_MESSAGE)} />
                 <StatCard icon={<UsersIcon />} label="নির্বাচিত নাম্বার" value={`${bn(selectedCount)}/${bn(students.length)}`} tone="sky" />
                 <StatCard icon={<CalcIcon />} label={`${bn(SMS_COST_PER_MESSAGE)} × ${bn(selectedCount)} = মোট খরচ`} value={bn(totalCost)} tone="strong" />
                 <StatCard icon={insufficient ? <AlertIcon /> : <WalletIcon />} label="খরচের পর ব্যালেন্স" value={bn(remaining)} tone={insufficient ? 'danger' : 'slate'} />
+                <div className="flex justify-center items-center">
+                  <button onClick={openBulkConfirm} disabled={noneSelected || insufficient || isSending}
+                    className="flex items-center gap-2 rounded-xl bg-[#4284f1] px-6 py-2.5 font-semibold text-white shadow-md shadow-[#4284f1]/30 transition hover:bg-[#2c68d8] active:scale-[.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4284f1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none">
+                    <SendIcon className="h-4 w-4" />Send SMS
+                  </button>
+                </div>
               </div>
 
               {insufficient && (
@@ -477,24 +569,8 @@ const PublicationOfResultsViaSMS = () => {
             </section>
 
             <div className="flex min-h-[260px] flex-1 flex-col overflow-hidden">
-              <div className="flex flex-none flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-4 py-3 shadow-[0_2px_8px_-6px_rgba(66,132,241,.5)] backdrop-blur sm:px-8">
-                <p className="text-sm text-slate-600 tabular-nums">
-                  <span className="font-semibold text-slate-800">{bn(selectedCount)} জন</span> × {bn(SMS_COST_PER_MESSAGE)} ={' '}
-                  <span className="text-lg font-bold text-[#2c68d8]">{bn(totalCost)}</span> পয়েন্ট খরচ হবে
-                  {smsFetching && <span className="ml-3 text-xs text-slate-400">লোড হচ্ছে…</span>}
-                </p>
-                <button onClick={handleSend} disabled={noneSelected || insufficient || isSending}
-                  className="flex items-center gap-2 rounded-xl bg-[#4284f1] px-6 py-2.5 font-semibold text-white shadow-md shadow-[#4284f1]/30 transition hover:bg-[#2c68d8] active:scale-[.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4284f1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none">
-                  {isSending ? (
-                    <><span className="spinner h-4 w-4 rounded-full border-2 border-white/40 border-t-white" />পাঠানো হচ্ছে…</>
-                  ) : (
-                    <><SendIcon className="h-4 w-4" />Send SMS</>
-                  )}
-                </button>
-              </div>
-
               <div className="flex-1 overflow-auto">
-                <table className="w-full min-w-[760px] text-left text-sm">
+                <table className="w-full min-w-[860px] text-left text-sm">
                   <thead className="sticky top-0 z-10 bg-slate-50 text-slate-600 shadow-[0_1px_0_#e2e8f0]">
                     <tr className="border-b border-slate-200">
                       <th className="w-14 px-5 py-3 text-center">
@@ -508,11 +584,12 @@ const PublicationOfResultsViaSMS = () => {
                       <th className="px-4 py-3 font-semibold">বিভাগ</th>
                       <th className="px-4 py-3 font-semibold">মোবাইল</th>
                       <th className="px-4 py-3 font-semibold">SMS</th>
+                      <th className="px-4 py-3 text-center font-semibold">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {smsLoading && (
-                      <tr><td colSpan={9} className="px-4 py-12 text-center text-slate-500">ফলাফল লোড হচ্ছে…</td></tr>
+                      <tr><td colSpan={10} className="px-4 py-12 text-center text-slate-500">ফলাফল লোড হচ্ছে…</td></tr>
                     )}
 
                     {!smsLoading && visible.map((s) => (
@@ -529,15 +606,39 @@ const PublicationOfResultsViaSMS = () => {
                         <td className={`px-4 py-3 ${s.isSelected ? 'text-slate-600' : 'text-slate-400'}`}>{s.dept}</td>
                         <td className={`px-4 py-3 tabular-nums ${s.isSelected ? 'text-slate-600' : 'text-slate-400'}`}>{s.mobile}</td>
                         <td className="px-4 py-3">
-                          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-200 ${s.isSelected ? 'bg-[#eaf2ff] text-[#2c68d8]' : 'bg-slate-200 text-slate-500'}`}>
-                            {s.isSelected ? <><CheckIcon className="h-3 w-3" />যাবে</> : 'যাবে না'}
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-200 ${s.isSelected
+                              ? 'bg-[#eaf2ff] text-[#2c68d8]'
+                              : 'bg-red-100 text-red-600'
+                              }`}
+                          >
+                            {s.isSelected ? (
+                              <>
+                                <CheckIcon className="h-3 w-3" />
+                                যাবে
+                              </>
+                            ) : (
+                              'যাবে না'
+                            )}
                           </span>
+                        </td>
+                        {/* ✅ Action: শুধু এই শিক্ষার্থীকে SMS */}
+                        <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            onClick={() => openSingleConfirm(s)}
+                            disabled={isSending || SMS_COST_PER_MESSAGE > smsBalance}
+                            aria-label={`${s.name} কে SMS পাঠান`}
+                            className="inline-flex items-center gap-1.5 rounded-lg bg-[#4284f1] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#2c68d8] active:scale-[.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4284f1] focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-slate-300"
+                          >
+                            <SendIcon className="h-3.5 w-3.5" />
+                            Send
+                          </button>
                         </td>
                       </tr>
                     ))}
 
                     {!smsLoading && visible.length === 0 && (
-                      <tr><td colSpan={9} className="px-4 py-12 text-center text-slate-500">
+                      <tr><td colSpan={10} className="px-4 py-12 text-center text-slate-500">
                         {!SessionID || !ExamID || !SubClassID
                           ? 'শিক্ষাবর্ষ, পরীক্ষা ও জামাত/ক্লাস নির্বাচন করুন।'
                           : query
@@ -555,7 +656,7 @@ const PublicationOfResultsViaSMS = () => {
 
       {/* ✅ Success Toast */}
       {toast && !toast.error && (
-        <div className="toast-in fixed bottom-10 left-1/2 z-40 flex items-center gap-3 rounded-2xl bg-slate-900 px-5 py-3 text-sm text-white shadow-2xl" role="status">
+        <div className="toast-in fixed bottom-10 left-1/2 z-[60] flex items-center gap-3 rounded-2xl bg-slate-900 px-5 py-3 text-sm text-white shadow-2xl" role="status">
           <span className="grid h-6 w-6 place-items-center rounded-full bg-emerald-500"><CheckIcon className="h-4 w-4" /></span>
           <span>
             {bn(toast.count)} জনকে SMS পাঠানো হয়েছে, {bn(toast.cost)} পয়েন্ট কেটে নেওয়া হয়েছে
@@ -566,13 +667,25 @@ const PublicationOfResultsViaSMS = () => {
 
       {/* ✅ Error Toast */}
       {toast && toast.error && (
-        <div className="toast-in fixed bottom-10 left-1/2 z-40 flex items-center gap-3 rounded-2xl bg-rose-600 px-5 py-3 text-sm text-white shadow-2xl" role="alert">
+        <div className="toast-in fixed bottom-10 left-1/2 z-[60] flex items-center gap-3 rounded-2xl bg-rose-600 px-5 py-3 text-sm text-white shadow-2xl" role="alert">
           <span className="grid h-6 w-6 place-items-center rounded-full bg-white/20"><AlertIcon className="h-4 w-4" /></span>
           <span>{toast.message}</span>
         </div>
       )}
 
       {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} cost={SMS_COST_PER_MESSAGE} />}
+
+      {/* ✅ মাদ্রাসার কোডসহ কনফার্ম মোডাল */}
+      {confirm && (
+        <ConfirmSendModal
+          targets={confirm.targets}
+          cost={SMS_COST_PER_MESSAGE}
+          balance={smsBalance}
+          isSending={isSending}
+          onClose={() => setConfirm(null)}
+          onConfirm={handleConfirmSend}
+        />
+      )}
     </div>
   );
 };
