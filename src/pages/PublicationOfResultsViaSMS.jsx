@@ -15,10 +15,42 @@ import {
   useGetCheckBalanceQuery,
   useSendPublishedResultMutation,
 } from '../features/sms/smsSlice';
+import { useGetInstitutionInfoQuery, useSendResultNotificationMutation } from '../features/settings/settingsQuerySlice';
 
-const SMS_COST_PER_MESSAGE = 1;
+const SMS_COST_PER_MESSAGE = 1; // প্রতি SMS-এ কর্তন (আপনার রেট অনুযায়ী বদলান)
+const UNICODE_SINGLE = 70;      // প্রথম SMS: সর্বোচ্চ ৭০ অক্ষর
+const UNICODE_MULTI = 67;       // পরবর্তী প্রতি SMS: ৬৭ অক্ষর
 
 const bn = (n) => Number(n).toLocaleString('bn-BD');
+
+/* ---------- SMS helpers ---------- */
+const buildMessage = (s, selectedExamName, InstitutionName) =>
+  [
+    `${InstitutionName ?? ''}`,
+    `${selectedExamName ?? ''}`,
+    `কোড: ${s.code ?? ''}`,
+    `নাম: ${s.name ?? ''}`,
+    `গড়: ${s.gpa ?? ''}`,
+    `মোট: ${s.total ?? ''}`,
+    `মেধা: ${s.merit ?? ''}`,
+    `বিভাগ: ${s.dept ?? ''}`,
+  ].join('\n');
+
+// গেটওয়ে নিয়ম:
+// - ≤ ৭০ অক্ষর → ১ SMS
+// - ৭০-এর বেশি হলে প্রথম ৭০ + বাকি প্রতি ৬৭ অক্ষরে একটি segment
+const countSms = (text) => {
+  const chars = text.length;
+  if (chars === 0) return { chars: 0, segments: 0 };
+  const segments =
+    chars <= UNICODE_SINGLE
+      ? 1
+      : 1 + Math.ceil((chars - UNICODE_SINGLE) / UNICODE_MULTI);
+  return { chars, segments };
+};
+
+const isValidMobile = (m) =>
+  /^(\+?88)?01[3-9]\d{8}$/.test(String(m || '').trim());
 
 /* ---------- আইকন ---------- */
 const Icon = ({ children, className = 'w-5 h-5' }) => (
@@ -37,6 +69,12 @@ const SearchIcon = (p) => (<Icon {...p}><circle cx="11" cy="11" r="8" /><line x1
 const CloseIcon = (p) => (<Icon {...p}><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></Icon>);
 const CheckIcon = (p) => (<Icon {...p}><polyline points="20 6 9 17 4 12" /></Icon>);
 const AlertIcon = (p) => (<Icon {...p}><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></Icon>);
+const AppNotifyIcon = (p) => (
+  <Icon {...p}>
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+  </Icon>
+);
 
 /* ---------- ছোট কম্পোনেন্ট ---------- */
 const StatCard = ({ icon, label, value, tone = 'slate', hint }) => {
@@ -79,12 +117,12 @@ const HelpModal = ({ onClose, cost }) => {
 
   const sampleSms = `জামিয়া মাদানিয়া বারিধারা
 বার্ষিক পরীক্ষা
-নাম : মাহমুদ হাসান মাসুম
-আইডি: 1001206
-মোট : 664
-গড় : 94
-বিভাগ : মুমতায
-মেধা : 3`;
+কোড: 1001206
+নাম: মাহমুদ হাসান মাসুম
+গড়: 94
+মোট: 664
+মেধা: 3
+বিভাগ: মুমতায`;
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="SMS কীভাবে যাবে">
@@ -102,26 +140,26 @@ const HelpModal = ({ onClose, cost }) => {
           <div className="whitespace-pre-line rounded-xl bg-white px-4 py-3 font-medium leading-relaxed text-slate-800 ring-1 ring-slate-200" style={{ fontFamily: "'Hind Siliguri', 'Noto Sans Bengali', system-ui, sans-serif" }}>
             {sampleSms}
           </div>
+          <p className="mt-3 text-xs text-slate-500">
+            বাংলা Unicode SMS: ৭০ অক্ষর/মেসেজ, ৭০-এর বেশি হলে পরবর্তী প্রতি SMS-এ ৬৭ অক্ষর। প্রতি SMS-এ কর্তন {bn(cost)} পয়েন্ট।
+          </p>
         </div>
       </div>
     </div>
   );
 };
 
-/* ---------- ✅ কনফার্ম মোডাল (মাদ্রাসার কোড ইনপুট) ---------- */
-const ConfirmSendModal = ({ targets, cost, balance, isSending, onClose, onConfirm }) => {
+/* ---------- ✅ কনফার্ম মোডাল — SMS (মাদ্রাসার কোড ইনপুট) ---------- */
+const ConfirmSendModal = ({ targets, cost, totalSms, balance, isSending, onClose, onConfirm }) => {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const inputRef = useRef(null);
 
   const count = targets.length;
-  const totalCost = count * cost;
+  const totalCost = totalSms * cost;
   const insufficient = balance - totalCost < 0;
 
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
+  useEffect(() => { inputRef.current?.focus(); }, []);
   useEffect(() => {
     const onKey = (e) => e.key === 'Escape' && !isSending && onClose();
     window.addEventListener('keydown', onKey);
@@ -160,7 +198,8 @@ const ConfirmSendModal = ({ targets, cost, balance, isSending, onClose, onConfir
 
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl bg-[#f3f7ff] px-4 py-2.5 text-sm text-slate-600">
             <span>প্রাপক: <b className="text-[#2c68d8]">{bn(count)} জন</b></span>
-            <span>খরচ: <b className="text-[#2c68d8]">{bn(totalCost)} পয়েন্ট</b></span>
+            <span>মোট SMS ব্যালেন্স: <b className="text-[#2c68d8]">{bn(balance)}</b></span>
+            <span>খরচ: <b className="text-[#2c68d8]">{bn(totalSms)} SMS</b></span>
           </div>
 
           <label htmlFor="madrasah-code" className="mt-4 block text-sm font-medium text-slate-600">
@@ -207,6 +246,57 @@ const ConfirmSendModal = ({ targets, cost, balance, isSending, onClose, onConfir
   );
 };
 
+/* ---------- ✅ কনফার্ম মোডাল — App Notification ---------- */
+const ConfirmAppNotifyModal = ({ targets, isSending, onClose, onConfirm }) => {
+  const count = targets.length;
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && !isSending && onClose();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose, isSending]);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4" role="dialog" aria-modal="true" aria-label="App Notification নিশ্চিতকরণ">
+      <div className="modal-fade absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={() => !isSending && onClose()} />
+      <div className="modal-rise relative w-full max-w-md overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:rounded-3xl">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+          <h2 className="text-lg font-bold text-slate-800">App Notification নিশ্চিতকরণ</h2>
+          <button onClick={onClose} disabled={isSending} aria-label="বন্ধ করুন"
+            className="grid h-9 w-9 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4284f1] disabled:opacity-50">
+            <CloseIcon className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="px-6 py-5">
+          <p className="text-base font-semibold leading-relaxed text-slate-800">
+            নির্বাচিত শিক্ষার্থীদের মোবাইল অ্যাপে ফলাফল প্রকাশের নোটিফিকেশন পাঠানো হবে।
+          </p>
+
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl bg-[#f3f7ff] px-4 py-2.5 text-sm text-slate-600">
+            <span>প্রাপক: <b className="text-[#2c68d8]">{bn(count)} জন</b></span>
+            <span>খরচ: <b className="text-[#2c68d8]">ফ্রি</b></span>
+          </div>
+
+          <div className="mt-5 flex items-center justify-end gap-3">
+            <button onClick={onClose} disabled={isSending}
+              className="rounded-xl px-5 py-2.5 font-medium text-slate-600 transition hover:bg-slate-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 disabled:opacity-50">
+              বাতিল
+            </button>
+            <button onClick={onConfirm} disabled={isSending}
+              className="flex items-center gap-2 rounded-xl bg-[#2c68d8] px-6 py-2.5 font-semibold text-white shadow-md shadow-[#2c68d8]/30 transition hover:bg-[#1b49b3] active:scale-[.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2c68d8] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none">
+              {isSending ? (
+                <><span className="spinner h-4 w-4 rounded-full border-2 border-white/40 border-t-white" />পাঠানো হচ্ছে…</>
+              ) : (
+                <><AppNotifyIcon className="h-4 w-4" />Send Notification</>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ---------- মূল কম্পোনেন্ট ---------- */
 const PublicationOfResultsViaSMS = () => {
   const [query, setQuery] = useState('');
@@ -218,7 +308,7 @@ const PublicationOfResultsViaSMS = () => {
   // ✅ Selection state
   const [selectedMap, setSelectedMap] = useState({});
 
-  // ✅ Confirm modal state: { targets: [...student objects], isBulk: boolean } | null
+  // ✅ Confirm modal state: { type: 'sms'|'app', targets, isBulk }
   const [confirm, setConfirm] = useState(null);
 
   const methods = useForm({
@@ -249,6 +339,9 @@ const PublicationOfResultsViaSMS = () => {
     if (Array.isArray(sessionData?.result)) return sessionData.result;
     return [];
   }, [sessionData]);
+
+
+  const { data: institutionInfo } = useGetInstitutionInfoQuery();
 
   // ✅ Exam query
   const { data: examNameData } = useGetExamFilterExamsQuery(
@@ -281,6 +374,9 @@ const PublicationOfResultsViaSMS = () => {
     );
     return found?.ExamName ?? '';
   }, [examOptions, ExamID]);
+
+  // ✅ Institution নাম
+  const InstitutionName = institutionInfo?.InstitutionName ?? '';
 
   // ======================================================
   // ✅ SMS Published Result query
@@ -323,6 +419,10 @@ const PublicationOfResultsViaSMS = () => {
   const [sendPublishedResult, { isLoading: isSending }] =
     useSendPublishedResultMutation();
 
+  // ✅ App Notification mutation
+  const [sendResultNotification, { isLoading: isSendingApp }] =
+    useSendResultNotificationMutation();
+
   // ✅ API students
   const apiStudents = useMemo(() => {
     if (!SubClassID) return [];
@@ -344,13 +444,17 @@ const PublicationOfResultsViaSMS = () => {
     setSelectedMap(next);
   }, [apiStudents]);
 
-  // ✅ students list
+  // ✅ students list (SMS message + অক্ষর + SMS count + App notification ফিল্ড)
   const students = useMemo(
     () =>
       apiStudents.map((s, i) => {
         const key = `${s?.কোড ?? ''}-${s?.মোবাইল ?? ''}-${i}`;
-        return {
+        const base = {
           key,
+          // ✅ App notification-এর জন্য backend ফিল্ড
+          userID: Number(s?.UserID ?? 0),
+          userTypeID: Number(s?.UserTypeID ?? 1),
+          subClassID: Number(s?.SubClassID ?? SubClassID ?? 0),
           code: s?.কোড ?? '',
           name: s?.নাম ?? '',
           gpa: s?.গড় ?? '',
@@ -358,10 +462,20 @@ const PublicationOfResultsViaSMS = () => {
           merit: s?.মেধা ?? '',
           dept: s?.বিভাগ ?? '',
           mobile: s?.মোবাইল ?? '',
+        };
+        const message = buildMessage(base, selectedExamName, InstitutionName);
+        const { chars, segments } = countSms(message);
+        const valid = isValidMobile(base.mobile);
+        return {
+          ...base,
+          message,
+          chars,
+          segments,
+          valid,
           isSelected: !!selectedMap[key],
         };
       }),
-    [apiStudents, selectedMap]
+    [apiStudents, selectedMap, selectedExamName, InstitutionName, SubClassID]
   );
 
   const selectedStudents = useMemo(
@@ -370,7 +484,18 @@ const PublicationOfResultsViaSMS = () => {
   );
 
   const selectedCount = selectedStudents.length;
-  const totalCost = selectedCount * SMS_COST_PER_MESSAGE;
+  // ✅ শুধু valid মোবাইলগুলো SMS পাবে
+  const sendable = useMemo(
+    () => selectedStudents.filter((s) => s.valid),
+    [selectedStudents]
+  );
+  const invalidCount = selectedCount - sendable.length;
+  // ✅ মোট SMS = প্রতিটি valid student-এর segments যোগফল
+  const totalSms = useMemo(
+    () => sendable.reduce((a, s) => a + s.segments, 0),
+    [sendable]
+  );
+  const totalCost = totalSms * SMS_COST_PER_MESSAGE;
   const remaining = smsBalance - totalCost;
   const insufficient = remaining < 0;
   const allSelected = students.length > 0 && selectedCount === students.length;
@@ -400,28 +525,43 @@ const PublicationOfResultsViaSMS = () => {
   };
 
   // ======================================================
-  // ✅ মোডাল খোলা — উপরের Send SMS (সব টিক দেওয়া)
+  // ✅ মোডাল খোলা — SMS (bulk + single)
   // ======================================================
-  const openBulkConfirm = () => {
-    if (noneSelected || insufficient || isSending) return;
-    setConfirm({ targets: selectedStudents, isBulk: true });
+  const openBulkSmsConfirm = () => {
+    if (noneSelected || insufficient || isSending || totalSms === 0) return;
+    setConfirm({ type: 'sms', targets: sendable, isBulk: true });
   };
 
-  // ✅ মোডাল খোলা — row-এর Action Send (শুধু ওই একজন)
-  const openSingleConfirm = (student) => {
+  const openSingleSmsConfirm = (student) => {
     if (isSending) return;
-    setConfirm({ targets: [student], isBulk: false });
+    if (!student.valid) return;
+    if (student.segments * SMS_COST_PER_MESSAGE > smsBalance) return;
+    setConfirm({ type: 'sms', targets: [student], isBulk: false });
   };
 
   // ======================================================
-  // ✅ handleSend — মোডালে কোড দিয়ে কনফার্ম করলে API call
+  // ✅ মোডাল খোলা — App Notification (bulk + single)
+  // ======================================================
+  const openBulkAppConfirm = () => {
+    if (noneSelected || isSendingApp) return;
+    setConfirm({ type: 'app', targets: selectedStudents, isBulk: true });
+  };
+
+  const openSingleAppConfirm = (student) => {
+    if (isSendingApp) return;
+    setConfirm({ type: 'app', targets: [student], isBulk: false });
+  };
+
+  // ======================================================
+  // ✅ handleSend — SMS (অপরিবর্তিত)
   // ======================================================
   const handleConfirmSend = async (madrasahCode) => {
-    if (!confirm || isSending) return;
+    if (!confirm || confirm.type !== 'sms' || isSending) return;
 
     const { targets, isBulk } = confirm;
     const count = targets.length;
-    const cost = count * SMS_COST_PER_MESSAGE;
+    const smsCount = targets.reduce((a, s) => a + (s.segments || 1), 0);
+    const cost = smsCount * SMS_COST_PER_MESSAGE;
 
     const smsTargets = targets.map((s) => ({
       কোড: s.code,
@@ -431,33 +571,34 @@ const PublicationOfResultsViaSMS = () => {
       মেধা: s.merit,
       বিভাগ: s.dept,
       মোবাইল: s.mobile,
+      message: s.message,
+      chars: s.chars,
+      segments: s.segments,
     }));
 
     try {
       const response = await sendPublishedResult({
         students: smsTargets,
         examName: selectedExamName,
-        madrasahCode, // ✅ মাদ্রাসার কোড
+        madrasahCode,
       }).unwrap();
 
       setConfirm(null);
 
       setToast({
         count: response?.successCount ?? count,
+        smsCount,
         cost,
         fail: response?.failCount ?? 0,
       });
       setTimeout(() => setToast(null), 5000);
 
       if (isBulk) {
-        // ✅ বাল্ক সেন্ডের পর: শুধু SubClassID reset (SessionID, ExamID অক্ষত)
         setValue('SubClassID', '');
         setSelectedMap({});
         setQuery('');
       }
-      // একজনকে পাঠালে টেবিল যেমন আছে তেমনই থাকবে
 
-      // ✅ ব্যালেন্স refetch
       refetchBalance?.();
     } catch (err) {
       console.error('❌ SMS send failed:', err);
@@ -468,6 +609,74 @@ const PublicationOfResultsViaSMS = () => {
           err?.data?.error ||
           err?.error ||
           'SMS পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।',
+      });
+      setTimeout(() => setToast(null), 5000);
+    }
+  };
+
+  // ======================================================
+  // ✅ buildNotifyBody — App Notification body (backend requirement)
+  // ======================================================
+  const buildNotifyBody = (targets) => ({
+    SessionID: Number(SessionID),
+    ExamName: selectedExamName,
+    results: targets.map((s) => ({
+      UserID: s.userID,
+      UserTypeID: s.userTypeID,
+      SubClassID: s.subClassID,
+      name: s.name,
+      code: s.code,
+      gpa: s.gpa,
+      total: s.total,
+      merit: s.merit,
+      dept: s.dept,
+      mobile: s.mobile,
+      message: s.message,
+      chars: s.chars,
+      segments: s.segments,
+    })),
+  });
+
+  // ======================================================
+  // ✅ handleSendApp — App Notification
+  // ======================================================
+  const handleSendApp = async () => {
+    if (!confirm || confirm.type !== 'app' || isSendingApp) return;
+
+    const { targets, isBulk } = confirm;
+    const count = targets.length;
+    const body = buildNotifyBody(targets);
+
+    console.log(JSON.stringify(body, null, 2), 'app notification body');
+
+    try {
+      const response = await sendResultNotification(body).unwrap();
+      const summary = response?.summary || {};
+
+      setConfirm(null);
+
+      setToast({
+        type: 'app',
+        count: summary.notificationsSent ?? summary.noticesCreated ?? count,
+        fail: summary.failed ?? 0,
+      });
+      setTimeout(() => setToast(null), 5000);
+
+      if (isBulk) {
+        setValue('SubClassID', '');
+        setSelectedMap({});
+        setQuery('');
+      }
+    } catch (err) {
+      console.error('❌ App notification failed:', err);
+      setConfirm(null);
+      setToast({
+        error: true,
+        message:
+          err?.data?.message ||
+          err?.data?.error ||
+          err?.error ||
+          'App notification পাঠাতে সমস্যা হয়েছে।',
       });
       setTimeout(() => setToast(null), 5000);
     }
@@ -494,8 +703,8 @@ const PublicationOfResultsViaSMS = () => {
         <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden rounded-3xl border border-white/80 bg-white shadow-2xl shadow-[#4284f1]/25">
           <header className="flex flex-none items-center justify-between gap-3 bg-gradient-to-r from-[#1b49b3] via-[#2c68d8] to-[#4284f1] px-5 py-5 sm:px-8">
             <div>
-              <h1 className="text-xl font-bold text-white sm:text-2xl">এসএমএস এর মাধ্যমে ফলাফল প্রকাশ</h1>
-              <p className="mt-0.5 text-sm text-blue-100">টিক দেওয়া শিক্ষার্থীদের নাম্বারে ফলাফল পাঠানো হবে</p>
+              <h1 className="text-xl font-bold text-white sm:text-2xl">ফলাফল প্রকাশ (SMS ও App Notification)</h1>
+              <p className="mt-0.5 text-sm text-blue-100">টিক দেওয়া শিক্ষার্থীদের SMS অথবা মোবাইল অ্যাপে নোটিফিকেশন পাঠান</p>
             </div>
             <button onClick={() => setHelpOpen(true)} aria-label="কীভাবে SMS যাবে দেখুন"
               className="flex shrink-0 items-center gap-2 rounded-full bg-white/15 px-3 py-2 text-sm font-medium text-white ring-1 ring-white/25 transition hover:bg-white/25 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
@@ -540,22 +749,38 @@ const PublicationOfResultsViaSMS = () => {
 
               <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-6">
                 <StatCard icon={<WalletIcon />} label="মোট ব্যালেন্স" value={bn(smsBalance)} tone="teal" hint="SMS" />
-                <StatCard icon={<TagIcon />} label="প্রতি SMS-এ কর্তন" value={bn(SMS_COST_PER_MESSAGE)} />
                 <StatCard icon={<UsersIcon />} label="নির্বাচিত নাম্বার" value={`${bn(selectedCount)}/${bn(students.length)}`} tone="sky" />
-                <StatCard icon={<CalcIcon />} label={`${bn(SMS_COST_PER_MESSAGE)} × ${bn(selectedCount)} = মোট খরচ`} value={bn(totalCost)} tone="strong" />
+                <StatCard icon={<CalcIcon />} label={`মোট SMS (${bn(SMS_COST_PER_MESSAGE)} × ${bn(totalSms)})`} value={bn(totalCost)} tone="" hint="খরচ" />
                 <StatCard icon={insufficient ? <AlertIcon /> : <WalletIcon />} label="খরচের পর ব্যালেন্স" value={bn(remaining)} tone={insufficient ? 'danger' : 'slate'} />
-                <div className="flex justify-center items-center">
-                  <button onClick={openBulkConfirm} disabled={noneSelected || insufficient || isSending}
-                    className="flex items-center gap-2 rounded-xl bg-[#4284f1] px-6 py-2.5 font-semibold text-white shadow-md shadow-[#4284f1]/30 transition hover:bg-[#2c68d8] active:scale-[.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4284f1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none">
-                    <SendIcon className="h-4 w-4" />Send SMS
+                <div className="flex items-center justify-end gap-2">
+                  <button onClick={openBulkSmsConfirm} disabled={noneSelected || insufficient || isSending || totalSms === 0}
+                    className="flex items-center gap-2 rounded-xl bg-[#4284f1] px-4 py-2.5 font-semibold text-white shadow-md shadow-[#4284f1]/30 transition hover:bg-[#2c68d8] active:scale-[.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4284f1] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                    title="সব checked শিক্ষার্থীকে SMS">
+                    <SendIcon className="h-4 w-4" />SMS
+                  </button>
+                  <button
+                    onClick={openBulkAppConfirm}
+                    disabled={noneSelected || isSendingApp}
+                    className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 px-4 py-2.5 font-semibold text-white shadow-md shadow-purple-500/30 transition-all duration-200 hover:from-violet-700 hover:to-purple-700 active:scale-[.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-none disabled:bg-slate-300 disabled:shadow-none"
+                    title="সব checked শিক্ষার্থীকে App Notification"
+                  >
+                    <AppNotifyIcon className="h-4 w-4" />
+                    App
                   </button>
                 </div>
               </div>
 
+              {invalidCount > 0 && (
+                <p className="mt-3 flex items-center gap-2 rounded-xl bg-amber-50 px-4 py-2.5 text-sm text-amber-700" role="alert">
+                  <AlertIcon className="h-4 w-4 shrink-0" />
+                  {bn(invalidCount)} জনের মোবাইল নম্বর সঠিক নয়, SMS বাদ দিয়ে পাঠানো হবে (App Notification পাবে)।
+                </p>
+              )}
+
               {insufficient && (
                 <p className="mt-3 flex items-center gap-2 rounded-xl bg-rose-50 px-4 py-2.5 text-sm text-rose-700" role="alert">
                   <AlertIcon className="h-4 w-4 shrink-0" />
-                  ব্যালেন্স পর্যাপ্ত নয়। কয়েকজনের টিক তুলে দিন অথবা ব্যালেন্স রিচার্জ করুন।
+                  SMS ব্যালেন্স পর্যাপ্ত নয়। App Notification ফ্রি।
                 </p>
               )}
 
@@ -570,7 +795,7 @@ const PublicationOfResultsViaSMS = () => {
 
             <div className="flex min-h-[260px] flex-1 flex-col overflow-hidden">
               <div className="flex-1 overflow-auto">
-                <table className="w-full min-w-[860px] text-left text-sm">
+                <table className="w-full min-w-[1040px] text-left text-sm">
                   <thead className="sticky top-0 z-10 bg-slate-50 text-slate-600 shadow-[0_1px_0_#e2e8f0]">
                     <tr className="border-b border-slate-200">
                       <th className="w-14 px-5 py-3 text-center">
@@ -583,20 +808,21 @@ const PublicationOfResultsViaSMS = () => {
                       <th className="px-4 py-3 text-center font-semibold">মেধা</th>
                       <th className="px-4 py-3 font-semibold">বিভাগ</th>
                       <th className="px-4 py-3 font-semibold">মোবাইল</th>
-                      <th className="px-4 py-3 font-semibold">SMS</th>
+                      <th className="px-4 py-3 text-center font-semibold">অক্ষর</th>
+                      <th className="px-4 py-3 text-center font-semibold">SMS</th>
                       <th className="px-4 py-3 text-center font-semibold">Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {smsLoading && (
-                      <tr><td colSpan={10} className="px-4 py-12 text-center text-slate-500">ফলাফল লোড হচ্ছে…</td></tr>
+                      <tr><td colSpan={11} className="px-4 py-12 text-center text-slate-500">ফলাফল লোড হচ্ছে…</td></tr>
                     )}
 
                     {!smsLoading && visible.map((s) => (
                       <tr key={s.key} onClick={() => toggle(s.key)}
                         className={`cursor-pointer border-b border-slate-100 transition-colors duration-200 ${s.isSelected ? 'hover:bg-[#eaf2ff]/70' : 'bg-slate-50/80 hover:bg-slate-100'}`}>
                         <td className="px-5 py-3 text-center" onClick={(e) => e.stopPropagation()}>
-                          <Checkbox checked={s.isSelected} onChange={() => toggle(s.key)} label={`${s.name} কে SMS পাঠান`} />
+                          <Checkbox checked={s.isSelected} onChange={() => toggle(s.key)} label={`${s.name} কে নির্বাচন করুন`} />
                         </td>
                         <td className={`px-4 py-3 tabular-nums transition-opacity ${s.isSelected ? 'text-slate-700' : 'text-slate-400'}`}>{s.code}</td>
                         <td className={`px-4 py-3 font-medium transition-all ${s.isSelected ? 'text-slate-900' : 'text-slate-400 line-through decoration-slate-300'}`}>{s.name}</td>
@@ -604,41 +830,45 @@ const PublicationOfResultsViaSMS = () => {
                         <td className={`px-4 py-3 text-center tabular-nums ${s.isSelected ? 'text-slate-600' : 'text-slate-400'}`}>{bn(s.total)}</td>
                         <td className={`px-4 py-3 text-center tabular-nums ${s.isSelected ? 'text-slate-600' : 'text-slate-400'}`}>{bn(s.merit)}</td>
                         <td className={`px-4 py-3 ${s.isSelected ? 'text-slate-600' : 'text-slate-400'}`}>{s.dept}</td>
-                        <td className={`px-4 py-3 tabular-nums ${s.isSelected ? 'text-slate-600' : 'text-slate-400'}`}>{s.mobile}</td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium transition-colors duration-200 ${s.isSelected
-                              ? 'bg-[#eaf2ff] text-[#2c68d8]'
-                              : 'bg-red-100 text-red-600'
-                              }`}
-                          >
-                            {s.isSelected ? (
-                              <>
-                                <CheckIcon className="h-3 w-3" />
-                                যাবে
-                              </>
-                            ) : (
-                              'যাবে না'
-                            )}
-                          </span>
+                        <td className={`px-4 py-3 tabular-nums ${s.isSelected && !s.valid ? 'font-semibold text-rose-600' : s.isSelected ? 'text-slate-600' : 'text-slate-400'}`}>
+                          {s.mobile}
+                          {s.isSelected && !s.valid && <span className="ml-1 text-[10px]">(ভুল)</span>}
                         </td>
-                        {/* ✅ Action: শুধু এই শিক্ষার্থীকে SMS */}
-                        <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
-                          <button
-                            onClick={() => openSingleConfirm(s)}
-                            disabled={isSending || SMS_COST_PER_MESSAGE > smsBalance}
-                            aria-label={`${s.name} কে SMS পাঠান`}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-[#4284f1] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#2c68d8] active:scale-[.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4284f1] focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-slate-300"
-                          >
-                            <SendIcon className="h-3.5 w-3.5" />
-                            Send
-                          </button>
+                        <td className={`px-4 py-3 text-center tabular-nums ${s.isSelected ? 'text-slate-600' : 'text-slate-400'}`}>
+                          {s.isSelected ? bn(s.chars) : '—'}
+                        </td>
+                        <td className={`px-4 py-3 text-center tabular-nums ${s.isSelected ? 'font-semibold text-[#2c68d8]' : 'text-slate-400'}`}>
+                          {s.isSelected ? bn(s.segments) : '—'}
+                        </td>
+                        <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => openSingleSmsConfirm(s)}
+                              disabled={isSending || !s.valid || s.segments * SMS_COST_PER_MESSAGE > smsBalance}
+                              aria-label={`${s.name} কে SMS পাঠান`}
+                              title="SMS"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-[#4284f1] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#2c68d8] active:scale-[.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4284f1] focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-slate-300"
+                            >
+                              <SendIcon className="h-3.5 w-3.5" />
+                              SMS
+                            </button>
+                            <button
+                              onClick={() => openSingleAppConfirm(s)}
+                              disabled={isSendingApp}
+                              aria-label={`${s.name} কে App Notification পাঠান`}
+                              title="App Notification"
+                              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-purple-500/30 transition-all duration-200 hover:from-violet-700 hover:to-purple-700 active:scale-[.97] focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-1 disabled:cursor-not-allowed disabled:bg-none disabled:bg-slate-300 disabled:shadow-none"
+                            >
+                              <AppNotifyIcon className="h-3.5 w-3.5" />
+                              App
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
 
                     {!smsLoading && visible.length === 0 && (
-                      <tr><td colSpan={10} className="px-4 py-12 text-center text-slate-500">
+                      <tr><td colSpan={11} className="px-4 py-12 text-center text-slate-500">
                         {!SessionID || !ExamID || !SubClassID
                           ? 'শিক্ষাবর্ষ, পরীক্ষা ও জামাত/ক্লাস নির্বাচন করুন।'
                           : query
@@ -659,8 +889,9 @@ const PublicationOfResultsViaSMS = () => {
         <div className="toast-in fixed bottom-10 left-1/2 z-[60] flex items-center gap-3 rounded-2xl bg-slate-900 px-5 py-3 text-sm text-white shadow-2xl" role="status">
           <span className="grid h-6 w-6 place-items-center rounded-full bg-emerald-500"><CheckIcon className="h-4 w-4" /></span>
           <span>
-            {bn(toast.count)} জনকে SMS পাঠানো হয়েছে, {bn(toast.cost)} পয়েন্ট কেটে নেওয়া হয়েছে
-            {toast.fail > 0 && <span className="ml-1 text-amber-300">({bn(toast.fail)} ব্যর্থ)</span>}
+            {toast.type === 'app'
+              ? <>{bn(toast.count)} জনকে App Notification পাঠানো হয়েছে{toast.fail > 0 && <span className="ml-1 text-amber-300">({bn(toast.fail)} ব্যর্থ)</span>}</>
+              : <>{bn(toast.count)} জনকে {bn(toast.smsCount ?? toast.count)}টি SMS পাঠানো হয়েছে, {bn(toast.cost)} পয়েন্ট কেটে নেওয়া হয়েছে{toast.fail > 0 && <span className="ml-1 text-amber-300">({bn(toast.fail)} ব্যর্থ)</span>}</>}
           </span>
         </div>
       )}
@@ -675,15 +906,26 @@ const PublicationOfResultsViaSMS = () => {
 
       {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} cost={SMS_COST_PER_MESSAGE} />}
 
-      {/* ✅ মাদ্রাসার কোডসহ কনফার্ম মোডাল */}
-      {confirm && (
+      {/* ✅ SMS কনফার্ম মোডাল */}
+      {confirm && confirm.type === 'sms' && (
         <ConfirmSendModal
           targets={confirm.targets}
           cost={SMS_COST_PER_MESSAGE}
+          totalSms={confirm.targets.reduce((a, s) => a + (s.segments || 1), 0)}
           balance={smsBalance}
           isSending={isSending}
           onClose={() => setConfirm(null)}
           onConfirm={handleConfirmSend}
+        />
+      )}
+
+      {/* ✅ App Notification কনফার্ম মোডাল */}
+      {confirm && confirm.type === 'app' && (
+        <ConfirmAppNotifyModal
+          targets={confirm.targets}
+          isSending={isSendingApp}
+          onClose={() => setConfirm(null)}
+          onConfirm={handleSendApp}
         />
       )}
     </div>
