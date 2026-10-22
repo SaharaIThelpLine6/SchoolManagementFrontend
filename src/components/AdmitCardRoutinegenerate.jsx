@@ -16,12 +16,14 @@ import {
   buildRoutineTable,
   formatSeatLine,
   getRoutineBodyMetrics,
+  getRoutineBreakText,
   getRoutineCell,
   getRoutineColumnLabel,
   getRoutineLayout,
   getRoutineTemplate,
   getRoutineUIText,
   getRoutineZones,
+  isRoutineBreak,
   orderRoutineColumns,
 } from '../Data/admitCardRoutineconfig';
 
@@ -341,6 +343,21 @@ export const RoutineCardFace = ({
 
   const routineRows = Array.isArray(routine) ? routine : [];
 
+  // বিরতির সারিতে ক্রম, তারিখ ও বার আগের মতোই আলাদা ঘরে থাকে, আর
+  // বিষয় থেকে শেষ কলাম পর্যন্ত ঘরগুলো মিলে একটাই চওড়া ঘর হয় — তাতে
+  // "বিরতি" লেখাটা এক পাশে না বসে পুরো পট্টির ঠিক মাঝখানে পড়ে।
+  // কলাম সেটিং থেকে বিষয় বাদ দিলে ক্রম/তারিখ/বার এর পরের যে কলামটা
+  // আছে সেখান থেকেই জোড়া শুরু হয়; ঐ তিনটা ছাড়া কিছুই না থাকলে কোনো ঘর
+  // জোড়া লাগে না — তারিখ বা বার মুছে সেখানে বিরতি বসানো হয় না।
+  const breakFrom = useMemo(() => {
+    const i = columns.findIndex((c) => c.id === 'subject');
+    if (i >= 0) return i;
+    const j = columns.findIndex(
+      (c) => !['serial', 'date', 'day'].includes(c.id)
+    );
+    return j >= 0 ? j : columns.length;
+  }, [columns]);
+
   // ------------------------------------------------------------------ আসন
   // বরাদ্দ (seat) না থাকলে ঘরটা লুকানো হয় না — বার্তা বসে, তাই ছাপা কাগজ
   // হাতে নিয়েই বোঝা যায় সিট প্ল্যানটা এখনো করা হয়নি। কোনো অনুমান করা
@@ -561,11 +578,24 @@ export const RoutineCardFace = ({
               </tr>
             </thead>
             <tbody>
-              {routineRows.map((row, i) => (
-                <tr key={row.SubID ?? `${row.serial}-${i}`}>
-                  {columns.map((c) => (
+              {routineRows.map((row, i) => {
+                // IsHidden = 1 মানে সারিটা পরীক্ষার নয়, বিরতির। তখন
+                // বিষয়ের ঘরে "বিরতি" লেখাটা লাল ও মোটা করে মাঝে বসে —
+                // কাগজে চোখ বুলিয়েই পরীক্ষার সারি থেকে আলাদা করা যায়।
+                const breakRow = isRoutineBreak(row);
+
+                return (
+                <tr key={row.ERID ?? row.SubID ?? `${row.serial}-${i}`}>
+                  {columns.map((c, ci) => {
+                    // বিরতির সারিতে breakFrom এর পরের ঘরগুলো আর আঁকা হয় না —
+                    // ওগুলো colSpan দিয়ে ঐ একটা ঘরের সাথেই মিশে গেছে
+                    if (breakRow && ci > breakFrom) return null;
+                    const merged = breakRow && ci === breakFrom;
+
+                    return (
                     <td
                       key={c.id}
+                      colSpan={merged ? columns.length - breakFrom : undefined}
                       className="overflow-hidden whitespace-nowrap"
                       style={{
                         height: rowH,
@@ -574,12 +604,15 @@ export const RoutineCardFace = ({
                           lineStyle ? 'transparent' : i % 2 ? rt.zebra : '#ffffff',
                         lineHeight: `${Math.max(rowH - 4, 9)}px`,
                         fontSize: cellFont,
-                        color: t.valueColor || '#111827',
+                        color: merged ? '#b91c1c' : t.valueColor || '#111827',
+                        fontWeight: merged ? 700 : undefined,
                         border: cellBorder(false),
                         borderBottom: `1px solid ${rt.gridColor}`,
                         padding: '0 4px',
                         boxSizing: 'border-box',
-                        textAlign: c.align || (dir === 'rtl' ? 'right' : 'left'),
+                        textAlign: merged
+                          ? 'center'
+                          : c.align || (dir === 'rtl' ? 'right' : 'left'),
                         textOverflow: 'clip',
                       }}
                     >
@@ -592,12 +625,16 @@ export const RoutineCardFace = ({
                           textOverflow: 'clip',
                         }}
                       >
-                        {getRoutineCell(row, c.id, lang)}
+                        {merged
+                          ? getRoutineBreakText(row, lang)
+                          : getRoutineCell(row, c.id, lang)}
                       </div>
                     </td>
-                  ))}
+                    );
+                  })}
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         ) : (

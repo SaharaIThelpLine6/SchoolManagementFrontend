@@ -617,6 +617,34 @@ const firstFilled = (obj = {}, keys = []) => {
   return '';
 };
 
+// ---------------------------------------------------------------------------
+// বিরতির সারি (Exam_Routine.IsHidden = 1)
+//
+// রুটিনের সব সারি পরীক্ষার নয় — মাঝে বিরতির সারিও থাকে। ঐ সারিতে কোনো
+// বিষয় বসানো হয় না, তাই বিষয়ের ঘরটা ফাঁকা পড়ে থাকত; কাগজে দেখে বোঝার
+// উপায় ছিল না ওটা বিরতি নাকি বিষয় বসাতে ভুলে গেছে। এখন ঐ ঘরেই
+// "বিরতি" লেখা বসে (Message লেখা থাকলে সেটাই)।
+//
+// সার্ভার hidden/message নামে পাঠায়, কিন্তু কাঁচা সারিতে IsHidden/Message
+// থাকতে পারে — দুইটাই ধরা হয়, তাই উৎস যেটাই হোক বিরতি চেনা যায়।
+// ---------------------------------------------------------------------------
+
+const isHiddenRow = (row = {}) => {
+  const v = row?.hidden ?? row?.IsHidden;
+  if (v === true) return true;
+  if (v === null || v === undefined || v === '') return false;
+  return Number(v) === 1;
+};
+
+/** সারিটা বিরতির কি না */
+export const isRoutineBreak = (row = {}) => isHiddenRow(row);
+
+/** বিরতির ঘরে যা লেখা থাকবে — Message থাকলে সেটা, নইলে "বিরতি" */
+export const getRoutineBreakText = (row = {}, lang) => {
+  const msg = String(row?.message ?? row?.Message ?? '').trim();
+  return msg || getRoutineUIText('breakText', lang);
+};
+
 /** বিষয়ের নাম — ভাষা অনুযায়ী, না পেলে মূল নাম */
 export const getRoutineSubject = (row = {}, lang) => {
   if (lang === 'en') {
@@ -662,6 +690,10 @@ const landRows = (land = {}) => {
       room: '',
       SubID: subId ?? null,
       // নাম সার্ভার বসিয়ে দেয় (Sub{i}Name), নইলে ফাঁকা
+      // Exam_RoutineLand এ IsHidden বলে কিছু নেই — ওখান থেকে আসা সারি
+      // তাই কখনোই বিরতি নয়
+      hidden: false,
+      message: '',
       SubjectName: land[`Sub${i}Name`] ?? '',
       SubjectNameEng: land[`Sub${i}NameEng`] ?? '',
       SubjectNameAra: land[`Sub${i}NameAra`] ?? '',
@@ -695,6 +727,11 @@ export const normalizeRoutineRows = (payload = {}) => {
         SubjectName: r.SubjectName ?? '',
         SubjectNameEng: r.SubjectNameEng ?? '',
         SubjectNameAra: r.SubjectNameAra ?? '',
+        // Exam_Routine এর IsHidden — ১ হলে ওটা পরীক্ষার সারি নয়, বিরতি।
+        // সার্ভার hidden/message নামে পাঠায়; পুরোনো নামদুটোও ধরা হলো যাতে
+        // কাঁচা সারি (IsHidden/Message) এলেও বিরতি চেনা যায়।
+        hidden: isHiddenRow(r),
+        message: r.message ?? r.Message ?? '',
       }));
   }
 
@@ -706,6 +743,13 @@ export const normalizeRoutineRows = (payload = {}) => {
 
 /** একটা সারির একটা কলামের লেখা */
 export const getRoutineCell = (row = {}, columnId, lang) => {
+  // বিরতির সারি — ক্রম, তারিখ, বার, সময় আগের মতোই, শুধু বিষয়ের ঘরে
+  // বিষয়ের বদলে "বিরতি" বসে। কক্ষের ঘর ফাঁকা, বিরতিতে কক্ষ লাগে না।
+  if (isRoutineBreak(row)) {
+    if (columnId === 'subject') return getRoutineBreakText(row, lang);
+    if (columnId === 'room') return '';
+  }
+
   switch (columnId) {
     case 'serial':
       return toLangDigit(row.serial, lang);
@@ -1015,6 +1059,7 @@ export const ROUTINE_UI = {
     seat: 'আসন',
     seats: 'আসন সংখ্যা',
     totalSeats: 'মোট আসন',
+    breakText: 'বিরতি',
     noRoutine: 'এই পরীক্ষার কোনো রুটিন পাওয়া যায়নি।',
     noRoutineHint: 'রুটিন এন্ট্রি থেকে আগে পরীক্ষার তারিখ ও বিষয় যোগ করুন।',
     noHall: 'এই হলের কলাম ও সারি পাওয়া যায়নি।',
@@ -1047,6 +1092,7 @@ export const ROUTINE_UI = {
     seat: 'Seat',
     seats: 'Seats',
     totalSeats: 'Total seats',
+    breakText: 'Break',
     noRoutine: 'No routine found for this exam.',
     noRoutineHint: 'Add exam dates and subjects from routine entry first.',
     noHall: 'No columns or rows found for this hall.',
@@ -1078,6 +1124,7 @@ export const ROUTINE_UI = {
     seat: 'المقعد',
     seats: 'المقاعد',
     totalSeats: 'مجموع المقاعد',
+    breakText: 'استراحة',
     noRoutine: 'لا يوجد جدول لهذا الامتحان.',
     noRoutineHint: 'أضف تواريخ ومواد الامتحان من إدخال الجدول أولاً.',
     noHall: 'لا توجد أعمدة أو صفوف لهذه القاعة.',
