@@ -384,12 +384,12 @@ export const UPLOAD_UI = {
   bn: {
     uploadTitle: 'নিজের ডিজাইন আপলোড',
     uploadNew: 'নতুন ডিজাইন আপলোড',
-    pickFile: 'ছবি বাছুন',
-    changeFile: 'ছবি বদলান',
+    pickFile: 'ব্রাউজ',
+    changeFile: 'পরিবর্তন',
     designName: 'ডিজাইনের নাম',
     sizeRule: 'ছবির মাপ',
     sizeRuleText: (exact, bytes) =>
-      `ছবির মাপ ঠিক ${exact} পিক্সেল হতে হবে — এর কম বা বেশি নেওয়া হবে না। সর্বোচ্চ ${bytes}, PNG বা JPG।`,
+      `ছবির প্রস্থ X উচ্চতা = ${exact} হতে হবে, এর কম বা বেশি হলে চলবে না। ছবির সাইজ ${bytes} পিক্সেল হতে হবে।`,
     yourSize: 'আপনার ছবির মাপ',
     preview: 'প্রিভিউ — ছাপাতেও হুবহু এমনই আসবে',
 
@@ -436,7 +436,7 @@ export const UPLOAD_UI = {
     errBytes: (b) => `ছবির আকার ${b} এর বেশি হওয়া যাবে না`,
     errUnreadable: 'ছবিটি পড়া যায়নি',
     errExact: (exact, got) =>
-      `মাপ মিলছে না — আপনার ছবি ${got} পিক্সেল, লাগবে ঠিক ${exact} পিক্সেল`,
+      `মাপ মিলছে না — আপনার ছবি ${got} পিক্সেল এ আছে।`,
     errUpload: 'আপলোড করা যায়নি',
   },
   en: {

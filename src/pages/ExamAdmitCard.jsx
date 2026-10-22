@@ -286,6 +286,14 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
+  /* প্রিভিউতে কী দেখছি — পুরো ডিজাইনসহ, নাকি যা আসলে ছাপা হবে কেবল সেটুকু।
+     "ছাপা কাগজের উপর ছাপা" চালু করা ডিজাইনে প্রেসের ছাপা কাগজে নকশা, লোগো,
+     প্রতিষ্ঠানের নাম আর "প্রবেশপত্র" লেখাটা আগে থেকেই থাকে — ওগুলো আমরা
+     ছাপি না। পর্দায় সেগুলো দেখা যায় বলে কাগজে শেষ পর্যন্ত কী বসবে তা
+     বোঝা যেত না; এই সুইচটা ঠিক সেটাই দেখায়। আপলোডের পর্দায় যেভাবে আছে
+     হুবহু সেভাবেই। */
+  const [simPrint, setSimPrint] = useState(false);
+
   // ------------------------------------------------- রুটিংসহ টেমপ্লেট
   // A5 = শুধু প্রবেশপত্র, A4 = রুটিনসহ। রুটিন চালু/বন্ধ এই একটা
   // সুইচেই ঠিক হয় — আলাদা "রুটিং বন্ধ" বলে আর কিছু নেই।
@@ -397,6 +405,18 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   );
 
   const template = routineOn ? routeTpl : plainTemplate;
+
+  // বাছা ডিজাইনে "ছাপা কাগজের উপর ছাপা" চালু আছে কি না — না থাকলে
+  // সুইচটার কোনো মানে নেই, তাই দেখানোও হয় না
+  const overlayOn = Boolean(template?.overlay);
+  const printSim = overlayOn && simPrint;
+
+  // overlay নেই এমন ডিজাইনে গেলে সুইচটা নিজেই ডিজাইন মোডে ফিরে আসে —
+  // নইলে পরে আবার overlay-ওয়ালা ডিজাইনে গেলে হঠাৎ ছাপা মোডে খুলত
+  useEffect(() => {
+    if (!overlayOn && simPrint) setSimPrint(false);
+  }, [overlayOn, simPrint]);
+
   const activeTemplateId = routineOn ? routeTemplate : selectedTemplate;
 
   const nameSize = watch(`institute_name_size_${activeTemplateId}`);
@@ -1214,9 +1234,15 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
           </div>
         </div>
 
-        {/* ===================================== ফিল্টার — এক লাইনে আটটা ঘর */}
+        {/* ===================================== ফিল্টার — এক লাইনে সাতটা ঘর
+
+            ঘর সাতটা, কিন্তু গ্রিড ছিল আটটা কলামের — ডান পাশে একটা কলাম
+            খালি পড়ে থাকত, আর বাকি সবাই সরু হয়ে বাঁ দিকে জমে যেত। তাতে
+            "শিক্ষার্থীর আইডি" আর "রিপোর্টের ধরণ" এর লেখা একটার ঘাড়ে
+            আরেকটা উঠে পড়ত। সাতটা করায় খালি কলামটা আর নেই — প্রতিটা ঘর
+            একটু চওড়া হয়ে পুরো সারিটা ভরে দেয়। */}
         <div className="rounded-[10px] border border-gray-200 bg-gray-50/70 p-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-8 items-end gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-7 items-end gap-3">
             <DefaultSelect
               label={`${ui('session')} :`}
               options={sessionData ?? []}
@@ -1251,18 +1277,18 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               hidePlaceholder
               initialValue={5}
             />
-            <DefaultInput
-              label={ui('studentId')}
-              valueField="UserCode"
-              nameField="UserCode"
-              registerKey="UserCode"
-            />
             <DefaultSelect
               label={`${ui('reportType')} :`}
               options={reportOptions}
               valueField="id"
               nameField="label"
               registerKey="ReportID"
+            />
+            <DefaultInput
+              label={ui('studentId')}
+              valueField="UserCode"
+              nameField="UserCode"
+              registerKey="UserCode"
             />
 
             <button
@@ -1491,19 +1517,58 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
           {/* =================================================== বাম পাশ */}
           <div className="min-w-0">
             <div className="xl:sticky xl:top-0 xl:z-10 bg-white pb-3">
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <p className="text-[15px] font-bold text-gray-700">
-                  {routineOn ? rui('routinePreview') : ui('livePreview')}
-                </p>
-                <p className="text-[14px] font-medium text-gray-600 truncate">
-                  {template.title}
-                </p>
+              {/* ছাপার প্রিভিউর নিয়ম — ছাপার CSS এর সেই একই ক্লাসটাই
+                  (buildPrintCss এর .admit-paper-only), তাই এখানে যা দেখা
+                  যায় কাগজেও হুবহু তাই আসে। */}
+              <style>{'.admit-print-sim .admit-paper-only{display:none !important}'}</style>
+
+              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                {/* বাঁ পাশে — কী দেখছি, আর কোন ডিজাইনের */}
+                <div className="flex items-baseline gap-2 min-w-0">
+                  <p className="text-[15px] font-bold text-gray-700 shrink-0">
+                    {printSim
+                      ? getUploadUIText('previewModePrint', lang)
+                      : routineOn
+                      ? rui('routinePreview')
+                      : ui('livePreview')}
+                  </p>
+                  <p className="text-[14px] font-medium text-gray-600 truncate">
+                    {template.title}
+                  </p>
+                </div>
+
+                {/* ডান পাশে — সুইচ। ডিজাইনটা ছাপা কাগজে আগে থেকেই আছে,
+                    তাই কাগজে শেষ পর্যন্ত কী বসবে সেটা আগে দেখে নেওয়াই
+                    আসল কাজ */}
+                {overlayOn ? (
+                  <div className="flex overflow-hidden rounded-[7px] border border-gray-300 shrink-0">
+                    {[
+                      { on: false, label: getUploadUIText('previewModeDesign', lang) },
+                      { on: true, label: getUploadUIText('previewModePrint', lang) },
+                    ].map((opt) => (
+                      <button
+                        key={String(opt.on)}
+                        type="button"
+                        onClick={() => setSimPrint(opt.on)}
+                        className={`px-3 py-1 text-[12px] font-medium transition ${
+                          simPrint === opt.on
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-white text-gray-600 hover:bg-gray-100'
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
               <div className="overflow-x-auto overscroll-x-contain -mx-1 px-1 pb-2">
                 {routineOn ? (
                   <div
-                    className="relative mx-auto overflow-hidden rounded-[4px] border border-gray-200"
+                    className={`relative mx-auto overflow-hidden rounded-[4px] border border-gray-200${
+                      printSim ? ' admit-print-sim bg-white' : ''
+                    }`}
                     style={{
                       width: ROUTINE_CARD_W * 0.72,
                       height: ROUTINE_CARD_H * 0.72,
@@ -1550,7 +1615,12 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="w-[520px] shrink-0" dir="ltr">
+                  <div
+                    className={`w-[520px] shrink-0${
+                      printSim ? ' admit-print-sim bg-white' : ''
+                    }`}
+                    dir="ltr"
+                  >
                     <AdmitCardFace
                       template={template}
                       fields={checkboxState}
@@ -1579,6 +1649,14 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 )}
               </div>
               
+              {/* ছাপা মোডে কেন অর্ধেক জিনিস উধাও — এক লাইনেই বলা থাকুক,
+                  নইলে দেখে মনে হতে পারে কিছু ভেঙে গেছে */}
+              {printSim ? (
+                <p className="mt-1 text-center text-[12px] text-gray-500">
+                  {getUploadUIText('previewPrintNote', lang)}
+                </p>
+              ) : null}
+
               {/* ================================================
                   এক লাইনে — টেমপ্লেট সিলেক্ট ও ফন্ট-রঙের তিনটা বক্স।
                   চারটে কলাম: প্রথমটায় টেমপ্লেট, তারপর নাম-ঠিকানা-পরীক্ষা।
@@ -2104,9 +2182,23 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                         e.stopPropagation();
                         openTemplateEditor(tpl);
                       }}
-                      className="absolute left-1 top-1 flex h-[26px] w-[26px] items-center justify-center rounded-full bg-white/90 text-[14px] leading-none text-blue-600 shadow hover:bg-blue-600 hover:text-white transition"
+                      className="absolute left-1 top-1 flex h-[26px] w-[26px] items-center justify-center rounded-full bg-white/90 text-blue-600 shadow hover:bg-blue-600 hover:text-white transition"
                     >
-                      ⇕
+                      {/* পেন্সিল — ⇕ দেখে মনে হতো ডিজাইনটা উপর-নিচ টেনে
+                          সরানোর বোতাম; পেন্সিলে সম্পাদনার কথাটা পরিষ্কার।
+                          inline SVG, তাই নতুন কোনো আইকন প্যাকেজ লাগে না। */}
+                      <svg
+                        className="h-[14px] w-[14px]"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M12 20h9" />
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                      </svg>
                     </button>
                   </>
                 ) : null}
