@@ -1,8 +1,132 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useId } from "react";
+import { createPortal } from "react-dom";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode, { convertOnLanguageChange } from "../../../utils/conveter";
 import { Buffer } from "buffer";
 import ScaledPreview from "../../../components/ScaledPreview";
+
+/* ═══════════════════════════════════════════════════════════
+   LANGUAGE (bn / en / ar)  — শুধু প্রিন্ট/প্রিভিউ শিটের জন্য
+   সাইডবার সবসময় বাংলা (TRANSLATIONS.bn)
+   ═══════════════════════════════════════════════════════════ */
+export const LANGUAGE_OPTIONS = [
+    { key: "bn", label: "বাংলা" },
+    { key: "en", label: "English" },
+    { key: "ar", label: "العربية" },
+];
+export const DEFAULT_LANGUAGE = "bn";
+
+const TRANSLATIONS = {
+    bn: {
+        settings: "সেটিং",
+        settingsSub: "রিপোর্টের কলাম ও প্রিন্ট অপশন",
+        footer: "© Result Report Generator",
+        language: "ভাষা",
+        printLanguage: "প্রিন্টের ভাষা",
+        printLanguageNote: "শুধু প্রিভিউ ও প্রিন্টের ভাষা বদলাবে।",
+        columnSelect: "কলাম নির্বাচন",
+        selectedCount: (c, n) => `${c}/${n} টি নির্বাচিত`,
+        all: "সব",
+        none: "কিছুই না",
+        result: "ফলাফল",
+        resultSub: "ফলাফল প্রদর্শনের ধরন নির্বাচন করুন",
+        printSetting: "প্রিন্ট সেটিং",
+        pageSize: "A4 Landscape",
+        color: "রঙ",
+        bwNote: "সাদা কালো মোডে শুধু গ্রেড কলামের রঙ থাকবে।",
+        colorOpt: "রঙিন",
+        bwOpt: "সাদা কালো",
+        idSerial: "আইডি সিরিয়ালে",
+        byDivision: "বিভাগ অনুসারে",
+        byNumber: "নাম্বার অনুসারে",
+        short: "সংক্ষিপ্ত",
+        headingTitle: "কলামের হেডিং",
+        headingNote: "ফাঁকা রাখলে ডিফল্ট নাম ব্যবহার হবে। লিখলে সব ভাষায় এই নামই দেখাবে। শুধু হেডিং বদলাবে, মান একই থাকবে।",
+        gpaLabelTitle: "গড়/জিপিএ কলাম",
+        gpaOpt: "জিপিএ",
+        avgOpt: "গড়",
+        gpaTextLabel: "গড়/জিপিএ কলামের নাম (নিজে লিখুন)",
+        gpaTextPlaceholder: "যেমন: গড় নম্বর",
+        gradeTextLabel: "গ্রেড কলামের নাম (নিজে লিখুন)",
+        gradeTextPlaceholder: "যেমন: গ্রেড / বিভাগ",
+        resetHeading: "ডিফল্টে ফিরুন",
+        sl: "ক্রমিক",
+        admission: "ভর্তি",
+        studentId: "আইডি",
+        name: "শিক্ষার্থীর নাম",
+        father: "পিতার নাম",
+        mother: "মাতার নাম",
+        address: "ঠিকানা",
+        total: "মোট",
+        gpa: "জিপিএ",
+        grade: "গ্রেড",
+        position: "স্থান",
+        average: "গড়",
+        totalExaminees: "মোট পরীক্ষার্থী",
+        subjectsTitle: (n, top, prod) => `মোট বিষয় ${n}টি পূর্ণমান ${top} × ${n} = ${prod}`,
+        resultTitle: "ফলাফল (নম্বরপত্র)",
+        classLabel: "শ্রেণি/জামাত",
+        page: (a, b) => `পৃষ্ঠা ${a} / ${b}`,
+        date: "তারিখ",
+        divisionFallback: "বিভাগ",
+        subjectFallback: "বিষয়",
+    },
+    en: {
+        totalExaminees: "Total Examinees",
+        sl: "SL",
+        admission: "Adm.",
+        studentId: "ID",
+        name: "Student Name",
+        father: "Father's Name",
+        mother: "Mother's Name",
+        address: "Address",
+        total: "Total",
+        gpa: "GPA",
+        grade: "Grade",
+        position: "Pos.",
+        average: "Avg.",
+        subjectsTitle: (n, top, prod) => `Total ${n} subjects, full marks ${top} × ${n} = ${prod}`,
+        resultTitle: "Result (Mark Sheet)",
+        classLabel: "Class",
+        page: (a, b) => `Page ${a} / ${b}`,
+        date: "Date",
+        divisionFallback: "Division",
+        subjectFallback: "Subject",
+    },
+    ar: {
+        totalExaminees: "إجمالي الممتحنين",
+        sl: "م",
+        admission: "القبول",
+        studentId: "الهوية",
+        name: "اسم الطالب",
+        father: "اسم الأب",
+        mother: "اسم الأم",
+        address: "العنوان",
+        total: "المجموع",
+        gpa: "المعدل",
+        grade: "التقدير",
+        position: "الترتيب",
+        average: "المتوسط",
+        subjectsTitle: (n, top, prod) => `إجمالي المواد ${n}، الدرجة الكاملة ${top} × ${n} = ${prod}`,
+        resultTitle: "النتيجة (كشف الدرجات)",
+        classLabel: "الصف",
+        page: (a, b) => `صفحة ${a} / ${b}`,
+        date: "التاريخ",
+        divisionFallback: "القسم",
+        subjectFallback: "المادة",
+    },
+};
+
+const ARABIC_INDIC = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+
+// ভাষা অনুযায়ী সংখ্যা ফরম্যাটার
+const makeNum = (lang) => (v) => {
+    if (v === undefined || v === null) return "";
+    const s = String(v);
+    if (lang === "bn") return bnBijoy2Unicode(s);
+    if (lang === "ar") return s.replace(/\d/g, (d) => ARABIC_INDIC[Number(d)]);
+    return s;
+};
 
 /* ═══════════════════════════════════════════════════════════
    HELPERS
@@ -10,16 +134,70 @@ import ScaledPreview from "../../../components/ScaledPreview";
 const getFirstValue = (...values) =>
     values.find((value) => value !== undefined && value !== null && value !== "");
 
-const getSubjectLabel = (subject) =>
-    getFirstValue(
-        subject.SubjectName,
-        subject.EngSubjectName,
-        subject.ArabicSubject,
-        subject.Subject?.SubjectName,
-        subject.Subject?.EngSubjectName,
-        subject.Subject?.ArabicSubject,
-        `বিষয় ${subject.SubjectSL}`
-    );
+// খালি স্ট্রিং/স্পেস বাদ দিয়ে প্রথম আসল টেক্সট
+const pickText = (...values) => {
+    const found = values.find((v) => typeof v === "string" && v.trim() !== "");
+    return found ? found.trim() : "";
+};
+
+// ভাষা অনুযায়ী অগ্রাধিকার: নির্বাচিত ভাষা আগে, না থাকলে বাংলা, তারপর বাকিগুলো
+const pickByLang = (lang, bnVal, enVal, arVal) => {
+    if (lang === "ar") return pickText(arVal, bnVal, enVal);
+    if (lang === "en") return pickText(enVal, bnVal, arVal);
+    return pickText(bnVal, enVal, arVal);
+};
+
+// প্রতিষ্ঠানের নাম: ভাষা অনুযায়ী (খালি থাকলে অন্য ভাষায় fallback)
+const getInstitutionName = (info, lang) => {
+    if (!info) return "";
+    return pickByLang(lang, info.InstitutionName, info.EngInstitutionName, info.AraInstitutionName);
+};
+
+// প্রতিষ্ঠানের ঠিকানা
+const getInstitutionAddress = (info, lang) => {
+    if (!info) return "";
+    return pickByLang(lang, info.Address, info.EngAddress, info.AraAddress);
+};
+
+// বিভাগ/গ্রেডের নাম (DivisionNames / DivisionEnglishs / DivisionArabics)
+const getDivisionName = (division, lang) => {
+    if (!division) return "";
+    return pickByLang(lang, division.DivisionNames, division.DivisionEnglishs, division.DivisionArabics);
+};
+
+// শিক্ষার্থীর নাম (UserName / studentEnglishName / studentArabicName)
+const getStudentName = (user, lang) => {
+    if (!user) return "";
+    return pickByLang(lang, user.UserName, user.studentEnglishName, user.studentArabicName);
+};
+
+// সেশনের নাম (SessionName / SessionEngName / SessionAraName)
+const getSessionName = (session, lang) => {
+    if (!session) return "";
+    return pickByLang(lang, session.SessionName, session.SessionEngName, session.SessionAraName);
+};
+
+// পরীক্ষার নাম (ExamName / ExamEngName / ExamAraName)
+const getExamName = (exam, lang) => {
+    if (!exam) return "";
+    return pickByLang(lang, exam.ExamName, exam.ExamEngName, exam.ExamAraName);
+};
+
+// শ্রেণির নাম (SubClass / SubClassEng / SubClassAra)
+const getClassName = (subClass, lang) => {
+    if (!subClass) return "";
+    return pickByLang(lang, subClass.SubClass, subClass.SubClassEng, subClass.SubClassAra);
+};
+
+// বিষয়ের নাম (SubjectName / EngSubjectName / ArabicSubject)
+const getSubjectLabel = (subject, lang, fallbackPrefix) => {
+    const bnName = getFirstValue(subject.SubjectName, subject.Subject?.SubjectName);
+    const enName = getFirstValue(subject.EngSubjectName, subject.Subject?.EngSubjectName);
+    const arName = getFirstValue(subject.ArabicSubject, subject.Subject?.ArabicSubject);
+
+    const picked = pickByLang(lang, bnName, enName, arName);
+    return picked || `${fallbackPrefix} ${subject.SubjectSL}`;
+};
 
 const getByPath = (obj, path) =>
     path.split(".").reduce((acc, key) => (acc == null ? undefined : acc[key]), obj);
@@ -34,23 +212,82 @@ const getExtraValue = (studentResult, option) => {
     return "";
 };
 
-const bn = (v) => bnBijoy2Unicode(String(v));
-
 const isFilled = (v) => v !== undefined && v !== null && v !== "";
 
 /* ═══════════════════════════════════════════════════════════
+   PASS NUMBER (বিষয়ভিত্তিক পাস নাম্বার)
+   ⚠️ আপনার backend এ পাস নাম্বারের ফিল্ডের নাম অন্য হলে
+      শুধু নিচের PASS_FIELDS অ্যারেতে সেই নামটা যোগ করুন।
+   ═══════════════════════════════════════════════════════════ */
+const PASS_FIELDS = [
+    "PassNumber", "SubjectPassNumber", "PassMark", "PassMarks",
+    "PassNo", "Pass", "SubjectPass", "MinNumber",
+];
+
+// একটি বিষয়ের পাস নাম্বার; না পেলে null (তখন মার্ক করা হবে না)
+const getPassMark = (subject) => {
+    for (const f of PASS_FIELDS) {
+        const v = getFirstValue(subject?.[f], subject?.Subject?.[f]);
+        if (v !== undefined) {
+            const n = Number(v);
+            if (Number.isFinite(n)) return n;
+        }
+    }
+    return null;
+};
+
+// নম্বর পাস নাম্বারের চেয়ে কম কি না
+const isBelowPass = (val, passMark) => {
+    if (passMark === null || !isFilled(val) || String(val).trim() === "") return false;
+    const n = Number(val);
+    if (!Number.isFinite(n)) return false;
+    return n < passMark;
+};
+
+/* ═══════════════════════════════════════════════════════════
+   KERAT ACTION — মোট নম্বরে যে বিষয় ধরা হবে না
+   subjectPassNumbers[i].KeratAction === true হলে ওই বিষয়
+   (SubVal{i+1}) মোট নম্বরের যোগফল থেকে বাদ যাবে।
+   ═══════════════════════════════════════════════════════════ */
+const isKerat = (subject) => {
+    const v = subject?.KeratAction;
+    return v === true || v === 1 || v === "1" || v === "true";
+};
+
+// KeratAction true বিষয় বাদ দিয়ে বাকি বিষয়ের যোগফল
+const calcTotal = (studentResult, subjects) => {
+    if (!Array.isArray(subjects) || subjects.length === 0) {
+        const n = Number(studentResult?.Total);
+        return Number.isFinite(n) ? n : 0;
+    }
+    let sum = 0;
+    subjects.forEach((s, i) => {
+        if (isKerat(s)) return;
+        const n = Number(studentResult?.[`SubVal${i + 1}`]);
+        if (Number.isFinite(n)) sum += n;
+    });
+    return sum;
+};
+
+/* ═══════════════════════════════════════════════════════════
    DIVISION SCALE (dynamic)
-   ExamType == 4  → subjectPassNumbers (DivisionID/DivisionNumber)
-   others         → conditionAverage   (DivisionID/DivisionNumber)
-   Name আসে divitionList থেকে
+   ExamType == 4  → subjectPassNumbers (DivisionID/DivisionNumber)  [পয়েন্ট ভিত্তিক]
+   others         → conditionAverage   (DivisionID/DivisionNumber)  [গড় ভিত্তিক]
+   Name আসে divitionList থেকে (ভাষা অনুযায়ী)
    return: { rows: [{id, name, num}], top }
    ═══════════════════════════════════════════════════════════ */
-const buildDivisionScale = (conditionAverage, subjectPassNumbers, divisionList) => {
+const buildDivisionScale = (
+    conditionAverage,
+    subjectPassNumbers,
+    divisionList,
+    fallbackPrefix = "বিভাগ",
+    lang = "bn"
+) => {
     const examType = Number(conditionAverage?.ExamType);
 
     const nameMap = {};
     (divisionList || []).forEach((d) => {
-        nameMap[Number(d.ID)] = d.DivisionNames;
+        nameMap[Number(d.ID)] = getDivisionName(d, lang);
     });
 
     let source = {};
@@ -74,7 +311,7 @@ const buildDivisionScale = (conditionAverage, subjectPassNumbers, divisionList) 
         if (!isFilled(id) || !isFilled(num)) continue;
         rows.push({
             id: Number(id),
-            name: nameMap[Number(id)] ?? `বিভাগ ${id}`,
+            name: nameMap[Number(id)] || `${fallbackPrefix} ${id}`,
             num: Number(num),
         });
     }
@@ -91,7 +328,7 @@ export const RESULT_COLUMNS = [
     { key: "id", label: "আইডি" },
     { key: "name", label: "শিক্ষার্থীর নাম" },
     { key: "total", label: "মোট" },
-    { key: "gpa", label: "জিপিএ" },
+    { key: "gpa", label: "গড়" },
     { key: "grade", label: "গ্রেড" },
     { key: "pos", label: "স্থান" },
 ];
@@ -152,17 +389,49 @@ export const COLOR_OPTIONS = [
 
 export const DEFAULT_COLOR_MODE = "color";
 
+// গড়/জিপিএ কলামের হেডিং — ডিফল্ট: গড়
+export const GPA_LABEL_OPTIONS = [
+    { key: "avg", label: "গড়" },
+    { key: "gpa", label: "জিপিএ" },
+];
+
+export const DEFAULT_GPA_LABEL = "avg";
+
 /* ═══════════════════════════════════════════════════════════
    THEME
    ═══════════════════════════════════════════════════════════ */
+const FAIL_NAME_RE = /স্থগিত|ছগিত|রাসিব|fail|^F$/i;
+
+// দ্রষ্টব্য: ফেল/স্থগিত চেনার জন্য সবসময় মূল বাংলা DivisionNames ব্যবহার হয় (ভাষা বদলালেও রঙ ঠিক থাকে)
+const isFailDivision = (studentResult) =>
+    FAIL_NAME_RE.test(String(studentResult?.Division?.DivisionNames ?? ""));
+
+// গড় দিয়ে fallback রঙ (যখন বিভাগ চেনা যায় না)
 const colorTint = (studentResult, avg) => {
-    const name = String(studentResult?.Division?.DivisionNames ?? "");
-    if (/স্থগিত|ছগিত|রাসিব|fail|^F$/i.test(name)) return { bg: "#fee2e2", fg: "#991b1b" };
+    if (isFailDivision(studentResult)) return { bg: "#fee2e2", fg: "#991b1b" };
     if (avg >= 80) return { bg: "#dcfce7", fg: "#166534" };
     if (avg >= 70) return { bg: "#cffafe", fg: "#155e75" };
     if (avg >= 60) return { bg: "#fef9c3", fg: "#854d0e" };
     if (avg >= 33) return { bg: "#ffedd5", fg: "#9a3412" };
     return { bg: "#fee2e2", fg: "#991b1b" };
+};
+
+// প্রতিটি গ্রেড/বিভাগের জন্য আলাদা আলাদা রঙ (বিভাগের ক্রম অনুযায়ী: ১ম = সেরা)
+const GRADE_COLORS = [
+    { bg: "#bbf7d0", fg: "#14532d" }, // সবুজ
+    { bg: "#99f6e4", fg: "#134e4a" }, // টিল
+    { bg: "#bae6fd", fg: "#075985" }, // আকাশি নীল
+    { bg: "#fef08a", fg: "#854d0e" }, // হলুদ
+    { bg: "#fed7aa", fg: "#9a3412" }, // কমলা
+    { bg: "#e9d5ff", fg: "#6b21a8" }, // বেগুনি
+    { bg: "#fbcfe8", fg: "#9d174d" }, // গোলাপি
+];
+const GRADE_FAIL_COLOR = { bg: "#fecaca", fg: "#991b1b" }; // ফেল/স্থগিত = লাল
+
+// অকৃতকার্য বিষয়ের মার্ক (পাস নাম্বারের চেয়ে কম)
+const FAIL_MARK = {
+    color: { bg: "#fecaca", fg: "#b91c1c", textDecoration: "none" },
+    bw: { bg: "#d4d4d4", fg: "#000", textDecoration: "underline" },
 };
 
 const DIVISION_PALETTE = [
@@ -183,8 +452,11 @@ const THEMES = {
             border: "#334155", text: "#0f172a", divider: "#cbd5e1",
         },
         palette: DIVISION_PALETTE,
-        medals: { 1: "#fbbf24", 2: "#cbd5e1", 3: "#fdba74" },
-        medalBorder: "1px solid transparent",
+        medals: {
+            1: { bg: "#facc15", fg: "#422006", border: "1.5px solid #a16207" }, // উজ্জ্বল সোনালি
+            2: { bg: "#38bdf8", fg: "#ffffff", border: "1.5px solid #0369a1" }, // নীল
+            3: { bg: "#ea580c", fg: "#ffffff", border: "1.5px solid #9a3412" }, // গাঢ় কমলা/ব্রোঞ্জ
+        },
     },
     bw: {
         C: {
@@ -197,24 +469,22 @@ const THEMES = {
             bodyBg: "#ffffff", altBg: "#ffffff",
             border: "#000", text: "#000", divider: "#737373",
         },
-        palette: DIVISION_PALETTE, // ✅ divisions always colorful even in bw mode
-        medals: { 1: "#d4d4d4", 2: "#e5e5e5", 3: "#f4f4f4" },
-        medalBorder: "1px solid #000",
+        palette: DIVISION_PALETTE,
+        medals: {
+            1: { bg: "#facc15", fg: "#422006", border: "1.5px solid #a16207" }, // উজ্জ্বল সোনালি
+            2: { bg: "#38bdf8", fg: "#ffffff", border: "1.5px solid #0369a1" }, // নীল
+            3: { bg: "#ea580c", fg: "#ffffff", border: "1.5px solid #9a3412" }, // গাঢ় কমলা/ব্রোঞ্জ
+        },
     },
-};
+}
+
+// শিট (প্রিভিউ + প্রিন্ট) এর সব লেখায় এই ফন্ট — প্রিন্ট portal document.body তে থাকায় আলাদা করে সেট করা
+const SHEET_FONT = '"SolaimanLipiNormal", "SolaimanLipi", serif';
 
 const bg = (color) => ({
     backgroundColor: color,
     boxShadow: `inset 0 0 0 1000px ${color}`,
 });
-
-const getTodayBangla = () => {
-    const d = new Date();
-    const dd = String(d.getDate()).padStart(2, "0");
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const yyyy = d.getFullYear();
-    return bnBijoy2Unicode(`${dd}/${mm}/${yyyy}`);
-};
 
 /* ═══════════════════════════════════════════════════════════
    A4 LANDSCAPE
@@ -251,6 +521,17 @@ const LS_VISIBLE = "resultSheetVisibleColumns";
 const LS_COLOR = "resultSheetColorMode";
 const LS_NAME_EXTRAS = "resultSheetNameExtras";
 const LS_RESULT_OPTS = "resultSheetResultOptions";
+const LS_LANG = "resultSheetLanguage";
+const LS_GPA_LABEL = "resultSheetGpaLabel";
+const LS_GPA_TEXT = "resultSheetGpaText";
+const LS_GRADE_TEXT = "resultSheetGradeText";
+
+const loadText = (key) => {
+    try {
+        return localStorage.getItem(key) || "";
+    } catch (e) { }
+    return "";
+};
 
 const loadObj = (key, fallback) => {
     try {
@@ -258,6 +539,13 @@ const loadObj = (key, fallback) => {
         if (saved && typeof saved === "object") return { ...fallback, ...saved };
     } catch (e) { }
     return { ...fallback };
+};
+
+// ফলাফল অপশন সবসময় ঠিক একটাই true থাকবে
+const ORDERED_RESULT_KEYS = ["idSerial", "byDivision", "byNumber", "short"];
+const normalizeResultOptions = (opts) => {
+    const active = ORDERED_RESULT_KEYS.find((k) => opts?.[k]) || "idSerial";
+    return Object.fromEntries(ORDERED_RESULT_KEYS.map((k) => [k, k === active]));
 };
 
 const loadStr = (key, options, fallback) => {
@@ -271,7 +559,7 @@ const loadStr = (key, options, fallback) => {
 /* ═══════════════════════════════════════════════════════════
    SIGNATURE
    ═══════════════════════════════════════════════════════════ */
-function SignatureSection({ C, dateBangla, NajemName, PrincipalName, najem, principal }) {
+function SignatureSection({ C, dateText, dateLabel, NajemName, PrincipalName, najem, principal }) {
     const signatureBox = {
         flex: 1, maxWidth: "280px", display: "flex",
         flexDirection: "column", alignItems: "center", textAlign: "center",
@@ -301,13 +589,13 @@ function SignatureSection({ C, dateBangla, NajemName, PrincipalName, najem, prin
                 <div style={sigImgWrap}><img src={principal} alt="signature" style={sigImg} /></div>
                 <div style={dashedLine} />
                 <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: C.text, lineHeight: 1.4 }}>{PrincipalName}</p>
-                <p style={{ margin: "2px 0 0", fontSize: "12px", fontWeight: 600, color: C.text }}>তারিখ : {dateBangla}</p>
+                <p style={{ margin: "2px 0 0", fontSize: "12px", fontWeight: 600, color: C.text }}>{dateLabel} : {dateText}</p>
             </div>
             <div style={signatureBox}>
                 <div style={sigImgWrap}><img src={najem} alt="signature" style={sigImg} /></div>
                 <div style={dashedLine} />
                 <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: C.text, lineHeight: 1.4 }}>{NajemName}</p>
-                <p style={{ margin: "2px 0 0", fontSize: "12px", fontWeight: 600, color: C.text }}>তারিখ : {dateBangla}</p>
+                <p style={{ margin: "2px 0 0", fontSize: "12px", fontWeight: 600, color: C.text }}>{dateLabel} : {dateText}</p>
             </div>
         </div>
     );
@@ -317,19 +605,48 @@ function SignatureSection({ C, dateBangla, NajemName, PrincipalName, najem, prin
    🧾 MAIN
    ═══════════════════════════════════════════════════════════ */
 export default function StudentResultSheet({ reportData, query, labels }) {
+
+    console.log(reportData, "reportData");
+
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
+
     const [principal, setPrincipal] = useState(null);
     const [najem, setNajem] = useState(null);
 
     const [visibleColumns, setVisibleColumns] = useState(() => loadObj(LS_VISIBLE, DEFAULT_VISIBLE_COLUMNS));
     const [nameExtras, setNameExtras] = useState(() => loadObj(LS_NAME_EXTRAS, DEFAULT_NAME_EXTRAS));
-    const [resultOptions, setResultOptions] = useState(() => loadObj(LS_RESULT_OPTS, DEFAULT_RESULT_OPTIONS));
+    const [resultOptions, setResultOptions] = useState(() =>
+        normalizeResultOptions(loadObj(LS_RESULT_OPTS, DEFAULT_RESULT_OPTIONS))
+    );
     const [colorMode, setColorMode] = useState(() => loadStr(LS_COLOR, COLOR_OPTIONS, DEFAULT_COLOR_MODE));
+    const [lang, setLang] = useState(() => loadStr(LS_LANG, LANGUAGE_OPTIONS, DEFAULT_LANGUAGE));
+    const [gpaLabelMode, setGpaLabelMode] = useState(() =>
+        loadStr(LS_GPA_LABEL, GPA_LABEL_OPTIONS, DEFAULT_GPA_LABEL)
+    );
+    const [gpaText, setGpaText] = useState(() => loadText(LS_GPA_TEXT));
+    const [gradeText, setGradeText] = useState(() => loadText(LS_GRADE_TEXT));
 
     useEffect(() => { localStorage.setItem(LS_VISIBLE, JSON.stringify(visibleColumns)); }, [visibleColumns]);
     useEffect(() => { localStorage.setItem(LS_NAME_EXTRAS, JSON.stringify(nameExtras)); }, [nameExtras]);
     useEffect(() => { localStorage.setItem(LS_RESULT_OPTS, JSON.stringify(resultOptions)); }, [resultOptions]);
     useEffect(() => { localStorage.setItem(LS_COLOR, colorMode); }, [colorMode]);
+    useEffect(() => { localStorage.setItem(LS_LANG, lang); }, [lang]);
+    useEffect(() => { localStorage.setItem(LS_GPA_LABEL, gpaLabelMode); }, [gpaLabelMode]);
+    useEffect(() => { localStorage.setItem(LS_GPA_TEXT, gpaText); }, [gpaText]);
+    useEffect(() => { localStorage.setItem(LS_GRADE_TEXT, gradeText); }, [gradeText]);
+
+    /* ── সাইডবার: সবসময় বাংলা ── */
+    const tUI = TRANSLATIONS.bn;
+    const numUI = useMemo(() => makeNum("bn"), []);
+
+    /* ── প্রিন্ট/প্রিভিউ শিট: নির্বাচিত ভাষা ── */
+    const t = { ...TRANSLATIONS.bn, ...(TRANSLATIONS[lang] || {}) };
+    const dir = lang === "ar" ? "rtl" : "ltr";
+    const num = useMemo(() => makeNum(lang), [lang]);
+
+    /* ── প্রতিষ্ঠানের নাম ও ঠিকানা (ভাষা অনুযায়ী) ── */
+    const institutionName = getInstitutionName(institutionInfo, lang);
+    const institutionAddress = getInstitutionAddress(institutionInfo, lang);
 
     const activeResultOption = useMemo(() => {
         if (resultOptions.idSerial) return "idSerial";
@@ -339,6 +656,21 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         return "idSerial";
     }, [resultOptions]);
 
+    /* ── বিভাগের ক্রম (শুধু id দিয়ে, নামের ভাষা অপ্রাসঙ্গিক) ── */
+    const divisionOrder = useMemo(() => {
+        const scale = buildDivisionScale(
+            reportData?.conditionAverage,
+            reportData?.subjectPassNumbers,
+            reportData?.divitionList,
+            "বিভাগ",
+            "bn"
+        );
+        const map = {};
+        scale.rows.forEach((d, i) => { map[d.id] = i; });
+        return map;
+    }, [reportData]);
+
+    /* ── সর্ট ফ্রন্টএন্ডে ── */
     const transformedData = useMemo(() => {
         if (!reportData) return null;
         const base = {
@@ -347,34 +679,38 @@ export default function StudentResultSheet({ reportData, query, labels }) {
             conditionAverage: reportData.conditionAverage,
             divitionList: reportData.divitionList,
         };
+        const all = Array.isArray(reportData.studentResults) ? reportData.studentResults : [];
+        const serialOf = (s) => Number(s?.User?.Admission?.[0]?.AdmissionSerial) || 0;
+        // KeratAction true বিষয় বাদ দিয়ে মোট
+        const totalOf = (s) => {
+            const n = calcTotal(s, reportData.subjectPassNumbers);
+            return Number.isNaN(n) ? -Infinity : n;
+        };
+
         switch (activeResultOption) {
-            case "byDivision":
-                return { ...base, studentResults: reportData.report2Results || [] };
+            case "byDivision": {
+                const rank = (s) => divisionOrder[Number(s?.DivisionID)] ?? 999;
+                const list = [...all].sort(
+                    (a, b) =>
+                        rank(a) - rank(b) ||
+                        Number(a?.DivisionID) - Number(b?.DivisionID) ||
+                        totalOf(b) - totalOf(a) ||
+                        serialOf(a) - serialOf(b)
+                );
+                return { ...base, studentResults: list };
+            }
             case "byNumber": {
-                const list = Array.isArray(reportData.studentResults) ? [...reportData.studentResults] : [];
-                list.sort((a, b) => {
-                    const ca = Number(a?.User?.UserCode);
-                    const cb = Number(b?.User?.UserCode);
-                    if (Number.isNaN(ca) && Number.isNaN(cb)) return 0;
-                    if (Number.isNaN(ca)) return 1;
-                    if (Number.isNaN(cb)) return -1;
-                    return ca - cb;
-                });
+                const list = [...all].sort(
+                    (a, b) => totalOf(b) - totalOf(a) || serialOf(a) - serialOf(b)
+                );
                 return { ...base, studentResults: list };
             }
             case "short":
-                return {
-                    ...base,
-                    studentResults:
-                        Array.isArray(reportData.report4Results) && reportData.report4Results.length > 0
-                            ? reportData.report4Results
-                            : reportData.studentResults || [],
-                };
             case "idSerial":
             default:
-                return { ...base, studentResults: reportData.studentResults || [] };
+                return { ...base, studentResults: all };
         }
-    }, [reportData, activeResultOption]);
+    }, [reportData, activeResultOption, divisionOrder]);
 
     const conditionAverage = transformedData?.conditionAverage || {};
     const subjectPassNumbers = transformedData?.subjectPassNumbers || [];
@@ -385,20 +721,39 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const S = theme.side;
     const paletteColor = (i) => theme.palette[Math.min(i, theme.palette.length - 1)];
 
+    // বাংলা হলে backend এর labels আগে, অন্য ভাষায় সরাসরি অনুবাদ (শুধু শিটের জন্য)
+    const L = (backendKey, tKey) =>
+        lang === "bn" ? (labels?.[backendKey] ?? t[tKey]) : t[tKey];
+
+    // গড়/জিপিএ কলামের হেডিং: নির্বাচিত মোড অনুযায়ী (ডিফল্ট গড়)
+    // নিজে লেখা টেক্সট থাকলে সেটাই অগ্রাধিকার পাবে
+    const gpaHeading =
+        gpaText.trim() ||
+        (gpaLabelMode === "gpa"
+            ? L("GPALabel", "gpa")
+            : L("AverageLabel", "average"));
+    const gradeHeading = gradeText.trim() || L("GradeLabel", "grade");
+
     const LABELS = {
-        sl: labels?.SerialLabel ?? "ক্রমিক",
-        studentId: labels?.StudentIDLabel ?? "আইডি",
-        admission: labels?.AdmissionIDLabel ?? "ভর্তি",
-        name: labels?.StudentNameLabel ?? "শিক্ষার্থীর নাম",
-        father: labels?.FatherNameLabel ?? "পিতার নাম",
-        mother: labels?.MotherNameLabel ?? "মাতার নাম",
-        address: labels?.AddressLabel ?? "ঠিকানা",
-        total: labels?.TotalLabel ?? "মোট",
-        gpa: labels?.GPALabel ?? "জিপিএ",
-        grade: labels?.GradeLabel ?? "গ্রেড",
-        position: labels?.PositionLabel ?? "স্থান",
-        average: labels?.AverageLabel ?? "গড়",
+        sl: L("SerialLabel", "sl"),
+        studentId: L("StudentIDLabel", "studentId"),
+        admission: L("AdmissionIDLabel", "admission"),
+        name: L("StudentNameLabel", "name"),
+        father: L("FatherNameLabel", "father"),
+        mother: L("MotherNameLabel", "mother"),
+        address: L("AddressLabel", "address"),
+        total: L("TotalLabel", "total"),
+        gpa: gpaHeading,
+        grade: gradeHeading,
+        position: L("PositionLabel", "position"),
+        average: L("AverageLabel", "average"),
     };
+
+    /* ── পরীক্ষা / সেশন / শ্রেণির নাম (ভাষা অনুযায়ী) ── */
+    const examName = getExamName(conditionAverage?.Exam, lang);
+    const sessionNameRaw = getSessionName(conditionAverage?.Session, lang);
+    const sessionName = lang === "ar" ? num(sessionNameRaw) : sessionNameRaw;
+    const className = getClassName(conditionAverage?.SubClass, lang);
 
     const show = { ...DEFAULT_VISIBLE_COLUMNS, ...(visibleColumns || {}) };
     const extrasState = { ...DEFAULT_NAME_EXTRAS, ...(nameExtras || {}) };
@@ -421,10 +776,61 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         return subjectPassNumbers.length;
     }, [conditionAverage, subjectPassNumbers]);
 
-    const divisionScale = useMemo(
-        () => buildDivisionScale(conditionAverage, subjectPassNumbers, divisionList),
-        [conditionAverage, subjectPassNumbers, divisionList]
+    /* ── পয়েন্ট ভিত্তিক (ExamType 4) নাকি গড় ভিত্তিক ── */
+    const isPointBased = Number(conditionAverage?.ExamType) === 4;
+
+    // গড় ভিত্তিক হলে ডান বক্সের "মোট বিষয়" = AverageSubsonkha, পয়েন্ট ভিত্তিক হলে আগের মতোই subjectCount
+    const summarySubjectCount = useMemo(() => {
+        if (isPointBased) return subjectCount;
+        const n = Number(conditionAverage?.AverageSubsonkha);
+        return n > 0 ? n : subjectCount;
+    }, [isPointBased, conditionAverage, subjectCount]);
+
+    /* ── প্রতিটি বিষয়ের পাস নাম্বার (সাবজেক্ট কলামের ক্রম অনুযায়ী) ── */
+    const passMarks = useMemo(
+        () => subjectPassNumbers.map((s) => getPassMark(s)),
+        [subjectPassNumbers]
     );
+
+    const divisionScale = useMemo(
+        () => buildDivisionScale(conditionAverage, subjectPassNumbers, divisionList, t.divisionFallback, lang),
+        [conditionAverage, subjectPassNumbers, divisionList, t.divisionFallback, lang]
+    );
+
+    /* ── গ্রেড/বিভাগ অনুযায়ী আলাদা রঙ: divisionId → রঙ ── */
+    const gradeColorMap = useMemo(() => {
+        const map = {};
+        const used = new Set();
+        let idx = 0;
+        // প্রথমে বিভাগের ক্রম অনুযায়ী (ফেল/স্থগিত বাদে)
+        const ordered = [...(divisionList || [])];
+        const orderIds = divisionScale.rows.map((d) => d.id);
+        ordered.sort((a, b) => {
+            const ia = orderIds.indexOf(Number(a.ID));
+            const ib = orderIds.indexOf(Number(b.ID));
+            return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+        });
+        ordered.forEach((d) => {
+            const id = Number(d.ID);
+            if (used.has(id)) return;
+            used.add(id);
+            if (FAIL_NAME_RE.test(String(d.DivisionNames ?? ""))) {
+                map[id] = GRADE_FAIL_COLOR;
+            } else {
+                map[id] = GRADE_COLORS[idx % GRADE_COLORS.length];
+                idx += 1;
+            }
+        });
+        return map;
+    }, [divisionList, divisionScale]);
+
+    const getGradeColor = (studentResult, avg) => {
+        if (isFailDivision(studentResult)) return GRADE_FAIL_COLOR;
+        const id = Number(getFirstValue(studentResult?.DivisionID, studentResult?.Division?.ID));
+        if (!Number.isNaN(id) && gradeColorMap[id]) return gradeColorMap[id];
+        if (!Number.isNaN(id)) return GRADE_COLORS[id % GRADE_COLORS.length];
+        return colorTint(studentResult, avg);
+    };
 
     const divisionStats = useMemo(() => {
         const allStudents =
@@ -438,7 +844,8 @@ export default function StudentResultSheet({ reportData, query, labels }) {
             const id = Number(getFirstValue(s?.DivisionID, s?.Division?.ID));
             if (Number.isNaN(id)) return;
             counts[id] = (counts[id] || 0) + 1;
-            if (s?.Division?.DivisionNames) extraNames[id] = s.Division.DivisionNames;
+            const nm = getDivisionName(s?.Division, lang);
+            if (nm) extraNames[id] = nm;
         });
 
         const rows = divisionScale.rows.map((d) => ({
@@ -450,12 +857,12 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         Object.keys(counts).forEach((k) => {
             const id = Number(k);
             if (!rows.some((r) => r.id === id)) {
-                rows.push({ id, label: extraNames[id] ?? `বিভাগ ${id}`, count: counts[id] });
+                rows.push({ id, label: extraNames[id] ?? `${t.divisionFallback} ${id}`, count: counts[id] });
             }
         });
 
         return { rows, total: allStudents.length };
-    }, [reportData, studentResultsDetails, divisionScale]);
+    }, [reportData, studentResultsDetails, divisionScale, t.divisionFallback, lang]);
 
     useEffect(() => {
         if (institutionInfo?.SignaturePrincipal?.data) {
@@ -495,6 +902,14 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
     const totalExaminees = divisionStats.total;
 
+    const getToday = () => {
+        const d = new Date();
+        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const yyyy = d.getFullYear();
+        return num(`${dd}/${mm}/${yyyy}`);
+    };
+
     const styles = {
         td: {
             border: `1px solid ${C.border}`, padding: "0 3px", textAlign: "center",
@@ -533,13 +948,13 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const renderCenterTitle = () => (
         <div style={{ textAlign: "center", alignSelf: "center", minWidth: 0 }}>
             <h1 style={{ fontSize: "22px", fontWeight: 800, margin: 0, lineHeight: 1.25, color: C.primaryDark }}>
-                {institutionInfo?.InstitutionName}
+                {institutionName}
             </h1>
             <p style={{ fontSize: "13px", fontWeight: 600, margin: "3px 0 0", color: C.muted }}>
-                {institutionInfo?.Address}
+                {institutionAddress}
             </p>
             <h2 style={{ fontSize: "14px", margin: "6px 0 0", fontWeight: 600, color: C.text }}>
-                {conditionAverage?.Exam?.ExamName} — {conditionAverage?.Session?.SessionName}
+                {examName} — {sessionName}
             </h2>
             <div style={{
                 display: "inline-block", ...bg(C.primaryMid), color: C.primaryDark,
@@ -547,23 +962,23 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 marginTop: "7px", fontWeight: 800, fontSize: "15px",
                 lineHeight: "22px", borderRadius: "999px",
             }}>
-                ফলাফল (নম্বরপত্র)
+                {t.resultTitle}
             </div>
             <p style={{ fontSize: "14px", margin: "6px 0 0", fontWeight: 600, color: C.text }}>
-                শ্রেণি/জামাত : <span style={{ color: C.primary }}>{conditionAverage?.SubClass?.SubClass}</span>
+                {t.classLabel} : <span style={{ color: C.primary }}>{className}</span>
             </p>
         </div>
     );
 
     const renderHeaderBlock = () => (
         <div style={{
-            display: "grid", gridTemplateColumns: "220px 1fr 220px", gridTemplateRows: "1fr",
+            display: "grid", gridTemplateColumns: "220px 1fr 290px", gridTemplateRows: "1fr",
             gap: "16px", padding: "10px 0", borderBottom: `3px solid ${C.primary}`,
             height: `${HEADER_H}px`, boxSizing: "border-box", overflow: "hidden",
             marginBottom: `${HEADER_GAP}px`,
         }}>
             <div style={sideBox}>
-                <div style={sideTitle}>মোট পরীক্ষার্থী = {bn(totalExaminees)}</div>
+                <div style={sideTitle}>{t.totalExaminees} = {num(totalExaminees)}</div>
                 <div style={sideBody}>
                     {divisionStats.rows.map((item, i) => (
                         <div key={item.id ?? i} style={{
@@ -571,16 +986,16 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                             ...bg(i % 2 ? S.altBg : S.bodyBg),
                         }}>
                             <div style={{
-                                paddingLeft: "8px", whiteSpace: "nowrap",
+                                paddingInlineStart: "8px", whiteSpace: "nowrap",
                                 overflow: "hidden", textOverflow: "ellipsis",
-                                color: paletteColor(i), fontWeight: 700, // Always bold for division colors
+                                color: paletteColor(i), fontWeight: 700,
                             }}>{item.label}</div>
                             <div style={cellCenter}>=</div>
                             <div style={{
-                                ...cellCenter, justifyContent: "flex-start", paddingLeft: "6px",
+                                ...cellCenter, justifyContent: "flex-start", paddingInlineStart: "6px",
                                 fontWeight: 700,
                             }}>
-                                {bn(item.count)}
+                                {num(item.count)}
                             </div>
                         </div>
                     ))}
@@ -591,27 +1006,31 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
             <div style={sideBox}>
                 <div style={sideTitle}>
-                    মোট বিষয় {bn(subjectCount)}টি পূর্ণমান {bn(divisionScale.top)} × {bn(subjectCount)} = {bn(divisionScale.top * subjectCount)}
+                    {t.subjectsTitle(
+                        num(summarySubjectCount),
+                        num(divisionScale.top),
+                        num(divisionScale.top * summarySubjectCount)
+                    )}
                 </div>
                 <div style={sideBody}>
                     {divisionScale.rows.map((item, i) => (
                         <div key={item.id ?? i} style={{
                             ...sideRowBase,
-                            gridTemplateColumns: "1fr 12px 30px 16px 16px 14px 40px",
+                            gridTemplateColumns: "1fr 14px 40px 20px 20px 16px 52px",
                             ...bg(i % 2 ? S.altBg : S.bodyBg),
                         }}>
                             <div style={{
-                                paddingLeft: "8px", whiteSpace: "nowrap",
+                                paddingInlineStart: "8px", whiteSpace: "nowrap",
                                 overflow: "hidden", textOverflow: "ellipsis",
-                                color: paletteColor(i), fontWeight: 700, // Always bold for division colors
+                                color: paletteColor(i), fontWeight: 700,
                             }}>{item.name}</div>
                             <div style={cellCenter}>:</div>
-                            <div style={{ ...cellCenter, justifyContent: "flex-end" }}>{bn(item.num)}</div>
-                            <div style={cellCenter}>X</div>
-                            <div style={cellCenter}>{bn(subjectCount)}</div>
+                            <div style={{ ...cellCenter, justifyContent: "flex-end" }}>{num(item.num)}</div>
+                            <div style={cellCenter}>×</div>
+                            <div style={cellCenter}>{num(summarySubjectCount)}</div>
                             <div style={cellCenter}>=</div>
-                            <div style={{ ...cellCenter, justifyContent: "flex-start", paddingLeft: "2px" }}>
-                                {bn(item.num * subjectCount)}
+                            <div style={{ ...cellCenter, justifyContent: "flex-start", paddingInlineStart: "2px" }}>
+                                {num(item.num * summarySubjectCount)}
                             </div>
                         </div>
                     ))}
@@ -661,7 +1080,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
             {showCol.admission && <th style={styles.th}>{LABELS.admission}</th>}
             {showCol.id && <th style={styles.th}>{LABELS.studentId}</th>}
             {showCol.name && (
-                <th style={{ ...styles.th, textAlign: "left", paddingLeft: "8px" }}>{nameHeaderLabel}</th>
+                <th style={{ ...styles.th, textAlign: "start", paddingInlineStart: "8px" }}>{nameHeaderLabel}</th>
             )}
             {subjectPassNumbers.map((subject, i) => (
                 <th key={i} style={{ ...styles.th, padding: "4px 1px" }}>
@@ -669,7 +1088,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                         display: "inline-block", writingMode: "vertical-rl", transform: "rotate(180deg)",
                         height: `${THEAD_H - 12}px`, fontSize: "12px", fontWeight: 700,
                         lineHeight: 1.2, textAlign: "center", overflow: "hidden",
-                    }}>{getSubjectLabel(subject)}</span>
+                    }}>{getSubjectLabel(subject, lang, t.subjectFallback)}</span>
                 </th>
             ))}
             {showCol.total && <th style={thStrong}>{LABELS.total}</th>}
@@ -680,23 +1099,24 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     );
 
     const renderNameCell = (studentResult, rowBg) => {
+        const studentName = getStudentName(studentResult?.User, lang);
         if (!hasExtras) {
             return (
                 <td style={{
-                    ...styles.td, ...bg(rowBg), textAlign: "left",
-                    paddingLeft: "8px", fontWeight: 600, textOverflow: "ellipsis",
-                }}>{studentResult?.User?.UserName}</td>
+                    ...styles.td, ...bg(rowBg), textAlign: "start",
+                    paddingInlineStart: "8px", fontWeight: 600, textOverflow: "ellipsis",
+                }}>{studentName}</td>
             );
         }
         const extras = activeExtras.map((o) => getExtraValue(studentResult, o)).filter((v) => v !== "");
         return (
-            <td style={{ ...styles.td, ...bg(rowBg), textAlign: "left", padding: "0 6px", whiteSpace: "normal" }}>
+            <td style={{ ...styles.td, ...bg(rowBg), textAlign: "start", padding: "0 6px", whiteSpace: "normal" }}>
                 <div style={{
                     display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2,
                     overflow: "hidden", fontSize: "11px", lineHeight: "14px",
                     maxHeight: "28px", wordBreak: "break-word",
                 }}>
-                    <span style={{ fontWeight: 700 }}>{studentResult?.User?.UserName}</span>
+                    <span style={{ fontWeight: 700 }}>{studentName}</span>
                     {extras.map((v, i) => (<span key={i}>{" - "}{v}</span>))}
                 </div>
             </td>
@@ -705,60 +1125,74 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
     const getSerial = (globalIndex) => globalIndex + 1;
 
+    const renderAdmission = (serial) =>
+        lang === "bn" ? convertOnLanguageChange(serial) : num(serial);
+
+    const failMark = FAIL_MARK[colorMode] || FAIL_MARK.color;
+
     const renderRow = (studentResult, globalIndex) => {
         const zebra = globalIndex % 2 === 1;
         const rowBg = zebra ? C.primaryFaint : "#fff";
-        const avg = Number(studentResult.Total) / Number(conditionAverage?.AverageSubsonkha || 1);
-        const tint = colorTint(studentResult, avg);
-        const gradeBg = studentResult?.DColor ? studentResult?.DColorType : tint.bg;
-        const gradeFg = studentResult?.DColor ? "#0f172a" : tint.fg;
+        // KeratAction true বিষয় বাদ দিয়ে মোট ও গড়
+        const total = calcTotal(studentResult, subjectPassNumbers);
+        const avg = total / Number(conditionAverage?.AverageSubsonkha || 1);
+        const gc = getGradeColor(studentResult, avg);
+        const gradeBg = gc.bg;
+        const gradeFg = gc.fg;
         const position = Number(studentResult.Positions);
         const medal = theme.medals[position];
 
         return (
             <tr key={studentResult.ID ?? globalIndex} style={{ background: rowBg, height: `${ROW_H}px` }}>
-                {showCol.sl && <td style={{ ...styles.td, ...bg(rowBg) }}>{bn(getSerial(globalIndex))}</td>}
+                {showCol.sl && <td style={{ ...styles.td, ...bg(rowBg) }}>{num(getSerial(globalIndex))}</td>}
                 {showCol.admission && (
                     <td style={{ ...styles.td, ...bg(rowBg) }}>
-                        {convertOnLanguageChange(studentResult?.User?.Admission?.[0]?.AdmissionSerial)}
+                        {renderAdmission(studentResult?.User?.Admission?.[0]?.AdmissionSerial)}
                     </td>
                 )}
-                {showCol.id && <td style={{ ...styles.td, ...bg(rowBg) }}>{bn(studentResult?.User?.UserCode)}</td>}
+                {showCol.id && <td style={{ ...styles.td, ...bg(rowBg) }}>{num(studentResult?.User?.UserCode)}</td>}
                 {showCol.name && renderNameCell(studentResult, rowBg)}
 
                 {Array.from({ length: conditionAverage?.SubSonkha || 0 }).map((_, mi) => {
                     const val = studentResult[`SubVal${mi + 1}`];
-                    const isZero = Number(val) === 0;
+                    const failed = isBelowPass(val, passMarks[mi] ?? null);
+                    // পাস নাম্বার জানা না থাকলে আগের মতো শূন্য হলে লাল
+                    const isZero = passMarks[mi] == null && isFilled(val) && Number(val) === 0;
+                    const warn = failed || isZero;
                     return (
                         <td key={mi} style={{
-                            ...styles.td, ...bg(rowBg),
-                            color: isZero ? C.danger : C.text,
-                            fontWeight: isZero ? 700 : 400,
-                        }}>{bn(val)}</td>
+                            ...styles.td,
+                            ...bg(failed ? failMark.bg : rowBg),
+                            color: failed ? failMark.fg : (isZero ? C.danger : C.text),
+                            fontWeight: warn ? 700 : 400,
+                            textDecoration: failed ? failMark.textDecoration : "none",
+                        }}>{num(val)}</td>
                     );
                 })}
 
                 {showCol.total && (
-                    <td style={{ ...styles.td, ...bg(C.primaryFaint), fontWeight: 700 }}>{bn(studentResult.Total)}</td>
+                    <td style={{ ...styles.td, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(total)}</td>
                 )}
                 {showCol.gpa && (
-                    <td style={{ ...styles.td, ...bg(C.primaryFaint), fontWeight: 700 }}>{bn(avg.toFixed(2))}</td>
+                    <td style={{ ...styles.td, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(avg.toFixed(2))}</td>
                 )}
                 {showCol.grade && (
                     <td style={{ ...styles.td, ...bg(gradeBg), fontWeight: 700, fontSize: "12px", color: gradeFg }}>
-                        {studentResult.Division?.DivisionNames}
+                        {getDivisionName(studentResult.Division, lang)}
                     </td>
                 )}
                 {showCol.pos && (
                     <td style={{ ...styles.td, ...bg(rowBg) }}>
                         {medal ? (
                             <span style={{
-                                display: "inline-block", boxSizing: "border-box",
-                                width: "18px", height: "18px", lineHeight: "16px",
-                                borderRadius: "50%", border: theme.medalBorder,
-                                ...bg(medal), fontWeight: 800, fontSize: "11px", verticalAlign: "middle",
-                            }}>{bn(studentResult.Positions)}</span>
-                        ) : bn(studentResult.Positions)}
+                                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                                boxSizing: "border-box", width: "20px", height: "20px",
+                                borderRadius: "50%", border: medal.border,
+                                ...bg(medal.bg), color: medal.fg,
+                                fontWeight: 800, fontSize: "11px", lineHeight: 1,
+                                verticalAlign: "middle",
+                            }}>{num(studentResult.Positions)}</span>
+                        ) : num(studentResult.Positions)}
                     </td>
                 )}
             </tr>
@@ -771,27 +1205,29 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const renderShortRow = (studentResult, globalIndex) => {
         const zebra = globalIndex % 2 === 1;
         const rowBg = zebra ? C.primaryFaint : "#fff";
-        const avg = Number(studentResult.Total) / Number(conditionAverage?.AverageSubsonkha || 1);
-        const tint = colorTint(studentResult, avg);
-        const divBg = studentResult?.DColor ? studentResult?.DColorType : tint.bg;
-        const divFg = studentResult?.DColor ? "#0f172a" : tint.fg;
+        // KeratAction true বিষয় বাদ দিয়ে গড়
+        const total = calcTotal(studentResult, subjectPassNumbers);
+        const avg = total / Number(conditionAverage?.AverageSubsonkha || 1);
+        const gc = getGradeColor(studentResult, avg);
+        const divBg = gc.bg;
+        const divFg = gc.fg;
         const fatherOpt = NAME_EXTRA_OPTIONS.find((o) => o.key === "father");
         const fatherName = fatherOpt ? getExtraValue(studentResult, fatherOpt) : "";
 
         return (
             <tr key={studentResult.ID ?? globalIndex} style={{ background: rowBg, height: `${SHORT_ROW_H}px` }}>
-                <td style={{ ...shortTd, ...bg(rowBg) }}>{bn(studentResult?.User?.UserCode ?? "")}</td>
+                <td style={{ ...shortTd, ...bg(rowBg) }}>{num(studentResult?.User?.UserCode ?? "")}</td>
                 <td style={{
-                    ...shortTd, ...bg(rowBg), textAlign: "left",
-                    paddingLeft: "6px", fontWeight: 600, textOverflow: "ellipsis",
-                }}>{studentResult?.User?.UserName}</td>
+                    ...shortTd, ...bg(rowBg), textAlign: "start",
+                    paddingInlineStart: "6px", fontWeight: 600, textOverflow: "ellipsis",
+                }}>{getStudentName(studentResult?.User, lang)}</td>
                 <td style={{
-                    ...shortTd, ...bg(rowBg), textAlign: "left",
-                    paddingLeft: "6px", textOverflow: "ellipsis",
+                    ...shortTd, ...bg(rowBg), textAlign: "start",
+                    paddingInlineStart: "6px", textOverflow: "ellipsis",
                 }}>{fatherName}</td>
-                <td style={{ ...shortTd, ...bg(C.primaryFaint), fontWeight: 700 }}>{bn(avg.toFixed(2))}</td>
+                <td style={{ ...shortTd, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(avg.toFixed(2))}</td>
                 <td style={{ ...shortTd, ...bg(divBg), color: divFg, fontWeight: 700, textOverflow: "ellipsis" }}>
-                    {studentResult.Division?.DivisionNames}
+                    {getDivisionName(studentResult.Division, lang)}
                 </td>
             </tr>
         );
@@ -810,9 +1246,9 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 <thead>
                     <tr style={{ height: `${SHORT_THEAD_H}px` }}>
                         <th style={shortTh}>{LABELS.studentId}</th>
-                        <th style={{ ...shortTh, textAlign: "left", paddingLeft: "6px" }}>{LABELS.name}</th>
-                        <th style={{ ...shortTh, textAlign: "left", paddingLeft: "6px" }}>{LABELS.father}</th>
-                        <th style={thStrong}>{LABELS.average}</th>
+                        <th style={{ ...shortTh, textAlign: "start", paddingInlineStart: "6px" }}>{LABELS.name}</th>
+                        <th style={{ ...shortTh, textAlign: "start", paddingInlineStart: "6px" }}>{LABELS.father}</th>
+                        <th style={thStrong}>{LABELS.gpa}</th>
                         <th style={thStrong}>{LABELS.grade}</th>
                     </tr>
                 </thead>
@@ -821,7 +1257,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         </div>
     );
 
-    const dateBangla = getTodayBangla();
+    const dateText = getToday();
 
     const renderPage = (pageIndex, students) => {
         const offset = pages.slice(0, pageIndex).reduce((sum, chunk) => sum + chunk.length, 0);
@@ -829,7 +1265,8 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         const signature = (
             <SignatureSection
                 C={C}
-                dateBangla={dateBangla}
+                dateText={dateText}
+                dateLabel={t.date}
                 PrincipalName={institutionInfo?.PrincipalName}
                 principal={principal}
                 najem={najem}
@@ -842,7 +1279,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 position: "absolute", left: 0, right: 0, bottom: "2px",
                 textAlign: "center", fontSize: "10px", color: C.muted,
             }}>
-                পৃষ্ঠা {bn(pageIndex + 1)} / {bn(pages.length)}
+                {t.page(num(pageIndex + 1), num(pages.length))}
             </div>
         );
 
@@ -883,38 +1320,71 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const pageBox = {
         position: "relative", width: `${PAGE_W}px`, height: `${PAGE_H}px`,
         boxSizing: "border-box", overflow: "hidden", background: "#fff", margin: "0 auto",
+        fontFamily: SHEET_FONT,
     };
 
+    /* ── সাইডবারের কলাম লিস্ট: সবসময় বাংলা (backend labels থাকলে সেগুলো) ── */
     const dynamicColumns = useMemo(
         () => [
-            { key: "sl", label: labels?.SerialLabel ?? "ক্রমিক" },
-            { key: "admission", label: labels?.AdmissionIDLabel ?? "ভর্তি" },
-            { key: "id", label: labels?.StudentIDLabel ?? "আইডি" },
-            { key: "name", label: labels?.StudentNameLabel ?? "শিক্ষার্থীর নাম" },
-            { key: "total", label: labels?.TotalLabel ?? "মোট" },
-            { key: "gpa", label: labels?.GPALabel ?? "জিপিএ" },
-            { key: "grade", label: labels?.GradeLabel ?? "গ্রেড" },
-            { key: "pos", label: labels?.PositionLabel ?? "স্থান" },
+            { key: "sl", label: labels?.SerialLabel ?? tUI.sl },
+            { key: "admission", label: labels?.AdmissionIDLabel ?? tUI.admission },
+            { key: "id", label: labels?.StudentIDLabel ?? tUI.studentId },
+            { key: "name", label: labels?.StudentNameLabel ?? tUI.name },
+            { key: "total", label: labels?.TotalLabel ?? tUI.total },
+            {
+                key: "gpa",
+                label: gpaText.trim() || (gpaLabelMode === "gpa"
+                    ? (labels?.GPALabel ?? tUI.gpa)
+                    : (labels?.AverageLabel ?? tUI.average)),
+            },
+            { key: "grade", label: gradeText.trim() || (labels?.GradeLabel ?? tUI.grade) },
+            { key: "pos", label: labels?.PositionLabel ?? tUI.position },
         ],
-        [labels]
+        [labels, tUI, gpaLabelMode, gpaText, gradeText]
     );
 
     const toggleColumn = (key) => setVisibleColumns((p) => ({ ...p, [key]: !p[key] }));
-    const toggleNameExtra = (key) => setNameExtras((p) => ({ ...p, [key]: !p[key] }));
-    const toggleResultOption = (key) =>
-        setResultOptions((prev) => {
-            const next = { ...prev, [key]: !prev[key] };
-            if (next[key]) Object.keys(next).forEach((k) => k !== key && (next[k] = false));
-            return next;
-        });
+    const selectResultOption = (key) =>
+        setResultOptions(
+            Object.fromEntries(ORDERED_RESULT_KEYS.map((k) => [k, k === key]))
+        );
     const setAllColumns = (value) =>
         setVisibleColumns(Object.fromEntries(dynamicColumns.map((c) => [c.key, value])));
+
+    /* ── সাইডবার প্যানেল: tUI + numUI (সবসময় বাংলা) ── */
+    const renderSettingsPanels = () => (
+        <>
+            <LanguageSelector t={tUI} value={lang} onChange={setLang} />
+            <ColumnSelector
+                t={tUI}
+                num={numUI}
+                value={visibleColumns}
+                onToggle={toggleColumn}
+                onSetAll={setAllColumns}
+                columns={dynamicColumns}
+            />
+            <HeadingSettings
+                t={tUI}
+                mode={gpaLabelMode}
+                onModeChange={setGpaLabelMode}
+                gpaText={gpaText}
+                onGpaText={setGpaText}
+                gradeText={gradeText}
+                onGradeText={setGradeText}
+            />
+            <ResultOptionsSelector t={tUI} value={resultOptions} onSelect={selectResultOption} />
+            <PrintSettings t={tUI} colorMode={colorMode} onColorChange={setColorMode} />
+        </>
+    );
 
     return (
         <div className="flex items-start w-full">
             <aside
-                className="hidden lg:flex flex-col w-[300px] shrink-0 bg-white border-r border-slate-200 sticky top-0 h-screen print:hidden"
-                style={{ overflow: "hidden" }}
+                className="hidden lg:flex flex-col w-[300px] shrink-0 bg-white border-r border-slate-200 sticky top-0 print:hidden"
+                style={{
+                    height: "calc(100vh - 100px)",
+                    overflow: "hidden",
+                }}
             >
                 <div className="p-5 border-b border-slate-100 shrink-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -924,36 +1394,37 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>
-                        <h2 className="text-sm font-bold text-slate-800">সেটিং</h2>
+                        <h2 className="text-sm font-bold text-slate-800">{tUI.settings}</h2>
                     </div>
-                    <p className="text-xs text-slate-400">রিপোর্টের কলাম ও প্রিন্ট অপশন</p>
+                    <p className="text-xs text-slate-400">{tUI.settingsSub}</p>
                 </div>
 
+                {/* কনটেন্ট বেশি হলে শুধু এই ডিভের ভেতরেই স্ক্রল হবে */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-4">
-                    <ColumnSelector value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={dynamicColumns} />
-                    <ResultOptionsSelector value={resultOptions} onToggle={toggleResultOption} />
-                    <PrintSettings colorMode={colorMode} onColorChange={setColorMode} />
+                    {renderSettingsPanels()}
                 </div>
 
                 <div className="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0">
-                    <p className="text-[10px] text-slate-400 text-center">© Result Report Generator</p>
+                    <p className="text-[10px] text-slate-400 text-center">{tUI.footer}</p>
                 </div>
             </aside>
 
             <div className="flex-1 min-w-0 w-full">
                 <div className="lg:hidden p-4 pb-0 print:hidden">
                     <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
-                        <ColumnSelector value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={dynamicColumns} />
-                        <ResultOptionsSelector value={resultOptions} onToggle={toggleResultOption} />
-                        <PrintSettings colorMode={colorMode} onColorChange={setColorMode} />
+                        {renderSettingsPanels()}
                     </div>
                 </div>
 
-                <div className="result-sheet-wrapper w-full">
-                    <div className="no-print">
+                {/* প্রিভিউ: fixed height + scroll (প্রিন্টে এটা আর ব্যবহার হয় না) */}
+                <div
+                    className="result-sheet-wrapper w-full overflow-x-hidden"
+                    style={{ height: "700px", overflowY: "auto" }}
+                >
+                    <div className="no-print p-4">
                         <ScaledPreview designWidth={PAGE_W}>
                             {pages.map((students, pageIndex) => (
-                                <div key={pageIndex} style={{
+                                <div key={pageIndex} dir={dir} style={{
                                     ...pageBox,
                                     boxShadow: "0 1px 6px rgba(15,23,42,0.18)",
                                     marginBottom: "24px",
@@ -963,29 +1434,39 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                             ))}
                         </ScaledPreview>
                     </div>
-
-                    <div className="print-only">
-                        {pages.map((students, pageIndex) => (
-                            <div key={pageIndex} style={{
-                                ...pageBox,
-                                pageBreakAfter: pageIndex < pages.length - 1 ? "always" : "auto",
-                                breakAfter: pageIndex < pages.length - 1 ? "page" : "auto",
-                            }}>
-                                {renderPage(pageIndex, students)}
-                            </div>
-                        ))}
-                    </div>
                 </div>
             </div>
 
+            {/* প্রিন্ট: document.body এ portal — scroll/overflow container এর বাইরে */}
+            {createPortal(
+                <div className="print-portal">
+                    {pages.map((students, pageIndex) => (
+                        <div key={pageIndex} dir={dir} style={{
+                            ...pageBox,
+                            margin: 0,
+                            pageBreakAfter: pageIndex < pages.length - 1 ? "always" : "auto",
+                            breakAfter: pageIndex < pages.length - 1 ? "page" : "auto",
+                        }}>
+                            {renderPage(pageIndex, students)}
+                        </div>
+                    ))}
+                </div>,
+                document.body
+            )}
+
             <style>{`
-        .print-only { display: none; }
+        .print-portal { display: none; }
+        .print-portal, .print-portal * { font-family: ${SHEET_FONT}; }
         @media print {
           @page { size: A4 landscape; margin: 5mm; }
-          html, body { margin: 0 !important; padding: 0 !important; }
+          html, body {
+            margin: 0 !important; padding: 0 !important;
+            height: auto !important; overflow: visible !important;
+            background: #fff !important;
+          }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          .no-print { display: none !important; }
-          .print-only { display: block !important; }
+          body > *:not(.print-portal) { display: none !important; }
+          .print-portal { display: block !important; }
           tr, td, th { page-break-inside: avoid !important; break-inside: avoid !important; }
           .signature-section { page-break-inside: avoid !important; break-inside: avoid !important; }
         }
@@ -995,7 +1476,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SIDEBAR SUB-COMPONENTS
+   SIDEBAR SUB-COMPONENTS  (সবসময় বাংলা টেক্সট পায়)
    ═══════════════════════════════════════════════════════════ */
 
 const SegmentedControl = ({ label, options, value, onChange }) => (
@@ -1016,71 +1497,147 @@ const SegmentedControl = ({ label, options, value, onChange }) => (
     </div>
 );
 
-const PrintSettings = ({ colorMode, onColorChange }) => (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-3">
-        <div className="flex items-center justify-between">
-            <p className="text-xs font-bold text-slate-700 leading-tight">প্রিন্ট সেটিং</p>
-            <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 rounded-md px-1.5 py-0.5">
-                A4 Landscape
-            </span>
-        </div>
-        <SegmentedControl label="রঙ" options={COLOR_OPTIONS} value={colorMode} onChange={onColorChange} />
-        <p className="text-[10px] text-slate-400 leading-snug">
-            সাদা কালো মোডে শুধু গ্রেড কলামের রঙ থাকবে।
-        </p>
+const LanguageSelector = ({ t, value, onChange }) => (
+    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+        <SegmentedControl label={t.printLanguage} options={LANGUAGE_OPTIONS} value={value} onChange={onChange} />
+        <p className="text-[10px] text-slate-400 leading-snug">{t.printLanguageNote}</p>
     </div>
 );
 
-const RESULT_OPTIONS_LIST = [
-    { key: "idSerial", label: "আইডি সিরিয়ালে" },
-    { key: "byDivision", label: "বিভাগ অনুসারে" },
-    { key: "byNumber", label: "নাম্বার অনুসারে" },
-    { key: "short", label: "সংক্ষিপ্ত" },
-];
+// কলামের হেডিং সেটিং: গড়/জিপিএ বাছাই + নিজে লেখা টেক্সট (গড়/জিপিএ ও গ্রেড)
+const HeadingSettings = ({ t, mode, onModeChange, gpaText, onGpaText, gradeText, onGradeText }) => {
+    const options = [
+        { key: "avg", label: t.avgOpt },
+        { key: "gpa", label: t.gpaOpt },
+    ];
+    const inputCls =
+        "w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-700 " +
+        "placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300";
+    const hasCustom = gpaText.trim() !== "" || gradeText.trim() !== "";
+    return (
+        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-3">
+            <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-700 leading-tight">{t.headingTitle}</p>
+                {hasCustom && (
+                    <button
+                        type="button"
+                        onClick={() => { onGpaText(""); onGradeText(""); }}
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200"
+                    >
+                        {t.resetHeading}
+                    </button>
+                )}
+            </div>
 
-const ResultOptionsSelector = ({ value, onToggle }) => (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
-        <p className="text-xs font-bold text-slate-700 leading-tight">ফলাফল</p>
-        <p className="text-[10px] text-slate-400 leading-tight mt-0.5 mb-2">
-            ফলাফল প্রদর্শনের ধরন নির্বাচন করুন
-        </p>
-        <div className="grid grid-cols-1 gap-1.5">
-            {RESULT_OPTIONS_LIST.map((opt) => {
-                const checked = !!value[opt.key];
-                return (
-                    <label key={opt.key} className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border cursor-pointer select-none text-xs transition-colors ${checked
-                        ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-medium"
-                        : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
-                        }`}>
-                        <input type="checkbox" checked={checked} onChange={() => onToggle(opt.key)}
-                            className="w-3.5 h-3.5 accent-emerald-600 cursor-pointer" />
-                        <span>{opt.label}</span>
-                    </label>
-                );
-            })}
+            <SegmentedControl label={t.gpaLabelTitle} options={options} value={mode} onChange={onModeChange} />
+
+            <div>
+                <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{t.gpaTextLabel}</p>
+                <input
+                    type="text"
+                    value={gpaText}
+                    onChange={(e) => onGpaText(e.target.value)}
+                    placeholder={t.gpaTextPlaceholder}
+                    maxLength={30}
+                    className={inputCls}
+                />
+            </div>
+
+            <div>
+                <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{t.gradeTextLabel}</p>
+                <input
+                    type="text"
+                    value={gradeText}
+                    onChange={(e) => onGradeText(e.target.value)}
+                    placeholder={t.gradeTextPlaceholder}
+                    maxLength={30}
+                    className={inputCls}
+                />
+            </div>
+
+            <p className="text-[10px] text-slate-400 leading-snug">{t.headingNote}</p>
         </div>
-    </div>
-);
+    );
+};
 
-const ColumnSelector = ({ value, onToggle, onSetAll, columns = RESULT_COLUMNS }) => {
+const PrintSettings = ({ t, colorMode, onColorChange }) => {
+    const colorOptions = [
+        { key: "color", label: t.colorOpt },
+        { key: "bw", label: t.bwOpt },
+    ];
+    return (
+        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-3">
+            <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-700 leading-tight">{t.printSetting}</p>
+                <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 rounded-md px-1.5 py-0.5">
+                    {t.pageSize}
+                </span>
+            </div>
+            <SegmentedControl label={t.color} options={colorOptions} value={colorMode} onChange={onColorChange} />
+            <p className="text-[10px] text-slate-400 leading-snug">{t.bwNote}</p>
+        </div>
+    );
+};
+
+/*
+  desktop sidebar আর mobile panel — দুই জায়গাতেই radio এর name আলাদা রাখতে useId() ব্যবহার।
+*/
+const ResultOptionsSelector = ({ t, value, onSelect }) => {
+    const groupName = useId();
+    const list = [
+        { key: "idSerial", label: t.idSerial },
+        { key: "byDivision", label: t.byDivision },
+        { key: "byNumber", label: t.byNumber },
+        { key: "short", label: t.short },
+    ];
+    return (
+        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+            <p className="text-xs font-bold text-slate-700 leading-tight">{t.result}</p>
+            <p className="text-[10px] text-slate-400 leading-tight mt-0.5 mb-2">{t.resultSub}</p>
+            <div role="radiogroup" className="grid grid-cols-1 gap-1.5">
+                {list.map((opt) => {
+                    const checked = !!value[opt.key];
+                    return (
+                        <label key={opt.key} className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border cursor-pointer select-none text-xs transition-colors ${checked
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-medium"
+                            : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                            }`}>
+                            <input
+                                type="radio"
+                                name={`resultOption-${groupName}`}
+                                value={opt.key}
+                                checked={checked}
+                                onChange={() => onSelect(opt.key)}
+                                className="w-3.5 h-3.5 accent-emerald-600 cursor-pointer"
+                            />
+                            <span>{opt.label}</span>
+                        </label>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+const ColumnSelector = ({ t, num, value, onToggle, onSetAll, columns = RESULT_COLUMNS }) => {
     const checkedCount = columns.filter((c) => value[c.key]).length;
     return (
         <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
             <div className="flex items-center justify-between mb-2">
                 <div>
-                    <p className="text-xs font-bold text-slate-700 leading-tight">কলাম নির্বাচন</p>
+                    <p className="text-xs font-bold text-slate-700 leading-tight">{t.columnSelect}</p>
                     <p className="text-[10px] text-slate-400 leading-tight mt-0.5">
-                        {checkedCount}/{columns.length} টি নির্বাচিত
+                        {t.selectedCount(num(checkedCount), num(columns.length))}
                     </p>
                 </div>
                 <div className="flex items-center gap-1">
                     <button type="button" onClick={() => onSetAll(true)}
                         className="px-2 py-1 rounded-md text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100">
-                        সব
+                        {t.all}
                     </button>
                     <button type="button" onClick={() => onSetAll(false)}
                         className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200">
-                        কিছুই না
+                        {t.none}
                     </button>
                 </div>
             </div>

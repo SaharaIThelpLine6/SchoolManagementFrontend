@@ -13,17 +13,20 @@ import {
 import { useGetLabelNameListsQuery, useGetResultReportDataQuery } from '../features/result/resultSilce';
 import StudentResultSheet from '../view/result/Reports/StudentResultSheet';
 import AttendanceSheet from '../view/result/Reports/AttendanceSheet';
-import StudentResultState from '../view/result/Reports/StudentResultState';
+import ClassDivisionSummarySheet from '../view/result/Reports/ClassDivisionSummarySheet';
+import SubjectWiseResultSheet from '../view/result/Reports/SubjectWiseResultSheet';
+import TeacherResultSheet from '../view/result/Reports/TeacherResultSheet';
 
-// Kon report-e kon filter lagbe (query param key onujayi)
-const REQUIRED_FILTERS = {
+// Report-wise required filters (query param key onujayi)
+const REPORT_REQUIRED = {
   1: ['session_id', 'exam_id', 'subclass_id'],
   2: ['session_id', 'exam_id', 'subclass_id'],
-  3: ['session_id', 'exam_id', 'subclass_id'],
+  3: ['session_id', 'exam_id'],
   4: ['session_id', 'exam_id', 'subclass_id'],
-  5: ['session_id', 'exam_id', 'subclass_id'],
-  6: ['session_id', 'exam_id'],
+  5: ['session_id', 'exam_id'], // শিক্ষক ভিত্তিক / একক শিক্ষক (sheet er sidebar e radio)
 };
+
+const isEmpty = (v) => v === undefined || v === null || v === '';
 
 const ResultReport = () => {
   const translate = useTranslate();
@@ -46,6 +49,7 @@ const ResultReport = () => {
     { SessionID: sessionID },
     { skip: !sessionID }
   );
+
   const { data: subclassListData } = useGetExamFilterSubclassesQuery(
     { SessionID: sessionID, ExamID: examID },
     { skip: !sessionID || !examID }
@@ -54,34 +58,34 @@ const ResultReport = () => {
   useEffect(() => {
     setValue('ExamID', '');
     setValue('SubClassID', '');
+    setValue('TeacherID', '');
   }, [sessionID, setValue]);
 
   useEffect(() => {
     setValue('SubClassID', '');
+    setValue('TeacherID', '');
   }, [examID, setValue]);
 
-  // Query params: shob required field na bhorle null (=> API call hobe na)
   const queryParams = (() => {
     if (!selectedReportID) return null;
+
+    const rid = Number(selectedReportID);
+    const required = REPORT_REQUIRED[rid];
+    if (!required) return null;
 
     const params = {
       report_data: selectedReportID,
       session_id: sessionID,
       exam_id: examID,
-      subclass_id: subClassID,
+      ...([1, 2, 4].includes(rid) ? { subclass_id: subClassID } : {}),
     };
 
-    const required = REQUIRED_FILTERS[Number(selectedReportID)] || [];
-    const isMissing = required.some(
-      (key) => params[key] === undefined || params[key] === '' || params[key] === null
-    );
-    if (isMissing) return null;
+    if (required.some((key) => isEmpty(params[key]))) return null;
 
     Object.keys(params).forEach((key) => {
-      if (params[key] === undefined || params[key] === '' || params[key] === null) {
-        delete params[key];
-      }
+      if (isEmpty(params[key])) delete params[key];
     });
+
     return params;
   })();
 
@@ -95,27 +99,37 @@ const ResultReport = () => {
   const shouldShowFields = (fieldName) => {
     switch (Number(selectedReportID)) {
       case 1:
-        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
       case 2:
+        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
       case 3:
+        return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
       case 4:
-      case 5:
         return ['ReportID', 'SessionID', 'ExamID', 'SubClassID'].includes(fieldName);
-      case 6:
+      case 5:
         return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
       default:
         return false;
     }
   };
 
+  // ✅ reportData shape অনুযায়ী সব key চেক
   const hasStudentResults =
     Array.isArray(reportData?.studentResults) && reportData.studentResults.length > 0;
   const hasDivisionStatistics =
     Array.isArray(reportData?.divisionStatistics) && reportData.divisionStatistics.length > 0;
-  // Attendance report onno key-te data pathale ekhane key-ta milie nin
   const hasAttendance = Array.isArray(reportData?.students) && reportData.students.length > 0;
+  // reportid 3 (summary) er jonno rows
+  const hasSummaryRows = Array.isArray(reportData?.rows) && reportData.rows.length > 0;
+  // reportid 5: teachers khali holeo sheet dekhabe (sidebar/radio dorkar)
+  const isTeacherReport =
+    Number(reportData?.reportid) === 5 && Array.isArray(reportData?.teachers);
 
-  const hasReportContent = hasStudentResults || hasDivisionStatistics || hasAttendance;
+  const hasReportContent =
+    hasStudentResults ||
+    hasDivisionStatistics ||
+    hasAttendance ||
+    hasSummaryRows ||
+    isTeacherReport;
 
   // Error thakle purono (stale) data dekhabo na
   const showReport = hasReportContent && !error && !!queryParams;
@@ -125,13 +139,18 @@ const ResultReport = () => {
   const renderReport = () => {
     if (!showReport) return null;
     const props = { reportData, query: queryParams, labels };
+
     switch (Number(selectedReportID)) {
       case 1:
         return <StudentResultSheet {...props} />;
       case 2:
         return <AttendanceSheet {...props} />;
       case 3:
-        return <StudentResultState {...props} />;
+        return <ClassDivisionSummarySheet {...props} />;
+      case 4:
+        return <SubjectWiseResultSheet {...props} />;
+      case 5:
+        return <TeacherResultSheet {...props} />;
       default:
         return null;
     }
@@ -181,9 +200,7 @@ const ResultReport = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-
               </div>
-
             </div>
 
             {/* Filter form — no submit button, auto-loads via useWatch */}
@@ -265,7 +282,7 @@ const ResultReport = () => {
                   <button
                     onClick={handlePrintPDF}
                     aria-label="Print"
-                    className={`group flex items-center justify-center border rounded-lg shadow-sm transition-all duration-200 w-10 h-10 bg-blue-600 border-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 active:scale-95`}
+                    className="group flex items-center justify-center border rounded-lg shadow-sm transition-all duration-200 w-10 h-10 bg-blue-600 border-blue-600 text-white hover:bg-blue-700 hover:border-blue-700 active:scale-95"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polyline points="6 9 6 2 18 2 18 9"></polyline>
@@ -307,8 +324,8 @@ const ResultReport = () => {
             </div>
           )}
         </main>
-      </div >
-    </FormProvider >
+      </div>
+    </FormProvider>
   );
 };
 

@@ -69,16 +69,24 @@ export const examReports = [
 export const resultReports = [
   {
     ReportID: 1,
-    ReportName: '1.গুরুত্বপূর্ন ফলাফল',
+    ReportName: '1. ফলাফল সকল পরীক্ষার্থী',
   },
   {
     ReportID: 2,
     ReportName: '2. প্রাপ্ত নম্বার অনুসারে হাজিরা খাতা',
   },
-  // {
-  //   ReportID: 3,
-  //   ReportName: '3. সেশন ভিওিক ফলাফল পরিসংখ্যান',
-  // },
+  {
+    ReportID: 3,
+    ReportName: '3. ফলাফল পরিসংখ্যান',
+  },
+  {
+    ReportID: 4,
+    ReportName: '4. কিতাব ভিওিক ফলাফল',
+  },
+  {
+    ReportID: 5,
+    ReportName: '5. শিক্ষক ভিওিক ফলাফল',
+  }
 ];
 export const resultReportsOld = [
   {

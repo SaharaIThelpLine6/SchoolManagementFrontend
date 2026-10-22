@@ -72,6 +72,18 @@ export const smsSlice = createApi({
       query: () => "bundles",
       providesTags: ["smsBundles"],
     }),
+
+    // ======================================================
+    // smsSlice.js — sendPublishedResult mutation যোগ করুন
+    // ======================================================
+    sendPublishedResult: builder.mutation({
+      query: ({ students, examName }) => ({
+        url: "/send-published-result",
+        method: "POST",
+        body: { students, examName },
+      }),
+      invalidatesTags: ["SmsBalance"],
+    }),
   }),
 });
 
@@ -83,4 +95,5 @@ export const {
   usePostSMSTemplateMutation,
   useUpdateSMSTemplateMutation,
   useDeleteSMSTemplateMutation,
+  useSendPublishedResultMutation
 } = smsSlice;

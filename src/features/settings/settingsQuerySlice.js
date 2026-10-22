@@ -391,6 +391,15 @@ export const settingsSlice = createApi({
         { type: "StudentDataExportTemplate", id: "LIST" },
       ],
     }),
+
+    // ✅ App notification পাঠানোর endpoint (আপনার দেওয়া router.post("/send_result_notification"))
+    sendResultNotification: builder.mutation({
+      query: (body) => ({
+        url: '/send_result_notification',
+        method: 'POST',
+        body,
+      }),
+    }),
   }),
 });
 
@@ -446,4 +455,6 @@ export const {
   useDeleteAllStudentDataExportTemplatesMutation,
   useLazyGetAllStudentDataExportTemplatesQuery,
   useLazyGetStudentDataExportTemplateByKeyQuery,  // ← নতুন নাম
+
+  useSendResultNotificationMutation
 } = settingsSlice;
