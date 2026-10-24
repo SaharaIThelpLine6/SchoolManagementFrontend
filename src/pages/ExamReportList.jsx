@@ -50,7 +50,15 @@ import ExamReportFive from '../view/exam/ExamReportPdf/numberLetterAdmissionSeri
 // ⭐ নতুন — ফি তালিকার পেজ ও সেটিংস
 import BanglaFeeList from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/BanglaFeeList';
 import FeeListSettingsModal from '../components/Modals/FeeListSettingsModal';
-import { loadFeeListSettings, pickFeeRows, sortFeeRows, feeRowsSummary, toBn } from '../Data/feeListColumns';
+import {
+  loadFeeListSettings,
+  saveFeeListSettings,
+  pickFeeRows,
+  sortFeeRows,
+  feeRowsSummary,
+  toBn,
+  paperColumnCount,
+} from '../Data/feeListColumns';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -156,9 +164,44 @@ const ExamReportList = ({ pageTitle }) => {
   // ⭐ "ভর্তি সিরিয়াল অনুযায়ী" কাগজে পরীক্ষার্থীর নামের ঘরটা থাকবে কি না
   const [serialShowName, setSerialShowName] = useState(true);
 
-  // তালিকার ধরন বা ভাষা বদলালে সেই অনুযায়ী সেভ করা সেটিংসটা তুলে আনি
+  /**
+   * সেটিংস বসানো — কলামের তথ্যগুলো যেমন আছে, সাথে সাজানোর ক্রমটাও
+   * বারে তুলে দেয়।
+   *
+   * সেটিংসে সাজানোর ক্রম বসানো না থাকলে বারটা যা আছে তাই থাকে, তাই
+   * পুরোনো সেভ করা সেটিংসেও কিছু ভাঙে না।
+   */
+  const applySettings = (next) => {
+    setFeeSettings(next);
+    if (next?.sortBy) setSortBy(next.sortBy);
+    if (next?.sortOrder) setSortOrder(next.sortOrder);
+  };
+
+  /* ⭐ কাগজে এক না দুই কলাম — উপরের ফিল্টার থেকেই বদলানো যায়, সেটিংস
+        খোলার দরকার নেই।
+
+     বদলটা সেটিংসেও সেভ হয়ে যায়, তাই পরেরবার পাতা খুললে এটাই থাকে — আর
+     সেটিংসের ভেতরের বোতাম দুইটাও একই জায়গা দেখায়, দুই জায়গায় দুই রকম
+     হয়ে যায় না।
+
+     এখানে কোনো ঘর ছাঁটা হয় না। দুই সাজের ঘরের তালিকা আলাদা করে রাখা
+     থাকে (visible আর visibleTwo), তাই এক কলামে আটটা বেছে রেখে দুই
+     কলামে ঘুরে এলেও এক কলামে আটটাই ফিরে আসে। */
+  const paperColumns = paperColumnCount(feeSettings?.paperColumns);
+
+  const changePaperColumns = (value) => {
+    const next = { ...feeSettings, paperColumns: paperColumnCount(value) };
+
+    saveFeeListSettings(feeListType, langId, next);
+    applySettings(next);
+  };
+
+  /* তালিকার ধরন বা ভাষা বদলালে সেই অনুযায়ী সেভ করা সেটিংসটা তুলে আনি।
+     সাথে সাজানোর ক্রমটাও — সেটিংসে বসানো থাকলে বারটা ওখান থেকেই ভরে,
+     তাই প্রতিবার হাতে বেছে নিতে হয় না। */
   useEffect(() => {
-    setFeeSettings(loadFeeListSettings(feeListType, langId));
+    applySettings(loadFeeListSettings(feeListType, langId));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feeListType, langId]);
 
   const shouldShowFields = (fieldName) => {
@@ -193,9 +236,19 @@ const ExamReportList = ({ pageTitle }) => {
 
   const isSignatureSheet = Number(ReportID) === 8;
 
+  // ⭐ সকল পরীক্ষার্থীর পরিসংখ্যান — এক পাতায় সব শ্রেণির হিসাব
+  const isStatistics = Number(ReportID) === 9;
+
   // রিপোর্ট ১ এ PDF বাছাই আর লাগে না — একটাই বাংলা পেজ, সেটিংস দিয়ে বদলায়
   const shouldSkip = (() => {
-    if (!ReportID || !SessionID || !ExamID || !SubClassID || !RDID) return true;
+    if (!ReportID || !SessionID || !ExamID) return true;
+
+    /* ⭐ পরিসংখ্যানে শ্রেণি বাছাই করাই হয় না — সব শ্রেণিই লাগে। আগে
+       এখানে SubClassID বাধ্যতামূলক ছিল, তাই ঐ রিপোর্টে কোয়েরিটা কখনো
+       চলতই না আর পাতাটা ডেমো তথ্য নিয়ে বসে থাকত। */
+    if (isStatistics) return false;
+
+    if (!SubClassID || !RDID) return true;
     if (isSignatureSheet || Number(ReportID) === 1) return false;
     return !PdfID;
   })();
@@ -436,6 +489,37 @@ const ExamReportList = ({ pageTitle }) => {
    */
   const showWatermark = !isFeeReport || feeSettings?.showWatermark !== false;
 
+  /**
+   * ⭐ জলছাপে এখন মাদরাসার নিজের লোগো বসে।
+   *
+   * আগে এখানে document_settings এর documentLogo বসত — সেটা আলাদা একটা
+   * ছবি, প্রতিষ্ঠানের লোগো নয়। এখন আগে সারির সাথে আসা লোগোটা দেখা হয়
+   * (রুটের header এ InstitutionLogo), না পেলে রিডাক্সের সেটিংস বা
+   * document_settings। তিনটাই না থাকলে পুরোনো documentLogo — তাহলে
+   * অন্য রিপোর্টগুলোর জলছাপ আগের মতোই থাকে।
+   */
+  const watermarkLogo = useMemo(() => {
+    const firstFeeRow = feeRows[0] || {};
+    return (
+      toImageSrc(
+        firstFeeRow.InstitutionLogo ||
+        firstFeeRow.Logo ||
+        firstFeeRow.logo ||
+        firstFeeRow.InstituteLogo
+      ) ||
+      instituteLogo ||
+      documentLogo
+    );
+  }, [feeRows, instituteLogo, documentLogo]);
+
+  /**
+   * জলছাপ কতটা গাঢ় — সেটিংসে শতাংশে রাখা (২–৩০), কাগজে ভগ্নাংশে বসে।
+   * ফি তালিকা ছাড়া বাকি রিপোর্টে আগের ০.০৫ ই থাকে।
+   */
+  const watermarkOpacity = isFeeReport
+    ? Math.min(Math.max(Number(feeSettings?.watermarkOpacity) || 5, 2), 30) / 100
+    : 0.05;
+
   /** কাগজের পেজটা যা পায় — সাজানো সারিগুলো আর এই তালিকার হিসাব */
   const feeReportData = useMemo(
     () => (isFeeReport && data ? { ...data, data: feeRows, total: feeRows.length, summary } : data),
@@ -450,7 +534,7 @@ const ExamReportList = ({ pageTitle }) => {
           @media print {
             .watermark-print {
               position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-              opacity: 0.05; z-index: 9999; pointer-events: none;
+              z-index: 9999; pointer-events: none;
               max-width: 60%; max-height: 60%;
               -webkit-print-color-adjust: exact; print-color-adjust: exact;
             }
@@ -461,9 +545,15 @@ const ExamReportList = ({ pageTitle }) => {
         `}
       </style>
 
-      {/* জলছাপ — শুধু পেছনে, হালকা হয়ে। কাগজের মাথার লোগো এটা নয়। */}
-      {!isSeatNoReport && documentLogo && logoIsActive && showWatermark && (
-        <img src={documentLogo} alt="Watermark" className="watermark-print" />
+      {/* জলছাপ — পাতার মাঝখানে, হালকা হয়ে লেখার পেছনে।
+          ঘনত্বটা সেটিংস থেকে, তাই ইনলাইনে বসানো। */}
+      {!isSeatNoReport && watermarkLogo && logoIsActive && showWatermark && (
+        <img
+          src={watermarkLogo}
+          alt=""
+          className="watermark-print"
+          style={{ opacity: watermarkOpacity }}
+        />
       )}
 
       <div>
@@ -545,67 +635,26 @@ const ExamReportList = ({ pageTitle }) => {
               <FormProvider {...methods}>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 
-                  {/* রিপোর্ট বাছাই + ফি তালিকার ধরন */}
-                  <div className="flex flex-col lg:flex-row gap-4 items-end">
-                    <div className="w-full lg:w-1/3">
-                      <DefaultSelect
-                        label={translate('Report')}
-                        nameField="ReportName"
-                        registerKey="ReportID"
-                        valueField="ReportID"
-                        options={examReports}
-                        type="number"
-                        require="This Field is required"
-                        defaultSelect={false}
-                        unicode={true}
-                      />
-                    </div>
+                  {/* ফিল্টারগুলো — রিপোর্ট বাছাইসহ এক লাইনে
 
-                    {/*
-                      তালিকার ধরন — তিনটা:
-                        ১ ফি বিহীন   → যারা এখনো ফি দেয়নি
-                        ২ ফি গৃহীত   → যারা ফি দিয়েছে
-                        ৩ সকল        → দুই দলই একসাথে
-                    */}
-                    {isFeeReport && (
-                      <div className="w-full lg:flex-1 rounded-xl border border-emerald-200 bg-emerald-50/50 p-2 flex items-center gap-2">
-                        <span className="text-[13px] font-semibold text-slate-700 whitespace-nowrap px-2">
-                          তালিকার ধরন:
-                        </span>
-                        {[
-                          { id: 3, text: 'সকল তালিকা' },
-                          { id: 1, text: 'ফি বিহীন তালিকা' },
-                          { id: 2, text: 'ফি গৃহীত তালিকা' },
-                        ].map((opt) => {
-                          const on = feeListType === opt.id;
-                          return (
-                            <button
-                              key={opt.id}
-                              type="button"
-                              onClick={() => setFeeListType(opt.id)}
-                              className={`relative flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition-all ${
-                                on
-                                  ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
-                                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                              }`}
-                            >
-                              {opt.text}
-                              {on && (
-                                <span className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-white border border-emerald-500 flex items-center justify-center">
-                                  <svg className="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-                                  </svg>
-                                </span>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
+                      আগে "রিপোর্টসমূহ" একা উপরে এক সারি নিয়ে বসত, নিচে
+                      বাকি ছয়টা। দুই সারিতে ভাগ হয়ে জায়গা নষ্ট হত, আর
+                      রিপোর্ট বদলে নিচের ঘরগুলোয় যেতে চোখ লাফ দিত। এখন
+                      সবগুলো একই সারিতে — বড় পর্দায় সাতটা কলাম, যা
+                      বেশিরভাগ রিপোর্টের ঘরের সংখ্যার সাথেই মেলে। */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 items-end">
+                    <DefaultSelect
+                      label={translate('Report')}
+                      nameField="ReportName"
+                      registerKey="ReportID"
+                      valueField="ReportID"
+                      options={examReports}
+                      type="number"
+                      require="This Field is required"
+                      defaultSelect={false}
+                      unicode={true}
+                    />
 
-                  {/* ফিল্টারগুলো */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 items-end">
                     {shouldShowFields('SessionID') && (
                       <DefaultSelect label={translate('Session')} nameField="SessionName" registerKey="SessionID" valueField="SessionID" options={sessionData ?? []} require="This Field is required" defaultSelect={false} unicode={true} />
                     )}
@@ -624,6 +673,38 @@ const ExamReportList = ({ pageTitle }) => {
 
                     {shouldShowFields('Langauge') && (
                       <DefaultSelect label={translate('Langauge')} nameField="name" registerKey="id" valueField="id" options={language ?? []} require="This Field is required" unicode={true} />
+                    )}
+
+                    {/* ⭐ কাগজে কয় কলাম — শুধু ফি তালিকার জন্য।
+
+                        এটা ফর্মের ঘর নয়, কাগজের সাজ — তাই react-hook-form
+                        এর বাইরে, সরাসরি সেটিংসেই বসে। দেখতে বাকিগুলোর মতোই
+                        রাখা হয়েছে যাতে সারিটা এলোমেলো না লাগে। */}
+                    {isFeeReport && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          কলাম
+                        </label>
+
+                        <div className="relative">
+                          <select
+                            value={paperColumns}
+                            onChange={(e) => changePaperColumns(e.target.value)}
+                            title="দুই কলামে কাগজের দুই পাশে দুইটা তালিকা বসে"
+                            className="w-full appearance-none rounded-md border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                          >
+                            <option value={1}>এক কলাম</option>
+                            <option value={2}>দুই কলাম</option>
+                          </select>
+
+                          <svg
+                            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
                     )}
 
                     {shouldShowFields('PdfSelect') && pdfOptions.length > 0 && (
@@ -650,6 +731,52 @@ const ExamReportList = ({ pageTitle }) => {
                       <DefaultSelect options={examHallList} registerKey="HallId" nameField="HallName" valueField="ID" label={translate('Exam Hall')} />
                     )}
                   </div>
+
+                  {/*
+                    তালিকার ধরন — তিনটা:
+                      ১ ফি বিহীন   → যারা এখনো ফি দেয়নি
+                      ২ ফি গৃহীত   → যারা ফি দিয়েছে
+                      ৩ সকল        → দুই দলই একসাথে
+
+                    আগে এটা রিপোর্ট বাছাইয়ের পাশে বসত। রিপোর্টটা এখন নিচের
+                    ফিল্টারের সারিতে চলে গেছে, তাই এই পট্টিটা নিজের সারিতেই
+                    পুরো চওড়া নিয়ে বসে — তিনটা বোতামই স্বচ্ছন্দে ধরে।
+                  */}
+                  {isFeeReport && (
+                    <div className="w-full rounded-xl border border-emerald-200 bg-emerald-50/50 p-2 flex items-center gap-2">
+                      <span className="text-[13px] font-semibold text-slate-700 whitespace-nowrap px-2">
+                        তালিকার ধরন:
+                      </span>
+                      {[
+                        { id: 3, text: 'সকল তালিকা' },
+                        { id: 1, text: 'ফি বিহীন তালিকা' },
+                        { id: 2, text: 'ফি গৃহীত তালিকা' },
+                      ].map((opt) => {
+                        const on = feeListType === opt.id;
+                        return (
+                          <button
+                            key={opt.id}
+                            type="button"
+                            onClick={() => setFeeListType(opt.id)}
+                            className={`relative flex-1 px-3 py-2 rounded-lg text-sm font-medium border transition-all ${
+                              on
+                                ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
+                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                            }`}
+                          >
+                            {opt.text}
+                            {on && (
+                              <span className="absolute -top-1.5 -right-1.5 h-5 w-5 rounded-full bg-white border border-emerald-500 flex items-center justify-center">
+                                <svg className="w-3 h-3 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                </svg>
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
 
                   {/* ⭐ কিতাব — শুধু নম্বর পত্রের জন্য
 
@@ -910,8 +1037,19 @@ const ExamReportList = ({ pageTitle }) => {
             <SingatureSheetNS reportData={data} queryParams={queryParams} documentLogo={documentLogo} logoIsActive={logoIsActive} />
           )}
 
-          {/* ৬. সকল পরীক্ষার্থীর পরিসংখ্যান */}
-          {Number(selectedReportID) === 9 && <StatisticsOfAllStudents />}
+          {/* ৬. সকল পরীক্ষার্থীর পরিসংখ্যান
+
+              রুট এখন { data, grandTotal, header } পাঠায় — শ্রেণি ধরে ধরে
+              কতজন, আর কাগজের মাথার তথ্য। লোগোটা header এই থাকে; না পেলে
+              পেজের নিজের খোঁজাটাই (instituteLogo) পেছনের ভরসা। */}
+          {isStatistics && !isLoading && (
+            <StatisticsOfAllStudents
+              reportData={data}
+              queryParams={queryParams}
+              instituteLogo={instituteLogo}
+              language={langId}
+            />
+          )}
 
           {/* ৭. পরীক্ষা কক্ষের আসন বিন্যাস */}
           {Number(selectedReportID) === 10 && <ExaminationRoomSeatingChart queryParams={queryParams} />}
@@ -927,7 +1065,8 @@ const ExamReportList = ({ pageTitle }) => {
         onClose={() => setSettingsOpen(false)}
         listType={feeListType}
         language={langId}
-        onSaved={setFeeSettings}
+        onSaved={applySettings}
+        watermarkLogo={watermarkLogo}
       />
     </>
   );

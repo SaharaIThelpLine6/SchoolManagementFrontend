@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   columnsForLanguage,
   resolveColumns,
@@ -12,6 +12,11 @@ import {
   saveFeeListSettings,
   toBn,
   MAX_COLUMNS,
+  MAX_COLUMNS_TWO_UP,
+  maxColumnsFor,
+  paperColumnCount,
+  visibleFor,
+  withVisible,
   WIDTH_MIN,
   WIDTH_MAX,
 } from '../../Data/feeListColumns';
@@ -25,53 +30,63 @@ import {
 //      সীমায় পৌঁছে গেলে বাকিগুলো নিষ্ক্রিয় হয়ে যায়, কারণ এর বেশি ঘর
 //      বসালে প্রতিটা ঘর এত সরু হয় যে নাম পড়া কষ্ট হয়ে যায়।
 //
+//      সব ঘর একসাথে এক প্রবাহে — আগে দলে দলে (শনাক্তকরণ, নাম ও পরিচয়…)
+//      ভাগ করা ছিল, প্রতিটার আলাদা শিরোনাম সহ। ওতে লম্বা হয়ে যেত আর
+//      খুঁজতেও বেশি চোখ বুলাতে হত। এখন কলামের তালিকার নিজের ক্রমেই
+//      সবগুলো পাশাপাশি বসে, জায়গা থাকলে এক লাইনেই।
+//
 //   ২) কাগজের হেডার — ঠিক যেভাবে ছাপা হবে সেভাবেই দেখায়। ওখানেই:
 //        • ঘরের নামে চাপ দিয়ে নতুন নাম লেখা
 //        • ⠿ ধরে টেনে ক্রম বদলানো
 //        • ↔ দিয়ে ঘরের জায়গা কমানো-বাড়ানো
 //        • ✕ দিয়ে ঘরটা সরিয়ে ফেলা
 //
+//   ৩) স্বাক্ষরের নাম — কাগজের নিচের তিনটা ঘরে কী বসবে। ফাঁকা রাখলে
+//      ডিফল্ট নামটাই যায়, ডান পাশেরটায় প্রতিষ্ঠানের মুহতামিমের নাম।
+//
+//   ৪) সাজানোর ক্রম — কোন ঘর ধরে, কোন দিকে। পাতা খোলার সময় এটাই
+//      ফিল্টারের "সাজানো" বারে বসে যায়।
+//
 // ফর্মে যে ভাষা বাছা হয়েছে সেই ভাষার ঘরগুলোই কেবল দেখায়, আর সেটিংসও
 // ভাষা ও তালিকার ধরন অনুযায়ী আলাদা সেভ হয়।
 // =============================================================================
 
-const GROUP_OF = {
-  SL: 'শনাক্তকরণ',
-  AdmissionSerial: 'শনাক্তকরণ',
-  UserCode: 'শনাক্তকরণ',
+/**
+ * সাজানোর বিকল্প — ফিল্টারের "সাজানো:" বারে যা আছে, হুবহু তাই।
+ *
+ * এখানে বসানো মানটাই পাতা খোলার সময় বারে উঠে আসে, তাই প্রতিবার হাতে
+ * বেছে নিতে হয় না। বারটা থেকেই যাচ্ছে — এক বারের জন্য অন্যভাবে সাজাতে
+ * চাইলে ওখান থেকেই বদলানো যাবে, শুধু সেটা সেভ হবে না।
+ *
+ * তালিকাটা এখানেই রাখা, feeListColumns থেকে আনা হয়নি — ঐ ফাইলে হাত না
+ * দিয়েই যাতে এটা চলে।
+ */
+/** কাগজে কয় কলাম — উপরের ফিল্টারের বিকল্প */
+const PAPER_COLUMN_OPTIONS = [
+  { value: 1, label: '১ কলাম' },
+  { value: 2, label: '২ কলাম' },
+];
 
-  UserName: 'নাম ও পরিচয়',
-  FatherName: 'নাম ও পরিচয়',
-  MotherName: 'নাম ও পরিচয়',
-  ArabicName: 'নাম ও পরিচয়',
-  ArabicFather: 'নাম ও পরিচয়',
-  ArabicShortAdd: 'নাম ও পরিচয়',
-  Mobile1: 'নাম ও পরিচয়',
-  DateOfBirth: 'নাম ও পরিচয়',
+const SORT_FIELDS = [
+  { key: 'AdmissionSerial', label: 'ভর্তি নং' },
+  { key: 'UserCode', label: 'আইডি নং' },
+];
 
-  SubClass: 'শ্রেণি ও পরীক্ষা',
-  SessionName: 'শ্রেণি ও পরীক্ষা',
-  ExamName: 'শ্রেণি ও পরীক্ষা',
-  SubClassAra: 'শ্রেণি ও পরীক্ষা',
-  SessionAraName: 'শ্রেণি ও পরীক্ষা',
-  ExamAraName: 'শ্রেণি ও পরীক্ষা',
+const SORT_ORDERS = [
+  { key: 'asc', label: 'ছোট → বড়', icon: 'M5 15l7-7 7 7' },
+  { key: 'desc', label: 'বড় → ছোট', icon: 'M19 9l-7 7-7-7' },
+];
 
-  Fee: 'টাকার হিসাব',
-  Less: 'টাকার হিসাব',
-  PayAmount: 'টাকার হিসাব',
-  DueAmount: 'টাকার হিসাব',
-  FeeStatus: 'টাকার হিসাব',
-
-  Signature: 'হাতে লেখার ঘর',
-  Remark: 'হাতে লেখার ঘর',
-};
-
-const GROUP_ORDER = [
-  'শনাক্তকরণ',
-  'নাম ও পরিচয়',
-  'শ্রেণি ও পরীক্ষা',
-  'টাকার হিসাব',
-  'হাতে লেখার ঘর',
+/**
+ * কাগজের নিচের তিনটা স্বাক্ষরের ঘর।
+ *
+ * placeholder টাই ডিফল্ট নাম — ফাঁকা রাখলে কাগজে ওটাই ছাপা হয়। তাই
+ * সেটিংসে হাত না দিলে কাগজ আগের মতোই থাকে।
+ */
+const SIGNATURE_FIELDS = [
+  { key: 'left', label: 'বাঁ পাশে', placeholder: 'হিসাব রক্ষক' },
+  { key: 'middle', label: 'মাঝখানে', placeholder: 'পরীক্ষা নিয়ন্ত্রক' },
+  { key: 'right', label: 'ডান পাশে', placeholder: 'মুহতামিম' },
 ];
 
 /** টিকের ঘর — নীল বাক্স, ভেতরে সাদা টিক */
@@ -90,7 +105,15 @@ const CheckBox = ({ checked }) => (
   </span>
 );
 
-const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSaved }) => {
+const FeeListSettingsModal = ({
+  open,
+  onClose,
+  listType = 1,
+  language = 1,
+  onSaved,
+  // ⭐ জলছাপের ছবিটা — প্রিভিউতে দেখানোর জন্য
+  watermarkLogo = '',
+}) => {
   const [settings, setSettings] = useState(() => defaultFeeListSettings(language));
   const [savedFlash, setSavedFlash] = useState(false);
 
@@ -114,22 +137,8 @@ const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSav
     }
   }, [open, listType, language]);
 
-  // এই ভাষার ঘরগুলো, দলে সাজানো
-  const groups = useMemo(() => {
-    const allowed = columnsForLanguage(language);
-    const byGroup = new Map();
-
-    allowed.forEach((col) => {
-      const name = GROUP_OF[col.key] || 'অন্যান্য';
-      if (!byGroup.has(name)) byGroup.set(name, []);
-      byGroup.get(name).push(col);
-    });
-
-    return GROUP_ORDER.filter((name) => byGroup.has(name)).map((name) => ({
-      title: name,
-      cols: byGroup.get(name),
-    }));
-  }, [language]);
+  // এই ভাষার ঘরগুলো — একটাই তালিকা, কলামের নিজের ক্রমে
+  const allColumns = useMemo(() => columnsForLanguage(language), [language]);
 
   // হেডার প্রিভিউর ঘরগুলো — কাগজে যেভাবে যাবে ঠিক সেভাবেই
   const previewColumns = useMemo(
@@ -137,17 +146,39 @@ const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSav
     [settings, language]
   );
 
-  const visible = settings.visible || [];
+  /* কাগজে কয় কলাম — ১ বা ২। দুই কলামে প্রতিটা তালিকা অর্ধেক চওড়া পায়,
+     তাই ঘরের সীমাও ছোট। */
+  const paperColumns = paperColumnCount(settings.paperColumns);
+  const columnLimit = maxColumnsFor(paperColumns);
+
+  /* ⭐ দুই সাজের দুইটা আলাদা তালিকা — এক কলামের বাছাই দুই কলামে গিয়ে
+        কাটা পড়ে না, তাই ফিরে এলে আগেরটাই পাওয়া যায়। */
+  const visible = visibleFor(settings, language);
   const isOn = (key) => visible.includes(key);
-  const isFull = visible.length >= MAX_COLUMNS;
+  const isFull = visible.length >= columnLimit;
 
   const toggle = (key) => {
-    setSettings((s) => ({ ...s, visible: toggleColumn(s.visible, key, language) }));
+    setSettings((s) =>
+      withVisible(s, toggleColumn(visibleFor(s, language), key, language, columnLimit))
+    );
     setWidthKey((k) => (k === key ? null : k));
+  };
+
+  /* এক ↔ দুই কলাম বদল — শুধু সাজটাই বদলায়, কোনো তালিকা ছাঁটা হয় না */
+  const setPaperColumns = (value) => {
+    setSettings((s) => ({ ...s, paperColumns: paperColumnCount(value) }));
+    setWidthKey(null);
   };
 
   const rename = (key, value) => {
     setSettings((s) => ({ ...s, labels: { ...(s.labels || {}), [key]: value } }));
+  };
+
+  const setSignature = (key, value) => {
+    setSettings((s) => ({
+      ...s,
+      signatures: { ...(s.signatures || {}), [key]: value },
+    }));
   };
 
   const setWidth = (key, value) => {
@@ -162,6 +193,99 @@ const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSav
       return { ...s, widths: next };
     });
   };
+
+  /* ---- ঘরের কিনারা ধরে টেনে চওড়া বদলানো (এক্সেলের মতো)
+
+     ঘরের ডান কিনারায় একটা সরু হাতল বসানো আছে। মাউস ওখানে গেলে কার্সার
+     ↔ হয়ে যায়, আর চেপে ধরে টানলে ঘরটা মাউসের সাথে সাথে চওড়া-সরু হয়।
+
+     হিসাবটা সোজা ভাগ নয়। ঘরের চওড়া বসে ওজনের অনুপাতে — w / (সবার যোগফল)।
+     তাই একটা ঘরের ওজন বাড়ালে বাকিরা আপনাআপনি সরু হয়, আর সরল যোগ করলে
+     ঘরটা মাউসের পিছিয়ে পড়ত। সেজন্য উল্টো দিক থেকে হিসাব: মাউস যেখানে
+     আছে সেটাকেই চাওয়া ভগ্নাংশ f ধরে নিয়ে w = f·R / (1−f) — এখানে R
+     বাকি ঘরগুলোর ওজনের যোগফল, যেটা টানার সময় বদলায় না। এতে কিনারাটা
+     ঠিক মাউসের নিচেই থাকে।
+
+     পয়েন্টার ইভেন্ট ব্যবহার করেছি, তাই মাউস-ট্র্যাকপ্যাড-টাচ সবেতেই চলে,
+     আর setPointerCapture করায় মাউস টেবিলের বাইরে চলে গেলেও টানা থামে না। */
+  const resizeRef = useRef(null);
+  const [resizingKey, setResizingKey] = useState(null);
+
+  const startResize = (col) => (e) => {
+    // ঘর টেনে সাজানোর ড্র্যাগটা যেন শুরু না হয়ে যায়
+    e.preventDefault();
+    e.stopPropagation();
+
+    const grip = e.currentTarget;
+    const th = grip.closest('th');
+    const table = grip.closest('table');
+    if (!th || !table) return;
+
+    const tableW = table.getBoundingClientRect().width;
+    const startPx = th.getBoundingClientRect().width;
+    const startWeight = col.weight || 100;
+    const totalWeight = previewColumns.reduce((sum, c) => sum + (c.weight || 100), 0);
+
+    resizeRef.current = {
+      key: col.key,
+      startX: e.clientX,
+      startPx,
+      startWeight,
+      tableW,
+      // বাকি ঘরগুলোর ওজন — টানার সময় এটা বদলায় না
+      others: totalWeight - startWeight,
+    };
+
+    try {
+      grip.setPointerCapture(e.pointerId);
+    } catch {
+      // পুরোনো ব্রাউজারে না পারলেও চলবে, শুধু বাইরে গেলে টানা ছুটে যাবে
+    }
+    setResizingKey(col.key);
+  };
+
+  const moveResize = (e) => {
+    const r = resizeRef.current;
+    if (!r) return;
+
+    const want = r.startPx + (e.clientX - r.startX);
+
+    if (r.others > 0 && r.tableW > 0) {
+      const f = Math.min(Math.max(want / r.tableW, 0.02), 0.9);
+      setWidth(r.key, (f * r.others) / (1 - f));
+    } else {
+      // একটাই ঘর — অনুপাতের হিসাব খাটে না, সরল ভাগই যথেষ্ট
+      setWidth(r.key, (want / Math.max(r.startPx, 1)) * r.startWeight);
+    }
+  };
+
+  const endResize = (e) => {
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // ধরা না থাকলে কিছু করার নেই
+    }
+    resizeRef.current = null;
+    setResizingKey(null);
+  };
+
+  /* টানার সময় গোটা পর্দায় কার্সার ↔ থাকুক, আর লেখা যেন সিলেক্ট হয়ে
+     নীল না হয়ে যায় */
+  useEffect(() => {
+    if (!resizingKey) return undefined;
+
+    const body = document.body;
+    const prevCursor = body.style.cursor;
+    const prevSelect = body.style.userSelect;
+
+    body.style.cursor = 'col-resize';
+    body.style.userSelect = 'none';
+
+    return () => {
+      body.style.cursor = prevCursor;
+      body.style.userSelect = prevSelect;
+    };
+  }, [resizingKey]);
 
   // ---- টেনে সাজানো
   const handleDragStart = (key) => (e) => {
@@ -184,7 +308,9 @@ const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSav
   const handleDrop = (key) => (e) => {
     e.preventDefault();
     if (dragKey && dragKey !== key) {
-      setSettings((s) => ({ ...s, visible: reorderColumns(s.visible, dragKey, key) }));
+      setSettings((s) =>
+        withVisible(s, reorderColumns(visibleFor(s, language), dragKey, key))
+      );
     }
     setDragKey(null);
     setOverKey(null);
@@ -215,6 +341,12 @@ const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSav
   const langName = langCode(language) === 'ar' ? 'আরবি' : 'বাংলা';
   const widthCol = widthKey ? previewColumns.find((c) => c.key === widthKey) : null;
 
+  // জলছাপের ঘনত্ব শতাংশে — বসানো না থাকলে আগের ৫%
+  const watermarkOpacity = Math.min(
+    Math.max(Number(settings.watermarkOpacity) || 5, 2),
+    30
+  );
+
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 print:hidden">
       <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px]" onClick={onClose} />
@@ -244,7 +376,7 @@ const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSav
               isFull ? 'bg-amber-500/80' : 'bg-white/15'
             }`}>
               <span className={`h-2 w-2 rounded-full ${isFull ? 'bg-white' : 'bg-emerald-300'}`} />
-              {toBn(visible.length)} / {toBn(MAX_COLUMNS)}
+              {toBn(visible.length)} / {toBn(columnLimit)}
             </span>
             <button
               type="button"
@@ -294,9 +426,11 @@ const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSav
             <p className="text-xs text-slate-500 mb-3">
               কাগজে ঠিক এভাবেই ছাপা হবে। নামের ঘরে চাপ দিয়ে নতুন নাম লিখুন,
               <span className="mx-1 text-slate-400">⠿</span>
-              ধরে টেনে ক্রম বদলান, আর
+              ধরে টেনে ক্রম বদলান, আর ঘরের ডান কিনারা ধরে টেনে চওড়া
+              কমান-বাড়ান — এক্সেলের মতো। (কিনারায় দুইবার চাপলে আগের মাপে
+              ফিরে যায়; স্লাইডারে নিখুঁত মাপ বসাতে
               <span className="mx-1 text-slate-400">↔</span>
-              দিয়ে ঘরের জায়গা কমান-বাড়ান।
+              বোতামটা আছে।)
             </p>
 
             {previewColumns.length === 0 ? (
@@ -321,6 +455,32 @@ const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSav
                   .fee-preview-table th:first-child,
                   .fee-preview-table td:first-child { border-left: 1px solid #cbd5e1; }
                   .fee-preview-table thead th { border-top: 1px solid #cbd5e1; }
+
+                  /* ---- কিনারার হাতল (এক্সেলের মতো) ----
+                     ঘরের ডান কিনারা ঘেঁষে সরু একটা পট্টি। চওড়া ৭px —
+                     চোখে পড়ে না, কিন্তু মাউস ধরতে কষ্ট হয় না। */
+                  .fee-preview-table thead th { position: relative; }
+
+                  .fee-col-grip {
+                    position: absolute;
+                    top: 0; right: 0; bottom: 0;
+                    width: 7px;
+                    cursor: col-resize;
+                    touch-action: none;
+                    z-index: 2;
+                  }
+                  /* ভেতরের দাগটা — মাউস কাছে গেলে বা টানার সময় দেখা যায় */
+                  .fee-col-grip::after {
+                    content: '';
+                    position: absolute;
+                    top: 3px; bottom: 3px; right: 2px;
+                    width: 2px;
+                    border-radius: 2px;
+                    background: transparent;
+                    transition: background .12s;
+                  }
+                  .fee-col-grip:hover::after,
+                  .fee-col-grip.is-resizing::after { background: #4f46e5; }
                 `}</style>
 
                 <div className="rounded-lg overflow-hidden">
@@ -407,6 +567,19 @@ const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSav
                                 title="চাপ দিয়ে নতুন নাম লিখুন"
                                 className="w-full bg-transparent text-center font-bold text-slate-900 placeholder:text-slate-900 placeholder:font-bold rounded px-1 py-0.5 outline-none cursor-text hover:bg-white/70 focus:bg-white focus:ring-2 focus:ring-indigo-300"
                               />
+
+                              {/* ডান কিনারার হাতল — ধরে টানলে ঘর চওড়া-সরু হয় */}
+                              <span
+                                className={`fee-col-grip ${
+                                  resizingKey === col.key ? 'is-resizing' : ''
+                                }`}
+                                title="টেনে ঘরের চওড়া বদলান"
+                                onPointerDown={startResize(col)}
+                                onPointerMove={moveResize}
+                                onPointerUp={endResize}
+                                onPointerCancel={endResize}
+                                onDoubleClick={() => clearWidth(col.key)}
+                              />
                             </th>
                           );
                         })}
@@ -486,64 +659,94 @@ const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSav
 
           {/* ১. কী কী দেখাবে — টিকের পিল */}
           <section className="rounded-xl border border-slate-200 bg-white p-4">
-            <div className="flex items-center gap-3 mb-1">
+            <div className="flex items-center gap-3 mb-3">
               <h3 className="font-bold text-slate-800">কী কী দেখাবে</h3>
               <span className="ml-auto text-xs text-slate-500">
                 সর্বোচ্চ {toBn(MAX_COLUMNS)}টি ঘর
               </span>
             </div>
 
-            <p className="text-xs text-slate-500 mb-3">
-              {isFull
-                ? `${toBn(MAX_COLUMNS)}টি হয়ে গেছে — নতুন ঘর নিতে আগে একটা টিক তুলে নিন`
-                : `কাগজে যাতে প্রতিটা ঘর আরামে বসে, তাই ${toBn(MAX_COLUMNS)}টির বেশি নেওয়া যায় না`}
-            </p>
+            {/* সব ঘর একসাথে — দল নেই, শিরোনাম নেই। জায়গা না কুলালে
+                নিজে থেকেই পরের লাইনে নেমে যায়। */}
+            <div className="flex flex-wrap gap-2">
+              {allColumns.map((col) => {
+                const on = isOn(col.key);
+                const blocked = !on && isFull;
 
-            <div className="space-y-3">
-              {groups.map((g) => (
-                <div key={g.title}>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="h-3.5 w-1 rounded bg-blue-500" />
-                    <span className="text-[13px] font-semibold text-slate-600">{g.title}</span>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {g.cols.map((col) => {
-                      const on = isOn(col.key);
-                      const blocked = !on && isFull;
-
-                      return (
-                        <button
-                          key={col.key}
-                          type="button"
-                          onClick={() => !blocked && toggle(col.key)}
-                          disabled={blocked}
-                          title={blocked ? `সর্বোচ্চ ${toBn(MAX_COLUMNS)}টি ঘর নেওয়া যায়` : undefined}
-                          className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-full border text-sm font-medium transition-all ${
-                            on
-                              ? 'bg-white border-slate-200 text-slate-800 shadow-sm'
-                              : blocked
-                                ? 'bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed'
-                                : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50/40'
-                          }`}
-                        >
-                          <CheckBox checked={on} />
-                          {settings.labels?.[col.key]?.trim() || col.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
+                return (
+                  <button
+                    key={col.key}
+                    type="button"
+                    onClick={() => !blocked && toggle(col.key)}
+                    disabled={blocked}
+                    title={blocked ? `সর্বোচ্চ ${toBn(MAX_COLUMNS)}টি ঘর নেওয়া যায়` : undefined}
+                    className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-full border text-sm font-medium transition-all ${
+                      on
+                        ? 'bg-white border-slate-200 text-slate-800 shadow-sm'
+                        : blocked
+                          ? 'bg-slate-50 border-slate-200 text-slate-300 cursor-not-allowed'
+                          : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300 hover:bg-blue-50/40'
+                    }`}
+                  >
+                    <CheckBox checked={on} />
+                    {settings.labels?.[col.key]?.trim() || col.label}
+                  </button>
+                );
+              })}
             </div>
           </section>
 
-          {/* ৩. কাগজের সেটিংস */}
+          {/* ৩. কাগজের সাজ — এক না দুই কলাম */}
+          <section className="rounded-xl border border-slate-200 bg-white p-4">
+            <h3 className="font-bold text-slate-800 mb-1">কাগজের সাজ</h3>
+            <p className="text-xs text-slate-500 mb-3">
+              দুই কলামে কাগজের দুই পাশে দুইটা তালিকা পাশাপাশি বসে — বাঁ
+              দিকটা ভরে তারপর ডান দিক। একই সংখ্যক শিক্ষার্থীতে কাগজ প্রায়
+              অর্ধেক লাগে। তবে প্রতিটা তালিকা অর্ধেক চওড়া পায়, তাই ঘরের
+              সীমাও কমে — {toBn(MAX_COLUMNS)} এর বদলে {toBn(MAX_COLUMNS_TWO_UP)}।
+              দুই সাজের ঘর আলাদা করে মনে রাখা হয়, তাই এক কলামে ফিরলে
+              ওখানে যা বেছে রেখেছিলেন সেটাই ফিরে আসে।
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1">
+                {PAPER_COLUMN_OPTIONS.map((opt) => {
+                  const on = paperColumns === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setPaperColumns(opt.value)}
+                      className={`px-3.5 py-2 rounded-md text-sm font-medium flex items-center gap-2 transition ${
+                        on ? 'bg-indigo-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {/* ছোট ছবিতে বোঝানো — কাগজটা কেমন দেখাবে */}
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x="3" y="4" width="18" height="16" rx="2" strokeWidth="2" />
+                        {opt.value === 2 && (
+                          <path strokeLinecap="round" strokeWidth="2" d="M12 4v16" />
+                        )}
+                      </svg>
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <span className="text-xs text-slate-500">
+                এখন সর্বোচ্চ <b className="text-slate-700">{toBn(columnLimit)}</b> টা ঘর বসবে
+                {isFull && <span className="text-amber-600"> — সীমায় পৌঁছে গেছে</span>}
+              </span>
+            </div>
+          </section>
+
+          {/* ৪. কাগজের সেটিংস */}
           <section className="rounded-xl border border-slate-200 bg-white p-4">
             <h3 className="font-bold text-slate-800 mb-1">কাগজের সেটিংস</h3>
             <p className="text-xs text-slate-500 mb-3">
-              প্রতিষ্ঠানের লোগো বসে কাগজের মাথায়, নামের উপরে। জলছাপ বসে
-              পাতার মাঝখানে, হালকা হয়ে লেখার পেছনে — দুইটা আলাদা ছবি।
+              প্রতিষ্ঠানের লোগো বসে কাগজের মাথায়, নামের উপরে। জলছাপেও
+              একই লোগো বসে, তবে পাতার মাঝখানে — হালকা হয়ে লেখার পেছনে।
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -570,37 +773,7 @@ const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSav
                 </button>
               ))}
 
-              {/* লোগো কোথায় বসবে — মাথার মাঝখানে, নাকি বাঁ পাশে */}
               <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
-                <label className="block text-[11px] text-slate-500 mb-1">লোগোর জায়গা</label>
-                <div className="flex gap-1">
-                  {[
-                    { key: 'top',  label: 'মাঝখানে' },
-                    { key: 'left', label: 'বাঁ পাশে' },
-                  ].map((opt) => {
-                    const on = (settings.logoPosition || 'top') === opt.key;
-                    return (
-                      <button
-                        key={opt.key}
-                        type="button"
-                        disabled={settings.showLogo === false}
-                        onClick={() => setSettings((s) => ({ ...s, logoPosition: opt.key }))}
-                        className={`flex-1 rounded-md px-2 py-1.5 text-sm font-medium transition ${
-                          settings.showLogo === false
-                            ? 'text-slate-300 cursor-not-allowed'
-                            : on
-                              ? 'bg-blue-600 text-white'
-                              : 'text-slate-600 hover:bg-slate-100'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 sm:col-span-2 lg:col-span-1">
                 <label className="block text-[11px] text-slate-500 mb-1">লেখার আকার</label>
                 <div className="flex items-center gap-2">
                   <input
@@ -615,6 +788,164 @@ const FeeListSettingsModal = ({ open, onClose, listType = 1, language = 1, onSav
                     {toBn(settings.fontSize || 13)}
                   </span>
                 </div>
+              </div>
+            </div>
+
+            {/* ── জলছাপের ঘনত্ব ও প্রিভিউ ─────────────────────
+                জলছাপ বন্ধ থাকলে এই অংশটা দেখানোর মানে নেই। */}
+            {settings.showWatermark !== false && (
+              <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-[13px] font-semibold text-slate-700 whitespace-nowrap">
+                    জলছাপের ঘনত্ব
+                  </span>
+
+                  <input
+                    type="range"
+                    min={2}
+                    max={30}
+                    step={1}
+                    value={watermarkOpacity}
+                    onChange={(e) =>
+                      setSettings((s) => ({ ...s, watermarkOpacity: Number(e.target.value) }))
+                    }
+                    className="flex-1 min-w-[160px] accent-blue-600"
+                  />
+
+                  <span className="w-14 text-center text-sm font-semibold text-slate-700">
+                    {toBn(watermarkOpacity)}%
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() => setSettings((s) => ({ ...s, watermarkOpacity: 5 }))}
+                    className="text-sm text-slate-500 hover:text-blue-700 font-medium whitespace-nowrap"
+                  >
+                    স্বয়ংক্রিয়
+                  </button>
+                </div>
+
+                {/* কাগজে কেমন দেখাবে — ছোট করে।
+                    লেখাগুলো উপরে, লোগোটা পেছনে — ঠিক যেভাবে ছাপা হয়। */}
+                <div className="mt-3 relative h-28 rounded-md border border-slate-200 bg-white overflow-hidden">
+                  {watermarkLogo ? (
+                    <img
+                      src={watermarkLogo}
+                      alt=""
+                      className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-h-[80%] max-w-[55%] object-contain pointer-events-none"
+                      style={{ opacity: watermarkOpacity / 100 }}
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[11px] text-slate-400">
+                        প্রতিষ্ঠানের লোগো পাওয়া যায়নি
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="relative px-3 py-2 text-[10px] leading-[1.9] text-slate-600">
+                    <div className="font-bold text-slate-800 text-[11px] text-center mb-1">
+                      নমুনা — কাগজে এভাবেই দেখাবে
+                    </div>
+                    {[1, 2, 3].map((n) => (
+                      <div key={n} className="flex gap-3 border-b border-slate-100">
+                        <span className="w-6 text-center">{toBn(n)}</span>
+                        <span className="flex-1">শিক্ষার্থীর নাম</span>
+                        <span className="w-14 text-center">১০০</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* ৩. স্বাক্ষরের নাম */}
+          <section className="rounded-xl border border-slate-200 bg-white p-4">
+            <h3 className="font-bold text-slate-800 mb-1">স্বাক্ষরের নাম</h3>
+            <p className="text-xs text-slate-500 mb-3">
+              কাগজের নিচে তিনটা স্বাক্ষরের ঘরে যে নাম বসবে। ফাঁকা রাখলে
+              ঘরের ভেতরে ধূসর করে লেখা নামটাই ছাপা হবে।
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {SIGNATURE_FIELDS.map((f) => (
+                <div key={f.key} className="rounded-lg border border-slate-200 bg-white px-3 py-2">
+                  <label className="block text-[11px] text-slate-500 mb-1">{f.label}</label>
+                  <input
+                    type="text"
+                    value={settings.signatures?.[f.key] ?? ''}
+                    placeholder={f.placeholder}
+                    onChange={(e) => setSignature(f.key, e.target.value)}
+                    className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-sm text-center outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* নিচে ঠিক যেভাবে বসবে — এক নজরে দেখে নেওয়ার জন্য */}
+            <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50/60 px-4 pt-8 pb-3">
+              <div className="flex justify-between text-[13px] text-slate-700">
+                {SIGNATURE_FIELDS.map((f) => (
+                  <div key={f.key} className="text-center">
+                    <div className="border-t border-slate-800 pt-1 px-6">
+                      {settings.signatures?.[f.key]?.trim() || f.placeholder}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ৫. সাজানোর ক্রম */}
+          <section className="rounded-xl border border-slate-200 bg-white p-4">
+            <h3 className="font-bold text-slate-800 mb-1">সাজানোর ক্রম</h3>
+            <p className="text-xs text-slate-500 mb-3">
+              তালিকাটা কোন ঘর ধরে, কোন দিকে সাজানো থাকবে। এটাই প্রতিবার
+              পাতা খোলার সময় বসে যাবে, তাই উপরের "সাজানো" বারে আর হাতে
+              বেছে নিতে হবে না।
+            </p>
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap gap-2">
+                {SORT_FIELDS.map((opt) => {
+                  const on = (settings.sortBy || 'AdmissionSerial') === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setSettings((s) => ({ ...s, sortBy: opt.key }))}
+                      className={`px-3.5 py-1.5 rounded-full text-sm font-medium border transition-all ${
+                        on
+                          ? 'bg-sky-600 border-sky-600 text-white shadow-sm'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex gap-1 ml-auto rounded-lg border border-slate-200 bg-white p-1">
+                {SORT_ORDERS.map((opt) => {
+                  const on = (settings.sortOrder || 'asc') === opt.key;
+                  return (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => setSettings((s) => ({ ...s, sortOrder: opt.key }))}
+                      className={`px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-1.5 transition ${
+                        on ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={opt.icon} />
+                      </svg>
+                      {opt.label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </section>

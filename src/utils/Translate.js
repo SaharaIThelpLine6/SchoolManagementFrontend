@@ -1051,7 +1051,7 @@ const useTranslate = () => {
     "Exam Student List": "পরীক্ষার্থী তালিকা",
     "Exam Hall List": "পরীক্ষা কেন্দ্রের তালিকা",
 
-    "Students Report (Demo)": "পরীক্ষার্থী তালিকা (ডেমো)"
+    "Students Report (Demo)" : "শিক্ষার্থী রিপোর্ট লিস্ট (ডেমো)"
   };
 
   return (key) =>

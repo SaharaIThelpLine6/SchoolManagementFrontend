@@ -351,7 +351,7 @@ const AdmitTemplateUpload = ({
       onClick={() => !busy && onClose?.()}
     >
       <div
-        className="bg-white rounded-xl w-full max-w-3xl my-6 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl"
+        className="bg-white rounded-xl w-full max-w-5xl my-6 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl"
         dir={dir}
         onClick={(e) => e.stopPropagation()}
       >
@@ -439,10 +439,28 @@ const AdmitTemplateUpload = ({
               <p className="text-[14px] text-gray-500">{t('pickFile')}</p>
             </div>
           ) : (
-            <div className="mt-5">
+            /* ─────────────────────────────────────────────────────────
+               প্রিভিউ বাঁয়ে, ঘর সরানো ডানে।
+
+               আগে স্লাইডারগুলো প্রিভিউর নিচে ছিল। কার্ডটা লম্বা (বিশেষত
+               A4), তাই স্লাইডার পর্যন্ত নামতে গেলে কার্ডটা পর্দার উপরে
+               উঠে যেত — কোন ঘর কতটা সরল সেটা আর চোখে দেখা যেত না, অনুমান
+               করে নাড়াতে হতো।
+
+               এখন দুইটা পাশাপাশি। ডান পাশটা স্ক্রল করলেও বাঁ পাশের কার্ডটা
+               জায়গায় আটকে থাকে (sticky), তাই স্লাইডার নাড়ানোর সাথে সাথেই
+               কার্ডে বদলটা দেখা যায়।
+
+               ছোট পর্দায় দুই কলামের জায়গা নেই — তখন আগের মতোই একটার নিচে
+               আরেকটা বসে।
+               ───────────────────────────────────────────────────────── */
+            <div className="mt-5 lg:flex lg:items-start lg:gap-6">
               {/* প্রিভিউতে কেবল ছাপার অংশটুকু লুকানোর নিয়ম — ছাপার CSS এর
                   সেই একই ক্লাসটাই, তাই যা দেখা যায় ছাপাতেও হুবহু তাই। */}
               <style>{'.admit-print-sim .admit-paper-only{display:none !important}'}</style>
+
+              {/* ───────────────────────── বাঁ পাশ — প্রিভিউ */}
+              <div className="lg:shrink-0 lg:sticky lg:top-0">
 
               <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <p className="text-[14px] font-bold text-gray-700">
@@ -528,11 +546,15 @@ const AdmitTemplateUpload = ({
               <p className="mt-2 text-center text-[12px] text-gray-500">
                 {overlay && simPrint ? t('previewPrintNote') : t('previewNote')}
               </p>
+              </div>
+
+              {/* ───────────────────────── ডান পাশ — ছাপা ও ঘর সরানো */}
+              <div className="mt-5 lg:mt-0 lg:flex-1 lg:min-w-0">
 
               {/* ============================ ছাপা কাগজের উপর ছাপা
                   ঘর সরানোর ঠিক উপরে — কারণ এটা চালু করলে কোন ঘরগুলো
                   আদৌ ছাপা হবে সেটাই বদলে যায়। */}
-              <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-[10px] border border-amber-200 bg-amber-50/60 px-4 py-3">
+              <label className="flex cursor-pointer items-start gap-3 rounded-[10px] border border-amber-200 bg-amber-50/60 px-4 py-3">
                 <input
                   type="checkbox"
                   checked={overlay}
@@ -557,9 +579,9 @@ const AdmitTemplateUpload = ({
               </label>
 
               {/* ================================= চারটি ঘরের উপর-নিচ
-                  প্রিভিউর ঠিক নিচে, কারণ নাড়ালে উপরের কার্ডেই সাথে সাথে
-                  দেখা যায় — দুটো আলাদা পর্দায় গেলে মিলিয়ে নেওয়া কঠিন হতো। */}
-              <div className="mt-5 rounded-[10px] border border-gray-200 bg-gray-50/70 px-4 py-3">
+                  প্রিভিউর ঠিক পাশে, কারণ নাড়ালে বাঁ পাশের কার্ডেই সাথে
+                  সাথে দেখা যায় — নিচে থাকলে কার্ডটা পর্দার বাইরে চলে যেত। */}
+              <div className="mt-4 rounded-[10px] border border-gray-200 bg-gray-50/70 px-4 py-3">
                 <div className="flex items-center justify-between gap-2">
                   <p className="text-[14px] font-bold text-gray-800">
                     {t('adjust')}
@@ -590,6 +612,7 @@ const AdmitTemplateUpload = ({
                     />
                   ))}
                 </div>
+              </div>
               </div>
             </div>
           )}

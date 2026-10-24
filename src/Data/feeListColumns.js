@@ -31,10 +31,60 @@
  */
 export const MAX_COLUMNS = 8;
 
+/**
+ * কাগজে দুই কলামে ছাপলে সর্বোচ্চ কয়টা ঘর।
+ *
+ * দুই কলামে প্রতিটা তালিকা কাগজের অর্ধেক চওড়া পায়। সেখানে আটটা ঘর
+ * বসালে একেকটা এত সরু হয় যে নামের প্রতিটা অক্ষর আলাদা লাইনে নেমে যায়।
+ * চারটায় ক্রমিক, ভর্তি নং, নাম আর একটা দরকারি ঘর স্বচ্ছন্দে ধরে।
+ */
+export const MAX_COLUMNS_TWO_UP = 4;
+
+/** কাগজের কলাম সংখ্যা → ১ বা ২, অন্য কিছু এলে ১ */
+export const paperColumnCount = (value) => (Number(value) === 2 ? 2 : 1);
+
+/** এই সাজে সর্বোচ্চ কয়টা ঘর বসতে পারে */
+export const maxColumnsFor = (paperColumns) =>
+  paperColumnCount(paperColumns) === 2 ? MAX_COLUMNS_TWO_UP : MAX_COLUMNS;
+
+/**
+ * দুই সাজের দুইটা আলাদা তালিকা।
+ *
+ * আগে একটাই তালিকা ছিল, আর দুই কলামে গেলে বাড়তি ঘরগুলো কেটে দেওয়া হত।
+ * তাতে এক কলামে ফেরার পরও কাটা অবস্থাটাই থেকে যেত — আটটা বেছে রেখে দুই
+ * কলামে ঘুরে এলে চারটা হয়ে যেত।
+ *
+ * তাই এখন দুইটা তালিকা পাশাপাশি থাকে:
+ *   visible     → এক কলামের, সর্বোচ্চ MAX_COLUMNS
+ *   visibleTwo  → দুই কলামের, সর্বোচ্চ MAX_COLUMNS_TWO_UP
+ *
+ * কোনোটাই অন্যটাকে কাটে না, তাই যে সাজে যা বেছে রাখা আছে ফিরে গেলে
+ * ঠিক সেটাই পাওয়া যায়।
+ *
+ * দুই কলামের তালিকা কখনো বসানো না থাকলে (প্রথমবার, বা পুরোনো সেভ করা
+ * সেটিংসে) এক কলামেরটার প্রথম কয়টা ঘর দিয়েই শুরু হয় — ফাঁকা টেবিল
+ * দেখানোর চেয়ে ভালো।
+ */
+export const visibleFor = (settings, languageId = 1) => {
+  const s = settings || defaultFeeListSettings(languageId);
+  const base = Array.isArray(s.visible) ? s.visible : [];
+
+  if (paperColumnCount(s.paperColumns) !== 2) return base.slice(0, MAX_COLUMNS);
+
+  const two = Array.isArray(s.visibleTwo) ? s.visibleTwo : [];
+  return (two.length ? two : base).slice(0, MAX_COLUMNS_TWO_UP);
+};
+
+/** চলতি সাজের তালিকাটা বদলে নতুন সেটিংস — অন্য সাজেরটায় হাত পড়ে না */
+export const withVisible = (settings, list) =>
+  paperColumnCount(settings?.paperColumns) === 2
+    ? { ...settings, visibleTwo: list }
+    : { ...settings, visible: list };
+
 export const FEE_LIST_COLUMNS = [
   // ---- শনাক্তকরণ
   { key: 'SL',              label: 'ক্রমিক',          lang: 'both', defaultOn: true,  align: 'center', weight: 45,  virtual: true },
-  { key: 'AdmissionSerial', label: 'ভর্তি নং',        lang: 'both', defaultOn: true, align: 'center', weight: 65 },
+  { key: 'AdmissionSerial', label: 'ভর্তি নং',        lang: 'both', defaultOn: false, align: 'center', weight: 65 },
   { key: 'UserCode',        label: 'আইডি নং',         lang: 'both', defaultOn: true,  align: 'center', weight: 75 },
 
   // ---- নাম ও পরিচয় (বাংলা) — লেখা বাঁ দিকে
@@ -72,7 +122,7 @@ export const FEE_LIST_COLUMNS = [
 
   // ---- হাতে লেখার ঘর
   { key: 'Signature',       label: 'স্বাক্ষর',        lang: 'both', defaultOn: true,  align: 'center', weight: 120, virtual: true, blank: true },
-  { key: 'Remark',          label: 'মন্তব্য',         lang: 'both', defaultOn: true, align: 'center', weight: 120, virtual: true, blank: true },
+  { key: 'Remark',          label: 'মন্তব্য',         lang: 'both', defaultOn: false, align: 'center', weight: 120, virtual: true, blank: true },
 ];
 
 /** জায়গার সীমা — এর বাইরে গেলে কাগজে ঘরটা বেঢপ লাগে */
@@ -116,6 +166,15 @@ export const defaultFeeListSettings = (languageId = 1) => ({
   // লোগোটা কোথায় — 'top' মাথার মাঝখানে, 'left' বাঁ পাশে (প্রবেশপত্রের মতো)
   logoPosition: 'top',
 
+  /* দুই কলামের নিজের তালিকা — ফাঁকা মানে এখনো আলাদা করে বাছা হয়নি,
+     তখন উপরের visible থেকেই প্রথম কয়টা নেওয়া হয় */
+  visibleTwo: [],
+
+  /* কাগজে কয় কলামে ছাপা হবে — ১ বা ২।
+     ২ দিলে কাগজের দুই পাশে দুইটা তালিকা পাশাপাশি বসে, বাঁ দিকটা ভরে
+     তারপর ডান দিক। একই সারির সংখ্যায় কাগজ প্রায় অর্ধেক লাগে। */
+  paperColumns: 1,
+
   fontSize: 13,
 });
 
@@ -156,13 +215,23 @@ export const loadFeeListSettings = (listType, languageId = 1) => {
     // নইলে বাংলা তালিকায় আরবি কলাম ফিরে আসত
     const allowed = new Set(columnsForLanguage(languageId).map((c) => c.key));
 
+    // দুই সাজের দুই তালিকা — আলাদা করে যাচাই হয়, কেউ কাউকে কাটে না
+    const paperColumns = paperColumnCount(saved.paperColumns);
+
+    const clean = (list, limit) =>
+      (Array.isArray(list) ? list : []).filter((k) => allowed.has(k)).slice(0, limit);
+
     const visible = Array.isArray(saved.visible)
-      ? saved.visible.filter((k) => allowed.has(k)).slice(0, MAX_COLUMNS)
+      ? clean(saved.visible, MAX_COLUMNS)
       : fallback.visible;
+
+    const visibleTwo = clean(saved.visibleTwo, MAX_COLUMNS_TWO_UP);
 
     return {
       ...fallback,
       ...saved,
+      paperColumns,
+      visibleTwo,
       // সব কলাম বাদ পড়ে গেলে ডিফল্টে ফিরি, নইলে টেবিলটা ফাঁকা দেখাত
       visible: visible.length ? visible : fallback.visible,
       labels: saved.labels && typeof saved.labels === 'object' ? saved.labels : {},
@@ -192,10 +261,10 @@ export const saveFeeListSettings = (listType, languageId, settings) => {
  * সীমায় পৌঁছে গেলে আর যোগ হয় না — তালিকাটা অপরিবর্তিত ফেরত যায়, যাতে
  * কাগজে ঘরগুলো এত সরু হয়ে না যায় যে নাম পড়াই কষ্ট হয়।
  */
-export const toggleColumn = (visible, key, languageId) => {
+export const toggleColumn = (visible, key, languageId, limit = MAX_COLUMNS) => {
   const list = visible || [];
   if (list.includes(key)) return list.filter((k) => k !== key);
-  if (list.length >= MAX_COLUMNS) return list;
+  if (list.length >= limit) return list;
 
   const order = columnsForLanguage(languageId).map((c) => c.key);
   const next = [...list, key];
@@ -239,8 +308,9 @@ export const resolveColumns = (settings, languageId = 1) => {
     weight: s.widths?.[col.key] ?? col.weight ?? 100,
   });
 
-  const picked = (s.visible || [])
-    .slice(0, MAX_COLUMNS)
+  const limit = maxColumnsFor(s.paperColumns);
+
+  const picked = visibleFor(s, languageId)
     .map((key) => {
       const col = byKey.get(key);
       if (!col) return null;    // এই ভাষার নয় — কাগজে যাবে না
@@ -251,7 +321,7 @@ export const resolveColumns = (settings, languageId = 1) => {
   // সব বাদ পড়লে অন্তত ডিফল্টগুলো, নইলে ফাঁকা টেবিল ছাপা হত
   if (picked.length) return picked;
 
-  return allowed.filter((c) => c.defaultOn).slice(0, MAX_COLUMNS).map(dress);
+  return allowed.filter((c) => c.defaultOn).slice(0, limit).map(dress);
 };
 
 /**
