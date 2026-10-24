@@ -241,7 +241,7 @@ const ResultReport = () => {
 
             <div
               className={`${filtersOpen ? 'grid' : 'hidden'} lg:grid mt-3 gap-3 items-end
-                grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5`}
+                grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6`}
             >
               <div className="min-w-0">
                 <DefaultSelect
