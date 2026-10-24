@@ -18,6 +18,7 @@ import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import useTranslate from '../utils/Translate';
 import ExamRoutinePrint from './ExamRoutinePrint';
+import { showModal } from '../utils/ModalControlar';
 
 const ExamRoutingList = ({ pageTitle }) => {
   const dispatch = useDispatch();
@@ -58,6 +59,12 @@ const ExamRoutingList = ({ pageTitle }) => {
     navigate(
       `/dashboard/exam/routine-edit/${routingSessionID}/${routingExamID}/${routingSubClassID}`
     );
+  };
+
+  const handleExamRoutineCreate = () => {
+    showModal('পরীক্ষার রুটিন তৈরি করুন', 'EXAM_ROUTINE_CREATE', {
+      closeOnOutSide: false,
+    });
   };
 
   const handleDelete = async (routing) => {
@@ -102,13 +109,13 @@ const ExamRoutingList = ({ pageTitle }) => {
           {translate('Exam Routine List')}
         </h2>
         <div className="flex items-center gap-4">
-          <Link
-            to="/dashboard/exam/routine-create"
+          <button
+            onClick={handleExamRoutineCreate}
             className="inline-flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
           >
             <FaPlus aria-hidden="true" />
             নতুন রুটিন তৈরি
-          </Link>
+          </button>
         </div>
       </div>
 

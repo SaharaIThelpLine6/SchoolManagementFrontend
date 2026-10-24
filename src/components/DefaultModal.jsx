@@ -97,6 +97,7 @@ import DivisionMarkSheetNoteModal from '../view/result/DivisionMarkSheetNoteModa
 import ResultReportSettingModal from '../view/result/Reports/ResultReportSettingModal';
 import ExamRouteCreateModal from '../view/exam/ExamRouteCreateModal';
 import ExamRouteSettingCreateModal from '../view/exam/ExamRouteSettingCreateModal';
+import ExamRoutineCreateModal from '../view/exam/ExamRouting/ExamRoutineCreateModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
@@ -432,7 +433,7 @@ const DefaultModal = () => {
                   <DivisionMarkSheetNoteModal />
                 )}
                 {modalType === 'EXAM_ROUTINE_CREATE' && (
-                  <ExamRouteCreateModal />
+                  <ExamRoutineCreateModal />
                 )}
                 {modalType === 'EXAM_ROUTINE_SETTING' && (
                   <ExamRouteSettingCreateModal />

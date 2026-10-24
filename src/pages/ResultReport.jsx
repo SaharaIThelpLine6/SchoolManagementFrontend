@@ -15,22 +15,38 @@ import StudentResultSheet from '../view/result/Reports/StudentResultSheet';
 import AttendanceSheet from '../view/result/Reports/AttendanceSheet';
 import ClassDivisionSummarySheet from '../view/result/Reports/ClassDivisionSummarySheet';
 import SubjectWiseResultSheet from '../view/result/Reports/SubjectWiseResultSheet';
+import SubjectAttendanceSheet from '../view/result/Reports/SubjectAttendanceSheet';
 import TeacherResultSheet from '../view/result/Reports/TeacherResultSheet';
+import { useGetResidentialQuery } from '../features/settings/settingsQuerySlice';
 
-// Report-wise required filters (query param key onujayi)
+// ✅ Report-wise required filters — residential_id optional (required list theke baad)
 const REPORT_REQUIRED = {
   1: ['session_id', 'exam_id', 'subclass_id'],
   2: ['session_id', 'exam_id', 'subclass_id'],
   3: ['session_id', 'exam_id'],
   4: ['session_id', 'exam_id', 'subclass_id'],
-  5: ['session_id', 'exam_id'], // শিক্ষক ভিত্তিক / একক শিক্ষক (sheet er sidebar e radio)
+  5: ['session_id', 'exam_id'],
+  6: ['session_id', 'exam_id', 'subclass_id'],
 };
+
+// ✅ যেসব রিপোর্টে আবাসিক ফিল্টার চলবে
+const RESIDENTIAL_REPORTS = [1, 2, 6];
+
+// ✅ "উভয়" এর RDID — এটা সিলেক্ট করলে সবাই আসবে (ফিল্টার পাঠানো হবে না)
+const RESIDENTIAL_ALL_ID = 5;
 
 const isEmpty = (v) => v === undefined || v === null || v === '';
 
+// RDID 1..4 হলেই specific ফিল্টার; খালি/0/5 হলে All
+const isSpecificResidential = (v) => {
+  if (isEmpty(v)) return false;
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 && n !== RESIDENTIAL_ALL_ID;
+};
+
 const ResultReport = () => {
   const translate = useTranslate();
-  const [filtersOpen, setFiltersOpen] = useState(true); // mobile/tablet এ collapse করার জন্য
+  const [filtersOpen, setFiltersOpen] = useState(true);
 
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
@@ -44,11 +60,13 @@ const ResultReport = () => {
   const sessionID = useWatch({ control, name: 'SessionID' });
   const examID = useWatch({ control, name: 'ExamID' });
   const subClassID = useWatch({ control, name: 'SubClassID' });
+  const RDID = useWatch({ control, name: 'RDID' });
 
   const { data: examNameData } = useGetExamFilterExamsQuery(
     { SessionID: sessionID },
     { skip: !sessionID }
   );
+  const { data: residentialData } = useGetResidentialQuery();
 
   const { data: subclassListData } = useGetExamFilterSubclassesQuery(
     { SessionID: sessionID, ExamID: examID },
@@ -59,11 +77,13 @@ const ResultReport = () => {
     setValue('ExamID', '');
     setValue('SubClassID', '');
     setValue('TeacherID', '');
+    setValue('RDID', '');
   }, [sessionID, setValue]);
 
   useEffect(() => {
     setValue('SubClassID', '');
     setValue('TeacherID', '');
+    setValue('RDID', '');
   }, [examID, setValue]);
 
   const queryParams = (() => {
@@ -77,7 +97,11 @@ const ResultReport = () => {
       report_data: selectedReportID,
       session_id: sessionID,
       exam_id: examID,
-      ...([1, 2, 4].includes(rid) ? { subclass_id: subClassID } : {}),
+      ...([1, 2, 4, 6].includes(rid) ? { subclass_id: subClassID } : {}),
+      // ✅ শুধু RDID 1-4 হলে residential_id যাবে। খালি বা 5 (উভয়) হলে যাবে না = All
+      ...(RESIDENTIAL_REPORTS.includes(rid) && isSpecificResidential(RDID)
+        ? { residential_id: Number(RDID) }
+        : {}),
     };
 
     if (required.some((key) => isEmpty(params[key]))) return null;
@@ -99,39 +123,51 @@ const ResultReport = () => {
   const shouldShowFields = (fieldName) => {
     switch (Number(selectedReportID)) {
       case 1:
+        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'RDID'].includes(fieldName);
       case 2:
-        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
+        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode', 'RDID'].includes(fieldName);
       case 3:
         return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
       case 4:
         return ['ReportID', 'SessionID', 'ExamID', 'SubClassID'].includes(fieldName);
       case 5:
         return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
+      case 6:
+        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'RDID'].includes(fieldName);
       default:
         return false;
     }
   };
 
-  // ✅ reportData shape অনুযায়ী সব key চেক
   const hasStudentResults =
     Array.isArray(reportData?.studentResults) && reportData.studentResults.length > 0;
+  const hasStudentAdmissions =
+    Array.isArray(reportData?.studentAdmissions) && reportData.studentAdmissions.length > 0;
   const hasDivisionStatistics =
     Array.isArray(reportData?.divisionStatistics) && reportData.divisionStatistics.length > 0;
   const hasAttendance = Array.isArray(reportData?.students) && reportData.students.length > 0;
-  // reportid 3 (summary) er jonno rows
   const hasSummaryRows = Array.isArray(reportData?.rows) && reportData.rows.length > 0;
-  // reportid 5: teachers khali holeo sheet dekhabe (sidebar/radio dorkar)
   const isTeacherReport =
     Number(reportData?.reportid) === 5 && Array.isArray(reportData?.teachers);
 
+  const isSubjectAttendanceReport =
+    Number(reportData?.reportid) === 6 &&
+    (
+      Array.isArray(reportData?.subjects) ||
+      Array.isArray(reportData?.students) ||
+      Array.isArray(reportData?.attendance) ||
+      hasStudentAdmissions
+    );
+
   const hasReportContent =
     hasStudentResults ||
+    hasStudentAdmissions ||
     hasDivisionStatistics ||
     hasAttendance ||
     hasSummaryRows ||
-    isTeacherReport;
+    isTeacherReport ||
+    isSubjectAttendanceReport;
 
-  // Error thakle purono (stale) data dekhabo na
   const showReport = hasReportContent && !error && !!queryParams;
 
   const handlePrintPDF = () => window.print();
@@ -151,6 +187,8 @@ const ResultReport = () => {
         return <SubjectWiseResultSheet {...props} />;
       case 5:
         return <TeacherResultSheet {...props} />;
+      case 6:
+        return <SubjectAttendanceSheet {...props} />;
       default:
         return null;
     }
@@ -162,7 +200,6 @@ const ResultReport = () => {
         {/* ═══════════════ HEADER ═══════════════ */}
         <header className="bg-white border-b border-slate-200 lg:sticky lg:top-0 z-30 print:hidden">
           <div className="mx-auto max-w-[1600px] px-3 sm:px-4 lg:px-6 py-3">
-            {/* Top bar: brand + actions */}
             <div className="flex items-center justify-between gap-2 sm:gap-3">
               <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 shrink-0">
@@ -181,7 +218,6 @@ const ResultReport = () => {
               </div>
 
               <div className="flex items-center gap-2 shrink-0">
-                {/* Filter toggle — শুধু lg এর নিচে */}
                 <button
                   type="button"
                   onClick={() => setFiltersOpen((v) => !v)}
@@ -203,7 +239,6 @@ const ResultReport = () => {
               </div>
             </div>
 
-            {/* Filter form — no submit button, auto-loads via useWatch */}
             <div
               className={`${filtersOpen ? 'grid' : 'hidden'} lg:grid mt-3 gap-3 items-end
                 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5`}
@@ -277,6 +312,20 @@ const ResultReport = () => {
                 </div>
               )}
 
+              {shouldShowFields('RDID') && (
+                <div className="min-w-0">
+                  <DefaultSelect
+                    label={translate('Residential')}
+                    nameField="ResidentialName"
+                    registerKey="RDID"
+                    valueField="RDID"
+                    options={residentialData ?? []} // ১-৪ = নির্দিষ্ট, ৫ (উভয়) = সবাই
+                    require={false} // খালি রাখলেও All
+                    unicode={true}
+                  />
+                </div>
+              )}
+
               {showReport && (
                 <div className="w-full flex items-end justify-end gap-2 lg:col-span-1">
                   <button
@@ -298,7 +347,6 @@ const ResultReport = () => {
 
         {/* ═══════════════ MAIN ═══════════════ */}
         <main className="mx-auto max-w-[1600px] print:max-w-none">
-          {/* First load: form unmount na kore main area-te loading dekhai */}
           {isLoading && <Loading />}
 
           {isFetching && (

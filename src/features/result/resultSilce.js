@@ -72,14 +72,21 @@ export const resultSilce = createApi({
       providesTags: ["Result"],
     }),
     getResultReportData: builder.query({
-      query: ({ session_id, exam_id, subclass_id, teacher_id, report_data }) => {
+      query: ({
+        session_id,
+        exam_id,
+        subclass_id,
+        teacher_id,
+        residential_id,
+        report_data,
+      }) => {
         const params = new URLSearchParams();
         if (report_data) params.append("reportid", report_data);
         if (session_id) params.append("sessionid", session_id);
         if (exam_id) params.append("examid", exam_id);
         if (subclass_id) params.append("subclassid", subclass_id);
         if (teacher_id) params.append("teacherid", teacher_id);
-
+        if (residential_id) params.append("residentialID", residential_id); // ✅ backend expects residentialID
 
         const queryString = params.toString();
         return queryString ? `result_report?${queryString}` : "result_report";

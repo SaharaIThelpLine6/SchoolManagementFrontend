@@ -86,6 +86,10 @@ export const resultReports = [
   {
     ReportID: 5,
     ReportName: '5. শিক্ষক ভিওিক ফলাফল',
+  },
+  {
+    ReportID: 6,
+    ReportName: '6. বিষয় ওয়ারী প্রাপ্ত নাম্বার অনুসারে হাজিরা খাতা',
   }
 ];
 export const resultReportsOld = [
