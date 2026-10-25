@@ -70,6 +70,10 @@ const TRANSLATIONS = {
         date: "তারিখ",
         divisionFallback: "বিভাগ",
         subjectFallback: "বিষয়",
+        pageOptions: "পেজ অপশন",
+        everyPageHeader: "প্রতি পেজে হেডার দেখাও",
+        everyPageSignature: "প্রতি পেজে সিগনেচার দেখাও",
+        pageOptionsNote: "বন্ধ থাকলে শুধু প্রথম পেজে হেডার ও শেষ পেজে সিগনেচার থাকবে।",
     },
     en: {
         totalExaminees: "Total Examinees",
@@ -216,15 +220,12 @@ const isFilled = (v) => v !== undefined && v !== null && v !== "";
 
 /* ═══════════════════════════════════════════════════════════
    PASS NUMBER (বিষয়ভিত্তিক পাস নাম্বার)
-   ⚠️ আপনার backend এ পাস নাম্বারের ফিল্ডের নাম অন্য হলে
-      শুধু নিচের PASS_FIELDS অ্যারেতে সেই নামটা যোগ করুন।
    ═══════════════════════════════════════════════════════════ */
 const PASS_FIELDS = [
     "PassNumber", "SubjectPassNumber", "PassMark", "PassMarks",
     "PassNo", "Pass", "SubjectPass", "MinNumber",
 ];
 
-// একটি বিষয়ের পাস নাম্বার; না পেলে null (তখন মার্ক করা হবে না)
 const getPassMark = (subject) => {
     for (const f of PASS_FIELDS) {
         const v = getFirstValue(subject?.[f], subject?.Subject?.[f]);
@@ -236,7 +237,6 @@ const getPassMark = (subject) => {
     return null;
 };
 
-// নম্বর পাস নাম্বারের চেয়ে কম কি না
 const isBelowPass = (val, passMark) => {
     if (passMark === null || !isFilled(val) || String(val).trim() === "") return false;
     const n = Number(val);
@@ -245,16 +245,13 @@ const isBelowPass = (val, passMark) => {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   KERAT ACTION — মোট নম্বরে যে বিষয় ধরা হবে না
-   subjectPassNumbers[i].KeratAction === true হলে ওই বিষয়
-   (SubVal{i+1}) মোট নম্বরের যোগফল থেকে বাদ যাবে।
+   KERAT ACTION
    ═══════════════════════════════════════════════════════════ */
 const isKerat = (subject) => {
     const v = subject?.KeratAction;
     return v === true || v === 1 || v === "1" || v === "true";
 };
 
-// KeratAction true বিষয় বাদ দিয়ে বাকি বিষয়ের যোগফল
 const calcTotal = (studentResult, subjects) => {
     if (!Array.isArray(subjects) || subjects.length === 0) {
         const n = Number(studentResult?.Total);
@@ -271,10 +268,6 @@ const calcTotal = (studentResult, subjects) => {
 
 /* ═══════════════════════════════════════════════════════════
    DIVISION SCALE (dynamic)
-   ExamType == 4  → subjectPassNumbers (DivisionID/DivisionNumber)  [পয়েন্ট ভিত্তিক]
-   others         → conditionAverage   (DivisionID/DivisionNumber)  [গড় ভিত্তিক]
-   Name আসে divitionList থেকে (ভাষা অনুযায়ী)
-   return: { rows: [{id, name, num}], top }
    ═══════════════════════════════════════════════════════════ */
 const buildDivisionScale = (
     conditionAverage,
@@ -398,15 +391,21 @@ export const GPA_LABEL_OPTIONS = [
 export const DEFAULT_GPA_LABEL = "avg";
 
 /* ═══════════════════════════════════════════════════════════
+   NEW: PAGE OPTIONS  (প্রতি পেজে হেডার / সিগনেচার)
+   ═══════════════════════════════════════════════════════════ */
+export const DEFAULT_PAGE_OPTIONS = {
+    everyPageHeader: true,
+    everyPageSignature: true,
+};
+
+/* ═══════════════════════════════════════════════════════════
    THEME
    ═══════════════════════════════════════════════════════════ */
 const FAIL_NAME_RE = /স্থগিত|ছগিত|রাসিব|fail|^F$/i;
 
-// দ্রষ্টব্য: ফেল/স্থগিত চেনার জন্য সবসময় মূল বাংলা DivisionNames ব্যবহার হয় (ভাষা বদলালেও রঙ ঠিক থাকে)
 const isFailDivision = (studentResult) =>
     FAIL_NAME_RE.test(String(studentResult?.Division?.DivisionNames ?? ""));
 
-// গড় দিয়ে fallback রঙ (যখন বিভাগ চেনা যায় না)
 const colorTint = (studentResult, avg) => {
     if (isFailDivision(studentResult)) return { bg: "#fee2e2", fg: "#991b1b" };
     if (avg >= 80) return { bg: "#dcfce7", fg: "#166534" };
@@ -416,19 +415,17 @@ const colorTint = (studentResult, avg) => {
     return { bg: "#fee2e2", fg: "#991b1b" };
 };
 
-// প্রতিটি গ্রেড/বিভাগের জন্য আলাদা আলাদা রঙ (বিভাগের ক্রম অনুযায়ী: ১ম = সেরা)
 const GRADE_COLORS = [
-    { bg: "#bbf7d0", fg: "#14532d" }, // সবুজ
-    { bg: "#99f6e4", fg: "#134e4a" }, // টিল
-    { bg: "#bae6fd", fg: "#075985" }, // আকাশি নীল
-    { bg: "#fef08a", fg: "#854d0e" }, // হলুদ
-    { bg: "#fed7aa", fg: "#9a3412" }, // কমলা
-    { bg: "#e9d5ff", fg: "#6b21a8" }, // বেগুনি
-    { bg: "#fbcfe8", fg: "#9d174d" }, // গোলাপি
+    { bg: "#bbf7d0", fg: "#14532d" },
+    { bg: "#99f6e4", fg: "#134e4a" },
+    { bg: "#bae6fd", fg: "#075985" },
+    { bg: "#fef08a", fg: "#854d0e" },
+    { bg: "#fed7aa", fg: "#9a3412" },
+    { bg: "#e9d5ff", fg: "#6b21a8" },
+    { bg: "#fbcfe8", fg: "#9d174d" },
 ];
-const GRADE_FAIL_COLOR = { bg: "#fecaca", fg: "#991b1b" }; // ফেল/স্থগিত = লাল
+const GRADE_FAIL_COLOR = { bg: "#fecaca", fg: "#991b1b" };
 
-// অকৃতকার্য বিষয়ের মার্ক (পাস নাম্বারের চেয়ে কম)
 const FAIL_MARK = {
     color: { bg: "#fecaca", fg: "#b91c1c", textDecoration: "none" },
     bw: { bg: "#d4d4d4", fg: "#000", textDecoration: "underline" },
@@ -453,9 +450,9 @@ const THEMES = {
         },
         palette: DIVISION_PALETTE,
         medals: {
-            1: { bg: "#facc15", fg: "#422006", border: "1.5px solid #a16207" }, // উজ্জ্বল সোনালি
-            2: { bg: "#38bdf8", fg: "#ffffff", border: "1.5px solid #0369a1" }, // নীল
-            3: { bg: "#ea580c", fg: "#ffffff", border: "1.5px solid #9a3412" }, // গাঢ় কমলা/ব্রোঞ্জ
+            1: { bg: "#facc15", fg: "#422006", border: "1.5px solid #a16207" },
+            2: { bg: "#38bdf8", fg: "#ffffff", border: "1.5px solid #0369a1" },
+            3: { bg: "#ea580c", fg: "#ffffff", border: "1.5px solid #9a3412" },
         },
     },
     bw: {
@@ -471,14 +468,13 @@ const THEMES = {
         },
         palette: DIVISION_PALETTE,
         medals: {
-            1: { bg: "#facc15", fg: "#422006", border: "1.5px solid #a16207" }, // উজ্জ্বল সোনালি
-            2: { bg: "#38bdf8", fg: "#ffffff", border: "1.5px solid #0369a1" }, // নীল
-            3: { bg: "#ea580c", fg: "#ffffff", border: "1.5px solid #9a3412" }, // গাঢ় কমলা/ব্রোঞ্জ
+            1: { bg: "#facc15", fg: "#422006", border: "1.5px solid #a16207" },
+            2: { bg: "#38bdf8", fg: "#ffffff", border: "1.5px solid #0369a1" },
+            3: { bg: "#ea580c", fg: "#ffffff", border: "1.5px solid #9a3412" },
         },
     },
-}
+};
 
-// শিট (প্রিভিউ + প্রিন্ট) এর সব লেখায় এই ফন্ট — প্রিন্ট portal document.body তে থাকায় আলাদা করে সেট করা
 const SHEET_FONT = '"SolaimanLipiNormal", "SolaimanLipi", serif';
 
 const bg = (color) => ({
@@ -525,6 +521,7 @@ const LS_LANG = "resultSheetLanguage";
 const LS_GPA_LABEL = "resultSheetGpaLabel";
 const LS_GPA_TEXT = "resultSheetGpaText";
 const LS_GRADE_TEXT = "resultSheetGradeText";
+const LS_PAGE_OPTS = "resultSheetPageOptions"; // NEW
 
 const loadText = (key) => {
     try {
@@ -541,7 +538,6 @@ const loadObj = (key, fallback) => {
     return { ...fallback };
 };
 
-// ফলাফল অপশন সবসময় ঠিক একটাই true থাকবে
 const ORDERED_RESULT_KEYS = ["idSerial", "byDivision", "byNumber", "short"];
 const normalizeResultOptions = (opts) => {
     const active = ORDERED_RESULT_KEYS.find((k) => opts?.[k]) || "idSerial";
@@ -625,6 +621,8 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     );
     const [gpaText, setGpaText] = useState(() => loadText(LS_GPA_TEXT));
     const [gradeText, setGradeText] = useState(() => loadText(LS_GRADE_TEXT));
+    // NEW: পেজ অপশন
+    const [pageOptions, setPageOptions] = useState(() => loadObj(LS_PAGE_OPTS, DEFAULT_PAGE_OPTIONS));
 
     useEffect(() => { localStorage.setItem(LS_VISIBLE, JSON.stringify(visibleColumns)); }, [visibleColumns]);
     useEffect(() => { localStorage.setItem(LS_NAME_EXTRAS, JSON.stringify(nameExtras)); }, [nameExtras]);
@@ -634,6 +632,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     useEffect(() => { localStorage.setItem(LS_GPA_LABEL, gpaLabelMode); }, [gpaLabelMode]);
     useEffect(() => { localStorage.setItem(LS_GPA_TEXT, gpaText); }, [gpaText]);
     useEffect(() => { localStorage.setItem(LS_GRADE_TEXT, gradeText); }, [gradeText]);
+    useEffect(() => { localStorage.setItem(LS_PAGE_OPTS, JSON.stringify(pageOptions)); }, [pageOptions]);
 
     /* ── সাইডবার: সবসময় বাংলা ── */
     const tUI = TRANSLATIONS.bn;
@@ -681,7 +680,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         };
         const all = Array.isArray(reportData.studentResults) ? reportData.studentResults : [];
         const serialOf = (s) => Number(s?.User?.Admission?.[0]?.AdmissionSerial) || 0;
-        // KeratAction true বিষয় বাদ দিয়ে মোট
         const totalOf = (s) => {
             const n = calcTotal(s, reportData.subjectPassNumbers);
             return Number.isNaN(n) ? -Infinity : n;
@@ -721,12 +719,9 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const S = theme.side;
     const paletteColor = (i) => theme.palette[Math.min(i, theme.palette.length - 1)];
 
-    // বাংলা হলে backend এর labels আগে, অন্য ভাষায় সরাসরি অনুবাদ (শুধু শিটের জন্য)
     const L = (backendKey, tKey) =>
         lang === "bn" ? (labels?.[backendKey] ?? t[tKey]) : t[tKey];
 
-    // গড়/জিপিএ কলামের হেডিং: নির্বাচিত মোড অনুযায়ী (ডিফল্ট গড়)
-    // নিজে লেখা টেক্সট থাকলে সেটাই অগ্রাধিকার পাবে
     const gpaHeading =
         gpaText.trim() ||
         (gpaLabelMode === "gpa"
@@ -776,17 +771,14 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         return subjectPassNumbers.length;
     }, [conditionAverage, subjectPassNumbers]);
 
-    /* ── পয়েন্ট ভিত্তিক (ExamType 4) নাকি গড় ভিত্তিক ── */
     const isPointBased = Number(conditionAverage?.ExamType) === 4;
 
-    // গড় ভিত্তিক হলে ডান বক্সের "মোট বিষয়" = AverageSubsonkha, পয়েন্ট ভিত্তিক হলে আগের মতোই subjectCount
     const summarySubjectCount = useMemo(() => {
         if (isPointBased) return subjectCount;
         const n = Number(conditionAverage?.AverageSubsonkha);
         return n > 0 ? n : subjectCount;
     }, [isPointBased, conditionAverage, subjectCount]);
 
-    /* ── প্রতিটি বিষয়ের পাস নাম্বার (সাবজেক্ট কলামের ক্রম অনুযায়ী) ── */
     const passMarks = useMemo(
         () => subjectPassNumbers.map((s) => getPassMark(s)),
         [subjectPassNumbers]
@@ -797,12 +789,10 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         [conditionAverage, subjectPassNumbers, divisionList, t.divisionFallback, lang]
     );
 
-    /* ── গ্রেড/বিভাগ অনুযায়ী আলাদা রঙ: divisionId → রঙ ── */
     const gradeColorMap = useMemo(() => {
         const map = {};
         const used = new Set();
         let idx = 0;
-        // প্রথমে বিভাগের ক্রম অনুযায়ী (ফেল/স্থগিত বাদে)
         const ordered = [...(divisionList || [])];
         const orderIds = divisionScale.rows.map((d) => d.id);
         ordered.sort((a, b) => {
@@ -875,30 +865,63 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         }
     }, [institutionInfo]);
 
-    const shortRowsPerCol = useMemo(
-        () =>
-            Math.max(1, Math.floor(
-                (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
-            )),
-        []
-    );
-
+    /* ═══════════════════════════════════════════════════════════
+       ⚡ PAGE BREAK / ROW CAPACITY FIX
+       সিগনেচার থাকলে SIGNATURE_H বাদ যাবে, না থাকলে পুরো জায়গা টেবিল নেবে।
+       ═══════════════════════════════════════════════════════════ */
     const pages = useMemo(() => {
         const list = studentResultsDetails;
         if (!list.length) return [[]];
 
-        const cap = isShort
-            ? shortRowsPerCol * 2
-            : Math.max(1, Math.floor(
-                (PAGE_H - HEADER_H - HEADER_GAP - THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / ROW_H
-            ));
-
         const chunks = [];
-        for (let i = 0; i < list.length; i += cap) {
-            chunks.push(list.slice(i, i + cap));
+        let remaining = [...list];
+
+        while (remaining.length > 0) {
+            // এই মুহূর্তে টেবিল শেষ হলে কি সিগনেচার দেখাতে হবে?
+            // শেষ পেজে সবসময় সিগনেচার থাকবে (কারণ everyPageSignature false হলেও শেষ পেজে থাকে)
+            // বা everyPageSignature true থাকলে সব পেজেই থাকবে
+
+            let currentCap = 0;
+
+            if (isShort) {
+                // শর্ট মোডের জন্য ক্যালকুলেশন
+                let hasSig = pageOptions.everyPageSignature;
+                let sigH = hasSig ? SIGNATURE_H : 0;
+                let rowsPerCol = Math.max(1, Math.floor(
+                    (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - sigH - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
+                ));
+                currentCap = rowsPerCol * 2;
+
+                // যদি বর্তমান রো-গুলো শেষ পেজের ক্যাপাসিটির মধ্যে পড়ে যায়, তবে সিগনেচার থাকবে
+                if (remaining.length <= currentCap) {
+                    rowsPerCol = Math.max(1, Math.floor(
+                        (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
+                    ));
+                    currentCap = rowsPerCol * 2;
+                }
+            } else {
+                // নরমাল মোডের জন্য ক্যালকুলেশন
+                let hasSig = pageOptions.everyPageSignature;
+                let sigH = hasSig ? SIGNATURE_H : 0;
+                let cap = Math.max(1, Math.floor(
+                    (PAGE_H - HEADER_H - HEADER_GAP - THEAD_H - sigH - FOOTER_RESERVE - SAFETY) / ROW_H
+                ));
+
+                // যদি বর্তমান রো-গুলো শেষ পেজের ক্যাপাসিটির মধ্যে পড়ে যায়, তবে সিগনেচার থাকবে
+                if (remaining.length <= cap) {
+                    cap = Math.max(1, Math.floor(
+                        (PAGE_H - HEADER_H - HEADER_GAP - THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / ROW_H
+                    ));
+                }
+                currentCap = cap;
+            }
+
+            chunks.push(remaining.slice(0, currentCap));
+            remaining = remaining.slice(currentCap);
         }
+
         return chunks;
-    }, [studentResultsDetails, ROW_H, isShort, shortRowsPerCol]);
+    }, [studentResultsDetails, ROW_H, isShort, pageOptions.everyPageSignature]);
 
     const totalExaminees = divisionStats.total;
 
@@ -1133,7 +1156,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const renderRow = (studentResult, globalIndex) => {
         const zebra = globalIndex % 2 === 1;
         const rowBg = zebra ? C.primaryFaint : "#fff";
-        // KeratAction true বিষয় বাদ দিয়ে মোট ও গড়
         const total = calcTotal(studentResult, subjectPassNumbers);
         const avg = total / Number(conditionAverage?.AverageSubsonkha || 1);
         const gc = getGradeColor(studentResult, avg);
@@ -1156,7 +1178,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 {Array.from({ length: conditionAverage?.SubSonkha || 0 }).map((_, mi) => {
                     const val = studentResult[`SubVal${mi + 1}`];
                     const failed = isBelowPass(val, passMarks[mi] ?? null);
-                    // পাস নাম্বার জানা না থাকলে আগের মতো শূন্য হলে লাল
                     const isZero = passMarks[mi] == null && isFilled(val) && Number(val) === 0;
                     const warn = failed || isZero;
                     return (
@@ -1205,7 +1226,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const renderShortRow = (studentResult, globalIndex) => {
         const zebra = globalIndex % 2 === 1;
         const rowBg = zebra ? C.primaryFaint : "#fff";
-        // KeratAction true বিষয় বাদ দিয়ে গড়
         const total = calcTotal(studentResult, subjectPassNumbers);
         const avg = total / Number(conditionAverage?.AverageSubsonkha || 1);
         const gc = getGradeColor(studentResult, avg);
@@ -1259,10 +1279,15 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
     const dateText = getToday();
 
+    const showHeaderOnPage = (pageIndex) => pageOptions.everyPageHeader || pageIndex === 0;
+    const showSignatureOnPage = (pageIndex) => pageOptions.everyPageSignature || pageIndex === pages.length - 1;
+
     const renderPage = (pageIndex, students) => {
         const offset = pages.slice(0, pageIndex).reduce((sum, chunk) => sum + chunk.length, 0);
+        const headerVisible = showHeaderOnPage(pageIndex);
+        const signatureVisible = showSignatureOnPage(pageIndex);
 
-        const signature = (
+        const signature = signatureVisible ? (
             <SignatureSection
                 C={C}
                 dateText={dateText}
@@ -1272,7 +1297,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 najem={najem}
                 NajemName={institutionInfo?.NajemName}
             />
-        );
+        ) : null;
 
         const pageFooter = (
             <div style={{
@@ -1284,11 +1309,24 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         );
 
         if (isShort) {
-            const leftRows = students.slice(0, shortRowsPerCol);
-            const rightRows = students.slice(shortRowsPerCol);
+            // এখানে currentShortRowsPerCol বের করার প্রয়োজন নেই, কারণ pages তৈরির সময়ই 
+            // currentCap ঠিক করে দেওয়া হয়েছে। সরাসরি students অ্যারেকে ভাগ করে নিলেই হবে।
+            // students.length ইতিমধ্যেই currentCap এর সমান বা ছোট।
+
+            // তবে শর্ট টেবিলে দুই কলামে ভাগ করার জন্য আমাদের জানতে হবে প্রতি কলামে কয়টি রো হবে।
+            // যেহেতু students.length <= currentCap, তাই আমরা simply অর্ধেক করে দিতে পারি।
+            // বা নির্দিষ্ট রো-ক্যাপাসিটি বের করে নিতে পারি।
+
+            const sigH = signatureVisible ? SIGNATURE_H : 0;
+            const rowsPerCol = Math.max(1, Math.floor(
+                (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - sigH - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
+            ));
+
+            const leftRows = students.slice(0, rowsPerCol);
+            const rightRows = students.slice(rowsPerCol);
             return (
                 <>
-                    {renderShortHeaderBlock()}
+                    {headerVisible && renderShortHeaderBlock()}
                     <div style={{
                         display: "flex", flexDirection: "row",
                         alignItems: "flex-start", justifyContent: "space-between",
@@ -1305,7 +1343,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
         return (
             <>
-                {renderHeaderBlock()}
+                {headerVisible && renderHeaderBlock()}
                 <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
                     {renderColGroup()}
                     <thead>{renderColumnHeaderRow()}</thead>
@@ -1323,7 +1361,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         fontFamily: SHEET_FONT,
     };
 
-    /* ── সাইডবারের কলাম লিস্ট: সবসময় বাংলা (backend labels থাকলে সেগুলো) ── */
     const dynamicColumns = useMemo(
         () => [
             { key: "sl", label: labels?.SerialLabel ?? tUI.sl },
@@ -1351,7 +1388,9 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const setAllColumns = (value) =>
         setVisibleColumns(Object.fromEntries(dynamicColumns.map((c) => [c.key, value])));
 
-    /* ── সাইডবার প্যানেল: tUI + numUI (সবসময় বাংলা) ── */
+    const togglePageOption = (key) =>
+        setPageOptions((p) => ({ ...p, [key]: !p[key] }));
+
     const renderSettingsPanels = () => (
         <>
             <LanguageSelector t={tUI} value={lang} onChange={setLang} />
@@ -1373,6 +1412,11 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 onGradeText={setGradeText}
             />
             <ResultOptionsSelector t={tUI} value={resultOptions} onSelect={selectResultOption} />
+            <PageOptionsSettings
+                t={tUI}
+                value={pageOptions}
+                onToggle={togglePageOption}
+            />
             <PrintSettings t={tUI} colorMode={colorMode} onColorChange={setColorMode} />
         </>
     );
@@ -1399,7 +1443,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                     <p className="text-xs text-slate-400">{tUI.settingsSub}</p>
                 </div>
 
-                {/* কনটেন্ট বেশি হলে শুধু এই ডিভের ভেতরেই স্ক্রল হবে */}
                 <div className="flex-1 overflow-y-auto p-5 space-y-4">
                     {renderSettingsPanels()}
                 </div>
@@ -1416,7 +1459,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                     </div>
                 </div>
 
-                {/* প্রিভিউ: fixed height + scroll (প্রিন্টে এটা আর ব্যবহার হয় না) */}
                 <div
                     className="result-sheet-wrapper w-full overflow-x-hidden"
                     style={{ height: "700px", overflowY: "auto" }}
@@ -1437,7 +1479,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 </div>
             </div>
 
-            {/* প্রিন্ট: document.body এ portal — scroll/overflow container এর বাইরে */}
             {createPortal(
                 <div className="print-portal">
                     {pages.map((students, pageIndex) => (
@@ -1476,7 +1517,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   SIDEBAR SUB-COMPONENTS  (সবসময় বাংলা টেক্সট পায়)
+   SIDEBAR SUB-COMPONENTS
    ═══════════════════════════════════════════════════════════ */
 
 const SegmentedControl = ({ label, options, value, onChange }) => (
@@ -1504,7 +1545,6 @@ const LanguageSelector = ({ t, value, onChange }) => (
     </div>
 );
 
-// কলামের হেডিং সেটিং: গড়/জিপিএ বাছাই + নিজে লেখা টেক্সট (গড়/জিপিএ ও গ্রেড)
 const HeadingSettings = ({ t, mode, onModeChange, gpaText, onGpaText, gradeText, onGradeText }) => {
     const options = [
         { key: "avg", label: t.avgOpt },
@@ -1560,6 +1600,34 @@ const HeadingSettings = ({ t, mode, onModeChange, gpaText, onGpaText, gradeText,
     );
 };
 
+const PageOptionsSettings = ({ t, value, onToggle }) => {
+    const items = [
+        { key: "everyPageHeader", label: t.everyPageHeader },
+        { key: "everyPageSignature", label: t.everyPageSignature },
+    ];
+    return (
+        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+            <p className="text-xs font-bold text-slate-700 leading-tight">{t.pageOptions}</p>
+            <div className="grid grid-cols-1 gap-1.5">
+                {items.map((item) => {
+                    const checked = !!value[item.key];
+                    return (
+                        <label key={item.key} className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border cursor-pointer select-none text-xs transition-colors ${checked
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-medium"
+                            : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                            }`}>
+                            <input type="checkbox" checked={checked} onChange={() => onToggle(item.key)}
+                                className="w-3.5 h-3.5 accent-emerald-600 cursor-pointer" />
+                            <span>{item.label}</span>
+                        </label>
+                    );
+                })}
+            </div>
+            <p className="text-[10px] text-slate-400 leading-snug">{t.pageOptionsNote}</p>
+        </div>
+    );
+};
+
 const PrintSettings = ({ t, colorMode, onColorChange }) => {
     const colorOptions = [
         { key: "color", label: t.colorOpt },
@@ -1579,9 +1647,6 @@ const PrintSettings = ({ t, colorMode, onColorChange }) => {
     );
 };
 
-/*
-  desktop sidebar আর mobile panel — দুই জায়গাতেই radio এর name আলাদা রাখতে useId() ব্যবহার।
-*/
 const ResultOptionsSelector = ({ t, value, onSelect }) => {
     const groupName = useId();
     const list = [

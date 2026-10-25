@@ -20,7 +20,7 @@ const HEIGHT_SAFETY = 0.98;
 
 // Font size control (percent)
 const FONT_MIN = 70;
-const FONT_MAX = 150;
+const FONT_MAX = 120;
 const FONT_STEP = 5;
 const FONT_DEFAULT = 100;
 const BASE_FONT_ATTR = 'data-erp-base-font';
@@ -394,7 +394,7 @@ SegmentedControl.propTypes = {
   onChange: PropTypes.func.isRequired,
 };
 
-/** Floating bar: Aa ফন্ট সাইজ  A−  ───●───  A+  120%  ↺  সংরক্ষণ */
+/** Floating bar: Aa ফন্ট সাইজ  A−  ───●───  A+  100%  ↺  সংরক্ষণ */
 const FontSizeBar = ({ value, saved, justSaved, onChange, onReset, onSave }) => {
   const dirty = value !== saved;
   return (
@@ -465,8 +465,9 @@ FontSizeBar.propTypes = {
 };
 
 /**
- * One routine inside its cell. The scale/position are decided by the parent,
- * so every routine on every sheet is exactly the same size.
+ * One routine inside its cell. The outer box (and the document's border) always
+ * keeps the same size. The text size changes inside it, and the inner content is
+ * shrunk (innerScale) only if it would not fit inside the fixed border.
  */
 const RoutineCell = ({ children, fit }) => (
   <div className="erp-cell__box">
@@ -552,8 +553,9 @@ const ExamRoutinePrint = ({ items, onClose }) => {
   const [results, setResults] = useState([]);
   const [loadingRoutines, setLoadingRoutines] = useState(true);
   const [readyToPrint, setReadyToPrint] = useState(false);
-  // Height (px, at the fixed layout width) of the tallest routine
-  const [tallestDoc, setTallestDoc] = useState(0);
+  // Height (px, at the fixed layout width) of the tallest routine at 100% font.
+  // It never changes with the font slider, so the border and page scale stay fixed.
+  const [baseHeight, setBaseHeight] = useState(0);
   const [fetchRoutine] = useLazyGetAllExamRoutineQuery();
   const { data: institution, isLoading: loadingInstitution } = useGetInstitutionInfoQuery();
 
@@ -570,20 +572,21 @@ const ExamRoutinePrint = ({ items, onClose }) => {
   const multiPerPage = settings.perPage > 1;
   const showCutLines = multiPerPage && settings.cutLines;
 
-  // One shared scale for every routine: fits the widest/tallest one, so all look identical
+  // One shared scale for every routine, based on the 100% font height (not the slider),
+  // so the border keeps exactly the same size however the font is changed.
   const padPx = multiPerPage ? CELL_PAD_MM * MM_TO_PX : 0;
   const cellWidth = (sheetWidth * MM_TO_PX) / cols - padPx * 2 - 1;
   const cellHeight = (sheetHeight * MM_TO_PX) / rows - padPx * 2 - 1;
   const fit = (() => {
-    if (!tallestDoc || cellWidth <= 0 || cellHeight <= 0) {
+    if (!baseHeight || cellWidth <= 0 || cellHeight <= 0) {
       return { ready: false, scale: 1, left: 0, top: 0 };
     }
-    const scale = Math.min(cellWidth / DOC_WIDTH_PX, (cellHeight * HEIGHT_SAFETY) / tallestDoc);
+    const scale = Math.min(cellWidth / DOC_WIDTH_PX, (cellHeight * HEIGHT_SAFETY) / baseHeight);
     return {
       ready: true,
       scale,
       left: (cellWidth - DOC_WIDTH_PX * scale) / 2,
-      top: multiPerPage ? (cellHeight - tallestDoc * scale) / 2 : 0,
+      top: multiPerPage ? (cellHeight - baseHeight * scale) / 2 : 0,
     };
   })();
 
@@ -682,34 +685,49 @@ const ExamRoutinePrint = ({ items, onClose }) => {
     return () => { cancelled = true; };
   }, [itemsKey, fetchRoutine]);
 
-  // Apply the text-only font scale. Runs after every render so newly mounted
-  // routines (page / per-page changes) get the same font size. It sets no state, so no loop.
-  useLayoutEffect(() => {
-    applyFontScale(previewRef.current, fontScale);
-  });
-
-  // Measure the tallest routine (re-measures when fonts / images / font size change its height)
+  // 1) Measure the tallest routine at the BASE (100%) font. The font slider is
+  //    deliberately not a dependency: the measured height is the fixed border height.
   useLayoutEffect(() => {
     const root = previewRef.current;
     if (!root || loading) return undefined;
     const docs = Array.from(root.querySelectorAll('.erp-doc'));
     if (docs.length === 0) {
-      setTallestDoc(0);
+      setBaseHeight(0);
       return undefined;
     }
 
+    // Measure with the original font (remove inline sizes), then restore the chosen one.
     const measure = () => {
+      applyFontScale(root, FONT_DEFAULT);
       const tallest = Math.max(
         ...docs.map((doc) => Math.max(doc.offsetHeight, doc.scrollHeight))
       );
-      setTallestDoc((previous) => (Math.abs(previous - tallest) < 0.5 ? previous : tallest));
+      applyFontScale(root, fontScaleRef.current);
+      setBaseHeight((previous) => (Math.abs(previous - tallest) < 0.5 ? previous : tallest));
     };
 
     measure();
-    const observer = new ResizeObserver(measure);
+    const observer = new ResizeObserver(() => {
+      // Only re-measure at 100%; ignore resizes caused by the font slider.
+      if (fontScaleRef.current === FONT_DEFAULT) measure();
+    });
     docs.forEach((doc) => observer.observe(doc));
     return () => observer.disconnect();
-  }, [loading, results, institution, settings.perPage, fontScale]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, results, institution, settings.perPage, settings.paper, settings.orientation]);
+
+  // Keep the latest font value readable inside observers without re-running them
+  const fontScaleRef = useRef(fontScale);
+  fontScaleRef.current = fontScale;
+
+  // 2) Apply the text-only font scale, then keep the content inside the fixed border.
+  //    Runs after every render so newly mounted routines get the same font size.
+  useLayoutEffect(() => {
+    const root = previewRef.current;
+    if (!root || !fit.ready) return;
+    applyFontScale(root, fontScale);
+    root.querySelectorAll('.erp-doc').forEach((doc) => fitInner(doc, baseHeight));
+  });
 
   // Wait for fonts + images before enabling the print button
   useEffect(() => {
@@ -933,6 +951,45 @@ const ExamRoutinePrint = ({ items, onClose }) => {
     document.body
   );
 };
+
+/**
+ * Keeps the document's border at a fixed height (the 100% height) and fits the
+ * inner content inside it. If a bigger font makes the content taller than the
+ * border, only the content is shrunk (never the border), so the border size
+ * stays the same at every font size.
+ */
+function fitInner(doc, baseHeight) {
+  const root = doc.firstElementChild;
+  if (!root || !baseHeight) return;
+
+  // Fixed border height = the 100% height; content is aligned to the top
+  root.style.setProperty('height', `${baseHeight}px`, 'important');
+  root.style.setProperty('overflow', 'hidden', 'important');
+  root.style.setProperty('display', 'flex', 'important');
+  root.style.setProperty('flex-direction', 'column', 'important');
+
+  const children = Array.from(root.children);
+  children.forEach((child) => {
+    child.style.removeProperty('zoom');
+    child.style.setProperty('flex-shrink', '0', 'important');
+  });
+
+  const styles = window.getComputedStyle(root);
+  const padding = (parseFloat(styles.paddingTop) || 0) + (parseFloat(styles.paddingBottom) || 0);
+  const border = (parseFloat(styles.borderTopWidth) || 0) + (parseFloat(styles.borderBottomWidth) || 0);
+  const available = baseHeight - padding - border;
+  const used = children.reduce((sum, child) => {
+    const margin = (parseFloat(window.getComputedStyle(child).marginTop) || 0)
+      + (parseFloat(window.getComputedStyle(child).marginBottom) || 0);
+    return sum + child.offsetHeight + margin;
+  }, 0);
+
+  if (used > available && used > 0) {
+    // Not enough room inside the border: shrink only the content a little
+    const ratio = Math.max(0.6, available / used);
+    children.forEach((child) => child.style.setProperty('zoom', String(ratio)));
+  }
+}
 
 ExamRoutinePrint.propTypes = {
   items: PropTypes.arrayOf(
