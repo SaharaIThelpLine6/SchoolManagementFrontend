@@ -27,11 +27,11 @@ export const examReports = [
   },
   {
     ReportID: 3,
-    ReportName: '3. সিট প্ল্যান অনুযায়ী দস্তখত পত্র',
+    ReportName: '3. সিট প্ল্যান অনুযায়ী স্বাক্ষরপত্র',
   },
   {
     ReportID: 12,
-    ReportName: '4. সিট প্ল্যান ছাড়া দস্তখত পত্র',
+    ReportName: '4. সিট প্ল্যান ছাড়া স্বাক্ষরপত্র',
   },
   {
     ReportID: 4,

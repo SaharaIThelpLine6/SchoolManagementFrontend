@@ -394,7 +394,7 @@ const ExamReportList = ({ pageTitle }) => {
       return;
     }
     if (Number(selectedReportID) === 3) {
-      // দস্তখত পত্রের সেটিংস — পরে বসবে
+      // স্বাক্ষরপত্র(দস্তখত) সেটিংস — পরে বসবে
       console.log('Opening Settings for Signature Letter (Report 3)');
     }
   };
@@ -982,7 +982,7 @@ const ExamReportList = ({ pageTitle }) => {
           {isFeeReport && langId === 2 && Number(selectedPdfID) === 3 && <NameWithAddressOneColumn />}
           {isFeeReport && langId === 2 && Number(selectedPdfID) === 4 && <StudentNameWithHolding />}
 
-          {/* ২. দস্তখত পত্র */}
+          {/* ২. স্বাক্ষরপত্র(দস্তখত) */}
           {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 1 && <ExamRoutine reportData={data} queryParams={queryParams} />}
           {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 2 && <WithoutExamRoutine reportData={data} queryParams={queryParams} requireSeatPlan />}
 

@@ -585,7 +585,7 @@ const ExamReport = ({ pageTitle }) => {
             Number(languageID) === 2 &&
             Number(selectedPdfID) === 4 && <StudentNameWithHolding />}
           {/* ২. প্রবেশ পত্র */}
-          {/* ৩. দস্তখত পত্র */}
+          {/* ৩. স্বাক্ষরপত্র */}
           {Number(selectedReportID) === 3 &&
             Number(languageID) === 1 &&
             Number(selectedPdfID) === 1 && <ExamRoutine reportData={data} queryParams={queryParams} />}
