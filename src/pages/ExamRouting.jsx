@@ -832,7 +832,7 @@ const ExamRouting = ({ pageTitle }) => {
     },
     {
       PrintID: 5,
-      PrintName: 'স্বাক্ষর/দস্তখত পত্র',
+      PrintName: 'স্বাক্ষরপত্র',
     },
   ];
   // Clear button handlers

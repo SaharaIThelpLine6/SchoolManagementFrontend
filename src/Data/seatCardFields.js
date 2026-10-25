@@ -19,8 +19,22 @@
 // আর ক্রমটা ঠিক করেন। এতে সেটিংসটা সহজ থাকে, কার্ডের চেহারাও এলোমেলো
 // হয় না।
 //
+// ⭐ কার্ডের চেহারা (ডিজাইন টেমপ্লেট, লেখার আকার, জলছাপের ঘনত্ব) এখানে
+//    নেই — ওগুলো seatCardTemplates.js এ। এই ফাইল শুধু "কোন তথ্য বসবে"
+//    সামলায়, ওটা সামলায় "দেখতে কেমন হবে"। তাই ডিজাইন বদলালে কোনো ঘর
+//    হারায় না। নিচে শুধু সেটিংসে তিনটা মান রাখা হয় আর সীমার মধ্যে আনা হয়।
+//
 // src/Data/seatCardFields.js
 // =============================================================================
+
+import {
+  DEFAULT_SEAT_TEMPLATE,
+  FONT_SCALE_DEFAULT,
+  WATERMARK_DEFAULT,
+  clampFontScale,
+  clampWatermarkOpacity,
+  getSeatTemplate,
+} from './seatCardTemplates';
 
 export const SEAT_CARD_FIELDS = [
   // ---- কাগজের মাথা
@@ -67,38 +81,57 @@ export const defaultSeatCardSettings = () => ({
   cardsPerPage: 8,
   borderStyle: 'dashed',
   showWatermark: true,
+
+  // ⭐ চেহারার তিনটা মান — বিস্তারিত seatCardTemplates.js এ
+  templateId: DEFAULT_SEAT_TEMPLATE,
+  fontScale: FONT_SCALE_DEFAULT,        // ১০০ = এখনকার মাপ
+  watermarkOpacity: WATERMARK_DEFAULT,  // শতাংশে
 });
 
 // সেটিংস ভাষা অনুযায়ী আলাদা রাখা হয় — ফি তালিকা যে নিয়মে রাখে
 const storageKey = (languageId) => `examSeatCard:settings:${langCode(languageId)}`;
 
+/**
+ * কাঁচা সেটিংসকে নিরাপদ রূপে আনা।
+ *
+ * localStorage আর ডাটাবেস — দুই উৎসের জন্যই একই ছাঁকনি, তাই যেখান থেকেই
+ * আসুক মানগুলো সীমার ভিতরে থাকে আর কোনো ঘর বাদ পড়ে না।
+ */
+export const normalizeSeatCardSettings = (saved) => {
+  const fallback = defaultSeatCardSettings();
+  if (!saved || typeof saved !== 'object') return fallback;
+
+  // মুছে ফেলা পুরোনো key ছেঁটে ফেলি — নইলে তালিকা থেকে তুলে দেওয়া
+  // ঘর ("পাশ" এর মতো) সেভ করা সেটিংসে রয়ে যেত
+  const visible = (Array.isArray(saved.visible) ? saved.visible : []).filter((k) =>
+    fieldByKey(k)
+  );
+
+  return {
+    ...fallback,
+    ...saved,
+    // সব ঘর বাদ পড়লে ডিফল্টে ফিরি, নইলে কার্ডটা একদম ফাঁকা যেত
+    visible: visible.length ? visible : fallback.visible,
+    cardsPerPage: cardsPerPageCount(saved.cardsPerPage),
+    borderStyle: borderStyleValue(saved.borderStyle),
+    showWatermark: saved.showWatermark !== false,
+
+    // চেনা না থাকলে getSeatTemplate ডিফল্টটাই ফেরত দেয়, তাই আইডিটা
+    // কখনো ভুল থাকে না
+    templateId: getSeatTemplate(saved.templateId).id,
+    fontScale: clampFontScale(saved.fontScale),
+    watermarkOpacity: clampWatermarkOpacity(saved.watermarkOpacity),
+  };
+};
+
 /** সেভ করা সেটিংস পড়া — না থাকলে বা নষ্ট থাকলে ডিফল্ট */
 export const loadSeatCardSettings = (languageId = 1) => {
-  const fallback = defaultSeatCardSettings();
-
   try {
     const raw = localStorage.getItem(storageKey(languageId));
-    if (!raw) return fallback;
-
-    const saved = JSON.parse(raw);
-
-    // মুছে ফেলা পুরোনো key ছেঁটে ফেলি — নইলে তালিকা থেকে তুলে দেওয়া
-    // ঘর ("পাশ" এর মতো) সেভ করা সেটিংসে রয়ে যেত
-    const visible = (Array.isArray(saved.visible) ? saved.visible : []).filter((k) =>
-      fieldByKey(k)
-    );
-
-    return {
-      ...fallback,
-      ...saved,
-      // সব ঘর বাদ পড়লে ডিফল্টে ফিরি, নইলে কার্ডটা একদম ফাঁকা যেত
-      visible: visible.length ? visible : fallback.visible,
-      cardsPerPage: cardsPerPageCount(saved.cardsPerPage),
-      borderStyle: borderStyleValue(saved.borderStyle),
-      showWatermark: saved.showWatermark !== false,
-    };
+    if (!raw) return defaultSeatCardSettings();
+    return normalizeSeatCardSettings(JSON.parse(raw));
   } catch {
-    return fallback;
+    return defaultSeatCardSettings();
   }
 };
 

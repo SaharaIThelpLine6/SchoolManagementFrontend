@@ -2,6 +2,17 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
+/**
+ * ⚠️ সিট কার্ড সেটিংসের রাউটটা exam_report এর রাউটার ফাইলে বসানো, তাই
+ * এই slice এর নিজের base (/api/settings) দিয়ে ওটায় পৌঁছানো যায় না।
+ *
+ * আপনার server এ exam_report যে পথে ডাকা হয় — যেমন
+ * `/api/exam/exam_report` হলে এখানে `/api/exam` — ঠিক সেই prefix টাই
+ * নিচে বসান। শুধু এই একটা লাইনই বদলাতে হবে, এন্ডপয়েন্ট দুইটা এখান
+ * থেকেই পথ নেয়।
+ */
+const EXAM_API = `${API_URL}/api/exam`;
+
 export const settingsSlice = createApi({
   reducerPath: 'siteSettings',
   baseQuery: fetchBaseQuery({
@@ -24,6 +35,7 @@ export const settingsSlice = createApi({
     'WebSettings',
     'DocumentSettings',
     'StudentDataExportTemplate',
+    'SeatCardSettings',
   ],
   endpoints: (builder) => ({
     getInstitutionInfo: builder.query({
@@ -313,6 +325,34 @@ export const settingsSlice = createApi({
       invalidatesTags: ['DocumentSettings'],
     }),
 
+    // ================== সিট কার্ড সেটিংস ==================
+    //
+    // ⭐ ব্যবহারকারীর বাছাই করা ডিজাইন, লেখার আকার, জলছাপের ঘনত্ব আর
+    //    কোন ঘরগুলো দেখাবে — সব একটা JSON হয়ে ডেটাবেজে বসে। ভাষা ধরে
+    //    আলাদা (বাংলা/আরবি), তাই দুই ভাষার কার্ড আলাদা সাজে রাখা যায়।
+    //
+    // এন্ডপয়েন্টটা না থাকলেও (পুরোনো সার্ভার) কিছু ভাঙে না — মডাল
+    // localStorage থেকেই চালায়, শুধু অন্য কম্পিউটারে সেটিংসটা যায় না।
+    getSeatCardSettings: builder.query({
+      // পুরো URL দেওয়া হয়েছে ইচ্ছে করেই — RTK Query পুরো URL পেলে
+      // slice এর base টা আর জোড়ে না, তাই অন্য রাউটারেও পৌঁছানো যায়
+      query: (languageId = 1) =>
+        `${EXAM_API}/seat_card_settings?LanguageID=${languageId}`,
+      providesTags: (result, error, languageId) => [
+        { type: 'SeatCardSettings', id: languageId ?? 1 },
+      ],
+    }),
+    saveSeatCardSettings: builder.mutation({
+      query: ({ languageId = 1, settings }) => ({
+        url: `${EXAM_API}/seat_card_settings`,
+        method: 'POST',
+        body: { LanguageID: languageId, Settings: settings },
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: 'SeatCardSettings', id: arg?.languageId ?? 1 },
+      ],
+    }),
+
 
 
     /* =========== student-data-export-template ✅ ১. GET ALL ============ */
@@ -444,6 +484,9 @@ export const {
   useDeleteSupportTicketMutation,
   useGetDocumentSettingsQuery,
   useSaveDocumentSettingsMutation,
+
+  useGetSeatCardSettingsQuery,
+  useSaveSeatCardSettingsMutation,
   useGenerateApiKeyMutation,
   useRegenerateApiKeyMutation,
 

@@ -20,7 +20,7 @@ export const reports = [
 // ★★★ এখানে আপনার চাহিদামতো ৯টি রিপোর্ট সেট করা হয়েছে ★★★
 export const examReports = [
   { ReportID: 1, ReportName: '১. পরীক্ষার ফি তালিকা' },
-  { ReportID: 3, ReportName: '২. দস্তখত পত্র' }, 
+  { ReportID: 3, ReportName: '২. স্বাক্ষরপত্র' }, 
   { ReportID: 4, ReportName: '৩. নম্বর পত্র' }, 
   { ReportID: 7, ReportName: '৪. সিট নং' },
   { ReportID: 8, ReportName: '৫. স্বাক্ষরপত্র ও নম্বরসীট' },

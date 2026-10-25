@@ -4,14 +4,13 @@ import { useGetSessionQuery } from "../../../../../features/session/sessionSlice
 import { useGetExamNameQuery } from "../../../../../features/exam/examQuerySlice";
 import { useGetSingleSubClassQuery } from "../../../../../features/class/classQuerySlice";
 import { useGetInstitutionInfoQuery } from "../../../../../features/settings/settingsQuerySlice";
-import SeatCardWatermark from "../../../../../pages/userpanel/SeatCard/SeatCardWatermark";
+import SeatCardFace, {
+  seatCardFaceCss,
+} from "../../../../../pages/userpanel/SeatCard/Seatcardface";
 import {
-  borderStyleValue,
   cardsPerPageCount,
   defaultSeatCardSettings,
   hasValue,
-  toBn,
-  visibleFieldsOfSection,
 } from "../../../../../Data/seatCardFields";
 
 /**
@@ -48,13 +47,36 @@ import {
  *
  *   খ) আসন নং ছাড়া (showSeatNo = false)
  *      বড় ঘরগুলো একেবারেই বসে না, বরাদ্দের শর্তটাও দেখা হয় না।
+ *
+ * ────────────────────────────────────────────────────────────────────
+ * ⭐ ডিজাইন টেমপ্লেট — চেহারাটা সেটিংস থেকে আসে
+ * ────────────────────────────────────────────────────────────────────
+ * কার্ডের সাজ এই ফাইলে বাঁধা নেই। সেটিংসে বাছা টেমপ্লেট থেকে কিছু মান
+ * (CSS ভেরিয়েবল) আসে, নিচের CSS শুধু var(--sc-…) পড়ে। তাই নতুন ডিজাইন
+ * যোগ করতে এই ফাইলে হাত দিতে হয় না — seatCardTemplates.js এর তালিকায়
+ * একটা লাইন বসালেই চলে।
+ *
+ * টেমপ্লেট যা যা বদলায়: বাইরের রেখা, মাথায় রঙিন পট্টি ও লোগোর দিক,
+ * শিরোনামের পট্টি, বড় ঘরগুলোর সাজ (একসাথে/আলাদা/ডান পাশে/ঘর নেই),
+ * নিচের লাইনে বিন্দু বা রেখা, আর স্বাক্ষরের ঘর।
+ *
+ * ⭐ কার্ডটা নিজে আঁকা হয় SeatCardFace এ — এই ফাইল শুধু কাগজ, পাতা আর
+ * কোন সারি কোন পাতায় সেটা সামলায়। সেটিংসের নমুনাও ওই একই কম্পোনেন্ট
+ * থেকে আঁকে, তাই সেটিংসে যা দেখবেন কাগজে হুবহু তাই ছাপা হবে।
+ *
+ * ⚠️ কোনো টেমপ্লেটেই তথ্য হারায় না। ডেমো ডিজাইনে যে ঘরগুলো নেই সেগুলোও
+ * এখানে বসে — "বড় ঘর নেই" ধাঁচে (boxes: 'none') কলাম/বেঞ্চ/আসন নিচের
+ * লাইনেই নেমে আসে, মুছে যায় না।
+ *
+ * ⭐ "অনেক ফাঁকা" লাগার দুইটা কারণ, দুইটাই এখানে সারানো:
+ *    ১. সব লেখা উপর থেকে শুরু হত, বাড়তি জায়গা নিচে জমত — এখন টেমপ্লেটে
+ *       density: 'spread' দিলে উপর-মাঝ-নিচে ছড়িয়ে বসে (--sc-justify)।
+ *    ২. আসন নং ছাড়া কাগজে বড় ঘর তিনটাই উঠে যায়, তাই আরো ফাঁকা পড়ত —
+ *       এখন ওই কাগজে নিচের লাইনগুলো একটু ছড়িয়ে বসে (.sc-airy)।
  */
 
 // কাগজের হিসাব (mm) — বদলাতে হলে শুধু এখানেই
 const PAGE = { width: 210, height: 297, pad: 10, gap: 4 };
-
-// ঘর ফাঁকা থাকলে যা বসবে
-const DASH = "-";
 
 /**
  * লোগো SQL Server এ varbinary, তাই বাইট হয়েই আসে — { type: 'Buffer',
@@ -250,11 +272,6 @@ const BSeatNoWhite = ({
     );
   }
 
-  /* ---- সেটিংস অনুযায়ী কোন ঘরগুলো বসবে */
-  const headerFields = visibleFieldsOfSection(cardSettings, "header");
-  const boxFields = withSeat ? visibleFieldsOfSection(cardSettings, "box") : [];
-  const detailFields = visibleFieldsOfSection(cardSettings, "detail");
-
   const perPage = cardsPerPageCount(cardSettings.cardsPerPage);
   const rowsPerPage = perPage / 2;
 
@@ -262,24 +279,6 @@ const BSeatNoWhite = ({
   for (let i = 0; i < allSeats.length; i += perPage) {
     pages.push(allSeats.slice(i, i + perPage));
   }
-
-  /** বড় ঘরের মান — সংখ্যা হলে বাংলা অঙ্কে, দরকারে দুই ঘরে (৩ → ০৩) */
-  const boxValue = (field, row) => {
-    const raw = row?.[field.key];
-    if (!hasValue(raw)) return DASH;
-
-    const n = Number(String(raw).trim());
-    if (!Number.isFinite(n)) return raw;      // "কলাম ২" এর মতো লেখা হলে যেমন আছে
-
-    return toBn(field.pad && n < 10 ? `0${n}` : n);
-  };
-
-  /** নিচের লাইনের মান — আইডির মতো সংখ্যাগুলো বাংলা অঙ্কে */
-  const detailValue = (field, row) => {
-    const raw = row?.[field.key];
-    if (!hasValue(raw)) return "";
-    return field.key === "UserCode" ? toBn(raw) : raw;
-  };
 
   return (
     <div className="seat-wrap bg-gray-100 print:bg-transparent w-full">
@@ -302,63 +301,8 @@ const BSeatNoWhite = ({
           overflow: hidden;
         }
 
-        /* ---- কার্ড ---- */
-        .seat-card {
-          box-sizing: border-box;
-          position: relative;
-          border: 0.4mm ${borderStyleValue(cardSettings.borderStyle)} #000000;
-          padding: 3mm 4mm;
-          background: #ffffff;
-          overflow: hidden;
-          display: flex;
-          flex-direction: column;
-          justify-content: flex-start;   /* উপর থেকে শুরু */
-          break-inside: avoid;
-          page-break-inside: avoid;
-        }
-
-        /* ---- মাথা: মাঝখানে ---- */
-        .sc-head { text-align: center; }
-        .sc-head .sc-h-0 { font-size: 12pt; font-weight: 700; line-height: 1.2; }
-        .sc-head .sc-h-n { font-size: 8pt; line-height: 1.35; }
-
-        /* ---- বড় ঘর ---- */
-        .sc-boxes {
-          display: flex;
-          width: 100%;
-          margin: 2mm 0;
-          border: 0.4mm solid #000000;
-        }
-        .sc-boxes > div {
-          flex: 1 1 0;
-          min-width: 0;
-          text-align: center;
-          padding: 1mm 1mm 1.5mm;
-        }
-        .sc-boxes > div + div { border-left: 0.4mm solid #000000; }
-        .sc-boxes .sc-b-lbl { font-size: 7.5pt; line-height: 1.1; }
-        .sc-boxes .sc-b-val {
-          font-size: 19pt; font-weight: 700; line-height: 1.15;
-          /* মান লম্বা হলে ঘরটা যেন না ফুলে ওঠে */
-          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-        }
-
-        /* ---- নিচের তথ্য ----
-           ⭐ margin-top: auto দেওয়া ছিল, তাতে লাইনগুলো কার্ডের একদম
-           তলায় চলে যেত আর মাঝখানে বড় ফাঁকা জায়গা পড়ে থাকত। এখন সব
-           উপর থেকেই শুরু হয়, বাড়তি জায়গাটা নিচে থাকে। */
-        .sc-details { text-align: left; }
-        .sc-details > p {
-          font-size: 9pt; line-height: 1.45;
-          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-        }
-        .sc-details .sc-d-lbl { }
-        .sc-details .sc-d-val { font-weight: 700; }
-
-        .sc-clamp {
-          display: -webkit-box; -webkit-line-clamp: 2;
-          -webkit-box-orient: vertical; overflow: hidden;
-        }
+        /* কার্ডের নিজের CSS — SeatCardFace থেকে, একবারই বসে */
+        ${seatCardFaceCss}
 
         @media screen {
           .seat-page { margin: 6mm auto; box-shadow: 0 1mm 4mm rgba(0,0,0,0.18); }
@@ -383,55 +327,13 @@ const BSeatNoWhite = ({
       {pages.map((pageSeats, pageIndex) => (
         <div key={pageIndex} className="seat-page">
           {pageSeats.map((row, cardIndex) => (
-            <div key={`${row.__key}-${pageIndex}-${cardIndex}`} className="seat-card">
-              {/* জলছাপ — সেটিংসে চালু থাকলে আর লোগোটা হাতে থাকলেই বসে।
-                  logoIsActive টা document_settings এর সুইচ, ওটা বন্ধ
-                  থাকলেও এই কাগজের নিজের সেটিংসই শেষ কথা। */}
-              {cardSettings.showWatermark !== false && watermarkSrc && (
-                <SeatCardWatermark
-                  documentLogo={watermarkSrc}
-                  logoIsActive
-                />
-              )}
-
-              {/* ---- মাথা ---- */}
-              {headerFields.length > 0 && (
-                <div className="sc-head">
-                  {headerFields.map((f, i) => (
-                    <p
-                      key={f.key}
-                      className={`${i === 0 ? "sc-h-0" : "sc-h-n"} sc-clamp`}
-                    >
-                      {row[f.key]}
-                    </p>
-                  ))}
-                </div>
-              )}
-
-              {/* ---- বড় ঘর ---- */}
-              {boxFields.length > 0 && (
-                <div className="sc-boxes">
-                  {boxFields.map((f) => (
-                    <div key={f.key}>
-                      <div className="sc-b-lbl">{f.label}</div>
-                      <div className="sc-b-val">{boxValue(f, row)}</div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* ---- নিচের তথ্য ---- */}
-              {detailFields.length > 0 && (
-                <div className="sc-details">
-                  {detailFields.map((f) => (
-                    <p key={f.key}>
-                      <span className="sc-d-lbl">{f.label}: </span>
-                      <span className="sc-d-val">{detailValue(f, row) || DASH}</span>
-                    </p>
-                  ))}
-                </div>
-              )}
-            </div>
+            <SeatCardFace
+              key={`${row.__key}-${pageIndex}-${cardIndex}`}
+              row={row}
+              settings={cardSettings}
+              logo={watermarkSrc}
+              withSeat={withSeat}
+            />
           ))}
 
           {/* শেষ পাতা অর্ধেক ভরা থাকলে বাকি ঘরগুলো খালি — তাতে ভরা
