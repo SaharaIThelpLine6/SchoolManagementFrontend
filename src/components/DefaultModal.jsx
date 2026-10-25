@@ -98,6 +98,7 @@ import ResultReportSettingModal from '../view/result/Reports/ResultReportSetting
 import ExamRouteCreateModal from '../view/exam/ExamRouteCreateModal';
 import ExamRouteSettingCreateModal from '../view/exam/ExamRouteSettingCreateModal';
 import ExamRoutineCreateModal from '../view/exam/ExamRouting/ExamRoutineCreateModal';
+import ExamRoutineUpdateModal from '../view/exam/ExamRouting/ExamRoutineUpdateModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
@@ -434,6 +435,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'EXAM_ROUTINE_CREATE' && (
                   <ExamRoutineCreateModal />
+                )}
+                {modalType === 'EXAM_ROUTINE_UPDATE' && (
+                  <ExamRoutineUpdateModal key={`${meta.sessionID}-${meta.examID}-${meta.subClassID}`} meta={meta} />
                 )}
                 {modalType === 'EXAM_ROUTINE_SETTING' && (
                   <ExamRouteSettingCreateModal />

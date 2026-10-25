@@ -323,8 +323,18 @@ export const examSlice = createApi({
       providesTags: ['ExamRoutine'],
     }),
     getAllExamRoutine: builder.query({
-      query: ({ sessionID, examID, subClassId}) =>
+      query: ({ sessionID, examID, subClassId }) =>
         `get_all_exam_routine/${sessionID}/${examID}/${subClassId}`,
+      providesTags: ['ExamRoutine'],
+    }),
+    getCheckExamCondition: builder.query({
+      query: ({ sessionID, examID, subClassId }) =>
+        `check_exam_condition/${sessionID}/${examID}/${subClassId}`,
+      providesTags: ['ExamRoutine'],
+    }),
+    getExamSubject: builder.query({
+      query: ({ sessionID, examID, subClassId }) =>
+        `get_exam_subject/${sessionID}/${examID}/${subClassId}`,
       providesTags: ['ExamRoutine'],
     }),
     getAllExamRoutineList: builder.query({
@@ -342,6 +352,7 @@ export const examSlice = createApi({
         method: 'POST',
         body,
       }),
+      invalidatesTags: ['ExamRoutine', 'ExamRoutineList'],
     }),
     putExamRoutine: builder.mutation({
       query: (body) => ({
@@ -429,7 +440,7 @@ export const examSlice = createApi({
     }),
 
     getExamConditonEntry: builder.query({
-      query: ({SessionID, ExamID, SubClassID}) => `exam_condition_entry/${SessionID}/${ExamID}/${SubClassID}`,
+      query: ({ SessionID, ExamID, SubClassID }) => `exam_condition_entry/${SessionID}/${ExamID}/${SubClassID}`,
       providesTags: ['ExamRules'],
     }),
 
@@ -443,10 +454,10 @@ export const examSlice = createApi({
     }),
 
     deleteExamCondition: builder.mutation({
-      query: ({SessionID, ExamID, SubClassID}) => ({
+      query: ({ SessionID, ExamID, SubClassID }) => ({
         url: `exam_condition_entry`,
         method: "DELETE",
-        body: {SessionID, ExamID, SubClassID},
+        body: { SessionID, ExamID, SubClassID },
       }),
       invalidatesTags: ["ExamDivitions", "ExamConditions"],
     }),
@@ -564,8 +575,7 @@ export const examSlice = createApi({
     }),
     getExamRoutineCard: builder.query({
       query: ({ SessionID, ExamID, SubClassID, HallID }) =>
-        `/exam_routine_card/${SessionID}/${ExamID}/${SubClassID}${
-          HallID ? `/${HallID}` : ''
+        `/exam_routine_card/${SessionID}/${ExamID}/${SubClassID}${HallID ? `/${HallID}` : ''
         }`,
       providesTags: ['ExamRoutineCard'],
     }),
@@ -645,6 +655,7 @@ export const {
   useDeleteAverageExamConditionSettingMutation,
   useGetExamRoutineQuery,
   useGetAllExamRoutineQuery,
+  useGetCheckExamConditionQuery,
   usePutExamRoutineMutation,
   useGetSingleExamRoutineQuery,
 
@@ -683,4 +694,6 @@ export const {
   useUpdateAdmitCardTemplateMutation,
 
   useGetAllExamRoutineListQuery,
+  useGetExamSubjectQuery,
+  useLazyGetAllExamRoutineQuery
 } = examSlice;

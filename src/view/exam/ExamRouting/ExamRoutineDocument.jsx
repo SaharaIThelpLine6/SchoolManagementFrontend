@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import PropTypes from 'prop-types';
+import './ExamRoutineDocument.compact.css';
 
 const bn = (value) => String(value ?? '').replace(/\d/g, (digit) => '০১২৩৪৫৬৭৮৯'[digit]);
 const isHidden = (row) => row.hidden === true || Number(row.hidden ?? row.IsHidden) === 1;
@@ -46,7 +47,7 @@ const ExamRoutineDocument = ({ details = {}, institution = {} }) => {
         ) : (
           <div className="routine-document__monogram" aria-hidden="true">{(institution?.InstitutionName || 'ম').charAt(0)}</div>
         )}
-        <div>
+        <div className="routine-document__header-text">
           <h1>{institution?.InstitutionName || 'পরীক্ষার রুটিন'}</h1>
           {institution?.Address && <p>{institution.Address}</p>}
           {institution?.ContactNumber && <p>মোবাইল: {bn(institution.ContactNumber)}</p>}
@@ -83,7 +84,6 @@ const ExamRoutineDocument = ({ details = {}, institution = {} }) => {
                 <td className="routine-document__serial">{bn(index + 1)}</td>
                 <td className="routine-document__date">
                   <span>{formatDate(row.Date ?? row.ExamDate)}</span>
-                  {row.BnExamDate && <small>{bn(row.BnExamDate)}</small>}
                 </td>
                 <td className="routine-document__day">{row.Day ?? row.ExamDay ?? '—'}</td>
                 {hidden ? (

@@ -1,11 +1,6 @@
-import React, { useEffect } from 'react';
-import { Buffer } from 'buffer';
+import React from 'react';
 import QRCode from "react-qr-code";
 
-// ⚠️ Path ta tomar file location onujayi thik koro.
-// Font file: src/assets/font/kalpurush.ttf  (choto hater k)
-// "?url" Vite-ke bole file-ta asset hishebe URL return korte.
-import kalpurushUrl from '../../assets/font/kalpurush.ttf?url';
 import { useGetLabelNameListsQuery } from '../../features/result/resultSilce';
 import { bufferToDataUrl } from '../../utils/bufferDataURL';
 
@@ -14,19 +9,6 @@ import { bufferToDataUrl } from '../../utils/bufferDataURL';
 // Print CSS (A4 Portrait, 1 student = 1 page)
 // ==========================================
 const PRINT_CSS = `
-@font-face {
-  font-family: 'KalpurushLocal';
-  src: url('${kalpurushUrl}') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Screen + print dutoy Kalpurush. Child element gulo inherit korbe */
-#marksheet-print-area {
-  font-family: 'KalpurushLocal', 'Kalpurush', 'Noto Sans Bengali', 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
-}
-
 @page {
   size: A4 portrait;
   margin: 6mm;
@@ -147,8 +129,6 @@ const pick = (...vals) => {
   return found === undefined ? '-' : found;
 };
 
-
-
 // Print-safe cell colors (inline, jate print-e drop na hoy)
 const EXACT = { WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' };
 const TH_STYLE = { backgroundColor: '#0f766e', color: '#ffffff', ...EXACT };
@@ -157,16 +137,16 @@ const TH_STYLE = { backgroundColor: '#0f766e', color: '#ffffff', ...EXACT };
 // Small components
 // ==========================================
 const SectionTitle = ({ icon, children }) => (
-  <div className="flex items-center gap-2 text-[13px] print:text-[11px] font-bold text-emerald-800 mt-6 mb-3 print:mt-2 print:mb-1.5">
+  <div className="flex items-center gap-2 text-[17px] print:text-[15px] font-bold text-emerald-800 mt-6 mb-3 print:mt-2 print:mb-1.5">
     <span className="text-emerald-600">{icon}</span>
     <span>{children}</span>
     <div className="flex-1 h-[2px] bg-gradient-to-r from-emerald-200 to-transparent" />
   </div>
 );
 
-const InfoRow = ({ label, value, labelW = 'w-[100px]' }) => (
-  <div className="flex border-b border-slate-200 py-2 print:py-1 text-[12px] print:text-[10.5px]">
-    <span className={`${labelW} print:w-[85px] shrink-0 text-slate-500 font-medium`}>{label}</span>
+const InfoRow = ({ label, value, labelW = 'w-[125px]' }) => (
+  <div className="flex border-b border-slate-200 py-2 print:py-1 text-[16px] print:text-[14px]">
+    <span className={`${labelW} print:w-[105px] shrink-0 text-slate-500 font-medium`}>{label}</span>
     <span className="font-semibold text-slate-800">{toBn(value)}</span>
   </div>
 );
@@ -189,11 +169,8 @@ const SingleMarkSheet = ({
   ExamID,
   SubClassID,
   ExamName,
-  DivisionID,
-  SessionID
 }) => {
   const studentSubjects = Array.isArray(student?.subjects) ? student.subjects : [];
-
 
   const findSubject = (subjectId) =>
     studentSubjects.find(
@@ -232,20 +209,20 @@ const SingleMarkSheet = ({
   const dense = totalSubjects > 10;
 
   const rowPad = ultraDense
-    ? 'print:py-[1px]'
+    ? 'print:py-0'
     : veryDense
-      ? 'print:py-0.5'
+      ? 'print:py-[1px]'
       : dense
-        ? 'print:py-1'
-        : 'print:py-1.5';
+        ? 'print:py-0.5'
+        : 'print:py-1';
 
   const rowText = ultraDense
-    ? 'print:text-[10px]'
+    ? 'print:text-[12.5px]'
     : veryDense
-      ? 'print:text-[11px]'
+      ? 'print:text-[13.5px]'
       : dense
-        ? 'print:text-[12px]'
-        : 'print:text-[13px]';
+        ? 'print:text-[15px]'
+        : 'print:text-[17px]';
 
   // ===== Division rows =====
   const divisionRows = [];
@@ -259,7 +236,6 @@ const SingleMarkSheet = ({
       const dId = source?.[`DivisionID${i}`];
       const dNum = source?.[`DivisionNumber${i}`];
 
-      // Division ID না থাকলে skip
       if (dId === null || dId === undefined || dId === '') continue;
 
       const found = divisions.find((d) => Number(d.ID) === Number(dId));
@@ -271,7 +247,7 @@ const SingleMarkSheet = ({
       });
     }
   } else {
-    // অন্যান্য ExamType → examConfig থেকে নাও (আগের মতো)
+    // অন্যান্য ExamType → examConfig থেকে নাও
     for (let i = 1; i <= 14; i++) {
       const dId = examConfig?.[`DivisionID${i}`];
       const dNum = examConfig?.[`DivisionNumber${i}`];
@@ -288,29 +264,6 @@ const SingleMarkSheet = ({
     }
   }
 
-  // console.log(examConfig, "examConfig");
-  // console.log(divisions, "divisions");
-  // console.log(examSubjects, "examSubjects");
-  // console.log(divisionRows, "divisionRows");
-  // const divisionRows = [];
-
-  // for (let i = 1; i <= 14; i++) {
-  //   const dId = examConfig?.[`DivisionID${i}`];
-  //   const dNum = examConfig?.[`DivisionNumber${i}`];
-
-  //   // Division ID না থাকলে skip
-  //   if (dId === null || dId === undefined || dId === '') continue;
-
-  //   const found = divisions.find((d) => Number(d.ID) === Number(dId));
-
-  //   if (!found) continue;
-
-  //   divisionRows.push({
-  //     name: found.DivisionNames,
-  //     number: dNum ?? 0,
-  //   });
-  // }
-
   const studentName = pick(student?.UserName, student?.StudentName, student?.Name);
   const fatherName = pick(student?.FatherName, student?.FathersName, student?.Father);
   const birthDate = pick(student?.DateOfBirth, student?.DOB, student?.BirthDate);
@@ -324,10 +277,6 @@ const SingleMarkSheet = ({
       student?.Total !== null
       ? (Number(student.Total) / examConfig.AverageSubsonkha).toFixed(2)
       : '-';
-  // const averageMark =
-  //   totalSubjects > 0 && student?.Total !== undefined && student?.Total !== null
-  //     ? (Number(student.Total) / totalSubjects).toFixed(2)
-  //     : '-';
 
   return (
     <div
@@ -346,24 +295,24 @@ const SingleMarkSheet = ({
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-slate-100">
-                <span className="text-[10px] font-medium text-slate-400">No Logo</span>
+                <span className="text-[12px] font-medium text-slate-400">No Logo</span>
               </div>
             )}
           </div>
           <div>
-            <h1 className="text-xl md:text-2xl print:text-[18px] font-bold leading-tight text-white drop-shadow-sm">
+            <h1 className="text-[30px] md:text-[32px] print:text-[24px] font-bold leading-tight text-white drop-shadow-sm">
               {toBn(institution?.InstitutionName || '-')}
             </h1>
-            <p className="text-[11px] md:text-xs print:text-[10px] text-emerald-100 mt-1 print:mt-0.5">
+            <p className="text-[15px] md:text-base print:text-[14px] text-emerald-100 mt-1 print:mt-0.5">
               {toBn(institution?.Address || '-')}
             </p>
           </div>
         </div>
         <div className="text-center md:text-right print:text-right">
-          <p className="text-[11px] md:text-xs print:text-[10px] text-emerald-100 mt-1 print:mt-0.5">
+          <p className="text-[15px] md:text-base print:text-[14px] text-emerald-100 mt-1 print:mt-0.5">
             {toBn(session?.SessionName || '-')}
           </p>
-          <span className="inline-block mt-1 rounded-full border border-emerald-300/50 bg-emerald-700/50 px-4 py-1.5 print:px-3 print:py-1 text-xs print:text-[10px] font-semibold text-white shadow-sm">
+          <span className="inline-block mt-1 rounded-full border border-emerald-300/50 bg-emerald-700/50 px-4 py-1.5 print:px-3 print:py-1 text-base print:text-[14px] font-semibold text-white shadow-sm">
             {toBn(ExamName || '-')}
           </span>
         </div>
@@ -373,10 +322,10 @@ const SingleMarkSheet = ({
 
       {/* Title bar */}
       <div className="flex flex-col sm:flex-row print:flex-row items-center justify-between bg-emerald-50 border-b border-emerald-100 px-8 py-3.5 print:px-5 print:py-2 print:shrink-0">
-        <h2 className="text-sm md:text-[15px] print:text-[12px] font-bold text-emerald-800 flex items-center gap-2">
+        <h2 className="text-[19px] md:text-[20px] print:text-[16px] font-bold text-emerald-800 flex items-center gap-2">
           <span>📋</span> পরীক্ষার্থীর বিস্তারিত ফলাফল
         </h2>
-        <span className="mt-2 sm:mt-0 print:mt-0 rounded-full bg-emerald-600 px-4 py-1 print:px-3 print:py-0.5 text-xs print:text-[10px] font-semibold text-white shadow-sm">
+        <span className="mt-2 sm:mt-0 print:mt-0 rounded-full bg-emerald-600 px-4 py-1 print:px-3 print:py-0.5 text-base print:text-[14px] font-semibold text-white shadow-sm">
           {toBn(classInfo?.ClassName || '-')}
         </span>
       </div>
@@ -402,29 +351,29 @@ const SingleMarkSheet = ({
             <SectionTitle icon="📝">নম্বর বিভাজন</SectionTitle>
             <div className="w-full rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
               <div className="bg-slate-100 border-b border-slate-200 px-3 py-1.5 print:px-2 print:py-1 text-center">
-                <p className="text-[12px] print:text-[10px] font-bold text-slate-700">
+                <p className="text-[16px] print:text-[14px] font-bold text-slate-700">
                   মোট বিভাগ - {toBn(divisionRows.length)} টি | মোট বিষয় {toBn(totalSubjects)} টি
                 </p>
               </div>
 
               <div className="p-2 print:p-1">
                 {divisionRows.length === 0 ? (
-                  <div className="text-center text-slate-400 text-[11px] print:text-[10px] py-2 print:py-1">
+                  <div className="text-center text-slate-400 text-[15px] print:text-[14px] py-2 print:py-1">
                     কোনো বিভাগ পাওয়া যায়নি
                   </div>
                 ) : (
                   divisionRows.map((item, index) => (
                     <div
                       key={index}
-                      className="flex justify-between items-center py-1 print:py-0.5 px-2 text-[12px] print:text-[10px] font-medium text-slate-600 border-b border-dashed border-slate-100 last:border-0"
+                      className="flex justify-between items-center py-1 print:py-0.5 px-2 text-[16px] print:text-[14px] font-medium text-slate-600 border-b border-dashed border-slate-100 last:border-0"
                     >
-                      <div className="w-[110px] truncate">{item.name}</div>
+                      <div className="w-[150px] print:w-[125px] truncate">{item.name}</div>
                       <div className="flex items-center gap-1.5 print:gap-1 text-slate-700">
                         <span>{toBn(totalSubjects)}</span>
                         <span className="text-slate-400">×</span>
                         <span>{toBn(item.number)}</span>
                         <span className="text-slate-400">=</span>
-                        <span className="font-bold text-emerald-700 w-9 print:w-8 text-right">
+                        <span className="font-bold text-emerald-700 w-12 print:w-11 text-right">
                           {toBn(totalSubjects * (Number(item.number) || 0))}
                         </span>
                       </div>
@@ -443,12 +392,12 @@ const SingleMarkSheet = ({
             <table className="w-full min-w-[700px] print:min-w-0 border-collapse bg-white text-slate-700">
               <thead>
                 <tr className="text-center">
-                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1.5 text-[13px] print:text-[10.5px] font-bold">ক্রমিক</th>
-                  <th style={TH_STYLE} className="border-b border-teal-700 px-4 py-3 print:px-2 print:py-1.5 text-[13px] print:text-[10.5px] font-bold text-left">বিষয়</th>
-                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1.5 text-[13px] print:text-[10.5px] font-bold">পূর্ণমান</th>
-                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1.5 text-[13px] print:text-[10.5px] font-bold">পাশমার্ক</th>
-                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1.5 text-[13px] print:text-[10.5px] font-bold whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
-                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1.5 text-[13px] print:text-[10.5px] font-bold">প্রাপ্ত নম্বর</th>
+                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] print:text-[14.5px] font-bold">ক্রমিক</th>
+                  <th style={TH_STYLE} className="border-b border-teal-700 px-4 py-3 print:px-2 print:py-1 text-[17px] print:text-[14.5px] font-bold text-left">বিষয়</th>
+                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] print:text-[14.5px] font-bold">পূর্ণমান</th>
+                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] print:text-[14.5px] font-bold">পাশমার্ক</th>
+                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] print:text-[14.5px] font-bold whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
+                  <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] print:text-[14.5px] font-bold">প্রাপ্ত নম্বর</th>
                 </tr>
               </thead>
               <tbody>
@@ -463,12 +412,12 @@ const SingleMarkSheet = ({
                       key={item.id}
                       className={`${isAlt ? 'row-alt' : 'row-plain'} text-center`}
                     >
-                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[13px] ${rowText}`}>{toBn(index + 1)}</td>
-                      <td style={cellStyle} className={`border-b border-slate-100 px-4 py-2.5 print:px-2 ${rowPad} text-left text-[13px] ${rowText} font-medium text-slate-800`}>{toBn(item.subject)}</td>
-                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[13px] ${rowText}`}>{toBn(item.fullMark)}</td>
-                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[13px] ${rowText}`}>{toBn(item.passMark)}</td>
-                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[13px] ${rowText}`}>{toBn(item.highestMark)}</td>
-                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[13px] ${rowText} font-bold text-emerald-700`}>{toBn(item.obtainedMark)}</td>
+                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText}`}>{toBn(index + 1)}</td>
+                      <td style={cellStyle} className={`border-b border-slate-100 px-4 py-2.5 print:px-2 ${rowPad} text-left text-[17px] ${rowText} font-medium text-slate-800`}>{toBn(item.subject)}</td>
+                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText}`}>{toBn(item.fullMark)}</td>
+                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText}`}>{toBn(item.passMark)}</td>
+                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText}`}>{toBn(item.highestMark)}</td>
+                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText} font-bold text-emerald-700`}>{toBn(item.obtainedMark)}</td>
                     </tr>
                   );
                 })}
@@ -481,21 +430,21 @@ const SingleMarkSheet = ({
         <div className="mt-6 print:mt-1 print:shrink-0">
           <SectionTitle icon="🏆">সারসংক্ষেপ</SectionTitle>
           <div className="grid grid-cols-2 md:grid-cols-4 print:grid-cols-4 gap-4 print:gap-2 mt-3 print:mt-1">
-            <div className="flex flex-col items-center justify-center gap-1.5 print:gap-0.5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 print:p-2 shadow-sm">
-              <p className="text-[12px] print:text-[10px] font-semibold text-emerald-600">প্রাপ্ত বিভাগ</p>
-              <p className="text-xl print:text-[14px] font-bold text-emerald-800">{toBn(divisionName)}</p>
+            <div className="flex flex-col items-center justify-center gap-1.5 print:gap-0.5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 print:p-1.5 shadow-sm">
+              <p className="text-[16px] print:text-[14px] font-semibold text-emerald-600">প্রাপ্ত বিভাগ</p>
+              <p className="text-[26px] print:text-[19px] font-bold text-emerald-800">{toBn(divisionName)}</p>
             </div>
-            <div className="flex flex-col items-center justify-center gap-1.5 print:gap-0.5 rounded-xl border border-blue-200 bg-blue-50 p-4 print:p-2 shadow-sm">
-              <p className="text-[12px] print:text-[10px] font-semibold text-blue-600">মেধা স্থান</p>
-              <p className="text-xl print:text-[14px] font-bold text-blue-800">{toBn(student?.Positions ?? '-')}</p>
+            <div className="flex flex-col items-center justify-center gap-1.5 print:gap-0.5 rounded-xl border border-blue-200 bg-blue-50 p-4 print:p-1.5 shadow-sm">
+              <p className="text-[16px] print:text-[14px] font-semibold text-blue-600">মেধা স্থান</p>
+              <p className="text-[26px] print:text-[19px] font-bold text-blue-800">{toBn(student?.Positions ?? '-')}</p>
             </div>
-            <div className="flex flex-col items-center justify-center gap-1.5 print:gap-0.5 rounded-xl border border-purple-200 bg-purple-50 p-4 print:p-2 shadow-sm">
-              <p className="text-[12px] print:text-[10px] font-semibold text-purple-600">গড়</p>
-              <p className="text-xl print:text-[14px] font-bold text-purple-800">{toBn(averageMark)}</p>
+            <div className="flex flex-col items-center justify-center gap-1.5 print:gap-0.5 rounded-xl border border-purple-200 bg-purple-50 p-4 print:p-1.5 shadow-sm">
+              <p className="text-[16px] print:text-[14px] font-semibold text-purple-600">গড়</p>
+              <p className="text-[26px] print:text-[19px] font-bold text-purple-800">{toBn(averageMark)}</p>
             </div>
-            <div className="flex flex-col items-center justify-center gap-1.5 print:gap-0.5 rounded-xl border border-amber-200 bg-amber-50 p-4 print:p-2 shadow-sm">
-              <p className="text-[12px] print:text-[10px] font-semibold text-amber-600">মোট নম্বর</p>
-              <p className="text-xl print:text-[14px] font-bold text-amber-800">{toBn(student?.Total ?? '-')}</p>
+            <div className="flex flex-col items-center justify-center gap-1.5 print:gap-0.5 rounded-xl border border-amber-200 bg-amber-50 p-4 print:p-1.5 shadow-sm">
+              <p className="text-[16px] print:text-[14px] font-semibold text-amber-600">মোট নম্বর</p>
+              <p className="text-[26px] print:text-[19px] font-bold text-amber-800">{toBn(student?.Total ?? '-')}</p>
             </div>
           </div>
         </div>
@@ -504,17 +453,17 @@ const SingleMarkSheet = ({
         <div className="marksheet-comments mt-8 pt-6 print:mt-2 print:pt-2 border-t border-slate-200 print:flex print:flex-col">
           <div className="flex flex-col md:flex-row print:flex-row gap-6 print:gap-3 print:flex-1 print:min-h-0">
             <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[50px]">
-              <p className="text-slate-700 font-semibold text-sm print:text-[11px]">
+              <p className="text-slate-700 font-semibold text-[17px] print:text-[14.5px]">
                 শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :
               </p>
 
-              <div className="border-b border-dashed border-slate-300 w-1/2 mt-1 print:mt-1">
+              <div className="border-b border-dashed border-slate-300 w-1/2 mt-1 print:mt-1 text-[16px] print:text-[14px]">
                 {student?.Note ?? ""}
               </div>
             </div>
 
             <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[50px] flex flex-col">
-              <p className="text-slate-700 font-semibold text-sm print:text-[11px]">
+              <p className="text-slate-700 font-semibold text-[17px] print:text-[14.5px]">
                 অভিভাবকের মন্তব্য ও স্বাক্ষর :
               </p>
 
@@ -539,7 +488,7 @@ const SingleMarkSheet = ({
           </div>
 
           <div className="mt-3 text-center print:mt-1">
-            <p className="text-sm text-slate-800 print:text-[9px]">
+            <p className="text-[17px] text-slate-800 print:text-[13px]">
               যাচাই করুন
             </p>
           </div>
@@ -560,11 +509,11 @@ const SingleMarkSheet = ({
           <div className="mt-2 w-full border-t-2 border-dashed border-slate-400 print:mt-1"></div>
 
           <div className="mt-3 space-y-1 text-center print:mt-1 print:space-y-0">
-            <p className="text-base font-bold text-slate-800 print:text-[11px]">
+            <p className="text-[20px] font-bold text-slate-800 print:text-[15px]">
               {institution?.PrincipalName}
             </p>
 
-            <p className="text-xs text-slate-500 print:text-[9px]">
+            <p className="text-[15px] text-slate-500 print:text-[13px]">
               তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}
             </p>
           </div>
@@ -585,11 +534,11 @@ const SingleMarkSheet = ({
           <div className="mt-2 w-full border-t-2 border-dashed border-slate-400 print:mt-1"></div>
 
           <div className="mt-3 space-y-1 text-center print:mt-1 print:space-y-0">
-            <p className="text-base font-bold text-slate-800 print:text-[11px]">
+            <p className="text-[20px] font-bold text-slate-800 print:text-[15px]">
               {institution?.NajemName}
             </p>
 
-            <p className="text-xs text-slate-500 print:text-[9px]">
+            <p className="text-[15px] text-slate-500 print:text-[13px]">
               তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}
             </p>
           </div>
@@ -598,8 +547,8 @@ const SingleMarkSheet = ({
       </div>
 
       {/* Bottom line */}
-      <div className="mx-8 print:mx-5 flex flex-col md:flex-row print:flex-row justify-between items-center border-t border-slate-200 py-3 print:py-1.5 text-[10px] print:text-[8px] text-slate-400 gap-2 print:shrink-0">
-        <span className="text-[11px] font-medium text-slate-500">
+      <div className="mx-8 print:mx-5 flex flex-col md:flex-row print:flex-row justify-between items-center border-t border-slate-200 py-3 print:py-1 text-[14px] print:text-[12px] text-slate-400 gap-2 print:shrink-0">
+        <span className="text-[15px] print:text-[13px] font-medium text-slate-500">
           Software Developed by{' '}
           <span className="font-bold tracking-wide text-emerald-600">
             SAHARAIT
@@ -614,18 +563,6 @@ const SingleMarkSheet = ({
 // Main Component
 // ==========================================
 const MarkSheetPdf = ({ data }) => {
-  // console.log(data, "data")
-  // Font age thekei load kore rakhbe, jate print preview-te fallback na dhore
-  useEffect(() => {
-    const load = () =>
-      document.fonts
-        .load("16px 'KalpurushLocal'", 'অআকখ০১২৩ABC')
-        .catch(() => { });
-    load();
-    window.addEventListener('beforeprint', load);
-    return () => window.removeEventListener('beforeprint', load);
-  }, []);
-
   const institution = data?.institution;
   const ExamName = data?.exam?.[0]?.ExamName;
 
@@ -645,18 +582,14 @@ const MarkSheetPdf = ({ data }) => {
   const divisions = Array.isArray(data?.divisions) ? data.divisions : [];
   const students = Array.isArray(data?.students) ? data.students : [];
 
-  console.log(data, "data")
-  console.log(divisions, "divisions")
-
   if (students.length === 0) {
     return (
-      <div className="flex items-center justify-center p-10 text-slate-500 bg-slate-50 rounded-lg border border-slate-200">
+      <div className="font-SolaimanLipi flex items-center justify-center p-10 text-slate-500 bg-slate-50 rounded-lg border border-slate-200 text-lg">
         কোনো শিক্ষার্থীর ডেটা পাওয়া যায়নি
       </div>
     );
   }
 
-  // Test-er jonno 3 jon: const visibleStudents = students.slice(0, 3);
   const visibleStudents = students;
 
   return (
@@ -664,7 +597,7 @@ const MarkSheetPdf = ({ data }) => {
       <style>{PRINT_CSS}</style>
       <div
         id="marksheet-print-area"
-        className="w-full bg-slate-100 py-6 min-h-screen print:bg-white print:py-0 print:min-h-0"
+        className="font-SolaimanLipi w-full bg-slate-100 py-6 min-h-screen print:bg-white print:py-0 print:min-h-0"
       >
         {visibleStudents.map((student, idx) => (
           <SingleMarkSheet
@@ -675,7 +608,6 @@ const MarkSheetPdf = ({ data }) => {
             signatureNajemSrc={signatureNajemSrc}
             signaturePrincipalSrc={signaturePrincipalSrc}
             session={session}
-            SessionID={session?.SessionID}
             classInfo={classInfo}
             SubClassID={classGroupInfo?.SubClassID}
             ExamName={ExamName}
@@ -683,7 +615,6 @@ const MarkSheetPdf = ({ data }) => {
             examSubjects={examSubjects}
             divisions={divisions}
             examConfig={examConfig}
-            DivisionID={student?.DivisionID}
             isLast={idx === visibleStudents.length - 1}
           />
         ))}

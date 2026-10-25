@@ -1,9 +1,6 @@
-
-
 import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
 import { FaPlus, FaPrint } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import EditButton from '../components/Button/EditButton';
@@ -20,14 +17,37 @@ import useTranslate from '../utils/Translate';
 import ExamRoutinePrint from './ExamRoutinePrint';
 import { showModal } from '../utils/ModalControlar';
 
+const getSubClassID = (routing) =>
+  routing.SubClassID ?? routing.classGroup?.SubClassID;
+
+const toPrintItem = (routing) => ({
+  sessionID: routing.SessionID,
+  examID: routing.ExamID,
+  subClassID: getSubClassID(routing),
+});
+
+// Same Session + Exam + Class should be printed only once.
+const toUniquePrintItems = (list) => {
+  const seen = new Set();
+  return list.reduce((items, routing) => {
+    const item = toPrintItem(routing);
+    const key = `${item.sessionID}-${item.examID}-${item.subClassID}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      items.push(item);
+    }
+    return items;
+  }, []);
+};
+
 const ExamRoutingList = ({ pageTitle }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const translate = useTranslate();
   const [sessionFilter, setSessionFilter] = useState('');
   const [examFilter, setExamFilter] = useState('');
   const [subClassFilter, setSubClassFilter] = useState('');
-  const [printRouting, setPrintRouting] = useState(null);
+  // Array of { sessionID, examID, subClassID } that will be printed
+  const [printItems, setPrintItems] = useState(null);
   const { data: sessions = [] } = useGetSessionsQuery();
   const { data: exams = [] } = useGetExamNamesQuery();
   const { data: subClasses = [] } = useGetSubClassListQuery();
@@ -40,24 +60,32 @@ const ExamRoutingList = ({ pageTitle }) => {
   const [deleteExamRoutine] = useDeleteExamRoutineMutation();
   const routingData = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
   const filteredRoutingData = routingData.filter((routing) => {
-    const routingSubClassID = routing.SubClassID ?? routing.classGroup?.SubClassID;
+    const routingSubClassID = getSubClassID(routing);
     return (
       (!sessionFilter || String(routing.SessionID) === sessionFilter) &&
       (!examFilter || String(routing.ExamID) === examFilter) &&
       (!subClassFilter || String(routingSubClassID) === subClassFilter)
     );
   });
+  const printAllCount = toUniquePrintItems(filteredRoutingData).length;
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
   const handleEdit = (routing) => {
-    const routingSessionID = routing.SessionID;
-    const routingExamID = routing.ExamID;
-    const routingSubClassID = routing.SubClassID ?? routing.classGroup?.SubClassID;
-    navigate(
-      `/dashboard/exam/routine-edit/${routingSessionID}/${routingExamID}/${routingSubClassID}`
+    showModal(
+      'পরীক্ষার রুটিন আপডেট করুন',
+      'EXAM_ROUTINE_UPDATE',
+      null,
+      {
+        closeOnOutSide: false,
+        meta: {
+          sessionID: routing.SessionID,
+          examID: routing.ExamID,
+          subClassID: getSubClassID(routing),
+        },
+      }
     );
   };
 
@@ -65,6 +93,17 @@ const ExamRoutingList = ({ pageTitle }) => {
     showModal('পরীক্ষার রুটিন তৈরি করুন', 'EXAM_ROUTINE_CREATE', {
       closeOnOutSide: false,
     });
+  };
+
+  // Top button: print every routine that matches the current filters
+  const handlePrintAll = () => {
+    const items = toUniquePrintItems(filteredRoutingData);
+    if (items.length > 0) setPrintItems(items);
+  };
+
+  // Row button: print only this routine
+  const handlePrintSingle = (routing) => {
+    setPrintItems([toPrintItem(routing)]);
   };
 
   const handleDelete = async (routing) => {
@@ -83,7 +122,7 @@ const ExamRoutingList = ({ pageTitle }) => {
       const response = await deleteExamRoutine({
         sessionID: routing.SessionID,
         examID: routing.ExamID,
-        subClassID: routing.SubClassID ?? routing.classGroup?.SubClassID,
+        subClassID: getSubClassID(routing),
       }).unwrap();
       await Swal.fire({
         icon: 'success',
@@ -119,7 +158,7 @@ const ExamRoutingList = ({ pageTitle }) => {
         </div>
       </div>
 
-      <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-4">
         <label className="text-sm font-medium text-gray-700">
           Session
           <select
@@ -165,6 +204,19 @@ const ExamRoutingList = ({ pageTitle }) => {
             ))}
           </select>
         </label>
+        <div className="flex items-end justify-end">
+          <button
+            type="button"
+            onClick={handlePrintAll}
+            disabled={printAllCount === 0}
+            className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+            title={`Print all routines (${printAllCount})`}
+            aria-label="Print all routines"
+          >
+            <FaPrint size={16} aria-hidden="true" />
+            সব প্রিন্ট ({printAllCount})
+          </button>
+        </div>
       </div>
 
       {isError ? (
@@ -188,7 +240,7 @@ const ExamRoutingList = ({ pageTitle }) => {
             <tbody>
               {filteredRoutingData.map((routing, index) => (
                 <tr
-                  key={routing.ERIDL ?? `${routing.SessionID}-${routing.ExamID}-${routing.SubClassID ?? routing.classGroup?.SubClassID}`}
+                  key={routing.ERIDL ?? `${routing.SessionID}-${routing.ExamID}-${getSubClassID(routing)}`}
                   className="border-b border-gray-100 hover:bg-gray-50"
                 >
                   <td className="px-4 py-3 text-sm text-gray-700">{index + 1}</td>
@@ -207,11 +259,7 @@ const ExamRoutingList = ({ pageTitle }) => {
                       <DeleteButton onClick={() => handleDelete(routing)} />
                       <button
                         type="button"
-                        onClick={() => setPrintRouting({
-                          sessionID: routing.SessionID,
-                          examID: routing.ExamID,
-                          subClassID: routing.SubClassID ?? routing.classGroup?.SubClassID,
-                        })}
+                        onClick={() => handlePrintSingle(routing)}
                         className="flex items-center justify-center rounded-md bg-emerald-600 p-2 text-white hover:bg-emerald-700"
                         title="Print routine as PDF"
                         aria-label="Print routine as PDF"
@@ -226,10 +274,10 @@ const ExamRoutingList = ({ pageTitle }) => {
           </table>
         </div>
       )}
-      {printRouting && (
+      {printItems && (
         <ExamRoutinePrint
-          {...printRouting}
-          onClose={() => setPrintRouting(null)}
+          items={printItems}
+          onClose={() => setPrintItems(null)}
         />
       )}
     </div>
