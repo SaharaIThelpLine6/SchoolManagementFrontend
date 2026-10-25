@@ -8,6 +8,7 @@ import './ExamRoutinePrint.css';
 import { FaPrint } from 'react-icons/fa';
 
 const STORAGE_KEY = 'examRoutinePrintSettings';
+const FONT_STORAGE_KEY = 'examRoutinePrintFontScale';
 const MM_TO_PX = 96 / 25.4;
 // Every routine is laid out at this width (A4 portrait minus 8mm margins), then scaled.
 const DOC_WIDTH_MM = 194;
@@ -16,6 +17,13 @@ const DOC_WIDTH_PX = DOC_WIDTH_MM * MM_TO_PX;
 const CELL_PAD_MM = 2;
 // Small safety so a routine is never clipped at the bottom
 const HEIGHT_SAFETY = 0.98;
+
+// Font size control (percent)
+const FONT_MIN = 70;
+const FONT_MAX = 150;
+const FONT_STEP = 5;
+const FONT_DEFAULT = 100;
+const BASE_FONT_ATTR = 'data-erp-base-font';
 
 const PAPER_SIZES = {
   a4: { label: 'A4', width: 210, height: 297 },
@@ -34,6 +42,21 @@ const DEFAULT_SETTINGS = {
 };
 
 const bn = (value) => String(value ?? '').replace(/\d/g, (digit) => '০১২৩৪৫৬৭৮৯'[digit]);
+
+const clampFont = (value) => {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return FONT_DEFAULT;
+  return Math.min(FONT_MAX, Math.max(FONT_MIN, Math.round(number / FONT_STEP) * FONT_STEP));
+};
+
+const loadFontScale = () => {
+  try {
+    const saved = window.localStorage.getItem(FONT_STORAGE_KEY);
+    return saved === null ? FONT_DEFAULT : clampFont(saved);
+  } catch {
+    return FONT_DEFAULT;
+  }
+};
 
 const loadSettings = () => {
   try {
@@ -174,15 +197,49 @@ const buildCss = (settings) => {
   .erp-btn--ghost:hover { background: #f3f5f9; }
   .erp-btn:focus-visible { outline: 2px solid #16a34a; outline-offset: 2px; }
 
-  .erp-main { position: relative; flex: 1; min-width: 0; overflow: auto; }
+  .erp-main-wrap { position: relative; display: flex; flex: 1; min-width: 0; min-height: 0; }
+  .erp-main { position: relative; flex: 1; min-width: 0; overflow: auto; padding-bottom: 84px; }
   .erp-main .exam-routine-preview__status {
     margin: 24px auto; max-width: 520px; padding: 12px 16px; text-align: center;
     border-radius: 10px; background: #fff; color: #374151; font-size: 14px;
   }
 
+  /* ---------- Floating font-size bar ---------- */
+  .erp-fontbar {
+    position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+    z-index: 30; display: flex; align-items: center; gap: 10px;
+    max-width: calc(100% - 24px); padding: 8px 12px; box-sizing: border-box;
+    background: #fff; border: 1px solid #e3e8ef; border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.18);
+    color: #1f2937; font-size: 14px; flex-wrap: wrap; justify-content: center;
+  }
+  .erp-fontbar__label {
+    display: inline-flex; align-items: center; gap: 6px; font-weight: 600; white-space: nowrap;
+  }
+  .erp-fontbar__label i { font-style: normal; font-weight: 800; font-size: 17px; color: #0f7a55; font-family: Georgia, serif; }
+  .erp-fontbar__step {
+    min-width: 44px; height: 36px; padding: 0 10px; border: 1px solid #d5dbe5; border-radius: 10px;
+    background: #fff; color: #374151; font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: all 0.15s ease; white-space: nowrap;
+  }
+  .erp-fontbar__step:hover:not(:disabled) { background: #f3f5f9; border-color: #b8c1cf; }
+  .erp-fontbar__step:disabled { opacity: 0.45; cursor: not-allowed; }
+  .erp-fontbar__step:focus-visible { outline: 2px solid #16a34a; outline-offset: 2px; }
+  .erp-fontbar__range { width: 150px; accent-color: #0f7a55; cursor: pointer; }
+  .erp-fontbar__value { min-width: 48px; text-align: center; font-weight: 700; color: #0f7a55; }
+  .erp-fontbar__save {
+    height: 36px; padding: 0 14px; border: 0; border-radius: 10px;
+    background: #0f7a55; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer;
+    transition: all 0.15s ease; white-space: nowrap;
+  }
+  .erp-fontbar__save:hover:not(:disabled) { background: #0b6244; }
+  .erp-fontbar__save:disabled { background: #cfd6e0; color: #7b8494; cursor: default; }
+  .erp-fontbar__save:focus-visible { outline: 2px solid #16a34a; outline-offset: 2px; }
+
   @media (max-width: 860px) {
     #exam-routine-print-preview.erp-root { flex-direction: column !important; }
     .erp-side { width: 100%; max-height: 48vh; border-right: 0; border-bottom: 1px solid #dde3ec; }
+    .erp-fontbar__range { width: 110px; }
   }
 }
 
@@ -248,9 +305,11 @@ const buildCss = (settings) => {
     height: auto !important; overflow: visible !important; background: #fff !important;
   }
   .erp-side,
+  .erp-fontbar,
   .exam-routine-preview__toolbar,
   .exam-routine-preview__status { display: none !important; }
-  .erp-main { display: block !important; overflow: visible !important; height: auto !important; }
+  .erp-main-wrap { display: block !important; position: static !important; overflow: visible !important; }
+  .erp-main { display: block !important; overflow: visible !important; height: auto !important; padding: 0 !important; }
   .erp-stage { padding: 0 !important; }
   .erp-zoom { height: auto !important; }
   .erp-pages {
@@ -274,6 +333,27 @@ const chunk = (list, size) => {
   const pages = [];
   for (let i = 0; i < list.length; i += size) pages.push(list.slice(i, i + size));
   return pages;
+};
+
+/**
+ * Scales only the text. Each element's original font size is remembered once,
+ * then font-size = original * percent. Layout widths, borders, logo and page size stay as they are.
+ */
+const applyFontScale = (root, percent) => {
+  if (!root) return;
+  root.querySelectorAll('.erp-doc *').forEach((element) => {
+    let base = parseFloat(element.getAttribute(BASE_FONT_ATTR));
+    if (!Number.isFinite(base)) {
+      base = parseFloat(window.getComputedStyle(element).fontSize);
+      if (!Number.isFinite(base) || base <= 0) return;
+      element.setAttribute(BASE_FONT_ATTR, String(base));
+    }
+    if (percent === FONT_DEFAULT) {
+      element.style.removeProperty('font-size');
+    } else {
+      element.style.setProperty('font-size', `${(base * percent / 100).toFixed(3)}px`, 'important');
+    }
+  });
 };
 
 /** Pill-style option picker (replaces <select>) */
@@ -312,6 +392,76 @@ SegmentedControl.propTypes = {
     })
   ).isRequired,
   onChange: PropTypes.func.isRequired,
+};
+
+/** Floating bar: Aa ফন্ট সাইজ  A−  ───●───  A+  120%  ↺  সংরক্ষণ */
+const FontSizeBar = ({ value, saved, justSaved, onChange, onReset, onSave }) => {
+  const dirty = value !== saved;
+  return (
+    <div className="erp-fontbar" role="group" aria-label="ফন্ট সাইজ">
+      <span className="erp-fontbar__label">
+        <i aria-hidden="true">Aa</i>
+        ফন্ট সাইজ
+      </span>
+      <button
+        type="button"
+        className="erp-fontbar__step"
+        onClick={() => onChange(value - FONT_STEP)}
+        disabled={value <= FONT_MIN}
+        aria-label="ফন্ট ছোট করুন"
+      >
+        A−
+      </button>
+      <input
+        type="range"
+        className="erp-fontbar__range"
+        min={FONT_MIN}
+        max={FONT_MAX}
+        step={FONT_STEP}
+        value={value}
+        onChange={(event) => onChange(Number(event.target.value))}
+        aria-label="ফন্ট সাইজ স্লাইডার"
+        aria-valuetext={`${value}%`}
+      />
+      <button
+        type="button"
+        className="erp-fontbar__step"
+        onClick={() => onChange(value + FONT_STEP)}
+        disabled={value >= FONT_MAX}
+        aria-label="ফন্ট বড় করুন"
+      >
+        A+
+      </button>
+      <span className="erp-fontbar__value" aria-live="polite">{bn(value)}%</span>
+      <button
+        type="button"
+        className="erp-fontbar__step"
+        onClick={onReset}
+        disabled={value === FONT_DEFAULT}
+        title="১০০% এ ফিরে যান"
+        aria-label="ফন্ট সাইজ রিসেট"
+      >
+        ↺
+      </button>
+      <button
+        type="button"
+        className="erp-fontbar__save"
+        onClick={onSave}
+        disabled={!dirty}
+      >
+        {justSaved && !dirty ? 'সংরক্ষিত ✓' : 'সংরক্ষণ'}
+      </button>
+    </div>
+  );
+};
+
+FontSizeBar.propTypes = {
+  value: PropTypes.number.isRequired,
+  saved: PropTypes.number.isRequired,
+  justSaved: PropTypes.bool.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onReset: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
 };
 
 /**
@@ -394,7 +544,11 @@ ScaledPreview.propTypes = {
 const ExamRoutinePrint = ({ items, onClose }) => {
   const previewRef = useRef(null);
   const closeRef = useRef(null);
+  const savedTimer = useRef(null);
   const [settings, setSettings] = useState(loadSettings);
+  const [fontScale, setFontScale] = useState(loadFontScale);
+  const [savedFontScale, setSavedFontScale] = useState(loadFontScale);
+  const [justSaved, setJustSaved] = useState(false);
   const [results, setResults] = useState([]);
   const [loadingRoutines, setLoadingRoutines] = useState(true);
   const [readyToPrint, setReadyToPrint] = useState(false);
@@ -445,6 +599,23 @@ const ExamRoutinePrint = ({ items, onClose }) => {
     });
   };
 
+  const changeFont = (value) => {
+    setJustSaved(false);
+    setFontScale(clampFont(value));
+  };
+
+  const saveFont = () => {
+    try {
+      window.localStorage.setItem(FONT_STORAGE_KEY, String(fontScale));
+    } catch {
+      /* ignore */
+    }
+    setSavedFontScale(fontScale);
+    setJustSaved(true);
+    window.clearTimeout(savedTimer.current);
+    savedTimer.current = window.setTimeout(() => setJustSaved(false), 2000);
+  };
+
   const paperOptions = Object.entries(PAPER_SIZES).map(([value, { label }]) => ({ value, label }));
   const perPageOptions = PER_PAGE_OPTIONS.map((count) => ({ value: count, label: bn(count) }));
   const marginOptions = MARGIN_OPTIONS.map((value) => ({ value, label: bn(value) }));
@@ -456,6 +627,7 @@ const ExamRoutinePrint = ({ items, onClose }) => {
     closeRef.current?.focus();
     return () => {
       document.body.classList.remove('exam-routine-print-active');
+      window.clearTimeout(savedTimer.current);
       previousFocus?.focus();
     };
   }, []);
@@ -510,7 +682,13 @@ const ExamRoutinePrint = ({ items, onClose }) => {
     return () => { cancelled = true; };
   }, [itemsKey, fetchRoutine]);
 
-  // Measure the tallest routine (re-measures when fonts / signature images change its height)
+  // Apply the text-only font scale. Runs after every render so newly mounted
+  // routines (page / per-page changes) get the same font size. It sets no state, so no loop.
+  useLayoutEffect(() => {
+    applyFontScale(previewRef.current, fontScale);
+  });
+
+  // Measure the tallest routine (re-measures when fonts / images / font size change its height)
   useLayoutEffect(() => {
     const root = previewRef.current;
     if (!root || loading) return undefined;
@@ -531,7 +709,7 @@ const ExamRoutinePrint = ({ items, onClose }) => {
     const observer = new ResizeObserver(measure);
     docs.forEach((doc) => observer.observe(doc));
     return () => observer.disconnect();
-  }, [loading, results, institution, settings.perPage]);
+  }, [loading, results, institution, settings.perPage, fontScale]);
 
   // Wait for fonts + images before enabling the print button
   useEffect(() => {
@@ -574,7 +752,6 @@ const ExamRoutinePrint = ({ items, onClose }) => {
         </div>
 
         <div className="erp-side__foot">
-
           <button
             ref={closeRef}
             type="button"
@@ -599,6 +776,7 @@ const ExamRoutinePrint = ({ items, onClose }) => {
             <span>ফিরে যান</span>
           </button>
         </div>
+
         <div className="erp-side__body">
           <section className="erp-card">
             <div className="erp-field">
@@ -687,6 +865,7 @@ const ExamRoutinePrint = ({ items, onClose }) => {
             </p>
           </section>
         </div>
+
         <div className="erp-side__foot">
           <button
             type="button"
@@ -697,47 +876,59 @@ const ExamRoutinePrint = ({ items, onClose }) => {
             <FaPrint size={16} aria-hidden="true" />
             <span>সব প্রিন্ট করুন</span>
           </button>
-
         </div>
       </aside>
 
-      <section className="erp-main">
-        {loading ? (
-          <p className="exam-routine-preview__status" role="status">Preparing exam routine…</p>
-        ) : validRoutines.length === 0 ? (
-          <p className="exam-routine-preview__status" role="alert">
-            The exam routine could not be loaded. Please close this preview and try again.
-          </p>
-        ) : (
-          <>
-            {failedCount > 0 && (
-              <p className="exam-routine-preview__status" role="alert">
-                {failedCount} routine(s) could not be loaded and are skipped.
-              </p>
-            )}
-            <ScaledPreview sheetPx={sheetPx}>
-              {pages.map((pageItems, pageIndex) => (
-                <section className="erp-sheet" key={pageIndex}>
-                  {pageItems.map((routine, index) => {
-                    const col = index % cols;
-                    const row = Math.floor(index / cols);
-                    const classes = ['erp-cell'];
-                    if (showCutLines && col < cols - 1) classes.push('erp-cell--cut-r');
-                    if (showCutLines && row < rows - 1) classes.push('erp-cell--cut-b');
-                    return (
-                      <div className={classes.join(' ')} key={routine.key}>
-                        <RoutineCell fit={fit}>
-                          <ExamRoutineDocument details={routine.details} institution={institution} />
-                        </RoutineCell>
-                      </div>
-                    );
-                  })}
-                </section>
-              ))}
-            </ScaledPreview>
-          </>
+      <div className="erp-main-wrap">
+        <section className="erp-main">
+          {loading ? (
+            <p className="exam-routine-preview__status" role="status">Preparing exam routine…</p>
+          ) : validRoutines.length === 0 ? (
+            <p className="exam-routine-preview__status" role="alert">
+              The exam routine could not be loaded. Please close this preview and try again.
+            </p>
+          ) : (
+            <>
+              {failedCount > 0 && (
+                <p className="exam-routine-preview__status" role="alert">
+                  {failedCount} routine(s) could not be loaded and are skipped.
+                </p>
+              )}
+              <ScaledPreview sheetPx={sheetPx}>
+                {pages.map((pageItems, pageIndex) => (
+                  <section className="erp-sheet" key={pageIndex}>
+                    {pageItems.map((routine, index) => {
+                      const col = index % cols;
+                      const row = Math.floor(index / cols);
+                      const classes = ['erp-cell'];
+                      if (showCutLines && col < cols - 1) classes.push('erp-cell--cut-r');
+                      if (showCutLines && row < rows - 1) classes.push('erp-cell--cut-b');
+                      return (
+                        <div className={classes.join(' ')} key={routine.key}>
+                          <RoutineCell fit={fit}>
+                            <ExamRoutineDocument details={routine.details} institution={institution} />
+                          </RoutineCell>
+                        </div>
+                      );
+                    })}
+                  </section>
+                ))}
+              </ScaledPreview>
+            </>
+          )}
+        </section>
+
+        {!loading && validRoutines.length > 0 && (
+          <FontSizeBar
+            value={fontScale}
+            saved={savedFontScale}
+            justSaved={justSaved}
+            onChange={changeFont}
+            onReset={() => changeFont(FONT_DEFAULT)}
+            onSave={saveFont}
+          />
         )}
-      </section>
+      </div>
     </main>,
     document.body
   );
