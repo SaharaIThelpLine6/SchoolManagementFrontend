@@ -268,6 +268,43 @@ const PaintedChrome = ({ t }) => (
  * তিনটি অংশ আলাদাভাবে বন্ধ করা যায়; ঘরের প্রস্থ একই থাকে যাতে
  * মাঝের QR কোড জায়গা থেকে সরে না যায়।
  */
+// const SignatureBlock = ({
+//   t,
+//   image,
+//   name,
+//   printDate,
+//   dateLabel,
+//   showImage,
+//   showName,
+//   showDate,
+// }) => (
+//   <div className="text-center w-[120px] shrink-0">
+//     {showImage ? (
+//       <div className="h-[22px] flex items-end justify-center">
+//         {image ? <img src={image} alt="" className="max-h-[40px] object-contain" /> : null}
+//       </div>
+//     ) : null}
+
+//     {showName ? (
+//       <p
+//         className="text-[11px] leading-[15px] pt-[2px]"
+//         style={{
+//           color: t.labelColor,
+//           borderTop: `1px solid ${t.signLineColor || t.labelColor}`,
+//         }}
+//       >
+//         {name}
+//       </p>
+//     ) : null}
+
+//     {showDate && printDate ? (
+//       <p className="text-[10px] leading-[14px]" style={{ color: t.labelColor }}>
+//         {dateLabel} : {printDate}
+//       </p>
+//     ) : null}
+//   </div>
+// );
+
 const SignatureBlock = ({
   t,
   image,
@@ -280,8 +317,17 @@ const SignatureBlock = ({
 }) => (
   <div className="text-center w-[120px] shrink-0">
     {showImage ? (
-      <div className="h-[22px] flex items-end justify-center">
-        {image ? <img src={image} alt="" className="max-h-[40px] object-contain" /> : null}
+      // 👇 ১. h-[32px] এর জায়গায় h-[40px] বা h-[45px] দিন (যতটা উপরে তুলতে চান)
+      <div className="h-[40px] flex items-end justify-center overflow-visible">
+        {image ? (
+          <img 
+            src={image} 
+            alt="" 
+            // 👇 ২. max-h-[40px] থেকে বাড়িয়ে max-h-[55px] বা max-h-[60px] করুন
+            // 👇 ৩. -mb-[2px] (নেগেটিভ মার্জিন) দিলে ছবিটা লাইনের আরও কাছে চলে যাবে
+            className="max-h-[55px] object-contain mb-[1px]" 
+          /> 
+        ) : null}
       </div>
     ) : null}
 
@@ -304,6 +350,21 @@ const SignatureBlock = ({
     ) : null}
   </div>
 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /** একটি কার্ডের ভিজ্যুয়াল — এডিটরের প্রিভিউও এই কম্পোনেন্টই ব্যবহার করে */
 export const AdmitCardFace = ({
@@ -822,7 +883,7 @@ export const AdmitCardFace = ({
 
           {qrValue ? (
             <div
-              className="rounded-[3px] shrink-0"
+              className="rounded-[3px] shrink-0 flex flex-col items-center justify-center" // flex যোগ করা হয়েছে
               style={{
                 background: t.qrPad || 'transparent',
                 padding: t.qrPad && t.qrPad !== 'transparent' ? 3 : 0,
@@ -838,6 +899,19 @@ export const AdmitCardFace = ({
                 viewBox="0 0 256 256"
                 style={{ width: qrSize, height: qrSize, display: 'block' }}
               />
+              
+              {/* 👇 এখানে নিচের লেখাটি যোগ করা হয়েছে */}
+              <p 
+                className="mt-1 text-center font-bold" 
+                style={{ 
+                  fontSize: '5px',       // লেখার সাইজ (প্রয়োজন অনুযায়ী বাড়াতে/কমাতে পারেন)
+                  lineHeight: '12px',    // লাইন হাইট ঠিক করা হয়েছে যেন QR এর সাথে লেগে না যায়
+                  color: t.labelColor || '#111827', // টেমপ্লেটের রঙ অথবা কালো
+                  whiteSpace: 'nowrap' 
+                }}
+              >
+                ফলাফল দেখতে QR Codeটি স্ক্যান করুন
+              </p>
             </div>
           ) : null}
 

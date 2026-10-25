@@ -60,6 +60,10 @@ import {
   paperColumnCount,
 } from '../Data/feeListColumns';
 
+// ⭐ নতুন — সিট কার্ডের সেটিংস (কোন ঘরগুলো কার্ডে বসবে)
+import SeatCardSettingsModal from '../components/Modals/SeatCardSettingsModal';
+import { loadSeatCardSettings } from '../Data/seatCardFields';
+
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -147,6 +151,10 @@ const ExamReportList = ({ pageTitle }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [feeSettings, setFeeSettings] = useState(() => loadFeeListSettings(1, 1));
 
+  // ⭐ সিট কার্ডের সেটিংস — কোন ঘরগুলো কার্ডে বসবে, কয়টা কার্ড প্রতি পাতায়
+  const [seatSettingsOpen, setSeatSettingsOpen] = useState(false);
+  const [seatSettings, setSeatSettings] = useState(() => loadSeatCardSettings(1));
+
   const { control, handleSubmit, watch } = methods;
   const formValues = useWatch({ control });
   const selectedReportID = formValues?.ReportID;
@@ -203,6 +211,12 @@ const ExamReportList = ({ pageTitle }) => {
     applySettings(loadFeeListSettings(feeListType, langId));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feeListType, langId]);
+
+  /* ⭐ সিট কার্ডের সেটিংসও ভাষা ধরে আলাদা — ভাষা বদলালে সেই ভাষার
+     সেভ করাটাই তুলে আনা হয় */
+  useEffect(() => {
+    setSeatSettings(loadSeatCardSettings(langId));
+  }, [langId]);
 
   const shouldShowFields = (fieldName) => {
     switch (Number(selectedReportID)) {
@@ -372,6 +386,11 @@ const ExamReportList = ({ pageTitle }) => {
   const handleOpenSettings = () => {
     if (isFeeReport) {
       setSettingsOpen(true);
+      return;
+    }
+    // ⭐ সিট নং — কার্ডে কোন ঘরগুলো বসবে সেটার সেটিংস
+    if (isSeatNoReport) {
+      setSeatSettingsOpen(true);
       return;
     }
     if (Number(selectedReportID) === 3) {
@@ -611,7 +630,9 @@ const ExamReportList = ({ pageTitle }) => {
                     </button>
                   )}
 
-                  {(isFeeReport || Number(selectedReportID) === 3) && (
+                  {/* ⭐ সিট নং রিপোর্টেও সেটিংস বোতামটা দেখায় — কার্ডের
+                      ঘরগুলো ওখান থেকেই বাছা হয় */}
+                  {(isFeeReport || isSeatNoReport || Number(selectedReportID) === 3) && (
                     <button
                       type="button"
                       onClick={handleOpenSettings}
@@ -1012,15 +1033,18 @@ const ExamReportList = ({ pageTitle }) => {
           )}
           {isNumberSheet && langId === 2 && Number(selectedPdfID) === 4 && <ArobicNumberClassBasedTC />}
 
-          {/* ৪. সিট নং */}
+          {/* ৪. সিট নং
+
+              ⭐ সাদা-কালো কার্ডে কোন ঘরগুলো বসবে সেটা seatSettings থেকে
+              আসে — উপরের সেটিংস বোতাম থেকে বাছা হয়, localStorage এ থাকে। */}
           {Number(selectedReportID) === 7 && Number(languageID) === 1 && Number(selectedPdfID) === 1 && (
-            <BSeatNoWhite queryParams={queryParams} documentLogo={documentLogo} logoIsActive={logoIsActive} showSeatNo studentList={Array.isArray(data) ? data : data?.data} />
+            <BSeatNoWhite queryParams={queryParams} documentLogo={documentLogo} logoIsActive={logoIsActive} instituteLogo={instituteLogo} showSeatNo settings={seatSettings} studentList={Array.isArray(data) ? data : data?.data} />
           )}
           {Number(selectedReportID) === 7 && Number(languageID) === 1 && Number(selectedPdfID) === 2 && (
             <BSeatNoColor queryParams={queryParams} documentLogo={documentLogo} logoIsActive={logoIsActive} showSeatNo />
           )}
           {Number(selectedReportID) === 7 && Number(languageID) === 1 && Number(selectedPdfID) === 3 && (
-            <BSeatNoWhite queryParams={queryParams} documentLogo={documentLogo} logoIsActive={logoIsActive} showSeatNo={false} studentList={Array.isArray(data) ? data : data?.data} />
+            <BSeatNoWhite queryParams={queryParams} documentLogo={documentLogo} logoIsActive={logoIsActive} instituteLogo={instituteLogo} showSeatNo={false} settings={seatSettings} studentList={Array.isArray(data) ? data : data?.data} />
           )}
           {Number(selectedReportID) === 7 && Number(languageID) === 2 && Number(selectedPdfID) === 1 && (
             <ASeatNoWhite queryParams={queryParams} documentLogo={documentLogo} logoIsActive={logoIsActive} />
@@ -1067,6 +1091,14 @@ const ExamReportList = ({ pageTitle }) => {
         language={langId}
         onSaved={applySettings}
         watermarkLogo={watermarkLogo}
+      />
+
+      {/* ⭐ সিট কার্ডের সেটিংস — কোন ঘরগুলো কার্ডে বসবে */}
+      <SeatCardSettingsModal
+        open={seatSettingsOpen}
+        onClose={() => setSeatSettingsOpen(false)}
+        language={langId}
+        onSaved={setSeatSettings}
       />
     </>
   );
