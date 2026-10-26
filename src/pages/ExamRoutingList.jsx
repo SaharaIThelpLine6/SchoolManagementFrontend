@@ -166,7 +166,7 @@ const ExamRoutingList = ({ pageTitle }) => {
             onChange={(event) => setSessionFilter(event.target.value)}
             className="mt-1 block h-11 w-full rounded-md border border-gray-300 bg-white px-3"
           >
-            <option value="">সব সেশন</option>
+            <option value="">সকল সেশন</option>
             {sessions.map((session) => (
               <option key={session.SessionID} value={session.SessionID}>
                 {session.SessionName}
@@ -181,7 +181,7 @@ const ExamRoutingList = ({ pageTitle }) => {
             onChange={(event) => setExamFilter(event.target.value)}
             className="mt-1 block h-11 w-full rounded-md border border-gray-300 bg-white px-3"
           >
-            <option value="">সব পরীক্ষা</option>
+            <option value="">সকল পরীক্ষা</option>
             {exams.map((exam) => (
               <option key={exam.ExamID} value={exam.ExamID}>
                 {exam.ExamName}
@@ -196,7 +196,7 @@ const ExamRoutingList = ({ pageTitle }) => {
             onChange={(event) => setSubClassFilter(event.target.value)}
             className="mt-1 block h-11 w-full rounded-md border border-gray-300 bg-white px-3"
           >
-            <option value="">সব শ্রেণি</option>
+            <option value="">সকল শ্রেণি</option>
             {subClasses.map((subClass) => (
               <option key={subClass.SubClassID} value={subClass.SubClassID}>
                 {subClass.SubClass}
