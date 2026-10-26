@@ -191,6 +191,7 @@ const Router = createBrowserRouter([
   },
   {
     path: '/',
+    // element: <LandingPage />,
     element: <Login />,
   },
   {

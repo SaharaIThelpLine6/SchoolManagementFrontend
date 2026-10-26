@@ -40,6 +40,19 @@ const QR_SIZE = 56;
 // ---------------------------------------------------------------------------
 export const WATERMARK_DEFAULTS = { size: 230, opacity: 0.07 };
 
+// ---------------------------------------------------------------------------
+// 👇 `layout` ঘরটা
+//
+// সাধারণ টেমপ্লেটে কার্ডের ভিতরটা AdmitCardFace ই আঁকে — হেডার, ব্যাজ, দুই
+// কলামে "নাম : মান", স্বাক্ষর। কিন্তু কোনো কোনো ডিজাইনের গড়নটাই আলাদা
+// (বর্ডার দেওয়া টেবিল, নির্দেশাবলীর ঘর ইত্যাদি) — ওগুলোর জন্য টেমপ্লেটে
+// `layout: '<নাম>'` লেখা থাকে, আর তখন ঐ নামের নিজের কম্পোনেন্টটাই আঁকে।
+//
+//   layout: 'navy'  →  AdmitCardNavy.jsx
+//
+// `layout` না থাকলে আগের নিয়মই চলে, তাই পুরোনো সব ডিজাইন হুবহু অক্ষত।
+// ---------------------------------------------------------------------------
+
 export const ADMIT_TEMPLATES = [
   
 
@@ -397,6 +410,225 @@ export const ADMIT_TEMPLATES = [
     bodyTop: 185,
     logoOffsetY: -15,
     photoOffsetY: -15,
+  },
+
+  {
+    // ------------------------------------------------------------------
+    // নেভি ও সোনালী — নিজের লেআউটওয়ালা প্রথম ডিজাইন।
+    //
+    // `layout: 'navy'` থাকায় কার্ডের ভিতরটা AdmitCardFace আঁকে না,
+    // AdmitCardNavy.jsx আঁকে — নেভি ব্যান্ড, সোনালী কোনা, বর্ডার দেওয়া
+    // তথ্যের ঘর, নির্দেশাবলী ও স্বাক্ষরের সারি।
+    //
+    // তাই নিচের ফ্রেম/ব্যাজ-সংক্রান্ত ঘরগুলো (frameStyle, ribbonStyle,
+    // headerDivider …) এখানে নেই — ওগুলো ঐ কম্পোনেন্ট পড়েই না। যে
+    // ঘরগুলো আছে সেগুলো রঙ, মাপ ও টগলের, আর ...ZONES / ...PHOTO
+    // রাখা হয়েছে যাতে অন্য কোড (যেমন getRoutineZones) মাপ খুঁজতে গিয়ে
+    // হোঁচট না খায়।
+    //
+    // আইডি '১০' নয় — নিচে ওই আইডিতে একটা মন্তব্য করা টেমপ্লেট পড়ে আছে,
+    // কেউ ওটা চালু করলে দুইটা এক আইডি হয়ে যেত।
+    // ------------------------------------------------------------------
+    id: '11',
+    title: 'নেভি ও সোনালী',
+    variant: 'painted',
+    layout: 'navy',
+    cardBg: '#ffffff',
+    navy: '#15294d',
+    gold: '#c9a227',
+    gridColor: '#cbd5e1',
+    labelBg: '#f1f5f9',
+    nameColor: '#ffffff',
+    addressColor: '#cbd5e1',
+    nameSize: 17,
+    addressSize: 9,
+    valueColor: '#111827',
+    labelColor: '#374151',
+    accent: '#15294d',
+    examNameColor: '#15294d',
+    examNameSize: 12,
+    photoBorder: '#94a3b8',
+    signLineColor: '#15294d',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 40,
+    qrPad: 'transparent',
+    ...ZONES,
+    ...PHOTO,
+  },
+
+  {
+    // বাংলা সোনালী — ক্রিম রঙের পট, দুইটা সোনালী রেখার ফ্রেম,
+    // লোগো-নাম-ঠিকানা উপরে মাঝ বরাবর, নিচে সোনালী ব্যাজ।
+    id: '12',
+    title: 'বাংলা সোনালী',
+    variant: 'painted',
+    layout: 'classic',
+    chrome: 'gold',
+    cardBg: '#fffdf6',
+    primary: '#1f5c3a',
+    gold: '#b08422',
+    gridColor: '#e2d9bf',
+    labelBg: '#faf4e4',
+    ribbonColor: '#ffffff',
+    nameColor: '#1f5c3a',
+    addressColor: '#6b6250',
+    nameSize: 17,
+    addressSize: 9,
+    valueColor: '#14261c',
+    labelColor: '#5b5340',
+    accent: '#1f5c3a',
+    examNameColor: '#1f5c3a',
+    examNameSize: 12,
+    photoBorder: '#c7b891',
+    signLineColor: '#1f5c3a',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 38,
+    qrPad: 'transparent',
+    ...ZONES,
+    ...PHOTO,
+  },
+
+  {
+    // সবুজ-সোনালী নকশা — মোটা সবুজ, মাঝে সোনালী, ভিতরে সরু সবুজ ফ্রেম,
+    // চার কোনায় সোনালী বর্গ।
+    id: '13',
+    title: 'সবুজ-সোনালী নকশা',
+    variant: 'painted',
+    layout: 'classic',
+    chrome: 'ornate',
+    cardBg: '#ffffff',
+    primary: '#0f5132',
+    gold: '#c9a227',
+    gridColor: '#cfe3d6',
+    labelBg: '#f0fdf4',
+    ribbonColor: '#ffffff',
+    nameColor: '#0f5132',
+    addressColor: '#5b6b60',
+    nameSize: 17,
+    addressSize: 9,
+    valueColor: '#14261c',
+    labelColor: '#4b5563',
+    accent: '#0f5132',
+    examNameColor: '#0f5132',
+    examNameSize: 12,
+    photoBorder: '#9bbcab',
+    signLineColor: '#0f5132',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 38,
+    qrPad: 'transparent',
+    ...ZONES,
+    ...PHOTO,
+  },
+
+  {
+    // মিহরাব — পুরো কার্ড গাঢ় সবুজে, উপরে সোনালী খিলানের রেখা,
+    // আর তথ্য-আসন-স্বাক্ষর সব একটা সাদা গোল-কোনা ঘরের ভিতরে।
+    id: '14',
+    title: 'মিহরাব (গাঢ় সবুজ)',
+    variant: 'painted',
+    layout: 'classic',
+    chrome: 'arch',
+    cardBg: '#0d4a4a',
+    primary: '#0d4a4a',
+    gold: '#d4af37',
+    gridColor: '#cbd5e1',
+    labelBg: '#f1f5f9',
+    ribbonColor: '#0d4a4a',
+    nameColor: '#ffffff',
+    addressColor: '#bcd7d7',
+    nameSize: 17,
+    addressSize: 9,
+    valueColor: '#0f172a',
+    labelColor: '#475569',
+    accent: '#0d4a4a',
+    examNameColor: '#0d4a4a',
+    examNameSize: 12,
+    photoBorder: '#94a3b8',
+    signLineColor: '#0d4a4a',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 38,
+    qrPad: 'transparent',
+    ...ZONES,
+    ...PHOTO,
+  },
+
+  {
+    // আধুনিক সবুজ — উপরে গোল-কোনা রঙিন ব্যান্ড, নিচে গোল-কোনা ঘর,
+    // একদম নিচে পাতলা রঙিন পট্টি।
+    id: '15',
+    title: 'আধুনিক সবুজ',
+    variant: 'painted',
+    layout: 'modern',
+    cardBg: '#ffffff',
+    primary: '#0e7a5f',
+    gold: '#ffffff',
+    gridColor: '#d1e7dd',
+    labelBg: '#f0fdf4',
+    nameColor: '#ffffff',
+    addressColor: '#d1fae5',
+    nameSize: 17,
+    addressSize: 9,
+    valueColor: '#0f172a',
+    labelColor: '#4b5563',
+    accent: '#0e7a5f',
+    examNameColor: '#0e7a5f',
+    examNameSize: 12,
+    photoBorder: '#a7d7c5',
+    signLineColor: '#0e7a5f',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 38,
+    qrPad: 'transparent',
+    ...ZONES,
+    ...PHOTO,
+  },
+
+  {
+    // সবুজ — নাম বড়। উপরে সবুজ ঢালের ব্যান্ড, নিচে সাদা ঘরে ছবি ও নাম,
+    // তারপর চারটা ছোট বাক্স (প্রথমটা আসনের)।
+    id: '16',
+    title: 'সবুজ — নাম বড়',
+    variant: 'painted',
+    layout: 'profile',
+    cardBg: '#f1f7f4',
+    primary: '#0b6b4f',
+    primaryDark: '#064e3b',
+    gold: '#ffffff',
+    gridColor: '#d1e7dd',
+    labelBg: '#e8f6ef',
+    nameColor: '#ffffff',
+    addressColor: '#d1fae5',
+    nameSize: 15,
+    addressSize: 8,
+    valueColor: '#0f172a',
+    labelColor: '#5b6b63',
+    accent: '#0b6b4f',
+    examNameColor: '#0b6b4f',
+    examNameSize: 11,
+    photoBorder: '#a7d7c5',
+    signLineColor: '#0b6b4f',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 38,
+    qrPad: 'transparent',
+    ...ZONES,
+    ...PHOTO,
   },
 
   // {

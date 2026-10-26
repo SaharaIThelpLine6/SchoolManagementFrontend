@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Buffer } from 'buffer';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
+import { skipToken } from '@reduxjs/toolkit/query';
 import Swal from 'sweetalert2';
 import ExamRoutingCheckbox from '../components/Checkboxes/ExamRoutingCheckbox';
 import DefaultSelect from '../components/Forms/DefaultSelect';
@@ -19,6 +20,7 @@ import {
 import { setPageName } from '../features/auth/authSlice';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetExamNamesQuery } from '../features/exam/examQuerySlice';
+import { useGetExamRoutineReportQuery } from '../features/reports/reportQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import { useGetResidentialQuery } from '../features/settings/settingsQuerySlice';
 import { fetchSettingsData } from '../features/settings/settingsSlice';
@@ -64,7 +66,27 @@ import {
 import SeatCardSettingsModal from '../components/Modals/SeatCardSettingsModal';
 import { loadSeatCardSettings } from '../Data/seatCardFields';
 
+// ⭐ ৯ নং — পরীক্ষার রুটিন (গ্রিড)
+import ExamRoutinePaper from '../view/exam/ExamReportPdf/ExamRoutinePaper';
+import {
+  getClassText,
+  getRRText,
+  getSubClassText,
+} from '../Data/Examroutinereportconfig';
+
 const API_URL = import.meta.env.VITE_SERVER_URL;
+
+/**
+ * ⭐ রুটিন রিপোর্টের আইডি — এক জায়গায় রাখা।
+ *
+ * examReportData.js এর examReports তালিকায় এই আইডিতেই একটা সারি বসাতে হবে:
+ *
+ *   { ReportID: 12, ReportName: 'পরীক্ষার রুটিন' },
+ *
+ * ১২ টা যদি ঐ তালিকায় আগে থেকেই কারো দখলে থাকে, শুধু এই একটা সংখ্যা
+ * বদলে দিলেই চলবে — নিচে আর কোথাও আইডিটা হাতে লেখা নেই।
+ */
+const ROUTINE_REPORT_ID = 12;
 
 /* ═══════════════════════════════════════════════════════════════════════════
    দুইটা লোগো — কোনটা কোথায়
@@ -155,7 +177,16 @@ const ExamReportList = ({ pageTitle }) => {
   const [seatSettingsOpen, setSeatSettingsOpen] = useState(false);
   const [seatSettings, setSeatSettings] = useState(() => loadSeatCardSettings(1));
 
-  const { control, handleSubmit, watch } = methods;
+  // ⭐ রুটিনের সাজসজ্জা — সবগুলোই ডিফল্টে কাগজের মতো
+  const [routineHideEmptyRows, setRoutineHideEmptyRows] = useState(false);
+  const [routineHideEmptyShift, setRoutineHideEmptyShift] = useState(false);
+  const [routineShowClassCol, setRoutineShowClassCol] = useState(false);
+  const [routineShowRoom, setRoutineShowRoom] = useState(false);
+  /* সময় ডিফল্টে চালু — এক বেলাতেও কিতাবভেদে সময় আলাদা হয়, আর নিচের
+     বি:দ্র: লাইনটা তখন কিছুই বলতে পারে না */
+  const [routineShowTime, setRoutineShowTime] = useState(true);
+
+  const { control, handleSubmit, watch, register, setValue } = methods;
   const formValues = useWatch({ control });
   const selectedReportID = formValues?.ReportID;
   const languageID = formValues?.id;
@@ -164,7 +195,15 @@ const ExamReportList = ({ pageTitle }) => {
   const isSeatNoReport = Number(selectedReportID) === 7;
   const isFeeReport = Number(selectedReportID) === 1;
   const isNumberSheet = Number(selectedReportID) === 4;   // ৩. নম্বর পত্র
+  // ⭐ ৯. পরীক্ষার রুটিন
+  const isRoutineReport = Number(selectedReportID) === ROUTINE_REPORT_ID;
   const langId = Number(languageID) || 1;
+
+  /* রুটিনের কনফিগটা ভাষা চেনে bn / en / ar নামে, আর এই পাতাটা সংখ্যায়
+     (১ = বাংলা, ২ = আরবি)। তাই এক লাইনে মিলিয়ে নেওয়া — তিন নম্বরটা
+     ইংরেজির জন্য রাখা, ঐ ভাষা তালিকায় না থাকলে বাংলাই থাকবে। */
+  const routineLang = langId === 2 ? 'ar' : langId === 3 ? 'en' : 'bn';
+  const rui = (key) => getRRText(key, routineLang);
 
   // ⭐ কোন কিতাবের নম্বর পত্র — পরীক্ষার রুটিনে যে কিতাবগুলো আছে তার একটা
   const [kitabId, setKitabId] = useState('');
@@ -236,6 +275,13 @@ const ExamReportList = ({ pageTitle }) => {
         return ['ReportID', 'SessionID', 'ExamID', 'HallList'].includes(fieldName);
       case 11:
         return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
+      /* ⭐ ৯. পরীক্ষার রুটিন
+         শুধু শিক্ষাবর্ষ, পরীক্ষা আর ভাষা এখানে। জামাত ও শ্রেণি দুইটা
+         নিচে আলাদা করে বসে, কারণ ওদুইটায় "সকল" বলে একটা ঘর লাগে —
+         DefaultSelect এ সেটা নেই। অবস্থান (RDID) রুটিনে লাগেই না,
+         রুটিন তো শ্রেণির, শিক্ষার্থীর নয়। */
+      case ROUTINE_REPORT_ID:
+        return ['ReportID', 'SessionID', 'ExamID', 'Langauge'].includes(fieldName);
       default:
         return false;
     }
@@ -245,8 +291,8 @@ const ExamReportList = ({ pageTitle }) => {
   const [errorMessage, setErrorMessage] = useState(null);
 
   const [
-    ReportID, SessionID, ExamID, SubClassID, RDID, ERIsActive, sevenColor, id, PdfID,
-  ] = watch(['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'RDID', 'ERIsActive', 'sevenColor', 'id', 'PdfID']);
+    ReportID, SessionID, ExamID, SubClassID, RDID, ERIsActive, sevenColor, id, PdfID, ClassID,
+  ] = watch(['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'RDID', 'ERIsActive', 'sevenColor', 'id', 'PdfID', 'ClassID']);
 
   const isSignatureSheet = Number(ReportID) === 8;
 
@@ -256,6 +302,11 @@ const ExamReportList = ({ pageTitle }) => {
   // রিপোর্ট ১ এ PDF বাছাই আর লাগে না — একটাই বাংলা পেজ, সেটিংস দিয়ে বদলায়
   const shouldSkip = (() => {
     if (!ReportID || !SessionID || !ExamID) return true;
+
+    /* ⭐ রুটিনের ডাটা এই কোয়েরি থেকে আসে না — ওটার নিজের রুট ও hook
+       আছে (নিচে routineData)। তাই এখানে সবসময়ই এড়িয়ে যাই, নইলে
+       অকারণে exam_report এ একটা রিকোয়েস্ট যেত। */
+    if (isRoutineReport) return true;
 
     /* ⭐ পরিসংখ্যানে শ্রেণি বাছাই করাই হয় না — সব শ্রেণিই লাগে। আগে
        এখানে SubClassID বাধ্যতামূলক ছিল, তাই ঐ রিপোর্টে কোয়েরিটা কখনো
@@ -293,11 +344,58 @@ const ExamReportList = ({ pageTitle }) => {
     { skip: shouldSkip }
   );
 
+  /* ══════════════════════════════════════════════════════════════════════
+     ⭐ ৯. পরীক্ষার রুটিন — নিজের রুট (/exam/exam_routine_report)
+
+     শিক্ষাবর্ষ ও পরীক্ষা ছাড়া কিছু লাগে না। জামাত ও শ্রেণি ঐচ্ছিক —
+     না দিলে পুরো মাদরাসার রুটিন এক পাতায়।
+
+     উত্তরটায় জামাত ও শ্রেণির পুরো তালিকাও আসে (ছাঁকনি যাই হোক), তাই
+     নিচের দুইটা ড্রপডাউন ওখান থেকেই ভরে — আলাদা কোনো কোয়েরি লাগে না।
+     ══════════════════════════════════════════════════════════════════════ */
+  const { data: routineData, isFetching: routineFetching } = useGetExamRoutineReportQuery(
+    isRoutineReport && SessionID && ExamID
+      ? {
+          SessionID,
+          ExamID,
+          ...(ClassID ? { ClassID } : {}),
+          ...(SubClassID ? { SubClassID } : {}),
+        }
+      : skipToken
+  );
+
   const { data: sessionData } = useGetSessionsQuery();
   const { data: SubClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
   const { data: residentialData } = useGetResidentialQuery();
   const { data: examHallList } = useGetExamHallListQuery();
+
+  // ⭐ রুটিনের জামাতের তালিকা — সার্ভারের উত্তর থেকেই
+  const routineClassOptions = useMemo(() => routineData?.classes ?? [], [routineData]);
+
+  /* ⭐ রুটিনের শ্রেণির তালিকা — চলতি SubClassListData থেকেই, কারণ ওটা
+     পাতা খোলার সাথে সাথেই চলে আসে। জামাত বাছা থাকলে সেই জামাতেরগুলোই
+     (Academic_ClassGroup.ClassID ধরে)। তালিকাটা না এলে সার্ভারের উত্তরের
+     subClasses টাই ব্যবহার হয়, তাই ঘরটা কখনো ফাঁকা থাকে না। */
+  const routineSubClassOptions = useMemo(() => {
+    const base =
+      (Array.isArray(SubClassListData) && SubClassListData.length
+        ? SubClassListData
+        : routineData?.subClasses) ?? [];
+
+    if (!ClassID) return base;
+    return base.filter((g) => String(g.ClassID ?? '') === String(ClassID));
+  }, [SubClassListData, routineData, ClassID]);
+
+  /* জামাত বদলালে আগের শ্রেণিটা নতুন জামাতে না-ও থাকতে পারে — তখন ঘরটা
+     খালি করে দিই, নইলে কোনো সারিই আসত না আর কারণটা চোখে পড়ত না */
+  useEffect(() => {
+    if (!isRoutineReport || !SubClassID) return;
+    const ok = routineSubClassOptions.some(
+      (g) => String(g.SubClassID) === String(SubClassID)
+    );
+    if (!ok) setValue('SubClassID', '');
+  }, [isRoutineReport, routineSubClassOptions, SubClassID, setValue]);
 
   useEffect(() => {
     dispatch(setPageName(pageTitle));
@@ -532,6 +630,18 @@ const ExamReportList = ({ pageTitle }) => {
   }, [feeRows, instituteLogo, documentLogo]);
 
   /**
+   * ⭐ রুটিনের কাগজের লোগো — আগে রুটের header এ আসা লোগোটা, না পেলে
+   * পাতার নিজের খোঁজাটাই (instituteLogo), শেষে documentLogo।
+   */
+  const routineLogo = useMemo(
+    () =>
+      toImageSrc(routineData?.header?.InstitutionLogo) ||
+      instituteLogo ||
+      documentLogo,
+    [routineData, instituteLogo, documentLogo]
+  );
+
+  /**
    * জলছাপ কতটা গাঢ় — সেটিংসে শতাংশে রাখা (২–৩০), কাগজে ভগ্নাংশে বসে।
    * ফি তালিকা ছাড়া বাকি রিপোর্টে আগের ০.০৫ ই থাকে।
    */
@@ -565,8 +675,11 @@ const ExamReportList = ({ pageTitle }) => {
       </style>
 
       {/* জলছাপ — পাতার মাঝখানে, হালকা হয়ে লেখার পেছনে।
-          ঘনত্বটা সেটিংস থেকে, তাই ইনলাইনে বসানো। */}
-      {!isSeatNoReport && watermarkLogo && logoIsActive && showWatermark && (
+          ঘনত্বটা সেটিংস থেকে, তাই ইনলাইনে বসানো।
+
+          ⭐ রুটিনের কাগজ বাদ — ওটার জলছাপ ওর নিজের ভিতরেই বসে, নইলে
+          আড়াআড়ি কাগজে দুইটা জলছাপ একটার উপর আরেকটা পড়ত। */}
+      {!isSeatNoReport && !isRoutineReport && watermarkLogo && logoIsActive && showWatermark && (
         <img
           src={watermarkLogo}
           alt=""
@@ -688,6 +801,68 @@ const ExamReportList = ({ pageTitle }) => {
                       <DefaultSelect label={translate('SubClass')} nameField="SubClass" registerKey="SubClassID" valueField="SubClassID" options={SubClassListData ?? []} require="This Field is required" unicode={true} />
                     )}
 
+                    {/* ⭐ রুটিনের দুইটা ছাঁকনি — জামাত (Academic_Class) ও
+                        শ্রেণি (Academic_ClassGroup)।
+
+                        দুইটাই ঐচ্ছিক, তাই "সকল" বলে একটা ঘর লাগে —
+                        DefaultSelect এ সেটা নেই, তাই সাধারণ select। দেখতে
+                        বাকিগুলোর মতোই রাখা হয়েছে যাতে সারিটা এলোমেলো না
+                        লাগে। জামাত বাছলে শ্রেণির তালিকাটা সেই জামাতেরগুলোয়
+                        নেমে আসে। */}
+                    {isRoutineReport && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {rui('mainClass')}
+                          </label>
+                          <div className="relative">
+                            <select
+                              {...register('ClassID')}
+                              className="w-full appearance-none rounded-md border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                            >
+                              <option value="">{rui('allClass')}</option>
+                              {routineClassOptions.map((c) => (
+                                <option key={c.ClassID} value={c.ClassID}>
+                                  {getClassText(c, routineLang) || c.ClassID}
+                                </option>
+                              ))}
+                            </select>
+                            <svg
+                              className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {rui('subClass')}
+                          </label>
+                          <div className="relative">
+                            <select
+                              {...register('SubClassID')}
+                              className="w-full appearance-none rounded-md border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                            >
+                              <option value="">{rui('allSubClass')}</option>
+                              {routineSubClassOptions.map((g) => (
+                                <option key={g.SubClassID} value={g.SubClassID}>
+                                  {getSubClassText(g, routineLang) || g.SubClassID}
+                                </option>
+                              ))}
+                            </select>
+                            <svg
+                              className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </>
+                    )}
+
                     {shouldShowFields('RDID') && (
                       <DefaultSelect label={translate('Residential')} nameField="ResidentialName" registerKey="RDID" valueField="RDID" options={residentialData ?? []} require="This Field is required" unicode={true} />
                     )}
@@ -796,6 +971,77 @@ const ExamReportList = ({ pageTitle }) => {
                           </button>
                         );
                       })}
+                    </div>
+                  )}
+
+                  {/* ⭐ রুটিনের সাজসজ্জা — শুধু ৯ নং এর জন্য
+
+                      চারটাই কাগজের সাজ, ফর্মের ঘর নয় — তাই react-hook-form
+                      এর বাইরে। ডিফল্টে সবগুলো বন্ধ, মানে কাগজটা হুবহু চলতি
+                      ছাপা রুটিনের মতোই বসে। */}
+                  {isRoutineReport && (
+                    <div className="rounded-xl border border-teal-200 bg-teal-50/50 p-3 flex flex-wrap items-center gap-3">
+                      <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700 px-1">
+                        <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        কাগজের সাজ:
+                      </span>
+
+                      {[
+                        {
+                          key: 'rows',
+                          text: rui('hideEmptyRow'),
+                          on: routineHideEmptyRows,
+                          set: setRoutineHideEmptyRows,
+                        },
+                        {
+                          key: 'shift',
+                          text: rui('hideEmptyShift'),
+                          on: routineHideEmptyShift,
+                          set: setRoutineHideEmptyShift,
+                        },
+                        {
+                          key: 'class',
+                          text: rui('showClassCol'),
+                          on: routineShowClassCol,
+                          set: setRoutineShowClassCol,
+                        },
+                        {
+                          key: 'time',
+                          text: rui('showTime'),
+                          on: routineShowTime,
+                          set: setRoutineShowTime,
+                        },
+                        {
+                          key: 'room',
+                          text: rui('showRoom'),
+                          on: routineShowRoom,
+                          set: setRoutineShowRoom,
+                        },
+                      ].map((opt) => (
+                        <label
+                          key={opt.key}
+                          className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 cursor-pointer hover:bg-slate-50 transition"
+                        >
+                          <input
+                            type="checkbox"
+                            className="h-[15px] w-[15px] accent-teal-600"
+                            checked={opt.on}
+                            onChange={(e) => opt.set(e.target.checked)}
+                          />
+                          <span className="text-[13px] font-medium text-slate-700">{opt.text}</span>
+                        </label>
+                      ))}
+
+                      {/* কত শ্রেণি, কত দিন — বাছাই বদলালেই সাথে সাথে বদলায় */}
+                      {routineData?.rows?.length ? (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-teal-200 px-3 py-1 text-xs font-semibold text-teal-700 ml-auto">
+                          {toBn(routineData.rows.length)} টি শ্রেণি ·{' '}
+                          {toBn(routineData.columns?.length ?? 0)} দিন
+                        </span>
+                      ) : null}
                     </div>
                   )}
 
@@ -952,7 +1198,7 @@ const ExamReportList = ({ pageTitle }) => {
         </div>
 
         {/* ═══ লোডিং ═══════════════════════════════════ */}
-        {isLoading && (
+        {(isLoading || routineFetching) && (
           <div className="mt-4 rounded-xl border border-slate-200 bg-white py-14 text-center print:hidden">
             <div className="inline-block h-8 w-8 rounded-full border-[3px] border-indigo-200 border-t-indigo-600 animate-spin" />
             <p className="text-slate-500 text-sm mt-3">তালিকা আনা হচ্ছে…</p>
@@ -1080,6 +1326,28 @@ const ExamReportList = ({ pageTitle }) => {
 
           {/* ৮. প্রতিষ্ঠানের আসন বিন্যাস */}
           {Number(selectedReportID) === 11 && <InstituteExamSeatingChart queryParams={queryParams} />}
+
+          {/* ৯. পরীক্ষার রুটিন
+
+              সারি = শ্রেণি, কলাম = তারিখ × বেলা, ঘর = কিতাব। ডাটা আসে
+              নিজের রুট থেকে (routineData), তাই উপরের data এর সাথে এর
+              কোনো সম্পর্ক নেই।
+
+              কাগজটা আড়াআড়ি (A4 landscape) — ঐ @page নিয়মটা কম্পোনেন্টের
+              ভিতরেই, তাই অন্য রিপোর্টের লম্বালম্বি কাগজে হাত পড়ে না। */}
+          {isRoutineReport && !routineFetching && (
+            <ExamRoutinePaper
+              reportData={routineData}
+              lang={routineLang}
+              instituteLogo={routineLogo}
+              showWatermark={logoIsActive}
+              hideEmptyRows={routineHideEmptyRows}
+              hideEmptyShift={routineHideEmptyShift}
+              showClassCol={routineShowClassCol}
+              showRoom={routineShowRoom}
+              showTime={routineShowTime}
+            />
+          )}
         </div>
       </div>
 

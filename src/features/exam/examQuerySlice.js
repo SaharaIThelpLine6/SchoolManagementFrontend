@@ -695,5 +695,5 @@ export const {
 
   useGetAllExamRoutineListQuery,
   useGetExamSubjectQuery,
-  useLazyGetAllExamRoutineQuery
+  useLazyGetAllExamRoutineQuery,
 } = examSlice;

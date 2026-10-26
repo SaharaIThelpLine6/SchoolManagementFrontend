@@ -59,7 +59,7 @@ export const reportQuerySlice = createApi({
     // ---------- Live student data for the builder preview ----------
     getStudentReportList: builder.query({
       query: (params = {}) => {
-        // null, undefined বা empty string গুলো বাদ দিয়ে ক্লিন প্যারামিটার তৈরি করা
+        // null, undefined বা empty string গুলো বাদ দিয়ে ক্লিন প্যারামিটার তৈরি করা
         const cleanParams = Object.fromEntries(
           Object.entries(params).filter(([, v]) => v !== '' && v !== undefined && v !== null)
         );
@@ -69,6 +69,14 @@ export const reportQuerySlice = createApi({
         };
       },
     }),
+
+    getExamRoutineReport: builder.query({
+      query: (params) => ({
+        url: '/exam_routine_report',
+        params,
+      }),
+    }),
+
   }),
 });
 
@@ -79,4 +87,5 @@ export const {
   useDeleteReportTemplateMutation,
   useGetReportFiltersQuery,
   useGetStudentReportListQuery,
+  useGetExamRoutineReportQuery,
 } = reportQuerySlice;
