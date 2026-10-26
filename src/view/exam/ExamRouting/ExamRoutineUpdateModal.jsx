@@ -120,14 +120,14 @@ const parseRoutineRows = (editDetails, subClassID, nextId) => {
 };
 
 const ICON_BTN =
-  'flex h-9 w-9 items-center justify-center rounded-lg border shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus:ring-2';
+  'flex h-8 w-8 items-center justify-center rounded-lg border shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus:ring-2';
 const BLUE_BTN = `${ICON_BTN} border-blue-200 bg-blue-50 text-blue-600 hover:bg-blue-100 focus:ring-blue-200`;
 const ROSE_BTN = `${ICON_BTN} border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 focus:ring-rose-200`;
 const TIME_INPUT =
-  'w-full min-w-[125px] rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500';
+  'w-full min-w-[100px] rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500';
 const TEXT_INPUT =
-  'w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
-const TH = 'whitespace-nowrap border-b border-blue-100 px-4 py-4 text-xs font-bold text-slate-700 sm:text-sm';
+  'w-full rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
+const TH = 'whitespace-nowrap border-b border-blue-100 px-2 py-4 text-xs font-bold text-slate-700 sm:text-sm';
 
 const ReadOnlyField = ({ label, value }) => (
   <div className="flex flex-col gap-1.5">
@@ -508,10 +508,11 @@ const ExamRoutineUpdateModal = ({ meta }) => {
 
             {/* Table */}
             <div className="overflow-x-auto rounded-xl border border-blue-100 bg-white shadow-sm">
-              <table className="w-full min-w-[1120px] border-separate border-spacing-0">
+              {/* ✅ FIX: min-w-[1120px] থেকে কমিয়ে min-w-[960px] করা হয়েছে */}
+              <table className="w-full min-w-[960px] border-separate border-spacing-0">
                 <thead className="bg-gradient-to-r from-slate-50 to-blue-50/70">
                   <tr className="border-b border-blue-100">
-                    <th className={`${TH} px-3 text-center`}>
+                    <th className={`${TH} px-2 text-center`}>
                       <div className="flex items-center justify-center">
                         <input
                           type="checkbox"
@@ -521,7 +522,7 @@ const ExamRoutineUpdateModal = ({ meta }) => {
                         />
                       </div>
                     </th>
-                    <th className={`${TH} px-3 text-center`}>ক্রম</th>
+                    <th className={`${TH} px-2 text-center`}>ক্রম</th>
                     <th className={`${TH} text-left`}>ক্যালেন্ডার তারিখ</th>
                     <th className={`${TH} text-center`}>ইংরেজী/আরবি</th>
                     <th className={`${TH} text-left`}>বার</th>
@@ -537,7 +538,7 @@ const ExamRoutineUpdateModal = ({ meta }) => {
                       key={item.id}
                       className="border-b border-slate-100 transition-colors odd:bg-white even:bg-slate-50/70 hover:bg-blue-50/70"
                     >
-                      <td className="px-3 py-3">
+                      <td className="px-1 py-2">
                         <div className="flex items-center justify-center gap-2">
                           <input
                             type="checkbox"
@@ -548,9 +549,9 @@ const ExamRoutineUpdateModal = ({ meta }) => {
                         </div>
                       </td>
 
-                      <td className="px-3 py-3 text-center text-sm font-medium text-slate-600">{item.sl}</td>
+                      <td className="px-1 py-2 text-center text-sm font-medium text-slate-600">{item.sl}</td>
 
-                      <td className="px-3 py-3">
+                      <td className="px-1 py-2">
                         <DatePickerOne
                           registerKey={`date_${item.id}`}
                           defaultValue={item.date}
@@ -561,23 +562,24 @@ const ExamRoutineUpdateModal = ({ meta }) => {
                       </td>
 
                       {/* ✅ ইংরেজী/আরবি — state থেকে controlled */}
-                      <td className="px-3 py-3">
+                      <td className="px-1 py-2">
                         <input
                           type="text"
                           value={item.BnExamDate || ''}
                           onChange={(event) => updateRow(item.id, { BnExamDate: event.target.value })}
                           aria-label="বাংলা বা আরবি তারিখ"
                           placeholder="বাংলা/আরবি তারিখ"
-                          className={`${TEXT_INPUT} min-w-[150px]`}
+                          /* ✅ FIX: min-w-[150px] কমিয়ে width সম্পূর্ণ ফ্লুইড করা হয়েছে */
+                          className={`${TEXT_INPUT} min-w-[100px]`}
                         />
                       </td>
 
-                      <td className="px-3 py-3 text-center text-sm font-medium text-slate-600">
+                      <td className="px-1 py-2 text-center text-sm font-medium text-slate-600">
                         {getBanglaWeekday(getDateOnly(watch(`date_${item.id}`)) || item.date)}
                       </td>
 
                       {item.hidden ? (
-                        <td colSpan={3} className="min-w-[390px] px-3 py-3">
+                        <td colSpan={3} className="min-w-[300px] px-1 py-2">
                           <DefaultInput
                             label="Message"
                             registerKey={`message_${item.id}`}
@@ -588,7 +590,7 @@ const ExamRoutineUpdateModal = ({ meta }) => {
                       ) : (
                         <>
                           {/* ✅ বিষয় — state থেকে controlled */}
-                          <td className="min-w-[160px] px-3 py-3">
+                          <td className="min-w-[120px] px-1 py-2">
                             <select
                               value={String(item.subject ?? '')}
                               onChange={(event) => updateRow(item.id, { subject: event.target.value })}
@@ -604,7 +606,7 @@ const ExamRoutineUpdateModal = ({ meta }) => {
                             </select>
                           </td>
 
-                          <td className="px-3 py-3">
+                          <td className="px-1 py-2">
                             <input
                               type="time"
                               value={item.startTime}
@@ -615,7 +617,7 @@ const ExamRoutineUpdateModal = ({ meta }) => {
                             />
                           </td>
 
-                          <td className="px-3 py-3">
+                          <td className="px-1 py-2">
                             <input
                               type="time"
                               value={item.endTime}
@@ -628,8 +630,8 @@ const ExamRoutineUpdateModal = ({ meta }) => {
                         </>
                       )}
 
-                      <td className="px-3 py-3">
-                        <div className="flex items-center justify-center gap-1.5">
+                      <td className="px-1 py-2">
+                        <div className="flex items-center justify-center gap-1">
                           <button
                             type="button"
                             onClick={() => handleHide(item)}
@@ -637,16 +639,16 @@ const ExamRoutineUpdateModal = ({ meta }) => {
                             title={item.hidden ? 'Show row' : 'Hide row'}
                             aria-label={item.hidden ? 'Show row' : 'Hide row'}
                           >
-                            <SvgIcon name={item.hidden ? 'FaEyeSlash' : 'FaEye'} size={18} />
+                            <SvgIcon name={item.hidden ? 'FaEyeSlash' : 'FaEye'} size={16} />
                           </button>
                           <button type="button" onClick={() => handleCopy(item)} className={BLUE_BTN} title="Add">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M12 5v14" />
                               <path d="M5 12h14" />
                             </svg>
                           </button>
                           <button type="button" onClick={() => handleDelete(item.id)} className={ROSE_BTN} title="Delete">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <polyline points="3 6 5 6 21 6" />
                               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                             </svg>

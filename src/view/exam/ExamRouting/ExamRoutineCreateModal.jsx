@@ -105,8 +105,11 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
   const routineSessionID = SessionID;
   const routineExamID = ExamID;
   const routineSubClassID = SubClassID;
+
+  // ✅ FIX: data → currentData. currentData নতুন query arg fetch হওয়ার সময়
+  // undefined থাকে, তাই আগের সিলেকশনের stale data দিয়ে ভুল অ্যালার্ট দেখাবে না।
   const {
-    data: editDetails,
+    currentData: editDetails,
     isFetching: isLoadingEditDetails,
   } = useGetAllExamRoutineQuery(
     {
@@ -158,7 +161,9 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
 
   const examRoutine = editDetails;
   const isCheckingExistingRoutine = isLoadingEditDetails;
-  const hasExistingRoutine = hasExistingRows(examRoutine);
+  // ✅ FIX: editDetails undefined হলে (নতুন সিলেকশনের ডেটা এখনো আসেনি) false ধরব
+  const hasExistingRoutine =
+    editDetails !== undefined && hasExistingRows(editDetails);
   const [postExamRoutine, { isLoading: isSavingRoutine }] = usePostExamRoutineMutation();
 
   const { data: sessionData } = useGetSessionsQuery();
@@ -212,9 +217,12 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
     lastAlertedSelectionRef.current = '';
   }, [selectionKey]);
 
+  // ✅ FIX: editDetails (currentData) undefined মানে নতুন সিলেকশনের ডেটা এখনো
+  // আসেনি — তখন অ্যালার্ট দেখাব না, অপেক্ষা করব।
   useEffect(() => {
     if (!SessionID || !ExamID || !SubClassID || isCheckingExistingRoutine) return;
     if (!isSetupDone) return;
+    if (!editDetails) return; // <-- বর্তমান সিলেকশনের ডেটা এখনো লোড হয়নি
     if (hasExistingRoutine && lastAlertedSelectionRef.current !== selectionKey) {
       lastAlertedSelectionRef.current = selectionKey;
       Swal.fire({
@@ -229,7 +237,7 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
     ExamID,
     SubClassID,
     selectionKey,
-    examRoutine,
+    editDetails,
     hasExistingRoutine,
     isCheckingExistingRoutine,
     isSetupDone,
@@ -695,10 +703,11 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
               className={`overflow-auto rounded-xl border border-blue-100 bg-white shadow-sm ${lockClass}`}
               aria-disabled={!isSetupDone}
             >
-              <table className="w-full min-w-[1120px] border-separate border-spacing-0">
+              {/* ✅ FIX: min-w-[1120px] থেকে কমিয়ে min-w-[960px] করা হয়েছে */}
+              <table className="w-full min-w-[960px] border-separate border-spacing-0">
                 <thead className="bg-gradient-to-r from-slate-50 to-blue-50/70">
                   <tr className="border-b border-blue-100">
-                    <th className="whitespace-nowrap border-b border-blue-100 px-3 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
+                    <th className="whitespace-nowrap border-b border-blue-100 px-2 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
                       <div className="flex items-center justify-center">
                         <input
                           type="checkbox"
@@ -708,15 +717,15 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
                         />
                       </div>
                     </th>
-                    <th className="whitespace-nowrap border-b border-blue-100 px-3 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
+                    <th className="whitespace-nowrap border-b border-blue-100 px-2 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
                       ক্রম
                     </th>
-                    <th className="whitespace-nowrap border-b border-blue-100 px-4 py-4 text-left text-xs font-bold text-slate-700 sm:text-sm">
+                    <th className="whitespace-nowrap border-b border-blue-100 px-2 py-4 text-left text-xs font-bold text-slate-700 sm:text-sm">
                       ক্যালেন্ডার তারিখ
                     </th>
 
                     {/* ইংরেজী/আরবি + checkbox */}
-                    <th className="whitespace-nowrap border-b border-blue-100 px-4 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
+                    <th className="whitespace-nowrap border-b border-blue-100 px-2 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
                       <div className="flex items-center justify-center gap-2">
                         <span>ইংরেজী/আরবি</span>
                         <input
@@ -730,15 +739,15 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
                       </div>
                     </th>
 
-                    <th className="whitespace-nowrap border-b border-blue-100 px-4 py-4 text-left text-xs font-bold text-slate-700 sm:text-sm">
+                    <th className="whitespace-nowrap border-b border-blue-100 px-2 py-4 text-left text-xs font-bold text-slate-700 sm:text-sm">
                       বার
                     </th>
-                    <th className="whitespace-nowrap border-b border-blue-100 px-4 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
+                    <th className="whitespace-nowrap border-b border-blue-100 px-2 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
                       বিষয়
                     </th>
 
                     {/* শুরু সময় + checkbox */}
-                    <th className="whitespace-nowrap border-b border-blue-100 px-4 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
+                    <th className="whitespace-nowrap border-b border-blue-100 px-2 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
                       <div className="flex items-center justify-center gap-2">
                         <span>শুরু সময়</span>
                         <input
@@ -753,7 +762,7 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
                     </th>
 
                     {/* শেষ সময় + checkbox */}
-                    <th className="whitespace-nowrap border-b border-blue-100 px-4 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
+                    <th className="whitespace-nowrap border-b border-blue-100 px-2 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
                       <div className="flex items-center justify-center gap-2">
                         <span>শেষ সময়</span>
                         <input
@@ -767,7 +776,7 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
                       </div>
                     </th>
 
-                    <th className="whitespace-nowrap border-b border-blue-100 px-4 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
+                    <th className="whitespace-nowrap border-b border-blue-100 px-2 py-4 text-center text-xs font-bold text-slate-700 sm:text-sm">
                       কার্যক্রম
                     </th>
                   </tr>
@@ -780,7 +789,7 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
                         key={item.id}
                         className="border-b border-slate-100 transition-colors odd:bg-white even:bg-slate-50/70 hover:bg-blue-50/70"
                       >
-                        <td className="px-1 py-3">
+                        <td className="px-1 py-2">
                           <div className="flex items-center justify-center gap-2">
                             <input
                               type="checkbox"
@@ -791,9 +800,9 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
                           </div>
                         </td>
 
-                        <td className="px-1 py-3 text-center text-sm font-medium text-slate-600">{item.sl}</td>
+                        <td className="px-1 py-2 text-center text-sm font-medium text-slate-600">{item.sl}</td>
 
-                        <td className="px-1 py-3">
+                        <td className="px-1 py-2">
                           <DatePickerOne
                             registerKey={`date_${item.id}`}
                             defaultValue={item.date}
@@ -802,7 +811,7 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
                             placeholder="তারিখ নির্বাচন করুন"
                           />
                         </td>
-                        <td className="px-1 py-3">
+                        <td className="px-1 py-2">
                           <input
                             type="text"
                             {...bnDateRegister}
@@ -813,15 +822,16 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
                             defaultValue={item.BnExamDate || ''}
                             aria-label="বাংলা বা আরবি তারিখ"
                             placeholder="বাংলা/আরবি তারিখ"
-                            className="w-full min-w-[150px] rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                            /* ✅ FIX: min-w-[150px] কমিয়ে width সম্পূর্ণ ফ্লুইড করা হয়েছে */
+                            className="w-full min-w-[100px] rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                           />
                         </td>
-                        <td className="px-2 py-1 text-center text-sm font-medium text-slate-600">
+                        <td className="px-1 py-2 text-center text-sm font-medium text-slate-600">
                           {getBanglaWeekday(getDateOnly(watch(`date_${item.id}`)) || item.date)}
                         </td>
 
                         {item.hidden ? (
-                          <td colSpan={3} className="min-w-[390px] px-1 py-3">
+                          <td colSpan={3} className="min-w-[300px] px-1 py-2">
                             <DefaultInput
                               label="Message"
                               registerKey={`message_${item.id}`}
@@ -831,7 +841,8 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
                           </td>
                         ) : (
                           <>
-                            <td className="min-w-[160px] px-1 py-3">
+                            {/* ✅ FIX: min-w-[160px] কমিয়ে width সম্পূর্ণ ফ্লুইড করা হয়েছে */}
+                            <td className="min-w-[120px] px-1 py-2">
                               <DefaultSelect
                                 label=""
                                 options={getSubjectOptionsForRow(item.id)}
@@ -850,47 +861,49 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
                             </td>
 
                             {/* শুরু সময় */}
-                            <td className="px-1 py-3">
+                            <td className="px-1 py-2">
                               <input
                                 type="time"
                                 value={item.startTime}
                                 aria-label="পরীক্ষা শুরুর সময়"
                                 onChange={(event) => handleRowTimeChange(item.id, 'startTime', event.target.value)}
-                                className="w-full min-w-[125px] rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                /* ✅ FIX: min-w-[125px] কমিয়ে width সম্পূর্ণ ফ্লুইড করা হয়েছে */
+                                className="w-full min-w-[100px] rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                               />
                             </td>
 
                             {/* শেষ সময় */}
-                            <td className="px-1 py-3">
+                            <td className="px-1 py-2">
                               <input
                                 type="time"
                                 value={item.endTime}
                                 aria-label="পরীক্ষা শেষের সময়"
                                 onChange={(event) => handleRowTimeChange(item.id, 'endTime', event.target.value)}
-                                className="w-full min-w-[125px] rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                                /* ✅ FIX: min-w-[125px] কমিয়ে width সম্পূর্ণ ফ্লুইড করা হয়েছে */
+                                className="w-full min-w-[100px] rounded-lg border border-slate-200 bg-white px-2 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                               />
                             </td>
                           </>
                         )}
 
-                        <td className="px-1 py-3">
-                          <div className="flex items-center justify-center gap-1.5">
+                        <td className="px-1 py-2">
+                          <div className="flex items-center justify-center gap-1">
                             <button
                               type="button"
                               onClick={() => handleHide(item)}
-                              className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-200"
                               title={item.hidden ? 'Show row' : 'Hide row'}
                               aria-label={item.hidden ? 'Show row' : 'Hide row'}
                             >
-                              <SvgIcon name={item.hidden ? 'FaEyeSlash' : 'FaEye'} size={18} />
+                              <SvgIcon name={item.hidden ? 'FaEyeSlash' : 'FaEye'} size={16} />
                             </button>
                             <button
                               type="button"
                               onClick={() => handleCopy(item)}
-                              className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-200 bg-blue-50 text-blue-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-200"
                               title="Add"
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M12 5v14" />
                                 <path d="M5 12h14" />
                               </svg>
@@ -899,10 +912,10 @@ const ExamRoutineCreateModal = ({ pageTitle }) => {
                             <button
                               type="button"
                               onClick={() => handleDelete(item.id)}
-                              className="flex h-9 w-9 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-rose-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-200"
+                              className="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-rose-600 shadow-sm transition hover:-translate-y-0.5 hover:bg-rose-100 focus:outline-none focus:ring-2 focus:ring-rose-200"
                               title="Delete"
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="3 6 5 6 21 6" />
                                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                               </svg>
