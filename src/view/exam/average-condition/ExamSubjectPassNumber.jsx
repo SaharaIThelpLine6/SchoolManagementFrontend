@@ -965,9 +965,10 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                       </button>
                       <button
                         type="button"
-                        className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                        className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex gap-1"
                         onClick={handleCloseDivisionManager}
                       >
+                        <SvgIcon name="LongArrowLeft" />
                         এক্সাম কন্ডিশনে ফিরে যান
                       </button>
                     </div>

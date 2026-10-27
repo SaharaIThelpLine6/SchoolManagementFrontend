@@ -63,7 +63,7 @@ const createDefaultGradeBands = (count = MIN_GRADE_BANDS) =>
     serial: index + 1,
   }));
 
-export default function ExamAverageDetermination({ sharedStepData, setSharedStepData }) {
+export default function ExamAverageDetermination({ sharedStepData, setSharedStepData, isDuplicate = false }) {
   const { next } = useMultiStepForm('examCondition');
 
 
@@ -309,9 +309,10 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
     }
 
     const sameDraft = sharedStepData &&
-      ["SessionID", "ExamID", "SubClassID", "ExamType"].every(
+      ["SessionID", "SubClassID", "ExamType"].every(
         (key) => String(sharedStepData[key]) === String(data[key])
-      );
+      ) &&
+      (!sharedStepData.ExamID || String(sharedStepData.ExamID) === String(data.ExamID));
     const payload = {
       ...(sameDraft ? sharedStepData : {}),
       ...data,
@@ -391,6 +392,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               nameField="SessionName"
               valueField={"SessionID"}
               initialValue={sharedStepData?.SessionID}
+              readOnly={isDuplicate}
               unicode={true}
               label={translate("Session")}
               require={"Session is Required"}
@@ -418,6 +420,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               nameField="SubClass"
               valueField={"SubClassID"}
               initialValue={sharedStepData?.SubClassID}
+              readOnly={isDuplicate}
               label={translate("SubClass")}
               require={"SubClass is Required"}
               unicode={true}
@@ -448,6 +451,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               nameField="name"
               valueField={"value"}
               initialValue={sharedStepData?.ExamType}
+              readOnly={isDuplicate}
               label={translate("Exam Type")}
               require={"SubClass is Required"}
               unicode={true}
@@ -455,7 +459,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
           </div>
         </div>
 
-        {previousCondition && !hasExistingExamCondition && !hasConditionInClass && !isClassConditionsFetching && (
+        {!isDuplicate && previousCondition && !hasExistingExamCondition && !hasConditionInClass && !isClassConditionsFetching && (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
             <div>
               <p className="font-semibold text-blue-900">
@@ -514,9 +518,10 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                   </button>
                   <button
                     type="button"
-                    className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                    className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex gap-1"
                     onClick={handleCloseDivisionManager}
                   >
+                    <SvgIcon name="LongArrowLeft" />
                     এক্সাম কন্ডিশনে ফিরে যান
                   </button>
                 </div>

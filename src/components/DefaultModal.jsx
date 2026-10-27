@@ -422,7 +422,7 @@ const DefaultModal = () => {
                   <SupportTicketModal id={id} />
                 )}
                 {modalType === 'EXAM_CONDITION_SETTINGS' && (
-                  <ExamConditionModal />
+                  <ExamConditionModal data={id} />
                 )}
                 {modalType === 'EXAM_CONDITION_SETTINGS_EDIT' && (
                   <ExamConditionEditModal data={id} />

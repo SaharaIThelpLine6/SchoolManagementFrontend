@@ -1065,6 +1065,8 @@ const useTranslate = () => {
     "Condition copied": "কন্ডিশন কপি হয়েছে",
     "Review each step before saving.": "সংরক্ষণের আগে প্রতিটি ধাপ যাচাই করুন।",
     "Could not copy the previous condition": "আগের কন্ডিশন কপি করা যায়নি",
+    "Duplicate Exam Condition": "পরীক্ষার কন্ডিশন অনুলিপি করুন",
+    "Failed to duplicate exam condition": "পরীক্ষার কন্ডিশন অনুলিপি করা যায়নি",
   };
 
   return (key) =>
