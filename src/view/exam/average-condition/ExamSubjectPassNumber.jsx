@@ -50,6 +50,31 @@ const withDefaultSubjectNumbers = (subjects) =>
     PassNumber: passNumberOrDefault(subject.PassNumber),
   }));
 
+const SubjectColumnHeader = ({ label, helpText }) => (
+  <span className="inline-flex items-center gap-1">
+    <span>{label}</span>
+    <button
+      type="button"
+      aria-label={`${label}: ${helpText}`}
+      data-tooltip-id="subject-column-tooltip"
+      data-tooltip-content={helpText}
+      data-tooltip-place="top"
+      className="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+    >
+      <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5">
+        <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M10 9v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="10" cy="6.5" r="1" fill="currentColor" />
+      </svg>
+    </button>
+  </span>
+);
+
+SubjectColumnHeader.propTypes = {
+  label: PropTypes.string.isRequired,
+  helpText: PropTypes.string.isRequired,
+};
+
 const SortableSubjectRow = ({ id, index, label, children }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id });
@@ -791,17 +816,31 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                             {translate("Subject")}
                           </th>
                           {ExamType != 3 && (<th className="text-left px-4 py-2 font-medium text-gray-600">
-                            {translate("Meyari")}
+                            <SubjectColumnHeader
+                              label={translate("Meyari")}
+                              helpText={`মিয়ারি হচ্ছে কিতাবের গুরুত্বের ধরন। এর মধ্যে কিতাবগুলো ৩ ধরনের কন্ডিশনে ভাগ করা যায়। যথা: ১) গড় মিয়ারি: যেসকল বিষয় কম গুরুত্বপূর্ণ সে সকল বিষয়কে গড় মিয়ারি দ্বারা প্রকাশ করা হয়। পরীক্ষায় যদি এমন কন্ডিশন ব্যবহার করা হয় যেখানে ২/৩/৪ কিতাবে বা তার কম বিষয়ে অকৃতকার্য হওয়ার পরও যদি গড়ে সকল বিষয়ে পাস করে তাহলে তাকে মাকবুল/বিশেষ বিবেচনায় পাস বলে বিবেচনা করার সুযোগ থাকে।
+২) মিয়ারি: মধ্যম গুরুত্বপূর্ণ এমন বিষয়গুলোকে মিয়ারি দ্বারা প্রকাশ করা যায়। মিয়ারি ও গড়মিয়ারির পরীক্ষার কন্ডিশনের ধরন প্রায় একই। নির্দিষ্ট বিষয়ে বা তার কম ফেল করার পর গড়ে পাস করলে মাকবুল/বিশেষ বিবেচনায় পাস বলে বিবেচনা করার সুযোগ থাকে।
+৩) অধিকতর মিয়ারি: যেসকল বিষয়গুলোকে অধিক গুরুত্ব দেওয়া হয় বা অধিক গুরুত্বপূর্ণ বিষয় হিসাবে ধরা হয় এবং যেগুলো ১ বিষয়ে অকৃতকার্য হলেই রাসিব বা ফেল হয় সে বিষয়গুলো অধিকতর গুরুত্বপূর্ণ বিষয় বলে বিবেচনা করা হয়। গড় মিয়ারি ও মিয়ারি বিষয়ে যা হোক না কেনো অধিকতর বিষয়ে ১ বিষয়ে অকৃতকার্য হলেই ফলাফলে তখন রাসিব বা ফেল দেখাবে। `}
+                            />
                           </th>)}
 
                           <th className="text-left px-4 py-2 font-medium text-gray-600">
-                            {translate("Max Number")}
+                            <SubjectColumnHeader
+                              label={translate("Max Number")}
+                              helpText={`১ টি পরীক্ষার ১ টি বিষয়ে সর্বোচ্চ যত নাম্বারে পরীক্ষা হয় উক্ত নাম্বারকে সর্বোচ্চ প্রাপ্য নম্বর বলে ধরা হয়। উদাহরনস্বরুপ: মাসিক পরীক্ষা যদি ২০ নাম্বারের হয় তাহলে সর্বোচ্চ প্রাপ্য নাম্বার হবে ২০, সাময়িক পরীক্ষা যদি ১০০ নাম্বারের হয় তখন উক্ত পরীক্ষার প্রাপ্য নাম্বার হবে ১০০। `}
+                            />
                           </th>
                           <th className="text-left px-4 py-2 font-medium text-gray-600">
-                            {translate("Pass Number")}
+                            <SubjectColumnHeader
+                              label={translate("Pass Number")}
+                              helpText={`১টি পরীক্ষায় কোনো নির্দিষ্ট বিষয়ে যত নাম্বার পেলে গড়ে মাকবুল বা পাস করে উক্ত প্রাপ্য নাম্বারকে পাস নাম্বার বলে বিবেচনা করা হয়। সকল স্কুল/মাদরাসা নিয়ম অনুযায়ী পরীক্ষার ৩৩%-৪০% নাম্বার পাস নাম্বার বলে ধরা হয়। যদি ১০০ নাম্বারে পরীক্ষা হয় পাস নাম্বার হবে ৩৩, ৫০ এ পরীক্ষা হলে পাস নাম্বার হবে ১৭, ২০ নাম্বারে পরীক্ষা হলে পাস নাম্বার হবে ৭।`}
+                            />
                           </th>
                           <th className="text-left px-4 py-2 font-medium text-gray-600">
-                            {translate("Optional")}
+                            <SubjectColumnHeader
+                              label={translate("Optional")}
+                              helpText={`ক্বেরাত কন্ডিশন বলতে অপশনাল বিষয় বুঝায়, যেসকল বিষয়ের পরীক্ষা হয় কিন্তু উক্ত পরীক্ষার নাম্বার মোট নাম্বারের সাথে যুক্ত হয় না, সেসকল বিষয় ক্বেরাত কন্ডিশন বলে বিবেচনা করা হয়। উল্লেখ্য, অপশনাল বিষয়ে অকৃতকার্য / অনুপস্থিত হলে রাসিব/ বিবেচনায় পাস বলে বিবেচনা করা যাবে।`}
+                            />
                           </th>
                           {/* <th className="px-4 py-2 w-10"></th> */}
                         </tr>

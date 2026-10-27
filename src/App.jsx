@@ -43,7 +43,21 @@ export default function App() {
           closeButton={false}
           className={`min-h-[50px] text-[14px] ${fontClass} text-white rounded-[4px] hidden_in_print`}
         />
-        <Tooltip id="my-tooltip" className="!rounded-[5px] !bg-gray-900 !text-white !px-[1px] !py-[1px] !text-[14px] !font-default !height-[5px]" />
+        <Tooltip id="my-tooltip" style={{ zIndex: 1000 }} className="!rounded-[5px] !bg-gray-900 !text-white !px-[1px] !py-[1px] !text-[14px] !font-default !height-[5px]" />
+        <Tooltip
+          id="subject-column-tooltip"
+          clickable
+          style={{
+            zIndex: 1000,
+            maxWidth: "min(90vw, 36rem)",
+            maxHeight: "70vh",
+            overflowY: "auto",
+            overflowWrap: "break-word",
+            whiteSpace: "pre-line",
+            textAlign: "left",
+          }}
+          className={`!rounded-lg !bg-gray-900 !text-white !text-sm !leading-relaxed ${fontClass}`}
+        />
       </Suspense>
     </>
   );
