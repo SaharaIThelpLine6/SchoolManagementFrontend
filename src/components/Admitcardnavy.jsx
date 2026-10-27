@@ -28,12 +28,17 @@ import {
 // এক সারিতে দুইটা করে। ফিল্ড বাছাই, লেবেল বদলানো, ভাষা — সব আগের মতোই
 // কাজ করে, কেবল চেহারাটা আলাদা।
 //
+// তথ্যের ঘরের নিচের জায়গাটায় আগে ছয়টা নির্দেশ বসত। ওগুলো কোডে লেখা
+// স্থির লেখা ছিল — ডাটাবেজ থেকে আসত না, প্রতিষ্ঠানভেদে বদলানোও যেত না।
+// তাই ওটা বাদ দিয়ে ঐ জায়গায় এখন শিক্ষার্থীর আসনের তথ্য বসে, যেটা
+// সত্যিকারের ডাটা (Exam_SitAllocation থেকে)।
+//
 // দুই মাপেই চলে:
-//   A5 (৪১০px)  → হেডার, তথ্যের ঘর, নির্দেশাবলী, সতর্কবার্তা, স্বাক্ষর
+//   A5 (৪১০px)  → হেডার, তথ্যের ঘর, আসনের ঘর, স্বাক্ষর
 //   A4 (৭৪০px)  → `bodyEnd` দেওয়া থাকে, তাই তথ্যের ঘর ওখানেই শেষ হয় আর
 //                 নিচের খালি জায়গাটা রুটিনের জন্য ছেড়ে দেওয়া হয়।
-//                 নির্দেশাবলী ও সতর্কবার্তা তখন বাদ যায় — ওই জায়গাটা
-//                 রুটিনের, নইলে দুইটা একটার উপর আরেকটা পড়ত।
+//                 আসনের ঘরটা তখন আঁকা হয় না — রুটিনের ব্লকেই আসনের
+//                 পট্টিটা আগের মতো বসে, দুইবার দেখানোর দরকার নেই।
 // ---------------------------------------------------------------------------
 
 const toImageSrc = (img) => {
@@ -57,53 +62,23 @@ const pairUp = (arr) => {
 // এই নকশার নিজের লেখা।
 //
 // admitCardConfig.js এর ADMIT_TEXTS/ADMIT_UI তে রাখিনি — ওগুলো সব ডিজাইনের
-// সাধারণ লেখা, আর এই ছয়টা নির্দেশ কেবল এই নকশাটারই।
+// সাধারণ লেখা, আর এই কয়টা কেবল এই নকশাটারই।
 // ---------------------------------------------------------------------------
 export const NAVY_TEXTS = {
   bn: {
     subTitle: 'প্রবেশপত্র',
     academicYear: 'শিক্ষাবর্ষ',
-    seatNo: 'আসন নং',
-    instructions: 'পরীক্ষার্থীদের জন্য নির্দেশাবলী',
-    rules: [
-      'সকল পরীক্ষার্থীকে প্রবেশপত্রসহ পরীক্ষা শুরুর কমপক্ষে ৩০ মিনিট পূর্বে কেন্দ্রে উপস্থিত হতে হবে।',
-      'পরীক্ষার হলে মোবাইল ফোন, স্মার্ট ঘড়ি ও ইলেকট্রনিক ডিভাইস সম্পূর্ণ নিষিদ্ধ।',
-      'প্রবেশপত্র ব্যতীত পরীক্ষার হলে প্রবেশ করা যাবে না।',
-      'প্রতিটি পরীক্ষা শেষে প্রশ্নপত্র জমা দিতে হবে।',
-      'পরীক্ষার হলে নীরবতা বজায় রাখতে হবে, অন্যদের বিঘ্ন ঘটানো যাবে না।',
-      'যেকোনো ধরনের অসদুপায় অবলম্বন করলে তাৎক্ষণিকভাবে বহিষ্কার করা হবে।',
-    ],
-    warning: 'অনুপস্থিত কোনো পরীক্ষা নেওয়া হবে না, পরীক্ষার ফলাফল বাতিল হবে।',
+    seatTitle: 'পরীক্ষার্থীর আসন',
   },
   en: {
     subTitle: 'Admission letter',
     academicYear: 'Academic year',
-    seatNo: 'Seat No.',
-    instructions: 'Instructions for candidates',
-    rules: [
-      'All candidates must arrive at the center (with admit card) at least 30 minutes before the start of the exam.',
-      'Mobile phones, smart watches and electronic devices are completely prohibited in the examination hall.',
-      'You will not be allowed to enter the examination hall without an admit card.',
-      'Question papers must be submitted at the end of each exam.',
-      'Silence must be maintained in the examination hall and no disruptions to others may be caused.',
-      'Any type of misconduct will result in immediate expulsion of the candidate.',
-    ],
-    warning: 'No absentee exams will be taken, and exam results will be canceled.',
+    seatTitle: "Candidate's seat",
   },
   ar: {
     subTitle: 'بطاقة الدخول',
     academicYear: 'العام الدراسي',
-    seatNo: 'رقم المقعد',
-    instructions: 'تعليمات للممتحنين',
-    rules: [
-      'على جميع الممتحنين الحضور إلى المركز ومعهم بطاقة الدخول قبل بدء الامتحان بثلاثين دقيقة على الأقل.',
-      'تُمنع الهواتف المحمولة والساعات الذكية والأجهزة الإلكترونية منعًا باتًا داخل القاعة.',
-      'لا يُسمح بدخول القاعة بدون بطاقة الدخول.',
-      'يجب تسليم ورقة الأسئلة عند انتهاء كل امتحان.',
-      'يجب الحفاظ على الهدوء داخل القاعة وعدم إزعاج الآخرين.',
-      'أي سلوك مخالف يؤدي إلى إخراج الممتحن فورًا.',
-    ],
-    warning: 'لا تُعاد الامتحانات للغائبين، وتُلغى نتيجة الامتحان.',
+    seatTitle: 'مقعد الممتحن',
   },
 };
 
@@ -137,19 +112,38 @@ export const NavyAdmitFace = ({
   showSignName,
   seatText = '',
   seatOffsetY = 0,
+  // স্বাক্ষরের সারি ও QR এর উপর-নিচ সরণ — সেটিংয়ের দুইটা স্লাইডার থেকে।
+  // translate দিয়ে সরে, জায়গা দখল করে না; তাই একটা নাড়ালেও অন্যটা
+  // নিজের জায়গাতেই থাকে। ০ মানে আগের জায়গা।
+  signOffsetY = 0,
+  qrOffsetY = 0,
   zoom = 1,
   printDate,
   labelOverrides = {},
   cardHeight,
   bodyEnd,
 }) => {
-  const t = template || {};
+  // ⚠️ সেটিংয়ের স্লাইডার ও রঙের ঘরগুলোর মান সারির সাথে আসে
+  // (admit_name_size, admit_name_color, …)। আগে সরাসরি টেমপ্লেটের মান
+  // পড়া হতো, তাই "প্রতিষ্ঠানের নাম / ঠিকানা / পরীক্ষার নাম" এর মাপ-রঙ
+  // নাড়লে এই ডিজাইনে কিছুই হতো না। সারির মান থাকলে সেটাই জেতে।
+  const tpl = template || {};
+  const t = {
+    ...tpl,
+    nameSize: student.admit_name_size || tpl.nameSize,
+    nameColor: student.admit_name_color || tpl.nameColor,
+    addressSize: student.admit_address_size || tpl.addressSize,
+    addressColor: student.admit_address_color || tpl.addressColor,
+    examNameSize: student.admit_exam_size || tpl.examNameSize,
+    examNameColor: student.admit_exam_color || tpl.examNameColor,
+  };
+
   const dir = getAdmitDir(lang);
   const z = Number(zoom) > 0 ? Number(zoom) : 1;
 
   const cardH = cardHeight || CARD_H;
-  // bodyEnd দেওয়া মানে নিচের জায়গাটা অন্য কিছুর (রুটিনের) — তাই
-  // নির্দেশাবলী ও সতর্কবার্তা তখন আঁকা হয় না
+  // bodyEnd দেওয়া মানে নিচের জায়গাটা অন্য কিছুর (রুটিনের) — আসনের ঘরটা
+  // তখন আঁকা হয় না, রুটিনের ব্লকেই ওটা বসে
   const compact = Boolean(bodyEnd);
 
   const navy = t.navy || t.accent || '#15294d';
@@ -175,8 +169,7 @@ export const NavyAdmitFace = ({
   const photoEnabled = showPhoto === undefined ? Boolean(t.showPhoto) : Boolean(showPhoto);
   const qrValue = qrEnabled ? buildAdmitQrValue(student, institutionCode) : '';
 
-  // স্বাক্ষরের ছবি ও নাম — তারিখটা এই নকশায় নেই, ওটা উপরের ঘরে
-  // "ইস্যুর তারিখ" হিসেবেই বসে
+  // স্বাক্ষরের ছবি ও নাম — তারিখটা এই নকশায় নেই, ওটা নিচের কোনায়
   const resolveOn = (newProp, oldProp, tplDefault) => {
     if (newProp !== undefined) return Boolean(newProp);
     if (oldProp !== undefined) return Boolean(oldProp);
@@ -203,7 +196,6 @@ export const NavyAdmitFace = ({
   const ROW_H = 20;        // তথ্যের ঘরের এক সারি
   const PHOTO_W = 60;
   const PHOTO_H = 70;
-  const SEAT_H = 34;
   const FOOT_H = 54;       // QR ও স্বাক্ষরের সারি
 
   const visibleFields = fields.filter(Boolean);
@@ -211,19 +203,21 @@ export const NavyAdmitFace = ({
 
   const infoTop = PAD + HEADER_H + EXAM_H + 6;
   const tableH = Math.max(rows.length * ROW_H, ROW_H);
-  const leftColH = (photoEnabled ? PHOTO_H + 4 : 0) + (seatText ? SEAT_H : 0);
-  const infoH = Math.max(tableH, leftColH);
+  const infoH = Math.max(tableH, photoEnabled ? PHOTO_H : 0);
 
   const footTop = cardH - PAD - FOOT_H;
-  const rulesTop = infoTop + infoH + 8;
-  const rulesH = Math.max(footTop - 6 - rulesTop, 0);
+
+  // আসনের ঘর — তথ্যের ঘরের নিচে, স্বাক্ষরের সারির উপরে।
+  // ঘরটা পুরো জায়গাটা টেনে নেয় না; একটা মাপ নিয়ে উপরের দিকে বসে, তাই
+  // ফিল্ড কম হলেও ঘরটা হাস্যকর রকম লম্বা হয়ে যায় না।
+  const seatOn = Boolean(String(seatText || '').trim());
+  const seatTop = infoTop + infoH + 8 + (Number(seatOffsetY) || 0);
+  const seatRoom = Math.max(footTop - 6 - seatTop, 0);
+  const seatH = Math.min(seatRoom, 56);
 
   // ফন্টের মাপ মাস্টার কন্ট্রোলে বড়-ছোট হয়, আগের কার্ডগুলোর মতোই
   const labelFont = Math.round(9.5 * z * 10) / 10;
   const valueFont = Math.round(10.5 * z * 10) / 10;
-
-  const rules = navyText('rules', lang);
-  const half = Math.ceil(rules.length / 2);
 
   return (
     <div
@@ -352,55 +346,28 @@ export const NavyAdmitFace = ({
         </div>
       ) : null}
 
-      {/* ---------------------------------------- বাঁ পাশ: ছবি ও আসন নম্বর */}
-      <div
-        className="absolute"
-        style={{ left: PAD + 4, top: infoTop, width: PHOTO_W }}
-      >
-        {photoEnabled ? (
-          <div
-            className="overflow-hidden bg-slate-100"
-            style={{
-              width: PHOTO_W,
-              height: PHOTO_H,
-              border: `1px solid ${t.photoBorder || grid}`,
-            }}
-          >
-            {photo ? (
-              <img src={photo} alt="" className="h-full w-full object-cover" />
-            ) : null}
-          </div>
-        ) : null}
-
-        {seatText ? (
-          <div
-            className="mt-1 px-1 py-[2px] text-center"
-            style={{
-              background: navy,
-              height: SEAT_H,
-              transform: seatOffsetY ? `translateY(${seatOffsetY}px)` : undefined,
-            }}
-          >
-            <p className="leading-tight" style={{ color: gold, fontSize: 7.5 }}>
-              {navyText('seatNo', lang)}
-            </p>
-            <p
-              className="truncate font-bold leading-tight"
-              style={{ color: '#ffffff', fontSize: 8.5 }}
-              title={seatText}
-            >
-              {seatText}
-            </p>
-          </div>
-        ) : null}
-      </div>
+      {/* -------------------------------------------------- বাঁ পাশ: ছবি */}
+      {photoEnabled ? (
+        <div
+          className="absolute overflow-hidden bg-slate-100"
+          style={{
+            left: PAD + 4,
+            top: infoTop,
+            width: PHOTO_W,
+            height: PHOTO_H,
+            border: `1px solid ${t.photoBorder || grid}`,
+          }}
+        >
+          {photo ? <img src={photo} alt="" className="h-full w-full object-cover" /> : null}
+        </div>
+      ) : null}
 
       {/* ------------------------------------------- তথ্যের ঘর — বর্ডার দেওয়া সারি */}
       <div
         className="absolute overflow-hidden"
         dir={dir}
         style={{
-          left: PAD + PHOTO_W + 10,
+          left: PAD + (photoEnabled ? PHOTO_W + 10 : 4),
           right: PAD + 4,
           top: infoTop,
           height: infoH,
@@ -460,50 +427,48 @@ export const NavyAdmitFace = ({
         ))}
       </div>
 
-      {/* ------------------------------------- নির্দেশাবলী ও সতর্কবার্তা (শুধু A5) */}
-      {!compact && rulesH > 40 ? (
+      {/* ------------------------------------------------ আসনের ঘর (শুধু A5)
+
+          আগে এখানে ছয়টা নির্দেশ বসত, কিন্তু ওগুলো কোডে লেখা স্থির লেখা —
+          ডাটাবেজ থেকে আসত না। তাই ওই জায়গাটা এখন আসল ডাটারই: শিক্ষার্থী
+          কোন হলে, কোন কলামে, কোন সারিতে, কত নম্বর আসনে।
+
+          লেখাটা পেজ থেকেই তৈরি হয়ে আসে (formatSeatLine), তাই ভাষা ও
+          অঙ্ক আগের মতোই ঠিক থাকে। সিট প্ল্যান না থাকলে ঐ বার্তাটাই বসে —
+          তখন ঘরটা হলুদ আভায়, যাতে কাগজ হাতে নিয়েই চোখে পড়ে। */}
+      {!compact && seatOn && seatH > 28 ? (
         <div
           className="absolute overflow-hidden"
           dir={dir}
-          style={{ left: PAD + 4, right: PAD + 4, top: rulesTop, height: rulesH }}
+          style={{
+            left: PAD + 4,
+            right: PAD + 4,
+            top: seatTop,
+            height: seatH,
+            border: `1px solid ${grid}`,
+            background: '#f8fafc',
+          }}
         >
-          <div className="flex items-center" style={{ gap: 5 }}>
-            <span style={{ width: 3, height: 11, background: navy }} />
-            <p className="font-bold" style={{ color: navy, fontSize: 9.5 }}>
-              {navyText('instructions', lang)}
+          {/* শিরোনামের পট্টি */}
+          <div
+            className="flex items-center px-2"
+            style={{ height: 17, background: navy }}
+          >
+            <p className="font-bold leading-none" style={{ color: gold, fontSize: 9 }}>
+              {navyText('seatTitle', lang)}
             </p>
           </div>
 
-          {/* ছয়টা নির্দেশ দুই কলামে — ১,২,৩ বাঁয়ে আর ৪,৫,৬ ডানে, ছাপা
-              কাগজে ঠিক এভাবেই পড়তে সুবিধা */}
-          <div className="mt-[3px] flex gap-3">
-            {[rules.slice(0, half), rules.slice(half)].map((col, ci) => (
-              <ol key={ci} className="min-w-0 flex-1">
-                {col.map((line, li) => (
-                  <li
-                    key={li}
-                    className="flex gap-1 leading-[11px]"
-                    style={{ color: t.valueColor || '#1f2937', fontSize: 7.5 }}
-                  >
-                    <span className="shrink-0" style={{ color: navy }}>
-                      {toLangDigit(ci * half + li + 1, lang)}.
-                    </span>
-                    <span className="min-w-0">{line}</span>
-                  </li>
-                ))}
-              </ol>
-            ))}
-          </div>
-
           <div
-            className="mt-[4px] flex items-center justify-center px-2 py-[3px]"
-            style={{ background: '#fef2f2', border: `1px dashed #fca5a5` }}
+            className="flex items-center justify-center px-2"
+            style={{ height: seatH - 17 }}
           >
             <p
-              className="text-center font-bold leading-tight"
-              style={{ color: '#b91c1c', fontSize: 8 }}
+              className="truncate text-center font-bold"
+              style={{ color: navy, fontSize: Math.round(12 * z * 10) / 10 }}
+              title={seatText}
             >
-              {navyText('warning', lang)}
+              {seatText}
             </p>
           </div>
         </div>
@@ -515,7 +480,12 @@ export const NavyAdmitFace = ({
         style={{ left: PAD + 4, right: PAD + 4, top: footTop, height: FOOT_H }}
       >
         {qrValue ? (
-          <div className="flex justify-center">
+          <div
+            className="flex justify-center"
+            style={{
+              transform: qrOffsetY ? `translateY(${Number(qrOffsetY)}px)` : undefined,
+            }}
+          >
             <QRCode
               value={qrValue}
               size={t.qrSize || 40}
@@ -532,7 +502,12 @@ export const NavyAdmitFace = ({
           </div>
         ) : null}
 
-        <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between">
+        <div
+          className="absolute bottom-0 left-0 right-0 flex items-end justify-between"
+          style={{
+            transform: signOffsetY ? `translateY(${Number(signOffsetY)}px)` : undefined,
+          }}
+        >
           {[
             {
               img: najemSignature,
@@ -550,7 +525,10 @@ export const NavyAdmitFace = ({
             <div
               key={i}
               className="w-[140px] text-center"
-              style={{ transform: z !== 1 ? `scale(${z})` : undefined, transformOrigin: i === 0 ? 'bottom left' : 'bottom right' }}
+              style={{
+                transform: z !== 1 ? `scale(${z})` : undefined,
+                transformOrigin: i === 0 ? 'bottom left' : 'bottom right',
+              }}
             >
               {s.on ? (
                 <div className="flex h-[18px] items-end justify-center">

@@ -11,6 +11,7 @@ import {
   listName,
   defaultFeeListSettings,
   paperColumnCount,
+  visibleSummaryCards,
 } from '../../../../Data/feeListColumns';
 
 // =============================================================================
@@ -234,6 +235,9 @@ const BanglaFeeList = ({
     cfg.fontSize,
     cfg.showHeader,
     cfg.showSummary,
+    // সবগুলো ঘর বন্ধ করলে সারসংক্ষেপটাই উঠে যায়, তখন উচ্চতা বদলায় —
+    // তাই গুনতিটাও হিসাবে রাখি, নইলে পাতা ভাগটা পুরোনো মাপেই থেকে যেত
+    visibleSummaryCards(cfg).length,
     cfg.showLogo,
     showTotalRow,
     Boolean(summary),
@@ -374,19 +378,33 @@ const BanglaFeeList = ({
     );
   };
 
+  /**
+   * উপরের সারসংক্ষেপ।
+   *
+   * ⭐ কোন ঘরগুলো বসবে সেটা সেটিংস থেকে আসে (সেটিংস → কাগজের সেটিংস →
+   * সারসংক্ষেপের ঘর)। আগে চারটাই বাঁধা ছিল, তাই "ফি গৃহীত" তালিকায়
+   * "ফি দেয়নি: ০" আর "ফি বিহীন" তালিকায় "মোট জমা: ০" — অর্থহীন শূন্য
+   * ঘরগুলোও কাগজে বসে থাকত।
+   *
+   * ঘরের সংখ্যা যা-ই হোক পুরো চওড়াটা সমান ভাগে ভাগ হয়, তাই দুইটা ঘর
+   * বাছলে সেই দুইটাই চওড়া হয়ে বসে — পাশে ফাঁকা জায়গা পড়ে থাকে না।
+   * grid-cols-N নামটা লিখিনি ইচ্ছে করেই: Tailwind যে ক্লাসগুলো কোডে
+   * লেখা দেখে না সেগুলো তৈরি করে না, তাই grid-cols-3 হয়তো কাজই করত না।
+   */
   const renderSummary = () => {
     if (!cfg.showSummary || !summary) return null;
 
+    const cards = visibleSummaryCards(cfg);
+    if (cards.length === 0) return null;
+
     return (
-      <div className="grid grid-cols-4 gap-2 pb-3">
-        {[
-          { label: 'মোট শিক্ষার্থী', value: summary.totalStudent, tone: 'border-slate-200 bg-slate-50 text-slate-700' },
-          { label: 'ফি দিয়েছে',     value: summary.paidCount,    tone: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
-          { label: 'ফি দেয়নি',      value: summary.unpaidCount,  tone: 'border-rose-200 bg-rose-50 text-rose-700' },
-          { label: 'মোট জমা',       value: summary.collected,    tone: 'border-sky-200 bg-sky-50 text-sky-700' },
-        ].map((c) => (
-          <div key={c.label} className={`rounded-lg border px-3 py-2 text-center ${c.tone}`}>
-            <div className="text-lg font-bold leading-tight">{toBn(c.value)}</div>
+      <div
+        className="grid gap-2 pb-3"
+        style={{ gridTemplateColumns: `repeat(${cards.length}, minmax(0, 1fr))` }}
+      >
+        {cards.map((c) => (
+          <div key={c.key} className={`rounded-lg border px-3 py-2 text-center ${c.tone}`}>
+            <div className="text-lg font-bold leading-tight">{toBn(summary[c.key])}</div>
             <div className="text-[11px] font-normal opacity-80">{c.label}</div>
           </div>
         ))}

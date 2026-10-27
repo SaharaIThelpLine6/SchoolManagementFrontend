@@ -117,6 +117,10 @@ const EXTRA_UI = {
     seatBox: 'আসনের পট্টি উপর-নিচ',
     seatHint: 'মাইনাস = উপরে, প্লাস = নিচে',
     seatOffNote: '"কার্ডে আসন দেখাও" চালু থাকলেই কাজ করবে।',
+    signBox: 'স্বাক্ষর উপর-নিচ',
+    signHint: 'দুই পাশের স্বাক্ষর, নাম ও তারিখ একসাথে',
+    qrBox: 'QR কোড উপর-নিচ',
+    qrHint: 'মাঝ বরাবরই থাকে, শুধু উপরে-নিচে সরে',
     auto: 'স্বয়ংক্রিয়',
     tplDefault: 'ডিফল্ট',
     tplCustom: 'নিজের',
@@ -130,6 +134,10 @@ const EXTRA_UI = {
     seatBox: 'Seat line up/down',
     seatHint: 'Minus = up, plus = down',
     seatOffNote: 'Works only when "Show seat on card" is on.',
+    signBox: 'Signature up/down',
+    signHint: 'Both signatures, names & dates together',
+    qrBox: 'QR code up/down',
+    qrHint: 'Stays centred, moves up or down only',
     auto: 'Auto',
     tplDefault: 'Default',
     tplCustom: 'Custom',
@@ -143,6 +151,10 @@ const EXTRA_UI = {
     seatBox: 'موضع شريط المقعد',
     seatHint: 'سالب = للأعلى، موجب = للأسفل',
     seatOffNote: 'يعمل فقط عند تفعيل "إظهار المقعد على البطاقة".',
+    signBox: 'موضع التوقيع',
+    signHint: 'التوقيعان والاسمان والتاريخ معًا',
+    qrBox: 'موضع رمز QR',
+    qrHint: 'يبقى في الوسط، يتحرك للأعلى أو الأسفل',
     auto: 'تلقائي',
     tplDefault: 'افتراضي',
     tplCustom: 'مخصص',
@@ -189,6 +201,16 @@ const SliderControl = ({
   const pct = Math.min(100, Math.max(0, ((num - min) / (max - min)) * 100));
   const atDefault = num === resetTo;
 
+  // নীল অংশটা ঠিক নবের মাঝ বরাবর শেষ হবে।
+  //
+  // শুধু শতকরা দিলে হতো না — ব্রাউজার নবটাকে ট্র্যাকের ভিতরে আধা-নব করে
+  // ঢুকিয়ে রাখে, তাই নবের মাঝ ঘোরে THUMB/2 থেকে (প্রস্থ − THUMB/2)
+  // পর্যন্ত। ফলে ০% এ নবটা থাকে ৮px ডানে, আর ১০০% এ ৮px বাঁয়ে।
+  // নিচের হিসাবটা ঠিক ঐ সরণটুকুই যোগ করে, তাই মান ছোট-বড় যাই হোক
+  // রঙ আর নবের মাঝে আর ফাঁক থাকে না।
+  const THUMB = 16;
+  const fill = `calc(${pct}% + ${(THUMB / 2 - (pct * THUMB) / 100).toFixed(2)}px)`;
+
   return (
     <div className="rounded-[8px] border border-gray-200 px-3 py-2 min-w-0">
       <div className="flex items-baseline justify-between gap-2 min-w-0">
@@ -208,7 +230,7 @@ const SliderControl = ({
           value={num}
           onChange={(e) => onChange(Number(e.target.value))}
           style={{
-            background: `linear-gradient(to right, #2563eb 0%, #2563eb ${pct}%, #e5e7eb ${pct}%, #e5e7eb 100%)`,
+            background: `linear-gradient(to right, #2563eb 0%, #2563eb ${fill}, #e5e7eb ${fill}, #e5e7eb 100%)`,
           }}
         />
 
@@ -602,6 +624,10 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   const [contentZoom, setContentZoom] = useState(100);
   // আসনের পট্টি কতটা উপরে/নিচে — px এ। মাইনাস = উপরে।
   const [seatOffsetY, setSeatOffsetY] = useState(0);
+  // স্বাক্ষরের সারি ও QR কোড — দুইটা আলাদা সরণ, px এ। মাইনাস = উপরে।
+  // ০ মানে আগের জায়গা, তাই হাত না দিলে কার্ড হুবহু আগের মতোই থাকে।
+  const [signOffsetY, setSignOffsetY] = useState(0);
+  const [qrOffsetY, setQrOffsetY] = useState(0);
 
   // কার্ড ও এডিটর — দুইটারই ভাষা
   const [lang, setLang] = useState(DEFAULT_ADMIT_LANG);
@@ -921,6 +947,12 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     if (setup.seatOffsetY !== undefined && setup.seatOffsetY !== null) {
       setSeatOffsetY(Number(setup.seatOffsetY) || 0);
     }
+    if (setup.signOffsetY !== undefined && setup.signOffsetY !== null) {
+      setSignOffsetY(Number(setup.signOffsetY) || 0);
+    }
+    if (setup.qrOffsetY !== undefined && setup.qrOffsetY !== null) {
+      setQrOffsetY(Number(setup.qrOffsetY) || 0);
+    }
 
     // স্বাক্ষরের নাম — সংরক্ষিত থাকলে সেটাই ইনপুটে বসে
     if (setup.najemName !== undefined) {
@@ -1026,6 +1058,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     // লেখার মাপ বা আসনের অবস্থান বদলালেও আগের আউটপুট বাতিল
     contentZoom,
     seatOffsetY,
+    signOffsetY,
+    qrOffsetY,
     // রুটিংয়ের কিছু বদলালেও আগের আউটপুট বাতিল
     admitMode,
     routeTemplate,
@@ -1296,6 +1330,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
       // ঘর, তাই পুরোনো সেটিং পড়তে গিয়ে কোথাও হোঁচট খায় না
       contentZoom,
       seatOffsetY,
+      signOffsetY,
+      qrOffsetY,
 
       // রুটিংয়ের সেটিং আলাদা ঘরে — তাই প্রবেশপত্রের পুরোনো সেটিং অটুট
       routing: {
@@ -1803,6 +1839,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               principalShowDate={principalSignDate}
               zoom={zoomFactor}
               seatOffsetY={seatOffsetY}
+              signOffsetY={signOffsetY}
+              qrOffsetY={qrOffsetY}
             />
           ) : (
             <AdmitCardGenerate
@@ -1833,6 +1871,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
               principalShowDate={principalSignDate}
               zoom={zoomFactor}
               seatOffsetY={seatOffsetY}
+              signOffsetY={signOffsetY}
+              qrOffsetY={qrOffsetY}
             />
           )}
         </div>
@@ -1961,6 +2001,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                         principalShowDate={principalSignDate}
                         zoom={zoomFactor}
                         seatOffsetY={seatOffsetY}
+                        signOffsetY={signOffsetY}
+                        qrOffsetY={qrOffsetY}
                       />
                     </div>
                   </div>
@@ -1995,6 +2037,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                       principalShowDate={principalSignDate}
                       zoom={zoomFactor}
                       seatOffsetY={seatOffsetY}
+                      signOffsetY={signOffsetY}
+                      qrOffsetY={qrOffsetY}
                       seatText={seatEnabled ? previewSeatText : ''}
                     />
                   </div>
@@ -2129,38 +2173,6 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                 জায়গাতেই থাকে, কেবল পট্টিটাই সরে।
             ========================================================== */}
             <div className="grid grid-cols-1 gap-2 mb-5">
-              <SliderControl
-                label={xui('sizeBox')}
-                hint={xui('sizeHint')}
-                value={contentZoom}
-                onChange={setContentZoom}
-                step={ZOOM_STEP}
-                min={ZOOM_MIN}
-                max={ZOOM_MAX}
-                suffix="%"
-                resetTo={100}
-                resetLabel={xui('auto')}
-              />
-
-              <SliderControl
-                label={xui('seatBox')}
-                hint={xui('seatHint')}
-                value={seatOffsetY}
-                onChange={setSeatOffsetY}
-                step={2}
-                min={SEAT_OFF_MIN}
-                max={SEAT_OFF_MAX}
-                suffix="px"
-                resetTo={0}
-                resetLabel={xui('auto')}
-              />
-
-              {/* আসনের পট্টিটাই বন্ধ থাকলে নিচের স্লাইডারটা টানলে পর্দায়
-                  কিছুই হয় না — কেন হয় না সেটা এক লাইনে বলা থাকুক */}
-              {!seatEnabled ? (
-                <p className="text-[11px] text-amber-600">{xui('seatOffNote')}</p>
-              ) : null}
-
               {/* ---- ফন্ট ও রঙ — প্রতিষ্ঠানের নাম, ঠিকানা, পরীক্ষার নাম ----
 
                   মাপটা স্লাইডারে (উপরের দুইটার মতোই), রঙটা সারির শেষে।
@@ -2188,7 +2200,7 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                   color: template.addressColor,
                   value: addressSize,
                   min: 8,
-                  max: 26,
+                  max: 40,
                 },
                 {
                   key: 'exam_name',
@@ -2223,6 +2235,67 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
                   }
                 />
               ))}
+              
+              <SliderControl
+                label={xui('sizeBox')}
+                hint={xui('sizeHint')}
+                value={contentZoom}
+                onChange={setContentZoom}
+                step={ZOOM_STEP}
+                min={ZOOM_MIN}
+                max={ZOOM_MAX}
+                suffix="%"
+                resetTo={100}
+                resetLabel={xui('auto')}
+              />
+
+              <SliderControl
+                label={xui('seatBox')}
+                hint={xui('seatHint')}
+                value={seatOffsetY}
+                onChange={setSeatOffsetY}
+                step={2}
+                min={SEAT_OFF_MIN}
+                max={SEAT_OFF_MAX}
+                suffix="px"
+                resetTo={0}
+                resetLabel={xui('auto')}
+              />
+
+              {/* আসনের পট্টিটাই বন্ধ থাকলে নিচের স্লাইডারটা টানলে পর্দায়
+                  কিছুই হয় না — কেন হয় না সেটা এক লাইনে বলা থাকুক */}
+              {!seatEnabled ? (
+                <p className="text-[11px] text-amber-600">{xui('seatOffNote')}</p>
+              ) : null}
+
+              {/* স্বাক্ষরের সারি — দুই পাশের ছবি, নাম ও তারিখ একসাথে।
+                  QR নিজের জায়গাতেই থাকে, নিচেরটা দিয়ে ওটা আলাদা সরে। */}
+              <SliderControl
+                label={xui('signBox')}
+                hint={xui('signHint')}
+                value={signOffsetY}
+                onChange={setSignOffsetY}
+                step={2}
+                min={SEAT_OFF_MIN}
+                max={SEAT_OFF_MAX}
+                suffix="px"
+                resetTo={0}
+                resetLabel={xui('auto')}
+              />
+
+              {/* QR কোড — মাঝ বরাবরই থাকে, কেবল উপরে-নিচে সরে */}
+              <SliderControl
+                label={xui('qrBox')}
+                hint={xui('qrHint')}
+                value={qrOffsetY}
+                onChange={setQrOffsetY}
+                step={2}
+                min={SEAT_OFF_MIN}
+                max={SEAT_OFF_MAX}
+                suffix="px"
+                resetTo={0}
+                resetLabel={xui('auto')}
+              />
             </div>
 
             <p className="font-bold text-[16px] mb-2">{ui('displaySettings')}</p>
