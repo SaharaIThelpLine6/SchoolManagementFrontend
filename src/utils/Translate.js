@@ -1051,7 +1051,20 @@ const useTranslate = () => {
     "Exam Student List": "পরীক্ষার্থী তালিকা",
     "Exam Hall List": "পরীক্ষা কেন্দ্রের তালিকা",
 
-    "Students Report (Demo)" : "শিক্ষার্থী রিপোর্ট লিস্ট (ডেমো)"
+    "Students Report (Demo)" : "শিক্ষার্থী রিপোর্ট লিস্ট (ডেমো)",
+    "Exam Condition Settings" : "পরীক্ষার কনডিশন সেটিংস",
+    "Select subjects" : "বিষয় নির্বাচন করুন",
+    "Previous condition available": "আগের পরীক্ষার কন্ডিশন পাওয়া গেছে",
+    "Copy its settings, then review each step before saving.": "সেটিংস কপি করে সংরক্ষণের আগে প্রতিটি ধাপ যাচাই করুন।",
+    "Copy previous condition": "আগের কন্ডিশন কপি করুন",
+    "Copying...": "কপি হচ্ছে...",
+    "Copy previous exam condition?": "আগের পরীক্ষার কন্ডিশন কপি করবেন?",
+    "This replaces the current draft. You can review and change every step before saving.": "এটি বর্তমান খসড়ার তথ্য বদলে দেবে। সংরক্ষণের আগে প্রতিটি ধাপ যাচাই ও পরিবর্তন করতে পারবেন।",
+    "Copy condition": "কন্ডিশন কপি করুন",
+    "The previous condition is unavailable for this exam type.": "এই পরীক্ষার ধরনের জন্য আগের কন্ডিশন পাওয়া যায়নি।",
+    "Condition copied": "কন্ডিশন কপি হয়েছে",
+    "Review each step before saving.": "সংরক্ষণের আগে প্রতিটি ধাপ যাচাই করুন।",
+    "Could not copy the previous condition": "আগের কন্ডিশন কপি করা যায়নি",
   };
 
   return (key) =>

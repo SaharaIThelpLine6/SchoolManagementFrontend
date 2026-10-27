@@ -199,20 +199,19 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
       console.log("First student raw data:", userResultData[0]);
 
       const formattedStudents = userResultData.map((student) => {
-        const allSubjects = [];
+        const allSubjects = (student.Subjects || []).map((subject, index) => {
+          const serial = Number(subject.Serial);
+          const slot = Number.isInteger(serial) && serial >= 1 && serial <= 14
+            ? serial
+            : index + 1;
+          const subValKey = `SubVal${slot}`;
 
-        student.Subjects?.forEach((subject, index) => {
-          const subValKey = `SubVal${index + 1}`;
-          const subVal = student[subValKey];
-
-          if (subVal !== null && subVal !== undefined) {
-            allSubjects.push({
-              SubjectName: subject.SubjectName,
-              SubjectID: subject.SubjectID,
-              SubValKey: subValKey,
-              Value: subVal,
-            });
-          }
+          return {
+            SubjectName: subject.SubjectName,
+            SubjectID: subject.SubjectID,
+            SubValKey: subValKey,
+            Value: student[subValKey] ?? "",
+          };
         });
 
         return {
@@ -539,7 +538,6 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
                         return allowedSubjectNames.includes(subject.SubjectName);
                       }
                     );
-
                     return (
                       <tr key={`student-${student.ID}`} className="bg-transparent">
                         <td className="p-2 border text-center whitespace-nowrap bg-white">

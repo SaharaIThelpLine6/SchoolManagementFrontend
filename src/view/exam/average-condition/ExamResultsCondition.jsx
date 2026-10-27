@@ -18,6 +18,7 @@ import bnBijoy2Unicode, { convertOnLanguageChange } from "../../../utils/convete
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import { set } from "lodash";
 import { useMultiStepForm } from "../../../hooks/useMultiStepForm";
+import SvgIcon from "../../../components/icons/SvgIcon";
 
 const createEmptyCondition = (id) => {
   const emptyRow = () => ({
@@ -220,16 +221,12 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
       sharedStepData.subjectPassNumbers.forEach(item => {
         !item?.optional ? subjectCount++ : null;
       });
-      if (sharedStepData?.isEditMode) {
-        if (sharedStepData?.SubSonkha) {
-          setValue("SubSonkha", sharedStepData?.SubSonkha);
-        }
-        else {
-          setValue("SubSonkha", subjectCount);
-        }
-      } else {
-        setValue("SubSonkha", subjectCount);
-      }
+      setValue(
+        "SubSonkha",
+        sharedStepData?.SubSonkha !== "" && sharedStepData?.SubSonkha != null
+          ? sharedStepData.SubSonkha
+          : subjectCount
+      );
 
 
     }
@@ -331,7 +328,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
               sharedStepData?.ExamType != 3 && sharedStepData?.ExamType != 4 ? (
                 <React.Fragment>
                   {/* কন্ডিশন-১ */}
-                  <div className="border border-gray-200 rounded-md p-4">
+                  <div hidden={!condition1Enabled} className="border border-gray-200 rounded-md p-4">
                     <label className="flex items-center gap-2 mb-3 font-medium text-gray-800">
                       <input type="checkbox" className="h-4 w-4" {...register("condition1.enabled")} checked={Boolean(watch("condition1.enabled"))} onChange={(event) => event.preventDefault()} aria-readonly="true" />
                       কন্ডিশন-১ : গর মি'ইয়ারী কিতাবে ফেল সংক্রান্ত
@@ -407,7 +404,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                   </div>
 
                   {/* কন্ডিশন-২ */}
-                  <div className="border border-gray-200 rounded-md p-4">
+                  <div hidden={!condition2Enabled} className="border border-gray-200 rounded-md p-4">
                     <label className="flex items-center gap-2 mb-3 font-medium text-gray-800">
                       <input type="checkbox" className="h-4 w-4" {...register("condition2.enabled")} checked={Boolean(watch("condition2.enabled"))} onChange={(event) => event.preventDefault()} aria-readonly="true" />
                       কন্ডিশন-২ : মি'ইয়ারী কিতাবে ফেল সংক্রান্ত
@@ -484,7 +481,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                   </div>
 
                   {/* কন্ডিশন-৩ */}
-                  <div className="border border-gray-200 rounded-md p-4">
+                  <div hidden={!condition3Enabled} className="border border-gray-200 rounded-md p-4">
                     <label className="flex items-center gap-2 mb-3 font-medium text-gray-800">
                       <input type="checkbox" className="h-4 w-4" {...register("condition3.enabled")} checked={Boolean(watch("condition3.enabled"))} onChange={(event) => event.preventDefault()} aria-readonly="true" />
                       কন্ডিশন-৩ : অধিকতর মি'ইয়ারী কিতাবে ফেল সংক্রান্ত
@@ -541,7 +538,7 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
 
             {
               sharedStepData?.ExamType == 4 ? (
-                <div className="border border-gray-200 rounded-md p-4">
+                <div hidden={!condition3Enabled} className="border border-gray-200 rounded-md p-4">
                   <label className="flex items-center gap-2 mb-3 font-medium text-gray-800">
                     <input type="checkbox" className="h-4 w-4" {...register("condition3.enabled")} checked={Boolean(watch("condition3.enabled"))} onChange={(event) => event.preventDefault()} aria-readonly="true" />
                     কন্ডিশন-১ :  কিতাবে ফেল সংক্রান্ত
@@ -655,7 +652,9 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
               <Button
                 type="button"
                 onClick={handleSaveAndPrevious}
+                className="flex items-center gap-1"
               >
+                <SvgIcon name="LongArrowLeft" />
                 {translate("Previous")}
               </Button>
             </div>
@@ -664,8 +663,10 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
             <div className="text-end">
               <Button
                 type="submit"
+                className="flex items-center gap-1"
               >
-                {translate("Save & Continue")}
+                {translate("Next")}
+                <SvgIcon name="LongArrowRight" />
               </Button>
             </div>
           </div>

@@ -5,8 +5,10 @@ import Button from '../../../components/Button/Button';
 import SortableTable from '../../../components/Tables/SortableTable';
 import {
   useGetExamConditionQuery,
+  useGetExamConditionsQuery,
   useGetExamDivitionByTypeQuery,
   useGetExamNamesQuery,
+  useLazyGetExamConditonEntryQuery,
   usePostExamDivitionMutation,
   useUpdateExamDivitionMutation,
 } from '../../../features/exam/examQuerySlice';
@@ -81,19 +83,21 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
     watch,
     reset,
     setValue,
+    getValues,
     formState: { errors },
   } = methods
 
   const sessionID = watch("SessionID");
   const examID = watch("ExamID");
   const subClassID = watch("SubClassID");
+  const ExamType = watch("ExamType");
 
   const [showDivisionManager, setShowDivisionManager] = useState(false);
   const [divisionOptions, setDivisionOptions] = useState([]);
   const [editingDivision, setEditingDivision] = useState(null);
 
   const {
-    data: examConditionData,
+    currentData: examConditionData,
     isLoading: isExamConditionLoading,
     isFetching: isExamConditionFetching,
   } = useGetExamConditionQuery(
@@ -115,6 +119,32 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
       typeof existingCondition === "object" &&
       Object.keys(existingCondition).length > 0
     );
+
+  const {
+    currentData: classConditions,
+    isFetching: isClassConditionsFetching,
+  } = useGetExamConditionsQuery(
+    { SessionID: sessionID, SubClassID: subClassID },
+    { skip: !sessionID || !subClassID }
+  );
+  const [getExamConditionEntry, { isFetching: isCopyingCondition }] =
+    useLazyGetExamConditonEntryQuery();
+
+  const hasConditionInClass = Array.isArray(classConditions) && classConditions.some(
+    (condition) => String(condition.ExamID) === String(examID)
+  );
+  const previousCondition = Array.isArray(classConditions) && examID && ExamType
+    ? classConditions
+      .filter((condition) =>
+        String(condition.ExamID) !== String(examID) &&
+        Number(condition.ExamType) === Number(ExamType)
+      )
+      .reduce((latest, condition) =>
+        !latest || Number(condition.ID) > Number(latest.ID)
+          ? condition
+          : latest,
+      null)
+    : null;
 
   useEffect(() => {
     if (sharedStepData) {
@@ -139,11 +169,13 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
   }, [sharedStepData, reset]);
 
   const translate = useTranslate()
-  const ExamType = watch("ExamType")
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
+  const suggestedExamName = previousCondition?.Exam?.ExamName ||
+    examNameData?.find((exam) => String(exam.ExamID) === String(previousCondition?.ExamID))?.ExamName ||
+    `Exam ${previousCondition?.ExamID}`;
   const { data: examDivitions } = useGetExamDivitionByTypeQuery(ExamType, {
     skip: !ExamType,
   });
@@ -260,7 +292,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
   };
 
   const onSubmit = (data) => {
-    if (isExamConditionLoading || isExamConditionFetching) {
+    if (isExamConditionLoading || isExamConditionFetching || isClassConditionsFetching) {
       Swal.fire({
         icon: "info",
         title: translate("Checking exam condition..."),
@@ -268,7 +300,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
       return;
     }
 
-    if (hasExistingExamCondition) {
+    if (hasExistingExamCondition || hasConditionInClass) {
       Swal.fire({
         icon: "error",
         title: translate("Exam condition already exist."),
@@ -276,7 +308,12 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
       return;
     }
 
+    const sameDraft = sharedStepData &&
+      ["SessionID", "ExamID", "SubClassID", "ExamType"].every(
+        (key) => String(sharedStepData[key]) === String(data[key])
+      );
     const payload = {
+      ...(sameDraft ? sharedStepData : {}),
       ...data,
       divisionOptions,
     };
@@ -285,6 +322,59 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
 
     setSharedStepData(payload);
     next();
+  };
+
+  const handleCopyPreviousCondition = async () => {
+    if (!previousCondition || hasExistingExamCondition || hasConditionInClass) return;
+
+    const target = {
+      SessionID: sessionID,
+      ExamID: examID,
+      SubClassID: subClassID,
+      ExamType,
+    };
+    const confirmation = await Swal.fire({
+      icon: "question",
+      title: translate("Copy previous exam condition?"),
+      text: `${suggestedExamName}. ${translate("This replaces the current draft. You can review and change every step before saving.")}`,
+      showCancelButton: true,
+      confirmButtonText: translate("Copy condition"),
+    });
+    if (!confirmation.isConfirmed) return;
+
+    try {
+      const source = await getExamConditionEntry({
+        SessionID: target.SessionID,
+        ExamID: previousCondition.ExamID,
+        SubClassID: target.SubClassID,
+      }).unwrap();
+      if (!source || Number(source.ExamType) !== Number(target.ExamType)) {
+        throw new Error(translate("The previous condition is unavailable for this exam type."));
+      }
+      if (["SessionID", "ExamID", "SubClassID", "ExamType"].some(
+        (key) => String(getValues(key)) !== String(target[key])
+      )) return;
+
+      setSharedStepData({
+        ...source,
+        ...target,
+        isEditMode: false,
+        divisionOptions,
+      });
+      Swal.fire({
+        icon: "success",
+        title: translate("Condition copied"),
+        text: translate("Review each step before saving."),
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: translate("Could not copy the previous condition"),
+        text: error?.data?.error || error?.data?.message || error.message,
+      });
+    }
   };
 
 
@@ -300,6 +390,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               placeholder="বছর নির্বাচন করুন"
               nameField="SessionName"
               valueField={"SessionID"}
+              initialValue={sharedStepData?.SessionID}
               unicode={true}
               label={translate("Session")}
               require={"Session is Required"}
@@ -312,6 +403,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               placeholder="পরীক্ষা নির্বাচন করুন"
               nameField="ExamName"
               valueField={"ExamID"}
+              initialValue={sharedStepData?.ExamID}
               label={translate("Exam")}
               unicode={true}
               require={"Exam is Required"}
@@ -325,6 +417,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               placeholder="শ্রেণি নির্বাচন করুন"
               nameField="SubClass"
               valueField={"SubClassID"}
+              initialValue={sharedStepData?.SubClassID}
               label={translate("SubClass")}
               require={"SubClass is Required"}
               unicode={true}
@@ -354,12 +447,33 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               placeholder=" পরিক্ষার ধরন নির্বাচন "
               nameField="name"
               valueField={"value"}
+              initialValue={sharedStepData?.ExamType}
               label={translate("Exam Type")}
               require={"SubClass is Required"}
               unicode={true}
             />
           </div>
         </div>
+
+        {previousCondition && !hasExistingExamCondition && !hasConditionInClass && !isClassConditionsFetching && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <div>
+              <p className="font-semibold text-blue-900">
+                {translate("Previous condition available")}: {suggestedExamName}
+              </p>
+              <p className="text-sm text-blue-800">
+                {translate("Copy its settings, then review each step before saving.")}
+              </p>
+            </div>
+            <Button
+              type="button"
+              onClick={handleCopyPreviousCondition}
+              disabled={isCopyingCondition}
+            >
+              {isCopyingCondition ? translate("Copying...") : translate("Copy previous condition")}
+            </Button>
+          </div>
+        )}
 
 
         {
@@ -372,7 +486,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                   </h2>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-4">
                   <div>
                     <DefaultInput type='text' registerKey={"DivisionName"} placeholder={"বিভাগ (বাংলা)"} required />
                   </div>
@@ -383,6 +497,9 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                   
                   <div>
                     <DefaultInput registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
+                  </div>
+                  <div>
+                    <DefaultInput registerKey={"Note"} placeholder={"নোট"} />
                   </div>
 
                 </div>
@@ -428,7 +545,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                 </div>
               </div>
             ) : (
-              <div className="w-full space-y-10 bg-white rounded-xl shadow-md">
+              <div className="w-full space-y-10">
                 <section>
                   <h2 className="text-lg font-semibold text-gray-800 mb-3 pl-2">
                     {translate("Grade based on marks")}
@@ -442,6 +559,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                       registerKey="maxAverageScore"
                       type='number'
                       placeholder="যেমন: ১০০"
+                      defaultValue={sharedStepData?.maxAverageScore ?? 100}
                       required
                     />
                   </div>
@@ -457,7 +575,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                             {translate("Grade (Bengali)")}
                             <button
                               type='button'
-                              className='text-blue- 600 flex items-center gap-1'
+                              className='bg-blue-100 text-blue-600 flex items-center gap-1 px-2 py-1 rounded-md text-sm font-medium hover:bg-blue-100'
                               onClick={() => setShowDivisionManager(true)}
                             >
                               <SvgIcon name={"TbPlus"} />
@@ -494,6 +612,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                                   registerKey={`gradeBands.${index}.DivisionID`}
                                   nameField="DivisionNames"
                                   valueField="ID"
+                                  initialValue={sharedStepData?.gradeBands?.[index]?.DivisionID}
                                   require="Division is Required"
                                   defaultValue={translate("Select Divition")}
                                 />
@@ -539,10 +658,10 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
             )
           ) : null
         }
-        <div className="text-end">
+        <div className="text-end flex items-center justify-end gap-2">
           {/* <Button type='button' className='bg-yellow-300 hover:bg-yellow-300 text-[#000]'>Save As Draft</Button> */}
           {
-            !showDivisionManager ? <Button type='submit'>{translate("Save & Continue")}</Button> : null
+            !showDivisionManager ? <Button type='submit' className="whitespace-nowrap flex gap-1 ">{translate("Next")} <SvgIcon name={"LongArrowRight"} /> </Button> : null
           }
 
         </div>

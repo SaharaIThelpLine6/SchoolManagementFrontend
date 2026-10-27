@@ -331,6 +331,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
     setValue("DivisionName", division?.DivisionNames || "");
     setValue("DivisionArabic", division?.DivisionArabics || "");
     setValue("DivisionEnglish", division?.DivisionEnglishs || "");
+    setValue("Note", division?.Note || "");
     setShowDivisionManager(true);
   };
 
@@ -339,6 +340,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
     setValue("DivisionName", "");
     setValue("DivisionArabic", "");
     setValue("DivisionEnglish", "");
+    setValue("Note", "");
     setShowDivisionManager(false);
   };
   const onSubmit = (data) => {
@@ -452,7 +454,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                   </h2>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-4">
                   <div>
                     <DefaultInput type='text' registerKey={"DivisionName"} placeholder={"বিভাগ (বাংলা)"} required />
                   </div>
@@ -461,6 +463,9 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                   </div>
                   <div>
                     <DefaultInput registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
+                  </div>
+                  <div>
+                    <DefaultInput registerKey={"Note"} placeholder={"নোট"} />
                   </div>
                 </div>
 
@@ -505,7 +510,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                 </div>
               </div>
             ) : (
-              <div className="w-full space-y-10 bg-white rounded-xl shadow-md">
+              <div className="w-full space-y-10">
                 <section>
                   <h2 className="text-lg font-semibold text-gray-800 mb-3 pl-2">
                     {translate("Grade based on marks")}

@@ -3,7 +3,7 @@ import { useFormContext } from "react-hook-form";
  const CheckboxOption = ({ label, registerKey }) => {
   const { register } = useFormContext();
   return (
-    <label className="flex items-center gap-2 cursor-pointer">
+    <label className="flex items-center gap-2 cursor-pointer vertical-align-middle">
       <input
         type="checkbox"
         {...register(registerKey)}
