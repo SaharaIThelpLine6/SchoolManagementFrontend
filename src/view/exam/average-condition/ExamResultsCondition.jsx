@@ -221,16 +221,12 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
       sharedStepData.subjectPassNumbers.forEach(item => {
         !item?.optional ? subjectCount++ : null;
       });
-      if (sharedStepData?.isEditMode) {
-        if (sharedStepData?.SubSonkha) {
-          setValue("SubSonkha", sharedStepData?.SubSonkha);
-        }
-        else {
-          setValue("SubSonkha", subjectCount);
-        }
-      } else {
-        setValue("SubSonkha", subjectCount);
-      }
+      setValue(
+        "SubSonkha",
+        sharedStepData?.SubSonkha !== "" && sharedStepData?.SubSonkha != null
+          ? sharedStepData.SubSonkha
+          : subjectCount
+      );
 
 
     }
