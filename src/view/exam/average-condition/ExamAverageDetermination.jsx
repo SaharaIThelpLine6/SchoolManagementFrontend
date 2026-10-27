@@ -300,6 +300,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               placeholder="বছর নির্বাচন করুন"
               nameField="SessionName"
               valueField={"SessionID"}
+              initialValue={sharedStepData?.SessionID}
               unicode={true}
               label={translate("Session")}
               require={"Session is Required"}
@@ -312,6 +313,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               placeholder="পরীক্ষা নির্বাচন করুন"
               nameField="ExamName"
               valueField={"ExamID"}
+              initialValue={sharedStepData?.ExamID}
               label={translate("Exam")}
               unicode={true}
               require={"Exam is Required"}
@@ -325,6 +327,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               placeholder="শ্রেণি নির্বাচন করুন"
               nameField="SubClass"
               valueField={"SubClassID"}
+              initialValue={sharedStepData?.SubClassID}
               label={translate("SubClass")}
               require={"SubClass is Required"}
               unicode={true}
@@ -354,6 +357,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               placeholder=" পরিক্ষার ধরন নির্বাচন "
               nameField="name"
               valueField={"value"}
+              initialValue={sharedStepData?.ExamType}
               label={translate("Exam Type")}
               require={"SubClass is Required"}
               unicode={true}
@@ -372,7 +376,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                   </h2>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-4">
                   <div>
                     <DefaultInput type='text' registerKey={"DivisionName"} placeholder={"বিভাগ (বাংলা)"} required />
                   </div>
@@ -383,6 +387,9 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                   
                   <div>
                     <DefaultInput registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
+                  </div>
+                  <div>
+                    <DefaultInput registerKey={"Note"} placeholder={"নোট"} />
                   </div>
 
                 </div>
@@ -428,7 +435,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                 </div>
               </div>
             ) : (
-              <div className="w-full space-y-10 bg-white rounded-xl shadow-md">
+              <div className="w-full space-y-10">
                 <section>
                   <h2 className="text-lg font-semibold text-gray-800 mb-3 pl-2">
                     {translate("Grade based on marks")}
@@ -442,6 +449,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                       registerKey="maxAverageScore"
                       type='number'
                       placeholder="যেমন: ১০০"
+                      defaultValue={100}
                       required
                     />
                   </div>
@@ -457,7 +465,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                             {translate("Grade (Bengali)")}
                             <button
                               type='button'
-                              className='text-blue- 600 flex items-center gap-1'
+                              className='bg-blue-100 text-blue-600 flex items-center gap-1 px-2 py-1 rounded-md text-sm font-medium hover:bg-blue-100'
                               onClick={() => setShowDivisionManager(true)}
                             >
                               <SvgIcon name={"TbPlus"} />
@@ -539,10 +547,10 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
             )
           ) : null
         }
-        <div className="text-end">
+        <div className="text-end flex items-center justify-end gap-2">
           {/* <Button type='button' className='bg-yellow-300 hover:bg-yellow-300 text-[#000]'>Save As Draft</Button> */}
           {
-            !showDivisionManager ? <Button type='submit'>{translate("Save & Continue")}</Button> : null
+            !showDivisionManager ? <Button type='submit' className="whitespace-nowrap flex gap-1 ">{translate("Next")} <SvgIcon name={"LongArrowRight"} /> </Button> : null
           }
 
         </div>

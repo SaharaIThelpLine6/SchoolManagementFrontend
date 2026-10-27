@@ -19,6 +19,7 @@ import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import DefaultSelect from "../../../components/Forms/DefaultSelect";
 import { useMultiStepForm } from "../../../hooks/useMultiStepForm";
+import SvgIcon from "../../../components/icons/SvgIcon";
 
 // ✅ Input with Label + Checkbox
 const InputWithCheckbox = ({ registerKey, checked, onCheckChange, filteredExamDivitions }) => (
@@ -206,7 +207,9 @@ const TalentCondition = ({ sharedStepData, setSharedStepData }) => {
               <Button
                 type="button"
                 onClick={handleSaveAndPrevious}
+                className="flex items-center gap-1"
               >
+                <SvgIcon name="LongArrowLeft" />
                 {translate("Previous")}
               </Button>
             </div>
