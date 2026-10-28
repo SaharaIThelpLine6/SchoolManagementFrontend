@@ -532,9 +532,9 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                     <div className="absolute right-2 top-1/2 -translate-y-1/2">
                       <button
                         type="button"
-                        aria-label={`মন্তব্য: শিক্ষার্থীর লিখিত কনডিশনটি পেলে এই মন্তব্য আসবে।`}
+                        aria-label={`এই ডিভিশনটি/বিভাগটি কোন শিক্ষার্থী পেলে তা মার্কসীটে শিক্ষক মন্তব্য হিসেবে অটো চলে আসবে।`}
                         data-tooltip-id="subject-column-tooltip"
-                        data-tooltip-content={"মন্তব্য: শিক্ষার্থীর লিখিত কনডিশনটি পেলে এই মন্তব্য আসবে।"}
+                        data-tooltip-content={"এই ডিভিশনটি/বিভাগটি কোন শিক্ষার্থী পেলে তা মার্কসীটে শিক্ষক মন্তব্য হিসেবে অটো চলে আসবে।"}
                         data-tooltip-place="top"
                         className="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                       >

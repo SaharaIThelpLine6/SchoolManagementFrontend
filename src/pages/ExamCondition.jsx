@@ -5,7 +5,7 @@ import Loading from '../components/Loading/Loading';
 import { useGetSettingsQuery } from '../features/settings/settingsQuerySlice';
 import { useDispatch } from 'react-redux';
 import { setPageName } from '../features/auth/authSlice';
-import { useDeleteExamConditionMutation, useDuplicateExamConditionsMutation, useGetExamConditionsQuery, useGetExamFilterExamsQuery, useGetExamFilterSubclassesQuery, useGetExamNamesQuery, useGetExamSessionQuery, useLazyGetExamConditonEntryQuery } from '../features/exam/examQuerySlice';
+import { useDeleteExamConditionMutation, useDuplicateExamConditionsMutation, useGetExamConditionsQuery, useGetExamFilterExamsQuery, useGetExamFilterSubclassesQuery, useGetExamSessionQuery, useLazyGetExamConditonEntryQuery } from '../features/exam/examQuerySlice';
 import SortableTable from '../components/Tables/SortableTable';
 import useTranslate from '../utils/Translate';
 import Button from '../components/Button/Button';
@@ -29,7 +29,6 @@ const ExamCondition = ({ pageTitle }) => {
   const [, { isLoading: isPasting, data: pasteResponse, reset: resetPasteResponse }] = useDuplicateExamConditionsMutation({
     fixedCacheKey: 'exam-condition-paste',
   });
-  const { data: allExams = [] } = useGetExamNamesQuery();
   const [copiedConditions, setCopiedConditions] = useState([]);
   const [pasteResult, setPasteResult] = useState(null);
   const dispatch = useDispatch();
@@ -77,10 +76,10 @@ const ExamCondition = ({ pageTitle }) => {
   useEffect(() => {
     if (!pasteResponse) return;
     const sourceMap = new Map(copiedConditions.map((row) => [conditionKey(row), row]));
-    const targetExamID = pasteResponse.results[0]?.ExamID;
     setPasteResult({
       ...pasteResponse,
-      examName: allExams.find((exam) => Number(exam.ExamID) === Number(targetExamID))?.ExamName,
+      sessionName: pasteResponse.target?.SessionName,
+      examName: pasteResponse.target?.ExamName,
       results: pasteResponse.results.map((item) => ({
         ...item,
         label: conditionLabel(sourceMap.get(conditionKey(item.source)) ?? item.source),
@@ -88,7 +87,7 @@ const ExamCondition = ({ pageTitle }) => {
     });
     setCopiedConditions([]);
     resetPasteResponse();
-  }, [pasteResponse, copiedConditions, allExams, resetPasteResponse]);
+  }, [pasteResponse, copiedConditions, resetPasteResponse]);
 
   const [getExamConditionEntry] = useLazyGetExamConditonEntryQuery();
 
@@ -372,7 +371,7 @@ const ExamCondition = ({ pageTitle }) => {
         <section className="mt-4 rounded-lg border border-gray-200 p-4" aria-live="polite">
           <div className="flex items-center justify-between gap-3">
             <p className="font-semibold">
-              {pasteResult.examName}: {pasteResult.succeeded} {translate('created')}, {pasteResult.failed} {translate('failed')}
+              {[pasteResult.sessionName, pasteResult.examName].filter(Boolean).join(' / ')}: {pasteResult.succeeded} {translate('created')}, {pasteResult.failed} {translate('failed')}
             </p>
             <button type="button" aria-label={translate('Close')} onClick={() => setPasteResult(null)}>
               <SvgIcon name="FiX" size={16} />

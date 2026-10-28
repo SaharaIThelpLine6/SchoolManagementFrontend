@@ -86,7 +86,7 @@ const MultiSelect = ({
       </div>
       {isOpen && (
         <div
-          style={{ height: dropdownHeight }}
+          style={{ maxHeight: dropdownHeight }}
           className="absolute z-50 mt-1.5 flex w-full flex-col overflow-hidden rounded-lg border border-blue-100 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
         >
           <div className="flex shrink-0 items-center gap-2 border-b border-slate-100 px-3 text-slate-400 focus-within:text-blue-500">
@@ -108,10 +108,10 @@ const MultiSelect = ({
               }}
               placeholder={searchPlaceholder}
               aria-label={searchPlaceholder}
-              className="h-11 min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+              className="h-8 min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
             />
           </div>
-          <div role="listbox" aria-multiselectable="true" className="min-h-0 max-h-60 flex-1 overflow-y-auto py-1">
+          <div role="listbox" aria-multiselectable="true" className="min-h-0 max-h-60  overflow-y-auto py-1 flex flex-wrap gap-x-1.5 gap-y1.5">
             {filteredOptions.map((option) => {
               const isSelected = selectedValues.includes(String(option[valueField]));
               return (
@@ -121,7 +121,7 @@ const MultiSelect = ({
                   role="option"
                   aria-selected={isSelected}
                   onClick={() => toggle(option[valueField])}
-                  className={`flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:bg-blue-50 ${isSelected ? "bg-blue-50 text-blue-800" : "text-slate-700 hover:bg-slate-50"}`}
+                  className={`flex w-auto items-center gap-3 px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:bg-blue-50 ${isSelected ? "bg-blue-50 text-blue-800" : "text-slate-700 hover:bg-slate-50"}`}
                 >
                   <span aria-hidden="true" className={`flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded border transition-colors ${isSelected ? "border-blue-600 bg-blue-600 text-white" : "border-slate-400 bg-white"}`}>
                     {isSelected && (
