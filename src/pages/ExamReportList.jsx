@@ -26,11 +26,6 @@ import { useGetResidentialQuery } from '../features/settings/settingsQuerySlice'
 import { fetchSettingsData } from '../features/settings/settingsSlice';
 import { useGetExamReportQuery } from '../features/userReports/userReportsSlice';
 import useTranslate from '../utils/Translate';
-import ArobicNumberClassBasedTC from '../view/exam/ExamReportPdf/numberClassBased/ArobicNumberClassBasedTC';
-import ArobicNameWithLegal from '../view/exam/ExamReportPdf/numberLetter/ArobicNameWithLegal';
-import ArobicNameWithTwoColumn from '../view/exam/ExamReportPdf/numberLetter/ArobicNameWithTwoColumn';
-import BanglaNumberWithTwoColumn from '../view/exam/ExamReportPdf/numberLetter/BanglaNumberWithTwoColumn';
-import BanglaWithOutNameColumn from '../view/exam/ExamReportPdf/numberLetter/BanglaWithOutNameColumn';
 import BSeatNoColor from '../view/exam/ExamReportPdf/seatNo/Bangla/BSeatNoColor';
 import BSeatNoWhite from '../view/exam/ExamReportPdf/seatNo/Bangla/BSeatNoWhite';
 import ASeatNoColor from '../view/exam/ExamReportPdf/seatNo/English/ASeatNoColor';
@@ -38,7 +33,6 @@ import ASeatNoSeatPlain from '../view/exam/ExamReportPdf/seatNo/English/ASeatNoS
 import ASeatNoWhite from '../view/exam/ExamReportPdf/seatNo/English/ASeatNoWhite';
 import ExamRoutine from '../view/exam/ExamReportPdf/signatureLetter/ExamRoutine';
 import WithoutExamRoutine from '../view/exam/ExamReportPdf/signatureLetter/WithoutExamRoutine';
-import SingatureSheetNS from '../view/exam/ExamReportPdf/signatureSheetndNumberSheet/SingatureSheetNS';
 import StatisticsOfAllStudents from '../view/exam/ExamReportPdf/StatisticsOfAllStudents';
 import ArobicOneColumnA5 from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/ArobicOneColumnA5';
 import ArobicTwoColumn from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/ArobicTwoColumn';
@@ -47,7 +41,6 @@ import StudentNameWithHolding from '../view/exam/ExamReportPdf/studentFeeWithdra
 import { useGetExamHallListQuery } from '../features/examhall/examHallQuerySlice';
 import ExaminationRoomSeatingChart from '../view/exam/ExamReportPdf/ExaminationRoomSeatingChart';
 import InstituteExamSeatingChart from '../view/exam/ExamReportPdf/InstituteExamSeatingChart';
-import ExamReportFive from '../view/exam/ExamReportPdf/numberLetterAdmissionSerial/ExamReportFive';
 
 // ⭐ নতুন — ফি তালিকার পেজ ও সেটিংস
 import BanglaFeeList from '../view/exam/ExamReportPdf/studentFeeWithdrawalLists/BanglaFeeList';
@@ -65,6 +58,23 @@ import {
 // ⭐ নতুন — সিট কার্ডের সেটিংস (কোন ঘরগুলো কার্ডে বসবে)
 import SeatCardSettingsModal from '../components/Modals/SeatCardSettingsModal';
 import { loadSeatCardSettings } from '../Data/seatCardFields';
+
+// ⭐ ৩ নং — নম্বর পত্র ও স্বাক্ষরপত্র (আগের ৩ আর ৫ এক হয়ে)
+import NumberSheetPaper from '../view/exam/ExamReportPdf/numberLetter/NumberSheetPaper';
+import NumberSheetSettingsModal from '../components/Modals/NumberSheetSettingsModal';
+import {
+  ORIENTATIONS,
+  PAPERS,
+  SORT_KEYS,
+  TITLE_DEFAULT,
+  columnCount,
+  loadNumberSheetSettings,
+  orientationValue,
+  paperById,
+  saveNumberSheetSettings,
+  sortKeyValue,
+  sortOrderValue,
+} from '../Data/numberSheetColumns';
 
 // ⭐ ৯ নং — পরীক্ষার রুটিন (গ্রিড)
 import ExamRoutinePaper from '../view/exam/ExamReportPdf/ExamRoutinePaper';
@@ -177,6 +187,11 @@ const ExamReportList = ({ pageTitle }) => {
   const [seatSettingsOpen, setSeatSettingsOpen] = useState(false);
   const [seatSettings, setSeatSettings] = useState(() => loadSeatCardSettings(1));
 
+  /* ⭐ নম্বর পত্রের সেটিংস — কাগজ (A4/A5), দিক, কলাম, ঘর ও সাজানোর ক্রম।
+     আগের "৫. স্বাক্ষরপত্র ও নম্বরসীট" এখন এই সেটিংসেরই একটা সাজ। */
+  const [numberSettingsOpen, setNumberSettingsOpen] = useState(false);
+  const [numberSettings, setNumberSettings] = useState(() => loadNumberSheetSettings(1));
+
   // ⭐ রুটিনের সাজসজ্জা — সবগুলোই ডিফল্টে কাগজের মতো
   const [routineHideEmptyRows, setRoutineHideEmptyRows] = useState(false);
   const [routineHideEmptyShift, setRoutineHideEmptyShift] = useState(false);
@@ -194,7 +209,15 @@ const ExamReportList = ({ pageTitle }) => {
 
   const isSeatNoReport = Number(selectedReportID) === 7;
   const isFeeReport = Number(selectedReportID) === 1;
-  const isNumberSheet = Number(selectedReportID) === 4;   // ৩. নম্বর পত্র
+  /* ⭐ ৩. নম্বর পত্র ও স্বাক্ষরপত্র — আগের দুইটা রিপোর্ট এক হয়েছে।
+
+     ৪ = নম্বর পত্র, ৮ = স্বাক্ষরপত্র ও নম্বরসীট। কাগজ দুইটা প্রায় একই
+     ছিল — একই শিক্ষার্থীর তালিকা, শুধু স্বাক্ষরপত্রে বাড়তি কয়েকটা ফাঁকা
+     ঘর। তাই এখন একটাই কাগজ, আর ঘরগুলো সেটিংস থেকে বাছা হয়।
+
+     ৮ নম্বরটা এখানে রাখা আছে পেছনের ভরসা হিসেবে — কারো ব্রাউজারে বা
+     লিংকে পুরোনো বাছাইটা থেকে গেলেও কাগজটা ঠিকই আসবে, ফাঁকা পর্দা নয়। */
+  const isNumberSheet = [4, 8].includes(Number(selectedReportID));
   // ⭐ ৯. পরীক্ষার রুটিন
   const isRoutineReport = Number(selectedReportID) === ROUTINE_REPORT_ID;
   const langId = Number(languageID) || 1;
@@ -207,9 +230,6 @@ const ExamReportList = ({ pageTitle }) => {
 
   // ⭐ কোন কিতাবের নম্বর পত্র — পরীক্ষার রুটিনে যে কিতাবগুলো আছে তার একটা
   const [kitabId, setKitabId] = useState('');
-
-  // ⭐ "ভর্তি সিরিয়াল অনুযায়ী" কাগজে পরীক্ষার্থীর নামের ঘরটা থাকবে কি না
-  const [serialShowName, setSerialShowName] = useState(true);
 
   /**
    * সেটিংস বসানো — কলামের তথ্যগুলো যেমন আছে, সাথে সাজানোর ক্রমটাও
@@ -257,18 +277,41 @@ const ExamReportList = ({ pageTitle }) => {
     setSeatSettings(loadSeatCardSettings(langId));
   }, [langId]);
 
+  /* নম্বর পত্রের সেটিংসও ভাষা ধরে আলাদা */
+  useEffect(() => {
+    setNumberSettings(loadNumberSheetSettings(langId));
+  }, [langId]);
+
+  /* ⭐ কাগজ, দিক, কলাম আর সাজানোর ক্রম — উপরের বার থেকেই বদলানো যায়,
+     সেটিংস খোলার দরকার নেই।
+
+     বদলটা সেটিংসেও সেভ হয়ে যায়, তাই পরেরবার পাতা খুললে এটাই থাকে — আর
+     সেটিংসের ভেতরের বোতামগুলোও একই জায়গা দেখায়, দুই জায়গায় দুই রকম
+     হয়ে যায় না। ফি তালিকার কলাম বদলানোটা ঠিক এই নিয়মেই চলে। */
+  const changeNumberSetting = (patch) => {
+    const next = { ...numberSettings, ...patch };
+    saveNumberSheetSettings(langId, next);
+    setNumberSettings(next);
+  };
+
   const shouldShowFields = (fieldName) => {
     switch (Number(selectedReportID)) {
       case 1:
         return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'SubClassID', 'Langauge'].includes(fieldName);
       case 3:
         return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'RDID', 'Langauge', 'PdfSelect'].includes(fieldName);
+      /* ⭐ ৩. নম্বর পত্র ও স্বাক্ষরপত্র (৪ ও ৮ — দুইটা এক হয়েছে)
+
+         ClassID যোগ হয়েছে: জামাত বাছলে নিচের শ্রেণির তালিকাটা সেই
+         জামাতেরগুলোয় নেমে আসে। ৯ নং রিপোর্টে যে ছাঁকনিটা আছে, এটাও সেটাই।
+
+         PdfSelect আর নেই — কাগজের ধরন এখন সেটিংস থেকে বাছা হয়, তাই
+         ড্রপডাউনে চার রকম কাগজ বেছে নেওয়ার দরকার ফুরিয়েছে। */
       case 4:
-        return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'SubClassID', 'Langauge', 'PdfSelect'].includes(fieldName);
+      case 8:
+        return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'ClassID', 'SubClassID', 'Langauge'].includes(fieldName);
       case 7:
         return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'SubClassID', 'Langauge', 'PdfSelect'].includes(fieldName);
-      case 8:
-        return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'SubClassID'].includes(fieldName);
       case 9:
         return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'ClassID'].includes(fieldName);
       case 10:
@@ -314,13 +357,32 @@ const ExamReportList = ({ pageTitle }) => {
     if (isStatistics) return false;
 
     if (!SubClassID || !RDID) return true;
+
+    /* ⭐ নম্বর পত্রে আর PdfID লাগে না।
+
+       আগে কাগজের ধরনটা "পিডিএফ" ড্রপডাউন থেকে বাছা হত, তাই নিচের
+       `return !PdfID` শর্তটা ঠিক ছিল। এখন ধরনটা সেটিংস থেকে আসে আর ঐ
+       ড্রপডাউনটাই নেই — মানে PdfID কখনোই ভরবে না, আর শর্তটা থাকলে
+       কোয়েরিটা কোনোদিনই চলত না, পাতাটা চিরকাল ফাঁকা দেখাত। */
+    if (isNumberSheet) return false;
+
     if (isSignatureSheet || Number(ReportID) === 1) return false;
     return !PdfID;
   })();
 
   // রিপোর্ট ১ এ report_id টা ১ বা ২ ই যায় (পুরোনো আচরণ অক্ষত), আর কোন
   // তালিকা সেটা ListType বলে দেয় — "সকল" (৩) এর জন্য আলাদা report_id নেই
-  const actualReportId = Number(ReportID) === 1 ? (feeListType === 2 ? 2 : 1) : ReportID;
+  const actualReportId = (() => {
+    if (Number(ReportID) === 1) return feeListType === 2 ? 2 : 1;
+
+    /* ⭐ পুরোনো "৫. স্বাক্ষরপত্র ও নম্বরসীট" (৮) এখন ৪ এর কাগজেই বসে।
+       সার্ভারে ৮ পাঠালে অন্য চেহারার উত্তর আসত (ভর্তি নং, কিতাবের তালিকা
+       বা মাথার তথ্য ছাড়া), তাই ৪ ই পাঠাই — কাগজটা যে তথ্য চায় সেটা
+       ওখানেই আছে। */
+    if (Number(ReportID) === 8) return 4;
+
+    return ReportID;
+  })();
 
   const { data, isLoading, isError, error } = useGetExamReportQuery(
     {
@@ -372,6 +434,60 @@ const ExamReportList = ({ pageTitle }) => {
 
   // ⭐ রুটিনের জামাতের তালিকা — সার্ভারের উত্তর থেকেই
   const routineClassOptions = useMemo(() => routineData?.classes ?? [], [routineData]);
+
+  /* ⭐ নম্বর পত্রের জামাতের তালিকা — SubClassListData থেকেই বের করা।
+
+     রুটিনের জামাতগুলো আসে রুটিনের নিজের রুট থেকে (routineData.classes),
+     কিন্তু নম্বর পত্রে ওই রুটটা ডাকা হয় না। তাই শ্রেণির তালিকাটা থেকেই
+     আলাদা জামাতগুলো তুলে নিই — বাড়তি কোনো কোয়েরি লাগে না, আর তালিকাটা
+     পাতা খোলার সাথে সাথেই চলে আসে।
+
+     নামের ঘরটা প্রতিষ্ঠানভেদে এক নামে থাকে না, তাই কয়েকটা চেনা নাম
+     পরপর দেখা হয়; কিছুই না পেলে আইডিটাই বসে — ফাঁকা ঘর দেখানোর চেয়ে
+     সেটা ঢের ভালো। */
+  const numberClassOptions = useMemo(() => {
+    const seen = new Map();
+
+    for (const g of SubClassListData || []) {
+      const id = g?.ClassID;
+      if (id === null || id === undefined || String(id) === '') continue;
+
+      const key = String(id);
+      if (seen.has(key)) continue;
+
+      const label =
+        getClassText(g, routineLang) ||
+        (typeof g.Class === 'string' ? g.Class : '') ||
+        g.ClassName ||
+        g.ClassNameEng ||
+        (g.Class && typeof g.Class === 'object'
+          ? g.Class.Class || g.Class.ClassName || ''
+          : '') ||
+        key;
+
+      seen.set(key, { ClassID: id, label });
+    }
+
+    return [...seen.values()];
+  }, [SubClassListData, routineLang]);
+
+  /* নম্বর পত্রে জামাত বাছলে শ্রেণির তালিকাটা সেই জামাতেরগুলোয় নেমে আসে */
+  const numberSubClassOptions = useMemo(() => {
+    const base = SubClassListData || [];
+    if (!isNumberSheet || !ClassID) return base;
+    return base.filter((g) => String(g.ClassID ?? '') === String(ClassID));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [SubClassListData, isNumberSheet, ClassID]);
+
+  /* জামাত বদলালে আগের শ্রেণিটা আর ওই জামাতের নাও হতে পারে — তখন খালি
+     করে দিই, নইলে এমন শ্রেণির কাগজ ছাপা হত যেটা ছাঁকনিতে নেই */
+  useEffect(() => {
+    if (!isNumberSheet || !SubClassID) return;
+    const ok = numberSubClassOptions.some(
+      (g) => String(g.SubClassID) === String(SubClassID)
+    );
+    if (!ok) setValue('SubClassID', '');
+  }, [isNumberSheet, numberSubClassOptions, SubClassID, setValue]);
 
   /* ⭐ রুটিনের শ্রেণির তালিকা — চলতি SubClassListData থেকেই, কারণ ওটা
      পাতা খোলার সাথে সাথেই চলে আসে। জামাত বাছা থাকলে সেই জামাতেরগুলোই
@@ -489,6 +605,11 @@ const ExamReportList = ({ pageTitle }) => {
     // ⭐ সিট নং — কার্ডে কোন ঘরগুলো বসবে সেটার সেটিংস
     if (isSeatNoReport) {
       setSeatSettingsOpen(true);
+      return;
+    }
+    // ⭐ নম্বর পত্র ও স্বাক্ষরপত্র — কাগজ, কলাম, ঘর ও সাজানোর ক্রম
+    if (isNumberSheet) {
+      setNumberSettingsOpen(true);
       return;
     }
     if (Number(selectedReportID) === 3) {
@@ -745,7 +866,7 @@ const ExamReportList = ({ pageTitle }) => {
 
                   {/* ⭐ সিট নং রিপোর্টেও সেটিংস বোতামটা দেখায় — কার্ডের
                       ঘরগুলো ওখান থেকেই বাছা হয় */}
-                  {(isFeeReport || isSeatNoReport || Number(selectedReportID) === 3) && (
+                  {(isFeeReport || isSeatNoReport || isNumberSheet || Number(selectedReportID) === 3) && (
                     <button
                       type="button"
                       onClick={handleOpenSettings}
@@ -797,8 +918,41 @@ const ExamReportList = ({ pageTitle }) => {
                       <DefaultSelect label={translate('Exam')} nameField="ExamName" registerKey="ExamID" valueField="ExamID" options={examNameData ?? []} require="This Field is required" unicode={true} />
                     )}
 
+                    {/* নম্বর পত্রে উপরে জামাত বাছা থাকলে এখানে সেই জামাতের
+                        শ্রেণিগুলোই আসে — বাকি রিপোর্টে পুরো তালিকাটাই */}
                     {shouldShowFields('SubClassID') && (
-                      <DefaultSelect label={translate('SubClass')} nameField="SubClass" registerKey="SubClassID" valueField="SubClassID" options={SubClassListData ?? []} require="This Field is required" unicode={true} />
+                      <DefaultSelect label={translate('SubClass')} nameField="SubClass" registerKey="SubClassID" valueField="SubClassID" options={(isNumberSheet ? numberSubClassOptions : SubClassListData) ?? []} require="This Field is required" unicode={true} />
+                    )}
+
+                    {/* ⭐ নম্বর পত্রের জামাতের ছাঁকনি — ৯ নং রিপোর্টের মতোই।
+
+                        ঐচ্ছিক, তাই "সকল" বলে একটা ঘর লাগে — DefaultSelect এ
+                        সেটা নেই, তাই সাধারণ select। দেখতে বাকিগুলোর মতোই। */}
+                    {isNumberSheet && shouldShowFields('ClassID') && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {rui('mainClass')}
+                        </label>
+                        <div className="relative">
+                          <select
+                            {...register('ClassID')}
+                            className="w-full appearance-none rounded-md border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                          >
+                            <option value="">{rui('allClass')}</option>
+                            {numberClassOptions.map((c) => (
+                              <option key={c.ClassID} value={c.ClassID}>
+                                {c.label}
+                              </option>
+                            ))}
+                          </select>
+                          <svg
+                            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
                     )}
 
                     {/* ⭐ রুটিনের দুইটা ছাঁকনি — জামাত (Academic_Class) ও
@@ -1060,7 +1214,10 @@ const ExamReportList = ({ pageTitle }) => {
                         কিতাব:
                       </span>
 
-                      <div className="relative min-w-[240px] flex-1 max-w-sm">
+                      {/* ⭐ ঘরটা আর টেনে লম্বা হয় না (flex-1 তুলে দেওয়া)।
+                          কিতাবের নাম তো ছোট, অথচ ঘরটা বারের অর্ধেক জায়গা
+                          খেয়ে বসে থাকত। */}
+                      <div className="relative w-[190px] shrink-0">
                         <select
                           value={kitabId}
                           onChange={(e) => setKitabId(e.target.value)}
@@ -1089,42 +1246,147 @@ const ExamReportList = ({ pageTitle }) => {
                         </svg>
                       </div>
 
-                      {/* নামের ঘর — শুধু "ভর্তি সিরিয়াল অনুযায়ী" কাগজের জন্য।
-                          বাকি দুইটা কাগজ তো নামসহ আর নাম ছাড়া আলাদা
-                          অপশনেই আছে, তাই ওখানে সুইচটা দেখানোর মানে নেই। */}
-                      {Number(selectedPdfID) === 3 && (
+                      {/* ⭐ সাজানোর ক্রম — ভর্তি নং না আইডি নং।
+
+                          আগে এখানে "নামসহ / নাম ছাড়া" সুইচ ছিল, কিন্তু
+                          নামের ঘরটা এখন সেটিংসের আর দশটা ঘরের মতোই টিক
+                          দিয়ে বন্ধ করা যায় — তাই ওটার আর দরকার নেই।
+
+                          ফি তালিকার বারটা যেমন, এটাও তেমন — দুই রিপোর্টে
+                          একই নিয়ম। */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12px] font-medium text-slate-500">সাজানো:</span>
+
+                        <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1">
+                          {SORT_KEYS.map((opt) => {
+                            const on = sortKeyValue(numberSettings.sortBy) === opt.key;
+
+                            return (
+                              <button
+                                key={opt.key}
+                                type="button"
+                                onClick={() => changeNumberSetting({ sortBy: opt.key })}
+                                className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                                  on ? 'bg-violet-600 text-white' : 'text-slate-600 hover:bg-slate-50'
+                                }`}
+                              >
+                                {opt.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+
                         <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1">
                           {[
-                            { on: true, text: 'নামসহ' },
-                            { on: false, text: 'নাম ছাড়া' },
-                          ].map((opt) => (
-                            <button
-                              key={opt.text}
-                              type="button"
-                              onClick={() => setSerialShowName(opt.on)}
-                              className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                                serialShowName === opt.on
-                                  ? 'bg-violet-600 text-white'
-                                  : 'text-slate-600 hover:bg-slate-50'
-                              }`}
-                            >
-                              {opt.text}
-                            </button>
-                          ))}
+                            { id: 'asc', text: 'ছোট → বড়' },
+                            { id: 'desc', text: 'বড় → ছোট' },
+                          ].map((opt) => {
+                            const on = sortOrderValue(numberSettings.sortOrder) === opt.id;
+
+                            return (
+                              <button
+                                key={opt.id}
+                                type="button"
+                                onClick={() => changeNumberSetting({ sortOrder: opt.id })}
+                                className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                                  on ? 'bg-violet-600 text-white' : 'text-slate-600 hover:bg-slate-50'
+                                }`}
+                              >
+                                {opt.text}
+                              </button>
+                            );
+                          })}
                         </div>
-                      )}
+                      </div>
 
-                      {/* শ্রেণি/জামাত — এটা উপরের ফিল্টার থেকেই আসে, এখানে
-                          শুধু দেখানো হয় যাতে কাগজে কী বসবে আগেই বোঝা যায় */}
-                      {subClassName && (
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-violet-200 px-3 py-1 text-xs font-semibold text-violet-700">
-                          শ্রেণি/জামাত: {subClassName}
+                      {/* ⭐ কাগজের শিরোনাম — পট্টিতে যা বসবে।
+
+                          সেটিংসেও আছে, কিন্তু এটা কাগজভেদে বদলায় (একবার
+                          "নম্বর পত্র", পরেরবার "স্বাক্ষরপত্র"), তাই হাতের
+                          কাছেই রাখা। দুই জায়গার মান এক। */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12px] font-medium text-slate-500 whitespace-nowrap">
+                          শিরোনাম:
                         </span>
-                      )}
 
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600 ml-auto">
-                        পরীক্ষার্থী: {toBn(numberSheetRows.length)} জন
-                      </span>
+                        <div className="relative min-w-[180px]">
+                          <input
+                            type="text"
+                            value={numberSettings.title ?? ''}
+                            placeholder={TITLE_DEFAULT}
+                            onChange={(e) => changeNumberSetting({ title: e.target.value })}
+                            title="কাগজের শিরোনাম — কাগজের পট্টিতেও সরাসরি লেখা যায়"
+                            className="w-full rounded-lg border border-violet-300 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-slate-700 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
+                          />
+                          <svg
+                            className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-violet-500"
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* ⭐ কাগজ, দিক ও কলাম — সেটিংসে তো আছেই, এখানেও।
+
+                          এগুলোই সবচেয়ে বেশি বদলানো হয় (এক কলাম না দুই,
+                          A4 না A5), তাই প্রতিবার সেটিংস খোলা ঝামেলা।
+                          দুই জায়গার মানটা একই — এখানে বদলালে সেটিংসেও
+                          বসে যায়, আর সেটিংসে বদলালে এখানেও দেখা যায়। */}
+                      <div className="flex items-center gap-1.5">
+                        {[
+                          {
+                            key: 'paper',
+                            title: 'কাগজের মাপ',
+                            value: paperById(numberSettings.paper).id,
+                            options: PAPERS.map((p) => ({ id: p.id, label: p.label })),
+                            pick: (v) => changeNumberSetting({ paper: paperById(v).id }),
+                          },
+                          {
+                            key: 'orientation',
+                            title: 'দিক',
+                            value: orientationValue(numberSettings.orientation),
+                            options: ORIENTATIONS,
+                            pick: (v) => changeNumberSetting({ orientation: orientationValue(v) }),
+                          },
+                          {
+                            key: 'columns',
+                            title: 'কলাম',
+                            value: columnCount(numberSettings.columns),
+                            options: [
+                              { id: 1, label: '১ কলাম' },
+                              { id: 2, label: '২ কলাম' },
+                            ],
+                            pick: (v) => changeNumberSetting({ columns: columnCount(v) }),
+                          },
+                        ].map((sel) => (
+                          <div key={sel.key} className="relative">
+                            <select
+                              title={sel.title}
+                              value={sel.value}
+                              onChange={(e) => sel.pick(e.target.value)}
+                              className="appearance-none rounded-lg border border-violet-300 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-slate-700 outline-none transition focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
+                            >
+                              {sel.options.map((opt) => (
+                                <option key={opt.id} value={opt.id}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </select>
+                            <svg
+                              className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-violet-500"
+                              fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* ⭐ "শ্রেণি/জামাত" আর "পরীক্ষার্থী: ৩ জন" চিপ দুইটা
+                          তুলে দেওয়া হলো — দুইটাই উপরের ফিল্টারে আর কাগজের
+                          মাথায় এমনিতেই আছে, বারটা শুধু লম্বা করছিল। */}
                     </div>
                   )}
 
@@ -1232,52 +1494,28 @@ const ExamReportList = ({ pageTitle }) => {
           {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 1 && <ExamRoutine reportData={data} queryParams={queryParams} />}
           {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 2 && <WithoutExamRoutine reportData={data} queryParams={queryParams} requireSeatPlan />}
 
-          {/* ৩. নম্বর পত্র
+          {/* ৩. নম্বর পত্র ও স্বাক্ষরপত্র
 
-              reportData এ অ্যারেটাই যায় (numberSheetRows) — রুট এখন অবজেক্ট
-              পাঠালেও পেজগুলোর আগের চুক্তি অক্ষত। মাথার তথ্য আর বাছাই করা
-              কিতাবটা আলাদা প্রপে। */}
-          {isNumberSheet && langId === 1 && Number(selectedPdfID) === 1 && (
-            <BanglaNumberWithTwoColumn
-              reportData={numberSheetRows}
-              queryParams={queryParams}
-              header={numberSheetHeader}
-              subClassName={subClassName}
-              kitabName={kitabName}
-            />
-          )}
-          {isNumberSheet && langId === 1 && Number(selectedPdfID) === 2 && (
-            <BanglaWithOutNameColumn
-              reportData={numberSheetRows}
-              queryParams={queryParams}
-              header={numberSheetHeader}
-              subClassName={subClassName}
-              kitabName={kitabName}
-            />
-          )}
-          {isNumberSheet && langId === 1 && Number(selectedPdfID) === 3 && (
-            <ExamReportFive
-              data={numberSheetRows}
-              header={numberSheetHeader}
-              subClassName={subClassName}
-              kitabName={kitabName}
-              showName={serialShowName}
-            />
-          )}
-          {isNumberSheet && langId === 1 && Number(selectedPdfID) === 4 && <ArobicNumberClassBasedTC />}
+              ⭐ আগে এখানে আটটা শাখা ছিল — ভাষা × চার রকম কাগজ — আর
+              স্বাক্ষরপত্রটা আলাদা রিপোর্ট (৮) হিসেবে আরো নিচে বসত।
 
-          {isNumberSheet && langId === 2 && Number(selectedPdfID) === 1 && <ArobicNameWithTwoColumn reportData={numberSheetRows} queryParams={queryParams} />}
-          {isNumberSheet && langId === 2 && Number(selectedPdfID) === 2 && <ArobicNameWithLegal />}
-          {isNumberSheet && langId === 2 && Number(selectedPdfID) === 3 && (
-            <ExamReportFive
-              data={numberSheetRows}
+              এখন একটাই কাগজ। কোন মাপ, কয় কলাম, কোন দিক আর কোন ঘরগুলো
+              বসবে — সবটা সেটিংস থেকে আসে (উপরের সেটিংস বোতাম)। তাই
+              আরবি-বাংলা আলাদা করারও দরকার নেই, ঘরের নামগুলোই যা বদলায়।
+
+              reportData এ অ্যারেটাই যায় (numberSheetRows) — সাজানোর কাজটা
+              কাগজ নিজেই করে, সেটিংসের ক্রম ধরে। */}
+          {isNumberSheet && (
+            <NumberSheetPaper
+              reportData={numberSheetRows}
               header={numberSheetHeader}
+              settings={numberSettings}
               subClassName={subClassName}
               kitabName={kitabName}
-              showName={serialShowName}
+              instituteLogo={instituteLogo || watermarkLogo}
+              onTitleChange={(title) => changeNumberSetting({ title })}
             />
           )}
-          {isNumberSheet && langId === 2 && Number(selectedPdfID) === 4 && <ArobicNumberClassBasedTC />}
 
           {/* ৪. সিট নং
 
@@ -1300,11 +1538,6 @@ const ExamReportList = ({ pageTitle }) => {
           )}
           {Number(selectedReportID) === 7 && Number(languageID) === 2 && Number(selectedPdfID) === 3 && (
             <ASeatNoSeatPlain queryParams={queryParams} documentLogo={documentLogo} logoIsActive={logoIsActive} />
-          )}
-
-          {/* ৫. স্বাক্ষরপত্র ও নম্বরসীট */}
-          {Number(selectedReportID) === 8 && (
-            <SingatureSheetNS reportData={data} queryParams={queryParams} documentLogo={documentLogo} logoIsActive={logoIsActive} />
           )}
 
           {/* ৬. সকল পরীক্ষার্থীর পরিসংখ্যান
@@ -1367,6 +1600,15 @@ const ExamReportList = ({ pageTitle }) => {
         onClose={() => setSeatSettingsOpen(false)}
         language={langId}
         onSaved={setSeatSettings}
+      />
+
+      {/* ⭐ নম্বর পত্র ও স্বাক্ষরপত্রের সেটিংস */}
+      <NumberSheetSettingsModal
+        open={numberSettingsOpen}
+        onClose={() => setNumberSettingsOpen(false)}
+        language={langId}
+        onSaved={setNumberSettings}
+        watermarkLogo={watermarkLogo}
       />
     </>
   );

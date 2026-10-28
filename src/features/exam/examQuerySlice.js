@@ -1,4 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { matchesExamConditionDestination } from '../../utils/examConditionPasteResult';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -18,6 +19,8 @@ export const examSlice = createApi({
     'ExamNames',
     'ExamFeeSettings',
     'ExamCondition',
+    'ExamConditions',
+    'ExamSession',
     'AverageExamConditionAll',
     'GetStudentList',
     'StudentAdmitCard',
@@ -439,6 +442,25 @@ export const examSlice = createApi({
       invalidatesTags: ["ExamDivitions", "ExamConditions"],
     }),
 
+    duplicateExamConditions: builder.mutation({
+      query: ({ SessionID, ExamID, conditions }) => ({
+        url: 'exam_condition_copy',
+        method: 'POST',
+        body: { SessionID, ExamID, conditions },
+        validateStatus: (response, data) => response.status >= 200 && response.status < 300 &&
+          matchesExamConditionDestination(data, SessionID, ExamID),
+      }),
+      transformErrorResponse: (response) => ({
+        ...response,
+        data: response.status === 200
+          ? { error: 'The exam copy API did not confirm the selected destination. Update the backend before trying again.' }
+          : response.data,
+      }),
+      invalidatesTags: (result) => result?.succeeded > 0
+        ? ['ExamConditions', 'ExamNames', 'ExamSession', 'ExamRules', 'ExamCondition', 'AverageExamConditionAll']
+        : [],
+    }),
+
     getExamConditonEntry: builder.query({
       query: ({ SessionID, ExamID, SubClassID }) => `exam_condition_entry/${SessionID}/${ExamID}/${SubClassID}`,
       providesTags: ['ExamRules'],
@@ -669,6 +691,7 @@ export const {
   usePostExamDivitionMutation,
   useUpdateExamDivitionMutation,
   usePostExamSettingsMutation,
+  useDuplicateExamConditionsMutation,
   useLazyGetExamConditonEntryQuery,
   useUpdateExamSettingsMutation,
   useDeleteExamConditionMutation,

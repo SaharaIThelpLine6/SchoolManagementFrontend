@@ -86,6 +86,8 @@ import ShiftEntry from '../view/attendance/ShiftEntry';
 import ScheduleShiftEntry from '../view/attendance/ScheduleShiftEntry';
 import TimeSettingEntry from '../view/attendance/TimeSettingEntry';
 import ExamConditionEditModal from '../view/exam/examCondition/ExamConditionEditModal';
+import ExamConditionPasteModal from '../view/exam/examCondition/ExamConditionPasteModal';
+import { useDuplicateExamConditionsMutation } from '../features/exam/examQuerySlice';
 
 // Admin View
 import MadrasahActionView from '../view/AdminView/madrasah/MadrasahActionView';
@@ -106,6 +108,10 @@ const DefaultModal = () => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const scrollRef = useRef(null);
+  const [, { isLoading: isPastingConditions }] = useDuplicateExamConditionsMutation({
+    fixedCacheKey: 'exam-condition-paste',
+  });
+  const isCloseDisabled = modalType === 'EXAM_CONDITION_PASTE' && isPastingConditions;
 
   // Local state to drive enter/exit animations
   const [show, setShow] = useState(false);
@@ -143,7 +149,7 @@ const DefaultModal = () => {
       <ClickOutside
         className="max-w-screen-lg w-full"
         onClick={() => {
-          if (meta?.closeOnOutSide !== false) {
+          if (!isCloseDisabled && meta?.closeOnOutSide !== false) {
             dispatch(closeModal());
           }
         }}
@@ -163,7 +169,8 @@ const DefaultModal = () => {
               )}
               <button
                 onClick={() => dispatch(closeModal())}
-                className="text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full p-1 transition-colors"
+                disabled={isCloseDisabled}
+                className="text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Close"
               >
                 <svg
@@ -427,6 +434,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'EXAM_CONDITION_SETTINGS_EDIT' && (
                   <ExamConditionEditModal data={id} />
+                )}
+                {modalType === 'EXAM_CONDITION_PASTE' && (
+                  <ExamConditionPasteModal conditions={id} />
                 )}
                 {modalType === 'MADRASAH_ACTION_MODAL' && (
                   <MadrasahActionView id={id} meta={meta} />

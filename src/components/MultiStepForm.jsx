@@ -37,7 +37,7 @@ export default function MultiStepForm({
   return (
     <>
       {showStepper && (
-        <div className="sticky top-0 z-30 border-b border-gray-100 bg-white pt-4">
+        <div className="sticky top-0 z-30 w-full min-w-0 border-b border-gray-100 bg-white py-4">
           <div className="mx-auto">
             <div className="relative flex items-start justify-between">
               {/* Background line */}
@@ -72,11 +72,13 @@ export default function MultiStepForm({
                 return (
                   <div
                     key={index}
-                    className="flex-1 flex flex-col items-center relative z-10"
+                    className="relative z-10 flex min-w-0 flex-1 flex-col items-center"
                   >
                     <button
                       type="button"
                       disabled={!canGo}
+                      aria-label={`${index + 1}. ${translate(step.label || '')}`}
+                      aria-current={isActive ? 'step' : undefined}
                       onClick={() =>
                         canGo &&
                         dispatch(
@@ -98,9 +100,9 @@ export default function MultiStepForm({
                       {isCompleted ? <FiCheck size={18} /> : index + 1}
                     </button>
 
-                    <div className="mt-3 text-center px-1">
+                    <div className="mt-3 min-w-0 max-w-full px-1 text-center">
                       <p
-                        className={`text-sm font-semibold ${
+                        className={`break-words text-[11px] font-semibold leading-4 sm:text-sm sm:leading-5 ${
                           isCompleted || isActive
                             ? "text-gray-900"
                             : "text-gray-400"

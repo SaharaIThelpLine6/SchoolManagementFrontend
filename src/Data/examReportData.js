@@ -23,11 +23,14 @@ export const examReports = [
   { ReportID: 3, ReportName: '২. স্বাক্ষরপত্র' }, 
   { ReportID: 4, ReportName: '৩. নম্বর পত্র' }, 
   { ReportID: 7, ReportName: '৪. সিট নং' },
-  { ReportID: 8, ReportName: '৫. স্বাক্ষরপত্র ও নম্বরসীট' },
-  { ReportID: 9, ReportName: '৬. সকল পরীক্ষার্থীর পরিসংখ্যান' },
-  { ReportID: 10, ReportName: '৭. পরীক্ষা কক্ষের আসন বিন্যাস' },
-  { ReportID: 11, ReportName: '৮. প্রতিষ্ঠানের আসন বিন্যাস' },
-  { ReportID: 12, ReportName: '৯. পরীক্ষার রুটিন' },
+  { ReportID: 9, ReportName: '৫. সকল পরীক্ষার্থীর পরিসংখ্যান' },
+  { ReportID: 10, ReportName: '৬. পরীক্ষা কক্ষের আসন বিন্যাস' },
+  { ReportID: 11, ReportName: '৭. প্রতিষ্ঠানের আসন বিন্যাস' },
+  // { ReportID: 8, ReportName: '৫. স্বাক্ষরপত্র ও নম্বরসীট' },
+  // { ReportID: 9, ReportName: '৬. সকল পরীক্ষার্থীর পরিসংখ্যান' },
+  // { ReportID: 10, ReportName: '৭. পরীক্ষা কক্ষের আসন বিন্যাস' },
+  // { ReportID: 11, ReportName: '৮. প্রতিষ্ঠানের আসন বিন্যাস' },
+  // { ReportID: 12, ReportName: '৯. পরীক্ষার রুটিন' },
 ];
 
 export const resultReports = [
