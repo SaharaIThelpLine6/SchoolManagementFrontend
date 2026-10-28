@@ -1,7 +1,39 @@
 import React from "react";
 import bnBijoy2Unicode from "../../utils/conveter";
 
+const formatNumber = (value) =>
+  value == null ? "" : bnBijoy2Unicode(String(value));
+
+const getDivisionName = (subject, value) => {
+  if (value == null || value === "") return "";
+
+  const mark = Number(value);
+  if (!Number.isFinite(mark)) return "";
+
+  for (let index = 1; index <= 7; index++) {
+    const threshold = subject[`DivisionNumber${index}`];
+    if (
+      threshold != null &&
+      threshold !== "" &&
+      Number.isFinite(Number(threshold)) &&
+      mark >= Number(threshold)
+    ) {
+      return subject[`Division${index}`]?.DivisionNames ?? "";
+    }
+  }
+
+  return "";
+};
+
 const PointWiseResult = ({ studentResult }) => {
+  const examSubjects = [...(studentResult?.examSubjectPassNumber ?? [])]
+    .filter(
+      (subject) =>
+        Number.isInteger(Number(subject.SubjectSL)) &&
+        Number(subject.SubjectSL) > 0
+    )
+    .sort((a, b) => Number(a.SubjectSL) - Number(b.SubjectSL));
+
   return (
     <div className="bg-white px-[5px]">
       <div className="flex flex-col items-center">
@@ -9,24 +41,24 @@ const PointWiseResult = ({ studentResult }) => {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">
-                {studentResult?.StudentIDLabel}:
+                শিক্ষার্থী আইডি:
               </p>
-              <p>{bnBijoy2Unicode(String(studentResult?.UserCode))}</p>
+              <p>{studentResult?.User?.UserCode}</p>
             </div>
 
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">
-                {studentResult?.ClassNameLabel}:
+                শ্রেণি:
               </p>
               <p className="text-[16px]">
-                {studentResult?.SubClass}
+                {studentResult?.Class?.SubClass}
               </p>
             </div>
 
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">প্রাপ্তি বিভাগ:</p>
-              <p className="text-[16px] font-bold">
-                {String(studentResult?.Division)}
+              <p className="text-[16px]">
+                {studentResult?.Division?.DivisionNames}
               </p>
             </div>
           </div>
@@ -35,24 +67,23 @@ const PointWiseResult = ({ studentResult }) => {
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">নাম:</p>
               <p className="text-[16px]">
-                {studentResult?.UserName}
+                {studentResult?.User?.UserName}
               </p>
             </div>
 
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">পিতার নাম:</p>
               <p className="text-[16px]">
-                {studentResult?.FatherName}
+                {studentResult?.User?.FatherName}
               </p>
             </div>
             <div className="flex items-center space-x-2">
               <p className="font-semibold text-[16px]">জন্ম তারিখ:</p>
               <p className="text-[16px]">
-               
-                {studentResult?.DateOfBirth
-                  ? bnBijoy2Unicode(studentResult.DateOfBirth.split("T")[0])
-                  : ""}
-                ইং
+                {studentResult?.User?.DateOfBirth
+                  ? bnBijoy2Unicode(studentResult.User.DateOfBirth.split("T")[0])
+                  : ""}{" "}
+                ইং{" "}
               </p>
             </div>
           </div>
@@ -112,70 +143,57 @@ const PointWiseResult = ({ studentResult }) => {
           </tr>
         </thead>
         <tbody>
-          {Array.from({ length: studentResult.SubSonkha }).map((_, index) => (
-            <tr key={index}>
-              <td
-                className="text-[16px] border border-black h-[36px] pl-4"
-                bgcolor="#ffffff"
-              >
-                {bnBijoy2Unicode(String(index + 1))}
-              </td>
-              <td
-                className="text-[16px] border border-black h-[36px] pl-4"
-                bgcolor="#ffffff"
-              >
-                {studentResult[`Subject${index + 1}`]}
-              </td>
-              <td
-                className="text-[16px] border border-black h-[36px] pl-4"
-                bgcolor="#ffffff"
-              >
-                {bnBijoy2Unicode(String(studentResult[`DVTop${index + 1}`]))}
-              </td>
-              <td
-                className="text-[16px] border border-black h-[36px] pl-4"
-                bgcolor="#ffffff"
-              >
-                {bnBijoy2Unicode(
-                  String(studentResult[`PassNumber${index + 1}`])
-                )}
-              </td>
-              <td
-                className="text-[16px] border border-black h-[36px] pl-4 "
-                bgcolor="#ffffff"
-              >
-                {bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}
-              </td>
-              <td
-                className="text-[16px] border border-black h-[36px] pl-4 font-bold"
-                bgcolor="#ffffff"
-              >
-                {studentResult[`GPA${index + 1}`] == 5
-                  ? "A+"
-                  : studentResult[`GPA${index + 1}`] == 4
-                  ? "A"
-                  : studentResult[`GPA${index + 1}`] == 3.5
-                  ? "A-"
-                  : studentResult[`GPA${index + 1}`] == 3
-                  ? "B"
-                  : studentResult[`GPA${index + 1}`] == 2
-                  ? "C"
-                  : studentResult[`GPA${index + 1}`] == 1
-                  ? "D"
-                  : "F"}
-              </td>
-              {/* <td className="text-[16px] border border-black h-[36px] pl-4 " bgcolor="#ffffff">{String(studentResult[`Division`])}</td> */}
-              {index === 0 && (
+          {examSubjects.map((subject) => {
+            const slot = Number(subject.SubjectSL);
+            const mark = studentResult?.[`SubVal${slot}`];
+
+            return (
+              <tr key={subject.ID ?? slot}>
                 <td
-                  className="text-[16px] border border-black text-center align-middle font-bold"
+                  className="text-[16px] border border-black h-[36px] pl-4"
                   bgcolor="#ffffff"
-                  rowSpan={studentResult.SubSonkha}
                 >
-                  {studentResult.GPA.toFixed(2)}
+                  {formatNumber(slot)}
                 </td>
-              )}
-            </tr>
-          ))}
+                <td
+                  className="text-[16px] border border-black h-[36px] pl-4"
+                  bgcolor="#ffffff"
+                >
+                  {subject.Subject?.SubjectName}
+                </td>
+                <td
+                  className="text-[16px] border border-black h-[36px] pl-4"
+                  bgcolor="#ffffff"
+                >
+                  {formatNumber(subject.MaxNumber)}
+                </td>
+                <td
+                  className="text-[16px] border border-black h-[36px] pl-4"
+                  bgcolor="#ffffff"
+                >
+                  {formatNumber(subject.PassNumber)}
+                </td>
+                <td
+                  className="text-[16px] border border-black h-[36px] pl-4"
+                  bgcolor="#ffffff"
+                >
+                  {formatNumber(mark)}
+                </td>
+                <td
+                  className="text-[16px] border border-black h-[36px] pl-4 font-bold"
+                  bgcolor="#ffffff"
+                >
+                  {getDivisionName(subject, mark)}
+                </td>
+                <td
+                  className="text-[16px] border border-black h-[36px] pl-4"
+                  bgcolor="#ffffff"
+                >
+                  {formatNumber(studentResult?.[`GPA${slot}`])}
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
@@ -184,15 +202,15 @@ const PointWiseResult = ({ studentResult }) => {
           <div className="flex justify-between items-center border border-black p-4 font-bold">
             <div className="flex items-center space-x-2 ">
               <p className="text-[16px]">প্রাপ্ত গ্রেড:</p>
-              <p>{String(studentResult?.Division)}</p>
+              <p>{studentResult?.Division?.DivisionNames}</p>
             </div>
             <div className="flex items-center space-x-2">
               <p className="text-[16px]">মেধা স্থান:</p>
-              <p>{String(studentResult?.Positions)}</p>
+              <p>{formatNumber(studentResult?.Positions)}</p>
             </div>
             <div className="flex items-center space-x-2">
               <p className="text-[16px]">মোট নম্বর:</p>
-              <p>{bnBijoy2Unicode(String(studentResult?.Total))}</p>
+              <p>{formatNumber(studentResult?.Total)}</p>
             </div>
           </div>
         </div>
