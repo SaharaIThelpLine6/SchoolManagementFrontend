@@ -400,9 +400,9 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="w-full min-w-0 space-y-5 sm:space-y-8">
 
-        <div className='grid grid-cols-3 lg:grid-cols-4 gap-3 w-full pt-5'>
+        <div className='grid w-full min-w-0 grid-cols-1 gap-3 pt-4 sm:grid-cols-2 sm:pt-5 lg:grid-cols-4 [&>div]:min-w-0'>
           <div>
             <DefaultSelect
               options={sessionData ?? []}
@@ -484,8 +484,8 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
         </div>
 
         {!isDuplicate && previousCondition && !hasExistingExamCondition && !hasConditionInClass && !isClassConditionsFetching && (
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
-            <div>
+          <div className="flex min-w-0 flex-col items-stretch gap-3 rounded-lg border border-blue-200 bg-blue-50 p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+            <div className="min-w-0 flex-1 break-words">
               <p className="font-semibold text-blue-900">
                 {`এই ক্লাসের ${suggestedExamName} কনডিশন পাওয়া গেছে।`}
               </p>
@@ -497,6 +497,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               type="button"
               onClick={handleCopyPreviousCondition}
               disabled={isCopyingCondition}
+              className="w-full shrink-0 sm:w-auto"
             >
               {isCopyingCondition ? translate("Copying...") : translate("Copy condition")}
             </Button>
@@ -507,14 +508,14 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
         {
           ExamType != 4 ? (
             showDivisionManager ? (
-              <div className="w-full space-y-6 bg-white">
+              <div className="w-full min-w-0 space-y-5 bg-white sm:space-y-6">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <h2 className="text-lg font-semibold text-gray-800 pl-1">
                     {editingDivision ? "বিভাগ সম্পাদনা করুন" : "নতুন বিভাগ যোগ করুন"}
                   </h2>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-4">
+                <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 [&>div]:min-w-0">
                   <div>
                     <DefaultInput type='text' registerKey={"DivisionName"} placeholder={"বিভাগ (বাংলা)"} required />
                   </div>
@@ -548,17 +549,17 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
 
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                   <button
                     type="button"
-                    className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                    className="inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 sm:w-auto"
                     onClick={handleCreateDivision}
                   >
                     {editingDivision ? "আপডেট করুন" : "সাবমিট ও নতুন যোগ করুন"}
                   </button>
                   <button
                     type="button"
-                    className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex gap-1"
+                    className="flex w-full items-center justify-center gap-1 rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto"
                     onClick={handleCloseDivisionManager}
                   >
                     <SvgIcon name="LongArrowLeft" />
@@ -567,7 +568,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                 </div>
 
 
-                <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                <div className="w-full min-w-0 max-w-full overflow-x-auto rounded-lg border border-gray-200">
                   <SortableTable columns={[
                     { title: "SL.", render: (row, rowIndex) => <>{rowIndex + 1}</> },
                     { title: "বিভাগ (বাংলা).", field: "DivisionNames" },
@@ -591,13 +592,23 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                 </div>
               </div>
             ) : (
-              <div className="w-full space-y-10">
-                <section>
-                  <h2 className="text-lg font-semibold text-gray-800 mb-3 pl-2">
-                    {translate("Grade based on marks")}
-                  </h2>
+              <div className="w-full min-w-0 space-y-6 sm:space-y-10">
+                <section className="min-w-0">
+                  <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 className="min-w-0 break-words text-base font-semibold text-gray-800 sm:text-lg">
+                      {translate("Grade based on marks")}
+                    </h2>
+                    <button
+                      type="button"
+                      className="inline-flex w-full shrink-0 items-center justify-center gap-1 rounded-md bg-blue-100 px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-200 sm:w-auto"
+                      onClick={() => setShowDivisionManager(true)}
+                    >
+                      <SvgIcon name="TbPlus" />
+                      {translate("Add Division")}
+                    </button>
+                  </div>
 
-                  <div className="mb-4 max-w-xs">
+                  <div className="mb-4 w-full sm:max-w-xs">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {translate("Max Number")} <span className="text-red-500">*</span>
                     </label>
@@ -610,23 +621,15 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                     />
                   </div>
 
-                  <div className="overflow-x-auto border border-gray-200 rounded-lg">
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-50">
+                  <div className="w-full min-w-0 md:overflow-x-auto md:rounded-lg md:border md:border-gray-200">
+                    <table className="block w-full text-sm md:table">
+                      <thead className="hidden bg-gray-50 md:table-header-group">
                         <tr>
                           <th className="text-left px-4 py-2 font-medium text-gray-600">
                             {translate("Minimum Number")} (&ge;)
                           </th>
-                          <th className="text-left px-4 py-2 font-medium text-gray-600 flex items-center justify-between">
+                          <th className="px-4 py-2 text-left font-medium text-gray-600">
                             {translate("Grade (Bengali)")}
-                            <button
-                              type='button'
-                              className='bg-blue-100 text-blue-600 flex items-center gap-1 px-2 py-1 rounded-md text-sm font-medium hover:bg-blue-100'
-                              onClick={() => setShowDivisionManager(true)}
-                            >
-                              <SvgIcon name={"TbPlus"} />
-                              {translate("Add Division")}
-                            </button>
                           </th>
 
                           <th className="text-left px-4 py-2 font-medium text-gray-600">
@@ -638,12 +641,14 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
 
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:table-row-group">
                         {gradeFields.map((field, index) => {
-                          const selectedDivisionValue = watch(`gradeBands.${index}.gradeBn`);
                           return (
-                            <tr key={field.id} className="border-t border-gray-100">
-                              <td className="px-4 py-2">
+                            <tr key={field.id} className="grid min-w-0 grid-cols-1 gap-3 rounded-lg border border-gray-200 bg-white p-3 md:table-row md:rounded-none md:border-x-0 md:border-b-0 md:border-gray-100 md:p-0">
+                              <td className="block min-w-0 md:table-cell md:px-4 md:py-2">
+                                <span className="mb-1 block text-xs font-medium text-gray-600 md:hidden">
+                                  {translate("Minimum Number")} (&ge;)
+                                </span>
                                 <DefaultInput
                                   type='number'
                                   registerKey={`gradeBands.${index}.DivisionNumber`}
@@ -651,7 +656,10 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                                   required
                                 />
                               </td>
-                              <td className="px-4 py-2">
+                              <td className="block min-w-0 md:table-cell md:px-4 md:py-2">
+                                <span className="mb-1 block text-xs font-medium text-gray-600 md:hidden">
+                                  {translate("Grade (Bengali)")}
+                                </span>
                                 <DefaultSelect
                                   label=""
                                   options={examDivitions}
@@ -664,7 +672,10 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                                   defaultValue={translate("Select Divition")}
                                 />
                               </td>
-                              <td className="px-4 py-2">
+                              <td className="block min-w-0 md:table-cell md:px-4 md:py-2">
+                                <span className="mb-2 block text-xs font-medium text-gray-600 md:hidden">
+                                  {translate("Color")}
+                                </span>
                                 <HighlightToggle
                                   register={register}
                                   control={control}
@@ -674,7 +685,10 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                               </td>
                               {
                                 ExamType == 2 ? (
-                                  <td className="px-4 py-2">
+                                  <td className="block min-w-0 md:table-cell md:px-4 md:py-2">
+                                    <span className="mb-1 block text-xs font-medium text-gray-600 md:hidden">
+                                      {translate("Highest mark in recitation")}
+                                    </span>
                                     <DefaultInput
                                       registerKey={`gradeBands.${index}.TopNum`}
                                       placeholder="যেমন: ৮০"
@@ -689,12 +703,12 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                     </table>
                   </div>
 
-                  <div className="flex justify-end p-2">
+                  <div className="flex justify-end py-3 sm:px-2">
                     <button
                       type="button"
                       onClick={handleAddGradeBand}
                       disabled={gradeFields.length >= MAX_GRADE_BANDS}
-                      className="inline-flex items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-[14px] font-medium text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400"
+                      className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-100 disabled:cursor-not-allowed disabled:border-gray-200 disabled:bg-gray-100 disabled:text-gray-400 sm:w-auto"
                     >
                       <SvgIcon name={"TbPlus"} />
                       {translate("Add")}
@@ -705,10 +719,10 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
             )
           ) : null
         }
-        <div className="text-end flex items-center justify-end gap-2">
+        <div className="flex items-center justify-end gap-2 border-t border-gray-100 pt-4">
           {/* <Button type='button' className='bg-yellow-300 hover:bg-yellow-300 text-[#000]'>Save As Draft</Button> */}
           {
-            !showDivisionManager ? <Button type='submit' className="whitespace-nowrap flex gap-1 ">{translate("Next")} <SvgIcon name={"LongArrowRight"} /> </Button> : null
+            !showDivisionManager ? <Button type='submit' className="flex w-full items-center justify-center gap-1 whitespace-nowrap sm:w-auto">{translate("Next")} <SvgIcon name={"LongArrowRight"} /> </Button> : null
           }
 
         </div>

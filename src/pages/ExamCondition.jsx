@@ -46,7 +46,7 @@ const ExamCondition = ({ pageTitle }) => {
   const sessionID = useWatch({ control, name: 'SessionID' });
   const examID = useWatch({ control, name: 'ExamID' });
   const subClassID = useWatch({ control, name: 'SubClassID' });
-  const { data: examConditions, refetch: refetchExamConditions } = useGetExamConditionsQuery({
+  const { data: examConditions, refetch: refetchExamConditions, isFetching: isConditionsFetching } = useGetExamConditionsQuery({
     SessionID: sessionID,
     ExamID: examID,
     SubClassID: subClassID,
@@ -227,13 +227,13 @@ const ExamCondition = ({ pageTitle }) => {
         const isCopied = copiedKeys.has(conditionKey(row));
         return (
           <div className='flex w-full flex-nowrap gap-2 justify-center items-center'>
-            <Button type='button' className='!px-2 !py-2' tooltip_message='Result Entry'>
+            <Button type='button' className='!px-2 !py-2' tooltip_message='Result Entry' aria-label={translate('Result Entry')}>
               <SvgIcon
                 name={"TbChecklist"}
                 size={14}
               />
             </Button>
-            <Button type='button' className='!px-2 !py-2' tooltip_message='Edit Exam Condition' onClick={() => { handleConditionEdit(row) }}>
+            <Button type='button' className='!px-2 !py-2' tooltip_message='Edit Exam Condition' aria-label={translate('Edit Exam Condition')} onClick={() => { handleConditionEdit(row) }}>
               <SvgIcon
                 name={"FiEdit"}
                 size={14}
@@ -303,7 +303,7 @@ const ExamCondition = ({ pageTitle }) => {
   return (
     <div className="p-4 bg-white rounded-md shadow-md">
 
-      <div className="quick_action bg-white font-default flex items-center justify-between">
+      <div className="quick_action bg-white font-default flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-col items-center justify-center gap-2">
           <h2 className="text-[20px] text-center font-bold">{translate(pageTitle)}</h2>
         </div>
@@ -388,7 +388,49 @@ const ExamCondition = ({ pageTitle }) => {
         </section>
       )}
 
-      <div className="mt-5 overflow-x-auto">
+      <div className="mt-5 space-y-3 md:hidden">
+        {(examConditions ?? []).map((row) => (
+          <details
+            key={conditionKey(row)}
+            className={`group min-w-0 overflow-hidden rounded-lg border ${copiedKeys.has(conditionKey(row)) ? 'border-green-300 bg-green-50/30' : 'border-gray-200 bg-white'}`}
+          >
+            <summary className="flex min-h-12 cursor-pointer list-none items-center gap-3 rounded-lg p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 [&::-webkit-details-marker]:hidden">
+              <span className="min-w-0 flex-1">
+                <span className="block break-words font-semibold text-theme-dark">
+                  {row.SubClass?.SubClass ?? row.SubClassID}
+                </span>
+                <span className="mt-1 block break-words text-sm text-gray-600">
+                  {row.Exam?.ExamName ?? row.ExamID}
+                </span>
+              </span>
+              <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5 shrink-0 text-gray-500 transition-transform group-open:rotate-180">
+                <path d="m5 7.5 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </summary>
+            <div className="border-t border-gray-200 px-4 pb-4">
+              <dl className="divide-y divide-gray-100 text-sm">
+                {columns.slice(0, -1).map((column, index) => (
+                  <div key={index} className="grid grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-3 py-3">
+                    <dt className="min-w-0 break-words font-medium text-gray-600">{column.title}</dt>
+                    <dd className="min-w-0 break-words text-right text-theme-dark">{column.render(row)}</dd>
+                  </div>
+                ))}
+              </dl>
+              <div className="border-t border-gray-100 pt-3">
+                <p className="mb-3 text-sm font-medium text-gray-600">{translate('Action')}</p>
+                {columns[columns.length - 1].render(row)}
+              </div>
+            </div>
+          </details>
+        ))}
+        {!examConditions?.length && (
+          <p role="status" className="rounded-lg border border-gray-200 p-4 text-center text-sm text-gray-600">
+            {translate(isConditionsFetching ? 'Loading...' : 'No data available for the selected filters')}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-5 hidden overflow-x-auto md:block">
         <SortableTable
           columns={columns}
           isFilterColumn={false}

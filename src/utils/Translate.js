@@ -1083,6 +1083,8 @@ const useTranslate = () => {
     "This exam condition has already been created for this session and class.": "এই সেশন ও শ্রেণির জন্য পরীক্ষার কন্ডিশন ইতিমধ্যে তৈরি করা হয়েছে।",
     "Exam condition already exist.": "পরীক্ষার কন্ডিশন ইতিমধ্যে তৈরি করা হয়েছে।",
     "This division has already been selected": "এই বিভাগটি ইতিমধ্যে নির্বাচন করা হয়েছে।",
+    "Color": "রং",
+    "Grade Count": "গ্রেড সংখ্যা",
     "The copied exam condition no longer exists.": "কপি করা পরীক্ষার কন্ডিশনটি আর পাওয়া যাচ্ছে না।",
     "The copied exam condition is incomplete. Please check its settings.": "কপি করা পরীক্ষার কন্ডিশনটি অসম্পূর্ণ। এর সেটিংস যাচাই করুন।",
     "Could not copy this condition. Please try again.": "এই কন্ডিশনটি কপি করা যায়নি। আবার চেষ্টা করুন।",

@@ -51,15 +51,15 @@ const withDefaultSubjectNumbers = (subjects) =>
   }));
 
 const SubjectColumnHeader = ({ label, helpText }) => (
-  <span className="inline-flex items-center gap-1">
-    <span>{label}</span>
+  <span className="inline-flex min-w-0 items-center gap-1">
+    <span className="min-w-0 break-words">{label}</span>
     <button
       type="button"
       aria-label={`${label}: ${helpText}`}
       data-tooltip-id="subject-column-tooltip"
       data-tooltip-content={helpText}
       data-tooltip-place="top"
-      className="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+      className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
     >
       <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5">
         <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
@@ -89,15 +89,16 @@ const SortableSubjectRow = ({ id, index, label, children }) => {
         zIndex: isDragging ? 1 : undefined,
         backgroundColor: isDragging ? "white" : undefined,
       }}
-      className="border-t border-gray-100"
+      className="grid min-w-0 grid-cols-2 gap-3 rounded-lg border border-gray-200 bg-white p-3 lg:table-row lg:rounded-none lg:border-x-0 lg:border-b-0 lg:border-gray-100 lg:p-0"
     >
-      <td className="px-2 py-2 text-center align-middle">
+      <td className="col-span-full flex items-center justify-between lg:table-cell lg:px-2 lg:py-2 lg:text-center lg:align-middle">
+        <span className="text-sm font-semibold text-gray-600 lg:hidden">{index + 1}</span>
         <button
           type="button"
           {...attributes}
           {...listeners}
           aria-label={`${label} ${index + 1}`}
-          className="inline-flex cursor-grab items-center justify-center rounded p-2 text-gray-500 hover:bg-gray-100 active:cursor-grabbing"
+          className="inline-flex min-h-11 min-w-11 cursor-grab items-center justify-center rounded p-2 text-gray-500 hover:bg-gray-100 active:cursor-grabbing lg:min-h-0 lg:min-w-0"
           style={{ touchAction: "none" }}
         >
           <SvgIcon name="GrDrag" size={18} />
@@ -777,17 +778,26 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
     );
   };
 
+  const subjectHelpText = {
+    mayeri: `মিয়ারি হচ্ছে কিতাবের গুরুত্বের ধরন। এর মধ্যে কিতাবগুলো ৩ ধরনের কন্ডিশনে ভাগ করা যায়। যথা: ১) গড় মিয়ারি: যেসকল বিষয় কম গুরুত্বপূর্ণ সে সকল বিষয়কে গড় মিয়ারি দ্বারা প্রকাশ করা হয়। পরীক্ষায় যদি এমন কন্ডিশন ব্যবহার করা হয় যেখানে ২/৩/৪ কিতাবে বা তার কম বিষয়ে অকৃতকার্য হওয়ার পরও যদি গড়ে সকল বিষয়ে পাস করে তাহলে তাকে মাকবুল/বিশেষ বিবেচনায় পাস বলে বিবেচনা করার সুযোগ থাকে।
+২) মিয়ারি: মধ্যম গুরুত্বপূর্ণ এমন বিষয়গুলোকে মিয়ারি দ্বারা প্রকাশ করা যায়। মিয়ারি ও গড়মিয়ারির পরীক্ষার কন্ডিশনের ধরন প্রায় একই। নির্দিষ্ট বিষয়ে বা তার কম ফেল করার পর গড়ে পাস করলে মাকবুল/বিশেষ বিবেচনায় পাস বলে বিবেচনা করার সুযোগ থাকে।
+৩) অধিকতর মিয়ারি: যেসকল বিষয়গুলোকে অধিক গুরুত্ব দেওয়া হয় বা অধিক গুরুত্বপূর্ণ বিষয় হিসাবে ধরা হয় এবং যেগুলো ১ বিষয়ে অকৃতকার্য হলেই রাসিব বা ফেল হয় সে বিষয়গুলো অধিকতর গুরুত্বপূর্ণ বিষয় বলে বিবেচনা করা হয়। গড় মিয়ারি ও মিয়ারি বিষয়ে যা হোক না কেনো অধিকতর বিষয়ে ১ বিষয়ে অকৃতকার্য হলেই ফলাফলে তখন রাসিব বা ফেল দেখাবে। `,
+    maxNumber: `১ টি পরীক্ষার ১ টি বিষয়ে সর্বোচ্চ যত নাম্বারে পরীক্ষা হয় উক্ত নাম্বারকে সর্বোচ্চ প্রাপ্য নম্বর বলে ধরা হয়। উদাহরনস্বরুপ: মাসিক পরীক্ষা যদি ২০ নাম্বারের হয় তাহলে সর্বোচ্চ প্রাপ্য নাম্বার হবে ২০, সাময়িক পরীক্ষা যদি ১০০ নাম্বারের হয় তখন উক্ত পরীক্ষার প্রাপ্য নাম্বার হবে ১০০। `,
+    passNumber: `১টি পরীক্ষায় কোনো নির্দিষ্ট বিষয়ে যত নাম্বার পেলে গড়ে মাকবুল বা পাস করে উক্ত প্রাপ্য নাম্বারকে পাস নাম্বার বলে বিবেচনা করা হয়। সকল স্কুল/মাদরাসা নিয়ম অনুযায়ী পরীক্ষার ৩৩%-৪০% নাম্বার পাস নাম্বার বলে ধরা হয়। যদি ১০০ নাম্বারে পরীক্ষা হয় পাস নাম্বার হবে ৩৩, ৫০ এ পরীক্ষা হলে পাস নাম্বার হবে ১৭, ২০ নাম্বারে পরীক্ষা হলে পাস নাম্বার হবে ৭।`,
+    optional: `ক্বেরাত কন্ডিশন বলতে অপশনাল বিষয় বুঝায়, যেসকল বিষয়ের পরীক্ষা হয় কিন্তু উক্ত পরীক্ষার নাম্বার মোট নাম্বারের সাথে যুক্ত হয় না, সেসকল বিষয় ক্বেরাত কন্ডিশন বলে বিবেচনা করা হয়। উল্লেখ্য, অপশনাল বিষয়ে অকৃতকার্য / অনুপস্থিত হলে রাসিব/ বিবেচনায় পাস বলে বিবেচনা করা যাবে।`,
+  };
+
   return (
-    <div>
+    <div className="w-full min-w-0">
 
       {
         ExamType != 4 ? (
           <FormProvider {...methods}>
             <form
-              className="w-full space-y-10 bg-white"
+              className="w-full min-w-0 space-y-6 bg-white sm:space-y-10"
               onSubmit={handleSubmit(onSubmit)}
             >
-              <section>
+              <section className="min-w-0">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">
                   {translate("Subject Pass Number")}
                 </h2>
@@ -803,14 +813,14 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                   searchPlaceholder={translate("Search subjects")}
                   emptyMessage={translate("No subjects found")}
                 />
-                <div className="min-h-[200px]">
+                <div className="min-h-[163px] w-full min-w-0 lg:min-h-[200px] lg:overflow-x-auto">
                   {subjectFields.length > 0 && <DndContext
                     sensors={subjectDragSensors}
                     collisionDetection={closestCenter}
                     onDragEnd={handleSubjectDragEnd}
                   >
-                    <table className="w-full text-sm border border-gray-100">
-                      <thead className="bg-gray-50">
+                    <table className="block w-full text-sm lg:table lg:border lg:border-gray-100">
+                      <thead className="hidden bg-gray-50 lg:table-header-group">
                         <tr>
                           <th className="w-12 px-2 py-2" aria-label={translate("Reorder subjects")} />
                           <th className="text-left px-4 py-2 font-medium text-gray-600">
@@ -819,34 +829,32 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                           {ExamType != 3 && (<th className="text-left px-4 py-2 font-medium text-gray-600">
                             <SubjectColumnHeader
                               label={translate("Meyari")}
-                              helpText={`মিয়ারি হচ্ছে কিতাবের গুরুত্বের ধরন। এর মধ্যে কিতাবগুলো ৩ ধরনের কন্ডিশনে ভাগ করা যায়। যথা: ১) গড় মিয়ারি: যেসকল বিষয় কম গুরুত্বপূর্ণ সে সকল বিষয়কে গড় মিয়ারি দ্বারা প্রকাশ করা হয়। পরীক্ষায় যদি এমন কন্ডিশন ব্যবহার করা হয় যেখানে ২/৩/৪ কিতাবে বা তার কম বিষয়ে অকৃতকার্য হওয়ার পরও যদি গড়ে সকল বিষয়ে পাস করে তাহলে তাকে মাকবুল/বিশেষ বিবেচনায় পাস বলে বিবেচনা করার সুযোগ থাকে।
-২) মিয়ারি: মধ্যম গুরুত্বপূর্ণ এমন বিষয়গুলোকে মিয়ারি দ্বারা প্রকাশ করা যায়। মিয়ারি ও গড়মিয়ারির পরীক্ষার কন্ডিশনের ধরন প্রায় একই। নির্দিষ্ট বিষয়ে বা তার কম ফেল করার পর গড়ে পাস করলে মাকবুল/বিশেষ বিবেচনায় পাস বলে বিবেচনা করার সুযোগ থাকে।
-৩) অধিকতর মিয়ারি: যেসকল বিষয়গুলোকে অধিক গুরুত্ব দেওয়া হয় বা অধিক গুরুত্বপূর্ণ বিষয় হিসাবে ধরা হয় এবং যেগুলো ১ বিষয়ে অকৃতকার্য হলেই রাসিব বা ফেল হয় সে বিষয়গুলো অধিকতর গুরুত্বপূর্ণ বিষয় বলে বিবেচনা করা হয়। গড় মিয়ারি ও মিয়ারি বিষয়ে যা হোক না কেনো অধিকতর বিষয়ে ১ বিষয়ে অকৃতকার্য হলেই ফলাফলে তখন রাসিব বা ফেল দেখাবে। `}
+                              helpText={subjectHelpText.mayeri}
                             />
                           </th>)}
 
                           <th className="text-left px-4 py-2 font-medium text-gray-600">
                             <SubjectColumnHeader
                               label={translate("Max Number")}
-                              helpText={`১ টি পরীক্ষার ১ টি বিষয়ে সর্বোচ্চ যত নাম্বারে পরীক্ষা হয় উক্ত নাম্বারকে সর্বোচ্চ প্রাপ্য নম্বর বলে ধরা হয়। উদাহরনস্বরুপ: মাসিক পরীক্ষা যদি ২০ নাম্বারের হয় তাহলে সর্বোচ্চ প্রাপ্য নাম্বার হবে ২০, সাময়িক পরীক্ষা যদি ১০০ নাম্বারের হয় তখন উক্ত পরীক্ষার প্রাপ্য নাম্বার হবে ১০০। `}
+                              helpText={subjectHelpText.maxNumber}
                             />
                           </th>
                           <th className="text-left px-4 py-2 font-medium text-gray-600">
                             <SubjectColumnHeader
                               label={translate("Pass Number")}
-                              helpText={`১টি পরীক্ষায় কোনো নির্দিষ্ট বিষয়ে যত নাম্বার পেলে গড়ে মাকবুল বা পাস করে উক্ত প্রাপ্য নাম্বারকে পাস নাম্বার বলে বিবেচনা করা হয়। সকল স্কুল/মাদরাসা নিয়ম অনুযায়ী পরীক্ষার ৩৩%-৪০% নাম্বার পাস নাম্বার বলে ধরা হয়। যদি ১০০ নাম্বারে পরীক্ষা হয় পাস নাম্বার হবে ৩৩, ৫০ এ পরীক্ষা হলে পাস নাম্বার হবে ১৭, ২০ নাম্বারে পরীক্ষা হলে পাস নাম্বার হবে ৭।`}
+                              helpText={subjectHelpText.passNumber}
                             />
                           </th>
                           <th className="text-left px-4 py-2 font-medium text-gray-600">
                             <SubjectColumnHeader
                               label={translate("Optional")}
-                              helpText={`ক্বেরাত কন্ডিশন বলতে অপশনাল বিষয় বুঝায়, যেসকল বিষয়ের পরীক্ষা হয় কিন্তু উক্ত পরীক্ষার নাম্বার মোট নাম্বারের সাথে যুক্ত হয় না, সেসকল বিষয় ক্বেরাত কন্ডিশন বলে বিবেচনা করা হয়। উল্লেখ্য, অপশনাল বিষয়ে অকৃতকার্য / অনুপস্থিত হলে রাসিব/ বিবেচনায় পাস বলে বিবেচনা করা যাবে।`}
+                              helpText={subjectHelpText.optional}
                             />
                           </th>
                           {/* <th className="px-4 py-2 w-10"></th> */}
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="grid grid-cols-1 gap-3 lg:table-row-group">
                         <SortableContext
                           items={subjectFields.map((field) => field.id)}
                           strategy={verticalListSortingStrategy}
@@ -858,7 +866,8 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                               index={index}
                               label={translate("Drag subject row")}
                             >
-                              <td className="px-4 py-2 align-top">
+                              <td className="col-span-full block min-w-0 lg:table-cell lg:px-4 lg:py-2 lg:align-top">
+                                <span className="mb-1 block text-xs font-medium text-gray-600 lg:hidden">{translate('Subject')}</span>
                                 <DefaultSelect
                                   options={filteredSubjects ?? []}
                                   valueField="SubjectID"
@@ -868,7 +877,10 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                                 />
                               </td>
 
-                              {ExamType != 3 && (<td className="px-4 py-2 align-top">
+                              {ExamType != 3 && (<td className="col-span-full block min-w-0 lg:table-cell lg:px-4 lg:py-2 lg:align-top">
+                                <div className="mb-1 text-xs font-medium text-gray-600 lg:hidden">
+                                  <SubjectColumnHeader label={translate('Meyari')} helpText={subjectHelpText.mayeri} />
+                                </div>
                                 <DefaultSelect
                                   options={[
                                     { id: 1, name: translate("Gor mayeri") },
@@ -886,14 +898,20 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
 
                               }
 
-                              <td className="px-4 py-2 align-top">
+                              <td className="block min-w-0 lg:table-cell lg:px-4 lg:py-2 lg:align-top">
+                                <div className="mb-1 text-xs font-medium text-gray-600 lg:hidden">
+                                  <SubjectColumnHeader label={translate('Max Number')} helpText={subjectHelpText.maxNumber} />
+                                </div>
                                 <DefaultInput
                                   type="number"
                                   registerKey={`subjectPassNumbers.${index}.MaxNumber`}
                                   require="This is required!"
                                 />
                               </td>
-                              <td className="px-4 py-2 align-top">
+                              <td className="block min-w-0 lg:table-cell lg:px-4 lg:py-2 lg:align-top">
+                                <div className="mb-1 text-xs font-medium text-gray-600 lg:hidden">
+                                  <SubjectColumnHeader label={translate('Pass Number')} helpText={subjectHelpText.passNumber} />
+                                </div>
                                 <DefaultInput
                                   type="number"
                                   registerKey={`subjectPassNumbers.${index}.PassNumber`}
@@ -902,7 +920,10 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                               </td>
 
 
-                              <td className="px-4 py-2 align-top whitespace-nowrap vertical-align-middle">
+                              <td className="col-span-full block min-w-0 lg:table-cell lg:px-4 lg:py-2 lg:align-top lg:whitespace-nowrap">
+                                <div className="mb-2 text-xs font-medium text-gray-600 lg:hidden">
+                                  <SubjectColumnHeader label={translate('Optional')} helpText={subjectHelpText.optional} />
+                                </div>
                                 <CheckboxOption
                                   label={translate("Kerat Condition")}
                                   registerKey={`subjectPassNumbers.${index}.optional`}
@@ -928,12 +949,12 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                   </DndContext>}
                 </div>
 
-                <div className="mt-6 grid grid-cols-2 gap-4">
+                <div className="mt-6 grid grid-cols-1 gap-3 border-t border-gray-100 pt-4 sm:grid-cols-2">
                   <div>
                     <Button
                       type="button"
                       onClick={handleSaveAndPrevious}
-                      className="flex items-center gap-1"
+                      className="flex w-full items-center justify-center gap-1 sm:w-auto"
                     >
                       <SvgIcon name="LongArrowLeft" />
                       {translate("Previous")}
@@ -958,7 +979,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                   </div> */}
 
                   <div className="text-end flex justify-end">
-                    <Button type="submit" className="flex items-center gap-1">
+                    <Button type="submit" className="flex w-full items-center justify-center gap-1 sm:w-auto">
                       {translate("Next")}
                       <SvgIcon name="LongArrowRight" />
                     </Button>
@@ -970,20 +991,20 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
         ) : (
           <FormProvider {...methods}>
             <form
-              className="w-full space-y-10 bg-white p-6 rounded-xl shadow-md"
+              className="w-full min-w-0 space-y-6 bg-white sm:rounded-xl sm:p-4 sm:shadow-md lg:space-y-10 lg:p-6"
               onSubmit={handleSubmit(onSubmit)}
             >
 
               {
                 showDivisionManager ? (
-                  <div className="w-full space-y-6 bg-white">
+                  <div className="w-full min-w-0 space-y-6 bg-white">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <h2 className="text-lg font-semibold text-gray-800 pl-1">
                         {editingDivision ? "বিভাগ সম্পাদনা করুন" : "নতুন বিভাগ যোগ করুন"}
                       </h2>
                     </div>
 
-                    <div className="grid gap-4 md:grid-cols-3">
+                    <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 [&>div]:min-w-0">
                       <div>
                         <DefaultInput type="number" registerKey={"DivisionName"} placeholder={"বিভাগ (বাংলা)"} required />
                       </div>
@@ -995,17 +1016,17 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       <button
                         type="button"
-                        className="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+                        className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 sm:w-auto"
                         onClick={handleCreateDivision}
                       >
                         {editingDivision ? "আপডেট করুন" : "সাবমিট ও নতুন যোগ করুন"}
                       </button>
                       <button
                         type="button"
-                        className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex gap-1"
+                        className="flex w-full items-center justify-center gap-1 rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 sm:w-auto"
                         onClick={handleCloseDivisionManager}
                       >
                         <SvgIcon name="LongArrowLeft" />
@@ -1014,7 +1035,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                     </div>
 
 
-                    <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                    <div className="w-full min-w-0 max-w-full overflow-x-auto rounded-lg border border-gray-200">
                       <SortableTable columns={[
                         {
                           title: "Action",
@@ -1030,12 +1051,12 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                     </div>
                   </div>
                 ) : (
-                  <section>
+                  <section className="min-w-0">
                     <h2 className="text-lg font-semibold text-gray-800 mb-3 pl-2">
                       {translate("Grade based on marks")}
                     </h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-5 my-5">
+                    <div className="my-5 grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 [&>div]:min-w-0">
                       <DefaultSelect
                         label={translate('Subject')}
                         options={filteredSubjects ?? []}
@@ -1070,27 +1091,30 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                       />
                     </div>
 
-                    <div className="overflow-x-auto border border-gray-200 rounded-lg">
-                      <table className="w-full text-sm">
-                        <thead className="bg-gray-50">
+                    <div className="mb-3 flex justify-end">
+                      <button
+                        type="button"
+                        className="inline-flex w-full items-center justify-center gap-1 rounded-md bg-blue-100 px-3 py-2 text-sm font-medium text-blue-600 hover:bg-blue-200 sm:w-auto"
+                        onClick={() => setShowDivisionManager(true)}
+                      >
+                        <SvgIcon name="TbPlus" />
+                        {translate('Add Division')}
+                      </button>
+                    </div>
+                    <div className="w-full min-w-0 md:overflow-x-auto md:rounded-lg md:border md:border-gray-200">
+                      <table className="block w-full text-sm md:table">
+                        <thead className="hidden bg-gray-50 md:table-header-group">
                           <tr>
                             <th className="text-left px-4 py-2 font-medium text-gray-600">
                               {translate("Minimum Number")} (&ge;)
                             </th>
-                            <th className="text-left px-4 py-2 font-medium text-gray-600 flex items-center justify-between">
+                            <th className="px-4 py-2 text-left font-medium text-gray-600">
                               {translate("Grade (Bengali)")}
-                              <button
-                                type='button'
-                                className='text-blue-600 flex items-center gap-1'
-                                onClick={() => setShowDivisionManager(true)}
-                              >
-                                <SvgIcon name={"TbPlus"} />
-                                {translate("Add Division")}
-                              </button>
                             </th>
+                            <th className="px-4 py-2 text-left font-medium text-gray-600">{translate('Color')}</th>
                           </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:table-row-group">
                           {gradeFields.map((field, index) => {
                             const selectedDivisionValue = gradeBandsInEditor[index]?.DivisionID;
                             const divisionsUsedInOtherRows = new Set(
@@ -1105,7 +1129,6 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                                 !divisionsUsedInOtherRows.has(String(division.ID))
                             );
 
-                            const division = colorDivisions[index]
                             const rowDivisionId = selectedDivisionValue;
                             const hasRowDivision =
                               rowDivisionId !== "" && rowDivisionId !== null && rowDivisionId !== undefined;
@@ -1115,8 +1138,9 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                               )
                               : null;
                             return (
-                              <tr key={field.id} className="border-t border-gray-100">
-                                <td className="px-4 py-2">
+                              <tr key={field.id} className="grid min-w-0 grid-cols-1 gap-3 rounded-lg border border-gray-200 bg-white p-3 md:table-row md:rounded-none md:border-x-0 md:border-b-0 md:border-gray-100 md:p-0">
+                                <td className="block min-w-0 md:table-cell md:px-4 md:py-2">
+                                  <span className="mb-1 block text-xs font-medium text-gray-600 md:hidden">{translate('Minimum Number')} (&ge;)</span>
                                   <DefaultInput
                                     registerKey={`gradeBands.${index}.DivisionNumber`}
                                     type="number"
@@ -1125,7 +1149,8 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                                     defaultValue={getValues(`gradeBands.${index}.DivisionNumber`)}
                                   />
                                 </td>
-                                <td className="px-4 py-2">
+                                <td className="block min-w-0 md:table-cell md:px-4 md:py-2">
+                                  <span className="mb-1 block text-xs font-medium text-gray-600 md:hidden">{translate('Grade (Bengali)')}</span>
                                   <DefaultSelect
                                     label=""
                                     options={availableDivisions}
@@ -1136,16 +1161,15 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                                     disabled={shouldDisableDivisionSelect}
                                   />
                                 </td>
-                                <td className="px-4 py-2">
-                                  <td className="px-4 py-2">
-                                    {hasRowDivision && (
-                                      <HighlightToggle
-                                        isHighlighted={rowColorSetting?.isHighlighted || false}
-                                        highlightColor={rowColorSetting?.highlightColor || "#ffeb3b"}
-                                        onChange={(changes) => updateGradeColorSetting(rowDivisionId, changes)}
-                                      />
-                                    )}
-                                  </td>
+                                <td className="block min-w-0 md:table-cell md:px-4 md:py-2">
+                                  <span className="mb-2 block text-xs font-medium text-gray-600 md:hidden">{translate('Color')}</span>
+                                  {hasRowDivision && (
+                                    <HighlightToggle
+                                      isHighlighted={rowColorSetting?.isHighlighted || false}
+                                      highlightColor={rowColorSetting?.highlightColor || "#ffeb3b"}
+                                      onChange={(changes) => updateGradeColorSetting(rowDivisionId, changes)}
+                                    />
+                                  )}
                                 </td>
 
                               </tr>
@@ -1170,7 +1194,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                       </div>
                     )} */}
                     <div className="mt-2">
-                      <Button type="button" onClick={handleAddAnotherSubject} className="flex gap-1"> <SvgIcon name={"TbPlus"} /> {translate("Add Now")}</Button>
+                      <Button type="button" onClick={handleAddAnotherSubject} className="flex w-full items-center justify-center gap-1 sm:w-auto"> <SvgIcon name={"TbPlus"} /> {translate("Add Now")}</Button>
                     </div>
 
                   </section>
@@ -1178,9 +1202,9 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
               }
 
               {subjectGradeFields.length > 0 && (
-                <div className="mt-6 overflow-x-auto border border-gray-200 rounded-lg">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50">
+                <div className="mt-6 w-full min-w-0 lg:overflow-x-auto lg:rounded-lg lg:border lg:border-gray-200">
+                  <table className="block w-full text-sm lg:table">
+                    <thead className="hidden bg-gray-50 lg:table-header-group">
                       <tr>
                         <th className="text-left px-4 py-2 font-medium text-gray-600">SL.</th>
                         <th className="text-left px-4 py-2 font-medium text-gray-600">{translate("Subject")}</th>
@@ -1191,7 +1215,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                         <th className="px-4 py-2 w-10"></th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:table-row-group">
                       {subjectGradeFields.map((field, index) => {
                         const rowData = watch(`subjectGradeList.${index}`);
                         const subjectName =
@@ -1203,14 +1227,29 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                         ).length;
 
                         return (
-                          <tr key={field.id} className="border-t border-gray-100">
-                            <td className="px-4 py-2">{index + 1}</td>
-                            <td className="px-4 py-2">{subjectName}</td>
-                            <td className="px-4 py-2">{rowData?.PassNumber}</td>
-                            <td className="px-4 py-2">{rowData?.MaxNumber}</td>
-                            <td className="px-4 py-2">{filledGradeCount}</td>
-                            <td className="px-4 py-2">{rowData?.mayeri == 1 ? "গড় মিয়ারি" : rowData?.mayeri == 2 ? "মিয়ারি" : rowData?.mayeri == 3 ? " অধিকতর মিয়ারি" : rowData?.mayeri == 4 ? "অপশনাল" : ""}</td>
-                            <td className="px-4 py-2 text-right">
+                          <tr key={field.id} className="grid min-w-0 grid-cols-2 gap-3 rounded-lg border border-gray-200 bg-white p-3 lg:table-row lg:rounded-none lg:border-x-0 lg:border-b-0 lg:border-gray-100 lg:p-0">
+                            <td className="hidden px-4 py-2 lg:table-cell">{index + 1}</td>
+                            <td className="col-span-full block min-w-0 break-words lg:table-cell lg:px-4 lg:py-2">
+                              <span className="mb-1 block text-xs font-medium text-gray-600 lg:hidden">{index + 1}. {translate('Subject')}</span>
+                              {subjectName}
+                            </td>
+                            <td className="block min-w-0 lg:table-cell lg:px-4 lg:py-2">
+                              <span className="mb-1 block text-xs font-medium text-gray-600 lg:hidden">{translate('Pass Number')}</span>
+                              {rowData?.PassNumber}
+                            </td>
+                            <td className="block min-w-0 lg:table-cell lg:px-4 lg:py-2">
+                              <span className="mb-1 block text-xs font-medium text-gray-600 lg:hidden">{translate('Max Number')}</span>
+                              {rowData?.MaxNumber}
+                            </td>
+                            <td className="block min-w-0 lg:table-cell lg:px-4 lg:py-2">
+                              <span className="mb-1 block text-xs font-medium text-gray-600 lg:hidden">{translate('Grade Count')}</span>
+                              {filledGradeCount}
+                            </td>
+                            <td className="block min-w-0 break-words lg:table-cell lg:px-4 lg:py-2">
+                              <span className="mb-1 block text-xs font-medium text-gray-600 lg:hidden">{translate('Meyari')}</span>
+                              {rowData?.mayeri == 1 ? "গড় মিয়ারি" : rowData?.mayeri == 2 ? "মিয়ারি" : rowData?.mayeri == 3 ? " অধিকতর মিয়ারি" : rowData?.mayeri == 4 ? "অপশনাল" : ""}
+                            </td>
+                            <td className="col-span-full block min-w-0 border-t border-gray-100 pt-3 lg:table-cell lg:border-t-0 lg:px-4 lg:py-2 lg:text-right">
                               <div className="flex items-center justify-end gap-2">
                                 <EditButton
                                   onClick={() => handleEditSubjectGrade(index)}
@@ -1218,6 +1257,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                                 <button
                                   type="button"
                                   onClick={() => removeSubjectGrade(index)}
+                                  aria-label={`${translate('Delete')} ${subjectName}`}
                                   className="bg-red-600 hover:bg-red-800 flex justify-center items-center text-white rounded-md py-2 px-3"
                                 >
                                   ✕
@@ -1232,14 +1272,14 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                 </div>
               )}
 
-              <div className="mt-6 flex justify-between gap-4">
-                <div>
-                  <Button type="button" onClick={handleSaveAndPrevious}>
+              <div className="mt-6 flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:justify-between">
+                <div className="min-w-0">
+                  <Button type="button" onClick={handleSaveAndPrevious} className="w-full sm:w-auto">
                     {translate("Previous")}
                   </Button>
                 </div>
-                <div className="text-end">
-                  <Button type="submit">
+                <div className="min-w-0 text-end">
+                  <Button type="submit" className="w-full sm:w-auto">
                     {translate("Save & Continue")}
                   </Button>
                 </div>

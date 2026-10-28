@@ -47,20 +47,20 @@ const MultiSelect = ({
   );
 
   return (
-    <div ref={containerRef} className="relative mb-4 w-[98%]">
+    <div ref={containerRef} className="relative mb-4 w-full min-w-0 sm:w-[98%]">
       {label && <span className="mb-1.5 block text-sm font-medium text-slate-700">{label}</span>}
       <div className={`flex min-h-12 flex-wrap items-center gap-2 rounded-lg border bg-white px-3 py-2 transition-colors focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 ${isOpen ? "border-blue-400 ring-2 ring-blue-100" : "border-blue-200 hover:border-blue-300"}`}>
         {selectedOptions.map((option) => (
           <span
             key={option[valueField]}
-            className="inline-flex min-h-8 items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-2.5 text-sm text-slate-800"
+            className="inline-flex min-h-8 min-w-0 max-w-full items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-2.5 text-sm text-slate-800"
           >
-            {option[nameField]}
+            <span className="min-w-0 break-words">{option[nameField]}</span>
             <button
               type="button"
               onClick={() => toggle(option[valueField])}
               aria-label={`Remove ${option[nameField]}`}
-              className="rounded p-0.5 text-slate-500 transition-colors hover:bg-blue-100 hover:text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
+              className="shrink-0 rounded p-0.5 text-slate-500 transition-colors hover:bg-blue-100 hover:text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
             >
               <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
                 <path d="M5 5l10 10M15 5L5 15" />
@@ -76,9 +76,9 @@ const MultiSelect = ({
             setIsOpen((open) => !open);
             setSearch("");
           }}
-          className="flex min-h-8 min-w-32 flex-1 items-center justify-between gap-2 rounded px-1 text-left text-sm text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
+          className="flex min-h-8 min-w-0 flex-1 basis-32 items-center justify-between gap-2 rounded px-1 text-left text-sm text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
         >
-          <span>{placeholder}</span>
+          <span className="min-w-0 break-words">{placeholder}</span>
           <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${isOpen ? "rotate-180" : ""}`} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="m5 7.5 5 5 5-5" />
           </svg>
@@ -108,7 +108,7 @@ const MultiSelect = ({
               }}
               placeholder={searchPlaceholder}
               aria-label={searchPlaceholder}
-              className="h-11 w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+              className="h-11 min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
             />
           </div>
           <div role="listbox" aria-multiselectable="true" className="min-h-0 max-h-60 flex-1 overflow-y-auto py-1">
@@ -130,7 +130,7 @@ const MultiSelect = ({
                       </svg>
                     )}
                   </span>
-                  {option[nameField]}
+                  <span className="min-w-0 break-words">{option[nameField]}</span>
                 </button>
               );
             })}
