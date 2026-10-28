@@ -614,7 +614,7 @@ const PrintSettings = ({
                 {paper} · {orientation === "landscape" ? "Landscape" : "Portrait"}
             </span>
         </div>
-        <SegmentedControl label="রঙ" options={COLOR_OPTIONS} value={colorMode} onChange={onColorChange} />
+        {/* <SegmentedControl label="রঙ" options={COLOR_OPTIONS} value={colorMode} onChange={onColorChange} /> */}
         <SegmentedControl label="পেজ দিক" options={ORIENTATION_OPTIONS} value={orientation} onChange={onOrientationChange} />
         <SegmentedControl label="কাগজের সাইজ" options={PAPER_OPTIONS} value={paper} onChange={onPaperChange} />
         <SegmentedControl label="মাসের দিন সংখ্যা" options={DAYS_OPTIONS} value={daysCount} onChange={onDaysChange} />

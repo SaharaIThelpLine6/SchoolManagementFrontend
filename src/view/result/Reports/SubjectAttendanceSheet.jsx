@@ -621,7 +621,7 @@ const PrintSettings = ({
 
         <SegmentedControl label="১. পেজ দিক (Orientation)" options={ORIENTATION_OPTIONS} value={orientation} onChange={onOrientationChange} />
         <SegmentedControl label="২. পেজ সাইজ (Page Size)" options={PAGE_SIZE_OPTIONS} value={pageSize} onChange={onPageSizeChange} />
-        <SegmentedControl label="৩. রঙ" options={COLOR_OPTIONS} value={colorMode} onChange={onColorChange} />
+        {/* <SegmentedControl label="৩. রঙ" options={COLOR_OPTIONS} value={colorMode} onChange={onColorChange} /> */}
         <SegmentedControl label="মাসের দিন সংখ্যা" options={DAYS_OPTIONS} value={daysCount} onChange={onDaysChange} />
 
         <p className="text-[10px] text-slate-400 leading-snug">
