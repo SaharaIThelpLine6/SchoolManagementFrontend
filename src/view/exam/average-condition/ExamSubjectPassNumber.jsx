@@ -792,6 +792,7 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                   {translate("Subject Pass Number")}
                 </h2>
                 <MultiSelect
+                  dropdownHeight={163}
                   options={filteredSubjects}
                   value={selectedSubjectIds}
                   onChange={handleSubjectSelectionChange}

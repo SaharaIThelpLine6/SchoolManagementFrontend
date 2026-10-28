@@ -11,6 +11,7 @@ const MultiSelect = ({
   placeholder = "Select options",
   searchPlaceholder = "Search options",
   emptyMessage = "No options found",
+  dropdownHeight,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -46,7 +47,7 @@ const MultiSelect = ({
   );
 
   return (
-    <div ref={containerRef} className="relative mb-4">
+    <div ref={containerRef} className="relative mb-4 w-[98%]">
       {label && <span className="mb-1.5 block text-sm font-medium text-slate-700">{label}</span>}
       <div className={`flex min-h-12 flex-wrap items-center gap-2 rounded-lg border bg-white px-3 py-2 transition-colors focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 ${isOpen ? "border-blue-400 ring-2 ring-blue-100" : "border-blue-200 hover:border-blue-300"}`}>
         {selectedOptions.map((option) => (
@@ -84,8 +85,11 @@ const MultiSelect = ({
         </button>
       </div>
       {isOpen && (
-        <div className="absolute z-50 mt-1.5 w-full overflow-hidden rounded-lg border border-blue-100 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center gap-2 border-b border-slate-100 px-3 text-slate-400 focus-within:text-blue-500">
+        <div
+          style={{ height: dropdownHeight }}
+          className="absolute z-50 mt-1.5 flex w-full flex-col overflow-hidden rounded-lg border border-blue-100 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
+        >
+          <div className="flex shrink-0 items-center gap-2 border-b border-slate-100 px-3 text-slate-400 focus-within:text-blue-500">
             <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-4 w-4 shrink-0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
               <circle cx="8.5" cy="8.5" r="5.5" />
               <path d="m13 13 4 4" />
@@ -107,7 +111,7 @@ const MultiSelect = ({
               className="h-11 w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
             />
           </div>
-          <div role="listbox" aria-multiselectable="true" className="max-h-60 overflow-y-auto py-1">
+          <div role="listbox" aria-multiselectable="true" className="min-h-0 max-h-60 flex-1 overflow-y-auto py-1">
             {filteredOptions.map((option) => {
               const isSelected = selectedValues.includes(String(option[valueField]));
               return (
@@ -152,4 +156,5 @@ MultiSelect.propTypes = {
   placeholder: PropTypes.string,
   searchPlaceholder: PropTypes.string,
   emptyMessage: PropTypes.string,
+  dropdownHeight: PropTypes.number,
 };

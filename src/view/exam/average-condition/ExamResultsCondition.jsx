@@ -607,8 +607,34 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                 <tbody>
                   <tr className="border-t border-gray-100">
                     <td className="px-4 py-2 align-middle">
+                      <label htmlFor="SubSonkha" class="font-bold text-sm mb-1.5 block">
+                        <div class="flex items-center gap-2 justify-between">
+                          <div class="flex items-center gap-1">
+                            <span class="text-gray-700">
+                              <p>মোট কত নাম্বার দিয়ে ভাগ</p>
+                            </span>
+                            <span class="text-red-500">*</span>
+                            <span>:</span>
+                            <button
+                              type="button"
+                              aria-label={`ধরুন আপনি ১০টি কিতাব নির্বাচন করেছেন সুতরাং অটোমেটিক ১০ দ্বারা ভাগ হবে। যদি আপনি চান যে ৯ দ্বারা বা ১১ দ্বারা ভাগ করবেন, তাহলে আপনি এখানে সংখ্যা উল্লেখ করুন`}
+                              data-tooltip-id="subject-column-tooltip"
+                              data-tooltip-content={"ধরুন আপনি ১০টি কিতাব নির্বাচন করেছেন সুতরাং অটোমেটিক ১০ দ্বারা ভাগ হবে। যদি আপনি চান যে ৯ দ্বারা বা ১১ দ্বারা ভাগ করবেন, তাহলে আপনি এখানে সংখ্যা উল্লেখ করুন"}
+                              data-tooltip-place="top"
+                              className="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                            >
+                              <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5">
+                                <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
+                                <path d="M10 9v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                <circle cx="10" cy="6.5" r="1" fill="currentColor" />
+                              </svg>
+                            </button>
+
+                          </div>
+                        </div>
+                      </label>
                       {
-                        sharedStepData?.ExamType != 4 ? <DefaultInput label={" উল্লেখিত সংখ্যা ব্যতীত অন্য সংখ্যা দ্বারা যদি মোট নাম্বার ভাগ দেয়ার প্রয়োজন হয় তাহলে নিচের বক্সে উল্লেখ করুন"} registerKey="SubSonkha" type="number" require="This Field is required" defaultValue={getValues("SubSonkha")} />
+                        sharedStepData?.ExamType != 4 ? <DefaultInput label="" registerKey="SubSonkha" type="number" require="This Field is required" defaultValue={getValues("SubSonkha")} />
                           : null
                       }
 

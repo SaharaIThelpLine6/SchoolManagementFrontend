@@ -1,10 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import PropTypes from 'prop-types';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import Loading from '../components/Loading/Loading';
 import { useGetSettingsQuery } from '../features/settings/settingsQuerySlice';
 import { useDispatch } from 'react-redux';
-import { setPageName, setQuickBarConfig } from '../features/auth/authSlice';
-import { useDeleteExamConditionMutation, useGetExamConditionsQuery, useGetExamFilterExamsQuery, useGetExamFilterSubclassesQuery, useGetExamSessionQuery, useLazyGetExamConditonEntryQuery } from '../features/exam/examQuerySlice';
+import { setPageName } from '../features/auth/authSlice';
+import { useDeleteExamConditionMutation, useDuplicateExamConditionsMutation, useGetExamConditionsQuery, useGetExamFilterExamsQuery, useGetExamFilterSubclassesQuery, useGetExamNamesQuery, useGetExamSessionQuery, useLazyGetExamConditonEntryQuery } from '../features/exam/examQuerySlice';
 import SortableTable from '../components/Tables/SortableTable';
 import useTranslate from '../utils/Translate';
 import Button from '../components/Button/Button';
@@ -13,11 +14,24 @@ import SvgIcon from '../components/icons/SvgIcon';
 import { showModal } from '../utils/ModalControlar';
 import Swal from 'sweetalert2';
 import DeleteButton from '../components/Button/DeleteButton';
+
+const conditionKey = (row) => `${row.SessionID}:${row.ExamID}:${row.SubClassID}`;
+const conditionLabel = (row) => [
+  row.Session?.SessionName ?? row.SessionID,
+  row.Exam?.ExamName ?? row.ExamID,
+  row.SubClass?.SubClass ?? row.SubClassID,
+].join(' / ');
+
 const ExamCondition = ({ pageTitle }) => {
   // const { data, error, isLoading } = useGetExamConditionsSettingsQuery();
-  const { data: response, isLoading, error } = useGetSettingsQuery();
+  const { isLoading, error } = useGetSettingsQuery();
   const [deleteExamCondition] = useDeleteExamConditionMutation();
-  const data = response?.data.find((item) => item.ID == 20);
+  const [, { isLoading: isPasting, data: pasteResponse, reset: resetPasteResponse }] = useDuplicateExamConditionsMutation({
+    fixedCacheKey: 'exam-condition-paste',
+  });
+  const { data: allExams = [] } = useGetExamNamesQuery();
+  const [copiedConditions, setCopiedConditions] = useState([]);
+  const [pasteResult, setPasteResult] = useState(null);
   const dispatch = useDispatch();
   const translate = useTranslate();
 
@@ -60,7 +74,23 @@ const ExamCondition = ({ pageTitle }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  const [getExamConditionEntry, { data: examConditionData, isLoading: isExamConditionLoading, error: examConditionError, isFetching: isExamConditionFetching, },] = useLazyGetExamConditonEntryQuery();
+  useEffect(() => {
+    if (!pasteResponse) return;
+    const sourceMap = new Map(copiedConditions.map((row) => [conditionKey(row), row]));
+    const targetExamID = pasteResponse.results[0]?.ExamID;
+    setPasteResult({
+      ...pasteResponse,
+      examName: allExams.find((exam) => Number(exam.ExamID) === Number(targetExamID))?.ExamName,
+      results: pasteResponse.results.map((item) => ({
+        ...item,
+        label: conditionLabel(sourceMap.get(conditionKey(item.source)) ?? item.source),
+      })),
+    });
+    setCopiedConditions([]);
+    resetPasteResponse();
+  }, [pasteResponse, copiedConditions, allExams, resetPasteResponse]);
+
+  const [getExamConditionEntry] = useLazyGetExamConditonEntryQuery();
 
   const handleExamCondetionModal = () => {
     showModal("Exam Condition Settings", "EXAM_CONDITION_SETTINGS", null, { closeOnOutSide: false, header: "sticky" })
@@ -90,29 +120,18 @@ const ExamCondition = ({ pageTitle }) => {
     }
   };
 
-  const handleConditionDuplicate = async (row) => {
-    try {
-      const source = await getExamConditionEntry({
-        SessionID: row.SessionID,
-        ExamID: row.ExamID,
-        SubClassID: row.SubClassID,
-      }).unwrap();
-      if (!source) throw new Error("Condition not found");
+  const copiedKeys = new Set(copiedConditions.map(conditionKey));
 
-      showModal(
-        "Duplicate Exam Condition",
-        "EXAM_CONDITION_SETTINGS",
-        { ...source, ExamID: "", isEditMode: false },
-        { closeOnOutSide: false, header: "sticky" }
-      );
-    } catch (error) {
-      console.error("Failed to load condition for duplication:", error);
-      Swal.fire({
-        icon: "error",
-        title: translate("Failed to duplicate exam condition"),
-        text: error?.data?.message || error?.data?.error || error?.message || translate("Please try again."),
-      });
-    }
+  const handleToggleCopyCondition = (row) => {
+    setCopiedConditions((previous) => previous.some((item) => conditionKey(item) === conditionKey(row))
+      ? previous.filter((item) => conditionKey(item) !== conditionKey(row))
+      : [...previous, row]);
+    setPasteResult(null);
+  };
+
+  const handlePasteConditions = () => {
+    if (!copiedConditions.length || isPasting) return;
+    showModal('Paste Exam Conditions', 'EXAM_CONDITION_PASTE', copiedConditions, { closeOnOutSide: false });
   };
 
   const handleDelete = async (data) => {
@@ -139,7 +158,7 @@ const ExamCondition = ({ pageTitle }) => {
           }
         });
 
-        const deleteExamConditionResponse = await deleteExamCondition({
+        await deleteExamCondition({
           SessionID: data.SessionID,
           ExamID: data.ExamID,
           SubClassID: data.SubClassID,
@@ -166,37 +185,6 @@ const ExamCondition = ({ pageTitle }) => {
   };
 
   const columns = [
-    {
-      title: translate('Action'), hozAlign: 'center', render: (row) => {
-        return (
-          <div className='flex gap-2 justify-center items-center'>
-            <Button type='button' tooltip_message='Result Entry'>
-              <SvgIcon
-                name={"TbChecklist"}
-                size={14}
-              />
-            </Button>
-            <Button type='button' tooltip_message='Edit Exam Condition' onClick={() => { handleConditionEdit(row) }}>
-              <SvgIcon
-                name={"FiEdit"}
-                size={14}
-              />
-            </Button>
-            <Button
-              type="button"
-              tooltip_message={translate("Duplicate Exam Condition")}
-              aria-label={translate("Duplicate Exam Condition")}
-              onClick={() => handleConditionDuplicate(row)}
-              disabled={isExamConditionFetching}
-            >
-              <SvgIcon name="Copy" size={16} />
-            </Button>
-            <DeleteButton onClick={() => { handleDelete(row) }} />
-
-          </div>
-        );
-      },
-    },
     {
       title: translate('Session'), hozAlign: 'center', render: (row) => {
         return (
@@ -233,6 +221,40 @@ const ExamCondition = ({ pageTitle }) => {
           <>{row?.ExamType == 1 ? "দরসিয়াত" : row?.ExamType == 2 ? "হিফজ কন্ডিশন ভিত্তিক" : row?.ExamType == 3 ? "গড়ে যা আসবে তাই" : row?.ExamType == 4 ? "পয়েন্ট ভিত্তিক" : ""}</>
         );
       }
+    },
+    {
+      title: translate('Action'), hozAlign: 'center', fixedWidth: 200, render: (row) => {
+        const isCopied = copiedKeys.has(conditionKey(row));
+        return (
+          <div className='flex w-full flex-nowrap gap-2 justify-center items-center'>
+            <Button type='button' className='!px-2 !py-2' tooltip_message='Result Entry'>
+              <SvgIcon
+                name={"TbChecklist"}
+                size={14}
+              />
+            </Button>
+            <Button type='button' className='!px-2 !py-2' tooltip_message='Edit Exam Condition' onClick={() => { handleConditionEdit(row) }}>
+              <SvgIcon
+                name={"FiEdit"}
+                size={14}
+              />
+            </Button>
+            <Button
+              type="button"
+              tooltip_message={translate(isCopied ? 'Remove from copied' : 'Copy condition')}
+              aria-label={`${translate(isCopied ? 'Remove from copied' : 'Copy condition')} ${conditionLabel(row)}`}
+              aria-pressed={isCopied}
+              className={`!px-2 !py-2 ${isCopied ? '!bg-green-600 hover:!bg-green-700' : ''}`}
+              onClick={() => handleToggleCopyCondition(row)}
+              disabled={isPasting}
+            >
+              <SvgIcon name="Copy" size={16} />
+            </Button>
+            <DeleteButton onClick={() => { handleDelete(row) }} />
+
+          </div>
+        );
+      },
     },
     // {
     //   title: 'Exam Start Date',
@@ -281,17 +303,15 @@ const ExamCondition = ({ pageTitle }) => {
   return (
     <div className="p-4 bg-white rounded-md shadow-md">
 
-      <div className="quick_action bg-white font-default grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
-        <div className="flex items-center justify-start gap-2">
-          <button className='border border-blue-600 text-blue-600 rounded-[10px] py-1 px-4 flex items-center gap-1' onClick={handleExamCondetionModal}> <SvgIcon name={"TbPlus"} />  {translate("Add New")}</button>
-        </div>
-
+      <div className="quick_action bg-white font-default flex items-center justify-between">
         <div className="flex flex-col items-center justify-center gap-2">
-          <h2 className="text-[16px] text-center font-bold">{translate(pageTitle)}</h2>
+          <h2 className="text-[20px] text-center font-bold">{translate(pageTitle)}</h2>
+        </div>
+        <div className="flex items-center justify-start gap-2">
+          <button className='inline-flex h-10 items-center gap-2 rounded-md bg-blue-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-blue-700' onClick={handleExamCondetionModal}> <SvgIcon name={"TbPlus"} />  {translate("Add New")}</button>
         </div>
 
-        <div className="flex items-center justify-end gap-2">
-        </div>
+
       </div>
 
       <FormProvider {...methods}>
@@ -325,6 +345,49 @@ const ExamCondition = ({ pageTitle }) => {
         </div>
       </FormProvider>
 
+      {copiedConditions.length > 0 && (
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <Button
+            type="button"
+            onClick={handlePasteConditions}
+            disabled={isPasting}
+          >
+            {translate('Paste')} ({copiedConditions.length})
+          </Button>
+          <span className="text-sm text-gray-600" role="status">
+            {copiedConditions.length} {translate('conditions copied')}
+          </span>
+          <button
+            type="button"
+            className="text-sm text-red-600 underline disabled:opacity-50"
+            onClick={() => setCopiedConditions([])}
+            disabled={isPasting}
+          >
+            {translate('Clear copied')}
+          </button>
+        </div>
+      )}
+
+      {pasteResult && (
+        <section className="mt-4 rounded-lg border border-gray-200 p-4" aria-live="polite">
+          <div className="flex items-center justify-between gap-3">
+            <p className="font-semibold">
+              {pasteResult.examName}: {pasteResult.succeeded} {translate('created')}, {pasteResult.failed} {translate('failed')}
+            </p>
+            <button type="button" aria-label={translate('Close')} onClick={() => setPasteResult(null)}>
+              <SvgIcon name="FiX" size={16} />
+            </button>
+          </div>
+          <ul className="mt-2 max-h-72 space-y-2 overflow-y-auto text-sm">
+            {pasteResult.results.map((item, index) => (
+              <li key={`${conditionKey(item.source)}:${index}`} className={item.status === 'success' ? 'text-green-700' : 'text-red-600'}>
+                {item.label} — {item.status === 'success' ? translate('Created successfully') : translate(item.message)}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <div className="mt-5 overflow-x-auto">
         <SortableTable
           columns={columns}
@@ -337,5 +400,6 @@ const ExamCondition = ({ pageTitle }) => {
     </div>
   );
 };
+ExamCondition.propTypes = { pageTitle: PropTypes.string };
 //  
 export default ExamCondition;

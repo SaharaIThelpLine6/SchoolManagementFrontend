@@ -18,6 +18,8 @@ export const examSlice = createApi({
     'ExamNames',
     'ExamFeeSettings',
     'ExamCondition',
+    'ExamConditions',
+    'ExamSession',
     'AverageExamConditionAll',
     'GetStudentList',
     'StudentAdmitCard',
@@ -439,6 +441,17 @@ export const examSlice = createApi({
       invalidatesTags: ["ExamDivitions", "ExamConditions"],
     }),
 
+    duplicateExamConditions: builder.mutation({
+      query: (body) => ({
+        url: 'exam_condition_copy',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: (result) => result?.succeeded > 0
+        ? ['ExamConditions', 'ExamNames', 'ExamSession', 'ExamRules', 'ExamCondition', 'AverageExamConditionAll']
+        : [],
+    }),
+
     getExamConditonEntry: builder.query({
       query: ({ SessionID, ExamID, SubClassID }) => `exam_condition_entry/${SessionID}/${ExamID}/${SubClassID}`,
       providesTags: ['ExamRules'],
@@ -669,6 +682,7 @@ export const {
   usePostExamDivitionMutation,
   useUpdateExamDivitionMutation,
   usePostExamSettingsMutation,
+  useDuplicateExamConditionsMutation,
   useLazyGetExamConditonEntryQuery,
   useUpdateExamSettingsMutation,
   useDeleteExamConditionMutation,

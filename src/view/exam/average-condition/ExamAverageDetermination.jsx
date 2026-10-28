@@ -91,6 +91,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
   const examID = watch("ExamID");
   const subClassID = watch("SubClassID");
   const ExamType = watch("ExamType");
+  const hasCompleteSelection = Boolean(sessionID && examID && subClassID);
 
   const [showDivisionManager, setShowDivisionManager] = useState(false);
   const [divisionOptions, setDivisionOptions] = useState([]);
@@ -107,7 +108,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
       SubClassID: subClassID,
     },
     {
-      skip: !sessionID || !examID || !subClassID,
+      skip: !hasCompleteSelection,
     }
   );
 
@@ -133,6 +134,10 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
   const hasConditionInClass = Array.isArray(classConditions) && classConditions.some(
     (condition) => String(condition.ExamID) === String(examID)
   );
+  const showExistingConditionMessage = hasCompleteSelection &&
+    !isExamConditionLoading && !isExamConditionFetching && !isClassConditionsFetching &&
+    (hasExistingExamCondition || hasConditionInClass);
+
   const previousCondition = Array.isArray(classConditions) && examID && ExamType
     ? classConditions
       .filter((condition) =>
@@ -143,7 +148,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
         !latest || Number(condition.ID) > Number(latest.ID)
           ? condition
           : latest,
-      null)
+        null)
     : null;
 
   useEffect(() => {
@@ -196,6 +201,20 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
       DivisionID: "",
       TopNum: "",
       serial: gradeFields.length + 1,
+    });
+  };
+
+  const handleGradeDivisionChange = (index, division) => {
+    if (division?.ID == null || division.ID === '') return;
+    const alreadySelected = (getValues('gradeBands') ?? []).some((band, rowIndex) =>
+      rowIndex !== index && String(band.DivisionID) === String(division.ID)
+    );
+    if (!alreadySelected) return;
+
+    setValue(`gradeBands.${index}.DivisionID`, '', { shouldDirty: true, shouldValidate: true });
+    Swal.fire({
+      icon: 'error',
+      title: translate('This division has already been selected'),
     });
   };
 
@@ -457,13 +476,18 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               unicode={true}
             />
           </div>
+          {showExistingConditionMessage && (
+            <p role="alert" className="text-sm font-medium text-red-600 mt-0 col-span-full">
+              {translate("This exam condition has already been created for this session and class.")}
+            </p>
+          )}
         </div>
 
         {!isDuplicate && previousCondition && !hasExistingExamCondition && !hasConditionInClass && !isClassConditionsFetching && (
           <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4">
             <div>
               <p className="font-semibold text-blue-900">
-                {translate("Previous condition available")}: {suggestedExamName}
+                {`এই ক্লাসের ${suggestedExamName} কনডিশন পাওয়া গেছে।`}
               </p>
               <p className="text-sm text-blue-800">
                 {translate("Copy its settings, then review each step before saving.")}
@@ -474,7 +498,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
               onClick={handleCopyPreviousCondition}
               disabled={isCopyingCondition}
             >
-              {isCopyingCondition ? translate("Copying...") : translate("Copy previous condition")}
+              {isCopyingCondition ? translate("Copying...") : translate("Copy condition")}
             </Button>
           </div>
         )}
@@ -498,12 +522,28 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                   <div>
                     <DefaultInput registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
                   </div>
-                  
-                  <div>
+
+                  <div className='relative'>
                     <DefaultInput registerKey={"DivisionArabic"} placeholder={"বিভাগ (আরবি)"} />
                   </div>
-                  <div>
-                    <DefaultInput registerKey={"Note"} placeholder={"নোট"} />
+                  <div className='relative'>
+                    <DefaultInput registerKey={"Note"} placeholder={"মন্তব্য"} />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                      <button
+                        type="button"
+                        aria-label={`মন্তব্য: শিক্ষার্থীর লিখিত কনডিশনটি পেলে এই মন্তব্য আসবে।`}
+                        data-tooltip-id="subject-column-tooltip"
+                        data-tooltip-content={"মন্তব্য: শিক্ষার্থীর লিখিত কনডিশনটি পেলে এই মন্তব্য আসবে।"}
+                        data-tooltip-place="top"
+                        className="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                      >
+                        <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5">
+                          <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
+                          <path d="M10 9v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                          <circle cx="10" cy="6.5" r="1" fill="currentColor" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
 
                 </div>
@@ -533,6 +573,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                     { title: "বিভাগ (বাংলা).", field: "DivisionNames" },
                     { title: "বিভাগ ( ইংরেজি ).", field: "DivisionEnglishs", render: (row, rowIndex) => <>{row?.DivisionEnglishs ? row?.DivisionEnglishs : '-'}</>, position: "center" },
                     { title: "বিভাগ ( আরবি ).", field: "DivisionArabics", render: (row, rowIndex) => <>{row?.DivisionArabics ? row?.DivisionArabics : '-'}</>, position: "center" },
+                    { title: "মন্তব্য", field: "Note", render: (row, rowIndex) => <>{row?.Note ? row?.Note : '-'}</>, position: "center" },
                     {
                       title: "Action",
                       render: (row) => (
@@ -604,7 +645,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                             <tr key={field.id} className="border-t border-gray-100">
                               <td className="px-4 py-2">
                                 <DefaultInput
-                                type='number'
+                                  type='number'
                                   registerKey={`gradeBands.${index}.DivisionNumber`}
                                   placeholder="যেমন: ৮০"
                                   required
@@ -618,6 +659,7 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                                   nameField="DivisionNames"
                                   valueField="ID"
                                   initialValue={sharedStepData?.gradeBands?.[index]?.DivisionID}
+                                  onChange={(division) => handleGradeDivisionChange(index, division)}
                                   require="Division is Required"
                                   defaultValue={translate("Select Divition")}
                                 />

@@ -89,6 +89,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
     handleSubmit,
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = methods
 
@@ -214,6 +215,20 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
       setValue("maxAverageScore", sharedStepData.maxAverageScore);
     }
   }, [sharedStepData?.maxAverageScore, setValue]);
+
+  const handleGradeDivisionChange = (index, division) => {
+    if (division?.ID == null || division.ID === '') return;
+    const alreadySelected = (getValues('gradeBands') ?? []).some((band, rowIndex) =>
+      rowIndex !== index && String(band.DivisionID) === String(division.ID)
+    );
+    if (!alreadySelected) return;
+
+    setValue(`gradeBands.${index}.DivisionID`, '', { shouldDirty: true, shouldValidate: true });
+    Swal.fire({
+      icon: 'error',
+      title: translate('This division has already been selected'),
+    });
+  };
 
   const handleAddGradeBand = () => {
     // Get current fields count
@@ -580,6 +595,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                                   registerKey={`gradeBands.${index}.DivisionID`}
                                   nameField="DivisionNames"
                                   valueField="ID"
+                                  onChange={(division) => handleGradeDivisionChange(index, division)}
                                   require="Division is Required"
                                   defaultValue={translate("Select Divition")}
                                 />
