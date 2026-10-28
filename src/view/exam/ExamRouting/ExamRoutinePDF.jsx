@@ -83,7 +83,8 @@ const ExamRoutinePDF = ({
   const timeNote = buildTimeNote(reportData?.times, lang);
   const notices = reportData?.messages ?? [];
   // বি:দ্র: — আগে সময়ের লাইন, তারপর রুটিনে লেখা নোটিশগুলো
-  const noteLines = [timeNote, ...notices].filter(Boolean);
+  // const noteLines = [timeNote, ...notices].filter(Boolean);
+  const noteLines = []
 
   const instName = getInstituteName(header, lang);
   const instAddress = getInstituteAddress(header, lang);
@@ -184,7 +185,7 @@ const ExamRoutinePDF = ({
               {rows.map((row) => (
                 <tr key={row.SubClassID}>
                   {showClassCol ? (
-                    <td className="routine-rowhead">{getClassText(row, lang) || '-'}</td>
+                    <td className="routine-rowhead">{getClassText(row, lang) || ''}</td>
                   ) : null}
 
                   <td className="routine-rowhead">
@@ -218,8 +219,8 @@ const ExamRoutinePDF = ({
                               );
                             })
                           ) : (
-
-                            <span className="text-gray-400">-</span>
+                            // ✅ এখানে আগে <span className="text-gray-400">-</span> ছিল, সেটি রিমুভ করে ফাঁকা করে দেওয়া হয়েছে
+                            null
                           )}
                         </td>
                       );
