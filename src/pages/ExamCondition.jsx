@@ -14,6 +14,7 @@ import SvgIcon from '../components/icons/SvgIcon';
 import { showModal } from '../utils/ModalControlar';
 import Swal from 'sweetalert2';
 import DeleteButton from '../components/Button/DeleteButton';
+import { formatExamConditionPasteResult } from '../utils/examConditionPasteResult';
 
 const conditionKey = (row) => `${row.SessionID}:${row.ExamID}:${row.SubClassID}`;
 const conditionLabel = (row) => [
@@ -75,16 +76,7 @@ const ExamCondition = ({ pageTitle }) => {
 
   useEffect(() => {
     if (!pasteResponse) return;
-    const sourceMap = new Map(copiedConditions.map((row) => [conditionKey(row), row]));
-    setPasteResult({
-      ...pasteResponse,
-      sessionName: pasteResponse.target?.SessionName,
-      examName: pasteResponse.target?.ExamName,
-      results: pasteResponse.results.map((item) => ({
-        ...item,
-        label: conditionLabel(sourceMap.get(conditionKey(item.source)) ?? item.source),
-      })),
-    });
+    setPasteResult(formatExamConditionPasteResult(pasteResponse, copiedConditions));
     setCopiedConditions([]);
     resetPasteResponse();
   }, [pasteResponse, copiedConditions, resetPasteResponse]);
