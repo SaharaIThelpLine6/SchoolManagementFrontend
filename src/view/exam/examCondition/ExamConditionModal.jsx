@@ -18,7 +18,7 @@ const ExamConditionModal = ({ pageTitle, data }) => {
   }, [dispatch, pageTitle]);
 
   return (
-    <div className="font-default bg-white">
+    <div className="w-full min-w-0 bg-white font-default">
       <MultiStepForm
         formId="examCondition"
         showStepper

@@ -11,6 +11,7 @@ const MultiSelect = ({
   placeholder = "Select options",
   searchPlaceholder = "Search options",
   emptyMessage = "No options found",
+  dropdownHeight,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -46,20 +47,20 @@ const MultiSelect = ({
   );
 
   return (
-    <div ref={containerRef} className="relative mb-4">
+    <div ref={containerRef} className="relative mb-4 w-full min-w-0 sm:w-[98%]">
       {label && <span className="mb-1.5 block text-sm font-medium text-slate-700">{label}</span>}
       <div className={`flex min-h-12 flex-wrap items-center gap-2 rounded-lg border bg-white px-3 py-2 transition-colors focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 ${isOpen ? "border-blue-400 ring-2 ring-blue-100" : "border-blue-200 hover:border-blue-300"}`}>
         {selectedOptions.map((option) => (
           <span
             key={option[valueField]}
-            className="inline-flex min-h-8 items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-2.5 text-sm text-slate-800"
+            className="inline-flex min-h-8 min-w-0 max-w-full items-center gap-2 rounded-md border border-blue-200 bg-blue-50 px-2.5 text-sm text-slate-800"
           >
-            {option[nameField]}
+            <span className="min-w-0 break-words">{option[nameField]}</span>
             <button
               type="button"
               onClick={() => toggle(option[valueField])}
               aria-label={`Remove ${option[nameField]}`}
-              className="rounded p-0.5 text-slate-500 transition-colors hover:bg-blue-100 hover:text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
+              className="shrink-0 rounded p-0.5 text-slate-500 transition-colors hover:bg-blue-100 hover:text-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
             >
               <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
                 <path d="M5 5l10 10M15 5L5 15" />
@@ -75,17 +76,20 @@ const MultiSelect = ({
             setIsOpen((open) => !open);
             setSearch("");
           }}
-          className="flex min-h-8 min-w-32 flex-1 items-center justify-between gap-2 rounded px-1 text-left text-sm text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
+          className="flex min-h-8 min-w-0 flex-1 basis-32 items-center justify-between gap-2 rounded px-1 text-left text-sm text-slate-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
         >
-          <span>{placeholder}</span>
+          <span className="min-w-0 break-words">{placeholder}</span>
           <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${isOpen ? "rotate-180" : ""}`} stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="m5 7.5 5 5 5-5" />
           </svg>
         </button>
       </div>
       {isOpen && (
-        <div className="absolute z-50 mt-1.5 w-full overflow-hidden rounded-lg border border-blue-100 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
-          <div className="flex items-center gap-2 border-b border-slate-100 px-3 text-slate-400 focus-within:text-blue-500">
+        <div
+          style={{ height: dropdownHeight }}
+          className="absolute z-50 mt-1.5 flex w-full flex-col overflow-hidden rounded-lg border border-blue-100 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
+        >
+          <div className="flex shrink-0 items-center gap-2 border-b border-slate-100 px-3 text-slate-400 focus-within:text-blue-500">
             <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-4 w-4 shrink-0" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
               <circle cx="8.5" cy="8.5" r="5.5" />
               <path d="m13 13 4 4" />
@@ -104,10 +108,10 @@ const MultiSelect = ({
               }}
               placeholder={searchPlaceholder}
               aria-label={searchPlaceholder}
-              className="h-11 w-full bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+              className="h-11 min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
             />
           </div>
-          <div role="listbox" aria-multiselectable="true" className="max-h-60 overflow-y-auto py-1">
+          <div role="listbox" aria-multiselectable="true" className="min-h-0 max-h-60 flex-1 overflow-y-auto py-1">
             {filteredOptions.map((option) => {
               const isSelected = selectedValues.includes(String(option[valueField]));
               return (
@@ -126,7 +130,7 @@ const MultiSelect = ({
                       </svg>
                     )}
                   </span>
-                  {option[nameField]}
+                  <span className="min-w-0 break-words">{option[nameField]}</span>
                 </button>
               );
             })}
@@ -152,4 +156,5 @@ MultiSelect.propTypes = {
   placeholder: PropTypes.string,
   searchPlaceholder: PropTypes.string,
   emptyMessage: PropTypes.string,
+  dropdownHeight: PropTypes.number,
 };

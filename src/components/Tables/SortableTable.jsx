@@ -63,9 +63,26 @@ const SortableTable = ({
     center: 'text-center',
     end: 'text-right',
   };
+  const getColumnWidthStyle = (column) =>
+    column.fixedWidth
+      ? {
+          width: column.fixedWidth,
+          minWidth: column.fixedWidth,
+          maxWidth: column.fixedWidth,
+        }
+      : undefined;
+
   return (
     <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
       <table className="w-full text-sm text-left text-gray-500">
+        <colgroup>
+          {columns.map((column, index) => (
+            <col
+              key={index}
+              style={column.fixedWidth ? { width: column.fixedWidth } : undefined}
+            />
+          ))}
+        </colgroup>
         <thead
           className={`text-xs sm:text-sm text-theme-dark font-default uppercase bg-gray-50`}
         >
@@ -73,6 +90,7 @@ const SortableTable = ({
             {columns.map((column, index) => (
               <th
                 key={index}
+                style={getColumnWidthStyle(column)}
                 className={`px-3 py-3 text-nowrap ${
                   alignClass[column.hozAlign] || 'text-left'
                 }`}
@@ -97,6 +115,7 @@ const SortableTable = ({
               {columns.map((column, index) => (
                 <th
                   key={index}
+                  style={getColumnWidthStyle(column)}
                   className={`px-3 h-[40px] text-${column.hozAlign || 'start'}`}
                 >
                   {column.filterable && (
@@ -173,6 +192,7 @@ const SortableTable = ({
               {columns.map((column, cellIndex) => (
                 <td
                   key={cellIndex}
+                  style={getColumnWidthStyle(column)}
                   className={`px-3 py-4 font-medium text-theme-dark ${rowWrap ? 'whitespace-nowrap' : 'whitespace-wrap'}  font-default text-${
                     column.hozAlign || 'start'
                   } ${tdclass}`}

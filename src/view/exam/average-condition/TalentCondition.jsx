@@ -13,6 +13,7 @@ import {
 } from "../../../features/exam/examQuerySlice";
 import { ViewPermission } from "../../../Routes/ViewPermission";
 import useTranslate from "../../../utils/Translate";
+import { hideModal } from "../../../utils/ModalControlar";
 import PointConditionFilteringForm from "../point-condition/PointConditionFilteringForm";
 import { permissionsDataList } from "../../../Data/permissions";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
@@ -76,7 +77,7 @@ const TalentCondition = ({ sharedStepData, setSharedStepData }) => {
   const { data: sessionData } = useGetSessionsQuery();
   const { data: examNameData } = useGetExamNamesQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
-   const { next, previous } = useMultiStepForm(sharedStepData?.isEditMode ? 'examConditionEdit' : 'examCondition');
+  const { next, previous } = useMultiStepForm(sharedStepData?.isEditMode ? 'examConditionEdit' : 'examCondition');
   const {
     data: examTalentConditionData,
     isLoading,
@@ -116,7 +117,7 @@ const TalentCondition = ({ sharedStepData, setSharedStepData }) => {
   const handleSelectAll = (e) => {
     setCheckedInputs(Array(inputs.length).fill(e.target.checked));
   };
-    const handleSaveAndPrevious = () => {
+  const handleSaveAndPrevious = () => {
     previous();
   };
 
@@ -138,7 +139,7 @@ const TalentCondition = ({ sharedStepData, setSharedStepData }) => {
     try {
       console.log(updatedData);
       const response = sharedStepData?.isEditMode ? await updateExamSettings(updatedData).unwrap() : await addExamSettings(updatedData).unwrap();
-      // next();
+      hideModal();
       Swal.fire({
         icon: "success",
         title: "Success",
@@ -186,6 +187,18 @@ const TalentCondition = ({ sharedStepData, setSharedStepData }) => {
                 />
                 <label className="font-semibold">
                   {translate('Select all inputs')}
+                  <button type="button" aria-label={`ধরুন আপনি চাচ্ছেন শুধু মুমতাযের মধ্যে মেধা হবে। তাহলে আপনি শুধু মুমতায উল্লেখ করুন। অথবা আপনি চাচ্ছেন মুমতায ও জায়িদের মধ্যে মেধা হবে, তাহলে আপনি মুমতায ও জায়িদ নির্বাচন করুন। এভাবে যে কয়টি উল্লেখ করবেন, সেগুলোর মধ্যে মেধা হবে।`}
+                    data-tooltip-id="subject-column-tooltip"
+                    data-tooltip-content={"ধরুন আপনি চাচ্ছেন শুধু মুমতাযের মধ্যে মেধা হবে। তাহলে আপনি শুধু মুমতায উল্লেখ করুন। অথবা আপনি চাচ্ছেন মুমতায ও জায়িদের মধ্যে মেধা হবে, তাহলে আপনি মুমতায ও জায়িদ নির্বাচন করুন। এভাবে যে কয়টি উল্লেখ করবেন, সেগুলোর মধ্যে মেধা হবে।"}
+                    data-tooltip-place="top"
+                    className="inline-flex h-5 w-5 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 pt-[9px]"
+                  >
+                    <svg aria-hidden="true" viewBox="0 0 22 20" fill="none" className="h-4 w-4">
+                      <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
+                      <path d="M10 9v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      <circle cx="10" cy="6.5" r="1" fill="currentColor" />
+                    </svg>
+                  </button>
                 </label>
               </div>
 
