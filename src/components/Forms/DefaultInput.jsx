@@ -22,7 +22,7 @@ const DefaultInput = ({
   unicode = false,
   labelPosition = 'top',
   validate,
-  defaultValue = '',
+  defaultValue,
   showError = false,
   isRtl = false,
 }) => {
@@ -42,7 +42,8 @@ const DefaultInput = ({
   // ✅ Watch field value
   const currentValue = useWatch({ name: registerKey, control });
 
-  // ✅ প্রথমবারে defaultValue সেট করে দেবে
+  // Only explicitly supplied defaults should update the form value. An
+  // implicit empty string would erase values restored by react-hook-form.
   useEffect(() => {
     if (defaultValue !== undefined && defaultValue !== null) {
       setValue(registerKey, defaultValue, { shouldValidate: false });

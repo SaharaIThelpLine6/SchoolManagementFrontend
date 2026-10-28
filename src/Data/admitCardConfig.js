@@ -53,7 +53,18 @@ export const WATERMARK_DEFAULTS = { size: 230, opacity: 0.07 };
 // `layout` না থাকলে আগের নিয়মই চলে, তাই পুরোনো সব ডিজাইন হুবহু অক্ষত।
 // ---------------------------------------------------------------------------
 
-export const ADMIT_TEMPLATES = [
+// ---------------------------------------------------------------------------
+// 👇 `hidden` ঘরটা
+//
+// কোনো ডিজাইন সাময়িকভাবে বন্ধ রাখতে ওটায় `hidden: true` বসান — তখন
+// টেমপ্লেটের তালিকায় ওটা আর দেখা যায় না। ডিজাইনটা মুছে যায় না, তাই
+// ফিরিয়ে আনতে কেবল লাইনটা সরালেই হলো।
+//
+// আগে থেকে কোনো প্রতিষ্ঠানের সেটিংয়ে ঐ ডিজাইনটাই সংরক্ষিত থাকলে কার্ড
+// তবু আগের মতোই ছাপবে — কারণ getTemplate() নিচের পূর্ণ তালিকাটাই খোঁজে,
+// ছাঁকা তালিকাটা নয়। শুধু নতুন করে বাছা যাবে না।
+// ---------------------------------------------------------------------------
+const ALL_ADMIT_TEMPLATES = [
   
 
   {
@@ -468,6 +479,39 @@ export const ADMIT_TEMPLATES = [
     layout: 'classic',
     chrome: 'gold',
     cardBg: '#fffdf6',
+
+    // ---- ঘরের জায়গা ও মাপ (শুধু এই ডিজাইনের) ----
+    headerShiftY: 0,      // পুরো হেডার একসাথে — মাইনাস = উপরে
+    logoTopPx: 25,
+    logoLeftPx: 24,
+    logoSizePx: 38,
+    headTopPx: 25,        // নাম ও ঠিকানার ব্লক
+    headLeftPx: 70,
+    headRightPx: 70,
+    titleTopPx: 65,       // "প্রবেশপত্র"
+    titleSizePx: 13,
+    titleOffsetX: 0,
+    examTopPx: 80,        // পরীক্ষার নাম ও শিক্ষাবর্ষ
+    examOffsetX: 0,
+    bodyTopPx: 105,        // ছবি ও তথ্যের ঘর
+    bodyLeftPx: 22,
+    bodyRightPx: 22,
+    photoWPx: 58,
+    photoHPx: 70,
+    photoGapPx: 12,       // ছবি ও তথ্যের ঘরের মাঝের ফাঁক
+    rowHPx: 20,           // তথ্যের এক সারির উচ্চতা
+    rulesLeftPx: 22,
+    rulesRightPx: 22,
+    rulesMaxHPx: 104,
+    seatHPx: 20,          // আসনের পট্টি
+    seatLeftPx: 22,
+    seatRightPx: 22,
+    footHPx: 76,          // QR ও স্বাক্ষরের সারি
+    footLeftPx: 22,
+    footRightPx: 22,
+    qrOffsetY: 14,        // QR নিচে নামবে (+) / উপরে উঠবে (-)
+    qrOffsetX: 0,         // QR ডানে (+) / বামে (-)
+
     primary: '#1f5c3a',
     gold: '#b08422',
     gridColor: '#e2d9bf',
@@ -499,6 +543,7 @@ export const ADMIT_TEMPLATES = [
     // চার কোনায় সোনালী বর্গ।
     id: '13',
     title: 'সবুজ-সোনালী নকশা',
+    hidden: true,
     variant: 'painted',
     layout: 'classic',
     chrome: 'ornate',
@@ -534,6 +579,7 @@ export const ADMIT_TEMPLATES = [
     // আর তথ্য-আসন-স্বাক্ষর সব একটা সাদা গোল-কোনা ঘরের ভিতরে।
     id: '14',
     title: 'মিহরাব (গাঢ় সবুজ)',
+    hidden: true,
     variant: 'painted',
     layout: 'classic',
     chrome: 'arch',
@@ -569,6 +615,7 @@ export const ADMIT_TEMPLATES = [
     // একদম নিচে পাতলা রঙিন পট্টি।
     id: '15',
     title: 'আধুনিক সবুজ',
+    hidden: true,
     variant: 'painted',
     layout: 'modern',
     cardBg: '#ffffff',
@@ -602,6 +649,7 @@ export const ADMIT_TEMPLATES = [
     // তারপর চারটা ছোট বাক্স (প্রথমটা আসনের)।
     id: '16',
     title: 'সবুজ — নাম বড়',
+    hidden: true,
     variant: 'painted',
     layout: 'profile',
     cardBg: '#f1f7f4',
@@ -626,6 +674,314 @@ export const ADMIT_TEMPLATES = [
     showSignDate: false,
     showQR: true,
     qrSize: 38,
+    qrPad: 'transparent',
+    ...ZONES,
+    ...PHOTO,
+  },
+
+  {
+    // রাজকীয় সবুজ-সোনালী — কারুকাজের ফ্রেম, চার কোনায় সোনালী পদক,
+    // উপরে বিসমিল্লাহ, নিচে দুআ।
+    //
+    // নির্দেশাবলী বদলাতে চাইলে এখানে `rules: { bn: [...], en: [...],
+    // ar: [...] }` বসান — না দিলে AdmitCardLayouts.jsx এর ভিত্তি
+    // তালিকাটা বসে।
+    id: '17',
+    title: 'রাজকীয় সবুজ-সোনালী',
+    hidden: true,
+    variant: 'painted',
+    layout: 'royal',
+    cardBg: '#fffdf8',
+    primary: '#0b5c3b',
+    gold: '#c9a227',
+    gridColor: '#d9cfae',
+    labelBg: '#fdf8ea',
+    nameColor: '#0b5c3b',
+    addressColor: '#6b6250',
+    nameSize: 15,
+    addressSize: 7.5,
+    valueColor: '#14261c',
+    labelColor: '#5b5340',
+    accent: '#0b5c3b',
+    examNameColor: '#0b5c3b',
+    examNameSize: 11,
+    photoBorder: '#c7b891',
+    signLineColor: '#0b5c3b',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 34,
+    qrPad: 'transparent',
+    ...ZONES,
+    ...PHOTO,
+  },
+
+  {
+    // মিহরাব — গাঢ় সবুজ পটে সোনালী খিলান, ভিতরে সাদা ঘর।
+    id: '18',
+    title: 'মিহরাব খিলান',
+    hidden: true,
+    variant: 'painted',
+    layout: 'mihrab',
+    cardBg: '#0c4a4a',
+    primary: '#0c4a4a',
+    gold: '#d4af37',
+    gridColor: '#cbd5e1',
+    labelBg: '#eef6f6',
+    nameColor: '#ffffff',
+    addressColor: '#d4af37',
+    nameSize: 14,
+    addressSize: 7.5,
+    valueColor: '#0f172a',
+    labelColor: '#475569',
+    accent: '#0c4a4a',
+    examNameColor: '#d4af37',
+    examNameSize: 11,
+    photoBorder: '#94a3b8',
+    signLineColor: '#0c4a4a',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 34,
+    qrPad: 'transparent',
+    ...ZONES,
+    ...PHOTO,
+  },
+
+  {
+    // ------------------------------------------------------------------
+    // নিজের ছবির উপর ছাপা — A5।
+    //
+    // `image` এর ছবিটাই পুরো কার্ডের পট; নকশা, কোনার রঙ ও "ADMIT CARD"
+    // ব্যাজ ঐ ছবিতেই আঁকা, তাই কোড ওগুলো আর আঁকে না — কেবল ডাটা বসায়।
+    //
+    // ⚠️ ফোল্ডারের নামে ফাঁকা জায়গা থাকায় ঠিকানায় %20 দিতে হয়েছে।
+    // ফোল্ডারটার নাম `custom-design` করে দিলে ঠিকানাটা পরিষ্কার হয়:
+    //   image: '/admitcard/custom-design/admitcard-1.jpeg'
+    //
+    // ঘরগুলো কোথায় বসবে তা `bodyTopPx` দিয়ে একটু উপরে-নিচে করা যায়,
+    // ছবির ব্যানার লম্বা-খাটো হলে কাজে লাগে।
+    // ------------------------------------------------------------------
+    id: '19',
+    title: 'কাস্টম ডিজাইন ১',
+    variant: 'painted',
+    layout: 'bgimage',
+    image: '/admitcard/custom_desigin/admitcard-1.jpeg',
+    thumb: '/admitcard/custom_desigin/admitcard-1.jpeg',
+    cardBg: '#ffffff',
+
+    // ---- ঘরের জায়গা ও মাপ (শুধু এই ডিজাইনের) ----
+    headerShiftY: 0,      // পুরো হেডার একসাথে — মাইনাস = উপরে
+    logoTopPx: 25,
+    logoLeftPx: 24,
+    logoSizePx: 38,
+    headTopPx: 25,        // নাম ও ঠিকানার ব্লক
+    headLeftPx: 70,
+    headRightPx: 70,
+    titleTopPx: 65,       // "প্রবেশপত্র"
+    titleSizePx: 13,
+    titleOffsetX: 0,
+    examTopPx: 80,        // পরীক্ষার নাম ও শিক্ষাবর্ষ
+    examOffsetX: 0,
+    bodyTopPx: 105,        // ছবি ও তথ্যের ঘর
+    bodyLeftPx: 22,
+    bodyRightPx: 22,
+    photoWPx: 58,
+    photoHPx: 70,
+    photoGapPx: 12,       // ছবি ও তথ্যের ঘরের মাঝের ফাঁক
+    rowHPx: 20,           // তথ্যের এক সারির উচ্চতা
+    rulesLeftPx: 22,
+    rulesRightPx: 22,
+    rulesMaxHPx: 104,
+    seatHPx: 20,          // আসনের পট্টি
+    seatLeftPx: 22,
+    seatRightPx: 22,
+    footHPx: 76,          // QR ও স্বাক্ষরের সারি
+    footLeftPx: 22,
+    footRightPx: 22,
+    qrOffsetY: 14,        // QR নিচে নামবে (+) / উপরে উঠবে (-)
+    qrOffsetX: 0,         // QR ডানে (+) / বামে (-)
+
+    primary: '#1e3a8a',
+    gold: '#f59e0b',
+    gridColor: '#c7d2fe',
+    labelBg: '#eef2ff',
+    seatBg: '#fde68a',
+    seatBorder: '#d97706',
+    seatColor: '#92400e',
+    qrColor: '#111827',
+    nameColor: '#1e3a8a',
+    addressColor: '#475569',
+    nameSize: 15,
+    addressSize: 11.5,
+    valueColor: '#0f172a',
+    labelColor: '#475569',
+    accent: '#1e3a8a',
+    examNameColor: '#1e3a8a',
+    examNameSize: 10,
+    photoBorder: '#94a3b8',
+    signLineColor: '#1e3a8a',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 34,
+    qrPad: 'transparent',
+    ...ZONES,
+    ...PHOTO,
+  },
+
+  {
+    // ------------------------------------------------------------------
+    // কাস্টম ডিজাইন ২।
+    //
+    // নিচের "ঘরের জায়গা ও মাপ" অংশের সংখ্যাগুলো কেবল এই আইডির
+    // ডিজাইনেই খাটে — এখানে যা বদলাবেন অন্য কোনো ডিজাইনে তার প্রভাব
+    // পড়বে না। মানগুলো এখন ডিফল্টেই বসানো, তাই যেটা সরাতে চান কেবল
+    // সেই সংখ্যাটাই বদলান।
+    //
+    // সবচেয়ে কাজের দুইটা: `headerShiftY` (পুরো হেডার একসাথে উপর-নিচ)
+    // আর `bodyTopPx` (ছবি ও তথ্যের ঘর)।
+    // ------------------------------------------------------------------
+    id: '20',
+    title: 'কাস্টম ডিজাইন ২',
+    variant: 'painted',
+    layout: 'bgimage',
+    image: '/admitcard/custom_desigin/admitcard-2.jpeg',
+    thumb: '/admitcard/custom_desigin/admitcard-2.jpeg',
+    cardBg: '#ffffff',
+
+    // ---- ঘরের জায়গা ও মাপ (শুধু এই ডিজাইনের) ----
+    headerShiftY: 0,      // পুরো হেডার একসাথে — মাইনাস = উপরে
+    logoTopPx: 25,
+    logoLeftPx: 24,
+    logoSizePx: 38,
+    headTopPx: 25,        // নাম ও ঠিকানার ব্লক
+    headLeftPx: 70,
+    headRightPx: 70,
+    titleTopPx: 65,       // "প্রবেশপত্র"
+    titleSizePx: 13,
+    titleOffsetX: 0,
+    examTopPx: 80,        // পরীক্ষার নাম ও শিক্ষাবর্ষ
+    examOffsetX: 0,
+    bodyTopPx: 105,        // ছবি ও তথ্যের ঘর
+    bodyLeftPx: 22,
+    bodyRightPx: 22,
+    photoWPx: 58,
+    photoHPx: 70,
+    photoGapPx: 12,       // ছবি ও তথ্যের ঘরের মাঝের ফাঁক
+    rowHPx: 20,           // তথ্যের এক সারির উচ্চতা
+    rulesLeftPx: 22,
+    rulesRightPx: 22,
+    rulesMaxHPx: 104,
+    seatHPx: 20,          // আসনের পট্টি
+    seatLeftPx: 22,
+    seatRightPx: 22,
+    footHPx: 76,          // QR ও স্বাক্ষরের সারি
+    footLeftPx: 22,
+    footRightPx: 22,
+    qrOffsetY: 14,        // QR নিচে নামবে (+) / উপরে উঠবে (-)
+    qrOffsetX: 0,         // QR ডানে (+) / বামে (-)
+
+    // ---- রঙ ও ফন্ট ----
+    primary: '#1e3a8a',
+    gold: '#f59e0b',
+    gridColor: '#c7d2fe',
+    labelBg: '#eef2ff',
+    seatBg: '#fde68a',
+    seatBorder: '#d97706',
+    seatColor: '#92400e',
+    qrColor: '#111827',
+    nameColor: '#1e3a8a',
+    addressColor: '#475569',
+    nameSize: 15,
+    addressSize: 10.5,
+    valueColor: '#0f172a',
+    labelColor: '#475569',
+    accent: '#1e3a8a',
+    examNameColor: '#1e3a8a',
+    examNameSize: 10,
+    photoBorder: '#94a3b8',
+    signLineColor: '#1e3a8a',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 34,
+    qrPad: 'transparent',
+    ...ZONES,
+    ...PHOTO,
+  },
+
+  {
+    // কাস্টম ডিজাইন ৩ — উপরেরটার মতোই, নিজের সংখ্যাগুলো নিজের।
+    id: '21',
+    title: 'কাস্টম ডিজাইন ৩',
+    variant: 'painted',
+    layout: 'bgimage',
+    image: '/admitcard/custom_desigin/admitcard-3.jpeg',
+    thumb: '/admitcard/custom_desigin/admitcard-3.jpeg',
+    cardBg: '#ffffff',
+
+    // ---- ঘরের জায়গা ও মাপ (শুধু এই ডিজাইনের) ----
+    headerShiftY: 0,
+    logoTopPx: 25,
+    logoLeftPx: 24,
+    logoSizePx: 38,
+    headTopPx: 25,
+    headLeftPx: 70,
+    headRightPx: 70,
+    titleTopPx: 65,
+    titleSizePx: 13,
+    titleOffsetX: 0,
+    examTopPx: 80,
+    examOffsetX: 0,
+    bodyTopPx: 105,
+    bodyLeftPx: 22,
+    bodyRightPx: 22,
+    photoWPx: 58,
+    photoHPx: 70,
+    photoGapPx: 12,
+    rowHPx: 20,
+    rulesLeftPx: 22,
+    rulesRightPx: 22,
+    rulesMaxHPx: 104,
+    seatHPx: 20,
+    seatLeftPx: 22,
+    seatRightPx: 22,
+    footHPx: 76,
+    footLeftPx: 22,
+    footRightPx: 22,
+    qrOffsetY: 14,        // QR নিচে নামবে (+) / উপরে উঠবে (-)
+    qrOffsetX: 0,         // QR ডানে (+) / বামে (-)
+
+    // ---- রঙ ও ফন্ট ----
+    primary: '#1e3a8a',
+    gold: '#f59e0b',
+    gridColor: '#c7d2fe',
+    labelBg: '#eef2ff',
+    seatBg: '#fde68a',
+    seatBorder: '#d97706',
+    seatColor: '#92400e',
+    qrColor: '#111827',
+    nameColor: '#1e3a8a',
+    addressColor: '#475569',
+    nameSize: 15,
+    addressSize: 10.5,
+    valueColor: '#0f172a',
+    labelColor: '#475569',
+    accent: '#1e3a8a',
+    examNameColor: '#1e3a8a',
+    examNameSize: 10,
+    photoBorder: '#94a3b8',
+    signLineColor: '#1e3a8a',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 34,
     qrPad: 'transparent',
     ...ZONES,
     ...PHOTO,
@@ -669,8 +1025,16 @@ export const ADMIT_TEMPLATES = [
   // },
 ];
 
+/** তালিকায় যেগুলো দেখা যাবে — `hidden: true` দেওয়াগুলো বাদ */
+export const ADMIT_TEMPLATES = ALL_ADMIT_TEMPLATES.filter((t) => !t.hidden);
+
+/**
+ * আইডি দিয়ে ডিজাইন খোঁজা — পূর্ণ তালিকা থেকেই, বন্ধ করা ডিজাইনসহ।
+ * নইলে কারো সংরক্ষিত ডিজাইন বন্ধ করে দিলে তার কার্ড হঠাৎ অন্য নকশায়
+ * ছাপতে শুরু করত।
+ */
 export const getTemplate = (id) =>
-  ADMIT_TEMPLATES.find((t) => String(t.id) === String(id)) || ADMIT_TEMPLATES[0];
+  ALL_ADMIT_TEMPLATES.find((t) => String(t.id) === String(id)) || ADMIT_TEMPLATES[0];
 
 // ---------------------------------------------------------------------------
 // ভাষা
@@ -1264,7 +1628,9 @@ export const resolveFieldLabels = (labelRow, { lang } = {}) => {
 };
 
 // সব টেমপ্লেটে সব ফিল্ড অ্যালাও; কোনো টেমপ্লেটে সীমা দরকার হলে এখানে বদলান
-const ALL_TEMPLATE_IDS = ADMIT_TEMPLATES.map((t) => t.id);
+// পূর্ণ তালিকা থেকেই — বন্ধ করা ডিজাইন কারো সেটিংয়ে সংরক্ষিত থাকলে
+// তার ফিল্ডের তালিকাটাও যেন ফাঁকা না দেখায়
+const ALL_TEMPLATE_IDS = ALL_ADMIT_TEMPLATES.map((t) => t.id);
 
 export const ADMIT_ALLOWED_FIELDS = ADMIT_FIELDS.reduce((acc, f) => {
   acc[f.id] = ALL_TEMPLATE_IDS;

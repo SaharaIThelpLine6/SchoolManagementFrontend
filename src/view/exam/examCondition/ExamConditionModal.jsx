@@ -8,7 +8,7 @@ import ExamAverageDetermination from "../average-condition/ExamAverageDeterminat
 import ExamResultsCondition from "../average-condition/ExamResultsCondition";
 import TalentCondition from "../average-condition/TalentCondition";
 
-const ExamConditionModal = ({ pageTitle }) => {
+const ExamConditionModal = ({ pageTitle, data }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
   const [activeStep, setActiveStep] = useState(0);
@@ -22,10 +22,12 @@ const ExamConditionModal = ({ pageTitle }) => {
       <MultiStepForm
         formId="examCondition"
         showStepper
+        defaultData={data}
         steps={[
           {
             label: "Average Determination",
             component: ExamAverageDetermination,
+            props: { isDuplicate: Boolean(data) },
           },
           {
             label: "Subject Pass",

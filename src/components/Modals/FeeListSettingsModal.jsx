@@ -15,7 +15,10 @@ import {
   MAX_COLUMNS_TWO_UP,
   maxColumnsFor,
   paperColumnCount,
+  SUMMARY_CARDS,
+  toggleSummaryCard,
   visibleFor,
+  visibleSummaryCards,
   withVisible,
   WIDTH_MIN,
   WIDTH_MAX,
@@ -790,6 +793,56 @@ const FeeListSettingsModal = ({
                 </div>
               </div>
             </div>
+
+            {/* ── সারসংক্ষেপে কোন ঘরগুলো বসবে ───────────────────
+                ⭐ সারসংক্ষেপ বন্ধ থাকলে দেখানোর মানে নেই।
+
+                তালিকাভেদে কিছু ঘর অর্থহীন — "ফি গৃহীত" তালিকায়
+                "ফি দেয়নি" সবসময় ০, "ফি বিহীন" তালিকায় "মোট জমা"
+                সবসময় ০। সেই শূন্য ঘরগুলো এখন বন্ধ করা যায়। */}
+            {settings.showSummary !== false && (
+              <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50/60 p-3">
+                <div className="flex flex-wrap items-center gap-2 mb-2">
+                  <span className="text-[13px] font-semibold text-slate-700">
+                    সারসংক্ষেপের ঘর
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    ({toBn(visibleSummaryCards(settings).length)} টি বসবে)
+                  </span>
+
+                  {visibleSummaryCards(settings).length === 0 && (
+                    <span className="text-xs text-amber-600">
+                      — সবগুলো বন্ধ, তাই সারসংক্ষেপটাই বসবে না
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {SUMMARY_CARDS.map((card) => {
+                    const on = visibleSummaryCards(settings).some((c) => c.key === card.key);
+
+                    return (
+                      <button
+                        key={card.key}
+                        type="button"
+                        onClick={() =>
+                          setSettings((st) => ({
+                            ...st,
+                            visibleSummary: toggleSummaryCard(st.visibleSummary, card.key),
+                          }))
+                        }
+                        className={`inline-flex items-center gap-2.5 rounded-lg border px-3 py-2 text-left transition ${
+                          on ? card.tone : 'border-slate-200 bg-white text-slate-400'
+                        }`}
+                      >
+                        <CheckBox checked={on} />
+                        <span className="text-sm">{card.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* ── জলছাপের ঘনত্ব ও প্রিভিউ ─────────────────────
                 জলছাপ বন্ধ থাকলে এই অংশটা দেখানোর মানে নেই। */}

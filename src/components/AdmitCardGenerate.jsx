@@ -153,6 +153,8 @@ const AdmitCardGenerate = ({
   seats = null,
   zoom = 1,
   seatOffsetY = 0,
+  signOffsetY = 0,
+  qrOffsetY = 0,
 }) => {
   const template = templateObj || getTemplate(templateId);
   const layout = getPrintLayout(reportType);
@@ -199,6 +201,8 @@ const AdmitCardGenerate = ({
                   showSignDate={showSignDate}
                   zoom={zoom}
                   seatOffsetY={seatOffsetY}
+                  signOffsetY={signOffsetY}
+                  qrOffsetY={qrOffsetY}
                   seatText={
                     seats?.get?.(
                       String(student.AdmissionID ?? student.UserID ?? student.StudentCode)
@@ -373,6 +377,10 @@ export const AdmitCardFace = ({
   // আসনের পট্টিটা কতটা উপরে/নিচে বসবে (px)। মাইনাস = উপরে, প্লাস = নিচে।
   // ০ দিলে আগের জায়গাতেই — স্বাক্ষরের সারির ঠিক উপরে।
   seatOffsetY = 0,
+  // স্বাক্ষরের সারি ও QR কতটা উপরে/নিচে বসবে (px)। সেটিংয়ের দুইটা
+  // স্লাইডার থেকে আসে। ০ দিলে আগের জায়গাতেই, তাই পুরোনো কার্ড অটুট।
+  signOffsetY = 0,
+  qrOffsetY = 0,
   // মাস্টার কন্ট্রোল — একটা মানেই চারটা অংশ (তথ্যের ঘর, বাঁ স্বাক্ষর,
   // QR, ডান স্বাক্ষর) একসাথে ছোট-বড় হয়। ১ = আগের মাপ, তাই প্রপটা না
   // দিলে কার্ডের চেহারা একটুও বদলায় না।
@@ -409,12 +417,17 @@ export const AdmitCardFace = ({
         showPhoto={showPhoto}
         najemShowSign={najemShowSign}
         najemShowName={najemShowName}
+        najemShowDate={najemShowDate}
         principalShowSign={principalShowSign}
         principalShowName={principalShowName}
+        principalShowDate={principalShowDate}
         showSign={showSign}
         showSignName={showSignName}
+        showSignDate={showSignDate}
         seatText={seatText}
         seatOffsetY={seatOffsetY}
+        signOffsetY={signOffsetY}
+        qrOffsetY={qrOffsetY}
         zoom={zoom}
         printDate={printDate}
         labelOverrides={labelOverrides}
@@ -559,7 +572,13 @@ export const AdmitCardFace = ({
   const headerShift = shiftY(t.headerOffsetY ?? 0);
   const ribbonShift = shiftY(t.ribbonOffsetY ?? 0);
   const bodyShift = shiftY(t.bodyOffsetY ?? 0);
-  const signShift = shiftY(t.signOffsetY ?? 0);
+  // স্বাক্ষরের সারি — টেমপ্লেটের নিজের সরণ + সেটিংয়ের স্লাইডার।
+  // দুইটা যোগ হয়ে চলে, তাই আপলোড করা ডিজাইনের বসানো জায়গা অটুট থাকে
+  // আর স্লাইডারটা তার উপরে সরায়।
+  const signShift = shiftY((t.signOffsetY ?? 0) + (Number(signOffsetY) || 0));
+
+  // QR এর নিজের সরণ — স্বাক্ষরের সারির ভিতরে, কেবল QR টুকুই নড়ে।
+  const qrShift = Number(qrOffsetY) || 0;
 
   // আসনের পট্টির নিজের সরণ — স্বাক্ষরের সারির সাথেই চলে (টেমপ্লেটের
   // signOffsetY), তার উপরে পেজ থেকে আসা seatOffsetY যোগ হয়। তাই
@@ -927,8 +946,16 @@ export const AdmitCardFace = ({
             <div
               className="shrink-0"
               style={
-                z !== 1
-                  ? { transform: `scale(${z})`, transformOrigin: 'bottom center' }
+                qrShift || z !== 1
+                  ? {
+                      // ডানেরটা আগে লেখা হলেও CSS ডান থেকে বাঁয়ে প্রয়োগ করে —
+                      // তাই আগে scale, পরে সরণ। ফলে সরণটা zoom এ গুণ হয় না,
+                      // স্লাইডারে যত px লেখা ঠিক ততটুকুই নামে।
+                      transform: `${qrShift ? `translateY(${qrShift}px) ` : ''}${
+                        z !== 1 ? `scale(${z})` : ''
+                      }`.trim(),
+                      transformOrigin: 'bottom center',
+                    }
                   : undefined
               }
             >

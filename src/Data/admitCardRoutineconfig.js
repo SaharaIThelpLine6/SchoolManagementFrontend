@@ -129,7 +129,10 @@ const R_ZONES = {
 const R_PHOTO = { photoW: 58, photoH: 74 };
 const R_QR_SIZE = 56;
 
-export const ROUTINE_CARD_TEMPLATES = [
+// 👇 `hidden: true` দিলে ডিজাইনটা তালিকায় আর দেখা যায় না, কিন্তু মুছে
+// যায় না — কারো সেটিংয়ে ওটা সংরক্ষিত থাকলে কার্ড আগের মতোই ছাপে,
+// কারণ getRoutineTemplate() নিচের পূর্ণ তালিকাটাই খোঁজে।
+const ALL_ROUTINE_CARD_TEMPLATES = [
   {
     id: 'r1',
     title: 'রুটিন — সাদা',
@@ -451,6 +454,7 @@ export const ROUTINE_CARD_TEMPLATES = [
     // সবুজ-সোনালী নকশা — A5 এর id '13'
     id: 'r8',
     title: 'রুটিন — সবুজ-সোনালী নকশা',
+    hidden: true,
     variant: 'painted',
     layout: 'classic',
     chrome: 'ornate',
@@ -499,6 +503,7 @@ export const ROUTINE_CARD_TEMPLATES = [
     // তাই টেবিলের রঙগুলো হালকাই রাখা।
     id: 'r9',
     title: 'রুটিন — মিহরাব (গাঢ় সবুজ)',
+    hidden: true,
     variant: 'painted',
     layout: 'classic',
     chrome: 'arch',
@@ -545,6 +550,7 @@ export const ROUTINE_CARD_TEMPLATES = [
     // আধুনিক সবুজ — A5 এর id '15'
     id: 'r10',
     title: 'রুটিন — আধুনিক সবুজ',
+    hidden: true,
     variant: 'painted',
     layout: 'modern',
     cardBg: '#ffffff',
@@ -589,6 +595,7 @@ export const ROUTINE_CARD_TEMPLATES = [
     // সবুজ — নাম বড়। A5 এর id '16' এর রুটিন রূপ।
     id: 'r11',
     title: 'রুটিন — সবুজ, নাম বড়',
+    hidden: true,
     variant: 'painted',
     layout: 'profile',
     cardBg: '#f1f7f4',
@@ -629,13 +636,111 @@ export const ROUTINE_CARD_TEMPLATES = [
       seatColor: '#0b6b4f',
     },
   },
+
+  {
+    // রাজকীয় সবুজ-সোনালী — A5 এর id '17'
+    id: 'r12',
+    title: 'রুটিন — রাজকীয় সবুজ-সোনালী',
+    hidden: true,
+    variant: 'painted',
+    layout: 'royal',
+    cardBg: '#fffdf8',
+    primary: '#0b5c3b',
+    gold: '#c9a227',
+    gridColor: '#d9cfae',
+    labelBg: '#fdf8ea',
+    nameColor: '#0b5c3b',
+    addressColor: '#6b6250',
+    nameSize: 15,
+    addressSize: 7.5,
+    valueColor: '#14261c',
+    labelColor: '#5b5340',
+    accent: '#0b5c3b',
+    examNameColor: '#0b5c3b',
+    examNameSize: 11,
+    photoBorder: '#c7b891',
+    signLineColor: '#0b5c3b',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 34,
+    qrPad: 'transparent',
+    ...R_ZONES,
+    ...R_PHOTO,
+    table: {
+      tableStyle: 'grid',
+      headBg: '#0b5c3b',
+      headColor: '#ffffff',
+      borderColor: '#0b5c3b',
+      gridColor: '#d9cfae',
+      titleColor: '#0b5c3b',
+      titleBg: '#fdf8ea',
+      zebra: '#fffdf8',
+      seatBg: '#fdf8ea',
+      seatColor: '#0b5c3b',
+    },
+  },
+
+  {
+    // মিহরাব খিলান — A5 এর id '18'।
+    // কার্ডের পট গাঢ়, কিন্তু রুটিনের টেবিলটা সাদা ঘরের উপরে বসে,
+    // তাই টেবিলের রঙগুলো হালকাই।
+    id: 'r13',
+    title: 'রুটিন — মিহরাব খিলান',
+    hidden: true,
+    variant: 'painted',
+    layout: 'mihrab',
+    cardBg: '#0c4a4a',
+    primary: '#0c4a4a',
+    gold: '#d4af37',
+    gridColor: '#cbd5e1',
+    labelBg: '#eef6f6',
+    nameColor: '#ffffff',
+    addressColor: '#d4af37',
+    nameSize: 14,
+    addressSize: 7.5,
+    valueColor: '#0f172a',
+    labelColor: '#475569',
+    accent: '#0c4a4a',
+    examNameColor: '#d4af37',
+    examNameSize: 11,
+    photoBorder: '#94a3b8',
+    signLineColor: '#0c4a4a',
+    showPhoto: true,
+    showSignature: true,
+    showSignDate: false,
+    showQR: true,
+    qrSize: 34,
+    qrPad: 'transparent',
+    ...R_ZONES,
+    ...R_PHOTO,
+    table: {
+      tableStyle: 'grid',
+      headBg: '#0c4a4a',
+      headColor: '#ffffff',
+      borderColor: '#0c4a4a',
+      gridColor: '#cbd5e1',
+      titleColor: '#0c4a4a',
+      titleBg: '#eef6f6',
+      zebra: '#f8fafc',
+      seatBg: '#eef6f6',
+      seatColor: '#0c4a4a',
+    },
+  },
 ];
+
+/** তালিকায় যেগুলো দেখা যাবে — `hidden: true` দেওয়াগুলো বাদ */
+export const ROUTINE_CARD_TEMPLATES = ALL_ROUTINE_CARD_TEMPLATES.filter(
+  (t) => !t.hidden
+);
 
 /** পুরোনো নাম — অন্য ফাইলে import থাকলে ভাঙবে না */
 export const ROUTINE_TEMPLATES = ROUTINE_CARD_TEMPLATES;
 
+/** আইডি দিয়ে খোঁজা — পূর্ণ তালিকা থেকেই, বন্ধ করা ডিজাইনসহ */
 export const getRoutineTemplate = (id) =>
-  ROUTINE_CARD_TEMPLATES.find((t) => String(t.id) === String(id)) ||
+  ALL_ROUTINE_CARD_TEMPLATES.find((t) => String(t.id) === String(id)) ||
   ROUTINE_CARD_TEMPLATES[0];
 
 /**
@@ -644,7 +749,8 @@ export const getRoutineTemplate = (id) =>
  * (admitCardConfig.js এর isRoutineMode)। এটা কেবল আইডি যাচাইয়ের জন্য।
  */
 export const isRoutineOn = (id) =>
-  Boolean(id) && ROUTINE_CARD_TEMPLATES.some((t) => String(t.id) === String(id));
+  Boolean(id) &&
+  ALL_ROUTINE_CARD_TEMPLATES.some((t) => String(t.id) === String(id));
 
 // ---------------------------------------------------------------------------
 // রুটিনের রঙ

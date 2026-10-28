@@ -36,7 +36,7 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
       ExamID: null,
       SubClassID: null,
       SubjectID: "",
-      PassNumber: "",
+      PassNumber: 33,
       MeariAction: false,
       MaxNumber: "",
       KeratAction: false,
@@ -95,7 +95,7 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
         ExamID: subjectAndPassNumberFilter.ExamId,
         SubClassID: subjectAndPassNumberFilter.SubClassId,
         SubjectID: "",
-        PassNumber: "",
+        PassNumber: 33,
         MeariAction: false,
         MaxNumber: "",
         KeratAction: false,
@@ -115,7 +115,10 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
   const handleEdit = (row) => {
     setEditingId(row.ID);
     setValue("SubjectID", row.BookID);
-    setValue("PassNumber", row.PassNumber);
+    setValue(
+      "PassNumber",
+      row.PassNumber === "" || row.PassNumber == null ? 33 : row.PassNumber
+    );
     setValue("MeariAction", row.MeariAction);
     setValue("MaxNumber", row.MaxNumber);
     setValue("KeratAction", row.KeratAction);
@@ -128,7 +131,7 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
       ExamID: subjectAndPassNumberFilter?.ExamId,
       SubClassID: subjectAndPassNumberFilter?.SubClassId,
       SubjectID: "",
-      PassNumber: "",
+      PassNumber: 33,
       MeariAction: false,
       MaxNumber: "",
       KeratAction: false,
@@ -162,7 +165,9 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
         return;
       }
 
-      if (!data.PassNumber) {
+      const passNumber = data.PassNumber === "" || data.PassNumber == null ? 33 : data.PassNumber;
+
+      if (!passNumber) {
         Swal.fire({
           icon: "warning",
           title: "Pass Number Required",
@@ -176,7 +181,7 @@ const SubjectPassNumber = ({ pageTitle, title }) => {
         ExamID: subjectAndPassNumberFilter.ExamId,
         SubClassID: subjectAndPassNumberFilter.SubClassId,
         BookID: data.SubjectID,
-        PassNumber: data.PassNumber,
+        PassNumber: passNumber,
         MeariAction: data.MeariAction || false,
         MaxNumber: data.MaxNumber || 0,
         KeratAction: data.KeratAction || false,

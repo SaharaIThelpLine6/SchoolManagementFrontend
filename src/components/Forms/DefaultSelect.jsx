@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import useTranslate from "../../utils/Translate";
 import bnBijoy2Unicode from "../../utils/conveter";
 
@@ -49,10 +49,18 @@ const DefaultSelect = ({
     register,
     formState: { errors },
     setValue,
+    getValues,
+    control,
   } = useFormContext();
 
   const translate = useTranslate();
   const [isOpen, setIsOpen] = useState(false);
+  const selectedValue = useWatch({
+    control,
+    name: registerKey,
+    disabled: !hidePlaceholder,
+  });
+  const firstOptionValue = options?.[0]?.[valueField];
 
   const toggleDropdown = () => {
     if (!disabled) {
@@ -105,6 +113,24 @@ const DefaultSelect = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialValue, registerKey, options?.length, valueField]);
 
+  // Keep the form value in sync when there is no placeholder, including after
+  // async options arrive or a field-array row is reset to an empty value.
+  useEffect(() => {
+    if (!hidePlaceholder || firstOptionValue == null || firstOptionValue === "") {
+      return;
+    }
+
+    const currentValue = getValues(registerKey);
+    if (currentValue != null && currentValue !== "" && !Number.isNaN(currentValue)) {
+      return;
+    }
+
+    setValue(
+      registerKey,
+      type === "number" ? Number(firstOptionValue) : String(firstOptionValue)
+    );
+  }, [hidePlaceholder, firstOptionValue, selectedValue, registerKey, type, getValues, setValue]);
+
   return (
     <div
       className={` font-SolaimanLipi w-full ${
@@ -147,7 +173,7 @@ const DefaultSelect = ({
             onChange={readOnly ? (event) => event.preventDefault() : handleChange}
             onMouseDown={readOnly ? (event) => event.preventDefault() : undefined}
             onKeyDown={readOnly ? (event) => event.preventDefault() : undefined}
-            defaultValue={initialValue ?? ""}
+            defaultValue={initialValue ?? (hidePlaceholder ? firstOptionValue : "")}
             disabled={disabled}
             aria-readonly={readOnly}
             className={`relative z-20 w-full appearance-none font-default rounded-lg border text-sm h-11 ${

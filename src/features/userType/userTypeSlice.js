@@ -236,6 +236,7 @@ export const userTypeSlice = createApi({
 export const {
   useGetUserTypesQuery,
   useGetUserBySearchQuery,
+  useLazyGetUserBySearchQuery,
   useGetAllMadrasahQuery,
   useGetMadrasahStatsQuery,
   useToggleMadrasahActionMutation,

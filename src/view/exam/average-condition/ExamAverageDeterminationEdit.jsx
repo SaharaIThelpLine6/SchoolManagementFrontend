@@ -331,6 +331,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
     setValue("DivisionName", division?.DivisionNames || "");
     setValue("DivisionArabic", division?.DivisionArabics || "");
     setValue("DivisionEnglish", division?.DivisionEnglishs || "");
+    setValue("Note", division?.Note || "");
     setShowDivisionManager(true);
   };
 
@@ -339,6 +340,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
     setValue("DivisionName", "");
     setValue("DivisionArabic", "");
     setValue("DivisionEnglish", "");
+    setValue("Note", "");
     setShowDivisionManager(false);
   };
   const onSubmit = (data) => {
@@ -452,7 +454,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                   </h2>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 md:grid-cols-4">
                   <div>
                     <DefaultInput type='text' registerKey={"DivisionName"} placeholder={"বিভাগ (বাংলা)"} required />
                   </div>
@@ -461,6 +463,9 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                   </div>
                   <div>
                     <DefaultInput registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
+                  </div>
+                  <div>
+                    <DefaultInput registerKey={"Note"} placeholder={"নোট"} />
                   </div>
                 </div>
 
@@ -474,9 +479,10 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                   </button>
                   <button
                     type="button"
-                    className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                    className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex gap-1"
                     onClick={handleCloseDivisionManager}
                   >
+                    <SvgIcon name="LongArrowLeft" />
                     এক্সাম কন্ডিশনে ফিরে যান
                   </button>
                 </div>
@@ -505,7 +511,7 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                 </div>
               </div>
             ) : (
-              <div className="w-full space-y-10 bg-white rounded-xl shadow-md">
+              <div className="w-full space-y-10">
                 <section>
                   <h2 className="text-lg font-semibold text-gray-800 mb-3 pl-2">
                     {translate("Grade based on marks")}
@@ -619,9 +625,9 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
             )
           ) : null
         }
-        <div className="text-end">
+        <div className="text-end flex justify-end items-center">
           {
-            !showDivisionManager ? <Button type='submit'>{translate("Save & Continue")}</Button> : null
+            !showDivisionManager ? <Button type='submit' className='flex gap-1'>{translate("Next")}  <SvgIcon name={"LongArrowRight"} /> </Button> : null
           }
 
         </div>

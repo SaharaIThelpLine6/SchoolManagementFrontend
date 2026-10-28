@@ -154,6 +154,9 @@ export const defaultFeeListSettings = (languageId = 1) => ({
   showSummary: true,
   showTotalRow: true,
 
+  // উপরের সারসংক্ষেপে কোন ঘরগুলো বসবে (SUMMARY_CARDS দেখুন)
+  visibleSummary: SUMMARY_CARDS.filter((c) => c.defaultOn).map((c) => c.key),
+
   // ⭐ দুইটা আলাদা লোগো — একটাই ভেবে গুলিয়ে ফেলা সহজ, তাই নাম দুইটা:
   //
   //   showLogo      → প্রতিষ্ঠানের লোগো, কাগজের মাথায় নামের উপরে স্পষ্ট করে
@@ -236,6 +239,14 @@ export const loadFeeListSettings = (listType, languageId = 1) => {
       visible: visible.length ? visible : fallback.visible,
       labels: saved.labels && typeof saved.labels === 'object' ? saved.labels : {},
       widths: saved.widths && typeof saved.widths === 'object' ? saved.widths : {},
+
+      /* সারসংক্ষেপের ঘর — অচেনা key ছেঁটে ফেলি।
+         ⭐ ফাঁকা তালিকা জোর করে ডিফল্টে ফেরাই না: সবগুলো বন্ধ করাটাও
+         একটা বাছাই, ওটা কেড়ে নিলে বন্ধ করা যেত না। আর পুরোনো সেভ করা
+         সেটিংসে চাবিটাই নেই — তখন উপরের fallback এর চারটাই বসে। */
+      visibleSummary: Array.isArray(saved.visibleSummary)
+        ? saved.visibleSummary.filter((k) => summaryCardByKey(k))
+        : fallback.visibleSummary,
     };
   } catch {
     return fallback;
@@ -478,6 +489,64 @@ export const pickFeeRows = (reportData, listType) => {
 };
 
 /** যে তালিকাটা দেখানো হচ্ছে তার হিসাব — উপরের পিল আর সর্বমোট ঘরের জন্য */
+/* ───────────────────────────────────────────────────────────────────────────
+   উপরের সারসংক্ষেপের ঘরগুলো
+
+   কাগজের মাথায় যে রঙিন ঘরগুলো বসে (মোট শিক্ষার্থী, ফি দিয়েছে…) —
+   কোনটা বসবে সেটা এখন বাছাই করা যায়। কারণ তালিকাভেদে কিছু ঘর অর্থহীন:
+   "ফি গৃহীত" তালিকায় "ফি দেয়নি" সবসময় ০, আর "ফি বিহীন" তালিকায়
+   "মোট জমা" সবসময় ০ — ওই শূন্যগুলো কাগজে বসে থাকার কোনো মানে নেই।
+
+   key টা feeRowsSummary এর ফলের চাবি, তাই নতুন ঘর যোগ করতে হলে ওখানে
+   মানটা বের করে এখানে একটা লাইন — কাগজ আর সেটিংস, দুই জায়গাতেই চলে আসবে।
+   ─────────────────────────────────────────────────────────────────────────── */
+export const SUMMARY_CARDS = [
+  { key: 'totalStudent', label: 'মোট শিক্ষার্থী', defaultOn: true,
+    tone: 'border-slate-200 bg-slate-50 text-slate-700' },
+  { key: 'paidCount',    label: 'ফি দিয়েছে',     defaultOn: true,
+    tone: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
+  { key: 'unpaidCount',  label: 'ফি দেয়নি',      defaultOn: true,
+    tone: 'border-rose-200 bg-rose-50 text-rose-700' },
+  { key: 'collected',    label: 'মোট জমা',       defaultOn: true,
+    tone: 'border-sky-200 bg-sky-50 text-sky-700' },
+
+  // এই দুইটা আগে ছিল না — মানটা হিসাব হত, কিন্তু কাগজে বসত না
+  { key: 'due',          label: 'মোট বাকি',      defaultOn: false,
+    tone: 'border-amber-200 bg-amber-50 text-amber-700' },
+  { key: 'shownCount',   label: 'এই তালিকায়',    defaultOn: false,
+    tone: 'border-violet-200 bg-violet-50 text-violet-700' },
+];
+
+export const summaryCardByKey = (key) =>
+  SUMMARY_CARDS.find((c) => c.key === key) || null;
+
+/**
+ * যে ঘরগুলো বসবে, সেভ করা ক্রমেই।
+ *
+ * পুরোনো সেভ করা সেটিংসে এই তালিকাটা নেই — তখন ডিফল্ট চারটাই বসে, মানে
+ * আগে যা দেখতেন ঠিক তাই। আর সবগুলো বন্ধ করলে ফাঁকা তালিকাই মানা হয়,
+ * জোর করে ডিফল্ট ফেরানো হয় না — তখন সারসংক্ষেপটাই আর বসে না।
+ */
+export const visibleSummaryCards = (settings) => {
+  const list = Array.isArray(settings?.visibleSummary)
+    ? settings.visibleSummary
+    : SUMMARY_CARDS.filter((c) => c.defaultOn).map((c) => c.key);
+
+  return list.map(summaryCardByKey).filter(Boolean);
+};
+
+/** একটা ঘর চালু/বন্ধ — চালু করলে তালিকার নিজের জায়গায় বসে, শেষে নয় */
+export const toggleSummaryCard = (visibleSummary, key) => {
+  const list = Array.isArray(visibleSummary)
+    ? visibleSummary
+    : SUMMARY_CARDS.filter((c) => c.defaultOn).map((c) => c.key);
+
+  if (list.includes(key)) return list.filter((k) => k !== key);
+
+  const order = SUMMARY_CARDS.map((c) => c.key);
+  return [...list, key].sort((a, b) => order.indexOf(a) - order.indexOf(b));
+};
+
 export const feeRowsSummary = (rows, reportData) => {
   const list = Array.isArray(rows) ? rows : [];
   const paidCount = list.filter((r) => r?.IsPaid).length;

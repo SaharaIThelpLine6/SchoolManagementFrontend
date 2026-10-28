@@ -90,6 +90,31 @@ const ExamCondition = ({ pageTitle }) => {
     }
   };
 
+  const handleConditionDuplicate = async (row) => {
+    try {
+      const source = await getExamConditionEntry({
+        SessionID: row.SessionID,
+        ExamID: row.ExamID,
+        SubClassID: row.SubClassID,
+      }).unwrap();
+      if (!source) throw new Error("Condition not found");
+
+      showModal(
+        "Duplicate Exam Condition",
+        "EXAM_CONDITION_SETTINGS",
+        { ...source, ExamID: "", isEditMode: false },
+        { closeOnOutSide: false, header: "sticky" }
+      );
+    } catch (error) {
+      console.error("Failed to load condition for duplication:", error);
+      Swal.fire({
+        icon: "error",
+        title: translate("Failed to duplicate exam condition"),
+        text: error?.data?.message || error?.data?.error || error?.message || translate("Please try again."),
+      });
+    }
+  };
+
   const handleDelete = async (data) => {
     try {
       const result = await Swal.fire({
@@ -156,6 +181,15 @@ const ExamCondition = ({ pageTitle }) => {
                 name={"FiEdit"}
                 size={14}
               />
+            </Button>
+            <Button
+              type="button"
+              tooltip_message={translate("Duplicate Exam Condition")}
+              aria-label={translate("Duplicate Exam Condition")}
+              onClick={() => handleConditionDuplicate(row)}
+              disabled={isExamConditionFetching}
+            >
+              <SvgIcon name="Copy" size={16} />
             </Button>
             <DeleteButton onClick={() => { handleDelete(row) }} />
 

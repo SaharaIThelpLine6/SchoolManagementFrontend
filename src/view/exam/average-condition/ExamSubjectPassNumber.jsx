@@ -1,4 +1,20 @@
 import { useEffect, useRef, useState } from "react";
+import PropTypes from "prop-types";
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useDispatch } from "react-redux";
 import useTranslate from "../../../utils/Translate";
 import Button from "../../../components/Button/Button";
@@ -17,8 +33,87 @@ import CheckboxOption from "./CheckboxOption";
 import DefaultInput from "../../../components/Forms/DefaultInput";
 import SvgIcon from "../../../components/icons/SvgIcon";
 import { useMultiStepForm } from "../../../hooks/useMultiStepForm";
+import MultiSelect from "../../../components/Forms/MultiSelect";
 
 const MAX_GRADE_BANDS = 7;
+
+const passNumberOrDefault = (passNumber) =>
+  passNumber === "" || passNumber == null ? 33 : passNumber;
+
+const withDefaultSubjectNumbers = (subjects) =>
+  subjects.map((subject) => ({
+    ...subject,
+    MaxNumber:
+      subject.MaxNumber === "" || subject.MaxNumber == null
+        ? 100
+        : subject.MaxNumber,
+    PassNumber: passNumberOrDefault(subject.PassNumber),
+  }));
+
+const SubjectColumnHeader = ({ label, helpText }) => (
+  <span className="inline-flex items-center gap-1">
+    <span>{label}</span>
+    <button
+      type="button"
+      aria-label={`${label}: ${helpText}`}
+      data-tooltip-id="subject-column-tooltip"
+      data-tooltip-content={helpText}
+      data-tooltip-place="top"
+      className="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+    >
+      <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5">
+        <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
+        <path d="M10 9v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="10" cy="6.5" r="1" fill="currentColor" />
+      </svg>
+    </button>
+  </span>
+);
+
+SubjectColumnHeader.propTypes = {
+  label: PropTypes.string.isRequired,
+  helpText: PropTypes.string.isRequired,
+};
+
+const SortableSubjectRow = ({ id, index, label, children }) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id });
+
+  return (
+    <tr
+      ref={setNodeRef}
+      style={{
+        transform: CSS.Transform.toString(transform),
+        transition,
+        position: "relative",
+        zIndex: isDragging ? 1 : undefined,
+        backgroundColor: isDragging ? "white" : undefined,
+      }}
+      className="border-t border-gray-100"
+    >
+      <td className="px-2 py-2 text-center align-middle">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          aria-label={`${label} ${index + 1}`}
+          className="inline-flex cursor-grab items-center justify-center rounded p-2 text-gray-500 hover:bg-gray-100 active:cursor-grabbing"
+          style={{ touchAction: "none" }}
+        >
+          <SvgIcon name="GrDrag" size={18} />
+        </button>
+      </td>
+      {children}
+    </tr>
+  );
+};
+
+SortableSubjectRow.propTypes = {
+  id: PropTypes.string.isRequired,
+  index: PropTypes.number.isRequired,
+  label: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
+};
 
 const getUniqueDivisionIds = (gradeBands = []) =>
   new Set(
@@ -160,7 +255,11 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
         { DivisionNumber: "", DivisionID: "", TopNum: "", Serial: 6 },
         { DivisionNumber: "", DivisionID: "", TopNum: "", Serial: 7 },
       ],
-      subjectPassNumbers: sharedStepData?.subjectPassNumbers?.length ? sharedStepData.subjectPassNumbers : [{ SubjectID: "", mayeri: "", optional: false, PassNumber: "" }],
+      subjectPassNumbers: sharedStepData?.subjectPassNumbers?.length
+        ? withDefaultSubjectNumbers(sharedStepData.subjectPassNumbers)
+        : sharedStepData?.ExamType == 4
+          ? [{ SubjectID: "", mayeri: "", optional: false, MaxNumber: 100, PassNumber: 33 }]
+          : [],
       gradeColorSettings:
         normalizeGradeColorSettings(
           sharedStepData?.gradeColorSettings ||
@@ -199,8 +298,10 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
         ? sharedStepData?.gradeBands || []
         : emptyGradeBands,
       subjectPassNumbers: sharedStepData?.subjectPassNumbers?.length
-        ? sharedStepData.subjectPassNumbers
-        : [{ SubjectID: "", mayeri: "", optional: false, PassNumber: "" }],
+        ? withDefaultSubjectNumbers(sharedStepData.subjectPassNumbers)
+        : sharedStepData?.ExamType == 4
+          ? [{ SubjectID: "", mayeri: "", optional: false, MaxNumber: 100, PassNumber: 33 }]
+          : [],
       subjectGradeList: sharedStepData?.subjectGradeList || [],
       gradeColorSettings:
         normalizeGradeColorSettings(
@@ -232,6 +333,8 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
     fields: subjectFields,
     append: appendSubject,
     remove: removeSubject,
+    move: moveSubject,
+    replace: replaceSubjects,
   } = useFieldArray({
     control,
     name: "subjectPassNumbers",
@@ -258,6 +361,14 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
   }, [divitionList, examDivitions, setValue]);
 
   const onSubmit = (data) => {
+    if (ExamType != 4 && !data.subjectPassNumbers?.length) {
+      Swal.fire({
+        icon: "warning",
+        title: translate("Select at least one subject"),
+      });
+      return;
+    }
+
     const gradeColorSettings = normalizeGradeColorSettings(
       data.gradeColorSettings,
       data.subjectGradeList
@@ -325,7 +436,10 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
     if (sharedStepData?.subjectPassNumbers?.length) {
       sharedStepData.subjectPassNumbers.forEach((band, idx) => {
         setValue(`subjectPassNumbers.${idx}.SubjectID`, band.SubjectID);
-        setValue(`subjectPassNumbers.${idx}.PassNumber`, band.PassNumber);
+        setValue(
+          `subjectPassNumbers.${idx}.PassNumber`,
+          passNumberOrDefault(band.PassNumber)
+        );
       });
     }
   }, [subjectsListData, sharedStepData?.SubClassID, sharedStepData?.subjectPassNumbers, setValue]);
@@ -588,6 +702,40 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
   const colorDivisions = (examDivitions || []).filter((division) =>
     colorDivisionIds.has(String(division.ID))
   );
+  const selectedSubjectIds = (watch("subjectPassNumbers") || [])
+    .map((subject) => subject?.SubjectID)
+    .filter((id) => id !== "" && id != null)
+    .map(String);
+  const subjectDragSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleSubjectDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return;
+
+    const from = subjectFields.findIndex((field) => field.id === active.id);
+    const to = subjectFields.findIndex((field) => field.id === over.id);
+    if (from !== -1 && to !== -1) moveSubject(from, to);
+  };
+
+  const handleSubjectSelectionChange = (selectedIds) => {
+    const currentRows = getValues("subjectPassNumbers") || [];
+    const emptyRow = currentRows.find((row) => !row?.SubjectID);
+    const rows = selectedIds.map((id) =>
+      currentRows.find((row) => String(row.SubjectID) === id) || {
+        ...emptyRow,
+        SubjectID: id,
+        mayeri: emptyRow?.mayeri || "",
+        MaxNumber: emptyRow?.MaxNumber ?? 100,
+        PassNumber: passNumberOrDefault(emptyRow?.PassNumber),
+        optional: emptyRow?.optional || false,
+      }
+    );
+
+    replaceSubjects(withDefaultSubjectNumbers(rows));
+  };
+
   const updateGradeColorSetting = (divisionId, changes) => {
     const subjectGradeList = getValues("subjectGradeList") || [];
     const settings = normalizeGradeColorSettings(
@@ -636,92 +784,131 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
         ExamType != 4 ? (
           <FormProvider {...methods}>
             <form
-              className="w-full space-y-10 bg-white rounded-xl shadow-md"
+              className="w-full space-y-10 bg-white"
               onSubmit={handleSubmit(onSubmit)}
             >
               <section>
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">
                   {translate("Subject Pass Number")}
                 </h2>
+                <MultiSelect
+                  options={filteredSubjects}
+                  value={selectedSubjectIds}
+                  onChange={handleSubjectSelectionChange}
+                  valueField="SubjectID"
+                  nameField="SubjectName"
+                  label={translate("Subject")}
+                  placeholder={translate("Select subjects")}
+                  searchPlaceholder={translate("Search subjects")}
+                  emptyMessage={translate("No subjects found")}
+                />
+                <div className="min-h-[200px]">
+                  {subjectFields.length > 0 && <DndContext
+                    sensors={subjectDragSensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleSubjectDragEnd}
+                  >
+                    <table className="w-full text-sm border border-gray-100">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="w-12 px-2 py-2" aria-label={translate("Reorder subjects")} />
+                          <th className="text-left px-4 py-2 font-medium text-gray-600">
+                            {translate("Subject")}
+                          </th>
+                          {ExamType != 3 && (<th className="text-left px-4 py-2 font-medium text-gray-600">
+                            <SubjectColumnHeader
+                              label={translate("Meyari")}
+                              helpText={`মিয়ারি হচ্ছে কিতাবের গুরুত্বের ধরন। এর মধ্যে কিতাবগুলো ৩ ধরনের কন্ডিশনে ভাগ করা যায়। যথা: ১) গড় মিয়ারি: যেসকল বিষয় কম গুরুত্বপূর্ণ সে সকল বিষয়কে গড় মিয়ারি দ্বারা প্রকাশ করা হয়। পরীক্ষায় যদি এমন কন্ডিশন ব্যবহার করা হয় যেখানে ২/৩/৪ কিতাবে বা তার কম বিষয়ে অকৃতকার্য হওয়ার পরও যদি গড়ে সকল বিষয়ে পাস করে তাহলে তাকে মাকবুল/বিশেষ বিবেচনায় পাস বলে বিবেচনা করার সুযোগ থাকে।
+২) মিয়ারি: মধ্যম গুরুত্বপূর্ণ এমন বিষয়গুলোকে মিয়ারি দ্বারা প্রকাশ করা যায়। মিয়ারি ও গড়মিয়ারির পরীক্ষার কন্ডিশনের ধরন প্রায় একই। নির্দিষ্ট বিষয়ে বা তার কম ফেল করার পর গড়ে পাস করলে মাকবুল/বিশেষ বিবেচনায় পাস বলে বিবেচনা করার সুযোগ থাকে।
+৩) অধিকতর মিয়ারি: যেসকল বিষয়গুলোকে অধিক গুরুত্ব দেওয়া হয় বা অধিক গুরুত্বপূর্ণ বিষয় হিসাবে ধরা হয় এবং যেগুলো ১ বিষয়ে অকৃতকার্য হলেই রাসিব বা ফেল হয় সে বিষয়গুলো অধিকতর গুরুত্বপূর্ণ বিষয় বলে বিবেচনা করা হয়। গড় মিয়ারি ও মিয়ারি বিষয়ে যা হোক না কেনো অধিকতর বিষয়ে ১ বিষয়ে অকৃতকার্য হলেই ফলাফলে তখন রাসিব বা ফেল দেখাবে। `}
+                            />
+                          </th>)}
 
-                <table className="w-full text-sm border border-gray-100">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="text-left px-4 py-2 font-medium text-gray-600">
-                        {translate("Subject")}
-                      </th>
-                      {ExamType != 3 && (<th className="text-left px-4 py-2 font-medium text-gray-600">
-                        {translate("Meyari")}
-                      </th>)}
+                          <th className="text-left px-4 py-2 font-medium text-gray-600">
+                            <SubjectColumnHeader
+                              label={translate("Max Number")}
+                              helpText={`১ টি পরীক্ষার ১ টি বিষয়ে সর্বোচ্চ যত নাম্বারে পরীক্ষা হয় উক্ত নাম্বারকে সর্বোচ্চ প্রাপ্য নম্বর বলে ধরা হয়। উদাহরনস্বরুপ: মাসিক পরীক্ষা যদি ২০ নাম্বারের হয় তাহলে সর্বোচ্চ প্রাপ্য নাম্বার হবে ২০, সাময়িক পরীক্ষা যদি ১০০ নাম্বারের হয় তখন উক্ত পরীক্ষার প্রাপ্য নাম্বার হবে ১০০। `}
+                            />
+                          </th>
+                          <th className="text-left px-4 py-2 font-medium text-gray-600">
+                            <SubjectColumnHeader
+                              label={translate("Pass Number")}
+                              helpText={`১টি পরীক্ষায় কোনো নির্দিষ্ট বিষয়ে যত নাম্বার পেলে গড়ে মাকবুল বা পাস করে উক্ত প্রাপ্য নাম্বারকে পাস নাম্বার বলে বিবেচনা করা হয়। সকল স্কুল/মাদরাসা নিয়ম অনুযায়ী পরীক্ষার ৩৩%-৪০% নাম্বার পাস নাম্বার বলে ধরা হয়। যদি ১০০ নাম্বারে পরীক্ষা হয় পাস নাম্বার হবে ৩৩, ৫০ এ পরীক্ষা হলে পাস নাম্বার হবে ১৭, ২০ নাম্বারে পরীক্ষা হলে পাস নাম্বার হবে ৭।`}
+                            />
+                          </th>
+                          <th className="text-left px-4 py-2 font-medium text-gray-600">
+                            <SubjectColumnHeader
+                              label={translate("Optional")}
+                              helpText={`ক্বেরাত কন্ডিশন বলতে অপশনাল বিষয় বুঝায়, যেসকল বিষয়ের পরীক্ষা হয় কিন্তু উক্ত পরীক্ষার নাম্বার মোট নাম্বারের সাথে যুক্ত হয় না, সেসকল বিষয় ক্বেরাত কন্ডিশন বলে বিবেচনা করা হয়। উল্লেখ্য, অপশনাল বিষয়ে অকৃতকার্য / অনুপস্থিত হলে রাসিব/ বিবেচনায় পাস বলে বিবেচনা করা যাবে।`}
+                            />
+                          </th>
+                          {/* <th className="px-4 py-2 w-10"></th> */}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <SortableContext
+                          items={subjectFields.map((field) => field.id)}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          {subjectFields.map((field, index) => (
+                            <SortableSubjectRow
+                              key={field.id}
+                              id={field.id}
+                              index={index}
+                              label={translate("Drag subject row")}
+                            >
+                              <td className="px-4 py-2 align-top">
+                                <DefaultSelect
+                                  options={filteredSubjects ?? []}
+                                  valueField="SubjectID"
+                                  nameField="SubjectName"
+                                  registerKey={`subjectPassNumbers.${index}.SubjectID`}
+                                  require="This is required!"
+                                />
+                              </td>
 
-                      <th className="text-left px-4 py-2 font-medium text-gray-600">
-                        {translate("Max Number")}
-                      </th>
-                      <th className="text-left px-4 py-2 font-medium text-gray-600">
-                        {translate("Pass Number")}
-                      </th>
-                      <th className="text-left px-4 py-2 font-medium text-gray-600">
-                        {translate("Optional")}
-                      </th>
-                      <th className="px-4 py-2 w-10"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {subjectFields.map((field, index) => (
-                      <tr key={field.id} className="border-t border-gray-100">
-                        <td className="px-4 py-2 align-top">
-                          <DefaultSelect
-                            options={filteredSubjects ?? []}
-                            valueField="SubjectID"
-                            nameField="SubjectName"
-                            registerKey={`subjectPassNumbers.${index}.SubjectID`}
-                            require="This is required!"
-                          />
-                        </td>
+                              {ExamType != 3 && (<td className="px-4 py-2 align-top">
+                                <DefaultSelect
+                                  options={[
+                                    { id: 1, name: translate("Gor mayeri") },
+                                    { id: 2, name: translate("Mayeri") },
+                                    { id: 3, name: translate("Most Mayeri") },
+                                  ]}
+                                  valueField="id"
+                                  nameField="name"
+                                  registerKey={`subjectPassNumbers.${index}.mayeri`}
+                                  require="This is required!"
+                                  hidePlaceholder={true}
 
-                        {ExamType != 3 && (<td className="px-4 py-2 align-top">
-                          <DefaultSelect
-                            options={[
-                              { id: 1, name: translate("Gor mayeri") },
-                              { id: 2, name: translate("Mayeri") },
-                              { id: 3, name: translate("Most Mayeri") },
-                            ]}
-                            valueField="id"
-                            nameField="name"
-                            registerKey={`subjectPassNumbers.${index}.mayeri`}
-                            require="This is required!"
+                                />
+                              </td>)
 
-                          />
-                        </td>)
+                              }
 
-                        }
-
-                        <td className="px-4 py-2 align-top">
-                          <DefaultInput
-                            type="number"
-                            registerKey={`subjectPassNumbers.${index}.MaxNumber`}
-                            require="This is required!"
-                            defaultValue={100}
-                          />
-                        </td>
-                        <td className="px-4 py-2 align-top">
-                          <DefaultInput
-                            type="number"
-                            registerKey={`subjectPassNumbers.${index}.PassNumber`}
-                            require="This is required!"
-                            defaultValue={null}
-                          />
-                        </td>
+                              <td className="px-4 py-2 align-top">
+                                <DefaultInput
+                                  type="number"
+                                  registerKey={`subjectPassNumbers.${index}.MaxNumber`}
+                                  require="This is required!"
+                                />
+                              </td>
+                              <td className="px-4 py-2 align-top">
+                                <DefaultInput
+                                  type="number"
+                                  registerKey={`subjectPassNumbers.${index}.PassNumber`}
+                                  require="This is required!"
+                                />
+                              </td>
 
 
-                        <td className="px-4 py-2 align-top">
-                          <CheckboxOption
-                            label={translate("Kerat Condition")}
-                            registerKey={`subjectPassNumbers.${index}.optional`}
-                          />
-                        </td>
+                              <td className="px-4 py-2 align-top whitespace-nowrap vertical-align-middle">
+                                <CheckboxOption
+                                  label={translate("Kerat Condition")}
+                                  registerKey={`subjectPassNumbers.${index}.optional`}
+                                />
+                              </td>
 
-                        <td className="px-4 py-2 align-top text-right">
+                              {/* <td className="px-4 py-2 align-top text-right">
                           {subjectFields.length > 1 && (
                             <button
                               type="button"
@@ -731,23 +918,28 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                               ✕
                             </button>
                           )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </td> */}
+                            </SortableSubjectRow>
+                          ))}
+                        </SortableContext>
+                      </tbody>
+                    </table>
+                  </DndContext>}
+                </div>
 
-                <div className="mt-6 grid grid-cols-3 gap-4">
+                <div className="mt-6 grid grid-cols-2 gap-4">
                   <div>
                     <Button
                       type="button"
                       onClick={handleSaveAndPrevious}
+                      className="flex items-center gap-1"
                     >
+                      <SvgIcon name="LongArrowLeft" />
                       {translate("Previous")}
                     </Button>
                   </div>
 
-                  <div className="flex justify-center">
+                  {/* <div className="flex justify-center">
                     <button
                       type="button"
                       onClick={() =>
@@ -762,14 +954,12 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                     >
                       <SvgIcon name={"TbPlus"} /> {translate("Add Subject")}
                     </button>
-                  </div>
+                  </div> */}
 
-                  <div className="text-end">
-                    <Button
-                      type="submit"
-                    // onClick={handleSaveAndContinue}
-                    >
-                      {translate("Save & Continue")}
+                  <div className="text-end flex justify-end">
+                    <Button type="submit" className="flex items-center gap-1">
+                      {translate("Next")}
+                      <SvgIcon name="LongArrowRight" />
                     </Button>
                   </div>
                 </div>
@@ -814,9 +1004,10 @@ const ExamSubjectPassNumber = ({ sharedStepData, setSharedStepData }) => {
                       </button>
                       <button
                         type="button"
-                        className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                        className="rounded-md border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 flex gap-1"
                         onClick={handleCloseDivisionManager}
                       >
+                        <SvgIcon name="LongArrowLeft" />
                         এক্সাম কন্ডিশনে ফিরে যান
                       </button>
                     </div>
