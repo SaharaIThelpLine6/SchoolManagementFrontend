@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { useSearchParams } from 'react-router-dom';
 import DefaultSelect from '../components/Forms/DefaultSelect';
-import { examReports, language } from '../Data/examReportData';
+import { language } from '../Data/examReportData';
 import { setPageName } from '../features/auth/authSlice';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetExamNamesQuery } from '../features/exam/examQuerySlice';
@@ -13,12 +13,9 @@ import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import { fetchSettingsData } from '../features/settings/settingsSlice';
 import useTranslate from '../utils/Translate';
 
-import {
-  getClassText,
-  getRRText,
-  getSubClassText,
-} from '../Data/Examroutinereportconfig';
+import { getRRText, getSubClassText } from '../Data/Examroutinereportconfig';
 import ExamRoutinePDF from '../view/exam/ExamRouting/ExamRoutinePDF';
+import { useGetLabelNameListsQuery } from '../features/result/resultSilce';
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -74,7 +71,6 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
   const translate = useTranslate();
   const dispatch = useDispatch();
 
-  // ✅ URL থেকে প্যারামস রিড করা
   const [searchParams] = useSearchParams();
   const urlSessionID = searchParams.get('sessionid');
   const urlExamID = searchParams.get('examid');
@@ -83,7 +79,6 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
   const methods = useForm({
     defaultValues: {
       ReportID: ROUTINE_REPORT_ID,
-      // ✅ URL-এ ডাটা থাকলে ফর্মের ডিফল্ট ভ্যালু হিসেবে সেট হবে
       SessionID: urlSessionID || '',
       ExamID: urlExamID || '',
       SubClassID: urlSubClassID || '',
@@ -97,15 +92,23 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
   const [logoIsActive, setLogoIsActive] = useState(false);
   const [docSettings, setDocSettings] = useState(null);
 
-  // ✅ আপনার রিকোয়ারমেন্ট অনুযায়ী ডিফল্ট ভ্যালু সেট করা হলো
-  const [routineHideEmptyRows, setRoutineHideEmptyRows] = useState(true); // always checked
-  const [routineHideEmptyShift, setRoutineHideEmptyShift] = useState(true); // always checked
+  const [routineHideEmptyRows] = useState(true);
+  const [routineHideEmptyShift] = useState(true);
   const [routineShowClassCol, setRoutineShowClassCol] = useState(false);
   const [routineShowRoom, setRoutineShowRoom] = useState(false);
-  const [routineShowTime, setRoutineShowTime] = useState(false); // unchecked
+  const [routineShowTime, setRoutineShowTime] = useState(false);
 
-  // ✅ পরীক্ষা সময়সূচী নোট (bottom-left এ show হবে)
+  // ✅ মাল্টি-লাইন সময়সূচী নোট
   const [routineScheduleNote, setRoutineScheduleNote] = useState('');
+  const noteRef = useRef(null);
+
+  // ✅ textarea লাইন অনুযায়ী অটো বড় হবে
+  useEffect(() => {
+    const el = noteRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, [routineScheduleNote]);
 
   const { control, handleSubmit, watch, register, setValue } = methods;
   const formValues = useWatch({ control });
@@ -118,12 +121,10 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
   const routineLang = langId === 2 ? 'ar' : langId === 3 ? 'en' : 'bn';
   const rui = (key) => getRRText(key, routineLang);
 
-  // watch করা হচ্ছে যেন কুয়েরি রি-রান হয়
   const [SessionID, ExamID, SubClassID, ClassID] = watch([
     'SessionID', 'ExamID', 'SubClassID', 'ClassID',
   ]);
 
-  // ✅ URL থেকে আসা ডাটা ফর্মে সেট করা (যাতে সিলেক্ট বক্সে দেখায়)
   useEffect(() => {
     if (urlSessionID) setValue('SessionID', urlSessionID);
     if (urlExamID) setValue('ExamID', urlExamID);
@@ -134,8 +135,8 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
     if (Number(selectedReportID) !== ROUTINE_REPORT_ID) return false;
     return ['ReportID', 'SessionID', 'ExamID', 'Langauge'].includes(fieldName);
   };
+  const { data: labelNames = [] } = useGetLabelNameListsQuery();
 
-  // ✅ আপডেট করা কুয়েরি (URL এর ডাটা সবার আগে প্রায়োরিটি পাবে)
   const { data: routineData, isFetching: routineFetching } = useGetExamRoutineReportQuery(
     isRoutineReport && (SessionID || urlSessionID) && (ExamID || urlExamID)
       ? {
@@ -150,8 +151,6 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
   const { data: sessionData } = useGetSessionsQuery();
   const { data: SubClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
-
-  const routineClassOptions = useMemo(() => routineData?.classes ?? [], [routineData]);
 
   const routineSubClassOptions = useMemo(() => {
     const base =
@@ -207,6 +206,12 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
     [settingsState, docSettings]
   );
 
+  // ✅ FIX: আগে `useMemo(() => ..., [deps])` ঠিকমতো লেখা ছিল না
+  const signaturePrincipal = useMemo(
+    () => toImageSrc(routineData?.header?.SignaturePrincipal),
+    [routineData]
+  );
+
   const routineLogo = useMemo(
     () =>
       toImageSrc(routineData?.header?.InstitutionLogo) ||
@@ -258,61 +263,32 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
                     )}
 
                     {isRoutineReport && (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            {rui('mainClass')}
-                          </label>
-                          <div className="relative">
-                            <select
-                              {...register('ClassID')}
-                              className="w-full appearance-none rounded-md border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                            >
-                              <option value="">{rui('allClass')}</option>
-                              {routineClassOptions.map((c) => (
-                                <option key={c.ClassID} value={c.ClassID}>
-                                  {getClassText(c, routineLang) || c.ClassID}
-                                </option>
-                              ))}
-                            </select>
-                            <svg
-                              className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </div>
+                      <div>
+                        <label className="block text-sm font-bold text-black mb-1">
+                          {labelNames[0]?.SubClassNameLabel ?? 'শ্রেণি/জামাত'} :
+                        </label>
+                        <div className="relative">
+                          <select
+                            {...register('SubClassID')}
+                            className="w-full appearance-none rounded-md border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                          >
+                            <option value="">{rui('allSubClass')}</option>
+                            {routineSubClassOptions.map((g) => (
+                              <option key={g.SubClassID} value={g.SubClassID}>
+                                {getSubClassText(g, routineLang) || g.SubClassID}
+                              </option>
+                            ))}
+                          </select>
+                          <svg
+                            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                          </svg>
                         </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            {rui('subClass')}
-                          </label>
-                          <div className="relative">
-                            <select
-                              {...register('SubClassID')}
-                              className="w-full appearance-none rounded-md border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                            >
-                              <option value="">{rui('allSubClass')}</option>
-                              {routineSubClassOptions.map((g) => (
-                                <option key={g.SubClassID} value={g.SubClassID}>
-                                  {getSubClassText(g, routineLang) || g.SubClassID}
-                                </option>
-                              ))}
-                            </select>
-                            <svg
-                              className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </div>
-                        </div>
-                      </>
+                      </div>
                     )}
 
                     {shouldShowFields('Langauge') && (
@@ -322,55 +298,58 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
                         registerKey="id"
                         valueField="id"
                         options={language ?? []}
-                        require="This Field is required"
-                        unicode={true}
                       />
                     )}
                   </div>
 
                   {isRoutineReport && (
-                    <div className="rounded-xl border border-teal-200 bg-teal-50/50 p-3 flex flex-wrap items-center gap-3">
-                      {/* ১. কাগজের সাজ লেবেল */}
-                      <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700 px-1">
+                    <div className="rounded-xl border border-teal-200 bg-teal-50/50 p-3 flex flex-wrap items-start gap-3">
+                      <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700 px-1 py-1.5">
                         <svg className="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
-                        কাগজের সাজ:
+                        কাগজের সাইজ:
                       </span>
 
-                      {/* ২. চেকবক্সগুলো */}
                       {[
-                        { key: 'rows', text: rui('hideEmptyRow'), on: routineHideEmptyRows, set: setRoutineHideEmptyRows },
-                        { key: 'shift', text: rui('hideEmptyShift'), on: routineHideEmptyShift, set: setRoutineHideEmptyShift },
-                        { key: 'class', text: rui('showClassCol'), on: routineShowClassCol, set: setRoutineShowClassCol },
                         { key: 'time', text: rui('showTime'), on: routineShowTime, set: setRoutineShowTime },
-                        { key: 'room', text: rui('showRoom'), on: routineShowRoom, set: setRoutineShowRoom },
                       ].map((opt) => (
-                        <label key={opt.key} className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 cursor-pointer hover:bg-slate-50 transition">
-                          <input type="checkbox" className="h-[15px] w-[15px] accent-teal-600" checked={opt.on} onChange={(e) => opt.set(e.target.checked)} />
+                        <label
+                          key={opt.key}
+                          className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 cursor-pointer hover:bg-slate-50 transition"
+                        >
+                          <input
+                            type="checkbox"
+                            className="h-[15px] w-[15px] accent-teal-600"
+                            checked={opt.on}
+                            onChange={(e) => opt.set(e.target.checked)}
+                          />
                           <span className="text-[13px] font-medium text-slate-700">{opt.text}</span>
                         </label>
                       ))}
 
-                      {/* ৩. পরীক্ষা সময়সূচী ইনপুট (কাগজের সাজের ঠিক পাশে) */}
-                      <div className="flex-1 min-w-[200px] flex items-center gap-2 rounded-full border border-indigo-200 bg-white px-3 py-1.5 ml-2">
-                        <label htmlFor="routineScheduleNote" className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-700 shrink-0 cursor-pointer">
+                      {/* ✅ মাল্টি-লাইন সময়সূচী: Enter = নতুন লাইন */}
+                      <div className="flex-1 min-w-[240px] flex items-start gap-2 rounded-2xl border border-indigo-200 bg-white px-3 py-1.5 ml-2">
+                        <label
+                          htmlFor="routineScheduleNote"
+                          className="flex items-center gap-1.5 text-[13px] font-semibold text-slate-700 shrink-0 cursor-pointer pt-[3px]"
+                        >
                           <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                           </svg>
                           সময়সূচী:
                         </label>
-                        <input
+                        <textarea
                           id="routineScheduleNote"
-                          type="text"
+                          ref={noteRef}
+                          rows={1}
                           value={routineScheduleNote}
                           onChange={(e) => setRoutineScheduleNote(e.target.value)}
-                          placeholder="যেমন: সকাল ১০টা থেকে দুপুর ১টা..."
-                          className="w-full bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400"
+                          placeholder={'যেমন:\n১। পরীক্ষার তারিখ, শুরু ও শেষের সময়\n২। অবশ্যই সকালে আসতে হবে'}
+                          className="w-full resize-none overflow-hidden bg-transparent text-sm text-gray-800 outline-none placeholder:text-gray-400 leading-6"
                         />
                       </div>
 
-                      {/* ৪. প্রিন্ট বাটন (একদম ডানদিকে) */}
                       <button
                         type="button"
                         onClick={onSubmit}
@@ -403,6 +382,7 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
               reportData={routineData}
               lang={routineLang}
               instituteLogo={routineLogo}
+              signaturePrincipal={signaturePrincipal}
               showWatermark={logoIsActive}
               hideEmptyRows={routineHideEmptyRows}
               hideEmptyShift={routineHideEmptyShift}

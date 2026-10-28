@@ -1,5 +1,4 @@
 import {
-  buildTimeNote,
   getCellText,
   getClassText,
   getDateText,
@@ -14,7 +13,6 @@ import {
   getShiftText,
   getSubClassText,
   getTimeText,
-  toLangDigit,
 } from '../../../Data/Examroutinereportconfig';
 
 const PAPER_CSS = `
@@ -34,6 +32,7 @@ const PAPER_CSS = `
     .routine-table { page-break-inside: auto; }
     .routine-table tr { page-break-inside: avoid; page-break-after: auto; }
     .routine-table thead { display: table-header-group; }
+    .routine-footer { page-break-inside: avoid; }
   }
 
   .routine-table { border-collapse: collapse; width: 100%; }
@@ -57,6 +56,7 @@ const ExamRoutinePDF = ({
   reportData,
   lang = 'bn',
   instituteLogo = '',
+  signaturePrincipal = '',
   showWatermark = true,
   hideEmptyRows = false,
   hideEmptyShift = false,
@@ -80,12 +80,6 @@ const ExamRoutinePDF = ({
       ? shifts.filter((s) => (col.shiftsUsed || []).includes(s))
       : shifts;
 
-  const timeNote = buildTimeNote(reportData?.times, lang);
-  const notices = reportData?.messages ?? [];
-  // বি:দ্র: — আগে সময়ের লাইন, তারপর রুটিনে লেখা নোটিশগুলো
-  // const noteLines = [timeNote, ...notices].filter(Boolean);
-  const noteLines = []
-
   const instName = getInstituteName(header, lang);
   const instAddress = getInstituteAddress(header, lang);
 
@@ -93,7 +87,11 @@ const ExamRoutinePDF = ({
     ? ui('routineOf')(getExamText(header, lang), getSessionText(header, lang)).trim()
     : ui('routineTitle');
 
-  const hasScheduleNote = Boolean(scheduleNote && scheduleNote.trim());
+  // ✅ মাল্টি-লাইন: প্রতিটা লাইন আলাদা, ফাঁকা লাইন বাদ
+  const scheduleLines = (scheduleNote || '')
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
 
   if (!columns.length || !rows.length) {
     return (
@@ -112,7 +110,6 @@ const ExamRoutinePDF = ({
           className="routine-paper relative mx-auto min-w-[900px] bg-white p-5 shadow-lg print:shadow-none"
           dir={dir}
         >
-
           {showWatermark && instituteLogo ? (
             <img
               src={instituteLogo}
@@ -128,7 +125,6 @@ const ExamRoutinePDF = ({
             />
           ) : null}
 
-
           <div className="relative mb-3 flex items-start gap-3">
             <div className="w-[70px] shrink-0">
               {instituteLogo ? (
@@ -142,14 +138,11 @@ const ExamRoutinePDF = ({
               <p className="mt-0.5 text-[15px] font-semibold text-gray-800">{titleLine}</p>
             </div>
 
-
             <div className="w-[70px] shrink-0" />
           </div>
 
-
           <table className="routine-table relative text-[12px]">
             <thead>
-
               <tr>
                 {showClassCol ? (
                   <th rowSpan={2} style={{ minWidth: 86 }}>
@@ -199,9 +192,8 @@ const ExamRoutinePDF = ({
 
                       return (
                         <td key={`${row.SubClassID}-${col.key}-${shift}`}>
-                          {names.length ? (
-
-                            list.map((item, i) => {
+                          {names.length
+                            ? list.map((item, i) => {
                               const time = showTime ? getTimeText(item, lang) : '';
                               const room = showRoom ? getRoomText(item, lang) : '';
                               return (
@@ -218,10 +210,7 @@ const ExamRoutinePDF = ({
                                 </span>
                               );
                             })
-                          ) : (
-                            // ✅ এখানে আগে <span className="text-gray-400">-</span> ছিল, সেটি রিমুভ করে ফাঁকা করে দেওয়া হয়েছে
-                            null
-                          )}
+                            : null}
                         </td>
                       );
                     })
@@ -231,32 +220,40 @@ const ExamRoutinePDF = ({
             </tbody>
           </table>
 
-
-          <div className="relative mt-3 flex items-end justify-between gap-6 text-[12px]">
-            {/* ✅ বাম দিকে: সময়সূচী নোট + বি:দ্র */}
-            <div className="min-w-0 text-gray-800">
-              {hasScheduleNote ? (
-                <div className="mb-2px-3 py-1.5 text-left">
-
-                  <p className="mt-0.5 text-[12px] text-black whitespace-pre-wrap">
-                    {scheduleNote.trim()}
-                  </p>
-                </div>
-              ) : null}
-
-              {noteLines.map((line, i) => (
-                <p key={`${i}-${line.slice(0, 12)}`}>
-                  {i === 0 ? <span className="font-semibold">{ui('note')} </span> : null}
-                  {toLangDigit(i + 1, lang)}। {line}
+          <div className="routine-footer relative mt-3 flex items-end justify-between gap-6 text-[12px]">
+            {/* বাম দিকে: প্রতিটা লাইন আলাদা */}
+            <div className="min-w-0 flex-1 text-left text-black">
+              {scheduleLines.map((line, i) => (
+                <p key={`${i}-${line.slice(0, 12)}`} className="leading-5">
+                  {line}
                 </p>
               ))}
             </div>
 
-            <p className="shrink-0 font-semibold text-gray-900">
-              {header?.PrincipalName
-                ? `${header.PrincipalName} — ${ui('principal')}`
-                : ui('principal')}
-            </p>
+            {/* ডান দিকে: সিগনেচার (উপরে) + নাম (নিচে) */}
+            <div className="shrink-0 text-center flex flex-col items-center justify-start pt-0 mt-0">
+              {signaturePrincipal ? (
+                <img
+                  src={signaturePrincipal}
+                  alt=""
+                  /* Changed h-[48px] to max-h-[48px] and removed mb-1 */
+                  className="mx-auto block max-h-[48px] max-w-[160px] object-contain"
+                  style={{
+                    WebkitPrintColorAdjust: 'exact',
+                    printColorAdjust: 'exact',
+                  }}
+                />
+              ) : null}
+
+              {/* Replaced text dashes with a clean border line and tight margins */}
+              <div className="w-[160px] border-b-2 border-dotted border-black my-1"></div>
+
+              <p className="m-0 font-semibold text-gray-900 leading-tight">
+                {header?.PrincipalName
+                  ? `${header.PrincipalName}`
+                  : ui('principal')}
+              </p>
+            </div>
           </div>
         </div>
       </div>

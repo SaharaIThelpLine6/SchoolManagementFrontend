@@ -10,12 +10,12 @@ import { FaPrint } from 'react-icons/fa';
 const STORAGE_KEY = 'examRoutinePrintSettings';
 const FONT_STORAGE_KEY = 'examRoutinePrintFontScale';
 const MM_TO_PX = 96 / 25.4;
-// Every routine is laid out at this width (A4 portrait minus 8mm margins), then scaled.
+
+// Base document width (A4 portrait minus 8mm margins)
 const DOC_WIDTH_MM = 194;
 const DOC_WIDTH_PX = DOC_WIDTH_MM * MM_TO_PX;
-// Gap between a routine and its cell edge when several routines share one sheet
+
 const CELL_PAD_MM = 2;
-// Small safety so a routine is never clipped at the bottom
 const HEIGHT_SAFETY = 0.98;
 
 // Font size control (percent)
@@ -27,12 +27,15 @@ const BASE_FONT_ATTR = 'data-erp-base-font';
 
 const PAPER_SIZES = {
   a4: { label: 'A4', width: 210, height: 297 },
+  a5: { label: 'A5', width: 148, height: 210 },
   a3: { label: 'A3', width: 297, height: 420 },
   letter: { label: 'Letter', width: 215.9, height: 279.4 },
   legal: { label: 'Legal', width: 215.9, height: 355.6 },
 };
+
 const PER_PAGE_OPTIONS = [1, 2, 3, 4];
 const MARGIN_OPTIONS = [0, 5, 8, 12];
+
 const DEFAULT_SETTINGS = {
   paper: 'a4',
   orientation: 'portrait',
@@ -121,7 +124,7 @@ const buildCss = (settings) => {
     display: flex; flex-direction: column; flex-shrink: 0;
     width: 330px; max-width: 100%; box-sizing: border-box;
     background: #f6f8fb; border-right: 1px solid #dde3ec;
-    color: #1f2937; font-family: inherit;
+    color: #1f2937; font-family: inherit; overflow-y: auto;
   }
   .erp-side__head {
     padding: 16px 16px 12px; background: #fff; border-bottom: 1px solid #e5e9f0;
@@ -129,7 +132,7 @@ const buildCss = (settings) => {
   .erp-side__title { margin: 0; font-size: 16px; font-weight: 700; color: #14532d; }
   .erp-side__sub { margin: 2px 0 0; font-size: 12px; color: #6b7280; }
   .erp-side__body {
-    flex: 1; min-height: 0; overflow-y: auto; padding: 14px 16px;
+    flex: 1; min-height: 0; padding: 14px 16px;
     display: flex; flex-direction: column; gap: 14px;
   }
   .erp-card {
@@ -140,6 +143,7 @@ const buildCss = (settings) => {
   .erp-card__title small { font-weight: 400; color: #9ca3af; }
   .erp-field + .erp-field { margin-top: 14px; }
   .erp-hint { margin: 8px 0 0; font-size: 11.5px; line-height: 1.5; color: #8791a1; }
+  .erp-hint--tip { color: #0f7a55; font-weight: 600; }
 
   .erp-seg {
     display: grid; gap: 4px; padding: 4px;
@@ -243,7 +247,7 @@ const buildCss = (settings) => {
   }
 }
 
-/* ---------- Preview ---------- */
+/* ---------- Preview & Print ---------- */
 .erp-stage { width: 100%; box-sizing: border-box; padding: 16px 0 32px; }
 .erp-zoom { position: relative; width: 100%; }
 .erp-pages {
@@ -272,19 +276,25 @@ const buildCss = (settings) => {
 .erp-cell--cut-b { border-bottom: 1px dashed #9a9a9a; }
 .erp-cell__box { position: absolute; inset: var(--erp-pad); overflow: hidden; }
 
-/* The routine is laid out at a fixed width, then scaled (transform) with one shared scale */
-.erp-doc {
-  position: absolute; top: 0; left: 0;
-  width: ${DOC_WIDTH_MM}mm; transform-origin: 0 0;
-}
+/* Position wrapper (plain offsets, no scaling) */
+.erp-pos { position: absolute; top: 0; left: 0; }
+
+/*
+  The routine is laid out at a computed width and shrunk with CSS "zoom".
+  Unlike transform: scale(), zoom shrinks the real layout box too, so the
+  browser's print fragmentation no longer cuts off the lower cells.
+  The width is set inline (px) so the table always fills the whole cell.
+*/
+.erp-doc { box-sizing: border-box; }
+
 /* Neutralise any fixed page size / margin / shadow of ExamRoutineDocument's root element */
 .erp-doc > * {
   box-sizing: border-box;
   width: 100% !important; max-width: none !important;
   height: auto !important; min-height: 0 !important;
   margin: 0 !important; box-shadow: none !important;
+  border-color: transparent !important; /* Removing unwanted borders */
 }
-/* Keep date / day / time on one line so every routine has the same height */
 .erp-doc .routine-document__serial,
 .erp-doc .routine-document__date,
 .erp-doc .routine-document__day,
@@ -316,11 +326,14 @@ const buildCss = (settings) => {
     position: static !important; display: block !important;
     width: auto !important; margin: 0 !important; transform: none !important;
   }
-  .erp-sheet { box-shadow: none !important; margin: 0 !important; }
+  .erp-sheet {
+    box-shadow: none !important;
+    margin: 0 !important;
+    border: none !important;
+  }
 }`;
 };
 
-// A routine is printable if it has at least one visible row or a message
 const hasVisibleRows = (details) => {
   const rows = Array.isArray(details?.routine) ? details.routine : [];
   return rows.some((row) => {
@@ -335,10 +348,6 @@ const chunk = (list, size) => {
   return pages;
 };
 
-/**
- * Scales only the text. Each element's original font size is remembered once,
- * then font-size = original * percent. Layout widths, borders, logo and page size stay as they are.
- */
 const applyFontScale = (root, percent) => {
   if (!root) return;
   root.querySelectorAll('.erp-doc *').forEach((element) => {
@@ -356,7 +365,6 @@ const applyFontScale = (root, percent) => {
   });
 };
 
-/** Pill-style option picker (replaces <select>) */
 const SegmentedControl = ({ label, value, options, onChange }) => (
   <div
     className="erp-seg"
@@ -394,7 +402,6 @@ SegmentedControl.propTypes = {
   onChange: PropTypes.func.isRequired,
 };
 
-/** Floating bar: Aa ফন্ট সাইজ  A−  ───●───  A+  100%  ↺  সংরক্ষণ */
 const FontSizeBar = ({ value, saved, justSaved, onChange, onReset, onSave }) => {
   const dirty = value !== saved;
   return (
@@ -464,21 +471,26 @@ FontSizeBar.propTypes = {
   onSave: PropTypes.func.isRequired,
 };
 
-/**
- * One routine inside its cell. The outer box (and the document's border) always
- * keeps the same size. The text size changes inside it, and the inner content is
- * shrunk (innerScale) only if it would not fit inside the fixed border.
- */
+/*
+  Layout:  .erp-pos (absolute, left/top)  >  .erp-doc (width = docWidth px, zoom = scale)
+  docWidth = cellWidth / scale, so after zoom the document is exactly as wide as the cell.
+*/
 const RoutineCell = ({ children, fit }) => (
   <div className="erp-cell__box">
     <div
-      className="erp-doc"
+      className="erp-pos"
       style={{
-        transform: `translate(${fit.left}px, ${fit.top}px) scale(${fit.scale})`,
+        left: `${fit.left}px`,
+        top: `${fit.top}px`,
         visibility: fit.ready ? 'visible' : 'hidden',
       }}
     >
-      {children}
+      <div
+        className="erp-doc"
+        style={{ width: `${fit.docWidth}px`, zoom: fit.scale }}
+      >
+        {children}
+      </div>
     </div>
   </div>
 );
@@ -488,12 +500,12 @@ RoutineCell.propTypes = {
   fit: PropTypes.shape({
     ready: PropTypes.bool,
     scale: PropTypes.number,
+    docWidth: PropTypes.number,
     left: PropTypes.number,
     top: PropTypes.number,
   }).isRequired,
 };
 
-/** Scales the whole preview down to the available width (screen only, print is untouched) */
 const ScaledPreview = ({ sheetPx, children }) => {
   const stageRef = useRef(null);
   const pagesRef = useRef(null);
@@ -542,6 +554,49 @@ ScaledPreview.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
+// Remove everything fitInner() forced on the document, so it can be measured naturally
+function resetInner(doc) {
+  const root = doc.firstElementChild;
+  if (!root) return;
+  ['height', 'overflow', 'display', 'flex-direction'].forEach((prop) => root.style.removeProperty(prop));
+  Array.from(root.children).forEach((child) => {
+    child.style.removeProperty('zoom');
+    child.style.removeProperty('flex-shrink');
+  });
+}
+
+// Keep the document inside baseHeight (matters when the font size is increased)
+function fitInner(doc, baseHeight) {
+  const root = doc.firstElementChild;
+  if (!root || !baseHeight) return;
+
+  root.style.setProperty('height', `${baseHeight}px`, 'important');
+  root.style.setProperty('overflow', 'hidden', 'important');
+  root.style.setProperty('display', 'flex', 'important');
+  root.style.setProperty('flex-direction', 'column', 'important');
+
+  const children = Array.from(root.children);
+  children.forEach((child) => {
+    child.style.removeProperty('zoom');
+    child.style.setProperty('flex-shrink', '0', 'important');
+  });
+
+  const styles = window.getComputedStyle(root);
+  const padding = (parseFloat(styles.paddingTop) || 0) + (parseFloat(styles.paddingBottom) || 0);
+  const border = (parseFloat(styles.borderTopWidth) || 0) + (parseFloat(styles.borderBottomWidth) || 0);
+  const available = baseHeight - padding - border;
+  const used = children.reduce((sum, child) => {
+    const childStyles = window.getComputedStyle(child);
+    const margin = (parseFloat(childStyles.marginTop) || 0) + (parseFloat(childStyles.marginBottom) || 0);
+    return sum + child.offsetHeight + margin;
+  }, 0);
+
+  if (used > available && used > 0) {
+    const ratio = Math.max(0.6, available / used);
+    children.forEach((child) => child.style.setProperty('zoom', String(ratio)));
+  }
+}
+
 const ExamRoutinePrint = ({ items, onClose }) => {
   const previewRef = useRef(null);
   const closeRef = useRef(null);
@@ -553,8 +608,6 @@ const ExamRoutinePrint = ({ items, onClose }) => {
   const [results, setResults] = useState([]);
   const [loadingRoutines, setLoadingRoutines] = useState(true);
   const [readyToPrint, setReadyToPrint] = useState(false);
-  // Height (px, at the fixed layout width) of the tallest routine at 100% font.
-  // It never changes with the font slider, so the border and page scale stay fixed.
   const [baseHeight, setBaseHeight] = useState(0);
   const [fetchRoutine] = useLazyGetAllExamRoutineQuery();
   const { data: institution, isLoading: loadingInstitution } = useGetInstitutionInfoQuery();
@@ -564,6 +617,7 @@ const ExamRoutinePrint = ({ items, onClose }) => {
   const validRoutines = results.filter((result) => result.details && hasVisibleRows(result.details));
   const failedCount = results.length - validRoutines.length;
   const pages = chunk(validRoutines, settings.perPage);
+
   const { cols, rows, sheetWidth, sheetHeight } = getLayout(settings);
   const sheetPx = sheetWidth * MM_TO_PX;
   const singleDetails = validRoutines.length === 1 ? validRoutines[0].details : null;
@@ -571,22 +625,27 @@ const ExamRoutinePrint = ({ items, onClose }) => {
   const className = singleDetails?.classGroup?.SubClass ?? '';
   const multiPerPage = settings.perPage > 1;
   const showCutLines = multiPerPage && settings.cutLines;
+  const landscapeFour = settings.perPage === 4 && settings.orientation === 'landscape';
 
-  // One shared scale for every routine, based on the 100% font height (not the slider),
-  // so the border keeps exactly the same size however the font is changed.
   const padPx = multiPerPage ? CELL_PAD_MM * MM_TO_PX : 0;
   const cellWidth = (sheetWidth * MM_TO_PX) / cols - padPx * 2 - 1;
   const cellHeight = (sheetHeight * MM_TO_PX) / rows - padPx * 2 - 1;
+
   const fit = (() => {
     if (!baseHeight || cellWidth <= 0 || cellHeight <= 0) {
-      return { ready: false, scale: 1, left: 0, top: 0 };
+      return { ready: false, scale: 1, docWidth: DOC_WIDTH_PX, left: 0, top: 0 };
     }
+    // Scale is limited by whichever side is tighter
     const scale = Math.min(cellWidth / DOC_WIDTH_PX, (cellHeight * HEIGHT_SAFETY) / baseHeight);
+    // When height is the limit, lay the document out WIDER so that after
+    // scaling it still fills the full cell width (no empty side columns).
+    const docWidth = Math.floor(cellWidth / scale);
     return {
       ready: true,
       scale,
-      left: (cellWidth - DOC_WIDTH_PX * scale) / 2,
-      top: multiPerPage ? (cellHeight - baseHeight * scale) / 2 : 0,
+      docWidth,
+      left: 0,
+      top: 0, // always start from the top of the cell
     };
   })();
 
@@ -623,7 +682,6 @@ const ExamRoutinePrint = ({ items, onClose }) => {
   const perPageOptions = PER_PAGE_OPTIONS.map((count) => ({ value: count, label: bn(count) }));
   const marginOptions = MARGIN_OPTIONS.map((value) => ({ value, label: bn(value) }));
 
-  // Body class + focus handling
   useEffect(() => {
     const previousFocus = document.activeElement;
     document.body.classList.add('exam-routine-print-active');
@@ -635,7 +693,6 @@ const ExamRoutinePrint = ({ items, onClose }) => {
     };
   }, []);
 
-  // PDF file name = document title
   useEffect(() => {
     const previousTitle = document.title;
     document.title = singleDetails
@@ -644,14 +701,12 @@ const ExamRoutinePrint = ({ items, onClose }) => {
     return () => { document.title = previousTitle; };
   }, [singleDetails, examName, className]);
 
-  // Esc closes the preview
   useEffect(() => {
     const handleEscape = (event) => { if (event.key === 'Escape') onClose(); };
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [onClose]);
 
-  // Load every selected routine
   useEffect(() => {
     let cancelled = false;
     setLoadingRoutines(true);
@@ -685,8 +740,10 @@ const ExamRoutinePrint = ({ items, onClose }) => {
     return () => { cancelled = true; };
   }, [itemsKey, fetchRoutine]);
 
-  // 1) Measure the tallest routine at the BASE (100%) font. The font slider is
-  //    deliberately not a dependency: the measured height is the fixed border height.
+  const fontScaleRef = useRef(fontScale);
+  fontScaleRef.current = fontScale;
+
+  // Measure the natural (unscaled, 100% font) height of the tallest routine
   useLayoutEffect(() => {
     const root = previewRef.current;
     if (!root || loading) return undefined;
@@ -696,19 +753,32 @@ const ExamRoutinePrint = ({ items, onClose }) => {
       return undefined;
     }
 
-    // Measure with the original font (remove inline sizes), then restore the chosen one.
     const measure = () => {
+      // Temporarily undo zoom + custom width so we measure at the natural base size
+      const saved = docs.map((doc) => ({ zoom: doc.style.zoom, width: doc.style.width }));
+      docs.forEach((doc) => {
+        doc.style.zoom = '1';
+        doc.style.width = `${DOC_WIDTH_PX}px`;
+        resetInner(doc);
+      });
+
       applyFontScale(root, FONT_DEFAULT);
       const tallest = Math.max(
         ...docs.map((doc) => Math.max(doc.offsetHeight, doc.scrollHeight))
       );
       applyFontScale(root, fontScaleRef.current);
+
+      docs.forEach((doc, index) => {
+        fitInner(doc, tallest);
+        doc.style.zoom = saved[index].zoom;
+        doc.style.width = saved[index].width;
+      });
+
       setBaseHeight((previous) => (Math.abs(previous - tallest) < 0.5 ? previous : tallest));
     };
 
     measure();
     const observer = new ResizeObserver(() => {
-      // Only re-measure at 100%; ignore resizes caused by the font slider.
       if (fontScaleRef.current === FONT_DEFAULT) measure();
     });
     docs.forEach((doc) => observer.observe(doc));
@@ -716,20 +786,19 @@ const ExamRoutinePrint = ({ items, onClose }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, results, institution, settings.perPage, settings.paper, settings.orientation]);
 
-  // Keep the latest font value readable inside observers without re-running them
-  const fontScaleRef = useRef(fontScale);
-  fontScaleRef.current = fontScale;
-
-  // 2) Apply the text-only font scale, then keep the content inside the fixed border.
-  //    Runs after every render so newly mounted routines get the same font size.
+  // Re-apply font scale + inner fitting after every render (zoom is lifted while measuring)
   useLayoutEffect(() => {
     const root = previewRef.current;
     if (!root || !fit.ready) return;
     applyFontScale(root, fontScale);
-    root.querySelectorAll('.erp-doc').forEach((doc) => fitInner(doc, baseHeight));
+    root.querySelectorAll('.erp-doc').forEach((doc) => {
+      const currentZoom = doc.style.zoom;
+      doc.style.zoom = '1';
+      fitInner(doc, baseHeight);
+      doc.style.zoom = currentZoom;
+    });
   });
 
-  // Wait for fonts + images before enabling the print button
   useEffect(() => {
     setReadyToPrint(false);
     if (loading || validRoutines.length === 0) return undefined;
@@ -833,6 +902,11 @@ const ExamRoutinePrint = ({ items, onClose }) => {
                   ? `এক পেজে ${bn(cols)} কলাম × ${bn(rows)} সারিতে সাজানো হবে।`
                   : 'প্রতি পেজে একটি করে রুটিন ছাপা হবে।'}
               </p>
+              {landscapeFour && (
+                <p className="erp-hint erp-hint--tip">
+                  টিপস: ৪টি রুটিনের জন্য Portrait দিলে সবচেয়ে বেশি জায়গা কাজে লাগে।
+                </p>
+              )}
             </div>
 
             <div className="erp-field">
@@ -951,45 +1025,6 @@ const ExamRoutinePrint = ({ items, onClose }) => {
     document.body
   );
 };
-
-/**
- * Keeps the document's border at a fixed height (the 100% height) and fits the
- * inner content inside it. If a bigger font makes the content taller than the
- * border, only the content is shrunk (never the border), so the border size
- * stays the same at every font size.
- */
-function fitInner(doc, baseHeight) {
-  const root = doc.firstElementChild;
-  if (!root || !baseHeight) return;
-
-  // Fixed border height = the 100% height; content is aligned to the top
-  root.style.setProperty('height', `${baseHeight}px`, 'important');
-  root.style.setProperty('overflow', 'hidden', 'important');
-  root.style.setProperty('display', 'flex', 'important');
-  root.style.setProperty('flex-direction', 'column', 'important');
-
-  const children = Array.from(root.children);
-  children.forEach((child) => {
-    child.style.removeProperty('zoom');
-    child.style.setProperty('flex-shrink', '0', 'important');
-  });
-
-  const styles = window.getComputedStyle(root);
-  const padding = (parseFloat(styles.paddingTop) || 0) + (parseFloat(styles.paddingBottom) || 0);
-  const border = (parseFloat(styles.borderTopWidth) || 0) + (parseFloat(styles.borderBottomWidth) || 0);
-  const available = baseHeight - padding - border;
-  const used = children.reduce((sum, child) => {
-    const margin = (parseFloat(window.getComputedStyle(child).marginTop) || 0)
-      + (parseFloat(window.getComputedStyle(child).marginBottom) || 0);
-    return sum + child.offsetHeight + margin;
-  }, 0);
-
-  if (used > available && used > 0) {
-    // Not enough room inside the border: shrink only the content a little
-    const ratio = Math.max(0.6, available / used);
-    children.forEach((child) => child.style.setProperty('zoom', String(ratio)));
-  }
-}
 
 ExamRoutinePrint.propTypes = {
   items: PropTypes.arrayOf(

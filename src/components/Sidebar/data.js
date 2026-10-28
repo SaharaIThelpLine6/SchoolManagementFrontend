@@ -373,8 +373,8 @@ export const menuData = [
       },
       {
         id: '4',
-        name: 'Result Report',
-        route: 'result/report',
+        name: 'SMS Results Public',
+        route: 'result/publication-results-sms',
       },
       {
         id: '5',
@@ -383,8 +383,8 @@ export const menuData = [
       },
       {
         id: '6',
-        name: 'SMS Results Public',
-        route: 'result/publication-results-sms',
+        name: 'Result Report',
+        route: 'result/report',
       },
     ],
   },

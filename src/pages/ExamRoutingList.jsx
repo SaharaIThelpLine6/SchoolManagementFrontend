@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 import { FaPlus, FaPrint } from 'react-icons/fa';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 import EditButton from '../components/Button/EditButton';
 import DeleteButton from '../components/Button/DeleteButton';
 import { setPageName } from '../features/auth/authSlice';
@@ -16,7 +17,8 @@ import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import useTranslate from '../utils/Translate';
 import ExamRoutinePrint from './ExamRoutinePrint';
 import { showModal } from '../utils/ModalControlar';
-import { Link } from "react-router-dom";
+import { useGetLabelNameListsQuery } from '../features/result/resultSilce';
+
 const getSubClassID = (routing) =>
   routing.SubClassID ?? routing.classGroup?.SubClassID;
 
@@ -43,12 +45,15 @@ const toUniquePrintItems = (list) => {
 const ExamRoutingList = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
+  const navigate = useNavigate();
   const [sessionFilter, setSessionFilter] = useState('');
+  const [printType, setPrintType] = useState("1");
   const [examFilter, setExamFilter] = useState('');
   const [subClassFilter, setSubClassFilter] = useState('');
   // Array of { sessionID, examID, subClassID } that will be printed
   const [printItems, setPrintItems] = useState(null);
   const { data: sessions = [] } = useGetSessionsQuery();
+  const { data: labelNames = [] } = useGetLabelNameListsQuery();
   const { data: exams = [] } = useGetExamNamesQuery();
   const { data: subClasses = [] } = useGetSubClassListQuery();
   const {
@@ -95,15 +100,41 @@ const ExamRoutingList = ({ pageTitle }) => {
     });
   };
 
-  // Top button: print every routine that matches the current filters
+  // Top button:
+  //  - printType === "1" → navigate to /dashboard/exam/routing-print
+  //  - printType === "2" → open ExamRoutinePrint with ALL filtered routines
   const handlePrintAll = () => {
+    if (printAllCount === 0) return;
+
+    if (printType === "1") {
+      navigate(
+        `/dashboard/exam/routing-print?sessionid=${sessionFilter}&examid=${examFilter}&subclassid=${subClassFilter}&type=${printType}`
+      );
+      return;
+    }
+
     const items = toUniquePrintItems(filteredRoutingData);
     if (items.length > 0) setPrintItems(items);
   };
 
-  // Row button: print only this routine
+  // Row button:
+  //  - printType === "1" → navigate to /dashboard/exam/routing-print (with this row's values)
+  //  - printType === "2" → open ExamRoutinePrint with ONLY THIS ROW's routine
   const handlePrintSingle = (routing) => {
-    setPrintItems([toPrintItem(routing)]);
+    const sessionID = routing.SessionID;
+    const examID = routing.ExamID;
+    const subClassID = getSubClassID(routing);
+
+    // if (printType === "1") {
+    //   navigate(
+    //     `/dashboard/exam/routing-print?sessionid=${sessionID}&examid=${examID}&subclassid=${subClassID}&type=${printType}`
+    //   );
+    //   return;
+    // }
+
+    // FIXED: Single row print korle sudhu oi row er data e pathabe
+    const items = toUniquePrintItems([routing]);
+    if (items.length > 0) setPrintItems(items);
   };
 
   const handleDelete = async (routing) => {
@@ -160,7 +191,7 @@ const ExamRoutingList = ({ pageTitle }) => {
 
       <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-4">
         <label className="text-sm font-medium text-gray-700">
-          Session
+          {translate('Session')}:
           <select
             value={sessionFilter}
             onChange={(event) => setSessionFilter(event.target.value)}
@@ -175,7 +206,7 @@ const ExamRoutingList = ({ pageTitle }) => {
           </select>
         </label>
         <label className="text-sm font-medium text-gray-700">
-          Exam
+          {translate('Exam')}:
           <select
             value={examFilter}
             onChange={(event) => setExamFilter(event.target.value)}
@@ -190,7 +221,7 @@ const ExamRoutingList = ({ pageTitle }) => {
           </select>
         </label>
         <label className="text-sm font-medium text-gray-700">
-          Class/Jamaat
+          {labelNames[0]?.SubClassNameLabel ?? "শ্রেণি/জামাত"}:
           <select
             value={subClassFilter}
             onChange={(event) => setSubClassFilter(event.target.value)}
@@ -205,31 +236,28 @@ const ExamRoutingList = ({ pageTitle }) => {
           </select>
         </label>
         <div className="flex items-end justify-end">
-          <Link
-            to={`/dashboard/exam/routing-print?sessionid=${sessionFilter}&examid=${examFilter}&subclassid=${subClassFilter}`}
-            className={`inline-flex h-11 items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 ${printAllCount === 0 ? "pointer-events-none cursor-not-allowed opacity-50" : ""
-              }`}
-            aria-disabled={printAllCount === 0}
-            title={`Print all routines (${printAllCount})`}
-            aria-label="Print all routines"
-            onClick={(e) => {
-              if (printAllCount === 0) e.preventDefault();
-            }}
-          >
-            <FaPrint size={16} aria-hidden="true" />
-            সব প্রিন্ট ({printAllCount})
-          </Link>
-          {/* <button
-            type="button"
-            onClick={handlePrintAll}
-            disabled={printAllCount === 0}
-            className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-            title={`Print all routines (${printAllCount})`}
-            aria-label="Print all routines"
-          >
-            <FaPrint size={16} aria-hidden="true" />
-            সব প্রিন্ট ({printAllCount})
-          </button> */}
+          <div className="flex items-center gap-2">
+            <select
+              value={printType}
+              onChange={(e) => setPrintType(e.target.value)}
+              className="h-11 rounded-md border border-gray-300 bg-white px-3 text-sm outline-none focus:border-emerald-500"
+            >
+              <option value="1">সংক্ষিপ্ত এক পৃষ্ঠায়</option>
+              <option value="2">বিস্তারিত ভিন্ন পৃষ্ঠায়</option>
+            </select>
+
+            <button
+              type="button"
+              onClick={handlePrintAll}
+              disabled={printAllCount === 0}
+              className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+              title={`Print all routines (${printAllCount})`}
+              aria-label="Print all routines"
+            >
+              <FaPrint size={16} aria-hidden="true" />
+              সকল প্রিন্ট ({printAllCount})
+            </button>
+          </div>
         </div>
       </div>
 

@@ -26,6 +26,16 @@ const imageSource = (value) => {
   return Array.isArray(bytes) && bytes.length ? `data:image/png;base64,${Buffer.from(bytes).toString('base64')}` : '';
 };
 
+// Signature column: fixed minimum width so both lines look the same,
+// and the line itself is a plain border (prints even without "Background graphics").
+const SIGNATURE_MIN_WIDTH = '120px';
+const signatureLineStyle = {
+  width: '100%',
+  height: 0,
+  margin: '2px 0 3px',
+  borderTop: '1px solid #333',
+};
+
 const ExamRoutineDocument = ({ details = {}, institution = {} }) => {
   // Keep the saved order and each break's own date/day, including multiple breaks.
   const rows = (Array.isArray(details.routine) ? details.routine : []).filter(
@@ -116,10 +126,12 @@ const ExamRoutineDocument = ({ details = {}, institution = {} }) => {
 
       <footer className="routine-document__signatures">
         {signatures.map((signature) => (
-          <div key={signature.label}>
+          <div key={signature.label} style={{ minWidth: SIGNATURE_MIN_WIDTH }}>
             <div className="routine-document__signature-image">
               {signature.image && <img src={signature.image} alt={`${signature.label} এর স্বাক্ষর`} />}
             </div>
+            {/* Signature underline */}
+            <div className="routine-document__signature-line" style={signatureLineStyle} aria-hidden="true" />
             {/* <p className="routine-document__signature-label">{signature.label}</p> */}
             {signature.name && <p>{signature.name}</p>}
             {/* <p className="routine-document__signature-date">তারিখ: ........................</p> */}
