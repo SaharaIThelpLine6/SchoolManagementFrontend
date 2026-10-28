@@ -618,9 +618,9 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
             <div className="min-w-0 rounded-md border border-gray-200 p-3 sm:p-4">
 
 
-              <div className="grid w-full min-w-0 grid-cols-1 gap-4 text-sm md:grid-cols-2">
+              <div className="w-full text-sm">
                   <div hidden={Number(sharedStepData?.ExamType) === 4} className="min-w-0 md:col-span-2">
-                    <div className="w-full min-w-0 md:max-w-xs">
+                    <div className="w-full min-w-0">
                       <label htmlFor="SubSonkha" className="mb-1.5 block text-sm font-bold">
                           <span className="flex items-start gap-1">
                             <span className="min-w-0 break-words text-gray-700">মোট কত নাম্বার দিয়ে ভাগ</span>
@@ -650,8 +650,10 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
 
                     </div>
                   </div>
-                  <div className="grid min-w-0 grid-cols-1 gap-4 border-t border-gray-100 pt-4 md:col-span-2 md:grid-cols-2">
-                    <div className="min-w-0">
+
+
+                  <div className=" w-full gap-4 border-t border-gray-100 pt-4 flex">
+                    <div className="w-full">
                       <DefaultSelect
                         label="যদি কোন এক বিষয়ে নাম্বার এন্ট্রি না হয়"
                         options={examDivitions}
@@ -672,8 +674,8 @@ const ExamResultsCondition = ({ sharedStepData, setSharedStepData }) => {
                       />
                     </div>
                   </div>
-                  <div className="grid min-w-0 grid-cols-1 gap-4 border-t border-gray-100 pt-4 md:col-span-2 md:grid-cols-2">
-                    <div className="min-w-0">
+                  <div className="pt-4">
+                    <div className="w-full">
 
                       <DefaultInput label={"মেধার সংখ্যা কত হবে তা উল্লেখ করুন।"} registerKey="meritCount" type="number" require="This Field is required" defaultValue={getValues("meritCount")} />
                     </div>
