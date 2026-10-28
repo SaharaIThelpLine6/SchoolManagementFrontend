@@ -1,7 +1,7 @@
 import { useMemo, useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../../utils/conveter";
-import { Buffer } from "buffer"; // ✅ Buffer import for dynamic logo
+import { Buffer } from "buffer";
 
 /* ═══════════════════════════════════════════════════════════
    HELPERS
@@ -12,6 +12,30 @@ const bg = (color) => ({
     backgroundColor: color,
     boxShadow: `inset 0 0 0 1000px ${color}`,
 });
+
+const getFirstValue = (...values) =>
+    values.find((value) => value !== undefined && value !== null && value !== "");
+
+const isFilled = (v) => v !== undefined && v !== null && v !== "";
+
+const isKerat = (subject) => {
+    const v = subject?.KeratAction;
+    return v === true || v === 1 || v === "1" || v === "true";
+};
+
+const calcTotal = (studentResult, subjects) => {
+    if (!Array.isArray(subjects) || subjects.length === 0) {
+        const n = Number(studentResult?.Total);
+        return Number.isFinite(n) ? n : 0;
+    }
+    let sum = 0;
+    subjects.forEach((s, i) => {
+        if (isKerat(s)) return;
+        const n = Number(studentResult?.[`SubVal${i + 1}`]);
+        if (Number.isFinite(n)) sum += n;
+    });
+    return sum;
+};
 
 /* ✅ Fallback logo if institution logo is not available */
 const EXAMPLE_LOGO =
@@ -68,11 +92,11 @@ export const DEFAULT_DAYS = "31";
    PAGE LAYOUT CONSTANTS
    ═══════════════════════════════════════════════════════════ */
 const PX_PER_MM = 96 / 25.4;
-const PAGE_MARGIN_MM = 5; // must match @page margin
-const SAFETY_MM = 2; // keeps every page a little shorter than the paper → no blank trailing page
-const THEAD_PX = 48; // column header row (vertical day numbers)
-const ROW_MIN_PX = 30; // minimum student row height
-const TITLE_FALLBACK_PX = 225; // used until the real title block is measured
+const PAGE_MARGIN_MM = 5;
+const SAFETY_MM = 2;
+const THEAD_PX = 48;
+const ROW_MIN_PX = 30;
+const TITLE_FALLBACK_PX = 225;
 
 /* ═══════════════════════════════════════════════════════════
    THEME
@@ -150,13 +174,40 @@ function FillField({ label, flex = 1, color }) {
    🧾 MAIN
    ═══════════════════════════════════════════════════════════ */
 export default function AttendanceSheet({ reportData, query }) {
+
+    console.log(reportData, "reportData");
+
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
-    const [institutionLogo, setInstitutionLogo] = useState(null); // ✅ State for dynamic logo
+    const [institutionLogo, setInstitutionLogo] = useState(null);
 
     const conditionAverage = reportData?.conditionAverage || {};
-    const studentResultsDetails = Array.isArray(reportData?.studentResults)
-        ? reportData.studentResults
-        : [];
+    const subjectPassNumbers = reportData?.subjectPassNumbers || [];
+
+    /* ═══════════════════════════════════════════════════════════
+       ⚡ STUDENT RESULTS SORTED BY NUMBER (নাম্বার অনুসারে)
+       StudentResultSheet এর byNumber লজিক অনুসরণ করে
+       - মোট নম্বর বেশি থেকে কম
+       - সমান হলে AdmissionSerial অনুসারে
+       ═══════════════════════════════════════════════════════════ */
+    const studentResultsDetails = useMemo(() => {
+        const all = Array.isArray(reportData?.studentResults)
+            ? reportData.studentResults
+            : [];
+
+        // Admission serial getter
+        const serialOf = (s) => Number(s?.User?.Admission?.[0]?.AdmissionSerial) || 0;
+
+        // Total marks calculator (Kerat subjects বাদ দিয়ে)
+        const totalOf = (s) => {
+            const n = calcTotal(s, subjectPassNumbers);
+            return Number.isNaN(n) ? -Infinity : n;
+        };
+
+        // Sort: বেশি নম্বর আগে, সমান হলে AdmissionSerial অনুসারে
+        return [...all].sort(
+            (a, b) => totalOf(b) - totalOf(a) || serialOf(a) - serialOf(b)
+        );
+    }, [reportData?.studentResults, subjectPassNumbers]);
 
     /* ✅ sidebar state */
     const [visibleColumns, setVisibleColumns] = useState(() => loadObj(LS_VISIBLE, DEFAULT_VISIBLE_COLUMNS));
@@ -165,7 +216,7 @@ export default function AttendanceSheet({ reportData, query }) {
     const [daysCount, setDaysCount] = useState(() => loadStr(LS_DAYS, DAYS_OPTIONS, DEFAULT_DAYS));
     const [paper, setPaper] = useState(() => loadStr(LS_PAPER, PAPER_OPTIONS, DEFAULT_PAPER));
 
-    /* ✅ measured height of the title block (so row count is always exact) */
+    /* ✅ measured height of the title block */
     const [titleH, setTitleH] = useState(TITLE_FALLBACK_PX);
     const titleRef = useRef(null);
 
@@ -178,21 +229,16 @@ export default function AttendanceSheet({ reportData, query }) {
 
     /* ✅ Dynamic Logo Fetching */
     useEffect(() => {
-        // Check for common logo property names in institutionInfo
         const logoData = institutionInfo?.InstitutionLogo || institutionInfo?.Logo || institutionInfo?.InstitutionImage;
 
         if (logoData?.data) {
-            // If it's a buffer object (like { type: 'Buffer', data: [...] })
             const buf = Buffer.from(logoData.data);
             setInstitutionLogo(`data:image/png;base64,${buf.toString("base64")}`);
         } else if (typeof logoData === "string" && logoData.startsWith("data:image")) {
-            // If it's already a base64 string
             setInstitutionLogo(logoData);
         } else if (typeof logoData === "string" && logoData.startsWith("http")) {
-            // If it's a URL
             setInstitutionLogo(logoData);
         } else {
-            // Fallback
             setInstitutionLogo(EXAMPLE_LOGO);
         }
     }, [institutionInfo]);
@@ -358,7 +404,7 @@ export default function AttendanceSheet({ reportData, query }) {
         </div>
     );
 
-    /* one printable page = title block + column header + exactly `rowsPerPage` rows */
+    /* one printable page */
     const renderPage = (rows, pageIndex) => (
         <div
             key={pageIndex}
@@ -416,7 +462,7 @@ export default function AttendanceSheet({ reportData, query }) {
                         const rowBg = index % 2 === 1 ? C.zebra : "#fff";
                         const td = { ...cellBase, ...bg(rowBg), textAlign: "center", height: `${rowHeightPx}px` };
 
-                        /* empty-state message (only when there are no students at all) */
+                        /* empty-state message */
                         if (!student && studentResultsDetails.length === 0 && rowPos === 0) {
                             return (
                                 <tr key={`empty-${index}`} style={{ height: `${rowHeightPx}px` }}>
@@ -458,9 +504,8 @@ export default function AttendanceSheet({ reportData, query }) {
     /* ═══ RENDER ═══ */
     return (
         <div className="rs-root flex w-full bg-slate-100 lg:h-[100dvh] lg:overflow-hidden">
-            {/* ═══════════ SIDEBAR — fixed, নিজে scroll ═══════════ */}
+            {/* ═══════════ SIDEBAR ═══════════ */}
             <aside className="hidden lg:flex flex-col w-[300px] shrink-0 h-full bg-white border-r border-slate-200 shadow-[2px_0_12px_rgba(15,23,42,0.04)] print:hidden">
-                {/* Header — fixed */}
                 <div className="p-5 border-b border-slate-100 shrink-0">
                     <div className="flex items-center gap-2 mb-1">
                         <div className="w-6 h-6 rounded-md bg-emerald-50 flex items-center justify-center">
@@ -474,12 +519,10 @@ export default function AttendanceSheet({ reportData, query }) {
                     <p className="text-xs text-slate-400">হাজিরা খাতার কলাম ও প্রিন্ট অপশন</p>
                 </div>
 
-                {/* Preview info — fixed */}
                 <div className="px-5 py-3 border-b border-slate-100 shrink-0">
                     <PreviewInfo count={studentResultsDetails.length} days={days} pages={pages.length} />
                 </div>
 
-                {/* Scrollable content — শুধু এই অংশ scroll করবে */}
                 <div className="rs-scroll flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
                     <ColumnSelector value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={ATTENDANCE_COLUMNS} />
                     <PrintSettings
@@ -490,16 +533,13 @@ export default function AttendanceSheet({ reportData, query }) {
                     />
                 </div>
 
-                {/* Footer — fixed */}
                 <div className="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0">
                     <p className="text-[10px] text-slate-400 text-center">© Result Report Generator</p>
                 </div>
             </aside>
 
-            {/* ═══════════ REPORT BODY — নিজে scroll ═══════════ */}
+            {/* ═══════════ REPORT BODY ═══════════ */}
             <main className="rs-main rs-scroll flex-1 min-w-0 lg:h-full lg:overflow-y-auto">
-
-                {/* mobile settings */}
                 <div className="lg:hidden p-4 pb-0 print:hidden">
                     <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
                         <PreviewInfo count={studentResultsDetails.length} days={days} pages={pages.length} />
@@ -513,7 +553,6 @@ export default function AttendanceSheet({ reportData, query }) {
                     </div>
                 </div>
 
-                {/* Sheet pages */}
                 <div className="result-sheet-wrapper w-full p-4 lg:p-6">
                     <div className="sheet-scroll overflow-x-auto pb-2">
                         <div
@@ -531,7 +570,6 @@ export default function AttendanceSheet({ reportData, query }) {
 
             {/* ═══ CSS ═══ */}
             <style>{`
-        /* nice thin scrollbar (sidebar + main) */
         .rs-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; scroll-behavior: smooth; }
         .rs-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
         .rs-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -543,13 +581,11 @@ export default function AttendanceSheet({ reportData, query }) {
           html, body { margin: 0 !important; padding: 0 !important; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-          /* scroll lock print-e off */
           .rs-root { display: block !important; height: auto !important; overflow: visible !important; background: #fff !important; }
           .rs-main { height: auto !important; overflow: visible !important; }
           .result-sheet-wrapper { padding: 0 !important; }
           .sheet-scroll { overflow: visible !important; padding: 0 !important; }
 
-          /* pages: no gap / shadow, one physical sheet each */
           .sheet-pages { display: block !important; width: auto !important; margin: 0 !important; gap: 0 !important; }
           .sheet-page { box-shadow: none !important; margin: 0 !important; break-after: page; page-break-after: always; }
           .sheet-page:last-child { break-after: auto; page-break-after: auto; }
@@ -614,7 +650,6 @@ const PrintSettings = ({
                 {paper} · {orientation === "landscape" ? "Landscape" : "Portrait"}
             </span>
         </div>
-        {/* <SegmentedControl label="রঙ" options={COLOR_OPTIONS} value={colorMode} onChange={onColorChange} /> */}
         <SegmentedControl label="পেজ দিক" options={ORIENTATION_OPTIONS} value={orientation} onChange={onOrientationChange} />
         <SegmentedControl label="কাগজের সাইজ" options={PAPER_OPTIONS} value={paper} onChange={onPaperChange} />
         <SegmentedControl label="মাসের দিন সংখ্যা" options={DAYS_OPTIONS} value={daysCount} onChange={onDaysChange} />

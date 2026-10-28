@@ -16,6 +16,26 @@ const bg = (color) => ({
 const EXAMPLE_LOGO =
     "https://images.seeklogo.com/logo-png/42/1/madrasha-logo-png_seeklogo-424804.png";
 
+/* ✅ Total marks calculator helpers (StudentResultSheet এর byNumber লজিক) */
+const isKerat = (subject) => {
+    const v = subject?.KeratAction;
+    return v === true || v === 1 || v === "1" || v === "true";
+};
+
+const calcTotal = (studentResult, subjects) => {
+    if (!Array.isArray(subjects) || subjects.length === 0) {
+        const n = Number(studentResult?.Total);
+        return Number.isFinite(n) ? n : 0;
+    }
+    let sum = 0;
+    subjects.forEach((s, i) => {
+        if (isKerat(s)) return;
+        const n = Number(studentResult?.[`SubVal${i + 1}`]);
+        if (Number.isFinite(n)) sum += n;
+    });
+    return sum;
+};
+
 /* ═══════════════════════════════════════════════════════════
    OPTIONS & CONSTANTS
    ═══════════════════════════════════════════════════════════ */
@@ -181,9 +201,33 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
     const [institutionLogo, setInstitutionLogo] = useState(null);
 
     const conditionAverage = reportData?.conditionAverage || {};
-    const studentResultsDetails = Array.isArray(reportData?.studentResults)
-        ? reportData.studentResults
-        : [];
+    const subjectPassNumbers = reportData?.subjectPassNumbers || [];
+
+    /* ═══════════════════════════════════════════════════════════
+       ⚡ STUDENT RESULTS SORTED BY NUMBER (নাম্বার অনুসারে)
+       StudentResultSheet এর byNumber লজিক অনুসরণ করে
+       - মোট নম্বর বেশি থেকে কম
+       - সমান হলে AdmissionSerial অনুসারে
+       ═══════════════════════════════════════════════════════════ */
+    const studentResultsDetails = useMemo(() => {
+        const all = Array.isArray(reportData?.studentResults)
+            ? reportData.studentResults
+            : [];
+
+        // Admission serial getter
+        const serialOf = (s) => Number(s?.User?.Admission?.[0]?.AdmissionSerial) || 0;
+
+        // Total marks calculator (Kerat subjects বাদ দিয়ে)
+        const totalOf = (s) => {
+            const n = calcTotal(s, subjectPassNumbers);
+            return Number.isNaN(n) ? -Infinity : n;
+        };
+
+        // Sort: বেশি নম্বর আগে, সমান হলে AdmissionSerial অনুসারে
+        return [...all].sort(
+            (a, b) => totalOf(b) - totalOf(a) || serialOf(a) - serialOf(b)
+        );
+    }, [reportData?.studentResults, subjectPassNumbers]);
 
     /* ✅ State Management */
     const [visibleColumns, setVisibleColumns] = useState(() => loadObj(LS_VISIBLE, DEFAULT_VISIBLE_COLUMNS));
