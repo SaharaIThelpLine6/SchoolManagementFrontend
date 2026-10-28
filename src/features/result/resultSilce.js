@@ -14,7 +14,7 @@ export const resultSilce = createApi({
       return headers;
     },
   }),
-  tagTypes: ["ExamList", "Result", "StudentMarksheetNote"],
+  tagTypes: ["ExamList", "Result", "StudentMarksheetNote", "ExamDivisionNameResult"],
   endpoints: (builder) => ({
     getExamList: builder.query({
       query: ({ session_id, exam_id, subclass_id } = {}) => {
@@ -107,6 +107,7 @@ export const resultSilce = createApi({
       query: () => `get_label_names`,
     }),
 
+
     getExamDivisionName: builder.query({
       query: ({ ExamType }) => ({
         url: '/get_exam_division_name',
@@ -149,6 +150,41 @@ export const resultSilce = createApi({
         { type: "SmsPublishedResult", id: `${arg.sessionid}-${arg.examid}-${arg.classid}-${arg.query ?? ""}` },
       ],
     }),
+    getExamDivisionNameResults: builder.query({
+      query: () => `exam_division_result_setting`,
+      providesTags: ["ExamDivisionNameResult"],
+
+    }),
+    createExamDivisionNameResult: builder.mutation({
+      query: (data) => ({
+        url: 'exam_division_result',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['ExamDivisionNameResult'],
+    }),
+
+    updateExamDivisionNameResult: builder.mutation({
+      query: ({ id, ...updatedData }) => ({
+        url: `exam_division_result/${id}`,
+        method: 'PUT',
+        body: updatedData,
+      }),
+      invalidatesTags: ['ExamDivisionNameResult'],
+    }),
+
+    deleteExamDivisionNameResult: builder.mutation({
+      query: (id) => ({
+        url: `exam_division_result/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['ExamDivisionNameResult'],
+    }),
+    getExamType: builder.query({
+      query: ({ sessionid, examid }) =>
+        `exam_type?sessionid=${sessionid}&examid=${examid}`,
+      providesTags: ['ExamNames'],
+    }),
   }),
 });
 
@@ -165,5 +201,10 @@ export const {
   useGetExamDivisionNameQuery,
   useGetExamDivisionNoteQuery,
   useUpdateExamDivisionNoteMutation,
-  useGetSmsPublishedResultQuery
+  useGetSmsPublishedResultQuery,
+  useGetExamTypeQuery,
+  useCreateExamDivisionNameResultMutation,
+  useDeleteExamDivisionNameResultMutation,
+  useUpdateExamDivisionNameResultMutation,
+  useGetExamDivisionNameResultsQuery
 } = resultSilce;

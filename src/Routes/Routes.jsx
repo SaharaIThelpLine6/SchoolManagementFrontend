@@ -183,6 +183,7 @@ import PublicationOfResultsViaSMS from '../pages/PublicationOfResultsViaSMS';
 import ExamRoutingList from '../pages/ExamRoutingList';
 import ExamRoutingCreate from '../pages/ExamRoutingCreate';
 import ExamRoutineEdit from '../pages/ExamRoutineEdit';
+import ExamAllClassRoutine from '../pages/ExamAllClassRoutine';
 
 const Router = createBrowserRouter([
   {
@@ -198,7 +199,7 @@ const Router = createBrowserRouter([
     path: '/login',
     element: <Login />,
   },
-   {
+  {
     path: '/privacy-policy',
     element: <PrivacyPolicy />,
   },
@@ -842,6 +843,12 @@ const Router = createBrowserRouter([
                 path: 'routing',
                 element: (
                   <ExamRoutingList pageTitle="Exam Routing Create" />
+                ),
+              },
+              {
+                path: 'routing-print',
+                element: (
+                  <ExamAllClassRoutine pageTitle="Exam Routing Create" />
                 ),
               },
               {

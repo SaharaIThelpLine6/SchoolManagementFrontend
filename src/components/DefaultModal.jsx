@@ -99,6 +99,7 @@ import ExamRouteCreateModal from '../view/exam/ExamRouteCreateModal';
 import ExamRouteSettingCreateModal from '../view/exam/ExamRouteSettingCreateModal';
 import ExamRoutineCreateModal from '../view/exam/ExamRouting/ExamRoutineCreateModal';
 import ExamRoutineUpdateModal from '../view/exam/ExamRouting/ExamRoutineUpdateModal';
+import ExamDivisionSettingModal from '../view/result/Reports/ExamDivisionSettingModal';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
@@ -441,6 +442,9 @@ const DefaultModal = () => {
                 )}
                 {modalType === 'EXAM_ROUTINE_SETTING' && (
                   <ExamRouteSettingCreateModal />
+                )}
+                {modalType === 'EXAM_DIVISION_SETTING' && (
+                  <ExamDivisionSettingModal />
                 )}
               </div>
             )}

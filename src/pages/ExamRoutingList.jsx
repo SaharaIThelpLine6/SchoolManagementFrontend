@@ -16,7 +16,7 @@ import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import useTranslate from '../utils/Translate';
 import ExamRoutinePrint from './ExamRoutinePrint';
 import { showModal } from '../utils/ModalControlar';
-
+import { Link } from "react-router-dom";
 const getSubClassID = (routing) =>
   routing.SubClassID ?? routing.classGroup?.SubClassID;
 
@@ -205,7 +205,21 @@ const ExamRoutingList = ({ pageTitle }) => {
           </select>
         </label>
         <div className="flex items-end justify-end">
-          <button
+          <Link
+            to={`/dashboard/exam/routing-print?sessionid=${sessionFilter}&examid=${examFilter}&subclassid=${subClassFilter}`}
+            className={`inline-flex h-11 items-center justify-center gap-2 rounded-md bg-emerald-600 px-4 text-sm font-semibold text-white hover:bg-emerald-700 ${printAllCount === 0 ? "pointer-events-none cursor-not-allowed opacity-50" : ""
+              }`}
+            aria-disabled={printAllCount === 0}
+            title={`Print all routines (${printAllCount})`}
+            aria-label="Print all routines"
+            onClick={(e) => {
+              if (printAllCount === 0) e.preventDefault();
+            }}
+          >
+            <FaPrint size={16} aria-hidden="true" />
+            সব প্রিন্ট ({printAllCount})
+          </Link>
+          {/* <button
             type="button"
             onClick={handlePrintAll}
             disabled={printAllCount === 0}
@@ -215,7 +229,7 @@ const ExamRoutingList = ({ pageTitle }) => {
           >
             <FaPrint size={16} aria-hidden="true" />
             সব প্রিন্ট ({printAllCount})
-          </button>
+          </button> */}
         </div>
       </div>
 
