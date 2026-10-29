@@ -401,15 +401,15 @@ export const menuData = [
       },
       {
         id: '2',
-        name: 'Result Entry & Publish',
+        name: 'Result Entry',
         route: 'result',
         icon: 'SubResult',
       },
-      // {
-      //   id: '2',
-      //   name: 'Result Publish',
-      //   route: 'result-publish',
-      // },
+      {
+        id: '7',
+        name: 'Result Publish',
+        route: 'result/result-publish',
+      },
       {
         id: '3',
         name: 'Mark Sheet',
