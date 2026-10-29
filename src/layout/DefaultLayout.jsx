@@ -13,7 +13,7 @@ import TawkMessenger from "@tawk.to/tawk-messenger-react";
 import DeveloperCredit from "../components/DeveloperCredit";
 import { useGetCurrentMadrasahQuery } from "../features/userType/userTypeSlice";
 import { useGetRedirectStatusQuery } from "../features/Admin/redirectSlice";
-// import DashboardQuickActions from "../components/DashboardQuickActions";
+import DashboardQuickActions from "../components/DashboardQuickActions";
 
 const tawkPropertyId = import.meta.env.VITE_TAWK_PROPERTY_ID;
 const tawkWidgetId = import.meta.env.VITE_TAWK_WIDGET_ID;
@@ -156,7 +156,7 @@ const DefaultLayout = () => {
           <DeveloperCredit />
         </main>
       </div>
-      {/* {isAuthenticated && !isOpen && <DashboardQuickActions key={location.pathname} />} */}
+      {isAuthenticated && !isOpen && <DashboardQuickActions key={location.pathname} />}
       {/* ✅ Show Tawk chat only when logged in */}
       {/* {isAuthenticated && (
         <TawkMessenger propertyId={tawkPropertyId} widgetId={tawkWidgetId} />

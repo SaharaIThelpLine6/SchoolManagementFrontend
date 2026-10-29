@@ -10,10 +10,10 @@ import { setEditUserID } from '../features/settings/settingsSlice';
 import { setEditMode } from '../features/userInfo/userInfoSlice';
 import { useLazyGetUserBySearchQuery } from '../features/userType/userTypeSlice';
 import './DashboardQuickActions.css';
+import { useGetInstitutionInfoQuery } from '../features/settings/settingsQuerySlice';
 
 // Defaults to the support number already used on the website's contact page.
-const whatsappNumber = (import.meta.env.VITE_SUPPORT_WHATSAPP_NUMBER)
-  .replace(/\D/g, '');
+const whatsappNumber = (import.meta.env.VITE_SUPPORT_WHATSAPP_NUMBER);
 const whatsappMessage = import.meta.env.VITE_SUPPORT_WHATSAPP_MESSAGE ||
   'আসসালামু আলাইকুম। আমি Qmmsoft ড্যাশবোর্ড ব্যবহার করছি। আমার কিছু সহায়তা প্রয়োজন।';
 const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`;
@@ -60,6 +60,7 @@ export default function DashboardQuickActions() {
   const launcherRef = useRef(null);
   const inputRef = useRef(null);
   const requestRef = useRef(null);
+  const { data: institutionInfo, isSuccess } = useGetInstitutionInfoQuery();
 
   const close = (restoreFocus = true) => {
     requestRef.current?.abort();
