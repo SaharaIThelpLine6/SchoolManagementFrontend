@@ -2,7 +2,7 @@
   --quick-primary: #0b7ed3;
   position: fixed;
   right: max(30px, env(safe-area-inset-right));
-  bottom: max(80px, env(safe-area-inset-bottom));
+  bottom: max(60px, env(safe-area-inset-bottom));
   z-index: 40;
   color: #24344b;
 }

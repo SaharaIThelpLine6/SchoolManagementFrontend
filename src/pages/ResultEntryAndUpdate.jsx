@@ -268,10 +268,7 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
 
   const totalPages = Math.ceil(filteredByID.length / PAGE_SIZE) || 1;
 
-  const paginatedData = filteredByID.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
+  const paginatedData = filteredByID;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -597,7 +594,7 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
             </div>
           )}
 
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex justify-between items-center mt-4 sticky bottom-0 bg-white py-4">
             <Button
               type="submit"
               loading={isSubmitting}
@@ -606,11 +603,11 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
               {translate("Refresh Results")}
             </Button>
 
-            <DefaultPagination
+            {/* <DefaultPagination
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
-            />
+            /> */}
           </div>
         </form>
       </div>
