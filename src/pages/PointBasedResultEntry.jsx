@@ -12,7 +12,6 @@ import {
 } from '../features/exam/examQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 
-import bnBijoy2Unicode from '../utils/conveter';
 import useTranslate from '../utils/Translate';
 
 import EditButton from '../components/Button/EditButton';
@@ -24,11 +23,8 @@ import SortableTable from '../components/Tables/SortableTable';
 import { permissionsDataList } from '../Data/permissions';
 import {
   useGetExamListQuery,
-  useUpdateExamListStatusUpdateMutation,
 } from '../features/result/resultSilce';
 import { ViewPermission } from '../Routes/ViewPermission';
-import Button from '../components/Button/Button';
-import { showModal } from '../utils/ModalControlar';
 
 const PAGE_SIZE = 10;
 
@@ -43,11 +39,11 @@ const PointBasedResultEntry = ({ pageTitle }) => {
 
   const [postExamFeeSetting] = usePostExamFeeSettingMutation();
   const [updateExamFeeSetting] = useUpdateExamFeeSettingMutation();
-  const [updateStatus] = useUpdateExamListStatusUpdateMutation();
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
+  
   const session_id = watch('SessionID');
   const exam_id = watch('ExamID');
   const subclass_id = watch('SubClassID');
@@ -63,13 +59,9 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     }
   );
 
-  // console.log(session_id, exam_id, subclass_id, "Ids");
-  // console.log(examListData, "examListData");
-
   const totalPages = Math.ceil((examListData?.length || 0) / PAGE_SIZE);
 
   const paginatedData = useMemo(() => {
-    console.log(examListData);
     const start = (currentPage - 1) * PAGE_SIZE;
     return examListData?.slice(start, start + PAGE_SIZE) || [];
   }, [examListData, currentPage]);
@@ -130,39 +122,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
     }
   };
 
-  const handleStatusUpdate = async (id, currentPublished) => {
-    const newPublished = !currentPublished;
-    const confirmResult = await Swal.fire({
-      title: `Are you sure you want to mark as ${newPublished ? 'Published' : 'Unpublished'
-        }?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'Cancel',
-    });
-
-    if (!confirmResult.isConfirmed) return;
-
-    try {
-      await updateStatus({ id, published: newPublished }).unwrap();
-      Swal.fire({
-        icon: 'success',
-        title: 'Updated!',
-        text: `Status has been ${newPublished ? 'published' : 'unpublished'}.`,
-        timer: 1500,
-        showConfirmButton: false,
-      });
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: 'Update failed. Please try again.',
-      });
-    }
-  };
-
-
-
   // Table Data Columns 
   const columns = [
     {
@@ -195,36 +154,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
       render: (row) => row.ExamType == 1 ? "দরসিয়াত" : row.ExamType == 2 ? "হিফজ কন্ডিশন ভিত্তিক" : row.ExamType == 3 ? "গড়ে যা আসবে তাই" : "পয়েন্ট ভিত্তিক",
     },
     {
-      title: translate('Status'),
-      field: 'Published',
-      hozAlign: 'center',
-      render: (row) => {
-        const isPublished = row?.Published;
-        return (
-          <ViewPermission
-            permissionId={permissionsDataList.result_entry}
-            permissionType="edit"
-            empty={true}
-          >
-            <button
-              className={`px-3 py-1 rounded text-sm font-medium ${isPublished
-                ? 'bg-green-500 text-white'
-                : 'bg-red-500 text-white'
-                }`}
-              onClick={() => handleStatusUpdate(row.ID, isPublished)}
-              disabled={isLoading}
-            >
-              {isLoading
-                ? 'Updating...'
-                : isPublished
-                  ? 'প্রকাশিত'
-                  : 'অপ্রকাশিত'}
-            </button>
-          </ViewPermission>
-        );
-      },
-    },
-    {
       title: translate('Action'),
       hozAlign: 'center',
       render: (row) => (
@@ -234,8 +163,6 @@ const PointBasedResultEntry = ({ pageTitle }) => {
             permissionType="edit"
             empty={true}
           >
-
-
             <EditButton
               onClick={() =>
                 navigate(
@@ -245,7 +172,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
             />
           </ViewPermission>
           <button
-            className="p-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md flex items-center gap-1"
+            className="p-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md flex items-center gap-1 transition-colors shadow-sm"
             title="Print"
             onClick={() =>
               navigate(
@@ -261,65 +188,106 @@ const PointBasedResultEntry = ({ pageTitle }) => {
   ];
 
   return (
-    <div className="font-SolaimanLipi bg-white p-6 md:p-4 rounded-xl shadow-lg">
-      <div className="filter_header flex items-center justify-between pt-5">
-        <h3 className="text-base sm:text-[20px] font-bold">
-          {translate('Result Entry')}
-        </h3>{' '}
-      </div>
-      <FormProvider {...methods}>
-        <form className="w-full space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <input type="hidden" {...methods.register('ID')} />
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <DefaultSelect
-              label={translate('Session') + ':'}
-              options={sessionData ?? []}
-              valueField="SessionID"
-              nameField="SessionName"
-              registerKey="SessionID"
-            />
-            <DefaultSelect
-              label={translate('Exam Name') + ':'}
-              options={examNameData ?? []}
-              valueField="ExamID"
-              nameField="ExamName"
-              registerKey="ExamID"
-            />
-            <DefaultSelect
-              label={translate('Class/Jamaat') + ':'}
-              options={subClassListData ?? []}
-              valueField="SubClassID"
-              nameField="SubClass"
-              registerKey="SubClassID"
+    <div className="font-SolaimanLipi bg-gray-50 min-h-screen p-4 md:p-6">
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        
+        {/* ---------- মডার্ন হেডার ---------- */}
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-[#7C3AED] via-[#4F46E5] to-[#06B6D4] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-6 w-6 text-white"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-[19px] font-bold leading-tight text-white">
+                {translate('Result Entry')}
+              </h3>
+              <p className="text-[12.5px] text-white/80">
+                শিক্ষাবর্ষ, পরীক্ষা ও জামাত অনুযায়ী ফলাফল এন্ট্রি করুন
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ---------- মেইন কন্টেন্ট ---------- */}
+        <div className="p-5 md:p-6">
+          
+          {/* ফিল্টার সেকশন */}
+          <FormProvider {...methods}>
+            <form className="w-full mb-6 bg-gray-50/50 p-5 rounded-xl border border-gray-100" onSubmit={handleSubmit(onSubmit)}>
+              <input type="hidden" {...methods.register('ID')} />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <DefaultSelect
+                  label={translate('Session') + ' :'}
+                  options={sessionData ?? []}
+                  valueField="SessionID"
+                  nameField="SessionName"
+                  registerKey="SessionID"
+                />
+                <DefaultSelect
+                  label={translate('Exam Name') + ' :'}
+                  options={examNameData ?? []}
+                  valueField="ExamID"
+                  nameField="ExamName"
+                  registerKey="ExamID"
+                />
+                <DefaultSelect
+                  label={translate('Class/Jamaat') + ' :'}
+                  options={subClassListData ?? []}
+                  valueField="SubClassID"
+                  nameField="SubClass"
+                  registerKey="SubClassID"
+                />
+              </div>
+            </form>
+          </FormProvider>
+
+          {/* টেবিল সেকশন */}
+          <div className="mt-2">
+            {isLoading ? (
+              <div className="py-10"><Loading /></div>
+            ) : error ? (
+              <div className="text-red-500 text-center py-8 bg-red-50 rounded-xl border border-red-100">
+                <p className="font-medium">{translate('Failed to load exam fee settings. Please try again.')}</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+                <SortableTable
+                  columns={columns}
+                  data={paginatedData}
+                  isFilterColumn={false}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* পেজিনেশন */}
+          <div className="mt-6 border-t border-gray-100 pt-4">
+            <DefaultPagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
             />
           </div>
-        </form>
-      </FormProvider>
-
-      <div className="mt-5">
-        {isLoading ? (
-          <Loading />
-        ) : error ? (
-          <div className="text-red-500 text-center py-4">
-            {translate('Failed to load exam fee settings. Please try again.')}
-          </div>
-        ) : (
-          <SortableTable
-            columns={columns}
-            data={paginatedData}
-            isFilterColumn={false}
-          />
-        )}
+          
+        </div>
       </div>
-
-      <DefaultPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
     </div>
   );
 };
-//  
 
 export default PointBasedResultEntry;

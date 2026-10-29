@@ -1097,6 +1097,7 @@ const useTranslate = () => {
     "The exam copy API did not confirm the selected destination. Update the backend before trying again.": "পরীক্ষার কন্ডিশন কপি করার API নির্বাচিত গন্তব্য নিশ্চিত করেনি। আবার চেষ্টা করার আগে ব্যাকএন্ড আপডেট করুন।",
     "Related settings exist without a main exam condition at the destination. Please check the destination data.": "গন্তব্যে মূল পরীক্ষার কন্ডিশন নেই, তবে সম্পর্কিত সেটিংসের রেকর্ড আছে। গন্তব্যের ডেটা যাচাই করুন।",
     "A database key conflict prevented copying this condition. Please check the table constraints; this does not confirm an existing destination condition.": "ডেটাবেসের কী কনফ্লিক্টের কারণে কন্ডিশন কপি হয়নি। টেবিলের কনস্ট্রেইন্ট যাচাই করুন; এই ত্রুটি মানেই গন্তব্যে কন্ডিশন আছে এমন নয়।",
+    "Result Publish": "ফলাফল প্রকাশ",
   };
 
   return (key) =>

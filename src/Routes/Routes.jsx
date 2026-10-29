@@ -171,6 +171,7 @@ import AttendenceEntry from '../pages/AttendenceEntry';
 import HomWorkGroup from '../pages/HomWorkGroup';
 import DocumentSettings from '../pages/userpanel/DocumentSettings';
 import SMSPaymentConfirm from '../pages/SMSPaymentConfirm';
+import ResultPublish from '../pages/ResultPublish';
 
 // AdminRoutes
 import AdminRoutes from "../Admin/routes/AdminRoutes";
@@ -911,7 +912,7 @@ const Router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.result_entry}
                   >
-                    <PointBasedResultEntry pageTitle="Result Entry & Publish" />
+                    <PointBasedResultEntry pageTitle="Result Entry" />
                     {/* <PageNotFound /> */}
                   </RequirePermission>
                 ),
@@ -919,10 +920,8 @@ const Router = createBrowserRouter([
               {
                 path: 'result-publish',
                 element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.result_entry}
-                  >
-                    <PointBasedResultEntry pageTitle="Result Publish" />
+                  <RequirePermission permissionId={permissionsDataList.result_entry}>
+                    <ResultPublish pageTitle="Result Publish" />
                   </RequirePermission>
                 ),
               },
