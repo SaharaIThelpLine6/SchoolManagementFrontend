@@ -142,8 +142,8 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
       ? {
         SessionID: SessionID || urlSessionID,
         ExamID: ExamID || urlExamID,
-        ...(ClassID ? { ClassID } : {}),
-        ...((SubClassID || urlSubClassID) ? { SubClassID: SubClassID || urlSubClassID } : {}),
+        // ...(ClassID ? { ClassID } : {}),
+        // ...((SubClassID || urlSubClassID) ? { SubClassID: SubClassID || urlSubClassID } : {}),
       }
       : skipToken
   );
@@ -262,7 +262,7 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
                       />
                     )}
 
-                    {isRoutineReport && (
+                    {/* {isRoutineReport && (
                       <div>
                         <label className="block text-sm font-bold text-black mb-1">
                           {labelNames[0]?.SubClassNameLabel ?? 'শ্রেণি/জামাত'} :
@@ -289,7 +289,7 @@ const ExamAllClassRoutine = ({ pageTitle }) => {
                           </svg>
                         </div>
                       </div>
-                    )}
+                    )} */}
 
                     {shouldShowFields('Langauge') && (
                       <DefaultSelect
