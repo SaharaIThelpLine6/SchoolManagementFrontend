@@ -184,6 +184,7 @@ import ExamRoutingList from '../pages/ExamRoutingList';
 import ExamRoutingCreate from '../pages/ExamRoutingCreate';
 import ExamRoutineEdit from '../pages/ExamRoutineEdit';
 import ExamAllClassRoutine from '../pages/ExamAllClassRoutine';
+import StudentInfo from '../components/Tables/StudentInfo';
 
 const Router = createBrowserRouter([
   {
@@ -213,8 +214,8 @@ const Router = createBrowserRouter([
         children: [
           {
             index: true,
-            element: <Home />,
-            // element: <DashboardDesignNew />,
+            // element: <Home />,
+            element: <DashboardDesignNew />,
           },
           {
             path: 'general-info',
@@ -325,7 +326,8 @@ const Router = createBrowserRouter([
                   <RequirePermission
                     permissionId={permissionsDataList.student_admission}
                   >
-                    <AddStudent pageTitle="Add Student" />
+                    {/* <AddStudent pageTitle="Add Student" /> */}
+                    <StudentInfo pageTitle="Add Student" />
                   </RequirePermission>
                 ),
               },

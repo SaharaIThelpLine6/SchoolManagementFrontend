@@ -593,6 +593,17 @@ export const userStudentSlice = createApi({
       },
       invalidatesTags: ['Student', "MadrashaQuotaInfo"],
     }),
+
+    getStudentAttendanceTodayDashboard: builder.query({
+      query: (params) => ({
+        url: "/student_attendance/session_summary",
+        params: {
+          ...(params?.date && {
+            date: params.date,
+          }),
+        },
+      }),
+    }),
   }),
 });
 
@@ -663,5 +674,6 @@ export const {
   useGetFilteredStudentsQuery,
   useGetUserByIdQuery,
   useUpdateUserMutation,
-  usePostGuardianInfoMutation
+  usePostGuardianInfoMutation,
+  useGetStudentAttendanceTodayDashboardQuery
 } = userStudentSlice;

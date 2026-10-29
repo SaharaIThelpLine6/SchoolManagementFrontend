@@ -316,56 +316,63 @@ const SideBar = () => {
     return <div className="p-4 text-red-500">Failed to load menu.</div>;
 
   return (
-    <aside className="h-[calc(100vh-64px)]  font-SolaimanLipi lg:h-full overflow-y-auto w-[250px] bg-white shadow-[2px_0_4px_rgba(0,0,0,0.1)] text-sm text-black scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 scrollbar-thumb-rounded-full print:hidden">
+
+    <aside className="h-[calc(100vh-64px)] font-SolaimanLipi lg:h-full overflow-y-auto w-[250px] bg-white shadow-[2px_0_4px_rgba(0,0,0,0.1)] text-sm text-black scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 scrollbar-thumb-rounded-full print:hidden">
       <nav className="mt-4">
         <ul className="space-y-2 pb-[100px] sideb">
           {filteredMenuData.map((menu) => (
             <li key={menu.id}>
               {Array.isArray(menu.subMenu) ? (
                 <>
-
                   <button
                     onClick={() => handleToggle(menu.id)}
-                    className={`w-full flex px-4 items-center justify-between border-l-6 border-solid gap-2 py-2.5 ${location.pathname.includes(menu.route) // was: .startsWith(menu.route)
-                      ? 'bg-[#deeff9] text-[#007af7] border-l-[#007af7]'
-                      : 'hover:text-[#007af7] hover:bg-[#ddeffe] border-l-transparent'
+                    className={`w-full flex px-4 items-center justify-between border-l-6 border-solid gap-2 py-2.5 ${location.pathname.includes(menu.route)
+                      ? 'bg-[#b3dcff] text-[#007af7] border-l-[#007af7]'
+                      : 'hover:text-[#007af7] hover:bg-[#c5e4ff] border-l-transparent'
                       }`}
                   >
                     <div className="flex items-center justify-center gap-2">
                       <SvgIcon name={menu.icon} size={24} />
                       {translate(menu.name)}
                     </div>
+
                     <span>
                       {openMenuId === menu.id ? (
-                        <SvgIcon name={'FaChevronUp'} size={14} />
+                        <SvgIcon name="FaChevronUp" size={14} />
                       ) : (
-                        <SvgIcon name={'FaChevronDown'} size={14} />
+                        <SvgIcon name="FaChevronDown" size={14} />
                       )}
                     </span>
                   </button>
 
                   <ul
-                    className={`relative text-gray-600 overflow-hidden transition-all duration-300 ease-in-out
-                    ${openMenuId === menu.id
-                        ? 'max-h-[1000px] opacity-100'
-                        : 'max-h-0 opacity-0'
+                    className={`relative text-gray-600 overflow-hidden transition-all duration-300 ease-in-out ${openMenuId === menu.id
+                      ? 'max-h-[1000px] opacity-100'
+                      : 'max-h-0 opacity-0'
                       }`}
                   >
                     <div className="absolute top-0 bottom-0 left-6 w-px border-l-2 border-dashed border-[#007af7] z-0" />
 
                     {menu.subMenu.map((item) => (
-                      <li key={item.id} className="relative z-10 pl-[26px]">
+                      <li
+                        key={item.id}
+                        className="relative z-10 pl-[26px]"
+                      >
                         <NavLink
                           to={getDashboardPath(item.route)}
                           end
                           className={({ isActive }) =>
-                            `block py-2 pl-4 rounded-md transition
-                            ${isActive
-                              ? 'bg-[#ddeffe] text-[#007af7]'
-                              : 'hover:text-[#007af7] hover:bg-[#ddeffe]'
+                            `flex items-center gap-2 py-2 pl-4 rounded-md transition ${isActive
+                              ? 'bg-[#b3dcff] text-[#007af7] font-semibold'
+                              : 'hover:text-[#007af7] hover:bg-[#c5e4ff]'
                             }`
                           }
                         >
+                          {/* আইকন যোগ করার কোড */}
+                          {item.icon && (
+                            <SvgIcon name={item.icon} size={16} className="text-current" />
+                          )}
+
                           {translate(item.name)}
                         </NavLink>
                       </li>
@@ -377,9 +384,9 @@ const SideBar = () => {
                   to={getDashboardPath(menu.route)}
                   onClick={() => setOpenMenuId(null)}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 py-2 px-4 border-l-6 border-solid ${isActive
-                      ? 'bg-[#ddeffe] text-[#007af7] border-l-[#007af7]'
-                      : 'hover:text-[#007af7] hover:bg-[#ddeffe] border-l-transparent'
+                    `flex items-center gap-2 py-2 px-4 border-l-6 border-solid transition ${isActive
+                      ? 'bg-[#b3dcff] text-[#007af7] border-l-[#007af7] font-semibold'
+                      : 'hover:text-[#007af7] hover:bg-[#c5e4ff] border-l-transparent'
                     }`
                   }
                 >
@@ -396,6 +403,7 @@ const SideBar = () => {
         </ul>
       </nav>
     </aside>
+
   );
 };
 

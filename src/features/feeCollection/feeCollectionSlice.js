@@ -573,6 +573,25 @@ export const feeCollectionSlice = createApi({
         return `user_transaction_filter?${params}`;
       },
     }),
+    getPaymentTransactionReport: builder.query({
+      query: ({
+        startDate,
+        endDate,
+      }) => ({
+        url: "/payment_transaction_report",
+        method: "GET",
+        params: {
+          startDate,
+          endDate,
+        },
+      }),
+      providesTags: [
+        'StudentFeeAdmissions',
+        'StudentFeeSettings',
+        'StudentFeeCollection',
+        'StudentFee',
+      ],
+    }),
   }),
 });
 
@@ -657,5 +676,6 @@ export const {
   useGetStudentFeeLandSingleFilterQuery,
   useUpdateMonthlyAttendanceLeftMutation,
   useUpdateMonthlyAttendanceRightMutation,
-  useGetSearchStudentsExamFeeQuery
+  useGetSearchStudentsExamFeeQuery,
+  useGetPaymentTransactionReportQuery
 } = feeCollectionSlice;

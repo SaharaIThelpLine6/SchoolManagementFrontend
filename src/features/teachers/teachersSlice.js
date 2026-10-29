@@ -199,6 +199,15 @@ export const teachersSlice = createApi({
       }),
       invalidatesTags: ["Teacher_Subject"],
     }),
+    getTeacherAttendanceTodayDashboard: builder.query({
+      query: ({ date }) => ({
+        url: "/teacher_attendance_today_count",
+        method: "GET",
+        params: {
+          date,
+        },
+      }),
+    }),
   }),
 });
 
@@ -224,4 +233,5 @@ export const {
   useDeleteTeacherSubjectMutation,
   useGetTeacherSubjectSubmissionsQuery,
   useSubmitTeacherKhataMutation,
+  useGetTeacherAttendanceTodayDashboardQuery
 } = teachersSlice;
