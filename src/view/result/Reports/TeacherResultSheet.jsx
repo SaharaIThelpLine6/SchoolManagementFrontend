@@ -594,14 +594,14 @@ export default function TeacherResultSheet({ reportData }) {
         </OptionGroup>
       )}
 
-      <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+      {/* <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
         <div className="flex items-center justify-between">
           <p className="text-xs font-bold text-slate-700 leading-tight">প্রিন্ট সেটিং</p>
           <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 rounded-md px-1.5 py-0.5">
             A4 Landscape
           </span>
         </div>
-      </div>
+      </div> */}
     </>
   );
 

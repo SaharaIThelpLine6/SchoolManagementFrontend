@@ -175,7 +175,6 @@ function FillField({ label, flex = 1, color }) {
    ═══════════════════════════════════════════════════════════ */
 export default function AttendanceSheet({ reportData, query }) {
 
-    console.log(reportData, "reportData");
 
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
     const [institutionLogo, setInstitutionLogo] = useState(null);

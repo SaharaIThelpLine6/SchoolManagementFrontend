@@ -31,7 +31,11 @@ const TRANSLATIONS = {
         result: "ফলাফল",
         resultSub: "ফলাফল প্রদর্শনের ধরন নির্বাচন করুন",
         printSetting: "প্রিন্ট সেটিং",
-        pageSize: "A4 Landscape",
+        paperSize: "পেপার সাইজ",
+        orientation: "ওরিয়েন্টেশন",
+        landscapeOpt: "ল্যান্ডস্কেপ",
+        portraitOpt: "পোর্ট্রেট",
+        printNote: "প্রিভিউ ও প্রিন্ট একই সাইজে হবে। প্রিন্ট ডায়ালগে Scale ১০০% রাখুন।",
         color: "রঙ",
         bwNote: "সাদা কালো মোডে শুধু গ্রেড কলামের রঙ থাকবে।",
         colorOpt: "রঙিন",
@@ -391,7 +395,67 @@ export const GPA_LABEL_OPTIONS = [
 export const DEFAULT_GPA_LABEL = "avg";
 
 /* ═══════════════════════════════════════════════════════════
-   NEW: PAGE OPTIONS  (প্রতি পেজে হেডার / সিগনেচার)
+   NEW: PAPER SIZE & ORIENTATION
+   ═══════════════════════════════════════════════════════════ */
+export const PAPER_OPTIONS = [
+    { key: "A4", label: "A4" },
+    { key: "A5", label: "A5" },
+    { key: "Legal", label: "Legal" },
+];
+export const DEFAULT_PAPER = "A4";
+
+export const ORIENTATION_OPTIONS = [
+    { key: "landscape", label: "ল্যান্ডস্কেপ" },
+    { key: "portrait", label: "পোর্ট্রেট" },
+];
+export const DEFAULT_ORIENTATION = "landscape";
+
+// পেপারের আসল মাপ (mm) — portrait অবস্থায় (w × h)
+const PAPER_MM = {
+    A4: { w: 210, h: 297, css: "A4" },
+    A5: { w: 148, h: 210, css: "A5" },
+    Legal: { w: 215.9, h: 355.6, css: "legal" },
+};
+const PRINT_MARGIN_MM = 5;
+const PX_PER_MM = 96 / 25.4;
+const DESIGN_W_LANDSCAPE = 1080;
+const DESIGN_W_PORTRAIT = 900;
+
+/**
+ * পেপার সাইজ + ওরিয়েন্টেশন অনুযায়ী ডিজাইন-পেজের মাপ (px) বের করে।
+ * - W/H            : ডিজাইন স্পেস (লেআউটের হিসাব এখানে)
+ * - scale          : প্রিন্টের সময় ডিজাইনকে আসল প্রিন্টেবল এরিয়ায় ফিট করার স্কেল
+ * - outW/outH      : স্কেল করার পর প্রিন্ট পেজের বাইরের বক্সের মাপ
+ */
+const getPageDims = (paper, orientation) => {
+    const p = PAPER_MM[paper] || PAPER_MM[DEFAULT_PAPER];
+    const isLandscape = orientation !== "portrait";
+
+    const sheetW = isLandscape ? p.h : p.w;
+    const sheetH = isLandscape ? p.w : p.h;
+
+    const printW = sheetW - PRINT_MARGIN_MM * 2;
+    const printH = sheetH - PRINT_MARGIN_MM * 2;
+
+    const W = isLandscape ? DESIGN_W_LANDSCAPE : DESIGN_W_PORTRAIT;
+    const H = Math.floor((W * printH) / printW);
+
+    // সামান্য কম স্কেল (0.995) — যাতে ১px এর কারণে ফাঁকা পেজ না তৈরি হয়
+    const scale = ((printW * PX_PER_MM) / W) * 0.995;
+
+    return {
+        W,
+        H,
+        scale,
+        outW: Math.floor(W * scale),
+        outH: Math.floor(H * scale),
+        pageCss: `${p.css} ${isLandscape ? "landscape" : "portrait"}`,
+        isLandscape,
+    };
+};
+
+/* ═══════════════════════════════════════════════════════════
+   PAGE OPTIONS  (প্রতি পেজে হেডার / সিগনেচার)
    ═══════════════════════════════════════════════════════════ */
 export const DEFAULT_PAGE_OPTIONS = {
     everyPageHeader: true,
@@ -483,10 +547,8 @@ const bg = (color) => ({
 });
 
 /* ═══════════════════════════════════════════════════════════
-   A4 LANDSCAPE
+   LAYOUT CONSTANTS  (PAGE_W / PAGE_H এখন কম্পোনেন্টের ভেতরে ডায়নামিক)
    ═══════════════════════════════════════════════════════════ */
-const PAGE_W = 1080;
-const PAGE_H = 750;
 const THEAD_H = 100;
 const HEADER_H = 190;
 const HEADER_GAP = 8;
@@ -499,16 +561,15 @@ const ROW_H_EXTRA = 32;
 const COL = { sl: 36, admission: 46, id: 52, total: 46, gpa: 52, grade: 96, pos: 38 };
 const NAME_W_NORMAL = 190;
 const NAME_W_EXTRA = 360;
+// পোর্ট্রেটে প্রস্থ কম, তাই নামের কলাম একটু ছোট
+const NAME_W_NORMAL_PORTRAIT = 160;
+const NAME_W_EXTRA_PORTRAIT = 250;
 
 const SHORT_HEADER_H = 150;
 const SHORT_THEAD_H = 30;
 const SHORT_ROW_H = 28;
 const SHORT_COL_GAP = 14;
-const SHORT_TABLE_W = (PAGE_W - SHORT_COL_GAP) / 2;
 const SHORT_COL = { id: 54, avg: 58, division: 94 };
-const SHORT_NAME_W = Math.floor(
-    (SHORT_TABLE_W - SHORT_COL.id - SHORT_COL.avg - SHORT_COL.division) / 2
-);
 
 /* ═══════════════════════════════════════════════════════════
    LOCAL STORAGE
@@ -521,7 +582,9 @@ const LS_LANG = "resultSheetLanguage";
 const LS_GPA_LABEL = "resultSheetGpaLabel";
 const LS_GPA_TEXT = "resultSheetGpaText";
 const LS_GRADE_TEXT = "resultSheetGradeText";
-const LS_PAGE_OPTS = "resultSheetPageOptions"; // NEW
+const LS_PAGE_OPTS = "resultSheetPageOptions";
+const LS_PAPER = "resultSheetPaperSize"; // NEW
+const LS_ORIENTATION = "resultSheetOrientation"; // NEW
 
 const loadText = (key) => {
     try {
@@ -621,8 +684,12 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     );
     const [gpaText, setGpaText] = useState(() => loadText(LS_GPA_TEXT));
     const [gradeText, setGradeText] = useState(() => loadText(LS_GRADE_TEXT));
-    // NEW: পেজ অপশন
     const [pageOptions, setPageOptions] = useState(() => loadObj(LS_PAGE_OPTS, DEFAULT_PAGE_OPTIONS));
+    // NEW: পেপার সাইজ ও ওরিয়েন্টেশন
+    const [paperSize, setPaperSize] = useState(() => loadStr(LS_PAPER, PAPER_OPTIONS, DEFAULT_PAPER));
+    const [orientation, setOrientation] = useState(() =>
+        loadStr(LS_ORIENTATION, ORIENTATION_OPTIONS, DEFAULT_ORIENTATION)
+    );
 
     useEffect(() => { localStorage.setItem(LS_VISIBLE, JSON.stringify(visibleColumns)); }, [visibleColumns]);
     useEffect(() => { localStorage.setItem(LS_NAME_EXTRAS, JSON.stringify(nameExtras)); }, [nameExtras]);
@@ -633,6 +700,18 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     useEffect(() => { localStorage.setItem(LS_GPA_TEXT, gpaText); }, [gpaText]);
     useEffect(() => { localStorage.setItem(LS_GRADE_TEXT, gradeText); }, [gradeText]);
     useEffect(() => { localStorage.setItem(LS_PAGE_OPTS, JSON.stringify(pageOptions)); }, [pageOptions]);
+    useEffect(() => { localStorage.setItem(LS_PAPER, paperSize); }, [paperSize]);
+    useEffect(() => { localStorage.setItem(LS_ORIENTATION, orientation); }, [orientation]);
+
+    /* ── পেজ ডাইমেনশন (পেপার + ওরিয়েন্টেশন অনুযায়ী) ── */
+    const pageDims = useMemo(() => getPageDims(paperSize, orientation), [paperSize, orientation]);
+    const PAGE_W = pageDims.W;
+    const PAGE_H = pageDims.H;
+
+    const SHORT_TABLE_W = (PAGE_W - SHORT_COL_GAP) / 2;
+    const SHORT_NAME_W = Math.floor(
+        (SHORT_TABLE_W - SHORT_COL.id - SHORT_COL.avg - SHORT_COL.division) / 2
+    );
 
     /* ── সাইডবার: সবসময় বাংলা ── */
     const tUI = TRANSLATIONS.bn;
@@ -759,7 +838,9 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const showCol = show;
 
     const ROW_H = hasExtras ? ROW_H_EXTRA : ROW_H_NORMAL;
-    const nameW = hasExtras ? NAME_W_EXTRA : NAME_W_NORMAL;
+    const nameW = pageDims.isLandscape
+        ? (hasExtras ? NAME_W_EXTRA : NAME_W_NORMAL)
+        : (hasExtras ? NAME_W_EXTRA_PORTRAIT : NAME_W_NORMAL_PORTRAIT);
 
     const studentResultsDetails = Array.isArray(transformedData?.studentResults)
         ? transformedData.studentResults
@@ -866,8 +947,8 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     }, [institutionInfo]);
 
     /* ═══════════════════════════════════════════════════════════
-       ⚡ PAGE BREAK / ROW CAPACITY FIX
-       সিগনেচার থাকলে SIGNATURE_H বাদ যাবে, না থাকলে পুরো জায়গা টেবিল নেবে।
+       ⚡ PAGE BREAK / ROW CAPACITY
+       PAGE_H এখন পেপার সাইজ + ওরিয়েন্টেশন অনুযায়ী বদলায়।
        ═══════════════════════════════════════════════════════════ */
     const pages = useMemo(() => {
         const list = studentResultsDetails;
@@ -877,22 +958,16 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         let remaining = [...list];
 
         while (remaining.length > 0) {
-            // এই মুহূর্তে টেবিল শেষ হলে কি সিগনেচার দেখাতে হবে?
-            // শেষ পেজে সবসময় সিগনেচার থাকবে (কারণ everyPageSignature false হলেও শেষ পেজে থাকে)
-            // বা everyPageSignature true থাকলে সব পেজেই থাকবে
-
             let currentCap = 0;
 
             if (isShort) {
-                // শর্ট মোডের জন্য ক্যালকুলেশন
-                let hasSig = pageOptions.everyPageSignature;
-                let sigH = hasSig ? SIGNATURE_H : 0;
+                let sigH = pageOptions.everyPageSignature ? SIGNATURE_H : 0;
                 let rowsPerCol = Math.max(1, Math.floor(
                     (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - sigH - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
                 ));
                 currentCap = rowsPerCol * 2;
 
-                // যদি বর্তমান রো-গুলো শেষ পেজের ক্যাপাসিটির মধ্যে পড়ে যায়, তবে সিগনেচার থাকবে
+                // শেষ পেজ হলে সিগনেচার থাকবেই
                 if (remaining.length <= currentCap) {
                     rowsPerCol = Math.max(1, Math.floor(
                         (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
@@ -900,14 +975,12 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                     currentCap = rowsPerCol * 2;
                 }
             } else {
-                // নরমাল মোডের জন্য ক্যালকুলেশন
-                let hasSig = pageOptions.everyPageSignature;
-                let sigH = hasSig ? SIGNATURE_H : 0;
+                let sigH = pageOptions.everyPageSignature ? SIGNATURE_H : 0;
                 let cap = Math.max(1, Math.floor(
                     (PAGE_H - HEADER_H - HEADER_GAP - THEAD_H - sigH - FOOTER_RESERVE - SAFETY) / ROW_H
                 ));
 
-                // যদি বর্তমান রো-গুলো শেষ পেজের ক্যাপাসিটির মধ্যে পড়ে যায়, তবে সিগনেচার থাকবে
+                // শেষ পেজ হলে সিগনেচার থাকবেই
                 if (remaining.length <= cap) {
                     cap = Math.max(1, Math.floor(
                         (PAGE_H - HEADER_H - HEADER_GAP - THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / ROW_H
@@ -921,7 +994,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         }
 
         return chunks;
-    }, [studentResultsDetails, ROW_H, isShort, pageOptions.everyPageSignature]);
+    }, [studentResultsDetails, ROW_H, isShort, pageOptions.everyPageSignature, PAGE_H]);
 
     const totalExaminees = divisionStats.total;
 
@@ -1309,14 +1382,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         );
 
         if (isShort) {
-            // এখানে currentShortRowsPerCol বের করার প্রয়োজন নেই, কারণ pages তৈরির সময়ই 
-            // currentCap ঠিক করে দেওয়া হয়েছে। সরাসরি students অ্যারেকে ভাগ করে নিলেই হবে।
-            // students.length ইতিমধ্যেই currentCap এর সমান বা ছোট।
-
-            // তবে শর্ট টেবিলে দুই কলামে ভাগ করার জন্য আমাদের জানতে হবে প্রতি কলামে কয়টি রো হবে।
-            // যেহেতু students.length <= currentCap, তাই আমরা simply অর্ধেক করে দিতে পারি।
-            // বা নির্দিষ্ট রো-ক্যাপাসিটি বের করে নিতে পারি।
-
             const sigH = signatureVisible ? SIGNATURE_H : 0;
             const rowsPerCol = Math.max(1, Math.floor(
                 (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - sigH - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
@@ -1417,7 +1482,15 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 value={pageOptions}
                 onToggle={togglePageOption}
             />
-            <PrintSettings t={tUI} colorMode={colorMode} onColorChange={setColorMode} />
+            <PrintSettings
+                t={tUI}
+                colorMode={colorMode}
+                onColorChange={setColorMode}
+                paperSize={paperSize}
+                onPaperChange={setPaperSize}
+                orientation={orientation}
+                onOrientationChange={setOrientation}
+            />
         </>
     );
 
@@ -1464,7 +1537,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                     style={{ height: "700px", overflowY: "auto" }}
                 >
                     <div className="no-print p-4">
-                        <ScaledPreview designWidth={PAGE_W}>
+                        <ScaledPreview designWidth={PAGE_W} key={`${paperSize}-${orientation}`}>
                             {pages.map((students, pageIndex) => (
                                 <div key={pageIndex} dir={dir} style={{
                                     ...pageBox,
@@ -1479,16 +1552,31 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 </div>
             </div>
 
+            {/* ── প্রিন্ট পোর্টাল: ডিজাইন-পেজকে আসল প্রিন্টেবল এরিয়ায় স্কেল করে বসানো হয় ── */}
             {createPortal(
                 <div className="print-portal">
                     {pages.map((students, pageIndex) => (
-                        <div key={pageIndex} dir={dir} style={{
-                            ...pageBox,
-                            margin: 0,
-                            pageBreakAfter: pageIndex < pages.length - 1 ? "always" : "auto",
-                            breakAfter: pageIndex < pages.length - 1 ? "page" : "auto",
-                        }}>
-                            {renderPage(pageIndex, students)}
+                        <div
+                            key={pageIndex}
+                            className="print-page-outer"
+                            style={{
+                                width: `${pageDims.outW}px`,
+                                height: `${pageDims.outH}px`,
+                                overflow: "hidden",
+                                margin: 0,
+                                padding: 0,
+                                pageBreakAfter: pageIndex < pages.length - 1 ? "always" : "auto",
+                                breakAfter: pageIndex < pages.length - 1 ? "page" : "auto",
+                            }}
+                        >
+                            <div dir={dir} style={{
+                                ...pageBox,
+                                margin: 0,
+                                transform: `scale(${pageDims.scale})`,
+                                transformOrigin: "top left",
+                            }}>
+                                {renderPage(pageIndex, students)}
+                            </div>
                         </div>
                     ))}
                 </div>,
@@ -1499,7 +1587,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         .print-portal { display: none; }
         .print-portal, .print-portal * { font-family: ${SHEET_FONT}; }
         @media print {
-          @page { size: A4 landscape; margin: 5mm; }
+          @page { size: ${pageDims.pageCss}; margin: ${PRINT_MARGIN_MM}mm; }
           html, body {
             margin: 0 !important; padding: 0 !important;
             height: auto !important; overflow: visible !important;
@@ -1508,6 +1596,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           body > *:not(.print-portal) { display: none !important; }
           .print-portal { display: block !important; }
+          .print-page-outer { box-sizing: border-box; }
           tr, td, th { page-break-inside: avoid !important; break-inside: avoid !important; }
           .signature-section { page-break-inside: avoid !important; break-inside: avoid !important; }
         }
@@ -1628,7 +1717,19 @@ const PageOptionsSettings = ({ t, value, onToggle }) => {
     );
 };
 
-const PrintSettings = ({ t, colorMode, onColorChange }) => {
+const PrintSettings = ({
+    t,
+    colorMode,
+    onColorChange,
+    paperSize,
+    onPaperChange,
+    orientation,
+    onOrientationChange,
+}) => {
+    const orientationOptions = [
+        { key: "landscape", label: t.landscapeOpt },
+        { key: "portrait", label: t.portraitOpt },
+    ];
     const colorOptions = [
         { key: "color", label: t.colorOpt },
         { key: "bw", label: t.bwOpt },
@@ -1638,11 +1739,28 @@ const PrintSettings = ({ t, colorMode, onColorChange }) => {
             <div className="flex items-center justify-between">
                 <p className="text-xs font-bold text-slate-700 leading-tight">{t.printSetting}</p>
                 <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 rounded-md px-1.5 py-0.5">
-                    {t.pageSize}
+                    {paperSize} {orientation === "portrait" ? t.portraitOpt : t.landscapeOpt}
                 </span>
             </div>
-            <SegmentedControl label={t.color} options={colorOptions} value={colorMode} onChange={onColorChange} />
-            <p className="text-[10px] text-slate-400 leading-snug">{t.bwNote}</p>
+
+            <SegmentedControl
+                label={t.paperSize}
+                options={PAPER_OPTIONS}
+                value={paperSize}
+                onChange={onPaperChange}
+            />
+
+            <SegmentedControl
+                label={t.orientation}
+                options={orientationOptions}
+                value={orientation}
+                onChange={onOrientationChange}
+            />
+
+            <p className="text-[10px] text-slate-400 leading-snug">{t.printNote}</p>
+
+            {/* <SegmentedControl label={t.color} options={colorOptions} value={colorMode} onChange={onColorChange} />
+            <p className="text-[10px] text-slate-400 leading-snug">{t.bwNote}</p> */}
         </div>
     );
 };
