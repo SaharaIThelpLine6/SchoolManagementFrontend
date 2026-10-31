@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { Buffer } from 'buffer';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import { useDispatch, useSelector } from 'react-redux';
@@ -63,17 +63,21 @@ import { loadSeatCardSettings } from '../Data/seatCardFields';
 import NumberSheetPaper from '../view/exam/ExamReportPdf/numberLetter/NumberSheetPaper';
 import NumberSheetSettingsModal from '../components/Modals/NumberSheetSettingsModal';
 import {
+  NUMBER_SHEET_FIELDS,
   ORIENTATIONS,
   PAPERS,
   SORT_KEYS,
   TITLE_DEFAULT,
   columnCount,
   loadNumberSheetSettings,
+  maxFieldsFor,
   orientationValue,
   paperById,
   saveNumberSheetSettings,
   sortKeyValue,
   sortOrderValue,
+  toggleField,
+  visibleFields,
 } from '../Data/numberSheetColumns';
 
 // ⭐ ৯ নং — পরীক্ষার রুটিন (গ্রিড)
@@ -86,34 +90,7 @@ import {
 
 const API_URL = import.meta.env.VITE_SERVER_URL;
 
-/**
- * ⭐ রুটিন রিপোর্টের আইডি — এক জায়গায় রাখা।
- *
- * examReportData.js এর examReports তালিকায় এই আইডিতেই একটা সারি বসাতে হবে:
- *
- *   { ReportID: 12, ReportName: 'পরীক্ষার রুটিন' },
- *
- * ১২ টা যদি ঐ তালিকায় আগে থেকেই কারো দখলে থাকে, শুধু এই একটা সংখ্যা
- * বদলে দিলেই চলবে — নিচে আর কোথাও আইডিটা হাতে লেখা নেই।
- */
 const ROUTINE_REPORT_ID = 12;
-
-/* ═══════════════════════════════════════════════════════════════════════════
-   দুইটা লোগো — কোনটা কোথায়
-
-     প্রতিষ্ঠানের লোগো → কাগজের মাথায়, নামের উপরে বা বাঁ পাশে, স্পষ্ট করে
-     জলছাপের লোগো     → পাতার মাঝখানে, হালকা হয়ে পেছনে
-
-   মূল উৎস এখন রুট — loadReportHeader() এ Institution_Information থেকে
-   InstitutionLogo আসে আর ...header প্রতিটা সারিতে ছড়িয়ে যায়, তাই কাগজের
-   পাতা সারি থেকেই লোগোটা তুলে নেয় (প্রবেশপত্রের কার্ড যেভাবে নেয়)।
-
-   নিচের খোঁজাটা শুধু পেছনের ভরসা — রুট কোনো কারণে লোগো না পাঠালে রিডাক্সের
-   সেটিংস বা document_settings এ দেখা হয়।
-
-   লোগো SQL Server এ varbinary, তাই বাইট হয়েই আসে — toImageSrc টা
-   AdmitCardGenerate এর হুবহু একই।
-   ═══════════════════════════════════════════════════════════════════════════ */
 
 const toImageSrc = (img) => {
   if (!img) return '';
@@ -125,7 +102,6 @@ const toImageSrc = (img) => {
   return '';
 };
 
-/** লোগো যেসব নামে থাকতে পারে — রুটেরটা InstitutionLogo, তাই ওটা আগে */
 const INSTITUTE_LOGO_KEYS = [
   'InstitutionLogo', 'institutionLogo',
   'Logo', 'logo',
@@ -134,7 +110,6 @@ const INSTITUTE_LOGO_KEYS = [
   'HeaderLogo', 'headerLogo',
 ];
 
-/** আর যেসব ঘরের ভেতরে থাকতে পারে */
 const LOGO_CONTAINERS = [
   'institutionInfo', 'institution', 'instituteInfo',
   'data', 'settings', 'settingsData', 'info', 'result',
@@ -166,40 +141,32 @@ const ExamReportList = ({ pageTitle }) => {
   const settingsState = useSelector((state) => state.settings);
   const { status } = settingsState;
 
-  // জলছাপের লোগো (document_settings থেকে)
   const [documentLogo, setDocumentLogo] = useState('');
   const [logoIsActive, setLogoIsActive] = useState(false);
-  // একই উত্তরে প্রতিষ্ঠানের লোগোও থাকতে পারে, তাই পুরোটাই রেখে দিই
   const [docSettings, setDocSettings] = useState(null);
 
-  // ফি বিহীন (1) নাকি ফি গৃহীত (2) নাকি ফি 
   const [feeListType, setFeeListType] = useState(3);
 
-  // ⭐ সাজানোর ক্রম — ভর্তি নং বা আইডি নং, আরোহী বা অবরোহী
   const [sortBy, setSortBy] = useState('AdmissionSerial');
   const [sortOrder, setSortOrder] = useState('asc');
 
-  // ⭐ কলাম সেটিংস
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [feeSettings, setFeeSettings] = useState(() => loadFeeListSettings(1, 1));
 
-  // ⭐ সিট কার্ডের সেটিংস — কোন ঘরগুলো কার্ডে বসবে, কয়টা কার্ড প্রতি পাতায়
   const [seatSettingsOpen, setSeatSettingsOpen] = useState(false);
   const [seatSettings, setSeatSettings] = useState(() => loadSeatCardSettings(1));
 
-  /* ⭐ নম্বর পত্রের সেটিংস — কাগজ (A4/A5), দিক, কলাম, ঘর ও সাজানোর ক্রম।
-     আগের "৫. স্বাক্ষরপত্র ও নম্বরসীট" এখন এই সেটিংসেরই একটা সাজ। */
   const [numberSettingsOpen, setNumberSettingsOpen] = useState(false);
   const [numberSettings, setNumberSettings] = useState(() => loadNumberSheetSettings(1));
 
-  // ⭐ রুটিনের সাজসজ্জা — সবগুলোই ডিফল্টে কাগজের মতো
   const [routineHideEmptyRows, setRoutineHideEmptyRows] = useState(false);
   const [routineHideEmptyShift, setRoutineHideEmptyShift] = useState(false);
   const [routineShowClassCol, setRoutineShowClassCol] = useState(false);
   const [routineShowRoom, setRoutineShowRoom] = useState(false);
-  /* সময় ডিফল্টে চালু — এক বেলাতেও কিতাবভেদে সময় আলাদা হয়, আর নিচের
-     বি:দ্র: লাইনটা তখন কিছুই বলতে পারে না */
   const [routineShowTime, setRoutineShowTime] = useState(true);
+
+  const [isColumnDropdownOpen, setIsColumnDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const { control, handleSubmit, watch, register, setValue } = methods;
   const formValues = useWatch({ control });
@@ -209,89 +176,70 @@ const ExamReportList = ({ pageTitle }) => {
 
   const isSeatNoReport = Number(selectedReportID) === 7;
   const isFeeReport = Number(selectedReportID) === 1;
-  /* ⭐ ৩. নম্বর পত্র ও স্বাক্ষরপত্র — আগের দুইটা রিপোর্ট এক হয়েছে।
-
-     ৪ = নম্বর পত্র, ৮ = স্বাক্ষরপত্র ও নম্বরসীট। কাগজ দুইটা প্রায় একই
-     ছিল — একই শিক্ষার্থীর তালিকা, শুধু স্বাক্ষরপত্রে বাড়তি কয়েকটা ফাঁকা
-     ঘর। তাই এখন একটাই কাগজ, আর ঘরগুলো সেটিংস থেকে বাছা হয়।
-
-     ৮ নম্বরটা এখানে রাখা আছে পেছনের ভরসা হিসেবে — কারো ব্রাউজারে বা
-     লিংকে পুরোনো বাছাইটা থেকে গেলেও কাগজটা ঠিকই আসবে, ফাঁকা পর্দা নয়। */
   const isNumberSheet = [4, 8].includes(Number(selectedReportID));
-  // ⭐ ৯. পরীক্ষার রুটিন
   const isRoutineReport = Number(selectedReportID) === ROUTINE_REPORT_ID;
   const langId = Number(languageID) || 1;
 
-  /* রুটিনের কনফিগটা ভাষা চেনে bn / en / ar নামে, আর এই পাতাটা সংখ্যায়
-     (১ = বাংলা, ২ = আরবি)। তাই এক লাইনে মিলিয়ে নেওয়া — তিন নম্বরটা
-     ইংরেজির জন্য রাখা, ঐ ভাষা তালিকায় না থাকলে বাংলাই থাকবে। */
   const routineLang = langId === 2 ? 'ar' : langId === 3 ? 'en' : 'bn';
   const rui = (key) => getRRText(key, routineLang);
 
-  // ⭐ কোন কিতাবের নম্বর পত্র — পরীক্ষার রুটিনে যে কিতাবগুলো আছে তার একটা
   const [kitabId, setKitabId] = useState('');
 
-  /**
-   * সেটিংস বসানো — কলামের তথ্যগুলো যেমন আছে, সাথে সাজানোর ক্রমটাও
-   * বারে তুলে দেয়।
-   *
-   * সেটিংসে সাজানোর ক্রম বসানো না থাকলে বারটা যা আছে তাই থাকে, তাই
-   * পুরোনো সেভ করা সেটিংসেও কিছু ভাঙে না।
-   */
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsColumnDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const applySettings = (next) => {
     setFeeSettings(next);
     if (next?.sortBy) setSortBy(next.sortBy);
     if (next?.sortOrder) setSortOrder(next.sortOrder);
   };
 
-  /* ⭐ কাগজে এক না দুই কলাম — উপরের ফিল্টার থেকেই বদলানো যায়, সেটিংস
-        খোলার দরকার নেই।
-
-     বদলটা সেটিংসেও সেভ হয়ে যায়, তাই পরেরবার পাতা খুললে এটাই থাকে — আর
-     সেটিংসের ভেতরের বোতাম দুইটাও একই জায়গা দেখায়, দুই জায়গায় দুই রকম
-     হয়ে যায় না।
-
-     এখানে কোনো ঘর ছাঁটা হয় না। দুই সাজের ঘরের তালিকা আলাদা করে রাখা
-     থাকে (visible আর visibleTwo), তাই এক কলামে আটটা বেছে রেখে দুই
-     কলামে ঘুরে এলেও এক কলামে আটটাই ফিরে আসে। */
   const paperColumns = paperColumnCount(feeSettings?.paperColumns);
 
   const changePaperColumns = (value) => {
     const next = { ...feeSettings, paperColumns: paperColumnCount(value) };
-
     saveFeeListSettings(feeListType, langId, next);
     applySettings(next);
   };
 
-  /* তালিকার ধরন বা ভাষা বদলালে সেই অনুযায়ী সেভ করা সেটিংসটা তুলে আনি।
-     সাথে সাজানোর ক্রমটাও — সেটিংসে বসানো থাকলে বারটা ওখান থেকেই ভরে,
-     তাই প্রতিবার হাতে বেছে নিতে হয় না। */
   useEffect(() => {
     applySettings(loadFeeListSettings(feeListType, langId));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [feeListType, langId]);
 
-  /* ⭐ সিট কার্ডের সেটিংসও ভাষা ধরে আলাদা — ভাষা বদলালে সেই ভাষার
-     সেভ করাটাই তুলে আনা হয় */
   useEffect(() => {
     setSeatSettings(loadSeatCardSettings(langId));
   }, [langId]);
 
-  /* নম্বর পত্রের সেটিংসও ভাষা ধরে আলাদা */
   useEffect(() => {
     setNumberSettings(loadNumberSheetSettings(langId));
   }, [langId]);
 
-  /* ⭐ কাগজ, দিক, কলাম আর সাজানোর ক্রম — উপরের বার থেকেই বদলানো যায়,
-     সেটিংস খোলার দরকার নেই।
-
-     বদলটা সেটিংসেও সেভ হয়ে যায়, তাই পরেরবার পাতা খুললে এটাই থাকে — আর
-     সেটিংসের ভেতরের বোতামগুলোও একই জায়গা দেখায়, দুই জায়গায় দুই রকম
-     হয়ে যায় না। ফি তালিকার কলাম বদলানোটা ঠিক এই নিয়মেই চলে। */
+  // ⭐ Quick Change: শুধু স্টেট আপডেট হবে, LocalStorage এ সেভ হবে না (স্থায়ী সেভ সেটিংস মডাল থেকে হবে)
   const changeNumberSetting = (patch) => {
-    const next = { ...numberSettings, ...patch };
-    saveNumberSheetSettings(langId, next);
-    setNumberSettings(next);
+    setNumberSettings((prev) => ({ ...prev, ...patch }));
+  };
+
+  // ⭐ সেটিংস মডাল যে তালিকা ও যে কি থেকে পড়ে, ড্রপডাউনও হুবহু সেটাই
+  const numberFieldLimit = maxFieldsFor(numberSettings.columns);
+
+  const activeFields = useMemo(
+    () => visibleFields(numberSettings).map((f) => f.key),
+    [numberSettings]
+  );
+
+  const numberFieldsFull = activeFields.length >= numberFieldLimit;
+
+  const handleToggleColumn = (key) => {
+    changeNumberSetting({
+      visible: toggleField(numberSettings.visible, key, numberFieldLimit),
+    });
   };
 
   const shouldShowFields = (fieldName) => {
@@ -300,13 +248,6 @@ const ExamReportList = ({ pageTitle }) => {
         return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'SubClassID', 'Langauge'].includes(fieldName);
       case 3:
         return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'RDID', 'Langauge', 'PdfSelect'].includes(fieldName);
-      /* ⭐ ৩. নম্বর পত্র ও স্বাক্ষরপত্র (৪ ও ৮ — দুইটা এক হয়েছে)
-
-         ClassID যোগ হয়েছে: জামাত বাছলে নিচের শ্রেণির তালিকাটা সেই
-         জামাতেরগুলোয় নেমে আসে। ৯ নং রিপোর্টে যে ছাঁকনিটা আছে, এটাও সেটাই।
-
-         PdfSelect আর নেই — কাগজের ধরন এখন সেটিংস থেকে বাছা হয়, তাই
-         ড্রপডাউনে চার রকম কাগজ বেছে নেওয়ার দরকার ফুরিয়েছে। */
       case 4:
       case 8:
         return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'ClassID', 'SubClassID', 'Langauge'].includes(fieldName);
@@ -318,11 +259,6 @@ const ExamReportList = ({ pageTitle }) => {
         return ['ReportID', 'SessionID', 'ExamID', 'HallList'].includes(fieldName);
       case 11:
         return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
-      /* ⭐ ৯. পরীক্ষার রুটিন
-         শুধু শিক্ষাবর্ষ, পরীক্ষা আর ভাষা এখানে। জামাত ও শ্রেণি দুইটা
-         নিচে আলাদা করে বসে, কারণ ওদুইটায় "সকল" বলে একটা ঘর লাগে —
-         DefaultSelect এ সেটা নেই। অবস্থান (RDID) রুটিনে লাগেই না,
-         রুটিন তো শ্রেণির, শিক্ষার্থীর নয়। */
       case ROUTINE_REPORT_ID:
         return ['ReportID', 'SessionID', 'ExamID', 'Langauge'].includes(fieldName);
       default:
@@ -338,49 +274,21 @@ const ExamReportList = ({ pageTitle }) => {
   ] = watch(['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'RDID', 'ERIsActive', 'sevenColor', 'id', 'PdfID', 'ClassID']);
 
   const isSignatureSheet = Number(ReportID) === 8;
-
-  // ⭐ সকল পরীক্ষার্থীর পরিসংখ্যান — এক পাতায় সব শ্রেণির হিসাব
   const isStatistics = Number(ReportID) === 9;
 
-  // রিপোর্ট ১ এ PDF বাছাই আর লাগে না — একটাই বাংলা পেজ, সেটিংস দিয়ে বদলায়
   const shouldSkip = (() => {
     if (!ReportID || !SessionID || !ExamID) return true;
-
-    /* ⭐ রুটিনের ডাটা এই কোয়েরি থেকে আসে না — ওটার নিজের রুট ও hook
-       আছে (নিচে routineData)। তাই এখানে সবসময়ই এড়িয়ে যাই, নইলে
-       অকারণে exam_report এ একটা রিকোয়েস্ট যেত। */
     if (isRoutineReport) return true;
-
-    /* ⭐ পরিসংখ্যানে শ্রেণি বাছাই করাই হয় না — সব শ্রেণিই লাগে। আগে
-       এখানে SubClassID বাধ্যতামূলক ছিল, তাই ঐ রিপোর্টে কোয়েরিটা কখনো
-       চলতই না আর পাতাটা ডেমো তথ্য নিয়ে বসে থাকত। */
     if (isStatistics) return false;
-
     if (!SubClassID || !RDID) return true;
-
-    /* ⭐ নম্বর পত্রে আর PdfID লাগে না।
-
-       আগে কাগজের ধরনটা "পিডিএফ" ড্রপডাউন থেকে বাছা হত, তাই নিচের
-       `return !PdfID` শর্তটা ঠিক ছিল। এখন ধরনটা সেটিংস থেকে আসে আর ঐ
-       ড্রপডাউনটাই নেই — মানে PdfID কখনোই ভরবে না, আর শর্তটা থাকলে
-       কোয়েরিটা কোনোদিনই চলত না, পাতাটা চিরকাল ফাঁকা দেখাত। */
     if (isNumberSheet) return false;
-
     if (isSignatureSheet || Number(ReportID) === 1) return false;
     return !PdfID;
   })();
 
-  // রিপোর্ট ১ এ report_id টা ১ বা ২ ই যায় (পুরোনো আচরণ অক্ষত), আর কোন
-  // তালিকা সেটা ListType বলে দেয় — "সকল" (৩) এর জন্য আলাদা report_id নেই
   const actualReportId = (() => {
     if (Number(ReportID) === 1) return feeListType === 2 ? 2 : 1;
-
-    /* ⭐ পুরোনো "৫. স্বাক্ষরপত্র ও নম্বরসীট" (৮) এখন ৪ এর কাগজেই বসে।
-       সার্ভারে ৮ পাঠালে অন্য চেহারার উত্তর আসত (ভর্তি নং, কিতাবের তালিকা
-       বা মাথার তথ্য ছাড়া), তাই ৪ ই পাঠাই — কাগজটা যে তথ্য চায় সেটা
-       ওখানেই আছে। */
     if (Number(ReportID) === 8) return 4;
-
     return ReportID;
   })();
 
@@ -395,26 +303,13 @@ const ExamReportList = ({ pageTitle }) => {
       Language: id,
       sevenColor,
       pdf_id: PdfID,
-      // নিচের তিনটা সার্ভারের জন্য — স্লাইসটা এগুলো URL এ বসালে সার্ভারও
-      // একই ক্রমে সাজিয়ে পাঠাবে। না বসালেও ক্ষতি নেই, কারণ বাছাই আর সাজানো
-      // দুইটাই এখন এখানেই হয় (নিচে feeRows দেখুন)।
       SortBy: sortBy,
       SortOrder: sortOrder,
-      // ১ = ফি বিহীন, ২ = ফি গৃহীত, ৩ = সকল
       ListType: Number(ReportID) === 1 ? feeListType : undefined,
     },
     { skip: shouldSkip }
   );
 
-  /* ══════════════════════════════════════════════════════════════════════
-     ⭐ ৯. পরীক্ষার রুটিন — নিজের রুট (/exam/exam_routine_report)
-
-     শিক্ষাবর্ষ ও পরীক্ষা ছাড়া কিছু লাগে না। জামাত ও শ্রেণি ঐচ্ছিক —
-     না দিলে পুরো মাদরাসার রুটিন এক পাতায়।
-
-     উত্তরটায় জামাত ও শ্রেণির পুরো তালিকাও আসে (ছাঁকনি যাই হোক), তাই
-     নিচের দুইটা ড্রপডাউন ওখান থেকেই ভরে — আলাদা কোনো কোয়েরি লাগে না।
-     ══════════════════════════════════════════════════════════════════════ */
   const { data: routineData, isFetching: routineFetching } = useGetExamRoutineReportQuery(
     isRoutineReport && SessionID && ExamID
       ? {
@@ -432,19 +327,8 @@ const ExamReportList = ({ pageTitle }) => {
   const { data: residentialData } = useGetResidentialQuery();
   const { data: examHallList } = useGetExamHallListQuery();
 
-  // ⭐ রুটিনের জামাতের তালিকা — সার্ভারের উত্তর থেকেই
   const routineClassOptions = useMemo(() => routineData?.classes ?? [], [routineData]);
 
-  /* ⭐ নম্বর পত্রের জামাতের তালিকা — SubClassListData থেকেই বের করা।
-
-     রুটিনের জামাতগুলো আসে রুটিনের নিজের রুট থেকে (routineData.classes),
-     কিন্তু নম্বর পত্রে ওই রুটটা ডাকা হয় না। তাই শ্রেণির তালিকাটা থেকেই
-     আলাদা জামাতগুলো তুলে নিই — বাড়তি কোনো কোয়েরি লাগে না, আর তালিকাটা
-     পাতা খোলার সাথে সাথেই চলে আসে।
-
-     নামের ঘরটা প্রতিষ্ঠানভেদে এক নামে থাকে না, তাই কয়েকটা চেনা নাম
-     পরপর দেখা হয়; কিছুই না পেলে আইডিটাই বসে — ফাঁকা ঘর দেখানোর চেয়ে
-     সেটা ঢের ভালো। */
   const numberClassOptions = useMemo(() => {
     const seen = new Map();
 
@@ -471,16 +355,12 @@ const ExamReportList = ({ pageTitle }) => {
     return [...seen.values()];
   }, [SubClassListData, routineLang]);
 
-  /* নম্বর পত্রে জামাত বাছলে শ্রেণির তালিকাটা সেই জামাতেরগুলোয় নেমে আসে */
   const numberSubClassOptions = useMemo(() => {
     const base = SubClassListData || [];
     if (!isNumberSheet || !ClassID) return base;
     return base.filter((g) => String(g.ClassID ?? '') === String(ClassID));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [SubClassListData, isNumberSheet, ClassID]);
 
-  /* জামাত বদলালে আগের শ্রেণিটা আর ওই জামাতের নাও হতে পারে — তখন খালি
-     করে দিই, নইলে এমন শ্রেণির কাগজ ছাপা হত যেটা ছাঁকনিতে নেই */
   useEffect(() => {
     if (!isNumberSheet || !SubClassID) return;
     const ok = numberSubClassOptions.some(
@@ -489,10 +369,6 @@ const ExamReportList = ({ pageTitle }) => {
     if (!ok) setValue('SubClassID', '');
   }, [isNumberSheet, numberSubClassOptions, SubClassID, setValue]);
 
-  /* ⭐ রুটিনের শ্রেণির তালিকা — চলতি SubClassListData থেকেই, কারণ ওটা
-     পাতা খোলার সাথে সাথেই চলে আসে। জামাত বাছা থাকলে সেই জামাতেরগুলোই
-     (Academic_ClassGroup.ClassID ধরে)। তালিকাটা না এলে সার্ভারের উত্তরের
-     subClasses টাই ব্যবহার হয়, তাই ঘরটা কখনো ফাঁকা থাকে না। */
   const routineSubClassOptions = useMemo(() => {
     const base =
       (Array.isArray(SubClassListData) && SubClassListData.length
@@ -503,8 +379,6 @@ const ExamReportList = ({ pageTitle }) => {
     return base.filter((g) => String(g.ClassID ?? '') === String(ClassID));
   }, [SubClassListData, routineData, ClassID]);
 
-  /* জামাত বদলালে আগের শ্রেণিটা নতুন জামাতে না-ও থাকতে পারে — তখন ঘরটা
-     খালি করে দিই, নইলে কোনো সারিই আসত না আর কারণটা চোখে পড়ত না */
   useEffect(() => {
     if (!isRoutineReport || !SubClassID) return;
     const ok = routineSubClassOptions.some(
@@ -580,7 +454,6 @@ const ExamReportList = ({ pageTitle }) => {
     if (!reportList) return [];
     const found = reportList.find((item) => item.id === Number(languageID));
     return found?.pdfList || [];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedReportID, languageID]);
 
   useEffect(() => {
@@ -602,53 +475,29 @@ const ExamReportList = ({ pageTitle }) => {
       setSettingsOpen(true);
       return;
     }
-    // ⭐ সিট নং — কার্ডে কোন ঘরগুলো বসবে সেটার সেটিংস
     if (isSeatNoReport) {
       setSeatSettingsOpen(true);
       return;
     }
-    // ⭐ নম্বর পত্র ও স্বাক্ষরপত্র — কাগজ, কলাম, ঘর ও সাজানোর ক্রম
     if (isNumberSheet) {
       setNumberSettingsOpen(true);
       return;
     }
     if (Number(selectedReportID) === 3) {
-      // স্বাক্ষরপত্র(দস্তখত) সেটিংস — পরে বসবে
       console.log('Opening Settings for Signature Letter (Report 3)');
     }
   };
 
-  /* ══════════════════════════════════════════════════════════════════════
-     কোন তালিকা আর কোন ক্রমে — এটা এখন এখানেই হয়
-
-     আগে তিনটাই (ListType / SortBy / SortOrder) সার্ভারে পাঠানো হতো, কিন্তু
-     useGetExamReportQuery স্লাইসটা নির্দিষ্ট কয়েকটা প্যারামই URL এ বসায় —
-     এই তিনটা চুপচাপ বাদ পড়ে যেত। সেজন্যই "সকল তালিকা" ফাঁকা আসত আর সাজানো
-     কাজ করত না।
-
-     এখন সার্ভার দুই দলের তালিকাই একসাথে পাঠায়, আর বাছাই-সাজানো এখানে হয়।
-     ফল — স্লাইসে হাত দিতে হয় না, আর তালিকা বা ক্রম বদলালে নতুন করে সার্ভারে
-     যেতেও হয় না, সাথে সাথেই বদলায়।
-     ══════════════════════════════════════════════════════════════════════ */
   const feeRows = useMemo(() => {
     if (!isFeeReport || !data) return [];
     return sortFeeRows(pickFeeRows(data, feeListType), sortBy, sortOrder);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, isFeeReport, feeListType, sortBy, sortOrder]);
 
   const summary = useMemo(
     () => (isFeeReport && data ? feeRowsSummary(feeRows, data) : data?.summary),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isFeeReport, data, feeRows]
   );
 
-  /* ══════════════════════════════════════════════════════════════════════
-     নম্বর পত্র — সারি, কিতাবের তালিকা আর কাগজের মাথা
-
-     রুট এখন অবজেক্ট পাঠায় ({ data, subjects, header })। পুরোনো পেজগুলো
-     অ্যারে ধরে লেখা, তাই এখানেই খুলে নিয়ে আগের মতো অ্যারে করে পাঠানো হয় —
-     আরবি পেজগুলোয় হাত দিতে হয় না।
-     ══════════════════════════════════════════════════════════════════════ */
   const numberSheetRows = useMemo(() => {
     if (!isNumberSheet || !data) return [];
     return Array.isArray(data) ? data : data.data ?? [];
@@ -664,7 +513,6 @@ const ExamReportList = ({ pageTitle }) => {
     [isNumberSheet, data]
   );
 
-  /** কিতাবের নাম — ভাষা অনুযায়ী */
   const subjectLabel = (sub) => {
     if (!sub) return '';
     return (
@@ -674,14 +522,11 @@ const ExamReportList = ({ pageTitle }) => {
     );
   };
 
-  // তালিকা বদলালে আগের বাছাইটা আর নাও থাকতে পারে — তখন খালি করে দিই,
-  // নইলে কাগজে এমন কিতাবের নাম বসত যেটা এই পরীক্ষায় নেই
   useEffect(() => {
     if (!kitabId) return;
     if (!examSubjects.some((sub) => String(sub.SubID) === String(kitabId))) {
       setKitabId('');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [examSubjects]);
 
   const selectedKitab = useMemo(
@@ -691,17 +536,6 @@ const ExamReportList = ({ pageTitle }) => {
 
   const kitabName = subjectLabel(selectedKitab);
 
-  /**
-   * শ্রেণি/জামাতের নাম — তিন জায়গায় খোঁজা হয়:
-   *
-   *   ১) রুটের মাথা (header)
-   *   ২) প্রথম সারি
-   *   ৩) ⭐ উপরের "সাব ক্লাস" ড্রপডাউনের নিজের তালিকা
-   *
-   * তিন নম্বরটাই সবচেয়ে নির্ভরযোগ্য — নামটা তো ওই ড্রপডাউনেই লেখা, যেটা
-   * থেকে বাছাই করা হয়েছে। তাই সার্ভার কোনো কারণে নামটা না পাঠালেও কাগজের
-   * ঘরটা আর ফাঁকা যায় না।
-   */
   const subClassName =
     (langId === 2
       ? numberSheetHeader?.SubClassAra || numberSheetHeader?.SubClass
@@ -711,31 +545,13 @@ const ExamReportList = ({ pageTitle }) => {
     (SubClassListData || []).find((c) => String(c.SubClassID) === String(SubClassID))?.SubClass ||
     '';
 
-  /**
-   * প্রতিষ্ঠানের লোগো — আগে রিডাক্সের সেটিংসে, না পেলে document_settings এর
-   * উত্তরে খোঁজা হয়। দুই জায়গাতেই না থাকলে মাথায় লোগো ছাড়াই ছাপা হবে —
-   * জলছাপের ছবিটা আর ওখানে বসবে না।
-   */
   const instituteLogo = useMemo(
     () => findInstituteLogo(settingsState) || findInstituteLogo(docSettings),
     [settingsState, docSettings]
   );
 
-  /**
-   * জলছাপ দেখাবে কিনা — ফি তালিকায় এটা সেটিংস থেকে ঠিক হয়, বাকি
-   * রিপোর্টগুলোয় আগের মতোই (লোগো থাকলেই বসে)।
-   */
   const showWatermark = !isFeeReport || feeSettings?.showWatermark !== false;
 
-  /**
-   * ⭐ জলছাপে এখন মাদরাসার নিজের লোগো বসে।
-   *
-   * আগে এখানে document_settings এর documentLogo বসত — সেটা আলাদা একটা
-   * ছবি, প্রতিষ্ঠানের লোগো নয়। এখন আগে সারির সাথে আসা লোগোটা দেখা হয়
-   * (রুটের header এ InstitutionLogo), না পেলে রিডাক্সের সেটিংস বা
-   * document_settings। তিনটাই না থাকলে পুরোনো documentLogo — তাহলে
-   * অন্য রিপোর্টগুলোর জলছাপ আগের মতোই থাকে।
-   */
   const watermarkLogo = useMemo(() => {
     const firstFeeRow = feeRows[0] || {};
     return (
@@ -750,10 +566,6 @@ const ExamReportList = ({ pageTitle }) => {
     );
   }, [feeRows, instituteLogo, documentLogo]);
 
-  /**
-   * ⭐ রুটিনের কাগজের লোগো — আগে রুটের header এ আসা লোগোটা, না পেলে
-   * পাতার নিজের খোঁজাটাই (instituteLogo), শেষে documentLogo।
-   */
   const routineLogo = useMemo(
     () =>
       toImageSrc(routineData?.header?.InstitutionLogo) ||
@@ -762,18 +574,12 @@ const ExamReportList = ({ pageTitle }) => {
     [routineData, instituteLogo, documentLogo]
   );
 
-  /**
-   * জলছাপ কতটা গাঢ় — সেটিংসে শতাংশে রাখা (২–৩০), কাগজে ভগ্নাংশে বসে।
-   * ফি তালিকা ছাড়া বাকি রিপোর্টে আগের ০.০৫ ই থাকে।
-   */
   const watermarkOpacity = isFeeReport
     ? Math.min(Math.max(Number(feeSettings?.watermarkOpacity) || 5, 2), 30) / 100
     : 0.05;
 
-  /** কাগজের পেজটা যা পায় — সাজানো সারিগুলো আর এই তালিকার হিসাব */
   const feeReportData = useMemo(
     () => (isFeeReport && data ? { ...data, data: feeRows, total: feeRows.length, summary } : data),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [isFeeReport, data, feeRows, summary]
   );
 
@@ -788,18 +594,12 @@ const ExamReportList = ({ pageTitle }) => {
               max-width: 60%; max-height: 60%;
               -webkit-print-color-adjust: exact; print-color-adjust: exact;
             }
-            /* ⭐ উপরে আটকানো কার্ডটা কাগজে আটকে থাকার দরকার নেই */
             .exam-report-bar { position: static !important; }
           }
           @media screen { .watermark-print { display: none; } }
         `}
       </style>
 
-      {/* জলছাপ — পাতার মাঝখানে, হালকা হয়ে লেখার পেছনে।
-          ঘনত্বটা সেটিংস থেকে, তাই ইনলাইনে বসানো।
-
-          ⭐ রুটিনের কাগজ বাদ — ওটার জলছাপ ওর নিজের ভিতরেই বসে, নইলে
-          আড়াআড়ি কাগজে দুইটা জলছাপ একটার উপর আরেকটা পড়ত। */}
       {!isSeatNoReport && !isRoutineReport && watermarkLogo && logoIsActive && showWatermark && (
         <img
           src={watermarkLogo}
@@ -811,17 +611,10 @@ const ExamReportList = ({ pageTitle }) => {
 
       <div>
         <div className="flex flex-col font-default gap-3 print:hidden">
-          {/*
-            ⭐ উপরে আটকানো (sticky) — তালিকা লম্বা হলেও রিপোর্ট বাছাই,
-               ফিল্টার আর সাজানোর ঘরগুলো চোখের সামনেই থাকে, নিচে স্ক্রল
-               করে আবার উপরে ফিরতে হয় না।
-          */}
-          <div className="exam-report-bar relative w-full rounded-2xl bg-white shadow-md border border-slate-200 overflow-hidden">
+          <div className="exam-report-bar relative w-full rounded-2xl bg-white shadow-md border border-slate-200">
 
             {/* ═══ রঙিন হেডার ═══════════════════════════ */}
-            <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-sky-500 px-5 py-4">
-
-              {/* ---- উপরের সারি: শিরোনাম, গণনা, বোতাম ---- */}
+            <div className="bg-gradient-to-r from-indigo-600 via-blue-600 to-sky-500 px-5 py-4 rounded-t-2xl">
               <div className="flex items-center gap-4">
                 <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center shrink-0">
                   <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -864,8 +657,6 @@ const ExamReportList = ({ pageTitle }) => {
                     </button>
                   )}
 
-                  {/* ⭐ সিট নং রিপোর্টেও সেটিংস বোতামটা দেখায় — কার্ডের
-                      ঘরগুলো ওখান থেকেই বাছা হয় */}
                   {(isFeeReport || isSeatNoReport || isNumberSheet || Number(selectedReportID) === 3) && (
                     <button
                       type="button"
@@ -889,14 +680,6 @@ const ExamReportList = ({ pageTitle }) => {
             <div className="p-5 space-y-4">
               <FormProvider {...methods}>
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-
-                  {/* ফিল্টারগুলো — রিপোর্ট বাছাইসহ এক লাইনে
-
-                      আগে "রিপোর্টসমূহ" একা উপরে এক সারি নিয়ে বসত, নিচে
-                      বাকি ছয়টা। দুই সারিতে ভাগ হয়ে জায়গা নষ্ট হত, আর
-                      রিপোর্ট বদলে নিচের ঘরগুলোয় যেতে চোখ লাফ দিত। এখন
-                      সবগুলো একই সারিতে — বড় পর্দায় সাতটা কলাম, যা
-                      বেশিরভাগ রিপোর্টের ঘরের সংখ্যার সাথেই মেলে। */}
                   <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 items-end">
                     <DefaultSelect
                       label={translate('Report')}
@@ -918,16 +701,10 @@ const ExamReportList = ({ pageTitle }) => {
                       <DefaultSelect label={translate('Exam')} nameField="ExamName" registerKey="ExamID" valueField="ExamID" options={examNameData ?? []} require="This Field is required" unicode={true} />
                     )}
 
-                    {/* নম্বর পত্রে উপরে জামাত বাছা থাকলে এখানে সেই জামাতের
-                        শ্রেণিগুলোই আসে — বাকি রিপোর্টে পুরো তালিকাটাই */}
                     {shouldShowFields('SubClassID') && (
                       <DefaultSelect label={translate('SubClass')} nameField="SubClass" registerKey="SubClassID" valueField="SubClassID" options={(isNumberSheet ? numberSubClassOptions : SubClassListData) ?? []} require="This Field is required" unicode={true} />
                     )}
 
-                    {/* ⭐ নম্বর পত্রের জামাতের ছাঁকনি — ৯ নং রিপোর্টের মতোই।
-
-                        ঐচ্ছিক, তাই "সকল" বলে একটা ঘর লাগে — DefaultSelect এ
-                        সেটা নেই, তাই সাধারণ select। দেখতে বাকিগুলোর মতোই। */}
                     {isNumberSheet && shouldShowFields('ClassID') && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -955,14 +732,6 @@ const ExamReportList = ({ pageTitle }) => {
                       </div>
                     )}
 
-                    {/* ⭐ রুটিনের দুইটা ছাঁকনি — জামাত (Academic_Class) ও
-                        শ্রেণি (Academic_ClassGroup)।
-
-                        দুইটাই ঐচ্ছিক, তাই "সকল" বলে একটা ঘর লাগে —
-                        DefaultSelect এ সেটা নেই, তাই সাধারণ select। দেখতে
-                        বাকিগুলোর মতোই রাখা হয়েছে যাতে সারিটা এলোমেলো না
-                        লাগে। জামাত বাছলে শ্রেণির তালিকাটা সেই জামাতেরগুলোয়
-                        নেমে আসে। */}
                     {isRoutineReport && (
                       <>
                         <div>
@@ -1025,11 +794,6 @@ const ExamReportList = ({ pageTitle }) => {
                       <DefaultSelect label={translate('Langauge')} nameField="name" registerKey="id" valueField="id" options={language ?? []} require="This Field is required" unicode={true} />
                     )}
 
-                    {/* ⭐ কাগজে কয় কলাম — শুধু ফি তালিকার জন্য।
-
-                        এটা ফর্মের ঘর নয়, কাগজের সাজ — তাই react-hook-form
-                        এর বাইরে, সরাসরি সেটিংসেই বসে। দেখতে বাকিগুলোর মতোই
-                        রাখা হয়েছে যাতে সারিটা এলোমেলো না লাগে। */}
                     {isFeeReport && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1082,16 +846,6 @@ const ExamReportList = ({ pageTitle }) => {
                     )}
                   </div>
 
-                  {/*
-                    তালিকার ধরন — তিনটা:
-                      ১ ফি বিহীন   → যারা এখনো ফি দেয়নি
-                      ২ ফি গৃহীত   → যারা ফি দিয়েছে
-                      ৩ সকল        → দুই দলই একসাথে
-
-                    আগে এটা রিপোর্ট বাছাইয়ের পাশে বসত। রিপোর্টটা এখন নিচের
-                    ফিল্টারের সারিতে চলে গেছে, তাই এই পট্টিটা নিজের সারিতেই
-                    পুরো চওড়া নিয়ে বসে — তিনটা বোতামই স্বচ্ছন্দে ধরে।
-                  */}
                   {isFeeReport && (
                     <div className="w-full rounded-xl border border-emerald-200 bg-emerald-50/50 p-2 flex items-center gap-2">
                       <span className="text-[13px] font-semibold text-slate-700 whitespace-nowrap px-2">
@@ -1128,11 +882,6 @@ const ExamReportList = ({ pageTitle }) => {
                     </div>
                   )}
 
-                  {/* ⭐ রুটিনের সাজসজ্জা — শুধু ৯ নং এর জন্য
-
-                      চারটাই কাগজের সাজ, ফর্মের ঘর নয় — তাই react-hook-form
-                      এর বাইরে। ডিফল্টে সবগুলো বন্ধ, মানে কাগজটা হুবহু চলতি
-                      ছাপা রুটিনের মতোই বসে। */}
                   {isRoutineReport && (
                     <div className="rounded-xl border border-teal-200 bg-teal-50/50 p-3 flex flex-wrap items-center gap-3">
                       <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700 px-1">
@@ -1189,7 +938,6 @@ const ExamReportList = ({ pageTitle }) => {
                         </label>
                       ))}
 
-                      {/* কত শ্রেণি, কত দিন — বাছাই বদলালেই সাথে সাথে বদলায় */}
                       {routineData?.rows?.length ? (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-teal-200 px-3 py-1 text-xs font-semibold text-teal-700 ml-auto">
                           {toBn(routineData.rows.length)} টি শ্রেণি ·{' '}
@@ -1199,11 +947,6 @@ const ExamReportList = ({ pageTitle }) => {
                     </div>
                   )}
 
-                  {/* ⭐ কিতাব — শুধু নম্বর পত্রের জন্য
-
-                      পরীক্ষা বাছাই করলে ওই পরীক্ষার রুটিনে যে কিতাবগুলো
-                      আছে সেগুলোই এখানে আসে। যেটা বাছবেন সেটাই কাগজের
-                      মাথার "কিতাব" ঘরে বসবে। */}
                   {isNumberSheet && (
                     <div className="rounded-xl border border-violet-200 bg-gradient-to-r from-violet-50 via-fuchsia-50 to-violet-50 p-3 flex flex-wrap items-center gap-3">
                       <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700 px-1">
@@ -1214,9 +957,6 @@ const ExamReportList = ({ pageTitle }) => {
                         কিতাব:
                       </span>
 
-                      {/* ⭐ ঘরটা আর টেনে লম্বা হয় না (flex-1 তুলে দেওয়া)।
-                          কিতাবের নাম তো ছোট, অথচ ঘরটা বারের অর্ধেক জায়গা
-                          খেয়ে বসে থাকত। */}
                       <div className="relative w-[190px] shrink-0">
                         <select
                           value={kitabId}
@@ -1246,64 +986,127 @@ const ExamReportList = ({ pageTitle }) => {
                         </svg>
                       </div>
 
-                      {/* ⭐ সাজানোর ক্রম — ভর্তি নং না আইডি নং।
+                      <div className="flex items-center gap-2">
+                        <span className="text-[12px] font-medium text-slate-500 whitespace-nowrap">সাজানো:</span>
 
-                          আগে এখানে "নামসহ / নাম ছাড়া" সুইচ ছিল, কিন্তু
-                          নামের ঘরটা এখন সেটিংসের আর দশটা ঘরের মতোই টিক
-                          দিয়ে বন্ধ করা যায় — তাই ওটার আর দরকার নেই।
-
-                          ফি তালিকার বারটা যেমন, এটাও তেমন — দুই রিপোর্টে
-                          একই নিয়ম। */}
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[12px] font-medium text-slate-500">সাজানো:</span>
-
-                        <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1">
+                        <div className="flex gap-2">
                           {SORT_KEYS.map((opt) => {
-                            const on = sortKeyValue(numberSettings.sortBy) === opt.key;
+                            const isActive = sortKeyValue(numberSettings.sortBy) === opt.key;
+                            const isAsc = sortOrderValue(numberSettings.sortOrder) === 'asc';
 
                             return (
                               <button
                                 key={opt.key}
                                 type="button"
-                                onClick={() => changeNumberSetting({ sortBy: opt.key })}
-                                className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                                  on ? 'bg-violet-600 text-white' : 'text-slate-600 hover:bg-slate-50'
+                                onClick={() => {
+                                  if (isActive) {
+                                    changeNumberSetting({ sortOrder: isAsc ? 'desc' : 'asc' });
+                                  } else {
+                                    changeNumberSetting({ sortBy: opt.key, sortOrder: 'asc' });
+                                  }
+                                }}
+                                className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 transition-all ${
+                                  isActive
+                                    ? 'border-violet-500 bg-violet-50 shadow-sm'
+                                    : 'border-slate-200 bg-white hover:bg-slate-50'
                                 }`}
                               >
-                                {opt.label}
-                              </button>
-                            );
-                          })}
-                        </div>
-
-                        <div className="flex gap-1 rounded-lg border border-slate-200 bg-white p-1">
-                          {[
-                            { id: 'asc', text: 'ছোট → বড়' },
-                            { id: 'desc', text: 'বড় → ছোট' },
-                          ].map((opt) => {
-                            const on = sortOrderValue(numberSettings.sortOrder) === opt.id;
-
-                            return (
-                              <button
-                                key={opt.id}
-                                type="button"
-                                onClick={() => changeNumberSetting({ sortOrder: opt.id })}
-                                className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
-                                  on ? 'bg-violet-600 text-white' : 'text-slate-600 hover:bg-slate-50'
-                                }`}
-                              >
-                                {opt.text}
+                                <span className={`text-sm ${isActive ? 'text-violet-700 font-bold' : 'text-slate-600 font-medium'}`}>
+                                  {opt.label}
+                                </span>
+                                
+                                <div className={`w-[1px] h-4 ${isActive ? 'bg-violet-200' : 'bg-slate-200'}`} />
+                                
+                                <div className="flex items-center gap-1">
+                                  <svg
+                                    className={`h-3.5 w-3.5 transition-colors ${
+                                      isActive && isAsc ? 'text-violet-700' : 'text-slate-300'
+                                    }`}
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 19V5m-7 7 7-7 7 7" />
+                                  </svg>
+                                  <svg
+                                    className={`h-3.5 w-3.5 transition-colors ${
+                                      isActive && !isAsc ? 'text-violet-700' : 'text-slate-300'
+                                    }`}
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m7-7-7 7-7-7" />
+                                  </svg>
+                                </div>
                               </button>
                             );
                           })}
                         </div>
                       </div>
 
-                      {/* ⭐ কাগজের শিরোনাম — পট্টিতে যা বসবে।
+                      {/* ⭐ নতুন ডাইনামিক চেকবক্স ড্রপডাউন */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[12px] font-medium text-slate-500 whitespace-nowrap">
+                          কলাম:
+                        </span>
+                        
+                        <div className="relative" ref={dropdownRef}>
+                          <button
+                            type="button"
+                            onClick={() => setIsColumnDropdownOpen(!isColumnDropdownOpen)}
+                            className="flex items-center justify-between min-w-[130px] appearance-none rounded-lg border border-violet-300 bg-white py-1.5 pl-3 pr-8 text-sm font-medium text-slate-700 outline-none transition hover:bg-slate-50 focus:border-violet-500 focus:ring-2 focus:ring-violet-200"
+                          >
+                            <span className="truncate">
+                              {activeFields.length > 0
+                                ? `${toBn(activeFields.length)} / ${toBn(numberFieldLimit)} টি কলাম`
+                                : 'কলাম নির্বাচন'}
+                            </span>
+                            <svg className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
 
-                          সেটিংসেও আছে, কিন্তু এটা কাগজভেদে বদলায় (একবার
-                          "নম্বর পত্র", পরেরবার "স্বাক্ষরপত্র"), তাই হাতের
-                          কাছেই রাখা। দুই জায়গার মান এক। */}
+                          {isColumnDropdownOpen && (
+                            <div className="absolute z-50 mt-1 w-60 rounded-md bg-white shadow-lg border border-gray-200 py-1 max-h-72 overflow-y-auto">
+                              {NUMBER_SHEET_FIELDS.map((f) => {
+                                const isChecked = activeFields.includes(f.key);
+                                const locked = !isChecked && numberFieldsFull;
+
+                                return (
+                                  <label
+                                    key={f.key}
+                                    title={
+                                      locked
+                                        ? 'সীমায় পৌঁছে গেছে — আগে একটা কলাম বন্ধ করুন'
+                                        : undefined
+                                    }
+                                    className={`flex items-center gap-2.5 px-4 py-2 transition-colors ${
+                                      locked
+                                        ? 'opacity-40 cursor-not-allowed'
+                                        : 'hover:bg-slate-50 cursor-pointer'
+                                    }`}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isChecked}
+                                      disabled={locked}
+                                      onChange={() => handleToggleColumn(f.key)}
+                                      className="h-4 w-4 accent-violet-600 rounded border-gray-300"
+                                    />
+                                    <span className={`text-sm ${isChecked ? 'font-semibold text-violet-700' : 'text-slate-700'}`}>
+                                      {numberSettings.labels?.[f.key]?.trim() || f.label}
+                                    </span>
+                                  </label>
+                                );
+                              })}
+
+                              <p className="px-4 pt-1.5 pb-1 text-[11px] text-slate-400 border-t border-slate-100 mt-1">
+                                {columnCount(numberSettings.columns) === 2
+                                  ? 'দুই কলামে সর্বোচ্চ ৪টি ঘর বসে'
+                                  : 'সর্বোচ্চ ৮টি ঘর বসে'}
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
                       <div className="flex items-center gap-1.5">
                         <span className="text-[12px] font-medium text-slate-500 whitespace-nowrap">
                           শিরোনাম:
@@ -1328,12 +1131,6 @@ const ExamReportList = ({ pageTitle }) => {
                         </div>
                       </div>
 
-                      {/* ⭐ কাগজ, দিক ও কলাম — সেটিংসে তো আছেই, এখানেও।
-
-                          এগুলোই সবচেয়ে বেশি বদলানো হয় (এক কলাম না দুই,
-                          A4 না A5), তাই প্রতিবার সেটিংস খোলা ঝামেলা।
-                          দুই জায়গার মানটা একই — এখানে বদলালে সেটিংসেও
-                          বসে যায়, আর সেটিংসে বদলালে এখানেও দেখা যায়। */}
                       <div className="flex items-center gap-1.5">
                         {[
                           {
@@ -1383,14 +1180,9 @@ const ExamReportList = ({ pageTitle }) => {
                           </div>
                         ))}
                       </div>
-
-                      {/* ⭐ "শ্রেণি/জামাত" আর "পরীক্ষার্থী: ৩ জন" চিপ দুইটা
-                          তুলে দেওয়া হলো — দুইটাই উপরের ফিল্টারে আর কাগজের
-                          মাথায় এমনিতেই আছে, বারটা শুধু লম্বা করছিল। */}
                     </div>
                   )}
 
-                  {/* ⭐ সাজানোর ক্রম — শুধু ফি তালিকার জন্য */}
                   {isFeeReport && (
                     <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-3 flex flex-wrap items-center gap-3">
                       <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700 px-1">
@@ -1423,7 +1215,6 @@ const ExamReportList = ({ pageTitle }) => {
                         })}
                       </div>
 
-                      {/* কত জন উঠল — তালিকা বদলালেই সাথে সাথে বদলায় */}
                       <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-sky-200 px-3 py-1 text-xs font-semibold text-sky-700">
                         দেখাচ্ছে: {toBn(feeRows.length)} জন
                       </span>
@@ -1470,7 +1261,7 @@ const ExamReportList = ({ pageTitle }) => {
         {/* ═══ প্রিন্ট এরিয়া ════════════════════════════ */}
         <div className="print:block">
 
-          {/* ১. পরীক্ষার ফি তালিকা — বাংলা (নতুন একক পেজ) */}
+          {/* ১. পরীক্ষার ফি তালিকা — বাংলা */}
           {isFeeReport && langId === 1 && !isLoading && (
             <BanglaFeeList
               reportData={feeReportData}
@@ -1494,17 +1285,7 @@ const ExamReportList = ({ pageTitle }) => {
           {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 1 && <ExamRoutine reportData={data} queryParams={queryParams} />}
           {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 2 && <WithoutExamRoutine reportData={data} queryParams={queryParams} requireSeatPlan />}
 
-          {/* ৩. নম্বর পত্র ও স্বাক্ষরপত্র
-
-              ⭐ আগে এখানে আটটা শাখা ছিল — ভাষা × চার রকম কাগজ — আর
-              স্বাক্ষরপত্রটা আলাদা রিপোর্ট (৮) হিসেবে আরো নিচে বসত।
-
-              এখন একটাই কাগজ। কোন মাপ, কয় কলাম, কোন দিক আর কোন ঘরগুলো
-              বসবে — সবটা সেটিংস থেকে আসে (উপরের সেটিংস বোতাম)। তাই
-              আরবি-বাংলা আলাদা করারও দরকার নেই, ঘরের নামগুলোই যা বদলায়।
-
-              reportData এ অ্যারেটাই যায় (numberSheetRows) — সাজানোর কাজটা
-              কাগজ নিজেই করে, সেটিংসের ক্রম ধরে। */}
+          {/* ৩. নম্বর পত্র ও স্বাক্ষরপত্র */}
           {isNumberSheet && (
             <NumberSheetPaper
               reportData={numberSheetRows}
@@ -1517,10 +1298,7 @@ const ExamReportList = ({ pageTitle }) => {
             />
           )}
 
-          {/* ৪. সিট নং
-
-              ⭐ সাদা-কালো কার্ডে কোন ঘরগুলো বসবে সেটা seatSettings থেকে
-              আসে — উপরের সেটিংস বোতাম থেকে বাছা হয়, localStorage এ থাকে। */}
+          {/* ৪. সিট নং */}
           {Number(selectedReportID) === 7 && Number(languageID) === 1 && Number(selectedPdfID) === 1 && (
             <BSeatNoWhite queryParams={queryParams} documentLogo={documentLogo} logoIsActive={logoIsActive} instituteLogo={instituteLogo} showSeatNo settings={seatSettings} studentList={Array.isArray(data) ? data : data?.data} />
           )}
@@ -1540,11 +1318,7 @@ const ExamReportList = ({ pageTitle }) => {
             <ASeatNoSeatPlain queryParams={queryParams} documentLogo={documentLogo} logoIsActive={logoIsActive} />
           )}
 
-          {/* ৬. সকল পরীক্ষার্থীর পরিসংখ্যান
-
-              রুট এখন { data, grandTotal, header } পাঠায় — শ্রেণি ধরে ধরে
-              কতজন, আর কাগজের মাথার তথ্য। লোগোটা header এই থাকে; না পেলে
-              পেজের নিজের খোঁজাটাই (instituteLogo) পেছনের ভরসা। */}
+          {/* ৬. সকল পরীক্ষার্থীর পরিসংখ্যান */}
           {isStatistics && !isLoading && (
             <StatisticsOfAllStudents
               reportData={data}
@@ -1560,14 +1334,7 @@ const ExamReportList = ({ pageTitle }) => {
           {/* ৮. প্রতিষ্ঠানের আসন বিন্যাস */}
           {Number(selectedReportID) === 11 && <InstituteExamSeatingChart queryParams={queryParams} />}
 
-          {/* ৯. পরীক্ষার রুটিন
-
-              সারি = শ্রেণি, কলাম = তারিখ × বেলা, ঘর = কিতাব। ডাটা আসে
-              নিজের রুট থেকে (routineData), তাই উপরের data এর সাথে এর
-              কোনো সম্পর্ক নেই।
-
-              কাগজটা আড়াআড়ি (A4 landscape) — ঐ @page নিয়মটা কম্পোনেন্টের
-              ভিতরেই, তাই অন্য রিপোর্টের লম্বালম্বি কাগজে হাত পড়ে না। */}
+          {/* ৯. পরীক্ষার রুটিন */}
           {isRoutineReport && !routineFetching && (
             <ExamRoutinePaper
               reportData={routineData}

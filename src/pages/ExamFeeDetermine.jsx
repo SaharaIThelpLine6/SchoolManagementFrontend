@@ -894,7 +894,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                         />
                       </div> */}
                       <div className="flex items-center gap-2 flex-nowrap">
-                        {/* ⭐ প্রথমে ফি-এর ইনপুট বক্স */}
+                        {/* ⭐ ইনপুট বক্সটি আগে */}
                         <input
                           type="number"
                           value={commonFee}
@@ -905,8 +905,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                           title="এখানে ফি লিখলেই নির্বাচিত সব শ্রেণীতে বসে যাবে"
                           className="h-[34px] w-[130px] shrink-0 border border-[#E9D5FF] rounded-md px-3 text-sm bg-white outline-none transition focus:border-[#7C3AED]"
                         />
-                        
-                        {/* ⭐ এরপরে রিসেট বাটন */}
+                        {/* ⭐ রিসেট বাটনটি পরে */}
                         <button
                           type="button"
                           onClick={handleResetFees}
@@ -930,7 +929,8 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                         className="h-4 w-4 accent-[#7C3AED] cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
                       />
                       <span>{translate("Class/Jamaat")}</span>
-                      <span className="hidden sm:block">{translate("Fee")}</span>
+                      {/* <span className="hidden sm:block">{translate("Fee")}</span> */}
+                      <span className="hidden sm:block text-center w-full pr-[85px]">{translate("Fee")}</span>
                       <span className="hidden sm:block text-center">অবস্থা</span>
                     </div>
 
