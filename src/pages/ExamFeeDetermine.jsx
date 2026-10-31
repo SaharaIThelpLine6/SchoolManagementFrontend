@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 
@@ -19,7 +18,6 @@ import useTranslate from "../utils/Translate";
 
 import SortableTable from "../components/Tables/SortableTable";
 import Loading from "../components/Loading/Loading";
-import DefaultSelect from "../components/Forms/DefaultSelect";
 import StudentFeeGroup from "../view/exam/StudentFeeGroup";
 import { useGetNameOFExamFeeQuery } from "../features/feeCollection/feeCollectionSlice";
 import DeleteButton from "../components/Button/DeleteButton";
@@ -29,8 +27,6 @@ import SvgIcon from "../components/icons/SvgIcon";
 
 const PAGE_SIZE = 10;
 
-// হেডার সিলেকশন ফর্ম — শিক্ষাবর্ষ/পরীক্ষা/ফি-র নাম একবার বেছে নিলে
-// নিচের গ্রিডে সব শ্রেণী একসাথে এসে যাবে
 const EMPTY_FORM = {
   SessionID: "",
   ExamID: "",
@@ -49,6 +45,9 @@ const C = {
 const controlClass =
   "h-[38px] w-full border border-[#E9D5FF] rounded-md px-3 text-sm bg-white outline-none transition focus:border-[#7C3AED]";
 
+const modalSelectClass =
+  "h-[42px] w-full border border-[#E9D5FF] rounded-lg px-3 text-sm bg-white text-gray-700 outline-none transition focus:border-[#7C3AED] focus:ring-2 focus:ring-[#DDD6FE]";
+
 // খালি/বিভিন্ন টাইপের মান নিরাপদে স্ট্রিং-এ মিলিয়ে দেখার জন্য
 const includesText = (value, query) =>
   String(value ?? "").toLowerCase().includes(query);
@@ -65,18 +64,17 @@ const blockNegativeKey = (e) => {
 const sanitizeFee = (value) => String(value ?? "").replace(/[^0-9.]/g, "");
 
 const ExamFeeDetermine = ({ pageTitle }) => {
-  const location = useLocation();
   const dispatch = useDispatch();
   const translate = useTranslate();
   const methods = useForm({ defaultValues: EMPTY_FORM });
-  const { watch, setValue } = methods;
+  const { watch, setValue, register } = methods;
 
   const SessionID = watch("SessionID");
   const ExamID = watch("ExamID");
-  const SLID = watch("SLID");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false);
+  const [showSetupModal, setShowSetupModal] = useState(false);
   const [saving, setSaving] = useState(false);
 
   // শ্রেণী ভিত্তিক ফি — { [SubClassID]: { checked, fee } }
@@ -213,7 +211,29 @@ const ExamFeeDetermine = ({ pageTitle }) => {
         selectedRows.length > 0 && !allChecked;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [classFees, allChecked]);
+  }, [classFees, allChecked, showSetupModal]);
+
+  /* ---------------- মডাল খোলা থাকলে পেছনের স্ক্রল বন্ধ + Esc ----------------
+     ⭐ দুটো মডালের যেকোনো একটা খোলা থাকলেই চলবে। Esc চাপলে আগে উপরেরটা
+     (ছাত্র ফি গ্রুপ) বন্ধ হবে, তারপর ফি নির্ধারণ মডাল।
+  --------------------------------------------------------- */
+  useEffect(() => {
+    if (!showSetupModal && !showStudentFeeGroup) return;
+
+    const onKeyDown = (e) => {
+      if (e.key !== "Escape") return;
+      if (showStudentFeeGroup) setShowStudentFeeGroup(false);
+      else closeSetupModal();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showSetupModal, showStudentFeeGroup]);
 
   const setClassValue = (id, patch) =>
     setClassFees((prev) => ({
@@ -307,13 +327,27 @@ const ExamFeeDetermine = ({ pageTitle }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  // টেবিলের রো এডিট — উপরের সিলেকশন সেট করে ওই শ্রেণীটাই গ্রিডে ফোকাস হবে
+  /* ---------------- মডাল খোলা/বন্ধ ---------------- */
+  const openSetupModal = () => {
+    pendingEditRef.current = null;
+    setCommonFee("");
+    methods.reset(EMPTY_FORM);
+    setShowSetupModal(true);
+  };
+
+  const closeSetupModal = () => {
+    setShowSetupModal(false);
+    setCommonFee("");
+  };
+
+  // টেবিলের রো এডিট — মডাল খুলে ওই শ্রেণীটাই গ্রিডে ফোকাস হবে
   const handleEdit = (row) => {
     pendingEditRef.current = { SubClassID: row.SubClassID, Fee: row.Fee };
-    setValue("SessionID", row.SessionID);
-    setValue("ExamID", row.ExamID);
-    setValue("SLID", row.SLID);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setCommonFee("");
+    setValue("SessionID", String(row.SessionID ?? ""));
+    setValue("ExamID", String(row.ExamID ?? ""));
+    setValue("SLID", String(row.SLID ?? ""));
+    setShowSetupModal(true);
   };
 
   /* ---------------- রিসেট ----------------
@@ -385,7 +419,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
       Swal.fire({
         icon: "warning",
         title: "ফর্ম অসম্পূর্ণ",
-        text: "শিক্ষাবর্ষ, পরীক্ষা এবং ফি-র নাম নির্বাচন করুন।",
+        text: "শিক্ষাবর্ষ, পরীক্ষা এবং ফি-এর নাম নির্বাচন করুন।",
         confirmButtonColor: "#7C3AED",
       });
       return;
@@ -451,6 +485,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
     refetch();
 
     if (failed.length === 0) {
+      closeSetupModal();
       Swal.fire({
         icon: "success",
         title: "সফলভাবে সংরক্ষণ হয়েছে",
@@ -469,18 +504,16 @@ const ExamFeeDetermine = ({ pageTitle }) => {
     }
   };
 
+  /* ---------------- লেবেল — লাল তারকা সহ একটাই কোলন ---------------- */
+  const ModalLabel = ({ children, required }) => (
+    <label className="mb-1.5 block text-[13px] font-bold text-[#5B21B6]">
+      {children}
+      {required && <span className="text-red-500"> *</span>} :
+    </label>
+  );
+
   // Table Data Columns
   const columns = [
-    {
-      title: translate("Action"),
-      hozAlign: "center",
-      render: (row) => (
-        <div className="flex justify-center items-center gap-2">
-          <EditButton onClick={() => handleEdit(row)} />
-          <DeleteButton onClick={() => handleDelete(row.ID)} />
-        </div>
-      ),
-    },
     {
       title: translate("ID"),
       hozAlign: "center",
@@ -525,16 +558,38 @@ const ExamFeeDetermine = ({ pageTitle }) => {
         <span className="font-bold text-[#6D28D9]">{row?.Fee}</span>
       ),
     },
+    {
+      title: translate("Action"),
+      hozAlign: "center",
+      render: (row) => (
+        <div className="flex justify-center items-center gap-2">
+          <EditButton onClick={() => handleEdit(row)} />
+          <DeleteButton onClick={() => handleDelete(row.ID)} />
+        </div>
+      ),
+    },
   ];
 
   return (
-    <div className="font-SolaimanLipi space-y-4">
-      {/* ---------------- গ্রেডিয়েন্ট হেডার (পরীক্ষার রিপোর্ট স্টাইল) ---------------- */}
+    <div className="font-SolaimanLipi space-y-4 bg-transparent">
+      {/* ---------------- গ্রেডিয়েন্ট হেডার ---------------- */}
       <div className={`${C.gradient} rounded-xl shadow-lg px-5 py-4 text-white`}>
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
             <div className="h-11 w-11 rounded-lg bg-white/20 flex items-center justify-center">
-              <SvgIcon name="FaPlus" size={18} />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-6 w-6 text-white"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6M9 15h6M9 11h6" />
+              </svg>
             </div>
             <div>
               <h3 className="text-base sm:text-[20px] font-bold leading-tight">
@@ -546,19 +601,19 @@ const ExamFeeDetermine = ({ pageTitle }) => {
             </div>
           </div>
 
-          {/* ফি-র নাম (সাব লেজার) যোগ — মডাল থেকে কল হবে */}
+          {/* ফি নির্ধারণের পুরো ফর্ম মডালে খুলবে */}
           <button
             type="button"
-            onClick={() => setShowStudentFeeGroup(true)}
+            onClick={openSetupModal}
             className="flex items-center gap-2 bg-white text-[#6D28D9] font-bold text-sm px-4 py-2 rounded-lg shadow hover:bg-[#F5F3FF] transition"
           >
             <SvgIcon name="FaPlus" size={13} />
-            {translate("Fee Name")}
+            নতুন যুক্ত করুন
           </button>
         </div>
       </div>
 
-      <div className="bg-white p-6 md:p-4 rounded-xl shadow-lg">
+      <div className="bg-transparent p-6 md:p-4 rounded-xl shadow-none">
         {/* ডুপ্লিকেট থাকলে সতর্কবার্তা */}
         {duplicateRowCount > 0 && (
           <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-medium text-red-600">
@@ -567,169 +622,8 @@ const ExamFeeDetermine = ({ pageTitle }) => {
           </div>
         )}
 
-        <FormProvider {...methods}>
-          <form className="w-full" onSubmit={(e) => e.preventDefault()}>
-            <div className={`${C.panel} border ${C.panelBorder} rounded-xl p-4`}>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <DefaultSelect
-                  label={translate("Session") + " :"}
-                  options={sessionData ?? []}
-                  valueField="SessionID"
-                  nameField="SessionName"
-                  registerKey="SessionID"
-                  unicode={true}
-                />
-                <DefaultSelect
-                  label={translate("Exam Name") + " :"}
-                  options={examNameData ?? []}
-                  valueField="ExamID"
-                  nameField="ExamName"
-                  registerKey="ExamID"
-                  unicode={true}
-                />
-                <DefaultSelect
-                  label={`${translate("Fee Name")}:`}
-                  nameField="SlName"
-                  registerKey="SLID"
-                  valueField="SLID"
-                  options={nameOfExamFeeData ?? []}
-                  unicode={true}
-                />
-              </div>
-            </div>
-          </form>
-        </FormProvider>
-
-        {/* ---------------- শ্রেণী/জামাত গ্রিড ---------------- */}
-        <div className="mt-5">
-          {!SessionID || !ExamID ? (
-            <div className={`${C.soft} rounded-xl px-4 py-8 text-center text-sm font-medium`}>
-              শিক্ষাবর্ষ ও পরীক্ষা নির্বাচন করলে সব শ্রেণী/জামাতের তালিকা এখানে দেখাবে।
-            </div>
-          ) : (
-            <div className={`border ${C.panelBorder} rounded-xl overflow-hidden`}>
-              {/* এক লাইনের টুলবার — টাইটেল, কমন ফি, রিসেট, সংরক্ষণ */}
-              <div className={`${C.panel} border-b ${C.panelBorder} px-4 py-3 flex items-center justify-between gap-2 flex-wrap`}>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h4 className="text-sm font-bold text-[#5B21B6] whitespace-nowrap">
-                    {translate("Class/Jamaat")} — ফি নির্ধারণ
-                  </h4>
-                  <span
-                    title="আগে থেকে নির্ধারিত শ্রেণীগুলো আপডেট হবে, বাকিগুলো নতুন যোগ হবে।"
-                    className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#7C3AED] text-white cursor-help"
-                  >
-                    {selectedRows.length} / {classRows.length}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 flex-nowrap">
-                  <button
-                    type="button"
-                    onClick={handleResetFees}
-                    title="শুধু লেখা ফি-গুলো মুছবে"
-                    className="h-[34px] shrink-0 px-2.5 rounded-md text-xs font-bold bg-white text-[#6D28D9] border border-[#DDD6FE] hover:bg-[#F5F3FF] transition whitespace-nowrap"
-                  >
-                    {translate("Reset")}
-                  </button>
-                  {/* ⭐ এখানে ফি লিখলেই নির্বাচিত সব শ্রেণীতে সাথে সাথে বসে যাবে */}
-                  <input
-                    type="number"
-                    value={commonFee}
-                    onChange={handleCommonFeeChange}
-                    onKeyDown={blockNegativeKey}
-                    min="0"
-                    placeholder="শ্রেণি ফি নির্ধারন"
-                    title="এখানে ফি লিখলেই নির্বাচিত সব শ্রেণীতে বসে যাবে"
-                    className="h-[34px] w-[130px] shrink-0 border border-[#E9D5FF] rounded-md px-3 text-sm bg-white outline-none transition focus:border-[#7C3AED]"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSaveAll}
-                    disabled={saving}
-                    className={`h-[34px] shrink-0 px-3 rounded-md text-xs font-bold ${C.primary} transition whitespace-nowrap ${
-                      saving ? "opacity-60 cursor-not-allowed" : ""
-                    }`}
-                  >
-                    {saving
-                      ? "সংরক্ষণ হচ্ছে..."
-                      : `সব সংরক্ষণ করুন (${selectedRows.length})`}
-                  </button>
-                </div>
-              </div>
-
-              {/* কলাম হেডার — প্রথম ঘরে সব নির্বাচন/সব বাদ চেকবক্স */}
-              <div className="grid grid-cols-[40px_1fr] sm:grid-cols-[40px_1fr_160px_120px] gap-2 items-center px-4 py-2 bg-[#F5F3FF] text-[12px] font-bold text-[#5B21B6]">
-                <input
-                  ref={selectAllRef}
-                  type="checkbox"
-                  checked={allChecked}
-                  onChange={toggleAll}
-                  disabled={classRows.length === 0}
-                  title="সব নির্বাচন / সব বাদ"
-                  className="h-4 w-4 accent-[#7C3AED] cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
-                />
-                <span>{translate("Class/Jamaat")}</span>
-                <span className="hidden sm:block">{translate("Fee")}</span>
-                <span className="hidden sm:block text-center">অবস্থা</span>
-              </div>
-
-              {/* রো গুলো */}
-              <div className="max-h-[420px] overflow-y-auto divide-y divide-[#F3E8FF]">
-                {classRows.map((row) => (
-                  <div
-                    key={row.id}
-                    className={`grid grid-cols-[40px_1fr] sm:grid-cols-[40px_1fr_160px_120px] gap-2 items-center px-4 py-2 transition ${
-                      row.checked ? "bg-white" : "bg-gray-50/60"
-                    } hover:bg-[#FAF5FF]`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={row.checked}
-                      onChange={(e) =>
-                        setClassValue(row.id, { checked: e.target.checked })
-                      }
-                      className="h-4 w-4 accent-[#7C3AED] cursor-pointer"
-                    />
-
-                    <span className="text-sm font-medium text-gray-700">
-                      {row.name}
-                    </span>
-
-                    <input
-                      type="number"
-                      value={row.fee}
-                      onChange={(e) =>
-                        setClassValue(row.id, {
-                          fee: sanitizeFee(e.target.value),
-                          checked: true,
-                        })
-                      }
-                      onKeyDown={blockNegativeKey}
-                      min="0"
-                      placeholder="ফি"
-                      className={`${controlClass} col-start-2 sm:col-start-auto`}
-                    />
-
-                    <div className="col-start-2 sm:col-start-auto flex sm:justify-center">
-                      {row.existing ? (
-                        <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0]">
-                          নির্ধারিত
-                        </span>
-                      ) : (
-                        <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#F5F3FF] text-[#6D28D9] border border-[#DDD6FE]">
-                          নতুন
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
         {/* ---------------- সার্চ + ফিল্টার বার ---------------- */}
-        <div className={`mt-6 ${C.panel} border ${C.panelBorder} rounded-xl p-4`}>
+        <div className={`${C.panel} border ${C.panelBorder} rounded-xl p-4`}>
           <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
             <h4 className="text-sm font-bold text-[#5B21B6]">
               {translate("Search & Filter")}
@@ -839,11 +733,13 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                 : translate("No data available")}
             </div>
           ) : (
-            <SortableTable
-              columns={columns}
-              data={paginatedData}
-              isFilterColumn={false}
-            />
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+              <SortableTable
+                columns={columns}
+                data={paginatedData}
+                isFilterColumn={false}
+              />
+            </div>
           )}
         </div>
 
@@ -854,10 +750,258 @@ const ExamFeeDetermine = ({ pageTitle }) => {
         />
       </div>
 
-      {/* ---------------- Student Fee Group — মডাল ---------------- */}
+      {/* ---------------- ফি নির্ধারণ — মডাল ----------------
+          ⭐ backdrop-blur বাদ দেওয়া হয়েছে — এটা নতুন containing block বানায়,
+          যার ভেতরে নেস্টেড <dialog> এর top-layer রেন্ডার ভেঙে যায়।
+          ⭐ ছাত্র ফি গ্রুপ খোলা থাকলে এই মডাল শুধু লুকিয়ে থাকবে (আনমাউন্ট নয়),
+          তাই ফর্মের ডেটা ও সিলেকশন অক্ষত থাকবে।
+      --------------------------------------------------------- */}
+      {showSetupModal && (
+        <div
+          style={{ display: showStudentFeeGroup ? "none" : undefined }}
+          className="fixed inset-0 z-40 flex items-start justify-center overflow-y-auto bg-black/50 p-4"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) closeSetupModal();
+          }}
+        >
+          <div className="my-6 w-full max-w-4xl overflow-hidden rounded-xl bg-white shadow-2xl">
+            {/* মডাল হেডার */}
+            <div className={`${C.gradient} flex items-center justify-between px-5 py-3.5`}>
+              <div>
+                <h4 className="text-[17px] font-bold text-white">
+                  {translate("Exam Fee Determine")}
+                </h4>
+                <p className="text-[12px] text-white/80">
+                  শিক্ষাবর্ষ, পরীক্ষা ও ফি-এর নাম বেছে নিয়ে শ্রেণীভিত্তিক ফি দিন
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeSetupModal}
+                className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/20 text-white transition hover:bg-white/30"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="M18 6 6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* মডাল বডি */}
+            <div className="max-h-[75vh] overflow-y-auto px-5 py-5">
+              <FormProvider {...methods}>
+                <form className="w-full" onSubmit={(e) => e.preventDefault()}>
+                  <div className={`${C.panel} border ${C.panelBorder} rounded-xl p-4`}>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <ModalLabel required>{translate("Session")}</ModalLabel>
+                        <select className={modalSelectClass} {...register("SessionID")}>
+                          <option value="">নির্বাচন করুন</option>
+                          {(sessionData ?? []).map((s) => (
+                            <option key={s.SessionID} value={s.SessionID}>
+                              {s.SessionName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <ModalLabel required>{translate("Exam Name")}</ModalLabel>
+                        <select className={modalSelectClass} {...register("ExamID")}>
+                          <option value="">নির্বাচন করুন</option>
+                          {(examNameData ?? []).map((e) => (
+                            <option key={e.ExamID} value={e.ExamID}>
+                              {e.ExamName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <ModalLabel required>{translate("Fee Name")}</ModalLabel>
+                        <div className="flex items-center gap-2">
+                          <select className={modalSelectClass} {...register("SLID")}>
+                            <option value="">নির্বাচন করুন</option>
+                            {(nameOfExamFeeData ?? []).map((f) => (
+                              <option key={f.SLID} value={f.SLID}>
+                                {f.SlName}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() => setShowStudentFeeGroup(true)}
+                            title="নতুন ফি-এর নাম যুক্ত করুন"
+                            className={`h-[42px] w-[42px] shrink-0 rounded-lg ${C.primary} flex items-center justify-center transition`}
+                          >
+                            <SvgIcon name="FaPlus" size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </FormProvider>
+
+              {/* ---------------- শ্রেণী/জামাত গ্রিড ---------------- */}
+              <div className="mt-4">
+                {!SessionID || !ExamID ? (
+                  <div className={`${C.soft} rounded-xl px-4 py-8 text-center text-sm font-medium`}>
+                    শিক্ষাবর্ষ ও পরীক্ষা নির্বাচন করলে সব শ্রেণী/জামাতের তালিকা এখানে দেখাবে।
+                  </div>
+                ) : (
+                  <div className={`border ${C.panelBorder} rounded-xl overflow-hidden bg-white`}>
+                    {/* এক লাইনের টুলবার — টাইটেল, কমন ফি, রিসেট */}
+                    <div className={`${C.panel} border-b ${C.panelBorder} px-4 py-3 flex items-center justify-between gap-2 flex-wrap`}>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="text-sm font-bold text-[#5B21B6] whitespace-nowrap">
+                          {translate("Class/Jamaat")} — ফি নির্ধারণ
+                        </h4>
+                        <span
+                          title="আগে থেকে নির্ধারিত শ্রেণীগুলো আপডেট হবে, বাকিগুলো নতুন যোগ হবে।"
+                          className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#7C3AED] text-white cursor-help"
+                        >
+                          {selectedRows.length} / {classRows.length}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 flex-nowrap">
+                        <button
+                          type="button"
+                          onClick={handleResetFees}
+                          title="শুধু লেখা ফি-গুলো মুছবে"
+                          className="h-[34px] shrink-0 px-2.5 rounded-md text-xs font-bold bg-white text-[#6D28D9] border border-[#DDD6FE] hover:bg-[#F5F3FF] transition whitespace-nowrap"
+                        >
+                          {translate("Reset")}
+                        </button>
+                        {/* ⭐ এখানে ফি লিখলেই নির্বাচিত সব শ্রেণীতে সাথে সাথে বসে যাবে */}
+                        <input
+                          type="number"
+                          value={commonFee}
+                          onChange={handleCommonFeeChange}
+                          onKeyDown={blockNegativeKey}
+                          min="0"
+                          placeholder="সকল শ্রেণী ফি"
+                          title="এখানে ফি লিখলেই নির্বাচিত সব শ্রেণীতে বসে যাবে"
+                          className="h-[34px] w-[130px] shrink-0 border border-[#E9D5FF] rounded-md px-3 text-sm bg-white outline-none transition focus:border-[#7C3AED]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* কলাম হেডার — প্রথম ঘরে সব নির্বাচন/সব বাদ চেকবক্স */}
+                    <div className="grid grid-cols-[40px_1fr] sm:grid-cols-[40px_1fr_160px_120px] gap-2 items-center px-4 py-2 bg-[#F5F3FF] text-[12px] font-bold text-[#5B21B6]">
+                      <input
+                        ref={selectAllRef}
+                        type="checkbox"
+                        checked={allChecked}
+                        onChange={toggleAll}
+                        disabled={classRows.length === 0}
+                        title="সব নির্বাচন / সব বাদ"
+                        className="h-4 w-4 accent-[#7C3AED] cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+                      />
+                      <span>{translate("Class/Jamaat")}</span>
+                      <span className="hidden sm:block">{translate("Fee")}</span>
+                      <span className="hidden sm:block text-center">অবস্থা</span>
+                    </div>
+
+                    {/* রো গুলো */}
+                    <div className="max-h-[340px] overflow-y-auto divide-y divide-[#F3E8FF]">
+                      {classRows.map((row) => (
+                        <div
+                          key={row.id}
+                          className={`grid grid-cols-[40px_1fr] sm:grid-cols-[40px_1fr_160px_120px] gap-2 items-center px-4 py-2 transition ${
+                            row.checked ? "bg-white" : "bg-gray-50/60"
+                          } hover:bg-[#FAF5FF]`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={row.checked}
+                            onChange={(e) =>
+                              setClassValue(row.id, { checked: e.target.checked })
+                            }
+                            className="h-4 w-4 accent-[#7C3AED] cursor-pointer"
+                          />
+
+                          <span className="text-sm font-medium text-gray-700">
+                            {row.name}
+                          </span>
+
+                          <input
+                            type="number"
+                            value={row.fee}
+                            onChange={(e) =>
+                              setClassValue(row.id, {
+                                fee: sanitizeFee(e.target.value),
+                                checked: true,
+                              })
+                            }
+                            onKeyDown={blockNegativeKey}
+                            min="0"
+                            placeholder="ফি"
+                            className={`${controlClass} col-start-2 sm:col-start-auto`}
+                          />
+
+                          <div className="col-start-2 sm:col-start-auto flex sm:justify-center">
+                            {row.existing ? (
+                              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#ECFDF5] text-[#047857] border border-[#A7F3D0]">
+                                নির্ধারিত
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-[#F5F3FF] text-[#6D28D9] border border-[#DDD6FE]">
+                                নতুন
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* মডাল ফুটার */}
+            <div className="flex items-center justify-end gap-2 border-t border-gray-100 bg-gray-50 px-5 py-3.5">
+              <button
+                type="button"
+                onClick={closeSetupModal}
+                className="rounded-lg border border-gray-300 bg-white px-5 py-2 text-[13px] font-bold text-gray-600 transition hover:bg-gray-100"
+              >
+                {translate("Cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveAll}
+                disabled={saving}
+                className={`rounded-lg px-6 py-2 text-[13px] font-bold ${C.primary} shadow-sm transition ${
+                  saving ? "opacity-60 cursor-not-allowed" : ""
+                }`}
+              >
+                {saving
+                  ? "সংরক্ষণ হচ্ছে..."
+                  : `সব সংরক্ষণ করুন (${selectedRows.length})`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------------- Student Fee Group — মডাল ----------------
+          ⭐ z-50 এবং পোর্টাল ছাড়া — এর ভেতরের "Sub Sidiary Ledger" মডালটা
+          রিডাক্স দিয়ে লেআউট লেভেলে রেন্ডার হয়, তাই এই ওভারলে বেশি z-index
+          বা body-পোর্টাল পেলে ওটাকে ঢেকে ফেলে।
+      --------------------------------------------------------- */}
       {showStudentFeeGroup && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4 overflow-y-auto">
-          <div className="w-full max-w-5xl my-6 rounded-xl overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4">
+          <div className="my-6 w-full max-w-5xl rounded-xl shadow-2xl">
             <StudentFeeGroup onBack={() => setShowStudentFeeGroup(false)} />
           </div>
         </div>
