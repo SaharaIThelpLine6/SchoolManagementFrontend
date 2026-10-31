@@ -896,6 +896,7 @@ const useTranslate = () => {
     "Previous": "পূর্ববর্তী",
     "Add Subject": "বিষয় যুক্ত করুন",
     "Student Id Card": "শিক্ষার্থী পরিচয়পত্র",
+    "How to work": "কিভাবে কাজ করবেন",
 
     "Primary Title": "প্রধান শিরোনাম",
     "Color Palette": "কালার প্যালেট",

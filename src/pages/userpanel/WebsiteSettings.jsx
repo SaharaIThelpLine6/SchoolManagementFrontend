@@ -147,7 +147,7 @@ export default function WebsiteSettings() {
           } catch (e) {
             replaceVideo([]);
           }
-        } 
+        }
         else if (key == 'importantLinks') {
           try {
             const links = JSON.parse(value);
@@ -214,7 +214,7 @@ export default function WebsiteSettings() {
     formData.append('whyUsList', JSON.stringify(data.whyUsList));
     formData.append('subjectListTitle', data.subjectListTitle);
     formData.append('teacherListTitle', data.teacherListTitle);
-    
+
     // Colors
     formData.append('primary', data.primary);
     formData.append('secondary', data.secondary);
@@ -295,6 +295,45 @@ export default function WebsiteSettings() {
     <FormProvider {...methods}>
       <div className="website-settings">
         <form onSubmit={methods.handleSubmit(onSubmit)}>
+          <div className="w-full flex justify-end items-center">
+            <a
+              href="https://www.youtube.com/watch?v=sdvhPC02B4E&t=153s"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-2 px-3 py-2 rounded-lg
+    bg-red-50 border border-red-200 text-red-600
+    hover:bg-red-600 hover:text-white hover:border-red-600
+    shadow-sm hover:shadow-md transition-all duration-300"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z" />
+              </svg>
+
+              <span className="text-sm font-semibold whitespace-nowrap">
+                {translate("কিভাবে কাজ করবেন")}
+              </span>
+
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M7 17 17 7M7 7h10v10" />
+              </svg>
+            </a>
+          </div>
           <div className="mt-2">
             <DefaultInput
               registerKey="primaryHeading"
@@ -382,7 +421,7 @@ export default function WebsiteSettings() {
             registerKey="aboutText"
             type="textarea"
             label={translate("About Section Text")}
-            // require="About text is required"
+          // require="About text is required"
           />
           <div className="bg-blue-50 p-5 rounded-lg border border-blue-100 mt-4 mb-4">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
