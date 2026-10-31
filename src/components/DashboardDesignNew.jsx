@@ -6,6 +6,7 @@ import useTranslate from '../utils/Translate';
 import { useGetPaymentTransactionReportQuery } from '../features/feeCollection/feeCollectionSlice';
 import { useGetStudentAttendanceTodayDashboardQuery } from '../features/student/studentQuerySlice';
 import { useGetTeacherAttendanceTodayDashboardQuery } from '../features/teachers/teachersSlice';
+import Module from './Module';
 
 /* ---------- Bangla Number Helper ---------- */
 const toBanglaNumber = (value) => {
@@ -377,6 +378,7 @@ const DashboardDesignNew = () => {
           })}
         </div>
       </div>
+      <Module />
     </div>
   );
 };
