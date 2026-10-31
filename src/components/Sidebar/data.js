@@ -409,6 +409,7 @@ export const menuData = [
         id: '7',
         name: 'Result Publish',
         route: 'result/result-publish',
+        icon: 'SubResult',
       },
       {
         id: '3',

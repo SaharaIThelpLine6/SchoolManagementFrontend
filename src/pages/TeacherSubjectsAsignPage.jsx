@@ -376,10 +376,11 @@ const TeacherSubjectsAsignPage = () => {
   // RENDER
   // =========================
   return (
-    <div className="font-SolaimanLipi h-screen overflow-hidden bg-gradient-to-br from-slate-50 flex">
-      <div className="w-full h-full flex flex-col rounded-[16px] bg-white/85 backdrop-blur-xl ring-1 ring-[#2563EB]/20  overflow-hidden">
+    // এখানে bg-white/85 বাদ দেওয়া হয়েছে বা ট্রান্সপারেন্ট করা হয়েছে
+    <div className="font-SolaimanLipi h-screen overflow-hidden bg-transparent flex">
+      <div className="w-full h-full flex flex-col rounded-[16px] bg-transparent overflow-hidden">
         {/* ============ HEADER (FIXED) ============ */}
-        <div className="relative shrink-0 bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#1E40AF] px-5 sm:px-7 py-5">
+        <div className="relative shrink-0 bg-gradient-to-r from-[#2563EB] via-[#1D4ED8] to-[#1E40AF] px-5 sm:px-7 py-5 rounded-t-2xl">
           {/* decorative glow */}
           <div className="pointer-events-none absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_top_right,white,transparent_55%)]" />
           <div className="pointer-events-none absolute -bottom-16 -left-10 w-52 h-52 rounded-full bg-white/10 blur-2xl" />
@@ -462,9 +463,9 @@ const TeacherSubjectsAsignPage = () => {
             className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5"
             onSubmit={handleSubmit(onSubmit)}
           >
-            {/* ============ FILTER CARD ============ */}
-            <div className="rounded-2xl bg-gradient-to-br from-white via-emerald-50/40 to-teal-50/40 border border-emerald-100/80 p-4 shadow-sm">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* ============ FILTER CARD & TOP SAVE BUTTON ============ */}
+            <div className="rounded-2xl bg-white/60 backdrop-blur-md border border-emerald-100/80 p-4 shadow-sm flex flex-col md:flex-row items-end gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1 w-full">
                 <DefaultSelect
                   label="Session"
                   options={sessionData ?? []}
@@ -487,6 +488,21 @@ const TeacherSubjectsAsignPage = () => {
                   nameField="UserName"
                   require={translate("Teacher is required")}
                 />
+              </div>
+              
+              {/* ⭐ Save Button Top Right */}
+              <div className="w-full md:w-auto shrink-0">
+                <Button
+                  type="submit"
+                  className="w-full md:w-auto h-[42px] px-6 shadow-md"
+                  disabled={isSaving}
+                >
+                  {isSaving
+                    ? translate("Saving...")
+                    : isEditMode
+                      ? translate("Update")
+                      : translate("Save")}
+                </Button>
               </div>
             </div>
 
@@ -621,7 +637,7 @@ const TeacherSubjectsAsignPage = () => {
                   {[...Array(3)].map((_, i) => (
                     <div
                       key={i}
-                      className="rounded-2xl border border-gray-100 bg-white p-4 animate-pulse"
+                      className="rounded-2xl border border-gray-100 bg-white/60 p-4 animate-pulse"
                     >
                       <div className="h-4 w-32 bg-gradient-to-r from-gray-200 to-gray-100 rounded-full mb-4" />
                       <div className="flex flex-wrap gap-2">
@@ -636,7 +652,7 @@ const TeacherSubjectsAsignPage = () => {
                   ))}
                 </div>
               ) : ExamClassSubjectsError ? (
-                <div className="flex flex-col items-center justify-center gap-2 py-10 rounded-2xl border border-red-100 bg-gradient-to-br from-red-50 to-rose-50">
+                <div className="flex flex-col items-center justify-center gap-2 py-10 rounded-2xl border border-red-100 bg-gradient-to-br from-red-50/80 to-rose-50/80 backdrop-blur-sm">
                   <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-400 to-rose-600 flex items-center justify-center text-white shadow-lg shadow-red-200">
                     !
                   </div>
@@ -648,7 +664,7 @@ const TeacherSubjectsAsignPage = () => {
                 ExamClassSubjectsData.data.map((subClass) => (
                   <div
                     key={subClass.SubClassID}
-                    className="rounded-2xl border border-gray-200/80 bg-white shadow-sm hover:shadow-lg hover:shadow-emerald-100/60 hover:border-emerald-200 transition-all duration-300 overflow-hidden"
+                    className="rounded-2xl border border-gray-200/80 bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg hover:shadow-emerald-100/60 hover:border-emerald-200 transition-all duration-300 overflow-hidden"
                   >
                     <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-slate-50 via-emerald-50/70 to-transparent border-b border-gray-100">
                       <h3 className="text-[15px] font-bold text-gray-800 flex items-center gap-2.5">
@@ -686,12 +702,13 @@ const TeacherSubjectsAsignPage = () => {
                                 ? `Assigned to ${info.teacherName}`
                                 : "Click to select"
                             }
-                            className={`relative px-3.5 py-1.5 rounded-full text-[13px] font-semibold border transition-all duration-200 focus:outline-none ${selected
-                              ? "bg-gradient-to-r from-emerald-500 to-green-600 border-transparent text-white shadow-md shadow-emerald-200/80 cursor-not-allowed"
-                              : disabled
-                                ? "bg-gradient-to-r from-rose-50 to-red-50 border-rose-200 text-rose-500 cursor-not-allowed opacity-80"
-                                : "bg-white border-gray-200 text-gray-700 hover:border-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 hover:text-emerald-700 hover:shadow-md hover:shadow-emerald-100 hover:-translate-y-0.5"
-                              }`}
+                            className={`relative px-3.5 py-1.5 rounded-full text-[13px] font-semibold border transition-all duration-200 focus:outline-none ${
+                              selected
+                                ? "bg-gradient-to-r from-emerald-500 to-green-600 border-transparent text-white shadow-md shadow-emerald-200/80 cursor-not-allowed"
+                                : disabled
+                                  ? "bg-gradient-to-r from-rose-50 to-red-50 border-rose-200 text-rose-500 cursor-not-allowed opacity-80"
+                                  : "bg-white border-gray-200 text-gray-700 hover:border-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 hover:text-emerald-700 hover:shadow-md hover:shadow-emerald-100 hover:-translate-y-0.5"
+                            }`}
                           >
                             {subject.SubjectName}
 
@@ -740,21 +757,9 @@ const TeacherSubjectsAsignPage = () => {
               )}
             </div>
 
-            {/* ============ BUTTONS ============ */}
-            <div className="w-full flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
-              <Button
-                type="submit"
-                className="w-full md:w-auto"
-                disabled={isSaving}
-              >
-                {isSaving
-                  ? translate("Saving...")
-                  : isEditMode
-                    ? translate("Update")
-                    : translate("Save")}
-              </Button>
-
-              {isEditMode && (
+            {/* ============ BOTTOM BUTTONS (Cancel only if edit mode) ============ */}
+            {isEditMode && (
+              <div className="w-full flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
                 <Button
                   type="button"
                   variant="secondary"
@@ -763,8 +768,8 @@ const TeacherSubjectsAsignPage = () => {
                 >
                   {translate("Cancel")}
                 </Button>
-              )}
-            </div>
+              </div>
+            )}
           </form>
         </FormProvider>
       </div>

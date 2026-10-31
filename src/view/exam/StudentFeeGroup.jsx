@@ -201,13 +201,11 @@ const StudentFeeGroup = ({ pageTitle, onBack }) => {
 
   const columns = [
     {
-      title: translate("Action"),
+      title: translate("ID"),
+      field: "SLID",
       hozAlign: "center",
       render: (row) => (
-        <div className="flex justify-center items-center gap-2">
-          <DeleteButton onClick={() => handleDelete(row.SFGID)} />
-          <EditButton onClick={() => handleEditStudentGroup(row.SFGID)} />
-        </div>
+        <span className="font-bold text-[#6D28D9]">{row?.SLID}</span>
       ),
     },
     {
@@ -217,18 +215,20 @@ const StudentFeeGroup = ({ pageTitle, onBack }) => {
       render: (row) => <>{row.AccStudentFeeGroupName?.SFGName}</>,
     },
     {
-      title: translate("ID"),
-      field: "SLID",
-      hozAlign: "center",
-      render: (row) => (
-        <span className="font-bold text-[#6D28D9]">{row?.SLID}</span>
-      ),
-    },
-    {
       title: translate("Fee Name"),
       field: "Designation",
       hozAlign: "center",
       render: (row) => <>{bnBijoy2Unicode(row.AccSubsidiaryLedger?.SlName)}</>,
+    },
+    {
+      title: translate("Action"),
+      hozAlign: "center",
+      render: (row) => (
+        <div className="flex justify-center items-center gap-2">
+          <DeleteButton onClick={() => handleDelete(row.SFGID)} />
+          <EditButton onClick={() => handleEditStudentGroup(row.SFGID)} />
+        </div>
+      ),
     },
   ];
 
@@ -242,9 +242,6 @@ const StudentFeeGroup = ({ pageTitle, onBack }) => {
       <div className={`${C.gradient} px-5 py-4 text-white`}>
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-lg bg-white/20 flex items-center justify-center">
-              <SvgIcon name="FaPlus" size={18} />
-            </div>
             <div>
               <h3 className="text-base sm:text-[20px] font-bold leading-tight">
                 {translate("Student Fee Group")}
@@ -264,9 +261,21 @@ const StudentFeeGroup = ({ pageTitle, onBack }) => {
             <button
               type="button"
               onClick={() => onBack(false)}
-              className="bg-white text-[#6D28D9] font-bold text-sm px-4 py-2 rounded-lg shadow hover:bg-[#F5F3FF] transition"
+              title={translate("Close")}
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20 text-white transition hover:bg-white/30 shadow-sm"
             >
-              {translate("Back")}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+              >
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
             </button>
           </div>
         </div>

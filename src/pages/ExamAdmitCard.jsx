@@ -1106,8 +1106,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
 
   return (
     <FormProvider {...methods}>
-      <div className="font-SolaimanLipi bg-gray-50 min-h-screen p-4 md:p-6 hidden_in_print max-w-full overflow-x-hidden" dir={uiDir}>
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="font-SolaimanLipi p-4 md:p-6 hidden_in_print max-w-full overflow-x-hidden" dir={uiDir}>
+        <div className="rounded-xl overflow-hidden">
           
           {/* ================================================== মডার্ন হেডার */}
           <div className="flex flex-col gap-4 bg-gradient-to-r from-[#7C3AED] via-[#4F46E5] to-[#06B6D4] px-5 py-5 sm:flex-row sm:items-center sm:justify-between relative overflow-hidden">

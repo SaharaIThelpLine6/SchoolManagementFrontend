@@ -16,9 +16,9 @@ import useTranslate from '../utils/Translate';
 
 import EditButton from '../components/Button/EditButton';
 import DefaultSelect from '../components/Forms/DefaultSelect';
-import SvgIcon from '../components/icons/SvgIcon';
+// import SvgIcon from '../components/icons/SvgIcon'; // Print বাটন বাদ দেওয়ায় এটি আর প্রয়োজন নেই
 import Loading from '../components/Loading/Loading';
-import DefaultPagination from '../components/Pagination/DefaultPagination';
+// import DefaultPagination from '../components/Pagination/DefaultPagination'; // Pagination বাদ দেওয়া হয়েছে
 import SortableTable from '../components/Tables/SortableTable';
 import { permissionsDataList } from '../Data/permissions';
 import {
@@ -171,28 +171,21 @@ const PointBasedResultEntry = ({ pageTitle }) => {
               }
             />
           </ViewPermission>
-          <button
-            className="p-2 text-white bg-yellow-500 hover:bg-yellow-600 rounded-md flex items-center gap-1 transition-colors shadow-sm"
-            title="Print"
-            onClick={() =>
-              navigate(
-                `/dashboard/result/mark-sheet/${row?.ID}?session_id=${row?.SessionID}&exam_id=${row?.ExamID}&subclass_id=${row?.SubClassID}`
-              )
-            }
-          >
-            <SvgIcon name={'TbPrinter'} size={20} />
-          </button>
+          {/* ⭐ প্রিন্ট বাটনটি বাদ দেওয়া হয়েছে */}
         </div>
       ),
     },
   ];
 
   return (
-    <div className="font-SolaimanLipi bg-gray-50 min-h-screen p-4 md:p-6">
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+    // ⭐ মেইন পেজের ব্যাকগ্রাউন্ড bg-gray-50 থেকে পরিবর্তন করে bg-transparent করা হয়েছে
+    <div className="font-SolaimanLipi bg-transparent min-h-screen p-4 md:p-6">
+      
+      {/* ⭐ কন্টেইনার থেকে bg-white ও shadow-lg বাদ দেওয়া হয়েছে */}
+      <div className="bg-transparent rounded-xl overflow-hidden">
         
         {/* ---------- মডার্ন হেডার ---------- */}
-        <div className="flex flex-col gap-3 bg-gradient-to-r from-[#7C3AED] via-[#4F46E5] to-[#06B6D4] px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-[#7C3AED] via-[#4F46E5] to-[#06B6D4] px-5 py-4 sm:flex-row sm:items-center sm:justify-between rounded-xl mb-4 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/20">
               <svg
@@ -224,11 +217,11 @@ const PointBasedResultEntry = ({ pageTitle }) => {
         </div>
 
         {/* ---------- মেইন কন্টেন্ট ---------- */}
-        <div className="p-5 md:p-6">
+        <div className="p-0">
           
           {/* ফিল্টার সেকশন */}
           <FormProvider {...methods}>
-            <form className="w-full mb-6 bg-gray-50/50 p-5 rounded-xl border border-gray-100" onSubmit={handleSubmit(onSubmit)}>
+            <form className="w-full mb-4 bg-white p-5 rounded-xl border border-gray-200 shadow-sm" onSubmit={handleSubmit(onSubmit)}>
               <input type="hidden" {...methods.register('ID')} />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <DefaultSelect
@@ -265,7 +258,8 @@ const PointBasedResultEntry = ({ pageTitle }) => {
                 <p className="font-medium">{translate('Failed to load exam fee settings. Please try again.')}</p>
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
+              /* ⭐ শুধু টেবিল অংশের ব্যাকগ্রাউন্ড সাদা রাখা হয়েছে */
+              <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm bg-white">
                 <SortableTable
                   columns={columns}
                   data={paginatedData}
@@ -275,14 +269,7 @@ const PointBasedResultEntry = ({ pageTitle }) => {
             )}
           </div>
 
-          {/* পেজিনেশন */}
-          <div className="mt-6 border-t border-gray-100 pt-4">
-            <DefaultPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
-          </div>
+          {/* ⭐ Pagination সেকশনটি বাদ দেওয়া হয়েছে */}
           
         </div>
       </div>

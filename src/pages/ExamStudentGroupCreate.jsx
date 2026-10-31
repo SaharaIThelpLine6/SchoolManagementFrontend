@@ -693,7 +693,19 @@ export default function ExamStudentGroupCreate() {
           <div className="relative flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <span className="w-11 h-11 rounded-xl bg-white/20 border border-white/25 flex items-center justify-center text-white shrink-0">
-                <SvgIcon name="FiUsers" size={20} />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-6 w-6 text-white"
+                >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6M9 15h6M9 11h6" />
+                </svg>
               </span>
               <div className="min-w-0">
                 <h1 className="text-lg sm:text-xl font-bold text-white leading-tight">পরীক্ষার্থী গ্রুপ তৈরি</h1>
