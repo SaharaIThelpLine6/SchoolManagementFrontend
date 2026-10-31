@@ -382,6 +382,7 @@ const SideBar = () => {
               ) : (
                 <NavLink
                   to={getDashboardPath(menu.route)}
+                  end  // 👈 Add this line
                   onClick={() => setOpenMenuId(null)}
                   className={({ isActive }) =>
                     `flex items-center gap-2 py-2 px-4 border-l-6 border-solid transition ${isActive
@@ -392,11 +393,28 @@ const SideBar = () => {
                 >
                   <SvgIcon
                     name={menu.icon}
-                    size={14}
+                    size={20}
                     className="text-current"
                   />
                   {translate(menu.name)}
                 </NavLink>
+                // <NavLink
+                //   to={getDashboardPath(menu.route)}
+                //   onClick={() => setOpenMenuId(null)}
+                //   className={({ isActive }) =>
+                //     `flex items-center gap-2 py-2 px-4 border-l-6 border-solid transition ${isActive
+                //       ? 'bg-[#b3dcff] text-[#007af7] border-l-[#007af7] font-semibold'
+                //       : 'hover:text-[#007af7] hover:bg-[#c5e4ff] border-l-transparent'
+                //     }`
+                //   }
+                // >
+                //   <SvgIcon
+                //     name={menu.icon}
+                //     size={14}
+                //     className="text-current"
+                //   />
+                //   {translate(menu.name)}
+                // </NavLink>
               )}
             </li>
           ))}

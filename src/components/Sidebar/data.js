@@ -1,45 +1,53 @@
 export const menuData = [
   {
     id: '1',
+    name: 'Dashboard',
+    route: '/dashboard',
+    icon: 'SubDashboard',
+    // subMenu: []
+  },
+  {
+    id: '2',
+    name: 'Modules',
+    route: '/dashboard/module-lists',
+    icon: 'SubModules',
+    // subMenu: []
+  },
+  {
+    id: '3',
     name: 'General Information',
     route: 'general-info',
     icon: 'LuWarehouse',
     subMenu: [
+
       {
         id: '1',
-        name: 'Dashboard',
-        // route: '/',
-        route: '/dashboard',
-        icon: 'SubDashboard'
-      },
-      {
-        id: '2',
         name: 'New User',
         route: 'general-info/users-info',
         icon: 'SubUser'
       },
       {
-        id: '3',
+        id: '2',
         name: 'Month Name',
         route: 'general-info/month-name-list',
         subMenu: false,
         icon: 'SubCalendar'
       },
       // {
-      //   id: '4',
+      //   id: '3',
       //   name: 'All Madrasah',
       //   route: 'general-info/all-madrasah',
       //   subMenu: false,
       // },
       {
-        id: '5',
+        id: '4',
         name: 'Institution Information',
         route: 'general-info/institution-info',
         subMenu: false,
         icon: 'SubBuilding'
       },
       {
-        id: '6',
+        id: '5',
         name: 'RFID Card',
         route: 'general-info/rfid-card',
         subMenu: false,
@@ -47,27 +55,27 @@ export const menuData = [
       },
 
       {
-        id: '7',
+        id: '6',
         name: 'User Image',
         route: 'general-info/user-image',
         subMenu: false,
         icon: 'SubImage'
       },
       {
-        id: '8',
+        id: '7',
         name: 'Bulk Image',
         route: 'general-info/bulk-image',
         subMenu: false,
         icon: 'SubImage'
       },
       {
-        id: '9',
+        id: '8',
         name: 'SMS',
         route: 'general-info/sms',
         icon: 'SubMessage'
       },
       {
-        id: '10',
+        id: '9',
         name: 'User Reports',
         route: 'general-info/user-reports',
         icon: 'SubReport'
@@ -75,7 +83,7 @@ export const menuData = [
     ],
   },
   {
-    id: '2',
+    id: '4',
     name: 'Student',
     route: 'students',
     icon: 'PiStudentBold',
@@ -199,7 +207,7 @@ export const menuData = [
   //   ]
   // },
   {
-    id: '4',
+    id: '5',
     name: 'Parent Panel',
     route: 'parent-panel',
     icon: 'FaUsers',
@@ -260,7 +268,7 @@ export const menuData = [
     ],
   },
   {
-    id: "3",
+    id: "6",
     name: "Teacher Staff",
     route: "teacherinfo",
     icon: "IoIosPeople",
@@ -299,7 +307,7 @@ export const menuData = [
     ],
   },
   {
-    id: '5',
+    id: '7',
     name: 'Exam',
     route: '/exam',
     icon: 'PiExam',
@@ -388,7 +396,7 @@ export const menuData = [
     ],
   },
   {
-    id: '6',
+    id: '8',
     name: 'Result',
     route: 'result',
     icon: 'GiGraduateCap',
@@ -438,7 +446,7 @@ export const menuData = [
     ],
   },
   // {
-  //   id: '6',
+  //   id: '9',
   //   name: 'Board Exam',
   //   route: '/board-info',
   //   icon: 'UniversityIcon',
@@ -472,7 +480,7 @@ export const menuData = [
   // },
   //   
   {
-    id: '7',
+    id: '10',
     name: 'Darul Ikama',
     route: '/darul-ikama',
     icon: 'RiSchoolFill',
@@ -498,7 +506,7 @@ export const menuData = [
     ],
   },
   {
-    id: '8',
+    id: '11',
     name: 'Accounting',
     route: 'accounting',
     icon: 'FaCalculator',
@@ -578,7 +586,7 @@ export const menuData = [
   //   ],
   // },
   {
-    id: '9',
+    id: '12',
     name: 'Payment',
     route: '/payment',
     icon: 'MdOutlinePayment',
@@ -610,7 +618,7 @@ export const menuData = [
   },
 
   // {
-  //   id: "10",
+  //   id: "13",
   //   name: "Donation",
   //   route: "/donation",
   //   icon: "FaDonate",
@@ -633,14 +641,14 @@ export const menuData = [
   //   ],
   // },
   // {
-  //   id: "10",
+  //   id: "14",
   //   name: "Library",
   //   route: "/library",
   //   icon: "ImLibrary",
   //   subMenu: [],
   // },
   // {
-  //   id: "11",
+  //   id: "15",
   //   name: "Others",
   //   route: "/others",
   //   icon: "HiDotsCircleHorizontal",
@@ -648,7 +656,7 @@ export const menuData = [
   // },
 
   {
-    id: '10',
+    id: '16',
     name: 'Settings',
     route: '/settings',
     icon: 'IoMdSettings',
@@ -680,7 +688,7 @@ export const menuData = [
     ],
   },
   {
-    id: '11',
+    id: '17',
     name: 'Help',
     route: '/help',
     icon: 'IoMdHelp',

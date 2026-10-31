@@ -929,7 +929,7 @@ const Module = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-orange-50/40 p-6 font-SolaimanLipi">
+    <div className="min-h-screen bg-gradient-to-br rounded-md from-emerald-50 via-white to-orange-50/40 p-6 font-SolaimanLipi">
       {/* পেজ হেডার */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3.5">

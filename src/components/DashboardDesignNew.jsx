@@ -286,7 +286,7 @@ const DashboardDesignNew = () => {
 
   /* ---------- Render ---------- */
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-sky-50 to-indigo-50 font-SolaimanLipi">
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-slate-50 via-sky-50 to-indigo-50 rounded-md font-SolaimanLipi">
       {/* Background mesh glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-sky-200/40 rounded-full blur-3xl" />
@@ -378,7 +378,6 @@ const DashboardDesignNew = () => {
           })}
         </div>
       </div>
-      <Module />
     </div>
   );
 };

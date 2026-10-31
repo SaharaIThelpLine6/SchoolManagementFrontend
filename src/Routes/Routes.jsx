@@ -186,6 +186,7 @@ import ExamRoutingCreate from '../pages/ExamRoutingCreate';
 import ExamRoutineEdit from '../pages/ExamRoutineEdit';
 import ExamAllClassRoutine from '../pages/ExamAllClassRoutine';
 import StudentInfo from '../components/Tables/StudentInfo';
+import ModuleLists from '../pages/ModuleLists';
 
 const Router = createBrowserRouter([
   {
@@ -217,6 +218,11 @@ const Router = createBrowserRouter([
             index: true,
             // element: <Home />,
             element: <DashboardDesignNew />,
+          },
+          {
+            path: 'module-lists',
+            // element: <Home />,
+            element: <ModuleLists />,
           },
           {
             path: 'general-info',

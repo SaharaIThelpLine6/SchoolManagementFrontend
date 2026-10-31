@@ -14,6 +14,7 @@ const useTranslate = () => {
     Status: 'স্ট্যাটাস',
     Reset: 'রিসেট',
     Delete: 'ডিলিট',
+    Modules: 'মডিউলসমূহ',
     Edit: 'এডিট',
     Debit: 'ডেবিট',
     Credit: 'ক্রেডিট',
