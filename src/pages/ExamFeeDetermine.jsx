@@ -873,7 +873,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-2 flex-nowrap">
+                      {/* <div className="flex items-center gap-2 flex-nowrap">
                         <button
                           type="button"
                           onClick={handleResetFees}
@@ -882,7 +882,6 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                         >
                           {translate("Reset")}
                         </button>
-                        {/* ⭐ এখানে ফি লিখলেই নির্বাচিত সব শ্রেণীতে সাথে সাথে বসে যাবে */}
                         <input
                           type="number"
                           value={commonFee}
@@ -893,6 +892,29 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                           title="এখানে ফি লিখলেই নির্বাচিত সব শ্রেণীতে বসে যাবে"
                           className="h-[34px] w-[130px] shrink-0 border border-[#E9D5FF] rounded-md px-3 text-sm bg-white outline-none transition focus:border-[#7C3AED]"
                         />
+                      </div> */}
+                      <div className="flex items-center gap-2 flex-nowrap">
+                        {/* ⭐ প্রথমে ফি-এর ইনপুট বক্স */}
+                        <input
+                          type="number"
+                          value={commonFee}
+                          onChange={handleCommonFeeChange}
+                          onKeyDown={blockNegativeKey}
+                          min="0"
+                          placeholder="সকল শ্রেণী ফি"
+                          title="এখানে ফি লিখলেই নির্বাচিত সব শ্রেণীতে বসে যাবে"
+                          className="h-[34px] w-[130px] shrink-0 border border-[#E9D5FF] rounded-md px-3 text-sm bg-white outline-none transition focus:border-[#7C3AED]"
+                        />
+                        
+                        {/* ⭐ এরপরে রিসেট বাটন */}
+                        <button
+                          type="button"
+                          onClick={handleResetFees}
+                          title="শুধু লেখা ফি-গুলো মুছবে"
+                          className="h-[34px] shrink-0 px-2.5 rounded-md text-xs font-bold bg-white text-[#6D28D9] border border-[#DDD6FE] hover:bg-[#F5F3FF] transition whitespace-nowrap"
+                        >
+                          {translate("Reset")}
+                        </button>
                       </div>
                     </div>
 
