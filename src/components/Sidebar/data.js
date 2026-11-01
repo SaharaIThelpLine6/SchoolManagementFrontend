@@ -312,12 +312,12 @@ export const menuData = [
     route: '/exam',
     icon: 'PiExam',
     subMenu: [
-      {
-        id: '1',
-        name: 'Exam Name',
-        route: 'exam',
-        icon: 'SubExam',
-      },
+      // {
+      //   id: '1',
+      //   name: 'Exam Name',
+      //   route: 'exam',
+      //   icon: 'SubExam',
+      // },
       {
         id: '2',
         name: 'Exam Fee Determine',

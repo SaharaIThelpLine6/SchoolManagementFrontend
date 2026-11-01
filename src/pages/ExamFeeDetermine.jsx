@@ -24,6 +24,7 @@ import DeleteButton from "../components/Button/DeleteButton";
 import EditButton from "../components/Button/EditButton";
 import DefaultPagination from "../components/Pagination/DefaultPagination";
 import SvgIcon from "../components/icons/SvgIcon";
+import Exam from "./Exam"; // ✅ Exam পপআপের জন্য
 
 const PAGE_SIZE = 10;
 
@@ -75,6 +76,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showStudentFeeGroup, setShowStudentFeeGroup] = useState(false);
   const [showSetupModal, setShowSetupModal] = useState(false);
+  const [showExamPopup, setShowExamPopup] = useState(false); // ✅ নতুন
   const [saving, setSaving] = useState(false);
 
   // শ্রেণী ভিত্তিক ফি — { [SubClassID]: { checked, fee } }
@@ -214,15 +216,16 @@ const ExamFeeDetermine = ({ pageTitle }) => {
   }, [classFees, allChecked, showSetupModal]);
 
   /* ---------------- মডাল খোলা থাকলে পেছনের স্ক্রল বন্ধ + Esc ----------------
-     ⭐ দুটো মডালের যেকোনো একটা খোলা থাকলেই চলবে। Esc চাপলে আগে উপরেরটা
-     (ছাত্র ফি গ্রুপ) বন্ধ হবে, তারপর ফি নির্ধারণ মডাল।
+     ⭐ তিনটে মডালের যেকোনো একটা খোলা থাকলেই চলবে। Esc চাপলে আগে উপরেরটা
+     (Exam পপআপ → ছাত্র ফি গ্রুপ → ফি নির্ধারণ মডাল) বন্ধ হবে।
   --------------------------------------------------------- */
   useEffect(() => {
-    if (!showSetupModal && !showStudentFeeGroup) return;
+    if (!showSetupModal && !showStudentFeeGroup && !showExamPopup) return;
 
     const onKeyDown = (e) => {
       if (e.key !== "Escape") return;
-      if (showStudentFeeGroup) setShowStudentFeeGroup(false);
+      if (showExamPopup) setShowExamPopup(false);
+      else if (showStudentFeeGroup) setShowStudentFeeGroup(false);
       else closeSetupModal();
     };
     document.addEventListener("keydown", onKeyDown);
@@ -233,7 +236,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
       document.body.style.overflow = "";
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showSetupModal, showStudentFeeGroup]);
+  }, [showSetupModal, showStudentFeeGroup, showExamPopup]);
 
   const setClassValue = (id, patch) =>
     setClassFees((prev) => ({
@@ -400,7 +403,7 @@ const ExamFeeDetermine = ({ pageTitle }) => {
           text:
             error?.data?.message ||
             error?.data?.error ||
-            "ডেটা মুছে ফেলতে ব্যর্থ হয়েছে।",
+            "ডেটা মুছতে ব্যর্থ হয়েছে।",
           confirmButtonColor: "#7C3AED",
         });
         console.error("Delete error:", error);
@@ -750,15 +753,10 @@ const ExamFeeDetermine = ({ pageTitle }) => {
         />
       </div>
 
-      {/* ---------------- ফি নির্ধারণ — মডাল ----------------
-          ⭐ backdrop-blur বাদ দেওয়া হয়েছে — এটা নতুন containing block বানায়,
-          যার ভেতরে নেস্টেড <dialog> এর top-layer রেন্ডার ভেঙে যায়।
-          ⭐ ছাত্র ফি গ্রুপ খোলা থাকলে এই মডাল শুধু লুকিয়ে থাকবে (আনমাউন্ট নয়),
-          তাই ফর্মের ডেটা ও সিলেকশন অক্ষত থাকবে।
-      --------------------------------------------------------- */}
+      {/* ---------------- ফি নির্ধারণ — মডাল ---------------- */}
       {showSetupModal && (
         <div
-          style={{ display: showStudentFeeGroup ? "none" : undefined }}
+          style={{ display: showStudentFeeGroup || showExamPopup ? "none" : undefined }}
           className="fixed inset-0 z-40 flex items-start justify-center overflow-y-auto bg-black/50 p-4"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) closeSetupModal();
@@ -813,16 +811,27 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                         </select>
                       </div>
 
+                      {/* ✅ Exam Name এর + আইকন এখন ফি-এর নামের মতো সিলেক্ট বক্সের পাশে */}
                       <div>
                         <ModalLabel required>{translate("Exam Name")}</ModalLabel>
-                        <select className={modalSelectClass} {...register("ExamID")}>
-                          <option value="">নির্বাচন করুন</option>
-                          {(examNameData ?? []).map((e) => (
-                            <option key={e.ExamID} value={e.ExamID}>
-                              {e.ExamName}
-                            </option>
-                          ))}
-                        </select>
+                        <div className="flex items-center gap-2">
+                          <select className={modalSelectClass} {...register("ExamID")}>
+                            <option value="">নির্বাচন করুন</option>
+                            {(examNameData ?? []).map((e) => (
+                              <option key={e.ExamID} value={e.ExamID}>
+                                {e.ExamName}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() => setShowExamPopup(true)}
+                            title="নতুন পরীক্ষার নাম যুক্ত করুন"
+                            className={`h-[42px] w-[42px] shrink-0 rounded-lg ${C.primary} flex items-center justify-center transition`}
+                          >
+                            <SvgIcon name="FaPlus" size={13} />
+                          </button>
+                        </div>
                       </div>
 
                       <div>
@@ -873,26 +882,6 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                         </span>
                       </div>
 
-                      {/* <div className="flex items-center gap-2 flex-nowrap">
-                        <button
-                          type="button"
-                          onClick={handleResetFees}
-                          title="শুধু লেখা ফি-গুলো মুছবে"
-                          className="h-[34px] shrink-0 px-2.5 rounded-md text-xs font-bold bg-white text-[#6D28D9] border border-[#DDD6FE] hover:bg-[#F5F3FF] transition whitespace-nowrap"
-                        >
-                          {translate("Reset")}
-                        </button>
-                        <input
-                          type="number"
-                          value={commonFee}
-                          onChange={handleCommonFeeChange}
-                          onKeyDown={blockNegativeKey}
-                          min="0"
-                          placeholder="সকল শ্রেণী ফি"
-                          title="এখানে ফি লিখলেই নির্বাচিত সব শ্রেণীতে বসে যাবে"
-                          className="h-[34px] w-[130px] shrink-0 border border-[#E9D5FF] rounded-md px-3 text-sm bg-white outline-none transition focus:border-[#7C3AED]"
-                        />
-                      </div> */}
                       <div className="flex items-center gap-2 flex-nowrap">
                         {/* ⭐ ইনপুট বক্সটি আগে */}
                         <input
@@ -929,7 +918,6 @@ const ExamFeeDetermine = ({ pageTitle }) => {
                         className="h-4 w-4 accent-[#7C3AED] cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
                       />
                       <span>{translate("Class/Jamaat")}</span>
-                      {/* <span className="hidden sm:block">{translate("Fee")}</span> */}
                       <span className="hidden sm:block text-center w-full pr-[85px]">{translate("Fee")}</span>
                       <span className="hidden sm:block text-center">অবস্থা</span>
                     </div>
@@ -1016,15 +1004,51 @@ const ExamFeeDetermine = ({ pageTitle }) => {
         </div>
       )}
 
-      {/* ---------------- Student Fee Group — মডাল ----------------
-          ⭐ z-50 এবং পোর্টাল ছাড়া — এর ভেতরের "Sub Sidiary Ledger" মডালটা
-          রিডাক্স দিয়ে লেআউট লেভেলে রেন্ডার হয়, তাই এই ওভারলে বেশি z-index
-          বা body-পোর্টাল পেলে ওটাকে ঢেকে ফেলে।
-      --------------------------------------------------------- */}
+      {/* ---------------- Student Fee Group — মডাল ---------------- */}
       {showStudentFeeGroup && (
         <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-4">
           <div className="my-6 w-full max-w-5xl rounded-xl shadow-2xl">
             <StudentFeeGroup onBack={() => setShowStudentFeeGroup(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* ---------------- Exam পেজ — পপআপ হিসেবে ----------------
+          ⭐ X বাটনটি এখন মডালের ঠিক কর্নারে (বাইরের দিকে) বসানো হয়েছে, 
+          ফলে হেডারের কোনো বাটনের সাথে ওভারল্যাপ করবে না।
+          ⭐ পপআপের বাইরে ক্লিক করলেও বন্ধ হবে।
+      --------------------------------------------------------- */}
+      {showExamPopup && (
+        <div 
+          className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/60 p-4"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) setShowExamPopup(false);
+          }}
+        >
+          {/* my-10 দেওয়া হয়েছে যাতে উপরের দিক থেকে কিছুটা জায়গা থাকে */}
+          <div className="relative my-10 w-full max-w-5xl">
+            <button
+              type="button"
+              onClick={() => setShowExamPopup(false)}
+              title="বন্ধ করুন"
+              className="absolute -top-4 -right-4 z-[100] flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-white shadow-xl transition hover:bg-red-600 border-[3px] border-white"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-5 w-5"
+              >
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="rounded-xl overflow-hidden bg-white shadow-2xl">
+              <Exam pageTitle={pageTitle} />
+            </div>
           </div>
         </div>
       )}

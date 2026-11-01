@@ -4,13 +4,12 @@ import QRCode from "react-qr-code";
 import { useGetLabelNameListsQuery } from '../../features/result/resultSilce';
 import { bufferToDataUrl } from '../../utils/bufferDataURL';
 
-
 // ==========================================
-// Print CSS (A4 Portrait, 1 student = 1 page)
+// Print CSS (Dynamic Paper Size & Orientation)
 // ==========================================
-const PRINT_CSS = `
+const getPrintCss = (paperSize, orientation) => `
 @page {
-  size: A4 portrait;
+  size: ${paperSize} ${orientation};
   margin: 6mm;
 }
 
@@ -23,7 +22,6 @@ const PRINT_CSS = `
     padding: 0 !important;
   }
 
-  /* shob kichu hide, shudhu marksheet area dekhabe */
   body * {
     visibility: hidden !important;
   }
@@ -47,13 +45,14 @@ const PRINT_CSS = `
   }
 
   .marksheet-page {
-    width: 198mm !important;
-    height: 280mm !important;
+    width: 100% !important;
+    height: auto !important;
     max-width: none !important;
     margin: 0 auto !important;
     overflow: hidden !important;
     box-shadow: none !important;
     border-radius: 0 !important;
+    border: none !important;
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
@@ -62,7 +61,6 @@ const PRINT_CSS = `
     page-break-after: always !important;
   }
 
-  /* Body-r shob section chhoto hobe na, shudhu comment box baki jaiga nibe */
   .marksheet-body > * {
     flex-shrink: 0 !important;
   }
@@ -72,7 +70,6 @@ const PRINT_CSS = `
     min-height: 50px !important;
   }
 
-  /* Marks table: border gray, clip hobe na */
   .marksheet-page .marks-table-wrap {
     border: 1px solid #e2e8f0 !important;
     overflow: visible !important;
@@ -95,7 +92,6 @@ const PRINT_CSS = `
     page-break-inside: avoid !important;
   }
 
-  /* Table header color (th-te direct, tr-e na) */
   .marksheet-page .marks-table-wrap thead th {
     background-color: #0f766e !important;
     background-image: none !important;
@@ -103,7 +99,6 @@ const PRINT_CSS = `
     border-color: #0f766e !important;
   }
 
-  /* Zebra row color (td-te direct) */
   .marksheet-page .marks-table-wrap tbody tr.row-alt td {
     background-color: #f0fdfa !important;
   }
@@ -117,7 +112,6 @@ const PRINT_CSS = `
 // Helpers
 // ==========================================
 
-// English digit -> Bangla digit
 const BN_DIGITS = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
 const toBn = (value) => {
   if (value === undefined || value === null) return value;
@@ -129,7 +123,6 @@ const pick = (...vals) => {
   return found === undefined ? '-' : found;
 };
 
-// Print-safe cell colors (inline, jate print-e drop na hoy)
 const EXACT = { WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' };
 const TH_STYLE = { backgroundColor: '#0f766e', color: '#ffffff', ...EXACT };
 
@@ -169,11 +162,13 @@ const SingleMarkSheet = ({
   ExamID,
   SubClassID,
   ExamName,
-  // ⭐ নতুন প্রপস
   showDate = true,
   showSignature = true,
   principalName = '',
   najemName = '',
+  paperSize = 'A4',
+  orientation = 'portrait',
+  studentInfoFields = {}, // ⭐ নতুন প্রপস
 }) => {
   const studentSubjects = Array.isArray(student?.subjects) ? student.subjects : [];
 
@@ -208,7 +203,6 @@ const SingleMarkSheet = ({
 
   const totalSubjects = examSubjects.length;
 
-  // ===== Density (subject beshi hole compact) =====
   const ultraDense = totalSubjects > 20;
   const veryDense = totalSubjects > 15;
   const dense = totalSubjects > 10;
@@ -229,12 +223,9 @@ const SingleMarkSheet = ({
         ? 'print:text-[15px]'
         : 'print:text-[17px]';
 
-  // ===== Division rows =====
   const divisionRows = [];
 
   if (Number(examConfig?.ExamType) === 4) {
-    // ExamType 4 → examSubjects থেকে DivisionID & DivisionNumber নাও
-    // examSubjects এর প্রথম subject টাই base ধরা হচ্ছে (সব subject এ একই division থাকে)
     const source = examSubjects?.[0] || {};
 
     for (let i = 1; i <= 14; i++) {
@@ -252,7 +243,6 @@ const SingleMarkSheet = ({
       });
     }
   } else {
-    // অন্যান্য ExamType → examConfig থেকে নাও
     for (let i = 1; i <= 14; i++) {
       const dId = examConfig?.[`DivisionID${i}`];
       const dNum = examConfig?.[`DivisionNumber${i}`];
@@ -271,6 +261,7 @@ const SingleMarkSheet = ({
 
   const studentName = pick(student?.UserName, student?.StudentName, student?.Name);
   const fatherName = pick(student?.FatherName, student?.FathersName, student?.Father);
+  const motherName = pick(student?.MotherName, student?.MothersName, student?.Mother); // ⭐ নতুন: Mother's Name
   const birthDate = pick(student?.DateOfBirth, student?.DOB, student?.BirthDate);
   const rollNumber = pick(student?.AdmissionSerial);
   const registration = pick(student?.UserCode);
@@ -283,10 +274,14 @@ const SingleMarkSheet = ({
       ? (Number(student.Total) / examConfig.AverageSubsonkha).toFixed(2)
       : '-';
 
+  let previewWidth = 'max-w-[794px]'; 
+  if (paperSize === 'A5' && orientation === 'portrait') previewWidth = 'max-w-[559px]';
+  if (paperSize === 'A4' && orientation === 'landscape') previewWidth = 'max-w-[1123px]';
+  if (paperSize === 'A5' && orientation === 'landscape') previewWidth = 'max-w-[794px]';
+
   return (
     <div
-      className={`marksheet-page ${isLast ? '' : 'not-last'
-        } relative mx-auto w-full max-w-[900px] overflow-hidden bg-white shadow-xl rounded-xl border border-slate-200 text-slate-800 mb-10 print:mb-0 print:flex print:flex-col`}
+      className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white shadow-xl rounded-xl border border-slate-200 text-slate-800 mb-10 print:mb-0 print:flex print:flex-col`}
     >
       {/* Header */}
       <div className="relative flex flex-col md:flex-row print:flex-row items-center justify-between bg-gradient-to-r from-teal-800 to-emerald-600 px-8 py-6 print:px-5 print:py-3 text-white print:shrink-0">
@@ -343,11 +338,13 @@ const SingleMarkSheet = ({
           <div>
             <SectionTitle icon="👤">পরীক্ষার্থীর তথ্য</SectionTitle>
             <div className="bg-slate-50/50 rounded-lg p-3 print:p-2 border border-slate-100">
-              <InfoRow label="নাম" value={studentName} />
-              <InfoRow label="পিতার নাম" value={fatherName} />
-              <InfoRow label="জন্ম তারিখ" value={birthDate} />
-              <InfoRow label={labels?.StudentIDLabel ?? "দাখেলা"} value={registration} />
-              <InfoRow label={labels?.AdmissionIDLabel ?? "ভর্তি নং"} value={rollNumber} />
+              {/* ⭐ এখানে studentInfoFields অনুযায়ী কন্ডিশনালি রেন্ডার হবে */}
+              {studentInfoFields.name && <InfoRow label="নাম" value={studentName} />}
+              {studentInfoFields.fatherName && <InfoRow label="পিতার নাম" value={fatherName} />}
+              {studentInfoFields.motherName && <InfoRow label="মাতার নাম" value={motherName} />}
+              {studentInfoFields.dob && <InfoRow label="জন্ম তারিখ" value={birthDate} />}
+              {studentInfoFields.registration && <InfoRow label={labels?.StudentIDLabel ?? "দাখেলা"} value={registration} />}
+              {studentInfoFields.admission && <InfoRow label={labels?.AdmissionIDLabel ?? "ভর্তি নং"} value={rollNumber} />}
             </div>
           </div>
 
@@ -454,7 +451,7 @@ const SingleMarkSheet = ({
           </div>
         </div>
 
-        {/* Comments & Signature (baki jaiga automatic nibe) */}
+        {/* Comments & Signature */}
         <div className="marksheet-comments mt-8 pt-6 print:mt-2 print:pt-2 border-t border-slate-200 print:flex print:flex-col">
           <div className="flex flex-col md:flex-row print:flex-row gap-6 print:gap-3 print:flex-1 print:min-h-0">
             <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[50px]">
@@ -502,7 +499,6 @@ const SingleMarkSheet = ({
         {/* মুহতামিম - Large */}
         <div className="col-span-2 flex w-full flex-col items-center">
           <div className="h-16 w-full flex items-end justify-center print:h-10">
-            {/* ⭐ showSignature চেক করা হচ্ছে */}
             {showSignature && signaturePrincipalSrc ? (
               <img
                 src={signaturePrincipalSrc}
@@ -516,11 +512,9 @@ const SingleMarkSheet = ({
 
           <div className="mt-3 space-y-1 text-center print:mt-1 print:space-y-0">
             <p className="text-[20px] font-bold text-slate-800 print:text-[15px]">
-              {/* ⭐ principalName থাকলে সেটা দেখাবে, না থাকলে institution থেকে আসবে */}
               {principalName || institution?.PrincipalName}
             </p>
 
-            {/* ⭐ showDate চেক করা হচ্ছে */}
             {showDate && (
               <p className="text-[15px] text-slate-500 print:text-[13px]">
                 তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}
@@ -532,7 +526,6 @@ const SingleMarkSheet = ({
         {/* নায়েবে তালিমাত - Large */}
         <div className="col-span-2 flex w-full flex-col items-center">
           <div className="h-16 w-full flex items-end justify-center print:h-10">
-            {/* ⭐ showSignature চেক করা হচ্ছে */}
             {showSignature && signatureNajemSrc ? (
               <img
                 src={signatureNajemSrc}
@@ -546,11 +539,9 @@ const SingleMarkSheet = ({
 
           <div className="mt-3 space-y-1 text-center print:mt-1 print:space-y-0">
             <p className="text-[20px] font-bold text-slate-800 print:text-[15px]">
-              {/* ⭐ najemName থাকলে সেটা দেখাবে, না থাকলে institution থেকে আসবে */}
               {najemName || institution?.NajemName}
             </p>
 
-            {/* ⭐ showDate চেক করা হচ্ছে */}
             {showDate && (
               <p className="text-[15px] text-slate-500 print:text-[13px]">
                 তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}
@@ -580,11 +571,13 @@ const SingleMarkSheet = ({
 const MarkSheetPdf = ({ 
   data, 
   templateId,
-  // ⭐ নতুন প্রপসগুলো রিসিভ করা হলো
   showDate, 
   showSignature, 
   principalName, 
-  najemName 
+  najemName,
+  paperSize = 'A4',
+  orientation = 'portrait',
+  studentInfoFields = {}
 }) => {
   const institution = data?.institution;
   const ExamName = data?.exam?.[0]?.ExamName;
@@ -617,10 +610,10 @@ const MarkSheetPdf = ({
 
   return (
     <>
-      <style>{PRINT_CSS}</style>
+      <style>{getPrintCss(paperSize, orientation)}</style>
       <div
         id="marksheet-print-area"
-        className="font-SolaimanLipi w-full bg-slate-100 py-6 min-h-screen print:bg-white print:py-0 print:min-h-0"
+        className="font-SolaimanLipi w-full bg-slate-100 py-6 min-h-screen flex flex-col items-center print:bg-white print:py-0 print:min-h-0 print:block"
       >
         {visibleStudents.map((student, idx) => (
           <SingleMarkSheet
@@ -639,11 +632,13 @@ const MarkSheetPdf = ({
             divisions={divisions}
             examConfig={examConfig}
             isLast={idx === visibleStudents.length - 1}
-            // ⭐ নতুন প্রপসগুলো SingleMarkSheet-এ পাঠানো হলো
             showDate={showDate}
             showSignature={showSignature}
             principalName={principalName}
             najemName={najemName}
+            paperSize={paperSize}
+            orientation={orientation}
+            studentInfoFields={studentInfoFields} // ⭐ নতুন প্রপস পাস করা হলো
           />
         ))}
       </div>
@@ -652,6 +647,692 @@ const MarkSheetPdf = ({
 };
 
 export default MarkSheetPdf;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React from 'react';
+// import QRCode from "react-qr-code";
+
+// import { useGetLabelNameListsQuery } from '../../features/result/resultSilce';
+// import { bufferToDataUrl } from '../../utils/bufferDataURL';
+
+
+// // ==========================================
+// // Print CSS (A4 Portrait, 1 student = 1 page)
+// // ==========================================
+// const PRINT_CSS = `
+// @page {
+//   size: A4 portrait;
+//   margin: 6mm;
+// }
+
+// @media print {
+//   html, body {
+//     height: auto !important;
+//     overflow: visible !important;
+//     background: #fff !important;
+//     margin: 0 !important;
+//     padding: 0 !important;
+//   }
+
+//   /* shob kichu hide, shudhu marksheet area dekhabe */
+//   body * {
+//     visibility: hidden !important;
+//   }
+//   #marksheet-print-area,
+//   #marksheet-print-area * {
+//     visibility: visible !important;
+//   }
+//   #marksheet-print-area {
+//     position: absolute !important;
+//     left: 0 !important;
+//     top: 0 !important;
+//     width: 100% !important;
+//     margin: 0 !important;
+//     padding: 0 !important;
+//     background: #fff !important;
+//   }
+
+//   * {
+//     -webkit-print-color-adjust: exact !important;
+//     print-color-adjust: exact !important;
+//   }
+
+//   .marksheet-page {
+//     width: 198mm !important;
+//     height: 280mm !important;
+//     max-width: none !important;
+//     margin: 0 auto !important;
+//     overflow: hidden !important;
+//     box-shadow: none !important;
+//     border-radius: 0 !important;
+//     break-inside: avoid !important;
+//     page-break-inside: avoid !important;
+//   }
+//   .marksheet-page.not-last {
+//     break-after: page !important;
+//     page-break-after: always !important;
+//   }
+
+//   /* Body-r shob section chhoto hobe na, shudhu comment box baki jaiga nibe */
+//   .marksheet-body > * {
+//     flex-shrink: 0 !important;
+//   }
+//   .marksheet-body > .marksheet-comments {
+//     flex: 1 1 auto !important;
+//     flex-shrink: 1 !important;
+//     min-height: 50px !important;
+//   }
+
+//   /* Marks table: border gray, clip hobe na */
+//   .marksheet-page .marks-table-wrap {
+//     border: 1px solid #e2e8f0 !important;
+//     overflow: visible !important;
+//     height: auto !important;
+//     flex: none !important;
+//   }
+//   .marksheet-page .marks-table-wrap table {
+//     border: 0 !important;
+//     border-collapse: collapse !important;
+//   }
+//   .marksheet-page .marks-table-wrap th,
+//   .marksheet-page .marks-table-wrap td {
+//     border-color: #e2e8f0 !important;
+//   }
+//   .marksheet-page .marks-table-wrap tbody tr:last-child td {
+//     border-bottom: 0 !important;
+//   }
+//   .marksheet-page .marks-table-wrap tr {
+//     break-inside: avoid !important;
+//     page-break-inside: avoid !important;
+//   }
+
+//   /* Table header color (th-te direct, tr-e na) */
+//   .marksheet-page .marks-table-wrap thead th {
+//     background-color: #0f766e !important;
+//     background-image: none !important;
+//     color: #ffffff !important;
+//     border-color: #0f766e !important;
+//   }
+
+//   /* Zebra row color (td-te direct) */
+//   .marksheet-page .marks-table-wrap tbody tr.row-alt td {
+//     background-color: #f0fdfa !important;
+//   }
+//   .marksheet-page .marks-table-wrap tbody tr.row-plain td {
+//     background-color: #ffffff !important;
+//   }
+// }
+// `;
+
+// // ==========================================
+// // Helpers
+// // ==========================================
+
+// // English digit -> Bangla digit
+// const BN_DIGITS = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+// const toBn = (value) => {
+//   if (value === undefined || value === null) return value;
+//   return String(value).replace(/\d/g, (d) => BN_DIGITS[Number(d)]);
+// };
+
+// const pick = (...vals) => {
+//   const found = vals.find((v) => v !== undefined && v !== null && v !== '' && v !== 'null');
+//   return found === undefined ? '-' : found;
+// };
+
+// // Print-safe cell colors (inline, jate print-e drop na hoy)
+// const EXACT = { WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' };
+// const TH_STYLE = { backgroundColor: '#0f766e', color: '#ffffff', ...EXACT };
+
+// // ==========================================
+// // Small components
+// // ==========================================
+// const SectionTitle = ({ icon, children }) => (
+//   <div className="flex items-center gap-2 text-[17px] print:text-[15px] font-bold text-emerald-800 mt-6 mb-3 print:mt-2 print:mb-1.5">
+//     <span className="text-emerald-600">{icon}</span>
+//     <span>{children}</span>
+//     <div className="flex-1 h-[2px] bg-gradient-to-r from-emerald-200 to-transparent" />
+//   </div>
+// );
+
+// const InfoRow = ({ label, value, labelW = 'w-[125px]' }) => (
+//   <div className="flex border-b border-slate-200 py-2 print:py-1 text-[16px] print:text-[14px]">
+//     <span className={`${labelW} print:w-[105px] shrink-0 text-slate-500 font-medium`}>{label}</span>
+//     <span className="font-semibold text-slate-800">{toBn(value)}</span>
+//   </div>
+// );
+
+// // ==========================================
+// // Single Student Mark Sheet  (1 page)
+// // ==========================================
+// const SingleMarkSheet = ({
+//   student,
+//   institution,
+//   imageSrc,
+//   signatureNajemSrc,
+//   signaturePrincipalSrc,
+//   session,
+//   classInfo,
+//   examSubjects,
+//   divisions = [],
+//   examConfig = {},
+//   isLast = false,
+//   ExamID,
+//   SubClassID,
+//   ExamName,
+//   // ⭐ নতুন প্রপস
+//   showDate = true,
+//   showSignature = true,
+//   principalName = '',
+//   najemName = '',
+// }) => {
+//   const studentSubjects = Array.isArray(student?.subjects) ? student.subjects : [];
+
+//   const findSubject = (subjectId) =>
+//     studentSubjects.find(
+//       (m) => m?.SubjectID === subjectId || m?.SubjectId === subjectId || m?.subjectId === subjectId
+//     );
+//   const { data } = useGetLabelNameListsQuery();
+
+//   const labels = data?.[0] || {};
+
+//   const getObtainedMark = (subjectId) => {
+//     const found = findSubject(subjectId);
+//     if (found) return pick(found?.Marks, found?.ObtainedMark, found?.Mark, 0);
+//     return '-';
+//   };
+
+//   const getHighestMark = (subjectId, fallback) => {
+//     const found = findSubject(subjectId);
+//     if (found) return pick(found?.HighestMark, fallback);
+//     return pick(fallback);
+//   };
+
+//   const subjects = examSubjects.map((s, i) => ({
+//     id: s?.ID ?? i + 1,
+//     subject: pick(s?.SubjectName, s?.ArabicSubject, s?.EngSubjectName),
+//     fullMark: pick(s?.MaxNumber),
+//     passMark: pick(s?.PassNumber),
+//     highestMark: getHighestMark(s?.SubjectID, s?.HighestMark),
+//     obtainedMark: getObtainedMark(s?.SubjectID),
+//   }));
+
+//   const totalSubjects = examSubjects.length;
+
+//   // ===== Density (subject beshi hole compact) =====
+//   const ultraDense = totalSubjects > 20;
+//   const veryDense = totalSubjects > 15;
+//   const dense = totalSubjects > 10;
+
+//   const rowPad = ultraDense
+//     ? 'print:py-0'
+//     : veryDense
+//       ? 'print:py-[1px]'
+//       : dense
+//         ? 'print:py-0.5'
+//         : 'print:py-1';
+
+//   const rowText = ultraDense
+//     ? 'print:text-[12.5px]'
+//     : veryDense
+//       ? 'print:text-[13.5px]'
+//       : dense
+//         ? 'print:text-[15px]'
+//         : 'print:text-[17px]';
+
+//   // ===== Division rows =====
+//   const divisionRows = [];
+
+//   if (Number(examConfig?.ExamType) === 4) {
+//     // ExamType 4 → examSubjects থেকে DivisionID & DivisionNumber নাও
+//     // examSubjects এর প্রথম subject টাই base ধরা হচ্ছে (সব subject এ একই division থাকে)
+//     const source = examSubjects?.[0] || {};
+
+//     for (let i = 1; i <= 14; i++) {
+//       const dId = source?.[`DivisionID${i}`];
+//       const dNum = source?.[`DivisionNumber${i}`];
+
+//       if (dId === null || dId === undefined || dId === '') continue;
+
+//       const found = divisions.find((d) => Number(d.ID) === Number(dId));
+//       if (!found) continue;
+
+//       divisionRows.push({
+//         name: found.DivisionNames,
+//         number: dNum ?? 0,
+//       });
+//     }
+//   } else {
+//     // অন্যান্য ExamType → examConfig থেকে নাও
+//     for (let i = 1; i <= 14; i++) {
+//       const dId = examConfig?.[`DivisionID${i}`];
+//       const dNum = examConfig?.[`DivisionNumber${i}`];
+
+//       if (dId === null || dId === undefined || dId === '') continue;
+
+//       const found = divisions.find((d) => Number(d.ID) === Number(dId));
+//       if (!found) continue;
+
+//       divisionRows.push({
+//         name: found.DivisionNames,
+//         number: dNum ?? 0,
+//       });
+//     }
+//   }
+
+//   const studentName = pick(student?.UserName, student?.StudentName, student?.Name);
+//   const fatherName = pick(student?.FatherName, student?.FathersName, student?.Father);
+//   const birthDate = pick(student?.DateOfBirth, student?.DOB, student?.BirthDate);
+//   const rollNumber = pick(student?.AdmissionSerial);
+//   const registration = pick(student?.UserCode);
+
+//   const divisionName = pick(student?.DivisionNames);
+//   const averageMark =
+//     examConfig?.AverageSubsonkha > 0 &&
+//       student?.Total !== undefined &&
+//       student?.Total !== null
+//       ? (Number(student.Total) / examConfig.AverageSubsonkha).toFixed(2)
+//       : '-';
+
+//   return (
+//     <div
+//       className={`marksheet-page ${isLast ? '' : 'not-last'
+//         } relative mx-auto w-full max-w-[900px] overflow-hidden bg-white shadow-xl rounded-xl border border-slate-200 text-slate-800 mb-10 print:mb-0 print:flex print:flex-col`}
+//     >
+//       {/* Header */}
+//       <div className="relative flex flex-col md:flex-row print:flex-row items-center justify-between bg-gradient-to-r from-teal-800 to-emerald-600 px-8 py-6 print:px-5 print:py-3 text-white print:shrink-0">
+//         <div className="flex items-center gap-4 print:gap-3 mb-4 md:mb-0 print:mb-0">
+//           <div className="h-[70px] w-[70px] print:h-[56px] print:w-[56px] overflow-hidden rounded-full border-[3px] border-emerald-300 bg-white shadow-md shrink-0">
+//             {imageSrc ? (
+//               <img
+//                 src={imageSrc}
+//                 alt={institution?.InstitutionName || 'Institution Logo'}
+//                 className="h-full w-full object-cover"
+//               />
+//             ) : (
+//               <div className="flex h-full w-full items-center justify-center bg-slate-100">
+//                 <span className="text-[12px] font-medium text-slate-400">No Logo</span>
+//               </div>
+//             )}
+//           </div>
+//           <div>
+//             <h1 className="text-[30px] md:text-[32px] print:text-[24px] font-bold leading-tight text-white drop-shadow-sm">
+//               {toBn(institution?.InstitutionName || '-')}
+//             </h1>
+//             <p className="text-[15px] md:text-base print:text-[14px] text-emerald-100 mt-1 print:mt-0.5">
+//               {toBn(institution?.Address || '-')}
+//             </p>
+//           </div>
+//         </div>
+//         <div className="text-center md:text-right print:text-right">
+//           <p className="text-[15px] md:text-base print:text-[14px] text-emerald-100 mt-1 print:mt-0.5">
+//             {toBn(session?.SessionName || '-')}
+//           </p>
+//           <span className="inline-block mt-1 rounded-full border border-emerald-300/50 bg-emerald-700/50 px-4 py-1.5 print:px-3 print:py-1 text-base print:text-[14px] font-semibold text-white shadow-sm">
+//             {toBn(ExamName || '-')}
+//           </span>
+//         </div>
+//       </div>
+
+//       <div className="h-1 shrink-0 bg-gradient-to-r from-[#e5484d] via-[#facc15] via-[#22c55e] via-[#0ea5e9] to-[#a855f7]" />
+
+//       {/* Title bar */}
+//       <div className="flex flex-col sm:flex-row print:flex-row items-center justify-between bg-emerald-50 border-b border-emerald-100 px-8 py-3.5 print:px-5 print:py-2 print:shrink-0">
+//         <h2 className="text-[19px] md:text-[20px] print:text-[16px] font-bold text-emerald-800 flex items-center gap-2">
+//           <span>📋</span> পরীক্ষার্থীর বিস্তারিত ফলাফল
+//         </h2>
+//         <span className="mt-2 sm:mt-0 print:mt-0 rounded-full bg-emerald-600 px-4 py-1 print:px-3 print:py-0.5 text-base print:text-[14px] font-semibold text-white shadow-sm">
+//           {toBn(classInfo?.ClassName || '-')}
+//         </span>
+//       </div>
+
+//       {/* Body */}
+//       <div className="marksheet-body px-6 md:px-8 pb-8 print:px-5 print:pb-2 print:flex-1 print:flex print:flex-col print:min-h-0">
+//         {/* Top grid: Student info + Division */}
+//         <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-8 print:gap-4 mt-2 print:mt-0 print:shrink-0">
+//           {/* Left: Student Info */}
+//           <div>
+//             <SectionTitle icon="👤">পরীক্ষার্থীর তথ্য</SectionTitle>
+//             <div className="bg-slate-50/50 rounded-lg p-3 print:p-2 border border-slate-100">
+//               <InfoRow label="নাম" value={studentName} />
+//               <InfoRow label="পিতার নাম" value={fatherName} />
+//               <InfoRow label="জন্ম তারিখ" value={birthDate} />
+//               <InfoRow label={labels?.StudentIDLabel ?? "দাখেলা"} value={registration} />
+//               <InfoRow label={labels?.AdmissionIDLabel ?? "ভর্তি নং"} value={rollNumber} />
+//             </div>
+//           </div>
+
+//           {/* Right: Division Breakdown */}
+//           <div>
+//             <SectionTitle icon="📝">নম্বর বিভাজন</SectionTitle>
+//             <div className="w-full rounded-lg border border-slate-200 bg-white shadow-sm overflow-hidden">
+//               <div className="bg-slate-100 border-b border-slate-200 px-3 py-1.5 print:px-2 print:py-1 text-center">
+//                 <p className="text-[16px] print:text-[14px] font-bold text-slate-700">
+//                   মোট বিভাগ - {toBn(divisionRows.length)} টি | মোট বিষয় {toBn(totalSubjects)} টি
+//                 </p>
+//               </div>
+
+//               <div className="p-2 print:p-1">
+//                 {divisionRows.length === 0 ? (
+//                   <div className="text-center text-slate-400 text-[15px] print:text-[14px] py-2 print:py-1">
+//                     কোনো বিভাগ পাওয়া যায়নি
+//                   </div>
+//                 ) : (
+//                   divisionRows.map((item, index) => (
+//                     <div
+//                       key={index}
+//                       className="flex justify-between items-center py-1 print:py-0.5 px-2 text-[16px] print:text-[14px] font-medium text-slate-600 border-b border-dashed border-slate-100 last:border-0"
+//                     >
+//                       <div className="w-[150px] print:w-[125px] truncate">{item.name}</div>
+//                       <div className="flex items-center gap-1.5 print:gap-1 text-slate-700">
+//                         <span>{toBn(totalSubjects)}</span>
+//                         <span className="text-slate-400">×</span>
+//                         <span>{toBn(item.number)}</span>
+//                         <span className="text-slate-400">=</span>
+//                         <span className="font-bold text-emerald-700 w-12 print:w-11 text-right">
+//                           {toBn(totalSubjects * (Number(item.number) || 0))}
+//                         </span>
+//                       </div>
+//                     </div>
+//                   ))
+//                 )}
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Marks Table */}
+//         <div className="mt-8 print:mt-1 print:shrink-0">
+//           <SectionTitle icon="📊">বিষয়ভিত্তিক ফলাফল</SectionTitle>
+//           <div className="marks-table-wrap w-full overflow-x-auto print:overflow-visible rounded-lg border border-slate-200 shadow-sm">
+//             <table className="w-full min-w-[700px] print:min-w-0 border-collapse bg-white text-slate-700">
+//               <thead>
+//                 <tr className="text-center">
+//                   <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] print:text-[14.5px] font-bold">ক্রমিক</th>
+//                   <th style={TH_STYLE} className="border-b border-teal-700 px-4 py-3 print:px-2 print:py-1 text-[17px] print:text-[14.5px] font-bold text-left">বিষয়</th>
+//                   <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] print:text-[14.5px] font-bold">পূর্ণমান</th>
+//                   <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] print:text-[14.5px] font-bold">পাশমার্ক</th>
+//                   <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] print:text-[14.5px] font-bold whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
+//                   <th style={TH_STYLE} className="border-b border-teal-700 px-3 py-3 print:px-2 print:py-1 text-[17px] print:text-[14.5px] font-bold">প্রাপ্ত নম্বর</th>
+//                 </tr>
+//               </thead>
+//               <tbody>
+//                 {subjects.map((item, index) => {
+//                   const isAlt = index % 2 !== 0;
+//                   const cellStyle = {
+//                     backgroundColor: isAlt ? '#f0fdfa' : '#ffffff',
+//                     ...EXACT,
+//                   };
+//                   return (
+//                     <tr
+//                       key={item.id}
+//                       className={`${isAlt ? 'row-alt' : 'row-plain'} text-center`}
+//                     >
+//                       <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText}`}>{toBn(index + 1)}</td>
+//                       <td style={cellStyle} className={`border-b border-slate-100 px-4 py-2.5 print:px-2 ${rowPad} text-left text-[17px] ${rowText} font-medium text-slate-800`}>{toBn(item.subject)}</td>
+//                       <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText}`}>{toBn(item.fullMark)}</td>
+//                       <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText}`}>{toBn(item.passMark)}</td>
+//                       <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText}`}>{toBn(item.highestMark)}</td>
+//                       <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText} font-bold text-emerald-700`}>{toBn(item.obtainedMark)}</td>
+//                     </tr>
+//                   );
+//                 })}
+//               </tbody>
+//             </table>
+//           </div>
+//         </div>
+
+//         {/* Summary Cards */}
+//         <div className="mt-6 print:mt-1 print:shrink-0">
+//           <SectionTitle icon="🏆">সারসংক্ষেপ</SectionTitle>
+//           <div className="grid grid-cols-2 md:grid-cols-4 print:grid-cols-4 gap-4 print:gap-2 mt-3 print:mt-1">
+//             <div className="flex flex-col items-center justify-center gap-1.5 print:gap-0.5 rounded-xl border border-emerald-200 bg-emerald-50 p-4 print:p-1.5 shadow-sm">
+//               <p className="text-[16px] print:text-[14px] font-semibold text-emerald-600">প্রাপ্ত বিভাগ</p>
+//               <p className="text-[26px] print:text-[19px] font-bold text-emerald-800">{toBn(divisionName)}</p>
+//             </div>
+//             <div className="flex flex-col items-center justify-center gap-1.5 print:gap-0.5 rounded-xl border border-blue-200 bg-blue-50 p-4 print:p-1.5 shadow-sm">
+//               <p className="text-[16px] print:text-[14px] font-semibold text-blue-600">মেধা স্থান</p>
+//               <p className="text-[26px] print:text-[19px] font-bold text-blue-800">{toBn(student?.Positions ?? '-')}</p>
+//             </div>
+//             <div className="flex flex-col items-center justify-center gap-1.5 print:gap-0.5 rounded-xl border border-purple-200 bg-purple-50 p-4 print:p-1.5 shadow-sm">
+//               <p className="text-[16px] print:text-[14px] font-semibold text-purple-600">গড়</p>
+//               <p className="text-[26px] print:text-[19px] font-bold text-purple-800">{toBn(averageMark)}</p>
+//             </div>
+//             <div className="flex flex-col items-center justify-center gap-1.5 print:gap-0.5 rounded-xl border border-amber-200 bg-amber-50 p-4 print:p-1.5 shadow-sm">
+//               <p className="text-[16px] print:text-[14px] font-semibold text-amber-600">মোট নম্বর</p>
+//               <p className="text-[26px] print:text-[19px] font-bold text-amber-800">{toBn(student?.Total ?? '-')}</p>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Comments & Signature (baki jaiga automatic nibe) */}
+//         <div className="marksheet-comments mt-8 pt-6 print:mt-2 print:pt-2 border-t border-slate-200 print:flex print:flex-col">
+//           <div className="flex flex-col md:flex-row print:flex-row gap-6 print:gap-3 print:flex-1 print:min-h-0">
+//             <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[50px]">
+//               <p className="text-slate-700 font-semibold text-[17px] print:text-[14.5px]">
+//                 শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :
+//               </p>
+
+//               <div className="border-b border-dashed border-slate-300 w-1/2 mt-1 print:mt-1 text-[16px] print:text-[14px]">
+//                 {student?.Note ?? ""}
+//               </div>
+//             </div>
+
+//             <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[50px] flex flex-col">
+//               <p className="text-slate-700 font-semibold text-[17px] print:text-[14.5px]">
+//                 অভিভাবকের মন্তব্য ও স্বাক্ষর :
+//               </p>
+
+//               <div className="border-b border-dashed border-slate-300 w-1/2 mt-2 print:mt-1"></div>
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Footer Signatures */}
+//       <div className="grid grid-cols-5 items-start gap-6 bg-white border-t border-slate-200 px-8 py-6 print:gap-4 print:px-5 print:py-2 print:mt-auto print:shrink-0">
+
+//         {/* QR Code - Small */}
+//         <div className="col-span-1 flex w-full flex-col items-center mt-2">
+//           <div className="mt-3 print:mt-1">
+//             <QRCode
+//               size={75}
+//               style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+//               value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
+//               viewBox={`0 0 256 256`}
+//             />
+//           </div>
+
+//           <div className="mt-3 text-center print:mt-1">
+//             <p className="text-[17px] text-slate-800 print:text-[13px]">
+//               যাচাই করুন
+//             </p>
+//           </div>
+//         </div>
+
+//         {/* মুহতামিম - Large */}
+//         <div className="col-span-2 flex w-full flex-col items-center">
+//           <div className="h-16 w-full flex items-end justify-center print:h-10">
+//             {/* ⭐ showSignature চেক করা হচ্ছে */}
+//             {showSignature && signaturePrincipalSrc ? (
+//               <img
+//                 src={signaturePrincipalSrc}
+//                 alt="Signature Principal"
+//                 className="max-h-16 max-w-full object-contain print:max-h-10"
+//               />
+//             ) : null}
+//           </div>
+
+//           <div className="mt-2 w-full border-t-2 border-dashed border-slate-400 print:mt-1"></div>
+
+//           <div className="mt-3 space-y-1 text-center print:mt-1 print:space-y-0">
+//             <p className="text-[20px] font-bold text-slate-800 print:text-[15px]">
+//               {/* ⭐ principalName থাকলে সেটা দেখাবে, না থাকলে institution থেকে আসবে */}
+//               {principalName || institution?.PrincipalName}
+//             </p>
+
+//             {/* ⭐ showDate চেক করা হচ্ছে */}
+//             {showDate && (
+//               <p className="text-[15px] text-slate-500 print:text-[13px]">
+//                 তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}
+//               </p>
+//             )}
+//           </div>
+//         </div>
+
+//         {/* নায়েবে তালিমাত - Large */}
+//         <div className="col-span-2 flex w-full flex-col items-center">
+//           <div className="h-16 w-full flex items-end justify-center print:h-10">
+//             {/* ⭐ showSignature চেক করা হচ্ছে */}
+//             {showSignature && signatureNajemSrc ? (
+//               <img
+//                 src={signatureNajemSrc}
+//                 alt="Signature Najem"
+//                 className="max-h-16 max-w-full object-contain print:max-h-10"
+//               />
+//             ) : null}
+//           </div>
+
+//           <div className="mt-2 w-full border-t-2 border-dashed border-slate-400 print:mt-1"></div>
+
+//           <div className="mt-3 space-y-1 text-center print:mt-1 print:space-y-0">
+//             <p className="text-[20px] font-bold text-slate-800 print:text-[15px]">
+//               {/* ⭐ najemName থাকলে সেটা দেখাবে, না থাকলে institution থেকে আসবে */}
+//               {najemName || institution?.NajemName}
+//             </p>
+
+//             {/* ⭐ showDate চেক করা হচ্ছে */}
+//             {showDate && (
+//               <p className="text-[15px] text-slate-500 print:text-[13px]">
+//                 তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}
+//               </p>
+//             )}
+//           </div>
+//         </div>
+
+//       </div>
+
+//       {/* Bottom line */}
+//       <div className="mx-8 print:mx-5 flex flex-col md:flex-row print:flex-row justify-between items-center border-t border-slate-200 py-3 print:py-1 text-[14px] print:text-[12px] text-slate-400 gap-2 print:shrink-0">
+//         <span className="text-[15px] print:text-[13px] font-medium text-slate-500">
+//           Software Developed by{' '}
+//           <span className="font-bold tracking-wide text-emerald-600">
+//             SAHARAIT
+//           </span>
+//         </span>
+//       </div>
+//     </div>
+//   );
+// };
+
+// // ==========================================
+// // Main Component
+// // ==========================================
+// const MarkSheetPdf = ({ 
+//   data, 
+//   templateId,
+//   // ⭐ নতুন প্রপসগুলো রিসিভ করা হলো
+//   showDate, 
+//   showSignature, 
+//   principalName, 
+//   najemName 
+// }) => {
+//   const institution = data?.institution;
+//   const ExamName = data?.exam?.[0]?.ExamName;
+
+//   const imageSrc = bufferToDataUrl(institution?.Logo);
+//   const signatureNajemSrc = bufferToDataUrl(institution?.SignatureNajem);
+//   const signaturePrincipalSrc = bufferToDataUrl(institution?.SignaturePrincipal);
+
+//   const session = data?.session || {};
+//   const classInfo = data?.class || {};
+//   const classGroupInfo = data?.classGroup || {};
+//   const examSubjects = Array.isArray(data?.examSubjects) ? data.examSubjects : [];
+
+//   const examConfig = Array.isArray(data?.conditionAverage)
+//     ? data.conditionAverage[0] || {}
+//     : data?.conditionAverage || {};
+
+//   const divisions = Array.isArray(data?.divisions) ? data.divisions : [];
+//   const students = Array.isArray(data?.students) ? data.students : [];
+
+//   if (students.length === 0) {
+//     return (
+//       <div className="font-SolaimanLipi flex items-center justify-center p-10 text-slate-500 bg-slate-50 rounded-lg border border-slate-200 text-lg">
+//         কোনো শিক্ষার্থীর ডেটা পাওয়া যায়নি
+//       </div>
+//     );
+//   }
+
+//   const visibleStudents = students;
+
+//   return (
+//     <>
+//       <style>{PRINT_CSS}</style>
+//       <div
+//         id="marksheet-print-area"
+//         className="font-SolaimanLipi w-full bg-slate-100 py-6 min-h-screen print:bg-white print:py-0 print:min-h-0"
+//       >
+//         {visibleStudents.map((student, idx) => (
+//           <SingleMarkSheet
+//             key={student?.ID ?? student?.UserID ?? idx}
+//             student={student}
+//             institution={institution}
+//             imageSrc={imageSrc}
+//             signatureNajemSrc={signatureNajemSrc}
+//             signaturePrincipalSrc={signaturePrincipalSrc}
+//             session={session}
+//             classInfo={classInfo}
+//             SubClassID={classGroupInfo?.SubClassID}
+//             ExamName={ExamName}
+//             ExamID={data?.examid}
+//             examSubjects={examSubjects}
+//             divisions={divisions}
+//             examConfig={examConfig}
+//             isLast={idx === visibleStudents.length - 1}
+//             // ⭐ নতুন প্রপসগুলো SingleMarkSheet-এ পাঠানো হলো
+//             showDate={showDate}
+//             showSignature={showSignature}
+//             principalName={principalName}
+//             najemName={najemName}
+//           />
+//         ))}
+//       </div>
+//     </>
+//   );
+// };
+
+// export default MarkSheetPdf;
 
 
 
