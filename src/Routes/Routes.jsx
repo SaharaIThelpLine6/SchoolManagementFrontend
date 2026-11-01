@@ -105,6 +105,7 @@ import StudentsReport from '../pages/StudentsReport';
 import StudentsReportList from '../pages/StudentsReportList';
 // import TalentCondition from '../pages/TalentCondition';
 import User from '../pages/User';
+import UserHistory from '../pages/UserHistory';
 import UserImage from '../pages/UserImage';
 import UserReports from '../pages/UserReports';
 import YoutubeTutorials from '../pages/YoutubeTutorials';
@@ -234,6 +235,16 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.user_entry}
                   >
                     <User pageTitle="User Information" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'user-history',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.user_role}
+                  >
+                    <UserHistory pageTitle="Student History" />
                   </RequirePermission>
                 ),
               },
