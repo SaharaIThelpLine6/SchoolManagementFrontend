@@ -151,11 +151,11 @@ const TeacherInfo = () => {
   }, []);
 
   const handleTeacherCreateModel = useCallback(() => {
-    showModal('শিক্ষাক তৈরি করুন', 'ADD_TEACHER_INFO');
+    showModal('শিক্ষক তৈরি করুন', 'ADD_TEACHER_INFO');
   }, []);
 
   const handleTeacherUpdateModel = useCallback((id) => {
-    showModal('শিক্ষাক আপডেট করুন', 'UPDATE_TEACHER_INFO', id);
+    showModal('শিক্ষক আপডেট করুন', 'UPDATE_TEACHER_INFO', id);
   }, []);
 
   if (isLoading) {

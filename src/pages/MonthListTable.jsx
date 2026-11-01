@@ -32,7 +32,7 @@ const MonthListTable = ({ pageTitle }) => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return monthsList.slice(start, start + PAGE_SIZE);
   }, [monthsList, currentPage]);
-// 
+  // 
   const handleOpenModal = useCallback(() => {
     showModal(translate('Create month names'), 'ADD_MONTHNAMES');
   }, [translate]);
@@ -97,8 +97,12 @@ const MonthListTable = ({ pageTitle }) => {
           permissionId={permissionsDataList.month_name}
           permissionType="insert"
         >
-          <Button onClick={handleOpenModal}>
-            {translate('Months create')}
+          <Button
+            onClick={handleOpenModal}
+            className="flex items-center gap-2"
+          >
+            <SvgIcon name="FaPlus" size={16} />
+            <span>{translate('Create new')}</span>
           </Button>
         </ViewPermission>
       </div>
