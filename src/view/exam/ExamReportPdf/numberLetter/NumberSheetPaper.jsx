@@ -456,7 +456,7 @@ const NumberSheetPaper = ({
           {(info.examName || info.sessionName || info.sessionAraName) && (
             <div className="ns-meta-cell">
               <span className="ns-meta-lbl">শ্রেণি/জামাত: </span>
-              {info.examName}
+              {info.subClassName}
             </div>
           )}
           {(info.examName || info.sessionName || info.sessionAraName) && (

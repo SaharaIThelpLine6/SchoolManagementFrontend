@@ -50,11 +50,35 @@ const MarkSheet = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('template-1');
 
-  // ⭐ নতুন স্টেট: স্বাক্ষর, তারিখ ও নামের জন্য
+  // ⭐ স্টেট: স্বাক্ষর, তারিখ ও নামের জন্য
   const [showDate, setShowDate] = useState(true);
   const [showSignature, setShowSignature] = useState(true);
   const [principalName, setPrincipalName] = useState('');
   const [najemName, setNajemName] = useState('');
+
+  // ⭐ স্টেট: প্রিন্ট পেপার সাইজ এবং ওরিয়েন্টেশন
+  const [paperSize, setPaperSize] = useState('A4');
+  const [orientation, setOrientation] = useState('portrait');
+
+  // ⭐ স্টেট: appliedUserCode
+  const [appliedUserCode1, setAppliedUserCode1] = useState('');
+  const [appliedUserCode2, setAppliedUserCode2] = useState('');
+
+  // ⭐ স্টেট: পরীক্ষার্থীর তথ্য (কোন কোন ফিল্ড দেখাবে)
+  const [studentInfoFields, setStudentInfoFields] = useState({
+    name: true,
+    fatherName: true,
+    motherName: true,
+    dob: false,
+    registration: true,
+    admission: true,
+  });
+
+  // ⭐ নতুন স্টেট: ড্রপডাউন ওপেন/ক্লোজ
+  const [isInfoDropdownOpen, setIsInfoDropdownOpen] = useState(false);
+
+  // ⭐ চেক করা হচ্ছে কয়টি ফিল্ড সিলেক্ট করা আছে
+  const checkedCount = Object.values(studentInfoFields).filter(Boolean).length;
 
   const {
     data: reportData,
@@ -82,10 +106,13 @@ const MarkSheet = () => {
     { skip: !sessionID || !examID }
   );
 
+  // ⭐ params-এ appliedUserCode1 এবং appliedUserCode2 যোগ করা হলো
   const params = {
     sessionid: Number(sessionID),
     examid: Number(examID),
     classid: Number(SubClassID),
+    UserCode1: appliedUserCode1 || undefined,
+    UserCode2: appliedUserCode2 || undefined,
   };
 
   const hasMarkSheetParams = !!params.sessionid && !!params.examid && !!params.classid;
@@ -113,6 +140,17 @@ const MarkSheet = () => {
     setValue('SubClassID', '');
   }, [examID, setValue]);
 
+  // ⭐ ড্রপডাউন বন্ধ করার জন্য বাইরে ক্লিক লিসেনার
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.info-dropdown-container')) {
+        setIsInfoDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const shouldShowFields = (fieldName) => {
     switch (selectedReportID) {
       case 1:
@@ -129,25 +167,31 @@ const MarkSheet = () => {
     }
   };
 
+  // ⭐ onSubmit-এ appliedUserCode সেট করা হলো
   const onSubmit = (formData) => {
-    const params = {
+    setAppliedUserCode1(formData.UserCode1 || '');
+    setAppliedUserCode2(formData.UserCode2 || '');
+
+    const queryObj = {
       report_data: selectedReportID,
       session_id: formData.SessionID,
       exam_id: formData.ExamID,
       subclass_id: formData.SubClassID,
+      UserCode1: formData.UserCode1,
+      UserCode2: formData.UserCode2,
     };
 
-    Object.keys(params).forEach((key) => {
-      if (params[key] === undefined || params[key] === '') {
-        delete params[key];
+    Object.keys(queryObj).forEach((key) => {
+      if (queryObj[key] === undefined || queryObj[key] === '') {
+        delete queryObj[key];
       }
     });
 
-    setQueryParams(params);
+    setQueryParams(queryObj);
   };
 
   const handleStudentMarkSheetNote = () => {
-    setIsSettingsOpen(false); // ⭐ নোট ওপেন করার আগে সেটিংস মডাল বন্ধ হবে
+    setIsSettingsOpen(false);
     showModal('মার্কশিট নোট তৈরি করুন', 'STUDENT_MARK_SHEET_NOTE', {
       closeOnOutSide: false,
     });
@@ -180,7 +224,6 @@ const MarkSheet = () => {
       );
     }
 
-    // ⭐ এখানে নতুন সেটিংস প্রপসগুলো পাঠানো হলো
     return (
       <MarkSheetPdf 
         data={data} 
@@ -189,6 +232,9 @@ const MarkSheet = () => {
         showSignature={showSignature}
         principalName={principalName}
         najemName={najemName}
+        paperSize={paperSize}
+        orientation={orientation}
+        studentInfoFields={studentInfoFields} 
       />
     );
   };
@@ -198,63 +244,17 @@ const MarkSheet = () => {
   return (
     <div className="font-SolaimanLipi space-y-4 bg-transparent max-w-full overflow-x-hidden">
       
-      {/* ================= গ্রেডিয়েন্ট হেডার ================= */}
-      <div className={`${C.gradient} rounded-xl shadow-lg px-5 py-4 text-white print:hidden`}>
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-white">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <path d="M14 2v6h6M9 15h6M9 11h6" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-base sm:text-[20px] font-bold leading-tight">
-                {translate('Mark Sheet')}
-              </h3>
-              <p className="text-xs sm:text-sm text-white/80">
-                শিক্ষাবর্ষ ও পরীক্ষা অনুযায়ী মার্কশিট তৈরি ও প্রিন্ট করুন
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* ⭐ শুধুমাত্র সেটিংস বাটন */}
-            <button
-              type="button"
-              onClick={() => setIsSettingsOpen(true)}
-              className="flex items-center justify-center h-9 w-9 bg-white/20 text-white rounded-lg shadow hover:bg-white/30 transition"
-              title="সেটিংস ও টেমপ্লেট"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* ================= মূল কন্টেন্ট এরিয়া ================= */}
-      <div className="flex flex-col lg:flex-row gap-5 min-h-screen print:min-h-0 print:gap-0 print:block">
+      <div className="flex flex-col gap-5 min-h-screen print:min-h-0 print:gap-0 print:block">
         
-        {/* Left: Filter Panel */}
-        <div className="print:hidden lg:w-[35%] xl:w-[30%] shrink-0 lg:sticky lg:top-4 lg:self-start">
+        {/* Top: Filter Panel (Horizontal) */}
+        <div className="print:hidden w-full">
           <div className={`bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden`}>
-            <div className={`${C.panel} border-b ${C.panelBorder} px-4 py-3`}>
-              <h4 className="text-sm font-bold text-[#5B21B6] flex items-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                ফিল্টার ও সেটিংস
-              </h4>
-            </div>
-            
             <div className="p-5">
               <FormProvider {...methods}>
                 <form
                   onSubmit={handleSubmit(onSubmit)}
-                  className="grid grid-cols-1 gap-4"
+                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 items-end"
                 >
                   <DefaultSelect
                     label={translate('Report')}
@@ -316,29 +316,41 @@ const MarkSheet = () => {
                   )}
 
                   {shouldShowFields('UserCode') && (
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2">
                       <DefaultInput registerKey="UserCode1" label="আইডি থেকে" />
                       <DefaultInput registerKey="UserCode2" label="আইডি পর্যন্ত" />
                     </div>
                   )}
 
-                  <button
-                    type="submit"
-                    className={`mt-2 w-full flex items-center justify-center gap-2 h-[42px] rounded-lg text-[14px] font-bold ${C.primary} shadow-sm transition`}
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    রিপোর্ট তৈরি করুন
-                  </button>
+                  {/* ⭐ রিপোর্ট তৈরি এবং সেটিংস বাটন */}
+                  <div className="flex items-center gap-2 w-full">
+                    <button
+                      type="submit"
+                      className={`w-auto px-6 flex items-center justify-center gap-1.5 h-[44px] rounded-lg text-[13px] font-bold ${C.primary} shadow-sm transition`}
+                    >
+                      View
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => setIsSettingsOpen(true)}
+                      className="flex items-center justify-center h-[38px] w-[38px] shrink-0 bg-white border border-[#E9D5FF] text-[#7C3AED] rounded-lg shadow-sm hover:bg-[#F5F3FF] transition"
+                      title="সেটিংস ও টেমপ্লেট"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </button>
+                  </div>
                 </form>
               </FormProvider>
             </div>
           </div>
         </div>
 
-        {/* Right: Result Panel */}
-        <div className="flex-1 min-w-0 bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden print:border-0 print:shadow-none">
+        {/* Bottom: Result Panel (Full Width) */}
+        <div className="w-full bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden print:border-0 print:shadow-none">
           
           {/* Result Toolbar */}
           <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center justify-between print:hidden">
@@ -355,7 +367,111 @@ const MarkSheet = () => {
                   {translate('Loading report...')}
                 </span>
               )}
-              
+
+              <div className="flex items-center gap-2 mr-2">
+                <div className="relative info-dropdown-container">
+                  <button
+                    type="button"
+                    onClick={() => setIsInfoDropdownOpen(!isInfoDropdownOpen)}
+                    className="flex items-center justify-between gap-2 h-8 rounded-lg border border-[#DDD6FE] bg-white px-3 py-1 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                  >
+                    পরীক্ষার্থীর তথ্য
+                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {isInfoDropdownOpen && (
+                    <div className="absolute right-0 top-full mt-1 w-64 bg-white border border-slate-200 shadow-xl rounded-xl p-3 z-50">
+                      <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-100">
+                        <span className="text-xs font-bold text-slate-600">তথ্য নির্বাচন করুন</span>
+                        <span className="text-[10px] font-bold text-violet-600 bg-violet-100 px-2 py-0.5 rounded">সর্বোচ্চ ৫টি</span>
+                      </div>
+                      <div className="space-y-2">
+                        <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.name && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                          <input 
+                            type="checkbox" 
+                            checked={studentInfoFields.name} 
+                            onChange={(e) => setStudentInfoFields(prev => ({ ...prev, name: e.target.checked }))} 
+                            disabled={!studentInfoFields.name && checkedCount >= 5}
+                            className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                          />
+                          <span className="text-sm font-medium text-slate-700">নাম</span>
+                        </label>
+                        <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.fatherName && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                          <input 
+                            type="checkbox" 
+                            checked={studentInfoFields.fatherName} 
+                            onChange={(e) => setStudentInfoFields(prev => ({ ...prev, fatherName: e.target.checked }))} 
+                            disabled={!studentInfoFields.fatherName && checkedCount >= 5}
+                            className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                          />
+                          <span className="text-sm font-medium text-slate-700">পিতার নাম</span>
+                        </label>
+                        <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.motherName && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                          <input 
+                            type="checkbox" 
+                            checked={studentInfoFields.motherName} 
+                            onChange={(e) => setStudentInfoFields(prev => ({ ...prev, motherName: e.target.checked }))} 
+                            disabled={!studentInfoFields.motherName && checkedCount >= 5}
+                            className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                          />
+                          <span className="text-sm font-medium text-slate-700">মাতার নাম</span>
+                        </label>
+                        <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.dob && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                          <input 
+                            type="checkbox" 
+                            checked={studentInfoFields.dob} 
+                            onChange={(e) => setStudentInfoFields(prev => ({ ...prev, dob: e.target.checked }))} 
+                            disabled={!studentInfoFields.dob && checkedCount >= 5}
+                            className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                          />
+                          <span className="text-sm font-medium text-slate-700">জন্ম তারিখ</span>
+                        </label>
+                        <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.registration && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                          <input 
+                            type="checkbox" 
+                            checked={studentInfoFields.registration} 
+                            onChange={(e) => setStudentInfoFields(prev => ({ ...prev, registration: e.target.checked }))} 
+                            disabled={!studentInfoFields.registration && checkedCount >= 5}
+                            className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                          />
+                          <span className="text-sm font-medium text-slate-700">দাখেলা</span>
+                        </label>
+                        <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.admission && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                          <input 
+                            type="checkbox" 
+                            checked={studentInfoFields.admission} 
+                            onChange={(e) => setStudentInfoFields(prev => ({ ...prev, admission: e.target.checked }))} 
+                            disabled={!studentInfoFields.admission && checkedCount >= 5}
+                            className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                          />
+                          <span className="text-sm font-medium text-slate-700">ভর্তি নং</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <select
+                  value={paperSize}
+                  onChange={(e) => setPaperSize(e.target.value)}
+                  className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                >
+                  <option value="A4">A4</option>
+                  <option value="A5">A5</option>
+                </select>
+
+                <select
+                  value={orientation}
+                  onChange={(e) => setOrientation(e.target.value)}
+                  className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                >
+                  <option value="portrait">Portrait</option>
+                  <option value="landscape">Landscape</option>
+                </select>
+              </div>
+
               <button
                 onClick={() => window.print()}
                 disabled={!canPrint}
@@ -375,14 +491,14 @@ const MarkSheet = () => {
             </div>
           )}
 
-          <div className="overflow-y-auto overflow-x-hidden max-h-[calc(100vh-200px)] p-4 print:p-0 print:max-h-none print:overflow-visible">
+          <div className="overflow-y-auto overflow-x-hidden max-h-[calc(100vh-280px)] p-4 print:p-0 print:max-h-none print:overflow-visible">
             {renderResult()}
           </div>
         </div>
         
       </div>
 
-      {/* ================= ⭐ নতুন: সেটিংস ও টেমপ্লেট মডাল ================= */}
+      {/* ================= সেটিংস ও টেমপ্লেট মডাল ================= */}
       {isSettingsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 print:hidden">
           <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
@@ -421,7 +537,82 @@ const MarkSheet = () => {
                 </button>
               </div>
 
-              {/* ⭐ নতুন: স্বাক্ষর, তারিখ ও নামের সেটিংস */}
+              {/* ⭐ পরীক্ষার্থীর তথ্য সেটিংস (মডালের ভেতরেও থাকলো) */}
+              <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                    <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                    পরীক্ষার্থীর তথ্য (কোনটি দেখাবে)
+                  </h4>
+                  <span className="text-xs font-bold text-violet-600 bg-violet-100 px-2 py-1 rounded">
+                    সর্বোচ্চ ৫টি
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.name && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <input 
+                      type="checkbox" 
+                      checked={studentInfoFields.name} 
+                      onChange={(e) => setStudentInfoFields(prev => ({ ...prev, name: e.target.checked }))} 
+                      disabled={!studentInfoFields.name && checkedCount >= 5}
+                      className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                    />
+                    <span className="text-sm font-medium text-slate-700">নাম</span>
+                  </label>
+                  <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.fatherName && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <input 
+                      type="checkbox" 
+                      checked={studentInfoFields.fatherName} 
+                      onChange={(e) => setStudentInfoFields(prev => ({ ...prev, fatherName: e.target.checked }))} 
+                      disabled={!studentInfoFields.fatherName && checkedCount >= 5}
+                      className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                    />
+                    <span className="text-sm font-medium text-slate-700">পিতার নাম</span>
+                  </label>
+                  <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.motherName && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <input 
+                      type="checkbox" 
+                      checked={studentInfoFields.motherName} 
+                      onChange={(e) => setStudentInfoFields(prev => ({ ...prev, motherName: e.target.checked }))} 
+                      disabled={!studentInfoFields.motherName && checkedCount >= 5}
+                      className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                    />
+                    <span className="text-sm font-medium text-slate-700">মাতার নাম</span>
+                  </label>
+                  <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.dob && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <input 
+                      type="checkbox" 
+                      checked={studentInfoFields.dob} 
+                      onChange={(e) => setStudentInfoFields(prev => ({ ...prev, dob: e.target.checked }))} 
+                      disabled={!studentInfoFields.dob && checkedCount >= 5}
+                      className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                    />
+                    <span className="text-sm font-medium text-slate-700">জন্ম তারিখ</span>
+                  </label>
+                  <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.registration && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <input 
+                      type="checkbox" 
+                      checked={studentInfoFields.registration} 
+                      onChange={(e) => setStudentInfoFields(prev => ({ ...prev, registration: e.target.checked }))} 
+                      disabled={!studentInfoFields.registration && checkedCount >= 5}
+                      className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                    />
+                    <span className="text-sm font-medium text-slate-700">দাখেলা</span>
+                  </label>
+                  <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.admission && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                    <input 
+                      type="checkbox" 
+                      checked={studentInfoFields.admission} 
+                      onChange={(e) => setStudentInfoFields(prev => ({ ...prev, admission: e.target.checked }))} 
+                      disabled={!studentInfoFields.admission && checkedCount >= 5}
+                      className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
+                    />
+                    <span className="text-sm font-medium text-slate-700">ভর্তি নং</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* ⭐ স্বাক্ষর, তারিখ ও নামের সেটিংস */}
               <div className="mb-8 p-4 bg-slate-50 border border-slate-200 rounded-xl">
                 <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
                   <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
@@ -532,341 +723,3 @@ const MarkSheet = () => {
 };
 
 export default MarkSheet;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { useEffect, useState } from 'react';
-// import Loading from '../components/Loading/Loading';
-// import useTranslate from '../utils/Translate';
-// import { FormProvider, useForm, useWatch } from 'react-hook-form';
-// import DefaultSelect from '../components/Forms/DefaultSelect';
-// import { markSheetResultReports } from '../Data/userReportsData';
-// import { useGetClassListQuery } from '../features/class/classQuerySlice';
-// import {
-//   useGetExamFilterExamsQuery,
-//   useGetExamFilterSubclassesQuery,
-//   useGetExamSessionQuery,
-// } from '../features/exam/examQuerySlice';
-// import Button from '../components/Button/Button';
-// import { useGetMarkSheetQuery, useGetResultReportDataQuery } from '../features/result/resultSilce';
-// import DefaultInput from '../components/Forms/DefaultInput';
-// import MarkSheetPdf from '../components/ResultPdf/MarkSheetPdf';
-// import { showModal } from '../utils/ModalControlar';
-
-// // ==========================================
-// // Inline loading spinner (শুধু মার্কশিট এলাকার জন্য)
-// // ==========================================
-// const MarkSheetLoader = () => (
-//   <div className="flex flex-col items-center justify-center gap-3 py-24 print:hidden">
-//     <div className="h-12 w-12 animate-spin rounded-full border-4 border-emerald-200 border-t-emerald-600" />
-//     <p className="text-sm font-medium text-emerald-700">মার্কশিট লোড হচ্ছে, অপেক্ষা করুন...</p>
-//   </div>
-// );
-
-// const MarkSheet = () => {
-//   const translate = useTranslate();
-//   const [queryParams, setQueryParams] = useState(null);
-//   const {
-//     data: reportData,
-//     isLoading,
-//     isFetching,
-//     error,
-//   } = useGetResultReportDataQuery(queryParams, { skip: !queryParams });
-
-//   const { data: sessionData } = useGetExamSessionQuery();
-//   const { data: classListData } = useGetClassListQuery();
-//   const methods = useForm();
-//   const { control, handleSubmit, setValue } = methods;
-
-//   const selectedReportID = useWatch({ control, name: 'ReportID' });
-//   const sessionID = useWatch({ control, name: 'SessionID' });
-//   const examID = useWatch({ control, name: 'ExamID' });
-//   const SubClassID = useWatch({ control, name: 'SubClassID' });
-
-//   const { data: examNameData } = useGetExamFilterExamsQuery(
-//     { SessionID: sessionID },
-//     { skip: !sessionID }
-//   );
-//   const { data: subclassListData } = useGetExamFilterSubclassesQuery(
-//     { SessionID: sessionID, ExamID: examID },
-//     { skip: !sessionID || !examID }
-//   );
-
-//   const params = {
-//     sessionid: Number(sessionID),
-//     examid: Number(examID),
-//     classid: Number(SubClassID),
-//   };
-
-//   const hasMarkSheetParams = !!params.sessionid && !!params.examid && !!params.classid;
-
-//   // ✅ Mark sheet data loading state
-//   const {
-//     data,
-//     isLoading: isMarkSheetLoading,
-//     isFetching: isMarkSheetFetching,
-//     isError: isMarkSheetError,
-//   } = useGetMarkSheetQuery(params, {
-//     skip: !hasMarkSheetParams,
-//     refetchOnMountOrArgChange: true,
-//   });
-
-//   // console.log(data, "data")
-
-//   // isFetching ধরলে নতুন filter দিলে পুরনো data না দেখিয়ে loader দেখাবে
-//   const isMarkSheetBusy = hasMarkSheetParams && (isMarkSheetLoading || isMarkSheetFetching);
-
-//   useEffect(() => {
-//     setValue('ExamID', '');
-//     setValue('SubClassID', '');
-//   }, [sessionID, setValue]);
-
-//   useEffect(() => {
-//     setValue('SubClassID', '');
-//   }, [examID, setValue]);
-
-//   const shouldShowFields = (fieldName) => {
-//     switch (selectedReportID) {
-//       case 1:
-//         return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
-//       case 2:
-//       case 3:
-//       case 4:
-//       case 5:
-//         return ['ReportID', 'SessionID', 'ExamID', 'SubClassID'].includes(fieldName);
-//       case 6:
-//         return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
-//       default:
-//         return false;
-//     }
-//   };
-
-//   const onSubmit = (formData) => {
-//     const params = {
-//       report_data: selectedReportID,
-//       session_id: formData.SessionID,
-//       exam_id: formData.ExamID,
-//       subclass_id: formData.SubClassID,
-//     };
-
-//     Object.keys(params).forEach((key) => {
-//       if (params[key] === undefined || params[key] === '') {
-//         delete params[key];
-//       }
-//     });
-
-//     setQueryParams(params);
-//   };
-
-//   const handleStudentMarkSheetNote = () => {
-//     showModal('মার্কশিট নোট তৈরি করুন', 'STUDENT_MARK_SHEET_NOTE', {
-//       closeOnOutSide: false,
-//     });
-//   };
-
-//   if (isLoading) {
-//     return <Loading />;
-//   }
-
-//   // Result panel-এ কী দেখাবে
-//   const renderResult = () => {
-//     if (isMarkSheetBusy) return <MarkSheetLoader />;
-
-//     if (isMarkSheetError) {
-//       return (
-//         <div className="p-4 m-2 bg-white rounded-md shadow-md text-red-600 text-center print:hidden">
-//           মার্কশিট লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।
-//         </div>
-//       );
-//     }
-
-//     if (!hasMarkSheetParams || !data) {
-//       return (
-//         <div className="p-10 text-center text-slate-500 print:hidden">
-//           মার্কশিট দেখতে সেশন, পরীক্ষা ও শ্রেণী নির্বাচন করুন।
-//         </div>
-//       );
-//     }
-
-//     return <MarkSheetPdf data={data} />;
-//   };
-
-//   const canPrint = hasMarkSheetParams && !!data && !isMarkSheetBusy && !isMarkSheetError;
-
-//   return (
-//     <div>
-//       <div className="flex items-center justify-between bg-white p-4 rounded-tl-lg rounded-tr-lg print:hidden mb-4">
-//         <h1 className="font-semibold text-lg text-theme-dark font-default mb-0">
-//           {translate('Mark Sheet')}
-//         </h1>
-//         <div className="flex items-center gap-2">
-//           <Button onClick={handleStudentMarkSheetNote}>
-//             <span className="flex items-center gap-1.5">
-//               <svg
-//                 xmlns="http://www.w3.org/2000/svg"
-//                 width={18}
-//                 height={18}
-//                 viewBox="0 0 24 24"
-//                 fill="none"
-//                 stroke="currentColor"
-//                 strokeWidth={2}
-//                 strokeLinecap="round"
-//                 strokeLinejoin="round"
-//               >
-//                 <path d="M12 5v14" />
-//                 <path d="M5 12h14" />
-//               </svg>
-//               বিভাগ মার্কশিট নোট
-//             </span>
-//           </Button>
-//         </div>
-//       </div>
-
-//       <div className="flex flex-col lg:flex-row gap-4 min-h-screen print:min-h-0 print:gap-0 print:block">
-//         {/* Left: Filter Panel (print-e hide) */}
-//         <div className="p-4 print:hidden bg-white lg:w-[40%] lg:sticky lg:top-4 lg:self-start">
-//           <FormProvider {...methods}>
-//             <form
-//               onSubmit={handleSubmit(onSubmit)}
-//               className="grid grid-cols-1 md:grid-cols-1 gap-4"
-//             >
-//               <DefaultSelect
-//                 label={translate('Report')}
-//                 nameField="ReportName"
-//                 registerKey="ReportID"
-//                 valueField="ReportID"
-//                 options={markSheetResultReports}
-//                 type="number"
-//                 require="This Field is required"
-//               />
-
-//               {shouldShowFields('SessionID') && (
-//                 <DefaultSelect
-//                   label={translate('Session')}
-//                   nameField="SessionName"
-//                   registerKey="SessionID"
-//                   valueField="SessionID"
-//                   options={sessionData ?? []}
-//                   require="This Field is required"
-//                   defaultSelect={false}
-//                   unicode={true}
-//                 />
-//               )}
-
-//               {shouldShowFields('ExamID') && (
-//                 <DefaultSelect
-//                   label={translate('Exam')}
-//                   nameField="ExamName"
-//                   registerKey="ExamID"
-//                   valueField="ExamID"
-//                   options={examNameData ?? []}
-//                   require={'This Field is required'}
-//                   unicode={true}
-//                 />
-//               )}
-
-//               {shouldShowFields('ClassID') && (
-//                 <DefaultSelect
-//                   label={translate('Class')}
-//                   nameField="ClassName"
-//                   registerKey="ClassID"
-//                   valueField="ClassID"
-//                   options={classListData ?? []}
-//                   require={'This Field is required'}
-//                   unicode={true}
-//                 />
-//               )}
-
-//               {shouldShowFields('SubClassID') && (
-//                 <DefaultSelect
-//                   label={translate('Sub Class')}
-//                   nameField="SubClass"
-//                   registerKey="SubClassID"
-//                   valueField="SubClassID"
-//                   options={subclassListData ?? []}
-//                   require={'This Field is required'}
-//                   unicode={true}
-//                 />
-//               )}
-
-//               {shouldShowFields('UserCode') && (
-//                 <>
-//                   <DefaultInput registerKey="UserCode1" label="আইডি থেকে" />
-//                   <DefaultInput registerKey="UserCode2" label="আইডি পর্যন্ত" />
-//                 </>
-//               )}
-
-//               <Button type="submit">Submit</Button>
-//             </form>
-//           </FormProvider>
-//         </div>
-
-//         {/* Right: Result Panel */}
-//         <div className="w-full text-sm text-black bg-white relative print:bg-transparent print:text-[inherit]">
-//           {isFetching && <div className="p-2 print:hidden">{translate('Loading report...')}</div>}
-
-//           {error && (
-//             <div className="p-4 bg-white rounded-md shadow-md text-red-600 text-center print:hidden">
-//               Failed to load report.
-//             </div>
-//           )}
-
-//           <div className="print:hidden flex justify-end p-2">
-//             <button
-//               onClick={() => window.print()}
-//               disabled={!canPrint}
-//               className="px-4 py-2 rounded bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-emerald-600 print:hidden"
-//             >
-//               প্রিন্ট করুন
-//             </button>
-//           </div>
-
-//           {/* Screen-e scroll, print-e full flow */}
-//           <div className="overflow-y-auto overflow-x-hidden max-h-[calc(100vh-180px)] pr-2 print:max-h-none print:overflow-visible print:pr-0">
-//             {renderResult()}
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default MarkSheet;

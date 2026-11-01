@@ -1450,6 +1450,13 @@ export const ADMIT_FIELDS = [
     demoEn: 'Tutorial Exam',
     demoAr: 'الاختبار التجريبي',
   },
+  {
+    id: 'CustomBlank',
+    name: 'Blank box',
+    nameAr: 'مربع فارغ',
+    label: 'খালি ঘর',
+    demo: '\u00A0',
+  },
 ];
 
 const buildFieldMap = (key) =>
