@@ -1,42 +1,37 @@
 import React, { useMemo } from "react";
 import Chart from "react-apexcharts";
-import { useGetSessionsQuery } from "../features/session/sessionSlice";
+import { useGetSessionsWithStudentQuery } from "../features/session/sessionSlice";
 import useTranslate from "../utils/Translate";
 
 const SessionChart = () => {
-  const { data, isLoading, isError } = useGetSessionsQuery();
   const t = useTranslate();
+  const {
+    data: sessionsWithStudent,
+    isLoading: isSessionsWithStudentLoading,
+    isError: isSessionsWithStudentError,
+  } = useGetSessionsWithStudentQuery();
 
-  // Build series from the data dynamically
-  const { chartOptions, chartSeries, totals } = useMemo(() => {
-    const sessions = Array.isArray(data) ? data : [];
+  console.log("Sessions with Student Data:", sessionsWithStudent);
 
-    // Sort by CreateAt ascending so the timeline flows left -> right
-    const sorted = [...sessions].sort(
-      (a, b) => new Date(a.CreateAt) - new Date(b.CreateAt)
-    );
+  const { chartOptions, chartSeries, totalStudents } = useMemo(() => {
+    const sessions = Array.isArray(sessionsWithStudent?.sessions)
+      ? sessionsWithStudent.sessions
+      : [];
 
-    // Categories = session names (fallback to SessionID)
+    // Sort by Serial ascending so the timeline flows left -> right
+    const sorted = [...sessions].sort((a, b) => (a.Serial ?? 0) - (b.Serial ?? 0));
+
+    // Categories = session names
     const categories = sorted.map(
       (s) => s.SessionName || s.SessionEngName || `Session ${s.SessionID}`
     );
 
-    // Series 1: Active sessions (SessionStatus === 1)
-    const activeSeries = sorted.map((s) => (s.SessionStatus === 1 ? 1 : 0));
+    // Series = student count per session
+    const studentSeries = sorted.map((s) => Number(s.studentCount) || 0);
 
-    // Series 2: Cumulative created sessions
-    let running = 0;
-    const createdSeries = sorted.map(() => ++running);
+    const totalStudents = studentSeries.reduce((sum, n) => sum + n, 0);
 
-    // Totals
-    const totalSessions = sorted.length;
-    const activeCount = sorted.filter((s) => s.SessionStatus === 1).length;
-    const inactiveCount = totalSessions - activeCount;
-
-    const chartSeries = [
-      { name: t("Created Sessions"), data: createdSeries },
-      { name: t("Active Sessions"), data: activeSeries },
-    ];
+    const chartSeries = [{ name: t("Students"), data: studentSeries }];
 
     const chartOptions = {
       chart: {
@@ -60,7 +55,7 @@ const SessionChart = () => {
           top: 4,
         },
       },
-      colors: ["#6366f1", "#10b981"], // indigo & emerald
+      colors: ["#6366f1"], // indigo
       dataLabels: { enabled: false },
       stroke: {
         curve: "smooth",
@@ -76,8 +71,8 @@ const SessionChart = () => {
         },
       },
       markers: {
-        size: 0,
-        hover: { size: 6 },
+        size: 4,
+        hover: { size: 7 },
         strokeColors: "#fff",
         strokeWidth: 2,
       },
@@ -99,6 +94,7 @@ const SessionChart = () => {
         },
         min: 0,
         forceNiceScale: true,
+        title: { text: t("Students"), style: { color: "#6b7280" } },
       },
       grid: {
         borderColor: "#e5e7eb",
@@ -116,18 +112,16 @@ const SessionChart = () => {
       tooltip: {
         theme: "light",
         x: { show: true },
-        y: { formatter: (val) => `${val}` },
+        y: {
+          formatter: (val) => `${val} ${t("Students")}`,
+        },
       },
     };
 
-    return {
-      chartOptions,
-      chartSeries,
-      totals: { totalSessions, activeCount, inactiveCount },
-    };
-  }, [data, t]);
+    return { chartOptions, chartSeries, totalStudents };
+  }, [sessionsWithStudent, t]);
 
-  if (isLoading) {
+  if (isSessionsWithStudentLoading) {
     return (
       <div className="w-full rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-100">
         <div className="animate-pulse space-y-4">
@@ -138,7 +132,7 @@ const SessionChart = () => {
     );
   }
 
-  if (isError) {
+  if (isSessionsWithStudentError) {
     return (
       <div className="rounded-2xl bg-red-50 p-6 text-center text-red-600 ring-1 ring-red-100">
         {t("Failed to load sessions. Please try again.")}
@@ -152,28 +146,17 @@ const SessionChart = () => {
       <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-gray-800">
-            {t("Session Overview")}
+            {t("Session Students Overview")}
           </h2>
           <p className="text-sm text-gray-500">
-            {t("Distribution of sessions over time")}
+            {t("Number of students admitted per session")}
           </p>
         </div>
 
-        {/* Stat badges */}
-        <div className="flex flex-wrap gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
-            <span className="h-2 w-2 rounded-full bg-indigo-500" />
-            {t("Total")}: {totals.totalSessions}
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            {t("Active")}: {totals.activeCount}
-          </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">
-            <span className="h-2 w-2 rounded-full bg-gray-400" />
-            {t("Inactive")}: {totals.inactiveCount}
-          </span>
-        </div>
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+          <span className="h-2 w-2 rounded-full bg-indigo-500" />
+          {t("Total Students")}: {totalStudents}
+        </span>
       </div>
 
       {/* Chart */}
