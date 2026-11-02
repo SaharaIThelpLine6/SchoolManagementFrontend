@@ -557,7 +557,7 @@ const useTranslate = () => {
     Account: 'অ্যাকাউন্ট',
     'User ID': 'ইউজার আইডি',
     'Book Name': 'কিতাবের নাম',
-    'Add Book': 'কিতাব যোগ করুন',
+    'Add Book': 'কিতাব তৈরি করুন',
     'Update Book': 'কিতাব আপডেট করুন',
     "Student's English Name": 'শিক্ষার্থীর ইংরেজি নাম',
     'Start User ID': 'ইউজার আইডি হতে',

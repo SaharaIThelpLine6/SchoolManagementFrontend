@@ -120,6 +120,8 @@ const Book = ({ pageTitle }) => {
     isLoading,
   } = useGetAcademicSubjectsQuery(selectedSubClassID);
 
+  console.log(academicSubjectData, "academicSubjectData")
+
   const { data: subClassData = [] } = useGetSubClassListQuery();
 
   // 🔹 Institution info (print header/footer এর জন্য)
@@ -138,9 +140,20 @@ const Book = ({ pageTitle }) => {
     setCurrentPage(1);
   }, [selectedSubClassID]);
 
-  const currentData = academicSubjectData || [];
+  // প্রথমে currentData তৈরি করো
+  const currentData = useMemo(() => {
+    return [...(academicSubjectData || [])].sort((a, b) => {
+      return (
+        Number(a.SubClassID) - Number(b.SubClassID) ||
+        Number(a.SubSerial) - Number(b.SubSerial)
+      );
+    });
+  }, [academicSubjectData]);
+
+  // এরপর totalPages হিসাব করো
   const totalPages = Math.ceil(currentData.length / PAGE_SIZE);
 
+  // Pagination
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return currentData.slice(start, start + PAGE_SIZE);
