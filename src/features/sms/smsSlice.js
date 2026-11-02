@@ -25,6 +25,14 @@ export const smsSlice = createApi({
       }),
     }),
 
+    uploadVoiceRecording: builder.mutation({
+      query: (audio) => {
+        const body = new FormData();
+        body.append("audio", audio);
+        return { url: "voice/upload", method: "POST", body };
+      },
+    }),
+
     // ✅ Update Template (id আলাদা করে নিন, body তে বাকি ডাটা)
     updateSMSTemplate: builder.mutation({
       query: ({ id, ...data }) => ({
@@ -89,6 +97,7 @@ export const smsSlice = createApi({
 
 export const {
   usePostSMSSendMutation,
+  useUploadVoiceRecordingMutation,
   useGetSMSTemplatesQuery,
   useGetCheckBalanceQuery,
   useGetSMSBundleQuery,

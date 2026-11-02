@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -20,6 +20,10 @@ import SvgIcon from '../../../components/icons/SvgIcon';
 
 const getDateOnly = (value) => {
   if (!value) return '';
+  if (typeof value === 'string') {
+    const calendarDate = /^(\d{4}-\d{2}-\d{2})(?:$|[ T])/.exec(value);
+    if (calendarDate) return calendarDate[1];
+  }
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
     const isUtcMidnight =
       value.getUTCHours() === 0 &&
@@ -170,6 +174,11 @@ const ExamRoutineUpdateModal = ({ meta }) => {
 
   const { data: academicSubjectsData = [] } = useGetAcademicSubjectsQuery();
   const [StartDate, EndDate] = watch(['StartDate', 'EndDate']);
+  const endDateOnly = getDateOnly(EndDate);
+  const lastSelectableTime = useMemo(
+    () => (endDateOnly ? new Date(`${endDateOnly}T23:59:59.999`) : undefined),
+    [endDateOnly]
+  );
 
   const {
     data: editDetails,
@@ -556,7 +565,7 @@ const ExamRoutineUpdateModal = ({ meta }) => {
                           registerKey={`date_${item.id}`}
                           defaultValue={item.date}
                           minDate={getDateOnly(StartDate)}
-                          maxDate={getDateOnly(EndDate)}
+                          maxDate={lastSelectableTime}
                           placeholder="তারিখ নির্বাচন করুন"
                         />
                       </td>
