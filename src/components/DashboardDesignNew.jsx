@@ -7,6 +7,12 @@ import { useGetPaymentTransactionReportQuery } from '../features/feeCollection/f
 import { useGetStudentAttendanceTodayDashboardQuery } from '../features/student/studentQuerySlice';
 import { useGetTeacherAttendanceTodayDashboardQuery } from '../features/teachers/teachersSlice';
 import Module from './Module';
+import SessionChart from './SessionChart';
+import BloodGroupStudentChart from './BloodGroupStudentChart';
+import PieChart from './Charts/PieChart';
+import CalendarOne from './Calendar/CalendarOne';
+import ClassRoutine from './Tables/ClassRoutine';
+import CustomCalendar from './CustomCalendar';
 
 /* ---------- Bangla Number Helper ---------- */
 const toBanglaNumber = (value) => {
@@ -376,6 +382,22 @@ const DashboardDesignNew = () => {
               </div>
             );
           })}
+        </div>
+        <div className="flex justify-between gap-4 mt-6">
+          <BloodGroupStudentChart />
+          <SessionChart />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-1 col-span-1">
+            <PieChart />
+          </div>
+          <div className="md:col-span-1 col-span-1">
+            {/* <CalendarOne /> */}
+            <CustomCalendar />
+          </div>
+          <div className="md:col-span-1 col-span-1">
+            <ClassRoutine />
+          </div>
         </div>
       </div>
     </div>

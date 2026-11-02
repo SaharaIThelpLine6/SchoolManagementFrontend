@@ -19,6 +19,7 @@ import {
 import { ViewPermission } from '../Routes/ViewPermission';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
+import SvgIcon from '../components/icons/SvgIcon';
 
 const PAGE_SIZE = 10;
 
@@ -203,8 +204,11 @@ const Session = ({ pageTitle }) => {
           permissionId={permissionsDataList.academic_year}
           permissionType="insert"
         >
-          <Button onClick={handleCreateOpenForm}>
-            {translate('Create Session')}
+          <Button onClick={handleCreateOpenForm}
+            className="flex items-center gap-2"
+          >
+            <SvgIcon name="FaPlus" size={16} />
+            {translate('Create new')}
           </Button>
         </ViewPermission>
       </div>

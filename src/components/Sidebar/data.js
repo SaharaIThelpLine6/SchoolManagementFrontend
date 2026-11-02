@@ -19,35 +19,40 @@ export const menuData = [
     route: 'general-info',
     icon: 'LuWarehouse',
     subMenu: [
-
       {
         id: '1',
+        name: 'Session',
+        route: 'general-info/sessions',
+        icon: 'SubCalendar',
+      },
+      {
+        id: '2',
         name: 'New User',
         route: 'general-info/users-info',
         icon: 'SubUser'
       },
       {
-        id: '2',
+        id: '3',
         name: 'Month Name',
         route: 'general-info/month-name-list',
         subMenu: false,
         icon: 'SubCalendar'
       },
       // {
-      //   id: '3',
+      //   id: '4',
       //   name: 'All Madrasah',
       //   route: 'general-info/all-madrasah',
       //   subMenu: false,
       // },
       {
-        id: '4',
+        id: '5',
         name: 'Institution Information',
         route: 'general-info/institution-info',
         subMenu: false,
         icon: 'SubBuilding'
       },
       {
-        id: '5',
+        id: '6',
         name: 'RFID Card',
         route: 'general-info/rfid-card',
         subMenu: false,
@@ -55,27 +60,27 @@ export const menuData = [
       },
 
       {
-        id: '6',
+        id: '7',
         name: 'User Image',
         route: 'general-info/user-image',
         subMenu: false,
         icon: 'SubImage'
       },
       {
-        id: '7',
+        id: '8',
         name: 'Bulk Image',
         route: 'general-info/bulk-image',
         subMenu: false,
         icon: 'SubImage'
       },
       {
-        id: '8',
+        id: '9',
         name: 'SMS',
         route: 'general-info/sms',
         icon: 'SubMessage'
       },
       {
-        id: '9',
+        id: '10',
         name: 'User Reports',
         route: 'general-info/user-reports',
         icon: 'SubReport'
@@ -90,78 +95,72 @@ export const menuData = [
     subMenu: [
       {
         id: '1',
-        name: 'Session',
-        route: 'students/sessions',
-        icon: 'SubCalendar',
-      },
-      {
-        id: '2',
         name: 'Class',
         route: 'students/class',
         icon: 'SubBook',
       },
       {
-        id: '3',
+        id: '2',
         name: 'Sub Class',
         route: 'students/section',
         icon: 'SubGroup',
       },
       {
-        id: '4',
+        id: '3',
         name: 'Students Admission',
         route: 'students',
         icon: 'SubUser',
       },
       {
-        id: '5',
+        id: '4',
         name: 'English & Arobi Name',
         route: 'students/english-arobi-name',
         icon: 'SubForm',
       },
       {
-        id: '6',
+        id: '5',
         name: 'Book',
         route: 'students/book-list',
         icon: 'SubBook',
       },
       {
-        id: '7',
+        id: '6',
         name: 'Group Distribution',
         route: 'students/group-distribution',
         icon: 'SubGroup',
       },
       {
-        id: '8',
+        id: '7',
         name: 'Data Export',
         route: 'students/data-export',
         icon: 'SubExport',
       },
       {
-        id: '9',
+        id: '8',
         name: 'Certificate of Attestation',
         route: 'students/certificate-of-attestation',
         icon: 'SubCertificate',
       },
       {
-        id: '10',
+        id: '9',
         name: 'Students Report (Demo)',
         route: 'students/report',
         icon: 'SubReport',
       },
       {
-        id: '11',
+        id: '10',
         name: 'Online Admission',
         route: 'students/online-admission',
         icon: 'SubUser',
       },
       {
-        id: '12',
+        id: '11',
         name: 'Student ID Card',
         route: 'students/student-id-card',
         icon: 'SubIdCard',
       },
       {
-        id: '13',
+        id: '12',
         name: 'Students Report List',
         route: 'students/report_list',
         icon: 'SubReport',

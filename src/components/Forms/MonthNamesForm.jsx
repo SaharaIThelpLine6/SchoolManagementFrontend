@@ -24,12 +24,52 @@ import DefaultSelect from "./DefaultSelect";
 
 const DESKTOP_QUERY = "(min-width: 768px)";
 
+/* ---------- Class chip ---------- */
+const LockIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-2.5 h-2.5" fill="currentColor">
+    <path d="M17 9V7a5 5 0 0 0-10 0v2H5v12h14V9h-2zM9 7a3 3 0 0 1 6 0v2H9V7z" />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="3">
+    <path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const ClassChip = ({ label, selected, locked, disabled, onClick }) => {
+  const base =
+    "relative inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border text-sm font-medium transition-all duration-200 select-none";
+  const state = locked
+    ? "bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed"
+    : selected
+      ? "bg-blue-50 border-blue-500 text-blue-700 shadow-sm ring-2 ring-blue-100"
+      : "bg-white border-gray-300 text-gray-700 hover:border-blue-400 hover:bg-blue-50/50 active:scale-95";
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={locked || disabled}
+      title={locked ? "এই সেশনে ইতিমধ্যে মাসের নাম আছে" : undefined}
+      className={`${base} ${state}`}
+    >
+      {selected && !locked && <CheckIcon />}
+      {label}
+      {locked && (
+        <span className="absolute -top-2 -right-1 w-4 h-4 rounded-full bg-white border border-pink-300 text-pink-500 flex items-center justify-center shadow-sm">
+          <LockIcon />
+        </span>
+      )}
+    </button>
+  );
+};
+
 const MonthNamesForm = ({ id, isEdit = false }) => {
   const translate = useTranslate();
   const dispatch = useDispatch();
   const inputRefs = useRef({});
 
-  // শুধু একটি layout render করার জন্য
   const [isDesktop, setIsDesktop] = useState(
     typeof window !== "undefined" && window.matchMedia(DESKTOP_QUERY).matches
   );
@@ -49,17 +89,16 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
     (state) => state.class
   );
 
-  const { data: monthsList = [] } = useGetMonthListQuery(undefined, {
-    skip: !isEdit,
-  });
+  // ✅ skip সরানো হয়েছে — locked class বের করার জন্য সবসময় লাগবে
+  const { data: monthsList = [] } = useGetMonthListQuery();
 
-  const [insertMonth] = useInsertMonthMutation();
-  const [editMonth] = useEditMonthMutation();
+  const [insertMonth, { isLoading: isSaving }] = useInsertMonthMutation();
+  const [editMonth, { isLoading: isUpdating }] = useEditMonthMutation();
 
   const methods = useForm({
     defaultValues: {
       monthData: months.map(() => ({ bangla: "", english: "", arabic: "" })),
-      ClassID: "",
+      ClassIDs: [],
       SessionID: "",
     },
   });
@@ -69,14 +108,43 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
     handleSubmit,
     reset,
     setValue,
+    watch,
     control,
     formState: { errors },
   } = methods;
 
-  const { fields } = useFieldArray({
-    control,
-    name: "monthData",
-  });
+  const { fields } = useFieldArray({ control, name: "monthData" });
+
+  // ✅ ClassIDs custom field validation
+  useEffect(() => {
+    register("ClassIDs", {
+      validate: (v) =>
+        (Array.isArray(v) && v.length > 0) || translate("Class is required"),
+    });
+  }, [register]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const selectedIds = watch("ClassIDs") || [];
+  const sessionId = watch("SessionID");
+
+  // ✅ নির্বাচিত session এ যে class গুলোর data আছে সেগুলো lock
+  const lockedIds = useMemo(() => {
+    if (isEdit || !sessionId) return new Set();
+    return new Set(
+      monthsList
+        .filter((m) => String(m.SessionID) === String(sessionId))
+        .map((m) => Number(m.ClassID))
+    );
+  }, [monthsList, sessionId, isEdit]);
+
+  // session বদলালে locked class selection থেকে বাদ
+  useEffect(() => {
+    if (isEdit || lockedIds.size === 0) return;
+    const current = methods.getValues("ClassIDs") || [];
+    const filtered = current.filter((cid) => !lockedIds.has(cid));
+    if (filtered.length !== current.length) {
+      setValue("ClassIDs", filtered, { shouldValidate: true });
+    }
+  }, [lockedIds, isEdit]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const defaultValues = useMemo(() => {
     if (!isEdit || !id) return null;
@@ -92,7 +160,7 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
 
     return {
       monthData: monthDataArray,
-      ClassID: item?.ClassID || "",
+      ClassIDs: item?.ClassID ? [Number(item.ClassID)] : [],
       SessionID: item?.SessionID || "",
     };
   }, [id, monthsList, isEdit]);
@@ -107,7 +175,7 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
       reset(defaultValues);
     } else if (!isEdit) {
       reset({
-        ClassID: "",
+        ClassIDs: [],
         SessionID: "",
         monthData: months.map(() => ({ bangla: "", english: "", arabic: "" })),
       });
@@ -131,6 +199,32 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
         Loading Data...
       </div>
     );
+
+  /* ---------- Class chip handlers ---------- */
+  const toggleClass = (classId) => {
+    const next = selectedIds.includes(classId)
+      ? selectedIds.filter((c) => c !== classId)
+      : [...selectedIds, classId];
+    setValue("ClassIDs", next, { shouldValidate: true, shouldDirty: true });
+  };
+
+  const selectableIds = classList
+    .map((c) => Number(c.ClassID))
+    .filter((cid) => !lockedIds.has(cid));
+  const allSelected =
+    selectableIds.length > 0 &&
+    selectableIds.every((cid) => selectedIds.includes(cid));
+
+  const toggleAll = () =>
+    setValue("ClassIDs", allSelected ? [] : selectableIds, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+
+  // edit এ শুধু ওই class টাই দেখাবে
+  const visibleClasses = isEdit
+    ? classList.filter((c) => selectedIds.includes(Number(c.ClassID)))
+    : classList;
 
   const convertBanglaToEnglishDigit = (str) =>
     str
@@ -167,14 +261,10 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
       shouldDirty: true,
     });
 
-    // একই column এর পরের মাসে যাবে (Bangla -> Bangla, English -> English, Arabic -> Arabic)
     const nextIndex = index + 1;
-
-    // শেষ মাসের পরে আর যাবে না
     if (nextIndex >= months.length) return;
 
     const nextInput = inputRefs.current[`${nextIndex}-${fieldType}`];
-
     if (nextInput) {
       nextInput.focus();
       try {
@@ -187,10 +277,7 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
 
   const onSubmit = async (data) => {
     try {
-      const payload = {
-        ClassID: data.ClassID,
-        SessionID: data.SessionID,
-      };
+      const payload = { SessionID: data.SessionID };
 
       data.monthData.forEach((item, index) => {
         const i = index + 1;
@@ -200,15 +287,19 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
       });
 
       if (isEdit) {
-        await editMonth({ id, ...payload }).unwrap();
+        await editMonth({ id, ClassID: data.ClassIDs[0], ...payload }).unwrap();
       } else {
-        await insertMonth(payload).unwrap();
+        await insertMonth({ ClassIDs: data.ClassIDs, ...payload }).unwrap();
       }
 
       Swal.fire({
         title: translate(
           isEdit ? "Updated successfully!" : "Saved successfully!"
         ),
+        text:
+          !isEdit && data.ClassIDs.length > 1
+            ? `${data.ClassIDs.length} টি ক্লাসের জন্য সংরক্ষণ হয়েছে`
+            : undefined,
         icon: "success",
         timer: 1500,
         showConfirmButton: false,
@@ -218,10 +309,13 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
       hideModal();
     } catch (error) {
       console.error("Save failed", error);
+      const existNames = error?.data?.existClassNames;
       Swal.fire({
         icon: "error",
         title: translate("Failed to save data"),
-        text: error?.data?.message || "Something went wrong",
+        text: existNames?.length
+          ? `${error?.data?.message}: ${existNames.join(", ")}`
+          : error?.data?.message || "Something went wrong",
       });
     }
   };
@@ -259,43 +353,82 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
     />
   );
 
+  const busy = isSaving || isUpdating;
+
   return (
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="font-default bg-gray-50 p-3 sm:p-4 rounded-lg"
+        className="font-SolaimanLipi"
       >
-        {/* Top: Session & Class */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6 bg-white p-3 sm:p-4 rounded shadow-sm border border-gray-200">
-          <DefaultSelect
-            options={academicSession}
-            require={translate("Session is required")}
-            nameField={"SessionName"}
-            valueField={"SessionID"}
-            registerKey={"SessionID"}
-            type={"number"}
-            label="Academic Session"
-            unicode
-            disabled={isEdit}
-          />
+        {/* Top: Session + Class chips */}
+        <div className="mb-4 sm:mb-6 bg-white p-3 sm:p-4 rounded-lg shadow-sm border border-gray-200 space-y-4">
+          <div className="max-w-sm">
+            <DefaultSelect
+              options={academicSession}
+              require={translate("Session is required")}
+              nameField={"SessionName"}
+              valueField={"SessionID"}
+              registerKey={"SessionID"}
+              type={"number"}
+              label="Session"
+              unicode
+              disabled={isEdit}
+            />
+          </div>
 
-          <DefaultSelect
-            options={classList}
-            require={translate("Class is required")}
-            nameField={"ClassName"}
-            valueField={"ClassID"}
-            registerKey={"ClassID"}
-            type={"number"}
-            label="Class"
-            unicode
-            disabled={isEdit}
-          />
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-sm font-semibold text-gray-700">
+                {translate("Class")}
+                {!isEdit && selectedIds.length > 0 && (
+                  <span className="ml-2 text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                    {selectedIds.length} নির্বাচিত
+                  </span>
+                )}
+              </label>
+
+              {!isEdit && selectableIds.length > 1 && (
+                <button
+                  type="button"
+                  onClick={toggleAll}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  {allSelected ? "সব বাদ দিন" : "সব নির্বাচন"}
+                </button>
+              )}
+            </div>
+
+            <div
+              className={`flex flex-wrap gap-x-2.5 gap-y-3 p-3 rounded-lg bg-gray-50 border ${errors?.ClassIDs ? "border-red-400" : "border-gray-100"
+                }`}
+            >
+              {visibleClasses.map((c) => {
+                const cid = Number(c.ClassID);
+                return (
+                  <ClassChip
+                    key={cid}
+                    label={(c.ClassName || "").trim()}
+                    selected={selectedIds.includes(cid)}
+                    locked={lockedIds.has(cid)}
+                    disabled={isEdit}
+                    onClick={() => toggleClass(cid)}
+                  />
+                );
+              })}
+            </div>
+
+            {errors?.ClassIDs && (
+              <p className="mt-1.5 text-xs text-red-500">
+                {errors.ClassIDs.message}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Month Table */}
         <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
           {isDesktop ? (
-            /* Desktop header */
             <div className="grid grid-cols-12 bg-blue-600 text-white font-semibold text-sm">
               <div className="col-span-2 p-3 text-center border-r border-blue-500">
                 {translate("Month")}
@@ -311,7 +444,6 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
               </div>
             </div>
           ) : (
-            /* Mobile header */
             <div className="grid grid-cols-3 bg-blue-600 text-white font-semibold text-xs">
               <div className="p-2 text-center border-r border-blue-500">
                 {translate("Bangla Name")}
@@ -331,31 +463,25 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
                   }`}
               >
                 {isDesktop ? (
-                  /* Desktop row */
                   <div className="grid grid-cols-12">
                     <div className="col-span-2 flex items-center justify-center p-2 text-sm font-medium text-gray-700 border-r border-gray-100 bg-gray-100/50">
                       {translate(months[index])}
                     </div>
-
                     <div className="col-span-3 p-1.5 border-r border-gray-100">
                       {renderInput(index, "bangla")}
                     </div>
-
                     <div className="col-span-3 p-1.5 border-r border-gray-100">
                       {renderInput(index, "english")}
                     </div>
-
                     <div className="col-span-4 p-1.5">
                       {renderInput(index, "arabic")}
                     </div>
                   </div>
                 ) : (
-                  /* Mobile card */
                   <div className="p-3 space-y-2">
                     <div className="text-xs font-semibold text-gray-700 bg-gray-100/70 inline-block px-2 py-0.5 rounded">
                       {translate(months[index])}
                     </div>
-
                     <div className="grid grid-cols-1 gap-2">
                       {renderInput(index, "bangla")}
                       {renderInput(index, "english")}
@@ -368,8 +494,8 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-6">
+        {/* Buttons - sticky at bottom */}
+        <div className="sticky bottom-0 -mx-4 px-4 py-3 mt-6 bg-white/95 backdrop-blur border-t border-slate-100 flex flex-col-reverse sm:flex-row justify-end gap-3 z-10">
           <Button
             type="button"
             onClick={hideModal}
@@ -379,9 +505,10 @@ const MonthNamesForm = ({ id, isEdit = false }) => {
           </Button>
           <Button
             type="submit"
-            className="!bg-blue-600 hover:!bg-blue-700 !text-white !px-8 shadow-md w-full sm:w-auto"
+            disabled={busy}
+            className="!bg-blue-600 hover:!bg-blue-700 !text-white !px-8 shadow-md w-full sm:w-auto disabled:opacity-60"
           >
-            {translate(isEdit ? "Update" : "Save")}
+            {busy ? "..." : translate(isEdit ? "Update" : "Save")}
           </Button>
         </div>
       </form>
@@ -440,6 +567,8 @@ export default MonthNamesForm;
 //   const { classList, status: classStatus } = useSelector(
 //     (state) => state.class
 //   );
+
+//   console.log(classList, "classList")
 
 //   const { data: monthsList = [] } = useGetMonthListQuery(undefined, {
 //     skip: !isEdit,
@@ -559,23 +688,13 @@ export default MonthNamesForm;
 //       shouldDirty: true,
 //     });
 
-//     // পরের field ঠিক করা
-//     let nextIndex = index;
-//     let nextType = fieldType;
+//     // একই column এর পরের মাসে যাবে (Bangla -> Bangla, English -> English, Arabic -> Arabic)
+//     const nextIndex = index + 1;
 
-//     if (fieldType === "bangla") {
-//       nextType = "english";
-//     } else if (fieldType === "english") {
-//       nextType = "arabic";
-//     } else if (fieldType === "arabic") {
-//       nextType = "bangla";
-//       nextIndex = index + 1;
-//     }
-
-//     // শেষ field এর পরে আর যাবে না
+//     // শেষ মাসের পরে আর যাবে না
 //     if (nextIndex >= months.length) return;
 
-//     const nextInput = inputRefs.current[`${nextIndex}-${nextType}`];
+//     const nextInput = inputRefs.current[`${nextIndex}-${fieldType}`];
 
 //     if (nextInput) {
 //       nextInput.focus();

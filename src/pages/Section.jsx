@@ -13,6 +13,7 @@ import { useGetSubclassesQuery } from '../features/session/sessionSlice';
 import { ViewPermission } from '../Routes/ViewPermission';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
+import SvgIcon from '../components/icons/SvgIcon';
 
 const PAGE_SIZE = 10;
 
@@ -185,14 +186,17 @@ const Section = ({ pageTitle }) => {
       {/* 🔹 Header */}
       <div className="filter_header border-b border-[#e9edf4] flex items-center justify-between sm:px-5 py-5 pt-0 sm:pt-5 mb-6">
         <h3 className="font-default text-[20px] font-bold">
-          {translate('Session')}
+          {translate('Section Lists')}
         </h3>
         <ViewPermission
           permissionId={permissionsDataList.sub_class}
           permissionType="insert"
         >
-          <Button onClick={handleCreateOpenForm}>
-            {translate('Create Session')}
+          <Button onClick={handleCreateOpenForm}
+            className="flex items-center gap-2"
+          >
+            <SvgIcon name="FaPlus" size={16} />
+            {translate('Create new')}
           </Button>
         </ViewPermission>
       </div>

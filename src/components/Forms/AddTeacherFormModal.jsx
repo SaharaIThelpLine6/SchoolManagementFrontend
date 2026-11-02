@@ -876,13 +876,13 @@ const AddTeacherFormModal = ({ userId }) => {
                 defaultValue={teacherData?.Mobile1 || ''}
               />
 
-              <DefaultSelect
+              {/* <DefaultSelect
                 label="সম্পর্ক"
                 options={studentRelation}
                 valueField="RelationID"
                 nameField="RelationName"
                 registerKey="Relationship1"
-              />
+              /> */}
 
               <DefaultInput
                 label="মোবাইল ২"
@@ -892,13 +892,13 @@ const AddTeacherFormModal = ({ userId }) => {
                 defaultValue={teacherData?.Mobile2 || ''}
               />
 
-              <DefaultSelect
+              {/* <DefaultSelect
                 label="সম্পর্ক"
                 options={studentRelation}
                 valueField="RelationID"
                 nameField="RelationName"
                 registerKey="Relationship2"
-              />
+              /> */}
 
               <DefaultSelect
                 label="রক্তের গ্রুপ"

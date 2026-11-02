@@ -106,29 +106,29 @@ const ClassCreateUpdateModal = ({ id }) => {
   };
 
   return (
-    <div className="w-full border rounded-lg p-5 bg-white shadow-inner">
-      <h2 className="text-lg font-semibold mb-4 text-gray-700">
-        {isEditMode ? translate('Update Class') : translate('Create Class')}
-      </h2>
-
+    <div className="w-full p-5">
       <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
-          <DefaultInput
-            label={translate('Class Name')}
-            registerKey="ClassName"
-            require={translate('Class name is required')}
-          />
+        <form onSubmit={handleSubmit(onSubmit)} >
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <DefaultInput
+              label={translate('Class Name')}
+              registerKey="ClassName"
+              require={translate('Class name is required')}
+              placeholder={translate('Enter Class name')}
+            />
 
-          <DefaultInput
-            label={translate('English Name')}
-            registerKey="EnglishClass"
-          />
+            <DefaultInput
+              label={translate('English Name')}
+              registerKey="EnglishClass"
+              placeholder={translate('Enter English name')}
+            />
 
-          <DefaultInput
-            label={translate('Arabic Name')}
-            registerKey="ArabicClass"
-          />
-
+            <DefaultInput
+              label={translate('Arabic Name')}
+              registerKey="ArabicClass"
+              placeholder={translate('Enter Arabic name')}
+            />
+          </div>
           <div className="flex gap-3 mt-4 justify-end">
             <Button
               type="submit"

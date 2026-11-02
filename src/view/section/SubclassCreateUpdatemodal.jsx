@@ -136,18 +136,12 @@ const SubclassCreateUpdatemodal = ({ id }) => {
   if (isError) return <div className="text-red-500">Error loading data</div>;
 
   return (
-    <div className="w-full border rounded-lg p-5 bg-white shadow-inner">
-      <h2 className="text-lg font-semibold mb-4 text-gray-700">
-        {isEditMode
-          ? translate('Update Sub Class')
-          : translate('Create Sub Class')}
-      </h2>
-
+    <div className="w-full p-5">
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="grid grid-cols-2 gap-3">
             <DefaultSelect
-              label="Class ID"
+              label="Class Name"
               options={classes ?? []}
               valueField="ClassID"
               nameField="ClassName"
@@ -160,26 +154,26 @@ const SubclassCreateUpdatemodal = ({ id }) => {
               registerKey="Serial"
               defaultValue={isEditMode ? subClassData?.Serial : serialNumber}
               type="number"
-              placeholder={'Enter sub class serial...'}
+              placeholder={translate('Enter serial number')}
             />
             <DefaultInput
               label={translate('Sub Class Bangla')}
               registerKey="SubClass"
               require={translate('Sub class name is required')}
               defaultValue={isEditMode ? subClassData?.SubClass : className}
-              placeholder={'Enter sub class bangla name...'}
+              placeholder={translate('Enter sub class bangla name...')}
             />
             <DefaultInput
               label={translate('English Name')}
               registerKey="SubClassEng"
               defaultValue={subClassData?.SubClassEng}
-              placeholder={'Enter subclass english name...'}
+              placeholder={translate('Enter subclass english name...')}
             />
             <DefaultInput
               label={translate('Arabic Name')}
               registerKey="SubClassAra"
               defaultValue={subClassData?.SubClassAra}
-              placeholder={'Enter sub class arobic name...'}
+              placeholder={translate('Enter sub class arabic name...')}
             />
           </div>
 

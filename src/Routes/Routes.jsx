@@ -222,7 +222,6 @@ const Router = createBrowserRouter([
           },
           {
             path: 'module-lists',
-            // element: <Home />,
             element: <ModuleLists />,
           },
           {
@@ -326,6 +325,16 @@ const Router = createBrowserRouter([
                 ),
               },
               {
+                path: 'sessions',
+                element: (
+                  <RequirePermission
+                    permissionId={permissionsDataList.academic_year}
+                  >
+                    <Session pageTitle="Session" />
+                  </RequirePermission>
+                ),
+              },
+              {
                 path: 'bulk-image',
                 element: (
                   <OwenGuide>
@@ -349,16 +358,7 @@ const Router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-              {
-                path: 'sessions',
-                element: (
-                  <RequirePermission
-                    permissionId={permissionsDataList.academic_year}
-                  >
-                    <Session pageTitle="Session" />
-                  </RequirePermission>
-                ),
-              },
+
               {
                 path: 'Class',
                 element: (
