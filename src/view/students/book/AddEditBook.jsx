@@ -114,10 +114,7 @@ const AddEditBook = ({ id }) => {
   };
 
   return (
-    <div className="w-full border rounded-lg p-5 bg-white shadow-inner">
-      <h2 className="text-lg font-semibold mb-4 text-gray-700">
-        {isEditMode ? translate('Update Subject') : translate('Create Subject')}
-      </h2>
+    <div className="w-full p-5">
 
       <FormProvider {...methods}>
         <form

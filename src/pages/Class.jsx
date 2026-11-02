@@ -1,14 +1,24 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import Swal from 'sweetalert2';
+import { renderToStaticMarkup } from 'react-dom/server';
+
 import Button from '../components/Button/Button';
 import EditButton from '../components/Button/EditButton';
+import DeleteButton from '../components/Button/DeleteButton';
 import Loading from '../components/Loading/Loading';
 import DefaultPagination from '../components/Pagination/DefaultPagination';
 import SortableTable from '../components/Tables/SortableTable';
+import ClassListPDF from '../view/class/ClassListPDF';
+
 import { permissionsDataList } from '../Data/permissions';
 import { setPageName } from '../features/auth/authSlice';
-import { useGetClassListQuery } from '../features/class/classQuerySlice';
+import {
+  useGetClassListQuery,
+  useDeleteClassMutation,
+} from '../features/class/classQuerySlice';
+import { useGetInstitutionInfoQuery } from '../features/settings/settingsQuerySlice';
+
 import { ViewPermission } from '../Routes/ViewPermission';
 import { showModal } from '../utils/ModalControlar';
 import useTranslate from '../utils/Translate';
@@ -16,6 +26,89 @@ import SvgIcon from '../components/icons/SvgIcon';
 
 const PAGE_SIZE = 10;
 
+// ============================================================
+// 🔹 Print window: A4 Portrait / Landscape
+// ============================================================
+const openPrintWindow = (innerHTML, orientation = 'portrait') => {
+  const win = window.open('', '_blank', 'width=1200,height=900');
+  if (!win) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Popup blocked',
+      text: 'Please allow popups for this site and try again.',
+    });
+    return;
+  }
+
+  win.document.open();
+  win.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Print</title>
+        <style>
+          @page {
+            size: A4 ${orientation};
+            margin: 10mm;
+          }
+          * { box-sizing: border-box; }
+          html, body {
+            margin: 0;
+            padding: 0;
+            font-family: 'SolaimanLipi', 'Noto Sans Bengali', Arial, sans-serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+            color: #000;
+            background: #fff;
+          }
+          table { border-collapse: collapse; }
+          thead { display: table-header-group; }
+          tr, img { page-break-inside: avoid; break-inside: avoid; }
+        </style>
+      </head>
+      <body>${innerHTML}</body>
+    </html>
+  `);
+  win.document.close();
+
+  // সব image load হওয়ার পর print
+  const trigger = () => {
+    try {
+      win.focus();
+      win.print();
+      setTimeout(() => win.close(), 500);
+    } catch (e) {
+      // ignore
+    }
+  };
+
+  const waitForImages = () => {
+    const imgs = Array.from(win.document.images || []);
+    if (imgs.length === 0) return setTimeout(trigger, 300);
+
+    Promise.all(
+      imgs.map(
+        (img) =>
+          new Promise((resolve) => {
+            if (img.complete) return resolve();
+            img.onload = resolve;
+            img.onerror = resolve;
+          })
+      )
+    ).then(() => setTimeout(trigger, 300));
+  };
+
+  if (win.document.readyState === 'complete') {
+    waitForImages();
+  } else {
+    win.onload = waitForImages;
+  }
+};
+
+// ============================================================
+// 🔹 Class Component
+// ============================================================
 const Class = ({ pageTitle }) => {
   const dispatch = useDispatch();
   const translate = useTranslate();
@@ -28,8 +121,11 @@ const Class = ({ pageTitle }) => {
     refetch,
   } = useGetClassListQuery();
 
+  // 🔹 Institution info (print header/footer এর জন্য)
+  const { data: institutionInfo } = useGetInstitutionInfoQuery();
+
   // 🔹 Delete Mutation
-  //   const [deleteClass] = useDeleteClassMutation();
+  const [deleteClass] = useDeleteClassMutation();
 
   // 🔹 Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -45,12 +141,12 @@ const Class = ({ pageTitle }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  // 🔹 Open Create Modal
+  // 🔹 Create Modal
   const handleCreateOpenForm = useCallback(() => {
     showModal(translate('Class Create'), 'CLASS_CREATE_FORM');
   }, [translate]);
 
-  // 🔹 Open Edit Modal
+  // 🔹 Edit Modal
   const handleEditOpenForm = useCallback(
     (id) => {
       showModal(translate('Class Update'), 'CLASS_EDIT_FORM', id);
@@ -71,26 +167,70 @@ const Class = ({ pageTitle }) => {
       cancelButtonText: translate('Cancel'),
     });
 
-    if (result.isConfirmed) {
-      try {
-        // await deleteClass(id).unwrap();
+    if (!result.isConfirmed) return;
 
-        await Swal.fire({
-          icon: 'success',
-          title: translate('Deleted successfully'),
-          timer: 1500,
-          showConfirmButton: false,
-        });
-
-        refetch(); // auto refresh list
-      } catch (err) {
-        await Swal.fire({
-          icon: 'error',
-          title: translate('Error'),
-          text: err?.data?.message || translate('Failed to delete class'),
-        });
-      }
+    try {
+      await deleteClass(id).unwrap();
+      await Swal.fire({
+        icon: 'success',
+        title: translate('Deleted successfully'),
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      refetch();
+    } catch (err) {
+      await Swal.fire({
+        icon: 'error',
+        title: translate('Error'),
+        text:
+          err?.data?.message ||
+          err?.error ||
+          translate('Failed to delete class'),
+      });
     }
+  };
+
+  // ============================================================
+  // 🔹 PRINT: orientation select → render → print
+  // ============================================================
+  const handlePrint = async () => {
+    if (!classes.length) {
+      Swal.fire({
+        icon: 'info',
+        title: translate('No data'),
+        text: translate('There is no class to print.'),
+      });
+      return;
+    }
+
+    // 1) Orientation select
+    const { value: orientation } = await Swal.fire({
+      title: translate('Select Print Orientation'),
+      input: 'radio',
+      inputOptions: {
+        portrait: translate('Portrait (উল্লম্ব)'),
+        landscape: translate('Landscape (আড়াআড়ি)'),
+      },
+      inputValue: 'portrait',
+      showCancelButton: true,
+      confirmButtonText: translate('Print'),
+      cancelButtonText: translate('Cancel'),
+      inputValidator: (v) =>
+        !v ? translate('Please select an orientation') : null,
+    });
+    if (!orientation) return;
+
+    // 2) Render → static HTML
+    const html = renderToStaticMarkup(
+      <ClassListPDF
+        data={classes}
+        orientation={orientation}
+        institution={institutionInfo}
+      />
+    );
+
+    // 3) Print
+    openPrintWindow(html, orientation);
   };
 
   if (isLoading) return <Loading />;
@@ -114,15 +254,15 @@ const Class = ({ pageTitle }) => {
     },
     {
       title: translate('English'),
-      field: 'EnglishName',
+      field: 'EnglishClass',
       hozAlign: 'center',
-      render: (row) => <p>{row.EnglishName ?? "-"}</p>,
+      render: (row) => <p>{row.EnglishClass || row.EnglishName || ''}</p>,
     },
     {
-      title: translate('عربي'),
+      title: translate('Arabic'),
       field: 'ArabicClass',
       hozAlign: 'center',
-      render: (row) => <p>{row.ArabicClass ?? "-"}</p>,
+      render: (row) => <p>{row.ArabicClass}</p>,
     },
     {
       title: translate('Action'),
@@ -138,19 +278,13 @@ const Class = ({ pageTitle }) => {
             <EditButton onClick={() => handleEditOpenForm(row.ClassID)} />
           </ViewPermission>
 
-          {/* <ViewPermission
+          <ViewPermission
             permissionId={permissionsDataList.class}
             permissionType="delete"
             empty={true}
           >
-            <Button
-              onClick={() => handleDeleteOpenForm(row.ClassID)}
-              variant="danger"
-              size="sm"
-            >
-              {translate('Delete')}
-            </Button>
-          </ViewPermission> */}
+            <DeleteButton onClick={() => handleDeleteOpenForm(row.ClassID)} />
+          </ViewPermission>
         </div>
       ),
     },
@@ -164,18 +298,31 @@ const Class = ({ pageTitle }) => {
           {translate('Class Lists')}
         </h3>
 
-        <ViewPermission
-          permissionId={permissionsDataList.class}
-          permissionType="insert"
-        >
-          <Button onClick={handleCreateOpenForm}
-            className="flex items-center gap-2"
+        <div className="flex items-center gap-3">
+          {/* 🔹 Print Button */}
+          <button
+            type="button"
+            onClick={handlePrint}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition"
           >
-            <SvgIcon name="FaPlus" size={16} />
+            <SvgIcon name="TbPrinter" size={16} />
+            {/* {translate('Print')} */}
+          </button>
 
-            {translate('Create new')}
-          </Button>
-        </ViewPermission>
+          {/* Create new */}
+          <ViewPermission
+            permissionId={permissionsDataList.class}
+            permissionType="insert"
+          >
+            <Button
+              onClick={handleCreateOpenForm}
+              className="flex items-center gap-2"
+            >
+              <SvgIcon name="FaPlus" size={16} />
+              {translate('Create new')}
+            </Button>
+          </ViewPermission>
+        </div>
       </div>
 
       {/* Table */}

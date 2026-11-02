@@ -97,6 +97,14 @@ export const classSlice = createApi({
       }),
       invalidatesTags: ['Academic_Subjects'],
     }),
+    deleteClass: builder.mutation({
+      query: (id) => ({
+        url: `delete_class`,
+        method: 'DELETE',
+        body: { id },
+      }),
+      invalidatesTags: ['ClassList'],
+    }),
     getLastSerialSubject: builder.query({
       query: (id) => `academic_subjects/last-serial/${id}`,
       providesTags: ['Academic_Subjects'],
@@ -275,5 +283,6 @@ export const {
   useDeleteTimeSlotMutation,
   useGetSingleSubClassQuery,
   useGetStudentCountInfoQuery,
-  useGetExamClassSubjectsQuery
+  useGetExamClassSubjectsQuery,
+  useDeleteClassMutation,
 } = classSlice;

@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css'; // 🔹 Swal CSS fix
 import Button from '../../components/Button/Button';
 import DefaultInput from '../../components/Forms/DefaultInput';
+import DefaultInputCustom from '../../components/Forms/DefaultInputCustom';
 import {
   useCreateClassMutation,
   useGetSingleClassQuery,
@@ -117,16 +118,16 @@ const ClassCreateUpdateModal = ({ id }) => {
               placeholder={translate('Enter Class name')}
             />
 
-            <DefaultInput
-              label={translate('English Name')}
+            <DefaultInputCustom
+              label={'Class Name'}
               registerKey="EnglishClass"
-              placeholder={translate('Enter English name')}
+              placeholder={'Enter English name...'}
             />
 
             <DefaultInput
-              label={translate('Arabic Name')}
+              label="الاسم العربي"
               registerKey="ArabicClass"
-              placeholder={translate('Enter Arabic name')}
+              placeholder="أدخل الاسم باللغة العربية..."
             />
           </div>
           <div className="flex gap-3 mt-4 justify-end">
