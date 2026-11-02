@@ -113,10 +113,16 @@ const Class = ({ pageTitle }) => {
       render: (row) => <p>{row.ClassName}</p>,
     },
     {
-      title: translate('Arabic'),
+      title: translate('English'),
+      field: 'EnglishName',
+      hozAlign: 'center',
+      render: (row) => <p>{row.EnglishName ?? "-"}</p>,
+    },
+    {
+      title: translate('عربي'),
       field: 'ArabicClass',
       hozAlign: 'center',
-      render: (row) => <p>{row.ArabicClass}</p>,
+      render: (row) => <p>{row.ArabicClass ?? "-"}</p>,
     },
     {
       title: translate('Action'),

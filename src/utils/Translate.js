@@ -1123,8 +1123,9 @@ const useTranslate = () => {
     "A database key conflict prevented copying this condition. Please check the table constraints; this does not confirm an existing destination condition.": "ডেটাবেসের কী কনফ্লিক্টের কারণে কন্ডিশন কপি হয়নি। টেবিলের কনস্ট্রেইন্ট যাচাই করুন; এই ত্রুটি মানেই গন্তব্যে কন্ডিশন আছে এমন নয়।",
     "Result Publish": "ফলাফল প্রকাশ",
     "Session Name": "সেশন নাম",
-    "Session Overview": "সেশন ওভারভিউ",
-    "Distribution of sessions over time": "সময়ের সাথে সেশন বিতরণ",
+    "Session Students Overview": "শিক্ষাবর্ষ শিক্ষার্থীর ওভারভিউ",
+    "Number of students admitted per session":
+      "প্রতি শিক্ষাবর্ষে ভর্তি হওয়া শিক্ষার্থীর সংখ্যা",
     "Created Sessions": "তৈরিকৃত সেশন",
     "Active Sessions": "সক্রিয় সেশন",
     Total: "মোট",

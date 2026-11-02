@@ -20,8 +20,8 @@ export const sessionSlice = createApi({
       query: () => 'academic_session',
       providesTags: ['Sessions'], // ✅ Refetch when invalidated
     }),
-    getSessionsWithMonth: builder.query({
-      query: () => 'academic_session_with_month',
+    getSessionsWithStudent: builder.query({
+      query: () => 'academic_session_with_student',
       providesTags: ['Sessions'], // ✅ Refetch when invalidated
     }),
     getBloodGroupStudentCount: builder.query({
@@ -121,5 +121,6 @@ export const {
   useDeleteSubclassMutation,
   useGetSubclassQuery,
   useGetLastSubclassQuery,
-  useGetBloodGroupStudentCountQuery
+  useGetBloodGroupStudentCountQuery,
+  useGetSessionsWithStudentQuery,
 } = sessionSlice;
