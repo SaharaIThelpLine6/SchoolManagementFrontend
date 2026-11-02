@@ -84,7 +84,7 @@ const Header = () => {
             onClick={handleOpenModal}
             className="text-white bg-cyan-500 hover:bg-cyan-600 font-medium rounded-full text-xs px-4 py-1.5"
           >
-            Buy now
+            {translate("Buy Now")}
           </button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
