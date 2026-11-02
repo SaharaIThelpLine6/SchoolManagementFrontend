@@ -188,6 +188,7 @@ import ExamRoutineEdit from '../pages/ExamRoutineEdit';
 import ExamAllClassRoutine from '../pages/ExamAllClassRoutine';
 import StudentInfo from '../components/Tables/StudentInfo';
 import ModuleLists from '../pages/ModuleLists';
+import VoiceSMS from '../pages/VoiceSMS';
 
 const Router = createBrowserRouter([
   {
@@ -291,6 +292,14 @@ const Router = createBrowserRouter([
                 element: (
                   <RequirePermission permissionId={permissionsDataList.sms}>
                     <SMS pageTitle="SMS" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'voice-sms',
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.sms}>
+                    <VoiceSMS pageTitle="VoiceSMS" />
                   </RequirePermission>
                 ),
               },
