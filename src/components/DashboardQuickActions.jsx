@@ -177,12 +177,12 @@ export default function DashboardQuickActions() {
         <div className="dashboard-quick-actions__menu" id="dashboard-quick-actions-panel" role="group" aria-label={text.open}>
           
           {/* ⭐ নতুন ইউজার আইকন (আনকমেন্ট করা হলো) */}
-          {canEdit && (
+          {/* {canEdit && (
             <button type="button" className="dashboard-quick-actions__action" onClick={() => { setError(''); setView('user'); }}>
               <span className="dashboard-quick-actions__label">{text.update}</span>
               <span className="dashboard-quick-actions__action-icon dashboard-quick-actions__action-icon--user"><FiUser size={23} aria-hidden="true" /></span>
             </button>
-          )}
+          )} */}
 
           <a className="dashboard-quick-actions__action" href={whatsappUrl} target="_blank" rel="noopener noreferrer" onClick={() => close()}>
             <span className="dashboard-quick-actions__label">{text.whatsapp}</span>
