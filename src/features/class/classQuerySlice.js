@@ -29,6 +29,10 @@ export const classSlice = createApi({
       query: () => 'view_class',
       providesTags: ['ClassList'],
     }),
+    getAcademicInfo: builder.query({
+      query: () => '/session_wise_student_count',
+      providesTags: ["ClassList", "SubClassList", "Academic_Subjects", "SubClasss"],
+    }),
     createClass: builder.mutation({
       query: (data) => ({
         url: 'insert_class',
@@ -285,4 +289,5 @@ export const {
   useGetStudentCountInfoQuery,
   useGetExamClassSubjectsQuery,
   useDeleteClassMutation,
+  useGetAcademicInfoQuery
 } = classSlice;
