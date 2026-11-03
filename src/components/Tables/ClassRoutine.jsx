@@ -5,20 +5,15 @@ import StudentClassListSkeleton from "../Skeleton/StudentClassListSkeleton";
 import bnBijoy2Unicode from "../../utils/conveter";
 import useTranslate from "../../utils/Translate";
 
-const ClassRoutine = () => {
+const ClassRoutine = ({ data, isLoading, isError }) => {
   const translate = useTranslate();
 
-  const {
-    data: studentclassData,
-    isLoading,
-    isError,
-  } = useGetAcademicInfoQuery();
 
   // যদি লোডিং হয়
   if (isLoading) return <StudentClassListSkeleton />;
   if (isError) return <p>ডেটা আনতে সমস্যা হয়েছে!</p>;
 
-  const classWiseStudent = studentclassData?.classWiseStudent ?? [];
+  const classWiseStudent = data ?? [];
 
   return (
     <div className="w-full font-default h-[450px] 2xl:h-[580px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col">

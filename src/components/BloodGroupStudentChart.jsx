@@ -178,10 +178,10 @@ const BloodGroupStudentChart = () => {
 
         {/* Stat badges */}
         <div className="flex flex-wrap gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
+          {/* <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
             <span className="h-2 w-2 rounded-full bg-indigo-500" />
             {t("Total Students")}: {totalStudents}
-          </span>
+          </span> */}
           <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
             {t("Groups")}: {groupCount}

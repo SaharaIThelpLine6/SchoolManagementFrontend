@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import SvgIcon from "../components/icons/SvgIcon";
-import { useGetStudentCountInfoQuery } from '../features/class/classQuerySlice';
+import { useGetAcademicInfoQuery, useGetStudentCountInfoQuery } from '../features/class/classQuerySlice';
 import useTranslate from '../utils/Translate';
 import { useGetPaymentTransactionReportQuery } from '../features/feeCollection/feeCollectionSlice';
 import { useGetStudentAttendanceTodayDashboardQuery } from '../features/student/studentQuerySlice';
@@ -99,6 +99,14 @@ const DashboardDesignNew = () => {
 
   const liveDate = getTodayBanglaDate();
 
+
+  const {
+    data: studentclassData,
+    isLoading,
+    isError,
+  } = useGetAcademicInfoQuery();
+  const classWiseStudent = studentclassData?.classWiseStudent ?? [];
+
   /* ---------- Queries ---------- */
   const {
     data: paymentTransactionData,
@@ -116,6 +124,8 @@ const DashboardDesignNew = () => {
     isFetching: studentFetching,
     refetch: refetchStudent,
   } = useGetStudentCountInfoQuery();
+
+  console.log(studentData, "studentData")
 
   const {
     data: attendanceData,
@@ -389,14 +399,14 @@ const DashboardDesignNew = () => {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1 col-span-1">
-            <PieChart />
+            <PieChart data={classWiseStudent} isLoading={isLoading} isError={isError} />
           </div>
           <div className="md:col-span-1 col-span-1">
             {/* <CalendarOne /> */}
             <CustomCalendar />
           </div>
           <div className="md:col-span-1 col-span-1">
-            <ClassRoutine />
+            <ClassRoutine data={classWiseStudent} isLoading={isLoading} isError={isError} />
           </div>
         </div>
       </div>

@@ -266,7 +266,7 @@ const initialModules = [
     audience: 'teacher',
     theme: 'rose',
     icon: 'result',
-    defaultEnabled: false,
+    defaultEnabled: true,
     version: 'v3.0.2',
     price: 'ফ্রি',
     features: [
@@ -298,7 +298,7 @@ const initialModules = [
     audience: 'parent',
     theme: 'amber',
     icon: 'video',
-    defaultEnabled: false,
+    defaultEnabled: true,
     version: 'v1.4.5',
     price: 'ফ্রি',
     features: [
@@ -330,7 +330,7 @@ const initialModules = [
     audience: 'parent',
     theme: 'pink',
     icon: 'alert',
-    defaultEnabled: false,
+    defaultEnabled: true,
     version: 'v1.2.0',
     price: 'ফ্রি',
     features: [

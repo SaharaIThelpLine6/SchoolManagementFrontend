@@ -1,56 +1,43 @@
 import React, { useState, useMemo } from "react";
 import ReactApexChart from "react-apexcharts";
-import { useGetStudentNumberByClassQuery } from "../../features/dashboard/dashboardQuerySlice";
 import PieChartSkeleton from "../Skeleton/PieChartSkeleton";
 import bnBijoy2Unicode from "../../utils/conveter";
 import useTranslate from "../../utils/Translate";
 
 const COLORS = [
-  "#FF6384",
-  "#3C50E0",
-  "#FFBB28",
-  "#00C49F",
-  "#6577F3",
-  "#A28BD4",
-  "#FF6B6B",
-  "#10B981",
-  "#F97316",
-  "#06B6D4",
-  "#8B5CF6",
-  "#EC4899",
-  "#84CC16",
-  "#14B8A6",
+  "#FF6384", "#3C50E0", "#FFBB28", "#00C49F", "#6577F3",
+  "#A28BD4", "#FF6B6B", "#10B981", "#F97316", "#06B6D4",
+  "#8B5CF6", "#EC4899", "#84CC16", "#14B8A6",
 ];
 
-const PieChart = () => {
+const PieChart = ({ data, isLoading, isError }) => {
   const translate = useTranslate();
-  const {
-    data: student_count,
-    isLoading,
-    isError,
-  } = useGetStudentNumberByClassQuery();
-
-  // drilldown: কোন ক্লাস সিলেক্ট করা হয়েছে (index)
   const [selectedIndex, setSelectedIndex] = useState(null);
 
+  // Build labels / series / total from the `data` prop
   const { labels, series, total } = useMemo(() => {
-    const data = student_count || [];
+    const list = Array.isArray(data) ? data : [];
     return {
-      labels: data.map((item) => bnBijoy2Unicode(item.className)),
-      series: data.map((item) => Number(item.student) || 0),
-      total: data.reduce((sum, item) => sum + (Number(item.student) || 0), 0),
+      labels: list.map((item) => bnBijoy2Unicode(item.className || "")),
+      series: list.map((item) => Number(item.totalStudent) || 0),
+      total: list.reduce(
+        (sum, item) => sum + (Number(item.totalStudent) || 0),
+        0
+      ),
     };
-  }, [student_count]);
+  }, [data]);
 
   if (isLoading) return <PieChartSkeleton />;
   if (isError) return <p>ডেটা আনতে সমস্যা হয়েছে!</p>;
 
   const selected =
-    selectedIndex !== null && student_count?.[selectedIndex]
+    selectedIndex !== null && data?.[selectedIndex]
       ? {
         name: labels[selectedIndex],
         count: series[selectedIndex],
-        percent: total ? ((series[selectedIndex] / total) * 100).toFixed(1) : 0,
+        percent: total
+          ? ((series[selectedIndex] / total) * 100).toFixed(1)
+          : 0,
         color: COLORS[selectedIndex % COLORS.length],
       }
       : null;
@@ -62,7 +49,6 @@ const PieChart = () => {
       events: {
         dataPointSelection: (event, chartContext, config) => {
           const idx = config.dataPointIndex;
-          // একই স্লাইসে আবার ক্লিক করলে drilldown বন্ধ
           setSelectedIndex((prev) => (prev === idx ? null : idx));
         },
       },
@@ -152,11 +138,13 @@ const PieChart = () => {
         />
       </div>
 
-      {/* Drilldown detail card */}
       {selected ? (
         <div
           className="mt-4 p-4 rounded-lg border flex items-center justify-between"
-          style={{ borderColor: selected.color, backgroundColor: `${selected.color}15` }}
+          style={{
+            borderColor: selected.color,
+            backgroundColor: `${selected.color}15`,
+          }}
         >
           <div className="flex items-center gap-3">
             <span

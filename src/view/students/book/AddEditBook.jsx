@@ -62,6 +62,7 @@ const AddEditBook = ({ id }) => {
   useEffect(() => {
     if (editData) {
       setValue('SubClassID', editData.SubClassID || '');
+      setValue('SubSerial', editData.SubSerial ?? '');
       setValue('SubjectName', editData.SubjectName || '');
       setValue('ArabicSubject', editData.ArabicSubject || '');
       setValue('EngSubjectName', editData.EngSubjectName || '');
@@ -89,6 +90,8 @@ const AddEditBook = ({ id }) => {
         await updateSubject({
           id,
           SubClassID: formData.SubClassID,
+          // SubSerial input disabled thakle form value ashe na, tai editData theke fallback
+          SubSerial: formData.SubSerial || editData?.SubSerial,
           SubjectName: formData.SubjectName,
           ArabicSubject: formData.ArabicSubject,
           EngSubjectName: formData.EngSubjectName,
@@ -106,7 +109,10 @@ const AddEditBook = ({ id }) => {
         await Swal.fire({
           icon: 'error',
           title: translate('Error'),
-          text: err?.data?.message || translate('Failed to update subject'),
+          text:
+            err?.data?.message ||
+            err?.data?.error ||
+            translate('Failed to update subject'),
           width: '400px',
         });
       }

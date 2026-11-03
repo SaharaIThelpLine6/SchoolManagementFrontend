@@ -192,7 +192,7 @@ const ExamDivisionSettingModal = () => {
 
           <div className="col-span-2 mt-4">
             <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
-              {translate('Select Divisions')}
+              {translate('Please do not select Fail, Suspended, or Absent divisions. Only select divisions for passed students to calculate the percentage.')}
               <span className="text-sm font-normal text-gray-500 ml-2">
                 ({translate('Selected')}: {selectedDivisions.length})
               </span>

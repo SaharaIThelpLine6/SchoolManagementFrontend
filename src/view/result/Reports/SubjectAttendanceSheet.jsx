@@ -4,10 +4,98 @@ import bnBijoy2Unicode from "../../../utils/conveter";
 import { Buffer } from "buffer";
 
 /* ═══════════════════════════════════════════════════════════
+   LANGUAGE (bn / en / ar) — শুধু প্রিন্ট/প্রিভিউ শিটের জন্য
+   সাইডবার সবসময় বাংলা (TRANSLATIONS.bn)
+   ═══════════════════════════════════════════════════════════ */
+export const LANGUAGE_OPTIONS = [
+    { key: "bn", label: "বাংলা" },
+    { key: "en", label: "English" },
+    { key: "ar", label: "العربية" },
+];
+export const DEFAULT_LANGUAGE = "bn";
+
+const TRANSLATIONS = {
+    bn: {
+        /* sidebar */
+        settings: "সেটিং",
+        settingsSub: "হাজিরা খাতার কলাম ও প্রিন্ট অপশন",
+        footer: "© Result Report Generator",
+        preview: "হাজিরা খাতা প্রিভিউ",
+        people: "জন",
+        daysUnit: "দিন",
+        subjectsUnit: "বিষয়",
+        printLanguage: "প্রিন্টের ভাষা",
+        printLanguageNote: "শুধু প্রিভিউ ও প্রিন্টের ভাষা বদলাবে।",
+        kitabLabel: "বিষয়ের খাতা",
+        columnSelect: "কলাম নির্বাচন",
+        selectedCount: (c, n) => `${c}/${n} টি নির্বাচিত`,
+        all: "সব",
+        none: "কিছুই না",
+        printSetting: "প্রিন্ট সেটিং",
+        orientationLabel: "১. পেজ দিক (Orientation)",
+        pageSizeLabel: "২. পেজ সাইজ (Page Size)",
+        monthDays: "মাসের দিন সংখ্যা",
+        printNote: "Portrait-এ ৩১ দিনের কলাম সরু হবে, বেশি দিন হলে Landscape ব্যবহার করুন।",
+        rowsTitle: "খালি রো সেটিং",
+        rowsLabel: "খালি শিক্ষার্থী-ব্লক সংখ্যা",
+        rowsPlaceholder: "ফাঁকা = কোনো খালি রো নেই",
+        rowsReset: "রিসেট",
+        rowsNote:
+            "সংখ্যা (যেমন ১ বা ৫) দিলে শিক্ষার্থীদের পরে ঠিক ততটি খালি ব্লক প্রিভিউ ও প্রিন্টে আসবে। প্রতিটি ব্লকে বিষয়ের সংখ্যা অনুযায়ী সব সারি থাকবে। ফাঁকা বা ০ দিলে কোনো খালি রো যোগ হবে না।",
+        /* sheet */
+        defaultInstitution: "আদর্শ ইনসান একাডেমি",
+        defaultAddress: "ঠিকানা",
+        title: "দৈনন্দিন শিক্ষার্থীর হাজিরা খাতা",
+        classLabel: "শ্রেণি/জামাত :",
+        month: "মাস :",
+        year: "বছর :",
+        sl: "ক্রঃ",
+        id: "আইডি",
+        student: "শিক্ষার্থী",
+        present: "উপ :",
+        absent: "অনু :",
+        noStudent: "কোনো শিক্ষার্থী পাওয়া যায়নি",
+    },
+    en: {
+        title: "Daily Student Attendance Register",
+        classLabel: "Class :",
+        month: "Month :",
+        year: "Year :",
+        sl: "SL",
+        id: "ID",
+        student: "Student",
+        present: "Pres.",
+        absent: "Abs.",
+        noStudent: "No students found",
+    },
+    ar: {
+        title: "سجل الحضور اليومي للطلاب",
+        classLabel: "الصف :",
+        month: "الشهر :",
+        year: "السنة :",
+        sl: "م",
+        id: "الهوية",
+        student: "الطالب",
+        present: "حضور",
+        absent: "غياب",
+        noStudent: "لا يوجد طلاب",
+    },
+};
+
+const ARABIC_INDIC = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+
+// ভাষা অনুযায়ী সংখ্যা ফরম্যাটার
+const makeNum = (lang) => (v) => {
+    if (v === undefined || v === null) return "";
+    const s = String(v);
+    if (lang === "bn") return bnBijoy2Unicode(s);
+    if (lang === "ar") return s.replace(/\d/g, (d) => ARABIC_INDIC[Number(d)]);
+    return s;
+};
+
+/* ═══════════════════════════════════════════════════════════
    HELPERS
    ═══════════════════════════════════════════════════════════ */
-const bn = (v) => bnBijoy2Unicode(String(v));
-
 const bg = (color) => ({
     backgroundColor: color,
     boxShadow: `inset 0 0 0 1000px ${color}`,
@@ -15,6 +103,38 @@ const bg = (color) => ({
 
 const EXAMPLE_LOGO =
     "https://images.seeklogo.com/logo-png/42/1/madrasha-logo-png_seeklogo-424804.png";
+
+// খালি স্ট্রিং/স্পেস বাদ দিয়ে প্রথম আসল টেক্সট
+const pickText = (...values) => {
+    const found = values.find((v) => typeof v === "string" && v.trim() !== "");
+    return found ? found.trim() : "";
+};
+
+// ভাষা অনুযায়ী অগ্রাধিকার: নির্বাচিত ভাষা আগে, না থাকলে বাংলা, তারপর বাকিগুলো
+const pickByLang = (lang, bnVal, enVal, arVal) => {
+    if (lang === "ar") return pickText(arVal, bnVal, enVal);
+    if (lang === "en") return pickText(enVal, bnVal, arVal);
+    return pickText(bnVal, enVal, arVal);
+};
+
+const getInstitutionName = (info, lang) =>
+    info ? pickByLang(lang, info.InstitutionName, info.EngInstitutionName, info.AraInstitutionName) : "";
+
+const getInstitutionAddress = (info, lang) =>
+    info ? pickByLang(lang, info.Address, info.EngAddress, info.AraAddress) : "";
+
+const getClassName = (subClass, lang) =>
+    subClass ? pickByLang(lang, subClass.SubClass, subClass.SubClassEng, subClass.SubClassAra) : "";
+
+const getStudentName = (user, lang) => {
+    if (!user) return "";
+    return pickByLang(
+        lang,
+        user.UserName,
+        user.studentEnglishName?.EnglishName,
+        user.studentArabicName?.ArabicName
+    );
+};
 
 /* ✅ Total marks calculator helpers (StudentResultSheet এর byNumber লজিক) */
 const isKerat = (subject) => {
@@ -92,6 +212,8 @@ export const KITAB_OPTIONS = [
 ];
 export const DEFAULT_KITAB = "7";
 
+const MAX_EXTRA_BLOCKS = 200;
+
 /* ═══════════════════════════════════════════════════════════
    THEME
    ═══════════════════════════════════════════════════════════ */
@@ -127,6 +249,8 @@ const LS_ORIENTATION = "attendanceSheetOrientation";
 const LS_PAGE_SIZE = "attendanceSheetPageSize";
 const LS_DAYS = "attendanceSheetDays";
 const LS_KITAB = "attendanceSheetKitab";
+const LS_LANG = "attendanceSheetLanguage";
+const LS_ROWS = "attendanceSheetCustomRows";
 
 const loadObj = (key, fallback) => {
     try {
@@ -142,6 +266,13 @@ const loadStr = (key, options, fallback) => {
         if (saved && options.some((o) => o.key === saved)) return saved;
     } catch (e) { }
     return fallback;
+};
+
+const loadText = (key) => {
+    try {
+        return localStorage.getItem(key) || "";
+    } catch (e) { }
+    return "";
 };
 
 /* ═══════════════════════════════════════════════════════════
@@ -205,7 +336,6 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
 
     /* ═══════════════════════════════════════════════════════════
        ⚡ STUDENT RESULTS SORTED BY NUMBER (নাম্বার অনুসারে)
-       StudentResultSheet এর byNumber লজিক অনুসরণ করে
        - মোট নম্বর বেশি থেকে কম
        - সমান হলে AdmissionSerial অনুসারে
        ═══════════════════════════════════════════════════════════ */
@@ -214,16 +344,13 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
             ? reportData.studentResults
             : [];
 
-        // Admission serial getter
         const serialOf = (s) => Number(s?.User?.Admission?.[0]?.AdmissionSerial) || 0;
 
-        // Total marks calculator (Kerat subjects বাদ দিয়ে)
         const totalOf = (s) => {
             const n = calcTotal(s, subjectPassNumbers);
             return Number.isNaN(n) ? -Infinity : n;
         };
 
-        // Sort: বেশি নম্বর আগে, সমান হলে AdmissionSerial অনুসারে
         return [...all].sort(
             (a, b) => totalOf(b) - totalOf(a) || serialOf(a) - serialOf(b)
         );
@@ -236,6 +363,9 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
     const [pageSize, setPageSize] = useState(() => loadStr(LS_PAGE_SIZE, PAGE_SIZE_OPTIONS, DEFAULT_PAGE_SIZE));
     const [daysCount, setDaysCount] = useState(() => loadStr(LS_DAYS, DAYS_OPTIONS, DEFAULT_DAYS));
     const [kitabType, setKitabType] = useState(() => loadStr(LS_KITAB, KITAB_OPTIONS, DEFAULT_KITAB));
+    const [lang, setLang] = useState(() => loadStr(LS_LANG, LANGUAGE_OPTIONS, DEFAULT_LANGUAGE));
+    /* ✅ খালি শিক্ষার্থী-ব্লক সংখ্যা ("" = কোনো খালি রো নেই) */
+    const [rowsInput, setRowsInput] = useState(() => loadText(LS_ROWS));
 
     /* ✅ LocalStorage Save */
     useEffect(() => { localStorage.setItem(LS_VISIBLE, JSON.stringify(visibleColumns)); }, [visibleColumns]);
@@ -244,6 +374,8 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
     useEffect(() => { localStorage.setItem(LS_PAGE_SIZE, pageSize); }, [pageSize]);
     useEffect(() => { localStorage.setItem(LS_DAYS, daysCount); }, [daysCount]);
     useEffect(() => { localStorage.setItem(LS_KITAB, kitabType); }, [kitabType]);
+    useEffect(() => { localStorage.setItem(LS_LANG, lang); }, [lang]);
+    useEffect(() => { localStorage.setItem(LS_ROWS, rowsInput); }, [rowsInput]);
 
     /* ✅ Dynamic Logo Fetching */
     useEffect(() => {
@@ -258,6 +390,21 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
         }
     }, [institutionInfo]);
 
+    /* ── সাইডবার: সবসময় বাংলা ── */
+    const tUI = TRANSLATIONS.bn;
+    const numUI = useMemo(() => makeNum("bn"), []);
+
+    /* ── প্রিন্ট/প্রিভিউ শিট: নির্বাচিত ভাষা ── */
+    const t = { ...TRANSLATIONS.bn, ...(TRANSLATIONS[lang] || {}) };
+    const dir = lang === "ar" ? "rtl" : "ltr";
+    const num = useMemo(() => makeNum(lang), [lang]);
+
+    const institutionName =
+        getInstitutionName(institutionInfo, lang) || TRANSLATIONS.bn.defaultInstitution;
+    const institutionAddress =
+        getInstitutionAddress(institutionInfo, lang) || TRANSLATIONS.bn.defaultAddress;
+    const className = getClassName(conditionAverage?.SubClass, lang);
+
     const C = THEMES[colorMode] || THEMES.color;
     const show = { ...DEFAULT_VISIBLE_COLUMNS, ...(visibleColumns || {}) };
     const days = Number(daysCount) || 31;
@@ -265,6 +412,22 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
 
     /* ✅ বিষয়ের সংখ্যা (প্রতি শিক্ষার্থীর সারি) */
     const subjectCount = Math.max(Number(kitabType) || 1, 1);
+
+    /* ✅ খালি ব্লক সংখ্যা */
+    const extraBlocks = useMemo(() => {
+        const n = parseInt(String(rowsInput ?? "").trim(), 10);
+        if (!Number.isFinite(n) || n < 0) return 0;
+        return Math.min(n, MAX_EXTRA_BLOCKS);
+    }, [rowsInput]);
+
+    /* শিক্ষার্থী + খালি ব্লক (student = null মানে খালি) */
+    const blocks = useMemo(
+        () => [
+            ...studentResultsDetails,
+            ...Array.from({ length: extraBlocks }, () => null),
+        ],
+        [studentResultsDetails, extraBlocks]
+    );
 
     const visibleColCount =
         (show.sl ? 1 : 0) +
@@ -279,6 +442,10 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
     const toggleColumn = (key) => setVisibleColumns((p) => ({ ...p, [key]: !p[key] }));
     const setAllColumns = (value) =>
         setVisibleColumns(Object.fromEntries(ATTENDANCE_COLUMNS.map((c) => [c.key, value])));
+    const handleRowsChange = (v) => {
+        const cleaned = String(v).replace(/[^\d]/g, "").slice(0, 3);
+        setRowsInput(cleaned);
+    };
 
     /* Styles */
     const cellBase = {
@@ -324,7 +491,7 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
     );
 
     const renderSheet = () => (
-        <div className="sheet-card" style={{
+        <div className="sheet-card" dir={dir} style={{
             width: sheetWidth, maxWidth: "none", margin: "0 auto",
             background: "#fff", color: C.text,
         }}>
@@ -342,41 +509,41 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                                         src={institutionLogo || EXAMPLE_LOGO}
                                         alt="logo"
                                         style={{
-                                            position: "absolute", left: "6px", top: "0px",
+                                            position: "absolute", insetInlineStart: "6px", top: "0px",
                                             width: "80px", height: "80px", objectFit: "contain",
                                             userSelect: "none", pointerEvents: "none",
                                         }}
                                     />
                                     <h1 style={{ margin: 0, fontSize: "24px", fontWeight: 800, lineHeight: 1.3, color: C.primaryDark }}>
-                                        {institutionInfo?.InstitutionName || "আদর্শ ইনসান একাডেমি"}
+                                        {institutionName}
                                     </h1>
                                     <p style={{ margin: "2px 0 0", fontSize: "15px", fontWeight: 600, color: C.muted }}>
-                                        {institutionInfo?.Address || "ঠিকানা"}
+                                        {institutionAddress}
                                     </p>
                                     <h2 style={{
                                         display: "inline-block", margin: "6px 0 0", padding: "0 24px 2px",
                                         fontSize: "17px", fontWeight: 600, lineHeight: 1.3, color: C.text,
                                         borderBottom: `1.5px solid ${C.text}`,
                                     }}>
-                                        দৈনন্দিন শিক্ষার্থীর হাজিরা খাতা
+                                        {t.title}
                                     </h2>
                                 </div>
 
                                 {/* শ্রেণি + মাস + বছর */}
                                 <div style={{
                                     marginTop: "8px", display: "flex", alignItems: "flex-end",
-                                    gap: "18px", textAlign: "left",
+                                    gap: "18px", textAlign: "start",
                                 }}>
                                     <div style={{ flex: 2, display: "flex", alignItems: "flex-end", gap: "4px", minWidth: 0 }}>
                                         <span style={{ fontSize: "15px", fontWeight: 700, whiteSpace: "nowrap", color: C.text }}>
-                                            শ্রেণি/জামাত :
+                                            {t.classLabel}
                                         </span>
                                         <span style={{ fontSize: "15px", fontWeight: 700, color: C.primaryDark }}>
-                                            {conditionAverage?.SubClass?.SubClass || ""}
+                                            {className}
                                         </span>
                                     </div>
-                                    <FillField label="মাস :" flex={1} color={C.text} />
-                                    <FillField label="বছর :" flex={1} color={C.text} />
+                                    <FillField label={t.month} flex={1} color={C.text} />
+                                    <FillField label={t.year} flex={1} color={C.text} />
                                 </div>
                             </div>
                         </th>
@@ -385,31 +552,32 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                     {/* Column Header */}
                     {visibleColCount > 0 && (
                         <tr>
-                            {show.sl && <th style={{ ...thStyle, fontSize: "11px" }}>ক্রঃ</th>}
-                            {show.id && <th style={{ ...thStyle, fontSize: "11px" }}>আইডি</th>}
-                            {show.name && <th style={{ ...thStyle, fontSize: "11px", wordBreak: "break-word" }}>শিক্ষার্থী</th>}
+                            {show.sl && <th style={{ ...thStyle, fontSize: "11px" }}>{t.sl}</th>}
+                            {show.id && <th style={{ ...thStyle, fontSize: "11px" }}>{t.id}</th>}
+                            {show.name && <th style={{ ...thStyle, fontSize: "11px", wordBreak: "break-word" }}>{t.student}</th>}
                             {show.sub && <th style={thStyle} />}
                             {show.days && Array.from({ length: days }).map((_, i) => (
                                 <th key={i} style={{ ...thStyle, padding: "4px 0" }}>
-                                    <span style={{ fontSize: "11px", fontWeight: "bold" }}>{bn(i + 1)}</span>
+                                    <span style={{ fontSize: "11px", fontWeight: "bold" }}>{num(i + 1)}</span>
                                 </th>
                             ))}
                             {show.present && (
                                 <th style={{ ...thStyle, ...bg(C.headStrongBg) }}>
-                                    <span style={thVertical}>উপ :</span>
+                                    <span style={thVertical}>{t.present}</span>
                                 </th>
                             )}
                             {show.absent && (
                                 <th style={{ ...thStyle, ...bg(C.headStrongBg) }}>
-                                    <span style={thVertical}>অনু :</span>
+                                    <span style={thVertical}>{t.absent}</span>
                                 </th>
                             )}
                         </tr>
                     )}
                 </thead>
 
-                {/* ✅ প্রতি শিক্ষার্থীর জন্য আলাদা tbody → প্রিন্টে মাঝখানে পেজ ভাঙবে না */}
-                {studentResultsDetails.map((studentResult, studentIndex) => {
+                {/* ✅ প্রতি শিক্ষার্থীর (বা খালি ব্লকের) জন্য আলাদা tbody → প্রিন্টে মাঝখানে পেজ ভাঙবে না */}
+                {blocks.map((studentResult, studentIndex) => {
+                    const isBlank = !studentResult;
                     const rowBg = studentIndex % 2 === 1 ? C.zebra : "#fff";
                     const td = {
                         ...cellBase,
@@ -423,7 +591,7 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
 
                     return (
                         <tbody
-                            key={studentResult.ID ?? studentIndex}
+                            key={studentResult?.ID ?? `blank-${studentIndex}`}
                             style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
                         >
                             {Array.from({ length: subjectCount }).map((_, subIndex) => (
@@ -442,7 +610,7 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                                                         fontSize: "14px",
                                                         fontWeight: 700,
                                                     }}>
-                                                        {bn(studentIndex + 1)}
+                                                        {isBlank ? "" : num(studentIndex + 1)}
                                                     </div>
                                                 </td>
                                             )}
@@ -450,7 +618,7 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                                             {show.id && (
                                                 <td rowSpan={subjectCount} style={mergedTd}>
                                                     <VText fontSize={14} fontWeight={700}>
-                                                        {bn(studentResult?.User?.UserCode ?? "")}
+                                                        {isBlank ? "" : num(studentResult?.User?.UserCode ?? "")}
                                                     </VText>
                                                 </td>
                                             )}
@@ -458,7 +626,7 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                                             {show.name && (
                                                 <td rowSpan={subjectCount} style={mergedTd}>
                                                     <VText fontSize={13} fontWeight={600} wrap>
-                                                        {studentResult?.User?.UserName}
+                                                        {isBlank ? "" : getStudentName(studentResult?.User, lang)}
                                                     </VText>
                                                 </td>
                                             )}
@@ -468,7 +636,7 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                                     {/* ✅ বিষয় নং (১, ২, ৩ ...) */}
                                     {show.sub && (
                                         <td style={{ ...td, fontSize: "11px", fontWeight: 600 }}>
-                                            {bn(subIndex + 1)}
+                                            {num(subIndex + 1)}
                                         </td>
                                     )}
 
@@ -483,19 +651,35 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                     );
                 })}
 
-                {studentResultsDetails.length === 0 && (
+                {blocks.length === 0 && (
                     <tbody>
                         <tr>
                             <td colSpan={Math.max(visibleColCount, 1)} style={{
                                 ...cellBase, textAlign: "center", padding: "16px", color: C.muted,
                             }}>
-                                কোনো শিক্ষার্থী পাওয়া যায়নি
+                                {t.noStudent}
                             </td>
                         </tr>
                     </tbody>
                 )}
             </table>
         </div>
+    );
+
+    const settingsPanels = (
+        <>
+            <LanguageSelector t={tUI} value={lang} onChange={setLang} />
+            <KitabSelect t={tUI} value={kitabType} onChange={setKitabType} />
+            <ColumnSelector t={tUI} num={numUI} value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={ATTENDANCE_COLUMNS} />
+            <RowsSettings t={tUI} value={rowsInput} onChange={handleRowsChange} onReset={() => setRowsInput("")} />
+            <PrintSettings
+                t={tUI}
+                colorMode={colorMode} onColorChange={setColorMode}
+                orientation={orientation} onOrientationChange={setOrientation}
+                pageSize={pageSize} onPageSizeChange={setPageSize}
+                daysCount={daysCount} onDaysChange={setDaysCount}
+            />
+        </>
     );
 
     /* ═══ RENDER ═══ */
@@ -511,29 +695,21 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>
-                        <h2 className="text-sm font-bold text-slate-800">সেটিং</h2>
+                        <h2 className="text-sm font-bold text-slate-800">{tUI.settings}</h2>
                     </div>
-                    <p className="text-xs text-slate-400">হাজিরা খাতার কলাম ও প্রিন্ট অপশন</p>
+                    <p className="text-xs text-slate-400">{tUI.settingsSub}</p>
                 </div>
 
                 <div className="px-5 py-3 border-b border-slate-100 shrink-0">
-                    <PreviewInfo count={studentResultsDetails.length} days={days} subjects={subjectCount} />
+                    <PreviewInfo t={tUI} num={numUI} count={studentResultsDetails.length} days={days} subjects={subjectCount} />
                 </div>
 
                 <div className="rs-scroll flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
-                    <KitabSelect value={kitabType} onChange={setKitabType} />
-
-                    <ColumnSelector value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={ATTENDANCE_COLUMNS} />
-                    <PrintSettings
-                        colorMode={colorMode} onColorChange={setColorMode}
-                        orientation={orientation} onOrientationChange={setOrientation}
-                        pageSize={pageSize} onPageSizeChange={setPageSize}
-                        daysCount={daysCount} onDaysChange={setDaysCount}
-                    />
+                    {settingsPanels}
                 </div>
 
                 <div className="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0">
-                    <p className="text-[10px] text-slate-400 text-center">© Result Report Generator</p>
+                    <p className="text-[10px] text-slate-400 text-center">{tUI.footer}</p>
                 </div>
             </aside>
 
@@ -541,15 +717,8 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
             <main className="rs-main rs-scroll flex-1 min-w-0 lg:h-full lg:overflow-y-auto">
                 <div className="lg:hidden p-4 pb-0 print:hidden">
                     <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
-                        <PreviewInfo count={studentResultsDetails.length} days={days} subjects={subjectCount} />
-                        <KitabSelect value={kitabType} onChange={setKitabType} />
-                        <ColumnSelector value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={ATTENDANCE_COLUMNS} />
-                        <PrintSettings
-                            colorMode={colorMode} onColorChange={setColorMode}
-                            orientation={orientation} onOrientationChange={setOrientation}
-                            pageSize={pageSize} onPageSizeChange={setPageSize}
-                            daysCount={daysCount} onDaysChange={setDaysCount}
-                        />
+                        <PreviewInfo t={tUI} num={numUI} count={studentResultsDetails.length} days={days} subjects={subjectCount} />
+                        {settingsPanels}
                     </div>
                 </div>
 
@@ -602,9 +771,9 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
    SIDEBAR SUB-COMPONENTS
    ═══════════════════════════════════════════════════════════ */
 
-const KitabSelect = ({ value, onChange }) => (
+const KitabSelect = ({ t, value, onChange }) => (
     <div>
-        <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">বিষয়ের খাতা</label>
+        <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">{t.kitabLabel}</label>
         <select
             value={value}
             onChange={(e) => onChange(e.target.value)}
@@ -619,17 +788,17 @@ const KitabSelect = ({ value, onChange }) => (
     </div>
 );
 
-const PreviewInfo = ({ count, days, subjects }) => (
+const PreviewInfo = ({ t, num, count, days, subjects }) => (
     <div className="flex items-center gap-2 min-w-0 flex-wrap">
-        <span className="text-sm font-bold text-slate-800 truncate">হাজিরা খাতা প্রিভিউ</span>
+        <span className="text-sm font-bold text-slate-800 truncate">{t.preview}</span>
         <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-2 py-0.5 shrink-0">
-            {bn(count)} জন
+            {num(count)} {t.people}
         </span>
         <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 rounded-md px-2 py-0.5 shrink-0">
-            {bn(days)} দিন
+            {num(days)} {t.daysUnit}
         </span>
         <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 rounded-md px-2 py-0.5 shrink-0">
-            {bn(subjects)} বিষয়
+            {num(subjects)} {t.subjectsUnit}
         </span>
     </div>
 );
@@ -652,7 +821,49 @@ const SegmentedControl = ({ label, options, value, onChange }) => (
     </div>
 );
 
+const LanguageSelector = ({ t, value, onChange }) => (
+    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+        <SegmentedControl label={t.printLanguage} options={LANGUAGE_OPTIONS} value={value} onChange={onChange} />
+        <p className="text-[10px] text-slate-400 leading-snug">{t.printLanguageNote}</p>
+    </div>
+);
+
+const RowsSettings = ({ t, value, onChange, onReset }) => {
+    const inputCls =
+        "w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-700 " +
+        "placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300";
+    return (
+        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+            <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-700 leading-tight">{t.rowsTitle}</p>
+                {String(value).trim() !== "" && (
+                    <button
+                        type="button"
+                        onClick={onReset}
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200"
+                    >
+                        {t.rowsReset}
+                    </button>
+                )}
+            </div>
+            <div>
+                <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{t.rowsLabel}</p>
+                <input
+                    type="text"
+                    inputMode="numeric"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder={t.rowsPlaceholder}
+                    className={inputCls}
+                />
+            </div>
+            <p className="text-[10px] text-slate-400 leading-snug">{t.rowsNote}</p>
+        </div>
+    );
+};
+
 const PrintSettings = ({
+    t,
     colorMode, onColorChange,
     orientation, onOrientationChange,
     pageSize, onPageSizeChange,
@@ -660,39 +871,37 @@ const PrintSettings = ({
 }) => (
     <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-3">
         <div className="flex items-center justify-between">
-            <p className="text-xs font-bold text-slate-700 leading-tight">প্রিন্ট সেটিং</p>
+            <p className="text-xs font-bold text-slate-700 leading-tight">{t.printSetting}</p>
         </div>
 
-        <SegmentedControl label="১. পেজ দিক (Orientation)" options={ORIENTATION_OPTIONS} value={orientation} onChange={onOrientationChange} />
-        <SegmentedControl label="২. পেজ সাইজ (Page Size)" options={PAGE_SIZE_OPTIONS} value={pageSize} onChange={onPageSizeChange} />
+        <SegmentedControl label={t.orientationLabel} options={ORIENTATION_OPTIONS} value={orientation} onChange={onOrientationChange} />
+        <SegmentedControl label={t.pageSizeLabel} options={PAGE_SIZE_OPTIONS} value={pageSize} onChange={onPageSizeChange} />
         {/* <SegmentedControl label="৩. রঙ" options={COLOR_OPTIONS} value={colorMode} onChange={onColorChange} /> */}
-        <SegmentedControl label="মাসের দিন সংখ্যা" options={DAYS_OPTIONS} value={daysCount} onChange={onDaysChange} />
+        <SegmentedControl label={t.monthDays} options={DAYS_OPTIONS} value={daysCount} onChange={onDaysChange} />
 
-        <p className="text-[10px] text-slate-400 leading-snug">
-            Portrait-এ ৩১ দিনের কলাম সরু হবে, বেশি দিন হলে Landscape ব্যবহার করুন।
-        </p>
+        <p className="text-[10px] text-slate-400 leading-snug">{t.printNote}</p>
     </div>
 );
 
-const ColumnSelector = ({ value, onToggle, onSetAll, columns = ATTENDANCE_COLUMNS }) => {
+const ColumnSelector = ({ t, num, value, onToggle, onSetAll, columns = ATTENDANCE_COLUMNS }) => {
     const checkedCount = columns.filter((c) => value[c.key]).length;
     return (
         <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
             <div className="flex items-center justify-between mb-2">
                 <div>
-                    <p className="text-xs font-bold text-slate-700 leading-tight">কলাম নির্বাচন</p>
+                    <p className="text-xs font-bold text-slate-700 leading-tight">{t.columnSelect}</p>
                     <p className="text-[10px] text-slate-400 leading-tight mt-0.5">
-                        {checkedCount}/{columns.length} টি নির্বাচিত
+                        {t.selectedCount(num(checkedCount), num(columns.length))}
                     </p>
                 </div>
                 <div className="flex items-center gap-1">
                     <button type="button" onClick={() => onSetAll(true)}
                         className="px-2 py-1 rounded-md text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100">
-                        সব
+                        {t.all}
                     </button>
                     <button type="button" onClick={() => onSetAll(false)}
                         className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200">
-                        কিছুই না
+                        {t.none}
                     </button>
                 </div>
             </div>

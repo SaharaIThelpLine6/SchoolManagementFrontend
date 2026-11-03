@@ -175,8 +175,10 @@ const getDivisionName = (division, lang) => {
 
 // শিক্ষার্থীর নাম (UserName / studentEnglishName / studentArabicName)
 const getStudentName = (user, lang) => {
+
+    console.log(user, "user")
     if (!user) return "";
-    return pickByLang(lang, user.UserName, user.studentEnglishName, user.studentArabicName);
+    return pickByLang(lang, user.UserName, user.studentEnglishName, user.studentArabicName?.ArabicName);
 };
 
 // সেশনের নাম (SessionName / SessionEngName / SessionAraName)
@@ -665,7 +667,7 @@ function SignatureSection({ C, dateText, dateLabel, NajemName, PrincipalName, na
    ═══════════════════════════════════════════════════════════ */
 export default function StudentResultSheet({ reportData, query, labels }) {
 
-    console.log(reportData, "reportData");
+    console.log(reportData, "reportData language");
 
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
 

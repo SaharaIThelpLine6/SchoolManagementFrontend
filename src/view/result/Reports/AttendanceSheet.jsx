@@ -4,19 +4,146 @@ import bnBijoy2Unicode from "../../../utils/conveter";
 import { Buffer } from "buffer";
 
 /* ═══════════════════════════════════════════════════════════
+   LANGUAGE (bn / en / ar) — শুধু প্রিন্ট/প্রিভিউ শিটের জন্য
+   সাইডবার সবসময় বাংলা (TRANSLATIONS.bn)
+   ═══════════════════════════════════════════════════════════ */
+export const LANGUAGE_OPTIONS = [
+    { key: "bn", label: "বাংলা" },
+    { key: "en", label: "English" },
+    { key: "ar", label: "العربية" },
+];
+export const DEFAULT_LANGUAGE = "bn";
+
+const TRANSLATIONS = {
+    bn: {
+        /* sidebar */
+        settings: "সেটিং",
+        settingsSub: "হাজিরা খাতার কলাম ও প্রিন্ট অপশন",
+        footer: "© Result Report Generator",
+        preview: "হাজিরা খাতা প্রিভিউ",
+        people: "জন",
+        daysUnit: "দিন",
+        pageUnit: "পৃষ্ঠা",
+        printLanguage: "প্রিন্টের ভাষা",
+        printLanguageNote: "শুধু প্রিভিউ ও প্রিন্টের ভাষা বদলাবে।",
+        columnSelect: "কলাম নির্বাচন",
+        selectedCount: (c, n) => `${c}/${n} টি নির্বাচিত`,
+        all: "সব",
+        none: "কিছুই না",
+        printSetting: "প্রিন্ট সেটিং",
+        pageDirection: "পেজ দিক",
+        paperSize: "কাগজের সাইজ",
+        monthDays: "মাসের দিন সংখ্যা",
+        printNote:
+            "Portrait-এ ৩১ দিনের কলাম সরু হবে, বেশি দিন হলে Landscape ব্যবহার করুন। প্রিন্ট ডায়ালগে Paper size একই (A4/Legal) এবং Margins \"Default\" রাখুন।",
+        rowsTitle: "খালি রো সেটিং",
+        rowsLabel: "খালি রো সংখ্যা",
+        rowsPlaceholder: "ফাঁকা = পুরো পেজ অটো",
+        rowsReset: "অটো",
+        rowsNote:
+            "ফাঁকা রাখলে পেজ খালি রো দিয়ে ভরবে। সংখ্যা (যেমন ১ বা ৫) দিলে শিক্ষার্থীদের পরে ঠিক ততটি খালি রো প্রিভিউ ও প্রিন্টে আসবে। ০ দিলে কোনো খালি রো থাকবে না।",
+        /* sheet */
+        title: "দৈনন্দিন শিক্ষার্থীর হাজিরা খাতা",
+        classLabel: "শ্রেণী",
+        bookName: "কিতাবের নাম :",
+        month: "মাস :",
+        hijriYear: "হিজরী/সন :",
+        teacherName: "শিক্ষক/শিক্ষিকার নাম :",
+        hour: "ঘন্টা :",
+        sl: "ক্রমিক",
+        id: "আইডি নং",
+        name: "শিক্ষার্থীর নাম",
+        present: "উপ :",
+        absent: "অনু :",
+        noStudent: "কোনো শিক্ষার্থী পাওয়া যায়নি",
+    },
+    en: {
+        title: "Daily Student Attendance Register",
+        classLabel: "Class",
+        bookName: "Book Name :",
+        month: "Month :",
+        hijriYear: "Hijri/Year :",
+        teacherName: "Teacher's Name :",
+        hour: "Period :",
+        sl: "SL",
+        id: "ID No.",
+        name: "Student Name",
+        present: "Pres.",
+        absent: "Abs.",
+        noStudent: "No students found",
+    },
+    ar: {
+        title: "سجل الحضور اليومي للطلاب",
+        classLabel: "الصف",
+        bookName: "اسم الكتاب :",
+        month: "الشهر :",
+        hijriYear: "الهجري/السنة :",
+        teacherName: "اسم المعلم/المعلمة :",
+        hour: "الحصة :",
+        sl: "م",
+        id: "رقم الهوية",
+        name: "اسم الطالب",
+        present: "حضور",
+        absent: "غياب",
+        noStudent: "لا يوجد طلاب",
+    },
+};
+
+const ARABIC_INDIC = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+
+// ভাষা অনুযায়ী সংখ্যা ফরম্যাটার
+const makeNum = (lang) => (v) => {
+    if (v === undefined || v === null) return "";
+    const s = String(v);
+    if (lang === "bn") return bnBijoy2Unicode(s);
+    if (lang === "ar") return s.replace(/\d/g, (d) => ARABIC_INDIC[Number(d)]);
+    return s;
+};
+
+/* ═══════════════════════════════════════════════════════════
    HELPERS
    ═══════════════════════════════════════════════════════════ */
-const bn = (v) => bnBijoy2Unicode(String(v));
-
 const bg = (color) => ({
     backgroundColor: color,
     boxShadow: `inset 0 0 0 1000px ${color}`,
 });
 
-const getFirstValue = (...values) =>
-    values.find((value) => value !== undefined && value !== null && value !== "");
-
 const isFilled = (v) => v !== undefined && v !== null && v !== "";
+
+// খালি স্ট্রিং/স্পেস বাদ দিয়ে প্রথম আসল টেক্সট
+const pickText = (...values) => {
+    const found = values.find((v) => typeof v === "string" && v.trim() !== "");
+    return found ? found.trim() : "";
+};
+
+// ভাষা অনুযায়ী অগ্রাধিকার: নির্বাচিত ভাষা আগে, না থাকলে বাংলা, তারপর বাকিগুলো
+const pickByLang = (lang, bnVal, enVal, arVal) => {
+    if (lang === "ar") return pickText(arVal, bnVal, enVal);
+    if (lang === "en") return pickText(enVal, bnVal, arVal);
+    return pickText(bnVal, enVal, arVal);
+};
+
+const getInstitutionName = (info, lang) =>
+    info ? pickByLang(lang, info.InstitutionName, info.EngInstitutionName, info.AraInstitutionName) : "";
+
+const getInstitutionAddress = (info, lang) =>
+    info ? pickByLang(lang, info.Address, info.EngAddress, info.AraAddress) : "";
+
+const getStudentName = (user, lang) => {
+    if (!user) return "";
+    return pickByLang(
+        lang,
+        user.UserName,
+        user.studentEnglishName?.EnglishName,
+        user.studentArabicName?.ArabicName
+    );
+};
+
+const getSessionName = (session, lang) =>
+    session ? pickByLang(lang, session.SessionName, session.SessionEngName, session.SessionAraName) : "";
+
+const getClassName = (subClass, lang) =>
+    subClass ? pickByLang(lang, subClass.SubClass, subClass.SubClassEng, subClass.SubClassAra) : "";
 
 const isKerat = (subject) => {
     const v = subject?.KeratAction;
@@ -88,6 +215,8 @@ export const DAYS_OPTIONS = [
 ];
 export const DEFAULT_DAYS = "31";
 
+const MAX_CUSTOM_ROWS = 500;
+
 /* ═══════════════════════════════════════════════════════════
    PAGE LAYOUT CONSTANTS
    ═══════════════════════════════════════════════════════════ */
@@ -132,6 +261,8 @@ const LS_COLOR = "attendanceSheetColorMode";
 const LS_ORIENTATION = "attendanceSheetOrientation";
 const LS_DAYS = "attendanceSheetDays";
 const LS_PAPER = "attendanceSheetPaper";
+const LS_LANG = "attendanceSheetLanguage";
+const LS_ROWS = "attendanceSheetCustomRows";
 
 const loadObj = (key, fallback) => {
     try {
@@ -147,6 +278,13 @@ const loadStr = (key, options, fallback) => {
         if (saved && options.some((o) => o.key === saved)) return saved;
     } catch (e) { }
     return fallback;
+};
+
+const loadText = (key) => {
+    try {
+        return localStorage.getItem(key) || "";
+    } catch (e) { }
+    return "";
 };
 
 const chunk = (arr, size) => {
@@ -175,7 +313,6 @@ function FillField({ label, flex = 1, color }) {
    ═══════════════════════════════════════════════════════════ */
 export default function AttendanceSheet({ reportData, query }) {
 
-
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
     const [institutionLogo, setInstitutionLogo] = useState(null);
 
@@ -184,7 +321,6 @@ export default function AttendanceSheet({ reportData, query }) {
 
     /* ═══════════════════════════════════════════════════════════
        ⚡ STUDENT RESULTS SORTED BY NUMBER (নাম্বার অনুসারে)
-       StudentResultSheet এর byNumber লজিক অনুসরণ করে
        - মোট নম্বর বেশি থেকে কম
        - সমান হলে AdmissionSerial অনুসারে
        ═══════════════════════════════════════════════════════════ */
@@ -193,16 +329,13 @@ export default function AttendanceSheet({ reportData, query }) {
             ? reportData.studentResults
             : [];
 
-        // Admission serial getter
         const serialOf = (s) => Number(s?.User?.Admission?.[0]?.AdmissionSerial) || 0;
 
-        // Total marks calculator (Kerat subjects বাদ দিয়ে)
         const totalOf = (s) => {
             const n = calcTotal(s, subjectPassNumbers);
             return Number.isNaN(n) ? -Infinity : n;
         };
 
-        // Sort: বেশি নম্বর আগে, সমান হলে AdmissionSerial অনুসারে
         return [...all].sort(
             (a, b) => totalOf(b) - totalOf(a) || serialOf(a) - serialOf(b)
         );
@@ -214,6 +347,9 @@ export default function AttendanceSheet({ reportData, query }) {
     const [orientation, setOrientation] = useState(() => loadStr(LS_ORIENTATION, ORIENTATION_OPTIONS, DEFAULT_ORIENTATION));
     const [daysCount, setDaysCount] = useState(() => loadStr(LS_DAYS, DAYS_OPTIONS, DEFAULT_DAYS));
     const [paper, setPaper] = useState(() => loadStr(LS_PAPER, PAPER_OPTIONS, DEFAULT_PAPER));
+    const [lang, setLang] = useState(() => loadStr(LS_LANG, LANGUAGE_OPTIONS, DEFAULT_LANGUAGE));
+    /* ✅ custom খালি রো সংখ্যা ("" = অটো / পুরো পেজ ভরবে) */
+    const [rowsInput, setRowsInput] = useState(() => loadText(LS_ROWS));
 
     /* ✅ measured height of the title block */
     const [titleH, setTitleH] = useState(TITLE_FALLBACK_PX);
@@ -225,6 +361,8 @@ export default function AttendanceSheet({ reportData, query }) {
     useEffect(() => { localStorage.setItem(LS_ORIENTATION, orientation); }, [orientation]);
     useEffect(() => { localStorage.setItem(LS_DAYS, daysCount); }, [daysCount]);
     useEffect(() => { localStorage.setItem(LS_PAPER, paper); }, [paper]);
+    useEffect(() => { localStorage.setItem(LS_LANG, lang); }, [lang]);
+    useEffect(() => { localStorage.setItem(LS_ROWS, rowsInput); }, [rowsInput]);
 
     /* ✅ Dynamic Logo Fetching */
     useEffect(() => {
@@ -242,6 +380,21 @@ export default function AttendanceSheet({ reportData, query }) {
         }
     }, [institutionInfo]);
 
+    /* ── সাইডবার: সবসময় বাংলা ── */
+    const tUI = TRANSLATIONS.bn;
+    const numUI = useMemo(() => makeNum("bn"), []);
+
+    /* ── প্রিন্ট/প্রিভিউ শিট: নির্বাচিত ভাষা ── */
+    const t = { ...TRANSLATIONS.bn, ...(TRANSLATIONS[lang] || {}) };
+    const dir = lang === "ar" ? "rtl" : "ltr";
+    const num = useMemo(() => makeNum(lang), [lang]);
+
+    const institutionName = getInstitutionName(institutionInfo, lang);
+    const institutionAddress = getInstitutionAddress(institutionInfo, lang);
+    const sessionNameRaw = getSessionName(conditionAverage?.Session, lang);
+    const sessionName = lang === "ar" ? num(sessionNameRaw) : sessionNameRaw;
+    const className = getClassName(conditionAverage?.SubClass, lang);
+
     const C = THEMES[colorMode] || THEMES.color;
     const show = { ...DEFAULT_VISIBLE_COLUMNS, ...(visibleColumns || {}) };
     const days = Number(daysCount) || 31;
@@ -255,10 +408,24 @@ export default function AttendanceSheet({ reportData, query }) {
         (show.present ? 1 : 0) +
         (show.absent ? 1 : 0);
 
+    /* custom রো: null = অটো, সংখ্যা = শিক্ষার্থীর পরে ঠিক এতগুলো খালি রো */
+    const customRows = useMemo(() => {
+        const s = String(rowsInput ?? "").trim();
+        if (s === "") return null;
+        const n = parseInt(s, 10);
+        if (!Number.isFinite(n) || n < 0) return null;
+        return Math.min(n, MAX_CUSTOM_ROWS);
+    }, [rowsInput]);
+
     /* sidebar handlers */
     const toggleColumn = (key) => setVisibleColumns((p) => ({ ...p, [key]: !p[key] }));
     const setAllColumns = (value) =>
         setVisibleColumns(Object.fromEntries(ATTENDANCE_COLUMNS.map((c) => [c.key, value])));
+    const handleRowsChange = (v) => {
+        // শুধু অঙ্ক রাখো
+        const cleaned = String(v).replace(/[^\d]/g, "").slice(0, 3);
+        setRowsInput(cleaned);
+    };
 
     /* ═══ PAGE GEOMETRY ═══ */
     const paperDef = PAPER_MM[paper] || PAPER_MM[DEFAULT_PAPER];
@@ -274,8 +441,24 @@ export default function AttendanceSheet({ reportData, query }) {
     /* stretch rows slightly so the grid ends exactly at the bottom of the page */
     const rowHeightPx = Math.floor((rowsAreaPx / rowsPerPage) * 100) / 100;
 
-    /* split students into pages, pad every page with empty rows */
+    /* split students into pages */
     const pages = useMemo(() => {
+        /* ── custom মোড: শিক্ষার্থী + ঠিক N টি খালি রো, পেজ প্যাড হবে না ── */
+        if (customRows !== null) {
+            const items = [
+                ...studentResultsDetails.map((student) => student),
+                ...Array.from({ length: customRows }, () => null),
+            ];
+            if (items.length === 0) return [[]];
+            return chunk(items, rowsPerPage).map((list, pageIndex) =>
+                list.map((student, i) => ({
+                    student,
+                    index: pageIndex * rowsPerPage + i,
+                }))
+            );
+        }
+
+        /* ── অটো মোড: প্রতি পেজ খালি রো দিয়ে ভরবে ── */
         const chunks = studentResultsDetails.length
             ? chunk(studentResultsDetails, rowsPerPage)
             : [[]];
@@ -289,7 +472,7 @@ export default function AttendanceSheet({ reportData, query }) {
             }
             return rows;
         });
-    }, [studentResultsDetails, rowsPerPage]);
+    }, [studentResultsDetails, rowsPerPage, customRows]);
 
     /* measure the real title block height (first page) */
     useLayoutEffect(() => {
@@ -300,7 +483,7 @@ export default function AttendanceSheet({ reportData, query }) {
         };
         measure();
         if (document.fonts?.ready) document.fonts.ready.then(measure);
-    }, [institutionInfo, institutionLogo, conditionAverage?.Session?.SessionName, conditionAverage?.SubClass?.SubClass, orientation, paper]);
+    }, [institutionInfo, institutionLogo, sessionName, className, orientation, paper, lang]);
 
     /* styles */
     const cellBase = {
@@ -352,7 +535,7 @@ export default function AttendanceSheet({ reportData, query }) {
                     src={institutionLogo || EXAMPLE_LOGO}
                     alt="logo"
                     style={{
-                        position: "absolute", left: "6px", top: "2px",
+                        position: "absolute", insetInlineStart: "6px", top: "2px",
                         width: "88px", height: "88px", objectFit: "contain",
                         userSelect: "none", pointerEvents: "none",
                     }}
@@ -361,16 +544,16 @@ export default function AttendanceSheet({ reportData, query }) {
                     margin: 0, fontSize: "22px", fontWeight: 800,
                     lineHeight: 1.3, color: C.primaryDark,
                 }}>
-                    {institutionInfo?.InstitutionName}
+                    {institutionName}
                 </h1>
                 <p style={{ margin: "2px 0 0", fontSize: "15px", fontWeight: 600, color: C.muted }}>
-                    {institutionInfo?.Address}
+                    {institutionAddress}
                 </p>
                 <h2 style={{
                     margin: "4px 0 0", fontSize: "17px", fontWeight: 600,
                     lineHeight: 1.3, color: C.text,
                 }}>
-                    দৈনন্দিন শিক্ষার্থীর হাজিরা খাতা - {conditionAverage?.Session?.SessionName}
+                    {t.title} - {sessionName}
                 </h2>
                 <div style={{
                     display: "inline-block", marginTop: "6px",
@@ -379,7 +562,7 @@ export default function AttendanceSheet({ reportData, query }) {
                     border: `1.5px solid ${C.primary}`, borderRadius: "3px",
                     fontWeight: 800, fontSize: "16px", lineHeight: "24px",
                 }}>
-                    শ্রেণী : {conditionAverage?.SubClass?.SubClass}
+                    {t.classLabel} : {className}
                 </div>
             </div>
 
@@ -388,16 +571,16 @@ export default function AttendanceSheet({ reportData, query }) {
                 marginTop: "10px", padding: "8px 10px",
                 border: `1px solid ${C.border}`, borderRadius: "3px",
                 display: "flex", flexDirection: "column", gap: "8px",
-                textAlign: "left",
+                textAlign: "start",
             }}>
                 <div style={{ display: "flex", gap: "18px" }}>
-                    <FillField label="কিতাবের নাম :" flex={2} color={C.text} />
-                    <FillField label="মাস :" flex={1.2} color={C.text} />
-                    <FillField label="হিজরী/সন :" flex={1.2} color={C.text} />
+                    <FillField label={t.bookName} flex={2} color={C.text} />
+                    <FillField label={t.month} flex={1.2} color={C.text} />
+                    <FillField label={t.hijriYear} flex={1.2} color={C.text} />
                 </div>
                 <div style={{ display: "flex", gap: "18px" }}>
-                    <FillField label="শিক্ষক/শিক্ষিকার নাম :" flex={2.4} color={C.text} />
-                    <FillField label="ঘন্টা :" flex={1} color={C.text} />
+                    <FillField label={t.teacherName} flex={2.4} color={C.text} />
+                    <FillField label={t.hour} flex={1} color={C.text} />
                 </div>
             </div>
         </div>
@@ -407,6 +590,7 @@ export default function AttendanceSheet({ reportData, query }) {
     const renderPage = (rows, pageIndex) => (
         <div
             key={pageIndex}
+            dir={dir}
             className="sheet-card sheet-page"
             style={{
                 width: `${sheetWidthMm}mm`,
@@ -430,26 +614,26 @@ export default function AttendanceSheet({ reportData, query }) {
                     {/* Column header */}
                     {visibleColCount > 0 && (
                         <tr style={{ height: `${THEAD_PX}px` }}>
-                            {show.sl && <th style={thStyle}>ক্রমিক</th>}
-                            {show.id && <th style={thStyle}>আইডি নং</th>}
+                            {show.sl && <th style={thStyle}>{t.sl}</th>}
+                            {show.id && <th style={thStyle}>{t.id}</th>}
                             {show.name && (
-                                <th style={{ ...thStyle, textAlign: "left", paddingLeft: "8px" }}>
-                                    শিক্ষার্থীর নাম
+                                <th style={{ ...thStyle, textAlign: "start", paddingInlineStart: "8px" }}>
+                                    {t.name}
                                 </th>
                             )}
                             {show.days && Array.from({ length: days }).map((_, i) => (
                                 <th key={i} style={{ ...thStyle, padding: "4px 0", verticalAlign: "bottom" }}>
-                                    <span style={{ ...thVertical, fontSize: "11px" }}>{bn(i + 1)}</span>
+                                    <span style={{ ...thVertical, fontSize: "11px" }}>{num(i + 1)}</span>
                                 </th>
                             ))}
                             {show.present && (
                                 <th style={{ ...thStyle, ...bg(C.headStrongBg) }}>
-                                    <span style={thVertical}>উপ :</span>
+                                    <span style={thVertical}>{t.present}</span>
                                 </th>
                             )}
                             {show.absent && (
                                 <th style={{ ...thStyle, ...bg(C.headStrongBg) }}>
-                                    <span style={thVertical}>অনু :</span>
+                                    <span style={thVertical}>{t.absent}</span>
                                 </th>
                             )}
                         </tr>
@@ -457,16 +641,27 @@ export default function AttendanceSheet({ reportData, query }) {
                 </thead>
 
                 <tbody>
+                    {rows.length === 0 && (
+                        <tr style={{ height: `${rowHeightPx}px` }}>
+                            <td
+                                colSpan={Math.max(visibleColCount, 1)}
+                                style={{ ...cellBase, textAlign: "center", color: C.muted, height: `${rowHeightPx}px` }}
+                            >
+                                {t.noStudent}
+                            </td>
+                        </tr>
+                    )}
+
                     {rows.map(({ student, index }, rowPos) => {
                         const rowBg = index % 2 === 1 ? C.zebra : "#fff";
                         const td = { ...cellBase, ...bg(rowBg), textAlign: "center", height: `${rowHeightPx}px` };
 
-                        /* empty-state message */
-                        if (!student && studentResultsDetails.length === 0 && rowPos === 0) {
+                        /* empty-state message (শুধু অটো মোডে) */
+                        if (!student && customRows === null && studentResultsDetails.length === 0 && rowPos === 0) {
                             return (
                                 <tr key={`empty-${index}`} style={{ height: `${rowHeightPx}px` }}>
                                     <td colSpan={Math.max(visibleColCount, 1)} style={{ ...td, color: C.muted }}>
-                                        কোনো শিক্ষার্থী পাওয়া যায়নি
+                                        {t.noStudent}
                                     </td>
                                 </tr>
                             );
@@ -477,14 +672,14 @@ export default function AttendanceSheet({ reportData, query }) {
                                 key={student?.ID ?? `blank-${index}`}
                                 style={{ height: `${rowHeightPx}px`, breakInside: "avoid", pageBreakInside: "avoid" }}
                             >
-                                {show.sl && <td style={td}>{student ? bn(index + 1) : ""}</td>}
-                                {show.id && <td style={td}>{student ? bn(student?.User?.UserCode ?? "") : ""}</td>}
+                                {show.sl && <td style={td}>{student ? num(index + 1) : ""}</td>}
+                                {show.id && <td style={td}>{student ? num(student?.User?.UserCode ?? "") : ""}</td>}
                                 {show.name && (
                                     <td style={{
-                                        ...td, textAlign: "left", paddingLeft: "8px", fontWeight: 600,
+                                        ...td, textAlign: "start", paddingInlineStart: "8px", fontWeight: 600,
                                         whiteSpace: "nowrap", textOverflow: "ellipsis",
                                     }}>
-                                        {student?.User?.UserName ?? ""}
+                                        {student ? getStudentName(student?.User, lang) : ""}
                                     </td>
                                 )}
                                 {show.days && Array.from({ length: days }).map((_, d) => (
@@ -500,6 +695,21 @@ export default function AttendanceSheet({ reportData, query }) {
         </div>
     );
 
+    const settingsPanels = (
+        <>
+            <LanguageSelector t={tUI} value={lang} onChange={setLang} />
+            <ColumnSelector t={tUI} num={numUI} value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={ATTENDANCE_COLUMNS} />
+            <RowsSettings t={tUI} value={rowsInput} onChange={handleRowsChange} onReset={() => setRowsInput("")} />
+            <PrintSettings
+                t={tUI}
+                colorMode={colorMode} onColorChange={setColorMode}
+                orientation={orientation} onOrientationChange={setOrientation}
+                paper={paper} onPaperChange={setPaper}
+                daysCount={daysCount} onDaysChange={setDaysCount}
+            />
+        </>
+    );
+
     /* ═══ RENDER ═══ */
     return (
         <div className="rs-root flex w-full bg-slate-100 lg:h-[100dvh] lg:overflow-hidden">
@@ -513,27 +723,21 @@ export default function AttendanceSheet({ reportData, query }) {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                         </div>
-                        <h2 className="text-sm font-bold text-slate-800">সেটিং</h2>
+                        <h2 className="text-sm font-bold text-slate-800">{tUI.settings}</h2>
                     </div>
-                    <p className="text-xs text-slate-400">হাজিরা খাতার কলাম ও প্রিন্ট অপশন</p>
+                    <p className="text-xs text-slate-400">{tUI.settingsSub}</p>
                 </div>
 
                 <div className="px-5 py-3 border-b border-slate-100 shrink-0">
-                    <PreviewInfo count={studentResultsDetails.length} days={days} pages={pages.length} />
+                    <PreviewInfo t={tUI} num={numUI} count={studentResultsDetails.length} days={days} pages={pages.length} />
                 </div>
 
                 <div className="rs-scroll flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
-                    <ColumnSelector value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={ATTENDANCE_COLUMNS} />
-                    <PrintSettings
-                        colorMode={colorMode} onColorChange={setColorMode}
-                        orientation={orientation} onOrientationChange={setOrientation}
-                        paper={paper} onPaperChange={setPaper}
-                        daysCount={daysCount} onDaysChange={setDaysCount}
-                    />
+                    {settingsPanels}
                 </div>
 
                 <div className="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0">
-                    <p className="text-[10px] text-slate-400 text-center">© Result Report Generator</p>
+                    <p className="text-[10px] text-slate-400 text-center">{tUI.footer}</p>
                 </div>
             </aside>
 
@@ -541,14 +745,8 @@ export default function AttendanceSheet({ reportData, query }) {
             <main className="rs-main rs-scroll flex-1 min-w-0 lg:h-full lg:overflow-y-auto">
                 <div className="lg:hidden p-4 pb-0 print:hidden">
                     <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
-                        <PreviewInfo count={studentResultsDetails.length} days={days} pages={pages.length} />
-                        <ColumnSelector value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={ATTENDANCE_COLUMNS} />
-                        <PrintSettings
-                            colorMode={colorMode} onColorChange={setColorMode}
-                            orientation={orientation} onOrientationChange={setOrientation}
-                            paper={paper} onPaperChange={setPaper}
-                            daysCount={daysCount} onDaysChange={setDaysCount}
-                        />
+                        <PreviewInfo t={tUI} num={numUI} count={studentResultsDetails.length} days={days} pages={pages.length} />
+                        {settingsPanels}
                     </div>
                 </div>
 
@@ -601,18 +799,18 @@ export default function AttendanceSheet({ reportData, query }) {
    SIDEBAR SUB-COMPONENTS
    ═══════════════════════════════════════════════════════════ */
 
-const PreviewInfo = ({ count, days, pages }) => (
+const PreviewInfo = ({ t, num, count, days, pages }) => (
     <div className="flex items-center gap-2 min-w-0 flex-wrap">
-        <span className="text-sm font-bold text-slate-800 truncate">হাজিরা খাতা প্রিভিউ</span>
+        <span className="text-sm font-bold text-slate-800 truncate">{t.preview}</span>
         <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-2 py-0.5 shrink-0">
-            {bn(count)} জন
+            {num(count)} {t.people}
         </span>
         <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 rounded-md px-2 py-0.5 shrink-0">
-            {bn(days)} দিন
+            {num(days)} {t.daysUnit}
         </span>
         {pages > 1 && (
             <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 rounded-md px-2 py-0.5 shrink-0">
-                {bn(pages)} পৃষ্ঠা
+                {num(pages)} {t.pageUnit}
             </span>
         )}
     </div>
@@ -636,7 +834,49 @@ const SegmentedControl = ({ label, options, value, onChange }) => (
     </div>
 );
 
+const LanguageSelector = ({ t, value, onChange }) => (
+    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+        <SegmentedControl label={t.printLanguage} options={LANGUAGE_OPTIONS} value={value} onChange={onChange} />
+        <p className="text-[10px] text-slate-400 leading-snug">{t.printLanguageNote}</p>
+    </div>
+);
+
+const RowsSettings = ({ t, value, onChange, onReset }) => {
+    const inputCls =
+        "w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-700 " +
+        "placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300";
+    return (
+        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+            <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-700 leading-tight">{t.rowsTitle}</p>
+                {String(value).trim() !== "" && (
+                    <button
+                        type="button"
+                        onClick={onReset}
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200"
+                    >
+                        {t.rowsReset}
+                    </button>
+                )}
+            </div>
+            <div>
+                {/* <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{t.rowsLabel}</p> */}
+                <input
+                    type="text"
+                    inputMode="numeric"
+                    value={value}
+                    onChange={(e) => onChange(e.target.value)}
+                    placeholder={t.rowsPlaceholder}
+                    className={inputCls}
+                />
+            </div>
+            <p className="text-[10px] text-slate-400 leading-snug">{t.rowsNote}</p>
+        </div>
+    );
+};
+
 const PrintSettings = ({
+    t,
     colorMode, onColorChange,
     orientation, onOrientationChange,
     paper, onPaperChange,
@@ -644,40 +884,37 @@ const PrintSettings = ({
 }) => (
     <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-3">
         <div className="flex items-center justify-between">
-            <p className="text-xs font-bold text-slate-700 leading-tight">প্রিন্ট সেটিং</p>
+            <p className="text-xs font-bold text-slate-700 leading-tight">{t.printSetting}</p>
             <span className="text-[10px] font-semibold text-slate-500 bg-white border border-slate-200 rounded-md px-1.5 py-0.5">
                 {paper} · {orientation === "landscape" ? "Landscape" : "Portrait"}
             </span>
         </div>
-        <SegmentedControl label="পেজ দিক" options={ORIENTATION_OPTIONS} value={orientation} onChange={onOrientationChange} />
-        <SegmentedControl label="কাগজের সাইজ" options={PAPER_OPTIONS} value={paper} onChange={onPaperChange} />
-        <SegmentedControl label="মাসের দিন সংখ্যা" options={DAYS_OPTIONS} value={daysCount} onChange={onDaysChange} />
-        <p className="text-[10px] text-slate-400 leading-snug">
-            Portrait-এ ৩১ দিনের কলাম সরু হবে, বেশি দিন হলে Landscape ব্যবহার করুন।
-            প্রিন্ট ডায়ালগে Paper size একই (A4/Legal) এবং Margins "Default" রাখুন।
-        </p>
+        <SegmentedControl label={t.pageDirection} options={ORIENTATION_OPTIONS} value={orientation} onChange={onOrientationChange} />
+        <SegmentedControl label={t.paperSize} options={PAPER_OPTIONS} value={paper} onChange={onPaperChange} />
+        <SegmentedControl label={t.monthDays} options={DAYS_OPTIONS} value={daysCount} onChange={onDaysChange} />
+        <p className="text-[10px] text-slate-400 leading-snug">{t.printNote}</p>
     </div>
 );
 
-const ColumnSelector = ({ value, onToggle, onSetAll, columns = ATTENDANCE_COLUMNS }) => {
+const ColumnSelector = ({ t, num, value, onToggle, onSetAll, columns = ATTENDANCE_COLUMNS }) => {
     const checkedCount = columns.filter((c) => value[c.key]).length;
     return (
         <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
             <div className="flex items-center justify-between mb-2">
                 <div>
-                    <p className="text-xs font-bold text-slate-700 leading-tight">কলাম নির্বাচন</p>
+                    <p className="text-xs font-bold text-slate-700 leading-tight">{t.columnSelect}</p>
                     <p className="text-[10px] text-slate-400 leading-tight mt-0.5">
-                        {checkedCount}/{columns.length} টি নির্বাচিত
+                        {t.selectedCount(num(checkedCount), num(columns.length))}
                     </p>
                 </div>
                 <div className="flex items-center gap-1">
                     <button type="button" onClick={() => onSetAll(true)}
                         className="px-2 py-1 rounded-md text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100">
-                        সব
+                        {t.all}
                     </button>
                     <button type="button" onClick={() => onSetAll(false)}
                         className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200">
-                        কিছুই না
+                        {t.none}
                     </button>
                 </div>
             </div>
