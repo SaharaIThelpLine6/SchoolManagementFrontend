@@ -12,6 +12,7 @@ import Button from "../components/Button/Button";
 import { useGetExamNamesQuery } from "../features/student/studentQuerySlice";
 import TableInput from "../components/Input/TableInput";
 import {
+  resultSilce,
   useGetUserResultQuery,
   useUpdateAndPostResultMutation,
 } from "../features/result/resultSilce";
@@ -20,7 +21,8 @@ import Loading from "../components/Loading/Loading";
 import DefaultPagination from "../components/Pagination/DefaultPagination";
 import DefaultInput from "../components/Forms/DefaultInput";
 import { useGetTeacherSubjectsByFilterQuery } from "../features/teachers/teachersSlice";
-import { updateResultCell } from "../helper/socket";
+import { updateResultCell, updateResultDivision } from "../helper/socket";
+import { useGetExamConditionsQuery, useGetExamDivitionByTypeQuery } from "../features/exam/examQuerySlice";
 
 const PAGE_SIZE = 10;
 
@@ -31,7 +33,7 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
   const { user } = useSelector((state) => state.auth);
 
   // ✅ permissionType === 6 মানে teacher
-  const isTeacher = user?.permissionType === 6;
+  const isTeacher = Number(user?.permissionType) === 6;
 
   const methods = useForm({
     defaultValues: {
@@ -53,17 +55,25 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [students, setStudents] = useState([]);
   const [cellSaveStatus, setCellSaveStatus] = useState({});
+  const [savingDivisionId, setSavingDivisionId] = useState(null);
 
   const [updateAndPostResult] = useUpdateAndPostResultMutation();
 
   const { data: sessionData } = useGetSessionsQuery();
   const { data: subClassListData } = useGetSubClassListQuery();
   const { data: examNameData } = useGetExamNamesQuery();
-
   const session_id = watch("SessionID");
   const exam_id = watch("ExamID");
   const subclass_id = watch("SubClassID");
   const selectedSubject = watch("subjectSelect");
+  const { currentData: examConditions } = useGetExamConditionsQuery(
+    { SessionID: session_id, ExamID: exam_id, SubClassID: subclass_id },
+    { skip: !session_id || !exam_id || !subclass_id }
+  );
+  const examType = examConditions?.[0]?.ExamType;
+  const { currentData: examDivitions = [] } = useGetExamDivitionByTypeQuery(examType, {
+    skip: !examType,
+  });
 
   // =========================
   // TEACHER SUBJECTS (only for teacher: permissionType === 6)
@@ -243,6 +253,8 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
             student?.Result ??
             student?.result ??
             null,
+          DivisionID: student.DivisionID,
+          ResultEntryType: Number(student.ResultEntryType) === 1 ? 1 : 0,
         };
       });
 
@@ -304,6 +316,53 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
     } catch (error) {
       console.error("Result cell update error:", error.message);
       setCellSaveStatus((previous) => ({ ...previous, [cellKey]: "failed" }));
+    }
+  };
+
+  const handleDivisionChange = async (student, event) => {
+    const currentValue = student.DivisionID == null ? "" : String(student.DivisionID);
+    const selectedValue = event.target.value;
+    event.target.value = currentValue;
+    if (!selectedValue || selectedValue === currentValue) return;
+
+    const division = examDivitions.find((item) => String(item.ID) === selectedValue);
+    if (!division) return;
+
+    const confirmation = await Swal.fire({
+      icon: "warning",
+      title: translate("Change division manually?"),
+      text: translate("This division will be saved as a manual result and will not change during automatic calculation."),
+      showCancelButton: true,
+      confirmButtonText: translate("Yes"),
+      cancelButtonText: translate("Cancel"),
+    });
+    if (!confirmation.isConfirmed) return;
+
+    setSavingDivisionId(student.ID);
+    try {
+      const updated = await updateResultDivision({
+        SessionID: Number(session_id),
+        ExamID: Number(exam_id),
+        SubClassID: Number(subclass_id),
+        UserID: student.UserID,
+        DivisionID: Number(selectedValue),
+      });
+      dispatch(resultSilce.util.updateQueryData(
+        "getUserResult",
+        { session_id, exam_id, subclass_id },
+        (draft) => {
+          const result = draft.find((item) => item.ID === updated.ID);
+          if (!result) return;
+          result.DivisionID = updated.DivisionID;
+          result.Division = { ...result.Division, ID: updated.DivisionID, DivisionNames: updated.DivisionNames };
+          result.ResultEntryType = updated.ResultEntryType;
+        }
+      ));
+      dispatch(resultSilce.util.invalidateTags(["getResultReportData"]));
+    } catch (error) {
+      Swal.fire({ icon: "error", title: translate("Could not save division"), text: error.message });
+    } finally {
+      setSavingDivisionId(null);
     }
   };
 
@@ -494,16 +553,16 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
 
           {paginatedData.length > 0 && (
             <div className="mt-6 overflow-x-auto">
-              <table className="w-full border-collapse">
+              <table className="w-full table-auto border-collapse">
                 <thead>
                   <tr className="bg-gray-100">
-                    <th className="p-2 border whitespace-nowrap w-16">
+                    <th className="w-16 min-w-16 border p-2 break-words">
                       {translate("Admission Serial")}
                     </th>
-                    <th className="p-2 border whitespace-nowrap w-16">
+                    <th className="w-16 min-w-16 border p-2 break-words">
                       {translate("UserCode")}
                     </th>
-                    <th className="p-2 border whitespace-nowrap w-40">
+                    <th className="border p-2 whitespace-nowrap">
                       {translate("Student Name")}
                     </th>
 
@@ -511,17 +570,18 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
                       filteredSubjects?.map((subject, index) => (
                         <th
                           key={`header-${index}`}
-                          className="p-2 border whitespace-nowrap w-20"
+                          className="min-w-20 border p-2 break-words"
+                          style={{ width: `${100 / filteredSubjects.length}%` }}
                         >
                           {subject}
                         </th>
                       ))}
 
-                    <th className="p-2 border whitespace-nowrap w-20">
+                    <th className={`min-w-20 border p-2 whitespace-nowrap ${filteredSubjects.length ? "w-20" : "w-full"}`}>
                       {translate("Total")}
                     </th>
-                    <th className="p-2 border whitespace-nowrap w-20">
-                      {translate("GPA")}
+                    <th className="w-[150px] min-w-[150px] max-w-[150px] border p-2 whitespace-nowrap">
+                      {translate("Division")}
                     </th>
                   </tr>
                 </thead>
@@ -543,7 +603,7 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
                         <td className="p-2 border text-center whitespace-nowrap bg-white">
                           {convertOnLanguageChange(student?.UserCode)}
                         </td>
-                        <td className="p-2 border text-center whitespace-nowrap bg-white">
+                        <td className="border bg-white p-2 text-center whitespace-nowrap">
                           {student.UserName}
                         </td>
 
@@ -583,8 +643,29 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
                         <td className="p-2 border text-center whitespace-nowrap bg-white">
                           {student.Total ?? "-"}
                         </td>
-                        <td className="p-2 border text-center whitespace-nowrap bg-white">
-                          {student.Division ?? "-"}
+                        <td className="w-[150px] min-w-[150px] max-w-[150px] overflow-hidden border bg-white p-2 text-center whitespace-nowrap">
+                          {isTeacher ? (
+                            <span className="block truncate">{student.Division ?? "-"}</span>
+                          ) : (
+                            <div className="flex w-full min-w-0 flex-col items-center gap-1">
+                              <select
+                                aria-label={`${translate("Division")} - ${student.UserName}`}
+                                value={student.DivisionID ?? ""}
+                                onChange={(event) => handleDivisionChange(student, event)}
+                                disabled={!examType || isSubmitting || savingDivisionId === student.ID}
+                                className={`w-[132px] min-w-0 max-w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none disabled:bg-gray-100 ${student.ResultEntryType === 1 ? "border-1 border-amber-700" : ""}`}
+                              >
+                                <option value="">{student.Division || translate("Select division")}</option>
+                                {student.DivisionID != null && !examDivitions.some((item) => String(item.ID) === String(student.DivisionID)) && (
+                                  <option value={student.DivisionID}>{student.Division || `Division ${student.DivisionID}`}</option>
+                                )}
+                                {examDivitions.map((division) => (
+                                  <option key={division.ID} value={division.ID}>{division.DivisionNames}</option>
+                                ))}
+                              </select>
+                       
+                            </div>
+                          )}
                         </td>
                       </tr>
                     );

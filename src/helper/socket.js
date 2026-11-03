@@ -83,6 +83,19 @@ export const updateResultCell = (payload) => {
   });
 };
 
+export const updateResultDivision = (payload) => {
+  if (!socket?.connected) {
+    return Promise.reject(new Error("Result socket is not connected"));
+  }
+  return new Promise((resolve, reject) => {
+    socket.timeout(10000).emit("update_result_division", payload, (error, response) => {
+      if (error) reject(new Error("Division save timed out"));
+      else if (response?.success) resolve(response.data);
+      else reject(new Error(response?.message || "Could not save division"));
+    });
+  });
+};
+
 // Optional: manually disconnect
 export const disconnectSocket = () => {
   if (socket) {

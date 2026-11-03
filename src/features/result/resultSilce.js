@@ -14,7 +14,7 @@ export const resultSilce = createApi({
       return headers;
     },
   }),
-  tagTypes: ["ExamList", "Result", "StudentMarksheetNote", "ExamDivisionNameResult"],
+  tagTypes: ["ExamList", "Result", "getResultReportData", "StudentMarksheetNote", "ExamDivisionNameResult"],
   endpoints: (builder) => ({
     getExamList: builder.query({
       query: ({ session_id, exam_id, subclass_id } = {}) => {

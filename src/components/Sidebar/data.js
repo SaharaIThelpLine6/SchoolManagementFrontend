@@ -392,6 +392,12 @@ export const menuData = [
         route: 'exam/report',
         icon: 'SubReport',
       },
+      {
+        id: '13',
+        name: 'All Tutorials Exam',
+        route: 'exam/all-tutorials-exam',
+        icon: 'SubVideo',
+      },
     ],
   },
   {
@@ -441,6 +447,12 @@ export const menuData = [
         name: 'Result Report',
         route: 'result/report',
         icon: 'SubReport',
+      },
+      {
+        id: '8',
+        name: 'All Tutorials Result',
+        route: 'result/all-tutorials-result',
+        icon: 'SubVideo',
       },
     ],
   },
@@ -504,73 +516,127 @@ export const menuData = [
       },
     ],
   },
-  {
-    id: '11',
-    name: 'Accounting',
-    route: 'accounting',
-    icon: 'FaCalculator',
-    subMenu: [
-      {
-        id: '1',
-        name: 'Deposit Costs',
-        route: 'accounting',
-        icon: 'SubMoney',
-      },
-      {
-        id: '2',
-        name: 'Deposit Costs Report',
-        route: 'accounting/income-expense-report',
-        icon: 'SubReport',
-      },
-      {
-        id: '3',
-        name: 'Fee Setting',
-        route: 'accounting/fee-setting',
-        icon: 'SubSettings',
-      },
-      {
-        id: '4',
-        name: 'Student Fee Collection',
-        route: 'accounting/student-fee-collection',
-        icon: 'SubFee',
-      },
-      {
-        id: '5',
-        name: 'Dues List',
-        route: 'accounting/dues-list',
-        icon: 'SubDues',
-      },
-      {
-        id: '6',
-        name: 'Monthly Dues',
-        route: 'accounting/monthly-dues',
-        icon: 'SubDues',
-      },
-      {
-        id: '7',
-        name: 'Fee Collection Report',
-        route: 'accounting/fee-collection-report',
-        icon: 'SubReport',
-      },
-      {
-        id: '8',
-        name: 'Balance Transfer',
-        route: 'accounting/balance-transfer',
-        icon: 'SubTransfer',
-      },
-      {
-        id: '9',
-        name: 'Delete Edit Record',
-        route: 'accounting/delete-edit-record',
-        icon: 'SubDelete',
-      },
-      // {
-      //   id: '10',
-      //   name: 'Student Admission',
-      //   route: '/accounting/student-admission',
-      // },
-    ],
-  },
+  // {
+  //   id: '11',
+  //   name: 'Accounting',
+  //   route: 'accounting',
+  //   icon: 'FaCalculator',
+  //   subMenu: [
+  //     {
+  //       id: '1',
+  //       name: 'Deposit Costs',
+  //       route: 'accounting',
+  //       icon: 'SubMoney',
+  //     },
+  //     {
+  //       id: '2',
+  //       name: 'Deposit Costs Report',
+  //       route: 'accounting/income-expense-report',
+  //       icon: 'SubReport',
+  //     },
+  //     {
+  //       id: '3',
+  //       name: 'Fee Setting',
+  //       route: 'accounting/fee-setting',
+  //       icon: 'SubSettings',
+  //     },
+  //     {
+  //       id: '4',
+  //       name: 'Student Fee Collection',
+  //       route: 'accounting/student-fee-collection',
+  //       icon: 'SubFee',
+  //     },
+  //     {
+  //       id: '5',
+  //       name: 'Dues List',
+  //       route: 'accounting/dues-list',
+  //       icon: 'SubDues',
+  //     },
+  //     {
+  //       id: '6',
+  //       name: 'Monthly Dues',
+  //       route: 'accounting/monthly-dues',
+  //       icon: 'SubDues',
+  //     },
+  //     {
+  //       id: '7',
+  //       name: 'Fee Collection Report',
+  //       route: 'accounting/fee-collection-report',
+  //       icon: 'SubReport',
+  //     },
+  //     {
+  //       id: '8',
+  //       name: 'Balance Transfer',
+  //       route: 'accounting/balance-transfer',
+  //       icon: 'SubTransfer',
+  //     },
+  //     {
+  //       id: '9',
+  //       name: 'Delete Edit Record',
+  //       route: 'accounting/delete-edit-record',
+  //       icon: 'SubDelete',
+  //     },
+  //     // {
+  //     //   id: '10',
+  //     //   name: 'Student Admission',
+  //     //   route: '/accounting/student-admission',
+  //     // },
+  //   ],
+  // },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
   // {
   //   id: '18',
   //   name: 'Talimat',

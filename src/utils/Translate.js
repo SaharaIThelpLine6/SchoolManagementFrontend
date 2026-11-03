@@ -14,6 +14,11 @@ const useTranslate = () => {
     Status: 'স্ট্যাটাস',
     Reset: 'রিসেট',
     Delete: 'ডিলিট',
+    Remove: 'সরান',
+    "Select division": "বিভাগ নির্বাচন করুন",
+    "Change division manually?": "বিভাগটি কি ম্যানুয়ালি পরিবর্তন করবেন?",
+    "This division will be saved as a manual result and will not change during automatic calculation.": "এই বিভাগটি ম্যানুয়াল ফলাফল হিসেবে সংরক্ষিত হবে এবং স্বয়ংক্রিয় হিসাবের সময় পরিবর্তন হবে না।",
+    "Could not save division": "বিভাগ সংরক্ষণ করা যায়নি",
     Modules: 'মডিউলসমূহ',
     Edit: 'এডিট',
     Debit: 'ডেবিট',
@@ -1145,6 +1150,7 @@ const useTranslate = () => {
     "students": "জন শিক্ষার্থী",
     "Failed to load blood group data": "রক্তের গ্রুপ ডেটা লোড করতে ব্যর্থ হয়েছে",
     "No student data found": "কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি",
+    "All Tutorials Exam" : "সকল পরীক্ষার টিউটোরিয়াল",
   };
 
   return (key) =>

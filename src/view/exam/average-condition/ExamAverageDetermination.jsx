@@ -204,6 +204,11 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
     });
   };
 
+  const handleRemoveGradeBand = () => {
+    if (gradeFields.length <= MIN_GRADE_BANDS) return;
+    removeGrade(gradeFields.length - 1);
+  };
+
   const handleGradeDivisionChange = (index, division) => {
     if (division?.ID == null || division.ID === '') return;
     const alreadySelected = (getValues('gradeBands') ?? []).some((band, rowIndex) =>
@@ -703,7 +708,17 @@ export default function ExamAverageDetermination({ sharedStepData, setSharedStep
                     </table>
                   </div>
 
-                  <div className="flex justify-end py-3 sm:px-2">
+                  <div className="flex flex-col justify-end gap-2 py-3 sm:flex-row sm:px-2">
+                    {gradeFields.length > MIN_GRADE_BANDS && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveGradeBand}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100 sm:w-auto"
+                      >
+                        <SvgIcon name="FaTrash" size={16} />
+                        {translate("Remove")}
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={handleAddGradeBand}
