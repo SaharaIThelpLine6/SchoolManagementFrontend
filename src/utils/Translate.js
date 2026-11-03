@@ -1144,6 +1144,7 @@ const useTranslate = () => {
     "students": "জন শিক্ষার্থী",
     "Failed to load blood group data": "রক্তের গ্রুপ ডেটা লোড করতে ব্যর্থ হয়েছে",
     "No student data found": "কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি",
+    "All Tutorials Exam" : "সকল পরীক্ষার টিউটোরিয়াল",
   };
 
   return (key) =>
