@@ -976,13 +976,81 @@ export const translateRoutineDay = (value, lang) => {
   return hit?.[lang] ?? String(value);
 };
 
-/** "১০:০০ - ০১:০০" — AM/PM লেখা থাকলে সেটা অটুট থাকে, শুধু অঙ্ক বদলায় */
+// ---------------------------------------------------------------------------
+// সময় — ডাটাবেজে ২৪ ঘণ্টায় ("09:00:00", "14:30"), কার্ডে ১২ ঘণ্টায়
+// দিনের ভাগ সহ: "সকাল ০৯:০০ - দুপুর ১২:০০"।
+//
+// AM/PM নয়, বাংলায় যেভাবে বলা হয় সেভাবেই — শুরু ও শেষ দুইটারই নিজের
+// ভাগ বসে, তাই পরীক্ষা সকালে না রাতে সেটা কাগজে দেখেই বোঝা যায়।
+//
+// ঘণ্টা ধরে ভাগগুলো (২৪ ঘণ্টার হিসাবে):
+//   ০৪–০৫ ভোর · ০৬–১১ সকাল · ১২–১৪ দুপুর
+//   ১৫–১৭ বিকাল · ১৮–১৯ সন্ধ্যা · বাকিটা রাত
+//
+// অন্যরকম শব্দ বা অন্য ভাগ চাইলে নিচের দুইটা ঘরেই বদলান — পুরো
+// সিস্টেমে সময় এখান থেকেই আসে।
+// ---------------------------------------------------------------------------
+const DAY_PARTS = {
+  bn: { dawn: 'ভোর', morning: 'সকাল', noon: 'দুপুর', afternoon: 'বিকাল', evening: 'সন্ধ্যা', night: 'রাত' },
+  en: { dawn: 'Dawn', morning: 'Morning', noon: 'Noon', afternoon: 'Afternoon', evening: 'Evening', night: 'Night' },
+  ar: { dawn: 'فجراً', morning: 'صباحاً', noon: 'ظهراً', afternoon: 'عصراً', evening: 'مساءً', night: 'ليلاً' },
+};
+
+/** ২৪ ঘণ্টার ঘণ্টাটা → দিনের কোন ভাগ */
+const dayPartOf = (h) => {
+  if (h >= 4 && h < 6) return 'dawn';
+  if (h >= 6 && h < 12) return 'morning';
+  if (h >= 12 && h < 15) return 'noon';
+  if (h >= 15 && h < 18) return 'afternoon';
+  if (h >= 18 && h < 20) return 'evening';
+  return 'night';
+};
+
+/**
+ * একটা সময় → { text: 'hh:mm', part: 'morning' | … | null }
+ *
+ * ঘণ্টাটা হাতেই বদলানো হয়, Date দিয়ে নয় — সার্ভার কখনো
+ * "1970-01-01T09:00:00.000Z" ধরনের লেখাও পাঠায়, আর Date এ ফেললে
+ * টাইমজোন ধরে ঘণ্টাটা সরে গিয়ে ভুল সময় ছাপত।
+ *
+ * ডাটাবেজে আগে থেকেই AM/PM (বা ص/م) লেখা থাকলে ঘণ্টাটা ঐ লেখা থেকেই
+ * বোঝা হয়, আর লেখাটুকু ফেলে দিয়ে বাংলা ভাগটাই বসে — নইলে "সকাল
+ * ০৯:০০ AM" ধরনের দুইবার লেখা পড়ত।
+ */
+const splitClock = (raw) => {
+  const text = raw === null || raw === undefined ? '' : String(raw).trim();
+  if (!text) return null;
+
+  const hit = text.match(/(\d{1,2}):(\d{2})/);
+  if (!hit) return { text, part: null };
+
+  let h = Number(hit[1]);
+  if (!Number.isFinite(h) || h > 23) return { text, part: null };
+
+  // লেখায় AM/PM থাকলে ১২ ঘণ্টার হিসাব ধরে ২৪ ঘণ্টায় আনি
+  const pm = /p\.?\s*m/i.test(text) || /م/.test(text);
+  const am = /a\.?\s*m/i.test(text) || /ص/.test(text);
+  if (pm && h < 12) h += 12;
+  if (am && h === 12) h = 0;
+
+  return {
+    text: `${String(h % 12 || 12).padStart(2, '0')}:${hit[2]}`,
+    part: dayPartOf(h),
+  };
+};
+
+/** "সকাল ০৯:০০ - দুপুর ১২:০০" */
 export const formatRoutineTime = (start, end, lang) => {
-  const a = start === null || start === undefined ? '' : String(start).trim();
-  const b = end === null || end === undefined ? '' : String(end).trim();
+  const words = DAY_PARTS[lang] || DAY_PARTS.bn;
+  const a = splitClock(start);
+  const b = splitClock(end);
   if (!a && !b) return '';
-  if (a && b) return `${toLangDigit(a, lang)} - ${toLangDigit(b, lang)}`;
-  return toLangDigit(a || b, lang);
+
+  // ভাগটা সময়ের আগে বসে — বাংলায় এভাবেই বলা হয় ("সকাল ন\u200cটা")
+  const show = (c) => `${c.part ? `${words[c.part]} ` : ''}${toLangDigit(c.text, lang)}`;
+
+  if (a && b) return `${show(a)} - ${show(b)}`;
+  return show(a || b);
 };
 
 /** বাংলা কার্ডে BnExamDate থাকলে সেটাই, নইলে তারিখ ফরম্যাট করা হয় */

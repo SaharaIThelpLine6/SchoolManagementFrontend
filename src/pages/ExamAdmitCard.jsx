@@ -736,6 +736,32 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     if (setup.examNameSize) setValue(`exam_name_size_${tplId}`, setup.examNameSize);
     if (setup.examNameColor) setValue(`exam_name_color_${tplId}`, setup.examNameColor);
 
+    // প্রতিটা ডিজাইনের নিজের ফন্ট ও রঙ — উপরের ছয়টা সমতল ঘরের পরে বসে,
+    // তাই চালু ডিজাইনের মানও এখান থেকেই চূড়ান্ত হয়।
+    if (setup.templates && typeof setup.templates === 'object') {
+      Object.entries(setup.templates).forEach(([id, v]) => {
+        if (!v || typeof v !== 'object') return;
+        if (v.nameSize) setValue(`institute_name_size_${id}`, v.nameSize);
+        if (v.nameColor) setValue(`institute_name_color_${id}`, v.nameColor);
+        if (v.addressSize) setValue(`institute_address_size_${id}`, v.addressSize);
+        if (v.addressColor) setValue(`institute_address_color_${id}`, v.addressColor);
+        if (v.examNameSize) setValue(`exam_name_size_${id}`, v.examNameSize);
+        if (v.examNameColor) setValue(`exam_name_color_${id}`, v.examNameColor);
+      });
+    }
+
+    // ফিল্ডের নিজের দেওয়া নাম — সরাসরি ফর্মে বসাই।
+    //
+    // শুধু savedLabelsRef এ রাখলে হতো না: নিচের যে ইফেক্টটা ঘরগুলো ভরে
+    // সেটা প্রথম রেন্ডারেই চলে যায় (ডিফল্ট নাম বসিয়ে), আর ওর শর্তটা
+    // "ঘর খালি থাকলে" — তাই সংরক্ষিত নামগুলো আর কখনো ইনপুটে পৌঁছাত না।
+    // ফলে নাম বদলে সংরক্ষণ করলেও রিফ্রেশে ডিফল্ট নামটাই ফিরে আসত।
+    if (setup.labels && typeof setup.labels === 'object') {
+      Object.entries(setup.labels).forEach(([fieldId, text]) => {
+        if (text) setValue(`fieldkey_${fieldId}`, text);
+      });
+    }
+
     savedLabelsRef.current = setup.labels || null;
   }, [savedSettings, setValue, selectedTemplate]);
 
@@ -975,6 +1001,29 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
       if (typed && String(typed).trim()) labels[f] = String(typed).trim();
     });
 
+    // ফর্মে ঘরগুলো টেমপ্লেট ধরে আলাদা (institute_name_size_12, …)।
+    // সবগুলো একসাথে তুলে নিই, তাই যে ডিজাইনেই মাপ-রঙ সাজানো হোক
+    // সেটা নিজের আইডির ঘরে জমে — অন্য ডিজাইনে গেলেও হারায় না।
+    const TPL_FONT_FIELDS = [
+      ['institute_name_size', 'nameSize'],
+      ['institute_name_color', 'nameColor'],
+      ['institute_address_size', 'addressSize'],
+      ['institute_address_color', 'addressColor'],
+      ['exam_name_size', 'examNameSize'],
+      ['exam_name_color', 'examNameColor'],
+    ];
+
+    const templates = {};
+    Object.keys(formData).forEach((formKey) => {
+      TPL_FONT_FIELDS.forEach(([prefix, outKey]) => {
+        if (!formKey.startsWith(`${prefix}_`)) return;
+        const id = formKey.slice(prefix.length + 1);
+        const value = formData[formKey];
+        if (!id || value === undefined || value === null || value === '') return;
+        templates[id] = { ...(templates[id] || {}), [outKey]: value };
+      });
+    });
+
     const setup = {
       templateId: selectedTemplate,
       lang,
@@ -1014,6 +1063,10 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
       addressColor: addressColor || template.addressColor,
       examNameSize: examSize || template.examNameSize || 13,
       examNameColor: examColor || template.examNameColor || template.labelColor,
+
+      // প্রতি ডিজাইনের নিজের ফন্ট ও রঙ — উপরের ছয়টা সমতল ঘর শুধু
+      // চালু ডিজাইনেরটা, তাই পুরোনো সেটিং পড়ার জন্য ওগুলোও রাখা আছে।
+      templates,
     };
 
     try {

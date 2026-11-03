@@ -174,6 +174,10 @@ import DocumentSettings from '../pages/userpanel/DocumentSettings';
 import SMSPaymentConfirm from '../pages/SMSPaymentConfirm';
 import ResultPublish from '../pages/ResultPublish';
 
+//! YouTube Tutorial:
+import AllTutorialsExam from '../pages/TutorialVideo/AllTutorialsExam';
+import AllTutorialsResult from '../pages/TutorialVideo/AllTutorialsResult';
+
 // AdminRoutes
 import AdminRoutes from "../Admin/routes/AdminRoutes";
 import TeacherInfo from '../components/Tables/TeacherInfo';
@@ -928,6 +932,12 @@ const Router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
+              {
+                path: 'all-tutorials-exam',
+                element: (
+                    <AllTutorialsExam pageTitle="All Tutorials Exam" />
+                ),
+              },
             ],
           },
 
@@ -1018,6 +1028,12 @@ const Router = createBrowserRouter([
                   >
                     <ResultEntryAndUpdate pageTitle="Result" />
                   </RequirePermission>
+                ),
+              },
+              {
+                path: 'all-tutorials-result',
+                element: (
+                    <AllTutorialsResult pageTitle="All Tutorials Result" />
                 ),
               },
 
