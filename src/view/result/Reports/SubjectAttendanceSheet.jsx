@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../../utils/conveter";
 import { Buffer } from "buffer";
@@ -35,13 +36,27 @@ const TRANSLATIONS = {
         orientationLabel: "১. পেজ দিক (Orientation)",
         pageSizeLabel: "২. পেজ সাইজ (Page Size)",
         monthDays: "মাসের দিন সংখ্যা",
-        printNote: "Portrait-এ ৩১ দিনের কলাম সরু হবে, বেশি দিন হলে Landscape ব্যবহার করুন।",
+        printNote:
+            "Portrait-এ ৩১ দিনের কলাম সরু হবে, বেশি দিন হলে Landscape ব্যবহার করুন। প্রিন্ট ডায়ালগে Scale ১০০% বা Custom (যেমন ৯৫) — দুটোতেই শিট পেজের মাঝখানে থাকবে।",
         rowsTitle: "খালি রো সেটিং",
         rowsLabel: "খালি শিক্ষার্থী-ব্লক সংখ্যা",
         rowsPlaceholder: "ফাঁকা = কোনো খালি রো নেই",
         rowsReset: "রিসেট",
         rowsNote:
             "সংখ্যা (যেমন ১ বা ৫) দিলে শিক্ষার্থীদের পরে ঠিক ততটি খালি ব্লক প্রিভিউ ও প্রিন্টে আসবে। প্রতিটি ব্লকে বিষয়ের সংখ্যা অনুযায়ী সব সারি থাকবে। ফাঁকা বা ০ দিলে কোনো খালি রো যোগ হবে না।",
+        /* month / year */
+        monthYearTitle: "মাস ও বছর",
+        monthLangLabel: "মাসের নামের ভাষা",
+        monthLabelUI: "মাস",
+        yearLabelUI: "বছর",
+        blankOpt: "— ফাঁকা (হাতে লিখব) —",
+        monthYearNote:
+            "মাস ও বছর বাছলে প্রিভিউ ও প্রিন্টে অটো বসে যাবে এবং মাসের দিন সংখ্যাও অটো সেট হবে (লিপ ইয়ার সহ)। ফাঁকা রাখলে ডটেড লাইন থাকবে।",
+        monthYearReset: "রিসেট",
+        /* font size */
+        fontSize: "ফন্ট সাইজ",
+        fontSizeNote: "প্রিভিউ ও প্রিন্টের সব লেখা একসাথে ছোট/বড় হবে।",
+        fontReset: "১০০%-এ ফিরুন",
         /* sheet */
         defaultInstitution: "আদর্শ ইনসান একাডেমি",
         defaultAddress: "ঠিকানা",
@@ -80,6 +95,23 @@ const TRANSLATIONS = {
         absent: "غياب",
         noStudent: "لا يوجد طلاب",
     },
+};
+
+/* ── মাসের নাম (বাংলা / English / العربية) ── */
+const MONTH_NAMES = {
+    bn: ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"],
+    en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+    ar: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
+};
+
+export const YEAR_MIN = 1990;
+export const YEAR_MAX = 2050;
+const YEARS = Array.from({ length: YEAR_MAX - YEAR_MIN + 1 }, (_, i) => String(YEAR_MIN + i));
+
+// মাস (১-১২) ও বছর অনুযায়ী দিন সংখ্যা (লিপ ইয়ার সহ)
+const daysInMonth = (month, year) => {
+    const y = Number(year) || new Date().getFullYear();
+    return new Date(y, Number(month), 0).getDate();
 };
 
 const ARABIC_INDIC = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
@@ -214,6 +246,20 @@ export const DEFAULT_KITAB = "7";
 
 const MAX_EXTRA_BLOCKS = 200;
 
+/* ── ফন্ট স্কেল ── */
+export const FONT_SCALE_MIN = 60;
+export const FONT_SCALE_MAX = 160;
+export const FONT_SCALE_STEP = 5;
+export const DEFAULT_FONT_SCALE = 100;
+const clampFont = (v) => Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, v));
+
+/* ── পেপারের আসল মাপ (mm) — portrait অবস্থায় ── */
+const PAPER_MM = {
+    A4: { w: 210, h: 297, css: "A4" },
+    legal: { w: 215.9, h: 355.6, css: "legal" },
+};
+const PRINT_MARGIN_MM = 5;
+
 /* ═══════════════════════════════════════════════════════════
    THEME
    ═══════════════════════════════════════════════════════════ */
@@ -251,6 +297,10 @@ const LS_DAYS = "attendanceSheetDays";
 const LS_KITAB = "attendanceSheetKitab";
 const LS_LANG = "attendanceSheetLanguage";
 const LS_ROWS = "attendanceSheetCustomRows";
+const LS_MONTH = "attendanceSheetMonth";
+const LS_YEAR = "attendanceSheetYear";
+const LS_MONTH_LANG = "attendanceSheetMonthLang";
+const LS_FONT_SCALE = "attendanceSheetFontScale";
 
 const loadObj = (key, fallback) => {
     try {
@@ -275,17 +325,35 @@ const loadText = (key) => {
     return "";
 };
 
+const loadMonth = () => {
+    const v = loadText(LS_MONTH);
+    return /^(1[0-2]|[1-9])$/.test(v) ? v : "";
+};
+
+const loadYear = () => {
+    const v = loadText(LS_YEAR);
+    return YEARS.includes(v) ? v : "";
+};
+
+const loadFontScale = () => {
+    try {
+        const n = Number(localStorage.getItem(LS_FONT_SCALE));
+        if (Number.isFinite(n) && n > 0) return clampFont(n);
+    } catch (e) { }
+    return DEFAULT_FONT_SCALE;
+};
+
 /* ═══════════════════════════════════════════════════════════
    FILL-IN FIELD
    ═══════════════════════════════════════════════════════════ */
-function FillField({ label, flex = 1, color, value }) {
+function FillField({ label, flex = 1, color, value, fs }) {
     return (
         <div style={{ flex, display: "flex", alignItems: "flex-end", gap: "4px", minWidth: 0 }}>
-            <span style={{ fontSize: "15px", fontWeight: 600, whiteSpace: "nowrap", color }}>{label}</span>
+            <span style={{ fontSize: fs(15), fontWeight: 600, whiteSpace: "nowrap", color }}>{label}</span>
             <span style={{
-                flex: 1, minWidth: "20px", height: "22px",
+                flex: 1, minWidth: "20px", minHeight: "22px",
                 borderBottom: `1.5px dotted ${color}`,
-                fontSize: "14px", fontWeight: 600, textAlign: "center",
+                fontSize: fs(14), fontWeight: 600, textAlign: "center",
                 lineHeight: "20px",
             }}>
                 {value || ""}
@@ -296,6 +364,7 @@ function FillField({ label, flex = 1, color, value }) {
 
 /* ═══════════════════════════════════════════════════════════
    VERTICAL TEXT (merged cell-এর ঠিক মাঝখানে বসানোর জন্য)
+   fontSize এখানে px সংখ্যা (স্কেল করা)
    ═══════════════════════════════════════════════════════════ */
 function VText({ children, fontSize = 13, fontWeight = 700, wrap = false }) {
     return (
@@ -336,8 +405,6 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
 
     /* ═══════════════════════════════════════════════════════════
        ⚡ STUDENT RESULTS SORTED BY NUMBER (নাম্বার অনুসারে)
-       - মোট নম্বর বেশি থেকে কম
-       - সমান হলে AdmissionSerial অনুসারে
        ═══════════════════════════════════════════════════════════ */
     const studentResultsDetails = useMemo(() => {
         const all = Array.isArray(reportData?.studentResults)
@@ -366,6 +433,12 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
     const [lang, setLang] = useState(() => loadStr(LS_LANG, LANGUAGE_OPTIONS, DEFAULT_LANGUAGE));
     /* ✅ খালি শিক্ষার্থী-ব্লক সংখ্যা ("" = কোনো খালি রো নেই) */
     const [rowsInput, setRowsInput] = useState(() => loadText(LS_ROWS));
+    /* ✅ মাস / বছর / মাসের ভাষা ("" = ফাঁকা) */
+    const [monthIdx, setMonthIdx] = useState(loadMonth);
+    const [year, setYear] = useState(loadYear);
+    const [monthLang, setMonthLang] = useState(() => loadStr(LS_MONTH_LANG, LANGUAGE_OPTIONS, DEFAULT_LANGUAGE));
+    /* ✅ ফন্ট স্কেল */
+    const [fontScale, setFontScale] = useState(loadFontScale);
 
     /* ✅ LocalStorage Save */
     useEffect(() => { localStorage.setItem(LS_VISIBLE, JSON.stringify(visibleColumns)); }, [visibleColumns]);
@@ -376,6 +449,10 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
     useEffect(() => { localStorage.setItem(LS_KITAB, kitabType); }, [kitabType]);
     useEffect(() => { localStorage.setItem(LS_LANG, lang); }, [lang]);
     useEffect(() => { localStorage.setItem(LS_ROWS, rowsInput); }, [rowsInput]);
+    useEffect(() => { localStorage.setItem(LS_MONTH, monthIdx); }, [monthIdx]);
+    useEffect(() => { localStorage.setItem(LS_YEAR, year); }, [year]);
+    useEffect(() => { localStorage.setItem(LS_MONTH_LANG, monthLang); }, [monthLang]);
+    useEffect(() => { localStorage.setItem(LS_FONT_SCALE, String(fontScale)); }, [fontScale]);
 
     /* ✅ Dynamic Logo Fetching */
     useEffect(() => {
@@ -389,6 +466,10 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
             setInstitutionLogo(EXAMPLE_LOGO);
         }
     }, [institutionInfo]);
+
+    // সব ফন্ট সাইজ এই ফাংশন দিয়ে স্কেল হয় (fs(12) => "12px" × fontScale%)
+    const fn = (px) => (px * fontScale) / 100;
+    const fs = (px) => `${fn(px)}px`;
 
     /* ── সাইডবার: সবসময় বাংলা ── */
     const tUI = TRANSLATIONS.bn;
@@ -404,6 +485,10 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
     const institutionAddress =
         getInstitutionAddress(institutionInfo, lang) || TRANSLATIONS.bn.defaultAddress;
     const className = getClassName(conditionAverage?.SubClass, lang);
+
+    /* ✅ শিটে বসানোর মাস ও বছর */
+    const monthText = monthIdx ? MONTH_NAMES[monthLang][Number(monthIdx) - 1] : "";
+    const yearText = year ? num(year) : "";
 
     const C = THEMES[colorMode] || THEMES.color;
     const show = { ...DEFAULT_VISIBLE_COLUMNS, ...(visibleColumns || {}) };
@@ -447,11 +532,32 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
         setRowsInput(cleaned);
     };
 
+    // মাস/বছর বাছলে দিন সংখ্যা অটো সেট
+    const applyAutoDays = (m, y) => {
+        if (!m) return;
+        setDaysCount(String(daysInMonth(m, y)));
+    };
+    const handleMonthChange = (m) => {
+        setMonthIdx(m);
+        applyAutoDays(m, year);
+    };
+    const handleYearChange = (y) => {
+        setYear(y);
+        applyAutoDays(monthIdx, y);
+    };
+    const resetMonthYear = () => {
+        setMonthIdx("");
+        setYear("");
+    };
+
+    const changeFontScale = (delta) => setFontScale((p) => clampFont(p + delta));
+    const resetFontScale = () => setFontScale(DEFAULT_FONT_SCALE);
+
     /* Styles */
     const cellBase = {
         border: `1px solid ${C.border}`,
         padding: "1px",
-        fontSize: "13px",
+        fontSize: fs(13),
         color: C.text,
         overflow: "hidden",
     };
@@ -469,14 +575,21 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
         transform: "rotate(180deg)",
         whiteSpace: "nowrap",
         fontWeight: 700,
-        fontSize: "13px",
+        fontSize: fs(13),
     };
 
     /* Name column: কম বিষয় হলে সারি কম, তাই নামের জায়গা একটু চওড়া */
     const nameColWidth = subjectCount <= 4 ? 64 : 42;
     const rowHeight = subjectCount <= 5 ? 28 : 24;
 
-    const sheetWidth = isLandscape ? (pageSize === "legal" ? "345mm" : "287mm") : "200mm";
+    /* ── পেপার ও ওরিয়েন্টেশন অনুযায়ী প্রিন্টযোগ্য প্রস্থ (mm) ── */
+    const paper = PAPER_MM[pageSize] || PAPER_MM[DEFAULT_PAGE_SIZE];
+    const sheetW_mm = isLandscape ? paper.h : paper.w;
+    const printWidthMm = Math.floor((sheetW_mm - PRINT_MARGIN_MM * 2) * 10) / 10 - 0.5;
+    const pageCss = `${paper.css} ${isLandscape ? "landscape" : "portrait"}`;
+
+    /* প্রিভিউ-এর প্রস্থ (আগের মতোই) */
+    const previewWidth = isLandscape ? (pageSize === "legal" ? "345mm" : "287mm") : "200mm";
 
     const renderColGroup = () => (
         <colgroup>
@@ -490,9 +603,11 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
         </colgroup>
     );
 
-    const renderSheet = () => (
+    /* isPrint = true হলে প্রিন্ট পোর্টালের জন্য: নির্দিষ্ট mm প্রস্থ + margin: 0 auto (সেন্টার) */
+    const renderSheet = (isPrint = false) => (
         <div className="sheet-card" dir={dir} style={{
-            width: sheetWidth, maxWidth: "none", margin: "0 auto",
+            width: isPrint ? `${printWidthMm}mm` : previewWidth,
+            maxWidth: "none", margin: "0 auto",
             background: "#fff", color: C.text,
         }}>
             <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
@@ -514,15 +629,15 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                                             userSelect: "none", pointerEvents: "none",
                                         }}
                                     />
-                                    <h1 style={{ margin: 0, fontSize: "24px", fontWeight: 800, lineHeight: 1.3, color: C.primaryDark }}>
+                                    <h1 style={{ margin: 0, fontSize: fs(24), fontWeight: 800, lineHeight: 1.3, color: C.primaryDark }}>
                                         {institutionName}
                                     </h1>
-                                    <p style={{ margin: "2px 0 0", fontSize: "15px", fontWeight: 600, color: C.muted }}>
+                                    <p style={{ margin: "2px 0 0", fontSize: fs(15), fontWeight: 600, color: C.muted }}>
                                         {institutionAddress}
                                     </p>
                                     <h2 style={{
                                         display: "inline-block", margin: "6px 0 0", padding: "0 24px 2px",
-                                        fontSize: "17px", fontWeight: 600, lineHeight: 1.3, color: C.text,
+                                        fontSize: fs(17), fontWeight: 600, lineHeight: 1.3, color: C.text,
                                         borderBottom: `1.5px solid ${C.text}`,
                                     }}>
                                         {t.title}
@@ -535,15 +650,15 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                                     gap: "18px", textAlign: "start",
                                 }}>
                                     <div style={{ flex: 2, display: "flex", alignItems: "flex-end", gap: "4px", minWidth: 0 }}>
-                                        <span style={{ fontSize: "15px", fontWeight: 700, whiteSpace: "nowrap", color: C.text }}>
+                                        <span style={{ fontSize: fs(15), fontWeight: 700, whiteSpace: "nowrap", color: C.text }}>
                                             {t.classLabel}
                                         </span>
-                                        <span style={{ fontSize: "15px", fontWeight: 700, color: C.primaryDark }}>
+                                        <span style={{ fontSize: fs(15), fontWeight: 700, color: C.primaryDark }}>
                                             {className}
                                         </span>
                                     </div>
-                                    <FillField label={t.month} flex={1} color={C.text} />
-                                    <FillField label={t.year} flex={1} color={C.text} />
+                                    <FillField label={t.month} flex={1} color={C.text} value={monthText} fs={fs} />
+                                    <FillField label={t.year} flex={1} color={C.text} value={yearText} fs={fs} />
                                 </div>
                             </div>
                         </th>
@@ -552,13 +667,13 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                     {/* Column Header */}
                     {visibleColCount > 0 && (
                         <tr>
-                            {show.sl && <th style={{ ...thStyle, fontSize: "11px" }}>{t.sl}</th>}
-                            {show.id && <th style={{ ...thStyle, fontSize: "11px" }}>{t.id}</th>}
-                            {show.name && <th style={{ ...thStyle, fontSize: "11px", wordBreak: "break-word" }}>{t.student}</th>}
+                            {show.sl && <th style={{ ...thStyle, fontSize: fs(11) }}>{t.sl}</th>}
+                            {show.id && <th style={{ ...thStyle, fontSize: fs(11) }}>{t.id}</th>}
+                            {show.name && <th style={{ ...thStyle, fontSize: fs(11), wordBreak: "break-word" }}>{t.student}</th>}
                             {show.sub && <th style={thStyle} />}
                             {show.days && Array.from({ length: days }).map((_, i) => (
                                 <th key={i} style={{ ...thStyle, padding: "4px 0" }}>
-                                    <span style={{ fontSize: "11px", fontWeight: "bold" }}>{num(i + 1)}</span>
+                                    <span style={{ fontSize: fs(11), fontWeight: "bold" }}>{num(i + 1)}</span>
                                 </th>
                             ))}
                             {show.present && (
@@ -607,7 +722,7 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                                                         justifyContent: "center",
                                                         width: "100%",
                                                         height: "100%",
-                                                        fontSize: "14px",
+                                                        fontSize: fs(14),
                                                         fontWeight: 700,
                                                     }}>
                                                         {isBlank ? "" : num(studentIndex + 1)}
@@ -617,7 +732,7 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                                             {/* আইডি: vertical, মাঝখানে */}
                                             {show.id && (
                                                 <td rowSpan={subjectCount} style={mergedTd}>
-                                                    <VText fontSize={14} fontWeight={700}>
+                                                    <VText fontSize={fn(14)} fontWeight={700}>
                                                         {isBlank ? "" : num(studentResult?.User?.UserCode ?? "")}
                                                     </VText>
                                                 </td>
@@ -625,7 +740,7 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                                             {/* নাম: vertical, মাঝখানে */}
                                             {show.name && (
                                                 <td rowSpan={subjectCount} style={mergedTd}>
-                                                    <VText fontSize={13} fontWeight={600} wrap>
+                                                    <VText fontSize={fn(13)} fontWeight={600} wrap>
                                                         {isBlank ? "" : getStudentName(studentResult?.User, lang)}
                                                     </VText>
                                                 </td>
@@ -635,7 +750,7 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
 
                                     {/* ✅ বিষয় নং (১, ২, ৩ ...) */}
                                     {show.sub && (
-                                        <td style={{ ...td, fontSize: "11px", fontWeight: 600 }}>
+                                        <td style={{ ...td, fontSize: fs(11), fontWeight: 600 }}>
                                             {num(subIndex + 1)}
                                         </td>
                                     )}
@@ -670,8 +785,20 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
         <>
             <LanguageSelector t={tUI} value={lang} onChange={setLang} />
             <KitabSelect t={tUI} value={kitabType} onChange={setKitabType} />
+            <MonthYearSettings
+                t={tUI}
+                num={numUI}
+                monthLang={monthLang}
+                onMonthLangChange={setMonthLang}
+                month={monthIdx}
+                onMonthChange={handleMonthChange}
+                year={year}
+                onYearChange={handleYearChange}
+                onReset={resetMonthYear}
+            />
             <ColumnSelector t={tUI} num={numUI} value={visibleColumns} onToggle={toggleColumn} onSetAll={setAllColumns} columns={ATTENDANCE_COLUMNS} />
             <RowsSettings t={tUI} value={rowsInput} onChange={handleRowsChange} onReset={() => setRowsInput("")} />
+            <FontSizeSettings t={tUI} num={numUI} value={fontScale} onChange={changeFontScale} onReset={resetFontScale} />
             <PrintSettings
                 t={tUI}
                 colorMode={colorMode} onColorChange={setColorMode}
@@ -729,11 +856,19 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                             boxShadow: "0 2px 10px rgba(15,23,42,0.12), 0 0 0 1px rgba(15,23,42,0.05)",
                             background: "#fff",
                         }}>
-                            {renderSheet()}
+                            {renderSheet(false)}
                         </div>
                     </div>
                 </div>
             </main>
+
+            {/* ── প্রিন্ট পোর্টাল: শিট সবসময় পেজের মাঝখানে (margin: 0 auto), Chrome Scale যাই হোক ── */}
+            {createPortal(
+                <div className="print-portal">
+                    {renderSheet(true)}
+                </div>,
+                document.body
+            )}
 
             {/* ═══ CSS & PRINT SETTINGS ═══ */}
             <style>{`
@@ -743,21 +878,33 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                 .rs-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 999px; border: 2px solid transparent; background-clip: padding-box; }
                 .rs-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; background-clip: padding-box; border: 2px solid transparent; }
 
+                .print-portal { display: none; }
+
                 @media print {
                     @page {
-                        size: ${pageSize === "legal" ? "legal" : "A4"} ${orientation};
-                        margin: 5mm;
+                        size: ${pageCss};
+                        margin: ${PRINT_MARGIN_MM}mm;
                     }
 
-                    html, body { margin: 0 !important; padding: 0 !important; }
+                    html, body {
+                        margin: 0 !important; padding: 0 !important;
+                        width: auto !important;
+                        height: auto !important; min-height: 0 !important;
+                        overflow: visible !important;
+                        background: #fff !important;
+                    }
                     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-                    .rs-root { display: block !important; height: auto !important; overflow: visible !important; background: #fff !important; }
-                    .rs-main { height: auto !important; overflow: visible !important; }
-                    .result-sheet-wrapper { padding: 0 !important; }
-                    .sheet-scroll { overflow: visible !important; padding: 0 !important; }
-                    .sheet-paper { box-shadow: none !important; width: 100% !important; margin: 0 !important; }
-                    .sheet-card { width: 100% !important; margin: 0 !important; }
+                    body > *:not(.print-portal) { display: none !important; }
+                    .print-portal {
+                        display: block !important;
+                        width: 100% !important;
+                        margin: 0 !important; padding: 0 !important;
+                    }
+                    .print-portal .sheet-card {
+                        margin: 0 auto !important;
+                        max-width: 100% !important;
+                    }
 
                     thead { display: table-header-group !important; }
                     tbody, tr, td, th { page-break-inside: avoid !important; break-inside: avoid !important; }
@@ -770,6 +917,10 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
 /* ═══════════════════════════════════════════════════════════
    SIDEBAR SUB-COMPONENTS
    ═══════════════════════════════════════════════════════════ */
+
+const selectCls =
+    "w-full px-3 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg " +
+    "focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all cursor-pointer";
 
 const KitabSelect = ({ t, value, onChange }) => (
     <div>
@@ -787,6 +938,114 @@ const KitabSelect = ({ t, value, onChange }) => (
         </select>
     </div>
 );
+
+const MonthYearSettings = ({
+    t, num,
+    monthLang, onMonthLangChange,
+    month, onMonthChange,
+    year, onYearChange,
+    onReset,
+}) => (
+    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-3">
+        <div className="flex items-center justify-between">
+            <p className="text-xs font-bold text-slate-700 leading-tight">{t.monthYearTitle}</p>
+            {(month || year) && (
+                <button
+                    type="button"
+                    onClick={onReset}
+                    className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200"
+                >
+                    {t.monthYearReset}
+                </button>
+            )}
+        </div>
+
+        <SegmentedControl
+            label={t.monthLangLabel}
+            options={LANGUAGE_OPTIONS}
+            value={monthLang}
+            onChange={onMonthLangChange}
+        />
+
+        <div>
+            <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">{t.monthLabelUI}</label>
+            <select
+                value={month}
+                onChange={(e) => onMonthChange(e.target.value)}
+                className={selectCls}
+                dir={monthLang === "ar" ? "rtl" : "ltr"}
+            >
+                <option value="">{t.blankOpt}</option>
+                {MONTH_NAMES[monthLang].map((name, i) => (
+                    <option key={i} value={String(i + 1)}>{name}</option>
+                ))}
+            </select>
+        </div>
+
+        <div>
+            <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">{t.yearLabelUI}</label>
+            <select
+                value={year}
+                onChange={(e) => onYearChange(e.target.value)}
+                className={selectCls}
+            >
+                <option value="">{t.blankOpt}</option>
+                {YEARS.map((y) => (
+                    <option key={y} value={y}>{num(y)}</option>
+                ))}
+            </select>
+        </div>
+
+        <p className="text-[10px] text-slate-400 leading-snug">{t.monthYearNote}</p>
+    </div>
+);
+
+const FontSizeSettings = ({ t, num, value, onChange, onReset }) => {
+    const btnCls =
+        "w-10 h-8 rounded-lg border border-slate-200 bg-white text-slate-700 font-bold " +
+        "hover:bg-emerald-50 hover:border-emerald-200 disabled:opacity-40 disabled:cursor-not-allowed " +
+        "transition-colors flex items-center justify-center select-none";
+    return (
+        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+            <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-700 leading-tight">{t.fontSize}</p>
+                {value !== DEFAULT_FONT_SCALE && (
+                    <button
+                        type="button"
+                        onClick={onReset}
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200"
+                    >
+                        {t.fontReset}
+                    </button>
+                )}
+            </div>
+            <div className="flex items-center gap-2">
+                <button
+                    type="button"
+                    className={btnCls}
+                    disabled={value <= FONT_SCALE_MIN}
+                    onClick={() => onChange(-FONT_SCALE_STEP)}
+                    title="A−"
+                >
+                    <span className="text-[11px]">A</span><span className="text-xs">−</span>
+                </button>
+                <div className="flex-1 text-center text-sm font-bold text-emerald-700 bg-white border border-slate-200 rounded-lg py-1">
+                    {num(value)}%
+                </div>
+                <button
+                    type="button"
+                    className={btnCls}
+                    disabled={value >= FONT_SCALE_MAX}
+                    onClick={() => onChange(FONT_SCALE_STEP)}
+                    title="A+"
+                >
+                    <span className="text-base">A</span><span className="text-xs">+</span>
+                </button>
+            </div>
+            <p className="text-[10px] text-slate-400 leading-snug">{t.fontSizeNote}</p>
+        </div>
+    );
+};
 
 const PreviewInfo = ({ t, num, count, days, subjects }) => (
     <div className="flex items-center gap-2 min-w-0 flex-wrap">

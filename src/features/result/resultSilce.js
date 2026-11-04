@@ -93,6 +93,46 @@ export const resultSilce = createApi({
       },
       providesTags: ["getResultReportData"],
     }),
+    getTeacherSubjectInfo: builder.query({
+      query: ({
+        session_id,
+        exam_id,
+        subclass_id,
+        subject_id,
+      }) => {
+        const params = new URLSearchParams();
+
+        if (session_id) params.append("sessionid", session_id);
+        if (exam_id) params.append("examid", exam_id);
+        if (subclass_id) params.append("subclassid", subclass_id);
+        if (subject_id) params.append("subjectid", subject_id);
+
+        const queryString = params.toString();
+
+        return queryString
+          ? `teacher-subject-info?${queryString}`
+          : "teacher-subject-info";
+      },
+      providesTags: ["getTeacherSubjectInfo"],
+    }),
+
+    getExamRoutineSubjectList: builder.query({
+      query: ({ session_id, exam_id, subclass_id }) => {
+        const params = new URLSearchParams();
+
+        if (session_id) params.append("sessionid", session_id);
+        if (exam_id) params.append("examid", exam_id);
+        if (subclass_id) params.append("subclassid", subclass_id);
+
+        const queryString = params.toString();
+
+        return queryString
+          ? `exam-routine-subject-list?${queryString}`
+          : "exam-routine-subject-list";
+      },
+      providesTags: ["getExamRoutineSubjectList"],
+    }),
+
     getMarkSheet: builder.query({
       query: ({ sessionid, examid, classid, recordName, UserCode1, UserCode2 }) => ({
         url: "/mark-sheet",
@@ -206,5 +246,7 @@ export const {
   useCreateExamDivisionNameResultMutation,
   useDeleteExamDivisionNameResultMutation,
   useUpdateExamDivisionNameResultMutation,
-  useGetExamDivisionNameResultsQuery
+  useGetExamDivisionNameResultsQuery,
+  useGetTeacherSubjectInfoQuery,
+  useGetExamRoutineSubjectListQuery,
 } = resultSilce;

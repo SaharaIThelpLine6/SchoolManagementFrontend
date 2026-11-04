@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../../utils/conveter";
 import { Buffer } from "buffer";
@@ -39,6 +40,24 @@ const PAGE_H = 750;
 const ROW_H = 30;
 const PASS_MARK = 33;
 
+/* ── প্রিন্ট পেজিনেশনের আনুমানিক উচ্চতা (design px) ── */
+const PAGE_PAD_V = 40;        // padding 20 + 20
+const FIRST_HEADER_H = 250;   // হেডার ব্লক + "বিষয় পরিবেশিত ফলাফল" টাইটেল
+const THEAD_H = 35;
+const SIGNATURE_H = 140;
+const PAGE_FOOTER_RESERVE = 20;
+const SAFETY = 10;
+
+/* ── প্রিন্ট: A4 landscape, margin 5mm ──
+   ডিজাইন-পেজকে প্রিন্টেবল এরিয়ায় ফিট করে স্কেল করা হয়।
+   আউটার বক্সে margin: 0 auto → Chrome Scale (১০০% / Custom ৯৫) যাই হোক মাঝখানে বসে। */
+const PRINT_MARGIN_MM = 5;
+const PX_PER_MM = 96 / 25.4;
+const PRINT_AREA_W_MM = 297 - PRINT_MARGIN_MM * 2;
+const PRINT_SCALE = ((PRINT_AREA_W_MM * PX_PER_MM) / PAGE_W) * 0.99;
+const PRINT_OUT_W = Math.floor(PAGE_W * PRINT_SCALE);
+const PRINT_OUT_H = Math.floor(PAGE_H * PRINT_SCALE);
+
 /* ═══════════════════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════ */
@@ -78,6 +97,38 @@ export default function SubjectWiseResultSheet({ reportData }) {
   const className = pickText(conditionAverage?.SubClass?.SubClass) || "নাহবেমীর (৩য় শ্রেণি)-২";
 
   const { totalStudents, totalExaminees, totalAbsent } = headerStats;
+
+  /* ── প্রিন্ট পেজিনেশন: সারি বেশি হলে একাধিক পেজ ── */
+  const pages = useMemo(() => {
+    const n = columns.length;
+    if (!n) return [[]];
+
+    const avail = (isFirst, withSig) =>
+      PAGE_H -
+      PAGE_PAD_V -
+      (isFirst ? FIRST_HEADER_H : 0) -
+      THEAD_H -
+      (withSig ? SIGNATURE_H : 0) -
+      PAGE_FOOTER_RESERVE -
+      SAFETY;
+    const capNoSig = (isFirst) => Math.max(1, Math.floor(avail(isFirst, false) / ROW_H));
+    const capWithSig = (isFirst) => Math.max(1, Math.floor(avail(isFirst, true) / ROW_H));
+
+    const chunks = [];
+    let i = 0;
+    while (i < n) {
+      const isFirst = chunks.length === 0;
+      const remaining = n - i;
+      if (remaining <= capWithSig(isFirst)) {
+        chunks.push(columns.slice(i));
+        break;
+      }
+      const take = Math.min(capNoSig(isFirst), remaining - 1);
+      chunks.push(columns.slice(i, i + take));
+      i += take;
+    }
+    return chunks;
+  }, [columns]);
 
   /* ── Styles ── */
   const th = {
@@ -251,19 +302,51 @@ export default function SubjectWiseResultSheet({ reportData }) {
     );
   };
 
-  /* ── Page ── */
-  const renderPage = () => (
-    <>
-      {renderHeaderBlock()}
-
-      <div style={{ textAlign: "center", margin: "10px 0", fontSize: "14px", fontWeight: 700 }}>
-        বিষয় পরিবেশিত ফলাফল
+  /* ── Signature ── */
+  const renderSignature = () => (
+    <div
+      className="signature-section"
+      style={{
+        marginTop: "auto",
+        paddingTop: "40px",
+        display: "flex",
+        justifyContent: "flex-end",
+      }}
+    >
+      <div style={{ textAlign: "center", width: "200px" }}>
+        {principal && (
+          <div className="flex justify-center items-center">
+            <img
+              src={principal}
+              alt="signature"
+              style={{ height: "40px", marginBottom: "5px" }}
+            />
+          </div>
+        )}
+        <div style={{ borderTop: "1px dashed #000", width: "160px", margin: "0 auto" }} />
+        <p style={{ margin: "4px 0 0", fontSize: "12px", fontWeight: 700 }}>মুহতামিম সাহেব</p>
+        <p style={{ margin: "2px 0 0", fontSize: "12px" }}>
+          তারিখ: {makeNum(new Date().toLocaleDateString("bn-BD"))}
+        </p>
       </div>
+    </div>
+  );
+
+  /* ── Page (rows = এই পেজের সারি, offset = আগের পেজগুলোর সারি সংখ্যা) ── */
+  const renderPage = (rows, offset, isFirst, isLast) => (
+    <>
+      {isFirst && renderHeaderBlock()}
+
+      {isFirst && (
+        <div style={{ textAlign: "center", margin: "10px 0", fontSize: "14px", fontWeight: 700 }}>
+          বিষয় পরিবেশিত ফলাফল
+        </div>
+      )}
 
       {/* ⭐ tableLayout: auto — কলাম টেক্সট অনুযায়ী প্রসারিত হবে */}
       <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "auto" }}>
         <thead>
-          <tr style={{ height: "35px" }}>
+          <tr style={{ height: `${THEAD_H}px` }}>
             <th style={{ ...th, width: "1%" }}>ক্রমিক</th>
             <th style={th}>বিষয়</th>
             <th style={{ ...th, width: "200px" }}>শিক্ষকের নাম</th>
@@ -273,34 +356,10 @@ export default function SubjectWiseResultSheet({ reportData }) {
             <th style={divTh}>মোট</th>
           </tr>
         </thead>
-        <tbody>{columns.map(renderSubjectRow)}</tbody>
+        <tbody>{rows.map((c, i) => renderSubjectRow(c, offset + i))}</tbody>
       </table>
 
-      <div
-        style={{
-          marginTop: "auto",
-          paddingTop: "40px",
-          display: "flex",
-          justifyContent: "flex-end",
-        }}
-      >
-        <div style={{ textAlign: "center", width: "200px" }}>
-          {principal && (
-            <div className="flex justify-center items-center">
-              <img
-                src={principal}
-                alt="signature"
-                style={{ height: "40px", marginBottom: "5px" }}
-              />
-            </div>
-          )}
-          <div style={{ borderTop: "1px dashed #000", width: "160px", margin: "0 auto" }} />
-          <p style={{ margin: "4px 0 0", fontSize: "12px", fontWeight: 700 }}>মুহতামিম সাহেব</p>
-          <p style={{ margin: "2px 0 0", fontSize: "12px" }}>
-            তারিখ: {makeNum(new Date().toLocaleDateString("bn-BD"))}
-          </p>
-        </div>
-      </div>
+      {isLast && renderSignature()}
     </>
   );
 
@@ -314,6 +373,17 @@ export default function SubjectWiseResultSheet({ reportData }) {
     display: "flex",
     flexDirection: "column",
     padding: "20px 25px",
+  };
+
+  // প্রিন্ট পেজ: নির্দিষ্ট উচ্চতা + স্কেল
+  const printPageBox = {
+    ...pageBox,
+    margin: 0,
+    height: `${PAGE_H}px`,
+    minHeight: `${PAGE_H}px`,
+    overflow: "hidden",
+    transform: `scale(${PRINT_SCALE})`,
+    transformOrigin: "top left",
   };
 
   return (
@@ -332,21 +402,65 @@ export default function SubjectWiseResultSheet({ reportData }) {
                   marginBottom: "24px",
                 }}
               >
-                {renderPage()}
+                {renderPage(columns, 0, true, true)}
               </div>
             </ScaledPreview>
           </div>
         </div>
       </div>
 
+      {/* ── প্রিন্ট পোর্টাল: পেজ মাঝখানে (margin: 0 auto), Chrome Scale যাই হোক ── */}
+      {createPortal(
+        <div className="print-portal">
+          {pages.map((rows, pageIndex) => {
+            const offset = pages.slice(0, pageIndex).reduce((s, c) => s + c.length, 0);
+            const isLast = pageIndex === pages.length - 1;
+            return (
+              <div
+                key={pageIndex}
+                className="print-page-outer"
+                style={{
+                  width: `${PRINT_OUT_W}px`,
+                  height: `${PRINT_OUT_H}px`,
+                  overflow: "hidden",
+                  margin: "0 auto",
+                  padding: 0,
+                  pageBreakAfter: isLast ? "auto" : "always",
+                  breakAfter: isLast ? "auto" : "page",
+                  pageBreakInside: "avoid",
+                  breakInside: "avoid",
+                }}
+              >
+                <div style={printPageBox}>
+                  {renderPage(rows, offset, pageIndex === 0, isLast)}
+                </div>
+              </div>
+            );
+          })}
+        </div>,
+        document.body
+      )}
+
       <style>{`
-        .print-only { display: none; }
+        .print-portal { display: none; }
         @media print {
-          @page { size: A4 landscape; margin: 5mm; }
-          html, body { margin: 0 !important; padding: 0 !important; }
+          @page { size: A4 landscape; margin: ${PRINT_MARGIN_MM}mm; }
+          html, body {
+            margin: 0 !important; padding: 0 !important;
+            width: auto !important;
+            height: auto !important; overflow: visible !important;
+            background: #fff !important;
+          }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          .no-print { display: none !important; }
-          .print-only { display: block !important; }
+          body > *:not(.print-portal) { display: none !important; }
+          .print-portal { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+          .print-page-outer {
+            box-sizing: border-box;
+            display: block !important;
+            margin: 0 auto !important;
+          }
+          tr, td, th { page-break-inside: avoid !important; break-inside: avoid !important; }
+          .signature-section { page-break-inside: avoid !important; break-inside: avoid !important; }
         }
       `}</style>
     </div>

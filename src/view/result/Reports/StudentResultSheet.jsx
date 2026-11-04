@@ -35,7 +35,7 @@ const TRANSLATIONS = {
         orientation: "ওরিয়েন্টেশন",
         landscapeOpt: "ল্যান্ডস্কেপ",
         portraitOpt: "পোর্ট্রেট",
-        printNote: "প্রিভিউ ও প্রিন্ট একই সাইজে হবে। প্রিন্ট ডায়ালগে Scale ১০০% রাখুন।",
+        printNote: "প্রিন্ট ডায়ালগে Scale ১০০% বা Custom (যেমন ৯৫) — দুটোতেই লেখা পেজের মাঝখানে থাকবে।",
         color: "রঙ",
         bwNote: "সাদা কালো মোডে শুধু গ্রেড কলামের রঙ থাকবে।",
         colorOpt: "রঙিন",
@@ -55,7 +55,7 @@ const TRANSLATIONS = {
         gradeTextPlaceholder: "যেমন: গ্রেড / বিভাগ",
         resetHeading: "ডিফল্টে ফিরুন",
         sl: "ক্রমিক",
-        admission: "ভর্তি",
+        admission: "সিট নং",
         studentId: "আইডি",
         name: "শিক্ষার্থীর নাম",
         father: "পিতার নাম",
@@ -77,12 +77,15 @@ const TRANSLATIONS = {
         pageOptions: "পেজ অপশন",
         everyPageHeader: "প্রতি পেজে হেডার দেখাও",
         everyPageSignature: "প্রতি পেজে সিগনেচার দেখাও",
-        pageOptionsNote: "বন্ধ থাকলে শুধু প্রথম পেজে হেডার ও শেষ পেজে সিগনেচার থাকবে।",
+        pageOptionsNote: "বন্ধ থাকলে শুধু প্রথম পেজে হেডার ও শেষ পেজে সিগনেচার থাকবে। ফাঁকা জায়গায় অটো বেশি সারি বসবে।",
+        fontSize: "ফন্ট সাইজ",
+        fontSizeNote: "প্রিভিউ ও প্রিন্টের সব লেখা একসাথে ছোট/বড় হবে।",
+        fontReset: "১০০%-এ ফিরুন",
     },
     en: {
         totalExaminees: "Total Examinees",
         sl: "SL",
-        admission: "Adm.",
+        admission: "Seat No",
         studentId: "ID",
         name: "Student Name",
         father: "Father's Name",
@@ -104,7 +107,7 @@ const TRANSLATIONS = {
     ar: {
         totalExaminees: "إجمالي الممتحنين",
         sl: "م",
-        admission: "القبول",
+        admission: "رقم الجلوس",
         studentId: "الهوية",
         name: "اسم الطالب",
         father: "اسم الأب",
@@ -142,64 +145,52 @@ const makeNum = (lang) => (v) => {
 const getFirstValue = (...values) =>
     values.find((value) => value !== undefined && value !== null && value !== "");
 
-// খালি স্ট্রিং/স্পেস বাদ দিয়ে প্রথম আসল টেক্সট
 const pickText = (...values) => {
     const found = values.find((v) => typeof v === "string" && v.trim() !== "");
     return found ? found.trim() : "";
 };
 
-// ভাষা অনুযায়ী অগ্রাধিকার: নির্বাচিত ভাষা আগে, না থাকলে বাংলা, তারপর বাকিগুলো
 const pickByLang = (lang, bnVal, enVal, arVal) => {
     if (lang === "ar") return pickText(arVal, bnVal, enVal);
     if (lang === "en") return pickText(enVal, bnVal, arVal);
     return pickText(bnVal, enVal, arVal);
 };
 
-// প্রতিষ্ঠানের নাম: ভাষা অনুযায়ী (খালি থাকলে অন্য ভাষায় fallback)
 const getInstitutionName = (info, lang) => {
     if (!info) return "";
     return pickByLang(lang, info.InstitutionName, info.EngInstitutionName, info.AraInstitutionName);
 };
 
-// প্রতিষ্ঠানের ঠিকানা
 const getInstitutionAddress = (info, lang) => {
     if (!info) return "";
     return pickByLang(lang, info.Address, info.EngAddress, info.AraAddress);
 };
 
-// বিভাগ/গ্রেডের নাম (DivisionNames / DivisionEnglishs / DivisionArabics)
 const getDivisionName = (division, lang) => {
     if (!division) return "";
     return pickByLang(lang, division.DivisionNames, division.DivisionEnglishs, division.DivisionArabics);
 };
 
-// শিক্ষার্থীর নাম (UserName / studentEnglishName / studentArabicName)
 const getStudentName = (user, lang) => {
-
-    console.log(user, "user")
     if (!user) return "";
     return pickByLang(lang, user.UserName, user.studentEnglishName, user.studentArabicName?.ArabicName);
 };
 
-// সেশনের নাম (SessionName / SessionEngName / SessionAraName)
 const getSessionName = (session, lang) => {
     if (!session) return "";
     return pickByLang(lang, session.SessionName, session.SessionEngName, session.SessionAraName);
 };
 
-// পরীক্ষার নাম (ExamName / ExamEngName / ExamAraName)
 const getExamName = (exam, lang) => {
     if (!exam) return "";
     return pickByLang(lang, exam.ExamName, exam.ExamEngName, exam.ExamAraName);
 };
 
-// শ্রেণির নাম (SubClass / SubClassEng / SubClassAra)
 const getClassName = (subClass, lang) => {
     if (!subClass) return "";
     return pickByLang(lang, subClass.SubClass, subClass.SubClassEng, subClass.SubClassAra);
 };
 
-// বিষয়ের নাম (SubjectName / EngSubjectName / ArabicSubject)
 const getSubjectLabel = (subject, lang, fallbackPrefix) => {
     const bnName = getFirstValue(subject.SubjectName, subject.Subject?.SubjectName);
     const enName = getFirstValue(subject.EngSubjectName, subject.Subject?.EngSubjectName);
@@ -323,7 +314,7 @@ const buildDivisionScale = (
    ═══════════════════════════════════════════════════════════ */
 export const RESULT_COLUMNS = [
     { key: "sl", label: "ক্রমিক" },
-    { key: "admission", label: "ভর্তি" },
+    { key: "admission", label: "সিট নং" },
     { key: "id", label: "আইডি" },
     { key: "name", label: "শিক্ষার্থীর নাম" },
     { key: "total", label: "মোট" },
@@ -388,7 +379,6 @@ export const COLOR_OPTIONS = [
 
 export const DEFAULT_COLOR_MODE = "color";
 
-// গড়/জিপিএ কলামের হেডিং — ডিফল্ট: গড়
 export const GPA_LABEL_OPTIONS = [
     { key: "avg", label: "গড়" },
     { key: "gpa", label: "জিপিএ" },
@@ -397,7 +387,7 @@ export const GPA_LABEL_OPTIONS = [
 export const DEFAULT_GPA_LABEL = "avg";
 
 /* ═══════════════════════════════════════════════════════════
-   NEW: PAPER SIZE & ORIENTATION
+   PAPER SIZE & ORIENTATION
    ═══════════════════════════════════════════════════════════ */
 export const PAPER_OPTIONS = [
     { key: "A4", label: "A4" },
@@ -412,7 +402,15 @@ export const ORIENTATION_OPTIONS = [
 ];
 export const DEFAULT_ORIENTATION = "landscape";
 
-// পেপারের আসল মাপ (mm) — portrait অবস্থায় (w × h)
+/* ═══════════════════════════════════════════════════════════
+   FONT SCALE (সব টেক্সটের সাইজ কন্ট্রোল)
+   ═══════════════════════════════════════════════════════════ */
+export const FONT_SCALE_MIN = 60;
+export const FONT_SCALE_MAX = 160;
+export const FONT_SCALE_STEP = 5;
+export const DEFAULT_FONT_SCALE = 100;
+const clampFont = (v) => Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, v));
+
 const PAPER_MM = {
     A4: { w: 210, h: 297, css: "A4" },
     A5: { w: 148, h: 210, css: "A5" },
@@ -424,10 +422,9 @@ const DESIGN_W_LANDSCAPE = 1080;
 const DESIGN_W_PORTRAIT = 900;
 
 /**
- * পেপার সাইজ + ওরিয়েন্টেশন অনুযায়ী ডিজাইন-পেজের মাপ (px) বের করে।
- * - W/H            : ডিজাইন স্পেস (লেআউটের হিসাব এখানে)
- * - scale          : প্রিন্টের সময় ডিজাইনকে আসল প্রিন্টেবল এরিয়ায় ফিট করার স্কেল
- * - outW/outH      : স্কেল করার পর প্রিন্ট পেজের বাইরের বক্সের মাপ
+ * পেপার সাইজ + ওরিয়েন্টেশন অনুযায়ী ডিজাইন-পেজের মাপ (px)।
+ * Chrome-এর Scale (১০০% / Custom ৯৫ ইত্যাদি) যাই হোক, প্রিন্ট পেজ
+ * margin: 0 auto দিয়ে মাঝখানে বসে এবং কখনো প্রিন্টেবল এরিয়ার বাইরে যায় না।
  */
 const getPageDims = (paper, orientation) => {
     const p = PAPER_MM[paper] || PAPER_MM[DEFAULT_PAPER];
@@ -442,8 +439,8 @@ const getPageDims = (paper, orientation) => {
     const W = isLandscape ? DESIGN_W_LANDSCAPE : DESIGN_W_PORTRAIT;
     const H = Math.floor((W * printH) / printW);
 
-    // সামান্য কম স্কেল (0.995) — যাতে ১px এর কারণে ফাঁকা পেজ না তৈরি হয়
-    const scale = ((printW * PX_PER_MM) / W) * 0.995;
+    // 0.99 — রাউন্ডিং এর কারণে যেন ফাঁকা/ভাঙা পেজ না হয়
+    const scale = ((printW * PX_PER_MM) / W) * 0.99;
 
     return {
         W,
@@ -549,7 +546,7 @@ const bg = (color) => ({
 });
 
 /* ═══════════════════════════════════════════════════════════
-   LAYOUT CONSTANTS  (PAGE_W / PAGE_H এখন কম্পোনেন্টের ভেতরে ডায়নামিক)
+   LAYOUT CONSTANTS
    ═══════════════════════════════════════════════════════════ */
 const THEAD_H = 100;
 const HEADER_H = 190;
@@ -557,13 +554,14 @@ const HEADER_GAP = 8;
 const FOOTER_RESERVE = 20;
 const SAFETY = 8;
 const SIGNATURE_H = 130;
+const SIGNATURE_MARGIN = 14; // SignatureSection এর marginTop
 const ROW_H_NORMAL = 24;
 const ROW_H_EXTRA = 32;
+const MAX_STRETCH = 1.5; // সারি সর্বোচ্চ কতটা বড় হয়ে ফাঁকা জায়গা ভরবে
 
 const COL = { sl: 36, admission: 46, id: 52, total: 46, gpa: 52, grade: 96, pos: 38 };
 const NAME_W_NORMAL = 190;
 const NAME_W_EXTRA = 360;
-// পোর্ট্রেটে প্রস্থ কম, তাই নামের কলাম একটু ছোট
 const NAME_W_NORMAL_PORTRAIT = 160;
 const NAME_W_EXTRA_PORTRAIT = 250;
 
@@ -585,8 +583,9 @@ const LS_GPA_LABEL = "resultSheetGpaLabel";
 const LS_GPA_TEXT = "resultSheetGpaText";
 const LS_GRADE_TEXT = "resultSheetGradeText";
 const LS_PAGE_OPTS = "resultSheetPageOptions";
-const LS_PAPER = "resultSheetPaperSize"; // NEW
-const LS_ORIENTATION = "resultSheetOrientation"; // NEW
+const LS_PAPER = "resultSheetPaperSize";
+const LS_ORIENTATION = "resultSheetOrientation";
+const LS_FONT_SCALE = "resultSheetFontScale";
 
 const loadText = (key) => {
     try {
@@ -601,6 +600,14 @@ const loadObj = (key, fallback) => {
         if (saved && typeof saved === "object") return { ...fallback, ...saved };
     } catch (e) { }
     return { ...fallback };
+};
+
+const loadFontScale = () => {
+    try {
+        const n = Number(localStorage.getItem(LS_FONT_SCALE));
+        if (Number.isFinite(n) && n > 0) return clampFont(n);
+    } catch (e) { }
+    return DEFAULT_FONT_SCALE;
 };
 
 const ORDERED_RESULT_KEYS = ["idSerial", "byDivision", "byNumber", "short"];
@@ -620,7 +627,7 @@ const loadStr = (key, options, fallback) => {
 /* ═══════════════════════════════════════════════════════════
    SIGNATURE
    ═══════════════════════════════════════════════════════════ */
-function SignatureSection({ C, dateText, dateLabel, NajemName, PrincipalName, najem, principal }) {
+function SignatureSection({ C, fs, dateText, dateLabel, NajemName, PrincipalName, najem, principal }) {
     const signatureBox = {
         flex: 1, maxWidth: "280px", display: "flex",
         flexDirection: "column", alignItems: "center", textAlign: "center",
@@ -640,7 +647,7 @@ function SignatureSection({ C, dateText, dateLabel, NajemName, PrincipalName, na
 
     return (
         <div className="signature-section" style={{
-            marginTop: "14px", paddingTop: "10px",
+            marginTop: `${SIGNATURE_MARGIN}px`, paddingTop: "10px",
             borderTop: `2px solid ${C.primary}`,
             display: "flex", justifyContent: "space-between",
             alignItems: "flex-end", gap: "24px",
@@ -649,14 +656,14 @@ function SignatureSection({ C, dateText, dateLabel, NajemName, PrincipalName, na
             <div style={signatureBox}>
                 <div style={sigImgWrap}><img src={principal} alt="signature" style={sigImg} /></div>
                 <div style={dashedLine} />
-                <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: C.text, lineHeight: 1.4 }}>{PrincipalName}</p>
-                <p style={{ margin: "2px 0 0", fontSize: "12px", fontWeight: 600, color: C.text }}>{dateLabel} : {dateText}</p>
+                <p style={{ margin: 0, fontSize: fs(13), fontWeight: 700, color: C.text, lineHeight: 1.4 }}>{PrincipalName}</p>
+                <p style={{ margin: "2px 0 0", fontSize: fs(12), fontWeight: 600, color: C.text }}>{dateLabel} : {dateText}</p>
             </div>
             <div style={signatureBox}>
                 <div style={sigImgWrap}><img src={najem} alt="signature" style={sigImg} /></div>
                 <div style={dashedLine} />
-                <p style={{ margin: 0, fontSize: "13px", fontWeight: 700, color: C.text, lineHeight: 1.4 }}>{NajemName}</p>
-                <p style={{ margin: "2px 0 0", fontSize: "12px", fontWeight: 600, color: C.text }}>{dateLabel} : {dateText}</p>
+                <p style={{ margin: 0, fontSize: fs(13), fontWeight: 700, color: C.text, lineHeight: 1.4 }}>{NajemName}</p>
+                <p style={{ margin: "2px 0 0", fontSize: fs(12), fontWeight: 600, color: C.text }}>{dateLabel} : {dateText}</p>
             </div>
         </div>
     );
@@ -666,9 +673,6 @@ function SignatureSection({ C, dateText, dateLabel, NajemName, PrincipalName, na
    🧾 MAIN
    ═══════════════════════════════════════════════════════════ */
 export default function StudentResultSheet({ reportData, query, labels }) {
-
-    console.log(reportData, "reportData language");
-
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
 
     const [principal, setPrincipal] = useState(null);
@@ -687,11 +691,11 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const [gpaText, setGpaText] = useState(() => loadText(LS_GPA_TEXT));
     const [gradeText, setGradeText] = useState(() => loadText(LS_GRADE_TEXT));
     const [pageOptions, setPageOptions] = useState(() => loadObj(LS_PAGE_OPTS, DEFAULT_PAGE_OPTIONS));
-    // NEW: পেপার সাইজ ও ওরিয়েন্টেশন
     const [paperSize, setPaperSize] = useState(() => loadStr(LS_PAPER, PAPER_OPTIONS, DEFAULT_PAPER));
     const [orientation, setOrientation] = useState(() =>
         loadStr(LS_ORIENTATION, ORIENTATION_OPTIONS, DEFAULT_ORIENTATION)
     );
+    const [fontScale, setFontScale] = useState(loadFontScale);
 
     useEffect(() => { localStorage.setItem(LS_VISIBLE, JSON.stringify(visibleColumns)); }, [visibleColumns]);
     useEffect(() => { localStorage.setItem(LS_NAME_EXTRAS, JSON.stringify(nameExtras)); }, [nameExtras]);
@@ -704,8 +708,12 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     useEffect(() => { localStorage.setItem(LS_PAGE_OPTS, JSON.stringify(pageOptions)); }, [pageOptions]);
     useEffect(() => { localStorage.setItem(LS_PAPER, paperSize); }, [paperSize]);
     useEffect(() => { localStorage.setItem(LS_ORIENTATION, orientation); }, [orientation]);
+    useEffect(() => { localStorage.setItem(LS_FONT_SCALE, String(fontScale)); }, [fontScale]);
 
-    /* ── পেজ ডাইমেনশন (পেপার + ওরিয়েন্টেশন অনুযায়ী) ── */
+    // সব ফন্ট সাইজ এই ফাংশন দিয়ে স্কেল হয় (fs(12) => "12px" × fontScale%)
+    const fs = (px) => `${(px * fontScale) / 100}px`;
+
+    /* ── পেজ ডাইমেনশন ── */
     const pageDims = useMemo(() => getPageDims(paperSize, orientation), [paperSize, orientation]);
     const PAGE_W = pageDims.W;
     const PAGE_H = pageDims.H;
@@ -724,7 +732,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const dir = lang === "ar" ? "rtl" : "ltr";
     const num = useMemo(() => makeNum(lang), [lang]);
 
-    /* ── প্রতিষ্ঠানের নাম ও ঠিকানা (ভাষা অনুযায়ী) ── */
     const institutionName = getInstitutionName(institutionInfo, lang);
     const institutionAddress = getInstitutionAddress(institutionInfo, lang);
 
@@ -736,7 +743,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         return "idSerial";
     }, [resultOptions]);
 
-    /* ── বিভাগের ক্রম (শুধু id দিয়ে, নামের ভাষা অপ্রাসঙ্গিক) ── */
     const divisionOrder = useMemo(() => {
         const scale = buildDivisionScale(
             reportData?.conditionAverage,
@@ -825,7 +831,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         average: L("AverageLabel", "average"),
     };
 
-    /* ── পরীক্ষা / সেশন / শ্রেণির নাম (ভাষা অনুযায়ী) ── */
     const examName = getExamName(conditionAverage?.Exam, lang);
     const sessionNameRaw = getSessionName(conditionAverage?.Session, lang);
     const sessionName = lang === "ar" ? num(sessionNameRaw) : sessionNameRaw;
@@ -949,54 +954,97 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     }, [institutionInfo]);
 
     /* ═══════════════════════════════════════════════════════════
-       ⚡ PAGE BREAK / ROW CAPACITY
-       PAGE_H এখন পেপার সাইজ + ওরিয়েন্টেশন অনুযায়ী বদলায়।
+       ⚡ PAGE BREAK / ROW CAPACITY (অটো ফিল)
+       - প্রতিটি পেজের জন্য আলাদা হিসাব: হেডার আছে কিনা, সিগনেচার আছে কিনা
+       - হেডার/সিগনেচার না থাকলে সেই জায়গায় বেশি সারি বসে
+       - ফুল পেজে সারির উচ্চতা সামান্য বাড়িয়ে নিচের ফাঁকা জায়গা ভরে দেওয়া হয়
+       - শেষ পেজে সিগনেচার সবসময় থাকে
        ═══════════════════════════════════════════════════════════ */
-    const pages = useMemo(() => {
+    const pagesInfo = useMemo(() => {
         const list = studentResultsDetails;
-        if (!list.length) return [[]];
+        const baseRow = isShort ? SHORT_ROW_H : ROW_H;
 
-        const chunks = [];
+        if (!list.length) return [{ students: [], rowH: baseRow, perCol: 1 }];
+
+        const getAvail = (headerOn, sigOn) => {
+            const top = isShort
+                ? (headerOn ? SHORT_HEADER_H + HEADER_GAP : 0) + SHORT_THEAD_H
+                : (headerOn ? HEADER_H + HEADER_GAP : 0) + THEAD_H;
+            const sig = sigOn ? SIGNATURE_H + SIGNATURE_MARGIN : 0;
+            return PAGE_H - top - sig - FOOTER_RESERVE - SAFETY;
+        };
+        const perColOf = (avail) => Math.max(1, Math.floor(avail / SHORT_ROW_H));
+        const capOf = (avail) =>
+            isShort ? perColOf(avail) * 2 : Math.max(1, Math.floor(avail / ROW_H));
+
+        const infos = [];
         let remaining = [...list];
+        let idx = 0;
 
         while (remaining.length > 0) {
-            let currentCap = 0;
+            const headerOn = pageOptions.everyPageHeader || idx === 0;
+            const sigOn = pageOptions.everyPageSignature;
 
-            if (isShort) {
-                let sigH = pageOptions.everyPageSignature ? SIGNATURE_H : 0;
-                let rowsPerCol = Math.max(1, Math.floor(
-                    (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - sigH - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
-                ));
-                currentCap = rowsPerCol * 2;
+            const availWith = getAvail(headerOn, true);
+            const capWith = capOf(availWith);
 
-                // শেষ পেজ হলে সিগনেচার থাকবেই
-                if (remaining.length <= currentCap) {
-                    rowsPerCol = Math.max(1, Math.floor(
-                        (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
-                    ));
-                    currentCap = rowsPerCol * 2;
-                }
+            let take;
+            let availUsed;
+            let isLast = false;
+
+            if (remaining.length <= capWith) {
+                // শেষ পেজ — সিগনেচার সহ সব ধরবে
+                take = remaining.length;
+                availUsed = availWith;
+                isLast = true;
+            } else if (sigOn) {
+                take = capWith;
+                availUsed = availWith;
             } else {
-                let sigH = pageOptions.everyPageSignature ? SIGNATURE_H : 0;
-                let cap = Math.max(1, Math.floor(
-                    (PAGE_H - HEADER_H - HEADER_GAP - THEAD_H - sigH - FOOTER_RESERVE - SAFETY) / ROW_H
-                ));
-
-                // শেষ পেজ হলে সিগনেচার থাকবেই
-                if (remaining.length <= cap) {
-                    cap = Math.max(1, Math.floor(
-                        (PAGE_H - HEADER_H - HEADER_GAP - THEAD_H - SIGNATURE_H - FOOTER_RESERVE - SAFETY) / ROW_H
-                    ));
+                const availNo = getAvail(headerOn, false);
+                const capNo = capOf(availNo);
+                if (remaining.length <= capNo) {
+                    // বাকি সারি সিগনেচার ছাড়া এক পেজে ধরত, কিন্তু শেষ পেজে সিগনেচার লাগবে
+                    take = capWith;
+                } else {
+                    take = capNo;
                 }
-                currentCap = cap;
+                availUsed = availNo;
             }
 
-            chunks.push(remaining.slice(0, currentCap));
-            remaining = remaining.slice(currentCap);
+            const students = remaining.slice(0, take);
+            remaining = remaining.slice(take);
+
+            let perCol = 1;
+            let rowH = baseRow;
+
+            if (isShort) {
+                perCol = isLast ? perColOf(availUsed) : Math.max(1, Math.ceil(take / 2));
+                const full = !isLast || take === capWith;
+                if (full) {
+                    rowH = Math.max(
+                        SHORT_ROW_H,
+                        Math.min(SHORT_ROW_H * MAX_STRETCH, Math.floor(availUsed / perCol))
+                    );
+                }
+            } else {
+                const full = !isLast || take === capWith;
+                if (full) {
+                    rowH = Math.max(
+                        ROW_H,
+                        Math.min(ROW_H * MAX_STRETCH, Math.floor(availUsed / take))
+                    );
+                }
+            }
+
+            infos.push({ students, rowH, perCol });
+            idx += 1;
         }
 
-        return chunks;
-    }, [studentResultsDetails, ROW_H, isShort, pageOptions.everyPageSignature, PAGE_H]);
+        return infos;
+    }, [studentResultsDetails, ROW_H, isShort, pageOptions.everyPageHeader, pageOptions.everyPageSignature, PAGE_H]);
+
+    const pages = useMemo(() => pagesInfo.map((p) => p.students), [pagesInfo]);
 
     const totalExaminees = divisionStats.total;
 
@@ -1011,13 +1059,12 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const styles = {
         td: {
             border: `1px solid ${C.border}`, padding: "0 3px", textAlign: "center",
-            verticalAlign: "middle", height: `${ROW_H}px`, fontSize: "12px",
-            lineHeight: `${ROW_H - 2}px`, overflow: "hidden",
-            whiteSpace: "nowrap", color: C.text,
+            verticalAlign: "middle", fontSize: fs(12),
+            overflow: "hidden", whiteSpace: "nowrap", color: C.text,
         },
         th: {
             border: `1px solid ${C.border}`, padding: "2px", textAlign: "center",
-            verticalAlign: "middle", fontSize: "12px", fontWeight: 700,
+            verticalAlign: "middle", fontSize: fs(12), fontWeight: 700,
             color: C.primaryDark, overflow: "hidden", ...bg(C.primarySoft),
         },
     };
@@ -1025,7 +1072,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
     const sideTitle = {
         ...bg(S.headBg), color: S.headFg, textAlign: "center",
-        fontSize: "13px", fontWeight: 700, height: "26px", lineHeight: "26px",
+        fontSize: fs(13), fontWeight: 700, height: "26px", lineHeight: "26px",
         flexShrink: 0, whiteSpace: "nowrap", overflow: "hidden",
     };
     const sideBox = {
@@ -1039,30 +1086,30 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     };
     const sideRowBase = {
         flex: 1, display: "grid", alignItems: "center",
-        fontSize: "13px", minHeight: 0, color: S.text,
+        fontSize: fs(13), minHeight: 0, color: S.text,
     };
     const cellCenter = { display: "flex", alignItems: "center", justifyContent: "center" };
 
     const renderCenterTitle = () => (
         <div style={{ textAlign: "center", alignSelf: "center", minWidth: 0 }}>
-            <h1 style={{ fontSize: "22px", fontWeight: 800, margin: 0, lineHeight: 1.25, color: C.primaryDark }}>
+            <h1 style={{ fontSize: fs(22), fontWeight: 800, margin: 0, lineHeight: 1.25, color: C.primaryDark }}>
                 {institutionName}
             </h1>
-            <p style={{ fontSize: "13px", fontWeight: 600, margin: "3px 0 0", color: C.muted }}>
+            <p style={{ fontSize: fs(13), fontWeight: 600, margin: "3px 0 0", color: C.muted }}>
                 {institutionAddress}
             </p>
-            <h2 style={{ fontSize: "14px", margin: "6px 0 0", fontWeight: 600, color: C.text }}>
+            <h2 style={{ fontSize: fs(14), margin: "6px 0 0", fontWeight: 600, color: C.text }}>
                 {examName} — {sessionName}
             </h2>
             <div style={{
                 display: "inline-block", ...bg(C.primaryMid), color: C.primaryDark,
                 border: `1.5px solid ${C.primary}`, padding: "2px 22px",
-                marginTop: "7px", fontWeight: 800, fontSize: "15px",
+                marginTop: "7px", fontWeight: 800, fontSize: fs(15),
                 lineHeight: "22px", borderRadius: "999px",
             }}>
                 {t.resultTitle}
             </div>
-            <p style={{ fontSize: "14px", margin: "6px 0 0", fontWeight: 600, color: C.text }}>
+            <p style={{ fontSize: fs(14), margin: "6px 0 0", fontWeight: 600, color: C.text }}>
                 {t.classLabel} : <span style={{ color: C.primary }}>{className}</span>
             </p>
         </div>
@@ -1184,7 +1231,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 <th key={i} style={{ ...styles.th, padding: "4px 1px" }}>
                     <span style={{
                         display: "inline-block", writingMode: "vertical-rl", transform: "rotate(180deg)",
-                        height: `${THEAD_H - 12}px`, fontSize: "12px", fontWeight: 700,
+                        height: `${THEAD_H - 12}px`, fontSize: fs(12), fontWeight: 700,
                         lineHeight: 1.2, textAlign: "center", overflow: "hidden",
                     }}>{getSubjectLabel(subject, lang, t.subjectFallback)}</span>
                 </th>
@@ -1196,22 +1243,22 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         </tr>
     );
 
-    const renderNameCell = (studentResult, rowBg) => {
+    const renderNameCell = (studentResult, rowBg, tdBase) => {
         const studentName = getStudentName(studentResult?.User, lang);
         if (!hasExtras) {
             return (
                 <td style={{
-                    ...styles.td, ...bg(rowBg), textAlign: "start",
+                    ...tdBase, ...bg(rowBg), textAlign: "start",
                     paddingInlineStart: "8px", fontWeight: 600, textOverflow: "ellipsis",
                 }}>{studentName}</td>
             );
         }
         const extras = activeExtras.map((o) => getExtraValue(studentResult, o)).filter((v) => v !== "");
         return (
-            <td style={{ ...styles.td, ...bg(rowBg), textAlign: "start", padding: "0 6px", whiteSpace: "normal" }}>
+            <td style={{ ...tdBase, ...bg(rowBg), textAlign: "start", padding: "0 6px", whiteSpace: "normal" }}>
                 <div style={{
                     display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2,
-                    overflow: "hidden", fontSize: "11px", lineHeight: "14px",
+                    overflow: "hidden", fontSize: fs(11), lineHeight: "14px",
                     maxHeight: "28px", wordBreak: "break-word",
                 }}>
                     <span style={{ fontWeight: 700 }}>{studentName}</span>
@@ -1228,7 +1275,12 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
     const failMark = FAIL_MARK[colorMode] || FAIL_MARK.color;
 
-    const renderRow = (studentResult, globalIndex) => {
+    const renderRow = (studentResult, globalIndex, rowH) => {
+        const tdBase = {
+            ...styles.td,
+            height: `${rowH}px`,
+            lineHeight: `${rowH - 2}px`,
+        };
         const zebra = globalIndex % 2 === 1;
         const rowBg = zebra ? C.primaryFaint : "#fff";
         const total = calcTotal(studentResult, subjectPassNumbers);
@@ -1240,15 +1292,19 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         const medal = theme.medals[position];
 
         return (
-            <tr key={studentResult.ID ?? globalIndex} style={{ background: rowBg, height: `${ROW_H}px` }}>
-                {showCol.sl && <td style={{ ...styles.td, ...bg(rowBg) }}>{num(getSerial(globalIndex))}</td>}
+            <tr key={studentResult.ID ?? globalIndex} style={{ background: rowBg, height: `${rowH}px` }}>
+                {showCol.sl && <td style={{ ...tdBase, ...bg(rowBg) }}>{num(getSerial(globalIndex))}</td>}
                 {showCol.admission && (
-                    <td style={{ ...styles.td, ...bg(rowBg) }}>
+                    <td style={{ ...tdBase, ...bg(rowBg) }}>
                         {renderAdmission(studentResult?.User?.Admission?.[0]?.AdmissionSerial)}
                     </td>
                 )}
-                {showCol.id && <td style={{ ...styles.td, ...bg(rowBg) }}>{num(studentResult?.User?.UserCode)}</td>}
-                {showCol.name && renderNameCell(studentResult, rowBg)}
+                {showCol.id && (
+                    <td style={{ ...tdBase, ...bg(rowBg) }}>
+                        {num(studentResult?.User?.UserCode)}
+                    </td>
+                )}
+                {showCol.name && renderNameCell(studentResult, rowBg, tdBase)}
 
                 {Array.from({ length: conditionAverage?.SubSonkha || 0 }).map((_, mi) => {
                     const val = studentResult[`SubVal${mi + 1}`];
@@ -1257,7 +1313,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                     const warn = failed || isZero;
                     return (
                         <td key={mi} style={{
-                            ...styles.td,
+                            ...tdBase,
                             ...bg(failed ? failMark.bg : rowBg),
                             color: failed ? failMark.fg : (isZero ? C.danger : C.text),
                             fontWeight: warn ? 700 : 400,
@@ -1267,25 +1323,25 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 })}
 
                 {showCol.total && (
-                    <td style={{ ...styles.td, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(total)}</td>
+                    <td style={{ ...tdBase, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(total)}</td>
                 )}
                 {showCol.gpa && (
-                    <td style={{ ...styles.td, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(avg.toFixed(2))}</td>
+                    <td style={{ ...tdBase, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(avg.toFixed(2))}</td>
                 )}
                 {showCol.grade && (
-                    <td style={{ ...styles.td, ...bg(gradeBg), fontWeight: 700, fontSize: "12px", color: gradeFg }}>
+                    <td style={{ ...tdBase, ...bg(gradeBg), fontWeight: 700, fontSize: fs(12), color: gradeFg }}>
                         {getDivisionName(studentResult.Division, lang)}
                     </td>
                 )}
                 {showCol.pos && (
-                    <td style={{ ...styles.td, ...bg(rowBg) }}>
+                    <td style={{ ...tdBase, ...bg(rowBg) }}>
                         {medal ? (
                             <span style={{
                                 display: "inline-flex", alignItems: "center", justifyContent: "center",
                                 boxSizing: "border-box", width: "20px", height: "20px",
                                 borderRadius: "50%", border: medal.border,
                                 ...bg(medal.bg), color: medal.fg,
-                                fontWeight: 800, fontSize: "11px", lineHeight: 1,
+                                fontWeight: 800, fontSize: fs(11), lineHeight: 1,
                                 verticalAlign: "middle",
                             }}>{num(studentResult.Positions)}</span>
                         ) : num(studentResult.Positions)}
@@ -1295,10 +1351,15 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         );
     };
 
-    const shortTd = { ...styles.td, height: `${SHORT_ROW_H}px`, lineHeight: `${SHORT_ROW_H - 2}px`, fontSize: "12px" };
-    const shortTh = { ...styles.th, height: `${SHORT_THEAD_H}px`, fontSize: "12px" };
+    const shortTh = { ...styles.th, height: `${SHORT_THEAD_H}px`, fontSize: fs(12) };
 
-    const renderShortRow = (studentResult, globalIndex) => {
+    const renderShortRow = (studentResult, globalIndex, rowH) => {
+        const shortTd = {
+            ...styles.td,
+            height: `${rowH}px`,
+            lineHeight: `${rowH - 2}px`,
+            fontSize: fs(12),
+        };
         const zebra = globalIndex % 2 === 1;
         const rowBg = zebra ? C.primaryFaint : "#fff";
         const total = calcTotal(studentResult, subjectPassNumbers);
@@ -1310,7 +1371,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         const fatherName = fatherOpt ? getExtraValue(studentResult, fatherOpt) : "";
 
         return (
-            <tr key={studentResult.ID ?? globalIndex} style={{ background: rowBg, height: `${SHORT_ROW_H}px` }}>
+            <tr key={studentResult.ID ?? globalIndex} style={{ background: rowBg, height: `${rowH}px` }}>
                 <td style={{ ...shortTd, ...bg(rowBg) }}>{num(studentResult?.User?.UserCode ?? "")}</td>
                 <td style={{
                     ...shortTd, ...bg(rowBg), textAlign: "start",
@@ -1328,7 +1389,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         );
     };
 
-    const renderShortTable = (rows, startIndex) => (
+    const renderShortTable = (rows, startIndex, rowH) => (
         <div style={{ width: `${SHORT_TABLE_W}px`, flexShrink: 0 }}>
             <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
                 <colgroup>
@@ -1347,7 +1408,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                         <th style={thStrong}>{LABELS.grade}</th>
                     </tr>
                 </thead>
-                <tbody>{rows.map((s, i) => renderShortRow(s, startIndex + i))}</tbody>
+                <tbody>{rows.map((s, i) => renderShortRow(s, startIndex + i, rowH))}</tbody>
             </table>
         </div>
     );
@@ -1361,10 +1422,12 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         const offset = pages.slice(0, pageIndex).reduce((sum, chunk) => sum + chunk.length, 0);
         const headerVisible = showHeaderOnPage(pageIndex);
         const signatureVisible = showSignatureOnPage(pageIndex);
+        const info = pagesInfo[pageIndex] || { rowH: isShort ? SHORT_ROW_H : ROW_H, perCol: 1 };
 
         const signature = signatureVisible ? (
             <SignatureSection
                 C={C}
+                fs={fs}
                 dateText={dateText}
                 dateLabel={t.date}
                 PrincipalName={institutionInfo?.PrincipalName}
@@ -1377,20 +1440,15 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         const pageFooter = (
             <div style={{
                 position: "absolute", left: 0, right: 0, bottom: "2px",
-                textAlign: "center", fontSize: "10px", color: C.muted,
+                textAlign: "center", fontSize: fs(10), color: C.muted,
             }}>
                 {t.page(num(pageIndex + 1), num(pages.length))}
             </div>
         );
 
         if (isShort) {
-            const sigH = signatureVisible ? SIGNATURE_H : 0;
-            const rowsPerCol = Math.max(1, Math.floor(
-                (PAGE_H - SHORT_HEADER_H - HEADER_GAP - SHORT_THEAD_H - sigH - FOOTER_RESERVE - SAFETY) / SHORT_ROW_H
-            ));
-
-            const leftRows = students.slice(0, rowsPerCol);
-            const rightRows = students.slice(rowsPerCol);
+            const leftRows = students.slice(0, info.perCol);
+            const rightRows = students.slice(info.perCol);
             return (
                 <>
                     {headerVisible && renderShortHeaderBlock()}
@@ -1399,8 +1457,8 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                         alignItems: "flex-start", justifyContent: "space-between",
                         gap: `${SHORT_COL_GAP}px`,
                     }}>
-                        {renderShortTable(leftRows, offset)}
-                        {renderShortTable(rightRows, offset + leftRows.length)}
+                        {renderShortTable(leftRows, offset, info.rowH)}
+                        {renderShortTable(rightRows, offset + leftRows.length, info.rowH)}
                     </div>
                     {signature}
                     {pageFooter}
@@ -1414,7 +1472,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
                     {renderColGroup()}
                     <thead>{renderColumnHeaderRow()}</thead>
-                    <tbody>{students.map((s, i) => renderRow(s, offset + i))}</tbody>
+                    <tbody>{students.map((s, i) => renderRow(s, offset + i, info.rowH))}</tbody>
                 </table>
                 {signature}
                 {pageFooter}
@@ -1431,7 +1489,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const dynamicColumns = useMemo(
         () => [
             { key: "sl", label: labels?.SerialLabel ?? tUI.sl },
-            { key: "admission", label: labels?.AdmissionIDLabel ?? tUI.admission },
+            { key: "admission", label: labels?.AdmissionIDLabel ?? "সিট নং" },
             { key: "id", label: labels?.StudentIDLabel ?? tUI.studentId },
             { key: "name", label: labels?.StudentNameLabel ?? tUI.name },
             { key: "total", label: labels?.TotalLabel ?? tUI.total },
@@ -1458,6 +1516,9 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const togglePageOption = (key) =>
         setPageOptions((p) => ({ ...p, [key]: !p[key] }));
 
+    const changeFontScale = (delta) => setFontScale((p) => clampFont(p + delta));
+    const resetFontScale = () => setFontScale(DEFAULT_FONT_SCALE);
+
     const renderSettingsPanels = () => (
         <>
             <LanguageSelector t={tUI} value={lang} onChange={setLang} />
@@ -1483,6 +1544,13 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 t={tUI}
                 value={pageOptions}
                 onToggle={togglePageOption}
+            />
+            <FontSizeSettings
+                t={tUI}
+                num={numUI}
+                value={fontScale}
+                onChange={changeFontScale}
+                onReset={resetFontScale}
             />
             <PrintSettings
                 t={tUI}
@@ -1554,7 +1622,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 </div>
             </div>
 
-            {/* ── প্রিন্ট পোর্টাল: ডিজাইন-পেজকে আসল প্রিন্টেবল এরিয়ায় স্কেল করে বসানো হয় ── */}
+            {/* ── প্রিন্ট পোর্টাল: পেজ মাঝখানে (margin: 0 auto), Chrome Scale যাই হোক ── */}
             {createPortal(
                 <div className="print-portal">
                     {pages.map((students, pageIndex) => (
@@ -1565,10 +1633,12 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                                 width: `${pageDims.outW}px`,
                                 height: `${pageDims.outH}px`,
                                 overflow: "hidden",
-                                margin: 0,
+                                margin: "0 auto",
                                 padding: 0,
                                 pageBreakAfter: pageIndex < pages.length - 1 ? "always" : "auto",
                                 breakAfter: pageIndex < pages.length - 1 ? "page" : "auto",
+                                pageBreakInside: "avoid",
+                                breakInside: "avoid",
                             }}
                         >
                             <div dir={dir} style={{
@@ -1592,13 +1662,18 @@ export default function StudentResultSheet({ reportData, query, labels }) {
           @page { size: ${pageDims.pageCss}; margin: ${PRINT_MARGIN_MM}mm; }
           html, body {
             margin: 0 !important; padding: 0 !important;
+            width: auto !important;
             height: auto !important; overflow: visible !important;
             background: #fff !important;
           }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           body > *:not(.print-portal) { display: none !important; }
-          .print-portal { display: block !important; }
-          .print-page-outer { box-sizing: border-box; }
+          .print-portal { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+          .print-page-outer {
+            box-sizing: border-box;
+            display: block !important;
+            margin: 0 auto !important;
+          }
           tr, td, th { page-break-inside: avoid !important; break-inside: avoid !important; }
           .signature-section { page-break-inside: avoid !important; break-inside: avoid !important; }
         }
@@ -1635,6 +1710,53 @@ const LanguageSelector = ({ t, value, onChange }) => (
         <p className="text-[10px] text-slate-400 leading-snug">{t.printLanguageNote}</p>
     </div>
 );
+
+const FontSizeSettings = ({ t, num, value, onChange, onReset }) => {
+    const btnCls =
+        "w-10 h-8 rounded-lg border border-slate-200 bg-white text-slate-700 font-bold " +
+        "hover:bg-emerald-50 hover:border-emerald-200 disabled:opacity-40 disabled:cursor-not-allowed " +
+        "transition-colors flex items-center justify-center select-none";
+    return (
+        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+            <div className="flex items-center justify-between">
+                <p className="text-xs font-bold text-slate-700 leading-tight">{t.fontSize}</p>
+                {value !== DEFAULT_FONT_SCALE && (
+                    <button
+                        type="button"
+                        onClick={onReset}
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200"
+                    >
+                        {t.fontReset}
+                    </button>
+                )}
+            </div>
+            <div className="flex items-center gap-2">
+                <button
+                    type="button"
+                    className={btnCls}
+                    disabled={value <= FONT_SCALE_MIN}
+                    onClick={() => onChange(-FONT_SCALE_STEP)}
+                    title="A−"
+                >
+                    <span className="text-[11px]">A</span><span className="text-xs">−</span>
+                </button>
+                <div className="flex-1 text-center text-sm font-bold text-emerald-700 bg-white border border-slate-200 rounded-lg py-1">
+                    {num(value)}%
+                </div>
+                <button
+                    type="button"
+                    className={btnCls}
+                    disabled={value >= FONT_SCALE_MAX}
+                    onClick={() => onChange(FONT_SCALE_STEP)}
+                    title="A+"
+                >
+                    <span className="text-base">A</span><span className="text-xs">+</span>
+                </button>
+            </div>
+            <p className="text-[10px] text-slate-400 leading-snug">{t.fontSizeNote}</p>
+        </div>
+    );
+};
 
 const HeadingSettings = ({ t, mode, onModeChange, gpaText, onGpaText, gradeText, onGradeText }) => {
     const options = [
@@ -1761,8 +1883,8 @@ const PrintSettings = ({
 
             <p className="text-[10px] text-slate-400 leading-snug">{t.printNote}</p>
 
-            {/* <SegmentedControl label={t.color} options={colorOptions} value={colorMode} onChange={onColorChange} />
-            <p className="text-[10px] text-slate-400 leading-snug">{t.bwNote}</p> */}
+            <SegmentedControl label={t.color} options={colorOptions} value={colorMode} onChange={onColorChange} />
+            <p className="text-[10px] text-slate-400 leading-snug">{t.bwNote}</p>
         </div>
     );
 };
