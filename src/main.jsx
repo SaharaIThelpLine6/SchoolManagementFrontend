@@ -4,7 +4,8 @@ import { Provider } from 'react-redux'
 import { registerSW } from 'virtual:pwa-register'
 
 import App from './App.jsx'
-import './index.css'
+// import './index.css'
+import './backup_index.css'
 import store from './store/store.js'
 
 registerSW({

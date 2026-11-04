@@ -125,7 +125,7 @@ const Footer = () => {
         </button>
 
         <a
-          href="https://wa.me/8801700000000"
+          href="https://wa.me/8801822930055"
           target="_blank"
           rel="noreferrer"
           aria-label="হোয়াটসঅ্যাপে যোগাযোগ করুন"

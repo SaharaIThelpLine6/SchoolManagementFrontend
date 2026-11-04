@@ -1150,7 +1150,16 @@ const useTranslate = () => {
     "students": "জন শিক্ষার্থী",
     "Failed to load blood group data": "রক্তের গ্রুপ ডেটা লোড করতে ব্যর্থ হয়েছে",
     "No student data found": "কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি",
-    "All Tutorials Exam" : "সকল পরীক্ষার টিউটোরিয়াল",
+    "All Tutorials Exam" : "সকল টিউটোরিয়াল পরীক্ষা",
+    "All Tutorials Result" : "সকল টিউটোরিয়াল ফলাফল",
+    "All Tutorials General" : "সকল টিউটোরিয়াল সাধারণ",
+    "All Tutorials Student" : "সকল টিউটোরিয়াল শিক্ষার্থী",
+    "All Tutorials Parents" : "সকল টিউটোরিয়াল অভিভাবক",
+    "All Tutorials Teacher" : "সকল টিউটোরিয়াল শিক্ষক",
+    "All Tutorials Darulikama" : "সকল টিউটোরিয়াল দারুল ইকামা",
+    "All Tutorials Accounting" : "সকল টিউটোরিয়াল হিসাবরক্ষণ",
+    "All Tutorials Payment" : "সকল টিউটোরিয়াল পেমেন্ট",
+    "All Tutorials setting" : "সকল টিউটোরিয়াল সেটিংস",
   };
 
   return (key) =>

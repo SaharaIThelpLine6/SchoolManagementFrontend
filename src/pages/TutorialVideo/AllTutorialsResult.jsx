@@ -118,16 +118,6 @@ export default function AllTutorialsExam() {
                         {/* ================= FEATURED VIDEO ================= */}
                         {featuredVideo && (
                             <div className="mb-10">
-                                <div className="flex items-center gap-3 mb-5 bg-white rounded-3xl border border-indigo-100 shadow-xl shadow-indigo-100/50">
-                                    <div className="w-1.5 h-7 rounded-full bg-gradient-to-b from-violet-600 to-blue-500" />
-                                    <h2 className="text-xl font-bold text-gray-800">
-                                        বিশেষ টিউটোরিয়াল
-                                    </h2>
-                                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-amber-100 to-orange-100 text-orange-600">
-                                        ⭐ Featured
-                                    </span>
-                                </div>
-
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-white rounded-3xl border border-indigo-100 shadow-xl shadow-indigo-100/50 p-4 sm:p-6 overflow-hidden">
                                     {/* Featured Video Player */}
                                     <div className="relative">
