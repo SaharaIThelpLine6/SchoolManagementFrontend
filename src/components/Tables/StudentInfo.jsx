@@ -21,6 +21,15 @@ import { useGetFilteredStudentsQuery } from '../../features/student/studentQuery
 import DefaultSelect from '../Forms/DefaultSelect';
 import ToggleSwitch from '../Switchers/ToggleSwitch';
 import Button from '../Button/Button';
+import { useGetSessionQuery, useGetSessionsQuery } from '../../features/session/sessionSlice';
+import { useGetSubClasssQuery } from '../../features/class/classQuerySlice';
+
+// ✅ Response array ba { data: [] } duto shape-i handle korar helper
+const toArray = (res) => {
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res?.data)) return res.data;
+  return [];
+};
 
 const StudentInfo = () => {
   const dispatch = useDispatch();
@@ -28,7 +37,7 @@ const StudentInfo = () => {
   const currentPage = useSelector((state) => state.pagination.currentPage);
   const { user } = useSelector((state) => state.auth);
   const [preview, setPreview] = useState({});
-  console.log("test")
+
   // ✅ More menu states
   const [openMenuId, setOpenMenuId] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -37,12 +46,14 @@ const StudentInfo = () => {
 
   // ✅ ফর্ম স্টেট
   const methods = useForm();
-  const { watch, reset, formState: { errors } } = methods;
+  const { watch, reset, setValue, formState: { errors } } = methods;
 
   const userTypeID = watch("UserTypeID");
   const filterTypeId = watch("FilterTypeId");
   const filterValue = watch("FilterValue");
   const userAction = watch("UserAction");
+  const sessionId = watch("SessionID"); // ✅ NEW
+  const subClassId = watch("SubClassID"); // ✅ NEW
 
   // ✅ Debounce
   const [debouncedFilterValue, setDebouncedFilterValue] = useState("");
@@ -52,6 +63,18 @@ const StudentInfo = () => {
     }, 500);
     return () => clearTimeout(handler);
   }, [filterValue]);
+
+  // ✅ NEW: Session clear/change hole SubClass reset hobe
+  useEffect(() => {
+    if (!sessionId) {
+      setValue("SubClassID", "");
+    }
+  }, [sessionId, setValue]);
+
+  // ✅ NEW: Kono filter change hole page 1 e fire jabe
+  useEffect(() => {
+    dispatch(setCurrentPage(1));
+  }, [filterTypeId, debouncedFilterValue, userAction, sessionId, subClassId, dispatch]);
 
   // ✅ Close menu on outside click + scroll + resize
   useEffect(() => {
@@ -97,14 +120,31 @@ const StudentInfo = () => {
     queryParams.UserAction = userAction;
   }
 
+  // ✅ NEW: Session filter
+  if (sessionId) {
+    queryParams.SessionID = sessionId;
+  }
+
+  // ✅ NEW: SubClass filter (session select thakle tobei jabe)
+  if (sessionId && subClassId) {
+    queryParams.SubClassID = subClassId;
+  }
+
   // ✅ RTK Query
   const { data: usersData, isLoading, isError, refetch } = useGetFilteredStudentsQuery(queryParams);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
+  const { data: sessionData } = useGetSessionsQuery();
+
+  const { data: subClassData } = useGetSubClasssQuery();
+  // console.log(subClassData, "subClassData")
   const [updateUserStatus] = useUpdateUserStatusMutation();
   const { data: userType = [] } = useGetUserTypesQuery(undefined, {
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
+
+  const sessionList = toArray(sessionData);
+  const subClassList = toArray(subClassData);
 
   const brandData = usersData?.users || [];
   const totalPage = usersData?.totalPages || 1;
@@ -112,10 +152,17 @@ const StudentInfo = () => {
 
   useEffect(() => {
     refetch();
-  }, [userTypeID, filterTypeId, debouncedFilterValue, userAction, currentPage, itemPerPage, refetch]);
+  }, [userTypeID, filterTypeId, debouncedFilterValue, userAction, sessionId, subClassId, currentPage, itemPerPage, refetch]);
 
   const handleResetFilters = () => {
-    reset({ UserTypeID: '', FilterTypeId: '', FilterValue: '', UserAction: '' });
+    reset({
+      UserTypeID: '',
+      FilterTypeId: '',
+      FilterValue: '',
+      UserAction: '',
+      SessionID: '',
+      SubClassID: '',
+    });
     setDebouncedFilterValue('');
     dispatch(setCurrentPage(1));
   };
@@ -224,6 +271,15 @@ const StudentInfo = () => {
     { FilterTypeId: "3", FilterTypeName: "মোবাইল" },
   ];
 
+  const hasAnyFilter =
+    !!filterValue ||
+    (userAction !== undefined && userAction !== "" && userAction !== null) ||
+    !!sessionId ||
+    !!subClassId;
+
+  const selectBaseClass =
+    "border border-gray-200 rounded-lg py-2 px-3 text-[13px] font-medium text-gray-600 bg-white w-full focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all";
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 w-full overflow-hidden font-SolaimanLipi">
       {/* ✅ Custom CSS for smooth dropdown animation */}
@@ -262,9 +318,10 @@ const StudentInfo = () => {
         </div>
 
         {/* Filters */}
-        <div className="px-6 py-5 flex flex-col md:flex-row justify-between items-center bg-white gap-4 border-t border-gray-50">
+        <div className="px-6 py-5 flex flex-col lg:flex-row lg:items-center justify-between bg-white gap-4 border-t border-gray-50">
 
-          <div className="flex items-center gap-2 w-full md:w-[440px]">
+          {/* Left: search filter */}
+          <div className="flex items-center gap-2 w-full lg:w-[440px]">
             <div className="w-[150px] shrink-0">
               <DefaultSelect
                 options={filterTypeOptions}
@@ -291,7 +348,7 @@ const StudentInfo = () => {
               </div>
             )}
 
-            {(filterValue || userAction !== "") && (
+            {hasAnyFilter && (
               <button
                 type="button"
                 onClick={handleResetFilters}
@@ -305,16 +362,51 @@ const StudentInfo = () => {
             )}
           </div>
 
-          {/* ✅ UserAction Dynamic */}
-          <div className="w-full md:w-[150px]">
-            <select
-              {...methods.register("UserAction")}
-              className="border border-gray-200 rounded-lg py-2 px-3 text-[13px] font-medium text-gray-600 bg-white w-full focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-            >
-              <option value="">সকল স্ট্যাটাস</option>
-              <option value="1">সক্রিয়</option>
-              <option value="0">নিষ্ক্রিয়</option>
-            </select>
+          {/* Right: Session, SubClass, Status */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
+            {/* ✅ NEW: Session select */}
+            <div className="w-full sm:w-[170px]">
+              <select
+                {...methods.register("SessionID")}
+                className={selectBaseClass}
+              >
+                <option value="">সকল সেশন</option>
+                {sessionList.map((s) => (
+                  <option key={s.SessionID} value={s.SessionID}>
+                    {s.SessionName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* ✅ NEW: SubClass select (session select korle tobei enable) */}
+            <div className="w-full sm:w-[170px]">
+              <select
+                {...methods.register("SubClassID")}
+                disabled={!sessionId}
+                className={`${selectBaseClass} disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed`}
+                title={!sessionId ? "আগে সেশন নির্বাচন করুন" : ""}
+              >
+                <option value="">সকল সাব-ক্লাস</option>
+                {subClassList.map((sc) => (
+                  <option key={sc.SubClassID} value={sc.SubClassID}>
+                    {sc.SubClass}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* ✅ UserAction Dynamic */}
+            <div className="w-full sm:w-[150px]">
+              <select
+                {...methods.register("UserAction")}
+                className={selectBaseClass}
+              >
+                <option value="">সকল স্ট্যাটাস</option>
+                <option value="1">সক্রিয়</option>
+                <option value="0">নিষ্ক্রিয়</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -455,7 +547,7 @@ const StudentInfo = () => {
                   })
                 ) : (
                   <tr>
-                    <td colSpan="7" className="text-center py-10 text-gray-500 bg-gray-50/50 text-[14px]">
+                    <td colSpan="6" className="text-center py-10 text-gray-500 bg-gray-50/50 text-[14px]">
                       No users found
                     </td>
                   </tr>
@@ -465,13 +557,16 @@ const StudentInfo = () => {
           </div>
         </div>
 
-        {/* Pagination */}
-        <div className="px-6 py-2 flex flex-col sm:flex-row justify-between items-center bg-white gap-4">
-          <div className="text-[13px] text-gray-500 font-normal">
+        {/* ✅ Pagination - center aligned */}
+        <div className="px-6 py-5 flex flex-row items-center justify-center gap-3 bg-white relative">
+
+          {/* 1. Make this absolutely positioned to the left */}
+          <div className="text-[13px] text-gray-500 font-normal text-center absolute left-6">
             Showing <span className="font-semibold text-gray-700">{startRecord}</span> to <span className="font-semibold text-gray-700">{endRecord}</span> of <span className="font-semibold text-gray-700">{totalUsers}</span> users
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* 2. This container will now perfectly center in the middle of the screen */}
+          <div className="flex items-center justify-center gap-4 flex-wrap">
             <select
               className="border border-gray-200 rounded-md bg-white py-1.5 px-3 text-[13px] text-gray-600 focus:outline-none focus:border-blue-500 transition-all cursor-pointer"
               onChange={(e) => {
@@ -485,7 +580,7 @@ const StudentInfo = () => {
               ))}
             </select>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center justify-center gap-1.5">
               <button
                 onClick={() => dispatch(setCurrentPage(currentPage - 1))}
                 disabled={currentPage === 1}

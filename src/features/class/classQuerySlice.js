@@ -33,6 +33,13 @@ export const classSlice = createApi({
       query: () => '/session_wise_student_count',
       providesTags: ["ClassList", "SubClassList", "Academic_Subjects", "SubClasss"],
     }),
+    getSessionWiseStudentCountBySession: builder.query({
+      query: (sessionId) => ({
+        url: '/session_wise_student_count_by_session',
+        params: sessionId ? { sessionId } : {},
+      }),
+      keepUnusedDataFor: 0,
+    }),
     createClass: builder.mutation({
       query: (data) => ({
         url: 'insert_class',
@@ -240,7 +247,10 @@ export const classSlice = createApi({
       providesTags: ['SingleSubClass'],
     }),
     getStudentCountInfo: builder.query({
-      query: () => '/student_count',
+      query: (sessionId) => ({
+        url: '/student_count_by_session',
+        params: sessionId ? { sessionId } : {},
+      }),
     }),
     getExamClassSubjects: builder.query({
       query: ({ SessionID, ExamID }) => ({
@@ -289,5 +299,6 @@ export const {
   useGetStudentCountInfoQuery,
   useGetExamClassSubjectsQuery,
   useDeleteClassMutation,
-  useGetAcademicInfoQuery
+  useGetAcademicInfoQuery,
+  useGetSessionWiseStudentCountBySessionQuery
 } = classSlice;
