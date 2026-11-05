@@ -6,8 +6,7 @@ import { Buffer } from "buffer";
 import ScaledPreview from "../../../components/ScaledPreview";
 
 /* ═══════════════════════════════════════════════════════════
-   LANGUAGE (bn / en / ar)  — শুধু প্রিন্ট/প্রিভিউ শিটের জন্য
-   সাইডবার সবসময় বাংলা (TRANSLATIONS.bn)
+   LANGUAGE
    ═══════════════════════════════════════════════════════════ */
 export const LANGUAGE_OPTIONS = [
     { key: "bn", label: "বাংলা" },
@@ -37,7 +36,7 @@ const TRANSLATIONS = {
         portraitOpt: "পোর্ট্রেট",
         printNote: "প্রিন্ট ডায়ালগে Scale ১০০% বা Custom (যেমন ৯৫) — দুটোতেই লেখা পেজের মাঝখানে থাকবে।",
         color: "রঙ",
-        bwNote: "সাদা কালো মোডে শুধু গ্রেড কলামের রঙ থাকবে।",
+        bwNote: "সাদা কালো মোডে শুধু স্থান কলামের রঙ থাকবে।",
         colorOpt: "রঙিন",
         bwOpt: "সাদা কালো",
         idSerial: "আইডি সিরিয়ালে",
@@ -130,7 +129,6 @@ const TRANSLATIONS = {
 
 const ARABIC_INDIC = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
 
-// ভাষা অনুযায়ী সংখ্যা ফরম্যাটার
 const makeNum = (lang) => (v) => {
     if (v === undefined || v === null) return "";
     const s = String(v);
@@ -216,7 +214,7 @@ const getExtraValue = (studentResult, option) => {
 const isFilled = (v) => v !== undefined && v !== null && v !== "";
 
 /* ═══════════════════════════════════════════════════════════
-   PASS NUMBER (বিষয়ভিত্তিক পাস নাম্বার)
+   PASS NUMBER
    ═══════════════════════════════════════════════════════════ */
 const PASS_FIELDS = [
     "PassNumber", "SubjectPassNumber", "PassMark", "PassMarks",
@@ -264,7 +262,7 @@ const calcTotal = (studentResult, subjects) => {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   DIVISION SCALE (dynamic)
+   DIVISION SCALE
    ═══════════════════════════════════════════════════════════ */
 const buildDivisionScale = (
     conditionAverage,
@@ -403,7 +401,7 @@ export const ORIENTATION_OPTIONS = [
 export const DEFAULT_ORIENTATION = "landscape";
 
 /* ═══════════════════════════════════════════════════════════
-   FONT SCALE (সব টেক্সটের সাইজ কন্ট্রোল)
+   FONT SCALE
    ═══════════════════════════════════════════════════════════ */
 export const FONT_SCALE_MIN = 60;
 export const FONT_SCALE_MAX = 160;
@@ -411,50 +409,56 @@ export const FONT_SCALE_STEP = 5;
 export const DEFAULT_FONT_SCALE = 100;
 const clampFont = (v) => Math.min(FONT_SCALE_MAX, Math.max(FONT_SCALE_MIN, v));
 
+/* ───────────────────────────────────────────────
+   ⚠️ এখানেই মূল ফিক্স — প্রিন্ট মাপ
+   ─────────────────────────────────────────────── */
 const PAPER_MM = {
     A4: { w: 210, h: 297, css: "A4" },
     A5: { w: 148, h: 210, css: "A5" },
     Legal: { w: 215.9, h: 355.6, css: "legal" },
 };
-const PRINT_MARGIN_MM = 5;
+
+// 🔥 সব মার্জিন ০ করে দিচ্ছি — কনটেন্ট নিজেই ভেতরে প্যাডিং নেবে
+const PRINT_MARGIN_MM = 0;
+
 const PX_PER_MM = 96 / 25.4;
 const DESIGN_W_LANDSCAPE = 1080;
 const DESIGN_W_PORTRAIT = 900;
 
 /**
- * পেপার সাইজ + ওরিয়েন্টেশন অনুযায়ী ডিজাইন-পেজের মাপ (px)।
- * Chrome-এর Scale (১০০% / Custom ৯৫ ইত্যাদি) যাই হোক, প্রিন্ট পেজ
- * margin: 0 auto দিয়ে মাঝখানে বসে এবং কখনো প্রিন্টেবল এরিয়ার বাইরে যায় না।
+ * ⚠️ নতুন লজিক:
+ * - print sheet width/height = পেপার সাইজ (মার্জিন বাদে)
+ * - ডিজাইন px → print mm সরাসরি স্কেল
+ * - border rounding এ যেন না কাটে তাই 0.995 ফ্যাক্টর
  */
 const getPageDims = (paper, orientation) => {
     const p = PAPER_MM[paper] || PAPER_MM[DEFAULT_PAPER];
     const isLandscape = orientation !== "portrait";
 
-    const sheetW = isLandscape ? p.h : p.w;
-    const sheetH = isLandscape ? p.w : p.h;
-
-    const printW = sheetW - PRINT_MARGIN_MM * 2;
-    const printH = sheetH - PRINT_MARGIN_MM * 2;
+    const sheetWmm = isLandscape ? p.h : p.w;
+    const sheetHmm = isLandscape ? p.w : p.h;
 
     const W = isLandscape ? DESIGN_W_LANDSCAPE : DESIGN_W_PORTRAIT;
-    const H = Math.floor((W * printH) / printW);
+    const H = Math.floor((W * sheetHmm) / sheetWmm);
 
-    // 0.99 — রাউন্ডিং এর কারণে যেন ফাঁকা/ভাঙা পেজ না হয়
-    const scale = ((printW * PX_PER_MM) / W) * 0.99;
+    // ⚠️ এখানে 0.992 এর বদলে 0.985 — বর্ডার একটু ভেতরে থাকবে, কাটবে না
+    const scale = ((sheetWmm * PX_PER_MM) / W) * 0.985;
 
     return {
         W,
         H,
         scale,
-        outW: Math.floor(W * scale),
-        outH: Math.floor(H * scale),
+        outW: Math.round(W * scale),
+        outH: Math.round(H * scale),
         pageCss: `${p.css} ${isLandscape ? "landscape" : "portrait"}`,
         isLandscape,
+        sheetWmm,
+        sheetHmm,
     };
 };
 
 /* ═══════════════════════════════════════════════════════════
-   PAGE OPTIONS  (প্রতি পেজে হেডার / সিগনেচার)
+   PAGE OPTIONS
    ═══════════════════════════════════════════════════════════ */
 export const DEFAULT_PAGE_OPTIONS = {
     everyPageHeader: true,
@@ -488,16 +492,24 @@ const GRADE_COLORS = [
     { bg: "#fbcfe8", fg: "#9d174d" },
 ];
 const GRADE_FAIL_COLOR = { bg: "#fecaca", fg: "#991b1b" };
+const BW_GRADE = { bg: "#ffffff", fg: "#000000" };
 
 const FAIL_MARK = {
     color: { bg: "#fecaca", fg: "#b91c1c", textDecoration: "none" },
-    bw: { bg: "#d4d4d4", fg: "#000", textDecoration: "underline" },
+    bw: { bg: "#ffffff", fg: "#000", textDecoration: "underline" },
 };
 
 const DIVISION_PALETTE = [
     "#15803d", "#16a34a", "#0d9488", "#2563eb",
     "#d97706", "#ea580c", "#dc2626", "#6b7280",
 ];
+const BW_PALETTE = ["#000", "#000", "#000", "#000", "#000", "#000", "#000", "#000"];
+
+const MEDALS = {
+    1: { bg: "#facc15", fg: "#422006", border: "1.5px solid #a16207" },
+    2: { bg: "#38bdf8", fg: "#ffffff", border: "1.5px solid #0369a1" },
+    3: { bg: "#ea580c", fg: "#ffffff", border: "1.5px solid #9a3412" },
+};
 
 const THEMES = {
     color: {
@@ -512,29 +524,21 @@ const THEMES = {
             border: "#334155", text: "#0f172a", divider: "#cbd5e1",
         },
         palette: DIVISION_PALETTE,
-        medals: {
-            1: { bg: "#facc15", fg: "#422006", border: "1.5px solid #a16207" },
-            2: { bg: "#38bdf8", fg: "#ffffff", border: "1.5px solid #0369a1" },
-            3: { bg: "#ea580c", fg: "#ffffff", border: "1.5px solid #9a3412" },
-        },
+        medals: MEDALS,
     },
     bw: {
         C: {
-            primary: "#000", primaryDark: "#000", primaryMid: "#d4d4d4",
-            primarySoft: "#e5e5e5", primaryFaint: "#f4f4f4", border: "#000",
-            borderSoft: "#737373", text: "#000", muted: "#404040", danger: "#000",
+            primary: "#000", primaryDark: "#000", primaryMid: "#ffffff",
+            primarySoft: "#ffffff", primaryFaint: "#ffffff", border: "#000",
+            borderSoft: "#000", text: "#000", muted: "#000", danger: "#000",
         },
         side: {
-            headBg: "#7f7f7f", headFg: "#ffffff",
+            headBg: "#ffffff", headFg: "#000000",
             bodyBg: "#ffffff", altBg: "#ffffff",
-            border: "#000", text: "#000", divider: "#737373",
+            border: "#000", text: "#000", divider: "#000",
         },
-        palette: DIVISION_PALETTE,
-        medals: {
-            1: { bg: "#facc15", fg: "#422006", border: "1.5px solid #a16207" },
-            2: { bg: "#38bdf8", fg: "#ffffff", border: "1.5px solid #0369a1" },
-            3: { bg: "#ea580c", fg: "#ffffff", border: "1.5px solid #9a3412" },
-        },
+        palette: BW_PALETTE,
+        medals: MEDALS,
     },
 };
 
@@ -554,10 +558,10 @@ const HEADER_GAP = 8;
 const FOOTER_RESERVE = 20;
 const SAFETY = 8;
 const SIGNATURE_H = 130;
-const SIGNATURE_MARGIN = 14; // SignatureSection এর marginTop
+const SIGNATURE_MARGIN = 14;
 const ROW_H_NORMAL = 24;
 const ROW_H_EXTRA = 32;
-const MAX_STRETCH = 1.5; // সারি সর্বোচ্চ কতটা বড় হয়ে ফাঁকা জায়গা ভরবে
+const MAX_STRETCH = 1.5;
 
 const COL = { sl: 36, admission: 46, id: 52, total: 46, gpa: 52, grade: 96, pos: 38 };
 const NAME_W_NORMAL = 190;
@@ -588,9 +592,7 @@ const LS_ORIENTATION = "resultSheetOrientation";
 const LS_FONT_SCALE = "resultSheetFontScale";
 
 const loadText = (key) => {
-    try {
-        return localStorage.getItem(key) || "";
-    } catch (e) { }
+    try { return localStorage.getItem(key) || ""; } catch (e) { }
     return "";
 };
 
@@ -670,7 +672,7 @@ function SignatureSection({ C, fs, dateText, dateLabel, NajemName, PrincipalName
 }
 
 /* ═══════════════════════════════════════════════════════════
-   🧾 MAIN
+   MAIN
    ═══════════════════════════════════════════════════════════ */
 export default function StudentResultSheet({ reportData, query, labels }) {
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
@@ -710,10 +712,8 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     useEffect(() => { localStorage.setItem(LS_ORIENTATION, orientation); }, [orientation]);
     useEffect(() => { localStorage.setItem(LS_FONT_SCALE, String(fontScale)); }, [fontScale]);
 
-    // সব ফন্ট সাইজ এই ফাংশন দিয়ে স্কেল হয় (fs(12) => "12px" × fontScale%)
     const fs = (px) => `${(px * fontScale) / 100}px`;
 
-    /* ── পেজ ডাইমেনশন ── */
     const pageDims = useMemo(() => getPageDims(paperSize, orientation), [paperSize, orientation]);
     const PAGE_W = pageDims.W;
     const PAGE_H = pageDims.H;
@@ -723,11 +723,9 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         (SHORT_TABLE_W - SHORT_COL.id - SHORT_COL.avg - SHORT_COL.division) / 2
     );
 
-    /* ── সাইডবার: সবসময় বাংলা ── */
     const tUI = TRANSLATIONS.bn;
     const numUI = useMemo(() => makeNum("bn"), []);
 
-    /* ── প্রিন্ট/প্রিভিউ শিট: নির্বাচিত ভাষা ── */
     const t = { ...TRANSLATIONS.bn, ...(TRANSLATIONS[lang] || {}) };
     const dir = lang === "ar" ? "rtl" : "ltr";
     const num = useMemo(() => makeNum(lang), [lang]);
@@ -756,7 +754,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         return map;
     }, [reportData]);
 
-    /* ── সর্ট ফ্রন্টএন্ডে ── */
     const transformedData = useMemo(() => {
         if (!reportData) return null;
         const base = {
@@ -804,6 +801,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const theme = THEMES[colorMode] || THEMES.color;
     const C = theme.C;
     const S = theme.side;
+    const isBW = colorMode === "bw";
     const paletteColor = (i) => theme.palette[Math.min(i, theme.palette.length - 1)];
 
     const L = (backendKey, tKey) =>
@@ -903,6 +901,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     }, [divisionList, divisionScale]);
 
     const getGradeColor = (studentResult, avg) => {
+        if (isBW) return BW_GRADE;
         if (isFailDivision(studentResult)) return GRADE_FAIL_COLOR;
         const id = Number(getFirstValue(studentResult?.DivisionID, studentResult?.Division?.ID));
         if (!Number.isNaN(id) && gradeColorMap[id]) return gradeColorMap[id];
@@ -954,11 +953,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     }, [institutionInfo]);
 
     /* ═══════════════════════════════════════════════════════════
-       ⚡ PAGE BREAK / ROW CAPACITY (অটো ফিল)
-       - প্রতিটি পেজের জন্য আলাদা হিসাব: হেডার আছে কিনা, সিগনেচার আছে কিনা
-       - হেডার/সিগনেচার না থাকলে সেই জায়গায় বেশি সারি বসে
-       - ফুল পেজে সারির উচ্চতা সামান্য বাড়িয়ে নিচের ফাঁকা জায়গা ভরে দেওয়া হয়
-       - শেষ পেজে সিগনেচার সবসময় থাকে
+       PAGE BREAK / ROW CAPACITY
        ═══════════════════════════════════════════════════════════ */
     const pagesInfo = useMemo(() => {
         const list = studentResultsDetails;
@@ -993,7 +988,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
             let isLast = false;
 
             if (remaining.length <= capWith) {
-                // শেষ পেজ — সিগনেচার সহ সব ধরবে
                 take = remaining.length;
                 availUsed = availWith;
                 isLast = true;
@@ -1004,7 +998,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 const availNo = getAvail(headerOn, false);
                 const capNo = capOf(availNo);
                 if (remaining.length <= capNo) {
-                    // বাকি সারি সিগনেচার ছাড়া এক পেজে ধরত, কিন্তু শেষ পেজে সিগনেচার লাগবে
                     take = capWith;
                 } else {
                     take = capNo;
@@ -1074,6 +1067,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         ...bg(S.headBg), color: S.headFg, textAlign: "center",
         fontSize: fs(13), fontWeight: 700, height: "26px", lineHeight: "26px",
         flexShrink: 0, whiteSpace: "nowrap", overflow: "hidden",
+        ...(isBW ? { borderBottom: `1px solid ${S.border}` } : {}),
     };
     const sideBox = {
         border: `1px solid ${S.border}`, alignSelf: "stretch",
@@ -1484,6 +1478,8 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         position: "relative", width: `${PAGE_W}px`, height: `${PAGE_H}px`,
         boxSizing: "border-box", overflow: "hidden", background: "#fff", margin: "0 auto",
         fontFamily: SHEET_FONT,
+        // ⚠️ ভেতরে ২px প্যাডিং — বর্ডার একটু ভেতরে থাকবে, প্রিন্টে কাটবে না
+        padding: "2px",
     };
 
     const dynamicColumns = useMemo(
@@ -1568,10 +1564,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         <div className="flex items-start w-full">
             <aside
                 className="hidden lg:flex flex-col w-[300px] shrink-0 bg-white border-r border-slate-200 sticky top-0 print:hidden"
-                style={{
-                    height: "calc(100vh - 100px)",
-                    overflow: "hidden",
-                }}
+                style={{ height: "calc(100vh - 100px)", overflow: "hidden" }}
             >
                 <div className="p-5 border-b border-slate-100 shrink-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -1622,7 +1615,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                 </div>
             </div>
 
-            {/* ── প্রিন্ট পোর্টাল: পেজ মাঝখানে (margin: 0 auto), Chrome Scale যাই হোক ── */}
+            {/* ── প্রিন্ট পোর্টাল ── */}
             {createPortal(
                 <div className="print-portal">
                     {pages.map((students, pageIndex) => (
@@ -1630,8 +1623,11 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                             key={pageIndex}
                             className="print-page-outer"
                             style={{
+                                // ⚠️ outer = print sheet (মার্জিন ০)
                                 width: `${pageDims.outW}px`,
                                 height: `${pageDims.outH}px`,
+                                // ⚠️ overflow visible রাখছি না, hidden রাখছি — 
+                                // কিন্তু ভেতরে স্কেলড ডিজাইন ঠিকমতো বসবে
                                 overflow: "hidden",
                                 margin: "0 auto",
                                 padding: 0,
@@ -1639,6 +1635,8 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                                 breakAfter: pageIndex < pages.length - 1 ? "page" : "auto",
                                 pageBreakInside: "avoid",
                                 breakInside: "avoid",
+                                // ⚠️ নিচের লাইনটি জরুরি — Chrome এক্সট্রা pixel নেয় না
+                                boxSizing: "border-box",
                             }}
                         >
                             <div dir={dir} style={{
@@ -1646,6 +1644,9 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                                 margin: 0,
                                 transform: `scale(${pageDims.scale})`,
                                 transformOrigin: "top left",
+                                // ⚠️ width/height নিশ্চিত করা — স্কেল করার পরেও যেন exact ফিট হয়
+                                width: `${PAGE_W}px`,
+                                height: `${PAGE_H}px`,
                             }}>
                                 {renderPage(pageIndex, students)}
                             </div>
@@ -1658,24 +1659,46 @@ export default function StudentResultSheet({ reportData, query, labels }) {
             <style>{`
         .print-portal { display: none; }
         .print-portal, .print-portal * { font-family: ${SHEET_FONT}; }
+
         @media print {
-          @page { size: ${pageDims.pageCss}; margin: ${PRINT_MARGIN_MM}mm; }
+          /* ⚠️ মার্জিন ০ — কারণ আমরা নিজেরাই ভেতরে padding দিয়েছি */
+          @page { size: ${pageDims.pageCss}; margin: 0 !important; }
+
           html, body {
             margin: 0 !important; padding: 0 !important;
             width: auto !important;
             height: auto !important; overflow: visible !important;
             background: #fff !important;
           }
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            box-sizing: border-box !important;
+          }
           body > *:not(.print-portal) { display: none !important; }
-          .print-portal { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+          .print-portal {
+            display: block !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
           .print-page-outer {
             box-sizing: border-box;
             display: block !important;
             margin: 0 auto !important;
+            /* ⚠️ নিচের দুটি লাইন — border একটু ভেতরে রাখার জন্য */
+            padding: 0 !important;
+            overflow: hidden !important;
+            page-break-after: always;
+            break-after: page;
+          }
+          .print-page-outer:last-child {
+            page-break-after: auto;
+            break-after: auto;
           }
           tr, td, th { page-break-inside: avoid !important; break-inside: avoid !important; }
           .signature-section { page-break-inside: avoid !important; break-inside: avoid !important; }
+          table { border-collapse: collapse !important; }
         }
       `}</style>
         </div>
@@ -1685,7 +1708,6 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 /* ═══════════════════════════════════════════════════════════
    SIDEBAR SUB-COMPONENTS
    ═══════════════════════════════════════════════════════════ */
-
 const SegmentedControl = ({ label, options, value, onChange }) => (
     <div>
         <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{label}</p>
@@ -1721,35 +1743,24 @@ const FontSizeSettings = ({ t, num, value, onChange, onReset }) => {
             <div className="flex items-center justify-between">
                 <p className="text-xs font-bold text-slate-700 leading-tight">{t.fontSize}</p>
                 {value !== DEFAULT_FONT_SCALE && (
-                    <button
-                        type="button"
-                        onClick={onReset}
-                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200"
-                    >
+                    <button type="button" onClick={onReset}
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200">
                         {t.fontReset}
                     </button>
                 )}
             </div>
             <div className="flex items-center gap-2">
-                <button
-                    type="button"
-                    className={btnCls}
+                <button type="button" className={btnCls}
                     disabled={value <= FONT_SCALE_MIN}
-                    onClick={() => onChange(-FONT_SCALE_STEP)}
-                    title="A−"
-                >
+                    onClick={() => onChange(-FONT_SCALE_STEP)} title="A−">
                     <span className="text-[11px]">A</span><span className="text-xs">−</span>
                 </button>
                 <div className="flex-1 text-center text-sm font-bold text-emerald-700 bg-white border border-slate-200 rounded-lg py-1">
                     {num(value)}%
                 </div>
-                <button
-                    type="button"
-                    className={btnCls}
+                <button type="button" className={btnCls}
                     disabled={value >= FONT_SCALE_MAX}
-                    onClick={() => onChange(FONT_SCALE_STEP)}
-                    title="A+"
-                >
+                    onClick={() => onChange(FONT_SCALE_STEP)} title="A+">
                     <span className="text-base">A</span><span className="text-xs">+</span>
                 </button>
             </div>
@@ -1772,11 +1783,8 @@ const HeadingSettings = ({ t, mode, onModeChange, gpaText, onGpaText, gradeText,
             <div className="flex items-center justify-between">
                 <p className="text-xs font-bold text-slate-700 leading-tight">{t.headingTitle}</p>
                 {hasCustom && (
-                    <button
-                        type="button"
-                        onClick={() => { onGpaText(""); onGradeText(""); }}
-                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200"
-                    >
+                    <button type="button" onClick={() => { onGpaText(""); onGradeText(""); }}
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200">
                         {t.resetHeading}
                     </button>
                 )}
@@ -1786,26 +1794,14 @@ const HeadingSettings = ({ t, mode, onModeChange, gpaText, onGpaText, gradeText,
 
             <div>
                 <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{t.gpaTextLabel}</p>
-                <input
-                    type="text"
-                    value={gpaText}
-                    onChange={(e) => onGpaText(e.target.value)}
-                    placeholder={t.gpaTextPlaceholder}
-                    maxLength={30}
-                    className={inputCls}
-                />
+                <input type="text" value={gpaText} onChange={(e) => onGpaText(e.target.value)}
+                    placeholder={t.gpaTextPlaceholder} maxLength={30} className={inputCls} />
             </div>
 
             <div>
                 <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{t.gradeTextLabel}</p>
-                <input
-                    type="text"
-                    value={gradeText}
-                    onChange={(e) => onGradeText(e.target.value)}
-                    placeholder={t.gradeTextPlaceholder}
-                    maxLength={30}
-                    className={inputCls}
-                />
+                <input type="text" value={gradeText} onChange={(e) => onGradeText(e.target.value)}
+                    placeholder={t.gradeTextPlaceholder} maxLength={30} className={inputCls} />
             </div>
 
             <p className="text-[10px] text-slate-400 leading-snug">{t.headingNote}</p>
@@ -1842,13 +1838,7 @@ const PageOptionsSettings = ({ t, value, onToggle }) => {
 };
 
 const PrintSettings = ({
-    t,
-    colorMode,
-    onColorChange,
-    paperSize,
-    onPaperChange,
-    orientation,
-    onOrientationChange,
+    t, colorMode, onColorChange, paperSize, onPaperChange, orientation, onOrientationChange,
 }) => {
     const orientationOptions = [
         { key: "landscape", label: t.landscapeOpt },
@@ -1867,19 +1857,8 @@ const PrintSettings = ({
                 </span>
             </div>
 
-            <SegmentedControl
-                label={t.paperSize}
-                options={PAPER_OPTIONS}
-                value={paperSize}
-                onChange={onPaperChange}
-            />
-
-            <SegmentedControl
-                label={t.orientation}
-                options={orientationOptions}
-                value={orientation}
-                onChange={onOrientationChange}
-            />
+            <SegmentedControl label={t.paperSize} options={PAPER_OPTIONS} value={paperSize} onChange={onPaperChange} />
+            <SegmentedControl label={t.orientation} options={orientationOptions} value={orientation} onChange={onOrientationChange} />
 
             <p className="text-[10px] text-slate-400 leading-snug">{t.printNote}</p>
 
@@ -1909,14 +1888,9 @@ const ResultOptionsSelector = ({ t, value, onSelect }) => {
                             ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-medium"
                             : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
                             }`}>
-                            <input
-                                type="radio"
-                                name={`resultOption-${groupName}`}
-                                value={opt.key}
-                                checked={checked}
-                                onChange={() => onSelect(opt.key)}
-                                className="w-3.5 h-3.5 accent-emerald-600 cursor-pointer"
-                            />
+                            <input type="radio" name={`resultOption-${groupName}`} value={opt.key}
+                                checked={checked} onChange={() => onSelect(opt.key)}
+                                className="w-3.5 h-3.5 accent-emerald-600 cursor-pointer" />
                             <span>{opt.label}</span>
                         </label>
                     );

@@ -35,9 +35,12 @@ const TRANSLATIONS = {
         printSetting: "প্রিন্ট সেটিং",
         orientationLabel: "১. পেজ দিক (Orientation)",
         pageSizeLabel: "২. পেজ সাইজ (Page Size)",
+        colorLabel: "৩. রঙ",
+        colorOpt: "রঙিন",
+        bwOpt: "সাদা কালো",
         monthDays: "মাসের দিন সংখ্যা",
         printNote:
-            "Portrait-এ ৩১ দিনের কলাম সরু হবে, বেশি দিন হলে Landscape ব্যবহার করুন। প্রিন্ট ডায়ালগে Scale ১০০% বা Custom (যেমন ৯৫) — দুটোতেই শিট পেজের মাঝখানে থাকবে।",
+            "Portrait-এ ৩১ দিনের কলাম সরু হবে, বেশি দিন হলে Landscape ব্যবহার করুন। প্রিন্ট ডায়ালগে Scale ১০০% বা Custom (যেমন ৯৫) — দুটোতেই শিট পেজের মাঝখানে থাকবে। সাদা কালো নির্বাচন করলে প্রিন্টে কোনো রঙ থাকবে না (লোগোসহ)।",
         rowsTitle: "খালি রো সেটিং",
         rowsLabel: "খালি শিক্ষার্থী-ব্লক সংখ্যা",
         rowsPlaceholder: "ফাঁকা = কোনো খালি রো নেই",
@@ -51,7 +54,7 @@ const TRANSLATIONS = {
         yearLabelUI: "বছর",
         blankOpt: "— ফাঁকা (হাতে লিখব) —",
         monthYearNote:
-            "মাস ও বছর বাছলে প্রিভিউ ও প্রিন্টে অটো বসে যাবে এবং মাসের দিন সংখ্যাও অটো সেট হবে (লিপ ইয়ার সহ)। ফাঁকা রাখলে ডটেড লাইন থাকবে।",
+            "মাস ও বছর বাছলে প্রিভিউ ও প্রিন্টে অটো বসে যাবে এবং মাসের দিন সংখ্যাও অটো সেট হবে (লিপ ইয়ার সহ)। মাসের নাম বাংলা, English বা العربية — যেকোনো ভাষায় বসানো যাবে। ফাঁকা রাখলে ডটেড লাইন থাকবে।",
         monthYearReset: "রিসেট",
         /* font size */
         fontSize: "ফন্ট সাইজ",
@@ -261,28 +264,28 @@ const PAPER_MM = {
 const PRINT_MARGIN_MM = 5;
 
 /* ═══════════════════════════════════════════════════════════
-   THEME
+   THEME (গ্রে কালার রিমুভ করা হয়েছে)
    ═══════════════════════════════════════════════════════════ */
 const THEMES = {
     color: {
         primary: "#0f766e",
         primaryDark: "#134e4a",
-        headBg: "#ccfbf1",
+        headBg: "#ccfbf1", // হালকা সবুজ/টিল
         headStrongBg: "#99f6e4",
-        zebra: "#f0fdfa",
+        zebra: "#f0fdfa", // খুব হালকা টিল
         border: "#334155",
         text: "#0f172a",
-        muted: "#64748b",
+        muted: "#475569", // গ্রে এর বদলে ডার্ক স্লেট
     },
     bw: {
         primary: "#000",
         primaryDark: "#000",
-        headBg: "#e5e5e5",
-        headStrongBg: "#d4d4d4",
-        zebra: "#fff",
+        headBg: "#ffffff", // সাদা
+        headStrongBg: "#ffffff", // সাদা
+        zebra: "#ffffff", // সাদা
         border: "#000",
         text: "#000",
-        muted: "#404040",
+        muted: "#000",
     },
 };
 
@@ -491,6 +494,7 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
     const yearText = year ? num(year) : "";
 
     const C = THEMES[colorMode] || THEMES.color;
+    const isBW = colorMode === "bw";
     const show = { ...DEFAULT_VISIBLE_COLUMNS, ...(visibleColumns || {}) };
     const days = Number(daysCount) || 31;
     const isLandscape = orientation === "landscape";
@@ -627,6 +631,8 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                                             position: "absolute", insetInlineStart: "6px", top: "0px",
                                             width: "80px", height: "80px", objectFit: "contain",
                                             userSelect: "none", pointerEvents: "none",
+                                            /* ✅ সাদা কালো মোডে লোগোও সাদা-কালো */
+                                            filter: isBW ? "grayscale(1)" : "none",
                                         }}
                                     />
                                     <h1 style={{ margin: 0, fontSize: fs(24), fontWeight: 800, lineHeight: 1.3, color: C.primaryDark }}>
@@ -824,7 +830,7 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                         </div>
                         <h2 className="text-sm font-bold text-slate-800">{tUI.settings}</h2>
                     </div>
-                    <p className="text-xs text-slate-400">{tUI.settingsSub}</p>
+                    <p className="text-xs text-slate-500">{tUI.settingsSub}</p>
                 </div>
 
                 <div className="px-5 py-3 border-b border-slate-100 shrink-0">
@@ -835,8 +841,8 @@ export default function SubjectAttendanceSheet({ reportData, query }) {
                     {settingsPanels}
                 </div>
 
-                <div className="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0">
-                    <p className="text-[10px] text-slate-400 text-center">{tUI.footer}</p>
+                <div className="p-4 border-t border-slate-100 bg-white shrink-0">
+                    <p className="text-[10px] text-slate-500 text-center">{tUI.footer}</p>
                 </div>
             </aside>
 
@@ -924,11 +930,11 @@ const selectCls =
 
 const KitabSelect = ({ t, value, onChange }) => (
     <div>
-        <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">{t.kitabLabel}</label>
+        <label className="block text-[11px] font-semibold text-slate-600 mb-1.5">{t.kitabLabel}</label>
         <select
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="w-full px-3 py-2 text-sm font-semibold text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all cursor-pointer"
+            className="w-full px-3 py-2 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all cursor-pointer"
         >
             {KITAB_OPTIONS.map((opt) => (
                 <option key={opt.key} value={opt.key}>
@@ -946,14 +952,14 @@ const MonthYearSettings = ({
     year, onYearChange,
     onReset,
 }) => (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-3">
+    <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-3">
         <div className="flex items-center justify-between">
             <p className="text-xs font-bold text-slate-700 leading-tight">{t.monthYearTitle}</p>
             {(month || year) && (
                 <button
                     type="button"
                     onClick={onReset}
-                    className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200"
+                    className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200"
                 >
                     {t.monthYearReset}
                 </button>
@@ -968,7 +974,7 @@ const MonthYearSettings = ({
         />
 
         <div>
-            <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">{t.monthLabelUI}</label>
+            <label className="block text-[11px] font-semibold text-slate-600 mb-1.5">{t.monthLabelUI}</label>
             <select
                 value={month}
                 onChange={(e) => onMonthChange(e.target.value)}
@@ -983,7 +989,7 @@ const MonthYearSettings = ({
         </div>
 
         <div>
-            <label className="block text-[11px] font-semibold text-slate-500 mb-1.5">{t.yearLabelUI}</label>
+            <label className="block text-[11px] font-semibold text-slate-600 mb-1.5">{t.yearLabelUI}</label>
             <select
                 value={year}
                 onChange={(e) => onYearChange(e.target.value)}
@@ -996,7 +1002,7 @@ const MonthYearSettings = ({
             </select>
         </div>
 
-        <p className="text-[10px] text-slate-400 leading-snug">{t.monthYearNote}</p>
+        <p className="text-[10px] text-slate-500 leading-snug">{t.monthYearNote}</p>
     </div>
 );
 
@@ -1006,14 +1012,14 @@ const FontSizeSettings = ({ t, num, value, onChange, onReset }) => {
         "hover:bg-emerald-50 hover:border-emerald-200 disabled:opacity-40 disabled:cursor-not-allowed " +
         "transition-colors flex items-center justify-center select-none";
     return (
-        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+        <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
             <div className="flex items-center justify-between">
                 <p className="text-xs font-bold text-slate-700 leading-tight">{t.fontSize}</p>
                 {value !== DEFAULT_FONT_SCALE && (
                     <button
                         type="button"
                         onClick={onReset}
-                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200"
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200"
                     >
                         {t.fontReset}
                     </button>
@@ -1042,7 +1048,7 @@ const FontSizeSettings = ({ t, num, value, onChange, onReset }) => {
                     <span className="text-base">A</span><span className="text-xs">+</span>
                 </button>
             </div>
-            <p className="text-[10px] text-slate-400 leading-snug">{t.fontSizeNote}</p>
+            <p className="text-[10px] text-slate-500 leading-snug">{t.fontSizeNote}</p>
         </div>
     );
 };
@@ -1053,10 +1059,10 @@ const PreviewInfo = ({ t, num, count, days, subjects }) => (
         <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-md px-2 py-0.5 shrink-0">
             {num(count)} {t.people}
         </span>
-        <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 rounded-md px-2 py-0.5 shrink-0">
+        <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 rounded-md px-2 py-0.5 shrink-0">
             {num(days)} {t.daysUnit}
         </span>
-        <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 rounded-md px-2 py-0.5 shrink-0">
+        <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 rounded-md px-2 py-0.5 shrink-0">
             {num(subjects)} {t.subjectsUnit}
         </span>
     </div>
@@ -1064,7 +1070,7 @@ const PreviewInfo = ({ t, num, count, days, subjects }) => (
 
 const SegmentedControl = ({ label, options, value, onChange }) => (
     <div>
-        <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{label}</p>
+        <p className="text-[11px] font-semibold text-slate-600 mb-1.5">{label}</p>
         <div className="grid grid-flow-col auto-cols-fr gap-1 p-1 rounded-lg bg-slate-100">
             {options.map((opt) => {
                 const active = value === opt.key;
@@ -1072,7 +1078,7 @@ const SegmentedControl = ({ label, options, value, onChange }) => (
                     <button key={opt.key} type="button" onClick={() => onChange(opt.key)}
                         className={`px-2 py-1.5 rounded-md text-xs font-semibold transition-all ${active
                             ? "bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-200"
-                            : "text-slate-500 hover:text-slate-700"
+                            : "text-slate-600 hover:text-slate-800"
                             }`}>{opt.label}</button>
                 );
             })}
@@ -1081,32 +1087,32 @@ const SegmentedControl = ({ label, options, value, onChange }) => (
 );
 
 const LanguageSelector = ({ t, value, onChange }) => (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+    <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
         <SegmentedControl label={t.printLanguage} options={LANGUAGE_OPTIONS} value={value} onChange={onChange} />
-        <p className="text-[10px] text-slate-400 leading-snug">{t.printLanguageNote}</p>
+        <p className="text-[10px] text-slate-500 leading-snug">{t.printLanguageNote}</p>
     </div>
 );
 
 const RowsSettings = ({ t, value, onChange, onReset }) => {
     const inputCls =
         "w-full px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white text-xs text-slate-700 " +
-        "placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300";
+        "placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-300";
     return (
-        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+        <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-2">
             <div className="flex items-center justify-between">
                 <p className="text-xs font-bold text-slate-700 leading-tight">{t.rowsTitle}</p>
                 {String(value).trim() !== "" && (
                     <button
                         type="button"
                         onClick={onReset}
-                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200"
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200"
                     >
                         {t.rowsReset}
                     </button>
                 )}
             </div>
             <div>
-                <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{t.rowsLabel}</p>
+                <p className="text-[11px] font-semibold text-slate-600 mb-1.5">{t.rowsLabel}</p>
                 <input
                     type="text"
                     inputMode="numeric"
@@ -1116,7 +1122,7 @@ const RowsSettings = ({ t, value, onChange, onReset }) => {
                     className={inputCls}
                 />
             </div>
-            <p className="text-[10px] text-slate-400 leading-snug">{t.rowsNote}</p>
+            <p className="text-[10px] text-slate-500 leading-snug">{t.rowsNote}</p>
         </div>
     );
 };
@@ -1128,28 +1134,37 @@ const PrintSettings = ({
     pageSize, onPageSizeChange,
     daysCount, onDaysChange,
 }) => (
-    <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-3">
+    <div className="rounded-xl border border-slate-200 bg-white p-3 space-y-3">
         <div className="flex items-center justify-between">
             <p className="text-xs font-bold text-slate-700 leading-tight">{t.printSetting}</p>
         </div>
 
         <SegmentedControl label={t.orientationLabel} options={ORIENTATION_OPTIONS} value={orientation} onChange={onOrientationChange} />
         <SegmentedControl label={t.pageSizeLabel} options={PAGE_SIZE_OPTIONS} value={pageSize} onChange={onPageSizeChange} />
-        {/* <SegmentedControl label="৩. রঙ" options={COLOR_OPTIONS} value={colorMode} onChange={onColorChange} /> */}
+        {/* ✅ রঙিন / সাদা কালো */}
+        <SegmentedControl
+            label={t.colorLabel}
+            options={[
+                { key: "color", label: t.colorOpt },
+                { key: "bw", label: t.bwOpt },
+            ]}
+            value={colorMode}
+            onChange={onColorChange}
+        />
         <SegmentedControl label={t.monthDays} options={DAYS_OPTIONS} value={daysCount} onChange={onDaysChange} />
 
-        <p className="text-[10px] text-slate-400 leading-snug">{t.printNote}</p>
+        <p className="text-[10px] text-slate-500 leading-snug">{t.printNote}</p>
     </div>
 );
 
 const ColumnSelector = ({ t, num, value, onToggle, onSetAll, columns = ATTENDANCE_COLUMNS }) => {
     const checkedCount = columns.filter((c) => value[c.key]).length;
     return (
-        <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3">
+        <div className="rounded-xl border border-slate-200 bg-white p-3">
             <div className="flex items-center justify-between mb-2">
                 <div>
                     <p className="text-xs font-bold text-slate-700 leading-tight">{t.columnSelect}</p>
-                    <p className="text-[10px] text-slate-400 leading-tight mt-0.5">
+                    <p className="text-[10px] text-slate-500 leading-tight mt-0.5">
                         {t.selectedCount(num(checkedCount), num(columns.length))}
                     </p>
                 </div>
@@ -1159,7 +1174,7 @@ const ColumnSelector = ({ t, num, value, onToggle, onSetAll, columns = ATTENDANC
                         {t.all}
                     </button>
                     <button type="button" onClick={() => onSetAll(false)}
-                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200">
+                        className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200">
                         {t.none}
                     </button>
                 </div>
@@ -1170,7 +1185,7 @@ const ColumnSelector = ({ t, num, value, onToggle, onSetAll, columns = ATTENDANC
                     return (
                         <label key={col.key} className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border cursor-pointer select-none text-xs transition-colors ${checked
                             ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-medium"
-                            : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                             }`}>
                             <input type="checkbox" checked={checked} onChange={() => onToggle(col.key)}
                                 className="w-3.5 h-3.5 accent-emerald-600 cursor-pointer" />

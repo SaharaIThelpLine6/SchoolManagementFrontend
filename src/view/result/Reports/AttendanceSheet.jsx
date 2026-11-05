@@ -1,12 +1,12 @@
 import { useMemo, useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../../utils/conveter";
+import { createPortal } from "react-dom";
 import { Buffer } from "buffer";
 import { useGetExamRoutineSubjectListQuery, useGetTeacherSubjectInfoQuery } from "../../../features/result/resultSilce";
 
 /* ═══════════════════════════════════════════════════════════
-   LANGUAGE (bn / en / ar) — শুধু প্রিন্ট/প্রিভিউ শিটের জন্য
-   সাইডবার সবসময় বাংলা (TRANSLATIONS.bn)
+   LANGUAGE (bn / en / ar)
    ═══════════════════════════════════════════════════════════ */
 export const LANGUAGE_OPTIONS = [
     { key: "bn", label: "বাংলা" },
@@ -17,7 +17,6 @@ export const DEFAULT_LANGUAGE = "bn";
 
 const TRANSLATIONS = {
     bn: {
-        /* sidebar */
         settings: "সেটিং",
         settingsSub: "হাজিরা খাতার কলাম ও প্রিন্ট অপশন",
         footer: "© Result Report Generator",
@@ -35,18 +34,18 @@ const TRANSLATIONS = {
         pageDirection: "পেজ দিক",
         paperSize: "কাগজের সাইজ",
         monthDays: "মাসের দিন সংখ্যা",
-        printNote:
-            "Portrait-এ ৩১ দিনের কলাম সরু হবে, বেশি দিন হলে Landscape ব্যবহার করুন। প্রিন্ট ডায়ালগে Paper size একই (A4/Legal) এবং Margins \"Default\" রাখুন।",
+        colorLabel: "রঙ",
+        colorOpt: "রঙিন",
+        bwOpt: "সাদা কালো",
+        printNote: "Portrait-এ ৩১ দিনের কলাম সরু হবে, বেশি দিন হলে Landscape ব্যবহার করুন। প্রিন্ট ডায়ালগে Paper size একই (A4/Legal) এবং Margins \"Default\" রাখুন।",
         scaleLabel: "স্কেল (%)",
         scalePlaceholder: "৯৫",
-        scaleNote:
-            "৫০ থেকে ১০০ এর মধ্যে দিন। শিট পেজের ঠিক মাঝখানে বসবে এবং Landscape/Portrait দুটোতেই পেজ ভাঙবে না। প্রিন্ট ডায়ালগে Scale \"Default/100\" রাখুন।",
+        scaleNote: "৫০ থেকে ১০০ এর মধ্যে দিন। শিট পেজের ঠিক মাঝখানে বসবে এবং Landscape/Portrait দুটোতেই পেজ ভাঙবে না। প্রিন্ট ডায়ালগে Scale \"Default/100\" রাখুন।",
         rowsTitle: "খালি রো সেটিং",
         rowsLabel: "খালি রো সংখ্যা",
         rowsPlaceholder: "ফাঁকা = পুরো পেজ অটো",
         rowsReset: "অটো",
-        rowsNote:
-            "ফাঁকা রাখলে পেজ খালি রো দিয়ে ভরবে। সংখ্যা (যেমন ১ বা ৫) দিলে শিক্ষার্থীদের পরে ঠিক ততটি খালি রো প্রিভিউ ও প্রিন্টে আসবে। ০ দিলে কোনো খালি রো থাকবে না।",
+        rowsNote: "ফাঁকা রাখলে পেজ খালি রো দিয়ে ভরবে। সংখ্যা (যেমন ১ বা ৫) দিলে শিক্ষার্থীদের পরে ঠিক ততটি খালি রো প্রিভিউ ও প্রিন্টে আসবে। ০ দিলে কোনো খালি রো থাকবে না।",
         fontTitle: "ফন্ট সাইজ",
         fontSmaller: "ছোট",
         fontBigger: "বড়",
@@ -64,9 +63,7 @@ const TRANSLATIONS = {
         yearPlaceholder: "— বছর —",
         hourLabel: "ঘন্টা",
         hourPlaceholder: "যেমন: ১ম ঘন্টা",
-        infoNote:
-            "কিতাব নির্বাচন করলে কিতাবের নাম ও শিক্ষকের নাম প্রিভিউ ও প্রিন্টে নিজে থেকে বসবে। মাস প্রিন্টের ভাষায় দেখাবে।",
-        /* sheet */
+        infoNote: "কিতাব নির্বাচন করলে কিতাবের নাম ও শিক্ষকের নাম প্রিভিউ ও প্রিন্টে নিজে থেকে বসবে। মাস প্রিন্টের ভাষায় দেখাবে।",
         title: "দৈনন্দিন শিক্ষার্থীর হাজিরা খাতা",
         classLabel: "শ্রেণী",
         bookName: "কিতাবের নাম :",
@@ -115,7 +112,6 @@ const TRANSLATIONS = {
 
 const ARABIC_INDIC = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
 
-// ভাষা অনুযায়ী সংখ্যা ফরম্যাটার
 const makeNum = (lang) => (v) => {
     if (v === undefined || v === null) return "";
     const s = String(v);
@@ -125,7 +121,7 @@ const makeNum = (lang) => (v) => {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   MONTH / YEAR
+   MONTH NAMES (৩ ভাষায়)
    ═══════════════════════════════════════════════════════════ */
 const MONTH_NAMES = {
     bn: ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"],
@@ -140,20 +136,11 @@ const YEAR_LIST = Array.from({ length: YEAR_TO - YEAR_FROM + 1 }, (_, i) => Stri
 /* ═══════════════════════════════════════════════════════════
    HELPERS
    ═══════════════════════════════════════════════════════════ */
-const bg = (color) => ({
-    backgroundColor: color,
-    boxShadow: `inset 0 0 0 1000px ${color}`,
-});
-
-const isFilled = (v) => v !== undefined && v !== null && v !== "";
-
-// খালি স্ট্রিং/স্পেস বাদ দিয়ে প্রথম আসল টেক্সট
 const pickText = (...values) => {
     const found = values.find((v) => typeof v === "string" && v.trim() !== "");
     return found ? found.trim() : "";
 };
 
-// ভাষা অনুযায়ী অগ্রাধিকার: নির্বাচিত ভাষা আগে, না থাকলে বাংলা, তারপর বাকিগুলো
 const pickByLang = (lang, bnVal, enVal, arVal) => {
     if (lang === "ar") return pickText(arVal, bnVal, enVal);
     if (lang === "en") return pickText(enVal, bnVal, arVal);
@@ -201,9 +188,7 @@ const calcTotal = (studentResult, subjects) => {
     return sum;
 };
 
-/* ✅ Fallback logo if institution logo is not available */
-const EXAMPLE_LOGO =
-    "https://images.seeklogo.com/logo-png/42/1/madrasha-logo-png_seeklogo-424804.png";
+const EXAMPLE_LOGO = "https://images.seeklogo.com/logo-png/42/1/madrasha-logo-png_seeklogo-424804.png";
 
 /* ═══════════════════════════════════════════════════════════
    OPTIONS
@@ -217,9 +202,7 @@ export const ATTENDANCE_COLUMNS = [
     { key: "absent", label: "অনুপস্থিত" },
 ];
 
-export const DEFAULT_VISIBLE_COLUMNS = Object.fromEntries(
-    ATTENDANCE_COLUMNS.map((c) => [c.key, true])
-);
+export const DEFAULT_VISIBLE_COLUMNS = Object.fromEntries(ATTENDANCE_COLUMNS.map((c) => [c.key, true]));
 
 export const COLOR_OPTIONS = [
     { key: "color", label: "রঙিন" },
@@ -233,7 +216,6 @@ export const ORIENTATION_OPTIONS = [
 ];
 export const DEFAULT_ORIENTATION = "landscape";
 
-/* ✅ Paper size (mm, portrait dimensions) */
 export const PAPER_OPTIONS = [
     { key: "A4", label: "A4" },
     { key: "Legal", label: "Legal" },
@@ -253,14 +235,9 @@ export const DAYS_OPTIONS = [
 export const DEFAULT_DAYS = "31";
 
 const MAX_CUSTOM_ROWS = 500;
-
-/* ✅ Scale (%) — পেজের ভেতরে শিট ছোট করে মাঝখানে বসানো */
 const DEFAULT_SCALE = 95;
 const MIN_SCALE = 50;
 const MAX_SCALE = 100;
-const SCALE_PRESETS = [90, 95, 100];
-
-/* ✅ Font size (%) */
 const DEFAULT_FONT = 100;
 const MIN_FONT = 50;
 const MAX_FONT = 150;
@@ -271,7 +248,8 @@ const FONT_STEP = 5;
    ═══════════════════════════════════════════════════════════ */
 const PX_PER_MM = 96 / 25.4;
 const PAGE_MARGIN_MM = 5;
-const SAFETY_MM = 2;
+// ✅ আগে ২mm ছিল — এত কম slack এ ব্রাউজারের rounding এ extra ফাঁকা পেজ আসত। এখন ৪mm।
+const SAFETY_MM = 4;
 const THEAD_PX = 48;
 const ROW_MIN_PX = 30;
 const TITLE_FALLBACK_PX = 225;
@@ -289,16 +267,20 @@ const THEMES = {
         border: "#334155",
         text: "#0f172a",
         muted: "#64748b",
+        infoBorder: "#334155",
+        dotted: "#334155",
     },
     bw: {
         primary: "#000",
         primaryDark: "#000",
-        headBg: "#e5e5e5",
-        headStrongBg: "#d4d4d4",
-        zebra: "#fff",
+        headBg: "#ffffff",
+        headStrongBg: "#f3f4f6",
+        zebra: "#ffffff",
         border: "#000",
         text: "#000",
         muted: "#404040",
+        infoBorder: "#000",
+        dotted: "#000",
     },
 };
 
@@ -335,9 +317,7 @@ const loadStr = (key, options, fallback) => {
 };
 
 const loadText = (key) => {
-    try {
-        return localStorage.getItem(key) || "";
-    } catch (e) { }
+    try { return localStorage.getItem(key) || ""; } catch (e) { }
     return "";
 };
 
@@ -366,16 +346,16 @@ const chunk = (arr, size) => {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   FILL-IN FIELD (label + value on dotted line)
+   FILL-IN FIELD
    ═══════════════════════════════════════════════════════════ */
-function FillField({ label, value, flex = 1, color, fs }) {
+function FillField({ label, value, flex = 1, color, dottedColor, fs }) {
     return (
         <div style={{ flex, display: "flex", alignItems: "flex-end", gap: "4px", minWidth: 0 }}>
             <span style={{ fontSize: fs(15), fontWeight: 600, whiteSpace: "nowrap", color }}>{label}</span>
             <span style={{
                 flex: 1, minWidth: "20px", minHeight: fs(16),
                 padding: "0 4px",
-                borderBottom: `1.5px dotted ${color}`,
+                borderBottom: `1.5px dotted ${dottedColor || color}`,
                 fontSize: fs(15), fontWeight: 700, lineHeight: 1.25,
                 whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
                 color,
@@ -391,46 +371,32 @@ function FillField({ label, value, flex = 1, color, fs }) {
    ═══════════════════════════════════════════════════════════ */
 export default function AttendanceSheet({ reportData, query }) {
 
-    /* ✅ sidebar state */
     const [visibleColumns, setVisibleColumns] = useState(() => loadObj(LS_VISIBLE, DEFAULT_VISIBLE_COLUMNS));
     const [colorMode, setColorMode] = useState(() => loadStr(LS_COLOR, COLOR_OPTIONS, DEFAULT_COLOR_MODE));
     const [orientation, setOrientation] = useState(() => loadStr(LS_ORIENTATION, ORIENTATION_OPTIONS, DEFAULT_ORIENTATION));
     const [daysCount, setDaysCount] = useState(() => loadStr(LS_DAYS, DAYS_OPTIONS, DEFAULT_DAYS));
     const [paper, setPaper] = useState(() => loadStr(LS_PAPER, PAPER_OPTIONS, DEFAULT_PAPER));
     const [lang, setLang] = useState(() => loadStr(LS_LANG, LANGUAGE_OPTIONS, DEFAULT_LANGUAGE));
-    /* ✅ custom খালি রো সংখ্যা ("" = অটো / পুরো পেজ ভরবে) */
     const [rowsInput, setRowsInput] = useState(() => loadText(LS_ROWS));
-    /* ✅ scale ইনপুট (স্ট্রিং, ফাঁকা হলে ডিফল্ট ৯৫) */
     const [scaleInput, setScaleInput] = useState(() => {
         const s = loadText(LS_SCALE);
         return s === "" ? String(DEFAULT_SCALE) : s;
     });
-    /* ✅ ফন্ট সাইজ % */
     const [fontPct, setFontPct] = useState(() => loadNum(LS_FONT, DEFAULT_FONT, MIN_FONT, MAX_FONT));
-    /* ✅ মাস / বছর / ঘন্টা */
     const [month, setMonth] = useState(loadMonth);
     const [year, setYear] = useState(loadYear);
     const [hourInput, setHourInput] = useState(() => loadText(LS_HOUR));
-    /* ✅ নির্বাচিত কিতাব (SubjectID স্ট্রিং) */
     const [subjectId, setSubjectId] = useState("");
 
     const SessionID = reportData?.conditionAverage?.SessionID;
     const ExamID = reportData?.conditionAverage?.ExamID;
     const SubClassID = reportData?.conditionAverage?.SubClassID;
 
-    /* ✅ কিতাবের লিস্ট */
     const { data: examRoutineSubjectData } = useGetExamRoutineSubjectListQuery(
-        {
-            session_id: SessionID,
-            exam_id: ExamID,
-            subclass_id: SubClassID,
-        },
-        {
-            skip: !SessionID || !ExamID || !SubClassID,
-        }
+        { session_id: SessionID, exam_id: ExamID, subclass_id: SubClassID },
+        { skip: !SessionID || !ExamID || !SubClassID }
     );
 
-    /* ডুপ্লিকেট বাদ দিয়ে ইউনিক কিতাব লিস্ট (ডাটা না থাকলে খালি) */
     const subjectList = useMemo(() => {
         const raw = Array.isArray(examRoutineSubjectData?.data) ? examRoutineSubjectData.data : [];
         const seen = new Set();
@@ -445,21 +411,12 @@ export default function AttendanceSheet({ reportData, query }) {
         return out;
     }, [examRoutineSubjectData]);
 
-    /* নির্বাচিত আইডি লিস্টে না থাকলে (ক্লাস/সেশন বদলালে) বাতিল ধরা হবে */
     const selectedSubjectId = subjectList.some((s) => s.value === subjectId) ? subjectId : "";
     const SubjectID = selectedSubjectId ? Number(selectedSubjectId) : undefined;
 
-    /* ✅ শিক্ষকের তথ্য (currentData = আগের কিতাবের পুরনো ডাটা দেখাবে না) */
     const { currentData: teacherSubjectData, isFetching: teacherLoading } = useGetTeacherSubjectInfoQuery(
-        {
-            session_id: SessionID,
-            exam_id: ExamID,
-            subclass_id: SubClassID,
-            subject_id: SubjectID,
-        },
-        {
-            skip: !SessionID || !ExamID || !SubClassID || !SubjectID,
-        }
+        { session_id: SessionID, exam_id: ExamID, subclass_id: SubClassID, subject_id: SubjectID },
+        { skip: !SessionID || !ExamID || !SubClassID || !SubjectID }
     );
 
     const teacherRows = Array.isArray(teacherSubjectData?.data) ? teacherSubjectData.data : [];
@@ -482,33 +439,29 @@ export default function AttendanceSheet({ reportData, query }) {
     const conditionAverage = reportData?.conditionAverage || {};
     const subjectPassNumbers = reportData?.subjectPassNumbers || [];
 
-    /* ═══════════════════════════════════════════════════════════
-       ⚡ STUDENT RESULTS SORTED BY NUMBER (নাম্বার অনুসারে)
-       - মোট নম্বর বেশি থেকে কম
-       - সমান হলে AdmissionSerial অনুসারে
-       ═══════════════════════════════════════════════════════════ */
     const studentResultsDetails = useMemo(() => {
-        const all = Array.isArray(reportData?.studentResults)
-            ? reportData.studentResults
-            : [];
-
+        const all = Array.isArray(reportData?.studentResults) ? reportData.studentResults : [];
         const serialOf = (s) => Number(s?.User?.Admission?.[0]?.AdmissionSerial) || 0;
-
         const totalOf = (s) => {
             const n = calcTotal(s, subjectPassNumbers);
             return Number.isNaN(n) ? -Infinity : n;
         };
-
-        return [...all].sort(
-            (a, b) => totalOf(b) - totalOf(a) || serialOf(a) - serialOf(b)
-        );
+        return [...all].sort((a, b) => totalOf(b) - totalOf(a) || serialOf(a) - serialOf(b));
     }, [reportData?.studentResults, subjectPassNumbers]);
 
-    /* ✅ measured height of the title block */
+    // ✅ প্রিন্টের জন্য আলাদা container (document.body এর সরাসরি child) — parent layout এর কোনো প্রভাব থাকবে না
+    const [printRoot, setPrintRoot] = useState(null);
+    useEffect(() => {
+        const el = document.createElement("div");
+        el.className = "print-portal";
+        document.body.appendChild(el);
+        setPrintRoot(el);
+        return () => { document.body.removeChild(el); };
+    }, []);
+
     const [titleH, setTitleH] = useState(TITLE_FALLBACK_PX);
     const titleRef = useRef(null);
 
-    /* ✅ localStorage save */
     useEffect(() => { localStorage.setItem(LS_VISIBLE, JSON.stringify(visibleColumns)); }, [visibleColumns]);
     useEffect(() => { localStorage.setItem(LS_COLOR, colorMode); }, [colorMode]);
     useEffect(() => { localStorage.setItem(LS_ORIENTATION, orientation); }, [orientation]);
@@ -522,10 +475,8 @@ export default function AttendanceSheet({ reportData, query }) {
     useEffect(() => { localStorage.setItem(LS_YEAR, year); }, [year]);
     useEffect(() => { localStorage.setItem(LS_HOUR, hourInput); }, [hourInput]);
 
-    /* ✅ Dynamic Logo Fetching */
     useEffect(() => {
         const logoData = institutionInfo?.InstitutionLogo || institutionInfo?.Logo || institutionInfo?.InstitutionImage;
-
         if (logoData?.data) {
             const buf = Buffer.from(logoData.data);
             setInstitutionLogo(`data:image/png;base64,${buf.toString("base64")}`);
@@ -538,11 +489,9 @@ export default function AttendanceSheet({ reportData, query }) {
         }
     }, [institutionInfo]);
 
-    /* ── সাইডবার: সবসময় বাংলা ── */
     const tUI = TRANSLATIONS.bn;
     const numUI = useMemo(() => makeNum("bn"), []);
 
-    /* ── প্রিন্ট/প্রিভিউ শিট: নির্বাচিত ভাষা ── */
     const t = { ...TRANSLATIONS.bn, ...(TRANSLATIONS[lang] || {}) };
     const dir = lang === "ar" ? "rtl" : "ltr";
     const num = useMemo(() => makeNum(lang), [lang]);
@@ -553,7 +502,6 @@ export default function AttendanceSheet({ reportData, query }) {
     const sessionName = lang === "ar" ? num(sessionNameRaw) : sessionNameRaw;
     const className = getClassName(conditionAverage?.SubClass, lang);
 
-    /* শিটে দেখানো মাস/বছর (প্রিন্টের ভাষা অনুযায়ী) */
     const monthText = month !== "" ? (MONTH_NAMES[lang] || MONTH_NAMES.bn)[Number(month)] : "";
     const yearText = year !== "" ? num(year) : "";
 
@@ -562,7 +510,6 @@ export default function AttendanceSheet({ reportData, query }) {
     const days = Number(daysCount) || 31;
     const isLandscape = orientation === "landscape";
 
-    /* ✅ scale (0.5 – 1) */
     const scalePct = useMemo(() => {
         const n = parseInt(scaleInput, 10);
         if (!Number.isFinite(n)) return DEFAULT_SCALE;
@@ -570,37 +517,29 @@ export default function AttendanceSheet({ reportData, query }) {
     }, [scaleInput]);
     const scale = scalePct / 100;
 
-    /* ✅ ফন্ট স্কেল */
     const f = fontPct / 100;
     const fs = (px) => `${+(px * f).toFixed(2)}px`;
-    const grow = Math.max(1, f); // শুধু বড় করলে উচ্চতা/প্রস্থ বাড়বে
+    const grow = Math.max(1, f);
     const theadPx = Math.round(THEAD_PX * grow);
     const rowMinPx = Math.round(ROW_MIN_PX * grow);
     const w = (px) => `${Math.round(px * grow)}px`;
 
     const visibleColCount =
-        (show.sl ? 1 : 0) +
-        (show.id ? 1 : 0) +
-        (show.name ? 1 : 0) +
-        (show.days ? days : 0) +
-        (show.present ? 1 : 0) +
-        (show.absent ? 1 : 0);
+        (show.sl ? 1 : 0) + (show.id ? 1 : 0) + (show.name ? 1 : 0) +
+        (show.days ? days : 0) + (show.present ? 1 : 0) + (show.absent ? 1 : 0);
 
-    /* custom রো: null = অটো, সংখ্যা = শিক্ষার্থীর পরে ঠিক এতগুলো খালি রো */
     const customRows = useMemo(() => {
         const s = String(rowsInput ?? "").trim();
         if (s === "") return null;
         const n = parseInt(s, 10);
-        if (!Number.isFinite(n) || n < 0) return null;
+        if (!Number.isFinite(n) || n <= 0) return null;
         return Math.min(n, MAX_CUSTOM_ROWS);
     }, [rowsInput]);
 
-    /* sidebar handlers */
     const toggleColumn = (key) => setVisibleColumns((p) => ({ ...p, [key]: !p[key] }));
     const setAllColumns = (value) =>
         setVisibleColumns(Object.fromEntries(ATTENDANCE_COLUMNS.map((c) => [c.key, value])));
     const handleRowsChange = (v) => {
-        // শুধু অঙ্ক রাখো
         const cleaned = String(v).replace(/[^\d]/g, "").slice(0, 3);
         setRowsInput(cleaned);
     };
@@ -622,49 +561,58 @@ export default function AttendanceSheet({ reportData, query }) {
     const pageHmm = isLandscape ? paperDef.w : paperDef.h;
 
     const sheetWidthMm = +(pageWmm - PAGE_MARGIN_MM * 2).toFixed(1);
-    const pageHeightPx = (pageHmm - PAGE_MARGIN_MM * 2 - SAFETY_MM) * PX_PER_MM;
+    // ✅ mm এ রাখা হলো, প্রিন্টে একই মান CSS এ ব্যবহার হবে
+    const sheetHeightMm = +(pageHmm - PAGE_MARGIN_MM * 2 - SAFETY_MM).toFixed(1);
+    const pageHeightPx = sheetHeightMm * PX_PER_MM;
 
-    /* space left for student rows on ONE page */
     const rowsAreaPx = pageHeightPx - titleH - theadPx - 4;
-    const rowsPerPage = Math.max(1, Math.floor(rowsAreaPx / rowMinPx));
-    /* stretch rows slightly so the grid ends exactly at the bottom of the page */
-    const rowHeightPx = Math.floor((rowsAreaPx / rowsPerPage) * 100) / 100;
+    const maxRowsFit = Math.max(1, Math.floor(rowsAreaPx / rowMinPx));
 
-    /* split students into pages */
+    /* ✅ পেজ ভাঙার লজিক */
     const pages = useMemo(() => {
-        /* ── custom মোড: শিক্ষার্থী + ঠিক N টি খালি রো, পেজ প্যাড হবে না ── */
+        const studentCount = studentResultsDetails.length;
+        if (studentCount === 0 && customRows === null) return [[]];
+
         if (customRows !== null) {
             const items = [
                 ...studentResultsDetails.map((student) => student),
                 ...Array.from({ length: customRows }, () => null),
             ];
-            if (items.length === 0) return [[]];
-            return chunk(items, rowsPerPage).map((list, pageIndex) =>
+            return chunk(items, maxRowsFit).map((list, pageIndex) =>
                 list.map((student, i) => ({
                     student,
-                    index: pageIndex * rowsPerPage + i,
+                    index: pageIndex * maxRowsFit + i,
                 }))
             );
         }
 
-        /* ── অটো মোড: প্রতি পেজ খালি রো দিয়ে ভরবে ── */
-        const chunks = studentResultsDetails.length
-            ? chunk(studentResultsDetails, rowsPerPage)
-            : [[]];
+        const chunks = chunk(studentResultsDetails, maxRowsFit);
+        const totalPages = chunks.length;
+
         return chunks.map((list, pageIndex) => {
             const rows = list.map((student, i) => ({
                 student,
-                index: pageIndex * rowsPerPage + i,
+                index: pageIndex * maxRowsFit + i,
             }));
-            while (rows.length < rowsPerPage) {
-                rows.push({ student: null, index: pageIndex * rowsPerPage + rows.length });
+
+            if (pageIndex === totalPages - 1) {
+                while (rows.length < maxRowsFit) {
+                    rows.push({ student: null, index: pageIndex * maxRowsFit + rows.length });
+                }
             }
             return rows;
         });
-    }, [studentResultsDetails, rowsPerPage, customRows]);
+    }, [studentResultsDetails, maxRowsFit, customRows]);
 
-    /* measure the real title block height (first page)
-       ⚠️ offsetHeight ব্যবহার — transform scale এর প্রভাব পড়ে না */
+    // ✅ শেষ পেজে সারি ফুল-হাইট (Stretch) করার লজিক
+    const lastPageIdx = pages.length - 1;
+    const lastPageRows = pages[lastPageIdx] || [];
+    const isStretched = customRows === null && lastPageRows.filter(r => r.student !== null).length < maxRowsFit;
+
+    const finalRowHeight = isStretched
+        ? Math.floor(rowsAreaPx / Math.max(1, lastPageRows.length))
+        : Math.floor(rowsAreaPx / maxRowsFit);
+
     useLayoutEffect(() => {
         const measure = () => {
             if (!titleRef.current) return;
@@ -675,7 +623,6 @@ export default function AttendanceSheet({ reportData, query }) {
         if (document.fonts?.ready) document.fonts.ready.then(measure);
     }, [institutionInfo, institutionLogo, sessionName, className, orientation, paper, lang, fontPct, bookNameText, teacherNameText, monthText, yearText, hourInput]);
 
-    /* styles */
     const cellBase = {
         border: `1px solid ${C.border}`,
         padding: "3px 2px",
@@ -683,14 +630,16 @@ export default function AttendanceSheet({ reportData, query }) {
         color: C.text,
         overflow: "hidden",
     };
+
     const thStyle = {
         ...cellBase,
-        ...bg(C.headBg),
+        backgroundColor: C.headBg,
         color: C.primaryDark,
         fontWeight: 700,
         textAlign: "center",
         verticalAlign: "middle",
     };
+
     const thVertical = {
         display: "inline-block",
         writingMode: "vertical-rl",
@@ -717,9 +666,9 @@ export default function AttendanceSheet({ reportData, query }) {
             style={{
                 padding: "8px 8px 10px",
                 borderBottom: `3px solid ${C.primary}`,
+                background: "#fff",
             }}
         >
-            {/* logo + title */}
             <div style={{ position: "relative", textAlign: "center", minHeight: "92px" }}>
                 <img
                     src={institutionLogo || EXAMPLE_LOGO}
@@ -730,25 +679,19 @@ export default function AttendanceSheet({ reportData, query }) {
                         userSelect: "none", pointerEvents: "none",
                     }}
                 />
-                <h1 style={{
-                    margin: 0, fontSize: fs(22), fontWeight: 800,
-                    lineHeight: 1.3, color: C.primaryDark,
-                }}>
+                <h1 style={{ margin: 0, fontSize: fs(22), fontWeight: 800, lineHeight: 1.3, color: C.primaryDark }}>
                     {institutionName}
                 </h1>
                 <p style={{ margin: "2px 0 0", fontSize: fs(15), fontWeight: 600, color: C.muted }}>
                     {institutionAddress}
                 </p>
-                <h2 style={{
-                    margin: "4px 0 0", fontSize: fs(17), fontWeight: 600,
-                    lineHeight: 1.3, color: C.text,
-                }}>
+                <h2 style={{ margin: "4px 0 0", fontSize: fs(17), fontWeight: 600, lineHeight: 1.3, color: C.text }}>
                     {t.title} - {sessionName}
                 </h2>
                 <div style={{
                     display: "inline-block", marginTop: "6px",
                     minWidth: "320px", padding: "1px 24px",
-                    ...bg(C.headBg), color: C.primaryDark,
+                    backgroundColor: C.headBg, color: C.primaryDark,
                     border: `1.5px solid ${C.primary}`, borderRadius: "3px",
                     fontWeight: 800, fontSize: fs(16), lineHeight: fs(24),
                 }}>
@@ -756,39 +699,35 @@ export default function AttendanceSheet({ reportData, query }) {
                 </div>
             </div>
 
-            {/* fill-in info block */}
             <div style={{
                 marginTop: "10px", padding: "8px 10px",
-                border: `1px solid ${C.border}`, borderRadius: "3px",
+                border: `1px solid ${C.infoBorder}`, borderRadius: "3px",
                 display: "flex", flexDirection: "column", gap: "8px",
                 textAlign: "start",
             }}>
                 <div style={{ display: "flex", gap: "18px" }}>
-                    <FillField label={t.bookName} value={bookNameText} flex={2} color={C.text} fs={fs} />
-                    <FillField label={t.month} value={monthText} flex={1.2} color={C.text} fs={fs} />
-                    <FillField label={t.hijriYear} value={yearText} flex={1.2} color={C.text} fs={fs} />
+                    <FillField label={t.bookName} value={bookNameText} flex={2} color={C.text} dottedColor={C.dotted} fs={fs} />
+                    <FillField label={t.month} value={monthText} flex={1.2} color={C.text} dottedColor={C.dotted} fs={fs} />
+                    <FillField label={t.hijriYear} value={yearText} flex={1.2} color={C.text} dottedColor={C.dotted} fs={fs} />
                 </div>
                 <div style={{ display: "flex", gap: "18px" }}>
-                    <FillField label={t.teacherName} value={teacherNameText} flex={2.4} color={C.text} fs={fs} />
-                    <FillField label={t.hour} value={hourInput.trim()} flex={1} color={C.text} fs={fs} />
+                    <FillField label={t.teacherName} value={teacherNameText} flex={2.4} color={C.text} dottedColor={C.dotted} fs={fs} />
+                    <FillField label={t.hour} value={hourInput.trim()} flex={1} color={C.text} dottedColor={C.dotted} fs={fs} />
                 </div>
             </div>
         </div>
     );
 
-    /* one printable page
-       বাইরের .sheet-page = পুরো printable এরিয়া (কখনো পেজ ছাড়ায় না)
-       ভেতরের .sheet-scaled = scale হয়ে ঠিক মাঝখানে বসে */
-    const renderPage = (rows, pageIndex) => (
+    const renderPage = (rows, pageIndex, isPrint = false) => (
         <div
-            key={pageIndex}
+            key={(isPrint ? "p" : "s") + pageIndex}
             dir={dir}
             className="sheet-card sheet-page"
             style={{
                 width: `${sheetWidthMm}mm`,
-                height: `${pageHeightPx}px`,
+                height: `${sheetHeightMm}mm`,
                 display: "flex",
-                alignItems: "center",
+                alignItems: "flex-start",
                 justifyContent: "center",
                 overflow: "hidden",
                 background: "#fff",
@@ -800,24 +739,22 @@ export default function AttendanceSheet({ reportData, query }) {
                 className="sheet-scaled"
                 style={{
                     width: `${sheetWidthMm}mm`,
-                    height: `${pageHeightPx}px`,
+                    height: `${sheetHeightMm}mm`,
                     flexShrink: 0,
                     overflow: "hidden",
                     transform: `scale(${scale})`,
-                    transformOrigin: "center center",
+                    transformOrigin: "top center",
                 }}
             >
                 <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
                     {renderColGroup()}
                     <thead style={{ display: "table-header-group" }}>
-                        {/* Title block */}
                         <tr>
-                            <th colSpan={Math.max(visibleColCount, 1)} style={{ padding: 0, fontWeight: 400 }}>
-                                {renderTitleBlock(pageIndex === 0)}
+                            <th colSpan={Math.max(visibleColCount, 1)} style={{ padding: 0, fontWeight: 400, backgroundColor: "#fff" }}>
+                                {renderTitleBlock(!isPrint && pageIndex === 0)}
                             </th>
                         </tr>
 
-                        {/* Column header */}
                         {visibleColCount > 0 && (
                             <tr style={{ height: `${theadPx}px` }}>
                                 {show.sl && <th style={thStyle}>{t.sl}</th>}
@@ -833,12 +770,12 @@ export default function AttendanceSheet({ reportData, query }) {
                                     </th>
                                 ))}
                                 {show.present && (
-                                    <th style={{ ...thStyle, ...bg(C.headStrongBg) }}>
+                                    <th style={{ ...thStyle, backgroundColor: C.headStrongBg }}>
                                         <span style={thVertical}>{t.present}</span>
                                     </th>
                                 )}
                                 {show.absent && (
-                                    <th style={{ ...thStyle, ...bg(C.headStrongBg) }}>
+                                    <th style={{ ...thStyle, backgroundColor: C.headStrongBg }}>
                                         <span style={thVertical}>{t.absent}</span>
                                     </th>
                                 )}
@@ -848,10 +785,10 @@ export default function AttendanceSheet({ reportData, query }) {
 
                     <tbody>
                         {rows.length === 0 && (
-                            <tr style={{ height: `${rowHeightPx}px` }}>
+                            <tr style={{ height: `${finalRowHeight}px` }}>
                                 <td
                                     colSpan={Math.max(visibleColCount, 1)}
-                                    style={{ ...cellBase, textAlign: "center", color: C.muted, height: `${rowHeightPx}px` }}
+                                    style={{ ...cellBase, textAlign: "center", color: C.muted, height: `${finalRowHeight}px` }}
                                 >
                                     {t.noStudent}
                                 </td>
@@ -860,12 +797,11 @@ export default function AttendanceSheet({ reportData, query }) {
 
                         {rows.map(({ student, index }, rowPos) => {
                             const rowBg = index % 2 === 1 ? C.zebra : "#fff";
-                            const td = { ...cellBase, ...bg(rowBg), textAlign: "center", height: `${rowHeightPx}px` };
+                            const td = { ...cellBase, backgroundColor: rowBg, textAlign: "center", height: `${finalRowHeight}px` };
 
-                            /* empty-state message (শুধু অটো মোডে) */
                             if (!student && customRows === null && studentResultsDetails.length === 0 && rowPos === 0) {
                                 return (
-                                    <tr key={`empty-${index}`} style={{ height: `${rowHeightPx}px` }}>
+                                    <tr key={`empty-${index}`} style={{ height: `${finalRowHeight}px` }}>
                                         <td colSpan={Math.max(visibleColCount, 1)} style={{ ...td, color: C.muted }}>
                                             {t.noStudent}
                                         </td>
@@ -876,7 +812,7 @@ export default function AttendanceSheet({ reportData, query }) {
                             return (
                                 <tr
                                     key={student?.ID ?? `blank-${index}`}
-                                    style={{ height: `${rowHeightPx}px`, breakInside: "avoid", pageBreakInside: "avoid" }}
+                                    style={{ height: `${finalRowHeight}px`, breakInside: "avoid", pageBreakInside: "avoid" }}
                                 >
                                     {show.sl && <td style={td}>{student ? num(index + 1) : ""}</td>}
                                     {show.id && <td style={td}>{student ? num(student?.User?.UserCode ?? "") : ""}</td>}
@@ -891,8 +827,8 @@ export default function AttendanceSheet({ reportData, query }) {
                                     {show.days && Array.from({ length: days }).map((_, d) => (
                                         <td key={d} style={td} />
                                     ))}
-                                    {show.present && <td style={{ ...td, ...bg(C.zebra) }} />}
-                                    {show.absent && <td style={{ ...td, ...bg(C.zebra) }} />}
+                                    {show.present && <td style={{ ...td, backgroundColor: C.zebra }} />}
+                                    {show.absent && <td style={{ ...td, backgroundColor: C.zebra }} />}
                                 </tr>
                             );
                         })}
@@ -907,6 +843,7 @@ export default function AttendanceSheet({ reportData, query }) {
             <LanguageSelector t={tUI} value={lang} onChange={setLang} />
             <SheetInfoSettings
                 t={tUI}
+                lang={lang}
                 subjectOptions={subjectList}
                 subjectValue={selectedSubjectId}
                 onSubjectChange={setSubjectId}
@@ -944,11 +881,9 @@ export default function AttendanceSheet({ reportData, query }) {
         </>
     );
 
-    /* ═══ RENDER ═══ */
     return (
         <div className="rs-root flex w-full bg-slate-100 lg:h-[100dvh] lg:overflow-hidden">
-            {/* ═══════════ SIDEBAR ═══════════ */}
-            <aside className="hidden lg:flex flex-col w-[300px] shrink-0 h-full bg-white border-r border-slate-200 shadow-[2px_0_12px_rgba(15,23,42,0.04)] print:hidden">
+            <aside className="no-print hidden lg:flex flex-col w-[300px] shrink-0 h-full bg-white border-r border-slate-200 shadow-[2px_0_12px_rgba(15,23,42,0.04)] print:hidden">
                 <div className="p-5 border-b border-slate-100 shrink-0">
                     <div className="flex items-center gap-2 mb-1">
                         <div className="w-6 h-6 rounded-md bg-emerald-50 flex items-center justify-center">
@@ -975,9 +910,8 @@ export default function AttendanceSheet({ reportData, query }) {
                 </div>
             </aside>
 
-            {/* ═══════════ REPORT BODY ═══════════ */}
             <main className="rs-main rs-scroll flex-1 min-w-0 lg:h-full lg:overflow-y-auto">
-                <div className="lg:hidden p-4 pb-0 print:hidden">
+                <div className="no-print lg:hidden p-4 pb-0 print:hidden">
                     <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
                         <PreviewInfo t={tUI} num={numUI} count={studentResultsDetails.length} days={days} pages={pages.length} />
                         {settingsPanels}
@@ -999,8 +933,15 @@ export default function AttendanceSheet({ reportData, query }) {
                 </div>
             </main>
 
-            {/* ═══ CSS ═══ */}
+            {printRoot && createPortal(
+                <div className="sheet-pages-print">
+                    {pages.map((rows, i) => renderPage(rows, i, true))}
+                </div>,
+                printRoot
+            )}
+
             <style>{`
+        .print-portal { display: none; }
         .rs-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; scroll-behavior: smooth; }
         .rs-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
         .rs-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -1009,17 +950,40 @@ export default function AttendanceSheet({ reportData, query }) {
 
         @media print {
           @page { size: ${paperDef.css} ${orientation}; margin: ${PAGE_MARGIN_MM}mm; }
-          html, body { margin: 0 !important; padding: 0 !important; }
+
+          html, body {
+            margin: 0 !important; padding: 0 !important;
+            height: auto !important; min-height: 0 !important;
+            overflow: visible !important;
+            background: #fff !important;
+          }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
-          .rs-root { display: block !important; height: auto !important; overflow: visible !important; background: #fff !important; }
-          .rs-main { height: auto !important; overflow: visible !important; }
-          .result-sheet-wrapper { padding: 0 !important; }
-          .sheet-scroll { overflow: visible !important; padding: 0 !important; }
+          /* ✅ পুরো অ্যাপ (sidebar, header, layout সব) প্রিন্টে লুকানো — শুধু print-portal থাকবে */
+          body > *:not(.print-portal) { display: none !important; }
+          .print-portal { display: block !important; margin: 0 !important; padding: 0 !important; }
 
-          .sheet-pages { display: block !important; width: auto !important; margin: 0 !important; gap: 0 !important; }
-          .sheet-page { box-shadow: none !important; margin: 0 !important; break-after: page; page-break-after: always; break-inside: avoid; page-break-inside: avoid; }
-          .sheet-page:last-child { break-after: auto; page-break-after: auto; }
+          .sheet-pages-print { display: block !important; margin: 0 !important; padding: 0 !important; }
+
+          .print-portal .sheet-page {
+            box-shadow: none !important;
+            margin: 0 !important;
+            height: ${sheetHeightMm}mm !important;
+            max-height: ${sheetHeightMm}mm !important;
+            overflow: hidden !important;
+            break-after: auto !important;
+            page-break-after: auto !important;
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
+          }
+          .print-portal .sheet-page + .sheet-page {
+            break-before: page !important;
+            page-break-before: always !important;
+          }
+          .print-portal .sheet-scaled {
+            height: ${sheetHeightMm}mm !important;
+            max-height: ${sheetHeightMm}mm !important;
+          }
 
           thead { display: table-header-group !important; }
           tr, td, th { page-break-inside: avoid !important; break-inside: avoid !important; }
@@ -1079,7 +1043,6 @@ const LanguageSelector = ({ t, value, onChange }) => (
     </div>
 );
 
-/* ✅ সিলেক্ট ফিল্ড */
 const SelectField = ({ label, value, onChange, options, placeholder }) => (
     <div>
         <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{label}</p>
@@ -1092,14 +1055,14 @@ const SelectField = ({ label, value, onChange, options, placeholder }) => (
     </div>
 );
 
-/* ✅ শিটের তথ্য: কিতাব, মাস, বছর, ঘন্টা */
 const SheetInfoSettings = ({
-    t, num,
+    t, num, lang,
     subjectOptions, subjectValue, onSubjectChange, teacherName, teacherLoading,
     month, onMonthChange, year, onYearChange,
     hour, onHourChange,
 }) => {
-    const monthOptions = MONTH_NAMES.bn.map((m, i) => ({ value: String(i), label: m }));
+    const monthList = MONTH_NAMES[lang] || MONTH_NAMES.bn;
+    const monthOptions = monthList.map((m, i) => ({ value: String(i), label: m }));
     const yearOptions = YEAR_LIST.map((y) => ({ value: y, label: num(y) }));
     return (
         <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2.5">
@@ -1140,7 +1103,6 @@ const SheetInfoSettings = ({
     );
 };
 
-/* ✅ ফন্ট সাইজ বার (A− / ১০০% / A+) */
 const FontSizeBar = ({ t, num, value, onSmaller, onBigger, onReset, canSmaller, canBigger }) => (
     <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2">
         <p className="text-xs font-bold text-slate-700 leading-tight">{t.fontTitle}</p>
@@ -1225,38 +1187,15 @@ const PrintSettings = ({
         <SegmentedControl label={t.paperSize} options={PAPER_OPTIONS} value={paper} onChange={onPaperChange} />
         <SegmentedControl label={t.monthDays} options={DAYS_OPTIONS} value={daysCount} onChange={onDaysChange} />
 
-        {/* ✅ Scale */}
-        {/* <div>
-            <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{t.scaleLabel}</p>
-            <div className="flex items-center gap-1.5">
-                <input
-                    type="text"
-                    inputMode="numeric"
-                    value={scaleInput}
-                    onChange={(e) => onScaleChange(e.target.value)}
-                    onBlur={onScaleBlur}
-                    placeholder="95"
-                    className={fieldCls + " !w-16 text-center"}
-                />
-                {SCALE_PRESETS.map((n) => {
-                    const active = scalePct === n;
-                    return (
-                        <button
-                            key={n}
-                            type="button"
-                            onClick={() => onScalePreset(n)}
-                            className={`px-2 py-1.5 rounded-md text-[11px] font-semibold transition-all ${active
-                                ? "bg-white text-emerald-700 shadow-sm ring-1 ring-emerald-200"
-                                : "bg-slate-100 text-slate-500 hover:text-slate-700"
-                                }`}
-                        >
-                            {num(n)}%
-                        </button>
-                    );
-                })}
-            </div>
-            <p className="text-[10px] text-slate-400 leading-snug mt-1.5">{t.scaleNote}</p>
-        </div> */}
+        <SegmentedControl
+            label={t.colorLabel}
+            options={[
+                { key: "color", label: t.colorOpt },
+                { key: "bw", label: t.bwOpt },
+            ]}
+            value={colorMode}
+            onChange={onColorChange}
+        />
 
         <p className="text-[10px] text-slate-400 leading-snug">{t.printNote}</p>
     </div>
@@ -1301,4 +1240,4 @@ const ColumnSelector = ({ t, num, value, onToggle, onSetAll, columns = ATTENDANC
             </div>
         </div>
     );
-}; ``
+};
