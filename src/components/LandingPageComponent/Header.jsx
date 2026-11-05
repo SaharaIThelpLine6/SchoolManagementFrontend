@@ -88,7 +88,7 @@ const Header = () => {
         </NavLink>
 
         {/* Dropdown – কোম্পানি */}
-        <div className="relative group">
+        {/* <div className="relative group">
           <button
             className={`flex items-center gap-1 bg-transparent border-none font-inherit cursor-pointer p-0 transition-colors duration-200 ${inactiveLink}`}
           >
@@ -120,8 +120,9 @@ const Header = () => {
               </NavLink>
             </li>
           </ul>
-        </div>
+        </div> */}
 
+        <NavLink to="/about-us" className={`transition-colors duration-200 ${inactiveLink}`}>আমাদের সম্পর্কে</NavLink>
         <NavLink to="/contact-us" className={`transition-colors duration-200 ${inactiveLink}`}>যোগাযোগ</NavLink>
 
         {/* মাদ্রাসা লগিন – outlined button, tai alada kore chokhe pore */}
