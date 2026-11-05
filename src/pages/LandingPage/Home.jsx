@@ -213,9 +213,6 @@ const PricingCard = ({ pkg, index }) => {
                 <p className={`text-[13px] font-bold tracking-wide ${featured ? 'text-white/70' : 'text-slate-400'}`}>
                     {pkg.name}
                 </p>
-                <p className={`mt-1 text-[15px] font-semibold ${featured ? 'text-white' : 'text-slate-700'}`}>
-                    শিক্ষার্থী লিমিট {pkg.limit}
-                </p>
                 <div className="mt-5 flex items-end gap-1.5">
                     <span className={`text-2xl font-bold ${featured ? 'text-white/80' : 'text-slate-400'}`}>৳</span>
                     <span className={`text-[42px] leading-none font-extrabold tracking-tight ${featured ? 'text-white' : 'text-slate-900'}`}>
@@ -228,6 +225,9 @@ const PricingCard = ({ pkg, index }) => {
             <div className={`h-px w-full ${featured ? 'bg-white/15' : 'bg-slate-100'}`} />
 
             <ul className="flex flex-col gap-3.5 py-6 flex-1">
+                <p className={`mt-1 text-[15px] font-semibold ${featured ? 'text-white' : 'text-slate-700'}`}>
+                    শিক্ষার্থী লিমিট {pkg.limit}
+                </p>
                 {pkg.features.map((f, i) => (
                     <li key={i} className="flex items-start gap-2.5">
                         <span
@@ -1199,17 +1199,17 @@ const Home = () => {
       </section>
 
       {/* ========== PARTNERS MARQUEE ========== */}
-      <section className="py-20 md:py-24 bg-slate-50 overflow-hidden">
+      {/* <section className="py-20 md:py-24 bg-slate-50 overflow-hidden">
         <div className="px-5">
           <SectionHeading
             eyebrow="আমাদের গ্রাহক"
             title="আমাদের সম্মানিত পার্টনারসমূহ"
             subtitle="দেশের বিভিন্ন প্রান্তের মাদ্রাসা ও শিক্ষা প্রতিষ্ঠান আমাদের সফটওয়্যার ব্যবহার করছে।"
           />
-        </div>
+        </div> */}
 
         {/* সারি ১ */}
-        <div className="relative w-full overflow-hidden partners-mask">
+        {/* <div className="relative w-full overflow-hidden partners-mask">
           <div className="flex items-center gap-4 w-max animate-marquee hover:[animation-play-state:paused]">
             {[...PARTNERS, ...PARTNERS].map((p, i) => (
               <div
@@ -1223,10 +1223,10 @@ const Home = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* সারি ২ (উল্টো দিকে) */}
-        <div className="relative w-full overflow-hidden partners-mask mt-4">
+        {/* <div className="relative w-full overflow-hidden partners-mask mt-4">
           <div className="flex items-center gap-4 w-max qmm-marquee-rev hover:[animation-play-state:paused]">
             {[...PARTNERS.slice().reverse(), ...PARTNERS.slice().reverse()].map((p, i) => (
               <div
@@ -1253,7 +1253,7 @@ const Home = () => {
             সফটওয়্যার কিনতে যোগাযোগ করুন
           </a>
         </div>
-      </section>
+      </section> */}
 
       {/* ========== PRICING ========== */}
       <section className="py-20 md:py-28 px-5 bg-white">
