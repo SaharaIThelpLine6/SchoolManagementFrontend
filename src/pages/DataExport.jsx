@@ -544,7 +544,7 @@ const DataExport = ({ pageTitle }) => {
         ${institutionInfo?.InstitutionName || ''}
       </h1>
       <p style="font-size: 15px; margin: 4px 0 0 0; color: #333; font-family: 'SolaimanLipi';">
-        ${institutionInfo?.PoliceStation || ''}, ${institutionInfo?.District || ''}
+        ${institutionInfo?.Address || ''}
       </p>
     </div>
     <div style="display: flex; justify-content: center; align-items: center; margin: 12px 0;">
