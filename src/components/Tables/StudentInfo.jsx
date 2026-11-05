@@ -28,7 +28,7 @@ const StudentInfo = () => {
   const currentPage = useSelector((state) => state.pagination.currentPage);
   const { user } = useSelector((state) => state.auth);
   const [preview, setPreview] = useState({});
-
+  console.log("test")
   // ✅ More menu states
   const [openMenuId, setOpenMenuId] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
