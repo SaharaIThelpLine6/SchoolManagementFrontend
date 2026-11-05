@@ -85,6 +85,12 @@ export const menuData = [
         route: 'general-info/user-reports',
         icon: 'SubReport'
       },
+      {
+        id: '11',
+        name: 'All Tutorials General',
+        route: 'general-info/all-tutorials-general',
+        icon: 'SubVideo'
+      },
     ],
   },
   {
@@ -164,6 +170,12 @@ export const menuData = [
         name: 'Students Report List',
         route: 'students/report_list',
         icon: 'SubReport',
+      },
+      {
+        id: '13',
+        name: 'All Tutorials Student',
+        route: 'students/all-tutorials-student',
+        icon: 'SubVideo'
       },
     ],
   },
@@ -263,7 +275,13 @@ export const menuData = [
         name: 'User Attendance',
         route: 'parent-panel/user-attendance',
         icon: 'SubUser',
-      }
+      },
+      {
+        id: '10',
+        name: 'All Tutorials Parents',
+        route: 'parent-panel/all-tutorials-Parents',
+        icon: 'SubVideo',
+      },
     ],
   },
   {
@@ -303,6 +321,12 @@ export const menuData = [
       //   route: "/teacherinfo/designation",
       //   subMenu: false,
       // },
+      {
+        id: '6',
+        name: 'All Tutorials Teacher',
+        route: 'teacherinfo/all-tutorials-teacher',
+        icon: 'SubVideo',
+      },
     ],
   },
   {
@@ -514,6 +538,12 @@ export const menuData = [
         route: 'darul-ikama/vacation',
         icon: 'SubGatePass',
       },
+      {
+        id: '4',
+        name: 'All Tutorials Darulikama',
+        route: 'darul-ikama/all-tutorials-darul-ikama',
+        icon: 'SubVideo',
+      },
     ],
   },
   // {
@@ -581,11 +611,14 @@ export const menuData = [
   //     //   name: 'Student Admission',
   //     //   route: '/accounting/student-admission',
   //     // },
+  //     {
+  //       id: '11',
+  //       name: 'All Tutorials Accounting',
+  //       route: 'accounting/all-tutorials-accounting',
+  //       icon: 'SubVideo',
+  //     },
   //   ],
   // },
-
-
-
 
 
 
@@ -679,6 +712,12 @@ export const menuData = [
         route: 'payment-history/online-payment-invoice',
         icon: 'SubDocument',
       },
+      {
+        id: '5',
+        name: 'All Tutorials Payment',
+        route: 'all-tutorials-payment',
+        icon: 'SubVideo',
+      },
     ],
   },
 
@@ -749,6 +788,12 @@ export const menuData = [
         name: 'Document Settings',
         route: 'settings/document-settings',
         icon: 'SubDocument',
+      },
+      {
+        id: '5',
+        name: 'All Tutorials setting',
+        route: 'settings/all-tutorials-setting',
+        icon: 'SubVideo',
       },
     ],
   },

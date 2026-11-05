@@ -176,6 +176,14 @@ import ResultPublish from '../pages/ResultPublish';
 
 //! YouTube Tutorial:
 import AllTutorialsExam from '../pages/TutorialVideo/AllTutorialsExam';
+import AllTutorialsGeneral from '../pages/TutorialVideo/AllTutorialsGeneral';
+import AllTutorialsStudent from '../pages/TutorialVideo/AllTutorialsStudent';
+import AllTutorialsParents from '../pages/TutorialVideo/AllTutorialsParents';
+import AllTutorialsTeacher from '../pages/TutorialVideo/AllTutorialsTeacher';
+import AllTutorialsDarulkama from '../pages/TutorialVideo/AllTutorialsDarulkama';
+import AllTutorialsAccounting from '../pages/TutorialVideo/AllTutorialsAccounting';
+import AllTutorialsPayment from '../pages/TutorialVideo/AllTutorialsPayment';
+import AllTutorialsSetting from '../pages/TutorialVideo/AllTutorialsSetting';
 import AllTutorialsResult from '../pages/TutorialVideo/AllTutorialsResult';
 
 // AdminRoutes
@@ -199,11 +207,38 @@ const Router = createBrowserRouter([
     path: '/forget_password',
     element: <ForgetPassword />,
   },
+
+  // {
+  //   path: '/',
+  //   element: <Login />,
+  // },
+
   {
-    path: '/',
-    // element: <LandingPage />,
-    element: <Login />,
+    element: <MainLayout />,
+    children: [
+      {
+        path: '/',
+        element: <LandingPage />,
+      },
+      {
+        path: '/about-us',
+        element: <AboutUs />,
+      },
+      {
+        path: '/management-team',
+        element: <ManagementTeam />,
+      },
+      {
+        path: '/photo-gallery',
+        element: <PhotoGallery />,
+      },
+      {
+        path: '/contact-us',
+        element: <ContactUs />,
+      },
+    ],
   },
+
   {
     path: '/login',
     element: <Login />,
@@ -355,6 +390,12 @@ const Router = createBrowserRouter([
                   </OwenGuide>
                 ),
               },
+              {
+                path: 'all-tutorials-general',
+                element: (
+                    <AllTutorialsGeneral pageTitle="All Tutorials General" />
+                ),
+              },
             ],
           },
           {
@@ -495,7 +536,13 @@ const Router = createBrowserRouter([
                     <StudentIdCardGenerate pageTitle="Student Id Card Print" />
                   </RequirePermission>
                 ),
-              }
+              },
+              {
+                path: 'all-tutorials-student',
+                element: (
+                    <AllTutorialsStudent pageTitle="All Tutorials Student" />
+                ),
+              },
             ],
           },
           {
@@ -675,6 +722,12 @@ const Router = createBrowserRouter([
                   // </RequirePermission>
                 ),
               },
+              {
+                path: 'all-tutorials-Parents',
+                element: (
+                    <AllTutorialsParents pageTitle="All Tutorials Parents" />
+                ),
+              },
             ],
           },
           {
@@ -729,6 +782,12 @@ const Router = createBrowserRouter([
                   >
                     <AddDesignation pageTitle="Designation List" />
                   </RequirePermission>
+                ),
+              },
+              {
+                path: 'all-tutorials-teacher',
+                element: (
+                    <AllTutorialsTeacher pageTitle="All Tutorials Teacher" />
                 ),
               },
             ],
@@ -1148,6 +1207,12 @@ const Router = createBrowserRouter([
                   // </RequirePermission>
                 ),
               },
+              {
+                path: 'all-tutorials-darul-ikama',
+                element: (
+                    <AllTutorialsDarulkama pageTitle="All Tutorials Darulikama" />
+                ),
+              },
             ],
           },
           {
@@ -1279,6 +1344,12 @@ const Router = createBrowserRouter([
               //     </RequirePermission>
               //   ),
               // },
+              {
+                path: 'all-tutorials-accounting',
+                element: (
+                    <AllTutorialsAccounting pageTitle="All Tutorials Accounting" />
+                ),
+              },
             ],
           },
           {
@@ -1311,6 +1382,12 @@ const Router = createBrowserRouter([
                   // <PaymentRouteGuard>
                   <OnlinePaymentInvoice pageTitle="Online Payment Invoice" />
                   // </PaymentRouteGuard>
+                ),
+              },
+              {
+                path: 'all-tutorials-payment',
+                element: (
+                    <AllTutorialsPayment pageTitle="All Tutorials Payment" />
                 ),
               },
             ],
@@ -1384,6 +1461,12 @@ const Router = createBrowserRouter([
               {
                 path: 'document-settings',
                 element: <DocumentSettings pageTitle="Document Settings" />,
+              },
+              {
+                path: 'all-tutorials-setting',
+                element: (
+                    <AllTutorialsSetting pageTitle="All Tutorials Setting" />
+                ),
               },
             ],
           },

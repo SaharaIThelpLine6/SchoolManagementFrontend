@@ -38,6 +38,22 @@ const ENGLISH_MONTHS = [
   "December",
 ];
 
+// ✅ ইংরেজি মাসের বাংলা নাম (filter-এ ইংরেজির পাশাপাশি দেখানো হবে)
+const ENGLISH_MONTHS_BN = [
+  "জানুয়ারি",
+  "ফেব্রুয়ারি",
+  "মার্চ",
+  "এপ্রিল",
+  "মে",
+  "জুন",
+  "জুলাই",
+  "আগস্ট",
+  "সেপ্টেম্বর",
+  "অক্টোবর",
+  "নভেম্বর",
+  "ডিসেম্বর",
+];
+
 // ✅ বার — index 0 = শনিবার, 6 = শুক্রবার
 const WEEKDAYS = ["শনিবার", "রবিবার", "সোমবার", "মঙ্গলবার", "বুধবার", "বৃহস্পতিবার", "শুক্রবার"];
 const FRIDAY_INDEX = 6;
@@ -105,13 +121,16 @@ const BanglaAttendence = ({
   // ✅ আরবি মাস / ইংরেজি মাস (যেকোনো একটি) ও শুরুর বার — ইউজারের নির্বাচন
   const [arabicMonthIdx, setArabicMonthIdx] = useState("");
   const [englishMonthIdx, setEnglishMonthIdx] = useState("");
+  const [banglaMonthIdx, setBanglaMonthIdx] = useState("");
   const [startWeekday, setStartWeekday] = useState("");
 
   // ✅ নির্বাচিত মাস
   const selectedMonth = arabicMonthIdx !== "" ? ARABIC_MONTHS[Number(arabicMonthIdx)] : null;
   const selectedEnglishMonth =
     englishMonthIdx !== "" ? ENGLISH_MONTHS[Number(englishMonthIdx)] : "";
-  const hasMonth = Boolean(selectedMonth || selectedEnglishMonth);
+  const selectedBanglaMonth =
+    banglaMonthIdx !== "" ? ENGLISH_MONTHS_BN[Number(banglaMonthIdx)] : "";  // ✅ নতুন
+  const hasMonth = Boolean(selectedMonth || selectedEnglishMonth || selectedBanglaMonth);  // ✅ আপডেট
 
   // ✅ সবসময় ১ থেকে ৩১ দিন ফিক্সড
   const days = Array.from({ length: 31 }, (_, i) => i + 1);
@@ -220,7 +239,10 @@ const BanglaAttendence = ({
             onChange={(e) => {
               setArabicMonthIdx(e.target.value);
               // 🔹 একটি বাছলে অন্যটি খালি হয়ে যাবে
-              if (e.target.value !== "") setEnglishMonthIdx("");
+              if (e.target.value !== "") {
+                setEnglishMonthIdx("");
+                setBanglaMonthIdx("");   // ✅ নতুন
+              }
             }}
             className="border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
           >
@@ -240,12 +262,38 @@ const BanglaAttendence = ({
             onChange={(e) => {
               setEnglishMonthIdx(e.target.value);
               // 🔹 একটি বাছলে অন্যটি খালি হয়ে যাবে
-              if (e.target.value !== "") setArabicMonthIdx("");
+              if (e.target.value !== "") {
+                setArabicMonthIdx("");
+                setBanglaMonthIdx("");
+              }
             }}
             className="border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
           >
             <option value="">-- নির্বাচন করুন --</option>
             {ENGLISH_MONTHS.map((m, i) => (
+              <option key={i} value={i}>
+                {m}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="text-xs font-medium text-slate-600 block mb-1">বাংলা মাস</label>
+          <select
+            value={banglaMonthIdx}
+            onChange={(e) => {
+              setBanglaMonthIdx(e.target.value);
+              // 🔹 একটি বাছলে বাকিগুলো খালি হয়ে যাবে
+              if (e.target.value !== "") {
+                setArabicMonthIdx("");
+                setEnglishMonthIdx("");
+              }
+            }}
+            className="border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
+          >
+            <option value="">-- নির্বাচন করুন --</option>
+            {ENGLISH_MONTHS_BN.map((m, i) => (
               <option key={i} value={i}>
                 {m}
               </option>
@@ -416,7 +464,7 @@ const BanglaAttendence = ({
                 </div>
                 {/* 🔹 আরবি অথবা ইংরেজি — যেকোনো একটি */}
                 <div className="flex-1 border border-black py-0.5 px-2">
-                  মাস : {selectedMonth?.name || selectedEnglishMonth || ''}
+                  মাস : {selectedMonth?.name || selectedEnglishMonth || selectedBanglaMonth || ''}
                 </div>
               </div>
 

@@ -35,9 +35,8 @@ export default {
         SutonnyMJ: 'SutonnyMJ',
         PlusJakarta: 'Plus Jakarta Sans',
         default: ['var(--app-font)'],
-      },
-      boxShadow: {
-        sub_menu: '0 0 15px -5px rgba(0, 0, 0, 0.2)',
+        // ===== Landing / Home page =====
+        solaiman: ['SolaimanLipi', 'sans-serif'], // font-solaiman
       },
       height: {
         svh: '100svh',
@@ -100,6 +99,26 @@ export default {
         // success: '#219653',
         // danger: '#D34053',
         // warning: '#FFA70B',
+
+        // ===== Landing / Home page palette =====
+        // bg-primary / text-primary / to-primary / border-primary
+        // bg-primary-dark / text-primary-dark / from-primary-dark / via-primary-dark
+        // from-primary-navy
+        primary: {
+          DEFAULT: '#78B9B5',
+          dark: '#0F828C',
+          light: '#065084',
+          navy: '#320A6B',
+        },
+        ink: {
+          DEFAULT: '#263238',
+          light: '#6B7280',
+        },
+        surface: {
+          DEFAULT: '#F5F9FC',
+          dark: '#EDF2F7',
+        },
+        line: '#D9E8F5',
       },
       fontSize: {
         'title-xxl': ['44px', '55px'],
@@ -269,7 +288,11 @@ export default {
       borderWidth: {
         6: '6px',
       },
+      // NOTE: age extend-e DUITA boxShadow key chilo — JS object-e
+      // dwitiyo ta prothom ta ke muche dito, tai `shadow-sub_menu`
+      // kono din generate hoto na. Ekhon duitai ek jaygay merge kora.
       boxShadow: {
+        sub_menu: '0 0 15px -5px rgba(0, 0, 0, 0.2)',
         default: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)',
         card: '0px 1px 3px rgba(0, 0, 0, 0.12)',
         'card-2': '0px 1px 2px rgba(0, 0, 0, 0.05)',
@@ -284,6 +307,11 @@ export default {
         6: '0px 3px 15px rgba(0, 0, 0, 0.1)',
         7: '-5px 0 0 #313D4A, 5px 0 0 #313D4A',
         8: '1px 0 0 #313D4A, -1px 0 0 #313D4A, 0 1px 0 #313D4A, 0 -1px 0 #313D4A, 0 3px 13px rgb(0 0 0 / 8%)',
+        // ===== Landing / Home page =====
+        'card-sm': '0 1px 3px rgba(0, 0, 0, 0.08)',
+        'card-md': '0 4px 14px rgba(0, 0, 0, 0.05)',
+        'card-lg': '0 10px 25px rgba(0, 0, 0, 0.12)',
+        'card-xl': '0 12px 30px rgba(0, 0, 0, 0.15)',
       },
       dropShadow: {
         1: '0px 1px 0px #E2E8F0',
@@ -298,12 +326,47 @@ export default {
           '0%': { opacity: '0', transform: 'scale(0)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
+        // ===== Landing / Home page =====
+        marquee: {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-50%)' },
+        },
+        'slide-in-left': {
+          from: { opacity: '0', transform: 'translateX(-80px)' },
+          to: { opacity: '1', transform: 'translateX(0)' },
+        },
+        'slide-in-right': {
+          from: { opacity: '0', transform: 'translateX(80px)' },
+          to: { opacity: '1', transform: 'translateX(0)' },
+        },
+        'fade-in-up': {
+          from: { opacity: '0', transform: 'translateY(40px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
+        },
+        'bounce-in': {
+          '0%': { opacity: '0', transform: 'scale(0.3)' },
+          '50%': { opacity: '1', transform: 'scale(1.05)' },
+          '70%': { transform: 'scale(0.9)' },
+          '100%': { transform: 'scale(1)' },
+        },
+        'pulse-slow': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.5' },
+        },
       },
       animation: {
         shimmer: 'shimmer 1s ease-in-out infinite',
         'pulse-custom':
           'pulse-custom 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         scaleIn: 'scaleIn 0.4s ease-out',
+        // ===== Landing / Home page =====
+        marquee: 'marquee 30s linear infinite',
+        'slide-in-left': 'slide-in-left 0.6s ease-out both',
+        'slide-in-right': 'slide-in-right 0.6s ease-out both',
+        'fade-in-up': 'fade-in-up 0.5s ease-out both',
+        'bounce-in':
+          'bounce-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) both',
+        'pulse-slow': 'pulse-slow 3s infinite',
       },
     },
   },
@@ -317,3 +380,355 @@ export default {
     },
   ],
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// /** @type {import('tailwindcss').Config} */
+// const defaultTheme = require("tailwindcss/defaultTheme");
+// const colors = require("tailwindcss/colors");
+// export default {
+//   corePlugins: {
+//     animation: true,
+//   },
+//   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
+//   safelist: [
+//     'bg-purple-400',
+//     'bg-blue-400',
+//     'bg-green-400',
+//     'bg-red-400',
+//     'bg-purple-500',
+//     'bg-blue-500',
+//     'bg-green-500',
+//     'bg-red-500',
+//   ],
+//   theme: {
+//     extend: {
+//       direction: {
+//         rtl: 'rtl',
+//         ltr: 'ltr',
+//       },
+//       screens: {
+//         print: { raw: 'print' },
+//       },
+//       fontFamily: {
+//         hind: ['Hind Siliguri', 'sans-serif'], // 'font-hind' ক্লাস তৈরি হবে
+//         lato: '"Lato", serif',
+//         SolaimanLipi: 'SolaimanLipiNormal, serif',
+//         Poppins: ['Poppins', 'sans-serif'],
+//         noto: '"Noto Serif Bengali", serif',
+//         kalpurush: "'Kalpurush', sans-serif",
+//         SutonnyMJ: 'SutonnyMJ',
+//         PlusJakarta: 'Plus Jakarta Sans',
+//         default: ['var(--app-font)'],
+//       },
+//       boxShadow: {
+//         sub_menu: '0 0 15px -5px rgba(0, 0, 0, 0.2)',
+//       },
+//       height: {
+//         svh: '100svh',
+//       },
+//       colors: {
+//         'theme-offwhite': '#ededed',
+//         'theme-dark': '#121212',
+//         'theme-color': '#0B7ED3',
+//         'theme-secondary': '#0b7ed333',
+//         warning: '#ffa70b',
+//         danger: '#d34053',
+//         success: '#219653',
+//         info: '#6577f3',
+//         'custom-focus': '#007af7',
+//         current: 'currentColor',
+//         transparent: 'transparent',
+//         white: '#FFFFFF',
+//         black: {
+//           ...colors.black,
+//           DEFAULT: '#1C2434',
+//           2: '#010101',
+//         },
+//         red: {
+//           ...colors.red,
+//           DEFAULT: '#FB5454',
+//         },
+//         // body: '#64748B',
+//         // bodydark: '#AEB7C0',
+//         // bodydark1: '#DEE4EE',
+//         // bodydark2: '#8A99AF',
+//         // primary: '#3C50E0',
+//         // secondary: '#80CAEE',
+//         stroke: '#E2E8F0',
+//         gray: {
+//           ...colors.gray,
+//           DEFAULT: '#EFF4FB',
+//           2: '#F7F9FC',
+//           3: '#FAFAFA',
+//         },
+//         graydark: '#333A48',
+//         whiten: '#F1F5F9',
+//         whiter: '#F5F7FD',
+//         boxdark: '#24303F',
+//         'boxdark-2': '#1A222C',
+//         strokedark: '#2E3A47',
+//         'form-strokedark': '#3d4d60',
+//         'form-input': '#1d2a39',
+//         meta: {
+//           1: '#DC3545',
+//           2: '#EFF2F7',
+//           3: '#10B981',
+//           4: '#313D4A',
+//           5: '#259AE6',
+//           6: '#FFBA00',
+//           7: '#FF6766',
+//           8: '#F0950C',
+//           9: '#E5E7EB',
+//           10: '#0FADCF',
+//         },
+//         // success: '#219653',
+//         // danger: '#D34053',
+//         // warning: '#FFA70B',
+//       },
+//       fontSize: {
+//         'title-xxl': ['44px', '55px'],
+//         'title-xl': ['36px', '45px'],
+//         'title-xl2': ['33px', '45px'],
+//         'title-lg': ['28px', '35px'],
+//         'title-md': ['24px', '30px'],
+//         'title-md2': ['26px', '30px'],
+//         'title-sm': ['20px', '26px'],
+//         'title-xsm': ['18px', '24px'],
+//       },
+//       spacing: {
+//         4.5: '1.125rem',
+//         5.5: '1.375rem',
+//         6.5: '1.625rem',
+//         7.5: '1.875rem',
+//         8.5: '2.125rem',
+//         9.5: '2.375rem',
+//         10.5: '2.625rem',
+//         11: '2.75rem',
+//         11.5: '2.875rem',
+//         12.5: '3.125rem',
+//         13: '3.25rem',
+//         13.5: '3.375rem',
+//         14: '3.5rem',
+//         14.5: '3.625rem',
+//         15: '3.75rem',
+//         15.5: '3.875rem',
+//         16: '4rem',
+//         16.5: '4.125rem',
+//         17: '4.25rem',
+//         17.5: '4.375rem',
+//         18: '4.5rem',
+//         18.5: '4.625rem',
+//         19: '4.75rem',
+//         19.5: '4.875rem',
+//         21: '5.25rem',
+//         21.5: '5.375rem',
+//         22: '5.5rem',
+//         22.5: '5.625rem',
+//         24.5: '6.125rem',
+//         25: '6.25rem',
+//         25.5: '6.375rem',
+//         26: '6.5rem',
+//         27: '6.75rem',
+//         27.5: '6.875rem',
+//         29: '7.25rem',
+//         29.5: '7.375rem',
+//         30: '7.5rem',
+//         31: '7.75rem',
+//         32.5: '8.125rem',
+//         34: '8.5rem',
+//         34.5: '8.625rem',
+//         35: '8.75rem',
+//         36.5: '9.125rem',
+//         37.5: '9.375rem',
+//         39: '9.75rem',
+//         39.5: '9.875rem',
+//         40: '10rem',
+//         42.5: '10.625rem',
+//         44: '11rem',
+//         45: '11.25rem',
+//         46: '11.5rem',
+//         47.5: '11.875rem',
+//         49: '12.25rem',
+//         50: '12.5rem',
+//         52: '13rem',
+//         52.5: '13.125rem',
+//         54: '13.5rem',
+//         54.5: '13.625rem',
+//         55: '13.75rem',
+//         55.5: '13.875rem',
+//         59: '14.75rem',
+//         60: '15rem',
+//         62.5: '15.625rem',
+//         65: '16.25rem',
+//         67: '16.75rem',
+//         67.5: '16.875rem',
+//         70: '17.5rem',
+//         72.5: '18.125rem',
+//         73: '18.25rem',
+//         75: '18.75rem',
+//         90: '22.5rem',
+//         94: '23.5rem',
+//         95: '23.75rem',
+//         100: '25rem',
+//         115: '28.75rem',
+//         125: '31.25rem',
+//         132.5: '33.125rem',
+//         150: '37.5rem',
+//         171.5: '42.875rem',
+//         180: '45rem',
+//         187.5: '46.875rem',
+//         203: '50.75rem',
+//         230: '57.5rem',
+//         242.5: '60.625rem',
+//       },
+//       maxWidth: {
+//         2.5: '0.625rem',
+//         3: '0.75rem',
+//         4: '1rem',
+//         11: '2.75rem',
+//         13: '3.25rem',
+//         14: '3.5rem',
+//         15: '3.75rem',
+//         22.5: '5.625rem',
+//         25: '6.25rem',
+//         30: '7.5rem',
+//         34: '8.5rem',
+//         35: '8.75rem',
+//         40: '10rem',
+//         42.5: '10.625rem',
+//         44: '11rem',
+//         45: '11.25rem',
+//         70: '17.5rem',
+//         90: '22.5rem',
+//         94: '23.5rem',
+//         125: '31.25rem',
+//         132.5: '33.125rem',
+//         142.5: '35.625rem',
+//         150: '37.5rem',
+//         180: '45rem',
+//         203: '50.75rem',
+//         230: '57.5rem',
+//         242.5: '60.625rem',
+//         270: '67.5rem',
+//         280: '70rem',
+//         292.5: '73.125rem',
+//       },
+//       maxHeight: {
+//         35: '8.75rem',
+//         70: '17.5rem',
+//         90: '22.5rem',
+//         96: '24rem',
+//         550: '34.375rem',
+//         300: '18.75rem',
+//       },
+//       minWidth: {
+//         22.5: '5.625rem',
+//         42.5: '10.625rem',
+//         47.5: '11.875rem',
+//         75: '18.75rem',
+//       },
+//       zIndex: {
+//         999999: '999999',
+//         99999: '99999',
+//         9999: '9999',
+//         999: '999',
+//         99: '99',
+//         9: '9',
+//         1: '1',
+//       },
+//       opacity: {
+//         65: '.65',
+//       },
+//       // backgroundImage: {
+//       //   video: "url('../images/video/video.png')",
+//       // },
+//       content: {
+//         'icon-copy': 'url("../images/icon/icon-copy-alt.svg")',
+//       },
+//       transitionProperty: {
+//         width: 'width',
+//         stroke: 'stroke',
+//         height: 'max-height',
+//       },
+//       borderWidth: {
+//         6: '6px',
+//       },
+//       boxShadow: {
+//         default: '0px 8px 13px -3px rgba(0, 0, 0, 0.07)',
+//         card: '0px 1px 3px rgba(0, 0, 0, 0.12)',
+//         'card-2': '0px 1px 2px rgba(0, 0, 0, 0.05)',
+//         switcher:
+//           '0px 2px 4px rgba(0, 0, 0, 0.2), inset 0px 2px 2px #FFFFFF, inset 0px -1px 1px rgba(0, 0, 0, 0.1)',
+//         'switch-1': '0px 0px 5px rgba(0, 0, 0, 0.15)',
+//         1: '0px 1px 3px rgba(0, 0, 0, 0.08)',
+//         2: '0px 1px 4px rgba(0, 0, 0, 0.12)',
+//         3: '0px 1px 5px rgba(0, 0, 0, 0.14)',
+//         4: '0px 4px 10px rgba(0, 0, 0, 0.12)',
+//         5: '0px 1px 1px rgba(0, 0, 0, 0.15)',
+//         6: '0px 3px 15px rgba(0, 0, 0, 0.1)',
+//         7: '-5px 0 0 #313D4A, 5px 0 0 #313D4A',
+//         8: '1px 0 0 #313D4A, -1px 0 0 #313D4A, 0 1px 0 #313D4A, 0 -1px 0 #313D4A, 0 3px 13px rgb(0 0 0 / 8%)',
+//       },
+//       dropShadow: {
+//         1: '0px 1px 0px #E2E8F0',
+//         2: '0px 1px 4px rgba(0, 0, 0, 0.12)',
+//       },
+//       keyframes: {
+//         shimmer: {
+//           '0%': { backgroundPositionX: '180%' },
+//           '100%': { backgroundPositionX: '-20%' },
+//         },
+//         scaleIn: {
+//           '0%': { opacity: '0', transform: 'scale(0)' },
+//           '100%': { opacity: '1', transform: 'scale(1)' },
+//         },
+//       },
+//       animation: {
+//         shimmer: 'shimmer 1s ease-in-out infinite',
+//         'pulse-custom':
+//           'pulse-custom 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+//         scaleIn: 'scaleIn 0.4s ease-out',
+//       },
+//     },
+//   },
+//   plugins: [
+//     require('tailwind-scrollbar'),
+//     function ({ addUtilities }) {
+//       addUtilities({
+//         '.direction-rtl': { direction: 'rtl' },
+//         '.direction-ltr': { direction: 'ltr' },
+//       });
+//     },
+//   ],
+// };
