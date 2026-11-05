@@ -154,7 +154,9 @@ export const userStudentSlice = createApi({
         userTypeID,
         filterTypeId,
         filterValue,
-        UserAction,    // ✅ NEW
+        UserAction,
+        SessionID,    // ✅ NEW
+        SubClassID,   // ✅ NEW
       }) => {
         const params = new URLSearchParams();
 
@@ -165,9 +167,19 @@ export const userStudentSlice = createApi({
         if (filterTypeId) params.append('filterTypeId', filterTypeId);
         if (filterValue) params.append('filterValue', filterValue);
 
-        // ✅ UserAction filter (0 বা 1 দুটোই পাঠাবে)
+        // UserAction filter (0 বা 1 দুটোই পাঠাবে)
         if (UserAction !== undefined && UserAction !== null && UserAction !== '') {
           params.append('UserAction', UserAction);
+        }
+
+        // ✅ NEW: Session filter
+        if (SessionID !== undefined && SessionID !== null && SessionID !== '') {
+          params.append('SessionID', SessionID);
+        }
+
+        // ✅ NEW: SubClass filter
+        if (SubClassID !== undefined && SubClassID !== null && SubClassID !== '') {
+          params.append('SubClassID', SubClassID);
         }
 
         return `/student_filter?${params.toString()}`;

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import ReactApexChart from "react-apexcharts";
 import PieChartSkeleton from "../Skeleton/PieChartSkeleton";
 import bnBijoy2Unicode from "../../utils/conveter";
@@ -27,8 +27,25 @@ const PieChart = ({ data, isLoading, isError }) => {
     };
   }, [data]);
 
+  // Reset selected index whenever data changes (e.g. session change)
+  useEffect(() => {
+    setSelectedIndex(null);
+  }, [data]);
+
   if (isLoading) return <PieChartSkeleton />;
   if (isError) return <p>ডেটা আনতে সমস্যা হয়েছে!</p>;
+
+  // Guard: no data
+  if (!series.length || total === 0) {
+    return (
+      <div className="w-full min-h-[450px] 2xl:min-h-[580px] mx-auto mt-6 p-4 bg-white rounded-lg shadow-md flex flex-col items-center justify-center font-SolaimanLipi">
+        <h2 className="text-xl font-bold text-gray-800 text-center mb-4">
+          {translate("Class-based student distribution")}
+        </h2>
+        <p className="text-sm text-gray-500">কোনো ডেটা পাওয়া যায়নি</p>
+      </div>
+    );
+  }
 
   const selected =
     selectedIndex !== null && data?.[selectedIndex]
@@ -130,6 +147,7 @@ const PieChart = ({ data, isLoading, isError }) => {
 
       <div className="flex-1 flex items-center justify-center mt-2">
         <ReactApexChart
+          key={series.join("-")}   // 👈 force re-mount on series change
           options={options}
           series={series}
           type="donut"
