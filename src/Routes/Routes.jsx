@@ -201,6 +201,8 @@ import ExamAllClassRoutine from '../pages/ExamAllClassRoutine';
 import StudentInfo from '../components/Tables/StudentInfo';
 import ModuleLists from '../pages/ModuleLists';
 import VoiceSMS from '../pages/VoiceSMS';
+import JointResultEntry from '../pages/JointResultEntry';
+import JointResultList from '../pages/JointResultList';
 
 const Router = createBrowserRouter([
   {
@@ -1075,6 +1077,36 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.sms_result_publish}
                   >
                     <PublicationOfResultsViaSMS pageTitle="Admission Form Print" />
+                  </RequirePermission>
+                ),
+              },
+                   {
+                path: 'all-tutorials-result',
+                element: (
+                  <AllTutorialsResult pageTitle="All Tutorials Result" />
+                ),
+              },
+              {
+                path: 'joint-result-publish',
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.result_entry}>
+                    <JointResultList pageTitle="যৌথ ফলাফল প্রকাশনা" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'joint-result-publish/list',
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.result_entry}>
+                    <JointResultList pageTitle="যৌথ ফলাফল প্রকাশনা" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'joint-result-publish/entry',
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.result_entry}>
+                    <JointResultEntry pageTitle="গুচ্ছ পদ্ধতিতে রেজাল্ট প্রকাশ" />
                   </RequirePermission>
                 ),
               },
