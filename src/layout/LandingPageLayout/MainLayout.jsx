@@ -5,7 +5,7 @@ import Footer from '../../components/LandingPageComponent/Footer';
 
 const MainLayout = () => {
   return (
-    <div>
+    <div className="font-solaiman">
       <Header />
       <Outlet />
       <Footer />

@@ -254,6 +254,12 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
       }
     });
   };
+
+  const handleRemoveGradeBand = () => {
+    if (gradeFields.length <= MIN_GRADE_BANDS) return;
+    removeGrade(gradeFields.length - 1);
+  };
+
   // const handleAddGradeBand = () => {
   //   if (gradeFields.length >= MAX_GRADE_BANDS) return;
 
@@ -479,8 +485,24 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                   <div>
                     <DefaultInput registerKey={"DivisionEnglish"} placeholder={"বিভাগ (ইংরেজি)"} />
                   </div>
-                  <div>
-                    <DefaultInput registerKey={"Note"} placeholder={"নোট"} />
+                  <div className='relative'>
+                    <DefaultInput registerKey={"Note"} placeholder={"মন্তব্য"} />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                      <button
+                        type="button"
+                        aria-label="এই ডিভিশনটি/বিভাগটি কোন শিক্ষার্থী পেলে তা মার্কসীটে শিক্ষক মন্তব্য হিসেবে অটো চলে আসবে।"
+                        data-tooltip-id="subject-column-tooltip"
+                        data-tooltip-content="এই ডিভিশনটি/বিভাগটি কোন শিক্ষার্থী পেলে তা মার্কসীটে শিক্ষক মন্তব্য হিসেবে অটো চলে আসবে।"
+                        data-tooltip-place="top"
+                        className="inline-flex h-4 w-4 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                      >
+                        <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" className="h-3.5 w-3.5">
+                          <circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.5" />
+                          <path d="M10 9v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                          <circle cx="10" cy="6.5" r="1" fill="currentColor" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -521,7 +543,8 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                     { title: "SL.", render: (row, rowIndex) => <>{rowIndex + 1}</> },
                     { title: "বিভাগ (বাংলা).", field: "DivisionNames" },
                     { title: "বিভাগ ( ইংরেজি ).", field: "DivisionEnglishs" },
-                    { title: "বিভাগ ( আরবি ).", field: "DivisionArabics" }
+                    { title: "বিভাগ ( আরবি ).", field: "DivisionArabics" },
+                    { title: "মন্তব্য", field: "Note", render: (row) => <>{row?.Note ? row.Note : '-'}</>, position: "center" }
                   ]} data={examDivitions} isFilterColumn={false} />
                 </div>
               </div>
@@ -637,7 +660,17 @@ export default function ExamAverageDeterminationEdit({ sharedStepData, setShared
                       </tbody>
                     </table>
                   </div>
-                  <div className="flex justify-end py-3 sm:px-2">
+                  <div className="flex flex-col justify-end gap-2 py-3 sm:flex-row sm:px-2">
+                    {gradeFields.length > MIN_GRADE_BANDS && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveGradeBand}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-100 sm:w-auto"
+                      >
+                        <SvgIcon name="FaTrash" size={16} />
+                        {translate("Remove")}
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={handleAddGradeBand}

@@ -70,9 +70,9 @@ const AboutUs = () => {
           <p className="text-base text-gray-500">কিছু গুরুত্বপূর্ণ সংখ্যা যা আমাদের সফলতার গল্প বলে</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-          <StatsItem value="১০০+" label="সক্রিয় প্রতিষ্ঠান" />
-          <StatsItem value="৫০০+" label="শিক্ষক ব্যবহারকারী" />
-          <StatsItem value="১০,০০০+" label="শিক্ষার্থী" />
+          <StatsItem value="৯০০+" label="সক্রিয় প্রতিষ্ঠান" />
+          <StatsItem value="৪৫০০+" label="শিক্ষক ব্যবহারকারী" />
+          <StatsItem value="১০,০০,০০০+" label="শিক্ষার্থী" />
           <StatsItem value="২৪/৭" label="সাপোর্ট" />
         </div>
       </section>

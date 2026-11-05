@@ -39,6 +39,12 @@ const ManagementTeam = () => {
       bio: '.Net Framework, C++, MySql সহ একাধিক প্রোগ্রামিং ল্যাংগুয়েজে অভিজ্ঞ ডেভেলোপার।',
       img: img3,
     },
+        {
+      name: 'মোঃ মনসুরুল আজম শিপু',
+      role: 'কাস্টমার সাপোর্ট লিড',
+      bio: 'গ্রাহক সেবায় ১০ বছরের অভিজ্ঞতা।',
+      img: 'https://placehold.co/200x200/0F828C/white?text=manager',
+    },
     {
       name: 'মো: ইমন হাসান',
       role: 'Web Developer',
@@ -46,10 +52,10 @@ const ManagementTeam = () => {
       img: 'https://placehold.co/200x200/0F828C/white?text=Developer',
     },
     {
-      name: 'মনছুরুল আজম (শিপু)',
-      role: 'কাস্টমার সাপোর্ট লিড',
-      bio: 'গ্রাহক সেবায় ১০ বছরের অভিজ্ঞতা।',
-      img: 'https://placehold.co/200x200/0F828C/white?text=manager',
+      name: 'মো: সায়েফ আহম্মেদ',
+      role: 'Junior Web Developer',
+      bio: 'JAVASCRIPT,MySQL,Python,etc.',
+      img: 'https://placehold.co/200x200/0F828C/white?text=Developer',
     },
   ];
 

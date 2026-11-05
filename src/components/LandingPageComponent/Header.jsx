@@ -45,6 +45,24 @@ const Header = () => {
     </NavLink>
   );
 
+  // লগিন আইকন
+  const LoginIcon = ({ className = 'w-4 h-4' }) => (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+      <path d="M10 17l5-5-5-5" />
+      <path d="M15 12H3" />
+    </svg>
+  );
+
   return (
     <header
       id="mainHeader"
@@ -105,7 +123,19 @@ const Header = () => {
         </div>
 
         <NavLink to="/contact-us" className={`transition-colors duration-200 ${inactiveLink}`}>যোগাযোগ</NavLink>
-        <NavLink to="/login" className={`transition-colors duration-200 ${inactiveLink}`}>মাদ্রাসা লগিন</NavLink>
+
+        {/* মাদ্রাসা লগিন – outlined button, tai alada kore chokhe pore */}
+        <NavLink
+          to="/login"
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-md border text-[13px] font-semibold no-underline shrink-0 transition-all duration-200 active:scale-[0.97] ${
+            scrolled
+              ? 'text-[#0F828C] border-[#0F828C] bg-white hover:bg-[#0F828C] hover:text-white'
+              : 'text-white border-white/70 bg-white/10 backdrop-blur-sm hover:bg-white/20 hover:border-white'
+          }`}
+        >
+          <LoginIcon className="w-4 h-4 shrink-0" />
+          মাদ্রাসা লগিন
+        </NavLink>
       </nav>
 
       {/* CTA – Desktop (inline style added for gradient) */}
@@ -182,7 +212,16 @@ const Header = () => {
 
             {/* Simple links */}
             <NavLink to="/contact-us" onClick={() => setMenuOpen(false)} className="flex items-center justify-between px-5 py-4 text-[15px] font-semibold text-[#263238] border-b border-[#D9E8F5] no-underline hover:text-[#0F828C]">যোগাযোগ</NavLink>
-            <NavLink to="/login" onClick={() => setMenuOpen(false)} className="flex items-center justify-between px-5 py-4 text-[15px] font-semibold text-[#263238] border-b border-[#D9E8F5] no-underline hover:text-[#0F828C]">মাদ্রাসা লগিন</NavLink>
+
+            {/* মাদ্রাসা লগিন – highlighted row */}
+            <NavLink
+              to="/login"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2.5 px-5 py-4 text-[15px] font-bold text-[#0F828C] bg-[#F5F9FC] border-l-4 border-[#0F828C] no-underline hover:bg-[#E8F3F4]"
+            >
+              <LoginIcon className="w-[18px] h-[18px] shrink-0" />
+              মাদ্রাসা লগিন
+            </NavLink>
           </div>
 
           {/* CTA button (mobile) — inline style added for gradient */}

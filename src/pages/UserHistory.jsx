@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import ReactApexChart from "react-apexcharts";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 /* =========================================================
    UserHistory — শিক্ষার্থীর সম্পূর্ণ হিস্ট্রি (ডেমো ডাটা)
@@ -581,6 +582,18 @@ const groupByMonth = (rows) => {
 export default function UserHistory() {
   const user = DEMO_USER;
 
+  /* ---- ইউজার কোড (কুইক অ্যাকশন / URL থেকে) ---- */
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const userCode = searchParams.get("code") || location.state?.userCode || "";
+  const userID = location.state?.userID ?? null;
+
+  useEffect(() => {
+    if (!userCode) return;
+    // TODO: এখানে backend call — userCode / userID দিয়ে ইউজারের ডাটা আনো
+    // যেমন: trigger({ code: userCode }) বা useGetUserHistoryQuery(userCode)
+  }, [userCode, userID]);
+
   const TABS = [
     { key: "all", label: "সব তথ্য" },
     { key: "academic", label: "একাডেমিক" },
@@ -671,7 +684,7 @@ export default function UserHistory() {
       style={{ fontFamily: "'Noto Sans Bengali','Kalpurush','SolaimanLipi',sans-serif" }}
     >
       <div className="w-full mx-auto max-w-[1500px]">
-
+        
 
         {/* ============================================================
             ইউজার ইনফরমেশন
@@ -716,7 +729,7 @@ export default function UserHistory() {
 
               {/* কলাম ১ */}
               <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2 space-y-1">
-                <InfoRow icon="file" label="দাখেলা" value={bn(user.dakhila)} />
+                <InfoRow icon="file" label="দাখেলা" value={bn(userCode || user.dakhila)} />
                 <InfoRow icon="user" label="পিতা" value={user.father} />
                 <InfoRow icon="user" label="সম্পর্ক ১" value={user.relation1} />
                 <InfoRow icon="user" label="মাতা" value={user.mother} />
