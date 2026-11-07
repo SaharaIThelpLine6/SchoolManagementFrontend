@@ -74,6 +74,41 @@ const COL_W = {
   total: 15,    // উপ / অনু
 };
 
+// ✅ পৃষ্ঠার দিক (Portrait / Landscape) — localStorage এ মনে থাকবে
+const ORIENTATION_KEY = "studentReport_attendanceOrientation";
+const ROWS_KEY = "studentReport_attendanceRows";
+const ROW_HEIGHT_KEY = "studentReport_attendanceRowHeight";
+const SON_KEY = "studentReport_attendanceSon";
+const HIJRI_KEY = "studentReport_attendanceHijri";
+
+const readText = (key) => {
+  if (typeof window === "undefined") return "";
+  try {
+    return localStorage.getItem(key) || "";
+  } catch {
+    return "";
+  }
+};
+
+const readNumber = (key, fallback, min) => {
+  if (typeof window === "undefined") return fallback;
+  try {
+    const n = Number(localStorage.getItem(key));
+    return Number.isFinite(n) && n >= min ? n : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const readOrientation = () => {
+  if (typeof window === "undefined") return "portrait";
+  try {
+    return localStorage.getItem(ORIENTATION_KEY) === "landscape" ? "landscape" : "portrait";
+  } catch {
+    return "portrait";
+  }
+};
+
 const BanglaAttendence = ({ 
   reportData, 
   SubClassID, 
@@ -82,6 +117,52 @@ const BanglaAttendence = ({
   rowsPerPage = { portrait: 35, landscape: 30 }
 }) => {
   const [logo, setLogo] = useState(null);
+
+  // ✅ পৃষ্ঠার দিক
+  const [orientation, setOrientation] = useState(readOrientation);
+  useEffect(() => {
+    try {
+      localStorage.setItem(ORIENTATION_KEY, orientation);
+    } catch {
+      /* ignore */
+    }
+  }, [orientation]);
+
+  // ✅ প্রতি পেজে কয়টি রো + প্রতিটি রো কত উঁচু — এখান থেকেই ঠিক করা যাবে
+  const settingsRows = rowsPerPage?.portrait || 35;
+  const [rowsPerPageInput, setRowsPerPageInput] = useState(() =>
+    readNumber(ROWS_KEY, settingsRows, 1)
+  );
+  const [rowHeight, setRowHeight] = useState(() => readNumber(ROW_HEIGHT_KEY, 22, 10));
+
+  // ✅ সন ও হিজরী — ইউজার নিজে লিখবে, রিপোর্টের ঘরে বসবে
+  const [sonText, setSonText] = useState(() => readText(SON_KEY));
+  const [hijriText, setHijriText] = useState(() => readText(HIJRI_KEY));
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(SON_KEY, sonText);
+      localStorage.setItem(HIJRI_KEY, hijriText);
+    } catch {
+      /* ignore */
+    }
+  }, [sonText, hijriText]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(ROWS_KEY, String(rowsPerPageInput));
+      localStorage.setItem(ROW_HEIGHT_KEY, String(rowHeight));
+    } catch {
+      /* ignore */
+    }
+  }, [rowsPerPageInput, rowHeight]);
+
+  const isLandscape = orientation === "landscape";
+  // 🔴 A4 এর ছাপযোগ্য জায়গা (margin 5mm 8mm বাদ দিয়ে) — এর বেশি হলেই
+  //    পৃষ্ঠা উপচে পরের শিটে চলে যেত, তাই height ফিক্সড + overflow hidden
+  const PAGE_W = isLandscape ? "281mm" : "194mm";
+  const PAGE_H = isLandscape ? "193mm" : "280mm";
+  const PAGE_SIZE = isLandscape ? "A4 landscape" : "A4 portrait";
 
   const { data: instutionInfo, isLoading: institutionLoading } =
     useGetInstitutionInfoQuery();
@@ -149,7 +230,7 @@ const BanglaAttendence = ({
     setManualEmptyRows(0);
   }, [reportData, SubClassID, SessionID]);
 
-  const ROWS_PER_PAGE = rowsPerPage?.portrait || 35;
+  const ROWS_PER_PAGE = Math.max(1, Number(rowsPerPageInput) || 1);
 
   const chunks = useMemo(() => {
     if (!reportData || reportData.length === 0) return [];
@@ -164,7 +245,7 @@ const BanglaAttendence = ({
   const remainingSpace = Math.max(0, ROWS_PER_PAGE - (chunks[chunks.length - 1]?.length || 0));
 
   return (
-    <div className="font-bangla bg-white text-xs p-4 sm:p-6">
+    <div className="bn-att font-bangla bg-white text-xs p-4 sm:p-6">
       <style>
         {`
           @keyframes bangla-attendence-spin {
@@ -173,9 +254,39 @@ const BanglaAttendence = ({
           .bangla-attendence-spinner {
             animation: bangla-attendence-spin 0.8s linear infinite;
           }
+
+          /* ✅ তারিখের ঘরের লম্বালম্বি লেখা — <th> এ transform দিলে
+             border-collapse এর উপরের লাইনটা প্রিন্টে মুছে যায়, তাই
+             ভেতরের <span> এ দেওয়া হলো */
+          .bn-att .vertical-text {
+            display: inline-block;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            height: 50px;
+            padding: 2px 0;
+            font-size: 10px;
+            font-weight: bold;
+            line-height: 1;
+          }
+
+          /* 🔴 স্ক্রিনের প্রিভিউ = প্রিন্টের পেজ — যা দেখছো ঠিক তাই ছাপবে */
+          .bn-att .print-page-container {
+            width: ${PAGE_W};
+            height: ${PAGE_H};
+            max-width: 100%;
+            margin: 0 auto 18px auto;
+            background: #fff;
+            overflow: hidden;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 6px rgba(0,0,0,0.15);
+          }
+
           @media print {
             @page {
-              size: A4 portrait;
+              size: ${PAGE_SIZE};
               margin: 5mm 8mm;
             }
             html, body {
@@ -184,17 +295,19 @@ const BanglaAttendence = ({
               box-sizing: border-box;
               background: white;
             }
-            .print-page-container {
+            .bn-att { padding: 0 !important; }
+            .bn-att .print-page-container {
+              width: 100%;
+              height: ${PAGE_H};
+              max-width: none;
+              margin: 0;
+              box-shadow: none;
+              overflow: hidden;
               page-break-after: always;
               page-break-inside: avoid;
               break-after: page;
-              height: 285mm;
-              position: relative;
-              box-sizing: border-box;
-              display: flex;
-              flex-direction: column;
             }
-            .print-page-container:last-child {
+            .bn-att .print-page-container:last-child {
               page-break-after: auto;
               break-after: auto;
             }
@@ -215,15 +328,6 @@ const BanglaAttendence = ({
             th, td {
               border: 1px solid black !important;
               padding: 0;
-            }
-            .vertical-text {
-              writing-mode: vertical-rl;
-              text-orientation: mixed;
-              transform: rotate(180deg);
-              height: 50px;
-              padding: 2px !important;
-              font-size: 10px;
-              font-weight: bold;
             }
             .no-print { display: none !important; }
           }
@@ -315,6 +419,75 @@ const BanglaAttendence = ({
           </select>
         </div>
 
+        {/* ✅ সন — রিপোর্টের "সন :" ঘরে বসবে */}
+        <div>
+          <label className="text-xs font-medium text-slate-600 block mb-1">সন</label>
+          <input
+            type="text"
+            value={sonText}
+            onChange={(e) => setSonText(e.target.value)}
+            placeholder="যেমন: ২০২৬"
+            className="w-32 border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
+          />
+        </div>
+
+        {/* ✅ হিজরী — রিপোর্টের "হিজরী :" ঘরে বসবে */}
+        <div>
+          <label className="text-xs font-medium text-slate-600 block mb-1">হিজরী</label>
+          <input
+            type="text"
+            value={hijriText}
+            onChange={(e) => setHijriText(e.target.value)}
+            placeholder="যেমন: ১৪৪৮"
+            className="w-32 border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
+          />
+        </div>
+
+        {/* ✅ পৃষ্ঠার দিক — Portrait / Landscape */}
+        <div>
+          <label className="text-xs font-medium text-slate-600 block mb-1">পৃষ্ঠার দিক</label>
+          <select
+            value={orientation}
+            onChange={(e) => setOrientation(e.target.value)}
+            className="border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
+          >
+            <option value="portrait">Portrait (লম্বালম্বি)</option>
+            <option value="landscape">Landscape (আড়াআড়ি)</option>
+          </select>
+        </div>
+
+        {/* ✅ প্রতি পেজে কয়টি রো */}
+        <div>
+          <label className="text-xs font-medium text-slate-600 block mb-1">প্রতি পেজে রো</label>
+          <input
+            type="number"
+            min={1}
+            max={80}
+            value={rowsPerPageInput}
+            onChange={(e) => setRowsPerPageInput(e.target.value === "" ? "" : Number(e.target.value))}
+            onBlur={(e) => {
+              const n = Number(e.target.value);
+              setRowsPerPageInput(Number.isFinite(n) && n >= 1 ? Math.min(80, n) : 1);
+            }}
+            className="w-28 border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
+          />
+        </div>
+
+        {/* ✅ রো-এর উচ্চতা — বেশি রো আঁটাতে এটা কমাও */}
+        <div>
+          <label className="text-xs font-medium text-slate-600 block mb-1">
+            রো-এর উচ্চতা ({toBengaliNumber(rowHeight)}px)
+          </label>
+          <input
+            type="range"
+            min={12}
+            max={34}
+            value={rowHeight}
+            onChange={(e) => setRowHeight(Number(e.target.value))}
+            className="w-36 accent-[#1B3A57] align-middle"
+          />
+        </div>
+
         {hasMonth && startWeekday !== "" && (
           <div className="text-xs text-slate-700 bg-red-50 border border-red-200 rounded px-3 py-1.5">
             <span className="font-semibold text-red-700">শুক্রবার (ছুটি): </span>
@@ -384,6 +557,9 @@ const BanglaAttendence = ({
           <span className="text-xs text-slate-500 ml-auto">
             পেজে জায়গা আছে: {toBengaliNumber(remainingSpace)} টি ঘর
           </span>
+          <span className="w-full text-[11px] text-slate-400">
+            প্রিভিউতে নিচের অংশ কেটে গেলে — রো-এর উচ্চতা কমাও, অথবা পৃষ্ঠার দিক Landscape করো।
+          </span>
         </div>
       )}
 
@@ -416,15 +592,7 @@ const BanglaAttendence = ({
         const emptyRowsOnThisPage = isLastPage ? manualEmptyRows : 0;
 
         return (
-          <div
-            key={pageIndex}
-            className="print-page-container"
-            style={{
-              width: "100%",
-              maxWidth: "210mm",
-              margin: "0 auto",
-            }}
-          >
+          <div key={pageIndex} className="print-page-container">
             <div className="bg-white flex flex-col h-full p-2">
               
               {/* হেডার */}
@@ -457,10 +625,10 @@ const BanglaAttendence = ({
                   শিক্ষাবর্ষ : {sessionData?.SessionName || ''}
                 </div>
                 <div className="flex-1 border border-black py-0.5 px-2">
-                  সন :
+                  সন : {sonText}
                 </div>
                 <div className="flex-1 border border-black py-0.5 px-2">
-                  হিজরী :
+                  হিজরী : {hijriText}
                 </div>
                 {/* 🔹 আরবি অথবা ইংরেজি — যেকোনো একটি */}
                 <div className="flex-1 border border-black py-0.5 px-2">
@@ -469,7 +637,7 @@ const BanglaAttendence = ({
               </div>
 
               {/* টেবিল */}
-              <div className="w-full flex-grow">
+              <div className="w-full flex-grow min-h-0 overflow-hidden">
                 <table className="w-full border-collapse table-fixed text-[11px]">
                   {/* ✅ কলামের প্রস্থ একজায়গায় — নাম বড়, বাকিগুলো সরু */}
                   <colgroup>
@@ -503,19 +671,23 @@ const BanglaAttendence = ({
                         return (
                           <th
                             key={day}
-                            className="border border-black text-center bg-white vertical-text relative"
+                            className="border border-black text-center bg-white p-0 align-bottom"
                           >
-                            <span className={friday ? "text-red-600 font-extrabold" : ""}>
+                            <span
+                              className={`vertical-text ${
+                                friday ? "text-red-600 font-extrabold" : ""
+                              }`}
+                            >
                               {toBengaliNumber(day)}
                             </span>
                           </th>
                         );
                       })}
-                      <th className="border border-black text-center bg-white vertical-text">
-                        উপ :
+                      <th className="border border-black text-center bg-white p-0 align-bottom">
+                        <span className="vertical-text">উপ :</span>
                       </th>
-                      <th className="border border-black text-center bg-white vertical-text">
-                        অনু :
+                      <th className="border border-black text-center bg-white p-0 align-bottom">
+                        <span className="vertical-text">অনু :</span>
                       </th>
                     </tr>
                   </thead>
@@ -523,7 +695,7 @@ const BanglaAttendence = ({
                     {chunk.map((student, index) => {
                       const serial = pageIndex * ROWS_PER_PAGE + index + 1;
                       return (
-                        <tr key={student.AdmissionID ?? index} className="h-[22px]">
+                        <tr key={student.AdmissionID ?? index} style={{ height: `${rowHeight}px` }}>
                           <td className="border border-black text-center bg-white align-middle">
                             {toBengaliNumber(serial)}
                           </td>
@@ -577,7 +749,7 @@ const BanglaAttendence = ({
                     {/* ✅ ইউজারের যোগ করা খালি রো */}
                     {emptyRowsOnThisPage > 0 &&
                       Array.from({ length: emptyRowsOnThisPage }).map((_, i) => (
-                        <tr key={`manual-empty-${i}`} className="h-[22px]">
+                        <tr key={`manual-empty-${i}`} style={{ height: `${rowHeight}px` }}>
                           <td className="border border-black text-center bg-white"></td>
                           <td className="border border-black text-center bg-white"></td>
                           <td className="border border-black text-center bg-white"></td>
@@ -622,7 +794,7 @@ const BanglaAttendence = ({
               </div>
 
               {/* ফুটার */}
-              <div className="flex justify-between items-end mt-6 pb-1 px-4 text-[12px] font-bold">
+              <div className="flex justify-between items-end mt-3 px-4 text-[12px] font-bold shrink-0">
                 <div className="border-t border-black w-56 text-center pt-1">
                   মোট কার্য দিবস : 
                 </div>
@@ -630,7 +802,7 @@ const BanglaAttendence = ({
                   শিক্ষক/শিক্ষিকার স্বাক্ষর : 
                 </div>
               </div>
-              <div className="text-center w-full text-black text-[13px] font-bold mt-2">
+              <div className="text-center w-full text-black text-[13px] font-bold mt-1 shrink-0">
                 পৃষ্ঠা : {toBengaliNumber(pageIndex + 1)}
               </div>
             </div>

@@ -14,7 +14,7 @@ export const reportQuerySlice = createApi({
       return headers;
     },
   }),
-  tagTypes: ['ReportTemplate'],
+  tagTypes: ['ReportTemplate', 'ReportSettings'],
   endpoints: (builder) => ({
     // ---------- Template CRUD ----------
     getReportTemplates: builder.query({
@@ -77,6 +77,26 @@ export const reportQuerySlice = createApi({
       }),
     }),
 
+    // ⚙️ রিপোর্ট সেটিং পড়া
+    getReportSettings: builder.query({
+      query: (reportKey) =>
+        `/report_settings?report_key=${encodeURIComponent(reportKey || 'student_report')}`,
+      providesTags: (result, error, reportKey) => [
+        { type: 'ReportSettings', id: reportKey || 'student_report' },
+      ],
+    }),
+
+    // ⚙️ রিপোর্ট সেটিং সেভ (upsert)
+    saveReportSettings: builder.mutation({
+      query: (body) => ({
+        url: '/report_settings',
+        method: 'PUT',
+        body,
+      }),
+      invalidatesTags: (result, error, body) => [
+        { type: 'ReportSettings', id: body?.ReportKey || 'student_report' },
+      ],
+    }),
   }),
 });
 
@@ -88,4 +108,6 @@ export const {
   useGetReportFiltersQuery,
   useGetStudentReportListQuery,
   useGetExamRoutineReportQuery,
+  useGetReportSettingsQuery,
+  useSaveReportSettingsMutation,
 } = reportQuerySlice;

@@ -1,7 +1,15 @@
-import SvgIcon from "../../../../components/icons/SvgIcon";
-import { GENDER_OPTIONS, ADMISSION_TYPE_OPTIONS, USER_STATUS_OPTIONS } from "./reportFilterConstants";
+// view/students/reports/student-report-list/ReportFilterFields.jsx
+//
+// 🔵 ফিল্টারগুলো উপরের বারে (হরাইজন্টাল)। নিচের ফুটার সারি (নোট/রিসেট) বাদ —
+//    "মোট পাওয়া গেছে" এখন গ্রিডের ভেতরেই উপরে বসে, আর রিসেট বাটন হেডারে।
 
-// 🟢 কয়টি বিষয়ের খাতা — শুধু BanglaAttendenceSubjectWari-এর জন্য (showBookLine=true হলে দেখাবে)
+import {
+  GENDER_OPTIONS,
+  ADMISSION_TYPE_OPTIONS,
+  USER_STATUS_OPTIONS,
+} from "./reportFilterConstants";
+
+// 🟢 কয়টি বিষয়ের খাতা — শুধু BanglaAttendenceSubjectWari (showBookLine)
 const BOOK_OF_SUBJECT_OPTIONS = [
   { value: "3", label: "৩ বিষয়ের খাতা" },
   { value: "4", label: "৪ বিষয়ের খাতা" },
@@ -13,29 +21,69 @@ const BOOK_OF_SUBJECT_OPTIONS = [
   { value: "10", label: "১০ বিষয়ের খাতা" },
 ];
 
+// 🟢 ভর্তি ফরমের অবস্থা — শুধু AdmissionFormPdf (showAdmissionStatus)
+export const ADMISSION_STATUS_OPTIONS = [
+  { value: "", label: "খালি ফরম (তথ্য ছাড়া)" },
+  { value: "1", label: "ভর্তির আগে (বিগত তথ্য)" },
+  { value: "2", label: "ভর্তির পরে (বিগত + বর্তমান)" },
+];
+
 const bn = (num) => {
   if (num === "" || num === null || num === undefined) return "";
   const d = ["০", "১", "২", "৩", "৪", "৫", "৬", "৭", "৮", "৯"];
   return num.toString().replace(/\d/g, (x) => d[x]);
 };
 
-function Checkbox({ checked, onChange, label, disabled }) {
+/* ---------------------------------------------------------
+   শেয়ার্ড ফিল্ড — বাইরের কম্পোনেন্টও একই লুক পাবে
+--------------------------------------------------------- */
+export function FilterSelect({ label, required, value, onChange, children, className = "" }) {
   return (
-    <label className={`flex items-center gap-2 text-sm py-1 ${disabled ? "text-slate-400 cursor-not-allowed opacity-60" : "text-slate-700 cursor-pointer"}`}>
-      <span
-        onClick={() => !disabled && onChange(!checked)}
-        className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 ${
-          checked ? "bg-[#1B3A57] border-[#1B3A57]" : "bg-white border-slate-300"
-        }`}
+    <div className={className}>
+      <label className="block text-[12px] font-semibold text-slate-600 mb-1 truncate">
+        {label} {required && <span className="text-red-500">*</span>} :
+      </label>
+      <select
+        value={value ?? ""}
+        onChange={onChange}
+        className="w-full border border-slate-300 rounded-lg px-2.5 py-2 text-[13px] bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-200 focus:border-indigo-400 transition-colors"
       >
-        {checked && (
-          <span className="text-white">
-            <SvgIcon name="FiCheck" size={11} />
-          </span>
-        )}
-      </span>
-      <span>{label}</span>
-    </label>
+        {children}
+      </select>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------
+   🟢 ফলাফল — গ্রিডের ভেতরেই, ফিল্টারগুলোর পাশে
+--------------------------------------------------------- */
+function ResultBox({ isReady, loading, resultCount, requiredFilters }) {
+  let text;
+  let tone;
+
+  if (!isReady) {
+    text = `${requiredFilters.includes("SubClassID") ? "শিক্ষাবর্ষ ও জামাত" : "শিক্ষাবর্ষ"} নির্বাচন করুন`;
+    tone = "border-amber-300 bg-amber-50 text-amber-700";
+  } else if (loading) {
+    text = "লোড হচ্ছে...";
+    tone = "border-indigo-300 bg-indigo-50 text-indigo-700";
+  } else {
+    text = `মোট পাওয়া গেছে: ${bn(resultCount)} জন শিক্ষার্থী`;
+    tone = "border-emerald-300 bg-emerald-50 text-emerald-700";
+  }
+
+  return (
+    <div>
+      <label className="block text-[12px] font-semibold text-slate-600 mb-1 truncate">
+        ফলাফল :
+      </label>
+      <div
+        className={`w-full border rounded-lg px-2.5 py-2 text-[12.5px] font-bold truncate ${tone}`}
+        title={text}
+      >
+        {text}
+      </div>
+    </div>
   );
 }
 
@@ -49,165 +97,161 @@ export default function ReportFilterFields({
   residentialData = [],
   resultCount = 0,
   loading = false,
-  onPrint,
-  onReset,
-  note,
-  showBookLine = false, // 🟢 নতুন prop — শুধু BanglaAttendenceSubjectWari এর জন্য true হবে
+  isReady = true,
+  requiredFilters = [],
+  showBookLine = false,
+  showAdmissionStatus = false,
+  leadingField = null, // রিপোর্ট সিলেক্ট বক্স — গ্রিডের প্রথম ঘরে বসবে
+  extraFilters = null, // রিপোর্ট-ভিত্তিক বাড়তি অপশন (ভাষা, প্রিন্ট মোড ইত্যাদি)
 }) {
-  const handlePrint = onPrint || (() => window.print());
+  const req = (key) => requiredFilters.includes(key);
+  const set = (key) => (e) => setFilters((p) => ({ ...p, [key]: e.target.value }));
+
+  // 🔹 বাড়তি অপশন না থাকলে দ্বিতীয় সারিটা একদমই রেন্ডার হবে না
+  const hasSecondRow = showBookLine || showAdmissionStatus || Boolean(extraFilters);
 
   return (
-    <div className="space-y-4">
-      {note && <p className="text-xs text-slate-500 leading-relaxed">{note}</p>}
+    <div className="space-y-3">
+      {/* ================= মূল ফিল্টার সারি ================= */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
+        {leadingField}
 
-      <div className="flex gap-2 mb-2 border-b border-slate-200 pb-4">
-        <button
-          onClick={handlePrint}
-          className="flex-1 bg-[#1B3A57] text-white py-2 rounded text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[#1B3A57]/90 transition-colors"
-        >
-          <SvgIcon name="FiPrinter" size={16} /> প্রিন্ট করুন
-        </button>
-        <button
-          onClick={onReset}
-          className="px-3 bg-slate-200 text-slate-700 py-2 rounded text-sm font-semibold hover:bg-slate-300 transition-colors flex items-center gap-1.5"
-          title="রিসেট ফিল্টার"
-        >
-          <SvgIcon name="FiRefreshCw" size={16} />
-          রিসেট ফিল্টার
-        </button>
-      </div>
-
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">শিক্ষাবর্ষ</label>
-        <select
+        <FilterSelect
+          label="শিক্ষাবর্ষ"
+          required={req("SessionID")}
           value={filters.SessionID}
-          onChange={(e) => setFilters((p) => ({ ...p, SessionID: e.target.value }))}
-          className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
+          onChange={set("SessionID")}
         >
-          <option value="">উভয়</option>
+          <option value="">নির্বাচন করুন</option>
           {sessions.map((s) => (
-            <option key={s.SessionID} value={s.SessionID}>{s.SessionName}</option>
+            <option key={s.SessionID} value={s.SessionID}>
+              {s.SessionName}
+            </option>
           ))}
-        </select>
-      </div>
+        </FilterSelect>
 
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">সাব ক্লাস / জামাত</label>
-        <select
+        <FilterSelect
+          label="সাব ক্লাস / জামাত"
+          required={req("SubClassID")}
           value={filters.SubClassID}
-          onChange={(e) => setFilters((p) => ({ ...p, SubClassID: e.target.value }))}
-          className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
+          onChange={set("SubClassID")}
         >
-          <option value="">উভয়</option>
+          <option value="">{req("SubClassID") ? "নির্বাচন করুন" : "সকল জামাত"}</option>
           {subClasses.map((sc) => (
             <option key={sc.SubClassID} value={sc.SubClassID}>
               {sc.SubClass}
             </option>
           ))}
-        </select>
-      </div>
+        </FilterSelect>
 
-      {/* 🟢 কয়টি বিষয়ের খাতা — শুধু showBookLine=true হলে দেখাবে (BanglaAttendenceSubjectWari) */}
-      {showBookLine && (
-        <div>
-          <label className="text-xs font-medium text-slate-600 mb-1 block">কয়টি বিষয়ের খাতা</label>
-          <select
-            value={filters.BookLine || "3"}
-            onChange={(e) => setFilters((p) => ({ ...p, BookLine: e.target.value }))}
-            className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
-          >
-            {BOOK_OF_SUBJECT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">লিঙ্গ</label>
-        <select
-          value={filters.gender}
-          onChange={(e) => setFilters((p) => ({ ...p, gender: e.target.value }))}
-          className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
-        >
+        <FilterSelect label="লিঙ্গ" value={filters.gender} onChange={set("gender")}>
           {GENDER_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
+            <option key={o.label} value={o.value}>
+              {o.label}
+            </option>
           ))}
-        </select>
-      </div>
+        </FilterSelect>
 
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">নতুন/পুরাতন</label>
-        <select
+        <FilterSelect
+          label="নতুন / পুরাতন"
           value={filters.admissionType}
-          onChange={(e) => setFilters((p) => ({ ...p, admissionType: e.target.value }))}
-          className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
+          onChange={set("admissionType")}
         >
           {ADMISSION_TYPE_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
+            <option key={o.label} value={o.value}>
+              {o.label}
+            </option>
           ))}
-        </select>
-      </div>
+        </FilterSelect>
 
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">Residential :</label>
-        <select
+        <FilterSelect
+          label="অবস্থান"
           value={filters.ResidentialStatusId}
-          onChange={(e) => setFilters((p) => ({ ...p, ResidentialStatusId: e.target.value }))}
-          className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
-        >
-          <option value="">Select</option>
-          {residentialData.map((r) => (
-            <option key={r.RDID} value={r.RDID}>{r.ResidentialName}</option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">User Status</label>
-        <div className="flex items-center gap-4">
-          {USER_STATUS_OPTIONS.map((o) => (
-            <Checkbox
-              key={o.value}
-              checked={filters.is_active === o.value}
-              onChange={() => setFilters((p) => ({ ...p, is_active: o.value }))}
-              label={o.label}
-            />
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">জেলা</label>
-        <select
-          value={filters.DistrictID}
-          onChange={(e) => setFilters((p) => ({ ...p, DistrictID: e.target.value }))}
-          className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
+          onChange={set("ResidentialStatusId")}
         >
           <option value="">সকল</option>
-          {districts.map((d) => (
-            <option key={d.DistrictID} value={d.DistrictID}>{d.DistrictName}</option>
+          {residentialData.map((r) => (
+            <option key={r.RDID} value={r.RDID}>
+              {r.ResidentialName}
+            </option>
           ))}
-        </select>
-      </div>
+        </FilterSelect>
 
-      <div>
-        <label className="text-xs font-medium text-slate-600 mb-1 block">থানা</label>
-        <select
+        <FilterSelect label="স্ট্যাটাস" value={filters.is_active} onChange={set("is_active")}>
+          {USER_STATUS_OPTIONS.map((o) => (
+            <option key={o.label} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </FilterSelect>
+
+        <FilterSelect label="জেলা" value={filters.DistrictID} onChange={set("DistrictID")}>
+          <option value="">সকল</option>
+          {districts.map((d) => (
+            <option key={d.DistrictID} value={d.DistrictID}>
+              {d.DistrictName}
+            </option>
+          ))}
+        </FilterSelect>
+
+        <FilterSelect
+          label="থানা"
           value={filters.permanentPoliceStationID}
-          onChange={(e) => setFilters((p) => ({ ...p, permanentPoliceStationID: e.target.value }))}
-          className="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-[#1B3A57]"
+          onChange={set("permanentPoliceStationID")}
         >
           <option value="">সকল</option>
           {thanas.map((th) => (
-            <option key={th.PoliceStationID} value={th.PoliceStationID}>{th.PoliceStationName}</option>
+            <option key={th.PoliceStationID} value={th.PoliceStationID}>
+              {th.PoliceStationName}
+            </option>
           ))}
-        </select>
+        </FilterSelect>
+
+        {/* 🟢 ফলাফল — থানার ঠিক পরের ঘরে */}
+        <ResultBox
+          isReady={isReady}
+          loading={loading}
+          resultCount={resultCount}
+          requiredFilters={requiredFilters}
+        />
       </div>
 
-      <div className="text-xs text-slate-500 pt-1 font-semibold">
-        {loading ? "লোড হচ্ছে..." : `মোট পাওয়া গেছে: ${bn(resultCount)} জন শিক্ষার্থী`}
-      </div>
+      {/* ============ রিপোর্ট-ভিত্তিক দ্বিতীয় সারি (দরকার হলেই) ============ */}
+      {hasSecondRow && (
+        <div className="rounded-xl border border-violet-100 bg-violet-50/60 p-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 items-end">
+            {showBookLine && (
+              <FilterSelect
+                label="কয়টি বিষয়ের খাতা"
+                value={filters.BookLine || "3"}
+                onChange={set("BookLine")}
+              >
+                {BOOK_OF_SUBJECT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </FilterSelect>
+            )}
+
+            {showAdmissionStatus && (
+              <FilterSelect
+                label="ভর্তির অবস্থা"
+                value={filters.IsActive || ""}
+                onChange={set("IsActive")}
+              >
+                {ADMISSION_STATUS_OPTIONS.map((o) => (
+                  <option key={o.label} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </FilterSelect>
+            )}
+
+            {extraFilters}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { Buffer } from "buffer";
 import { useState, useMemo, useEffect, useRef } from "react";
 import Button from "../../../../components/Button/Button";
-import SvgIcon from "../../../../components/icons/SvgIcon";
 import { useGetInstitutionInfoQuery } from "../../../../features/settings/settingsQuerySlice";
 import {
   useGetReportTemplatesQuery,
@@ -9,12 +8,22 @@ import {
   useUpdateReportTemplateMutation,
   useDeleteReportTemplateMutation,
 } from "../../../../features/reports/reportQuerySlice";
-import useReportFilters from "../../../../hooks/ReportPageHooks/useReportFilters";
-import ReportFilterFields from "./ReportFilterFields";
 import { ADMISSION_TYPE_OPTIONS } from "./reportFilterConstants";
+import {
+  GearIcon,
+  CheckIcon,
+  TrashIcon,
+  PlusIcon,
+  DocIcon,
+  LayoutIcon,
+  ChevronIcon,
+} from "./ReportIcons";
 
 /* ---------------------------------------------------------
-   Static definitions
+   🔵 পরিবর্তন:
+   - ফিল্টার আর এখানে নেই — ফিল্টার এখন উপরের বারে (FilterableReportView)।
+     এই কম্পোনেন্ট শুধু props হিসেবে filters/filteredData পায়।
+   - ফন্ট সাইজ ও জলছাপ ⚙️ সেটিং থেকে আসে (ReportThemeRoot এর CSS ভ্যারিয়েবল)।
 --------------------------------------------------------- */
 
 const SUB_HEADER_DEFS = [
@@ -63,7 +72,7 @@ const PAGE_PX = {
   landscape: { width: 1123, height: 790, padX: 16, padY: 16 },
 };
 
-// ✅ পারফেক্ট ব্যালেন্সের জন্য সেফটি গ্যাপ ২৫px করা হয়েছে
+// ✅ পারফেক্ট ব্যালেন্সের জন্য সেফটি গ্যাপ ২৫px
 const SAFETY_GAP = 25;
 
 const SHRINK_STEP = 10;
@@ -111,11 +120,11 @@ function defaultBuilderState() {
    Small UI bits
 --------------------------------------------------------- */
 
-function SectionTitle({ icon, children }) {
+function SectionTitle({ icon, iconNode, children }) {
   return (
     <div className="flex items-center gap-2 text-slate-700 font-semibold text-sm mb-3">
-      <span className="text-[#8B2635]">
-        <SvgIcon name={icon} size={16} />
+      <span className="text-[#8B2635] flex items-center">
+        {iconNode || icon}
       </span>
       <span>{children}</span>
     </div>
@@ -133,7 +142,7 @@ function Checkbox({ checked, onChange, label, disabled }) {
       >
         {checked && (
           <span className="text-white">
-            <SvgIcon name="FiCheck" size={11} />
+            <CheckIcon size={11} />
           </span>
         )}
       </span>
@@ -142,33 +151,26 @@ function Checkbox({ checked, onChange, label, disabled }) {
   );
 }
 
-function TabButton({ active, onClick, icon, children }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-sm font-medium border-b-2 transition-colors ${
-        active ? "border-[#8B2635] text-[#8B2635]" : "border-transparent text-slate-500 hover:text-slate-700"
-      }`}
-    >
-      <SvgIcon name={icon} size={14} />
-      {children}
-    </button>
-  );
-}
-
 /* ---------------------------------------------------------
    Main component
 --------------------------------------------------------- */
 
 export default function ReportBuilder({
+  // 🔵 উপরের ফিল্টার বার থেকে আসা ডাটা
+  filters = {},
+  filteredData = [],
+  dataLoading = false,
+  sessions = [],
+  subClasses = [],
+  settings,
   portraitRowsPerPage = 20,
   landscapeRowsPerPage = 21,
 }) {
-  const [tab, setTab] = useState("design");
   const [builder, setBuilder] = useState(defaultBuilderState());
   const [templateName, setTemplateName] = useState("");
   const [activeTemplateId, setActiveTemplateId] = useState(null);
   const [savingTemplate, setSavingTemplate] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(true);
 
   const [logo, setLogo] = useState(null);
   const { data: instutionInfo } = useGetInstitutionInfoQuery();
@@ -230,19 +232,6 @@ export default function ReportBuilder({
   const [addReportTemplate] = useAddReportTemplateMutation();
   const [updateReportTemplate] = useUpdateReportTemplateMutation();
   const [deleteReportTemplate] = useDeleteReportTemplateMutation();
-
-  const {
-    filters,
-    setFilters,
-    resetFilters,
-    sessions,
-    subClasses,
-    districts,
-    thanas,
-    residentialData,
-    filteredData,
-    dataLoading,
-  } = useReportFilters();
 
   const isLandscape = builder.orientation === "landscape";
   const page = isLandscape ? PAGE_PX.landscape : PAGE_PX.portrait;
@@ -475,9 +464,9 @@ export default function ReportBuilder({
 
       <div className="mt-3 mb-1">
         <div className="border-[1.5px] border-black rounded-full px-6 py-[4px] inline-block bg-white">
-          <span className="text-[14px] sm:text-[16px] font-bold text-black tracking-wide">
+          <h2 className="text-[14px] sm:text-[16px] font-bold text-black tracking-wide">
             {builder.title || "শিরোনাম"}
-          </span>
+          </h2>
         </div>
       </div>
 
@@ -563,6 +552,15 @@ export default function ReportBuilder({
   const [shrink, setShrink] = useState(0);
   const [fallbackTrim, setFallbackTrim] = useState(0);
 
+  // ⚙️ সেটিং এর ফন্ট সাইজ বদলালেও আবার মাপজোক হবে
+  const fontSignature = JSON.stringify({
+    inst: settings?.InstitutionFontSize,
+    title: settings?.TitleFontSize,
+    body: settings?.BodyFontSize,
+    thead: settings?.TableHeadFontSize,
+    tbody: settings?.TableBodyFontSize,
+  });
+
   const layoutSignature = useMemo(
     () =>
       JSON.stringify({
@@ -575,8 +573,9 @@ export default function ReportBuilder({
         hasLogo: !!logo,
         inst: instutionInfo?.InstitutionName || "",
         addr: instutionInfo?.Address || "",
+        fontSignature,
       }),
-    [columnsKey, builder.orientation, builder.subHeaders, builder.title, builder.sessionBesideTitle, currentSessionLabel, logo, instutionInfo]
+    [columnsKey, builder.orientation, builder.subHeaders, builder.title, builder.sessionBesideTitle, currentSessionLabel, logo, instutionInfo, fontSignature]
   );
 
   useEffect(() => {
@@ -693,17 +692,16 @@ export default function ReportBuilder({
     return out;
   }, [chunks]);
 
-  // ✅ নিখুঁত Watchdog: এবার শুধুমাত্র টেবিলের নিজস্ব কন্টেইনারের সাথে আসল টেবিলের উচ্চতা মাপা হবে
+  // ✅ Watchdog — টেবিল পেজের চেয়ে বড় হয়ে গেলে রো কমানো
   useEffect(() => {
     if (!chunks.length) return;
     const id = requestAnimationFrame(() => {
       const el = visiblePageTableRef.current;
       if (!el) return;
-      
+
       const tableEl = el.querySelector("table");
       if (!tableEl) return;
-      
-      // যদি টেবিলের উচ্চতা তার flex-grow কন্টেইনারের চেয়ে বড় হয়ে যায়
+
       if (tableEl.offsetHeight > el.clientHeight + 2) {
         if (autoReady) {
           setShrink((s) => (s < MAX_SHRINK ? s + SHRINK_STEP : s));
@@ -766,30 +764,42 @@ export default function ReportBuilder({
         }
       `}</style>
 
-      <div className="w-full min-h-screen bg-slate-100 flex flex-col lg:flex-row print:block print:min-h-0 print:bg-white" style={{ fontFamily: "'Noto Sans Bengali','Kalpurush','SolaimanLipi',sans-serif" }}>
-        
-        {/* LEFT PANEL */}
-        <div className="w-full lg:w-[380px] bg-white border-r border-slate-200 flex flex-col shrink-0 print:hidden">
-          <div className="px-4 pt-4 pb-2 border-b border-slate-200">
-            <h1 className="text-base font-bold text-slate-800">রিপোর্ট টেমপ্লেট বিল্ডার</h1>
-            <p className="text-xs text-slate-500 mt-0.5">ভর্তি রেজিস্টার — লাইভ ডাটা</p>
+      <div className="w-full bg-slate-100 rounded-xl flex flex-col lg:flex-row lg:items-start print:block print:min-h-0 print:bg-white" style={{ fontFamily: "'Noto Sans Bengali','Kalpurush','SolaimanLipi',sans-serif" }}>
+
+        {/* LEFT PANEL — টেমপ্লেট ডিজাইন (ফিল্টার এখন উপরের বারে) */}
+        <div
+          className={`w-full lg:w-[380px] bg-white border-r border-slate-200 flex flex-col shrink-0 print:hidden rounded-l-xl lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-hidden ${
+            panelOpen ? "" : "lg:w-[52px]"
+          }`}
+        >
+          <div className="px-4 pt-4 pb-3 border-b border-slate-200 flex items-start justify-between gap-2">
+            {panelOpen && (
+              <div>
+                <h1 className="text-base font-bold text-slate-800">রিপোর্ট টেমপ্লেট বিল্ডার</h1>
+                <p className="text-xs text-slate-500 mt-0.5">ভর্তি রেজিস্টার — লাইভ ডাটা</p>
+              </div>
+            )}
+            <button
+              onClick={() => setPanelOpen((v) => !v)}
+              title={panelOpen ? "প্যানেল লুকান" : "প্যানেল দেখান"}
+              className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center shrink-0"
+            >
+              <ChevronIcon dir={panelOpen ? "left" : "right"} size={16} />
+            </button>
           </div>
-          <div className="flex border-b border-slate-200">
-            <TabButton active={tab === "design"} onClick={() => setTab("design")} icon="FiSettings">ডিজাইন ও টেমপ্লেট</TabButton>
-            <TabButton active={tab === "filter"} onClick={() => setTab("filter")} icon="FiFilter">ফিল্টার</TabButton>
-          </div>
-          <div className="flex-1 overflow-y-auto px-4 py-4">
-            {tab === "design" && (
+
+          {panelOpen && (
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 py-4">
               <div className="space-y-6">
                 <div className="bg-slate-50 p-3 rounded border border-slate-200">
-                  <SectionTitle icon="FiLayout">টেমপ্লেট নির্বাচন ও সেভ</SectionTitle>
+                  <SectionTitle icon={<LayoutIcon size={16} />}>টেমপ্লেট নির্বাচন ও সেভ</SectionTitle>
                   <div className="mb-3">
                     <label className="text-xs font-medium text-slate-600 mb-1 block">টেমপ্লেটের নাম</label>
                     <input value={templateName} onChange={(e) => setTemplateName(e.target.value)} placeholder="যেমন: ভর্তি রেজিস্টার - পোর্ট্রেট" className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1B3A57]/30" />
                   </div>
                   <div className="flex items-center gap-2 mb-4">
                     <Button onClick={handleSaveTemplate} disabled={savingTemplate}>{savingTemplate ? "সেভ হচ্ছে..." : activeTemplateId ? "আপডেট করে সেভ" : "টেমপ্লেট সেভ করুন"}</Button>
-                    <button onClick={handleNewTemplate} title="নতুন টেমপ্লেট" className="px-3 py-2 text-white bg-slate-500 hover:bg-slate-600 rounded-md flex items-center gap-1.5 text-sm font-medium transition-colors"><SvgIcon name="FiPlus" size={16} />নতুন</button>
+                    <button onClick={handleNewTemplate} title="নতুন টেমপ্লেট" className="px-3 py-2 text-white bg-slate-500 hover:bg-slate-600 rounded-md flex items-center gap-1.5 text-sm font-medium transition-colors"><PlusIcon size={16} />নতুন</button>
                   </div>
                   {templatesLoading && <p className="text-xs text-slate-400">টেমপ্লেট লোড হচ্ছে...</p>}
                   {!templatesLoading && templates.length > 0 && (
@@ -798,7 +808,7 @@ export default function ReportBuilder({
                       {templates.map((t) => (
                         <div key={t.TemplateID} className={`flex items-center justify-between border rounded px-3 py-2 text-sm ${activeTemplateId === t.TemplateID ? "border-[#1B3A57] bg-[#1B3A57]/5" : "border-slate-200 bg-white"}`}>
                           <button onClick={() => handleLoadTemplate(t)} className="text-left flex-1 truncate text-slate-700">{t.TemplateName}</button>
-                          <button onClick={() => handleDeleteTemplate(t.TemplateID)} title="Delete" className="px-2 py-1 text-white bg-red-500 hover:bg-red-600 rounded-md ml-2 flex items-center gap-1 text-xs transition-colors"><SvgIcon name="FiTrash2" size={14} />ডিলিট</button>
+                          <button onClick={() => handleDeleteTemplate(t.TemplateID)} title="Delete" className="px-2 py-1 text-white bg-red-500 hover:bg-red-600 rounded-md ml-2 flex items-center gap-1 text-xs transition-colors"><TrashIcon size={14} />ডিলিট</button>
                         </div>
                       ))}
                     </div>
@@ -806,14 +816,14 @@ export default function ReportBuilder({
                 </div>
                 <hr className="border-slate-200" />
                 <div>
-                  <SectionTitle icon="FiFileText">শিরোনাম (Title)</SectionTitle>
+                  <SectionTitle icon={<DocIcon size={16} />}>শিরোনাম (Title)</SectionTitle>
                   <input value={builder.title} onChange={(e) => setBuilder((b) => ({ ...b, title: e.target.value }))} placeholder="যেমন: ভর্তি রেজিস্টার" className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1B3A57]/30 focus:border-[#1B3A57]" />
-                  <label className="flex items-center gap-2 mt-2 text-xs text-slate-600 cursor-pointer">
+                  <div className="mt-2">
                     <Checkbox checked={builder.sessionBesideTitle} onChange={(v) => setBuilder((b) => ({ ...b, sessionBesideTitle: v }))} label="শিক্ষাবর্ষ শিরোনামের পাশে দেখান" />
-                  </label>
+                  </div>
                 </div>
                 <div>
-                  <SectionTitle icon="FiSettings">সাব-হেডার (শিরোনামের নিচে)</SectionTitle>
+                  <SectionTitle iconNode={<GearIcon size={16} />}>সাব-হেডার (শিরোনামের নিচে)</SectionTitle>
                   <div className="grid grid-cols-1 gap-0.5">
                     {SUB_HEADER_DEFS.map((s) => (
                       <Checkbox key={s.key} checked={builder.subHeaders[s.key]} onChange={(v) => toggleSubHeader(s.key, v)} label={s.label} />
@@ -822,7 +832,7 @@ export default function ReportBuilder({
                 </div>
                 <div>
                   <div className="flex justify-between items-end mb-2">
-                    <SectionTitle icon="FiSettings">ডাটা কলাম নির্বাচন</SectionTitle>
+                    <SectionTitle iconNode={<GearIcon size={16} />}>ডাটা কলাম নির্বাচন</SectionTitle>
                     <span className={`text-[10px] font-semibold ${slotsFull ? "text-red-500" : "text-slate-400"}`}>মোট: {bn(totalColumns)} / {bn(maxTotalColumns)}</span>
                   </div>
                   <div className="w-full h-1.5 bg-slate-200 rounded-full mb-3 overflow-hidden">
@@ -839,7 +849,7 @@ export default function ReportBuilder({
                 </div>
                 <div>
                   <div className="flex justify-between items-end mb-2">
-                    <SectionTitle icon="FiSettings">কাস্টম কলাম ({isLandscape ? "Landscape" : "Portrait"})</SectionTitle>
+                    <SectionTitle iconNode={<GearIcon size={16} />}>কাস্টম কলাম ({isLandscape ? "Landscape" : "Portrait"})</SectionTitle>
                     <span className="text-[10px] text-slate-400">মোট: {bn(currentCustomColumns.length)}</span>
                   </div>
                   <p className="text-[10px] text-slate-500 mb-2 leading-relaxed">এই কাস্টম কলামগুলো শুধু <b>{isLandscape ? "Landscape" : "Portrait"}</b> মোডে দেখাবে। ডাটা সোর্স খালি রাখলে হাতে লিখার জন্য খালি কলাম থাকবে।</p>
@@ -850,7 +860,7 @@ export default function ReportBuilder({
                         <div className="flex gap-1.5 items-center">
                           <span className="text-[10px] text-slate-400 font-semibold w-5">#{idx + 1}</span>
                           <input value={col.label} onChange={(e) => handleUpdateCustomColumn(col.id, "label", e.target.value)} placeholder="হেডারের নাম" className="flex-1 border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-[#1B3A57]" />
-                          <button onClick={() => handleDeleteCustomColumn(col.id)} title="Delete" className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded text-xs transition-colors"><SvgIcon name="FiTrash2" size={12} />Delete</button>
+                          <button onClick={() => handleDeleteCustomColumn(col.id)} title="Delete" className="p-1.5 bg-red-500 hover:bg-red-600 text-white rounded text-xs transition-colors"><TrashIcon size={12} /></button>
                         </div>
                         <div className="flex gap-1.5">
                           <select value={col.key} onChange={(e) => handleUpdateCustomColumn(col.id, "key", e.target.value)} className="flex-1 border border-slate-300 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-[#1B3A57]">
@@ -862,40 +872,40 @@ export default function ReportBuilder({
                     ))}
                   </div>
                   <button onClick={handleAddCustomColumn} disabled={slotsFull} className={`mt-3 w-full py-2 border-2 border-dashed rounded text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${slotsFull ? "border-slate-200 text-slate-300 cursor-not-allowed" : "border-slate-300 hover:border-[#1B3A57] text-slate-600 hover:text-[#1B3A57]"}`}>
-                    <SvgIcon name="FiPlus" size={14} />{slotsFull ? `স্লট পূর্ণ (${bn(maxTotalColumns)})` : "নতুন কাস্টম কলাম যোগ করুন"}
+                    <PlusIcon size={14} />{slotsFull ? `স্লট পূর্ণ (${bn(maxTotalColumns)})` : "নতুন কাস্টম কলাম যোগ করুন"}
                   </button>
                 </div>
                 <div>
-                  <SectionTitle icon="FiFileText">পৃষ্ঠার দিক</SectionTitle>
+                  <SectionTitle icon={<DocIcon size={16} />}>পৃষ্ঠার দিক</SectionTitle>
                   <div className="flex gap-2">
                     <button onClick={() => setBuilder((b) => ({ ...b, orientation: "portrait" }))} className={`flex-1 flex flex-col items-center gap-1 py-2 rounded border text-xs ${!isLandscape ? "border-[#1B3A57] bg-[#1B3A57]/5 text-[#1B3A57] font-semibold" : "border-slate-300 text-slate-500"}`}>
-                      <SvgIcon name="FiFileText" size={18} />Portrait
+                      <DocIcon size={18} />Portrait
                     </button>
                     <button onClick={() => setBuilder((b) => ({ ...b, orientation: "landscape" }))} className={`flex-1 flex flex-col items-center gap-1 py-2 rounded border text-xs ${isLandscape ? "border-[#1B3A57] bg-[#1B3A57]/5 text-[#1B3A57] font-semibold" : "border-slate-300 text-slate-500"}`}>
-                      <span className="rotate-90 inline-block"><SvgIcon name="FiFileText" size={18} /></span>Landscape
+                      <span className="rotate-90 inline-block"><DocIcon size={18} /></span>Landscape
                     </button>
                   </div>
                 </div>
                 <div className="bg-slate-50 border border-slate-200 rounded p-3">
-                  <SectionTitle icon="FiLayout">পেজে রো বসানো (অটো)</SectionTitle>
-                  <p className="text-[11px] text-slate-600 leading-relaxed">প্রতি পেজে কয়টি রো বসবে তা লেখার আসল উচ্চতা মেপে নিজে থেকেই ঠিক হয়। নাম বা ঠিকানা দুই লাইনে গেলে সেই পেজে রো কম বসে, বাকিটা পরের পেজে যায়।</p>
+                  <SectionTitle icon={<LayoutIcon size={16} />}>পেজে রো বসানো (অটো)</SectionTitle>
+                  <p className="text-[11px] text-slate-600 leading-relaxed">প্রতি পেজে কয়টি রো বসবে তা লেখার আসল উচ্চতা মেপে নিজে থেকেই ঠিক হয়। ⚙️ সেটিং থেকে ফন্ট বড় করলে পেজে রো কম বসবে।</p>
                   <div className="mt-2 text-[11px] font-semibold text-slate-700">{dataLoading ? "ডাটা লোড হচ্ছে..." : filteredData.length === 0 ? "কোনো ডাটা নেই" : `মোট ${bn(filteredData.length)} জন · ${bn(totalPages)} পৃষ্ঠা · এই পৃষ্ঠায় ${bn(rowsOnCurrentPage)} জন`}</div>
                   <div className="mt-1 text-[10px] text-slate-400 leading-relaxed">{autoReady ? `মাপ: টেবিলের জায়গা ${pageSpace.table}px · হেডার ${pageSpace.thead}px · রো-এর জন্য ${Math.round(availableForRows)}px${shrink ? ` · সংশোধন −${shrink}px` : ""}` : "মাপজোক চলছে..."}</div>
                 </div>
               </div>
-            )}
-            {tab === "filter" && (
-              <ReportFilterFields filters={filters} setFilters={setFilters} sessions={sessions} subClasses={subClasses} districts={districts} thanas={thanas} residentialData={residentialData} resultCount={filteredData.length} loading={dataLoading} onPrint={() => window.print()} onReset={() => { resetFilters(); setCurrentPage(1); }} note="টেমপ্লেট তৈরি হয়ে গেলে এখান থেকে ফিল্টার করে দেখুন প্রিভিউতে কোন ডাটা আসবে।" />
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* RIGHT PREVIEW */}
-        <div ref={previewAreaRef} className="flex-1 overflow-auto p-4 md:p-6 flex flex-col items-center print:p-0 print:overflow-visible print:block">
-          <div className="flex items-center gap-4 mb-4 bg-white px-4 py-2 rounded shadow-sm print:hidden">
-            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="text-slate-600 disabled:opacity-50 hover:text-[#1B3A57]"><SvgIcon name="FiChevronLeft" size={20} /></button>
+        <div
+          ref={previewAreaRef}
+          className="flex-1 min-w-0 overflow-auto p-4 md:p-6 flex flex-col items-center lg:sticky lg:top-4 lg:self-start lg:max-h-[calc(100vh-2rem)] print:static print:max-h-none print:p-0 print:overflow-visible print:block"
+        >
+          <div className="sticky top-0 z-20 flex items-center gap-4 mb-4 bg-white px-4 py-2 rounded shadow-sm print:hidden">
+            <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="text-slate-600 disabled:opacity-50 hover:text-[#1B3A57]"><ChevronIcon dir="left" size={20} /></button>
             <span className="text-sm font-semibold text-slate-700">পেজ {bn(currentPage)} / {bn(totalPages)}{rowsOnCurrentPage > 0 && <span className="text-slate-400 font-normal"> · এই পেজে {bn(rowsOnCurrentPage)} জন</span>}</span>
-            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="text-slate-600 disabled:opacity-50 hover:text-[#1B3A57]"><SvgIcon name="FiChevronRight" size={20} /></button>
+            <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="text-slate-600 disabled:opacity-50 hover:text-[#1B3A57]"><ChevronIcon dir="right" size={20} /></button>
           </div>
 
           <div ref={measureRef} className="measure-layer print:hidden" aria-hidden="true" style={{ position: "fixed", left: "-99999px", top: 0, width: `${innerWidth}px`, visibility: "hidden", pointerEvents: "none", zIndex: -1, background: "#fff" }}>
@@ -911,7 +921,11 @@ export default function ReportBuilder({
             ) : chunks.length === 0 ? (
               <div className="print-scale-wrapper" style={{ width: page.width * scale, height: page.height * scale, marginBottom: "1rem" }}>
                 <div className="print-page-container bg-white shadow-md relative" style={{ width: `${page.width}px`, height: `${page.height}px`, padding: `${page.padY}px ${page.padX}px`, boxSizing: "border-box", transform: `scale(${scale})`, transformOrigin: "top left", overflow: "hidden" }}>
-                  <div className="text-center text-slate-400 p-10 font-bold">ফিল্টারে কোনো শিক্ষার্থী পাওয়া যায়নি</div>
+                  <div className="print-border-wrapper h-full flex flex-col">
+                    {renderHeaderBlock()}
+                    {renderSubHeaderBlock()}
+                    <div className="text-center text-slate-400 p-10 font-bold">শিক্ষাবর্ষ ও অন্যান্য ফিল্টার দিলে এখানে ডাটা আসবে</div>
+                  </div>
                 </div>
               </div>
             ) : (
@@ -924,14 +938,14 @@ export default function ReportBuilder({
                       <div className="print-border-wrapper h-full flex flex-col">
                         {renderHeaderBlock()}
                         {renderSubHeaderBlock()}
-                        
+
                         <div ref={isVisibleOnScreen ? visiblePageTableRef : null} className="w-full flex-grow" style={{ minHeight: 0 }}>
                           <table className="w-full border-collapse border border-black text-black" style={{ fontSize: "11px", tableLayout: "fixed" }}>
                             {renderTableHead()}
                             <tbody>{chunk.map((row, idx) => renderRow(row, startIndex + idx + 1, row.ID ?? `${pageIndex}-${idx}`, false))}</tbody>
                           </table>
                         </div>
-                        
+
                         {renderFooter(pageIndex + 1, totalPages)}
                       </div>
                     </div>

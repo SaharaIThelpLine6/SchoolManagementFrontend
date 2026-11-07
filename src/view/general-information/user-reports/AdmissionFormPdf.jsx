@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
-// import bnBijoy2Unicode from "../../../utils/conveter";
 import PdfHeader from "./PdfHeader";
 
 const AdmissionFormPdf = ({ student, admissionStatus, SubClassID, SessionID }) => {

@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
-import { formatDate } from "../../../helper/formatTime";
 
 const BanglaAttendenceSubjectWari = ({ reportData, SubClassID, BookLine, rowsPerPage }) => {
   const [logo, setLogo] = useState(null);
