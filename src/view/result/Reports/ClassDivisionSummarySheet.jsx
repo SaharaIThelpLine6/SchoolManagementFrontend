@@ -247,6 +247,8 @@ function PrintDonut({ values, colors, size }) {
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════ */
 export default function ClassDivisionSummarySheet({ reportData }) {
+
+  console.log(reportData, "reportData")
   const { data: institutionInfo } = useGetInstitutionInfoQuery();
   const [logo, setLogo] = useState(null);
   const [najem, setNajem] = useState(null);
