@@ -3,6 +3,7 @@ import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
+import ReportSortControl from "./student-report-list/ReportSortControl";
 
 // ✅ আরবি মাসের তালিকা (দিনসংখ্যা সহ)
 const ARABIC_MONTHS = [
@@ -114,7 +115,11 @@ const BanglaAttendence = ({
   SubClassID, 
   SessionID,
   isLoading = false,
-  rowsPerPage = { portrait: 35, landscape: 30 }
+  rowsPerPage = { portrait: 35, landscape: 30 },
+  // ↕️ সাজানো — গ্লোবাল ফিল্টার থেকে আসে
+  sortBy,
+  sortDir,
+  onSortChange,
 }) => {
   const [logo, setLogo] = useState(null);
 
@@ -158,11 +163,16 @@ const BanglaAttendence = ({
   }, [rowsPerPageInput, rowHeight]);
 
   const isLandscape = orientation === "landscape";
-  // 🔴 A4 এর ছাপযোগ্য জায়গা (margin 5mm 8mm বাদ দিয়ে) — এর বেশি হলেই
-  //    পৃষ্ঠা উপচে পরের শিটে চলে যেত, তাই height ফিক্সড + overflow hidden
-  const PAGE_W = isLandscape ? "281mm" : "194mm";
-  const PAGE_H = isLandscape ? "193mm" : "280mm";
-  const PAGE_SIZE = isLandscape ? "A4 landscape" : "A4 portrait";
+
+  // 🔴 প্রিভিউ আর প্রিন্ট — দুইটাই হুবহু একই বক্স।
+  //    @page margin: 0 দিয়ে পুরো A4 শিটটাই নেওয়া হচ্ছে, আর পেজের ভেতরের
+  //    মার্জিন কন্টেইনারের padding দিয়ে। ফলে ব্রাউজারের "printable area"
+  //    হিসাব করার দরকার নেই — যা স্ক্রিনে দেখছো ঠিক তাই ছাপবে।
+  //    (96dpi: 210mm = 794px, 297mm = 1123px; ১-২px স্ল্যাক রাখা হয়েছে
+  //     যাতে রাউন্ডিং এর কারণে পরের শিটে না গড়ায়।)
+  const PAGE = isLandscape
+    ? { w: 1123, h: 790, padX: 24, padY: 18, size: "A4 landscape" }
+    : { w: 794, h: 1118, padX: 24, padY: 18, size: "A4 portrait" };
 
   const { data: instutionInfo, isLoading: institutionLoading } =
     useGetInstitutionInfoQuery();
@@ -270,11 +280,12 @@ const BanglaAttendence = ({
             line-height: 1;
           }
 
-          /* 🔴 স্ক্রিনের প্রিভিউ = প্রিন্টের পেজ — যা দেখছো ঠিক তাই ছাপবে */
+          /* 🔴 প্রিভিউ = প্রিন্ট — একই বক্স, একই padding, একই overflow */
           .bn-att .print-page-container {
-            width: ${PAGE_W};
-            height: ${PAGE_H};
+            width: ${PAGE.w}px;
+            height: ${PAGE.h}px;
             max-width: 100%;
+            padding: ${PAGE.padY}px ${PAGE.padX}px;
             margin: 0 auto 18px auto;
             background: #fff;
             overflow: hidden;
@@ -286,23 +297,26 @@ const BanglaAttendence = ({
 
           @media print {
             @page {
-              size: ${PAGE_SIZE};
-              margin: 5mm 8mm;
+              size: ${PAGE.size};
+              margin: 0;
             }
             html, body {
-              margin: 0;
-              padding: 0;
+              margin: 0 !important;
+              padding: 0 !important;
               box-sizing: border-box;
               background: white;
             }
-            .bn-att { padding: 0 !important; }
+            .bn-att {
+              padding: 0 !important;
+              margin: 0 !important;
+            }
             .bn-att .print-page-container {
-              width: 100%;
-              height: ${PAGE_H};
-              max-width: none;
-              margin: 0;
-              box-shadow: none;
-              overflow: hidden;
+              width: ${PAGE.w}px !important;
+              height: ${PAGE.h}px !important;
+              max-width: none !important;
+              margin: 0 !important;
+              box-shadow: none !important;
+              overflow: hidden !important;
               page-break-after: always;
               page-break-inside: avoid;
               break-after: page;
@@ -316,7 +330,6 @@ const BanglaAttendence = ({
               border-collapse: collapse !important;
               table-layout: fixed;
               width: 100%;
-              font-size: 10px; 
             }
             tr {
               page-break-inside: avoid;
@@ -325,9 +338,10 @@ const BanglaAttendence = ({
             thead {
               display: table-header-group;
             }
+            /* 🔹 শুধু বর্ডারের রঙ নিশ্চিত করা — ফন্ট সাইজ বা padding এখানে
+               দিলে প্রিভিউর সাথে প্রিন্ট আর মিলত না */
             th, td {
               border: 1px solid black !important;
-              padding: 0;
             }
             .no-print { display: none !important; }
           }
@@ -488,6 +502,9 @@ const BanglaAttendence = ({
           />
         </div>
 
+        {/* ↕️ সাজানো */}
+        <ReportSortControl sortBy={sortBy} sortDir={sortDir} onChange={onSortChange} />
+
         {hasMonth && startWeekday !== "" && (
           <div className="text-xs text-slate-700 bg-red-50 border border-red-200 rounded px-3 py-1.5">
             <span className="font-semibold text-red-700">শুক্রবার (ছুটি): </span>
@@ -593,7 +610,7 @@ const BanglaAttendence = ({
 
         return (
           <div key={pageIndex} className="print-page-container">
-            <div className="bg-white flex flex-col h-full p-2">
+            <div className="bg-white flex flex-col h-full">
               
               {/* হেডার */}
               <div className="flex items-center justify-between mb-1 bg-white">

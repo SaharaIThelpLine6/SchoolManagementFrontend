@@ -29,7 +29,9 @@ export function defaultReportFilters() {
     DistrictID: "",
     permanentPoliceStationID: "",
     // 🔹 ক্লায়েন্ট-সাইড অপশন (ব্যাকএন্ডে যায় না)
-    language: "bangla", // 🌐 গ্লোবাল ভাষা — বাংলা / আরবি
+    language: "bangla",          // 🌐 গ্লোবাল ভাষা — বাংলা / আরবি
+    sortBy: "AdmissionSerial",   // ↕️ সাজানো — ভর্তি নং / আইডি নং
+    sortDir: "asc",              // asc = ছোট থেকে বড়, desc = উল্টো
     BookLine: "3",      // কয়টি বিষয়ের খাতা — BanglaAttendenceSubjectWari
     IsActive: "",       // ভর্তির আগে/পরে — AdmissionFormPdf
   };
@@ -116,7 +118,42 @@ export default function useReportFilters(options = {}) {
     refetch,
   } = useGetStudentReportListQuery(queryParams, { skip: !isReady });
 
-  const filteredData = isReady && Array.isArray(fetchedData) ? fetchedData : [];
+  // ↕️ সাজানো — ভর্তি নং (AdmissionSerial) অথবা আইডি নং (StudentCode)
+  //    সংখ্যা আগে, তারপর টেক্সট, খালিগুলো সবসময় শেষে (দিক যাই হোক)।
+  const filteredData = useMemo(() => {
+    const rows = isReady && Array.isArray(fetchedData) ? [...fetchedData] : [];
+    if (rows.length < 2) return rows;
+
+    const key = filters.sortBy === "StudentCode" ? "StudentCode" : "AdmissionSerial";
+    const dir = filters.sortDir === "desc" ? -1 : 1;
+
+    const asNumber = (value) => {
+      if (value === null || value === undefined || String(value).trim() === "") return null;
+      const n = Number(String(value).trim());
+      return Number.isFinite(n) ? n : null;
+    };
+
+    rows.sort((a, b) => {
+      const na = asNumber(a?.[key]);
+      const nb = asNumber(b?.[key]);
+
+      if (na !== null && nb !== null) {
+        if (na !== nb) return (na - nb) * dir;
+      } else if (na !== null) {
+        return -1; // খালি/টেক্সট সবসময় শেষে
+      } else if (nb !== null) {
+        return 1;
+      } else {
+        const ta = String(a?.[key] ?? "");
+        const tb = String(b?.[key] ?? "");
+        if (ta !== tb) return ta.localeCompare(tb, "bn") * dir;
+      }
+      return (Number(a?.AdmissionID) || 0) - (Number(b?.AdmissionID) || 0);
+    });
+
+    return rows;
+  }, [fetchedData, isReady, filters.sortBy, filters.sortDir]);
+
   const dataLoading = isReady && (isFetching || isLoading);
 
   const resetFilters = () => setFilters(defaultReportFilters());

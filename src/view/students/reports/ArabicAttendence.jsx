@@ -3,6 +3,7 @@ import { Buffer } from "buffer";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import { useGetSubClassListQuery } from "../../../features/class/classQuerySlice";
 import { useGetSessionsQuery } from "../../../features/session/sessionSlice";
+import ReportSortControl from "./student-report-list/ReportSortControl";
 
 // ✅ আরবি সংখ্যায় রূপান্তর — টেক্সটের ভেতরের ইংরেজি ডিজিটও বদলে যাবে
 // (যেমন SessionAraName = "1448 هـ" → "١٤٤٨ هـ")
@@ -86,6 +87,10 @@ const ArabicAttendence = ({
   SessionID,
   isLoading = false,
   rowsPerPage = { portrait: 35, landscape: 30 },
+  // ↕️ সাজানো — গ্লোবাল ফিল্টার থেকে আসে
+  sortBy,
+  sortDir,
+  onSortChange,
 }) => {
   const [logo, setLogo] = useState(null);
 
@@ -419,6 +424,9 @@ const ArabicAttendence = ({
             className="w-36 accent-[#1B3A57] align-middle"
           />
         </div>
+
+        {/* ↕️ সাজানো */}
+        <ReportSortControl sortBy={sortBy} sortDir={sortDir} onChange={onSortChange} />
 
         {selectedMonthIdx !== "" && startWeekday !== "" && (
           <div className="text-xs text-slate-700 bg-red-50 border border-red-200 rounded px-3 py-1.5">

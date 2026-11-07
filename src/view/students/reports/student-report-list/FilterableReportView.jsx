@@ -161,6 +161,7 @@ export default function FilterableReportView({
         <ReportThemeRoot settings={settings} watermarkSrc={logoSrc}>
           {children({
             filters,
+            setFilters,
             filteredData,
             dataLoading,
             rowsPerPage,

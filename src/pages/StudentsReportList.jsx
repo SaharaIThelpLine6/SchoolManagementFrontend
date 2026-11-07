@@ -142,7 +142,11 @@ export default function StudentsReportList() {
 
   /* -------- রিপোর্ট রেন্ডার -------- */
   const renderReport = (ctx) => {
-    const { filters, filteredData, dataLoading, rowsPerPage, settings, sessions, subClasses } = ctx;
+    const { filters, setFilters, filteredData, dataLoading, rowsPerPage, settings, sessions, subClasses } = ctx;
+
+    // ↕️ সাজানো — কন্ট্রোল হাজিরা খাতার প্যানেলে, কাজ হয় গ্লোবাল ফিল্টারে
+    const handleSort = (key, dir) =>
+      setFilters((p) => ({ ...p, sortBy: key, sortDir: dir }));
 
     switch (cfg.component) {
       case 'ReportBuilder':
@@ -168,6 +172,9 @@ export default function StudentsReportList() {
             SessionID={filters.SessionID}
             isLoading={dataLoading}
             rowsPerPage={rowsPerPage}
+            sortBy={filters.sortBy}
+            sortDir={filters.sortDir}
+            onSortChange={handleSort}
           />
         ) : (
           <ArabicAttendence
@@ -176,6 +183,9 @@ export default function StudentsReportList() {
             SessionID={filters.SessionID}
             isLoading={dataLoading}
             rowsPerPage={rowsPerPage}
+            sortBy={filters.sortBy}
+            sortDir={filters.sortDir}
+            onSortChange={handleSort}
           />
         );
 
