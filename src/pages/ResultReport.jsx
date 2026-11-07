@@ -171,6 +171,23 @@ const ResultReport = () => {
 
   const showReport = hasReportContent && !error && !!queryParams;
 
+  const reportErrorInfo = (() => {
+    if (error) {
+      return {
+        message: error?.data?.message || null,
+        examName: error?.data?.examName || null,
+      };
+    }
+    // Case 2: HTTP 200 kintu success: false
+    if (data && data.success === false) {
+      return {
+        message: data.message || null,
+        examName: data.examName || null,
+      };
+    }
+    return null;
+  })();
+
   const handlePrintPDF = () => window.print();
 
   const renderReport = () => {
@@ -385,10 +402,60 @@ const ResultReport = () => {
             </div>
           )}
 
-          {error && !isFetching && (
-            <div className="m-3 sm:m-4 lg:m-6 p-4 sm:p-5 bg-rose-50 border border-rose-100 rounded-xl text-center print:hidden">
-              <p className="text-sm font-medium text-rose-700">রিপোর্ট লোড করা যায়নি</p>
-              <p className="text-xs text-rose-500 mt-1">Failed to load report. Please try again.</p>
+          {reportErrorInfo && !isFetching && (
+            <div className="m-3 sm:m-4 lg:m-6 print:hidden">
+              <div className="mx-auto max-w-xl rounded-2xl border border-rose-100 bg-white shadow-sm overflow-hidden">
+                {/* top accent */}
+                <div className="h-1 bg-gradient-to-r from-rose-400 to-amber-400" />
+
+                <div className="p-5 sm:p-6 text-center">
+                  {/* icon */}
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-rose-500">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14.14A2 2 0 003.84 21h16.32a2 2 0 001.73-3l-8.18-14.14a2 2 0 00-3.42 0z"
+                      />
+                    </svg>
+                  </div>
+
+                  <p className="text-base font-semibold text-slate-800">
+                    রিপোর্ট লোড করা যায়নি
+                  </p>
+
+                  {/* exam name chip */}
+                  {reportErrorInfo.examName && (
+                    <span className="mt-2 inline-block rounded-full bg-rose-50 px-3 py-1 text-xs font-medium text-rose-600">
+                      {reportErrorInfo.examName}
+                    </span>
+                  )}
+
+                  {/* actual message from API */}
+                  <p className="mt-3 rounded-lg bg-slate-50 px-4 py-3 text-sm leading-relaxed text-slate-600">
+                    {reportErrorInfo.message ||
+                      "রিপোর্ট লোড করতে সমস্যা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"}
+                  </p>
+
+                  {/* retry button */}
+                  {typeof refetch === "function" && (
+                    <button
+                      type="button"
+                      onClick={() => refetch()}
+                      className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-rose-500 px-4 py-2 text-xs font-medium text-white transition hover:bg-rose-600 active:scale-95"
+                    >
+                      আবার চেষ্টা করুন
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           )}
 

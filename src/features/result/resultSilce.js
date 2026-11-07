@@ -213,6 +213,7 @@ export const resultSilce = createApi({
       invalidatesTags: ['ExamDivisionNameResult'],
     }),
 
+
     deleteExamDivisionNameResult: builder.mutation({
       query: (id) => ({
         url: `exam_division_result/${id}`,
@@ -221,8 +222,8 @@ export const resultSilce = createApi({
       invalidatesTags: ['ExamDivisionNameResult'],
     }),
     getExamType: builder.query({
-      query: ({ sessionid, examid }) =>
-        `exam_type?sessionid=${sessionid}&examid=${examid}`,
+      query: ({ examid }) =>
+        `exam_type?examid=${examid}`,
       providesTags: ['ExamNames'],
     }),
   }),
@@ -249,4 +250,5 @@ export const {
   useGetExamDivisionNameResultsQuery,
   useGetTeacherSubjectInfoQuery,
   useGetExamRoutineSubjectListQuery,
+  useGe
 } = resultSilce;

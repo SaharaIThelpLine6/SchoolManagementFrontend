@@ -34,6 +34,124 @@ import { calculateAge } from '../../utils/calculateAge';
 import { extractLocationCodes } from '../../utils/locationUtils';
 import useTranslate from '../../utils/Translate';
 
+/* ============================================================
+   ✅ Name language config (multiple checkbox)
+============================================================ */
+const NAME_LANGUAGES = [
+  { value: 'bn', label: 'Bangla' },
+  { value: 'en', label: 'English' },
+  { value: 'ar', label: 'Arabic' },
+];
+
+const VALID_LANGS = ['bn', 'en', 'ar'];
+
+// ✅ DB তে যে যে ভাষার নাম আছে সেগুলো আগে থেকেই টিক থাকবে
+const getLangsFromUser = (u) => {
+  const langs = [];
+  if (u?.UserName || u?.FatherName || u?.MotherName) langs.push('bn');
+  if (
+    u?.englishName?.EnglishName ||
+    u?.englishName?.EnglishFather ||
+    u?.englishName?.EnglishMother
+  )
+    langs.push('en');
+  if (
+    u?.arabicName?.ArabicName ||
+    u?.arabicName?.ArabicFather ||
+    u?.arabicName?.ArabicMother
+  )
+    langs.push('ar');
+  return langs.length > 0 ? langs : ['bn'];
+};
+
+const formatDate = (dateVal) => {
+  if (!dateVal) return '';
+  const d = new Date(dateVal);
+  if (isNaN(d.getTime())) return '';
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split('T')[0];
+};
+
+/* ============================================================
+   DEFAULT VALUES
+============================================================ */
+const defaultValues = {
+  GenderID: '',
+  UserName: '',
+  EnglishFullName: '',
+  EnglishFatherName: '',
+  EnglishMotherName: '',
+  ArabicFullName: '',
+  ArabicFatherName: '',
+  ArabicMotherName: '',
+  UserTypeID: 1,
+  UserCode: '',
+  FatherName: '',
+  MotherName: '',
+  DateOfBirth: '',
+  age: '',
+  NIDNO: '',
+  Mobile1: '',
+  Mobile2: '',
+  Relationship1: '',
+  Relationship2: '',
+  Email: '',
+  BloodGroup: '',
+  DivisionID: '',
+  DistrictID: '',
+  permanentPoliceStationID: '',
+  permanentPost: '',
+  permanentVill: '',
+  sameAddress: false,
+  DivisionID2: '',
+  DistrictID2: '',
+  TransientPoliceStationID: '',
+  TransientPost: '',
+  TransientVill: '',
+};
+
+// ✅ userData → form values (location gulo lazy load hobe tai khali)
+const buildFormValues = (userData) => ({
+  UserName: userData?.UserName ?? '',
+  FatherName: userData?.FatherName ?? '',
+  MotherName: userData?.MotherName ?? '',
+
+  EnglishFullName: userData?.englishName?.EnglishName ?? '',
+  EnglishFatherName: userData?.englishName?.EnglishFather ?? '',
+  EnglishMotherName: userData?.englishName?.EnglishMother ?? '',
+
+  ArabicFullName: userData?.arabicName?.ArabicName ?? '',
+  ArabicFatherName: userData?.arabicName?.ArabicFather ?? '',
+  ArabicMotherName: userData?.arabicName?.ArabicMother ?? '',
+
+  GenderID: userData?.GenderID ?? '',
+  UserTypeID: userData?.UserTypeID ?? 1,
+  UserCode: userData?.UserCode ?? '',
+  DateOfBirth: formatDate(userData?.DateOfBirth),
+  age: '',
+  NIDNO: userData?.NIDNO ?? '',
+  Mobile1: userData?.Mobile1 ?? '',
+  Mobile2: userData?.Mobile2 ?? '',
+  Relationship1: userData?.Relationship1 ?? '',
+  Relationship2: userData?.Relationship2 ?? '',
+  Email: userData?.Email ?? '',
+  BloodGroup: userData?.BloodGroup ?? '',
+
+  DivisionID: '',
+  DistrictID: '',
+  permanentPoliceStationID: '',
+  permanentPost: userData?.permanentPost ?? '',
+  permanentVill: userData?.permanentVill ?? '',
+
+  sameAddress: false,
+  DivisionID2: '',
+  DistrictID2: '',
+  TransientPoliceStationID: '',
+  TransientPost: userData?.TransientPost ?? '',
+  TransientVill: userData?.TransientVill ?? '',
+});
+
 const UpdateStudentFormModal = ({ userId }) => {
   const translate = useTranslate();
   const navigate = useNavigate();
@@ -41,41 +159,20 @@ const UpdateStudentFormModal = ({ userId }) => {
   const { hasPermission } = usePermission();
 
   const isEditMode = Boolean(userId);
-  console.log(isEditMode, 'isEditMode');
 
   const [currentStep, setCurrentStep] = useState(1);
   const [showLoading, setShowLoading] = useState(isEditMode);
+  const [nameLangs, setNameLangs] = useState(['bn']);
 
-  /* ============================================================
-     DEFAULT VALUES
-  ============================================================ */
-  const defaultValues = {
-    GenderID: '',
-    UserName: '',
-    UserTypeID: 1,
-    UserCode: '',
-    FatherName: '',
-    MotherName: '',
-    DateOfBirth: '',
-    age: '',
-    NIDNO: '',
-    Mobile1: '',
-    Mobile2: '',
-    Relationship1: '',
-    Relationship2: '',
-    Email: '',
-    BloodGroup: '',
-    DivisionID: '',
-    DistrictID: '',
-    permanentPoliceStationID: '',
-    permanentPost: '',
-    permanentVill: '',
-    sameAddress: false,
-    DivisionID2: '',
-    DistrictID2: '',
-    TransientPoliceStationID: '',
-    TransientPost: '',
-    TransientVill: '',
+  // ✅ checkbox toggle (কমপক্ষে একটি ভাষা টিক থাকতে হবে)
+  const toggleNameLang = (lang) => {
+    setNameLangs((prev) => {
+      if (prev.includes(lang)) {
+        if (prev.length === 1) return prev; // শেষ টিকটি খোলা যাবে না
+        return prev.filter((l) => l !== lang);
+      }
+      return VALID_LANGS.filter((l) => l === lang || prev.includes(l));
+    });
   };
 
   const methods = useForm({
@@ -114,27 +211,13 @@ const UpdateStudentFormModal = ({ userId }) => {
     'DateOfBirth',
   ]);
 
-  /* ============================================================
-     HELPERS
-  ============================================================ */
-  const formatDate = (dateVal) => {
-    if (!dateVal) return '';
-    const d = new Date(dateVal);
-    if (isNaN(d.getTime())) return '';
-    return new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-      .toISOString()
-      .split('T')[0];
-  };
-
   const formattedDate = formatDate(DateOfBirth);
   const ageValue = calculateAge(DateOfBirth);
 
   /* ============================================================
      MUTATIONS
   ============================================================ */
-
   const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
-
   const isSubmitting = isUpdating;
 
   /* ============================================================
@@ -153,8 +236,6 @@ const UpdateStudentFormModal = ({ userId }) => {
     () => (isEditMode ? userInfoRes?.data : null),
     [isEditMode, userInfoRes]
   );
-
-  console.log('userData:', userData);
 
   /* ============================================================
      SETTINGS QUERIES
@@ -223,7 +304,6 @@ const UpdateStudentFormModal = ({ userId }) => {
 
     setShowLoading(true);
 
-    // Parse location codes from police station IDs (e.g. 202002)
     const {
       DivisionID: permDivision,
       DistrictID: permDistrict,
@@ -237,37 +317,10 @@ const UpdateStudentFormModal = ({ userId }) => {
     } = extractLocationCodes(userData?.TransientPoliceStationID);
 
     /* ---------- Reset all scalar fields ---------- */
-    reset({
-      UserName: userData?.UserName ?? '',
-      FatherName: userData?.FatherName ?? '',
-      MotherName: userData?.MotherName ?? '',
-      GenderID: userData?.GenderID ?? '',
-      UserTypeID: userData?.UserTypeID ?? 1,
-      UserCode: userData?.UserCode ?? '',
-      DateOfBirth: formatDate(userData?.DateOfBirth),
-      age: '',
-      NIDNO: userData?.NIDNO ?? '',
-      Mobile1: userData?.Mobile1 ?? '',
-      Mobile2: userData?.Mobile2 ?? '',
-      Relationship1: userData?.Relationship1 ?? '',
-      Relationship2: userData?.Relationship2 ?? '',
-      Email: userData?.Email ?? '',
-      BloodGroup: userData?.BloodGroup ?? '',
+    reset(buildFormValues(userData));
 
-      // Location placeholders
-      DivisionID: '',
-      DistrictID: '',
-      permanentPoliceStationID: '',
-      permanentPost: userData?.permanentPost ?? '',
-      permanentVill: userData?.permanentVill ?? '',
-
-      sameAddress: false,
-      DivisionID2: '',
-      DistrictID2: '',
-      TransientPoliceStationID: '',
-      TransientPost: userData?.TransientPost ?? '',
-      TransientVill: userData?.TransientVill ?? '',
-    });
+    // ✅ DB তে যে ভাষার নাম আছে সেগুলো টিক হয়ে থাকবে
+    setNameLangs(getLangsFromUser(userData));
 
     isSameAddressRef.current = false;
 
@@ -413,6 +466,7 @@ const UpdateStudentFormModal = ({ userId }) => {
       ...defaultValues,
       GenderID: dataGender?.Action || '',
     });
+    setNameLangs(['bn']);
     setCurrentStep(1);
     isInitializedRef.current = true;
   }, [reset, dataGender, isEditMode]);
@@ -438,14 +492,15 @@ const UpdateStudentFormModal = ({ userId }) => {
       if (dob > today) {
         await Swal.fire({
           icon: 'warning',
-          title: 'তারিখ সঠিক নয়!',
+          title: 'তারিখ সঠিক নয়!',
           text: 'জন্ম তারিখ আজকের তারিখের পর হতে পারবে না।',
           confirmButtonText: 'ঠিক আছে',
         });
         return;
       }
 
-      // ✅ UserCode theke number convert kora (API response e number hoy)
+      const activeLangs = VALID_LANGS.filter((l) => nameLangs.includes(l));
+
       const payload = {
         ...data,
         UserCode: data.UserCode ? Number(data.UserCode) : null,
@@ -453,15 +508,32 @@ const UpdateStudentFormModal = ({ userId }) => {
         DateOfBirth: formattedDate,
         NewOldId: 1,
         IsActive: 1,
+        ActiveNameLangs: activeLangs,
       };
+
+      // ✅ টিক না থাকা ভাষার field গুলো payload থেকে বাদ —
+      // backend ওই ভাষার ডাটা touch করবে না (অপরিবর্তিত থাকবে)
+      if (!activeLangs.includes('bn')) {
+        delete payload.UserName;
+        delete payload.FatherName;
+        delete payload.MotherName;
+      }
+      if (!activeLangs.includes('en')) {
+        delete payload.EnglishFullName;
+        delete payload.EnglishFatherName;
+        delete payload.EnglishMotherName;
+      }
+      if (!activeLangs.includes('ar')) {
+        delete payload.ArabicFullName;
+        delete payload.ArabicFatherName;
+        delete payload.ArabicMotherName;
+      }
 
       console.log('payload:', payload);
 
-      let response;
-
       if (isEditMode) {
         payload.UserID = Number(userId);
-        response = await updateUser({
+        await updateUser({
           userId: Number(userId),
           body: payload,
         }).unwrap();
@@ -476,10 +548,9 @@ const UpdateStudentFormModal = ({ userId }) => {
       }
 
       reset(defaultValues);
+      setNameLangs(['bn']);
       setCurrentStep(1);
       dispatch(closeModal());
-
-
     } catch (err) {
       console.log(err);
       Swal.fire({
@@ -493,6 +564,23 @@ const UpdateStudentFormModal = ({ userId }) => {
       });
       console.error('Error saving student:', err);
     }
+  };
+
+  const onInvalid = (formErrors) => {
+    console.error('❌ Validation failed:', formErrors);
+    const errorMessages = Object.keys(formErrors)
+      .map((key) => {
+        const msg = formErrors[key]?.message;
+        return msg ? `• ${msg}` : `• ${key}: required`;
+      })
+      .join('<br/>');
+
+    Swal.fire({
+      icon: 'warning',
+      title: 'ফর্ম পূরণে সমস্যা',
+      html: errorMessages || 'কিছু ফিল্ড পূরণ করা হয়নি।',
+      confirmButtonText: 'ঠিক আছে',
+    });
   };
 
   /* ============================================================
@@ -514,34 +602,8 @@ const UpdateStudentFormModal = ({ userId }) => {
         PoliceStationID: transPolice,
       } = extractLocationCodes(userData?.TransientPoliceStationID);
 
-      reset({
-        UserName: userData?.UserName ?? '',
-        FatherName: userData?.FatherName ?? '',
-        MotherName: userData?.MotherName ?? '',
-        GenderID: userData?.GenderID ?? '',
-        UserTypeID: userData?.UserTypeID ?? 1,
-        UserCode: userData?.UserCode ?? '',
-        DateOfBirth: formatDate(userData?.DateOfBirth),
-        age: '',
-        NIDNO: userData?.NIDNO ?? '',
-        Mobile1: userData?.Mobile1 ?? '',
-        Mobile2: userData?.Mobile2 ?? '',
-        Relationship1: userData?.Relationship1 ?? '',
-        Relationship2: userData?.Relationship2 ?? '',
-        Email: userData?.Email ?? '',
-        BloodGroup: userData?.BloodGroup ?? '',
-        DivisionID: '',
-        DistrictID: '',
-        permanentPoliceStationID: '',
-        permanentPost: userData?.permanentPost ?? '',
-        permanentVill: userData?.permanentVill ?? '',
-        sameAddress: false,
-        DivisionID2: '',
-        DistrictID2: '',
-        TransientPoliceStationID: '',
-        TransientPost: userData?.TransientPost ?? '',
-        TransientVill: userData?.TransientVill ?? '',
-      });
+      reset(buildFormValues(userData));
+      setNameLangs(getLangsFromUser(userData));
 
       setTimeout(() => {
         setValue('DivisionID', permDivision);
@@ -566,6 +628,7 @@ const UpdateStudentFormModal = ({ userId }) => {
       setTimeout(() => setShowLoading(false), 1500);
     } else {
       reset(defaultValues);
+      setNameLangs(['bn']);
     }
     setCurrentStep(1);
   };
@@ -583,11 +646,13 @@ const UpdateStudentFormModal = ({ userId }) => {
     let fieldsToValidate = [];
 
     if (currentStep === 1) {
-      fieldsToValidate = ['GenderID', 'UserName', 'Mobile1'];
-    } else if (currentStep === 2) {
-      fieldsToValidate = [];
-    } else if (currentStep === 3) {
-      fieldsToValidate = [];
+      // ✅ টিক দেওয়া প্রতিটি ভাষার Full Name আবশ্যক
+      const fullNameKeys = [];
+      if (nameLangs.includes('bn')) fullNameKeys.push('UserName');
+      if (nameLangs.includes('en')) fullNameKeys.push('EnglishFullName');
+      if (nameLangs.includes('ar')) fullNameKeys.push('ArabicFullName');
+
+      fieldsToValidate = ['GenderID', ...fullNameKeys, 'Mobile1'];
     }
 
     const isValid = await trigger(fieldsToValidate);
@@ -663,30 +728,66 @@ const UpdateStudentFormModal = ({ userId }) => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
+        <form
+          onSubmit={handleSubmit(onSubmit, onInvalid)}
+          noValidate
+          className="w-full space-y-6"
+        >
           {/* ============================= STEP 1 ============================= */}
           <div
             className={`bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-fade-in w-full ${currentStep !== 1 ? 'hidden' : ''
               }`}
           >
-            <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex items-center gap-3">
-              <div className="w-6 h-6 rounded-full bg-yellow-500 text-white flex items-center justify-center font-bold text-sm">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+            <div className="bg-gray-50 border-b border-gray-200 px-6 py-4 flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full bg-yellow-500 text-white flex items-center justify-center font-bold text-sm">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-bold text-gray-800">
+                  ১. ব্যক্তিগত তথ্য
+                </h2>
               </div>
-              <h2 className="text-xl font-bold text-gray-800">
-                ১. ব্যক্তিগত তথ্য
-              </h2>
+
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {NAME_LANGUAGES.map((lang) => {
+                    const isChecked = nameLangs.includes(lang.value);
+                    return (
+                      <label
+                        key={lang.value}
+                        className={`flex items-center gap-2 px-4 py-1.5 rounded-full border cursor-pointer text-sm font-medium transition-all duration-200 select-none ${isChecked
+                          ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
+                          : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100'
+                          }`}
+                      >
+                        <input
+                          type="checkbox"
+                          name="nameLanguage"
+                          value={lang.value}
+                          checked={isChecked}
+                          onChange={() => toggleNameLang(lang.value)}
+                          className="h-3.5 w-3.5 accent-yellow-400 cursor-pointer"
+                        />
+                        {lang.label}
+                      </label>
+                    );
+                  })}
+                </div>
+                <p className="text-[12px] text-gray-500">
+                  টিক না দেওয়া ভাষার নাম অপরিবর্তিত থাকবে
+                </p>
+              </div>
             </div>
 
             <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -695,8 +796,7 @@ const UpdateStudentFormModal = ({ userId }) => {
                 {...register('UserTypeID', { valueAsNumber: true })}
                 value={1}
               />
-              {
-                !isEditMode &&
+              {!isEditMode && (
                 <DefaultInput
                   label={<span className="text-red-500">দাখেলা</span>}
                   type="number"
@@ -709,21 +809,19 @@ const UpdateStudentFormModal = ({ userId }) => {
                   }
                   disable={userCodeData ? true : false}
                 />
-              }
-              {
-                isEditMode &&
+              )}
+              {isEditMode && (
                 <DefaultInput
                   label={<span className="text-red-500">দাখেলা</span>}
                   type="number"
                   placeholder="100149"
                   registerKey="UserCode"
                   require="Dakhela is required!"
-                  // codeSetting={true}
                   defaultValue={
                     userData?.UserCode ? String(userData.UserCode) : ''
                   }
                 />
-              }
+              )}
 
               <DefaultSelect
                 label={<span className="text-red-500">লিঙ্গ</span>}
@@ -737,32 +835,108 @@ const UpdateStudentFormModal = ({ userId }) => {
                 valueField="GenderID"
               />
 
-              <div>
-                <DefaultInput
-                  label={<span className="text-red-500">নাম</span>}
-                  type="text"
-                  registerKey="UserName"
-                  placeholder="নাম লিখুন ..."
-                  require="Name is required!"
-                  defaultValue={userData?.UserName || ''}
-                />
-                <p className='text-rose-600 text-[13px] pt-1'> নাম এডিটের ক্ষেত্রে ১ টি কোটা কর্তন হবে</p>
-              </div>
-              <DefaultInput
-                label="পিতার নাম"
-                type="text"
-                registerKey="FatherName"
-                placeholder="পিতার নাম লিখুন ..."
-                defaultValue={userData?.FatherName || ''}
-              />
+              {/* ============================================================
+                  ✅ Name Fields (টিক দেওয়া সব ভাষার জন্য দেখাবে)
+                  Full Name → Father Name → Mother Name
+                  Full Name আবশ্যক, Father/Mother ঐচ্ছিক
+                 ============================================================ */}
 
-              <DefaultInput
-                label="মাতার নাম"
-                type="text"
-                registerKey="MotherName"
-                placeholder="মাতার নাম লিখুন ..."
-                defaultValue={userData?.MotherName || ''}
-              />
+              {/* ---------- Bangla (bn) ---------- */}
+              {nameLangs.includes('bn') && (
+                <>
+                  <div>
+                    <DefaultInput
+                      label={
+                        <span className="text-red-500">পূর্ণ নাম (বাংলা)</span>
+                      }
+                      type="text"
+                      registerKey="UserName"
+                      placeholder="নাম লিখুন ..."
+                      require="Name is required!"
+                      defaultValue={userData?.UserName || ''}
+                    />
+                    <p className="text-rose-600 text-[13px] pt-1">
+                      নাম এডিটের ক্ষেত্রে ১ টি কোটা কর্তন হবে
+                    </p>
+                  </div>
+                  <DefaultInput
+                    label="পিতার নাম"
+                    type="text"
+                    registerKey="FatherName"
+                    placeholder="পিতার নাম লিখুন ..."
+                    defaultValue={userData?.FatherName || ''}
+                  />
+                  <DefaultInput
+                    label="মাতার নাম"
+                    type="text"
+                    registerKey="MotherName"
+                    placeholder="মাতার নাম লিখুন ..."
+                    defaultValue={userData?.MotherName || ''}
+                  />
+                </>
+              )}
+
+              {/* ---------- English (en) ---------- */}
+              {nameLangs.includes('en') && (
+                <>
+                  <DefaultInput
+                    label={
+                      <span className="text-red-500">
+                        পূর্ণ নাম (English)
+                      </span>
+                    }
+                    type="text"
+                    registerKey="EnglishFullName"
+                    placeholder="Enter full name ..."
+                    require="English name is required!"
+                    defaultValue={userData?.englishName?.EnglishName || ''}
+                  />
+                  <DefaultInput
+                    label="পিতার নাম (English)"
+                    type="text"
+                    registerKey="EnglishFatherName"
+                    placeholder="Enter father's name ..."
+                    defaultValue={userData?.englishName?.EnglishFather || ''}
+                  />
+                  <DefaultInput
+                    label="মাতার নাম (English)"
+                    type="text"
+                    registerKey="EnglishMotherName"
+                    placeholder="Enter mother's name ..."
+                    defaultValue={userData?.englishName?.EnglishMother || ''}
+                  />
+                </>
+              )}
+
+              {/* ---------- Arabic (ar) ---------- */}
+              {nameLangs.includes('ar') && (
+                <>
+                  <DefaultInput
+                    label={
+                      <span className="text-red-500">পূর্ণ নাম (আরবি)</span>
+                    }
+                    type="text"
+                    registerKey="ArabicFullName"
+                    placeholder="الاسم الكامل ..."
+                    require="Arabic name is required!"
+                    defaultValue={userData?.arabicName?.ArabicName || ''}
+                  />
+                  <DefaultInput
+                    label="পিতার নাম (আরবি)"
+                    type="text"
+                    registerKey="ArabicFatherName"
+                    placeholder="اسم الأب ..."
+                    defaultValue={userData?.arabicName?.ArabicFather || ''}
+                  />
+                  <DefaultInput
+                    label="মাতার নাম (আরবি)"
+                    type="text"
+                    registerKey="ArabicMotherName"
+                    placeholder="اسم الأم ..."
+                    defaultValue={userData?.arabicName?.ArabicMother || ''}
+                  />
+                </>
+              )}
 
               <DatePickerOne
                 dateCalender="জন্ম তারিখ"

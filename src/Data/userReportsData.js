@@ -81,11 +81,11 @@ export const resultReports = [
   },
   {
     ReportID: 4,
-    ReportName: '4. কিতাব ভিওিক ফলাফল',
+    ReportName: '4. কিতাব ভিত্তিক ফলাফল',
   },
   {
     ReportID: 5,
-    ReportName: '5. শিক্ষক ভিওিক ফলাফল',
+    ReportName: '5. শিক্ষক ভিত্তিক ফলাফল',
   },
   {
     ReportID: 6,
