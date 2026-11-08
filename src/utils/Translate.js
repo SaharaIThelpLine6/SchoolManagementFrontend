@@ -24,7 +24,7 @@ const useTranslate = () => {
     Debit: 'ডেবিট',
     Credit: 'ক্রেডিট',
     SubLedger: 'সাবলেজার',
-    "Please do not select Fail, Suspended, or Absent divisions. Only select divisions for passed students to calculate the percentage.": "শতকরা হার (%) হিসাব করার জন্য শুধুমাত্র পাসকৃত শিক্ষার্থীদের বিভাগ নির্বাচন করুন। ফেল, স্থগিত ও অনুপস্থিত বিভাগ নির্বাচন করবেন না।",
+    "Please do not select Fail, Suspended divisions. Only select divisions for passed students to calculate the percentage.": "শতকরা হার (%) হিসাব করার জন্য শুধুমাত্র পাসকৃত শিক্ষার্থীদের বিভাগ নির্বাচন করুন। ফেল, স্থগিত বিভাগ নির্বাচন করবেন না।",
     "Select Print Orientation": 'প্রিন্টের পৃষ্ঠার দিক নির্বাচন করুন',
     'SMS Results Public': 'SMS ফলাফল প্রকাশ',
     'Exam Routine List': 'পরীক্ষার সময়সূচির তালিকা',

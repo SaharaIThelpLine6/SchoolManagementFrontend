@@ -14,7 +14,7 @@ export const resultSilce = createApi({
       return headers;
     },
   }),
-  tagTypes: ["ExamList", "Result", "getResultReportData", "StudentMarksheetNote", "ExamDivisionNameResult"],
+  tagTypes: ["ExamList", "Result", "getResultReportData", "StudentMarksheetNote", "ExamDivisionNameResult", "ExamDivisionSetting"],
   endpoints: (builder) => ({
     getExamList: builder.query({
       query: ({ session_id, exam_id, subclass_id } = {}) => {
@@ -221,6 +221,47 @@ export const resultSilce = createApi({
       }),
       invalidatesTags: ['ExamDivisionNameResult'],
     }),
+
+
+    // GET ALL
+    getExamDivisionSetting: builder.query({
+      query: () => ({
+        url: 'exam_division_setting',
+        method: 'GET',
+      }),
+      providesTags: ['ExamDivisionSetting'],
+    }),
+
+    // CREATE
+    createExamDivisionSetting: builder.mutation({
+      query: (data) => ({
+        url: 'exam_division_setting',
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: ['ExamDivisionSetting'],
+    }),
+
+    // UPDATE
+    updateExamDivisionSetting: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `exam_division_setting/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: ['ExamDivisionSetting'],
+    }),
+
+    // DELETE
+    deleteExamDivisionSetting: builder.mutation({
+      query: (id) => ({
+        url: `exam_division_setting/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['ExamDivisionSetting'],
+    }),
+
+
     getExamType: builder.query({
       query: ({ examid }) =>
         `exam_type?examid=${examid}`,
@@ -250,5 +291,8 @@ export const {
   useGetExamDivisionNameResultsQuery,
   useGetTeacherSubjectInfoQuery,
   useGetExamRoutineSubjectListQuery,
-  useGe
+  useGetExamDivisionSettingQuery,
+  useCreateExamDivisionSettingMutation,
+  useUpdateExamDivisionSettingMutation,
+  useDeleteExamDivisionSettingMutation,
 } = resultSilce;
