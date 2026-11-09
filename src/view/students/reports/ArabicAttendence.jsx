@@ -428,6 +428,70 @@ const ArabicAttendence = ({
         {/* ↕️ সাজানো */}
         <ReportSortControl sortBy={sortBy} sortDir={sortDir} onChange={onSortChange} />
 
+        {/* ✅ শেষ পেজে খালি ঘর — আলাদা প্যানেল না রেখে এখানেই */}
+        {chunks.length > 0 && (
+          <div>
+            <label className="text-xs font-medium text-slate-600 block mb-1">
+              শেষ পেজে খালি ঘর :{" "}
+              <span className="font-bold text-[#1B3A57]">{toArabicNumber(manualEmptyRows)}</span> টি
+              <span className="text-slate-400"> (জায়গা আছে {toArabicNumber(remainingSpace)})</span>
+            </label>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                onClick={() => setManualEmptyRows((n) => n + 1)}
+                disabled={manualEmptyRows >= remainingSpace}
+                className={`px-2.5 py-1.5 rounded text-[12px] font-semibold transition-colors ${
+                  manualEmptyRows >= remainingSpace
+                    ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                    : "bg-[#1B3A57] text-white hover:bg-[#1B3A57]/90"
+                }`}
+              >
+                + একটি
+              </button>
+
+              <button
+                onClick={() => setManualEmptyRows((n) => Math.max(0, n - 1))}
+                disabled={manualEmptyRows <= 0}
+                className={`px-2.5 py-1.5 rounded text-[12px] font-semibold transition-colors ${
+                  manualEmptyRows <= 0
+                    ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                    : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+                }`}
+              >
+                − একটি
+              </button>
+
+              <button
+                onClick={() => setManualEmptyRows(remainingSpace)}
+                disabled={manualEmptyRows >= remainingSpace}
+                className={`px-2.5 py-1.5 rounded text-[12px] font-semibold transition-colors ${
+                  manualEmptyRows >= remainingSpace
+                    ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                    : "bg-slate-200 text-slate-700 hover:bg-slate-300"
+                }`}
+              >
+                বাকি সব
+              </button>
+
+              <button
+                onClick={() => setManualEmptyRows(0)}
+                disabled={manualEmptyRows <= 0}
+                className={`px-2.5 py-1.5 rounded text-[12px] font-semibold transition-colors ${
+                  manualEmptyRows <= 0
+                    ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                    : "bg-red-500 text-white hover:bg-red-600"
+                }`}
+              >
+                সব মুছুন
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* 💡 হিন্ট */}
+        <span className="w-full text-[11px] text-slate-400">
+          প্রিভিউতে নিচের অংশ কেটে গেলে — রো-এর উচ্চতা কমাও, অথবা পৃষ্ঠার দিক Landscape করো।
+        </span>
         {selectedMonthIdx !== "" && startWeekday !== "" && (
           <div className="text-xs text-slate-700 bg-red-50 border border-red-200 rounded px-3 py-1.5">
             <span className="font-semibold text-red-700">
@@ -440,75 +504,6 @@ const ArabicAttendence = ({
         )}
       </div>
 
-      {/* ✅ শেষ পেজে খালি ঘর নিয়ন্ত্রণ প্যানেল */}
-      {chunks.length > 0 && (
-        <div
-          dir="ltr"
-          className="no-print mb-3 p-3 bg-slate-50 border border-slate-200 rounded flex flex-wrap items-center gap-3"
-        >
-          <span className="text-sm font-semibold text-slate-700">
-            শেষ পেজে খালি ঘর:
-          </span>
-          <span className="text-sm font-bold text-[#1B3A57]">
-            {toArabicNumber(manualEmptyRows)} টি
-          </span>
-
-          <button
-            onClick={() => setManualEmptyRows((n) => n + 1)}
-            disabled={manualEmptyRows >= remainingSpace}
-            className={`px-3 py-1.5 rounded text-sm font-semibold transition-colors ${
-              manualEmptyRows >= remainingSpace
-                ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                : "bg-[#1B3A57] text-white hover:bg-[#1B3A57]/90"
-            }`}
-          >
-            + একটি খালি ঘর
-          </button>
-
-          <button
-            onClick={() => setManualEmptyRows((n) => Math.max(0, n - 1))}
-            disabled={manualEmptyRows <= 0}
-            className={`px-3 py-1.5 rounded text-sm font-semibold transition-colors ${
-              manualEmptyRows <= 0
-                ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                : "bg-slate-200 text-slate-700 hover:bg-slate-300"
-            }`}
-          >
-            − একটি বাদ
-          </button>
-
-          <button
-            onClick={() => setManualEmptyRows(remainingSpace)}
-            disabled={manualEmptyRows >= remainingSpace}
-            className={`px-3 py-1.5 rounded text-sm font-semibold transition-colors ${
-              manualEmptyRows >= remainingSpace
-                ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                : "bg-slate-200 text-slate-700 hover:bg-slate-300"
-            }`}
-          >
-            বাকি সব ভরাও
-          </button>
-
-          <button
-            onClick={() => setManualEmptyRows(0)}
-            disabled={manualEmptyRows <= 0}
-            className={`px-3 py-1.5 rounded text-sm font-semibold transition-colors ${
-              manualEmptyRows <= 0
-                ? "bg-slate-200 text-slate-400 cursor-not-allowed"
-                : "bg-red-500 text-white hover:bg-red-600"
-            }`}
-          >
-            সব খালি ঘর মুছুন
-          </button>
-
-          <span className="text-xs text-slate-500 ml-auto">
-            পেজে জায়গা আছে: {toArabicNumber(remainingSpace)} টি ঘর
-          </span>
-          <span className="w-full text-[11px] text-slate-400">
-            প্রিভিউতে নিচের অংশ কেটে গেলে — রো-এর উচ্চতা কমাও, অথবা পৃষ্ঠার দিক Landscape করো।
-          </span>
-        </div>
-      )}
 
       {/* ✅ কোনো ডাটা না পেলে — আরবিতে বার্তা */}
       {!showLoading && chunks.length === 0 && (

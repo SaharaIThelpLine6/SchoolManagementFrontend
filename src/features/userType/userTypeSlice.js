@@ -230,6 +230,9 @@ export const userTypeSlice = createApi({
       }),
       invalidatesTags: ['Users'],
     }),
+    getUserFullInfo: builder.query({
+      query: (UserCode) => `${API_URL}/api/academic/user_full_info/${UserCode}`,
+    }),
   }),
 });
 
@@ -256,5 +259,6 @@ export const {
   useLazyGetUserInfoBySearchQuery,
   useGetNewAccessTokenMutation,
   useUpdateUserStatusMutation,
-  useGetGuardianOccupationTypeQuery
+  useGetGuardianOccupationTypeQuery,
+  useGetUserFullInfoQuery,
 } = userTypeSlice;

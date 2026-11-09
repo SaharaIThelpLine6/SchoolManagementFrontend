@@ -389,10 +389,20 @@ const WithoutExamRoutine = ({
           </div>
           )}
 
+          {/* ⭐ মারহালা/শ্রেণীর লাইন — নামটা আর লাইনের বাইরে যায় না।
+
+               আগে ফাঁকা জায়গাটা ডট দিয়ে লেখা ছিল আর শ্রেণীর নামটা
+               `absolute left-[150px] bottom-[10px]` দিয়ে ডটের উপরে বসানো
+               হত। absolute বলে ওটা লাইনের উচ্চতার হিসাবেই ধরত না — তাই
+               লম্বা নাম হলে ডান দিকে উপচে যেত, আর bottom-[10px] ওটাকে
+               ঠেলে টেবিলের উপরের বর্ডারের বাইরে তুলে দিত।
+
+               এখন ডট নেই, একটা dotted নিচের বর্ডার — নামটা তার ভেতরেই
+               বসে, baseline মিলিয়ে। নাম যত বড়ই হোক ঘরের ভেতরেই থাকে। */}
           <div className="mb-2 text-left">
-            <p className="font-semibold text-[18px] relative">
-              মারহালা/শ্রেণীঃ ...................................................
-              <span className="absolute left-[150px] bottom-[10px]">
+            <p className="font-semibold text-[18px] flex items-baseline gap-2">
+              <span className="shrink-0">মারহালা/শ্রেণীঃ</span>
+              <span className="min-w-[200px] max-w-[420px] border-b border-dotted border-black px-2 text-center leading-tight break-words">
                 {subClassData?.SubClass}
               </span>
             </p>

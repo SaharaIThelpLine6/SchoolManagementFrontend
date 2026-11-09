@@ -95,6 +95,45 @@ const buildAssetUrl = (value) => {
   return `${base}/public/${raw.replace(/^\/+/, '')}`;
 };
 
+// ---------------------------------------------------------------------------
+// ফিল্টার — এই ব্রাউজারেই জমে, ডাটাবেজে নয়
+//
+// শিক্ষাবর্ষ, পরীক্ষা, শ্রেণি, অবস্থান ও রিপোর্টের ধরণ — এগুলো প্রতিদিনের
+// বাছাই, প্রতিষ্ঠানের সেটিং নয়। তাই Report_Template এ না পাঠিয়ে
+// localStorage এ রাখা হয়: পেজ খুললেই আগের বাছাইটা ফিরে আসে, আর বারবার
+// ফিল্টার করতে হয় না।
+//
+// ঘরটা প্রতিষ্ঠান ধরে আলাদা — একই ব্রাউজারে দুই মাদরাসায় ঢুকলেও
+// একটার বাছাই অন্যটায় গিয়ে পড়ে না।
+// ---------------------------------------------------------------------------
+const FILTER_STORE_PREFIX = 'admitCardFilters';
+
+const filterStoreKeyFor = (institutionInfo) =>
+  `${FILTER_STORE_PREFIX}:${institutionInfo?.InstitutionCode ?? 'default'}`;
+
+const readLocalFilters = (key) => {
+  try {
+    const raw = window.localStorage.getItem(key);
+    const parsed = raw ? JSON.parse(raw) : null;
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    // ব্রাউজারে localStorage বন্ধ থাকলেও পেজটা আগের মতোই চলবে
+    return {};
+  }
+};
+
+const writeLocalFilters = (key, value) => {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    /* জায়গা না থাকলে বা বন্ধ থাকলে — চুপচাপ ছেড়ে দিই */
+  }
+};
+
+/** বাছাইটা তালিকায় আছে কি না — মুছে ফেলা সেশন বসালে ঘর ফাঁকা দেখাত */
+const optionExists = (list, field, value) =>
+  Array.isArray(list) && list.some((o) => String(o?.[field]) === String(value));
+
 const EXTRA_UI = {
   bn: {
     sizeBox: 'লেখার মাপ',
@@ -528,6 +567,9 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
   const instName = getInstituteName(institutionInfo, lang);
   const instAddress = getInstituteAddress(institutionInfo, lang);
 
+  // ফিল্টার কোন ঘরে জমবে — প্রতিষ্ঠান ধরে আলাদা
+  const filterStoreKey = filterStoreKeyFor(institutionInfo);
+
   const SessionID = watch('SessionID');
   const ExamID = watch('ExamID');
   const SubClassID = watch('SubClassID');
@@ -662,6 +704,8 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
 
   const hydratedRef = useRef(false);
   const savedLabelsRef = useRef(null);
+  // কোন প্রতিষ্ঠানের ফিল্টার ফেরানো হয়ে গেছে — একবারই চলে
+  const filtersLoadedRef = useRef('');
 
   useEffect(() => {
     if (hydratedRef.current) return;
@@ -726,7 +770,11 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
     if (Array.isArray(r.columns) && r.columns.length) setRoutineColumns(r.columns);
     if (r.seat !== undefined) setSeatEnabled(Boolean(r.seat));
 
-    if (setup.reportType) setValue('ReportID', setup.reportType);
+    // রিপোর্টের ধরণটা এখন ফিল্টার হিসেবে ব্রাউজারেই জমে। স্থানীয় বাছাই
+    // ফিরে আসার পর ডাটাবেজের পুরোনো মানটা আর উপরে বসতে দিই না।
+    if (setup.reportType && !filtersLoadedRef.current) {
+      setValue('ReportID', setup.reportType);
+    }
 
     const tplId = setup.templateId || selectedTemplate;
     if (setup.nameSize) setValue(`institute_name_size_${tplId}`, setup.nameSize);
@@ -1089,6 +1137,54 @@ const ExamAdmitCard = ({ pageTitle = 'Exam Admit Card' }) => {
       });
     }
   };
+
+  // ---------------------------------------------- সংরক্ষিত ফিল্টার ফেরানো
+  // তালিকাগুলো আসার পরেই বসাই, আর যে মানটা তালিকায় নেই সেটা বসাই না —
+  // সেশন বা পরীক্ষা মুছে ফেলা হলে ঘরটা ফাঁকা দেখাত।
+  useEffect(() => {
+    if (filtersLoadedRef.current === filterStoreKey) return;
+    if (!sessionData || !examNameData || !subClassData) return;
+
+    filtersLoadedRef.current = filterStoreKey;
+    const saved = readLocalFilters(filterStoreKey);
+
+    if (optionExists(sessionData, 'SessionID', saved.SessionID)) {
+      setValue('SessionID', saved.SessionID);
+    }
+    if (optionExists(examNameData, 'ExamID', saved.ExamID)) {
+      setValue('ExamID', saved.ExamID);
+    }
+    if (optionExists(subClassData, 'SubClassID', saved.SubClassID)) {
+      setValue('SubClassID', saved.SubClassID);
+    }
+    if (optionExists(residentialData, 'RDID', saved.RDID)) {
+      setValue('RDID', saved.RDID);
+    }
+    // রিপোর্টের ধরণের তালিকা মোডভেদে বদলায়; বেঠিক হলে নিচের ইফেক্টই
+    // প্রথমটায় ফিরিয়ে আনে, তাই এখানে আলাদা যাচাই লাগে না
+    if (saved.ReportID) setValue('ReportID', saved.ReportID);
+  }, [
+    filterStoreKey,
+    sessionData,
+    examNameData,
+    subClassData,
+    residentialData,
+    setValue,
+  ]);
+
+  // ---------------------------------------------- ফিল্টার জমানো
+  // ফেরানোর কাজ শেষ হওয়ার আগে লিখি না — নইলে খালি ঘরগুলো জমা পড়ে
+  // আগের বাছাই মুছে যেত।
+  useEffect(() => {
+    if (filtersLoadedRef.current !== filterStoreKey) return;
+    writeLocalFilters(filterStoreKey, {
+      SessionID: SessionID || '',
+      ExamID: ExamID || '',
+      SubClassID: SubClassID || '',
+      RDID: RDID || '',
+      ReportID: reportType || '',
+    });
+  }, [filterStoreKey, SessionID, ExamID, SubClassID, RDID, reportType]);
 
   const reportOptions = useMemo(
     () =>
