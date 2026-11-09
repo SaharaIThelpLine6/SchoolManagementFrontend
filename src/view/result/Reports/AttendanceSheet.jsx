@@ -1,5 +1,4 @@
-
-import { useMemo, useState, useEffect, useLayoutEffect, useRef, useId } from "react";
+import { useMemo, useState, useEffect, useLayoutEffect, useRef, useId, useCallback } from "react";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../../utils/conveter";
 import { createPortal } from "react-dom";
@@ -15,6 +14,8 @@ export const LANGUAGE_OPTIONS = [
     { key: "ar", label: "العربية" },
 ];
 export const DEFAULT_LANGUAGE = "bn";
+
+const SHEET_FONT = "'SolaimanLipi', 'Noto Sans Bengali', 'Kalpurush', sans-serif";
 
 const TRANSLATIONS = {
     bn: {
@@ -54,7 +55,7 @@ const TRANSLATIONS = {
         fontNote: "শিটের সব লেখা একসাথে ছোট-বড় হবে।",
         infoTitle: "শিটের তথ্য",
         subjectLabel: "কিতাবের নাম",
-        subjectPlaceholder: "— নির্বাচন করুন —",
+        subjectSelected: (c, n) => `${c}/${n} টি কিতাব নির্বাচিত`,
         subjectEmpty: "কোনো কিতাব পাওয়া যায়নি",
         teacherLoading: "শিক্ষক লোড হচ্ছে...",
         teacherAuto: "শিক্ষক",
@@ -64,7 +65,7 @@ const TRANSLATIONS = {
         yearPlaceholder: "— বছর —",
         hourLabel: "ঘন্টা",
         hourPlaceholder: "যেমন: ১ম ঘন্টা",
-        infoNote: "কিতাব নির্বাচন করলে কিতাবের নাম ও শিক্ষকের নাম প্রিভিউ ও প্রিন্টে নিজে থেকে বসবে। মাস প্রিন্টের ভাষায় দেখাবে।",
+        infoNote: "যতগুলো কিতাব চেক করবেন, প্রতিটি কিতাবের জন্য সব শিক্ষার্থীর আলাদা হাজিরা খাতা (কিতাব ও শিক্ষকের নামসহ) প্রিভিউ ও প্রিন্টে আসবে। আনচেক করলে ওই কিতাবের পেজ বাদ যাবে। মাস প্রিন্টের ভাষায় দেখাবে।",
         orderTitle: "শিক্ষার্থীর ক্রম",
         orderSub: "শিক্ষার্থীদের সাজানোর ধরন নির্বাচন করুন",
         idSerial: "আইডি সিরিয়ালে",
@@ -389,6 +390,29 @@ const chunk = (arr, size) => {
 };
 
 /* ═══════════════════════════════════════════════════════════
+   TEACHER LOADER (প্রতিটি checked কিতাবের শিক্ষক আলাদা লোড)
+   ═══════════════════════════════════════════════════════════ */
+function TeacherLoader({ subjectId, sessionId, examId, subClassId, onChange }) {
+    const { currentData, isFetching } = useGetTeacherSubjectInfoQuery(
+        { session_id: sessionId, exam_id: examId, subclass_id: subClassId, subject_id: Number(subjectId) },
+        { skip: !sessionId || !examId || !subClassId || !subjectId }
+    );
+
+    useEffect(() => {
+        const rows = Array.isArray(currentData?.data) ? currentData.data : [];
+        const teacher = rows
+            .map((r) => (r?.TeacherName || "").trim())
+            .filter(Boolean)
+            .filter((n, i, a) => a.indexOf(n) === i)
+            .join("، ");
+        const book = (rows[0]?.SubjectName || "").trim();
+        onChange(subjectId, { teacher, book, loading: !!isFetching });
+    }, [currentData, isFetching, subjectId, onChange]);
+
+    return null;
+}
+
+/* ═══════════════════════════════════════════════════════════
    FILL-IN FIELD
    ═══════════════════════════════════════════════════════════ */
 function FillField({ label, value, flex = 1, color, dottedColor, fs }) {
@@ -414,7 +438,7 @@ function FillField({ label, value, flex = 1, color, dottedColor, fs }) {
    ═══════════════════════════════════════════════════════════ */
 export default function AttendanceSheet({ reportData, query }) {
 
-    console.log(reportData, "reportData")
+    // console.log(reportData, "reportData")
 
     const [visibleColumns, setVisibleColumns] = useState(() => loadObj(LS_VISIBLE, DEFAULT_VISIBLE_COLUMNS));
     const [colorMode, setColorMode] = useState(() => loadStr(LS_COLOR, COLOR_OPTIONS, DEFAULT_COLOR_MODE));
@@ -431,7 +455,9 @@ export default function AttendanceSheet({ reportData, query }) {
     const [month, setMonth] = useState(loadMonth);
     const [year, setYear] = useState(loadYear);
     const [hourInput, setHourInput] = useState(() => loadText(LS_HOUR));
-    const [subjectId, setSubjectId] = useState("");
+    // ✅ null = ডিফল্ট (প্রথম কিতাব checked), array = ইউজারের নির্বাচন
+    const [subjectSel, setSubjectSel] = useState(null);
+    const [teacherMap, setTeacherMap] = useState({});
     const [orderMode, setOrderMode] = useState(() => loadStr(LS_ORDER, ORDER_OPTIONS, DEFAULT_ORDER));
     const [excludedDivs, setExcludedDivs] = useState(loadExcludedDivisions);
 
@@ -458,27 +484,36 @@ export default function AttendanceSheet({ reportData, query }) {
         return out;
     }, [examRoutineSubjectData]);
 
-    const selectedSubjectId = subjectList.some((s) => s.value === subjectId) ? subjectId : "";
-    const SubjectID = selectedSubjectId ? Number(selectedSubjectId) : undefined;
+    // ক্লাস/পরীক্ষা বদলালে (কিতাব তালিকা বদলালে) আবার ডিফল্টে ফিরবে
+    const subjectKey = useMemo(() => subjectList.map((s) => s.value).join(","), [subjectList]);
+    useEffect(() => { setSubjectSel(null); }, [subjectKey]);
 
-    const { currentData: teacherSubjectData, isFetching: teacherLoading } = useGetTeacherSubjectInfoQuery(
-        { session_id: SessionID, exam_id: ExamID, subclass_id: SubClassID, subject_id: SubjectID },
-        { skip: !SessionID || !ExamID || !SubClassID || !SubjectID }
-    );
+    // ✅ কার্যকর নির্বাচিত কিতাব (ডিফল্ট: প্রথমটি)
+    const selectedSubjectIds = useMemo(() => {
+        if (subjectSel === null) return subjectList.length ? [subjectList[0].value] : [];
+        return subjectList.filter((s) => subjectSel.includes(s.value)).map((s) => s.value);
+    }, [subjectSel, subjectList]);
 
-    const teacherRows = Array.isArray(teacherSubjectData?.data) ? teacherSubjectData.data : [];
-    const teacherNameText = useMemo(
-        () =>
-            teacherRows
-                .map((r) => (r?.TeacherName || "").trim())
-                .filter(Boolean)
-                .filter((n, i, a) => a.indexOf(n) === i)
-                .join("، "),
-        [teacherRows]
-    );
-    const bookNameText = selectedSubjectId
-        ? (teacherRows[0]?.SubjectName || subjectList.find((s) => s.value === selectedSubjectId)?.label || "").trim()
-        : "";
+    const toggleSubject = useCallback((id) => {
+        setSubjectSel((prev) => {
+            const current = prev === null
+                ? (subjectList.length ? [subjectList[0].value] : [])
+                : prev;
+            return current.includes(id) ? current.filter((x) => x !== id) : [...current, id];
+        });
+    }, [subjectList]);
+
+    const setAllSubjects = useCallback((checked) => {
+        setSubjectSel(checked ? subjectList.map((s) => s.value) : []);
+    }, [subjectList]);
+
+    const handleTeacherChange = useCallback((id, val) => {
+        setTeacherMap((prev) => {
+            const p = prev[id];
+            if (p && p.teacher === val.teacher && p.book === val.book && p.loading === val.loading) return prev;
+            return { ...prev, [id]: val };
+        });
+    }, []);
 
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
     const [institutionLogo, setInstitutionLogo] = useState(null);
@@ -692,7 +727,7 @@ export default function AttendanceSheet({ reportData, query }) {
     const rowsAreaPx = pageHeightPx - titleH - theadPx - 4;
     const maxRowsFit = Math.max(1, Math.floor(rowsAreaPx / rowMinPx));
 
-    /* ✅ পেজ ভাঙার লজিক */
+    /* ✅ পেজ ভাঙার লজিক (একটি কিতাবের জন্য) */
     const pages = useMemo(() => {
         const studentCount = studentResultsDetails.length;
         if (studentCount === 0 && customRows === null) return [[]];
@@ -728,6 +763,31 @@ export default function AttendanceSheet({ reportData, query }) {
         });
     }, [studentResultsDetails, maxRowsFit, customRows]);
 
+    /* ✅ প্রতিটি checked কিতাবের জন্য আলাদা গ্রুপ (কিছুই checked না থাকলে ফাঁকা কিতাবের একটি গ্রুপ) */
+    const sheetGroups = useMemo(() => {
+        if (selectedSubjectIds.length === 0) {
+            return [{ id: "none", bookName: "", teacherName: "" }];
+        }
+        return selectedSubjectIds.map((id) => {
+            const info = teacherMap[id];
+            const label = subjectList.find((s) => s.value === id)?.label || "";
+            return {
+                id,
+                bookName: (info?.book || label || "").trim(),
+                teacherName: info?.teacher || "",
+            };
+        });
+    }, [selectedSubjectIds, teacherMap, subjectList]);
+
+    // ✅ সব কিতাবের পেজ একসাথে (প্রিভিউ ও প্রিন্টে একই তালিকা)
+    const flatPages = useMemo(
+        () =>
+            sheetGroups.flatMap((group, groupIdx) =>
+                pages.map((rows, pageIndex) => ({ rows, pageIndex, group, groupIdx }))
+            ),
+        [sheetGroups, pages]
+    );
+
     // ✅ শেষ পেজে সারি ফুল-হাইট (Stretch) করার লজিক
     const lastPageIdx = pages.length - 1;
     const lastPageRows = pages[lastPageIdx] || [];
@@ -737,6 +797,7 @@ export default function AttendanceSheet({ reportData, query }) {
         ? Math.floor(rowsAreaPx / Math.max(1, lastPageRows.length))
         : Math.floor(rowsAreaPx / maxRowsFit);
 
+    const firstGroup = sheetGroups[0];
     useLayoutEffect(() => {
         const measure = () => {
             if (!titleRef.current) return;
@@ -745,7 +806,7 @@ export default function AttendanceSheet({ reportData, query }) {
         };
         measure();
         if (document.fonts?.ready) document.fonts.ready.then(measure);
-    }, [institutionInfo, institutionLogo, sessionName, className, orientation, paper, lang, fontPct, bookNameText, teacherNameText, monthText, yearText, hourInput]);
+    }, [institutionInfo, institutionLogo, sessionName, className, orientation, paper, lang, fontPct, firstGroup?.bookName, firstGroup?.teacherName, monthText, yearText, hourInput]);
 
     const cellBase = {
         border: `1px solid ${C.border}`,
@@ -784,7 +845,7 @@ export default function AttendanceSheet({ reportData, query }) {
         </colgroup>
     );
 
-    const renderTitleBlock = (withRef) => (
+    const renderTitleBlock = (withRef, group) => (
         <div
             ref={withRef ? titleRef : null}
             style={{
@@ -830,21 +891,21 @@ export default function AttendanceSheet({ reportData, query }) {
                 textAlign: "start",
             }}>
                 <div style={{ display: "flex", gap: "18px" }}>
-                    <FillField label={t.bookName} value={bookNameText} flex={2} color={C.text} dottedColor={C.dotted} fs={fs} />
+                    <FillField label={t.bookName} value={group?.bookName} flex={2} color={C.text} dottedColor={C.dotted} fs={fs} />
                     <FillField label={t.month} value={monthText} flex={1.2} color={C.text} dottedColor={C.dotted} fs={fs} />
                     <FillField label={t.hijriYear} value={yearText} flex={1.2} color={C.text} dottedColor={C.dotted} fs={fs} />
                 </div>
                 <div style={{ display: "flex", gap: "18px" }}>
-                    <FillField label={t.teacherName} value={teacherNameText} flex={2.4} color={C.text} dottedColor={C.dotted} fs={fs} />
+                    <FillField label={t.teacherName} value={group?.teacherName} flex={2.4} color={C.text} dottedColor={C.dotted} fs={fs} />
                     <FillField label={t.hour} value={hourInput.trim()} flex={1} color={C.text} dottedColor={C.dotted} fs={fs} />
                 </div>
             </div>
         </div>
     );
 
-    const renderPage = (rows, pageIndex, isPrint = false) => (
+    const renderPage = ({ rows, pageIndex, group, groupIdx }, isPrint = false) => (
         <div
-            key={(isPrint ? "p" : "s") + pageIndex}
+            key={(isPrint ? "p" : "s") + group.id + "-" + pageIndex}
             dir={dir}
             className="sheet-card sheet-page"
             style={{
@@ -856,6 +917,7 @@ export default function AttendanceSheet({ reportData, query }) {
                 overflow: "hidden",
                 background: "#fff",
                 color: C.text,
+                fontFamily: SHEET_FONT,
                 boxShadow: "0 2px 10px rgba(15,23,42,0.12), 0 0 0 1px rgba(15,23,42,0.05)",
             }}
         >
@@ -875,7 +937,7 @@ export default function AttendanceSheet({ reportData, query }) {
                     <thead style={{ display: "table-header-group" }}>
                         <tr>
                             <th colSpan={Math.max(visibleColCount, 1)} style={{ padding: 0, fontWeight: 400, backgroundColor: "#fff" }}>
-                                {renderTitleBlock(!isPrint && pageIndex === 0)}
+                                {renderTitleBlock(!isPrint && groupIdx === 0 && pageIndex === 0, group)}
                             </th>
                         </tr>
 
@@ -969,10 +1031,10 @@ export default function AttendanceSheet({ reportData, query }) {
                 t={tUI}
                 lang={lang}
                 subjectOptions={subjectList}
-                subjectValue={selectedSubjectId}
-                onSubjectChange={setSubjectId}
-                teacherName={teacherNameText}
-                teacherLoading={!!SubjectID && teacherLoading}
+                selectedSubjectIds={selectedSubjectIds}
+                onToggleSubject={toggleSubject}
+                onSetAllSubjects={setAllSubjects}
+                teacherMap={teacherMap}
                 month={month} onMonthChange={setMonth}
                 year={year} onYearChange={setYear}
                 hour={hourInput} onHourChange={setHourInput}
@@ -1016,6 +1078,18 @@ export default function AttendanceSheet({ reportData, query }) {
 
     return (
         <div className="rs-root flex w-full bg-slate-100 lg:h-[100dvh] lg:overflow-hidden">
+            {/* ✅ প্রতিটি checked কিতাবের শিক্ষক লোডার */}
+            {selectedSubjectIds.map((id) => (
+                <TeacherLoader
+                    key={id}
+                    subjectId={id}
+                    sessionId={SessionID}
+                    examId={ExamID}
+                    subClassId={SubClassID}
+                    onChange={handleTeacherChange}
+                />
+            ))}
+
             <aside className="no-print hidden lg:flex flex-col w-[300px] shrink-0 h-full bg-white border-r border-slate-200 shadow-[2px_0_12px_rgba(15,23,42,0.04)] print:hidden">
                 <div className="p-5 border-b border-slate-100 shrink-0">
                     <div className="flex items-center gap-2 mb-1">
@@ -1031,7 +1105,7 @@ export default function AttendanceSheet({ reportData, query }) {
                 </div>
 
                 <div className="px-5 py-3 border-b border-slate-100 shrink-0">
-                    <PreviewInfo t={tUI} num={numUI} count={studentResultsDetails.length} days={days} pages={pages.length} />
+                    <PreviewInfo t={tUI} num={numUI} count={studentResultsDetails.length} days={days} pages={flatPages.length} />
                 </div>
 
                 <div className="rs-scroll flex-1 min-h-0 overflow-y-auto p-5 space-y-4">
@@ -1046,7 +1120,7 @@ export default function AttendanceSheet({ reportData, query }) {
             <main className="rs-main rs-scroll flex-1 min-w-0 lg:h-full lg:overflow-y-auto">
                 <div className="no-print lg:hidden p-4 pb-0 print:hidden">
                     <div className="bg-white rounded-xl p-4 shadow-sm space-y-3">
-                        <PreviewInfo t={tUI} num={numUI} count={studentResultsDetails.length} days={days} pages={pages.length} />
+                        <PreviewInfo t={tUI} num={numUI} count={studentResultsDetails.length} days={days} pages={flatPages.length} />
                         {settingsPanels}
                     </div>
                 </div>
@@ -1060,7 +1134,7 @@ export default function AttendanceSheet({ reportData, query }) {
                                 display: "flex", flexDirection: "column", gap: "16px",
                             }}
                         >
-                            {pages.map((rows, i) => renderPage(rows, i))}
+                            {flatPages.map((p) => renderPage(p))}
                         </div>
                     </div>
                 </div>
@@ -1068,12 +1142,23 @@ export default function AttendanceSheet({ reportData, query }) {
 
             {printRoot && createPortal(
                 <div className="sheet-pages-print">
-                    {pages.map((rows, i) => renderPage(rows, i, true))}
+                    {flatPages.map((p) => renderPage(p, true))}
                 </div>,
                 printRoot
             )}
 
             <style>{`
+        /* ✅ SolaimanLipi — ফন্ট ফাইল public/fonts/SolaimanLipi.ttf এ রাখুন (আগে থেকে লোড থাকলে দরকার নেই) */
+        @font-face {
+          font-family: 'SolaimanLipi';
+          src: local('SolaimanLipi'), local('Solaiman Lipi'), url('/fonts/SolaimanLipi.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+          font-display: swap;
+        }
+
+        .sheet-page, .sheet-page * { font-family: ${SHEET_FONT} !important; }
+
         .print-portal { display: none; }
         .rs-scroll { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; scroll-behavior: smooth; }
         .rs-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -1277,29 +1362,67 @@ const DivisionFilter = ({ t, num, options, excluded, onToggle, onSetAll }) => {
 
 const SheetInfoSettings = ({
     t, num, lang,
-    subjectOptions, subjectValue, onSubjectChange, teacherName, teacherLoading,
+    subjectOptions, selectedSubjectIds, onToggleSubject, onSetAllSubjects, teacherMap,
     month, onMonthChange, year, onYearChange,
     hour, onHourChange,
 }) => {
     const monthList = MONTH_NAMES[lang] || MONTH_NAMES.bn;
     const monthOptions = monthList.map((m, i) => ({ value: String(i), label: m }));
     const yearOptions = YEAR_LIST.map((y) => ({ value: y, label: num(y) }));
+    const selectedSet = new Set(selectedSubjectIds);
     return (
         <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2.5">
             <p className="text-xs font-bold text-slate-700 leading-tight">{t.infoTitle}</p>
 
-            <SelectField
-                label={t.subjectLabel}
-                value={subjectValue}
-                onChange={onSubjectChange}
-                options={subjectOptions}
-                placeholder={subjectOptions.length ? t.subjectPlaceholder : t.subjectEmpty}
-            />
-            {subjectValue !== "" && (
-                <p className="text-[10px] text-emerald-700 leading-snug bg-emerald-50 border border-emerald-100 rounded-md px-2 py-1">
-                    {t.teacherAuto}: {teacherLoading ? t.teacherLoading : (teacherName || "—")}
-                </p>
-            )}
+            {/* ✅ কিতাবের নাম — checkbox (ডিফল্টে প্রথমটি checked) */}
+            <div>
+                <div className="flex items-center justify-between mb-1.5">
+                    <div className="min-w-0">
+                        <p className="text-[11px] font-semibold text-slate-500">{t.subjectLabel}</p>
+                        <p className="text-[10px] text-slate-400 leading-tight mt-0.5">
+                            {t.subjectSelected(num(selectedSubjectIds.length), num(subjectOptions.length))}
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                        <button type="button" onClick={() => onSetAllSubjects(true)}
+                            className="px-2 py-1 rounded-md text-[10px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100">
+                            {t.all}
+                        </button>
+                        <button type="button" onClick={() => onSetAllSubjects(false)}
+                            className="px-2 py-1 rounded-md text-[10px] font-semibold text-slate-500 bg-slate-100 hover:bg-slate-200">
+                            {t.none}
+                        </button>
+                    </div>
+                </div>
+
+                {subjectOptions.length === 0 ? (
+                    <p className="text-[11px] text-slate-400 py-2 text-center">{t.subjectEmpty}</p>
+                ) : (
+                    <div className="grid grid-cols-1 gap-1.5 max-h-56 overflow-y-auto pr-0.5 rs-scroll">
+                        {subjectOptions.map((s) => {
+                            const checked = selectedSet.has(s.value);
+                            const info = teacherMap?.[s.value];
+                            return (
+                                <label key={s.value} className={`flex flex-col gap-0.5 px-2.5 py-1.5 rounded-lg border cursor-pointer select-none text-xs transition-colors ${checked
+                                    ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-medium"
+                                    : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
+                                    }`}>
+                                    <span className="flex items-center gap-2">
+                                        <input type="checkbox" checked={checked} onChange={() => onToggleSubject(s.value)}
+                                            className="w-3.5 h-3.5 accent-emerald-600 cursor-pointer" />
+                                        <span className="flex-1 truncate">{s.label}</span>
+                                    </span>
+                                    {checked && (
+                                        <span className="text-[10px] text-emerald-700 font-normal pl-[22px] truncate">
+                                            {t.teacherAuto}: {info?.loading ? t.teacherLoading : (info?.teacher || "—")}
+                                        </span>
+                                    )}
+                                </label>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
 
             <div className="grid grid-cols-2 gap-2">
                 <SelectField label={t.monthLabel} value={month} onChange={onMonthChange} options={monthOptions} placeholder={t.monthPlaceholder} />
