@@ -3,14 +3,9 @@ import { FormProvider, useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 
 import Button from '../../components/Button/Button';
-import DefaultInput from '../../components/Forms/DefaultInput';
 
 import {
-  useCreateTimeShiftingMutation,
   useGetTimeShiftingsQuery,
-  useUpdateTimeShiftingMutation,
-  useGetTimeShiftingByIdQuery,
-  useDeleteTimeShiftingMutation,
   useGetTimeCheckTypesQuery,
   useCreateTimeSwitchMutation,
   useUpdateTimeSwitchMutation,
@@ -18,13 +13,11 @@ import {
   useGetTimeSwitchesQuery
 } from '../../features/attendance/attendanceSlice';
 
-import { hideModal } from '../../utils/ModalControlar';
 import useTranslate from '../../utils/Translate';
 import SvgIcon from '../../components/icons/SvgIcon';
 import TimePicker from '../../components/Forms/DatePicker/TimePicker';
 import DefaultSelect from '../../components/Forms/DefaultSelect';
 import { attendanceFormatTime, formatTime } from '../../helper/formatTime';
-import { convertToTimeLocal } from '../../helper/formatTimeSlots';
 
 const ScheduleShiftEntry = () => {
   const methods = useForm();
