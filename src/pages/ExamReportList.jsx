@@ -15,6 +15,8 @@ import {
   language,
   oneLanguageExamReport,
   sevenLanguageExamReport,
+  signatureRoutineOptions,
+  signatureSeatOptions,
   threeLanguageExamReport,
 } from '../Data/examReportData';
 import { setPageName } from '../features/auth/authSlice';
@@ -247,7 +249,8 @@ const ExamReportList = ({ pageTitle }) => {
       case 1:
         return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'SubClassID', 'Langauge'].includes(fieldName);
       case 3:
-        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'RDID', 'Langauge', 'PdfSelect'].includes(fieldName);
+        // ⭐ একটা PdfSelect এর বদলে দুইটা আলাদা ফিল্টার — রুটিন আর সিট নং
+        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'RDID', 'Langauge', 'SigRoutine', 'SigSeat'].includes(fieldName);
       case 4:
       case 8:
         return ['ReportID', 'SessionID', 'RDID', 'ExamID', 'ClassID', 'SubClassID', 'Langauge'].includes(fieldName);
@@ -271,7 +274,39 @@ const ExamReportList = ({ pageTitle }) => {
 
   const [
     ReportID, SessionID, ExamID, SubClassID, RDID, ERIsActive, sevenColor, id, PdfID, ClassID,
-  ] = watch(['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'RDID', 'ERIsActive', 'sevenColor', 'id', 'PdfID', 'ClassID']);
+    SigRoutine, SigSeat,
+  ] = watch(['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'RDID', 'ERIsActive', 'sevenColor', 'id', 'PdfID', 'ClassID', 'SigRoutine', 'SigSeat']);
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     ২ নং স্বাক্ষরপত্র — দুইটা ফিল্টার থেকে PdfID
+
+     ব্যবহারকারী দুইটা আলাদা ড্রপডাউন বাছে, কিন্তু ব্যাকএন্ড, queryParams
+     আর নিচের কাগজের শাখাগুলো আগের মতোই PdfID দেখে। তাই এখানে দুইটা
+     মিলিয়ে PdfID বসিয়ে দেওয়া হয় — বাকি কোথাও হাত দিতে হয়নি।
+
+       রুটিন সহ   + সিট নং সহ    → ১
+       রুটিন সহ   + সিট নং ছাড়া  → ৩
+       রুটিন ছাড়া + সিট নং সহ    → ৪
+       রুটিন ছাড়া + সিট নং ছাড়া  → ২
+
+     দুইটার একটাও বাছা না হলে PdfID ফাঁকা করে দিই — নইলে অন্য রিপোর্ট
+     থেকে ফিরে আসার সময় আগের PdfID টা রয়ে গিয়ে কাগজ বসে যেত, অথচ
+     ফিল্টার দুইটা তখনো খালি।
+     ═══════════════════════════════════════════════════════════════════════ */
+  useEffect(() => {
+    if (Number(ReportID) !== 3) return;
+
+    if (!SigRoutine || !SigSeat) {
+      if (PdfID) setValue('PdfID', '');
+      return;
+    }
+
+    const withRoutine = Number(SigRoutine) === 1;
+    const withSeat = Number(SigSeat) === 1;
+    const nextPdfID = withRoutine ? (withSeat ? 1 : 3) : (withSeat ? 4 : 2);
+
+    if (Number(PdfID) !== nextPdfID) setValue('PdfID', nextPdfID);
+  }, [ReportID, SigRoutine, SigSeat, PdfID, setValue]);
 
   const isSignatureSheet = Number(ReportID) === 8;
   const isStatistics = Number(ReportID) === 9;
@@ -821,6 +856,31 @@ const ExamReportList = ({ pageTitle }) => {
                       </div>
                     )}
 
+                    {/* ⭐ ২ নং স্বাক্ষরপত্রের দুইটা আলাদা ফিল্টার, দুইটাই বাধ্যতামূলক */}
+                    {shouldShowFields('SigRoutine') && (
+                      <DefaultSelect
+                        label="পরীক্ষার রুটিন"
+                        nameField="name"
+                        registerKey="SigRoutine"
+                        valueField="id"
+                        options={signatureRoutineOptions}
+                        require="This Field is required"
+                        unicode={true}
+                      />
+                    )}
+
+                    {shouldShowFields('SigSeat') && (
+                      <DefaultSelect
+                        label="সিট নং"
+                        nameField="name"
+                        registerKey="SigSeat"
+                        valueField="id"
+                        options={signatureSeatOptions}
+                        require="This Field is required"
+                        unicode={true}
+                      />
+                    )}
+
                     {shouldShowFields('PdfSelect') && pdfOptions.length > 0 && (
                       <DefaultSelect label={translate('PDF Select')} nameField="name" registerKey="PdfID" valueField="PdfID" options={pdfOptions} require="This Field is required" />
                     )}
@@ -1282,8 +1342,25 @@ const ExamReportList = ({ pageTitle }) => {
           {isFeeReport && langId === 2 && Number(selectedPdfID) === 4 && <StudentNameWithHolding />}
 
           {/* ২. স্বাক্ষরপত্র(দস্তখত) */}
-          {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 1 && <ExamRoutine reportData={data} queryParams={queryParams} />}
-          {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 2 && <WithoutExamRoutine reportData={data} queryParams={queryParams} requireSeatPlan />}
+          {/* PdfID টা উপরের দুইটা ফিল্টার (রুটিন + সিট নং) থেকে হিসাব হয়ে বসে:
+              ১ রুটিন সহ + সিট নং সহ    | ৩ রুটিন সহ + সিট নং ছাড়া
+              ৪ রুটিন ছাড়া + সিট নং সহ  | ২ রুটিন ছাড়া + সিট নং ছাড়া
+
+              সিট নং সহ → ExamRoutine (হল ধরে ধরে, সিট প্ল্যান লাগে)
+              সিট নং ছাড়া → WithoutExamRoutine (পুরো শ্রেণি একসাথে)
+              useRoutine → কিতাবের কলাম রুটিন থেকে, নইলে পরীক্ষার শর্ত থেকে */}
+          {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 1 && (
+            <ExamRoutine reportData={data} queryParams={queryParams} useRoutine />
+          )}
+          {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 3 && (
+            <WithoutExamRoutine reportData={data} queryParams={queryParams} useRoutine />
+          )}
+          {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 4 && (
+            <ExamRoutine reportData={data} queryParams={queryParams} useRoutine={false} />
+          )}
+          {Number(selectedReportID) === 3 && Number(languageID) === 1 && Number(selectedPdfID) === 2 && (
+            <WithoutExamRoutine reportData={data} queryParams={queryParams} useRoutine={false} />
+          )}
 
           {/* ৩. নম্বর পত্র ও স্বাক্ষরপত্র */}
           {isNumberSheet && (

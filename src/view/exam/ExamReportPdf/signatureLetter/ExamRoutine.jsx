@@ -167,7 +167,23 @@ const FOOTER_ROWS = [
 ];
 
 /**
- * পরীক্ষার্থী দস্তখত / স্বাক্ষরপত্র — রুটিন সহ, হল ধরে ধরে।
+ * পরীক্ষার্থী দস্তখত / স্বাক্ষরপত্র — সিট নং (আসন বিন্যাস) সহ, হল ধরে ধরে।
+ *
+ * ⭐ কিতাবের কলাম দুই রকম হতে পারে — `useRoutine` প্রপটাই ঠিক করে:
+ *
+ *     useRoutine = true   → পরীক্ষার রুটিন থেকে (তারিখ, বার, সময় সবই বসে)
+ *     useRoutine = false  → রুটিন ছাড়া। পরীক্ষার শর্তে বাছাই করা কিতাবগুলো
+ *                           (conditionSubjects) বসে, তারিখ/বার/সময় ফাঁকা
+ *                           থাকে। শর্তও না থাকলে ১৪টা ফাঁকা ঘর, শিক্ষক
+ *                           হাতে লিখে নেন।
+ *
+ *   conditionSubjects ব্যাকএন্ড রুটিনের সারির হুবহু একই চেহারায় পাঠায়
+ *   (`subject` নেস্ট করা, ExamDate/ExamDay/StartTime null), তাই নিচের
+ *   কলাম রেন্ডারারগুলো দুই অবস্থাতেই অবিকল চলে — আলাদা নিয়ম লাগেনি।
+ *
+ * ⚠️ এই কাগজটা হল ধরে ধরে ছাপে, তাই আসন বিন্যাস (সিট প্ল্যান) না থাকলে
+ *    বসানোর মতো কিছুই থাকে না — তখন নিচে একটা নোটিশ দেখায়, আগের মতো
+ *    নিঃশব্দে সাদা পাতা আসে না।
  *
  * ⭐ পাতা ভাঙার নিয়ম — এক হলের তালিকা লম্বা হয়ে একাধিক পাতায় গেলে:
  *
@@ -182,8 +198,13 @@ const FOOTER_ROWS = [
  *       পাতায় ছাপে — তাই প্রতি পাতার নিচে স্বাক্ষরের ঘর বসে যাচ্ছিল।
  *       এখন tbody এর শেষে, তাই তালিকার ঠিক পরে একবারই আসে।
  */
-const ExamRoutine = ({ reportData, queryParams, instituteLogo = "" }) => {
-  const { data: examSeatPlanData } = useGetHallwiseSeatPlanQuery({
+const ExamRoutine = ({
+  reportData,
+  queryParams,
+  instituteLogo = "",
+  useRoutine = true,
+}) => {
+  const { data: examSeatPlanData, isLoading: seatPlanLoading } = useGetHallwiseSeatPlanQuery({
     sessionId: queryParams?.SessionID,
     examId: queryParams?.ExamID,
     subClassId: queryParams?.SubClassID,
@@ -202,7 +223,19 @@ const ExamRoutine = ({ reportData, queryParams, instituteLogo = "" }) => {
 
   const hallEntries = examSeatPlanData ? Object.entries(examSeatPlanData) : [];
 
-  const routine = reportData?.routine ?? [];
+  /* ---- কিতাবের কলামগুলো
+     useRoutine → রুটিন থেকে। নইলে শর্তের কিতাব, তাও না থাকলে ১৪টা ফাঁকা ঘর। */
+  const routine = useMemo(() => {
+    if (useRoutine) {
+      const fromRoutine = reportData?.routine ?? [];
+      if (fromRoutine.length) return fromRoutine;
+    }
+
+    const conditionSubjects = reportData?.conditionSubjects ?? [];
+    if (conditionSubjects.length) return conditionSubjects;
+
+    return Array.from({ length: 14 });
+  }, [useRoutine, reportData?.routine, reportData?.conditionSubjects]);
 
   /* মাথার colSpan সারিটা পুরো টেবিল জুড়ে — তিনটা বাঁধা ঘর + কিতাবের ঘরগুলো */
   const totalCols = 3 + routine.length;
@@ -571,6 +604,23 @@ const ExamRoutine = ({ reportData, queryParams, instituteLogo = "" }) => {
       {renderBody(assignments, items)}
     </table>
   );
+
+  /* ⚠️ আসন বিন্যাস না থাকলে এই কাগজে বসানোর মতো কিছু নেই।
+     গার্ডটা সব হুকের পরে — নইলে হুকের ক্রম ভেঙে যেত। */
+  if (!seatPlanLoading && hallEntries.length === 0) {
+    return (
+      <div className="mt-4 rounded-xl border border-dashed border-amber-300 bg-amber-50 py-14 text-center print:hidden">
+        <p className="text-amber-800 font-semibold text-[16px]">
+          এই পরীক্ষার আসন বিন্যাস (সিট প্ল্যান) এখনো করা হয়নি
+        </p>
+        <p className="text-amber-700 text-[14px] mt-1 leading-relaxed">
+          এই কাগজটা হল ধরে ধরে ছাপে, তাই আসন বিন্যাস ছাড়া তালিকা বসানো যায় না।
+          <br />
+          PDF Select থেকে &quot;সিট নং ছাড়া&quot; অপশনটি বেছে নিন।
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>

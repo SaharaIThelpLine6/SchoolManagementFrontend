@@ -53,6 +53,21 @@ export const resultSilce = createApi({
       }),
       invalidatesTags: ["ExamList"],
     }),
+    setJointResultExam: builder.mutation({
+      query: (body) => ({
+        url: "joint-result-selection",
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["ExamList", "Result", "getResultReportData"],
+    }),
+    deleteJointResultSetup: builder.mutation({
+      query: ({ SessionID, SubClassID, ExamID }) => ({
+        url: `joint-result-selection/${SessionID}/${SubClassID}/${ExamID}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ExamList", "Result", "getResultReportData"],
+    }),
     updateAndPostResult: builder.mutation({
       query: (body) => ({
         url: `update_result`,
@@ -260,8 +275,6 @@ export const resultSilce = createApi({
       }),
       invalidatesTags: ['ExamDivisionSetting'],
     }),
-
-
     getExamType: builder.query({
       query: ({ examid }) =>
         `exam_type?examid=${examid}`,
@@ -274,6 +287,8 @@ export const {
   useGetExamListQuery,
   useGetUserResultQuery,
   useUpdateExamListStatusUpdateMutation,
+  useSetJointResultExamMutation,
+  useDeleteJointResultSetupMutation,
   useUpdateAndPostResultMutation,
   useGetUserSingleResultQuery,
   useGetResultReportDataQuery,

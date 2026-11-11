@@ -2,6 +2,7 @@ import React from "react";
 import bnBijoy2Unicode from "../../utils/conveter";
 
 const AvgNumberResult = ({ studentResult }) => {
+  const jointColumns = studentResult?.jointSourceExams ?? [];
   
   return (
     <div className="bg-white px-[5px]">
@@ -70,34 +71,42 @@ const AvgNumberResult = ({ studentResult }) => {
             <th
               className="text-semibold text-[16px] border border-black h- "
               bgcolor="#ffffff"
-            >
+             rowSpan={jointColumns.length > 0 ? 2 : 1}>
               ক্রমিক নং
             </th>
             <th
               className="text-semibold text-[16px] border border-black h-12 "
               bgcolor="#ffffff"
-            >
+             rowSpan={jointColumns.length > 0 ? 2 : 1}>
               বিষয়
             </th>
             <th
               className="text-semibold text-[16px] border border-black h-12 "
               bgcolor="#ffffff"
-            >
+             rowSpan={jointColumns.length > 0 ? 2 : 1}>
               পূর্ণমান
             </th>
             <th
               className="text-semibold text-[16px] border border-black h-12 "
               bgcolor="#ffffff"
-            >
+             rowSpan={jointColumns.length > 0 ? 2 : 1}>
               পাশ নম্বর
             </th>
             <th
               className="text-semibold text-[16px] border border-black h-12 "
               bgcolor="#ffffff"
-            >
+             colSpan={1 + jointColumns.length}>
               প্রাপ্ত নম্বর
             </th>
           </tr>
+          {jointColumns.length > 0 && (
+            <tr>
+              <th className="text-semibold text-[14px] border border-black h-12 px-2" bgcolor="#ffffff">{bnBijoy2Unicode(studentResult?.Exam?.ExamName ?? "")}</th>
+              {jointColumns.map((exam) => (
+                <th key={exam.ExamID} className="text-semibold text-[14px] border border-black h-12 px-2" bgcolor="#ffffff">{bnBijoy2Unicode(exam.ExamName ?? "")}</th>
+              ))}
+            </tr>
+          )}
         </thead>
         <tbody>
           {Array.from({ length: studentResult?.averageCondition?.SubSonkha }).map((_, index) => (
@@ -134,6 +143,11 @@ const AvgNumberResult = ({ studentResult }) => {
               >
                 {bnBijoy2Unicode(String(studentResult[`SubVal${index + 1}`]))}
               </td>
+              {jointColumns.map((exam) => (
+                <td key={exam.ExamID} className="text-[16px] border border-black h-[36px] pl-4" bgcolor="#ffffff">
+                  {bnBijoy2Unicode(String(exam.MarksByUserID?.[String(studentResult?.UserID)]?.[studentResult?.averageCondition?.[`SubjectID${index + 1}`]] ?? ""))}
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>

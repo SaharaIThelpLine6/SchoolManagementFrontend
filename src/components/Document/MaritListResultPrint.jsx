@@ -58,7 +58,7 @@ const MaritListResultPrint = () => {
                                             <table className="w-full">
                                                 <thead>
                                                     <tr>
-                                                        <th className="text-[20px] font-bold mb-2 pl-0 text-start pb-2" colSpan={6}>শ্রেনী/জামাত: {bnBijoy2Unicode(classWiseMaritList.SubClass)}</th>
+                                                        <th className="text-[20px] font-bold mb-2 pl-0 text-start pb-2" colSpan={7 + (classWiseMaritList.jointSourceExams ?? []).reduce((count, exam) => count + (exam.Subjects?.length ?? 0), 0)}>শ্রেনী/জামাত: {bnBijoy2Unicode(classWiseMaritList.SubClass)}</th>
                                                     </tr>
                                                     <tr>
                                                         <th className="p-3 border border-r border-black">ক্রমিক</th>
@@ -68,6 +68,9 @@ const MaritListResultPrint = () => {
                                                         <th className="p-3 border border-r border-black">মোট নাম্বার</th>
                                                         <th className="p-3 border border-r border-black">বিভাগ</th>
                                                         <th className="p-3 border border-r border-black">মেধাস্থান</th>
+                                                        {(classWiseMaritList.jointSourceExams ?? []).flatMap((exam) => (exam.Subjects ?? []).map((subject) => (
+                                                            <th key={`${exam.ExamID}-${subject.SubjectID}`} className="p-3 border border-r border-black">{bnBijoy2Unicode(exam.ExamName)} - {bnBijoy2Unicode(subject.SubjectName)}</th>
+                                                        )))}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -80,6 +83,9 @@ const MaritListResultPrint = () => {
                                                             <td className="p-3 border border-black text-[14px] bg-white text-center">{bnBijoy2Unicode(String(maritData.Total))}</td>
                                                             <td className="p-3 border border-black text-[14px] bg-white text-center font-bold">{bnBijoy2Unicode(maritData.Division)}</td>
                                                             <td className="p-3 border border-black text-[14px] bg-white text-center">{maritData.Positions}</td>
+                                                            {(classWiseMaritList.jointSourceExams ?? []).flatMap((exam) => (exam.Subjects ?? []).map((subject) => (
+                                                                <td key={`${exam.ExamID}-${subject.SubjectID}`} className="p-3 border border-black text-[14px] bg-white text-center">{bnBijoy2Unicode(String(maritData.jointSourceMarks?.[exam.ExamID]?.[subject.SubjectID] ?? ""))}</td>
+                                                            )))}
 
                                                         </tr>
                                                     ))}
