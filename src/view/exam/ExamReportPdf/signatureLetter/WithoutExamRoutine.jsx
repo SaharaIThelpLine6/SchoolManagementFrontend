@@ -158,9 +158,20 @@ const FOOTER_ROWS = [
 ];
 
 /**
- * পরীক্ষার্থী দস্তখত / স্বাক্ষরপত্র — রুটিন বিহীন।
+ * পরীক্ষার্থী দস্তখত / স্বাক্ষরপত্র — সিট নং (আসন বিন্যাস) ছাড়া।
  *
- * ⭐ এই কাগজটা সিট প্ল্যানের উপর নির্ভর করে না, রুটিনের উপরেও না।
+ * ⭐ এই কাগজটা সিট প্ল্যানের উপর নির্ভর করে না। পুরো শ্রেণির তালিকা
+ *    একসাথে বসে, হল ধরে ভাগ হয় না।
+ *
+ * ⭐ কিতাবের কলাম দুই রকম — `useRoutine` প্রপটাই ঠিক করে:
+ *
+ *     useRoutine = true   → পরীক্ষার রুটিন থেকে (তারিখ, বার, সময় সবই বসে)
+ *     useRoutine = false  → রুটিন ছাড়া, শর্তের কিতাবগুলো
+ *
+ *    আগে এই সিদ্ধান্তটা কম্পোনেন্টের ভেতরে `queryParams.PdfID === 1` দেখে
+ *    নেওয়া হত। PdfID ১ তখন অন্য কম্পোনেন্টে যেত বলে ঐ শাখাটা কখনো চলতই
+ *    না, আর নতুন PdfID যোগ করলেই নিয়মটা ভেঙে পড়ত — তাই সিদ্ধান্তটা এখন
+ *    বাইরে থেকে প্রপে আসে, PdfID এর সংখ্যার উপর আর নির্ভর করে না।
  *
  * আগে এখানে একটা গেট ছিল — সিট প্ল্যান না থাকলে কম্পোনেন্টটা `null`
  * ফেরত দিত, মানে পুরো পাতাটাই উধাও। ফলে যে মাদরাসায় শ্রেণিবিন্যাস এখনো
@@ -197,6 +208,7 @@ const WithoutExamRoutine = ({
   reportData,
   queryParams,
   instituteLogo = "",
+  useRoutine = false,
   requireSeatPlan = false,
 }) => {
   const hasReportStudentList = Array.isArray(reportData?.studentList);
@@ -223,17 +235,20 @@ const WithoutExamRoutine = ({
   ];
 
   /* ---- কিতাবের কলামগুলো
-     PdfID ১  → রুটিন থেকে (তারিখ, বার, সময়, কিতাব — সবই আসে)
-     PdfID ২  → রুটিন বিহীন। শর্তের কিতাবগুলো বসে, তারিখ/বার/সময় ফাঁকা।
-                শর্তও না থাকলে ১৪টা ফাঁকা ঘর, আগের মতোই। */
+     useRoutine → রুটিন থেকে (তারিখ, বার, সময়, কিতাব — সবই আসে)
+     নইলে       → শর্তের কিতাবগুলো বসে, তারিখ/বার/সময় ফাঁকা।
+                  শর্তও না থাকলে ১৪টা ফাঁকা ঘর, আগের মতোই। */
   const routineColumns = useMemo(() => {
-    if (Number(queryParams?.PdfID) === 1) return reportData?.routine ?? [];
+    if (useRoutine) {
+      const fromRoutine = reportData?.routine ?? [];
+      if (fromRoutine.length) return fromRoutine;
+    }
 
     const conditionSubjects = reportData?.conditionSubjects ?? [];
     if (conditionSubjects.length) return conditionSubjects;
 
     return Array.from({ length: 14 });
-  }, [queryParams?.PdfID, reportData?.routine, reportData?.conditionSubjects]);
+  }, [useRoutine, reportData?.routine, reportData?.conditionSubjects]);
 
   const colCount = routineColumns.length || 1;
 
