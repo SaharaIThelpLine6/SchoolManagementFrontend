@@ -13,6 +13,73 @@ const getPrintCss = (paperSize, orientation) => `
   margin: 5mm;
 }
 
+/* ==========================================
+   সাদা-কালো মোড — প্রিভিউ ও প্রিন্ট দুই জায়গাতেই এক রকম।
+   ব্যাকগ্রাউন্ড সাদা, লেখা কালো, বর্ডার কালো।
+   ========================================== */
+.marksheet-mode-bw,
+.marksheet-mode-bw * {
+  color: #000 !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: #000000 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* হেডার ও টেবিল-হেডারের ইনলাইন/প্রিন্ট রঙ হারাতে বেশি specificity লাগে */
+.marksheet-mode-bw .marksheet-page .marks-table-wrap thead th,
+.marksheet-mode-bw .marksheet-page .marks-table-wrap tbody tr.row-alt td,
+.marksheet-mode-bw .marksheet-page .marks-table-wrap tbody tr.row-plain td {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #000000 !important;
+  border-color: #000000 !important;
+}
+
+/* টেবিলের চারপাশ ও প্রতিটি ঘরে কালো বর্ডার।
+   প্রিন্ট CSS-এর .marksheet-page .marks-table-wrap রুলকে হারাতে
+   এখানে specificity বেশি রাখা হয়েছে। */
+.marksheet-mode-bw .marksheet-page .marks-table-wrap {
+  border: 1.5px solid #000000 !important;
+  border-radius: 0 !important;
+}
+.marksheet-mode-bw .marksheet-page .marks-table-wrap table {
+  border-collapse: collapse !important;
+}
+.marksheet-mode-bw .marksheet-page .marks-table-wrap th,
+.marksheet-mode-bw .marksheet-page .marks-table-wrap td {
+  border: 1px solid #000000 !important;
+}
+.marksheet-mode-bw .marksheet-page .marks-table-wrap tbody tr:last-child td {
+  border-bottom: 1px solid #000000 !important;
+}
+
+/* পুরো মার্কশিটের চারপাশে কালো বর্ডার */
+.marksheet-mode-bw .marksheet-page {
+  border: 2px solid #000000 !important;
+  border-radius: 0 !important;
+}
+
+/* হেডারে কোনো বর্ডার থাকবে না (লোগোর রিং, পরীক্ষার ব্যাজ) */
+.marksheet-mode-bw .marksheet-header,
+.marksheet-mode-bw .marksheet-header * {
+  border: 0 !important;
+}
+
+/* লোগো, স্বাক্ষরের ছবি ও ইমোজি আইকন সাদা-কালো */
+.marksheet-mode-bw .section-icon,
+.marksheet-mode-bw img {
+  filter: grayscale(100%) !important;
+  -webkit-filter: grayscale(100%) !important;
+}
+
+/* হেডারের নিচের রংধনু স্ট্রিপ — সাদা-কালোতে পুরো বাদ,
+   নইলে নামের চারপাশে বাক্সের মতো দেখায় */
+.marksheet-mode-bw .marksheet-rainbow {
+  display: none !important;
+}
+
 @media print {
   html, body {
     height: auto !important;
@@ -56,6 +123,10 @@ const getPrintCss = (paperSize, orientation) => `
     break-inside: avoid !important;
     page-break-inside: avoid !important;
   }
+  .marksheet-mode-bw .marksheet-page {
+    border: 2px solid #000000 !important;
+  }
+
   .marksheet-page.not-last {
     break-after: page !important;
     page-break-after: always !important;
@@ -132,7 +203,7 @@ const TH_STYLE = { backgroundColor: '#0f766e', color: '#ffffff', ...EXACT };
 // ⭐ right প্রপ যোগ — সেকশন টাইটেলের ডান পাশে ব্যাজ বসানোর জন্য
 const SectionTitle = ({ icon, children, right }) => (
   <div className="flex items-center gap-2 text-[17px] print:text-[15px] font-bold text-emerald-800 mt-6 mb-3 print:mt-1.5 print:mb-1">
-    <span className="text-emerald-600">{icon}</span>
+    <span className="section-icon text-emerald-600">{icon}</span>
     <span className="whitespace-nowrap">{children}</span>
     <div className="flex-1 h-[2px] bg-gradient-to-r from-emerald-200 to-transparent" />
     {right}
@@ -141,8 +212,8 @@ const SectionTitle = ({ icon, children, right }) => (
 
 const InfoRow = ({ label, value, labelW = 'w-[125px]' }) => (
   <div className="flex border-b border-slate-200 py-2 print:py-1 text-[16px] print:text-[14px]">
-    <span className={`${labelW} print:w-[105px] shrink-0 text-black font-medium`}>{label}</span>
-    <span className="font-semibold text-black">{toBn(value)}</span>
+    <span className={`${labelW} print:w-[105px] shrink-0 text-black font-bold`}>{label}</span>
+    <span className="font-bold text-black">{toBn(value)}</span>
   </div>
 );
 
@@ -286,9 +357,9 @@ const SingleMarkSheet = ({
       className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white shadow-xl rounded-xl border border-slate-200 text-slate-800 mb-10 print:mb-0 print:flex print:flex-col`}
     >
       {/* ⭐ Header — সেশন ও পরীক্ষার নাম এক লাইনে, উচ্চতা কমানো */}
-      <div className="relative flex flex-col md:flex-row print:flex-row items-center justify-between bg-gradient-to-r from-teal-800 to-emerald-600 px-8 py-4 print:px-5 print:py-2 text-white print:shrink-0">
+      <div className="marksheet-header relative flex flex-col md:flex-row print:flex-row items-center justify-between bg-gradient-to-r from-teal-800 to-emerald-600 px-8 py-4 print:px-5 print:py-2 text-white print:shrink-0">
         <div className="flex items-center gap-4 print:gap-2.5 mb-3 md:mb-0 print:mb-0">
-          <div className="h-[60px] w-[60px] print:h-[46px] print:w-[46px] overflow-hidden rounded-full border-[3px] border-emerald-300 bg-white shadow-md shrink-0">
+          <div className="h-[60px] w-[60px] print:h-[46px] print:w-[46px] overflow-hidden rounded-full border-[3px] border-emerald-300 print:border-0 bg-white shadow-md print:shadow-none shrink-0">
             {imageSrc ? (
               <img
                 src={imageSrc}
@@ -317,13 +388,13 @@ const SingleMarkSheet = ({
             {toBn(session?.SessionName || '-')}
           </span>
           <span className="text-emerald-300/60 print:text-[13px]">|</span>
-          <span className="rounded-full border border-emerald-300/50 bg-emerald-700/50 px-3.5 py-1 print:px-2.5 print:py-0.5 text-[15px] print:text-[13px] font-semibold text-white shadow-sm whitespace-nowrap">
+          <span className="rounded-full border border-emerald-300/50 print:border-0 bg-emerald-700/50 px-3.5 py-1 print:px-2.5 print:py-0.5 text-[15px] print:text-[13px] font-semibold text-white shadow-sm print:shadow-none whitespace-nowrap">
             {toBn(ExamName || '-')}
           </span>
         </div>
       </div>
 
-      <div className="h-1 shrink-0 bg-gradient-to-r from-[#e5484d] via-[#facc15] via-[#22c55e] via-[#0ea5e9] to-[#a855f7]" />
+      <div className="marksheet-rainbow h-1 shrink-0 bg-gradient-to-r from-[#e5484d] via-[#facc15] via-[#22c55e] via-[#0ea5e9] to-[#a855f7]" />
 
       {/* ⭐ Title bar সরানো হয়েছে — শ্রেণীর নাম এখন "পরীক্ষার্থীর তথ্য" সেকশনে */}
 
@@ -374,7 +445,7 @@ const SingleMarkSheet = ({
                   divisionRows.map((item, index) => (
                     <div
                       key={index}
-                      className="flex justify-between items-center py-1 print:py-0.5 px-2 text-[16px] print:text-[14px] font-medium text-black border-b border-dashed border-slate-200 last:border-0"
+                      className="flex justify-between items-center py-1 print:py-0.5 px-2 text-[16px] print:text-[14px] font-bold text-black border-b border-dashed border-slate-200 last:border-0"
                     >
                       <div className="w-[150px] print:w-[125px] truncate">{item.name}</div>
                       <div className="flex items-center gap-1.5 print:gap-1 text-black">
@@ -421,11 +492,11 @@ const SingleMarkSheet = ({
                       key={item.id}
                       className={`${isAlt ? 'row-alt' : 'row-plain'} text-center`}
                     >
-                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText}`}>{toBn(index + 1)}</td>
-                      <td style={cellStyle} className={`border-b border-slate-100 px-4 py-2.5 print:px-2 ${rowPad} text-left text-[17px] ${rowText} font-medium text-black`}>{toBn(item.subject)}</td>
-                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText}`}>{toBn(item.fullMark)}</td>
-                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText}`}>{toBn(item.passMark)}</td>
-                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText}`}>{toBn(item.highestMark)}</td>
+                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText} font-bold`}>{toBn(index + 1)}</td>
+                      <td style={cellStyle} className={`border-b border-slate-100 px-4 py-2.5 print:px-2 ${rowPad} text-left text-[17px] ${rowText} font-bold text-black`}>{toBn(item.subject)}</td>
+                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText} font-bold`}>{toBn(item.fullMark)}</td>
+                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText} font-bold`}>{toBn(item.passMark)}</td>
+                      <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText} font-bold`}>{toBn(item.highestMark)}</td>
                       <td style={cellStyle} className={`border-b border-slate-100 px-3 py-2.5 print:px-2 ${rowPad} text-[17px] ${rowText} font-bold text-black`}>{toBn(item.obtainedMark)}</td>
                     </tr>
                   );
@@ -440,19 +511,19 @@ const SingleMarkSheet = ({
           <SectionTitle icon="🏆">সারসংক্ষেপ</SectionTitle>
           <div className="grid grid-cols-2 md:grid-cols-4 print:grid-cols-4 gap-3 print:gap-1.5 mt-2 print:mt-0.5">
             <div className="flex flex-col items-center justify-center gap-0.5 print:gap-0 rounded-lg border border-emerald-200 bg-emerald-50 p-2.5 print:p-1 shadow-sm">
-              <p className="text-[14px] print:text-[12.5px] font-semibold text-emerald-600">প্রাপ্ত বিভাগ</p>
+              <p className="text-[14px] print:text-[12.5px] font-bold text-emerald-600">প্রাপ্ত বিভাগ</p>
               <p className="text-[20px] print:text-[16px] font-bold text-emerald-800 leading-tight">{toBn(divisionName)}</p>
             </div>
             <div className="flex flex-col items-center justify-center gap-0.5 print:gap-0 rounded-lg border border-blue-200 bg-blue-50 p-2.5 print:p-1 shadow-sm">
-              <p className="text-[14px] print:text-[12.5px] font-semibold text-blue-600">মেধা স্থান</p>
+              <p className="text-[14px] print:text-[12.5px] font-bold text-blue-600">মেধা স্থান</p>
               <p className="text-[20px] print:text-[16px] font-bold text-blue-800 leading-tight">{toBn(student?.Positions ?? '-')}</p>
             </div>
             <div className="flex flex-col items-center justify-center gap-0.5 print:gap-0 rounded-lg border border-purple-200 bg-purple-50 p-2.5 print:p-1 shadow-sm">
-              <p className="text-[14px] print:text-[12.5px] font-semibold text-purple-600">গড়</p>
+              <p className="text-[14px] print:text-[12.5px] font-bold text-purple-600">গড়</p>
               <p className="text-[20px] print:text-[16px] font-bold text-purple-800 leading-tight">{toBn(averageMark)}</p>
             </div>
             <div className="flex flex-col items-center justify-center gap-0.5 print:gap-0 rounded-lg border border-amber-200 bg-amber-50 p-2.5 print:p-1 shadow-sm">
-              <p className="text-[14px] print:text-[12.5px] font-semibold text-amber-600">মোট নম্বর</p>
+              <p className="text-[14px] print:text-[12.5px] font-bold text-amber-600">মোট নম্বর</p>
               <p className="text-[20px] print:text-[16px] font-bold text-amber-800 leading-tight">{toBn(student?.Total ?? '-')}</p>
             </div>
           </div>
@@ -462,7 +533,7 @@ const SingleMarkSheet = ({
         <div className="marksheet-comments mt-8 pt-6 print:mt-1.5 print:pt-1.5 border-t border-slate-200 print:flex print:flex-col">
           <div className="flex flex-col md:flex-row print:flex-row gap-6 print:gap-3 print:flex-1 print:min-h-0">
             <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[85px] flex flex-col">
-              <p className="text-black font-semibold text-[17px] print:text-[14px]">
+              <p className="text-black font-bold text-[17px] print:text-[14px]">
                 শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :
               </p>
 
@@ -472,7 +543,7 @@ const SingleMarkSheet = ({
             </div>
 
             <div className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-5 print:p-3 min-h-[120px] print:min-h-[85px] flex flex-col">
-              <p className="text-black font-semibold text-[17px] print:text-[14px]">
+              <p className="text-black font-bold text-[17px] print:text-[14px]">
                 অভিভাবকের মন্তব্য ও স্বাক্ষর :
               </p>
 
@@ -497,7 +568,7 @@ const SingleMarkSheet = ({
           </div>
 
           <div className="mt-3 text-center print:mt-0.5">
-            <p className="text-[17px] text-black print:text-[12.5px]">
+            <p className="text-[17px] text-black font-bold print:text-[12.5px]">
               যাচাই করুন
             </p>
           </div>
@@ -523,7 +594,7 @@ const SingleMarkSheet = ({
             </p>
 
             {showDate && (
-              <p className="text-[15px] text-black print:text-[12.5px]">
+              <p className="text-[15px] text-black font-bold print:text-[12.5px]">
                 তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}
               </p>
             )}
@@ -550,7 +621,7 @@ const SingleMarkSheet = ({
             </p>
 
             {showDate && (
-              <p className="text-[15px] text-black print:text-[12.5px]">
+              <p className="text-[15px] text-black font-bold print:text-[12.5px]">
                 তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}
               </p>
             )}
@@ -560,8 +631,8 @@ const SingleMarkSheet = ({
       </div>
 
       {/* Bottom line */}
-      <div className="mx-8 print:mx-5 flex flex-col md:flex-row print:flex-row justify-between items-center border-t border-slate-200 py-3 print:py-0.5 text-[14px] print:text-[11.5px] text-slate-400 gap-2 print:shrink-0">
-        <span className="text-[15px] print:text-[11.5px] font-medium text-black">
+      <div className="mx-8 print:mx-0 print:px-5 flex flex-col md:flex-row print:flex-row justify-between items-center border-t border-slate-200 py-1.5 print:py-0 gap-2 print:shrink-0">
+        <span className="text-[11px] print:text-[8.5px] font-semibold text-black">
           Software Developed by{' '}
           <span className="font-bold tracking-wide text-black">
             SAHARAIT
@@ -584,7 +655,8 @@ const MarkSheetPdf = ({
   najemName,
   paperSize = 'A4',
   orientation = 'portrait',
-  studentInfoFields = {}
+  studentInfoFields = {},
+  colorMode = 'color', // ⭐ নতুন প্রপস: 'color' | 'bw'
 }) => {
   const institution = data?.institution;
   const ExamName = data?.exam?.[0]?.ExamName;
@@ -620,7 +692,9 @@ const MarkSheetPdf = ({
       <style>{getPrintCss(paperSize, orientation)}</style>
       <div
         id="marksheet-print-area"
-        className="font-SolaimanLipi w-full bg-slate-100 py-6 min-h-screen flex flex-col items-center print:bg-white print:py-0 print:min-h-0 print:block"
+        className={`font-SolaimanLipi w-full bg-slate-100 py-6 min-h-screen flex flex-col items-center print:bg-white print:py-0 print:min-h-0 print:block ${
+          colorMode === 'bw' ? 'marksheet-mode-bw' : ''
+        }`}
       >
         {visibleStudents.map((student, idx) => (
           <SingleMarkSheet
@@ -654,7 +728,6 @@ const MarkSheetPdf = ({
 };
 
 export default MarkSheetPdf;
-
 
 
 
