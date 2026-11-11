@@ -50,6 +50,7 @@ import { VideoTutorialQuerySlice } from '../features/videotutorial/VideoTutorial
 import { redirectSlice } from "../features/Admin/redirectSlice";
 import { adminPaymentSlice } from "../features/Admin/adminPaymentSlice";
 import { domainManageSlice } from "../features/Admin/domainManage/domainManageSlice";
+import { adminDashboardSlice } from "../features/Admin/adminDashboardSlice";
 
 const store = configureStore({
   reducer: {
@@ -105,6 +106,7 @@ const store = configureStore({
     [redirectSlice.reducerPath]: redirectSlice.reducer,
     [adminPaymentSlice.reducerPath]: adminPaymentSlice.reducer,
     [domainManageSlice.reducerPath]: domainManageSlice.reducer,
+    [adminDashboardSlice.reducerPath]: adminDashboardSlice.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -146,6 +148,7 @@ const store = configureStore({
       .concat(redirectSlice.middleware)
       .concat(domainManageSlice.middleware)
       .concat(adminPaymentSlice.middleware)
+      .concat(adminDashboardSlice.middleware)
 
 });
 

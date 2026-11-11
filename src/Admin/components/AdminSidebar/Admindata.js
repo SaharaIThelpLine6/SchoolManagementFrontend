@@ -13,6 +13,12 @@ export const AdminmenuData = [
   },
   {
     id: '3',
+    name: 'All Madrasah Login Info',
+    route: '/admin/all-madrasah-login-info',
+    icon: 'LuWarehouse',
+  },
+  {
+    id: '4',
     name: 'Payment Info',
     route: '/Payment-info',
     icon: 'LuWarehouse',
@@ -34,7 +40,7 @@ export const AdminmenuData = [
     ],
   },
   {
-    id: '4',
+    id: '5',
     name: 'Exam',
     route: '/Exam',
     icon: 'LuWarehouse',

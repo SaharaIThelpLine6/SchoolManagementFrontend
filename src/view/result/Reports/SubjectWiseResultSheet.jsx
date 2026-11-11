@@ -1,21 +1,89 @@
 import { useMemo, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { useSelector } from "react-redux";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode from "../../../utils/conveter";
 import { Buffer } from "buffer";
 import ScaledPreview from "../../../components/ScaledPreview";
 
 /* ═══════════════════════════════════════════════════════════
-   HELPERS & CONSTANTS
+   LANGUAGE
+   languageId (Redux: state.auth.resultLanguageId)
+   1 = বাংলা, 2 = العربية, 3 = English
    ═══════════════════════════════════════════════════════════ */
-const makeNum = (v) => {
-  if (v === undefined || v === null) return "";
-  return bnBijoy2Unicode(String(v));
+const DEFAULT_LANGUAGE = "bn";
+const LANGUAGE_ID_MAP = { 1: "bn", 2: "ar", 3: "en" };
+
+const TRANSLATIONS = {
+  bn: {
+    totalStudents: "মোট শিক্ষার্থী",
+    totalExaminees: "মোট পরীক্ষার্থী",
+    totalAbsent: "মোট অনুপস্থিত",
+    avgResultTitle: "গড় পরিবেশিত ফলাফল",
+    subjectResultTitle: "বিষয় পরিবেশিত ফলাফল",
+    className: "শ্রেণির নাম",
+    teacherName: "শিক্ষকের নাম",
+    total: "মোট",
+    sl: "ক্রমিক",
+    subject: "বিষয়",
+    principalTitle: "মুহতামিম সাহেব",
+    date: "তারিখ",
+    divisionFallback: "বিভাগ",
+  },
+  en: {
+    totalStudents: "Total Students",
+    totalExaminees: "Total Examinees",
+    totalAbsent: "Total Absent",
+    avgResultTitle: "Average Result",
+    subjectResultTitle: "Subject-wise Result",
+    className: "Class Name",
+    teacherName: "Teacher's Name",
+    total: "Total",
+    sl: "SL",
+    subject: "Subject",
+    principalTitle: "Principal",
+    date: "Date",
+    divisionFallback: "Division",
+  },
+  ar: {
+    totalStudents: "إجمالي الطلاب",
+    totalExaminees: "إجمالي الممتحنين",
+    totalAbsent: "إجمالي الغائبين",
+    avgResultTitle: "نتيجة المتوسط",
+    subjectResultTitle: "النتيجة حسب المادة",
+    className: "اسم الصف",
+    teacherName: "اسم المعلم",
+    total: "المجموع",
+    sl: "م",
+    subject: "المادة",
+    principalTitle: "المدير",
+    date: "التاريخ",
+    divisionFallback: "القسم",
+  },
 };
 
+const ARABIC_INDIC = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+
+const makeNum = (lang) => (v) => {
+  if (v === undefined || v === null) return "";
+  const s = String(v);
+  if (lang === "bn") return bnBijoy2Unicode(s);
+  if (lang === "ar") return s.replace(/\d/g, (d) => ARABIC_INDIC[Number(d)]);
+  return s;
+};
+
+/* ═══════════════════════════════════════════════════════════
+   HELPERS & CONSTANTS
+   ═══════════════════════════════════════════════════════════ */
 const pickText = (...values) => {
   const found = values.find((v) => typeof v === "string" && v.trim() !== "");
   return found ? found.trim() : "";
+};
+
+const pickByLang = (lang, bnVal, enVal, arVal) => {
+  if (lang === "ar") return pickText(arVal, bnVal, enVal);
+  if (lang === "en") return pickText(enVal, bnVal, arVal);
+  return pickText(bnVal, enVal, arVal);
 };
 
 const bufferToDataUrl = (file) =>
@@ -42,7 +110,9 @@ const PASS_MARK = 33;
 
 /* ── প্রিন্ট পেজিনেশনের আনুমানিক উচ্চতা (design px) ── */
 const PAGE_PAD_V = 40;        // padding 20 + 20
-const FIRST_HEADER_H = 250;   // হেডার ব্লক + "বিষয় পরিবেশিত ফলাফল" টাইটেল
+const HEADER_BLOCK_H = 200;   // হেডার ব্লক (fixed — যাতে পেজিনেশন হিসাব নিখুঁত হয়)
+const TITLE_BLOCK_H = 40;     // "বিষয় পরিবেশিত ফলাফল" টাইটেল (fixed)
+const FIRST_HEADER_H = HEADER_BLOCK_H + TITLE_BLOCK_H;
 const THEAD_H = 35;
 const SIGNATURE_H = 140;
 const PAGE_FOOTER_RESERVE = 20;
@@ -65,6 +135,15 @@ export default function SubjectWiseResultSheet({ reportData }) {
   const { data: institutionInfo } = useGetInstitutionInfoQuery();
   const [logo, setLogo] = useState(null);
   const [principal, setPrincipal] = useState(null);
+
+  // ✅ ভাষা Redux slice থেকে আসে (ResultReport এর Language dropdown এটা সেট করে)
+  const languageId = useSelector((state) => state.auth.resultLanguageId);
+  const lang = LANGUAGE_ID_MAP[Number(languageId)] || DEFAULT_LANGUAGE;
+
+  const t = { ...TRANSLATIONS.bn, ...(TRANSLATIONS[lang] || {}) };
+  const dir = lang === "ar" ? "rtl" : "ltr";
+  const makeNumber = useMemo(() => makeNum(lang), [lang]);
+  const num = makeNumber;
 
   // লোগো এবং সিগনেচার লোড
   useEffect(() => {
@@ -90,13 +169,60 @@ export default function SubjectWiseResultSheet({ reportData }) {
     [dynamicDivisions]
   );
 
-  const institutionName = pickText(institutionInfo?.InstitutionName) || "জামেয়া রশীদিয়া";
-  const institutionAddress = pickText(institutionInfo?.Address) || "লাকসাম, কুমিল্লা, বাংলাদেশ";
-  const examName = pickText(conditionAverage?.Exam?.ExamName) || "১ম সাময়িক পরীক্ষা";
-  const sessionName = pickText(conditionAverage?.Session?.SessionName) || "২০২৬-২০২৭ইং";
-  const className = pickText(conditionAverage?.SubClass?.SubClass) || "নাহবেমীর (৩য় শ্রেণি)-২";
+  // ✅ ভাষা অনুযায়ী নাম (রেসপন্সের top-level field → না থাকলে conditionAverage → বাংলা fallback)
+  const divisionLabel = (d) => pickByLang(lang, d?.name, d?.nameEn, d?.nameAr);
+
+  const institutionName =
+    pickByLang(
+      lang,
+      institutionInfo?.InstitutionName,
+      institutionInfo?.EngInstitutionName,
+      institutionInfo?.AraInstitutionName
+    ) || "জামেয়া রশীদিয়া";
+
+  const institutionAddress =
+    pickByLang(
+      lang,
+      institutionInfo?.Address,
+      institutionInfo?.EngAddress,
+      institutionInfo?.AraAddress
+    ) || "লাকসাম, কুমিল্লা, বাংলাদেশ";
+
+  const examName =
+    pickByLang(
+      lang,
+      reportData?.examName ?? conditionAverage?.Exam?.ExamName,
+      reportData?.examNameEn ?? conditionAverage?.Exam?.ExamEngName,
+      reportData?.examNameAr ?? conditionAverage?.Exam?.ExamAraName
+    ) || "১ম সাময়িক পরীক্ষা";
+
+  const sessionNameRaw =
+    pickByLang(
+      lang,
+      reportData?.sessionName ?? conditionAverage?.Session?.SessionName,
+      reportData?.sessionNameEn ?? conditionAverage?.Session?.SessionEngName,
+      reportData?.sessionNameAr ?? conditionAverage?.Session?.SessionAraName
+    ) || "২০২৬-২০২৭ইং";
+  const sessionName = lang === "ar" ? num(sessionNameRaw) : sessionNameRaw;
+
+  const className =
+    pickByLang(
+      lang,
+      reportData?.subClassName ?? conditionAverage?.SubClass?.SubClass,
+      reportData?.subClassNameEn ?? conditionAverage?.SubClass?.SubClassEng,
+      reportData?.subClassNameAr ?? conditionAverage?.SubClass?.SubClassAra
+    ) || "নাহবেমীর (৩য় শ্রেণি)-২";
 
   const { totalStudents, totalExaminees, totalAbsent } = headerStats;
+
+  const getToday = () => {
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return num(`${dd}/${mm}/${yyyy}`);
+  };
+  const dateText = getToday();
 
   /* ── প্রিন্ট পেজিনেশন: সারি বেশি হলে একাধিক পেজ ── */
   const pages = useMemo(() => {
@@ -149,9 +275,11 @@ export default function SubjectWiseResultSheet({ reportData }) {
     textAlign: "center",
     verticalAlign: "middle",
     height: `${ROW_H}px`,
+    lineHeight: `${ROW_H - 2}px`,
     fontSize: "12px",
     color: C.text,
     whiteSpace: "nowrap",
+    overflow: "hidden",
   };
 
   // ডিভিশন কলাম: কনটেন্ট অনুযায়ী সংকুচিত, কিন্তু সর্বনিম্ন ৭০px
@@ -176,12 +304,21 @@ export default function SubjectWiseResultSheet({ reportData }) {
       }}
     >
       <span>{label} = </span>
-      <span style={{ fontWeight: 700 }}>{makeNum(value)}</span>
+      <span style={{ fontWeight: 700 }}>{num(value)}</span>
     </div>
   );
 
   const renderHeaderBlock = () => (
-    <div style={{ display: "flex", flexDirection: "column", marginBottom: "10px" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: `${HEADER_BLOCK_H}px`,
+        boxSizing: "border-box",
+        overflow: "hidden",
+        flexShrink: 0,
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -235,15 +372,15 @@ export default function SubjectWiseResultSheet({ reportData }) {
               backgroundColor: "#fff",
             }}
           >
-            গড় পরিবেশিত ফলাফল
+            {t.avgResultTitle}
           </div>
         </div>
 
-        <div style={{ width: "200px", textAlign: "right" }}>
+        <div style={{ width: "200px", textAlign: "end" }}>
           <div style={{ fontSize: "13px", border: `1px solid ${C.border}` }}>
-            {statBox("মোট শিক্ষার্থী", totalStudents)}
-            {statBox("মোট পরীক্ষার্থী", totalExaminees)}
-            {statBox("মোট অনুপস্থিত", totalAbsent, true)}
+            {statBox(t.totalStudents, totalStudents)}
+            {statBox(t.totalExaminees, totalExaminees)}
+            {statBox(t.totalAbsent, totalAbsent, true)}
           </div>
         </div>
       </div>
@@ -251,12 +388,12 @@ export default function SubjectWiseResultSheet({ reportData }) {
       <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "5px" }}>
         <thead>
           <tr>
-            <th style={{ ...th, width: "25%" }}>শ্রেণির নাম</th>
-            <th style={{ ...th, width: "25%" }}>শিক্ষকের নাম</th>
+            <th style={{ ...th, width: "25%" }}>{t.className}</th>
+            <th style={{ ...th, width: "25%" }}>{t.teacherName}</th>
             {dynamicDivisions.map((d) => (
-              <th key={d.id} style={th}>{d.name}</th>
+              <th key={d.id} style={th}>{divisionLabel(d)}</th>
             ))}
-            <th style={th}>মোট</th>
+            <th style={th}>{t.total}</th>
           </tr>
         </thead>
         <tbody>
@@ -264,10 +401,11 @@ export default function SubjectWiseResultSheet({ reportData }) {
             <td style={td}>{className}</td>
             <td style={td}></td>
             {dynamicDivisions.map((d) => {
+              // divisionSummary এর name সবসময় বাংলা নাম — তাই d.name (বাংলা) দিয়েই মেলানো হচ্ছে
               const match = divisionSummary.find((s) => String(s.name) === String(d.name));
-              return <td key={d.id} style={td}>{makeNum(match ? match.count : 0)}</td>;
+              return <td key={d.id} style={td}>{num(match ? match.count : 0)}</td>;
             })}
-            <td style={td}>{makeNum(totalStudents)}</td>
+            <td style={td}>{num(totalStudents)}</td>
           </tr>
         </tbody>
       </table>
@@ -289,15 +427,18 @@ export default function SubjectWiseResultSheet({ reportData }) {
       if (target) counts[target.id]++;
     });
 
+    // ✅ বিষয়ের নাম ভাষা অনুযায়ী
+    const subjectName = pickByLang(lang, column.name, column.nameEn, column.nameAr);
+
     return (
       <tr key={column.id} style={{ height: `${ROW_H}px` }}>
-        <td style={td}>{makeNum(index + 1)}</td>
-        <td style={{ ...textCell, fontWeight: 500 }}>{column.name}</td>
+        <td style={td}>{num(index + 1)}</td>
+        <td style={{ ...textCell, fontWeight: 500 }}>{subjectName}</td>
         <td style={{ ...textCell, fontSize: "11px" }}>{column.teacherName || ""}</td>
         {dynamicDivisions.map((d) => (
-          <td key={d.id} style={td}>{makeNum(counts[d.id] || 0)}</td>
+          <td key={d.id} style={td}>{num(counts[d.id] || 0)}</td>
         ))}
-        <td style={{ ...td, fontWeight: 600 }}>{makeNum(marks.length)}</td>
+        <td style={{ ...td, fontWeight: 600 }}>{num(marks.length)}</td>
       </tr>
     );
   };
@@ -324,9 +465,9 @@ export default function SubjectWiseResultSheet({ reportData }) {
           </div>
         )}
         <div style={{ borderTop: "1px dashed #000", width: "160px", margin: "0 auto" }} />
-        <p style={{ margin: "4px 0 0", fontSize: "12px", fontWeight: 700 }}>মুহতামিম সাহেব</p>
+        <p style={{ margin: "4px 0 0", fontSize: "12px", fontWeight: 700 }}>{t.principalTitle}</p>
         <p style={{ margin: "2px 0 0", fontSize: "12px" }}>
-          তারিখ: {makeNum(new Date().toLocaleDateString("bn-BD"))}
+          {t.date}: {dateText}
         </p>
       </div>
     </div>
@@ -338,22 +479,31 @@ export default function SubjectWiseResultSheet({ reportData }) {
       {isFirst && renderHeaderBlock()}
 
       {isFirst && (
-        <div style={{ textAlign: "center", margin: "10px 0", fontSize: "14px", fontWeight: 700 }}>
-          বিষয় পরিবেশিত ফলাফল
+        <div
+          style={{
+            height: `${TITLE_BLOCK_H}px`,
+            lineHeight: `${TITLE_BLOCK_H}px`,
+            textAlign: "center",
+            fontSize: "14px",
+            fontWeight: 700,
+            flexShrink: 0,
+          }}
+        >
+          {t.subjectResultTitle}
         </div>
       )}
 
       {/* ⭐ tableLayout: auto — কলাম টেক্সট অনুযায়ী প্রসারিত হবে */}
-      <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "auto" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "auto", flexShrink: 0 }}>
         <thead>
           <tr style={{ height: `${THEAD_H}px` }}>
-            <th style={{ ...th, width: "1%" }}>ক্রমিক</th>
-            <th style={th}>বিষয়</th>
-            <th style={{ ...th, width: "200px" }}>শিক্ষকের নাম</th>
+            <th style={{ ...th, width: "1%" }}>{t.sl}</th>
+            <th style={th}>{t.subject}</th>
+            <th style={{ ...th, width: "200px" }}>{t.teacherName}</th>
             {dynamicDivisions.map((d) => (
-              <th key={d.id} style={divTh}>{d.name}</th>
+              <th key={d.id} style={divTh}>{divisionLabel(d)}</th>
             ))}
-            <th style={divTh}>মোট</th>
+            <th style={divTh}>{t.total}</th>
           </tr>
         </thead>
         <tbody>{rows.map((c, i) => renderSubjectRow(c, offset + i))}</tbody>
@@ -396,6 +546,7 @@ export default function SubjectWiseResultSheet({ reportData }) {
           <div className="no-print p-4">
             <ScaledPreview designWidth={PAGE_W}>
               <div
+                dir={dir}
                 style={{
                   ...pageBox,
                   boxShadow: "0 1px 6px rgba(15,23,42,0.18)",
@@ -431,7 +582,7 @@ export default function SubjectWiseResultSheet({ reportData }) {
                   breakInside: "avoid",
                 }}
               >
-                <div style={printPageBox}>
+                <div dir={dir} style={printPageBox}>
                   {renderPage(rows, offset, pageIndex === 0, isLast)}
                 </div>
               </div>
