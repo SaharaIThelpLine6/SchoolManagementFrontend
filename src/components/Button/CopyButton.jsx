@@ -10,7 +10,6 @@ export default function CopyButton({ text = '', className = '', onClick }) {
         setCopied(true);
         setTimeout(() => setCopied(false), 1500);
       }
-
       // যদি parent থেকে onClick দেওয়া থাকে, সেটা execute করবে
       if (onClick) {
         onClick();

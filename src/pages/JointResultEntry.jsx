@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import Swal from 'sweetalert2';
 import { setPageName } from '../features/auth/authSlice';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
-import { useGetExamListQuery } from '../features/result/resultSilce';
+import { useGetExamListQuery, useSetJointResultExamMutation } from '../features/result/resultSilce';
 
 const resultTypes = [
   {
@@ -49,15 +50,26 @@ SectionHeading.propTypes = {
 
 export default function JointResultEntry({ pageTitle }) {
   const dispatch = useDispatch();
-  const { register, watch } = useForm({
-    defaultValues: { SessionID: '', SubClassID: '' },
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const editTargetExamId = searchParams.get('edit') === 'true' ? searchParams.get('exam_id') || '' : '';
+  const { register, watch, reset } = useForm({
+    defaultValues: {
+      SessionID: searchParams.get('session_id') || '',
+      SubClassID: searchParams.get('subclass_id') || '',
+    },
   });
   const sessionId = watch('SessionID');
   const subClassId = watch('SubClassID');
+  const scopeKey = sessionId && subClassId ? `${sessionId}:${subClassId}` : '';
+  const hydrationKey = scopeKey ? `${scopeKey}:${editTargetExamId}` : '';
   const [resultType, setResultType] = useState('average');
   const [selectedExamIds, setSelectedExamIds] = useState([]);
+  const [jointExamId, setJointExamId] = useState('');
   const [weights, setWeights] = useState({});
   const [showReview, setShowReview] = useState(false);
+  const [hydratedScope, setHydratedScope] = useState('');
+  const [setJointResultExam, { isLoading: isSaving }] = useSetJointResultExamMutation();
 
   const { data: sessions = [], isLoading: isSessionsLoading } = useGetSessionsQuery();
   const { data: subClasses = [], isLoading: isSubClassesLoading } = useGetSubClassListQuery();
@@ -75,8 +87,11 @@ export default function JointResultEntry({ pageTitle }) {
 
   useEffect(() => {
     setSelectedExamIds([]);
+    setJointExamId('');
+    setResultType('average');
     setWeights({});
     setShowReview(false);
+    setHydratedScope('');
   }, [sessionId, subClassId]);
 
   const availableExams = useMemo(() => {
@@ -86,17 +101,53 @@ export default function JointResultEntry({ pageTitle }) {
       uniqueExams.set(String(row.ExamID), {
         id: String(row.ExamID),
         name: row.Exam?.ExamName || `পরীক্ষা ${row.ExamID}`,
+        examType: Number(row.ExamType),
+        isJointResult: Boolean(row.IsJointResult),
+        sourceExamIds: (row.JointSourceExamIDs || []).map(String),
+        jointResultType: row.JointResultType,
+        jointExamWeights: row.JointExamWeights || {},
       });
     });
     return [...uniqueExams.values()];
   }, [examRows]);
 
+  useEffect(() => {
+    if (!hydrationKey) {
+      setHydratedScope('');
+      return;
+    }
+    if (isExamListFetching || hydratedScope === hydrationKey) return;
+
+    const savedSetup = availableExams.find((exam) =>
+      exam.isJointResult && (!editTargetExamId || exam.id === editTargetExamId)
+    );
+    setJointExamId(savedSetup?.id || '');
+    const savedSourceIds = savedSetup?.sourceExamIds || [];
+    setSelectedExamIds(savedSourceIds);
+    if (savedSetup?.jointResultType) {
+      setResultType(['average', 'percentage'].includes(savedSetup.jointResultType)
+        ? savedSetup.jointResultType
+        : 'average');
+    }
+    setWeights(savedSetup?.jointExamWeights || {});
+    setHydratedScope(hydrationKey);
+  }, [availableExams, editTargetExamId, hydratedScope, hydrationKey, isExamListFetching]);
+
   const selectedExams = availableExams.filter((exam) => selectedExamIds.includes(exam.id));
+  useEffect(() => {
+    if (jointExamId && !selectedExamIds.includes(jointExamId)) {
+      setJointExamId('');
+    }
+  }, [jointExamId, selectedExamIds]);
   const totalWeight = selectedExams.reduce(
     (total, exam) => total + (Number(weights[exam.id]) || 0),
     0
   );
-  const isWeightValid = resultType !== 'percentage' || totalWeight === 100;
+  const isWeightValid = resultType !== 'percentage' || Math.abs(totalWeight - 100) < 0.001;
+  const pointwiseExamIds = availableExams.filter((exam) => exam.examType === 4).map((exam) => exam.id);
+  const hasPointwiseExamSelected = selectedExams.some((exam) => exam.examType === 4);
+  const hasAllPointwiseExamsSelected = pointwiseExamIds.every((id) => selectedExamIds.includes(id));
+  const isExamSelectionValid = !hasPointwiseExamSelected || hasAllPointwiseExamsSelected;
   const canReview = selectedExams.length > 0 && isWeightValid;
 
   const toggleExam = (examId) => {
@@ -106,6 +157,49 @@ export default function JointResultEntry({ pageTitle }) {
         : [...current, examId]
     );
     setShowReview(false);
+  };
+
+  const handleSave = async () => {
+    try {
+      await setJointResultExam({
+        SessionID: sessionId,
+        SubClassID: subClassId,
+        ExamID: jointExamId,
+        SourceExamIDs: selectedExamIds,
+        ResultType: resultType,
+        Weights: weights,
+        ...(editTargetExamId ? { EditExamID: editTargetExamId } : {}),
+      }).unwrap();
+
+      await Swal.fire({
+        icon: 'success',
+        title: editTargetExamId ? 'সফলভাবে সম্পাদিত হয়েছে' : 'সফল হয়েছে',
+        text: editTargetExamId
+          ? 'যৌথ ফলাফলের সেটআপ হালনাগাদ করা হয়েছে।'
+          : 'যৌথ ফলাফলের সেটআপ সংরক্ষণ করা হয়েছে।',
+        confirmButtonText: 'ঠিক আছে',
+      });
+      if (editTargetExamId) {
+        navigate('/dashboard/result/joint-result-publish');
+        return;
+      }
+      reset({ SessionID: '', SubClassID: '' });
+      setSelectedExamIds([]);
+      setJointExamId('');
+      setResultType('average');
+      setWeights({});
+      setShowReview(false);
+    } catch (error) {
+      const isDuplicate = error?.status === 409;
+      await Swal.fire({
+        icon: 'error',
+        title: isDuplicate ? 'আগেই তৈরি করা হয়েছে' : 'সংরক্ষণ করা যায়নি',
+        text: isDuplicate
+          ? 'এই target পরীক্ষার জন্য এই শিক্ষাবর্ষ ও শ্রেণিতে যৌথ ফলাফলের সেটআপ আগে থেকেই তৈরি আছে।'
+          : error?.data?.error || error?.message || 'আবার চেষ্টা করুন।',
+        confirmButtonText: 'ঠিক আছে',
+      });
+    }
   };
 
   return (
@@ -119,6 +213,9 @@ export default function JointResultEntry({ pageTitle }) {
           <p className="mt-2 max-w-2xl text-base leading-7 text-slate-600">
             একাধিক পরীক্ষার ফলাফল একত্র করে মার্কশিট তৈরি ও প্রকাশের ধরন নির্ধারণ করুন।
           </p>
+          {editTargetExamId && (
+            <p className="mt-2 text-sm font-semibold text-[#007af7]">সংরক্ষিত যৌথ ফলাফলের সেটআপ সম্পাদনা</p>
+          )}
         </div>
         <Link
           to="/dashboard/result/joint-result-publish"
@@ -127,6 +224,14 @@ export default function JointResultEntry({ pageTitle }) {
           প্রকাশনার তালিকা দেখুন
         </Link>
       </header>
+
+      {editTargetExamId && hydratedScope === hydrationKey && !availableExams.some(
+        (exam) => exam.id === editTargetExamId && exam.isJointResult
+      ) && (
+        <p className="rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">
+          সম্পাদনার জন্য যৌথ ফলাফলের সেটআপটি পাওয়া যায়নি। তালিকা থেকে আবার নির্বাচন করুন।
+        </p>
+      )}
 
       {/* <div className="flex items-start gap-3 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-amber-950" role="status">
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" className="mt-0.5 h-5 w-5 shrink-0">
@@ -174,13 +279,15 @@ export default function JointResultEntry({ pageTitle }) {
             );
           })}
         </div>
+        {hasPointwiseExamSelected && !resultType && (
+          <p className="mt-3 text-sm text-slate-600">Pointwise exam বাছাই হয়েছে। যৌথ ফলের জন্য উপরের দুইটি mode-এর একটি বেছে নিন।</p>
+        )}
       </section>
 
       <section className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
         <SectionHeading
           number="02"
           title="সেশন ও শ্রেণি নির্বাচন"
-          description="সেশন ও শ্রেণি নির্বাচন করার পর গড় বা শতাংশের হিসাবে অন্তর্ভুক্ত করার পরীক্ষাগুলো বেছে নিন।"
         />
         <div className="grid gap-4 md:grid-cols-2">
           <label className="block">
@@ -247,18 +354,45 @@ export default function JointResultEntry({ pageTitle }) {
                       className="h-4 w-4 rounded border-slate-300 accent-[#007af7] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#007af7]"
                     />
                     <span className="text-base font-medium text-slate-800">{exam.name}</span>
+                    {exam.examType === 4 && <span className="ml-auto rounded bg-violet-50 px-2 py-1 text-xs font-semibold text-violet-700">Pointwise</span>}
                   </label>
                 ))}
               </div>
             )}
           </div>
+          {hasPointwiseExamSelected && !hasAllPointwiseExamsSelected && (
+            <p className="mt-3 text-sm text-red-700" role="alert">Pointwise result-এর জন্য ExamType 4-এর সব পরীক্ষাই নির্বাচন করতে হবে।</p>
+          )}
         </div>
+      </section>
+
+      <section className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
+        <SectionHeading
+          number="03"
+          title="যে পরীক্ষার রিপোর্টে যৌথ ফলাফল দেখাবেন"
+        description="উপরে source হিসেবে বেছে নেওয়া পরীক্ষাগুলোর মধ্য থেকে একটি target exam নির্বাচন করুন।"
+        />
+        {!sessionId || !subClassId ? (
+          <p className="rounded-md bg-slate-50 px-4 py-5 text-sm text-slate-600">আগে শিক্ষাবর্ষ ও শ্রেণি নির্বাচন করুন।</p>
+        ) : selectedExams.length === 0 ? (
+          <p className="rounded-md bg-slate-50 px-4 py-5 text-sm text-slate-600">আগে যৌথ ফলাফলে অন্তর্ভুক্ত করার পরীক্ষাগুলো নির্বাচন করুন।</p>
+        ) : (
+          <div className="grid gap-px overflow-hidden rounded-md border border-slate-200 bg-slate-200 sm:grid-cols-2 lg:grid-cols-3">
+            {selectedExams.map((exam) => (
+              <label key={exam.id} className="flex min-h-14 cursor-pointer items-center gap-3 bg-white px-4 py-3 hover:bg-slate-50">
+                <input type="radio" name="jointResultExam" value={exam.id} checked={jointExamId === exam.id} onChange={() => setJointExamId(exam.id)} className="h-4 w-4 accent-[#007af7]" />
+                <span className="text-base font-medium text-slate-800">{exam.name}</span>
+                {exam.isJointResult && <span className="ml-auto rounded bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700">বর্তমান যৌথ ফল</span>}
+              </label>
+            ))}
+          </div>
+        )}
       </section>
 
       {resultType === 'percentage' && (
         <section className="rounded-lg border border-slate-200 bg-white p-4 sm:p-6">
           <SectionHeading
-            number="03"
+            number="04"
             title="পরীক্ষাভিত্তিক শতাংশ নির্ধারণ"
             description="প্রতিটি নির্বাচিত পরীক্ষার ওজন নির্ধারণ করুন। সব শতাংশের যোগফল ১০০% হতে হবে।"
           />
@@ -364,11 +498,11 @@ export default function JointResultEntry({ pageTitle }) {
         </p> */}
         <button
           type="button"
-          disabled
-          title="Joint result API সংযুক্ত হলে চালু হবে"
-          className="inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center rounded-md bg-[#007af7] px-5 py-2 text-base font-semibold text-white sm:w-auto"
+          disabled={!sessionId || !subClassId || !jointExamId || !resultType || selectedExamIds.length === 0 || !isWeightValid || !isExamSelectionValid || isSaving || Boolean(editTargetExamId && !availableExams.some((exam) => exam.id === editTargetExamId && exam.isJointResult))}
+          onClick={handleSave}
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-[#007af7] px-5 py-2 text-base font-semibold text-white hover:bg-[#0066cc] disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
         >
-          সেটআপ সংরক্ষণ করুন
+          {isSaving ? 'সংরক্ষণ হচ্ছে…' : editTargetExamId ? 'পরিবর্তন সংরক্ষণ করুন' : 'যৌথ ফলাফলের পরীক্ষা সংরক্ষণ করুন'}
         </button>
       </footer>
     </main>

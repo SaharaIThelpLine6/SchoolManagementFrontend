@@ -1095,14 +1095,6 @@ const Router = createBrowserRouter([
                 ),
               },
               {
-                path: 'joint-result-publish/list',
-                element: (
-                  <RequirePermission permissionId={permissionsDataList.result_entry}>
-                    <JointResultList pageTitle="যৌথ ফলাফল প্রকাশনা" />
-                  </RequirePermission>
-                ),
-              },
-              {
                 path: 'joint-result-publish/entry',
                 element: (
                   <RequirePermission permissionId={permissionsDataList.result_entry}>

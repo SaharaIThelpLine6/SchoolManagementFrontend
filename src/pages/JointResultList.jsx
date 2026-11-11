@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { setPageName } from '../features/auth/authSlice';
 import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
+import { useDeleteJointResultSetupMutation, useGetExamListQuery } from '../features/result/resultSilce';
 
 const resultTypes = ['সব ধরন', 'Joint Exam Result', 'Percentage-Based Result'];
 const statuses = ['সব অবস্থা', 'প্রকাশিত', 'অপ্রকাশিত', 'খসড়া'];
@@ -19,17 +21,65 @@ export default function JointResultList({ pageTitle }) {
   const [subClassId, setSubClassId] = useState('');
   const { data: sessions = [] } = useGetSessionsQuery();
   const { data: subClasses = [] } = useGetSubClassListQuery();
+  const [deleteJointResultSetup, { isLoading: isDeleting }] = useDeleteJointResultSetupMutation();
+  const { currentData: examRows = [], isFetching, isError } = useGetExamListQuery({
+    session_id: sessionId,
+    subclass_id: subClassId,
+  });
 
   useEffect(() => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  const sampleSession = sessions[0];
-  const sampleSubClass = subClasses[0];
-  const listRows = [
-    { id: 'preview-1', name: 'Joint Exam Result', sessionId: String(sampleSession?.SessionID ?? ''), session: sampleSession?.SessionName || 'নমুনা সেশন', subClassId: String(sampleSubClass?.SubClassID ?? ''), subClass: sampleSubClass?.SubClass || 'নমুনা শ্রেণি', exams: 'নির্বাচিত পরীক্ষা', status: 'অপ্রকাশিত' },
-    { id: 'preview-2', name: 'Percentage-Based Result', sessionId: String(sampleSession?.SessionID ?? ''), session: sampleSession?.SessionName || 'নমুনা সেশন', subClassId: String(sampleSubClass?.SubClassID ?? ''), subClass: sampleSubClass?.SubClass || 'নমুনা শ্রেণি', exams: 'নির্বাচিত পরীক্ষা', status: 'খসড়া' },
-  ];
+  const listRows = examRows
+    .filter((row) => row.IsJointResult)
+    .map((row) => ({
+      id: row.ID,
+      examId: String(row.ExamID),
+      name: row.JointResultType === 'percentage' ? 'Percentage-Based Result' : 'Joint Exam Result',
+      sessionId: String(row.SessionID ?? ''),
+      session: row.Session?.SessionName || '',
+      subClassId: String(row.SubClassID ?? ''),
+      subClass: row.SubClass?.SubClass || '',
+      exams: `${row.Exam?.ExamName || ''} ← ${(row.JointSourceExamIDs || []).map((sourceExamId) =>
+        examRows.find((exam) => String(exam.ExamID) === String(sourceExamId))?.Exam?.ExamName || sourceExamId
+      ).join(' + ')}`,
+      status: Number(row.Published) ? 'প্রকাশিত' : 'অপ্রকাশিত',
+    }));
+
+  const handleDelete = async (row) => {
+    const confirmation = await Swal.fire({
+      icon: 'warning',
+      title: 'যৌথ ফলাফলের সেটআপ মুছবেন?',
+      text: `${row.exams} সেটআপটি মুছে যাবে।`,
+      showCancelButton: true,
+      confirmButtonText: 'মুছে ফেলুন',
+      cancelButtonText: 'বাতিল',
+      confirmButtonColor: '#dc2626',
+    });
+    if (!confirmation.isConfirmed) return;
+
+    try {
+      await deleteJointResultSetup({
+        SessionID: row.sessionId,
+        SubClassID: row.subClassId,
+        ExamID: row.examId,
+      }).unwrap();
+      await Swal.fire({
+        icon: 'success',
+        title: 'মুছে ফেলা হয়েছে',
+        text: 'যৌথ ফলাফলের সেটআপ মুছে ফেলা হয়েছে।',
+        confirmButtonText: 'ঠিক আছে',
+      });
+    } catch (error) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'মুছে ফেলা যায়নি',
+        text: error?.data?.error || error?.message || 'আবার চেষ্টা করুন।',
+        confirmButtonText: 'ঠিক আছে',
+      });
+    }
+  };
 
   const visibleRows = listRows.filter((row) => {
     const matchesType = resultType === resultTypes[0] || row.name === resultType;
@@ -114,7 +164,7 @@ export default function JointResultList({ pageTitle }) {
             <h2 className="text-lg font-bold text-slate-900">যৌথ ফলাফলের তালিকা</h2>
             <p className="mt-1 text-sm text-slate-600">প্রিভিউ সারি: {visibleRows.length}</p>
           </div>
-          <span className="w-fit rounded border border-slate-300 px-2 py-1 text-sm font-semibold text-slate-600">নমুনা UI · প্রকৃত রেকর্ড নয়</span>
+          <span className="w-fit rounded border border-slate-300 px-2 py-1 text-sm font-semibold text-slate-600">সংরক্ষিত সেটআপ</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-left">
@@ -130,7 +180,11 @@ export default function JointResultList({ pageTitle }) {
               </tr>
             </thead>
             <tbody>
-              {visibleRows.map((row, index) => (
+              {isFetching ? (
+                <tr><td colSpan={7} className="px-4 py-10 text-center text-slate-500">তালিকা লোড হচ্ছে…</td></tr>
+              ) : isError ? (
+                <tr><td colSpan={7} className="px-4 py-10 text-center text-red-700">তালিকা লোড করা যায়নি। আবার চেষ্টা করুন।</td></tr>
+              ) : visibleRows.map((row, index) => (
                 <tr key={row.id} className="border-t border-slate-200">
                   <td className="px-4 py-4 text-sm text-slate-600">{String(index + 1).padStart(2, '0')}</td>
                   <th scope="row" className="px-4 py-4 text-base font-semibold text-slate-900">{row.name}</th>
@@ -143,14 +197,30 @@ export default function JointResultList({ pageTitle }) {
                     </span>
                   </td>
                   <td className="px-4 py-4 text-right">
-                    <button
-                      type="button"
-                      disabled
-                      title="প্রকৃত রেকর্ড ও প্রকাশনা API সংযুক্ত হলে চালু হবে"
-                      className="rounded px-2 py-1 text-sm font-semibold text-slate-400"
-                    >
-                      প্রকাশ করুন
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      <Link
+                        to={`/dashboard/result/joint-result-publish/entry?edit=true&session_id=${encodeURIComponent(row.sessionId)}&subclass_id=${encodeURIComponent(row.subClassId)}&exam_id=${encodeURIComponent(row.examId)}`}
+                        className="rounded px-2 py-1 text-sm font-semibold text-[#007af7] hover:bg-[#ddeffe]"
+                      >
+                        সম্পাদনা
+                      </Link>
+                      <button
+                        type="button"
+                        disabled
+                        title="প্রকাশনা API যুক্ত হলে চালু হবে"
+                        className="rounded px-2 py-1 text-sm font-semibold text-slate-400"
+                      >
+                        প্রকাশ করুন
+                      </button>
+                      <button
+                        type="button"
+                        disabled={isDeleting}
+                        onClick={() => handleDelete(row)}
+                        className="rounded px-2 py-1 text-sm font-semibold text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {isDeleting ? 'মুছছে…' : 'মুছুন'}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -165,9 +235,9 @@ export default function JointResultList({ pageTitle }) {
             </tbody>
           </table>
         </div>
-        <div className="border-t border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
-          নমুনা সারিগুলো প্রকাশ করা যাবে না। প্রকৃত রেকর্ড এবং প্রকাশনার নিয়ন্ত্রণ সার্ভার সংযোগের পর চালু হবে।
-        </div>
+        {/* <div className="border-t border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
+          তালিকায় প্রতিটি target exam-এর পাশে joint result-এ অন্তর্ভুক্ত source exam-গুলো দেখানো হয়েছে।
+        </div> */}
       </section>
     </main>
   );
