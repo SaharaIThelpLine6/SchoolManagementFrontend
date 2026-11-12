@@ -148,7 +148,7 @@ const PublicLayout = () => {
             onClick={toggleSidebar}
             className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-600 text-white text-[18px] font-bold mt-4 hover:bg-green-700 transition-colors"
           >
-            গার্জিয়ান পোর্টাল
+            গার্ডিয়ান পোর্টাল
           </Link>
         </nav>
       </aside>
@@ -171,7 +171,7 @@ const PublicLayout = () => {
             </Link>
 
             {/* Navigation */}
-            <nav className="flex items-center gap-8">
+            <nav className="flex items-center gap-6">
               <Link to={`/${schoolid}`} className="text-gray-600 hover:text-green-700 transition text-[18px] font-bold">
                 হোম
               </Link>
@@ -229,10 +229,18 @@ const PublicLayout = () => {
               </Link>
 
               <Link
+                to={`https://qmmsoft.com/login`}
+                target="_blank"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-[18px] font-semibold no-underline shrink-0 transition-all duration-200 active:scale-[0.97] text-black border-green-700/70 bg-green-700/10 backdrop-blur-sm hover:bg-green-700/20 hover:border-black"
+              >
+                লগিন
+              </Link>
+              <Link
                 to={`https://play.google.com/store/apps/details?id=com.sahara20251.qmmsoft`}
+                target="_blank"
                 className="bg-green-600 text-white px-5 py-2.5 rounded-full hover:bg-green-700 transition shadow-md text-[18px] font-bold"
               >
-                গার্জিয়ান পোর্টাল
+                গার্ডিয়ান পোর্টাল
               </Link>
             </nav>
 
