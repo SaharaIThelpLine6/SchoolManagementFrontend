@@ -616,6 +616,32 @@ export const userStudentSlice = createApi({
         },
       }),
     }),
+
+    getStudentPromotions: builder.query({
+      query: (params) => ({
+        url: '/student_promotion',
+        method: 'GET',
+        params,
+      }),
+      providesTags: ['StudentPromotion'],
+    }),
+
+    createStudentPromotion: builder.mutation({
+      query: (promotions) => ({
+        url: '/student_promotion',
+        method: 'POST',
+        body: { promotions },
+      }),
+      invalidatesTags: ['StudentPromotion'],
+    }),
+
+    deleteStudentPromotion: builder.mutation({
+      query: (id) => ({
+        url: `/student_promotion/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['StudentPromotion'],
+    }),
   }),
 });
 
@@ -687,5 +713,9 @@ export const {
   useGetUserByIdQuery,
   useUpdateUserMutation,
   usePostGuardianInfoMutation,
-  useGetStudentAttendanceTodayDashboardQuery
+  useGetStudentAttendanceTodayDashboardQuery,
+
+  useGetStudentPromotionsQuery,
+  useCreateStudentPromotionMutation,
+  useDeleteStudentPromotionMutation,
 } = userStudentSlice;

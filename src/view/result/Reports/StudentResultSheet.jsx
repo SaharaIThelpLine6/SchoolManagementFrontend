@@ -732,6 +732,11 @@ function SignatureSection({ C, fs, dateText, dateLabel, NajemName, PrincipalName
    ═══════════════════════════════════════════════════════════ */
 export default function StudentResultSheet({ reportData, query, labels }) {
 
+
+
+    console.log(reportData, "reportData")
+
+
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
 
     const [principal, setPrincipal] = useState(null);

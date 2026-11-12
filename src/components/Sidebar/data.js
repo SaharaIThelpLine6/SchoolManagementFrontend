@@ -117,62 +117,68 @@ export const menuData = [
         route: 'students',
         icon: 'SubUser',
       },
+      // {
+      //   id: '4',
+      //   name: 'Admission Lists',
+      //   route: 'students/admission-lists',
+      //   icon: 'SubUser',
+      // },
       {
-        id: '4',
+        id: '5',
         name: 'English & Arobi Name',
         route: 'students/english-arobi-name',
         icon: 'SubForm',
       },
       {
-        id: '5',
+        id: '6',
         name: 'Book',
         route: 'students/book-list',
         icon: 'SubBook',
       },
       {
-        id: '6',
+        id: '7',
         name: 'Group Distribution',
         route: 'students/group-distribution',
         icon: 'SubGroup',
       },
       {
-        id: '7',
+        id: '8',
         name: 'Data Export',
         route: 'students/data-export',
         icon: 'SubExport',
       },
       {
-        id: '8',
+        id: '9',
         name: 'Certificate of Attestation',
         route: 'students/certificate-of-attestation',
         icon: 'SubCertificate',
       },
       {
-        id: '9',
+        id: '10',
         name: 'Students Report (Demo)',
         route: 'students/report',
         icon: 'SubReport',
       },
       {
-        id: '10',
+        id: '11',
         name: 'Online Admission',
         route: 'students/online-admission',
         icon: 'SubUser',
       },
       {
-        id: '11',
+        id: '12',
         name: 'Student ID Card',
         route: 'students/student-id-card',
         icon: 'SubIdCard',
       },
       {
-        id: '12',
+        id: '13',
         name: 'Students Report List',
         route: 'students/report_list',
         icon: 'SubReport',
       },
       {
-        id: '13',
+        id: '14',
         name: 'All Tutorials Student',
         route: 'students/all-tutorials-student',
         icon: 'SubVideo'
@@ -669,7 +675,7 @@ export const menuData = [
 
 
 
-  
+
   // {
   //   id: '18',
   //   name: 'Talimat',

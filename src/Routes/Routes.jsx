@@ -203,6 +203,7 @@ import ModuleLists from '../pages/ModuleLists';
 import VoiceSMS from '../pages/VoiceSMS';
 import JointResultEntry from '../pages/JointResultEntry';
 import JointResultList from '../pages/JointResultList';
+import AdmissionLists from '../components/Tables/AdmissionLists';
 
 const Router = createBrowserRouter([
   {
@@ -395,7 +396,7 @@ const Router = createBrowserRouter([
               {
                 path: 'all-tutorials-general',
                 element: (
-                    <AllTutorialsGeneral pageTitle="All Tutorials General" />
+                  <AllTutorialsGeneral pageTitle="All Tutorials General" />
                 ),
               },
             ],
@@ -420,6 +421,14 @@ const Router = createBrowserRouter([
                 element: (
                   <RequirePermission permissionId={permissionsDataList.class}>
                     <Class pageTitle="Class" />
+                  </RequirePermission>
+                ),
+              },
+              {
+                path: 'admission-lists',
+                element: (
+                  <RequirePermission permissionId={permissionsDataList.student_admission}>
+                    <AdmissionLists pageTitle="Admission Lists" />
                   </RequirePermission>
                 ),
               },
@@ -542,7 +551,7 @@ const Router = createBrowserRouter([
               {
                 path: 'all-tutorials-student',
                 element: (
-                    <AllTutorialsStudent pageTitle="All Tutorials Student" />
+                  <AllTutorialsStudent pageTitle="All Tutorials Student" />
                 ),
               },
             ],
@@ -727,7 +736,7 @@ const Router = createBrowserRouter([
               {
                 path: 'all-tutorials-Parents',
                 element: (
-                    <AllTutorialsParents pageTitle="All Tutorials Parents" />
+                  <AllTutorialsParents pageTitle="All Tutorials Parents" />
                 ),
               },
             ],
@@ -789,7 +798,7 @@ const Router = createBrowserRouter([
               {
                 path: 'all-tutorials-teacher',
                 element: (
-                    <AllTutorialsTeacher pageTitle="All Tutorials Teacher" />
+                  <AllTutorialsTeacher pageTitle="All Tutorials Teacher" />
                 ),
               },
             ],
@@ -996,7 +1005,7 @@ const Router = createBrowserRouter([
               {
                 path: 'all-tutorials-exam',
                 element: (
-                    <AllTutorialsExam pageTitle="All Tutorials Exam" />
+                  <AllTutorialsExam pageTitle="All Tutorials Exam" />
                 ),
               },
             ],
@@ -1080,7 +1089,7 @@ const Router = createBrowserRouter([
                   </RequirePermission>
                 ),
               },
-                   {
+              {
                 path: 'all-tutorials-result',
                 element: (
                   <AllTutorialsResult pageTitle="All Tutorials Result" />
@@ -1116,7 +1125,7 @@ const Router = createBrowserRouter([
               {
                 path: 'all-tutorials-result',
                 element: (
-                    <AllTutorialsResult pageTitle="All Tutorials Result" />
+                  <AllTutorialsResult pageTitle="All Tutorials Result" />
                 ),
               },
 
@@ -1234,7 +1243,7 @@ const Router = createBrowserRouter([
               {
                 path: 'all-tutorials-darul-ikama',
                 element: (
-                    <AllTutorialsDarulkama pageTitle="All Tutorials Darulikama" />
+                  <AllTutorialsDarulkama pageTitle="All Tutorials Darulikama" />
                 ),
               },
             ],
@@ -1371,7 +1380,7 @@ const Router = createBrowserRouter([
               {
                 path: 'all-tutorials-accounting',
                 element: (
-                    <AllTutorialsAccounting pageTitle="All Tutorials Accounting" />
+                  <AllTutorialsAccounting pageTitle="All Tutorials Accounting" />
                 ),
               },
             ],
@@ -1411,7 +1420,7 @@ const Router = createBrowserRouter([
               {
                 path: 'all-tutorials-payment',
                 element: (
-                    <AllTutorialsPayment pageTitle="All Tutorials Payment" />
+                  <AllTutorialsPayment pageTitle="All Tutorials Payment" />
                 ),
               },
             ],
@@ -1489,7 +1498,7 @@ const Router = createBrowserRouter([
               {
                 path: 'all-tutorials-setting',
                 element: (
-                    <AllTutorialsSetting pageTitle="All Tutorials Setting" />
+                  <AllTutorialsSetting pageTitle="All Tutorials Setting" />
                 ),
               },
             ],
