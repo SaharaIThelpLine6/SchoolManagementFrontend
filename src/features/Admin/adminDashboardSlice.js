@@ -16,8 +16,8 @@ export const adminDashboardSlice = createApi({
   }),
   tagTypes: ['AdminMaddrasahPayments', 'LoginOverview', 'LoginDetails'],
   endpoints: (builder) => ({
-    // Login History - Route 1: shob madrasa er overview (table + chart + summary)
-    // params: startDate, endDate, loginType, search, groupBy, page, limit
+    // Login History - Route 1: shob madrasa er overview
+    // params: startDate, endDate, loginType, search, groupBy, order (asc|desc), page, limit
     getLoginOverview: builder.query({
       query: (params = {}) => ({
         url: '/user_login_overview',
@@ -28,7 +28,8 @@ export const adminDashboardSlice = createApi({
     }),
 
     // Login History - Route 2: ekta madrasa er details (view icon click korle)
-    // params: institutionCode (required), startDate, endDate, loginType, userId, groupBy, page, limit
+    // params: institutionCode (required), startDate, endDate, loginType, userId,
+    //         groupBy, order (asc|desc), page, limit
     getLoginDetails: builder.query({
       query: ({ institutionCode, ...params }) => ({
         url: `/user_login_details/${institutionCode}`,

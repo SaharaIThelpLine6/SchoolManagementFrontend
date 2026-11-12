@@ -1169,6 +1169,92 @@ const useTranslate = () => {
     "All Tutorials Accounting": "সকল টিউটোরিয়াল হিসাবরক্ষণ",
     "All Tutorials Payment": "সকল টিউটোরিয়াল পেমেন্ট",
     "All Tutorials setting": "সকল টিউটোরিয়াল সেটিংস",
+
+    // ---- Login History: order (notun) ----
+    "Order": "ক্রম",
+    "Ascending": "ঊর্ধ্বক্রম (ছোট থেকে বড়)",
+    "Descending": "নিম্নক্রম (বড় থেকে ছোট)",
+
+    // ---- Login History: page title / header ----
+    "Madrasah Login Information": "মাদরাসার লগইন তথ্য",
+    "All madrasah login summary": "সব মাদরাসার লগইন সারসংক্ষেপ",
+    "Login details of this madrasah": "এই মাদরাসার লগইন বিস্তারিত",
+    "Madrasah": "মাদরাসা",
+    "Total Madrasah": "মোট মাদরাসা",
+    "Madrasah List": "মাদরাসার তালিকা",
+    "Back": "ফিরে যান",
+
+    // ---- Filters ----
+    "Date": "তারিখ",
+    "Last 1 Month": "গত ১ মাস",
+    "Custom": "কাস্টম",
+    "Today": "আজ",
+    "Yesterday": "গতকাল",
+    "Last 7 days": "গত ৭ দিন",
+    "Last 30 days": "গত ৩০ দিন",
+    "Last 90 days": "গত ৯০ দিন",
+    "This month": "এই মাস",
+    "This year": "এই বছর",
+    "Start date": "শুরুর তারিখ",
+    "End date": "শেষের তারিখ",
+    "Reset": "রিসেট",
+    "Cancel": "বাতিল",
+    "Apply": "প্রয়োগ করুন",
+    "Reset Filter": "ফিল্টার রিসেট",
+    "Time (Hour)": "সময় (ঘণ্টা)",
+    "Day": "দিন",
+    "Week": "সপ্তাহ",
+    "Month": "মাস",
+    "All Login Types": "সব লগইন ধরন",
+    "Search by Madrasah Name or Code...": "মাদরাসার নাম বা কোড দিয়ে খুঁজুন...",
+    "Filter by User ID...": "ইউজার আইডি দিয়ে ফিল্টার করুন...",
+
+    // ---- Login types ----
+    "Desktop App": "ডেস্কটপ অ্যাপ",
+    "Website Dashboard": "ওয়েবসাইট ড্যাশবোর্ড",
+    "Teacher App": "শিক্ষক অ্যাপ",
+    "Login Type": "লগইন ধরন",
+
+    // ---- Summary / charts ----
+    "Total Logins": "মোট লগইন",
+    "Unique Users": "ইউনিক ইউজার",
+    "By Login Type": "লগইন ধরন অনুযায়ী",
+    "Total vs Unique": "মোট বনাম ইউনিক",
+    "Logins by Hour of Day": "দিনের ঘণ্টা অনুযায়ী লগইন",
+    "Daily Login Trend": "দৈনিক লগইন প্রবণতা",
+    "Weekly Login Trend": "সাপ্তাহিক লগইন প্রবণতা",
+    "Monthly Login Trend": "মাসিক লগইন প্রবণতা",
+    "Login Trend": "লগইন প্রবণতা",
+    "Login Type Share": "লগইন ধরনের অনুপাত",
+    "Top 10 Madrasah": "শীর্ষ ১০ মাদরাসা",
+    "Top 10 Users": "শীর্ষ ১০ ইউজার",
+    "Click a bar to view details": "বিস্তারিত দেখতে বারে ক্লিক করুন",
+    "Click a bar to filter by user": "ইউজার ফিল্টার করতে বারে ক্লিক করুন",
+    "to": "থেকে",
+    "Total": "মোট",
+
+    // ---- Tables ----
+    "Code": "কোড",
+    "Last Login": "সর্বশেষ লগইন",
+    "First Login": "প্রথম লগইন",
+    "Action": "অ্যাকশন",
+    "View Details": "বিস্তারিত দেখুন",
+    "User ID": "ইউজার আইডি",
+    "User": "ইউজার",
+    "Login Time": "লগইন সময়",
+    "Login List": "লগইন তালিকা",
+    "Login Summary": "লগইন সারসংক্ষেপ",
+    "Week Start (Monday)": "সপ্তাহের শুরু (সোমবার)",
+    "Clear": "মুছুন",
+
+    // ---- Pagination / states ----
+    "Previous": "আগের",
+    "Next": "পরের",
+    "Page": "পৃষ্ঠা",
+    "Loading...": "লোড হচ্ছে...",
+    "No Data Found": "কোনো তথ্য পাওয়া যায়নি",
+    "Failed to load data": "তথ্য লোড করা যায়নি",
+    "Retry": "আবার চেষ্টা করুন",
   };
 
   return (key) =>

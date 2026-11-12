@@ -27,6 +27,20 @@ const GROUP_OPTIONS = [
   { value: "month", label: "Month" },
 ];
 
+// Table er order (default = asc)
+const ORDER_OPTIONS = [
+  { value: "asc", label: "Ascending" },
+  { value: "desc", label: "Descending" },
+];
+
+const DEFAULT_FILTERS = {
+  startDate: "",
+  endDate: "",
+  loginType: "",
+  groupBy: "day",
+  order: "asc",
+};
+
 const BN_MONTHS = [
   "জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন",
   "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর",
@@ -543,12 +557,7 @@ const AdminUserLoginHistory = () => {
   const translate = useTranslate();
 
   // ---------- Filters ----------
-  const [filters, setFilters] = useState({
-    startDate: "",
-    endDate: "",
-    loginType: "",
-    groupBy: "day",
-  });
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [searchInput, setSearchInput] = useState(""); // overview: madrasa search
   const [userIdInput, setUserIdInput] = useState(""); // details: user filter
   const search = useDebounce(searchInput.trim());
@@ -567,7 +576,7 @@ const AdminUserLoginHistory = () => {
   };
 
   const commonParams = useMemo(() => {
-    const p = { groupBy: filters.groupBy };
+    const p = { groupBy: filters.groupBy, order: filters.order };
     if (filters.startDate && filters.endDate) {
       p.startDate = filters.startDate;
       p.endDate = filters.endDate;
@@ -607,7 +616,8 @@ const AdminUserLoginHistory = () => {
   const hasFilters =
     filters.startDate ||
     filters.loginType ||
-    filters.groupBy !== "day" ||
+    filters.groupBy !== DEFAULT_FILTERS.groupBy ||
+    filters.order !== DEFAULT_FILTERS.order ||
     searchInput ||
     userIdInput;
 
@@ -629,7 +639,7 @@ const AdminUserLoginHistory = () => {
   };
 
   const resetAll = () => {
-    setFilters({ startDate: "", endDate: "", loginType: "", groupBy: "day" });
+    setFilters(DEFAULT_FILTERS);
     setSearchInput("");
     setUserIdInput("");
     setOverviewPage(1);
@@ -673,6 +683,9 @@ const AdminUserLoginHistory = () => {
   const thClass = "px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wide whitespace-nowrap";
   const tdClass = "px-4 py-3 text-sm text-gray-700 whitespace-nowrap";
 
+  const selectClass =
+    "bg-white border border-gray-300 text-gray-700 text-sm rounded-md focus:ring-2 focus:ring-blue-500 py-2 px-3 cursor-pointer";
+
   return (
     <div className="font-default bg-gray-50 min-h-screen pb-10">
       {/* ================= Filter bar ================= */}
@@ -715,7 +728,7 @@ const AdminUserLoginHistory = () => {
             <select
               value={filters.groupBy}
               onChange={(e) => updateFilters({ groupBy: e.target.value })}
-              className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md focus:ring-2 focus:ring-blue-500 py-2 px-3 cursor-pointer"
+              className={selectClass}
             >
               {GROUP_OPTIONS.map((g) => (
                 <option key={g.value} value={g.value}>
@@ -724,10 +737,24 @@ const AdminUserLoginHistory = () => {
               ))}
             </select>
 
+            {/* Order select: overview ar details duto route ei kaj kore */}
+            <select
+              value={filters.order}
+              onChange={(e) => updateFilters({ order: e.target.value })}
+              className={selectClass}
+              title={translate("Order")}
+            >
+              {ORDER_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {translate(o.label)}
+                </option>
+              ))}
+            </select>
+
             <select
               value={filters.loginType}
               onChange={(e) => updateFilters({ loginType: e.target.value })}
-              className="bg-white border border-gray-300 text-gray-700 text-sm rounded-md focus:ring-2 focus:ring-blue-500 py-2 px-3 cursor-pointer"
+              className={selectClass}
             >
               <option value="">{translate("All Login Types")}</option>
               {TYPE_ENTRIES.map((t) => (
@@ -981,7 +1008,7 @@ const AdminUserLoginHistory = () => {
                         <td className={tdClass}>{serialBase + idx + 1}</td>
                         <td className={`${tdClass} font-medium text-gray-800`}>{row.userId}</td>
                         <td className={tdClass}>
-                          <TypeBadge type={row.loginType} name={row.loginTypeName} />
+                          <TypeBadge type={row.loginType} name={translate(row.loginTypeName)} />
                         </td>
                         <td className={tdClass}>{row.loginTime || formatDateTime(row.loginDateTime)}</td>
                       </tr>
