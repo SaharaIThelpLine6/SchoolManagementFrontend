@@ -957,7 +957,7 @@ const Home = () => {
               title="অ্যান্ড্রয়েড অ্যাপ"
               desc="প্লে স্টোর থেকে ডাউনলোড করে ব্যবহার করুন"
               cta="ডাউনলোড করুন"
-              href="https://play.google.com/store/search?q=qmmsoft&c=apps&hl=en"
+              href="https://play.google.com/store/apps/details?id=com.sahara20251.qmmsoft.teacher&hl=en"
             />
             <PlatformCard
               index={3}

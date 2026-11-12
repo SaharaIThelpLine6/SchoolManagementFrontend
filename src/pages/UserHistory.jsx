@@ -693,24 +693,74 @@ export default function UserHistory() {
   }, [info, userInfo, user]);
 
   const results = F(resultRows);
-  const reports = F(user.reports);
-  const leaves = F(user.leaves);
-  const monthlyFees = F(user.monthlyFees);
+  /* চারিত্রিক রিপোর্ট / বহিস্কারকৃত — সার্ভারের সারি, নতুন তারিখ আগে */
+  const reportsRows = useMemo(() => {
+    if (!info) return user.reports;
+    return (userInfo?.reports ?? []).map((r, i) => ({
+      id: r.SRID ?? i,
+      session: r.SessionName ?? String(r.SessionID ?? ""),
+      date: r.ReportDate ?? "",
+      type: r.ReportTypeName || r.ReportCetName || "",
+      note: r.Remark ?? "",
+    }));
+  }, [info, userInfo, user]);
+
+  const reports = F(reportsRows);
+  /* গেইট পাস ও ছুটি — সার্ভারের সারি, নতুন ছুটি আগে */
+  const leavesRows = useMemo(() => {
+    if (!info) return user.leaves;
+    return (userInfo?.vacations ?? []).map((v, i) => ({
+      id: v.ID ?? i,
+      session: v.SessionName ?? String(v.SessionID ?? ""),
+      from: v.DateFrom ?? "",
+      to: v.DateTo ?? "",
+      days: Number(v.Days) || 0,
+      type: v.VacationTypeName ?? "",
+      reason: v.Reason ?? "",
+      status: v.Status ?? "",
+    }));
+  }, [info, userInfo, user]);
+
+  const leaves = F(leavesRows);
+  /* মাসিক ফি — সার্ভারের মাসভিত্তিক সারি, নতুন মাস আগে */
+  const monthlyFeeRows = useMemo(() => {
+    if (!info) return user.monthlyFees;
+    return (userInfo?.monthlyFees?.months ?? []).map((m, i) => ({
+      id: `${m.SessionID ?? ""}-${m.MonthID ?? i}`,
+      session: m.SessionName ?? String(m.SessionID ?? ""),
+      // নাম ডাটাবেজেই আছে, না পেলে নম্বর ধরে বসানো হয়
+      month: m.MonthName || (m.MonthNumber ? MONTHS[m.MonthNumber - 1] : "") || "",
+      assigned: Number(m.assigned) || 0,
+      received: Number(m.received) || 0,
+    }));
+  }, [info, userInfo, user]);
+
+  const monthlyFees = F(monthlyFeeRows);
   const mealFees = F(user.mealFees);
   const otherFees = F(user.otherFees);
-  /* উপস্থিতি — সার্ভারের মাসভিত্তিক সারি, ডেমোর মতো একই শেপে */
+  /* উপস্থিতি — সার্ভারের মাসভিত্তিক সারি, ডেমোর মতো একই শেপে।
+     সাজানো descending — নতুন বছরের শেষ মাস সবার উপরে। */
   const attendanceRows = useMemo(() => {
-    if (!info) return user.attendance;
-    return (userInfo?.attendance?.months ?? []).map((m, i) => ({
-      id: m.SL ?? i,
-      session: m.SessionName ?? String(m.SessionID ?? m.Years ?? ""),
-      // চার্টের মাসের নামের সাথে মিল রাখতে নম্বর ধরে বসানো হয়
-      month: (m.MonthNumber ? MONTHS[m.MonthNumber - 1] : null) || m.MonthName || "",
-      working: Number(m.working) || 0,
-      present: Number(m.present) || 0,
-      absent: Number(m.absent) || 0,
-      leave: Number(m.leave) || 0,
-    }));
+    const rows = !info
+      ? user.attendance.map((r) => ({
+        ...r,
+        year: Number(r.session) || 0,
+        monthNo: MONTHS.indexOf(r.month) + 1,
+      }))
+      : (userInfo?.attendance?.months ?? []).map((m, i) => ({
+        id: m.SL ?? i,
+        session: m.SessionName ?? String(m.SessionID ?? m.Years ?? ""),
+        // চার্টের মাসের নামের সাথে মিল রাখতে নম্বর ধরে বসানো হয়
+        month: (m.MonthNumber ? MONTHS[m.MonthNumber - 1] : null) || m.MonthName || "",
+        working: Number(m.working) || 0,
+        present: Number(m.present) || 0,
+        absent: Number(m.absent) || 0,
+        leave: Number(m.leave) || 0,
+        year: Number(m.Years) || 0,
+        monthNo: Number(m.MonthNumber) || 0,
+      }));
+
+    return [...rows].sort((a, b) => (b.year - a.year) || (b.monthNo - a.monthNo));
   }, [info, userInfo, user]);
 
   const attendance = F(attendanceRows);
@@ -1184,7 +1234,7 @@ export default function UserHistory() {
 
               {show("leave") && (
                 <Card
-                  title="মন্তব্য / বার্ষিক প্রতিবেদন / আখলাকী রিপোর্ট"
+                  title="চারিত্রিক রিপোর্ট / বহিস্কারকৃত শিক্ষার্থীর তালিকা"
                   icon="note"
                   accent="amber"
                   badge={`${bn(reports.length)} টি`}
@@ -1234,11 +1284,7 @@ export default function UserHistory() {
                       { key: "to", label: "তারিখ পর্যন্ত", tdClass: "whitespace-nowrap text-slate-600", render: (r) => bn(r.to) },
                       { key: "days", label: "দিন", align: "right", tdClass: "text-right font-bold text-slate-800", render: (r) => bn(r.days) },
                       { key: "type", label: "ধরন", render: (r) => <Pill tone={r.type === "ছুটি" ? "violet" : "cyan"}>{r.type}</Pill> },
-                      { key: "reason", label: "বিবরণ", tdClass: "text-slate-700 min-w-[200px]" },
-                      {
-                        key: "status", label: "অবস্থা",
-                        render: (r) => <Pill tone={r.status === "অনুমোদিত" ? "emerald" : "rose"}>{r.status}</Pill>,
-                      },
+                      { key: "reason", label: "বিবরণ", tdClass: "text-slate-700 min-w-[200px]" }
                     ]}
                     rows={leaves}
                     empty="কোনো ছুটির রেকর্ড নেই"
