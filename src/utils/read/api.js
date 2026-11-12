@@ -70,7 +70,8 @@ export const getPublicData = async (path) => {
     return res.data;
   } catch (error) {
     console.error('Error fetching data:', error);
-    throw new Error("Data fetching failed");
+    // Pass the server's (Bangla) error message through so the UI can show it.
+    throw new Error(error.response?.data?.error || "Data fetching failed");
   }
 
 };
