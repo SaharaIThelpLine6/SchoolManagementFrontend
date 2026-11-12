@@ -46,6 +46,7 @@ const useTranslate = () => {
     'User Notice': 'ইউজার নোটিশ',
     'Notice': 'নোটিশ',
     'Admission Serial': 'ভর্তি নাম্বার',
+    'Admission Lists': 'ভর্তি তালিকা',
     'Admission Deadline Date': 'ভর্তির সময়সীমা তারিখ',
     'Admission Deadline': 'ভর্তির সময়সীমা',
     'Online Admission Message': 'অনলাইন ভর্তির মেসেজ',
