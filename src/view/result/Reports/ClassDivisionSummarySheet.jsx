@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
 import { Buffer } from "buffer";
 import Chart from "react-apexcharts";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
@@ -6,18 +7,94 @@ import bnBijoy2Unicode from "../../../utils/conveter";
 import ScaledPreview from "../../../components/ScaledPreview";
 
 /* ═══════════════════════════════════════════════════════════
-   HELPERS
+   LANGUAGE
+   languageId (Redux: state.auth.resultLanguageId)
+   1 = বাংলা, 2 = العربية, 3 = English
    ═══════════════════════════════════════════════════════════ */
-const bn = (v) => bnBijoy2Unicode(String(v ?? ""));
+export const DEFAULT_LANGUAGE = "bn";
+const LANGUAGE_ID_MAP = { 1: "bn", 2: "ar", 3: "en" };
 
-const getTodayBangla = () => {
-  const d = new Date();
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yyyy = d.getFullYear();
-  return bnBijoy2Unicode(`${dd}/${mm}/${yyyy}`);
+const TRANSLATIONS = {
+  bn: {
+    sl: "ক্রমিক",
+    className: "শ্রেণি",
+    totalAdmission: "মোট ভর্তি",
+    totalExaminees: "মোট পরীক্ষার্থী",
+    passRate: "পাসের হার",
+    grandTotal: "সর্বমোট",
+    date: "তারিখ",
+    page: (a, b) => `পৃষ্ঠা ${a} / ${b}`,
+    total: "মোট",
+    chartClassTitle: "শ্রেণিভিত্তিক মোট শিক্ষার্থী",
+    chartClassSub: "প্রতি ক্লাসের মোট",
+    chartDivisionTitle: "বিভাগভিত্তিক সারসংক্ষেপ",
+    chartDivisionSub: "সব শ্রেণির সম্মিলিত সংখ্যা",
+    chartStackedTitle: "বিভাগ অনুযায়ী শ্রেণির তুলনা",
+    chartStackedSub: "স্ট্যাকড বার চার্ট",
+    noData: "কোনো ডেটা পাওয়া যায়নি।",
+  },
+  en: {
+    sl: "SL",
+    className: "Class",
+    totalAdmission: "Total Admission",
+    totalExaminees: "Total Examinees",
+    passRate: "Pass Rate",
+    grandTotal: "Grand Total",
+    date: "Date",
+    page: (a, b) => `Page ${a} / ${b}`,
+    total: "Total",
+    chartClassTitle: "Total Students by Class",
+    chartClassSub: "Total of each class",
+    chartDivisionTitle: "Division-wise Summary",
+    chartDivisionSub: "Combined count of all classes",
+    chartStackedTitle: "Class Comparison by Division",
+    chartStackedSub: "Stacked bar chart",
+    noData: "No data found.",
+  },
+  ar: {
+    sl: "م",
+    className: "الصف",
+    totalAdmission: "إجمالي القبول",
+    totalExaminees: "إجمالي الممتحنين",
+    passRate: "نسبة النجاح",
+    grandTotal: "المجموع الكلي",
+    date: "التاريخ",
+    page: (a, b) => `صفحة ${a} / ${b}`,
+    total: "المجموع",
+    chartClassTitle: "إجمالي الطلاب حسب الصف",
+    chartClassSub: "مجموع كل صف",
+    chartDivisionTitle: "ملخص حسب التقدير",
+    chartDivisionSub: "العدد الإجمالي لجميع الصفوف",
+    chartStackedTitle: "مقارنة الصفوف حسب التقدير",
+    chartStackedSub: "مخطط أعمدة مكدسة",
+    noData: "لم يتم العثور على بيانات.",
+  },
 };
 
+const ARABIC_INDIC = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+
+const makeNum = (lang) => (v) => {
+  if (v === undefined || v === null) return "";
+  const s = String(v);
+  if (lang === "bn") return bnBijoy2Unicode(s);
+  if (lang === "ar") return s.replace(/\d/g, (d) => ARABIC_INDIC[Number(d)]);
+  return s;
+};
+
+const pickText = (...values) => {
+  const found = values.find((v) => typeof v === "string" && v.trim() !== "");
+  return found ? found.trim() : "";
+};
+
+const pickByLang = (lang, bnVal, enVal, arVal) => {
+  if (lang === "ar") return pickText(arVal, bnVal, enVal);
+  if (lang === "en") return pickText(enVal, bnVal, arVal);
+  return pickText(bnVal, enVal, arVal);
+};
+
+/* ═══════════════════════════════════════════════════════════
+   HELPERS
+   ═══════════════════════════════════════════════════════════ */
 const toDataUrl = (field) => {
   if (!field?.data) return null;
   const buf = Buffer.from(field.data);
@@ -43,9 +120,7 @@ const SIGNATURE_H = 130;
 const FOOTER_RESERVE = 20;
 const SAFETY = 8;
 
-/* ── প্রিন্ট: A4 landscape, margin 5mm ──
-   ডিজাইন-পেজকে প্রিন্টেবল এরিয়ার ভেতরে ফিট করে স্কেল করা হয়।
-   আউটার বক্স margin: 0 auto → Chrome Scale (১০০% / Custom ৯৫) যাই হোক মাঝখানে বসে। */
+/* ── প্রিন্ট: A4 landscape, margin 5mm ── */
 const PRINT_MARGIN_MM = 5;
 const PX_PER_MM = 96 / 25.4;
 const PRINT_AREA_W_MM = 297 - PRINT_MARGIN_MM * 2;
@@ -87,7 +162,7 @@ const DONUT_SIZE = Math.min(DONUT_AREA_H, CHART_INNER_W) - 4;
 /* ═══════════════════════════════════════════════════════════
    DISTRIBUTED COLUMNS (pure HTML/CSS — প্রিন্টে)
    ═══════════════════════════════════════════════════════════ */
-function PrintDistributedColumns({ labels, totals, width, height }) {
+function PrintDistributedColumns({ labels, totals, width, height, num }) {
   const AXIS_W = 36;
   const TOP_PAD = 26;
   const LABEL_H = 130;
@@ -105,7 +180,7 @@ function PrintDistributedColumns({ labels, totals, width, height }) {
   const barW = Math.min(slot * 0.6, 110);
 
   return (
-    <div style={{ position: "relative", width: `${width}px`, height: `${height}px`, overflow: "hidden" }}>
+    <div dir="ltr" style={{ position: "relative", width: `${width}px`, height: `${height}px`, overflow: "hidden" }}>
       {ticks.map((t) => {
         const y = TOP_PAD + plotH - (t / axisMax) * plotH;
         return (
@@ -118,7 +193,7 @@ function PrintDistributedColumns({ labels, totals, width, height }) {
               position: "absolute", left: 0, top: `${y - 8}px`, width: `${AXIS_W - 6}px`,
               textAlign: "right", fontSize: "12px", color: "#475569",
             }}>
-              {bn(t)}
+              {num(t)}
             </div>
           </div>
         );
@@ -141,7 +216,7 @@ function PrintDistributedColumns({ labels, totals, width, height }) {
               top: `${TOP_PAD + plotH - h - 20}px`,
               textAlign: "center", fontSize: "14px", fontWeight: 700, color: "#000",
             }}>
-              {bn(v)}
+              {num(v)}
             </div>
 
             <div style={{
@@ -169,7 +244,7 @@ function PrintDistributedColumns({ labels, totals, width, height }) {
 /* ═══════════════════════════════════════════════════════════
    DONUT (pure SVG — প্রিন্টে সবসময় ঠিকমতো আঁকে)
    ═══════════════════════════════════════════════════════════ */
-function PrintDonut({ values, colors, size }) {
+function PrintDonut({ values, colors, size, num, totalLabel }) {
   const total = values.reduce((a, b) => a + (Number(b) || 0), 0);
   const cx = size / 2;
   const cy = size / 2;
@@ -220,7 +295,7 @@ function PrintDonut({ values, colors, size }) {
             fontSize="13" fontWeight="700" fill="#fff"
             style={{ fontFamily: "inherit" }}
           >
-            {bn(s.v)}
+            {num(s.v)}
           </text>
         ) : null
       )}
@@ -230,14 +305,14 @@ function PrintDonut({ values, colors, size }) {
         textAnchor="middle" dominantBaseline="central"
         fontSize="16" fill="#444" style={{ fontFamily: "inherit" }}
       >
-        মোট
+        {totalLabel}
       </text>
       <text
         x={cx} y={cy + 14}
         textAnchor="middle" dominantBaseline="central"
         fontSize="26" fontWeight="700" fill="#222" style={{ fontFamily: "inherit" }}
       >
-        {bn(total)}
+        {num(total)}
       </text>
     </svg>
   );
@@ -247,25 +322,78 @@ function PrintDonut({ values, colors, size }) {
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════ */
 export default function ClassDivisionSummarySheet({ reportData }) {
-
-  // console.log(reportData, "reportData")
   const { data: institutionInfo } = useGetInstitutionInfoQuery();
   const [logo, setLogo] = useState(null);
   const [najem, setNajem] = useState(null);
   const printRef = useRef(null);
+
+  // ✅ ভাষা Redux slice থেকে আসে (ResultReport এর Language dropdown এটা সেট করে)
+  const languageId = useSelector((state) => state.auth.resultLanguageId);
+  const lang = LANGUAGE_ID_MAP[Number(languageId)] || DEFAULT_LANGUAGE;
+
+  const t = { ...TRANSLATIONS.bn, ...(TRANSLATIONS[lang] || {}) };
+  const dir = lang === "ar" ? "rtl" : "ltr";
+  const num = useMemo(() => makeNum(lang), [lang]);
+
+  // Apex চার্টের সংখ্যা ফরম্যাটার
+  const numFmt = (v) => {
+    if (v === null || v === undefined || String(v).trim() === "") return v;
+    const n = Number(v);
+    return Number.isFinite(n) ? num(Math.round(n * 100) / 100) : v;
+  };
 
   useEffect(() => {
     setLogo(toDataUrl(institutionInfo?.Logo ?? institutionInfo?.InstitutionLogo));
     setNajem(toDataUrl(institutionInfo?.SignatureNajem));
   }, [institutionInfo]);
 
-  const divisions = Array.isArray(reportData?.divisions) ? reportData.divisions : [];
+  const institutionName = pickByLang(
+    lang,
+    institutionInfo?.InstitutionName,
+    institutionInfo?.EngInstitutionName,
+    institutionInfo?.AraInstitutionName
+  );
+  const institutionAddress = pickByLang(
+    lang,
+    institutionInfo?.Address,
+    institutionInfo?.EngAddress,
+    institutionInfo?.AraAddress
+  );
+
+  const rawDivisions = Array.isArray(reportData?.divisions) ? reportData.divisions : [];
   const rows = Array.isArray(reportData?.rows) ? reportData.rows : [];
   const totalsData = reportData?.totals || {};
 
-  const examName = reportData?.examName ?? "";
-  const sessionName = reportData?.sessionName ?? "";
-  const dateBangla = getTodayBangla();
+  // ✅ ভাষা অনুযায়ী ডিভিশনের নাম (id/counts আগের মতোই)
+  const divisions = useMemo(
+    () =>
+      rawDivisions.map((d) => ({
+        ...d,
+        label: pickByLang(lang, d.name, d.nameEn, d.nameAr),
+      })),
+    [rawDivisions, lang]
+  );
+
+  const classLabel = (r) =>
+    pickByLang(lang, r.sessionWithClass, r.sessionWithClassEn, r.sessionWithClassAr);
+
+  const examName = pickByLang(lang, reportData?.examName, reportData?.examNameEn, reportData?.examNameAr);
+  const sessionNameRaw = pickByLang(
+    lang,
+    reportData?.sessionName,
+    reportData?.sessionNameEn,
+    reportData?.sessionNameAr
+  );
+  const sessionName = lang === "ar" ? num(sessionNameRaw) : sessionNameRaw;
+
+  const getToday = () => {
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    return num(`${dd}/${mm}/${yyyy}`);
+  };
+  const dateText = getToday();
 
   const rowTotal = (r) =>
     r.totalExaminees != null
@@ -287,16 +415,16 @@ export default function ClassDivisionSummarySheet({ reportData }) {
   );
 
   const chartData = useMemo(() => {
-    const labels = rows.map((r) => r.sessionWithClass);
+    const labels = rows.map((r) => classLabel(r));
     const totals = rows.map((r) => rowTotal(r));
     const divisionTotals = divisions.map((d) => colTotals[d.id] || 0);
     const stacked = divisions.map((d) => ({
-      name: d.name,
+      name: d.label,
       data: rows.map((r) => Number(r.counts?.[d.id]) || 0),
     }));
     return { labels, totals, divisionTotals, stacked };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rows, divisions, colTotals]);
+  }, [rows, divisions, colTotals, lang]);
 
   /* ── pagination (টেবিল পেজ) ── */
   const pages = useMemo(() => {
@@ -353,17 +481,17 @@ export default function ClassDivisionSummarySheet({ reportData }) {
           src={logo}
           alt="logo"
           style={{
-            position: "absolute", left: "14px", top: "6px",
+            position: "absolute", insetInlineStart: "14px", top: "6px",
             height: "100px", width: "100px", objectFit: "contain",
           }}
         />
       )}
       <div style={{ paddingTop: "8px" }}>
         <h1 style={{ margin: 0, fontSize: "26px", fontWeight: 800, lineHeight: 1.3, color: "#000" }}>
-          {institutionInfo?.InstitutionName}
+          {institutionName}
         </h1>
         <p style={{ margin: "4px 0 0", fontSize: "15px", fontWeight: 700, color: "#000" }}>
-          {institutionInfo?.Address}
+          {institutionAddress}
         </p>
         <p style={{ margin: "6px 0 0", fontSize: "18px", fontWeight: 600, color: "#000" }}>
           {examName} - {sessionName}
@@ -386,12 +514,12 @@ export default function ClassDivisionSummarySheet({ reportData }) {
   const renderTableHead = () => (
     <thead>
       <tr style={{ height: `${THEAD_H}px` }}>
-        <th style={th}>ক্রমিক</th>
-        <th style={{ ...th, textAlign: "left", paddingLeft: "8px" }}>সাব ক্লাস বাংলা</th>
-        <th style={th}>মোট ভর্তি</th>
-        <th style={th}>মোট পরীক্ষার্থী</th>
-        {divisions.map((d) => <th key={d.id} style={th}>{d.name}</th>)}
-        <th style={th}>পাসের হার</th>
+        <th style={th}>{t.sl}</th>
+        <th style={{ ...th, textAlign: "start", paddingInlineStart: "8px" }}>{t.className}</th>
+        <th style={th}>{t.totalAdmission}</th>
+        <th style={th}>{t.totalExaminees}</th>
+        {divisions.map((d) => <th key={d.id} style={th}>{d.label}</th>)}
+        <th style={th}>{t.passRate}</th>
       </tr>
     </thead>
   );
@@ -402,16 +530,19 @@ export default function ClassDivisionSummarySheet({ reportData }) {
 
     return (
       <tr key={r.id ?? globalIndex} style={{ height: `${ROW_H}px` }}>
-        <td style={td}>{bn(globalIndex + 1)}</td>
-        <td style={{ ...td, textAlign: "left", paddingLeft: "6px", fontWeight: 600, textOverflow: "ellipsis" }}>
-          {r.sessionWithClass}
+        <td style={td}>{num(globalIndex + 1)}</td>
+        <td style={{
+          ...td, textAlign: "start", paddingInlineStart: "6px",
+          fontWeight: 600, textOverflow: "ellipsis",
+        }}>
+          {classLabel(r)}
         </td>
-        <td style={{ ...td, fontWeight: 700 }}>{bn(admission)}</td>
-        <td style={{ ...td, fontWeight: 700 }}>{bn(rowTotal(r))}</td>
+        <td style={{ ...td, fontWeight: 700 }}>{num(admission)}</td>
+        <td style={{ ...td, fontWeight: 700 }}>{num(rowTotal(r))}</td>
         {divisions.map((d) => (
-          <td key={d.id} style={td}>{bn(Number(r.counts?.[d.id]) || 0)}</td>
+          <td key={d.id} style={td}>{num(Number(r.counts?.[d.id]) || 0)}</td>
         ))}
-        <td style={{ ...td, fontWeight: 700 }}>{bn(rate)}%</td>
+        <td style={{ ...td, fontWeight: 700 }}>{num(rate)}%</td>
       </tr>
     );
   };
@@ -420,16 +551,16 @@ export default function ClassDivisionSummarySheet({ reportData }) {
     <tfoot>
       <tr style={{ height: `${ROW_H}px`, backgroundColor: "#eef5f0" }}>
         <td style={{ ...td, fontWeight: 800 }} colSpan={2}>
-          সর্বমোট
+          {t.grandTotal}
         </td>
-        <td style={{ ...td, fontWeight: 800 }}>{bn(totalsData.admissionCount || 0)}</td>
-        <td style={{ ...td, fontWeight: 800 }}>{bn(grandTotal)}</td>
+        <td style={{ ...td, fontWeight: 800 }}>{num(totalsData.admissionCount || 0)}</td>
+        <td style={{ ...td, fontWeight: 800 }}>{num(grandTotal)}</td>
         {divisions.map((d) => (
           <td key={d.id} style={{ ...td, fontWeight: 700 }}>
-            {bn(totalsData.divisionTotals?.[d.id] || colTotals[d.id] || 0)}
+            {num(totalsData.divisionTotals?.[d.id] || colTotals[d.id] || 0)}
           </td>
         ))}
-        <td style={{ ...td, fontWeight: 800 }}>{bn(formatRate(totalsData.overallPassRate))}%</td>
+        <td style={{ ...td, fontWeight: 800 }}>{num(formatRate(totalsData.overallPassRate))}%</td>
       </tr>
     </tfoot>
   );
@@ -438,7 +569,7 @@ export default function ClassDivisionSummarySheet({ reportData }) {
     <div className="signature-section" style={{
       height: `${SIGNATURE_H}px`, boxSizing: "border-box", overflow: "hidden",
       display: "flex", justifyContent: "flex-end", alignItems: "flex-end",
-      paddingTop: "10px", paddingRight: "40px",
+      paddingTop: "10px", paddingInlineEnd: "40px",
     }}>
       <div style={{ width: "260px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
         <div style={{ height: "56px", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
@@ -454,7 +585,7 @@ export default function ClassDivisionSummarySheet({ reportData }) {
           {institutionInfo?.NajemName}
         </p>
         <p style={{ margin: "4px 0 0", fontSize: "14px", fontWeight: 600, color: "#000" }}>
-          তারিখ : {dateBangla}
+          {t.date} : {dateText}
         </p>
       </div>
     </div>
@@ -465,7 +596,7 @@ export default function ClassDivisionSummarySheet({ reportData }) {
       position: "absolute", left: 0, right: 0, bottom: "2px",
       textAlign: "center", fontSize: "10px", color: "#404040",
     }}>
-      পৃষ্ঠা {bn(pageNumber)} / {bn(totalPages)}
+      {t.page(num(pageNumber), num(totalPages))}
     </div>
   );
 
@@ -519,7 +650,7 @@ export default function ClassDivisionSummarySheet({ reportData }) {
         breakInside: "avoid",
       }}
     >
-      <div className="print-page" style={printPageBox}>
+      <div className="print-page" dir={dir} style={printPageBox}>
         {content}
       </div>
     </div>
@@ -544,23 +675,41 @@ export default function ClassDivisionSummarySheet({ reportData }) {
     dataLabels: { enabled: false },
     xaxis: {
       categories: chartData.labels,
-      labels: { style: { fontSize: "11px" } },
+      labels: { style: { fontSize: "11px" }, formatter: numFmt },
     },
     yaxis: { labels: { style: { fontSize: "11px" } } },
     grid: { borderColor: "#eef1ee" },
-    tooltip: { theme: "light" },
+    tooltip: { theme: "light", y: { formatter: numFmt } },
   };
 
   const donutOptions = {
     chart: { ...commonChart, type: "donut" },
-    labels: divisions.map((d) => d.name),
+    labels: divisions.map((d) => d.label),
     colors: CHART_COLORS,
     legend: { position: "bottom", fontSize: "12px" },
-    dataLabels: { enabled: true, style: { fontSize: "11px" } },
-    plotOptions: {
-      pie: { donut: { size: "58%", labels: { show: true, total: { show: true, label: "মোট" } } } },
+    dataLabels: {
+      enabled: true,
+      style: { fontSize: "11px" },
+      formatter: (val) => `${num(Number(val).toFixed(1))}%`,
     },
-    tooltip: { theme: "light" },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: "58%",
+          labels: {
+            show: true,
+            value: { formatter: numFmt },
+            total: {
+              show: true,
+              label: t.total,
+              formatter: (w) =>
+                num(w.globals.seriesTotals.reduce((a, b) => a + b, 0)),
+            },
+          },
+        },
+      },
+    },
+    tooltip: { theme: "light", y: { formatter: numFmt } },
   };
 
   const stackedOptions = {
@@ -572,10 +721,10 @@ export default function ClassDivisionSummarySheet({ reportData }) {
       categories: chartData.labels,
       labels: { rotate: -45, style: { fontSize: "10px" } },
     },
-    yaxis: { labels: { style: { fontSize: "11px" } } },
+    yaxis: { labels: { style: { fontSize: "11px" }, formatter: numFmt } },
     legend: { position: "bottom", fontSize: "12px" },
     grid: { borderColor: "#eef1ee" },
-    tooltip: { theme: "light" },
+    tooltip: { theme: "light", y: { formatter: numFmt } },
   };
 
   /* ── প্রিন্টের জন্য চার্ট পেজ ── */
@@ -593,7 +742,7 @@ export default function ClassDivisionSummarySheet({ reportData }) {
       borderBottom: "2px solid #000", paddingTop: "6px",
     }}>
       <h1 style={{ margin: 0, fontSize: "24px", fontWeight: 800, lineHeight: 1.3, color: "#000" }}>
-        {institutionInfo?.InstitutionName}
+        {institutionName}
       </h1>
       <p style={{ margin: "4px 0 0", fontSize: "16px", fontWeight: 600, color: "#000" }}>
         {examName} - {sessionName}
@@ -612,9 +761,9 @@ export default function ClassDivisionSummarySheet({ reportData }) {
         <div style={chartCard}>
           <div style={{ height: `${CHART_TITLE_H}px`, overflow: "hidden" }}>
             <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "#155b49" }}>
-              শ্রেণিভিত্তিক মোট শিক্ষার্থী
+              {t.chartClassTitle}
             </h3>
-            <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#475569" }}>প্রতি ক্লাসের মোট</p>
+            <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#475569" }}>{t.chartClassSub}</p>
           </div>
 
           <PrintDistributedColumns
@@ -622,18 +771,19 @@ export default function ClassDivisionSummarySheet({ reportData }) {
             totals={chartData.totals}
             width={CHART_INNER_W}
             height={CHART_INNER_H}
+            num={num}
           />
         </div>
 
         <div style={chartCard}>
           <div style={{ height: `${CHART_TITLE_H}px`, overflow: "hidden" }}>
             <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "#155b49" }}>
-              বিভাগভিত্তিক সারসংক্ষেপ
+              {t.chartDivisionTitle}
             </h3>
-            <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#475569" }}>সব শ্রেণির সম্মিলিত সংখ্যা</p>
+            <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#475569" }}>{t.chartDivisionSub}</p>
           </div>
 
-          <div style={{
+          <div dir="ltr" style={{
             width: `${CHART_INNER_W}px`, height: `${DONUT_AREA_H}px`,
             display: "flex", alignItems: "center", justifyContent: "center",
             overflow: "hidden",
@@ -642,6 +792,8 @@ export default function ClassDivisionSummarySheet({ reportData }) {
               values={chartData.divisionTotals}
               colors={CHART_COLORS}
               size={DONUT_SIZE}
+              num={num}
+              totalLabel={t.total}
             />
           </div>
 
@@ -660,7 +812,7 @@ export default function ClassDivisionSummarySheet({ reportData }) {
                   background: CHART_COLORS[i % CHART_COLORS.length],
                   display: "inline-block", flexShrink: 0,
                 }} />
-                <span>{d.name}</span>
+                <span>{d.label}</span>
               </div>
             ))}
           </div>
@@ -674,7 +826,7 @@ export default function ClassDivisionSummarySheet({ reportData }) {
   if (!rows.length) {
     return (
       <div className="w-full p-6 text-center text-slate-500 text-sm">
-        কোনো ডেটা পাওয়া যায়নি।
+        {t.noData}
       </div>
     );
   }
@@ -682,25 +834,43 @@ export default function ClassDivisionSummarySheet({ reportData }) {
   return (
     <div className="w-full">
       {/* ── CHARTS (স্ক্রিনে Full Width; প্রিন্টে লুকানো) ── */}
-      <div className="no-print w-full mb-6">
+      <div className="no-print w-full mb-6" dir={dir}>
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-4">
           <div className="bg-white border border-[#e1e9e3] rounded-2xl p-5 shadow-sm w-full min-w-0">
-            <h3 className="m-0 mb-1 text-base font-bold text-[#155b49]">শ্রেণিভিত্তিক মোট শিক্ষার্থী</h3>
-            <p className="m-0 mb-3 text-xs text-[#718078]">প্রতি ক্লাসের মোট</p>
-            <Chart options={totalBarOptions} series={[{ name: "মোট", data: chartData.totals }]} type="bar" height={340} />
+            <h3 className="m-0 mb-1 text-base font-bold text-[#155b49]">{t.chartClassTitle}</h3>
+            <p className="m-0 mb-3 text-xs text-[#718078]">{t.chartClassSub}</p>
+            <Chart
+              key={`bar-${lang}`}
+              options={totalBarOptions}
+              series={[{ name: t.total, data: chartData.totals }]}
+              type="bar"
+              height={340}
+            />
           </div>
 
           <div className="bg-white border border-[#e1e9e3] rounded-2xl p-5 shadow-sm w-full min-w-0">
-            <h3 className="m-0 mb-1 text-base font-bold text-[#155b49]">বিভাগভিত্তিক সারসংক্ষেপ</h3>
-            <p className="m-0 mb-3 text-xs text-[#718078]">সব শ্রেণির সম্মিলিত সংখ্যা</p>
-            <Chart options={donutOptions} series={chartData.divisionTotals} type="donut" height={340} />
+            <h3 className="m-0 mb-1 text-base font-bold text-[#155b49]">{t.chartDivisionTitle}</h3>
+            <p className="m-0 mb-3 text-xs text-[#718078]">{t.chartDivisionSub}</p>
+            <Chart
+              key={`donut-${lang}`}
+              options={donutOptions}
+              series={chartData.divisionTotals}
+              type="donut"
+              height={340}
+            />
           </div>
         </div>
 
         <div className="bg-white border border-[#e1e9e3] rounded-2xl p-5 shadow-sm w-full min-w-0">
-          <h3 className="m-0 mb-1 text-base font-bold text-[#155b49]">বিভাগ অনুযায়ী শ্রেণির তুলনা</h3>
-          <p className="m-0 mb-3 text-xs text-[#718078]">স্ট্যাকড বার চার্ট</p>
-          <Chart options={stackedOptions} series={chartData.stacked} type="bar" height={380} />
+          <h3 className="m-0 mb-1 text-base font-bold text-[#155b49]">{t.chartStackedTitle}</h3>
+          <p className="m-0 mb-3 text-xs text-[#718078]">{t.chartStackedSub}</p>
+          <Chart
+            key={`stacked-${lang}`}
+            options={stackedOptions}
+            series={chartData.stacked}
+            type="bar"
+            height={380}
+          />
         </div>
       </div>
 
@@ -710,7 +880,7 @@ export default function ClassDivisionSummarySheet({ reportData }) {
         <div className="no-print">
           <ScaledPreview designWidth={PAGE_W}>
             {pages.map((pageRows, pageIndex) => (
-              <div key={pageIndex} style={{
+              <div key={pageIndex} dir={dir} style={{
                 ...pageBox,
                 boxShadow: "0 1px 6px rgba(15,23,42,0.18)",
                 marginBottom: "24px",
@@ -774,3 +944,4 @@ export default function ClassDivisionSummarySheet({ reportData }) {
     </div>
   );
 }
+

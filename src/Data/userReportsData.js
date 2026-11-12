@@ -149,6 +149,11 @@ export const language = [
   { id: 1, name: 'বাংলা' },
   { id: 2, name: 'আরবী' },
 ];
+export const languageResultReport = [
+  { id: 1, name: 'বাংলা' },
+  { id: 2, name: 'আরবী' },
+  { id: 3, name: 'ইংরেজি' },
+];
 export const examVacationStatus = [
   { id: 1, name: 'পরীক্ষার রুটিন থেকে' },
   { id: 2, name: 'পরীক্ষার রুটিন বিহীন' },
