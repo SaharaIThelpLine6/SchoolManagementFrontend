@@ -241,6 +241,7 @@ const studentResultPublicViewSlice = createSlice({
             })
             .addCase(fetchMaritResult.pending, (state) => {
                 state.maritListStatus = 'loading';
+                state.resultError = null;
             })
             .addCase(fetchMaritResult.fulfilled, (state, action) => {
                 state.maritListStatus = 'succeeded';
@@ -250,6 +251,7 @@ const studentResultPublicViewSlice = createSlice({
             .addCase(fetchMaritResult.rejected, (state, action) => {
                 state.maritListStatus = 'failed';
                 state.error = action.error.message;
+                state.resultError = action.error.message;
             })
             .addCase(fetchWebsiteSettings.pending, (state) => {
                 state.websiteSettingStatus = 'loading';

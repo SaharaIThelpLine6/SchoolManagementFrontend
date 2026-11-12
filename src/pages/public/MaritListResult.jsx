@@ -10,7 +10,7 @@ import MaritListResultPrint from '../../components/Document/MaritListResultPrint
 
 const MaritListResult = () => {
     const { schoolid, seassonid, examid } = useParams();
-    const { maritList, schoolData, resultError, studentResult, status: resultStatus } = useSelector((state) => state.studentResultPublicView)
+    const { maritListStatus } = useSelector((state) => state.studentResultPublicView)
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -22,11 +22,14 @@ const MaritListResult = () => {
             resultUrl: `${seassonid}/${examid}`
         }));
 
-    }, [dispatch])
+    }, [dispatch, schoolid, seassonid, examid])
 
-    if (resultStatus === 'failed') {
-        navigate(`/${schoolid}/maritlist_request?sessionid=${seassonid}&examid=${examid}`);
-    }
+    // On error, go back to the form; the form shows the server's Bangla message in a toast.
+    useEffect(() => {
+        if (maritListStatus === 'failed') {
+            navigate(`/${schoolid}/maritlist_request?sessionid=${seassonid}&examid=${examid}`);
+        }
+    }, [maritListStatus, navigate, schoolid, seassonid, examid]);
 
 
     return (

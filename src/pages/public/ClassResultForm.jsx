@@ -9,7 +9,7 @@ import AnimatedSelect from "../../components/Forms/AnimatedSelect";
 import ResultLayout from "./ResultLayout";
 
 const ClassResultForm = () => {
-    const { academicSession, exam, classList, status, error, resultStatus, schoolData } = useSelector((state) => state.studentResultPublicView);
+    const { academicSession, exam, classList, status, error, resultStatus, resultError, schoolData } = useSelector((state) => state.studentResultPublicView);
     const [buttonDisable, setButtonDisable] = useState(true)
 
     const { schoolid } = useParams();
@@ -46,15 +46,14 @@ const ClassResultForm = () => {
     }, [SessionID, ExamID, SubClassID]);
     const toastShown = useRef(false);
     useEffect(() => {
-        if (resultStatus === 'failed' && !toastShown.current) {
-            dispatch(setResultError(null));
+        if (resultStatus === 'failed' && resultError && !toastShown.current) {
             toastShown.current = true;
-
-            toast.dark("দুঃখিত, কোন তথ্য পাওয়া যায়নি!", {
+            toast.dark(resultError || "দুঃখিত, কোন তথ্য পাওয়া যায়নি!", {
                 type: "error",
             });
+            dispatch(setResultError(null));
         }
-    }, [resultStatus, setResultError]);
+    }, [resultStatus, resultError, dispatch]);
 
     return (
         <FormProvider {...methods}>

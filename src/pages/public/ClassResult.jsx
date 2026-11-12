@@ -23,9 +23,12 @@ const ClassResult = () => {
         }
     }, [schoolData])
 
-    if (resultStatus === 'failed') {
-        navigate(`/${schoolid}/classes`);
-    }
+    // On error, go back to the form; the form shows the server's Bangla message in a toast.
+    useEffect(() => {
+        if (resultStatus === 'failed') {
+            navigate(`/${schoolid}/classes`);
+        }
+    }, [resultStatus, navigate, schoolid]);
 
     // এসেন্ডিং অর্ডারে সাজানো
     const sortedClassResult = classResult?.data ? [...classResult?.data].sort((a, b) => {

@@ -8,7 +8,7 @@ import AnimatedSelect from "../../components/Forms/AnimatedSelect";
 import ResultLayout from "./ResultLayout";
 
 const MaritListForm = () => {
-  const { academicSession, exam, classList, status, error, resultStatus } =
+  const { academicSession, exam, classList, status, error, maritListStatus, resultError } =
     useSelector((state) => state.studentResultPublicView);
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -46,15 +46,14 @@ const MaritListForm = () => {
 
   const toastShown = useRef(false);
   useEffect(() => {
-    if (resultStatus === "failed" && !toastShown.current) {
-      dispatch(setResultError(null));
+    if (maritListStatus === "failed" && resultError && !toastShown.current) {
       toastShown.current = true;
-
-      toast.dark("দুঃখিত, কোন তথ্য পাওয়া যায়নি!", {
+      toast.dark(resultError || "দুঃখিত, কোন তথ্য পাওয়া যায়নি!", {
         type: "error",
       });
+      dispatch(setResultError(null));
     }
-  }, [resultStatus, dispatch]);
+  }, [maritListStatus, resultError, dispatch]);
 
   return (
     <FormProvider {...methods}>
