@@ -850,13 +850,18 @@ export default function AttendanceSheet({ reportData, query }) {
 
     const firstGroup = sheetGroups[0];
     useLayoutEffect(() => {
+        let cancelled = false;
         const measure = () => {
-            if (!titleRef.current) return;
+            if (cancelled || !titleRef.current) return;
             const h = Math.ceil(titleRef.current.offsetHeight) + 1;
             if (h > 1) setTitleH((prev) => (Math.abs(prev - h) > 1 ? h : prev));
         };
         measure();
-        if (document.fonts?.ready) document.fonts.ready.then(measure);
+        if (document.fonts) {
+            document.fonts.load("16px 'SolaimanLipi'").then(measure).catch(() => { });
+            document.fonts.ready.then(measure);
+        }
+        return () => { cancelled = true; };
     }, [institutionInfo, institutionLogo, sessionName, className, orientation, paper, lang, fontPct, firstGroup?.bookName, firstGroup?.teacherName, monthText, yearText, hourInput]);
 
     const cellBase = {
@@ -1204,9 +1209,9 @@ export default function AttendanceSheet({ reportData, query }) {
 
             <style>{`
         /* ✅ SolaimanLipi — ফন্ট ফাইল public/fonts/SolaimanLipi.ttf এ রাখুন (আগে থেকে লোড থাকলে দরকার নেই) */
-        @font-face {
+             @font-face {
           font-family: 'SolaimanLipi';
-          src: local('SolaimanLipi'), local('Solaiman Lipi'), url('/fonts/SolaimanLipi.ttf') format('truetype');
+          src: local('SolaimanLipi'), local('Solaiman Lipi'), url('/SolaimanLipi.ttf') format('truetype');
           font-weight: normal;
           font-style: normal;
           font-display: swap;
