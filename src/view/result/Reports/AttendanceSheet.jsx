@@ -768,7 +768,11 @@ export default function AttendanceSheet({ reportData, query }) {
 
     const sheetWidthMm = +(pageWmm - PAGE_MARGIN_MM * 2).toFixed(1);
     const sheetHeightMm = +(pageHmm - PAGE_MARGIN_MM * 2 - SAFETY_MM).toFixed(1);
-    const pageHeightPx = sheetHeightMm * PX_PER_MM;
+
+    // ✅ scale করার পর পুরো পেজ ভরার জন্য ভিতরের layout ১/scale গুণ বড়
+    const innerWidthMm = +(sheetWidthMm / scale).toFixed(2);
+    const innerHeightMm = +(sheetHeightMm / scale).toFixed(2);
+    const pageHeightPx = innerHeightMm * PX_PER_MM;
 
     const rowsAreaPx = pageHeightPx - titleH - theadPx - 4;
     const maxRowsFit = Math.max(1, Math.floor(rowsAreaPx / rowMinPx));
@@ -958,9 +962,7 @@ export default function AttendanceSheet({ reportData, query }) {
             style={{
                 width: `${sheetWidthMm}mm`,
                 height: `${sheetHeightMm}mm`,
-                display: "flex",
-                alignItems: "flex-start",
-                justifyContent: "center",
+                position: "relative",
                 overflow: "hidden",
                 background: "#fff",
                 color: C.text,
@@ -971,9 +973,12 @@ export default function AttendanceSheet({ reportData, query }) {
             <div
                 className="sheet-scaled"
                 style={{
-                    width: `${sheetWidthMm}mm`,
-                    height: `${sheetHeightMm}mm`,
-                    flexShrink: 0,
+                    position: "absolute",
+                    top: 0,
+                    left: "50%",
+                    marginLeft: `-${innerWidthMm / 2}mm`,
+                    width: `${innerWidthMm}mm`,
+                    height: `${innerHeightMm}mm`,
                     overflow: "hidden",
                     transform: `scale(${scale})`,
                     transformOrigin: "top center",
@@ -1249,8 +1254,8 @@ export default function AttendanceSheet({ reportData, query }) {
             page-break-before: always !important;
           }
           .print-portal .sheet-scaled {
-            height: ${sheetHeightMm}mm !important;
-            max-height: ${sheetHeightMm}mm !important;
+            height: ${innerHeightMm}mm !important;
+            max-height: ${innerHeightMm}mm !important;
           }
 
           thead { display: table-header-group !important; }
