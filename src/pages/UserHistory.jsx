@@ -152,13 +152,6 @@ const DEMO_USER = {
     ...mkFee("2024", 1200, [1200, 1200, 1200, 1200, 1200, 1200, 1200, 1200, 1200, 1200, 1200, 1200]),
   ],
 
-  /* --- খাবার ফি --- */
-  mealFees: [
-    ...mkFee("2026", 3000, [3000, 3000, 2500, 3000, 3000, 3000, 3000, 1500, 3000, 3000, 0, 0]),
-    ...mkFee("2025", 2600, [2600, 2600, 2600, 2600, 2600, 2600, 2600, 2600, 2600, 2600, 2600, 2000]),
-    ...mkFee("2024", 2400, [2400, 2400, 2400, 2400, 2400, 2400, 2400, 2400, 2400, 2400, 2400, 2400]),
-  ],
-
   /* --- অন্যান্য ফি --- */
   otherFees: [
     { id: 1, head: "ভর্তি ফি", session: "2026", assigned: 5000, received: 5000, date: "05/01/2026" },
@@ -288,7 +281,7 @@ function ChartBox({ categories = [], series = [], defaultType = "bar", height = 
       axisBorder: { show: false },
       axisTicks: { show: false },
       labels: {
-        style: { colors: "#6b7280", fontSize: "12px" },
+        style: { colors: "#6b7280", fontSize: "14px" },
         rotate: -35,
         rotateAlways: false,
         hideOverlappingLabels: true,
@@ -298,7 +291,7 @@ function ChartBox({ categories = [], series = [], defaultType = "bar", height = 
     },
     yaxis: {
       labels: {
-        style: { colors: "#6b7280", fontSize: "12px" },
+        style: { colors: "#6b7280", fontSize: "14px" },
         formatter: (v) => bn(Math.round(Number(v) || 0)),
       },
     },
@@ -318,14 +311,14 @@ function ChartBox({ categories = [], series = [], defaultType = "bar", height = 
       show: list.length > 1,
       position: "bottom",
       horizontalAlign: "center",
-      fontSize: "12px",
+      fontSize: "14px",
       labels: { colors: "#6b7280" },
       markers: { radius: 12 },
       itemMargin: { horizontal: 8, vertical: 2 },
     },
     noData: {
       text: "চার্টের জন্য কোনো তথ্য নেই",
-      style: { color: "#94a3b8", fontSize: "13px" },
+      style: { color: "#94a3b8", fontSize: "15px" },
     },
   };
 
@@ -334,20 +327,20 @@ function ChartBox({ categories = [], series = [], defaultType = "bar", height = 
   return (
     <div className="px-4 pt-3 pb-2 bg-white border-b border-slate-100">
       <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-        <span className="text-[12px] font-bold text-slate-500">{note}</span>
+        <span className="text-[14px] font-bold text-slate-500">{note}</span>
         <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
           {OPTS.map((o) => (
             <button
               key={o.key}
               type="button"
               onClick={() => setType(o.key)}
-              className={`h-[28px] px-2.5 rounded-lg text-[11px] font-bold flex items-center gap-1 transition ${
+              className={`h-[32px] px-3 rounded-lg text-[13px] font-bold flex items-center gap-1 transition ${
                 type === o.key
                   ? "bg-white text-[#6D3BEF] shadow-sm"
                   : "text-slate-500 hover:text-slate-700"
               }`}
             >
-              <Icon name={o.icon} className="w-[13px] h-[13px]" />
+              <Icon name={o.icon} className="w-[15px] h-[15px]" />
               {o.label}
             </button>
           ))}
@@ -355,9 +348,9 @@ function ChartBox({ categories = [], series = [], defaultType = "bar", height = 
             type="button"
             onClick={() => setZoomKey((k) => k + 1)}
             title="জুম রিসেট করুন"
-            className="h-[28px] px-2.5 rounded-lg text-[11px] font-bold flex items-center gap-1 text-slate-500 transition hover:bg-white hover:text-[#6D3BEF]"
+            className="h-[32px] px-3 rounded-lg text-[13px] font-bold flex items-center gap-1 text-slate-500 transition hover:bg-white hover:text-[#6D3BEF]"
           >
-            <Icon name="reset" className="w-[13px] h-[13px]" />
+            <Icon name="reset" className="w-[15px] h-[15px]" />
             রিসেট
           </button>
         </div>
@@ -399,25 +392,25 @@ function Card({ title, icon = "file", accent = "violet", badge, chart, children,
         <span className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${ac.icon}`}>
           <Icon name={icon} className="w-[17px] h-[17px]" />
         </span>
-        <h2 className="text-[15px] font-bold text-slate-800 leading-snug">{title}</h2>
+        <h2 className="text-[16px] font-bold text-slate-800 leading-snug">{title}</h2>
 
         <div className="ml-auto flex items-center gap-2">
           {chart && (
             <button
               type="button"
               onClick={() => setShowChart((v) => !v)}
-              className={`h-[28px] flex items-center gap-1.5 rounded-full border px-3 text-[11px] font-bold transition ${
+              className={`h-[32px] flex items-center gap-1.5 rounded-full border px-3 text-[13px] font-bold transition ${
                 showChart
                   ? "bg-[#6D3BEF] text-white border-[#6D3BEF]"
                   : "bg-white text-slate-600 border-slate-200 hover:border-[#6D3BEF]/40 hover:text-[#6D3BEF]"
               }`}
             >
-              <Icon name="chart" className="w-[13px] h-[13px]" />
+              <Icon name="chart" className="w-[15px] h-[15px]" />
               {showChart ? "চার্ট বন্ধ" : "চার্ট দেখুন"}
             </button>
           )}
           {badge !== undefined && badge !== null && (
-            <span className={`shrink-0 h-[28px] flex items-center rounded-full border px-3 text-xs font-bold whitespace-nowrap ${ac.soft}`}>
+            <span className={`shrink-0 h-[32px] flex items-center rounded-full border px-3 text-[13px] font-bold whitespace-nowrap ${ac.soft}`}>
               {badge}
             </span>
           )}
@@ -432,8 +425,8 @@ function Card({ title, icon = "file", accent = "violet", badge, chart, children,
 function Table({ columns, rows, empty = "কোনো তথ্য পাওয়া যায়নি", footer, maxHeight = "max-h-[340px]", minWidth = "min-w-[520px]" }) {
   return (
     <div className={`overflow-auto ${maxHeight}`}>
-      <table className={`w-full ${minWidth} text-sm`}>
-        <thead className="sticky top-0 z-10 bg-slate-50 text-[11px] font-semibold text-slate-500 tracking-wide shadow-[0_1px_0_0_rgba(0,0,0,0.05)]">
+      <table className={`w-full ${minWidth} text-[16px]`}>
+        <thead className="sticky top-0 z-10 bg-slate-50 text-[14px] font-semibold text-slate-500 tracking-wide shadow-[0_1px_0_0_rgba(0,0,0,0.05)]">
           <tr>
             {columns.map((c) => (
               <th key={c.key} className={`px-3 py-2.5 whitespace-nowrap ${c.align === "right" ? "text-right" : "text-left"} ${c.thClass || ""}`}>
@@ -445,7 +438,7 @@ function Table({ columns, rows, empty = "কোনো তথ্য পাওয�
         <tbody>
           {rows.length === 0 ? (
             <tr>
-              <td colSpan={columns.length} className="text-center text-slate-400 italic py-10 text-sm">{empty}</td>
+              <td colSpan={columns.length} className="text-center text-slate-400 italic py-10 text-[16px]">{empty}</td>
             </tr>
           ) : (
             rows.map((row, i) => (
@@ -469,13 +462,108 @@ function Table({ columns, rows, empty = "কোনো তথ্য পাওয�
   );
 }
 
+
+/* বছর → মাস → খাত — মিলিয়ে দেখানো টেবিল (ফলাফল শিটের মতো মার্জ করা ঘর) */
+function CollectionTable({ years, totals, showSession, empty = "কোনো আদায়ের তথ্য নেই" }) {
+  const headCols = 4 + (showSession ? 1 : 0);
+  const thClass = "border border-slate-300 px-3 py-2.5 bg-slate-100 text-[14px] font-bold text-slate-700 whitespace-nowrap";
+  const tdClass = "border border-slate-300 px-3 py-2.5 text-[16px]";
+
+  if (!years.length) {
+    return <div className="text-center text-slate-400 italic py-10 text-[16px]">{empty}</div>;
+  }
+
+  let sl = 0;
+
+  return (
+    <div className="overflow-auto max-h-[460px]">
+      <table className="w-full min-w-[880px] border-collapse">
+        <thead className="sticky top-0 z-10">
+          <tr>
+            <th className={`${thClass} text-left w-[70px]`}>বছর</th>
+            <th className={`${thClass} text-left w-[90px]`}>মাস</th>
+            <th className={`${thClass} text-left w-10`}>ক্র:</th>
+            <th className={`${thClass} text-left`}>খাতের নাম</th>
+            {showSession && <th className={`${thClass} text-left`}>শিক্ষাবর্ষ</th>}
+            <th className={`${thClass} text-right`}>নির্ধারিত</th>
+            <th className={`${thClass} text-right`}>ছাড়</th>
+            <th className={`${thClass} text-right`}>গৃহীত</th>
+            <th className={`${thClass} text-right`}>বকেয়া</th>
+            <th className={`${thClass} text-left`}>আদায়ের তারিখ</th>
+            <th className={`${thClass} text-right w-[110px]`}>মাসের মোট</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {years.map((y) => y.months.map((m, mi) => m.heads.map((h, hi) => {
+            sl += 1;
+            return (
+              <tr key={h.id} className="hover:bg-slate-50/70 transition-colors">
+                {mi === 0 && hi === 0 && (
+                  <td
+                    rowSpan={y.count}
+                    className={`${tdClass} bg-slate-100 text-center align-middle text-[16px] font-bold text-slate-800`}
+                  >
+                    {bn(y.year) || "—"}
+                  </td>
+                )}
+
+                {hi === 0 && (
+                  <td
+                    rowSpan={m.heads.length}
+                    className={`${tdClass} bg-slate-50 text-center align-middle text-[16px] font-bold text-slate-700`}
+                  >
+                    {m.month || "—"}
+                  </td>
+                )}
+
+                <td className={`${tdClass} text-slate-500`}>{bn(sl)}</td>
+                <td className={`${tdClass} font-semibold text-slate-800 whitespace-nowrap`}>{h.head || "—"}</td>
+                {showSession && <td className={`${tdClass} text-slate-600`}>{bn(h.session)}</td>}
+                <td className={`${tdClass} text-right text-slate-700`}>{bn(h.assigned)}</td>
+                <td className={`${tdClass} text-right text-slate-500`}>{bn(h.less)}</td>
+                <td className={`${tdClass} text-right font-bold text-emerald-600`}>{bn(h.received)}</td>
+                <td className={`${tdClass} text-right font-bold ${h.due > 0 ? "text-rose-600" : "text-emerald-600"}`}>
+                  {bn(h.due)}
+                </td>
+                <td className={`${tdClass} whitespace-nowrap text-slate-600`}>{bn(h.date) || "—"}</td>
+
+                {hi === 0 && (
+                  <td
+                    rowSpan={m.heads.length}
+                    className={`${tdClass} bg-emerald-50 text-right align-middle text-[16px] font-bold text-emerald-700`}
+                  >
+                    {bn(m.received)}
+                  </td>
+                )}
+              </tr>
+            );
+          })))}
+        </tbody>
+
+        <tfoot className="sticky bottom-0 bg-slate-100">
+          <tr className="text-[16px] font-bold text-slate-800">
+            <td className="border border-slate-300 px-3 py-3" colSpan={headCols}>সর্বমোট</td>
+            <td className="border border-slate-300 px-3 py-3 text-right">{bn(totals.assigned)}</td>
+            <td className="border border-slate-300 px-3 py-3 text-right text-slate-600">{bn(totals.less)}</td>
+            <td className="border border-slate-300 px-3 py-3 text-right text-emerald-600">{bn(totals.received)}</td>
+            <td className="border border-slate-300 px-3 py-3 text-right text-rose-600">{bn(totals.due)}</td>
+            <td className="border border-slate-300 px-3 py-3" />
+            <td className="border border-slate-300 px-3 py-3 text-right text-emerald-700">{bn(totals.received)}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  );
+}
+
 /* 👇 InfoRow — লেখা কাটা যাবে না, লাইন ব্রেক হয়ে পুরোটা শো করবে */
 function InfoRow({ icon, label, value, valueClass = "text-slate-800" }) {
   return (
     <div className="flex items-start gap-2 py-1.5 border-b border-slate-100 last:border-0 min-w-0">
       {icon && <span className="mt-0.5 text-slate-400 shrink-0"><Icon name={icon} className="w-4 h-4" /></span>}
-      <span className="mt-0.5 text-[12px] font-medium text-slate-500 w-[65px] shrink-0">{label}</span>
-      <span className={`flex-1 min-w-0 text-[13px] font-bold bg-slate-100/80 px-2.5 py-1 rounded-lg border border-slate-200/60 shadow-sm break-words whitespace-normal leading-snug ${valueClass}`}>
+      <span className="mt-0.5 text-[14px] font-medium text-slate-500 w-[65px] shrink-0">{label}</span>
+      <span className={`flex-1 min-w-0 text-[16px] font-bold bg-slate-100/80 px-2.5 py-1 rounded-lg border border-slate-200/60 shadow-sm break-words whitespace-normal leading-snug ${valueClass}`}>
         {value || "—"}
       </span>
     </div>
@@ -490,9 +578,9 @@ function StatCard({ label, value, hint, accent = "violet", icon = "wallet" }) {
         <Icon name={icon} className="w-5 h-5" />
       </span>
       <div className="min-w-0">
-        <p className="text-[12px] font-medium text-slate-500 leading-tight">{label}</p>
-        <p className="text-lg font-bold text-slate-800 leading-tight mt-0.5">{value}</p>
-        {hint && <p className="text-[11px] text-slate-400 mt-0.5">{hint}</p>}
+        <p className="text-[14px] font-medium text-slate-500 leading-tight">{label}</p>
+        <p className="text-xl font-bold text-slate-800 leading-tight mt-0.5">{value}</p>
+        {hint && <p className="text-[13px] text-slate-400 mt-0.5">{hint}</p>}
       </div>
     </div>
   );
@@ -502,8 +590,8 @@ function MiniStat({ label, value, accent = "violet" }) {
   const ac = ACCENTS[accent] || ACCENTS.violet;
   return (
     <div className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2">
-      <p className="text-[11px] font-medium text-slate-500 leading-tight">{label}</p>
-      <p className={`text-[16px] font-extrabold leading-tight mt-0.5 ${ac.bar.replace("bg-", "text-")}`}>{value}</p>
+      <p className="text-[13px] font-medium text-slate-500 leading-tight">{label}</p>
+      <p className={`text-[18px] font-extrabold leading-tight mt-0.5 ${ac.bar.replace("bg-", "text-")}`}>{value}</p>
     </div>
   );
 }
@@ -511,8 +599,8 @@ function MiniStat({ label, value, accent = "violet" }) {
 function HeaderChip({ label, value }) {
   return (
     <div className="min-h-[36px] max-w-full flex items-center justify-center gap-1.5 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-1">
-      <span className="text-[12px] font-medium text-slate-500 shrink-0">{label}</span>
-      <span className="text-[13px] font-bold text-slate-800 break-words text-center">{value}</span>
+      <span className="text-[14px] font-medium text-slate-500 shrink-0">{label}</span>
+      <span className="text-[16px] font-bold text-slate-800 break-words text-center">{value}</span>
     </div>
   );
 }
@@ -527,7 +615,7 @@ function Pill({ children, tone = "slate" }) {
     rose: "bg-rose-50 text-rose-700 border-rose-200",
   };
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border whitespace-nowrap ${tones[tone]}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-bold border whitespace-nowrap ${tones[tone]}`}>
       {children}
     </span>
   );
@@ -566,7 +654,7 @@ function FeeTable({ rows, showSession }) {
       rows={rows}
       empty="এই শিক্ষাবর্ষে কোনো ফি নির্ধারণ করা হয়নি"
       footer={
-        <tr className="text-[13px] font-bold text-slate-700">
+        <tr className="text-[16px] font-bold text-slate-700">
           <td className="px-3 py-2.5" colSpan={showSession ? 2 : 1}>সর্বমোট</td>
           <td className="px-3 py-2.5 text-right">{bn(totalAssigned)}</td>
           <td className="px-3 py-2.5 text-right text-emerald-600">{bn(totalReceived)}</td>
@@ -639,7 +727,7 @@ export default function UserHistory() {
     const demo = new Set();
     [
       user.admissions, user.results, user.reports, user.leaves,
-      user.monthlyFees, user.mealFees, user.otherFees, user.attendance,
+      user.monthlyFees, user.otherFees, user.attendance,
     ].forEach((arr) => arr.forEach((r) => r.session && demo.add(String(r.session))));
 
     return Array.from(demo)
@@ -736,7 +824,6 @@ export default function UserHistory() {
   }, [info, userInfo, user]);
 
   const monthlyFees = F(monthlyFeeRows);
-  const mealFees = F(user.mealFees);
   const otherFees = F(user.otherFees);
   /* উপস্থিতি — সার্ভারের মাসভিত্তিক সারি, ডেমোর মতো একই শেপে।
      সাজানো descending — নতুন বছরের শেষ মাস সবার উপরে। */
@@ -765,9 +852,104 @@ export default function UserHistory() {
 
   const attendance = F(attendanceRows);
 
+
+  /* ---- অন্যান্য আদায় — বছর → মাস → খাত ---- */
+  const collectionGroups = useMemo(() => {
+    const parseDMY = (v) => {
+      const m = String(v || "").match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      return m ? { year: Number(m[3]), monthNo: Number(m[2]) } : null;
+    };
+
+    const items = !info
+      ? user.otherFees.map((r, i) => {
+        const d = parseDMY(r.date);
+        const assigned = Number(r.assigned) || 0;
+        const received = Number(r.received) || 0;
+        return {
+          id: r.id ?? i,
+          year: d?.year ?? (Number(r.session) || 0),
+          monthNo: d?.monthNo ?? 0,
+          month: d ? MONTHS[d.monthNo - 1] : "",
+          head: r.head ?? "",
+          session: r.session ?? "",
+          assigned,
+          less: 0,
+          received,
+          due: Math.max(assigned - received, 0),
+          date: r.date ?? "",
+        };
+      })
+      : (userInfo?.collections?.items ?? []).map((r, i) => ({
+        id: `${r.Year ?? ""}-${r.MonthNumber ?? ""}-${r.SLID ?? i}`,
+        year: Number(r.Year) || 0,
+        monthNo: Number(r.MonthNumber) || 0,
+        // নাম ডাটাবেজেই আছে, না পেলে নম্বর ধরে বসানো হয়
+        month: r.MonthName || (r.MonthNumber ? MONTHS[r.MonthNumber - 1] : "") || "",
+        head: r.HeadName ?? "",
+        session: r.SessionName ?? String(r.SessionID ?? ""),
+        assigned: Number(r.assigned) || 0,
+        less: Number(r.less) || 0,
+        received: Number(r.received) || 0,
+        due: Number(r.due) || 0,
+        date: r.Date ?? "",
+      }));
+
+    const rows = F(items);
+
+    /* নতুন বছর ও নতুন মাস আগে, একই মাসে খাত নাম ধরে */
+    const years = [];
+    const yearMap = new Map();
+
+    [...rows]
+      .sort((a, b) => (b.year - a.year)
+        || (b.monthNo - a.monthNo)
+        || String(a.head).localeCompare(String(b.head), "bn"))
+      .forEach((r) => {
+        if (!yearMap.has(r.year)) {
+          const y = {
+            year: r.year, months: [], monthMap: new Map(),
+            assigned: 0, less: 0, received: 0, due: 0, count: 0,
+          };
+          yearMap.set(r.year, y);
+          years.push(y);
+        }
+        const y = yearMap.get(r.year);
+
+        if (!y.monthMap.has(r.monthNo)) {
+          const m = {
+            monthNo: r.monthNo, month: r.month, heads: [],
+            assigned: 0, less: 0, received: 0, due: 0,
+          };
+          y.monthMap.set(r.monthNo, m);
+          y.months.push(m);
+        }
+        const m = y.monthMap.get(r.monthNo);
+
+        m.heads.push(r);
+        [m, y].forEach((o) => {
+          o.assigned += r.assigned;
+          o.less += r.less;
+          o.received += r.received;
+          o.due += r.due;
+        });
+        y.count += 1;
+      });
+
+    const totals = rows.reduce((t, r) => ({
+      assigned: t.assigned + r.assigned,
+      less: t.less + r.less,
+      received: t.received + r.received,
+      due: t.due + r.due,
+    }), { assigned: 0, less: 0, received: 0, due: 0 });
+
+    const headCount = new Set(rows.map((r) => r.head)).size;
+
+    return { years, rows, totals, headCount };
+  }, [info, userInfo, user, F]);
+
   /* ---- সারসংক্ষেপ হিসাব ---- */
   const totals = useMemo(() => {
-    const groups = [monthlyFees, mealFees, otherFees];
+    const groups = [monthlyFees, otherFees];
     const assigned = groups.reduce((t, g) => t + sum(g, "assigned"), 0);
     const received = groups.reduce((t, g) => t + sum(g, "received"), 0);
     const due = Math.max(assigned - received, 0);
@@ -775,7 +957,7 @@ export default function UserHistory() {
       .filter((l) => l.status !== "বাতিল")
       .reduce((t, l) => t + (Number(l.days) || 0), 0);
     return { assigned, received, due, leaveDays };
-  }, [monthlyFees, mealFees, otherFees, leaves]);
+  }, [monthlyFees, otherFees, leaves]);
 
   /* ---- ফি — Exam_FeeAccept, নির্বাচিত শিক্ষাবর্ষ ধরে ---- */
   const feeSummary = useMemo(() => {
@@ -804,7 +986,6 @@ export default function UserHistory() {
 
   /* ---- চার্ট ডাটা ---- */
   const monthlyChart = useMemo(() => groupByMonth(monthlyFees), [monthlyFees]);
-  const mealChart = useMemo(() => groupByMonth(mealFees), [mealFees]);
   const attChart = useMemo(() => {
     const map = new Map();
     MONTHS.forEach((m) => map.set(m, { month: m, present: 0, absent: 0 }));
@@ -915,12 +1096,28 @@ export default function UserHistory() {
                 )}
               </div>
 
-              <h2 className="mt-4 text-[18px] font-extrabold text-[#6D3BEF] bg-violet-50 px-4 py-1.5 rounded-xl border border-violet-100 shadow-sm leading-snug">
+              <h2 className="mt-4 text-[20px] font-extrabold text-[#6D3BEF] bg-violet-50 px-4 py-1.5 rounded-xl border border-violet-100 shadow-sm leading-snug">
                 {userInfoFetching ? "লোড হচ্ছে…" : profile.name}
               </h2>
-              <div className="mt-1.5 flex items-center gap-1.5 flex-wrap justify-center">
+              {/* <div className="mt-1.5 flex items-center gap-1.5 flex-wrap justify-center">
                 <Pill tone="violet">{profile.role}</Pill>
                 <Pill tone={isActive ? "emerald" : "rose"}>{profile.status}</Pill>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="h-[36px] flex items-center gap-1.5 rounded-full border border-[#6D3BEF]/30 bg-violet-50 px-3.5 text-[13px] font-bold text-[#6D3BEF] transition hover:bg-violet-100 active:scale-95"
+                >
+                  <Icon name="print" className="w-[15px] h-[15px]" />
+                  প্রিন্ট
+                </button>
+              </div> */}
+              <div className="mt-1.5 flex items-center gap-1.5 flex-wrap justify-center">
+                <Pill tone="violet">{profile.role}</Pill>
+                {/* ✅ StudentInfo এর মতো ডাইনামিক স্ট্যাটাস ব্যাজ */}
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[13px] font-bold border whitespace-nowrap ${isActive ? "bg-[#ecfdf5] text-[#059669] border-emerald-200" : "bg-[#fef2f2] text-[#dc2626] border-rose-200"}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${isActive ? 'bg-[#059669]' : 'bg-[#dc2626]'}`}></span>
+                  {profile.status}
+                </span>
                 <button
                   type="button"
                   onClick={() => window.print()}
@@ -968,7 +1165,7 @@ export default function UserHistory() {
                 <div>
                   <div className="pb-1 border-b border-slate-200 flex items-center gap-1.5 mb-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#6D3BEF]"></div>
-                    <span className="text-[12px] font-bold text-[#6D3BEF]">স্থায়ী ঠিকানা</span>
+                    <span className="text-[14px] font-bold text-[#6D3BEF]">স্থায়ী ঠিকানা</span>
                   </div>
                   <div className="space-y-1">
                     <InfoRow icon="pin" label="গ্রাম" value={profile.village} />
@@ -982,7 +1179,7 @@ export default function UserHistory() {
                 <div>
                   <div className="pb-1 border-b border-slate-200 flex items-center gap-1.5 mb-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-[#6D3BEF]"></div>
-                    <span className="text-[12px] font-bold text-[#6D3BEF]">অস্থায়ী ঠিকানা</span>
+                    <span className="text-[14px] font-bold text-[#6D3BEF]">অস্থায়ী ঠিকানা</span>
                   </div>
                   <div className="space-y-1">
                     <InfoRow icon="pin" label="গ্রাম" value={profile.tempVillage} />
@@ -1005,15 +1202,15 @@ export default function UserHistory() {
 
           {/* শিক্ষাবর্ষ ড্রপডাউন */}
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-            <label className="flex items-center gap-1.5 text-[12px] font-bold text-slate-500 mb-2">
-              <Icon name="filter" className="w-[14px] h-[14px] text-[#6D3BEF]" />
+            <label className="flex items-center gap-1.5 text-[14px] font-bold text-slate-500 mb-2">
+              <Icon name="filter" className="w-[16px] h-[16px] text-[#6D3BEF]" />
               শিক্ষাবর্ষ নির্বাচন
             </label>
             <div className="relative">
               <select
                 value={session}
                 onChange={(e) => setSession(e.target.value)}
-                className="w-full h-[42px] appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-9 text-[14px] font-bold text-slate-800 outline-none transition focus:border-[#6D3BEF] focus:bg-white focus:ring-2 focus:ring-[#6D3BEF]/15"
+                className="w-full h-[42px] appearance-none rounded-xl border border-slate-200 bg-slate-50 px-3 pr-9 text-[16px] font-bold text-slate-800 outline-none transition focus:border-[#6D3BEF] focus:bg-white focus:ring-2 focus:ring-[#6D3BEF]/15"
               >
                 <option value="all">সব শিক্ষাবর্ষ</option>
                 {SESSIONS.map((s) => (
@@ -1026,7 +1223,7 @@ export default function UserHistory() {
                 </svg>
               </span>
             </div>
-            <p className="mt-2 text-[11px] text-slate-400">
+            <p className="mt-2 text-[13px] text-slate-400">
               {isAll
                 ? "সব শিক্ষাবর্ষের সম্পূর্ণ তথ্য দেখানো হচ্ছে"
                 : `শুধুমাত্র ${bn(sessionLabel)} শিক্ষাবর্ষের তথ্য দেখানো হচ্ছে`}
@@ -1048,7 +1245,7 @@ export default function UserHistory() {
               key={t.key}
               type="button"
               onClick={() => setTab(t.key)}
-              className={`h-[36px] px-4 rounded-xl text-sm font-bold border transition ${
+              className={`h-[36px] px-4 rounded-xl text-[14px] font-bold border transition ${
                 tab === t.key
                   ? "bg-gradient-to-r from-[#6D3BEF] to-[#22B8F0] text-white border-transparent shadow-sm shadow-[#6D3BEF]/20"
                   : "bg-white text-slate-600 border-slate-200 hover:border-[#6D3BEF]/40 hover:text-[#6D3BEF]"
@@ -1173,7 +1370,7 @@ export default function UserHistory() {
                 </div>
 
                 <div className="px-4 pt-3 pb-1">
-                  <div className="flex items-center justify-between text-[11px] font-bold text-slate-500 mb-1">
+                  <div className="flex items-center justify-between text-[13px] font-bold text-slate-500 mb-1">
                     <span>সার্বিক উপস্থিতির হার</span>
                     <span className="text-emerald-600">{bn(att.rate)}%</span>
                   </div>
@@ -1216,7 +1413,7 @@ export default function UserHistory() {
                     rows={attendance}
                     empty="উপস্থিতির কোনো রেকর্ড নেই"
                     footer={
-                      <tr className="text-[13px] font-bold text-slate-700">
+                      <tr className="text-[16px] font-bold text-slate-700">
                         <td className="px-3 py-2.5" colSpan={isAll ? 2 : 1}>সর্বমোট</td>
                         <td className="px-3 py-2.5 text-right">{bn(att.working)}</td>
                         <td className="px-3 py-2.5 text-right text-emerald-600">{bn(att.present)}</td>
@@ -1293,9 +1490,9 @@ export default function UserHistory() {
               )}
             </div>
 
-            {/* মাসিক ফি ও খাবার ফি — পাশাপাশি */}
+            {/* মাসিক ফি */}
             {show("fee") && (
-              <div className="grid grid-cols-1 2xl:grid-cols-2 gap-4 items-start">
+              <div className="grid grid-cols-1 gap-4 items-start">
                 <Card
                   title="মাসিক ফি"
                   icon="wallet"
@@ -1316,82 +1513,34 @@ export default function UserHistory() {
                 >
                   <FeeTable rows={monthlyFees} showSession={isAll} />
                 </Card>
-
-                <Card
-                  title="খাবার ফি"
-                  icon="food"
-                  accent="cyan"
-                  badge={`বকেয়া ${taka(Math.max(sum(mealFees, "assigned") - sum(mealFees, "received"), 0))}`}
-                  chart={
-                    <ChartBox
-                      note="মাস অনুযায়ী নির্ধারিত ও গৃহীত"
-                      defaultType="line"
-                      height={250}
-                      categories={mealChart.map((r) => r.month)}
-                      series={[
-                        { name: "নির্ধারিত", data: mealChart.map((r) => r.assigned), color: "#CBD5E1" },
-                        { name: "গৃহীত", data: mealChart.map((r) => r.received), color: "#22B8F0" },
-                      ]}
-                    />
-                  }
-                >
-                  <FeeTable rows={mealFees} showSession={isAll} />
-                </Card>
               </div>
             )}
 
-            {/* অন্যান্য ফি */}
+            {/* অন্যান্য আদায় — বছর → মাস → খাত */}
             {show("fee") && (
               <Card
-                title="ভর্তি ফি ও অন্যান্য আদায়"
+                title="অন্যান্য আদায়"
                 icon="tag"
                 accent="emerald"
-                badge={`${bn(otherFees.length)} টি খাত`}
+                badge={`${bn(collectionGroups.headCount)} টি খাত`}
                 chart={
                   <ChartBox
                     note="খাত অনুযায়ী নির্ধারিত ও গৃহীত"
                     defaultType="bar"
                     height={250}
-                    categories={otherFees.map((r) => (isAll ? `${r.head} (${bn(r.session)})` : r.head))}
+                    categories={collectionGroups.rows.map((r) => (r.month ? `${r.head} (${r.month})` : r.head))}
                     series={[
-                      { name: "নির্ধারিত", data: otherFees.map((r) => r.assigned), color: "#CBD5E1" },
-                      { name: "গৃহীত", data: otherFees.map((r) => r.received), color: "#10B981" },
+                      { name: "নির্ধারিত", data: collectionGroups.rows.map((r) => r.assigned), color: "#CBD5E1" },
+                      { name: "গৃহীত", data: collectionGroups.rows.map((r) => r.received), color: "#10B981" },
                     ]}
                   />
                 }
               >
-                <Table
-                  minWidth="min-w-[620px]"
-                  columns={[
-                    { key: "sl", label: "ক্র:", thClass: "w-12", tdClass: "text-slate-400", render: (_r, i) => bn(i + 1) },
-                    { key: "head", label: "খাতের নাম", tdClass: "font-semibold text-slate-800 whitespace-nowrap" },
-                    { key: "session", label: "শিক্ষাবর্ষ", render: (r) => bn(r.session) },
-                    { key: "assigned", label: "নির্ধারিত", align: "right", render: (r) => bn(r.assigned) },
-                    { key: "received", label: "গৃহীত", align: "right", tdClass: "text-right text-emerald-600 font-bold", render: (r) => bn(r.received) },
-                    {
-                      key: "due", label: "বকেয়া", align: "right",
-                      render: (r) => {
-                        const due = Math.max((Number(r.assigned) || 0) - (Number(r.received) || 0), 0);
-                        return due > 0
-                          ? <span className="font-bold text-rose-600">{bn(due)}</span>
-                          : <span className="font-bold text-emerald-600">০</span>;
-                      },
-                    },
-                    { key: "date", label: "আদায়ের তারিখ", tdClass: "whitespace-nowrap text-slate-600", render: (r) => bn(r.date) },
-                  ]}
-                  rows={otherFees}
-                  footer={
-                    <tr className="text-[13px] font-bold text-slate-700">
-                      <td className="px-3 py-2.5" colSpan={3}>সর্বমোট</td>
-                      <td className="px-3 py-2.5 text-right">{bn(sum(otherFees, "assigned"))}</td>
-                      <td className="px-3 py-2.5 text-right text-emerald-600">{bn(sum(otherFees, "received"))}</td>
-                      <td className="px-3 py-2.5 text-right text-rose-600">
-                        {bn(Math.max(sum(otherFees, "assigned") - sum(otherFees, "received"), 0))}
-                      </td>
-                      <td className="px-3 py-2.5" />
-                    </tr>
-                  }
-                  empty="অন্য কোনো ফি নির্ধারণ করা হয়নি"
+                <CollectionTable
+                  years={collectionGroups.years}
+                  totals={collectionGroups.totals}
+                  showSession={isAll}
+                  empty="অন্য কোনো ফি আদায় হয়নি"
                 />
               </Card>
             )}

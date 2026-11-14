@@ -37,9 +37,12 @@ const C = {
 // ⭐ টেমপ্লেট লিস্ট
 const MARK_SHEET_TEMPLATES = [
   { id: 'template-1', name: 'Standard Mark Sheet', desc: 'সাধারণ মার্কশিট ডিজাইন' },
-  { id: 'template-2', name: 'Tabular Mark Sheet', desc: 'ট্যাবুলার ফরম্যাট' },
-  { id: 'template-3', name: 'Grade Sheet', desc: 'গ্রেড ভিত্তিক মার্কশিট' },
-  { id: 'template-4', name: 'Compact Mark Sheet', desc: 'কম্প্যাক্ট ডিজাইন' },
+  { id: 'template-2', name: 'Modern Gradient', desc: 'আধুনিক গ্র‍্যাডিয়েন্ট ডিজাইন (নতুন)' },
+  { id: 'template-3', name: 'Elegant Classic', desc: 'এলিগ্যান্ট গোল্ড ফ্রেম ডিজাইন (নতুন)' },
+  { id: 'template-4', name: 'Minimalist Mono', desc: 'সাদা-কালো মিনিমাল এডিটরিয়াল ডিজাইন (নতুন)' },
+  { id: 'template-5', name: 'Bold Sidebar', desc: 'ডার্ক সাইডবার স্প্লিট লেআউট (নতুন)' },
+  { id: 'template-6', name: 'Vintage Gazette', desc: 'সংবাদপত্র স্টাইল সেরিফ ডিজাইন (নতুন)' },
+  { id: 'template-7', name: 'Bauhaus Bold', desc: 'প্রাইমারি কালার পোস্টার ডিজাইন (নতুন)' },
 ];
 
 const MarkSheet = () => {
