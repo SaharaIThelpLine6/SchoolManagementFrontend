@@ -254,17 +254,17 @@ const ResultReport = () => {
         <header className="bg-white border-b border-slate-200 lg:sticky lg:top-0 z-30 print:hidden">
           <div className="mx-auto max-w-[1600px] px-3 sm:px-4 lg:px-6 py-3">
             <div className="flex items-center justify-between gap-2 sm:gap-3">
-              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="flex items-center gap-2.5 sm:gap-3 w-full">
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25 shrink-0">
                   <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
                 </div>
-                <div className="min-w-0">
-                  <h1 className="font-bold text-sm sm:text-base text-slate-800 leading-tight truncate">
+                <div>
+                  <h1 className="font-bold text-sm sm:text-base text-slate-800">
                     ফলাফল রিপোর্ট
                   </h1>
-                  <p className="text-[11px] text-slate-400 leading-tight truncate">
+                  <p className="text-[12px] text-slate-400 leading-tight truncate">
                     Result Report Generator
                   </p>
                 </div>

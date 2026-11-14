@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { FormProvider, useForm } from "react-hook-form";
@@ -56,6 +56,8 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
   const [students, setStudents] = useState([]);
   const [cellSaveStatus, setCellSaveStatus] = useState({});
   const [savingDivisionId, setSavingDivisionId] = useState(null);
+  // প্রতিটি ঘরের শেষ সেভ হওয়া মান (একই মান বারবার সেভ এড়াতে)
+  const lastSavedValues = useRef({});
 
   const [updateAndPostResult] = useUpdateAndPostResultMutation();
 
@@ -255,6 +257,8 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
             null,
           DivisionID: student.DivisionID,
           ResultEntryType: Number(student.ResultEntryType) === 1 ? 1 : 0,
+          DColor: Number(student.DColor) === 1 ? 1 : 0,
+          DColorType: student.DColorType || null,
         };
       });
 
@@ -299,7 +303,12 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
     if (isSubjectSubmitted(subject)) return;
 
     const cellKey = `students.${student.ID}.${subject.SubValKey}`;
-    const rawValue = event.target.value;
+    const rawValue = event.target.value.trim();
+
+    // ✅ কিছু না বদলে শুধু ঘরের উপর দিয়ে গেলে (Tab/ক্লিক) সেভ হবে না
+    const lastSaved = lastSavedValues.current[cellKey] ?? String(subject.Value ?? "");
+    if (rawValue === lastSaved) return;
+
     const payload = {
       UserID: student.UserID,
       SessionID: Number(session_id),
@@ -312,6 +321,7 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
     setCellSaveStatus((previous) => ({ ...previous, [cellKey]: "saving" }));
     try {
       await updateResultCell(payload);
+      lastSavedValues.current[cellKey] = rawValue;
       setCellSaveStatus((previous) => ({ ...previous, [cellKey]: "saved" }));
     } catch (error) {
       console.error("Result cell update error:", error.message);
@@ -328,15 +338,47 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
     const division = examDivitions.find((item) => String(item.ID) === selectedValue);
     if (!division) return;
 
+    // ✅ চেকবক্স সবসময় শুরুতে আনচেক থাকবে; বর্তমান রঙ থাকলে পিকারে সেটাই আগে থেকে বসানো থাকবে
+    const hasCurrentColor = student.DColor === 1 && /^#[0-9a-fA-F]{6}$/.test(String(student.DColorType || ""));
+    const initialColor = hasCurrentColor ? student.DColorType : "#fde68a";
+
     const confirmation = await Swal.fire({
       icon: "warning",
       title: translate("Change division manually?"),
-      text: translate("This division will be saved as a manual result and will not change during automatic calculation."),
+      html: `
+        <p style="margin:0 0 14px">${translate("This division will be saved as a manual result and will not change during automatic calculation.")}</p>
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc">
+          <label for="manual-division-use-color" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;color:#334155">
+            <input id="manual-division-use-color" type="checkbox" style="width:18px;height:18px;cursor:pointer" />
+            রঙ দিয়ে চিহ্নিত করুন
+          </label>
+          <input id="manual-division-color" type="color" value="${initialColor}" disabled
+            aria-label="রঙ নির্বাচন করুন"
+            style="width:44px;height:32px;padding:0;border:1px solid #cbd5e1;border-radius:6px;cursor:pointer;background:#fff" />
+        </div>
+      `,
       showCancelButton: true,
       confirmButtonText: translate("Yes"),
       cancelButtonText: translate("Cancel"),
+      didOpen: (popup) => {
+        const toggle = popup.querySelector("#manual-division-use-color");
+        const picker = popup.querySelector("#manual-division-color");
+        const sync = () => {
+          picker.disabled = !toggle.checked;
+          picker.style.opacity = toggle.checked ? "1" : "0.4";
+        };
+        toggle.addEventListener("change", sync);
+        sync();
+      },
+      preConfirm: () => {
+        const popup = Swal.getPopup();
+        const useColor = popup.querySelector("#manual-division-use-color").checked;
+        const color = popup.querySelector("#manual-division-color").value;
+        return { useColor, color };
+      },
     });
     if (!confirmation.isConfirmed) return;
+    const { useColor, color } = confirmation.value || {};
 
     setSavingDivisionId(student.ID);
     try {
@@ -346,6 +388,8 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
         SubClassID: Number(subclass_id),
         UserID: student.UserID,
         DivisionID: Number(selectedValue),
+        DColor: useColor ? 1 : 0,
+        DColorType: useColor ? color : null,
       });
       dispatch(resultSilce.util.updateQueryData(
         "getUserResult",
@@ -356,6 +400,8 @@ const ResultEntryAndUpdate = ({ pageTitle }) => {
           result.DivisionID = updated.DivisionID;
           result.Division = { ...result.Division, ID: updated.DivisionID, DivisionNames: updated.DivisionNames };
           result.ResultEntryType = updated.ResultEntryType;
+          result.DColor = updated.DColor;
+          result.DColorType = updated.DColorType;
         }
       ));
       dispatch(resultSilce.util.invalidateTags(["getResultReportData"]));

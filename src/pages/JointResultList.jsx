@@ -8,7 +8,7 @@ import { useGetSubClassListQuery } from '../features/class/classQuerySlice';
 import { useGetSessionsQuery } from '../features/session/sessionSlice';
 import { useDeleteJointResultSetupMutation, useGetExamListQuery } from '../features/result/resultSilce';
 
-const resultTypes = ['সব ধরন', 'Joint Exam Result', 'Percentage-Based Result'];
+const resultTypes = ['সব ধরন', 'সমন্বিত গড় পদ্ধতি', 'শতকরা হার পদ্ধতি'];
 const statuses = ['সব অবস্থা', 'প্রকাশিত', 'অপ্রকাশিত', 'খসড়া'];
 const selectClass =
   'h-11 w-full rounded-md border border-slate-300 bg-white px-3 text-base text-slate-800 outline-none focus-visible:border-[#007af7] focus-visible:ring-2 focus-visible:ring-[#007af7]/20';
@@ -36,7 +36,7 @@ export default function JointResultList({ pageTitle }) {
     .map((row) => ({
       id: row.ID,
       examId: String(row.ExamID),
-      name: row.JointResultType === 'percentage' ? 'Percentage-Based Result' : 'Joint Exam Result',
+      name: row.JointResultType === 'percentage' ? 'শতকরা হার পদ্ধতি' : 'সমন্বিত গড় পদ্ধতি',
       sessionId: String(row.SessionID ?? ''),
       session: row.Session?.SessionName || '',
       subClassId: String(row.SubClassID ?? ''),
@@ -162,9 +162,9 @@ export default function JointResultList({ pageTitle }) {
         <div className="flex flex-col gap-1 border-b border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div>
             <h2 className="text-lg font-bold text-slate-900">যৌথ ফলাফলের তালিকা</h2>
-            <p className="mt-1 text-sm text-slate-600">প্রিভিউ সারি: {visibleRows.length}</p>
+            {/* <p className="mt-1 text-sm text-slate-600">প্রিভিউ সারি: {visibleRows.length}</p> */}
           </div>
-          <span className="w-fit rounded border border-slate-300 px-2 py-1 text-sm font-semibold text-slate-600">সংরক্ষিত সেটআপ</span>
+          {/* <span className="w-fit rounded border border-slate-300 px-2 py-1 text-sm font-semibold text-slate-600">সংরক্ষিত সেটআপ</span> */}
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-left">
@@ -202,16 +202,16 @@ export default function JointResultList({ pageTitle }) {
                         to={`/dashboard/result/joint-result-publish/entry?edit=true&session_id=${encodeURIComponent(row.sessionId)}&subclass_id=${encodeURIComponent(row.subClassId)}&exam_id=${encodeURIComponent(row.examId)}`}
                         className="rounded px-2 py-1 text-sm font-semibold text-[#007af7] hover:bg-[#ddeffe]"
                       >
-                        সম্পাদনা
+                        এডিট
                       </Link>
-                      <button
+                      {/* <button
                         type="button"
                         disabled
                         title="প্রকাশনা API যুক্ত হলে চালু হবে"
                         className="rounded px-2 py-1 text-sm font-semibold text-slate-400"
                       >
                         প্রকাশ করুন
-                      </button>
+                      </button> */}
                       <button
                         type="button"
                         disabled={isDeleting}

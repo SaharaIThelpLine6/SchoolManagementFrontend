@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useId } from "react";
+import { Fragment, useMemo, useState, useEffect, useId } from "react";
 import { createPortal } from "react-dom";
 import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQuerySlice";
 import bnBijoy2Unicode, { convertOnLanguageChange } from "../../../utils/conveter";
@@ -73,6 +73,10 @@ const TRANSLATIONS = {
         date: "তারিখ",
         divisionFallback: "বিভাগ",
         subjectFallback: "বিষয়",
+        jointMethods: { average: "সমন্বিত গড় পদ্ধতি", percentage: "শতকরা হার পদ্ধতি" },
+        jointLegend: (method, exams) => `যৌথ ফলাফল${method ? ` (${method})` : ""}: ${exams}`,
+        jointExamCol: "পরীক্ষা",
+        jointFinal: "চূড়ান্ত",
         pageOptions: "পেজ অপশন",
         everyPageHeader: "প্রতি পেজে হেডার দেখাও",
         everyPageSignature: "প্রতি পেজে সিগনেচার দেখাও",
@@ -102,6 +106,10 @@ const TRANSLATIONS = {
         date: "Date",
         divisionFallback: "Division",
         subjectFallback: "Subject",
+        jointMethods: { average: "Combined average method", percentage: "Percentage method" },
+        jointLegend: (method, exams) => `Joint result${method ? ` (${method})` : ""}: ${exams}`,
+        jointExamCol: "Exam",
+        jointFinal: "Final",
     },
     ar: {
         totalExaminees: "إجمالي الممتحنين",
@@ -124,6 +132,10 @@ const TRANSLATIONS = {
         date: "التاريخ",
         divisionFallback: "القسم",
         subjectFallback: "المادة",
+        jointMethods: { average: "طريقة المتوسط المجمع", percentage: "طريقة النسبة المئوية" },
+        jointLegend: (method, exams) => `نتيجة مشتركة${method ? ` (${method})` : ""}: ${exams}`,
+        jointExamCol: "الامتحان",
+        jointFinal: "النهائي",
     },
 };
 
@@ -616,6 +628,8 @@ const SIGNATURE_H = 130;
 const SIGNATURE_MARGIN = 14;
 const ROW_H_NORMAL = 24;
 const ROW_H_EXTRA = 32;
+const JOINT_SUB_ROW_H = 20; // যৌথ ফলাফলে প্রতিটি পরীক্ষার সারির উচ্চতা
+const JOINT_LABEL_W = 115;
 const MAX_STRETCH = 1.5;
 
 // const COL = { sl: 36, admission: 46, id: 52, total: 46, gpa: 52, grade: 96, pos: 38 };
@@ -904,7 +918,16 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const isShort = activeResultOption === "short";
     const showCol = show;
 
-    const ROW_H = hasExtras ? ROW_H_EXTRA : ROW_H_NORMAL;
+    // ✅ যৌথ ফলাফল: যুক্ত হওয়া অন্য পরীক্ষাগুলোর নম্বর (backend: reportData.jointResult)
+    const jointResult = reportData?.jointResult || null;
+    const jointExams = Array.isArray(jointResult?.exams) ? jointResult.exams : [];
+    const hasJoint = jointExams.length > 0 && !isShort;
+
+    // যৌথ ফলাফলে প্রতি শিক্ষার্থী = যুক্ত পরীক্ষার সারি + চূড়ান্ত সারি
+    const jointSpan = hasJoint ? jointExams.length + 1 : 1;
+    const ROW_H = hasJoint
+        ? Math.max(JOINT_SUB_ROW_H * jointSpan, hasExtras ? ROW_H_EXTRA : ROW_H_NORMAL)
+        : (hasExtras ? ROW_H_EXTRA : ROW_H_NORMAL);
     const nameW = pageDims.isLandscape
         ? (hasExtras ? NAME_W_EXTRA : NAME_W_NORMAL)
         : (hasExtras ? NAME_W_EXTRA_PORTRAIT : NAME_W_NORMAL_PORTRAIT);
@@ -1161,6 +1184,29 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     };
     const cellCenter = { display: "flex", alignItems: "center", justifyContent: "center" };
 
+    const jointLegendText = hasJoint
+        ? t.jointLegend(
+            t.jointMethods?.[jointResult?.resultType] || "",
+            jointExams
+                .map((exam) => {
+                    const name = getExamName(exam, lang) || num(exam.ExamID);
+                    const w = Number(exam.Weight);
+                    return jointResult?.resultType === "percentage" && Number.isFinite(w) && w > 0
+                        ? `${name} (${num(w)}%)`
+                        : name;
+                })
+                .join(" + ")
+        )
+        : "";
+
+    // প্রতিটি সারির লেবেল: যুক্ত পরীক্ষাগুলো, শেষে চূড়ান্ত (ExamType 4 এ নিজ পরীক্ষার নম্বর)
+    const jointRowLabels = hasJoint
+        ? [
+            ...jointExams.map((exam) => getExamName(exam, lang) || num(exam.ExamID)),
+            Number(conditionAverage?.ExamType) === 4 ? (examName || t.jointFinal) : t.jointFinal,
+        ]
+        : [];
+
     const renderCenterTitle = () => (
         <div style={{ textAlign: "center", alignSelf: "center", minWidth: 0 }}>
             <h1 style={{ fontSize: fs(22), fontWeight: 800, margin: 0, lineHeight: 1.25, color: C.primaryDark }}>
@@ -1183,6 +1229,11 @@ export default function StudentResultSheet({ reportData, query, labels }) {
             <p style={{ fontSize: fs(14), margin: "6px 0 0", fontWeight: 600, color: C.text }}>
                 {t.classLabel} : <span style={{ color: C.primary }}>{className}</span>
             </p>
+            {hasJoint && (
+                <p style={{ fontSize: fs(11), margin: "4px 0 0", fontWeight: 600, color: C.muted, lineHeight: 1.3 }}>
+                    {jointLegendText}
+                </p>
+            )}
         </div>
     );
 
@@ -1272,6 +1323,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
             {showCol.admission && <col style={{ width: `${COL.admission}px` }} />}
             {showCol.id && <col style={{ width: `${COL.id}px` }} />}
             {showCol.name && <col style={{ width: `${nameW}px` }} />}
+            {hasJoint && <col style={{ width: `${JOINT_LABEL_W}px` }} />}
             {subjectPassNumbers.map((_, i) => <col key={i} />)}
             {showCol.total && <col style={{ width: `${COL.total}px` }} />}
             {showCol.gpa && <col style={{ width: `${COL.gpa}px` }} />}
@@ -1298,6 +1350,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
             {showCol.name && (
                 <th style={{ ...styles.th, textAlign: "start", paddingInlineStart: "8px" }}>{nameHeaderLabel}</th>
             )}
+            {hasJoint && <th style={styles.th}>{t.jointExamCol}</th>}
             {subjectPassNumbers.map((subject, i) => (
                 <th key={i} style={{ ...styles.th, padding: "4px 1px" }}>
                     <span style={{
@@ -1314,11 +1367,11 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         </tr>
     );
 
-    const renderNameCell = (studentResult, rowBg, tdBase) => {
+    const renderNameCell = (studentResult, rowBg, tdBase, rowSpan = 1) => {
         const studentName = getStudentName(studentResult?.User, lang);
         if (!hasExtras) {
             return (
-                <td style={{
+                <td rowSpan={rowSpan} style={{
                     ...tdBase, ...bg(rowBg), textAlign: "start",
                     paddingInlineStart: "8px", fontWeight: 600, textOverflow: "ellipsis",
                 }}>{studentName}</td>
@@ -1326,7 +1379,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         }
         const extras = activeExtras.map((o) => getExtraValue(studentResult, o)).filter((v) => v !== "");
         return (
-            <td style={{ ...tdBase, ...bg(rowBg), textAlign: "start", padding: "0 6px", whiteSpace: "normal" }}>
+            <td rowSpan={rowSpan} style={{ ...tdBase, ...bg(rowBg), textAlign: "start", padding: "0 6px", whiteSpace: "normal" }}>
                 <div style={{
                     display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2,
                     overflow: "hidden", fontSize: fs(11), lineHeight: "14px",
@@ -1346,12 +1399,27 @@ export default function StudentResultSheet({ reportData, query, labels }) {
 
     const failMark = FAIL_MARK[colorMode] || FAIL_MARK.color;
 
+    const renderPosition = (studentResult) => {
+        const p = Number(studentResult.Positions);
+        if (!Number.isFinite(p) || p <= 0) return "";
+        const m = theme.medals[p];
+        return m ? (
+            <span style={{
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                boxSizing: "border-box", width: "20px", height: "20px",
+                borderRadius: "50%", border: m.border,
+                ...bg(m.bg), color: m.fg,
+                fontWeight: 800, fontSize: fs(11), lineHeight: 1,
+                verticalAlign: "middle",
+            }}>{num(p)}</span>
+        ) : num(p);
+    };
+
+    // যৌথ ফলাফলে একজন শিক্ষার্থী = একাধিক সারি (প্রতিটি যুক্ত পরীক্ষা + চূড়ান্ত);
+    // ক্রমিক, আইডি, নাম, মোট, গড়, বিভাগ, স্থান rowSpan দিয়ে একত্রিত।
     const renderRow = (studentResult, globalIndex, rowH) => {
-        const tdBase = {
-            ...styles.td,
-            height: `${rowH}px`,
-            lineHeight: `${rowH - 2}px`,
-        };
+        const span = jointSpan;
+        const subH = rowH / span;
         const zebra = globalIndex % 2 === 1;
         const rowBg = zebra ? C.primaryFaint : "#fff";
         const total = calcTotal(studentResult, subjectPassNumbers);
@@ -1360,70 +1428,104 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         const gc = getGradeColor(studentResult, avg);
         const gradeBg = gc.bg;
         const gradeFg = gc.fg;
+        const subjectCount = conditionAverage?.SubSonkha || 0;
+        const userJointMarks = hasJoint ? jointResult?.marks?.[studentResult?.UserID] : null;
 
-        return (
-            <tr key={studentResult.ID ?? globalIndex} style={{ background: rowBg, height: `${rowH}px` }}>
-                {showCol.sl && <td style={{ ...tdBase, ...bg(rowBg) }}>{num(getSerial(globalIndex))}</td>}
-                {showCol.admission && (
-                    <td style={{ ...tdBase, ...bg(rowBg) }}>
-                        {renderAdmission(studentResult?.User?.Admission?.[0]?.AdmissionSerial)}
-                    </td>
-                )}
-                {showCol.id && (
-                    <td style={{ ...tdBase, ...bg(rowBg) }}>
-                        {num(studentResult?.User?.UserCode)}
-                    </td>
-                )}
-                {showCol.name && renderNameCell(studentResult, rowBg, tdBase)}
+        const spanTd = span > 1
+            ? { ...styles.td, lineHeight: 1.25 }
+            : { ...styles.td, height: `${rowH}px`, lineHeight: `${rowH - 2}px` };
+        const subTd = { ...styles.td, height: `${subH}px`, lineHeight: `${subH - 2}px` };
+        // একই শিক্ষার্থীর সারিগুলোর মাঝে হালকা ড্যাশ লাইন
+        const innerEdges = (r) => ({
+            ...(r > 0 ? { borderTop: `1px dashed ${C.borderSoft}` } : {}),
+            ...(r < span - 1 ? { borderBottom: `1px dashed ${C.borderSoft}` } : {}),
+        });
 
-                {Array.from({ length: conditionAverage?.SubSonkha || 0 }).map((_, mi) => {
-                    const val = studentResult[`SubVal${mi + 1}`];
-                    const failed = isBelowPass(val, passMarks[mi] ?? null);
-                    const isZero = passMarks[mi] == null && isFilled(val) && Number(val) === 0;
-                    const warn = failed || isZero;
-                    return (
-                        <td key={mi} style={{
-                            ...tdBase,
-                            ...bg(failed ? failMark.bg : rowBg),
-                            color: failed ? failMark.fg : (isZero ? C.danger : C.text),
-                            fontWeight: warn ? 700 : 400,
-                            textDecoration: failed ? failMark.textDecoration : "none",
-                        }}>{num(val)}</td>
-                    );
-                })}
+        const renderFinalMark = (mi, edge) => {
+            const val = studentResult[`SubVal${mi + 1}`];
+            const failed = isBelowPass(val, passMarks[mi] ?? null);
+            const isZero = passMarks[mi] == null && isFilled(val) && Number(val) === 0;
+            const warn = failed || isZero;
+            return (
+                <td key={mi} style={{
+                    ...subTd, ...edge,
+                    ...bg(failed ? failMark.bg : rowBg),
+                    color: failed ? failMark.fg : (isZero ? C.danger : C.text),
+                    fontWeight: span > 1 || warn ? 700 : 400,
+                    textDecoration: failed ? failMark.textDecoration : "none",
+                }}>{num(val)}</td>
+            );
+        };
 
-                {showCol.total && (
-                    <td style={{ ...tdBase, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(total)}</td>
-                )}
-                {showCol.gpa && (
-                    <td style={{ ...tdBase, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(gpaValue.toFixed(2))}</td>
-                )}
-                {showCol.grade && (
-                    <td style={{ ...tdBase, ...bg(gradeBg), fontWeight: 700, fontSize: fs(12), color: gradeFg }}>
-                        {getDivisionName(studentResult.Division, lang)}
-                    </td>
-                )}
-                {showCol.pos && (
-                    <td style={{ ...tdBase, ...bg(rowBg) }}>
-                        {(() => {
-                            const p = Number(studentResult.Positions);
-                            if (!Number.isFinite(p) || p <= 0) return "";
-                            const m = theme.medals[p];
-                            return m ? (
-                                <span style={{
-                                    display: "inline-flex", alignItems: "center", justifyContent: "center",
-                                    boxSizing: "border-box", width: "20px", height: "20px",
-                                    borderRadius: "50%", border: m.border,
-                                    ...bg(m.bg), color: m.fg,
-                                    fontWeight: 800, fontSize: fs(11), lineHeight: 1,
-                                    verticalAlign: "middle",
-                                }}>{num(p)}</span>
-                            ) : num(p);
-                        })()}
-                    </td>
-                )}
-            </tr>
-        );
+        const renderSourceMark = (mi, k, edge) => {
+            const val = userJointMarks?.[mi]?.[k];
+            const filled = isFilled(val);
+            const failed = filled && isBelowPass(val, passMarks[mi] ?? null);
+            return (
+                <td key={mi} style={{
+                    ...subTd, ...edge, ...bg(rowBg),
+                    fontSize: fs(11), fontWeight: 400,
+                    color: failed ? C.danger : (filled ? C.text : C.muted),
+                }}>{filled ? num(val) : "–"}</td>
+            );
+        };
+
+        const renderLabel = (r, edge) => {
+            const isFinal = r === span - 1;
+            return (
+                <td title={jointRowLabels[r]} style={{
+                    ...subTd, ...edge, ...bg(isFinal ? C.primarySoft : rowBg),
+                    textAlign: "start", paddingInlineStart: "5px", textOverflow: "ellipsis",
+                    fontSize: fs(14), fontWeight: isFinal ? 700 : 500,
+                    color: isFinal ? C.primaryDark : C.muted,
+                }}>{jointRowLabels[r]}</td>
+            );
+        };
+
+        const rowKey = studentResult.ID ?? globalIndex;
+
+        return <Fragment key={rowKey}>{Array.from({ length: span }).map((_, r) => {
+            const isFirst = r === 0;
+            const isFinal = r === span - 1;
+            const edge = span > 1 ? innerEdges(r) : {};
+            return (
+                <tr key={`${rowKey}-${r}`} style={{ background: rowBg, height: `${subH}px` }}>
+                    {isFirst && showCol.sl && <td rowSpan={span} style={{ ...spanTd, ...bg(rowBg) }}>{num(getSerial(globalIndex))}</td>}
+                    {isFirst && showCol.admission && (
+                        <td rowSpan={span} style={{ ...spanTd, ...bg(rowBg) }}>
+                            {renderAdmission(studentResult?.User?.Admission?.[0]?.AdmissionSerial)}
+                        </td>
+                    )}
+                    {isFirst && showCol.id && (
+                        <td rowSpan={span} style={{ ...spanTd, ...bg(rowBg) }}>
+                            {num(studentResult?.User?.UserCode)}
+                        </td>
+                    )}
+                    {isFirst && showCol.name && renderNameCell(studentResult, rowBg, spanTd, span)}
+
+                    {hasJoint && renderLabel(r, edge)}
+
+                    {Array.from({ length: subjectCount }).map((__, mi) =>
+                        isFinal ? renderFinalMark(mi, edge) : renderSourceMark(mi, r, edge)
+                    )}
+
+                    {isFirst && showCol.total && (
+                        <td rowSpan={span} style={{ ...spanTd, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(total)}</td>
+                    )}
+                    {isFirst && showCol.gpa && (
+                        <td rowSpan={span} style={{ ...spanTd, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(gpaValue.toFixed(2))}</td>
+                    )}
+                    {isFirst && showCol.grade && (
+                        <td rowSpan={span} style={{ ...spanTd, ...bg(gradeBg), fontWeight: 700, fontSize: fs(12), color: gradeFg, whiteSpace: "normal" }}>
+                            {getDivisionName(studentResult.Division, lang)}
+                        </td>
+                    )}
+                    {isFirst && showCol.pos && (
+                        <td rowSpan={span} style={{ ...spanTd, ...bg(rowBg) }}>{renderPosition(studentResult)}</td>
+                    )}
+                </tr>
+            );
+        })}</Fragment>;
     };
 
     const shortTh = { ...styles.th, height: `${SHORT_THEAD_H}px`, fontSize: fs(12) };
