@@ -473,6 +473,12 @@ export const menuData = [
         icon: 'SubForm',
       },
       {
+        id: '9',
+        name: 'Joint Result Publication',
+        route: 'result/joint-result-publish',
+        icon: 'SubReport',
+      },
+      {
         id: '6',
         name: 'Result Report',
         route: 'result/report',

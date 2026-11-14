@@ -1256,6 +1256,7 @@ const useTranslate = () => {
     "No Data Found": "কোনো তথ্য পাওয়া যায়নি",
     "Failed to load data": "তথ্য লোড করা যায়নি",
     "Retry": "আবার চেষ্টা করুন",
+    "Joint Result Publication": "যৌথ ফলাফল প্রকাশনা",
   };
 
   return (key) =>

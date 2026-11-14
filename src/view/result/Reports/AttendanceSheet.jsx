@@ -3,7 +3,7 @@ import { useGetInstitutionInfoQuery } from "../../../features/settings/settingsQ
 import bnBijoy2Unicode from "../../../utils/conveter";
 import { createPortal } from "react-dom";
 import { Buffer } from "buffer";
-import { useGetExamRoutineSubjectListQuery, useGetTeacherSubjectInfoQuery } from "../../../features/result/resultSilce";
+import { useGetTeacherSubjectInfoQuery } from "../../../features/result/resultSilce";
 
 /* ═══════════════════════════════════════════════════════════
    LANGUAGE (bn / en / ar)
@@ -59,13 +59,17 @@ const TRANSLATIONS = {
         subjectEmpty: "কোনো কিতাব পাওয়া যায়নি",
         teacherLoading: "শিক্ষক লোড হচ্ছে...",
         teacherAuto: "শিক্ষক",
+        teacherInputPlaceholder: "শিক্ষকের নাম লিখুন (ঐচ্ছিক)",
+        monthTypeLabel: "মাসের ধরন",
+        monthGregorian: "ইংরেজি মাস",
+        monthHijri: "আরবি মাস",
         monthLabel: "মাস",
         yearLabel: "সন / বছর",
         monthPlaceholder: "— মাস —",
-        yearPlaceholder: "— বছর —",
+        yearPlaceholder: "যেমন: ১৪৪৭",
         hourLabel: "ঘন্টা",
         hourPlaceholder: "যেমন: ১ম ঘন্টা",
-        infoNote: "যতগুলো কিতাব চেক করবেন, প্রতিটি কিতাবের জন্য সব শিক্ষার্থীর আলাদা হাজিরা খাতা (কিতাব ও শিক্ষকের নামসহ) প্রিভিউ ও প্রিন্টে আসবে। আনচেক করলে ওই কিতাবের পেজ বাদ যাবে। মাস প্রিন্টের ভাষায় দেখাবে।",
+        infoNote: "যতগুলো কিতাব চেক করবেন, প্রতিটি কিতাবের জন্য সব শিক্ষার্থীর আলাদা হাজিরা খাতা (কিতাব ও শিক্ষকের নামসহ) প্রিভিউ ও প্রিন্টে আসবে। কিতাবের নিচের ঘরে শিক্ষকের নাম লিখলে সেটাই বসবে, ফাঁকা রাখলে অটো শিক্ষক আসবে। মাস প্রিন্টের ভাষায় দেখাবে।",
         orderTitle: "শিক্ষার্থীর ক্রম",
         orderSub: "শিক্ষার্থীদের সাজানোর ধরন নির্বাচন করুন",
         idSerial: "আইডি সিরিয়ালে",
@@ -133,7 +137,7 @@ const makeNum = (lang) => (v) => {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   MONTH NAMES (৩ ভাষায়)
+   MONTH NAMES — ইংরেজি ও আরবি (হিজরী) মাস, ৩ ভাষায়
    ═══════════════════════════════════════════════════════════ */
 const MONTH_NAMES = {
     bn: ["জানুয়ারি", "ফেব্রুয়ারি", "মার্চ", "এপ্রিল", "মে", "জুন", "জুলাই", "আগস্ট", "সেপ্টেম্বর", "অক্টোবর", "নভেম্বর", "ডিসেম্বর"],
@@ -141,9 +145,34 @@ const MONTH_NAMES = {
     ar: ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"],
 };
 
-const YEAR_FROM = 1990;
-const YEAR_TO = 2050;
-const YEAR_LIST = Array.from({ length: YEAR_TO - YEAR_FROM + 1 }, (_, i) => String(YEAR_FROM + i));
+const HIJRI_MONTH_NAMES = {
+    bn: [
+        "মুহাররম", "সফর", "রবিউল আউয়াল", "রবিউস সানি",
+        "জমাদিউল আউয়াল", "জমাদিউস সানি", "রজব", "শা'বান",
+        "রমজান", "শাওয়াল", "জ্বিলকদ", "জ্বিলহজ্জ",
+    ],
+    en: [
+        "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
+        "Jumada al-Awwal", "Jumada al-Thani", "Rajab", "Sha'ban",
+        "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah",
+    ],
+    ar: [
+        "محرم", "صفر", "ربيع الأول", "ربيع الثاني",
+        "جمادى الأولى", "جمادى الآخرة", "رجب", "شعبان",
+        "رمضان", "شوال", "ذو القعدة", "ذو الحجة",
+    ],
+};
+
+export const MONTH_TYPE_OPTIONS = [
+    { key: "gregorian", label: "ইংরেজি মাস" },
+    { key: "hijri", label: "আরবি মাস" },
+];
+export const DEFAULT_MONTH_TYPE = "gregorian";
+
+const getMonthNames = (type, lang) => {
+    const src = type === "hijri" ? HIJRI_MONTH_NAMES : MONTH_NAMES;
+    return src[lang] || src.bn;
+};
 
 /* ═══════════════════════════════════════════════════════════
    HELPERS
@@ -287,6 +316,9 @@ const THEAD_PX = 48;
 const ROW_MIN_PX = 30;
 const TITLE_FALLBACK_PX = 225;
 
+// ✅ আইডি নং কলামের প্রস্থ (আগে ৫৬ ছিল)
+const ID_COL_PX = 80;
+
 /* ═══════════════════════════════════════════════════════════
    THEME
    ═══════════════════════════════════════════════════════════ */
@@ -330,6 +362,7 @@ const LS_ROWS = "attendanceSheetCustomRows";
 const LS_SCALE = "attendanceSheetScale";
 const LS_FONT = "attendanceSheetFontPct";
 const LS_MONTH = "attendanceSheetMonth";
+const LS_MONTH_TYPE = "attendanceSheetMonthType";
 const LS_YEAR = "attendanceSheetYear";
 const LS_HOUR = "attendanceSheetHour";
 const LS_ORDER = "attendanceSheetOrder";
@@ -369,9 +402,10 @@ const loadMonth = () => {
     return /^(?:[0-9]|1[01])$/.test(s) ? s : "";
 };
 
+// ✅ সন এখন যেকোনো ৪ সংখ্যার (হিজরী ১৪৪৭ বা ইংরেজি ২০২৬)
 const loadYear = () => {
     const s = loadText(LS_YEAR);
-    return YEAR_LIST.includes(s) ? s : "";
+    return /^\d{1,4}$/.test(s) ? s : "";
 };
 
 // ✅ শুধু আনচেক করা (বাদ দেওয়া) বিভাগের ID সেভ হয় — তাই ডিফল্টে সব চেক থাকে
@@ -438,8 +472,6 @@ function FillField({ label, value, flex = 1, color, dottedColor, fs }) {
    ═══════════════════════════════════════════════════════════ */
 export default function AttendanceSheet({ reportData, query }) {
 
-    // console.log(reportData, "reportData")
-
     const [visibleColumns, setVisibleColumns] = useState(() => loadObj(LS_VISIBLE, DEFAULT_VISIBLE_COLUMNS));
     const [colorMode, setColorMode] = useState(() => loadStr(LS_COLOR, COLOR_OPTIONS, DEFAULT_COLOR_MODE));
     const [orientation, setOrientation] = useState(() => loadStr(LS_ORIENTATION, ORIENTATION_OPTIONS, DEFAULT_ORIENTATION));
@@ -453,11 +485,14 @@ export default function AttendanceSheet({ reportData, query }) {
     });
     const [fontPct, setFontPct] = useState(() => loadNum(LS_FONT, DEFAULT_FONT, MIN_FONT, MAX_FONT));
     const [month, setMonth] = useState(loadMonth);
+    const [monthType, setMonthType] = useState(() => loadStr(LS_MONTH_TYPE, MONTH_TYPE_OPTIONS, DEFAULT_MONTH_TYPE));
     const [year, setYear] = useState(loadYear);
     const [hourInput, setHourInput] = useState(() => loadText(LS_HOUR));
     // ✅ null = ডিফল্ট (প্রথম কিতাব checked), array = ইউজারের নির্বাচন
     const [subjectSel, setSubjectSel] = useState(null);
     const [teacherMap, setTeacherMap] = useState({});
+    // ✅ কিতাব অনুযায়ী ম্যানুয়াল শিক্ষকের নাম { [subjectId]: "নাম" }
+    const [teacherInputs, setTeacherInputs] = useState({});
     const [orderMode, setOrderMode] = useState(() => loadStr(LS_ORDER, ORDER_OPTIONS, DEFAULT_ORDER));
     const [excludedDivs, setExcludedDivs] = useState(loadExcludedDivisions);
 
@@ -465,24 +500,21 @@ export default function AttendanceSheet({ reportData, query }) {
     const ExamID = reportData?.conditionAverage?.ExamID;
     const SubClassID = reportData?.conditionAverage?.SubClassID;
 
-    const { data: examRoutineSubjectData } = useGetExamRoutineSubjectListQuery(
-        { session_id: SessionID, exam_id: ExamID, subclass_id: SubClassID },
-        { skip: !SessionID || !ExamID || !SubClassID }
-    );
-
+    // ✅ কিতাবের তালিকা — result report এর subjectPassNumbers থেকে (নাম ও সঠিক ID সহ)
     const subjectList = useMemo(() => {
-        const raw = Array.isArray(examRoutineSubjectData?.data) ? examRoutineSubjectData.data : [];
+        const raw = Array.isArray(reportData?.subjectPassNumbers) ? reportData.subjectPassNumbers : [];
         const seen = new Set();
         const out = [];
         raw.forEach((s) => {
-            if (!s || s.SubjectID === undefined || s.SubjectID === null) return;
-            const id = String(s.SubjectID);
-            if (seen.has(id)) return;
-            seen.add(id);
-            out.push({ value: id, label: s.SubjectName || id });
+            const id = s?.SubjectID;
+            if (id === undefined || id === null) return;
+            const key = String(id);
+            if (seen.has(key)) return;
+            seen.add(key);
+            out.push({ value: key, label: s?.Subject?.SubjectName || key });
         });
         return out;
-    }, [examRoutineSubjectData]);
+    }, [reportData?.subjectPassNumbers]);
 
     // ক্লাস/পরীক্ষা বদলালে (কিতাব তালিকা বদলালে) আবার ডিফল্টে ফিরবে
     const subjectKey = useMemo(() => subjectList.map((s) => s.value).join(","), [subjectList]);
@@ -513,6 +545,10 @@ export default function AttendanceSheet({ reportData, query }) {
             if (p && p.teacher === val.teacher && p.book === val.book && p.loading === val.loading) return prev;
             return { ...prev, [id]: val };
         });
+    }, []);
+
+    const handleTeacherInput = useCallback((id, value) => {
+        setTeacherInputs((prev) => ({ ...prev, [id]: value }));
     }, []);
 
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
@@ -612,8 +648,9 @@ export default function AttendanceSheet({ reportData, query }) {
         return () => { document.body.removeChild(el); };
     }, []);
 
-    const [titleH, setTitleH] = useState(TITLE_FALLBACK_PX);
-    const titleRef = useRef(null);
+    // ✅ পুরো thead (title + column header) এর আসল উচ্চতা — browser থেকে মাপা
+    const [headH, setHeadH] = useState(TITLE_FALLBACK_PX + THEAD_PX);
+    const headRef = useRef(null);
 
     useEffect(() => { localStorage.setItem(LS_VISIBLE, JSON.stringify(visibleColumns)); }, [visibleColumns]);
     useEffect(() => { localStorage.setItem(LS_COLOR, colorMode); }, [colorMode]);
@@ -625,6 +662,7 @@ export default function AttendanceSheet({ reportData, query }) {
     useEffect(() => { localStorage.setItem(LS_SCALE, scaleInput); }, [scaleInput]);
     useEffect(() => { localStorage.setItem(LS_FONT, String(fontPct)); }, [fontPct]);
     useEffect(() => { localStorage.setItem(LS_MONTH, month); }, [month]);
+    useEffect(() => { localStorage.setItem(LS_MONTH_TYPE, monthType); }, [monthType]);
     useEffect(() => { localStorage.setItem(LS_YEAR, year); }, [year]);
     useEffect(() => { localStorage.setItem(LS_HOUR, hourInput); }, [hourInput]);
     useEffect(() => { localStorage.setItem(LS_ORDER, orderMode); }, [orderMode]);
@@ -657,7 +695,8 @@ export default function AttendanceSheet({ reportData, query }) {
     const sessionName = lang === "ar" ? num(sessionNameRaw) : sessionNameRaw;
     const className = getClassName(conditionAverage?.SubClass, lang);
 
-    const monthText = month !== "" ? (MONTH_NAMES[lang] || MONTH_NAMES.bn)[Number(month)] : "";
+    // ✅ মাসের নাম: ইংরেজি বা আরবি (হিজরী) — প্রিন্টের ভাষায়
+    const monthText = month !== "" ? (getMonthNames(monthType, lang)[Number(month)] || "") : "";
     const yearText = year !== "" ? num(year) : "";
 
     const C = THEMES[colorMode] || THEMES.color;
@@ -707,6 +746,14 @@ export default function AttendanceSheet({ reportData, query }) {
         if (!Number.isFinite(n)) return setScaleInput(String(DEFAULT_SCALE));
         setScaleInput(String(Math.min(MAX_SCALE, Math.max(MIN_SCALE, n))));
     };
+    const handleYearChange = (v) => {
+        // বাংলা/আরবি ডিজিট টাইপ করলেও ইংরেজি ডিজিটে রূপান্তর
+        const bnDigits = "০১২৩৪৫৬৭৮৯";
+        const normalized = String(v)
+            .replace(/[০-৯]/g, (d) => String(bnDigits.indexOf(d)))
+            .replace(/[٠-٩]/g, (d) => String(ARABIC_INDIC.indexOf(d)));
+        setYear(normalized.replace(/[^\d]/g, "").slice(0, 4));
+    };
     const changeFont = (delta) =>
         setFontPct((p) => Math.min(MAX_FONT, Math.max(MIN_FONT, p + delta)));
 
@@ -722,9 +769,14 @@ export default function AttendanceSheet({ reportData, query }) {
 
     const sheetWidthMm = +(pageWmm - PAGE_MARGIN_MM * 2).toFixed(1);
     const sheetHeightMm = +(pageHmm - PAGE_MARGIN_MM * 2 - SAFETY_MM).toFixed(1);
-    const pageHeightPx = sheetHeightMm * PX_PER_MM;
 
-    const rowsAreaPx = pageHeightPx - titleH - theadPx - 4;
+    // ✅ scale করার পর পুরো পেজ ভরার জন্য ভিতরের layout ১/scale গুণ বড়
+    const innerWidthMm = +(sheetWidthMm / scale).toFixed(2);
+    const innerHeightMm = +(sheetHeightMm / scale).toFixed(2);
+    const pageHeightPx = innerHeightMm * PX_PER_MM;
+
+    // ✅ thead এর আসল (মাপা) উচ্চতা বাদ দিয়ে বাকি জায়গায় row বসবে
+    const rowsAreaPx = pageHeightPx - headH - 2;
     const maxRowsFit = Math.max(1, Math.floor(rowsAreaPx / rowMinPx));
 
     /* ✅ পেজ ভাঙার লজিক (একটি কিতাবের জন্য) */
@@ -763,7 +815,7 @@ export default function AttendanceSheet({ reportData, query }) {
         });
     }, [studentResultsDetails, maxRowsFit, customRows]);
 
-    /* ✅ প্রতিটি checked কিতাবের জন্য আলাদা গ্রুপ (কিছুই checked না থাকলে ফাঁকা কিতাবের একটি গ্রুপ) */
+    /* ✅ প্রতিটি checked কিতাবের জন্য আলাদা গ্রুপ — ম্যানুয়াল শিক্ষকের নাম থাকলে সেটা অগ্রাধিকার পাবে */
     const sheetGroups = useMemo(() => {
         if (selectedSubjectIds.length === 0) {
             return [{ id: "none", bookName: "", teacherName: "" }];
@@ -771,13 +823,14 @@ export default function AttendanceSheet({ reportData, query }) {
         return selectedSubjectIds.map((id) => {
             const info = teacherMap[id];
             const label = subjectList.find((s) => s.value === id)?.label || "";
+            const manualTeacher = (teacherInputs[id] || "").trim();
             return {
                 id,
                 bookName: (info?.book || label || "").trim(),
-                teacherName: info?.teacher || "",
+                teacherName: manualTeacher || info?.teacher || "",
             };
         });
-    }, [selectedSubjectIds, teacherMap, subjectList]);
+    }, [selectedSubjectIds, teacherMap, teacherInputs, subjectList]);
 
     // ✅ সব কিতাবের পেজ একসাথে (প্রিভিউ ও প্রিন্টে একই তালিকা)
     const flatPages = useMemo(
@@ -797,16 +850,29 @@ export default function AttendanceSheet({ reportData, query }) {
         ? Math.floor(rowsAreaPx / Math.max(1, lastPageRows.length))
         : Math.floor(rowsAreaPx / maxRowsFit);
 
-    const firstGroup = sheetGroups[0];
+    /* ✅ thead এর উচ্চতা মাপা */
+    const measureHead = useCallback(() => {
+        const el = headRef.current;
+        if (!el) return;
+        const h = Math.ceil(el.offsetHeight) + 1;
+        if (h > 10) setHeadH((prev) => (Math.abs(prev - h) > 1 ? h : prev));
+    }, []);
+
+    // প্রতিটি render এর পর মাপবে (সাইজ না বদলালে state বদলায় না, তাই loop হয় না)
     useLayoutEffect(() => {
-        const measure = () => {
-            if (!titleRef.current) return;
-            const h = Math.ceil(titleRef.current.offsetHeight) + 1;
-            if (h > 1) setTitleH((prev) => (Math.abs(prev - h) > 1 ? h : prev));
-        };
-        measure();
-        if (document.fonts?.ready) document.fonts.ready.then(measure);
-    }, [institutionInfo, institutionLogo, sessionName, className, orientation, paper, lang, fontPct, firstGroup?.bookName, firstGroup?.teacherName, monthText, yearText, hourInput]);
+        measureHead();
+    });
+
+    // font আসলে লোড হওয়ার পর আবার মাপবে
+    useEffect(() => {
+        if (!document.fonts) return;
+        let cancelled = false;
+        const run = () => { if (!cancelled) measureHead(); };
+        document.fonts.load("16px 'SolaimanLipi'").then(run).catch(() => { });
+        document.fonts.ready.then(run);
+        const timer = setTimeout(run, 600);
+        return () => { cancelled = true; clearTimeout(timer); };
+    }, [measureHead, institutionInfo, institutionLogo, lang]);
 
     const cellBase = {
         border: `1px solid ${C.border}`,
@@ -837,7 +903,7 @@ export default function AttendanceSheet({ reportData, query }) {
     const renderColGroup = () => (
         <colgroup>
             {show.sl && <col style={{ width: w(36) }} />}
-            {show.id && <col style={{ width: w(56) }} />}
+            {show.id && <col style={{ width: w(ID_COL_PX) }} />}
             {show.name && <col style={{ width: w(isLandscape ? 190 : 150) }} />}
             {show.days && Array.from({ length: days }).map((_, i) => <col key={i} />)}
             {show.present && <col style={{ width: w(38) }} />}
@@ -845,9 +911,8 @@ export default function AttendanceSheet({ reportData, query }) {
         </colgroup>
     );
 
-    const renderTitleBlock = (withRef, group) => (
+    const renderTitleBlock = (group) => (
         <div
-            ref={withRef ? titleRef : null}
             style={{
                 padding: "8px 8px 10px",
                 borderBottom: `3px solid ${C.primary}`,
@@ -911,9 +976,7 @@ export default function AttendanceSheet({ reportData, query }) {
             style={{
                 width: `${sheetWidthMm}mm`,
                 height: `${sheetHeightMm}mm`,
-                display: "flex",
-                alignItems: "flex-start",
-                justifyContent: "center",
+                position: "relative",
                 overflow: "hidden",
                 background: "#fff",
                 color: C.text,
@@ -924,9 +987,12 @@ export default function AttendanceSheet({ reportData, query }) {
             <div
                 className="sheet-scaled"
                 style={{
-                    width: `${sheetWidthMm}mm`,
-                    height: `${sheetHeightMm}mm`,
-                    flexShrink: 0,
+                    position: "absolute",
+                    top: 0,
+                    left: "50%",
+                    marginLeft: `-${innerWidthMm / 2}mm`,
+                    width: `${innerWidthMm}mm`,
+                    height: `${innerHeightMm}mm`,
                     overflow: "hidden",
                     transform: `scale(${scale})`,
                     transformOrigin: "top center",
@@ -934,10 +1000,13 @@ export default function AttendanceSheet({ reportData, query }) {
             >
                 <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
                     {renderColGroup()}
-                    <thead style={{ display: "table-header-group" }}>
+                    <thead
+                        ref={!isPrint && groupIdx === 0 && pageIndex === 0 ? headRef : null}
+                        style={{ display: "table-header-group" }}
+                    >
                         <tr>
                             <th colSpan={Math.max(visibleColCount, 1)} style={{ padding: 0, fontWeight: 400, backgroundColor: "#fff" }}>
-                                {renderTitleBlock(!isPrint && groupIdx === 0 && pageIndex === 0, group)}
+                                {renderTitleBlock(group)}
                             </th>
                         </tr>
 
@@ -1035,8 +1104,11 @@ export default function AttendanceSheet({ reportData, query }) {
                 onToggleSubject={toggleSubject}
                 onSetAllSubjects={setAllSubjects}
                 teacherMap={teacherMap}
+                teacherInputs={teacherInputs}
+                onTeacherInput={handleTeacherInput}
+                monthType={monthType} onMonthTypeChange={setMonthType}
                 month={month} onMonthChange={setMonth}
-                year={year} onYearChange={setYear}
+                year={year} onYearChange={handleYearChange}
                 hour={hourInput} onHourChange={setHourInput}
                 num={numUI}
             />
@@ -1148,10 +1220,10 @@ export default function AttendanceSheet({ reportData, query }) {
             )}
 
             <style>{`
-        /* ✅ SolaimanLipi — ফন্ট ফাইল public/fonts/SolaimanLipi.ttf এ রাখুন (আগে থেকে লোড থাকলে দরকার নেই) */
+        /* ✅ SolaimanLipi — ফন্ট ফাইল public/SolaimanLipi.ttf এ আছে */
         @font-face {
           font-family: 'SolaimanLipi';
-          src: local('SolaimanLipi'), local('Solaiman Lipi'), url('/fonts/SolaimanLipi.ttf') format('truetype');
+          src: local('SolaimanLipi'), local('Solaiman Lipi'), url('/SolaimanLipi.ttf') format('truetype');
           font-weight: normal;
           font-style: normal;
           font-display: swap;
@@ -1199,8 +1271,8 @@ export default function AttendanceSheet({ reportData, query }) {
             page-break-before: always !important;
           }
           .print-portal .sheet-scaled {
-            height: ${sheetHeightMm}mm !important;
-            max-height: ${sheetHeightMm}mm !important;
+            height: ${innerHeightMm}mm !important;
+            max-height: ${innerHeightMm}mm !important;
           }
 
           thead { display: table-header-group !important; }
@@ -1363,18 +1435,20 @@ const DivisionFilter = ({ t, num, options, excluded, onToggle, onSetAll }) => {
 const SheetInfoSettings = ({
     t, num, lang,
     subjectOptions, selectedSubjectIds, onToggleSubject, onSetAllSubjects, teacherMap,
+    teacherInputs, onTeacherInput,
+    monthType, onMonthTypeChange,
     month, onMonthChange, year, onYearChange,
     hour, onHourChange,
 }) => {
-    const monthList = MONTH_NAMES[lang] || MONTH_NAMES.bn;
+    // ✅ ইংরেজি বা আরবি মাস (প্রিন্টের ভাষা অনুযায়ী নাম)
+    const monthList = getMonthNames(monthType, lang);
     const monthOptions = monthList.map((m, i) => ({ value: String(i), label: m }));
-    const yearOptions = YEAR_LIST.map((y) => ({ value: y, label: num(y) }));
     const selectedSet = new Set(selectedSubjectIds);
     return (
         <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-3 space-y-2.5">
             <p className="text-xs font-bold text-slate-700 leading-tight">{t.infoTitle}</p>
 
-            {/* ✅ কিতাবের নাম — checkbox (ডিফল্টে প্রথমটি checked) */}
+            {/* ✅ কিতাবের নাম — checkbox + শিক্ষকের নাম লেখার ঘর */}
             <div>
                 <div className="flex items-center justify-between mb-1.5">
                     <div className="min-w-0">
@@ -1398,35 +1472,71 @@ const SheetInfoSettings = ({
                 {subjectOptions.length === 0 ? (
                     <p className="text-[11px] text-slate-400 py-2 text-center">{t.subjectEmpty}</p>
                 ) : (
-                    <div className="grid grid-cols-1 gap-1.5 max-h-56 overflow-y-auto pr-0.5 rs-scroll">
+                    <div className="grid grid-cols-1 gap-1.5 max-h-72 overflow-y-auto pr-0.5 rs-scroll">
                         {subjectOptions.map((s) => {
                             const checked = selectedSet.has(s.value);
                             const info = teacherMap?.[s.value];
                             return (
-                                <label key={s.value} className={`flex flex-col gap-0.5 px-2.5 py-1.5 rounded-lg border cursor-pointer select-none text-xs transition-colors ${checked
+                                <div key={s.value} className={`rounded-lg border text-xs transition-colors ${checked
                                     ? "bg-emerald-50 border-emerald-200 text-emerald-800 font-medium"
                                     : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50"
                                     }`}>
-                                    <span className="flex items-center gap-2">
-                                        <input type="checkbox" checked={checked} onChange={() => onToggleSubject(s.value)}
-                                            className="w-3.5 h-3.5 accent-emerald-600 cursor-pointer" />
-                                        <span className="flex-1 truncate">{s.label}</span>
-                                    </span>
-                                    {checked && (
-                                        <span className="text-[10px] text-emerald-700 font-normal pl-[22px] truncate">
-                                            {t.teacherAuto}: {info?.loading ? t.teacherLoading : (info?.teacher || "—")}
+                                    <label className="flex flex-col gap-0.5 px-2.5 py-1.5 cursor-pointer select-none">
+                                        <span className="flex items-center gap-2">
+                                            <input type="checkbox" checked={checked} onChange={() => onToggleSubject(s.value)}
+                                                className="w-3.5 h-3.5 accent-emerald-600 cursor-pointer" />
+                                            <span className="flex-1 truncate">{s.label}</span>
                                         </span>
+                                        {checked && (
+                                            <span className="text-[10px] text-emerald-700 font-normal pl-[22px] truncate">
+                                                {t.teacherAuto}: {info?.loading ? t.teacherLoading : (info?.teacher || "—")}
+                                            </span>
+                                        )}
+                                    </label>
+                                    {checked && (
+                                        <div className="px-2.5 pb-2 pl-[32px]">
+                                            <input
+                                                type="text"
+                                                value={teacherInputs?.[s.value] || ""}
+                                                maxLength={80}
+                                                onChange={(e) => onTeacherInput(s.value, e.target.value)}
+                                                placeholder={t.teacherInputPlaceholder}
+                                                className={fieldCls + " font-normal"}
+                                            />
+                                        </div>
                                     )}
-                                </label>
+                                </div>
                             );
                         })}
                     </div>
                 )}
             </div>
 
+            {/* ✅ মাসের ধরন: ইংরেজি / আরবি */}
+            <SegmentedControl
+                label={t.monthTypeLabel}
+                options={[
+                    { key: "gregorian", label: t.monthGregorian },
+                    { key: "hijri", label: t.monthHijri },
+                ]}
+                value={monthType}
+                onChange={onMonthTypeChange}
+            />
+
             <div className="grid grid-cols-2 gap-2">
                 <SelectField label={t.monthLabel} value={month} onChange={onMonthChange} options={monthOptions} placeholder={t.monthPlaceholder} />
-                <SelectField label={t.yearLabel} value={year} onChange={onYearChange} options={yearOptions} placeholder={t.yearPlaceholder} />
+                <div>
+                    <p className="text-[11px] font-semibold text-slate-500 mb-1.5">{t.yearLabel}</p>
+                    <input
+                        type="text"
+                        inputMode="numeric"
+                        value={year ? num(year) : ""}
+                        maxLength={8}
+                        onChange={(e) => onYearChange(e.target.value)}
+                        placeholder={t.yearPlaceholder}
+                        className={fieldCls}
+                    />
+                </div>
             </div>
 
             <div>

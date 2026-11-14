@@ -13,14 +13,14 @@ const resultTypes = [
   {
     id: 'average',
     number: '01',
-    title: 'Joint Exam Result',
+    title: 'সমন্বিত গড় পদ্ধতি',
     subtitle: 'নির্বাচিত পরীক্ষাগুলোর গড় ফলাফল',
     description: 'সেশন, শ্রেণি ও পরীক্ষা নির্বাচন করে নির্বাচিত পরীক্ষাগুলোর নম্বরের গড় নির্ণয় করুন।',
   },
   {
     id: 'percentage',
     number: '02',
-    title: 'Percentage-Based Result',
+    title: 'শতকরা হার পদ্ধতি',
     subtitle: 'নির্ধারিত শতাংশে চূড়ান্ত ফলাফল',
     description: 'প্রতিটি পরীক্ষার ওজন নির্ধারণ করে চূড়ান্ত ফল তৈরি করুন।',
   },
