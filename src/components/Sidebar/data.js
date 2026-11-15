@@ -111,12 +111,12 @@ export const menuData = [
         route: 'students/section',
         icon: 'SubGroup',
       },
-      {
-        id: '3',
-        name: 'Students Admission',
-        route: 'students',
-        icon: 'SubUser',
-      },
+      // {
+      //   id: '3',
+      //   name: 'Students Admission',
+      //   route: 'students',
+      //   icon: 'SubUser',
+      // },
       // {
       //   id: '4',
       //   name: 'Admission Lists',
