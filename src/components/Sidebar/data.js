@@ -796,12 +796,12 @@ export const menuData = [
         route: 'settings/website-settings',
         icon: 'SubWebsite',
       },
-      {
-        id: '4',
-        name: 'Document Settings',
-        route: 'settings/document-settings',
-        icon: 'SubDocument',
-      },
+      // {
+      //   id: '4',
+      //   name: 'Document Settings',
+      //   route: 'settings/document-settings',
+      //   icon: 'SubDocument',
+      // },
       {
         id: '5',
         name: 'All Tutorials setting',
