@@ -312,9 +312,11 @@ const FONT_STEP = 5;
 const PX_PER_MM = 96 / 25.4;
 const PAGE_MARGIN_MM = 5;
 const SAFETY_MM = 4;
-const THEAD_PX = 48;
-const ROW_MIN_PX = 30;
-const TITLE_FALLBACK_PX = 225;
+const THEAD_PX = 40;            // আগে 48
+const ROW_MIN_PX = 24;          // আগে 30
+const TITLE_FALLBACK_PX = 190;  // আগে 225
+// ✅ borders/rounding এর জন্য নিচে সামান্য নিরাপদ জায়গা (px) — এর ফলে শেষ রো আর কাটা পড়বে না
+const ROWS_SLACK_PX = 4;
 
 // ✅ আইডি নং কলামের প্রস্থ (আগে ৫৬ ছিল)
 const ID_COL_PX = 80;
@@ -775,9 +777,13 @@ export default function AttendanceSheet({ reportData, query }) {
     const innerHeightMm = +(sheetHeightMm / scale).toFixed(2);
     const pageHeightPx = innerHeightMm * PX_PER_MM;
 
-    // ✅ thead এর আসল (মাপা) উচ্চতা বাদ দিয়ে বাকি জায়গায় row বসবে
-    const rowsAreaPx = pageHeightPx - headH - 2;
+    // ✅ thead এর আসল (মাপা) উচ্চতা + নিরাপদ slack বাদ দিয়ে বাকি জায়গায় row বসবে
+    const rowsAreaPx = Math.max(rowMinPx, Math.floor(pageHeightPx - headH - ROWS_SLACK_PX));
     const maxRowsFit = Math.max(1, Math.floor(rowsAreaPx / rowMinPx));
+
+    // ✅ প্রতিটি রো-র উচ্চতা: ভাগশেষ প্রথম কয়েকটা রো-তে ১px করে ভাগ — নিচে কোনো ফাঁকা থাকবে না
+    const baseRowHeight = Math.floor(rowsAreaPx / maxRowsFit);
+    const extraRowPx = rowsAreaPx - baseRowHeight * maxRowsFit;
 
     /* ✅ পেজ ভাঙার লজিক (একটি কিতাবের জন্য) */
     const pages = useMemo(() => {
@@ -841,20 +847,11 @@ export default function AttendanceSheet({ reportData, query }) {
         [sheetGroups, pages]
     );
 
-    // ✅ শেষ পেজে সারি ফুল-হাইট (Stretch) করার লজিক
-    const lastPageIdx = pages.length - 1;
-    const lastPageRows = pages[lastPageIdx] || [];
-    const isStretched = customRows === null && lastPageRows.filter(r => r.student !== null).length < maxRowsFit;
-
-    const finalRowHeight = isStretched
-        ? Math.floor(rowsAreaPx / Math.max(1, lastPageRows.length))
-        : Math.floor(rowsAreaPx / maxRowsFit);
-
     /* ✅ thead এর উচ্চতা মাপা */
     const measureHead = useCallback(() => {
         const el = headRef.current;
         if (!el) return;
-        const h = Math.ceil(el.offsetHeight) + 1;
+        const h = Math.ceil(el.getBoundingClientRect().height) + 1;
         if (h > 10) setHeadH((prev) => (Math.abs(prev - h) > 1 ? h : prev));
     }, []);
 
@@ -871,19 +868,24 @@ export default function AttendanceSheet({ reportData, query }) {
         document.fonts.load("16px 'SolaimanLipi'").then(run).catch(() => { });
         document.fonts.ready.then(run);
         const timer = setTimeout(run, 600);
-        return () => { cancelled = true; clearTimeout(timer); };
+        const timer2 = setTimeout(run, 1800);
+        return () => { cancelled = true; clearTimeout(timer); clearTimeout(timer2); };
     }, [measureHead, institutionInfo, institutionLogo, lang]);
 
+    // ✅ রো-র উচ্চতা কোনোভাবেই বাড়তে পারবে না: vertical padding ০, fixed line-height, border-box
     const cellBase = {
         border: `1px solid ${C.border}`,
-        padding: "3px 2px",
+        padding: "0 2px",
+        boxSizing: "border-box",
         fontSize: fs(14),
+        lineHeight: 1.2,
         color: C.text,
         overflow: "hidden",
     };
 
     const thStyle = {
         ...cellBase,
+        padding: "1px 2px",
         backgroundColor: C.headBg,
         color: C.primaryDark,
         fontWeight: 700,
@@ -914,45 +916,45 @@ export default function AttendanceSheet({ reportData, query }) {
     const renderTitleBlock = (group) => (
         <div
             style={{
-                padding: "8px 8px 10px",
+                padding: "4px 8px 6px",
                 borderBottom: `3px solid ${C.primary}`,
                 background: "#fff",
             }}
         >
-            <div style={{ position: "relative", textAlign: "center", minHeight: "92px" }}>
+            <div style={{ position: "relative", textAlign: "center", minHeight: "70px" }}>
                 <img
                     src={institutionLogo || EXAMPLE_LOGO}
                     alt="logo"
                     style={{
-                        position: "absolute", insetInlineStart: "6px", top: "2px",
-                        width: "88px", height: "88px", objectFit: "contain",
+                        position: "absolute", insetInlineStart: "6px", top: "0px",
+                        width: "68px", height: "68px", objectFit: "contain",
                         userSelect: "none", pointerEvents: "none",
                     }}
                 />
                 <h1 style={{ margin: 0, fontSize: fs(22), fontWeight: 800, lineHeight: 1.3, color: C.primaryDark }}>
                     {institutionName}
                 </h1>
-                <p style={{ margin: "2px 0 0", fontSize: fs(15), fontWeight: 600, color: C.muted }}>
+                <p style={{ margin: "0", fontSize: fs(15), fontWeight: 600, color: C.muted }}>
                     {institutionAddress}
                 </p>
-                <h2 style={{ margin: "4px 0 0", fontSize: fs(17), fontWeight: 600, lineHeight: 1.3, color: C.text }}>
+                <h2 style={{ margin: "2px 0 0", fontSize: fs(17), fontWeight: 600, lineHeight: 1.3, color: C.text }}>
                     {t.title} - {sessionName}
                 </h2>
                 <div style={{
-                    display: "inline-block", marginTop: "6px",
-                    minWidth: "320px", padding: "1px 24px",
+                    display: "inline-block", marginTop: "3px",
+                    minWidth: "320px", padding: "0 24px",
                     backgroundColor: C.headBg, color: C.primaryDark,
                     border: `1.5px solid ${C.primary}`, borderRadius: "3px",
-                    fontWeight: 800, fontSize: fs(16), lineHeight: fs(24),
+                    fontWeight: 800, fontSize: fs(16), lineHeight: fs(22),
                 }}>
                     {t.classLabel} : {className}
                 </div>
             </div>
 
             <div style={{
-                marginTop: "10px", padding: "8px 10px",
+                marginTop: "6px", padding: "4px 10px",
                 border: `1px solid ${C.infoBorder}`, borderRadius: "3px",
-                display: "flex", flexDirection: "column", gap: "8px",
+                display: "flex", flexDirection: "column", gap: "4px",
                 textAlign: "start",
             }}>
                 <div style={{ display: "flex", gap: "18px" }}>
@@ -1020,7 +1022,7 @@ export default function AttendanceSheet({ reportData, query }) {
                                     </th>
                                 )}
                                 {show.days && Array.from({ length: days }).map((_, i) => (
-                                    <th key={i} style={{ ...thStyle, padding: "4px 0", verticalAlign: "bottom" }}>
+                                    <th key={i} style={{ ...thStyle, padding: "2px 0", verticalAlign: "bottom" }}>
                                         <span style={{ ...thVertical, fontSize: fs(11) }}>{num(i + 1)}</span>
                                     </th>
                                 ))}
@@ -1040,10 +1042,10 @@ export default function AttendanceSheet({ reportData, query }) {
 
                     <tbody>
                         {rows.length === 0 && (
-                            <tr style={{ height: `${finalRowHeight}px` }}>
+                            <tr style={{ height: `${rowsAreaPx}px` }}>
                                 <td
                                     colSpan={Math.max(visibleColCount, 1)}
-                                    style={{ ...cellBase, textAlign: "center", color: C.muted, height: `${finalRowHeight}px` }}
+                                    style={{ ...cellBase, textAlign: "center", color: C.muted, height: `${rowsAreaPx}px` }}
                                 >
                                     {t.noStudent}
                                 </td>
@@ -1052,11 +1054,13 @@ export default function AttendanceSheet({ reportData, query }) {
 
                         {rows.map(({ student, index }, rowPos) => {
                             const rowBg = index % 2 === 1 ? C.zebra : "#fff";
-                            const td = { ...cellBase, backgroundColor: rowBg, textAlign: "center", height: `${finalRowHeight}px` };
+                            // ✅ ভাগশেষ px প্রথম কয়েকটা রো-তে ভাগ করা — ফাঁকা জায়গা থাকবে না
+                            const rowH = baseRowHeight + (rowPos < extraRowPx ? 1 : 0);
+                            const td = { ...cellBase, backgroundColor: rowBg, textAlign: "center", height: `${rowH}px` };
 
                             if (!student && customRows === null && studentResultsDetails.length === 0 && rowPos === 0) {
                                 return (
-                                    <tr key={`empty-${index}`} style={{ height: `${finalRowHeight}px` }}>
+                                    <tr key={`empty-${index}`} style={{ height: `${rowH}px` }}>
                                         <td colSpan={Math.max(visibleColCount, 1)} style={{ ...td, color: C.muted }}>
                                             {t.noStudent}
                                         </td>
@@ -1067,7 +1071,7 @@ export default function AttendanceSheet({ reportData, query }) {
                             return (
                                 <tr
                                     key={student?.ID ?? `blank-${index}`}
-                                    style={{ height: `${finalRowHeight}px`, breakInside: "avoid", pageBreakInside: "avoid" }}
+                                    style={{ height: `${rowH}px`, breakInside: "avoid", pageBreakInside: "avoid" }}
                                 >
                                     {show.sl && <td style={td}>{student ? num(index + 1) : ""}</td>}
                                     {show.id && <td style={td}>{student ? num(student?.User?.UserCode ?? "") : ""}</td>}
