@@ -122,7 +122,7 @@ export const resultReportsOld = [
 export const markSheetResultReports = [
   {
     ReportID: 1,
-    ReportName: '1. ব্যক্তিগত মার্কসীট',
+    ReportName: '1. মার্কসীট',
   }
 ];
 

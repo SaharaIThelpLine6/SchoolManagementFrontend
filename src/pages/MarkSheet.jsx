@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Loading from '../components/Loading/Loading';
 import useTranslate from '../utils/Translate';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
@@ -56,162 +56,6 @@ const MARK_SHEET_TEMPLATES = [
 ];
 
 // ==========================================
-// Template thumbnails
-// A small drawing of each design, shown on the template card in the
-// settings modal so the design is recognisable before it is selected.
-// Nothing here is real data — it is a miniature of the layout.
-// ==========================================
-const TEMPLATE_THUMBS = {
-  'template-1': { layout: 'standard', page: '#ffffff', frame: '#e2e8f0', head: 'linear-gradient(to right,#115e59,#059669)', accent: '#0f766e', alt: '#f0fdfa', rainbow: true, radius: 4 },
-  'template-2': { layout: 'standard', page: '#faf8ff', frame: '#ddd6fe', head: 'linear-gradient(to bottom right,#312e81,#7e22ce,#c026d3)', accent: '#6d28d9', alt: '#f5f3ff', rainbow: true, radius: 8, inset: true },
-  'template-3': { layout: 'centered', page: '#fffdf7', frame: '#b45309', head: 'linear-gradient(to bottom,#fef3c7,#ffffff)', accent: '#b45309', alt: '#fffbeb', headText: '#92400e', double: true, radius: 3 },
-  'template-4': { layout: 'standard', page: '#ffffff', frame: '#000000', head: '#ffffff', accent: '#000000', alt: '#fafafa', headText: '#000000', rule: true, radius: 0 },
-  'template-5': { layout: 'sidebar', page: '#ffffff', frame: '#a5f3fc', head: 'linear-gradient(to bottom,#0f172a,#083344)', accent: '#0891b2', alt: '#ecfeff', radius: 8 },
-  'template-6': { layout: 'centered', page: '#f5f0e3', frame: '#1c1917', head: '#f5f0e3', accent: '#1c1917', alt: '#ede7d5', headText: '#1c1917', masthead: true, radius: 0 },
-  'template-7': { layout: 'bauhaus', page: '#ffffff', frame: '#000000', head: '#dc2626', accent: '#2563eb', alt: '#fef3c7', radius: 0 },
-  'template-8': { layout: 'centered', page: '#ffffff', frame: '#000000', head: '#ffffff', accent: '#334155', alt: '#ffffff', headText: '#000000', radius: 0 },
-  'template-9': { layout: 'centered', page: '#FFFDF4', frame: '#C9A227', head: '#FFFDF4', accent: '#2E8B8B', alt: '#f0fdfa', headText: '#1E3A8A', ribbon: true, double: true, radius: 2 },
-  'template-10': { layout: 'standard', page: '#ffffff', frame: '#1d4ed8', head: '#ffffff', accent: '#1e3a8a', alt: '#eff6ff', headText: '#1e3a8a', double: true, radius: 2 },
-  'template-11': { layout: 'centered', page: '#ffffff', frame: '#1d4ed8', head: '#ffffff', accent: '#1d4ed8', alt: '#eff6ff', headText: '#1d4ed8', title: true, double: true, radius: 2 },
-  'template-12': { layout: 'standard', page: '#f3faf6', frame: '#c9a227', head: 'linear-gradient(to right,#0b3d26,#14694a,#0b3d26)', accent: '#0f5132', alt: '#ecfdf5', outer: '#0f5132', radius: 8, inset: true },
-};
-
-const ThumbRows = ({ count = 3, color = '#cbd5e1' }) => (
-  <div className="flex w-full flex-col gap-[2px]">
-    {Array.from({ length: count }).map((_, i) => (
-      <div key={i} className="h-[2px] rounded-full" style={{ backgroundColor: color, opacity: 0.55 }} />
-    ))}
-  </div>
-);
-
-const ThumbTable = ({ t, rows = 4 }) => (
-  <div className="w-full overflow-hidden" style={{ border: `1px solid ${t.accent}33`, borderRadius: 2 }}>
-    <div className="h-[4px] w-full" style={{ background: t.accent }} />
-    {Array.from({ length: rows }).map((_, i) => (
-      <div key={i} className="flex h-[4px] items-center gap-[3px] px-[2px]" style={{ backgroundColor: i % 2 ? t.alt : '#ffffff' }}>
-        <div className="h-[1.5px] flex-1 rounded-full" style={{ backgroundColor: t.accent, opacity: 0.35 }} />
-        <div className="h-[1.5px] w-[6px] rounded-full" style={{ backgroundColor: t.accent, opacity: 0.55 }} />
-        <div className="h-[1.5px] w-[6px] rounded-full" style={{ backgroundColor: t.accent, opacity: 0.55 }} />
-      </div>
-    ))}
-  </div>
-);
-
-const ThumbChips = ({ t, count = 4 }) => (
-  <div className="flex gap-[3px]">
-    {Array.from({ length: count }).map((_, i) => (
-      <div key={i} className="h-[7px] flex-1 rounded-[2px]" style={{ background: t.accent, opacity: 0.25 + i * 0.12, border: `0.5px solid ${t.accent}` }} />
-    ))}
-  </div>
-);
-
-const TemplateThumb = ({ id }) => {
-  const t = TEMPLATE_THUMBS[id] || TEMPLATE_THUMBS['template-1'];
-
-  // Bauhaus is colour blocks rather than a page layout.
-  if (t.layout === 'bauhaus') {
-    return (
-      <div className="h-full w-full overflow-hidden bg-white" style={{ border: '2px solid #000' }}>
-        <div className="flex h-[22%] items-center gap-[3px] px-[4px]" style={{ backgroundColor: '#dc2626', borderBottom: '2px solid #000' }}>
-          <div className="h-[8px] w-[8px] rounded-full border border-black bg-white" />
-          <div className="h-[3px] flex-1 rounded-full bg-white/80" />
-        </div>
-        <div className="h-[10%]" style={{ backgroundColor: '#facc15', borderBottom: '2px solid #000' }} />
-        <div className="flex h-[68%]">
-          <div className="w-[12%]" style={{ backgroundColor: '#dc2626', borderRight: '2px solid #000' }} />
-          <div className="flex-1 p-[3px]">
-            <div className="mb-[3px] h-[10px] w-full bg-black" />
-            <div className="mb-[3px] h-[5px] w-full" style={{ backgroundColor: '#2563eb' }} />
-            <ThumbTable t={t} rows={3} />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Dark side column with the content on the right.
-  if (t.layout === 'sidebar') {
-    return (
-      <div className="flex h-full w-full overflow-hidden" style={{ border: `1px solid ${t.frame}`, borderRadius: t.radius, backgroundColor: t.page }}>
-        <div className="flex w-[35%] flex-col items-center gap-[3px] p-[4px]" style={{ background: t.head }}>
-          <div className="h-[10px] w-[10px] rounded-[3px] bg-white/90" />
-          <ThumbRows count={4} color="#67e8f9" />
-          <div className="mt-auto h-[10px] w-[10px] rounded-[2px] bg-white" />
-        </div>
-        <div className="flex flex-1 flex-col gap-[3px] p-[4px]">
-          <ThumbTable t={t} rows={4} />
-          <ThumbChips t={t} />
-        </div>
-      </div>
-    );
-  }
-
-  const centered = t.layout === 'centered';
-
-  return (
-    <div
-      className="h-full w-full overflow-hidden"
-      style={{
-        border: `${t.double ? 2 : 1}px ${t.double ? 'double' : 'solid'} ${t.frame}`,
-        borderRadius: t.radius,
-        backgroundColor: t.outer || t.page,
-        padding: t.inset || t.outer ? 2 : 0,
-      }}
-    >
-      <div
-        className="flex h-full w-full flex-col gap-[3px] p-[4px]"
-        style={{
-          backgroundColor: t.page,
-          borderRadius: Math.max(0, t.radius - 2),
-          border: t.outer ? `1px solid ${t.frame}` : undefined,
-        }}
-      >
-        <div
-          className={`flex shrink-0 items-center gap-[3px] px-[3px] py-[2px] ${centered ? 'flex-col justify-center' : ''}`}
-          style={{
-            background: t.head,
-            borderRadius: t.inset ? 3 : 0,
-            borderBottom: t.masthead || t.rule ? `2px solid ${t.accent}` : undefined,
-          }}
-        >
-          {!centered && (
-            <div className="h-[9px] w-[9px] shrink-0 rounded-full bg-white" style={{ border: `1px solid ${t.accent}66` }} />
-          )}
-          <div className={`flex flex-col gap-[2px] ${centered ? 'items-center' : 'flex-1'}`}>
-            <div className="h-[3px] rounded-full" style={{ width: centered ? 34 : '70%', backgroundColor: t.headText || '#ffffff', opacity: 0.9 }} />
-            <div className="h-[2px] rounded-full" style={{ width: centered ? 22 : '45%', backgroundColor: t.headText || '#ffffff', opacity: 0.55 }} />
-          </div>
-          {t.ribbon && <div className="h-[5px] w-[26px] rounded-[1px]" style={{ background: 'linear-gradient(to right,#ea580c,#f59e0b,#ea580c)' }} />}
-          {t.title && <div className="h-[3px] w-[30px] rounded-full" style={{ backgroundColor: t.accent }} />}
-        </div>
-
-        {t.rainbow && (
-          <div className="h-[2px] w-full shrink-0 rounded-full" style={{ background: 'linear-gradient(to right,#e5484d,#facc15,#22c55e,#0ea5e9,#a855f7)' }} />
-        )}
-
-        <div className="flex shrink-0 gap-[4px]">
-          <div className="flex-1 rounded-[2px] p-[2px]" style={{ border: `0.5px solid ${t.accent}44`, backgroundColor: t.alt }}>
-            <ThumbRows count={3} color={t.accent} />
-          </div>
-          <div className="flex-1 rounded-[2px] p-[2px]" style={{ border: `0.5px solid ${t.accent}44`, backgroundColor: t.alt }}>
-            <ThumbRows count={3} color={t.accent} />
-          </div>
-        </div>
-
-        <ThumbTable t={t} rows={4} />
-        <ThumbChips t={t} />
-
-        <div className="mt-auto flex shrink-0 items-end gap-[4px] pt-[2px]">
-          <div className="h-[8px] w-[8px] rounded-[1px] bg-white" style={{ border: `1px solid ${t.accent}` }} />
-          <div className="flex-1 border-t border-dashed" style={{ borderColor: t.accent }} />
-          <div className="flex-1 border-t border-dashed" style={{ borderColor: t.accent }} />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
 // Size sliders
 // One control shape, used both on the toolbar and inside the settings
 // modal, so a size can be changed from either place and both show the
@@ -252,12 +96,11 @@ const ScaleSlider = ({ label, value, onChange, hint, min = 60, max = 160, step =
 );
 
 /**
- * Live sample of the subject table at the chosen row size, so the effect
- * is visible without closing the settings modal.
+ * Live sample of the result table. It uses the same arithmetic the sheet
+ * does — real padding and real font sizes, never a zoom — so what the
+ * sample shows is what gets printed.
  */
 const TableScaleSample = ({ rowGap = 100, font = 100 }) => {
-  // Same arithmetic the sheet itself uses: real padding and font sizes,
-  // so the sample shows what will actually be printed.
   const pad = (6 * (Number(rowGap) || 100)) / 100;
   const size = (11 * (Number(font) || 100)) / 100;
   const cell = { paddingTop: pad, paddingBottom: pad, fontSize: size };
@@ -267,8 +110,8 @@ const TableScaleSample = ({ rowGap = 100, font = 100 }) => {
       <table className="w-full border-collapse text-center">
         <thead>
           <tr style={{ backgroundColor: '#0f5132', color: '#ffffff' }}>
-            {['ক্রমিক', 'বিষয়', 'পূর্ণমান', 'প্রাপ্ত নম্বর'].map((h, i) => (
-              <th key={h} className={`px-2 font-bold ${i === 1 ? 'text-left' : ''}`} style={cell}>{h}</th>
+            {['ক্রমিক', 'বিষয়', 'পূর্ণমান', 'প্রাপ্ত নম্বর'].map((head, i) => (
+              <th key={head} className={`px-2 font-bold ${i === 1 ? 'text-left' : ''}`} style={cell}>{head}</th>
             ))}
           </tr>
         </thead>
@@ -289,17 +132,131 @@ const TableScaleSample = ({ rowGap = 100, font = 100 }) => {
 };
 
 /** Live sample of the institution name and address at the chosen size. */
-const HeaderScaleSample = ({ scale, name, address }) => (
-  <div
-    className="mt-2 overflow-hidden rounded-md px-3 py-2 text-center text-white"
-    style={{ backgroundImage: 'linear-gradient(to right,#0b3d26,#14694a,#0b3d26)' }}
-  >
-    <div style={{ zoom: (Number(scale) || 100) / 100 }}>
-      <p className="text-[15px] font-bold leading-tight">{name || 'প্রতিষ্ঠানের নাম'}</p>
-      <p className="text-[10px] text-emerald-100">{address || 'ঠিকানা'}</p>
+const HeaderScaleSample = ({ scale, name, address }) => {
+  const pct = (Number(scale) || 100) / 100;
+  return (
+    <div
+      className="mt-2 overflow-hidden rounded-md px-3 py-2 text-center text-white"
+      style={{ backgroundImage: 'linear-gradient(to right,#0b3d26,#14694a,#0b3d26)' }}
+    >
+      <p className="font-bold leading-tight" style={{ fontSize: 15 * pct }}>
+        {name || 'প্রতিষ্ঠানের নাম'}
+      </p>
+      <p className="text-emerald-100" style={{ fontSize: 10 * pct }}>
+        {address || 'ঠিকানা'}
+      </p>
     </div>
-  </div>
-);
+  );
+};
+
+// ==========================================
+// Template miniature
+// A real mark sheet, rendered small. The abstract thumbnails could not show
+// what a design actually looks like, so each card now renders the template
+// itself — same header, same table, same colours — shrunk to fit.
+//
+// The sheet is laid out at A4 width (794px) and scaled down with a
+// transform, which costs nothing to lay out and keeps every proportion.
+// Each one gets its own scopeId so the stylesheet it carries applies to
+// that card alone and never leaks into the sheet being previewed.
+// ==========================================
+const MINI_WIDTH = 794;   // the width every template is designed at
+// One A4 page at that scale: the sheet is 286mm tall (the printable area),
+// which is 286 x 96 / 25.4 px. Matching it exactly keeps the card from
+// showing a strip of empty white under the sheet.
+const MINI_HEIGHT = Math.round((286 * 96) / 25.4);
+
+/** A single student with a few subjects — enough to show a design off. */
+const MINI_SAMPLE = {
+  institution: {
+    InstitutionName: 'জামিয়া ইসলামিয়া দারুল মাদরাসা',
+    Address: 'যাত্রাবাড়ী, ঢাকা',
+    InstitutionCode: 'SAMPLE',
+    PrincipalName: 'মুহতামিম',
+    NajemName: 'নাযেম',
+    Logo: null,
+    SignatureNajem: null,
+    SignaturePrincipal: null,
+  },
+  session: { SessionName: '২০২৬', SessionID: 1 },
+  class: { ClassName: 'নমুনা শ্রেণী' },
+  classGroup: { SubClassID: 1 },
+  exam: [{ ExamID: 1, ExamName: 'বার্ষিক পরীক্ষা' }],
+  examid: 1,
+  conditionAverage: [{
+    ExamType: 1, AverageSubsonkha: 4,
+    DivisionID1: 1, DivisionNumber1: 80,
+    DivisionID2: 2, DivisionNumber2: 70,
+    DivisionID3: 3, DivisionNumber3: 60,
+  }],
+  divisions: [
+    { ID: 1, DivisionNames: 'এ+' },
+    { ID: 2, DivisionNames: 'এ' },
+    { ID: 3, DivisionNames: 'এ-' },
+  ],
+  examSubjects: ['বাংলা', 'ইংরেজি', 'গণিত', 'হাদীস'].map((name, i) => ({
+    ID: i + 1, SubjectID: i + 1, SubjectName: name,
+    MaxNumber: 100, PassNumber: 33, HighestMark: 95,
+  })),
+  students: [{
+    ID: 1, UserID: 1,
+    UserName: 'মোসা: জান্নাতুল আক্তার',
+    FatherName: 'মো: রাসেল মিয়া',
+    MotherName: 'মোসা: ঝিমা বেগম',
+    DateOfBirth: '০১/০১/২০১২',
+    AdmissionSerial: 7, UserCode: '১০০৪',
+    DivisionNames: 'এ', Positions: 2, Total: 340,
+    Note: 'ভালো ফলাফল করেছে।',
+    subjects: [88, 82, 90, 80].map((mark, i) => ({ SubjectID: i + 1, Marks: mark, HighestMark: 95 })),
+  }],
+};
+
+const TemplateMiniature = ({
+  templateId, data, width = 150,
+  showDate, showSignature, principalName, najemName,
+  paperSize, orientation, studentInfoFields, colorMode,
+  showClassTeacherSign, showGuardianSign,
+  headerScale, contentFontScale, rowGapScale,
+}) => {
+  // The real report can hold hundreds of students; a card needs exactly one.
+  const sheetData = useMemo(() => {
+    if (!data?.students?.length) return MINI_SAMPLE;
+    return { ...data, students: data.students.slice(0, 1) };
+  }, [data]);
+
+  const scale = width / MINI_WIDTH;
+
+  return (
+    <div
+      className="relative overflow-hidden rounded bg-white"
+      style={{ width, height: MINI_HEIGHT * scale }}
+    >
+      <div
+        className="pointer-events-none absolute left-0 top-0 origin-top-left"
+        style={{ width: MINI_WIDTH, transform: `scale(${scale})` }}
+      >
+        <MarkSheetPdf
+          data={sheetData}
+          templateId={templateId}
+          scopeId={`ms-mini-${templateId}-${width}`}
+          showDate={showDate}
+          showSignature={showSignature}
+          principalName={principalName}
+          najemName={najemName}
+          paperSize={paperSize}
+          orientation={orientation}
+          studentInfoFields={studentInfoFields}
+          colorMode={colorMode}
+          showClassTeacherSign={showClassTeacherSign}
+          showGuardianSign={showGuardianSign}
+          headerScale={headerScale}
+          contentFontScale={contentFontScale}
+          rowGapScale={rowGapScale}
+        />
+      </div>
+    </div>
+  );
+};
 
 const MarkSheet = () => {
   const translate = useTranslate();
@@ -607,6 +564,25 @@ const MarkSheet = () => {
 
   const canPrint = hasMarkSheetParams && !!data && !isMarkSheetBusy && !isMarkSheetError;
 
+  // Passed to every miniature so a card shows the design with the
+  // settings actually in force, not a generic version of it.
+  const miniProps = {
+    data,
+    showDate,
+    showSignature,
+    principalName,
+    najemName,
+    paperSize: 'A4',
+    orientation: 'portrait',
+    studentInfoFields,
+    colorMode,
+    showClassTeacherSign,
+    showGuardianSign,
+    headerScale,
+    contentFontScale,
+    rowGapScale,
+  };
+
   return (
     <div className="font-SolaimanLipi space-y-4 bg-transparent max-w-full overflow-x-hidden">
 
@@ -629,7 +605,7 @@ const MarkSheet = () => {
               <FormProvider {...methods}>
                 <form
                   onSubmit={handleSubmit(onSubmit)}
-                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 items-end"
+                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-[repeat(4,minmax(0,1fr))_minmax(0,2fr)_auto] gap-3 items-end"
                 >
                   <DefaultSelect
                     label={translate('Report')}
@@ -691,17 +667,17 @@ const MarkSheet = () => {
                   )}
 
                   {shouldShowFields('UserCode') && (
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-2 sm:col-span-2 xl:col-span-1 xl:col-start-5">
                       <DefaultInput registerKey="UserCode1" label="আইডি থেকে" />
                       <DefaultInput registerKey="UserCode2" label="আইডি পর্যন্ত" />
                     </div>
                   )}
 
                   {/* ⭐ রিপোর্ট তৈরি এবং সেটিংস বাটন */}
-                  <div className="flex items-center gap-2 w-full">
+                  <div className="flex items-center gap-2 w-full min-w-0 sm:col-span-2 xl:col-span-1 xl:col-start-6">
                     <button
                       type="submit"
-                      className={`w-auto px-6 flex items-center justify-center gap-1.5 h-[44px] rounded-lg text-[13px] font-bold ${C.primary} shadow-sm transition`}
+                      className={`w-auto px-5 flex items-center justify-center gap-1.5 h-[44px] shrink-0 rounded-lg text-[13px] font-bold ${C.primary} shadow-sm transition`}
                     >
                       View
                     </button>
@@ -716,11 +692,11 @@ const MarkSheet = () => {
                       }`}
                       title="সব টেমপ্লেট দেখে নির্বাচন করুন"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5h16v14H4zM4 9h16M9 9v10" />
                       </svg>
-                      টেমপ্লেট
-                      <svg className={`w-3.5 h-3.5 transition-transform ${isTemplatePanelOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <span className="whitespace-nowrap">টেমপ্লেট</span>
+                      <svg className={`w-3.5 h-3.5 shrink-0 transition-transform ${isTemplatePanelOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
@@ -764,7 +740,7 @@ const MarkSheet = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-12">
                   {MARK_SHEET_TEMPLATES.map((tpl) => {
                     const isSelected = selectedTemplate === tpl.id;
                     return (
@@ -779,11 +755,11 @@ const MarkSheet = () => {
                             : 'border-slate-200 bg-white hover:border-slate-300'
                         }`}
                       >
-                        <div className="h-20 w-full">
-                          <TemplateThumb id={tpl.id} />
+                        <div className="flex justify-center">
+                          <TemplateMiniature templateId={tpl.id} width={75} {...miniProps} />
                         </div>
                         <div className="mt-1.5 flex items-center justify-between gap-1">
-                          <span className={`truncate text-[11px] font-bold ${isSelected ? 'text-[#6D28D9]' : 'text-slate-600'}`}>
+                          <span className={`truncate text-[10px] font-bold leading-tight ${isSelected ? 'text-[#6D28D9]' : 'text-slate-600'}`}>
                             {tpl.name}
                           </span>
                           {isSelected && (
@@ -1363,8 +1339,8 @@ const MarkSheet = () => {
                       <p className="text-xs text-slate-500">{tpl.desc}</p>
 
                       {/* Miniature of the design */}
-                      <div className={`mt-3 w-full h-28 rounded-lg border p-1.5 ${isSelected ? 'border-[#DDD6FE] bg-white' : 'border-slate-100 bg-slate-50'}`}>
-                        <TemplateThumb id={tpl.id} />
+                      <div className={`mt-3 flex w-full justify-center rounded-lg border p-1.5 ${isSelected ? 'border-[#DDD6FE] bg-white' : 'border-slate-100 bg-slate-50'}`}>
+                        <TemplateMiniature templateId={tpl.id} width={105} {...miniProps} />
                       </div>
                     </div>
                   );
@@ -1444,8 +1420,8 @@ const MarkSheet = () => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-4 py-8">
-                  <div className="h-[420px] w-[300px] rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-                    <TemplateThumb id={previewTemplateId} />
+                  <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+                    <TemplateMiniature templateId={previewTemplateId} width={210} {...miniProps} />
                   </div>
                   <p className="text-sm font-medium text-slate-500 text-center">
                     সেশন, পরীক্ষা ও শ্রেণী নির্বাচন করে View দিলে এখানে আসল ডাটা দিয়ে প্রিভিউ দেখা যাবে।

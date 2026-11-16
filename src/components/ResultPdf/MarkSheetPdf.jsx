@@ -49,13 +49,32 @@ const getDensity = (totalSubjects) => {
   return { cap: Infinity, pad: 4 };
 };
 
+/**
+ * Prefix every selector in a stylesheet so the rules apply inside one
+ * element only. Used for the template miniatures, where a dozen sheets are
+ * on screen together and each one needs its own type sizes.
+ * The stylesheet handed in holds plain rules only — no at-rules — because
+ * the caller keeps @page and the print block out of it.
+ */
+const scopeSelectors = (css, prefix) =>
+  css.replace(/(^|\n)([^@\n{}][^{}]*?)\s*\{/g, (whole, lead, selector) => {
+    const scoped = selector
+      .split(',')
+      .map((one) => `${prefix} ${one.trim()}`)
+      .join(',\n');
+    return `${lead}${scoped} {`;
+  });
+
 const getPrintCss = (paperSize, orientation, templateId, sizes = {}) => {
   const pageHeight = getPageHeightMm(paperSize, orientation);
 
   // ---- Size settings -------------------------------------------------
   // Each one is a percentage. At 100 nothing is emitted at all, so an
   // untouched sheet renders exactly as its template designed it.
-  const { headerScale = 100, contentFontScale = 100, rowGapScale = 100, totalSubjects = 0 } = sizes;
+  const {
+    headerScale = 100, contentFontScale = 100, rowGapScale = 100,
+    totalSubjects = 0, scopeId = null,
+  } = sizes;
   const m = TYPE_METRICS[templateId] || TYPE_METRICS['template-1'];
   const density = getDensity(totalSubjects);
 
@@ -134,8 +153,9 @@ ${tableSel} thead th { font-size: ${px(m.head * fontPct)} !important; }
   };
   const p = palette[templateId] || { th: '#0f766e', thBorder: '#0f766e', alt: '#f0fdfa' };
 
-  return `
-@page { size: ${paperSize} ${orientation}; margin: ${PAGE_MARGIN_MM}mm; }
+  // Rules that describe the sheet. With a scopeId they are prefixed so
+  // they reach only that one preview, leaving the real sheet alone.
+  const sheetCss = `
 
 /* ---------------------------------------------------------------
    One page, one size.
@@ -220,7 +240,13 @@ ${headerCss}${contentFontCss}${tableFontCss}${rowGapCss}
 .marksheet-mode-bw .marksheet-rainbow {
   display: none !important;
 }
+`;
 
+  if (scopeId) return scopeSelectors(sheetCss, `#${scopeId}`);
+
+  return `
+@page { size: ${paperSize} ${orientation}; margin: ${PAGE_MARGIN_MM}mm; }
+${sheetCss}
 @media print {
   html, body {
     height: auto !important;
@@ -3220,6 +3246,7 @@ const MarkSheetPdf = ({
   studentInfoFields = {}, colorMode = 'color',
   showClassTeacherSign = true, showGuardianSign = true,
   headerScale = 100, contentFontScale = 100, rowGapScale = 100,
+  scopeId = null,
 }) => {
   const institution = data?.institution;
   const ExamName = data?.exam?.[0]?.ExamName;
@@ -3303,12 +3330,15 @@ const MarkSheetPdf = ({
         contentFontScale,
         rowGapScale,
         totalSubjects: examSubjects.length,
+        scopeId,
       })}</style>
       <div
-        id="marksheet-print-area"
-        className={`font-SolaimanLipi w-full bg-slate-100 py-6 min-h-screen flex flex-col items-center print:bg-white print:py-0 min-h-0 print:block ${
-          colorMode === 'bw' ? 'marksheet-mode-bw' : ''
-        }`}
+        id={scopeId || 'marksheet-print-area'}
+        className={`font-SolaimanLipi w-full ${
+          scopeId
+            ? ''
+            : 'bg-slate-100 py-6 min-h-screen flex flex-col items-center print:bg-white print:py-0 min-h-0 print:block'
+        } ${colorMode === 'bw' ? 'marksheet-mode-bw' : ''}`}
       >
         {/* Paper zoom wrapper — pages render at the real paper width */}
         <div className="w-full" style={{ zoom: paperZoom }}>
