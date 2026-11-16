@@ -15,6 +15,11 @@ const getPrintCss = (paperSize, orientation, templateId) => {
     'template-5': { th: '#0891b2', thBorder: '#0e7490', alt: '#ecfeff' },
     'template-6': { th: '#1c1917', thBorder: '#000000', alt: '#ede7d5', base: '#f5f0e3' },
     'template-7': { th: '#2563eb', thBorder: '#000000', alt: '#fef3c7', base: '#ffffff' },
+    'template-8': { th: '#ffffff', thBorder: '#000000', alt: '#ffffff' },
+    'template-9': { th: '#2E8B8B', thBorder: '#000000', alt: '#f0fdfa' },
+    'template-10': { th: '#1e3a8a', thBorder: '#1e3a8a', alt: '#eff6ff' },
+    'template-11': { th: '#1d4ed8', thBorder: '#1e293b', alt: '#eff6ff' },
+    'template-12': { th: '#0f5132', thBorder: '#c9a227', alt: '#ecfdf5' },
   };
   const p = palette[templateId] || { th: '#0f766e', thBorder: '#0f766e', alt: '#f0fdfa' };
 
@@ -177,6 +182,10 @@ const TH_STYLE_MONO = { backgroundColor: '#000000', color: '#ffffff', ...EXACT }
 const TH_STYLE_SIDEBAR = { backgroundColor: '#0891b2', color: '#ffffff', ...EXACT };
 const TH_STYLE_GAZETTE = { backgroundColor: '#1c1917', color: '#f5f0e3', ...EXACT };
 const TH_STYLE_BAUHAUS = { backgroundColor: '#2563eb', color: '#ffffff', ...EXACT };
+const TH_STYLE_TRADITIONAL = { backgroundColor: '#2E8B8B', color: '#ffffff', ...EXACT };
+const TH_STYLE_TRANSCRIPT = { backgroundColor: '#1e3a8a', color: '#ffffff', ...EXACT };
+const TH_STYLE_ORNATE = { backgroundColor: '#1d4ed8', color: '#ffffff', ...EXACT };
+const TH_STYLE_ROYAL = { backgroundColor: '#0f5132', color: '#ffffff', ...EXACT };
 
 // ==========================================
 // শেয়ার্ড ডাটা ক্যালকুলেশন (৩টি টেমপ্লেটেই ব্যবহার)
@@ -279,6 +288,83 @@ const getPaperZoom = (paperSize, orientation) => {
 };
 
 // ==========================================
+// Shared field list
+// Report 1 (the default template) is the single source of truth for which
+// student fields exist. Every template builds its information block from
+// this helper, so no template can ever print a field report 1 does not
+// have, and a field switched off in the settings disappears everywhere.
+// ==========================================
+const buildInfoItems = ({
+  studentInfoFields = {}, labels = {},
+  studentName, fatherName, motherName, birthDate, registration, rollNumber,
+}) => [
+  studentInfoFields.name && { key: 'name', label: 'নাম', enLabel: 'NAME', value: studentName },
+  studentInfoFields.fatherName && { key: 'fatherName', label: 'পিতার নাম', enLabel: 'FATHER', value: fatherName },
+  studentInfoFields.motherName && { key: 'motherName', label: 'মাতার নাম', enLabel: 'MOTHER', value: motherName },
+  studentInfoFields.dob && { key: 'dob', label: 'জন্ম তারিখ', enLabel: 'DATE OF BIRTH', value: birthDate },
+  studentInfoFields.registration && { key: 'registration', label: labels?.StudentIDLabel ?? 'দাখেলা', enLabel: labels?.StudentIDLabel ?? 'REGISTRATION', value: registration },
+  studentInfoFields.admission && { key: 'admission', label: labels?.AdmissionIDLabel ?? 'ভর্তি নং', enLabel: labels?.AdmissionIDLabel ?? 'ADMISSION', value: rollNumber },
+].filter(Boolean);
+
+/**
+ * Column totals for the subject table.
+ * Only real marks are added up — a missing mark counts as zero instead of
+ * being replaced by a sample value.
+ */
+const sumSubjectMarks = (subjects = []) =>
+  subjects.reduce(
+    (acc, item) => ({
+      fullMark: acc.fullMark + (Number(item.fullMark) || 0),
+      passMark: acc.passMark + (Number(item.passMark) || 0),
+      highestMark: acc.highestMark + (Number(item.highestMark) || 0),
+      obtainedMark: acc.obtainedMark + (Number(item.obtainedMark) || 0),
+    }),
+    { fullMark: 0, passMark: 0, highestMark: 0, obtainedMark: 0 }
+  );
+
+/** Percentage of a single subject — blank when the marks are not numeric. */
+const subjectPercent = (obtained, full) => {
+  const o = Number(obtained);
+  const f = Number(full);
+  if (!Number.isFinite(o) || !Number.isFinite(f) || f <= 0) return '-';
+  return `${Math.round((o / f) * 100)}%`;
+};
+
+/** The four summary values report 1 shows, reused by every template. */
+const buildSummaryItems = ({ divisionName, student, averageMark }) => [
+  { key: 'division', label: 'প্রাপ্ত বিভাগ', enLabel: 'DIVISION', value: divisionName },
+  { key: 'position', label: 'মেধা স্থান', enLabel: 'POSITION', value: student?.Positions ?? '-' },
+  { key: 'average', label: 'গড়', enLabel: 'AVERAGE', value: averageMark },
+  { key: 'total', label: 'মোট নম্বর', enLabel: 'TOTAL', value: student?.Total ?? '-' },
+];
+
+// Decorative backgrounds, drawn as inline SVG so nothing has to be uploaded.
+const PATTERN_GEOMETRIC =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='44' viewBox='0 0 44 44'%3E%3Cg fill='none' stroke='%23b08d2e' stroke-width='1'%3E%3Cpath d='M22 3 L26.5 14 L38 14 L28.8 21.2 L32.3 32.5 L22 25.8 L11.7 32.5 L15.2 21.2 L6 14 L17.5 14 Z'/%3E%3C/g%3E%3C/svg%3E\")";
+
+const PATTERN_MEDALLION =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg fill='none' stroke='%23b08d2e' stroke-width='1.2'%3E%3Ccircle cx='110' cy='110' r='96'/%3E%3Ccircle cx='110' cy='110' r='72'/%3E%3Ccircle cx='110' cy='110' r='48'/%3E%3Ccircle cx='110' cy='110' r='24'/%3E%3Cpath d='M110 14 L110 206 M14 110 L206 110 M42 42 L178 178 M178 42 L42 178'/%3E%3C/g%3E%3C/svg%3E\")";
+
+const PATTERN_LATTICE =
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cg fill='none' stroke='%231d4ed8' stroke-width='1'%3E%3Cpath d='M15 0 L30 15 L15 30 L0 15 Z'/%3E%3Ccircle cx='15' cy='15' r='4'/%3E%3C/g%3E%3C/svg%3E\")";
+
+/** Corner ornament used by the framed templates. */
+const CornerOrnament = ({ position, color = '#C9A227' }) => {
+  const edges = {
+    tl: 'top-1.5 left-1.5 border-t-[3px] border-l-[3px] rounded-tl',
+    tr: 'top-1.5 right-1.5 border-t-[3px] border-r-[3px] rounded-tr',
+    bl: 'bottom-1.5 left-1.5 border-b-[3px] border-l-[3px] rounded-bl',
+    br: 'bottom-1.5 right-1.5 border-b-[3px] border-r-[3px] rounded-br',
+  };
+  return (
+    <div
+      className={`pointer-events-none absolute h-7 w-7 print:h-5 print:w-5 ${edges[position]}`}
+      style={{ borderColor: color }}
+    />
+  );
+};
+
+// ==========================================
 // Small components
 // ==========================================
 const SectionTitle = ({ icon, children, right, accent = 'emerald' }) => {
@@ -325,6 +411,11 @@ const SingleMarkSheet = ({
   const { data } = useGetLabelNameListsQuery();
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
+
+  const infoItems = buildInfoItems({
+    studentInfoFields, labels, studentName, fatherName, motherName,
+    birthDate, registration, rollNumber,
+  });
 
   return (
     <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white shadow-xl rounded-xl border border-slate-200 text-slate-800 mb-10 print:mb-0 print:flex print:flex-col`}>
@@ -373,12 +464,9 @@ const SingleMarkSheet = ({
               পরীক্ষার্থীর তথ্য
             </SectionTitle>
             <div className="bg-slate-50/50 rounded-lg p-3 print:p-2 border border-slate-100">
-              {studentInfoFields.name && <InfoRow label="নাম" value={studentName} />}
-              {studentInfoFields.fatherName && <InfoRow label="পিতার নাম" value={fatherName} />}
-              {studentInfoFields.motherName && <InfoRow label="মাতার নাম" value={motherName} />}
-              {studentInfoFields.dob && <InfoRow label="জন্ম তারিখ" value={birthDate} />}
-              {studentInfoFields.registration && <InfoRow label={labels?.StudentIDLabel ?? 'দাখেলা'} value={registration} />}
-              {studentInfoFields.admission && <InfoRow label={labels?.AdmissionIDLabel ?? 'ভর্তি নং'} value={rollNumber} />}
+              {infoItems.map((f) => (
+                <InfoRow key={f.key} label={f.label} value={f.value} />
+              ))}
             </div>
           </div>
 
@@ -553,6 +641,11 @@ const SingleMarkSheetModern = ({
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
+  const infoItems = buildInfoItems({
+    studentInfoFields, labels, studentName, fatherName, motherName,
+    birthDate, registration, rollNumber,
+  });
+
   const summaryItems = [
     { label: 'প্রাপ্ত বিভাগ', value: divisionName, from: 'from-violet-500', to: 'to-indigo-500', icon: '🏅' },
     { label: 'মেধা স্থান', value: student?.Positions ?? '-', from: 'from-indigo-500', to: 'to-blue-500', icon: '🎯' },
@@ -610,12 +703,9 @@ const SingleMarkSheetModern = ({
               পরীক্ষার্থীর তথ্য
             </SectionTitle>
             <div className="rounded-xl bg-white border-l-4 border-violet-500 shadow-sm p-3 print:p-2 border-r border-t border-b border-violet-100">
-              {studentInfoFields.name && <InfoRow label="নাম" value={studentName} />}
-              {studentInfoFields.fatherName && <InfoRow label="পিতার নাম" value={fatherName} />}
-              {studentInfoFields.motherName && <InfoRow label="মাতার নাম" value={motherName} />}
-              {studentInfoFields.dob && <InfoRow label="জন্ম তারিখ" value={birthDate} />}
-              {studentInfoFields.registration && <InfoRow label={labels?.StudentIDLabel ?? 'দাখেলা'} value={registration} />}
-              {studentInfoFields.admission && <InfoRow label={labels?.AdmissionIDLabel ?? 'ভর্তি নং'} value={rollNumber} />}
+              {infoItems.map((f) => (
+                <InfoRow key={f.key} label={f.label} value={f.value} />
+              ))}
             </div>
           </div>
 
@@ -781,6 +871,11 @@ const SingleMarkSheetElegant = ({
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
+  const infoItems = buildInfoItems({
+    studentInfoFields, labels, studentName, fatherName, motherName,
+    birthDate, registration, rollNumber,
+  });
+
   const summaryItems = [
     { label: 'প্রাপ্ত বিভাগ', value: divisionName },
     { label: 'মেধা স্থান', value: student?.Positions ?? '-' },
@@ -836,12 +931,9 @@ const SingleMarkSheetElegant = ({
             <div>
               <SectionTitle icon="◆" accent="amber">পরীক্ষার্থীর তথ্য</SectionTitle>
               <div className="rounded-md bg-white border border-amber-300 p-3 print:p-2">
-                {studentInfoFields.name && <InfoRow label="নাম" value={studentName} />}
-                {studentInfoFields.fatherName && <InfoRow label="পিতার নাম" value={fatherName} />}
-                {studentInfoFields.motherName && <InfoRow label="মাতার নাম" value={motherName} />}
-                {studentInfoFields.dob && <InfoRow label="জন্ম তারিখ" value={birthDate} />}
-                {studentInfoFields.registration && <InfoRow label={labels?.StudentIDLabel ?? 'দাখেলা'} value={registration} />}
-                {studentInfoFields.admission && <InfoRow label={labels?.AdmissionIDLabel ?? 'ভর্তি নং'} value={rollNumber} />}
+              {infoItems.map((f) => (
+                <InfoRow key={f.key} label={f.label} value={f.value} />
+              ))}
               </div>
             </div>
 
@@ -1007,14 +1099,10 @@ const SingleMarkSheetMinimal = ({
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
-  const infoItems = [
-    studentInfoFields.name && { label: 'NAME', value: studentName },
-    studentInfoFields.fatherName && { label: 'FATHER', value: fatherName },
-    studentInfoFields.motherName && { label: 'MOTHER', value: motherName },
-    studentInfoFields.dob && { label: 'DATE OF BIRTH', value: birthDate },
-    studentInfoFields.registration && { label: labels?.StudentIDLabel ?? 'REGISTRATION', value: registration },
-    studentInfoFields.admission && { label: labels?.AdmissionIDLabel ?? 'ADMISSION', value: rollNumber },
-  ].filter(Boolean);
+  const infoItems = buildInfoItems({
+    studentInfoFields, labels, studentName, fatherName, motherName,
+    birthDate, registration, rollNumber,
+  });
 
   return (
     <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-black border border-black mb-10 print:mb-0 print:flex print:flex-col`}>
@@ -1051,7 +1139,7 @@ const SingleMarkSheetMinimal = ({
         <div className="grid grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-x-6 gap-y-2.5 print:gap-y-1.5 print:shrink-0">
           {infoItems.map((f, i) => (
             <div key={i} className="border-b border-zinc-300 pb-1 print:pb-0.5">
-              <div className="text-[8.5px] print:text-[8px] uppercase tracking-[0.22em] text-zinc-500">{f.label}</div>
+              <div className="text-[8.5px] print:text-[8px] uppercase tracking-[0.22em] text-zinc-500">{f.enLabel}</div>
               <div className="text-[13.5px] print:text-[12px] font-semibold truncate">{toBn(f.value)}</div>
             </div>
           ))}
@@ -1215,14 +1303,10 @@ const SingleMarkSheetSidebar = ({
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
-  const infoItems = [
-    studentInfoFields.name && { label: 'নাম', value: studentName },
-    studentInfoFields.fatherName && { label: 'পিতা', value: fatherName },
-    studentInfoFields.motherName && { label: 'মাতা', value: motherName },
-    studentInfoFields.dob && { label: 'জন্ম তারিখ', value: birthDate },
-    studentInfoFields.registration && { label: labels?.StudentIDLabel ?? 'দাখেলা', value: registration },
-    studentInfoFields.admission && { label: labels?.AdmissionIDLabel ?? 'ভর্তি নং', value: rollNumber },
-  ].filter(Boolean);
+  const infoItems = buildInfoItems({
+    studentInfoFields, labels, studentName, fatherName, motherName,
+    birthDate, registration, rollNumber,
+  });
 
   const summaryItems = [
     { label: 'বিভাগ', value: divisionName, tone: 'from-cyan-500 to-teal-500' },
@@ -1435,14 +1519,10 @@ const SingleMarkSheetGazette = ({
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
-  const infoItems = [
-    studentInfoFields.name && { label: 'NAME', value: studentName },
-    studentInfoFields.fatherName && { label: 'FATHER', value: fatherName },
-    studentInfoFields.motherName && { label: 'MOTHER', value: motherName },
-    studentInfoFields.dob && { label: 'DATE OF BIRTH', value: birthDate },
-    studentInfoFields.registration && { label: labels?.StudentIDLabel ?? 'REG.', value: registration },
-    studentInfoFields.admission && { label: labels?.AdmissionIDLabel ?? 'ADM.', value: rollNumber },
-  ].filter(Boolean);
+  const infoItems = buildInfoItems({
+    studentInfoFields, labels, studentName, fatherName, motherName,
+    birthDate, registration, rollNumber,
+  });
 
   return (
     <div
@@ -1485,7 +1565,7 @@ const SingleMarkSheetGazette = ({
             <div className="space-y-1 text-[11.5px] print:text-[10.5px]">
               {infoItems.map((f, i) => (
                 <div key={i} className="flex items-baseline border-b border-dotted border-stone-400 pb-0.5">
-                  <span className="text-[8px] print:text-[7.5px] font-bold uppercase tracking-wider text-stone-500 w-20 shrink-0">{f.label}</span>
+                  <span className="text-[8px] print:text-[7.5px] font-bold uppercase tracking-wider text-stone-500 w-20 shrink-0">{f.enLabel}</span>
                   <span className="font-semibold truncate">{toBn(f.value)}</span>
                 </div>
               ))}
@@ -1600,10 +1680,12 @@ const SingleMarkSheetGazette = ({
       {/* ── Footer: publication info */}
       <div className="border-t-[3px] border-double border-stone-900 px-5 py-2 print:px-4 print:py-1 print:mt-auto print:shrink-0">
         <div className="grid grid-cols-5 items-end gap-3 print:gap-2">
-          <div className="col-span-1">
-            <QRCode size={48} style={{ height: 'auto', width: '100%' }}
-              value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
-              viewBox="0 0 256 256" />
+          <div className="col-span-1 flex flex-col items-center">
+            <div className="w-[50px] print:w-[32px]">
+              <QRCode size={40} style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
+                value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
+                viewBox="0 0 256 256" />
+            </div>
             <p className="text-[8px] print:text-[7.5px] text-center italic mt-0.5">Verify</p>
           </div>
           <div className="col-span-2 text-center">
@@ -1658,14 +1740,10 @@ const SingleMarkSheetBauhaus = ({
   const labels = data?.[0] || {};
   const previewWidth = getPreviewWidth(paperSize, orientation);
 
-  const infoItems = [
-    studentInfoFields.name && { label: 'NAME', value: studentName },
-    studentInfoFields.fatherName && { label: 'FATHER', value: fatherName },
-    studentInfoFields.motherName && { label: 'MOTHER', value: motherName },
-    studentInfoFields.dob && { label: 'DOB', value: birthDate },
-    studentInfoFields.registration && { label: labels?.StudentIDLabel ?? 'REG', value: registration },
-    studentInfoFields.admission && { label: labels?.AdmissionIDLabel ?? 'ADM', value: rollNumber },
-  ].filter(Boolean);
+  const infoItems = buildInfoItems({
+    studentInfoFields, labels, studentName, fatherName, motherName,
+    birthDate, registration, rollNumber,
+  });
 
   const summaryItems = [
     { label: 'DIVISION', value: divisionName, bg: 'bg-red-600', border: 'border-red-800' },
@@ -1723,7 +1801,7 @@ const SingleMarkSheetBauhaus = ({
             <div className="bg-black text-white px-4 py-2.5 print:px-3 print:py-1.5 grid grid-cols-2 md:grid-cols-3 print:grid-cols-3 gap-x-4 gap-y-1.5 print:gap-y-1 border-b-[6px] border-black print:shrink-0">
               {infoItems.map((f, i) => (
                 <div key={i}>
-                  <div className="text-[7.5px] print:text-[7px] uppercase tracking-[0.2em] font-black text-yellow-400">{f.label}</div>
+                  <div className="text-[7.5px] print:text-[7px] uppercase tracking-[0.2em] font-black text-yellow-400">{f.enLabel}</div>
                   <div className="text-[11.5px] print:text-[10.5px] font-bold truncate">{toBn(f.value)}</div>
                 </div>
               ))}
@@ -2011,6 +2089,960 @@ const SingleMarkSheetClassic = ({
 };
 
 // ==========================================
+// TEMPLATE 9: Traditional School
+// Cream sheet inside a gold double frame, with corner ornaments, a ribbon
+// badge and dotted-line information rows. Every value is read from the
+// report data — the sheet never prints a sample institution, district or
+// any field that report 1 does not provide.
+// ==========================================
+const DottedValue = ({ label, value, width = 'w-32' }) => (
+  <span className="inline-flex items-baseline gap-1.5 whitespace-nowrap">
+    <span>{label}</span>
+    <span className={`${width} print:w-24 inline-block border-b border-dotted border-[#1E3A8A] text-center`}>
+      {toBn(value ?? '')}
+    </span>
+  </span>
+);
+
+const SingleMarkSheetTraditional = ({
+  student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
+  session, classInfo, examSubjects, divisions = [], examConfig = {},
+  isLast = false, ExamID, SubClassID, ExamName,
+  showDate = true, showSignature = true, principalName = '', najemName = '',
+  paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
+  showClassTeacherSign = true, showGuardianSign = true,
+}) => {
+  const {
+    subjects, totalSubjects, divisionRows, rowPad, rowText,
+    studentName, fatherName, motherName, birthDate, rollNumber,
+    registration, divisionName, averageMark,
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+
+  const { data } = useGetLabelNameListsQuery();
+  const labels = data?.[0] || {};
+  const previewWidth = getPreviewWidth(paperSize, orientation);
+
+  const infoItems = buildInfoItems({
+    studentInfoFields, labels, studentName, fatherName, motherName,
+    birthDate, registration, rollNumber,
+  });
+  const totals = sumSubjectMarks(subjects);
+
+  return (
+    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-[#FFFDF4] text-[#1E3A8A] shadow-xl mb-10 print:mb-0 print:shadow-none print:flex print:flex-col border-[7px] border-double border-[#C9A227] p-1.5 print:p-1`}>
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.07]"
+        style={{ backgroundImage: PATTERN_GEOMETRIC }}
+      />
+      <CornerOrnament position="tl" />
+      <CornerOrnament position="tr" />
+      <CornerOrnament position="bl" />
+      <CornerOrnament position="br" />
+
+      <div className="relative z-10 border border-[#C9A227] px-6 py-4 print:px-4 print:py-2 flex flex-col print:flex-1 print:min-h-0">
+
+        {/* Header — institution, logos and the exam ribbon */}
+        <div className="marksheet-header text-center shrink-0">
+          <h1 className="text-[28px] md:text-[30px] print:text-[21px] font-bold leading-tight">
+            {toBn(institution?.InstitutionName || '-')}
+          </h1>
+          <p className="text-[16px] print:text-[13px] font-bold text-[#0f766e] mt-0.5">
+            {toBn(institution?.Address || '-')}
+          </p>
+
+          <div className="mt-3 print:mt-1.5 flex items-center justify-between gap-3">
+            <div className="h-[66px] w-[66px] print:h-[48px] print:w-[48px] shrink-0 overflow-hidden rounded-full border-2 border-[#1E3A8A] bg-white flex items-center justify-center">
+              {imageSrc
+                ? <img src={imageSrc} alt="Logo" className="h-full w-full object-cover" />
+                : <span className="text-[9px] text-slate-400">No Logo</span>}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="relative inline-block">
+                <div className="absolute -left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 rotate-45 bg-[#c2410c]" />
+                <div className="absolute -right-3.5 top-1/2 -translate-y-1/2 h-5 w-5 rotate-45 bg-[#c2410c]" />
+                <div
+                  className="relative z-10 rounded-sm border-y-2 border-[#fde047] px-8 print:px-5 py-1.5 print:py-0.5 text-[19px] print:text-[14px] font-bold text-white shadow-md"
+                  style={{ backgroundImage: 'linear-gradient(to right,#ea580c,#f59e0b,#ea580c)', ...EXACT }}
+                >
+                  {toBn(ExamName || '-')}
+                </div>
+              </div>
+              <div className="text-[21px] print:text-[15px] font-bold mt-1 print:mt-0.5">নম্বর পত্র</div>
+            </div>
+
+            <div className="h-[66px] w-[66px] print:h-[48px] print:w-[48px] shrink-0 overflow-hidden rounded-full border-2 border-[#1E3A8A] bg-white flex items-center justify-center">
+              {imageSrc
+                ? <img src={imageSrc} alt="Logo" className="h-full w-full object-cover" />
+                : <span className="text-[9px] text-slate-400">No Logo</span>}
+            </div>
+          </div>
+        </div>
+
+        <div className="marksheet-body flex flex-col print:flex-1 print:min-h-0">
+
+          {/* Institution / session line */}
+          <div className="mt-3 print:mt-1.5 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 text-[15px] print:text-[12px] font-bold shrink-0">
+            <DottedValue label="প্রতিষ্ঠান কোড -" value={institution?.InstitutionCode || '-'} />
+            <DottedValue label="শ্রেণী -" value={classInfo?.ClassName || '-'} />
+            <DottedValue label="সেশন -" value={session?.SessionName || '-'} />
+            {showDate && <DottedValue label="তারিখ -" value={new Date().toLocaleDateString('bn-BD')} />}
+          </div>
+
+          {/* Student information — same fields as report 1 */}
+          <div className="mt-2.5 print:mt-1.5 space-y-2 print:space-y-1 text-[15px] print:text-[12.5px] font-bold shrink-0">
+            {infoItems.map((f) => (
+              <div key={f.key}>
+                <DottedValue label={`${f.label} -`} value={f.value} width="w-[330px]" />
+              </div>
+            ))}
+          </div>
+
+          {/* Subject table */}
+          <div className="mt-3 print:mt-1.5 print:shrink-0">
+            <div className="marks-table-wrap w-full overflow-x-auto print:overflow-visible border border-black">
+              <table className="w-full min-w-[640px] print:min-w-0 border-collapse bg-white text-[14px] print:text-[12px] font-bold text-[#1E3A8A]">
+                <thead>
+                  <tr className="text-center">
+                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1 w-[8%]">ক্রমিক</th>
+                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1 text-left">বিষয়</th>
+                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1">পূর্ণমান</th>
+                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1">পাশমার্ক</th>
+                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1 whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
+                    <th style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1">প্রাপ্ত নম্বর</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subjects.map((item, index) => {
+                    const isAlt = index % 2 !== 0;
+                    const cellStyle = { backgroundColor: isAlt ? '#f0fdfa' : '#ffffff', ...EXACT };
+                    return (
+                      <tr key={item.id} className={`${isAlt ? 'row-alt' : 'row-plain'} text-center`}>
+                        <td style={cellStyle} className={`border border-black px-2 py-1.5 ${rowPad} ${rowText}`}>{toBn(index + 1)}</td>
+                        <td style={cellStyle} className={`border border-black px-2 py-1.5 ${rowPad} ${rowText} text-left`}>{toBn(item.subject)}</td>
+                        <td style={cellStyle} className={`border border-black px-2 py-1.5 ${rowPad} ${rowText}`}>{toBn(item.fullMark)}</td>
+                        <td style={cellStyle} className={`border border-black px-2 py-1.5 ${rowPad} ${rowText}`}>{toBn(item.passMark)}</td>
+                        <td style={cellStyle} className={`border border-black px-2 py-1.5 ${rowPad} ${rowText}`}>{toBn(item.highestMark)}</td>
+                        <td style={cellStyle} className={`border border-black px-2 py-1.5 ${rowPad} ${rowText}`}>{toBn(item.obtainedMark)}</td>
+                      </tr>
+                    );
+                  })}
+                  <tr className="text-center">
+                    <td style={TH_STYLE_TRADITIONAL} className="border border-black px-2 py-1.5 print:py-1" colSpan={2}>যোগ</td>
+                    <td style={{ backgroundColor: '#f0fdfa', ...EXACT }} className="border border-black px-2 py-1.5 print:py-1">{toBn(totals.fullMark)}</td>
+                    <td style={{ backgroundColor: '#f0fdfa', ...EXACT }} className="border border-black px-2 py-1.5 print:py-1">{toBn(totals.passMark)}</td>
+                    <td style={{ backgroundColor: '#f0fdfa', ...EXACT }} className="border border-black px-2 py-1.5 print:py-1">{toBn(totals.highestMark)}</td>
+                    <td style={{ backgroundColor: '#f0fdfa', ...EXACT }} className="border border-black px-2 py-1.5 print:py-1">{toBn(totals.obtainedMark)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Division breakdown + summary line */}
+          <div className="mt-2.5 print:mt-1.5 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 print:gap-3 print:shrink-0">
+            <div className="border border-[#C9A227] bg-white/70 p-2 print:p-1.5">
+              <p className="text-[13px] print:text-[11.5px] font-bold border-b border-dotted border-[#1E3A8A] pb-0.5 mb-1">
+                নম্বর বিভাজন — মোট বিভাগ {toBn(divisionRows.length)} টি | মোট বিষয় {toBn(totalSubjects)} টি
+              </p>
+              {divisionRows.length === 0 ? (
+                <p className="text-[12px] print:text-[11px] text-slate-400">কোনো বিভাগ পাওয়া যায়নি</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-x-3">
+                  {divisionRows.map((item, i) => (
+                    <div key={i} className="flex justify-between text-[12.5px] print:text-[11px] border-b border-dotted border-[#C9A227] py-0.5">
+                      <span className="truncate">{item.name}</span>
+                      <span className="ml-2">{toBn(totalSubjects * (Number(item.number) || 0))}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="border border-[#C9A227] bg-white/70 p-2 print:p-1.5 grid grid-cols-2 gap-x-3 gap-y-1 text-[13.5px] print:text-[11.5px] font-bold">
+              <DottedValue label="প্রাপ্ত বিভাগ -" value={divisionName} width="w-20" />
+              <DottedValue label="মেধা স্থান -" value={student?.Positions ?? '-'} width="w-20" />
+              <DottedValue label="গড় -" value={averageMark} width="w-20" />
+              <DottedValue label="মোট নম্বর -" value={student?.Total ?? '-'} width="w-20" />
+            </div>
+          </div>
+
+          {/* Remarks */}
+          {(showClassTeacherSign || showGuardianSign) && (
+            <div className="marksheet-comments mt-2.5 print:mt-1.5 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 print:gap-3 print:flex-1 print:min-h-0">
+              {showClassTeacherSign && (
+                <div className="border border-[#C9A227] bg-white/70 p-2.5 print:p-1.5 min-h-[70px] print:min-h-[55px]">
+                  <p className="text-[13.5px] print:text-[11.5px] font-bold">শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য :</p>
+                  <div className="mt-1.5 border-b border-dotted border-[#1E3A8A] text-[13px] print:text-[11px]">{student?.Note ?? ''}</div>
+                </div>
+              )}
+              {showGuardianSign && (
+                <div className="border border-[#C9A227] bg-white/70 p-2.5 print:p-1.5 min-h-[70px] print:min-h-[55px]">
+                  <p className="text-[13.5px] print:text-[11.5px] font-bold">অভিভাবকের মন্তব্য :</p>
+                  <div className="mt-1.5 border-b border-dotted border-[#1E3A8A]" />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Signatures + verification */}
+        <div className="mt-auto pt-4 print:pt-2 print:shrink-0 grid grid-cols-4 items-end gap-4 print:gap-2">
+          <div className="flex flex-col items-center">
+            <div className="bg-white p-0.5 border border-[#C9A227] w-[62px] print:w-[46px]">
+              <QRCode size={62} style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
+                value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
+                viewBox="0 0 256 256" />
+            </div>
+            <p className="text-[11px] print:text-[9px] font-bold mt-1 print:mt-0.5">যাচাই করুন</p>
+          </div>
+
+          <div className="text-center">
+            <div className="h-10 print:h-6" />
+            <div className="border-t border-dotted border-[#1E3A8A] pt-1 text-[13.5px] print:text-[11px] font-bold">
+              শ্রেণী শিক্ষকের স্বাক্ষর
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="h-10 print:h-6 flex items-end justify-center">
+              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
+            </div>
+            <div className="border-t border-dotted border-[#1E3A8A] pt-1 text-[13.5px] print:text-[11px] font-bold">
+              {toBn(najemName || institution?.NajemName || 'নায়েবে তালিমাত')}
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="h-10 print:h-6 flex items-end justify-center">
+              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
+            </div>
+            <div className="border-t border-dotted border-[#1E3A8A] pt-1 text-[13.5px] print:text-[11px] font-bold">
+              {toBn(principalName || institution?.PrincipalName || 'মুহতামিম')}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-1 text-[10px] print:text-[8px] font-semibold text-[#8a6d1f] print:shrink-0">
+          Software Developed by <span className="font-bold tracking-wide">SAHARAIT</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// TEMPLATE 10: Academic Transcript
+// Blue bordered transcript with a boxed information panel, a ruled result
+// table and a signature strip. Columns and fields match report 1 exactly,
+// so nothing on the sheet depends on data the report does not return.
+// ==========================================
+const SingleMarkSheetTranscript = ({
+  student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
+  session, classInfo, examSubjects, divisions = [], examConfig = {},
+  isLast = false, ExamID, SubClassID, ExamName,
+  showDate = true, showSignature = true, principalName = '', najemName = '',
+  paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
+  showClassTeacherSign = true, showGuardianSign = true,
+}) => {
+  const {
+    subjects, totalSubjects, divisionRows, rowPad,
+    studentName, fatherName, motherName, birthDate, rollNumber,
+    registration, divisionName, averageMark,
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+
+  const { data } = useGetLabelNameListsQuery();
+  const labels = data?.[0] || {};
+  const previewWidth = getPreviewWidth(paperSize, orientation);
+
+  const infoItems = buildInfoItems({
+    studentInfoFields, labels, studentName, fatherName, motherName,
+    birthDate, registration, rollNumber,
+  });
+  const summaryItems = buildSummaryItems({ divisionName, student, averageMark });
+  const totals = sumSubjectMarks(subjects);
+
+  return (
+    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-slate-900 shadow-xl mb-10 print:mb-0 print:shadow-none print:flex print:flex-col border-[3px] border-[#1d4ed8] p-1.5 print:p-1`}>
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        style={{ backgroundImage: PATTERN_LATTICE }}
+      />
+
+      <div className="relative z-10 border border-[#93c5fd] px-5 py-4 print:px-3.5 print:py-2 flex flex-col print:flex-1 print:min-h-0">
+
+        {/* Header */}
+        <div className="marksheet-header flex items-center gap-4 print:gap-3 border-b-2 border-[#1d4ed8] pb-3 print:pb-1.5 shrink-0">
+          <div className="h-[62px] w-[62px] print:h-[46px] print:w-[46px] shrink-0 overflow-hidden rounded-full border-2 border-[#1d4ed8] bg-white flex items-center justify-center">
+            {imageSrc
+              ? <img src={imageSrc} alt="Logo" className="h-full w-full object-cover" />
+              : <span className="text-[9px] text-slate-400">No Logo</span>}
+          </div>
+          <div className="flex-1 text-center min-w-0">
+            <h1 className="text-[26px] md:text-[28px] print:text-[20px] font-bold leading-tight text-[#1e3a8a]">
+              {toBn(institution?.InstitutionName || '-')}
+            </h1>
+            <p className="text-[14px] print:text-[12px] font-semibold text-slate-600 mt-0.5">
+              {toBn(institution?.Address || '-')}
+            </p>
+            <span
+              className="mt-1.5 print:mt-1 inline-block rounded px-3 py-0.5 print:px-2.5 print:py-0 text-[13px] print:text-[11.5px] font-bold text-white"
+              style={{ backgroundColor: '#1d4ed8', ...EXACT }}
+            >
+              {toBn(ExamName || '-')} — মার্কশিট
+            </span>
+          </div>
+          <div className="h-[62px] w-[62px] print:h-[46px] print:w-[46px] shrink-0" />
+        </div>
+
+        <div className="marksheet-body flex flex-col print:flex-1 print:min-h-0">
+
+          {/* Student information + division breakdown */}
+          <div className="mt-3 print:mt-1.5 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 print:gap-3 print:shrink-0">
+            <div className="border border-slate-400">
+              <div
+                className="px-2 py-1 print:py-0.5 text-center text-[13px] print:text-[11.5px] font-bold text-white"
+                style={{ backgroundColor: '#1e3a8a', ...EXACT }}
+              >
+                পরীক্ষার্থীর তথ্য
+              </div>
+              <table className="w-full border-collapse text-[13px] print:text-[11.5px]">
+                <tbody>
+                  {infoItems.map((f) => (
+                    <tr key={f.key}>
+                      <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-semibold text-slate-600 w-[42%]">{f.label}</td>
+                      <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-bold">{toBn(f.value)}</td>
+                    </tr>
+                  ))}
+                  <tr>
+                    <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-semibold text-slate-600">শ্রেণী</td>
+                    <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-bold">{toBn(classInfo?.ClassName || '-')}</td>
+                  </tr>
+                  <tr>
+                    <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-semibold text-slate-600">সেশন</td>
+                    <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-bold">{toBn(session?.SessionName || '-')}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="border border-slate-400">
+              <div
+                className="px-2 py-1 print:py-0.5 text-center text-[13px] print:text-[11.5px] font-bold text-white"
+                style={{ backgroundColor: '#1e3a8a', ...EXACT }}
+              >
+                নম্বর বিভাজন ({toBn(divisionRows.length)} টি | বিষয় {toBn(totalSubjects)} টি)
+              </div>
+              {divisionRows.length === 0 ? (
+                <div className="px-2 py-2 text-center text-[12px] print:text-[11px] text-slate-400">কোনো বিভাগ পাওয়া যায়নি</div>
+              ) : (
+                <table className="w-full border-collapse text-[12.5px] print:text-[11px]">
+                  <tbody>
+                    {divisionRows.map((item, i) => (
+                      <tr key={i}>
+                        <td className="border border-slate-300 px-2 py-0.5 font-semibold truncate">{item.name}</td>
+                        <td className="border border-slate-300 px-2 py-0.5 text-center tabular-nums">{toBn(totalSubjects)} × {toBn(item.number)}</td>
+                        <td className="border border-slate-300 px-2 py-0.5 text-right font-bold tabular-nums">
+                          {toBn(totalSubjects * (Number(item.number) || 0))}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+
+          {/* Result table */}
+          <div className="mt-3 print:mt-1.5 print:shrink-0">
+            <div className="marks-table-wrap w-full overflow-x-auto print:overflow-visible border border-slate-500">
+              <table className="w-full min-w-[640px] print:min-w-0 border-collapse bg-white">
+                <thead>
+                  <tr className="text-center">
+                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] print:text-[11px] font-bold w-[8%]">ক্রমিক</th>
+                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] print:text-[11px] font-bold text-left">বিষয়</th>
+                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] print:text-[11px] font-bold">পূর্ণমান</th>
+                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] print:text-[11px] font-bold">পাশমার্ক</th>
+                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] print:text-[11px] font-bold whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
+                    <th style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1 text-[12.5px] print:text-[11px] font-bold">প্রাপ্ত নম্বর</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subjects.map((item, index) => {
+                    const isAlt = index % 2 !== 0;
+                    const cellStyle = { backgroundColor: isAlt ? '#eff6ff' : '#ffffff', ...EXACT };
+                    return (
+                      <tr key={item.id} className={`${isAlt ? 'row-alt' : 'row-plain'} text-center text-[13px] print:text-[11.5px]`}>
+                        <td style={cellStyle} className={`border border-slate-300 px-2 py-1.5 ${rowPad} tabular-nums text-slate-500`}>{toBn(index + 1)}</td>
+                        <td style={cellStyle} className={`border border-slate-300 px-2 py-1.5 ${rowPad} text-left font-semibold`}>{toBn(item.subject)}</td>
+                        <td style={cellStyle} className={`border border-slate-300 px-2 py-1.5 ${rowPad} tabular-nums`}>{toBn(item.fullMark)}</td>
+                        <td style={cellStyle} className={`border border-slate-300 px-2 py-1.5 ${rowPad} tabular-nums`}>{toBn(item.passMark)}</td>
+                        <td style={cellStyle} className={`border border-slate-300 px-2 py-1.5 ${rowPad} tabular-nums`}>{toBn(item.highestMark)}</td>
+                        <td style={cellStyle} className={`border border-slate-300 px-2 py-1.5 ${rowPad} tabular-nums font-bold text-[#1d4ed8]`}>{toBn(item.obtainedMark)}</td>
+                      </tr>
+                    );
+                  })}
+                  <tr className="text-center text-[13px] print:text-[11.5px] font-bold">
+                    <td style={TH_STYLE_TRANSCRIPT} className="border border-[#1e3a8a] px-2 py-1.5 print:py-1" colSpan={2}>সর্বমোট</td>
+                    <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-300 px-2 py-1.5 print:py-1 tabular-nums">{toBn(totals.fullMark)}</td>
+                    <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-300 px-2 py-1.5 print:py-1 tabular-nums">{toBn(totals.passMark)}</td>
+                    <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-300 px-2 py-1.5 print:py-1 tabular-nums">{toBn(totals.highestMark)}</td>
+                    <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-300 px-2 py-1.5 print:py-1 tabular-nums">{toBn(totals.obtainedMark)}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Summary + remarks */}
+          <div className="mt-3 print:mt-1.5 grid grid-cols-1 md:grid-cols-5 print:grid-cols-5 gap-4 print:gap-3 print:flex-1 print:min-h-0">
+            <div className="md:col-span-2 print:col-span-2 border border-slate-400 self-start">
+              <table className="w-full border-collapse text-[13px] print:text-[11.5px]">
+                <tbody>
+                  {summaryItems.map((item) => (
+                    <tr key={item.key}>
+                      <td className="border border-slate-300 px-2 py-1 print:py-0.5 font-semibold text-slate-600">{item.label}</td>
+                      <td className="border border-slate-300 px-2 py-1 print:py-0.5 text-right font-bold tabular-nums text-[#1d4ed8]">{toBn(item.value)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {(showClassTeacherSign || showGuardianSign) && (
+              <div className="marksheet-comments md:col-span-3 print:col-span-3 border border-slate-400 p-2.5 print:p-1.5 flex flex-col gap-2 print:gap-1">
+                {showClassTeacherSign && (
+                  <div>
+                    <p className="text-[12.5px] print:text-[11px] font-bold text-slate-600">শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য :</p>
+                    <div className="mt-1 border-b border-dashed border-slate-400 text-[12.5px] print:text-[11px] min-h-[22px] print:min-h-[16px]">{student?.Note ?? ''}</div>
+                  </div>
+                )}
+                {showGuardianSign && (
+                  <div>
+                    <p className="text-[12.5px] print:text-[11px] font-bold text-slate-600">অভিভাবকের মন্তব্য :</p>
+                    <div className="mt-1 border-b border-dashed border-slate-400 min-h-[22px] print:min-h-[16px]" />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Signature strip */}
+        <div className="mt-auto pt-3 print:pt-1.5 print:shrink-0 border-t-2 border-[#1d4ed8] grid grid-cols-4 items-end gap-4 print:gap-2">
+          <div className="flex flex-col items-center">
+            <div className="w-[58px] print:w-[44px] border border-slate-300 p-0.5 bg-white">
+              <QRCode size={58} style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
+                value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
+                viewBox="0 0 256 256" />
+            </div>
+            <p className="text-[10.5px] print:text-[9px] font-bold text-slate-600 mt-1 print:mt-0.5">যাচাই করুন</p>
+          </div>
+
+          <div className="text-center">
+            <div className="h-10 print:h-6" />
+            <div className="border-t border-slate-500 pt-1 text-[12.5px] print:text-[11px] font-bold">শ্রেণী শিক্ষক</div>
+          </div>
+
+          <div className="text-center">
+            <div className="h-10 print:h-6 flex items-end justify-center">
+              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
+            </div>
+            <div className="border-t border-slate-500 pt-1 text-[12.5px] print:text-[11px] font-bold">
+              {toBn(najemName || institution?.NajemName || 'নায়েবে তালিমাত')}
+            </div>
+            {showDate && <div className="text-[10px] print:text-[9px] text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+          </div>
+
+          <div className="text-center">
+            <div className="h-10 print:h-6 flex items-end justify-center">
+              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
+            </div>
+            <div className="border-t border-slate-500 pt-1 text-[12.5px] print:text-[11px] font-bold">
+              {toBn(principalName || institution?.PrincipalName || 'মুহতামিম')}
+            </div>
+            {showDate && <div className="text-[10px] print:text-[9px] text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+          </div>
+        </div>
+
+        <div className="mt-1 text-[10px] print:text-[8px] font-semibold text-slate-500 print:shrink-0">
+          Software Developed by <span className="font-bold tracking-wide text-[#1d4ed8]">SAHARAIT</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// TEMPLATE 11: Ornate Certificate
+// Wide ornamental blue frame, a spaced-out MARKSHEET title and a boxed
+// student panel above a ruled table. The percentage column is calculated
+// from the obtained and full marks that report 1 already provides.
+// ==========================================
+const SingleMarkSheetOrnate = ({
+  student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
+  session, classInfo, examSubjects, divisions = [], examConfig = {},
+  isLast = false, ExamID, SubClassID, ExamName,
+  showDate = true, showSignature = true, principalName = '', najemName = '',
+  paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
+  showClassTeacherSign = true, showGuardianSign = true,
+}) => {
+  const {
+    subjects, totalSubjects, divisionRows, rowPad,
+    studentName, fatherName, motherName, birthDate, rollNumber,
+    registration, divisionName, averageMark,
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+
+  const { data } = useGetLabelNameListsQuery();
+  const labels = data?.[0] || {};
+  const previewWidth = getPreviewWidth(paperSize, orientation);
+
+  const infoItems = buildInfoItems({
+    studentInfoFields, labels, studentName, fatherName, motherName,
+    birthDate, registration, rollNumber,
+  });
+  const summaryItems = buildSummaryItems({ divisionName, student, averageMark });
+  const totals = sumSubjectMarks(subjects);
+
+  return (
+    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-slate-900 shadow-xl mb-10 print:mb-0 print:shadow-none print:flex print:flex-col`}>
+      {/* Ornamental frame */}
+      <div
+        className="absolute inset-0"
+        style={{ backgroundImage: PATTERN_LATTICE, opacity: 0.5, ...EXACT }}
+      />
+      <div className="absolute inset-0 bg-white" style={{ margin: '26px', ...EXACT }} />
+
+      <div className="relative z-10 m-[26px] print:m-[18px] border-2 border-[#1d4ed8] px-6 py-5 print:px-4 print:py-2.5 flex flex-col print:flex-1 print:min-h-0">
+
+        {/* Header */}
+        <div className="marksheet-header flex items-center gap-4 print:gap-3 shrink-0">
+          <div className="h-[72px] w-[72px] print:h-[50px] print:w-[50px] shrink-0 overflow-hidden rounded-full border-2 border-[#1d4ed8] bg-white flex items-center justify-center">
+            {imageSrc
+              ? <img src={imageSrc} alt="Logo" className="h-full w-full object-cover" />
+              : <span className="text-[9px] text-slate-400">No Logo</span>}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-[30px] md:text-[32px] print:text-[22px] font-bold leading-tight text-[#1d4ed8] tracking-wide">
+              {toBn(institution?.InstitutionName || '-')}
+            </h1>
+            <p className="text-[15px] print:text-[12.5px] font-semibold text-[#2563eb] mt-0.5">
+              {toBn(institution?.Address || '-')}
+            </p>
+          </div>
+        </div>
+
+        <div className="text-center mt-4 print:mt-2 shrink-0">
+          <h2 className="text-[26px] print:text-[19px] font-bold tracking-[0.35em] underline underline-offset-[6px] decoration-2">
+            MARKSHEET
+          </h2>
+          <p className="text-[18px] print:text-[14px] font-semibold text-[#2563eb] mt-2 print:mt-1">
+            {toBn(ExamName || '-')} — {toBn(session?.SessionName || '-')}
+          </p>
+        </div>
+
+        <div className="marksheet-body flex flex-col print:flex-1 print:min-h-0">
+
+          {/* Student panel */}
+          <div className="mt-4 print:mt-2 border-2 border-slate-800 px-4 py-3 print:px-3 print:py-1.5 print:shrink-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-x-8 gap-y-2 print:gap-y-1">
+              {infoItems.map((f) => (
+                <div key={f.key} className="text-[16px] print:text-[12.5px] font-semibold">
+                  {f.label} – <span className="font-bold">{toBn(f.value)}</span>
+                </div>
+              ))}
+              <div className="text-[16px] print:text-[12.5px] font-semibold">
+                শ্রেণী – <span className="font-bold">{toBn(classInfo?.ClassName || '-')}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Result table */}
+          <div className="mt-4 print:mt-2 print:shrink-0">
+            <div className="marks-table-wrap w-full overflow-x-auto print:overflow-visible border-2 border-slate-800">
+              <table className="w-full min-w-[640px] print:min-w-0 border-collapse bg-white">
+                <thead>
+                  <tr className="text-center">
+                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] print:text-[11.5px] font-bold text-left">বিষয়</th>
+                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] print:text-[11.5px] font-bold">পূর্ণমান</th>
+                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] print:text-[11.5px] font-bold">পাশমার্ক</th>
+                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] print:text-[11.5px] font-bold whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
+                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] print:text-[11.5px] font-bold">প্রাপ্ত নম্বর</th>
+                    <th style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-[14px] print:text-[11.5px] font-bold">শতকরা</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subjects.map((item, index) => {
+                    const isAlt = index % 2 !== 0;
+                    const cellStyle = { backgroundColor: isAlt ? '#eff6ff' : '#ffffff', ...EXACT };
+                    return (
+                      <tr key={item.id} className={`${isAlt ? 'row-alt' : 'row-plain'} text-center text-[14px] print:text-[11.5px]`}>
+                        <td style={cellStyle} className={`border border-slate-800 px-3 py-2 ${rowPad} text-left font-semibold`}>{toBn(item.subject)}</td>
+                        <td style={cellStyle} className={`border border-slate-800 px-3 py-2 ${rowPad} tabular-nums`}>{toBn(item.fullMark)}</td>
+                        <td style={cellStyle} className={`border border-slate-800 px-3 py-2 ${rowPad} tabular-nums`}>{toBn(item.passMark)}</td>
+                        <td style={cellStyle} className={`border border-slate-800 px-3 py-2 ${rowPad} tabular-nums`}>{toBn(item.highestMark)}</td>
+                        <td style={cellStyle} className={`border border-slate-800 px-3 py-2 ${rowPad} tabular-nums font-bold text-[#1d4ed8]`}>{toBn(item.obtainedMark)}</td>
+                        <td style={cellStyle} className={`border border-slate-800 px-3 py-2 ${rowPad} tabular-nums`}>{toBn(subjectPercent(item.obtainedMark, item.fullMark))}</td>
+                      </tr>
+                    );
+                  })}
+                  <tr className="text-center text-[14px] print:text-[11.5px] font-bold">
+                    <td style={TH_STYLE_ORNATE} className="border border-slate-800 px-3 py-2 print:py-1 text-left">মোট</td>
+                    <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-800 px-3 py-2 print:py-1 tabular-nums">{toBn(totals.fullMark)}</td>
+                    <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-800 px-3 py-2 print:py-1 tabular-nums">{toBn(totals.passMark)}</td>
+                    <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-800 px-3 py-2 print:py-1 tabular-nums">{toBn(totals.highestMark)}</td>
+                    <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-800 px-3 py-2 print:py-1 tabular-nums">{toBn(totals.obtainedMark)}</td>
+                    <td style={{ backgroundColor: '#dbeafe', ...EXACT }} className="border border-slate-800 px-3 py-2 print:py-1 tabular-nums">
+                      {toBn(subjectPercent(totals.obtainedMark, totals.fullMark))}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Summary + division breakdown */}
+          <div className="mt-4 print:mt-2 grid grid-cols-2 md:grid-cols-4 print:grid-cols-4 gap-3 print:gap-2 print:shrink-0">
+            {summaryItems.map((item) => (
+              <div key={item.key} className="border-2 border-[#1d4ed8] text-center px-2 py-2 print:py-1">
+                <p className="text-[12px] print:text-[10.5px] font-semibold text-[#2563eb]">{item.label}</p>
+                <p className="text-[19px] print:text-[14px] font-bold leading-tight">{toBn(item.value)}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 print:mt-1.5 border border-slate-400 px-3 py-1.5 print:py-1 text-[12.5px] print:text-[11px] print:shrink-0">
+            <span className="font-bold text-[#1d4ed8]">নম্বর বিভাজন :</span>{' '}
+            {divisionRows.length === 0
+              ? <span className="text-slate-400">কোনো বিভাগ পাওয়া যায়নি</span>
+              : divisionRows.map((item, i) => (
+                <span key={i} className="mr-3 whitespace-nowrap">
+                  {item.name} – {toBn(totalSubjects)} × {toBn(item.number)} = <span className="font-bold">{toBn(totalSubjects * (Number(item.number) || 0))}</span>
+                </span>
+              ))}
+          </div>
+
+          {/* Remarks */}
+          {(showClassTeacherSign || showGuardianSign) && (
+            <div className="marksheet-comments mt-3 print:mt-1.5 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 print:gap-3 print:flex-1 print:min-h-0">
+              {showClassTeacherSign && (
+                <div className="border border-slate-400 p-2.5 print:p-1.5 min-h-[70px] print:min-h-[55px]">
+                  <p className="text-[13px] print:text-[11px] font-bold text-[#1d4ed8]">শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য :</p>
+                  <div className="mt-1.5 border-b border-dashed border-slate-400 text-[12.5px] print:text-[11px]">{student?.Note ?? ''}</div>
+                </div>
+              )}
+              {showGuardianSign && (
+                <div className="border border-slate-400 p-2.5 print:p-1.5 min-h-[70px] print:min-h-[55px]">
+                  <p className="text-[13px] print:text-[11px] font-bold text-[#1d4ed8]">অভিভাবকের মন্তব্য :</p>
+                  <div className="mt-1.5 border-b border-dashed border-slate-400" />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Signatures */}
+        <div className="mt-auto pt-4 print:pt-2 print:shrink-0 grid grid-cols-3 items-end gap-6 print:gap-3">
+          <div className="flex flex-col items-center">
+            <div className="w-[60px] print:w-[46px] border border-[#1d4ed8] p-0.5 bg-white">
+              <QRCode size={60} style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
+                value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
+                viewBox="0 0 256 256" />
+            </div>
+            <p className="text-[10.5px] print:text-[9px] font-bold text-[#2563eb] mt-1 print:mt-0.5">যাচাই করুন</p>
+          </div>
+
+          <div className="text-center">
+            <div className="h-11 print:h-7 flex items-end justify-center">
+              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
+            </div>
+            <div className="border-t-2 border-slate-800 pt-1 text-[13.5px] print:text-[11.5px] font-bold">
+              {toBn(najemName || institution?.NajemName || 'নায়েবে তালিমাত')}
+            </div>
+            {showDate && <div className="text-[10px] print:text-[9px] text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+          </div>
+
+          <div className="text-center">
+            <div className="h-11 print:h-7 flex items-end justify-center">
+              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
+            </div>
+            <div className="border-t-2 border-slate-800 pt-1 text-[13.5px] print:text-[11.5px] font-bold">
+              {toBn(principalName || institution?.PrincipalName || 'মুহতামিম')}
+            </div>
+            {showDate && <div className="text-[10px] print:text-[9px] text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+          </div>
+        </div>
+
+        <div className="mt-1 text-center text-[10px] print:text-[8px] font-semibold text-slate-500 print:shrink-0">
+          Software Developed by <span className="font-bold tracking-wide text-[#1d4ed8]">SAHARAIT</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// TEMPLATE 12: Royal Emerald
+// Ornamental green sheet with a patterned frame, a medallion watermark and
+// rounded information cards. It renders exactly the fields report 1
+// renders — information rows, division breakdown, subject table, summary,
+// remarks, QR and the two signatures.
+// ==========================================
+const SingleMarkSheetRoyal = ({
+  student, institution, imageSrc, signatureNajemSrc, signaturePrincipalSrc,
+  session, classInfo, examSubjects, divisions = [], examConfig = {},
+  isLast = false, ExamID, SubClassID, ExamName,
+  showDate = true, showSignature = true, principalName = '', najemName = '',
+  paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
+  showClassTeacherSign = true, showGuardianSign = true,
+}) => {
+  const {
+    subjects, totalSubjects, divisionRows, rowPad, rowText,
+    studentName, fatherName, motherName, birthDate, rollNumber,
+    registration, divisionName, averageMark,
+  } = computeMarkSheetData({ student, examSubjects, examConfig, divisions });
+
+  const { data } = useGetLabelNameListsQuery();
+  const labels = data?.[0] || {};
+  const previewWidth = getPreviewWidth(paperSize, orientation);
+
+  const infoItems = buildInfoItems({
+    studentInfoFields, labels, studentName, fatherName, motherName,
+    birthDate, registration, rollNumber,
+  });
+  const summaryItems = buildSummaryItems({ divisionName, student, averageMark });
+
+  return (
+    <div className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden shadow-2xl mb-10 print:mb-0 print:shadow-none print:flex print:flex-col border-[3px] border-[#0b3d26] p-1.5 print:p-1`}
+      style={{ backgroundColor: '#0f5132', ...EXACT }}
+    >
+      <div
+        className="pointer-events-none absolute inset-0 opacity-25"
+        style={{ backgroundImage: PATTERN_GEOMETRIC }}
+      />
+
+      <div
+        className="relative z-10 border-2 border-[#c9a227] px-5 py-4 print:px-3.5 print:py-2 flex flex-col print:flex-1 print:min-h-0"
+        style={{ backgroundColor: '#f3faf6', ...EXACT }}
+      >
+        {/* Medallion watermark */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.08] bg-center bg-no-repeat"
+          style={{ backgroundImage: PATTERN_MEDALLION }}
+        />
+
+        {/* Header band */}
+        <div
+          className="marksheet-header relative z-10 rounded-xl px-4 py-2.5 print:px-3 print:py-1.5 text-white shrink-0 border border-[#c9a227]"
+          style={{ backgroundImage: 'linear-gradient(to right,#0b3d26,#14694a,#0b3d26)', ...EXACT }}
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div className="h-[52px] w-[52px] print:h-[40px] print:w-[40px] shrink-0 overflow-hidden rounded-full border-2 border-[#c9a227] bg-white flex items-center justify-center">
+              {imageSrc
+                ? <img src={imageSrc} alt="Logo" className="h-full w-full object-cover" />
+                : <span className="text-[8px] text-slate-400">No Logo</span>}
+            </div>
+            <div className="flex-1 text-center min-w-0">
+              <h1 className="text-[24px] md:text-[26px] print:text-[19px] font-bold leading-tight">
+                {toBn(institution?.InstitutionName || '-')}
+              </h1>
+              <p className="text-[13px] print:text-[11.5px] text-emerald-100 mt-0.5">
+                {toBn(institution?.Address || '-')}
+              </p>
+            </div>
+            <div className="shrink-0 flex flex-col items-end gap-1">
+              <span
+                className="rounded-full border border-[#c9a227] px-3 py-0.5 print:px-2 print:py-0 text-[12px] print:text-[10.5px] font-bold whitespace-nowrap"
+                style={{ backgroundColor: '#0b3d26', ...EXACT }}
+              >
+                {toBn(session?.SessionName || '-')}
+              </span>
+              <span
+                className="rounded-full px-3 py-0.5 print:px-2 print:py-0 text-[12px] print:text-[10.5px] font-bold text-[#0b3d26] whitespace-nowrap"
+                style={{ backgroundColor: '#c9a227', ...EXACT }}
+              >
+                {toBn(ExamName || '-')}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="marksheet-body relative z-10 flex flex-col print:flex-1 print:min-h-0">
+
+          {/* Information + division breakdown */}
+          <div className="mt-3 print:mt-1.5 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 print:gap-3 print:shrink-0">
+            <div className="rounded-xl border border-[#c9a227] bg-white/85 overflow-hidden">
+              <div
+                className="flex items-center justify-between px-3 py-1 print:py-0.5 text-white text-[13px] print:text-[11.5px] font-bold"
+                style={{ backgroundColor: '#0f5132', ...EXACT }}
+              >
+                <span>পরীক্ষার্থীর তথ্য</span>
+                <span
+                  className="rounded-full px-2 py-0 text-[11px] print:text-[10px] text-[#0b3d26]"
+                  style={{ backgroundColor: '#c9a227', ...EXACT }}
+                >
+                  {toBn(classInfo?.ClassName || '-')}
+                </span>
+              </div>
+              <div className="p-2 print:p-1.5 space-y-1 print:space-y-0.5">
+                {infoItems.map((f) => (
+                  <div key={f.key} className="flex items-baseline border-b border-dotted border-emerald-200 pb-0.5 text-[13.5px] print:text-[11.5px]">
+                    <span className="w-[105px] print:w-[88px] shrink-0 font-semibold text-emerald-800">{f.label}</span>
+                    <span className="font-bold text-slate-900 truncate">{toBn(f.value)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-[#c9a227] bg-white/85 overflow-hidden">
+              <div
+                className="px-3 py-1 print:py-0.5 text-center text-white text-[13px] print:text-[11.5px] font-bold"
+                style={{ backgroundColor: '#0f5132', ...EXACT }}
+              >
+                নম্বর বিভাজন
+              </div>
+              <div className="px-2 py-1 print:py-0.5 text-center text-[12px] print:text-[10.5px] font-bold text-emerald-800 border-b border-emerald-100">
+                মোট বিভাগ - {toBn(divisionRows.length)} টি | মোট বিষয় {toBn(totalSubjects)} টি
+              </div>
+              <div className="p-2 print:p-1.5">
+                {divisionRows.length === 0 ? (
+                  <div className="text-center text-slate-400 text-[12px] print:text-[11px] py-1">কোনো বিভাগ পাওয়া যায়নি</div>
+                ) : (
+                  divisionRows.map((item, i) => (
+                    <div key={i} className="flex justify-between items-center py-0.5 text-[13px] print:text-[11px] font-bold text-slate-800 border-b border-dotted border-emerald-200 last:border-0">
+                      <span className="w-[120px] print:w-[100px] truncate">{item.name}</span>
+                      <span className="flex items-center gap-1 tabular-nums">
+                        <span>{toBn(totalSubjects)}</span><span>×</span><span>{toBn(item.number)}</span><span>=</span>
+                        <span className="w-12 print:w-10 text-right text-emerald-800">{toBn(totalSubjects * (Number(item.number) || 0))}</span>
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Result table */}
+          <div className="mt-3 print:mt-1.5 print:shrink-0">
+            <div className="flex items-center gap-2 mb-1 print:mb-0.5">
+              <span className="text-[13.5px] print:text-[11.5px] font-bold text-emerald-900">বিষয়ভিত্তিক ফলাফল</span>
+              <div className="flex-1 h-[2px]" style={{ backgroundImage: 'linear-gradient(to right,#c9a227,transparent)', ...EXACT }} />
+            </div>
+            <div className="marks-table-wrap w-full overflow-x-auto print:overflow-visible rounded-xl border border-[#c9a227]">
+              <table className="w-full min-w-[640px] print:min-w-0 border-collapse bg-white/90 text-slate-900">
+                <thead>
+                  <tr className="text-center">
+                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] print:text-[11.5px] font-bold w-[8%]">ক্রমিক</th>
+                    <th style={TH_STYLE_ROYAL} className="px-3 py-2 print:py-1 text-[13px] print:text-[11.5px] font-bold text-left">বিষয়</th>
+                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] print:text-[11.5px] font-bold">পূর্ণমান</th>
+                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] print:text-[11.5px] font-bold">পাশমার্ক</th>
+                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] print:text-[11.5px] font-bold whitespace-nowrap">সর্বোচ্চ প্রাপ্ত</th>
+                    <th style={TH_STYLE_ROYAL} className="px-2 py-2 print:py-1 text-[13px] print:text-[11.5px] font-bold">প্রাপ্ত নম্বর</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subjects.map((item, index) => {
+                    const isAlt = index % 2 !== 0;
+                    const cellStyle = { backgroundColor: isAlt ? '#ecfdf5' : '#ffffff', ...EXACT };
+                    return (
+                      <tr key={item.id} className={`${isAlt ? 'row-alt' : 'row-plain'} text-center`}>
+                        <td style={cellStyle} className={`border-b border-emerald-100 px-2 py-2 ${rowPad} text-[13.5px] ${rowText} font-bold text-emerald-700 tabular-nums`}>{toBn(index + 1)}</td>
+                        <td style={cellStyle} className={`border-b border-emerald-100 px-3 py-2 ${rowPad} text-left text-[13.5px] ${rowText} font-bold`}>{toBn(item.subject)}</td>
+                        <td style={cellStyle} className={`border-b border-emerald-100 px-2 py-2 ${rowPad} text-[13.5px] ${rowText} font-bold tabular-nums`}>{toBn(item.fullMark)}</td>
+                        <td style={cellStyle} className={`border-b border-emerald-100 px-2 py-2 ${rowPad} text-[13.5px] ${rowText} font-bold tabular-nums`}>{toBn(item.passMark)}</td>
+                        <td style={cellStyle} className={`border-b border-emerald-100 px-2 py-2 ${rowPad} text-[13.5px] ${rowText} font-bold tabular-nums`}>{toBn(item.highestMark)}</td>
+                        <td style={cellStyle} className={`border-b border-emerald-100 px-2 py-2 ${rowPad} text-[13.5px] ${rowText} font-bold tabular-nums text-emerald-800`}>{toBn(item.obtainedMark)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Summary cards */}
+          <div className="mt-3 print:mt-1.5 print:shrink-0">
+            <div className="flex items-center gap-2 mb-1 print:mb-0.5">
+              <span className="text-[13.5px] print:text-[11.5px] font-bold text-emerald-900">সারসংক্ষেপ</span>
+              <div className="flex-1 h-[2px]" style={{ backgroundImage: 'linear-gradient(to right,#c9a227,transparent)', ...EXACT }} />
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 print:grid-cols-4 gap-3 print:gap-1.5">
+              {summaryItems.map((item) => (
+                <div
+                  key={item.key}
+                  className="rounded-xl border border-[#c9a227] px-2 py-2 print:py-1 text-center text-white"
+                  style={{ backgroundImage: 'linear-gradient(to bottom right,#14694a,#0b3d26)', ...EXACT }}
+                >
+                  <p className="text-[11.5px] print:text-[10px] font-semibold text-emerald-100">{item.label}</p>
+                  <p className="text-[19px] print:text-[14px] font-bold leading-tight">{toBn(item.value)}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Remarks */}
+          {(showClassTeacherSign || showGuardianSign) && (
+            <div className="marksheet-comments mt-3 print:mt-1.5 grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-4 print:gap-3 print:flex-1 print:min-h-0">
+              {showClassTeacherSign && (
+                <div className="rounded-xl border border-[#c9a227] bg-white/85 p-2.5 print:p-1.5 min-h-[70px] print:min-h-[55px]">
+                  <p className="text-[13px] print:text-[11px] font-bold text-emerald-900">শ্রেণী শিক্ষক/শিক্ষিকার মন্তব্য ও স্বাক্ষর :</p>
+                  <div className="mt-1.5 border-b border-dashed border-emerald-400 text-[12.5px] print:text-[11px] text-slate-700">{student?.Note ?? ''}</div>
+                </div>
+              )}
+              {showGuardianSign && (
+                <div className="rounded-xl border border-[#c9a227] bg-white/85 p-2.5 print:p-1.5 min-h-[70px] print:min-h-[55px]">
+                  <p className="text-[13px] print:text-[11px] font-bold text-emerald-900">অভিভাবকের মন্তব্য ও স্বাক্ষর :</p>
+                  <div className="mt-1.5 border-b border-dashed border-emerald-400" />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Footer — verification and signatures */}
+        <div className="relative z-10 mt-auto pt-3 print:pt-1.5 print:shrink-0 grid grid-cols-5 items-end gap-4 print:gap-2 border-t border-[#c9a227]">
+          <div className="col-span-1 flex flex-col items-center">
+            <div className="w-[62px] print:w-[46px] rounded-lg border border-[#c9a227] bg-white p-0.5">
+              <QRCode size={62} style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
+                value={`https://qmmsoft.com/${institution?.InstitutionCode}/students/${session?.SessionID}/${ExamID}/${SubClassID}/${student?.UserCode}`}
+                viewBox="0 0 256 256" />
+            </div>
+            <p className="text-[10.5px] print:text-[9px] font-bold text-emerald-800 mt-1 print:mt-0.5">যাচাই করুন</p>
+          </div>
+
+          <div className="col-span-2 text-center">
+            <div className="h-11 print:h-7 flex items-end justify-center">
+              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
+            </div>
+            <div className="border-t-2 border-dashed border-[#c9a227] pt-1 print:pt-0.5">
+              <p className="text-[14px] print:text-[11.5px] font-bold text-emerald-900">{toBn(najemName || institution?.NajemName || 'নায়েবে তালিমাত')}</p>
+              {showDate && <p className="text-[10.5px] print:text-[9px] text-emerald-700 tabular-nums">তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+            </div>
+          </div>
+
+          <div className="col-span-2 text-center">
+            <div className="h-11 print:h-7 flex items-end justify-center">
+              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
+            </div>
+            <div className="border-t-2 border-dashed border-[#c9a227] pt-1 print:pt-0.5">
+              <p className="text-[14px] print:text-[11.5px] font-bold text-emerald-900">{toBn(principalName || institution?.PrincipalName || 'মুহতামিম')}</p>
+              {showDate && <p className="text-[10.5px] print:text-[9px] text-emerald-700 tabular-nums">তারিখ : {toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="relative z-10 mt-2 print:mt-1 rounded-lg text-center py-1 print:py-0.5 text-[10px] print:text-[8px] font-semibold text-[#0b3d26] print:shrink-0"
+          style={{ backgroundColor: '#c9a227', ...EXACT }}
+        >
+          Software Developed by <span className="font-bold tracking-wide">SAHARAIT</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
 // Main Component — templateId অনুযায়ী ডিজাইন সিলেক্ট
 // ==========================================
 const MarkSheetPdf = ({
@@ -2085,7 +3117,13 @@ const MarkSheetPdf = ({
     if (templateId === 'template-3') return <SingleMarkSheetElegant {...commonProps} />;
     if (templateId === 'template-4') return <SingleMarkSheetMinimal {...commonProps} />;
     if (templateId === 'template-5') return <SingleMarkSheetSidebar {...commonProps} />;
+    if (templateId === 'template-6') return <SingleMarkSheetGazette {...commonProps} />;
+    if (templateId === 'template-7') return <SingleMarkSheetBauhaus {...commonProps} />;
     if (templateId === 'template-8') return <SingleMarkSheetClassic {...commonProps} />;
+    if (templateId === 'template-9') return <SingleMarkSheetTraditional {...commonProps} />;
+    if (templateId === 'template-10') return <SingleMarkSheetTranscript {...commonProps} />;
+    if (templateId === 'template-11') return <SingleMarkSheetOrnate {...commonProps} />;
+    if (templateId === 'template-12') return <SingleMarkSheetRoyal {...commonProps} />;
     return <SingleMarkSheet {...commonProps} />; // default = template-1
   };
 

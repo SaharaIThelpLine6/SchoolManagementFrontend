@@ -49,7 +49,167 @@ const MARK_SHEET_TEMPLATES = [
   { id: 'template-6', name: 'Vintage Gazette', desc: 'সংবাদপত্র স্টাইল সেরিফ ডিজাইন (নতুন)' },
   { id: 'template-7', name: 'Bauhaus Bold', desc: 'প্রাইমারি কালার পোস্টার ডিজাইন (নতুন)' },
   { id: 'template-8', name: 'Classic Traditional', desc: 'সাদা-কালো বর্ডারের চিরচেনা ক্লাসিক ডিজাইন (নতুন)' },
+  { id: 'template-9', name: 'Traditional School', desc: 'গোল্ড ফ্রেম ও রিবন ব্যাজসহ প্রচলিত স্কুল ডিজাইন (নতুন)' },
+  { id: 'template-10', name: 'Academic Transcript', desc: 'নীল বর্ডারের ট্রান্সক্রিপ্ট ডিজাইন (নতুন)' },
+  { id: 'template-11', name: 'Ornate Certificate', desc: 'অলংকৃত ফ্রেমের সার্টিফিকেট ডিজাইন (নতুন)' },
+  { id: 'template-12', name: 'Royal Emerald', desc: 'সবুজ-সোনালী ইসলামিক নকশার ডিজাইন (নতুন)' },
 ];
+
+// ==========================================
+// Template thumbnails
+// A small drawing of each design, shown on the template card in the
+// settings modal so the design is recognisable before it is selected.
+// Nothing here is real data — it is a miniature of the layout.
+// ==========================================
+const TEMPLATE_THUMBS = {
+  'template-1': { layout: 'standard', page: '#ffffff', frame: '#e2e8f0', head: 'linear-gradient(to right,#115e59,#059669)', accent: '#0f766e', alt: '#f0fdfa', rainbow: true, radius: 4 },
+  'template-2': { layout: 'standard', page: '#faf8ff', frame: '#ddd6fe', head: 'linear-gradient(to bottom right,#312e81,#7e22ce,#c026d3)', accent: '#6d28d9', alt: '#f5f3ff', rainbow: true, radius: 8, inset: true },
+  'template-3': { layout: 'centered', page: '#fffdf7', frame: '#b45309', head: 'linear-gradient(to bottom,#fef3c7,#ffffff)', accent: '#b45309', alt: '#fffbeb', headText: '#92400e', double: true, radius: 3 },
+  'template-4': { layout: 'standard', page: '#ffffff', frame: '#000000', head: '#ffffff', accent: '#000000', alt: '#fafafa', headText: '#000000', rule: true, radius: 0 },
+  'template-5': { layout: 'sidebar', page: '#ffffff', frame: '#a5f3fc', head: 'linear-gradient(to bottom,#0f172a,#083344)', accent: '#0891b2', alt: '#ecfeff', radius: 8 },
+  'template-6': { layout: 'centered', page: '#f5f0e3', frame: '#1c1917', head: '#f5f0e3', accent: '#1c1917', alt: '#ede7d5', headText: '#1c1917', masthead: true, radius: 0 },
+  'template-7': { layout: 'bauhaus', page: '#ffffff', frame: '#000000', head: '#dc2626', accent: '#2563eb', alt: '#fef3c7', radius: 0 },
+  'template-8': { layout: 'centered', page: '#ffffff', frame: '#000000', head: '#ffffff', accent: '#334155', alt: '#ffffff', headText: '#000000', radius: 0 },
+  'template-9': { layout: 'centered', page: '#FFFDF4', frame: '#C9A227', head: '#FFFDF4', accent: '#2E8B8B', alt: '#f0fdfa', headText: '#1E3A8A', ribbon: true, double: true, radius: 2 },
+  'template-10': { layout: 'standard', page: '#ffffff', frame: '#1d4ed8', head: '#ffffff', accent: '#1e3a8a', alt: '#eff6ff', headText: '#1e3a8a', double: true, radius: 2 },
+  'template-11': { layout: 'centered', page: '#ffffff', frame: '#1d4ed8', head: '#ffffff', accent: '#1d4ed8', alt: '#eff6ff', headText: '#1d4ed8', title: true, double: true, radius: 2 },
+  'template-12': { layout: 'standard', page: '#f3faf6', frame: '#c9a227', head: 'linear-gradient(to right,#0b3d26,#14694a,#0b3d26)', accent: '#0f5132', alt: '#ecfdf5', outer: '#0f5132', radius: 8, inset: true },
+};
+
+const ThumbRows = ({ count = 3, color = '#cbd5e1' }) => (
+  <div className="flex w-full flex-col gap-[2px]">
+    {Array.from({ length: count }).map((_, i) => (
+      <div key={i} className="h-[2px] rounded-full" style={{ backgroundColor: color, opacity: 0.55 }} />
+    ))}
+  </div>
+);
+
+const ThumbTable = ({ t, rows = 4 }) => (
+  <div className="w-full overflow-hidden" style={{ border: `1px solid ${t.accent}33`, borderRadius: 2 }}>
+    <div className="h-[4px] w-full" style={{ background: t.accent }} />
+    {Array.from({ length: rows }).map((_, i) => (
+      <div key={i} className="flex h-[4px] items-center gap-[3px] px-[2px]" style={{ backgroundColor: i % 2 ? t.alt : '#ffffff' }}>
+        <div className="h-[1.5px] flex-1 rounded-full" style={{ backgroundColor: t.accent, opacity: 0.35 }} />
+        <div className="h-[1.5px] w-[6px] rounded-full" style={{ backgroundColor: t.accent, opacity: 0.55 }} />
+        <div className="h-[1.5px] w-[6px] rounded-full" style={{ backgroundColor: t.accent, opacity: 0.55 }} />
+      </div>
+    ))}
+  </div>
+);
+
+const ThumbChips = ({ t, count = 4 }) => (
+  <div className="flex gap-[3px]">
+    {Array.from({ length: count }).map((_, i) => (
+      <div key={i} className="h-[7px] flex-1 rounded-[2px]" style={{ background: t.accent, opacity: 0.25 + i * 0.12, border: `0.5px solid ${t.accent}` }} />
+    ))}
+  </div>
+);
+
+const TemplateThumb = ({ id }) => {
+  const t = TEMPLATE_THUMBS[id] || TEMPLATE_THUMBS['template-1'];
+
+  // Bauhaus is colour blocks rather than a page layout.
+  if (t.layout === 'bauhaus') {
+    return (
+      <div className="h-full w-full overflow-hidden bg-white" style={{ border: '2px solid #000' }}>
+        <div className="flex h-[22%] items-center gap-[3px] px-[4px]" style={{ backgroundColor: '#dc2626', borderBottom: '2px solid #000' }}>
+          <div className="h-[8px] w-[8px] rounded-full border border-black bg-white" />
+          <div className="h-[3px] flex-1 rounded-full bg-white/80" />
+        </div>
+        <div className="h-[10%]" style={{ backgroundColor: '#facc15', borderBottom: '2px solid #000' }} />
+        <div className="flex h-[68%]">
+          <div className="w-[12%]" style={{ backgroundColor: '#dc2626', borderRight: '2px solid #000' }} />
+          <div className="flex-1 p-[3px]">
+            <div className="mb-[3px] h-[10px] w-full bg-black" />
+            <div className="mb-[3px] h-[5px] w-full" style={{ backgroundColor: '#2563eb' }} />
+            <ThumbTable t={t} rows={3} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Dark side column with the content on the right.
+  if (t.layout === 'sidebar') {
+    return (
+      <div className="flex h-full w-full overflow-hidden" style={{ border: `1px solid ${t.frame}`, borderRadius: t.radius, backgroundColor: t.page }}>
+        <div className="flex w-[35%] flex-col items-center gap-[3px] p-[4px]" style={{ background: t.head }}>
+          <div className="h-[10px] w-[10px] rounded-[3px] bg-white/90" />
+          <ThumbRows count={4} color="#67e8f9" />
+          <div className="mt-auto h-[10px] w-[10px] rounded-[2px] bg-white" />
+        </div>
+        <div className="flex flex-1 flex-col gap-[3px] p-[4px]">
+          <ThumbTable t={t} rows={4} />
+          <ThumbChips t={t} />
+        </div>
+      </div>
+    );
+  }
+
+  const centered = t.layout === 'centered';
+
+  return (
+    <div
+      className="h-full w-full overflow-hidden"
+      style={{
+        border: `${t.double ? 2 : 1}px ${t.double ? 'double' : 'solid'} ${t.frame}`,
+        borderRadius: t.radius,
+        backgroundColor: t.outer || t.page,
+        padding: t.inset || t.outer ? 2 : 0,
+      }}
+    >
+      <div
+        className="flex h-full w-full flex-col gap-[3px] p-[4px]"
+        style={{
+          backgroundColor: t.page,
+          borderRadius: Math.max(0, t.radius - 2),
+          border: t.outer ? `1px solid ${t.frame}` : undefined,
+        }}
+      >
+        <div
+          className={`flex shrink-0 items-center gap-[3px] px-[3px] py-[2px] ${centered ? 'flex-col justify-center' : ''}`}
+          style={{
+            background: t.head,
+            borderRadius: t.inset ? 3 : 0,
+            borderBottom: t.masthead || t.rule ? `2px solid ${t.accent}` : undefined,
+          }}
+        >
+          {!centered && (
+            <div className="h-[9px] w-[9px] shrink-0 rounded-full bg-white" style={{ border: `1px solid ${t.accent}66` }} />
+          )}
+          <div className={`flex flex-col gap-[2px] ${centered ? 'items-center' : 'flex-1'}`}>
+            <div className="h-[3px] rounded-full" style={{ width: centered ? 34 : '70%', backgroundColor: t.headText || '#ffffff', opacity: 0.9 }} />
+            <div className="h-[2px] rounded-full" style={{ width: centered ? 22 : '45%', backgroundColor: t.headText || '#ffffff', opacity: 0.55 }} />
+          </div>
+          {t.ribbon && <div className="h-[5px] w-[26px] rounded-[1px]" style={{ background: 'linear-gradient(to right,#ea580c,#f59e0b,#ea580c)' }} />}
+          {t.title && <div className="h-[3px] w-[30px] rounded-full" style={{ backgroundColor: t.accent }} />}
+        </div>
+
+        {t.rainbow && (
+          <div className="h-[2px] w-full shrink-0 rounded-full" style={{ background: 'linear-gradient(to right,#e5484d,#facc15,#22c55e,#0ea5e9,#a855f7)' }} />
+        )}
+
+        <div className="flex shrink-0 gap-[4px]">
+          <div className="flex-1 rounded-[2px] p-[2px]" style={{ border: `0.5px solid ${t.accent}44`, backgroundColor: t.alt }}>
+            <ThumbRows count={3} color={t.accent} />
+          </div>
+          <div className="flex-1 rounded-[2px] p-[2px]" style={{ border: `0.5px solid ${t.accent}44`, backgroundColor: t.alt }}>
+            <ThumbRows count={3} color={t.accent} />
+          </div>
+        </div>
+
+        <ThumbTable t={t} rows={4} />
+        <ThumbChips t={t} />
+
+        <div className="mt-auto flex shrink-0 items-end gap-[4px] pt-[2px]">
+          <div className="h-[8px] w-[8px] rounded-[1px] bg-white" style={{ border: `1px solid ${t.accent}` }} />
+          <div className="flex-1 border-t border-dashed" style={{ borderColor: t.accent }} />
+          <div className="flex-1 border-t border-dashed" style={{ borderColor: t.accent }} />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const MarkSheet = () => {
   const translate = useTranslate();
@@ -99,6 +259,11 @@ const MarkSheet = () => {
 
   // ⭐ নতুন স্টেট: ড্রপডাউন ওপেন/ক্লোজ
   const [isInfoDropdownOpen, setIsInfoDropdownOpen] = useState(false);
+
+  // Template id shown in the large preview overlay (null = closed).
+  // With mark sheet data already loaded the overlay renders the real
+  // sheet in that design; otherwise it shows the thumbnail.
+  const [previewTemplateId, setPreviewTemplateId] = useState(null);
 
   // ⭐ চেক করা হচ্ছে কয়টি ফিল্ড সিলেক্ট করা আছে
   const checkedCount = Object.values(studentInfoFields).filter(Boolean).length;
@@ -883,33 +1048,58 @@ const MarkSheet = () => {
                 {MARK_SHEET_TEMPLATES.map((tpl) => {
                   const isSelected = selectedTemplate === tpl.id;
                   return (
-                    <button
+                    <div
                       key={tpl.id}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => setSelectedTemplate(tpl.id)}
-                      className={`flex flex-col items-start p-4 rounded-xl border-2 transition-all text-left ${
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setSelectedTemplate(tpl.id);
+                        }
+                      }}
+                      className={`flex cursor-pointer flex-col items-start p-4 rounded-xl border-2 transition-all text-left outline-none ${
                         isSelected
                           ? 'border-[#7C3AED] bg-[#F5F3FF] shadow-md ring-2 ring-[#7C3AED]/20'
                           : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                       }`}
                     >
-                      <div className="flex items-center justify-between w-full mb-2">
+                      <div className="flex items-center justify-between w-full mb-2 gap-2">
                         <span className={`font-bold text-sm ${isSelected ? 'text-[#6D28D9]' : 'text-slate-700'}`}>
                           {tpl.name}
                         </span>
-                        {isSelected && (
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED] text-white">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {/* Opens the design full size without selecting it */}
+                          <button
+                            type="button"
+                            title="বড় করে দেখুন"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewTemplateId(tpl.id);
+                            }}
+                            className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:border-[#DDD6FE] hover:text-[#7C3AED] transition"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16zM11 8v6M8 11h6" />
                             </svg>
-                          </span>
-                        )}
+                          </button>
+                          {isSelected && (
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED] text-white">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <p className="text-xs text-slate-500">{tpl.desc}</p>
-                      
-                      <div className={`mt-3 w-full h-20 rounded-lg border flex items-center justify-center ${isSelected ? 'border-[#DDD6FE] bg-white' : 'border-slate-100 bg-slate-50'}`}>
-                        <span className="text-[10px] text-slate-400 font-medium">Template Preview</span>
+
+                      {/* Miniature of the design */}
+                      <div className={`mt-3 w-full h-28 rounded-lg border p-1.5 ${isSelected ? 'border-[#DDD6FE] bg-white' : 'border-slate-100 bg-slate-50'}`}>
+                        <TemplateThumb id={tpl.id} />
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -935,6 +1125,81 @@ const MarkSheet = () => {
                   {isSavingSettings ? 'সেভ হচ্ছে...' : 'সেভ করুন'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= বড় প্রিভিউ =================
+          মার্কশিট ডাটা লোড থাকলে আসল ডিজাইন, না থাকলে মিনিয়েচার। */}
+      {previewTemplateId && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 print:hidden">
+          <div className="flex w-full max-w-4xl max-h-[90vh] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className={`${C.gradient} flex items-center justify-between px-5 py-3`}>
+              <div>
+                <h3 className="text-white font-bold text-base">
+                  {MARK_SHEET_TEMPLATES.find((t) => t.id === previewTemplateId)?.name}
+                </h3>
+                <p className="text-white/80 text-xs mt-0.5">
+                  {MARK_SHEET_TEMPLATES.find((t) => t.id === previewTemplateId)?.desc}
+                </p>
+              </div>
+              <button
+                onClick={() => setPreviewTemplateId(null)}
+                className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/20 text-white hover:bg-white/30 transition"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto bg-slate-100 p-4">
+              {hasMarkSheetParams && data ? (
+                <div style={{ zoom: 0.62 }}>
+                  <MarkSheetPdf
+                    data={data}
+                    templateId={previewTemplateId}
+                    showDate={showDate}
+                    showSignature={showSignature}
+                    principalName={principalName}
+                    najemName={najemName}
+                    paperSize={paperSize}
+                    orientation={orientation}
+                    studentInfoFields={studentInfoFields}
+                    colorMode={colorMode}
+                    showClassTeacherSign={showClassTeacherSign}
+                    showGuardianSign={showGuardianSign}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-4 py-8">
+                  <div className="h-[420px] w-[300px] rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+                    <TemplateThumb id={previewTemplateId} />
+                  </div>
+                  <p className="text-sm font-medium text-slate-500 text-center">
+                    সেশন, পরীক্ষা ও শ্রেণী নির্বাচন করে View দিলে এখানে আসল ডাটা দিয়ে প্রিভিউ দেখা যাবে।
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 border-t border-slate-100 px-5 py-3">
+              <button
+                onClick={() => setPreviewTemplateId(null)}
+                className="px-5 py-2 rounded-lg text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+              >
+                বন্ধ করুন
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedTemplate(previewTemplateId);
+                  setPreviewTemplateId(null);
+                }}
+                className={`px-5 py-2 rounded-lg text-sm font-bold shadow-sm transition ${C.primary}`}
+              >
+                এই ডিজাইনটি নির্বাচন করুন
+              </button>
             </div>
           </div>
         </div>
