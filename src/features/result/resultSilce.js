@@ -14,7 +14,7 @@ export const resultSilce = createApi({
       return headers;
     },
   }),
-  tagTypes: ["ExamList", "Result", "getResultReportData", "StudentMarksheetNote", "ExamDivisionNameResult", "ExamDivisionSetting"],
+  tagTypes: ["ExamList", "Result", "getResultReportData", "StudentMarksheetNote", "ExamDivisionNameResult", "ExamDivisionSetting", "MarkSheetSettings"],
   endpoints: (builder) => ({
     getExamList: builder.query({
       query: ({ session_id, exam_id, subclass_id } = {}) => {
@@ -162,6 +162,21 @@ export const resultSilce = createApi({
       query: () => `get_label_names`,
     }),
 
+    // Mark sheet settings — stored in the Report_Template table,
+    // the same way admit_card_settings are stored
+    getMarkSheetSettings: builder.query({
+      query: () => `mark_sheet_settings`,
+      providesTags: ["MarkSheetSettings"],
+    }),
+    saveMarkSheetSettings: builder.mutation({
+      query: (setup) => ({
+        url: `mark_sheet_settings`,
+        method: "POST",
+        body: { setup },
+      }),
+      invalidatesTags: ["MarkSheetSettings"],
+    }),
+
 
     getExamDivisionName: builder.query({
       query: ({ ExamType }) => ({
@@ -294,6 +309,8 @@ export const {
   useGetResultReportDataQuery,
   useGetMarkSheetQuery,
   useGetLabelNameListsQuery,
+  useGetMarkSheetSettingsQuery,
+  useSaveMarkSheetSettingsMutation,
 
   useGetExamDivisionNameQuery,
   useGetExamDivisionNoteQuery,

@@ -57,7 +57,7 @@ import Exam from '../pages/Exam';
 import ExamAdmitCard from '../pages/ExamAdmitCard';
 import ExamCondition from '../pages/ExamCondition';
 import ExamFeeDetermine from '../pages/ExamFeeDetermine';
-import ExamReport from '../pages/ExamReport';
+// import ExamReport from '../pages/ExamReport';
 import ExamReportList from '../pages/ExamReportList';
 import ExamRouting from '../pages/ExamRouting';
 import ExamRules from '../pages/ExamRules';

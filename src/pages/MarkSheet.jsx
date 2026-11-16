@@ -11,7 +11,12 @@ import {
   useGetExamSessionQuery,
 } from '../features/exam/examQuerySlice';
 import Button from '../components/Button/Button';
-import { useGetMarkSheetQuery, useGetResultReportDataQuery } from '../features/result/resultSilce';
+import {
+  useGetMarkSheetQuery,
+  useGetResultReportDataQuery,
+  useGetMarkSheetSettingsQuery,
+  useSaveMarkSheetSettingsMutation,
+} from '../features/result/resultSilce';
 import DefaultInput from '../components/Forms/DefaultInput';
 import MarkSheetPdf from '../components/ResultPdf/MarkSheetPdf';
 import { showModal } from '../utils/ModalControlar';
@@ -37,10 +42,264 @@ const C = {
 // ⭐ টেমপ্লেট লিস্ট
 const MARK_SHEET_TEMPLATES = [
   { id: 'template-1', name: 'Standard Mark Sheet', desc: 'সাধারণ মার্কশিট ডিজাইন' },
-  { id: 'template-2', name: 'Tabular Mark Sheet', desc: 'ট্যাবুলার ফরম্যাট' },
-  { id: 'template-3', name: 'Grade Sheet', desc: 'গ্রেড ভিত্তিক মার্কশিট' },
-  { id: 'template-4', name: 'Compact Mark Sheet', desc: 'কম্প্যাক্ট ডিজাইন' },
+  { id: 'template-2', name: 'Modern Gradient', desc: 'আধুনিক গ্র‍্যাডিয়েন্ট ডিজাইন (নতুন)' },
+  { id: 'template-3', name: 'Elegant Classic', desc: 'এলিগ্যান্ট গোল্ড ফ্রেম ডিজাইন (নতুন)' },
+  { id: 'template-4', name: 'Minimalist Mono', desc: 'সাদা-কালো মিনিমাল এডিটরিয়াল ডিজাইন (নতুন)' },
+  { id: 'template-5', name: 'Bold Sidebar', desc: 'ডার্ক সাইডবার স্প্লিট লেআউট (নতুন)' },
+  { id: 'template-6', name: 'Vintage Gazette', desc: 'সংবাদপত্র স্টাইল সেরিফ ডিজাইন (নতুন)' },
+  { id: 'template-7', name: 'Bauhaus Bold', desc: 'প্রাইমারি কালার পোস্টার ডিজাইন (নতুন)' },
+  { id: 'template-8', name: 'Classic Traditional', desc: 'সাদা-কালো বর্ডারের চিরচেনা ক্লাসিক ডিজাইন (নতুন)' },
+  { id: 'template-9', name: 'Traditional School', desc: 'গোল্ড ফ্রেম ও রিবন ব্যাজসহ প্রচলিত স্কুল ডিজাইন (নতুন)' },
+  { id: 'template-10', name: 'Academic Transcript', desc: 'নীল বর্ডারের ট্রান্সক্রিপ্ট ডিজাইন (নতুন)' },
+  { id: 'template-11', name: 'Ornate Certificate', desc: 'অলংকৃত ফ্রেমের সার্টিফিকেট ডিজাইন (নতুন)' },
+  { id: 'template-12', name: 'Royal Emerald', desc: 'সবুজ-সোনালী ইসলামিক নকশার ডিজাইন (নতুন)' },
 ];
+
+// ==========================================
+// Template thumbnails
+// A small drawing of each design, shown on the template card in the
+// settings modal so the design is recognisable before it is selected.
+// Nothing here is real data — it is a miniature of the layout.
+// ==========================================
+const TEMPLATE_THUMBS = {
+  'template-1': { layout: 'standard', page: '#ffffff', frame: '#e2e8f0', head: 'linear-gradient(to right,#115e59,#059669)', accent: '#0f766e', alt: '#f0fdfa', rainbow: true, radius: 4 },
+  'template-2': { layout: 'standard', page: '#faf8ff', frame: '#ddd6fe', head: 'linear-gradient(to bottom right,#312e81,#7e22ce,#c026d3)', accent: '#6d28d9', alt: '#f5f3ff', rainbow: true, radius: 8, inset: true },
+  'template-3': { layout: 'centered', page: '#fffdf7', frame: '#b45309', head: 'linear-gradient(to bottom,#fef3c7,#ffffff)', accent: '#b45309', alt: '#fffbeb', headText: '#92400e', double: true, radius: 3 },
+  'template-4': { layout: 'standard', page: '#ffffff', frame: '#000000', head: '#ffffff', accent: '#000000', alt: '#fafafa', headText: '#000000', rule: true, radius: 0 },
+  'template-5': { layout: 'sidebar', page: '#ffffff', frame: '#a5f3fc', head: 'linear-gradient(to bottom,#0f172a,#083344)', accent: '#0891b2', alt: '#ecfeff', radius: 8 },
+  'template-6': { layout: 'centered', page: '#f5f0e3', frame: '#1c1917', head: '#f5f0e3', accent: '#1c1917', alt: '#ede7d5', headText: '#1c1917', masthead: true, radius: 0 },
+  'template-7': { layout: 'bauhaus', page: '#ffffff', frame: '#000000', head: '#dc2626', accent: '#2563eb', alt: '#fef3c7', radius: 0 },
+  'template-8': { layout: 'centered', page: '#ffffff', frame: '#000000', head: '#ffffff', accent: '#334155', alt: '#ffffff', headText: '#000000', radius: 0 },
+  'template-9': { layout: 'centered', page: '#FFFDF4', frame: '#C9A227', head: '#FFFDF4', accent: '#2E8B8B', alt: '#f0fdfa', headText: '#1E3A8A', ribbon: true, double: true, radius: 2 },
+  'template-10': { layout: 'standard', page: '#ffffff', frame: '#1d4ed8', head: '#ffffff', accent: '#1e3a8a', alt: '#eff6ff', headText: '#1e3a8a', double: true, radius: 2 },
+  'template-11': { layout: 'centered', page: '#ffffff', frame: '#1d4ed8', head: '#ffffff', accent: '#1d4ed8', alt: '#eff6ff', headText: '#1d4ed8', title: true, double: true, radius: 2 },
+  'template-12': { layout: 'standard', page: '#f3faf6', frame: '#c9a227', head: 'linear-gradient(to right,#0b3d26,#14694a,#0b3d26)', accent: '#0f5132', alt: '#ecfdf5', outer: '#0f5132', radius: 8, inset: true },
+};
+
+const ThumbRows = ({ count = 3, color = '#cbd5e1' }) => (
+  <div className="flex w-full flex-col gap-[2px]">
+    {Array.from({ length: count }).map((_, i) => (
+      <div key={i} className="h-[2px] rounded-full" style={{ backgroundColor: color, opacity: 0.55 }} />
+    ))}
+  </div>
+);
+
+const ThumbTable = ({ t, rows = 4 }) => (
+  <div className="w-full overflow-hidden" style={{ border: `1px solid ${t.accent}33`, borderRadius: 2 }}>
+    <div className="h-[4px] w-full" style={{ background: t.accent }} />
+    {Array.from({ length: rows }).map((_, i) => (
+      <div key={i} className="flex h-[4px] items-center gap-[3px] px-[2px]" style={{ backgroundColor: i % 2 ? t.alt : '#ffffff' }}>
+        <div className="h-[1.5px] flex-1 rounded-full" style={{ backgroundColor: t.accent, opacity: 0.35 }} />
+        <div className="h-[1.5px] w-[6px] rounded-full" style={{ backgroundColor: t.accent, opacity: 0.55 }} />
+        <div className="h-[1.5px] w-[6px] rounded-full" style={{ backgroundColor: t.accent, opacity: 0.55 }} />
+      </div>
+    ))}
+  </div>
+);
+
+const ThumbChips = ({ t, count = 4 }) => (
+  <div className="flex gap-[3px]">
+    {Array.from({ length: count }).map((_, i) => (
+      <div key={i} className="h-[7px] flex-1 rounded-[2px]" style={{ background: t.accent, opacity: 0.25 + i * 0.12, border: `0.5px solid ${t.accent}` }} />
+    ))}
+  </div>
+);
+
+const TemplateThumb = ({ id }) => {
+  const t = TEMPLATE_THUMBS[id] || TEMPLATE_THUMBS['template-1'];
+
+  // Bauhaus is colour blocks rather than a page layout.
+  if (t.layout === 'bauhaus') {
+    return (
+      <div className="h-full w-full overflow-hidden bg-white" style={{ border: '2px solid #000' }}>
+        <div className="flex h-[22%] items-center gap-[3px] px-[4px]" style={{ backgroundColor: '#dc2626', borderBottom: '2px solid #000' }}>
+          <div className="h-[8px] w-[8px] rounded-full border border-black bg-white" />
+          <div className="h-[3px] flex-1 rounded-full bg-white/80" />
+        </div>
+        <div className="h-[10%]" style={{ backgroundColor: '#facc15', borderBottom: '2px solid #000' }} />
+        <div className="flex h-[68%]">
+          <div className="w-[12%]" style={{ backgroundColor: '#dc2626', borderRight: '2px solid #000' }} />
+          <div className="flex-1 p-[3px]">
+            <div className="mb-[3px] h-[10px] w-full bg-black" />
+            <div className="mb-[3px] h-[5px] w-full" style={{ backgroundColor: '#2563eb' }} />
+            <ThumbTable t={t} rows={3} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Dark side column with the content on the right.
+  if (t.layout === 'sidebar') {
+    return (
+      <div className="flex h-full w-full overflow-hidden" style={{ border: `1px solid ${t.frame}`, borderRadius: t.radius, backgroundColor: t.page }}>
+        <div className="flex w-[35%] flex-col items-center gap-[3px] p-[4px]" style={{ background: t.head }}>
+          <div className="h-[10px] w-[10px] rounded-[3px] bg-white/90" />
+          <ThumbRows count={4} color="#67e8f9" />
+          <div className="mt-auto h-[10px] w-[10px] rounded-[2px] bg-white" />
+        </div>
+        <div className="flex flex-1 flex-col gap-[3px] p-[4px]">
+          <ThumbTable t={t} rows={4} />
+          <ThumbChips t={t} />
+        </div>
+      </div>
+    );
+  }
+
+  const centered = t.layout === 'centered';
+
+  return (
+    <div
+      className="h-full w-full overflow-hidden"
+      style={{
+        border: `${t.double ? 2 : 1}px ${t.double ? 'double' : 'solid'} ${t.frame}`,
+        borderRadius: t.radius,
+        backgroundColor: t.outer || t.page,
+        padding: t.inset || t.outer ? 2 : 0,
+      }}
+    >
+      <div
+        className="flex h-full w-full flex-col gap-[3px] p-[4px]"
+        style={{
+          backgroundColor: t.page,
+          borderRadius: Math.max(0, t.radius - 2),
+          border: t.outer ? `1px solid ${t.frame}` : undefined,
+        }}
+      >
+        <div
+          className={`flex shrink-0 items-center gap-[3px] px-[3px] py-[2px] ${centered ? 'flex-col justify-center' : ''}`}
+          style={{
+            background: t.head,
+            borderRadius: t.inset ? 3 : 0,
+            borderBottom: t.masthead || t.rule ? `2px solid ${t.accent}` : undefined,
+          }}
+        >
+          {!centered && (
+            <div className="h-[9px] w-[9px] shrink-0 rounded-full bg-white" style={{ border: `1px solid ${t.accent}66` }} />
+          )}
+          <div className={`flex flex-col gap-[2px] ${centered ? 'items-center' : 'flex-1'}`}>
+            <div className="h-[3px] rounded-full" style={{ width: centered ? 34 : '70%', backgroundColor: t.headText || '#ffffff', opacity: 0.9 }} />
+            <div className="h-[2px] rounded-full" style={{ width: centered ? 22 : '45%', backgroundColor: t.headText || '#ffffff', opacity: 0.55 }} />
+          </div>
+          {t.ribbon && <div className="h-[5px] w-[26px] rounded-[1px]" style={{ background: 'linear-gradient(to right,#ea580c,#f59e0b,#ea580c)' }} />}
+          {t.title && <div className="h-[3px] w-[30px] rounded-full" style={{ backgroundColor: t.accent }} />}
+        </div>
+
+        {t.rainbow && (
+          <div className="h-[2px] w-full shrink-0 rounded-full" style={{ background: 'linear-gradient(to right,#e5484d,#facc15,#22c55e,#0ea5e9,#a855f7)' }} />
+        )}
+
+        <div className="flex shrink-0 gap-[4px]">
+          <div className="flex-1 rounded-[2px] p-[2px]" style={{ border: `0.5px solid ${t.accent}44`, backgroundColor: t.alt }}>
+            <ThumbRows count={3} color={t.accent} />
+          </div>
+          <div className="flex-1 rounded-[2px] p-[2px]" style={{ border: `0.5px solid ${t.accent}44`, backgroundColor: t.alt }}>
+            <ThumbRows count={3} color={t.accent} />
+          </div>
+        </div>
+
+        <ThumbTable t={t} rows={4} />
+        <ThumbChips t={t} />
+
+        <div className="mt-auto flex shrink-0 items-end gap-[4px] pt-[2px]">
+          <div className="h-[8px] w-[8px] rounded-[1px] bg-white" style={{ border: `1px solid ${t.accent}` }} />
+          <div className="flex-1 border-t border-dashed" style={{ borderColor: t.accent }} />
+          <div className="flex-1 border-t border-dashed" style={{ borderColor: t.accent }} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==========================================
+// Size sliders
+// One control shape, used both on the toolbar and inside the settings
+// modal, so a size can be changed from either place and both show the
+// same value.
+// ==========================================
+const BN_DIGITS = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+const toBnNum = (value) => String(value).replace(/\d/g, (d) => BN_DIGITS[Number(d)]);
+
+const ScaleSlider = ({ label, value, onChange, hint, min = 60, max = 160, step = 5 }) => (
+  <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-[13px] font-semibold text-slate-700">{label}</span>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-[12px] font-bold text-[#7C3AED] tabular-nums">{toBnNum(value)}%</span>
+        <button
+          type="button"
+          title="রিসেট"
+          onClick={() => onChange('100')}
+          className="flex h-5 w-5 items-center justify-center rounded border border-slate-200 text-slate-400 hover:text-[#7C3AED] hover:border-[#DDD6FE] transition"
+        >
+          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h5M20 20v-5h-5M20 9A8 8 0 006.3 5.3M4 15a8 8 0 0013.7 3.7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <input
+      type="range"
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="mt-2 h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-[#7C3AED]"
+    />
+    {hint && <p className="mt-1 text-[11px] leading-snug text-slate-500">{hint}</p>}
+  </div>
+);
+
+/**
+ * Live sample of the subject table at the chosen row size, so the effect
+ * is visible without closing the settings modal.
+ */
+const TableScaleSample = ({ rowGap = 100, font = 100 }) => {
+  // Same arithmetic the sheet itself uses: real padding and font sizes,
+  // so the sample shows what will actually be printed.
+  const pad = (6 * (Number(rowGap) || 100)) / 100;
+  const size = (11 * (Number(font) || 100)) / 100;
+  const cell = { paddingTop: pad, paddingBottom: pad, fontSize: size };
+
+  return (
+    <div className="mt-2 overflow-hidden rounded-md border border-slate-200">
+      <table className="w-full border-collapse text-center">
+        <thead>
+          <tr style={{ backgroundColor: '#0f5132', color: '#ffffff' }}>
+            {['ক্রমিক', 'বিষয়', 'পূর্ণমান', 'প্রাপ্ত নম্বর'].map((h, i) => (
+              <th key={h} className={`px-2 font-bold ${i === 1 ? 'text-left' : ''}`} style={cell}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {[['১', 'বাংলা', '১০০', '৮৫'], ['২', 'ইংরেজি', '১০০', '৭৮']].map((row, i) => (
+            <tr key={i} style={{ backgroundColor: i % 2 ? '#ecfdf5' : '#ffffff' }}>
+              {row.map((value, j) => (
+                <td key={j} className={`border-b border-emerald-100 px-2 font-bold ${j === 1 ? 'text-left' : ''}`} style={cell}>
+                  {value}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+/** Live sample of the institution name and address at the chosen size. */
+const HeaderScaleSample = ({ scale, name, address }) => (
+  <div
+    className="mt-2 overflow-hidden rounded-md px-3 py-2 text-center text-white"
+    style={{ backgroundImage: 'linear-gradient(to right,#0b3d26,#14694a,#0b3d26)' }}
+  >
+    <div style={{ zoom: (Number(scale) || 100) / 100 }}>
+      <p className="text-[15px] font-bold leading-tight">{name || 'প্রতিষ্ঠানের নাম'}</p>
+      <p className="text-[10px] text-emerald-100">{address || 'ঠিকানা'}</p>
+    </div>
+  </div>
+);
 
 const MarkSheet = () => {
   const translate = useTranslate();
@@ -56,16 +315,35 @@ const MarkSheet = () => {
   const [principalName, setPrincipalName] = useState('');
   const [najemName, setNajemName] = useState('');
 
+  // ⭐ নতুন স্টেট: শ্রেণী শিক্ষক ও অভিভাবকের স্বাক্ষর দেখানো/লুকানো
+  const [showClassTeacherSign, setShowClassTeacherSign] = useState(true);
+  const [showGuardianSign, setShowGuardianSign] = useState(true);
+
   // ⭐ স্টেট: প্রিন্ট পেপার সাইজ এবং ওরিয়েন্টেশন
   const [paperSize, setPaperSize] = useState('A4');
   const [orientation, setOrientation] = useState('portrait');
 
   // ⭐ স্টেট: প্রিন্ট স্কেল (subject বেশি হলে ছোট করে এক পেজে আনার জন্য)
-  //    ডিফল্ট ৯০% — ১৪ বিষয় পর্যন্ত এক পেজে ধরে। আরও বিষয় হলে ৮৫% / ৮০% দিন।
-  const [printScale, setPrintScale] = useState('90');
+  const [printScale, setPrintScale] = useState('100');
 
   // ⭐ স্টেট: রঙিন / সাদা-কালো প্রিন্ট
   const [colorMode, setColorMode] = useState('color');
+
+  // Font scale — shrinks/enlarges the whole sheet (preview + print).
+  // The control sits on the toolbar AND inside the settings modal.
+  const [fontScale, setFontScale] = useState('100');
+
+  // Institution name and address size, independent of the rest of the
+  // sheet, so a long name can be shrunk or a short one enlarged.
+  const [headerScale, setHeaderScale] = useState('100');
+
+  // Subject table (বিষয়ভিত্তিক ফলাফল), two separate controls:
+  //   rowGapScale    how much air each row has — cell padding
+  //   contentFontScale the size of every piece of text in the sheet body
+  // Neither one zooms; both change real px values, so the table keeps
+  // its width and the page keeps its layout.
+  const [rowGapScale, setRowGapScale] = useState('100');
+  const [contentFontScale, setContentFontScale] = useState('100');
 
   // ⭐ স্টেট: appliedUserCode
   const [appliedUserCode1, setAppliedUserCode1] = useState('');
@@ -84,6 +362,18 @@ const MarkSheet = () => {
   // ⭐ নতুন স্টেট: ড্রপডাউন ওপেন/ক্লোজ
   const [isInfoDropdownOpen, setIsInfoDropdownOpen] = useState(false);
 
+  // Toolbar popover holding the three size sliders.
+  const [isSizeDropdownOpen, setIsSizeDropdownOpen] = useState(false);
+
+  // Template strip under the filter row — every design at a glance,
+  // so one can be picked without opening the settings modal.
+  const [isTemplatePanelOpen, setIsTemplatePanelOpen] = useState(false);
+
+  // Template id shown in the large preview overlay (null = closed).
+  // With mark sheet data already loaded the overlay renders the real
+  // sheet in that design; otherwise it shows the thumbnail.
+  const [previewTemplateId, setPreviewTemplateId] = useState(null);
+
   // ⭐ চেক করা হচ্ছে কয়টি ফিল্ড সিলেক্ট করা আছে
   const checkedCount = Object.values(studentInfoFields).filter(Boolean).length;
 
@@ -96,6 +386,12 @@ const MarkSheet = () => {
 
   const { data: sessionData } = useGetExamSessionQuery();
   const { data: classListData } = useGetClassListQuery();
+
+  // Saved settings — stored in the Report_Template table, the same way
+  // admit_card_settings are stored (one JSON row per institution)
+  const { data: savedSettings } = useGetMarkSheetSettingsQuery();
+  const [saveMarkSheetSettings, { isLoading: isSavingSettings, isError: isSaveError }] =
+    useSaveMarkSheetSettingsMutation();
   const methods = useForm();
   const { control, handleSubmit, setValue } = methods;
 
@@ -153,10 +449,39 @@ const MarkSheet = () => {
       if (!event.target.closest('.info-dropdown-container')) {
         setIsInfoDropdownOpen(false);
       }
+      if (!event.target.closest('.size-dropdown-container')) {
+        setIsSizeDropdownOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Apply the saved settings once they arrive from the database.
+  // null/missing values keep the page defaults.
+  useEffect(() => {
+    const s = savedSettings?.setup;
+    if (!s) return;
+
+    if (s.templateId) setSelectedTemplate(s.templateId);
+    if (s.showDate !== null && s.showDate !== undefined) setShowDate(Boolean(s.showDate));
+    if (s.showSignature !== null && s.showSignature !== undefined) setShowSignature(Boolean(s.showSignature));
+    if (s.showClassTeacherSign !== null && s.showClassTeacherSign !== undefined) setShowClassTeacherSign(Boolean(s.showClassTeacherSign));
+    if (s.showGuardianSign !== null && s.showGuardianSign !== undefined) setShowGuardianSign(Boolean(s.showGuardianSign));
+    if (s.principalName) setPrincipalName(s.principalName);
+    if (s.najemName) setNajemName(s.najemName);
+    if (s.paperSize) setPaperSize(s.paperSize);
+    if (s.orientation) setOrientation(s.orientation);
+    if (s.colorMode) setColorMode(s.colorMode);
+    if (s.printScale) setPrintScale(String(s.printScale));
+    if (s.fontScale) setFontScale(String(s.fontScale));
+    if (s.headerScale) setHeaderScale(String(s.headerScale));
+    if (s.rowGapScale) setRowGapScale(String(s.rowGapScale));
+    if (s.contentFontScale) setContentFontScale(String(s.contentFontScale));
+    if (s.studentInfoFields && typeof s.studentInfoFields === 'object') {
+      setStudentInfoFields((prev) => ({ ...prev, ...s.studentInfoFields }));
+    }
+  }, [savedSettings]);
 
   const shouldShowFields = (fieldName) => {
     switch (selectedReportID) {
@@ -204,6 +529,34 @@ const MarkSheet = () => {
     });
   };
 
+  // Save the current setup into the Report_Template table.
+  // The modal closes only when the save succeeds.
+  const handleSaveSettings = async () => {
+    try {
+      await saveMarkSheetSettings({
+        templateId: selectedTemplate,
+        showDate,
+        showSignature,
+        showClassTeacherSign,
+        showGuardianSign,
+        principalName,
+        najemName,
+        paperSize,
+        orientation,
+        colorMode,
+        printScale: Number(printScale),
+        fontScale: Number(fontScale),
+        headerScale: Number(headerScale),
+        rowGapScale: Number(rowGapScale),
+        contentFontScale: Number(contentFontScale),
+        studentInfoFields,
+      }).unwrap();
+      setIsSettingsOpen(false);
+    } catch {
+      // isSaveError shows the message inside the modal footer
+    }
+  };
+
   if (isLoading) {
     return <Loading />;
   }
@@ -243,6 +596,11 @@ const MarkSheet = () => {
         orientation={orientation}
         studentInfoFields={studentInfoFields}
         colorMode={colorMode}
+        showClassTeacherSign={showClassTeacherSign} // ⭐ নতুন প্রপস
+        showGuardianSign={showGuardianSign} // ⭐ নতুন প্রপস
+        headerScale={headerScale}
+        contentFontScale={contentFontScale}
+        rowGapScale={rowGapScale}
       />
     );
   };
@@ -350,6 +708,25 @@ const MarkSheet = () => {
                     
                     <button
                       type="button"
+                      onClick={() => setIsTemplatePanelOpen((open) => !open)}
+                      className={`flex items-center gap-1.5 h-[38px] px-3 shrink-0 rounded-lg border text-[12px] font-bold shadow-sm transition ${
+                        isTemplatePanelOpen
+                          ? 'bg-[#F5F3FF] border-[#7C3AED] text-[#6D28D9]'
+                          : 'bg-white border-[#E9D5FF] text-[#7C3AED] hover:bg-[#F5F3FF]'
+                      }`}
+                      title="সব টেমপ্লেট দেখে নির্বাচন করুন"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5h16v14H4zM4 9h16M9 9v10" />
+                      </svg>
+                      টেমপ্লেট
+                      <svg className={`w-3.5 h-3.5 transition-transform ${isTemplatePanelOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => setIsSettingsOpen(true)}
                       className="flex items-center justify-center h-[38px] w-[38px] shrink-0 bg-white border border-[#E9D5FF] text-[#7C3AED] rounded-lg shadow-sm hover:bg-[#F5F3FF] transition"
                       title="সেটিংস ও টেমপ্লেট"
@@ -363,6 +740,70 @@ const MarkSheet = () => {
                 </form>
               </FormProvider>
             </div>
+
+            {/* ================= টেমপ্লেট স্ট্রিপ =================
+                ফিল্টারের নিচে সব ডিজাইন একসাথে — ক্লিক করলেই সিলেক্ট হয়। */}
+            {isTemplatePanelOpen && (
+              <div className="border-t border-slate-200 bg-slate-50 px-5 py-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-slate-700">টেমপ্লেট নির্বাচন করুন</span>
+                    <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700 border border-violet-200">
+                      {MARK_SHEET_TEMPLATES.find((t) => t.id === selectedTemplate)?.name}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsTemplatePanelOpen(false)}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition"
+                    title="বন্ধ করুন"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                  {MARK_SHEET_TEMPLATES.map((tpl) => {
+                    const isSelected = selectedTemplate === tpl.id;
+                    return (
+                      <button
+                        key={tpl.id}
+                        type="button"
+                        onClick={() => setSelectedTemplate(tpl.id)}
+                        title={tpl.desc}
+                        className={`rounded-lg border-2 p-1.5 text-left transition ${
+                          isSelected
+                            ? 'border-[#7C3AED] bg-white shadow-md ring-2 ring-[#7C3AED]/20'
+                            : 'border-slate-200 bg-white hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="h-20 w-full">
+                          <TemplateThumb id={tpl.id} />
+                        </div>
+                        <div className="mt-1.5 flex items-center justify-between gap-1">
+                          <span className={`truncate text-[11px] font-bold ${isSelected ? 'text-[#6D28D9]' : 'text-slate-600'}`}>
+                            {tpl.name}
+                          </span>
+                          {isSelected && (
+                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#7C3AED] text-white">
+                              <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <p className="mt-3 text-[11px] text-slate-500">
+                  ডিজাইনটি বড় করে দেখতে বা অন্য সেটিংস বদলাতে পাশের ⚙ বাটনে যান।
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -513,6 +954,55 @@ const MarkSheet = () => {
                   <option value="80">৮০%</option>
                   <option value="75">৭৫%</option>
                 </select>
+
+                {/* Size sliders — the same three controls as in the settings modal */}
+                <div className="relative size-dropdown-container">
+                  <button
+                    type="button"
+                    onClick={() => setIsSizeDropdownOpen(!isSizeDropdownOpen)}
+                    title="লেখার আকার"
+                    className="flex items-center gap-2 h-8 rounded-lg border border-[#DDD6FE] bg-white px-3 py-1 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                  >
+                    <svg className="w-4 h-4 text-[#7C3AED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7V5h10v2M9 5v14M7 19h4M15 13v-1h6v1M18 12v7M16.5 19h3" />
+                    </svg>
+                    আকার
+                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {isSizeDropdownOpen && (
+                    <div className="absolute right-0 top-full mt-1 w-80 bg-white border border-slate-200 shadow-xl rounded-xl p-3 z-50 space-y-2.5">
+                      <ScaleSlider
+                        label="লেখার আকার"
+                        value={fontScale}
+                        onChange={setFontScale}
+                        hint="পুরো মার্কশিট ছোট/বড় হয়।"
+                      />
+                      <ScaleSlider
+                        label="নাম ও ঠিকানার আকার"
+                        value={headerScale}
+                        onChange={setHeaderScale}
+                        hint="শুধু প্রতিষ্ঠানের নাম ও ঠিকানা।"
+                      />
+                      <ScaleSlider
+                        label="ফলাফলের সারির ফাঁক"
+                        value={rowGapScale}
+                        onChange={setRowGapScale}
+                        min={40}
+                        max={220}
+                        hint="সারিগুলোর উপরে-নিচে কতটুকু ফাঁকা থাকবে।"
+                      />
+                      <ScaleSlider
+                        label="লেখার ফন্ট"
+                        value={contentFontScale}
+                        onChange={setContentFontScale}
+                        hint="পরীক্ষার্থীর তথ্য, নম্বর বিভাজন, ফলাফল, সারসংক্ষেপ ও মন্তব্য — সব লেখা।"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <button
@@ -537,7 +1027,10 @@ const MarkSheet = () => {
           <div className="overflow-y-auto overflow-x-hidden max-h-[calc(100vh-280px)] p-4 print:p-0 print:max-h-none print:overflow-visible">
             {/* ⭐ প্রিন্ট স্কেল এই wrapper-এর উপর অ্যাপ্লাই হয় */}
             <div id="mark-sheet-print-area">
-              {renderResult()}
+              {/* Font scale — applies on screen and in print (compounds with print scale) */}
+              <div style={{ zoom: Number(fontScale) / 100 }}>
+                {renderResult()}
+              </div>
             </div>
           </div>
         </div>
@@ -609,9 +1102,9 @@ const MarkSheet = () => {
                     onChange={(e) => setPrintScale(e.target.value)}
                     className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
                   >
-                    <option value="100">১০০%</option>
+                    <option value="100">১০০% (ডিফল্ট)</option>
                     <option value="95">৯৫%</option>
-                    <option value="90">৯০% (ডিফল্ট)</option>
+                    <option value="90">৯০%</option>
                     <option value="85">৮৫%</option>
                     <option value="80">৮০%</option>
                     <option value="75">৭৫%</option>
@@ -619,6 +1112,56 @@ const MarkSheet = () => {
                   <p className="text-xs text-slate-500">
                     বিষয় বেশি হয়ে ফুটার ২য় পেজে গেলে ৮৫% বা ৮০% দিন।
                   </p>
+                </div>
+
+              </div>
+
+              {/* ⭐ আকারের সেটিংস — তিনটি স্লাইডার, সাথে লাইভ প্রিভিউ */}
+              <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7V5h10v2M9 5v14M7 19h4M15 13v-1h6v1M18 12v7M16.5 19h3" /></svg>
+                  লেখার আকার
+                </h4>
+
+                <div className="space-y-3">
+                  <ScaleSlider
+                    label="লেখার আকার (পুরো মার্কশিট)"
+                    value={fontScale}
+                    onChange={setFontScale}
+                    hint="প্রিভিউ ও প্রিন্ট দুই জায়গাতেই পুরো মার্কশিট ছোট/বড় হবে।"
+                  />
+
+                  <div>
+                    <ScaleSlider
+                      label="প্রতিষ্ঠানের নাম ও ঠিকানার আকার"
+                      value={headerScale}
+                      onChange={setHeaderScale}
+                      hint="শুধু উপরের নাম ও ঠিকানা — বাকি লেখা অপরিবর্তিত থাকবে।"
+                    />
+                    <HeaderScaleSample
+                      scale={headerScale}
+                      name={data?.institution?.InstitutionName}
+                      address={data?.institution?.Address}
+                    />
+                  </div>
+
+                  <div>
+                    <ScaleSlider
+                      label="ফলাফলের সারির ফাঁক"
+                      value={rowGapScale}
+                      onChange={setRowGapScale}
+                      min={40}
+                      max={220}
+                      hint="সারিগুলোর উপরে-নিচে কতটুকু ফাঁকা থাকবে — লেখার সাইজ বদলাবে না।"
+                    />
+                    <ScaleSlider
+                      label="লেখার ফন্ট"
+                      value={contentFontScale}
+                      onChange={setContentFontScale}
+                      hint="পরীক্ষার্থীর তথ্য, নম্বর বিভাজন, বিষয়ভিত্তিক ফলাফল, সারসংক্ষেপ ও মন্তব্য — সব লেখা একসাথে ছোট/বড় হবে। সারির ফাঁক বদলাবে না।"
+                    />
+                    <TableScaleSample rowGap={rowGapScale} font={contentFontScale} />
+                  </div>
                 </div>
               </div>
 
@@ -725,6 +1268,25 @@ const MarkSheet = () => {
                       />
                       <span className="text-sm font-medium text-slate-700">স্বাক্ষর (ছবি) দেখাবে</span>
                     </label>
+                    {/* ⭐ নতুন চেকবক্স */}
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={showClassTeacherSign} 
+                        onChange={(e) => setShowClassTeacherSign(e.target.checked)} 
+                        className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                      />
+                      <span className="text-sm font-medium text-slate-700">শ্রেণী শিক্ষক মন্তব্য দেখাবে</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={showGuardianSign} 
+                        onChange={(e) => setShowGuardianSign(e.target.checked)} 
+                        className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                      />
+                      <span className="text-sm font-medium text-slate-700">অভিভাবক মন্তব্য দেখাবে</span>
+                    </label>
                   </div>
 
                   {/* নাম এডিট করার ইনপুট */}
@@ -753,39 +1315,69 @@ const MarkSheet = () => {
                 {MARK_SHEET_TEMPLATES.map((tpl) => {
                   const isSelected = selectedTemplate === tpl.id;
                   return (
-                    <button
+                    <div
                       key={tpl.id}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => setSelectedTemplate(tpl.id)}
-                      className={`flex flex-col items-start p-4 rounded-xl border-2 transition-all text-left ${
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setSelectedTemplate(tpl.id);
+                        }
+                      }}
+                      className={`flex cursor-pointer flex-col items-start p-4 rounded-xl border-2 transition-all text-left outline-none ${
                         isSelected
                           ? 'border-[#7C3AED] bg-[#F5F3FF] shadow-md ring-2 ring-[#7C3AED]/20'
                           : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
                       }`}
                     >
-                      <div className="flex items-center justify-between w-full mb-2">
+                      <div className="flex items-center justify-between w-full mb-2 gap-2">
                         <span className={`font-bold text-sm ${isSelected ? 'text-[#6D28D9]' : 'text-slate-700'}`}>
                           {tpl.name}
                         </span>
-                        {isSelected && (
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED] text-white">
-                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {/* Opens the design full size without selecting it */}
+                          <button
+                            type="button"
+                            title="বড় করে দেখুন"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setPreviewTemplateId(tpl.id);
+                            }}
+                            className="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 hover:border-[#DDD6FE] hover:text-[#7C3AED] transition"
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16zM11 8v6M8 11h6" />
                             </svg>
-                          </span>
-                        )}
+                          </button>
+                          {isSelected && (
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED] text-white">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </span>
+                          )}
+                        </div>
                       </div>
                       <p className="text-xs text-slate-500">{tpl.desc}</p>
-                      
-                      <div className={`mt-3 w-full h-20 rounded-lg border flex items-center justify-center ${isSelected ? 'border-[#DDD6FE] bg-white' : 'border-slate-100 bg-slate-50'}`}>
-                        <span className="text-[10px] text-slate-400 font-medium">Template Preview</span>
+
+                      {/* Miniature of the design */}
+                      <div className={`mt-3 w-full h-28 rounded-lg border p-1.5 ${isSelected ? 'border-[#DDD6FE] bg-white' : 'border-slate-100 bg-slate-50'}`}>
+                        <TemplateThumb id={tpl.id} />
                       </div>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
 
-              {/* Modal Footer */}
-              <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-100">
+              {/* Modal Footer — সেভ করুন writes the setup to the database */}
+              <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                {isSaveError && (
+                  <span className="mr-auto text-xs font-semibold text-red-600">
+                    সেটিং সংরক্ষণ করা যায়নি, আবার চেষ্টা করুন।
+                  </span>
+                )}
                 <button
                   onClick={() => setIsSettingsOpen(false)}
                   className="px-5 py-2 rounded-lg text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
@@ -793,12 +1385,91 @@ const MarkSheet = () => {
                   বাতিল
                 </button>
                 <button
-                  onClick={() => setIsSettingsOpen(false)}
-                  className={`px-5 py-2 rounded-lg text-sm font-bold shadow-sm transition ${C.primary}`}
+                  onClick={handleSaveSettings}
+                  disabled={isSavingSettings}
+                  className={`px-5 py-2 rounded-lg text-sm font-bold shadow-sm transition disabled:opacity-60 disabled:cursor-not-allowed ${C.primary}`}
                 >
-                  সেভ করুন
+                  {isSavingSettings ? 'সেভ হচ্ছে...' : 'সেভ করুন'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= বড় প্রিভিউ =================
+          মার্কশিট ডাটা লোড থাকলে আসল ডিজাইন, না থাকলে মিনিয়েচার। */}
+      {previewTemplateId && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 print:hidden">
+          <div className="flex w-full max-w-4xl max-h-[90vh] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className={`${C.gradient} flex items-center justify-between px-5 py-3`}>
+              <div>
+                <h3 className="text-white font-bold text-base">
+                  {MARK_SHEET_TEMPLATES.find((t) => t.id === previewTemplateId)?.name}
+                </h3>
+                <p className="text-white/80 text-xs mt-0.5">
+                  {MARK_SHEET_TEMPLATES.find((t) => t.id === previewTemplateId)?.desc}
+                </p>
+              </div>
+              <button
+                onClick={() => setPreviewTemplateId(null)}
+                className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/20 text-white hover:bg-white/30 transition"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-auto bg-slate-100 p-4">
+              {hasMarkSheetParams && data ? (
+                <div style={{ zoom: 0.62 }}>
+                  <MarkSheetPdf
+                    data={data}
+                    templateId={previewTemplateId}
+                    showDate={showDate}
+                    showSignature={showSignature}
+                    principalName={principalName}
+                    najemName={najemName}
+                    paperSize={paperSize}
+                    orientation={orientation}
+                    studentInfoFields={studentInfoFields}
+                    colorMode={colorMode}
+                    showClassTeacherSign={showClassTeacherSign}
+                    showGuardianSign={showGuardianSign}
+                    headerScale={headerScale}
+                    contentFontScale={contentFontScale}
+                    rowGapScale={rowGapScale}
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-4 py-8">
+                  <div className="h-[420px] w-[300px] rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+                    <TemplateThumb id={previewTemplateId} />
+                  </div>
+                  <p className="text-sm font-medium text-slate-500 text-center">
+                    সেশন, পরীক্ষা ও শ্রেণী নির্বাচন করে View দিলে এখানে আসল ডাটা দিয়ে প্রিভিউ দেখা যাবে।
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 border-t border-slate-100 px-5 py-3">
+              <button
+                onClick={() => setPreviewTemplateId(null)}
+                className="px-5 py-2 rounded-lg text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+              >
+                বন্ধ করুন
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedTemplate(previewTemplateId);
+                  setPreviewTemplateId(null);
+                }}
+                className={`px-5 py-2 rounded-lg text-sm font-bold shadow-sm transition ${C.primary}`}
+              >
+                এই ডিজাইনটি নির্বাচন করুন
+              </button>
             </div>
           </div>
         </div>
@@ -808,1619 +1479,3 @@ const MarkSheet = () => {
 };
 
 export default MarkSheet;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { useEffect, useState } from 'react';
-// import Loading from '../components/Loading/Loading';
-// import useTranslate from '../utils/Translate';
-// import { FormProvider, useForm, useWatch } from 'react-hook-form';
-// import DefaultSelect from '../components/Forms/DefaultSelect';
-// import { markSheetResultReports } from '../Data/userReportsData';
-// import { useGetClassListQuery } from '../features/class/classQuerySlice';
-// import {
-//   useGetExamFilterExamsQuery,
-//   useGetExamFilterSubclassesQuery,
-//   useGetExamSessionQuery,
-// } from '../features/exam/examQuerySlice';
-// import Button from '../components/Button/Button';
-// import { useGetMarkSheetQuery, useGetResultReportDataQuery } from '../features/result/resultSilce';
-// import DefaultInput from '../components/Forms/DefaultInput';
-// import MarkSheetPdf from '../components/ResultPdf/MarkSheetPdf';
-// import { showModal } from '../utils/ModalControlar';
-
-// // ==========================================
-// // Inline loading spinner (শুধু মার্কশিট এলাকার জন্য)
-// // ==========================================
-// const MarkSheetLoader = () => (
-//   <div className="flex flex-col items-center justify-center gap-3 py-24 print:hidden">
-//     <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
-//     <p className="text-sm font-medium text-indigo-700">মার্কশিট লোড হচ্ছে, অপেক্ষা করুন...</p>
-//   </div>
-// );
-
-// /* ---------------- কালার প্যালেট ---------------- */
-// const C = {
-//   gradient: "bg-gradient-to-r from-[#7C3AED] via-[#4F46E5] to-[#06B6D4]",
-//   panel: "bg-[#FAF5FF]",
-//   panelBorder: "border-[#E9D5FF]",
-//   primary: "bg-[#7C3AED] hover:bg-[#6D28D9] text-white",
-// };
-
-// // ⭐ টেমপ্লেট লিস্ট
-// const MARK_SHEET_TEMPLATES = [
-//   { id: 'template-1', name: 'Standard Mark Sheet', desc: 'সাধারণ মার্কশিট ডিজাইন' },
-//   { id: 'template-2', name: 'Tabular Mark Sheet', desc: 'ট্যাবুলার ফরম্যাট' },
-//   { id: 'template-3', name: 'Grade Sheet', desc: 'গ্রেড ভিত্তিক মার্কশিট' },
-//   { id: 'template-4', name: 'Compact Mark Sheet', desc: 'কম্প্যাক্ট ডিজাইন' },
-// ];
-
-// const MarkSheet = () => {
-//   const translate = useTranslate();
-//   const [queryParams, setQueryParams] = useState(null);
-
-//   // ⭐ স্টেট: সেটিংস মডাল এবং টেমপ্লেট সিলেকশন
-//   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-//   const [selectedTemplate, setSelectedTemplate] = useState('template-1');
-
-//   // ⭐ স্টেট: স্বাক্ষর, তারিখ ও নামের জন্য
-//   const [showDate, setShowDate] = useState(true);
-//   const [showSignature, setShowSignature] = useState(true);
-//   const [principalName, setPrincipalName] = useState('');
-//   const [najemName, setNajemName] = useState('');
-
-//   // ⭐ স্টেট: প্রিন্ট পেপার সাইজ এবং ওরিয়েন্টেশন
-//   const [paperSize, setPaperSize] = useState('A4');
-//   const [orientation, setOrientation] = useState('portrait');
-
-//   // ⭐ স্টেট: প্রিন্ট স্কেল (subject বেশি হলে ছোট করে এক পেজে আনার জন্য)
-//   //    ডিফল্ট ৯০% — ১৪ বিষয় পর্যন্ত এক পেজে ধরে। আরও বিষয় হলে ৮৫% / ৮০% দিন।
-//   const [printScale, setPrintScale] = useState('90');
-
-//   // ⭐ স্টেট: appliedUserCode
-//   const [appliedUserCode1, setAppliedUserCode1] = useState('');
-//   const [appliedUserCode2, setAppliedUserCode2] = useState('');
-
-//   // ⭐ স্টেট: পরীক্ষার্থীর তথ্য (কোন কোন ফিল্ড দেখাবে)
-//   const [studentInfoFields, setStudentInfoFields] = useState({
-//     name: true,
-//     fatherName: true,
-//     motherName: true,
-//     dob: false,
-//     registration: true,
-//     admission: true,
-//   });
-
-//   // ⭐ নতুন স্টেট: ড্রপডাউন ওপেন/ক্লোজ
-//   const [isInfoDropdownOpen, setIsInfoDropdownOpen] = useState(false);
-
-//   // ⭐ চেক করা হচ্ছে কয়টি ফিল্ড সিলেক্ট করা আছে
-//   const checkedCount = Object.values(studentInfoFields).filter(Boolean).length;
-
-//   const {
-//     data: reportData,
-//     isLoading,
-//     isFetching,
-//     error,
-//   } = useGetResultReportDataQuery(queryParams, { skip: !queryParams });
-
-//   const { data: sessionData } = useGetExamSessionQuery();
-//   const { data: classListData } = useGetClassListQuery();
-//   const methods = useForm();
-//   const { control, handleSubmit, setValue } = methods;
-
-//   const selectedReportID = useWatch({ control, name: 'ReportID' });
-//   const sessionID = useWatch({ control, name: 'SessionID' });
-//   const examID = useWatch({ control, name: 'ExamID' });
-//   const SubClassID = useWatch({ control, name: 'SubClassID' });
-
-//   const { data: examNameData } = useGetExamFilterExamsQuery(
-//     { SessionID: sessionID },
-//     { skip: !sessionID }
-//   );
-//   const { data: subclassListData } = useGetExamFilterSubclassesQuery(
-//     { SessionID: sessionID, ExamID: examID },
-//     { skip: !sessionID || !examID }
-//   );
-
-//   // ⭐ params-এ appliedUserCode1 এবং appliedUserCode2 যোগ করা হলো
-//   const params = {
-//     sessionid: Number(sessionID),
-//     examid: Number(examID),
-//     classid: Number(SubClassID),
-//     UserCode1: appliedUserCode1 || undefined,
-//     UserCode2: appliedUserCode2 || undefined,
-//   };
-
-//   const hasMarkSheetParams = !!params.sessionid && !!params.examid && !!params.classid;
-
-//   // ✅ Mark sheet data loading state
-//   const {
-//     data,
-//     isLoading: isMarkSheetLoading,
-//     isFetching: isMarkSheetFetching,
-//     isError: isMarkSheetError,
-//   } = useGetMarkSheetQuery(params, {
-//     skip: !hasMarkSheetParams,
-//     refetchOnMountOrArgChange: true,
-//   });
-
-//   // isFetching ধরলে নতুন filter দিলে পুরনো data না দেখিয়ে loader দেখাবে
-//   const isMarkSheetBusy = hasMarkSheetParams && (isMarkSheetLoading || isMarkSheetFetching);
-
-//   useEffect(() => {
-//     setValue('ExamID', '');
-//     setValue('SubClassID', '');
-//   }, [sessionID, setValue]);
-
-//   useEffect(() => {
-//     setValue('SubClassID', '');
-//   }, [examID, setValue]);
-
-//   // ⭐ ড্রপডাউন বন্ধ করার জন্য বাইরে ক্লিক লিসেনার
-//   useEffect(() => {
-//     const handleClickOutside = (event) => {
-//       if (!event.target.closest('.info-dropdown-container')) {
-//         setIsInfoDropdownOpen(false);
-//       }
-//     };
-//     document.addEventListener('mousedown', handleClickOutside);
-//     return () => document.removeEventListener('mousedown', handleClickOutside);
-//   }, []);
-
-//   const shouldShowFields = (fieldName) => {
-//     switch (selectedReportID) {
-//       case 1:
-//         return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
-//       case 2:
-//       case 3:
-//       case 4:
-//       case 5:
-//         return ['ReportID', 'SessionID', 'ExamID', 'SubClassID'].includes(fieldName);
-//       case 6:
-//         return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
-//       default:
-//         return false;
-//     }
-//   };
-
-//   // ⭐ onSubmit-এ appliedUserCode সেট করা হলো
-//   const onSubmit = (formData) => {
-//     setAppliedUserCode1(formData.UserCode1 || '');
-//     setAppliedUserCode2(formData.UserCode2 || '');
-
-//     const queryObj = {
-//       report_data: selectedReportID,
-//       session_id: formData.SessionID,
-//       exam_id: formData.ExamID,
-//       subclass_id: formData.SubClassID,
-//       UserCode1: formData.UserCode1,
-//       UserCode2: formData.UserCode2,
-//     };
-
-//     Object.keys(queryObj).forEach((key) => {
-//       if (queryObj[key] === undefined || queryObj[key] === '') {
-//         delete queryObj[key];
-//       }
-//     });
-
-//     setQueryParams(queryObj);
-//   };
-
-//   const handleStudentMarkSheetNote = () => {
-//     setIsSettingsOpen(false);
-//     showModal('মার্কশিট নোট তৈরি করুন', 'STUDENT_MARK_SHEET_NOTE', {
-//       closeOnOutSide: false,
-//     });
-//   };
-
-//   if (isLoading) {
-//     return <Loading />;
-//   }
-
-//   // Result panel-এ কী দেখাবে
-//   const renderResult = () => {
-//     if (isMarkSheetBusy) return <MarkSheetLoader />;
-
-//     if (isMarkSheetError) {
-//       return (
-//         <div className="p-4 m-2 bg-red-50 border border-red-200 rounded-md shadow-sm text-red-600 text-center print:hidden">
-//           মার্কশিট লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।
-//         </div>
-//       );
-//     }
-
-//     if (!hasMarkSheetParams || !data) {
-//       return (
-//         <div className="flex flex-col items-center justify-center py-24 text-slate-400 print:hidden">
-//           <svg className="w-16 h-16 mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-//           </svg>
-//           <p className="text-sm font-medium">মার্কশিট দেখতে সেশন, পরীক্ষা ও শ্রেণী নির্বাচন করুন।</p>
-//         </div>
-//       );
-//     }
-
-//     return (
-//       <MarkSheetPdf 
-//         data={data} 
-//         templateId={selectedTemplate} 
-//         showDate={showDate}
-//         showSignature={showSignature}
-//         principalName={principalName}
-//         najemName={najemName}
-//         paperSize={paperSize}
-//         orientation={orientation}
-//         studentInfoFields={studentInfoFields} 
-//       />
-//     );
-//   };
-
-//   const canPrint = hasMarkSheetParams && !!data && !isMarkSheetBusy && !isMarkSheetError;
-
-//   return (
-//     <div className="font-SolaimanLipi space-y-4 bg-transparent max-w-full overflow-x-hidden">
-
-//       {/* ================= প্রিন্ট কমপ্যাক্ট স্টাইল =================
-//           সমস্যা: কন্টেন্ট ১.১৩ পেজ হয়ে যাওয়ায় ফুটার (QR + স্বাক্ষর) ২য় পেজে চলে যায়।
-//           সমাধান ২ ধাপে —
-//             ১) ফিক্সড হাইট ও ফ্লেক্স স্পেসার বন্ধ করা (ফুটারের উপরের ফাঁকা জায়গা দূর)
-//             ২) printScale দিয়ে সামান্য ছোট করা
-//           নোট: MarkSheetPdf.jsx-এ যদি আগে থেকেই @page রুল থাকে, তাহলে নিচের
-//           @page লাইনটি সেখান থেকে বা এখান থেকে — যেকোনো একটি রাখুন। */}
-//       <style>{`
-//         @media print {
-//           @page { size: ${paperSize} ${orientation}; margin: 4mm; }
-
-//           #mark-sheet-print-area {
-//             zoom: ${Number(printScale) / 100};
-//           }
-
-//           /* ১) ফিক্সড হাইট নিউট্রালাইজ — A4 হাইট ধরে রাখা বক্স ফুটারকে নিচে ঠেলে দেয় */
-//           #mark-sheet-print-area [class*="min-h-"],
-//           #mark-sheet-print-area [class*="h-screen"] {
-//             min-height: 0 !important;
-//             height: auto !important;
-//           }
-
-//           /* ২) ফ্লেক্স স্পেসার বন্ধ — ফুটার মন্তব্য বক্সের ঠিক নিচে উঠে আসবে।
-//                 শুধু খালি (:empty) স্পেসার ধরা হচ্ছে, যাতে মন্তব্যের বক্সের মতো
-//                 কন্টেন্টওয়ালা flex-1 এলিমেন্ট চেপে সরু হয়ে না যায়। */
-//           #mark-sheet-print-area .mt-auto { margin-top: 0 !important; }
-//           #mark-sheet-print-area [class*="flex-1"]:empty,
-//           #mark-sheet-print-area [class*="grow"]:empty {
-//             flex-grow: 0 !important;
-//             display: none !important;
-//           }
-
-//           /* ২খ) মন্তব্য/স্বাক্ষরের বক্স যেন সমান প্রস্থে ছড়িয়ে থাকে */
-//           #mark-sheet-print-area [class*="flex-1"]:not(:empty) {
-//             flex: 1 1 0% !important;
-//             min-width: 0 !important;
-//           }
-
-//           /* ২গ) শেষ ব্লকের পর জোর করে পেজ ব্রেক হলে ফাঁকা পেজ তৈরি হয় — বন্ধ */
-//           #mark-sheet-print-area *:last-child {
-//             page-break-after: auto !important;
-//             break-after: auto !important;
-//           }
-
-//           /* ৩) অতিরিক্ত শ্যাডো ও টেবিল ব্রেক কন্ট্রোল */
-//           #mark-sheet-print-area * { box-shadow: none !important; }
-//           #mark-sheet-print-area table { page-break-inside: auto; }
-//           #mark-sheet-print-area tr { page-break-inside: avoid; }
-//         }
-//       `}</style>
-
-//       {/* ================= মূল কন্টেন্ট এরিয়া ================= */}
-//       <div className="flex flex-col gap-5 min-h-screen print:min-h-0 print:gap-0 print:block">
-        
-//         {/* Top: Filter Panel (Horizontal) */}
-//         <div className="print:hidden w-full">
-//           <div className={`bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden`}>
-//             <div className="p-5">
-//               <FormProvider {...methods}>
-//                 <form
-//                   onSubmit={handleSubmit(onSubmit)}
-//                   className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 items-end"
-//                 >
-//                   <DefaultSelect
-//                     label={translate('Report')}
-//                     nameField="ReportName"
-//                     registerKey="ReportID"
-//                     valueField="ReportID"
-//                     options={markSheetResultReports}
-//                     type="number"
-//                     require="This Field is required"
-//                   />
-
-//                   {shouldShowFields('SessionID') && (
-//                     <DefaultSelect
-//                       label={translate('Session')}
-//                       nameField="SessionName"
-//                       registerKey="SessionID"
-//                       valueField="SessionID"
-//                       options={sessionData ?? []}
-//                       require="This Field is required"
-//                       defaultSelect={false}
-//                       unicode={true}
-//                     />
-//                   )}
-
-//                   {shouldShowFields('ExamID') && (
-//                     <DefaultSelect
-//                       label={translate('Exam')}
-//                       nameField="ExamName"
-//                       registerKey="ExamID"
-//                       valueField="ExamID"
-//                       options={examNameData ?? []}
-//                       require={'This Field is required'}
-//                       unicode={true}
-//                     />
-//                   )}
-
-//                   {shouldShowFields('ClassID') && (
-//                     <DefaultSelect
-//                       label={translate('Class')}
-//                       nameField="ClassName"
-//                       registerKey="ClassID"
-//                       valueField="ClassID"
-//                       options={classListData ?? []}
-//                       require={'This Field is required'}
-//                       unicode={true}
-//                     />
-//                   )}
-
-//                   {shouldShowFields('SubClassID') && (
-//                     <DefaultSelect
-//                       label={translate('Sub Class')}
-//                       nameField="SubClass"
-//                       registerKey="SubClassID"
-//                       valueField="SubClassID"
-//                       options={subclassListData ?? []}
-//                       require={'This Field is required'}
-//                       unicode={true}
-//                     />
-//                   )}
-
-//                   {shouldShowFields('UserCode') && (
-//                     <div className="grid grid-cols-2 gap-2">
-//                       <DefaultInput registerKey="UserCode1" label="আইডি থেকে" />
-//                       <DefaultInput registerKey="UserCode2" label="আইডি পর্যন্ত" />
-//                     </div>
-//                   )}
-
-//                   {/* ⭐ রিপোর্ট তৈরি এবং সেটিংস বাটন */}
-//                   <div className="flex items-center gap-2 w-full">
-//                     <button
-//                       type="submit"
-//                       className={`w-auto px-6 flex items-center justify-center gap-1.5 h-[44px] rounded-lg text-[13px] font-bold ${C.primary} shadow-sm transition`}
-//                     >
-//                       View
-//                     </button>
-                    
-//                     <button
-//                       type="button"
-//                       onClick={() => setIsSettingsOpen(true)}
-//                       className="flex items-center justify-center h-[38px] w-[38px] shrink-0 bg-white border border-[#E9D5FF] text-[#7C3AED] rounded-lg shadow-sm hover:bg-[#F5F3FF] transition"
-//                       title="সেটিংস ও টেমপ্লেট"
-//                     >
-//                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-//                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-//                       </svg>
-//                     </button>
-//                   </div>
-//                 </form>
-//               </FormProvider>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* Bottom: Result Panel (Full Width) */}
-//         <div className="w-full bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden print:border-0 print:shadow-none">
-          
-//           {/* Result Toolbar */}
-//           <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center justify-between print:hidden">
-//             <div className="flex items-center gap-3">
-//               <span className="text-sm font-bold text-slate-700">প্রিভিউ</span>
-//               <span className="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold border border-violet-200">
-//                 {MARK_SHEET_TEMPLATES.find(t => t.id === selectedTemplate)?.name || 'Default Template'}
-//               </span>
-//             </div>
-            
-//             <div className="flex items-center gap-3">
-//               {isFetching && (
-//                 <span className="text-xs text-indigo-600 font-semibold animate-pulse">
-//                   {translate('Loading report...')}
-//                 </span>
-//               )}
-
-//               <div className="flex items-center gap-2 mr-2">
-//                 <div className="relative info-dropdown-container">
-//                   <button
-//                     type="button"
-//                     onClick={() => setIsInfoDropdownOpen(!isInfoDropdownOpen)}
-//                     className="flex items-center justify-between gap-2 h-8 rounded-lg border border-[#DDD6FE] bg-white px-3 py-1 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-//                   >
-//                     পরীক্ষার্থীর তথ্য
-//                     <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-//                     </svg>
-//                   </button>
-
-//                   {isInfoDropdownOpen && (
-//                     <div className="absolute right-0 top-full mt-1 w-64 bg-white border border-slate-200 shadow-xl rounded-xl p-3 z-50">
-//                       <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-100">
-//                         <span className="text-xs font-bold text-slate-600">তথ্য নির্বাচন করুন</span>
-//                         <span className="text-[10px] font-bold text-violet-600 bg-violet-100 px-2 py-0.5 rounded">সর্বোচ্চ ৫টি</span>
-//                       </div>
-//                       <div className="space-y-2">
-//                         <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.name && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-//                           <input 
-//                             type="checkbox" 
-//                             checked={studentInfoFields.name} 
-//                             onChange={(e) => setStudentInfoFields(prev => ({ ...prev, name: e.target.checked }))} 
-//                             disabled={!studentInfoFields.name && checkedCount >= 5}
-//                             className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-//                           />
-//                           <span className="text-sm font-medium text-slate-700">নাম</span>
-//                         </label>
-//                         <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.fatherName && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-//                           <input 
-//                             type="checkbox" 
-//                             checked={studentInfoFields.fatherName} 
-//                             onChange={(e) => setStudentInfoFields(prev => ({ ...prev, fatherName: e.target.checked }))} 
-//                             disabled={!studentInfoFields.fatherName && checkedCount >= 5}
-//                             className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-//                           />
-//                           <span className="text-sm font-medium text-slate-700">পিতার নাম</span>
-//                         </label>
-//                         <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.motherName && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-//                           <input 
-//                             type="checkbox" 
-//                             checked={studentInfoFields.motherName} 
-//                             onChange={(e) => setStudentInfoFields(prev => ({ ...prev, motherName: e.target.checked }))} 
-//                             disabled={!studentInfoFields.motherName && checkedCount >= 5}
-//                             className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-//                           />
-//                           <span className="text-sm font-medium text-slate-700">মাতার নাম</span>
-//                         </label>
-//                         <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.dob && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-//                           <input 
-//                             type="checkbox" 
-//                             checked={studentInfoFields.dob} 
-//                             onChange={(e) => setStudentInfoFields(prev => ({ ...prev, dob: e.target.checked }))} 
-//                             disabled={!studentInfoFields.dob && checkedCount >= 5}
-//                             className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-//                           />
-//                           <span className="text-sm font-medium text-slate-700">জন্ম তারিখ</span>
-//                         </label>
-//                         <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.registration && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-//                           <input 
-//                             type="checkbox" 
-//                             checked={studentInfoFields.registration} 
-//                             onChange={(e) => setStudentInfoFields(prev => ({ ...prev, registration: e.target.checked }))} 
-//                             disabled={!studentInfoFields.registration && checkedCount >= 5}
-//                             className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-//                           />
-//                           <span className="text-sm font-medium text-slate-700">দাখেলা</span>
-//                         </label>
-//                         <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.admission && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-//                           <input 
-//                             type="checkbox" 
-//                             checked={studentInfoFields.admission} 
-//                             onChange={(e) => setStudentInfoFields(prev => ({ ...prev, admission: e.target.checked }))} 
-//                             disabled={!studentInfoFields.admission && checkedCount >= 5}
-//                             className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-//                           />
-//                           <span className="text-sm font-medium text-slate-700">ভর্তি নং</span>
-//                         </label>
-//                       </div>
-//                     </div>
-//                   )}
-//                 </div>
-
-//                 <select
-//                   value={paperSize}
-//                   onChange={(e) => setPaperSize(e.target.value)}
-//                   className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-//                 >
-//                   <option value="A4">A4</option>
-//                   <option value="A5">A5</option>
-//                 </select>
-
-//                 <select
-//                   value={orientation}
-//                   onChange={(e) => setOrientation(e.target.value)}
-//                   className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-//                 >
-//                   <option value="portrait">Portrait</option>
-//                   <option value="landscape">Landscape</option>
-//                 </select>
-
-//                 {/* ⭐ প্রিন্ট স্কেল — subject বেশি হলে ছোট করে এক পেজে আনার জন্য */}
-//                 <select
-//                   value={printScale}
-//                   onChange={(e) => setPrintScale(e.target.value)}
-//                   title="প্রিন্ট সাইজ — subject বেশি হলে ছোট করুন"
-//                   className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-//                 >
-//                   <option value="100">১০০%</option>
-//                   <option value="95">৯৫%</option>
-//                   <option value="90">৯০%</option>
-//                   <option value="85">৮৫%</option>
-//                   <option value="80">৮০%</option>
-//                   <option value="75">৭৫%</option>
-//                 </select>
-//               </div>
-
-//               <button
-//                 onClick={() => window.print()}
-//                 disabled={!canPrint}
-//                 className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-[#7C3AED] text-white text-xs font-bold hover:bg-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed transition"
-//               >
-//                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-//                 </svg>
-//                 প্রিন্ট করুন
-//               </button>
-//             </div>
-//           </div>
-
-//           {error && (
-//             <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-md text-red-600 text-center text-sm font-medium">
-//               Failed to load report.
-//             </div>
-//           )}
-
-//           <div className="overflow-y-auto overflow-x-hidden max-h-[calc(100vh-280px)] p-4 print:p-0 print:max-h-none print:overflow-visible">
-//             {/* ⭐ প্রিন্ট স্কেল এই wrapper-এর উপর অ্যাপ্লাই হয় */}
-//             <div id="mark-sheet-print-area">
-//               {renderResult()}
-//             </div>
-//           </div>
-//         </div>
-        
-//       </div>
-
-//       {/* ================= সেটিংস ও টেমপ্লেট মডাল ================= */}
-//       {isSettingsOpen && (
-//         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 print:hidden">
-//           <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            
-//             {/* Modal Header */}
-//             <div className={`${C.gradient} px-5 py-4 flex items-center justify-between`}>
-//               <div>
-//                 <h3 className="text-white font-bold text-lg">মার্কশিট সেটিংস</h3>
-//                 <p className="text-white/80 text-xs mt-0.5">পছন্দের টেমপ্লেট ও সেটিংস সিলেক্ট করুন</p>
-//               </div>
-//               <button
-//                 onClick={() => setIsSettingsOpen(false)}
-//                 className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/20 text-white hover:bg-white/30 transition"
-//               >
-//                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-//                 </svg>
-//               </button>
-//             </div>
-
-//             {/* Modal Body */}
-//             <div className="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
-              
-//               {/* ⭐ নতুন: নোট বাটন */}
-//               <div className="mb-6">
-//                 <button
-//                   type="button"
-//                   onClick={handleStudentMarkSheetNote}
-//                   className="w-full flex items-center justify-center gap-2 bg-[#F5F3FF] border border-[#E9D5FF] text-[#6D28D9] font-bold text-sm px-4 py-3 rounded-xl hover:bg-[#EDE9FE] transition shadow-sm"
-//                 >
-//                   <svg xmlns="http://www.w3.org/2000/svg" width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-//                     <path d="M12 5v14" />
-//                     <path d="M5 12h14" />
-//                   </svg>
-//                   বিভাগ মার্কশিট নোট তৈরি করুন
-//                 </button>
-//               </div>
-
-//               {/* ⭐ প্রিন্ট সাইজ সেটিংস (মডালের ভেতরেও) */}
-//               <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-xl">
-//                 <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
-//                   <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" /></svg>
-//                   প্রিন্ট সাইজ (এক পেজে আনতে)
-//                 </h4>
-//                 <div className="flex items-center gap-3">
-//                   <select
-//                     value={printScale}
-//                     onChange={(e) => setPrintScale(e.target.value)}
-//                     className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
-//                   >
-//                     <option value="100">১০০%</option>
-//                     <option value="95">৯৫%</option>
-//                     <option value="90">৯০% (ডিফল্ট)</option>
-//                     <option value="85">৮৫%</option>
-//                     <option value="80">৮০%</option>
-//                     <option value="75">৭৫%</option>
-//                   </select>
-//                   <p className="text-xs text-slate-500">
-//                     বিষয় বেশি হয়ে ফুটার ২য় পেজে গেলে ৮৫% বা ৮০% দিন।
-//                   </p>
-//                 </div>
-//               </div>
-
-//               {/* ⭐ পরীক্ষার্থীর তথ্য সেটিংস (মডালের ভেতরেও থাকলো) */}
-//               <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-xl">
-//                 <div className="flex items-center justify-between mb-4">
-//                   <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
-//                     <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-//                     পরীক্ষার্থীর তথ্য (কোনটি দেখাবে)
-//                   </h4>
-//                   <span className="text-xs font-bold text-violet-600 bg-violet-100 px-2 py-1 rounded">
-//                     সর্বোচ্চ ৫টি
-//                   </span>
-//                 </div>
-//                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-//                   <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.name && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-//                     <input 
-//                       type="checkbox" 
-//                       checked={studentInfoFields.name} 
-//                       onChange={(e) => setStudentInfoFields(prev => ({ ...prev, name: e.target.checked }))} 
-//                       disabled={!studentInfoFields.name && checkedCount >= 5}
-//                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-//                     />
-//                     <span className="text-sm font-medium text-slate-700">নাম</span>
-//                   </label>
-//                   <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.fatherName && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-//                     <input 
-//                       type="checkbox" 
-//                       checked={studentInfoFields.fatherName} 
-//                       onChange={(e) => setStudentInfoFields(prev => ({ ...prev, fatherName: e.target.checked }))} 
-//                       disabled={!studentInfoFields.fatherName && checkedCount >= 5}
-//                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-//                     />
-//                     <span className="text-sm font-medium text-slate-700">পিতার নাম</span>
-//                   </label>
-//                   <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.motherName && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-//                     <input 
-//                       type="checkbox" 
-//                       checked={studentInfoFields.motherName} 
-//                       onChange={(e) => setStudentInfoFields(prev => ({ ...prev, motherName: e.target.checked }))} 
-//                       disabled={!studentInfoFields.motherName && checkedCount >= 5}
-//                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-//                     />
-//                     <span className="text-sm font-medium text-slate-700">মাতার নাম</span>
-//                   </label>
-//                   <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.dob && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-//                     <input 
-//                       type="checkbox" 
-//                       checked={studentInfoFields.dob} 
-//                       onChange={(e) => setStudentInfoFields(prev => ({ ...prev, dob: e.target.checked }))} 
-//                       disabled={!studentInfoFields.dob && checkedCount >= 5}
-//                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-//                     />
-//                     <span className="text-sm font-medium text-slate-700">জন্ম তারিখ</span>
-//                   </label>
-//                   <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.registration && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-//                     <input 
-//                       type="checkbox" 
-//                       checked={studentInfoFields.registration} 
-//                       onChange={(e) => setStudentInfoFields(prev => ({ ...prev, registration: e.target.checked }))} 
-//                       disabled={!studentInfoFields.registration && checkedCount >= 5}
-//                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-//                     />
-//                     <span className="text-sm font-medium text-slate-700">দাখেলা</span>
-//                   </label>
-//                   <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.admission && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-//                     <input 
-//                       type="checkbox" 
-//                       checked={studentInfoFields.admission} 
-//                       onChange={(e) => setStudentInfoFields(prev => ({ ...prev, admission: e.target.checked }))} 
-//                       disabled={!studentInfoFields.admission && checkedCount >= 5}
-//                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-//                     />
-//                     <span className="text-sm font-medium text-slate-700">ভর্তি নং</span>
-//                   </label>
-//                 </div>
-//               </div>
-
-//               {/* ⭐ স্বাক্ষর, তারিখ ও নামের সেটিংস */}
-//               <div className="mb-8 p-4 bg-slate-50 border border-slate-200 rounded-xl">
-//                 <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
-//                   <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-//                   স্বাক্ষর, তারিখ ও নামের সেটিংস
-//                 </h4>
-                
-//                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-//                   {/* চেকবক্স সেটিংস */}
-//                   <div className="flex flex-col gap-3">
-//                     <label className="flex items-center gap-2 cursor-pointer">
-//                       <input 
-//                         type="checkbox" 
-//                         checked={showDate} 
-//                         onChange={(e) => setShowDate(e.target.checked)} 
-//                         className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
-//                       />
-//                       <span className="text-sm font-medium text-slate-700">তারিখ দেখাবে</span>
-//                     </label>
-//                     <label className="flex items-center gap-2 cursor-pointer">
-//                       <input 
-//                         type="checkbox" 
-//                         checked={showSignature} 
-//                         onChange={(e) => setShowSignature(e.target.checked)} 
-//                         className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
-//                       />
-//                       <span className="text-sm font-medium text-slate-700">স্বাক্ষর (ছবি) দেখাবে</span>
-//                     </label>
-//                   </div>
-
-//                   {/* নাম এডিট করার ইনপুট */}
-//                   <div className="flex flex-col gap-3">
-//                     <input
-//                       type="text"
-//                       value={principalName}
-//                       onChange={(e) => setPrincipalName(e.target.value)}
-//                       placeholder="মুহতামিমের নাম (ফাঁকা রাখলে ডিফল্ট)"
-//                       className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none"
-//                     />
-//                     <input
-//                       type="text"
-//                       value={najemName}
-//                       onChange={(e) => setNajemName(e.target.value)}
-//                       placeholder="নায়েবে তালিমাতের নাম (ফাঁকা রাখলে ডিফল্ট)"
-//                       className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none"
-//                     />
-//                   </div>
-//                 </div>
-//               </div>
-
-//               <h4 className="text-sm font-bold text-slate-700 mb-4 pb-3 border-b border-slate-100">টেমপ্লেট নির্বাচন করুন</h4>
-              
-//               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
-//                 {MARK_SHEET_TEMPLATES.map((tpl) => {
-//                   const isSelected = selectedTemplate === tpl.id;
-//                   return (
-//                     <button
-//                       key={tpl.id}
-//                       onClick={() => setSelectedTemplate(tpl.id)}
-//                       className={`flex flex-col items-start p-4 rounded-xl border-2 transition-all text-left ${
-//                         isSelected
-//                           ? 'border-[#7C3AED] bg-[#F5F3FF] shadow-md ring-2 ring-[#7C3AED]/20'
-//                           : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
-//                       }`}
-//                     >
-//                       <div className="flex items-center justify-between w-full mb-2">
-//                         <span className={`font-bold text-sm ${isSelected ? 'text-[#6D28D9]' : 'text-slate-700'}`}>
-//                           {tpl.name}
-//                         </span>
-//                         {isSelected && (
-//                           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED] text-white">
-//                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-//                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-//                             </svg>
-//                           </span>
-//                         )}
-//                       </div>
-//                       <p className="text-xs text-slate-500">{tpl.desc}</p>
-                      
-//                       <div className={`mt-3 w-full h-20 rounded-lg border flex items-center justify-center ${isSelected ? 'border-[#DDD6FE] bg-white' : 'border-slate-100 bg-slate-50'}`}>
-//                         <span className="text-[10px] text-slate-400 font-medium">Template Preview</span>
-//                       </div>
-//                     </button>
-//                   );
-//                 })}
-//               </div>
-
-//               {/* Modal Footer */}
-//               <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-100">
-//                 <button
-//                   onClick={() => setIsSettingsOpen(false)}
-//                   className="px-5 py-2 rounded-lg text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
-//                 >
-//                   বাতিল
-//                 </button>
-//                 <button
-//                   onClick={() => setIsSettingsOpen(false)}
-//                   className={`px-5 py-2 rounded-lg text-sm font-bold shadow-sm transition ${C.primary}`}
-//                 >
-//                   সেভ করুন
-//                 </button>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default MarkSheet;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // import { useEffect, useState } from 'react';
-// // import Loading from '../components/Loading/Loading';
-// // import useTranslate from '../utils/Translate';
-// // import { FormProvider, useForm, useWatch } from 'react-hook-form';
-// // import DefaultSelect from '../components/Forms/DefaultSelect';
-// // import { markSheetResultReports } from '../Data/userReportsData';
-// // import { useGetClassListQuery } from '../features/class/classQuerySlice';
-// // import {
-// //   useGetExamFilterExamsQuery,
-// //   useGetExamFilterSubclassesQuery,
-// //   useGetExamSessionQuery,
-// // } from '../features/exam/examQuerySlice';
-// // import Button from '../components/Button/Button';
-// // import { useGetMarkSheetQuery, useGetResultReportDataQuery } from '../features/result/resultSilce';
-// // import DefaultInput from '../components/Forms/DefaultInput';
-// // import MarkSheetPdf from '../components/ResultPdf/MarkSheetPdf';
-// // import { showModal } from '../utils/ModalControlar';
-
-// // // ==========================================
-// // // Inline loading spinner (শুধু মার্কশিট এলাকার জন্য)
-// // // ==========================================
-// // const MarkSheetLoader = () => (
-// //   <div className="flex flex-col items-center justify-center gap-3 py-24 print:hidden">
-// //     <div className="h-12 w-12 animate-spin rounded-full border-4 border-indigo-200 border-t-indigo-600" />
-// //     <p className="text-sm font-medium text-indigo-700">মার্কশিট লোড হচ্ছে, অপেক্ষা করুন...</p>
-// //   </div>
-// // );
-
-// // /* ---------------- কালার প্যালেট ---------------- */
-// // const C = {
-// //   gradient: "bg-gradient-to-r from-[#7C3AED] via-[#4F46E5] to-[#06B6D4]",
-// //   panel: "bg-[#FAF5FF]",
-// //   panelBorder: "border-[#E9D5FF]",
-// //   primary: "bg-[#7C3AED] hover:bg-[#6D28D9] text-white",
-// // };
-
-// // // ⭐ টেমপ্লেট লিস্ট
-// // const MARK_SHEET_TEMPLATES = [
-// //   { id: 'template-1', name: 'Standard Mark Sheet', desc: 'সাধারণ মার্কশিট ডিজাইন' },
-// //   { id: 'template-2', name: 'Tabular Mark Sheet', desc: 'ট্যাবুলার ফরম্যাট' },
-// //   { id: 'template-3', name: 'Grade Sheet', desc: 'গ্রেড ভিত্তিক মার্কশিট' },
-// //   { id: 'template-4', name: 'Compact Mark Sheet', desc: 'কম্প্যাক্ট ডিজাইন' },
-// // ];
-
-// // const MarkSheet = () => {
-// //   const translate = useTranslate();
-// //   const [queryParams, setQueryParams] = useState(null);
-
-// //   // ⭐ স্টেট: সেটিংস মডাল এবং টেমপ্লেট সিলেকশন
-// //   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-// //   const [selectedTemplate, setSelectedTemplate] = useState('template-1');
-
-// //   // ⭐ স্টেট: স্বাক্ষর, তারিখ ও নামের জন্য
-// //   const [showDate, setShowDate] = useState(true);
-// //   const [showSignature, setShowSignature] = useState(true);
-// //   const [principalName, setPrincipalName] = useState('');
-// //   const [najemName, setNajemName] = useState('');
-
-// //   // ⭐ স্টেট: প্রিন্ট পেপার সাইজ এবং ওরিয়েন্টেশন
-// //   const [paperSize, setPaperSize] = useState('A4');
-// //   const [orientation, setOrientation] = useState('portrait');
-
-// //   // ⭐ স্টেট: appliedUserCode
-// //   const [appliedUserCode1, setAppliedUserCode1] = useState('');
-// //   const [appliedUserCode2, setAppliedUserCode2] = useState('');
-
-// //   // ⭐ স্টেট: পরীক্ষার্থীর তথ্য (কোন কোন ফিল্ড দেখাবে)
-// //   const [studentInfoFields, setStudentInfoFields] = useState({
-// //     name: true,
-// //     fatherName: true,
-// //     motherName: true,
-// //     dob: false,
-// //     registration: true,
-// //     admission: true,
-// //   });
-
-// //   // ⭐ নতুন স্টেট: ড্রপডাউন ওপেন/ক্লোজ
-// //   const [isInfoDropdownOpen, setIsInfoDropdownOpen] = useState(false);
-
-// //   // ⭐ চেক করা হচ্ছে কয়টি ফিল্ড সিলেক্ট করা আছে
-// //   const checkedCount = Object.values(studentInfoFields).filter(Boolean).length;
-
-// //   const {
-// //     data: reportData,
-// //     isLoading,
-// //     isFetching,
-// //     error,
-// //   } = useGetResultReportDataQuery(queryParams, { skip: !queryParams });
-
-// //   const { data: sessionData } = useGetExamSessionQuery();
-// //   const { data: classListData } = useGetClassListQuery();
-// //   const methods = useForm();
-// //   const { control, handleSubmit, setValue } = methods;
-
-// //   const selectedReportID = useWatch({ control, name: 'ReportID' });
-// //   const sessionID = useWatch({ control, name: 'SessionID' });
-// //   const examID = useWatch({ control, name: 'ExamID' });
-// //   const SubClassID = useWatch({ control, name: 'SubClassID' });
-
-// //   const { data: examNameData } = useGetExamFilterExamsQuery(
-// //     { SessionID: sessionID },
-// //     { skip: !sessionID }
-// //   );
-// //   const { data: subclassListData } = useGetExamFilterSubclassesQuery(
-// //     { SessionID: sessionID, ExamID: examID },
-// //     { skip: !sessionID || !examID }
-// //   );
-
-// //   // ⭐ params-এ appliedUserCode1 এবং appliedUserCode2 যোগ করা হলো
-// //   const params = {
-// //     sessionid: Number(sessionID),
-// //     examid: Number(examID),
-// //     classid: Number(SubClassID),
-// //     UserCode1: appliedUserCode1 || undefined,
-// //     UserCode2: appliedUserCode2 || undefined,
-// //   };
-
-// //   const hasMarkSheetParams = !!params.sessionid && !!params.examid && !!params.classid;
-
-// //   // ✅ Mark sheet data loading state
-// //   const {
-// //     data,
-// //     isLoading: isMarkSheetLoading,
-// //     isFetching: isMarkSheetFetching,
-// //     isError: isMarkSheetError,
-// //   } = useGetMarkSheetQuery(params, {
-// //     skip: !hasMarkSheetParams,
-// //     refetchOnMountOrArgChange: true,
-// //   });
-
-// //   // isFetching ধরলে নতুন filter দিলে পুরনো data না দেখিয়ে loader দেখাবে
-// //   const isMarkSheetBusy = hasMarkSheetParams && (isMarkSheetLoading || isMarkSheetFetching);
-
-// //   useEffect(() => {
-// //     setValue('ExamID', '');
-// //     setValue('SubClassID', '');
-// //   }, [sessionID, setValue]);
-
-// //   useEffect(() => {
-// //     setValue('SubClassID', '');
-// //   }, [examID, setValue]);
-
-// //   // ⭐ ড্রপডাউন বন্ধ করার জন্য বাইরে ক্লিক লিসেনার
-// //   useEffect(() => {
-// //     const handleClickOutside = (event) => {
-// //       if (!event.target.closest('.info-dropdown-container')) {
-// //         setIsInfoDropdownOpen(false);
-// //       }
-// //     };
-// //     document.addEventListener('mousedown', handleClickOutside);
-// //     return () => document.removeEventListener('mousedown', handleClickOutside);
-// //   }, []);
-
-// //   const shouldShowFields = (fieldName) => {
-// //     switch (selectedReportID) {
-// //       case 1:
-// //         return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
-// //       case 2:
-// //       case 3:
-// //       case 4:
-// //       case 5:
-// //         return ['ReportID', 'SessionID', 'ExamID', 'SubClassID'].includes(fieldName);
-// //       case 6:
-// //         return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
-// //       default:
-// //         return false;
-// //     }
-// //   };
-
-// //   // ⭐ onSubmit-এ appliedUserCode সেট করা হলো
-// //   const onSubmit = (formData) => {
-// //     setAppliedUserCode1(formData.UserCode1 || '');
-// //     setAppliedUserCode2(formData.UserCode2 || '');
-
-// //     const queryObj = {
-// //       report_data: selectedReportID,
-// //       session_id: formData.SessionID,
-// //       exam_id: formData.ExamID,
-// //       subclass_id: formData.SubClassID,
-// //       UserCode1: formData.UserCode1,
-// //       UserCode2: formData.UserCode2,
-// //     };
-
-// //     Object.keys(queryObj).forEach((key) => {
-// //       if (queryObj[key] === undefined || queryObj[key] === '') {
-// //         delete queryObj[key];
-// //       }
-// //     });
-
-// //     setQueryParams(queryObj);
-// //   };
-
-// //   const handleStudentMarkSheetNote = () => {
-// //     setIsSettingsOpen(false);
-// //     showModal('মার্কশিট নোট তৈরি করুন', 'STUDENT_MARK_SHEET_NOTE', {
-// //       closeOnOutSide: false,
-// //     });
-// //   };
-
-// //   if (isLoading) {
-// //     return <Loading />;
-// //   }
-
-// //   // Result panel-এ কী দেখাবে
-// //   const renderResult = () => {
-// //     if (isMarkSheetBusy) return <MarkSheetLoader />;
-
-// //     if (isMarkSheetError) {
-// //       return (
-// //         <div className="p-4 m-2 bg-red-50 border border-red-200 rounded-md shadow-sm text-red-600 text-center print:hidden">
-// //           মার্কশিট লোড করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।
-// //         </div>
-// //       );
-// //     }
-
-// //     if (!hasMarkSheetParams || !data) {
-// //       return (
-// //         <div className="flex flex-col items-center justify-center py-24 text-slate-400 print:hidden">
-// //           <svg className="w-16 h-16 mb-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-// //             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-// //           </svg>
-// //           <p className="text-sm font-medium">মার্কশিট দেখতে সেশন, পরীক্ষা ও শ্রেণী নির্বাচন করুন।</p>
-// //         </div>
-// //       );
-// //     }
-
-// //     return (
-// //       <MarkSheetPdf 
-// //         data={data} 
-// //         templateId={selectedTemplate} 
-// //         showDate={showDate}
-// //         showSignature={showSignature}
-// //         principalName={principalName}
-// //         najemName={najemName}
-// //         paperSize={paperSize}
-// //         orientation={orientation}
-// //         studentInfoFields={studentInfoFields} 
-// //       />
-// //     );
-// //   };
-
-// //   const canPrint = hasMarkSheetParams && !!data && !isMarkSheetBusy && !isMarkSheetError;
-
-// //   return (
-// //     <div className="font-SolaimanLipi space-y-4 bg-transparent max-w-full overflow-x-hidden">
-      
-// //       {/* ================= মূল কন্টেন্ট এরিয়া ================= */}
-// //       <div className="flex flex-col gap-5 min-h-screen print:min-h-0 print:gap-0 print:block">
-        
-// //         {/* Top: Filter Panel (Horizontal) */}
-// //         <div className="print:hidden w-full">
-// //           <div className={`bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden`}>
-// //             <div className="p-5">
-// //               <FormProvider {...methods}>
-// //                 <form
-// //                   onSubmit={handleSubmit(onSubmit)}
-// //                   className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 items-end"
-// //                 >
-// //                   <DefaultSelect
-// //                     label={translate('Report')}
-// //                     nameField="ReportName"
-// //                     registerKey="ReportID"
-// //                     valueField="ReportID"
-// //                     options={markSheetResultReports}
-// //                     type="number"
-// //                     require="This Field is required"
-// //                   />
-
-// //                   {shouldShowFields('SessionID') && (
-// //                     <DefaultSelect
-// //                       label={translate('Session')}
-// //                       nameField="SessionName"
-// //                       registerKey="SessionID"
-// //                       valueField="SessionID"
-// //                       options={sessionData ?? []}
-// //                       require="This Field is required"
-// //                       defaultSelect={false}
-// //                       unicode={true}
-// //                     />
-// //                   )}
-
-// //                   {shouldShowFields('ExamID') && (
-// //                     <DefaultSelect
-// //                       label={translate('Exam')}
-// //                       nameField="ExamName"
-// //                       registerKey="ExamID"
-// //                       valueField="ExamID"
-// //                       options={examNameData ?? []}
-// //                       require={'This Field is required'}
-// //                       unicode={true}
-// //                     />
-// //                   )}
-
-// //                   {shouldShowFields('ClassID') && (
-// //                     <DefaultSelect
-// //                       label={translate('Class')}
-// //                       nameField="ClassName"
-// //                       registerKey="ClassID"
-// //                       valueField="ClassID"
-// //                       options={classListData ?? []}
-// //                       require={'This Field is required'}
-// //                       unicode={true}
-// //                     />
-// //                   )}
-
-// //                   {shouldShowFields('SubClassID') && (
-// //                     <DefaultSelect
-// //                       label={translate('Sub Class')}
-// //                       nameField="SubClass"
-// //                       registerKey="SubClassID"
-// //                       valueField="SubClassID"
-// //                       options={subclassListData ?? []}
-// //                       require={'This Field is required'}
-// //                       unicode={true}
-// //                     />
-// //                   )}
-
-// //                   {shouldShowFields('UserCode') && (
-// //                     <div className="grid grid-cols-2 gap-2">
-// //                       <DefaultInput registerKey="UserCode1" label="আইডি থেকে" />
-// //                       <DefaultInput registerKey="UserCode2" label="আইডি পর্যন্ত" />
-// //                     </div>
-// //                   )}
-
-// //                   {/* ⭐ রিপোর্ট তৈরি এবং সেটিংস বাটন */}
-// //                   <div className="flex items-center gap-2 w-full">
-// //                     <button
-// //                       type="submit"
-// //                       className={`w-auto px-6 flex items-center justify-center gap-1.5 h-[44px] rounded-lg text-[13px] font-bold ${C.primary} shadow-sm transition`}
-// //                     >
-// //                       View
-// //                     </button>
-                    
-// //                     <button
-// //                       type="button"
-// //                       onClick={() => setIsSettingsOpen(true)}
-// //                       className="flex items-center justify-center h-[38px] w-[38px] shrink-0 bg-white border border-[#E9D5FF] text-[#7C3AED] rounded-lg shadow-sm hover:bg-[#F5F3FF] transition"
-// //                       title="সেটিংস ও টেমপ্লেট"
-// //                     >
-// //                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-// //                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-// //                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-// //                       </svg>
-// //                     </button>
-// //                   </div>
-// //                 </form>
-// //               </FormProvider>
-// //             </div>
-// //           </div>
-// //         </div>
-
-// //         {/* Bottom: Result Panel (Full Width) */}
-// //         <div className="w-full bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden print:border-0 print:shadow-none">
-          
-// //           {/* Result Toolbar */}
-// //           <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center justify-between print:hidden">
-// //             <div className="flex items-center gap-3">
-// //               <span className="text-sm font-bold text-slate-700">প্রিভিউ</span>
-// //               <span className="px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 text-[10px] font-bold border border-violet-200">
-// //                 {MARK_SHEET_TEMPLATES.find(t => t.id === selectedTemplate)?.name || 'Default Template'}
-// //               </span>
-// //             </div>
-            
-// //             <div className="flex items-center gap-3">
-// //               {isFetching && (
-// //                 <span className="text-xs text-indigo-600 font-semibold animate-pulse">
-// //                   {translate('Loading report...')}
-// //                 </span>
-// //               )}
-
-// //               <div className="flex items-center gap-2 mr-2">
-// //                 <div className="relative info-dropdown-container">
-// //                   <button
-// //                     type="button"
-// //                     onClick={() => setIsInfoDropdownOpen(!isInfoDropdownOpen)}
-// //                     className="flex items-center justify-between gap-2 h-8 rounded-lg border border-[#DDD6FE] bg-white px-3 py-1 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-// //                   >
-// //                     পরীক্ষার্থীর তথ্য
-// //                     <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-// //                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-// //                     </svg>
-// //                   </button>
-
-// //                   {isInfoDropdownOpen && (
-// //                     <div className="absolute right-0 top-full mt-1 w-64 bg-white border border-slate-200 shadow-xl rounded-xl p-3 z-50">
-// //                       <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-100">
-// //                         <span className="text-xs font-bold text-slate-600">তথ্য নির্বাচন করুন</span>
-// //                         <span className="text-[10px] font-bold text-violet-600 bg-violet-100 px-2 py-0.5 rounded">সর্বোচ্চ ৫টি</span>
-// //                       </div>
-// //                       <div className="space-y-2">
-// //                         <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.name && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-// //                           <input 
-// //                             type="checkbox" 
-// //                             checked={studentInfoFields.name} 
-// //                             onChange={(e) => setStudentInfoFields(prev => ({ ...prev, name: e.target.checked }))} 
-// //                             disabled={!studentInfoFields.name && checkedCount >= 5}
-// //                             className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-// //                           />
-// //                           <span className="text-sm font-medium text-slate-700">নাম</span>
-// //                         </label>
-// //                         <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.fatherName && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-// //                           <input 
-// //                             type="checkbox" 
-// //                             checked={studentInfoFields.fatherName} 
-// //                             onChange={(e) => setStudentInfoFields(prev => ({ ...prev, fatherName: e.target.checked }))} 
-// //                             disabled={!studentInfoFields.fatherName && checkedCount >= 5}
-// //                             className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-// //                           />
-// //                           <span className="text-sm font-medium text-slate-700">পিতার নাম</span>
-// //                         </label>
-// //                         <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.motherName && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-// //                           <input 
-// //                             type="checkbox" 
-// //                             checked={studentInfoFields.motherName} 
-// //                             onChange={(e) => setStudentInfoFields(prev => ({ ...prev, motherName: e.target.checked }))} 
-// //                             disabled={!studentInfoFields.motherName && checkedCount >= 5}
-// //                             className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-// //                           />
-// //                           <span className="text-sm font-medium text-slate-700">মাতার নাম</span>
-// //                         </label>
-// //                         <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.dob && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-// //                           <input 
-// //                             type="checkbox" 
-// //                             checked={studentInfoFields.dob} 
-// //                             onChange={(e) => setStudentInfoFields(prev => ({ ...prev, dob: e.target.checked }))} 
-// //                             disabled={!studentInfoFields.dob && checkedCount >= 5}
-// //                             className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-// //                           />
-// //                           <span className="text-sm font-medium text-slate-700">জন্ম তারিখ</span>
-// //                         </label>
-// //                         <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.registration && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-// //                           <input 
-// //                             type="checkbox" 
-// //                             checked={studentInfoFields.registration} 
-// //                             onChange={(e) => setStudentInfoFields(prev => ({ ...prev, registration: e.target.checked }))} 
-// //                             disabled={!studentInfoFields.registration && checkedCount >= 5}
-// //                             className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-// //                           />
-// //                           <span className="text-sm font-medium text-slate-700">দাখেলা</span>
-// //                         </label>
-// //                         <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.admission && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-// //                           <input 
-// //                             type="checkbox" 
-// //                             checked={studentInfoFields.admission} 
-// //                             onChange={(e) => setStudentInfoFields(prev => ({ ...prev, admission: e.target.checked }))} 
-// //                             disabled={!studentInfoFields.admission && checkedCount >= 5}
-// //                             className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-// //                           />
-// //                           <span className="text-sm font-medium text-slate-700">ভর্তি নং</span>
-// //                         </label>
-// //                       </div>
-// //                     </div>
-// //                   )}
-// //                 </div>
-
-// //                 <select
-// //                   value={paperSize}
-// //                   onChange={(e) => setPaperSize(e.target.value)}
-// //                   className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-// //                 >
-// //                   <option value="A4">A4</option>
-// //                   <option value="A5">A5</option>
-// //                 </select>
-
-// //                 <select
-// //                   value={orientation}
-// //                   onChange={(e) => setOrientation(e.target.value)}
-// //                   className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-// //                 >
-// //                   <option value="portrait">Portrait</option>
-// //                   <option value="landscape">Landscape</option>
-// //                 </select>
-// //               </div>
-
-// //               <button
-// //                 onClick={() => window.print()}
-// //                 disabled={!canPrint}
-// //                 className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-[#7C3AED] text-white text-xs font-bold hover:bg-[#6D28D9] disabled:opacity-50 disabled:cursor-not-allowed transition"
-// //               >
-// //                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-// //                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-// //                 </svg>
-// //                 প্রিন্ট করুন
-// //               </button>
-// //             </div>
-// //           </div>
-
-// //           {error && (
-// //             <div className="p-4 m-4 bg-red-50 border border-red-200 rounded-md text-red-600 text-center text-sm font-medium">
-// //               Failed to load report.
-// //             </div>
-// //           )}
-
-// //           <div className="overflow-y-auto overflow-x-hidden max-h-[calc(100vh-280px)] p-4 print:p-0 print:max-h-none print:overflow-visible">
-// //             {renderResult()}
-// //           </div>
-// //         </div>
-        
-// //       </div>
-
-// //       {/* ================= সেটিংস ও টেমপ্লেট মডাল ================= */}
-// //       {isSettingsOpen && (
-// //         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 print:hidden">
-// //           <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            
-// //             {/* Modal Header */}
-// //             <div className={`${C.gradient} px-5 py-4 flex items-center justify-between`}>
-// //               <div>
-// //                 <h3 className="text-white font-bold text-lg">মার্কশিট সেটিংস</h3>
-// //                 <p className="text-white/80 text-xs mt-0.5">পছন্দের টেমপ্লেট ও সেটিংস সিলেক্ট করুন</p>
-// //               </div>
-// //               <button
-// //                 onClick={() => setIsSettingsOpen(false)}
-// //                 className="h-8 w-8 flex items-center justify-center rounded-lg bg-white/20 text-white hover:bg-white/30 transition"
-// //               >
-// //                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-// //                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-// //                 </svg>
-// //               </button>
-// //             </div>
-
-// //             {/* Modal Body */}
-// //             <div className="p-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
-              
-// //               {/* ⭐ নতুন: নোট বাটন */}
-// //               <div className="mb-6">
-// //                 <button
-// //                   type="button"
-// //                   onClick={handleStudentMarkSheetNote}
-// //                   className="w-full flex items-center justify-center gap-2 bg-[#F5F3FF] border border-[#E9D5FF] text-[#6D28D9] font-bold text-sm px-4 py-3 rounded-xl hover:bg-[#EDE9FE] transition shadow-sm"
-// //                 >
-// //                   <svg xmlns="http://www.w3.org/2000/svg" width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-// //                     <path d="M12 5v14" />
-// //                     <path d="M5 12h14" />
-// //                   </svg>
-// //                   বিভাগ মার্কশিট নোট তৈরি করুন
-// //                 </button>
-// //               </div>
-
-// //               {/* ⭐ পরীক্ষার্থীর তথ্য সেটিংস (মডালের ভেতরেও থাকলো) */}
-// //               <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-xl">
-// //                 <div className="flex items-center justify-between mb-4">
-// //                   <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
-// //                     <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-// //                     পরীক্ষার্থীর তথ্য (কোনটি দেখাবে)
-// //                   </h4>
-// //                   <span className="text-xs font-bold text-violet-600 bg-violet-100 px-2 py-1 rounded">
-// //                     সর্বোচ্চ ৫টি
-// //                   </span>
-// //                 </div>
-// //                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-// //                   <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.name && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-// //                     <input 
-// //                       type="checkbox" 
-// //                       checked={studentInfoFields.name} 
-// //                       onChange={(e) => setStudentInfoFields(prev => ({ ...prev, name: e.target.checked }))} 
-// //                       disabled={!studentInfoFields.name && checkedCount >= 5}
-// //                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-// //                     />
-// //                     <span className="text-sm font-medium text-slate-700">নাম</span>
-// //                   </label>
-// //                   <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.fatherName && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-// //                     <input 
-// //                       type="checkbox" 
-// //                       checked={studentInfoFields.fatherName} 
-// //                       onChange={(e) => setStudentInfoFields(prev => ({ ...prev, fatherName: e.target.checked }))} 
-// //                       disabled={!studentInfoFields.fatherName && checkedCount >= 5}
-// //                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-// //                     />
-// //                     <span className="text-sm font-medium text-slate-700">পিতার নাম</span>
-// //                   </label>
-// //                   <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.motherName && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-// //                     <input 
-// //                       type="checkbox" 
-// //                       checked={studentInfoFields.motherName} 
-// //                       onChange={(e) => setStudentInfoFields(prev => ({ ...prev, motherName: e.target.checked }))} 
-// //                       disabled={!studentInfoFields.motherName && checkedCount >= 5}
-// //                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-// //                     />
-// //                     <span className="text-sm font-medium text-slate-700">মাতার নাম</span>
-// //                   </label>
-// //                   <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.dob && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-// //                     <input 
-// //                       type="checkbox" 
-// //                       checked={studentInfoFields.dob} 
-// //                       onChange={(e) => setStudentInfoFields(prev => ({ ...prev, dob: e.target.checked }))} 
-// //                       disabled={!studentInfoFields.dob && checkedCount >= 5}
-// //                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-// //                     />
-// //                     <span className="text-sm font-medium text-slate-700">জন্ম তারিখ</span>
-// //                   </label>
-// //                   <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.registration && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-// //                     <input 
-// //                       type="checkbox" 
-// //                       checked={studentInfoFields.registration} 
-// //                       onChange={(e) => setStudentInfoFields(prev => ({ ...prev, registration: e.target.checked }))} 
-// //                       disabled={!studentInfoFields.registration && checkedCount >= 5}
-// //                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-// //                     />
-// //                     <span className="text-sm font-medium text-slate-700">দাখেলা</span>
-// //                   </label>
-// //                   <label className={`flex items-center gap-2 cursor-pointer ${!studentInfoFields.admission && checkedCount >= 5 ? 'opacity-50 cursor-not-allowed' : ''}`}>
-// //                     <input 
-// //                       type="checkbox" 
-// //                       checked={studentInfoFields.admission} 
-// //                       onChange={(e) => setStudentInfoFields(prev => ({ ...prev, admission: e.target.checked }))} 
-// //                       disabled={!studentInfoFields.admission && checkedCount >= 5}
-// //                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
-// //                     />
-// //                     <span className="text-sm font-medium text-slate-700">ভর্তি নং</span>
-// //                   </label>
-// //                 </div>
-// //               </div>
-
-// //               {/* ⭐ স্বাক্ষর, তারিখ ও নামের সেটিংস */}
-// //               <div className="mb-8 p-4 bg-slate-50 border border-slate-200 rounded-xl">
-// //                 <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
-// //                   <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-// //                   স্বাক্ষর, তারিখ ও নামের সেটিংস
-// //                 </h4>
-                
-// //                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-// //                   {/* চেকবক্স সেটিংস */}
-// //                   <div className="flex flex-col gap-3">
-// //                     <label className="flex items-center gap-2 cursor-pointer">
-// //                       <input 
-// //                         type="checkbox" 
-// //                         checked={showDate} 
-// //                         onChange={(e) => setShowDate(e.target.checked)} 
-// //                         className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
-// //                       />
-// //                       <span className="text-sm font-medium text-slate-700">তারিখ দেখাবে</span>
-// //                     </label>
-// //                     <label className="flex items-center gap-2 cursor-pointer">
-// //                       <input 
-// //                         type="checkbox" 
-// //                         checked={showSignature} 
-// //                         onChange={(e) => setShowSignature(e.target.checked)} 
-// //                         className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
-// //                       />
-// //                       <span className="text-sm font-medium text-slate-700">স্বাক্ষর (ছবি) দেখাবে</span>
-// //                     </label>
-// //                   </div>
-
-// //                   {/* নাম এডিট করার ইনপুট */}
-// //                   <div className="flex flex-col gap-3">
-// //                     <input
-// //                       type="text"
-// //                       value={principalName}
-// //                       onChange={(e) => setPrincipalName(e.target.value)}
-// //                       placeholder="মুহতামিমের নাম (ফাঁকা রাখলে ডিফল্ট)"
-// //                       className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none"
-// //                     />
-// //                     <input
-// //                       type="text"
-// //                       value={najemName}
-// //                       onChange={(e) => setNajemName(e.target.value)}
-// //                       placeholder="নায়েবে তালিমাতের নাম (ফাঁকা রাখলে ডিফল্ট)"
-// //                       className="w-full px-3 py-1.5 text-sm border border-slate-300 rounded-md focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none"
-// //                     />
-// //                   </div>
-// //                 </div>
-// //               </div>
-
-// //               <h4 className="text-sm font-bold text-slate-700 mb-4 pb-3 border-b border-slate-100">টেমপ্লেট নির্বাচন করুন</h4>
-              
-// //               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
-// //                 {MARK_SHEET_TEMPLATES.map((tpl) => {
-// //                   const isSelected = selectedTemplate === tpl.id;
-// //                   return (
-// //                     <button
-// //                       key={tpl.id}
-// //                       onClick={() => setSelectedTemplate(tpl.id)}
-// //                       className={`flex flex-col items-start p-4 rounded-xl border-2 transition-all text-left ${
-// //                         isSelected
-// //                           ? 'border-[#7C3AED] bg-[#F5F3FF] shadow-md ring-2 ring-[#7C3AED]/20'
-// //                           : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
-// //                       }`}
-// //                     >
-// //                       <div className="flex items-center justify-between w-full mb-2">
-// //                         <span className={`font-bold text-sm ${isSelected ? 'text-[#6D28D9]' : 'text-slate-700'}`}>
-// //                           {tpl.name}
-// //                         </span>
-// //                         {isSelected && (
-// //                           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#7C3AED] text-white">
-// //                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-// //                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
-// //                             </svg>
-// //                           </span>
-// //                         )}
-// //                       </div>
-// //                       <p className="text-xs text-slate-500">{tpl.desc}</p>
-                      
-// //                       <div className={`mt-3 w-full h-20 rounded-lg border flex items-center justify-center ${isSelected ? 'border-[#DDD6FE] bg-white' : 'border-slate-100 bg-slate-50'}`}>
-// //                         <span className="text-[10px] text-slate-400 font-medium">Template Preview</span>
-// //                       </div>
-// //                     </button>
-// //                   );
-// //                 })}
-// //               </div>
-
-// //               {/* Modal Footer */}
-// //               <div className="mt-6 flex justify-end gap-3 pt-4 border-t border-slate-100">
-// //                 <button
-// //                   onClick={() => setIsSettingsOpen(false)}
-// //                   className="px-5 py-2 rounded-lg text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
-// //                 >
-// //                   বাতিল
-// //                 </button>
-// //                 <button
-// //                   onClick={() => setIsSettingsOpen(false)}
-// //                   className={`px-5 py-2 rounded-lg text-sm font-bold shadow-sm transition ${C.primary}`}
-// //                 >
-// //                   সেভ করুন
-// //                 </button>
-// //               </div>
-// //             </div>
-// //           </div>
-// //         </div>
-// //       )}
-// //     </div>
-// //   );
-// // };
-
-// // export default MarkSheet;

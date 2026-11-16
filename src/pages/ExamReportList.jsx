@@ -1243,65 +1243,76 @@ const ExamReportList = ({ pageTitle }) => {
                     </div>
                   )}
 
+                  {/* ⭐ এখানে রিপোর্ট ১ এর সাজানো অপশনটি রিপোর্ট ৩ এর মতো আপডেট করা হয়েছে */}
                   {isFeeReport && (
                     <div className="rounded-xl border border-sky-200 bg-sky-50/50 p-3 flex flex-wrap items-center gap-3">
-                      <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700 px-1">
-                        <svg className="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
-                        </svg>
-                        সাজানো:
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-2 text-[13px] font-semibold text-slate-700 px-1">
+                          <svg className="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+                          </svg>
+                          সাজানো:
+                        </span>
 
-                      <div className="flex flex-wrap gap-2">
-                        {[
-                          { key: 'AdmissionSerial', text: 'ভর্তি নং' },
-                          { key: 'UserCode', text: 'আইডি নং' },
-                        ].map((opt) => {
-                          const on = sortBy === opt.key;
-                          return (
-                            <button
-                              key={opt.key}
-                              type="button"
-                              onClick={() => setSortBy(opt.key)}
-                              className={`px-3.5 py-1.5 rounded-full text-sm font-medium border transition-all ${
-                                on
-                                  ? 'bg-sky-600 border-sky-600 text-white shadow-sm'
-                                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                              }`}
-                            >
-                              {opt.text}
-                            </button>
-                          );
-                        })}
+                        <div className="flex gap-2">
+                          {[
+                            { key: 'AdmissionSerial', label: 'ভর্তি নং' },
+                            { key: 'UserCode', label: 'আইডি নং' },
+                          ].map((opt) => {
+                            const isActive = sortBy === opt.key;
+                            const isAsc = sortOrder === 'asc';
+
+                            return (
+                              <button
+                                key={opt.key}
+                                type="button"
+                                onClick={() => {
+                                  if (isActive) {
+                                    setSortOrder(isAsc ? 'desc' : 'asc');
+                                  } else {
+                                    setSortBy(opt.key);
+                                    setSortOrder('asc');
+                                  }
+                                }}
+                                className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 transition-all ${
+                                  isActive
+                                    ? 'border-sky-500 bg-sky-50 shadow-sm'
+                                    : 'border-slate-200 bg-white hover:bg-slate-50'
+                                }`}
+                              >
+                                <span className={`text-sm ${isActive ? 'text-sky-700 font-bold' : 'text-slate-600 font-medium'}`}>
+                                  {opt.label}
+                                </span>
+
+                                <div className={`w-[1px] h-4 ${isActive ? 'bg-sky-200' : 'bg-slate-200'}`} />
+
+                                <div className="flex items-center gap-1">
+                                  <svg
+                                    className={`h-3.5 w-3.5 transition-colors ${
+                                      isActive && isAsc ? 'text-sky-700' : 'text-slate-300'
+                                    }`}
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 19V5m-7 7 7-7 7 7" />
+                                  </svg>
+                                  <svg
+                                    className={`h-3.5 w-3.5 transition-colors ${
+                                      isActive && !isAsc ? 'text-sky-700' : 'text-slate-300'
+                                    }`}
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m7-7-7 7-7-7" />
+                                  </svg>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
 
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-sky-200 px-3 py-1 text-xs font-semibold text-sky-700">
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-white border border-sky-200 px-3 py-1 text-xs font-semibold text-sky-700 ml-auto">
                         দেখাচ্ছে: {toBn(feeRows.length)} জন
                       </span>
-
-                      <div className="flex gap-1 ml-auto rounded-lg border border-slate-200 bg-white p-1">
-                        {[
-                          { key: 'asc', text: 'ছোট → বড়', icon: 'M5 15l7-7 7 7' },
-                          { key: 'desc', text: 'বড় → ছোট', icon: 'M19 9l-7 7-7-7' },
-                        ].map((opt) => {
-                          const on = sortOrder === opt.key;
-                          return (
-                            <button
-                              key={opt.key}
-                              type="button"
-                              onClick={() => setSortOrder(opt.key)}
-                              className={`px-3 py-1.5 rounded-md text-sm font-medium flex items-center gap-1.5 transition ${
-                                on ? 'bg-indigo-600 text-white' : 'text-slate-600 hover:bg-slate-50'
-                              }`}
-                            >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={opt.icon} />
-                              </svg>
-                              {opt.text}
-                            </button>
-                          );
-                        })}
-                      </div>
                     </div>
                   )}
                 </form>
