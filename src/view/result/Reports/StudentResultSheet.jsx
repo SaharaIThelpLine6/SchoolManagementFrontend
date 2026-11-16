@@ -280,6 +280,22 @@ const calcTotal = (studentResult, subjects) => {
     return sum;
 };
 
+// ✅ যৌথ ফলাফল: সব পরীক্ষার সারির নম্বর যোগ করে মোট (চূড়ান্ত সারি + যুক্ত পরীক্ষাগুলো)
+const calcJointTotal = (studentResult, subjects, jointResult) => {
+    const base = calcTotal(studentResult, subjects);
+    const userMarks = jointResult?.marks?.[studentResult?.UserID];
+    if (!Array.isArray(userMarks)) return base;
+    let sum = base;
+    userMarks.forEach((examMarks, i) => {
+        if (Array.isArray(subjects) && subjects[i] && isKerat(subjects[i])) return;
+        (examMarks || []).forEach((v) => {
+            const n = Number(v);
+            if (v !== null && v !== undefined && v !== "" && Number.isFinite(n)) sum += n;
+        });
+    });
+    return sum;
+};
+
 /* ═══════════════════════════════════════════════════════════
    GPA (ExamType === 4) — GPA1, GPA2 ... এর গড়
    কোনো বিষয়ে GPA 0 (ফেল) হলে জিপিএ 0.00
@@ -906,8 +922,11 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         };
         const all = Array.isArray(reportData.studentResults) ? reportData.studentResults : [];
         const serialOf = (s) => Number(s?.User?.Admission?.[0]?.AdmissionSerial) || 0;
+        const hasJointData = Array.isArray(reportData.jointResult?.exams) && reportData.jointResult.exams.length > 0;
         const totalOf = (s) => {
-            const n = calcTotal(s, reportData.subjectPassNumbers);
+            const n = hasJointData
+                ? calcJointTotal(s, reportData.subjectPassNumbers, reportData.jointResult)
+                : calcTotal(s, reportData.subjectPassNumbers);
             return Number.isNaN(n) ? -Infinity : n;
         };
 
@@ -988,6 +1007,14 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const jointResult = reportData?.jointResult || null;
     const jointExams = Array.isArray(jointResult?.exams) ? jointResult.exams : [];
     const hasJoint = jointExams.length > 0 && !isShort;
+
+    // যৌথ average: সব পরীক্ষার AverageSubsonkha যোগফল (যুক্ত পরীক্ষা + বর্তমান পরীক্ষা)
+    // কোনো যুক্ত পরীক্ষার মান না থাকলে বর্তমান পরীক্ষার মান ধরা হবে
+    const currentAvgSubs = Number(conditionAverage?.AverageSubsonkha) || 0;
+    const jointAverageDivisor = jointExams.reduce(
+        (sum, exam) => sum + (Number(exam?.AverageSubsonkha) || currentAvgSubs),
+        currentAvgSubs
+    );
 
     // যৌথ ফলাফলে প্রতি শিক্ষার্থী = যুক্ত পরীক্ষার সারি + চূড়ান্ত সারি
     const jointSpan = hasJoint ? jointExams.length + 1 : 1;
@@ -1291,11 +1318,11 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         )
         : "";
 
-    // প্রতিটি সারির লেবেল: যুক্ত পরীক্ষাগুলো, শেষে চূড়ান্ত (ExamType 4 এ নিজ পরীক্ষার নম্বর)
+    // প্রতিটি সারির লেবেল: যুক্ত পরীক্ষাগুলো, শেষে বর্তমান পরীক্ষার নাম (না থাকলে চূড়ান্ত)
     const jointRowLabels = hasJoint
         ? [
             ...jointExams.map((exam) => getExamName(exam, lang) || num(exam.ExamID)),
-            Number(conditionAverage?.ExamType) === 4 ? (examName || t.jointFinal) : t.jointFinal,
+            examName || t.jointFinal,
         ]
         : [];
 
@@ -1541,6 +1568,14 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         const gradeFg = gc.fg;
         const subjectCount = conditionAverage?.SubSonkha || 0;
         const userJointMarks = hasJoint ? jointResult?.marks?.[studentResult?.UserID] : null;
+        // মোট কলাম: যৌথ ফলাফলে সব পরীক্ষার সারি যোগ করে
+        const displayTotal = hasJoint
+            ? calcJointTotal(studentResult, subjectPassNumbers, jointResult)
+            : total;
+        // গড় কলাম: যৌথ average পদ্ধতিতে মোট ÷ (সব পরীক্ষার AverageSubsonkha যোগফল)
+        const displayGpa = hasJoint && !isPointBased && jointResult?.resultType === "average"
+            ? displayTotal / (jointAverageDivisor || 1)
+            : gpaValue;
 
         const spanTd = span > 1
             ? { ...styles.td, lineHeight: 1.25 }
@@ -1621,10 +1656,10 @@ export default function StudentResultSheet({ reportData, query, labels }) {
                     )}
 
                     {isFirst && showCol.total && (
-                        <td rowSpan={span} style={{ ...spanTd, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(total)}</td>
+                        <td rowSpan={span} style={{ ...spanTd, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(displayTotal)}</td>
                     )}
                     {isFirst && showCol.gpa && (
-                        <td rowSpan={span} style={{ ...spanTd, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(gpaValue.toFixed(2))}</td>
+                        <td rowSpan={span} style={{ ...spanTd, ...bg(C.primaryFaint), fontWeight: 700 }}>{num(displayGpa.toFixed(2))}</td>
                     )}
                     {isFirst && showCol.grade && (
                         <td rowSpan={span} style={{ ...spanTd, ...bg(gradeBg), fontWeight: 700, fontSize: fs(13), color: gradeFg, whiteSpace: "normal" }}>
