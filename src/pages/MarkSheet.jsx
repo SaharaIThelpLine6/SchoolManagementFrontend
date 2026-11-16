@@ -211,6 +211,96 @@ const TemplateThumb = ({ id }) => {
   );
 };
 
+// ==========================================
+// Size sliders
+// One control shape, used both on the toolbar and inside the settings
+// modal, so a size can be changed from either place and both show the
+// same value.
+// ==========================================
+const BN_DIGITS = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+const toBnNum = (value) => String(value).replace(/\d/g, (d) => BN_DIGITS[Number(d)]);
+
+const ScaleSlider = ({ label, value, onChange, hint, min = 60, max = 160, step = 5 }) => (
+  <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-[13px] font-semibold text-slate-700">{label}</span>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-[12px] font-bold text-[#7C3AED] tabular-nums">{toBnNum(value)}%</span>
+        <button
+          type="button"
+          title="রিসেট"
+          onClick={() => onChange('100')}
+          className="flex h-5 w-5 items-center justify-center rounded border border-slate-200 text-slate-400 hover:text-[#7C3AED] hover:border-[#DDD6FE] transition"
+        >
+          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h5M20 20v-5h-5M20 9A8 8 0 006.3 5.3M4 15a8 8 0 0013.7 3.7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <input
+      type="range"
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="mt-2 h-1.5 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-[#7C3AED]"
+    />
+    {hint && <p className="mt-1 text-[11px] leading-snug text-slate-500">{hint}</p>}
+  </div>
+);
+
+/**
+ * Live sample of the subject table at the chosen row size, so the effect
+ * is visible without closing the settings modal.
+ */
+const TableScaleSample = ({ rowGap = 100, font = 100 }) => {
+  // Same arithmetic the sheet itself uses: real padding and font sizes,
+  // so the sample shows what will actually be printed.
+  const pad = (6 * (Number(rowGap) || 100)) / 100;
+  const size = (11 * (Number(font) || 100)) / 100;
+  const cell = { paddingTop: pad, paddingBottom: pad, fontSize: size };
+
+  return (
+    <div className="mt-2 overflow-hidden rounded-md border border-slate-200">
+      <table className="w-full border-collapse text-center">
+        <thead>
+          <tr style={{ backgroundColor: '#0f5132', color: '#ffffff' }}>
+            {['ক্রমিক', 'বিষয়', 'পূর্ণমান', 'প্রাপ্ত নম্বর'].map((h, i) => (
+              <th key={h} className={`px-2 font-bold ${i === 1 ? 'text-left' : ''}`} style={cell}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {[['১', 'বাংলা', '১০০', '৮৫'], ['২', 'ইংরেজি', '১০০', '৭৮']].map((row, i) => (
+            <tr key={i} style={{ backgroundColor: i % 2 ? '#ecfdf5' : '#ffffff' }}>
+              {row.map((value, j) => (
+                <td key={j} className={`border-b border-emerald-100 px-2 font-bold ${j === 1 ? 'text-left' : ''}`} style={cell}>
+                  {value}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+/** Live sample of the institution name and address at the chosen size. */
+const HeaderScaleSample = ({ scale, name, address }) => (
+  <div
+    className="mt-2 overflow-hidden rounded-md px-3 py-2 text-center text-white"
+    style={{ backgroundImage: 'linear-gradient(to right,#0b3d26,#14694a,#0b3d26)' }}
+  >
+    <div style={{ zoom: (Number(scale) || 100) / 100 }}>
+      <p className="text-[15px] font-bold leading-tight">{name || 'প্রতিষ্ঠানের নাম'}</p>
+      <p className="text-[10px] text-emerald-100">{address || 'ঠিকানা'}</p>
+    </div>
+  </div>
+);
+
 const MarkSheet = () => {
   const translate = useTranslate();
   const [queryParams, setQueryParams] = useState(null);
@@ -243,6 +333,18 @@ const MarkSheet = () => {
   // The control sits on the toolbar AND inside the settings modal.
   const [fontScale, setFontScale] = useState('100');
 
+  // Institution name and address size, independent of the rest of the
+  // sheet, so a long name can be shrunk or a short one enlarged.
+  const [headerScale, setHeaderScale] = useState('100');
+
+  // Subject table (বিষয়ভিত্তিক ফলাফল), two separate controls:
+  //   rowGapScale    how much air each row has — cell padding
+  //   contentFontScale the size of every piece of text in the sheet body
+  // Neither one zooms; both change real px values, so the table keeps
+  // its width and the page keeps its layout.
+  const [rowGapScale, setRowGapScale] = useState('100');
+  const [contentFontScale, setContentFontScale] = useState('100');
+
   // ⭐ স্টেট: appliedUserCode
   const [appliedUserCode1, setAppliedUserCode1] = useState('');
   const [appliedUserCode2, setAppliedUserCode2] = useState('');
@@ -259,6 +361,13 @@ const MarkSheet = () => {
 
   // ⭐ নতুন স্টেট: ড্রপডাউন ওপেন/ক্লোজ
   const [isInfoDropdownOpen, setIsInfoDropdownOpen] = useState(false);
+
+  // Toolbar popover holding the three size sliders.
+  const [isSizeDropdownOpen, setIsSizeDropdownOpen] = useState(false);
+
+  // Template strip under the filter row — every design at a glance,
+  // so one can be picked without opening the settings modal.
+  const [isTemplatePanelOpen, setIsTemplatePanelOpen] = useState(false);
 
   // Template id shown in the large preview overlay (null = closed).
   // With mark sheet data already loaded the overlay renders the real
@@ -340,6 +449,9 @@ const MarkSheet = () => {
       if (!event.target.closest('.info-dropdown-container')) {
         setIsInfoDropdownOpen(false);
       }
+      if (!event.target.closest('.size-dropdown-container')) {
+        setIsSizeDropdownOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -363,6 +475,9 @@ const MarkSheet = () => {
     if (s.colorMode) setColorMode(s.colorMode);
     if (s.printScale) setPrintScale(String(s.printScale));
     if (s.fontScale) setFontScale(String(s.fontScale));
+    if (s.headerScale) setHeaderScale(String(s.headerScale));
+    if (s.rowGapScale) setRowGapScale(String(s.rowGapScale));
+    if (s.contentFontScale) setContentFontScale(String(s.contentFontScale));
     if (s.studentInfoFields && typeof s.studentInfoFields === 'object') {
       setStudentInfoFields((prev) => ({ ...prev, ...s.studentInfoFields }));
     }
@@ -431,6 +546,9 @@ const MarkSheet = () => {
         colorMode,
         printScale: Number(printScale),
         fontScale: Number(fontScale),
+        headerScale: Number(headerScale),
+        rowGapScale: Number(rowGapScale),
+        contentFontScale: Number(contentFontScale),
         studentInfoFields,
       }).unwrap();
       setIsSettingsOpen(false);
@@ -480,6 +598,9 @@ const MarkSheet = () => {
         colorMode={colorMode}
         showClassTeacherSign={showClassTeacherSign} // ⭐ নতুন প্রপস
         showGuardianSign={showGuardianSign} // ⭐ নতুন প্রপস
+        headerScale={headerScale}
+        contentFontScale={contentFontScale}
+        rowGapScale={rowGapScale}
       />
     );
   };
@@ -587,6 +708,25 @@ const MarkSheet = () => {
                     
                     <button
                       type="button"
+                      onClick={() => setIsTemplatePanelOpen((open) => !open)}
+                      className={`flex items-center gap-1.5 h-[38px] px-3 shrink-0 rounded-lg border text-[12px] font-bold shadow-sm transition ${
+                        isTemplatePanelOpen
+                          ? 'bg-[#F5F3FF] border-[#7C3AED] text-[#6D28D9]'
+                          : 'bg-white border-[#E9D5FF] text-[#7C3AED] hover:bg-[#F5F3FF]'
+                      }`}
+                      title="সব টেমপ্লেট দেখে নির্বাচন করুন"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 5h16v14H4zM4 9h16M9 9v10" />
+                      </svg>
+                      টেমপ্লেট
+                      <svg className={`w-3.5 h-3.5 transition-transform ${isTemplatePanelOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => setIsSettingsOpen(true)}
                       className="flex items-center justify-center h-[38px] w-[38px] shrink-0 bg-white border border-[#E9D5FF] text-[#7C3AED] rounded-lg shadow-sm hover:bg-[#F5F3FF] transition"
                       title="সেটিংস ও টেমপ্লেট"
@@ -600,6 +740,70 @@ const MarkSheet = () => {
                 </form>
               </FormProvider>
             </div>
+
+            {/* ================= টেমপ্লেট স্ট্রিপ =================
+                ফিল্টারের নিচে সব ডিজাইন একসাথে — ক্লিক করলেই সিলেক্ট হয়। */}
+            {isTemplatePanelOpen && (
+              <div className="border-t border-slate-200 bg-slate-50 px-5 py-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-slate-700">টেমপ্লেট নির্বাচন করুন</span>
+                    <span className="rounded-full bg-violet-100 px-2 py-0.5 text-[10px] font-bold text-violet-700 border border-violet-200">
+                      {MARK_SHEET_TEMPLATES.find((t) => t.id === selectedTemplate)?.name}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsTemplatePanelOpen(false)}
+                    className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition"
+                    title="বন্ধ করুন"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                  {MARK_SHEET_TEMPLATES.map((tpl) => {
+                    const isSelected = selectedTemplate === tpl.id;
+                    return (
+                      <button
+                        key={tpl.id}
+                        type="button"
+                        onClick={() => setSelectedTemplate(tpl.id)}
+                        title={tpl.desc}
+                        className={`rounded-lg border-2 p-1.5 text-left transition ${
+                          isSelected
+                            ? 'border-[#7C3AED] bg-white shadow-md ring-2 ring-[#7C3AED]/20'
+                            : 'border-slate-200 bg-white hover:border-slate-300'
+                        }`}
+                      >
+                        <div className="h-20 w-full">
+                          <TemplateThumb id={tpl.id} />
+                        </div>
+                        <div className="mt-1.5 flex items-center justify-between gap-1">
+                          <span className={`truncate text-[11px] font-bold ${isSelected ? 'text-[#6D28D9]' : 'text-slate-600'}`}>
+                            {tpl.name}
+                          </span>
+                          {isSelected && (
+                            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#7C3AED] text-white">
+                              <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <p className="mt-3 text-[11px] text-slate-500">
+                  ডিজাইনটি বড় করে দেখতে বা অন্য সেটিংস বদলাতে পাশের ⚙ বাটনে যান।
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -751,21 +955,54 @@ const MarkSheet = () => {
                   <option value="75">৭৫%</option>
                 </select>
 
-                {/* Font size — same control also lives in the settings modal */}
-                <select
-                  value={fontScale}
-                  onChange={(e) => setFontScale(e.target.value)}
-                  title="লেখার মাপ — পুরো মার্কশিট ছোট/বড় হয়"
-                  className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-                >
-                  <option value="70">লেখা ৭০%</option>
-                  <option value="80">লেখা ৮০%</option>
-                  <option value="90">লেখা ৯০%</option>
-                  <option value="100">লেখা ১০০%</option>
-                  <option value="110">লেখা ১১০%</option>
-                  <option value="120">লেখা ১২০%</option>
-                  <option value="130">লেখা ১৩০%</option>
-                </select>
+                {/* Size sliders — the same three controls as in the settings modal */}
+                <div className="relative size-dropdown-container">
+                  <button
+                    type="button"
+                    onClick={() => setIsSizeDropdownOpen(!isSizeDropdownOpen)}
+                    title="লেখার আকার"
+                    className="flex items-center gap-2 h-8 rounded-lg border border-[#DDD6FE] bg-white px-3 py-1 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                  >
+                    <svg className="w-4 h-4 text-[#7C3AED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7V5h10v2M9 5v14M7 19h4M15 13v-1h6v1M18 12v7M16.5 19h3" />
+                    </svg>
+                    আকার
+                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  {isSizeDropdownOpen && (
+                    <div className="absolute right-0 top-full mt-1 w-80 bg-white border border-slate-200 shadow-xl rounded-xl p-3 z-50 space-y-2.5">
+                      <ScaleSlider
+                        label="লেখার আকার"
+                        value={fontScale}
+                        onChange={setFontScale}
+                        hint="পুরো মার্কশিট ছোট/বড় হয়।"
+                      />
+                      <ScaleSlider
+                        label="নাম ও ঠিকানার আকার"
+                        value={headerScale}
+                        onChange={setHeaderScale}
+                        hint="শুধু প্রতিষ্ঠানের নাম ও ঠিকানা।"
+                      />
+                      <ScaleSlider
+                        label="ফলাফলের সারির ফাঁক"
+                        value={rowGapScale}
+                        onChange={setRowGapScale}
+                        min={40}
+                        max={220}
+                        hint="সারিগুলোর উপরে-নিচে কতটুকু ফাঁকা থাকবে।"
+                      />
+                      <ScaleSlider
+                        label="লেখার ফন্ট"
+                        value={contentFontScale}
+                        onChange={setContentFontScale}
+                        hint="পরীক্ষার্থীর তথ্য, নম্বর বিভাজন, ফলাফল, সারসংক্ষেপ ও মন্তব্য — সব লেখা।"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <button
@@ -877,24 +1114,54 @@ const MarkSheet = () => {
                   </p>
                 </div>
 
-                {/* Font size — same control as the toolbar one */}
-                <div className="flex items-center gap-3 mt-3">
-                  <select
+              </div>
+
+              {/* ⭐ আকারের সেটিংস — তিনটি স্লাইডার, সাথে লাইভ প্রিভিউ */}
+              <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                <h4 className="text-sm font-bold text-slate-700 mb-3 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7V5h10v2M9 5v14M7 19h4M15 13v-1h6v1M18 12v7M16.5 19h3" /></svg>
+                  লেখার আকার
+                </h4>
+
+                <div className="space-y-3">
+                  <ScaleSlider
+                    label="লেখার আকার (পুরো মার্কশিট)"
                     value={fontScale}
-                    onChange={(e) => setFontScale(e.target.value)}
-                    className="h-9 rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-violet-500 focus:ring-1 focus:ring-violet-500"
-                  >
-                    <option value="70">লেখা ৭০%</option>
-                    <option value="80">লেখা ৮০%</option>
-                    <option value="90">লেখা ৯০%</option>
-                    <option value="100">লেখা ১০০% (ডিফল্ট)</option>
-                    <option value="110">লেখা ১১০%</option>
-                    <option value="120">লেখা ১২০%</option>
-                    <option value="130">লেখা ১৩০%</option>
-                  </select>
-                  <p className="text-xs text-slate-500">
-                    লেখার মাপ — প্রিভিউ ও প্রিন্ট দুই জায়গাতেই পুরো মার্কশিট ছোট/বড় হবে।
-                  </p>
+                    onChange={setFontScale}
+                    hint="প্রিভিউ ও প্রিন্ট দুই জায়গাতেই পুরো মার্কশিট ছোট/বড় হবে।"
+                  />
+
+                  <div>
+                    <ScaleSlider
+                      label="প্রতিষ্ঠানের নাম ও ঠিকানার আকার"
+                      value={headerScale}
+                      onChange={setHeaderScale}
+                      hint="শুধু উপরের নাম ও ঠিকানা — বাকি লেখা অপরিবর্তিত থাকবে।"
+                    />
+                    <HeaderScaleSample
+                      scale={headerScale}
+                      name={data?.institution?.InstitutionName}
+                      address={data?.institution?.Address}
+                    />
+                  </div>
+
+                  <div>
+                    <ScaleSlider
+                      label="ফলাফলের সারির ফাঁক"
+                      value={rowGapScale}
+                      onChange={setRowGapScale}
+                      min={40}
+                      max={220}
+                      hint="সারিগুলোর উপরে-নিচে কতটুকু ফাঁকা থাকবে — লেখার সাইজ বদলাবে না।"
+                    />
+                    <ScaleSlider
+                      label="লেখার ফন্ট"
+                      value={contentFontScale}
+                      onChange={setContentFontScale}
+                      hint="পরীক্ষার্থীর তথ্য, নম্বর বিভাজন, বিষয়ভিত্তিক ফলাফল, সারসংক্ষেপ ও মন্তব্য — সব লেখা একসাথে ছোট/বড় হবে। সারির ফাঁক বদলাবে না।"
+                    />
+                    <TableScaleSample rowGap={rowGapScale} font={contentFontScale} />
+                  </div>
                 </div>
               </div>
 
@@ -1170,6 +1437,9 @@ const MarkSheet = () => {
                     colorMode={colorMode}
                     showClassTeacherSign={showClassTeacherSign}
                     showGuardianSign={showGuardianSign}
+                    headerScale={headerScale}
+                    contentFontScale={contentFontScale}
+                    rowGapScale={rowGapScale}
                   />
                 </div>
               ) : (
