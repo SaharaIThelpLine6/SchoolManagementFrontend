@@ -330,6 +330,10 @@ const MarkSheet = () => {
   // ⭐ স্টেট: প্রিন্ট স্কেল (subject বেশি হলে ছোট করে এক পেজে আনার জন্য)
   const [printScale, setPrintScale] = useState('100');
 
+  // Squeezes the sheet in from the left and right edges. 100 = full width,
+  // lower leaves a wider blank margin on both sides.
+  const [sideScale, setSideScale] = useState('100');
+
   // ⭐ স্টেট: রঙিন / সাদা-কালো প্রিন্ট
   const [colorMode, setColorMode] = useState('color');
 
@@ -516,6 +520,7 @@ const MarkSheet = () => {
     if (s.orientation) setOrientation(s.orientation);
     if (s.colorMode) setColorMode(s.colorMode);
     if (s.printScale) setPrintScale(String(s.printScale));
+    if (s.sideScale) setSideScale(String(s.sideScale));
     if (s.fontScale) setFontScale(String(s.fontScale));
     if (s.headerScale) setHeaderScale(String(s.headerScale));
     if (s.rowGapScale) setRowGapScale(String(s.rowGapScale));
@@ -593,6 +598,7 @@ const MarkSheet = () => {
         orientation,
         colorMode,
         printScale: Number(printScale),
+        sideScale: Number(sideScale),
         fontScale: Number(fontScale),
         headerScale: Number(headerScale),
         rowGapScale: Number(rowGapScale),
@@ -692,6 +698,18 @@ const MarkSheet = () => {
         @media print {
           #mark-sheet-print-area { zoom: ${Number(printScale) / 100}; }
         }
+        ${Number(sideScale) === 100 ? '' : `
+        #mark-sheet-print-area .marksheet-page {
+          padding-left: ${(100 - Number(sideScale)) / 2}% !important;
+          padding-right: ${(100 - Number(sideScale)) / 2}% !important;
+        }
+        /* The subject tables carry a min-width on screen (print already
+           clears it). Without lifting it the table stops shrinking and
+           pushes back out through the margin we just made, so the preview
+           would stop matching the print. */
+        #mark-sheet-print-area .marksheet-page table {
+          min-width: 0 !important;
+        }`}
       `}</style>
 
       {/* ================= মূল কন্টেন্ট এরিয়া ================= */}
@@ -1021,14 +1039,31 @@ const MarkSheet = () => {
                   <option value="A5">A5</option>
                 </select>
 
-                <select
-                  value={orientation}
-                  onChange={(e) => setOrientation(e.target.value)}
-                  className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
-                >
-                  <option value="portrait">Portrait</option>
-                  <option value="landscape">Landscape</option>
-                </select>
+                {/* কাগজ লম্বা নাকি আড়াআড়ি — ছবি দেখেই বোঝা যায় */}
+                <div className="flex h-8 items-center gap-0.5 rounded-lg border border-[#DDD6FE] bg-white p-0.5">
+                  {[
+                    { value: 'portrait', title: 'লম্বা কাগজ (Portrait)', x: 7, y: 3, w: 10, h: 18 },
+                    { value: 'landscape', title: 'আড়াআড়ি কাগজ (Landscape)', x: 3, y: 7, w: 18, h: 10 },
+                  ].map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      title={opt.title}
+                      aria-label={opt.title}
+                      aria-pressed={orientation === opt.value}
+                      onClick={() => setOrientation(opt.value)}
+                      className={`flex h-7 w-8 items-center justify-center rounded-md transition ${
+                        orientation === opt.value
+                          ? 'bg-[#F5F3FF] text-[#7C3AED] ring-1 ring-[#7C3AED]'
+                          : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
+                      }`}
+                    >
+                      <svg className="h-[18px] w-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <rect x={opt.x} y={opt.y} width={opt.w} height={opt.h} rx="1.5" strokeWidth="2" />
+                      </svg>
+                    </button>
+                  ))}
+                </div>
 
                 {/* ⭐ রঙিন / সাদা-কালো */}
                 <select
@@ -1041,12 +1076,21 @@ const MarkSheet = () => {
                   <option value="bw">সাদা-কালো</option>
                 </select>
 
-                {/* ⭐ প্রিন্ট স্কেল — subject বেশি হলে ছোট করে এক পেজে আনার জন্য */}
+                {/* ⭐ প্রিন্ট স্কেল — subject বেশি হলে ছোট করে এক পেজে আনার জন্য।
+                    আইকনটা বোঝায় পুরো পাতাটাই ছোট-বড় হচ্ছে। */}
+                <div
+                  title="পুরো পাতা ছোট/বড় — বিষয় বেশি হয়ে দুই পাতায় চলে গেলে কমিয়ে দিন"
+                  className="flex h-8 items-center gap-1 rounded-lg border border-[#DDD6FE] bg-white pl-2 focus-within:border-[#7C3AED] focus-within:ring-1 focus-within:ring-[#7C3AED]"
+                >
+                  <svg className="h-4 w-4 shrink-0 text-[#7C3AED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="18" height="18" rx="2" strokeWidth="2" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 8h4M8 8v4M16 16h-4M16 16v-4" />
+                  </svg>
                 <select
                   value={printScale}
                   onChange={(e) => setPrintScale(e.target.value)}
-                  title="প্রিন্ট সাইজ — subject বেশি হলে ছোট করুন"
-                  className="h-8 rounded-lg border border-[#DDD6FE] bg-white px-2 py-1 text-sm font-medium text-slate-700 outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                  aria-label="পুরো পাতার আকার"
+                  className="h-full rounded-r-lg border-0 bg-transparent pl-0 pr-2 text-sm font-medium text-slate-700 outline-none focus:ring-0"
                 >
                   <option value="100">১০০%</option>
                   <option value="95">৯৫%</option>
@@ -1055,6 +1099,32 @@ const MarkSheet = () => {
                   <option value="80">৮০%</option>
                   <option value="75">৭৫%</option>
                 </select>
+                </div>
+
+                {/* ⭐ দুই পাশ থেকে চেপে আনা — কাগজের বাঁ ও ডান কিনারায় কতটুকু
+                    ফাঁকা থাকবে। পাতার মাপ বদলায় না, ভিতরের লেখা ভিতরে আসে। */}
+                <div
+                  title="দুই পাশ থেকে চেপে আনুন — বাঁ ও ডান কিনারায় ফাঁকা বাড়ে"
+                  className="flex h-8 items-center gap-1 rounded-lg border border-[#DDD6FE] bg-white pl-2 focus-within:border-[#7C3AED] focus-within:ring-1 focus-within:ring-[#7C3AED]"
+                >
+                  <svg className="h-4 w-4 shrink-0 text-[#7C3AED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4v16M21 4v16" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12h4m0 0L8.5 9.5M11 12l-2.5 2.5M17 12h-4m0 0l2.5-2.5M13 12l2.5 2.5" />
+                  </svg>
+                  <select
+                    value={sideScale}
+                    onChange={(e) => setSideScale(e.target.value)}
+                    aria-label="দুই পাশের ফাঁক"
+                    className="h-full rounded-r-lg border-0 bg-transparent pl-0 pr-2 text-sm font-medium text-slate-700 outline-none focus:ring-0"
+                  >
+                    <option value="100">১০০%</option>
+                    <option value="96">৯৬%</option>
+                    <option value="92">৯২%</option>
+                    <option value="88">৮৮%</option>
+                    <option value="84">৮৪%</option>
+                    <option value="80">৮০%</option>
+                  </select>
+                </div>
 
                 {/* Block offsets — report 2 only, same three controls as in the settings modal */}
                 {isPressReport && (
