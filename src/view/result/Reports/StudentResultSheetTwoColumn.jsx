@@ -8,9 +8,7 @@ export default function StudentResultSheetTwoColumn({ reportData, query }) {
     const { data: institutionInfo } = useGetInstitutionInfoQuery();
     const { conditionAverage, subjectPassNumbers } = reportData;
 
-    const studentResultsDetails = Array.isArray(reportData?.studentResults)
-        ? reportData.studentResults
-        : [];
+    const studentResultsDetails = Array.isArray(reportData?.studentResults) ? reportData.studentResults : [];
 
     // --- split into pages of 40, then each page into 2 fixed columns of 20 ---
     const pages = [];

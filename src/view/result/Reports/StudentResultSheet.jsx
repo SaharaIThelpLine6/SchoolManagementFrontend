@@ -1008,13 +1008,8 @@ export default function StudentResultSheet({ reportData, query, labels }) {
     const jointExams = Array.isArray(jointResult?.exams) ? jointResult.exams : [];
     const hasJoint = jointExams.length > 0 && !isShort;
 
-    // যৌথ average: সব পরীক্ষার AverageSubsonkha যোগফল (যুক্ত পরীক্ষা + বর্তমান পরীক্ষা)
-    // কোনো যুক্ত পরীক্ষার মান না থাকলে বর্তমান পরীক্ষার মান ধরা হবে
-    const currentAvgSubs = Number(conditionAverage?.AverageSubsonkha) || 0;
-    const jointAverageDivisor = jointExams.reduce(
-        (sum, exam) => sum + (Number(exam?.AverageSubsonkha) || currentAvgSubs),
-        currentAvgSubs
-    );
+    // যৌথ average: শুধু টার্গেট (বর্তমান) পরীক্ষার AverageSubsonkha দিয়ে ভাগ
+    const jointAverageDivisor = Number(conditionAverage?.AverageSubsonkha) || 0;
 
     // যৌথ ফলাফলে প্রতি শিক্ষার্থী = যুক্ত পরীক্ষার সারি + চূড়ান্ত সারি
     const jointSpan = hasJoint ? jointExams.length + 1 : 1;
@@ -1572,7 +1567,7 @@ export default function StudentResultSheet({ reportData, query, labels }) {
         const displayTotal = hasJoint
             ? calcJointTotal(studentResult, subjectPassNumbers, jointResult)
             : total;
-        // গড় কলাম: যৌথ average পদ্ধতিতে মোট ÷ (সব পরীক্ষার AverageSubsonkha যোগফল)
+        // গড় কলাম: যৌথ average পদ্ধতিতে মোট ÷ টার্গেট পরীক্ষার AverageSubsonkha
         const displayGpa = hasJoint && !isPointBased && jointResult?.resultType === "average"
             ? displayTotal / (jointAverageDivisor || 1)
             : gpaValue;
