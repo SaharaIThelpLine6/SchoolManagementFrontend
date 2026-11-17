@@ -3,7 +3,7 @@ import Loading from '../components/Loading/Loading';
 import useTranslate from '../utils/Translate';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import DefaultSelect from '../components/Forms/DefaultSelect';
-import { markSheetResultReports } from '../Data/userReportsData';
+import { languageResultReport, markSheetResultReports } from '../Data/userReportsData';
 import { useGetClassListQuery } from '../features/class/classQuerySlice';
 import {
   useGetExamFilterExamsQuery,
@@ -217,6 +217,7 @@ const TemplateMiniature = ({
   paperSize, orientation, studentInfoFields, colorMode,
   showClassTeacherSign, showGuardianSign,
   headerScale, contentFontScale, rowGapScale,
+  language,
 }) => {
   // The real report can hold hundreds of students; a card needs exactly one.
   const sheetData = useMemo(() => {
@@ -252,6 +253,7 @@ const TemplateMiniature = ({
           headerScale={headerScale}
           contentFontScale={contentFontScale}
           rowGapScale={rowGapScale}
+          language={language}
         />
       </div>
     </div>
@@ -352,13 +354,14 @@ const MarkSheet = () => {
   const { data: savedSettings } = useGetMarkSheetSettingsQuery();
   const [saveMarkSheetSettings, { isLoading: isSavingSettings, isError: isSaveError }] =
     useSaveMarkSheetSettingsMutation();
-  const methods = useForm();
+  const methods = useForm({ defaultValues: { LanguageID: 1 } });
   const { control, handleSubmit, setValue } = methods;
 
   const selectedReportID = useWatch({ control, name: 'ReportID' });
   const sessionID = useWatch({ control, name: 'SessionID' });
   const examID = useWatch({ control, name: 'ExamID' });
   const SubClassID = useWatch({ control, name: 'SubClassID' });
+  const languageID = useWatch({ control, name: 'LanguageID' });
 
   const { data: examNameData } = useGetExamFilterExamsQuery(
     { SessionID: sessionID },
@@ -377,6 +380,10 @@ const MarkSheet = () => {
     UserCode1: appliedUserCode1 || undefined,
     UserCode2: appliedUserCode2 || undefined,
   };
+
+  // 1 = Bangla, 2 = Arabic, 3 = English. Empty select means Bangla.
+  // The API always sends all three, so this only picks which one prints.
+  const sheetLanguage = Number(languageID) || 1;
 
   const hasMarkSheetParams = !!params.sessionid && !!params.examid && !!params.classid;
 
@@ -446,14 +453,14 @@ const MarkSheet = () => {
   const shouldShowFields = (fieldName) => {
     switch (selectedReportID) {
       case 1:
-        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
+        return ['ReportID', 'LanguageID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
       case 2:
       case 3:
       case 4:
       case 5:
-        return ['ReportID', 'SessionID', 'ExamID', 'SubClassID'].includes(fieldName);
+        return ['ReportID', 'LanguageID', 'SessionID', 'ExamID', 'SubClassID'].includes(fieldName);
       case 6:
-        return ['ReportID', 'SessionID', 'ExamID'].includes(fieldName);
+        return ['ReportID', 'LanguageID', 'SessionID', 'ExamID'].includes(fieldName);
       default:
         return false;
     }
@@ -561,6 +568,7 @@ const MarkSheet = () => {
         headerScale={headerScale}
         contentFontScale={contentFontScale}
         rowGapScale={rowGapScale}
+        language={sheetLanguage}
       />
     );
   };
@@ -584,6 +592,7 @@ const MarkSheet = () => {
     headerScale,
     contentFontScale,
     rowGapScale,
+    language: sheetLanguage,
   };
 
   return (
@@ -608,7 +617,7 @@ const MarkSheet = () => {
               <FormProvider {...methods}>
                 <form
                   onSubmit={handleSubmit(onSubmit)}
-                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-[repeat(4,minmax(0,1fr))_minmax(0,2fr)_auto] gap-3 items-end"
+                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-[repeat(5,minmax(0,1fr))_minmax(0,1.7fr)_auto] gap-3 items-end"
                 >
                   <DefaultSelect
                     label={translate('Report')}
@@ -619,6 +628,18 @@ const MarkSheet = () => {
                     type="number"
                     require="This Field is required"
                   />
+
+                  {shouldShowFields('LanguageID') && (
+                    <DefaultSelect
+                      label="ভাষা"
+                      nameField="name"
+                      registerKey="LanguageID"
+                      valueField="id"
+                      options={languageResultReport}
+                      type="number"
+                      defaultSelect={false}
+                    />
+                  )}
 
                   {shouldShowFields('SessionID') && (
                     <DefaultSelect
@@ -670,14 +691,14 @@ const MarkSheet = () => {
                   )}
 
                   {shouldShowFields('UserCode') && (
-                    <div className="grid grid-cols-2 gap-2 sm:col-span-2 xl:col-span-1 xl:col-start-5">
+                    <div className="grid grid-cols-2 gap-2 sm:col-span-2 xl:col-span-1 xl:col-start-6">
                       <DefaultInput registerKey="UserCode1" label="আইডি থেকে" />
                       <DefaultInput registerKey="UserCode2" label="আইডি পর্যন্ত" />
                     </div>
                   )}
 
                   {/* ⭐ রিপোর্ট তৈরি এবং সেটিংস বাটন */}
-                  <div className="flex items-center gap-2 w-full min-w-0 sm:col-span-2 xl:col-span-1 xl:col-start-6">
+                  <div className="flex items-center gap-2 w-full min-w-0 sm:col-span-2 xl:col-span-1 xl:col-start-7">
                     <button
                       type="submit"
                       className={`w-auto px-5 flex items-center justify-center gap-1.5 h-[44px] shrink-0 rounded-lg text-[13px] font-bold ${C.primary} shadow-sm transition`}
@@ -1444,6 +1465,7 @@ const MarkSheet = () => {
                     headerScale={headerScale}
                     contentFontScale={contentFontScale}
                     rowGapScale={rowGapScale}
+                    language={sheetLanguage}
                   />
                 </div>
               ) : (
