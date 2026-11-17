@@ -322,6 +322,8 @@ function PrintDonut({ values, colors, size, num, totalLabel }) {
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════ */
 export default function ClassDivisionSummarySheet({ reportData }) {
+
+  console.log(reportData, "reportData")
   const { data: institutionInfo } = useGetInstitutionInfoQuery();
   const [logo, setLogo] = useState(null);
   const [najem, setNajem] = useState(null);
@@ -665,19 +667,38 @@ export default function ClassDivisionSummarySheet({ reportData }) {
     animations: { enabled: true, speed: 500 },
   };
 
+  // ✅ শ্রেণিভিত্তিক মোট শিক্ষার্থী: Full width, vertical bar (column) চার্ট
   const totalBarOptions = {
     chart: { ...commonChart, type: "bar" },
     plotOptions: {
-      bar: { horizontal: true, borderRadius: 4, barHeight: "60%", distributed: true },
+      bar: {
+        horizontal: false,
+        borderRadius: 4,
+        columnWidth: "65%",
+        distributed: true,
+        dataLabels: { position: "top" },
+      },
     },
     colors: CHART_COLORS,
     legend: { show: false },
-    dataLabels: { enabled: false },
+    dataLabels: {
+      enabled: true,
+      offsetY: -20,
+      formatter: numFmt,
+      style: { fontSize: "11px", fontWeight: 700, colors: ["#000"] },
+    },
     xaxis: {
       categories: chartData.labels,
-      labels: { style: { fontSize: "11px" }, formatter: numFmt },
+      labels: {
+        rotate: -45,
+        rotateAlways: true,
+        trim: false,
+        hideOverlappingLabels: false,
+        maxHeight: 170,
+        style: { fontSize: "11px" },
+      },
     },
-    yaxis: { labels: { style: { fontSize: "11px" } } },
+    yaxis: { labels: { style: { fontSize: "11px" }, formatter: numFmt } },
     grid: { borderColor: "#eef1ee" },
     tooltip: { theme: "light", y: { formatter: numFmt } },
   };
@@ -835,32 +856,33 @@ export default function ClassDivisionSummarySheet({ reportData }) {
     <div className="w-full">
       {/* ── CHARTS (স্ক্রিনে Full Width; প্রিন্টে লুকানো) ── */}
       <div className="no-print w-full mb-6" dir={dir}>
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-4">
-          <div className="bg-white border border-[#e1e9e3] rounded-2xl p-5 shadow-sm w-full min-w-0">
-            <h3 className="m-0 mb-1 text-base font-bold text-[#155b49]">{t.chartClassTitle}</h3>
-            <p className="m-0 mb-3 text-xs text-[#718078]">{t.chartClassSub}</p>
-            <Chart
-              key={`bar-${lang}`}
-              options={totalBarOptions}
-              series={[{ name: t.total, data: chartData.totals }]}
-              type="bar"
-              height={340}
-            />
-          </div>
-
-          <div className="bg-white border border-[#e1e9e3] rounded-2xl p-5 shadow-sm w-full min-w-0">
-            <h3 className="m-0 mb-1 text-base font-bold text-[#155b49]">{t.chartDivisionTitle}</h3>
-            <p className="m-0 mb-3 text-xs text-[#718078]">{t.chartDivisionSub}</p>
-            <Chart
-              key={`donut-${lang}`}
-              options={donutOptions}
-              series={chartData.divisionTotals}
-              type="donut"
-              height={340}
-            />
-          </div>
+        {/* ✅ শ্রেণিভিত্তিক মোট শিক্ষার্থী: Full width bar chart */}
+        <div className="bg-white border border-[#e1e9e3] rounded-2xl p-5 shadow-sm w-full min-w-0 mb-4">
+          <h3 className="m-0 mb-1 text-base font-bold text-[#155b49]">{t.chartClassTitle}</h3>
+          <p className="m-0 mb-3 text-xs text-[#718078]">{t.chartClassSub}</p>
+          <Chart
+            key={`bar-${lang}`}
+            options={totalBarOptions}
+            series={[{ name: t.total, data: chartData.totals }]}
+            type="bar"
+            height={460}
+          />
         </div>
 
+        {/* বিভাগভিত্তিক সারসংক্ষেপ (donut) */}
+        <div className="bg-white border border-[#e1e9e3] rounded-2xl p-5 shadow-sm w-full min-w-0 mb-4">
+          <h3 className="m-0 mb-1 text-base font-bold text-[#155b49]">{t.chartDivisionTitle}</h3>
+          <p className="m-0 mb-3 text-xs text-[#718078]">{t.chartDivisionSub}</p>
+          <Chart
+            key={`donut-${lang}`}
+            options={donutOptions}
+            series={chartData.divisionTotals}
+            type="donut"
+            height={340}
+          />
+        </div>
+
+        {/* বিভাগ অনুযায়ী শ্রেণির তুলনা (stacked) */}
         <div className="bg-white border border-[#e1e9e3] rounded-2xl p-5 shadow-sm w-full min-w-0">
           <h3 className="m-0 mb-1 text-base font-bold text-[#155b49]">{t.chartStackedTitle}</h3>
           <p className="m-0 mb-3 text-xs text-[#718078]">{t.chartStackedSub}</p>
@@ -944,4 +966,3 @@ export default function ClassDivisionSummarySheet({ reportData }) {
     </div>
   );
 }
-
