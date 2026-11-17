@@ -105,12 +105,12 @@ const ToolbarSkeleton = () => (
 
 /* ---------- Refresh Button ---------- */
 
-const RefreshButton = ({ onClick, isFetching }) => (
+const RefreshButton = ({ t, onClick, isFetching }) => (
   <button
     onClick={onClick}
     disabled={isFetching}
     className="group flex items-center gap-2 text-xs font-medium text-gray-600 bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/70 shadow-sm hover:bg-white hover:text-gray-900 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-    title="রিফ্রেশ করুন"
+    title={t("Refresh")}
   >
     <svg
       className={`w-4 h-4 transition-transform duration-500 ${isFetching
@@ -130,7 +130,7 @@ const RefreshButton = ({ onClick, isFetching }) => (
     </svg>
 
     <span className="hidden md:inline">
-      {isFetching ? 'রিফ্রেশ হচ্ছে...' : 'রিফ্রেশ'}
+      {isFetching ? 'Refreshing...' : t("Refresh")}
     </span>
   </button>
 );
@@ -345,15 +345,15 @@ const DashboardDesignNew = () => {
 
   const statCards = [
     {
-      title: 'মোট শিক্ষার্থী',
+      title: t("Total Students"),
       value: formatBanglaNumber(studentData?.totalAllSessionStudent),
-      subtitle: 'সকল সেশনের',
+      subtitle: t("All Sessions"),
       icon: 'TbGraduationCap',
       accent: 'sky',
       loading: studentLoading,
     },
     {
-      title: 'মোট শিক্ষার্থী',
+      title: t("Total Students"),
       value: formatBanglaNumber(studentData?.runningSession?.totalStudent),
       subtitle: selectedSessionName,
       icon: 'TbUserGroup',
@@ -361,7 +361,7 @@ const DashboardDesignNew = () => {
       loading: studentLoading,
     },
     {
-      title: 'সক্রিয় শিক্ষার্থী',
+      title: t("Active Students"),
       value: formatBanglaNumber(studentData?.runningSession?.activeStudent),
       subtitle: selectedSessionName,
       icon: 'TbUserCheck',
@@ -369,7 +369,7 @@ const DashboardDesignNew = () => {
       loading: studentLoading,
     },
     {
-      title: 'নিষ্ক্রিয় শিক্ষার্থী',
+      title: t("InActive Students"),
       value: formatBanglaNumber(studentData?.runningSession?.inactiveStudent),
       subtitle: selectedSessionName,
       icon: 'TbUserOff',
@@ -377,23 +377,23 @@ const DashboardDesignNew = () => {
       loading: studentLoading,
     },
     {
-      title: 'মোট শিক্ষক/স্টাফ',
+      title: t("Total Teacher/Staff"),
       value: formatBanglaNumber(studentData?.totalStaff),
-      subtitle: 'সক্রিয়',
+      subtitle: t("Active"),
       icon: 'TbUserGroup',
       accent: 'indigo',
       loading: studentLoading,
     },
     {
-      title: 'দাতা সদস্য',
+      title: t("Total Donor"),
       value: formatBanglaNumber(studentData?.totalDonor),
-      subtitle: 'এন্ট্রি হিসাবে',
+      subtitle: 'As an entry',
       icon: 'TbHeartHandshake',
       accent: 'pink',
       loading: studentLoading,
     },
     {
-      title: 'মোট আয়',
+      title: t('Total Income'),
       value: formatBanglaNumber(paymentTransactionData?.summary?.totalDr),
       subtitle: liveDate,
       icon: 'TbCoin',
@@ -401,7 +401,7 @@ const DashboardDesignNew = () => {
       loading: paymentLoading,
     },
     {
-      title: 'মোট ব্যয়',
+      title: t('Total Expenditure'),
       value: formatBanglaNumber(paymentTransactionData?.summary?.totalCr),
       subtitle: liveDate,
       icon: 'TbReceipt',
@@ -409,7 +409,7 @@ const DashboardDesignNew = () => {
       loading: paymentLoading,
     },
     {
-      title: 'শিক্ষার্থীর ফি',
+      title: t("Student Fee"),
       value: formatBanglaNumber(paymentTransactionData?.summary?.studentFeeTotal),
       subtitle: liveDate,
       icon: 'TbAlertCircle',
@@ -417,7 +417,7 @@ const DashboardDesignNew = () => {
       loading: paymentLoading,
     },
     {
-      title: 'দান অনুদান',
+      title: t('Donation'),
       value: formatBanglaNumber(paymentTransactionData?.summary?.donationTotal),
       subtitle: liveDate,
       icon: 'TbHeartHandshake',
@@ -425,33 +425,33 @@ const DashboardDesignNew = () => {
       loading: paymentLoading,
     },
     {
-      title: 'আজকের উপস্থিত',
+      title: t("Those Present Today"),
       value: formatBanglaNumber(attendanceData?.summary?.totalPresent ?? 0),
-      subtitle: `শিক্ষার্থী • ${liveDate}`,
+      subtitle: `${t("Student")} • ${liveDate}`,
       icon: 'TbCheckSquare',
       accent: 'teal',
       loading: attendanceLoading,
     },
     {
-      title: 'আজকের অনুপস্থিত',
+      title: t("Todays Absence"),
       value: formatBanglaNumber(attendanceData?.summary?.totalAbsent ?? 0),
-      subtitle: `শিক্ষার্থী • ${liveDate}`,
+      subtitle: `${t("Student")} • ${liveDate}`,
       icon: 'TbUserOff',
       accent: 'red',
       loading: attendanceLoading,
     },
     {
-      title: 'আজকের উপস্থিত',
+      title: t("Those Present Today"),
       value: formatBanglaNumber(attendanceTeacherData?.teacher?.present ?? 0),
-      subtitle: `শিক্ষক • ${liveDate}`,
+      subtitle: `${t("Teacher")} • ${liveDate}`,
       icon: 'TbUserCheck',
       accent: 'cyan',
       loading: attendanceTeacherLoading,
     },
     {
-      title: 'আজকের অনুপস্থিত',
+      title: t("Todays Absence"),
       value: formatBanglaNumber(attendanceTeacherData?.teacher?.absent ?? 0),
-      subtitle: `শিক্ষক • ${liveDate}`,
+      subtitle: `${t("Teacher")}  • ${liveDate}`,
       icon: 'TbUserOff',
       accent: 'slate',
       loading: attendanceTeacherLoading,
@@ -632,11 +632,11 @@ const DashboardDesignNew = () => {
 
           <div>
             <h1 className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight">
-              ড্যাশবোর্ড
+              {t("Dashboard")}
             </h1>
 
             <p className="text-xs md:text-sm text-gray-500 mt-0.5">
-              আজকের সংক্ষিপ্ত পরিসংখ্যান
+              {t("Today’s brief statistics")}
             </p>
           </div>
 
@@ -648,7 +648,7 @@ const DashboardDesignNew = () => {
             <div className="flex items-center gap-2 text-xs text-gray-600 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/70 shadow-sm">
 
               <span className="font-medium whitespace-nowrap">
-                সেশন:
+                {t("Session")}:
               </span>
 
               <select
@@ -659,7 +659,7 @@ const DashboardDesignNew = () => {
               >
 
                 <option value="">
-                  চলতি সেশন
+                  {t("Running Session")}
                 </option>
 
                 {sessionList.map((session) => (
@@ -687,7 +687,7 @@ const DashboardDesignNew = () => {
                   }`}
               />
 
-              {isFetchingAny ? 'আপডেট হচ্ছে...' : 'লাইভ আপডেট'}
+              {isFetchingAny ? t("Updating...") : t("Live Update")}
 
             </div>
 
@@ -695,6 +695,7 @@ const DashboardDesignNew = () => {
             {/* Refresh Button */}
 
             <RefreshButton
+              t={t}
               onClick={handleRefreshAll}
               isFetching={isFetchingAny}
             />
