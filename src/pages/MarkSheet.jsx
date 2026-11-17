@@ -314,6 +314,7 @@ const MarkSheet = () => {
     dob: false,
     registration: true,
     admission: true,
+    totalStudents: true,
   });
 
   // ⭐ নতুন স্টেট: ড্রপডাউন ওপেন/ক্লোজ
@@ -332,7 +333,9 @@ const MarkSheet = () => {
   const [previewTemplateId, setPreviewTemplateId] = useState(null);
 
   // ⭐ চেক করা হচ্ছে কয়টি ফিল্ড সিলেক্ট করা আছে
-  const checkedCount = Object.values(studentInfoFields).filter(Boolean).length;
+  const checkedCount = Object.entries(studentInfoFields).filter(
+    ([key, val]) => key !== 'totalStudents' && Boolean(val)
+  ).length;
 
   const {
     data: reportData,
@@ -882,6 +885,18 @@ const MarkSheet = () => {
                           />
                           <span className="text-sm font-medium text-slate-700">ভর্তি নং</span>
                         </label>
+                        {/* ⭐ Separate section — not part of the 5-field limit */}
+                        <div className="pt-2 border-t border-slate-100">
+                          <label className="flex items-center gap-2 cursor-pointer">
+                            <input 
+                              type="checkbox" 
+                              checked={studentInfoFields.totalStudents !== false} 
+                              onChange={(e) => setStudentInfoFields(prev => ({ ...prev, totalStudents: e.target.checked }))} 
+                              className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500" 
+                            />
+                            <span className="text-sm font-medium text-slate-700">মোট পরীক্ষার্থীর সংখ্যা</span>
+                          </label>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -1212,6 +1227,19 @@ const MarkSheet = () => {
                       className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed" 
                     />
                     <span className="text-sm font-medium text-slate-700">ভর্তি নং</span>
+                  </label>
+                  {/* ⭐ totalStudents is separate — not part of the 5-field limit */}
+                  <label className="col-span-2 sm:col-span-3 flex items-center gap-2 cursor-pointer pt-3 mt-1 border-t border-slate-200">
+                    <input 
+                      type="checkbox" 
+                      checked={studentInfoFields.totalStudents !== false} 
+                      onChange={(e) => setStudentInfoFields(prev => ({ ...prev, totalStudents: e.target.checked }))} 
+                      className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500" 
+                    />
+                    <span className="text-sm font-medium text-slate-700">
+                      মোট পরীক্ষার্থীর সংখ্যা
+                      <span className="ml-2 text-[10px] text-slate-400 font-normal">(৫টির সীমার বাইরে)</span>
+                    </span>
                   </label>
                 </div>
               </div>
