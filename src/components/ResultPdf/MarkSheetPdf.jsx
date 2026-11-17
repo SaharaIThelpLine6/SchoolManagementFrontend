@@ -164,6 +164,29 @@ ${tableSel} thead th { font-size: ${px(m.head * fontPct)} !important; }
   };
   const p = palette[templateId] || { th: '#0f766e', thBorder: '#0f766e', alt: '#f0fdfa' };
 
+  // Header text colour follows its own background.
+  //
+  // The print rule below used to say color:#ffffff whatever the header was.
+  // That is right for the dark headers, but template 8's header is white —
+  // so its heading row printed white on white and came out completely
+  // blank. Reading the background's luminance keeps every template right,
+  // including any pale header added later.
+  const readableOn = (hex) => {
+    const raw = String(hex || '').replace('#', '');
+    const full = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw;
+    if (!/^[0-9a-fA-F]{6}$/.test(full)) return '#ffffff';
+
+    const channel = (i) => {
+      const v = parseInt(full.slice(i, i + 2), 16) / 255;
+      return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+    };
+    const luminance =
+      0.2126 * channel(0) + 0.7152 * channel(2) + 0.0722 * channel(4);
+
+    return luminance > 0.4 ? '#000000' : '#ffffff';
+  };
+  const thText = readableOn(p.th);
+
   // Rules that describe the sheet. With a scopeId they are prefixed so
   // they reach only that one preview, leaving the real sheet alone.
   const sheetCss = `
@@ -328,7 +351,7 @@ ${sheetCss}
   .marksheet-page .marks-table-wrap thead th {
     background-color: ${p.th} !important;
     background-image: none !important;
-    color: #ffffff !important;
+    color: ${thText} !important;
     border-color: ${p.thBorder} !important;
   }
   .marksheet-page .marks-table-wrap tbody tr.row-alt td {
@@ -2372,10 +2395,10 @@ const SingleMarkSheetBauhaus = ({
 
 //         {/* ── Summary strip */}
 //         <div className="mt-3 print:mt-2 border-[1.5px] border-black flex flex-wrap text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-bold shrink-0">
-//           <div className="flex-1 border-r border-black px-2 py-1 print:py-0.5 whitespace-nowrap">{ms('division')} : {toBn(divisionName)}</div>
-//           <div className="border-r border-black px-3 py-1 print:py-0.5 whitespace-nowrap">{ms('meritPosition')} : {toBn(student?.Positions ?? '-')}</div>
-//           <div className="border-r border-black px-3 py-1 print:py-0.5 whitespace-nowrap">{ms('average')} : {toBn(averageMark)}</div>
-//           <div className="px-3 py-1 print:py-0.5 whitespace-nowrap">{ms('totalMark')} : {toBn(student?.Total ?? '-')}</div>
+//           <div className="flex-1 border-r border-black px-2 py-1 print:py-0.5 break-words">{ms('division')} : {toBn(divisionName)}</div>
+//           <div className="border-r border-black px-3 py-1 print:py-0.5 break-words">{ms('meritPosition')} : {toBn(student?.Positions ?? '-')}</div>
+//           <div className="border-r border-black px-3 py-1 print:py-0.5 break-words">{ms('average')} : {toBn(averageMark)}</div>
+//           <div className="px-3 py-1 print:py-0.5 break-words">{ms('totalMark')} : {toBn(student?.Total ?? '-')}</div>
 //         </div>
 
 //         {/* ── Comment boxes */}
@@ -2426,6 +2449,9 @@ const SingleMarkSheetClassic = ({
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
+  // Printing onto a sheet a press has already printed
+  pressPrint = false, pressHidePreview = true,
+  pressExamOffset = 0, pressBodyOffset = 0, pressSignOffset = 0,
 }) => {
   const {
     subjects, totalSubjects, divisionRows,
@@ -2451,6 +2477,42 @@ const SingleMarkSheetClassic = ({
   const fullPerSubject = Number(subjects?.[0]?.fullMark) || 0;
   const totalFullMark = fullPerSubject * totalSubjects;
 
+  // ---- Printing onto paper a press has already printed
+  //
+  // The institution block and the page border are already on the paper, so
+  // the app must not print over them.
+  //
+  // Hiding is done with opacity, not display and not visibility:
+  //   display:none would collapse the space and pull everything below it up
+  //   visibility is already taken — the print stylesheet uses
+  //     body * { visibility: hidden !important }
+  //     #marksheet-print-area * { visibility: visible !important }
+  //   to print this area alone, and that !important would win.
+  // opacity:0 keeps the block's exact height and no other rule touches it.
+  //
+  // It applies inside @media print only, so the institution block stays on
+  // screen while the three offsets are being lined up.
+  // pressHidePreview also takes the institution block off the screen, so the
+  // preview shows what the paper will actually look like and the three
+  // blocks can be lined up against the blank space the press leaves.
+  const hideOnScreen = pressPrint && pressHidePreview;
+  const pressHide = pressPrint ? (hideOnScreen ? ' opacity-0' : ' print:opacity-0') : '';
+
+  // Built whole rather than appended, because two border-colour utilities on
+  // one element are resolved by their order in the stylesheet, not in the
+  // class attribute — appending one would not reliably win.
+  const pageBorder = hideOnScreen
+    ? 'border-2 border-dashed border-slate-300 print:border-0'
+    : pressPrint
+      ? 'border-2 border-black print:border-0'
+      : 'border-2 border-black';
+
+  // Moves a block up or down without changing the space it takes
+  const shiftY = (value) => {
+    const px = Number(value) || 0;
+    return px ? { transform: `translateY(${px}px)` } : undefined;
+  };
+
   const infoRows = [
     studentInfoFields.name && [ms('studentName'), studentName],
     [ms('classNameAlt'), classInfo?.ClassName || '-'],
@@ -2464,23 +2526,37 @@ const SingleMarkSheetClassic = ({
   ].filter(Boolean);
 
   return (
-    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-black border-2 border-black mb-10 print:mb-0 flex flex-col`}>
+    <div dir={dir} className={`marksheet-page ${isLast ? '' : 'not-last'} ${previewWidth} relative mx-auto w-full overflow-hidden bg-white text-black ${pageBorder} mb-10 print:mb-0 flex flex-col`}>
       {/* ── Header: centered institution block, logo on the left */}
       <div className="marksheet-header relative text-center px-4 pt-3 pb-1 print:px-3 print:pt-2 print:pb-0.5 shrink-0">
-        {imageSrc && (
-          <img
-            src={imageSrc}
-            alt="Logo"
-            className="absolute left-4 top-[52px] print:left-3 print:top-[42px] h-[62px] w-[62px] print:h-[50px] print:w-[50px] object-contain"
-          />
-        )}
-        <h1 className="marksheet-inst-name text-[28px] ms-fs-28 print:text-[22px] ms-pfs-22 font-bold leading-tight">{toBn(instName || '-')}</h1>
-        <p className="marksheet-inst-address text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-semibold leading-snug">{toBn(instAddress || '-')}</p>
-        <p className="text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-semibold leading-snug">{ms('academicYear')} : {toBn(sessionName || '-')}</p>
-        <p className="text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold leading-snug">{ms('exam')} : {toBn(ExamName || '-')}</p>
+        {/* Already on the press-printed paper, so not printed again */}
+        <div className={`marksheet-press-head${pressHide}`}>
+          {imageSrc && (
+            <img
+              src={imageSrc}
+              alt="Logo"
+              className="absolute left-4 top-[52px] print:left-3 print:top-[42px] h-[62px] w-[62px] print:h-[50px] print:w-[50px] object-contain"
+            />
+          )}
+          <h1 className="marksheet-inst-name text-[28px] ms-fs-28 print:text-[22px] ms-pfs-22 font-bold leading-tight">{toBn(instName || '-')}</h1>
+          <p className="marksheet-inst-address text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-semibold leading-snug">{toBn(instAddress || '-')}</p>
+          <p className="text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-semibold leading-snug">{ms('academicYear')} : {toBn(sessionName || '-')}</p>
+        </div>
+
+        {/* Block 1 of 3 — the exam line */}
+        <p
+          className="marksheet-press-exam text-[16px] ms-fs-16 print:text-[14px] ms-pfs-14 font-bold leading-snug"
+          style={shiftY(pressExamOffset)}
+        >
+          {ms('exam')} : {toBn(ExamName || '-')}
+        </p>
       </div>
 
-      <div className="marksheet-body px-4 pb-2 print:px-3 print:pb-1 flex-1 flex flex-col min-h-0">
+      {/* Block 2 of 3 — the data block */}
+      <div
+        className="marksheet-body px-4 pb-2 print:px-3 print:pb-1 flex-1 flex flex-col min-h-0"
+        style={shiftY(pressBodyOffset)}
+      >
         {/* ── Student info (left) + division breakdown box (right) */}
         <div className="mt-1 flex items-start justify-between gap-4 print:gap-3 shrink-0">
           <div className="text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 leading-[1.8] print:leading-[1.6]">
@@ -2493,7 +2569,7 @@ const SingleMarkSheetClassic = ({
           </div>
 
           <div className="w-[300px] print:w-[255px] shrink-0 border-[1.5px] border-black">
-            <div className="border-b-[1.5px] border-black px-2 py-0.5 text-center text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-bold whitespace-nowrap">
+            <div className="border-b-[1.5px] border-black px-2 py-0.5 text-center text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-bold leading-tight break-words">
               {ms('totalSubjects')} {toBn(totalSubjects)} {ms('items')} - {ms('fullMark')} {toBn(fullPerSubject)} * {toBn(totalSubjects)} = {toBn(totalFullMark)}
             </div>
             {divisionRows.length === 0 ? (
@@ -2541,10 +2617,10 @@ const SingleMarkSheetClassic = ({
 
         {/* ── Summary strip */}
         <div className="mt-3 print:mt-2 border-[1.5px] border-black flex flex-wrap text-[15px] ms-fs-15 print:text-[13px] ms-pfs-13 font-bold shrink-0">
-          <div className="flex-1 border-r border-black px-2 py-1 print:py-0.5 whitespace-nowrap">{ms('division')} : {toBn(divisionName)}</div>
-          <div className="border-r border-black px-3 py-1 print:py-0.5 whitespace-nowrap">{ms('meritPosition')} : {toBn(student?.Positions ?? '-')}</div>
-          <div className="border-r border-black px-3 py-1 print:py-0.5 whitespace-nowrap">{ms('average')} : {toBn(averageMark)}</div>
-          <div className="px-3 py-1 print:py-0.5 whitespace-nowrap">{ms('totalMark')} : {toBn(student?.Total ?? '-')}</div>
+          <div className="flex-1 border-r border-black px-2 py-1 print:py-0.5 break-words">{ms('division')} : {toBn(divisionName)}</div>
+          <div className="border-r border-black px-3 py-1 print:py-0.5 break-words">{ms('meritPosition')} : {toBn(student?.Positions ?? '-')}</div>
+          <div className="border-r border-black px-3 py-1 print:py-0.5 break-words">{ms('average')} : {toBn(averageMark)}</div>
+          <div className="px-3 py-1 print:py-0.5 break-words">{ms('totalMark')} : {toBn(student?.Total ?? '-')}</div>
         </div>
 
         {/* ── Comment boxes: respect showClassTeacherSign / showGuardianSign */}
@@ -2565,8 +2641,11 @@ const SingleMarkSheetClassic = ({
         )}
       </div>
 
-      {/* ── Signatures: always show name + line; image only if showSignature */}
-      <div className="flex items-end justify-between px-10 print:px-8 pt-8 pb-3 print:pt-3 print:pb-2 mt-auto shrink-0">
+      {/* Block 3 of 3 — the signature row */}
+      <div
+        className="marksheet-press-sign flex items-end justify-between px-10 print:px-8 pt-8 pb-3 print:pt-3 print:pb-2 mt-auto shrink-0"
+        style={shiftY(pressSignOffset)}
+      >
         {/* Principal / মুহতামিম */}
         <div className="flex flex-col items-center w-[180px] print:w-[150px]">
           <div className="h-12 print:h-9 flex items-end justify-center w-full">
@@ -3661,6 +3740,9 @@ const MarkSheetPdf = ({
   showClassTeacherSign = true, showGuardianSign = true,
   headerScale = 100, contentFontScale = 100, rowGapScale = 100,
   language = 1,
+  // Press-printed mark sheet (report 2) — only template 8 uses these
+  pressPrint = false, pressHidePreview = true,
+  pressExamOffset = 0, pressBodyOffset = 0, pressSignOffset = 0,
   scopeId = null,
 }) => {
   const institution = data?.institution;
@@ -3761,6 +3843,11 @@ const MarkSheetPdf = ({
       totalStudents,
       ExamName,
       lang,
+      pressPrint,
+      pressHidePreview,
+      pressExamOffset,
+      pressBodyOffset,
+      pressSignOffset,
       ExamID: data?.examid,
       SubClassID: classGroupInfo?.SubClassID,
     };

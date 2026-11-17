@@ -123,6 +123,10 @@ export const markSheetResultReports = [
   {
     ReportID: 1,
     ReportName: '1. মার্কসীট',
+  },
+  {
+    ReportID: 2,
+    ReportName: '2. প্রেসে ছাপা মার্কশিট',
   }
 ];
 

@@ -64,6 +64,45 @@ const MARK_SHEET_TEMPLATES = [
 const BN_DIGITS = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
 const toBnNum = (value) => String(value).replace(/\d/g, (d) => BN_DIGITS[Number(d)]);
 
+/**
+ * Moves one block of the press-printed sheet up or down.
+ * Pixels, not a percentage, and it rests at 0 rather than 100 — minus is up,
+ * plus is down, so a block can be lined up with what the press already put
+ * on the paper.
+ */
+const OffsetSlider = ({ label, value, onChange, hint, min = -100, max = 100, step = 1 }) => (
+  <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-[13px] font-semibold text-slate-700">{label}</span>
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-[12px] font-bold text-[#7C3AED] tabular-nums">
+          {Number(value) > 0 ? '+' : ''}{toBnNum(value)} px
+        </span>
+        <button
+          type="button"
+          title="রিসেট"
+          onClick={() => onChange('0')}
+          className="flex h-5 w-5 items-center justify-center rounded border border-slate-200 text-slate-400 hover:text-[#7C3AED] hover:border-[#DDD6FE] transition"
+        >
+          <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h5M20 20v-5h-5M20 9A8 8 0 006.3 5.3M4 15a8 8 0 0013.7 3.7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+    <input
+      type="range"
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="mt-2 w-full accent-[#7C3AED]"
+    />
+    {hint && <p className="mt-1 text-[11px] leading-snug text-slate-500">{hint}</p>}
+  </div>
+);
+
 const ScaleSlider = ({ label, value, onChange, hint, min = 60, max = 160, step = 5 }) => (
   <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm">
     <div className="flex items-center justify-between gap-3">
@@ -218,6 +257,7 @@ const TemplateMiniature = ({
   showClassTeacherSign, showGuardianSign,
   headerScale, contentFontScale, rowGapScale,
   language,
+  pressPrint, pressHidePreview, pressExamOffset, pressBodyOffset, pressSignOffset,
 }) => {
   // The real report can hold hundreds of students; a card needs exactly one.
   const sheetData = useMemo(() => {
@@ -254,6 +294,11 @@ const TemplateMiniature = ({
           contentFontScale={contentFontScale}
           rowGapScale={rowGapScale}
           language={language}
+          pressPrint={pressPrint}
+          pressHidePreview={pressHidePreview}
+          pressExamOffset={pressExamOffset}
+          pressBodyOffset={pressBodyOffset}
+          pressSignOffset={pressSignOffset}
         />
       </div>
     </div>
@@ -325,6 +370,17 @@ const MarkSheet = () => {
   // Toolbar popover holding the three size sliders.
   const [isSizeDropdownOpen, setIsSizeDropdownOpen] = useState(false);
 
+  // Report 2 — printing onto a sheet the press has already printed.
+  // The three offsets move the exam line, the data block and the signature
+  // row separately, so each can be lined up with the paper.
+  const [isPressDropdownOpen, setIsPressDropdownOpen] = useState(false);
+  // Takes the institution block off the preview too, so the screen shows
+  // what the press-printed paper will look like
+  const [pressHidePreview, setPressHidePreview] = useState(true);
+  const [pressExamOffset, setPressExamOffset] = useState('0');
+  const [pressBodyOffset, setPressBodyOffset] = useState('0');
+  const [pressSignOffset, setPressSignOffset] = useState('0');
+
   // Template strip under the filter row — every design at a glance,
   // so one can be picked without opening the settings modal.
   const [isTemplatePanelOpen, setIsTemplatePanelOpen] = useState(false);
@@ -381,6 +437,22 @@ const MarkSheet = () => {
     UserCode2: appliedUserCode2 || undefined,
   };
 
+  // Report 2 is the press-printed mark sheet. It always uses the Classic
+  // Traditional design (template-8), because the blocks that print are
+  // positioned for that one sheet; picking another design here would put
+  // them in the wrong place on the pre-printed paper.
+  const PRESS_TEMPLATE_ID = 'template-8';
+  const isPressReport = Number(selectedReportID) === 2;
+  const activeTemplate = isPressReport ? PRESS_TEMPLATE_ID : selectedTemplate;
+
+  const pressProps = {
+    pressPrint: isPressReport,
+    pressHidePreview,
+    pressExamOffset: Number(pressExamOffset) || 0,
+    pressBodyOffset: Number(pressBodyOffset) || 0,
+    pressSignOffset: Number(pressSignOffset) || 0,
+  };
+
   // 1 = Bangla, 2 = Arabic, 3 = English. Empty select means Bangla.
   // The API always sends all three, so this only picks which one prints.
   const sheetLanguage = Number(languageID) || 1;
@@ -419,6 +491,9 @@ const MarkSheet = () => {
       if (!event.target.closest('.size-dropdown-container')) {
         setIsSizeDropdownOpen(false);
       }
+      if (!event.target.closest('.press-dropdown-container')) {
+        setIsPressDropdownOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -445,6 +520,10 @@ const MarkSheet = () => {
     if (s.headerScale) setHeaderScale(String(s.headerScale));
     if (s.rowGapScale) setRowGapScale(String(s.rowGapScale));
     if (s.contentFontScale) setContentFontScale(String(s.contentFontScale));
+    if (s.pressHidePreview !== null && s.pressHidePreview !== undefined) setPressHidePreview(Boolean(s.pressHidePreview));
+    if (s.pressExamOffset !== null && s.pressExamOffset !== undefined) setPressExamOffset(String(s.pressExamOffset));
+    if (s.pressBodyOffset !== null && s.pressBodyOffset !== undefined) setPressBodyOffset(String(s.pressBodyOffset));
+    if (s.pressSignOffset !== null && s.pressSignOffset !== undefined) setPressSignOffset(String(s.pressSignOffset));
     if (s.studentInfoFields && typeof s.studentInfoFields === 'object') {
       setStudentInfoFields((prev) => ({ ...prev, ...s.studentInfoFields }));
     }
@@ -452,9 +531,11 @@ const MarkSheet = () => {
 
   const shouldShowFields = (fieldName) => {
     switch (selectedReportID) {
+      // Report 2 is the press-printed mark sheet — same filters as report 1,
+      // only the sheet it prints onto is different.
       case 1:
-        return ['ReportID', 'LanguageID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
       case 2:
+        return ['ReportID', 'LanguageID', 'SessionID', 'ExamID', 'SubClassID', 'UserCode'].includes(fieldName);
       case 3:
       case 4:
       case 5:
@@ -516,6 +597,10 @@ const MarkSheet = () => {
         headerScale: Number(headerScale),
         rowGapScale: Number(rowGapScale),
         contentFontScale: Number(contentFontScale),
+        pressHidePreview,
+        pressExamOffset: Number(pressExamOffset),
+        pressBodyOffset: Number(pressBodyOffset),
+        pressSignOffset: Number(pressSignOffset),
         studentInfoFields,
       }).unwrap();
       setIsSettingsOpen(false);
@@ -554,7 +639,7 @@ const MarkSheet = () => {
     return (
       <MarkSheetPdf 
         data={data} 
-        templateId={selectedTemplate} 
+        templateId={activeTemplate} 
         showDate={showDate}
         showSignature={showSignature}
         principalName={principalName}
@@ -569,6 +654,7 @@ const MarkSheet = () => {
         contentFontScale={contentFontScale}
         rowGapScale={rowGapScale}
         language={sheetLanguage}
+        {...pressProps}
       />
     );
   };
@@ -593,6 +679,7 @@ const MarkSheet = () => {
     contentFontScale,
     rowGapScale,
     language: sheetLanguage,
+    ...pressProps,
   };
 
   return (
@@ -706,6 +793,7 @@ const MarkSheet = () => {
                       View
                     </button>
                     
+                    {!isPressReport && (
                     <button
                       type="button"
                       onClick={() => setIsTemplatePanelOpen((open) => !open)}
@@ -724,6 +812,7 @@ const MarkSheet = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                       </svg>
                     </button>
+                    )}
 
                     <button
                       type="button"
@@ -967,6 +1056,66 @@ const MarkSheet = () => {
                   <option value="75">৭৫%</option>
                 </select>
 
+                {/* Block offsets — report 2 only, same three controls as in the settings modal */}
+                {isPressReport && (
+                  <div className="relative press-dropdown-container">
+                    <button
+                      type="button"
+                      onClick={() => setIsPressDropdownOpen(!isPressDropdownOpen)}
+                      title="ঘর উপর-নিচ"
+                      className="flex items-center gap-2 h-8 rounded-lg border border-[#DDD6FE] bg-white px-3 py-1 text-sm font-medium text-slate-700 outline-none hover:bg-slate-50 focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
+                    >
+                      <svg className="w-4 h-4 text-[#7C3AED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m0-16l-3 3m3-3l3 3m-3 13l-3-3m3 3l3-3" />
+                      </svg>
+                      ঘর সরান
+                      <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    {isPressDropdownOpen && (
+                      <div className="absolute right-0 top-full mt-1 w-80 bg-white border border-slate-200 shadow-xl rounded-xl p-3 z-50 space-y-2.5">
+                        <p className="px-1 text-[11px] leading-snug text-slate-500">
+                          প্রেসে ছাপা কাগজে শুধু এই তিনটা ঘর ছাপা হবে। কাগজের সাথে মিলিয়ে আলাদা আলাদা উপরে-নিচে সরান।
+                        </p>
+                        <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={pressHidePreview}
+                          onChange={(e) => setPressHidePreview(e.target.checked)}
+                          className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                        />
+                        <span>
+                          <span className="block text-[13px] font-semibold text-slate-700">প্রিভিউতেও হেডার লুকান</span>
+                          <span className="block text-[11px] leading-snug text-slate-500">
+                            প্রতিষ্ঠানের নাম, ঠিকানা ও শিক্ষাবর্ষ পর্দাতেও সরে যাবে — ছাপা কাগজ যেমন দেখাবে ঠিক তেমন। জায়গাটা ফাঁকা থেকে যায়, বর্ডারটা তখন কাটা দাগে দেখায়।
+                          </span>
+                        </span>
+                      </label>
+                      <OffsetSlider
+                        label="পরীক্ষার নামের লাইন"
+                        value={pressExamOffset}
+                        onChange={setPressExamOffset}
+                        hint="মাইনাস = উপরে, প্লাস = নিচে।"
+                      />
+                      <OffsetSlider
+                        label="মাঝের ডাটা ব্লক"
+                        value={pressBodyOffset}
+                        onChange={setPressBodyOffset}
+                        hint="পরীক্ষার্থীর তথ্য, নম্বর বিভাজন, ফলাফলের টেবিল ও মন্তব্য — একসাথে।"
+                      />
+                      <OffsetSlider
+                        label="স্বাক্ষরের সারি"
+                        value={pressSignOffset}
+                        onChange={setPressSignOffset}
+                        hint="নিচের দুই স্বাক্ষর ও তারিখ।"
+                      />
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* Size sliders — the same three controls as in the settings modal */}
                 <div className="relative size-dropdown-container">
                   <button
@@ -1127,6 +1276,57 @@ const MarkSheet = () => {
                 </div>
 
               </div>
+
+              {/* প্রেসে ছাপা মার্কশিটের ঘর — রিপোর্ট ২ বাছলে দেখা যায় */}
+              {isPressReport && (
+                <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                  <h4 className="text-sm font-bold text-slate-700 mb-1 flex items-center gap-2">
+                    <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m0-16l-3 3m3-3l3 3m-3 13l-3-3m3 3l3-3" />
+                    </svg>
+                    ঘর উপর-নিচ করুন
+                  </h4>
+                  <p className="mb-3 text-[12px] leading-snug text-slate-600">
+                    প্রেসে ছাপা কাগজে প্রতিষ্ঠানের নাম, ঠিকানা, শিক্ষাবর্ষ ও বর্ডার আগে থেকেই আছে — তাই ওগুলো আর ছাপা হয় না।
+                    শুধু নিচের তিনটা ঘর বসে। কাগজ হাতে নিয়ে মিলিয়ে নিন।
+                  </p>
+
+                  <div className="space-y-3">
+                      <label className="flex items-start gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 shadow-sm cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={pressHidePreview}
+                          onChange={(e) => setPressHidePreview(e.target.checked)}
+                          className="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-violet-600 focus:ring-violet-500"
+                        />
+                        <span>
+                          <span className="block text-[13px] font-semibold text-slate-700">প্রিভিউতেও হেডার লুকান</span>
+                          <span className="block text-[11px] leading-snug text-slate-500">
+                            প্রতিষ্ঠানের নাম, ঠিকানা ও শিক্ষাবর্ষ পর্দাতেও সরে যাবে — ছাপা কাগজ যেমন দেখাবে ঠিক তেমন। জায়গাটা ফাঁকা থেকে যায়, বর্ডারটা তখন কাটা দাগে দেখায়।
+                          </span>
+                        </span>
+                      </label>
+                      <OffsetSlider
+                        label="পরীক্ষার নামের লাইন"
+                        value={pressExamOffset}
+                        onChange={setPressExamOffset}
+                        hint="মাইনাস = উপরে, প্লাস = নিচে।"
+                      />
+                      <OffsetSlider
+                        label="মাঝের ডাটা ব্লক"
+                        value={pressBodyOffset}
+                        onChange={setPressBodyOffset}
+                        hint="পরীক্ষার্থীর তথ্য, নম্বর বিভাজন, ফলাফলের টেবিল ও মন্তব্য — একসাথে।"
+                      />
+                      <OffsetSlider
+                        label="স্বাক্ষরের সারি"
+                        value={pressSignOffset}
+                        onChange={setPressSignOffset}
+                        hint="নিচের দুই স্বাক্ষর ও তারিখ।"
+                      />
+                  </div>
+                </div>
+              )}
 
               {/* ⭐ আকারের সেটিংস — তিনটি স্লাইডার, সাথে লাইভ প্রিভিউ */}
               <div className="mb-6 p-4 bg-slate-50 border border-slate-200 rounded-xl">
@@ -1466,6 +1666,7 @@ const MarkSheet = () => {
                     contentFontScale={contentFontScale}
                     rowGapScale={rowGapScale}
                     language={sheetLanguage}
+                    {...pressProps}
                   />
                 </div>
               ) : (
