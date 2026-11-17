@@ -629,18 +629,6 @@ const MarkSheet = () => {
                     require="This Field is required"
                   />
 
-                  {shouldShowFields('LanguageID') && (
-                    <DefaultSelect
-                      label="ভাষা"
-                      nameField="name"
-                      registerKey="LanguageID"
-                      valueField="id"
-                      options={languageResultReport}
-                      type="number"
-                      defaultSelect={false}
-                    />
-                  )}
-
                   {shouldShowFields('SessionID') && (
                     <DefaultSelect
                       label={translate('Session')}
@@ -687,6 +675,18 @@ const MarkSheet = () => {
                       options={subclassListData ?? []}
                       require={'This Field is required'}
                       unicode={true}
+                    />
+                  )}
+
+                  {shouldShowFields('LanguageID') && (
+                    <DefaultSelect
+                      label="ভাষা"
+                      nameField="name"
+                      registerKey="LanguageID"
+                      valueField="id"
+                      options={languageResultReport}
+                      type="number"
+                      defaultSelect={false}
                     />
                   )}
 

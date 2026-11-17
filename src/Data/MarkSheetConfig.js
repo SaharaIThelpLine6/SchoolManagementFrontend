@@ -22,7 +22,7 @@ const safeLang = (lang) => (isLang(lang) ? lang : DEFAULT_MARK_SHEET_LANG);
 
 // The filter sends a number, everything below works on a code.
 //   1 = Bangla   2 = Arabic   3 = English
-export const LANG_ID_TO_CODE = { 1: 'bn', 2: 'ar', 3: 'en' };
+export const LANG_ID_TO_CODE = { 1: 'bn', 2: 'en', 3: 'ar' };
 
 export const toLangCode = (value) => {
   if (isLang(value)) return value;

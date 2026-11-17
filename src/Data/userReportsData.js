@@ -151,8 +151,8 @@ export const language = [
 ];
 export const languageResultReport = [
   { id: 1, name: 'বাংলা' },
-  { id: 2, name: 'আরবী' },
-  { id: 3, name: 'ইংরেজি' },
+  { id: 2, name: 'ইংরেজি' },
+  { id: 3, name: 'আরবী' },
 ];
 export const examVacationStatus = [
   { id: 1, name: 'পরীক্ষার রুটিন থেকে' },

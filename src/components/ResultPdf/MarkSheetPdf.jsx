@@ -5,6 +5,7 @@ import { useGetLabelNameListsQuery } from '../../features/result/resultSilce';
 import { bufferToDataUrl } from '../../utils/bufferDataURL';
 import {
   toLangCode,
+  pickLang,
   getInstitutionAddress,
   getInstitutionName,
   getLangValue,
@@ -3665,17 +3666,15 @@ const MarkSheetPdf = ({
   const institution = data?.institution;
 
   // Language the sheet is printed in.
-  //   1 = Bangla (default)   2 = Arabic   3 = English
   // The API always sends all three, so the choice is made here.
-  const languageId = [2, 3].includes(Number(language)) ? Number(language) : 1;
+  // LANG_ID_TO_CODE in MarkSheetConfig is the only place that says which
+  // id means which language — the labels below and the database columns
+  // picked here both read it, so the two can never disagree.
+  const lang = toLangCode(language);
 
   // Picks the translated text, falling back to Bangla when it is missing.
-  const byLanguage = (bangla, arabic, english) => {
-    const chosen = languageId === 2 ? arabic : languageId === 3 ? english : bangla;
-    const text = chosen === null || chosen === undefined ? '' : String(chosen).trim();
-
-    return text !== '' ? text : bangla;
-  };
+  const byLanguage = (bangla, arabic, english) =>
+    pickLang(bangla, arabic, english, lang);
 
   const examRow = data?.exam?.[0];
   const ExamName = byLanguage(examRow?.ExamName, examRow?.ExamAraName, examRow?.ExamEngName);
@@ -3711,7 +3710,7 @@ const MarkSheetPdf = ({
   if (students.length === 0) {
     return (
       <div className="font-SolaimanLipi flex items-center justify-center p-10 text-slate-500 bg-slate-50 rounded-lg border border-slate-200 text-lg">
-        {getMarkSheetText('noData', languageId)}
+        {getMarkSheetText('noData', lang)}
       </div>
     );
   }
@@ -3761,7 +3760,7 @@ const MarkSheetPdf = ({
       showGuardianSign,
       totalStudents,
       ExamName,
-      lang: toLangCode(language),
+      lang,
       ExamID: data?.examid,
       SubClassID: classGroupInfo?.SubClassID,
     };
