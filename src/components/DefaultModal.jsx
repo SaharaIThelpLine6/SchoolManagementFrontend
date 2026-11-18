@@ -102,6 +102,7 @@ import ExamRouteSettingCreateModal from '../view/exam/ExamRouteSettingCreateModa
 import ExamRoutineCreateModal from '../view/exam/ExamRouting/ExamRoutineCreateModal';
 import ExamRoutineUpdateModal from '../view/exam/ExamRouting/ExamRoutineUpdateModal';
 import ExamDivisionSettingModal from '../view/result/Reports/ExamDivisionSettingModal';
+import UserPasswordChange from './Forms/UserPasswordChange';
 
 const DefaultModal = () => {
   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
@@ -196,6 +197,7 @@ const DefaultModal = () => {
                 {modalType === 'ADD_STUDENT' && <AdmissionFormModal userId={id} />}
                 {modalType === 'UPDATE_STUDENT' && <UpdateStudentFormModal userId={id} />}
                 {modalType === 'ADD_USER' && <AddUserFormModal />}
+                {modalType === 'PasswordChange' && <UserPasswordChange />}
                 {modalType === 'ADD_PARENT_ACCOUNT' && <AddParentFormModal userId={id} />}
                 {modalType === 'ADD_TEACHER_INFO' && <AddTeacherFormModal />}
                 {modalType === 'UPDATE_TEACHER_INFO' && <AddTeacherFormModal userId={id} />}
