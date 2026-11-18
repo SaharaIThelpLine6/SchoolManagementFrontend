@@ -150,6 +150,8 @@ const StudentInfo = () => {
   const totalPage = usersData?.totalPages || 1;
   const totalUsers = usersData?.totalUsers || 0;
 
+  console.log(usersData?.totalUsers, "usersData")
+
   useEffect(() => {
     refetch();
   }, [userTypeID, filterTypeId, debouncedFilterValue, userAction, sessionId, subClassId, currentPage, itemPerPage, refetch]);

@@ -84,8 +84,8 @@ const TeacherSubjectsAsignPage = () => {
     { skip: !SessionID || !ExamID }
   );
 
-  console.log(teacherSubjects, "teacherSubjects")
-  console.log(ExamClassSubjectsData, "ExamClassSubjectsData")
+  // console.log(teacherSubjects, "teacherSubjects")
+  // console.log(ExamClassSubjectsData, "ExamClassSubjectsData")
 
   // =========================
   // SAFE REFETCH
@@ -706,10 +706,10 @@ const TeacherSubjectsAsignPage = () => {
                                 : "Click to select"
                             }
                             className={`relative px-3.5 py-1.5 rounded-full text-[13px] font-semibold border transition-all duration-200 focus:outline-none ${selected
-                                ? "bg-gradient-to-r from-emerald-500 to-green-600 border-transparent text-white shadow-md shadow-emerald-200/80 cursor-not-allowed"
-                                : disabled
-                                  ? "bg-gradient-to-r from-rose-50 to-red-50 border-rose-200 text-rose-500 cursor-not-allowed opacity-80"
-                                  : "bg-white border-gray-200 text-gray-700 hover:border-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 hover:text-emerald-700 hover:shadow-md hover:shadow-emerald-100 hover:-translate-y-0.5"
+                              ? "bg-gradient-to-r from-emerald-500 to-green-600 border-transparent text-white shadow-md shadow-emerald-200/80 cursor-not-allowed"
+                              : disabled
+                                ? "bg-gradient-to-r from-rose-50 to-red-50 border-rose-200 text-rose-500 cursor-not-allowed opacity-80"
+                                : "bg-white border-gray-200 text-gray-700 hover:border-emerald-400 hover:bg-gradient-to-r hover:from-emerald-50 hover:to-teal-50 hover:text-emerald-700 hover:shadow-md hover:shadow-emerald-100 hover:-translate-y-0.5"
                               }`}
                           >
                             {subject.SubjectName}
