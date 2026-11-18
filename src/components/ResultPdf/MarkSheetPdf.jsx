@@ -644,6 +644,8 @@ const SingleMarkSheet = ({
   session, classInfo, examSubjects, divisions = [], examConfig = {},
   isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
@@ -849,22 +851,30 @@ const SingleMarkSheet = ({
         </div>
         <div className="col-span-2 flex w-full flex-col items-center">
           <div className="h-16 w-full flex items-end justify-center print:h-8">
-            {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-16 max-w-full object-contain print:max-h-8" />}
+            {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-16 max-w-full object-contain print:max-h-8" />}
           </div>
+          {principalShowName && (
           <div className="mt-2 w-full border-t-2 border-dashed border-slate-400 print:mt-0.5"></div>
+          )}
           <div className="mt-3 space-y-1 text-center print:mt-0.5 print:space-y-0">
+            {principalShowName && (
             <p className="text-[20px] ms-fs-20 font-bold text-black print:text-[14px] ms-pfs-14">{principalName || institution?.PrincipalName || ms('principal')}</p>
-            {showDate && <p className="text-[15px] ms-fs-15 text-black font-bold print:text-[12.5px] ms-pfs-12_5">{ms('date')} : {printDate}</p>}
+            )}
+            {showDate && principalShowDate && <p className="text-[15px] ms-fs-15 text-black font-bold print:text-[12.5px] ms-pfs-12_5">{ms('date')} : {printDate}</p>}
           </div>
         </div>
         <div className="col-span-2 flex w-full flex-col items-center">
           <div className="h-16 w-full flex items-end justify-center print:h-8">
-            {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-16 max-w-full object-contain print:max-h-8" />}
+            {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-16 max-w-full object-contain print:max-h-8" />}
           </div>
+          {najemShowName && (
           <div className="mt-2 w-full border-t-2 border-dashed border-slate-400 print:mt-0.5"></div>
+          )}
           <div className="mt-3 space-y-1 text-center print:mt-0.5 print:space-y-0">
+            {najemShowName && (
             <p className="text-[20px] ms-fs-20 font-bold text-black print:text-[14px] ms-pfs-14">{najemName || institution?.NajemName || ms('najem')}</p>
-            {showDate && <p className="text-[15px] ms-fs-15 text-black font-bold print:text-[12.5px] ms-pfs-12_5">{ms('date')} : {printDate}</p>}
+            )}
+            {showDate && najemShowDate && <p className="text-[15px] ms-fs-15 text-black font-bold print:text-[12.5px] ms-pfs-12_5">{ms('date')} : {printDate}</p>}
           </div>
         </div>
       </div>
@@ -886,6 +896,8 @@ const SingleMarkSheetModern = ({
   session, classInfo, examSubjects, divisions = [], examConfig = {},
   isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
@@ -1092,22 +1104,30 @@ const SingleMarkSheetModern = ({
         </div>
         <div className="col-span-2 flex w-full flex-col items-center">
           <div className="h-16 w-full flex items-end justify-center print:h-8">
-            {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-16 max-w-full object-contain print:max-h-8" />}
+            {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-16 max-w-full object-contain print:max-h-8" />}
           </div>
+          {principalShowName && (
           <div className="mt-2 w-full border-t-2 border-violet-300 print:mt-0.5"></div>
+          )}
           <div className="mt-3 space-y-1 text-center print:mt-0.5 print:space-y-0">
+            {principalShowName && (
             <p className="text-[18px] ms-fs-18 font-bold text-violet-900 print:text-[13.5px] ms-pfs-13_5">{principalName || institution?.PrincipalName || ms('principal')}</p>
-            {showDate && <p className="text-[13px] ms-fs-13 text-slate-600 font-semibold print:text-[12px] ms-pfs-12">{ms('date')} : {printDate}</p>}
+            )}
+            {showDate && principalShowDate && <p className="text-[13px] ms-fs-13 text-slate-600 font-semibold print:text-[12px] ms-pfs-12">{ms('date')} : {printDate}</p>}
           </div>
         </div>
         <div className="col-span-2 flex w-full flex-col items-center">
           <div className="h-16 w-full flex items-end justify-center print:h-8">
-            {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-16 max-w-full object-contain print:max-h-8" />}
+            {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-16 max-w-full object-contain print:max-h-8" />}
           </div>
+          {najemShowName && (
           <div className="mt-2 w-full border-t-2 border-violet-300 print:mt-0.5"></div>
+          )}
           <div className="mt-3 space-y-1 text-center print:mt-0.5 print:space-y-0">
+            {najemShowName && (
             <p className="text-[18px] ms-fs-18 font-bold text-violet-900 print:text-[13.5px] ms-pfs-13_5">{najemName || institution?.NajemName || ms('najem')}</p>
-            {showDate && <p className="text-[13px] ms-fs-13 text-slate-600 font-semibold print:text-[12px] ms-pfs-12">{ms('date')} : {printDate}</p>}
+            )}
+            {showDate && najemShowDate && <p className="text-[13px] ms-fs-13 text-slate-600 font-semibold print:text-[12px] ms-pfs-12">{ms('date')} : {printDate}</p>}
           </div>
         </div>
       </div>
@@ -1129,6 +1149,8 @@ const SingleMarkSheetElegant = ({
   session, classInfo, examSubjects, divisions = [], examConfig = {},
   isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
@@ -1333,22 +1355,30 @@ const SingleMarkSheetElegant = ({
           </div>
           <div className="col-span-2 flex w-full flex-col items-center">
             <div className="h-16 w-full flex items-end justify-center print:h-8">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-16 max-w-full object-contain print:max-h-8" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-16 max-w-full object-contain print:max-h-8" />}
             </div>
+            {principalShowName && (
             <div className="mt-2 w-full border-t-2 border-double border-amber-600 print:mt-0.5"></div>
+            )}
             <div className="mt-3 space-y-1 text-center print:mt-0.5 print:space-y-0">
+              {principalShowName && (
               <p className="text-[18px] ms-fs-18 font-bold text-amber-900 print:text-[13.5px] ms-pfs-13_5">{principalName || institution?.PrincipalName || ms('principal')}</p>
-              {showDate && <p className="text-[13px] ms-fs-13 text-amber-700 font-semibold print:text-[12px] ms-pfs-12">{ms('date')} : {printDate}</p>}
+              )}
+              {showDate && principalShowDate && <p className="text-[13px] ms-fs-13 text-amber-700 font-semibold print:text-[12px] ms-pfs-12">{ms('date')} : {printDate}</p>}
             </div>
           </div>
           <div className="col-span-2 flex w-full flex-col items-center">
             <div className="h-16 w-full flex items-end justify-center print:h-8">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-16 max-w-full object-contain print:max-h-8" />}
+              {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-16 max-w-full object-contain print:max-h-8" />}
             </div>
+            {najemShowName && (
             <div className="mt-2 w-full border-t-2 border-double border-amber-600 print:mt-0.5"></div>
+            )}
             <div className="mt-3 space-y-1 text-center print:mt-0.5 print:space-y-0">
+              {najemShowName && (
               <p className="text-[18px] ms-fs-18 font-bold text-amber-900 print:text-[13.5px] ms-pfs-13_5">{najemName || institution?.NajemName || ms('najem')}</p>
-              {showDate && <p className="text-[13px] ms-fs-13 text-amber-700 font-semibold print:text-[12px] ms-pfs-12">{ms('date')} : {printDate}</p>}
+              )}
+              {showDate && najemShowDate && <p className="text-[13px] ms-fs-13 text-amber-700 font-semibold print:text-[12px] ms-pfs-12">{ms('date')} : {printDate}</p>}
             </div>
           </div>
         </div>
@@ -1371,6 +1401,8 @@ const SingleMarkSheetMinimal = ({
   session, classInfo, examSubjects, divisions = [], examConfig = {},
   isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
@@ -1553,20 +1585,24 @@ const SingleMarkSheetMinimal = ({
         </div>
         <div className="text-center">
           <div className="h-10 print:h-7 flex items-end justify-center">
-            {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-7" />}
+            {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-7" />}
           </div>
-          <div className="border-t border-black mt-1.5 pt-1.5">
+          <div style={principalShowName ? undefined : { borderTopWidth: 0 }} className="border-t border-black mt-1.5 pt-1.5">
+            {principalShowName && (
             <div className="text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 font-bold uppercase tracking-wide">{principalName || institution?.PrincipalName || ms('principal')}</div>
-            {showDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-zinc-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+            )}
+            {showDate && principalShowDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-zinc-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
           </div>
         </div>
         <div className="text-center">
           <div className="h-10 print:h-7 flex items-end justify-center">
-            {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-7" />}
+            {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-7" />}
           </div>
-          <div className="border-t border-black mt-1.5 pt-1.5">
+          <div style={najemShowName ? undefined : { borderTopWidth: 0 }} className="border-t border-black mt-1.5 pt-1.5">
+            {najemShowName && (
             <div className="text-[12px] ms-fs-12 print:text-[11px] ms-pfs-11 font-bold uppercase tracking-wide">{najemName || institution?.NajemName || ms('najem')}</div>
-            {showDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-zinc-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+            )}
+            {showDate && najemShowDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-zinc-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
           </div>
         </div>
       </div>
@@ -1586,6 +1622,8 @@ const SingleMarkSheetSidebar = ({
   session, classInfo, examSubjects, divisions = [], examConfig = {},
   isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
@@ -1780,19 +1818,27 @@ const SingleMarkSheetSidebar = ({
         <div className="grid grid-cols-2 gap-8 print:gap-6 max-w-xl mx-auto print:max-w-lg">
           <div className="flex flex-col items-center">
             <div className="h-12 print:h-8 flex items-end justify-center w-full">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-12 max-w-full object-contain print:max-h-8" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-12 max-w-full object-contain print:max-h-8" />}
             </div>
+            {principalShowName && (
             <div className="border-t-2 border-cyan-700 mt-1.5 print:mt-1 w-full"></div>
+            )}
+            {principalShowName && (
             <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold text-slate-800 mt-1.5 print:mt-1 text-center">{principalName || institution?.PrincipalName || ms('principal')}</p>
-            {showDate && <p className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 text-slate-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+            )}
+            {showDate && principalShowDate && <p className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 text-slate-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
           </div>
           <div className="flex flex-col items-center">
             <div className="h-12 print:h-8 flex items-end justify-center w-full">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-12 max-w-full object-contain print:max-h-8" />}
+              {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-12 max-w-full object-contain print:max-h-8" />}
             </div>
+            {najemShowName && (
             <div className="border-t-2 border-cyan-700 mt-1.5 print:mt-1 w-full"></div>
+            )}
+            {najemShowName && (
             <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold text-slate-800 mt-1.5 print:mt-1 text-center">{najemName || institution?.NajemName || ms('najem')}</p>
-            {showDate && <p className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 text-slate-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
+            )}
+            {showDate && najemShowDate && <p className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 text-slate-500 mt-0.5 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</p>}
           </div>
         </div>
       </div>
@@ -1812,6 +1858,8 @@ const SingleMarkSheetGazette = ({
   session, classInfo, examSubjects, divisions = [], examConfig = {},
   isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
@@ -2030,20 +2078,24 @@ const SingleMarkSheetGazette = ({
           </div>
           <div className="col-span-2 text-center">
             <div className="h-9 print:h-6 flex items-end justify-center">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-9 max-w-full object-contain print:max-h-6" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-9 max-w-full object-contain print:max-h-6" />}
             </div>
-            <div className="border-t border-stone-900 mt-1 pt-1">
+            <div style={principalShowName ? undefined : { borderTopWidth: 0 }} className="border-t border-stone-900 mt-1 pt-1">
+              {principalShowName && (
               <div className="text-[11.5px] ms-fs-11_5 print:text-[10.5px] ms-pfs-10_5 font-bold italic">{principalName || institution?.PrincipalName || ms('principal')}</div>
-              {showDate && <div className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 italic mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+              )}
+              {showDate && principalShowDate && <div className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 italic mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
             </div>
           </div>
           <div className="col-span-2 text-center">
             <div className="h-9 print:h-6 flex items-end justify-center">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-9 max-w-full object-contain print:max-h-6" />}
+              {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-9 max-w-full object-contain print:max-h-6" />}
             </div>
-            <div className="border-t border-stone-900 mt-1 pt-1">
+            <div style={najemShowName ? undefined : { borderTopWidth: 0 }} className="border-t border-stone-900 mt-1 pt-1">
+              {najemShowName && (
               <div className="text-[11.5px] ms-fs-11_5 print:text-[10.5px] ms-pfs-10_5 font-bold italic">{najemName || institution?.NajemName || ms('najem')}</div>
-              {showDate && <div className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 italic mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+              )}
+              {showDate && najemShowDate && <div className="text-[9px] ms-fs-9 print:text-[8px] ms-pfs-8 italic mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
             </div>
           </div>
         </div>
@@ -2064,6 +2116,8 @@ const SingleMarkSheetBauhaus = ({
   session, classInfo, examSubjects, divisions = [], examConfig = {},
   isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
@@ -2252,20 +2306,24 @@ const SingleMarkSheetBauhaus = ({
             </div>
             <div className="col-span-2 text-center">
               <div className="h-8 print:h-6 flex items-end justify-center">
-                {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-8 max-w-full object-contain print:max-h-6" style={{ filter: 'invert(1)' }} />}
+                {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-8 max-w-full object-contain print:max-h-6" style={{ filter: 'invert(1)' }} />}
               </div>
-              <div className="border-t-2 border-yellow-400 mt-1 pt-1">
+              <div style={principalShowName ? undefined : { borderTopWidth: 0 }} className="border-t-2 border-yellow-400 mt-1 pt-1">
+                {principalShowName && (
                 <div className="text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 font-black uppercase">{principalName || institution?.PrincipalName || ms('principal')}</div>
-                {showDate && <div className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 text-white/60 mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+                )}
+                {showDate && principalShowDate && <div className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 text-white/60 mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
               </div>
             </div>
             <div className="col-span-2 text-center">
               <div className="h-8 print:h-6 flex items-end justify-center">
-                {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-8 max-w-full object-contain print:max-h-6" style={{ filter: 'invert(1)' }} />}
+                {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-8 max-w-full object-contain print:max-h-6" style={{ filter: 'invert(1)' }} />}
               </div>
-              <div className="border-t-2 border-yellow-400 mt-1 pt-1">
+              <div style={najemShowName ? undefined : { borderTopWidth: 0 }} className="border-t-2 border-yellow-400 mt-1 pt-1">
+                {najemShowName && (
                 <div className="text-[11px] ms-fs-11 print:text-[10px] ms-pfs-10 font-black uppercase">{najemName || institution?.NajemName || ms('najem')}</div>
-                {showDate && <div className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 text-white/60 mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+                )}
+                {showDate && najemShowDate && <div className="text-[8px] ms-fs-8 print:text-[7.5px] ms-pfs-7_5 text-white/60 mt-0.5">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
               </div>
             </div>
           </div>
@@ -2446,6 +2504,8 @@ const SingleMarkSheetClassic = ({
   session, classInfo, examSubjects, divisions = [], examConfig = {},
   isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
@@ -2649,15 +2709,19 @@ const SingleMarkSheetClassic = ({
         {/* Principal / মুহতামিম */}
         <div className="flex flex-col items-center w-[180px] print:w-[150px]">
           <div className="h-12 print:h-9 flex items-end justify-center w-full">
-            {showSignature && signaturePrincipalSrc && (
+            {showSignature && principalShowSign && signaturePrincipalSrc && (
               <img src={signaturePrincipalSrc} alt="Signature Principal" className="max-h-12 max-w-[150px] object-contain print:max-h-9" />
             )}
           </div>
+          {principalShowName && (
           <div className="w-full border-t-2 border-dashed border-black mt-1"></div>
+          )}
+          {principalShowName && (
           <p className="text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-bold mt-1 text-center leading-tight">
             {principalName || institution?.PrincipalName || ''}
           </p>
-          {showDate && (
+          )}
+          {showDate && principalShowDate && (
             <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold mt-0.5">
               {ms('date')} : {printDate}
             </p>
@@ -2667,15 +2731,19 @@ const SingleMarkSheetClassic = ({
         {/* Vice Principal / নায়েবে তালিমাত */}
         <div className="flex flex-col items-center w-[180px] print:w-[150px]">
           <div className="h-12 print:h-9 flex items-end justify-center w-full">
-            {showSignature && signatureNajemSrc && (
+            {showSignature && najemShowSign && signatureNajemSrc && (
               <img src={signatureNajemSrc} alt="Signature Najem" className="max-h-12 max-w-[150px] object-contain print:max-h-9" />
             )}
           </div>
+          {najemShowName && (
           <div className="w-full border-t-2 border-dashed border-black mt-1"></div>
+          )}
+          {najemShowName && (
           <p className="text-[14px] ms-fs-14 print:text-[12px] ms-pfs-12 font-bold mt-1 text-center leading-tight">
             {najemName || institution?.NajemName || ''}
           </p>
-          {showDate && (
+          )}
+          {showDate && najemShowDate && (
             <p className="text-[13px] ms-fs-13 print:text-[11.5px] ms-pfs-11_5 font-bold mt-0.5">
               {ms('date')} : {printDate}
             </p>
@@ -2707,6 +2775,8 @@ const SingleMarkSheetTraditional = ({
   session, classInfo, examSubjects, divisions = [], examConfig = {},
   isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
@@ -2936,7 +3006,7 @@ const SingleMarkSheetTraditional = ({
           {/* ── Vice Principal — name & designation always, image optional */}
           <div className="text-center">
             <div className="h-10 print:h-6 flex items-end justify-center">
-              {showSignature && signatureNajemSrc && (
+              {showSignature && najemShowSign && signatureNajemSrc && (
                 <img
                   src={signatureNajemSrc}
                   alt="Vice Principal signature"
@@ -2944,10 +3014,12 @@ const SingleMarkSheetTraditional = ({
                 />
               )}
             </div>
+            {najemShowName && (
             <div className="border-t border-dotted border-[#1E3A8A] pt-1 text-[13.5px] ms-fs-13_5 print:text-[11px] ms-pfs-11 font-bold">
               {toBn(najemName || institution?.NajemName || ms('najem'))}
             </div>
-            {showDate && (
+            )}
+            {showDate && najemShowDate && (
               <div className="text-[11px] ms-fs-11 print:text-[9.5px] ms-pfs-9_5 font-semibold text-stone-600 mt-0.5">
                 {ms('date')} : {printDate}
               </div>
@@ -2957,7 +3029,7 @@ const SingleMarkSheetTraditional = ({
           {/* ── Principal — name & designation always, image optional */}
           <div className="text-center">
             <div className="h-10 print:h-6 flex items-end justify-center">
-              {showSignature && signaturePrincipalSrc && (
+              {showSignature && principalShowSign && signaturePrincipalSrc && (
                 <img
                   src={signaturePrincipalSrc}
                   alt="Principal signature"
@@ -2965,10 +3037,12 @@ const SingleMarkSheetTraditional = ({
                 />
               )}
             </div>
+            {principalShowName && (
             <div className="border-t border-dotted border-[#1E3A8A] pt-1 text-[13.5px] ms-fs-13_5 print:text-[11px] ms-pfs-11 font-bold">
               {toBn(principalName || institution?.PrincipalName || ms('principal'))}
             </div>
-            {showDate && (
+            )}
+            {showDate && principalShowDate && (
               <div className="text-[11px] ms-fs-11 print:text-[9.5px] ms-pfs-9_5 font-semibold text-stone-600 mt-0.5">
                 {ms('date')} : {printDate}
               </div>
@@ -2995,6 +3069,8 @@ const SingleMarkSheetTranscript = ({
   session, classInfo, examSubjects, divisions = [], examConfig = {},
   isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
@@ -3207,22 +3283,26 @@ const SingleMarkSheetTranscript = ({
 
           <div className="text-center">
             <div className="h-10 print:h-6 flex items-end justify-center">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
+              {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
             </div>
+            {najemShowName && (
             <div className="border-t border-slate-500 pt-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold">
               {toBn(najemName || institution?.NajemName || ms('najem'))}
             </div>
-            {showDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+            )}
+            {showDate && najemShowDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
           </div>
 
           <div className="text-center">
             <div className="h-10 print:h-6 flex items-end justify-center">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-10 max-w-full object-contain print:max-h-6" />}
             </div>
+            {principalShowName && (
             <div className="border-t border-slate-500 pt-1 text-[12.5px] ms-fs-12_5 print:text-[11px] ms-pfs-11 font-bold">
               {toBn(principalName || institution?.PrincipalName || ms('principal'))}
             </div>
-            {showDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+            )}
+            {showDate && principalShowDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
           </div>
         </div>
 
@@ -3245,6 +3325,8 @@ const SingleMarkSheetOrnate = ({
   session, classInfo, examSubjects, divisions = [], examConfig = {},
   isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
@@ -3428,22 +3510,26 @@ const SingleMarkSheetOrnate = ({
 
           <div className="text-center">
             <div className="h-11 print:h-7 flex items-end justify-center">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
+              {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
             </div>
+            {najemShowName && (
             <div className="border-t-2 border-slate-800 pt-1 text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold">
               {toBn(najemName || institution?.NajemName || ms('najem'))}
             </div>
-            {showDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+            )}
+            {showDate && najemShowDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
           </div>
 
           <div className="text-center">
             <div className="h-11 print:h-7 flex items-end justify-center">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
             </div>
+            {principalShowName && (
             <div className="border-t-2 border-slate-800 pt-1 text-[13.5px] ms-fs-13_5 print:text-[11.5px] ms-pfs-11_5 font-bold">
               {toBn(principalName || institution?.PrincipalName || ms('principal'))}
             </div>
-            {showDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
+            )}
+            {showDate && principalShowDate && <div className="text-[10px] ms-fs-10 print:text-[9px] ms-pfs-9 text-slate-500 tabular-nums">{toBn(new Date().toLocaleDateString('bn-BD'))}</div>}
           </div>
         </div>
 
@@ -3467,6 +3553,8 @@ const SingleMarkSheetRoyal = ({
   session, classInfo, examSubjects, divisions = [], examConfig = {},
   isLast = false, ExamID, SubClassID, ExamName, lang = 'bn',
   showDate = true, showSignature = true, principalName = '', najemName = '',
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   paperSize = 'A4', orientation = 'portrait', studentInfoFields = {},
   showClassTeacherSign = true, showGuardianSign = true,
   totalStudents = 0,
@@ -3699,21 +3787,25 @@ const SingleMarkSheetRoyal = ({
 
           <div className="col-span-2 text-center">
             <div className="h-11 print:h-7 flex items-end justify-center">
-              {showSignature && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
+              {showSignature && najemShowSign && signatureNajemSrc && <img src={signatureNajemSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
             </div>
-            <div className="border-t-2 border-dashed border-[#c9a227] pt-1 print:pt-0.5">
+            <div style={najemShowName ? undefined : { borderTopWidth: 0 }} className="border-t-2 border-dashed border-[#c9a227] pt-1 print:pt-0.5">
+              {najemShowName && (
               <p className="text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold text-emerald-900">{toBn(najemName || institution?.NajemName || ms('najem'))}</p>
-              {showDate && <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 text-emerald-700 tabular-nums">{ms('date')} : {printDate}</p>}
+              )}
+              {showDate && najemShowDate && <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 text-emerald-700 tabular-nums">{ms('date')} : {printDate}</p>}
             </div>
           </div>
 
           <div className="col-span-2 text-center">
             <div className="h-11 print:h-7 flex items-end justify-center">
-              {showSignature && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
+              {showSignature && principalShowSign && signaturePrincipalSrc && <img src={signaturePrincipalSrc} alt="" className="max-h-11 max-w-full object-contain print:max-h-7" />}
             </div>
-            <div className="border-t-2 border-dashed border-[#c9a227] pt-1 print:pt-0.5">
+            <div style={principalShowName ? undefined : { borderTopWidth: 0 }} className="border-t-2 border-dashed border-[#c9a227] pt-1 print:pt-0.5">
+              {principalShowName && (
               <p className="text-[14px] ms-fs-14 print:text-[11.5px] ms-pfs-11_5 font-bold text-emerald-900">{toBn(principalName || institution?.PrincipalName || ms('principal'))}</p>
-              {showDate && <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 text-emerald-700 tabular-nums">{ms('date')} : {printDate}</p>}
+              )}
+              {showDate && principalShowDate && <p className="text-[10.5px] ms-fs-10_5 print:text-[9px] ms-pfs-9 text-emerald-700 tabular-nums">{ms('date')} : {printDate}</p>}
             </div>
           </div>
         </div>
@@ -3738,6 +3830,10 @@ const MarkSheetPdf = ({
   paperSize = 'A4', orientation = 'portrait',
   studentInfoFields = {}, colorMode = 'color',
   showClassTeacherSign = true, showGuardianSign = true,
+  // The two signature blocks, three switchable parts each: the signature
+  // image, the name with the line above it, and the date under it.
+  najemShowSign = true, najemShowName = true, najemShowDate = true,
+  principalShowSign = true, principalShowName = true, principalShowDate = true,
   headerScale = 100, contentFontScale = 100, rowGapScale = 100,
   language = 1,
   // Press-printed mark sheet (report 2) — only template 8 uses these
@@ -3840,6 +3936,12 @@ const MarkSheetPdf = ({
       studentInfoFields,
       showClassTeacherSign,
       showGuardianSign,
+      najemShowSign,
+      najemShowName,
+      najemShowDate,
+      principalShowSign,
+      principalShowName,
+      principalShowDate,
       totalStudents,
       ExamName,
       lang,

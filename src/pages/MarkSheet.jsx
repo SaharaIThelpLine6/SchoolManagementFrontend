@@ -255,6 +255,7 @@ const TemplateMiniature = ({
   showDate, showSignature, principalName, najemName,
   paperSize, orientation, studentInfoFields, colorMode,
   showClassTeacherSign, showGuardianSign,
+  najemShowSign, najemShowName, najemShowDate, principalShowSign, principalShowName, principalShowDate,
   headerScale, contentFontScale, rowGapScale,
   language,
   pressPrint, pressHidePreview, pressExamOffset, pressBodyOffset, pressSignOffset,
@@ -290,6 +291,12 @@ const TemplateMiniature = ({
           colorMode={colorMode}
           showClassTeacherSign={showClassTeacherSign}
           showGuardianSign={showGuardianSign}
+          najemShowSign={najemShowSign}
+          najemShowName={najemShowName}
+          najemShowDate={najemShowDate}
+          principalShowSign={principalShowSign}
+          principalShowName={principalShowName}
+          principalShowDate={principalShowDate}
           headerScale={headerScale}
           contentFontScale={contentFontScale}
           rowGapScale={rowGapScale}
@@ -316,6 +323,15 @@ const MarkSheet = () => {
   // ⭐ স্টেট: স্বাক্ষর, তারিখ ও নামের জন্য
   const [showDate, setShowDate] = useState(true);
   const [showSignature, setShowSignature] = useState(true);
+
+  // The two signature blocks, three parts each — signature image,
+  // name with the line above it, and the date under it.
+  const [najemShowSign, setNajemShowSign] = useState(true);
+  const [najemShowName, setNajemShowName] = useState(true);
+  const [najemShowDate, setNajemShowDate] = useState(true);
+  const [principalShowSign, setPrincipalShowSign] = useState(true);
+  const [principalShowName, setPrincipalShowName] = useState(true);
+  const [principalShowDate, setPrincipalShowDate] = useState(true);
   const [principalName, setPrincipalName] = useState('');
   const [najemName, setNajemName] = useState('');
 
@@ -512,6 +528,12 @@ const MarkSheet = () => {
     if (s.templateId) setSelectedTemplate(s.templateId);
     if (s.showDate !== null && s.showDate !== undefined) setShowDate(Boolean(s.showDate));
     if (s.showSignature !== null && s.showSignature !== undefined) setShowSignature(Boolean(s.showSignature));
+    if (s.najemShowSign !== null && s.najemShowSign !== undefined) setNajemShowSign(Boolean(s.najemShowSign));
+    if (s.najemShowName !== null && s.najemShowName !== undefined) setNajemShowName(Boolean(s.najemShowName));
+    if (s.najemShowDate !== null && s.najemShowDate !== undefined) setNajemShowDate(Boolean(s.najemShowDate));
+    if (s.principalShowSign !== null && s.principalShowSign !== undefined) setPrincipalShowSign(Boolean(s.principalShowSign));
+    if (s.principalShowName !== null && s.principalShowName !== undefined) setPrincipalShowName(Boolean(s.principalShowName));
+    if (s.principalShowDate !== null && s.principalShowDate !== undefined) setPrincipalShowDate(Boolean(s.principalShowDate));
     if (s.showClassTeacherSign !== null && s.showClassTeacherSign !== undefined) setShowClassTeacherSign(Boolean(s.showClassTeacherSign));
     if (s.showGuardianSign !== null && s.showGuardianSign !== undefined) setShowGuardianSign(Boolean(s.showGuardianSign));
     if (s.principalName) setPrincipalName(s.principalName);
@@ -590,6 +612,12 @@ const MarkSheet = () => {
         templateId: selectedTemplate,
         showDate,
         showSignature,
+        najemShowSign,
+        najemShowName,
+        najemShowDate,
+        principalShowSign,
+        principalShowName,
+        principalShowDate,
         showClassTeacherSign,
         showGuardianSign,
         principalName,
@@ -656,6 +684,12 @@ const MarkSheet = () => {
         colorMode={colorMode}
         showClassTeacherSign={showClassTeacherSign} // ⭐ নতুন প্রপস
         showGuardianSign={showGuardianSign} // ⭐ নতুন প্রপস
+        najemShowSign={najemShowSign}
+        najemShowName={najemShowName}
+        najemShowDate={najemShowDate}
+        principalShowSign={principalShowSign}
+        principalShowName={principalShowName}
+        principalShowDate={principalShowDate}
         headerScale={headerScale}
         contentFontScale={contentFontScale}
         rowGapScale={rowGapScale}
@@ -681,6 +715,12 @@ const MarkSheet = () => {
     colorMode,
     showClassTeacherSign,
     showGuardianSign,
+    najemShowSign,
+    najemShowName,
+    najemShowDate,
+    principalShowSign,
+    principalShowName,
+    principalShowDate,
     headerScale,
     contentFontScale,
     rowGapScale,
@@ -1563,6 +1603,74 @@ const MarkSheet = () => {
                       />
                       <span className="text-sm font-medium text-slate-700">স্বাক্ষর (ছবি) দেখাবে</span>
                     </label>
+
+                    {/* দুই স্বাক্ষরের তিনটা করে অংশ — আলাদা আলাদা */}
+                    <div className="mt-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 rounded-lg border border-slate-200 bg-white p-3">
+                      <p className="sm:col-span-2 text-[12px] font-bold text-slate-500">
+                        নায়েবে তালিমাত ও মুহতামিম — প্রতিটা অংশ আলাদা করে বন্ধ করা যায়
+                      </p>
+                      <div className="space-y-1">
+                        <p className="text-[13px] font-semibold text-slate-700">নায়েবে তালিমাত</p>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={najemShowSign}
+                          onChange={(e) => setNajemShowSign(e.target.checked)}
+                          className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-sm text-slate-600">স্বাক্ষরের ছবি</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={najemShowName}
+                          onChange={(e) => setNajemShowName(e.target.checked)}
+                          className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-sm text-slate-600">নাম ও উপরের রেখা</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={najemShowDate}
+                          onChange={(e) => setNajemShowDate(e.target.checked)}
+                          className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-sm text-slate-600">তারিখ</span>
+                      </label>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[13px] font-semibold text-slate-700">মুহতামিম</p>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={principalShowSign}
+                          onChange={(e) => setPrincipalShowSign(e.target.checked)}
+                          className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-sm text-slate-600">স্বাক্ষরের ছবি</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={principalShowName}
+                          onChange={(e) => setPrincipalShowName(e.target.checked)}
+                          className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-sm text-slate-600">নাম ও উপরের রেখা</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={principalShowDate}
+                          onChange={(e) => setPrincipalShowDate(e.target.checked)}
+                          className="w-4 h-4 text-violet-600 rounded border-slate-300 focus:ring-violet-500"
+                        />
+                        <span className="text-sm text-slate-600">তারিখ</span>
+                      </label>
+                      </div>
+                    </div>
+
                     {/* ⭐ নতুন চেকবক্স */}
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input 
@@ -1732,6 +1840,12 @@ const MarkSheet = () => {
                     colorMode={colorMode}
                     showClassTeacherSign={showClassTeacherSign}
                     showGuardianSign={showGuardianSign}
+                    najemShowSign={najemShowSign}
+                    najemShowName={najemShowName}
+                    najemShowDate={najemShowDate}
+                    principalShowSign={principalShowSign}
+                    principalShowName={principalShowName}
+                    principalShowDate={principalShowDate}
                     headerScale={headerScale}
                     contentFontScale={contentFontScale}
                     rowGapScale={rowGapScale}
