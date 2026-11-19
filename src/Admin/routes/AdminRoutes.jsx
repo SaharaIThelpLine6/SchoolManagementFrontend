@@ -9,6 +9,7 @@ import AdminAllMaddrasahPaymentInfo from "../pages/Payment/AdminAllMaddrasahPaym
 import AdminAllMaddrasahPaymentHistory from "../pages/Payment/AdminAllMaddrasahPaymentHistory";
 import QueryManage from "../pages/Exam/QueryManage";
 import AdminAllMadrasahLoginInfo from "../pages/AdminAllMadrasahLoginInfo";
+import AdminMadrasahUpdateManagement from "../pages/AdminMadrasahUpdateManagement";
 
 const ProtectedRoute = () => {
   const { token, user } = useSelector((state) => state.auth);
@@ -41,6 +42,7 @@ const AdminRoutes = [
           { path: "/admin/dashboard", element: <AdminDashboard /> },
           { path: "/admin/all-madrasah", element: <AdminAllMadrasah /> },
           { path: "/admin/all-madrasah-login-info", element: <AdminAllMadrasahLoginInfo /> },
+          { path: "/admin/madrasah-update-management", element: <AdminMadrasahUpdateManagement />, },
           { path: "/admin/ssl-comerce", element: <AdminAllMaddrasahPaymentInfo /> },
           { path: "/admin/maddrasah-payment-history", element: <AdminAllMaddrasahPaymentHistory /> },
           { path: "/admin/query-manage", element: <QueryManage /> },

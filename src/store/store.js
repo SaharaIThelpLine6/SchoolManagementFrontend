@@ -51,6 +51,7 @@ import { redirectSlice } from "../features/Admin/redirectSlice";
 import { adminPaymentSlice } from "../features/Admin/adminPaymentSlice";
 import { domainManageSlice } from "../features/Admin/domainManage/domainManageSlice";
 import { adminDashboardSlice } from "../features/Admin/adminDashboardSlice";
+import { madrasahUpdateSlice } from "../features/Admin/madrasahUpdateSlice";
 
 const store = configureStore({
   reducer: {
@@ -107,6 +108,7 @@ const store = configureStore({
     [adminPaymentSlice.reducerPath]: adminPaymentSlice.reducer,
     [domainManageSlice.reducerPath]: domainManageSlice.reducer,
     [adminDashboardSlice.reducerPath]: adminDashboardSlice.reducer,
+    [madrasahUpdateSlice.reducerPath]: madrasahUpdateSlice.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -149,6 +151,7 @@ const store = configureStore({
       .concat(domainManageSlice.middleware)
       .concat(adminPaymentSlice.middleware)
       .concat(adminDashboardSlice.middleware)
+      .concat(madrasahUpdateSlice.middleware)
 
 });
 
