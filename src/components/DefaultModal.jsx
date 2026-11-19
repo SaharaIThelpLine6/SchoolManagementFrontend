@@ -105,7 +105,7 @@ import ExamDivisionSettingModal from '../view/result/Reports/ExamDivisionSetting
 import UserPasswordChange from './Forms/UserPasswordChange';
 
 const DefaultModal = () => {
-  const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
+  const { isOpen, title, description, modalType, id, meta } = useSelector((state) => state.modal);
   const dispatch = useDispatch();
   const translate = useTranslate();
   const scrollRef = useRef(null);
@@ -113,6 +113,9 @@ const DefaultModal = () => {
     fixedCacheKey: 'exam-condition-paste',
   });
   const isCloseDisabled = modalType === 'EXAM_CONDITION_PASTE' && isPastingConditions;
+
+  // Optional description: modal state থেকে, না থাকলে meta.description থেকে
+  const modalDescription = description || meta?.description;
 
   // Local state to drive enter/exit animations
   const [show, setShow] = useState(false);
@@ -161,23 +164,31 @@ const DefaultModal = () => {
               ? 'opacity-100 translate-y-0 scale-100'
               : 'opacity-0 translate-y-6 scale-95'}`}
         >
-          <div className="bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 relative flex flex-col w-full max-h-[90vh] overflow-hidden">
-            <div className="header relative shrink-0 z-20 bg-white/95 backdrop-blur pl-4 pr-3 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
-              {title && (
-                <h2 className="text-[18px] font-bold text-slate-800">
-                  {translate(title)}
-                </h2>
-              )}
+          <div className="bg-white rounded-2xl shadow-xl ring-1 ring-black/5 relative flex flex-col w-full max-h-[90vh] overflow-hidden">
+            {/* Header */}
+            <div className="header relative shrink-0 z-20 bg-gradient-to-r from-[#7C3AED] via-[#4F46E5] to-[#06B6D4] px-5 py-4 flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                {title && (
+                  <h2 className="truncate text-[16px] font-bold text-white">
+                    {translate(title)}
+                  </h2>
+                )}
+                {modalDescription && (
+                  <p className="mt-0.5 text-[12px] text-white/80">
+                    {translate(modalDescription)}
+                  </p>
+                )}
+              </div>
               <button
                 onClick={() => dispatch(closeModal())}
                 disabled={isCloseDisabled}
-                className="text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="shrink-0 rounded-full bg-white/20 p-1.5 text-white backdrop-blur-sm transition-colors hover:bg-white/30 disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Close"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width={22}
-                  height={22}
+                  width={20}
+                  height={20}
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -193,271 +204,274 @@ const DefaultModal = () => {
             </div>
 
             {modalType && (
-              <div className="body min-h-0 overflow-y-auto scroll-smooth p-4 pt-0" ref={scrollRef}>
-                {modalType === 'ADD_STUDENT' && <AdmissionFormModal userId={id} />}
-                {modalType === 'UPDATE_STUDENT' && <UpdateStudentFormModal userId={id} />}
-                {modalType === 'ADD_USER' && <AddUserFormModal />}
-                {modalType === 'PasswordChange' && <UserPasswordChange />}
-                {modalType === 'ADD_PARENT_ACCOUNT' && <AddParentFormModal userId={id} />}
-                {modalType === 'ADD_TEACHER_INFO' && <AddTeacherFormModal />}
-                {modalType === 'UPDATE_TEACHER_INFO' && <AddTeacherFormModal userId={id} />}
-                {modalType === 'FEE_COLLECTION' && (
-                  <FeeCollectionForm userId={id} />
-                )}
-                {modalType === 'PAYMENT' && <PaymentModal serviceId={id} />}
-                {modalType === 'ADD_TEACHER' && <AddTeacherForm userId={id} />}
-                {modalType === 'SESSION_CREATE_FORM' && (
-                  <SessionCreateUpdateModal />
-                )}
-                {modalType === 'SESSION_EDIT_FORM' && (
-                  <SessionCreateUpdateModal id={id} />
-                )}
-                {modalType === 'CLASS_CREATE_FORM' && (
-                  <ClassCreateUpdateModal />
-                )}
-                {modalType === 'RESULT_REPORT_SETTINGS' && (
-                  <ResultReportSettingModal />
-                )}
-                {modalType === 'CLASS_EDIT_FORM' && (
-                  <ClassCreateUpdateModal id={id} />
-                )}
-                {modalType === 'EDIT_TEACHER' && (
-                  <EditTeacherForm userId={id} />
-                )}
-                {modalType === 'ADD_DESIGNATION' && <DesignationForm />}
-                {modalType === 'EDIT_DESIGNATION' && (
-                  <DesignationForm userId={id} />
-                )}
-                {modalType === 'CREATE_EXAM_RULE' && (
-                  <ExamRuleCreateUpdateForm />
-                )}
-                {modalType === 'UPDATE_EXAM_RULE' && (
-                  <ExamRuleCreateUpdateForm id={id} />
-                )}
-                {modalType === 'CREATE_HOME_WORK' && (
-                  <HomeWorkCreateUpdateForm />
-                )}
-                {modalType === 'UPDATE_HOME_WORK' && (
-                  <HomeWorkCreateUpdateForm id={id} />
-                )}
-                {modalType === 'CREATE_HOME_WORK_GROUP' && (
-                  <HomeWorkGroupCreateUpdateForm />
-                )}
-                {modalType === 'UPDATE_HOME_WORK_GROUP' && (
-                  <HomeWorkGroupCreateUpdateForm id={id} />
-                )}
+              <div className="body min-h-0 overflow-y-auto scroll-smooth px-5 py-5" ref={scrollRef}>
+                {/* Card */}
+                <div className="">
+                  {modalType === 'ADD_STUDENT' && <AdmissionFormModal userId={id} />}
+                  {modalType === 'UPDATE_STUDENT' && <UpdateStudentFormModal userId={id} />}
+                  {modalType === 'ADD_USER' && <AddUserFormModal />}
+                  {modalType === 'PasswordChange' && <UserPasswordChange />}
+                  {modalType === 'ADD_PARENT_ACCOUNT' && <AddParentFormModal userId={id} />}
+                  {modalType === 'ADD_TEACHER_INFO' && <AddTeacherFormModal />}
+                  {modalType === 'UPDATE_TEACHER_INFO' && <AddTeacherFormModal userId={id} />}
+                  {modalType === 'FEE_COLLECTION' && (
+                    <FeeCollectionForm userId={id} />
+                  )}
+                  {modalType === 'PAYMENT' && <PaymentModal serviceId={id} />}
+                  {modalType === 'ADD_TEACHER' && <AddTeacherForm userId={id} />}
+                  {modalType === 'SESSION_CREATE_FORM' && (
+                    <SessionCreateUpdateModal />
+                  )}
+                  {modalType === 'SESSION_EDIT_FORM' && (
+                    <SessionCreateUpdateModal id={id} />
+                  )}
+                  {modalType === 'CLASS_CREATE_FORM' && (
+                    <ClassCreateUpdateModal />
+                  )}
+                  {modalType === 'RESULT_REPORT_SETTINGS' && (
+                    <ResultReportSettingModal />
+                  )}
+                  {modalType === 'CLASS_EDIT_FORM' && (
+                    <ClassCreateUpdateModal id={id} />
+                  )}
+                  {modalType === 'EDIT_TEACHER' && (
+                    <EditTeacherForm userId={id} />
+                  )}
+                  {modalType === 'ADD_DESIGNATION' && <DesignationForm />}
+                  {modalType === 'EDIT_DESIGNATION' && (
+                    <DesignationForm userId={id} />
+                  )}
+                  {modalType === 'CREATE_EXAM_RULE' && (
+                    <ExamRuleCreateUpdateForm />
+                  )}
+                  {modalType === 'UPDATE_EXAM_RULE' && (
+                    <ExamRuleCreateUpdateForm id={id} />
+                  )}
+                  {modalType === 'CREATE_HOME_WORK' && (
+                    <HomeWorkCreateUpdateForm />
+                  )}
+                  {modalType === 'UPDATE_HOME_WORK' && (
+                    <HomeWorkCreateUpdateForm id={id} />
+                  )}
+                  {modalType === 'CREATE_HOME_WORK_GROUP' && (
+                    <HomeWorkGroupCreateUpdateForm />
+                  )}
+                  {modalType === 'UPDATE_HOME_WORK_GROUP' && (
+                    <HomeWorkGroupCreateUpdateForm id={id} />
+                  )}
 
-                {modalType === 'VIEW_HOME_WORK' && <HomeWorkView id={id} />}
-                {modalType === 'VIEW_NOTICE_USERPANEL' && <NoticeView id={id} />}
-                {modalType === 'TEACHER_VIEW_HOME_WORK' && (
-                  <HomeWorkViewTeacher id={id} />
-                )}
-                {modalType === 'VIEW_EXAM_RULE' && <ExamRuleView id={id} />}
-                {modalType === 'ADD_TYPEOFVACATION' && <TypeOfVacationForm />}
-                {modalType === 'ADD_CLASS_ROUTINE' && (
-                  <ClassRoutineCreateUpdate />
-                )}
-                {modalType === 'ADD_CLASS_ROUTINE_TIME_SLOTS' && <TimeSlotsCreateUpdate />}
-                {modalType === 'EDIT_CLASS_ROUTINE' && (
-                  <ClassRoutineCreateUpdate id={id} />
-                )}
-                {modalType === 'ADD_FUND' && <FundForm />}
-                {modalType === 'OPEN_FUND' && <FundForm />}
-                {modalType === 'OPEN_GENERAL' && <GeneralForm />}
-                {modalType === 'OPEN_BANK_INFO' && <BankInfoSettings />}
-                {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
-                {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
-                {/* {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />} */}
-                {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
-                {modalType === 'STUDENT_FEE_GROUP' && <StudentFeeGroup />}
-                {modalType === 'SECTION_CREATE_FORM' && (
-                  <SubclassCreateUpdatemodal />
-                )}
-                {modalType === 'SECTION_EDIT_FORM' && (
-                  <SubclassCreateUpdatemodal id={id} />
-                )}
-                {modalType === 'UPDATE_STUDENT_FEE_COMMENT_BOX' && (
-                  <CommentBoxModal />
-                )}
-                {modalType === 'STUDENT_FEE_SMS_TAMPLATE' && (
-                  <FeeSMSTamplateModal />
-                )}
-                {modalType === 'EDIT_TYPEOFVACATION' && (
-                  <TypeOfVacationForm userId={id} />
-                )}
-                {modalType === 'USER_NOTICE_CREATE' && (
-                  <UserNoticeCreateForm />
-                )}
-                {modalType === 'USER_NOTICE_UPDATE' && (
-                  <UserNoticeUpdateForm id={id} />
-                )}
-                {modalType === 'EDIT_CLASS_VIDEO' && (
-                  <ClassVideoCreateUpdate videoId={id} />
-                )}
-                {modalType === 'CREATE_CLASS_VIDEO' && (
-                  <ClassVideoCreateUpdate />
-                )}
-                {modalType === 'EDIT_STUDENTREPORT' && (
-                  <EditStudentReport id={id} />
-                )}
-                {modalType === 'ADD_STUDENTVACATION' && (
-                  <AddStudentVacationForm />
-                )}
-                {modalType === 'ADD_MONTHNAMES' && <MonthNamesForm />}
-                {modalType === 'EDIT_MONTHNAMES' && (
-                  <MonthNamesForm id={id} isEdit={true} />
-                )}
-                {modalType === 'EDIT_STUDENTVACATION' && (
-                  <EditStudentVacationForm userId={id} />
-                )}
+                  {modalType === 'VIEW_HOME_WORK' && <HomeWorkView id={id} />}
+                  {modalType === 'VIEW_NOTICE_USERPANEL' && <NoticeView id={id} />}
+                  {modalType === 'TEACHER_VIEW_HOME_WORK' && (
+                    <HomeWorkViewTeacher id={id} />
+                  )}
+                  {modalType === 'VIEW_EXAM_RULE' && <ExamRuleView id={id} />}
+                  {modalType === 'ADD_TYPEOFVACATION' && <TypeOfVacationForm />}
+                  {modalType === 'ADD_CLASS_ROUTINE' && (
+                    <ClassRoutineCreateUpdate />
+                  )}
+                  {modalType === 'ADD_CLASS_ROUTINE_TIME_SLOTS' && <TimeSlotsCreateUpdate />}
+                  {modalType === 'EDIT_CLASS_ROUTINE' && (
+                    <ClassRoutineCreateUpdate id={id} />
+                  )}
+                  {modalType === 'ADD_FUND' && <FundForm />}
+                  {modalType === 'OPEN_FUND' && <FundForm />}
+                  {modalType === 'OPEN_GENERAL' && <GeneralForm />}
+                  {modalType === 'OPEN_BANK_INFO' && <BankInfoSettings />}
+                  {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
+                  {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
+                  {/* {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />} */}
+                  {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
+                  {modalType === 'STUDENT_FEE_GROUP' && <StudentFeeGroup />}
+                  {modalType === 'SECTION_CREATE_FORM' && (
+                    <SubclassCreateUpdatemodal />
+                  )}
+                  {modalType === 'SECTION_EDIT_FORM' && (
+                    <SubclassCreateUpdatemodal id={id} />
+                  )}
+                  {modalType === 'UPDATE_STUDENT_FEE_COMMENT_BOX' && (
+                    <CommentBoxModal />
+                  )}
+                  {modalType === 'STUDENT_FEE_SMS_TAMPLATE' && (
+                    <FeeSMSTamplateModal />
+                  )}
+                  {modalType === 'EDIT_TYPEOFVACATION' && (
+                    <TypeOfVacationForm userId={id} />
+                  )}
+                  {modalType === 'USER_NOTICE_CREATE' && (
+                    <UserNoticeCreateForm />
+                  )}
+                  {modalType === 'USER_NOTICE_UPDATE' && (
+                    <UserNoticeUpdateForm id={id} />
+                  )}
+                  {modalType === 'EDIT_CLASS_VIDEO' && (
+                    <ClassVideoCreateUpdate videoId={id} />
+                  )}
+                  {modalType === 'CREATE_CLASS_VIDEO' && (
+                    <ClassVideoCreateUpdate />
+                  )}
+                  {modalType === 'EDIT_STUDENTREPORT' && (
+                    <EditStudentReport id={id} />
+                  )}
+                  {modalType === 'ADD_STUDENTVACATION' && (
+                    <AddStudentVacationForm />
+                  )}
+                  {modalType === 'ADD_MONTHNAMES' && <MonthNamesForm />}
+                  {modalType === 'EDIT_MONTHNAMES' && (
+                    <MonthNamesForm id={id} isEdit={true} />
+                  )}
+                  {modalType === 'EDIT_STUDENTVACATION' && (
+                    <EditStudentVacationForm userId={id} />
+                  )}
 
-                {modalType === 'STUDENT_FILTER' && <StudentFilterModal />}
-                {modalType === 'ONLINE_ADMISSION_SERIAL' && (
-                  <AdmissionSerialModal />
-                )}
-                {modalType === 'USER_FILTER' && <UserFilterModal />}
-                {modalType === 'SELECTED_PERSTUDENT_FEE_FILTER' && (
-                  <SelectedPerStudentFeeModal />
-                )}
-                {modalType === 'SMS_TEMPLATES' && <SMSTemplate />}
-                {modalType === 'SMS_BUY' && <SMSBuy />}
-                {modalType === 'PAYMENT_GETWAY' && <PaymentGetway />}
-                {modalType === 'SUCCESSANDERROR' && <SuccessAndError />}
-                {modalType === 'ADD_BOOK' && <AddEditBook />}
-                {modalType === 'SHIFT_ENTRY' && <ShiftEntry />}
-                {modalType === 'SCHEDULE_SHIFT_ENTRY' && <ScheduleShiftEntry />}
-                {modalType === 'SHIFT_TIME_SETTING' && <TimeSettingEntry />}
-                {modalType === 'CREATE_PAYMENT_INFO' && (
-                  <CreateEditPaymentInfoModal />
-                )}
-                {modalType === 'EDIT_PAYMENT_INFO' && (
-                  <CreateEditPaymentInfoModal id={id} />
-                )}
-                {modalType === 'CODE_SETTING' && <CodeSetting />}
-                {modalType === 'UPDATE_BOOK' && <AddEditBook id={id} />}
-                {modalType === 'COMPLAINT_BOX_TERMS_AND_CONDITIONS_CREATE' && (
-                  <MaddrasahReportEditCreate />
-                )}
-                {modalType === 'COMPLAINT_BOX_TERMS_AND_CONDITIONS_UPDATE' && (
-                  <MaddrasahReportEditCreate id={id} />
-                )}
-                {modalType === 'STUDENT_COMPLAINT_VIEW' && (
-                  <StudentReportView id={id} />
-                )}
-                {modalType === 'ONLINE_ADMISSION_MESSAGE_UPDATE' && (
-                  <AdmissionMessageModal id={id} />
-                )}
-                {modalType === 'VIEW_PAYMENT_INFO' && (
-                  <PaymentSSLInfoView id={id} />
-                )}
-                {modalType === 'SUB_SIDIARY' && <Subsidiary />}
-                {modalType === 'EXAM_REPORT_SETTING' && <ExamReportSetting />}
-                {modalType === 'ACCOUNTING_DUES_LIST_STATEMENT' && (
-                  <Statement />
-                )}
-                {modalType === 'BALANCE_TRANSFER' && <BalanceTransferModal />}
-                {modalType === 'STUDENT_ADMISSION_FEE_ACCEPT' && (
-                  <StudentAdmissionFeeAcceptForm />
-                )}
-                {modalType === 'STUDENT_MONTH_FEE_ACCEPT_FORM' && (
-                  <StudentMonthFeeAceptForm />
-                )}
-                {modalType === 'STUDENT_MONTH_DUE_FEE_ACCEPT_FORM' && (
-                  <StudentMonthDueFeeAceptForm />
-                )}
-                {modalType === 'STUDENT_MONTH_FEE_ACCEPT' && (
-                  <MonthStudentFeeForm />
-                )}
-                {modalType === 'STUDENT_MONTHLY_ATTENDANCE' && (
-                  <MonthlyAttendance />
-                )}
-                {modalType === 'OTHERS_STUDENT_FEE_ACCEPT' && (
-                  <OthersStudentFeeAcceptForm />
-                )}
-                {modalType === 'DUE_OTHERS_STUDENT_FEE_ACCEPT' && (
-                  <DueOthersStudentFeeAcceptForm />
-                )}
-                {modalType === 'ACC_EXAM_FEE_COLLECTOR' && (
-                  <AccExamFeeCollector />
-                )}
-                {modalType === 'BALANCE_TRANSFER_UPDATE' && (
-                  <BalanceTransferModal />
-                )}
-                {modalType === 'USER_SEARCH' && <UserSearch />}
-                {modalType === 'POWER_DISTRIBUTION' && (
-                  <AddLoginUsersModal id={id} />
-                )}
-                {modalType === 'USER_NAME_CHANGE' && (
-                  <UserNamePasswordChangeModal id={id} changeType="username" />
-                )}
-                {modalType === 'PASSWORD_CHANGE' && (
-                  <UserNamePasswordChangeModal id={id} changeType="password" />
-                )}
-                {modalType === 'OPEN_TODAYS_BALANCE' && <TodaysBalance />}
-                {modalType === 'OPEN_PAYMENT_USER_PANEL_MODAL' && (
-                  <PaymentModalUserPanel />
-                )}
-                {modalType === 'CHANGE_STUDENT_CLASS' && (
-                  <ChangeStudentClass userId={id} />
-                )}
-                {modalType === 'CHARACTER_REPORT_CATEGORY' && (
-                  <CharecterReportCategoryModal />
-                )}
-                {modalType === 'CHARACTER_REPORT_TYPE' && (
-                  <CharecterReportTypeModal />
-                )}
-                {modalType === 'DATA_EXPORT_FEILD' && (
-                  <DataExportModel dataExport={id} />
-                )}
-                {modalType === 'STUDENT_ID_CARD' && (
-                  <StudentCardModel />
-                )}
-                {/* User Panel Models */}
-                {modalType === 'SESSION_CHANGE_MODEL' && (
-                  <SessionChangeModal id={id} />
-                )}
-                {modalType === 'MOBILE_PANEL_STUDENT_REPORT' && (
-                  <StudentSingleReport id={id} />
-                )}
-                {modalType === 'STUDENT_COMPLAINT_REPORT' && (
-                  <StudentSingleConplaint id={id} />
-                )}
-                {modalType === 'REPORT_HEADER_MODAL' && (
-                  <ReportHeaderModal id={id} />
-                )}
-                {modalType === 'ADMISSION_CONTENT_SETTINGS' && (
-                  <AdmissionFormContentEditModal id={id} />
-                )}
-                {modalType === 'SUPPORT_TICKET_SUPPORT' && (
-                  <SupportTicketModal id={id} />
-                )}
-                {modalType === 'EXAM_CONDITION_SETTINGS' && (
-                  <ExamConditionModal data={id} />
-                )}
-                {modalType === 'EXAM_CONDITION_SETTINGS_EDIT' && (
-                  <ExamConditionEditModal data={id} />
-                )}
-                {modalType === 'EXAM_CONDITION_PASTE' && (
-                  <ExamConditionPasteModal conditions={id} />
-                )}
-                {modalType === 'MADRASAH_ACTION_MODAL' && (
-                  <MadrasahActionView id={id} meta={meta} />
-                )}
-                {modalType === 'STUDENT_MARK_SHEET_NOTE' && (
-                  <DivisionMarkSheetNoteModal />
-                )}
-                {modalType === 'EXAM_ROUTINE_CREATE' && (
-                  <ExamRoutineCreateModal />
-                )}
-                {modalType === 'EXAM_ROUTINE_UPDATE' && (
-                  <ExamRoutineUpdateModal key={`${meta.sessionID}-${meta.examID}-${meta.subClassID}`} meta={meta} />
-                )}
-                {modalType === 'EXAM_ROUTINE_SETTING' && (
-                  <ExamRouteSettingCreateModal />
-                )}
-                {modalType === 'EXAM_DIVISION_SETTING' && (
-                  <ExamDivisionSettingModal />
-                )}
+                  {modalType === 'STUDENT_FILTER' && <StudentFilterModal />}
+                  {modalType === 'ONLINE_ADMISSION_SERIAL' && (
+                    <AdmissionSerialModal />
+                  )}
+                  {modalType === 'USER_FILTER' && <UserFilterModal />}
+                  {modalType === 'SELECTED_PERSTUDENT_FEE_FILTER' && (
+                    <SelectedPerStudentFeeModal />
+                  )}
+                  {modalType === 'SMS_TEMPLATES' && <SMSTemplate />}
+                  {modalType === 'SMS_BUY' && <SMSBuy />}
+                  {modalType === 'PAYMENT_GETWAY' && <PaymentGetway />}
+                  {modalType === 'SUCCESSANDERROR' && <SuccessAndError />}
+                  {modalType === 'ADD_BOOK' && <AddEditBook />}
+                  {modalType === 'SHIFT_ENTRY' && <ShiftEntry />}
+                  {modalType === 'SCHEDULE_SHIFT_ENTRY' && <ScheduleShiftEntry />}
+                  {modalType === 'SHIFT_TIME_SETTING' && <TimeSettingEntry />}
+                  {modalType === 'CREATE_PAYMENT_INFO' && (
+                    <CreateEditPaymentInfoModal />
+                  )}
+                  {modalType === 'EDIT_PAYMENT_INFO' && (
+                    <CreateEditPaymentInfoModal id={id} />
+                  )}
+                  {modalType === 'CODE_SETTING' && <CodeSetting />}
+                  {modalType === 'UPDATE_BOOK' && <AddEditBook id={id} />}
+                  {modalType === 'COMPLAINT_BOX_TERMS_AND_CONDITIONS_CREATE' && (
+                    <MaddrasahReportEditCreate />
+                  )}
+                  {modalType === 'COMPLAINT_BOX_TERMS_AND_CONDITIONS_UPDATE' && (
+                    <MaddrasahReportEditCreate id={id} />
+                  )}
+                  {modalType === 'STUDENT_COMPLAINT_VIEW' && (
+                    <StudentReportView id={id} />
+                  )}
+                  {modalType === 'ONLINE_ADMISSION_MESSAGE_UPDATE' && (
+                    <AdmissionMessageModal id={id} />
+                  )}
+                  {modalType === 'VIEW_PAYMENT_INFO' && (
+                    <PaymentSSLInfoView id={id} />
+                  )}
+                  {modalType === 'SUB_SIDIARY' && <Subsidiary />}
+                  {modalType === 'EXAM_REPORT_SETTING' && <ExamReportSetting />}
+                  {modalType === 'ACCOUNTING_DUES_LIST_STATEMENT' && (
+                    <Statement />
+                  )}
+                  {modalType === 'BALANCE_TRANSFER' && <BalanceTransferModal />}
+                  {modalType === 'STUDENT_ADMISSION_FEE_ACCEPT' && (
+                    <StudentAdmissionFeeAcceptForm />
+                  )}
+                  {modalType === 'STUDENT_MONTH_FEE_ACCEPT_FORM' && (
+                    <StudentMonthFeeAceptForm />
+                  )}
+                  {modalType === 'STUDENT_MONTH_DUE_FEE_ACCEPT_FORM' && (
+                    <StudentMonthDueFeeAceptForm />
+                  )}
+                  {modalType === 'STUDENT_MONTH_FEE_ACCEPT' && (
+                    <MonthStudentFeeForm />
+                  )}
+                  {modalType === 'STUDENT_MONTHLY_ATTENDANCE' && (
+                    <MonthlyAttendance />
+                  )}
+                  {modalType === 'OTHERS_STUDENT_FEE_ACCEPT' && (
+                    <OthersStudentFeeAcceptForm />
+                  )}
+                  {modalType === 'DUE_OTHERS_STUDENT_FEE_ACCEPT' && (
+                    <DueOthersStudentFeeAcceptForm />
+                  )}
+                  {modalType === 'ACC_EXAM_FEE_COLLECTOR' && (
+                    <AccExamFeeCollector />
+                  )}
+                  {modalType === 'BALANCE_TRANSFER_UPDATE' && (
+                    <BalanceTransferModal />
+                  )}
+                  {modalType === 'USER_SEARCH' && <UserSearch />}
+                  {modalType === 'POWER_DISTRIBUTION' && (
+                    <AddLoginUsersModal id={id} />
+                  )}
+                  {modalType === 'USER_NAME_CHANGE' && (
+                    <UserNamePasswordChangeModal id={id} changeType="username" />
+                  )}
+                  {modalType === 'PASSWORD_CHANGE' && (
+                    <UserNamePasswordChangeModal id={id} changeType="password" />
+                  )}
+                  {modalType === 'OPEN_TODAYS_BALANCE' && <TodaysBalance />}
+                  {modalType === 'OPEN_PAYMENT_USER_PANEL_MODAL' && (
+                    <PaymentModalUserPanel />
+                  )}
+                  {modalType === 'CHANGE_STUDENT_CLASS' && (
+                    <ChangeStudentClass userId={id} />
+                  )}
+                  {modalType === 'CHARACTER_REPORT_CATEGORY' && (
+                    <CharecterReportCategoryModal />
+                  )}
+                  {modalType === 'CHARACTER_REPORT_TYPE' && (
+                    <CharecterReportTypeModal />
+                  )}
+                  {modalType === 'DATA_EXPORT_FEILD' && (
+                    <DataExportModel dataExport={id} />
+                  )}
+                  {modalType === 'STUDENT_ID_CARD' && (
+                    <StudentCardModel />
+                  )}
+                  {/* User Panel Models */}
+                  {modalType === 'SESSION_CHANGE_MODEL' && (
+                    <SessionChangeModal id={id} />
+                  )}
+                  {modalType === 'MOBILE_PANEL_STUDENT_REPORT' && (
+                    <StudentSingleReport id={id} />
+                  )}
+                  {modalType === 'STUDENT_COMPLAINT_REPORT' && (
+                    <StudentSingleConplaint id={id} />
+                  )}
+                  {modalType === 'REPORT_HEADER_MODAL' && (
+                    <ReportHeaderModal id={id} />
+                  )}
+                  {modalType === 'ADMISSION_CONTENT_SETTINGS' && (
+                    <AdmissionFormContentEditModal id={id} />
+                  )}
+                  {modalType === 'SUPPORT_TICKET_SUPPORT' && (
+                    <SupportTicketModal id={id} />
+                  )}
+                  {modalType === 'EXAM_CONDITION_SETTINGS' && (
+                    <ExamConditionModal data={id} />
+                  )}
+                  {modalType === 'EXAM_CONDITION_SETTINGS_EDIT' && (
+                    <ExamConditionEditModal data={id} />
+                  )}
+                  {modalType === 'EXAM_CONDITION_PASTE' && (
+                    <ExamConditionPasteModal conditions={id} />
+                  )}
+                  {modalType === 'MADRASAH_ACTION_MODAL' && (
+                    <MadrasahActionView id={id} meta={meta} />
+                  )}
+                  {modalType === 'STUDENT_MARK_SHEET_NOTE' && (
+                    <DivisionMarkSheetNoteModal />
+                  )}
+                  {modalType === 'EXAM_ROUTINE_CREATE' && (
+                    <ExamRoutineCreateModal />
+                  )}
+                  {modalType === 'EXAM_ROUTINE_UPDATE' && (
+                    <ExamRoutineUpdateModal key={`${meta.sessionID}-${meta.examID}-${meta.subClassID}`} meta={meta} />
+                  )}
+                  {modalType === 'EXAM_ROUTINE_SETTING' && (
+                    <ExamRouteSettingCreateModal />
+                  )}
+                  {modalType === 'EXAM_DIVISION_SETTING' && (
+                    <ExamDivisionSettingModal />
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -468,3 +482,473 @@ const DefaultModal = () => {
 };
 
 export default DefaultModal;
+// import DueOthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/DueOthersStudentFeeAcceptForm';
+// import StudentAdmissionFeeAcceptForm from '../view/accounting/student-fee-collection/StudentAdmissionFeeAcceptForm';
+// import StudentMonthDueFeeAceptForm from '../view/accounting/student-fee-collection/StudentMonthDueFeeAceptForm';
+// import OthersStudentFeeAcceptForm from '../view/accounting/student-fee-collection/OthersStudentFeeAcceptForm';
+// import StudentMonthFeeAceptForm from '../view/accounting/student-fee-collection/StudentMonthFeeAceptForm';
+// import FeeSMSTamplateModal from '../view/accounting/student-fee-collection/FeeSMSTamplateModal';
+// import MonthStudentFeeForm from '../view/accounting/student-fee-collection/MonthStudentFeeForm';
+// import ClassRoutineCreateUpdate from '../view/students/class-routine/ClassRoutineCreateUpdate';
+// import CharecterReportCategoryModal from '../view/darulikama/CharecterReportCategoryModal';
+// import AccExamFeeCollector from '../view/accounting/student-exam-fee/AccExamFeeCollector';
+// import CommentBoxModal from '../view/accounting/student-fee-collection/CommentBoxModal';
+// import UserNamePasswordChangeModal from '../view/settings/UserNamePasswordChangeModal';
+// import StudentSingleConplaint from '../pages/userpanel/Modal/StudentSingleConplaint';
+// import AdmissionSerialModal from '../view/students/admission/AdmissionSerialModal';
+// import CharecterReportTypeModal from '../view/darulikama/CharecterReportTypeModal';
+// import SubclassCreateUpdatemodal from '../view/section/SubclassCreateUpdatemodal';
+// import MaddrasahReportEditCreate from '../view/talimat/MaddrasahReportEditCreate';
+// import SessionCreateUpdateModal from '../view/Session/SessionCreateUpdateModal';
+// import StudentSingleReport from '../pages/userpanel/Modal/StudentSingleReport';
+// import ClassVideoCreateUpdate from '../pages/userpanel/ClassVideoCreateUpdate';
+// import SuccessAndError from '../view/general-information/sms/SuccessAndError';
+// import PaymentModalUserPanel from '../pages/userpanel/PaymentModalUserPanel';
+// import BalanceTransferModal from '../view/accounting/BalanceTransferModal';
+// import ClassCreateUpdateModal from '../view/class/ClassCreateUpdateModal';
+// import PaymentGetway from '../view/general-information/sms/PaymentGetway';
+// import ExamRuleCreateUpdateForm from './Forms/ExamRuleCreateUpdateForm';
+// import ChangeStudentClass from '../view/accounting/ChangeStudentClass';
+// import SMSTemplate from '../view/general-information/sms/SMSTemplate';
+// import SessionChangeModal from '../view/UserPanel/SessionChangeModal';
+// import EditStudentVacationForm from './Forms/EditStudentVacationForm';
+// import AddLoginUsersModal from '../view/settings/AddLoginUsersModal';
+// import MonthlyAttendance from '../view/accounting/MonthlyAttendance';
+// import AddStudentVacationForm from './Forms/AddStudentVacationForm';
+// import DataExportModel from '../view/students/pdf/DataExportModel';
+// import StudentIdCardGenerate from '../pages/StudentIdCardGenerate';
+// import BankInfoSettings from '../view/accounting/BankInfoSettings';
+// import StudentReportView from '../view/talimat/StudentReportView';
+// import StudentFeeGroup from '../view/accounting/StudentFeeGroup';
+// import ReportSettings from '../view/accounting/ReportSettings';
+// import Statement from '../view/accounting/dues-list/Statement';
+// import SubGeneralForm from '../view/accounting/SubGeneralForm';
+// import ExamReportSetting from '../view/exam/ExamReportSetting';
+// import TodaysBalance from '../view/accounting/TodaysBalance';
+// import SMSBuy from '../view/general-information/sms/SMSBuy';
+// import AddEditBook from '../view/students/book/AddEditBook';
+// import EditStudentReport from './Forms/EditStudentReport';
+// import { closeModal } from '../features/modal/modalSlice';
+// import FeeCollectionForm from './Forms/FeeCollectionForm';
+// import GeneralForm from '../view/accounting/GeneralForm';
+// import { useDispatch, useSelector } from 'react-redux';
+// import DesignationForm from './Forms/DesignationForm';
+// import EditTeacherForm from './Forms/EditTeacherForm';
+// import AddTeacherForm from './Forms/AddTeacherForm';
+// import FundForm from '../view/accounting/FundForm';
+// import Subsidiary from '../view/exam/Subsidiary';
+// import ExamRuleView from './Forms/ExamRuleView';
+// import CodeSetting from './Modals/CodeSetting';
+// import useTranslate from '../utils/Translate';
+// import ClickOutside from './ClickOutside';
+// import HomeWorkCreateUpdateForm from './Forms/HomeWorkCreateUpdateForm';
+// import HomeWorkGroupCreateUpdateForm from './Forms/HomeWorkGroupCreateUpdateForm';
+// import HomeWorkView from './Forms/HomeWorkView';
+// import HomeWorkViewTeacher from './Forms/HomeWorkViewTeacher';
+// import MonthNamesForm from './Forms/MonthNamesForm';
+// import TypeOfVacationForm from './Forms/TypeOfVacationForm';
+// import CreateEditPaymentInfoModal from './Modals/CreateEditPaymentInfoModal';
+// import PaymentModal from './Modals/PaymentModal';
+// import PaymentSSLInfoView from './Modals/PaymentSSLInfoVierw';
+// import SelectedPerStudentFeeModal from './Modals/SelectedPerStudentFeeModal';
+// import StudentFilterModal from './Modals/StudentFilterModal';
+// import UserFilterModal from './Modals/UserFilterModal';
+// import UserSearch from './UserSearch';
+// import ReportHeaderModal from '../view/general-information/ReportHeaderModal';
+// import TimeSlotsCreateUpdate from '../view/students/class-routine/TimeSlotsCreateUpdate';
+// import AdmissionMessageModal from '../view/students/admission/AdmissionMessageModal';
+// import UserNoticeCreateForm from './Forms/UserNoticeCreateForm';
+// import UserNoticeUpdateForm from './Forms/UserNoticeUpdateForm';
+// import NoticeView from './Forms/NoticeView';
+// import AdmissionFormContentEditModal from '../view/result/AdmissionFormContentEditModal';
+// import { useEffect, useRef, useState } from 'react';
+// import SupportTicketModal from '../view/support-ticket/SupportTicketModal';
+// import AdmissionFormModal from './Forms/AdmissionFormModal';
+// import ExamConditionModal from '../view/exam/examCondition/ExamConditionModal';
+// import StudentCardModel from '../view/students/id-card-model/StudentCardModel';
+// import ShiftEntry from '../view/attendance/ShiftEntry';
+// import ScheduleShiftEntry from '../view/attendance/ScheduleShiftEntry';
+// import TimeSettingEntry from '../view/attendance/TimeSettingEntry';
+// import ExamConditionEditModal from '../view/exam/examCondition/ExamConditionEditModal';
+// import ExamConditionPasteModal from '../view/exam/examCondition/ExamConditionPasteModal';
+// import { useDuplicateExamConditionsMutation } from '../features/exam/examQuerySlice';
+
+// // Admin View
+// import MadrasahActionView from '../view/AdminView/madrasah/MadrasahActionView';
+// import AddUserFormModal from './Forms/AddUserFormModal';
+// import AddTeacherFormModal from './Forms/AddTeacherFormModal';
+// import UpdateStudentFormModal from './Forms/UpdateStudentFormModal';
+// import AddParentFormModal from './Forms/AddParentFormModal';
+// import DivisionMarkSheetNoteModal from '../view/result/DivisionMarkSheetNoteModal';
+// import ResultReportSettingModal from '../view/result/Reports/ResultReportSettingModal';
+// import ExamRouteCreateModal from '../view/exam/ExamRouteCreateModal';
+// import ExamRouteSettingCreateModal from '../view/exam/ExamRouteSettingCreateModal';
+// import ExamRoutineCreateModal from '../view/exam/ExamRouting/ExamRoutineCreateModal';
+// import ExamRoutineUpdateModal from '../view/exam/ExamRouting/ExamRoutineUpdateModal';
+// import ExamDivisionSettingModal from '../view/result/Reports/ExamDivisionSettingModal';
+// import UserPasswordChange from './Forms/UserPasswordChange';
+
+// const DefaultModal = () => {
+//   const { isOpen, title, modalType, id, meta } = useSelector((state) => state.modal);
+//   const dispatch = useDispatch();
+//   const translate = useTranslate();
+//   const scrollRef = useRef(null);
+//   const [, { isLoading: isPastingConditions }] = useDuplicateExamConditionsMutation({
+//     fixedCacheKey: 'exam-condition-paste',
+//   });
+//   const isCloseDisabled = modalType === 'EXAM_CONDITION_PASTE' && isPastingConditions;
+
+//   // Local state to drive enter/exit animations
+//   const [show, setShow] = useState(false);
+
+//   useEffect(() => {
+//     if (isOpen) {
+//       // Trigger enter animation on next frame
+//       const raf = requestAnimationFrame(() => setShow(true));
+//       return () => cancelAnimationFrame(raf);
+//     } else {
+//       // Trigger exit animation
+//       setShow(false);
+//     }
+//   }, [isOpen]);
+
+//   // Lock body scroll while modal is open
+//   useEffect(() => {
+//     if (isOpen) {
+//       const prev = document.body.style.overflow;
+//       document.body.style.overflow = 'hidden';
+//       return () => {
+//         document.body.style.overflow = prev;
+//       };
+//     }
+//   }, [isOpen]);
+
+//   if (!isOpen) return null;
+
+//   return (
+//     <div
+//       className={`fixed inset-0 flex justify-center items-center z-50 px-4
+//         transition-all duration-300 ease-out
+//         ${show ? 'bg-black/50 opacity-100' : 'bg-black/0 backdrop-blur-0 opacity-0'}`}
+//     >
+//       <ClickOutside
+//         className="max-w-screen-lg w-full"
+//         onClick={() => {
+//           if (!isCloseDisabled && meta?.closeOnOutSide !== false) {
+//             dispatch(closeModal());
+//           }
+//         }}
+//       >
+//         <div
+//           className={`w-full transform transition-all duration-300 ease-out
+//             ${show
+//               ? 'opacity-100 translate-y-0 scale-100'
+//               : 'opacity-0 translate-y-6 scale-95'}`}
+//         >
+//           <div className="bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 relative flex flex-col w-full max-h-[90vh] overflow-hidden">
+//             <div className="header relative shrink-0 z-20 bg-white/95 backdrop-blur pl-4 pr-3 pt-3 pb-2 border-b border-slate-100 flex items-center justify-between">
+//               {title && (
+//                 <h2 className="text-[18px] font-bold text-slate-800">
+//                   {translate(title)}
+//                 </h2>
+//               )}
+//               <button
+//                 onClick={() => dispatch(closeModal())}
+//                 disabled={isCloseDisabled}
+//                 className="text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-full p-1 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+//                 aria-label="Close"
+//               >
+//                 <svg
+//                   xmlns="http://www.w3.org/2000/svg"
+//                   width={22}
+//                   height={22}
+//                   viewBox="0 0 24 24"
+//                   fill="none"
+//                   stroke="currentColor"
+//                   strokeWidth={2}
+//                   strokeLinecap="round"
+//                   strokeLinejoin="round"
+//                 >
+//                   <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+//                   <path d="M18 6l-12 12" />
+//                   <path d="M6 6l12 12" />
+//                 </svg>
+//               </button>
+//             </div>
+
+//             {modalType && (
+//               <div className="body min-h-0 overflow-y-auto scroll-smooth p-4 pt-0" ref={scrollRef}>
+//                 {modalType === 'ADD_STUDENT' && <AdmissionFormModal userId={id} />}
+//                 {modalType === 'UPDATE_STUDENT' && <UpdateStudentFormModal userId={id} />}
+//                 {modalType === 'ADD_USER' && <AddUserFormModal />}
+//                 {modalType === 'PasswordChange' && <UserPasswordChange />}
+//                 {modalType === 'ADD_PARENT_ACCOUNT' && <AddParentFormModal userId={id} />}
+//                 {modalType === 'ADD_TEACHER_INFO' && <AddTeacherFormModal />}
+//                 {modalType === 'UPDATE_TEACHER_INFO' && <AddTeacherFormModal userId={id} />}
+//                 {modalType === 'FEE_COLLECTION' && (
+//                   <FeeCollectionForm userId={id} />
+//                 )}
+//                 {modalType === 'PAYMENT' && <PaymentModal serviceId={id} />}
+//                 {modalType === 'ADD_TEACHER' && <AddTeacherForm userId={id} />}
+//                 {modalType === 'SESSION_CREATE_FORM' && (
+//                   <SessionCreateUpdateModal />
+//                 )}
+//                 {modalType === 'SESSION_EDIT_FORM' && (
+//                   <SessionCreateUpdateModal id={id} />
+//                 )}
+//                 {modalType === 'CLASS_CREATE_FORM' && (
+//                   <ClassCreateUpdateModal />
+//                 )}
+//                 {modalType === 'RESULT_REPORT_SETTINGS' && (
+//                   <ResultReportSettingModal />
+//                 )}
+//                 {modalType === 'CLASS_EDIT_FORM' && (
+//                   <ClassCreateUpdateModal id={id} />
+//                 )}
+//                 {modalType === 'EDIT_TEACHER' && (
+//                   <EditTeacherForm userId={id} />
+//                 )}
+//                 {modalType === 'ADD_DESIGNATION' && <DesignationForm />}
+//                 {modalType === 'EDIT_DESIGNATION' && (
+//                   <DesignationForm userId={id} />
+//                 )}
+//                 {modalType === 'CREATE_EXAM_RULE' && (
+//                   <ExamRuleCreateUpdateForm />
+//                 )}
+//                 {modalType === 'UPDATE_EXAM_RULE' && (
+//                   <ExamRuleCreateUpdateForm id={id} />
+//                 )}
+//                 {modalType === 'CREATE_HOME_WORK' && (
+//                   <HomeWorkCreateUpdateForm />
+//                 )}
+//                 {modalType === 'UPDATE_HOME_WORK' && (
+//                   <HomeWorkCreateUpdateForm id={id} />
+//                 )}
+//                 {modalType === 'CREATE_HOME_WORK_GROUP' && (
+//                   <HomeWorkGroupCreateUpdateForm />
+//                 )}
+//                 {modalType === 'UPDATE_HOME_WORK_GROUP' && (
+//                   <HomeWorkGroupCreateUpdateForm id={id} />
+//                 )}
+
+//                 {modalType === 'VIEW_HOME_WORK' && <HomeWorkView id={id} />}
+//                 {modalType === 'VIEW_NOTICE_USERPANEL' && <NoticeView id={id} />}
+//                 {modalType === 'TEACHER_VIEW_HOME_WORK' && (
+//                   <HomeWorkViewTeacher id={id} />
+//                 )}
+//                 {modalType === 'VIEW_EXAM_RULE' && <ExamRuleView id={id} />}
+//                 {modalType === 'ADD_TYPEOFVACATION' && <TypeOfVacationForm />}
+//                 {modalType === 'ADD_CLASS_ROUTINE' && (
+//                   <ClassRoutineCreateUpdate />
+//                 )}
+//                 {modalType === 'ADD_CLASS_ROUTINE_TIME_SLOTS' && <TimeSlotsCreateUpdate />}
+//                 {modalType === 'EDIT_CLASS_ROUTINE' && (
+//                   <ClassRoutineCreateUpdate id={id} />
+//                 )}
+//                 {modalType === 'ADD_FUND' && <FundForm />}
+//                 {modalType === 'OPEN_FUND' && <FundForm />}
+//                 {modalType === 'OPEN_GENERAL' && <GeneralForm />}
+//                 {modalType === 'OPEN_BANK_INFO' && <BankInfoSettings />}
+//                 {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />}
+//                 {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
+//                 {/* {modalType === 'OPEN_ACC_REPORT_SETTINGS' && <ReportSettings />} */}
+//                 {modalType === 'OPEN_SUB_GENERAL' && <SubGeneralForm />}
+//                 {modalType === 'STUDENT_FEE_GROUP' && <StudentFeeGroup />}
+//                 {modalType === 'SECTION_CREATE_FORM' && (
+//                   <SubclassCreateUpdatemodal />
+//                 )}
+//                 {modalType === 'SECTION_EDIT_FORM' && (
+//                   <SubclassCreateUpdatemodal id={id} />
+//                 )}
+//                 {modalType === 'UPDATE_STUDENT_FEE_COMMENT_BOX' && (
+//                   <CommentBoxModal />
+//                 )}
+//                 {modalType === 'STUDENT_FEE_SMS_TAMPLATE' && (
+//                   <FeeSMSTamplateModal />
+//                 )}
+//                 {modalType === 'EDIT_TYPEOFVACATION' && (
+//                   <TypeOfVacationForm userId={id} />
+//                 )}
+//                 {modalType === 'USER_NOTICE_CREATE' && (
+//                   <UserNoticeCreateForm />
+//                 )}
+//                 {modalType === 'USER_NOTICE_UPDATE' && (
+//                   <UserNoticeUpdateForm id={id} />
+//                 )}
+//                 {modalType === 'EDIT_CLASS_VIDEO' && (
+//                   <ClassVideoCreateUpdate videoId={id} />
+//                 )}
+//                 {modalType === 'CREATE_CLASS_VIDEO' && (
+//                   <ClassVideoCreateUpdate />
+//                 )}
+//                 {modalType === 'EDIT_STUDENTREPORT' && (
+//                   <EditStudentReport id={id} />
+//                 )}
+//                 {modalType === 'ADD_STUDENTVACATION' && (
+//                   <AddStudentVacationForm />
+//                 )}
+//                 {modalType === 'ADD_MONTHNAMES' && <MonthNamesForm />}
+//                 {modalType === 'EDIT_MONTHNAMES' && (
+//                   <MonthNamesForm id={id} isEdit={true} />
+//                 )}
+//                 {modalType === 'EDIT_STUDENTVACATION' && (
+//                   <EditStudentVacationForm userId={id} />
+//                 )}
+
+//                 {modalType === 'STUDENT_FILTER' && <StudentFilterModal />}
+//                 {modalType === 'ONLINE_ADMISSION_SERIAL' && (
+//                   <AdmissionSerialModal />
+//                 )}
+//                 {modalType === 'USER_FILTER' && <UserFilterModal />}
+//                 {modalType === 'SELECTED_PERSTUDENT_FEE_FILTER' && (
+//                   <SelectedPerStudentFeeModal />
+//                 )}
+//                 {modalType === 'SMS_TEMPLATES' && <SMSTemplate />}
+//                 {modalType === 'SMS_BUY' && <SMSBuy />}
+//                 {modalType === 'PAYMENT_GETWAY' && <PaymentGetway />}
+//                 {modalType === 'SUCCESSANDERROR' && <SuccessAndError />}
+//                 {modalType === 'ADD_BOOK' && <AddEditBook />}
+//                 {modalType === 'SHIFT_ENTRY' && <ShiftEntry />}
+//                 {modalType === 'SCHEDULE_SHIFT_ENTRY' && <ScheduleShiftEntry />}
+//                 {modalType === 'SHIFT_TIME_SETTING' && <TimeSettingEntry />}
+//                 {modalType === 'CREATE_PAYMENT_INFO' && (
+//                   <CreateEditPaymentInfoModal />
+//                 )}
+//                 {modalType === 'EDIT_PAYMENT_INFO' && (
+//                   <CreateEditPaymentInfoModal id={id} />
+//                 )}
+//                 {modalType === 'CODE_SETTING' && <CodeSetting />}
+//                 {modalType === 'UPDATE_BOOK' && <AddEditBook id={id} />}
+//                 {modalType === 'COMPLAINT_BOX_TERMS_AND_CONDITIONS_CREATE' && (
+//                   <MaddrasahReportEditCreate />
+//                 )}
+//                 {modalType === 'COMPLAINT_BOX_TERMS_AND_CONDITIONS_UPDATE' && (
+//                   <MaddrasahReportEditCreate id={id} />
+//                 )}
+//                 {modalType === 'STUDENT_COMPLAINT_VIEW' && (
+//                   <StudentReportView id={id} />
+//                 )}
+//                 {modalType === 'ONLINE_ADMISSION_MESSAGE_UPDATE' && (
+//                   <AdmissionMessageModal id={id} />
+//                 )}
+//                 {modalType === 'VIEW_PAYMENT_INFO' && (
+//                   <PaymentSSLInfoView id={id} />
+//                 )}
+//                 {modalType === 'SUB_SIDIARY' && <Subsidiary />}
+//                 {modalType === 'EXAM_REPORT_SETTING' && <ExamReportSetting />}
+//                 {modalType === 'ACCOUNTING_DUES_LIST_STATEMENT' && (
+//                   <Statement />
+//                 )}
+//                 {modalType === 'BALANCE_TRANSFER' && <BalanceTransferModal />}
+//                 {modalType === 'STUDENT_ADMISSION_FEE_ACCEPT' && (
+//                   <StudentAdmissionFeeAcceptForm />
+//                 )}
+//                 {modalType === 'STUDENT_MONTH_FEE_ACCEPT_FORM' && (
+//                   <StudentMonthFeeAceptForm />
+//                 )}
+//                 {modalType === 'STUDENT_MONTH_DUE_FEE_ACCEPT_FORM' && (
+//                   <StudentMonthDueFeeAceptForm />
+//                 )}
+//                 {modalType === 'STUDENT_MONTH_FEE_ACCEPT' && (
+//                   <MonthStudentFeeForm />
+//                 )}
+//                 {modalType === 'STUDENT_MONTHLY_ATTENDANCE' && (
+//                   <MonthlyAttendance />
+//                 )}
+//                 {modalType === 'OTHERS_STUDENT_FEE_ACCEPT' && (
+//                   <OthersStudentFeeAcceptForm />
+//                 )}
+//                 {modalType === 'DUE_OTHERS_STUDENT_FEE_ACCEPT' && (
+//                   <DueOthersStudentFeeAcceptForm />
+//                 )}
+//                 {modalType === 'ACC_EXAM_FEE_COLLECTOR' && (
+//                   <AccExamFeeCollector />
+//                 )}
+//                 {modalType === 'BALANCE_TRANSFER_UPDATE' && (
+//                   <BalanceTransferModal />
+//                 )}
+//                 {modalType === 'USER_SEARCH' && <UserSearch />}
+//                 {modalType === 'POWER_DISTRIBUTION' && (
+//                   <AddLoginUsersModal id={id} />
+//                 )}
+//                 {modalType === 'USER_NAME_CHANGE' && (
+//                   <UserNamePasswordChangeModal id={id} changeType="username" />
+//                 )}
+//                 {modalType === 'PASSWORD_CHANGE' && (
+//                   <UserNamePasswordChangeModal id={id} changeType="password" />
+//                 )}
+//                 {modalType === 'OPEN_TODAYS_BALANCE' && <TodaysBalance />}
+//                 {modalType === 'OPEN_PAYMENT_USER_PANEL_MODAL' && (
+//                   <PaymentModalUserPanel />
+//                 )}
+//                 {modalType === 'CHANGE_STUDENT_CLASS' && (
+//                   <ChangeStudentClass userId={id} />
+//                 )}
+//                 {modalType === 'CHARACTER_REPORT_CATEGORY' && (
+//                   <CharecterReportCategoryModal />
+//                 )}
+//                 {modalType === 'CHARACTER_REPORT_TYPE' && (
+//                   <CharecterReportTypeModal />
+//                 )}
+//                 {modalType === 'DATA_EXPORT_FEILD' && (
+//                   <DataExportModel dataExport={id} />
+//                 )}
+//                 {modalType === 'STUDENT_ID_CARD' && (
+//                   <StudentCardModel />
+//                 )}
+//                 {/* User Panel Models */}
+//                 {modalType === 'SESSION_CHANGE_MODEL' && (
+//                   <SessionChangeModal id={id} />
+//                 )}
+//                 {modalType === 'MOBILE_PANEL_STUDENT_REPORT' && (
+//                   <StudentSingleReport id={id} />
+//                 )}
+//                 {modalType === 'STUDENT_COMPLAINT_REPORT' && (
+//                   <StudentSingleConplaint id={id} />
+//                 )}
+//                 {modalType === 'REPORT_HEADER_MODAL' && (
+//                   <ReportHeaderModal id={id} />
+//                 )}
+//                 {modalType === 'ADMISSION_CONTENT_SETTINGS' && (
+//                   <AdmissionFormContentEditModal id={id} />
+//                 )}
+//                 {modalType === 'SUPPORT_TICKET_SUPPORT' && (
+//                   <SupportTicketModal id={id} />
+//                 )}
+//                 {modalType === 'EXAM_CONDITION_SETTINGS' && (
+//                   <ExamConditionModal data={id} />
+//                 )}
+//                 {modalType === 'EXAM_CONDITION_SETTINGS_EDIT' && (
+//                   <ExamConditionEditModal data={id} />
+//                 )}
+//                 {modalType === 'EXAM_CONDITION_PASTE' && (
+//                   <ExamConditionPasteModal conditions={id} />
+//                 )}
+//                 {modalType === 'MADRASAH_ACTION_MODAL' && (
+//                   <MadrasahActionView id={id} meta={meta} />
+//                 )}
+//                 {modalType === 'STUDENT_MARK_SHEET_NOTE' && (
+//                   <DivisionMarkSheetNoteModal />
+//                 )}
+//                 {modalType === 'EXAM_ROUTINE_CREATE' && (
+//                   <ExamRoutineCreateModal />
+//                 )}
+//                 {modalType === 'EXAM_ROUTINE_UPDATE' && (
+//                   <ExamRoutineUpdateModal key={`${meta.sessionID}-${meta.examID}-${meta.subClassID}`} meta={meta} />
+//                 )}
+//                 {modalType === 'EXAM_ROUTINE_SETTING' && (
+//                   <ExamRouteSettingCreateModal />
+//                 )}
+//                 {modalType === 'EXAM_DIVISION_SETTING' && (
+//                   <ExamDivisionSettingModal />
+//                 )}
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       </ClickOutside>
+//     </div>
+//   );
+// };
+
+// export default DefaultModal;

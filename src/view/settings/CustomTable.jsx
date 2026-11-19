@@ -45,13 +45,13 @@ const CustomTable = ({ columns, data, close, showActions = true }) => {
 
     try {
       if (item === "Permission Management") {
-        showModal("Power Distribution", "POWER_DISTRIBUTION", id);
+        showModal("Power Distribution", "POWER_DISTRIBUTION", id, "Set access and permissions for this user");
         closeMenu();
       } else if (item === "Change User Name") {
-        showModal("Change User Name", "USER_NAME_CHANGE", id);
+        showModal("Change User Name", "USER_NAME_CHANGE", id, "Set a new login name for this user");
         closeMenu();
       } else if (item === "Password Change") {
-        showModal("Change Password", "PASSWORD_CHANGE", id);
+        showModal("Password Change", "PASSWORD_CHANGE", id, "Choose a strong password to keep the account safe");
         closeMenu();
       } else if (item === "Admin User") {
         await updateLoginUserType({
