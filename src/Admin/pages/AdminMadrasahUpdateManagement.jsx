@@ -205,6 +205,9 @@ const AdminMadrasahUpdateManagement = ({ pageTitle }) => {
   // Rows edited on screen but not saved yet, keyed by UserCode
   const [draftRows, setDraftRows] = useState({});
 
+  // True once the first template has been opened automatically
+  const hasAutoSelected = useRef(false);
+
   // ---------- Modal state ----------
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [isTemplateListOpen, setIsTemplateListOpen] = useState(false);
@@ -221,6 +224,7 @@ const AdminMadrasahUpdateManagement = ({ pageTitle }) => {
   const {
     data: templateData,
     isLoading: isLoadingTemplates,
+    isFetching: isFetchingTemplates,
     isError: isErrorTemplates,
   } = useGetUpdateTemplatesQuery();
 
@@ -274,12 +278,26 @@ const AdminMadrasahUpdateManagement = ({ pageTitle }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  // Pick the newest template as soon as the list arrives
+  // The newest template is opened once, on the first load only, so that
+  // choosing the blank option later really does clear the selection
   useEffect(() => {
-    if (!selectedTemplateId && templates.length) {
-      setSelectedTemplateId(templates[0].ID);
-    }
-  }, [templates, selectedTemplateId]);
+    if (isFetchingTemplates || hasAutoSelected.current) return;
+    if (!templates.length) return;
+
+    hasAutoSelected.current = true;
+    setSelectedTemplateId(templates[0].ID);
+  }, [templates, isFetchingTemplates]);
+
+  // A template that no longer exists (deleted here or in another tab) is
+  // dropped, otherwise the page keeps asking the API for a missing ID
+  useEffect(() => {
+    if (isFetchingTemplates || !selectedTemplateId) return;
+    if (templates.some((item) => item.ID === selectedTemplateId)) return;
+
+    setSelectedTemplateId(null);
+    setCurrentPage(1);
+    setTypeFilter("");
+  }, [templates, selectedTemplateId, isFetchingTemplates]);
 
   // Unsaved edits belong to the template and page they were made on
   useEffect(() => {
@@ -808,7 +826,9 @@ const AdminMadrasahUpdateManagement = ({ pageTitle }) => {
 
       {!selectedTemplateId ? (
         <div className="rounded-lg border border-dashed border-gray-300 py-16 text-center text-sm text-gray-500">
-          {translate("Create a template first, then select it to update the madrasah list.")}
+          {templates.length
+            ? translate("Select a template above to see the madrasah list.")
+            : translate("Create a template first, then select it to update the madrasah list.")}
         </div>
       ) : (
         <>
