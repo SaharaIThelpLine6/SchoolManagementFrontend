@@ -205,6 +205,9 @@ const AdminMadrasahUpdateManagement = ({ pageTitle }) => {
   // Rows edited on screen but not saved yet, keyed by UserCode
   const [draftRows, setDraftRows] = useState({});
 
+  // True once the first template has been opened automatically
+  const hasAutoSelected = useRef(false);
+
   // ---------- Modal state ----------
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [isTemplateListOpen, setIsTemplateListOpen] = useState(false);
@@ -221,6 +224,7 @@ const AdminMadrasahUpdateManagement = ({ pageTitle }) => {
   const {
     data: templateData,
     isLoading: isLoadingTemplates,
+    isFetching: isFetchingTemplates,
     isError: isErrorTemplates,
   } = useGetUpdateTemplatesQuery();
 
@@ -274,12 +278,26 @@ const AdminMadrasahUpdateManagement = ({ pageTitle }) => {
     if (pageTitle) dispatch(setPageName(pageTitle));
   }, [dispatch, pageTitle]);
 
-  // Pick the newest template as soon as the list arrives
+  // The newest template is opened once, on the first load only, so that
+  // choosing the blank option later really does clear the selection
   useEffect(() => {
-    if (!selectedTemplateId && templates.length) {
-      setSelectedTemplateId(templates[0].ID);
-    }
-  }, [templates, selectedTemplateId]);
+    if (isFetchingTemplates || hasAutoSelected.current) return;
+    if (!templates.length) return;
+
+    hasAutoSelected.current = true;
+    setSelectedTemplateId(templates[0].ID);
+  }, [templates, isFetchingTemplates]);
+
+  // A template that no longer exists (deleted here or in another tab) is
+  // dropped, otherwise the page keeps asking the API for a missing ID
+  useEffect(() => {
+    if (isFetchingTemplates || !selectedTemplateId) return;
+    if (templates.some((item) => item.ID === selectedTemplateId)) return;
+
+    setSelectedTemplateId(null);
+    setCurrentPage(1);
+    setTypeFilter("");
+  }, [templates, selectedTemplateId, isFetchingTemplates]);
 
   // Unsaved edits belong to the template and page they were made on
   useEffect(() => {
@@ -808,7 +826,9 @@ const AdminMadrasahUpdateManagement = ({ pageTitle }) => {
 
       {!selectedTemplateId ? (
         <div className="rounded-lg border border-dashed border-gray-300 py-16 text-center text-sm text-gray-500">
-          {translate("Create a template first, then select it to update the madrasah list.")}
+          {templates.length
+            ? translate("Select a template above to see the madrasah list.")
+            : translate("Create a template first, then select it to update the madrasah list.")}
         </div>
       ) : (
         <>
@@ -1231,7 +1251,7 @@ const AdminMadrasahUpdateManagement = ({ pageTitle }) => {
                   onChange={(e) =>
                     setTemplateForm((previous) => ({ ...previous, Title: e.target.value }))
                   }
-                  placeholder={translate("Example: Sayef")}
+                  placeholder={translate("Example: Madrasha Status")}
                   className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
                 />
               </div>
@@ -1249,12 +1269,6 @@ const AdminMadrasahUpdateManagement = ({ pageTitle }) => {
                   className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
                 />
               </div>
-
-              <p className="text-[11px] leading-snug text-gray-500">
-                {translate(
-                  "Every madrasah of User_AllUserInfo shows up under the template automatically. Types are added after the template is created."
-                )}
-              </p>
             </div>
 
             <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">

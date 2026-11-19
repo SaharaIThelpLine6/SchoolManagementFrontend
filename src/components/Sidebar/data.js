@@ -481,7 +481,7 @@ export const menuData = [
       {
         id: '6',
         name: 'Result Report',
-        route: 'result/report',
+        route: 'result/result-report',
         icon: 'SubReport',
       },
       {
