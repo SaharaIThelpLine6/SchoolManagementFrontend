@@ -1044,7 +1044,7 @@ const Router = createBrowserRouter([
                 ),
               },
               {
-                path: 'report',
+                path: 'result-report',
                 element: (
                   <RequirePermission
                     permissionId={permissionsDataList.result_report}
@@ -1063,7 +1063,7 @@ const Router = createBrowserRouter([
                     permissionId={permissionsDataList.marksheet}
                   >
                     {/* result report */}
-                    <MarkSheet pageTitle="Result Report" />
+                    <MarkSheet pageTitle="Mark Sheet" />
                     {/* <PageNotFound /> */}
 
                   </RequirePermission>

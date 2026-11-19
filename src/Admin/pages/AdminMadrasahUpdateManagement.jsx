@@ -1251,7 +1251,7 @@ const AdminMadrasahUpdateManagement = ({ pageTitle }) => {
                   onChange={(e) =>
                     setTemplateForm((previous) => ({ ...previous, Title: e.target.value }))
                   }
-                  placeholder={translate("Example: Sayef")}
+                  placeholder={translate("Example: Madrasha Status")}
                   className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
                 />
               </div>
@@ -1269,12 +1269,6 @@ const AdminMadrasahUpdateManagement = ({ pageTitle }) => {
                   className="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-[#7C3AED] focus:ring-1 focus:ring-[#7C3AED]"
                 />
               </div>
-
-              <p className="text-[11px] leading-snug text-gray-500">
-                {translate(
-                  "Every madrasah of User_AllUserInfo shows up under the template automatically. Types are added after the template is created."
-                )}
-              </p>
             </div>
 
             <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">
